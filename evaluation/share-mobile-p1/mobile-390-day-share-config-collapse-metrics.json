@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-20T22:32:22.061Z",
+  "checkedAt": "2026-07-20T23:38:32.014Z",
   "route": "/workspace?share",
   "scenario": {
     "label": "mobile-390",
@@ -28,6 +28,12 @@
     "mobileConfigToggleBottom": 632,
     "mobileConfigToggleHeight": 44,
     "mobileConfigExpanded": false,
+    "stageRailText": "01 대상1명 확인02 채널메일, 문자03 언어베트남어(Tiếng Việt)04 전송보완 필요",
+    "stageRailDisplay": "none",
+    "stageRailBottom": 0,
+    "stageRailWidth": 0,
+    "stageItemCount": 4,
+    "stageColumns": 3,
     "paragraphCount": 10,
     "primaryCount": 1,
     "channelCards": [

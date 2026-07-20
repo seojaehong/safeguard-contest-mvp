@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-20T22:32:33.104Z",
+  "checkedAt": "2026-07-20T23:39:26.015Z",
   "route": "/dispatch?theme=day",
   "viewport": {
     "width": 1440,
@@ -8,27 +8,27 @@
   "verdict": "PASS",
   "metrics": {
     "viewportHeight": 900,
-    "pageHeight": 1116,
+    "pageHeight": 1090,
     "rootWidth": 1156,
-    "rootHeight": 652,
-    "previewLeft": 877,
-    "previewBottom": 898.390625,
-    "primaryRight": 861,
-    "primaryBottom": 544.390625,
-    "linesClientHeight": 228,
-    "linesScrollHeight": 228,
+    "rootHeight": 626,
+    "previewLeft": 883,
+    "previewBottom": 798.390625,
+    "primaryRight": 873,
+    "primaryBottom": 542.390625,
+    "linesClientHeight": 137,
+    "linesScrollHeight": 220,
     "linesOverflowY": "auto",
     "channelCards": [
       {
-        "width": 164,
+        "width": 170,
         "height": 44
       },
       {
-        "width": 164,
+        "width": 170,
         "height": 44
       },
       {
-        "width": 164,
+        "width": 170,
         "height": 44
       }
     ],

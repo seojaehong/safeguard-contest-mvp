@@ -1,0 +1,73 @@
+{
+  "verdict": "PASS_CURRENT_SOURCE",
+  "checkedAt": "2026-07-21 KST",
+  "source": {
+    "productCommit": "b35421e07dafed3dc61f6a6406ee75d7df36d0ef",
+    "branch": "chore/recipient-foreign-live-gate-20260720"
+  },
+  "scope": {
+    "route": "/workspace?share",
+    "claim": "Four-step share stage rail plus bounded desktop two-pane composition",
+    "productionLiveClaimed": false
+  },
+  "contracts": {
+    "stageRailVisibleOnWorkspaceShareDesktop": true,
+    "stageRailStepCount": 4,
+    "desktopStageColumns": 4,
+    "desktopHorizontalOverflow": 0,
+    "ctaInsideDesktopViewport": true,
+    "previewInsideDesktopViewport": true,
+    "standaloneDispatchHeightGuardPreserved": true,
+    "providerContractsChanged": false
+  },
+  "freshGeometry": {
+    "workspaceShareDesktopDay1440x900": {
+      "stageRailItemCount": 4,
+      "stageColumns": 4,
+      "horizontalOverflow": 0,
+      "primaryBottom": 461,
+      "previewBottom": 817,
+      "stageRailBottom": 849
+    },
+    "standaloneDispatchDesktop1440x900": {
+      "rootWidth": 1156,
+      "rootHeight": 626,
+      "primaryBottom": 542,
+      "previewBottom": 798,
+      "horizontalOverflow": 0
+    }
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-simplification.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 11
+    },
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts -t \"keeps localized worker dispatch previews bounded|standalone dispatch\" --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 2
+    },
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-simplification.test.ts tests\\workspace-share-mobile-browser.test.ts -t \"keeps only the four-step delivery sequence|uses a real desktop two-pane share composition|keeps localized worker dispatch previews bounded|standalone dispatch\" --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 2,
+      "testsPassed": 4
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "status": "PASS"
+    }
+  ],
+  "remainingDebt": [
+    "Current-source evidence only; production live geometry is not claimed.",
+    "Actual provider dispatch, billing conversion, and channel-specific live delivery remain gated by provider configuration and auth.",
+    "Share flow still needs final recipient/channel/message/result copy polish after live deployment."
+  ]
+}

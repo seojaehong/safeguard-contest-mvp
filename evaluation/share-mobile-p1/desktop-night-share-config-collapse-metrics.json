@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-20T22:32:25.546Z",
+  "checkedAt": "2026-07-20T23:38:35.903Z",
   "route": "/workspace?share",
   "scenario": {
     "label": "desktop",
@@ -10,17 +10,17 @@
   "verdict": "PASS",
   "metrics": {
     "viewportHeight": 900,
-    "pageHeight": 918,
-    "previewLeft": 771,
-    "previewBottom": 705,
-    "primaryRight": 755,
-    "primaryTop": 305,
-    "primaryBottom": 349,
+    "pageHeight": 946,
+    "previewLeft": 777,
+    "previewBottom": 816.84375,
+    "primaryRight": 767,
+    "primaryTop": 416.84375,
+    "primaryBottom": 460.84375,
     "linesClientHeight": 326,
     "linesScrollHeight": 408,
     "linesOverflowY": "auto",
-    "lastParagraphBottom": 774,
-    "linesBottom": 692,
+    "lastParagraphBottom": 885.84375,
+    "linesBottom": 803.84375,
     "previewText": "[SafeClaw]\n\nTiếng Việt\n\n- Trước khi bắt đầu công việc, hãy kiểm tra toàn bộ khu vực nguy hiểm, lối đi bộ, tuyến xe nâng và thiết bị bảo hộ cá nhân.\n\n- Khóa bánh xe của giàn giáo, kiểm tra lan can và tuyệt đối không di chuyển giàn giáo khi vẫn còn người làm việc ở phía trên.\n\n- Nếu gió mạnh hơn, giàn giáo rung hoặc có nguy cơ rơi ngã, hãy dừng công việc ngay và di chuyển đến vị trí an toàn.\n\n- Không đi vào khu vực xe nâng và luôn giữ lối đi bộ tách biệt với tuyến vận chuyển vật liệu trong suốt ca làm việc.\n\n- Mang dây an toàn, mũ, giày và các thiết bị bảo hộ được yêu cầu trước khi bước lên sàn công tác.\n\n- Báo ngay cho quản lý khi phát hiện lan can, bánh xe, sàn thao tác hoặc điểm neo dây an toàn không bảo đảm.\n\n- Chỉ tiếp tục công việc sau khi người quản lý xác nhận rằng biện pháp khắc phục đã hoàn thành và khu vực đã an toàn.\n\n- Nếu chưa hiểu bất kỳ nội dung nào, hãy dừng lại và yêu cầu quản lý hoặc phiên dịch giải thích lại bằng tiếng Việt.",
     "mobileSummaryText": "대상1명 선택채널메일, 문자언어베트남어(Tiếng Việt)",
     "mobileSummaryBottom": 0,
@@ -28,40 +28,46 @@
     "mobileConfigToggleBottom": 0,
     "mobileConfigToggleHeight": 0,
     "mobileConfigExpanded": false,
+    "stageRailText": "01 대상\n1명 확인\n02 채널\n메일, 문자\n03 언어\n베트남어(Tiếng Việt)\n04 전송\n보완 필요",
+    "stageRailDisplay": "grid",
+    "stageRailBottom": 849,
+    "stageRailWidth": 1154,
+    "stageItemCount": 4,
+    "stageColumns": 4,
     "paragraphCount": 10,
     "primaryCount": 1,
     "channelCards": [
       {
-        "width": 191,
+        "width": 197,
         "height": 44
       },
       {
-        "width": 191,
+        "width": 197,
         "height": 44
       },
       {
-        "width": 191,
+        "width": 197,
         "height": 44
       }
     ],
     "configCards": [
       {
         "display": "grid",
-        "width": 400,
+        "width": 412,
         "height": 150,
-        "bottom": 511
+        "bottom": 623
       },
       {
         "display": "grid",
-        "width": 606,
+        "width": 624,
         "height": 150,
-        "bottom": 673
+        "bottom": 785
       },
       {
         "display": "grid",
-        "width": 194,
+        "width": 200,
         "height": 150,
-        "bottom": 511
+        "bottom": 623
       }
     ],
     "horizontalOverflow": 0,

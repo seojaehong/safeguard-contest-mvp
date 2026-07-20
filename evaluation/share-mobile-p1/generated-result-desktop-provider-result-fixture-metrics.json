@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-20T22:32:37.330Z",
+  "checkedAt": "2026-07-20T23:38:48.359Z",
   "route": "/workspace?share",
   "scenario": {
     "label": "generated-result-desktop",
@@ -10,57 +10,57 @@
   "fixtureGeneratedProviderResultProof": true,
   "providerDispatchLiveClaimed": false,
   "dispatchPostCount": 1,
-  "dispatchPostIdempotencyKey": "provider-dispatch-v1-bc0ea589-4eaf-4502-81de-34cea9c1780e-f2e163c6",
+  "dispatchPostIdempotencyKey": "provider-dispatch-v1-fb446384-aee8-4e75-8af3-cc6317ed17e1-5076ab14",
   "metrics": {
     "viewportWidth": 1440,
     "viewportHeight": 900,
-    "pageHeight": 900,
+    "pageHeight": 928,
     "root": {
       "left": 130,
       "right": 1310,
       "top": 189,
-      "bottom": 836,
+      "bottom": 864,
       "width": 1180,
-      "height": 647
+      "height": 675
     },
     "preview": {
-      "left": 771,
-      "right": 1291,
-      "top": 333,
-      "bottom": 733,
+      "left": 777,
+      "right": 1297,
+      "top": 399,
+      "bottom": 799,
       "width": 520,
       "height": 400
     },
     "primary": {
-      "left": 149,
-      "right": 446,
-      "top": 333,
-      "bottom": 377,
-      "width": 297,
+      "left": 143,
+      "right": 449,
+      "top": 399,
+      "bottom": 443,
+      "width": 306,
       "height": 44
     },
     "result": {
-      "left": 149,
-      "right": 755,
-      "top": 717,
-      "bottom": 785,
-      "width": 606,
+      "left": 143,
+      "right": 767,
+      "top": 321,
+      "bottom": 389,
+      "width": 624,
       "height": 68
     },
     "resultSummary": {
-      "left": 161,
-      "right": 743,
-      "top": 729,
-      "bottom": 773,
-      "width": 582,
+      "left": 155,
+      "right": 755,
+      "top": 333,
+      "bottom": 377,
+      "width": 600,
       "height": 44
     },
     "resultDetail": {
-      "left": 161,
-      "right": 743,
-      "top": 773,
-      "bottom": 965,
-      "width": 582,
+      "left": 155,
+      "right": 755,
+      "top": 377,
+      "bottom": 569,
+      "width": 600,
       "height": 192
     },
     "resultOpen": false,
@@ -75,30 +75,30 @@
       {
         "display": "grid",
         "height": 150,
-        "bottom": 539
+        "bottom": 605
       },
       {
         "display": "grid",
         "height": 150,
-        "bottom": 701
+        "bottom": 767
       },
       {
         "display": "grid",
         "height": 150,
-        "bottom": 539
+        "bottom": 605
       }
     ],
     "channelCards": [
       {
-        "width": 191,
+        "width": 197,
         "height": 44
       },
       {
-        "width": 191,
+        "width": 197,
         "height": 44
       },
       {
-        "width": 191,
+        "width": 197,
         "height": 44
       }
     ],
