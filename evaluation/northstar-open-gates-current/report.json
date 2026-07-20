@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-20T21:40:52.324Z",
-  "sourceSha": "0499d937a196c04a97a8117fb81fa9fd4ccb56f6",
+  "generatedAt": "2026-07-20T22:01:19.527Z",
+  "sourceSha": "bd78d47bab789ceb486a939f16b93d694d33aea6",
   "overall": "open",
   "gates": [
     {
@@ -26,10 +26,10 @@
       "id": "ui_documents_share_cockpit",
       "state": "proven",
       "label": "Documents and Share cockpit UI",
-      "evidencePath": "evaluation\\documents-inner-pane-depth-2026-07-21\\report.json",
-      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, section-level evidence/quality actions, production-confirmed inner-pane default depth, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch.",
+      "evidencePath": "evaluation\\documents-field-first-affordance-2026-07-21\\report.json",
+      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch.",
       "nextActions": [
-        "Continue UI product depth on richer per-document editing affordances beyond the current section-level evidence/quality shortcuts.",
+        "Continue UI product depth on richer risk-row editing, full document field-first authoring, and document-specific drilldown beyond the current selected-section affordance.",
         "Optional follow-up: make the mobile Share configuration disclosure a guided stepper if more hand-holding is needed."
       ]
     },

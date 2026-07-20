@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-20T21:40:53.247Z",
-  "head": "0499d937a196c04a97a8117fb81fa9fd4ccb56f6",
+  "generatedAt": "2026-07-20T22:01:25.038Z",
+  "head": "bd78d47bab789ceb486a939f16b93d694d33aea6",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "1836f33381574165bb7f3768ea274531c43a0851",
+    "commitSha": "addae84665db7435759163ebdac777a1e5ac5864",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-90suiruai-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-oojgnlugi-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -36,8 +36,8 @@
     {
       "id": "ui_documents_share_cockpit",
       "state": "proven",
-      "artifact": "evaluation\\documents-inner-pane-depth-2026-07-21\\report.json",
-      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, section-level evidence/quality actions, production-confirmed inner-pane default depth, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch."
+      "artifact": "evaluation\\documents-field-first-affordance-2026-07-21\\report.json",
+      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch."
     },
     {
       "id": "dispatch_standalone_cockpit",
@@ -146,9 +146,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "0499d937a196c04a97a8117fb81fa9fd4ccb56f6",
+      "sourceCommit": "bd78d47bab789ceb486a939f16b93d694d33aea6",
       "sourceStatus": "exact",
-      "productionCommit": "0499d937a196c04a97a8117fb81fa9fd4ccb56f6",
+      "productionCommit": "bd78d47bab789ceb486a939f16b93d694d33aea6",
       "productionStatus": "ancestor_of_head"
     },
     {

@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-20T21:40:53.247Z
-Source HEAD at generation: 0499d937a196c04a97a8117fb81fa9fd4ccb56f6
-Live commit at generation: 1836f33381574165bb7f3768ea274531c43a0851
+Generated at: 2026-07-20T22:01:25.038Z
+Source HEAD at generation: bd78d47bab789ceb486a939f16b93d694d33aea6
+Live commit at generation: addae84665db7435759163ebdac777a1e5ac5864
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -29,7 +29,7 @@ Overall: `northstar_open_approval_gated`
 | --- | --- | --- |
 | final_99_gate | notice | evaluation\final-99-gate-current-2026-07-21\report.json |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
-| ui_documents_share_cockpit | proven | evaluation\documents-inner-pane-depth-2026-07-21\report.json |
+| ui_documents_share_cockpit | proven | evaluation\documents-field-first-affordance-2026-07-21\report.json |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
 | share_result_fixture_cockpit | proven | evaluation\share-result-drilldown-2026-07-21\report.json |
 | kosha_exact_trust_registry | proven | evaluation\kosha-current-northstar-regression-2026-07-21\report.json |
