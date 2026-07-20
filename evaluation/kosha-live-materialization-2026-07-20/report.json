@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-07-19T23:23:13.036Z",
+  "generatedAt": "2026-07-20T03:56:05.748Z",
   "buildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "975fb3eff075e9b81d1310b3f683878cb0e40a18",
+    "commitSha": "e31a823cd6b356dcd7ce9ad61c6045e27361d5b4",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-9y7sl4swk-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-c7ljherc0-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "cases": [
@@ -43,7 +43,7 @@
     {
       "id": "scaffold-fall",
       "ok": true,
-      "elapsedSec": 21.35,
+      "elapsedSec": 19.72,
       "mode": "live",
       "statusKosha": "live",
       "koshaExternalMode": "live",
@@ -52,13 +52,12 @@
       "koshaCitationCount": 0,
       "deliverableKoshaCount": 34,
       "expectedCoverage": {
-        "KOSHA": 408,
+        "KOSHA": 409,
         "비계": 1073,
-        "추락": 311
+        "추락": 313
       },
       "publicInternalTermHits": [],
       "internalOnlyTermHits": [
-        "externalData.weather.signals.1.mode",
         "externalData.weather.signals.6.mode",
         "externalData.weather.signals.7.mode",
         "qualityContract.items.0.key",
@@ -115,7 +114,7 @@
     {
       "id": "hotwork-ventilation",
       "ok": true,
-      "elapsedSec": 19.32,
+      "elapsedSec": 20.07,
       "mode": "live",
       "statusKosha": "live",
       "koshaExternalMode": "live",
@@ -124,9 +123,9 @@
       "koshaCitationCount": 0,
       "deliverableKoshaCount": 20,
       "expectedCoverage": {
-        "KOSHA": 130,
+        "KOSHA": 131,
         "화기": 112,
-        "화재": 224
+        "화재": 226
       },
       "publicInternalTermHits": [],
       "internalOnlyTermHits": [
@@ -186,7 +185,7 @@
     {
       "id": "electrical-panel",
       "ok": true,
-      "elapsedSec": 16.31,
+      "elapsedSec": 18.94,
       "mode": "live",
       "statusKosha": "live",
       "koshaExternalMode": "live",

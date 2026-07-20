@@ -1,8 +1,8 @@
 # KOSHA Live Materialization Gate
 
-Generated at: 2026-07-19T23:23:13.036Z
+Generated at: 2026-07-20T03:56:05.748Z
 
-Production commit: `975fb3eff075e9b81d1310b3f683878cb0e40a18`
+Production commit: `e31a823cd6b356dcd7ce9ad61c6045e27361d5b4`
 
 Findings: 0
 
@@ -10,7 +10,7 @@ Findings: 0
 
 | Case | Ask OK | KOSHA status | KOSHA refs | KOSHA citations | Deliverable KOSHA mentions | Public internal paths | Internal-only paths |
 | --- | ---: | --- | ---: | ---: | ---: | --- | ---: |
-| scaffold-fall | true | live / live | 5 | 0 | 34 | - | 35 |
+| scaffold-fall | true | live / live | 5 | 0 | 34 | - | 34 |
 | hotwork-ventilation | true | live / live | 6 | 0 | 20 | - | 34 |
 | electrical-panel | true | live / live | 6 | 0 | 29 | - | 32 |
 
