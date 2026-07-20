@@ -1,12 +1,12 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v1",
-  "generatedAt": "2026-07-20T05:14:27.294Z",
-  "head": "b04442367640b1ad201caeaea41373bf0a72842d",
+  "generatedAt": "2026-07-20T05:19:48.112Z",
+  "head": "ceda7092e834db3c38769e5523c7452125084411",
   "liveBuildInfo": {
-    "commitSha": "b04442367640b1ad201caeaea41373bf0a72842d",
+    "commitSha": "ceda7092e834db3c38769e5523c7452125084411",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ex7is2pwr-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-a40lkvzt2-seojaehongs-projects.vercel.app"
   },
   "overall": "northstar_open_approval_gated",
   "dbMutationPerformed": false,
@@ -26,7 +26,7 @@
     },
     {
       "id": "kosha_exact_trust_registry",
-      "artifact": "evaluation/kosha-current-live-gate-2026-07-20/report.json",
+      "artifact": "evaluation/kosha-focused-current-gate-2026-07-20/report.json",
       "result": "pass",
       "exactPins": [
         "D-C-13",
@@ -34,7 +34,9 @@
         "B-E-10"
       ],
       "localCorpusItems": 234,
-      "localCorpusChunks": 7127
+      "localCorpusChunks": 7127,
+      "testsPassed": 53,
+      "testFilesPassed": 5
     },
     {
       "id": "rls_llm_wiki_application_boundary",

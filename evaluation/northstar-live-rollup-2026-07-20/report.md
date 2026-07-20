@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-20T05:14:27.294Z
+Generated at: 2026-07-20T05:19:48.112Z
 
-Current HEAD / live production build: `b04442367640b1ad201caeaea41373bf0a72842d`
+Current HEAD / live production build: `ceda7092e834db3c38769e5523c7452125084411`
 
 Overall: `northstar_open_approval_gated`
 
@@ -14,7 +14,7 @@ This rollup does not claim the long-term North Star is complete. It records the 
 | --- | --- | --- |
 | Live harness quality | PASS, failed contracts 0 | `evaluation/live-harness-quality-probe-current-2026-07-20/report.json` |
 | KOSHA materialization | PASS, finding count 0 | `evaluation/kosha-live-materialization-2026-07-20/report.json` |
-| KOSHA exact trust registry | PASS, D-C-13 / D-C-7 / B-E-10 | `evaluation/kosha-current-live-gate-2026-07-20/report.json` |
+| KOSHA exact trust registry | PASS, D-C-13 / D-C-7 / B-E-10, focused 5 files / 53 tests | `evaluation/kosha-focused-current-gate-2026-07-20/report.json` |
 | RLS / LLM Wiki app boundary | PASS approval-gated, 9 files / 83 tests | `evaluation/rls-current-tenant-boundary-gate-2026-07-20/report.json` |
 | Live critical surface | PASS, 8 routes x 2 viewports, findings 0 | `evaluation/live-critical-surface-current-2026-07-20-rerun/report.json` |
 | Operator wiki / reference corpus | PASS approval-gated, 18 files / 208 tests, ontology 166/169 | `evaluation/operator-wiki-reference-corpus-current-gate-2026-07-20/report.json` |
@@ -43,6 +43,7 @@ This rollup does not claim the long-term North Star is complete. It records the 
 - SIF vector retrieval is production-active.
 - All KOSHA metadata rows are exact evidence.
 - DB migration or data upload was performed in this rollup.
+
 
 
 
