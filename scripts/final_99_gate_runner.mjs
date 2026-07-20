@@ -815,6 +815,14 @@ SafeClaw는 공식자료 기반 초안과 현장 기록 보조 도구입니다. 
   writeMarkdown(path.join(docsDir, "commercialization-onepager.md"), content);
 }
 
+function outFile(fileName) {
+  return path.relative(rootDir, path.join(outDir, fileName));
+}
+
+function docFile(fileName) {
+  return path.relative(rootDir, path.join(docsDir, fileName));
+}
+
 function writeDecisionMarkdown(summary) {
   const lines = [
     "# SafeClaw final-99-gate decision",
@@ -890,14 +898,14 @@ async function main() {
     elapsedMs: elapsedMs(),
     gates,
     outputs: {
-      authHistory: "evaluation/final-99-gate/auth-history-smoke.json",
-      documentDownloads: "evaluation/final-99-gate/document-download-smoke.json",
-      publicDataAiMap: "evaluation/final-99-gate/public-data-ai-map.json",
-      prodGoldenPath: "evaluation/final-99-gate/prod-golden-path.json",
-      decision: "evaluation/final-99-gate/decision.md",
-      evidenceMapDoc: "docs/submission-evidence-map.md",
-      securityPrivacyDoc: "docs/security_privacy_readiness.md",
-      commercializationDoc: "docs/commercialization-onepager.md"
+      authHistory: outFile("auth-history-smoke.json"),
+      documentDownloads: outFile("document-download-smoke.json"),
+      publicDataAiMap: outFile("public-data-ai-map.json"),
+      prodGoldenPath: outFile("prod-golden-path.json"),
+      decision: outFile("decision.md"),
+      evidenceMapDoc: docFile("submission-evidence-map.md"),
+      securityPrivacyDoc: docFile("security_privacy_readiness.md"),
+      commercializationDoc: docFile("commercialization-onepager.md")
     },
     notes: [
       "provider 전파는 관리자 인증과 서버 소유 workpack/share session이 필요하며, 카카오/밴드는 승인 전이라 제외했습니다.",

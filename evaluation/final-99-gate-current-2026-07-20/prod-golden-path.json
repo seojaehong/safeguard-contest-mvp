@@ -1,0 +1,165 @@
+{
+  "generatedAt": "2026-07-20T12:28:42.283Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "commit": "69e15998",
+  "overall": "pass_with_notice",
+  "elapsedMs": 75425,
+  "gates": [
+    {
+      "name": "ask-orchestration",
+      "verdict": "pass",
+      "evidence": "11/11 documents"
+    },
+    {
+      "name": "auth-history-reuse",
+      "verdict": "pass_with_notice",
+      "evidence": "SAFEGUARD_AUTH_TOKEN이 없어 live 관리자 저장/재열기는 실행하지 않았습니다. UI는 비회원 임시 저장과 관리자 로그인 필요 상태로 방어합니다."
+    },
+    {
+      "name": "document-downloads",
+      "verdict": "pass",
+      "evidence": "core PDF + orchestration XLS/HWPX/PDF smoke"
+    },
+    {
+      "name": "public-data-ai-map",
+      "verdict": "pass",
+      "evidence": "docs/submission-evidence-map.md"
+    },
+    {
+      "name": "ai-remediation-flow",
+      "verdict": "pass",
+      "evidence": "OpenAI"
+    },
+    {
+      "name": "dispatch-policy",
+      "verdict": "pass_with_notice",
+      "evidence": "raw payload rejected, band locked, auth gate enforced"
+    },
+    {
+      "name": "screenshots",
+      "verdict": "pass",
+      "evidence": "5 screenshots"
+    }
+  ],
+  "outputs": {
+    "authHistory": "evaluation\\final-99-gate-current-2026-07-20\\auth-history-smoke.json",
+    "documentDownloads": "evaluation\\final-99-gate-current-2026-07-20\\document-download-smoke.json",
+    "publicDataAiMap": "evaluation\\final-99-gate-current-2026-07-20\\public-data-ai-map.json",
+    "prodGoldenPath": "evaluation\\final-99-gate-current-2026-07-20\\prod-golden-path.json",
+    "decision": "evaluation\\final-99-gate-current-2026-07-20\\decision.md",
+    "evidenceMapDoc": "docs\\submission-evidence-map.md",
+    "securityPrivacyDoc": "docs\\security_privacy_readiness.md",
+    "commercializationDoc": "docs\\commercialization-onepager.md"
+  },
+  "notes": [
+    "provider 전파는 관리자 인증과 서버 소유 workpack/share session이 필요하며, 카카오/밴드는 승인 전이라 제외했습니다.",
+    "HWPX는 제출형 초안으로 고지합니다.",
+    "관리자 이력 게이트는 SAFEGUARD_AUTH_TOKEN이 없으면 pass_with_notice로 남습니다."
+  ],
+  "ask": {
+    "status": 200,
+    "mode": "live",
+    "documentCount": 11,
+    "externalSignals": {
+      "lawgo": true,
+      "weather": true,
+      "work24": true,
+      "kosha": true,
+      "accidentCases": true
+    }
+  },
+  "remediation": {
+    "verdict": "pass",
+    "status": 200,
+    "configured": true,
+    "providerLabel": "OpenAI",
+    "catalogStatus": {
+      "configured": true,
+      "ok": true,
+      "count": 6,
+      "message": "KOSHA 오프라인 보조근거와 Supabase 안전 지식 DB에서 참고자료를 조회했습니다. 공식 KOSHA 정확 본문 번들로 partial DB 본문을 대체했습니다."
+    },
+    "textPreview": "[보완 제안: 위험성평가표 감소대책 담당자 및 이행확인 추가] ■ 이동식 비계 작업발판·안전난간·바퀴 잠금 및 아웃트리거 상태 점검 ■ 강풍 시 작업중지 판단자 지정 및 즉시 작업중지 실행 여부 확인 ■ 지게차 동선 주변 신호수 배치 및 작업자·장비 동선 분리 상태 점검 ■ 이동식 비계 하부 출입통제 및 하부 안전 통로 확보 여부 확인 ■ 신규 투입자 안전보건교육 이수 및 작업내용 숙지 점검 담당자별 이행확인란 작성 후 작업 시작 전 및 작업 중 정기 점검 기록 필수 반영 근거: 작업별 담당자 지정과 이행 확인으로 실시간 위험요소 대응 및 기록 유지",
+    "sourceCount": 5,
+    "policy": "AI 보완은 자동 덮어쓰기가 아니라 제안, 사용자 편집, 삽입 흐름으로만 인정합니다."
+  },
+  "dispatch": {
+    "verdict": "pass_with_notice",
+    "officialChannels": [
+      "email",
+      "sms"
+    ],
+    "excludedChannels": [
+      "kakao",
+      "band"
+    ],
+    "policyNotice": "메일·문자는 관리자 인증과 서버 소유 workpack/share session이 있을 때만 provider 전송합니다. 이 게이트는 raw workpack 전송 차단, 밴드 잠금, 무인 provider 호출 차단을 확인합니다.",
+    "capability": {
+      "status": 200,
+      "providerDispatch": {
+        "capability": false,
+        "mode": "preview_only",
+        "reason": "persistent_idempotency_unavailable",
+        "channels": {
+          "email": {
+            "capability": false,
+            "reason": "persistent_idempotency_unavailable"
+          },
+          "sms": {
+            "capability": false,
+            "reason": "persistent_idempotency_unavailable"
+          },
+          "kakao": {
+            "capability": false,
+            "reason": "persistent_idempotency_unavailable"
+          }
+        }
+      }
+    },
+    "legacyRejected": {
+      "status": 400,
+      "rejectedFields": [
+        "recipients",
+        "workpack"
+      ],
+      "message": "전파 요청에는 서버 권한 식별자, 채널, 대상 언어, 검증된 메시지만 사용할 수 있습니다."
+    },
+    "locked": {
+      "status": 400,
+      "lockedChannels": [
+        "band"
+      ],
+      "message": "밴드 전파는 승인 대기 상태입니다. 현재 서버 전파는 메일·문자와 설정된 카카오 알림톡만 허용합니다."
+    },
+    "authGate": {
+      "status": 401,
+      "message": "관리자 로그인이 필요합니다.",
+      "providerCalled": null
+    }
+  },
+  "screenshots": {
+    "verdict": "pass",
+    "screenshots": [
+      {
+        "route": "/",
+        "path": "evaluation\\final-99-gate-current-2026-07-20\\screenshots\\01-home.png"
+      },
+      {
+        "route": "/workspace",
+        "path": "evaluation\\final-99-gate-current-2026-07-20\\screenshots\\02-workspace.png"
+      },
+      {
+        "route": "/documents",
+        "path": "evaluation\\final-99-gate-current-2026-07-20\\screenshots\\03-documents.png"
+      },
+      {
+        "route": "/evidence",
+        "path": "evaluation\\final-99-gate-current-2026-07-20\\screenshots\\04-evidence.png"
+      },
+      {
+        "route": "/dispatch",
+        "path": "evaluation\\final-99-gate-current-2026-07-20\\screenshots\\05-dispatch.png"
+      }
+    ]
+  }
+}

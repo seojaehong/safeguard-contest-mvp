@@ -1,0 +1,59 @@
+{
+  "generatedAt": "2026-07-20T12:28:42.283Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "commit": "69e15998",
+  "overall": "pass_with_notice",
+  "elapsedMs": 75425,
+  "gates": [
+    {
+      "name": "ask-orchestration",
+      "verdict": "pass",
+      "evidence": "11/11 documents"
+    },
+    {
+      "name": "auth-history-reuse",
+      "verdict": "pass_with_notice",
+      "evidence": "SAFEGUARD_AUTH_TOKEN이 없어 live 관리자 저장/재열기는 실행하지 않았습니다. UI는 비회원 임시 저장과 관리자 로그인 필요 상태로 방어합니다."
+    },
+    {
+      "name": "document-downloads",
+      "verdict": "pass",
+      "evidence": "core PDF + orchestration XLS/HWPX/PDF smoke"
+    },
+    {
+      "name": "public-data-ai-map",
+      "verdict": "pass",
+      "evidence": "docs/submission-evidence-map.md"
+    },
+    {
+      "name": "ai-remediation-flow",
+      "verdict": "pass",
+      "evidence": "OpenAI"
+    },
+    {
+      "name": "dispatch-policy",
+      "verdict": "pass_with_notice",
+      "evidence": "raw payload rejected, band locked, auth gate enforced"
+    },
+    {
+      "name": "screenshots",
+      "verdict": "pass",
+      "evidence": "5 screenshots"
+    }
+  ],
+  "outputs": {
+    "authHistory": "evaluation\\final-99-gate-current-2026-07-20\\auth-history-smoke.json",
+    "documentDownloads": "evaluation\\final-99-gate-current-2026-07-20\\document-download-smoke.json",
+    "publicDataAiMap": "evaluation\\final-99-gate-current-2026-07-20\\public-data-ai-map.json",
+    "prodGoldenPath": "evaluation\\final-99-gate-current-2026-07-20\\prod-golden-path.json",
+    "decision": "evaluation\\final-99-gate-current-2026-07-20\\decision.md",
+    "evidenceMapDoc": "docs\\submission-evidence-map.md",
+    "securityPrivacyDoc": "docs\\security_privacy_readiness.md",
+    "commercializationDoc": "docs\\commercialization-onepager.md"
+  },
+  "notes": [
+    "provider 전파는 관리자 인증과 서버 소유 workpack/share session이 필요하며, 카카오/밴드는 승인 전이라 제외했습니다.",
+    "HWPX는 제출형 초안으로 고지합니다.",
+    "관리자 이력 게이트는 SAFEGUARD_AUTH_TOKEN이 없으면 pass_with_notice로 남습니다."
+  ]
+}
