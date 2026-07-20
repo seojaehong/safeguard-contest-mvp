@@ -10,7 +10,7 @@ This is not a production RLS launch proof. No DB schema, data, storage, policy, 
 
 ## Authority
 
-- Source SHA: `a888a4681293dcddf72b309af8a5532919d49d62`
+- Source SHA: `a2987ff462eb0f410bfc1ef124ffce7c8934ac91`
 - Worktree: `C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\recipient-foreign-live-gate-20260720`
 - Branch: `chore/recipient-foreign-live-gate-20260720`
 
@@ -25,8 +25,8 @@ npm.cmd test -- tests\supabase-tenant-isolation-harness.test.ts tests\workpack-c
 Result:
 
 - Test files: 9 passed / 9
-- Tests: 82 passed / 82
-- Duration: 7.62s
+- Tests: 83 passed / 83
+- Duration: 6.63s
 
 Preflight command:
 

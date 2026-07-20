@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-rls-current-tenant-boundary-gate/v1",
-  "checkedAt": "2026-07-20T02:41:34.960Z",
-  "sourceSha": "a888a4681293dcddf72b309af8a5532919d49d62",
+  "checkedAt": "2026-07-20T04:03:16.000Z",
+  "sourceSha": "a2987ff462eb0f410bfc1ef124ffce7c8934ac91",
   "verdict": "application_boundary_pass_approval_gated",
   "dbMutationPerformed": false,
   "networkOpenedByPreflight": false,
@@ -9,8 +9,8 @@
   "tests": {
     "command": "npm.cmd test -- tests\\supabase-tenant-isolation-harness.test.ts tests\\workpack-commercial-tenant-hardening.test.ts tests\\tenant-harness-memory.test.ts tests\\tenant-harness-memory-claw-tool.test.ts tests\\mcp-harness-tenant-memory-route.test.ts tests\\education-records-tenant-boundary.test.ts tests\\dispatch-logs-tenant-boundary.test.ts tests\\rls-llm-wiki-approval-preflight.test.ts tests\\llm-wiki-rls-approval-packet.test.ts --maxWorkers=1 --fileParallelism=false",
     "testFilesPassed": 9,
-    "testsPassed": 82,
-    "durationSeconds": 7.62,
+    "testsPassed": 83,
+    "durationSeconds": 6.63,
     "status": "pass"
   },
   "preflight": {
