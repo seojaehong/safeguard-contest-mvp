@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-20T03:51:04.344Z",
-  "sourceSha": "3b7bf2f0d853b303ba8215e78f3c95aa4716a427",
+  "generatedAt": "2026-07-20T03:58:50.936Z",
+  "sourceSha": "355d868256abf1f8b6d4fc01541bc7238406b65a",
   "overall": "open",
   "gates": [
     {
@@ -18,7 +18,7 @@
       "id": "live_harness_quality",
       "state": "proven",
       "label": "Live evidence harness quality",
-      "evidencePath": "evaluation\\live-harness-quality-probe-current-2026-07-19\\report.json",
+      "evidencePath": "evaluation\\live-harness-quality-probe-current-2026-07-20\\report.json",
       "detail": "Live harness probe passed with zero failed contracts.",
       "nextActions": []
     },

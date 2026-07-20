@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-20T03:51:04.344Z
-Source SHA: `3b7bf2f0d853b303ba8215e78f3c95aa4716a427`
+Generated at: 2026-07-20T03:58:50.936Z
+Source SHA: `355d868256abf1f8b6d4fc01541bc7238406b65a`
 Overall: `open`
 
 ## Gate Matrix
@@ -9,7 +9,7 @@ Overall: `open`
 | Gate | State | Evidence | Detail |
 | --- | --- | --- | --- |
 | final_99_gate | notice | evaluation\final-99-gate\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate\notice-carry.json. |
-| live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-19\report.json | Live harness probe passed with zero failed contracts. |
+| live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json | Live harness probe passed with zero failed contracts. |
 | supabase_rls_launch_isolation | approval_gated | evaluation\supabase-rls-approval-2026-07-17\report.md | Read-only audit exists, but live RLS catalog and tenant A/B isolation are not proven. |
 | llm_wiki_publication | approval_gated | evaluation\llm-wiki-rls-approval-2026-07-17\report.md | Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. |
 | sif_embedding_runtime | approval_gated | evaluation\sif-embedding-gate\approval-preflight-report.json | SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. |

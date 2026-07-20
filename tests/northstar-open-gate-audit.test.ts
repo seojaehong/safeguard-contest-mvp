@@ -77,7 +77,7 @@ function createFixtureRoot(): string {
   writeJson(rootDir, path.join("evaluation", "final-99-gate", "report.json"), {
     overall: "pass_with_notice",
   });
-  writeJson(rootDir, path.join("evaluation", "live-harness-quality-probe-current-2026-07-19", "report.json"), {
+  writeJson(rootDir, path.join("evaluation", "live-harness-quality-probe-current-2026-07-20", "report.json"), {
     evaluation: {
       verdict: "pass",
       contracts: [

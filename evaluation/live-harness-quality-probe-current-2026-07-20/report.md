@@ -1,7 +1,7 @@
 # SafeClaw Live Harness Quality Probe
 
 - Overall: PASS
-- Generated: 2026-07-20T02:37:43.983Z
+- Generated: 2026-07-20T03:57:50.165Z
 - Base URL: https://www.safeclaw.kr
 - Request: POST /api/ask (enhanced)
 - HTTP: 200

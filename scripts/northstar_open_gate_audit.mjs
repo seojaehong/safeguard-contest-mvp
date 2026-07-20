@@ -16,7 +16,7 @@ const DEFAULT_OUTPUT_DIR = path.join("evaluation", "northstar-open-gates-current
 const EVIDENCE_PATHS = Object.freeze({
   final99: path.join("evaluation", "final-99-gate", "report.json"),
   final99NoticeCarry: path.join("evaluation", "final-99-gate", "notice-carry.json"),
-  liveHarness: path.join("evaluation", "live-harness-quality-probe-current-2026-07-19", "report.json"),
+  liveHarness: path.join("evaluation", "live-harness-quality-probe-current-2026-07-20", "report.json"),
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
   llmWikiApproval: path.join("evaluation", "llm-wiki-rls-approval-2026-07-17", "report.md"),
   sifEmbeddingPreflight: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
@@ -199,7 +199,7 @@ function evaluateLiveHarnessGate(rootDir) {
       state: "missing",
       evidencePath,
       detail: "Live harness quality report is missing or invalid.",
-      nextActions: ["Run `node scripts/live_harness_quality_probe.mjs --base-url https://www.safeclaw.kr --output evaluation/live-harness-quality-probe-current-2026-07-19`."],
+      nextActions: ["Run `node scripts/live_harness_quality_probe.mjs --base-url https://www.safeclaw.kr --output evaluation/live-harness-quality-probe-current-2026-07-20`."],
     });
   }
 
