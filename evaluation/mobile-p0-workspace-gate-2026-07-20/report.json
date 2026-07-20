@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-20T13:34:32.094Z",
+  "checkedAt": "2026-07-20T13:38:38.585Z",
   "verdict": "MOBILE_FIXED",
   "hardBlockersClosed": true,
   "production": {
@@ -64,7 +64,8 @@
     }
   },
   "acceptance": {
-    "horizontalOverflow": true,
+    "horizontalOverflow": false,
+    "noHorizontalOverflow": true,
     "stickyOverlap": false,
     "ctaOcclusion": false,
     "textClipping": false,

@@ -7,6 +7,10 @@ import { describe, expect, it } from "vitest";
 type MobileP0Report = {
   verdict: string;
   hardBlockersClosed: boolean;
+  acceptance: {
+    horizontalOverflow: boolean;
+    noHorizontalOverflow: boolean;
+  };
   production: {
     commitSha: string;
   };
@@ -108,6 +112,8 @@ describe("mobile P0 report from geometry", () => {
 
     expect(report.verdict).toBe("MOBILE_FIXED");
     expect(report.hardBlockersClosed).toBe(true);
+    expect(report.acceptance.horizontalOverflow).toBe(false);
+    expect(report.acceptance.noHorizontalOverflow).toBe(true);
     expect(report.production.commitSha).toBe("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
     expect(report.mobileFlow.documentsSafetyBrief.heightRatio).toBe(1.5);
     expect(report.mobileFlow.documentsSafetyBrief.documentDeepReviewOpen).toBe(false);

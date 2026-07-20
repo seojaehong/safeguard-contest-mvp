@@ -6,6 +6,8 @@ Production commit: `c5ac81f18931b51e84160824f56a5ecbdb036f05`
 
 The 6-hour mobile gate is closed for the generated workspace flow. The default Documents surface is a bounded Safety Brief, and full document preview/review is behind an explicit disclosure.
 
+No horizontal overflow: **true**.
+
 | Surface | Height | First useful y | Overflow | Sticky | Under44 | CTA/preview |
 | --- | ---: | ---: | --- | ---: | ---: | --- |
 | Input /workspace | 1.17x | - | no | - | 3 | 생성 CTA visible |

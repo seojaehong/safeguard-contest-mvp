@@ -255,7 +255,8 @@ export function buildMobileP0Report(rootDir, geometry, liveCritical, generatedAt
       },
     },
     acceptance: {
-      horizontalOverflow: !documentsOverflow && !shareOverflow,
+      horizontalOverflow: documentsOverflow || shareOverflow,
+      noHorizontalOverflow: !documentsOverflow && !shareOverflow,
       stickyOverlap: documentStickyCount > 0 || shareStickyCount > 0,
       ctaOcclusion: primaryShareCtas !== 1,
       textClipping: false,
@@ -290,6 +291,8 @@ Verdict: **${report.verdict === "MOBILE_FIXED" ? "MOBILE FIXED" : "MOBILE PARTIA
 Production commit: \`${report.production.commitSha}\`
 
 The 6-hour mobile gate is ${report.verdict === "MOBILE_FIXED" ? "closed" : "partially closed"} for the generated workspace flow. The default Documents surface is a bounded Safety Brief, and full document preview/review is behind an explicit disclosure.
+
+No horizontal overflow: **${report.acceptance.noHorizontalOverflow ? "true" : "false"}**.
 
 | Surface | Height | First useful y | Overflow | Sticky | Under44 | CTA/preview |
 | --- | ---: | ---: | --- | ---: | ---: | --- |
