@@ -1,12 +1,12 @@
 {
-  "checkedAt": "2026-07-20T13:48:01.410Z",
+  "checkedAt": "2026-07-20T14:26:03.359Z",
   "verdict": "MOBILE_FIXED",
   "hardBlockersClosed": true,
   "production": {
-    "commitSha": "9fedcf019a6b24882131ba913ad7c6358b1ad9d4",
+    "commitSha": "928244cb28a575a23d951e621624ea8b014d77a1",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-dktlinub5-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-npuapwdkq-seojaehongs-projects.vercel.app",
     "url": "https://www.safeclaw.kr/workspace"
   },
   "viewport": {
@@ -49,7 +49,7 @@
       "stickyLikeCount": 0
     },
     "share": {
-      "bodyHeight": 1451,
+      "bodyHeight": 1455,
       "viewportHeight": 844,
       "heightRatio": 1.72,
       "shareY": 244,

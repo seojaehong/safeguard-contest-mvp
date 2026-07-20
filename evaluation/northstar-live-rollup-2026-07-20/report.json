@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-20T13:55:13.294Z",
-  "head": "cd45c092101a30892043b397bd89261673377f01",
+  "generatedAt": "2026-07-20T14:26:03.565Z",
+  "head": "928244cb28a575a23d951e621624ea8b014d77a1",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "cd45c092101a30892043b397bd89261673377f01",
+    "commitSha": "928244cb28a575a23d951e621624ea8b014d77a1",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-8pmdd3w4b-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-npuapwdkq-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -63,7 +63,7 @@
   "mobileP0": {
     "artifact": "evaluation\\mobile-p0-workspace-gate-2026-07-20\\report.json",
     "verdict": "MOBILE_FIXED",
-    "productionCommit": "9fedcf019a6b24882131ba913ad7c6358b1ad9d4",
+    "productionCommit": "928244cb28a575a23d951e621624ea8b014d77a1",
     "documentsHeightRatio": 1.5,
     "firstUsefulReviewY": 262,
     "documentDeepReviewOpen": false,
@@ -80,7 +80,7 @@
   },
   "workspaceGeometry": {
     "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-    "productionCommit": "9fedcf019a6b24882131ba913ad7c6358b1ad9d4",
+    "productionCommit": "928244cb28a575a23d951e621624ea8b014d77a1",
     "mobileDocumentDeepReviewOpen": false,
     "mobileVisibleDocumentPreviews": 0
   },
@@ -118,7 +118,7 @@
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
       "sourceCommit": "cd45c092101a30892043b397bd89261673377f01",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },
@@ -134,9 +134,9 @@
       "id": "live_harness_quality",
       "artifact": "evaluation\\live-harness-quality-probe-current-2026-07-20\\report.json",
       "sourceCommit": "cd45c092101a30892043b397bd89261673377f01",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "cd45c092101a30892043b397bd89261673377f01",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "kosha_exact_trust_registry",
@@ -175,16 +175,16 @@
       "artifact": "evaluation\\mobile-p0-workspace-gate-2026-07-20\\report.json",
       "sourceCommit": null,
       "sourceStatus": "missing",
-      "productionCommit": "9fedcf019a6b24882131ba913ad7c6358b1ad9d4",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "928244cb28a575a23d951e621624ea8b014d77a1",
+      "productionStatus": "matches_live"
     },
     {
       "id": "workspace_docs_share_geometry",
       "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
       "sourceCommit": null,
       "sourceStatus": "missing",
-      "productionCommit": "9fedcf019a6b24882131ba913ad7c6358b1ad9d4",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "928244cb28a575a23d951e621624ea8b014d77a1",
+      "productionStatus": "matches_live"
     }
   ],
   "contradictions": [],

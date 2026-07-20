@@ -1,13 +1,14 @@
 {
   "schemaVersion": "safeclaw-workspace-share-ia-remediation/v1",
-  "generatedAt": "2026-07-20T14:25:00Z",
+  "generatedAt": "2026-07-20T14:32:00Z",
   "scope": {
     "route": "/workspace",
     "surfaces": [
       "documents",
       "share"
     ],
-    "measurementMode": "local-production-build"
+    "measurementMode": "production",
+    "productionCommit": "928244cb28a575a23d951e621624ea8b014d77a1"
   },
   "verdict": "desktop_share_cockpit_pass_mobile_preserved",
   "changes": [
@@ -106,7 +107,7 @@
   "remainingIaDebt": [
     "Mobile Share remains a longer single-column flow; this patch preserves the previous mobile rescue but does not make mobile CTA first-viewport.",
     "Documents short desktop remains 1.57x viewport; full preview is hidden, but a future manager-cockpit pass can further compress the default brief.",
-    "Production verification must be rerun after deployment because this report was measured on a local production build."
+    "Mobile Share remains a longer single-column flow and needs a separate mobile CTA-first pass if that becomes the next release blocker."
   ],
   "artifacts": [
     "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",

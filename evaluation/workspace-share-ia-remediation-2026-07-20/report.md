@@ -1,7 +1,8 @@
 # SafeClaw Workspace Share IA Remediation
 
-- Generated: 2026-07-20T14:25:00Z
-- Measurement mode: local production build
+- Generated: 2026-07-20T14:32:00Z
+- Measurement mode: production
+- Production commit: `928244cb28a575a23d951e621624ea8b014d77a1`
 - Verdict: desktop share cockpit PASS, mobile rescue preserved
 
 ## Product Answer
@@ -53,7 +54,7 @@ This is a bounded desktop-share remediation, not the final product architecture.
 
 - Mobile Share remains a longer single-column flow; this patch preserves the previous mobile rescue but does not make mobile CTA first-viewport.
 - Documents short desktop remains 1.57x viewport; full preview is hidden, but a future manager-cockpit pass can further compress the default brief.
-- Production verification must be rerun after deployment because this report was measured on a local production build.
+- Mobile Share remains a longer single-column flow and needs a separate mobile CTA-first pass if that becomes the next release blocker.
 
 ## Evidence
 

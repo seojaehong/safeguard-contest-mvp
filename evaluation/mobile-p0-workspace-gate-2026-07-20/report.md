@@ -2,7 +2,7 @@
 
 Verdict: **MOBILE FIXED**
 
-Measured runtime commit: `9fedcf019a6b24882131ba913ad7c6358b1ad9d4`
+Measured runtime commit: `928244cb28a575a23d951e621624ea8b014d77a1`
 
 The 6-hour mobile gate is closed for the generated workspace flow. The default Documents surface is a bounded Safety Brief, and full document preview/review is behind an explicit disclosure.
 
