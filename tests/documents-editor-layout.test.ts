@@ -1152,6 +1152,8 @@ describe("documents editor layout", () => {
       expect(initial.detailsLabel).toBe("문서 9종 · 제출 정보");
       expect(initial.desktopPanelDisplays).toEqual(["none", "none", "none"]);
       expect(initial.cockpitText).not.toMatch(/(?:11|12)종/u);
+      expect(initial.cockpitText).toContain("오늘 문서");
+      expect(initial.cockpitText).toContain("핵심 3종");
       expect(initial.bannerWorkspaceCtas).toBe(0);
 
       await launcher.getByRole("button", { name: "TBM 기록" }).click();

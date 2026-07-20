@@ -19883,8 +19883,20 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-page-decision-copy p,
-  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-page-decision-action > div:first-child,
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-page-decision-action > div:first-child {
+    display: none;
+  }
+
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-current-workpack {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+    width: calc(100% - 32px);
+    margin-top: 8px;
+    padding: 8px 10px;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-current-workpack span,
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-current-workpack a {
     display: none;
   }
 
@@ -19903,7 +19915,7 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .workpack-shell {
-    max-height: min(420px, calc(100vh - 300px));
+    max-height: min(386px, calc(100vh - 334px));
     margin-top: 8px;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -21196,22 +21208,20 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-current-workpack {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 6px;
     width: calc(100% - 32px);
-    margin-top: 12px;
-    padding: 12px;
+    margin-top: 8px;
+    padding: 8px 10px;
   }
 
-  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-current-workpack strong {
-    font-size: var(--text-caption);
-    font-weight: 600;
-    line-height: var(--leading-caption);
-    letter-spacing: var(--tracking-body);
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-current-workpack span,
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-current-workpack a {
+    display: none;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-document-cockpit {
-    margin-top: 12px;
+    margin-top: 8px;
   }
 
   .safeclaw-module-shell.module-variant-document .safeclaw-mobile-document-priority {
@@ -21226,15 +21236,27 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-mobile-document-priority {
     grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
+    gap: 6px;
+    padding: 10px;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-mobile-document-priority > span,
-  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-mobile-document-priority > h2,
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-mobile-core-list,
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-mobile-document-details {
     grid-column: 1;
     grid-row: auto;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-mobile-document-priority > h2 {
+    display: none;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .document-toolbar {
+    display: none;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .workpack-shell {
+    margin-top: 8px;
   }
 
   .safeclaw-module-shell.module-variant-document .safeclaw-mobile-document-priority > span {

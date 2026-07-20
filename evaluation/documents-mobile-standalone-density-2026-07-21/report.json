@@ -1,0 +1,140 @@
+{
+  "title": "Documents Mobile Standalone Density Gate",
+  "checkedAt": "2026-07-21T02:11:03+09:00",
+  "sourceHeadBeforeCommit": "58831542f44f3d027ea6d4f4d2e09245636db770",
+  "branch": "chore/recipient-foreign-live-gate-20260720",
+  "verdict": "PASS",
+  "scope": {
+    "route": "/documents",
+    "viewportPriority": "mobile standalone density",
+    "productCodeFiles": [
+      "app/globals.css"
+    ],
+    "testFiles": [
+      "tests/documents-editor-layout.test.ts"
+    ],
+    "excludedContracts": [
+      "WorkpackEditor data model",
+      "document export rendering",
+      "Supabase schema or data",
+      "provider dispatch",
+      "evidence harness retrieval"
+    ]
+  },
+  "baselineProductionDebt": {
+    "productMarker": "be7f45cdf06f5a807b4fc024edf1210da334a46b",
+    "route": "/documents",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "bodyHeight": 1816,
+    "heightRatio": 2.15,
+    "workpackTop": 545,
+    "editorTop": 671,
+    "textareaTop": 1005,
+    "overflowX": false,
+    "outside": 0
+  },
+  "currentPatchContract": {
+    "currentWorkStripVisible": true,
+    "cockpitTextIncludes": [
+      "오늘 문서",
+      "핵심 3종"
+    ],
+    "routeSpecificToolbarHiddenOnMobileDocuments": true,
+    "desktopShortHeightWorkbenchPreserved": true,
+    "routeSplitAloneSufficient": false,
+    "recommendedIA": "step split plus viewport-first cockpit plus drilldown/detail"
+  },
+  "currentSourceMobileGeometry": {
+    "baseUrl": "http://127.0.0.1:3457",
+    "route": "/documents?theme=day",
+    "evidenceType": "local current-source browser measurement",
+    "productionEvidence": false,
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "bodyHeight": 1634,
+    "heightRatio": 1.94,
+    "workpackShell": {
+      "top": 476,
+      "bottom": 1586,
+      "height": 1110,
+      "overflowY": "visible"
+    },
+    "documentEditor": {
+      "top": 602,
+      "bottom": 1586,
+      "height": 984
+    },
+    "documentTextarea": {
+      "top": 823,
+      "bottom": 980,
+      "height": 157
+    },
+    "currentWorkStrip": {
+      "visible": true,
+      "top": 207,
+      "bottom": 297,
+      "height": 90,
+      "textExcerpt": "기본 예시 표시아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입력 후 진행합니다."
+    },
+    "mobileCoreLauncher": {
+      "top": 305,
+      "bottom": 468,
+      "textContains": [
+        "오늘 문서",
+        "핵심 3종"
+      ]
+    },
+    "overflowX": false,
+    "outside": 0,
+    "baselineComparison": {
+      "bodyHeight": {
+        "before": 1816,
+        "after": 1634
+      },
+      "editorTop": {
+        "before": 671,
+        "after": 602
+      },
+      "textareaTop": {
+        "before": 1005,
+        "after": 823
+      }
+    }
+  },
+  "verification": {
+    "focusedRegression": {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"bounds the default documents route editor|counts only non-empty|keeps sample display|puts the core launcher before the mobile editor\" --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 5,
+      "testsSkipped": 26,
+      "durationSeconds": 36.35
+    },
+    "documentsLayoutSuite": {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 31,
+      "durationSeconds": 146.83
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    "diffCheck": {
+      "command": "git diff --check -- app\\globals.css tests\\documents-editor-layout.test.ts",
+      "status": "PASS",
+      "notes": "line-ending warnings only"
+    }
+  },
+  "limitations": [
+    "No DB schema, Supabase data, provider dispatch, or export rendering changes were made.",
+    "This gate does not claim that route splitting alone solves the IA issue.",
+    "Production deployment and live mobile geometry are not claimed until this commit is pushed and the production marker advances."
+  ]
+}
