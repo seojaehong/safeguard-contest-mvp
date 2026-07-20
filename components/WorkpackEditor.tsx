@@ -365,6 +365,61 @@ function buildTbmBridgeRows(data: AskResponse, riskRows: SheetRow[]) {
   }));
 }
 
+function isTbmDocumentKey(key: DocumentKey) {
+  return key === "tbmBriefing" || key === "tbmLogDraft";
+}
+
+function compactList(items: readonly string[], fallback: string, limit: number) {
+  const compacted = items.map((item) => item.trim()).filter(Boolean);
+  return (compacted.length ? compacted : [fallback]).slice(0, limit);
+}
+
+function TbmDocumentCockpit({ data, documentKey }: { data: AskResponse; documentKey: DocumentKey }) {
+  if (!isTbmDocumentKey(documentKey)) return null;
+  const actions = compactList(data.riskSummary.immediateActions, data.riskSummary.topRisk, 3);
+  const questions = compactList(data.deliverables.tbmQuestions, "오늘 위험요인과 작업중지 기준을 전원이 설명할 수 있나요?", 3);
+  const practicalPoints = compactList(data.practicalPoints, data.riskSummary.topRisk, 3);
+  const weatherSignal = data.externalData.weather.summary || data.scenario.weatherNote || "현장 확인";
+
+  return (
+    <section className={styles.tbmCockpit} data-testid="tbm-document-cockpit" aria-label="TBM 진행 요약">
+      <div className={styles.tbmCockpitHeader}>
+        <div>
+          <span className="eyebrow">TBM 진행 cockpit</span>
+          <strong>{documentKey === "tbmLogDraft" ? "기록 전 확인할 질문과 조치" : "브리핑 전에 바로 읽을 핵심"}</strong>
+        </div>
+        <span>{data.scenario.workerCount.toLocaleString("ko-KR")}명 · 위험도 {data.riskSummary.riskLevel}</span>
+      </div>
+      <div className={styles.tbmCockpitGrid}>
+        <article>
+          <b>오늘 작업</b>
+          <strong>{data.scenario.workSummary}</strong>
+          <small>{weatherSignal}</small>
+        </article>
+        <article>
+          <b>핵심 위험</b>
+          <strong>{data.riskSummary.topRisk}</strong>
+          <small>{practicalPoints[0]}</small>
+        </article>
+      </div>
+      <div className={styles.tbmCockpitColumns}>
+        <div>
+          <b>진행 질문</b>
+          <ol>
+            {questions.map((question) => <li key={question}>{question}</li>)}
+          </ol>
+        </div>
+        <div>
+          <b>즉시 조치</b>
+          <ol>
+            {actions.map((action) => <li key={action}>{action}</li>)}
+          </ol>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function inferDisasterType(text: string, index: number) {
   if (/추락|떨어|비계|고소|발판/.test(text)) return "추락";
   if (/전도|넘어|미끄|우천|바닥/.test(text)) return "전도/미끄럼";
@@ -1986,6 +2041,7 @@ function RiskAssessmentRowsEditor({
   isLocked,
   onConfirmStructuredEdit,
   onRowChange,
+  onFieldFocus,
   onAdd,
   onRemove
 }: {
@@ -1996,6 +2052,7 @@ function RiskAssessmentRowsEditor({
   isLocked: boolean;
   onConfirmStructuredEdit: () => void;
   onRowChange: <K extends keyof RiskAssessmentRow>(rowIndex: number, field: K, value: RiskAssessmentRow[K]) => void;
+  onFieldFocus?: (element: HTMLElement) => void;
   onAdd: () => void;
   onRemove: (rowIndex: number) => void;
 }) {
@@ -2046,7 +2103,13 @@ function RiskAssessmentRowsEditor({
         </div>
       ) : null}
 
-      <fieldset className={styles.riskRowsFieldset} disabled={isLocked}>
+      <fieldset
+        className={styles.riskRowsFieldset}
+        disabled={isLocked}
+        onFocusCapture={(event) => {
+          if (event.target instanceof HTMLElement) onFieldFocus?.(event.target);
+        }}
+      >
       <div className={styles.riskRowsList}>
         {rows.map((row, rowIndex) => {
           const rowId = rowIds[rowIndex] ?? `risk-row-${rowIndex}`;
@@ -2104,7 +2167,7 @@ function RiskAssessmentRowsEditor({
                 </label>
               </div>
 
-              <details className={styles.riskRowDetails}>
+              <details className={styles.riskRowDetails} data-testid="risk-row-details">
                 <summary>행 상세 편집</summary>
                 <div className={styles.riskRowPrimaryGrid}>
                   <label>
@@ -2595,7 +2658,9 @@ export function WorkpackEditor({
 
   useLayoutEffect(() => {
     if (!expandedStructuredSectionId) return;
-    const riskRowTarget = selected.key === "riskAssessmentDraft"
+    const firstSectionId = structuredDocument.body[0]?.id ?? null;
+    const shouldPreferRiskRow = selected.key === "riskAssessmentDraft" && expandedStructuredSectionId === firstSectionId;
+    const riskRowTarget = shouldPreferRiskRow
       ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="risk-row-editor-row"]')
         || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="risk-rows-editor"]')
         || null
@@ -2604,15 +2669,22 @@ export function WorkpackEditor({
       alignPaneTargetBelowToolbar(riskRowTarget);
       return;
     }
+    const tbmCockpitTarget = isTbmDocumentKey(selected.key)
+      ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="tbm-document-cockpit"]') || null
+      : null;
+    if (tbmCockpitTarget) {
+      alignPaneTargetBelowToolbar(tbmCockpitTarget);
+      return;
+    }
     const activeSection = Array.from(
       documentBodyRef.current?.querySelectorAll<HTMLElement>("[data-section-id]") || []
     ).find((section) => section.dataset.sectionId === expandedStructuredSectionId) || null;
-    const target = activeSection?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
-      || activeSection?.querySelector<HTMLElement>("textarea")
+    const target = activeSection?.querySelector<HTMLElement>("textarea")
+      || activeSection?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
       || activeSection
       || null;
     alignPaneTargetBelowToolbar(target);
-  }, [expandedStructuredSectionId, selected.key]);
+  }, [expandedStructuredSectionId, selected.key, structuredDocument.body]);
 
   useEffect(() => {
     const alignFrame = window.requestAnimationFrame(() => {
@@ -2621,6 +2693,10 @@ export function WorkpackEditor({
           || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="risk-rows-editor"]')
           || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
           || null
+        : isTbmDocumentKey(selected.key)
+          ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="tbm-document-cockpit"]')
+            || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
+            || null
         : documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
         || textareaRef.current
         || documentBodyRef.current;
@@ -3209,9 +3285,13 @@ export function WorkpackEditor({
                   isLocked={structuredRiskEditLocked}
                   onConfirmStructuredEdit={confirmStructuredRiskEdit}
                   onRowChange={updateCanonicalRiskRow}
+                  onFieldFocus={alignPaneTargetBelowToolbar}
                   onAdd={addCanonicalRiskRow}
                   onRemove={removeCanonicalRiskRow}
                 />
+              ) : null}
+              {isTbmDocumentKey(selected.key) ? (
+                <TbmDocumentCockpit data={data} documentKey={selected.key} />
               ) : null}
               {structuredDocument.body.map((section, index) => {
                 const inputId = `document-section-${selected.key}-${index}`;

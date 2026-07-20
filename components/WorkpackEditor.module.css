@@ -266,6 +266,87 @@
   padding-bottom: var(--space-1);
 }
 
+.tbmCockpit {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  border: 1px solid var(--workspace-rule-strong);
+  border-radius: var(--radius-soft);
+  background: var(--workspace-surface-1);
+  padding: var(--space-3);
+}
+
+.tbmCockpitHeader,
+.tbmCockpitGrid,
+.tbmCockpitColumns {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-3);
+}
+
+.tbmCockpitHeader {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.tbmCockpitHeader > div,
+.tbmCockpit article,
+.tbmCockpitColumns > div {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.tbmCockpitHeader strong,
+.tbmCockpit article strong {
+  overflow-wrap: anywhere;
+  color: var(--workspace-ink);
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
+}
+
+.tbmCockpitHeader > span,
+.tbmCockpit article small {
+  color: var(--workspace-muted);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+.tbmCockpitGrid,
+.tbmCockpitColumns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.tbmCockpit article {
+  border: 1px solid var(--workspace-rule);
+  border-radius: 6px;
+  background: var(--workspace-surface-2);
+  padding: var(--space-2);
+}
+
+.tbmCockpit b {
+  color: var(--workspace-muted);
+  font-size: var(--text-hud);
+  font-family: var(--font-hud);
+  font-weight: 700;
+  letter-spacing: var(--tracking-hud);
+  line-height: var(--leading-hud);
+}
+
+.tbmCockpit ol {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--workspace-ink);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
 .riskRowsHeader,
 .riskRowHeader {
   display: flex;
@@ -1255,13 +1336,58 @@
     padding-bottom: 0;
   }
 
+  .tbmCockpit {
+    gap: 6px;
+    max-height: 132px;
+    overflow: auto;
+    padding: 8px;
+  }
+
+  .tbmCockpitHeader,
+  .tbmCockpitGrid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .tbmCockpitColumns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .tbmCockpit article {
+    padding: 6px;
+  }
+
+  .tbmCockpit ol {
+    gap: 2px;
+  }
+
+  .tbmCockpitHeader strong,
+  .tbmCockpit article strong,
+  .tbmCockpit article small,
+  .tbmCockpit li {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+  }
+
+  .tbmCockpitHeader strong,
+  .tbmCockpit article strong {
+    -webkit-line-clamp: 2;
+  }
+
+  .tbmCockpit article small,
+  .tbmCockpit li {
+    -webkit-line-clamp: 1;
+  }
+
   .riskRowsList {
     gap: 6px;
   }
 
   .riskRowsHeader,
   .riskRowHeader {
-    gap: 8px;
+    gap: 4px;
   }
 
   .addRiskRowButton {
@@ -1270,11 +1396,11 @@
   }
 
   .riskRow {
-    padding: var(--space-2);
+    padding: 6px;
   }
 
   .riskRowHeader {
-    min-height: 40px;
+    min-height: 36px;
   }
 
   .riskRowHeader strong,
@@ -1288,7 +1414,7 @@
   .riskRowDetailGrid,
   .riskScaleGrid {
     grid-template-columns: minmax(0, 1fr);
-    gap: 6px;
+    gap: 4px;
   }
 
   .riskRowWideField {
@@ -1303,7 +1429,7 @@
   .riskRow input,
   .riskRow select,
   .riskRow textarea {
-    padding: 7px 9px;
+    padding: 6px 8px;
   }
 
   .riskRowDetails summary {

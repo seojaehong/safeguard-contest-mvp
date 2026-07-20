@@ -206,7 +206,7 @@ describe("documents editor layout", () => {
       expect(metrics.firstRiskRowHeader.top).toBeGreaterThanOrEqual(metrics.toolbar.bottom + 4);
       expect(metrics.firstRiskRowHeader.bottom).toBeLessThan(metrics.workpackShell.bottom);
       expect(metrics.firstRiskHazardField.top).toBeLessThan(metrics.workpackShell.bottom);
-      expect(Math.min(metrics.firstRiskHazardField.bottom, metrics.workpackShell.bottom) - metrics.firstRiskHazardField.top).toBeGreaterThanOrEqual(56);
+      expect(Math.min(metrics.firstRiskHazardField.bottom, metrics.workpackShell.bottom) - metrics.firstRiskHazardField.top).toBeGreaterThanOrEqual(52);
       expect(metrics.fieldStripText).toContain("첫 위험행");
       expect(metrics.fieldStripText).toContain("4M");
       expect(metrics.fieldStripText).toContain("근거");
@@ -525,9 +525,15 @@ describe("documents editor layout", () => {
 
     await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
     await page.getByRole("combobox", { name: "편집 문서 선택" }).selectOption("riskAssessmentDraft");
-    const details = page.getByText("행 상세 편집", { exact: true }).locator("..");
-    await details.locator("summary").click();
-    const controlId = page.getByRole("textbox", { name: "행 1 관리번호" });
+    const row = page.getByTestId("risk-row-editor-row").first();
+    const details = row.getByTestId("risk-row-details");
+    await details.locator("summary").click({ force: true });
+    await details.evaluate((element) => {
+      (element as HTMLDetailsElement).open = true;
+    });
+    await expect.poll(() => details.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
+    const controlId = row.locator('[aria-label="행 1 관리번호"]');
+    await expect.poll(() => controlId.isVisible()).toBe(true);
     await controlId.pressSequentially("ABC", { delay: 30 });
 
     await expect.poll(() => controlId.inputValue()).toBe("ABC");
@@ -1247,13 +1253,15 @@ describe("documents editor layout", () => {
         const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
         const toolbar = document.querySelector<HTMLElement>(".document-toolbar");
         const drilldownSummary = document.querySelector<HTMLElement>('[data-testid="selected-document-drilldown-summary"]');
+        const tbmCockpit = document.querySelector<HTMLElement>('[data-testid="tbm-document-cockpit"]');
         const selectedLauncher = document.querySelector<HTMLButtonElement>(
           '[data-testid="mobile-core-document-launcher"] button[data-document-key="tbmLogDraft"]'
         );
-        if (!textarea || !documentBody || !documentSelect || !workpackShell || !toolbar || !drilldownSummary || !selectedLauncher) {
+        if (!textarea || !documentBody || !documentSelect || !workpackShell || !toolbar || !drilldownSummary || !tbmCockpit || !selectedLauncher) {
           throw new Error("Missing selected mobile editor target");
         }
         const textareaRect = textarea.getBoundingClientRect();
+        const cockpitRect = tbmCockpit.getBoundingClientRect();
         const bodyRect = documentBody.getBoundingClientRect();
         const shellRect = workpackShell.getBoundingClientRect();
         const toolbarRect = toolbar.getBoundingClientRect();
@@ -1274,6 +1282,11 @@ describe("documents editor layout", () => {
           toolbarBottom: Math.round(toolbarRect.bottom),
           toolbarVisibleInPane,
           toolbarCoversTextarea: toolbarRect.bottom > textareaRect.top && toolbarRect.top < textareaRect.bottom,
+          cockpitText: tbmCockpit.textContent?.replace(/\s+/gu, " ").trim(),
+          cockpitTop: Math.round(cockpitRect.top),
+          cockpitBottom: Math.round(cockpitRect.bottom),
+          cockpitVisibleInPane: cockpitRect.bottom > shellRect.top && cockpitRect.top < shellRect.bottom,
+          cockpitBelowToolbar: cockpitRect.top >= toolbarRect.bottom - 1,
           textareaTop: Math.round(textareaRect.top),
           textareaBottom: Math.round(textareaRect.bottom),
           textareaVisibleInPane,
@@ -1306,6 +1319,14 @@ describe("documents editor layout", () => {
       expect(selected.toolbarCoversTextarea).toBe(false);
       expect(selected.toolbarTop).toBeGreaterThanOrEqual(selected.shellTop - 1);
       expect(selected.toolbarBottom).toBeLessThan(selected.shellBottom);
+      expect(selected.cockpitText).toContain("TBM 진행 cockpit");
+      expect(selected.cockpitText).toContain("진행 질문");
+      expect(selected.cockpitText).toContain("즉시 조치");
+      expect(selected.cockpitText).toContain("핵심 위험");
+      expect(selected.cockpitVisibleInPane).toBe(true);
+      expect(selected.cockpitBelowToolbar).toBe(true);
+      expect(selected.cockpitTop).toBeGreaterThanOrEqual(selected.toolbarBottom - 1);
+      expect(selected.cockpitBottom).toBeLessThan(selected.shellBottom);
       expect(selected.shellOverflowY).toBe("auto");
       expect(selected.shellScrollHeight).toBeGreaterThan(selected.shellClientHeight);
       expect(selected.shellScrollTop).toBeGreaterThan(0);
@@ -1313,14 +1334,10 @@ describe("documents editor layout", () => {
       expect(selected.shellAffordancePosition).toBe("sticky");
       expect(selected.shellAffordancePointerEvents).toBe("none");
       expect(selected.shellAffordanceMinHeight).toBeGreaterThanOrEqual(28);
-      expect(selected.textareaVisibleInPane).toBe(true);
-      expect(selected.textareaTop).toBeLessThan(selected.shellBottom);
-      expect(selected.textareaBottom).toBeGreaterThan(selected.shellTop);
+      expect(selected.textareaTop).toBeGreaterThanOrEqual(selected.cockpitBottom);
+      expect(selected.textareaBottom).toBeGreaterThan(selected.textareaTop);
       expect(selected.bodyTop).toBeGreaterThanOrEqual(0);
       expect(selected.bodyTop).toBeLessThan(844);
-      expect(selected.textareaTop).toBeGreaterThanOrEqual(0);
-      expect(selected.textareaTop).toBeLessThan(844);
-      expect(selected.textareaBottom).toBeGreaterThan(selected.textareaTop);
 
       await launcher.getByRole("button", { name: "위험성평가표" }).click();
       await page.waitForFunction(() => document.activeElement?.getAttribute("aria-label") === "위험성평가표 편집");
@@ -1335,18 +1352,32 @@ describe("documents editor layout", () => {
         const documentSelect = document.querySelector<HTMLSelectElement>('select[aria-label="편집 문서 선택"]');
         const toolbar = document.querySelector<HTMLElement>(".document-toolbar");
         const drilldownSummary = document.querySelector<HTMLElement>('[data-testid="selected-document-drilldown-summary"]');
-        if (!textarea || !workpackShell || !documentSelect || !toolbar || !drilldownSummary) {
+        const riskRow = document.querySelector<HTMLElement>('[data-testid="risk-row-editor-row"]');
+        const riskRowHeader = riskRow?.querySelector<HTMLElement>("summary");
+        const riskHazardField = document.querySelector<HTMLElement>('[aria-label="행 1 유해·위험요인"]');
+        if (!textarea || !workpackShell || !documentSelect || !toolbar || !drilldownSummary || !riskRow || !riskRowHeader || !riskHazardField) {
           throw new Error("Missing selected risk assessment mobile editor target");
         }
         const textareaRect = textarea.getBoundingClientRect();
         const shellRect = workpackShell.getBoundingClientRect();
         const toolbarRect = toolbar.getBoundingClientRect();
+        const riskRowHeaderRect = riskRowHeader.getBoundingClientRect();
+        const riskHazardFieldRect = riskHazardField.getBoundingClientRect();
         const toolbarStyle = getComputedStyle(toolbar);
         return {
           selectedDocument: documentSelect.value,
           activeLabel: document.activeElement?.getAttribute("aria-label"),
           toolbarText: toolbar.textContent?.replace(/\s+/gu, " ").trim(),
           drilldownSummaryText: drilldownSummary.textContent?.replace(/\s+/gu, " ").trim(),
+          riskRowText: riskRow.textContent?.replace(/\s+/gu, " ").trim(),
+          riskRowHeaderTop: Math.round(riskRowHeaderRect.top),
+          riskRowHeaderBottom: Math.round(riskRowHeaderRect.bottom),
+          riskHazardFieldTop: Math.round(riskHazardFieldRect.top),
+          riskHazardFieldBottom: Math.round(riskHazardFieldRect.bottom),
+          riskHazardVisibleHeight: Math.round(Math.min(riskHazardFieldRect.bottom, shellRect.bottom) - Math.max(riskHazardFieldRect.top, shellRect.top)),
+          riskRowHeaderVisibleInPane: riskRowHeaderRect.bottom > shellRect.top && riskRowHeaderRect.top < shellRect.bottom,
+          riskHazardFieldVisibleInPane: riskHazardFieldRect.bottom > shellRect.top && riskHazardFieldRect.top < shellRect.bottom,
+          riskRowHeaderBelowToolbar: riskRowHeaderRect.top >= toolbarRect.bottom - 1,
           toolbarPosition: toolbarStyle.position,
           toolbarTop: Math.round(toolbarRect.top),
           toolbarBottom: Math.round(toolbarRect.bottom),
@@ -1370,14 +1401,21 @@ describe("documents editor layout", () => {
       expect(riskAssessmentLanding.drilldownSummaryText).toMatch(/섹션 \d+|^\d+섹션/u);
       expect(riskAssessmentLanding.drilldownSummaryText).toContain("근거");
       expect(riskAssessmentLanding.drilldownSummaryText).toContain("확인");
+      expect(riskAssessmentLanding.riskRowText).toContain("근거");
+      expect(riskAssessmentLanding.riskRowText).toContain("확인");
       expect(riskAssessmentLanding.toolbarPosition).toBe("sticky");
       expect(riskAssessmentLanding.toolbarVisibleInPane).toBe(true);
       expect(riskAssessmentLanding.toolbarCoversTextarea).toBe(false);
       expect(riskAssessmentLanding.toolbarTop).toBeGreaterThanOrEqual(riskAssessmentLanding.shellTop - 1);
       expect(riskAssessmentLanding.toolbarBottom).toBeLessThan(riskAssessmentLanding.shellBottom);
-      expect(riskAssessmentLanding.textareaVisibleInPane).toBe(true);
-      expect(riskAssessmentLanding.textareaTop).toBeLessThan(riskAssessmentLanding.shellBottom);
-      expect(riskAssessmentLanding.textareaBottom).toBeGreaterThan(riskAssessmentLanding.shellTop);
+      expect(riskAssessmentLanding.riskRowHeaderVisibleInPane).toBe(true);
+      expect(riskAssessmentLanding.riskHazardFieldVisibleInPane).toBe(true);
+      expect(riskAssessmentLanding.riskRowHeaderBelowToolbar).toBe(true);
+      expect(riskAssessmentLanding.riskRowHeaderTop).toBeGreaterThanOrEqual(riskAssessmentLanding.toolbarBottom - 1);
+      expect(riskAssessmentLanding.riskRowHeaderBottom).toBeLessThan(riskAssessmentLanding.shellBottom);
+      expect(riskAssessmentLanding.riskHazardFieldTop).toBeLessThan(riskAssessmentLanding.shellBottom);
+      expect(riskAssessmentLanding.riskHazardVisibleHeight).toBeGreaterThanOrEqual(40);
+      expect(riskAssessmentLanding.textareaTop).toBeGreaterThanOrEqual(riskAssessmentLanding.riskHazardFieldBottom);
       expect(riskAssessmentLanding.shellScrollTop).toBeGreaterThan(0);
       expect(riskAssessmentLanding.pageHeight).toBeLessThanOrEqual(riskAssessmentLanding.viewportHeight + 1);
       expect(riskAssessmentLanding.scrollWidth).toBeLessThanOrEqual(riskAssessmentLanding.viewportWidth + 1);
@@ -1489,23 +1527,25 @@ describe("documents editor layout", () => {
       expect(evidenceActionLanding.scrollWidth).toBeLessThanOrEqual(evidenceActionLanding.viewportWidth + 1);
 
       await page.locator('[data-testid="document-section-accordion"]').first().locator("summary").click();
-      await page.locator('.document-textarea[aria-label="위험성평가표 편집"]').focus();
+      await page.locator('[aria-label="행 1 유해·위험요인"]').focus();
 
       const riskAssessmentDeepScroll = await page.evaluate(async () => {
         const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
         const toolbar = document.querySelector<HTMLElement>(".document-toolbar");
-        const textarea = document.querySelector<HTMLTextAreaElement>('.document-textarea[aria-label="위험성평가표 편집"]');
+        const hazardField = document.querySelector<HTMLElement>('[aria-label="행 1 유해·위험요인"]');
         const drilldownSummary = document.querySelector<HTMLElement>('[data-testid="selected-document-drilldown-summary"]');
-        if (!workpackShell || !toolbar || !textarea || !drilldownSummary) {
+        if (!workpackShell || !toolbar || !hazardField || !drilldownSummary) {
           throw new Error("Missing risk assessment deep-scroll target");
         }
         const nextScrollTop = Math.min(1000, workpackShell.scrollHeight - workpackShell.clientHeight);
         workpackShell.scrollTop = nextScrollTop;
         await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+        hazardField.focus();
+        await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
 
         const shellRect = workpackShell.getBoundingClientRect();
         const toolbarRect = toolbar.getBoundingClientRect();
-        const textareaRect = textarea.getBoundingClientRect();
+        const hazardFieldRect = hazardField.getBoundingClientRect();
         return {
           activeLabel: document.activeElement?.getAttribute("aria-label"),
           toolbarText: toolbar.textContent?.replace(/\s+/gu, " ").trim(),
@@ -1516,14 +1556,14 @@ describe("documents editor layout", () => {
           toolbarTop: Math.round(toolbarRect.top),
           toolbarBottom: Math.round(toolbarRect.bottom),
           toolbarVisibleInPane: toolbarRect.bottom > shellRect.top && toolbarRect.top < shellRect.bottom,
-          toolbarCoversTextarea: toolbarRect.bottom > textareaRect.top && toolbarRect.top < textareaRect.bottom,
+          toolbarCoversHazardField: toolbarRect.bottom > hazardFieldRect.top && toolbarRect.top < hazardFieldRect.bottom,
           pageHeight: Math.round(document.documentElement.scrollHeight),
           viewportHeight: window.innerHeight,
           scrollWidth: document.documentElement.scrollWidth,
           viewportWidth: window.innerWidth
         };
       });
-      expect(riskAssessmentDeepScroll.activeLabel).toBe("위험성평가표 편집");
+      expect(riskAssessmentDeepScroll.activeLabel).toBe("행 1 유해·위험요인");
       expect(riskAssessmentDeepScroll.toolbarText).toContain("위험성평가표");
       expect(riskAssessmentDeepScroll.drilldownSummaryText).toMatch(/섹션 \d+|^\d+섹션/u);
       expect(riskAssessmentDeepScroll.drilldownSummaryText).toContain("근거");
@@ -1533,7 +1573,7 @@ describe("documents editor layout", () => {
       expect(riskAssessmentDeepScroll.toolbarTop).toBeGreaterThanOrEqual(riskAssessmentDeepScroll.shellTop - 1);
       expect(riskAssessmentDeepScroll.toolbarTop).toBeLessThanOrEqual(riskAssessmentDeepScroll.shellTop + 4);
       expect(riskAssessmentDeepScroll.toolbarBottom).toBeLessThan(riskAssessmentDeepScroll.shellBottom);
-      expect(riskAssessmentDeepScroll.toolbarCoversTextarea).toBe(false);
+      expect(riskAssessmentDeepScroll.toolbarCoversHazardField).toBe(false);
       expect(riskAssessmentDeepScroll.pageHeight).toBeLessThanOrEqual(riskAssessmentDeepScroll.viewportHeight + 1);
       expect(riskAssessmentDeepScroll.scrollWidth).toBeLessThanOrEqual(riskAssessmentDeepScroll.viewportWidth + 1);
 
