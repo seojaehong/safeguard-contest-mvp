@@ -1,0 +1,75 @@
+{
+  "checkedAt": "2026-07-21T01:50:00+09:00",
+  "verdict": {
+    "standaloneDocumentsDesktopShort": "PASS_AFTER_PATCH",
+    "workspaceDocumentsCockpit": "PASS_EXISTING_PRODUCTION",
+    "workspaceShareDesktopTwoPane": "PASS_EXISTING_PRODUCTION",
+    "workspaceShareChannelDensity": "PASS_AFTER_PATCH",
+    "standaloneDocumentsMobile": "FOLLOW_UP",
+    "deepReviewDrilldown": "FOLLOW_UP"
+  },
+  "productionBaseline": {
+    "buildCommitSha": "e3191abe1b7cf41126d03e50d0670555e71cd94a",
+    "standaloneDocuments": {
+      "desktop1440x723": {
+        "pageHeight": 1698,
+        "heightRatio": 2.35,
+        "workpackTop": 506,
+        "editorTop": 506,
+        "textareaTop": 815
+      },
+      "mobile390x844": {
+        "pageHeight": 1816,
+        "heightRatio": 2.15,
+        "workpackTop": 545,
+        "editorTop": 671,
+        "textareaTop": 1005
+      }
+    },
+    "workspaceDocumentsDesktopShort": {
+      "bodyHeight": 876,
+      "viewportHeight": 723,
+      "workbenchBottom": 722,
+      "safetyBriefBottom": 649,
+      "riskAssessmentEditCtaBottom": 391,
+      "shareCtaBottom": 441,
+      "visibleDocumentPreviews": 0,
+      "overflowX": false,
+      "outside": 0
+    },
+    "workspaceShareDesktopShort": {
+      "bodyHeight": 920,
+      "viewportHeight": 723,
+      "formBottom": 675,
+      "previewBottom": 705,
+      "previewWidth": 520,
+      "primaryCtaBottom": 349,
+      "overflowX": false,
+      "outside": 0
+    }
+  },
+  "patchScope": [
+    "app/globals.css",
+    "tests/documents-editor-layout.test.ts",
+    "tests/workspace-share-mobile-browser.test.ts"
+  ],
+  "checks": [
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"bounds the default documents route editor\" --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS 1 selected / 30 skipped"
+    },
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS 1 file / 31 tests"
+    },
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS 1 file / 1 test"
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    }
+  ],
+  "iaDecision": "Route split helps orientation, but viewport-first cockpit plus explicit drilldown/detail is the actual fix for long documents and share content."
+}

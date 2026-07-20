@@ -108,6 +108,54 @@ describe("documents editor layout", () => {
     expect(visibleText).not.toMatch(DEFAULT_VISIBLE_OPERATIONAL_LABELS);
   }, 90_000);
 
+  it("bounds the default documents route editor as a viewport-first cockpit", async () => {
+    if (!browser) throw new Error("Browser was not started");
+
+    const cases = [
+      { width: 1440, height: 723, maxRatio: 1.5 }
+    ] as const;
+
+    for (const viewport of cases) {
+      const page = await browser.newPage({ viewport });
+      await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+
+      const metrics = await page.evaluate(() => {
+        const rect = (selector: string) => {
+          const element = document.querySelector(selector);
+          if (!element) throw new Error(`Missing documents cockpit selector: ${selector}`);
+          const bounds = element.getBoundingClientRect();
+          const style = window.getComputedStyle(element);
+          return {
+            top: Math.round(bounds.top),
+            bottom: Math.round(bounds.bottom),
+            height: Math.round(bounds.height),
+            overflowY: style.overflowY
+          };
+        };
+
+        return {
+          viewportHeight: window.innerHeight,
+          bodyHeight: document.documentElement.scrollHeight,
+          scrollWidth: document.documentElement.scrollWidth,
+          clientWidth: document.documentElement.clientWidth,
+          workpackShell: rect(".workpack-shell"),
+          documentEditor: rect(".document-editor"),
+          mobileCoreLauncher: rect('[data-testid="mobile-core-document-launcher"]')
+        };
+      });
+
+      expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth + 1);
+      expect(metrics.bodyHeight / metrics.viewportHeight).toBeLessThanOrEqual(viewport.maxRatio);
+      expect(metrics.workpackShell.overflowY).toBe("auto");
+      expect(metrics.workpackShell.top).toBeLessThanOrEqual(360);
+      expect(metrics.documentEditor.top).toBeLessThanOrEqual(360);
+      expect(metrics.workpackShell.height).toBeGreaterThanOrEqual(360);
+      expect(metrics.workpackShell.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
+
+      await page.close();
+    }
+  }, 90_000);
+
   it("renders actual message samples and an empty permit with document-specific structured sections", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 391, height: 844 } });

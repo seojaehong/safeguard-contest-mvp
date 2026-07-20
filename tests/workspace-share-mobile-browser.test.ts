@@ -123,6 +123,7 @@ describe("workspace mobile share presentation", () => {
             const primary = primaryActions[0];
             const paragraphs = [...document.querySelectorAll<HTMLElement>(".message-preview-lines p")];
             const toggles = [...document.querySelectorAll<HTMLElement>(".workspace-theme-toggle button")];
+            const channelCards = [...document.querySelectorAll<HTMLElement>(".channel-grid .channel-card")];
             if (!preview || !lines || !primary) throw new Error("Missing share presentation target");
             const previewRect = preview.getBoundingClientRect();
             const linesRect = lines.getBoundingClientRect();
@@ -144,6 +145,10 @@ describe("workspace mobile share presentation", () => {
               previewText: lines.innerText,
               paragraphCount: paragraphs.length,
               primaryCount: primaryActions.length,
+              channelCards: channelCards.map((card) => {
+                const rect = card.getBoundingClientRect();
+                return { width: Math.round(rect.width), height: Math.round(rect.height) };
+              }),
               horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
               toggleSizes: toggles.map((toggle) => {
                 const rect = toggle.getBoundingClientRect();
@@ -172,6 +177,11 @@ describe("workspace mobile share presentation", () => {
             expect.soft(metrics.previewLeft, `${scenario.label} ${theme} desktop preview right pane`).toBeGreaterThanOrEqual(metrics.primaryRight);
             expect.soft(metrics.pageHeight, `${scenario.label} ${theme} desktop share task distance`).toBeLessThanOrEqual(metrics.viewportHeight * 1.35);
             expect.soft(metrics.lastParagraphBottom, `${scenario.label} ${theme} desktop paragraph is bounded by preview`).toBeGreaterThanOrEqual(metrics.linesBottom);
+            expect.soft(metrics.channelCards.length, `${scenario.label} ${theme} channel card count`).toBe(3);
+            for (const card of metrics.channelCards) {
+              expect.soft(card.width, `${scenario.label} ${theme} channel card readable width`).toBeGreaterThanOrEqual(150);
+              expect.soft(card.height, `${scenario.label} ${theme} channel card compact height`).toBeLessThanOrEqual(80);
+            }
           }
           expect.soft(metrics.paragraphCount, `${scenario.label} ${theme} full Vietnamese paragraph count`).toBe(vietnameseParagraphs.length + 2);
           for (const paragraph of vietnameseParagraphs) {
