@@ -1,10 +1,10 @@
 # Documents Field-First Affordance Gate
 
-Checked at: 2026-07-21 06:52 KST
+Checked at: 2026-07-21 06:55 KST
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE`
+`PASS_PRODUCTION`
 
 This is a bounded `/documents` field-first affordance patch. It keeps the existing first-edit cockpit and bounded pane contracts, then makes the open section answer the next practical question: what field is being edited, what evidence supports it, and where to validate/recheck it.
 
@@ -22,6 +22,8 @@ Route/page split alone remains insufficient. The accepted IA is:
 ## Source Patch
 
 - Source patch commit: `3bb927635b9b9612e27da5ebf02819253f7cffa9`
+- Evidence/production marker commit: `67afa408726a80b4d69d69224b009bc3d501cb44`
+- Production environment: `master`, `production`
 - Scope: `components/WorkpackEditor.tsx`, `components/WorkpackEditor.module.css`, `tests/documents-editor-layout.test.ts`
 - Backend/provider/export contracts changed: false
 
@@ -35,9 +37,9 @@ Route/page split alone remains insufficient. The accepted IA is:
 - Pane alignment targets the field strip instead of only the textarea, so the strip and action row are not hidden under the sticky toolbar.
 - The textarea remains visible with usable editable area inside the bounded pane.
 
-## Current-Source Metrics
+## Production Metrics
 
-Local current-source browser probe: `http://localhost:3218/documents?theme=day`.
+Live production browser probe: `https://www.safeclaw.kr/documents?theme=day`.
 
 ### Mobile 390x844
 
@@ -50,15 +52,15 @@ Local current-source browser probe: `http://localhost:3218/documents?theme=day`.
 - `.workpack-shell = top 476 / bottom 796 / height 320`
 - `.workpack-shell.scrollHeight = 1481`
 - toolbar `bottom = 572`
-- field strip `top = 580`, `bottom = 628`, `height = 48`
-- action row `top = 628`, `bottom = 672`, `height = 44`
-- first textarea `top = 672`, `bottom = 829`, `height = 157`
-- visible textarea area inside pane: `124px`
+- field strip `top = 581`, `bottom = 629`, `height = 48`
+- action row `top = 629`, `bottom = 673`, `height = 44`
+- first textarea `top = 673`, `bottom = 830.25`, `height = 157.25`
+- visible textarea area inside pane: `123px`
 - field strip below toolbar: true
 - action row inside pane: true
 - textarea has usable visible area in pane: true
 - sticky toolbar overlaps field/action/textarea: false
-- field strip text: `현재 편집 필드 / 기본 정보 / 근거 48건 연결 / 점검 초안 확인`
+- field strip text: `현재 편집 필드 / 기본 정보 / 근거48건 연결 / 점검초안 확인`
 
 ### Desktop 1440x723
 
@@ -70,10 +72,10 @@ Local current-source browser probe: `http://localhost:3218/documents?theme=day`.
 - risk launcher pressed: true
 - `.workpack-shell = top 336 / bottom 722 / height 386`
 - `.workpack-shell.scrollHeight = 1521`
-- toolbar `bottom = 335`
-- field strip `top = 493`, `bottom = 541`, `height = 48`
-- action row `top = 541`, `bottom = 585`, `height = 44`
-- first textarea `top = 585`, `bottom = 738`, `height = 153`
+- toolbar `bottom = 334.88`
+- field strip `top = 492.88`, `bottom = 540.88`, `height = 48`
+- action row `top = 540.88`, `bottom = 584.88`, `height = 44`
+- first textarea `top = 584.88`, `bottom = 738.13`, `height = 153.25`
 - visible textarea area inside pane: `137px`
 - field strip below toolbar: true
 - action row inside pane: true
@@ -91,7 +93,7 @@ Local current-source browser probe: `http://localhost:3218/documents?theme=day`.
 
 ## Remaining Debt
 
-This closes the first field-first affordance layer for the selected risk-assessment section. It does not close:
+This production evidence closes the first field-first affordance layer for the selected risk-assessment section. It does not close:
 
 - full textarea visibility inside the 320px mobile pane;
 - richer risk-row field editing and row-level readability;
@@ -99,3 +101,7 @@ This closes the first field-first affordance layer for the selected risk-assessm
 - provider live dispatch or result persistence.
 
 The next product-depth wave should keep the same principle: selected document, selected section, explicit evidence/recheck action, bounded long content.
+
+## IA Interpretation
+
+The user's structure concern remains the correct product frame: adding more routes alone would not make long safety artifacts short. Routes help orientation, while the actual launch contract is first-viewport cockpit plus bounded drilldown. This gate proves the selected `/documents` pane now exposes the current editable field, supporting evidence count, and evidence/recheck actions before the textarea on live production. The long editor body still exists inside the bounded pane, so the remaining work is risk-row/field-first authoring depth and richer document-specific drilldown, not another route-count change.

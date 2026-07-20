@@ -232,11 +232,12 @@
     "remainingDebt": "This reduces bounded pane default depth only; document-specific summaries, risk-row readability, and full 12-document authoring UX remain product-depth follow-up."
   },
   "documentsFieldFirstAffordanceUpdate": {
-    "checkedAt": "2026-07-21T06:52:00+09:00",
+    "checkedAt": "2026-07-21T06:55:43+09:00",
     "sourcePatchCommit": "3bb927635b9b9612e27da5ebf02819253f7cffa9",
+    "productionMarker": "67afa408726a80b4d69d69224b009bc3d501cb44",
     "artifact": "evaluation/documents-field-first-affordance-2026-07-21/report.json",
     "scope": "standalone /documents selected-section field-first affordance",
-    "verdict": "PASS_CURRENT_SOURCE",
+    "verdict": "PASS_PRODUCTION",
     "routeSplitAloneAcceptedAsFix": false,
     "mobile390x844": {
       "bodyHeight": 844,
@@ -248,13 +249,13 @@
       "workpackShellClientHeight": 320,
       "workpackShellScrollHeight": 1481,
       "toolbarBottom": 572,
-      "fieldStripTop": 580,
-      "fieldStripBottom": 628,
-      "actionsTop": 628,
-      "actionsBottom": 672,
-      "firstTextareaTop": 672,
-      "firstTextareaBottom": 829,
-      "visibleTextareaHeightInsidePane": 124,
+      "fieldStripTop": 581,
+      "fieldStripBottom": 629,
+      "actionsTop": 629,
+      "actionsBottom": 673,
+      "firstTextareaTop": 673,
+      "firstTextareaBottom": 830.25,
+      "visibleTextareaHeightInsidePane": 123,
       "fieldStripBelowToolbar": true,
       "actionsInsidePane": true,
       "toolbarOverlap": false,
@@ -269,13 +270,13 @@
       "workpackShellBottom": 722,
       "workpackShellClientHeight": 386,
       "workpackShellScrollHeight": 1521,
-      "fieldStripTop": 493,
-      "fieldStripBottom": 541,
-      "actionsTop": 541,
-      "actionsBottom": 585,
-      "firstTextareaTop": 585,
-      "firstTextareaBottom": 738,
-      "visibleTextareaHeightInsidePane": 137,
+      "fieldStripTop": 492.88,
+      "fieldStripBottom": 540.88,
+      "actionsTop": 540.88,
+      "actionsBottom": 584.88,
+      "firstTextareaTop": 584.88,
+      "firstTextareaBottom": 738.13,
+      "visibleTextareaHeightInsidePane": 137.12,
       "horizontalOverflow": false
     },
     "focusedGate": {
@@ -290,7 +291,8 @@
       "command": "npm.cmd run typecheck",
       "result": "PASS"
     },
-    "remainingDebt": "This adds field/evidence/recheck affordance for the selected risk-assessment section. Full textarea visibility inside the mobile pane, richer risk-row editing, and all-document field-first UX remain product-depth follow-up."
+    "remainingDebt": "This adds field/evidence/recheck affordance for the selected risk-assessment section on production. Full textarea visibility inside the mobile pane, richer risk-row editing, and all-document field-first UX remain product-depth follow-up.",
+    "structuralInterpretation": "Route split helps orientation but is not accepted as the length fix by itself. The accepted UX contract is route split plus first-viewport cockpit plus bounded pane/drilldown/progressive disclosure."
   },
   "productionMarker": "f504b15e9682e35bce97d629b86e02268c08a185",
   "documentsDesktopShort": {

@@ -96,18 +96,21 @@ Interpretation: this closes a bounded default-depth slice inside the document pa
 
 ## 2026-07-21 Documents Field-First Affordance Update
 
-Current-source bounded gate:
+Production-confirmed bounded gate:
 
 - Artifact: `evaluation/documents-field-first-affordance-2026-07-21/report.md`
 - Source patch commit: `3bb927635b9b9612e27da5ebf02819253f7cffa9`
+- Production/evidence marker: `67afa408726a80b4d69d69224b009bc3d501cb44`
 - This wave keeps default `/documents` on `위험성평가표`, keeps the first-edit cockpit, and adds a field-first strip to the open selected section.
-- Mobile 390x844 current-source: body `844px / 1.00x`, shell `476-796`, field strip `580-628`, evidence/recheck action row `628-672`, first textarea `672-829`, visible textarea area in pane `124px`, overflow `0`, toolbar overlap `0`.
-- Desktop 1440x723 current-source: body `770px / 1.07x`, shell `336-722`, field strip `493-541`, action row `541-585`, first textarea `585-738`, visible textarea area in pane `137px`, overflow `0`, toolbar overlap `0`.
+- Mobile 390x844 live production: body `844px / 1.00x`, shell `476-796`, field strip `581-629`, evidence/recheck action row `629-673`, first textarea `673-830.25`, visible textarea area in pane `123px`, overflow `0`, toolbar overlap `0`.
+- Desktop 1440x723 live production: body `770px / 1.07x`, shell `336-722`, field strip `492.88-540.88`, action row `540.88-584.88`, first textarea `584.88-738.13`, visible textarea area in pane `137.12px`, overflow `0`, toolbar overlap `0`.
 - Focused browser: default cockpit field-first slice PASS, 1/1 selected.
 - Focused preservation browser: core launcher + requested document + default cockpit + expanded tools containment PASS, 5/5 selected.
 - TypeScript: PASS.
 
-Interpretation: this closes a field-first affordance slice for the selected risk-assessment section: the user sees the editable field, supporting evidence count, review state, and evidence/recheck CTAs before reading the textarea. Full textarea visibility inside the 320px mobile pane and field-first authoring across all 12 documents remain OPEN.
+Interpretation: this closes a field-first affordance slice on production for the selected risk-assessment section: the user sees the editable field, supporting evidence count, review state, and evidence/recheck CTAs before reading the textarea. Full textarea visibility inside the 320px mobile pane and field-first authoring across all 12 documents remain OPEN.
+
+Structural answer to the user's route-split question: page/route split is useful for orientation, but it is not the length fix by itself. The accepted UX contract is route split plus first-viewport cockpit plus bounded pane/drilldown/progressive disclosure. Long safety documents and Share/result details remain legitimate only when they are contained behind selected sections, accordions, drawers, or detail panes with persistent local context.
 
 ## Current Production Baseline
 
