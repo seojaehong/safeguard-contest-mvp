@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-20T16:30:58.315Z
-Source HEAD at generation: 4dd391e1ed773469627fe81bebe0f8a250766373
-Live commit at generation: 4dd391e1ed773469627fe81bebe0f8a250766373
+Generated at: 2026-07-21T02:34:27+09:00
+Source HEAD at generation: 3a91ec7ebee10d71e759b5c9fc261ec4a8974a28
+Live commit at generation: f504b15e9682e35bce97d629b86e02268c08a185
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -10,10 +10,9 @@ Overall: `northstar_open_approval_gated`
 ## Current Mobile P0
 
 - Verdict: `MOBILE_FIXED`
-- Documents: 1.5x viewport, first useful y=262
-- Deep review closed: yes
-- Visible full previews while closed: 0
-- Share: 1.72x viewport, preview y=380
+- Workspace Documents: deep review closed, visible full previews while closed = 0
+- Standalone Documents mobile: 1.00x viewport, bodyHeight 844, current-work strip visible, workpack internal pane 320px with overflowY auto
+- Share mobile: selected summary, preview, and primary CTA are all visible in the first viewport
 
 ## Gate Matrix
 
@@ -21,6 +20,7 @@ Overall: `northstar_open_approval_gated`
 | --- | --- | --- |
 | final_99_gate | notice | evaluation\final-99-gate-current-2026-07-20\report.json |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
+| ui_documents_share_cockpit | proven | evaluation\documents-mobile-internal-pane-2026-07-21\report.json |
 | kosha_exact_trust_registry | proven | evaluation\kosha-current-live-gate-2026-07-20\report.json |
 | supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
 | llm_wiki_publication | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
@@ -30,7 +30,8 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | product_live | evaluation\northstar-open-gates-current\report.json |
+| ui_documents_share_cockpit | exact | product_live | evaluation\documents-mobile-internal-pane-2026-07-21\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-20\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
 | kosha_exact_trust_registry | ancestor | ancestor_of_head | evaluation\kosha-current-live-gate-2026-07-20\report.json |

@@ -1,12 +1,12 @@
 # UI Follow-Up Ledger
 
-Checked at: 2026-07-21 KST
+Checked at: 2026-07-21 02:34 KST
 
 ## Current Split Verdict
 
 - Documents desktop cockpit: PASS
 - Share desktop cockpit: PASS
-- Documents mobile cockpit: PASS after the 2026-07-21 bounded mobile patch
+- Documents mobile cockpit: PASS after the 2026-07-21 internal-pane production patch
 - Share mobile action cockpit: PASS after the 2026-07-21 bounded mobile patch
 - Share mobile default flow: PASS after adding the selected 대상/채널/언어 summary strip
 
@@ -16,7 +16,7 @@ This ledger intentionally does not mark frontend as globally perfect. The curren
 
 Current production evidence after the latest workspace IA work:
 
-- Production marker: `bd4beeebbb02c977b1f34d02b5895f7fcacba568`
+- Production marker: `f504b15e9682e35bce97d629b86e02268c08a185`
 - Documents desktop-short 1440x723:
   - `documentWorkbench.bottom = 722`
   - `safetyBrief.bottom = 649`
@@ -67,6 +67,27 @@ Documents mobile 390x844 current-source gate:
 - `overflowX = false`
 - `outside = 0`
 
+## 2026-07-21 Standalone Documents Internal Pane Update
+
+Production `/documents?theme=day` at 390x844:
+
+- `bodyHeight = 844`
+- `heightRatio = 1.00`
+- `currentWorkStrip.visible = true`
+- `currentWorkStrip.bottom = 297`
+- `mobileCoreLauncher.bottom = 468`
+- `workpackPane.top = 476`
+- `workpackPane.bottom = 796`
+- `workpackPane.height = 320`
+- `workpackPane.overflowY = auto`
+- `workpackPane.scrollHeight = 1110`
+- `documentEditor.top = 602`
+- `documentTextarea.top = 823`
+- `overflowX = false`
+- `outside = 0`
+
+Interpretation: the raw mobile standalone `/documents` long-page complaint is closed for the default surface. Long document editing remains available inside a bounded internal pane, so remaining IA debt moves to pane readability and document-specific drilldown, not route body height.
+
 Share mobile 390x844 current-source gate:
 
 - `shareMobileSummary.bottom = 432`
@@ -81,7 +102,7 @@ Share mobile 390x844 current-source gate:
 
 ## Next Bounded Wave
 
-Recommended branch name if full Share mobile closure is required:
+Recommended branch name if deeper document-pane readability or full Share mobile closure is required:
 
 ```text
 fix/mobile-doc-share-cockpit

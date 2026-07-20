@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-20T16:30:57.711Z
-Source SHA: `4dd391e1ed773469627fe81bebe0f8a250766373`
+Generated at: 2026-07-21T02:34:27+09:00
+Source SHA: `3a91ec7ebee10d71e759b5c9fc261ec4a8974a28`
 Overall: `open`
 
 ## Gate Matrix
@@ -10,6 +10,7 @@ Overall: `open`
 | --- | --- | --- | --- |
 | final_99_gate | notice | evaluation\final-99-gate-current-2026-07-20\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate-current-2026-07-20\notice-carry.json. |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json | Live harness probe passed with zero failed contracts. |
+| ui_documents_share_cockpit | proven | evaluation\documents-mobile-internal-pane-2026-07-21\report.json | Current production closes the raw mobile /documents long-page complaint: 390x844 bodyHeight 844, workpack pane overflowY auto, current-work strip visible, and share desktop/mobile cockpit gates remain green. |
 | supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Read-only RLS approval preflight passed at source SHA cbb134c52185aab4e0ac3f9d648eee82aee2634f, but live RLS catalog and tenant A/B isolation are not proven. |
 | llm_wiki_publication | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA cbb134c52185aab4e0ac3f9d648eee82aee2634f. |
 | sif_embedding_runtime | approval_gated | evaluation\sif-embedding-gate\approval-preflight-report.json | SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 4dd391e1ed773469627fe81bebe0f8a250766373. |
@@ -44,3 +45,4 @@ Overall: `open`
 - sif_embedding_runtime: Approve SIF-only migration, embedding cost, upload, and vector runtime separately.
 - sif_embedding_runtime: Do not claim vector retrieval is production-active before post-migration verification.
 - kosha_exact_trust_registry: Promote additional metadata-verified KOSHA candidates to exact trust only through separate immutable acquisition/review.
+- ui_documents_share_cockpit: Remaining UI work should focus on internal pane readability and document-specific drilldown, not raw route body height.

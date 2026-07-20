@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-21T00:05:00+09:00",
+  "checkedAt": "2026-07-21T02:34:27+09:00",
   "verdict": {
     "documentsDesktopCockpit": "PASS",
     "shareDesktopCockpit": "PASS",
@@ -7,7 +7,7 @@
     "shareMobileActionCockpit": "PASS",
     "shareMobileDefaultFlow": "PASS"
   },
-  "productionMarker": "bd4beeebbb02c977b1f34d02b5895f7fcacba568",
+  "productionMarker": "f504b15e9682e35bce97d629b86e02268c08a185",
   "documentsDesktopShort": {
     "viewport": {
       "width": 1440,
@@ -67,6 +67,28 @@
       "interpretation": "action cockpit passes; full detail flow remains partial"
     }
   },
+  "standaloneDocumentsInternalPaneUpdate": {
+    "checkedAt": "2026-07-21T02:34:27+09:00",
+    "productionMarker": "f504b15e9682e35bce97d629b86e02268c08a185",
+    "artifact": "evaluation/documents-mobile-internal-pane-2026-07-21/report.json",
+    "documentsMobile390x844": {
+      "bodyHeight": 844,
+      "heightRatio": 1.0,
+      "currentWorkStripVisible": true,
+      "currentWorkStripBottom": 297,
+      "mobileCoreLauncherBottom": 468,
+      "workpackPaneTop": 476,
+      "workpackPaneBottom": 796,
+      "workpackPaneHeight": 320,
+      "workpackPaneOverflowY": "auto",
+      "workpackPaneScrollHeight": 1110,
+      "documentEditorTop": 602,
+      "documentTextareaTop": 823,
+      "overflowX": false,
+      "outside": 0,
+      "interpretation": "raw route body height closed; long editor content remains in bounded internal pane"
+    }
+  },
   "structuralDecision": {
     "routeSplitAloneIsEnough": false,
     "actualFix": "viewport-first progressive disclosure",
@@ -74,9 +96,9 @@
     "managerMode": "full 12-document review, provenance, logs, and deep editing behind explicit disclosure"
   },
   "nextWave": {
-    "recommendedBranch": "fix/mobile-doc-share-cockpit",
+    "recommendedBranch": "fix/mobile-doc-pane-readability",
     "scope": [
-      "documents mobile cockpit density",
+      "documents internal pane readability and document-specific drilldown",
       "share mobile compact flow"
     ]
   }

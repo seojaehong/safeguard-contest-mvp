@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-20T16:30:58.315Z",
-  "head": "4dd391e1ed773469627fe81bebe0f8a250766373",
+  "generatedAt": "2026-07-21T02:34:27+09:00",
+  "head": "3a91ec7ebee10d71e759b5c9fc261ec4a8974a28",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "4dd391e1ed773469627fe81bebe0f8a250766373",
+    "commitSha": "f504b15e9682e35bce97d629b86e02268c08a185",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-b6po2pxe4-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-kiapofu1c-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 6
+    "gateCount": 7
   },
   "provenGates": [
     {
@@ -32,6 +32,12 @@
       "state": "proven",
       "artifact": "evaluation\\live-harness-quality-probe-current-2026-07-20\\report.json",
       "detail": "Live harness probe passed with zero failed contracts."
+    },
+    {
+      "id": "ui_documents_share_cockpit",
+      "state": "proven",
+      "artifact": "evaluation\\documents-mobile-internal-pane-2026-07-21\\report.json",
+      "detail": "Current production closes the raw mobile /documents long-page complaint: 390x844 bodyHeight 844, workpack pane overflowY auto, current-work strip visible, and share desktop/mobile cockpit gates remain green."
     },
     {
       "id": "kosha_exact_trust_registry",
@@ -61,16 +67,31 @@
     }
   ],
   "mobileP0": {
-    "artifact": "evaluation\\mobile-p0-workspace-gate-2026-07-20\\report.json",
+    "artifact": "evaluation\\documents-mobile-internal-pane-2026-07-21\\report.json",
     "verdict": "MOBILE_FIXED",
-    "productionCommit": "928244cb28a575a23d951e621624ea8b014d77a1",
-    "documentsHeightRatio": 1.5,
-    "firstUsefulReviewY": 262,
+    "productionCommit": "f504b15e9682e35bce97d629b86e02268c08a185",
+    "documentsHeightRatio": 1.0,
+    "firstUsefulReviewY": 305,
     "documentDeepReviewOpen": false,
     "visibleDocumentPreviews": 0,
     "shareHeightRatio": 1.72,
     "sharePreviewY": 380,
     "hardBlockersClosed": true
+  },
+  "uiDocumentsShareCockpit": {
+    "artifact": "evaluation\\documents-mobile-internal-pane-2026-07-21\\report.json",
+    "productionCommit": "f504b15e9682e35bce97d629b86e02268c08a185",
+    "documentsMobile390x844": {
+      "bodyHeight": 844,
+      "heightRatio": 1.0,
+      "currentWorkStripVisible": true,
+      "mobileCoreLauncherBottom": 468,
+      "workpackPaneBottom": 796,
+      "workpackPaneOverflowY": "auto",
+      "workpackPaneScrollHeight": 1110,
+      "overflowX": false,
+      "outside": 0
+    }
   },
   "liveCritical": {
     "artifact": "evaluation\\live-critical-surface-current-2026-07-20-rerun\\report.json",
@@ -117,10 +138,18 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "4dd391e1ed773469627fe81bebe0f8a250766373",
+      "sourceCommit": "3a91ec7ebee10d71e759b5c9fc261ec4a8974a28",
       "sourceStatus": "exact",
-      "productionCommit": "4dd391e1ed773469627fe81bebe0f8a250766373",
-      "productionStatus": "matches_live"
+      "productionCommit": "f504b15e9682e35bce97d629b86e02268c08a185",
+      "productionStatus": "product_live"
+    },
+    {
+      "id": "ui_documents_share_cockpit",
+      "artifact": "evaluation\\documents-mobile-internal-pane-2026-07-21\\report.json",
+      "sourceCommit": "3a91ec7ebee10d71e759b5c9fc261ec4a8974a28",
+      "sourceStatus": "exact",
+      "productionCommit": "f504b15e9682e35bce97d629b86e02268c08a185",
+      "productionStatus": "product_live"
     },
     {
       "id": "final_99_gate",

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-20T16:30:57.711Z",
-  "sourceSha": "4dd391e1ed773469627fe81bebe0f8a250766373",
+  "generatedAt": "2026-07-21T02:34:27+09:00",
+  "sourceSha": "3a91ec7ebee10d71e759b5c9fc261ec4a8974a28",
   "overall": "open",
   "gates": [
     {
@@ -21,6 +21,16 @@
       "evidencePath": "evaluation\\live-harness-quality-probe-current-2026-07-20\\report.json",
       "detail": "Live harness probe passed with zero failed contracts.",
       "nextActions": []
+    },
+    {
+      "id": "ui_documents_share_cockpit",
+      "state": "proven",
+      "label": "Documents and Share cockpit UI",
+      "evidencePath": "evaluation\\documents-mobile-internal-pane-2026-07-21\\report.json",
+      "detail": "Current production closes the raw mobile /documents long-page complaint: 390x844 bodyHeight 844, workpack pane overflowY auto, current-work strip visible, and share desktop/mobile cockpit gates remain green.",
+      "nextActions": [
+        "Continue UI work on internal pane readability and document-specific drilldown, not raw route body height."
+      ]
     },
     {
       "id": "supabase_rls_launch_isolation",
