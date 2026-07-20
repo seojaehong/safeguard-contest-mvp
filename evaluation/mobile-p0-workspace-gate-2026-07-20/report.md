@@ -2,7 +2,7 @@
 
 Verdict: **MOBILE FIXED**
 
-Production commit: `c5ac81f18931b51e84160824f56a5ecbdb036f05`
+Production commit: `bc48a0d2fbcb4c4017e5c5e4406669b745d789ee`
 
 The 6-hour mobile gate is closed for the generated workspace flow. The default Documents surface is a bounded Safety Brief, and full document preview/review is behind an explicit disclosure.
 
