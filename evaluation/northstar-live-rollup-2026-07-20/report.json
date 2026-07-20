@@ -69,6 +69,14 @@
       "testsPassed": 289,
       "liveUnauthenticatedStatus": 401,
       "engineExecutionReached": false
+    },
+    {
+      "id": "export_foreign_dispatch_quality",
+      "artifact": "evaluation/export-foreign-dispatch-current-gate-2026-07-20/report.json",
+      "result": "pass",
+      "testFilesPassed": 9,
+      "testsPassed": 67,
+      "providerDispatchSideEffectPerformed": false
     }
   ],
   "approvalGated": [

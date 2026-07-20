@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "safeclaw-export-foreign-dispatch-current-gate/v1",
+  "checkedAt": "2026-07-20T04:34:49.995Z",
+  "head": "f3e9f373614c8500d24e73ea1e99ecccb1ba423b",
+  "verdict": "pass",
+  "dbMutationPerformed": false,
+  "providerDispatchSideEffectPerformed": false,
+  "focusedTests": {
+    "command": "npm.cmd test -- tests\\document-export-localization.test.ts tests\\editor-export-integrity.test.ts tests\\xlsx-export-route.test.ts tests\\pdf-korean-font-integration.test.ts tests\\pdf-font-failure.test.ts tests\\foreign-worker-languages.test.ts tests\\foreign-parse.test.ts tests\\workflow-dispatch-capability-policy.test.ts tests\\provider-dispatch-idempotency-gate.test.ts --maxWorkers=1 --fileParallelism=false",
+    "testFilesPassed": 9,
+    "testsPassed": 67,
+    "status": "pass"
+  },
+  "verifiedScope": [
+    "document_export_localization",
+    "editor_export_integrity",
+    "xlsx_export_route_rendering",
+    "pdf_korean_font_integration",
+    "pdf_font_failure_behavior",
+    "foreign_worker_language_generation_parse",
+    "dispatch_capability_idempotency_policy"
+  ]
+}

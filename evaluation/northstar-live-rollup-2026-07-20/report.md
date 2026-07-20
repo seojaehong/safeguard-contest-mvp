@@ -19,6 +19,7 @@ This rollup does not claim the long-term North Star is complete. It records the 
 | Live critical surface | PASS, 8 routes x 2 viewports, findings 0 | `evaluation/live-critical-surface-current-2026-07-20-rerun/report.json` |
 | Operator wiki / reference corpus | PASS approval-gated, 18 files / 208 tests, ontology 166/169 | `evaluation/operator-wiki-reference-corpus-current-gate-2026-07-20/report.json` |
 | Hermes / OpenClaw runtime boundary | PASS boundary, 13 files / 289 tests, live unauth 401 | `evaluation/hermes-openclaw-runtime-current-gate-2026-07-20/report.json` |
+| Export / foreign dispatch quality | PASS, 9 files / 67 tests, no provider side effect | `evaluation/export-foreign-dispatch-current-gate-2026-07-20/report.json` |
 
 ## Still Approval-Gated
 

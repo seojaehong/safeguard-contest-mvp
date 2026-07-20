@@ -1,12 +1,12 @@
 # Export / Foreign Dispatch Current Gate
 
-Checked at: 2026-07-20 KST
+Checked at: 2026-07-20T04:34:49.995Z
 
 ## Verdict
 
-PASS on current master lineage through `c9ed4d89`.
+PASS on current master lineage through `f3e9f373614c8500d24e73ea1e99ecccb1ba423b`.
 
-Current master already contains the active export and foreign-dispatch integration lineage. Earlier isolated candidate SHAs are not direct ancestors, but the current integrated files preserve the relevant contracts through the active route/component tests.
+Current master contains the active export and foreign-dispatch integration line. Earlier isolated candidate SHAs are not direct ancestors, but the current integrated files preserve the relevant contracts through the active route/component tests.
 
 ## Verified Scope
 
@@ -19,9 +19,11 @@ Current master already contains the active export and foreign-dispatch integrati
 
 ## Verification
 
-`npm.cmd test -- tests\document-export-localization.test.ts tests\editor-export-integrity.test.ts tests\xlsx-export-route.test.ts tests\pdf-korean-font-integration.test.ts tests\pdf-font-failure.test.ts tests\foreign-worker-languages.test.ts tests\foreign-parse.test.ts tests\workflow-dispatch-capability-policy.test.ts tests\provider-dispatch-idempotency-gate.test.ts --maxWorkers=1 --fileParallelism=false`
+```powershell
+npm.cmd test -- tests\document-export-localization.test.ts tests\editor-export-integrity.test.ts tests\xlsx-export-route.test.ts tests\pdf-korean-font-integration.test.ts tests\pdf-font-failure.test.ts tests\foreign-worker-languages.test.ts tests\foreign-parse.test.ts tests\workflow-dispatch-capability-policy.test.ts tests\provider-dispatch-idempotency-gate.test.ts --maxWorkers=1 --fileParallelism=false
+```
 
-Result: PASS, 9 files / 66 tests.
+Result: PASS, 9 files / 67 tests.
 
 ## Notes
 
