@@ -68,11 +68,23 @@
       "engineExecutionReached": false,
       "productionMarkerAtLiveSmoke": "a888a4681293dcddf72b309af8a5532919d49d62",
       "status": "adapter_boundary_pass_live_execution_not_claimed"
+    },
+    "liveCriticalSurfaceRerun": {
+      "command": "node evaluation\\live-critical-surface-current-2026-07-20-rerun\\run-live-critical-surface-rerun.mjs",
+      "productionMarker": "6ac736394b58bbade424fc876ccc99e96a503de9",
+      "routesChecked": 8,
+      "viewportsChecked": 2,
+      "p1p2Findings": 0,
+      "p3Findings": 1,
+      "remainingFinding": "mobile root remains long (12.8x viewport)",
+      "documentsDesktopHeight": 2286,
+      "shareVietnameseMobileHeight": 855,
+      "status": "pass_with_p3_landing_density"
     }
   },
   "remaining": [
     "Operator Wiki Export / Public Reference Corpus maturation",
-    "remaining non-workspace page density",
+    "landing page mobile density after demo-critical routes",
     "RLS live tenant A/B, Storage, service-role, and publication RPC proof after explicit approval",
     "Hermes/OpenClaw authenticated operator-owned runtime E2E proof",
     "regeneration comparison after next production product commit"

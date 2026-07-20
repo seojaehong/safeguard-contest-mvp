@@ -20,6 +20,7 @@ Current `master` and the current production-visible product line are aligned wit
 - Live generation grounding comparison and DB-harness quality contract probe
 - Application-level tenant-boundary tests and RLS / LLM Wiki approval preflight
 - Hermes/OpenClaw runtime adapter, service-auth, and fail-closed route boundary
+- Current live critical surface rerun with no P1/P2 UI blockers
 
 This gate does not claim the entire 24h/72h North Star objective is complete. It records that the current high-risk KOSHA/SIF/ontology and terminology boundaries are green on the authoritative code state.
 
@@ -195,6 +196,29 @@ Evidence:
 - `evaluation/hermes-openclaw-runtime-current-gate-2026-07-20/report.md`
 - `evaluation/hermes-openclaw-runtime-current-gate-2026-07-20/report.json`
 
+### Live Critical Surface Rerun
+
+Command:
+
+```powershell
+node evaluation\live-critical-surface-current-2026-07-20-rerun\run-live-critical-surface-rerun.mjs
+```
+
+Result:
+
+- Production build marker: `6ac736394b58bbade424fc876ccc99e96a503de9`
+- Routes checked: `/`, `/workspace`, `/why`, `/ontology`, `/knowledge`, `/documents`, `/reports`, `/share/not-a-session?lang=vi`
+- Viewports: desktop 1440x900, mobile 390x844
+- P1/P2 findings: 0
+- Remaining finding: P3, `/` mobile landing remains long at 12.8x viewport
+- `/documents` desktop live height after compact patch: 2286px
+- `/share/not-a-session?lang=vi` mobile live height: 855px, horizontal overflow false
+
+Evidence:
+
+- `evaluation/live-critical-surface-current-2026-07-20-rerun/report.md`
+- `evaluation/live-critical-surface-current-2026-07-20-rerun/report.json`
+
 ### TypeScript
 
 Command:
@@ -236,7 +260,7 @@ The current implementation preserves the accepted product direction:
 The broader objective remains active. The next highest-value workstreams are:
 
 1. Public Reference Corpus / Operator Wiki Export: continue improving review/export surfaces without turning Markdown/wiki into runtime truth.
-2. Remaining page density: continue bringing non-workspace pages toward the compact workspace design.
+2. Landing page mobile density: current live critical surface has no P1/P2 UI blockers, but `/` mobile remains long and should be compressed after demo-critical routes.
 3. RLS live launch proof: application boundary is green, but live tenant A/B, Storage, service-role, and publication RPC gates remain approval-gated.
 4. Hermes/OpenClaw live execution proof: adapter boundary is green, but an authenticated operator-owned runtime E2E is still not claimed.
 5. Re-run generation comparison after the next production product commit to keep the evidence current.

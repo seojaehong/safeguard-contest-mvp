@@ -1,0 +1,716 @@
+{
+  "checkedAt": "2026-07-20T02:48:40.366Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "buildInfo": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "6ac736394b58bbade424fc876ccc99e96a503de9",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-q8eedszbo-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "routes": [
+    "/",
+    "/workspace",
+    "/why",
+    "/ontology",
+    "/knowledge",
+    "/documents",
+    "/reports",
+    "/share/not-a-session?lang=vi"
+  ],
+  "viewports": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "findings": [
+    {
+      "route": "/",
+      "viewport": "mobile",
+      "severity": "P3",
+      "message": "mobile root remains long (12.8x viewport)"
+    }
+  ],
+  "rows": [
+    {
+      "route": "/",
+      "viewport": "desktop",
+      "status": 200,
+      "url": "https://www.safeclaw.kr/",
+      "screenshot": "screenshots/desktop-root.png",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "scrollHeight": 5604,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "heightRatio": 6.23,
+      "horizontalOverflow": false,
+      "outsideCount": 0,
+      "under44Count": 9,
+      "under44Samples": [
+        {
+          "text": "제품",
+          "w": 38,
+          "h": 44,
+          "visible": true
+        },
+        {
+          "text": "문제",
+          "w": 38,
+          "h": 44,
+          "visible": true
+        },
+        {
+          "text": "근거",
+          "w": 38,
+          "h": 44,
+          "visible": true
+        },
+        {
+          "text": "작업 이력실시간 검토 중",
+          "w": 395,
+          "h": 16,
+          "visible": true
+        },
+        {
+          "text": "작업공간",
+          "w": 55,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "text": "문서",
+          "w": 28,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "text": "근거",
+          "w": 28,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "text": "API 상태",
+          "w": 56,
+          "h": 24,
+          "visible": true
+        }
+      ],
+      "internalTerms": [],
+      "bodySample": "safeclaw/os\n제품\n문제\n작동 방식\n외국인 안내\n근거\n제품 구성\n작업 시작\n로그인\n작업 시작 →\n제품 · 운영 준비\nREGION · KR-CENTRAL\nPUBLIC API · ACTIVE\nUPDATED · 2026-07-20\n산업안전 · 현장 문서 작업공간\n오늘 작업을\n안전 문서팩으로\n준비합니다.\n\nsafeclaw는 현장관리자가 작업 전 필요한 안전 문서를 근거와 함께 준비하도록 돕는 웹 작업공간입니다.\n\n한 줄 입력으로 위험성평가, TBM, 안전교육, 외국인 안내문, 현장 전파 메시지 초안을 생성합니다.\n\n채용하지 않은 안전관리자 — 한 명 몫의 문서 업무를 대신합니다.\n\n작업공간 열기 →\n문서팩 보기\nsafeclaw · AI 안전관리자\n생성 중\n작업 입력\n\n세이프건설 서울 성수동 외벽 도장 · 이동식 비계 · 오후 강풍 · 신규 작업자 1명\n\n작업 이력\n실시간 검토 중\n\n▸\n기상청 실황·특보 확인\n\n§ 01\n문제\n작업 전 문서와 공지를\n하나의 흐름으로 잇습니다.\n01 · INPUT\n입력\n\n오늘 작업 내용을 한 줄로 정리합니다.\n\n작업\n02 · CHECK\n확인\n\n법령, 기상, KOSHA, 교육 근거를 함께 확인합니다.\n\n근거\n03 · DRAFT\n초안"
+    },
+    {
+      "route": "/workspace",
+      "viewport": "desktop",
+      "status": 200,
+      "url": "https://www.safeclaw.kr/workspace",
+      "screenshot": "screenshots/desktop-workspace.png",
+      "title": "작업공간 | SafeClaw",
+      "scrollHeight": 988,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "heightRatio": 1.1,
+      "horizontalOverflow": false,
+      "outsideCount": 0,
+      "under44Count": 5,
+      "under44Samples": [
+        {
+          "text": "Day",
+          "w": 50,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "Night",
+          "w": 62,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "",
+          "w": 20,
+          "h": 20,
+          "visible": true
+        },
+        {
+          "text": "",
+          "w": 20,
+          "h": 20,
+          "visible": true
+        },
+        {
+          "text": "",
+          "w": 20,
+          "h": 20,
+          "visible": true
+        }
+      ],
+      "internalTerms": [],
+      "bodySample": "SafeClaw\n현장 안전 문서팩\n현장 상황\n입력\nDay\nNight\n준비됨\n현장 상황 입력\n작업공간\n입력\n진행 중\n▣\n문서\n잠김\n▣\n공유\n잠김\n현장 작업 입력\n오늘 작업은 무엇인가요?\n\n지역, 작업, 인원, 주요 위험만 적어도 됩니다.\n\n현장 상황 입력\n0/600자\n\n작성 팁: 지역, 작업인원, 장비, 날씨/조건, 신규·외국인 근로자 여부를 적고, 사진은 +로 최대 10장 첨부하세요.\n\n+\n사진\n사진 첨부 최대 10장\n첨부하면 위험요인 후보를 자동 분석하고, 선택한 후보만 문서에 반영합니다.\n강화 모드\n안전 문서 생성\n고급 설정\n예시 불러오기"
+    },
+    {
+      "route": "/why",
+      "viewport": "desktop",
+      "status": 200,
+      "url": "https://www.safeclaw.kr/why",
+      "screenshot": "screenshots/desktop-why.png",
+      "title": "왜 SafeClaw인가 | SafeClaw",
+      "scrollHeight": 1142,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "heightRatio": 1.27,
+      "horizontalOverflow": false,
+      "outsideCount": 0,
+      "under44Count": 5,
+      "under44Samples": [
+        {
+          "text": "메뉴",
+          "w": 42,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "01대시보드",
+          "w": 203,
+          "h": 40,
+          "visible": true
+        },
+        {
+          "text": "Day",
+          "w": 48,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "Night",
+          "w": 48,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "작업공간 열기",
+          "w": 96,
+          "h": 36,
+          "visible": true
+        }
+      ],
+      "internalTerms": [],
+      "bodySample": "본문으로 건너뛰기\nSafeClaw\n메뉴\n\n현장 안전 문서팩\n\n주요 메뉴\n01\n작업공간\n입력 · 생성\n02\n문서\n위험성평가 · TBM\n03\n리포트\n주간 · 월간\n04\n근거\nDB · 온톨로지\n05\n이력\n증빙 · 파일\n06\n설정\nAI · 현장\n작업공간 관련\n01\n대시보드\n SITE 기본 현장\n공공 근거 Law.go · KOSHA · 기상청\n바로 사용\nDay\nNight\n차별성\n왜 SafeClaw인가.\n\n검색기나 템플릿이 아니라, 근거를 위험성평가표, TBM, 교육기록, 전파 메시지의 문장으로 연결하는 작업공간입니다.\n\n업무 범위\n근거 연결 · 실행 문서 · 현장 전파\n작업공간 열기\n기상청\n\n현재·예보·특보 신호를 작업중지 기준과 TBM 문구에 반영합니다.\n\nLaw.go\n\n법령, 판례, 해석례를 문서 반영 근거로 연결합니다.\n\nWork24\n\n작업과 대상에 맞는 후속 교육 후보를 제안합니다.\n\nKOSHA\n\n공식자료, 교육, 재해사례를 위험성평가와 교육기록에 연결합니다.\n\n비교\n대안별 차이\nSafeClaw와 기존 안전 문서 작성 대안의 기능 비교\n기준\nSafeClaw\n안전관리 SaaS\n한글·엑셀 양식\n일반 AI\n한 줄 입력에서 문서팩 생성\n지원\n부분 지원\n직접 작성\n프롬"
+    },
+    {
+      "route": "/ontology",
+      "viewport": "desktop",
+      "status": 200,
+      "url": "https://www.safeclaw.kr/ontology",
+      "screenshot": "screenshots/desktop-ontology.png",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "scrollHeight": 2077,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "heightRatio": 2.31,
+      "horizontalOverflow": false,
+      "outsideCount": 0,
+      "under44Count": 8,
+      "under44Samples": [
+        {
+          "text": "SafeClaw",
+          "w": 94,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "text": "메뉴",
+          "w": 42,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "01지식 DB",
+          "w": 203,
+          "h": 40,
+          "visible": true
+        },
+        {
+          "text": "02온톨로지",
+          "w": 203,
+          "h": 40,
+          "visible": true
+        },
+        {
+          "text": "03API 연결",
+          "w": 203,
+          "h": 40,
+          "visible": true
+        },
+        {
+          "text": "Day",
+          "w": 48,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "Night",
+          "w": 48,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "작업공간 열기",
+          "w": 96,
+          "h": 36,
+          "visible": true
+        }
+      ],
+      "internalTerms": [],
+      "bodySample": "본문으로 건너뛰기\nSafeClaw\n메뉴\n\n현장 안전 문서팩\n\n주요 메뉴\n01\n작업공간\n입력 · 생성\n02\n문서\n위험성평가 · TBM\n03\n리포트\n주간 · 월간\n04\n근거\nDB · 온톨로지\n05\n이력\n증빙 · 파일\n06\n설정\nAI · 현장\n근거 관련\n01\n지식 DB\n02\n온톨로지\n03\nAPI 연결\n SITE 기본 현장\n공공 근거 Law.go · KOSHA · 기상청\n바로 사용\nDay\nNight\n운영 온톨로지\n작업과 근거의 연결.\n\n작업, 위험요인, 안전조치와 법령을 선택한 항목 중심으로 확인합니다.\n\n업무 범위\n166개 안전지식 · 169개 연결\n작업공간 열기\n검증된 안전지식\n166\n검증 완료 범위\n검증된 연결\n169\n출처 연결 유지\n근거 차단\n0\n무출처 항목 제외\n01\n오늘 작업\n현장 맥락\n02\nSIF · KOSHA\n위험·조치 근거\n03\n개선 기록\n사진·메모 반영\n04\n다음 작업\n검증 후 재사용\n관계 탐색\n선택 항목 중심 안전지식\n\n전체 그래프 대신 선택한 항목과 직접 연결된 근거만 표시합니다.\n\n직접 관계\n확장 관계\n안전지식 검색\n유형\n전체 유형\n문서종\n법조문\n안전조치\n위험요인\n작업유형\n중처법 의무\n정렬\n연결 많은 순\n이름 순\n위험요인\n추락\n관련 항목 13"
+    },
+    {
+      "route": "/knowledge",
+      "viewport": "desktop",
+      "status": 200,
+      "url": "https://www.safeclaw.kr/knowledge",
+      "screenshot": "screenshots/desktop-knowledge.png",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "scrollHeight": 5325,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "heightRatio": 5.92,
+      "horizontalOverflow": false,
+      "outsideCount": 0,
+      "under44Count": 8,
+      "under44Samples": [
+        {
+          "text": "SafeClaw",
+          "w": 94,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "text": "메뉴",
+          "w": 42,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "01지식 DB",
+          "w": 203,
+          "h": 40,
+          "visible": true
+        },
+        {
+          "text": "02온톨로지",
+          "w": 203,
+          "h": 40,
+          "visible": true
+        },
+        {
+          "text": "03API 연결",
+          "w": 203,
+          "h": 40,
+          "visible": true
+        },
+        {
+          "text": "Day",
+          "w": 48,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "Night",
+          "w": 48,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "근거 검색",
+          "w": 74,
+          "h": 36,
+          "visible": true
+        }
+      ],
+      "internalTerms": [],
+      "bodySample": "본문으로 건너뛰기\nSafeClaw\n메뉴\n\n현장 안전 문서팩\n\n주요 메뉴\n01\n작업공간\n입력 · 생성\n02\n문서\n위험성평가 · TBM\n03\n리포트\n주간 · 월간\n04\n근거\nDB · 온톨로지\n05\n이력\n증빙 · 파일\n06\n설정\nAI · 현장\n근거 관련\n01\n지식 DB\n02\n온톨로지\n03\nAPI 연결\n SITE 기본 현장\n공공 근거 Law.go · KOSHA · 기상청\n바로 사용\nDay\nNight\n지식 DB\n지식 DB.\n\n법령 전문, KOSHA 자료, 재해사례, 서식 기준을 문서 보완과 근거 탐색에 쓰는 지식층으로 관리합니다.\n\n업무 범위\n9,920개 근거 항목 · KOSHA 1,040건\n근거 검색\n내장 지식 베이스\n8개 위험요인 · 4개 서식\n\n기본 위험요인과 서식 기준을 내장 위키로 관리하고, 현장 문서 보완 때 짧은 근거 요약만 보여줍니다.\n\n운영 지식\n원본 이벤트 · 검토 대기 · 미게시\n\nAI가 만든 내용은 검토 전 후보로 분리되며, 사람의 결정 후에도 자동 게시되지 않습니다.\n\n지식 카탈로그\n9,920개 항목 · 1,063개 출처\n\n기술지원규정 폴더 1,040건 기준과 Supabase 기술지원규정 소스 1,040건을 연결했습니다.\n\n오늘 할 일\n작업과 "
+    },
+    {
+      "route": "/documents",
+      "viewport": "desktop",
+      "status": 200,
+      "url": "https://www.safeclaw.kr/documents",
+      "screenshot": "screenshots/desktop-documents.png",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "scrollHeight": 2286,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "heightRatio": 2.54,
+      "horizontalOverflow": false,
+      "outsideCount": 0,
+      "under44Count": 32,
+      "under44Samples": [
+        {
+          "text": "SafeClaw",
+          "w": 94,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "text": "메뉴",
+          "w": 42,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "01TBM 모드",
+          "w": 203,
+          "h": 40,
+          "visible": true
+        },
+        {
+          "text": "02작업자 · 교육",
+          "w": 203,
+          "h": 40,
+          "visible": true
+        },
+        {
+          "text": "03현장 전파",
+          "w": 203,
+          "h": 40,
+          "visible": true
+        },
+        {
+          "text": "04작업자 열람",
+          "w": 203,
+          "h": 40,
+          "visible": true
+        },
+        {
+          "text": "Day",
+          "w": 48,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "Night",
+          "w": 48,
+          "h": 36,
+          "visible": true
+        }
+      ],
+      "internalTerms": [],
+      "bodySample": "본문으로 건너뛰기\nSafeClaw\n메뉴\n\n현장 안전 문서팩\n\n주요 메뉴\n01\n작업공간\n입력 · 생성\n02\n문서\n위험성평가 · TBM\n03\n리포트\n주간 · 월간\n04\n근거\nDB · 온톨로지\n05\n이력\n증빙 · 파일\n06\n설정\nAI · 현장\n문서 관련\n01\nTBM 모드\n02\n작업자 · 교육\n03\n현장 전파\n04\n작업자 열람\n SITE 기본 현장\n공공 근거 Law.go · KOSHA · 기상청\n바로 사용\nDay\nNight\n문서팩\n문서 편집.\n\n위험성평가표, 작업계획서, TBM, 안전보건교육 기록을 한 화면에서 편집하고 PDF, XLS, HWPX 제출본으로 출력합니다.\n\n업무 범위\n편집 · 보완 · PDF/XLS/HWPX 출력\n새 문서팩 만들기\n기본 예시 표시\n아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입력 후 진행합니다.\n오늘 문서\n핵심 3종\n위험성평가표TBM 브리핑TBM 기록\n문서 9종 · 제출 정보\n문서팩\n오늘 문서\n\n12개 문서 · 브라우저 자동 저장\n\n01\n점검결과 요약\n현장명, 작업조건, 핵심 위험, 즉시조치, 연결 상태를 첫 장으로 정리합니다.\n02\n위험성평가표\nKOSHA 절차에 맞춰 사전준비, 위험요인, "
+    },
+    {
+      "route": "/reports",
+      "viewport": "desktop",
+      "status": 200,
+      "url": "https://www.safeclaw.kr/reports",
+      "screenshot": "screenshots/desktop-reports.png",
+      "title": "SafeClaw 리포트 · 다운로드 센터",
+      "scrollHeight": 900,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "heightRatio": 1,
+      "horizontalOverflow": false,
+      "outsideCount": 0,
+      "under44Count": 0,
+      "under44Samples": [],
+      "internalTerms": [],
+      "bodySample": "본문으로 건너뛰기\nSafeClaw\n메뉴\n\n현장 안전 문서팩\n\n주요 메뉴\n01\n작업공간\n입력 · 생성\n02\n문서\n위험성평가 · TBM\n03\n리포트\n주간 · 월간\n04\n근거\nDB · 온톨로지\n05\n이력\n증빙 · 파일\n06\n설정\nAI · 현장\n SITE 기본 현장\n공공 근거 Law.go · KOSHA · 기상청\n바로 사용\nDay\nNight\n리포트\n개선 리포트.\n\n주간·월간·사용자 기간의 위험성평가와 승인된 개선 근거를 분류별로 정리합니다.\n\n업무 범위\n리포트 기능 사용 가능\n작업공간에서 개선 추가\n데이터 출처 · 없음\n최근 작업팩이 없습니다.\n\n작업공간에서 문서팩을 만든 뒤 리포트로 돌아오세요.\n\n현재 작업팩 필요\n작업팩을 만든 뒤 다운로드를 준비할 수 있습니다.\n\n작업공간에서 만들기\n샘플 미리보기"
+    },
+    {
+      "route": "/share/not-a-session?lang=vi",
+      "viewport": "desktop",
+      "status": 200,
+      "url": "https://www.safeclaw.kr/share/not-a-session?lang=vi",
+      "screenshot": "screenshots/desktop-share-not-a-session-lang-vi.png",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "scrollHeight": 900,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "heightRatio": 1,
+      "horizontalOverflow": false,
+      "outsideCount": 0,
+      "under44Count": 6,
+      "under44Samples": [
+        {
+          "text": "SafeClaw",
+          "w": 94,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "text": "Menu",
+          "w": 54,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "01대시보드",
+          "w": 203,
+          "h": 40,
+          "visible": true
+        },
+        {
+          "text": "Sáng",
+          "w": 46,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "Tối",
+          "w": 46,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "Về không gian làm việc",
+          "w": 161,
+          "h": 36,
+          "visible": true
+        }
+      ],
+      "internalTerms": [],
+      "bodySample": "Chuyển đến nội dung chính\nSafeClaw\nMenu\n\nGói tài liệu an toàn hiện trường\n\n주요 메뉴\n01\n작업공간\n입력 · 생성\n02\n문서\n위험성평가 · TBM\n03\n리포트\n주간 · 월간\n04\n근거\nDB · 온톨로지\n05\n이력\n증빙 · 파일\n06\n설정\nAI · 현장\n작업공간 관련\n01\n대시보드\n Hiện trường mặc định\nCăn cứ chính thức Law.go · KOSHA · KMA\nSẵn sàng dùng\nSáng\nTối\nCông nhân xem\nMàn hình xác nhận tài liệu\n\nKiểm tra tài liệu an toàn hiện trường và để lại xác nhận đã xem.\n\nPhạm vi công việc\nXác nhận người nhận\nVề không gian làm việc\nKiểm tra gói tài liệu\n\nMàn hình xác nhận chỉ dành cho công nhân được mời.\n\nCông việc hiện tại\n\nChưa tải được chi tiết công việc được chia sẻ.\n\nTrạng thái: Đa"
+    },
+    {
+      "route": "/",
+      "viewport": "mobile",
+      "status": 200,
+      "url": "https://www.safeclaw.kr/",
+      "screenshot": "screenshots/mobile-root.png",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "scrollHeight": 10800,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "heightRatio": 12.8,
+      "horizontalOverflow": false,
+      "outsideCount": 0,
+      "under44Count": 11,
+      "under44Samples": [
+        {
+          "text": "safeclaw/os",
+          "w": 358,
+          "h": 30,
+          "visible": true
+        },
+        {
+          "text": "제품",
+          "w": 28,
+          "h": 44,
+          "visible": true
+        },
+        {
+          "text": "문제",
+          "w": 28,
+          "h": 44,
+          "visible": true
+        },
+        {
+          "text": "근거",
+          "w": 28,
+          "h": 44,
+          "visible": true
+        },
+        {
+          "text": "작업 시작",
+          "w": 34,
+          "h": 44,
+          "visible": true
+        },
+        {
+          "text": "작업 이력실시간 검토 중",
+          "w": 303,
+          "h": 16,
+          "visible": true
+        },
+        {
+          "text": "작업공간",
+          "w": 55,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "text": "문서",
+          "w": 28,
+          "h": 24,
+          "visible": true
+        }
+      ],
+      "internalTerms": [],
+      "bodySample": "safeclaw/os\n제품\n문제\n작동 방식\n외국인 안내\n근거\n제품 구성\n작업 시작\n로그인\n작업 시작 →\n제품 · 운영 준비\nREGION · KR-CENTRAL\nPUBLIC API · ACTIVE\nUPDATED · 2026-07-20\n산업안전 · 현장 문서 작업공간\n오늘 작업을\n안전 문서팩으로\n준비합니다.\n\nsafeclaw는 현장관리자가 작업 전 필요한 안전 문서를 근거와 함께 준비하도록 돕는 웹 작업공간입니다.\n\n한 줄 입력으로 위험성평가, TBM, 안전교육, 외국인 안내문, 현장 전파 메시지 초안을 생성합니다.\n\n채용하지 않은 안전관리자 — 한 명 몫의 문서 업무를 대신합니다.\n\n작업공간 열기 →\n문서팩 보기\nsafeclaw · AI 안전관리자\n생성 중\n작업 입력\n\n세이프건설 서울 성수동 외벽 도장 · 이동식 비계 · 오후 강풍 · 신규 작업자 1명\n\n작업 이력\n실시간 검토 중\n\n▸\n기상청 실황·특보 확인\n\n§ 01\n문제\n작업 전 문서와 공지를\n하나의 흐름으로 잇습니다.\n01 · INPUT\n입력\n\n오늘 작업 내용을 한 줄로 정리합니다.\n\n작업\n02 · CHECK\n확인\n\n법령, 기상, KOSHA, 교육 근거를 함께 확인합니다.\n\n근거\n03 · DRAFT\n초안"
+    },
+    {
+      "route": "/workspace",
+      "viewport": "mobile",
+      "status": 200,
+      "url": "https://www.safeclaw.kr/workspace",
+      "screenshot": "screenshots/mobile-workspace.png",
+      "title": "작업공간 | SafeClaw",
+      "scrollHeight": 988,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "heightRatio": 1.17,
+      "horizontalOverflow": false,
+      "outsideCount": 0,
+      "under44Count": 3,
+      "under44Samples": [
+        {
+          "text": "",
+          "w": 20,
+          "h": 20,
+          "visible": true
+        },
+        {
+          "text": "",
+          "w": 20,
+          "h": 20,
+          "visible": true
+        },
+        {
+          "text": "",
+          "w": 20,
+          "h": 20,
+          "visible": true
+        }
+      ],
+      "internalTerms": [],
+      "bodySample": "SafeClaw\nDay\nNight\n작업공간\n입력\n▣\n문서\n▣\n공유\n현장 작업 입력\n오늘 작업은 무엇인가요?\n현장 상황 입력\n0/600자\n+\n사진\n사진 첨부 최대 10장\n강화 모드\n안전 문서 생성\n고급 설정\n예시 불러오기"
+    },
+    {
+      "route": "/why",
+      "viewport": "mobile",
+      "status": 200,
+      "url": "https://www.safeclaw.kr/why",
+      "screenshot": "screenshots/mobile-why.png",
+      "title": "왜 SafeClaw인가 | SafeClaw",
+      "scrollHeight": 2727,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "heightRatio": 3.23,
+      "horizontalOverflow": false,
+      "outsideCount": 0,
+      "under44Count": 0,
+      "under44Samples": [],
+      "internalTerms": [],
+      "bodySample": "본문으로 건너뛰기\nSafeClaw\n메뉴\n SITE 기본 현장\n바로 사용\nDay\nNight\n차별성\n왜 SafeClaw인가.\n\n검색기나 템플릿이 아니라, 근거를 위험성평가표, TBM, 교육기록, 전파 메시지의 문장으로 연결하는 작업공간입니다.\n\n업무 범위\n근거 연결 · 실행 문서 · 현장 전파\n작업공간 열기\n기상청\n\n현재·예보·특보 신호를 작업중지 기준과 TBM 문구에 반영합니다.\n\nLaw.go\n\n법령, 판례, 해석례를 문서 반영 근거로 연결합니다.\n\nWork24\n\n작업과 대상에 맞는 후속 교육 후보를 제안합니다.\n\nKOSHA\n\n공식자료, 교육, 재해사례를 위험성평가와 교육기록에 연결합니다.\n\n비교\n대안별 차이\nSafeClaw와 기존 안전 문서 작성 대안의 기능 비교\n기준\nSafeClaw\n안전관리 SaaS\n한글·엑셀 양식\n일반 AI\n한 줄 입력에서 문서팩 생성\n지원\n부분 지원\n직접 작성\n프롬프트 의존\n법령·기상·교육 근거 연결\n문서 문장에 연결\n제한적\n별도 검색\n별도 확인 필요\n외국인 전송본\n주요 언어 제공\n제한적\n직접 번역\n프롬프트 의존\nTBM 실행 흐름\n질문·확인·전파\n기록 중심\n수기\n별도 정리 필요\n증빙과 이력 확장성\n로드맵 포함\n제품별 상이\n파일 관리\n별"
+    },
+    {
+      "route": "/ontology",
+      "viewport": "mobile",
+      "status": 200,
+      "url": "https://www.safeclaw.kr/ontology",
+      "screenshot": "screenshots/mobile-ontology.png",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "scrollHeight": 2893,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "heightRatio": 3.43,
+      "horizontalOverflow": false,
+      "outsideCount": 0,
+      "under44Count": 0,
+      "under44Samples": [],
+      "internalTerms": [],
+      "bodySample": "본문으로 건너뛰기\nSafeClaw\n메뉴\n SITE 기본 현장\n바로 사용\nDay\nNight\n운영 온톨로지\n작업과 근거의 연결.\n\n작업, 위험요인, 안전조치와 법령을 선택한 항목 중심으로 확인합니다.\n\n업무 범위\n166개 안전지식 · 169개 연결\n작업공간 열기\n검증된 안전지식\n166\n검증 완료 범위\n검증된 연결\n169\n출처 연결 유지\n근거 차단\n0\n무출처 항목 제외\n관계 탐색\n선택 항목 중심 안전지식\n\n전체 그래프 대신 선택한 항목과 직접 연결된 근거만 표시합니다.\n\n직접 관계\n확장 관계\n안전지식 검색\n유형\n전체 유형\n문서종\n법조문\n안전조치\n위험요인\n작업유형\n중처법 의무\n정렬\n연결 많은 순\n이름 순\n위험요인\n추락\n관련 항목 13개 · 연결 12개 · 전체 안전지식 166개 보존\n그래프 전체 화면\n연결된 근거\n안전조치로 저감\n개구부·단부 안전난간·덮개 설치\n이 항목에서 연결\n안전조치로 저감\n규격 안전난간 설치\n이 항목에서 연결\n안전조치로 저감\n안전대·구명밧줄·송기마스크 착용\n이 항목에서 연결\n안전조치로 저감\n안전대 부착설비(지지로프) 설치\n이 항목에서 연결\n안전조치로 저감\n안전모·안전대 지급·착용\n이 항목에서 연결\n안전조치로 저감\n안전모·안전대 착용\n이 항목에서"
+    },
+    {
+      "route": "/knowledge",
+      "viewport": "mobile",
+      "status": 200,
+      "url": "https://www.safeclaw.kr/knowledge",
+      "screenshot": "screenshots/mobile-knowledge.png",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "scrollHeight": 1152,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "heightRatio": 1.36,
+      "horizontalOverflow": false,
+      "outsideCount": 0,
+      "under44Count": 0,
+      "under44Samples": [],
+      "internalTerms": [],
+      "bodySample": "본문으로 건너뛰기\nSafeClaw\n메뉴\n SITE 기본 현장\n바로 사용\nDay\nNight\n지식 DB\n지식 DB.\n\n법령 전문, KOSHA 자료, 재해사례, 서식 기준을 문서 보완과 근거 탐색에 쓰는 지식층으로 관리합니다.\n\n업무 범위\n9,920개 근거 항목 · KOSHA 1,040건\n근거 검색\n작업 보기\n오늘\n기술 지원\n참고자료\n위키\n검토 흐름\n진단\n내장 지식 베이스\n8개 위험요인 · 4개 서식\n\n기본 위험요인과 서식 기준을 내장 위키로 관리하고, 현장 문서 보완 때 짧은 근거 요약만 보여줍니다.\n\n운영 지식\n원본 이벤트 · 검토 대기 · 미게시\n\nAI가 만든 내용은 검토 전 후보로 분리되며, 사람의 결정 후에도 자동 게시되지 않습니다.\n\n지식 카탈로그\n9,920개 항목 · 1,063개 출처\n\n기술지원규정 폴더 1,040건 기준과 Supabase 기술지원규정 소스 1,040건을 연결했습니다.\n\n오늘 할 일\n작업과 위험요인으로 필요한 근거를 먼저 찾으세요.\n근거 검색"
+    },
+    {
+      "route": "/documents",
+      "viewport": "mobile",
+      "status": 200,
+      "url": "https://www.safeclaw.kr/documents",
+      "screenshot": "screenshots/mobile-documents.png",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "scrollHeight": 2525,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "heightRatio": 2.99,
+      "horizontalOverflow": false,
+      "outsideCount": 0,
+      "under44Count": 3,
+      "under44Samples": [
+        {
+          "text": "베타 형식",
+          "w": 93,
+          "h": 42,
+          "visible": true
+        },
+        {
+          "text": "사업장 서식 매핑 준비",
+          "w": 248,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "text": "전체 문서팩 다운로드",
+          "w": 167,
+          "h": 42,
+          "visible": true
+        }
+      ],
+      "internalTerms": [],
+      "bodySample": "본문으로 건너뛰기\nSafeClaw\n메뉴\n SITE 기본 현장\n바로 사용\nDay\nNight\n문서팩\n문서 편집.\n기본 예시 표시\n아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입력 후 진행합니다.\n오늘 문서\n핵심 3종\n위험성평가표\nTBM 브리핑\nTBM 기록\n문서 9종 · 제출 정보\n편집 문서\n점검결과 요약\n위험성평가표\n작업계획서\n안전작업허가 확인서\nTBM/작업 전 안전점검회의\nTBM 기록\n안전보건교육 기록\n비상대응 절차\n사진/증빙\n외국인 근로자 출력본\n외국인 근로자 전송본\n현장 공유 메시지\n문서 본문\n점검결과 요약\n\n현장명, 작업조건, 핵심 위험, 즉시조치, 연결 상태를 첫 장으로 정리합니다.\n\n자동 저장\n654자\n문서 유형\n점검 요약\n구조화\n원문\n01\n요약 본문\n02\n특수 대상/조건\n03\n핵심 판단\n04\n즉시 조치\n05\n문서팩 구성\n\n발주처 원본 양식, 직인, 결재선은 제출 전 확인 대상입니다.\n\n근거 4건 · 확인 필요 1건\n내보내기\n정식 제출본과 호환 형식\nPDF · XLSX · HWP\n제출 양식 미리보기\n표, 결재선, 인쇄 레이아웃\n인쇄물"
+    },
+    {
+      "route": "/reports",
+      "viewport": "mobile",
+      "status": 200,
+      "url": "https://www.safeclaw.kr/reports",
+      "screenshot": "screenshots/mobile-reports.png",
+      "title": "SafeClaw 리포트 · 다운로드 센터",
+      "scrollHeight": 844,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "heightRatio": 1,
+      "horizontalOverflow": false,
+      "outsideCount": 0,
+      "under44Count": 0,
+      "under44Samples": [],
+      "internalTerms": [],
+      "bodySample": "본문으로 건너뛰기\nSafeClaw\n메뉴\n SITE 기본 현장\n바로 사용\nDay\nNight\n리포트\n개선 리포트.\n\n주간·월간·사용자 기간의 위험성평가와 승인된 개선 근거를 분류별로 정리합니다.\n\n업무 범위\n리포트 기능 사용 가능\n작업공간에서 개선 추가\n데이터 출처 · 없음\n최근 작업팩이 없습니다.\n\n작업공간에서 문서팩을 만든 뒤 리포트로 돌아오세요.\n\n현재 작업팩 필요\n작업팩을 만든 뒤 다운로드를 준비할 수 있습니다.\n\n작업공간에서 만들기\n샘플 미리보기"
+    },
+    {
+      "route": "/share/not-a-session?lang=vi",
+      "viewport": "mobile",
+      "status": 200,
+      "url": "https://www.safeclaw.kr/share/not-a-session?lang=vi",
+      "screenshot": "screenshots/mobile-share-not-a-session-lang-vi.png",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "scrollHeight": 855,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "heightRatio": 1.01,
+      "horizontalOverflow": false,
+      "outsideCount": 0,
+      "under44Count": 0,
+      "under44Samples": [],
+      "internalTerms": [],
+      "bodySample": "Chuyển đến nội dung chính\nSafeClaw\nMenu\nSáng\nTối\nCông nhân xem\nMàn hình xác nhận tài liệu\n\nKiểm tra tài liệu an toàn hiện trường và để lại xác nhận đã xem.\n\nPhạm vi công việc\nXác nhận người nhận\nVề không gian làm việc\nKiểm tra gói tài liệu\n\nMàn hình xác nhận chỉ dành cho công nhân được mời.\n\nCông việc hiện tại\n\nChưa tải được chi tiết công việc được chia sẻ.\n\nTrạng thái: Đang chia sẻ\n\nPhạm vi: Chỉ công nhân được chỉ định\n\nHiện không thể xác nhận. Vui lòng hỏi quản lý về trạng thái phiên.\n\nVui lòng kiểm tra mã phiên chia sẻ."
+    }
+  ]
+}
