@@ -14443,8 +14443,8 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell .document-workbench .document-preview-pane pre {
-  min-height: 260px;
-  max-height: min(36vh, 320px);
+  min-height: 180px;
+  max-height: min(30vh, 260px);
   overflow: auto;
   border: 1px solid var(--workspace-rule);
   border-radius: 4px;
@@ -16511,8 +16511,8 @@ body:has(.safeclaw-landing) :is(
   }
 
   .command-center-shell .document-workbench .document-preview-pane pre {
-    min-height: 260px;
-    max-height: 360px;
+    min-height: 180px;
+    max-height: 240px;
     overflow: auto;
     font-size: var(--text-caption);
     line-height: var(--leading-caption);

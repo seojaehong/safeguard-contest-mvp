@@ -319,7 +319,7 @@ function riskLevelLabel(level: RiskAssessmentRow["riskLevel"] | string) {
 
 function buildSafetyBriefRows(data: AskResponse | null): SafetyBriefRiskRow[] {
   const rows = data?.structured?.riskAssessmentRows || [];
-  return rows.slice(0, 5).map((row) => ({
+  return rows.slice(0, 3).map((row) => ({
     process: row.process || row.task || "작업 단계",
     hazard: row.hazard || "현장 위험요인 확인",
     control: row.additionalControls || row.currentControls || "감소대책 현장 확인",
@@ -2327,7 +2327,7 @@ export function SafeGuardCommandCenter({
                     </ol>
                   </article>
                   <article className="safety-brief-risk-table">
-                    <span>위험성평가 상위 {safetyBriefRows.length ? `${Math.min(safetyBriefRows.length, 5)}개` : "항목"}</span>
+                    <span>위험성평가 상위 {safetyBriefRows.length ? `${safetyBriefRows.length}개` : "항목"}</span>
                     <div className="safety-brief-row-list">
                       {(safetyBriefRows.length ? safetyBriefRows : [{
                         process: fieldBrief.workSummary,
