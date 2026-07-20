@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-20T04:30:00.000Z
+Generated at: 2026-07-20T04:40:12.412Z
 
-Current HEAD / live production build: `24bb769e1aff4df41b8afa7807c8f2c0e6125007`
+Current HEAD / live production build: `dd6299c52dcbb1f7e2d8b435c25b8c9b9bc8080d`
 
 Overall: `northstar_open_approval_gated`
 
@@ -42,3 +42,4 @@ This rollup does not claim the long-term North Star is complete. It records the 
 - SIF vector retrieval is production-active.
 - All KOSHA metadata rows are exact evidence.
 - DB migration or data upload was performed in this rollup.
+
