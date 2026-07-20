@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-20T20:25:50.680Z",
-  "sourceSha": "1d01ac6e7506b7dbcd903031b5b14b6dafd5b6e4",
+  "generatedAt": "2026-07-20T20:35:38.534Z",
+  "sourceSha": "9f82b412a23a2da46ffc53cf6acacade746e4b32",
   "overall": "open",
   "gates": [
     {
@@ -48,7 +48,7 @@
       "state": "proven",
       "label": "Generated share result fixture cockpit",
       "evidencePath": "evaluation\\share-result-drilldown-2026-07-21\\report.json",
-      "detail": "Generated provider-result fixture proof is bounded: desktop page 900/900, result panel 606px with 2 x-ranges, mobile summary/preview/CTA/result inside 844px, dispatch POST count 1, provider live dispatch unclaimed.",
+      "detail": "Generated provider-result fixture proof is bounded: desktop page 900/900, result panel 606px with 2 x-ranges, mobile summary/preview/CTA/result inside 844px, closed summary shows channel status, dispatch POST count 1, provider live dispatch unclaimed.",
       "nextActions": [
         "Keep real provider dispatch gated until persistent idempotency and provider-result persistence are approved and live verified."
       ]
