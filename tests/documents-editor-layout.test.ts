@@ -480,7 +480,7 @@ describe("documents editor layout", () => {
     expect(["none", "not-mounted"]).toContain(metrics.previewDisplay);
   }, 90_000);
 
-  it("keeps the desktop cockpit in three columns with one launch-document count", async () => {
+  it("keeps the desktop documents surface compact with one launch-document count", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
@@ -490,41 +490,61 @@ describe("documents editor layout", () => {
       const index = document.querySelector(".safeclaw-doc-index");
       const primary = document.querySelector(".safeclaw-doc-primary");
       const exportPanel = document.querySelector(".safeclaw-doc-export");
+      const compactLauncher = document.querySelector("[data-testid='mobile-core-document-launcher']");
+      const coreList = document.querySelector(".safeclaw-mobile-core-list");
+      const details = document.querySelector<HTMLDetailsElement>(".safeclaw-mobile-document-details");
       const banner = document.querySelector(".safeclaw-current-workpack");
-      if (!cockpit || !index || !primary || !exportPanel || !banner) {
+      const editorWorkspace = document.querySelector('[data-testid="workpack-editor-workspace"]');
+      if (!cockpit || !index || !primary || !exportPanel || !compactLauncher || !coreList || !details || !banner || !editorWorkspace) {
         throw new Error("Missing desktop document cockpit target");
       }
 
       const cockpitStyle = getComputedStyle(cockpit);
+      const launcherStyle = getComputedStyle(compactLauncher);
       const indexRect = index.getBoundingClientRect();
       const primaryRect = primary.getBoundingClientRect();
       const exportRect = exportPanel.getBoundingClientRect();
+      const launcherRect = compactLauncher.getBoundingClientRect();
+      const coreRect = coreList.getBoundingClientRect();
+      const detailsRect = details.getBoundingClientRect();
+      const editorRect = editorWorkspace.getBoundingClientRect();
       return {
         cockpitDisplay: cockpitStyle.display,
+        launcherDisplay: launcherStyle.display,
         cockpitText: cockpit.textContent || "",
-        indexHeading: index.querySelector("h2")?.textContent,
-        exportHeading: exportPanel.querySelector("h2")?.textContent,
+        compactHeading: compactLauncher.querySelector("h2")?.textContent,
+        detailsOpen: details.open,
         indexLeft: Math.round(indexRect.left),
         indexRight: Math.round(indexRect.right),
         primaryLeft: Math.round(primaryRect.left),
         primaryRight: Math.round(primaryRect.right),
         exportLeft: Math.round(exportRect.left),
-        indexButtons: index.querySelectorAll("button").length,
-        primaryPreviews: primary.querySelectorAll(".safeclaw-doc-primary-grid > section").length,
-        exportFacts: exportPanel.querySelectorAll("dl > div").length,
+        indexDisplay: getComputedStyle(index).display,
+        primaryDisplay: getComputedStyle(primary).display,
+        exportDisplay: getComputedStyle(exportPanel).display,
+        launcherTop: Math.round(launcherRect.top),
+        launcherBottom: Math.round(launcherRect.bottom),
+        coreRight: Math.round(coreRect.right),
+        detailsLeft: Math.round(detailsRect.left),
+        editorTop: Math.round(editorRect.top),
+        coreButtons: coreList.querySelectorAll("button").length,
+        detailFacts: compactLauncher.querySelectorAll("[data-testid='mobile-submission-facts'] dd").length,
         bannerWorkspaceCtas: banner.querySelectorAll('a[href="/workspace"]').length
       };
     });
 
-    expect(contract.cockpitDisplay).toBe("grid");
-    expect(contract.indexRight).toBeLessThanOrEqual(contract.primaryLeft);
-    expect(contract.primaryRight).toBeLessThanOrEqual(contract.exportLeft);
-    expect(contract.indexLeft).toBeLessThan(contract.primaryLeft);
-    expect(contract.indexButtons).toBe(9);
-    expect(contract.primaryPreviews).toBe(3);
-    expect(contract.exportFacts).toBe(3);
-    expect(contract.indexHeading).toBe("3종 핵심. 6종 추가.");
-    expect(contract.exportHeading).toBe("9/9종 작성.");
+    expect(contract.cockpitDisplay).toBe("block");
+    expect(contract.launcherDisplay).toBe("grid");
+    expect(contract.indexDisplay).toBe("none");
+    expect(contract.primaryDisplay).toBe("none");
+    expect(contract.exportDisplay).toBe("none");
+    expect(contract.coreButtons).toBe(3);
+    expect(contract.detailFacts).toBe(3);
+    expect(contract.compactHeading).toBe("핵심 3종");
+    expect(contract.detailsOpen).toBe(false);
+    expect(contract.coreRight).toBeLessThanOrEqual(contract.detailsLeft);
+    expect(contract.editorTop).toBeGreaterThan(contract.launcherBottom);
+    expect(contract.editorTop - contract.launcherBottom).toBeLessThanOrEqual(48);
     expect(contract.cockpitText).not.toMatch(/(?:11|12)종/u);
     expect(contract.bannerWorkspaceCtas).toBe(0);
   }, 90_000);
@@ -580,7 +600,7 @@ describe("documents editor layout", () => {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
 
-    await page.locator(".safeclaw-doc-index-list button", { hasText: "위험성평가표" }).click();
+    await page.getByTestId("mobile-core-document-launcher").getByRole("button", { name: "위험성평가표" }).click();
     await page.waitForFunction(() => document.activeElement?.getAttribute("aria-label") === "위험성평가표 편집");
 
     const contract = await page.evaluate(() => {
