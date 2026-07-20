@@ -1,0 +1,73 @@
+{
+  "verdict": "pass_publication_approval_gated",
+  "date": "2026-07-20",
+  "worktree": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\recipient-foreign-live-gate-20260720",
+  "branch": "chore/recipient-foreign-live-gate-20260720",
+  "productionBuildInfo": {
+    "commitSha": "4025015b456c6c5903b40764c90782b7d90d503a",
+    "branch": "master",
+    "environment": "production",
+    "source": "vercel-system-env"
+  },
+  "focusedTests": {
+    "command": "npm.cmd test -- tests\\knowledge-governance.test.ts tests\\knowledge-governance-ui-contract.test.ts tests\\knowledge-page-layout.test.ts tests\\knowledge-mobile-ia-browser.test.ts tests\\knowledge-review-actions.test.ts tests\\knowledge-review-route.test.ts tests\\knowledge-review-prepare.test.ts tests\\knowledge-review-prepare-route.test.ts tests\\knowledge-review-inbox-browser.test.ts tests\\knowledge-promotion-gate.test.ts tests\\knowledge-runtime-smoke.test.ts tests\\ontology-knowledge-tool.test.ts tests\\ontology-graph-store.test.ts tests\\ontology-query.test.ts tests\\safety-reference-status-route.test.ts tests\\safety-reference-status-bundled-corpus.test.ts tests\\workpack-commercial-tenant-hardening.test.ts tests\\reporting-downloads.test.ts --maxWorkers=1 --fileParallelism=false",
+    "testFilesPassed": 18,
+    "testsPassed": 208,
+    "durationSeconds": 115.39,
+    "status": "pass"
+  },
+  "liveApiEvidence": {
+    "safetyReferenceStatus": {
+      "ok": true,
+      "status": "ready",
+      "items": 9920,
+      "technicalTotal": 1040,
+      "technicalSupportRegulations": 237,
+      "technicalGuidelines": 803,
+      "searchReady": true
+    },
+    "knowledgeGovernance": {
+      "ok": true,
+      "stageCount": 4,
+      "authorityLaneCount": 6,
+      "firstStageId": "knowledge_event",
+      "firstStageLabel": "원본 이벤트",
+      "firstAuthorityLaneId": "sif",
+      "firstAuthorityLaneLabel": "SIF 재해·통제 근거",
+      "mutationPolicy": {
+        "llmDbMutationAllowed": false,
+        "llmPublishAllowed": false,
+        "humanReviewRequired": true
+      }
+    },
+    "ontologyGraph": {
+      "ok": true,
+      "configured": true,
+      "scope": "published",
+      "nodeCount": 166,
+      "edgeCount": 169,
+      "publishedNodes": 166,
+      "publishedEdges": 169,
+      "uncitedDroppedNodes": 0,
+      "uncitedDroppedEdges": 0,
+      "nodeCountsByKind": {
+        "Task": 10,
+        "Hazard": 31,
+        "Control": 64,
+        "Article": 56,
+        "Accident": 0,
+        "Document": 3,
+        "Duty": 2
+      },
+      "advisoryNoticePresent": true
+    }
+  },
+  "boundaries": {
+    "dbMutationPerformed": false,
+    "schemaMigrationPerformed": false,
+    "llmWikiRuntimeSystemOfRecordClaimed": false,
+    "humanReviewRequiredForPublication": true,
+    "authenticatedHermesLiveExecutionClaimed": false
+  },
+  "status": "pass_approval_gated"
+}

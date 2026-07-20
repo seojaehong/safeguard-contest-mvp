@@ -21,6 +21,7 @@ Current `master` and the current production-visible product line are aligned wit
 - Application-level tenant-boundary tests and RLS / LLM Wiki approval preflight
 - Hermes/OpenClaw runtime adapter, service-auth, and fail-closed route boundary
 - Current live critical surface rerun with no P1/P2 UI blockers
+- Operator wiki / public reference corpus governance and live API readiness
 
 This gate does not claim the entire 24h/72h North Star objective is complete. It records that the current high-risk KOSHA/SIF/ontology and terminology boundaries are green on the authoritative code state.
 
@@ -31,6 +32,7 @@ This gate does not claim the entire 24h/72h North Star objective is complete. It
 - Source HEAD before this live generation evidence refresh: `9615766de2d1807bdd3634b8dcff957e66052f14`
 - Product code production marker after `/documents` compact patch: `5a77590bbecca47b122c5f498cfba0cad5486264`
 - Latest evidence-only commits after production product marker: `bc10fbe9`, `ac304c74`
+- Latest production build-info observed during operator wiki / corpus gate: `4025015b456c6c5903b40764c90782b7d90d503a`
 
 ## Verification
 
@@ -219,6 +221,30 @@ Evidence:
 - `evaluation/live-critical-surface-current-2026-07-20-rerun/report.md`
 - `evaluation/live-critical-surface-current-2026-07-20-rerun/report.json`
 
+### Operator Wiki / Public Reference Corpus Current Gate
+
+Commands:
+
+```powershell
+npm.cmd test -- tests\knowledge-governance.test.ts tests\knowledge-governance-ui-contract.test.ts tests\knowledge-page-layout.test.ts tests\knowledge-mobile-ia-browser.test.ts tests\knowledge-review-actions.test.ts tests\knowledge-review-route.test.ts tests\knowledge-review-prepare.test.ts tests\knowledge-review-prepare-route.test.ts tests\knowledge-review-inbox-browser.test.ts tests\knowledge-promotion-gate.test.ts tests\knowledge-runtime-smoke.test.ts tests\ontology-knowledge-tool.test.ts tests\ontology-graph-store.test.ts tests\ontology-query.test.ts tests\safety-reference-status-route.test.ts tests\safety-reference-status-bundled-corpus.test.ts tests\workpack-commercial-tenant-hardening.test.ts tests\reporting-downloads.test.ts --maxWorkers=1 --fileParallelism=false
+Invoke-RestMethod https://www.safeclaw.kr/api/safety-reference/status
+Invoke-RestMethod https://www.safeclaw.kr/api/knowledge/governance
+Invoke-RestMethod https://www.safeclaw.kr/api/ontology/graph
+```
+
+Result:
+
+- Tests: 18 files passed / 18, 208 tests passed / 208
+- Production build-info: `4025015b456c6c5903b40764c90782b7d90d503a`
+- Safety reference corpus: `ready`, 9,920 items, 1,040 technical references, search ready
+- Knowledge governance: 4 stages, 6 authority lanes, LLM DB mutation disabled, LLM publish disabled, human review required
+- Published ontology graph: 166 nodes, 169 edges, uncited dropped nodes 0, uncited dropped edges 0
+
+Evidence:
+
+- `evaluation/operator-wiki-reference-corpus-current-gate-2026-07-20/report.md`
+- `evaluation/operator-wiki-reference-corpus-current-gate-2026-07-20/report.json`
+
 ### TypeScript
 
 Command:
@@ -259,7 +285,7 @@ The current implementation preserves the accepted product direction:
 
 The broader objective remains active. The next highest-value workstreams are:
 
-1. Public Reference Corpus / Operator Wiki Export: continue improving review/export surfaces without turning Markdown/wiki into runtime truth.
+1. Public Reference Corpus / Operator Wiki Export: current governance and live API readiness are green; continue improving review/export surfaces without turning Markdown/wiki into runtime truth.
 2. Landing page mobile density: current live critical surface has no P1/P2 UI blockers, but `/` mobile remains long and should be compressed after demo-critical routes.
 3. RLS live launch proof: application boundary is green, but live tenant A/B, Storage, service-role, and publication RPC gates remain approval-gated.
 4. Hermes/OpenClaw live execution proof: adapter boundary is green, but an authenticated operator-owned runtime E2E is still not claimed.
