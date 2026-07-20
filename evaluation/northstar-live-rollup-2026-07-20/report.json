@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v1",
-  "generatedAt": "2026-07-20T07:45:44.858Z",
-  "head": "acd39ca644e6f39a207664bcde6dd4f424b03538",
+  "generatedAt": "2026-07-20T07:56:13.951Z",
+  "head": "779ee9e0ac433cde7ae17d70c587890cefce52f5",
   "liveBuildInfo": {
-    "commitSha": "acd39ca644e6f39a207664bcde6dd4f424b03538",
+    "commitSha": "779ee9e0ac433cde7ae17d70c587890cefce52f5",
     "branch": "master",
     "environment": "production",
     "deploymentUrl": "safeguard-contest-jw16yqknp-seojaehongs-projects.vercel.app"
@@ -59,7 +59,7 @@
     {
       "id": "kosha_guide_repair_plan",
       "artifact": "evaluation/kosha-guide-approval-current-2026-07-20/repair-plan.json",
-      "result": "pass_read_only_repair_queue_with_row_evidence_manifest",
+      "result": "pass_read_only_repair_queue_with_complete_row_evidence_manifest",
       "workstreams": 6,
       "dryRunUpdates": 7,
       "dryRunRetirements": 1,
@@ -67,17 +67,20 @@
       "retrievalScenarioBranchPairs": 8,
       "evidenceCoverageDeclared": true,
       "countOnlyWorkstreams": 3,
-      "rowLevelCompleteWorkstreams": 3,
+      "rowLevelCompleteWorkstreams": 6,
       "testFilesPassed": 3,
       "testsPassed": 117,
       "dbMutationPerformed": false,
       "rowEvidenceArtifact": "evaluation/kosha-guide-approval-current-2026-07-20/repair-row-evidence-manifest.json",
-      "incompleteRowEvidenceWorkstreams": 3,
+      "incompleteRowEvidenceWorkstreams": 0,
       "missingProvenanceRowManifestRows": 1040,
       "missingBodyHydrationRowManifestRows": 818,
       "missingSummaryRegenerationRowManifestRows": 789,
       "typecheck": "pass",
-      "embeddingGenerated": false
+      "embeddingGenerated": false,
+      "provenanceRowManifestRows": 1040,
+      "bodyHydrationRowManifestRows": 818,
+      "summaryRegenerationRowManifestRows": 822
     },
     {
       "id": "rls_llm_wiki_application_boundary",
