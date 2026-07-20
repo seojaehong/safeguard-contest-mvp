@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "safeclaw-ui-documents-contrast-current-gate/v1",
+  "generatedAt": "2026-07-20T04:58:39.140Z",
+  "verifiedBaseHead": "d09013966a85fea097434eb309953a916d30eef5",
+  "changedFiles": [
+    "app/globals.css"
+  ],
+  "result": "pass",
+  "findingClosed": "documents module list buttons inherited primary accent background and failed surface text AA contrast",
+  "dbMutationPerformed": false,
+  "providerDispatchSideEffectPerformed": false,
+  "tests": [
+    {
+      "testsPassed": 3,
+      "skipped": 0,
+      "result": "pass",
+      "command": "npm.cmd test -- tests\\product-module-shell.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 1
+    },
+    {
+      "testsPassed": 19,
+      "testsSkipped": 4,
+      "filesPassed": 4,
+      "filesSkipped": 1,
+      "command": "npm.cmd test -- tests\\north-star-document-ux.test.ts tests\\workspace-share-mobile-browser.test.ts tests\\workflow-share-panel-behavior.test.ts tests\\product-module-shell.test.ts tests\\ontology-ui-remediation.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "pass"
+    },
+    {
+      "result": "pass",
+      "command": "npm.cmd run typecheck"
+    },
+    {
+      "staticPages": "28/28",
+      "command": "npm.cmd run build",
+      "result": "pass"
+    }
+  ],
+  "notes": [
+    "Document module index and mobile document selector buttons are treated as list controls, not primary CTA buttons.",
+    "Accent remains as focus/selected inset cue while card text returns to workspace surface and ink tokens.",
+    "No provider dispatch, DB migration, or data mutation was performed."
+  ]
+}

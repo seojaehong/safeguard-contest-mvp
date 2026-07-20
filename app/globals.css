@@ -21554,6 +21554,63 @@ body:has(.safeclaw-landing) :is(
   color: var(--sc-steel-650);
 }
 
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-index-list button {
+  border-color: var(--workspace-rule);
+  background: var(--workspace-surface-2);
+  color: var(--workspace-ink);
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-index-list button:is(:hover, :focus-visible) {
+  border-color: var(--workspace-rule-strong);
+  background: var(--workspace-surface-3);
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-index-list button small {
+  color: var(--workspace-accent-text);
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-index-list button strong {
+  color: var(--workspace-ink);
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-index-list button em {
+  color: var(--workspace-muted);
+}
+
+.safeclaw-module-shell.module-variant-document :is(
+  .safeclaw-mobile-core-list,
+  .safeclaw-mobile-remaining-list
+) button {
+  border-color: var(--workspace-rule);
+  background: var(--workspace-surface-2);
+  color: var(--workspace-ink);
+}
+
+.safeclaw-module-shell.module-variant-document :is(
+  .safeclaw-mobile-core-list,
+  .safeclaw-mobile-remaining-list
+) button:is(:hover, :focus-visible) {
+  border-color: var(--workspace-rule-strong);
+  background: var(--workspace-surface-3);
+}
+
+.safeclaw-module-shell.module-variant-document :is(
+  .safeclaw-mobile-core-list,
+  .safeclaw-mobile-remaining-list
+) button[aria-pressed="true"] {
+  border-color: var(--workspace-accent);
+  background: var(--workspace-surface-3);
+  box-shadow: inset 4px 0 0 var(--workspace-accent);
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-mobile-remaining-list button small {
+  color: var(--workspace-accent-text);
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-mobile-remaining-list button strong {
+  color: var(--workspace-ink);
+}
+
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-secondary-tools > summary {
   display: flex;
   min-height: 44px;
