@@ -1,6 +1,6 @@
 {
   "schemaVersion": "safeclaw-kosha-guide-repair-plan/v1",
-  "generatedAt": "2026-07-20T06:48:15.839Z",
+  "generatedAt": "2026-07-20T06:54:47.807Z",
   "sourceAudit": "evaluation/kosha-guide-approval-current-2026-07-20/report.json",
   "decision": "approval_required_before_mutation_or_embedding",
   "readOnly": true,
@@ -13,6 +13,50 @@
     "retire": 1,
     "unchanged": 1032
   },
+  "evidenceCoverage": [
+    {
+      "workstreamId": "provenance_and_status_backfill_dry_run",
+      "coverage": "count_only",
+      "count": 1040,
+      "rowLevelEvidenceAvailable": false,
+      "reason": "The current audit records missing official provenance counts, but does not include all 1040 row identifiers in the evaluation artifact."
+    },
+    {
+      "workstreamId": "body_hydration_or_ocr_review",
+      "coverage": "count_only",
+      "count": 818,
+      "rowLevelEvidenceAvailable": false,
+      "reason": "The current audit records empty-body counts and parse accounting, but does not include all 818 row identifiers in the evaluation artifact."
+    },
+    {
+      "workstreamId": "summary_regeneration",
+      "coverage": "group_sample",
+      "count": 822,
+      "rowLevelEvidenceAvailable": false,
+      "reason": "The current audit includes duplicate summary groups and sample IDs, not a complete 822-row manifest."
+    },
+    {
+      "workstreamId": "version_state_reconciliation",
+      "coverage": "row_level_complete",
+      "count": 8,
+      "rowLevelEvidenceAvailable": true,
+      "reason": "The current audit includes every official version mismatch and retired local row."
+    },
+    {
+      "workstreamId": "control_causality_review",
+      "coverage": "row_level_complete",
+      "count": 71,
+      "rowLevelEvidenceAvailable": true,
+      "reason": "The current audit includes every operational review-required row and remaining secondary candidate row."
+    },
+    {
+      "workstreamId": "retrieval_branch_observation",
+      "coverage": "scenario_branch_level_complete",
+      "count": 8,
+      "rowLevelEvidenceAvailable": true,
+      "reason": "The current audit includes every untested retrieval scenario-branch pair."
+    }
+  ],
   "workstreams": [
     {
       "id": "provenance_and_status_backfill_dry_run",

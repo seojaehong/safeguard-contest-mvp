@@ -153,6 +153,50 @@ function buildRepairPlan(report) {
       retire: asNumber(dryRunCounts.retire, "dryRunCounts.retire"),
       unchanged: asNumber(dryRunCounts.unchanged, "dryRunCounts.unchanged")
     },
+    evidenceCoverage: [
+      {
+        workstreamId: "provenance_and_status_backfill_dry_run",
+        coverage: "count_only",
+        count: asNumber(quality.missingSourceUrlCount, "missingSourceUrlCount"),
+        rowLevelEvidenceAvailable: false,
+        reason: "The current audit records missing official provenance counts, but does not include all 1040 row identifiers in the evaluation artifact."
+      },
+      {
+        workstreamId: "body_hydration_or_ocr_review",
+        coverage: "count_only",
+        count: asNumber(quality.emptyBodyCount, "emptyBodyCount"),
+        rowLevelEvidenceAvailable: false,
+        reason: "The current audit records empty-body counts and parse accounting, but does not include all 818 row identifiers in the evaluation artifact."
+      },
+      {
+        workstreamId: "summary_regeneration",
+        coverage: "group_sample",
+        count: asNumber(quality.duplicateSummaryRows, "duplicateSummaryRows"),
+        rowLevelEvidenceAvailable: false,
+        reason: "The current audit includes duplicate summary groups and sample IDs, not a complete 822-row manifest."
+      },
+      {
+        workstreamId: "version_state_reconciliation",
+        coverage: "row_level_complete",
+        count: versionUpdates.length + retiredRows.length,
+        rowLevelEvidenceAvailable: true,
+        reason: "The current audit includes every official version mismatch and retired local row."
+      },
+      {
+        workstreamId: "control_causality_review",
+        coverage: "row_level_complete",
+        count: operationalReviewRows.length + operationalSecondaryRows.length,
+        rowLevelEvidenceAvailable: true,
+        reason: "The current audit includes every operational review-required row and remaining secondary candidate row."
+      },
+      {
+        workstreamId: "retrieval_branch_observation",
+        coverage: "scenario_branch_level_complete",
+        count: untestedBranches.length,
+        rowLevelEvidenceAvailable: true,
+        reason: "The current audit includes every untested retrieval scenario-branch pair."
+      }
+    ],
     workstreams,
     rowSets: {
       versionUpdates,
@@ -187,6 +231,9 @@ function writeMarkdown(plan, path) {
   const workstreamRows = plan.workstreams
     .map((item) => `| \`${item.id}\` | ${item.count.toLocaleString("ko-KR")} | ${item.mutationAllowedByThisRun ? "yes" : "no"} | ${markdownCell(item.action)} | ${markdownCell(item.countSemantics || "-")} | ${markdownCell(item.exitCriteria)} |`)
     .join("\n");
+  const coverageRows = plan.evidenceCoverage
+    .map((item) => `| \`${item.workstreamId}\` | ${item.coverage} | ${item.count.toLocaleString("ko-KR")} | ${item.rowLevelEvidenceAvailable ? "yes" : "no"} | ${markdownCell(item.reason)} |`)
+    .join("\n");
   const controlRows = [
     ...plan.rowSets.operationalControlReviewRequiredRows.slice(0, 10),
     ...plan.rowSets.operationalControlSecondaryCandidateRows
@@ -212,6 +259,12 @@ This plan is a read-only repair queue. It does not authorize DB mutation, upload
 | Workstream | Count | Mutation allowed | Action | Count semantics | Exit criteria |
 | --- | ---: | --- | --- | --- | --- |
 ${workstreamRows}
+
+## Evidence Coverage
+
+| Workstream | Coverage | Count | Row-level evidence available | Reason |
+| --- | --- | ---: | --- | --- |
+${coverageRows}
 
 ## Version Updates
 

@@ -1,6 +1,6 @@
 # KOSHA Guide Repair Plan
 
-Generated at: 2026-07-20T06:48:15.839Z
+Generated at: 2026-07-20T06:54:47.807Z
 
 ## Decision
 
@@ -18,6 +18,17 @@ This plan is a read-only repair queue. It does not authorize DB mutation, upload
 | `version_state_reconciliation` | 8 | no | Review official version updates and retired local rows. | - | Version update/retire dry-run is approved item by item before mutation. |
 | `control_causality_review` | 71 | no | Review heuristic-delta and cross-domain operational controls against source bodies. | - | Controls are source-derived, task-relevant, and cross-domain contamination fixtures pass. |
 | `retrieval_branch_observation` | 8 | no | Observe ranked and hybrid production retrieval branches with document reflection checks. | scenario-branch pairs, not unique branch names | KOSHA evidence and task-specific controls are reflected into documents without generic prose-only matches. |
+
+## Evidence Coverage
+
+| Workstream | Coverage | Count | Row-level evidence available | Reason |
+| --- | --- | ---: | --- | --- |
+| `provenance_and_status_backfill_dry_run` | count_only | 1,040 | no | The current audit records missing official provenance counts, but does not include all 1040 row identifiers in the evaluation artifact. |
+| `body_hydration_or_ocr_review` | count_only | 818 | no | The current audit records empty-body counts and parse accounting, but does not include all 818 row identifiers in the evaluation artifact. |
+| `summary_regeneration` | group_sample | 822 | no | The current audit includes duplicate summary groups and sample IDs, not a complete 822-row manifest. |
+| `version_state_reconciliation` | row_level_complete | 8 | yes | The current audit includes every official version mismatch and retired local row. |
+| `control_causality_review` | row_level_complete | 71 | yes | The current audit includes every operational review-required row and remaining secondary candidate row. |
+| `retrieval_branch_observation` | scenario_branch_level_complete | 8 | yes | The current audit includes every untested retrieval scenario-branch pair. |
 
 ## Version Updates
 

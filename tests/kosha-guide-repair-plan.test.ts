@@ -58,6 +58,8 @@ describe("KOSHA Guide repair plan", () => {
     const rowSets = asRecord(plan.rowSets, "rowSets");
     const dryRunCounts = asRecord(plan.dryRunCounts, "dryRunCounts");
     const approvalGate = asRecord(plan.approvalGate, "approvalGate");
+    const evidenceCoverage = asArray(plan.evidenceCoverage, "evidenceCoverage")
+      .map((value) => asRecord(value, "evidenceCoverage"));
 
     expect(plan.decision).toBe("approval_required_before_mutation_or_embedding");
     expect(plan.readOnly).toBe(true);
@@ -79,6 +81,18 @@ describe("KOSHA Guide repair plan", () => {
       .toHaveLength(1);
     expect(asArray(rowSets.untestedRetrievalBranches, "untestedRetrievalBranches").length)
       .toBeGreaterThanOrEqual(2);
+    expect(evidenceCoverage.find((item) => item.workstreamId === "provenance_and_status_backfill_dry_run"))
+      .toMatchObject({
+        coverage: "count_only",
+        rowLevelEvidenceAvailable: false,
+        count: 1040
+      });
+    expect(evidenceCoverage.find((item) => item.workstreamId === "version_state_reconciliation"))
+      .toMatchObject({
+        coverage: "row_level_complete",
+        rowLevelEvidenceAvailable: true,
+        count: 8
+      });
   });
 
   it("keeps repair workstreams explicit and approval-gated", () => {
