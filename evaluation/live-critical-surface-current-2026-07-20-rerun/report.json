@@ -1,14 +1,14 @@
 {
-  "checkedAt": "2026-07-20T11:49:37.414Z",
+  "checkedAt": "2026-07-20T12:58:20.123Z",
   "baseUrl": "https://www.safeclaw.kr",
   "buildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "58776450b2803b75751723ed2927c573f2ab5dea",
+    "commitSha": "ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-lp61zl5at-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-bzmo8wabq-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "routes": [

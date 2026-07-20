@@ -12,12 +12,12 @@ The initial mismatch was real: prior static/design-contract passes and the defau
 
 ## Authoritative Surface
 
-- Git HEAD used for source comparison: `96d16238ae71896aa608d93ee9db25d455bd6894`
+- Git HEAD used for source comparison: `ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d`
 - Served URL: `https://www.safeclaw.kr/workspace`
 - Build info endpoint: `https://www.safeclaw.kr/api/build-info`
-- Served commit: `96d16238ae71896aa608d93ee9db25d455bd6894`
+- Served commit: `ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d`
 - Served branch: `master`
-- Deployment URL: `safeguard-contest-8bkp35kfa-seojaehongs-projects.vercel.app`
+- Deployment URL: `safeguard-contest-bzmo8wabq-seojaehongs-projects.vercel.app`
 
 The current probe waits for generated document readiness (`12/12 생성` or `안전 문서팩 3종 준비 완료`) before measuring, so it does not accidentally capture the interim generating shell.
 
@@ -28,7 +28,7 @@ The current probe waits for generated document readiness (`12/12 생성` or `안
 | 1440x900 | Documents review | 1147 | 229 | 798 | Fixed versus prior 2070px/723px sticky report |
 | 1440x900 | Document edit | 2210 | 63 editor y / 374 textarea y | 1433 editor height | Improved; no horizontal overflow, sticky count 0 |
 | 1440x900 | Share | 1174 | 189 | 921 | Fixed; 1180px desktop surface, not mobile-card width |
-| 390x844 | Documents review | 1417 | 262 | 1050 | Acceptable as a compact step, no horizontal overflow |
+| 390x844 | Documents review | 1269 | 262 | 902 | Mobile fixed field-mode step, no horizontal overflow |
 | 390x844 | Document edit | 1981 | 63 editor y / 361 textarea y | 1359 editor height | Improved; textarea starts higher and editor depth is roughly halved |
 | 390x844 | Share | 1487 | 244 | 1138 | Not the old 3836px share body; one primary CTA, no horizontal overflow |
 
@@ -37,7 +37,7 @@ The current probe waits for generated document readiness (`12/12 생성` or `안
 The original default-stage complaints are fixed on current production:
 
 - Documents default review is `1147 / 900 = 1.27x` on desktop, not the old `2070 / 723 = 2.86x` report.
-- Mobile default review is `1417 / 844 = 1.68x`, with no horizontal overflow or sticky overlap.
+- Mobile default review is `1269 / 844 = 1.50x`, with no horizontal overflow, sticky overlap, or visible full preview while the deep review disclosure is closed.
 - Desktop share is a `1180px` surface at `1440px`, so it is no longer a narrow mobile-card layout.
 - Share has one primary CTA and no horizontal overflow on desktop or mobile.
 
@@ -69,7 +69,7 @@ The requested UX work was implemented across bounded fixes that are integrated i
 - `a2535d21` `chore: tighten workspace doc share gate`
   - tightened the production gate so document measurements wait for generated-state readiness.
 
-All five commits are ancestors of current HEAD `96d16238`. A separate older geometry commit `ddda375d` is not an ancestor of this branch, but the current DOM/CSS still contains the effective later fixes listed above.
+All five commits are ancestors of current HEAD `ee08ddd4`. A separate older geometry commit `ddda375d` is not an ancestor of this branch, but the current DOM/CSS still contains the effective later fixes listed above.
 
 ## Mismatch Finding
 
@@ -77,7 +77,7 @@ All five commits are ancestors of current HEAD `96d16238`. A separate older geom
 
 Possible user-surface mismatch sources:
 
-- If the user saw a narrow share card on desktop, they were likely on stale/non-authoritative local dev, cached deploy, or an older branch. Current production build `96d16238` renders `1180px` share width.
+- If the user saw a narrow share card on desktop, they were likely on stale/non-authoritative local dev, cached deploy, or an older branch. Current production build `ee08ddd4` renders `1180px` share width.
 - If the user clicked `편집` and judged the full edit experience, that is not stale. The current production edit surface is no longer sticky, but it is still long internally and remains a bounded UX follow-up.
 - Static 0 / 108 contract passes should not be treated as proof for this workflow-level gate unless they also measure generated document readiness, document height ratio, editor entry y-position, sticky overlap, and desktop share width.
 
@@ -139,7 +139,9 @@ Raw evidence was refreshed in `current-geometry.json` and the `*-current-*.png` 
 
 ## Current Verification
 
-- `node evaluation\workspace-docs-share-production-gate-2026-07-20\run-current-geometry-probe.mjs` — PASS, served commit `96d16238ae71896aa608d93ee9db25d455bd6894`, generated-state wait included.
+- `node evaluation\workspace-docs-share-production-gate-2026-07-20\run-current-geometry-probe.mjs` — PASS, served commit `ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d`, generated-state wait included.
+- The prior contradiction is closed on production: `documentDeepReviewOpen=false` and `visibleDocumentPreviews=0` for desktop/mobile document review.
+- `node evaluation\live-critical-surface-current-2026-07-20-rerun\run-live-critical-surface-rerun.mjs` — PASS, findings 0, served commit `ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d`.
 - `node -e "JSON.parse(...current-geometry.json); JSON.parse(...mismatch-investigation-2026-07-20.json)"` — PASS.
 - `npm.cmd test -- tests\workspace-layout-regression.test.ts tests\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false` — 2 files / 28 tests PASS, 1 skipped. Duration 201.93s.
 - `git diff --check` — PASS, line-ending warnings only.

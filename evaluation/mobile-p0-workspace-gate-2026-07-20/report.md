@@ -2,7 +2,7 @@
 
 Verdict: **MOBILE FIXED**
 
-Production commit: `695053239afa3f3ea5f28c0ce921d27afb32dd14`
+Production commit: `ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d`
 
 The 6-hour mobile gate is now closed for the generated workspace flow. The default Documents surface is a bounded Safety Brief, and full document preview/review is behind an explicit disclosure.
 
@@ -18,7 +18,7 @@ The 6-hour mobile gate is now closed for the generated workspace flow. The defau
 - Documents default moved full preview/edit/download behind `문서 깊게 보기`.
 - Documents mobile default changed from 2.45x to 1.5x.
 - Share mobile preview moved from y=1068 to y=380.
-- The production recheck on `69505323` resolves the prior probe contradiction: `documentDeepReviewOpen=false` and `visibleDocumentPreviews=0`.
+- The production recheck on `ee08ddd4` resolves the prior probe contradiction: `documentDeepReviewOpen=false` and `visibleDocumentPreviews=0`.
 - Production live-critical sweep reports findings 0.
 
 ## Remaining Follow-Up
