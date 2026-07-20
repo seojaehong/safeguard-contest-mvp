@@ -24,6 +24,13 @@ function collectEvidenceSurface(response: Awaited<ReturnType<typeof runAsk>>): s
   });
 }
 
+function collectStructuredEvidenceRefs(response: Awaited<ReturnType<typeof runAsk>>): string {
+  return [
+    ...(response.structured?.riskAssessmentRows ?? []).flatMap((row) => row.evidenceRefs),
+    ...(response.structured?.tbmRiskLinks ?? []).flatMap((link) => link.evidenceRefs),
+  ].join("\n");
+}
+
 describe("KOSHA/SIF materialization matrix", () => {
   it("materializes exact D-C-13 exterior-wall KOSHA guidance into the generated workpack", async () => {
     const response = await withNoSupabase(() => runAsk(
@@ -35,6 +42,7 @@ describe("KOSHA/SIF materialization matrix", () => {
     const evidenceSurface = collectEvidenceSurface(response);
 
     expect(evidenceSurface).toContain("D-C-13");
+    expect(collectStructuredEvidenceRefs(response)).toContain("D-C-13");
     expect(response.dbHarness?.summary.directEvidence).toBeGreaterThan(0);
     expect(response.dbHarness?.summary.sifCases).toBeGreaterThan(0);
     expect(documentSurface).toMatch(/외벽|도장/);
@@ -53,6 +61,7 @@ describe("KOSHA/SIF materialization matrix", () => {
     const evidenceSurface = collectEvidenceSurface(response);
 
     expect(evidenceSurface).toContain("D-C-7");
+    expect(collectStructuredEvidenceRefs(response)).toContain("D-C-7");
     expect(response.dbHarness?.summary.directEvidence).toBeGreaterThan(0);
     expect(documentSurface).toMatch(/이동식비계|비계/);
     expect(documentSurface).toMatch(/바퀴|아웃트리거|승강|추락/);
@@ -69,6 +78,7 @@ describe("KOSHA/SIF materialization matrix", () => {
     const evidenceSurface = collectEvidenceSurface(response);
 
     expect(evidenceSurface).toContain("B-E-10");
+    expect(collectStructuredEvidenceRefs(response)).toContain("B-E-10");
     expect(response.scenario.companyType).toBe("전기설비 점검");
     expect(documentSurface).toContain("정전전로");
     expect(documentSurface).toContain("배전반");
