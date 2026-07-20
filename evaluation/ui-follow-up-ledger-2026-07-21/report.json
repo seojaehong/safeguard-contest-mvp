@@ -216,9 +216,17 @@
     "currentSourceContract": {
       "stickyToolbarIncludesSelectedTitle": true,
       "stickyToolbarIncludesSectionEvidenceReviewSummary": true,
+      "oldAcceptanceWasPaneIntersectionOnly": true,
+      "liveStickyToolbarOverlapRed": {
+        "toolbarBottom": 572,
+        "textareaTop": 492,
+        "toolbarCoveredTextarea": true
+      },
       "summaryVisibleAfterTbmSelection": true,
       "summaryVisibleAfterRiskAssessmentSelection": true,
-      "summaryVisibleAfterRiskAssessmentDeepScroll": true
+      "summaryVisibleAfterRiskAssessmentDeepScroll": true,
+      "toolbarDoesNotCoverActiveTextareaAfterSelection": true,
+      "toolbarDoesNotCoverActiveTextareaAfterDeepScroll": true
     },
     "checks": [
       {

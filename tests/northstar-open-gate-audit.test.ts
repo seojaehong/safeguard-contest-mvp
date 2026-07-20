@@ -139,6 +139,8 @@ function createFixtureRoot(): string {
       riskAssessmentToolbarVisibleInPaneAfterDeepScroll: true,
       tbmLogDrilldownSummaryContainsSectionsEvidenceAndReview: true,
       riskAssessmentDrilldownSummaryContainsSectionsEvidenceAndReview: true,
+      tbmLogToolbarDoesNotCoverActiveTextareaAfterSelection: true,
+      riskAssessmentToolbarDoesNotCoverActiveTextareaAfterSelection: true,
       riskAssessmentDrilldownSummaryVisibleAfterDeepScroll: true,
       toolbarNearPaneTopAfterDeepScroll: true,
       toolbarDoesNotCoverActiveTextarea: true,

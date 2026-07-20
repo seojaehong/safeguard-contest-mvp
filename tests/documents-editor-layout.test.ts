@@ -1209,6 +1209,7 @@ describe("documents editor layout", () => {
           toolbarTop: Math.round(toolbarRect.top),
           toolbarBottom: Math.round(toolbarRect.bottom),
           toolbarVisibleInPane,
+          toolbarCoversTextarea: toolbarRect.bottom > textareaRect.top && toolbarRect.top < textareaRect.bottom,
           textareaTop: Math.round(textareaRect.top),
           textareaBottom: Math.round(textareaRect.bottom),
           textareaVisibleInPane,
@@ -1238,6 +1239,7 @@ describe("documents editor layout", () => {
       expect(selected.toolbarDisplay).not.toBe("none");
       expect(selected.toolbarPosition).toBe("sticky");
       expect(selected.toolbarVisibleInPane).toBe(true);
+      expect(selected.toolbarCoversTextarea).toBe(false);
       expect(selected.toolbarTop).toBeGreaterThanOrEqual(selected.shellTop - 1);
       expect(selected.toolbarBottom).toBeLessThan(selected.shellBottom);
       expect(selected.shellOverflowY).toBe("auto");
@@ -1285,6 +1287,7 @@ describe("documents editor layout", () => {
           toolbarTop: Math.round(toolbarRect.top),
           toolbarBottom: Math.round(toolbarRect.bottom),
           toolbarVisibleInPane: toolbarRect.bottom > shellRect.top && toolbarRect.top < shellRect.bottom,
+          toolbarCoversTextarea: toolbarRect.bottom > textareaRect.top && toolbarRect.top < textareaRect.bottom,
           shellTop: Math.round(shellRect.top),
           shellBottom: Math.round(shellRect.bottom),
           shellScrollTop: Math.round(workpackShell.scrollTop),
@@ -1305,6 +1308,7 @@ describe("documents editor layout", () => {
       expect(riskAssessmentLanding.drilldownSummaryText).toContain("확인");
       expect(riskAssessmentLanding.toolbarPosition).toBe("sticky");
       expect(riskAssessmentLanding.toolbarVisibleInPane).toBe(true);
+      expect(riskAssessmentLanding.toolbarCoversTextarea).toBe(false);
       expect(riskAssessmentLanding.toolbarTop).toBeGreaterThanOrEqual(riskAssessmentLanding.shellTop - 1);
       expect(riskAssessmentLanding.toolbarBottom).toBeLessThan(riskAssessmentLanding.shellBottom);
       expect(riskAssessmentLanding.textareaVisibleInPane).toBe(true);

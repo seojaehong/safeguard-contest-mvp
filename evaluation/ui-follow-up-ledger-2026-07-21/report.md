@@ -123,6 +123,8 @@ Current-source bounded gate:
 - Artifact: `evaluation/documents-mobile-pane-context-2026-07-21/report.md`
 - Source HEAD before patch: `bb60fdf8461dbd117827748ba7e35ef51de00bb2`
 - The sticky `.document-toolbar` now includes a selected-document drilldown summary: `N섹션 · 근거 N건 · 확인 N건`.
+- The old landing gate only proved the textarea intersected the internal pane. Live review found a stricter RED: sticky toolbar `bottom=572` could cover textarea `top=492`.
+- The strengthened gate now requires `toolbarCoversTextarea=false` on landing and after deep scroll.
 - Focused browser: `documents-editor-layout` mobile launcher slice PASS, 2/2.
 - Full browser file: `documents-editor-layout` PASS, 31/31.
 - TypeScript: PASS.

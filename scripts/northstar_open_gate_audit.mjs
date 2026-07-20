@@ -545,6 +545,8 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     && contextAssertions.riskAssessmentToolbarVisibleInPaneAfterDeepScroll === true
     && contextAssertions.tbmLogDrilldownSummaryContainsSectionsEvidenceAndReview === true
     && contextAssertions.riskAssessmentDrilldownSummaryContainsSectionsEvidenceAndReview === true
+    && contextAssertions.tbmLogToolbarDoesNotCoverActiveTextareaAfterSelection === true
+    && contextAssertions.riskAssessmentToolbarDoesNotCoverActiveTextareaAfterSelection === true
     && contextAssertions.riskAssessmentDrilldownSummaryVisibleAfterDeepScroll === true
     && contextAssertions.toolbarNearPaneTopAfterDeepScroll === true
     && contextAssertions.toolbarDoesNotCoverActiveTextarea === true

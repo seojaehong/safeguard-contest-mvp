@@ -1,6 +1,6 @@
 # Documents Mobile Pane Context Gate
 
-Checked at: 2026-07-21 03:50 KST
+Checked at: 2026-07-21 04:01 KST
 
 Latest source HEAD before this summary-depth patch: `bb60fdf8461dbd117827748ba7e35ef51de00bb2`
 
@@ -18,6 +18,8 @@ Production `45a5e6285c1bdc788fd40b99bb29de58200495fc` closed the selection landi
 
 - `위험성평가표` click landed with textarea `top=492`, `bottom=650` inside pane `476-796`.
 
+That old acceptance was only a pane-intersection PASS. A later live review found the sticky toolbar could still overlap the first editable field: toolbar `bottom=572` while textarea `top=492`. The strengthened contract now requires the active textarea to land below the visible sticky toolbar, not merely somewhere inside the pane.
+
 The next readability debt was deep internal pane scroll:
 
 - When `.workpack-shell.scrollTop` advanced to roughly `1010`, the user saw mid-document controls and evidence utilities.
@@ -29,7 +31,20 @@ The next readability debt was deep internal pane scroll:
 - The toolbar shows the selected document title and compact status.
 - The toolbar now also carries a selected-document drilldown summary: `N섹션 · 근거 N건 · 확인 N건`.
 - The toolbar stays inside `.workpack-shell` while the pane scrolls.
+- The pane alignment now keeps the first editable field below the sticky toolbar instead of merely partially visible behind it.
 - The existing non-interactive bottom scroll affordance remains.
+
+## Production Confirmation
+
+Production `a2028757e62553346733c757108f56a28495f888` confirms the selected-document summary is live:
+
+- `/documents?theme=day`, 390x844.
+- Default route: `bodyHeight=844`, `scrollWidth=390`, `.workpack-shell` `476-796`, `overflowY=auto`.
+- Default selected summary: `5섹션 · 근거 4건 · 확인 1건`.
+- After selecting `위험성평가표`: summary `7섹션 · 근거 4건 · 확인 1건`, toolbar sticky inside pane, `bodyHeight=844`, no horizontal overflow.
+- After internal deep scroll `scrollTop=1000`: the same summary remains visible in the sticky toolbar.
+
+Current-source patch after that production check additionally verifies the toolbar does not cover the selected document's first textarea on landing or deep scroll.
 
 ## Verified Contract
 
@@ -61,8 +76,10 @@ Assertions added:
 
 - After selecting `TBM 기록`, the toolbar is visible in `.workpack-shell`, sticky, and contains `TBM 기록`.
 - After selecting `TBM 기록`, the selected-document summary remains visible and includes `섹션`, `근거`, and `확인`.
+- After selecting `TBM 기록`, the sticky toolbar does not cover the active textarea.
 - After selecting `위험성평가표`, the toolbar is visible in `.workpack-shell`, sticky, and contains `위험성평가표`.
 - After selecting `위험성평가표`, the selected-document summary remains visible and includes `섹션`, `근거`, and `확인`.
+- After selecting `위험성평가표`, the sticky toolbar does not cover the active textarea.
 - After programmatic deep scroll (`scrollTop >= 600`), the toolbar remains near the pane top, below the pane bottom, and does not cover the active textarea.
 - After programmatic deep scroll, the selected-document summary still remains attached to the sticky pane toolbar.
 - Page height remains bounded after selection and deep scroll: `pageHeight <= viewportHeight + 1`.

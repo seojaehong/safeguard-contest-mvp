@@ -2555,11 +2555,16 @@ export function WorkpackEditor({
 
       const shellRect = shell.getBoundingClientRect();
       const targetRect = target.getBoundingClientRect();
-      const targetIsVisible = targetRect.bottom > shellRect.top && targetRect.top < shellRect.bottom;
+      const toolbar = documentBodyRef.current?.querySelector<HTMLElement>(".document-toolbar") || null;
+      const toolbarRect = toolbar?.getBoundingClientRect();
+      const visibleTop = toolbarRect && toolbarRect.bottom > shellRect.top && toolbarRect.top < shellRect.bottom
+        ? toolbarRect.bottom
+        : shellRect.top;
+      const targetIsVisible = targetRect.bottom > visibleTop && targetRect.top >= visibleTop && targetRect.top < shellRect.bottom;
       if (targetIsVisible) return;
 
-      const padding = 16;
-      const nextScrollTop = shell.scrollTop + targetRect.top - shellRect.top - padding;
+      const padding = 8;
+      const nextScrollTop = shell.scrollTop + targetRect.top - visibleTop - padding;
       shell.scrollTo({
         top: Math.max(0, nextScrollTop),
         behavior: "auto"

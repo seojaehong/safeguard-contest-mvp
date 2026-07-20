@@ -15,6 +15,12 @@
       "paneBottom": 796,
       "visibleInPane": true
     },
+    "oldAcceptanceWasPaneIntersectionOnly": true,
+    "liveStickyToolbarOverlapRed": {
+      "toolbarBottom": 572,
+      "textareaTop": 492,
+      "toolbarCoveredTextarea": true
+    },
     "deepScrollContextMissing": true,
     "deepScrollApproxScrollTop": 1010
   },
@@ -32,6 +38,8 @@
     "riskAssessmentToolbarVisibleInPaneAfterSelection": true,
     "riskAssessmentToolbarContainsSelectedTitle": true,
     "riskAssessmentDrilldownSummaryContainsSectionsEvidenceAndReview": true,
+    "tbmLogToolbarDoesNotCoverActiveTextareaAfterSelection": true,
+    "riskAssessmentToolbarDoesNotCoverActiveTextareaAfterSelection": true,
     "riskAssessmentToolbarVisibleInPaneAfterDeepScroll": true,
     "riskAssessmentDrilldownSummaryVisibleAfterDeepScroll": true,
     "riskAssessmentDeepScrollAtLeast": 600,
