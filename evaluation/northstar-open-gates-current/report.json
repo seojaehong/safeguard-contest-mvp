@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-20T22:36:28.233Z",
-  "sourceSha": "3ba467b0bc0bf7635b42584ac88e350c0d4507a0",
+  "generatedAt": "2026-07-20T22:43:03.821Z",
+  "sourceSha": "b8c582a53b549bd855e3aff785cd30f090be798a",
   "overall": "open",
   "gates": [
     {
@@ -27,7 +27,7 @@
       "state": "proven",
       "label": "Documents and Share cockpit UI",
       "evidencePath": "evaluation\\documents-risk-row-cockpit-2026-07-21\\report.json",
-      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, risk-row authoring cockpit, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch or full 12-document authoring completion.",
+      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, risk-row authoring cockpit, /share desktop two-pane channel composition, and /share selected-summary, preview, primary CTA, and collapsed mobile configuration stack. It does not claim provider live dispatch or full 12-document authoring completion.",
       "nextActions": [
         "Continue UI product depth on full 12-document field-first authoring, row-level validation actions, and document-specific drilldown beyond the current risk-row cockpit.",
         "Keep the production live geometry recorded for the risk-row cockpit slice; do not expand it into a full 12-document authoring claim.",
