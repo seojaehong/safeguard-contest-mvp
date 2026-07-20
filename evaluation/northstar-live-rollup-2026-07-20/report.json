@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-20T13:27:01.056Z",
-  "head": "cbb134c52185aab4e0ac3f9d648eee82aee2634f",
+  "generatedAt": "2026-07-20T13:34:32.878Z",
+  "head": "c5ac81f18931b51e84160824f56a5ecbdb036f05",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "cbb134c52185aab4e0ac3f9d648eee82aee2634f",
+    "commitSha": "c5ac81f18931b51e84160824f56a5ecbdb036f05",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-by5n7wfh2-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-kfus6bas1-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -63,7 +63,7 @@
   "mobileP0": {
     "artifact": "evaluation\\mobile-p0-workspace-gate-2026-07-20\\report.json",
     "verdict": "MOBILE_FIXED",
-    "productionCommit": "ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d",
+    "productionCommit": "c5ac81f18931b51e84160824f56a5ecbdb036f05",
     "documentsHeightRatio": 1.5,
     "firstUsefulReviewY": 262,
     "documentDeepReviewOpen": false,
@@ -74,13 +74,13 @@
   },
   "liveCritical": {
     "artifact": "evaluation\\live-critical-surface-current-2026-07-20-rerun\\report.json",
-    "productionCommit": "ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d",
+    "productionCommit": "c5ac81f18931b51e84160824f56a5ecbdb036f05",
     "findings": 0,
     "rowsChecked": 16
   },
   "workspaceGeometry": {
     "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-    "productionCommit": "ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d",
+    "productionCommit": "c5ac81f18931b51e84160824f56a5ecbdb036f05",
     "mobileDocumentDeepReviewOpen": false,
     "mobileVisibleDocumentPreviews": 0
   },
@@ -118,7 +118,7 @@
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
       "sourceCommit": "cbb134c52185aab4e0ac3f9d648eee82aee2634f",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },
@@ -150,7 +150,7 @@
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
       "sourceCommit": "cbb134c52185aab4e0ac3f9d648eee82aee2634f",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },
@@ -158,7 +158,7 @@
       "id": "sif_embedding_preflight",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
       "sourceCommit": "cbb134c52185aab4e0ac3f9d648eee82aee2634f",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },
@@ -167,24 +167,24 @@
       "artifact": "evaluation\\live-critical-surface-current-2026-07-20-rerun\\report.json",
       "sourceCommit": null,
       "sourceStatus": "missing",
-      "productionCommit": "ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "c5ac81f18931b51e84160824f56a5ecbdb036f05",
+      "productionStatus": "matches_live"
     },
     {
       "id": "mobile_p0_workspace",
       "artifact": "evaluation\\mobile-p0-workspace-gate-2026-07-20\\report.json",
       "sourceCommit": null,
       "sourceStatus": "missing",
-      "productionCommit": "ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "c5ac81f18931b51e84160824f56a5ecbdb036f05",
+      "productionStatus": "matches_live"
     },
     {
       "id": "workspace_docs_share_geometry",
       "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
       "sourceCommit": null,
       "sourceStatus": "missing",
-      "productionCommit": "ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "c5ac81f18931b51e84160824f56a5ecbdb036f05",
+      "productionStatus": "matches_live"
     }
   ],
   "contradictions": [],

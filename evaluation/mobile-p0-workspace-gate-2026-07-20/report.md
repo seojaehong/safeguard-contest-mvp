@@ -2,9 +2,9 @@
 
 Verdict: **MOBILE FIXED**
 
-Production commit: `ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d`
+Production commit: `c5ac81f18931b51e84160824f56a5ecbdb036f05`
 
-The 6-hour mobile gate is now closed for the generated workspace flow. The default Documents surface is a bounded Safety Brief, and full document preview/review is behind an explicit disclosure.
+The 6-hour mobile gate is closed for the generated workspace flow. The default Documents surface is a bounded Safety Brief, and full document preview/review is behind an explicit disclosure.
 
 | Surface | Height | First useful y | Overflow | Sticky | Under44 | CTA/preview |
 | --- | ---: | ---: | --- | ---: | ---: | --- |
@@ -16,9 +16,9 @@ The 6-hour mobile gate is now closed for the generated workspace flow. The defau
 ## What Changed
 
 - Documents default moved full preview/edit/download behind `문서 깊게 보기`.
-- Documents mobile default changed from 2.45x to 1.5x.
-- Share mobile preview moved from y=1068 to y=380.
-- The production recheck on `ee08ddd4` resolves the prior probe contradiction: `documentDeepReviewOpen=false` and `visibleDocumentPreviews=0`.
+- Documents mobile default is 1.5x viewport.
+- Share mobile preview is y=380.
+- Production recheck resolves the probe contradiction: `documentDeepReviewOpen=false` and `visibleDocumentPreviews=0`.
 - Production live-critical sweep reports findings 0.
 
 ## Remaining Follow-Up
@@ -28,7 +28,8 @@ The 6-hour mobile gate is now closed for the generated workspace flow. The defau
 
 ## Evidence
 
-- evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json
-- evaluation/live-critical-surface-current-2026-07-20-rerun/report.json
+- evaluation\workspace-docs-share-production-gate-2026-07-20\current-geometry.json
+- evaluation\live-critical-surface-current-2026-07-20-rerun\report.json
 - evaluation/workspace-docs-share-production-gate-2026-07-20/mobile-day-current-documents.png
 - evaluation/workspace-docs-share-production-gate-2026-07-20/mobile-day-current-share.png
+- evaluation/live-critical-surface-current-2026-07-20-rerun/screenshots/mobile-workspace.png

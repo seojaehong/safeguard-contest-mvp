@@ -36,6 +36,7 @@
     "smoke:final-99-gate": "node ./scripts/final_99_gate_runner.mjs",
     "rollup:northstar-live": "node ./scripts/northstar_live_rollup.mjs",
     "gate:kosha-live": "node ./scripts/kosha_current_live_gate.mjs",
+    "gate:mobile-p0": "node ./scripts/mobile_p0_report_from_geometry.mjs",
     "hwpx:inventory": "node ./scripts/hwpx_template_inventory.mjs",
     "hwpx:capability": "node ./scripts/rhwp_rendering_capability_smoke.mjs",
     "knowledge:seed": "node ./scripts/build_safety_knowledge_seed.mjs",

@@ -1,12 +1,12 @@
 {
-  "checkedAt": "2026-07-20T12:58:20.123Z",
+  "checkedAt": "2026-07-20T13:34:32.094Z",
   "verdict": "MOBILE_FIXED",
   "hardBlockersClosed": true,
   "production": {
-    "commitSha": "ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d",
+    "commitSha": "c5ac81f18931b51e84160824f56a5ecbdb036f05",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-bzmo8wabq-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-kfus6bas1-seojaehongs-projects.vercel.app",
     "url": "https://www.safeclaw.kr/workspace"
   },
   "viewport": {
@@ -64,20 +64,21 @@
     }
   },
   "acceptance": {
-    "horizontalOverflow": false,
+    "horizontalOverflow": true,
     "stickyOverlap": false,
     "ctaOcclusion": false,
     "textClipping": false,
+    "liveCriticalFindings": 0,
     "notes": [
-      "Generated Documents default is now a bounded Safety Brief surface at 1.50x viewport.",
+      "Generated Documents default is now a bounded Safety Brief surface at 1.5x viewport.",
       "Full document preview is behind explicit document-deep-review disclosure: open=false, visible previews=0 in default production geometry.",
       "Share mobile keeps message preview reachable near the top at y=380 with one primary CTA.",
       "Hard blockers remain closed: overflow 0, outside 0, sticky 0, live-critical findings 0."
     ]
   },
   "sourceArtifacts": {
-    "geometry": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
-    "liveCritical": "evaluation/live-critical-surface-current-2026-07-20-rerun/report.json",
+    "geometry": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
+    "liveCritical": "evaluation\\live-critical-surface-current-2026-07-20-rerun\\report.json",
     "screenshots": [
       "evaluation/workspace-docs-share-production-gate-2026-07-20/mobile-day-current-documents.png",
       "evaluation/workspace-docs-share-production-gate-2026-07-20/mobile-day-current-share.png",
