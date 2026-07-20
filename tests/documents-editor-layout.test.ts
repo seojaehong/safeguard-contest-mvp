@@ -162,12 +162,17 @@ describe("documents editor layout", () => {
           fieldStrip: rect('[data-testid="document-section-field-strip"]'),
           sectionActions: rect('[data-testid="document-section-actions"]'),
           firstSectionTextarea: rect(".document-section-textarea"),
+          riskRowsEditor: rect('[data-testid="risk-rows-editor"]'),
+          firstRiskRow: rect('[data-testid="risk-row-editor-row"]'),
+          firstRiskRowHeader: rect('[data-testid="risk-row-editor-row"] summary'),
+          firstRiskHazardField: rect('[aria-label="행 1 유해·위험요인"]'),
           secondaryTools: rect('[data-testid="editor-secondary-tools"]'),
           workpackShellScrollHeight: document.querySelector<HTMLElement>(".workpack-shell")?.scrollHeight || 0,
           defaultOpenSectionCount: Array.from(
             document.querySelectorAll<HTMLDetailsElement>('[data-testid="document-section-accordion"]')
           ).filter((section) => section.open).length,
           fieldStripText: document.querySelector('[data-testid="document-section-field-strip"]')?.textContent?.replace(/\s+/gu, " ").trim() || "",
+          firstRiskRowHeaderText: document.querySelector('[data-testid="risk-row-editor-row"] summary')?.textContent?.replace(/\s+/gu, " ").trim() || "",
           actionTexts: Array.from(document.querySelectorAll<HTMLElement>('[data-testid="document-section-actions"] button'))
             .map((button) => button.textContent?.replace(/\s+/gu, " ").trim()),
           fieldChipMetrics: Array.from(document.querySelectorAll<HTMLElement>('[data-testid="document-section-field-strip"] span'))
@@ -197,23 +202,27 @@ describe("documents editor layout", () => {
       expect(metrics.workpackShell.height).toBeGreaterThanOrEqual(viewport.minShellHeight);
       expect(metrics.workpackShell.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
       expect(metrics.mobileCoreLauncher.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
-      expect(metrics.fieldStripText).toContain("현재 편집 필드");
+      expect(metrics.riskRowsEditor.top).toBeLessThan(metrics.workpackShell.bottom);
+      expect(metrics.firstRiskRowHeader.top).toBeGreaterThanOrEqual(metrics.toolbar.bottom + 4);
+      expect(metrics.firstRiskRowHeader.bottom).toBeLessThan(metrics.workpackShell.bottom);
+      expect(metrics.firstRiskHazardField.top).toBeLessThan(metrics.workpackShell.bottom);
+      expect(Math.min(metrics.firstRiskHazardField.bottom, metrics.workpackShell.bottom) - metrics.firstRiskHazardField.top).toBeGreaterThanOrEqual(56);
+      expect(metrics.fieldStripText).toContain("첫 위험행");
+      expect(metrics.fieldStripText).toContain("4M");
       expect(metrics.fieldStripText).toContain("근거");
-      expect(metrics.fieldStripText).toContain("점검");
+      expect(metrics.firstRiskRowHeaderText).toContain("근거");
+      expect(metrics.firstRiskRowHeaderText).toContain("확인");
       expect(metrics.actionTexts).toEqual(["근거 보기", "점검 보기"]);
-      expect(metrics.fieldStrip.top).toBeGreaterThanOrEqual(metrics.toolbar.bottom + 4);
+      expect(metrics.fieldStrip.top).toBeGreaterThanOrEqual(metrics.firstRiskRow.bottom);
       expect(metrics.sectionActions.top).toBeGreaterThanOrEqual(metrics.fieldStrip.bottom);
-      expect(metrics.sectionActions.bottom).toBeLessThanOrEqual(metrics.workpackShell.bottom);
-      expect(metrics.firstSectionTextarea.top).toBeLessThanOrEqual(metrics.viewportHeight);
+      expect(metrics.sectionActions.top).toBeGreaterThan(metrics.workpackShell.bottom);
       expect(metrics.firstSectionTextarea.top).toBeGreaterThanOrEqual(metrics.sectionActions.bottom);
-      expect(metrics.firstSectionTextarea.top).toBeLessThan(metrics.workpackShell.bottom);
-      expect(Math.min(metrics.firstSectionTextarea.bottom, metrics.workpackShell.bottom) - metrics.firstSectionTextarea.top).toBeGreaterThanOrEqual(96);
+      expect(metrics.firstSectionTextarea.top).toBeGreaterThan(metrics.workpackShell.bottom);
       expect(metrics.defaultOpenSectionCount).toBe(1);
       if (viewport.name === "mobile") {
         expect(metrics.riskLauncherPressed).toBe("true");
-        expect(metrics.fieldStrip.bottom).toBeLessThanOrEqual(640);
-        expect(metrics.sectionActions.bottom).toBeLessThanOrEqual(700);
-        expect(metrics.firstSectionTextarea.top).toBeLessThanOrEqual(720);
+        expect(metrics.firstRiskRowHeader.bottom).toBeLessThanOrEqual(660);
+        expect(metrics.firstRiskHazardField.top).toBeLessThanOrEqual(760);
         expect(metrics.workpackShellScrollHeight).toBeLessThanOrEqual(1500);
         expect(metrics.secondaryTools.height).toBeLessThanOrEqual(240);
         expect(metrics.fieldChipMetrics).toHaveLength(3);
@@ -402,6 +411,7 @@ describe("documents editor layout", () => {
     await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
     await page.getByRole("combobox", { name: "편집 문서 선택" }).selectOption("riskAssessmentDraft");
     await page.getByRole("button", { name: "위험 항목" }).click();
+    await page.getByTestId("risk-row-editor-row").nth(1).getByText("행 상세 편집", { exact: true }).click();
     await page.getByRole("textbox", { name: "행 2 세부작업" }).fill("RELOAD_INCOMPLETE_TASK");
     await expect.poll(() => page.getByRole("textbox", { name: "행 2 유해·위험요인" }).getAttribute("aria-invalid"))
       .toBe("true");
@@ -411,6 +421,7 @@ describe("documents editor layout", () => {
 
     await page.reload({ waitUntil: "networkidle" });
     await page.getByRole("combobox", { name: "편집 문서 선택" }).selectOption("riskAssessmentDraft");
+    await page.getByTestId("risk-row-editor-row").nth(1).getByText("행 상세 편집", { exact: true }).click();
     await expect.poll(() => page.getByRole("textbox", { name: "행 2 세부작업" }).inputValue())
       .toBe("RELOAD_INCOMPLETE_TASK");
 
@@ -514,7 +525,7 @@ describe("documents editor layout", () => {
 
     await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
     await page.getByRole("combobox", { name: "편집 문서 선택" }).selectOption("riskAssessmentDraft");
-    const details = page.getByText("공정·조치·확인 세부", { exact: true }).locator("..");
+    const details = page.getByText("행 상세 편집", { exact: true }).locator("..");
     await details.locator("summary").click();
     const controlId = page.getByRole("textbox", { name: "행 1 관리번호" });
     await controlId.pressSequentially("ABC", { delay: 30 });

@@ -2024,7 +2024,7 @@ function RiskAssessmentRowsEditor({
   };
 
   return (
-    <section className={styles.riskRowsEditor} aria-label="위험성평가 구조화 행 편집">
+    <section className={styles.riskRowsEditor} data-testid="risk-rows-editor" aria-label="위험성평가 구조화 행 편집">
       <header className={styles.riskRowsHeader}>
         <div>
           <span className="eyebrow">평가 행</span>
@@ -2073,7 +2073,7 @@ function RiskAssessmentRowsEditor({
                   <span>{String(rowIndex + 1).padStart(2, "0")}</span>
                   <strong>{row.task || row.hazard || "새 위험 항목"}</strong>
                   <small className={styles.riskRowSummaryMeta}>
-                    {accidentTypeLabels[row.accidentType]} · 위험등급 {row.riskLevel}
+                    {accidentTypeLabels[row.accidentType]} · 위험등급 {row.riskLevel} · 근거 {row.evidenceRefs.length.toLocaleString("ko-KR")}건 · 확인 {verificationStatusLabels[row.verificationStatus]}
                   </small>
                 </div>
                 <button
@@ -2092,24 +2092,6 @@ function RiskAssessmentRowsEditor({
               </summary>
 
               <div className={styles.riskRowPrimaryGrid}>
-                <label>
-                  <span>세부작업</span>
-                  <input
-                    aria-label={`행 ${rowIndex + 1} 세부작업`}
-                    {...fieldErrorProps(rowIndex, rowId, "task")}
-                    value={row.task}
-                    onChange={(event) => onRowChange(rowIndex, "task", event.target.value)}
-                  />
-                </label>
-                <label>
-                  <span>작업장소</span>
-                  <input
-                    aria-label={`행 ${rowIndex + 1} 작업장소`}
-                    {...fieldErrorProps(rowIndex, rowId, "location")}
-                    value={row.location}
-                    onChange={(event) => onRowChange(rowIndex, "location", event.target.value)}
-                  />
-                </label>
                 <label className={styles.riskRowWideField}>
                   <span>유해·위험요인</span>
                   <textarea
@@ -2120,71 +2102,90 @@ function RiskAssessmentRowsEditor({
                     onChange={(event) => onRowChange(rowIndex, "hazard", event.target.value)}
                   />
                 </label>
-                <label className={styles.riskRowWideField}>
-                  <span>추가 감소대책</span>
-                  <textarea
-                    aria-label={`행 ${rowIndex + 1} 추가 감소대책`}
-                    {...fieldErrorProps(rowIndex, rowId, "additionalControls")}
-                    rows={2}
-                    value={row.additionalControls}
-                    onChange={(event) => onRowChange(rowIndex, "additionalControls", event.target.value)}
-                  />
-                </label>
-              </div>
-
-              <div className={styles.riskScaleGrid}>
-                <label>
-                  <span>4M</span>
-                  <select
-                    aria-label={`행 ${rowIndex + 1} 4M`}
-                    {...fieldErrorProps(rowIndex, rowId, "fourM")}
-                    value={row.fourM}
-                    onChange={(event) => onRowChange(rowIndex, "fourM", event.target.value as RiskAssessmentRow["fourM"])}
-                  >
-                    {FOUR_M_VALUES.map((value) => <option key={value} value={value}>{value}</option>)}
-                  </select>
-                </label>
-                <label>
-                  <span>재해형태</span>
-                  <select
-                    aria-label={`행 ${rowIndex + 1} 재해형태`}
-                    {...fieldErrorProps(rowIndex, rowId, "accidentType")}
-                    value={row.accidentType}
-                    onChange={(event) => onRowChange(rowIndex, "accidentType", event.target.value as RiskAssessmentRow["accidentType"])}
-                  >
-                    {ACCIDENT_TYPE_VALUES.map((value) => <option key={value} value={value}>{accidentTypeLabels[value]}</option>)}
-                  </select>
-                </label>
-                <label>
-                  <span>가능성</span>
-                  <select
-                    aria-label={`행 ${rowIndex + 1} 가능성`}
-                    {...fieldErrorProps(rowIndex, rowId, "likelihood")}
-                    value={row.likelihood}
-                    onChange={(event) => onRowChange(rowIndex, "likelihood", Number(event.target.value))}
-                  >
-                    {[1, 2, 3, 4, 5].map((value) => <option key={value} value={value}>{value}</option>)}
-                  </select>
-                </label>
-                <label>
-                  <span>중대성</span>
-                  <select
-                    aria-label={`행 ${rowIndex + 1} 중대성`}
-                    {...fieldErrorProps(rowIndex, rowId, "severity")}
-                    value={row.severity}
-                    onChange={(event) => onRowChange(rowIndex, "severity", Number(event.target.value))}
-                  >
-                    {[1, 2, 3, 4, 5].map((value) => <option key={value} value={value}>{value}</option>)}
-                  </select>
-                </label>
-                <div className={styles.riskLevelValue}>
-                  <span>위험등급</span>
-                  <strong data-risk-level={row.riskLevel}>{row.riskLevel}</strong>
-                </div>
               </div>
 
               <details className={styles.riskRowDetails}>
-                <summary>공정·조치·확인 세부</summary>
+                <summary>행 상세 편집</summary>
+                <div className={styles.riskRowPrimaryGrid}>
+                  <label>
+                    <span>세부작업</span>
+                    <input
+                      aria-label={`행 ${rowIndex + 1} 세부작업`}
+                      {...fieldErrorProps(rowIndex, rowId, "task")}
+                      value={row.task}
+                      onChange={(event) => onRowChange(rowIndex, "task", event.target.value)}
+                    />
+                  </label>
+                  <label>
+                    <span>작업장소</span>
+                    <input
+                      aria-label={`행 ${rowIndex + 1} 작업장소`}
+                      {...fieldErrorProps(rowIndex, rowId, "location")}
+                      value={row.location}
+                      onChange={(event) => onRowChange(rowIndex, "location", event.target.value)}
+                    />
+                  </label>
+                  <label className={styles.riskRowWideField}>
+                    <span>추가 감소대책</span>
+                    <textarea
+                      aria-label={`행 ${rowIndex + 1} 추가 감소대책`}
+                      {...fieldErrorProps(rowIndex, rowId, "additionalControls")}
+                      rows={2}
+                      value={row.additionalControls}
+                      onChange={(event) => onRowChange(rowIndex, "additionalControls", event.target.value)}
+                    />
+                  </label>
+                </div>
+                <div className={styles.riskScaleGrid}>
+                  <label>
+                    <span>4M</span>
+                    <select
+                      aria-label={`행 ${rowIndex + 1} 4M`}
+                      {...fieldErrorProps(rowIndex, rowId, "fourM")}
+                      value={row.fourM}
+                      onChange={(event) => onRowChange(rowIndex, "fourM", event.target.value as RiskAssessmentRow["fourM"])}
+                    >
+                      {FOUR_M_VALUES.map((value) => <option key={value} value={value}>{value}</option>)}
+                    </select>
+                  </label>
+                  <label>
+                    <span>재해형태</span>
+                    <select
+                      aria-label={`행 ${rowIndex + 1} 재해형태`}
+                      {...fieldErrorProps(rowIndex, rowId, "accidentType")}
+                      value={row.accidentType}
+                      onChange={(event) => onRowChange(rowIndex, "accidentType", event.target.value as RiskAssessmentRow["accidentType"])}
+                    >
+                      {ACCIDENT_TYPE_VALUES.map((value) => <option key={value} value={value}>{accidentTypeLabels[value]}</option>)}
+                    </select>
+                  </label>
+                  <label>
+                    <span>가능성</span>
+                    <select
+                      aria-label={`행 ${rowIndex + 1} 가능성`}
+                      {...fieldErrorProps(rowIndex, rowId, "likelihood")}
+                      value={row.likelihood}
+                      onChange={(event) => onRowChange(rowIndex, "likelihood", Number(event.target.value))}
+                    >
+                      {[1, 2, 3, 4, 5].map((value) => <option key={value} value={value}>{value}</option>)}
+                    </select>
+                  </label>
+                  <label>
+                    <span>중대성</span>
+                    <select
+                      aria-label={`행 ${rowIndex + 1} 중대성`}
+                      {...fieldErrorProps(rowIndex, rowId, "severity")}
+                      value={row.severity}
+                      onChange={(event) => onRowChange(rowIndex, "severity", Number(event.target.value))}
+                    >
+                      {[1, 2, 3, 4, 5].map((value) => <option key={value} value={value}>{value}</option>)}
+                    </select>
+                  </label>
+                  <div className={styles.riskLevelValue}>
+                    <span>위험등급</span>
+                    <strong data-risk-level={row.riskLevel}>{row.riskLevel}</strong>
+                  </div>
+                </div>
                 <div className={styles.riskRowDetailGrid}>
                   <label><span>관리번호</span><input aria-label={`행 ${rowIndex + 1} 관리번호`} {...fieldErrorProps(rowIndex, rowId, "controlId")} value={row.controlId || ""} onChange={(event) => onRowChange(rowIndex, "controlId", event.target.value || undefined)} /></label>
                   <label><span>공정</span><input aria-label={`행 ${rowIndex + 1} 공정`} {...fieldErrorProps(rowIndex, rowId, "process")} value={row.process} onChange={(event) => onRowChange(rowIndex, "process", event.target.value)} /></label>
@@ -2594,6 +2595,15 @@ export function WorkpackEditor({
 
   useLayoutEffect(() => {
     if (!expandedStructuredSectionId) return;
+    const riskRowTarget = selected.key === "riskAssessmentDraft"
+      ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="risk-row-editor-row"]')
+        || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="risk-rows-editor"]')
+        || null
+      : null;
+    if (riskRowTarget) {
+      alignPaneTargetBelowToolbar(riskRowTarget);
+      return;
+    }
     const activeSection = Array.from(
       documentBodyRef.current?.querySelectorAll<HTMLElement>("[data-section-id]") || []
     ).find((section) => section.dataset.sectionId === expandedStructuredSectionId) || null;
@@ -2602,11 +2612,16 @@ export function WorkpackEditor({
       || activeSection
       || null;
     alignPaneTargetBelowToolbar(target);
-  }, [expandedStructuredSectionId]);
+  }, [expandedStructuredSectionId, selected.key]);
 
   useEffect(() => {
     const alignFrame = window.requestAnimationFrame(() => {
-      const target = documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
+      const target = selected.key === "riskAssessmentDraft"
+        ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="risk-row-editor-row"]')
+          || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="risk-rows-editor"]')
+          || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
+          || null
+        : documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
         || textareaRef.current
         || documentBodyRef.current;
       alignPaneTargetBelowToolbar(target);
@@ -3185,6 +3200,19 @@ export function WorkpackEditor({
               data-testid="document-structured-editor"
               data-editor-kind={structuredDocument.profile.kind}
             >
+              {selected.key === "riskAssessmentDraft" ? (
+                <RiskAssessmentRowsEditor
+                  rows={canonicalRiskRows}
+                  rowIds={riskRowIds}
+                  validation={canonicalRiskValidation}
+                  isCurrent={canonicalRiskRowsAreCurrent}
+                  isLocked={structuredRiskEditLocked}
+                  onConfirmStructuredEdit={confirmStructuredRiskEdit}
+                  onRowChange={updateCanonicalRiskRow}
+                  onAdd={addCanonicalRiskRow}
+                  onRemove={removeCanonicalRiskRow}
+                />
+              ) : null}
               {structuredDocument.body.map((section, index) => {
                 const inputId = `document-section-${selected.key}-${index}`;
                 const sectionLineCount = section.value.split(/\r?\n/u).filter((line) => line.trim().length > 0).length;
@@ -3222,16 +3250,28 @@ export function WorkpackEditor({
                     {isSectionOpen ? (
                       <div className={styles.documentSectionFieldStrip} data-testid="document-section-field-strip">
                         <span>
-                          <b>현재 편집 필드</b>
-                          <strong>{section.label}</strong>
+                          <b>{selected.key === "riskAssessmentDraft" ? "첫 위험행" : "현재 편집 필드"}</b>
+                          <strong>
+                            {selected.key === "riskAssessmentDraft"
+                              ? canonicalRiskRows[0]?.task || canonicalRiskRows[0]?.hazard || section.label
+                              : section.label}
+                          </strong>
                         </span>
                         <span>
-                          <b>근거</b>
-                          <strong>{selectedRows.length.toLocaleString("ko-KR")}건 연결</strong>
+                          <b>{selected.key === "riskAssessmentDraft" ? "4M/등급" : "근거"}</b>
+                          <strong>
+                            {selected.key === "riskAssessmentDraft" && canonicalRiskRows[0]
+                              ? `${canonicalRiskRows[0].fourM} · ${canonicalRiskRows[0].riskLevel}`
+                              : `${selectedRows.length.toLocaleString("ko-KR")}건 연결`}
+                          </strong>
                         </span>
                         <span>
-                          <b>점검</b>
-                          <strong>{selectedUsesEditedText ? "수정본 재확인" : "초안 확인"}</strong>
+                          <b>{selected.key === "riskAssessmentDraft" ? "근거/점검" : "점검"}</b>
+                          <strong>
+                            {selected.key === "riskAssessmentDraft"
+                              ? `${(canonicalRiskRows[0]?.evidenceRefs.length ?? selectedRows.length).toLocaleString("ko-KR")}건 · ${selectedUsesEditedText ? "재확인" : "초안"}`
+                              : selectedUsesEditedText ? "수정본 재확인" : "초안 확인"}
+                          </strong>
                         </span>
                       </div>
                     ) : null}
@@ -3257,19 +3297,6 @@ export function WorkpackEditor({
                   </details>
                 );
               })}
-              {selected.key === "riskAssessmentDraft" ? (
-                <RiskAssessmentRowsEditor
-                  rows={canonicalRiskRows}
-                  rowIds={riskRowIds}
-                  validation={canonicalRiskValidation}
-                  isCurrent={canonicalRiskRowsAreCurrent}
-                  isLocked={structuredRiskEditLocked}
-                  onConfirmStructuredEdit={confirmStructuredRiskEdit}
-                  onRowChange={updateCanonicalRiskRow}
-                  onAdd={addCanonicalRiskRow}
-                  onRemove={removeCanonicalRiskRow}
-                />
-              ) : null}
             </div>
           ) : (
             <textarea

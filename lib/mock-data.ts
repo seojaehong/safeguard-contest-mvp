@@ -1,8 +1,14 @@
 import { AskResponse, DetailRecord, SearchResult } from "./types";
 import { selectFallbackAccidentCases } from "./accident-cases";
 import { buildEvidenceLabels } from "./smsa-mapping";
+import { serializeRiskAssessmentRowsToDraft } from "@/components/workpack-editor-structure";
 import { buildForeignWorkerBriefing, buildForeignWorkerTransmission, getDefaultForeignWorkerLanguages } from "./foreign-worker";
 import { attachQualityContract } from "./quality-contract";
+import {
+  validateRiskAssessmentRows,
+  type RiskAssessmentRow,
+  type RiskLevel
+} from "./risk-assessment-schema";
 
 type ScenarioProfile = {
   id: string;
@@ -776,6 +782,70 @@ function format4mLine(hazard: string) {
   return `   - 4M 체크: ${checks.map(([label, status]) => `${label}:${status === "중점" ? "■" : "□"}`).join(" ")} / 중점 확인: ${checks.filter(([, status]) => status === "중점").map(([label]) => label).join(", ") || "현장 확인"}`;
 }
 
+function canonicalRiskLevel(likelihood: number, severity: number): RiskLevel {
+  const score = likelihood * severity;
+  if (score >= 10) return "high";
+  if (score >= 5) return "medium";
+  return "low";
+}
+
+function accidentTypeForHazard(hazard: string): RiskAssessmentRow["accidentType"] {
+  if (/추락|전도/.test(hazard)) return "fall";
+  if (/충돌|동선|회차/.test(hazard)) return "struckBy";
+  if (/낙하|적재물/.test(hazard)) return "struckBy";
+  if (/화재|불꽃|가연물/.test(hazard)) return "fireExplosion";
+  if (/화상/.test(hazard)) return "burn";
+  if (/흄|환기|밀폐|호흡/.test(hazard)) return "asphyxiation";
+  if (/감전|전기/.test(hazard)) return "electricShock";
+  if (/미끄럼|젖음/.test(hazard)) return "slip";
+  return "other";
+}
+
+function fourMForHazard(hazard: string): RiskAssessmentRow["fourM"] {
+  if (/비계|지게차|장비|도구|용접|세척기|대차|펌프|랙|팔레트|끼임|낙하/.test(hazard)) return "Machine";
+  if (/강풍|우천|폭염|고온|환기|밀폐|젖음|동선|흄|비산|출하|혼잡/.test(hazard)) return "Media";
+  if (/통제|신호|작업중지|관리|교육|허가|감시|분리/.test(hazard)) return "Management";
+  return "Man";
+}
+
+function buildScenarioRiskAssessmentRows(scenario: ReturnType<typeof inferScenario>): RiskAssessmentRow[] {
+  const { profile } = scenario;
+  return profile.hazards.map((hazard, index) => {
+    const likelihood = index === 0 ? 3 : 2;
+    const severity = profile.riskLevel === "상" || index === 0 ? 4 : 3;
+    return {
+      controlId: `RA-${profile.id}-${index + 1}`,
+      location: scenario.siteName,
+      process: profile.processName,
+      task: index === 0 ? profile.workName : hazard,
+      equipment: /비계/.test(hazard)
+        ? "이동식 비계, 안전난간, 추락방지 보호구"
+        : /지게차|랙|상하차|피킹/.test(hazard)
+          ? "지게차, 랙, 팔레트, 신호장비"
+          : /용접|절단|화기/.test(hazard)
+            ? "용접기, 절단기, 소화기, 차폐막"
+            : "현장 장비 및 보호구",
+      hazard,
+      fourM: fourMForHazard(hazard),
+      accidentType: accidentTypeForHazard(hazard),
+      currentControls: profile.actions[index] || profile.actions[0],
+      likelihood,
+      severity,
+      riskLevel: canonicalRiskLevel(likelihood, severity),
+      additionalControls: profile.actions[index] || profile.actions[0],
+      owner: index === 0 ? "관리감독자" : "작업반장",
+      due: "현장 확인",
+      verification: index === 0 ? "작업 전 TBM 및 현장 사진 확인" : "작업 전 체크리스트 확인",
+      verificationStatus: index === 0 ? "planned" : "needsReview",
+      verificationDate: "현장 확인",
+      verificationChecker: "작업반장",
+      whyLikelihood: "작업 전 노출 빈도와 현장 통제 상태를 함께 반영",
+      whySeverity: "추락·충돌·화재 등 중대재해 가능성을 보수적으로 반영",
+      evidenceRefs: ["riskAssessmentDraft", "tbmBriefing"]
+    };
+  });
+}
+
 export function inferScenario(question: string) {
   const normalized = question.trim() || defaultQuestion;
   const workerCount = inferWorkerCount(normalized);
@@ -1181,6 +1251,8 @@ function buildOfficialStyleSafetyEducationRecord(scenario: ReturnType<typeof inf
 export function buildMockAskResponse(question: string, citations: SearchResult[], mode: AskResponse["mode"], statusDetail: string): AskResponse {
   const scenario = inferScenario(question);
   const profile = scenario.profile;
+  const riskAssessmentRows = buildScenarioRiskAssessmentRows(scenario);
+  const riskAssessmentValidation = validateRiskAssessmentRows(riskAssessmentRows);
   const responseScenario = {
     companyName: scenario.companyName,
     companyType: scenario.companyType,
@@ -1269,7 +1341,7 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
     riskSummary,
     deliverables: {
       workpackSummaryDraft: buildWorkpackSummaryDraft(scenario),
-      riskAssessmentDraft: buildOfficialStyleRiskAssessment(scenario),
+      riskAssessmentDraft: serializeRiskAssessmentRowsToDraft(riskAssessmentRows),
       workPlanDraft: buildOfficialStyleWorkPlan(scenario),
       tbmBriefing: buildOfficialStyleTbmBriefing(scenario),
       tbmLogDraft: buildOfficialStyleTbmLog(scenario),
@@ -1299,6 +1371,14 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
         "TBM 및 당일 안전교육 내용 확인 후 작업 시작 바랍니다."
       ].join("\n")
     },
+    structured: {
+      riskAssessmentRows,
+      riskAssessmentValidation: {
+        ok: riskAssessmentValidation.ok,
+        issueCount: riskAssessmentValidation.issues.length,
+        issues: riskAssessmentValidation.issues
+      }
+    },
     evidenceLabels: buildEvidenceLabels([
       "riskAssessmentDraft",
       "workPlanDraft",
@@ -1309,7 +1389,8 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
       "photoEvidenceDraft",
       "foreignWorkerBriefing",
       "foreignWorkerTransmission",
-      "kakaoMessage"
+      "kakaoMessage",
+      "structuredRiskRows"
     ]),
     status: {
       lawgo: mode === "live" ? "live" : mode === "fallback" ? "fallback" : "mock",

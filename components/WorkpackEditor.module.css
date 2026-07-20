@@ -1224,7 +1224,15 @@
 
   .editor :global(.document-textarea).sectionTextarea {
     min-height: 0;
-    padding: var(--space-3);
+    padding: 7px 9px;
+  }
+
+  .documentSection {
+    gap: 2px;
+  }
+
+  .documentSection > summary {
+    min-height: 36px;
   }
 
   .editorModeBar {
@@ -1243,26 +1251,63 @@
   }
 
   .riskRowsEditor {
-    gap: var(--space-1);
+    gap: 4px;
     padding-bottom: 0;
   }
 
   .riskRowsList {
-    gap: var(--space-2);
+    gap: 6px;
+  }
+
+  .riskRowsHeader,
+  .riskRowHeader {
+    gap: 8px;
+  }
+
+  .addRiskRowButton {
+    min-height: 40px;
+    padding: 0 10px;
   }
 
   .riskRow {
     padding: var(--space-2);
   }
 
+  .riskRowHeader {
+    min-height: 40px;
+  }
+
+  .riskRowHeader strong,
+  .riskRowSummaryMeta {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .riskRowPrimaryGrid,
   .riskRowDetailGrid,
   .riskScaleGrid {
     grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
   }
 
   .riskRowWideField {
     grid-column: auto;
+  }
+
+  .riskRow label,
+  .riskLevelValue {
+    gap: 4px;
+  }
+
+  .riskRow input,
+  .riskRow select,
+  .riskRow textarea {
+    padding: 7px 9px;
+  }
+
+  .riskRowDetails summary {
+    min-height: 36px;
   }
 
   .secondaryTools {
