@@ -2,7 +2,9 @@
   "verdict": "PASS",
   "checkedAt": "2026-07-21T00:36:00+09:00",
   "worktree": "recipient-foreign-live-gate-20260720",
+  "branch": "chore/recipient-foreign-live-gate-20260720",
   "baseHead": "55ed3e1f6c1bea53e57917209300f0814a2d6d34",
+  "build": "not run in this focused materialization gate",
   "productCodeChanged": false,
   "dbSchemaChanged": false,
   "supabaseWrites": false,
@@ -32,6 +34,7 @@
   "limitations": [
     "No new KOSHA corpus import or embedding migration was performed.",
     "No production API generation call was claimed from this focused gate.",
+    "No browser rendering or export/PDF consumer test was claimed from this focused gate.",
     "No DB/schema/Supabase mutation was performed."
   ]
 }
