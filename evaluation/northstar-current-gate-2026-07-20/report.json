@@ -1,0 +1,43 @@
+{
+  "verdict": "partial_pass_goal_active",
+  "date": "2026-07-20",
+  "worktree": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\recipient-foreign-live-gate-20260720",
+  "branch": "chore/recipient-foreign-live-gate-20260720",
+  "head": "ac304c7446e3d998c3f68d983430626b3f1cd7cf",
+  "productionProductMarker": "5a77590bbecca47b122c5f498cfba0cad5486264",
+  "checks": {
+    "runtimeHermesOpenClawBoundary": {
+      "command": "npm.cmd test -- tests\\engine-adapter.test.ts tests\\hermes-engine-adapter.test.ts tests\\openclaw-hermes-route.test.ts tests\\remote-hermes-contract.test.ts tests\\remote-hermes-runtime.test.ts tests\\remote-hermes-route.test.ts tests\\remote-engine-protocol.test.ts tests\\ai-provider-policy.test.ts tests\\knowledge-governance.test.ts tests\\knowledge-governance-ui-contract.test.ts tests\\llm-wiki-rls-approval-packet.test.ts --maxWorkers=1 --fileParallelism=false",
+      "testFilesPassed": 11,
+      "testsPassed": 212,
+      "status": "pass"
+    },
+    "koshaSifPhaseA": {
+      "command": "npm.cmd test -- tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-kosha-applicability-policy.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\exact-trusted-kosha-registry-wave3.test.ts tests\\kosha-grounding-fail-closed.test.ts tests\\kosha-materialization-matrix.test.ts tests\\kosha-guide-provenance-gate.test.ts tests\\kosha-guide-supporting-row-relevance.test.ts tests\\kosha-verified-subset-gate.test.ts tests\\phase-a-runtime-evidence-grounding.test.ts tests\\phase-a-runtime-evidence-bridge.test.ts tests\\phase-a-product-materialization.test.ts tests\\ontology-evidence-chains.test.ts tests\\ontology-seed.test.ts tests\\quality-contract.test.ts tests\\sif-embedding-gate-status.test.ts tests\\sif-embedding-runtime-probe.test.ts --maxWorkers=1 --fileParallelism=false",
+      "testFilesPassed": 17,
+      "testsPassed": 263,
+      "status": "pass"
+    },
+    "recipientPortal": {
+      "build": "pass_28_of_28",
+      "testFilesPassed": 1,
+      "testsPassed": 5,
+      "status": "pass"
+    },
+    "documentsDensity": {
+      "testFilesPassed": 1,
+      "testsPassed": 30,
+      "build": "pass_28_of_28",
+      "productionLiveDesktopHeightBefore": 3500,
+      "productionLiveDesktopHeightAfter": 2286,
+      "status": "pass"
+    }
+  },
+  "remaining": [
+    "live end-to-end generation quality comparison",
+    "RLS tenant-boundary follow-through requiring explicit approval for migrations",
+    "Hermes/OpenClaw live runtime readiness beyond adapter boundary",
+    "Operator Wiki Export / Public Reference Corpus maturation",
+    "remaining non-workspace page density"
+  ]
+}
