@@ -571,6 +571,8 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     && drilldownAssertions.pageHeightRemainsBoundedAfterSectionSwitch === true
     && drilldownAssertions.horizontalOverflowClosedAfterSectionSwitch === true
     && drilldownAssertions.workpackPaneRemainsInsideViewport === true
+    && drilldownAssertions.openSectionTextareaVisibleInPaneAfterSectionSwitch === true
+    && drilldownAssertions.toolbarDoesNotCoverOpenSectionTextareaAfterSectionSwitch === true
     && drilldownAssertions.selectedDocumentToolbarStillDoesNotCoverTextarea === true
     && paneChecksPass
     && drilldownChecksPass

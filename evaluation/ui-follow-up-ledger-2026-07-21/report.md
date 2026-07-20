@@ -148,6 +148,8 @@ Current-source bounded gate:
 - Default selected document has exactly one open body section: index `0`.
 - Opening the second section immediately keeps exactly one open section: index `1`; the first section returns to `펼치기`, the second becomes `편집 중`.
 - Native `<details>` double-open flicker is prevented by driving summary click/Enter/Space through React state.
+- Live `a31f097a` proved the one-section accordion but exposed a stricter RED: after opening the second section, toolbar `bottom=572` covered opened-section textarea `top=502`.
+- The current patch aligns the opened section textarea below the sticky toolbar and requires `toolbarDoesNotCoverOpenSectionTextareaAfterSectionSwitch=true`.
 - Page height and horizontal overflow remain bounded after section switching.
 - Focused browser: `documents-editor-layout` mobile launcher slice PASS, 2/2.
 - Full browser file: `documents-editor-layout` PASS, 31/31.

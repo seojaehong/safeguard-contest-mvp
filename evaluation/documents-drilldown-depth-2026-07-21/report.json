@@ -1,6 +1,7 @@
 {
-  "checkedAt": "2026-07-21T04:17:40+09:00",
+  "checkedAt": "2026-07-21T04:26:04+09:00",
   "sourceHeadBeforeCommit": "ea885c9f201b05810a13242edba891bb4bd98993",
+  "sourceHeadBeforeSectionOverlapPatch": "a31f097a8c7598751b0e09e274fd55b5bd2899a7",
   "branch": "chore/recipient-foreign-live-gate-20260720",
   "verdict": "PASS_CURRENT_SOURCE",
   "scope": "mobile /documents selected-document section accordion depth",
@@ -15,7 +16,25 @@
     "nativeDetailsDoubleOpenFlickerPrevented": true,
     "oneSectionOpenImmediatelyAfterSummaryClick": true,
     "sectionSummaryShowsLineCountAndState": true,
+    "openedSectionTextareaAlignedBelowStickyToolbar": true,
     "backendProviderOrExportContractsChanged": false
+  },
+  "liveRedBeforeSectionOverlapPatch": {
+    "productionMarker": "a31f097a8c7598751b0e09e274fd55b5bd2899a7",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "afterOpeningSecondSection": {
+      "bodyHeight": 844,
+      "horizontalOverflow": 0,
+      "openSectionCount": 1,
+      "openIndexes": [1],
+      "toolbarBottom": 572,
+      "openTextareaTop": 502,
+      "openTextareaBottom": 633,
+      "toolbarCoversOpenTextarea": true
+    }
   },
   "assertions": {
     "defaultOpenSectionCount": 1,
@@ -27,6 +46,8 @@
     "pageHeightRemainsBoundedAfterSectionSwitch": true,
     "horizontalOverflowClosedAfterSectionSwitch": true,
     "workpackPaneRemainsInsideViewport": true,
+    "openSectionTextareaVisibleInPaneAfterSectionSwitch": true,
+    "toolbarDoesNotCoverOpenSectionTextareaAfterSectionSwitch": true,
     "selectedDocumentToolbarStillDoesNotCoverTextarea": true
   },
   "checks": [

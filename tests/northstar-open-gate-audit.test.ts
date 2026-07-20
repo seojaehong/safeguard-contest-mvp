@@ -164,6 +164,8 @@ function createFixtureRoot(): string {
       pageHeightRemainsBoundedAfterSectionSwitch: true,
       horizontalOverflowClosedAfterSectionSwitch: true,
       workpackPaneRemainsInsideViewport: true,
+      openSectionTextareaVisibleInPaneAfterSectionSwitch: true,
+      toolbarDoesNotCoverOpenSectionTextareaAfterSectionSwitch: true,
       selectedDocumentToolbarStillDoesNotCoverTextarea: true,
     },
     checks: [

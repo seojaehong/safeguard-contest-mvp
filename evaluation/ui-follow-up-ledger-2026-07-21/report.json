@@ -284,6 +284,14 @@
       "oneSectionOpenImmediatelyAfterSummaryClick": true,
       "defaultOpenSectionCount": 1,
       "afterOpeningSecondSectionOpenCount": 1,
+      "liveRedBeforeSectionOverlapPatch": {
+        "productionMarker": "a31f097a8c7598751b0e09e274fd55b5bd2899a7",
+        "toolbarBottom": 572,
+        "openTextareaTop": 502,
+        "toolbarCoversOpenTextarea": true
+      },
+      "openSectionTextareaVisibleInPaneAfterSectionSwitch": true,
+      "toolbarDoesNotCoverOpenSectionTextareaAfterSectionSwitch": true,
       "pageHeightRemainsBoundedAfterSectionSwitch": true,
       "horizontalOverflowClosedAfterSectionSwitch": true,
       "providerDispatchLiveClaimed": false

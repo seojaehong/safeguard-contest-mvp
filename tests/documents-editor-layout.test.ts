@@ -1345,8 +1345,13 @@ describe("documents editor layout", () => {
       expect(sectionAccordionImmediateAfterSecondOpen.openIndexes).toEqual([1]);
       const sectionAccordionAfterSecondOpen = await page.evaluate(() => {
         const sections = Array.from(document.querySelectorAll<HTMLDetailsElement>('[data-testid="document-section-accordion"]'));
+        const openSection = sections.find((section) => section.open);
+        const openTextarea = openSection?.querySelector<HTMLTextAreaElement>("textarea");
         const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
+        const toolbar = document.querySelector<HTMLElement>(".document-toolbar");
         const shellRect = workpackShell?.getBoundingClientRect();
+        const toolbarRect = toolbar?.getBoundingClientRect();
+        const openTextareaRect = openTextarea?.getBoundingClientRect();
         return {
           openCount: sections.filter((section) => section.open).length,
           openIndexes: sections.map((section, index) => section.open ? index : -1).filter((index) => index >= 0),
@@ -1357,7 +1362,12 @@ describe("documents editor layout", () => {
           scrollWidth: document.documentElement.scrollWidth,
           viewportWidth: window.innerWidth,
           shellTop: shellRect ? Math.round(shellRect.top) : null,
-          shellBottom: shellRect ? Math.round(shellRect.bottom) : null
+          shellBottom: shellRect ? Math.round(shellRect.bottom) : null,
+          toolbarBottom: toolbarRect ? Math.round(toolbarRect.bottom) : null,
+          openTextareaTop: openTextareaRect ? Math.round(openTextareaRect.top) : null,
+          openTextareaBottom: openTextareaRect ? Math.round(openTextareaRect.bottom) : null,
+          openTextareaVisibleInPane: Boolean(openTextareaRect && shellRect && openTextareaRect.bottom > shellRect.top && openTextareaRect.top < shellRect.bottom),
+          toolbarCoversOpenTextarea: Boolean(toolbarRect && openTextareaRect && toolbarRect.bottom > openTextareaRect.top && toolbarRect.top < openTextareaRect.bottom)
         };
       });
       expect(sectionAccordionAfterSecondOpen.openCount).toBe(1);
@@ -1368,6 +1378,10 @@ describe("documents editor layout", () => {
       expect(sectionAccordionAfterSecondOpen.scrollWidth).toBeLessThanOrEqual(sectionAccordionAfterSecondOpen.viewportWidth + 1);
       expect(sectionAccordionAfterSecondOpen.shellTop).toBeGreaterThanOrEqual(0);
       expect(sectionAccordionAfterSecondOpen.shellBottom).toBeLessThanOrEqual(844);
+      expect(sectionAccordionAfterSecondOpen.openTextareaVisibleInPane).toBe(true);
+      expect(sectionAccordionAfterSecondOpen.toolbarCoversOpenTextarea).toBe(false);
+      expect(sectionAccordionAfterSecondOpen.openTextareaTop).toBeGreaterThanOrEqual((sectionAccordionAfterSecondOpen.toolbarBottom || 0) + 4);
+      expect(sectionAccordionAfterSecondOpen.openTextareaBottom).toBeGreaterThan(sectionAccordionAfterSecondOpen.openTextareaTop || 0);
 
       await page.locator('[data-testid="document-section-accordion"]').first().locator("summary").click();
       await page.locator('.document-textarea[aria-label="위험성평가표 편집"]').focus();
