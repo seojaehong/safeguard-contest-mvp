@@ -1,0 +1,44 @@
+{
+  "verdict": "PASS_CURRENT_SOURCE",
+  "checkedAt": "2026-07-21 KST",
+  "source": {
+    "productCommit": "04cba7f7c9aa9292b2538e428c7d067a4c7a6efc",
+    "branch": "chore/recipient-foreign-live-gate-20260720"
+  },
+  "scope": {
+    "route": "/documents",
+    "surface": "tbmBriefing and tbmLogDraft",
+    "claim": "TBM first-task cockpit before raw textarea",
+    "productionLiveClaimed": false
+  },
+  "contracts": {
+    "tbmCockpitVisible": true,
+    "tbmCockpitBelowToolbar": true,
+    "tbmRawTextareaSecondary": true,
+    "riskRowHeaderAndHazardStillVisible": true,
+    "providerOrExportContractsChanged": false
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"puts the core launcher before the mobile editor\" --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 2
+    },
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"canonical risk rows|incomplete new risk row|locks structured editing|row identity|bounds the default documents route editor|puts the core launcher before the mobile editor|keeps the editor workspace and expanded tools contained\" --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 8
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    }
+  ],
+  "remainingDebt": [
+    "Full 12-document field-first authoring is still open.",
+    "Work plan, permit, education, emergency, photo, and multilingual documents still need first-task cockpit or field-first surfaces.",
+    "Production live geometry for this TBM slice is not claimed until deployed and probed."
+  ]
+}
