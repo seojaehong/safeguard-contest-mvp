@@ -1,8 +1,9 @@
 # Workpack Editor Structured UX Gate
 
-Checked at: 2026-07-21 01:16 KST  
-Source HEAD before this evidence: $head  
-Branch: $branch
+Checked at: 2026-07-21 01:16 KST
+Source HEAD before this evidence: `2a8baac195bd28f4259ab4b1d4535c7aec6324f6`
+Evidence commit: `3e8e32f800aa8c242edbe43987b9ec5cd32625c8`
+Branch: `chore/recipient-foreign-live-gate-20260720`
 
 ## Verdict
 
@@ -28,14 +29,11 @@ This does not claim every one of the 12 document types is a final bespoke field-
 
 ## Verification
 
-- 
-pm.cmd test -- tests\workpack-risk-rows-editor.test.ts tests\workpack-editor-structured-sections.test.ts --maxWorkers=1 --fileParallelism=false  
+- `npm.cmd test -- tests\workpack-risk-rows-editor.test.ts tests\workpack-editor-structured-sections.test.ts --maxWorkers=1 --fileParallelism=false`
   PASS: 2 files / 11 tests.
-- 
-pm.cmd test -- tests\documents-editor-layout.test.ts -t "edits canonical risk rows" --maxWorkers=1 --fileParallelism=false  
+- `npm.cmd test -- tests\documents-editor-layout.test.ts -t "edits canonical risk rows" --maxWorkers=1 --fileParallelism=false`
   PASS: 1 selected test / 29 skipped.
-- 
-pm.cmd test -- tests\documents-editor-layout.test.ts --maxWorkers=1 --fileParallelism=false  
+- `npm.cmd test -- tests\documents-editor-layout.test.ts --maxWorkers=1 --fileParallelism=false`
   PASS: 1 file / 30 tests.
 
 ## Scope
