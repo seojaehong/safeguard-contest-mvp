@@ -18,6 +18,7 @@ Current `master` and the current production-visible product line are aligned wit
 - Recipient portal and foreign-worker confirmation browser contract
 - `/documents` standalone management density reduction
 - Live generation grounding comparison and DB-harness quality contract probe
+- Application-level tenant-boundary tests and RLS / LLM Wiki approval preflight
 
 This gate does not claim the entire 24h/72h North Star objective is complete. It records that the current high-risk KOSHA/SIF/ontology and terminology boundaries are green on the authoritative code state.
 
@@ -149,6 +150,30 @@ Evidence:
 - `evaluation/live-harness-quality-probe-current-2026-07-20/report.md`
 - `evaluation/live-harness-quality-probe-current-2026-07-20/summary.json`
 
+### RLS / Tenant Boundary Current Gate
+
+Commands:
+
+```powershell
+npm.cmd test -- tests\supabase-tenant-isolation-harness.test.ts tests\workpack-commercial-tenant-hardening.test.ts tests\tenant-harness-memory.test.ts tests\tenant-harness-memory-claw-tool.test.ts tests\mcp-harness-tenant-memory-route.test.ts tests\education-records-tenant-boundary.test.ts tests\dispatch-logs-tenant-boundary.test.ts tests\rls-llm-wiki-approval-preflight.test.ts tests\llm-wiki-rls-approval-packet.test.ts --maxWorkers=1 --fileParallelism=false
+node scripts\rls_llm_wiki_approval_preflight.mjs --output evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20
+```
+
+Result:
+
+- Tenant/RLS application tests: 9 files passed / 9, 82 tests passed / 82
+- Approval preflight: `approval_ready_open`
+- Failed preflight checks: 0
+- Launch readiness: `false`
+- DB mutation performed: `false`
+
+Evidence:
+
+- `evaluation/rls-current-tenant-boundary-gate-2026-07-20/report.md`
+- `evaluation/rls-current-tenant-boundary-gate-2026-07-20/report.json`
+- `evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.md`
+- `evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json`
+
 ### TypeScript
 
 Command:
@@ -189,8 +214,8 @@ The current implementation preserves the accepted product direction:
 
 The broader objective remains active. The next highest-value workstreams are:
 
-1. RLS / tenant-boundary audit follow-through: read-only reports exist, but migration or policy changes still require explicit approval.
-2. Hermes/OpenClaw live runtime readiness: adapter boundaries are green, but service auth, tenant gating, and operator-owned runtime deployment still need live evidence.
-3. Public Reference Corpus / Operator Wiki Export: continue improving review/export surfaces without turning Markdown/wiki into runtime truth.
-4. Remaining page density: continue bringing non-workspace pages toward the compact workspace design.
+1. Hermes/OpenClaw live runtime readiness: adapter boundaries are green, but service auth, tenant gating, and operator-owned runtime deployment still need live evidence.
+2. Public Reference Corpus / Operator Wiki Export: continue improving review/export surfaces without turning Markdown/wiki into runtime truth.
+3. Remaining page density: continue bringing non-workspace pages toward the compact workspace design.
+4. RLS live launch proof: application boundary is green, but live tenant A/B, Storage, service-role, and publication RPC gates remain approval-gated.
 5. Re-run generation comparison after the next production product commit to keep the evidence current.

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "safeclaw-rls-current-tenant-boundary-gate/v1",
+  "checkedAt": "2026-07-20T02:41:34.960Z",
+  "sourceSha": "a888a4681293dcddf72b309af8a5532919d49d62",
+  "verdict": "application_boundary_pass_approval_gated",
+  "dbMutationPerformed": false,
+  "networkOpenedByPreflight": false,
+  "launchReadiness": false,
+  "tests": {
+    "command": "npm.cmd test -- tests\\supabase-tenant-isolation-harness.test.ts tests\\workpack-commercial-tenant-hardening.test.ts tests\\tenant-harness-memory.test.ts tests\\tenant-harness-memory-claw-tool.test.ts tests\\mcp-harness-tenant-memory-route.test.ts tests\\education-records-tenant-boundary.test.ts tests\\dispatch-logs-tenant-boundary.test.ts tests\\rls-llm-wiki-approval-preflight.test.ts tests\\llm-wiki-rls-approval-packet.test.ts --maxWorkers=1 --fileParallelism=false",
+    "testFilesPassed": 9,
+    "testsPassed": 82,
+    "durationSeconds": 7.62,
+    "status": "pass"
+  },
+  "preflight": {
+    "command": "node scripts\\rls_llm_wiki_approval_preflight.mjs --output evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20",
+    "overall": "approval_ready_open",
+    "failedCheckIds": [],
+    "status": "pass"
+  },
+  "approvalsStillOpen": [
+    "authoritative_supabase_project_and_secret_free_catalog_snapshot",
+    "disposable_two_tenant_ab_negative_matrix",
+    "storage_objects_cross_tenant_isolation",
+    "service_role_route_idor_and_state_invariance",
+    "llm_wiki_publication_ddl_rpc_and_grant_approval",
+    "publication_atomicity_idempotency_rollback_and_leak_tests"
+  ]
+}

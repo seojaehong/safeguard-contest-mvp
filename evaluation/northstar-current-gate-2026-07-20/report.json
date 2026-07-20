@@ -48,13 +48,23 @@
       "probeVerdict": "pass",
       "failedContracts": 0,
       "status": "pass"
+    },
+    "rlsTenantBoundary": {
+      "testCommand": "npm.cmd test -- tests\\supabase-tenant-isolation-harness.test.ts tests\\workpack-commercial-tenant-hardening.test.ts tests\\tenant-harness-memory.test.ts tests\\tenant-harness-memory-claw-tool.test.ts tests\\mcp-harness-tenant-memory-route.test.ts tests\\education-records-tenant-boundary.test.ts tests\\dispatch-logs-tenant-boundary.test.ts tests\\rls-llm-wiki-approval-preflight.test.ts tests\\llm-wiki-rls-approval-packet.test.ts --maxWorkers=1 --fileParallelism=false",
+      "testFilesPassed": 9,
+      "testsPassed": 82,
+      "preflightOverall": "approval_ready_open",
+      "failedPreflightChecks": 0,
+      "launchReadiness": false,
+      "dbMutationPerformed": false,
+      "status": "pass_approval_gated"
     }
   },
   "remaining": [
-    "RLS tenant-boundary follow-through requiring explicit approval for migrations",
     "Hermes/OpenClaw live runtime readiness beyond adapter boundary",
     "Operator Wiki Export / Public Reference Corpus maturation",
     "remaining non-workspace page density",
+    "RLS live tenant A/B, Storage, service-role, and publication RPC proof after explicit approval",
     "regeneration comparison after next production product commit"
   ]
 }
