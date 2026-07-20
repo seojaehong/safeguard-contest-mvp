@@ -85,6 +85,7 @@ Result: 55 tests passed.
 - Embedding generation: no.
 - Vector retrieval enablement: no.
 - Raw audit: `evaluation/kosha-guide-approval-current-2026-07-20/report.json`
+- Repair plan: `evaluation/kosha-guide-approval-current-2026-07-20/repair-plan.json`
 
 ## Forbidden Claims
 

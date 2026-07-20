@@ -1,0 +1,1288 @@
+{
+  "schemaVersion": "safeclaw-kosha-guide-repair-plan/v1",
+  "generatedAt": "2026-07-20T06:48:15.839Z",
+  "sourceAudit": "evaluation/kosha-guide-approval-current-2026-07-20/report.json",
+  "decision": "approval_required_before_mutation_or_embedding",
+  "readOnly": true,
+  "dbMutationPerformed": false,
+  "uploadPerformed": false,
+  "embeddingGenerated": false,
+  "dryRunCounts": {
+    "insert": 0,
+    "update": 7,
+    "retire": 1,
+    "unchanged": 1032
+  },
+  "workstreams": [
+    {
+      "id": "provenance_and_status_backfill_dry_run",
+      "mutationAllowedByThisRun": false,
+      "count": 1040,
+      "action": "Backfill official URL, file ID, published date, current/retired status, and content hash.",
+      "exitCriteria": "All active KOSHA Guide rows have official provenance or are quarantined outside active retrieval."
+    },
+    {
+      "id": "body_hydration_or_ocr_review",
+      "mutationAllowedByThisRun": false,
+      "count": 818,
+      "action": "Hydrate source PDF text or attach reviewed OCR body.",
+      "exitCriteria": "Every launch row has non-empty source-grounded body text or is excluded from active retrieval."
+    },
+    {
+      "id": "summary_regeneration",
+      "mutationAllowedByThisRun": false,
+      "count": 822,
+      "action": "Replace fallback or reused summaries with source-grounded summaries.",
+      "exitCriteria": "Fallback-template summaries are zero for active KOSHA Guide retrieval rows."
+    },
+    {
+      "id": "version_state_reconciliation",
+      "mutationAllowedByThisRun": false,
+      "count": 8,
+      "action": "Review official version updates and retired local rows.",
+      "exitCriteria": "Version update/retire dry-run is approved item by item before mutation."
+    },
+    {
+      "id": "control_causality_review",
+      "mutationAllowedByThisRun": false,
+      "count": 71,
+      "action": "Review heuristic-delta and cross-domain operational controls against source bodies.",
+      "exitCriteria": "Controls are source-derived, task-relevant, and cross-domain contamination fixtures pass."
+    },
+    {
+      "id": "retrieval_branch_observation",
+      "mutationAllowedByThisRun": false,
+      "count": 8,
+      "action": "Observe ranked and hybrid production retrieval branches with document reflection checks.",
+      "exitCriteria": "KOSHA evidence and task-specific controls are reflected into documents without generic prose-only matches.",
+      "countSemantics": "scenario-branch pairs, not unique branch names"
+    }
+  ],
+  "rowSets": {
+    "versionUpdates": [
+      {
+        "stableKey": "B-M-7",
+        "officialCode": "B-M-7-2025",
+        "localCode": "B-M-7-2026",
+        "internalPath": "B-M-7-2026 양중기 일반 안전에 관한 기술지원규정.pdf"
+      },
+      {
+        "stableKey": "M-91",
+        "officialCode": "M-91-2012",
+        "localCode": "M-91-2011",
+        "internalPath": "M-91-2011 타워크레인의 지지.pdf"
+      },
+      {
+        "stableKey": "A-46",
+        "officialCode": "A-46-2021",
+        "localCode": "A-46-2018",
+        "internalPath": "A-46-2018 요오드에 대한 작업환경측정·분석 기술지침.pdf"
+      },
+      {
+        "stableKey": "A-48",
+        "officialCode": "A-48-2021",
+        "localCode": "A-48-2018",
+        "internalPath": "A-48-2018 오산화바나듐에 대한 작업환경측정·분석 기술지침.pdf"
+      },
+      {
+        "stableKey": "W-26",
+        "officialCode": "W-26-2023",
+        "localCode": "W-26-2022",
+        "internalPath": "W-26-2022 단체급식시설 환기에 관한 기술지침.pdf"
+      },
+      {
+        "stableKey": "C-C-83",
+        "officialCode": "C-C-83-2020",
+        "localCode": "C-C-83-2026",
+        "internalPath": "C-C-83-2026 가스폭발 예방을 위한 폭연방출구 설치에 관한 기술지원규정.pdf"
+      },
+      {
+        "stableKey": "D-61",
+        "officialCode": "D-61-2018",
+        "localCode": "D-61-2017",
+        "internalPath": "D-61-2017 플레어시스템의 역화방지설비 설계 및 설치에 관한 기술지침.pdf"
+      }
+    ],
+    "retiredRows": [
+      {
+        "stableKey": "W-14",
+        "localCode": "W-14-2022",
+        "internalPath": "W-14-2022_경고표지 작성 지침.pdf",
+        "officialRetired": true
+      }
+    ],
+    "operationalControlReviewRequiredRows": [
+      {
+        "id": "technical-support-01-0033-c-59-2022-지붕공사-안전보건작업-기술지침",
+        "title": "C-59-2022 지붕공사 안전보건작업 기술지침",
+        "initialFlags": [
+          "fall-control-cross-task"
+        ],
+        "removedFlags": [
+          "fall-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fall-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-01-0067-d-c-15-2026-콘크리트-단순-슬래브-포함-안전작업에-관한-기술지원규정",
+        "title": "D-C-15-2026 콘크리트(단순 슬래브 포함) 안전작업에 관한 기술지원규정",
+        "initialFlags": [
+          "forklift-control-cross-task"
+        ],
+        "removedFlags": [
+          "forklift-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "forklift-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-01-0070-d-c-4-2025-굴착기-안전보건작업-기술지원규정",
+        "title": "D-C-4-2025 굴착기 안전보건작업 기술지원규정",
+        "initialFlags": [
+          "forklift-control-cross-task"
+        ],
+        "removedFlags": [
+          "forklift-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "forklift-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-02-0010-b-m-16-2026-기계식-주차장치의-안전에-관한-기술지원규정",
+        "title": "B-M-16-2026 기계식 주차장치의 안전에 관한 기술지원규정",
+        "initialFlags": [
+          "forklift-control-cross-task"
+        ],
+        "removedFlags": [
+          "forklift-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "forklift-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-02-0017-b-m-22-2026-생활폐기물-수거차량의-구조-등에-관한-기술지원규정",
+        "title": "B-M-22-2026 생활폐기물 수거차량의 구조 등에 관한 기술지원규정",
+        "initialFlags": [
+          "forklift-control-cross-task"
+        ],
+        "removedFlags": [
+          "forklift-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "forklift-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-02-0018-b-m-23-2026-송풍기의-유지보수에-관한-기술지원규정",
+        "title": "B-M-23-2026 송풍기의 유지보수에 관한 기술지원규정",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-02-0024-b-m-29-2026-자동차-안전작업에-대한-기술지원규정",
+        "title": "B-M-29-2026 자동차 안전작업에 대한 기술지원규정",
+        "initialFlags": [
+          "forklift-control-cross-task"
+        ],
+        "removedFlags": [
+          "forklift-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "forklift-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-03-0008-x-36-2016-이삿짐운반용-리프트작업의-리스크-확인지침",
+        "title": "X-36-2016 이삿짐운반용 리프트작업의 리스크 확인지침",
+        "initialFlags": [
+          "forklift-control-cross-task"
+        ],
+        "removedFlags": [
+          "forklift-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "forklift-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-04-0010-h-147-2021-특별관리물질-취급-근로자의-작업환경관리-지침",
+        "title": "H-147-2021 특별관리물질 취급 근로자의 작업환경관리 지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-04-0011-h-158-2021-물질안전보건자료-교육실시에-관한-지침",
+        "title": "H-158-2021 물질안전보건자료 교육실시에 관한 지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-04-0026-t-3-2015-제조나노물질의-건강-유해성시험-시료의-적정용량-조제를-위한-해설지침",
+        "title": "T-3-2015 제조나노물질의 건강 유해성시험 시료의 적정용량 조제를 위한 해설지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-04-0028-t-32-2021-시험동물의-기관지-폐포-세척액-검사-지침",
+        "title": "T-32-2021 시험동물의 기관지·폐포 세척액 검사 지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-04-0037-w-15-2020-물질안전보건자료-작성-지침",
+        "title": "W-15-2020 물질안전보건자료 작성 지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-04-0039-w-2-2021-물질안전보건자료의-신뢰성-평가-지침",
+        "title": "W-2-2021 물질안전보건자료의 신뢰성 평가 지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-05-0006-e-g-11-2026-공기잠수-감압에-관한-기술지원규정",
+        "title": "E-G-11-2026 공기잠수 감압에 관한 기술지원규정",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-05-0007-e-g-12-2026-잠수용-기압조절실을-이용한-치료표-운용에-관한-기술지원규정",
+        "title": "E-G-12-2026 잠수용 기압조절실을 이용한 치료표 운용에 관한 기술지원규정",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-05-0008-e-g-13-2026-잠수용-호흡기체의-질-및-분압에-관한-기술지원규정",
+        "title": "E-G-13-2026 잠수용 호흡기체의 질 및 분압에 관한 기술지원규정",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-05-0009-e-g-14-2026-잠수기어업-표면공급식-잠수작업에-관한-기술지원규정",
+        "title": "E-G-14-2026 잠수기어업 표면공급식 잠수작업에 관한 기술지원규정",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-05-0012-e-g-17-2026-생식독성물질-취급-사업장의-보건관리에-관한-기술지원규정",
+        "title": "E-G-17-2026 생식독성물질 취급 사업장의 보건관리에 관한 기술지원규정",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-05-0016-e-g-20-2026-건축물-등의-석면조사에-관한-기술지원규정",
+        "title": "E-G-20-2026 건축물 등의 석면조사에 관한 기술지원규정",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-05-0017-e-g-21-2026-산업환기설비에-관한-기술지원규정",
+        "title": "E-G-21-2026 산업환기설비에 관한 기술지원규정",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-05-0021-e-g-4-2025-근골격계질환-예방을-위한-업종직종별-기술지원규정",
+        "title": "E-G-4-2025 근골격계질환 예방을 위한 업종직종별 기술지원규정",
+        "initialFlags": [
+          "forklift-control-cross-task"
+        ],
+        "removedFlags": [
+          "forklift-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "forklift-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-05-0023-e-g-6-2025-건강한-사무환경-구축-기술지원규정",
+        "title": "E-G-6-2025 건강한 사무환경 구축 기술지원규정",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-05-0025-e-g-8-2026-잠수용-기압조절실에-관한-기술지원규정",
+        "title": "E-G-8-2026 잠수용 기압조절실에 관한 기술지원규정",
+        "initialFlags": [
+          "confined-space-control-cross-task",
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task",
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task",
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-05-0028-g-34-2012-도기-생산-시-건강-유해물질-관리-기술지침",
+        "title": "G-34-2012 도기 생산 시 건강 유해물질 관리 기술지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-05-0030-g-41-2012-훈증작업-시-유해물질의-관리에-관한-기술지침",
+        "title": "G-41-2012 훈증작업 시 유해물질의 관리에 관한 기술지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-05-0040-h-115-2013-시안화수소-노출-사업장의-중독-예방-및-응급대응-지침",
+        "title": "H-115-2013 시안화수소 노출 사업장의 중독 예방 및 응급대응 지침",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-05-0041-h-116-2019-이산화질소-노출-사업장의-중독-예방-및-응급대응-지침",
+        "title": "H-116-2019 이산화질소 노출 사업장의 중독 예방 및 응급대응 지침",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-05-0042-h-117-2019-황화수소-취급근로자의-중독예방-및-응급대응-지침",
+        "title": "H-117-2019 황화수소 취급근로자의 중독예방 및 응급대응 지침",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-05-0048-h-123-2013-불산-불화수소-취급근로자의-중독예방-및-응급대응-지침",
+        "title": "H-123-2013 불산·불화수소 취급근로자의 중독예방 및 응급대응 지침",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-05-0057-h-175-2015-환경미화원-종사-사업장의-세척시설에-관한-기술지침",
+        "title": "H-175-2015 환경미화원 종사 사업장의 세척시설에 관한 기술지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-06-0009-a-g-17-2026-인력운반작업에-관한-기술지원규정",
+        "title": "A-G-17-2026 인력운반작업에 관한 기술지원규정",
+        "initialFlags": [
+          "forklift-control-cross-task"
+        ],
+        "removedFlags": [
+          "forklift-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "forklift-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-06-0010-a-g-18-2026-항만하역작업-안전에-관한-기술지원규정",
+        "title": "A-G-18-2026 항만하역작업 안전에 관한 기술지원규정",
+        "initialFlags": [
+          "forklift-control-cross-task"
+        ],
+        "removedFlags": [
+          "forklift-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "forklift-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-06-0023-g-10-2023-작업장-내-운반차량의-운행에-관한-안전지침",
+        "title": "G-10-2023 작업장 내 운반차량의 운행에 관한 안전지침",
+        "initialFlags": [
+          "forklift-control-cross-task"
+        ],
+        "removedFlags": [
+          "forklift-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "forklift-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-06-0025-g-101-2013-운송용-차량에서의-작업-시-떨어짐-사고를-방지하기-위한-기술지침",
+        "title": "G-101-2013 운송용 차량에서의 작업 시 떨어짐 사고를 방지하기 위한 기술지침",
+        "initialFlags": [
+          "forklift-control-cross-task"
+        ],
+        "removedFlags": [
+          "forklift-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "forklift-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-06-0046-g-24-2011-기계류의-방사성-물질로부터-위험을-줄이기-위한-안전가이드",
+        "title": "G-24-2011 기계류의 방사성 물질로부터 위험을 줄이기 위한 안전가이드",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-06-0051-g-4-2011-배관내-이송물질-표시에-관한-안전가이드",
+        "title": "G-4-2011 배관내 이송물질 표시에 관한 안전가이드",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-06-0052-g-40-2012-해상운송을-위한-포장-운반-및-선적에-관한-기술지침",
+        "title": "G-40-2012 해상운송을 위한 포장·운반 및 선적에 관한 기술지침",
+        "initialFlags": [
+          "forklift-control-cross-task"
+        ],
+        "removedFlags": [
+          "forklift-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "forklift-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-06-0058-g-55-2012-차량경정비작업안전에관한기술지침",
+        "title": "G-55-2012 차량경정비작업안전에관한기술지침",
+        "initialFlags": [
+          "forklift-control-cross-task"
+        ],
+        "removedFlags": [
+          "forklift-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "forklift-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-06-0074-g-9-2013-위험물질-취급작업장-위험표시에-관한-기술지침",
+        "title": "G-9-2013 위험물질 취급작업장 위험표시에 관한 기술지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-06-0075-g-90-2015-운반구에-관한-안전지침",
+        "title": "G-90-2015 운반구에 관한 안전지침",
+        "initialFlags": [
+          "forklift-control-cross-task"
+        ],
+        "removedFlags": [
+          "forklift-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "forklift-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-07-0062-a-161-2016-디젤입자상물질-원소탄소분석-에-대한-작업환경측정-분석-기술지침",
+        "title": "A-161-2016 디젤입자상물질(원소탄소분석)에 대한 작업환경측정·분석 기술지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-07-0169-w-20-2012-나노물질-제조취급-근로자-안전보건기술지침",
+        "title": "W-20-2012 나노물질 제조취급 근로자 안전보건기술지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-07-0171-w-24-2017-공기-중-제조나노물질의-노출평가에-대한-기술지침",
+        "title": "W-24-2017 공기 중 제조나노물질의 노출평가에 대한 기술지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-08-0018-h-141-2021-크롬의-생물학적-노출지표-물질-분석에-관한-기술지침",
+        "title": "H-141-2021 크롬의 생물학적 노출지표 물질 분석에 관한 기술지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-08-0021-h-148-2021-오산화바나듐의-생물학적-노출지표-물질-분석에-관한-기술지침",
+        "title": "H-148-2021_오산화바나듐의 생물학적 노출지표 물질 분석에 관한 기술지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-08-0022-h-149-2021-망간의-생물학적-노출지표-물질-분석에-관한-기술지침",
+        "title": "H-149-2021_망간의 생물학적 노출지표 물질 분석에 관한 기술지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-08-0023-h-15-2021-수은의생물학적노출지표물질분석에관한지침",
+        "title": "H-15-2021 수은의생물학적노출지표물질분석에관한지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-08-0024-h-152-2021-질산의-생물학적-노출지표-물질-분석에-관한-기술지침",
+        "title": "H-152-2021_질산의 생물학적 노출지표 물질 분석에 관한 기술지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-08-0025-h-16-2021-불화수소의생물학적노출지표물질분석에관한지침",
+        "title": "H-16-2021 불화수소의생물학적노출지표물질분석에관한지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-08-0026-h-17-2021-카드뮴의생물학적노출지표물질분석에관한지침",
+        "title": "H-17-2021 카드뮴의생물학적노출지표물질분석에관한지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-08-0027-h-180-2021-직업성-메틸알코올-급성중독-진료지침",
+        "title": "H-180-2021_직업성 메틸알코올 급성중독 진료지침",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-08-0028-h-181-2021-직업성-염소-급성중독-진료지침",
+        "title": "H-181-2021_직업성 염소 급성중독 진료지침",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-08-0029-h-182-2021-직업성-포름산-formic-acid-급성중독-진료지침",
+        "title": "H-182-2021__직업성 포름산(Formic Acid) 급성중독 진료지침",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-08-0030-h-183-2021-직업성-에틸렌글리콜-급성중독-진료지침",
+        "title": "H-183-2021_직업성 에틸렌글리콜 급성중독 진료지침",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-08-0031-h-184-2021-직업성-산화에틸렌-급성중독-진료지침",
+        "title": "H-184-2021_직업성 산화에틸렌 급성중독 진료지침",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-08-0044-h-209-2022-인듐의-생물학적-노출지표-물질분석-기술지침",
+        "title": "H-209-2022_인듐의 생물학적 노출지표 물질분석 기술지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-08-0045-h-21-2021-납의생물학적노출지표물질분석에관한지침",
+        "title": "H-21-2021 납의생물학적노출지표물질분석에관한지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-08-0057-h-44-2021-호흡기-감작물질-노출근로자의-보건관리-지침",
+        "title": "H-44-2021 호흡기 감작물질 노출근로자의 보건관리 지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-08-0065-h-51-2021-피부감작물질-노출-근로자의-보건관리-지침",
+        "title": "H-51-2021 피부감작물질 노출 근로자의 보건관리 지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-08-0081-h-99-2023-일산화탄소의-생물학적-노출지표물질-분석에-관한-기술지침",
+        "title": "H-99-2023 일산화탄소의 생물학적 노출지표물질 분석에 관한 기술지침",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-09-0005-b-e-13-2026-수변전설비에-관한-기술지원규정",
+        "title": "B-E-13-2026 수변전설비에 관한 기술지원규정",
+        "initialFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "removedFlags": [
+          "fire-chemical-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "fire-chemical-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-10-0084-c-c-85-2026-불활성가스-치환에-관한-기술지원규정",
+        "title": "C-C-85-2026 불활성가스 치환에 관한 기술지원규정",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-10-0136-k-1-2023-유해화학물질-저장-운반-및-취급에-관한-기술지침",
+        "title": "K-1-2023 유해화학물질 저장 운반 및 취급에 관한 기술지침",
+        "initialFlags": [
+          "forklift-control-cross-task"
+        ],
+        "removedFlags": [
+          "forklift-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "forklift-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-10-0159-p-137-2018-산소감지경보기-등의-설치-및-보수에-관한-기술지침",
+        "title": "P-137-2018 산소감지경보기 등의 설치 및 보수에 관한 기술지침",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-10-0160-p-138-2013-산소-과잉-분위기의-화재-위험성-및-방지대책에-관한-기술지침",
+        "title": "P-138-2013 산소 과잉 분위기의 화재 위험성 및 방지대책에 관한 기술지침",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-10-0170-p-159-2017-산소-및-불활성-기체-대기-벤트-설계에-관한-기술지침",
+        "title": "P-159-2017 산소 및 불활성 기체 대기 벤트 설계에 관한 기술지침",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-10-0179-p-170-2021-산소-배관-및-배관설비에-관한-기술지침",
+        "title": "P-170-2021 산소 배관 및 배관설비에 관한 기술지침",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-10-0196-p-31-2012-인화성-액체-이송용-탱크-차량의-안전에-관한-기술지침",
+        "title": "P-31-2012 인화성 액체 이송용 탱크 차량의 안전에 관한 기술지침",
+        "initialFlags": [
+          "forklift-control-cross-task"
+        ],
+        "removedFlags": [
+          "forklift-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "forklift-control-cross-task"
+        ]
+      },
+      {
+        "id": "technical-support-10-0197-p-32-2012-산소공급설비의-안전기술지침",
+        "title": "P-32-2012 산소공급설비의 안전기술지침",
+        "initialFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "removedFlags": [
+          "confined-space-control-cross-task"
+        ],
+        "unlabelledFlags": [
+          "confined-space-control-cross-task"
+        ]
+      }
+    ],
+    "operationalControlSecondaryCandidateRows": [
+      {
+        "id": "technical-support-01-0018-c-27-2011-낙하물-방호선반-설치-지침",
+        "title": "C-27-2011 낙하물 방호선반 설치 지침",
+        "flags": [
+          "machinery-control-cross-task"
+        ],
+        "controls": [
+          "가동부 방호덮개 설치 및 비상정지장치 작동 확인",
+          "정비 전 전원 차단 및 잠금표지(LOTO)"
+        ]
+      }
+    ],
+    "duplicateSummaryGroups": [
+      {
+        "summary": "산업위생분야 분야의 KOSHA 기술지원규정 또는 안전보건 기술지침 자료입니다.",
+        "rowCount": 170,
+        "sampleIds": [
+          "technical-support-07-0001-a-1-2018-구리에-대한-작업환경측정-분석-기술지침",
+          "technical-support-07-0002-a-102-2018-황산디메틸에-대한-작업환경측정-분석-기술지침-개정",
+          "technical-support-07-0003-a-103-2018-요오드화메틸에-대한-작업환경측정-분석-기술지침"
+        ],
+        "templateFallback": true,
+        "nonEmptyBodyRows": 0
+      },
+      {
+        "summary": "화학안전분야 분야의 KOSHA 기술지원규정 또는 안전보건 기술지침 자료입니다.",
+        "rowCount": 140,
+        "sampleIds": [
+          "technical-support-10-0095-d-1-2021-미압-배관-등에서의-폭연-방산구-설치에-관한-기술지침",
+          "technical-support-10-0096-d-12-2012-분진폭발방지에-관한-기술지침",
+          "technical-support-10-0097-d-13-2012-염소저장설비에-관한-기술지침"
+        ],
+        "templateFallback": true,
+        "nonEmptyBodyRows": 0
+      },
+      {
+        "summary": "기계안전분야 분야의 KOSHA 기술지원규정 또는 안전보건 기술지침 자료입니다.",
+        "rowCount": 106,
+        "sampleIds": [
+          "technical-support-02-0001-b-5-2011-조선업-안전점검-기술지침",
+          "technical-support-02-0002-b-6-2011-부선-안전작업-기술지침",
+          "technical-support-02-0004-b-m-10-2025-화학설비의-설치에-관한-기술지원규정"
+        ],
+        "templateFallback": true,
+        "nonEmptyBodyRows": 0
+      },
+      {
+        "summary": "전기안전분야 분야의 KOSHA 기술지원규정 또는 안전보건 기술지침 자료입니다.",
+        "rowCount": 78,
+        "sampleIds": [
+          "technical-support-09-0001-b-e-1-2025-피뢰시스템에-관한-기술지원규정",
+          "technical-support-09-0016-b-e-3-2025-변전실-등의-양압유지에-관한-기술지원규정",
+          "technical-support-09-0018-b-e-5-2025-비상전원의-선정-및-설치에-관한-기술지원규정"
+        ],
+        "templateFallback": true,
+        "nonEmptyBodyRows": 0
+      },
+      {
+        "summary": "산업의학분야 분야의 KOSHA 기술지원규정 또는 안전보건 기술지침 자료입니다.",
+        "rowCount": 73,
+        "sampleIds": [
+          "technical-support-08-0009-h-129-2023-폐활량검사-및-판정에-관한-지침",
+          "technical-support-08-0010-h-130-2021-접촉피부염의-작업관련성-평가지침",
+          "technical-support-08-0011-h-132-2023-벤젠-노출-근로자의-건강관리지침"
+        ],
+        "templateFallback": true,
+        "nonEmptyBodyRows": 0
+      },
+      {
+        "summary": "산업안전일반분야 분야의 KOSHA 기술지원규정 또는 안전보건 기술지침 자료입니다.",
+        "rowCount": 67,
+        "sampleIds": [
+          "technical-support-06-0014-a-g-3-2025-오토바이-배달작업-시-안전에-관한-기술지원규정",
+          "technical-support-06-0019-a-g-8-2025-산업재해-기록-분류에-관한-기술지원규정",
+          "technical-support-06-0020-a-g-9-2025-창고-작업-시-안전에-관한-기술지원규정"
+        ],
+        "templateFallback": true,
+        "nonEmptyBodyRows": 0
+      },
+      {
+        "summary": "건설안전분야 분야의 KOSHA 기술지원규정 또는 안전보건 기술지침 자료입니다.",
+        "rowCount": 61,
+        "sampleIds": [
+          "technical-support-01-0001-c-05-2016-건설공사-돌관작업-안전보건작업-지침",
+          "technical-support-01-0002-c-06-2015-타일-tile-공사-안전보건작업-지침",
+          "technical-support-01-0003-c-07-2012-시트-sheet-방수-안전보건작업-지침"
+        ],
+        "templateFallback": true,
+        "nonEmptyBodyRows": 0
+      },
+      {
+        "summary": "산업보건일반분야 분야의 KOSHA 기술지원규정 또는 안전보건 기술지침 자료입니다.",
+        "rowCount": 60,
+        "sampleIds": [
+          "technical-support-05-0001-a-10-2018-알루미늄에대한작업환경측정-분석기술지침",
+          "technical-support-05-0002-a-100-2018-디메틸아닐린에-대한-작업환경측정-분석-기술지침-개정",
+          "technical-support-05-0003-a-101-2018-테트라하이드로퓨란에-대한-작업환경측정-분석-기술지침-개정"
+        ],
+        "templateFallback": true,
+        "nonEmptyBodyRows": 0
+      },
+      {
+        "summary": "산업독성분야 분야의 KOSHA 기술지원규정 또는 안전보건 기술지침 자료입니다.",
+        "rowCount": 35,
+        "sampleIds": [
+          "technical-support-04-0010-h-147-2021-특별관리물질-취급-근로자의-작업환경관리-지침",
+          "technical-support-04-0011-h-158-2021-물질안전보건자료-교육실시에-관한-지침",
+          "technical-support-04-0012-h-81-2021-화학물질의-유해성-평가를-위한-유전독성시험에-관한-기술지침"
+        ],
+        "templateFallback": true,
+        "nonEmptyBodyRows": 0
+      },
+      {
+        "summary": "리스크관리분야 분야의 KOSHA 기술지원규정 또는 안전보건 기술지침 자료입니다.",
+        "rowCount": 28,
+        "sampleIds": [
+          "technical-support-03-0004-p-79-2011-기계공장에-대한-위험과-운전분석기법-m-hazop",
+          "technical-support-03-0005-x-27-2012-화학물질-리스크관리를-위한-작업공정별-관리요령의-활용에-관한-지침",
+          "technical-support-03-0006-x-34-2014-공정수명-단계별-리스크-평가-기법의-선정에-관한-지침"
+        ],
+        "templateFallback": true,
+        "nonEmptyBodyRows": 0
+      },
+      {
+        "summary": "ㆍ",
+        "rowCount": 4,
+        "sampleIds": [
+          "technical-support-02-0014-b-m-2-2025-혼합기의-안전작업에-관한-기술지원규정",
+          "technical-support-06-0017-a-g-6-2025-학교-급식실-근로자의-안전보건에-관한-기술지원규정",
+          "technical-support-06-0018-a-g-7-2025-공동주택-경비근로자의-관리업무-보조작업-시-안전에-관한-기술지원규정"
+        ],
+        "templateFallback": false,
+        "nonEmptyBodyRows": 4
+      }
+    ],
+    "untestedRetrievalBranches": [
+      "exterior-paint/ranked",
+      "exterior-paint/hybrid",
+      "confined-pump/ranked",
+      "confined-pump/hybrid",
+      "forklift-traffic/ranked",
+      "forklift-traffic/hybrid",
+      "electrostatic-paint/ranked",
+      "electrostatic-paint/hybrid"
+    ],
+    "downstreamReflectionFailures": [
+      {
+        "scenarioId": "exterior-paint",
+        "branch": "rest",
+        "executionStatus": "tested",
+        "failures": [
+          "missing-kosha-evidence:B-E-17-2026",
+          "missing-kosha-evidence:D-C-13-2026",
+          "missing-control-term:도료",
+          "missing-control-term:유기용제",
+          "missing-control-term:작업발판",
+          "missing-control-term:안전대"
+        ]
+      },
+      {
+        "scenarioId": "exterior-paint",
+        "branch": "ranked",
+        "executionStatus": "untested",
+        "failures": [
+          "branch-not-executed:ranked"
+        ]
+      },
+      {
+        "scenarioId": "exterior-paint",
+        "branch": "hybrid",
+        "executionStatus": "untested",
+        "failures": [
+          "branch-not-executed:hybrid"
+        ]
+      },
+      {
+        "scenarioId": "confined-pump",
+        "branch": "rest",
+        "executionStatus": "tested",
+        "failures": [
+          "missing-kosha-evidence:E-G-18-2026"
+        ]
+      },
+      {
+        "scenarioId": "confined-pump",
+        "branch": "ranked",
+        "executionStatus": "untested",
+        "failures": [
+          "branch-not-executed:ranked"
+        ]
+      },
+      {
+        "scenarioId": "confined-pump",
+        "branch": "hybrid",
+        "executionStatus": "untested",
+        "failures": [
+          "branch-not-executed:hybrid"
+        ]
+      },
+      {
+        "scenarioId": "forklift-traffic",
+        "branch": "rest",
+        "executionStatus": "tested",
+        "failures": [
+          "missing-kosha-evidence:B-M-11-2025",
+          "missing-control-term:보행자"
+        ]
+      },
+      {
+        "scenarioId": "forklift-traffic",
+        "branch": "ranked",
+        "executionStatus": "untested",
+        "failures": [
+          "branch-not-executed:ranked"
+        ]
+      },
+      {
+        "scenarioId": "forklift-traffic",
+        "branch": "hybrid",
+        "executionStatus": "untested",
+        "failures": [
+          "branch-not-executed:hybrid"
+        ]
+      },
+      {
+        "scenarioId": "electrostatic-paint",
+        "branch": "rest",
+        "executionStatus": "tested",
+        "failures": [
+          "missing-kosha-evidence:B-E-20-2026",
+          "missing-control-term:정전기",
+          "missing-control-term:접지",
+          "missing-control-term:방폭"
+        ]
+      },
+      {
+        "scenarioId": "electrostatic-paint",
+        "branch": "ranked",
+        "executionStatus": "untested",
+        "failures": [
+          "branch-not-executed:ranked"
+        ]
+      },
+      {
+        "scenarioId": "electrostatic-paint",
+        "branch": "hybrid",
+        "executionStatus": "untested",
+        "failures": [
+          "branch-not-executed:hybrid"
+        ]
+      }
+    ]
+  },
+  "approvalGate": {
+    "mutationAllowedByThisRun": false,
+    "requiredBeforeMutation": "explicit user approval after reviewed per-item dry-run",
+    "requiredBeforeEmbedding": "official provenance/body/control/retrieval branch blockers closed"
+  }
+}

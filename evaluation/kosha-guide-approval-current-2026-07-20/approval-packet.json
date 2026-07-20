@@ -3,6 +3,7 @@
   "generatedAt": "2026-07-20T06:42:00.000Z",
   "head": "3a6b9f4e25739954ba3b89c0b9d067ff52a28ef2",
   "sourceAudit": "evaluation/kosha-guide-approval-current-2026-07-20/report.json",
+  "repairPlan": "evaluation/kosha-guide-approval-current-2026-07-20/repair-plan.json",
   "decision": "approval_required_before_mutation_or_embedding",
   "currentSafeClaim": "KOSHA exact trust pins and Phase A materialization are proven; full 1040-row KOSHA Guide corpus is not yet launch-ready for authoritative grounding or embedding.",
   "dbMutationPerformed": false,
@@ -151,6 +152,13 @@
       "mutationAllowedByThisRun": false
     }
   ],
+  "repairPlanGate": {
+    "artifact": "evaluation/kosha-guide-approval-current-2026-07-20/repair-plan.json",
+    "workstreams": 6,
+    "dryRunUpdates": 7,
+    "dryRunRetirements": 1,
+    "mutationAllowedByThisRun": false
+  },
   "verifiedCommands": [
     {
       "command": "node scripts\\audit_kosha_guides.mjs --output-dir evaluation\\kosha-guide-approval-current-2026-07-20 --env-file <secret-env-file>",
