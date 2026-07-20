@@ -1,7 +1,7 @@
 # Live Critical Surface Current Rerun
 
-- Checked: 2026-07-20T06:13:28.637Z
-- Build marker: 157e081e2b539ad93264b8f2496f414a4430429f
+- Checked: 2026-07-20T08:01:48.403Z
+- Build marker: b6e4113ba145644b4716535863747aa9e72adec3
 - Findings: 0
 
 ## Findings
@@ -17,7 +17,7 @@ None.
 | /why | desktop | 200 | 1142 (1.27x) | no | 0 | 5 | - |
 | /ontology | desktop | 200 | 2077 (2.31x) | no | 0 | 8 | - |
 | /knowledge | desktop | 200 | 5325 (5.92x) | no | 0 | 8 | - |
-| /documents | desktop | 200 | 2286 (2.54x) | no | 0 | 32 | - |
+| /documents | desktop | 200 | 1698 (1.89x) | no | 0 | 32 | - |
 | /reports | desktop | 200 | 900 (1x) | no | 0 | 0 | - |
 | /share/not-a-session?lang=vi | desktop | 200 | 900 (1x) | no | 0 | 6 | - |
 | / | mobile | 200 | 2785 (3.3x) | no | 0 | 6 | - |
@@ -25,6 +25,6 @@ None.
 | /why | mobile | 200 | 2727 (3.23x) | no | 0 | 0 | - |
 | /ontology | mobile | 200 | 2893 (3.43x) | no | 0 | 0 | - |
 | /knowledge | mobile | 200 | 1152 (1.36x) | no | 0 | 0 | - |
-| /documents | mobile | 200 | 2525 (2.99x) | no | 0 | 3 | - |
+| /documents | mobile | 200 | 1816 (2.15x) | no | 0 | 3 | - |
 | /reports | mobile | 200 | 844 (1x) | no | 0 | 0 | - |
 | /share/not-a-session?lang=vi | mobile | 200 | 855 (1.01x) | no | 0 | 0 | - |

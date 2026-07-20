@@ -19725,6 +19725,12 @@ body:has(.safeclaw-landing) :is(
   box-shadow: none;
 }
 
+.command-center-shell .field-workspace-editor-focus .workpack-sidebar {
+  position: static;
+  top: auto;
+  align-self: start;
+}
+
 @media (max-width: 1180px) {
   .command-center-shell.workspace-theme-night .field-workspace .workpack-shell {
     grid-template-columns: 1fr;
