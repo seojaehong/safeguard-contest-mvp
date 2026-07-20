@@ -1,0 +1,28 @@
+{
+  "verdict": "pass",
+  "date": "2026-07-20",
+  "localHeadBeforeReport": "e9620ad5",
+  "scope": {
+    "route": "/workspace",
+    "surface": "share-step",
+    "productCodeChanged": false
+  },
+  "verification": {
+    "command": "npm.cmd test -- tests\\workflow-share-capability-browser.test.ts tests\\workspace-share-mobile-browser.test.ts tests\\share-recipient-portal-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+    "testFilesPassed": 2,
+    "testFilesSkipped": 1,
+    "testFilesTotal": 3,
+    "testsPassed": 4,
+    "testsSkipped": 5,
+    "testsTotal": 9,
+    "durationSeconds": 82.2,
+    "status": "pass"
+  },
+  "contracts": {
+    "singlePrimaryCta": "pass",
+    "vietnamesePreview": "pass",
+    "desktopMobileDayNightScreenshots": "pass",
+    "providerContainment": "pass",
+    "recipientPortalProductionGate": "not_claimed_skipped"
+  }
+}
