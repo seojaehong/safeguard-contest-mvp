@@ -1,6 +1,6 @@
 # Workspace Documents / Share Production Gate
 
-Checked at: 2026-07-20 KST
+Checked at: 2026-07-20T06:30:32.287Z
 
 ## Verdict
 
@@ -17,10 +17,10 @@ If the old behavior is still visible, the likely cause is stale local server, st
 
 - URL: `https://www.safeclaw.kr/workspace`
 - Build info source: `https://www.safeclaw.kr/api/build-info`
-- Commit: `8f77334b23345ae119caf50177ef1468e12fa727`
+- Commit: `42df140bf9889c89147dec962e6f76e6446f0427`
 - Branch: `master`
 - Environment: `production`
-- Deployment URL: `safeguard-contest-nagbh7nom-seojaehongs-projects.vercel.app`
+- Deployment URL: `safeguard-contest-ro78y7g5u-seojaehongs-projects.vercel.app`
 
 ## Flow Tested
 
@@ -35,21 +35,24 @@ Browser path:
 3. Fill the work description.
 4. Click `안전 문서 생성`.
 5. Wait for `.workspace-document-page`.
-6. Open the workspace menu and click `공유`.
-7. Wait for `.workspace-share-page`.
+6. Wait for `12/12 생성` or `안전 문서팩 3종 준비 완료` before measuring the documents screen.
+7. Open the workspace menu and click `공유`.
+8. Wait for `.workspace-share-page`.
 
 ## Geometry Metrics
 
 | Variant | Stage | Viewport | Page height | Stage y | Stage height | Stage width | Horizontal overflow | Outside elements | Primary share CTA |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Desktop Day | Documents | 1440x900 | 1149 | 229 | 800 | - | false | 0 | 0 |
+| Desktop Day | Documents | 1440x900 | 1147 | 229 | 798 | - | false | 0 | 0 |
 | Desktop Day | Share | 1440x900 | 1174 | - | 921 | 1180 | false | 0 | 1 |
 | Mobile Day | Documents | 390x844 | 1417 | 262 | 1050 | - | false | 0 | 0 |
 | Mobile Day | Share | 390x844 | 1487 | - | 1138 | 336 | false | 0 | 1 |
 
 ## Interpretation
 
-The reference-session failure measured approximately 2070px document height on a 723px viewport, about 2.9x one viewport, with stacked sticky regions. Current production desktop documents measured 1149px on a 900px viewport, about 1.28x, and mobile documents measured 1417px on an 844px viewport, about 1.68x. This is no longer the same launch-blocking geometry.
+The reference-session failure measured approximately 2070px document height on a 723px viewport, about 2.9x one viewport, with stacked sticky regions. Current production desktop documents measured 1147px on a 900px viewport, about 1.27x, and mobile documents measured 1417px on an 844px viewport, about 1.68x. This is no longer the same launch-blocking geometry.
+
+The documents measurement now waits for the generated state. The latest run records `생성 중=false`, `생성 대기=false`, and ready state present for both desktop and mobile document stages.
 
 Share desktop now opens a 1180px-wide production surface. That is a desktop-width composition rather than a narrow mobile card.
 

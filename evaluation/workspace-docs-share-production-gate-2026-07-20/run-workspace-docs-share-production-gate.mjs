@@ -97,6 +97,7 @@ for (const variant of variants) {
     await textarea.fill(inputText);
     await page.getByRole("button", { name: /안전 문서 생성/u }).click();
     await page.locator(".workspace-document-page").waitFor({ state: "visible", timeout: 60_000 });
+    await page.getByText(/12\/12 생성|안전 문서팩 3종 준비 완료/u).first().waitFor({ timeout: 60_000 });
     const documentStage = await measure(page, variant, "documents");
 
     const shareButton = page.getByLabel("작업공간 메뉴").getByRole("button").filter({ hasText: "공유" });
