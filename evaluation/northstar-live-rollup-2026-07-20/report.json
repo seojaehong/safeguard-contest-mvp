@@ -1,12 +1,12 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v1",
-  "generatedAt": "2026-07-20T05:50:55.000Z",
-  "head": "472f681bc12bf61b2fd7fd02668cd1ef3bd574db",
+  "generatedAt": "2026-07-20T05:56:40.000Z",
+  "head": "6ae80d47019409168c50ecd75e97c634dfc12461",
   "liveBuildInfo": {
-    "commitSha": "472f681bc12bf61b2fd7fd02668cd1ef3bd574db",
+    "commitSha": "6ae80d47019409168c50ecd75e97c634dfc12461",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ls5s6nmwb-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-4cyl22e3f-seojaehongs-projects.vercel.app"
   },
   "overall": "northstar_open_approval_gated",
   "dbMutationPerformed": false,
@@ -20,9 +20,12 @@
     },
     {
       "id": "kosha_materialization",
-      "artifact": "evaluation/kosha-live-materialization-2026-07-20/report.json",
+      "artifact": "evaluation/kosha-materialization-current-gate-2026-07-20/report.json",
       "result": "pass",
-      "findingCount": 0
+      "testFilesPassed": 9,
+      "testsPassed": 169,
+      "pythonTestsPassed": 19,
+      "typecheck": "pass"
     },
     {
       "id": "kosha_exact_trust_registry",

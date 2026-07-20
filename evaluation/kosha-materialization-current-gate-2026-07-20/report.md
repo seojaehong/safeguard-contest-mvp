@@ -1,8 +1,8 @@
 # KOSHA / Phase A Materialization Current Gate
 
-- Checked at: 2026-07-20 KST
-- Git HEAD: `d7227e55d52fedcece292af70584012491659976`
-- Branch: `fix/kosha-materialization-20260720`
+- Checked at: 2026-07-20T05:56:40.000Z
+- Git HEAD: `6ae80d47019409168c50ecd75e97c634dfc12461`
+- Branch: `chore/recipient-foreign-live-gate-20260720`
 - Scope: KOSHA exact trust registry, KOSHA applicability, fail-closed grounding, Phase A product materialization, Claw tool materialization
 
 ## Verdict
@@ -15,8 +15,8 @@ The current HEAD preserves the SIF/KOSHA-first evidence harness and Phase A mate
 
 | Gate | Command | Result |
 | --- | --- | --- |
-| KOSHA + Phase A focused Vitest | `npm.cmd test -- tests\exact-trusted-kosha-grounding.test.ts tests\exact-trusted-kosha-registry-wave2.test.ts tests\exact-trusted-kosha-registry-wave3.test.ts tests\kosha-grounding-fail-closed.test.ts tests\kosha-current-review-run-ask.test.ts tests\exact-kosha-applicability-policy.test.ts tests\kosha-materialization-matrix.test.ts tests\phase-a-product-materialization.test.ts tests\claw-tools-phase-a-materialization.test.ts --maxWorkers=1 --fileParallelism=false` | PASS, 9 files / 169 tests |
-| KOSHA acquisition Python tests | `python -m unittest scripts.tests.test_acquire_exact_kosha_body` | PASS, 19 tests |
+| KOSHA + Phase A focused Vitest | `npm.cmd test -- tests\exact-trusted-kosha-grounding.test.ts tests\exact-trusted-kosha-registry-wave2.test.ts tests\exact-trusted-kosha-registry-wave3.test.ts tests\kosha-grounding-fail-closed.test.ts tests\kosha-current-review-run-ask.test.ts tests\exact-kosha-applicability-policy.test.ts tests\kosha-materialization-matrix.test.ts tests\phase-a-product-materialization.test.ts tests\claw-tools-phase-a-materialization.test.ts --maxWorkers=1 --fileParallelism=false` | PASS, 9 files / 169 tests / 29.89s |
+| KOSHA acquisition Python tests | `python -m unittest scripts.tests.test_acquire_exact_kosha_body` | PASS, 19 tests / 1.323s |
 | Strict typecheck | `npm.cmd run typecheck` | PASS |
 | Production build | `npm.cmd run build` | PASS, Next.js 15.5.15, 28/28 static pages |
 

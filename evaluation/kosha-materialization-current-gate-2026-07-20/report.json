@@ -1,7 +1,7 @@
 {
-  "checkedAt": "2026-07-20T03:34:00+09:00",
-  "gitHead": "d7227e55d52fedcece292af70584012491659976",
-  "branch": "fix/kosha-materialization-20260720",
+  "checkedAt": "2026-07-20T05:56:40.000Z",
+  "gitHead": "6ae80d47019409168c50ecd75e97c634dfc12461",
+  "branch": "chore/recipient-foreign-live-gate-20260720",
   "verdict": "PASS",
   "scope": [
     "exact trusted KOSHA grounding",
@@ -20,13 +20,15 @@
       "command": "npm.cmd test -- tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\exact-trusted-kosha-registry-wave3.test.ts tests\\kosha-grounding-fail-closed.test.ts tests\\kosha-current-review-run-ask.test.ts tests\\exact-kosha-applicability-policy.test.ts tests\\kosha-materialization-matrix.test.ts tests\\phase-a-product-materialization.test.ts tests\\claw-tools-phase-a-materialization.test.ts --maxWorkers=1 --fileParallelism=false",
       "status": "PASS",
       "filesPassed": 9,
-      "testsPassed": 169
+      "testsPassed": 169,
+      "durationSeconds": 29.89
     },
     {
       "name": "KOSHA acquisition Python tests",
       "command": "python -m unittest scripts.tests.test_acquire_exact_kosha_body",
       "status": "PASS",
-      "testsPassed": 19
+      "testsPassed": 19,
+      "durationSeconds": 1.323
     },
     {
       "name": "Strict typecheck",
