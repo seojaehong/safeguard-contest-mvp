@@ -1,0 +1,37 @@
+{
+  "verdict": "pass",
+  "date": "2026-07-20",
+  "localHead": "7e96c2e6ec09158d846207dcaf558840b6f287bd",
+  "productionBuildInfo": {
+    "commitSha": "b1ec3635dbc0f60b4964ee5befbe2e03d311813f",
+    "branch": "master",
+    "environment": "production"
+  },
+  "scope": {
+    "route": "/knowledge",
+    "type": "evidence-only-current-gate",
+    "productCodeChanged": false
+  },
+  "checks": [
+    {
+      "name": "knowledge focused layout and mobile IA tests",
+      "command": "npm.cmd test -- tests\\knowledge-page-layout.test.ts tests\\knowledge-mobile-ia-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "testFilesPassed": 2,
+      "testFilesTotal": 2,
+      "testsPassed": 11,
+      "testsTotal": 11,
+      "durationSeconds": 72.44,
+      "status": "pass"
+    },
+    {
+      "name": "raw knowledge terms presentation boundary",
+      "status": "pass",
+      "evidence": "app/knowledge/page.tsx maps machine ids to Korean user-facing labels"
+    },
+    {
+      "name": "mobile KOSHA reference touch targets",
+      "status": "pass",
+      "evidence": "app/knowledge/KnowledgePage.module.css sets 44px minimum summary/link targets"
+    }
+  ]
+}
