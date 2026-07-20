@@ -1,12 +1,12 @@
 {
-  "checkedAt": "2026-07-20T11:20:17.527Z",
-  "verdict": "MOBILE_PARTIAL",
+  "checkedAt": "2026-07-20T11:51:41.295Z",
+  "verdict": "MOBILE_FIXED",
   "hardBlockersClosed": true,
   "production": {
-    "commitSha": "40d1f3802ac1d76963c2528dee033668d1ca58fe",
+    "commitSha": "58776450b2803b75751723ed2927c573f2ab5dea",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-dzmonfz2y-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-lp61zl5at-seojaehongs-projects.vercel.app",
     "url": "https://www.safeclaw.kr/workspace"
   },
   "viewport": {
@@ -24,14 +24,15 @@
       "outsideCount": 0
     },
     "documentsSafetyBrief": {
-      "bodyHeight": 2010,
+      "bodyHeight": 1269,
       "viewportHeight": 844,
-      "heightRatio": 2.38,
+      "heightRatio": 1.5,
       "stageY": 262,
-      "stageHeight": 1643,
+      "stageHeight": 902,
       "firstUsefulReviewY": 262,
-      "documentPreviewY": 1232,
-      "documentPreviewBottom": 1781,
+      "documentDeepReviewOpen": false,
+      "visibleDocumentPreviews": 0,
+      "documentPreviewYWhenClosed": 1247,
       "horizontalOverflow": false,
       "outsideCount": 0,
       "stickyLikeCount": 0,
@@ -68,9 +69,9 @@
     "ctaOcclusion": false,
     "textClipping": false,
     "notes": [
-      "Safety Brief Dashboard remains first and now exposes a near-top share action.",
-      "Share mobile preview moved before recipient/channel settings: preview y improved from 1068 to 380.",
-      "Documents mobile improved slightly but remains 2.38x with full preview at y=1232, so deep-review disclosure remains follow-up.",
+      "Generated Documents default is now a bounded Safety Brief surface at 1.50x viewport.",
+      "Full document preview is behind explicit document-deep-review disclosure: open=false, visible previews=0 in default production geometry.",
+      "Share mobile keeps message preview reachable near the top at y=380 with one primary CTA.",
       "Hard blockers remain closed: overflow 0, outside 0, sticky 0, live-critical findings 0."
     ]
   },

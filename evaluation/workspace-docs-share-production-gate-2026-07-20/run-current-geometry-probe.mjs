@@ -32,7 +32,11 @@ async function readMetrics(page) {
     const visible = (selector) => [...document.querySelectorAll(selector)].filter((element) => {
       const box = element.getBoundingClientRect();
       const style = getComputedStyle(element);
-      return box.width > 0 && box.height > 0 && style.display !== "none" && style.visibility !== "hidden";
+      const supportsCheckVisibility = typeof element.checkVisibility === "function";
+      const browserVisible = supportsCheckVisibility
+        ? element.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })
+        : true;
+      return browserVisible && box.width > 0 && box.height > 0 && style.display !== "none" && style.visibility !== "hidden";
     }).length;
     const outside = [...document.querySelectorAll("body *")].filter((element) => {
       const box = element.getBoundingClientRect();
@@ -54,6 +58,8 @@ async function readMetrics(page) {
       documentPage: rect(".workspace-document-page"),
       documentWorkbench: rect(".document-workbench"),
       documentPreview: rect(".document-preview-pane"),
+      documentDeepReviewOpen: Boolean(document.querySelector(".document-deep-review")?.open),
+      visibleDocumentPreviews: visible(".document-preview-pane"),
       documentEditor: rect(".document-editor"),
       documentTextarea: rect(".document-textarea"),
       sharePage: rect(".workspace-share-page"),

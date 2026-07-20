@@ -1,28 +1,29 @@
 # SafeClaw Mobile P0 Gate — 2026-07-20
 
-Verdict: **MOBILE PARTIAL**
+Verdict: **MOBILE FIXED**
 
-Production commit: `40d1f3802ac1d76963c2528dee033668d1ca58fe`
+Production commit: `58776450b2803b75751723ed2927c573f2ab5dea`
 
-The hard mobile blockers are closed on production: horizontal overflow 0, outside elements 0, sticky overlap 0, live-critical findings 0. The remaining gap is compact disclosure: generated Documents still exposes the full review surface by default, so this is not yet MOBILE FIXED.
+The 6-hour mobile gate is now closed for the generated workspace flow. The default Documents surface is a bounded Safety Brief, and full document preview/review is behind an explicit disclosure.
 
 | Surface | Height | First useful y | Overflow | Sticky | Under44 | CTA/preview |
 | --- | ---: | ---: | --- | ---: | ---: | --- |
 | Input /workspace | 1.17x | - | no | - | 3 | 생성 CTA visible |
-| Documents / Safety Brief | 2.38x | 262 | no | 0 | 0 | preview y=1232; near-top share action added |
-| Editor | 2.35x | 63 | no | 0 | - | textarea y=361 |
+| Documents / Safety Brief | 1.5x | 262 | no | 0 | 0 | deep open=false, visible previews=0 |
+| Editor / explicit deep review | 2.35x | 63 | no | 0 | - | textarea y=361 |
 | Share | 1.72x | 244 | no | 0 | 0 | CTA=1, preview y=380 |
 
-## What Improved
+## What Changed
 
+- Documents default moved full preview/edit/download behind `문서 깊게 보기`.
+- Documents mobile default changed from 2.45x to 1.5x.
 - Share mobile preview moved from y=1068 to y=380.
-- Share mobile height changed from 1.76x to 1.72x.
-- Documents mobile height changed from 2.45x to 2.38x, and the Safety Brief now has a direct share action.
+- Production live-critical sweep reports findings 0.
 
-## Remaining Debt
+## Remaining Follow-Up
 
-- Generated Documents default still needs true deep-review disclosure: the full document preview remains at y=1232.
-- MOBILE FIXED should require Documents default to keep field-mode brief and next action near-first viewport while moving full document review behind explicit selection/collapse.
+- Manager-mode deep review/editor is intentionally still longer after explicit open/edit.
+- Desktop broader IA and ontology page blockers remain separate release-ledger items.
 
 ## Evidence
 
