@@ -159,12 +159,28 @@ describe("documents editor layout", () => {
           documentEditor: rect(".document-editor"),
           mobileCoreLauncher: rect('[data-testid="mobile-core-document-launcher"]'),
           toolbar: rect(".document-toolbar"),
+          fieldStrip: rect('[data-testid="document-section-field-strip"]'),
+          sectionActions: rect('[data-testid="document-section-actions"]'),
           firstSectionTextarea: rect(".document-section-textarea"),
           secondaryTools: rect('[data-testid="editor-secondary-tools"]'),
           workpackShellScrollHeight: document.querySelector<HTMLElement>(".workpack-shell")?.scrollHeight || 0,
           defaultOpenSectionCount: Array.from(
             document.querySelectorAll<HTMLDetailsElement>('[data-testid="document-section-accordion"]')
           ).filter((section) => section.open).length,
+          fieldStripText: document.querySelector('[data-testid="document-section-field-strip"]')?.textContent?.replace(/\s+/gu, " ").trim() || "",
+          actionTexts: Array.from(document.querySelectorAll<HTMLElement>('[data-testid="document-section-actions"] button'))
+            .map((button) => button.textContent?.replace(/\s+/gu, " ").trim()),
+          fieldChipMetrics: Array.from(document.querySelectorAll<HTMLElement>('[data-testid="document-section-field-strip"] span'))
+            .map((chip) => {
+              const strong = chip.querySelector<HTMLElement>("strong");
+              const bounds = chip.getBoundingClientRect();
+              return {
+                width: Math.round(bounds.width),
+                text: strong?.textContent?.trim() || "",
+                textClientWidth: strong?.clientWidth || 0,
+                textScrollWidth: strong?.scrollWidth || 0
+              };
+            }),
           selectedDocumentTitle: document.querySelector(".document-toolbar .h2")?.textContent?.trim() || "",
           riskLauncherPressed: document.querySelector<HTMLButtonElement>(
             '[data-testid="mobile-core-document-launcher"] button[data-document-key="riskAssessmentDraft"]'
@@ -181,14 +197,30 @@ describe("documents editor layout", () => {
       expect(metrics.workpackShell.height).toBeGreaterThanOrEqual(viewport.minShellHeight);
       expect(metrics.workpackShell.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
       expect(metrics.mobileCoreLauncher.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
+      expect(metrics.fieldStripText).toContain("현재 편집 필드");
+      expect(metrics.fieldStripText).toContain("근거");
+      expect(metrics.fieldStripText).toContain("점검");
+      expect(metrics.actionTexts).toEqual(["근거 보기", "점검 보기"]);
+      expect(metrics.fieldStrip.top).toBeGreaterThanOrEqual(metrics.toolbar.bottom + 4);
+      expect(metrics.sectionActions.top).toBeGreaterThanOrEqual(metrics.fieldStrip.bottom);
+      expect(metrics.sectionActions.bottom).toBeLessThanOrEqual(metrics.workpackShell.bottom);
       expect(metrics.firstSectionTextarea.top).toBeLessThanOrEqual(metrics.viewportHeight);
-      expect(metrics.firstSectionTextarea.top).toBeGreaterThanOrEqual(metrics.toolbar.bottom + 4);
+      expect(metrics.firstSectionTextarea.top).toBeGreaterThanOrEqual(metrics.sectionActions.bottom);
+      expect(metrics.firstSectionTextarea.top).toBeLessThan(metrics.workpackShell.bottom);
+      expect(Math.min(metrics.firstSectionTextarea.bottom, metrics.workpackShell.bottom) - metrics.firstSectionTextarea.top).toBeGreaterThanOrEqual(96);
       expect(metrics.defaultOpenSectionCount).toBe(1);
       if (viewport.name === "mobile") {
         expect(metrics.riskLauncherPressed).toBe("true");
+        expect(metrics.fieldStrip.bottom).toBeLessThanOrEqual(640);
+        expect(metrics.sectionActions.bottom).toBeLessThanOrEqual(700);
         expect(metrics.firstSectionTextarea.top).toBeLessThanOrEqual(720);
         expect(metrics.workpackShellScrollHeight).toBeLessThanOrEqual(1500);
         expect(metrics.secondaryTools.height).toBeLessThanOrEqual(240);
+        expect(metrics.fieldChipMetrics).toHaveLength(3);
+        metrics.fieldChipMetrics.forEach((chip) => {
+          expect(chip.width).toBeGreaterThanOrEqual(88);
+          expect(chip.textClientWidth).toBeGreaterThanOrEqual(Math.min(chip.textScrollWidth, 60));
+        });
       }
 
       await page.close();

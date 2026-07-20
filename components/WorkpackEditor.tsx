@@ -2597,13 +2597,18 @@ export function WorkpackEditor({
     const activeSection = Array.from(
       documentBodyRef.current?.querySelectorAll<HTMLElement>("[data-section-id]") || []
     ).find((section) => section.dataset.sectionId === expandedStructuredSectionId) || null;
-    const target = activeSection?.querySelector<HTMLElement>("textarea") || activeSection || null;
+    const target = activeSection?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
+      || activeSection?.querySelector<HTMLElement>("textarea")
+      || activeSection
+      || null;
     alignPaneTargetBelowToolbar(target);
   }, [expandedStructuredSectionId]);
 
   useEffect(() => {
     const alignFrame = window.requestAnimationFrame(() => {
-      const target = textareaRef.current || documentBodyRef.current;
+      const target = documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
+        || textareaRef.current
+        || documentBodyRef.current;
       alignPaneTargetBelowToolbar(target);
     });
     return () => window.cancelAnimationFrame(alignFrame);
@@ -3214,15 +3219,22 @@ export function WorkpackEditor({
                         {sectionLineCount.toLocaleString("ko-KR")}줄 · {isSectionOpen ? "편집 중" : "펼치기"}
                       </em>
                     </summary>
-                    <textarea
-                      id={inputId}
-                      ref={index === 0 ? textareaRef : undefined}
-                      className={`document-textarea document-section-textarea ${styles.sectionTextarea}`}
-                      value={section.value}
-                      rows={lineCount}
-                      onChange={(event) => updateStructuredSection(section.id, event.target.value)}
-                      aria-label={index === 0 ? `${selected.title} 편집` : `${selected.title} ${section.label} 편집`}
-                    />
+                    {isSectionOpen ? (
+                      <div className={styles.documentSectionFieldStrip} data-testid="document-section-field-strip">
+                        <span>
+                          <b>현재 편집 필드</b>
+                          <strong>{section.label}</strong>
+                        </span>
+                        <span>
+                          <b>근거</b>
+                          <strong>{selectedRows.length.toLocaleString("ko-KR")}건 연결</strong>
+                        </span>
+                        <span>
+                          <b>점검</b>
+                          <strong>{selectedUsesEditedText ? "수정본 재확인" : "초안 확인"}</strong>
+                        </span>
+                      </div>
+                    ) : null}
                     {isSectionOpen ? (
                       <div className={styles.documentSectionActions} data-testid="document-section-actions">
                         <button type="button" onClick={() => openDocumentUtilityPanel("editor-evidence-panel")}>
@@ -3233,6 +3245,15 @@ export function WorkpackEditor({
                         </button>
                       </div>
                     ) : null}
+                    <textarea
+                      id={inputId}
+                      ref={index === 0 ? textareaRef : undefined}
+                      className={`document-textarea document-section-textarea ${styles.sectionTextarea}`}
+                      value={section.value}
+                      rows={lineCount}
+                      onChange={(event) => updateStructuredSection(section.id, event.target.value)}
+                      aria-label={index === 0 ? `${selected.title} 편집` : `${selected.title} ${section.label} 편집`}
+                    />
                   </details>
                 );
               })}
