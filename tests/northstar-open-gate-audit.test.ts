@@ -123,6 +123,80 @@ function createFixtureRoot(): string {
     uploaded: false,
     corpusCount: 6032,
   });
+  writeJson(rootDir, path.join("evaluation", "documents-mobile-internal-pane-2026-07-21", "report.json"), {
+    verdict: "PASS_CURRENT_SOURCE",
+    currentSourceGeometry: {
+      viewport: { width: 390, height: 844 },
+      bodyHeight: 844,
+      overflowX: false,
+      outside: 0,
+    },
+  });
+  writeJson(rootDir, path.join("evaluation", "documents-mobile-pane-context-2026-07-21", "report.json"), {
+    verdict: "PASS_CURRENT_SOURCE",
+    sourceHeadBeforeCommit: "fixture-sha",
+    assertions: {
+      riskAssessmentToolbarVisibleInPaneAfterDeepScroll: true,
+      toolbarNearPaneTopAfterDeepScroll: true,
+      toolbarDoesNotCoverActiveTextarea: true,
+      pageHeightBoundedAfterDeepScroll: true,
+      horizontalOverflowClosedAfterDeepScroll: true,
+    },
+    checks: [
+      { result: "PASS" },
+      { result: "PASS" },
+      { result: "PASS" },
+    ],
+  });
+  writeJson(rootDir, path.join("evaluation", "share-mobile-full-flow-2026-07-21", "report.json"), {
+    verdict: "PASS",
+    mobile390x844: {
+      shareMobileSummaryBottom: 432,
+      sharePreviewBottom: 659,
+      primaryShareCtaBottom: 720,
+      overflowX: false,
+      outside: 0,
+    },
+    documentsPreservation: {
+      mobileDocumentWorkbenchBottom: 835,
+    },
+  });
+  writeJson(rootDir, path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"), {
+    verdict: "PASS_PRODUCTION",
+    acceptance: {
+      pageHeightWithin135Viewport: true,
+      rootWidthAtLeast1040: true,
+      primaryCtaInsideViewport: true,
+      previewInsideViewport: true,
+      previewRightOfPrimaryAction: true,
+      channelCardsReadableAndCompact: true,
+      horizontalOverflowClosed: true,
+    },
+    production: {
+      liveVerified: true,
+      commitSha: "fixture-sha",
+      metrics: {
+        pageHeight: 1116,
+        heightRatio: 1.24,
+        horizontalOverflow: false,
+        outside: 0,
+      },
+    },
+  });
+  writeJson(rootDir, path.join("evaluation", "kosha-current-northstar-regression-2026-07-21", "report.json"), {
+    title: "KOSHA Current North Star Regression Gate",
+    verdict: "PASS",
+    dbSchemaChanged: false,
+    supabaseWrites: false,
+    embeddingGenerated: false,
+    embeddingUploaded: false,
+    coveredExactPins: ["D-C-13-2026", "D-C-7-2026", "B-E-10-2026"],
+    verification: {
+      structuredMaterializationAndHarness: { status: "PASS", testsPassed: 50 },
+      exactTrustAndCorpus: { status: "PASS", testsPassed: 173 },
+      typecheck: { status: "PASS" },
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "kosha-current-master-reconciliation-2026-07-19", "report.json"), {
     verdict: "pass_current_master_kosha_exact_registry_and_local_corpus_readiness",
     productionExactPins: ["D-C-13", "D-C-7", "B-E-10"],
@@ -210,6 +284,8 @@ describe("northstar open gate audit", () => {
     expect(audit.overall).toBe("open");
     expect(audit.gates.find((gate) => gate.id === "final_99_gate")?.state).toBe("notice");
     expect(audit.gates.find((gate) => gate.id === "live_harness_quality")?.state).toBe("proven");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.state).toBe("proven");
+    expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "supabase_rls_launch_isolation")?.state).toBe("approval_gated");
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_publication")?.state).toBe("approval_gated");
     expect(audit.gates.find((gate) => gate.id === "sif_embedding_runtime")?.state).toBe("approval_gated");
@@ -319,10 +395,9 @@ describe("northstar open gate audit", () => {
   it("contradicts the KOSHA exact trust gate when live exact pins are stale", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
-    const reportPath = path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json");
-    const report = JSON.parse(fs.readFileSync(path.join(rootDir, reportPath), "utf8")) as KoshaCurrentGateFixture;
-    report.liveStatus.exactTrustRegistry.count = 2;
-    report.liveStatus.exactTrustRegistry.stableDocumentKeys = ["D-C-13", "D-C-7"];
+    const reportPath = path.join("evaluation", "kosha-current-northstar-regression-2026-07-21", "report.json");
+    const report = JSON.parse(fs.readFileSync(path.join(rootDir, reportPath), "utf8")) as Record<string, unknown>;
+    report.coveredExactPins = ["D-C-13-2026", "D-C-7-2026"];
     writeJson(rootDir, reportPath, report);
 
     const audit = buildNorthstarOpenGateAudit({
@@ -338,13 +413,9 @@ describe("northstar open gate audit", () => {
   it("contradicts the KOSHA exact trust gate when mutation safety is lost", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
-    fs.rmSync(path.join(rootDir, "evaluation", "kosha-current-live-gate-2026-07-20"), {
-      recursive: true,
-      force: true,
-    });
-    const reportPath = path.join("evaluation", "kosha-current-master-reconciliation-2026-07-19", "report.json");
-    const report = JSON.parse(fs.readFileSync(path.join(rootDir, reportPath), "utf8")) as KoshaReconciliationFixture;
-    report.mutations.supabaseDataChanged = true;
+    const reportPath = path.join("evaluation", "kosha-current-northstar-regression-2026-07-21", "report.json");
+    const report = JSON.parse(fs.readFileSync(path.join(rootDir, reportPath), "utf8")) as Record<string, unknown>;
+    report.supabaseWrites = true;
     writeJson(rootDir, reportPath, report);
 
     const audit = buildNorthstarOpenGateAudit({
@@ -420,6 +491,10 @@ describe("northstar open gate audit", () => {
   it("fails evidence completeness when the current KOSHA reconciliation is missing", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
+    fs.rmSync(path.join(rootDir, "evaluation", "kosha-current-northstar-regression-2026-07-21"), {
+      recursive: true,
+      force: true,
+    });
     fs.rmSync(path.join(rootDir, "evaluation", "kosha-current-live-gate-2026-07-20"), {
       recursive: true,
       force: true,

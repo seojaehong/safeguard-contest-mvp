@@ -27,6 +27,11 @@ const EVIDENCE_PATHS = Object.freeze({
   llmWikiApproval: path.join("evaluation", "llm-wiki-rls-approval-2026-07-17", "report.md"),
   rlsLlmWikiApprovalPreflight: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
   sifEmbeddingPreflight: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
+  documentsMobileInternalPane: path.join("evaluation", "documents-mobile-internal-pane-2026-07-21", "report.json"),
+  documentsMobilePaneContext: path.join("evaluation", "documents-mobile-pane-context-2026-07-21", "report.json"),
+  shareMobileFullFlow: path.join("evaluation", "share-mobile-full-flow-2026-07-21", "report.json"),
+  dispatchStandalone: path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"),
+  koshaCurrentNorthstarRegression: path.join("evaluation", "kosha-current-northstar-regression-2026-07-21", "report.json"),
   koshaCurrentGate: path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json"),
   koshaCurrentReconciliation: path.join("evaluation", "kosha-current-master-reconciliation-2026-07-19", "report.json"),
   koshaCurrentLive: path.join("evaluation", "kosha-exact-trust-current-live-2026-07-19", "report.md"),
@@ -467,11 +472,174 @@ function readNumber(value) {
 }
 
 /**
+ * @param {unknown} value
+ */
+function readBoolean(value) {
+  return typeof value === "boolean" ? value : null;
+}
+
+/**
+ * @param {unknown} report
+ */
+function allChecksPassed(report) {
+  if (!isRecord(report)) return false;
+  const checks = Array.isArray(report.checks) ? report.checks : [];
+  return checks.length > 0 && checks.every((check) => (
+    isRecord(check) && (check.result === "PASS" || check.status === "PASS")
+  ));
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateUiDocumentsShareCockpitGate(rootDir) {
+  const internalPanePath = EVIDENCE_PATHS.documentsMobileInternalPane;
+  const paneContextPath = EVIDENCE_PATHS.documentsMobilePaneContext;
+  const sharePath = EVIDENCE_PATHS.shareMobileFullFlow;
+  const internalPane = readJsonFile(rootDir, internalPanePath);
+  const paneContext = readJsonFile(rootDir, paneContextPath);
+  const share = readJsonFile(rootDir, sharePath);
+
+  if (!isRecord(internalPane) || !isRecord(paneContext) || !isRecord(share)) {
+    return gateResult({
+      id: "ui_documents_share_cockpit",
+      label: "Documents and Share cockpit UI",
+      state: "missing",
+      evidencePath: !isRecord(internalPane) ? internalPanePath : !isRecord(paneContext) ? paneContextPath : sharePath,
+      detail: "Documents/share cockpit evidence is missing or invalid.",
+      nextActions: ["Regenerate documents mobile internal-pane, pane-context, and share mobile full-flow evidence."],
+    });
+  }
+
+  const internalPaneGeometry = isRecord(internalPane.currentSourceGeometry)
+    ? internalPane.currentSourceGeometry
+    : isRecord(internalPane.productionGeometry)
+      ? internalPane.productionGeometry
+      : {};
+  const contextAssertions = isRecord(paneContext.assertions) ? paneContext.assertions : {};
+  const shareDocuments = isRecord(share.documentsPreservation) ? share.documentsPreservation : {};
+  const shareMobile = isRecord(share.mobile390x844) ? share.mobile390x844 : {};
+  const paneChecksPass = allChecksPassed(paneContext);
+  const bodyHeight = readNumber(internalPaneGeometry.bodyHeight);
+  const viewportHeight = readNumber(isRecord(internalPaneGeometry.viewport) ? internalPaneGeometry.viewport.height : 844) || 844;
+  const contextSourceSha = readString(paneContext.sourceHeadBeforeCommit);
+  const contextSourceCurrent = isGitAncestor(rootDir, contextSourceSha);
+
+  const documentsPass = readString(internalPane.verdict).startsWith("PASS")
+    && bodyHeight !== null
+    && bodyHeight <= viewportHeight + 1
+    && readBoolean(internalPaneGeometry.overflowX) === false
+    && readNumber(internalPaneGeometry.outside) === 0
+    && contextAssertions.riskAssessmentToolbarVisibleInPaneAfterDeepScroll === true
+    && contextAssertions.toolbarNearPaneTopAfterDeepScroll === true
+    && contextAssertions.toolbarDoesNotCoverActiveTextarea === true
+    && contextAssertions.pageHeightBoundedAfterDeepScroll === true
+    && contextAssertions.horizontalOverflowClosedAfterDeepScroll === true
+    && paneChecksPass
+    && contextSourceCurrent;
+
+  const sharePass = readString(share.verdict).includes("PASS")
+    && readNumber(shareMobile.shareMobileSummaryBottom) !== null
+    && readNumber(shareMobile.sharePreviewBottom) !== null
+    && readNumber(shareMobile.primaryShareCtaBottom) !== null
+    && readBoolean(shareMobile.overflowX) === false
+    && readNumber(shareMobile.outside) === 0
+    && readNumber(shareDocuments.mobileDocumentWorkbenchBottom) !== null
+    && readNumber(shareDocuments.mobileDocumentWorkbenchBottom) <= 844;
+
+  if (documentsPass && sharePass) {
+    return gateResult({
+      id: "ui_documents_share_cockpit",
+      label: "Documents and Share cockpit UI",
+      state: "proven",
+      evidencePath: paneContextPath,
+      detail: "Current evidence closes /documents mobile raw height, selected-document landing/context, and /share first-action visibility. It does not close document-specific drilldown depth or mobile share target/channel/language stepper.",
+      nextActions: [
+        "Continue UI work on document-specific drilldown depth: selected document summary, accordions, and one-document-at-a-time editing.",
+        "Convert mobile share target/channel/language configuration from a long below-fold stack into a stepper or collapsed configuration flow.",
+      ],
+    });
+  }
+
+  return gateResult({
+    id: "ui_documents_share_cockpit",
+    label: "Documents and Share cockpit UI",
+    state: "contradicted",
+    evidencePath: documentsPass ? sharePath : paneContextPath,
+    detail: "Documents/share cockpit evidence no longer proves bounded page height, visible selected-document pane context, and first-viewport share action together.",
+    nextActions: ["Re-run documents/share browser geometry gates and fix any UI cockpit regression."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateDispatchStandaloneCockpitGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.dispatchStandalone;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "dispatch_standalone_cockpit",
+      label: "Standalone dispatch desktop cockpit",
+      state: "missing",
+      evidencePath,
+      detail: "Standalone dispatch cockpit report is missing or invalid.",
+      nextActions: ["Run the standalone /dispatch desktop cockpit gate before claiming dispatch UI closure."],
+    });
+  }
+
+  const acceptance = isRecord(report.acceptance) ? report.acceptance : {};
+  const production = isRecord(report.production) ? report.production : {};
+  const productionMetrics = isRecord(production.metrics) ? production.metrics : {};
+  const productionVerified = production.liveVerified === true
+    && readString(production.commitSha)
+    && isGitAncestor(rootDir, readString(production.commitSha));
+  const pass = readString(report.verdict) === "PASS_PRODUCTION"
+    && productionVerified
+    && acceptance.pageHeightWithin135Viewport === true
+    && acceptance.rootWidthAtLeast1040 === true
+    && acceptance.primaryCtaInsideViewport === true
+    && acceptance.previewInsideViewport === true
+    && acceptance.previewRightOfPrimaryAction === true
+    && acceptance.channelCardsReadableAndCompact === true
+    && acceptance.horizontalOverflowClosed === true
+    && readBoolean(productionMetrics.horizontalOverflow) === false
+    && readNumber(productionMetrics.outside) === 0;
+
+  if (pass) {
+    const pageHeight = readNumber(productionMetrics.pageHeight);
+    const heightRatio = readNumber(productionMetrics.heightRatio);
+    return gateResult({
+      id: "dispatch_standalone_cockpit",
+      label: "Standalone dispatch desktop cockpit",
+      state: "proven",
+      evidencePath,
+      detail: `Production /dispatch seeded desktop route is no longer mobile-stacked: pageHeight ${pageHeight ?? "unknown"} (${heightRatio ?? "unknown"}x), preview right pane, first-viewport CTA, readable channel cards, overflow false/outside 0.`,
+      nextActions: [
+        "Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved.",
+      ],
+    });
+  }
+
+  return gateResult({
+    id: "dispatch_standalone_cockpit",
+    label: "Standalone dispatch desktop cockpit",
+    state: "contradicted",
+    evidencePath,
+    detail: "Standalone dispatch report no longer proves desktop two-pane cockpit and compact readable channel cards in production.",
+    nextActions: ["Re-run standalone /dispatch desktop browser gate and fix the layout before claiming closure."],
+  });
+}
+
+/**
  * @param {string} rootDir
  * @returns {GateResult}
  */
 function evaluateKoshaExactTrustGate(rootDir) {
   const evidence = readFirstJsonFile(rootDir, [
+    EVIDENCE_PATHS.koshaCurrentNorthstarRegression,
     EVIDENCE_PATHS.koshaCurrentGate,
     EVIDENCE_PATHS.koshaCurrentReconciliation,
   ]);
@@ -486,6 +654,57 @@ function evaluateKoshaExactTrustGate(rootDir) {
       evidencePath,
       detail: "Current KOSHA reconciliation report is missing or invalid.",
       nextActions: ["Regenerate the current KOSHA reconciliation artifact before launch claims."],
+    });
+  }
+
+  if (readString(report.title) === "KOSHA Current North Star Regression Gate") {
+    const coveredPins = readStringArray(report.coveredExactPins);
+    const requiredPins = ["D-C-13-2026", "D-C-7-2026", "B-E-10-2026"];
+    const hasRequiredPins = requiredPins.every((pin) => coveredPins.includes(pin));
+    const verification = isRecord(report.verification) ? report.verification : {};
+    const verificationEntries = Object.values(verification).filter(isRecord);
+    const checksPass = verificationEntries.length >= 3
+      && verificationEntries.every((item) => item.status === "PASS");
+    const structured = isRecord(verification.structuredMaterializationAndHarness)
+      ? verification.structuredMaterializationAndHarness
+      : {};
+    const exact = isRecord(verification.exactTrustAndCorpus)
+      ? verification.exactTrustAndCorpus
+      : {};
+    const structuredTests = readNumber(structured.testsPassed);
+    const exactTests = readNumber(exact.testsPassed);
+    const totalTests = (structuredTests ?? 0) + (exactTests ?? 0);
+    const noMutations = report.dbSchemaChanged === false
+      && report.supabaseWrites === false
+      && report.embeddingGenerated === false
+      && report.embeddingUploaded === false;
+    const readiness = readString(report.verdict) === "PASS"
+      && hasRequiredPins
+      && checksPass
+      && totalTests >= 223
+      && noMutations;
+
+    if (readiness) {
+      return gateResult({
+        id: "kosha_exact_trust_registry",
+        label: "KOSHA exact trust registry",
+        state: "proven",
+        evidencePath,
+        detail: `Current source confirms ${coveredPins.length} exact KOSHA pins (${coveredPins.join(", ")}), structured materialization, grounded generation, and live harness quality: ${totalTests} tests plus typecheck PASS; no DB/schema/Supabase/embedding writes.`,
+        nextActions: [
+          "Promote additional metadata-verified KOSHA candidates to exact trust only through separate immutable acquisition/review.",
+          "Keep broader corpus exact-publishing, SIF vector retrieval, and DB persistence approval-gated.",
+        ],
+      });
+    }
+
+    return gateResult({
+      id: "kosha_exact_trust_registry",
+      label: "KOSHA exact trust registry",
+      state: "contradicted",
+      evidencePath,
+      detail: "Current KOSHA north-star regression no longer proves exact pins, structured materialization, focused tests, and no-mutation boundaries together.",
+      nextActions: ["Re-run KOSHA north-star regression before KOSHA launch claims."],
     });
   }
 
@@ -619,6 +838,8 @@ export function buildNorthstarOpenGateAudit(options = {}) {
   const gates = [
     evaluateFinal99Gate(rootDir),
     evaluateLiveHarnessGate(rootDir),
+    evaluateUiDocumentsShareCockpitGate(rootDir),
+    evaluateDispatchStandaloneCockpitGate(rootDir),
     evaluateRlsApprovalGate(rootDir),
     evaluateLlmWikiGate(rootDir),
     evaluateSifEmbeddingGate(rootDir),

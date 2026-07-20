@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-20T17:58:52.534Z",
-  "head": "2346cf1291304920bc8007b0efbceaf809a11ba3",
+  "generatedAt": "2026-07-20T18:27:38.352Z",
+  "head": "5bd750d6a6b1970c707baece5a7e8971ba96432d",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "2346cf1291304920bc8007b0efbceaf809a11ba3",
+    "commitSha": "5bd750d6a6b1970c707baece5a7e8971ba96432d",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-3jehddjqa-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-gjs460wyc-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -36,20 +36,20 @@
     {
       "id": "ui_documents_share_cockpit",
       "state": "proven",
-      "artifact": "evaluation\\documents-mobile-internal-pane-2026-07-21\\report.json",
-      "detail": "Current production closes the raw mobile /documents long-page complaint: 390x844 bodyHeight 844, workpack pane overflowY auto, current-work strip visible, and share desktop/mobile cockpit gates remain green."
+      "artifact": "evaluation\\documents-mobile-pane-context-2026-07-21\\report.json",
+      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context, and /share first-action visibility. It does not close document-specific drilldown depth or mobile share target/channel/language stepper."
     },
     {
       "id": "dispatch_standalone_cockpit",
       "state": "proven",
       "artifact": "evaluation\\dispatch-standalone-cockpit-2026-07-21\\report.json",
-      "detail": "Production /dispatch seeded desktop route is no longer mobile-stacked: 1440x900 pageHeight 1116 (1.24x), share root 1156x652, preview 520x398 right pane, primary CTA bottom 544, channel cards 164x44 x3, overflow false/outside 0."
+      "detail": "Production /dispatch seeded desktop route is no longer mobile-stacked: pageHeight 1116 (1.24x), preview right pane, first-viewport CTA, readable channel cards, overflow false/outside 0."
     },
     {
       "id": "kosha_exact_trust_registry",
       "state": "proven",
       "artifact": "evaluation\\kosha-current-northstar-regression-2026-07-21\\report.json",
-      "detail": "Current source confirms 3 exact KOSHA pins (D-C-13, D-C-7, B-E-10), KOSHA guide corpus, structured risk rows/TBM evidenceRefs, grounded generation, and live harness quality: 8 files / 223 tests PASS plus typecheck."
+      "detail": "Current source confirms 3 exact KOSHA pins (D-C-13-2026, D-C-7-2026, B-E-10-2026), structured materialization, grounded generation, and live harness quality: 223 tests plus typecheck PASS; no DB/schema/Supabase/embedding writes."
     }
   ],
   "approvalGated": [
@@ -140,9 +140,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "2346cf1291304920bc8007b0efbceaf809a11ba3",
+      "sourceCommit": "5bd750d6a6b1970c707baece5a7e8971ba96432d",
       "sourceStatus": "exact",
-      "productionCommit": "2346cf1291304920bc8007b0efbceaf809a11ba3",
+      "productionCommit": "5bd750d6a6b1970c707baece5a7e8971ba96432d",
       "productionStatus": "matches_live"
     },
     {
@@ -213,9 +213,9 @@
       "id": "dispatch_standalone_cockpit",
       "artifact": "evaluation\\dispatch-standalone-cockpit-2026-07-21\\report.json",
       "sourceCommit": "2346cf1291304920bc8007b0efbceaf809a11ba3",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "2346cf1291304920bc8007b0efbceaf809a11ba3",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     }
   ],
   "contradictions": [],

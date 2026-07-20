@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-21T02:57:40+09:00",
-  "sourceSha": "2346cf1291304920bc8007b0efbceaf809a11ba3",
+  "generatedAt": "2026-07-20T18:27:38.060Z",
+  "sourceSha": "5bd750d6a6b1970c707baece5a7e8971ba96432d",
   "overall": "open",
   "gates": [
     {
@@ -26,10 +26,11 @@
       "id": "ui_documents_share_cockpit",
       "state": "proven",
       "label": "Documents and Share cockpit UI",
-      "evidencePath": "evaluation\\documents-mobile-internal-pane-2026-07-21\\report.json",
-      "detail": "Current production closes the raw mobile /documents long-page complaint: 390x844 bodyHeight 844, workpack pane overflowY auto, current-work strip visible, and share desktop/mobile cockpit gates remain green.",
+      "evidencePath": "evaluation\\documents-mobile-pane-context-2026-07-21\\report.json",
+      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context, and /share first-action visibility. It does not close document-specific drilldown depth or mobile share target/channel/language stepper.",
       "nextActions": [
-        "Continue UI work on internal pane readability and document-specific drilldown, not raw route body height."
+        "Continue UI work on document-specific drilldown depth: selected document summary, accordions, and one-document-at-a-time editing.",
+        "Convert mobile share target/channel/language configuration from a long below-fold stack into a stepper or collapsed configuration flow."
       ]
     },
     {
@@ -37,7 +38,7 @@
       "state": "proven",
       "label": "Standalone dispatch desktop cockpit",
       "evidencePath": "evaluation\\dispatch-standalone-cockpit-2026-07-21\\report.json",
-      "detail": "Production /dispatch seeded desktop route is no longer mobile-stacked: 1440x900 pageHeight 1116 (1.24x), share root 1156x652, preview 520x398 right pane, primary CTA bottom 544, channel cards 164x44 x3, overflow false/outside 0.",
+      "detail": "Production /dispatch seeded desktop route is no longer mobile-stacked: pageHeight 1116 (1.24x), preview right pane, first-viewport CTA, readable channel cards, overflow false/outside 0.",
       "nextActions": [
         "Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved."
       ]
@@ -82,7 +83,7 @@
       "state": "proven",
       "label": "KOSHA exact trust registry",
       "evidencePath": "evaluation\\kosha-current-northstar-regression-2026-07-21\\report.json",
-      "detail": "Current source confirms 3 exact KOSHA pins (D-C-13, D-C-7, B-E-10), KOSHA guide corpus, structured risk rows/TBM evidenceRefs, grounded generation, and live harness quality: 8 files / 223 tests PASS plus typecheck.",
+      "detail": "Current source confirms 3 exact KOSHA pins (D-C-13-2026, D-C-7-2026, B-E-10-2026), structured materialization, grounded generation, and live harness quality: 223 tests plus typecheck PASS; no DB/schema/Supabase/embedding writes.",
       "nextActions": [
         "Promote additional metadata-verified KOSHA candidates to exact trust only through separate immutable acquisition/review.",
         "Keep broader corpus exact-publishing, SIF vector retrieval, and DB persistence approval-gated."

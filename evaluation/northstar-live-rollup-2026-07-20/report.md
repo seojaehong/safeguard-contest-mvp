@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-20T17:58:52.534Z
-Source HEAD at generation: 2346cf1291304920bc8007b0efbceaf809a11ba3
-Live commit at generation: 2346cf1291304920bc8007b0efbceaf809a11ba3
+Generated at: 2026-07-20T18:27:38.352Z
+Source HEAD at generation: 5bd750d6a6b1970c707baece5a7e8971ba96432d
+Live commit at generation: 5bd750d6a6b1970c707baece5a7e8971ba96432d
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -29,7 +29,7 @@ Overall: `northstar_open_approval_gated`
 | --- | --- | --- |
 | final_99_gate | notice | evaluation\final-99-gate-current-2026-07-20\report.json |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
-| ui_documents_share_cockpit | proven | evaluation\documents-mobile-internal-pane-2026-07-21\report.json |
+| ui_documents_share_cockpit | proven | evaluation\documents-mobile-pane-context-2026-07-21\report.json |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
 | kosha_exact_trust_registry | proven | evaluation\kosha-current-northstar-regression-2026-07-21\report.json |
 | supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
@@ -49,7 +49,7 @@ Overall: `northstar_open_approval_gated`
 | live_critical_surface | missing | ancestor_of_head | evaluation\live-critical-surface-current-2026-07-20-rerun\report.json |
 | mobile_p0_workspace | missing | ancestor_of_head | evaluation\mobile-p0-workspace-gate-2026-07-20\report.json |
 | workspace_docs_share_geometry | missing | ancestor_of_head | evaluation\workspace-docs-share-production-gate-2026-07-20\current-geometry.json |
-| dispatch_standalone_cockpit | exact | matches_live | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
+| dispatch_standalone_cockpit | ancestor | ancestor_of_head | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
 
 ## Carried Notices
 
