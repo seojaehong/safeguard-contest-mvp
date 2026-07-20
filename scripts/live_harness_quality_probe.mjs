@@ -4,6 +4,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const SCHEMA_VERSION = "safeclaw-live-harness-quality-probe/v1";
@@ -138,6 +139,59 @@ function canonicalize(value) {
 /** @param {unknown} left @param {unknown} right */
 function canonicalEqual(left, right) {
   return JSON.stringify(canonicalize(left)) === JSON.stringify(canonicalize(right));
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {string}
+ */
+function resolveSourceSha(rootDir = REPO_ROOT) {
+  try {
+    return execFileSync("git", ["rev-parse", "--verify", "HEAD"], {
+      cwd: rootDir,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * @param {string} baseUrl
+ * @param {number} timeoutMs
+ * @returns {Promise<Record<string, unknown>>}
+ */
+async function fetchLiveBuildInfo(baseUrl, timeoutMs) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), Math.min(timeoutMs, 20_000));
+  try {
+    const response = await fetch(`${baseUrl}/api/build-info`, {
+      method: "GET",
+      headers: { accept: "application/json" },
+      signal: controller.signal,
+    });
+    const text = await response.text();
+    /** @type {unknown} */
+    let parsed = null;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      parsed = null;
+    }
+    return {
+      ok: response.ok,
+      status: response.status,
+      ...(isRecord(parsed) ? parsed : { rawPreview: text.slice(0, 500) }),
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 /** @param {string} text @param {string[]} terms */
@@ -546,6 +600,9 @@ export function renderMarkdownEvidence(reportValue) {
     "",
     `- Overall: ${verdict}`,
     `- Generated: ${readString(report.generatedAt) || "unavailable"}`,
+    `- Source HEAD at generation: ${readString(report.sourceSha) || "unavailable"}`,
+    `- Live commit at generation: ${readString(asRecord(report.liveBuildInfo).commitSha) || "unavailable"}`,
+    "- Note: this artifact is generated before it is committed. A later evidence-only commit can contain this report without changing the measured runtime surface.",
     `- Base URL: ${readString(report.baseUrl) || "unavailable"}`,
     `- Request: ${readString(request.method) || "unknown"} ${readString(request.path) || "unknown"} (${readString(requestBody.aiMode) || "unknown"})`,
     `- HTTP: ${String(transport.status ?? "unavailable")}`,
@@ -744,10 +801,13 @@ async function runLiveProbe(options) {
     operations,
   };
   const evaluation = evaluateHarnessResponse(responsePayload, context);
+  const liveBuildInfo = await fetchLiveBuildInfo(options.baseUrl, options.timeoutMs);
   return {
     schemaVersion: SCHEMA_VERSION,
     generatedAt: new Date().toISOString(),
     startedAt,
+    sourceSha: resolveSourceSha(),
+    liveBuildInfo,
     baseUrl: options.baseUrl,
     scenario: CANONICAL_SCENARIO,
     request,
@@ -800,6 +860,7 @@ async function runInputJsonProbe(options) {
     schemaVersion: SCHEMA_VERSION,
     generatedAt: new Date().toISOString(),
     startedAt,
+    sourceSha: resolveSourceSha(),
     baseUrl: "unavailable (input-json)",
     inputJson: {
       path: options.inputJsonPath,

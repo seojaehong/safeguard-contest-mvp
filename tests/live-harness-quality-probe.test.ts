@@ -437,6 +437,8 @@ describe("live harness quality probe evaluator", () => {
       const reportJsonPath = path.join(process.cwd(), summary.json);
       const reportMdPath = path.join(process.cwd(), summary.markdown);
       const report = JSON.parse(fs.readFileSync(reportJsonPath, "utf8")) as {
+        sourceSha?: string;
+        liveBuildInfo?: unknown;
         baseUrl?: string;
         inputJson?: { path?: string };
         transport: { status: number | null };
@@ -451,11 +453,15 @@ describe("live harness quality probe evaluator", () => {
         json: path.relative(process.cwd(), path.join(outputDir, "report.json")),
         markdown: path.relative(process.cwd(), path.join(outputDir, "report.md")),
       });
+      expect(report.sourceSha).toMatch(/^[0-9a-f]{40}$/);
+      expect(report.liveBuildInfo).toBeUndefined();
       expect(report.baseUrl).toBe("unavailable (input-json)");
       expect(report.inputJson?.path).toBe(inputJsonPath);
       expect(report.transport.status).toBe(200);
       expect(report.evaluation.verdict).toBe("pass");
       expect(markdown).toContain("Overall: PASS");
+      expect(markdown).toContain("Source HEAD at generation:");
+      expect(markdown).toContain("Live commit at generation: unavailable");
       expect(markdown).toContain("Base URL: unavailable (input-json)");
       expect(markdown).toContain("HTTP: 200");
     } finally {

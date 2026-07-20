@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "safeclaw-workspace-ia-open-blockers/v1",
+  "generatedAt": "2026-07-20T14:05:00Z",
+  "scope": {
+    "route": "/workspace",
+    "surfaces": [
+      "generated-documents",
+      "share"
+    ]
+  },
+  "verdict": "open_ux_blocker",
+  "closedByMobileP0": {
+    "horizontalOverflow": false,
+    "stickyOverlap": false,
+    "fullDocumentPreviewHiddenWhenDeepReviewClosed": true,
+    "primaryShareCtas": 1
+  },
+  "openIssues": [
+    {
+      "id": "share-preview-metric-conflict",
+      "severity": "P1",
+      "summary": "Share preview y-position differs across current evidence artifacts and must be reconciled on current production.",
+      "evidence": {
+        "mobileP0SharePreviewY": 380,
+        "liveCurrentMobileSharePreviewY": 1068
+      }
+    },
+    {
+      "id": "desktop-share-mobile-card-risk",
+      "severity": "P1",
+      "summary": "Desktop 1440px share evidence still records a narrow preview width that can read as a mobile card.",
+      "evidence": {
+        "viewportWidth": 1440,
+        "viewportHeight": 723,
+        "shareDocumentHeight": 1025,
+        "sharePreviewY": 345,
+        "sharePreviewWidth": 380
+      }
+    },
+    {
+      "id": "documents-viewport-first-debt",
+      "severity": "P2",
+      "summary": "Documents default is improved, but viewport-first IA should be verified against the exact current production surface.",
+      "evidence": {
+        "desktopDocumentHeight": 1088,
+        "desktopViewportHeight": 723,
+        "desktopPreviewY": 420,
+        "mobileDocumentHeight": 1417,
+        "mobileViewportHeight": 844,
+        "mobilePreviewY": 639
+      }
+    }
+  ],
+  "nextAcceptance": {
+    "documentsDefault": [
+      "field-mode safety brief, top hazards, core document status, and next action visible in the first viewport",
+      "full document preview and editor closed behind explicit deep-review disclosure by default"
+    ],
+    "shareDesktop": [
+      "two-pane desktop composition at 1440px",
+      "primary controls visible before the fold",
+      "preview/status/warnings shown as a contextual desktop pane rather than a narrow centered mobile card"
+    ],
+    "shareMobile": [
+      "message preview and send CTA reachable without excessive scroll",
+      "details, evidence, logs, and history folded by default"
+    ]
+  }
+}
