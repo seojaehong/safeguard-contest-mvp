@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-rls-llm-wiki-approval-preflight/v1",
-  "generatedAt": "2026-07-20T02:41:34.960Z",
-  "sourceSha": "a888a4681293dcddf72b309af8a5532919d49d62",
+  "generatedAt": "2026-07-20T03:43:26.749Z",
+  "sourceSha": "df915f0635db53db24ab3c24f1517077ca0eccd3",
   "overall": "approval_ready_open",
   "launchReadiness": false,
   "dbMutationPerformed": false,
@@ -28,9 +28,9 @@
     "wikiReport": "evaluation/llm-wiki-rls-approval-2026-07-17/report.json",
     "wikiReportMd": "evaluation/llm-wiki-rls-approval-2026-07-17/report.md",
     "wikiSqlDesign": "evaluation/llm-wiki-rls-approval-2026-07-17/proposed-non-executable-publication-design.sql.txt",
-    "northstarReport": "evaluation/northstar-open-gates-current-2026-07-19/report.json",
     "tenantHarness": "scripts/supabase_tenant_isolation_harness.mjs",
-    "tenantManifest": "scripts/supabase_tenant_isolation_manifest.mjs"
+    "tenantManifest": "scripts/supabase_tenant_isolation_manifest.mjs",
+    "northstarReport": "evaluation/northstar-open-gates-current/report.json"
   },
   "checks": [
     {

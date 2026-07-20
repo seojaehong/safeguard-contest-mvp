@@ -11,10 +11,14 @@ const REQUIRED_FILES = Object.freeze({
   wikiReport: "evaluation/llm-wiki-rls-approval-2026-07-17/report.json",
   wikiReportMd: "evaluation/llm-wiki-rls-approval-2026-07-17/report.md",
   wikiSqlDesign: "evaluation/llm-wiki-rls-approval-2026-07-17/proposed-non-executable-publication-design.sql.txt",
-  northstarReport: "evaluation/northstar-open-gates-current-2026-07-19/report.json",
   tenantHarness: "scripts/supabase_tenant_isolation_harness.mjs",
   tenantManifest: "scripts/supabase_tenant_isolation_manifest.mjs",
 });
+
+const NORTHSTAR_REPORT_CANDIDATES = Object.freeze([
+  "evaluation/northstar-open-gates-current/report.json",
+  "evaluation/northstar-open-gates-current-2026-07-19/report.json",
+]);
 
 const CHECKLIST_SECTIONS = Object.freeze([
   "## A. Authoritative Target",
@@ -59,6 +63,10 @@ function readJson(root, relativePath) {
   return JSON.parse(readText(root, relativePath));
 }
 
+function firstExistingPath(root, relativePaths) {
+  return relativePaths.find((relativePath) => existsSync(resolve(root, relativePath))) ?? null;
+}
+
 function currentHead(root) {
   try {
     return execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
@@ -86,9 +94,16 @@ function gateState(report, gateId) {
 }
 
 function buildPreflight({ root }) {
+  const northstarReportPath = firstExistingPath(root, NORTHSTAR_REPORT_CANDIDATES);
   const missingFiles = Object.entries(REQUIRED_FILES)
     .filter(([, relativePath]) => !existsSync(resolve(root, relativePath)))
     .map(([id, relativePath]) => ({ id, relativePath }));
+  if (!northstarReportPath) {
+    missingFiles.push({
+      id: "northstarReport",
+      relativePath: NORTHSTAR_REPORT_CANDIDATES.join(" or "),
+    });
+  }
   if (missingFiles.length > 0) {
     return {
       schemaVersion: "safeclaw-rls-llm-wiki-approval-preflight/v1",
@@ -108,7 +123,7 @@ function buildPreflight({ root }) {
   const wikiReport = readJson(root, REQUIRED_FILES.wikiReport);
   const wikiReportMd = readText(root, REQUIRED_FILES.wikiReportMd);
   const wikiSqlDesign = readText(root, REQUIRED_FILES.wikiSqlDesign);
-  const northstarReport = readJson(root, REQUIRED_FILES.northstarReport);
+  const northstarReport = readJson(root, northstarReportPath);
   const tenantManifestText = readText(root, REQUIRED_FILES.tenantManifest);
   const tenantHarnessText = readText(root, REQUIRED_FILES.tenantHarness);
 
@@ -156,7 +171,10 @@ function buildPreflight({ root }) {
       "production migration approved",
       "service-role routes are safe because table RLS exists",
     ],
-    inputs: REQUIRED_FILES,
+    inputs: {
+      ...REQUIRED_FILES,
+      northstarReport: northstarReportPath,
+    },
     checks,
     failedCheckIds: failedChecks.map((item) => item.id),
   };

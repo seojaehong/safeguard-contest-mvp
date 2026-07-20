@@ -121,4 +121,28 @@ describe("RLS / LLM Wiki approval preflight", () => {
     };
     expect(typedReport.failedCheckIds).toEqual(["wiki_sql_design_non_executable"]);
   });
+
+  it("prefers the current northstar open-gate packet over the legacy dated packet", () => {
+    const root = fixtureRoot();
+    writeJson(root, "evaluation/northstar-open-gates-current-2026-07-19/report.json", {
+      gates: {
+        supabase_rls_launch_isolation: { status: "proven" },
+        llm_wiki_publication: { status: "proven" },
+      },
+    });
+    writeJson(root, "evaluation/northstar-open-gates-current/report.json", {
+      gates: [
+        { id: "supabase_rls_launch_isolation", state: "approval_gated" },
+        { id: "llm_wiki_publication", state: "approval_gated" },
+      ],
+    });
+
+    const { report, status } = runPreflight(root);
+
+    expect(status).toBe(0);
+    expect(report.overall).toBe("approval_ready_open");
+    expect(report.inputs).toMatchObject({
+      northstarReport: "evaluation/northstar-open-gates-current/report.json",
+    });
+  });
 });
