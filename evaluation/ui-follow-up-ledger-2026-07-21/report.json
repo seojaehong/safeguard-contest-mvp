@@ -145,6 +145,59 @@
       "remainingDebt": "inner pane remains long; deeper per-section summaries/readability/drilldown remain open"
     }
   },
+  "documentsInnerPaneDepthUpdate": {
+    "checkedAt": "2026-07-21T06:38:00+09:00",
+    "sourcePatchCommit": "d3a19519d41ae16503fa6b05b51a75b9140eeee1",
+    "artifact": "evaluation/documents-inner-pane-depth-2026-07-21/report.json",
+    "scope": "standalone /documents mobile inner-pane default secondary controls/details depth",
+    "verdict": "PASS_CURRENT_SOURCE",
+    "routeSplitAloneAcceptedAsFix": false,
+    "mobile390x844": {
+      "bodyHeight": 844,
+      "heightRatio": 1,
+      "selectedTitle": "위험성평가표",
+      "riskLauncherPressed": true,
+      "workpackShellTop": 476,
+      "workpackShellBottom": 796,
+      "workpackShellClientHeight": 320,
+      "workpackShellScrollHeightBefore": 1544,
+      "workpackShellScrollHeightAfter": 1447,
+      "toolbarBottom": 572,
+      "firstTextareaTop": 580,
+      "firstTextareaBottom": 737,
+      "firstTextareaBelowToolbar": true,
+      "secondaryToolsHeight": 213,
+      "defaultOpenSectionCount": 1,
+      "horizontalOverflow": false
+    },
+    "desktopShort1440x723": {
+      "bodyHeight": 770,
+      "heightRatio": 1.07,
+      "selectedTitle": "위험성평가표",
+      "riskLauncherPressed": true,
+      "workpackShellTop": 336,
+      "workpackShellBottom": 722,
+      "workpackShellClientHeight": 386,
+      "workpackShellScrollHeight": 1499,
+      "firstTextareaTop": 493,
+      "firstTextareaBottom": 658,
+      "defaultOpenSectionCount": 1,
+      "horizontalOverflow": false
+    },
+    "focusedGate": {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"bounds the default documents route editor\" --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS"
+    },
+    "preservationGate": {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"opens a requested document|bounds the default documents route editor|keeps the editor workspace and expanded tools contained\" --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    },
+    "remainingDebt": "This reduces bounded pane default depth only; document-specific summaries, risk-row readability, and full 12-document authoring UX remain product-depth follow-up."
+  },
   "productionMarker": "f504b15e9682e35bce97d629b86e02268c08a185",
   "documentsDesktopShort": {
     "viewport": {

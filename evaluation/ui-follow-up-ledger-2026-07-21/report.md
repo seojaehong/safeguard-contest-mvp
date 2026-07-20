@@ -75,6 +75,22 @@ Production confirmation:
 
 Interpretation: this closes the first-edit arrival gap on live production. It does not claim full document-specific editing depth is finished; the inner pane remains long (`desktop scrollHeight 1499`, mobile scrollHeight 1544), so richer per-section summaries/readability/drilldown remain product-depth follow-up.
 
+## 2026-07-21 Documents Inner-Pane Depth Update
+
+Current-source bounded gate:
+
+- Artifact: `evaluation/documents-inner-pane-depth-2026-07-21/report.md`
+- Source patch commit: `d3a19519d41ae16503fa6b05b51a75b9140eeee1`
+- The live first-edit cockpit remains the baseline contract: standalone `/documents` starts on `위험성평가표`, the risk launcher is pressed, the first textarea is visible in the first viewport, and it sits below the sticky toolbar.
+- This wave reduces default mobile inner-pane depth by compacting closed secondary controls/details, not by hiding the 3 core document affordance or changing export/data/provider contracts.
+- Mobile 390x844 current-source: body `844px / 1.00x`, shell `476-796`, `clientHeight = 320`, `scrollHeight = 1447` (down from live baseline `1544`), first textarea `580-737`, secondary tools `213px`, default open sections `1`, overflow `0`.
+- Desktop 1440x723 preservation: body `770px / 1.07x`, shell `336-722`, `clientHeight = 386`, `scrollHeight = 1499`, first textarea `493-658`, default open sections `1`, overflow `0`.
+- Focused browser: `documents-editor-layout` default cockpit slice PASS, 1/1 selected.
+- Focused preservation browser: `documents-editor-layout` requested document + default cockpit + expanded tools containment PASS, 3/3 selected.
+- TypeScript: PASS.
+
+Interpretation: this closes a bounded default-depth slice inside the document pane. It still does not claim full 12-document authoring UX is solved; deeper document-specific summaries, risk-row readability, and per-section action design remain OPEN.
+
 ## Current Production Baseline
 
 Current production evidence after the latest workspace IA work:
