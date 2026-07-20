@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-21T02:34:27+09:00",
-  "sourceSha": "3a91ec7ebee10d71e759b5c9fc261ec4a8974a28",
+  "generatedAt": "2026-07-21T02:57:40+09:00",
+  "sourceSha": "2346cf1291304920bc8007b0efbceaf809a11ba3",
   "overall": "open",
   "gates": [
     {
@@ -30,6 +30,16 @@
       "detail": "Current production closes the raw mobile /documents long-page complaint: 390x844 bodyHeight 844, workpack pane overflowY auto, current-work strip visible, and share desktop/mobile cockpit gates remain green.",
       "nextActions": [
         "Continue UI work on internal pane readability and document-specific drilldown, not raw route body height."
+      ]
+    },
+    {
+      "id": "dispatch_standalone_cockpit",
+      "state": "proven",
+      "label": "Standalone dispatch desktop cockpit",
+      "evidencePath": "evaluation\\dispatch-standalone-cockpit-2026-07-21\\report.json",
+      "detail": "Production /dispatch seeded desktop route is no longer mobile-stacked: 1440x900 pageHeight 1116 (1.24x), share root 1156x652, preview 520x398 right pane, primary CTA bottom 544, channel cards 164x44 x3, overflow false/outside 0.",
+      "nextActions": [
+        "Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved."
       ]
     },
     {

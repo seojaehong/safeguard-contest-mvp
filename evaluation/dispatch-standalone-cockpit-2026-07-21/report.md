@@ -1,8 +1,9 @@
 # Dispatch Standalone Cockpit Gate
 
-- Checked: 2026-07-21T02:51:41+09:00
+- Checked: 2026-07-21T02:57:40+09:00
 - Source HEAD before commit: `ba91572412b49bd61d463119f58382e4ca77396c`
-- Verdict: `PASS_CURRENT_SOURCE`
+- Product commit: `2346cf1291304920bc8007b0efbceaf809a11ba3`
+- Verdict: `PASS_PRODUCTION`
 - Route: `/dispatch`
 - Viewport: 1440x900 desktop
 
@@ -23,6 +24,22 @@ Measured current-source browser metrics:
 | primary action right | 861px |
 | horizontal overflow | 0 |
 | channel cards | 164x44, 164x44, 164x44 |
+
+Measured production browser metrics at `https://www.safeclaw.kr`:
+
+| Metric | Value |
+| --- | ---: |
+| production commit | `2346cf1291304920bc8007b0efbceaf809a11ba3` |
+| page height | 1116px / 1.24x viewport |
+| horizontal overflow | false |
+| outside horizontal elements | 0 |
+| share root | 1156x652, top 323, bottom 975 |
+| primary CTA | 582x44, top 500, bottom 544 |
+| preview | 520x398, top 500, bottom 898 |
+| preview right of primary | true |
+| message lines | client 228, scroll 228, overflow auto |
+| channel cards | 164x44, 164x44, 164x44 |
+| support panel | 1108x49 |
 
 Acceptance:
 
@@ -46,4 +63,4 @@ Acceptance:
 
 This gate does not claim real provider email/SMS/Kakao delivery. Production dispatch remains preview-only until persistent idempotency and provider result persistence are approved and verified.
 
-Production live verification should run after this commit is deployed.
+Production live verification is complete for commit `2346cf1291304920bc8007b0efbceaf809a11ba3`.

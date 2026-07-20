@@ -18,12 +18,13 @@ const ARTIFACTS = Object.freeze({
   final99: path.join("evaluation", "final-99-gate-current-2026-07-20", "report.json"),
   final99NoticeCarry: path.join("evaluation", "final-99-gate-current-2026-07-20", "notice-carry.json"),
   liveHarness: path.join("evaluation", "live-harness-quality-probe-current-2026-07-20", "report.json"),
-  kosha: path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json"),
+  kosha: path.join("evaluation", "kosha-current-northstar-regression-2026-07-21", "report.json"),
   rlsWiki: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
   sifEmbedding: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
   liveCritical: path.join("evaluation", "live-critical-surface-current-2026-07-20-rerun", "report.json"),
   mobileP0: path.join("evaluation", "mobile-p0-workspace-gate-2026-07-20", "report.json"),
   workspaceGeometry: path.join("evaluation", "workspace-docs-share-production-gate-2026-07-20", "current-geometry.json"),
+  dispatchStandalone: path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"),
 });
 
 /**
@@ -160,6 +161,7 @@ function extractSourceCommit(report) {
   }
   return asString(report.sourceCommit)
     || asString(report.sourceSha)
+    || asString(report.sourceHeadBeforeCommit)
     || asString(report.head)
     || asString(report.commitSha)
     || asString(report.commit);
@@ -271,6 +273,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const liveCritical = tryReadJson(rootDir, ARTIFACTS.liveCritical);
   const mobileP0 = tryReadJson(rootDir, ARTIFACTS.mobileP0);
   const workspaceGeometry = tryReadJson(rootDir, ARTIFACTS.workspaceGeometry);
+  const dispatchStandalone = tryReadJson(rootDir, ARTIFACTS.dispatchStandalone);
 
   const openGates = isRecord(openGate) && Array.isArray(openGate.gates) ? openGate.gates : [];
   const provenGates = [];
@@ -304,6 +307,12 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const mobileGeometry = geometryResults.find((row) => isRecord(row) && row.name === "mobile-day");
   const mobileDocuments = isRecord(mobileGeometry) ? recordAt(mobileGeometry, "documents") : null;
   const liveCriticalRows = isRecord(liveCritical) && Array.isArray(liveCritical.rows) ? liveCritical.rows : [];
+  const koshaLiveStatus = recordAt(kosha, "liveStatus");
+  const koshaExactTrustRegistry = recordAt(koshaLiveStatus, "exactTrustRegistry");
+  const koshaLocalCorpus = recordAt(koshaLiveStatus, "localCorpus");
+  const koshaCoveredExactPins = isRecord(kosha) && Array.isArray(kosha.coveredExactPins)
+    ? kosha.coveredExactPins
+    : [];
 
   const evidence = [
     evidenceStatus(rootDir, currentHead, liveCommit, "open_gate", ARTIFACTS.openGate, openGate),
@@ -315,6 +324,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "live_critical_surface", ARTIFACTS.liveCritical, liveCritical),
     evidenceStatus(rootDir, currentHead, liveCommit, "mobile_p0_workspace", ARTIFACTS.mobileP0, mobileP0),
     evidenceStatus(rootDir, currentHead, liveCommit, "workspace_docs_share_geometry", ARTIFACTS.workspaceGeometry, workspaceGeometry),
+    evidenceStatus(rootDir, currentHead, liveCommit, "dispatch_standalone_cockpit", ARTIFACTS.dispatchStandalone, dispatchStandalone),
   ];
 
   const contradictions = evidence.filter((item) => (
@@ -373,6 +383,17 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       mobileDocumentDeepReviewOpen: mobileDocuments ? mobileDocuments.documentDeepReviewOpen === true : null,
       mobileVisibleDocumentPreviews: mobileDocuments ? asNumber(mobileDocuments.visibleDocumentPreviews) : null,
     },
+    dispatchStandaloneCockpit: {
+      artifact: ARTIFACTS.dispatchStandalone,
+      verdict: isRecord(dispatchStandalone) ? asString(dispatchStandalone.verdict) : "missing",
+      pageHeight: asNumber(recordAt(dispatchStandalone, "metrics")?.pageHeight),
+      heightRatio: asNumber(recordAt(dispatchStandalone, "metrics")?.heightRatio),
+      rootWidth: asNumber(recordAt(dispatchStandalone, "metrics")?.rootWidth),
+      rootHeight: asNumber(recordAt(dispatchStandalone, "metrics")?.rootHeight),
+      previewBottom: asNumber(recordAt(dispatchStandalone, "metrics")?.previewBottom),
+      primaryBottom: asNumber(recordAt(dispatchStandalone, "metrics")?.primaryBottom),
+      horizontalOverflow: asNumber(recordAt(dispatchStandalone, "metrics")?.horizontalOverflow),
+    },
     final99: {
       artifact: ARTIFACTS.final99,
       overall: isRecord(final99) ? asString(final99.overall) : "missing",
@@ -382,12 +403,12 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     kosha: {
       artifact: ARTIFACTS.kosha,
       verdict: isRecord(kosha) ? asString(kosha.verdict) : "missing",
-      exactPins: isRecord(recordAt(kosha, "liveStatus")?.exactTrustRegistry)
-        ? recordAt(kosha, "liveStatus")?.exactTrustRegistry?.stableDocumentKeys
-        : [],
-      localCorpusItems: isRecord(recordAt(kosha, "liveStatus")?.localCorpus)
-        ? recordAt(kosha, "liveStatus")?.localCorpus?.itemCount
-        : null,
+      exactPins: koshaCoveredExactPins.length
+        ? koshaCoveredExactPins
+        : isRecord(koshaExactTrustRegistry) && Array.isArray(koshaExactTrustRegistry.stableDocumentKeys)
+          ? koshaExactTrustRegistry.stableDocumentKeys
+          : [],
+      localCorpusItems: isRecord(koshaLocalCorpus) ? koshaLocalCorpus.itemCount : null,
     },
     evidence,
     contradictions,
@@ -417,6 +438,14 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Deep review closed: ${rollup.mobileP0.documentDeepReviewOpen === false ? "yes" : "no"}`,
     `- Visible full previews while closed: ${rollup.mobileP0.visibleDocumentPreviews}`,
     `- Share: ${rollup.mobileP0.shareHeightRatio}x viewport, preview y=${rollup.mobileP0.sharePreviewY}`,
+    "",
+    "## Dispatch Standalone Cockpit",
+    "",
+    `- Verdict: \`${rollup.dispatchStandaloneCockpit.verdict}\``,
+    `- Page height: ${rollup.dispatchStandaloneCockpit.pageHeight}px (${rollup.dispatchStandaloneCockpit.heightRatio}x viewport)`,
+    `- Preview bottom: ${rollup.dispatchStandaloneCockpit.previewBottom}`,
+    `- Primary CTA bottom: ${rollup.dispatchStandaloneCockpit.primaryBottom}`,
+    `- Horizontal overflow: ${rollup.dispatchStandaloneCockpit.horizontalOverflow}`,
     "",
     "## Gate Matrix",
     "",

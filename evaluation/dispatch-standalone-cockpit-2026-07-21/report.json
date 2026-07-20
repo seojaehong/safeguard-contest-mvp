@@ -1,7 +1,8 @@
 {
   "schemaVersion": "safeclaw-dispatch-standalone-cockpit/v1",
-  "checkedAt": "2026-07-21T02:51:41+09:00",
-  "verdict": "PASS_CURRENT_SOURCE",
+  "checkedAt": "2026-07-21T02:57:40+09:00",
+  "verdict": "PASS_PRODUCTION",
+  "sourceCommit": "2346cf1291304920bc8007b0efbceaf809a11ba3",
   "sourceHeadBeforeCommit": "ba91572412b49bd61d463119f58382e4ca77396c",
   "branch": "chore/recipient-foreign-live-gate-20260720",
   "scope": {
@@ -80,8 +81,65 @@
     }
   },
   "production": {
-    "liveVerified": false,
-    "note": "This is a current-source browser gate. Production verification should run after this commit is deployed."
+    "liveVerified": true,
+    "checkedAt": "2026-07-21T02:57:40+09:00",
+    "baseUrl": "https://www.safeclaw.kr",
+    "route": "/dispatch?theme=day",
+    "commitSha": "2346cf1291304920bc8007b0efbceaf809a11ba3",
+    "branch": "master",
+    "environment": "production",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "metrics": {
+      "pageHeight": 1116,
+      "heightRatio": 1.24,
+      "horizontalOverflow": false,
+      "outside": 0,
+      "shareRoot": {
+        "width": 1156,
+        "height": 652,
+        "top": 323,
+        "bottom": 975
+      },
+      "primaryCta": {
+        "width": 582,
+        "height": 44,
+        "top": 500,
+        "bottom": 544
+      },
+      "preview": {
+        "width": 520,
+        "height": 398,
+        "top": 500,
+        "bottom": 898
+      },
+      "previewRightOfPrimary": true,
+      "messageLines": {
+        "clientHeight": 228,
+        "scrollHeight": 228,
+        "overflowY": "auto"
+      },
+      "channelCards": [
+        {
+          "width": 164,
+          "height": 44
+        },
+        {
+          "width": 164,
+          "height": 44
+        },
+        {
+          "width": 164,
+          "height": 44
+        }
+      ],
+      "supportPanel": {
+        "width": 1108,
+        "height": 49
+      }
+    }
   },
   "interpretation": [
     "The standalone /dispatch page no longer presents the share result as a mobile-like narrow card on desktop.",

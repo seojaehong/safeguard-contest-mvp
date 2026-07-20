@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T02:34:27+09:00",
-  "head": "3a91ec7ebee10d71e759b5c9fc261ec4a8974a28",
+  "generatedAt": "2026-07-20T17:58:52.534Z",
+  "head": "2346cf1291304920bc8007b0efbceaf809a11ba3",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f504b15e9682e35bce97d629b86e02268c08a185",
+    "commitSha": "2346cf1291304920bc8007b0efbceaf809a11ba3",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-kiapofu1c-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-3jehddjqa-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 7
+    "gateCount": 8
   },
   "provenGates": [
     {
@@ -38,6 +38,12 @@
       "state": "proven",
       "artifact": "evaluation\\documents-mobile-internal-pane-2026-07-21\\report.json",
       "detail": "Current production closes the raw mobile /documents long-page complaint: 390x844 bodyHeight 844, workpack pane overflowY auto, current-work strip visible, and share desktop/mobile cockpit gates remain green."
+    },
+    {
+      "id": "dispatch_standalone_cockpit",
+      "state": "proven",
+      "artifact": "evaluation\\dispatch-standalone-cockpit-2026-07-21\\report.json",
+      "detail": "Production /dispatch seeded desktop route is no longer mobile-stacked: 1440x900 pageHeight 1116 (1.24x), share root 1156x652, preview 520x398 right pane, primary CTA bottom 544, channel cards 164x44 x3, overflow false/outside 0."
     },
     {
       "id": "kosha_exact_trust_registry",
@@ -67,35 +73,20 @@
     }
   ],
   "mobileP0": {
-    "artifact": "evaluation\\documents-mobile-internal-pane-2026-07-21\\report.json",
+    "artifact": "evaluation\\mobile-p0-workspace-gate-2026-07-20\\report.json",
     "verdict": "MOBILE_FIXED",
-    "productionCommit": "f504b15e9682e35bce97d629b86e02268c08a185",
-    "documentsHeightRatio": 1.0,
-    "firstUsefulReviewY": 305,
+    "productionCommit": "928244cb28a575a23d951e621624ea8b014d77a1",
+    "documentsHeightRatio": 1.5,
+    "firstUsefulReviewY": 262,
     "documentDeepReviewOpen": false,
     "visibleDocumentPreviews": 0,
     "shareHeightRatio": 1.72,
     "sharePreviewY": 380,
     "hardBlockersClosed": true
   },
-  "uiDocumentsShareCockpit": {
-    "artifact": "evaluation\\documents-mobile-internal-pane-2026-07-21\\report.json",
-    "productionCommit": "f504b15e9682e35bce97d629b86e02268c08a185",
-    "documentsMobile390x844": {
-      "bodyHeight": 844,
-      "heightRatio": 1.0,
-      "currentWorkStripVisible": true,
-      "mobileCoreLauncherBottom": 468,
-      "workpackPaneBottom": 796,
-      "workpackPaneOverflowY": "auto",
-      "workpackPaneScrollHeight": 1110,
-      "overflowX": false,
-      "outside": 0
-    }
-  },
   "liveCritical": {
     "artifact": "evaluation\\live-critical-surface-current-2026-07-20-rerun\\report.json",
-    "productionCommit": "9fedcf019a6b24882131ba913ad7c6358b1ad9d4",
+    "productionCommit": "ba91572412b49bd61d463119f58382e4ca77396c",
     "findings": 0,
     "rowsChecked": 16
   },
@@ -104,6 +95,17 @@
     "productionCommit": "72b282315b7dcdd2bcc538de13dee9fd7d4c1c80",
     "mobileDocumentDeepReviewOpen": false,
     "mobileVisibleDocumentPreviews": 0
+  },
+  "dispatchStandaloneCockpit": {
+    "artifact": "evaluation\\dispatch-standalone-cockpit-2026-07-21\\report.json",
+    "verdict": "PASS_PRODUCTION",
+    "pageHeight": 1116,
+    "heightRatio": 1.24,
+    "rootWidth": 1156,
+    "rootHeight": 652,
+    "previewBottom": 898.390625,
+    "primaryBottom": 544.390625,
+    "horizontalOverflow": 0
   },
   "final99": {
     "artifact": "evaluation\\final-99-gate-current-2026-07-20\\report.json",
@@ -125,31 +127,23 @@
     ]
   },
   "kosha": {
-    "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
-    "verdict": "pass_current_kosha_exact_trust_and_corpus_gate",
+    "artifact": "evaluation\\kosha-current-northstar-regression-2026-07-21\\report.json",
+    "verdict": "PASS",
     "exactPins": [
-      "D-C-13",
-      "D-C-7",
-      "B-E-10"
+      "D-C-13-2026",
+      "D-C-7-2026",
+      "B-E-10-2026"
     ],
-    "localCorpusItems": 234
+    "localCorpusItems": null
   },
   "evidence": [
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "3a91ec7ebee10d71e759b5c9fc261ec4a8974a28",
+      "sourceCommit": "2346cf1291304920bc8007b0efbceaf809a11ba3",
       "sourceStatus": "exact",
-      "productionCommit": "f504b15e9682e35bce97d629b86e02268c08a185",
-      "productionStatus": "product_live"
-    },
-    {
-      "id": "ui_documents_share_cockpit",
-      "artifact": "evaluation\\documents-mobile-internal-pane-2026-07-21\\report.json",
-      "sourceCommit": "3a91ec7ebee10d71e759b5c9fc261ec4a8974a28",
-      "sourceStatus": "exact",
-      "productionCommit": "f504b15e9682e35bce97d629b86e02268c08a185",
-      "productionStatus": "product_live"
+      "productionCommit": "2346cf1291304920bc8007b0efbceaf809a11ba3",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -170,10 +164,10 @@
     {
       "id": "kosha_exact_trust_registry",
       "artifact": "evaluation\\kosha-current-northstar-regression-2026-07-21\\report.json",
-      "sourceCommit": "3dc37bc5569492ac59e2cab48b8c5d52793e3f0c",
-      "sourceStatus": "exact",
-      "productionCommit": "aedc3d4b607af8316b5d9276b6cd6a49c1bb2488",
-      "productionStatus": "product_live"
+      "sourceCommit": "aedc3d4b607af8316b5d9276b6cd6a49c1bb2488",
+      "sourceStatus": "ancestor",
+      "productionCommit": null,
+      "productionStatus": "missing"
     },
     {
       "id": "rls_llm_wiki_approval_preflight",
@@ -187,7 +181,7 @@
       "id": "sif_embedding_preflight",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
       "sourceCommit": "4dd391e1ed773469627fe81bebe0f8a250766373",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },
@@ -196,7 +190,7 @@
       "artifact": "evaluation\\live-critical-surface-current-2026-07-20-rerun\\report.json",
       "sourceCommit": null,
       "sourceStatus": "missing",
-      "productionCommit": "9fedcf019a6b24882131ba913ad7c6358b1ad9d4",
+      "productionCommit": "ba91572412b49bd61d463119f58382e4ca77396c",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -214,6 +208,14 @@
       "sourceStatus": "missing",
       "productionCommit": "72b282315b7dcdd2bcc538de13dee9fd7d4c1c80",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "dispatch_standalone_cockpit",
+      "artifact": "evaluation\\dispatch-standalone-cockpit-2026-07-21\\report.json",
+      "sourceCommit": "2346cf1291304920bc8007b0efbceaf809a11ba3",
+      "sourceStatus": "exact",
+      "productionCommit": "2346cf1291304920bc8007b0efbceaf809a11ba3",
+      "productionStatus": "matches_live"
     }
   ],
   "contradictions": [],
