@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-rls-llm-wiki-approval-preflight/v1",
-  "generatedAt": "2026-07-20T12:22:06.737Z",
-  "sourceSha": "ac80b4e21bde172df0612afa84156bc9db483a7c",
+  "generatedAt": "2026-07-20T12:48:57.991Z",
+  "sourceSha": "502b0d0f2dec511f4d4467c53291b3d23ef24586",
   "overall": "approval_ready_open",
   "launchReadiness": false,
   "dbMutationPerformed": false,
@@ -32,6 +32,48 @@
     "tenantManifest": "scripts/supabase_tenant_isolation_manifest.mjs",
     "northstarReport": "evaluation/northstar-open-gates-current/report.json"
   },
+  "artifactIntegrity": [
+    {
+      "path": "evaluation/supabase-rls-approval-2026-07-17/report.json",
+      "bytes": 4769,
+      "sha256": "f98ec7a7e9fa59ba1a9a762e0022b839691ee084459c05b2da921401c70faf94"
+    },
+    {
+      "path": "evaluation/supabase-rls-approval-2026-07-17/approval-checklist.md",
+      "bytes": 5443,
+      "sha256": "eaf34d3ec140ac44caa88239d4d92e0eb2b961299ad2cf1b012b0a788bda8a03"
+    },
+    {
+      "path": "evaluation/llm-wiki-rls-approval-2026-07-17/report.json",
+      "bytes": 2659,
+      "sha256": "2f042d81b1671e982c10b5ee274dbfb7b7be3f6d1470223d47b6df528e9c7dd4"
+    },
+    {
+      "path": "evaluation/llm-wiki-rls-approval-2026-07-17/report.md",
+      "bytes": 7586,
+      "sha256": "0de05473f71916dfc1d6b69f964ae2b85d14de0185b2a6824fb36705a29b141f"
+    },
+    {
+      "path": "evaluation/llm-wiki-rls-approval-2026-07-17/proposed-non-executable-publication-design.sql.txt",
+      "bytes": 3918,
+      "sha256": "b3d4760eda2668f2a6a05f3eb1a4e9c26eead63422ecdf6186f577c0501df193"
+    },
+    {
+      "path": "scripts/supabase_tenant_isolation_harness.mjs",
+      "bytes": 11568,
+      "sha256": "32891f6a827a460957a37d45a0dead358c0f6ddb39801e05d63842da625b1d9c"
+    },
+    {
+      "path": "scripts/supabase_tenant_isolation_manifest.mjs",
+      "bytes": 4043,
+      "sha256": "eec4c9d449e95267c0576121fbaa3982a0926a9e02f54c80175a0c229519d751"
+    },
+    {
+      "path": "evaluation/northstar-open-gates-current/report.json",
+      "bytes": 4311,
+      "sha256": "4a7d2e6fcfa822aa418ceecd3cb1511711ea5580ef7ba3117b1c823df0adef2b"
+    }
+  ],
   "checks": [
     {
       "id": "rls_status_approval_required",

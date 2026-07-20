@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-20T12:42:57.080Z",
-  "sourceSha": "131e486d7601a316dbd84db134a261843635818d",
+  "generatedAt": "2026-07-20T12:49:19.646Z",
+  "sourceSha": "502b0d0f2dec511f4d4467c53291b3d23ef24586",
   "overall": "open",
   "gates": [
     {
@@ -38,8 +38,8 @@
       "id": "llm_wiki_publication",
       "state": "approval_gated",
       "label": "LLM Wiki publication",
-      "evidencePath": "evaluation\\llm-wiki-rls-approval-2026-07-17\\report.md",
-      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete.",
+      "evidencePath": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
+      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 502b0d0f2dec511f4d4467c53291b3d23ef24586.",
       "nextActions": [
         "Approve final DDL, append-only ledger, graph pointer, and RPC threat model.",
         "Run approved publication canary in an isolated project.",

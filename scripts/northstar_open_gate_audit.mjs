@@ -25,6 +25,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveHarness: path.join("evaluation", "live-harness-quality-probe-current-2026-07-20", "report.json"),
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
   llmWikiApproval: path.join("evaluation", "llm-wiki-rls-approval-2026-07-17", "report.md"),
+  rlsLlmWikiApprovalPreflight: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
   sifEmbeddingPreflight: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
   koshaCurrentGate: path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json"),
   koshaCurrentReconciliation: path.join("evaluation", "kosha-current-master-reconciliation-2026-07-19", "report.json"),
@@ -309,6 +310,8 @@ function evaluateRlsApprovalGate(rootDir) {
 function evaluateLlmWikiGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.llmWikiApproval;
   const text = readTextFile(rootDir, evidencePath);
+  const preflightPath = EVIDENCE_PATHS.rlsLlmWikiApprovalPreflight;
+  const preflight = readJsonFile(rootDir, preflightPath);
   if (text === null) {
     return gateResult({
       id: "llm_wiki_publication",
@@ -322,13 +325,23 @@ function evaluateLlmWikiGate(rootDir) {
 
   const redApproval = /Verdict:\s*\*\*RED \/ approval required \/ launch not proven\*\*/u.test(text);
   const unavailable = /publication remains unavailable/u.test(text);
-  if (redApproval && unavailable) {
+  const preflightSourceSha = isRecord(preflight) ? readString(preflight.sourceSha) : "";
+  const preflightCurrent = isGitAncestor(rootDir, preflightSourceSha);
+  const preflightReady = isRecord(preflight)
+    && preflight.overall === "approval_ready_open"
+    && preflight.launchReadiness === false
+    && preflight.dbMutationPerformed === false
+    && preflight.networkOpened === false
+    && Array.isArray(preflight.failedCheckIds)
+    && preflight.failedCheckIds.length === 0
+    && preflightCurrent;
+  if (redApproval && unavailable && preflightReady) {
     return gateResult({
       id: "llm_wiki_publication",
       label: "LLM Wiki publication",
       state: "approval_gated",
-      evidencePath,
-      detail: "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete.",
+      evidencePath: preflightPath,
+      detail: `Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA ${preflightSourceSha || "not-recorded"}.`,
       nextActions: [
         "Approve final DDL, append-only ledger, graph pointer, and RPC threat model.",
         "Run approved publication canary in an isolated project.",
@@ -341,9 +354,13 @@ function evaluateLlmWikiGate(rootDir) {
     id: "llm_wiki_publication",
     label: "LLM Wiki publication",
     state: "contradicted",
-    evidencePath,
-    detail: "LLM Wiki report no longer clearly states the approval-required publication boundary.",
-    nextActions: ["Re-audit publication evidence before making any North Star completion claim."],
+    evidencePath: isRecord(preflight) ? preflightPath : evidencePath,
+    detail: redApproval && unavailable
+      ? (preflightCurrent
+        ? "LLM Wiki approval preflight is missing or failed even though the base report remains approval-required."
+        : `LLM Wiki approval preflight source SHA ${preflightSourceSha} is not an ancestor of current HEAD.`)
+      : "LLM Wiki report no longer clearly states the approval-required publication boundary.",
+    nextActions: ["Re-run the RLS/LLM Wiki approval preflight and re-audit publication evidence before making any North Star completion claim."],
   });
 }
 

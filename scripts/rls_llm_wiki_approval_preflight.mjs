@@ -1,7 +1,8 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
 
 const DEFAULT_OUTPUT_DIR = "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20";
 
@@ -73,6 +74,20 @@ function currentHead(root) {
   } catch {
     return null;
   }
+}
+
+function sha256File(root, relativePath) {
+  return createHash("sha256").update(readFileSync(resolve(root, relativePath))).digest("hex");
+}
+
+function artifactIntegrity(root, relativePath) {
+  const absolutePath = resolve(root, relativePath);
+  const stat = statSync(absolutePath);
+  return {
+    path: relativePath,
+    bytes: stat.size,
+    sha256: sha256File(root, relativePath)
+  };
 }
 
 function check(id, passed, message) {
@@ -147,6 +162,11 @@ function buildPreflight({ root }) {
   ];
 
   const failedChecks = checks.filter((item) => !item.passed);
+  const inputs = {
+    ...REQUIRED_FILES,
+    northstarReport: northstarReportPath,
+  };
+  const artifactIntegrityRows = Object.values(inputs).map((relativePath) => artifactIntegrity(root, relativePath));
   return {
     schemaVersion: "safeclaw-rls-llm-wiki-approval-preflight/v1",
     generatedAt: new Date().toISOString(),
@@ -171,10 +191,8 @@ function buildPreflight({ root }) {
       "production migration approved",
       "service-role routes are safe because table RLS exists",
     ],
-    inputs: {
-      ...REQUIRED_FILES,
-      northstarReport: northstarReportPath,
-    },
+    inputs,
+    artifactIntegrity: artifactIntegrityRows,
     checks,
     failedCheckIds: failedChecks.map((item) => item.id),
   };

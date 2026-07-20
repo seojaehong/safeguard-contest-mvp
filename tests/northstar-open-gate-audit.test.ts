@@ -96,6 +96,14 @@ function createFixtureRoot(): string {
     "Verdict: **RED / approval required / launch not proven**",
     "Until all blockers close, publication remains unavailable and launch readiness remains false.",
   ].join("\n"));
+  writeJson(rootDir, path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"), {
+    overall: "approval_ready_open",
+    sourceSha: "fixture-sha",
+    launchReadiness: false,
+    dbMutationPerformed: false,
+    networkOpened: false,
+    failedCheckIds: [],
+  });
   writeJson(rootDir, path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"), {
     ok: true,
     approvalHeld: true,
@@ -354,6 +362,26 @@ describe("northstar open gate audit", () => {
     const sifGate = audit.gates.find((gate) => gate.id === "sif_embedding_runtime");
     expect(sifGate?.state).toBe("contradicted");
     expect(sifGate?.detail).toContain("not an ancestor");
+  });
+
+  it("contradicts stale LLM Wiki publication preflight evidence from outside the current history", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json");
+    const report = JSON.parse(fs.readFileSync(path.join(rootDir, reportPath), "utf8")) as Record<string, unknown>;
+    report.sourceSha = "0000000000000000000000000000000000000000";
+    writeJson(rootDir, reportPath, report);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.overall).toBe("contradicted");
+    const wikiGate = audit.gates.find((gate) => gate.id === "llm_wiki_publication");
+    expect(wikiGate?.state).toBe("contradicted");
+    expect(wikiGate?.detail).toContain("not an ancestor");
   });
 
   it("fails evidence completeness when the current KOSHA reconciliation is missing", async () => {

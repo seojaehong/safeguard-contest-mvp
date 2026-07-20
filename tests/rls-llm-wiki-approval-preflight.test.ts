@@ -105,6 +105,24 @@ describe("RLS / LLM Wiki approval preflight", () => {
     expect(report.schemaMutationAuthorized).toBe(false);
     expect(report.approvalRequired).toBe(true);
     expect(report.failedCheckIds).toEqual([]);
+    expect(report.sourceSha).toEqual(expect.stringMatching(/^[0-9a-f]{40}$/u));
+    expect(report.artifactIntegrity).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        path: "evaluation/supabase-rls-approval-2026-07-17/report.json",
+        bytes: expect.any(Number),
+        sha256: expect.stringMatching(/^[0-9a-f]{64}$/u),
+      }),
+      expect.objectContaining({
+        path: "evaluation/llm-wiki-rls-approval-2026-07-17/report.json",
+        bytes: expect.any(Number),
+        sha256: expect.stringMatching(/^[0-9a-f]{64}$/u),
+      }),
+      expect.objectContaining({
+        path: "evaluation/northstar-open-gates-current-2026-07-19/report.json",
+        bytes: expect.any(Number),
+        sha256: expect.stringMatching(/^[0-9a-f]{64}$/u),
+      }),
+    ]));
     expect(JSON.stringify(report)).toContain("publication_ddl_rpc");
   });
 
