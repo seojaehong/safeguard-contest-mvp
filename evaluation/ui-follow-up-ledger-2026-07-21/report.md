@@ -177,6 +177,8 @@ Current-source bounded source/CSS and generated fixture gate:
 
 Interpretation: this is a result-depth containment layer plus a fixture-generated result-state proof, not provider live dispatch. Route/page split alone is still not accepted as the UX fix; long provider/result details must stay in bounded drilldown while the first viewport keeps publish/status, recipient/channel decision, preview, and primary action.
 
+Product-depth follow-up: the closed result summary is currently intentionally generic (`전송 결과 / 미리 확인`). The fixture proof opens the drilldown and verifies the retained validation-only channel results, so this is not a false-green layout-only proof. A later UX wave can improve the closed summary itself with a status chip, channel count, or save-state label without changing provider dispatch contracts.
+
 ## 2026-07-21 Dispatch Sample Shell Update
 
 Current-source bounded gate:

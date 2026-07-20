@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-20T19:02:13.096Z",
-  "head": "a2028757e62553346733c757108f56a28495f888",
+  "generatedAt": "2026-07-20T20:26:30.567Z",
+  "head": "1d01ac6e7506b7dbcd903031b5b14b6dafd5b6e4",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "a2028757e62553346733c757108f56a28495f888",
+    "commitSha": "1d01ac6e7506b7dbcd903031b5b14b6dafd5b6e4",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-eb66gnd92-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-or957j3om-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 8
+    "gateCount": 9
   },
   "provenGates": [
     {
@@ -36,14 +36,20 @@
     {
       "id": "ui_documents_share_cockpit",
       "state": "proven",
-      "artifact": "evaluation\\documents-mobile-pane-context-2026-07-21\\report.json",
-      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not close deeper document-specific accordion/drilldown depth or claim provider live dispatch."
+      "artifact": "evaluation\\documents-drilldown-depth-2026-07-21\\report.json",
+      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch."
     },
     {
       "id": "dispatch_standalone_cockpit",
       "state": "proven",
       "artifact": "evaluation\\dispatch-standalone-cockpit-2026-07-21\\report.json",
-      "detail": "Production /dispatch seeded desktop route is no longer mobile-stacked: pageHeight 1116 (1.24x), preview right pane, first-viewport CTA, readable channel cards, overflow false/outside 0."
+      "detail": "Production /dispatch seeded desktop and sample shell routes are no longer mobile-stacked: seeded pageHeight 1116 (1.24x), sample panels 635px/413px in distinct desktop regions, overflow false/outside 0."
+    },
+    {
+      "id": "share_result_fixture_cockpit",
+      "state": "proven",
+      "artifact": "evaluation\\share-result-drilldown-2026-07-21\\report.json",
+      "detail": "Generated provider-result fixture proof is bounded: desktop page 900/900, result panel 606px with 2 x-ranges, mobile summary/preview/CTA/result inside 844px, dispatch POST count 1, provider live dispatch unclaimed."
     },
     {
       "id": "kosha_exact_trust_registry",
@@ -140,9 +146,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "a2028757e62553346733c757108f56a28495f888",
+      "sourceCommit": "1d01ac6e7506b7dbcd903031b5b14b6dafd5b6e4",
       "sourceStatus": "exact",
-      "productionCommit": "a2028757e62553346733c757108f56a28495f888",
+      "productionCommit": "1d01ac6e7506b7dbcd903031b5b14b6dafd5b6e4",
       "productionStatus": "matches_live"
     },
     {
