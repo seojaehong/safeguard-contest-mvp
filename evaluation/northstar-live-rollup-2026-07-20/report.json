@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-20T14:26:03.565Z",
-  "head": "928244cb28a575a23d951e621624ea8b014d77a1",
+  "generatedAt": "2026-07-20T16:21:53.823Z",
+  "head": "972211083ac89ec9c428b74b706a11011643f550",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "928244cb28a575a23d951e621624ea8b014d77a1",
+    "commitSha": "972211083ac89ec9c428b74b706a11011643f550",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-npuapwdkq-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-ei4foj2mq-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -80,7 +80,7 @@
   },
   "workspaceGeometry": {
     "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-    "productionCommit": "928244cb28a575a23d951e621624ea8b014d77a1",
+    "productionCommit": "72b282315b7dcdd2bcc538de13dee9fd7d4c1c80",
     "mobileDocumentDeepReviewOpen": false,
     "mobileVisibleDocumentPreviews": 0
   },
@@ -117,8 +117,8 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "cd45c092101a30892043b397bd89261673377f01",
-      "sourceStatus": "ancestor",
+      "sourceCommit": "972211083ac89ec9c428b74b706a11011643f550",
+      "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
     },
@@ -176,15 +176,15 @@
       "sourceCommit": null,
       "sourceStatus": "missing",
       "productionCommit": "928244cb28a575a23d951e621624ea8b014d77a1",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "workspace_docs_share_geometry",
       "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
       "sourceCommit": null,
       "sourceStatus": "missing",
-      "productionCommit": "928244cb28a575a23d951e621624ea8b014d77a1",
-      "productionStatus": "matches_live"
+      "productionCommit": "72b282315b7dcdd2bcc538de13dee9fd7d4c1c80",
+      "productionStatus": "ancestor_of_head"
     }
   ],
   "contradictions": [],
