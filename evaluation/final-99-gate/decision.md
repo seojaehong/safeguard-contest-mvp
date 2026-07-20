@@ -1,10 +1,10 @@
 # SafeClaw final-99-gate decision
 
-- Generated at: 2026-07-19T10:27:24.113Z
-- Base URL: https://safeguard-contest-mvp.vercel.app
-- Commit: d675aadf
+- Generated at: 2026-07-20T03:27:25.033Z
+- Base URL: https://www.safeclaw.kr
+- Commit: cd6bd231
 - Overall: pass_with_notice
-- Elapsed: 82852ms
+- Elapsed: 80132ms
 
 ## Gate Results
 

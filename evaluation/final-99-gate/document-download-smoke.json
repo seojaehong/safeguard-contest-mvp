@@ -14,7 +14,7 @@
         "pdfStatus": 200,
         "htmlPath": "evaluation\\final-99-gate\\core-pdf\\risk-assessment.html",
         "pdfPath": "evaluation\\final-99-gate\\core-pdf\\risk-assessment.pdf",
-        "pdfBytes": 38664,
+        "pdfBytes": 38611,
         "requiredTerms": [
           {
             "term": "사전준비",
@@ -50,7 +50,7 @@
         "pdfStatus": 200,
         "htmlPath": "evaluation\\final-99-gate\\core-pdf\\work-plan.html",
         "pdfPath": "evaluation\\final-99-gate\\core-pdf\\work-plan.pdf",
-        "pdfBytes": 37020,
+        "pdfBytes": 36819,
         "requiredTerms": [
           {
             "term": "작업개요",
@@ -122,7 +122,7 @@
         "pdfStatus": 200,
         "htmlPath": "evaluation\\final-99-gate\\core-pdf\\tbm-log.html",
         "pdfPath": "evaluation\\final-99-gate\\core-pdf\\tbm-log.pdf",
-        "pdfBytes": 37506,
+        "pdfBytes": 37459,
         "requiredTerms": [
           {
             "term": "TBM",

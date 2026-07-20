@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-07-19T10:27:24.113Z",
-  "baseUrl": "https://safeguard-contest-mvp.vercel.app",
-  "commit": "d675aadf",
+  "generatedAt": "2026-07-20T03:27:25.033Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "commit": "cd6bd231",
   "overall": "pass_with_notice",
-  "elapsedMs": 82852,
+  "elapsedMs": 80132,
   "gates": [
     {
       "name": "ask-orchestration",
