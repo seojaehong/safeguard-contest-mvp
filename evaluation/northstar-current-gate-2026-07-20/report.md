@@ -22,7 +22,7 @@ Current `master` and the current production-visible product line are aligned wit
 - Hermes/OpenClaw runtime adapter, service-auth, and fail-closed route boundary
 - Current live critical surface rerun with no P1/P2 UI blockers
 - Operator wiki / public reference corpus governance and live API readiness
-- Mobile landing density P3 remediation on local production build
+- Mobile landing density P3 remediation on local and live production build
 
 This gate does not claim the entire 24h/72h North Star objective is complete. It records that the current high-risk KOSHA/SIF/ontology and terminology boundaries are green on the authoritative code state.
 
@@ -260,7 +260,9 @@ Result:
 
 - Frontend design contract: 1 file passed / 1, 22 tests passed / 22
 - Build: PASS, 28 / 28 static pages generated
+- Live production build-info after deploy: `042859ccd2da59c1f6afe4b0915eeba0e07cf5b2`
 - Local production `/` mobile 390x844 height: 2,785px, 3.30x viewport, horizontal overflow false
+- Live production `/` mobile 390x844 height: 2,785px, 3.30x viewport, horizontal overflow false
 - Local production `/` desktop 1440x900 height: 5,604px, 6.23x viewport, horizontal overflow false
 - Mobile landing nav hidden so it cannot target hidden mobile sections
 
@@ -269,6 +271,7 @@ Evidence:
 - `evaluation/landing-mobile-density-current-2026-07-20/report.md`
 - `evaluation/landing-mobile-density-current-2026-07-20/report.json`
 - `evaluation/landing-mobile-density-current-2026-07-20/geometry.json`
+- `evaluation/landing-mobile-density-current-2026-07-20/live-geometry.json`
 
 ### TypeScript
 
@@ -311,7 +314,7 @@ The current implementation preserves the accepted product direction:
 The broader objective remains active. The next highest-value workstreams are:
 
 1. Public Reference Corpus / Operator Wiki Export: current governance and live API readiness are green; continue improving review/export surfaces without turning Markdown/wiki into runtime truth.
-2. Landing page production redeploy verification: local production mobile density is remediated; verify live after this commit deploys.
+2. Landing page follow-up: live mobile density is remediated; revisit only if homepage content strategy changes.
 3. RLS live launch proof: application boundary is green, but live tenant A/B, Storage, service-role, and publication RPC gates remain approval-gated.
 4. Hermes/OpenClaw live execution proof: adapter boundary is green, but an authenticated operator-owned runtime E2E is still not claimed.
 5. Re-run generation comparison after the next production product commit to keep the evidence current.

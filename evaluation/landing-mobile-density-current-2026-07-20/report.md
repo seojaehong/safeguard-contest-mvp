@@ -26,6 +26,12 @@ The hidden mobile sections remain available on desktop. Mobile no longer exposes
 
 ## Verification
 
+Production build-info after deploy:
+
+- Commit: `042859ccd2da59c1f6afe4b0915eeba0e07cf5b2`
+- Branch: `master`
+- Environment: `production`
+
 ### Design Contract
 
 Command:
@@ -78,10 +84,30 @@ Evidence:
 - `evaluation/landing-mobile-density-current-2026-07-20/mobile-root-final.png`
 - `evaluation/landing-mobile-density-current-2026-07-20/desktop-root-final.png`
 
+### Live Production Geometry
+
+Route:
+
+```text
+https://www.safeclaw.kr/
+```
+
+Results:
+
+| Viewport | Document height | Ratio | Horizontal overflow | Mobile nav |
+| --- | ---: | ---: | --- | --- |
+| 390x844 | 2,785px | 3.30x | false | hidden |
+| 1440x900 | 5,604px | 6.23x | false | visible |
+
+Evidence:
+
+- `evaluation/landing-mobile-density-current-2026-07-20/live-geometry.json`
+- `evaluation/landing-mobile-density-current-2026-07-20/mobile-live-root-final.png`
+- `evaluation/landing-mobile-density-current-2026-07-20/desktop-live-root-final.png`
+
 ## Boundary
 
 - This is a mobile density remediation, not a homepage redesign.
 - No DB schema, data, API, or routing change was made.
 - Desktop landing content remains visible.
 - The broader North Star goal remains active.
-

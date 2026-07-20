@@ -105,18 +105,25 @@
       "testFilesPassed": 1,
       "testsPassed": 22,
       "buildStaticPages": "28/28",
+      "productionMarkerAfterDeploy": "042859ccd2da59c1f6afe4b0915eeba0e07cf5b2",
       "localProductionMobileHeight": 2785,
       "localProductionMobileRatio": 3.3,
       "localProductionMobileOverflow": false,
+      "liveProductionMobileHeight": 2785,
+      "liveProductionMobileRatio": 3.3,
+      "liveProductionMobileOverflow": false,
       "localProductionDesktopHeight": 5604,
       "localProductionDesktopRatio": 6.23,
       "localProductionDesktopOverflow": false,
-      "status": "pass_live_redeploy_pending"
+      "liveProductionDesktopHeight": 5604,
+      "liveProductionDesktopRatio": 6.23,
+      "liveProductionDesktopOverflow": false,
+      "status": "pass_live_verified"
     }
   },
   "remaining": [
     "Operator Wiki Export / Public Reference Corpus UX maturation after current governance/API readiness",
-    "landing page live redeploy verification after local density remediation",
+    "landing page content strategy follow-up only if homepage scope changes",
     "RLS live tenant A/B, Storage, service-role, and publication RPC proof after explicit approval",
     "Hermes/OpenClaw authenticated operator-owned runtime E2E proof",
     "regeneration comparison after next production product commit"
