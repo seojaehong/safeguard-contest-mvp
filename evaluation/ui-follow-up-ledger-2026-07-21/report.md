@@ -30,6 +30,25 @@ The section shortcut wave is a bounded drilldown-depth improvement, not the suff
 - Long documents, full messages, language variants, logs, and raw metadata must stay in bounded panes, accordions, drawers, or drilldown routes.
 - Follow-up evidence should keep measuring primary CTA/status/result bottom, selected editor/panel y-position, default-open details count, desktop column split, horizontal overflow, and sticky overlap.
 
+## 2026-07-21 Live Geometry Recheck After Shortcut Deploy
+
+Independent production probe at `552424531ae1bd9f6219cc27431509f4494e22e1` showed the outer routes are now bounded, but the user's structural concern is still valid if we only look at page height:
+
+- `/documents?theme=day` desktop 1440x723: outer page `770px / 1.07x`, but the workpack editor workspace is an internal scroll pane `386px / 1188px`.
+- `/documents?theme=day` mobile 390x844: outer page `844px / 1.00x`, but the workpack editor workspace is an internal scroll pane `320px / 1294px`.
+- Interpretation: page body height is no longer the blocker; deeper document readability now depends on selected-document drilldown, section actions, and internal-pane affordance.
+- `/dispatch?theme=day` desktop 1440x723: outer page `723px / 1.00x`, no horizontal overflow.
+- `/dispatch?theme=day` mobile 390x844 before this follow-up patch: `1202px / 1.42x`, no horizontal overflow. This was a real mobile sample-shell density debt.
+
+Current-source follow-up for `/dispatch` mobile sample shell:
+
+- Artifact: `evaluation/dispatch-standalone-cockpit-2026-07-21/report.md`
+- Focused browser: `workspace-share-mobile-browser` standalone dispatch sample PASS, 1/1 selected.
+- Mobile 390x844: `pageHeight = 893`, `heightRatio = 1.06`, `grid.bottom = 845`, sample panel bottoms `641 / 844`, `horizontalOverflow = 0`.
+- Desktop preservation: sample shell remains two desktop regions with `gridWidth = 1156`, panel widths `635 / 413`, and horizontal overflow `0`.
+
+Interpretation: `/dispatch` mobile sample/default shell is materially reduced in current source. Generated provider-result state and provider live dispatch remain separate; the route split question is still answered by cockpit plus bounded detail, not by adding pages alone.
+
 ## Current Production Baseline
 
 Current production evidence after the latest workspace IA work:

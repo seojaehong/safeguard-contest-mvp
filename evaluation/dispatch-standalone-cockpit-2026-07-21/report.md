@@ -85,13 +85,14 @@ Current-source sample shell metrics from `evaluation/share-mobile-p1/standalone-
 | distinct columns | true |
 | horizontal overflow | 0 |
 
-Mobile sample shell remains a one-column route:
+Mobile sample shell is now route-scoped compact one-column:
 
 | Metric | Value |
 | --- | ---: |
-| page height | 1202px / 1.42x viewport |
-| grid | 358x687, left 16 |
-| panels | 332px wide, same left alignment |
+| page height | 893px / 1.06x viewport |
+| grid | 358x392, left 16, top 453, bottom 845 |
+| first panel | 332x172, top 470, bottom 641 |
+| second panel | 332x179, top 665, bottom 844 |
 | horizontal overflow | 0 |
 
 Production verification for commit `a3254ae3176468e715fccb6dd308aada7c5870aa`:
@@ -106,4 +107,4 @@ Production verification for commit `a3254ae3176468e715fccb6dd308aada7c5870aa`:
 | second panel | 413x77, left 979 |
 | panel count | 2 |
 
-Interpretation: this closes the desktop sample-shell "wide stacked panel" risk in production evidence. It does not claim generated provider-result state proof and does not change provider dispatch capability. Mobile sample remains overflow-safe but still long/late (`1202px` on `390x844`), so mobile density stays separate product-depth debt.
+Interpretation: the earlier production evidence closed the desktop sample-shell "wide stacked panel" risk. The current-source follow-up also reduces the mobile sample shell from `1202px / 1.42x` to `893px / 1.06x`, with both sample panels effectively inside the first viewport and horizontal overflow still closed. This remains a sample/default shell proof, not generated provider-result state proof, and it does not change provider dispatch capability.

@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-20T19:47:22.953Z",
+  "checkedAt": "2026-07-20T20:59:40.089Z",
   "route": "/dispatch?theme=day",
   "viewport": {
     "width": 390,
@@ -8,28 +8,28 @@
   "verdict": "PASS",
   "metrics": {
     "viewportHeight": 844,
-    "pageHeight": 1202,
+    "pageHeight": 893,
     "grid": {
       "left": 16,
-      "top": 467,
-      "bottom": 1154,
+      "top": 453,
+      "bottom": 845,
       "width": 358,
-      "height": 687
+      "height": 392
     },
     "panels": [
       {
         "left": 29,
-        "top": 484,
-        "bottom": 758,
+        "top": 470,
+        "bottom": 641,
         "width": 332,
-        "height": 274
+        "height": 172
       },
       {
         "left": 29,
-        "top": 794,
-        "bottom": 1153,
+        "top": 665,
+        "bottom": 844,
         "width": 332,
-        "height": 360
+        "height": 179
       }
     ],
     "horizontalOverflow": 0

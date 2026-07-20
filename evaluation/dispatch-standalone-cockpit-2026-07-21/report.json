@@ -179,12 +179,27 @@
         "horizontalOverflow": 0
       },
       "mobile390x844": {
-        "pageHeight": 1202,
-        "heightRatio": 1.42,
+        "pageHeight": 893,
+        "heightRatio": 1.06,
+        "gridTop": 453,
+        "gridBottom": 845,
+        "gridHeight": 392,
         "gridWidth": 358,
-        "panelWidth": 332,
+        "firstPanel": {
+          "top": 470,
+          "bottom": 641,
+          "width": 332,
+          "height": 172
+        },
+        "secondPanel": {
+          "top": 665,
+          "bottom": 844,
+          "width": 332,
+          "height": 179
+        },
         "singleColumn": true,
-        "horizontalOverflow": 0
+        "horizontalOverflow": 0,
+        "mobileDensityDebtReduced": true
       },
       "generatedProviderResultStateClaimed": false,
       "providerDispatchLiveClaimed": false

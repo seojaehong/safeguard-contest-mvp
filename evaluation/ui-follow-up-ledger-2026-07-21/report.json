@@ -21,6 +21,45 @@
       "measure primary CTA/status/result bottom, selected editor/panel y-position, default-open details count, desktop column split, horizontal overflow, and sticky overlap"
     ]
   },
+  "liveGeometryRecheckAfterShortcutDeploy": {
+    "productionMarker": "552424531ae1bd9f6219cc27431509f4494e22e1",
+    "documentsDesktop1440x723": {
+      "outerPageHeight": 770,
+      "heightRatio": 1.07,
+      "horizontalOverflow": 0,
+      "workpackPaneHeight": 386,
+      "workpackPaneScrollHeight": 1188,
+      "interpretation": "outer route is bounded; internal pane readability remains the real drilldown-depth axis"
+    },
+    "documentsMobile390x844": {
+      "outerPageHeight": 844,
+      "heightRatio": 1.0,
+      "horizontalOverflow": 0,
+      "workpackPaneHeight": 320,
+      "workpackPaneScrollHeight": 1294,
+      "interpretation": "outer route is viewport-bound; selected-document pane/drilldown controls carry the long content"
+    },
+    "dispatchDesktop1440x723": {
+      "outerPageHeight": 723,
+      "heightRatio": 1.0,
+      "horizontalOverflow": 0
+    },
+    "dispatchMobile390x844BeforeCurrentPatch": {
+      "outerPageHeight": 1202,
+      "heightRatio": 1.42,
+      "horizontalOverflow": 0,
+      "interpretation": "real mobile sample-shell density debt"
+    },
+    "dispatchMobile390x844CurrentSourcePatch": {
+      "artifact": "evaluation/dispatch-standalone-cockpit-2026-07-21/report.json",
+      "outerPageHeight": 893,
+      "heightRatio": 1.06,
+      "gridBottom": 845,
+      "samplePanelBottoms": [641, 844],
+      "horizontalOverflow": 0,
+      "providerDispatchLiveClaimed": false
+    }
+  },
   "productionMarker": "f504b15e9682e35bce97d629b86e02268c08a185",
   "documentsDesktopShort": {
     "viewport": {

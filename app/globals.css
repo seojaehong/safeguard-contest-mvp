@@ -15293,6 +15293,49 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
+@media (max-width: 900px) {
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-page-decision-header {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 4px 12px;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-page-decision-copy p {
+    display: none;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-page-decision-action {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    border-left: 0;
+    border-top: 1px solid var(--workspace-rule);
+    padding: 8px 0 0;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two {
+    width: calc(100% - 32px);
+    margin-top: 8px;
+    gap: 8px;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .safeclaw-module-panel {
+    min-height: 0;
+    gap: 6px;
+    padding: 10px 12px;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .safeclaw-module-panel p:not(.export-error),
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .safeclaw-module-panel ul {
+    display: none;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .safeclaw-module-panel a {
+    min-height: 44px;
+    align-content: center;
+  }
+}
+
 .field-workspace-share-only {
   display: block;
   width: 100%;

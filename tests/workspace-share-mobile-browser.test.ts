@@ -1070,7 +1070,10 @@ describe("workspace mobile share presentation", () => {
       );
 
       expect.soft(mobileMetrics.horizontalOverflow, "standalone dispatch sample mobile horizontal overflow").toBe(0);
-      expect.soft(mobileMetrics.pageHeight, "standalone dispatch sample mobile task distance").toBeLessThanOrEqual(mobileMetrics.viewportHeight * 1.45);
+      expect.soft(mobileMetrics.pageHeight, "standalone dispatch sample mobile task distance").toBeLessThanOrEqual(mobileMetrics.viewportHeight * 1.08);
+      expect.soft(mobileMetrics.grid.bottom, "standalone dispatch sample mobile panels inside first viewport").toBeLessThanOrEqual(mobileMetrics.viewportHeight + 1);
+      expect.soft(mobileMetrics.panels[0].bottom, "standalone dispatch sample mobile first panel inside first viewport").toBeLessThanOrEqual(mobileMetrics.viewportHeight + 1);
+      expect.soft(mobileMetrics.panels[1].bottom, "standalone dispatch sample mobile second panel inside first viewport").toBeLessThanOrEqual(mobileMetrics.viewportHeight + 1);
       expect.soft(mobileMetrics.grid.width, "standalone dispatch sample mobile grid width").toBeLessThanOrEqual(390);
       expect.soft(mobileMetrics.panels[0].left, "standalone dispatch sample mobile single column alignment").toBe(mobileMetrics.panels[1].left);
     } finally {
