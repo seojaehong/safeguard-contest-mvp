@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-kosha-guide-approval-packet/v1",
-  "generatedAt": "2026-07-20T06:05:20.000Z",
-  "head": "1b951d228bbbdeb0513c2e1031df9ddf4ee0a758",
+  "generatedAt": "2026-07-20T06:42:00.000Z",
+  "head": "3a6b9f4e25739954ba3b89c0b9d067ff52a28ef2",
   "sourceAudit": "evaluation/kosha-guide-approval-current-2026-07-20/report.json",
   "decision": "approval_required_before_mutation_or_embedding",
   "currentSafeClaim": "KOSHA exact trust pins and Phase A materialization are proven; full 1040-row KOSHA Guide corpus is not yet launch-ready for authoritative grounding or embedding.",
@@ -22,9 +22,99 @@
     "officialVersionMismatchCount": 7,
     "retiredLocalRowCount": 1,
     "duplicateSummaryRows": 822,
+    "operationalControlReviewRequiredRows": 70,
+    "operationalControlSecondaryCandidateRows": 1,
     "retrievalReflectionFailures": 13,
+    "productionRetrievalUntestedBranches": 2,
     "manifestFailures": []
   },
+  "launchReadinessBlockers": [
+    {
+      "id": "authoritative-body-empty",
+      "severity": "BLOCKER",
+      "count": 818,
+      "requiredBeforeRelease": "Source PDF text or reviewed OCR body must be non-empty and hash/provenance linked."
+    },
+    {
+      "id": "item-provenance-missing",
+      "severity": "BLOCKER",
+      "count": 1040,
+      "requiredBeforeRelease": "Every launch row must resolve to official item URL, file ID, publication date, and current/retired state."
+    },
+    {
+      "id": "operational-control-ground-truth-review",
+      "severity": "HIGH",
+      "count": 70,
+      "requiredBeforeRelease": "Every heuristic delta must receive explicit reviewed ground-truth labels before KOSHA Guide controls are embedded or treated as product evidence."
+    },
+    {
+      "id": "operational-control-cross-domain-candidate",
+      "severity": "HIGH",
+      "count": 1,
+      "requiredBeforeRelease": "Remaining controls must be re-derived from source body and cross-domain fixtures must pass."
+    },
+    {
+      "id": "official-version-or-state-drift",
+      "severity": "HIGH",
+      "count": 8,
+      "requiredBeforeRelease": "Official current versions must replace stale versions and retired rows must be excluded after approval."
+    },
+    {
+      "id": "summary-not-source-grounded",
+      "severity": "HIGH",
+      "count": 822,
+      "requiredBeforeRelease": "Source-grounded summaries must replace fallback and bullet-only values."
+    },
+    {
+      "id": "production-retrieval-branch-unobserved",
+      "severity": "MEDIUM",
+      "count": 2,
+      "requiredBeforeRelease": "Ranked and hybrid production branches must be observed with KOSHA evidence reflection before broad retrieval claims."
+    }
+  ],
+  "preApprovalWorkstreams": [
+    {
+      "id": "provenance_and_status_backfill_dry_run",
+      "mutationAllowedByThisRun": false,
+      "inputs": [
+        "official item URL",
+        "official file ID",
+        "published date",
+        "current/retired state",
+        "content hash"
+      ],
+      "exitCriteria": "Zero-mutation diff maps all active rows and quarantines unresolved rows."
+    },
+    {
+      "id": "body_hydration_or_ocr_review",
+      "mutationAllowedByThisRun": false,
+      "inputs": [
+        "818 empty-body rows",
+        "15 attempted empty-output PDFs",
+        "803 non-attempted guideline rows"
+      ],
+      "exitCriteria": "Every launch row has non-empty official body or reviewed OCR body, otherwise it is excluded from active retrieval."
+    },
+    {
+      "id": "control_causality_review",
+      "mutationAllowedByThisRun": false,
+      "inputs": [
+        "70 operational-control review-required rows",
+        "1 secondary cross-domain candidate"
+      ],
+      "exitCriteria": "KOSHA controls are source-derived and cross-task contamination fixtures pass."
+    },
+    {
+      "id": "retrieval_branch_observation",
+      "mutationAllowedByThisRun": false,
+      "inputs": [
+        "ranked production branch",
+        "hybrid production branch",
+        "document reflection checks"
+      ],
+      "exitCriteria": "Observed production retrieval branches reflect KOSHA evidence into documents without generic prose-only matches."
+    }
+  ],
   "embeddingRecommendation": {
     "status": "adopt_after_repair_and_approval",
     "reason": "The corpus is valuable as the KOSHA Guide layer after SIF, but embedding current rows would mostly index titles, fallback summaries, and derived controls rather than official bodies.",
@@ -32,7 +122,9 @@
       "Backfill official URL, file ID, published date, current/retired status, and content hash for every active KOSHA Guide row.",
       "Hydrate or OCR the 818 empty-body rows, or quarantine unresolved rows outside active retrieval.",
       "Replace 822 fallback/duplicate summaries with source-grounded summaries.",
+      "Review 70 operational-control heuristic-delta rows and 1 cross-domain control candidate before treating controls as KOSHA-derived.",
       "Update 7 version mismatches and retire 1 officially retired local row.",
+      "Observe ranked and hybrid production retrieval branches with KOSHA evidence reflection.",
       "Split SIF and KOSHA Guide vector retrieval by corpus kind, index, and RPC.",
       "Run zero-mutation dry-run diff, focused tests, post-migration verification, and explicit user approval before any DB mutation or embedding upload."
     ]

@@ -1,6 +1,6 @@
 # KOSHA Guide Approval Packet
 
-Generated at: 2026-07-20T06:05:20.000Z
+Generated at: 2026-07-20T06:42:00.000Z
 
 ## Decision
 
@@ -24,7 +24,22 @@ SafeClaw can safely claim that KOSHA exact-trust pins and Phase A document mater
 | Official version mismatches | 7 |
 | Retired local rows | 1 |
 | Duplicate/fallback summary rows | 822 |
+| Operational-control review-required rows | 70 |
+| Operational-control secondary cross-domain candidates | 1 |
 | Retrieval reflection failures | 13 |
+| Production retrieval unobserved branches | 2 |
+
+## Launch-Readiness Blockers
+
+| Severity | Blocker | Count | Required before release |
+| --- | --- | ---: | --- |
+| BLOCKER | `authoritative-body-empty` | 818 | Source PDF text or reviewed OCR body must be non-empty and hash/provenance linked. |
+| BLOCKER | `item-provenance-missing` | 1,040 | Every launch row must resolve to official item URL, file ID, publication date, and current/retired state. |
+| HIGH | `operational-control-ground-truth-review` | 70 | Every heuristic delta must receive explicit reviewed ground-truth labels before KOSHA Guide controls are embedded or treated as product evidence. |
+| HIGH | `operational-control-cross-domain-candidate` | 1 | Remaining controls must be re-derived from source body and cross-domain fixtures must pass. |
+| HIGH | `official-version-or-state-drift` | 8 | Official current versions must replace stale versions and retired rows must be excluded after approval. |
+| HIGH | `summary-not-source-grounded` | 822 | Source-grounded summaries must replace fallback and bullet-only values. |
+| MEDIUM | `production-retrieval-branch-unobserved` | 2 | Ranked and hybrid production branches must be observed with KOSHA evidence reflection before broad retrieval claims. |
 
 ## Recommendation
 
@@ -37,9 +52,11 @@ The corpus is valuable as the technical-guidance layer in the SafeClaw evidence 
 1. Backfill official URL, file ID, published date, current/retired status, and content hash for every active KOSHA Guide row.
 2. Hydrate or OCR the 818 empty-body rows, or quarantine unresolved rows outside active retrieval.
 3. Replace 822 fallback/duplicate summaries with source-grounded summaries.
-4. Update 7 version mismatches and retire 1 officially retired local row.
-5. Split SIF and KOSHA Guide vector retrieval by corpus kind, index, and RPC.
-6. Run zero-mutation dry-run diff, focused tests, post-migration verification, and explicit user approval before any DB mutation or embedding upload.
+4. Review 70 operational-control heuristic-delta rows and 1 cross-domain control candidate before treating controls as KOSHA-derived.
+5. Update 7 version mismatches and retire 1 officially retired local row.
+6. Observe ranked and hybrid production retrieval branches with KOSHA evidence reflection.
+7. Split SIF and KOSHA Guide vector retrieval by corpus kind, index, and RPC.
+8. Run zero-mutation dry-run diff, focused tests, post-migration verification, and explicit user approval before any DB mutation or embedding upload.
 
 ## Verified Commands
 
