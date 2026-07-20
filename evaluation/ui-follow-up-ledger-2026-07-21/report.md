@@ -138,6 +138,24 @@ Production overlap remediation confirmation:
 
 Interpretation: selected-document summary is now part of the bounded pane context. Remaining document IA debt is deeper document-specific accordion/action design, not missing selected-document title or summary.
 
+## 2026-07-21 Documents Drilldown Depth Update
+
+Current-source bounded gate:
+
+- Artifact: `evaluation/documents-drilldown-depth-2026-07-21/report.md`
+- Source HEAD before patch: `ea885c9f201b05810a13242edba891bb4bd98993`
+- Inside the bounded `/documents` pane, structured document body sections now behave as a controlled accordion.
+- Default selected document has exactly one open body section: index `0`.
+- Opening the second section immediately keeps exactly one open section: index `1`; the first section returns to `펼치기`, the second becomes `편집 중`.
+- Native `<details>` double-open flicker is prevented by driving summary click/Enter/Space through React state.
+- Page height and horizontal overflow remain bounded after section switching.
+- Focused browser: `documents-editor-layout` mobile launcher slice PASS, 2/2.
+- Full browser file: `documents-editor-layout` PASS, 31/31.
+- North Star/open gate preservation: PASS, 13/13.
+- TypeScript: PASS.
+
+Interpretation: this closes the first document-specific drilldown depth layer: one selected document, one open body section, bounded pane. Remaining document IA debt is richer document-specific section actions and editing affordances, not raw route body height, missing selected context, or all sections expanding at once.
+
 Share mobile configuration-stack current-source gate:
 
 - Artifact: `evaluation/share-mobile-full-flow-2026-07-21/report.md`

@@ -153,6 +153,25 @@ function createFixtureRoot(): string {
       { result: "PASS" },
     ],
   });
+  writeJson(rootDir, path.join("evaluation", "documents-drilldown-depth-2026-07-21", "report.json"), {
+    verdict: "PASS_CURRENT_SOURCE",
+    sourceHeadBeforeCommit: "fixture-sha",
+    assertions: {
+      defaultOpenSectionCount: 1,
+      defaultOpenIndexes: [0],
+      afterOpeningSecondSectionOpenCount: 1,
+      afterOpeningSecondSectionOpenIndexes: [1],
+      pageHeightRemainsBoundedAfterSectionSwitch: true,
+      horizontalOverflowClosedAfterSectionSwitch: true,
+      workpackPaneRemainsInsideViewport: true,
+      selectedDocumentToolbarStillDoesNotCoverTextarea: true,
+    },
+    checks: [
+      { result: "PASS" },
+      { result: "PASS" },
+      { result: "PASS" },
+    ],
+  });
   writeJson(rootDir, path.join("evaluation", "share-mobile-full-flow-2026-07-21", "report.json"), {
     verdict: "PASS",
     mobile390x844Day: {

@@ -1,0 +1,60 @@
+{
+  "checkedAt": "2026-07-21T04:17:40+09:00",
+  "sourceHeadBeforeCommit": "ea885c9f201b05810a13242edba891bb4bd98993",
+  "branch": "chore/recipient-foreign-live-gate-20260720",
+  "verdict": "PASS_CURRENT_SOURCE",
+  "scope": "mobile /documents selected-document section accordion depth",
+  "structuralDecision": {
+    "routeSplitAloneAcceptedAsFix": false,
+    "requiredPattern": "viewport cockpit plus bounded drilldown",
+    "thisWave": "inside the bounded document pane, only one selected-document body section is open at a time"
+  },
+  "fix": {
+    "routeScopedDocumentsOnly": true,
+    "controlledSectionAccordion": true,
+    "nativeDetailsDoubleOpenFlickerPrevented": true,
+    "oneSectionOpenImmediatelyAfterSummaryClick": true,
+    "sectionSummaryShowsLineCountAndState": true,
+    "backendProviderOrExportContractsChanged": false
+  },
+  "assertions": {
+    "defaultOpenSectionCount": 1,
+    "defaultOpenIndexes": [0],
+    "afterOpeningSecondSectionOpenCount": 1,
+    "afterOpeningSecondSectionOpenIndexes": [1],
+    "firstSummaryMetaAfterSecondOpen": "펼치기",
+    "secondSummaryMetaAfterSecondOpen": "편집 중",
+    "pageHeightRemainsBoundedAfterSectionSwitch": true,
+    "horizontalOverflowClosedAfterSectionSwitch": true,
+    "workpackPaneRemainsInsideViewport": true,
+    "selectedDocumentToolbarStillDoesNotCoverTextarea": true
+  },
+  "checks": [
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"puts the core launcher before the mobile editor\" --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "testsPassed": 2
+    },
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "testsPassed": 31
+    },
+    {
+      "command": "npm.cmd test -- tests\\northstar-open-gate-audit.test.ts tests\\northstar-live-rollup.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 2,
+      "testsPassed": 13
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    }
+  ],
+  "remainingDebt": [
+    "Document-specific action design and richer per-document editing affordances remain future product depth.",
+    "Provider live dispatch remains approval-gated and is not claimed by this UI wave."
+  ]
+}

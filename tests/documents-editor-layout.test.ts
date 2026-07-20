@@ -1318,6 +1318,60 @@ describe("documents editor layout", () => {
       expect(riskAssessmentLanding.pageHeight).toBeLessThanOrEqual(riskAssessmentLanding.viewportHeight + 1);
       expect(riskAssessmentLanding.scrollWidth).toBeLessThanOrEqual(riskAssessmentLanding.viewportWidth + 1);
 
+      const sectionAccordionDefault = await page.evaluate(() => {
+        const sections = Array.from(document.querySelectorAll<HTMLDetailsElement>('[data-testid="document-section-accordion"]'));
+        return {
+          count: sections.length,
+          openCount: sections.filter((section) => section.open).length,
+          openIndexes: sections.map((section, index) => section.open ? index : -1).filter((index) => index >= 0),
+          summaryMeta: sections.map((section) => section.querySelector("summary em")?.textContent?.replace(/\s+/gu, " ").trim())
+        };
+      });
+      expect(sectionAccordionDefault.count).toBeGreaterThanOrEqual(2);
+      expect(sectionAccordionDefault.openCount).toBe(1);
+      expect(sectionAccordionDefault.openIndexes).toEqual([0]);
+      expect(sectionAccordionDefault.summaryMeta[0]).toContain("편집 중");
+      expect(sectionAccordionDefault.summaryMeta[1]).toContain("펼치기");
+
+      await page.locator('[data-testid="document-section-accordion"]').nth(1).locator("summary").click();
+      const sectionAccordionImmediateAfterSecondOpen = await page.evaluate(() => {
+        const sections = Array.from(document.querySelectorAll<HTMLDetailsElement>('[data-testid="document-section-accordion"]'));
+        return {
+          openCount: sections.filter((section) => section.open).length,
+          openIndexes: sections.map((section, index) => section.open ? index : -1).filter((index) => index >= 0)
+        };
+      });
+      expect(sectionAccordionImmediateAfterSecondOpen.openCount).toBe(1);
+      expect(sectionAccordionImmediateAfterSecondOpen.openIndexes).toEqual([1]);
+      const sectionAccordionAfterSecondOpen = await page.evaluate(() => {
+        const sections = Array.from(document.querySelectorAll<HTMLDetailsElement>('[data-testid="document-section-accordion"]'));
+        const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
+        const shellRect = workpackShell?.getBoundingClientRect();
+        return {
+          openCount: sections.filter((section) => section.open).length,
+          openIndexes: sections.map((section, index) => section.open ? index : -1).filter((index) => index >= 0),
+          firstMeta: sections[0]?.querySelector("summary em")?.textContent?.replace(/\s+/gu, " ").trim(),
+          secondMeta: sections[1]?.querySelector("summary em")?.textContent?.replace(/\s+/gu, " ").trim(),
+          pageHeight: Math.round(document.documentElement.scrollHeight),
+          viewportHeight: window.innerHeight,
+          scrollWidth: document.documentElement.scrollWidth,
+          viewportWidth: window.innerWidth,
+          shellTop: shellRect ? Math.round(shellRect.top) : null,
+          shellBottom: shellRect ? Math.round(shellRect.bottom) : null
+        };
+      });
+      expect(sectionAccordionAfterSecondOpen.openCount).toBe(1);
+      expect(sectionAccordionAfterSecondOpen.openIndexes).toEqual([1]);
+      expect(sectionAccordionAfterSecondOpen.firstMeta).toContain("펼치기");
+      expect(sectionAccordionAfterSecondOpen.secondMeta).toContain("편집 중");
+      expect(sectionAccordionAfterSecondOpen.pageHeight).toBeLessThanOrEqual(sectionAccordionAfterSecondOpen.viewportHeight + 1);
+      expect(sectionAccordionAfterSecondOpen.scrollWidth).toBeLessThanOrEqual(sectionAccordionAfterSecondOpen.viewportWidth + 1);
+      expect(sectionAccordionAfterSecondOpen.shellTop).toBeGreaterThanOrEqual(0);
+      expect(sectionAccordionAfterSecondOpen.shellBottom).toBeLessThanOrEqual(844);
+
+      await page.locator('[data-testid="document-section-accordion"]').first().locator("summary").click();
+      await page.locator('.document-textarea[aria-label="위험성평가표 편집"]').focus();
+
       const riskAssessmentDeepScroll = await page.evaluate(async () => {
         const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
         const toolbar = document.querySelector<HTMLElement>(".document-toolbar");

@@ -29,6 +29,7 @@ const EVIDENCE_PATHS = Object.freeze({
   sifEmbeddingPreflight: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
   documentsMobileInternalPane: path.join("evaluation", "documents-mobile-internal-pane-2026-07-21", "report.json"),
   documentsMobilePaneContext: path.join("evaluation", "documents-mobile-pane-context-2026-07-21", "report.json"),
+  documentsDrilldownDepth: path.join("evaluation", "documents-drilldown-depth-2026-07-21", "report.json"),
   shareMobileFullFlow: path.join("evaluation", "share-mobile-full-flow-2026-07-21", "report.json"),
   dispatchStandalone: path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"),
   koshaCurrentNorthstarRegression: path.join("evaluation", "kosha-current-northstar-regression-2026-07-21", "report.json"),
@@ -496,19 +497,21 @@ function allChecksPassed(report) {
 function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const internalPanePath = EVIDENCE_PATHS.documentsMobileInternalPane;
   const paneContextPath = EVIDENCE_PATHS.documentsMobilePaneContext;
+  const drilldownPath = EVIDENCE_PATHS.documentsDrilldownDepth;
   const sharePath = EVIDENCE_PATHS.shareMobileFullFlow;
   const internalPane = readJsonFile(rootDir, internalPanePath);
   const paneContext = readJsonFile(rootDir, paneContextPath);
+  const drilldown = readJsonFile(rootDir, drilldownPath);
   const share = readJsonFile(rootDir, sharePath);
 
-  if (!isRecord(internalPane) || !isRecord(paneContext) || !isRecord(share)) {
+  if (!isRecord(internalPane) || !isRecord(paneContext) || !isRecord(drilldown) || !isRecord(share)) {
     return gateResult({
       id: "ui_documents_share_cockpit",
       label: "Documents and Share cockpit UI",
       state: "missing",
-      evidencePath: !isRecord(internalPane) ? internalPanePath : !isRecord(paneContext) ? paneContextPath : sharePath,
+      evidencePath: !isRecord(internalPane) ? internalPanePath : !isRecord(paneContext) ? paneContextPath : !isRecord(drilldown) ? drilldownPath : sharePath,
       detail: "Documents/share cockpit evidence is missing or invalid.",
-      nextActions: ["Regenerate documents mobile internal-pane, pane-context, and share mobile full-flow evidence."],
+      nextActions: ["Regenerate documents mobile internal-pane, pane-context, drilldown-depth, and share mobile full-flow evidence."],
     });
   }
 
@@ -518,6 +521,7 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
       ? internalPane.productionGeometry
       : {};
   const contextAssertions = isRecord(paneContext.assertions) ? paneContext.assertions : {};
+  const drilldownAssertions = isRecord(drilldown.assertions) ? drilldown.assertions : {};
   const shareMobile = isRecord(share.mobile390x844Day)
     ? share.mobile390x844Day
     : isRecord(share.mobile390x844)
@@ -525,10 +529,13 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
       : {};
   const shareInterpretation = isRecord(share.interpretation) ? share.interpretation : {};
   const paneChecksPass = allChecksPassed(paneContext);
+  const drilldownChecksPass = allChecksPassed(drilldown);
   const bodyHeight = readNumber(internalPaneGeometry.bodyHeight);
   const viewportHeight = readNumber(isRecord(internalPaneGeometry.viewport) ? internalPaneGeometry.viewport.height : 844) || 844;
   const contextSourceSha = readString(paneContext.sourceHeadBeforeCommit);
   const contextSourceCurrent = isGitAncestor(rootDir, contextSourceSha);
+  const drilldownSourceSha = readString(drilldown.sourceHeadBeforeCommit);
+  const drilldownSourceCurrent = isGitAncestor(rootDir, drilldownSourceSha);
   const configCardDisplays = Array.isArray(shareMobile.configCardDisplays)
     ? shareMobile.configCardDisplays
     : [];
@@ -552,8 +559,23 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     && contextAssertions.toolbarDoesNotCoverActiveTextarea === true
     && contextAssertions.pageHeightBoundedAfterDeepScroll === true
     && contextAssertions.horizontalOverflowClosedAfterDeepScroll === true
+    && readString(drilldown.verdict).startsWith("PASS")
+    && drilldownAssertions.defaultOpenSectionCount === 1
+    && drilldownAssertions.afterOpeningSecondSectionOpenCount === 1
+    && Array.isArray(drilldownAssertions.defaultOpenIndexes)
+    && drilldownAssertions.defaultOpenIndexes.length === 1
+    && drilldownAssertions.defaultOpenIndexes[0] === 0
+    && Array.isArray(drilldownAssertions.afterOpeningSecondSectionOpenIndexes)
+    && drilldownAssertions.afterOpeningSecondSectionOpenIndexes.length === 1
+    && drilldownAssertions.afterOpeningSecondSectionOpenIndexes[0] === 1
+    && drilldownAssertions.pageHeightRemainsBoundedAfterSectionSwitch === true
+    && drilldownAssertions.horizontalOverflowClosedAfterSectionSwitch === true
+    && drilldownAssertions.workpackPaneRemainsInsideViewport === true
+    && drilldownAssertions.selectedDocumentToolbarStillDoesNotCoverTextarea === true
     && paneChecksPass
-    && contextSourceCurrent;
+    && drilldownChecksPass
+    && contextSourceCurrent
+    && drilldownSourceCurrent;
 
   const sharePass = readString(share.verdict).includes("PASS")
     && readNumber(shareMobile.shareMobileSummaryBottom) !== null
@@ -577,10 +599,10 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
       id: "ui_documents_share_cockpit",
       label: "Documents and Share cockpit UI",
       state: "proven",
-      evidencePath: paneContextPath,
-      detail: "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not close deeper document-specific accordion/drilldown depth or claim provider live dispatch.",
+      evidencePath: drilldownPath,
+      detail: "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch.",
       nextActions: [
-        "Continue UI work on deeper document-specific drilldown depth: section accordions, selected-document detail actions, and one-document-at-a-time editing.",
+        "Continue UI product depth on richer document-specific section actions and one-document-at-a-time editing affordances.",
         "Optional follow-up: make the mobile Share configuration disclosure a guided stepper if more hand-holding is needed.",
       ],
     });
@@ -590,7 +612,7 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     id: "ui_documents_share_cockpit",
     label: "Documents and Share cockpit UI",
     state: "contradicted",
-    evidencePath: documentsPass ? sharePath : paneContextPath,
+    evidencePath: documentsPass ? sharePath : drilldownPath,
     detail: "Documents/share cockpit evidence no longer proves bounded page height, visible selected-document pane context, and first-viewport share action together.",
     nextActions: ["Re-run documents/share browser geometry gates and fix any UI cockpit regression."],
   });

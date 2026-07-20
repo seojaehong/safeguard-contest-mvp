@@ -2297,6 +2297,13 @@ export function WorkpackEditor({
     () => buildStructuredDocumentSections(selected.key, selectedText),
     [selected.key, selectedText]
   );
+  const structuredSectionIdSignature = useMemo(
+    () => structuredDocument.body.map((section) => section.id).join("|"),
+    [structuredDocument.body]
+  );
+  const [expandedStructuredSectionId, setExpandedStructuredSectionId] = useState<string | null>(
+    () => structuredDocument.body[0]?.id ?? null
+  );
   const selectedHasIntentionalEmptyPermitDraft = selected.key === "workPermitDraft"
     && selectedText === ""
     && (
@@ -2430,6 +2437,14 @@ export function WorkpackEditor({
   useEffect(() => {
     setEditorMode("structured");
   }, [selected.key]);
+
+  useEffect(() => {
+    const sectionIds = structuredDocument.body.map((section) => section.id);
+    setExpandedStructuredSectionId((current) => {
+      if (current && sectionIds.includes(current)) return current;
+      return sectionIds[0] ?? null;
+    });
+  }, [structuredDocument.body, structuredSectionIdSignature]);
 
   useEffect(() => () => {
     if (saveAnnouncementTimerRef.current) {
@@ -3135,12 +3150,36 @@ export function WorkpackEditor({
             >
               {structuredDocument.body.map((section, index) => {
                 const inputId = `document-section-${selected.key}-${index}`;
+                const sectionLineCount = section.value.split(/\r?\n/u).filter((line) => line.trim().length > 0).length;
                 const lineCount = Math.min(5, Math.max(3, section.value.split(/\r?\n/u).length + 1));
+                const isSectionOpen = expandedStructuredSectionId === section.id;
+                const selectSection = () => setExpandedStructuredSectionId(section.id);
                 return (
-                  <details key={section.id} className={styles.documentSection} data-section-kind="body" open={index === 0}>
-                    <summary>
+                  <details
+                    key={section.id}
+                    className={styles.documentSection}
+                    data-testid="document-section-accordion"
+                    data-section-kind="body"
+                    data-section-open={isSectionOpen ? "true" : "false"}
+                    open={isSectionOpen}
+                  >
+                    <summary
+                      aria-expanded={isSectionOpen}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        selectSection();
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key !== "Enter" && event.key !== " ") return;
+                        event.preventDefault();
+                        selectSection();
+                      }}
+                    >
                       <span>{String(index + 1).padStart(2, "0")}</span>
                       <strong>{section.label}</strong>
+                      <em className={styles.documentSectionMeta}>
+                        {sectionLineCount.toLocaleString("ko-KR")}줄 · {isSectionOpen ? "편집 중" : "펼치기"}
+                      </em>
                     </summary>
                     <textarea
                       id={inputId}

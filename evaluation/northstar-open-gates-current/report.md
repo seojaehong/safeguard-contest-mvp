@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-20T19:02:12.734Z
-Source SHA: `a2028757e62553346733c757108f56a28495f888`
+Generated at: 2026-07-20T19:18:35.547Z
+Source SHA: `ea885c9f201b05810a13242edba891bb4bd98993`
 Overall: `open`
 
 ## Gate Matrix
@@ -10,7 +10,7 @@ Overall: `open`
 | --- | --- | --- | --- |
 | final_99_gate | notice | evaluation\final-99-gate-current-2026-07-20\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate-current-2026-07-20\notice-carry.json. |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json | Live harness probe passed with zero failed contracts. |
-| ui_documents_share_cockpit | proven | evaluation\documents-mobile-pane-context-2026-07-21\report.json | Current evidence closes /documents mobile raw height, selected-document landing/context/summary, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not close deeper document-specific accordion/drilldown depth or claim provider live dispatch. |
+| ui_documents_share_cockpit | proven | evaluation\documents-drilldown-depth-2026-07-21\report.json | Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch. |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json | Production /dispatch seeded desktop route is no longer mobile-stacked: pageHeight 1116 (1.24x), preview right pane, first-viewport CTA, readable channel cards, overflow false/outside 0. |
 | supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Read-only RLS approval preflight passed at source SHA cbb134c52185aab4e0ac3f9d648eee82aee2634f, but live RLS catalog and tenant A/B isolation are not proven. |
 | llm_wiki_publication | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA cbb134c52185aab4e0ac3f9d648eee82aee2634f. |
@@ -37,7 +37,7 @@ Overall: `open`
 ## Next Actions
 
 - final_99_gate: Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment.
-- ui_documents_share_cockpit: Continue UI work on deeper document-specific drilldown depth: section accordions, selected-document detail actions, and one-document-at-a-time editing.
+- ui_documents_share_cockpit: Continue UI product depth on richer document-specific section actions and one-document-at-a-time editing affordances.
 - ui_documents_share_cockpit: Optional follow-up: make the mobile Share configuration disclosure a guided stepper if more hand-holding is needed.
 - dispatch_standalone_cockpit: Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved.
 - supabase_rls_launch_isolation: Approve authoritative project and credential provenance.
