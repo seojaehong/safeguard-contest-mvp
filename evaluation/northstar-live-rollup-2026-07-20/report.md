@@ -1,0 +1,40 @@
+# SafeClaw North Star Live Rollup
+
+Generated at: 2026-07-20T04:09:00.000Z
+
+Current HEAD / live production build: `7d56f97bd9f28daa0b0db415730a124df54d2abb`
+
+Overall: `northstar_open_approval_gated`
+
+This rollup does not claim the long-term North Star is complete. It records the current production-visible evidence line and keeps approval-gated items explicit.
+
+## Proven On Current Line
+
+| Gate | Result | Evidence |
+| --- | --- | --- |
+| Live harness quality | PASS, failed contracts 0 | `evaluation/live-harness-quality-probe-current-2026-07-20/report.json` |
+| KOSHA materialization | PASS, finding count 0 | `evaluation/kosha-live-materialization-2026-07-20/report.json` |
+| KOSHA exact trust registry | PASS, D-C-13 / D-C-7 / B-E-10 | `evaluation/kosha-current-live-gate-2026-07-20/report.json` |
+| RLS / LLM Wiki app boundary | PASS approval-gated, 9 files / 83 tests | `evaluation/rls-current-tenant-boundary-gate-2026-07-20/report.json` |
+
+## Still Approval-Gated
+
+| Gate | State | Evidence |
+| --- | --- | --- |
+| SIF embedding runtime | Migration required; corpus ready; vector flag off | `evaluation/sif-embedding-gate/runtime-db-probe.json` |
+| Supabase RLS launch isolation | Approval-ready preflight only; launch readiness false | `evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json` |
+| LLM Wiki publication | Approval-ready preflight only; publication unavailable | `evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json` |
+
+## Safe Demo Claims
+
+- SafeClaw fixes SIF/KOSHA/current work-history evidence before LLM wording.
+- KOSHA exact-trust pins and live harness contracts are proven on the current production line.
+- SIF embedding corpus is prepared, but vector retrieval remains disabled until approved migration/upload/runtime verification.
+
+## Forbidden Claims
+
+- RLS launch isolation is proven.
+- LLM Wiki publication is available.
+- SIF vector retrieval is production-active.
+- All KOSHA metadata rows are exact evidence.
+- DB migration or data upload was performed in this rollup.
