@@ -14996,6 +14996,20 @@ body:has(.safeclaw-landing) :is(
     padding: 10px;
   }
 
+  .command-center-shell.workspace-page-share .share-form-card[data-share-owner="targets"] {
+    grid-column: 1 / span 2;
+  }
+
+  .command-center-shell.workspace-page-share .share-form-card[data-share-owner="language-preview"] {
+    grid-column: 3;
+  }
+
+  .command-center-shell.workspace-page-share .share-form-card[data-share-owner="channels"] {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    min-height: auto;
+  }
+
   .command-center-shell.workspace-page-share .share-form-card > p.muted.small,
   .command-center-shell.workspace-page-share .share-panel.workflow-panel .channel-readiness-note {
     display: none;
@@ -15007,12 +15021,13 @@ body:has(.safeclaw-landing) :is(
   }
 
   .command-center-shell.workspace-page-share .share-panel.workflow-panel .channel-grid {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 6px;
   }
 
   .command-center-shell.workspace-page-share .share-panel.workflow-panel .channel-card {
     display: flex;
+    align-items: center;
     justify-content: space-between;
     gap: 8px;
     min-height: 44px;

@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-20T19:47:09.511Z",
+  "checkedAt": "2026-07-20T22:32:25.546Z",
   "route": "/workspace?share",
   "scenario": {
     "label": "desktop",
@@ -10,7 +10,7 @@
   "verdict": "PASS",
   "metrics": {
     "viewportHeight": 900,
-    "pageHeight": 912,
+    "pageHeight": 918,
     "previewLeft": 771,
     "previewBottom": 705,
     "primaryRight": 755,
@@ -32,36 +32,36 @@
     "primaryCount": 1,
     "channelCards": [
       {
-        "width": 172,
+        "width": 191,
         "height": 44
       },
       {
-        "width": 172,
+        "width": 191,
         "height": 44
       },
       {
-        "width": 172,
+        "width": 191,
         "height": 44
       }
     ],
     "configCards": [
       {
         "display": "grid",
-        "width": 194,
-        "height": 306,
-        "bottom": 667
+        "width": 400,
+        "height": 150,
+        "bottom": 511
+      },
+      {
+        "display": "grid",
+        "width": 606,
+        "height": 150,
+        "bottom": 673
       },
       {
         "display": "grid",
         "width": 194,
-        "height": 306,
-        "bottom": 667
-      },
-      {
-        "display": "grid",
-        "width": 194,
-        "height": 306,
-        "bottom": 667
+        "height": 150,
+        "bottom": 511
       }
     ],
     "horizontalOverflow": 0,

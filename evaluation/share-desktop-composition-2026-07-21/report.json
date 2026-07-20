@@ -1,0 +1,40 @@
+{
+  "verdict": "PASS_CURRENT_SOURCE",
+  "checkedAt": "2026-07-21 KST",
+  "scope": {
+    "route": "/workspace",
+    "surface": "share",
+    "claim": "desktop composition and mobile regression only",
+    "liveProviderDispatchClaimed": false
+  },
+  "changedFiles": [
+    "app/globals.css"
+  ],
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-simplification.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 11
+    },
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 4
+    }
+  ],
+  "metrics": {
+    "desktopViewport": "1440x900",
+    "pageHeight": 918,
+    "previewLeft": 771,
+    "primaryRight": 755,
+    "channelCardWidths": [191, 191, 191],
+    "channelCardHeights": [44, 44, 44],
+    "horizontalOverflow": 0
+  },
+  "remainingDebt": [
+    "Broader share action-mode/wizard design is separate from this desktop composition patch.",
+    "Live provider dispatch remains approval/configuration gated."
+  ]
+}

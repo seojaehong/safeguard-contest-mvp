@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-20T20:34:21.591Z",
+  "checkedAt": "2026-07-20T22:32:37.330Z",
   "route": "/workspace?share",
   "scenario": {
     "label": "generated-result-desktop",
@@ -10,7 +10,7 @@
   "fixtureGeneratedProviderResultProof": true,
   "providerDispatchLiveClaimed": false,
   "dispatchPostCount": 1,
-  "dispatchPostIdempotencyKey": "provider-dispatch-v1-82660a90-b1ad-4abb-9594-fe1deb5ed522-10739339",
+  "dispatchPostIdempotencyKey": "provider-dispatch-v1-bc0ea589-4eaf-4502-81de-34cea9c1780e-f2e163c6",
   "metrics": {
     "viewportWidth": 1440,
     "viewportHeight": 900,
@@ -18,48 +18,48 @@
     "root": {
       "left": 130,
       "right": 1310,
-      "top": 194,
-      "bottom": 835,
+      "top": 189,
+      "bottom": 836,
       "width": 1180,
-      "height": 641
+      "height": 647
     },
     "preview": {
       "left": 771,
       "right": 1291,
-      "top": 338,
-      "bottom": 738,
+      "top": 333,
+      "bottom": 733,
       "width": 520,
       "height": 400
     },
     "primary": {
       "left": 149,
       "right": 446,
-      "top": 338,
-      "bottom": 382,
+      "top": 333,
+      "bottom": 377,
       "width": 297,
       "height": 44
     },
     "result": {
       "left": 149,
       "right": 755,
-      "top": 716,
-      "bottom": 784,
+      "top": 717,
+      "bottom": 785,
       "width": 606,
       "height": 68
     },
     "resultSummary": {
       "left": 161,
       "right": 743,
-      "top": 728,
-      "bottom": 772,
+      "top": 729,
+      "bottom": 773,
       "width": 582,
       "height": 44
     },
     "resultDetail": {
       "left": 161,
       "right": 743,
-      "top": 772,
-      "bottom": 964,
+      "top": 773,
+      "bottom": 965,
       "width": 582,
       "height": 192
     },
@@ -74,31 +74,31 @@
     "configCards": [
       {
         "display": "grid",
-        "height": 306,
-        "bottom": 700
+        "height": 150,
+        "bottom": 539
       },
       {
         "display": "grid",
-        "height": 306,
-        "bottom": 700
+        "height": 150,
+        "bottom": 701
       },
       {
         "display": "grid",
-        "height": 306,
-        "bottom": 700
+        "height": 150,
+        "bottom": 539
       }
     ],
     "channelCards": [
       {
-        "width": 172,
+        "width": 191,
         "height": 44
       },
       {
-        "width": 172,
+        "width": 191,
         "height": 44
       },
       {
-        "width": 172,
+        "width": 191,
         "height": 44
       }
     ],
