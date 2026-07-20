@@ -1,0 +1,43 @@
+{
+  "verdict": "PREVIEW_ONLY",
+  "checkedAt": "2026-07-21T00:58:00+09:00",
+  "production": {
+    "url": "https://www.safeclaw.kr/api/workflow/dispatch",
+    "commitSha": "72b282315b7dcdd2bcc538de13dee9fd7d4c1c80",
+    "method": "GET"
+  },
+  "externalDispatchPerformed": false,
+  "dbSchemaChanged": false,
+  "supabaseWrites": false,
+  "providerDispatch": {
+    "capability": false,
+    "mode": "preview_only",
+    "reason": "persistent_idempotency_unavailable",
+    "channels": {
+      "email": {
+        "capability": false,
+        "reason": "persistent_idempotency_unavailable"
+      },
+      "sms": {
+        "capability": false,
+        "reason": "persistent_idempotency_unavailable"
+      },
+      "kakao": {
+        "capability": false,
+        "reason": "persistent_idempotency_unavailable"
+      }
+    }
+  },
+  "interpretation": [
+    "Share UI, language preview, and recipient portal can be validated without external sends.",
+    "Current production must not be described as live email/SMS/Kakao dispatch capable.",
+    "Live dispatch requires persistent idempotency and provider result persistence before enabling."
+  ],
+  "nextImplementationGate": [
+    "persistent idempotency available",
+    "exactly-once dispatch result persistence",
+    "retry cannot duplicate external sends",
+    "preview-only and malformed capability paths fail closed",
+    "channel labels remain explicit"
+  ]
+}
