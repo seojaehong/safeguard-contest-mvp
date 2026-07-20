@@ -75,6 +75,23 @@ function runPreflight(root: string, output = "evaluation/out"): { readonly repor
 }
 
 describe("RLS / LLM Wiki approval preflight", () => {
+  it("writes the current approval packet to the current dated evidence directory by default", () => {
+    const root = fixtureRoot();
+    const result = spawnSync(process.execPath, [SCRIPT_PATH, "--root", root], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain("rls-llm-wiki-approval-preflight-current-2026-07-20");
+    const report = JSON.parse(
+      readFileSync(join(root, "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json"), "utf8"),
+    ) as Record<string, unknown>;
+    expect(report.overall).toBe("approval_ready_open");
+    expect(report.dbMutationPerformed).toBe(false);
+    expect(report.networkOpened).toBe(false);
+  });
+
   it("emits an approval-ready-open packet without claiming launch readiness", () => {
     const root = fixtureRoot();
     const { report, stdout, status } = runPreflight(root);

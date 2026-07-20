@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const DEFAULT_OUTPUT_DIR = "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-19";
+const DEFAULT_OUTPUT_DIR = "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20";
 
 const REQUIRED_FILES = Object.freeze({
   rlsReport: "evaluation/supabase-rls-approval-2026-07-17/report.json",
