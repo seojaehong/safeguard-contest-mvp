@@ -1,6 +1,6 @@
 # Recipient Portal Demo Capture
 
-Generated at: 2026-07-20 KST
+Generated at: 2026-07-20T06:22:27.050Z
 
 ## Verdict
 
@@ -32,6 +32,7 @@ Before confirmation:
 
 - viewport width: 390
 - scroll width: 390
+- page height: 1695
 - horizontal overflow: false
 - outside elements: 0
 - minimum control height: 44
@@ -39,14 +40,20 @@ Before confirmation:
 - Vietnamese safety notice present: true
 - Korean `문서팩 검토` leakage: false
 - confirmation button present: true
+- saved confirmation present: false
 
 After confirmation:
 
 - viewport width: 390
 - scroll width: 390
+- page height: 1760
 - horizontal overflow: false
 - outside elements: 0
 - minimum control height: 44
+- Vietnamese chrome present: true
+- Vietnamese safety notice present: true
+- Korean `문서팩 검토` leakage: false
+- confirmation button present: true
 - saved confirmation present: true
 
 ## Boundary
