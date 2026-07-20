@@ -1,12 +1,12 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v1",
-  "generatedAt": "2026-07-20T05:01:24.588Z",
-  "head": "1f3188515fe03bd51c6b32fa4da1ffa605f21179",
+  "generatedAt": "2026-07-20T05:14:27.294Z",
+  "head": "b04442367640b1ad201caeaea41373bf0a72842d",
   "liveBuildInfo": {
-    "commitSha": "1f3188515fe03bd51c6b32fa4da1ffa605f21179",
+    "commitSha": "b04442367640b1ad201caeaea41373bf0a72842d",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-nxb16x9mp-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-ex7is2pwr-seojaehongs-projects.vercel.app"
   },
   "overall": "northstar_open_approval_gated",
   "dbMutationPerformed": false,
@@ -92,8 +92,8 @@
   "approvalGated": [
     {
       "id": "sif_embedding_runtime",
-      "artifact": "evaluation/sif-embedding-gate/runtime-db-probe.json",
-      "state": "migration_required",
+      "artifact": "evaluation/sif-embedding-gate/approval-preflight-report.json",
+      "state": "approval_gated_execution_ready",
       "corpusCount": 6032,
       "executionReadyAfterApproval": true,
       "vectorFeatureFlagEnabled": false

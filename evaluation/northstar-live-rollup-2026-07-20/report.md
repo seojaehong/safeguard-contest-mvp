@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-20T05:01:24.588Z
+Generated at: 2026-07-20T05:14:27.294Z
 
-Current HEAD / live production build: `1f3188515fe03bd51c6b32fa4da1ffa605f21179`
+Current HEAD / live production build: `b04442367640b1ad201caeaea41373bf0a72842d`
 
 Overall: `northstar_open_approval_gated`
 
@@ -26,7 +26,7 @@ This rollup does not claim the long-term North Star is complete. It records the 
 
 | Gate | State | Evidence |
 | --- | --- | --- |
-| SIF embedding runtime | Migration required; corpus ready; vector flag off | `evaluation/sif-embedding-gate/runtime-db-probe.json` |
+| SIF embedding runtime | Migration required; corpus ready; execution env ready after approval; vector flag off | `evaluation/sif-embedding-gate/approval-preflight-report.json` |
 | Supabase RLS launch isolation | Approval-ready preflight only; launch readiness false | `evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json` |
 | LLM Wiki publication | Approval-ready preflight only; publication unavailable | `evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json` |
 
@@ -43,5 +43,6 @@ This rollup does not claim the long-term North Star is complete. It records the 
 - SIF vector retrieval is production-active.
 - All KOSHA metadata rows are exact evidence.
 - DB migration or data upload was performed in this rollup.
+
 
 
