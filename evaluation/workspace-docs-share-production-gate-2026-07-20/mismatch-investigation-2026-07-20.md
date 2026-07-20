@@ -4,17 +4,17 @@ Checked at: 2026-07-20 KST
 
 ## Verdict
 
-**PARTIALLY FIXED.**
+**PARTIALLY FIXED, WITH THE BOUNDED EDIT-MODE REMEDIATION SHIPPED.**
 
-The default `입력 -> 문서 -> 공유` route flow and desktop share layout are fixed on current production. The remaining issue is the document edit surface: the first textarea is visible in the first viewport, but the editor panel still has excessive internal depth.
+The default `입력 -> 문서 -> 공유` route flow and desktop share layout are fixed on current production. The document edit surface has also been compacted: normal sections are collapsed by default, risk rows no longer auto-open the first row, and the production editor panel height is materially lower.
 
 ## Current Authoritative Surface
 
-- Source HEAD: `778f4601b359adc7ea716ee84eebdaa58f026115`
+- Source HEAD: `45faccac787858e4085db65651f3921c5b5b4bbf`
 - Served URL: `https://www.safeclaw.kr/workspace`
-- Served commit: `778f4601b359adc7ea716ee84eebdaa58f026115`
+- Served commit: `45faccac787858e4085db65651f3921c5b5b4bbf`
 - Served branch: `master`
-- Deployment URL: `safeguard-contest-iig0xw90t-seojaehongs-projects.vercel.app`
+- Deployment URL: `safeguard-contest-e204b1a0y-seojaehongs-projects.vercel.app`
 - Probe guard: waits for `12/12 생성` or `안전 문서팩 3종 준비 완료` before measuring documents.
 
 ## What Was Implemented
@@ -34,10 +34,10 @@ The older `ddda375d` geometry commit is not an ancestor of the current branch, b
 | Surface | Viewport | Height ratio | Key geometry | Status |
 | --- | --- | ---: | --- | --- |
 | Documents review | 1440x900 | 1.27x | page 1147px, document y=229, no overflow, sticky 0 | Fixed |
-| Document edit | 1440x900 | 1.65x | textarea y=350, editor panel 2561px, sticky 1 | Partial |
+| Document edit | 1440x900 | 2.46x | textarea y=374, editor panel 1433px, sticky 1 | Improved |
 | Share | 1440x900 | 1.30x | share width 1180px, one primary CTA, no overflow | Fixed |
 | Documents review | 390x844 | 1.68x | document y=262, no overflow, sticky 0 | Fixed |
-| Document edit | 390x844 | 1.36x | textarea y=407, editor panel 2696px, sticky 0 | Partial |
+| Document edit | 390x844 | 2.35x | textarea y=361, editor panel 1359px, sticky 0 | Improved |
 | Share | 390x844 | 1.76x | share width 336px, one primary CTA, no overflow | Fixed |
 
 ## Why The User Still Saw A Problem
@@ -46,18 +46,18 @@ The previous "done" signal was too broad. It closed the original default documen
 
 If the user saw a narrow share card on desktop, that was likely stale/non-authoritative surface: old local dev server, old branch, cached deployment, wrong URL, or pre-`778f4601` build. Current production renders an 1180px share surface at 1440px.
 
-If the user clicked `편집` and judged the long edit screen, that is a real remaining issue. The current production editor still carries a long internal panel below the first editable area.
+If the user clicked `편집` before `45faccac`, that was a real remaining issue. Current production now shows a compacted edit surface, though it is still a full editing page rather than a tiny modal/card.
 
 Static typography/design-contract passes should not be used as evidence for this workflow-level UX. The gate must explicitly measure generated-state readiness, stage separation, document height, edit entry y-position, sticky overlap, and desktop share width.
 
 ## Bounded Remediation Path
 
-Keep the now-fixed default review/share surfaces. Remediate only document edit mode:
+Keep the now-fixed default review/share/edit surfaces. Move the next work to document-specific field editors:
 
 - Keep one visible stage at a time.
-- Keep desktop textarea y <= 350 and mobile textarea y <= 420.
-- Reduce editor internal panel height materially from 2561px desktop and 2696px mobile.
-- Move provenance/export/supporting content behind collapsed controls without deleting data contracts.
+- Keep mobile first textarea near the top of the first viewport.
+- Keep collapsed sections and provenance/export drawers by default.
+- Add document-specific field editors for TBM, permit, education, and foreign-worker documents without deleting data contracts.
 - Re-run `run-current-geometry-probe.mjs` against production and require fixed default review/share metrics to remain stable.
 
 Raw evidence:
@@ -67,7 +67,7 @@ Raw evidence:
 
 Verification:
 
-- `node evaluation\workspace-docs-share-production-gate-2026-07-20\run-current-geometry-probe.mjs` — PASS, served commit `778f4601b359adc7ea716ee84eebdaa58f026115`, generated-state wait included.
+- `node evaluation\workspace-docs-share-production-gate-2026-07-20\run-current-geometry-probe.mjs` — PASS, served commit `45faccac787858e4085db65651f3921c5b5b4bbf`, generated-state wait included.
 - JSON parse for `current-geometry.json` and `mismatch-investigation-2026-07-20.json` — PASS.
 - `npm.cmd test -- tests\workspace-layout-regression.test.ts tests\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false` — 2 files / 28 tests PASS, 1 skipped. Duration 201.93s.
 - `git diff --check` — PASS, line-ending warnings only.

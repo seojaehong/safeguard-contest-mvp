@@ -4,20 +4,20 @@ Checked at: 2026-07-20 KST
 
 ## Verdict
 
-**PARTIALLY FIXED.**
+**PARTIALLY FIXED, WITH THE BOUNDED EDIT-MODE REMEDIATION SHIPPED.**
 
 The current production surface no longer reproduces the old launch blocker for the default document review stage or the share desktop breakpoint. The staged `입력 -> 문서 -> 공유` flow is also real in the default flow: only one stage is visible at a time.
 
-However, the edit surface still contains a very tall internal document editor panel below the first action. So the mismatch is real: prior static/design-contract passes and the default document/share geometry gate did not fully prove the workflow-level edit experience the user expected.
+The initial mismatch was real: prior static/design-contract passes and the default document/share geometry gate did not fully prove the workflow-level edit experience the user expected. A bounded edit-mode remediation has now shipped to production and materially reduced the internal editor depth while preserving document/provenance/export contracts.
 
 ## Authoritative Surface
 
-- Git HEAD used for source comparison: `778f4601b359adc7ea716ee84eebdaa58f026115`
+- Git HEAD used for source comparison: `45faccac787858e4085db65651f3921c5b5b4bbf`
 - Served URL: `https://www.safeclaw.kr/workspace`
 - Build info endpoint: `https://www.safeclaw.kr/api/build-info`
-- Served commit: `778f4601b359adc7ea716ee84eebdaa58f026115`
+- Served commit: `45faccac787858e4085db65651f3921c5b5b4bbf`
 - Served branch: `master`
-- Deployment URL: `safeguard-contest-iig0xw90t-seojaehongs-projects.vercel.app`
+- Deployment URL: `safeguard-contest-e204b1a0y-seojaehongs-projects.vercel.app`
 
 The current probe waits for generated document readiness (`12/12 생성` or `안전 문서팩 3종 준비 완료`) before measuring, so it does not accidentally capture the interim generating shell.
 
@@ -26,10 +26,10 @@ The current probe waits for generated document readiness (`12/12 생성` or `안
 | Viewport | Stage | Page height | Stage y | Stage height | Key result |
 | --- | --- | ---: | ---: | ---: | --- |
 | 1440x900 | Documents review | 1147 | 229 | 798 | Fixed versus prior 2070px/723px sticky report |
-| 1440x900 | Document edit | 1489 | 63 editor y / 350 textarea y | 2561 editor height | Partially fixed; first textarea is visible, but the editor surface remains overlong |
+| 1440x900 | Document edit | 2210 | 63 editor y / 374 textarea y | 1433 editor height | Improved; no horizontal overflow, editor depth materially reduced |
 | 1440x900 | Share | 1174 | 189 | 921 | Fixed; 1180px desktop surface, not mobile-card width |
 | 390x844 | Documents review | 1417 | 262 | 1050 | Acceptable as a compact step, no horizontal overflow |
-| 390x844 | Document edit | 1152 | 84 editor y / 407 textarea y | 2696 editor height | Partially fixed; textarea starts in the first viewport, but hidden editor depth remains high |
+| 390x844 | Document edit | 1981 | 63 editor y / 361 textarea y | 1359 editor height | Improved; textarea starts higher and editor depth is roughly halved |
 | 390x844 | Share | 1487 | 244 | 1138 | Not the old 3836px share body; one primary CTA, no horizontal overflow |
 
 ## Interpretation
@@ -41,13 +41,14 @@ The original default-stage complaints are fixed on current production:
 - Desktop share is a `1180px` surface at `1440px`, so it is no longer a narrow mobile-card layout.
 - Share has one primary CTA and no horizontal overflow on desktop or mobile.
 
-The remaining mismatch is the edit-mode product depth:
+The edit-mode remediation result:
 
-- Desktop edit body is `1489 / 900 = 1.65x`, and the editor panel itself reports `2561px` height.
-- Mobile edit body is `1152 / 844 = 1.36x`, but the editor panel reports `2696px` height.
-- This means the first editable textarea is near the first viewport (`y=350` desktop, `y=407` mobile), but the full edit model still carries a long below-fold surface.
+- Desktop editor panel is reduced from `2561px` to `1433px`.
+- Mobile editor panel is reduced from `2696px` to `1359px`.
+- Mobile first textarea moves from `y=407` to `y=361`.
+- Horizontal overflow remains false and outside elements remain 0 on desktop/mobile.
 
-That is why the prior "done" signal and the user's current perception diverged: the implemented work closed default review/share geometry and first editor entry, but did not fully redesign edit mode into a short, field-first document editor.
+This does not make the edit screen a tiny one-card surface. It makes it a single, cleaner page flow with collapsed sections and no nested shell scroll in the north-star gate. Further product refinement can still turn each document into richer field-specific editors, but the immediate launch blocker is bounded and reduced.
 
 ## Implementation Trace
 
@@ -94,11 +95,11 @@ Possible user-surface mismatch sources:
 
 ## Next Remediation Gate
 
-Bounded fix target: keep default review/share as they are, and compress edit mode without changing the generation/harness contract.
+Remaining follow-up target: document-specific field editors, not the old overlong default textarea/rail surface.
 
-- Desktop edit: keep textarea y <= 350 and reduce internal editor panel height materially from 2561px.
-- Mobile edit: keep textarea y <= 420 and reduce internal editor panel height materially from 2696px.
-- Replace the long single textarea/default appendix feel with field-first document editing and collapsed provenance/export tools.
+- Keep the shipped default review/share geometry.
+- Preserve the shipped collapsed section model for risk assessment.
+- Add document-specific field editors for TBM, permit, education, and foreign-worker documents in a separate product workstream.
 - Keep one visible stage at a time.
 - Preserve existing workpack/document persistence and provenance data.
 
@@ -124,13 +125,14 @@ Verification:
 
 ## Post-Deploy Verification
 
-After commit `778f4601b359adc7ea716ee84eebdaa58f026115` was deployed to production, the same geometry probe was rerun against `https://www.safeclaw.kr`.
+After commit `45faccac787858e4085db65651f3921c5b5b4bbf` was deployed to production, the same geometry probe was rerun against `https://www.safeclaw.kr`.
 
-- Served commit: `778f4601b359adc7ea716ee84eebdaa58f026115`
+- Served commit: `45faccac787858e4085db65651f3921c5b5b4bbf`
 - Desktop documents review: page height 1147, horizontal overflow false
 - Desktop share: 1180px share surface, one primary CTA, horizontal overflow false
 - Mobile documents review: page height 1417, horizontal overflow false
-- Mobile document edit: page height 1152, horizontal overflow false, no sticky/fixed overlap detected, first textarea y=407
+- Desktop document edit: page height 2210, editor panel 1433, horizontal overflow false, first textarea y=374
+- Mobile document edit: page height 1981, editor panel 1359, horizontal overflow false, first textarea y=361
 - Mobile share: page height 1487, one primary CTA, horizontal overflow false
 
 Raw evidence was refreshed in `current-geometry.json` and the `*-current-*.png` screenshots.
