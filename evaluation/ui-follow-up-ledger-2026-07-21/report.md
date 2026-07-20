@@ -157,7 +157,7 @@ Current-source bounded gate:
 - North Star/open gate preservation: PASS, 13/13.
 - TypeScript: PASS.
 
-Interpretation: this closes the first document-specific drilldown depth layer: one selected document, one open body section, bounded pane. Remaining document IA debt is richer document-specific section actions and editing affordances, not raw route body height, missing selected context, or all sections expanding at once.
+Interpretation: this closes the first document-specific drilldown depth layer: one selected document, one open body section, bounded pane, and explicit evidence/quality shortcuts from the open section. Remaining document IA debt is richer per-document editing affordances, not raw route body height, missing selected context, all sections expanding at once, or hidden evidence entrypoints.
 
 ## 2026-07-21 Share Result Drilldown Update
 

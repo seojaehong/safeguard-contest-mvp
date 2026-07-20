@@ -1,6 +1,6 @@
 # Documents Drilldown Depth Gate
 
-Checked at: 2026-07-21 04:33 KST
+Checked at: 2026-07-21 05:38 KST
 
 Source HEAD before commit: `ea885c9f201b05810a13242edba891bb4bd98993`
 
@@ -10,9 +10,9 @@ Branch: `chore/recipient-foreign-live-gate-20260720`
 
 ## Verdict
 
-PASS for the bounded current-source `/documents` selected-document section accordion gate.
+PASS for the bounded current-source `/documents` selected-document section accordion and section-action gate.
 
-This wave does not claim that route splitting alone fixes document length. It moves the selected document deeper into the intended IA: viewport cockpit, bounded internal pane, then one selected body section open at a time.
+This wave does not claim that route splitting alone fixes document length. It moves the selected document deeper into the intended IA: viewport cockpit, bounded internal pane, one selected body section open at a time, then explicit local actions for evidence and quality review.
 
 ## What Changed
 
@@ -20,6 +20,8 @@ This wave does not claim that route splitting alone fixes document length. It mo
 - Only one selected-document body section is open at a time.
 - Summary clicks and keyboard Enter/Space are driven by React state with native `<details>` toggling prevented, so the two-open native flicker state is not accepted as product behavior.
 - Section summaries show compact local context: line count plus `편집 중` or `펼치기`.
+- The open section now exposes `근거 보기` and `점검 보기` actions so users can jump to evidence/quality review without hunting through the pane.
+- `근거 보기` opens the bounded utility drawer, moves the evidence panel into the internal pane, and keeps it below the sticky toolbar.
 - Opening another section also aligns the active section's textarea below the sticky document toolbar.
 - The patch is route/editor UI scoped and does not change backend, provider dispatch, export, DB, or document generation contracts.
 
@@ -86,6 +88,8 @@ Key assertions:
 - Default selected document body has exactly one open section: index `0`.
 - After opening the second section, the immediate stable state still has exactly one open section: index `1`.
 - The first section summary changes to `펼치기`; the second changes to `편집 중`.
+- The open section action rail exposes `근거 보기` and `점검 보기`.
+- `근거 보기` opens the evidence drawer and lands the evidence panel inside the bounded pane below the sticky toolbar.
 - The opened section textarea remains visible inside the pane and is not covered by the sticky toolbar.
 - The route page height remains bounded after section switching.
 - Horizontal overflow remains closed.
@@ -94,4 +98,4 @@ Key assertions:
 
 ## IA Note
 
-This closes the first document-specific drilldown depth layer: one selected document, one open body section, bounded pane. Remaining product depth is richer document-specific actions and section-level editing affordances, not raw route body height or missing local context.
+This closes the first document-specific drilldown depth layer: one selected document, one open body section, bounded pane, and explicit section-level evidence/quality actions. Remaining product depth is richer per-document editing affordances, not raw route body height, missing local context, or hidden evidence entrypoints.

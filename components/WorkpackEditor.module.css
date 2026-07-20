@@ -565,6 +565,33 @@
   padding: var(--space-4);
 }
 
+.documentSectionActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.documentSectionActions button {
+  min-height: 44px;
+  border: 1px solid var(--workspace-rule-strong);
+  border-radius: var(--radius-button);
+  background: var(--workspace-surface-1);
+  padding: 0 var(--space-3);
+  color: var(--workspace-ink);
+  font-size: var(--text-control);
+  font-weight: 700;
+  line-height: var(--leading-control);
+  cursor: pointer;
+}
+
+.documentSectionActions button:hover,
+.documentSectionActions button:focus-visible {
+  border-color: var(--workspace-accent);
+  outline: 2px solid rgba(31, 77, 67, 0.2);
+  outline-offset: 2px;
+}
+
 .editor :global(.document-textarea).sourceTextarea {
   max-height: none;
   overflow-y: hidden;

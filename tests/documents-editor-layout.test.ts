@@ -1366,6 +1366,8 @@ describe("documents editor layout", () => {
           toolbarBottom: toolbarRect ? Math.round(toolbarRect.bottom) : null,
           openTextareaTop: openTextareaRect ? Math.round(openTextareaRect.top) : null,
           openTextareaBottom: openTextareaRect ? Math.round(openTextareaRect.bottom) : null,
+          actionTexts: Array.from(openSection?.querySelectorAll<HTMLElement>('[data-testid="document-section-actions"] button') || [])
+            .map((button) => button.textContent?.replace(/\s+/gu, " ").trim()),
           openTextareaVisibleInPane: Boolean(openTextareaRect && shellRect && openTextareaRect.bottom > shellRect.top && openTextareaRect.top < shellRect.bottom),
           toolbarCoversOpenTextarea: Boolean(toolbarRect && openTextareaRect && toolbarRect.bottom > openTextareaRect.top && toolbarRect.top < openTextareaRect.bottom)
         };
@@ -1382,6 +1384,45 @@ describe("documents editor layout", () => {
       expect(sectionAccordionAfterSecondOpen.toolbarCoversOpenTextarea).toBe(false);
       expect(sectionAccordionAfterSecondOpen.openTextareaTop).toBeGreaterThanOrEqual((sectionAccordionAfterSecondOpen.toolbarBottom || 0) + 4);
       expect(sectionAccordionAfterSecondOpen.openTextareaBottom).toBeGreaterThan(sectionAccordionAfterSecondOpen.openTextareaTop || 0);
+      expect(sectionAccordionAfterSecondOpen.actionTexts).toEqual(["근거 보기", "점검 보기"]);
+
+      await page.getByTestId("document-section-actions").getByRole("button", { name: "근거 보기" }).click();
+      const evidenceActionLanding = await page.evaluate(async () => {
+        await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+        const drawer = document.querySelector<HTMLDetailsElement>('[data-testid="editor-provenance-drawer"]');
+        const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
+        const toolbar = document.querySelector<HTMLElement>(".document-toolbar");
+        const evidencePanel = document.querySelector<HTMLElement>('[data-testid="editor-evidence-panel"]');
+        if (!drawer || !workpackShell || !toolbar || !evidencePanel) {
+          throw new Error("Missing document section action target");
+        }
+        const shellRect = workpackShell.getBoundingClientRect();
+        const toolbarRect = toolbar.getBoundingClientRect();
+        const evidenceRect = evidencePanel.getBoundingClientRect();
+        return {
+          drawerOpen: drawer.open,
+          activeTestId: (document.activeElement as HTMLElement | null)?.dataset?.testid || "",
+          shellTop: Math.round(shellRect.top),
+          shellBottom: Math.round(shellRect.bottom),
+          toolbarBottom: Math.round(toolbarRect.bottom),
+          evidenceTop: Math.round(evidenceRect.top),
+          evidenceBottom: Math.round(evidenceRect.bottom),
+          evidenceVisibleInPane: evidenceRect.bottom > shellRect.top && evidenceRect.top < shellRect.bottom,
+          evidenceBelowToolbar: evidenceRect.top >= toolbarRect.bottom - 1,
+          pageHeight: Math.round(document.documentElement.scrollHeight),
+          viewportHeight: window.innerHeight,
+          scrollWidth: document.documentElement.scrollWidth,
+          viewportWidth: window.innerWidth
+        };
+      });
+      expect(evidenceActionLanding.drawerOpen).toBe(true);
+      expect(evidenceActionLanding.activeTestId).toBe("editor-evidence-panel");
+      expect(evidenceActionLanding.evidenceVisibleInPane).toBe(true);
+      expect(evidenceActionLanding.evidenceBelowToolbar).toBe(true);
+      expect(evidenceActionLanding.evidenceTop).toBeLessThan(evidenceActionLanding.shellBottom);
+      expect(evidenceActionLanding.evidenceTop).toBeGreaterThanOrEqual(evidenceActionLanding.toolbarBottom - 1);
+      expect(evidenceActionLanding.pageHeight).toBeLessThanOrEqual(evidenceActionLanding.viewportHeight + 1);
+      expect(evidenceActionLanding.scrollWidth).toBeLessThanOrEqual(evidenceActionLanding.viewportWidth + 1);
 
       await page.locator('[data-testid="document-section-accordion"]').first().locator("summary").click();
       await page.locator('.document-textarea[aria-label="위험성평가표 편집"]').focus();

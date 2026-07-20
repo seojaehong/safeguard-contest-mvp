@@ -2660,6 +2660,17 @@ export function WorkpackEditor({
     }
   }
 
+  function openDocumentUtilityPanel(targetTestId: "editor-evidence-panel" | "editor-quality-panel") {
+    const root = workpackShellRef.current || documentBodyRef.current;
+    const drawer = root?.querySelector<HTMLDetailsElement>('[data-testid="editor-provenance-drawer"]');
+    if (drawer) drawer.open = true;
+    window.requestAnimationFrame(() => {
+      const target = root?.querySelector<HTMLElement>(`[data-testid="${targetTestId}"]`) || null;
+      alignPaneTargetBelowToolbar(target);
+      target?.focus({ preventScroll: true });
+    });
+  }
+
   function selectDocumentTab(index: number) {
     const nextDocument = documentMeta[index];
     if (!nextDocument) return;
@@ -3204,6 +3215,16 @@ export function WorkpackEditor({
                       onChange={(event) => updateStructuredSection(section.id, event.target.value)}
                       aria-label={index === 0 ? `${selected.title} 편집` : `${selected.title} ${section.label} 편집`}
                     />
+                    {isSectionOpen ? (
+                      <div className={styles.documentSectionActions} data-testid="document-section-actions">
+                        <button type="button" onClick={() => openDocumentUtilityPanel("editor-evidence-panel")}>
+                          근거 보기
+                        </button>
+                        <button type="button" onClick={() => openDocumentUtilityPanel("editor-quality-panel")}>
+                          점검 보기
+                        </button>
+                      </div>
+                    ) : null}
                   </details>
                 );
               })}
@@ -3246,7 +3267,7 @@ export function WorkpackEditor({
               </span>
             </summary>
             <div className={`${styles.utilityContent} ${styles.provenanceContent}`}>
-            <section className={styles.provenanceSection} data-testid="editor-evidence-panel">
+            <section className={styles.provenanceSection} data-testid="editor-evidence-panel" tabIndex={-1}>
               <div className={styles.sectionHeading}>
                 <div>
                   <span className="eyebrow">생성 근거</span>
@@ -3290,7 +3311,7 @@ export function WorkpackEditor({
               ) : null}
             </section>
 
-          <section className={styles.provenanceSection} data-testid="editor-quality-panel">
+          <section className={styles.provenanceSection} data-testid="editor-quality-panel" tabIndex={-1}>
             <div className={`${styles.utilityContent} ${styles.qualityContent}`}>
               <div className={styles.sectionHeading}>
                 <div>

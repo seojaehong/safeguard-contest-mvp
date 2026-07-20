@@ -573,6 +573,10 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     && drilldownAssertions.horizontalOverflowClosedAfterSectionSwitch === true
     && drilldownAssertions.workpackPaneRemainsInsideViewport === true
     && drilldownAssertions.openSectionTextareaVisibleInPaneAfterSectionSwitch === true
+    && drilldownAssertions.openSectionActionsVisibleAfterSectionSwitch === true
+    && drilldownAssertions.evidenceActionDrawerOpen === true
+    && drilldownAssertions.evidenceActionPanelVisibleInPane === true
+    && drilldownAssertions.evidenceActionPanelBelowToolbar === true
     && drilldownAssertions.toolbarDoesNotCoverOpenSectionTextareaAfterSectionSwitch === true
     && drilldownAssertions.selectedDocumentToolbarStillDoesNotCoverTextarea === true
     && paneChecksPass
@@ -603,9 +607,9 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
       label: "Documents and Share cockpit UI",
       state: "proven",
       evidencePath: drilldownPath,
-      detail: "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch.",
+      detail: "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, section-level evidence/quality actions, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch.",
       nextActions: [
-        "Continue UI product depth on richer document-specific section actions and one-document-at-a-time editing affordances.",
+        "Continue UI product depth on richer per-document editing affordances beyond the current section-level evidence/quality shortcuts.",
         "Optional follow-up: make the mobile Share configuration disclosure a guided stepper if more hand-holding is needed.",
       ],
     });

@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-21T04:33:10+09:00",
+  "checkedAt": "2026-07-21T05:38:52+09:00",
   "sourceHeadBeforeCommit": "ea885c9f201b05810a13242edba891bb4bd98993",
   "sourceHeadBeforeSectionOverlapPatch": "a31f097a8c7598751b0e09e274fd55b5bd2899a7",
   "branch": "chore/recipient-foreign-live-gate-20260720",
@@ -8,7 +8,7 @@
   "structuralDecision": {
     "routeSplitAloneAcceptedAsFix": false,
     "requiredPattern": "viewport cockpit plus bounded drilldown",
-    "thisWave": "inside the bounded document pane, only one selected-document body section is open at a time"
+    "thisWave": "inside the bounded document pane, only one selected-document body section is open at a time and the open section exposes local action shortcuts"
   },
   "fix": {
     "routeScopedDocumentsOnly": true,
@@ -16,6 +16,10 @@
     "nativeDetailsDoubleOpenFlickerPrevented": true,
     "oneSectionOpenImmediatelyAfterSummaryClick": true,
     "sectionSummaryShowsLineCountAndState": true,
+    "openSectionActionRail": true,
+    "openSectionActionRailLabels": ["근거 보기", "점검 보기"],
+    "evidenceActionOpensUtilityDrawer": true,
+    "evidenceActionLandsPanelInsidePane": true,
     "openedSectionTextareaAlignedBelowStickyToolbar": true,
     "backendProviderOrExportContractsChanged": false
   },
@@ -72,6 +76,10 @@
     "horizontalOverflowClosedAfterSectionSwitch": true,
     "workpackPaneRemainsInsideViewport": true,
     "openSectionTextareaVisibleInPaneAfterSectionSwitch": true,
+    "openSectionActionsVisibleAfterSectionSwitch": true,
+    "evidenceActionDrawerOpen": true,
+    "evidenceActionPanelVisibleInPane": true,
+    "evidenceActionPanelBelowToolbar": true,
     "toolbarDoesNotCoverOpenSectionTextareaAfterSectionSwitch": true,
     "selectedDocumentToolbarStillDoesNotCoverTextarea": true
   },
@@ -100,7 +108,7 @@
     }
   ],
   "remainingDebt": [
-    "Document-specific action design and richer per-document editing affordances remain future product depth.",
+    "Richer per-document editing affordances remain future product depth beyond the current section-level evidence/quality action shortcuts.",
     "Provider live dispatch remains approval-gated and is not claimed by this UI wave."
   ]
 }
