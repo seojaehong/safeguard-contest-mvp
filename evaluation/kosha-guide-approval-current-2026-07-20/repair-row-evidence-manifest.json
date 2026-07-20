@@ -1,0 +1,163 @@
+{
+  "schemaVersion": "safeclaw-kosha-guide-repair-row-evidence/v1",
+  "generatedAt": "2026-07-20T07:43:38.242Z",
+  "sourceAudit": "evaluation/kosha-guide-approval-current-2026-07-20/report.json",
+  "repairPlan": "evaluation/kosha-guide-approval-current-2026-07-20/repair-plan.json",
+  "readOnly": true,
+  "dbMutationPerformed": false,
+  "uploadPerformed": false,
+  "embeddingGenerated": false,
+  "decision": "row_level_evidence_incomplete_before_mutation_or_embedding",
+  "rowSetInventory": [
+    {
+      "workstreamId": "provenance_and_status_backfill_dry_run",
+      "evidenceMode": "count_only",
+      "sourceCount": 1040,
+      "rowCountAvailable": 0,
+      "rowLevelComplete": false,
+      "missingRowManifestCount": 1040,
+      "nextArtifact": "official-provenance-backfill-row-manifest.json"
+    },
+    {
+      "workstreamId": "body_hydration_or_ocr_review",
+      "evidenceMode": "count_only",
+      "sourceCount": 818,
+      "rowCountAvailable": 0,
+      "rowLevelComplete": false,
+      "missingRowManifestCount": 818,
+      "nextArtifact": "body-hydration-ocr-row-manifest.json"
+    },
+    {
+      "workstreamId": "summary_regeneration",
+      "evidenceMode": "group_sample",
+      "sourceCount": 822,
+      "rowCountAvailable": 33,
+      "rowLevelComplete": false,
+      "missingRowManifestCount": 789,
+      "nextArtifact": "source-grounded-summary-row-manifest.json"
+    },
+    {
+      "workstreamId": "version_state_reconciliation",
+      "evidenceMode": "row_level_complete",
+      "sourceCount": 8,
+      "rowCountAvailable": 8,
+      "rowLevelComplete": true,
+      "missingRowManifestCount": 0,
+      "rowSetKeys": [
+        "versionUpdates",
+        "retiredRows"
+      ]
+    },
+    {
+      "workstreamId": "control_causality_review",
+      "evidenceMode": "row_level_complete",
+      "sourceCount": 71,
+      "rowCountAvailable": 71,
+      "rowLevelComplete": true,
+      "missingRowManifestCount": 0,
+      "rowSetKeys": [
+        "operationalControlReviewRequiredRows",
+        "operationalControlSecondaryCandidateRows"
+      ]
+    },
+    {
+      "workstreamId": "retrieval_branch_observation",
+      "evidenceMode": "scenario_branch_level_complete",
+      "sourceCount": 8,
+      "rowCountAvailable": 8,
+      "rowLevelComplete": true,
+      "missingRowManifestCount": 0,
+      "rowSetKeys": [
+        "untestedRetrievalBranches"
+      ]
+    }
+  ],
+  "summarySample": {
+    "duplicateSummaryGroups": 11,
+    "uniqueSampleIds": 33,
+    "sampleIds": [
+      "technical-support-07-0001-a-1-2018-구리에-대한-작업환경측정-분석-기술지침",
+      "technical-support-07-0002-a-102-2018-황산디메틸에-대한-작업환경측정-분석-기술지침-개정",
+      "technical-support-07-0003-a-103-2018-요오드화메틸에-대한-작업환경측정-분석-기술지침",
+      "technical-support-10-0095-d-1-2021-미압-배관-등에서의-폭연-방산구-설치에-관한-기술지침",
+      "technical-support-10-0096-d-12-2012-분진폭발방지에-관한-기술지침",
+      "technical-support-10-0097-d-13-2012-염소저장설비에-관한-기술지침",
+      "technical-support-02-0001-b-5-2011-조선업-안전점검-기술지침",
+      "technical-support-02-0002-b-6-2011-부선-안전작업-기술지침",
+      "technical-support-02-0004-b-m-10-2025-화학설비의-설치에-관한-기술지원규정",
+      "technical-support-09-0001-b-e-1-2025-피뢰시스템에-관한-기술지원규정",
+      "technical-support-09-0016-b-e-3-2025-변전실-등의-양압유지에-관한-기술지원규정",
+      "technical-support-09-0018-b-e-5-2025-비상전원의-선정-및-설치에-관한-기술지원규정",
+      "technical-support-08-0009-h-129-2023-폐활량검사-및-판정에-관한-지침",
+      "technical-support-08-0010-h-130-2021-접촉피부염의-작업관련성-평가지침",
+      "technical-support-08-0011-h-132-2023-벤젠-노출-근로자의-건강관리지침",
+      "technical-support-06-0014-a-g-3-2025-오토바이-배달작업-시-안전에-관한-기술지원규정",
+      "technical-support-06-0019-a-g-8-2025-산업재해-기록-분류에-관한-기술지원규정",
+      "technical-support-06-0020-a-g-9-2025-창고-작업-시-안전에-관한-기술지원규정",
+      "technical-support-01-0001-c-05-2016-건설공사-돌관작업-안전보건작업-지침",
+      "technical-support-01-0002-c-06-2015-타일-tile-공사-안전보건작업-지침"
+    ]
+  },
+  "incompleteWorkstreams": [
+    {
+      "workstreamId": "provenance_and_status_backfill_dry_run",
+      "evidenceMode": "count_only",
+      "sourceCount": 1040,
+      "rowCountAvailable": 0,
+      "missingRowManifestCount": 1040,
+      "nextArtifact": "official-provenance-backfill-row-manifest.json"
+    },
+    {
+      "workstreamId": "body_hydration_or_ocr_review",
+      "evidenceMode": "count_only",
+      "sourceCount": 818,
+      "rowCountAvailable": 0,
+      "missingRowManifestCount": 818,
+      "nextArtifact": "body-hydration-ocr-row-manifest.json"
+    },
+    {
+      "workstreamId": "summary_regeneration",
+      "evidenceMode": "group_sample",
+      "sourceCount": 822,
+      "rowCountAvailable": 33,
+      "missingRowManifestCount": 789,
+      "nextArtifact": "source-grounded-summary-row-manifest.json"
+    }
+  ],
+  "completeWorkstreams": [
+    {
+      "workstreamId": "version_state_reconciliation",
+      "evidenceMode": "row_level_complete",
+      "sourceCount": 8,
+      "rowCountAvailable": 8,
+      "rowSetKeys": [
+        "versionUpdates",
+        "retiredRows"
+      ]
+    },
+    {
+      "workstreamId": "control_causality_review",
+      "evidenceMode": "row_level_complete",
+      "sourceCount": 71,
+      "rowCountAvailable": 71,
+      "rowSetKeys": [
+        "operationalControlReviewRequiredRows",
+        "operationalControlSecondaryCandidateRows"
+      ]
+    },
+    {
+      "workstreamId": "retrieval_branch_observation",
+      "evidenceMode": "scenario_branch_level_complete",
+      "sourceCount": 8,
+      "rowCountAvailable": 8,
+      "rowSetKeys": [
+        "untestedRetrievalBranches"
+      ]
+    }
+  ],
+  "approvalGate": {
+    "mutationAllowedByThisRun": false,
+    "embeddingAllowedByThisRun": false,
+    "blocker": "Do not mutate Supabase rows or generate embeddings until every count-only workstream has a reviewed per-row manifest."
+  }
+}

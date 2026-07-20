@@ -1,6 +1,6 @@
 # KOSHA Guide Repair Plan
 
-Generated at: 2026-07-20T06:54:47.807Z
+Generated at: 2026-07-20T07:43:38.242Z
 
 ## Decision
 
@@ -86,3 +86,5 @@ This plan is a read-only repair queue. It does not authorize DB mutation, upload
 - Mutation allowed by this run: false
 - Required before mutation: explicit user approval after reviewed per-item dry-run
 - Required before embedding: official provenance/body/control/retrieval branch blockers closed
+- Required row evidence before approval: per-row provenance/status backfill manifest for all active rows; per-row body hydration/OCR review manifest for empty-body rows; per-row source-grounded summary regeneration manifest for fallback summary rows
+- Row evidence manifest: `evaluation/kosha-guide-approval-current-2026-07-20/repair-row-evidence-manifest.json`

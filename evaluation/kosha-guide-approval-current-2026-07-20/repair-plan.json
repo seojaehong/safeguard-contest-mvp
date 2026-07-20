@@ -1,12 +1,13 @@
 {
   "schemaVersion": "safeclaw-kosha-guide-repair-plan/v1",
-  "generatedAt": "2026-07-20T06:54:47.807Z",
+  "generatedAt": "2026-07-20T07:43:38.242Z",
   "sourceAudit": "evaluation/kosha-guide-approval-current-2026-07-20/report.json",
   "decision": "approval_required_before_mutation_or_embedding",
   "readOnly": true,
   "dbMutationPerformed": false,
   "uploadPerformed": false,
   "embeddingGenerated": false,
+  "rowEvidenceManifest": "evaluation/kosha-guide-approval-current-2026-07-20/repair-row-evidence-manifest.json",
   "dryRunCounts": {
     "insert": 0,
     "update": 7,
@@ -1327,6 +1328,11 @@
   "approvalGate": {
     "mutationAllowedByThisRun": false,
     "requiredBeforeMutation": "explicit user approval after reviewed per-item dry-run",
-    "requiredBeforeEmbedding": "official provenance/body/control/retrieval branch blockers closed"
+    "requiredBeforeEmbedding": "official provenance/body/control/retrieval branch blockers closed",
+    "requiredEvidenceBeforeApproval": [
+      "per-row provenance/status backfill manifest for all active rows",
+      "per-row body hydration/OCR review manifest for empty-body rows",
+      "per-row source-grounded summary regeneration manifest for fallback summary rows"
+    ]
   }
 }

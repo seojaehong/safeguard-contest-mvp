@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -66,7 +66,14 @@ describe("KOSHA Guide repair plan", () => {
     expect(plan.dbMutationPerformed).toBe(false);
     expect(plan.uploadPerformed).toBe(false);
     expect(plan.embeddingGenerated).toBe(false);
+    expect(plan.rowEvidenceManifest)
+      .toBe("evaluation/kosha-guide-approval-current-2026-07-20/repair-row-evidence-manifest.json");
     expect(asBoolean(approvalGate.mutationAllowedByThisRun, "mutationAllowedByThisRun")).toBe(false);
+    expect(asArray(approvalGate.requiredEvidenceBeforeApproval, "requiredEvidenceBeforeApproval")).toEqual([
+      "per-row provenance/status backfill manifest for all active rows",
+      "per-row body hydration/OCR review manifest for empty-body rows",
+      "per-row source-grounded summary regeneration manifest for fallback summary rows"
+    ]);
     expect(dryRunCounts).toMatchObject({
       insert: 0,
       update: 7,
@@ -135,5 +142,98 @@ describe("KOSHA Guide repair plan", () => {
     }
     const retrieval = workstreams.find((item) => item.id === "retrieval_branch_observation");
     expect(retrieval?.countSemantics).toBe("scenario-branch pairs, not unique branch names");
+  });
+
+  it("writes a row-evidence manifest without inflating count-only gaps into row-level evidence", () => {
+    const outputDir = mkdtempSync(join(tmpdir(), "safeclaw-kosha-repair-plan-"));
+    const output = join(outputDir, "repair-plan.json");
+    const rowEvidenceOutput = join(outputDir, "repair-row-evidence-manifest.json");
+    const rowEvidenceMarkdown = join(outputDir, "repair-row-evidence-manifest.md");
+    const result = spawnSync(
+      process.execPath,
+      [
+        "scripts/build_kosha_guide_repair_plan.mjs",
+        "--input",
+        "evaluation/kosha-guide-approval-current-2026-07-20/report.json",
+        "--output",
+        output
+      ],
+      {
+        cwd: process.cwd(),
+        encoding: "utf8",
+        timeout: 30_000,
+        windowsHide: true
+      }
+    );
+
+    expect(result.status).toBe(0);
+    expect(existsSync(rowEvidenceOutput)).toBe(true);
+    expect(existsSync(rowEvidenceMarkdown)).toBe(true);
+    const manifest = asRecord(
+      JSON.parse(readFileSync(rowEvidenceOutput, "utf8")) as unknown,
+      "rowEvidenceManifest"
+    );
+    const inventory = asArray(manifest.rowSetInventory, "rowSetInventory")
+      .map((value) => asRecord(value, "rowSetInventory.item"));
+    const incomplete = asArray(manifest.incompleteWorkstreams, "incompleteWorkstreams")
+      .map((value) => asRecord(value, "incompleteWorkstream"));
+    const complete = asArray(manifest.completeWorkstreams, "completeWorkstreams")
+      .map((value) => asRecord(value, "completeWorkstream"));
+    const summarySample = asRecord(manifest.summarySample, "summarySample");
+    const approvalGate = asRecord(manifest.approvalGate, "approvalGate");
+
+    expect(manifest.decision).toBe("row_level_evidence_incomplete_before_mutation_or_embedding");
+    expect(manifest.readOnly).toBe(true);
+    expect(manifest.dbMutationPerformed).toBe(false);
+    expect(manifest.uploadPerformed).toBe(false);
+    expect(manifest.embeddingGenerated).toBe(false);
+    expect(asBoolean(approvalGate.mutationAllowedByThisRun, "mutationAllowedByThisRun")).toBe(false);
+    expect(asBoolean(approvalGate.embeddingAllowedByThisRun, "embeddingAllowedByThisRun")).toBe(false);
+    expect(inventory).toHaveLength(6);
+    expect(incomplete.map((item) => item.workstreamId)).toEqual([
+      "provenance_and_status_backfill_dry_run",
+      "body_hydration_or_ocr_review",
+      "summary_regeneration"
+    ]);
+    expect(complete.map((item) => item.workstreamId)).toEqual([
+      "version_state_reconciliation",
+      "control_causality_review",
+      "retrieval_branch_observation"
+    ]);
+    expect(inventory.find((item) => item.workstreamId === "provenance_and_status_backfill_dry_run"))
+      .toMatchObject({
+        evidenceMode: "count_only",
+        sourceCount: 1040,
+        rowCountAvailable: 0,
+        rowLevelComplete: false,
+        missingRowManifestCount: 1040
+      });
+    expect(inventory.find((item) => item.workstreamId === "body_hydration_or_ocr_review"))
+      .toMatchObject({
+        evidenceMode: "count_only",
+        sourceCount: 818,
+        rowCountAvailable: 0,
+        rowLevelComplete: false,
+        missingRowManifestCount: 818
+      });
+    const summaryInventory = inventory.find((item) => item.workstreamId === "summary_regeneration");
+    expect(summaryInventory).toMatchObject({
+      evidenceMode: "group_sample",
+      sourceCount: 822,
+      rowLevelComplete: false,
+      nextArtifact: "source-grounded-summary-row-manifest.json"
+    });
+    expect(asNumber(summaryInventory?.rowCountAvailable, "summary.rowCountAvailable"))
+      .toBeLessThan(822);
+    expect(asNumber(summarySample.uniqueSampleIds, "summarySample.uniqueSampleIds"))
+      .toBe(asNumber(summaryInventory?.rowCountAvailable, "summary.rowCountAvailable"));
+    expect(inventory.find((item) => item.workstreamId === "control_causality_review"))
+      .toMatchObject({
+        evidenceMode: "row_level_complete",
+        sourceCount: 71,
+        rowCountAvailable: 71,
+        rowLevelComplete: true,
+        missingRowManifestCount: 0
+      });
   });
 });

@@ -147,6 +147,7 @@ function buildRepairPlan(report) {
     dbMutationPerformed: false,
     uploadPerformed: false,
     embeddingGenerated: false,
+    rowEvidenceManifest: "evaluation/kosha-guide-approval-current-2026-07-20/repair-row-evidence-manifest.json",
     dryRunCounts: {
       insert: asNumber(dryRunCounts.insert, "dryRunCounts.insert"),
       update: asNumber(dryRunCounts.update, "dryRunCounts.update"),
@@ -210,11 +211,139 @@ function buildRepairPlan(report) {
     approvalGate: {
       mutationAllowedByThisRun: false,
       requiredBeforeMutation: "explicit user approval after reviewed per-item dry-run",
-      requiredBeforeEmbedding: "official provenance/body/control/retrieval branch blockers closed"
+      requiredBeforeEmbedding: "official provenance/body/control/retrieval branch blockers closed",
+      requiredEvidenceBeforeApproval: [
+        "per-row provenance/status backfill manifest for all active rows",
+        "per-row body hydration/OCR review manifest for empty-body rows",
+        "per-row source-grounded summary regeneration manifest for fallback summary rows"
+      ]
     }
   };
 
   return plan;
+}
+
+function uniqueStrings(values) {
+  return [...new Set(values.map((value) => String(value)).filter((value) => value.length > 0))];
+}
+
+function buildRowEvidenceManifest(report, plan) {
+  const quality = asRecord(report.corpusQuality, "corpusQuality");
+  const summaryGroups = asArray(quality.duplicateSummaryDetails, "duplicateSummaryDetails")
+    .map((item) => asRecord(item, "duplicateSummaryDetail"));
+  const summarySampleIds = uniqueStrings(summaryGroups.flatMap((item) =>
+    asArray(item.sampleIds, "duplicateSummaryDetail.sampleIds")
+  ));
+  const controlReviewRows = asArray(
+    plan.rowSets.operationalControlReviewRequiredRows,
+    "plan.rowSets.operationalControlReviewRequiredRows"
+  );
+  const controlSecondaryRows = asArray(
+    plan.rowSets.operationalControlSecondaryCandidateRows,
+    "plan.rowSets.operationalControlSecondaryCandidateRows"
+  );
+  const versionRows = asArray(plan.rowSets.versionUpdates, "plan.rowSets.versionUpdates");
+  const retireRows = asArray(plan.rowSets.retiredRows, "plan.rowSets.retiredRows");
+  const retrievalRows = asArray(plan.rowSets.untestedRetrievalBranches, "plan.rowSets.untestedRetrievalBranches");
+
+  const rowSetInventory = [
+    {
+      workstreamId: "provenance_and_status_backfill_dry_run",
+      evidenceMode: "count_only",
+      sourceCount: asNumber(quality.missingSourceUrlCount, "missingSourceUrlCount"),
+      rowCountAvailable: 0,
+      rowLevelComplete: false,
+      missingRowManifestCount: asNumber(quality.missingSourceUrlCount, "missingSourceUrlCount"),
+      nextArtifact: "official-provenance-backfill-row-manifest.json"
+    },
+    {
+      workstreamId: "body_hydration_or_ocr_review",
+      evidenceMode: "count_only",
+      sourceCount: asNumber(quality.emptyBodyCount, "emptyBodyCount"),
+      rowCountAvailable: 0,
+      rowLevelComplete: false,
+      missingRowManifestCount: asNumber(quality.emptyBodyCount, "emptyBodyCount"),
+      nextArtifact: "body-hydration-ocr-row-manifest.json"
+    },
+    {
+      workstreamId: "summary_regeneration",
+      evidenceMode: "group_sample",
+      sourceCount: asNumber(quality.duplicateSummaryRows, "duplicateSummaryRows"),
+      rowCountAvailable: summarySampleIds.length,
+      rowLevelComplete: false,
+      missingRowManifestCount: asNumber(quality.duplicateSummaryRows, "duplicateSummaryRows") - summarySampleIds.length,
+      nextArtifact: "source-grounded-summary-row-manifest.json"
+    },
+    {
+      workstreamId: "version_state_reconciliation",
+      evidenceMode: "row_level_complete",
+      sourceCount: versionRows.length + retireRows.length,
+      rowCountAvailable: versionRows.length + retireRows.length,
+      rowLevelComplete: true,
+      missingRowManifestCount: 0,
+      rowSetKeys: ["versionUpdates", "retiredRows"]
+    },
+    {
+      workstreamId: "control_causality_review",
+      evidenceMode: "row_level_complete",
+      sourceCount: controlReviewRows.length + controlSecondaryRows.length,
+      rowCountAvailable: controlReviewRows.length + controlSecondaryRows.length,
+      rowLevelComplete: true,
+      missingRowManifestCount: 0,
+      rowSetKeys: ["operationalControlReviewRequiredRows", "operationalControlSecondaryCandidateRows"]
+    },
+    {
+      workstreamId: "retrieval_branch_observation",
+      evidenceMode: "scenario_branch_level_complete",
+      sourceCount: retrievalRows.length,
+      rowCountAvailable: retrievalRows.length,
+      rowLevelComplete: true,
+      missingRowManifestCount: 0,
+      rowSetKeys: ["untestedRetrievalBranches"]
+    }
+  ];
+  const incomplete = rowSetInventory.filter((item) => !item.rowLevelComplete);
+  const complete = rowSetInventory.filter((item) => item.rowLevelComplete);
+
+  return {
+    schemaVersion: "safeclaw-kosha-guide-repair-row-evidence/v1",
+    generatedAt: plan.generatedAt,
+    sourceAudit: plan.sourceAudit,
+    repairPlan: "evaluation/kosha-guide-approval-current-2026-07-20/repair-plan.json",
+    readOnly: true,
+    dbMutationPerformed: false,
+    uploadPerformed: false,
+    embeddingGenerated: false,
+    decision: incomplete.length > 0
+      ? "row_level_evidence_incomplete_before_mutation_or_embedding"
+      : "row_level_evidence_complete_for_review",
+    rowSetInventory,
+    summarySample: {
+      duplicateSummaryGroups: summaryGroups.length,
+      uniqueSampleIds: summarySampleIds.length,
+      sampleIds: summarySampleIds.slice(0, 20)
+    },
+    incompleteWorkstreams: incomplete.map((item) => ({
+      workstreamId: item.workstreamId,
+      evidenceMode: item.evidenceMode,
+      sourceCount: item.sourceCount,
+      rowCountAvailable: item.rowCountAvailable,
+      missingRowManifestCount: item.missingRowManifestCount,
+      nextArtifact: item.nextArtifact
+    })),
+    completeWorkstreams: complete.map((item) => ({
+      workstreamId: item.workstreamId,
+      evidenceMode: item.evidenceMode,
+      sourceCount: item.sourceCount,
+      rowCountAvailable: item.rowCountAvailable,
+      rowSetKeys: item.rowSetKeys
+    })),
+    approvalGate: {
+      mutationAllowedByThisRun: false,
+      embeddingAllowedByThisRun: false,
+      blocker: "Do not mutate Supabase rows or generate embeddings until every count-only workstream has a reviewed per-row manifest."
+    }
+  };
 }
 
 function markdownCell(value) {
@@ -295,6 +424,44 @@ ${retrievalRows}
 - Mutation allowed by this run: ${plan.approvalGate.mutationAllowedByThisRun}
 - Required before mutation: ${plan.approvalGate.requiredBeforeMutation}
 - Required before embedding: ${plan.approvalGate.requiredBeforeEmbedding}
+- Required row evidence before approval: ${plan.approvalGate.requiredEvidenceBeforeApproval.join("; ")}
+- Row evidence manifest: \`${plan.rowEvidenceManifest}\`
+`;
+  writeFileSync(path, body, "utf8");
+}
+
+function writeRowEvidenceMarkdown(manifest, path) {
+  const inventoryRows = manifest.rowSetInventory
+    .map((item) => `| \`${item.workstreamId}\` | ${item.evidenceMode} | ${item.sourceCount.toLocaleString("ko-KR")} | ${item.rowCountAvailable.toLocaleString("ko-KR")} | ${item.rowLevelComplete ? "yes" : "no"} | ${item.missingRowManifestCount.toLocaleString("ko-KR")} | ${markdownCell(item.nextArtifact || "-")} |`)
+    .join("\n");
+  const incompleteRows = manifest.incompleteWorkstreams
+    .map((item) => `| \`${item.workstreamId}\` | ${item.sourceCount.toLocaleString("ko-KR")} | ${item.rowCountAvailable.toLocaleString("ko-KR")} | ${item.missingRowManifestCount.toLocaleString("ko-KR")} | ${item.nextArtifact} |`)
+    .join("\n") || "| - | - | - | - | - |";
+  const body = `# KOSHA Guide Repair Row Evidence Manifest
+
+Generated at: ${manifest.generatedAt}
+
+Decision: \`${manifest.decision}\`
+
+This is a read-only manifest. It documents evidence coverage only and does not authorize DB mutation, upload, or embedding generation.
+
+## Row Set Inventory
+
+| Workstream | Evidence mode | Source count | Rows available | Row-level complete | Missing row manifest | Next artifact |
+| --- | --- | ---: | ---: | --- | ---: | --- |
+${inventoryRows}
+
+## Incomplete Workstreams
+
+| Workstream | Source count | Rows available now | Missing rows | Required next artifact |
+| --- | ---: | ---: | ---: | --- |
+${incompleteRows}
+
+## Approval Gate
+
+- Mutation allowed by this run: ${manifest.approvalGate.mutationAllowedByThisRun}
+- Embedding allowed by this run: ${manifest.approvalGate.embeddingAllowedByThisRun}
+- Blocker: ${manifest.approvalGate.blocker}
 `;
   writeFileSync(path, body, "utf8");
 }
@@ -305,14 +472,22 @@ const outputPath = resolve(options.output);
 const markdownPath = outputPath.replace(/\.json$/u, ".md");
 const report = readReport(inputPath);
 const plan = buildRepairPlan(report);
+const rowEvidenceManifest = buildRowEvidenceManifest(report, plan);
 mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(outputPath, `${JSON.stringify(plan, null, 2)}\n`, "utf8");
 writeMarkdown(plan, markdownPath);
+const rowEvidencePath = outputPath.replace(/repair-plan\.json$/u, "repair-row-evidence-manifest.json");
+const rowEvidenceMarkdownPath = rowEvidencePath.replace(/\.json$/u, ".md");
+writeFileSync(rowEvidencePath, `${JSON.stringify(rowEvidenceManifest, null, 2)}\n`, "utf8");
+writeRowEvidenceMarkdown(rowEvidenceManifest, rowEvidenceMarkdownPath);
 console.log(JSON.stringify({
   output: outputPath,
   markdown: markdownPath,
+  rowEvidenceManifest: rowEvidencePath,
+  rowEvidenceMarkdown: rowEvidenceMarkdownPath,
   workstreams: plan.workstreams.length,
   versionUpdates: plan.rowSets.versionUpdates.length,
   retiredRows: plan.rowSets.retiredRows.length,
+  incompleteRowEvidenceWorkstreams: rowEvidenceManifest.incompleteWorkstreams.length,
   mutationAllowedByThisRun: plan.approvalGate.mutationAllowedByThisRun
 }, null, 2));
