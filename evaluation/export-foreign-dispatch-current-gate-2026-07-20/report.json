@@ -1,14 +1,14 @@
 {
   "schemaVersion": "safeclaw-export-foreign-dispatch-current-gate/v1",
-  "checkedAt": "2026-07-20T05:40:18.000Z",
-  "head": "76111d0d19dda046ad988dcdc254d21abab38d65",
+  "checkedAt": "2026-07-20T06:18:50.698Z",
+  "head": "ac037c3a2a910f2ac64ad7eea04a8a3b13acd1c4",
   "verdict": "pass",
   "dbMutationPerformed": false,
   "providerDispatchSideEffectPerformed": false,
   "focusedTests": {
-    "command": "npm.cmd test -- tests\\document-export-localization.test.ts tests\\editor-export-integrity.test.ts tests\\xlsx-export-route.test.ts tests\\pdf-korean-font-integration.test.ts tests\\pdf-font-failure.test.ts tests\\foreign-worker-languages.test.ts tests\\foreign-parse.test.ts tests\\workflow-dispatch-capability-policy.test.ts tests\\provider-dispatch-idempotency-gate.test.ts --maxWorkers=1 --fileParallelism=false",
-    "testFilesPassed": 9,
-    "testsPassed": 67,
+    "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts tests\\workflow-share-capability-browser.test.ts tests\\workflow-share-client.test.ts tests\\workpack-share-authority-routes.test.ts tests\\document-export-localization.test.ts tests\\editor-export-integrity.test.ts tests\\xlsx-export-route.test.ts tests\\pdf-korean-font-integration.test.ts tests\\pdf-font-failure.test.ts tests\\foreign-worker-languages.test.ts tests\\foreign-parse.test.ts tests\\workflow-dispatch-capability-policy.test.ts tests\\provider-dispatch-idempotency-gate.test.ts --maxWorkers=1 --fileParallelism=false",
+    "testFilesPassed": 13,
+    "testsPassed": 143,
     "status": "pass"
   },
   "verifiedScope": [

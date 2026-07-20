@@ -1,21 +1,21 @@
 {
   "schemaVersion": "safeclaw-share-recipient-portal-current-gate/v1",
-  "checkedAt": "2026-07-20T05:50:55.000Z",
-  "head": "472f681bc12bf61b2fd7fd02668cd1ef3bd574db",
+  "checkedAt": "2026-07-20T06:18:50.698Z",
+  "head": "ac037c3a2a910f2ac64ad7eea04a8a3b13acd1c4",
   "liveBuildInfo": {
-    "commitSha": "472f681bc12bf61b2fd7fd02668cd1ef3bd574db",
+    "commitSha": "ac037c3a2a910f2ac64ad7eea04a8a3b13acd1c4",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ls5s6nmwb-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-i4is020vr-seojaehongs-projects.vercel.app"
   },
   "verdict": "pass",
   "dbMutationPerformed": false,
   "providerDispatchSideEffectPerformed": false,
   "focusedTests": {
-    "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts tests\\workflow-share-capability-browser.test.ts tests\\workflow-share-client.test.ts tests\\workpack-share-authority-routes.test.ts --maxWorkers=1 --fileParallelism=false",
-    "testFilesPassed": 4,
-    "testsPassed": 76,
-    "durationSeconds": 52.58,
+    "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts tests\\workflow-share-capability-browser.test.ts tests\\workflow-share-client.test.ts tests\\workpack-share-authority-routes.test.ts tests\\document-export-localization.test.ts tests\\editor-export-integrity.test.ts tests\\xlsx-export-route.test.ts tests\\pdf-korean-font-integration.test.ts tests\\pdf-font-failure.test.ts tests\\foreign-worker-languages.test.ts tests\\foreign-parse.test.ts tests\\workflow-dispatch-capability-policy.test.ts tests\\provider-dispatch-idempotency-gate.test.ts --maxWorkers=1 --fileParallelism=false",
+    "testFilesPassed": 13,
+    "testsPassed": 143,
+    "durationSeconds": 58.63,
     "status": "pass"
   },
   "liveBrowserSmoke": {
