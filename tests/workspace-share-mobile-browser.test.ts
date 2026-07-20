@@ -10,6 +10,7 @@ import {
   type CurrentWorkerSnapshot
 } from "@/lib/current-workpack";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
+import type { AskResponse, QualityContractItem } from "@/lib/types";
 import {
   startIsolatedNextBrowserHarness,
   type IsolatedNextBrowserHarness
@@ -28,6 +29,44 @@ const screenshotDirectory = join(
   "screenshots"
 );
 
+const testSupabaseUrl = "https://share-result-fixture.supabase.co";
+const testSupabaseAnonKey = "share-result-fixture-anon-key";
+const testSupabaseAuthStorageKey = "sb-share-result-fixture-auth-token";
+const testAccessToken = [
+  Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url"),
+  Buffer.from(JSON.stringify({
+    aud: "authenticated",
+    exp: 4_102_444_800,
+    role: "authenticated",
+    sub: "10000000-0000-4000-8000-000000000021",
+  })).toString("base64url"),
+  "share-result-fixture-signature",
+].join(".");
+
+const testAuthSession = {
+  access_token: testAccessToken,
+  refresh_token: "share-result-refresh-token",
+  expires_in: 2_147_483_647,
+  expires_at: 4_102_444_800,
+  token_type: "bearer",
+  user: {
+    id: "10000000-0000-4000-8000-000000000021",
+    app_metadata: { provider: "email", providers: ["email"] },
+    user_metadata: {},
+    aud: "authenticated",
+    email: "share-result@example.test",
+    phone: undefined,
+    created_at: "2026-07-21T00:00:00.000Z",
+    confirmed_at: "2026-07-21T00:00:00.000Z",
+    email_confirmed_at: "2026-07-21T00:00:00.000Z",
+    last_sign_in_at: "2026-07-21T00:00:00.000Z",
+    role: "authenticated",
+    updated_at: "2026-07-21T00:00:00.000Z",
+    identities: [],
+    is_anonymous: false,
+  },
+};
+
 const vietnameseParagraphs = [
   "Trước khi bắt đầu công việc, hãy kiểm tra toàn bộ khu vực nguy hiểm, lối đi bộ, tuyến xe nâng và thiết bị bảo hộ cá nhân.",
   "Khóa bánh xe của giàn giáo, kiểm tra lan can và tuyệt đối không di chuyển giàn giáo khi vẫn còn người làm việc ở phía trên.",
@@ -38,6 +77,158 @@ const vietnameseParagraphs = [
   "Chỉ tiếp tục công việc sau khi người quản lý xác nhận rằng biện pháp khắc phục đã hoàn thành và khu vực đã an toàn.",
   "Nếu chưa hiểu bất kỳ nội dung nào, hãy dừng lại và yêu cầu quản lý hoặc phiên dịch giải thích lại bằng tiếng Việt."
 ] as const;
+
+function buildShareReadyFixture(data: AskResponse): AskResponse {
+  const baseContract = data.qualityContract;
+  if (!baseContract) throw new Error("Sample workpack must include a quality contract");
+  const readyDocumentCoverage = [
+    { document: "위험성평가표", covered: true, evidenceTypes: ["directEvidence"] },
+    { document: "TBM 브리핑", covered: true, evidenceTypes: ["directEvidence"] },
+    { document: "TBM 기록", covered: true, evidenceTypes: ["supportingEvidence"] }
+  ] satisfies NonNullable<AskResponse["dbHarness"]>["summary"]["documentCoverage"];
+  const readyRetrievalContract = {
+    source: "safety_reference_items",
+    mode: "local-tag",
+    vector: {
+      enabled: false,
+      attempted: false,
+      ready: false,
+      reason: "disabled",
+      message: "fixture browser gate does not perform vector retrieval"
+    },
+    sourceCounts: {
+      directEvidence: 2,
+      sifCases: 0,
+      supportingEvidence: 1,
+      rest: 0,
+      ranked: 0,
+      vector: 0,
+      hybrid: 0,
+      localTag: 0,
+      localRanked: 0,
+      localHybrid: 0
+    },
+    message: "fixture retrieval contract"
+  } satisfies NonNullable<AskResponse["dbHarness"]>["summary"]["retrievalContract"];
+  const readyItem = (item: QualityContractItem): QualityContractItem => ({
+    ...item,
+    status: "ready",
+    detail: item.key === "persistence"
+      ? "fixture browser gate validates the UI path without changing persistence contracts."
+      : item.detail
+  });
+  return {
+    ...data,
+    ontologyQa: {
+      reviewTask: "이동식 비계 작업",
+      sourceDocumentKeys: ["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"],
+      detail: "fixture ontology QA passed",
+      result: {
+        reviewable: true,
+        task: "이동식 비계 작업",
+        covered: {
+          hazards: ["추락", "전도"],
+          controls: ["작업발판 점검", "추락방지 조치"],
+          articles: ["산업안전보건기준에 관한 규칙"]
+        },
+        missing: { hazards: [], controls: [], articles: [] },
+        coverageRate: 1,
+        verdict: "통과",
+        advisory: "fixture browser gate"
+      }
+    },
+    dbHarness: {
+      packet: {
+        mode: "db_harness_first",
+        question: data.question,
+        directEvidence: [],
+        sifCases: [],
+        supportingEvidence: [],
+        improvementMemory: [],
+        workpackMemory: [],
+        retrievalContract: readyRetrievalContract,
+        ontologyChecklist: {
+          status: "ready",
+          missing: []
+        },
+        generationContract: {
+          llmRole: "naturalize_only",
+          llmOutputScope: "rewrite_fixed_evidence_only",
+          evidenceAuthority: "db_harness",
+          providerRetryScope: "naturalization_retry_only",
+          fallbackChainAllowed: false,
+          genericProseSubstitutionAllowed: false,
+          missingEvidencePolicy: "surface_review_required",
+          requiredDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+          missingEvidence: [],
+          documentCoverage: readyDocumentCoverage
+        }
+      },
+      promptContext: "fixture prompt context",
+      summary: {
+        mode: "db_harness_first",
+        llmRole: "naturalize_only",
+        llmOutputScope: "rewrite_fixed_evidence_only",
+        evidenceAuthority: "db_harness",
+        providerRetryScope: "naturalization_retry_only",
+        fallbackChainAllowed: false,
+        genericProseSubstitutionAllowed: false,
+        missingEvidencePolicy: "surface_review_required",
+        directEvidence: 2,
+        sifCases: 0,
+        supportingEvidence: 1,
+        improvementMemory: 0,
+        workpackMemory: 0,
+        missingEvidence: [],
+        documentCoverage: readyDocumentCoverage,
+        retrievalContract: readyRetrievalContract,
+        ontologyStatus: "ready"
+      }
+    },
+    qualityContract: {
+      ...baseContract,
+      overall: "ready",
+      summary: "fixture quality contract ready",
+      items: baseContract.items.map(readyItem),
+      ontology: {
+        ...baseContract.ontology,
+        status: "ready",
+        matchCount: Math.max(baseContract.ontology.matchCount, 1),
+        reviewTask: "이동식 비계 작업",
+        verdict: "통과",
+        missingControlCount: 0,
+        detail: "fixture ontology QA passed"
+      },
+      evidence: {
+        ...baseContract.evidence,
+        status: "ready",
+        mappedCount: Math.max(baseContract.evidence.mappedCount, 2),
+        requiredCount: Math.max(baseContract.evidence.requiredCount, 2)
+      },
+      structured: {
+        ...baseContract.structured,
+        status: "ready",
+        readyCount: Math.max(baseContract.structured.readyCount, baseContract.structured.requiredCount),
+      },
+      integrity: baseContract.integrity
+        ? { ...baseContract.integrity, status: "ready", blockedCount: 0, blockedKeys: [] }
+        : undefined,
+      persistence: {
+        ...baseContract.persistence,
+        status: "ready"
+      },
+      dbHarness: {
+        ...baseContract.dbHarness,
+        status: "ready",
+        directEvidenceCount: Math.max(baseContract.dbHarness.directEvidenceCount, 2),
+        supportingEvidenceCount: Math.max(baseContract.dbHarness.supportingEvidenceCount, 1),
+        missingEvidence: [],
+        retrievalContract: readyRetrievalContract,
+        documentCoverage: readyDocumentCoverage
+      }
+    }
+  };
+}
 
 let browser: Browser | null = null;
 let harness: IsolatedNextBrowserHarness | null = null;
@@ -50,7 +241,11 @@ describe("workspace mobile share presentation", () => {
       slug: "workspace-share-mobile-p1",
       initialPath: "/workspace?theme=day",
       portSalt: 17416,
-      mode: "dev"
+      mode: "dev",
+      environment: {
+        NEXT_PUBLIC_SUPABASE_URL: testSupabaseUrl,
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: testSupabaseAnonKey
+      }
     });
     browser = harness.browser;
   }, 90_000);
@@ -385,6 +580,397 @@ describe("workspace mobile share presentation", () => {
       await page.close();
     }
   }, 90_000);
+
+  it("keeps generated provider-result details in bounded desktop and mobile drilldown", async () => {
+    if (!browser || !harness) throw new Error("Browser harness was not started");
+
+    const sample = buildSampleWorkpack();
+    const workerSnapshot = {
+      savedAt: "2026-07-21T10:30:00+09:00",
+      source: "workspace",
+      workers: [{
+        id: "worker-generated-result-fixture",
+        displayName: "베트남 작업자",
+        role: "외벽 도장 작업자",
+        joinedAt: "2026-07-21",
+        experienceLevel: "중간",
+        experienceSummary: "이동식 비계 작업 경험 보유",
+        nationality: "베트남",
+        languageCode: "vi",
+        languageLabel: "베트남어",
+        isNewWorker: false,
+        isForeignWorker: true,
+        trainingStatus: "당일 교육 예정",
+        trainingSummary: "베트남어 안내 후 이해 여부 확인 필요",
+        phone: "01000000003"
+      }],
+      selectedWorkerIds: ["worker-generated-result-fixture"]
+    } satisfies CurrentWorkerSnapshot;
+    const data = buildShareReadyFixture({
+      ...sample,
+      question: `${sample.question} provider 결과 화면 fixture 검증.`,
+      deliverables: {
+        ...sample.deliverables,
+        foreignWorkerLanguages: sample.deliverables.foreignWorkerLanguages.map((language) =>
+          language.code === "vi"
+            ? { ...language, lines: [...vietnameseParagraphs] }
+            : language
+        )
+      }
+    });
+    const stored = buildStoredCurrentWorkpack(data, { workerSnapshot });
+    const scenarios = [
+      { label: "generated-result-desktop", width: 1440, height: 900 },
+      { label: "generated-result-mobile", width: 390, height: 844 }
+    ] as const;
+    const workpackId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+    const savedWorkerId = "11111111-1111-4111-8111-111111111111";
+    const shareSessionId = "33333333-3333-4333-8333-333333333333";
+
+    for (const scenario of scenarios) {
+      const page = await browser.newPage({
+        viewport: { width: scenario.width, height: scenario.height }
+      });
+      let dispatchPostCount = 0;
+      let dispatchPostIdempotencyKey = "";
+      try {
+        await page.addInitScript(
+          ({ workpackKey, workpackValue, authKey, authValue }) => {
+            window.localStorage.setItem(workpackKey, workpackValue);
+            window.localStorage.setItem(authKey, authValue);
+          },
+          {
+            workpackKey: CURRENT_WORKPACK_STORAGE_KEY,
+            workpackValue: JSON.stringify(stored),
+            authKey: testSupabaseAuthStorageKey,
+            authValue: JSON.stringify(testAuthSession)
+          }
+        );
+        await page.route("**/api/workflow/dispatch", async (route) => {
+          const request = route.request();
+          if (request.method() === "GET") {
+            await route.fulfill({
+              status: 200,
+              contentType: "application/json",
+              body: JSON.stringify({
+                ok: true,
+                providerDispatch: {
+                  capability: true,
+                  mode: "live",
+                  reason: null,
+                  channels: {
+                    email: { capability: true, reason: null },
+                    sms: { capability: true, reason: null },
+                    kakao: { capability: false, reason: "provider_configuration_unavailable" }
+                  }
+                }
+              })
+            });
+            return;
+          }
+          const body = JSON.parse(request.postData() || "{}") as { idempotencyKey?: string };
+          dispatchPostCount += 1;
+          dispatchPostIdempotencyKey = body.idempotencyKey || "";
+          await route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify({
+              ok: true,
+              configured: true,
+              providerStatus: "validation-only",
+              workflowRunId: "validation-only-share-result-fixture",
+              idempotencyKey: body.idempotencyKey,
+              providerCalled: false,
+              duplicateRisk: false,
+              message: "Fixture provider-result state accepted. No external provider was called.",
+              channelResults: [
+                { channel: "email", provider: "safeclaw-fixture", status: "sent", message: "email fixture accepted" },
+                { channel: "sms", provider: "safeclaw-fixture", status: "sent", message: "sms fixture accepted" }
+              ]
+            })
+          });
+        });
+        await page.route("**/api/workers", async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify({
+              ok: true,
+              message: "fixture workers saved",
+              workerMap: { "worker-generated-result-fixture": savedWorkerId }
+            })
+          });
+        });
+        await page.route("**/api/workpacks", async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify({
+              ok: true,
+              message: "fixture workpack saved",
+              workpackId
+            })
+          });
+        });
+        await page.route("**/api/education-records", async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify({ ok: true, message: "fixture education saved", savedCount: 1 })
+          });
+        });
+        await page.route("**/api/workpacks/*/share-sessions", async (route) => {
+          if (route.request().method() === "GET") {
+            await route.fulfill({
+              status: 200,
+              contentType: "application/json",
+              body: JSON.stringify({ ok: true, sessions: [], confirmations: [] })
+            });
+            return;
+          }
+          await route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify({
+              ok: true,
+              message: "fixture share session created",
+              shareSessionId,
+              expiresAt: "2099-07-21T00:00:00.000Z"
+            })
+          });
+        });
+        await page.route("**/api/dispatch-logs?**", async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify({ ok: true, logs: [] })
+          });
+        });
+        await page.route("**/api/dispatch-logs", async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify({ ok: true, message: "fixture logs skipped", savedCount: 0 })
+          });
+        });
+
+        await page.goto(`${harness.baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+        await page.locator(".workspace-document-page").waitFor({ state: "visible" });
+        await page.getByLabel("작업공간 메뉴").getByRole("button").filter({ hasText: "공유" }).click();
+        await page.locator("[data-share-root]").waitFor({ state: "visible" });
+        if (scenario.width < 600) {
+          await page.getByRole("button", { name: /상세 설정/ }).click();
+        }
+        await page.locator("#workflow-language-select").selectOption("foreign:vi");
+        if (scenario.width < 600) {
+          await page.getByRole("button", { name: /상세 설정/ }).click();
+        }
+        const primaryButton = page.locator("button[data-share-primary]");
+        await page.waitForTimeout(750);
+        const preDispatchState = await page.evaluate(() => {
+          const primary = document.querySelector<HTMLButtonElement>("button[data-share-primary]");
+          const statusPill = document.querySelector<HTMLElement>(".share-status-pill");
+          const warning = document.querySelector<HTMLElement>(".share-readiness-warning");
+          const channelCards = [...document.querySelectorAll<HTMLElement>(".channel-grid .channel-card")];
+          return {
+            primaryText: primary?.innerText ?? "",
+            primaryDisabled: primary?.disabled ?? null,
+            statusText: statusPill?.innerText ?? "",
+            warningText: warning?.innerText ?? "",
+            channelTexts: channelCards.map((card) => card.innerText),
+            bodyText: document.body.innerText.slice(0, 3000)
+          };
+        });
+        writeFileSync(
+          join(evidenceDirectory, `${scenario.label}-provider-result-predispatch-state.json`),
+          `${JSON.stringify({
+            checkedAt: new Date().toISOString(),
+            route: "/workspace?share",
+            scenario,
+            preDispatchState
+          }, null, 2)}\n`,
+          "utf8"
+        );
+        await expect.poll(() => primaryButton.isEnabled(), {
+          message: `${scenario.label} provider result primary action enabled`,
+          timeout: 15_000
+        }).toBe(true);
+        await primaryButton.click();
+        await page.locator("[data-share-result-drilldown]").waitFor({ state: "visible", timeout: 15_000 });
+        await page.evaluate(async () => {
+          await document.fonts.ready;
+          await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+        });
+
+        const metrics = await page.evaluate(() => {
+          const rectOf = (element: HTMLElement | null) => {
+            if (!element) return null;
+            const rect = element.getBoundingClientRect();
+            return {
+              left: Math.round(rect.left),
+              right: Math.round(rect.right),
+              top: Math.round(rect.top),
+              bottom: Math.round(rect.bottom),
+              width: Math.round(rect.width),
+              height: Math.round(rect.height)
+            };
+          };
+          const root = document.querySelector<HTMLElement>("[data-share-root]");
+          const preview = document.querySelector<HTMLElement>("[data-share-preview]");
+          const primary = [...document.querySelectorAll<HTMLElement>("[data-share-primary]")]
+            .filter((element) => getComputedStyle(element).display !== "none")[0] || null;
+          const result = document.querySelector<HTMLElement>("[data-share-result-drilldown]");
+          const resultSummary = document.querySelector<HTMLElement>("[data-share-result-summary]");
+          const resultDetail = document.querySelector<HTMLElement>(".workflow-result-detail");
+          const mobileSummary = document.querySelector<HTMLElement>("[data-share-mobile-summary]");
+          const configCards = [...document.querySelectorAll<HTMLElement>(".share-config-card")];
+          const channelCards = [...document.querySelectorAll<HTMLElement>(".channel-grid .channel-card")];
+          const resultRect = rectOf(result);
+          const previewRect = rectOf(preview);
+          const primaryRect = rectOf(primary);
+          const firstViewportRects = [primaryRect, previewRect, resultRect].filter(
+            (rect): rect is NonNullable<typeof rect> => rect !== null
+          ).filter((rect) => rect.top < window.innerHeight);
+          const distinctFirstViewportXRanges = Array.from(new Set(firstViewportRects
+            .map((rect) => Math.round(rect.left / 80) * 80)));
+          return {
+            viewportWidth: window.innerWidth,
+            viewportHeight: window.innerHeight,
+            pageHeight: document.documentElement.scrollHeight,
+            root: rectOf(root),
+            preview: previewRect,
+            primary: primaryRect,
+            result: resultRect,
+            resultSummary: rectOf(resultSummary),
+            resultDetail: rectOf(resultDetail),
+            resultOpen: result?.hasAttribute("open") ?? false,
+            resultSummaryText: resultSummary?.innerText ?? "",
+            resultDetailText: resultDetail?.innerText ?? "",
+            resultDetailTextContent: resultDetail?.textContent ?? "",
+            resultDetailOverflowY: resultDetail ? getComputedStyle(resultDetail).overflowY : "",
+            resultDetailClientHeight: resultDetail?.clientHeight ?? 0,
+            resultDetailScrollHeight: resultDetail?.scrollHeight ?? 0,
+            mobileSummaryText: mobileSummary?.innerText ?? "",
+            configCards: configCards.map((card) => {
+              const rect = card.getBoundingClientRect();
+              return { display: getComputedStyle(card).display, height: Math.round(rect.height), bottom: Math.round(rect.bottom) };
+            }),
+            channelCards: channelCards.map((card) => {
+              const rect = card.getBoundingClientRect();
+              return { width: Math.round(rect.width), height: Math.round(rect.height) };
+            }),
+            distinctFirstViewportXRanges,
+            horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
+          };
+        });
+        await page.locator("[data-share-result-summary]").click();
+        await page.evaluate(async () => {
+          await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+        });
+        const openedResultMetrics = await page.evaluate(() => {
+          const result = document.querySelector<HTMLElement>("[data-share-result-drilldown]");
+          const resultDetail = document.querySelector<HTMLElement>(".workflow-result-detail");
+          const channelResults = [...document.querySelectorAll<HTMLElement>(".workflow-channel-result")];
+          return {
+            resultOpen: result?.hasAttribute("open") ?? false,
+            resultDetailText: resultDetail?.innerText ?? "",
+            resultDetailTextContent: resultDetail?.textContent ?? "",
+            channelResultCount: channelResults.length,
+            channelResultTexts: channelResults.map((item) => item.innerText)
+          };
+        });
+        await page.locator("[data-share-result-summary]").click();
+
+        await page.screenshot({
+          path: join(screenshotDirectory, `${scenario.label}-provider-result-fixture.png`),
+          fullPage: true
+        });
+
+        const assertionSummary = {
+          dispatchPostCalledExactlyOnce: dispatchPostCount === 1,
+          responseIdempotencyKeyCaptured: /^provider-dispatch-v1-/u.test(dispatchPostIdempotencyKey),
+          resultClosedByDefault: metrics.resultOpen === false,
+          openedResultShowsValidationCopy: openedResultMetrics.resultDetailTextContent.includes("미리 확인용 응답입니다"),
+          openedResultShowsChannelStatus: openedResultMetrics.resultDetailTextContent.includes("검증 전용"),
+          openedResultChannelCount: openedResultMetrics.channelResultCount,
+          horizontalOverflowClosed: metrics.horizontalOverflow === 0,
+          primaryInsideViewport: (metrics.primary?.bottom ?? Number.POSITIVE_INFINITY) <= metrics.viewportHeight,
+          resultSummaryInsideViewport: (metrics.resultSummary?.bottom ?? Number.POSITIVE_INFINITY) <= metrics.viewportHeight,
+          desktopPreviewRightPane: scenario.width < 600
+            ? true
+            : (metrics.preview?.left ?? 0) >= (metrics.primary?.right ?? Number.POSITIVE_INFINITY),
+          desktopDistinctRegions: scenario.width < 600
+            ? true
+            : metrics.distinctFirstViewportXRanges.length >= 2,
+          desktopResultPanelNotMonopolizingWidth: scenario.width < 600
+            ? true
+            : (metrics.result?.width ?? Number.POSITIVE_INFINITY) < metrics.viewportWidth * 0.75,
+          mobileConfigCardsCollapsed: scenario.width >= 600
+            ? true
+            : metrics.configCards.length === 3
+              && metrics.configCards.every((card) => card.display === "none" && card.height === 0)
+        };
+        const artifactVerdict = Object.entries(assertionSummary).every(([key, value]) => (
+          key === "openedResultChannelCount" ? value === 2 : value === true
+        )) ? "PASS" : "FAIL";
+        expect.soft(metrics.horizontalOverflow, `${scenario.label} provider result horizontal overflow`).toBe(0);
+        expect.soft(dispatchPostCount, `${scenario.label} dispatch POST called`).toBe(1);
+        expect.soft(dispatchPostIdempotencyKey, `${scenario.label} dispatch idempotency key`).toMatch(/^provider-dispatch-v1-/u);
+        expect.soft(metrics.resultSummaryText, `${scenario.label} provider result visible summary`).toContain("전송 결과");
+        expect.soft(metrics.resultDetailTextContent, `${scenario.label} validation result detail retained while closed`).toContain("미리 확인용 응답입니다");
+        expect.soft(metrics.resultDetailTextContent, `${scenario.label} validation channel details retained`).toContain("검증 전용");
+        expect.soft(metrics.resultOpen, `${scenario.label} validation result details closed by default`).toBe(false);
+        expect.soft(metrics.resultDetailOverflowY, `${scenario.label} result detail bounded overflow`).toBe("auto");
+        expect.soft(metrics.resultDetailScrollHeight, `${scenario.label} result detail retained content`).toBeGreaterThanOrEqual(metrics.resultDetailClientHeight);
+        expect.soft(openedResultMetrics.resultOpen, `${scenario.label} result details open on demand`).toBe(true);
+        expect.soft(openedResultMetrics.resultDetailTextContent, `${scenario.label} opened result validation copy`).toContain("미리 확인용 응답입니다");
+        expect.soft(openedResultMetrics.resultDetailTextContent, `${scenario.label} opened result channel status`).toContain("검증 전용");
+        expect.soft(openedResultMetrics.channelResultCount, `${scenario.label} opened channel result count`).toBe(2);
+        if (scenario.width < 600) {
+          expect.soft(metrics.pageHeight, `${scenario.label} mobile generated result task distance`).toBeLessThanOrEqual(metrics.viewportHeight * 1.35);
+          expect.soft(metrics.primary?.bottom ?? 9999, `${scenario.label} mobile primary above logs`).toBeLessThanOrEqual(metrics.viewportHeight);
+          expect.soft(metrics.result?.top ?? 0, `${scenario.label} mobile result after primary action`).toBeGreaterThanOrEqual(metrics.primary?.top ?? 0);
+          expect.soft(metrics.mobileSummaryText, `${scenario.label} mobile selected channel summary`).toContain("채널");
+          expect.soft(metrics.configCards.length, `${scenario.label} mobile config card count`).toBe(3);
+          for (const card of metrics.configCards) {
+            expect.soft(card.display, `${scenario.label} mobile config cards remain collapsed`).toBe("none");
+            expect.soft(card.height, `${scenario.label} mobile config cards hidden`).toBe(0);
+          }
+        } else {
+          expect.soft(metrics.pageHeight, `${scenario.label} desktop generated result task distance`).toBeLessThanOrEqual(metrics.viewportHeight * 1.35);
+          expect.soft(metrics.primary?.bottom ?? 9999, `${scenario.label} desktop primary in viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
+          expect.soft(metrics.preview?.bottom ?? 9999, `${scenario.label} desktop preview in viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
+          expect.soft(metrics.preview?.left ?? 0, `${scenario.label} desktop preview right pane`).toBeGreaterThanOrEqual(metrics.primary?.right ?? 9999);
+          expect.soft(metrics.distinctFirstViewportXRanges.length, `${scenario.label} desktop distinct result regions`).toBeGreaterThanOrEqual(2);
+          expect.soft(metrics.result?.width ?? 9999, `${scenario.label} desktop result panel does not monopolize width`).toBeLessThan(metrics.viewportWidth * 0.75);
+          expect.soft(metrics.channelCards.length, `${scenario.label} desktop channel card count`).toBe(3);
+          for (const card of metrics.channelCards) {
+            expect.soft(card.width, `${scenario.label} desktop channel card readable width`).toBeGreaterThanOrEqual(150);
+            expect.soft(card.height, `${scenario.label} desktop channel card compact height`).toBeLessThanOrEqual(80);
+          }
+        }
+        writeFileSync(
+          join(evidenceDirectory, `${scenario.label}-provider-result-fixture-metrics.json`),
+          `${JSON.stringify({
+            checkedAt: new Date().toISOString(),
+            route: "/workspace?share",
+            scenario,
+            verdict: artifactVerdict,
+            fixtureGeneratedProviderResultProof: true,
+            providerDispatchLiveClaimed: false,
+            dispatchPostCount,
+            dispatchPostIdempotencyKey,
+            metrics,
+            openedResultMetrics,
+            assertionSummary
+          }, null, 2)}\n`,
+          "utf8"
+        );
+      } finally {
+        await page.close();
+      }
+    }
+  }, 120_000);
 
   it("keeps the standalone dispatch sample shell from becoming a wide desktop stack", async () => {
     if (!browser || !harness) throw new Error("Browser harness was not started");

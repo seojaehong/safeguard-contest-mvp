@@ -1,7 +1,7 @@
 {
   "checkedAt": "2026-07-21T04:40:27+09:00",
   "verdict": "PASS",
-  "scope": "share provider/result drilldown source and CSS contract",
+  "scope": "share provider/result drilldown source, CSS, and generated fixture contract",
   "routeSplitAloneAcceptedAsFix": false,
   "providerDispatchLiveClaimed": false,
   "resultDrilldown": {
@@ -13,9 +13,68 @@
     "desktopResultSpansPreviewArea": false,
     "mobileOneColumnPreserved": true
   },
+  "generatedProviderResultFixture": {
+    "fixtureGeneratedProviderResultProof": true,
+    "providerDispatchLiveClaimed": false,
+    "externalProviderCalled": false,
+    "desktop1440x900": {
+      "artifact": "evaluation/share-mobile-p1/generated-result-desktop-provider-result-fixture-metrics.json",
+      "verdict": "PASS",
+      "dispatchPostCount": 1,
+      "idempotencyKeyPattern": "provider-dispatch-v1-*",
+      "pageHeight": 900,
+      "viewportHeight": 900,
+      "horizontalOverflow": 0,
+      "primaryBottom": 382,
+      "previewBottom": 738,
+      "resultSummaryBottom": 772,
+      "resultBottom": 784,
+      "resultOpenByDefault": false,
+      "openedChannelResultCount": 2,
+      "distinctFirstViewportXRanges": [160, 800],
+      "resultPanelWidth": 606,
+      "resultPanelMonopolizesViewportWidth": false
+    },
+    "mobile390x844": {
+      "artifact": "evaluation/share-mobile-p1/generated-result-mobile-provider-result-fixture-metrics.json",
+      "verdict": "PASS",
+      "dispatchPostCount": 1,
+      "idempotencyKeyPattern": "provider-dispatch-v1-*",
+      "pageHeight": 1052,
+      "viewportHeight": 844,
+      "heightRatio": 1.25,
+      "horizontalOverflow": 0,
+      "previewBottom": 577,
+      "primaryBottom": 638,
+      "resultSummaryBottom": 813,
+      "resultBottom": 825,
+      "resultOpenByDefault": false,
+      "openedChannelResultCount": 2,
+      "configCardsCollapsedByDefault": true
+    },
+    "assertions": {
+      "dispatchPostCalledExactlyOnce": true,
+      "responseIdempotencyKeyCaptured": true,
+      "resultClosedByDefault": true,
+      "openedResultShowsValidationCopy": true,
+      "openedResultShowsChannelStatus": true,
+      "openedResultChannelCount": 2,
+      "desktopPreviewRightPane": true,
+      "desktopDistinctRegions": true,
+      "desktopResultPanelNotMonopolizingWidth": true,
+      "mobileConfigCardsCollapsed": true
+    }
+  },
   "verification": {
     "focusedSourceCssGuard": "tests/workflow-share-panel-behavior.test.ts",
     "commands": [
+      {
+        "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts -t \"generated provider-result\" --maxWorkers=1 --fileParallelism=false",
+        "result": "PASS",
+        "testFilesPassed": 1,
+        "testsPassed": 1,
+        "testsSkipped": 3
+      },
       {
         "command": "npm.cmd test -- tests\\workflow-share-panel-behavior.test.ts --maxWorkers=1 --fileParallelism=false",
         "result": "PASS",
@@ -26,7 +85,7 @@
         "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false",
         "result": "PASS",
         "testFilesPassed": 1,
-        "testsPassed": 2
+        "testsPassed": 4
       },
       {
         "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"puts the core launcher before the mobile editor\" --maxWorkers=1 --fileParallelism=false",
@@ -41,10 +100,11 @@
       }
     ],
     "liveProviderResultGeneratedStateClaimed": false,
+    "fixtureProviderResultGeneratedStateClaimed": true,
     "shareBrowserEvidenceDirectory": "evaluation/share-mobile-p1"
   },
   "remainingFollowUp": [
-    "Generated provider-result browser proof once a safe fixture/result state is available.",
+    "Generated provider-result fixture proof is closed; live external provider dispatch remains explicitly unclaimed.",
     "Provider live dispatch remains gated on persistent idempotency and provider-result persistence approval."
   ]
 }

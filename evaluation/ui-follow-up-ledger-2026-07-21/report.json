@@ -356,7 +356,7 @@
   "shareResultDrilldownUpdate": {
     "checkedAt": "2026-07-21T04:40:27+09:00",
     "artifact": "evaluation/share-result-drilldown-2026-07-21/report.json",
-    "scope": "provider/channel/log result containment inside the Share cockpit",
+    "scope": "provider/channel/log result containment inside the Share cockpit plus generated fixture proof",
     "currentSourceContract": {
       "resultDrilldownSelector": "[data-share-result-drilldown]",
       "resultSummarySelector": "[data-share-result-summary]",
@@ -366,7 +366,46 @@
       "dispatchDesktopResultColumn": "left cockpit column",
       "providerDispatchLiveClaimed": false
     },
+    "generatedProviderResultFixture": {
+      "fixtureGeneratedProviderResultProof": true,
+      "providerDispatchLiveClaimed": false,
+      "externalProviderCalled": false,
+      "desktop1440x900": {
+        "pageHeight": 900,
+        "viewportHeight": 900,
+        "horizontalOverflow": 0,
+        "primaryBottom": 382,
+        "previewBottom": 738,
+        "resultSummaryBottom": 772,
+        "resultBottom": 784,
+        "resultPanelWidth": 606,
+        "distinctFirstViewportXRanges": [160, 800],
+        "dispatchPostCount": 1,
+        "resultOpenByDefault": false,
+        "openedChannelResultCount": 2
+      },
+      "mobile390x844": {
+        "pageHeight": 1052,
+        "viewportHeight": 844,
+        "horizontalOverflow": 0,
+        "previewBottom": 577,
+        "primaryBottom": 638,
+        "resultSummaryBottom": 813,
+        "resultBottom": 825,
+        "dispatchPostCount": 1,
+        "resultOpenByDefault": false,
+        "openedChannelResultCount": 2,
+        "configCardsCollapsedByDefault": true
+      }
+    },
     "checks": [
+      {
+        "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts -t \"generated provider-result\" --maxWorkers=1 --fileParallelism=false",
+        "result": "PASS",
+        "testFilesPassed": 1,
+        "testsPassed": 1,
+        "testsSkipped": 3
+      },
       {
         "command": "npm.cmd test -- tests\\workflow-share-panel-behavior.test.ts --maxWorkers=1 --fileParallelism=false",
         "result": "PASS",
@@ -377,7 +416,7 @@
         "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false",
         "result": "PASS",
         "testFilesPassed": 1,
-        "testsPassed": 2
+        "testsPassed": 4
       },
       {
         "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"puts the core launcher before the mobile editor\" --maxWorkers=1 --fileParallelism=false",
@@ -391,7 +430,7 @@
         "result": "PASS"
       }
     ],
-    "interpretation": "share result details are bounded drilldown; generated provider delivery and provider-result persistence remain separate gates"
+    "interpretation": "share result details are bounded drilldown and validation-only generated result state is fixture-proven; generated provider delivery and provider-result persistence remain separate gates"
   },
   "dispatchSampleShellUpdate": {
     "checkedAt": "2026-07-21T04:47:22+09:00",

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-20T19:52:59.718Z",
-  "sourceSha": "a3254ae3176468e715fccb6dd308aada7c5870aa",
+  "generatedAt": "2026-07-20T20:14:52.892Z",
+  "sourceSha": "a93d6be624ac44e7e6497b87157c82d47a17c8d1",
   "overall": "open",
   "gates": [
     {
@@ -41,6 +41,16 @@
       "detail": "Production /dispatch seeded desktop and sample shell routes are no longer mobile-stacked: seeded pageHeight 1116 (1.24x), sample panels 635px/413px in distinct desktop regions, overflow false/outside 0.",
       "nextActions": [
         "Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved."
+      ]
+    },
+    {
+      "id": "share_result_fixture_cockpit",
+      "state": "proven",
+      "label": "Generated share result fixture cockpit",
+      "evidencePath": "evaluation\\share-result-drilldown-2026-07-21\\report.json",
+      "detail": "Generated provider-result fixture proof is bounded: desktop page 900/900, result panel 606px with 2 x-ranges, mobile summary/preview/CTA/result inside 844px, dispatch POST count 1, provider live dispatch unclaimed.",
+      "nextActions": [
+        "Keep real provider dispatch gated until persistent idempotency and provider-result persistence are approved and live verified."
       ]
     },
     {

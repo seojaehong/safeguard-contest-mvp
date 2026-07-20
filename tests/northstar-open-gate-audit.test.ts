@@ -192,6 +192,54 @@ function createFixtureRoot(): string {
       providerDispatchLiveClaimed: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "share-result-drilldown-2026-07-21", "report.json"), {
+    verdict: "PASS",
+    generatedProviderResultFixture: {
+      fixtureGeneratedProviderResultProof: true,
+      providerDispatchLiveClaimed: false,
+      externalProviderCalled: false,
+      desktop1440x900: {
+        verdict: "PASS",
+        dispatchPostCount: 1,
+        pageHeight: 900,
+        viewportHeight: 900,
+        horizontalOverflow: 0,
+        primaryBottom: 382,
+        previewBottom: 738,
+        resultSummaryBottom: 772,
+        resultOpenByDefault: false,
+        openedChannelResultCount: 2,
+        distinctFirstViewportXRanges: [160, 800],
+        resultPanelWidth: 606,
+        resultPanelMonopolizesViewportWidth: false,
+      },
+      mobile390x844: {
+        verdict: "PASS",
+        dispatchPostCount: 1,
+        pageHeight: 1052,
+        viewportHeight: 844,
+        horizontalOverflow: 0,
+        previewBottom: 577,
+        primaryBottom: 638,
+        resultSummaryBottom: 813,
+        resultOpenByDefault: false,
+        openedChannelResultCount: 2,
+        configCardsCollapsedByDefault: true,
+      },
+      assertions: {
+        dispatchPostCalledExactlyOnce: true,
+        responseIdempotencyKeyCaptured: true,
+        resultClosedByDefault: true,
+        openedResultShowsValidationCopy: true,
+        openedResultShowsChannelStatus: true,
+        openedResultChannelCount: 2,
+        desktopPreviewRightPane: true,
+        desktopDistinctRegions: true,
+        desktopResultPanelNotMonopolizingWidth: true,
+        mobileConfigCardsCollapsed: true,
+      },
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"), {
     verdict: "PASS_PRODUCTION",
     acceptance: {
@@ -333,6 +381,7 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "live_harness_quality")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.state).toBe("proven");
+    expect(audit.gates.find((gate) => gate.id === "share_result_fixture_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "supabase_rls_launch_isolation")?.state).toBe("approval_gated");
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_publication")?.state).toBe("approval_gated");
     expect(audit.gates.find((gate) => gate.id === "sif_embedding_runtime")?.state).toBe("approval_gated");

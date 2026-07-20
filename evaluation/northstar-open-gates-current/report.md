@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-20T19:52:59.718Z
-Source SHA: `a3254ae3176468e715fccb6dd308aada7c5870aa`
+Generated at: 2026-07-20T20:14:52.892Z
+Source SHA: `a93d6be624ac44e7e6497b87157c82d47a17c8d1`
 Overall: `open`
 
 ## Gate Matrix
@@ -12,6 +12,7 @@ Overall: `open`
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json | Live harness probe passed with zero failed contracts. |
 | ui_documents_share_cockpit | proven | evaluation\documents-drilldown-depth-2026-07-21\report.json | Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch. |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json | Production /dispatch seeded desktop and sample shell routes are no longer mobile-stacked: seeded pageHeight 1116 (1.24x), sample panels 635px/413px in distinct desktop regions, overflow false/outside 0. |
+| share_result_fixture_cockpit | proven | evaluation\share-result-drilldown-2026-07-21\report.json | Generated provider-result fixture proof is bounded: desktop page 900/900, result panel 606px with 2 x-ranges, mobile summary/preview/CTA/result inside 844px, dispatch POST count 1, provider live dispatch unclaimed. |
 | supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Read-only RLS approval preflight passed at source SHA cbb134c52185aab4e0ac3f9d648eee82aee2634f, but live RLS catalog and tenant A/B isolation are not proven. |
 | llm_wiki_publication | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA cbb134c52185aab4e0ac3f9d648eee82aee2634f. |
 | sif_embedding_runtime | approval_gated | evaluation\sif-embedding-gate\approval-preflight-report.json | SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 4dd391e1ed773469627fe81bebe0f8a250766373. |
@@ -40,6 +41,7 @@ Overall: `open`
 - ui_documents_share_cockpit: Continue UI product depth on richer document-specific section actions and one-document-at-a-time editing affordances.
 - ui_documents_share_cockpit: Optional follow-up: make the mobile Share configuration disclosure a guided stepper if more hand-holding is needed.
 - dispatch_standalone_cockpit: Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved.
+- share_result_fixture_cockpit: Keep real provider dispatch gated until persistent idempotency and provider-result persistence are approved and live verified.
 - supabase_rls_launch_isolation: Approve authoritative project and credential provenance.
 - supabase_rls_launch_isolation: Run read-only live catalog capture.
 - supabase_rls_launch_isolation: Run disposable tenant A/B negative tests before production migration claims.

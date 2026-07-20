@@ -31,6 +31,7 @@ const EVIDENCE_PATHS = Object.freeze({
   documentsMobilePaneContext: path.join("evaluation", "documents-mobile-pane-context-2026-07-21", "report.json"),
   documentsDrilldownDepth: path.join("evaluation", "documents-drilldown-depth-2026-07-21", "report.json"),
   shareMobileFullFlow: path.join("evaluation", "share-mobile-full-flow-2026-07-21", "report.json"),
+  shareResultDrilldown: path.join("evaluation", "share-result-drilldown-2026-07-21", "report.json"),
   dispatchStandalone: path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"),
   koshaCurrentNorthstarRegression: path.join("evaluation", "kosha-current-northstar-regression-2026-07-21", "report.json"),
   koshaCurrentGate: path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json"),
@@ -703,6 +704,99 @@ function evaluateDispatchStandaloneCockpitGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluateShareResultFixtureCockpitGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.shareResultDrilldown;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "share_result_fixture_cockpit",
+      label: "Generated share result fixture cockpit",
+      state: "missing",
+      evidencePath,
+      detail: "Share result fixture report is missing or invalid.",
+      nextActions: ["Run the generated provider-result fixture browser gate before claiming Share result-state containment."],
+    });
+  }
+
+  const fixture = isRecord(report.generatedProviderResultFixture)
+    ? report.generatedProviderResultFixture
+    : {};
+  const desktop = isRecord(fixture.desktop1440x900) ? fixture.desktop1440x900 : {};
+  const mobile = isRecord(fixture.mobile390x844) ? fixture.mobile390x844 : {};
+  const assertions = isRecord(fixture.assertions) ? fixture.assertions : {};
+  const desktopRanges = Array.isArray(desktop.distinctFirstViewportXRanges)
+    ? desktop.distinctFirstViewportXRanges
+    : [];
+  const pass = readString(report.verdict) === "PASS"
+    && fixture.fixtureGeneratedProviderResultProof === true
+    && fixture.providerDispatchLiveClaimed === false
+    && fixture.externalProviderCalled === false
+    && readString(desktop.verdict) === "PASS"
+    && readNumber(desktop.dispatchPostCount) === 1
+    && readNumber(desktop.horizontalOverflow) === 0
+    && readNumber(desktop.pageHeight) !== null
+    && readNumber(desktop.viewportHeight) !== null
+    && (readNumber(desktop.pageHeight) || 0) <= (readNumber(desktop.viewportHeight) || 0)
+    && readNumber(desktop.primaryBottom) !== null
+    && (readNumber(desktop.primaryBottom) || 0) <= (readNumber(desktop.viewportHeight) || 0)
+    && readNumber(desktop.previewBottom) !== null
+    && (readNumber(desktop.previewBottom) || 0) <= (readNumber(desktop.viewportHeight) || 0)
+    && readNumber(desktop.resultSummaryBottom) !== null
+    && (readNumber(desktop.resultSummaryBottom) || 0) <= (readNumber(desktop.viewportHeight) || 0)
+    && desktop.resultOpenByDefault === false
+    && readNumber(desktop.openedChannelResultCount) === 2
+    && desktopRanges.length >= 2
+    && desktop.resultPanelMonopolizesViewportWidth === false
+    && readString(mobile.verdict) === "PASS"
+    && readNumber(mobile.dispatchPostCount) === 1
+    && readNumber(mobile.horizontalOverflow) === 0
+    && readNumber(mobile.previewBottom) !== null
+    && (readNumber(mobile.previewBottom) || 0) <= (readNumber(mobile.viewportHeight) || 0)
+    && readNumber(mobile.primaryBottom) !== null
+    && (readNumber(mobile.primaryBottom) || 0) <= (readNumber(mobile.viewportHeight) || 0)
+    && readNumber(mobile.resultSummaryBottom) !== null
+    && (readNumber(mobile.resultSummaryBottom) || 0) <= (readNumber(mobile.viewportHeight) || 0)
+    && mobile.resultOpenByDefault === false
+    && readNumber(mobile.openedChannelResultCount) === 2
+    && mobile.configCardsCollapsedByDefault === true
+    && assertions.dispatchPostCalledExactlyOnce === true
+    && assertions.responseIdempotencyKeyCaptured === true
+    && assertions.resultClosedByDefault === true
+    && assertions.openedResultShowsValidationCopy === true
+    && assertions.openedResultShowsChannelStatus === true
+    && readNumber(assertions.openedResultChannelCount) === 2
+    && assertions.desktopPreviewRightPane === true
+    && assertions.desktopDistinctRegions === true
+    && assertions.desktopResultPanelNotMonopolizingWidth === true
+    && assertions.mobileConfigCardsCollapsed === true;
+
+  if (pass) {
+    return gateResult({
+      id: "share_result_fixture_cockpit",
+      label: "Generated share result fixture cockpit",
+      state: "proven",
+      evidencePath,
+      detail: `Generated provider-result fixture proof is bounded: desktop page ${readNumber(desktop.pageHeight)}/${readNumber(desktop.viewportHeight)}, result panel ${readNumber(desktop.resultPanelWidth)}px with ${desktopRanges.length} x-ranges, mobile summary/preview/CTA/result inside ${readNumber(mobile.viewportHeight)}px, dispatch POST count 1, provider live dispatch unclaimed.`,
+      nextActions: [
+        "Keep real provider dispatch gated until persistent idempotency and provider-result persistence are approved and live verified.",
+      ],
+    });
+  }
+
+  return gateResult({
+    id: "share_result_fixture_cockpit",
+    label: "Generated share result fixture cockpit",
+    state: "contradicted",
+    evidencePath,
+    detail: "Share result report no longer proves validation-only generated result state, bounded details, first-viewport cockpit geometry, and no provider live dispatch claim together.",
+    nextActions: ["Re-run the generated provider-result browser fixture and update the report with dispatch POST and opened-detail evidence."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateKoshaExactTrustGate(rootDir) {
   const evidence = readFirstJsonFile(rootDir, [
     EVIDENCE_PATHS.koshaCurrentNorthstarRegression,
@@ -906,6 +1000,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateLiveHarnessGate(rootDir),
     evaluateUiDocumentsShareCockpitGate(rootDir),
     evaluateDispatchStandaloneCockpitGate(rootDir),
+    evaluateShareResultFixtureCockpitGate(rootDir),
     evaluateRlsApprovalGate(rootDir),
     evaluateLlmWikiGate(rootDir),
     evaluateSifEmbeddingGate(rootDir),

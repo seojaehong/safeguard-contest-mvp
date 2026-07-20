@@ -161,7 +161,7 @@ Interpretation: this closes the first document-specific drilldown depth layer: o
 
 ## 2026-07-21 Share Result Drilldown Update
 
-Current-source bounded source/CSS gate:
+Current-source bounded source/CSS and generated fixture gate:
 
 - Artifact: `evaluation/share-result-drilldown-2026-07-21/report.md`
 - Share result state now renders as `[data-share-result-drilldown]` with `[data-share-result-summary]`.
@@ -169,8 +169,13 @@ Current-source bounded source/CSS gate:
 - Failure, duplicate-risk, and duplicate-log states default open so critical warnings are not hidden.
 - Desktop `/workspace` Share and standalone `/dispatch` keep the result drilldown in the left cockpit column instead of spanning across the preview/right-pane area.
 - Mobile remains one-column and places result details after the first-action region.
+- Generated provider-result fixture proof is now present without enabling or calling real providers:
+  - Desktop 1440x900: `pageHeight=900`, primary/preview/result summary bottoms `382/738/772`, result panel `606px`, distinct x ranges `[160, 800]`, overflow `0`.
+  - Mobile 390x844: `pageHeight=1052`, preview/primary/result summary bottoms `577/638/813`, config cards collapsed, overflow `0`.
+  - Dispatch POST is called exactly once per viewport with a `provider-dispatch-v1-*` idempotency key.
+  - Result details are closed by default and show `2` validation-only channel results when opened.
 
-Interpretation: this is a result-depth containment layer, not provider live dispatch. Route/page split alone is still not accepted as the UX fix; long provider/result details must stay in bounded drilldown while the first viewport keeps publish/status, recipient/channel decision, preview, and primary action.
+Interpretation: this is a result-depth containment layer plus a fixture-generated result-state proof, not provider live dispatch. Route/page split alone is still not accepted as the UX fix; long provider/result details must stay in bounded drilldown while the first viewport keeps publish/status, recipient/channel decision, preview, and primary action.
 
 ## 2026-07-21 Dispatch Sample Shell Update
 

@@ -1,0 +1,135 @@
+{
+  "checkedAt": "2026-07-20T20:16:29.849Z",
+  "route": "/workspace?share",
+  "scenario": {
+    "label": "generated-result-mobile",
+    "width": 390,
+    "height": 844
+  },
+  "verdict": "PASS",
+  "fixtureGeneratedProviderResultProof": true,
+  "providerDispatchLiveClaimed": false,
+  "dispatchPostCount": 1,
+  "dispatchPostIdempotencyKey": "provider-dispatch-v1-d93aa170-0c0d-4d7c-b3a9-51c1cf779b6a-de145020",
+  "metrics": {
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "pageHeight": 1052,
+    "root": {
+      "left": 27,
+      "right": 363,
+      "top": 135,
+      "bottom": 838,
+      "width": 336,
+      "height": 703
+    },
+    "preview": {
+      "left": 40,
+      "right": 350,
+      "top": 331,
+      "bottom": 577,
+      "width": 310,
+      "height": 246
+    },
+    "primary": {
+      "left": 49,
+      "right": 341,
+      "top": 594,
+      "bottom": 638,
+      "width": 292,
+      "height": 44
+    },
+    "result": {
+      "left": 40,
+      "right": 350,
+      "top": 757,
+      "bottom": 825,
+      "width": 310,
+      "height": 68
+    },
+    "resultSummary": {
+      "left": 52,
+      "right": 338,
+      "top": 769,
+      "bottom": 813,
+      "width": 286,
+      "height": 44
+    },
+    "resultDetail": {
+      "left": 52,
+      "right": 338,
+      "top": 813,
+      "bottom": 1058,
+      "width": 286,
+      "height": 245
+    },
+    "resultOpen": false,
+    "resultSummaryText": "전송 결과\n미리 확인",
+    "resultDetailText": "",
+    "resultDetailTextContent": "채널별 전송 결과를 확인해 주세요.미리 확인용 응답입니다. 실제 전송 기록으로 저장하지 않습니다.전송 이력 · 저장 상태를 확인해 주세요.메일검증 전용채널별 전송 결과를 확인해 주세요.문자검증 전용채널별 전송 결과를 확인해 주세요.",
+    "resultDetailOverflowY": "auto",
+    "resultDetailClientHeight": 245,
+    "resultDetailScrollHeight": 245,
+    "mobileSummaryText": "대상\n1명 선택\n채널\n메일, 문자\n언어\n베트남어(Tiếng Việt)",
+    "configCards": [
+      {
+        "display": "none",
+        "height": 0,
+        "bottom": 0
+      },
+      {
+        "display": "none",
+        "height": 0,
+        "bottom": 0
+      },
+      {
+        "display": "none",
+        "height": 0,
+        "bottom": 0
+      }
+    ],
+    "channelCards": [
+      {
+        "width": 0,
+        "height": 0
+      },
+      {
+        "width": 0,
+        "height": 0
+      },
+      {
+        "width": 0,
+        "height": 0
+      }
+    ],
+    "distinctFirstViewportXRanges": [
+      80
+    ],
+    "horizontalOverflow": 0
+  },
+  "openedResultMetrics": {
+    "resultOpen": true,
+    "resultDetailText": "채널별 전송 결과를 확인해 주세요.\n\n미리 확인용 응답입니다. 실제 전송 기록으로 저장하지 않습니다.\n\n전송 이력 · 저장 상태를 확인해 주세요.\n\n메일\n검증 전용\n채널별 전송 결과를 확인해 주세요.\n문자\n검증 전용\n채널별 전송 결과를 확인해 주세요.",
+    "resultDetailTextContent": "채널별 전송 결과를 확인해 주세요.미리 확인용 응답입니다. 실제 전송 기록으로 저장하지 않습니다.전송 이력 · 저장 상태를 확인해 주세요.메일검증 전용채널별 전송 결과를 확인해 주세요.문자검증 전용채널별 전송 결과를 확인해 주세요.",
+    "channelResultCount": 2,
+    "channelResultTexts": [
+      "메일\n검증 전용\n채널별 전송 결과를 확인해 주세요.",
+      "문자\n검증 전용\n채널별 전송 결과를 확인해 주세요."
+    ]
+  },
+  "assertionSummary": {
+    "dispatchPostCalledExactlyOnce": true,
+    "responseIdempotencyKeyCaptured": true,
+    "resultClosedByDefault": true,
+    "openedResultShowsValidationCopy": true,
+    "openedResultShowsChannelStatus": true,
+    "openedResultChannelCount": 2,
+    "horizontalOverflowClosed": true,
+    "primaryInsideViewport": true,
+    "resultSummaryInsideViewport": true,
+    "desktopPreviewRightPane": true,
+    "desktopDistinctRegions": true,
+    "desktopResultPanelNotMonopolizingWidth": true,
+    "mobileConfigCardsCollapsed": true
+  }
+}
