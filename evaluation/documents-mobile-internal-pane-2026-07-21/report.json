@@ -1,0 +1,119 @@
+{
+  "title": "Documents Mobile Internal Pane Gate",
+  "checkedAt": "2026-07-21T02:27:00+09:00",
+  "sourceHeadBeforeCommit": "491bcfd3",
+  "branch": "chore/recipient-foreign-live-gate-20260720",
+  "verdict": "PASS_CURRENT_SOURCE",
+  "scope": {
+    "route": "/documents",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "productFiles": [
+      "app/globals.css"
+    ],
+    "testFiles": [
+      "tests/documents-editor-layout.test.ts"
+    ],
+    "excludedContracts": [
+      "WorkpackEditor data model",
+      "document export rendering",
+      "provider dispatch",
+      "Supabase schema or data"
+    ]
+  },
+  "geometry": {
+    "baseUrl": "http://127.0.0.1:3458",
+    "route": "/documents?theme=day",
+    "evidenceType": "local current-source browser measurement",
+    "productionEvidence": false,
+    "bodyHeight": 844,
+    "heightRatio": 1.0,
+    "overflowX": false,
+    "outside": 0,
+    "currentWorkStrip": {
+      "visible": true,
+      "top": 207,
+      "bottom": 297,
+      "height": 90,
+      "textIncludes": [
+        "기본 예시 표시",
+        "실제 저장·전파는 작업 입력 후 진행합니다"
+      ]
+    },
+    "mobileCockpit": {
+      "top": 305,
+      "bottom": 468,
+      "height": 163,
+      "textIncludes": [
+        "오늘 문서",
+        "핵심 3종"
+      ]
+    },
+    "workpackPane": {
+      "top": 476,
+      "bottom": 796,
+      "height": 320,
+      "overflowY": "auto",
+      "clientHeight": 320,
+      "scrollHeight": 1110
+    },
+    "documentEditor": {
+      "top": 602,
+      "bottom": 1586,
+      "height": 984,
+      "reachableInsidePane": true
+    },
+    "documentTextarea": {
+      "top": 823,
+      "bottom": 980,
+      "height": 157,
+      "reachableInsidePane": true
+    }
+  },
+  "baselineComparison": {
+    "beforeFirstDensityPatch": {
+      "bodyHeight": 1816,
+      "heightRatio": 2.15,
+      "editorTop": 671,
+      "textareaTop": 1005
+    },
+    "afterFirstDensityPatch": {
+      "bodyHeight": 1634,
+      "heightRatio": 1.94,
+      "editorTop": 602,
+      "textareaTop": 823
+    },
+    "afterInternalPanePatch": {
+      "bodyHeight": 844,
+      "heightRatio": 1.0,
+      "editorTop": 602,
+      "textareaTop": 823
+    }
+  },
+  "verification": {
+    "focusedBrowser": {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"bounds the default documents route editor|puts the core launcher before the mobile editor\" --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 3,
+      "testsSkipped": 28
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    "fullDocumentsSuite": {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 31
+    }
+  },
+  "limitations": [
+    "Production deployment is not claimed until this commit is pushed and /api/build-info advances.",
+    "This does not claim the full route-split IA redesign.",
+    "Long document editing remains available inside the bounded pane."
+  ]
+}

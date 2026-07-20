@@ -112,7 +112,24 @@ describe("documents editor layout", () => {
     if (!browser) throw new Error("Browser was not started");
 
     const cases = [
-      { width: 1440, height: 723, maxRatio: 1.5 }
+      {
+        name: "desktop short",
+        width: 1440,
+        height: 723,
+        maxRatio: 1.5,
+        maxShellTop: 360,
+        maxEditorTop: 360,
+        minShellHeight: 360
+      },
+      {
+        name: "mobile",
+        width: 390,
+        height: 844,
+        maxRatio: 1.35,
+        maxShellTop: 520,
+        maxEditorTop: 650,
+        minShellHeight: 300
+      }
     ] as const;
 
     for (const viewport of cases) {
@@ -147,10 +164,11 @@ describe("documents editor layout", () => {
       expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth + 1);
       expect(metrics.bodyHeight / metrics.viewportHeight).toBeLessThanOrEqual(viewport.maxRatio);
       expect(metrics.workpackShell.overflowY).toBe("auto");
-      expect(metrics.workpackShell.top).toBeLessThanOrEqual(360);
-      expect(metrics.documentEditor.top).toBeLessThanOrEqual(360);
-      expect(metrics.workpackShell.height).toBeGreaterThanOrEqual(360);
+      expect(metrics.workpackShell.top).toBeLessThanOrEqual(viewport.maxShellTop);
+      expect(metrics.documentEditor.top).toBeLessThanOrEqual(viewport.maxEditorTop);
+      expect(metrics.workpackShell.height).toBeGreaterThanOrEqual(viewport.minShellHeight);
       expect(metrics.workpackShell.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
+      expect(metrics.mobileCoreLauncher.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
 
       await page.close();
     }
@@ -1162,14 +1180,16 @@ describe("documents editor layout", () => {
         const textarea = document.querySelector<HTMLTextAreaElement>('.document-textarea[aria-label="TBM 기록 편집"]');
         const documentBody = document.querySelector('[data-testid="editor-document-body"]');
         const documentSelect = document.querySelector<HTMLSelectElement>('select[aria-label="편집 문서 선택"]');
+        const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
         const selectedLauncher = document.querySelector<HTMLButtonElement>(
           '[data-testid="mobile-core-document-launcher"] button[data-document-key="tbmLogDraft"]'
         );
-        if (!textarea || !documentBody || !documentSelect || !selectedLauncher) {
+        if (!textarea || !documentBody || !documentSelect || !workpackShell || !selectedLauncher) {
           throw new Error("Missing selected mobile editor target");
         }
         const textareaRect = textarea.getBoundingClientRect();
         const bodyRect = documentBody.getBoundingClientRect();
+        const shellStyle = getComputedStyle(workpackShell);
         return {
           activeLabel: document.activeElement?.getAttribute("aria-label"),
           selectedDocument: documentSelect.value,
@@ -1177,16 +1197,23 @@ describe("documents editor layout", () => {
           textareaTop: Math.round(textareaRect.top),
           textareaBottom: Math.round(textareaRect.bottom),
           bodyTop: Math.round(bodyRect.top),
-          scrollY: Math.round(window.scrollY)
+          scrollY: Math.round(window.scrollY),
+          shellOverflowY: shellStyle.overflowY,
+          shellScrollTop: Math.round(workpackShell.scrollTop),
+          shellClientHeight: Math.round(workpackShell.clientHeight),
+          shellScrollHeight: Math.round(workpackShell.scrollHeight)
         };
       });
 
       expect(selected.activeLabel).toBe("TBM 기록 편집");
       expect(selected.selectedDocument).toBe("tbmLogDraft");
       expect(selected.selectedPressed).toBe("true");
-      expect(selected.scrollY).toBeGreaterThan(0);
+      expect(selected.scrollY).toBe(0);
+      expect(selected.shellOverflowY).toBe("auto");
+      expect(selected.shellScrollHeight).toBeGreaterThan(selected.shellClientHeight);
+      expect(selected.shellScrollTop).toBeGreaterThan(0);
       expect(selected.bodyTop).toBeGreaterThanOrEqual(0);
-      expect(selected.bodyTop).toBeLessThanOrEqual(96);
+      expect(selected.bodyTop).toBeLessThan(844);
       expect(selected.textareaTop).toBeGreaterThanOrEqual(0);
       expect(selected.textareaTop).toBeLessThan(844);
       expect(selected.textareaBottom).toBeGreaterThan(selected.textareaTop);

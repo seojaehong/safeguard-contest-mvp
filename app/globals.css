@@ -21256,7 +21256,10 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .workpack-shell {
+    max-height: min(320px, calc(100vh - 524px));
     margin-top: 8px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .safeclaw-module-shell.module-variant-document .safeclaw-mobile-document-priority > span {
