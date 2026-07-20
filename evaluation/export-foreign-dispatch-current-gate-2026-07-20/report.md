@@ -1,12 +1,12 @@
 # Export / Foreign Dispatch Current Gate
 
-Checked at: 2026-07-20T04:34:49.995Z
+Checked at: 2026-07-20T05:40:18.000Z
 
 ## Verdict
 
-PASS on current master lineage through `f3e9f373614c8500d24e73ea1e99ecccb1ba423b`.
+PASS on current launch lineage through `76111d0d19dda046ad988dcdc254d21abab38d65`.
 
-Current master contains the active export and foreign-dispatch integration line. Earlier isolated candidate SHAs are not direct ancestors, but the current integrated files preserve the relevant contracts through the active route/component tests.
+Current master/launch branch contains the active export and foreign-dispatch integration line through `76111d0d19dda046ad988dcdc254d21abab38d65`. Earlier isolated candidate SHAs are not direct ancestors, but the current integrated files preserve the relevant contracts through the active route/component tests.
 
 ## Verified Scope
 
@@ -29,3 +29,4 @@ Result: PASS, 9 files / 67 tests.
 
 - This gate does not adopt the rejected multi-process candidate branch as a range merge.
 - No DB schema change, Supabase mutation, or provider dispatch side effect was performed.
+- Current rerun result: 9 test files passed / 67 tests passed / 7.10s.

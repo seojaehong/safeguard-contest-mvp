@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-export-foreign-dispatch-current-gate/v1",
-  "checkedAt": "2026-07-20T04:34:49.995Z",
-  "head": "f3e9f373614c8500d24e73ea1e99ecccb1ba423b",
+  "checkedAt": "2026-07-20T05:40:18.000Z",
+  "head": "76111d0d19dda046ad988dcdc254d21abab38d65",
   "verdict": "pass",
   "dbMutationPerformed": false,
   "providerDispatchSideEffectPerformed": false,
