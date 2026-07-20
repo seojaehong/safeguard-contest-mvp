@@ -1,0 +1,81 @@
+{
+  "checkedAt": "2026-07-20T11:03:16.515Z",
+  "verdict": "MOBILE_PARTIAL",
+  "hardBlockersClosed": true,
+  "production": {
+    "commitSha": "b43582bd5d46a46b6769513edb345138315741bc",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-pwg465n2c-seojaehongs-projects.vercel.app",
+    "url": "https://www.safeclaw.kr/workspace"
+  },
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "mobileFlow": {
+    "input": {
+      "route": "/workspace",
+      "heightRatio": 1.17,
+      "under44Count": 3,
+      "horizontalOverflow": false,
+      "outsideCount": 0
+    },
+    "documentsSafetyBrief": {
+      "bodyHeight": 2064,
+      "viewportHeight": 844,
+      "heightRatio": 2.45,
+      "stageY": 262,
+      "stageHeight": 1697,
+      "firstUsefulReviewY": 262,
+      "documentPreviewY": 1286,
+      "horizontalOverflow": false,
+      "outsideCount": 0,
+      "stickyLikeCount": 0,
+      "under44Count": 0
+    },
+    "editor": {
+      "bodyHeight": 1981,
+      "viewportHeight": 844,
+      "heightRatio": 2.35,
+      "editorY": 63,
+      "textareaY": 361,
+      "horizontalOverflow": false,
+      "outsideCount": 0,
+      "stickyLikeCount": 0
+    },
+    "share": {
+      "bodyHeight": 1487,
+      "viewportHeight": 844,
+      "heightRatio": 1.76,
+      "shareY": 244,
+      "shareWidth": 336,
+      "messagePreviewY": 1068,
+      "primaryShareCtas": 1,
+      "horizontalOverflow": false,
+      "outsideCount": 0,
+      "stickyLikeCount": 0,
+      "under44Count": 0
+    }
+  },
+  "acceptance": {
+    "horizontalOverflow": false,
+    "stickyOverlap": false,
+    "ctaOcclusion": false,
+    "textClipping": false,
+    "notes": [
+      "Safety Brief Dashboard shipped with top 3 risk rows.",
+      "Documents/share mobile hard blockers are closed: overflow 0, outside 0, sticky 0.",
+      "Verdict remains partial because generated documents are 2.45x and share is 1.76x, so full near-first-viewport disclosure remains follow-up."
+    ]
+  },
+  "sourceArtifacts": {
+    "geometry": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
+    "liveCritical": "evaluation/live-critical-surface-current-2026-07-20-rerun/report.json",
+    "screenshots": [
+      "evaluation/workspace-docs-share-production-gate-2026-07-20/mobile-day-current-documents.png",
+      "evaluation/workspace-docs-share-production-gate-2026-07-20/mobile-day-current-share.png",
+      "evaluation/live-critical-surface-current-2026-07-20-rerun/screenshots/mobile-workspace.png"
+    ]
+  }
+}
