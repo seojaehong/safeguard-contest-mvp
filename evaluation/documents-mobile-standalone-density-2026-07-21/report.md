@@ -60,6 +60,26 @@ Compared with the prior production baseline, the standalone mobile route still r
 - Textarea top: 1005px -> 823px
 - Current-work/provenance context: preserved, not hidden
 
+## Production Mobile Geometry
+
+Measured again after production `/api/build-info` advanced to `e702fdd73b6399aee3f85ed527ca232b68c4efed`.
+
+- Production URL: `https://www.safeclaw.kr/documents?theme=day`
+- Deployment URL: `safeguard-contest-1rc46o9n6-seojaehongs-projects.vercel.app`
+- Viewport: 390x844
+- Body height: 1634px, 1.94x viewport
+- Workpack shell top: 476px
+- Document editor top: 602px
+- Document textarea top: 823px
+- Current-work strip: visible, top 207px, bottom 297px
+- Current-work strip text: "기본 예시 표시... 실제 저장·전파는 작업 입력 후 진행합니다."
+- Cockpit text contains: "오늘 문서", "핵심 3종"
+- Mobile core launcher top/bottom: 305px / 468px
+- Horizontal overflow: false
+- Outside viewport elements: 0
+
+Production interpretation: the user will no longer be looking at the old 1816px/2.15x mobile `/documents` surface after the deployment cache reaches this marker. The route is still a long editor surface at 1.94x viewport, so the remaining IA principle is unchanged: full document editing remains deep work, while the default cockpit must keep context and launcher actions visible early.
+
 ## Verification
 
 Commands run:

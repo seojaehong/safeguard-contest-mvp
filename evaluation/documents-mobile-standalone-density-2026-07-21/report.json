@@ -106,6 +106,57 @@
       }
     }
   },
+  "productionMobileGeometry": {
+    "build": {
+      "commitSha": "e702fdd73b6399aee3f85ed527ca232b68c4efed",
+      "branch": "master",
+      "environment": "production",
+      "deploymentUrl": "safeguard-contest-1rc46o9n6-seojaehongs-projects.vercel.app"
+    },
+    "baseUrl": "https://www.safeclaw.kr",
+    "route": "/documents?theme=day",
+    "evidenceType": "live production browser measurement",
+    "productionEvidence": true,
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "bodyHeight": 1634,
+    "heightRatio": 1.94,
+    "workpackShell": {
+      "top": 476,
+      "bottom": 1586,
+      "height": 1110,
+      "overflowY": "visible"
+    },
+    "documentEditor": {
+      "top": 602,
+      "bottom": 1586,
+      "height": 984
+    },
+    "documentTextarea": {
+      "top": 823,
+      "bottom": 980,
+      "height": 157
+    },
+    "currentWorkStrip": {
+      "visible": true,
+      "top": 207,
+      "bottom": 297,
+      "height": 90,
+      "textExcerpt": "기본 예시 표시아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입력 후 진행합니다."
+    },
+    "mobileCoreLauncher": {
+      "top": 305,
+      "bottom": 468,
+      "textContains": [
+        "오늘 문서",
+        "핵심 3종"
+      ]
+    },
+    "overflowX": false,
+    "outside": 0
+  },
   "verification": {
     "focusedRegression": {
       "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"bounds the default documents route editor|counts only non-empty|keeps sample display|puts the core launcher before the mobile editor\" --maxWorkers=1 --fileParallelism=false",
@@ -135,6 +186,7 @@
   "limitations": [
     "No DB schema, Supabase data, provider dispatch, or export rendering changes were made.",
     "This gate does not claim that route splitting alone solves the IA issue.",
-    "Production deployment and live mobile geometry are not claimed until this commit is pushed and the production marker advances."
+    "Production live geometry is recorded for commit e702fdd73b6399aee3f85ed527ca232b68c4efed.",
+    "The route remains a long editor surface at 1.94x viewport; this wave is a bounded density/context-preservation fix, not a full mobile document editor redesign."
   ]
 }
