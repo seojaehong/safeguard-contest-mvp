@@ -1,14 +1,14 @@
 {
-  "checkedAt": "2026-07-20T02:48:40.366Z",
+  "checkedAt": "2026-07-20T04:13:08.004Z",
   "baseUrl": "https://www.safeclaw.kr",
   "buildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "6ac736394b58bbade424fc876ccc99e96a503de9",
+    "commitSha": "678ebbcdcd15c25ad9fdab517ae1e0b0a8c00e49",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-q8eedszbo-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-74yaebw5x-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "routes": [
@@ -33,14 +33,7 @@
       "height": 844
     }
   ],
-  "findings": [
-    {
-      "route": "/",
-      "viewport": "mobile",
-      "severity": "P3",
-      "message": "mobile root remains long (12.8x viewport)"
-    }
-  ],
+  "findings": [],
   "rows": [
     {
       "route": "/",
@@ -488,48 +481,18 @@
       "url": "https://www.safeclaw.kr/",
       "screenshot": "screenshots/mobile-root.png",
       "title": "SafeClaw | 안전 문서팩 생성",
-      "scrollHeight": 10800,
+      "scrollHeight": 2785,
       "scrollWidth": 390,
       "clientWidth": 390,
-      "heightRatio": 12.8,
+      "heightRatio": 3.3,
       "horizontalOverflow": false,
       "outsideCount": 0,
-      "under44Count": 11,
+      "under44Count": 6,
       "under44Samples": [
         {
           "text": "safeclaw/os",
           "w": 358,
           "h": 30,
-          "visible": true
-        },
-        {
-          "text": "제품",
-          "w": 28,
-          "h": 44,
-          "visible": true
-        },
-        {
-          "text": "문제",
-          "w": 28,
-          "h": 44,
-          "visible": true
-        },
-        {
-          "text": "근거",
-          "w": 28,
-          "h": 44,
-          "visible": true
-        },
-        {
-          "text": "작업 시작",
-          "w": 34,
-          "h": 44,
-          "visible": true
-        },
-        {
-          "text": "작업 이력실시간 검토 중",
-          "w": 303,
-          "h": 16,
           "visible": true
         },
         {
@@ -543,10 +506,28 @@
           "w": 28,
           "h": 24,
           "visible": true
+        },
+        {
+          "text": "근거",
+          "w": 28,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "text": "API 상태",
+          "w": 56,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "text": "로그인",
+          "w": 41,
+          "h": 24,
+          "visible": true
         }
       ],
       "internalTerms": [],
-      "bodySample": "safeclaw/os\n제품\n문제\n작동 방식\n외국인 안내\n근거\n제품 구성\n작업 시작\n로그인\n작업 시작 →\n제품 · 운영 준비\nREGION · KR-CENTRAL\nPUBLIC API · ACTIVE\nUPDATED · 2026-07-20\n산업안전 · 현장 문서 작업공간\n오늘 작업을\n안전 문서팩으로\n준비합니다.\n\nsafeclaw는 현장관리자가 작업 전 필요한 안전 문서를 근거와 함께 준비하도록 돕는 웹 작업공간입니다.\n\n한 줄 입력으로 위험성평가, TBM, 안전교육, 외국인 안내문, 현장 전파 메시지 초안을 생성합니다.\n\n채용하지 않은 안전관리자 — 한 명 몫의 문서 업무를 대신합니다.\n\n작업공간 열기 →\n문서팩 보기\nsafeclaw · AI 안전관리자\n생성 중\n작업 입력\n\n세이프건설 서울 성수동 외벽 도장 · 이동식 비계 · 오후 강풍 · 신규 작업자 1명\n\n작업 이력\n실시간 검토 중\n\n▸\n기상청 실황·특보 확인\n\n§ 01\n문제\n작업 전 문서와 공지를\n하나의 흐름으로 잇습니다.\n01 · INPUT\n입력\n\n오늘 작업 내용을 한 줄로 정리합니다.\n\n작업\n02 · CHECK\n확인\n\n법령, 기상, KOSHA, 교육 근거를 함께 확인합니다.\n\n근거\n03 · DRAFT\n초안"
+      "bodySample": "safeclaw/os\n로그인\n작업 시작 →\n제품 · 운영 준비\nREGION · KR-CENTRAL\nPUBLIC API · ACTIVE\nUPDATED · 2026-07-20\n산업안전 · 현장 문서 작업공간\n오늘 작업을\n안전 문서팩으로\n준비합니다.\n\nsafeclaw는 현장관리자가 작업 전 필요한 안전 문서를 근거와 함께 준비하도록 돕는 웹 작업공간입니다.\n\n채용하지 않은 안전관리자 — 한 명 몫의 문서 업무를 대신합니다.\n\n작업공간 열기 →\n문서팩 보기\n§ 01\n문제\n작업 전 문서와 공지를\n하나의 흐름으로 잇습니다.\n01 · INPUT\n입력\n\n오늘 작업 내용을 한 줄로 정리합니다.\n\n작업\n02 · CHECK\n확인\n\n법령, 기상, KOSHA, 교육 근거를 함께 확인합니다.\n\n근거\n03 · DRAFT\n초안\n\n위험성평가, TBM, 안전교육 기록 초안을 만듭니다.\n\n문서팩\n§ 06\n작업 시작\n샘플 작업으로\n바로 확인합니다.\nsafeclaw@workspace ~ %\n준비됨\n# 샘플 작업을 실제 API 조합으로 생성합니다\n질문: 서울 성수동 외벽 도장 · 이동식 비계 · 강풍 · 신규 작업자\n출력: 위험성평가표 / TBM / 안전교육 / 외국인 전송본 / 현장 전파 메시지"
     },
     {
       "route": "/workspace",

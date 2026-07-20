@@ -1,12 +1,12 @@
 # Live Critical Surface Current Rerun
 
-- Checked: 2026-07-20T02:48:40.366Z
-- Build marker: 6ac736394b58bbade424fc876ccc99e96a503de9
-- Findings: 1
+- Checked: 2026-07-20T04:13:08.004Z
+- Build marker: 678ebbcdcd15c25ad9fdab517ae1e0b0a8c00e49
+- Findings: 0
 
 ## Findings
 
-- P3: / mobile - mobile root remains long (12.8x viewport)
+None.
 
 ## Rows
 
@@ -20,7 +20,7 @@
 | /documents | desktop | 200 | 2286 (2.54x) | no | 0 | 32 | - |
 | /reports | desktop | 200 | 900 (1x) | no | 0 | 0 | - |
 | /share/not-a-session?lang=vi | desktop | 200 | 900 (1x) | no | 0 | 6 | - |
-| / | mobile | 200 | 10800 (12.8x) | no | 0 | 11 | - |
+| / | mobile | 200 | 2785 (3.3x) | no | 0 | 6 | - |
 | /workspace | mobile | 200 | 988 (1.17x) | no | 0 | 3 | - |
 | /why | mobile | 200 | 2727 (3.23x) | no | 0 | 0 | - |
 | /ontology | mobile | 200 | 2893 (3.43x) | no | 0 | 0 | - |
