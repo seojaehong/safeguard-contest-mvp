@@ -1196,6 +1196,25 @@ export function WorkflowSharePanel({
         </span>
       </section>
 
+      <nav className="share-stage-rail" aria-label="공유 진행 단계" data-share-stage-rail>
+        <span data-share-stage="targets">
+          <b>01 대상</b>
+          <strong>{targetWorkers.length ? `${targetWorkers.length.toLocaleString("ko-KR")}명 확인` : "대상 필요"}</strong>
+        </span>
+        <span data-share-stage="channels">
+          <b>02 채널</b>
+          <strong>{selectedChannelLabel}</strong>
+        </span>
+        <span data-share-stage="language">
+          <b>03 언어</b>
+          <strong>{selectedLanguageLabel}</strong>
+        </span>
+        <span data-share-stage="dispatch">
+          <b>04 전송</b>
+          <strong>{shareBlocked ? "보완 필요" : providerDispatchUi.canDispatch ? "전송 준비" : "미리보기"}</strong>
+        </span>
+      </nav>
+
       <button
         type="button"
         className="share-mobile-config-toggle"

@@ -102,6 +102,11 @@ describe("workspace share simplification", () => {
     expect(channels).toBeGreaterThan(targets);
     expect(language).toBeGreaterThan(channels);
     expect(preview).toBeGreaterThan(language);
+    expect(sharePanel).toContain('data-share-stage-rail');
+    expect(sharePanel).toContain('data-share-stage="targets"');
+    expect(sharePanel).toContain('data-share-stage="channels"');
+    expect(sharePanel).toContain('data-share-stage="language"');
+    expect(sharePanel).toContain('data-share-stage="dispatch"');
     expect(sharePanel).not.toContain("share-delivery-summary");
     expect(sharePanel).not.toContain("다음 행동 · {channel.nextAction}");
     expect(sharePanel).not.toContain('className="dispatch-evidence-ledger"');
@@ -124,7 +129,8 @@ describe("workspace share simplification", () => {
     );
 
     expect(desktopShareBlock).toContain("grid-template-columns: minmax(0, 1fr) minmax(520px, 0.72fr);");
-    expect(desktopShareBlock).toContain(".share-form-shell {\n    grid-template-columns: repeat(3, minmax(0, 1fr));");
+    expect(desktopShareBlock).toContain(".share-stage-rail {\n    grid-column: 1 / -1;\n    grid-row: 2;");
+    expect(desktopShareBlock).toContain(".share-form-shell {\n    grid-row: 3;\n    grid-template-columns: repeat(3, minmax(0, 1fr));");
     expect(desktopShareBlock).toContain(".share-form-card {\n    grid-row: 2;\n    align-content: start;\n    min-height: 150px;");
     expect(desktopShareBlock).toContain("grid-row: 2;");
     expect(desktopShareBlock).toContain(".channel-grid {\n    grid-template-columns: repeat(3, minmax(0, 1fr));");
@@ -133,7 +139,7 @@ describe("workspace share simplification", () => {
     expect(desktopShareBlock).toContain("min-height: min(400px, calc(100vh - 210px));");
     expect(desktopShareBlock).toContain("max-height: calc(100vh - 160px);");
     expect(desktopShareBlock).toContain("grid-column: 2;");
-    expect(desktopShareBlock).toContain("grid-row: 2 / span 4;");
+    expect(desktopShareBlock).toContain("grid-row: 3 / span 4;");
     expect(desktopShareBlock).toContain(".share-primary-action-row {\n    grid-column: 1 / -1;");
     expect(desktopShareBlock).toContain("grid-row: 1;");
     expect(desktopShareBlock).toContain("order: -1;");

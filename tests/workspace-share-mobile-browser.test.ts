@@ -335,10 +335,13 @@ describe("workspace mobile share presentation", () => {
             const toggles = [...document.querySelectorAll<HTMLElement>(".workspace-theme-toggle button")];
             const channelCards = [...document.querySelectorAll<HTMLElement>(".channel-grid .channel-card")];
             const configCards = [...document.querySelectorAll<HTMLElement>(".share-config-card")];
-            if (!preview || !lines || !primary) throw new Error("Missing share presentation target");
+            const stageRail = document.querySelector<HTMLElement>("[data-share-stage-rail]");
+            const stageItems = [...document.querySelectorAll<HTMLElement>("[data-share-stage]")];
+            if (!preview || !lines || !primary || !stageRail) throw new Error("Missing share presentation target");
             const previewRect = preview.getBoundingClientRect();
             const linesRect = lines.getBoundingClientRect();
             const primaryRect = primary.getBoundingClientRect();
+            const stageRailRect = stageRail.getBoundingClientRect();
             const lastParagraphRect = paragraphs.at(-1)?.getBoundingClientRect();
             const mobileSummaryRect = mobileSummary?.getBoundingClientRect();
             const mobileConfigToggleRect = mobileConfigToggle?.getBoundingClientRect();
@@ -362,6 +365,12 @@ describe("workspace mobile share presentation", () => {
               mobileConfigToggleBottom: mobileConfigToggleRect?.bottom ?? 0,
               mobileConfigToggleHeight: mobileConfigToggleRect?.height ?? 0,
               mobileConfigExpanded: mobileConfigToggle?.getAttribute("aria-expanded") === "true",
+              stageRailText: stageRail.innerText,
+              stageRailDisplay: getComputedStyle(stageRail).display,
+              stageRailBottom: Math.round(stageRailRect.bottom),
+              stageRailWidth: Math.round(stageRailRect.width),
+              stageItemCount: stageItems.length,
+              stageColumns: getComputedStyle(stageRail).gridTemplateColumns.split(" ").filter(Boolean).length,
               paragraphCount: paragraphs.length,
               primaryCount: primaryActions.length,
               channelCards: channelCards.map((card) => {
@@ -393,11 +402,17 @@ describe("workspace mobile share presentation", () => {
 
           expect.soft(metrics.primaryCount, `${scenario.label} ${theme} primary CTA count`).toBe(1);
           expect.soft(metrics.horizontalOverflow, `${scenario.label} ${theme} horizontal overflow`).toBe(0);
+          expect.soft(metrics.stageItemCount, `${scenario.label} ${theme} stage rail item count`).toBe(4);
+          expect.soft(metrics.stageRailText, `${scenario.label} ${theme} stage rail target`).toContain("01 대상");
+          expect.soft(metrics.stageRailText, `${scenario.label} ${theme} stage rail channel`).toContain("02 채널");
+          expect.soft(metrics.stageRailText, `${scenario.label} ${theme} stage rail language`).toContain("03 언어");
+          expect.soft(metrics.stageRailText, `${scenario.label} ${theme} stage rail dispatch`).toContain("04 전송");
           expect.soft(metrics.linesClientHeight, `${scenario.label} ${theme} bounded preview height`).toBeLessThanOrEqual(scenario.width < 600 ? 160 : 430);
           expect.soft(metrics.linesScrollHeight, `${scenario.label} ${theme} full message retained in preview`).toBeGreaterThanOrEqual(metrics.linesClientHeight);
           expect.soft(metrics.linesOverflowY, `${scenario.label} ${theme} bounded preview scroll`).toBe("auto");
           if (scenario.width < 600) {
             expect.soft(metrics.previewBottom, `${scenario.label} ${theme} preview before CTA`).toBeLessThanOrEqual(metrics.primaryTop);
+            expect.soft(metrics.stageRailDisplay, `${scenario.label} ${theme} mobile uses summary instead of stage rail`).toBe("none");
             expect.soft(metrics.primaryBottom, `${scenario.label} ${theme} CTA in mobile viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
             expect.soft(metrics.mobileSummaryBottom, `${scenario.label} ${theme} selected summary in mobile viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
             expect.soft(metrics.mobileConfigToggleBottom, `${scenario.label} ${theme} collapsed config entry in mobile viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
@@ -440,6 +455,7 @@ describe("workspace mobile share presentation", () => {
               "utf8"
             );
           } else {
+            expect.soft(metrics.stageColumns, `${scenario.label} ${theme} desktop stage rail columns`).toBe(4);
             expect.soft(metrics.primaryBottom, `${scenario.label} ${theme} desktop CTA in first viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
             expect.soft(metrics.previewBottom, `${scenario.label} ${theme} desktop preview in first viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
             expect.soft(metrics.previewLeft, `${scenario.label} ${theme} desktop preview right pane`).toBeGreaterThanOrEqual(metrics.primaryRight);

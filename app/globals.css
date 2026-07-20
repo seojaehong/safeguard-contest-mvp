@@ -14968,13 +14968,18 @@ body:has(.safeclaw-landing) :is(
     max-width: 1180px;
     grid-template-columns: minmax(0, 1fr) minmax(520px, 0.72fr);
     align-items: start;
-    gap: 16px;
+    gap: 10px;
     border-radius: var(--r-lg);
-    padding: 18px;
+    padding: 12px;
   }
 
   .command-center-shell.workspace-page-share .share-workflow-header {
     grid-column: 1 / -1;
+  }
+
+  .command-center-shell.workspace-page-share .share-stage-rail {
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
 
   .command-center-shell.workspace-page-share .share-form-shell,
@@ -14984,6 +14989,7 @@ body:has(.safeclaw-landing) :is(
   }
 
   .command-center-shell.workspace-page-share .share-form-shell {
+    grid-row: 3;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-content: start;
     align-items: stretch;
@@ -15047,7 +15053,7 @@ body:has(.safeclaw-landing) :is(
 
   .command-center-shell.workspace-page-share [data-share-preview] {
     grid-column: 2;
-    grid-row: 2 / span 4;
+    grid-row: 3 / span 4;
     position: sticky;
     top: 88px;
     align-self: start;
@@ -15161,6 +15167,43 @@ body:has(.safeclaw-landing) :is(
   display: none;
 }
 
+.share-stage-rail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+.share-stage-rail span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  border: 1px solid var(--share-line);
+  border-radius: 4px;
+  background: var(--share-surface-2);
+  padding: 8px 10px;
+}
+
+.share-stage-rail b {
+  color: var(--share-muted);
+  font-family: var(--font-hud);
+  font-size: var(--text-hud);
+  font-weight: 800;
+  line-height: var(--leading-hud);
+  letter-spacing: var(--tracking-hud);
+}
+
+.share-stage-rail strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--share-ink);
+  font-size: var(--text-caption);
+  font-weight: 750;
+  line-height: var(--leading-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (min-width: 960px) {
   .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two {
     width: min(1180px, calc(100% - 48px));
@@ -15176,14 +15219,18 @@ body:has(.safeclaw-landing) :is(
     margin: 0;
     grid-template-columns: minmax(0, 1fr) minmax(520px, 0.72fr);
     align-items: start;
-    gap: 16px;
+    gap: 10px;
     border-radius: var(--r-lg);
-    padding: 18px;
+    padding: 12px;
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .share-workflow-header {
     grid-column: 1 / -1;
     gap: 12px;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-stage-rail {
+    display: none;
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .share-workflow-header p {
@@ -15197,6 +15244,7 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .share-form-shell {
+    grid-row: 3;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-content: start;
     align-items: start;
@@ -15258,18 +15306,18 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-module-shell[data-module-route="/dispatch"] [data-share-preview] {
     grid-column: 2;
-    grid-row: 2 / span 4;
+    grid-row: 3 / span 4;
     position: sticky;
     top: 88px;
     align-self: start;
-    height: min(398px, calc(100vh - 212px));
-    min-height: min(398px, calc(100vh - 212px));
+    height: min(300px, calc(100vh - 212px));
+    min-height: min(300px, calc(100vh - 212px));
     max-height: calc(100vh - 160px);
     overflow: hidden;
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] [data-share-preview] .message-preview-lines {
-    max-height: calc(100vh - 310px);
+    max-height: min(210px, calc(100vh - 310px));
     overflow: auto;
   }
 
@@ -17195,6 +17243,17 @@ body:has(.safeclaw-landing) :is(
     letter-spacing: var(--tracking-body);
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .share-stage-rail {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .share-stage-rail span {
+    min-height: 42px;
+    padding: 6px 8px;
   }
 
   .share-mobile-config-toggle {
