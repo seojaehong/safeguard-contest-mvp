@@ -1,12 +1,12 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v1",
-  "generatedAt": "2026-07-20T04:24:20.000Z",
-  "head": "1acbbe963c13c9370574d4aa848faec04e6ef3cc",
+  "generatedAt": "2026-07-20T04:30:00.000Z",
+  "head": "24bb769e1aff4df41b8afa7807c8f2c0e6125007",
   "liveBuildInfo": {
-    "commitSha": "1acbbe963c13c9370574d4aa848faec04e6ef3cc",
+    "commitSha": "24bb769e1aff4df41b8afa7807c8f2c0e6125007",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-mgm17rm5a-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-k60yu7z6p-seojaehongs-projects.vercel.app"
   },
   "overall": "northstar_open_approval_gated",
   "dbMutationPerformed": false,
@@ -60,6 +60,15 @@
       "safetyReferenceItems": 9920,
       "publishedOntologyNodes": 166,
       "publishedOntologyEdges": 169
+    },
+    {
+      "id": "hermes_openclaw_runtime_boundary",
+      "artifact": "evaluation/hermes-openclaw-runtime-current-gate-2026-07-20/report.json",
+      "result": "adapter_boundary_pass_live_execution_not_claimed",
+      "testFilesPassed": 13,
+      "testsPassed": 289,
+      "liveUnauthenticatedStatus": 401,
+      "engineExecutionReached": false
     }
   ],
   "approvalGated": [

@@ -1,6 +1,6 @@
 # SafeClaw Hermes / OpenClaw Runtime Current Gate
 
-Checked at: 2026-07-20 KST
+Checked at: 2026-07-20T04:29:21.858Z
 
 ## Verdict
 
@@ -10,8 +10,8 @@ Live production runtime execution is still not claimed. The live `/api/agent/cha
 
 ## Authority
 
-- Source SHA for focused tests: `6ac73639`
-- Production build-info observed during live smoke: `a888a4681293dcddf72b309af8a5532919d49d62`
+- Source SHA for focused tests: `24bb769e1aff4df41b8afa7807c8f2c0e6125007`
+- Production build-info observed during live smoke: `24bb769e1aff4df41b8afa7807c8f2c0e6125007`
 - Worktree: `C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\recipient-foreign-live-gate-20260720`
 - Branch: `chore/recipient-foreign-live-gate-20260720`
 
@@ -27,7 +27,7 @@ Result:
 
 - Test files: 13 passed / 13
 - Tests: 289 passed / 289
-- Duration: 16.88s
+- Duration: 17.34s
 
 Live unauthenticated broker smoke:
 
@@ -39,7 +39,6 @@ Result:
 
 - HTTP: 401
 - Code: `AUTH_REQUIRED`
-- Public message: `로그인이 필요합니다.`
 - Engine execution: not reached
 
 ## Current Runtime Boundary

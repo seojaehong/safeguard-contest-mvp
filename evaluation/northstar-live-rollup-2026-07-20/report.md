@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-20T04:24:20.000Z
+Generated at: 2026-07-20T04:30:00.000Z
 
-Current HEAD / live production build: `1acbbe963c13c9370574d4aa848faec04e6ef3cc`
+Current HEAD / live production build: `24bb769e1aff4df41b8afa7807c8f2c0e6125007`
 
 Overall: `northstar_open_approval_gated`
 
@@ -18,6 +18,7 @@ This rollup does not claim the long-term North Star is complete. It records the 
 | RLS / LLM Wiki app boundary | PASS approval-gated, 9 files / 83 tests | `evaluation/rls-current-tenant-boundary-gate-2026-07-20/report.json` |
 | Live critical surface | PASS, 8 routes x 2 viewports, findings 0 | `evaluation/live-critical-surface-current-2026-07-20-rerun/report.json` |
 | Operator wiki / reference corpus | PASS approval-gated, 18 files / 208 tests, ontology 166/169 | `evaluation/operator-wiki-reference-corpus-current-gate-2026-07-20/report.json` |
+| Hermes / OpenClaw runtime boundary | PASS boundary, 13 files / 289 tests, live unauth 401 | `evaluation/hermes-openclaw-runtime-current-gate-2026-07-20/report.json` |
 
 ## Still Approval-Gated
 
