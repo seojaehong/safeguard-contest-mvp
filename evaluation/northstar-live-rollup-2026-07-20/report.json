@@ -1,12 +1,12 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v1",
-  "generatedAt": "2026-07-20T06:34:00.000Z",
-  "head": "a2535d218cbc4d00192fc337e7a27c527b836088",
+  "generatedAt": "2026-07-20T06:45:00.000Z",
+  "head": "0fc8c0acd9c431e2fa1e008de725e3d52e8b0376",
   "liveBuildInfo": {
-    "commitSha": "a2535d218cbc4d00192fc337e7a27c527b836088",
+    "commitSha": "3a6b9f4e25739954ba3b89c0b9d067ff52a28ef2",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-3sz09hptn-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-itihzle6p-seojaehongs-projects.vercel.app"
   },
   "overall": "northstar_open_approval_gated",
   "dbMutationPerformed": false,
@@ -49,7 +49,10 @@
       "items": 1040,
       "emptyBodyRows": 818,
       "missingOfficialProvenanceRows": 1040,
-      "testsPassed": 165,
+      "operationalControlReviewRequiredRows": 70,
+      "retrievalUntestedBranches": 2,
+      "approvalPacketTestsPassed": 114,
+      "testsPassed": 279,
       "dbMutationPerformed": false,
       "embeddingGenerated": false
     },

@@ -1,8 +1,10 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-20T06:34:00.000Z
+Generated at: 2026-07-20T06:45:00.000Z
 
-Current HEAD / live production build: `a2535d218cbc4d00192fc337e7a27c527b836088`
+Current HEAD: `0fc8c0acd9c431e2fa1e008de725e3d52e8b0376`
+
+Current live production build: `3a6b9f4e25739954ba3b89c0b9d067ff52a28ef2`
 
 Overall: `northstar_open_approval_gated`
 
@@ -15,7 +17,7 @@ This rollup does not claim the long-term North Star is complete. It records the 
 | Live harness quality | PASS, failed contracts 0 | `evaluation/live-harness-quality-probe-current-2026-07-20/report.json` |
 | KOSHA materialization | PASS, 9 files / 169 tests + Python 19 tests + typecheck | `evaluation/kosha-materialization-current-gate-2026-07-20/report.json` |
 | KOSHA exact trust registry | PASS, D-C-13 / D-C-7 / B-E-10, focused 5 files / 53 tests | `evaluation/kosha-focused-current-gate-2026-07-20/report.json` |
-| KOSHA guide approval packet | APPROVAL REQUIRED before mutation/embedding, 1040 rows audited, 818 empty bodies, 1040 missing official provenance rows | `evaluation/kosha-guide-approval-current-2026-07-20/approval-packet.json` |
+| KOSHA guide approval packet | APPROVAL REQUIRED before mutation/embedding, 1040 rows audited, 818 empty bodies, 1040 missing official provenance rows, 70 operational-control review rows, 2 retrieval branches unobserved, approval packet tests 2 files / 114 tests | `evaluation/kosha-guide-approval-current-2026-07-20/approval-packet.json` |
 | RLS / LLM Wiki app boundary | PASS approval-gated, 9 files / 83 tests | `evaluation/rls-current-tenant-boundary-gate-2026-07-20/report.json` |
 | Live critical surface | PASS, 8 routes x 2 viewports, 16 rows, findings 0 | `evaluation/live-critical-surface-current-2026-07-20-rerun/report.json` |
 | Operator wiki / reference corpus | PASS approval-gated, 18 files / 208 tests, ontology 166/169 | `evaluation/operator-wiki-reference-corpus-current-gate-2026-07-20/report.json` |
