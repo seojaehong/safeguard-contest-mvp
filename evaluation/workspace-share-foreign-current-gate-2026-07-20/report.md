@@ -8,11 +8,29 @@ No product code was changed in this pass.
 
 ## Scope
 
-- Local HEAD before this report: `e9620ad5`
+- Original report baseline: `e9620ad5`
+- Current refreshed source/evidence base before the 2026-07-21 browser rerun: `5ecd8d516ebfc23e9c0b89eb7a8b831b00c2ea7f`
 - Focus route: `/workspace` share step
 - Product scenario: selected Vietnamese worker, language-specific message preview, channel readiness containment, single primary CTA, invited worker recipient portal
 
 ## Verification
+
+Current refreshed gate on 2026-07-21:
+
+```powershell
+npm.cmd test -- tests\workspace-share-mobile-browser.test.ts tests\workflow-share-client.test.ts tests\workflow-share-panel-behavior.test.ts tests\workpack-share-authority-routes.test.ts --maxWorkers=1 --fileParallelism=false
+```
+
+Result:
+
+- Test files: `4 passed / 4`
+- Tests: `77 passed / 77`
+- Duration: `32.58s`
+
+The refreshed browser contract separates the current responsive IA correctly:
+
+- Mobile keeps the serial contract: Vietnamese preview appears before the single primary CTA, with bounded preview scrolling and no horizontal overflow.
+- Desktop uses the two-pane contract: primary CTA and message preview must both be inside the first viewport, and the preview must render in the right pane rather than as a mobile-style serial card.
 
 Command 1:
 
