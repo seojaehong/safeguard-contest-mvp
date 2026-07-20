@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-07-20T17:52:59.608Z",
+  "route": "/dispatch?theme=day",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "verdict": "PASS",
+  "metrics": {
+    "viewportHeight": 900,
+    "pageHeight": 1116,
+    "rootWidth": 1156,
+    "rootHeight": 652,
+    "previewLeft": 877,
+    "previewBottom": 898.390625,
+    "primaryRight": 861,
+    "primaryBottom": 544.390625,
+    "linesClientHeight": 228,
+    "linesScrollHeight": 228,
+    "linesOverflowY": "auto",
+    "channelCards": [
+      {
+        "width": 164,
+        "height": 44
+      },
+      {
+        "width": 164,
+        "height": 44
+      },
+      {
+        "width": 164,
+        "height": 44
+      }
+    ],
+    "horizontalOverflow": 0
+  }
+}

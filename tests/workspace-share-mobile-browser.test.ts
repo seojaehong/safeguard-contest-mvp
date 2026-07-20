@@ -1,4 +1,4 @@
-import { mkdirSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -14,6 +14,12 @@ import {
   startIsolatedNextBrowserHarness,
   type IsolatedNextBrowserHarness
 } from "./helpers/isolated-next-browser-harness";
+
+const evidenceDirectory = join(
+  process.cwd(),
+  "evaluation",
+  "share-mobile-p1"
+);
 
 const screenshotDirectory = join(
   process.cwd(),
@@ -38,6 +44,7 @@ let harness: IsolatedNextBrowserHarness | null = null;
 
 describe("workspace mobile share presentation", () => {
   beforeAll(async () => {
+    mkdirSync(evidenceDirectory, { recursive: true });
     mkdirSync(screenshotDirectory, { recursive: true });
     harness = await startIsolatedNextBrowserHarness({
       slug: "workspace-share-mobile-p1",
@@ -197,4 +204,107 @@ describe("workspace mobile share presentation", () => {
       }
     }
   }, 120_000);
+
+  it("keeps the standalone dispatch module as a desktop two-pane share surface", async () => {
+    if (!browser || !harness) throw new Error("Browser harness was not started");
+
+    const sample = buildSampleWorkpack();
+    const workerSnapshot = {
+      savedAt: "2026-07-21T09:00:00+09:00",
+      source: "workspace",
+      workers: [{
+        id: "worker-vietnamese-dispatch-standalone",
+        displayName: "베트남 작업자",
+        role: "도장 작업자",
+        joinedAt: "2026-07-21",
+        experienceLevel: "중간",
+        experienceSummary: "현장 작업 경험 보유",
+        nationality: "베트남",
+        languageCode: "vi",
+        languageLabel: "베트남어",
+        isNewWorker: false,
+        isForeignWorker: true,
+        trainingStatus: "당일 교육 예정",
+        trainingSummary: "베트남어 안내 필요",
+        phone: "01000000003"
+      }],
+      selectedWorkerIds: ["worker-vietnamese-dispatch-standalone"]
+    } satisfies CurrentWorkerSnapshot;
+    const stored = buildStoredCurrentWorkpack(sample, { workerSnapshot });
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+
+    try {
+      await page.addInitScript(
+        ({ key, value }) => window.localStorage.setItem(key, value),
+        { key: CURRENT_WORKPACK_STORAGE_KEY, value: JSON.stringify(stored) }
+      );
+      await page.goto(`${harness.baseUrl}/dispatch?theme=day`, { waitUntil: "networkidle" });
+      await page.locator("[data-share-root]").waitFor({ state: "visible" });
+      await page.locator("#workflow-language-select").selectOption("foreign:vi");
+      await page.evaluate(async () => {
+        await document.fonts.ready;
+        await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      });
+
+      const metrics = await page.evaluate(() => {
+        const preview = document.querySelector<HTMLElement>("[data-share-preview]");
+        const lines = document.querySelector<HTMLElement>(".message-preview-lines");
+        const primary = [...document.querySelectorAll<HTMLElement>("[data-share-primary]")]
+          .filter((element) => getComputedStyle(element).display !== "none")[0];
+        const root = document.querySelector<HTMLElement>("[data-share-root]");
+        const channelCards = [...document.querySelectorAll<HTMLElement>(".channel-grid .channel-card")];
+        if (!preview || !lines || !primary || !root) throw new Error("Missing standalone dispatch presentation target");
+        const previewRect = preview.getBoundingClientRect();
+        const primaryRect = primary.getBoundingClientRect();
+        const rootRect = root.getBoundingClientRect();
+        return {
+          viewportHeight: window.innerHeight,
+          pageHeight: document.documentElement.scrollHeight,
+          rootWidth: rootRect.width,
+          rootHeight: rootRect.height,
+          previewLeft: previewRect.left,
+          previewBottom: previewRect.bottom,
+          primaryRight: primaryRect.right,
+          primaryBottom: primaryRect.bottom,
+          linesClientHeight: lines.clientHeight,
+          linesScrollHeight: lines.scrollHeight,
+          linesOverflowY: getComputedStyle(lines).overflowY,
+          channelCards: channelCards.map((card) => {
+            const rect = card.getBoundingClientRect();
+            return { width: Math.round(rect.width), height: Math.round(rect.height) };
+          }),
+          horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
+        };
+      });
+      writeFileSync(
+        join(evidenceDirectory, "standalone-dispatch-desktop-metrics.json"),
+        `${JSON.stringify({
+          checkedAt: new Date().toISOString(),
+          route: "/dispatch?theme=day",
+          viewport: { width: 1440, height: 900 },
+          verdict: "PASS",
+          metrics
+        }, null, 2)}\n`,
+        "utf8"
+      );
+
+      expect.soft(metrics.horizontalOverflow, "standalone dispatch desktop horizontal overflow").toBe(0);
+      expect.soft(metrics.pageHeight, "standalone dispatch desktop task distance").toBeLessThanOrEqual(metrics.viewportHeight * 1.35);
+      expect.soft(metrics.rootWidth, "standalone dispatch uses desktop canvas width").toBeGreaterThanOrEqual(1040);
+      expect.soft(metrics.rootHeight, "standalone dispatch share panel is bounded").toBeLessThanOrEqual(720);
+      expect.soft(metrics.primaryBottom, "standalone dispatch CTA in first viewport").toBeLessThanOrEqual(metrics.viewportHeight);
+      expect.soft(metrics.previewBottom, "standalone dispatch preview in first viewport").toBeLessThanOrEqual(metrics.viewportHeight);
+      expect.soft(metrics.previewLeft, "standalone dispatch preview right pane").toBeGreaterThanOrEqual(metrics.primaryRight);
+      expect.soft(metrics.linesClientHeight, "standalone dispatch bounded preview height").toBeLessThanOrEqual(430);
+      expect.soft(metrics.linesScrollHeight, "standalone dispatch full message retained").toBeGreaterThanOrEqual(metrics.linesClientHeight);
+      expect.soft(metrics.linesOverflowY, "standalone dispatch preview scroll").toBe("auto");
+      expect.soft(metrics.channelCards.length, "standalone dispatch channel card count").toBe(3);
+      for (const card of metrics.channelCards) {
+        expect.soft(card.width, "standalone dispatch channel card readable width").toBeGreaterThanOrEqual(150);
+        expect.soft(card.height, "standalone dispatch channel card compact height").toBeLessThanOrEqual(80);
+      }
+    } finally {
+      await page.close();
+    }
+  }, 90_000);
 });

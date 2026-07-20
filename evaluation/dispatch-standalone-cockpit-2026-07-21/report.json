@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "safeclaw-dispatch-standalone-cockpit/v1",
+  "checkedAt": "2026-07-21T02:51:41+09:00",
+  "verdict": "PASS_CURRENT_SOURCE",
+  "sourceHeadBeforeCommit": "ba91572412b49bd61d463119f58382e4ca77396c",
+  "branch": "chore/recipient-foreign-live-gate-20260720",
+  "scope": {
+    "route": "/dispatch",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "productFiles": [
+      "app/globals.css"
+    ],
+    "testFiles": [
+      "tests/workspace-share-mobile-browser.test.ts"
+    ],
+    "excludedContracts": [
+      "provider dispatch live send",
+      "Supabase schema or data",
+      "workflow dispatch API behavior",
+      "mobile share ordering beyond existing regression"
+    ]
+  },
+  "metricsArtifact": "evaluation/share-mobile-p1/standalone-dispatch-desktop-metrics.json",
+  "metrics": {
+    "pageHeight": 1116,
+    "heightRatio": 1.24,
+    "rootWidth": 1156,
+    "rootHeight": 652,
+    "previewLeft": 877,
+    "previewBottom": 898.390625,
+    "primaryRight": 861,
+    "primaryBottom": 544.390625,
+    "previewRightPane": true,
+    "horizontalOverflow": 0,
+    "channelCards": [
+      {
+        "width": 164,
+        "height": 44
+      },
+      {
+        "width": 164,
+        "height": 44
+      },
+      {
+        "width": 164,
+        "height": 44
+      }
+    ]
+  },
+  "acceptance": {
+    "pageHeightWithin135Viewport": true,
+    "rootWidthAtLeast1040": true,
+    "rootHeightAtMost720": true,
+    "primaryCtaInsideViewport": true,
+    "previewInsideViewport": true,
+    "previewRightOfPrimaryAction": true,
+    "channelCardsReadableAndCompact": true,
+    "horizontalOverflowClosed": true
+  },
+  "verification": {
+    "focusedBrowser": {
+      "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts -t \"standalone dispatch module\" --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 1,
+      "testsSkipped": 1
+    },
+    "fullShareBrowser": {
+      "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 2
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    }
+  },
+  "production": {
+    "liveVerified": false,
+    "note": "This is a current-source browser gate. Production verification should run after this commit is deployed."
+  },
+  "interpretation": [
+    "The standalone /dispatch page no longer presents the share result as a mobile-like narrow card on desktop.",
+    "The default desktop dispatch surface uses a wide share canvas, right-pane preview, first-viewport primary action, and compact readable channel cards.",
+    "Real provider email/SMS/Kakao sends remain preview-only and approval-gated by persistent idempotency."
+  ]
+}

@@ -1,7 +1,7 @@
 # Live Critical Surface Current Rerun
 
-- Checked: 2026-07-20T13:47:26.151Z
-- Build marker: 9fedcf019a6b24882131ba913ad7c6358b1ad9d4
+- Checked: 2026-07-20T17:44:32.332Z
+- Build marker: ba91572412b49bd61d463119f58382e4ca77396c
 - Findings: 0
 
 ## Findings
@@ -25,6 +25,6 @@ None.
 | /why | mobile | 200 | 2727 (3.23x) | no | 0 | 0 | - |
 | /ontology | mobile | 200 | 2893 (3.43x) | no | 0 | 0 | - |
 | /knowledge | mobile | 200 | 1152 (1.36x) | no | 0 | 0 | - |
-| /documents | mobile | 200 | 1816 (2.15x) | no | 0 | 0 | - |
+| /documents | mobile | 200 | 844 (1x) | no | 0 | 0 | - |
 | /reports | mobile | 200 | 844 (1x) | no | 0 | 0 | - |
 | /share/not-a-session?lang=vi | mobile | 200 | 855 (1.01x) | no | 0 | 0 | - |

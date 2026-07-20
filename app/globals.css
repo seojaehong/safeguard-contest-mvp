@@ -15095,6 +15095,139 @@ body:has(.safeclaw-landing) :is(
   display: none;
 }
 
+@media (min-width: 960px) {
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two {
+    width: min(1180px, calc(100% - 48px));
+    margin-top: 16px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    border: 0;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .share-panel.workflow-panel {
+    max-width: 1180px;
+    margin: 0;
+    grid-template-columns: minmax(0, 1fr) minmax(520px, 0.72fr);
+    align-items: start;
+    gap: 16px;
+    border-radius: var(--r-lg);
+    padding: 18px;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-workflow-header {
+    grid-column: 1 / -1;
+    gap: 12px;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-workflow-header p {
+    display: none;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-form-shell,
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-inline-note,
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-readiness-warning {
+    grid-column: 1;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-form-shell {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-content: start;
+    align-items: start;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-form-card {
+    grid-row: 2;
+    align-content: start;
+    min-height: 0;
+    padding: 10px;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-form-card > p.muted.small,
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-panel.workflow-panel .channel-readiness-note {
+    display: none;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .recipient-chip-list {
+    max-height: 44px;
+    overflow: auto;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-panel.workflow-panel .channel-grid {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    align-items: start;
+    gap: 6px;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-panel.workflow-panel .channel-card {
+    display: flex;
+    height: 44px;
+    max-height: 44px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 7px 6px;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-panel.workflow-panel .channel-card strong,
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-panel.workflow-panel .channel-card em {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-primary-action-row {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    order: -1;
+    justify-content: stretch;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-primary-action-row .button {
+    flex: 1 1 0;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] [data-share-preview] {
+    grid-column: 2;
+    grid-row: 2 / span 4;
+    position: sticky;
+    top: 88px;
+    align-self: start;
+    height: min(398px, calc(100vh - 212px));
+    min-height: min(398px, calc(100vh - 212px));
+    max-height: calc(100vh - 160px);
+    overflow: hidden;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] [data-share-preview] .message-preview-lines {
+    max-height: calc(100vh - 310px);
+    overflow: auto;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .safeclaw-module-panel {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 4px 12px;
+    border-right: 0;
+    padding: 10px 12px;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .safeclaw-module-panel h2 {
+    margin: 0;
+    font-size: var(--text-component-title);
+    line-height: var(--leading-component-title);
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .safeclaw-module-panel p,
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .safeclaw-module-panel ul {
+    display: none;
+  }
+}
+
 .field-workspace-share-only {
   display: block;
   width: 100%;
