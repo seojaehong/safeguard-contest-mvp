@@ -8,21 +8,40 @@
     "productCodeChanged": false
   },
   "verification": {
-    "command": "npm.cmd test -- tests\\workflow-share-capability-browser.test.ts tests\\workspace-share-mobile-browser.test.ts tests\\share-recipient-portal-browser.test.ts --maxWorkers=1 --fileParallelism=false",
-    "testFilesPassed": 2,
-    "testFilesSkipped": 1,
-    "testFilesTotal": 3,
-    "testsPassed": 4,
-    "testsSkipped": 5,
-    "testsTotal": 9,
-    "durationSeconds": 82.2,
-    "status": "pass"
+    "sharePreviewAndCapability": {
+      "command": "npm.cmd test -- tests\\workflow-share-capability-browser.test.ts tests\\workspace-share-mobile-browser.test.ts tests\\share-recipient-portal-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "testFilesPassed": 2,
+      "testFilesSkipped": 1,
+      "testFilesTotal": 3,
+      "testsPassed": 4,
+      "testsSkipped": 5,
+      "testsTotal": 9,
+      "durationSeconds": 82.2,
+      "status": "pass"
+    },
+    "productionBuild": {
+      "command": "npm.cmd run build",
+      "staticPagesGenerated": 28,
+      "staticPagesTotal": 28,
+      "shareRecipientRouteIncluded": true,
+      "status": "pass"
+    },
+    "recipientPortal": {
+      "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "testFilesPassed": 1,
+      "testFilesTotal": 1,
+      "testsPassed": 5,
+      "testsTotal": 5,
+      "durationSeconds": 24.46,
+      "status": "pass"
+    }
   },
   "contracts": {
     "singlePrimaryCta": "pass",
     "vietnamesePreview": "pass",
     "desktopMobileDayNightScreenshots": "pass",
     "providerContainment": "pass",
-    "recipientPortalProductionGate": "not_claimed_skipped"
+    "recipientPortalProductionGate": "pass_with_mocked_share_session_api",
+    "liveProviderDelivery": "not_claimed_requires_provider_configuration"
   }
 }
