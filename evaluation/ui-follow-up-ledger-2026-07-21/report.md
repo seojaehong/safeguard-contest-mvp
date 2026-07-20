@@ -102,6 +102,20 @@ Current-source bounded gate:
 
 Interpretation: page split alone is not the fix. `/documents` must behave as a viewport cockpit with a bounded drilldown pane, and the pane must visibly land on the selected document's editable content.
 
+## 2026-07-21 Internal Pane Context Update
+
+Current-source bounded gate:
+
+- Artifact: `evaluation/documents-mobile-pane-context-2026-07-21/report.md`
+- Source HEAD before commit: `45a5e6285c1bdc788fd40b99bb29de58200495fc`
+- The baseline production landing fix was already green, but deep internal pane scroll still lost the selected-document title/context.
+- The new contract requires a compact selected-document toolbar to remain visible inside `.workpack-shell` while scrolling the pane.
+- Focused browser: `documents-editor-layout` mobile launcher slice PASS, 2/2.
+- Full browser file: `documents-editor-layout` PASS, 31/31.
+- TypeScript: PASS.
+
+Interpretation: long artifacts can remain in bounded panes, but each pane needs persistent local context. This is the next step from "short page" to readable drilldown.
+
 Share mobile 390x844 current-source gate:
 
 - `shareMobileSummary.bottom = 432`

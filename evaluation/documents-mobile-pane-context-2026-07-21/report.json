@@ -1,0 +1,60 @@
+{
+  "checkedAt": "2026-07-21T03:20:00+09:00",
+  "sourceHeadBeforeCommit": "45a5e6285c1bdc788fd40b99bb29de58200495fc",
+  "branch": "chore/recipient-foreign-live-gate-20260720",
+  "verdict": "PASS_CURRENT_SOURCE",
+  "scope": "mobile /documents internal pane selected-document context",
+  "baselineDebt": {
+    "productionMarker": "45a5e6285c1bdc788fd40b99bb29de58200495fc",
+    "landingBugClosed": true,
+    "riskAssessmentTextareaAfterClick": {
+      "top": 492,
+      "bottom": 650,
+      "paneTop": 476,
+      "paneBottom": 796,
+      "visibleInPane": true
+    },
+    "deepScrollContextMissing": true,
+    "deepScrollApproxScrollTop": 1010
+  },
+  "fix": {
+    "routeScopedDocumentsOnly": true,
+    "compactStickyDocumentToolbar": true,
+    "toolbarShowsSelectedTitle": true,
+    "preservesInternalPaneAffordance": true
+  },
+  "assertions": {
+    "tbmLogToolbarVisibleInPaneAfterSelection": true,
+    "tbmLogToolbarContainsSelectedTitle": true,
+    "riskAssessmentToolbarVisibleInPaneAfterSelection": true,
+    "riskAssessmentToolbarContainsSelectedTitle": true,
+    "riskAssessmentToolbarVisibleInPaneAfterDeepScroll": true,
+    "riskAssessmentDeepScrollAtLeast": 600,
+    "toolbarNearPaneTopAfterDeepScroll": true,
+    "toolbarDoesNotCoverActiveTextarea": true,
+    "pageHeightBoundedAfterDeepScroll": true,
+    "horizontalOverflowClosedAfterDeepScroll": true
+  },
+  "checks": [
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"puts the core launcher before the mobile editor\" --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "testsPassed": 2
+    },
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "testsPassed": 31
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    }
+  ],
+  "structuralDecision": {
+    "routeSplitAloneAcceptedAsFix": false,
+    "requiredPattern": "viewport cockpit plus bounded drilldown with persistent local context"
+  }
+}

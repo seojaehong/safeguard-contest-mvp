@@ -123,6 +123,40 @@
       }
     ]
   },
+  "internalPaneContextUpdate": {
+    "checkedAt": "2026-07-21T03:20:00+09:00",
+    "sourceHeadBeforeCommit": "45a5e6285c1bdc788fd40b99bb29de58200495fc",
+    "artifact": "evaluation/documents-mobile-pane-context-2026-07-21/report.json",
+    "baselineDebt": {
+      "productionMarker": "45a5e6285c1bdc788fd40b99bb29de58200495fc",
+      "landingBugClosed": true,
+      "deepScrollContextMissing": true
+    },
+    "currentSourceContract": {
+      "compactStickyDocumentToolbar": true,
+      "toolbarContainsSelectedDocumentTitle": true,
+      "toolbarVisibleInsidePaneAfterDeepScroll": true,
+      "toolbarDoesNotCoverActiveTextarea": true,
+      "pageHeightRemainsBounded": true,
+      "horizontalOverflowClosed": true
+    },
+    "checks": [
+      {
+        "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"puts the core launcher before the mobile editor\" --maxWorkers=1 --fileParallelism=false",
+        "result": "PASS",
+        "testsPassed": 2
+      },
+      {
+        "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts --maxWorkers=1 --fileParallelism=false",
+        "result": "PASS",
+        "testsPassed": 31
+      },
+      {
+        "command": "npm.cmd run typecheck",
+        "result": "PASS"
+      }
+    ]
+  },
   "structuralDecision": {
     "routeSplitAloneIsEnough": false,
     "actualFix": "viewport-first progressive disclosure",

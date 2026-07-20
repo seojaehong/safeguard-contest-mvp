@@ -21385,7 +21385,40 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .document-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    display: grid;
+    gap: 6px;
+    border: 1px solid var(--workspace-rule);
+    border-radius: var(--radius-soft);
+    background: var(--workspace-surface-1);
+    padding: 8px 10px;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .document-toolbar .eyebrow,
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .document-toolbar .muted {
     display: none;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .document-toolbar .h2 {
+    margin: 0;
+    color: var(--workspace-ink);
+    font-size: var(--text-table);
+    font-weight: 800;
+    line-height: var(--leading-table);
+    letter-spacing: var(--tracking-body);
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .document-toolbar .editor-document-meta {
+    gap: 4px;
+    max-width: none;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .document-toolbar .editor-document-meta span {
+    min-height: 24px;
+    padding: 0 6px;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .workpack-shell {
