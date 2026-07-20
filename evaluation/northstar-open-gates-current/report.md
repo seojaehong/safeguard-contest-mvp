@@ -1,14 +1,14 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-20T03:28:51.124Z
-Source SHA: `34e6c9a9e4d099708f693f9b95876c3d8dee64a0`
+Generated at: 2026-07-20T03:33:49.228Z
+Source SHA: `b57e71bf7af3a33d722bd117711d2e460ff6c912`
 Overall: `open`
 
 ## Gate Matrix
 
 | Gate | State | Evidence | Detail |
 | --- | --- | --- | --- |
-| final_99_gate | notice | evaluation\final-99-gate\report.json | final-99 overall is pass_with_notice. |
+| final_99_gate | notice | evaluation\final-99-gate\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate\notice-carry.json. |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-19\report.json | Live harness probe passed with zero failed contracts. |
 | supabase_rls_launch_isolation | approval_gated | evaluation\supabase-rls-approval-2026-07-17\report.md | Read-only audit exists, but live RLS catalog and tenant A/B isolation are not proven. |
 | llm_wiki_publication | approval_gated | evaluation\llm-wiki-rls-approval-2026-07-17\report.md | Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. |
@@ -34,7 +34,7 @@ Overall: `open`
 
 ## Next Actions
 
-- final_99_gate: Resolve or explicitly carry each notice before claiming fully automated launch readiness.
+- final_99_gate: Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment.
 - supabase_rls_launch_isolation: Approve authoritative project and credential provenance.
 - supabase_rls_launch_isolation: Run read-only live catalog capture.
 - supabase_rls_launch_isolation: Run disposable tenant A/B negative tests before production migration claims.

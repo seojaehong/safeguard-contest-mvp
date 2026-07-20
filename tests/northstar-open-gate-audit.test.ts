@@ -185,6 +185,45 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_publication")?.state).toBe("missing");
   });
 
+  it("records explicitly carried final-99 notices without allowing a fully automated launch claim", async () => {
+    const { buildNorthstarOpenGateAudit, renderNorthstarOpenGateMarkdown } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    writeJson(rootDir, path.join("evaluation", "final-99-gate", "notice-carry.json"), {
+      verdict: "carried",
+      fullyAutomatedLaunchClaimAllowed: false,
+      safeLaunchDemoClaimAllowed: true,
+      notices: [
+        {
+          gate: "auth-history-reuse",
+          carried: true,
+          launchImpact: "operator-auth-gated",
+        },
+        {
+          gate: "dispatch-policy",
+          carried: true,
+          launchImpact: "provider-approval-gated",
+        },
+      ],
+    });
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+    const finalGate = audit.gates.find((gate) => gate.id === "final_99_gate");
+    const markdown = renderNorthstarOpenGateMarkdown(audit);
+
+    expect(audit.overall).toBe("open");
+    expect(finalGate?.state).toBe("notice");
+    expect(finalGate?.detail).toContain("2 notices are explicitly carried");
+    expect(finalGate?.nextActions).toEqual([
+      "Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment.",
+    ]);
+    expect(markdown).toContain("notice-carry.json");
+    expect(markdown).toContain("Do not claim fully automated launch readiness");
+  });
+
   it("contradicts the KOSHA exact trust gate when live exact pins are stale", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();

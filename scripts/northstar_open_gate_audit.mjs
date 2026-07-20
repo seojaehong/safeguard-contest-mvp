@@ -15,6 +15,7 @@ const DEFAULT_OUTPUT_DIR = path.join("evaluation", "northstar-open-gates-current
 
 const EVIDENCE_PATHS = Object.freeze({
   final99: path.join("evaluation", "final-99-gate", "report.json"),
+  final99NoticeCarry: path.join("evaluation", "final-99-gate", "notice-carry.json"),
   liveHarness: path.join("evaluation", "live-harness-quality-probe-current-2026-07-19", "report.json"),
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
   llmWikiApproval: path.join("evaluation", "llm-wiki-rls-approval-2026-07-17", "report.md"),
@@ -133,14 +134,27 @@ function evaluateFinal99Gate(rootDir) {
 
   const overall = readString(report.overall);
   if (overall === "pass" || overall === "pass_with_notice") {
+    const noticeCarry = readJsonFile(rootDir, EVIDENCE_PATHS.final99NoticeCarry);
+    const notices = Array.isArray(noticeCarry?.notices) ? noticeCarry.notices : [];
+    const carriedNoticeCount = notices.filter((notice) => (
+      isRecord(notice) && notice.carried === true && readString(notice.launchImpact)
+    )).length;
+    const noticeCarryReady = isRecord(noticeCarry)
+      && noticeCarry.verdict === "carried"
+      && carriedNoticeCount >= 2
+      && noticeCarry.fullyAutomatedLaunchClaimAllowed === false;
     return gateResult({
       id: "final_99_gate",
       label: "Final 99 evidence gate",
       state: overall === "pass" ? "proven" : "notice",
       evidencePath,
-      detail: `final-99 overall is ${overall}.`,
+      detail: overall === "pass_with_notice" && noticeCarryReady
+        ? `final-99 overall is ${overall}; ${carriedNoticeCount} notices are explicitly carried in ${EVIDENCE_PATHS.final99NoticeCarry}.`
+        : `final-99 overall is ${overall}.`,
       nextActions: overall === "pass_with_notice"
-        ? ["Resolve or explicitly carry each notice before claiming fully automated launch readiness."]
+        ? noticeCarryReady
+          ? ["Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment."]
+          : ["Resolve or explicitly carry each notice before claiming fully automated launch readiness."]
         : [],
     });
   }
