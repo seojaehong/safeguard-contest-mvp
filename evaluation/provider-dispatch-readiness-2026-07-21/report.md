@@ -48,6 +48,26 @@ Response:
 - The UI should continue to say preview-only or setup-required when provider capability is not live.
 - Turning live dispatch on safely requires a bounded implementation of persistent idempotency / approval-effect ledger plus provider configuration verification.
 
+## Focused Source Verification
+
+Root cross-check command:
+
+```powershell
+npm.cmd test -- tests\provider-dispatch-idempotency-gate.test.ts tests\workflow-dispatch-capability-policy.test.ts tests\workflow-share-capability-browser.test.ts --maxWorkers=1 --fileParallelism=false
+```
+
+Result:
+
+- Test files: `3 passed / 3`
+- Tests: `11 passed / 11`
+- Duration: `28.45s`
+
+Source-level conclusion:
+
+- `PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED = false` keeps live provider delivery locked.
+- If live dispatch is enabled before persistent idempotency exists, the route returns `409`, marks `duplicateRisk: true`, and keeps `providerCalled: false` before any external send.
+- Fixture/preview mode can validate requests without real provider delivery.
+
 ## Related Passing Gates
 
 - Workspace share and foreign-worker browser contract: `evaluation/workspace-share-foreign-current-gate-2026-07-20/report.md`
@@ -63,3 +83,5 @@ Do not enable live dispatch by environment flag alone. The next implementation w
 3. Provider retries cannot duplicate external sends.
 4. Preview-only and malformed capability paths continue to fail closed.
 5. Email/SMS/Kakao channels are separately labeled; unsupported channels stay locked.
+
+If this requires a DB table or migration, that work needs explicit user approval before applying it. A draft such as `evaluation/provider-dispatch-idempotency-gate-2026-07-19/provider-dispatch-idempotency-draft.sql` should be reviewed before any schema change.

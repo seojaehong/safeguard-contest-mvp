@@ -33,11 +33,25 @@
     "Current production must not be described as live email/SMS/Kakao dispatch capable.",
     "Live dispatch requires persistent idempotency and provider result persistence before enabling."
   ],
+  "focusedSourceVerification": {
+    "command": "npm.cmd test -- tests\\provider-dispatch-idempotency-gate.test.ts tests\\workflow-dispatch-capability-policy.test.ts tests\\workflow-share-capability-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+    "status": "PASS",
+    "files": 3,
+    "tests": 11,
+    "durationSeconds": 28.45,
+    "conclusion": [
+      "PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED remains false.",
+      "Live dispatch before persistent idempotency returns 409 with providerCalled false.",
+      "Fixture and preview modes validate without real provider delivery."
+    ]
+  },
   "nextImplementationGate": [
     "persistent idempotency available",
     "exactly-once dispatch result persistence",
     "retry cannot duplicate external sends",
     "preview-only and malformed capability paths fail closed",
     "channel labels remain explicit"
-  ]
+  ],
+  "requiresUserApprovalBeforeDbMigration": true,
+  "draftMigrationCandidate": "evaluation/provider-dispatch-idempotency-gate-2026-07-19/provider-dispatch-idempotency-draft.sql"
 }
