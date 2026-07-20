@@ -213,6 +213,22 @@ function createFixtureRoot(): string {
         outside: 0,
       },
     },
+    sampleShellFollowUp: {
+      productionVerification: {
+        liveVerified: true,
+        commitSha: "fixture-sha",
+        desktop1440x900: {
+          horizontalOverflow: 0,
+          wideStackClosed: true,
+          firstPanel: { width: 635 },
+          secondPanel: { width: 413 },
+        },
+        mobile390x844: {
+          horizontalOverflow: 0,
+          singleColumn: true,
+        },
+      },
+    },
   });
   writeJson(rootDir, path.join("evaluation", "kosha-current-northstar-regression-2026-07-21", "report.json"), {
     title: "KOSHA Current North Star Regression Gate",

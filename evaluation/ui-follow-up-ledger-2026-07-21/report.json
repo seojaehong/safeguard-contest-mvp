@@ -81,6 +81,28 @@
       "detailedConfigurationCardsExpandOnDemand": true,
       "providerDispatchLiveClaimed": false
     },
+    "productionVerification": {
+      "liveVerified": true,
+      "productionMarker": "a3254ae3176468e715fccb6dd308aada7c5870aa",
+      "desktop1440x900": {
+        "bodyHeight": 900,
+        "gridWidth": 1156,
+        "gridHeight": 109,
+        "firstPanelWidth": 635,
+        "secondPanelWidth": 413,
+        "distinctXBuckets": [280, 960],
+        "horizontalOverflow": 0
+      },
+      "mobile390x844": {
+        "bodyHeight": 1202,
+        "gridWidth": 358,
+        "singleColumn": true,
+        "horizontalOverflow": 0,
+        "mobileDensityDebtRemains": true
+      },
+      "generatedProviderResultStateClaimed": false,
+      "providerDispatchLiveClaimed": false
+    },
     "mobile390x844Day": {
       "shareBodyHeight": 1020,
       "shareMobileSummaryBottom": 256,

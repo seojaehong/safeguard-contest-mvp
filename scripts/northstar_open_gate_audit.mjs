@@ -641,11 +641,21 @@ function evaluateDispatchStandaloneCockpitGate(rootDir) {
   const acceptance = isRecord(report.acceptance) ? report.acceptance : {};
   const production = isRecord(report.production) ? report.production : {};
   const productionMetrics = isRecord(production.metrics) ? production.metrics : {};
+  const sampleShellFollowUp = isRecord(report.sampleShellFollowUp) ? report.sampleShellFollowUp : {};
+  const sampleProduction = isRecord(sampleShellFollowUp.productionVerification)
+    ? sampleShellFollowUp.productionVerification
+    : {};
+  const sampleDesktop = isRecord(sampleProduction.desktop1440x900) ? sampleProduction.desktop1440x900 : {};
+  const sampleMobile = isRecord(sampleProduction.mobile390x844) ? sampleProduction.mobile390x844 : {};
   const productionVerified = production.liveVerified === true
     && readString(production.commitSha)
     && isGitAncestor(rootDir, readString(production.commitSha));
+  const sampleProductionVerified = sampleProduction.liveVerified === true
+    && readString(sampleProduction.commitSha)
+    && isGitAncestor(rootDir, readString(sampleProduction.commitSha));
   const pass = readString(report.verdict) === "PASS_PRODUCTION"
     && productionVerified
+    && sampleProductionVerified
     && acceptance.pageHeightWithin135Viewport === true
     && acceptance.rootWidthAtLeast1040 === true
     && acceptance.primaryCtaInsideViewport === true
@@ -654,7 +664,15 @@ function evaluateDispatchStandaloneCockpitGate(rootDir) {
     && acceptance.channelCardsReadableAndCompact === true
     && acceptance.horizontalOverflowClosed === true
     && readBoolean(productionMetrics.horizontalOverflow) === false
-    && readNumber(productionMetrics.outside) === 0;
+    && readNumber(productionMetrics.outside) === 0
+    && readBoolean(sampleDesktop.wideStackClosed) === true
+    && readNumber(sampleDesktop.horizontalOverflow) === 0
+    && readNumber(sampleDesktop.firstPanel?.width) !== null
+    && readNumber(sampleDesktop.secondPanel?.width) !== null
+    && (readNumber(sampleDesktop.firstPanel?.width) || 0) <= 720
+    && (readNumber(sampleDesktop.secondPanel?.width) || 0) <= 520
+    && readBoolean(sampleMobile.singleColumn) === true
+    && readNumber(sampleMobile.horizontalOverflow) === 0;
 
   if (pass) {
     const pageHeight = readNumber(productionMetrics.pageHeight);
@@ -664,7 +682,7 @@ function evaluateDispatchStandaloneCockpitGate(rootDir) {
       label: "Standalone dispatch desktop cockpit",
       state: "proven",
       evidencePath,
-      detail: `Production /dispatch seeded desktop route is no longer mobile-stacked: pageHeight ${pageHeight ?? "unknown"} (${heightRatio ?? "unknown"}x), preview right pane, first-viewport CTA, readable channel cards, overflow false/outside 0.`,
+      detail: `Production /dispatch seeded desktop and sample shell routes are no longer mobile-stacked: seeded pageHeight ${pageHeight ?? "unknown"} (${heightRatio ?? "unknown"}x), sample panels ${readNumber(sampleDesktop.firstPanel?.width) ?? "unknown"}px/${readNumber(sampleDesktop.secondPanel?.width) ?? "unknown"}px in distinct desktop regions, overflow false/outside 0.`,
       nextActions: [
         "Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved.",
       ],

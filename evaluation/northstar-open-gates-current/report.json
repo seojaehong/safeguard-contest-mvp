@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-20T19:27:23.791Z",
-  "sourceSha": "a31f097a8c7598751b0e09e274fd55b5bd2899a7",
+  "generatedAt": "2026-07-20T19:52:59.718Z",
+  "sourceSha": "a3254ae3176468e715fccb6dd308aada7c5870aa",
   "overall": "open",
   "gates": [
     {
@@ -38,7 +38,7 @@
       "state": "proven",
       "label": "Standalone dispatch desktop cockpit",
       "evidencePath": "evaluation\\dispatch-standalone-cockpit-2026-07-21\\report.json",
-      "detail": "Production /dispatch seeded desktop route is no longer mobile-stacked: pageHeight 1116 (1.24x), preview right pane, first-viewport CTA, readable channel cards, overflow false/outside 0.",
+      "detail": "Production /dispatch seeded desktop and sample shell routes are no longer mobile-stacked: seeded pageHeight 1116 (1.24x), sample panels 635px/413px in distinct desktop regions, overflow false/outside 0.",
       "nextActions": [
         "Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved."
       ]

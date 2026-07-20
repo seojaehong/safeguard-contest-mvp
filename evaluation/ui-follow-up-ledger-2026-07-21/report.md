@@ -182,7 +182,12 @@ Current-source bounded gate:
 - Desktop 1440x900 current-source sample shell: page `900px`, grid `1156x109`, first panel `635x77` at x `284`, second panel `413x77` at x `979`, distinct columns `true`, overflow `0`.
 - Mobile 390x844 remains one-column: page `1202px`, grid `358px` wide, panels `332px` wide, overflow `0`.
 
-Interpretation: this closes the standalone `/dispatch` sample-shell desktop wide-stack risk in current-source evidence. It still does not claim generated provider-result browser state proof or provider live dispatch.
+Production `a3254ae3176468e715fccb6dd308aada7c5870aa` confirms the same desktop sample-shell fix:
+
+- Desktop 1440x900: page `900px`, grid `1156x109`, first panel `635x77` at x `284`, second panel `413x77` at x `979`, overflow `0`.
+- Mobile 390x844: page `1202px`, grid `358px` wide, panels remain single-column and overflow `0`.
+
+Interpretation: this closes the standalone `/dispatch` sample-shell desktop wide-stack risk in production evidence. It still does not claim generated provider-result browser state proof or provider live dispatch. Mobile sample remains overflow-safe but long/late, so mobile density is separate product-depth debt.
 
 Share mobile configuration-stack current-source gate:
 
