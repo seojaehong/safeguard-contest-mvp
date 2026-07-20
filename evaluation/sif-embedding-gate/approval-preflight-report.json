@@ -1,6 +1,7 @@
 {
-  "generatedAt": "2026-07-20T05:11:57.549Z",
+  "generatedAt": "2026-07-20T12:42:47.238Z",
   "scope": "sif_embedding_next_approval_gate_preflight",
+  "sourceSha": "131e486d7601a316dbd84db134a261843635818d",
   "ok": true,
   "approvalHeld": true,
   "dbMutationPerformed": false,
@@ -18,6 +19,33 @@
   "batchSize": 100,
   "embeddingModel": "text-embedding-3-small",
   "embeddingDimensions": 1536,
+  "artifactIntegrity": [
+    {
+      "path": "evaluation\\sif-embedding-gate\\report.json",
+      "bytes": 1438,
+      "sha256": "2f0d5edf3c4971fdc2f11740a2d4692e8f15be9f2e7ea29b2fb261f03ed0ef73"
+    },
+    {
+      "path": "evaluation\\sif-embedding-gate\\sif-embedding-batch-manifest.json",
+      "bytes": 295907,
+      "sha256": "bab9db7a94f92672cbe27709f099150a8dedd78e6681156924b75042a8a739c0"
+    },
+    {
+      "path": "evaluation\\sif-embedding-gate\\sif-embedding-corpus.jsonl",
+      "bytes": 15946768,
+      "sha256": "b66e5c5c0877ad8a7c4c57437a96d2b4e58278cff05ccc5fff637cbd759aae34"
+    },
+    {
+      "path": "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql",
+      "bytes": 2743,
+      "sha256": "4322657cde9e852ecf8fd242715bfdefb526f320891a0fa2e085ac565419acf7"
+    },
+    {
+      "path": "scripts/prepare_sif_embedding_corpus.mjs",
+      "bytes": 16133,
+      "sha256": "7ca0cead3a3b12975717f7df17d133694879f57c381b32430bd0f71892c42924"
+    }
+  ],
   "checks": [
     {
       "id": "sif_source_count",
@@ -102,6 +130,27 @@
       "evidence": {
         "migrationPath": "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql",
         "sifOnly": true
+      }
+    },
+    {
+      "id": "preflight_source_sha_recorded",
+      "passed": true,
+      "evidence": {
+        "sourceSha": "131e486d7601a316dbd84db134a261843635818d"
+      }
+    },
+    {
+      "id": "artifact_integrity_recorded",
+      "passed": true,
+      "evidence": {
+        "artifactCount": 5,
+        "paths": [
+          "evaluation\\sif-embedding-gate\\report.json",
+          "evaluation\\sif-embedding-gate\\sif-embedding-batch-manifest.json",
+          "evaluation\\sif-embedding-gate\\sif-embedding-corpus.jsonl",
+          "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql",
+          "scripts/prepare_sif_embedding_corpus.mjs"
+        ]
       }
     },
     {

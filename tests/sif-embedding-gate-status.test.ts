@@ -6,7 +6,7 @@ import runtimeProbeFixture from "@/evaluation/sif-embedding-gate/runtime-db-prob
 import { getSifEmbeddingGateStatus } from "@/lib/sif-embedding-gate-status";
 
 function canonicalizeMachineFixture(value: unknown, key = ""): unknown {
-  if (key === "sha256" || key === "byteSize" || key === "approvalFingerprint") {
+  if (key === "sha256" || key === "byteSize" || key === "bytes" || key === "approvalFingerprint" || key === "sourceSha") {
     return `<${typeof value}>`;
   }
   if (key === "generatedAt" || key === "checkedAt") {
@@ -355,6 +355,6 @@ describe("SIF embedding gate status", () => {
     const canonicalFixture = JSON.stringify(canonicalizeMachineFixture(jsonValue));
     const fixtureHash = createHash("sha256").update(canonicalFixture).digest("hex");
 
-    expect(fixtureHash).toBe("ea8bebd30962e0eae6a4e0cc79c73002e3af21a592edce1d817b18c593d38fc9");
+    expect(fixtureHash).toBe("e1867684cca15c7ad15906618c9d7eda87e5abc816227e3e39e1639cd505e28c");
   });
 });

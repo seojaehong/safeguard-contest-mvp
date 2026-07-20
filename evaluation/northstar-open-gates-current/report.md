@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-20T12:36:58.782Z
-Source SHA: `d21e8d64f08e7b53976c508186d40defe59be2f9`
+Generated at: 2026-07-20T12:42:57.080Z
+Source SHA: `131e486d7601a316dbd84db134a261843635818d`
 Overall: `open`
 
 ## Gate Matrix
@@ -12,7 +12,7 @@ Overall: `open`
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json | Live harness probe passed with zero failed contracts. |
 | supabase_rls_launch_isolation | approval_gated | evaluation\supabase-rls-approval-2026-07-17\report.md | Read-only audit exists, but live RLS catalog and tenant A/B isolation are not proven. |
 | llm_wiki_publication | approval_gated | evaluation\llm-wiki-rls-approval-2026-07-17\report.md | Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. |
-| sif_embedding_runtime | approval_gated | evaluation\sif-embedding-gate\approval-preflight-report.json | SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. |
+| sif_embedding_runtime | approval_gated | evaluation\sif-embedding-gate\approval-preflight-report.json | SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 131e486d7601a316dbd84db134a261843635818d. |
 | kosha_exact_trust_registry | proven | evaluation\kosha-current-live-gate-2026-07-20\report.json | Current live runtime has 3 exact KOSHA pins (D-C-13, D-C-7, B-E-10), local corpus 234 items/7127 chunks, and focused KOSHA tests passed on the current HEAD. |
 
 ## Safe Demo Claims

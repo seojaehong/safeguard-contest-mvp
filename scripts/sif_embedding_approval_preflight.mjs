@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import crypto from "node:crypto";
+import { execFileSync } from "node:child_process";
 
 const DEFAULT_OUTPUT = "evaluation/sif-embedding-gate/approval-preflight-report.json";
 const DEFAULT_GATE_DIR = "evaluation/sif-embedding-gate";
@@ -62,6 +64,31 @@ function countJsonlLines(filePath) {
   const content = fs.readFileSync(filePath, "utf8").trim();
   if (!content) return 0;
   return content.split(/\r?\n/).length;
+}
+
+function sha256File(filePath) {
+  return crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
+}
+
+function fileIntegrity(filePath) {
+  const stat = fs.statSync(filePath);
+  return {
+    path: filePath,
+    bytes: stat.size,
+    sha256: sha256File(filePath)
+  };
+}
+
+function resolveSourceSha() {
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"]
+    }).trim();
+  } catch {
+    return "unknown";
+  }
 }
 
 function boolEnv(name) {
@@ -203,9 +230,30 @@ function main() {
   const vectorsPath = report.vectorsPath && fileExists(report.vectorsPath) ? report.vectorsPath : null;
   const migrationSql = fs.readFileSync(options.migrationPath, "utf8");
   const scriptSource = fs.readFileSync(options.scriptPath, "utf8");
+  const sourceSha = resolveSourceSha();
+  const artifactIntegrity = [
+    fileIntegrity(reportPath),
+    fileIntegrity(manifestPath),
+    fileIntegrity(corpusPath),
+    fileIntegrity(options.migrationPath),
+    fileIntegrity(options.scriptPath)
+  ];
   const env = summarizeEnv(options.requireExecutionEnv);
   const checks = [
     ...findChecks(report, manifest, corpusLineCount, vectorsPath, migrationSql, scriptSource, options.migrationPath, options.scriptPath),
+    {
+      id: "preflight_source_sha_recorded",
+      passed: /^[0-9a-f]{40}$/u.test(sourceSha),
+      evidence: { sourceSha }
+    },
+    {
+      id: "artifact_integrity_recorded",
+      passed: artifactIntegrity.every((artifact) => artifact.bytes > 0 && /^[0-9a-f]{64}$/u.test(artifact.sha256)),
+      evidence: {
+        artifactCount: artifactIntegrity.length,
+        paths: artifactIntegrity.map((artifact) => artifact.path)
+      }
+    },
     {
       id: "vector_feature_flag_stays_off_until_upload_verified",
       passed: !env.vectorFeatureFlagEnabled || report.uploadedCount === report.corpusCount,
@@ -224,6 +272,7 @@ function main() {
   const result = {
     generatedAt: new Date().toISOString(),
     scope: "sif_embedding_next_approval_gate_preflight",
+    sourceSha,
     ok,
     approvalHeld,
     dbMutationPerformed: false,
@@ -241,6 +290,7 @@ function main() {
     batchSize: report.batchSize,
     embeddingModel: report.embeddingModel,
     embeddingDimensions: report.embeddingDimensions,
+    artifactIntegrity,
     checks,
     failedCheckIds: failedChecks.map((check) => check.id),
     env,

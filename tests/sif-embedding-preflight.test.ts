@@ -18,6 +18,18 @@ function asStringArray(value: unknown): string[] {
   return value;
 }
 
+function normalizedArtifactPaths(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    throw new Error("Expected artifact array");
+  }
+  return value.map((item) => {
+    const record = asRecord(item);
+    expect(record.sha256).toEqual(expect.stringMatching(/^[0-9a-f]{64}$/u));
+    expect(typeof record.bytes === "number" && record.bytes > 0).toBe(true);
+    return String(record.path).replaceAll("\\", "/");
+  });
+}
+
 describe("SIF embedding approval preflight", () => {
   it("validates the fixed corpus/manifest without embedding or DB upload", () => {
     const outDir = mkdtempSync(join(tmpdir(), "safeclaw-sif-preflight-"));
@@ -49,11 +61,19 @@ describe("SIF embedding approval preflight", () => {
     expect(saved.uploaded).toBe(false);
     expect(saved.corpusCount).toBe(6032);
     expect(saved.batchCount).toBe(61);
+    expect(saved.sourceSha).toMatch(/^[0-9a-f]{40}$/u);
     expect(saved.migrationPath).toBe("evaluation/sif-embedding-gate/sif-embedding-only-migration.sql");
     expect(saved.commandHeldUntilApproval).toBe("npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload");
     expect(asStringArray(saved.failedCheckIds)).toEqual([]);
+    expect(normalizedArtifactPaths(saved.artifactIntegrity)).toEqual(expect.arrayContaining([
+      "evaluation/sif-embedding-gate/report.json",
+      "evaluation/sif-embedding-gate/sif-embedding-corpus.jsonl",
+      "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql"
+    ]));
     const checks = (saved.checks as Array<Record<string, unknown>>);
     expect(checks.some((check) => check.id === "embedding_requires_explicit_cost_approval_flag" && check.passed === true)).toBe(true);
+    expect(checks.some((check) => check.id === "preflight_source_sha_recorded" && check.passed === true)).toBe(true);
+    expect(checks.some((check) => check.id === "artifact_integrity_recorded" && check.passed === true)).toBe(true);
     const migrationCheck = checks.find((check) => check.id === "migration_scope_is_sif_embedding_only");
     expect(migrationCheck?.passed).toBe(true);
     expect(asRecord(migrationCheck?.evidence).sifOnly).toBe(true);

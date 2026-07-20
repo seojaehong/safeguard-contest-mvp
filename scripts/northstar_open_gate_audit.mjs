@@ -122,6 +122,25 @@ function resolveSourceSha(rootDir) {
 }
 
 /**
+ * @param {string} rootDir
+ * @param {string} possibleAncestorSha
+ */
+function isGitAncestor(rootDir, possibleAncestorSha) {
+  if (!/^[0-9a-f]{40}$/u.test(possibleAncestorSha)) {
+    return true;
+  }
+  try {
+    execFileSync("git", ["merge-base", "--is-ancestor", possibleAncestorSha, "HEAD"], {
+      cwd: rootDir,
+      stdio: ["ignore", "ignore", "ignore"],
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * @param {Partial<GateResult>} gate
  * @returns {GateResult}
  */
@@ -352,14 +371,16 @@ function evaluateSifEmbeddingGate(rootDir) {
   const embeddingGenerated = report.embeddingGenerated === true;
   const uploaded = report.uploaded === true;
   const corpusCount = typeof report.corpusCount === "number" ? report.corpusCount : null;
+  const sourceSha = readString(report.sourceSha);
+  const sourceShaCurrent = isGitAncestor(rootDir, sourceSha);
 
-  if (ok && approvalHeld && !dbMutationPerformed && !embeddingGenerated && !uploaded) {
+  if (ok && approvalHeld && !dbMutationPerformed && !embeddingGenerated && !uploaded && sourceShaCurrent) {
     return gateResult({
       id: "sif_embedding_runtime",
       label: "SIF embedding runtime",
       state: "approval_gated",
       evidencePath,
-      detail: `SIF corpus is ready for approval (${corpusCount ?? "unknown"} records), but embedding/upload/vector runtime is held.`,
+      detail: `SIF corpus is ready for approval (${corpusCount ?? "unknown"} records), but embedding/upload/vector runtime is held. Source SHA: ${sourceSha || "not-recorded"}.`,
       nextActions: [
         "Approve SIF-only migration, embedding cost, upload, and vector runtime separately.",
         "Do not claim vector retrieval is production-active before post-migration verification.",
@@ -372,7 +393,9 @@ function evaluateSifEmbeddingGate(rootDir) {
     label: "SIF embedding runtime",
     state: "contradicted",
     evidencePath,
-    detail: "SIF embedding preflight does not preserve the no-mutation approval hold.",
+    detail: sourceShaCurrent
+      ? "SIF embedding preflight does not preserve the no-mutation approval hold."
+      : `SIF embedding preflight source SHA ${sourceSha} is not an ancestor of current HEAD.`,
     nextActions: ["Re-run SIF embedding preflight and inspect mutation/upload flags."],
   });
 }
