@@ -8,9 +8,9 @@ Checked at: 2026-07-21 KST
 - Share desktop cockpit: PASS
 - Documents mobile cockpit: PASS after the 2026-07-21 bounded mobile patch
 - Share mobile action cockpit: PASS after the 2026-07-21 bounded mobile patch
-- Share mobile full flow: PARTIAL because target/channel/language details still continue below the first viewport
+- Share mobile default flow: PASS after adding the selected 대상/채널/언어 summary strip
 
-This ledger intentionally does not mark frontend as fully solved. The current desktop blockers are closed, and the mobile document cockpit is now closed. Share mobile still needs a compact wizard or disclosure wave for full-flow closure.
+This ledger intentionally does not mark frontend as globally perfect. The current desktop blockers are closed, the mobile document cockpit is closed, and the mobile share default flow is closed. Deeper mobile share configuration cards still remain below the fold by design.
 
 ## Current Production Baseline
 
@@ -69,8 +69,9 @@ Documents mobile 390x844 current-source gate:
 
 Share mobile 390x844 current-source gate:
 
-- `sharePreview.bottom = 599`
-- `primaryShareCta.bottom = 660`
+- `shareMobileSummary.bottom = 432`
+- `sharePreview.bottom = 659`
+- `primaryShareCta.bottom = 720`
 - `overflowX = false`
 - `outside = 0`
 - `shareBody = 1473`

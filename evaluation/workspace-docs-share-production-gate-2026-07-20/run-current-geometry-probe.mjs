@@ -73,6 +73,7 @@ async function readMetrics(page) {
       documentTextarea: rect(".document-textarea"),
       sharePage: rect(".workspace-share-page"),
       shareRoot: rect("[data-share-root]"),
+      shareMobileSummary: rect("[data-share-mobile-summary]"),
       shareForm: rect(".share-form-shell"),
       shareTargetCard: rect("[data-share-owner='targets']"),
       shareChannelCard: rect("[data-share-owner='channels']"),

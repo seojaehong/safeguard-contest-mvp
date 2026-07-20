@@ -6,7 +6,7 @@ Checked at: 2026-07-21 KST
 
 - Documents mobile cockpit: PASS
 - Share mobile action cockpit: PASS
-- Share mobile full flow: PARTIAL, because detailed target/channel/language cards continue below the first viewport.
+- Share mobile default flow: PASS after the selected 대상/채널/언어 summary strip was added.
 - Desktop preservation: PASS
 
 This is a bounded mobile IA patch. It does not claim that every long detail is gone; it proves the first-viewport field cockpit is usable while deep review and long sharing details remain behind or below explicit action surfaces.
@@ -49,16 +49,17 @@ Documents mobile meets the first-viewport cockpit contract.
 
 ### Share mobile 390x844
 
-- `sharePreview.bottom = 599`
-- `primaryShareCta.bottom = 660`
+- `shareMobileSummary.bottom = 432`
+- `sharePreview.bottom = 659`
+- `primaryShareCta.bottom = 720`
 - `overflowX = false`
 - `outside = 0`
-- `shareBody = 1473`
-- `shareTargetCard.bottom = 870`
-- `shareChannelCard.bottom = 1124`
-- `shareLanguageCard.bottom = 1261`
+- `shareBody = 1533`
+- `shareTargetCard.bottom = 930`
+- `shareChannelCard.bottom = 1184`
+- `shareLanguageCard.bottom = 1321`
 
-Share mobile action cockpit passes because the preview and primary action are reachable in the first viewport. The full target/channel/language detail flow remains long and should be handled in a follow-up wizard or drawer wave if a full mobile share-flow PASS is required.
+Share mobile default flow passes because the selected 대상/채널/언어 summary, preview, and primary action are reachable in the first viewport. The detailed target/channel/language cards still continue below the first viewport, but they no longer block the default field decision.
 
 ### Desktop preservation
 

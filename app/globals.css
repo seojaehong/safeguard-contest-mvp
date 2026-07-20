@@ -15088,6 +15088,10 @@ body:has(.safeclaw-landing) :is(
   gap: 12px;
 }
 
+.share-mobile-cockpit-summary {
+  display: none;
+}
+
 .field-workspace-share-only {
   display: block;
   width: 100%;
@@ -16852,6 +16856,10 @@ body:has(.safeclaw-landing) :is(
     order: 1;
   }
 
+  .share-panel.workflow-panel > .share-mobile-cockpit-summary {
+    order: 0;
+  }
+
   .share-panel.workflow-panel > .share-form-shell {
     order: 2;
   }
@@ -16881,6 +16889,45 @@ body:has(.safeclaw-landing) :is(
 
   .share-panel.workflow-panel .share-primary-action-row .button {
     width: 100%;
+  }
+
+  .share-mobile-cockpit-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .share-mobile-cockpit-summary span {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+    min-height: 44px;
+    align-content: center;
+    border: 1px solid var(--share-line);
+    border-radius: 4px;
+    background: var(--share-surface);
+    padding: 7px 8px;
+  }
+
+  .share-mobile-cockpit-summary b {
+    color: var(--share-muted);
+    font-size: var(--text-hud);
+    line-height: var(--leading-hud);
+    font-family: var(--font-hud);
+    font-weight: 700;
+    letter-spacing: var(--tracking-hud);
+  }
+
+  .share-mobile-cockpit-summary strong {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--share-ink);
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+    font-weight: 600;
+    letter-spacing: var(--tracking-body);
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .share-workflow-header {

@@ -1097,6 +1097,10 @@ export function WorkflowSharePanel({
     : ["서버 검수 조건을 확인해 주세요."];
   const canResolveAuthority = Boolean(effectiveAuthority || ensureWorkpackSaved);
   const providerDispatchUi = buildProviderDispatchUiContract(providerDispatchState);
+  const selectedChannelLabel = selectedChannels.length
+    ? selectedChannels.map((channel) => formatChannelName(channel)).join(", ")
+    : "채널 선택 필요";
+  const selectedLanguageLabel = formatMessageTargetLabel(data, selectedMessageTarget);
   const hasSelectedDispatchChannel = selectedChannels.some((channel) => (
     activeDispatchChannels.includes(channel as ActiveChannel)
     && buildProviderDispatchChannelUiContract({
@@ -1159,6 +1163,21 @@ export function WorkflowSharePanel({
           <strong>{providerDispatchUi.canDispatch ? (shareBlocked ? readiness?.summary : isSending ? phaseLabel[phase] : statusModel.dispatch.label) : providerDispatchUi.reasonLabel}</strong>
         </div>
       </header>
+
+      <section className="share-mobile-cockpit-summary" aria-label="모바일 전파 요약" data-share-mobile-summary>
+        <span>
+          <b>대상</b>
+          <strong>{recipientLabel}</strong>
+        </span>
+        <span>
+          <b>채널</b>
+          <strong>{selectedChannelLabel}</strong>
+        </span>
+        <span>
+          <b>언어</b>
+          <strong>{selectedLanguageLabel}</strong>
+        </span>
+      </section>
 
       <div className="share-form-shell">
         <section className="share-form-card share-recipient-card" aria-labelledby="workflow-recipient-heading" data-share-owner="targets">

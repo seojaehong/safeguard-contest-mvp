@@ -5,7 +5,7 @@
     "shareDesktopCockpit": "PASS",
     "documentsMobileCockpit": "PASS",
     "shareMobileActionCockpit": "PASS",
-    "shareMobileFullFlow": "PARTIAL"
+    "shareMobileDefaultFlow": "PASS"
   },
   "productionMarker": "bd4beeebbb02c977b1f34d02b5895f7fcacba568",
   "documentsDesktopShort": {
@@ -55,12 +55,13 @@
       "outside": 0
     },
     "shareMobile390x844": {
-      "sharePreviewBottom": 599,
-      "primaryShareCtaBottom": 660,
-      "shareBodyHeight": 1473,
-      "shareTargetCardBottom": 870,
-      "shareChannelCardBottom": 1124,
-      "shareLanguageCardBottom": 1261,
+      "shareMobileSummaryBottom": 432,
+      "sharePreviewBottom": 659,
+      "primaryShareCtaBottom": 720,
+      "shareBodyHeight": 1533,
+      "shareTargetCardBottom": 930,
+      "shareChannelCardBottom": 1184,
+      "shareLanguageCardBottom": 1321,
       "overflowX": false,
       "outside": 0,
       "interpretation": "action cockpit passes; full detail flow remains partial"

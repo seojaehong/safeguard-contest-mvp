@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-07-21T00:30:00+09:00",
+  "verdict": "PASS",
+  "scope": "mobile Share default flow",
+  "source": {
+    "baseHead": "b4eabe94e949e7e71f2b12092dd0f6ec2ca7d2a6",
+    "branch": "chore/recipient-foreign-live-gate-20260720",
+    "probeUrl": "http://localhost:3021",
+    "geometryArtifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json"
+  },
+  "mobile390x844": {
+    "shareMobileSummaryBottom": 432,
+    "sharePreviewBottom": 659,
+    "primaryShareCtaBottom": 720,
+    "shareTargetCardBottom": 930,
+    "shareChannelCardBottom": 1184,
+    "shareLanguageCardBottom": 1321,
+    "shareBodyHeight": 1533,
+    "overflowX": false,
+    "outside": 0
+  },
+  "desktopPreservation": {
+    "desktopShortTargetBottom": 675,
+    "desktopShortChannelBottom": 675,
+    "desktopShortLanguageBottom": 675,
+    "desktopShortPreviewBottom": 705,
+    "desktopShortPrimaryCtaBottom": 349,
+    "overflowX": false,
+    "outside": 0
+  },
+  "documentsPreservation": {
+    "mobileDocumentWorkbenchBottom": 835,
+    "mobileSafetyBriefBottom": 762,
+    "mobileDocumentSecondaryActionsBottom": 824,
+    "outside": 0
+  }
+}
