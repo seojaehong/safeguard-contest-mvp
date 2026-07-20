@@ -1,0 +1,117 @@
+{
+  "schemaVersion": "safeclaw-kosha-current-live-gate/v1",
+  "generatedAt": "2026-07-20T03:49:18.0601344Z",
+  "sourceSha": "3b7bf2f0d853b303ba8215e78f3c95aa4716a427",
+  "liveBuildInfo": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "3b7bf2f0d853b303ba8215e78f3c95aa4716a427",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-ol7vv7uf3-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "verdict": "pass_current_kosha_exact_trust_and_corpus_gate",
+  "liveStatus": {
+    "status": "ready",
+    "items": 9920,
+    "technicalTotal": 1040,
+    "technicalGuidelines": 803,
+    "technicalSupportRegulations": 237,
+    "technicalSplitOk": true,
+    "catalogSearchOk": true,
+    "localCorpus": {
+      "status": "ready",
+      "failures": [],
+      "snapshotId": "e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12",
+      "manifestSha256": "e234586aa3f217acc701aca743eb70ab89448ac8de71e1eb61960e526cabefa5",
+      "inventoryCount": 234,
+      "itemCount": 234,
+      "chunkCount": 7127,
+      "failureCount": 0
+    },
+    "exactTrustRegistry": {
+      "status": "ready",
+      "count": 3,
+      "integrityStatus": "ready",
+      "loadedItemCount": 3,
+      "failureReason": null,
+      "stableDocumentKeys": [
+        "D-C-13",
+        "D-C-7",
+        "B-E-10"
+      ],
+      "versions": [
+        "D-C-13-2026",
+        "D-C-7-2026",
+        "B-E-10-2026"
+      ],
+      "items": [
+        {
+          "itemId": "technical-support-01-0065-d-c-13-2026-외벽도장보수공사에-안전작업에-관한-기술지원규정",
+          "stableDocumentKey": "D-C-13",
+          "version": "D-C-13-2026",
+          "title": "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
+          "itemType": "technical-support-regulation",
+          "publishedAt": "2026-01-30",
+          "officialFileId": "CTC2026012914371557826167",
+          "bodySha256": "ea8bb93a3e03a40873222ab385d257e1a5946cb4d28e5c65951353731b0a5919",
+          "pdfSha256": "790a823a3fceae0328ba3c2692486c057f33a036a2ea1fa672e94a626c481179",
+          "provenanceSha256": "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282"
+        },
+        {
+          "itemId": "technical-support-01-0073-d-c-7-2026-비계-구조-및-안전작업에-관한-기술지원규정",
+          "stableDocumentKey": "D-C-7",
+          "version": "D-C-7-2026",
+          "title": "D-C-7-2026 비계 구조 및 안전작업에 관한 기술지원규정",
+          "itemType": "technical-support-regulation",
+          "publishedAt": "2026-01-30",
+          "officialFileId": "CTC2026012914243912403149",
+          "bodySha256": "97c58f2c39260e9e763bae54748466f0837064ddccfc8e29b77d857c9f390112",
+          "pdfSha256": "5059f9faefe6f5e1a81fb750a3a96e842508b38c1b420bbda935b698aa864ff3",
+          "provenanceSha256": "b2ade4323cddecc0a50dab98f944f0781dc09885c8bdece4c1a6c0ea2010d0ef"
+        },
+        {
+          "itemId": "technical-support-09-0002-b-e-10-2026-정전전로-및-그-인근에서의-전기작업에-관한-기술지원규정",
+          "stableDocumentKey": "B-E-10",
+          "version": "B-E-10-2026",
+          "title": "B-E-10-2026 정전전로 및 그 인근에서의 전기작업에 관한 기술지원규정",
+          "itemType": "technical-support-regulation",
+          "publishedAt": "2026-01-30",
+          "officialFileId": "CTC2026012913263450093332",
+          "bodySha256": "6fe137a8f788914b0f9804fbd81e8f9fa987dd108ce6edb2fd47eda9bee9b121",
+          "pdfSha256": "0a44548411eb5402761934de46fd70393064dca22c56b7b8a27967c3cab4eb23",
+          "provenanceSha256": "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282"
+        }
+      ]
+    }
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\kosha-grounding-fail-closed.test.ts tests\\kosha-current-review-run-ask.test.ts tests\\exact-kosha-applicability-policy.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "pass",
+      "filesPassed": 5,
+      "testsPassed": 80
+    },
+    {
+      "command": "python -m unittest scripts.tests.test_acquire_exact_kosha_body",
+      "result": "pass",
+      "testsPassed": 19
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "pass"
+    }
+  ],
+  "claimsAllowed": [
+    "KOSHA technical corpus is live-ready for current retrieval/search status.",
+    "Exact KOSHA evidence is limited to the pinned D-C-13, D-C-7, and B-E-10 documents.",
+    "Metadata-verified KOSHA candidates remain supporting/review-required unless promoted through exact acquisition review."
+  ],
+  "forbiddenClaims": [
+    "All 1,040 KOSHA technical materials are exact direct evidence.",
+    "Any KOSHA candidate can be cited as mandatory legal proof without lifecycle/provenance review.",
+    "Vector embedding retrieval is active before the approved SIF/KOSHA embedding migration/upload runtime gate."
+  ]
+}

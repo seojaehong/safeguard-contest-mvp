@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-20T03:34:18.421Z
-Source SHA: `9a7ead0950c3862dc6c0604dbed4806bea0f92ff`
+Generated at: 2026-07-20T03:51:04.344Z
+Source SHA: `3b7bf2f0d853b303ba8215e78f3c95aa4716a427`
 Overall: `open`
 
 ## Gate Matrix
@@ -13,7 +13,7 @@ Overall: `open`
 | supabase_rls_launch_isolation | approval_gated | evaluation\supabase-rls-approval-2026-07-17\report.md | Read-only audit exists, but live RLS catalog and tenant A/B isolation are not proven. |
 | llm_wiki_publication | approval_gated | evaluation\llm-wiki-rls-approval-2026-07-17\report.md | Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. |
 | sif_embedding_runtime | approval_gated | evaluation\sif-embedding-gate\approval-preflight-report.json | SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. |
-| kosha_exact_trust_registry | proven | evaluation\kosha-current-master-reconciliation-2026-07-19\report.json | Current runtime has 3 exact KOSHA pins (D-C-13, D-C-7, B-E-10), local corpus 234 items/7127 chunks, and zero DB/corpus mutations. |
+| kosha_exact_trust_registry | proven | evaluation\kosha-current-live-gate-2026-07-20\report.json | Current live runtime has 3 exact KOSHA pins (D-C-13, D-C-7, B-E-10), local corpus 234 items/7127 chunks, and focused KOSHA tests passed on the current HEAD. |
 
 ## Safe Demo Claims
 

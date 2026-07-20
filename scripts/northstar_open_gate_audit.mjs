@@ -20,6 +20,7 @@ const EVIDENCE_PATHS = Object.freeze({
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
   llmWikiApproval: path.join("evaluation", "llm-wiki-rls-approval-2026-07-17", "report.md"),
   sifEmbeddingPreflight: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
+  koshaCurrentGate: path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json"),
   koshaCurrentReconciliation: path.join("evaluation", "kosha-current-master-reconciliation-2026-07-19", "report.json"),
   koshaCurrentLive: path.join("evaluation", "kosha-exact-trust-current-live-2026-07-19", "report.md"),
 });
@@ -67,6 +68,21 @@ function readJsonFile(rootDir, relativePath) {
     return null;
   }
   return JSON.parse(text);
+}
+
+/**
+ * @param {string} rootDir
+ * @param {string[]} relativePaths
+ * @returns {{ path: string, report: unknown } | null}
+ */
+function readFirstJsonFile(rootDir, relativePaths) {
+  for (const relativePath of relativePaths) {
+    const report = readJsonFile(rootDir, relativePath);
+    if (report !== null) {
+      return { path: relativePath, report };
+    }
+  }
+  return null;
 }
 
 /**
@@ -374,8 +390,12 @@ function readNumber(value) {
  * @returns {GateResult}
  */
 function evaluateKoshaExactTrustGate(rootDir) {
-  const evidencePath = EVIDENCE_PATHS.koshaCurrentReconciliation;
-  const report = readJsonFile(rootDir, evidencePath);
+  const evidence = readFirstJsonFile(rootDir, [
+    EVIDENCE_PATHS.koshaCurrentGate,
+    EVIDENCE_PATHS.koshaCurrentReconciliation,
+  ]);
+  const evidencePath = evidence?.path || EVIDENCE_PATHS.koshaCurrentGate;
+  const report = evidence?.report;
   const liveText = readTextFile(rootDir, EVIDENCE_PATHS.koshaCurrentLive);
   if (!isRecord(report)) {
     return gateResult({
@@ -385,6 +405,54 @@ function evaluateKoshaExactTrustGate(rootDir) {
       evidencePath,
       detail: "Current KOSHA reconciliation report is missing or invalid.",
       nextActions: ["Regenerate the current KOSHA reconciliation artifact before launch claims."],
+    });
+  }
+
+  if (readString(report.schemaVersion) === "safeclaw-kosha-current-live-gate/v1") {
+    const liveStatus = isRecord(report.liveStatus) ? report.liveStatus : {};
+    const localCorpus = isRecord(liveStatus.localCorpus) ? liveStatus.localCorpus : {};
+    const exactTrustRegistry = isRecord(liveStatus.exactTrustRegistry) ? liveStatus.exactTrustRegistry : {};
+    const verification = Array.isArray(report.verification) ? report.verification : [];
+    const verificationPassed = verification.every((item) => isRecord(item) && item.result === "pass");
+    const exactKeys = readStringArray(exactTrustRegistry.stableDocumentKeys);
+    const requiredPins = ["D-C-13", "D-C-7", "B-E-10"];
+    const hasRequiredPins = requiredPins.every((pin) => exactKeys.includes(pin));
+    const localCorpusCount = readNumber(localCorpus.itemCount);
+    const localChunkCount = readNumber(localCorpus.chunkCount);
+    const exactCount = readNumber(exactTrustRegistry.count);
+    const readiness = readString(report.verdict) === "pass_current_kosha_exact_trust_and_corpus_gate"
+      && verificationPassed
+      && liveStatus.status === "ready"
+      && liveStatus.catalogSearchOk === true
+      && localCorpus.status === "ready"
+      && localCorpusCount !== null
+      && localCorpusCount >= 234
+      && localChunkCount !== null
+      && localChunkCount >= 7000
+      && exactTrustRegistry.status === "ready"
+      && exactCount === 3
+      && hasRequiredPins;
+
+    if (readiness) {
+      return gateResult({
+        id: "kosha_exact_trust_registry",
+        label: "KOSHA exact trust registry",
+        state: "proven",
+        evidencePath,
+        detail: `Current live runtime has ${exactCount} exact KOSHA pins (${exactKeys.join(", ")}), local corpus ${localCorpusCount} items/${localChunkCount} chunks, and focused KOSHA tests passed on the current HEAD.`,
+        nextActions: [
+          "Promote additional metadata-verified KOSHA candidates to exact trust only through separate immutable acquisition/review.",
+        ],
+      });
+    }
+
+    return gateResult({
+      id: "kosha_exact_trust_registry",
+      label: "KOSHA exact trust registry",
+      state: "contradicted",
+      evidencePath,
+      detail: "Current KOSHA live gate no longer proves exact pins, focused tests, and local corpus readiness together.",
+      nextActions: ["Re-run KOSHA exact trust tests and live status probe before KOSHA launch claims."],
     });
   }
 
