@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-20T04:40:12.412Z
+Generated at: 2026-07-20T05:01:24.588Z
 
-Current HEAD / live production build: `dd6299c52dcbb1f7e2d8b435c25b8c9b9bc8080d`
+Current HEAD / live production build: `1f3188515fe03bd51c6b32fa4da1ffa605f21179`
 
 Overall: `northstar_open_approval_gated`
 
@@ -20,6 +20,7 @@ This rollup does not claim the long-term North Star is complete. It records the 
 | Operator wiki / reference corpus | PASS approval-gated, 18 files / 208 tests, ontology 166/169 | `evaluation/operator-wiki-reference-corpus-current-gate-2026-07-20/report.json` |
 | Hermes / OpenClaw runtime boundary | PASS boundary, 13 files / 289 tests, live unauth 401 | `evaluation/hermes-openclaw-runtime-current-gate-2026-07-20/report.json` |
 | Export / foreign dispatch quality | PASS, 9 files / 67 tests, no provider side effect | `evaluation/export-foreign-dispatch-current-gate-2026-07-20/report.json` |
+| UI documents contrast | PASS, focused UI 4 files / 19 tests, build 28/28 | `evaluation/ui-documents-contrast-current-gate-2026-07-20/report.json` |
 
 ## Still Approval-Gated
 
@@ -42,4 +43,5 @@ This rollup does not claim the long-term North Star is complete. It records the 
 - SIF vector retrieval is production-active.
 - All KOSHA metadata rows are exact evidence.
 - DB migration or data upload was performed in this rollup.
+
 

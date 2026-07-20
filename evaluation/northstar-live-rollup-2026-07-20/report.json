@@ -1,12 +1,12 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v1",
-  "generatedAt": "2026-07-20T04:40:12.412Z",
-  "head": "dd6299c52dcbb1f7e2d8b435c25b8c9b9bc8080d",
+  "generatedAt": "2026-07-20T05:01:24.588Z",
+  "head": "1f3188515fe03bd51c6b32fa4da1ffa605f21179",
   "liveBuildInfo": {
-    "commitSha": "dd6299c52dcbb1f7e2d8b435c25b8c9b9bc8080d",
+    "commitSha": "1f3188515fe03bd51c6b32fa4da1ffa605f21179",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-p1fxmin0g-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-nxb16x9mp-seojaehongs-projects.vercel.app"
   },
   "overall": "northstar_open_approval_gated",
   "dbMutationPerformed": false,
@@ -77,6 +77,16 @@
       "testFilesPassed": 9,
       "testsPassed": 67,
       "providerDispatchSideEffectPerformed": false
+    },
+    {
+      "id": "ui_documents_contrast",
+      "artifact": "evaluation/ui-documents-contrast-current-gate-2026-07-20/report.json",
+      "result": "pass",
+      "testFilesPassed": 4,
+      "testFilesSkipped": 1,
+      "testsPassed": 19,
+      "testsSkipped": 4,
+      "buildStaticPages": "28/28"
     }
   ],
   "approvalGated": [
