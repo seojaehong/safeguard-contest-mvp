@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-17T16:39:34.554Z",
+  "generatedAt": "2026-07-20T03:45:28.145Z",
   "scope": "sif_embedding_next_approval_gate_preflight",
   "ok": true,
   "approvalHeld": true,
@@ -125,7 +125,7 @@
     "envFailure": false
   },
   "envFilesLoaded": [
-    ".env.local"
+    "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\.env.local"
   ],
   "executionReadyAfterApproval": true,
   "nextApprovalDecisions": [
