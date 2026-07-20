@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-20T12:18:00Z",
+  "verdict": "PASS",
+  "dbSchemaChanged": false,
+  "dataMutationPerformed": false,
+  "productChange": {
+    "file": "components/WorkflowSharePanel.tsx",
+    "summary": "Moved message preview after language preview to restore the target-channel-language-preview-send workflow order."
+  },
+  "gates": [
+    {
+      "name": "Workspace share simplification",
+      "command": "npm.cmd test -- tests\\workspace-share-simplification.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 10
+    },
+    {
+      "name": "Share recipient and foreign delivery",
+      "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts tests\\workpack-share-authority-routes.test.ts tests\\workflow-share-panel-behavior.test.ts tests\\workspace-share-simplification.test.ts tests\\foreign-worker-languages.test.ts tests\\foreign-parse.test.ts tests\\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 7,
+      "testsPassed": 77
+    },
+    {
+      "name": "TypeScript strict typecheck",
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    {
+      "name": "Mobile share and recipient browser",
+      "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts tests\\share-recipient-portal-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 2,
+      "testsPassed": 6
+    }
+  ],
+  "contracts": {
+    "managerShareDefaultOrder": [
+      "targets",
+      "channels",
+      "language-preview",
+      "message-preview",
+      "primary-send-cta"
+    ],
+    "recipientPortalCovered": true,
+    "foreignLanguageDispatchCovered": true,
+    "koreanLeakRejectionCovered": true
+  }
+}

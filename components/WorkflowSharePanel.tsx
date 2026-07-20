@@ -1160,16 +1160,6 @@ export function WorkflowSharePanel({
         </div>
       </header>
 
-      <section className="message-preview-panel" aria-label={formatMessagePreviewHeading(data, selectedMessageTarget)} data-share-preview>
-        <div className="compact-head">
-          <span className="eyebrow">메시지 미리보기</span>
-          <strong>{formatMessagePreviewHeading(data, selectedMessageTarget)}</strong>
-        </div>
-        <div className="message-preview-lines">
-          {previewItems.map((line, index) => <p key={`${line}-${index}`}>{line}</p>)}
-        </div>
-      </section>
-
       <div className="share-form-shell">
         <section className="share-form-card share-recipient-card" aria-labelledby="workflow-recipient-heading" data-share-owner="targets">
           <div className="recipient-section-head">
@@ -1265,6 +1255,16 @@ export function WorkflowSharePanel({
         </section>
 
       </div>
+
+      <section className="message-preview-panel" aria-label={formatMessagePreviewHeading(data, selectedMessageTarget)} data-share-preview>
+        <div className="compact-head">
+          <span className="eyebrow">메시지 미리보기</span>
+          <strong>{formatMessagePreviewHeading(data, selectedMessageTarget)}</strong>
+        </div>
+        <div className="message-preview-lines">
+          {previewItems.map((line, index) => <p key={`${line}-${index}`}>{line}</p>)}
+        </div>
+      </section>
 
       {authToken && !archiveWorkpackId ? (
         <p className="share-inline-note">
