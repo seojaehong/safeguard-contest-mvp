@@ -1,12 +1,12 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v1",
-  "generatedAt": "2026-07-20T05:35:58.000Z",
-  "head": "f60a39e315c7445af20328e883b2039fbeb4243d",
+  "generatedAt": "2026-07-20T05:50:55.000Z",
+  "head": "472f681bc12bf61b2fd7fd02668cd1ef3bd574db",
   "liveBuildInfo": {
-    "commitSha": "f60a39e315c7445af20328e883b2039fbeb4243d",
+    "commitSha": "472f681bc12bf61b2fd7fd02668cd1ef3bd574db",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-qvuj9yecg-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-ls5s6nmwb-seojaehongs-projects.vercel.app"
   },
   "overall": "northstar_open_approval_gated",
   "dbMutationPerformed": false,
@@ -79,6 +79,15 @@
       "result": "pass",
       "testFilesPassed": 9,
       "testsPassed": 67,
+      "providerDispatchSideEffectPerformed": false
+    },
+    {
+      "id": "share_recipient_portal",
+      "artifact": "evaluation/share-recipient-portal-current-gate-2026-07-20/report.json",
+      "result": "pass",
+      "testFilesPassed": 4,
+      "testsPassed": 76,
+      "liveVietnameseChrome": true,
       "providerDispatchSideEffectPerformed": false
     },
     {

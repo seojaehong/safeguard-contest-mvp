@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "safeclaw-share-recipient-portal-current-gate/v1",
+  "checkedAt": "2026-07-20T05:50:55.000Z",
+  "head": "472f681bc12bf61b2fd7fd02668cd1ef3bd574db",
+  "liveBuildInfo": {
+    "commitSha": "472f681bc12bf61b2fd7fd02668cd1ef3bd574db",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-ls5s6nmwb-seojaehongs-projects.vercel.app"
+  },
+  "verdict": "pass",
+  "dbMutationPerformed": false,
+  "providerDispatchSideEffectPerformed": false,
+  "focusedTests": {
+    "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts tests\\workflow-share-capability-browser.test.ts tests\\workflow-share-client.test.ts tests\\workpack-share-authority-routes.test.ts --maxWorkers=1 --fileParallelism=false",
+    "testFilesPassed": 4,
+    "testsPassed": 76,
+    "durationSeconds": 52.58,
+    "status": "pass"
+  },
+  "liveBrowserSmoke": {
+    "url": "https://www.safeclaw.kr/share/not-a-session?lang=vi",
+    "viewport": "390x844",
+    "httpStatus": 200,
+    "containsVietnameseChrome": true,
+    "containsKoreanChrome": false,
+    "pageErrors": [],
+    "status": "pass"
+  },
+  "verifiedScope": [
+    "recipient_portal_route_exists",
+    "vietnamese_query_language_chrome",
+    "invited_worker_confirmation_page_no_mobile_overflow",
+    "manual_language_switching",
+    "manager_share_capability_containment",
+    "share_session_authority_routes",
+    "provider_dispatch_side_effect_blocking"
+  ],
+  "notes": [
+    "Raw HTML contains the server shell and is not authoritative for localized recipient copy; the verified signal is the hydrated browser text.",
+    "The invalid-session live smoke proves the recipient portal page can render Vietnamese chrome without requiring a real worker token.",
+    "A real invited-worker confirmation still requires a generated share session and worker snapshot."
+  ]
+}
