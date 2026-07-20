@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-20T22:01:19.527Z
-Source SHA: `bd78d47bab789ceb486a939f16b93d694d33aea6`
+Generated at: 2026-07-20T22:36:28.233Z
+Source SHA: `3ba467b0bc0bf7635b42584ac88e350c0d4507a0`
 Overall: `open`
 
 ## Gate Matrix
@@ -10,7 +10,7 @@ Overall: `open`
 | --- | --- | --- | --- |
 | final_99_gate | notice | evaluation\final-99-gate-current-2026-07-21\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate-current-2026-07-21\notice-carry.json. |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json | Live harness probe passed with zero failed contracts. |
-| ui_documents_share_cockpit | proven | evaluation\documents-field-first-affordance-2026-07-21\report.json | Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch. |
+| ui_documents_share_cockpit | proven | evaluation\documents-risk-row-cockpit-2026-07-21\report.json | Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, risk-row authoring cockpit, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch or full 12-document authoring completion. |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json | Production /dispatch seeded desktop and sample shell routes are no longer mobile-stacked: seeded pageHeight 1116 (1.24x), sample panels 635px/413px in distinct desktop regions, overflow false/outside 0. |
 | share_result_fixture_cockpit | proven | evaluation\share-result-drilldown-2026-07-21\report.json | Generated provider-result fixture proof is bounded: desktop page 900/900, result panel 606px with 2 x-ranges, mobile summary/preview/CTA/result inside 844px, closed summary shows channel status, dispatch POST count 1, provider live dispatch unclaimed. |
 | supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Read-only RLS approval preflight passed at source SHA cbb134c52185aab4e0ac3f9d648eee82aee2634f, but live RLS catalog and tenant A/B isolation are not proven. |
@@ -38,8 +38,9 @@ Overall: `open`
 ## Next Actions
 
 - final_99_gate: Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment.
-- ui_documents_share_cockpit: Continue UI product depth on richer risk-row editing, full document field-first authoring, and document-specific drilldown beyond the current selected-section affordance.
-- ui_documents_share_cockpit: Optional follow-up: make the mobile Share configuration disclosure a guided stepper if more hand-holding is needed.
+- ui_documents_share_cockpit: Continue UI product depth on full 12-document field-first authoring, row-level validation actions, and document-specific drilldown beyond the current risk-row cockpit.
+- ui_documents_share_cockpit: Keep the production live geometry recorded for the risk-row cockpit slice; do not expand it into a full 12-document authoring claim.
+- ui_documents_share_cockpit: Keep /share generated-result and mobile stepper improvements as separate gates when user-visible sessions reproduce the complaint.
 - dispatch_standalone_cockpit: Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved.
 - share_result_fixture_cockpit: Keep real provider dispatch gated until persistent idempotency and provider-result persistence are approved and live verified.
 - supabase_rls_launch_isolation: Approve authoritative project and credential provenance.

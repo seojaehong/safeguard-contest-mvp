@@ -12,6 +12,52 @@
     "fullDocumentIaClaimed": false,
     "routeSplitAloneAcceptedAsFix": false
   },
+  "production": {
+    "build": {
+      "commitSha": "d5557d8f38727bc53a659fc59dca0b5aa8539aa3",
+      "branch": "master",
+      "environment": "production"
+    },
+    "url": "https://www.safeclaw.kr/documents?theme=day",
+    "mobile390x844": {
+      "bodyHeight": 844,
+      "viewportHeight": 844,
+      "horizontalOverflow": false,
+      "selectedDocumentTitle": "위험성평가표",
+      "riskLauncherPressed": true,
+      "workpackShellTop": 476,
+      "workpackShellBottom": 796,
+      "workpackShellClientHeight": 320,
+      "workpackShellScrollHeight": 1491,
+      "firstRiskRowHeaderTop": 590,
+      "firstRiskRowHeaderBottom": 650,
+      "firstRiskHazardFieldTop": 684,
+      "firstRiskHazardFieldBottom": 740,
+      "firstRiskHazardVisibleHeightInsideShell": 56,
+      "headerShowsEvidence": true,
+      "headerShowsVerification": true,
+      "riskRowDetailOpenCount": 0
+    },
+    "desktop1440x723": {
+      "bodyHeight": 770,
+      "viewportHeight": 723,
+      "horizontalOverflow": false,
+      "selectedDocumentTitle": "위험성평가표",
+      "riskLauncherPressed": true,
+      "workpackShellTop": 336,
+      "workpackShellBottom": 722,
+      "workpackShellClientHeight": 386,
+      "workpackShellScrollHeight": 1619,
+      "firstRiskRowHeaderTop": 506,
+      "firstRiskRowHeaderBottom": 566,
+      "firstRiskHazardFieldTop": 602,
+      "firstRiskHazardFieldBottom": 662,
+      "firstRiskHazardVisibleHeightInsideShell": 60,
+      "headerShowsEvidence": true,
+      "headerShowsVerification": true,
+      "riskRowDetailOpenCount": 0
+    }
+  },
   "contracts": {
     "firstRiskRowHeaderBelowToolbar": true,
     "firstHazardFieldUsableInShell": true,

@@ -22,6 +22,11 @@ This wave proves that the default standalone Documents route now starts from the
 
 ## Evidence
 
+- Production live geometry: PASS.
+  - Build marker: `d5557d8f38727bc53a659fc59dca0b5aa8539aa3`, branch `master`, environment `production`.
+  - URL: `https://www.safeclaw.kr/documents?theme=day`.
+  - Mobile 390x844: bodyHeight 844, overflow false, selected `위험성평가표`, risk launcher pressed, shell 476-796 with scrollHeight 1491, first row header 590-650, first hazard field 684-740, visible hazard height 56, row header contains `근거` and `확인`, row details closed by default.
+  - Desktop 1440x723: bodyHeight 770, overflow false, selected `위험성평가표`, shell 336-722, first row header 506-566, first hazard field 602-662, visible hazard height 60, row header contains `근거` and `확인`.
 - Focused `/documents` cockpit browser gate: PASS.
   - Command: `npm.cmd test -- tests\documents-editor-layout.test.ts -t "bounds the default documents route editor" --maxWorkers=1 --fileParallelism=false`
   - Result: 1 passed / 30 skipped.
