@@ -21605,20 +21605,20 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-document-body"] [class*="structuredEditor"] {
-    gap: 8px;
+    gap: 6px;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="document-section-accordion"] > summary {
-    min-height: 40px;
+    min-height: 36px;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-secondary-tools"] {
-    gap: 6px;
-    padding: 8px 10px;
+    gap: 4px;
+    padding: 6px 8px;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-secondary-tools"] summary {
-    min-height: 44px;
+    min-height: 40px;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-secondary-tools"] summary small,
@@ -21628,8 +21628,8 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-export-panel"] > summary,
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .submission-preview-panel > summary {
-    min-height: 44px;
-    padding-block: 8px;
+    min-height: 40px;
+    padding-block: 6px;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .workpack-shell {

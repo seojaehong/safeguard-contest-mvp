@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
-import { AskResponse, type PermitInspectionStructured } from "@/lib/types";
+import { AskResponse, type PermitInspectionStructured, type WorkPlanStructured } from "@/lib/types";
 import {
   ACCIDENT_TYPE_VALUES,
   FOUR_M_VALUES,
@@ -291,6 +291,12 @@ const documentCoverageLabels: Partial<Record<DocumentKey, string>> = {
   tbmLogDraft: "TBM 기록"
 };
 
+const CORE_DOCUMENT_KEYS: readonly DocumentKey[] = ["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"];
+const coreDocumentKeySet = new Set<DocumentKey>(CORE_DOCUMENT_KEYS);
+const coreDocumentMeta = documentMeta.filter((item) => coreDocumentKeySet.has(item.key));
+const supportingDocumentMeta = documentMeta.filter((item) => !coreDocumentKeySet.has(item.key));
+const SUPPORTING_DOCUMENT_KEYS: readonly DocumentKey[] = supportingDocumentMeta.map((item) => item.key);
+
 const DEFAULT_SELECTED_DOCUMENT_KEY: DocumentKey = "riskAssessmentDraft";
 
 function sanitizeFileName(value: string) {
@@ -369,6 +375,10 @@ function isTbmDocumentKey(key: DocumentKey) {
   return key === "tbmBriefing" || key === "tbmLogDraft";
 }
 
+function isExecutionDocumentKey(key: DocumentKey) {
+  return key === "workPlanDraft" || key === "workPermitDraft";
+}
+
 function compactList(items: readonly string[], fallback: string, limit: number) {
   const compacted = items.map((item) => item.trim()).filter(Boolean);
   return (compacted.length ? compacted : [fallback]).slice(0, limit);
@@ -413,6 +423,76 @@ function TbmDocumentCockpit({ data, documentKey }: { data: AskResponse; document
           <b>즉시 조치</b>
           <ol>
             {actions.map((action) => <li key={action}>{action}</li>)}
+          </ol>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function getWorkPlanStructured(data: AskResponse): WorkPlanStructured | null {
+  const deliverables = data.deliverables as { workPlanStructured?: WorkPlanStructured };
+  return deliverables.workPlanStructured ?? null;
+}
+
+function getPermitInspectionStructured(data: AskResponse): PermitInspectionStructured {
+  const deliverables = data.deliverables as { permitInspectionStructured?: PermitInspectionStructured };
+  return deliverables.permitInspectionStructured ?? buildPermitInspectionStructured(data);
+}
+
+function WorkExecutionDocumentCockpit({ data, documentKey }: { data: AskResponse; documentKey: DocumentKey }) {
+  if (!isExecutionDocumentKey(documentKey)) return null;
+  const workPlan = getWorkPlanStructured(data);
+  const permit = getPermitInspectionStructured(data);
+  const steps = workPlan?.workSteps.slice(0, 3) ?? [];
+  const stopCriteria = compactList(workPlan?.stopCriteria ?? data.riskSummary.immediateActions, data.riskSummary.topRisk, 3);
+  const conditions = permit.conditions.slice(0, 3);
+  const requiredAttachments = permit.attachments.filter((attachment) => attachment.required);
+  const blockedAttachments = requiredAttachments.filter((attachment) => attachment.status !== "첨부");
+  const completionChecks = permit.completionChecks.slice(0, 2);
+  const isPermit = documentKey === "workPermitDraft";
+
+  return (
+    <section className={styles.tbmCockpit} data-testid="execution-document-cockpit" aria-label="작업 실행 요약">
+      <div className={styles.tbmCockpitHeader}>
+        <div>
+          <span className="eyebrow">작업 실행 cockpit</span>
+          <strong>{isPermit ? "허가 조건과 첨부 확인" : "작업 순서와 중지 기준"}</strong>
+        </div>
+        <span>{data.scenario.workerCount.toLocaleString("ko-KR")}명 · {isPermit ? permit.basicInfo.permitType : data.riskSummary.riskLevel}</span>
+      </div>
+      <div className={styles.tbmCockpitGrid}>
+        <article>
+          <b>{isPermit ? "허가 조건" : "첫 작업"}</b>
+          <strong>{isPermit ? conditions[0]?.requirement ?? data.riskSummary.topRisk : steps[0]?.action ?? data.scenario.workSummary}</strong>
+          <small>{isPermit ? conditions[0]?.action ?? data.riskSummary.immediateActions[0] ?? "작업 전 확인" : steps[0]?.safetyMeasure ?? data.riskSummary.immediateActions[0] ?? "작업 전 확인"}</small>
+        </article>
+        <article>
+          <b>{isPermit ? "첨부 상태" : "작업중지"}</b>
+          <strong>{isPermit ? `${blockedAttachments.length.toLocaleString("ko-KR")}건 보완 · ${requiredAttachments.length.toLocaleString("ko-KR")}건 필수` : stopCriteria[0]}</strong>
+          <small>{isPermit ? blockedAttachments[0]?.name ?? "필수 첨부 확인" : stopCriteria[1] ?? data.scenario.weatherNote}</small>
+        </article>
+      </div>
+      <div className={styles.tbmCockpitColumns}>
+        <div>
+          <b>{isPermit ? "허가 조건" : "작업 순서"}</b>
+          <ol>
+            {(isPermit ? conditions : steps).map((item, index) => (
+              <li key={isPermit ? `${conditions[index]?.category}-${conditions[index]?.requirement}` : `${steps[index]?.stepNo}-${steps[index]?.action}`}>
+                {isPermit
+                  ? `${conditions[index]?.category} · ${conditions[index]?.requirement}`
+                  : `${steps[index]?.action} · ${steps[index]?.safetyMeasure}`}
+              </li>
+            ))}
+            {!isPermit && !steps.length ? <li>{data.scenario.workSummary}</li> : null}
+          </ol>
+        </div>
+        <div>
+          <b>{isPermit ? "첨부/종료" : "중지 기준"}</b>
+          <ol>
+            {(isPermit ? [...blockedAttachments.slice(0, 2).map((attachment) => `${attachment.name} · ${attachment.status}`), ...completionChecks.map((check) => `${check.item} · ${check.status}`)].slice(0, 3) : stopCriteria).map((item) => (
+              <li key={item}>{item}</li>
+            ))}
           </ol>
         </div>
       </div>
@@ -2343,6 +2423,7 @@ export function WorkpackEditor({
   const [saveAnnouncement, setSaveAnnouncement] = useState("");
   const [showFocusCue, setShowFocusCue] = useState(false);
   const [submissionPreviewOpen, setSubmissionPreviewOpen] = useState(false);
+  const [supportingDocumentsOpen, setSupportingDocumentsOpen] = useState(false);
   const [remediationDrafts, setRemediationDrafts] = useState<Record<string, RemediationDraft>>({});
   const [remediationLoadingId, setRemediationLoadingId] = useState<string | null>(null);
   const documentBodyRef = useRef<HTMLDivElement | null>(null);
@@ -2357,6 +2438,7 @@ export function WorkpackEditor({
     requiresRevalidation: false
   });
   const selected = documentMeta.find((item) => item.key === selectedKey) || documentMeta[0];
+  const selectedSupportingDocument = supportingDocumentMeta.some((item) => item.key === selected.key);
   const selectedTemplate = templatePresets.find((preset) => preset.kind === templateKind) || templatePresets[0];
   const selectedText = values[selected.key];
   const structuredDocument = useMemo(
@@ -2501,6 +2583,10 @@ export function WorkpackEditor({
   }, [selected.key]);
 
   useEffect(() => {
+    if (selectedSupportingDocument) setSupportingDocumentsOpen(true);
+  }, [selectedSupportingDocument]);
+
+  useEffect(() => {
     setEditorMode("structured");
   }, [selected.key]);
 
@@ -2641,7 +2727,7 @@ export function WorkpackEditor({
       : shellRect.top;
     const comfortableTargetTop = Math.min(
       shellRect.bottom - 80,
-      visibleTop + Math.max(96, shell.clientHeight * 0.45)
+      visibleTop + Math.max(32, shell.clientHeight * 0.18)
     );
     const targetIsVisible = targetRect.bottom > visibleTop
       && targetRect.top >= visibleTop
@@ -2676,6 +2762,13 @@ export function WorkpackEditor({
       alignPaneTargetBelowToolbar(tbmCockpitTarget);
       return;
     }
+    const executionCockpitTarget = isExecutionDocumentKey(selected.key)
+      ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="execution-document-cockpit"]') || null
+      : null;
+    if (executionCockpitTarget) {
+      alignPaneTargetBelowToolbar(executionCockpitTarget);
+      return;
+    }
     const activeSection = Array.from(
       documentBodyRef.current?.querySelectorAll<HTMLElement>("[data-section-id]") || []
     ).find((section) => section.dataset.sectionId === expandedStructuredSectionId) || null;
@@ -2686,8 +2779,8 @@ export function WorkpackEditor({
     alignPaneTargetBelowToolbar(target);
   }, [expandedStructuredSectionId, selected.key, structuredDocument.body]);
 
-  useEffect(() => {
-    const alignFrame = window.requestAnimationFrame(() => {
+  useLayoutEffect(() => {
+    const alignSelectedDocument = () => {
       const target = selected.key === "riskAssessmentDraft"
         ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="risk-row-editor-row"]')
           || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="risk-rows-editor"]')
@@ -2697,12 +2790,21 @@ export function WorkpackEditor({
           ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="tbm-document-cockpit"]')
             || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
             || null
+        : isExecutionDocumentKey(selected.key)
+          ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="execution-document-cockpit"]')
+            || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
+            || null
         : documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
         || textareaRef.current
         || documentBodyRef.current;
       alignPaneTargetBelowToolbar(target);
-    });
-    return () => window.cancelAnimationFrame(alignFrame);
+    };
+    const alignFrame = window.requestAnimationFrame(alignSelectedDocument);
+    const alignTimer = window.setTimeout(alignSelectedDocument, 80);
+    return () => {
+      window.cancelAnimationFrame(alignFrame);
+      window.clearTimeout(alignTimer);
+    };
   }, [selected.key]);
 
   function updateValue(value: string, options: { preserveCanonicalRiskRows?: boolean } = {}) {
@@ -2775,28 +2877,33 @@ export function WorkpackEditor({
     });
   }
 
-  function selectDocumentTab(index: number) {
-    const nextDocument = documentMeta[index];
-    if (!nextDocument) return;
-    setSelectedKey(nextDocument.key);
-    document.getElementById(documentTabId(nextDocument.key))?.focus();
+  function selectDocumentKey(key: DocumentKey) {
+    if (supportingDocumentMeta.some((item) => item.key === key)) {
+      setSupportingDocumentsOpen(true);
+    }
+    setSelectedKey(key);
+    window.requestAnimationFrame(() => {
+      document.getElementById(documentTabId(key))?.focus();
+    });
   }
 
-  function handleDocumentTabKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>, index: number) {
+  function handleDocumentTabKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>, key: DocumentKey, keys: readonly DocumentKey[]) {
     let nextIndex: number | null = null;
+    const index = keys.indexOf(key);
+    if (index < 0) return;
     if (event.key === "ArrowRight" || event.key === "ArrowDown") {
-      nextIndex = (index + 1) % documentMeta.length;
+      nextIndex = (index + 1) % keys.length;
     } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
-      nextIndex = (index - 1 + documentMeta.length) % documentMeta.length;
+      nextIndex = (index - 1 + keys.length) % keys.length;
     } else if (event.key === "Home") {
       nextIndex = 0;
     } else if (event.key === "End") {
-      nextIndex = documentMeta.length - 1;
+      nextIndex = keys.length - 1;
     }
 
     if (nextIndex === null) return;
     event.preventDefault();
-    selectDocumentTab(nextIndex);
+    selectDocumentKey(keys[nextIndex]);
   }
 
   function updateRemediationDraft(itemId: string, text: string) {
@@ -3159,6 +3266,28 @@ export function WorkpackEditor({
     }
   }
 
+  const renderDocumentTab = (item: (typeof documentMeta)[number], keys: readonly DocumentKey[]) => {
+    const documentIndex = documentMeta.findIndex((candidate) => candidate.key === item.key);
+    return (
+      <button
+        key={item.key}
+        id={documentTabId(item.key)}
+        type="button"
+        role="tab"
+        className={`doc-tab ${item.key === selected.key ? "active" : ""}`}
+        onClick={() => selectDocumentKey(item.key)}
+        onKeyDown={(event) => handleDocumentTabKeyDown(event, item.key, keys)}
+        aria-selected={item.key === selected.key}
+        aria-controls="workpack-document-body"
+        tabIndex={item.key === selected.key ? 0 : -1}
+      >
+        <span className={styles.documentIndex}>{String(documentIndex + 1).padStart(2, "0")}</span>
+        <strong>{item.title}</strong>
+        <span className={styles.documentDescription}>{item.description}</span>
+      </button>
+    );
+  };
+
   return (
     <section
       className={`workpack-shell ${styles.workspace}`}
@@ -3186,26 +3315,24 @@ export function WorkpackEditor({
           </select>
         </label>
 
-        <div className={`doc-tab-list ${styles.documentTabs}`} role="tablist" aria-label="편집 문서 선택">
-          {documentMeta.map((item, index) => (
-            <button
-              key={item.key}
-              id={documentTabId(item.key)}
-              type="button"
-              role="tab"
-              className={`doc-tab ${item.key === selected.key ? "active" : ""}`}
-              onClick={() => setSelectedKey(item.key)}
-              onKeyDown={(event) => handleDocumentTabKeyDown(event, index)}
-              aria-selected={item.key === selected.key}
-              aria-controls="workpack-document-body"
-              tabIndex={item.key === selected.key ? 0 : -1}
-            >
-              <span className={styles.documentIndex}>{String(index + 1).padStart(2, "0")}</span>
-              <strong>{item.title}</strong>
-              <span className={styles.documentDescription}>{item.description}</span>
-            </button>
-          ))}
+        <div className={`doc-tab-list ${styles.documentTabs}`} role="tablist" aria-label="핵심 문서 선택">
+          {coreDocumentMeta.map((item) => renderDocumentTab(item, CORE_DOCUMENT_KEYS))}
         </div>
+
+        <details
+          className={styles.supportingDocumentGroup}
+          data-testid="supporting-document-group"
+          open={supportingDocumentsOpen || selectedSupportingDocument}
+          onToggle={(event) => setSupportingDocumentsOpen(event.currentTarget.open)}
+        >
+          <summary>
+            <span>지원 문서 {supportingDocumentMeta.length.toLocaleString("ko-KR")}종</span>
+            <strong>{selectedSupportingDocument ? selected.title : "제출·교육·전송 세부 문서"}</strong>
+          </summary>
+          <div className={`doc-tab-list ${styles.documentTabs} ${styles.supportingDocumentTabs}`} role="tablist" aria-label="지원 문서 선택">
+            {supportingDocumentMeta.map((item) => renderDocumentTab(item, SUPPORTING_DOCUMENT_KEYS))}
+          </div>
+        </details>
       </aside>
 
       <div className={`card document-editor ${styles.editor} ${showFocusCue ? "editor-focus-cue" : ""}`}>
@@ -3292,6 +3419,9 @@ export function WorkpackEditor({
               ) : null}
               {isTbmDocumentKey(selected.key) ? (
                 <TbmDocumentCockpit data={data} documentKey={selected.key} />
+              ) : null}
+              {isExecutionDocumentKey(selected.key) ? (
+                <WorkExecutionDocumentCockpit data={data} documentKey={selected.key} />
               ) : null}
               {structuredDocument.body.map((section, index) => {
                 const inputId = `document-section-${selected.key}-${index}`;

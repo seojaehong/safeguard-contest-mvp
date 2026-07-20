@@ -104,6 +104,59 @@
   opacity: 1;
 }
 
+.supportingDocumentGroup {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  border-top: 1px solid var(--workspace-rule);
+  padding-top: var(--space-2);
+}
+
+.supportingDocumentGroup > summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+  min-height: 44px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: var(--radius-soft);
+  background: var(--workspace-surface-1);
+  padding: 7px 10px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.supportingDocumentGroup > summary::-webkit-details-marker {
+  display: none;
+}
+
+.supportingDocumentGroup > summary span {
+  color: var(--workspace-subtle);
+  font-family: var(--font-hud);
+  font-size: var(--text-hud);
+  font-weight: 700;
+  line-height: var(--leading-hud);
+  letter-spacing: var(--tracking-hud);
+}
+
+.supportingDocumentGroup > summary strong {
+  overflow: hidden;
+  color: var(--workspace-ink);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  line-height: var(--leading-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.supportingDocumentGroup[open] > summary {
+  border-color: var(--workspace-rule-strong);
+  background: var(--workspace-surface-2);
+}
+
+.supportingDocumentTabs {
+  padding-top: var(--space-1);
+}
+
 .editor {
   display: grid;
   align-content: start;
@@ -1286,8 +1339,8 @@
   }
 
   .documentBody {
-    gap: var(--space-3);
-    padding: var(--space-3);
+    gap: var(--space-2);
+    padding: var(--space-2);
   }
 
   .navigatorHeader {
@@ -1382,7 +1435,7 @@
   }
 
   .riskRowsList {
-    gap: 6px;
+    gap: 4px;
   }
 
   .riskRowsHeader,
@@ -1396,11 +1449,11 @@
   }
 
   .riskRow {
-    padding: 6px;
+    padding: 3px 6px;
   }
 
   .riskRowHeader {
-    min-height: 36px;
+    min-height: 26px;
   }
 
   .riskRowHeader strong,
@@ -1423,13 +1476,18 @@
 
   .riskRow label,
   .riskLevelValue {
-    gap: 4px;
+    gap: 1px;
+  }
+
+  .riskRow label > span {
+    font-size: var(--text-hud);
+    line-height: 1;
   }
 
   .riskRow input,
   .riskRow select,
   .riskRow textarea {
-    padding: 6px 8px;
+    padding: 4px 8px;
   }
 
   .riskRowDetails summary {

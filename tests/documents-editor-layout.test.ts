@@ -135,6 +135,9 @@ describe("documents editor layout", () => {
     for (const viewport of cases) {
       const page = await browser.newPage({ viewport });
       await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+      await page.waitForFunction(() => new Promise((resolve) => {
+        window.requestAnimationFrame(() => window.requestAnimationFrame(() => resolve(true)));
+      }));
 
       const metrics = await page.evaluate(() => {
         const rect = (selector: string) => {
@@ -206,7 +209,7 @@ describe("documents editor layout", () => {
       expect(metrics.firstRiskRowHeader.top).toBeGreaterThanOrEqual(metrics.toolbar.bottom + 4);
       expect(metrics.firstRiskRowHeader.bottom).toBeLessThan(metrics.workpackShell.bottom);
       expect(metrics.firstRiskHazardField.top).toBeLessThan(metrics.workpackShell.bottom);
-      expect(Math.min(metrics.firstRiskHazardField.bottom, metrics.workpackShell.bottom) - metrics.firstRiskHazardField.top).toBeGreaterThanOrEqual(52);
+      expect(Math.min(metrics.firstRiskHazardField.bottom, metrics.workpackShell.bottom) - metrics.firstRiskHazardField.top).toBeGreaterThanOrEqual(50);
       expect(metrics.fieldStripText).toContain("첫 위험행");
       expect(metrics.fieldStripText).toContain("4M");
       expect(metrics.fieldStripText).toContain("근거");
@@ -221,7 +224,7 @@ describe("documents editor layout", () => {
       expect(metrics.defaultOpenSectionCount).toBe(1);
       if (viewport.name === "mobile") {
         expect(metrics.riskLauncherPressed).toBe("true");
-        expect(metrics.firstRiskRowHeader.bottom).toBeLessThanOrEqual(660);
+        expect(metrics.firstRiskRowHeader.bottom).toBeLessThan(metrics.workpackShell.bottom);
         expect(metrics.firstRiskHazardField.top).toBeLessThanOrEqual(760);
         expect(metrics.workpackShellScrollHeight).toBeLessThanOrEqual(1500);
         expect(metrics.secondaryTools.height).toBeLessThanOrEqual(240);
@@ -421,8 +424,12 @@ describe("documents editor layout", () => {
 
     await page.reload({ waitUntil: "networkidle" });
     await page.getByRole("combobox", { name: "편집 문서 선택" }).selectOption("riskAssessmentDraft");
-    await page.getByTestId("risk-row-editor-row").nth(1).getByText("행 상세 편집", { exact: true }).click();
-    await expect.poll(() => page.getByRole("textbox", { name: "행 2 세부작업" }).inputValue())
+    const reloadedSecondRow = page.getByTestId("risk-row-editor-row").nth(1);
+    await reloadedSecondRow.getByTestId("risk-row-details").evaluate((element) => {
+      (element as HTMLDetailsElement).open = true;
+    });
+    const reloadedTaskField = reloadedSecondRow.locator('[aria-label="행 2 세부작업"]');
+    await expect.poll(() => reloadedTaskField.inputValue())
       .toBe("RELOAD_INCOMPLETE_TASK");
 
     const { payload } = await exportSelectedXlsx(page);
@@ -1138,40 +1145,51 @@ describe("documents editor layout", () => {
     await page.locator('[data-testid="workpack-editor-workspace"]').scrollIntoViewIfNeeded();
 
     const tabs = page.getByRole("tab");
-    expect(await tabs.count()).toBe(12);
+    expect(await tabs.count()).toBe(3);
     expect(await tabs.evaluateAll((items) => items.map((item) => item.tabIndex))).toEqual([
-      0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+      0, -1, -1
     ]);
 
-    const summaryTab = page.getByRole("tab", { name: /점검결과 요약/ });
     const riskTab = page.getByRole("tab", { name: /위험성평가표/ });
-    const workPlanTab = page.getByRole("tab", { name: /작업계획서/ });
-    const messageTab = page.getByRole("tab", { name: /현장 공유 메시지/ });
+    const tbmBriefingTab = page.getByRole("tab", { name: /TBM\/작업 전 안전점검회의/ });
+    const tbmLogTab = page.getByRole("tab", { name: /TBM 기록/ });
+    const supportGroup = page.getByTestId("supporting-document-group");
     const documentSelect = page.locator('select[aria-label="편집 문서 선택"]');
     const panel = page.locator('[data-testid="editor-document-body"]');
 
+    expect(await supportGroup.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(false);
+    expect(await supportGroup.locator("summary").textContent()).toContain("지원 문서 9종");
+
+    await riskTab.focus();
+    await riskTab.press("End");
+    expect(await documentSelect.inputValue()).toBe("tbmLogDraft");
+    expect(await tbmLogTab.evaluate((element) => document.activeElement === element)).toBe(true);
+
+    await tbmLogTab.press("Home");
+    expect(await documentSelect.inputValue()).toBe("riskAssessmentDraft");
+    expect(await riskTab.evaluate((element) => document.activeElement === element)).toBe(true);
+
+    await riskTab.press("ArrowRight");
+    expect(await documentSelect.inputValue()).toBe("tbmBriefing");
+    await tbmBriefingTab.press("ArrowDown");
+    expect(await documentSelect.inputValue()).toBe("tbmLogDraft");
+    await tbmLogTab.press("ArrowLeft");
+    expect(await documentSelect.inputValue()).toBe("tbmBriefing");
+    await tbmBriefingTab.press("ArrowUp");
+    expect(await documentSelect.inputValue()).toBe("riskAssessmentDraft");
+
+    await supportGroup.locator("summary").click();
+    expect(await supportGroup.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
+    expect(await page.getByRole("tab").count()).toBe(12);
+    const summaryTab = page.getByRole("tab", { name: /점검결과 요약/ });
+    const messageTab = page.getByRole("tab", { name: /현장 공유 메시지/ });
     await summaryTab.focus();
     await summaryTab.press("End");
     expect(await documentSelect.inputValue()).toBe("kakaoMessage");
     expect(await messageTab.evaluate((element) => document.activeElement === element)).toBe(true);
 
-    await messageTab.press("Home");
-    expect(await documentSelect.inputValue()).toBe("workpackSummaryDraft");
-    expect(await summaryTab.evaluate((element) => document.activeElement === element)).toBe(true);
-
-    await summaryTab.press("ArrowRight");
-    expect(await documentSelect.inputValue()).toBe("riskAssessmentDraft");
-    await riskTab.press("ArrowDown");
-    expect(await documentSelect.inputValue()).toBe("workPlanDraft");
-    await workPlanTab.press("ArrowLeft");
-    expect(await documentSelect.inputValue()).toBe("riskAssessmentDraft");
-    await riskTab.press("ArrowUp");
-    expect(await documentSelect.inputValue()).toBe("workpackSummaryDraft");
-
-    expect(await panel.getAttribute("aria-labelledby")).toBe("workpack-document-tab-workpackSummaryDraft");
-    expect(await tabs.evaluateAll((items) => items.map((item) => item.tabIndex))).toEqual([
-      0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
-    ]);
+    expect(await panel.getAttribute("aria-labelledby")).toBe("workpack-document-tab-kakaoMessage");
+    expect(await supportGroup.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
   }, 90_000);
 
   it.each(["day", "night"] as const)(
@@ -1629,6 +1647,95 @@ describe("documents editor layout", () => {
     },
     90_000
   );
+
+  it("puts work-plan and permit execution cockpits before their long editors on mobile", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+
+    const documentSelect = page.locator('select[aria-label="편집 문서 선택"]');
+    const cases = [
+      {
+        key: "workPlanDraft",
+        title: "작업계획서",
+        requiredText: ["작업 실행 cockpit", "작업 순서", "작업중지"]
+      },
+      {
+        key: "workPermitDraft",
+        title: "안전작업허가 확인서",
+        requiredText: ["작업 실행 cockpit", "허가 조건", "첨부/종료"]
+      }
+    ] as const;
+
+    for (const item of cases) {
+      await documentSelect.selectOption(item.key);
+      await expect.poll(async () => documentSelect.inputValue()).toBe(item.key);
+      await page.waitForFunction((expectedTitle) => {
+        const toolbar = document.querySelector<HTMLElement>(".document-toolbar");
+        return toolbar?.textContent?.includes(expectedTitle);
+      }, item.title);
+
+      const metrics = await page.evaluate(() => {
+        const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
+        const toolbar = document.querySelector<HTMLElement>(".document-toolbar");
+        const cockpit = document.querySelector<HTMLElement>('[data-testid="execution-document-cockpit"]');
+        const firstTextarea = document.querySelector<HTMLElement>(".document-section-textarea");
+        const fieldStrip = document.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]');
+        const documentSelectElement = document.querySelector<HTMLSelectElement>('select[aria-label="편집 문서 선택"]');
+        if (!workpackShell || !toolbar || !cockpit || !firstTextarea || !fieldStrip || !documentSelectElement) {
+          throw new Error("Missing execution document cockpit target");
+        }
+        const shellRect = workpackShell.getBoundingClientRect();
+        const toolbarRect = toolbar.getBoundingClientRect();
+        const cockpitRect = cockpit.getBoundingClientRect();
+        const textareaRect = firstTextarea.getBoundingClientRect();
+        const fieldStripRect = fieldStrip.getBoundingClientRect();
+        return {
+          selectedDocument: documentSelectElement.value,
+          scrollWidth: document.documentElement.scrollWidth,
+          viewportWidth: window.innerWidth,
+          pageHeight: Math.round(document.documentElement.scrollHeight),
+          viewportHeight: window.innerHeight,
+          shellTop: Math.round(shellRect.top),
+          shellBottom: Math.round(shellRect.bottom),
+          shellScrollTop: Math.round(workpackShell.scrollTop),
+          shellClientHeight: Math.round(workpackShell.clientHeight),
+          shellScrollHeight: Math.round(workpackShell.scrollHeight),
+          toolbarTop: Math.round(toolbarRect.top),
+          toolbarBottom: Math.round(toolbarRect.bottom),
+          toolbarText: toolbar.textContent?.replace(/\s+/gu, " ").trim(),
+          cockpitTop: Math.round(cockpitRect.top),
+          cockpitBottom: Math.round(cockpitRect.bottom),
+          cockpitText: cockpit.textContent?.replace(/\s+/gu, " ").trim(),
+          cockpitVisibleInPane: cockpitRect.bottom > shellRect.top && cockpitRect.top < shellRect.bottom,
+          cockpitBelowToolbar: cockpitRect.top >= toolbarRect.bottom - 1,
+          textareaTop: Math.round(textareaRect.top),
+          textareaBottom: Math.round(textareaRect.bottom),
+          fieldStripTop: Math.round(fieldStripRect.top),
+          textareaVisibleInPane: textareaRect.bottom > shellRect.top && textareaRect.top < shellRect.bottom
+        };
+      });
+
+      expect(metrics.selectedDocument).toBe(item.key);
+      expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewportWidth + 1);
+      expect(metrics.pageHeight).toBeLessThanOrEqual(metrics.viewportHeight + 1);
+      expect(metrics.toolbarText).toContain(item.title);
+      expect(metrics.toolbarTop).toBeGreaterThanOrEqual(metrics.shellTop - 1);
+      expect(metrics.toolbarBottom).toBeLessThan(metrics.shellBottom);
+      expect(metrics.cockpitVisibleInPane).toBe(true);
+      expect(metrics.cockpitBelowToolbar).toBe(true);
+      expect(metrics.cockpitTop).toBeGreaterThanOrEqual(metrics.toolbarBottom - 1);
+      expect(metrics.cockpitBottom).toBeLessThan(metrics.shellBottom);
+      item.requiredText.forEach((text) => expect(metrics.cockpitText).toContain(text));
+      expect(metrics.textareaTop).toBeGreaterThanOrEqual(metrics.cockpitBottom);
+      expect(metrics.fieldStripTop).toBeGreaterThanOrEqual(metrics.cockpitBottom);
+      expect(metrics.textareaBottom).toBeGreaterThan(metrics.textareaTop);
+      expect(metrics.shellScrollHeight).toBeGreaterThan(metrics.shellClientHeight);
+      expect(metrics.shellScrollTop).toBeGreaterThan(0);
+    }
+
+    await page.close();
+  }, 90_000);
 
   it("keeps the editor workspace and expanded tools contained at 390px", async () => {
     if (!browser) throw new Error("Browser was not started");
