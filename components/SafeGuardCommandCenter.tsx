@@ -64,6 +64,7 @@ import {
   type WorkpackReadiness
 } from "@/lib/workpack-readiness";
 import { formatCustomerFacingLabel, formatCustomerFacingText } from "@/lib/web-safe-presentation";
+import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 
 type SafeGuardCommandCenterProps = {
   examples: FieldExample[];
@@ -300,6 +301,40 @@ function riskToneClass(level: string) {
   if (level.includes("상")) return "risk-high";
   if (level.includes("중")) return "risk-medium";
   return "risk-low";
+}
+
+type SafetyBriefRiskRow = {
+  process: string;
+  hazard: string;
+  control: string;
+  riskLevel: string;
+  evidence: string;
+};
+
+function riskLevelLabel(level: RiskAssessmentRow["riskLevel"] | string) {
+  if (level === "high" || level.includes("상")) return "상";
+  if (level === "medium" || level.includes("중")) return "중";
+  return "하";
+}
+
+function buildSafetyBriefRows(data: AskResponse | null): SafetyBriefRiskRow[] {
+  const rows = data?.structured?.riskAssessmentRows || [];
+  return rows.slice(0, 5).map((row) => ({
+    process: row.process || row.task || "작업 단계",
+    hazard: row.hazard || "현장 위험요인 확인",
+    control: row.additionalControls || row.currentControls || "감소대책 현장 확인",
+    riskLevel: riskLevelLabel(row.riskLevel),
+    evidence: row.evidenceRefs.slice(0, 2).join(" · ") || "근거 확인 필요"
+  }));
+}
+
+function buildSafetyBriefHazards(data: AskResponse | null, rows: SafetyBriefRiskRow[]): string[] {
+  const hazards = rows.map((row) => row.hazard).filter(Boolean);
+  if (hazards.length) return Array.from(new Set(hazards)).slice(0, 3);
+  return [
+    data?.riskSummary.topRisk,
+    ...(data?.riskSummary.immediateActions || [])
+  ].filter((value): value is string => Boolean(value)).slice(0, 3);
 }
 
 function inferLocationFromText(text: string, fallback: string) {
@@ -1854,6 +1889,8 @@ export function SafeGuardCommandCenter({
     ...documentHarnessLoop,
     ...documentEvidence
   ].filter((item) => item.tone !== "ready").length;
+  const safetyBriefRows = buildSafetyBriefRows(data);
+  const safetyBriefHazards = buildSafetyBriefHazards(data, safetyBriefRows);
   const supportingDocumentItems = outputItems.filter((item) => !primaryDocumentKeys.has(item.key));
   const coreDocumentsReady = Boolean(data && focusDocumentItems.every((item) => {
     const body = (data.deliverables as Record<string, unknown>)[item.key];
@@ -2268,6 +2305,50 @@ export function SafeGuardCommandCenter({
                   <small>{generationProgress.detail}</small>
                 </div>
               </div>
+            ) : null}
+            {data ? (
+              <section className="safety-brief-dashboard" aria-label="Safety Brief Dashboard">
+                <div className="safety-brief-head">
+                  <div>
+                    <span>현장 5분 브리프</span>
+                    <strong>핵심 위험과 위험성평가 상위 항목부터 확인합니다.</strong>
+                  </div>
+                  <button type="button" className="button secondary" onClick={() => focusWorkpackEditor("riskAssessmentDraft")}>
+                    위험성평가표 편집
+                  </button>
+                </div>
+                <div className="safety-brief-grid">
+                  <article className="safety-brief-risk-card">
+                    <span>핵심 위험 3개</span>
+                    <ol>
+                      {(safetyBriefHazards.length ? safetyBriefHazards : ["생성 결과에서 핵심 위험을 확인하세요."]).map((hazard) => (
+                        <li key={hazard}>{hazard}</li>
+                      ))}
+                    </ol>
+                  </article>
+                  <article className="safety-brief-risk-table">
+                    <span>위험성평가 상위 {safetyBriefRows.length ? `${Math.min(safetyBriefRows.length, 5)}개` : "항목"}</span>
+                    <div className="safety-brief-row-list">
+                      {(safetyBriefRows.length ? safetyBriefRows : [{
+                        process: fieldBrief.workSummary,
+                        hazard: data.riskSummary.topRisk,
+                        control: data.riskSummary.immediateActions[0] || "감소대책 현장 확인",
+                        riskLevel: data.riskSummary.riskLevel,
+                        evidence: "위험성평가표 본문 확인"
+                      }]).map((row, index) => (
+                        <div key={`${row.process}-${row.hazard}-${index}`} className="safety-brief-row">
+                          <b>{String(index + 1).padStart(2, "0")}</b>
+                          <div>
+                            <strong>{row.hazard}</strong>
+                            <small>{row.process} · {row.control}</small>
+                          </div>
+                          <em className={`risk-badge ${riskToneClass(row.riskLevel)}`}>{riskLevelLabel(row.riskLevel)}</em>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+                </div>
+              </section>
             ) : null}
             <details
               className="document-provenance-drawer"

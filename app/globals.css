@@ -14271,6 +14271,124 @@ body:has(.safeclaw-landing) :is(
   letter-spacing: var(--tracking-body);
 }
 
+.command-center-shell .safety-brief-dashboard {
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 4px;
+  background: var(--workspace-surface-1);
+  padding: 16px;
+}
+
+.command-center-shell .safety-brief-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--workspace-rule);
+  padding-bottom: 12px;
+}
+
+.command-center-shell .safety-brief-head > div {
+  display: grid;
+  gap: 4px;
+}
+
+.command-center-shell .safety-brief-head span,
+.command-center-shell .safety-brief-risk-card > span,
+.command-center-shell .safety-brief-risk-table > span {
+  color: var(--workspace-subtle);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+.command-center-shell .safety-brief-head strong {
+  color: var(--workspace-ink);
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
+}
+
+.command-center-shell .safety-brief-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.36fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.command-center-shell .safety-brief-risk-card,
+.command-center-shell .safety-brief-risk-table {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 4px;
+  background: var(--workspace-surface-2);
+  padding: 12px;
+}
+
+.command-center-shell .safety-brief-risk-card ol {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.command-center-shell .safety-brief-risk-card li {
+  color: var(--workspace-ink);
+  font-size: var(--text-table);
+  font-weight: 600;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
+}
+
+.command-center-shell .safety-brief-row-list {
+  display: grid;
+  gap: 8px;
+}
+
+.command-center-shell .safety-brief-row {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 54px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 4px;
+  background: var(--workspace-surface-1);
+  padding: 8px 10px;
+}
+
+.command-center-shell .safety-brief-row b {
+  color: var(--workspace-subtle);
+  font-family: var(--font-hud);
+  font-size: var(--text-hud);
+  font-weight: 700;
+  line-height: var(--leading-hud);
+  letter-spacing: var(--tracking-hud);
+}
+
+.command-center-shell .safety-brief-row strong {
+  display: block;
+  color: var(--workspace-ink);
+  font-size: var(--text-table);
+  font-weight: 700;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
+}
+
+.command-center-shell .safety-brief-row small {
+  display: block;
+  margin-top: 2px;
+  color: var(--workspace-muted);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
 .command-center-shell .document-workbench .document-viewer-shell {
   display: grid;
   grid-template-columns: minmax(194px, 0.24fr) minmax(0, 1fr);
@@ -16344,6 +16462,22 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell .document-workbench {
     padding: 12px;
     gap: 12px;
+  }
+
+  .command-center-shell .safety-brief-dashboard {
+    padding: 12px;
+  }
+
+  .command-center-shell .safety-brief-head,
+  .command-center-shell .safety-brief-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .command-center-shell .safety-brief-row {
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    min-height: 60px;
+    padding: 8px;
   }
 
   .command-center-shell .document-review-status-strip,
