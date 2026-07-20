@@ -1,0 +1,65 @@
+{
+  "checkedAt": "2026-07-21T00:03:21+09:00",
+  "verdict": "PASS",
+  "scope": "current exact trusted KOSHA production gate",
+  "worktree": {
+    "gitHead": "bd4beeebbb02c977b1f34d02b5895f7fcacba568",
+    "branch": "chore/recipient-foreign-live-gate-20260720",
+    "evidenceType": "current worktree gate",
+    "freshProductionProbe": false
+  },
+  "exactTrustedPins": [
+    {
+      "stableDocumentKey": "D-C-13",
+      "version": "D-C-13-2026",
+      "title": "외벽도장보수공사에 안전작업에 관한 기술지원규정"
+    },
+    {
+      "stableDocumentKey": "D-C-7",
+      "version": "D-C-7-2026",
+      "title": "비계 구조 및 안전작업에 관한 기술지원규정"
+    },
+    {
+      "stableDocumentKey": "B-E-10",
+      "version": "B-E-10-2026",
+      "title": "정전전로 및 그 인근에서의 전기작업에 관한 기술지원규정"
+    }
+  ],
+  "runtimeAssets": {
+    "exactKoshaAssets": 3,
+    "koshaGuideCorpusAssets": 4,
+    "routeScopedConsumers": 17,
+    "globalTraceWildcard": false
+  },
+  "verification": {
+    "focusedVitest": {
+      "command": "npm.cmd test -- tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\kosha-grounding-fail-closed.test.ts tests\\kosha-current-review-run-ask.test.ts tests\\kosha-guide-corpus-audit.test.ts",
+      "filesPassed": 5,
+      "testsPassed": 173,
+      "status": "PASS"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "staticPagesGenerated": 28,
+      "staticPagesExpected": 28
+    }
+  },
+  "boundaries": {
+    "dbMigration": false,
+    "schemaMutation": false,
+    "supabaseDataWrite": false,
+    "embeddingUpload": false,
+    "fullCorpusExactPromotionClaimed": false
+  },
+  "evidenceHarnessOrder": [
+    "SIF and accident-history signals identify likely high-risk hazards",
+    "Exact KOSHA pins and KOSHA guide corpus provide technical controls",
+    "Law and article links classify statutory mandate where verified",
+    "LLM naturalizes a fixed evidence pack"
+  ]
+}

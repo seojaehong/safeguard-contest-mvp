@@ -1,0 +1,74 @@
+# UI Follow-Up Ledger
+
+Checked at: 2026-07-21 KST
+
+## Current Split Verdict
+
+- Documents desktop cockpit: PASS
+- Share desktop cockpit: PASS
+- Documents mobile cockpit: PARTIAL
+- Share mobile compact flow: PARTIAL
+
+This ledger intentionally does not mark frontend as fully solved. The current desktop blockers are closed, but mobile still needs a bounded IA wave.
+
+## Current Production Baseline
+
+Current production evidence after the latest workspace IA work:
+
+- Production marker: `bd4beeebbb02c977b1f34d02b5895f7fcacba568`
+- Documents desktop-short 1440x723:
+  - `documentWorkbench.bottom = 722`
+  - `safetyBrief.bottom = 649`
+  - `riskAssessmentEditCta.bottom = 391`
+  - `safetyBriefShareCta.bottom = 441`
+  - `documentSecondaryActions.bottom = 711`
+  - `documentProvenanceSummary.bottom = 702`
+  - `documentDeepReviewSummary.bottom = 710`
+  - `visibleDocumentPreviews = 0`
+  - `overflowX = false`
+  - `outside = 0`
+- Documents mobile 390x844:
+  - `bodyHeight = 1205`
+  - `riskAssessmentEditCta.bottom = 542`
+  - `safetyBriefShareCta.bottom = 543`
+  - `safetyBrief.bottom = 981`
+  - detail summaries remain below the first viewport
+  - `overflowX = false`
+  - `outside = 0`
+
+## Product Structure Decision
+
+Route splitting alone is not the length fix. `/input`, `/documents`, and `/share` help navigation clarity, but long documents and long sharing details can still make each route feel heavy.
+
+The actual fix is viewport-first progressive disclosure:
+
+- Field mode: decision summary, critical controls, and primary action in the first viewport.
+- Manager mode: full 12-document review, provenance, logs, and deep editing behind explicit disclosure.
+
+Product message:
+
+> 핵심 판단은 빠르게, 전체 12종은 필요할 때 깊게 검토.
+
+## Next Bounded Wave
+
+Recommended branch name:
+
+```text
+fix/mobile-doc-share-cockpit
+```
+
+Acceptance proposal:
+
+1. Documents mobile 390x844 default closed state:
+   - risk assessment edit CTA and share CTA remain in the first viewport.
+   - safety brief top hazards or summary card stay in the first viewport.
+   - provenance/deep-review/library entrypoints are compact chips or reachable via a sticky action drawer.
+   - `visibleDocumentPreviews = 0`, `deepReviewOpen = false`, `overflowX = false`, `outside = 0`.
+2. Share mobile 390x844:
+   - first viewport contains transmission summary, selected channel/language, primary send or preview CTA, and preview entrypoint.
+   - long multilingual previews, evidence, and logs are accordions, drawer, or wizard steps.
+   - if dispatch is gated, the gate is explicit and does not look like a broken send state.
+3. Evidence:
+   - keep selector rects for mobile document/share cockpit elements in geometry JSON.
+   - do not use total body height alone as pass/fail; long detail below the fold is acceptable only when first-viewport decision/action proof exists.
+

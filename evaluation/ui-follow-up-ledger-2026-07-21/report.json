@@ -1,0 +1,52 @@
+{
+  "checkedAt": "2026-07-21T00:05:00+09:00",
+  "verdict": {
+    "documentsDesktopCockpit": "PASS",
+    "shareDesktopCockpit": "PASS",
+    "documentsMobileCockpit": "PARTIAL",
+    "shareMobileCompactFlow": "PARTIAL"
+  },
+  "productionMarker": "bd4beeebbb02c977b1f34d02b5895f7fcacba568",
+  "documentsDesktopShort": {
+    "viewport": {
+      "width": 1440,
+      "height": 723
+    },
+    "documentWorkbenchBottom": 722,
+    "safetyBriefBottom": 649,
+    "riskAssessmentEditCtaBottom": 391,
+    "safetyBriefShareCtaBottom": 441,
+    "documentSecondaryActionsBottom": 711,
+    "documentProvenanceSummaryBottom": 702,
+    "documentDeepReviewSummaryBottom": 710,
+    "visibleDocumentPreviews": 0,
+    "overflowX": false,
+    "outside": 0
+  },
+  "documentsMobile": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "bodyHeight": 1205,
+    "riskAssessmentEditCtaBottom": 542,
+    "safetyBriefShareCtaBottom": 543,
+    "safetyBriefBottom": 981,
+    "detailSummariesBelowFirstViewport": true,
+    "overflowX": false,
+    "outside": 0
+  },
+  "structuralDecision": {
+    "routeSplitAloneIsEnough": false,
+    "actualFix": "viewport-first progressive disclosure",
+    "fieldMode": "decision summary, critical controls, and primary action in the first viewport",
+    "managerMode": "full 12-document review, provenance, logs, and deep editing behind explicit disclosure"
+  },
+  "nextWave": {
+    "recommendedBranch": "fix/mobile-doc-share-cockpit",
+    "scope": [
+      "documents mobile cockpit density",
+      "share mobile compact flow"
+    ]
+  }
+}
