@@ -4,35 +4,81 @@ Checked at: 2026-07-20 KST
 
 ## Verdict
 
-**FIXED for the original Documents/Share geometry blocker, with a remaining product-depth follow-up.**
+**PARTIALLY FIXED.**
 
-The current production surface no longer reproduces the old launch blocker for the default document review stage, the share desktop breakpoint, or the edit-mode first-action placement. The editor still has a long full document surface below the fold, but the first editable body now appears in the first viewport instead of being pushed below a risk-row editor.
+The current production surface no longer reproduces the old launch blocker for the default document review stage or the share desktop breakpoint. The staged `입력 -> 문서 -> 공유` flow is also real in the default flow: only one stage is visible at a time.
+
+However, the edit surface still contains a very tall internal document editor panel below the first action. So the mismatch is real: prior static/design-contract passes and the default document/share geometry gate did not fully prove the workflow-level edit experience the user expected.
 
 ## Authoritative Surface
 
-- Git HEAD used for source comparison: `b1ec3635dbc0f60b4964ee5befbe2e03d311813f`
+- Git HEAD used for source comparison: `778f4601b359adc7ea716ee84eebdaa58f026115`
 - Served URL: `https://www.safeclaw.kr/workspace`
 - Build info endpoint: `https://www.safeclaw.kr/api/build-info`
-- Served commit: `b1ec3635dbc0f60b4964ee5befbe2e03d311813f`
+- Served commit: `778f4601b359adc7ea716ee84eebdaa58f026115`
 - Served branch: `master`
-- Deployment URL: `safeguard-contest-5yybjwagl-seojaehongs-projects.vercel.app`
+- Deployment URL: `safeguard-contest-iig0xw90t-seojaehongs-projects.vercel.app`
+
+The current probe waits for generated document readiness (`12/12 생성` or `안전 문서팩 3종 준비 완료`) before measuring, so it does not accidentally capture the interim generating shell.
 
 ## Results
 
 | Viewport | Stage | Page height | Stage y | Stage height | Key result |
 | --- | --- | ---: | ---: | ---: | --- |
-| 1440x900 | Documents review | 1149 | 229 | 800 | Fixed versus prior 2070px/723px sticky report |
-| 1440x900 | Document edit | 1489 | 63 editor y / 350 textarea y | 2561 editor height | Improved; editable body is now first-viewport visible |
+| 1440x900 | Documents review | 1147 | 229 | 798 | Fixed versus prior 2070px/723px sticky report |
+| 1440x900 | Document edit | 1489 | 63 editor y / 350 textarea y | 2561 editor height | Partially fixed; first textarea is visible, but the editor surface remains overlong |
 | 1440x900 | Share | 1174 | 189 | 921 | Fixed; 1180px desktop surface, not mobile-card width |
 | 390x844 | Documents review | 1417 | 262 | 1050 | Acceptable as a compact step, no horizontal overflow |
-| 390x844 | Document edit | 1152 | 84 editor y / 407 textarea y | 2696 editor height | Fixed versus the late first-body blocker; textarea starts in the first viewport |
+| 390x844 | Document edit | 1152 | 84 editor y / 407 textarea y | 2696 editor height | Partially fixed; textarea starts in the first viewport, but hidden editor depth remains high |
 | 390x844 | Share | 1487 | 244 | 1138 | Not the old 3836px share body; one primary CTA, no horizontal overflow |
 
 ## Interpretation
 
-The staged `입력 -> 문서 -> 공유` routing is now real in the default flow: only one of input, documents, or share is visible at a time. The old share desktop problem is also fixed on current production because the share surface is 1180px wide at 1440px desktop.
+The original default-stage complaints are fixed on current production:
 
-The bounded edit remediation moved the 위험성평가 구조화 행 editor below the document body. On mobile, the first textarea now begins at y=407 in an 844px viewport; on desktop it begins at y=350. This closes the "편집 후 첫 행동이 아래로 밀리는" geometry issue while preserving the structured risk-row editor, provenance drawers, and export tools below the main body.
+- Documents default review is `1147 / 900 = 1.27x` on desktop, not the old `2070 / 723 = 2.86x` report.
+- Mobile default review is `1417 / 844 = 1.68x`, with no horizontal overflow or sticky overlap.
+- Desktop share is a `1180px` surface at `1440px`, so it is no longer a narrow mobile-card layout.
+- Share has one primary CTA and no horizontal overflow on desktop or mobile.
+
+The remaining mismatch is the edit-mode product depth:
+
+- Desktop edit body is `1489 / 900 = 1.65x`, and the editor panel itself reports `2561px` height.
+- Mobile edit body is `1152 / 844 = 1.36x`, but the editor panel reports `2696px` height.
+- This means the first editable textarea is near the first viewport (`y=350` desktop, `y=407` mobile), but the full edit model still carries a long below-fold surface.
+
+That is why the prior "done" signal and the user's current perception diverged: the implemented work closed default review/share geometry and first editor entry, but did not fully redesign edit mode into a short, field-first document editor.
+
+## Implementation Trace
+
+The requested UX work was implemented across bounded fixes that are integrated into current HEAD:
+
+- `54af1d7d` `fix: tighten workspace document and share stages`
+  - touched `components/SafeGuardCommandCenter.tsx`, `app/globals.css`, `tests/frontend-workbench-visual-contract.test.ts`, `tests/north-star-document-ux.test.ts`, `tests/workspace-share-mobile-browser.test.ts`
+  - changed staged workspace documents/share surfaces and captured desktop/mobile evidence.
+- `652ba44c` `fix: widen workspace share desktop surface`
+  - touched `app/globals.css`
+  - widened the share surface on desktop.
+- `98ddcddd` `fix: widen workspace share desktop layout`
+  - touched `app/globals.css`
+  - further adjusted the share desktop composition.
+- `4a6e35fb` `fix: compact documents mobile editor entry`
+  - touched `app/globals.css`
+  - moved the mobile edit entry up and reduced the first-action delay.
+- `a2535d21` `chore: tighten workspace doc share gate`
+  - tightened the production gate so document measurements wait for generated-state readiness.
+
+All five commits are ancestors of current HEAD `778f4601`. A separate older geometry commit `ddda375d` is not an ancestor of this branch, but the current DOM/CSS still contains the effective later fixes listed above.
+
+## Mismatch Finding
+
+**Reason for mismatch:** prior completion language was too broad. It should have said "default document review and share desktop layout fixed; edit mode still has product-depth work."
+
+Possible user-surface mismatch sources:
+
+- If the user saw a narrow share card on desktop, they were likely on stale/non-authoritative local dev, cached deploy, or an older branch. Current production build `778f4601` renders `1180px` share width.
+- If the user clicked `편집` and judged the full edit experience, that is not stale. The current production edit surface is still long internally and remains a bounded UX follow-up.
+- Static 0 / 108 contract passes should not be treated as proof for this workflow-level gate unless they also measure generated document readiness, document height ratio, editor entry y-position, sticky overlap, and desktop share width.
 
 ## Evidence
 
@@ -48,10 +94,11 @@ The bounded edit remediation moved the 위험성평가 구조화 행 editor belo
 
 ## Next Remediation Gate
 
-Bounded fix target: keep review/share as they are, and only compress edit mode.
+Bounded fix target: keep default review/share as they are, and compress edit mode without changing the generation/harness contract.
 
-- Desktop edit: editor body should fit the first viewport better, with the editable body visible without deep scrolling.
-- Mobile edit: textarea or first structured field should start above y=420, and editor page height should be materially reduced.
+- Desktop edit: keep textarea y <= 350 and reduce internal editor panel height materially from 2561px.
+- Mobile edit: keep textarea y <= 420 and reduce internal editor panel height materially from 2696px.
+- Replace the long single textarea/default appendix feel with field-first document editing and collapsed provenance/export tools.
 - Keep one visible stage at a time.
 - Preserve existing workpack/document persistence and provenance data.
 
@@ -77,13 +124,20 @@ Verification:
 
 ## Post-Deploy Verification
 
-After commit `b1ec3635dbc0f60b4964ee5befbe2e03d311813f` was deployed to production, the same geometry probe was rerun against `https://www.safeclaw.kr`.
+After commit `778f4601b359adc7ea716ee84eebdaa58f026115` was deployed to production, the same geometry probe was rerun against `https://www.safeclaw.kr`.
 
-- Served commit: `b1ec3635dbc0f60b4964ee5befbe2e03d311813f`
-- Desktop documents review: page height 1149, horizontal overflow false
+- Served commit: `778f4601b359adc7ea716ee84eebdaa58f026115`
+- Desktop documents review: page height 1147, horizontal overflow false
 - Desktop share: 1180px share surface, one primary CTA, horizontal overflow false
 - Mobile documents review: page height 1417, horizontal overflow false
 - Mobile document edit: page height 1152, horizontal overflow false, no sticky/fixed overlap detected, first textarea y=407
 - Mobile share: page height 1487, one primary CTA, horizontal overflow false
 
 Raw evidence was refreshed in `current-geometry.json` and the `*-current-*.png` screenshots.
+
+## Current Verification
+
+- `node evaluation\workspace-docs-share-production-gate-2026-07-20\run-current-geometry-probe.mjs` — PASS, served commit `778f4601b359adc7ea716ee84eebdaa58f026115`, generated-state wait included.
+- `node -e "JSON.parse(...current-geometry.json); JSON.parse(...mismatch-investigation-2026-07-20.json)"` — PASS.
+- `npm.cmd test -- tests\workspace-layout-regression.test.ts tests\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false` — 2 files / 28 tests PASS, 1 skipped. Duration 201.93s.
+- `git diff --check` — PASS, line-ending warnings only.

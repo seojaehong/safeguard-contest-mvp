@@ -1,0 +1,130 @@
+{
+  "checkedAt": "2026-07-20T06:59:37.096Z",
+  "verdict": "PARTIALLY_FIXED",
+  "authoritativeHead": "778f4601b359adc7ea716ee84eebdaa58f026115",
+  "servedUrl": "https://www.safeclaw.kr/workspace",
+  "servedCommit": "778f4601b359adc7ea716ee84eebdaa58f026115",
+  "servedBranch": "master",
+  "deploymentUrl": "safeguard-contest-iig0xw90t-seojaehongs-projects.vercel.app",
+  "generatedStateWait": true,
+  "implementedAndIntegrated": [
+    {
+      "commit": "54af1d7d",
+      "message": "fix: tighten workspace document and share stages",
+      "integratedInCurrentHead": true
+    },
+    {
+      "commit": "652ba44c",
+      "message": "fix: widen workspace share desktop surface",
+      "integratedInCurrentHead": true
+    },
+    {
+      "commit": "98ddcddd",
+      "message": "fix: widen workspace share desktop layout",
+      "integratedInCurrentHead": true
+    },
+    {
+      "commit": "4a6e35fb",
+      "message": "fix: compact documents mobile editor entry",
+      "integratedInCurrentHead": true
+    },
+    {
+      "commit": "a2535d21",
+      "message": "chore: tighten workspace doc share gate",
+      "integratedInCurrentHead": true
+    }
+  ],
+  "notAncestorButSupersededByCurrentGeometry": [
+    {
+      "commit": "ddda375d",
+      "message": "fix: restore workspace document share geometry",
+      "integratedInCurrentHead": false
+    }
+  ],
+  "measurements": {
+    "desktopDocumentsReview": {
+      "viewport": "1440x900",
+      "bodyHeight": 1147,
+      "viewportHeight": 900,
+      "heightRatio": 1.27,
+      "documentY": 229,
+      "documentHeight": 798,
+      "horizontalOverflow": false,
+      "outsideElements": 0,
+      "stickyLikeCount": 0,
+      "status": "fixed"
+    },
+    "desktopDocumentEdit": {
+      "viewport": "1440x900",
+      "bodyHeight": 1489,
+      "viewportHeight": 900,
+      "heightRatio": 1.65,
+      "editorY": 63,
+      "textareaY": 350,
+      "editorHeight": 2561,
+      "horizontalOverflow": false,
+      "outsideElements": 0,
+      "stickyLikeCount": 1,
+      "status": "partial"
+    },
+    "desktopShare": {
+      "viewport": "1440x900",
+      "bodyHeight": 1174,
+      "viewportHeight": 900,
+      "heightRatio": 1.30,
+      "shareY": 189,
+      "shareWidth": 1180,
+      "primaryShareCtas": 1,
+      "horizontalOverflow": false,
+      "outsideElements": 0,
+      "stickyLikeCount": 0,
+      "status": "fixed"
+    },
+    "mobileDocumentsReview": {
+      "viewport": "390x844",
+      "bodyHeight": 1417,
+      "viewportHeight": 844,
+      "heightRatio": 1.68,
+      "documentY": 262,
+      "documentHeight": 1050,
+      "horizontalOverflow": false,
+      "outsideElements": 0,
+      "stickyLikeCount": 0,
+      "status": "fixed"
+    },
+    "mobileDocumentEdit": {
+      "viewport": "390x844",
+      "bodyHeight": 1152,
+      "viewportHeight": 844,
+      "heightRatio": 1.36,
+      "editorY": 84,
+      "textareaY": 407,
+      "editorHeight": 2696,
+      "horizontalOverflow": false,
+      "outsideElements": 0,
+      "stickyLikeCount": 0,
+      "status": "partial"
+    },
+    "mobileShare": {
+      "viewport": "390x844",
+      "bodyHeight": 1487,
+      "viewportHeight": 844,
+      "heightRatio": 1.76,
+      "shareY": 244,
+      "shareWidth": 336,
+      "primaryShareCtas": 1,
+      "horizontalOverflow": false,
+      "outsideElements": 0,
+      "stickyLikeCount": 0,
+      "status": "fixed"
+    }
+  },
+  "mismatchReason": "Default documents review and desktop share were fixed and integrated, but edit mode still has overlong internal editor depth. Prior static/design-contract passes did not fully prove generated-state workflow geometry.",
+  "nextRemediation": [
+    "Keep default documents review and share layout unchanged.",
+    "Compress document edit mode only.",
+    "Keep desktop textarea y <= 350 and mobile textarea y <= 420.",
+    "Reduce editor internal panel height from 2561px desktop and 2696px mobile.",
+    "Move provenance/export/supporting content behind collapsed controls without deleting data contracts."
+  ]
+}

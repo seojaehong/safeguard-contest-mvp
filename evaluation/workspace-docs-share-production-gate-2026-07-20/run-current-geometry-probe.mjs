@@ -81,6 +81,7 @@ for (const variant of variants) {
     await page.locator("textarea").first().fill(inputText);
     await page.getByRole("button", { name: /안전 문서 생성/u }).click();
     await page.locator(".workspace-document-page").waitFor({ state: "visible", timeout: 60_000 });
+    await page.getByText(/12\/12 생성|안전 문서팩 3종 준비 완료/u).first().waitFor({ timeout: 60_000 });
     const documents = await readMetrics(page);
     await page.screenshot({ path: path.join(outDir, `${variant.name}-current-documents.png`), fullPage: true });
     await page.getByRole("button", { name: /^편집$/u }).first().click();
