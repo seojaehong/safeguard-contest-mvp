@@ -1,12 +1,12 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v1",
-  "generatedAt": "2026-07-20T07:56:13.951Z",
-  "head": "779ee9e0ac433cde7ae17d70c587890cefce52f5",
+  "generatedAt": "2026-07-20T08:11:31.019Z",
+  "head": "689a597dd5e87da64749c70b85d71716caebe1e8",
   "liveBuildInfo": {
-    "commitSha": "779ee9e0ac433cde7ae17d70c587890cefce52f5",
+    "commitSha": "689a597dd5e87da64749c70b85d71716caebe1e8",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-jw16yqknp-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-a3mv9wxf6-seojaehongs-projects.vercel.app"
   },
   "overall": "northstar_open_approval_gated",
   "dbMutationPerformed": false,
@@ -159,18 +159,21 @@
     {
       "id": "workspace_document_edit_compaction",
       "artifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
-      "result": "pass_bounded_edit_mode_remediation_shipped",
-      "sourceCommit": "45faccac787858e4085db65651f3921c5b5b4bbf",
-      "evidenceCommit": "c051f659a4ee28a1d6d2e8612e5c406ff5cc26c9",
+      "result": "pass_bounded_edit_mode_remediation_shipped_sticky_zero",
+      "sourceCommit": "689a597dd5e87da64749c70b85d71716caebe1e8",
+      "evidenceCommit": "689a597dd5e87da64749c70b85d71716caebe1e8",
       "desktopEditorPanelHeight": 1433,
       "mobileEditorPanelHeight": 1359,
       "desktopTextareaY": 374,
       "mobileTextareaY": 361,
       "horizontalOverflow": false,
       "outsideElements": 0,
-      "northStarDocumentUxTestsPassed": 4,
-      "workspaceFocusedTestsPassed": 1,
-      "buildStaticPages": "28/28"
+      "northStarDocumentUxTestsPassed": 7,
+      "workspaceFocusedTestsPassed": 7,
+      "buildStaticPages": "28/28",
+      "desktopEditorStickyLike": 0,
+      "mobileEditorStickyLike": 0,
+      "typecheck": "pass"
     },
     {
       "id": "ui_documents_contrast",
