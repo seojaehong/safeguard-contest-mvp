@@ -1,9 +1,10 @@
 {
   "verdict": "PREVIEW_ONLY",
-  "checkedAt": "2026-07-21T00:58:00+09:00",
+  "checkedAt": "2026-07-21T02:36:00+09:00",
   "production": {
     "url": "https://www.safeclaw.kr/api/workflow/dispatch",
-    "commitSha": "72b282315b7dcdd2bcc538de13dee9fd7d4c1c80",
+    "commitSha": "3a91ec7ebee10d71e759b5c9fc261ec4a8974a28",
+    "productCodeCommitSha": "f504b15e9682e35bce97d629b86e02268c08a185",
     "method": "GET"
   },
   "externalDispatchPerformed": false,

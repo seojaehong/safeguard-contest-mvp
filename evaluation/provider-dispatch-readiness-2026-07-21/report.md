@@ -9,7 +9,8 @@ The Share UI, recipient portal, and language-specific preview contracts are pass
 ## Production Probe
 
 - URL: `https://www.safeclaw.kr/api/workflow/dispatch`
-- Production marker at probe time: `72b282315b7dcdd2bcc538de13dee9fd7d4c1c80`
+- Production marker at probe time: `3a91ec7ebee10d71e759b5c9fc261ec4a8974a28`
+- Product code marker: `f504b15e9682e35bce97d629b86e02268c08a185`
 - Method: `GET`
 - External dispatch performed: no
 - DB/schema/Supabase writes: none
