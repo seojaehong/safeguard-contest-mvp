@@ -1,0 +1,52 @@
+{
+  "title": "Documents Risk-Row Cockpit Gate",
+  "checkedAt": "2026-07-21T07:25:39+09:00",
+  "verdict": "PASS_CURRENT_SOURCE",
+  "sourceHead": "2daa0bbf4a0dc0ae8aa71507a4a4a2dcf3aaf0e2",
+  "branch": "chore/recipient-foreign-live-gate-20260720",
+  "scope": {
+    "route": "/documents",
+    "document": "riskAssessmentDraft",
+    "claim": "risk-row authoring cockpit first-pane visibility and bounded drilldown",
+    "providerDispatchLiveClaimed": false,
+    "fullDocumentIaClaimed": false,
+    "routeSplitAloneAcceptedAsFix": false
+  },
+  "contracts": {
+    "firstRiskRowHeaderBelowToolbar": true,
+    "firstHazardFieldUsableInShell": true,
+    "rowHeaderShowsEvidenceAndVerification": true,
+    "rawSectionTextareaSecondary": true,
+    "rowDetailsBehindDrilldown": true,
+    "mobileWorkpackShellScrollHeightCap": 1500,
+    "horizontalOverflowClosed": true
+  },
+  "commands": [
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"bounds the default documents route editor\" --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "result": "1 passed / 30 skipped"
+    },
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"canonical risk rows|incomplete new risk row|locks structured editing|row identity\" --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "result": "4 passed / 27 skipped"
+    },
+    {
+      "command": "npm.cmd test -- tests\\workpack-risk-rows-editor.test.ts tests\\mock-deliverable-integrity.test.ts tests\\scenario-inference.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "result": "3 files / 33 tests"
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS",
+      "result": "tsc --noEmit --incremental false"
+    }
+  ],
+  "remainingDebt": [
+    "Full 12-document field-first authoring remains open.",
+    "Risk-row readability can still improve with row-level evidence actions and validation affordances.",
+    "Share/dispatch generated-result composition remains separate.",
+    "Provider live dispatch remains approval-gated."
+  ]
+}
