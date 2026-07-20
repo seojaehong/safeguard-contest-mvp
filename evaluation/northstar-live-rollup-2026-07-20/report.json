@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v1",
-  "generatedAt": "2026-07-20T06:50:00.000Z",
-  "head": "6331d8aa45b23badca96495e67f762c4dd7702e8",
+  "generatedAt": "2026-07-20T06:57:00.000Z",
+  "head": "510596d503f432232520c9f1f43c7b6532057f9a",
   "liveBuildInfo": {
     "commitSha": "3a6b9f4e25739954ba3b89c0b9d067ff52a28ef2",
     "branch": "master",
@@ -65,6 +65,9 @@
       "dryRunRetirements": 1,
       "controlReviewRows": 71,
       "retrievalScenarioBranchPairs": 8,
+      "evidenceCoverageDeclared": true,
+      "countOnlyWorkstreams": 3,
+      "rowLevelCompleteWorkstreams": 2,
       "testFilesPassed": 3,
       "testsPassed": 116,
       "dbMutationPerformed": false

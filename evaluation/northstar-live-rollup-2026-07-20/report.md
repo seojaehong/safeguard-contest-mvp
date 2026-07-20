@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-20T06:50:00.000Z
+Generated at: 2026-07-20T06:57:00.000Z
 
-Current HEAD: `6331d8aa45b23badca96495e67f762c4dd7702e8`
+Current HEAD: `510596d503f432232520c9f1f43c7b6532057f9a`
 
 Current live production build: `3a6b9f4e25739954ba3b89c0b9d067ff52a28ef2`
 
@@ -18,7 +18,7 @@ This rollup does not claim the long-term North Star is complete. It records the 
 | KOSHA materialization | PASS, 9 files / 169 tests + Python 19 tests + typecheck | `evaluation/kosha-materialization-current-gate-2026-07-20/report.json` |
 | KOSHA exact trust registry | PASS, D-C-13 / D-C-7 / B-E-10, focused 5 files / 53 tests | `evaluation/kosha-focused-current-gate-2026-07-20/report.json` |
 | KOSHA guide approval packet | APPROVAL REQUIRED before mutation/embedding, 1040 rows audited, 818 empty bodies, 1040 missing official provenance rows, 70 operational-control review rows, 2 retrieval branches unobserved, approval packet tests 2 files / 114 tests | `evaluation/kosha-guide-approval-current-2026-07-20/approval-packet.json` |
-| KOSHA guide repair plan | PASS read-only repair queue, 6 workstreams, update 7, retire 1, control review 71, retrieval scenario-branch pairs 8, focused 3 files / 116 tests | `evaluation/kosha-guide-approval-current-2026-07-20/repair-plan.json` |
+| KOSHA guide repair plan | PASS read-only repair queue, 6 workstreams, update 7, retire 1, control review 71, retrieval scenario-branch pairs 8, evidence coverage declared, focused 3 files / 116 tests | `evaluation/kosha-guide-approval-current-2026-07-20/repair-plan.json` |
 | RLS / LLM Wiki app boundary | PASS approval-gated, 9 files / 83 tests | `evaluation/rls-current-tenant-boundary-gate-2026-07-20/report.json` |
 | Live critical surface | PASS, 8 routes x 2 viewports, 16 rows, findings 0 | `evaluation/live-critical-surface-current-2026-07-20-rerun/report.json` |
 | Operator wiki / reference corpus | PASS approval-gated, 18 files / 208 tests, ontology 166/169 | `evaluation/operator-wiki-reference-corpus-current-gate-2026-07-20/report.json` |
