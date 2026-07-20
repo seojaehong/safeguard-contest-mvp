@@ -1,13 +1,13 @@
 {
-  "checkedAt": "2026-07-20T18:45:13.234Z",
+  "checkedAt": "2026-07-20T22:39:20.252Z",
   "build": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "560dc6ad50aad22c89f7a7f7b56f3ac1b67d95f2",
+    "commitSha": "4979638493c0eebd410e2f1ab0f5383c2f3c7102",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ena1z6bwf-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-81fnx0h82-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "inputText": "서울 성수동 외벽 도장 작업, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보. 이동식 비계와 자재 양중 동선 확인 필요.",
@@ -38,15 +38,15 @@
           "x": 186,
           "y": 229,
           "w": 1068,
-          "h": 493,
-          "bottom": 722
+          "h": 523,
+          "bottom": 752
         },
         "documentWorkbench": {
           "x": 186,
           "y": 229,
           "w": 1068,
-          "h": 493,
-          "bottom": 722
+          "h": 523,
+          "bottom": 752
         },
         "documentWorkbenchHead": {
           "x": 197,
@@ -59,8 +59,8 @@
           "x": 197,
           "y": 336,
           "w": 1046,
-          "h": 313,
-          "bottom": 649
+          "h": 343,
+          "bottom": 679
         },
         "safetyBriefActions": {
           "x": 1056,
@@ -85,24 +85,24 @@
         },
         "documentSecondaryActions": {
           "x": 197,
-          "y": 657,
+          "y": 687,
           "w": 1046,
           "h": 54,
-          "bottom": 711
+          "bottom": 741
         },
         "documentProvenanceSummary": {
           "x": 198,
-          "y": 658,
+          "y": 688,
           "w": 255,
           "h": 44,
-          "bottom": 702
+          "bottom": 732
         },
         "documentDeepReviewSummary": {
           "x": 461,
-          "y": 658,
+          "y": 688,
           "w": 255,
           "h": 52,
-          "bottom": 710
+          "bottom": 740
         },
         "documentPreview": {
           "x": 0,
@@ -131,7 +131,7 @@
         "body": {
           "width": 1440,
           "clientWidth": 1440,
-          "height": 2210,
+          "height": 2533,
           "clientHeight": 723,
           "overflowX": false
         },
@@ -144,8 +144,8 @@
           "x": 186,
           "y": -9,
           "w": 1068,
-          "h": 1853,
-          "bottom": 1844
+          "h": 2176,
+          "bottom": 2167
         },
         "documentWorkbench": null,
         "documentWorkbenchHead": null,
@@ -163,15 +163,15 @@
           "x": 482,
           "y": 63,
           "w": 772,
-          "h": 1433,
-          "bottom": 1496
+          "h": 1756,
+          "bottom": 1819
         },
         "documentTextarea": {
           "x": 499,
-          "y": 374,
+          "y": 1083,
           "w": 738,
           "h": 173,
-          "bottom": 547
+          "bottom": 1256
         },
         "sharePage": null,
         "shareRoot": {
@@ -237,7 +237,7 @@
         "body": {
           "width": 1440,
           "clientWidth": 1440,
-          "height": 912,
+          "height": 918,
           "clientHeight": 723,
           "overflowX": false
         },
@@ -265,15 +265,15 @@
           "x": 130,
           "y": 189,
           "w": 1180,
-          "h": 659,
-          "bottom": 848
+          "h": 665,
+          "bottom": 854
         },
         "shareRoot": {
           "x": 130,
           "y": 189,
           "w": 1180,
-          "h": 659,
-          "bottom": 848
+          "h": 665,
+          "bottom": 854
         },
         "shareMobileSummary": {
           "x": 0,
@@ -286,29 +286,29 @@
           "x": 149,
           "y": 305,
           "w": 606,
-          "h": 362,
-          "bottom": 667
+          "h": 368,
+          "bottom": 673
         },
         "shareTargetCard": {
           "x": 149,
           "y": 361,
-          "w": 194,
-          "h": 306,
-          "bottom": 667
+          "w": 400,
+          "h": 150,
+          "bottom": 511
         },
         "shareChannelCard": {
-          "x": 355,
-          "y": 361,
-          "w": 194,
-          "h": 306,
-          "bottom": 667
+          "x": 149,
+          "y": 523,
+          "w": 606,
+          "h": 150,
+          "bottom": 673
         },
         "shareLanguageCard": {
           "x": 561,
           "y": 361,
           "w": 194,
-          "h": 306,
-          "bottom": 667
+          "h": 150,
+          "bottom": 511
         },
         "sharePreview": {
           "x": 771,
@@ -361,15 +361,15 @@
           "x": 186,
           "y": 229,
           "w": 1068,
-          "h": 581,
-          "bottom": 810
+          "h": 615,
+          "bottom": 844
         },
         "documentWorkbench": {
           "x": 186,
           "y": 229,
           "w": 1068,
-          "h": 581,
-          "bottom": 810
+          "h": 615,
+          "bottom": 844
         },
         "documentWorkbenchHead": {
           "x": 199,
@@ -382,8 +382,8 @@
           "x": 199,
           "y": 358,
           "w": 1042,
-          "h": 365,
-          "bottom": 723
+          "h": 399,
+          "bottom": 757
         },
         "safetyBriefActions": {
           "x": 1048,
@@ -408,24 +408,24 @@
         },
         "documentSecondaryActions": {
           "x": 199,
-          "y": 735,
+          "y": 769,
           "w": 1042,
           "h": 62,
-          "bottom": 797
+          "bottom": 831
         },
         "documentProvenanceSummary": {
           "x": 200,
-          "y": 736,
+          "y": 770,
           "w": 253,
           "h": 52,
-          "bottom": 788
+          "bottom": 822
         },
         "documentDeepReviewSummary": {
           "x": 463,
-          "y": 736,
+          "y": 770,
           "w": 253,
           "h": 60,
-          "bottom": 796
+          "bottom": 830
         },
         "documentPreview": {
           "x": 0,
@@ -454,7 +454,7 @@
         "body": {
           "width": 1440,
           "clientWidth": 1440,
-          "height": 2210,
+          "height": 2533,
           "clientHeight": 900,
           "overflowX": false
         },
@@ -467,8 +467,8 @@
           "x": 186,
           "y": -9,
           "w": 1068,
-          "h": 1853,
-          "bottom": 1844
+          "h": 2176,
+          "bottom": 2167
         },
         "documentWorkbench": null,
         "documentWorkbenchHead": null,
@@ -486,15 +486,15 @@
           "x": 482,
           "y": 63,
           "w": 772,
-          "h": 1433,
-          "bottom": 1496
+          "h": 1756,
+          "bottom": 1819
         },
         "documentTextarea": {
           "x": 499,
-          "y": 374,
+          "y": 1083,
           "w": 738,
           "h": 173,
-          "bottom": 547
+          "bottom": 1256
         },
         "sharePage": null,
         "shareRoot": {
@@ -560,7 +560,7 @@
         "body": {
           "width": 1440,
           "clientWidth": 1440,
-          "height": 900,
+          "height": 918,
           "clientHeight": 900,
           "overflowX": false
         },
@@ -586,17 +586,17 @@
         "documentTextarea": null,
         "sharePage": {
           "x": 130,
-          "y": 261,
+          "y": 189,
           "w": 1180,
-          "h": 551,
-          "bottom": 812
+          "h": 665,
+          "bottom": 854
         },
         "shareRoot": {
           "x": 130,
-          "y": 261,
+          "y": 189,
           "w": 1180,
-          "h": 551,
-          "bottom": 812
+          "h": 665,
+          "bottom": 854
         },
         "shareMobileSummary": {
           "x": 0,
@@ -607,52 +607,52 @@
         },
         "shareForm": {
           "x": 149,
-          "y": 377,
+          "y": 305,
           "w": 606,
-          "h": 254,
-          "bottom": 631
+          "h": 368,
+          "bottom": 673
         },
         "shareTargetCard": {
           "x": 149,
-          "y": 433,
-          "w": 194,
-          "h": 198,
-          "bottom": 631
+          "y": 361,
+          "w": 400,
+          "h": 150,
+          "bottom": 511
         },
         "shareChannelCard": {
-          "x": 355,
-          "y": 433,
-          "w": 194,
-          "h": 198,
-          "bottom": 631
+          "x": 149,
+          "y": 523,
+          "w": 606,
+          "h": 150,
+          "bottom": 673
         },
         "shareLanguageCard": {
           "x": 561,
-          "y": 433,
+          "y": 361,
           "w": 194,
-          "h": 198,
-          "bottom": 631
+          "h": 150,
+          "bottom": 511
         },
         "sharePreview": {
           "x": 771,
-          "y": 377,
+          "y": 305,
           "w": 520,
           "h": 400,
-          "bottom": 777
+          "bottom": 705
         },
         "primaryShareCta": {
           "x": 149,
-          "y": 377,
+          "y": 305,
           "w": 606,
           "h": 44,
-          "bottom": 421
+          "bottom": 349
         },
         "primaryShareCtas": 1,
         "stickyLike": [
           {
             "selector": "message-preview-panel",
             "position": "sticky",
-            "y": 377,
+            "y": 305,
             "h": 400
           }
         ]
@@ -682,73 +682,73 @@
         "inputPage": null,
         "documentPage": {
           "x": 27,
-          "y": 303,
+          "y": 323,
           "w": 336,
-          "h": 532,
-          "bottom": 835
+          "h": 492,
+          "bottom": 815
         },
         "documentWorkbench": {
           "x": 27,
-          "y": 303,
+          "y": 323,
           "w": 336,
-          "h": 532,
-          "bottom": 835
+          "h": 492,
+          "bottom": 815
         },
         "documentWorkbenchHead": {
           "x": 38,
-          "y": 314,
+          "y": 334,
           "w": 314,
           "h": 107,
-          "bottom": 421
+          "bottom": 441
         },
         "safetyBrief": {
           "x": 38,
-          "y": 441,
+          "y": 461,
           "w": 314,
-          "h": 321,
-          "bottom": 762
+          "h": 281,
+          "bottom": 742
         },
         "safetyBriefActions": {
           "x": 45,
-          "y": 506,
+          "y": 526,
           "w": 300,
           "h": 46,
-          "bottom": 552
+          "bottom": 572
         },
         "riskAssessmentEditCta": {
           "x": 45,
-          "y": 507,
+          "y": 527,
           "w": 148,
           "h": 44,
-          "bottom": 551
+          "bottom": 571
         },
         "safetyBriefShareCta": {
           "x": 197,
-          "y": 506,
+          "y": 526,
           "w": 148,
           "h": 46,
-          "bottom": 552
+          "bottom": 572
         },
         "documentSecondaryActions": {
           "x": 38,
-          "y": 770,
+          "y": 750,
           "w": 314,
           "h": 54,
-          "bottom": 824
+          "bottom": 804
         },
         "documentProvenanceSummary": {
           "x": 39,
-          "y": 771,
+          "y": 751,
           "w": 155,
           "h": 44,
-          "bottom": 815
+          "bottom": 795
         },
         "documentDeepReviewSummary": {
           "x": 196,
-          "y": 771,
+          "y": 751,
           "w": 155,
           "h": 52,
-          "bottom": 823
+          "bottom": 803
         },
         "documentPreview": {
           "x": 0,
@@ -777,7 +777,7 @@
         "body": {
           "width": 390,
           "clientWidth": 390,
-          "height": 1981,
+          "height": 2254,
           "clientHeight": 844,
           "overflowX": false
         },
@@ -790,8 +790,8 @@
           "x": 27,
           "y": -130,
           "w": 336,
-          "h": 1614,
-          "bottom": 1484
+          "h": 1887,
+          "bottom": 1757
         },
         "documentWorkbench": null,
         "documentWorkbenchHead": null,
@@ -809,15 +809,15 @@
           "x": 27,
           "y": 63,
           "w": 336,
-          "h": 1359,
-          "bottom": 1422
+          "h": 1632,
+          "bottom": 1695
         },
         "documentTextarea": {
           "x": 40,
-          "y": 361,
+          "y": 1030,
           "w": 310,
           "h": 173,
-          "bottom": 534
+          "bottom": 1203
         },
         "sharePage": null,
         "shareRoot": {

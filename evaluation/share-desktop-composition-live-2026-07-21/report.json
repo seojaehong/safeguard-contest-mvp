@@ -1,0 +1,55 @@
+{
+  "verdict": "PASS_PRODUCTION",
+  "checkedAt": "2026-07-21 KST",
+  "scope": {
+    "route": "/workspace",
+    "surface": "share",
+    "claim": "production desktop share composition and mobile regression",
+    "liveProviderDispatchClaimed": false
+  },
+  "production": {
+    "url": "https://www.safeclaw.kr",
+    "commitSha": "4979638493c0eebd410e2f1ab0f5383c2f3c7102",
+    "deploymentUrl": "safeguard-contest-81fnx0h82-seojaehongs-projects.vercel.app"
+  },
+  "verification": {
+    "command": "node evaluation\\workspace-docs-share-production-gate-2026-07-20\\run-current-geometry-probe.mjs",
+    "status": "PASS"
+  },
+  "desktopShort": {
+    "viewport": "1440x723",
+    "pageHeight": 918,
+    "shareRoot": { "x": 130, "width": 1180, "height": 665, "bottom": 854 },
+    "primary": { "x": 149, "width": 606, "bottom": 349 },
+    "target": { "x": 149, "width": 400, "bottom": 511 },
+    "language": { "x": 561, "width": 194, "bottom": 511 },
+    "channel": { "x": 149, "width": 606, "bottom": 673 },
+    "preview": { "x": 771, "width": 520, "bottom": 705 },
+    "primaryCount": 1,
+    "horizontalOverflow": 0,
+    "outside": 0
+  },
+  "desktop": {
+    "viewport": "1440x900",
+    "pageHeight": 918,
+    "shareRoot": { "x": 130, "width": 1180, "height": 665, "bottom": 854 },
+    "primary": { "x": 149, "width": 606, "bottom": 349 },
+    "channel": { "x": 149, "width": 606, "bottom": 673 },
+    "preview": { "x": 771, "width": 520, "bottom": 705 },
+    "primaryCount": 1,
+    "horizontalOverflow": 0
+  },
+  "mobile": {
+    "viewport": "390x844",
+    "pageHeight": 993,
+    "shareRoot": { "x": 27, "width": 336, "height": 644, "bottom": 888 },
+    "preview": { "width": 310, "height": 219, "bottom": 659 },
+    "primary": { "width": 292, "height": 44, "bottom": 720 },
+    "horizontalOverflow": 0
+  },
+  "remainingDebt": [
+    "Full documents edit mode remains long; risk-row cockpit is first-task visibility, not full 12-document editor completion.",
+    "Full share wizard redesign is separate from this composition patch.",
+    "Live provider dispatch remains approval/configuration gated."
+  ]
+}
