@@ -159,6 +159,19 @@ Current-source bounded gate:
 
 Interpretation: this closes the first document-specific drilldown depth layer: one selected document, one open body section, bounded pane. Remaining document IA debt is richer document-specific section actions and editing affordances, not raw route body height, missing selected context, or all sections expanding at once.
 
+## 2026-07-21 Share Result Drilldown Update
+
+Current-source bounded source/CSS gate:
+
+- Artifact: `evaluation/share-result-drilldown-2026-07-21/report.md`
+- Share result state now renders as `[data-share-result-drilldown]` with `[data-share-result-summary]`.
+- Channel/provider/log details are contained inside `.workflow-result-detail` with bounded internal scroll.
+- Failure, duplicate-risk, and duplicate-log states default open so critical warnings are not hidden.
+- Desktop `/workspace` Share and standalone `/dispatch` keep the result drilldown in the left cockpit column instead of spanning across the preview/right-pane area.
+- Mobile remains one-column and places result details after the first-action region.
+
+Interpretation: this is a result-depth containment layer, not provider live dispatch. Route/page split alone is still not accepted as the UX fix; long provider/result details must stay in bounded drilldown while the first viewport keeps publish/status, recipient/channel decision, preview, and primary action.
+
 Share mobile configuration-stack current-source gate:
 
 - Artifact: `evaluation/share-mobile-full-flow-2026-07-21/report.md`

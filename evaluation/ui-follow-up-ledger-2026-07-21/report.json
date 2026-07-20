@@ -331,6 +331,46 @@
     ],
     "interpretation": "first document-specific drilldown depth layer closed; richer section actions remain product-depth follow-up"
   },
+  "shareResultDrilldownUpdate": {
+    "checkedAt": "2026-07-21T04:40:27+09:00",
+    "artifact": "evaluation/share-result-drilldown-2026-07-21/report.json",
+    "scope": "provider/channel/log result containment inside the Share cockpit",
+    "currentSourceContract": {
+      "resultDrilldownSelector": "[data-share-result-drilldown]",
+      "resultSummarySelector": "[data-share-result-summary]",
+      "boundedDetailClass": "workflow-result-detail",
+      "failureDuplicateRiskDefaultOpen": true,
+      "workspaceDesktopResultColumn": "left cockpit column",
+      "dispatchDesktopResultColumn": "left cockpit column",
+      "providerDispatchLiveClaimed": false
+    },
+    "checks": [
+      {
+        "command": "npm.cmd test -- tests\\workflow-share-panel-behavior.test.ts --maxWorkers=1 --fileParallelism=false",
+        "result": "PASS",
+        "testFilesPassed": 1,
+        "testsPassed": 9
+      },
+      {
+        "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+        "result": "PASS",
+        "testFilesPassed": 1,
+        "testsPassed": 2
+      },
+      {
+        "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"puts the core launcher before the mobile editor\" --maxWorkers=1 --fileParallelism=false",
+        "result": "PASS",
+        "testFilesPassed": 1,
+        "testsPassed": 2,
+        "testsSkipped": 29
+      },
+      {
+        "command": "npm.cmd run typecheck",
+        "result": "PASS"
+      }
+    ],
+    "interpretation": "share result details are bounded drilldown; generated provider delivery and provider-result persistence remain separate gates"
+  },
   "structuralDecision": {
     "routeSplitAloneIsEnough": false,
     "actualFix": "viewport-first progressive disclosure",

@@ -6169,6 +6169,42 @@ ul {
   letter-spacing: var(--tracking-body);
 }
 
+.workflow-result > summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.workflow-result > summary::-webkit-details-marker {
+  display: none;
+}
+
+.workflow-result > summary span {
+  color: var(--muted);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  line-height: var(--leading-caption);
+}
+
+.workflow-result > summary strong {
+  color: inherit;
+  font-size: var(--text-table);
+  font-weight: 800;
+  line-height: var(--leading-table);
+}
+
+.workflow-result-detail {
+  display: grid;
+  gap: 8px;
+  max-height: min(260px, 34vh);
+  overflow: auto;
+  padding-top: 8px;
+}
+
 .workflow-result.ok {
   background: rgba(232, 241, 237, 0.85);
   color: var(--accent);
@@ -15011,7 +15047,8 @@ body:has(.safeclaw-landing) :is(
   }
 
   .command-center-shell.workspace-page-share .workflow-result {
-    grid-column: 1 / -1;
+    grid-column: 1;
+    max-width: 100%;
   }
 }
 
@@ -15208,6 +15245,11 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-module-shell[data-module-route="/dispatch"] [data-share-preview] .message-preview-lines {
     max-height: calc(100vh - 310px);
     overflow: auto;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .workflow-result {
+    grid-column: 1;
+    max-width: 100%;
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .safeclaw-module-panel {
@@ -17011,6 +17053,10 @@ body:has(.safeclaw-landing) :is(
   .share-panel.workflow-panel > .share-inline-note,
   .share-panel.workflow-panel > .share-readiness-warning {
     order: 4;
+  }
+
+  .share-panel.workflow-panel > .workflow-result {
+    order: 6;
   }
 
   .share-panel.workflow-panel > .command-actions {

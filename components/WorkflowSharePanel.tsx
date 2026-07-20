@@ -1337,41 +1337,59 @@ export function WorkflowSharePanel({
       ) : null}
 
       {result ? (
-        <div className={resultClassName}>
-          <p>
-            {customerSafeMessage(result.message, "채널별 전송 결과를 확인해 주세요.")}
-          </p>
-          {validationOnlyResult ? (
-            <p>미리 확인용 응답입니다. 실제 전송 기록으로 저장하지 않습니다.</p>
-          ) : null}
-          {result.duplicateRisk ? (
-            <p role="alert">
-              {result.providerCalled === true
-                ? "전송 결과를 확정하지 못했습니다. 실제 발송되었을 수 있으므로 재전송하지 말고 관리자에게 확인하세요."
-                : "중복 전송을 안전하게 막을 수 없어 전송을 시작하지 않았습니다. 관리자에게 확인해 주세요."}
+        <details
+          className={resultClassName}
+          data-share-result-drilldown
+          open={Boolean(resultHasFailure || result.duplicateRisk || logSaveState.status === "duplicate-risk")}
+        >
+          <summary data-share-result-summary>
+            <span>전송 결과</span>
+            <strong>
+              {dispatchPresentation.fullySent
+                ? "전송 완료"
+                : resultHasFailure
+                  ? "확인 필요"
+                  : validationOnlyResult
+                    ? "미리 확인"
+                    : "상태 확인"}
+            </strong>
+          </summary>
+          <div className="workflow-result-detail">
+            <p>
+              {customerSafeMessage(result.message, "채널별 전송 결과를 확인해 주세요.")}
             </p>
-          ) : null}
-          {resultSource === "dispatch" ? (
-            <p>전송 이력 · {customerSafeMessage(logSaveState.message, "저장 상태를 확인해 주세요.")}</p>
-          ) : null}
-          {result.channelResults?.length ? (
-            <div className="workflow-channel-results" aria-label="채널별 전송 결과">
-              {result.channelResults.map((item, index) => (
-                <div
-                  key={`${item.channel || "channel"}-${index}`}
-                  className={`workflow-channel-result ${validationOnlyResult ? "validation-only" : item.status || "received"}`}
-                >
-                  <strong>{formatChannelName(item.channel)}</strong>
-                  <span>{formatChannelStatus(item.status, validationOnlyResult)}</span>
-                  {formatChannelMeta(item) ? <small>{formatChannelMeta(item)}</small> : null}
-                </div>
-              ))}
-            </div>
-          ) : null}
-          {logSaveState.status === "duplicate-risk" ? (
-            <p role="alert">전송 로그는 자동 재시도하지 않습니다. 관리자에게 요청 키로 저장 여부를 먼저 대조해 주세요.</p>
-          ) : null}
-        </div>
+            {validationOnlyResult ? (
+              <p>미리 확인용 응답입니다. 실제 전송 기록으로 저장하지 않습니다.</p>
+            ) : null}
+            {result.duplicateRisk ? (
+              <p role="alert">
+                {result.providerCalled === true
+                  ? "전송 결과를 확정하지 못했습니다. 실제 발송되었을 수 있으므로 재전송하지 말고 관리자에게 확인하세요."
+                  : "중복 전송을 안전하게 막을 수 없어 전송을 시작하지 않았습니다. 관리자에게 확인해 주세요."}
+              </p>
+            ) : null}
+            {resultSource === "dispatch" ? (
+              <p>전송 이력 · {customerSafeMessage(logSaveState.message, "저장 상태를 확인해 주세요.")}</p>
+            ) : null}
+            {result.channelResults?.length ? (
+              <div className="workflow-channel-results" aria-label="채널별 전송 결과">
+                {result.channelResults.map((item, index) => (
+                  <div
+                    key={`${item.channel || "channel"}-${index}`}
+                    className={`workflow-channel-result ${validationOnlyResult ? "validation-only" : item.status || "received"}`}
+                  >
+                    <strong>{formatChannelName(item.channel)}</strong>
+                    <span>{formatChannelStatus(item.status, validationOnlyResult)}</span>
+                    {formatChannelMeta(item) ? <small>{formatChannelMeta(item)}</small> : null}
+                  </div>
+                ))}
+              </div>
+            ) : null}
+            {logSaveState.status === "duplicate-risk" ? (
+              <p role="alert">전송 로그는 자동 재시도하지 않습니다. 관리자에게 요청 키로 저장 여부를 먼저 대조해 주세요.</p>
+            ) : null}
+          </div>
+        </details>
       ) : null}
 
     </article>

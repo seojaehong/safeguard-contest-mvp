@@ -194,6 +194,21 @@ describe("workflow share panel behavior", () => {
     expect(source).not.toContain("작업자 확인 화면은 /share/[sessionId] 경로에서 열립니다.");
   });
 
+  it("keeps provider result details as bounded drilldown in the share cockpit", () => {
+    const componentSource = readFileSync(join(process.cwd(), "components", "WorkflowSharePanel.tsx"), "utf8");
+    const cssSource = readFileSync(join(process.cwd(), "app", "globals.css"), "utf8");
+
+    expect(componentSource).toContain("data-share-result-drilldown");
+    expect(componentSource).toContain("data-share-result-summary");
+    expect(componentSource).toContain("workflow-result-detail");
+    expect(componentSource).toContain("open={Boolean(resultHasFailure || result.duplicateRisk || logSaveState.status === \"duplicate-risk\")}");
+    expect(cssSource).toContain(".workflow-result-detail");
+    expect(cssSource).toContain("max-height: min(260px, 34vh)");
+    expect(cssSource).toContain(".command-center-shell.workspace-page-share .workflow-result");
+    expect(cssSource).toContain(".safeclaw-module-shell[data-module-route=\"/dispatch\"] .workflow-result");
+    expect(cssSource).not.toContain(".command-center-shell.workspace-page-share .workflow-result {\n    grid-column: 1 / -1;");
+  });
+
   it("builds a stable provider-dispatch idempotency key for one attempt", () => {
     const input = {
       workpackId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",

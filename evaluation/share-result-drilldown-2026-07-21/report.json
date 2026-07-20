@@ -1,0 +1,50 @@
+{
+  "checkedAt": "2026-07-21T04:40:27+09:00",
+  "verdict": "PASS",
+  "scope": "share provider/result drilldown source and CSS contract",
+  "routeSplitAloneAcceptedAsFix": false,
+  "providerDispatchLiveClaimed": false,
+  "resultDrilldown": {
+    "selector": "[data-share-result-drilldown]",
+    "summarySelector": "[data-share-result-summary]",
+    "detailClass": "workflow-result-detail",
+    "boundedDetail": true,
+    "failureWarningsDefaultOpen": true,
+    "desktopResultSpansPreviewArea": false,
+    "mobileOneColumnPreserved": true
+  },
+  "verification": {
+    "focusedSourceCssGuard": "tests/workflow-share-panel-behavior.test.ts",
+    "commands": [
+      {
+        "command": "npm.cmd test -- tests\\workflow-share-panel-behavior.test.ts --maxWorkers=1 --fileParallelism=false",
+        "result": "PASS",
+        "testFilesPassed": 1,
+        "testsPassed": 9
+      },
+      {
+        "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+        "result": "PASS",
+        "testFilesPassed": 1,
+        "testsPassed": 2
+      },
+      {
+        "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"puts the core launcher before the mobile editor\" --maxWorkers=1 --fileParallelism=false",
+        "result": "PASS",
+        "testFilesPassed": 1,
+        "testsPassed": 2,
+        "testsSkipped": 29
+      },
+      {
+        "command": "npm.cmd run typecheck",
+        "result": "PASS"
+      }
+    ],
+    "liveProviderResultGeneratedStateClaimed": false,
+    "shareBrowserEvidenceDirectory": "evaluation/share-mobile-p1"
+  },
+  "remainingFollowUp": [
+    "Generated provider-result browser proof once a safe fixture/result state is available.",
+    "Provider live dispatch remains gated on persistent idempotency and provider-result persistence approval."
+  ]
+}
