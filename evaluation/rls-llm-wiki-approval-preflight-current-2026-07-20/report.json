@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-rls-llm-wiki-approval-preflight/v1",
-  "generatedAt": "2026-07-20T04:03:15.107Z",
-  "sourceSha": "a2987ff462eb0f410bfc1ef124ffce7c8934ac91",
+  "generatedAt": "2026-07-20T05:07:32.081Z",
+  "sourceSha": "3b0d71563017440d44f5b4a37c93e593d25e98e5",
   "overall": "approval_ready_open",
   "launchReadiness": false,
   "dbMutationPerformed": false,
