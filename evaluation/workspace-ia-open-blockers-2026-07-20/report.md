@@ -1,60 +1,68 @@
 # SafeClaw Workspace IA Open Blockers
 
 - Generated: 2026-07-20T14:05:00Z
+- Updated: 2026-07-21 KST
 - Scope: `/workspace` generated Documents and Share surfaces
-- Verdict: OPEN UX BLOCKER
+- Verdict: RESOLVED FOR CURRENT PRODUCTION COCKPIT GATE
 
-## What Is Closed
+## Current Production Reconciliation
 
-The mobile rescue gate closed the hard interaction blockers:
+Fresh production geometry was rerun against `https://www.safeclaw.kr` after the responsive share and document cockpit waves.
 
-- Horizontal overflow: none in the recorded mobile geometry
-- Sticky overlap: none in the recorded mobile geometry
-- Hidden full document preview while deep review is closed: recorded as hidden in the latest mobile P0 report
-- Share primary CTA count: one
+- Production marker: `72b282315b7dcdd2bcc538de13dee9fd7d4c1c80`
+- Geometry artifact: `evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json`
+- Checked at: `2026-07-20T15:50:36.684Z`
 
-These facts support the `MOBILE_FIXED` label only for the bounded hard-blocker gate.
+The earlier contradictory evidence is no longer authoritative for the current surface.
 
-## What Remains Open
+## What Is Closed Now
 
-The information architecture issue is not fully closed. The user concern should not be treated as stale or visual taste until the current production surface is reconciled with a fresh browser run.
+The current production gate closes the previously open cockpit blockers:
 
-Recorded evidence currently conflicts by surface and state:
+- Documents desktop-short 1440x723:
+  - `documentWorkbench.bottom = 722`
+  - `safetyBrief.bottom = 649`
+  - `riskAssessmentEditCta.bottom = 391`
+  - `safetyBriefShareCta.bottom = 441`
+  - `documentProvenanceSummary.bottom = 702`
+  - `documentDeepReviewSummary.bottom = 710`
+  - `visibleDocumentPreviews = 0`
+  - `documentDeepReviewOpen = false`
+  - `overflowX = false`, `outside = 0`
+- Documents mobile 390x844:
+  - `documentWorkbench.bottom = 835`
+  - `safetyBrief.bottom = 762`
+  - `riskAssessmentEditCta.bottom = 551`
+  - `safetyBriefShareCta.bottom = 552`
+  - `documentProvenanceSummary.bottom = 815`
+  - `documentDeepReviewSummary.bottom = 823`
+  - `visibleDocumentPreviews = 0`
+  - `documentDeepReviewOpen = false`
+  - `overflowX = false`, `outside = 0`
+- Share desktop-short 1440x723:
+  - `sharePreview.width = 520`
+  - `sharePreview.bottom = 705`
+  - `primaryShareCta.bottom = 349`
+  - `overflowX = false`, `outside = 0`
+- Share mobile 390x844:
+  - `shareMobileSummary.bottom = 432`
+  - `sharePreview.bottom = 659`
+  - `primaryShareCta.bottom = 720`
+  - `overflowX = false`, `outside = 0`
 
-- `evaluation/mobile-p0-workspace-gate-2026-07-20/report.json`
-  - Documents mobile body: 1269px on an 844px viewport
-  - Share mobile body: 1451px on an 844px viewport
-  - Share preview y: 380px
-- `evaluation/workspace-doc-share-live-current-2026-07-20-c6b2236f/report.md`
-  - Desktop 1440x723 Documents height: 1088px, preview y: 420px
-  - Desktop 1440x723 Share height: 1025px, preview y: 345px, preview width: 380px
-  - Mobile 390x844 Documents height: 1417px, preview y: 639px
-  - Mobile 390x844 Share height: 1487px, preview y: 1068px, preview width: 310px
+This closes the concrete stale blockers: the desktop share screen is no longer measured as a narrow 380px mobile-style card, the mobile share preview conflict is reconciled to the current 659px bottom / 432px summary / 720px CTA geometry, and Documents default keeps the full preview closed while the decision cockpit is inside the viewport.
 
-This means the current ledger must distinguish:
+## Product Structure Decision
 
-- Hard mobile blockers: closed by the mobile P0 gate
-- Viewport-first IA: still open until one authoritative production check resolves the conflicting Share preview position and desktop composition evidence
+The structural answer remains important:
 
-## Acceptance Criteria For The Next Bounded Patch
+- Route splitting alone is not the length fix.
+- Each route must be a one-decision cockpit by default.
+- Long document bodies, evidence logs, export settings, and transmission history remain valid, but they must live behind explicit deep-review/details surfaces.
+- The product message is: `핵심 판단은 빠르게, 전체 12종은 필요할 때 깊게 검토.`
 
-Documents default view:
+## Remaining Follow-Up
 
-- The first viewport should contain the field-mode safety brief, top hazards, core document status, and next action.
-- Full document preview and editor must remain behind an explicit deep-review disclosure by default.
-- Long deep-review content is acceptable only after the user opens it.
+The current production cockpit gate is resolved. Future north-star work should not reopen this blocker from stale evidence unless a fresh production geometry run contradicts the current artifact.
 
-Share desktop:
-
-- The desktop layout must read as a desktop result/action page, not a narrow mobile card.
-- At 1440px width, Share should use a two-pane composition: recipients/channel/options on one side and preview/status/warnings on the other.
-- Primary controls must be visible before the fold.
-
-Share mobile:
-
-- Message preview and send CTA should be reachable without excessive scroll.
-- Mobile can remain single-column, but details and logs should stay folded by default.
-
-## Next Step
-
-Run a fresh authoritative production geometry check against the current `/api/build-info` commit and reconcile the two Share preview measurements. If the narrow desktop share width or late mobile preview position still reproduces, open a bounded IA remediation branch rather than treating `MOBILE_FIXED` as full workflow completion.
+Separate future work remains valid for deeper manager-mode polish, document-specific editors, and live provider dispatch, but those are not this resolved cockpit blocker.

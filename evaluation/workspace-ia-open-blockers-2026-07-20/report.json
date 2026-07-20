@@ -1,6 +1,7 @@
 {
   "schemaVersion": "safeclaw-workspace-ia-open-blockers/v1",
   "generatedAt": "2026-07-20T14:05:00Z",
+  "updatedAt": "2026-07-21T00:55:00+09:00",
   "scope": {
     "route": "/workspace",
     "surfaces": [
@@ -8,62 +9,74 @@
       "share"
     ]
   },
-  "verdict": "open_ux_blocker",
-  "closedByMobileP0": {
-    "horizontalOverflow": false,
-    "stickyOverlap": false,
-    "fullDocumentPreviewHiddenWhenDeepReviewClosed": true,
-    "primaryShareCtas": 1
+  "verdict": "resolved_current_production_cockpit_gate",
+  "productionEvidence": {
+    "commitSha": "72b282315b7dcdd2bcc538de13dee9fd7d4c1c80",
+    "checkedAt": "2026-07-20T15:50:36.684Z",
+    "artifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json"
   },
-  "openIssues": [
+  "resolvedIssues": [
     {
       "id": "share-preview-metric-conflict",
-      "severity": "P1",
-      "summary": "Share preview y-position differs across current evidence artifacts and must be reconciled on current production.",
-      "evidence": {
-        "mobileP0SharePreviewY": 380,
-        "liveCurrentMobileSharePreviewY": 1068
-      }
+      "resolution": "current mobile share geometry records summary bottom 432, preview bottom 659, primary CTA bottom 720"
     },
     {
       "id": "desktop-share-mobile-card-risk",
-      "severity": "P1",
-      "summary": "Desktop 1440px share evidence still records a narrow preview width that can read as a mobile card.",
-      "evidence": {
-        "viewportWidth": 1440,
-        "viewportHeight": 723,
-        "shareDocumentHeight": 1025,
-        "sharePreviewY": 345,
-        "sharePreviewWidth": 380
-      }
+      "resolution": "current desktop-short share geometry records preview width 520 and CTA/preview within the 723px viewport"
     },
     {
       "id": "documents-viewport-first-debt",
-      "severity": "P2",
-      "summary": "Documents default is improved, but viewport-first IA should be verified against the exact current production surface.",
-      "evidence": {
-        "desktopDocumentHeight": 1088,
-        "desktopViewportHeight": 723,
-        "desktopPreviewY": 420,
-        "mobileDocumentHeight": 1417,
-        "mobileViewportHeight": 844,
-        "mobilePreviewY": 639
-      }
+      "resolution": "current desktop and mobile document geometry keeps safety brief, edit/share CTAs, provenance/deep-review entrypoints in the first viewport with full preview hidden"
     }
   ],
-  "nextAcceptance": {
-    "documentsDefault": [
-      "field-mode safety brief, top hazards, core document status, and next action visible in the first viewport",
-      "full document preview and editor closed behind explicit deep-review disclosure by default"
-    ],
-    "shareDesktop": [
-      "two-pane desktop composition at 1440px",
-      "primary controls visible before the fold",
-      "preview/status/warnings shown as a contextual desktop pane rather than a narrow centered mobile card"
-    ],
-    "shareMobile": [
-      "message preview and send CTA reachable without excessive scroll",
-      "details, evidence, logs, and history folded by default"
-    ]
-  }
+  "currentProductionMetrics": {
+    "documentsDesktopShort": {
+      "viewportHeight": 723,
+      "documentWorkbenchBottom": 722,
+      "safetyBriefBottom": 649,
+      "riskAssessmentEditCtaBottom": 391,
+      "safetyBriefShareCtaBottom": 441,
+      "documentProvenanceSummaryBottom": 702,
+      "documentDeepReviewSummaryBottom": 710,
+      "visibleDocumentPreviews": 0,
+      "documentDeepReviewOpen": false,
+      "overflowX": false,
+      "outside": 0
+    },
+    "documentsMobile": {
+      "viewportHeight": 844,
+      "documentWorkbenchBottom": 835,
+      "safetyBriefBottom": 762,
+      "riskAssessmentEditCtaBottom": 551,
+      "safetyBriefShareCtaBottom": 552,
+      "documentProvenanceSummaryBottom": 815,
+      "documentDeepReviewSummaryBottom": 823,
+      "visibleDocumentPreviews": 0,
+      "documentDeepReviewOpen": false,
+      "overflowX": false,
+      "outside": 0
+    },
+    "shareDesktopShort": {
+      "viewportHeight": 723,
+      "sharePreviewWidth": 520,
+      "sharePreviewBottom": 705,
+      "primaryShareCtaBottom": 349,
+      "overflowX": false,
+      "outside": 0
+    },
+    "shareMobile": {
+      "viewportHeight": 844,
+      "shareMobileSummaryBottom": 432,
+      "sharePreviewBottom": 659,
+      "primaryShareCtaBottom": 720,
+      "overflowX": false,
+      "outside": 0
+    }
+  },
+  "productStructureDecision": [
+    "Route splitting helps navigation clarity but is not the length fix by itself.",
+    "Each route must be a one-decision cockpit by default.",
+    "Long documents, evidence logs, export settings, and transmission history must remain behind explicit deep-review/detail surfaces.",
+    "Product message: 핵심 판단은 빠르게, 전체 12종은 필요할 때 깊게 검토."
+  ]
 }
