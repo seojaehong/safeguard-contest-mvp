@@ -12,6 +12,24 @@ Checked at: 2026-07-21 02:34 KST
 
 This ledger intentionally does not mark frontend as globally perfect. The current desktop blockers are closed, the mobile document cockpit is closed, and the mobile share default flow is closed. Detailed mobile Share configuration is now opt-in/collapsed by default; a more guided stepper remains optional product-depth follow-up.
 
+## Current Deployment And Structure Note
+
+Latest source pushed after this ledger line:
+
+- Product commit: `deb9134725f3c20005eb12c90eb665d19039163c` (`fix: add document section review shortcuts`)
+- Evidence commit: `bb6d2af3e2a71ecb5518742c0d57fefc1c2ef1af` (`chore: refresh northstar evidence for document shortcuts`)
+- Branch/master remote: `bb6d2af3e2a71ecb5518742c0d57fefc1c2ef1af`
+- Production marker at the latest check: `1fb47e20ffcece559a4fbfb6de74ccc5cd40968b`
+
+Interpretation: if the user is looking at production while it still reports `1fb47e20`, the new section-level `근거 보기` / `점검 보기` shortcuts are not live yet. That deployment lag is separate from the larger IA question.
+
+The section shortcut wave is a bounded drilldown-depth improvement, not the sufficient fix for every "documents are long / share feels mobile" complaint. The remaining structural contract is still:
+
+- Route/page split helps orientation, but is not accepted as the length fix by itself.
+- Each route needs a first-viewport cockpit: current state, selected item, primary action, provenance/status/result summary.
+- Long documents, full messages, language variants, logs, and raw metadata must stay in bounded panes, accordions, drawers, or drilldown routes.
+- Follow-up evidence should keep measuring primary CTA/status/result bottom, selected editor/panel y-position, default-open details count, desktop column split, horizontal overflow, and sticky overlap.
+
 ## Current Production Baseline
 
 Current production evidence after the latest workspace IA work:

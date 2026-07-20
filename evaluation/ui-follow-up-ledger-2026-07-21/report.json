@@ -7,6 +7,20 @@
     "shareMobileActionCockpit": "PASS",
     "shareMobileDefaultFlow": "PASS"
   },
+  "currentDeploymentAndStructureNote": {
+    "productCommit": "deb9134725f3c20005eb12c90eb665d19039163c",
+    "evidenceCommit": "bb6d2af3e2a71ecb5518742c0d57fefc1c2ef1af",
+    "remoteBranchAndMaster": "bb6d2af3e2a71ecb5518742c0d57fefc1c2ef1af",
+    "productionMarkerAtLatestCheck": "1fb47e20ffcece559a4fbfb6de74ccc5cd40968b",
+    "newSectionShortcutsLiveAtLatestCheck": false,
+    "sectionShortcutWaveSufficientForAllDocumentsShareComplaints": false,
+    "routeSplitAloneAcceptedAsFix": false,
+    "remainingStructuralContract": [
+      "first-viewport cockpit per route",
+      "bounded panes, accordions, drawers, or drilldown routes for long content",
+      "measure primary CTA/status/result bottom, selected editor/panel y-position, default-open details count, desktop column split, horizontal overflow, and sticky overlap"
+    ]
+  },
   "productionMarker": "f504b15e9682e35bce97d629b86e02268c08a185",
   "documentsDesktopShort": {
     "viewport": {
