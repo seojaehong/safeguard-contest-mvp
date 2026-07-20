@@ -1,7 +1,7 @@
 # Live Critical Surface Current Rerun
 
-- Checked: 2026-07-20T05:28:41.201Z
-- Build marker: afa311eb4602ef34f5cd1e7b15101c096d7ae3ba
+- Checked: 2026-07-20T06:13:28.637Z
+- Build marker: 157e081e2b539ad93264b8f2496f414a4430429f
 - Findings: 0
 
 ## Findings
@@ -12,7 +12,7 @@ None.
 
 | Route | Viewport | Status | Height | Overflow | Outside | Under44 | Internal terms |
 | --- | --- | ---: | ---: | --- | ---: | ---: | --- |
-| / | desktop | 200 | 5604 (6.23x) | no | 0 | 9 | - |
+| / | desktop | 200 | 5628 (6.25x) | no | 0 | 9 | - |
 | /workspace | desktop | 200 | 988 (1.1x) | no | 0 | 5 | - |
 | /why | desktop | 200 | 1142 (1.27x) | no | 0 | 5 | - |
 | /ontology | desktop | 200 | 2077 (2.31x) | no | 0 | 8 | - |

@@ -1,14 +1,14 @@
 {
-  "checkedAt": "2026-07-20T05:28:41.201Z",
+  "checkedAt": "2026-07-20T06:13:28.637Z",
   "baseUrl": "https://www.safeclaw.kr",
   "buildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "afa311eb4602ef34f5cd1e7b15101c096d7ae3ba",
+    "commitSha": "157e081e2b539ad93264b8f2496f414a4430429f",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-nnb3mbdyj-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-q6zrjj8t6-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "routes": [
@@ -42,29 +42,29 @@
       "url": "https://www.safeclaw.kr/",
       "screenshot": "screenshots/desktop-root.png",
       "title": "SafeClaw | 안전 문서팩 생성",
-      "scrollHeight": 5604,
+      "scrollHeight": 5628,
       "scrollWidth": 1440,
       "clientWidth": 1440,
-      "heightRatio": 6.23,
+      "heightRatio": 6.25,
       "horizontalOverflow": false,
       "outsideCount": 0,
       "under44Count": 9,
       "under44Samples": [
         {
           "text": "제품",
-          "w": 38,
+          "w": 40,
           "h": 44,
           "visible": true
         },
         {
           "text": "문제",
-          "w": 38,
+          "w": 40,
           "h": 44,
           "visible": true
         },
         {
           "text": "근거",
-          "w": 38,
+          "w": 40,
           "h": 44,
           "visible": true
         },
@@ -76,25 +76,25 @@
         },
         {
           "text": "작업공간",
-          "w": 55,
+          "w": 60,
           "h": 24,
           "visible": true
         },
         {
           "text": "문서",
-          "w": 28,
+          "w": 30,
           "h": 24,
           "visible": true
         },
         {
           "text": "근거",
-          "w": 28,
+          "w": 30,
           "h": 24,
           "visible": true
         },
         {
           "text": "API 상태",
-          "w": 56,
+          "w": 58,
           "h": 24,
           "visible": true
         }
