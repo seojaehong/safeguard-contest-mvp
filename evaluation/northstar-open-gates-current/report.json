@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-20T20:35:38.534Z",
-  "sourceSha": "9f82b412a23a2da46ffc53cf6acacade746e4b32",
+  "generatedAt": "2026-07-20T20:48:18.182Z",
+  "sourceSha": "deb9134725f3c20005eb12c90eb665d19039163c",
   "overall": "open",
   "gates": [
     {
@@ -27,9 +27,9 @@
       "state": "proven",
       "label": "Documents and Share cockpit UI",
       "evidencePath": "evaluation\\documents-drilldown-depth-2026-07-21\\report.json",
-      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch.",
+      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, section-level evidence/quality actions, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch.",
       "nextActions": [
-        "Continue UI product depth on richer document-specific section actions and one-document-at-a-time editing affordances.",
+        "Continue UI product depth on richer per-document editing affordances beyond the current section-level evidence/quality shortcuts.",
         "Optional follow-up: make the mobile Share configuration disclosure a guided stepper if more hand-holding is needed."
       ]
     },

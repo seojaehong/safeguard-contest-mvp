@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-20T20:35:38.514Z",
-  "head": "9f82b412a23a2da46ffc53cf6acacade746e4b32",
+  "generatedAt": "2026-07-20T20:48:18.716Z",
+  "head": "deb9134725f3c20005eb12c90eb665d19039163c",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "84db910881916e4c1987d27cd70e291467d7249f",
+    "commitSha": "1fb47e20ffcece559a4fbfb6de74ccc5cd40968b",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-d5p4k6cbp-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-e29zmlxuk-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -37,7 +37,7 @@
       "id": "ui_documents_share_cockpit",
       "state": "proven",
       "artifact": "evaluation\\documents-drilldown-depth-2026-07-21\\report.json",
-      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch."
+      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, section-level evidence/quality actions, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch."
     },
     {
       "id": "dispatch_standalone_cockpit",
@@ -49,7 +49,7 @@
       "id": "share_result_fixture_cockpit",
       "state": "proven",
       "artifact": "evaluation\\share-result-drilldown-2026-07-21\\report.json",
-      "detail": "Generated provider-result fixture proof is bounded: desktop page 900/900, result panel 606px with 2 x-ranges, mobile summary/preview/CTA/result inside 844px, dispatch POST count 1, provider live dispatch unclaimed."
+      "detail": "Generated provider-result fixture proof is bounded: desktop page 900/900, result panel 606px with 2 x-ranges, mobile summary/preview/CTA/result inside 844px, closed summary shows channel status, dispatch POST count 1, provider live dispatch unclaimed."
     },
     {
       "id": "kosha_exact_trust_registry",
@@ -146,9 +146,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "1d01ac6e7506b7dbcd903031b5b14b6dafd5b6e4",
-      "sourceStatus": "ancestor",
-      "productionCommit": "1d01ac6e7506b7dbcd903031b5b14b6dafd5b6e4",
+      "sourceCommit": "deb9134725f3c20005eb12c90eb665d19039163c",
+      "sourceStatus": "exact",
+      "productionCommit": "deb9134725f3c20005eb12c90eb665d19039163c",
       "productionStatus": "ancestor_of_head"
     },
     {
