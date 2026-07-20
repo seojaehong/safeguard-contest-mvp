@@ -1,12 +1,12 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v1",
-  "generatedAt": "2026-07-20T05:56:40.000Z",
-  "head": "6ae80d47019409168c50ecd75e97c634dfc12461",
+  "generatedAt": "2026-07-20T06:05:20.000Z",
+  "head": "1b951d228bbbdeb0513c2e1031df9ddf4ee0a758",
   "liveBuildInfo": {
-    "commitSha": "6ae80d47019409168c50ecd75e97c634dfc12461",
+    "commitSha": "1b951d228bbbdeb0513c2e1031df9ddf4ee0a758",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-4cyl22e3f-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-87j695295-seojaehongs-projects.vercel.app"
   },
   "overall": "northstar_open_approval_gated",
   "dbMutationPerformed": false,
@@ -40,6 +40,18 @@
       "localCorpusChunks": 7127,
       "testsPassed": 53,
       "testFilesPassed": 5
+    },
+    {
+      "id": "kosha_guide_approval_packet",
+      "artifact": "evaluation/kosha-guide-approval-current-2026-07-20/approval-packet.json",
+      "result": "approval_required_before_mutation_or_embedding",
+      "readOnlyAudit": true,
+      "items": 1040,
+      "emptyBodyRows": 818,
+      "missingOfficialProvenanceRows": 1040,
+      "testsPassed": 165,
+      "dbMutationPerformed": false,
+      "embeddingGenerated": false
     },
     {
       "id": "rls_llm_wiki_application_boundary",
@@ -123,6 +135,12 @@
       "id": "llm_wiki_publication",
       "artifact": "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json",
       "state": "approval_ready_open",
+      "launchReadiness": false
+    },
+    {
+      "id": "kosha_guide_full_corpus_embedding",
+      "artifact": "evaluation/kosha-guide-approval-current-2026-07-20/approval-packet.json",
+      "state": "approval_required_before_mutation_or_embedding",
       "launchReadiness": false
     }
   ],

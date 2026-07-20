@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "safeclaw-kosha-guide-approval-packet/v1",
+  "generatedAt": "2026-07-20T06:05:20.000Z",
+  "head": "1b951d228bbbdeb0513c2e1031df9ddf4ee0a758",
+  "sourceAudit": "evaluation/kosha-guide-approval-current-2026-07-20/report.json",
+  "decision": "approval_required_before_mutation_or_embedding",
+  "currentSafeClaim": "KOSHA exact trust pins and Phase A materialization are proven; full 1040-row KOSHA Guide corpus is not yet launch-ready for authoritative grounding or embedding.",
+  "dbMutationPerformed": false,
+  "uploadPerformed": false,
+  "embeddingGenerated": false,
+  "vectorRetrievalEnabled": false,
+  "readOnlyAudit": {
+    "itemCount": 1040,
+    "officialCurrentCount": 1039,
+    "officialRetiredCount": 679,
+    "usableNonemptyParseSuccess": 222,
+    "emptyBodyCount": 818,
+    "missingOfficialUrlCount": 1040,
+    "missingOfficialFileIdCount": 1040,
+    "missingOfficialPublishedAtCount": 1040,
+    "missingOfficialStatusCount": 1040,
+    "officialVersionMismatchCount": 7,
+    "retiredLocalRowCount": 1,
+    "duplicateSummaryRows": 822,
+    "retrievalReflectionFailures": 13,
+    "manifestFailures": []
+  },
+  "embeddingRecommendation": {
+    "status": "adopt_after_repair_and_approval",
+    "reason": "The corpus is valuable as the KOSHA Guide layer after SIF, but embedding current rows would mostly index titles, fallback summaries, and derived controls rather than official bodies.",
+    "requiredBeforeEmbedding": [
+      "Backfill official URL, file ID, published date, current/retired status, and content hash for every active KOSHA Guide row.",
+      "Hydrate or OCR the 818 empty-body rows, or quarantine unresolved rows outside active retrieval.",
+      "Replace 822 fallback/duplicate summaries with source-grounded summaries.",
+      "Update 7 version mismatches and retire 1 officially retired local row.",
+      "Split SIF and KOSHA Guide vector retrieval by corpus kind, index, and RPC.",
+      "Run zero-mutation dry-run diff, focused tests, post-migration verification, and explicit user approval before any DB mutation or embedding upload."
+    ]
+  },
+  "approvalGates": [
+    {
+      "id": "kosha_metadata_backfill",
+      "state": "approval_required",
+      "mutationAllowedByThisRun": false
+    },
+    {
+      "id": "kosha_body_hydration_or_ocr",
+      "state": "approval_required",
+      "mutationAllowedByThisRun": false
+    },
+    {
+      "id": "kosha_embedding_chunk_table_and_rpc",
+      "state": "approval_required",
+      "mutationAllowedByThisRun": false
+    },
+    {
+      "id": "kosha_vector_feature_flag",
+      "state": "disabled_until_post_migration_verify",
+      "mutationAllowedByThisRun": false
+    }
+  ],
+  "verifiedCommands": [
+    {
+      "command": "node scripts\\audit_kosha_guides.mjs --output-dir evaluation\\kosha-guide-approval-current-2026-07-20 --env-file <secret-env-file>",
+      "status": "pass_read_only",
+      "elapsedSeconds": 94.293
+    },
+    {
+      "command": "npm.cmd test -- tests\\kosha-guide-corpus-audit.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "pass",
+      "testFilesPassed": 1,
+      "testsPassed": 110
+    },
+    {
+      "command": "python -m unittest scripts.tests.test_snapshot_kosha_guide_corpus scripts.tests.test_ingest_safety_reference_catalog",
+      "status": "pass",
+      "testsPassed": 55
+    }
+  ],
+  "forbiddenClaims": [
+    "Full 1040-row KOSHA Guide corpus is authoritative-grounding ready.",
+    "KOSHA Guide embeddings are production-active.",
+    "KOSHA Guide DB metadata has been backfilled.",
+    "Retired KOSHA Guide rows have been removed from active retrieval.",
+    "A DB migration, upload, or embedding generation was performed by this run."
+  ]
+}
