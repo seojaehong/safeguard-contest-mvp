@@ -34,6 +34,7 @@ const EVIDENCE_PATHS = Object.freeze({
   documentsDrilldownDepth: path.join("evaluation", "documents-drilldown-depth-2026-07-21", "report.json"),
   documentsInnerPaneDepth: path.join("evaluation", "documents-inner-pane-depth-2026-07-21", "report.json"),
   documentsFieldFirstAffordance: path.join("evaluation", "documents-field-first-affordance-2026-07-21", "report.json"),
+  documentsRiskRowCockpit: path.join("evaluation", "documents-risk-row-cockpit-2026-07-21", "report.json"),
   shareMobileFullFlow: path.join("evaluation", "share-mobile-full-flow-2026-07-21", "report.json"),
   shareResultDrilldown: path.join("evaluation", "share-result-drilldown-2026-07-21", "report.json"),
   dispatchStandalone: path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"),
@@ -517,22 +518,24 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const drilldownPath = EVIDENCE_PATHS.documentsDrilldownDepth;
   const innerPaneDepthPath = EVIDENCE_PATHS.documentsInnerPaneDepth;
   const fieldFirstPath = EVIDENCE_PATHS.documentsFieldFirstAffordance;
+  const riskRowCockpitPath = EVIDENCE_PATHS.documentsRiskRowCockpit;
   const sharePath = EVIDENCE_PATHS.shareMobileFullFlow;
   const internalPane = readJsonFile(rootDir, internalPanePath);
   const paneContext = readJsonFile(rootDir, paneContextPath);
   const drilldown = readJsonFile(rootDir, drilldownPath);
   const innerPaneDepth = readJsonFile(rootDir, innerPaneDepthPath);
   const fieldFirst = readJsonFile(rootDir, fieldFirstPath);
+  const riskRowCockpit = readJsonFile(rootDir, riskRowCockpitPath);
   const share = readJsonFile(rootDir, sharePath);
 
-  if (!isRecord(internalPane) || !isRecord(paneContext) || !isRecord(drilldown) || !isRecord(innerPaneDepth) || !isRecord(fieldFirst) || !isRecord(share)) {
+  if (!isRecord(internalPane) || !isRecord(paneContext) || !isRecord(drilldown) || !isRecord(innerPaneDepth) || !isRecord(fieldFirst) || !isRecord(riskRowCockpit) || !isRecord(share)) {
     return gateResult({
       id: "ui_documents_share_cockpit",
       label: "Documents and Share cockpit UI",
       state: "missing",
-      evidencePath: !isRecord(internalPane) ? internalPanePath : !isRecord(paneContext) ? paneContextPath : !isRecord(drilldown) ? drilldownPath : !isRecord(innerPaneDepth) ? innerPaneDepthPath : !isRecord(fieldFirst) ? fieldFirstPath : sharePath,
+      evidencePath: !isRecord(internalPane) ? internalPanePath : !isRecord(paneContext) ? paneContextPath : !isRecord(drilldown) ? drilldownPath : !isRecord(innerPaneDepth) ? innerPaneDepthPath : !isRecord(fieldFirst) ? fieldFirstPath : !isRecord(riskRowCockpit) ? riskRowCockpitPath : sharePath,
       detail: "Documents/share cockpit evidence is missing or invalid.",
-      nextActions: ["Regenerate documents mobile internal-pane, pane-context, drilldown-depth, inner-pane-depth, field-first-affordance, and share mobile full-flow evidence."],
+      nextActions: ["Regenerate documents mobile internal-pane, pane-context, drilldown-depth, inner-pane-depth, field-first-affordance, risk-row cockpit, and share mobile full-flow evidence."],
     });
   }
 
@@ -550,6 +553,9 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const fieldFirstProduction = isRecord(fieldFirst.production) ? fieldFirst.production : {};
   const fieldFirstMobile = isRecord(fieldFirstProduction.mobile390x844) ? fieldFirstProduction.mobile390x844 : {};
   const fieldFirstDesktop = isRecord(fieldFirstProduction.desktop1440x723) ? fieldFirstProduction.desktop1440x723 : {};
+  const riskRowScope = isRecord(riskRowCockpit.scope) ? riskRowCockpit.scope : {};
+  const riskRowContracts = isRecord(riskRowCockpit.contracts) ? riskRowCockpit.contracts : {};
+  const riskRowCommands = Array.isArray(riskRowCockpit.commands) ? riskRowCockpit.commands : [];
   const shareMobile = isRecord(share.mobile390x844Day)
     ? share.mobile390x844Day
     : isRecord(share.mobile390x844)
@@ -568,6 +574,8 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const innerPaneDepthSourceCurrent = isGitAncestor(rootDir, innerPaneDepthSourceSha);
   const fieldFirstSourceSha = readString(fieldFirst.sourceHead);
   const fieldFirstSourceCurrent = isGitAncestor(rootDir, fieldFirstSourceSha);
+  const riskRowSourceSha = readString(riskRowCockpit.sourceHead);
+  const riskRowSourceCurrent = isGitAncestor(rootDir, riskRowSourceSha);
   const fieldFirstMobileShellHeight = readFirstNumber(fieldFirstMobile, [
     "workpackShellClientHeight",
     "workpackShellHeight",
@@ -664,7 +672,22 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     && readString(fieldFirstDesktop.selectedTitle) === "위험성평가표"
     && readBoolean(fieldFirstDesktop.horizontalOverflow) === false
     && readNumber(fieldFirstDesktop.visibleTextareaHeightInsidePane) !== null
-    && readNumber(fieldFirstDesktop.visibleTextareaHeightInsidePane) >= 96;
+    && readNumber(fieldFirstDesktop.visibleTextareaHeightInsidePane) >= 96
+    && readString(riskRowCockpit.verdict) === "PASS_CURRENT_SOURCE"
+    && riskRowSourceCurrent
+    && readString(riskRowScope.document) === "riskAssessmentDraft"
+    && readBoolean(riskRowScope.providerDispatchLiveClaimed) === false
+    && readBoolean(riskRowScope.fullDocumentIaClaimed) === false
+    && readBoolean(riskRowScope.routeSplitAloneAcceptedAsFix) === false
+    && riskRowContracts.firstRiskRowHeaderBelowToolbar === true
+    && riskRowContracts.firstHazardFieldUsableInShell === true
+    && riskRowContracts.rowHeaderShowsEvidenceAndVerification === true
+    && riskRowContracts.rawSectionTextareaSecondary === true
+    && riskRowContracts.rowDetailsBehindDrilldown === true
+    && readNumber(riskRowContracts.mobileWorkpackShellScrollHeightCap) <= 1500
+    && riskRowContracts.horizontalOverflowClosed === true
+    && riskRowCommands.length >= 4
+    && riskRowCommands.every((command) => isRecord(command) && command.status === "PASS");
 
   const sharePass = readString(share.verdict).includes("PASS")
     && readNumber(shareMobile.shareMobileSummaryBottom) !== null
@@ -688,11 +711,12 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
       id: "ui_documents_share_cockpit",
       label: "Documents and Share cockpit UI",
       state: "proven",
-      evidencePath: fieldFirstPath,
-      detail: "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch.",
+      evidencePath: riskRowCockpitPath,
+      detail: "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, risk-row authoring cockpit, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch or full 12-document authoring completion.",
       nextActions: [
-        "Continue UI product depth on richer risk-row editing, full document field-first authoring, and document-specific drilldown beyond the current selected-section affordance.",
-        "Optional follow-up: make the mobile Share configuration disclosure a guided stepper if more hand-holding is needed.",
+        "Continue UI product depth on full 12-document field-first authoring, row-level validation actions, and document-specific drilldown beyond the current risk-row cockpit.",
+        "Run production live geometry after the risk-row cockpit commit deploys before calling that slice live-proven.",
+        "Keep /share generated-result and mobile stepper improvements as separate gates when user-visible sessions reproduce the complaint.",
       ],
     });
   }
@@ -701,7 +725,7 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     id: "ui_documents_share_cockpit",
     label: "Documents and Share cockpit UI",
     state: "contradicted",
-    evidencePath: documentsPass ? sharePath : fieldFirstPath,
+    evidencePath: documentsPass ? sharePath : riskRowCockpitPath,
     detail: "Documents/share cockpit evidence no longer proves bounded page height, visible selected-document pane context, and first-viewport share action together.",
     nextActions: ["Re-run documents/share browser geometry gates and fix any UI cockpit regression."],
   });

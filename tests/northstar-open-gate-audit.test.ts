@@ -241,6 +241,32 @@ function createFixtureRoot(): string {
       },
     },
   });
+  writeJson(rootDir, path.join("evaluation", "documents-risk-row-cockpit-2026-07-21", "report.json"), {
+    verdict: "PASS_CURRENT_SOURCE",
+    sourceHead: "fixture-sha",
+    scope: {
+      route: "/documents",
+      document: "riskAssessmentDraft",
+      providerDispatchLiveClaimed: false,
+      fullDocumentIaClaimed: false,
+      routeSplitAloneAcceptedAsFix: false,
+    },
+    contracts: {
+      firstRiskRowHeaderBelowToolbar: true,
+      firstHazardFieldUsableInShell: true,
+      rowHeaderShowsEvidenceAndVerification: true,
+      rawSectionTextareaSecondary: true,
+      rowDetailsBehindDrilldown: true,
+      mobileWorkpackShellScrollHeightCap: 1500,
+      horizontalOverflowClosed: true,
+    },
+    commands: [
+      { status: "PASS" },
+      { status: "PASS" },
+      { status: "PASS" },
+      { status: "PASS" },
+    ],
+  });
   writeJson(rootDir, path.join("evaluation", "share-mobile-full-flow-2026-07-21", "report.json"), {
     verdict: "PASS",
     mobile390x844Day: {
