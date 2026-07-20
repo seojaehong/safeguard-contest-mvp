@@ -68,6 +68,11 @@ async function openGeneratedWorkspace(page: Page, theme: Theme) {
 
   await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-windy&theme=${theme}`, { waitUntil: "networkidle" });
   await page.getByRole("button", { name: /안전 문서 생성/ }).click();
+  const deepReview = page.getByTestId("document-deep-review");
+  const isOpen = await deepReview.evaluate((element) => (element as HTMLDetailsElement).open);
+  if (!isOpen) {
+    await deepReview.locator("> summary").click();
+  }
   await page.locator(".document-preview-pane").waitFor({ state: "visible" });
 }
 

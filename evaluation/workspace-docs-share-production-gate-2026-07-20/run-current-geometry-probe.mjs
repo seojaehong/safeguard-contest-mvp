@@ -84,7 +84,7 @@ for (const variant of variants) {
     await page.getByText(/12\/12 생성|안전 문서팩 3종 준비 완료/u).first().waitFor({ timeout: 60_000 });
     const documents = await readMetrics(page);
     await page.screenshot({ path: path.join(outDir, `${variant.name}-current-documents.png`), fullPage: true });
-    await page.getByRole("button", { name: /^편집$/u }).first().click();
+    await page.getByRole("button", { name: "위험성평가표 편집" }).click();
     await page.locator(".document-editor").waitFor({ state: "visible", timeout: 30_000 });
     const editor = await readMetrics(page);
     await page.screenshot({ path: path.join(outDir, `${variant.name}-current-editor.png`), fullPage: true });

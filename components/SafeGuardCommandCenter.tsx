@@ -2416,70 +2416,76 @@ export function SafeGuardCommandCenter({
                 </section>
               </div>
             </details>
-            <div className="document-viewer-shell">
-              <div className="document-viewer-list workbench-document-rail" aria-label="문서 목록">
-                {focusDocumentItems.map((item) => {
-                  const selected = item.key === selectedOutputItem.key;
-                  return (
-                    <button
-                      type="button"
-                      key={item.key}
-                      className={`${selected ? "selected" : ""} primary`}
-                      onClick={() => setRequestedDocumentKey(item.key)}
-                      aria-pressed={selected}
-                    >
-                      <span>{selected ? "선택" : "핵심 문서"}</span>
-                      <strong>{item.title}</strong>
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="document-preview-grid">
-                <article className="document-preview-pane">
-                  <div className="document-preview-head">
-                    <div>
-                      <span>{data ? "문서 미리보기" : "생성 대기"}</span>
-                      <strong>{selectedOutputItem.title}</strong>
-                    </div>
-                    {data ? (
-                      <div className="doc-card-actions">
-                        <button type="button" onClick={() => focusWorkpackEditor(selectedOutputItem.key)}>편집</button>
-                        <button
-                          type="button"
-                          onClick={() => focusWorkpackEditor(selectedOutputItem.key)}
-                          title={`${selectedOutputItem.title} 준제출형 내려받기`}
-                        >
-                          다운로드 설정
-                        </button>
+            <details className="document-deep-review" data-testid="document-deep-review">
+              <summary>
+                <span>문서 깊게 보기</span>
+                <strong>{selectedOutputItem.title} 미리보기 · 편집 · 다운로드</strong>
+              </summary>
+              <div className="document-viewer-shell">
+                <div className="document-viewer-list workbench-document-rail" aria-label="문서 목록">
+                  {focusDocumentItems.map((item) => {
+                    const selected = item.key === selectedOutputItem.key;
+                    return (
+                      <button
+                        type="button"
+                        key={item.key}
+                        className={`${selected ? "selected" : ""} primary`}
+                        onClick={() => setRequestedDocumentKey(item.key)}
+                        aria-pressed={selected}
+                      >
+                        <span>{selected ? "선택" : "핵심 문서"}</span>
+                        <strong>{item.title}</strong>
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="document-preview-grid">
+                  <article className="document-preview-pane">
+                    <div className="document-preview-head">
+                      <div>
+                        <span>{data ? "문서 미리보기" : "생성 대기"}</span>
+                        <strong>{selectedOutputItem.title}</strong>
                       </div>
+                      {data ? (
+                        <div className="doc-card-actions">
+                          <button type="button" onClick={() => focusWorkpackEditor(selectedOutputItem.key)}>편집</button>
+                          <button
+                            type="button"
+                            onClick={() => focusWorkpackEditor(selectedOutputItem.key)}
+                            title={`${selectedOutputItem.title} 준제출형 내려받기`}
+                          >
+                            다운로드 설정
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+                    <pre>
+                      {typeof selectedDocumentBody === "string" && selectedDocumentBody
+                        ? selectedDocumentBody.slice(0, 1200)
+                        : "현장 상황을 입력하고 문서팩을 생성하면 이곳에서 문서 본문과 근거를 바로 검토합니다."}
+                    </pre>
+                    {requiresRevalidation ? (
+                      <button
+                        type="button"
+                        className="button command-primary workbench-primary-action"
+                        disabled={isRevalidating}
+                        onClick={() => void handleEditedWorkpackRevalidation()}
+                      >
+                        {isRevalidating ? "재검증 중" : "편집본 재검증"}
+                      </button>
                     ) : null}
-                  </div>
-                  <pre>
-                    {typeof selectedDocumentBody === "string" && selectedDocumentBody
-                      ? selectedDocumentBody.slice(0, 1200)
-                      : "현장 상황을 입력하고 문서팩을 생성하면 이곳에서 문서 본문과 근거를 바로 검토합니다."}
-                  </pre>
-                  {requiresRevalidation ? (
                     <button
                       type="button"
-                      className="button command-primary workbench-primary-action"
-                      disabled={isRevalidating}
-                      onClick={() => void handleEditedWorkpackRevalidation()}
+                      className="button command-primary document-next-button workbench-primary-action workbench-disabled-state"
+                      disabled={!data}
+                      onClick={() => moveToWorkspacePage("share")}
                     >
-                      {isRevalidating ? "재검증 중" : "편집본 재검증"}
+                      공유 단계로 이동
                     </button>
-                  ) : null}
-                  <button
-                    type="button"
-                    className="button command-primary document-next-button workbench-primary-action workbench-disabled-state"
-                    disabled={!data}
-                    onClick={() => moveToWorkspacePage("share")}
-                  >
-                    공유 단계로 이동
-                  </button>
-                </article>
+                  </article>
+                </div>
               </div>
-            </div>
+            </details>
             <details className="document-work-history">
               <summary>
                 <span>작업 이력</span>

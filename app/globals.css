@@ -14407,6 +14407,70 @@ body:has(.safeclaw-landing) :is(
   gap: 12px;
 }
 
+.command-center-shell .document-deep-review {
+  display: grid;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 4px;
+  background: var(--workspace-surface-1);
+}
+
+.command-center-shell .document-deep-review > summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 12px;
+  color: var(--workspace-ink);
+  cursor: pointer;
+  list-style: none;
+}
+
+.command-center-shell .document-deep-review > summary::-webkit-details-marker {
+  display: none;
+}
+
+.command-center-shell .document-deep-review > summary::after {
+  content: "열기";
+  min-width: 44px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 4px;
+  background: var(--workspace-surface-2);
+  color: var(--workspace-muted);
+  padding: 8px 10px;
+  text-align: center;
+  font-size: var(--text-caption);
+  font-weight: 700;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+.command-center-shell .document-deep-review[open] > summary::after {
+  content: "닫기";
+}
+
+.command-center-shell .document-deep-review > summary span {
+  color: var(--workspace-subtle);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+.command-center-shell .document-deep-review > summary strong {
+  display: block;
+  color: var(--workspace-ink);
+  font-size: var(--text-table);
+  font-weight: 700;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
+}
+
+.command-center-shell .document-deep-review > .document-viewer-shell {
+  border-top: 1px solid var(--workspace-rule);
+  padding: 12px;
+}
+
 .command-center-shell .document-workbench .document-preview-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -16565,6 +16629,15 @@ body:has(.safeclaw-landing) :is(
 
   .command-center-shell .document-workbench .document-preview-pane {
     min-height: 0;
+  }
+
+  .command-center-shell .document-deep-review > summary {
+    min-height: 48px;
+    padding: 10px;
+  }
+
+  .command-center-shell .document-deep-review > .document-viewer-shell {
+    padding: 10px;
   }
 
   .share-panel.workflow-panel .channel-grid {

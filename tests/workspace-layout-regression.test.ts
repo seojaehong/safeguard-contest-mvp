@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import type { Browser } from "playwright";
+import type { Browser, Page } from "playwright";
 import { buildDbHarnessPacket, buildHarnessPromptContext } from "@/lib/db-harness";
 import {
   buildStoredCurrentWorkpack,
@@ -22,6 +22,17 @@ const DEFAULT_VISIBLE_OPERATIONAL_LABELS = /\b(?:Markdown|Supabase|API|JSON)\b|O
 
 function areCssPixelEdgesAdjacent(sideBottom: number, mainTop: number): boolean {
   return Math.abs(sideBottom - mainTop) <= CSS_PIXEL_ADJACENCY_TOLERANCE;
+}
+
+async function openDocumentDeepReview(page: Page): Promise<void> {
+  const deepReview = page.locator('[data-testid="document-deep-review"]');
+  if (await deepReview.count()) {
+    const isOpen = await deepReview.evaluate((element) => (element as HTMLDetailsElement).open);
+    if (!isOpen) {
+      await deepReview.locator("> summary").click();
+    }
+  }
+  await page.locator(".document-preview-pane").waitFor({ state: "visible" });
 }
 
 describe("mobile workspace adjacency contract", () => {
@@ -392,6 +403,7 @@ describe("workspace layout regression", () => {
     expect("DB 하네스 · 품질 계약").toMatch(DEFAULT_VISIBLE_OPERATIONAL_LABELS);
     expect(await sharePage.innerText()).not.toMatch(DEFAULT_VISIBLE_OPERATIONAL_LABELS);
     await page.getByLabel("작업공간 메뉴").getByRole("button").filter({ hasText: "문서" }).click();
+    await openDocumentDeepReview(page);
     await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
     const fieldWorkspace = page.locator(".field-workspace");
     await fieldWorkspace.waitFor({ state: "visible" });
@@ -1423,7 +1435,7 @@ describe("workspace layout regression", () => {
     expect(await progress.textContent()).toContain("생성 중");
     expect(await progress.textContent()).not.toContain("3/12");
     await expect.poll(async () => page.locator(".document-review-meter").getAttribute("class")).toContain("indeterminate");
-    await page.locator(".document-preview-pane").waitFor({ state: "visible" });
+    await openDocumentDeepReview(page);
   }, 90_000);
 
   it("keeps the generated document edit flow inside the workspace design system", async () => {
@@ -1525,7 +1537,7 @@ describe("workspace layout regression", () => {
 
     await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-windy&theme=day`, { waitUntil: "networkidle" });
     await page.getByRole("button", { name: /안전 문서 생성/ }).click();
-    await page.locator(".document-preview-pane").waitFor({ state: "visible" });
+    await openDocumentDeepReview(page);
     await page.locator(".doc-card-actions button", { hasText: "편집" }).waitFor({ state: "visible" });
     const progressSummary = await page.locator(".document-progress-summary").textContent();
     expect(progressSummary).toContain("12/12 생성");
@@ -1796,7 +1808,7 @@ describe("workspace layout regression", () => {
     }
 
     await page.getByRole("button", { name: "문서 검토로 돌아가기" }).click();
-    await page.locator(".document-preview-pane").waitFor({ state: "visible" });
+    await openDocumentDeepReview(page);
     expect(await page.locator(".field-workspace").count()).toBe(0);
     expect(await page.locator(".document-workbench").count()).toBe(1);
   }, 90_000);
@@ -1993,7 +2005,7 @@ describe("workspace layout regression", () => {
 
     await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-windy&theme=day`, { waitUntil: "networkidle" });
     await page.getByRole("button", { name: /안전 문서 생성/ }).click();
-    await page.locator(".document-preview-pane").waitFor({ state: "visible" });
+    await openDocumentDeepReview(page);
     await page.locator(".document-viewer-list button", { hasText: "TBM 브리핑" }).click();
     await page.waitForFunction(() => document.querySelector(".document-preview-head strong")?.textContent === "TBM 브리핑");
     await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
@@ -2062,12 +2074,12 @@ describe("workspace layout regression", () => {
     expect(invalidatedReview).toHaveProperty("qualityContract.ontology.status", "pending");
 
     await page.getByRole("button", { name: "문서 검토로 돌아가기" }).click();
-    await page.locator(".document-preview-pane").waitFor({ state: "visible" });
+    await openDocumentDeepReview(page);
     expect(await page.locator(".document-preview-pane pre").textContent()).toContain(sentinel);
     expect(await page.locator(".document-preview-head strong").textContent()).toBe("TBM 브리핑");
 
     await page.reload({ waitUntil: "networkidle" });
-    await page.locator(".document-preview-pane").waitFor({ state: "visible" });
+    await openDocumentDeepReview(page);
     await page.locator(".document-viewer-list button", { hasText: "TBM 브리핑" }).click();
     expect(await page.locator(".document-preview-pane pre").textContent()).toContain(sentinel);
     await page.getByRole("button", { name: "편집본 재검증" }).waitFor({ state: "visible" });
@@ -2085,6 +2097,7 @@ describe("workspace layout regression", () => {
     const concurrentEditor = page.getByRole("textbox", { name: "TBM/작업 전 안전점검회의 편집" });
     await concurrentEditor.fill(`${editedValue}\n${concurrentSentinel}`);
     await page.getByRole("button", { name: "문서 검토로 돌아가기" }).click();
+    await openDocumentDeepReview(page);
     releaseFirstGraph();
     await expect.poll(() => page.getByRole("button", { name: "편집본 재검증" }).isVisible()).toBe(true);
     await expect.poll(() => page.locator(".document-preview-pane pre").textContent()).toContain(concurrentSentinel);
@@ -2150,7 +2163,7 @@ describe("workspace layout regression", () => {
 
     await page.getByRole("button", { name: /^입력/ }).click();
     await page.getByRole("button", { name: /안전 문서 생성/ }).click();
-    await page.locator(".document-preview-pane").waitFor({ state: "visible" });
+    await openDocumentDeepReview(page);
     await page.locator(".document-viewer-list button", { hasText: "TBM 브리핑" }).click();
     await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
     const regeneratedEditor = page.getByRole("textbox", { name: "TBM/작업 전 안전점검회의 편집" });
@@ -2188,7 +2201,7 @@ describe("workspace layout regression", () => {
 
     await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-windy&theme=night`, { waitUntil: "networkidle" });
     await page.getByRole("button", { name: /안전 문서 생성/ }).click();
-    await page.locator(".document-preview-pane").waitFor({ state: "visible" });
+    await openDocumentDeepReview(page);
     expect.soft(await page.locator(".field-workspace").count()).toBe(0);
 
     await page.getByRole("button", { name: "다운로드 설정" }).click();
