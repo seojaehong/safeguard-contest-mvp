@@ -1,0 +1,360 @@
+{
+  "checkedAt": "2026-07-20T16:53:34.760Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "build": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "be7f45cdf06f5a807b4fc024edf1210da334a46b",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-fwt0icklz-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "records": [
+    {
+      "scenario": {
+        "name": "documents-desktop-short",
+        "path": "/documents?theme=day",
+        "width": 1440,
+        "height": 723,
+        "kind": "documents"
+      },
+      "metrics": {
+        "body": {
+          "height": 754,
+          "viewportHeight": 723,
+          "ratio": 1.04,
+          "overflowX": false
+        },
+        "outside": 0,
+        "documents": {
+          "workpackShell": {
+            "x": 260,
+            "y": 286,
+            "w": 1156,
+            "h": 420,
+            "bottom": 706,
+            "overflowY": "auto",
+            "display": "grid",
+            "position": "static"
+          },
+          "documentEditor": {
+            "x": 576,
+            "y": 286,
+            "w": 825,
+            "h": 1144,
+            "bottom": 1430,
+            "overflowY": "visible",
+            "display": "grid",
+            "position": "static"
+          },
+          "documentTextarea": {
+            "x": 621,
+            "y": 595,
+            "w": 735,
+            "h": 165,
+            "bottom": 760,
+            "overflowY": "hidden",
+            "display": "inline-block",
+            "position": "static"
+          },
+          "mobileCoreLauncher": {
+            "x": 260,
+            "y": 155,
+            "w": 1156,
+            "h": 123,
+            "bottom": 278,
+            "overflowY": "visible",
+            "display": "grid",
+            "position": "static"
+          },
+          "mobilePrimaryPreview": {
+            "x": 1090,
+            "y": 370,
+            "w": 315,
+            "h": 435,
+            "bottom": 805,
+            "overflowY": "visible",
+            "display": "block",
+            "position": "static"
+          }
+        },
+        "share": {
+          "root": null,
+          "form": null,
+          "preview": null,
+          "primary": null,
+          "channelCards": []
+        }
+      },
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\recipient-foreign-live-gate-20260720\\evaluation\\documents-share-ia-production-verify-2026-07-21\\documents-desktop-short.png"
+    },
+    {
+      "scenario": {
+        "name": "documents-mobile",
+        "path": "/documents?theme=day",
+        "width": 390,
+        "height": 844,
+        "kind": "documents"
+      },
+      "metrics": {
+        "body": {
+          "height": 1816,
+          "viewportHeight": 844,
+          "ratio": 2.15,
+          "overflowX": false
+        },
+        "outside": 0,
+        "documents": {
+          "workpackShell": {
+            "x": 12,
+            "y": 545,
+            "w": 366,
+            "h": 1223,
+            "bottom": 1768,
+            "overflowY": "visible",
+            "display": "grid",
+            "position": "static"
+          },
+          "documentEditor": {
+            "x": 12,
+            "y": 671,
+            "w": 366,
+            "h": 1097,
+            "bottom": 1768,
+            "overflowY": "visible",
+            "display": "grid",
+            "position": "static"
+          },
+          "documentTextarea": {
+            "x": 45,
+            "y": 1005,
+            "w": 300,
+            "h": 157,
+            "bottom": 1162,
+            "overflowY": "hidden",
+            "display": "inline-block",
+            "position": "static"
+          },
+          "mobileCoreLauncher": {
+            "x": 24,
+            "y": 311,
+            "w": 342,
+            "h": 218,
+            "bottom": 529,
+            "overflowY": "visible",
+            "display": "grid",
+            "position": "static"
+          },
+          "mobilePrimaryPreview": {
+            "x": 41,
+            "y": 936,
+            "w": 308,
+            "h": 256,
+            "bottom": 1192,
+            "overflowY": "visible",
+            "display": "grid",
+            "position": "static"
+          }
+        },
+        "share": {
+          "root": null,
+          "form": null,
+          "preview": null,
+          "primary": null,
+          "channelCards": []
+        }
+      },
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\recipient-foreign-live-gate-20260720\\evaluation\\documents-share-ia-production-verify-2026-07-21\\documents-mobile.png"
+    },
+    {
+      "scenario": {
+        "name": "workspace-share-desktop-short",
+        "path": "/workspace?theme=day",
+        "width": 1440,
+        "height": 723,
+        "kind": "workspace-share"
+      },
+      "metrics": {
+        "body": {
+          "height": 798,
+          "viewportHeight": 723,
+          "ratio": 1.1,
+          "overflowX": false
+        },
+        "outside": 0,
+        "documents": {
+          "workpackShell": null,
+          "documentEditor": null,
+          "documentTextarea": null,
+          "mobileCoreLauncher": null,
+          "mobilePrimaryPreview": null
+        },
+        "share": {
+          "root": {
+            "x": 130,
+            "y": 186,
+            "w": 1180,
+            "h": 545,
+            "bottom": 731,
+            "overflowY": "visible",
+            "display": "grid",
+            "position": "static"
+          },
+          "form": {
+            "x": 149,
+            "y": 302,
+            "w": 606,
+            "h": 362,
+            "bottom": 664,
+            "overflowY": "visible",
+            "display": "grid",
+            "position": "static"
+          },
+          "preview": {
+            "x": 771,
+            "y": 302,
+            "w": 520,
+            "h": 400,
+            "bottom": 702,
+            "overflowY": "hidden",
+            "display": "grid",
+            "position": "sticky"
+          },
+          "primary": {
+            "x": 149,
+            "y": 302,
+            "w": 606,
+            "h": 44,
+            "bottom": 346,
+            "overflowY": "visible",
+            "display": "flex",
+            "position": "static"
+          },
+          "channelCards": [
+            {
+              "x": 366,
+              "y": 401,
+              "w": 172,
+              "h": 44,
+              "bottom": 445,
+              "display": "flex"
+            },
+            {
+              "x": 366,
+              "y": 451,
+              "w": 172,
+              "h": 44,
+              "bottom": 495,
+              "display": "flex"
+            },
+            {
+              "x": 366,
+              "y": 501,
+              "w": 172,
+              "h": 44,
+              "bottom": 545,
+              "display": "flex"
+            }
+          ]
+        }
+      },
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\recipient-foreign-live-gate-20260720\\evaluation\\documents-share-ia-production-verify-2026-07-21\\workspace-share-desktop-short.png"
+    },
+    {
+      "scenario": {
+        "name": "workspace-share-mobile",
+        "path": "/workspace?theme=day",
+        "width": 390,
+        "height": 844,
+        "kind": "workspace-share"
+      },
+      "metrics": {
+        "body": {
+          "height": 1439,
+          "viewportHeight": 844,
+          "ratio": 1.7,
+          "overflowX": false
+        },
+        "outside": 0,
+        "documents": {
+          "workpackShell": null,
+          "documentEditor": null,
+          "documentTextarea": null,
+          "mobileCoreLauncher": null,
+          "mobilePrimaryPreview": null
+        },
+        "share": {
+          "root": {
+            "x": 27,
+            "y": 244,
+            "w": 336,
+            "h": 1090,
+            "bottom": 1334,
+            "overflowY": "visible",
+            "display": "grid",
+            "position": "static"
+          },
+          "form": {
+            "x": 40,
+            "y": 667,
+            "w": 310,
+            "h": 654,
+            "bottom": 1321,
+            "overflowY": "visible",
+            "display": "grid",
+            "position": "static"
+          },
+          "preview": {
+            "x": 40,
+            "y": 440,
+            "w": 310,
+            "h": 219,
+            "bottom": 659,
+            "overflowY": "visible",
+            "display": "grid",
+            "position": "static"
+          },
+          "primary": {
+            "x": 49,
+            "y": 676,
+            "w": 292,
+            "h": 44,
+            "bottom": 720,
+            "overflowY": "visible",
+            "display": "flex",
+            "position": "static"
+          },
+          "channelCards": [
+            {
+              "x": 50,
+              "y": 982,
+              "w": 91,
+              "h": 86,
+              "bottom": 1068,
+              "display": "grid"
+            },
+            {
+              "x": 149,
+              "y": 982,
+              "w": 91,
+              "h": 86,
+              "bottom": 1068,
+              "display": "grid"
+            },
+            {
+              "x": 249,
+              "y": 982,
+              "w": 91,
+              "h": 86,
+              "bottom": 1068,
+              "display": "grid"
+            }
+          ]
+        }
+      },
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\recipient-foreign-live-gate-20260720\\evaluation\\documents-share-ia-production-verify-2026-07-21\\workspace-share-mobile.png"
+    }
+  ]
+}
