@@ -179,19 +179,25 @@ function evidenceStatus(rootDir, currentHead, liveCommit, id, artifact, report) 
   const sourceCommit = extractSourceCommit(report);
   const explicitProductionCommit = extractProductionCommit(report);
   const productionCommit = explicitProductionCommit || (id === "open_gate" ? sourceCommit : "");
+  let productionStatus = "missing";
+  if (productionCommit) {
+    if (productionCommit === liveCommit) {
+      productionStatus = sourceCommit && sourceCommit !== liveCommit
+        ? "matches_live_source_mismatch"
+        : "matches_live";
+    } else {
+      productionStatus = isAncestor(rootDir, productionCommit)
+        ? "ancestor_of_head"
+        : "not_ancestor";
+    }
+  }
   return {
     id,
     artifact,
     sourceCommit: sourceCommit || null,
     sourceStatus: classifySha(rootDir, sourceCommit, currentHead),
     productionCommit: productionCommit || null,
-    productionStatus: productionCommit
-      ? productionCommit === liveCommit
-        ? "matches_live"
-        : isAncestor(rootDir, productionCommit)
-          ? "ancestor_of_head"
-          : "not_ancestor"
-      : "missing",
+    productionStatus,
   };
 }
 

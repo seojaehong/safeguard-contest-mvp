@@ -1,0 +1,171 @@
+{
+  "verdict": "pass",
+  "policyNotice": "HWPX는 원본 셀 단위 완전 복제가 아니라 제출형 초안입니다. 현장 검토 후 사용 고지를 유지합니다.",
+  "routeNotice": "",
+  "corePdf": {
+    "verdict": "pass",
+    "generatedCount": 4,
+    "checks": [
+      {
+        "id": "risk-assessment",
+        "title": "위험성평가표",
+        "sourceKey": "riskAssessmentDraft",
+        "htmlStatus": 200,
+        "pdfStatus": 200,
+        "htmlPath": "evaluation\\final-99-gate-current-2026-07-21\\core-pdf\\risk-assessment.html",
+        "pdfPath": "evaluation\\final-99-gate-current-2026-07-21\\core-pdf\\risk-assessment.pdf",
+        "pdfBytes": 38604,
+        "requiredTerms": [
+          {
+            "term": "사전준비",
+            "present": true
+          },
+          {
+            "term": "유해",
+            "present": true
+          },
+          {
+            "term": "위험성",
+            "present": true
+          },
+          {
+            "term": "감소대책",
+            "present": true
+          },
+          {
+            "term": "확인",
+            "present": true
+          }
+        ],
+        "hasUniqueStructure": true,
+        "hasSignatureOrCheck": true,
+        "hasKoreanEncoding": true,
+        "verdict": "pass"
+      },
+      {
+        "id": "work-plan",
+        "title": "작업계획서",
+        "sourceKey": "workPlanDraft",
+        "htmlStatus": 200,
+        "pdfStatus": 200,
+        "htmlPath": "evaluation\\final-99-gate-current-2026-07-21\\core-pdf\\work-plan.html",
+        "pdfPath": "evaluation\\final-99-gate-current-2026-07-21\\core-pdf\\work-plan.pdf",
+        "pdfBytes": 36937,
+        "requiredTerms": [
+          {
+            "term": "작업개요",
+            "present": true
+          },
+          {
+            "term": "작업순서",
+            "present": true
+          },
+          {
+            "term": "장비",
+            "present": true
+          },
+          {
+            "term": "작업중지",
+            "present": true
+          },
+          {
+            "term": "확인",
+            "present": true
+          }
+        ],
+        "hasUniqueStructure": true,
+        "hasSignatureOrCheck": true,
+        "hasKoreanEncoding": true,
+        "verdict": "pass"
+      },
+      {
+        "id": "permit-inspection",
+        "title": "허가/점검표",
+        "sourceKey": "photoEvidenceDraft",
+        "htmlStatus": 200,
+        "pdfStatus": 200,
+        "htmlPath": "evaluation\\final-99-gate-current-2026-07-21\\core-pdf\\permit-inspection.html",
+        "pdfPath": "evaluation\\final-99-gate-current-2026-07-21\\core-pdf\\permit-inspection.pdf",
+        "pdfBytes": 29898,
+        "requiredTerms": [
+          {
+            "term": "허가",
+            "present": true
+          },
+          {
+            "term": "작업 전",
+            "present": true
+          },
+          {
+            "term": "첨부",
+            "present": true
+          },
+          {
+            "term": "종료",
+            "present": true
+          },
+          {
+            "term": "확인",
+            "present": true
+          }
+        ],
+        "hasUniqueStructure": true,
+        "hasSignatureOrCheck": true,
+        "hasKoreanEncoding": true,
+        "verdict": "pass"
+      },
+      {
+        "id": "tbm-log",
+        "title": "TBM일지",
+        "sourceKey": "tbmLogDraft",
+        "htmlStatus": 200,
+        "pdfStatus": 200,
+        "htmlPath": "evaluation\\final-99-gate-current-2026-07-21\\core-pdf\\tbm-log.html",
+        "pdfPath": "evaluation\\final-99-gate-current-2026-07-21\\core-pdf\\tbm-log.pdf",
+        "pdfBytes": 37498,
+        "requiredTerms": [
+          {
+            "term": "TBM",
+            "present": true
+          },
+          {
+            "term": "위험성평가",
+            "present": true
+          },
+          {
+            "term": "기상",
+            "present": true
+          },
+          {
+            "term": "참석",
+            "present": true
+          },
+          {
+            "term": "확인",
+            "present": true
+          }
+        ],
+        "hasUniqueStructure": true,
+        "hasSignatureOrCheck": true,
+        "hasKoreanEncoding": true,
+        "verdict": "pass"
+      }
+    ]
+  },
+  "orchestration": {
+    "verdict": "pass",
+    "status": 0,
+    "stdout": "{ \"ok\": true, \"outDir\": \"evaluation\\\\final-99-gate-current-2026-07-21\\\\orchestration-download\", \"weatherMode\": \"live\", \"askMode\": \"live\", \"documentCount\": 11, \"downloadCount\": 14, \"failCount\": 0 } ",
+    "stderr": "",
+    "outDir": "evaluation\\final-99-gate-current-2026-07-21\\orchestration-download",
+    "parsedStdout": {
+      "ok": true,
+      "outDir": "evaluation\\final-99-gate-current-2026-07-21\\orchestration-download",
+      "weatherMode": "live",
+      "askMode": "live",
+      "documentCount": 11,
+      "downloadCount": 14,
+      "failCount": 0
+    }
+  }
+}

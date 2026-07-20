@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-20T20:48:18.716Z",
-  "head": "deb9134725f3c20005eb12c90eb665d19039163c",
+  "generatedAt": "2026-07-20T21:08:08.459Z",
+  "head": "8ec4db66eefc85e17efc28b6137a90526698f275",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "1fb47e20ffcece559a4fbfb6de74ccc5cd40968b",
+    "commitSha": "552424531ae1bd9f6219cc27431509f4494e22e1",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-e29zmlxuk-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-uv2xjentv-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -24,8 +24,8 @@
     {
       "id": "final_99_gate",
       "state": "notice",
-      "artifact": "evaluation\\final-99-gate-current-2026-07-20\\report.json",
-      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-20\\notice-carry.json."
+      "artifact": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
+      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-21\\notice-carry.json."
     },
     {
       "id": "live_harness_quality",
@@ -114,9 +114,9 @@
     "horizontalOverflow": 0
   },
   "final99": {
-    "artifact": "evaluation\\final-99-gate-current-2026-07-20\\report.json",
+    "artifact": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
     "overall": "pass_with_notice",
-    "productionCommit": "d34817a951b17f85d20567f3ef1bd4956f9d3c05",
+    "productionCommit": "552424531ae1bd9f6219cc27431509f4494e22e1",
     "noticeCarry": [
       {
         "gate": "auth-history-reuse",
@@ -146,18 +146,18 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "deb9134725f3c20005eb12c90eb665d19039163c",
+      "sourceCommit": "8ec4db66eefc85e17efc28b6137a90526698f275",
       "sourceStatus": "exact",
-      "productionCommit": "deb9134725f3c20005eb12c90eb665d19039163c",
+      "productionCommit": "8ec4db66eefc85e17efc28b6137a90526698f275",
       "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
-      "artifact": "evaluation\\final-99-gate-current-2026-07-20\\report.json",
-      "sourceCommit": "d34817a951b17f85d20567f3ef1bd4956f9d3c05",
-      "sourceStatus": "ancestor",
-      "productionCommit": "d34817a951b17f85d20567f3ef1bd4956f9d3c05",
-      "productionStatus": "ancestor_of_head"
+      "artifact": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
+      "sourceCommit": "8ec4db66eefc85e17efc28b6137a90526698f275",
+      "sourceStatus": "exact",
+      "productionCommit": "552424531ae1bd9f6219cc27431509f4494e22e1",
+      "productionStatus": "matches_live_source_mismatch"
     },
     {
       "id": "live_harness_quality",

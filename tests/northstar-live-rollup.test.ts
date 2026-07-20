@@ -196,4 +196,21 @@ describe("northstar live rollup", () => {
     expect(report.overall).toBe("northstar_evidence_contradicted");
     expect(report.evidence.find((item) => item.id === "mobile_p0_workspace")?.productionStatus).toBe("not_ancestor");
   });
+
+  it("does not mark source-ahead final-99 evidence as live-exact", () => {
+    const { root, head } = createFixtureRoot();
+    const liveCommit = execFileSync("git", ["rev-parse", "HEAD~1"], { cwd: root, encoding: "utf8" }).trim();
+    writeJson(root, "evaluation/final-99-gate-current-2026-07-21/report.json", {
+      sourceCommit: head,
+      productionBuild: { commitSha: liveCommit },
+      overall: "pass_with_notice",
+    });
+
+    const report = runRollup(root, liveCommit);
+    const final99 = report.evidence.find((item) => item.id === "final_99_gate");
+
+    expect(final99?.sourceStatus).toBe("exact");
+    expect(final99?.productionStatus).toBe("matches_live_source_mismatch");
+    expect(report.contradictions).toHaveLength(0);
+  });
 });

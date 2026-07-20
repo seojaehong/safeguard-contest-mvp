@@ -1,14 +1,14 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-20T20:48:18.182Z
-Source SHA: `deb9134725f3c20005eb12c90eb665d19039163c`
+Generated at: 2026-07-20T21:05:54.157Z
+Source SHA: `8ec4db66eefc85e17efc28b6137a90526698f275`
 Overall: `open`
 
 ## Gate Matrix
 
 | Gate | State | Evidence | Detail |
 | --- | --- | --- | --- |
-| final_99_gate | notice | evaluation\final-99-gate-current-2026-07-20\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate-current-2026-07-20\notice-carry.json. |
+| final_99_gate | notice | evaluation\final-99-gate-current-2026-07-21\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate-current-2026-07-21\notice-carry.json. |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json | Live harness probe passed with zero failed contracts. |
 | ui_documents_share_cockpit | proven | evaluation\documents-drilldown-depth-2026-07-21\report.json | Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, section-level evidence/quality actions, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch. |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json | Production /dispatch seeded desktop and sample shell routes are no longer mobile-stacked: seeded pageHeight 1116 (1.24x), sample panels 635px/413px in distinct desktop regions, overflow false/outside 0. |

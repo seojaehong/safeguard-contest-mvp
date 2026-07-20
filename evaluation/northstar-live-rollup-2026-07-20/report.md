@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-20T20:48:18.716Z
-Source HEAD at generation: deb9134725f3c20005eb12c90eb665d19039163c
-Live commit at generation: 1fb47e20ffcece559a4fbfb6de74ccc5cd40968b
+Generated at: 2026-07-20T21:08:08.459Z
+Source HEAD at generation: 8ec4db66eefc85e17efc28b6137a90526698f275
+Live commit at generation: 552424531ae1bd9f6219cc27431509f4494e22e1
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -27,7 +27,7 @@ Overall: `northstar_open_approval_gated`
 
 | Gate | State | Artifact |
 | --- | --- | --- |
-| final_99_gate | notice | evaluation\final-99-gate-current-2026-07-20\report.json |
+| final_99_gate | notice | evaluation\final-99-gate-current-2026-07-21\report.json |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
 | ui_documents_share_cockpit | proven | evaluation\documents-drilldown-depth-2026-07-21\report.json |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
@@ -42,7 +42,7 @@ Overall: `northstar_open_approval_gated`
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
 | open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
-| final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-20\report.json |
+| final_99_gate | exact | matches_live_source_mismatch | evaluation\final-99-gate-current-2026-07-21\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
 | kosha_exact_trust_registry | ancestor | missing | evaluation\kosha-current-northstar-regression-2026-07-21\report.json |
 | rls_llm_wiki_approval_preflight | ancestor | missing | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |

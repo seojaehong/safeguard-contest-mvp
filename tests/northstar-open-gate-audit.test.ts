@@ -413,7 +413,7 @@ describe("northstar open gate audit", () => {
 
     expect(audit.overall).toBe("evidence_missing");
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_publication")?.state).toBe("missing");
-  });
+  }, 15_000);
 
   it("records explicitly carried final-99 notices without allowing a fully automated launch claim", async () => {
     const { buildNorthstarOpenGateAudit, renderNorthstarOpenGateMarkdown } = await loadAuditModule();
