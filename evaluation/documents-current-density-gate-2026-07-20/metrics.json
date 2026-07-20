@@ -551,5 +551,118 @@
         }
       }
     ]
+  },
+  "liveAfter": {
+    "checkedAt": "2026-07-20T01:48:20.719Z",
+    "baseUrl": "https://www.safeclaw.kr",
+    "commitSha": "5a77590bbecca47b122c5f498cfba0cad5486264",
+    "results": [
+      {
+        "name": "desktop-live-after",
+        "metrics": {
+          "url": "https://www.safeclaw.kr/documents",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "doc": {
+            "clientWidth": 1440,
+            "scrollWidth": 1440,
+            "scrollHeight": 2286,
+            "bodyScrollWidth": 1440
+          },
+          "overflowX": false,
+          "outside": 0,
+          "documentCockpit": {
+            "x": 260,
+            "y": 323.390625,
+            "width": 1156,
+            "height": 151,
+            "bottom": 474.390625
+          },
+          "launcher": {
+            "x": 260,
+            "y": 323.390625,
+            "width": 1156,
+            "height": 151,
+            "bottom": 474.390625
+          },
+          "textarea": {
+            "x": 621,
+            "y": 791.265625,
+            "width": 750,
+            "height": 244,
+            "bottom": 1035.265625
+          },
+          "firstStructuredEditor": {
+            "x": 621,
+            "y": 763.265625,
+            "width": 750,
+            "height": 1082.75,
+            "bottom": 1846.015625
+          },
+          "workpackEditor": {
+            "x": 260,
+            "y": 506.390625,
+            "width": 1156,
+            "height": 1731.3125,
+            "bottom": 2237.703125
+          }
+        }
+      },
+      {
+        "name": "mobile-live-after",
+        "metrics": {
+          "url": "https://www.safeclaw.kr/documents",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "doc": {
+            "clientWidth": 390,
+            "scrollWidth": 390,
+            "scrollHeight": 2525,
+            "bodyScrollWidth": 390
+          },
+          "overflowX": false,
+          "outside": 0,
+          "documentCockpit": {
+            "x": 24,
+            "y": 311,
+            "width": 342,
+            "height": 218,
+            "bottom": 529
+          },
+          "launcher": {
+            "x": 24,
+            "y": 311,
+            "width": 342,
+            "height": 218,
+            "bottom": 529
+          },
+          "textarea": {
+            "x": 45,
+            "y": 1031.875,
+            "width": 300,
+            "height": 236,
+            "bottom": 1267.875
+          },
+          "firstStructuredEditor": {
+            "x": 45,
+            "y": 1003.875,
+            "width": 300,
+            "height": 1042.75,
+            "bottom": 2046.625
+          },
+          "workpackEditor": {
+            "x": 12,
+            "y": 545,
+            "width": 366,
+            "height": 1932.40625,
+            "bottom": 2477.40625
+          }
+        }
+      }
+    ]
   }
 }

@@ -33,6 +33,7 @@ The standalone `/documents` management page keeps horizontal overflow at zero an
 - Workpack editor y: `506px`
 - First structured editor y: `763px`
 - First textarea y: `791px`
+- Production live check at commit `5a77590b`: same metrics
 
 ### Mobile Before
 
@@ -51,6 +52,7 @@ The standalone `/documents` management page keeps horizontal overflow at zero an
 - Compact launcher y: `311px`, height `218px`
 - First structured editor y: `1004px`
 - First textarea y: `1032px`
+- Production live check at commit `5a77590b`: same metrics
 
 ## Interpretation
 
@@ -80,3 +82,5 @@ Results:
 - `mobile-documents.png`
 - `desktop-after-documents.png`
 - `mobile-after-documents.png`
+- `desktop-live-after-documents.png`
+- `mobile-live-after-documents.png`
