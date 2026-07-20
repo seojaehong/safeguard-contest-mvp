@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-20T13:13:54.592Z",
+  "generatedAt": "2026-07-20T13:26:59.254Z",
   "scope": "sif_embedding_next_approval_gate_preflight",
-  "sourceSha": "b25e1c2e2a1230bec29b6dcc5cc4853798cdd2c2",
+  "sourceSha": "cbb134c52185aab4e0ac3f9d648eee82aee2634f",
   "ok": true,
   "approvalHeld": true,
   "dbMutationPerformed": false,
@@ -136,7 +136,7 @@
       "id": "preflight_source_sha_recorded",
       "passed": true,
       "evidence": {
-        "sourceSha": "b25e1c2e2a1230bec29b6dcc5cc4853798cdd2c2"
+        "sourceSha": "cbb134c52185aab4e0ac3f9d648eee82aee2634f"
       }
     },
     {
@@ -170,7 +170,7 @@
     "supabaseServiceRolePresent": true,
     "vectorFeatureFlagEnabled": false,
     "executionEnvReady": true,
-    "requireExecutionEnv": true,
+    "requireExecutionEnv": false,
     "envFailure": false
   },
   "envFilesLoaded": [

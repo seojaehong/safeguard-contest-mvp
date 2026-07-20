@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-20T13:21:05.883Z
-Source SHA: `1c6e93476b5371861e190272efda9381065d77f3`
+Generated at: 2026-07-20T13:26:59.573Z
+Source SHA: `cbb134c52185aab4e0ac3f9d648eee82aee2634f`
 Overall: `open`
 
 ## Gate Matrix
@@ -10,9 +10,9 @@ Overall: `open`
 | --- | --- | --- | --- |
 | final_99_gate | notice | evaluation\final-99-gate-current-2026-07-20\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate-current-2026-07-20\notice-carry.json. |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json | Live harness probe passed with zero failed contracts. |
-| supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Read-only RLS approval preflight passed at source SHA b25e1c2e2a1230bec29b6dcc5cc4853798cdd2c2, but live RLS catalog and tenant A/B isolation are not proven. |
-| llm_wiki_publication | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA b25e1c2e2a1230bec29b6dcc5cc4853798cdd2c2. |
-| sif_embedding_runtime | approval_gated | evaluation\sif-embedding-gate\approval-preflight-report.json | SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: b25e1c2e2a1230bec29b6dcc5cc4853798cdd2c2. |
+| supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Read-only RLS approval preflight passed at source SHA cbb134c52185aab4e0ac3f9d648eee82aee2634f, but live RLS catalog and tenant A/B isolation are not proven. |
+| llm_wiki_publication | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA cbb134c52185aab4e0ac3f9d648eee82aee2634f. |
+| sif_embedding_runtime | approval_gated | evaluation\sif-embedding-gate\approval-preflight-report.json | SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: cbb134c52185aab4e0ac3f9d648eee82aee2634f. |
 | kosha_exact_trust_registry | proven | evaluation\kosha-current-live-gate-2026-07-20\report.json | Current live runtime has 3 exact KOSHA pins (D-C-13, D-C-7, B-E-10), local corpus 234 items/7127 chunks, and focused KOSHA tests passed on the current HEAD. |
 
 ## Safe Demo Claims

@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-20T13:21:06.553Z",
-  "head": "1c6e93476b5371861e190272efda9381065d77f3",
+  "generatedAt": "2026-07-20T13:27:01.056Z",
+  "head": "cbb134c52185aab4e0ac3f9d648eee82aee2634f",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "1c6e93476b5371861e190272efda9381065d77f3",
+    "commitSha": "cbb134c52185aab4e0ac3f9d648eee82aee2634f",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-nmd2x4yxu-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-by5n7wfh2-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -45,19 +45,19 @@
       "id": "supabase_rls_launch_isolation",
       "state": "approval_gated",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Read-only RLS approval preflight passed at source SHA b25e1c2e2a1230bec29b6dcc5cc4853798cdd2c2, but live RLS catalog and tenant A/B isolation are not proven."
+      "detail": "Read-only RLS approval preflight passed at source SHA cbb134c52185aab4e0ac3f9d648eee82aee2634f, but live RLS catalog and tenant A/B isolation are not proven."
     },
     {
       "id": "llm_wiki_publication",
       "state": "approval_gated",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA b25e1c2e2a1230bec29b6dcc5cc4853798cdd2c2."
+      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA cbb134c52185aab4e0ac3f9d648eee82aee2634f."
     },
     {
       "id": "sif_embedding_runtime",
       "state": "approval_gated",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: b25e1c2e2a1230bec29b6dcc5cc4853798cdd2c2."
+      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: cbb134c52185aab4e0ac3f9d648eee82aee2634f."
     }
   ],
   "mobileP0": {
@@ -117,7 +117,7 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "1c6e93476b5371861e190272efda9381065d77f3",
+      "sourceCommit": "cbb134c52185aab4e0ac3f9d648eee82aee2634f",
       "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
@@ -142,23 +142,23 @@
       "id": "kosha_exact_trust_registry",
       "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
       "sourceCommit": "1c6e93476b5371861e190272efda9381065d77f3",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "1c6e93476b5371861e190272efda9381065d77f3",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "sourceCommit": "b25e1c2e2a1230bec29b6dcc5cc4853798cdd2c2",
-      "sourceStatus": "ancestor",
+      "sourceCommit": "cbb134c52185aab4e0ac3f9d648eee82aee2634f",
+      "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
     },
     {
       "id": "sif_embedding_preflight",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "sourceCommit": "b25e1c2e2a1230bec29b6dcc5cc4853798cdd2c2",
-      "sourceStatus": "ancestor",
+      "sourceCommit": "cbb134c52185aab4e0ac3f9d648eee82aee2634f",
+      "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
     },
