@@ -1,13 +1,13 @@
 {
-  "checkedAt": "2026-07-20T11:01:07.853Z",
+  "checkedAt": "2026-07-20T11:18:21.298Z",
   "build": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "b43582bd5d46a46b6769513edb345138315741bc",
+    "commitSha": "40d1f3802ac1d76963c2528dee033668d1ca58fe",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-pwg465n2c-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-dzmonfz2y-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "inputText": "서울 성수동 외벽 도장 작업, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보. 이동식 비계와 자재 양중 동선 확인 필요.",
@@ -25,7 +25,7 @@
         "body": {
           "width": 1440,
           "clientWidth": 1440,
-          "height": 1419,
+          "height": 1464,
           "clientHeight": 900,
           "overflowX": false
         },
@@ -38,22 +38,22 @@
           "x": 186,
           "y": 229,
           "w": 1068,
-          "h": 1070,
-          "bottom": 1299
+          "h": 1115,
+          "bottom": 1344
         },
         "documentWorkbench": {
           "x": 186,
           "y": 229,
           "w": 1068,
-          "h": 1070,
-          "bottom": 1299
+          "h": 1115,
+          "bottom": 1344
         },
         "documentPreview": {
           "x": 410,
-          "y": 752,
+          "y": 797,
           "w": 831,
           "h": 424,
-          "bottom": 1176
+          "bottom": 1221
         },
         "documentEditor": null,
         "documentTextarea": null,
@@ -173,7 +173,7 @@
         "body": {
           "width": 390,
           "clientWidth": 390,
-          "height": 2064,
+          "height": 2010,
           "clientHeight": 844,
           "overflowX": false
         },
@@ -186,22 +186,22 @@
           "x": 27,
           "y": 262,
           "w": 336,
-          "h": 1697,
-          "bottom": 1959
+          "h": 1643,
+          "bottom": 1905
         },
         "documentWorkbench": {
           "x": 27,
           "y": 262,
           "w": 336,
-          "h": 1697,
-          "bottom": 1959
+          "h": 1643,
+          "bottom": 1905
         },
         "documentPreview": {
           "x": 40,
-          "y": 1286,
+          "y": 1232,
           "w": 310,
           "h": 549,
-          "bottom": 1835
+          "bottom": 1781
         },
         "documentEditor": null,
         "documentTextarea": null,
@@ -269,7 +269,7 @@
         "body": {
           "width": 390,
           "clientWidth": 390,
-          "height": 1487,
+          "height": 1451,
           "clientHeight": 844,
           "overflowX": false
         },
@@ -287,22 +287,22 @@
           "x": 27,
           "y": 244,
           "w": 336,
-          "h": 1138,
-          "bottom": 1382
+          "h": 1102,
+          "bottom": 1346
         },
         "shareRoot": {
           "x": 27,
           "y": 244,
           "w": 336,
-          "h": 1138,
-          "bottom": 1382
+          "h": 1102,
+          "bottom": 1346
         },
         "sharePreview": {
           "x": 40,
-          "y": 1068,
+          "y": 380,
           "w": 310,
-          "h": 249,
-          "bottom": 1317
+          "h": 219,
+          "bottom": 599
         },
         "primaryShareCtas": 1,
         "stickyLike": []
