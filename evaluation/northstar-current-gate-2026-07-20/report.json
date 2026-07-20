@@ -3,7 +3,7 @@
   "date": "2026-07-20",
   "worktree": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\recipient-foreign-live-gate-20260720",
   "branch": "chore/recipient-foreign-live-gate-20260720",
-  "head": "ac304c7446e3d998c3f68d983430626b3f1cd7cf",
+  "head": "9615766de2d1807bdd3634b8dcff957e66052f14",
   "productionProductMarker": "5a77590bbecca47b122c5f498cfba0cad5486264",
   "checks": {
     "runtimeHermesOpenClawBoundary": {
@@ -31,13 +31,30 @@
       "productionLiveDesktopHeightBefore": 3500,
       "productionLiveDesktopHeightAfter": 2286,
       "status": "pass"
+    },
+    "liveGenerationGrounding": {
+      "comparisonCommand": "node evaluation\\live-generation-grounding-comparison-2026-07-20\\run-live-generation-grounding-comparison.mjs",
+      "probeCommand": "node scripts\\live_harness_quality_probe.mjs --base-url https://www.safeclaw.kr --output live-harness-quality-probe-current-2026-07-20 --timeout-ms 120000",
+      "productionMarker": "ac304c7446e3d998c3f68d983430626b3f1cd7cf",
+      "templateQuality": "blocked",
+      "templateRows": 0,
+      "templateReferences": 4,
+      "enhancedQuality": "ready",
+      "enhancedRows": 5,
+      "enhancedReferences": 6,
+      "enhancedDirectEvidence": 2,
+      "enhancedSifCases": 3,
+      "enhancedSupportingEvidence": 2,
+      "probeVerdict": "pass",
+      "failedContracts": 0,
+      "status": "pass"
     }
   },
   "remaining": [
-    "live end-to-end generation quality comparison",
     "RLS tenant-boundary follow-through requiring explicit approval for migrations",
     "Hermes/OpenClaw live runtime readiness beyond adapter boundary",
     "Operator Wiki Export / Public Reference Corpus maturation",
-    "remaining non-workspace page density"
+    "remaining non-workspace page density",
+    "regeneration comparison after next production product commit"
   ]
 }

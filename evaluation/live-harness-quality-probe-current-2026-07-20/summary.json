@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "safeclaw-live-harness-quality-probe-summary/v1",
+  "generatedAt": "2026-07-20T02:37:43.983Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "request": "POST /api/ask (enhanced)",
+  "httpStatus": 200,
+  "verdict": "pass",
+  "qualityState": "ready",
+  "ontologyState": "ready",
+  "failedContracts": 0,
+  "contracts": [
+    "api_response",
+    "enhanced_mode",
+    "generation_evidence_sealed",
+    "db_harness_first",
+    "evidence_sets_present",
+    "structured_risk_tbm_links",
+    "scenario_controls_present",
+    "irrelevant_controls_absent",
+    "quality_state_ready",
+    "ontology_state_ready",
+    "no_db_mutation"
+  ]
+}

@@ -17,6 +17,7 @@ Current `master` and the current production-visible product line are aligned wit
 - Hermes/OpenClaw adapter boundary and provider-policy separation
 - Recipient portal and foreign-worker confirmation browser contract
 - `/documents` standalone management density reduction
+- Live generation grounding comparison and DB-harness quality contract probe
 
 This gate does not claim the entire 24h/72h North Star objective is complete. It records that the current high-risk KOSHA/SIF/ontology and terminology boundaries are green on the authoritative code state.
 
@@ -24,7 +25,7 @@ This gate does not claim the entire 24h/72h North Star objective is complete. It
 
 - Worktree: `C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\recipient-foreign-live-gate-20260720`
 - Branch: `chore/recipient-foreign-live-gate-20260720`
-- Current HEAD after latest evidence: `ac304c7446e3d998c3f68d983430626b3f1cd7cf`
+- Source HEAD before this live generation evidence refresh: `9615766de2d1807bdd3634b8dcff957e66052f14`
 - Product code production marker after `/documents` compact patch: `5a77590bbecca47b122c5f498cfba0cad5486264`
 - Latest evidence-only commits after production product marker: `bc10fbe9`, `ac304c74`
 
@@ -124,6 +125,30 @@ Evidence:
 
 - `evaluation/documents-current-density-gate-2026-07-20/report.md`
 
+### Live Generation Grounding / Quality Comparison Gate
+
+Commands:
+
+```powershell
+node evaluation\live-generation-grounding-comparison-2026-07-20\run-live-generation-grounding-comparison.mjs
+node scripts\live_harness_quality_probe.mjs --base-url https://www.safeclaw.kr --output live-harness-quality-probe-current-2026-07-20 --timeout-ms 120000
+```
+
+Result:
+
+- Production build marker during `/api/ask` comparison: `ac304c7446e3d998c3f68d983430626b3f1cd7cf`
+- `template`: HTTP 200, 698ms, quality `blocked`, structured rows 0, references 4
+- `enhanced`: HTTP 200, 20,013ms, quality `ready`, structured rows 5, references 6
+- Enhanced DB harness: direct evidence 2, SIF cases 3, supporting evidence 2, missing evidence 0, core document coverage 3 / 3
+- Live harness quality probe: PASS, failed contracts 0
+
+Evidence:
+
+- `evaluation/live-generation-grounding-comparison-2026-07-20/report.md`
+- `evaluation/live-generation-grounding-comparison-2026-07-20/comparison.json`
+- `evaluation/live-harness-quality-probe-current-2026-07-20/report.md`
+- `evaluation/live-harness-quality-probe-current-2026-07-20/summary.json`
+
 ### TypeScript
 
 Command:
@@ -164,8 +189,8 @@ The current implementation preserves the accepted product direction:
 
 The broader objective remains active. The next highest-value workstreams are:
 
-1. Live end-to-end generation quality comparison: prove that KOSHA/SIF grounding changes output quality, not just tests.
-2. RLS / tenant-boundary audit follow-through: read-only reports exist, but migration or policy changes still require explicit approval.
-3. Hermes/OpenClaw adapter path: keep isolated adapter/experimental path, then add stronger live readiness evidence only when service auth and tenant gates are present.
-4. Public Reference Corpus / Operator Wiki Export: continue improving review/export surfaces without turning Markdown/wiki into runtime truth.
-5. Remaining page density: continue bringing non-workspace pages toward the compact workspace design.
+1. RLS / tenant-boundary audit follow-through: read-only reports exist, but migration or policy changes still require explicit approval.
+2. Hermes/OpenClaw live runtime readiness: adapter boundaries are green, but service auth, tenant gating, and operator-owned runtime deployment still need live evidence.
+3. Public Reference Corpus / Operator Wiki Export: continue improving review/export surfaces without turning Markdown/wiki into runtime truth.
+4. Remaining page density: continue bringing non-workspace pages toward the compact workspace design.
+5. Re-run generation comparison after the next production product commit to keep the evidence current.

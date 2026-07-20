@@ -1,14 +1,14 @@
 {
-  "checkedAt": "2026-07-19T22:06:30.090Z",
+  "checkedAt": "2026-07-20T02:37:07.129Z",
   "endpoint": "https://www.safeclaw.kr/api/ask",
   "build": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "ae4a8f6cc440d1aac3d43e6e70e58db4f7326563",
+    "commitSha": "ac304c7446e3d998c3f68d983430626b3f1cd7cf",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ref4ykjpc-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-mr5drrweu-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "question": "서울 성수동 외벽 도장 작업, 이동식 비계 사용, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보. 추락, 비계 전도, 지게차 자재 양중 동선 충돌을 반영해서 위험성평가표와 TBM을 작성해줘.",
@@ -19,9 +19,9 @@
       "summary": {
         "mode": "template",
         "httpStatus": 200,
-        "elapsedMs": 254,
+        "elapsedMs": 698,
         "ok": true,
-        "statusDetail": "AI_MODE=template (외부 호출 없음, DB 하네스 템플릿 계약 적용) / DB 하네스 계약: review_required",
+        "statusDetail": "생성 모드: 템플릿 (외부 호출 없음, 고정 근거 템플릿 계약 적용) / 고정 근거 계약: review_required",
         "sourceMix": {
           "total": 4,
           "counts": {
@@ -124,7 +124,7 @@
             "detail": "핵심 문서 3/3종의 본문 placeholder와 필수 문구를 확인했습니다."
           },
           {
-            "label": "DB 하네스 계약",
+            "label": "고정 근거 계약",
             "status": "blocked",
             "detail": "고정된 DB 근거가 없어 전파 전 근거 매칭이 필요합니다."
           },
@@ -161,9 +161,9 @@
       "summary": {
         "mode": "enhanced",
         "httpStatus": 200,
-        "elapsedMs": 18704,
+        "elapsedMs": 20013,
         "ok": true,
-        "statusDetail": "Law.go와 OpenAI 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 초단기실황 호출 성공 (서울, base 20260720 0600) / 기상청 초단기예보 호출 성공 (서울, base 20260720 0630) / 기상청 단기예보 호출 성공 (서울, base 20260720 0500) / 기상청 기상특보 조회 성공 (전국, 202607200550) / 기상청 영향예보 연결 점검 필요: NO_DATA / 기상청 생활기상지수 자외선 조회 성공 (서울, areaNo 1100000000) / 기상청 생활기상지수 체감온도 연결 점검 필요: NO_DATA / 한국에너지기술연구원 실시간 홍반자외선 연결 점검 필요: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx/1.18.0 (Ubuntu)</center>\r\n</body>\r\n</html>\r\n / 고용24 사업주훈련 호출 성공 (지역코드 11). 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 7건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 지식 DB 매칭 4건 / Supabase 카탈로그 매칭 8건 (configured=true) / structured 위험성평가 rows 5건, 검증 이슈 0건 (structured rows=DB harness deterministic) / TBM-risk 연결 5건 (TBM-risk links=DB harness deterministic) / TBM structured=deterministic from risk rows / AI_MODE=enhanced (DB 하네스 row-first: 위험성평가 row 확정, TBM 구조 deterministic 조립)",
+        "statusDetail": "Law.go와 OpenAI 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 초단기실황 호출 성공 (서울, base 20260720 1000) / 기상청 초단기예보 호출 성공 (서울, base 20260720 1030) / 기상청 단기예보 호출 성공 (서울, base 20260720 1100) / 기상청 기상특보 조회 성공 (전국, 202607201130) / 기상청 영향예보 조회 성공 (울진군평지, 보건(일반인)) / 기상청 생활기상지수 자외선 조회 성공 (서울, areaNo 1100000000) / 기상청 생활기상지수 체감온도 연결 점검 필요: NO_DATA / 한국에너지기술연구원 실시간 홍반자외선 연결 점검 필요: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx/1.18.0 (Ubuntu)</center>\r\n</body>\r\n</html>\r\n / 고용24 사업주훈련 호출 성공 (지역코드 11). 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 7건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 지식 DB 매칭 4건 / Supabase 카탈로그 매칭 8건 (configured=true) / structured 위험성평가 rows 5건, 검증 이슈 0건 (structured rows=고정 근거 기반) / TBM-risk 연결 5건 (TBM-risk links=고정 근거 기반) / TBM structured=규칙 기반 from risk rows / 생성 모드: 강화 (고정 근거 위험요인 표 우선: 위험성평가 row 확정, TBM 구조 규칙 기반 조립)",
         "sourceMix": {
           "total": 9,
           "counts": {
@@ -268,7 +268,7 @@
             "detail": "핵심 문서 3/3종의 본문 placeholder와 필수 문구를 확인했습니다."
           },
           {
-            "label": "DB 하네스 계약",
+            "label": "고정 근거 계약",
             "status": "ready",
             "detail": "DB 근거 7건을 고정했고, 필수 문서 3/3종을 하네스가 커버했습니다."
           },
@@ -286,7 +286,7 @@
             "hazard": "외벽 도장 중 이동식 비계 작업발판·난간 미확인으로 인한 추락·전도 위험",
             "controls": null,
             "evidenceRefs": [
-              "DB 하네스 직접근거",
+              "고정 근거 직접근거",
               "KOSHA 공식자료",
               "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
               "검색: local-tag",
@@ -299,7 +299,7 @@
             "hazard": "자재 반입 지게차 동선과 작업자 통행 동선 중첩으로 인한 충돌 위험",
             "controls": null,
             "evidenceRefs": [
-              "DB 하네스 보조근거",
+              "고정 근거 보조근거",
               "고위험요인 사례",
               "OO공장 이동식 사다리를 사용하여 지게차 파렛트 위로 이동 중 발을 헛디뎌 높이 약 2.15m 아래 바닥으로 추락하여 사망 사례",
               "검색: rest"
@@ -311,7 +311,7 @@
             "hazard": "지게차 운반·상하차 중 적재물 전도·낙하 및 작업자 타격 위험",
             "controls": null,
             "evidenceRefs": [
-              "DB 하네스 보조근거",
+              "고정 근거 보조근거",
               "고위험요인 사례",
               "OO공장 OO 소속 지게차 포크로 프레임 구조부재와 상부철판 사이 틈을 벌리다가 프레임이 넘어지면서 재해자 흉부를 타격하여 사망 사례",
               "검색: rest"
@@ -323,7 +323,7 @@
             "hazard": "비계 조립·사용 중 작업발판·안전난간·고정 상태 미확인으로 인한 추락·전도 위험",
             "controls": null,
             "evidenceRefs": [
-              "DB 하네스 직접근거",
+              "고정 근거 직접근거",
               "KOSHA 공식자료",
               "D-C-7-2026 비계 구조 및 안전작업에 관한 기술지원규정",
               "검색: local-tag",
@@ -351,12 +351,12 @@
         "koshaMentions": 115,
         "sifMentions": 21,
         "evidenceRefs": [
-          "DB 하네스 직접근거",
+          "고정 근거 직접근거",
           "KOSHA 공식자료",
           "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
           "검색: local-tag",
           "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914371557826167/1",
-          "DB 하네스 보조근거",
+          "고정 근거 보조근거",
           "고위험요인 사례",
           "OO공장 이동식 사다리를 사용하여 지게차 파렛트 위로 이동 중 발을 헛디뎌 높이 약 2.15m 아래 바닥으로 추락하여 사망 사례",
           "검색: rest",
@@ -369,9 +369,9 @@
           "TBM 기록"
         ],
         "deliverableLengths": {
-          "riskAssessmentDraft": 4645,
-          "tbmBriefing": 2843,
-          "tbmLogDraft": 2253
+          "riskAssessmentDraft": 4654,
+          "tbmBriefing": 2855,
+          "tbmLogDraft": 2256
         },
         "textSnippets": {
           "riskAssessmentDraft": "위험성평가표(초안)\n공식자료 기반: KOSHA 위험성평가 절차 및 4M 기법 참고\n\n업체명: 세이프건설\n업종: 건설업\n작업명: 외벽 도장 작업\n공정/세부작업: 이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제\n작업장소: 서울 성수동 근린생활시설 현장\n작업인원: 5명\n기상 및 작업조건: 오후 강풍 예보, 작업중지 기준 공유 필요\n\n[1. 사전준비]\n- 평가대상 작업: 외벽 도장 작업\n- 참여자: 현장소장, 관리감독자, 작업반장, 해당 작업자\n- 확인자료: 작업계획, 기상조건, 장비·보호구 상태, 최근 TBM 기록\n\n[2. 유해·위험요인 파악]\n1. 세부작업: 이동식 비계 승·하강 및 작업발판 이동 중 추락\n   - 유해·위험요인: 이동식 비계 승·하강 및 작업발판 이동 중 추락\n   - 4M 체크: Man:■ Machine:■ Media:□ Management:□ / 중점 확인: Man, Machine\n\n2. 세부작업: 강풍 시 비계 전도와 공구·자재 낙하\n   - 유해·위험요인: 강풍 시 비계 전도와 공구·자재 낙하\n   - 4M 체크: Man:■ Machine:■ Media:■ Management:□ / 중점 확인: Man, Machine, Media\n\n3. 세부작업: 지게차 동선 인접 구간에서 작업자 충돌\n   - 유해·위험요인: 지게차 동선 인접 구간에서 작업자 충돌\n   - 4M 체크: Man:■ Machine:■ Media:■ Management:■ / 중점 확인: Man, Machine, Media, Management\n\n[3. 위험성 결정]\n1. 이동식 비계 승·하강 및 작업발판 이동 중 추락\n   - 현재 위험성: 상\n   - 판단근거: 사고 발생 가능성과 중대성을 함께 고려\n2. 강풍 시 비계 전도와 공구·자재 낙하\n   - 현재 위험성: 상\n   - 판단근거: 작업 전 통제 여부와 노출 빈도 확인\n3. 지게차 동선 인접 구간에서 작업자 충돌\n   - 현재 위험성: 중\n   - 판단근거: 관리감독 및 작업자 숙지 여부 확인\n\n[4. 감소대책 수립 및 실행]\n1. 작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검\n   - 실행시점: 작업 시작 전\n   - 담당: 관리감독자 / 작업반장\n   - 잔여 위험성: 중\n2. 풍속 상승 또는 돌풍 체감 시 즉시 작업중지 후 지상 대기\n   - 실행시점: 작업 시작 전 및 작업 중 수시\n   - 담당: 작업반장 / 신호수\n   - 잔여 위험성: 중",
