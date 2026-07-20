@@ -21389,10 +21389,34 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .workpack-shell {
+    position: relative;
     max-height: min(320px, calc(100vh - 524px));
     margin-top: 8px;
     overflow-y: auto;
     overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .workpack-shell::after {
+    content: "아래로 계속";
+    position: sticky;
+    z-index: 2;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    min-height: 28px;
+    align-items: flex-end;
+    justify-content: center;
+    margin-top: -28px;
+    padding: 12px 0 4px;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--workspace-surface-1) 68%);
+    color: var(--workspace-muted);
+    font-size: var(--text-hud);
+    font-weight: 700;
+    letter-spacing: var(--tracking-hud);
+    line-height: var(--leading-hud);
   }
 
   .safeclaw-module-shell.module-variant-document .safeclaw-mobile-document-priority > span {

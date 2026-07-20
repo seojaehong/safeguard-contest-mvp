@@ -1189,19 +1189,29 @@ describe("documents editor layout", () => {
         }
         const textareaRect = textarea.getBoundingClientRect();
         const bodyRect = documentBody.getBoundingClientRect();
+        const shellRect = workpackShell.getBoundingClientRect();
         const shellStyle = getComputedStyle(workpackShell);
+        const shellAfterStyle = getComputedStyle(workpackShell, "::after");
+        const textareaVisibleInPane = textareaRect.bottom > shellRect.top && textareaRect.top < shellRect.bottom;
         return {
           activeLabel: document.activeElement?.getAttribute("aria-label"),
           selectedDocument: documentSelect.value,
           selectedPressed: selectedLauncher.getAttribute("aria-pressed"),
           textareaTop: Math.round(textareaRect.top),
           textareaBottom: Math.round(textareaRect.bottom),
+          textareaVisibleInPane,
+          shellTop: Math.round(shellRect.top),
+          shellBottom: Math.round(shellRect.bottom),
           bodyTop: Math.round(bodyRect.top),
           scrollY: Math.round(window.scrollY),
           shellOverflowY: shellStyle.overflowY,
           shellScrollTop: Math.round(workpackShell.scrollTop),
           shellClientHeight: Math.round(workpackShell.clientHeight),
-          shellScrollHeight: Math.round(workpackShell.scrollHeight)
+          shellScrollHeight: Math.round(workpackShell.scrollHeight),
+          shellAffordanceContent: shellAfterStyle.content.replaceAll("\"", ""),
+          shellAffordancePosition: shellAfterStyle.position,
+          shellAffordancePointerEvents: shellAfterStyle.pointerEvents,
+          shellAffordanceMinHeight: Math.round(Number.parseFloat(shellAfterStyle.minHeight))
         };
       });
 
@@ -1212,18 +1222,58 @@ describe("documents editor layout", () => {
       expect(selected.shellOverflowY).toBe("auto");
       expect(selected.shellScrollHeight).toBeGreaterThan(selected.shellClientHeight);
       expect(selected.shellScrollTop).toBeGreaterThan(0);
+      expect(selected.shellAffordanceContent).toBe("아래로 계속");
+      expect(selected.shellAffordancePosition).toBe("sticky");
+      expect(selected.shellAffordancePointerEvents).toBe("none");
+      expect(selected.shellAffordanceMinHeight).toBeGreaterThanOrEqual(28);
+      expect(selected.textareaVisibleInPane).toBe(true);
+      expect(selected.textareaTop).toBeLessThan(selected.shellBottom);
+      expect(selected.textareaBottom).toBeGreaterThan(selected.shellTop);
       expect(selected.bodyTop).toBeGreaterThanOrEqual(0);
       expect(selected.bodyTop).toBeLessThan(844);
       expect(selected.textareaTop).toBeGreaterThanOrEqual(0);
       expect(selected.textareaTop).toBeLessThan(844);
       expect(selected.textareaBottom).toBeGreaterThan(selected.textareaTop);
 
-      await page.locator('select[aria-label="편집 문서 선택"]').selectOption("riskAssessmentDraft");
+      await launcher.getByRole("button", { name: "위험성평가표" }).click();
+      await page.waitForFunction(() => document.activeElement?.getAttribute("aria-label") === "위험성평가표 편집");
       await expect.poll(async () => {
         const riskAssessmentPressed = await launcher.getByRole("button", { name: "위험성평가표" }).getAttribute("aria-pressed");
         const tbmLogPressed = await launcher.getByRole("button", { name: "TBM 기록" }).getAttribute("aria-pressed");
         return [riskAssessmentPressed, tbmLogPressed];
       }).toEqual(["true", "false"]);
+      const riskAssessmentLanding = await page.evaluate(() => {
+        const textarea = document.querySelector<HTMLTextAreaElement>('.document-textarea[aria-label="위험성평가표 편집"]');
+        const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
+        const documentSelect = document.querySelector<HTMLSelectElement>('select[aria-label="편집 문서 선택"]');
+        if (!textarea || !workpackShell || !documentSelect) {
+          throw new Error("Missing selected risk assessment mobile editor target");
+        }
+        const textareaRect = textarea.getBoundingClientRect();
+        const shellRect = workpackShell.getBoundingClientRect();
+        return {
+          selectedDocument: documentSelect.value,
+          activeLabel: document.activeElement?.getAttribute("aria-label"),
+          shellTop: Math.round(shellRect.top),
+          shellBottom: Math.round(shellRect.bottom),
+          shellScrollTop: Math.round(workpackShell.scrollTop),
+          textareaTop: Math.round(textareaRect.top),
+          textareaBottom: Math.round(textareaRect.bottom),
+          textareaVisibleInPane: textareaRect.bottom > shellRect.top && textareaRect.top < shellRect.bottom,
+          pageHeight: Math.round(document.documentElement.scrollHeight),
+          viewportHeight: window.innerHeight,
+          scrollWidth: document.documentElement.scrollWidth,
+          viewportWidth: window.innerWidth
+        };
+      });
+      expect(riskAssessmentLanding.selectedDocument).toBe("riskAssessmentDraft");
+      expect(riskAssessmentLanding.activeLabel).toBe("위험성평가표 편집");
+      expect(riskAssessmentLanding.textareaVisibleInPane).toBe(true);
+      expect(riskAssessmentLanding.textareaTop).toBeLessThan(riskAssessmentLanding.shellBottom);
+      expect(riskAssessmentLanding.textareaBottom).toBeGreaterThan(riskAssessmentLanding.shellTop);
+      expect(riskAssessmentLanding.shellScrollTop).toBeGreaterThan(0);
+      expect(riskAssessmentLanding.pageHeight).toBeLessThanOrEqual(riskAssessmentLanding.viewportHeight + 1);
+      expect(riskAssessmentLanding.scrollWidth).toBeLessThanOrEqual(riskAssessmentLanding.viewportWidth + 1);
 
       await details.locator(":scope > summary").click();
       const expanded = await page.evaluate(() => {

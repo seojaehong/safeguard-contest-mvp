@@ -2280,6 +2280,7 @@ export function WorkpackEditor({
   const [remediationDrafts, setRemediationDrafts] = useState<Record<string, RemediationDraft>>({});
   const [remediationLoadingId, setRemediationLoadingId] = useState<string | null>(null);
   const documentBodyRef = useRef<HTMLDivElement | null>(null);
+  const workpackShellRef = useRef<HTMLElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const onDeliverablesChangeRef = useRef(onDeliverablesChange);
   const onSelectedDocumentChangeRef = useRef(onSelectedDocumentChange);
@@ -2543,6 +2544,27 @@ export function WorkpackEditor({
       window.clearTimeout(timer);
     };
   }, [focusToken, requestedDocumentKey]);
+
+  useEffect(() => {
+    const alignFrame = window.requestAnimationFrame(() => {
+      const shell = workpackShellRef.current;
+      const target = textareaRef.current || documentBodyRef.current;
+      if (!shell || !target || shell.scrollHeight <= shell.clientHeight) return;
+
+      const shellRect = shell.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const targetIsVisible = targetRect.bottom > shellRect.top && targetRect.top < shellRect.bottom;
+      if (targetIsVisible) return;
+
+      const padding = 16;
+      const nextScrollTop = shell.scrollTop + targetRect.top - shellRect.top - padding;
+      shell.scrollTo({
+        top: Math.max(0, nextScrollTop),
+        behavior: "auto"
+      });
+    });
+    return () => window.cancelAnimationFrame(alignFrame);
+  }, [selected.key]);
 
   function updateValue(value: string, options: { preserveCanonicalRiskRows?: boolean } = {}) {
     pendingChangeRef.current = { source: "user-edit", requiresRevalidation: true };
@@ -2992,6 +3014,7 @@ export function WorkpackEditor({
       className={`workpack-shell ${styles.workspace}`}
       id="workpack"
       data-testid="workpack-editor-workspace"
+      ref={workpackShellRef}
     >
       <aside className={`workpack-sidebar card list ${styles.navigator}`} aria-label="문서팩 문서 목록">
         <div className={styles.navigatorHeader}>

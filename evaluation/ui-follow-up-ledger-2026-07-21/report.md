@@ -88,6 +88,20 @@ Production `/documents?theme=day` at 390x844:
 
 Interpretation: the raw mobile standalone `/documents` long-page complaint is closed for the default surface. Long document editing remains available inside a bounded internal pane, so remaining IA debt moves to pane readability and document-specific drilldown, not route body height.
 
+## 2026-07-21 Internal Pane Landing Update
+
+Current-source bounded gate:
+
+- Artifact: `evaluation/documents-mobile-pane-landing-2026-07-21/report.md`
+- Source HEAD before commit: `547c2ed6099e8156e8ff01595003cb3222015231`
+- The baseline production RED was not raw page height. It was selection landing: after tapping `위험성평가표`, the first textarea started at `top=775` while the pane ended at `bottom=772`.
+- The new contract requires selected document editable content to intersect `.workpack-shell` immediately after selection.
+- Focused browser: `documents-editor-layout` mobile launcher slice PASS, 2/2.
+- Full browser file: `documents-editor-layout` PASS, 31/31.
+- TypeScript: PASS.
+
+Interpretation: page split alone is not the fix. `/documents` must behave as a viewport cockpit with a bounded drilldown pane, and the pane must visibly land on the selected document's editable content.
+
 Share mobile 390x844 current-source gate:
 
 - `shareMobileSummary.bottom = 432`

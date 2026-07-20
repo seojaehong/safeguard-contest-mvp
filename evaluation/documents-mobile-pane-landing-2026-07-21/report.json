@@ -1,0 +1,75 @@
+{
+  "checkedAt": "2026-07-21T03:12:00+09:00",
+  "sourceHeadBeforeCommit": "547c2ed6099e8156e8ff01595003cb3222015231",
+  "branch": "chore/recipient-foreign-live-gate-20260720",
+  "verdict": "PASS_CURRENT_SOURCE",
+  "scope": "mobile /documents internal pane landing and scroll affordance",
+  "nonGoals": [
+    "route split redesign",
+    "full document-specific drilldown redesign",
+    "provider dispatch",
+    "database or schema changes",
+    "export contract changes"
+  ],
+  "baselineRed": {
+    "productionMarker": "2346cf1291304920bc8007b0efbceaf809a11ba3",
+    "route": "/documents?theme=day",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "pageHeight": 844,
+    "heightRatio": 1,
+    "workpackPane": {
+      "top": 452,
+      "bottom": 772,
+      "height": 320,
+      "overflowY": "auto"
+    },
+    "riskAssessmentDraftAfterClick": {
+      "firstTextareaTop": 775,
+      "firstTextareaBottomRelation": "below pane bottom 772",
+      "editableContentVisibleImmediately": false
+    }
+  },
+  "fix": {
+    "workpackShellRef": true,
+    "alignSelectedEditableTargetIntoPane": true,
+    "bottomAffordanceContent": "아래로 계속"
+  },
+  "assertions": {
+    "paneOverflowYAuto": true,
+    "paneHasInternalScroll": true,
+    "affordanceContent": "아래로 계속",
+    "affordancePosition": "sticky",
+    "affordancePointerEvents": "none",
+    "affordanceMinHeightAtLeast": 28,
+    "tbmLogTextareaVisibleInPaneAfterClick": true,
+    "riskAssessmentTextareaVisibleInPaneAfterClick": true,
+    "pageHeightBoundedAfterRiskSelection": true,
+    "horizontalOverflowClosedAfterRiskSelection": true
+  },
+  "checks": [
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"puts the core launcher before the mobile editor\" --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "testsPassed": 2
+    },
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "testsPassed": 31
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    }
+  ],
+  "structuralDecision": {
+    "routeSplitAloneAcceptedAsFix": false,
+    "requiredPattern": "viewport cockpit plus bounded drilldown",
+    "documentSelectionRequirement": "selected document header or first editable section must be visible inside the bounded pane immediately after selection"
+  }
+}

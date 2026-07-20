@@ -89,6 +89,40 @@
       "interpretation": "raw route body height closed; long editor content remains in bounded internal pane"
     }
   },
+  "internalPaneLandingUpdate": {
+    "checkedAt": "2026-07-21T03:12:00+09:00",
+    "sourceHeadBeforeCommit": "547c2ed6099e8156e8ff01595003cb3222015231",
+    "artifact": "evaluation/documents-mobile-pane-landing-2026-07-21/report.json",
+    "baselineRed": {
+      "productionMarker": "2346cf1291304920bc8007b0efbceaf809a11ba3",
+      "workpackPaneBottom": 772,
+      "riskAssessmentFirstTextareaTopAfterClick": 775,
+      "editableContentVisibleImmediately": false
+    },
+    "currentSourceContract": {
+      "tbmLogTextareaVisibleInPaneAfterClick": true,
+      "riskAssessmentTextareaVisibleInPaneAfterClick": true,
+      "paneAffordanceContent": "아래로 계속",
+      "pageHeightRemainsBoundedAfterRiskSelection": true,
+      "horizontalOverflowClosedAfterRiskSelection": true
+    },
+    "checks": [
+      {
+        "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"puts the core launcher before the mobile editor\" --maxWorkers=1 --fileParallelism=false",
+        "result": "PASS",
+        "testsPassed": 2
+      },
+      {
+        "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts --maxWorkers=1 --fileParallelism=false",
+        "result": "PASS",
+        "testsPassed": 31
+      },
+      {
+        "command": "npm.cmd run typecheck",
+        "result": "PASS"
+      }
+    ]
+  },
   "structuralDecision": {
     "routeSplitAloneIsEnough": false,
     "actualFix": "viewport-first progressive disclosure",
