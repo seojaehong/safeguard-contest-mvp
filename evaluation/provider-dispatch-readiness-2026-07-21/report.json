@@ -47,11 +47,25 @@
   },
   "nextImplementationGate": [
     "persistent idempotency available",
-    "exactly-once dispatch result persistence",
+    "attempt reservation before any provider call",
     "retry cannot duplicate external sends",
     "preview-only and malformed capability paths fail closed",
     "channel labels remain explicit"
   ],
   "requiresUserApprovalBeforeDbMigration": true,
-  "draftMigrationCandidate": "evaluation/provider-dispatch-idempotency-gate-2026-07-19/provider-dispatch-idempotency-draft.sql"
+  "draftMigrationCandidate": "evaluation/provider-dispatch-idempotency-gate-2026-07-19/provider-dispatch-idempotency-draft.sql",
+  "draftScopeBoundary": {
+    "currentDraftCovers": "attempt-level idempotency reservation",
+    "doesNotYetProve": "per-channel exactly-once result persistence",
+    "channelLedgerOptionsBeforeLiveClaim": [
+      "add provider_dispatch_attempt_channels child table with unique attempt/channel constraint",
+      "define provider_result JSONB as canonical per-channel ledger and test route behavior"
+    ],
+    "additionalImplementationTestsNeeded": [
+      "service/admin write path",
+      "cross-tenant negative cases",
+      "reservation-before-provider-call",
+      "retry duplicate suppression"
+    ]
+  }
 }

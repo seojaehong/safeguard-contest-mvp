@@ -79,9 +79,14 @@ Source-level conclusion:
 Do not enable live dispatch by environment flag alone. The next implementation wave should prove:
 
 1. Persistent idempotency is available for provider dispatch attempts.
-2. Dispatch result rows are persisted exactly once per attempt/channel.
+2. Route code reserves an attempt before any provider call.
 3. Provider retries cannot duplicate external sends.
 4. Preview-only and malformed capability paths continue to fail closed.
 5. Email/SMS/Kakao channels are separately labeled; unsupported channels stay locked.
 
-If this requires a DB table or migration, that work needs explicit user approval before applying it. A draft such as `evaluation/provider-dispatch-idempotency-gate-2026-07-19/provider-dispatch-idempotency-draft.sql` should be reviewed before any schema change.
+The current draft SQL should be treated as attempt-level idempotency reservation only. It does not by itself prove per-channel exactly-once result persistence. Before claiming channel-level exactly-once, the next design must either:
+
+- add a `provider_dispatch_attempt_channels` child table with a unique attempt/channel constraint; or
+- explicitly define `provider_result` JSONB as the canonical per-channel ledger and test that route behavior.
+
+If this requires a DB table or migration, that work needs explicit user approval before applying it. A draft such as `evaluation/provider-dispatch-idempotency-gate-2026-07-19/provider-dispatch-idempotency-draft.sql` should be reviewed before any schema change. The implementation gate also needs service/admin write-path tests and cross-tenant negative tests.
