@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-20T06:26:00.000Z
+Generated at: 2026-07-20T06:34:00.000Z
 
-Current HEAD / live production build: `553978d15e107f53d41fa7b883c569bccef1edaa`
+Current HEAD / live production build: `a2535d218cbc4d00192fc337e7a27c527b836088`
 
 Overall: `northstar_open_approval_gated`
 
@@ -23,6 +23,7 @@ This rollup does not claim the long-term North Star is complete. It records the 
 | Export / foreign dispatch quality | PASS, 13 files / 143 tests, no provider side effect | `evaluation/export-foreign-dispatch-current-gate-2026-07-20/report.json` |
 | Share recipient portal | PASS, 13 files / 143 tests, live Vietnamese chrome, no provider side effect | `evaluation/share-recipient-portal-current-gate-2026-07-20/report.json` |
 | Recipient demo capture | PASS non-mutating 390px capture, overflow 0, min control 44, saved confirmation true | `evaluation/recipient-demo-capture-2026-07-20/metrics.json` |
+| Workspace documents/share geometry | PASS, generated state verified, desktop docs 1.27x, mobile docs 1.68x, desktop share 1180px | `evaluation/workspace-docs-share-production-gate-2026-07-20/metrics.json` |
 | UI documents contrast | PASS, focused UI 4 files / 19 tests, build 28/28 | `evaluation/ui-documents-contrast-current-gate-2026-07-20/report.json` |
 
 ## Still Approval-Gated
