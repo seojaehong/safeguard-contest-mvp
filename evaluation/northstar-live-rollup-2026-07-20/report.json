@@ -1,12 +1,12 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v1",
-  "generatedAt": "2026-07-20T04:16:20.000Z",
-  "head": "dab7d4f8f8e546dcbcbe7725b5c064c0533eb292",
+  "generatedAt": "2026-07-20T04:24:20.000Z",
+  "head": "1acbbe963c13c9370574d4aa848faec04e6ef3cc",
   "liveBuildInfo": {
-    "commitSha": "dab7d4f8f8e546dcbcbe7725b5c064c0533eb292",
+    "commitSha": "1acbbe963c13c9370574d4aa848faec04e6ef3cc",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-4pecnxra5-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-mgm17rm5a-seojaehongs-projects.vercel.app"
   },
   "overall": "northstar_open_approval_gated",
   "dbMutationPerformed": false,
@@ -50,6 +50,16 @@
       "routesChecked": 8,
       "viewportsChecked": 2,
       "findings": 0
+    },
+    {
+      "id": "operator_wiki_reference_corpus",
+      "artifact": "evaluation/operator-wiki-reference-corpus-current-gate-2026-07-20/report.json",
+      "result": "pass_approval_gated",
+      "testFilesPassed": 18,
+      "testsPassed": 208,
+      "safetyReferenceItems": 9920,
+      "publishedOntologyNodes": 166,
+      "publishedOntologyEdges": 169
     }
   ],
   "approvalGated": [
