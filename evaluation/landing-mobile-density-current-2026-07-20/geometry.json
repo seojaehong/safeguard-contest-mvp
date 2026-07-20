@@ -1,0 +1,112 @@
+[
+  {
+    "viewport": {
+      "name": "mobile",
+      "width": 390,
+      "height": 844
+    },
+    "title": "SafeClaw | 안전 문서팩 생성",
+    "documentHeight": 2785,
+    "viewportHeight": 844,
+    "width": 390,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "overflow": false,
+    "landingHeight": 2785,
+    "navDisplay": "none",
+    "sections": [
+      {
+        "id": "manifesto",
+        "display": "block",
+        "height": 1003,
+        "top": 864
+      },
+      {
+        "id": "execution",
+        "display": "none",
+        "height": 0,
+        "top": 0
+      },
+      {
+        "id": "language",
+        "display": "none",
+        "height": 0,
+        "top": 0
+      },
+      {
+        "id": "proof",
+        "display": "none",
+        "height": 0,
+        "top": 0
+      },
+      {
+        "id": "product-map",
+        "display": "none",
+        "height": 0,
+        "top": 0
+      },
+      {
+        "id": "start",
+        "display": "block",
+        "height": 575,
+        "top": 1867
+      }
+    ],
+    "heightRatio": 3.3
+  },
+  {
+    "viewport": {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900
+    },
+    "title": "SafeClaw | 안전 문서팩 생성",
+    "documentHeight": 5604,
+    "viewportHeight": 900,
+    "width": 1440,
+    "scrollWidth": 1440,
+    "bodyScrollWidth": 1440,
+    "overflow": false,
+    "landingHeight": 5604,
+    "navDisplay": "flex",
+    "sections": [
+      {
+        "id": "manifesto",
+        "display": "block",
+        "height": 642,
+        "top": 897
+      },
+      {
+        "id": "execution",
+        "display": "block",
+        "height": 708,
+        "top": 1539
+      },
+      {
+        "id": "language",
+        "display": "block",
+        "height": 743,
+        "top": 2247
+      },
+      {
+        "id": "proof",
+        "display": "block",
+        "height": 683,
+        "top": 2990
+      },
+      {
+        "id": "product-map",
+        "display": "block",
+        "height": 860,
+        "top": 3672
+      },
+      {
+        "id": "start",
+        "display": "block",
+        "height": 758,
+        "top": 4532
+      }
+    ],
+    "heightRatio": 6.23
+  }
+]

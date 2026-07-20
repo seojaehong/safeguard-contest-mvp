@@ -7948,9 +7948,7 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-landing-nav nav {
-    overflow-x: auto;
-    justify-content: flex-start;
-    padding-bottom: 4px;
+    display: none;
   }
 
   .safeclaw-landing-actions {
@@ -7962,6 +7960,49 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-os-section {
     padding-right: var(--os-gutter);
     padding-left: var(--os-gutter);
+  }
+
+  .safeclaw-os-hero {
+    min-height: auto;
+  }
+
+  .safeclaw-os-hero-body {
+    gap: var(--space-6);
+    min-height: auto;
+    padding-block: var(--space-8);
+  }
+
+  .safeclaw-os-tag {
+    margin-bottom: var(--space-5);
+  }
+
+  .safeclaw-os-hero p {
+    margin-top: var(--space-4);
+  }
+
+  .safeclaw-os-hero p + p,
+  .safeclaw-hero-position,
+  .hero-console-replay,
+  .safeclaw-landing #execution,
+  .safeclaw-landing #language,
+  .safeclaw-landing #proof,
+  .safeclaw-landing #product-map {
+    display: none;
+  }
+
+  .safeclaw-os-cta {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+
+  .safeclaw-os-section {
+    padding-block: var(--space-8);
+  }
+
+  .safeclaw-os-section-head {
+    margin-bottom: var(--space-4);
   }
 
   .safeclaw-os-status {
@@ -7990,6 +8031,7 @@ body:has(.safeclaw-landing) :is(
     font-weight: 800;
     line-height: var(--leading-section-title);
     letter-spacing: var(--tracking-section-title);
+    margin-bottom: var(--space-5);
   }
 
   .safeclaw-os-hero mark,
@@ -8013,10 +8055,16 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-proof-matrix article,
   .safeclaw-language-matrix article,
   .safeclaw-module-map a {
+    min-height: auto;
     border-right: 0;
   }
 
+  .safeclaw-pipeline-grid article:nth-child(n + 4) {
+    display: none;
+  }
+
   .safeclaw-terminal pre {
+    min-height: auto;
     padding: var(--space-8) var(--space-6);
     font-size: var(--text-body-lg);
     font-weight: 500;
@@ -20516,6 +20564,7 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-page-decision-copy h1 {
     margin: 0;
     font-size: var(--text-section-title);
+    font-weight: 800;
     line-height: var(--leading-section-title);
     letter-spacing: var(--tracking-section-title);
   }
@@ -20535,7 +20584,9 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-current-workpack strong {
     font-size: var(--text-caption);
+    font-weight: 600;
     line-height: var(--leading-caption);
+    letter-spacing: var(--tracking-body);
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-document-cockpit {
@@ -20622,7 +20673,7 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-mobile-core-list button {
     font-size: var(--text-control);
-    font-weight: 600;
+    font-weight: 700;
     line-height: var(--leading-control);
     text-align: center;
     letter-spacing: var(--tracking-body);

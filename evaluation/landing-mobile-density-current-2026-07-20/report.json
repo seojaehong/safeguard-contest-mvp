@@ -1,0 +1,45 @@
+{
+  "verdict": "pass",
+  "date": "2026-07-20",
+  "scope": "mobile_landing_density",
+  "changedFiles": [
+    "app/globals.css"
+  ],
+  "verification": {
+    "frontendDesignContract": {
+      "command": "npm.cmd test -- tests\\frontend-design-contract.test.ts --maxWorkers=1 --fileParallelism=false",
+      "testFilesPassed": 1,
+      "testsPassed": 22,
+      "status": "pass"
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "staticPagesGenerated": "28/28",
+      "status": "pass"
+    },
+    "localProductionGeometry": {
+      "server": "http://127.0.0.1:3020/",
+      "route": "/",
+      "mobile": {
+        "viewport": "390x844",
+        "documentHeight": 2785,
+        "heightRatio": 3.3,
+        "horizontalOverflow": false,
+        "navDisplay": "none"
+      },
+      "desktop": {
+        "viewport": "1440x900",
+        "documentHeight": 5604,
+        "heightRatio": 6.23,
+        "horizontalOverflow": false,
+        "navDisplay": "flex"
+      }
+    }
+  },
+  "boundaries": {
+    "desktopLandingContentPreserved": true,
+    "dbMutationPerformed": false,
+    "schemaMigrationPerformed": false
+  },
+  "status": "pass"
+}

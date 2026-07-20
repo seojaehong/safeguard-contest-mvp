@@ -98,11 +98,25 @@
       "publishedOntologyEdges": 169,
       "dbMutationPerformed": false,
       "status": "pass_approval_gated"
+    },
+    "landingMobileDensity": {
+      "testCommand": "npm.cmd test -- tests\\frontend-design-contract.test.ts --maxWorkers=1 --fileParallelism=false",
+      "buildCommand": "npm.cmd run build",
+      "testFilesPassed": 1,
+      "testsPassed": 22,
+      "buildStaticPages": "28/28",
+      "localProductionMobileHeight": 2785,
+      "localProductionMobileRatio": 3.3,
+      "localProductionMobileOverflow": false,
+      "localProductionDesktopHeight": 5604,
+      "localProductionDesktopRatio": 6.23,
+      "localProductionDesktopOverflow": false,
+      "status": "pass_live_redeploy_pending"
     }
   },
   "remaining": [
     "Operator Wiki Export / Public Reference Corpus UX maturation after current governance/API readiness",
-    "landing page mobile density after demo-critical routes",
+    "landing page live redeploy verification after local density remediation",
     "RLS live tenant A/B, Storage, service-role, and publication RPC proof after explicit approval",
     "Hermes/OpenClaw authenticated operator-owned runtime E2E proof",
     "regeneration comparison after next production product commit"
