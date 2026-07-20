@@ -288,9 +288,11 @@ export function renderMobileP0Markdown(report) {
 
 Verdict: **${report.verdict === "MOBILE_FIXED" ? "MOBILE FIXED" : "MOBILE PARTIAL"}**
 
-Production commit: \`${report.production.commitSha}\`
+Measured runtime commit: \`${report.production.commitSha}\`
 
 The 6-hour mobile gate is ${report.verdict === "MOBILE_FIXED" ? "closed" : "partially closed"} for the generated workspace flow. The default Documents surface is a bounded Safety Brief, and full document preview/review is behind an explicit disclosure.
+
+Note: this artifact is generated from a live production measurement before it is committed. A later evidence-only containing commit can differ from the measured runtime commit without implying a UI/runtime delta.
 
 No horizontal overflow: **${report.acceptance.noHorizontalOverflow ? "true" : "false"}**.
 

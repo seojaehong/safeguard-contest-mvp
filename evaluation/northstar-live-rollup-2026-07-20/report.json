@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-20T13:42:59.527Z",
-  "head": "bc48a0d2fbcb4c4017e5c5e4406669b745d789ee",
+  "generatedAt": "2026-07-20T13:48:02.016Z",
+  "head": "9fedcf019a6b24882131ba913ad7c6358b1ad9d4",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "bc48a0d2fbcb4c4017e5c5e4406669b745d789ee",
+    "commitSha": "9fedcf019a6b24882131ba913ad7c6358b1ad9d4",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-q8r2xh90l-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-dktlinub5-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -63,7 +63,7 @@
   "mobileP0": {
     "artifact": "evaluation\\mobile-p0-workspace-gate-2026-07-20\\report.json",
     "verdict": "MOBILE_FIXED",
-    "productionCommit": "bc48a0d2fbcb4c4017e5c5e4406669b745d789ee",
+    "productionCommit": "9fedcf019a6b24882131ba913ad7c6358b1ad9d4",
     "documentsHeightRatio": 1.5,
     "firstUsefulReviewY": 262,
     "documentDeepReviewOpen": false,
@@ -74,13 +74,13 @@
   },
   "liveCritical": {
     "artifact": "evaluation\\live-critical-surface-current-2026-07-20-rerun\\report.json",
-    "productionCommit": "bc48a0d2fbcb4c4017e5c5e4406669b745d789ee",
+    "productionCommit": "9fedcf019a6b24882131ba913ad7c6358b1ad9d4",
     "findings": 0,
     "rowsChecked": 16
   },
   "workspaceGeometry": {
     "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-    "productionCommit": "bc48a0d2fbcb4c4017e5c5e4406669b745d789ee",
+    "productionCommit": "9fedcf019a6b24882131ba913ad7c6358b1ad9d4",
     "mobileDocumentDeepReviewOpen": false,
     "mobileVisibleDocumentPreviews": 0
   },
@@ -167,7 +167,7 @@
       "artifact": "evaluation\\live-critical-surface-current-2026-07-20-rerun\\report.json",
       "sourceCommit": null,
       "sourceStatus": "missing",
-      "productionCommit": "bc48a0d2fbcb4c4017e5c5e4406669b745d789ee",
+      "productionCommit": "9fedcf019a6b24882131ba913ad7c6358b1ad9d4",
       "productionStatus": "matches_live"
     },
     {
@@ -175,7 +175,7 @@
       "artifact": "evaluation\\mobile-p0-workspace-gate-2026-07-20\\report.json",
       "sourceCommit": null,
       "sourceStatus": "missing",
-      "productionCommit": "bc48a0d2fbcb4c4017e5c5e4406669b745d789ee",
+      "productionCommit": "9fedcf019a6b24882131ba913ad7c6358b1ad9d4",
       "productionStatus": "matches_live"
     },
     {
@@ -183,7 +183,7 @@
       "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
       "sourceCommit": null,
       "sourceStatus": "missing",
-      "productionCommit": "bc48a0d2fbcb4c4017e5c5e4406669b745d789ee",
+      "productionCommit": "9fedcf019a6b24882131ba913ad7c6358b1ad9d4",
       "productionStatus": "matches_live"
     }
   ],

@@ -2,9 +2,11 @@
 
 Verdict: **MOBILE FIXED**
 
-Production commit: `bc48a0d2fbcb4c4017e5c5e4406669b745d789ee`
+Measured runtime commit: `9fedcf019a6b24882131ba913ad7c6358b1ad9d4`
 
 The 6-hour mobile gate is closed for the generated workspace flow. The default Documents surface is a bounded Safety Brief, and full document preview/review is behind an explicit disclosure.
+
+Note: this artifact is generated from a live production measurement before it is committed. A later evidence-only containing commit can differ from the measured runtime commit without implying a UI/runtime delta.
 
 No horizontal overflow: **true**.
 
