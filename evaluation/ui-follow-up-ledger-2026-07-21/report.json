@@ -3,8 +3,9 @@
   "verdict": {
     "documentsDesktopCockpit": "PASS",
     "shareDesktopCockpit": "PASS",
-    "documentsMobileCockpit": "PARTIAL",
-    "shareMobileCompactFlow": "PARTIAL"
+    "documentsMobileCockpit": "PASS",
+    "shareMobileActionCockpit": "PASS",
+    "shareMobileFullFlow": "PARTIAL"
   },
   "productionMarker": "bd4beeebbb02c977b1f34d02b5895f7fcacba568",
   "documentsDesktopShort": {
@@ -35,6 +36,34 @@
     "detailSummariesBelowFirstViewport": true,
     "overflowX": false,
     "outside": 0
+  },
+  "mobileCockpitUpdate": {
+    "checkedAt": "2026-07-21T00:13:16+09:00",
+    "documentsMobile390x844": {
+      "bodyHeight": 980,
+      "documentWorkbenchBottom": 835,
+      "safetyBriefBottom": 762,
+      "riskAssessmentEditCtaBottom": 551,
+      "safetyBriefShareCtaBottom": 552,
+      "documentSecondaryActionsBottom": 824,
+      "documentProvenanceSummaryBottom": 815,
+      "documentDeepReviewSummaryBottom": 823,
+      "visibleDocumentPreviews": 0,
+      "documentDeepReviewOpen": false,
+      "overflowX": false,
+      "outside": 0
+    },
+    "shareMobile390x844": {
+      "sharePreviewBottom": 599,
+      "primaryShareCtaBottom": 660,
+      "shareBodyHeight": 1473,
+      "shareTargetCardBottom": 870,
+      "shareChannelCardBottom": 1124,
+      "shareLanguageCardBottom": 1261,
+      "overflowX": false,
+      "outside": 0,
+      "interpretation": "action cockpit passes; full detail flow remains partial"
+    }
   },
   "structuralDecision": {
     "routeSplitAloneIsEnough": false,

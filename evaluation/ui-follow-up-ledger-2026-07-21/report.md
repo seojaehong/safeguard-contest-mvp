@@ -6,10 +6,11 @@ Checked at: 2026-07-21 KST
 
 - Documents desktop cockpit: PASS
 - Share desktop cockpit: PASS
-- Documents mobile cockpit: PARTIAL
-- Share mobile compact flow: PARTIAL
+- Documents mobile cockpit: PASS after the 2026-07-21 bounded mobile patch
+- Share mobile action cockpit: PASS after the 2026-07-21 bounded mobile patch
+- Share mobile full flow: PARTIAL because target/channel/language details still continue below the first viewport
 
-This ledger intentionally does not mark frontend as fully solved. The current desktop blockers are closed, but mobile still needs a bounded IA wave.
+This ledger intentionally does not mark frontend as fully solved. The current desktop blockers are closed, and the mobile document cockpit is now closed. Share mobile still needs a compact wizard or disclosure wave for full-flow closure.
 
 ## Current Production Baseline
 
@@ -49,9 +50,37 @@ Product message:
 
 > 핵심 판단은 빠르게, 전체 12종은 필요할 때 깊게 검토.
 
+## 2026-07-21 Mobile Cockpit Update
+
+Documents mobile 390x844 current-source gate:
+
+- `bodyHeight = 980`
+- `documentWorkbench.bottom = 835`
+- `safetyBrief.bottom = 762`
+- `riskAssessmentEditCta.bottom = 551`
+- `safetyBriefShareCta.bottom = 552`
+- `documentSecondaryActions.bottom = 824`
+- `documentProvenanceSummary.bottom = 815`
+- `documentDeepReviewSummary.bottom = 823`
+- `visibleDocumentPreviews = 0`
+- `deepReviewOpen = false`
+- `overflowX = false`
+- `outside = 0`
+
+Share mobile 390x844 current-source gate:
+
+- `sharePreview.bottom = 599`
+- `primaryShareCta.bottom = 660`
+- `overflowX = false`
+- `outside = 0`
+- `shareBody = 1473`
+- `shareTargetCard.bottom = 870`
+- `shareChannelCard.bottom = 1124`
+- `shareLanguageCard.bottom = 1261`
+
 ## Next Bounded Wave
 
-Recommended branch name:
+Recommended branch name if full Share mobile closure is required:
 
 ```text
 fix/mobile-doc-share-cockpit
@@ -71,4 +100,3 @@ Acceptance proposal:
 3. Evidence:
    - keep selector rects for mobile document/share cockpit elements in geometry JSON.
    - do not use total body height alone as pass/fail; long detail below the fold is acceptable only when first-viewport decision/action proof exists.
-
