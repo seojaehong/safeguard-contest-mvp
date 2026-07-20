@@ -160,6 +160,11 @@ describe("documents editor layout", () => {
           mobileCoreLauncher: rect('[data-testid="mobile-core-document-launcher"]'),
           toolbar: rect(".document-toolbar"),
           firstSectionTextarea: rect(".document-section-textarea"),
+          secondaryTools: rect('[data-testid="editor-secondary-tools"]'),
+          workpackShellScrollHeight: document.querySelector<HTMLElement>(".workpack-shell")?.scrollHeight || 0,
+          defaultOpenSectionCount: Array.from(
+            document.querySelectorAll<HTMLDetailsElement>('[data-testid="document-section-accordion"]')
+          ).filter((section) => section.open).length,
           selectedDocumentTitle: document.querySelector(".document-toolbar .h2")?.textContent?.trim() || "",
           riskLauncherPressed: document.querySelector<HTMLButtonElement>(
             '[data-testid="mobile-core-document-launcher"] button[data-document-key="riskAssessmentDraft"]'
@@ -178,9 +183,12 @@ describe("documents editor layout", () => {
       expect(metrics.mobileCoreLauncher.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
       expect(metrics.firstSectionTextarea.top).toBeLessThanOrEqual(metrics.viewportHeight);
       expect(metrics.firstSectionTextarea.top).toBeGreaterThanOrEqual(metrics.toolbar.bottom + 4);
+      expect(metrics.defaultOpenSectionCount).toBe(1);
       if (viewport.name === "mobile") {
         expect(metrics.riskLauncherPressed).toBe("true");
         expect(metrics.firstSectionTextarea.top).toBeLessThanOrEqual(720);
+        expect(metrics.workpackShellScrollHeight).toBeLessThanOrEqual(1500);
+        expect(metrics.secondaryTools.height).toBeLessThanOrEqual(240);
       }
 
       await page.close();
