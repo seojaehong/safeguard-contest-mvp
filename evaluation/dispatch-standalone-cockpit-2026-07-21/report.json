@@ -145,5 +145,49 @@
     "The standalone /dispatch page no longer presents the share result as a mobile-like narrow card on desktop.",
     "The default desktop dispatch surface uses a wide share canvas, right-pane preview, first-viewport primary action, and compact readable channel cards.",
     "Real provider email/SMS/Kakao sends remain preview-only and approval-gated by persistent idempotency."
-  ]
+  ],
+  "sampleShellFollowUp": {
+    "checkedAt": "2026-07-21T04:47:22+09:00",
+    "baselineProductionDebt": {
+      "commitSha": "ca273fe5a09fa098a6d12867624850a332c53761",
+      "route": "/dispatch?theme=day",
+      "desktop1440x900": {
+        "firstPanelWidthApprox": 1108,
+        "secondPanelWidthApprox": 1108,
+        "interpretation": "default/sample shell still read as wide stacked panels"
+      }
+    },
+    "currentSourcePatch": {
+      "desktopMetricsArtifact": "evaluation/share-mobile-p1/standalone-dispatch-sample-desktop-metrics.json",
+      "mobileMetricsArtifact": "evaluation/share-mobile-p1/standalone-dispatch-sample-mobile-metrics.json",
+      "desktop1440x900": {
+        "pageHeight": 900,
+        "heightRatio": 1.0,
+        "gridWidth": 1156,
+        "gridHeight": 109,
+        "firstPanel": {
+          "left": 284,
+          "width": 635,
+          "height": 77
+        },
+        "secondPanel": {
+          "left": 979,
+          "width": 413,
+          "height": 77
+        },
+        "distinctColumns": true,
+        "horizontalOverflow": 0
+      },
+      "mobile390x844": {
+        "pageHeight": 1202,
+        "heightRatio": 1.42,
+        "gridWidth": 358,
+        "panelWidth": 332,
+        "singleColumn": true,
+        "horizontalOverflow": 0
+      },
+      "generatedProviderResultStateClaimed": false,
+      "providerDispatchLiveClaimed": false
+    }
+  }
 }

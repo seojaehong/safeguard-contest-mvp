@@ -15140,12 +15140,13 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two {
     width: min(1180px, calc(100% - 48px));
     margin-top: 16px;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 0.92fr) minmax(360px, 0.62fr);
     gap: 12px;
     border: 0;
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .share-panel.workflow-panel {
+    grid-column: 1 / -1;
     max-width: 1180px;
     margin: 0;
     grid-template-columns: minmax(0, 1fr) minmax(520px, 0.72fr);
@@ -15260,6 +15261,14 @@ body:has(.safeclaw-landing) :is(
     gap: 4px 12px;
     border-right: 0;
     padding: 10px 12px;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .safeclaw-module-panel:first-child {
+    grid-column: 1;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .safeclaw-module-panel:last-child {
+    grid-column: 2;
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .safeclaw-module-panel h2 {

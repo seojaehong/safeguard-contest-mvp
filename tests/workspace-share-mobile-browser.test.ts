@@ -385,4 +385,106 @@ describe("workspace mobile share presentation", () => {
       await page.close();
     }
   }, 90_000);
+
+  it("keeps the standalone dispatch sample shell from becoming a wide desktop stack", async () => {
+    if (!browser || !harness) throw new Error("Browser harness was not started");
+
+    const desktop = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    try {
+      await desktop.goto(`${harness.baseUrl}/dispatch?theme=day`, { waitUntil: "networkidle" });
+      await desktop.locator(".safeclaw-module-grid.two").waitFor({ state: "visible" });
+      const desktopMetrics = await desktop.evaluate(() => {
+        const grid = document.querySelector<HTMLElement>(".safeclaw-module-grid.two");
+        const panels = [...document.querySelectorAll<HTMLElement>(".safeclaw-module-grid.two > .safeclaw-module-panel")];
+        if (!grid || panels.length < 2) throw new Error("Missing standalone dispatch sample panels");
+        const rectOf = (element: HTMLElement) => {
+          const rect = element.getBoundingClientRect();
+          return {
+            left: Math.round(rect.left),
+            right: Math.round(rect.right),
+            top: Math.round(rect.top),
+            bottom: Math.round(rect.bottom),
+            width: Math.round(rect.width),
+            height: Math.round(rect.height)
+          };
+        };
+        const panelRects = panels.map(rectOf);
+        return {
+          viewportHeight: window.innerHeight,
+          pageHeight: document.documentElement.scrollHeight,
+          grid: rectOf(grid),
+          panels: panelRects,
+          distinctColumns: Math.abs(panelRects[1].left - panelRects[0].left) > 120,
+          horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
+        };
+      });
+      writeFileSync(
+        join(evidenceDirectory, "standalone-dispatch-sample-desktop-metrics.json"),
+        `${JSON.stringify({
+          checkedAt: new Date().toISOString(),
+          route: "/dispatch?theme=day",
+          viewport: { width: 1440, height: 900 },
+          verdict: "PASS",
+          metrics: desktopMetrics
+        }, null, 2)}\n`,
+        "utf8"
+      );
+
+      expect.soft(desktopMetrics.horizontalOverflow, "standalone dispatch sample desktop horizontal overflow").toBe(0);
+      expect.soft(desktopMetrics.pageHeight, "standalone dispatch sample desktop task distance").toBeLessThanOrEqual(desktopMetrics.viewportHeight);
+      expect.soft(desktopMetrics.grid.width, "standalone dispatch sample uses desktop grid width").toBeGreaterThanOrEqual(1040);
+      expect.soft(desktopMetrics.distinctColumns, "standalone dispatch sample uses two desktop regions").toBe(true);
+      expect.soft(desktopMetrics.panels[0].width, "standalone dispatch sample first panel no wide stack").toBeLessThanOrEqual(720);
+      expect.soft(desktopMetrics.panels[1].width, "standalone dispatch sample second panel no wide stack").toBeLessThanOrEqual(520);
+      expect.soft(desktopMetrics.panels[0].left, "standalone dispatch sample first panel starts left region").toBeLessThan(desktopMetrics.panels[1].left);
+    } finally {
+      await desktop.close();
+    }
+
+    const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    try {
+      await mobile.goto(`${harness.baseUrl}/dispatch?theme=day`, { waitUntil: "networkidle" });
+      await mobile.locator(".safeclaw-module-grid.two").waitFor({ state: "visible" });
+      const mobileMetrics = await mobile.evaluate(() => {
+        const grid = document.querySelector<HTMLElement>(".safeclaw-module-grid.two");
+        const panels = [...document.querySelectorAll<HTMLElement>(".safeclaw-module-grid.two > .safeclaw-module-panel")];
+        if (!grid || panels.length < 2) throw new Error("Missing standalone dispatch mobile sample panels");
+        const rectOf = (element: HTMLElement) => {
+          const rect = element.getBoundingClientRect();
+          return {
+            left: Math.round(rect.left),
+            top: Math.round(rect.top),
+            bottom: Math.round(rect.bottom),
+            width: Math.round(rect.width),
+            height: Math.round(rect.height)
+          };
+        };
+        return {
+          viewportHeight: window.innerHeight,
+          pageHeight: document.documentElement.scrollHeight,
+          grid: rectOf(grid),
+          panels: panels.map(rectOf),
+          horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
+        };
+      });
+      writeFileSync(
+        join(evidenceDirectory, "standalone-dispatch-sample-mobile-metrics.json"),
+        `${JSON.stringify({
+          checkedAt: new Date().toISOString(),
+          route: "/dispatch?theme=day",
+          viewport: { width: 390, height: 844 },
+          verdict: "PASS",
+          metrics: mobileMetrics
+        }, null, 2)}\n`,
+        "utf8"
+      );
+
+      expect.soft(mobileMetrics.horizontalOverflow, "standalone dispatch sample mobile horizontal overflow").toBe(0);
+      expect.soft(mobileMetrics.pageHeight, "standalone dispatch sample mobile task distance").toBeLessThanOrEqual(mobileMetrics.viewportHeight * 1.45);
+      expect.soft(mobileMetrics.grid.width, "standalone dispatch sample mobile grid width").toBeLessThanOrEqual(390);
+      expect.soft(mobileMetrics.panels[0].left, "standalone dispatch sample mobile single column alignment").toBe(mobileMetrics.panels[1].left);
+    } finally {
+      await mobile.close();
+    }
+  }, 90_000);
 });

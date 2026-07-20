@@ -371,6 +371,37 @@
     ],
     "interpretation": "share result details are bounded drilldown; generated provider delivery and provider-result persistence remain separate gates"
   },
+  "dispatchSampleShellUpdate": {
+    "checkedAt": "2026-07-21T04:47:22+09:00",
+    "artifact": "evaluation/dispatch-standalone-cockpit-2026-07-21/report.json",
+    "scope": "standalone /dispatch default sample shell desktop composition",
+    "baselineProductionDebt": {
+      "productionMarker": "ca273fe5a09fa098a6d12867624850a332c53761",
+      "desktopPanelWidthsApprox": [1108, 1108],
+      "interpretation": "wide stacked module panels remained in the sample shell"
+    },
+    "currentSourceContract": {
+      "desktopGridWidth": 1156,
+      "desktopGridHeight": 109,
+      "desktopFirstPanelWidth": 635,
+      "desktopSecondPanelWidth": 413,
+      "desktopDistinctColumns": true,
+      "desktopHorizontalOverflow": 0,
+      "mobileSingleColumnPreserved": true,
+      "mobileHorizontalOverflow": 0,
+      "generatedProviderResultStateClaimed": false,
+      "providerDispatchLiveClaimed": false
+    },
+    "checks": [
+      {
+        "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+        "result": "PASS",
+        "testFilesPassed": 1,
+        "testsPassed": 3
+      }
+    ],
+    "interpretation": "sample /dispatch no longer looks like two full-width desktop stack panels; generated result-state proof remains a separate fixture/live gate"
+  },
   "structuralDecision": {
     "routeSplitAloneIsEnough": false,
     "actualFix": "viewport-first progressive disclosure",

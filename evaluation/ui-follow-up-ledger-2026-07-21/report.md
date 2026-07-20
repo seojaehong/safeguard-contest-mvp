@@ -172,6 +172,18 @@ Current-source bounded source/CSS gate:
 
 Interpretation: this is a result-depth containment layer, not provider live dispatch. Route/page split alone is still not accepted as the UX fix; long provider/result details must stay in bounded drilldown while the first viewport keeps publish/status, recipient/channel decision, preview, and primary action.
 
+## 2026-07-21 Dispatch Sample Shell Update
+
+Current-source bounded gate:
+
+- Artifact: `evaluation/dispatch-standalone-cockpit-2026-07-21/report.md`
+- Live `ca273fe5` showed the default/sample `/dispatch?theme=day` shell still had wide stacked panels around `1108px` each, even though generated/current-workpack Share already had a proper two-pane cockpit.
+- The current patch keeps generated/current-workpack Share as the full-width two-pane cockpit and changes only the sample/empty shell panels into two desktop regions.
+- Desktop 1440x900 current-source sample shell: page `900px`, grid `1156x109`, first panel `635x77` at x `284`, second panel `413x77` at x `979`, distinct columns `true`, overflow `0`.
+- Mobile 390x844 remains one-column: page `1202px`, grid `358px` wide, panels `332px` wide, overflow `0`.
+
+Interpretation: this closes the standalone `/dispatch` sample-shell desktop wide-stack risk in current-source evidence. It still does not claim generated provider-result browser state proof or provider live dispatch.
+
 Share mobile configuration-stack current-source gate:
 
 - Artifact: `evaluation/share-mobile-full-flow-2026-07-21/report.md`

@@ -64,3 +64,34 @@ Acceptance:
 This gate does not claim real provider email/SMS/Kakao delivery. Production dispatch remains preview-only until persistent idempotency and provider result persistence are approved and verified.
 
 Production live verification is complete for commit `2346cf1291304920bc8007b0efbceaf809a11ba3`.
+
+## 2026-07-21 Sample Shell Follow-Up
+
+Live production `ca273fe5a09fa098a6d12867624850a332c53761` confirmed that the provider-result drilldown patch was deployed, but the default/sample `/dispatch?theme=day` route still rendered two very wide stacked module panels:
+
+- desktop 1440x900: first panel approximately `1108px` wide, second panel approximately `1108px` wide.
+- x buckets stayed near `[240, 320]`, so the default route did not prove a deliberate desktop publish/status composition.
+
+Current-source bounded patch keeps generated/current-workpack Share as the full-width two-pane cockpit, but changes the sample/empty shell panels into two desktop regions.
+
+Current-source sample shell metrics from `evaluation/share-mobile-p1/standalone-dispatch-sample-desktop-metrics.json`:
+
+| Metric | Value |
+| --- | ---: |
+| page height | 900px / 1.00x viewport |
+| grid | 1156x109, left 260 |
+| first panel | 635x77, left 284 |
+| second panel | 413x77, left 979 |
+| distinct columns | true |
+| horizontal overflow | 0 |
+
+Mobile sample shell remains a one-column route:
+
+| Metric | Value |
+| --- | ---: |
+| page height | 1202px / 1.42x viewport |
+| grid | 358x687, left 16 |
+| panels | 332px wide, same left alignment |
+| horizontal overflow | 0 |
+
+Interpretation: this closes the desktop sample-shell "wide stacked panel" risk in current-source evidence. It does not claim generated provider-result state proof and does not change provider dispatch capability.

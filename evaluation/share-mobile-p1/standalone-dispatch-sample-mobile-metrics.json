@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-07-20T19:47:22.953Z",
+  "route": "/dispatch?theme=day",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "verdict": "PASS",
+  "metrics": {
+    "viewportHeight": 844,
+    "pageHeight": 1202,
+    "grid": {
+      "left": 16,
+      "top": 467,
+      "bottom": 1154,
+      "width": 358,
+      "height": 687
+    },
+    "panels": [
+      {
+        "left": 29,
+        "top": 484,
+        "bottom": 758,
+        "width": 332,
+        "height": 274
+      },
+      {
+        "left": 29,
+        "top": 794,
+        "bottom": 1153,
+        "width": 332,
+        "height": 360
+      }
+    ],
+    "horizontalOverflow": 0
+  }
+}
