@@ -67,7 +67,13 @@ Current-source bounded gate:
 - Mobile 390x844 current-source: selected `위험성평가표`, body `844px / 1.00x`, shell `476-796`, toolbar `476-572`, first textarea `580-737`, overflow `0`.
 - Focused browser: `documents-editor-layout` default cockpit slice PASS, 1/1 selected.
 
-Interpretation: this closes the first-edit arrival gap in current source. It does not claim full document-specific editing depth is finished; long content still belongs in bounded pane/drilldown, and richer section summaries remain product-depth follow-up.
+Production confirmation:
+
+- Production `/api/build-info`: `5dc34b4729ec2a8c77b74c1109d4dfd58dc01550`.
+- Live desktop 1440x723: selected `위험성평가표`, body `770px / 1.07x`, shell `336-722`, first textarea `492.875-658.125`, overflow `0`.
+- Live mobile 390x844: selected `위험성평가표`, body `844px / 1.00x`, launcher `305-468`, shell `476-796`, toolbar `476-572`, first textarea `581-738.25`, overflow `0`.
+
+Interpretation: this closes the first-edit arrival gap on live production. It does not claim full document-specific editing depth is finished; the inner pane remains long (`desktop scrollHeight 1499`, mobile scrollHeight 1544), so richer per-section summaries/readability/drilldown remain product-depth follow-up.
 
 ## Current Production Baseline
 

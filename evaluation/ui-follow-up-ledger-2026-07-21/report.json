@@ -73,7 +73,7 @@
     "sourceBase": "668c08147edf9d9e6b3cab7edf68b3a4f00229b6",
     "artifact": "evaluation/documents-first-edit-cockpit-2026-07-21/report.json",
     "scope": "standalone /documents default selected document and first editable section arrival",
-    "verdict": "PASS_CURRENT_SOURCE_PRODUCTION_PENDING",
+    "verdict": "PASS_PRODUCTION",
     "routeSplitAloneAcceptedAsFix": false,
     "desktopShort1440x723": {
       "bodyHeight": 770,
@@ -107,6 +107,42 @@
     "focusedGate": {
       "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"bounds the default documents route editor\" --maxWorkers=1 --fileParallelism=false",
       "result": "PASS"
+    },
+    "productionVerification": {
+      "productionMarker": "5dc34b4729ec2a8c77b74c1109d4dfd58dc01550",
+      "verdict": "PASS_PRODUCTION",
+      "desktopShort1440x723": {
+        "bodyHeight": 770,
+        "heightRatio": 1.07,
+        "selectedTitle": "위험성평가표",
+        "riskLauncherPressed": true,
+        "workpackShellTop": 336,
+        "workpackShellBottom": 722,
+        "workpackShellClientHeight": 386,
+        "workpackShellScrollHeight": 1499,
+        "firstTextareaTop": 492.875,
+        "firstTextareaBottom": 658.125,
+        "horizontalOverflow": false
+      },
+      "mobile390x844": {
+        "bodyHeight": 844,
+        "heightRatio": 1,
+        "selectedTitle": "위험성평가표",
+        "riskLauncherPressed": true,
+        "mobileCoreLauncherTop": 305,
+        "mobileCoreLauncherBottom": 468,
+        "workpackShellTop": 476,
+        "workpackShellBottom": 796,
+        "workpackShellClientHeight": 320,
+        "workpackShellScrollHeight": 1544,
+        "toolbarBottom": 572,
+        "firstTextareaTop": 581,
+        "firstTextareaBottom": 738.25,
+        "firstTextareaInsideFirstViewport": true,
+        "firstTextareaBelowToolbar": true,
+        "horizontalOverflow": false
+      },
+      "remainingDebt": "inner pane remains long; deeper per-section summaries/readability/drilldown remain open"
     }
   },
   "productionMarker": "f504b15e9682e35bce97d629b86e02268c08a185",

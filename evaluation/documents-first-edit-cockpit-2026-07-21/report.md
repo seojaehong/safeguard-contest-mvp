@@ -6,7 +6,7 @@ Source base before this patch: `668c08147edf9d9e6b3cab7edf68b3a4f00229b6`
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE / PRODUCTION_PENDING`
+`PASS_PRODUCTION`
 
 This bounded wave targets the user's current `/documents` complaint at the next IA layer. Previous evidence already closed raw page overflow, one-section accordion behavior, sticky-toolbar overlap, and section action shortcuts. This patch does not reopen those contracts; it changes the default standalone `/documents` cockpit so the selected document is `위험성평가표` and the first editable section lands inside the first viewport.
 
@@ -41,6 +41,31 @@ Measured with local current-source browser at `http://localhost:3217/documents?t
 - `.workpack-shell`: `top=476`, `bottom=796`, `height=320`, `overflowY=auto`, `clientHeight=320`, `scrollHeight=1544`
 - `.document-toolbar`: `top=476`, `bottom=572`
 - first `.document-section-textarea`: `top=580`, `bottom=737`
+- first textarea is below the sticky toolbar and inside the first viewport.
+
+## Production Geometry
+
+Measured on live `https://www.safeclaw.kr/documents?theme=day` after `/api/build-info` returned `5dc34b4729ec2a8c77b74c1109d4dfd58dc01550`.
+
+### Desktop Short 1440x723
+
+- `bodyHeight = 770`, `heightRatio = 1.07`
+- `horizontalOverflow = false`
+- selected document title: `위험성평가표`
+- risk launcher pressed: `true`
+- `.workpack-shell`: `top=336`, `bottom=722`, `height=386`, `overflowY=auto`, `clientHeight=386`, `scrollHeight=1499`
+- `.document-toolbar`: `top=229`, `bottom=333`
+- first `.document-section-textarea`: `top=493`, `bottom=658`
+
+### Mobile 390x844
+
+- `bodyHeight = 844`, `heightRatio = 1.00`
+- `horizontalOverflow = false`
+- selected document title: `위험성평가표`
+- risk launcher pressed: `true`
+- `.workpack-shell`: `top=476`, `bottom=796`, `height=320`, `overflowY=auto`, `clientHeight=320`, `scrollHeight=1544`
+- `.document-toolbar`: `top=476`, `bottom=572`
+- first `.document-section-textarea`: `top=581`, `bottom=738`
 - first textarea is below the sticky toolbar and inside the first viewport.
 
 ## Focused Gate
