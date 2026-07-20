@@ -460,10 +460,10 @@ describe("northstar open gate audit", () => {
     writeJson(rootDir, path.join("evaluation", "final-99-gate", "report.json"), {
       overall: "blocked",
     });
-    writeJson(rootDir, path.join("evaluation", "final-99-gate-current-2026-07-20", "report.json"), {
+    writeJson(rootDir, path.join("evaluation", "final-99-gate-current-2026-07-21", "report.json"), {
       overall: "pass_with_notice",
     });
-    writeJson(rootDir, path.join("evaluation", "final-99-gate-current-2026-07-20", "notice-carry.json"), {
+    writeJson(rootDir, path.join("evaluation", "final-99-gate-current-2026-07-21", "notice-carry.json"), {
       verdict: "carried",
       fullyAutomatedLaunchClaimAllowed: false,
       safeLaunchDemoClaimAllowed: true,
@@ -489,8 +489,8 @@ describe("northstar open gate audit", () => {
     const finalGate = audit.gates.find((gate) => gate.id === "final_99_gate");
 
     expect(finalGate?.state).toBe("notice");
-    expect(finalGate?.evidencePath).toBe(path.join("evaluation", "final-99-gate-current-2026-07-20", "report.json"));
-    expect(finalGate?.detail).toContain(path.join("evaluation", "final-99-gate-current-2026-07-20", "notice-carry.json"));
+    expect(finalGate?.evidencePath).toBe(path.join("evaluation", "final-99-gate-current-2026-07-21", "report.json"));
+    expect(finalGate?.detail).toContain(path.join("evaluation", "final-99-gate-current-2026-07-21", "notice-carry.json"));
   });
 
   it("contradicts the KOSHA exact trust gate when live exact pins are stale", async () => {

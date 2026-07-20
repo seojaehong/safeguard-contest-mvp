@@ -15,10 +15,12 @@ const DEFAULT_OUTPUT_DIR = path.join("evaluation", "northstar-open-gates-current
 
 const EVIDENCE_PATHS = Object.freeze({
   final99Candidates: Object.freeze([
+    path.join("evaluation", "final-99-gate-current-2026-07-21", "report.json"),
     path.join("evaluation", "final-99-gate-current-2026-07-20", "report.json"),
     path.join("evaluation", "final-99-gate", "report.json"),
   ]),
   final99NoticeCarryCandidates: Object.freeze([
+    path.join("evaluation", "final-99-gate-current-2026-07-21", "notice-carry.json"),
     path.join("evaluation", "final-99-gate-current-2026-07-20", "notice-carry.json"),
     path.join("evaluation", "final-99-gate", "notice-carry.json"),
   ]),
