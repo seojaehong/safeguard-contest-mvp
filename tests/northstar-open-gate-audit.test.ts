@@ -203,6 +203,44 @@ function createFixtureRoot(): string {
       },
     },
   });
+  writeJson(rootDir, path.join("evaluation", "documents-field-first-affordance-2026-07-21", "report.json"), {
+    verdict: "PASS_PRODUCTION",
+    sourceHead: "fixture-sha",
+    assertions: {
+      fieldStripVisibleBelowToolbar: true,
+      fieldStripNamesCurrentEditableFieldEvidenceAndReview: true,
+      evidenceAndReviewActionsVisibleInsidePane: true,
+      firstTextareaTopVisibleInsidePane: true,
+      firstTextareaUsableVisibleAreaAtLeast96px: true,
+      defaultOpenSectionCountIsOne: true,
+      horizontalOverflowClosed: true,
+    },
+    production: {
+      mobile390x844: {
+        bodyHeight: 844,
+        selectedTitle: "위험성평가표",
+        riskLauncherPressed: true,
+        workpackShellBottom: 796,
+        workpackShellClientHeight: 320,
+        workpackShellScrollHeight: 1481,
+        toolbarBottom: 572,
+        fieldStripTop: 581,
+        fieldStripBottom: 629,
+        actionsBottom: 673,
+        firstTextareaTop: 673,
+        visibleTextareaHeightInsidePane: 123,
+        toolbarCoversFieldStrip: false,
+        toolbarCoversActions: false,
+        toolbarCoversTextarea: false,
+        horizontalOverflow: false,
+      },
+      desktop1440x723: {
+        selectedTitle: "위험성평가표",
+        visibleTextareaHeightInsidePane: 137,
+        horizontalOverflow: false,
+      },
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "share-mobile-full-flow-2026-07-21", "report.json"), {
     verdict: "PASS",
     mobile390x844Day: {

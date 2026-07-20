@@ -33,6 +33,7 @@ const EVIDENCE_PATHS = Object.freeze({
   documentsMobilePaneContext: path.join("evaluation", "documents-mobile-pane-context-2026-07-21", "report.json"),
   documentsDrilldownDepth: path.join("evaluation", "documents-drilldown-depth-2026-07-21", "report.json"),
   documentsInnerPaneDepth: path.join("evaluation", "documents-inner-pane-depth-2026-07-21", "report.json"),
+  documentsFieldFirstAffordance: path.join("evaluation", "documents-field-first-affordance-2026-07-21", "report.json"),
   shareMobileFullFlow: path.join("evaluation", "share-mobile-full-flow-2026-07-21", "report.json"),
   shareResultDrilldown: path.join("evaluation", "share-result-drilldown-2026-07-21", "report.json"),
   dispatchStandalone: path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"),
@@ -477,6 +478,18 @@ function readNumber(value) {
 }
 
 /**
+ * @param {Record<string, unknown>} record
+ * @param {string[]} keys
+ */
+function readFirstNumber(record, keys) {
+  for (const key of keys) {
+    const value = readNumber(record[key]);
+    if (value !== null) return value;
+  }
+  return null;
+}
+
+/**
  * @param {unknown} value
  */
 function readBoolean(value) {
@@ -503,21 +516,23 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const paneContextPath = EVIDENCE_PATHS.documentsMobilePaneContext;
   const drilldownPath = EVIDENCE_PATHS.documentsDrilldownDepth;
   const innerPaneDepthPath = EVIDENCE_PATHS.documentsInnerPaneDepth;
+  const fieldFirstPath = EVIDENCE_PATHS.documentsFieldFirstAffordance;
   const sharePath = EVIDENCE_PATHS.shareMobileFullFlow;
   const internalPane = readJsonFile(rootDir, internalPanePath);
   const paneContext = readJsonFile(rootDir, paneContextPath);
   const drilldown = readJsonFile(rootDir, drilldownPath);
   const innerPaneDepth = readJsonFile(rootDir, innerPaneDepthPath);
+  const fieldFirst = readJsonFile(rootDir, fieldFirstPath);
   const share = readJsonFile(rootDir, sharePath);
 
-  if (!isRecord(internalPane) || !isRecord(paneContext) || !isRecord(drilldown) || !isRecord(innerPaneDepth) || !isRecord(share)) {
+  if (!isRecord(internalPane) || !isRecord(paneContext) || !isRecord(drilldown) || !isRecord(innerPaneDepth) || !isRecord(fieldFirst) || !isRecord(share)) {
     return gateResult({
       id: "ui_documents_share_cockpit",
       label: "Documents and Share cockpit UI",
       state: "missing",
-      evidencePath: !isRecord(internalPane) ? internalPanePath : !isRecord(paneContext) ? paneContextPath : !isRecord(drilldown) ? drilldownPath : !isRecord(innerPaneDepth) ? innerPaneDepthPath : sharePath,
+      evidencePath: !isRecord(internalPane) ? internalPanePath : !isRecord(paneContext) ? paneContextPath : !isRecord(drilldown) ? drilldownPath : !isRecord(innerPaneDepth) ? innerPaneDepthPath : !isRecord(fieldFirst) ? fieldFirstPath : sharePath,
       detail: "Documents/share cockpit evidence is missing or invalid.",
-      nextActions: ["Regenerate documents mobile internal-pane, pane-context, drilldown-depth, inner-pane-depth, and share mobile full-flow evidence."],
+      nextActions: ["Regenerate documents mobile internal-pane, pane-context, drilldown-depth, inner-pane-depth, field-first-affordance, and share mobile full-flow evidence."],
     });
   }
 
@@ -531,6 +546,10 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const innerPaneAssertions = isRecord(innerPaneDepth.assertions) ? innerPaneDepth.assertions : {};
   const innerPaneProduction = isRecord(innerPaneDepth.productionConfirmation) ? innerPaneDepth.productionConfirmation : {};
   const innerPaneMobile = isRecord(innerPaneProduction.mobile390x844) ? innerPaneProduction.mobile390x844 : {};
+  const fieldFirstAssertions = isRecord(fieldFirst.assertions) ? fieldFirst.assertions : {};
+  const fieldFirstProduction = isRecord(fieldFirst.production) ? fieldFirst.production : {};
+  const fieldFirstMobile = isRecord(fieldFirstProduction.mobile390x844) ? fieldFirstProduction.mobile390x844 : {};
+  const fieldFirstDesktop = isRecord(fieldFirstProduction.desktop1440x723) ? fieldFirstProduction.desktop1440x723 : {};
   const shareMobile = isRecord(share.mobile390x844Day)
     ? share.mobile390x844Day
     : isRecord(share.mobile390x844)
@@ -547,6 +566,12 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const drilldownSourceCurrent = isGitAncestor(rootDir, drilldownSourceSha);
   const innerPaneDepthSourceSha = readString(innerPaneDepth.sourceHead);
   const innerPaneDepthSourceCurrent = isGitAncestor(rootDir, innerPaneDepthSourceSha);
+  const fieldFirstSourceSha = readString(fieldFirst.sourceHead);
+  const fieldFirstSourceCurrent = isGitAncestor(rootDir, fieldFirstSourceSha);
+  const fieldFirstMobileShellHeight = readFirstNumber(fieldFirstMobile, [
+    "workpackShellClientHeight",
+    "workpackShellHeight",
+  ]);
   const configCardDisplays = Array.isArray(shareMobile.configCardDisplays)
     ? shareMobile.configCardDisplays
     : [];
@@ -607,7 +632,39 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     && innerPaneAssertions.defaultOpenSectionCountIsOne === true
     && innerPaneAssertions.firstTextareaBelowToolbar === true
     && innerPaneAssertions.firstTextareaInsideFirstViewport === true
-    && innerPaneDepthSourceCurrent;
+    && innerPaneDepthSourceCurrent
+    && readString(fieldFirst.verdict) === "PASS_PRODUCTION"
+    && fieldFirstSourceCurrent
+    && fieldFirstAssertions.fieldStripVisibleBelowToolbar === true
+    && fieldFirstAssertions.fieldStripNamesCurrentEditableFieldEvidenceAndReview === true
+    && fieldFirstAssertions.evidenceAndReviewActionsVisibleInsidePane === true
+    && fieldFirstAssertions.firstTextareaTopVisibleInsidePane === true
+    && fieldFirstAssertions.firstTextareaUsableVisibleAreaAtLeast96px === true
+    && fieldFirstAssertions.defaultOpenSectionCountIsOne === true
+    && fieldFirstAssertions.horizontalOverflowClosed === true
+    && readString(fieldFirstMobile.selectedTitle) === "위험성평가표"
+    && readBoolean(fieldFirstMobile.riskLauncherPressed) === true
+    && readNumber(fieldFirstMobile.bodyHeight) === 844
+    && fieldFirstMobileShellHeight === 320
+    && readNumber(fieldFirstMobile.workpackShellScrollHeight) !== null
+    && readNumber(fieldFirstMobile.workpackShellScrollHeight) <= 1500
+    && readNumber(fieldFirstMobile.fieldStripTop) !== null
+    && readNumber(fieldFirstMobile.fieldStripBottom) !== null
+    && readNumber(fieldFirstMobile.actionsBottom) !== null
+    && readNumber(fieldFirstMobile.firstTextareaTop) !== null
+    && readNumber(fieldFirstMobile.visibleTextareaHeightInsidePane) !== null
+    && readNumber(fieldFirstMobile.fieldStripTop) >= readNumber(fieldFirstMobile.toolbarBottom) + 4
+    && readNumber(fieldFirstMobile.actionsBottom) <= readNumber(fieldFirstMobile.workpackShellBottom)
+    && readNumber(fieldFirstMobile.firstTextareaTop) < readNumber(fieldFirstMobile.workpackShellBottom)
+    && readNumber(fieldFirstMobile.visibleTextareaHeightInsidePane) >= 96
+    && readBoolean(fieldFirstMobile.toolbarCoversFieldStrip) === false
+    && readBoolean(fieldFirstMobile.toolbarCoversActions) === false
+    && readBoolean(fieldFirstMobile.toolbarCoversTextarea) === false
+    && readBoolean(fieldFirstMobile.horizontalOverflow) === false
+    && readString(fieldFirstDesktop.selectedTitle) === "위험성평가표"
+    && readBoolean(fieldFirstDesktop.horizontalOverflow) === false
+    && readNumber(fieldFirstDesktop.visibleTextareaHeightInsidePane) !== null
+    && readNumber(fieldFirstDesktop.visibleTextareaHeightInsidePane) >= 96;
 
   const sharePass = readString(share.verdict).includes("PASS")
     && readNumber(shareMobile.shareMobileSummaryBottom) !== null
@@ -631,10 +688,10 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
       id: "ui_documents_share_cockpit",
       label: "Documents and Share cockpit UI",
       state: "proven",
-      evidencePath: innerPaneDepthPath,
-      detail: "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, section-level evidence/quality actions, production-confirmed inner-pane default depth, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch.",
+      evidencePath: fieldFirstPath,
+      detail: "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch.",
       nextActions: [
-        "Continue UI product depth on richer per-document editing affordances beyond the current section-level evidence/quality shortcuts.",
+        "Continue UI product depth on richer risk-row editing, full document field-first authoring, and document-specific drilldown beyond the current selected-section affordance.",
         "Optional follow-up: make the mobile Share configuration disclosure a guided stepper if more hand-holding is needed.",
       ],
     });
@@ -644,7 +701,7 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     id: "ui_documents_share_cockpit",
     label: "Documents and Share cockpit UI",
     state: "contradicted",
-    evidencePath: documentsPass ? sharePath : innerPaneDepthPath,
+    evidencePath: documentsPass ? sharePath : fieldFirstPath,
     detail: "Documents/share cockpit evidence no longer proves bounded page height, visible selected-document pane context, and first-viewport share action together.",
     nextActions: ["Re-run documents/share browser geometry gates and fix any UI cockpit regression."],
   });
