@@ -16540,6 +16540,12 @@ body:has(.safeclaw-landing) :is(
     gap: 12px;
   }
 
+  .command-center-shell.workspace-page-document .document-progress-summary,
+  .command-center-shell.workspace-page-document .document-work-history,
+  .command-center-shell.workspace-page-document .supporting-doc-cards {
+    display: none;
+  }
+
   .command-center-shell .safety-brief-dashboard {
     gap: 10px;
     padding: 10px;
