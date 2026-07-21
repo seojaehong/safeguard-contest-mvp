@@ -362,6 +362,52 @@ function createFixtureRoot(): string {
       { status: "PASS" },
     ],
   });
+  writeJson(rootDir, path.join("evaluation", "documents-complete-cockpits-2026-07-21", "report.json"), {
+    verdict: "PASS_CURRENT_SOURCE",
+    source: {
+      productCommit: "fixture-sha",
+    },
+    scope: {
+      route: "/documents",
+      surface: "12 document first-task cockpits",
+      productionLiveClaimed: false,
+    },
+    contracts: {
+      allTwelveDocumentFirstTaskSurfaces: true,
+      summaryCockpitVisible: true,
+      riskAssessmentFirstHazardVisible: true,
+      tbmCockpitsVisible: true,
+      executionCockpitsVisible: true,
+      educationAndForeignBriefingCockpitsVisible: true,
+      emergencyCockpitVisible: true,
+      photoCockpitVisible: true,
+      transmissionCockpitsVisible: true,
+      cockpitsBelowToolbar: true,
+      rawTextareasSecondary: true,
+      mobileCockpitsContainedInPane: true,
+      providerOrExportContractsChanged: false,
+    },
+    coveredDocumentKeys: [
+      "workpackSummaryDraft",
+      "riskAssessmentDraft",
+      "workPlanDraft",
+      "workPermitDraft",
+      "tbmBriefing",
+      "tbmLogDraft",
+      "safetyEducationRecordDraft",
+      "foreignWorkerBriefing",
+      "emergencyResponseDraft",
+      "photoEvidenceDraft",
+      "foreignWorkerTransmission",
+      "kakaoMessage",
+    ],
+    verification: [
+      { status: "PASS" },
+      { status: "PASS" },
+      { status: "PASS" },
+      { status: "PASS" },
+    ],
+  });
   writeJson(rootDir, path.join("evaluation", "share-desktop-composition-2026-07-21", "report.json"), {
     verdict: "PASS_PRODUCTION",
     scope: {
@@ -629,7 +675,7 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "final_99_gate")?.state).toBe("notice");
     expect(audit.gates.find((gate) => gate.id === "live_harness_quality")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.state).toBe("proven");
-    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("risk-row, TBM, education, and emergency authoring cockpits");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("12 document first-task cockpits");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("staged Share rail");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "share_result_fixture_cockpit")?.state).toBe("proven");

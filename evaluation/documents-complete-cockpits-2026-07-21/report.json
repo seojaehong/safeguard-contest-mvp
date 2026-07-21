@@ -1,0 +1,69 @@
+{
+  "verdict": "PASS_CURRENT_SOURCE",
+  "checkedAt": "2026-07-21 KST",
+  "source": {
+    "productCommit": "5124ef5f34aa89072402ba6c6e98b08c2ec5464c",
+    "branch": "chore/recipient-foreign-live-gate-20260720"
+  },
+  "scope": {
+    "route": "/documents",
+    "surface": "12 document first-task cockpits",
+    "productionLiveClaimed": false
+  },
+  "contracts": {
+    "allTwelveDocumentFirstTaskSurfaces": true,
+    "summaryCockpitVisible": true,
+    "riskAssessmentFirstHazardVisible": true,
+    "tbmCockpitsVisible": true,
+    "executionCockpitsVisible": true,
+    "educationAndForeignBriefingCockpitsVisible": true,
+    "emergencyCockpitVisible": true,
+    "photoCockpitVisible": true,
+    "transmissionCockpitsVisible": true,
+    "cockpitsBelowToolbar": true,
+    "rawTextareasSecondary": true,
+    "mobileCockpitsContainedInPane": true,
+    "providerOrExportContractsChanged": false
+  },
+  "coveredDocumentKeys": [
+    "workpackSummaryDraft",
+    "riskAssessmentDraft",
+    "workPlanDraft",
+    "workPermitDraft",
+    "tbmBriefing",
+    "tbmLogDraft",
+    "safetyEducationRecordDraft",
+    "foreignWorkerBriefing",
+    "emergencyResponseDraft",
+    "photoEvidenceDraft",
+    "foreignWorkerTransmission",
+    "kakaoMessage"
+  ],
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"puts supporting document cockpits\" --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 1
+    },
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"supports roving keyboard navigation|bounds the default documents route editor|puts the core launcher before the mobile editor|puts supporting document cockpits|keeps the editor workspace and expanded tools contained\" --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 6
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "status": "PASS"
+    }
+  ],
+  "remainingDebt": [
+    "Current-source evidence only; production browser geometry is still needed before final UX PASS.",
+    "Share staged rail still needs production live geometry after deployment reaches the staged-rail commit.",
+    "Provider live dispatch remains gated by approval, idempotency, and provider-result persistence."
+  ]
+}
