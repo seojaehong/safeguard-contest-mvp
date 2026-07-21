@@ -4,16 +4,17 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `5a94351c57d83c8a265d649686517666f6f7f2f1`
+Source HEAD: `b45cef2810b7996f6366654903e3bba3d0c1b106`
 
-Production `/api/build-info`: `d094d9c55b278684137dd568679f53a36773b3d2`
+Production `/api/build-info`: `b45cef2810b7996f6366654903e3bba3d0c1b106`
 
-Latest evidence commit live: `false`
+Latest evidence commit live: `true`
 
-Live-exact evidence commit: `d094d9c55b278684137dd568679f53a36773b3d2`
+Live-exact evidence commit: `b45cef2810b7996f6366654903e3bba3d0c1b106`
 
-Note: current HEAD `5a94351c57d83c8a265d649686517666f6f7f2f1` is an evidence-only refresh pushed after the live-exact artifact set. Production is still `d094d9c55b278684137dd568679f53a36773b3d2`, and the live rollup remains exact for that deployed marker.
+Live rollup matches production: `true`
 
+Note: source HEAD and production marker match for this artifact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -26,8 +27,8 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Documents and Share cockpit UI is proven for the current evidence scope.
 - Standalone Dispatch cockpit is proven for the current evidence scope.
 - Generated Share result fixture cockpit is proven without claiming real provider dispatch.
-- Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level, without claiming live production engine execution. Live unauthenticated broker smoke returns `AUTH_REQUIRED` before engine execution.
-- SIF embedding approval preflight is approval-held: corpus unknown records, no embedding generation, no upload, and vector runtime disabled until approval.
+- Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level, without claiming live production engine execution.
+- SIF embedding approval preflight is approval-held: no embedding generation, no upload, and vector runtime disabled until approval.
 - North Star approval runway is current and separates runtime/provider/database/vector gates from ordinary UI/evidence iteration.
 - RLS / LLM Wiki approval preflight remains operator-review ready, with no DB mutation or launch-readiness claim.
 - Final-99 is `pass_with_notice`, not clean launch-complete.
@@ -56,8 +57,9 @@ Route/page split alone is not accepted as the UX fix. The accepted structure is 
 
 ## Next Safe Work Without Approval
 
-1. Refresh source/live exact evidence when production marker advances to the evidence-only head.
-2. Keep UI follow-up strictly scoped to selected-editor/detail readability or reproduced desktop share perception issues.
-3. Keep Hermes/OpenClaw as a bounded external runtime/adapter path until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven.
-4. Keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
-5. Do not convert `pass_with_notice` into a full launch claim until secure auth history reuse and approved provider dispatch are verified.
+1. refresh source/live exact evidence when production marker advances to the evidence-only head.
+2. refresh live rollup before claiming live-exact if production advances beyond the current live rollup head.
+3. keep UI follow-up scoped to selected-editor/detail readability or reproduced desktop share perception issues.
+4. keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven.
+5. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
+6. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
