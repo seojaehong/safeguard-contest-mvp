@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-21T21:20:23+09:00",
+  "checkedAt": "2026-07-21T23:06:00+09:00",
   "verdict": {
     "workspaceDocumentsDefaultCockpit": "PASS_LIVE_DEFAULT_HEIGHT_CLOSED",
     "workspaceSelectedEditorDetail": "SPLIT_FIELD_SUMMARY_PASS_RAW_TEXTAREA_OPEN",
@@ -13,9 +13,9 @@
   "currentDeploymentAndStructureNote": {
     "defaultWorkspaceIaArtifact": "evaluation/workspace-ia-live-293-2026-07-21/report.json",
     "selectedEditorDetailArtifact": "evaluation/workspace-editor-detail-landing-2026-07-21/report.json",
-    "latestRefreshedLiveGeometryMarker": "ee52fff0be8d7a0007f1a23a5eec9f662e75aff9",
-    "selectedEditorLandingLiveMarker": "ee52fff0be8d7a0007f1a23a5eec9f662e75aff9",
-    "latestReportRefreshSourceMarkerBeforeThisLedgerUpdate": "ee52fff0be8d7a0007f1a23a5eec9f662e75aff9",
+    "latestRefreshedLiveGeometryMarker": "be64c3b15a8cb55bb132fa065ec485ffb700f652",
+    "selectedEditorLandingLiveMarker": "be64c3b15a8cb55bb132fa065ec485ffb700f652",
+    "latestReportRefreshSourceMarkerBeforeThisLedgerUpdate": "b005b968fb519180fb1f93dbdb434aee07f24f69",
     "defaultDocumentsAndShareCockpitHeightClosed": true,
     "selectedEditorFieldLevelLandingClosed": true,
     "selectedEditorFieldSummaryLandingClosed": true,
@@ -32,9 +32,9 @@
     ]
   },
   "latestLiveGeometryRefresh": {
-    "checkedAt": "2026-07-21T12:49:18.380Z",
+    "checkedAt": "2026-07-21T13:56:14.722Z",
     "artifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
-    "productionMarker": "e1ae6667f70144d72da94b175d72045713748898",
+    "productionMarker": "be64c3b15a8cb55bb132fa065ec485ffb700f652",
     "defaultDocumentsCockpitClosed": true,
     "selectedEditorFieldLevelLandingClosed": true,
     "selectedEditorFieldSummaryLandingClosed": true,

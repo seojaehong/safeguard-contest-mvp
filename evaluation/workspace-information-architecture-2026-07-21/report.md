@@ -2,15 +2,15 @@
 
 Verdict: `ROUTE_SPLIT_ALONE_IS_NOT_ENOUGH`
 
-Live commit checked: `e1ae6667f70144d72da94b175d72045713748898`
+Live commit checked: `be64c3b15a8cb55bb132fa065ec485ffb700f652`
 
-Current source/evidence HEAD at report generation: `e1ae6667f70144d72da94b175d72045713748898`
+Current source/evidence HEAD at report generation: `b005b968fb519180fb1f93dbdb434aee07f24f69`
 
 This report answers whether SafeClaw should split the workspace into more pages, and whether that would actually solve the long Document and Share screens.
 
 ## Current live geometry
 
-`https://www.safeclaw.kr` now serves commit `e1ae6667f70144d72da94b175d72045713748898`.
+`https://www.safeclaw.kr` now serves runtime commit `be64c3b15a8cb55bb132fa065ec485ffb700f652`. The current report/evidence refresh commit is `b005b968fb519180fb1f93dbdb434aee07f24f69`; it does not imply a UI runtime delta.
 
 | Viewport | Stage | Page height | Viewport | Ratio | Horizontal overflow | Outside viewport |
 | --- | --- | ---: | ---: | ---: | --- | ---: |
