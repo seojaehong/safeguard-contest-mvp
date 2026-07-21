@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-21T12:55:56.454Z",
-  "sourceSha": "ee52fff0be8d7a0007f1a23a5eec9f662e75aff9",
+  "generatedAt": "2026-07-21T12:59:54.800Z",
+  "sourceSha": "f9346f3e6ec57a40cdc4fbde24c49179d3eba9a4",
   "overall": "open",
   "gates": [
     {
@@ -71,7 +71,7 @@
       "state": "approval_gated",
       "label": "Supabase RLS launch isolation",
       "evidencePath": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Read-only RLS approval preflight passed at source SHA 9da4a0622078d5e90436b23414573e3b542c0ec0, but live RLS catalog and tenant A/B isolation are not proven.",
+      "detail": "Read-only RLS approval preflight passed at source SHA f9346f3e6ec57a40cdc4fbde24c49179d3eba9a4, but live RLS catalog and tenant A/B isolation are not proven.",
       "nextActions": [
         "Approve authoritative project and credential provenance.",
         "Run read-only live catalog capture.",
@@ -83,7 +83,7 @@
       "state": "approval_gated",
       "label": "LLM Wiki publication",
       "evidencePath": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 9da4a0622078d5e90436b23414573e3b542c0ec0.",
+      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA f9346f3e6ec57a40cdc4fbde24c49179d3eba9a4.",
       "nextActions": [
         "Approve final DDL, append-only ledger, graph pointer, and RPC threat model.",
         "Run approved publication canary in an isolated project.",
@@ -95,7 +95,7 @@
       "state": "approval_gated",
       "label": "SIF embedding runtime",
       "evidencePath": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 9da4a0622078d5e90436b23414573e3b542c0ec0.",
+      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: f9346f3e6ec57a40cdc4fbde24c49179d3eba9a4.",
       "nextActions": [
         "Approve SIF-only migration, embedding cost, upload, and vector runtime separately.",
         "Do not claim vector retrieval is production-active before post-migration verification."

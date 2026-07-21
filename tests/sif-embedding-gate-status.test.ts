@@ -16,7 +16,9 @@ function canonicalizeMachineFixture(value: unknown, key = ""): unknown {
     if (key === "envFilesLoaded") return "<path>";
     const normalizedPath = /path$/iu.test(key) ? value.replace(/\\/g, "/") : value;
     return key === "evidenceSummary"
-      ? normalizedPath.replace(/승인 지문 [0-9a-f]{64}/u, "승인 지문 <sha256>")
+      ? normalizedPath
+        .replace(/승인 지문 [0-9a-f]{64}/u, "승인 지문 <sha256>")
+        .replace(/sourceSha: [0-9a-f]{40}/u, "sourceSha: <git-sha>")
       : normalizedPath;
   }
   if (Array.isArray(value)) return value.map((item) => canonicalizeMachineFixture(item, key));
@@ -356,6 +358,6 @@ describe("SIF embedding gate status", () => {
     const canonicalFixture = JSON.stringify(canonicalizeMachineFixture(jsonValue));
     const fixtureHash = createHash("sha256").update(canonicalFixture).digest("hex");
 
-    expect(fixtureHash).toBe("e8d288184db97da773351813ef2505f5e632ae7e6037aa6e51889913ab5232e4");
+    expect(fixtureHash).toBe("aa54fe63a5ef76d356b345c8b6ae7e929bbb6ac3b87c1953496db592210a7453");
   });
 });
