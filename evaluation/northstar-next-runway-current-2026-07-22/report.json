@@ -1,8 +1,9 @@
 {
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "2bc348daa0799d55e13e1efea3f27fe69016b4a3",
-  "productionCommit": "2bc348daa0799d55e13e1efea3f27fe69016b4a3",
+  "sourceHead": "0ca62223e5af7073f83a6031906b2b9c3236eb2f",
+  "productionCommit": "1fff9dc7855f46c12c21562a57dca89030bfccc7",
+  "latestEvidenceCommitLive": false,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
     "liveRollup": "evaluation\\northstar-live-rollup-2026-07-20\\report.json",
@@ -54,7 +55,7 @@
     "selectedEditorDetail": "first risk-row header and hazard field land in the first viewport; raw long-form textarea remains secondary drilldown",
     "shareDesktop": "raw geometry is two-column; perceived full-workbench composition remains a follow-up only if reproduced",
     "shareMobile": "current compact cockpit remains first-viewport bounded in current evidence",
-    "hermesOpenclaw": "adapter and fail-closed auth boundary current-proven; live production engine execution remains unclaimed"
+    "hermesOpenclaw": "adapter and fail-closed auth boundary current-proven on source HEAD; live production unauthenticated broker smoke still returns AUTH_REQUIRED before engine execution"
   },
   "nextSafeWorkWithoutApproval": [
     "refresh source/live exact evidence when production marker advances",
