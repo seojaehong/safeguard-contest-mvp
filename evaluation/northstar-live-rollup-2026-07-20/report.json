@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T14:57:14.226Z",
-  "head": "cd3d46a822bf3dbec4eb4bc3c839b9165c29b2ea",
+  "generatedAt": "2026-07-21T15:04:31.345Z",
+  "head": "2bb73d367caaa0fb34110f459b6399c1ece346ee",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "cd3d46a822bf3dbec4eb4bc3c839b9165c29b2ea",
+    "commitSha": "2bb73d367caaa0fb34110f459b6399c1ece346ee",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ghofir1si-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-a0ux6lkc3-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -182,9 +182,9 @@
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
       "sourceCommit": "cd3d46a822bf3dbec4eb4bc3c839b9165c29b2ea",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "cd3d46a822bf3dbec4eb4bc3c839b9165c29b2ea",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -197,10 +197,10 @@
     {
       "id": "live_harness_quality",
       "artifact": "evaluation\\live-harness-quality-probe-current-2026-07-20\\report.json",
-      "sourceCommit": "1156525ea36b57f9fa385df790a4f4e0576da047",
-      "sourceStatus": "ancestor",
-      "productionCommit": "1156525ea36b57f9fa385df790a4f4e0576da047",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "2bb73d367caaa0fb34110f459b6399c1ece346ee",
+      "sourceStatus": "exact",
+      "productionCommit": "2bb73d367caaa0fb34110f459b6399c1ece346ee",
+      "productionStatus": "matches_live"
     },
     {
       "id": "kosha_exact_trust_registry",
@@ -246,9 +246,9 @@
       "id": "workspace_docs_share_geometry",
       "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
       "sourceCommit": "cd3d46a822bf3dbec4eb4bc3c839b9165c29b2ea",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "cd3d46a822bf3dbec4eb4bc3c839b9165c29b2ea",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "dispatch_standalone_cockpit",
@@ -270,9 +270,9 @@
       "id": "northstar_approval_runway",
       "artifact": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
       "sourceCommit": "cd3d46a822bf3dbec4eb4bc3c839b9165c29b2ea",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "cd3d46a822bf3dbec4eb4bc3c839b9165c29b2ea",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     }
   ],
   "contradictions": [],
