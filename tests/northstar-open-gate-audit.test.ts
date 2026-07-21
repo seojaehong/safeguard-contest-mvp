@@ -483,6 +483,35 @@ function createFixtureRoot(): string {
       },
     },
   });
+  writeJson(rootDir, path.join("evaluation", "share-desktop-short-cockpit-2026-07-21", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION",
+    providerDispatchLiveClaimed: false,
+    routeSplitAloneAcceptedAsFix: false,
+    currentSource: {
+      liveProductionGeometry: {
+        build: {
+          commitSha: "fixture-sha",
+          branch: "master",
+          environment: "production",
+          deploymentUrl: "fixture-deployment.example",
+        },
+        share: {
+          bodyHeight: 750,
+          viewportHeight: 723,
+          heightRatio: 1.04,
+          shareRootBottom: 750,
+          shareFormBottom: 689,
+          shareTargetCardBottom: 535,
+          shareLanguageCardBottom: 535,
+          shareChannelCardBottom: 689,
+          sharePreviewBottom: 605,
+          primaryCtaBottom: 389,
+          horizontalOverflow: 0,
+          outsideHorizontalElements: 0,
+        },
+      },
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "share-staged-flow-rail-2026-07-21", "report.json"), {
     verdict: "PASS_CURRENT_SOURCE",
     source: {
@@ -828,11 +857,12 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("12 document first-task cockpits");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("staged Share rail");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("desktop-short 1440x723");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("live mobile selected-summary");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exact 844px viewport");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exact one-viewport Documents");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.evidencePath).toBe(
-      path.join("evaluation", "documents-mobile-exact-cockpit-2026-07-21", "report.json"),
+      path.join("evaluation", "share-desktop-short-cockpit-2026-07-21", "report.json"),
     );
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).not.toContain("Promote the Share staged rail");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.state).toBe("proven");
