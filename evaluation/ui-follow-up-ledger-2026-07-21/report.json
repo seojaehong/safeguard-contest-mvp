@@ -1,20 +1,26 @@
 {
-  "checkedAt": "2026-07-21T02:34:27+09:00",
+  "checkedAt": "2026-07-21T20:06:52+09:00",
   "verdict": {
-    "documentsDesktopCockpit": "PASS",
-    "shareDesktopCockpit": "PASS",
-    "documentsMobileCockpit": "PASS",
-    "shareMobileActionCockpit": "PASS",
-    "shareMobileDefaultFlow": "PASS"
+    "workspaceDocumentsDefaultCockpit": "PASS_LIVE_DEFAULT_HEIGHT_CLOSED",
+    "workspaceSelectedEditorDetail": "PASS_FIELD_LEVEL_LANDING_ONLY",
+    "workspaceSelectedEditorFullRawTextarea": "OPEN_SECONDARY_DRILLDOWN",
+    "workspaceShareDesktopRawGeometry": "PASS_TWO_COLUMN",
+    "workspaceShareDesktopPerceivedWorkbench": "FOLLOW_UP_IF_REPRODUCED",
+    "workspaceShareMobileDefaultFlow": "PASS_FIRST_VIEWPORT",
+    "dispatchStandaloneSampleShell": "PASS_SAMPLE_GEOMETRY"
   },
   "currentDeploymentAndStructureNote": {
-    "productCommit": "deb9134725f3c20005eb12c90eb665d19039163c",
-    "evidenceCommit": "bb6d2af3e2a71ecb5518742c0d57fefc1c2ef1af",
-    "remoteBranchAndMaster": "bb6d2af3e2a71ecb5518742c0d57fefc1c2ef1af",
-    "productionMarkerAtLatestCheck": "1fb47e20ffcece559a4fbfb6de74ccc5cd40968b",
-    "newSectionShortcutsLiveAtLatestCheck": false,
-    "sectionShortcutWaveSufficientForAllDocumentsShareComplaints": false,
+    "defaultWorkspaceIaArtifact": "evaluation/workspace-ia-live-293-2026-07-21/report.json",
+    "selectedEditorDetailArtifact": "evaluation/workspace-editor-detail-landing-2026-07-21/report.json",
+    "selectedEditorLandingLiveMarker": "d66536560659571afba9671a63644d5610ab30d2",
+    "latestReportRefreshSourceMarkerBeforeThisLedgerUpdate": "86169341e01a1090054d94f0e847c3f8cd941280",
+    "defaultDocumentsAndShareCockpitHeightClosed": true,
+    "selectedEditorFieldLevelLandingClosed": true,
+    "selectedEditorFullRawTextareaShortClaimed": false,
+    "shareDesktopLiteralMobileStackReproduced": false,
+    "shareDesktopPerceivedNarrowCardFollowUp": true,
     "routeSplitAloneAcceptedAsFix": false,
+    "interpretation": "Default Documents and Share cockpits are no longer best described as stale or raw long-page failures. Remaining Documents UX debt is selected editor/detail depth: first risk-row field is visible, while the full raw textarea remains secondary drilldown. Remaining Share UX debt, if reproduced, should be judged as perceived desktop workbench composition rather than literal one-column mobile-stack geometry.",
     "remainingStructuralContract": [
       "first-viewport cockpit per route",
       "bounded panes, accordions, drawers, or drilldown routes for long content",

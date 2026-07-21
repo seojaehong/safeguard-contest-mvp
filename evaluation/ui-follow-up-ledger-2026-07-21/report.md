@@ -1,29 +1,29 @@
 # UI Follow-Up Ledger
 
-Checked at: 2026-07-21 02:34 KST
+Checked at: 2026-07-21 20:06 KST
 
 ## Current Split Verdict
 
-- Documents desktop cockpit: PASS
-- Share desktop cockpit: PASS
-- Documents mobile cockpit: PASS after the 2026-07-21 internal-pane production patch
-- Share mobile action cockpit: PASS after the 2026-07-21 bounded mobile patch
-- Share mobile default flow: PASS after adding the selected 대상/채널/언어 summary strip
+- `/workspace` default Documents cockpit: PASS on current live evidence. The raw page-height problem is closed for the default cockpit.
+- `/workspace` selected editor/detail: PASS for field-level landing, but NOT a full short raw-editor claim. The first risk-row header and hazard field are visible immediately; the raw textarea/full long-form body remains secondary drilldown.
+- `/workspace` Share desktop raw geometry: PASS as a two-column workbench by selector width/x-range. If users still perceive a narrow mobile-like card, treat that as a visual composition follow-up, not a raw layout failure.
+- `/workspace` Share mobile default flow: PASS for compact summary, preview, primary CTA, and collapsed detail controls inside the first viewport.
+- `/dispatch` standalone sample shell: PASS for desktop two-region geometry and mobile compact shell; generated/live provider dispatch remains separate.
 
-This ledger intentionally does not mark frontend as globally perfect. The current desktop blockers are closed, the mobile document cockpit is closed, and the mobile share default flow is closed. Detailed mobile Share configuration is now opt-in/collapsed by default; a more guided stepper remains optional product-depth follow-up.
+This ledger intentionally does not mark frontend as globally perfect. Current live evidence closes the default Documents/Share cockpit height issues and the selected editor field-level landing issue. Remaining UX debt is deeper full-document authoring, raw textarea/editor drilldown readability, and optional Share desktop full-workbench visual refinement if reproduced in the user-seen session.
 
 ## Current Deployment And Structure Note
 
-Latest source pushed after this ledger line:
+Latest current evidence represented by this ledger:
 
-- Product commit: `deb9134725f3c20005eb12c90eb665d19039163c` (`fix: add document section review shortcuts`)
-- Evidence commit: `bb6d2af3e2a71ecb5518742c0d57fefc1c2ef1af` (`chore: refresh northstar evidence for document shortcuts`)
-- Branch/master remote: `bb6d2af3e2a71ecb5518742c0d57fefc1c2ef1af`
-- Production marker at the latest check: `1fb47e20ffcece559a4fbfb6de74ccc5cd40968b`
+- Default workspace IA split artifact: `evaluation/workspace-ia-live-293-2026-07-21/report.json`
+- Selected editor field-level landing artifact: `evaluation/workspace-editor-detail-landing-2026-07-21/report.json`
+- Latest checked live marker for selected editor landing: `d66536560659571afba9671a63644d5610ab30d2`
+- Latest report-refresh source marker before this ledger update: `86169341e01a1090054d94f0e847c3f8cd941280`
 
-Interpretation: if the user is looking at production while it still reports `1fb47e20`, the new section-level `근거 보기` / `점검 보기` shortcuts are not live yet. That deployment lag is separate from the larger IA question.
+Interpretation: the user's refined reading is correct. The default Documents cockpit and Share cockpit are no longer best described as stale or raw long-page failures. The remaining Documents complaint belongs to selected editor/detail depth: the first meaningful risk-row field is now visible, while the full raw textarea is intentionally below the first work surface. The remaining Share complaint, if reproduced, should be tested as perceived desktop workbench composition rather than as a literal one-column/mobile-stack geometry failure.
 
-The section shortcut wave is a bounded drilldown-depth improvement, not the sufficient fix for every "documents are long / share feels mobile" complaint. The remaining structural contract is still:
+The remaining structural contract is still:
 
 - Route/page split helps orientation, but is not accepted as the length fix by itself.
 - Each route needs a first-viewport cockpit: current state, selected item, primary action, provenance/status/result summary.
