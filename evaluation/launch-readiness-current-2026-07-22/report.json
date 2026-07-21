@@ -1,10 +1,10 @@
 {
   "schemaVersion": "safeclaw-launch-readiness-current/v2",
-  "generatedAt": "2026-07-21T23:17:59.328Z",
+  "generatedAt": "2026-07-21T23:26:43.140Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceCommit": "7d685baa6da23d2bc1e88f00d85d8a744985db36",
-  "productionCommit": "7d685baa6da23d2bc1e88f00d85d8a744985db36",
-  "runtimeSmokeCommit": "7d685baa6da23d2bc1e88f00d85d8a744985db36",
+  "sourceCommit": "daba5722be2d0b504b6a4552ea9c39efcb77499f",
+  "productionCommit": "daba5722be2d0b504b6a4552ea9c39efcb77499f",
+  "runtimeSmokeCommit": "daba5722be2d0b504b6a4552ea9c39efcb77499f",
   "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
   "safeLaunchDemoClaimAllowed": true,
   "guidedPilotClaimAllowed": true,
@@ -15,7 +15,7 @@
   "apiAsk": {
     "status": 200,
     "ok": true,
-    "elapsedMs": 28910
+    "elapsedMs": 21198
   },
   "scenario": {
     "companyName": "도시가스공사",
@@ -133,9 +133,9 @@
     "overall": "pass_with_notice",
     "noticeCount": 2,
     "runtimeSmokeCommit": "6a95c23ffc57542f6a9a9aa14612b3466127a0ad",
-    "evidenceCommit": "7d685baa6da23d2bc1e88f00d85d8a744985db36",
+    "evidenceCommit": "daba5722be2d0b504b6a4552ea9c39efcb77499f",
     "fullyAutomatedLaunchClaimAllowed": false,
-    "note": "Final-99 was executed against production 6a95c23f before the evidence-only 7d685baa commit; this launch audit smoke was executed after production advanced to 7d685baa."
+    "note": "Final-99 was executed against production 6a95c23f before later evidence-only refreshes; this launch audit smoke was executed after production advanced to daba5722."
   },
   "northstarOverall": "open",
   "uiVerdict": "IA_BLOCKER_REFINED_CURRENT_LIVE",
@@ -167,9 +167,19 @@
     ]
   },
   "productionBuild": {
-    "commitSha": "7d685baa6da23d2bc1e88f00d85d8a744985db36",
+    "commitSha": "daba5722be2d0b504b6a4552ea9c39efcb77499f",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-muo7iwulm-seojaehongs-projects.vercel.app"
-  }
+    "deploymentUrl": "safeguard-contest-9nwo6exjv-seojaehongs-projects.vercel.app"
+  },
+  "connectedSurfaces": [
+    "Law.go / korean-law-mcp: 연결됨",
+    "Gemini: 연결됨",
+    "기상청: 연결됨",
+    "Work24: 연결됨",
+    "KOSHA 교육: 연결됨",
+    "KOSHA 공식자료: 연결됨",
+    "KOSHA 재해사례: 연결됨",
+    "n8n dispatch: 설정 점검만 수행"
+  ]
 }
