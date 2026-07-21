@@ -2,7 +2,7 @@
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
   "sourceHead": "0ca62223e5af7073f83a6031906b2b9c3236eb2f",
-  "productionCommit": "1fff9dc7855f46c12c21562a57dca89030bfccc7",
+  "productionCommit": "0ca62223e5af7073f83a6031906b2b9c3236eb2f",
   "latestEvidenceCommitLive": false,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
