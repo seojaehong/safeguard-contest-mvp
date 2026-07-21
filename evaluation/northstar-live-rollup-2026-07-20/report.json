@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T23:07:34.794Z",
-  "head": "7b36e4be67a10c644a9b659d6a645b8f77bb1b12",
+  "generatedAt": "2026-07-21T23:12:49.567Z",
+  "head": "6a95c23ffc57542f6a9a9aa14612b3466127a0ad",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "7b36e4be67a10c644a9b659d6a645b8f77bb1b12",
+    "commitSha": "6a95c23ffc57542f6a9a9aa14612b3466127a0ad",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-82zpq55wg-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-rmszvus2f-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -151,7 +151,7 @@
   "final99": {
     "artifact": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
     "overall": "pass_with_notice",
-    "productionCommit": "dff2263838bf562351c33696d0553fde49bd756b",
+    "productionCommit": "6a95c23ffc57542f6a9a9aa14612b3466127a0ad",
     "noticeCarry": [
       {
         "gate": "auth-history-reuse",
@@ -182,17 +182,17 @@
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
       "sourceCommit": "7b36e4be67a10c644a9b659d6a645b8f77bb1b12",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "7b36e4be67a10c644a9b659d6a645b8f77bb1b12",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
       "artifact": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
-      "sourceCommit": "dff2263838bf562351c33696d0553fde49bd756b",
-      "sourceStatus": "ancestor",
-      "productionCommit": "dff2263838bf562351c33696d0553fde49bd756b",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "6a95c23ffc57542f6a9a9aa14612b3466127a0ad",
+      "sourceStatus": "exact",
+      "productionCommit": "6a95c23ffc57542f6a9a9aa14612b3466127a0ad",
+      "productionStatus": "matches_live"
     },
     {
       "id": "live_harness_quality",
@@ -246,9 +246,9 @@
       "id": "workspace_docs_share_geometry",
       "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
       "sourceCommit": "7b36e4be67a10c644a9b659d6a645b8f77bb1b12",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "7b36e4be67a10c644a9b659d6a645b8f77bb1b12",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "dispatch_standalone_cockpit",
