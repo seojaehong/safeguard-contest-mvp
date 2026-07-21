@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T12:52:18.245Z",
-  "head": "e1ae6667f70144d72da94b175d72045713748898",
+  "generatedAt": "2026-07-21T12:55:54.545Z",
+  "head": "ee52fff0be8d7a0007f1a23a5eec9f662e75aff9",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "e1ae6667f70144d72da94b175d72045713748898",
+    "commitSha": "ee52fff0be8d7a0007f1a23a5eec9f662e75aff9",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-aj4urltse-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-i9xh9p6c9-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -181,9 +181,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "ef1c0bd8deae4b750e8b7470d25f363350ee91fd",
+      "sourceCommit": "e1ae6667f70144d72da94b175d72045713748898",
       "sourceStatus": "ancestor",
-      "productionCommit": "ef1c0bd8deae4b750e8b7470d25f363350ee91fd",
+      "productionCommit": "e1ae6667f70144d72da94b175d72045713748898",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -248,7 +248,7 @@
       "sourceCommit": null,
       "sourceStatus": "missing",
       "productionCommit": "e1ae6667f70144d72da94b175d72045713748898",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "dispatch_standalone_cockpit",
@@ -270,9 +270,9 @@
       "id": "northstar_approval_runway",
       "artifact": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
       "sourceCommit": "e1ae6667f70144d72da94b175d72045713748898",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "e1ae6667f70144d72da94b175d72045713748898",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     }
   ],
   "contradictions": [],
