@@ -991,6 +991,7 @@ function createFixtureRoot(): string {
     verification: {
       structuredMaterializationAndHarness: { status: "PASS", testsPassed: 50 },
       exactTrustAndCorpus: { status: "PASS", testsPassed: 173 },
+      combinedFocusedRegression: { status: "PASS", testsPassed: 226 },
       typecheck: { status: "PASS" },
     },
   });

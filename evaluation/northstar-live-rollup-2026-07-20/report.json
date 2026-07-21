@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T21:31:01.675Z",
-  "head": "47f994d94eeb1c6ec8f1cef9eea52273e210b5be",
+  "generatedAt": "2026-07-21T21:38:22.226Z",
+  "head": "dbe9fed5896150ff2977d68303771764f41e82d6",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "47f994d94eeb1c6ec8f1cef9eea52273e210b5be",
+    "commitSha": "dbe9fed5896150ff2977d68303771764f41e82d6",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-of892ch67-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-nogtsw82g-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -181,10 +181,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "dff2263838bf562351c33696d0553fde49bd756b",
-      "sourceStatus": "ancestor",
-      "productionCommit": "dff2263838bf562351c33696d0553fde49bd756b",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "dbe9fed5896150ff2977d68303771764f41e82d6",
+      "sourceStatus": "exact",
+      "productionCommit": "dbe9fed5896150ff2977d68303771764f41e82d6",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -205,10 +205,10 @@
     {
       "id": "kosha_exact_trust_registry",
       "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
-      "sourceCommit": "45731921a8e4d6e8fb0bb9d8269e98f9a5bb47c5",
-      "sourceStatus": "ancestor",
-      "productionCommit": "45731921a8e4d6e8fb0bb9d8269e98f9a5bb47c5",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "dbe9fed5896150ff2977d68303771764f41e82d6",
+      "sourceStatus": "exact",
+      "productionCommit": "dbe9fed5896150ff2977d68303771764f41e82d6",
+      "productionStatus": "matches_live"
     },
     {
       "id": "rls_llm_wiki_approval_preflight",

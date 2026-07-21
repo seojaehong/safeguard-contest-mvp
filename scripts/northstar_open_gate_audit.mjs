@@ -1621,9 +1621,13 @@ function evaluateKoshaExactTrustGate(rootDir) {
     const exact = isRecord(verification.exactTrustAndCorpus)
       ? verification.exactTrustAndCorpus
       : {};
+    const combined = isRecord(verification.combinedFocusedRegression)
+      ? verification.combinedFocusedRegression
+      : {};
     const structuredTests = readNumber(structured.testsPassed);
     const exactTests = readNumber(exact.testsPassed);
-    const totalTests = (structuredTests ?? 0) + (exactTests ?? 0);
+    const combinedTests = readNumber(combined.testsPassed);
+    const totalTests = combinedTests ?? ((structuredTests ?? 0) + (exactTests ?? 0));
     const noMutations = report.dbSchemaChanged === false
       && report.supabaseWrites === false
       && report.embeddingGenerated === false

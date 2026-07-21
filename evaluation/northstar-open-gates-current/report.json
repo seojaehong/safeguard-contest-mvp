@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-21T21:31:03.353Z",
-  "sourceSha": "47f994d94eeb1c6ec8f1cef9eea52273e210b5be",
+  "generatedAt": "2026-07-21T21:38:24.407Z",
+  "sourceSha": "dbe9fed5896150ff2977d68303771764f41e82d6",
   "overall": "open",
   "gates": [
     {
@@ -106,7 +106,7 @@
       "state": "proven",
       "label": "KOSHA exact trust registry",
       "evidencePath": "evaluation\\kosha-current-northstar-regression-2026-07-22\\report.json",
-      "detail": "Current source confirms 3 exact KOSHA pins (D-C-13-2026, D-C-7-2026, B-E-10-2026), structured materialization, grounded generation, and live harness quality: 223 tests plus typecheck PASS; no DB/schema/Supabase/embedding writes.",
+      "detail": "Current source confirms 3 exact KOSHA pins (D-C-13-2026, D-C-7-2026, B-E-10-2026), structured materialization, grounded generation, and live harness quality: 226 tests plus typecheck PASS; no DB/schema/Supabase/embedding writes.",
       "nextActions": [
         "Promote additional metadata-verified KOSHA candidates to exact trust only through separate immutable acquisition/review.",
         "Keep broader corpus exact-publishing, SIF vector retrieval, and DB persistence approval-gated."

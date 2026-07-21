@@ -1,7 +1,7 @@
 {
   "title": "KOSHA Current North Star Regression Gate",
-  "checkedAt": "2026-07-21T20:14:36.574Z",
-  "sourceHeadBeforeCommit": "bd4b4c936072be099d401e25a29edc24fb45ee2e",
+  "checkedAt": "2026-07-21T21:35:00.706Z",
+  "sourceHeadBeforeCommit": "dbe9fed5896150ff2977d68303771764f41e82d6",
   "branch": "chore/recipient-foreign-live-gate-20260720",
   "verdict": "PASS",
   "dbSchemaChanged": false,
@@ -45,14 +45,14 @@
       "status": "PASS",
       "filesPassed": 9,
       "testsPassed": 226,
-      "durationSeconds": 32.03
+      "durationSeconds": 28.22
     },
     "liveProductionGate": {
       "command": "npm.cmd run gate:kosha-live -- --output evaluation\\kosha-current-live-gate-2026-07-20 --base-url https://www.safeclaw.kr",
       "status": "PASS",
       "verdict": "pass_current_kosha_exact_trust_and_corpus_gate",
-      "sourceSha": "bd4b4c936072be099d401e25a29edc24fb45ee2e",
-      "liveCommit": "bd4b4c936072be099d401e25a29edc24fb45ee2e",
+      "sourceSha": "dbe9fed5896150ff2977d68303771764f41e82d6",
+      "liveCommit": "dbe9fed5896150ff2977d68303771764f41e82d6",
       "failedCheckIds": [],
       "evidencePath": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json"
     },
