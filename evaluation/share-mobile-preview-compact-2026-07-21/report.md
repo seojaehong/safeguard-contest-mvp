@@ -1,8 +1,9 @@
 # Share Mobile Preview Compact Evidence
 
-- Verdict: `PASS_CURRENT_SOURCE`
+- Verdict: `PASS_LIVE_PRODUCTION`
 - Product commit: `db6ac612b8ba4d83000d31b7f4f35d2bb66ffa6b`
-- Checked at: `2026-07-21T02:04:27.916Z`
+- Live build: `0ccefc5745147b136939214df0aabf28dcfb1d4a` (`master`, production)
+- Checked at: `2026-07-21T02:12:17.885Z`
 - Scope: mobile `/workspace?share` preview/panel containment only.
 
 ## Product Contract
@@ -38,6 +39,26 @@ This wave does not change backend/provider dispatch behavior and does not claim 
 - `dispatchPostCount`: `1`
 - `horizontalOverflow`: `0`
 
+## Live Production Browser Metrics
+
+### Mobile 390x844 Localized Preview
+
+- `pageHeight`: `844 / 844 = 1.00x`
+- `shareRootBottom`: `810`
+- `previewBottom`: `683`
+- `primary CTA`: top `698`, bottom `742`
+- horizontal overflow: `0`
+- outside horizontal elements: `0`
+
+### Desktop-Short 1440x723 Share Smoke
+
+- `pageHeight`: `723 / 723 = 1.00x`
+- `shareRootBottom`: `716`
+- `previewBottom`: `571`
+- `primaryBottom`: `389`
+- horizontal overflow: `0`
+- outside horizontal elements: `0`
+
 ## Verification Commands
 
 - `npm.cmd test -- tests\workspace-share-mobile-browser.test.ts -t "renders every Vietnamese paragraph" --maxWorkers=1 --fileParallelism=false --hookTimeout=180000` -> PASS, 1 file / 1 test
@@ -48,6 +69,6 @@ This wave does not change backend/provider dispatch behavior and does not claim 
 
 ## Remaining Boundaries
 
-- This is current-source evidence, not live-production promotion.
+- This is live-production evidence for the mobile Share preview compact wave.
 - It preserves the earlier mobile exact viewport contract; it is not a new provider dispatch claim.
 - Exact user-specific generated sessions can still require separate reproduction if their saved data differs from the fixture.

@@ -1,9 +1,15 @@
 {
   "schemaVersion": 1,
   "gate": "share-mobile-preview-compact-2026-07-21",
-  "verdict": "PASS_CURRENT_SOURCE",
-  "checkedAt": "2026-07-21T02:04:27.916Z",
+  "verdict": "PASS_LIVE_PRODUCTION",
+  "checkedAt": "2026-07-21T02:12:17.885Z",
   "productCommit": "db6ac612b8ba4d83000d31b7f4f35d2bb66ffa6b",
+  "liveBuildInfo": {
+    "commitSha": "0ccefc5745147b136939214df0aabf28dcfb1d4a",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-4zqgo1ixg-seojaehongs-projects.vercel.app"
+  },
   "providerDispatchLiveClaimed": false,
   "routeSplitAloneAcceptedAsFix": false,
   "scope": {
@@ -44,6 +50,29 @@
       "horizontalOverflow": 0
     }
   },
+  "liveProductionMetrics": {
+    "localizedPreview": {
+      "pageHeight": 844,
+      "viewportHeight": 844,
+      "heightRatio": 1,
+      "shareRootBottom": 810,
+      "previewBottom": 683,
+      "primaryTop": 698,
+      "primaryBottom": 742,
+      "horizontalOverflow": 0,
+      "outsideHorizontalElements": 0
+    },
+    "desktopShortShare": {
+      "pageHeight": 723,
+      "viewportHeight": 723,
+      "heightRatio": 1,
+      "shareRootBottom": 716,
+      "previewBottom": 571,
+      "primaryBottom": 389,
+      "horizontalOverflow": 0,
+      "outsideHorizontalElements": 0
+    }
+  },
   "checks": [
     {
       "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts -t \"renders every Vietnamese paragraph\" --maxWorkers=1 --fileParallelism=false --hookTimeout=180000",
@@ -74,7 +103,7 @@
     }
   ],
   "remainingDebt": [
-    "Live production promotion is pending until /api/build-info reaches db6ac612b8ba4d83000d31b7f4f35d2bb66ffa6b or later and live geometry is rerun.",
+    "Exact user-specific generated sessions can still require separate reproduction if their saved data differs from the fixture.",
     "Provider live dispatch remains approval-gated and is not claimed."
   ]
 }
