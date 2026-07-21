@@ -1,0 +1,174 @@
+{
+  "generatedAt": "2026-07-21T21:25:40.201Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "commit": "dff22638",
+  "sourceCommit": "dff2263838bf562351c33696d0553fde49bd756b",
+  "productionBuild": {
+    "ok": true,
+    "status": 200,
+    "commitSha": "dff2263838bf562351c33696d0553fde49bd756b",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-qk2wdvxxc-seojaehongs-projects.vercel.app"
+  },
+  "overall": "pass_with_notice",
+  "elapsedMs": 81979,
+  "gates": [
+    {
+      "name": "ask-orchestration",
+      "verdict": "pass",
+      "evidence": "11/11 documents"
+    },
+    {
+      "name": "auth-history-reuse",
+      "verdict": "pass_with_notice",
+      "evidence": "SAFEGUARD_AUTH_TOKEN이 없어 live 관리자 저장/재열기는 실행하지 않았습니다. UI는 비회원 임시 저장과 관리자 로그인 필요 상태로 방어합니다."
+    },
+    {
+      "name": "document-downloads",
+      "verdict": "pass",
+      "evidence": "core PDF + orchestration XLS/HWPX/PDF smoke"
+    },
+    {
+      "name": "public-data-ai-map",
+      "verdict": "pass",
+      "evidence": "docs/submission-evidence-map.md"
+    },
+    {
+      "name": "ai-remediation-flow",
+      "verdict": "pass",
+      "evidence": "OpenAI"
+    },
+    {
+      "name": "dispatch-policy",
+      "verdict": "pass_with_notice",
+      "evidence": "raw payload rejected, band locked, auth gate enforced"
+    },
+    {
+      "name": "screenshots",
+      "verdict": "pass",
+      "evidence": "5 screenshots"
+    }
+  ],
+  "outputs": {
+    "authHistory": "evaluation\\final-99-gate-current-2026-07-22\\auth-history-smoke.json",
+    "documentDownloads": "evaluation\\final-99-gate-current-2026-07-22\\document-download-smoke.json",
+    "publicDataAiMap": "evaluation\\final-99-gate-current-2026-07-22\\public-data-ai-map.json",
+    "prodGoldenPath": "evaluation\\final-99-gate-current-2026-07-22\\prod-golden-path.json",
+    "decision": "evaluation\\final-99-gate-current-2026-07-22\\decision.md",
+    "evidenceMapDoc": "docs\\submission-evidence-map.md",
+    "securityPrivacyDoc": "docs\\security_privacy_readiness.md",
+    "commercializationDoc": "docs\\commercialization-onepager.md"
+  },
+  "notes": [
+    "provider 전파는 관리자 인증과 서버 소유 workpack/share session이 필요하며, 카카오/밴드는 승인 전이라 제외했습니다.",
+    "HWPX는 제출형 초안으로 고지합니다.",
+    "관리자 이력 게이트는 SAFEGUARD_AUTH_TOKEN이 없으면 pass_with_notice로 남습니다."
+  ],
+  "ask": {
+    "status": 200,
+    "mode": "live",
+    "documentCount": 11,
+    "externalSignals": {
+      "lawgo": true,
+      "weather": true,
+      "work24": true,
+      "kosha": true,
+      "accidentCases": true
+    }
+  },
+  "remediation": {
+    "verdict": "pass",
+    "status": 200,
+    "configured": true,
+    "providerLabel": "OpenAI",
+    "catalogStatus": {
+      "configured": true,
+      "ok": true,
+      "count": 6,
+      "message": "KOSHA 오프라인 보조근거와 Supabase 안전 지식 DB에서 참고자료를 조회했습니다. 공식 KOSHA 정확 본문 번들로 partial DB 본문을 대체했습니다."
+    },
+    "textPreview": "[보완 제안: 강풍 대비 비계 안전관리 및 지게차 동선 통제] - 강풍 예보 시 풍속 및 돌풍 발생 여부를 작업 전 반드시 확인하고, 기준 초과 시 즉시 작업 중지 및 안전지대로 대피 조치한다. - 이동식 비계의 바퀴 잠금 상태와 아웃트리거, 안전난간, 작업발판 고정 상태를 작업 시작 전 점검하고 기록한다. - 하부 작업구역 출입 통제 및 지게차 운행 동선을 명확히 구분하여 임시 표지판과 신호수 배치로 작업자 안전 확보한다. - 신규 투입자에게는 강풍 시 작업중지 기준과 비계 안전요령, 지게차 위험구역 통행 방법을 작업 전 별도 교육한다. - 일일 TBM에서 위 사항 이행 여부를 점검하고 작업반장이 확인 서명하는 절차를 의무화한다. 확인자/근거: 작업반장 점검 및 서명, TBM 기록, 안전보건교육 기록에 강풍·비계·지게차 안전관리 기준 반영",
+    "sourceCount": 5,
+    "policy": "AI 보완은 자동 덮어쓰기가 아니라 제안, 사용자 편집, 삽입 흐름으로만 인정합니다."
+  },
+  "dispatch": {
+    "verdict": "pass_with_notice",
+    "officialChannels": [
+      "email",
+      "sms"
+    ],
+    "excludedChannels": [
+      "kakao",
+      "band"
+    ],
+    "policyNotice": "메일·문자는 관리자 인증과 서버 소유 workpack/share session이 있을 때만 provider 전송합니다. 이 게이트는 raw workpack 전송 차단, 밴드 잠금, 무인 provider 호출 차단을 확인합니다.",
+    "capability": {
+      "status": 200,
+      "providerDispatch": {
+        "capability": false,
+        "mode": "preview_only",
+        "reason": "persistent_idempotency_unavailable",
+        "channels": {
+          "email": {
+            "capability": false,
+            "reason": "persistent_idempotency_unavailable"
+          },
+          "sms": {
+            "capability": false,
+            "reason": "persistent_idempotency_unavailable"
+          },
+          "kakao": {
+            "capability": false,
+            "reason": "persistent_idempotency_unavailable"
+          }
+        }
+      }
+    },
+    "legacyRejected": {
+      "status": 400,
+      "rejectedFields": [
+        "recipients",
+        "workpack"
+      ],
+      "message": "전파 요청에는 서버 권한 식별자, 채널, 대상 언어, 검증된 메시지만 사용할 수 있습니다."
+    },
+    "locked": {
+      "status": 400,
+      "lockedChannels": [
+        "band"
+      ],
+      "message": "밴드 전파는 승인 대기 상태입니다. 현재 서버 전파는 메일·문자와 설정된 카카오 알림톡만 허용합니다."
+    },
+    "authGate": {
+      "status": 401,
+      "message": "관리자 로그인이 필요합니다.",
+      "providerCalled": null
+    }
+  },
+  "screenshots": {
+    "verdict": "pass",
+    "screenshots": [
+      {
+        "route": "/",
+        "path": "evaluation\\final-99-gate-current-2026-07-22\\screenshots\\01-home.png"
+      },
+      {
+        "route": "/workspace",
+        "path": "evaluation\\final-99-gate-current-2026-07-22\\screenshots\\02-workspace.png"
+      },
+      {
+        "route": "/documents",
+        "path": "evaluation\\final-99-gate-current-2026-07-22\\screenshots\\03-documents.png"
+      },
+      {
+        "route": "/evidence",
+        "path": "evaluation\\final-99-gate-current-2026-07-22\\screenshots\\04-evidence.png"
+      },
+      {
+        "route": "/dispatch",
+        "path": "evaluation\\final-99-gate-current-2026-07-22\\screenshots\\05-dispatch.png"
+      }
+    ]
+  }
+}

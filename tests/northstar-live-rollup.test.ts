@@ -50,7 +50,7 @@ function createFixtureRoot(): { root: string; head: string } {
     sourceSha: "OPEN_GATE_SOURCE_SHA",
     overall: "open",
     gates: [
-      { id: "final_99_gate", state: "notice", evidencePath: "evaluation/final-99-gate-current-2026-07-21/report.json", detail: "notice carried" },
+      { id: "final_99_gate", state: "notice", evidencePath: "evaluation/final-99-gate-current-2026-07-22/report.json", detail: "notice carried" },
       { id: "live_harness_quality", state: "proven", evidencePath: "evaluation/live-harness-quality-probe-current-2026-07-20/report.json", detail: "passed" },
       { id: "provider_dispatch_persistence", state: "approval_gated", evidencePath: "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json", detail: "preview only" },
       { id: "supabase_rls_launch_isolation", state: "approval_gated", evidencePath: "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", detail: "approval required" },
@@ -61,12 +61,12 @@ function createFixtureRoot(): { root: string; head: string } {
     safeDemoClaims: ["demo claim"],
     forbiddenClaims: ["forbidden claim"],
   });
-  writeJson(root, "evaluation/final-99-gate-current-2026-07-21/report.json", {
+  writeJson(root, "evaluation/final-99-gate-current-2026-07-22/report.json", {
     sourceCommit: "TO_FILL",
     productionBuild: { commitSha: "TO_FILL" },
     overall: "pass_with_notice",
   });
-  writeJson(root, "evaluation/final-99-gate-current-2026-07-21/notice-carry.json", {
+  writeJson(root, "evaluation/final-99-gate-current-2026-07-22/notice-carry.json", {
     notices: [
       { gate: "auth-history-reuse", launchImpact: "operator-auth-gated", allowedClaim: "allowed", forbiddenClaim: "forbidden" },
     ],
@@ -174,7 +174,7 @@ function createFixtureRoot(): { root: string; head: string } {
     fs.writeFileSync(absolutePath, next, "utf8");
   };
   [
-    "evaluation/final-99-gate-current-2026-07-21/report.json",
+    "evaluation/final-99-gate-current-2026-07-22/report.json",
     "evaluation/live-harness-quality-probe-current-2026-07-20/report.json",
     "evaluation/kosha-current-live-gate-2026-07-20/report.json",
     "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json",
@@ -249,7 +249,7 @@ describe("northstar live rollup", () => {
   it("does not mark source-ahead final-99 evidence as live-exact", () => {
     const { root, head } = createFixtureRoot();
     const liveCommit = execFileSync("git", ["rev-parse", "HEAD~1"], { cwd: root, encoding: "utf8" }).trim();
-    writeJson(root, "evaluation/final-99-gate-current-2026-07-21/report.json", {
+    writeJson(root, "evaluation/final-99-gate-current-2026-07-22/report.json", {
       sourceCommit: head,
       productionBuild: { commitSha: liveCommit },
       overall: "pass_with_notice",

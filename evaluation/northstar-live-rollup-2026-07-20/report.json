@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T21:20:39.107Z",
-  "head": "086dc9398167cb8ae417f651c9b40dd298c79107",
+  "generatedAt": "2026-07-21T21:26:51.936Z",
+  "head": "dff2263838bf562351c33696d0553fde49bd756b",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "086dc9398167cb8ae417f651c9b40dd298c79107",
+    "commitSha": "dff2263838bf562351c33696d0553fde49bd756b",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-89zq45a6s-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-qk2wdvxxc-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -149,9 +149,9 @@
     "uploaded": false
   },
   "final99": {
-    "artifact": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
+    "artifact": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
     "overall": "pass_with_notice",
-    "productionCommit": "5bc92d5074e8834224d33ed8a67ce13a7a0aac41",
+    "productionCommit": "dff2263838bf562351c33696d0553fde49bd756b",
     "noticeCarry": [
       {
         "gate": "auth-history-reuse",
@@ -181,18 +181,18 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "4095a38a1fad34035cbec7783834e47c9df26ce2",
+      "sourceCommit": "086dc9398167cb8ae417f651c9b40dd298c79107",
       "sourceStatus": "ancestor",
-      "productionCommit": "4095a38a1fad34035cbec7783834e47c9df26ce2",
+      "productionCommit": "086dc9398167cb8ae417f651c9b40dd298c79107",
       "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
-      "artifact": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
-      "sourceCommit": "5bc92d5074e8834224d33ed8a67ce13a7a0aac41",
-      "sourceStatus": "ancestor",
-      "productionCommit": "5bc92d5074e8834224d33ed8a67ce13a7a0aac41",
-      "productionStatus": "ancestor_of_head"
+      "artifact": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
+      "sourceCommit": "dff2263838bf562351c33696d0553fde49bd756b",
+      "sourceStatus": "exact",
+      "productionCommit": "dff2263838bf562351c33696d0553fde49bd756b",
+      "productionStatus": "matches_live"
     },
     {
       "id": "live_harness_quality",

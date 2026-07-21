@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-21T21:20:40.820Z",
-  "sourceSha": "086dc9398167cb8ae417f651c9b40dd298c79107",
+  "generatedAt": "2026-07-21T21:26:54.098Z",
+  "sourceSha": "dff2263838bf562351c33696d0553fde49bd756b",
   "overall": "open",
   "gates": [
     {
       "id": "final_99_gate",
       "state": "notice",
       "label": "Final 99 evidence gate",
-      "evidencePath": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
-      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-21\\notice-carry.json.",
+      "evidencePath": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
+      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-22\\notice-carry.json.",
       "nextActions": [
         "Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment."
       ]

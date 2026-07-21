@@ -16,7 +16,7 @@ const DEFAULT_BUILD_INFO_URL = "https://www.safeclaw.kr/api/build-info";
 const ARTIFACTS = Object.freeze({
   openGate: path.join("evaluation", "northstar-open-gates-current", "report.json"),
   liveRollup: path.join("evaluation", "northstar-live-rollup-2026-07-20", "report.json"),
-  final99: path.join("evaluation", "final-99-gate-current-2026-07-21", "report.json"),
+  final99: path.join("evaluation", "final-99-gate-current-2026-07-22", "report.json"),
   workspaceInformationArchitecture: path.join("evaluation", "workspace-information-architecture-2026-07-21", "report.json"),
   hermesOpenclawRuntime: path.join("evaluation", "hermes-openclaw-runtime-current-gate-2026-07-20", "report.json"),
   launchReadiness: path.join("evaluation", "launch-readiness-current-2026-07-22", "report.json"),

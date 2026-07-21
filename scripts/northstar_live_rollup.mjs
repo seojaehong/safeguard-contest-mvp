@@ -15,8 +15,8 @@ const DEFAULT_BUILD_INFO_URL = "https://www.safeclaw.kr/api/build-info";
 
 const ARTIFACTS = Object.freeze({
   openGate: path.join("evaluation", "northstar-open-gates-current", "report.json"),
-  final99: path.join("evaluation", "final-99-gate-current-2026-07-21", "report.json"),
-  final99NoticeCarry: path.join("evaluation", "final-99-gate-current-2026-07-21", "notice-carry.json"),
+  final99: path.join("evaluation", "final-99-gate-current-2026-07-22", "report.json"),
+  final99NoticeCarry: path.join("evaluation", "final-99-gate-current-2026-07-22", "notice-carry.json"),
   liveHarness: path.join("evaluation", "live-harness-quality-probe-current-2026-07-20", "report.json"),
   kosha: path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json"),
   rlsWiki: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
