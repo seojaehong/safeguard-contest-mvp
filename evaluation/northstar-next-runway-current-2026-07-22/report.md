@@ -4,17 +4,17 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `1d46e12360d34ac27e0b51af52e4e85fd7b68fab`
+Source HEAD: `8840d960cf9d907175a82d75b7da158922c0c88e`
 
-Production `/api/build-info`: `aa5e6f90de5acdf6efc99b5f39d66943dec8c89b`
+Production `/api/build-info`: `1d46e12360d34ac27e0b51af52e4e85fd7b68fab`
 
 Latest evidence commit live: `false`
 
-Live-exact evidence commit: `1d46e12360d34ac27e0b51af52e4e85fd7b68fab`
+Live-exact evidence commit: `8840d960cf9d907175a82d75b7da158922c0c88e`
 
 Live rollup matches production: `false`
 
-Note: current HEAD `1d46e12360d34ac27e0b51af52e4e85fd7b68fab` is ahead of production `aa5e6f90de5acdf6efc99b5f39d66943dec8c89b`, and the live rollup head `1d46e12360d34ac27e0b51af52e4e85fd7b68fab` does not yet match production. Refresh live rollup before claiming live-exact.
+Note: current HEAD `8840d960cf9d907175a82d75b7da158922c0c88e` is ahead of production `1d46e12360d34ac27e0b51af52e4e85fd7b68fab`, and the live rollup head `8840d960cf9d907175a82d75b7da158922c0c88e` does not yet match production. Refresh live rollup before claiming live-exact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
