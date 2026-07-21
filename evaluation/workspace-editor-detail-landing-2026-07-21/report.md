@@ -2,9 +2,9 @@
 
 Verdict: `PASS_LIVE_PRODUCTION_FIELD_LEVEL`
 
-Live production marker: `e1ae6667f70144d72da94b175d72045713748898`
+Live production marker: `cd3d46a822bf3dbec4eb4bc3c839b9165c29b2ea`
 
-Freshness note: the same selector geometry was re-probed on live production after the North Star evidence marker advanced to `e1ae6667`.
+Freshness note: the same selector geometry was re-probed on live production after the Final 99 evidence marker advanced to `cd3d46a8`.
 
 ## Scope
 
