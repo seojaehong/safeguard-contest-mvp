@@ -99,6 +99,22 @@ function createFixtureRoot(): { root: string; head: string } {
       liveDispatchUnlocked: false,
     },
   });
+  writeJson(root, "evaluation/northstar-approval-runway-2026-07-21/report.json", {
+    sourceHeadAtDraft: "TO_FILL",
+    liveCommitAtDraft: "TO_FILL",
+    overall: "approval_runway_ready_open",
+    launchReadiness: false,
+    dbMutationPerformed: false,
+    providerMessageSent: false,
+    embeddingGenerated: false,
+    uploaded: false,
+    approvalGates: [
+      { id: "provider_dispatch_persistence", state: "approval_gated" },
+      { id: "supabase_rls_launch_isolation", state: "approval_gated" },
+      { id: "llm_wiki_publication", state: "approval_gated" },
+      { id: "sif_embedding_runtime", state: "approval_gated" },
+    ],
+  });
   writeJson(root, "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", {
     sourceSha: "TO_FILL",
     overall: "approval_ready_open",
@@ -161,6 +177,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-harness-quality-probe-current-2026-07-20/report.json",
     "evaluation/kosha-current-live-gate-2026-07-20/report.json",
     "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json",
+    "evaluation/northstar-approval-runway-2026-07-21/report.json",
     "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json",
     "evaluation/sif-embedding-gate/approval-preflight-report.json",
     "evaluation/live-critical-surface-current-2026-07-20-rerun/report.json",
@@ -206,6 +223,8 @@ describe("northstar live rollup", () => {
     expect(report.evidence.find((item) => item.id === "open_gate")?.productionStatus).toBe("matches_live");
     expect(report.evidence.find((item) => item.id === "provider_dispatch_persistence")?.sourceStatus).toBe("ancestor");
     expect(report.evidence.find((item) => item.id === "provider_dispatch_persistence")?.productionStatus).toBe("missing");
+    expect(report.evidence.find((item) => item.id === "northstar_approval_runway")?.sourceStatus).toBe("ancestor");
+    expect(report.evidence.find((item) => item.id === "northstar_approval_runway")?.productionStatus).toBe("ancestor_of_head");
     expect(report.contradictions).toHaveLength(0);
   });
 

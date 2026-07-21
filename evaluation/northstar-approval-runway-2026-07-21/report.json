@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "safeclaw-northstar-approval-runway/v1",
+  "generatedAt": "2026-07-21T20:42:00+09:00",
+  "sourceHeadAtDraft": "baa0c32514d54802001d2c0101ad3d231445ff41",
+  "liveCommitAtDraft": "baa0c32514d54802001d2c0101ad3d231445ff41",
+  "overall": "approval_runway_ready_open",
+  "launchReadiness": false,
+  "dbMutationPerformed": false,
+  "providerMessageSent": false,
+  "embeddingGenerated": false,
+  "uploaded": false,
+  "routeSplitAloneAcceptedAsUxFix": false,
+  "approvalGates": [
+    {
+      "id": "provider_dispatch_persistence",
+      "state": "approval_gated",
+      "evidencePath": "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json",
+      "readyForOperatorReview": true,
+      "currentSafetyLock": "preview_only",
+      "approvalNeeded": [
+        "approve persistent idempotency migration scope",
+        "choose per-channel child table or canonical provider_result JSONB ledger",
+        "add updated_at trigger or route-owned timestamp contract",
+        "test reservation-before-provider-call, duplicate replay, and per-channel result retention"
+      ],
+      "forbiddenUntilApproved": [
+        "real provider dispatch",
+        "PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=true",
+        "channel-level exactly-once persistence claim"
+      ]
+    },
+    {
+      "id": "supabase_rls_launch_isolation",
+      "state": "approval_gated",
+      "evidencePath": "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json",
+      "readyForOperatorReview": true,
+      "currentSafetyLock": "read_only_preflight",
+      "approvalNeeded": [
+        "approve authoritative Supabase project and credential provenance",
+        "run read-only live catalog capture",
+        "run disposable tenant A/B negative matrix",
+        "verify Storage object isolation and service-role route invariants"
+      ],
+      "forbiddenUntilApproved": [
+        "RLS launch isolation proven",
+        "production migration approved",
+        "service-role routes safe because table RLS exists"
+      ]
+    },
+    {
+      "id": "llm_wiki_publication",
+      "state": "approval_gated",
+      "evidencePath": "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json",
+      "readyForOperatorReview": true,
+      "currentSafetyLock": "candidate_unpublished",
+      "approvalNeeded": [
+        "approve final DDL, RPC, grants, and append-only ledger",
+        "approve graph pointer and publication threat model",
+        "run isolated publication canary with atomicity, idempotency, rollback, and leak tests"
+      ],
+      "forbiddenUntilApproved": [
+        "LLM Wiki publication available",
+        "LLM Wiki publishes itself",
+        "generated wiki candidates published without human confirmation and RPC evidence"
+      ]
+    },
+    {
+      "id": "sif_embedding_runtime",
+      "state": "approval_gated",
+      "evidencePath": "evaluation/sif-embedding-gate/approval-preflight-report.json",
+      "readyForOperatorReview": true,
+      "currentSafetyLock": "approval_held_no_vectors",
+      "corpusCount": 6032,
+      "batchCount": 61,
+      "approvalNeeded": [
+        "approve SIF-only embedding migration",
+        "approve embedding cost and upload",
+        "run post-upload vector runtime verification",
+        "keep SAFETY_REFERENCE_VECTOR_SEARCH disabled until upload is verified"
+      ],
+      "forbiddenUntilApproved": [
+        "SIF vector retrieval production-active",
+        "embedding/upload completed",
+        "broader corpus exact-publishing or DB persistence claim"
+      ]
+    }
+  ],
+  "operatorSequence": [
+    "Confirm target production/staging project and secret-free evidence boundaries.",
+    "Approve or reject RLS live catalog and tenant A/B read-only probes.",
+    "Approve or reject LLM Wiki isolated publication canary.",
+    "Approve or reject SIF embedding migration, cost, and upload as a separate gate.",
+    "Approve or reject provider dispatch persistence migration and route-level replay tests.",
+    "Only after each gate has post-approval evidence, regenerate northstar-open-gates-current and northstar-live-rollup."
+  ],
+  "nonApprovalWorkStillAllowed": [
+    "UI/UX cockpit and drilldown refinements",
+    "KOSHA exact-trust evidence refreshes without DB writes",
+    "read-only live geometry probes",
+    "approval packet validation and report hygiene"
+  ],
+  "completionBoundary": "North Star remains open until approval-gated runtime/database/provider/vector publication checks are approved and verified. This runway is a launch-control artifact, not a launch-complete claim."
+}

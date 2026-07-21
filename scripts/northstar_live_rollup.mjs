@@ -26,6 +26,7 @@ const ARTIFACTS = Object.freeze({
   workspaceGeometry: path.join("evaluation", "workspace-docs-share-production-gate-2026-07-20", "current-geometry.json"),
   dispatchStandalone: path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"),
   providerDispatchIdempotency: path.join("evaluation", "provider-dispatch-idempotency-gate-2026-07-19", "report.json"),
+  approvalRunway: path.join("evaluation", "northstar-approval-runway-2026-07-21", "report.json"),
 });
 
 /**
@@ -150,6 +151,9 @@ function extractProductionCommit(report) {
   if (isRecord(report.buildInfo)) {
     return asString(report.buildInfo.commitSha);
   }
+  if (typeof report.liveCommitAtDraft === "string") {
+    return asString(report.liveCommitAtDraft);
+  }
   return "";
 }
 
@@ -162,6 +166,7 @@ function extractSourceCommit(report) {
   }
   return asString(report.sourceCommit)
     || asString(report.sourceSha)
+    || asString(report.sourceHeadAtDraft)
     || asString(report.sourceHeadBeforeCommit)
     || asString(report.head)
     || asString(report.commitSha)
@@ -282,6 +287,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const workspaceGeometry = tryReadJson(rootDir, ARTIFACTS.workspaceGeometry);
   const dispatchStandalone = tryReadJson(rootDir, ARTIFACTS.dispatchStandalone);
   const providerDispatchIdempotency = tryReadJson(rootDir, ARTIFACTS.providerDispatchIdempotency);
+  const approvalRunway = tryReadJson(rootDir, ARTIFACTS.approvalRunway);
 
   const openGates = isRecord(openGate) && Array.isArray(openGate.gates) ? openGate.gates : [];
   const provenGates = [];
@@ -349,6 +355,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "workspace_docs_share_geometry", ARTIFACTS.workspaceGeometry, workspaceGeometry),
     evidenceStatus(rootDir, currentHead, liveCommit, "dispatch_standalone_cockpit", ARTIFACTS.dispatchStandalone, dispatchStandalone),
     evidenceStatus(rootDir, currentHead, liveCommit, "provider_dispatch_persistence", ARTIFACTS.providerDispatchIdempotency, providerDispatchIdempotency),
+    evidenceStatus(rootDir, currentHead, liveCommit, "northstar_approval_runway", ARTIFACTS.approvalRunway, approvalRunway),
   ];
 
   const contradictions = evidence.filter((item) => (
@@ -436,6 +443,18 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       channelLevelExactlyOnceProven: recordAt(providerDispatchIdempotency, "channelResultPersistence")?.channelLevelExactlyOnceProven === true,
       providerMessageSent: recordAt(providerDispatchIdempotency, "safetyLocks")?.providerMessageSent === true,
       liveDispatchUnlocked: recordAt(providerDispatchIdempotency, "safetyLocks")?.liveDispatchUnlocked === true,
+    },
+    approvalRunway: {
+      artifact: ARTIFACTS.approvalRunway,
+      overall: isRecord(approvalRunway) ? asString(approvalRunway.overall) : "missing",
+      gateCount: isRecord(approvalRunway) && Array.isArray(approvalRunway.approvalGates)
+        ? approvalRunway.approvalGates.length
+        : null,
+      launchReadiness: isRecord(approvalRunway) ? approvalRunway.launchReadiness === true : null,
+      dbMutationPerformed: isRecord(approvalRunway) ? approvalRunway.dbMutationPerformed === true : null,
+      providerMessageSent: isRecord(approvalRunway) ? approvalRunway.providerMessageSent === true : null,
+      embeddingGenerated: isRecord(approvalRunway) ? approvalRunway.embeddingGenerated === true : null,
+      uploaded: isRecord(approvalRunway) ? approvalRunway.uploaded === true : null,
     },
     final99: {
       artifact: ARTIFACTS.final99,
