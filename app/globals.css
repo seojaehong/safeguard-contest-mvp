@@ -16983,8 +16983,19 @@ body:has(.safeclaw-landing) :is(
 }
 
 @media (max-width: 720px) {
+  .command-center-shell.workspace-page-share {
+    padding-bottom: 0;
+  }
+
+  .command-center-shell.workspace-page-share .linear-workspace-layout,
+  .command-center-shell.workspace-page-share .command-viewport {
+    min-height: 0;
+    height: auto;
+  }
+
   .command-center-shell:has(.workspace-share-page) .command-main {
     padding-top: 14px;
+    padding-bottom: 8px;
   }
 
   .command-center-shell:has(.workspace-share-page) .workspace-step-page {
@@ -17183,6 +17194,10 @@ body:has(.safeclaw-landing) :is(
   .share-panel.workflow-panel > .share-inline-note,
   .share-panel.workflow-panel > .share-readiness-warning {
     order: 6;
+  }
+
+  .share-panel.workflow-panel.share-config-collapsed > .share-readiness-warning {
+    display: none;
   }
 
   .share-panel.workflow-panel > .workflow-result {
