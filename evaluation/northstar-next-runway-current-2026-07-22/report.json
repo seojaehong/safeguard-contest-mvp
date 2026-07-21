@@ -1,0 +1,60 @@
+{
+  "checkedAtKst": "2026-07-22",
+  "verdict": "OPEN_APPROVAL_GATED",
+  "sourceHead": "8799b707923228487d056f4c2037daf07c8fa218",
+  "productionCommit": "8799b707923228487d056f4c2037daf07c8fa218",
+  "artifacts": {
+    "openGate": "evaluation\\northstar-open-gates-current\\report.json",
+    "liveRollup": "evaluation\\northstar-live-rollup-2026-07-20\\report.json",
+    "final99": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
+    "workspaceInformationArchitecture": "evaluation\\workspace-information-architecture-2026-07-21\\report.json"
+  },
+  "provenCurrentState": [
+    "live_harness_quality",
+    "kosha_exact_trust_registry",
+    "ui_documents_share_cockpit",
+    "dispatch_standalone_cockpit",
+    "share_result_fixture_cockpit"
+  ],
+  "noticeState": [
+    {
+      "gate": "final_99_gate",
+      "state": "notice",
+      "reason": "pass_with_notice with carried auth-history and dispatch-policy notices"
+    }
+  ],
+  "approvalGated": [
+    {
+      "gate": "provider_dispatch_persistence",
+      "reason": "persistent idempotency and provider-result persistence are not approved or live verified"
+    },
+    {
+      "gate": "supabase_rls_launch_isolation",
+      "reason": "live catalog and disposable tenant A/B isolation proof are not approved"
+    },
+    {
+      "gate": "llm_wiki_publication",
+      "reason": "publication RPC/RLS/ledger approval and canary are not complete"
+    },
+    {
+      "gate": "sif_embedding_runtime",
+      "reason": "migration, embedding cost, upload, and vector runtime approval remain separate"
+    }
+  ],
+  "uiInterpretation": {
+    "routeSplitAloneAcceptedAsFix": false,
+    "acceptedStructure": "step split plus first-viewport cockpit plus bounded drilldown/detail panes",
+    "documentsDefaultCockpit": "closed for raw route height in current live geometry",
+    "selectedEditorDetail": "first risk-row header and hazard field land in the first viewport; raw long-form textarea remains secondary drilldown",
+    "shareDesktop": "raw geometry is two-column; perceived full-workbench composition remains a follow-up only if reproduced",
+    "shareMobile": "current compact cockpit remains first-viewport bounded in current evidence"
+  },
+  "nextSafeWorkWithoutApproval": [
+    "refresh source/live exact evidence when production marker advances",
+    "keep UI follow-up scoped to drilldown readability or perceived desktop workbench composition",
+    "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
+    "do not claim full launch completion while final-99 remains pass_with_notice"
+  ],
+  "providerLiveDispatchClaimed": false,
+  "dbMutationPerformed": false
+}
