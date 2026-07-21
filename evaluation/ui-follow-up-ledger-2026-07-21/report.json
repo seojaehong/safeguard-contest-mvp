@@ -2,7 +2,8 @@
   "checkedAt": "2026-07-21T21:20:23+09:00",
   "verdict": {
     "workspaceDocumentsDefaultCockpit": "PASS_LIVE_DEFAULT_HEIGHT_CLOSED",
-    "workspaceSelectedEditorDetail": "PASS_FIELD_LEVEL_LANDING_ONLY",
+    "workspaceSelectedEditorDetail": "SPLIT_FIELD_SUMMARY_PASS_RAW_TEXTAREA_OPEN",
+    "workspaceSelectedEditorFieldSummary": "PASS_FIELD_LEVEL_LANDING_ONLY",
     "workspaceSelectedEditorFullRawTextarea": "OPEN_SECONDARY_DRILLDOWN",
     "workspaceShareDesktopRawGeometry": "PASS_TWO_COLUMN",
     "workspaceShareDesktopPerceivedWorkbench": "FOLLOW_UP_IF_REPRODUCED",
@@ -17,11 +18,13 @@
     "latestReportRefreshSourceMarkerBeforeThisLedgerUpdate": "ee52fff0be8d7a0007f1a23a5eec9f662e75aff9",
     "defaultDocumentsAndShareCockpitHeightClosed": true,
     "selectedEditorFieldLevelLandingClosed": true,
+    "selectedEditorFieldSummaryLandingClosed": true,
+    "selectedEditorRawTextareaLandingOpen": true,
     "selectedEditorFullRawTextareaShortClaimed": false,
     "shareDesktopLiteralMobileStackReproduced": false,
     "shareDesktopPerceivedNarrowCardFollowUp": true,
     "routeSplitAloneAcceptedAsFix": false,
-    "interpretation": "Default Documents and Share cockpits are no longer best described as stale or raw long-page failures. Remaining Documents UX debt is selected editor/detail depth: first risk-row field is visible, while the full raw textarea remains secondary drilldown. Remaining Share UX debt, if reproduced, should be judged as perceived desktop workbench composition rather than literal one-column mobile-stack geometry.",
+    "interpretation": "Default Documents and Share cockpits are no longer best described as stale or raw long-page failures. Remaining Documents UX debt is selected editor/detail depth: first risk-row field or summary is visible, while the full raw textarea starts below the first viewport and remains an open drilldown/readability issue. Remaining Share UX debt, if reproduced, should be judged as perceived desktop workbench composition rather than literal one-column mobile-stack geometry.",
     "remainingStructuralContract": [
       "first-viewport cockpit per route",
       "bounded panes, accordions, drawers, or drilldown routes for long content",
@@ -34,6 +37,8 @@
     "productionMarker": "e1ae6667f70144d72da94b175d72045713748898",
     "defaultDocumentsCockpitClosed": true,
     "selectedEditorFieldLevelLandingClosed": true,
+    "selectedEditorFieldSummaryLandingClosed": true,
+    "selectedEditorRawTextareaLandingOpen": true,
     "selectedEditorFullRawTextareaShortClaimed": false,
     "shareDesktopLiteralMobileStackReproduced": false,
     "documentsDesktopShort1440x723": {
@@ -93,7 +98,7 @@
       "horizontalOverflow": false,
       "outside": 0
     },
-    "interpretation": "Default Documents and Share cockpits are live-closed for raw height/overflow. Selected editor/detail has field-level landing, while full raw textarea remains secondary drilldown. Share desktop is raw two-column, so any remaining complaint should be tested as perceived full-workbench composition rather than literal mobile stacking."
+    "interpretation": "Default Documents and Share cockpits are live-closed for raw height/overflow. Selected editor/detail has field-level landing, while full raw textarea starts below the first viewport and remains an open drilldown/readability issue. Share desktop is raw two-column, so any remaining complaint should be tested as perceived full-workbench composition rather than literal mobile stacking."
   },
   "workspaceIaLiveF67Refinement": {
     "checkedAt": "2026-07-21T14:26:21.1708333+09:00",

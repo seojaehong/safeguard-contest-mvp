@@ -5,12 +5,12 @@ Checked at: 2026-07-21 21:20 KST
 ## Current Split Verdict
 
 - `/workspace` default Documents cockpit: PASS on current live evidence. The raw page-height problem is closed for the default cockpit.
-- `/workspace` selected editor/detail: PASS for field-level landing, but NOT a full short raw-editor claim. The first risk-row header and hazard field are visible immediately; the raw textarea/full long-form body remains secondary drilldown.
+- `/workspace` selected editor/detail: SPLIT. Field-summary landing is PASS because the first risk-row header and hazard field are visible immediately, but raw textarea/detail landing remains OPEN because the full long-form textarea starts below the first viewport.
 - `/workspace` Share desktop raw geometry: PASS as a two-column workbench by selector width/x-range. If users still perceive a narrow mobile-like card, treat that as a visual composition follow-up, not a raw layout failure.
 - `/workspace` Share mobile default flow: PASS for compact summary, preview, primary CTA, and collapsed detail controls inside the first viewport.
 - `/dispatch` standalone sample shell: PASS for desktop two-region geometry and mobile compact shell; generated/live provider dispatch remains separate.
 
-This ledger intentionally does not mark frontend as globally perfect. Current live evidence closes the default Documents/Share cockpit height issues and the selected editor field-level landing issue. Remaining UX debt is deeper full-document authoring, raw textarea/editor drilldown readability, and optional Share desktop full-workbench visual refinement if reproduced in the user-seen session.
+This ledger intentionally does not mark frontend as globally perfect. Current live evidence closes the default Documents/Share cockpit height issues and the selected editor field-summary landing issue. It does not close selected editor/detail as a whole: raw textarea/editor drilldown readability remains OPEN, along with deeper full-document authoring and optional Share desktop full-workbench visual refinement if reproduced in the user-seen session.
 
 ## Current Deployment And Structure Note
 
@@ -22,12 +22,12 @@ Latest current evidence represented by this ledger:
 - Latest checked live marker for selected editor landing: `ee52fff0be8d7a0007f1a23a5eec9f662e75aff9`
 - Latest report-refresh source marker before this ledger update: `ee52fff0be8d7a0007f1a23a5eec9f662e75aff9`
 
-Interpretation: the user's refined reading is correct. The default Documents cockpit and Share cockpit are no longer best described as stale or raw long-page failures. The remaining Documents complaint belongs to selected editor/detail depth: the first meaningful risk-row field is now visible, while the full raw textarea is intentionally below the first work surface. The remaining Share complaint, if reproduced, should be tested as perceived desktop workbench composition rather than as a literal one-column/mobile-stack geometry failure.
+Interpretation: the user's refined reading is correct. The default Documents cockpit and Share cockpit are no longer best described as stale or raw long-page failures. The remaining Documents complaint belongs to selected editor/detail depth: the first meaningful risk-row field/summary is now visible, while the full raw textarea starts below the first viewport and stays OPEN as a drilldown/readability issue. The remaining Share complaint, if reproduced, should be tested as perceived desktop workbench composition rather than as a literal one-column/mobile-stack geometry failure.
 
 Latest live geometry refresh at `e1ae6667f70144d72da94b175d72045713748898` keeps that split:
 
 - `/workspace` Documents default cockpit: desktop-short `723/723`, mobile `844/844`, workbench bottoms `710/786`, `visibleDocumentPreviews=0`, overflow `0`.
-- `/workspace` selected editor/detail: field-level landing remains green, but raw textarea remains secondary below the first viewport: desktop-short risk row header `522-579`, hazard field `615-675`, raw textarea `1094-1267`; mobile risk row header `526-583`, hazard field `607-657`, raw textarea `987-1160`.
+- `/workspace` selected editor/detail: field-level landing remains green, but raw textarea/detail landing remains open: desktop-short risk row header `522-579`, hazard field `615-675`, raw textarea `1094-1267`; mobile risk row header `526-583`, hazard field `607-657`, raw textarea `987-1160`.
 - `/workspace` Share: desktop is raw two-column geometry, not a literal mobile stack: desktop-short form/preview widths `636/520`, CTA bottom `389`, preview bottom `571`; mobile is compact first-viewport flow with preview/CTA bottoms `683/742`.
 
 The remaining structural contract is still:
