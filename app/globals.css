@@ -16983,38 +16983,47 @@ body:has(.safeclaw-landing) :is(
 }
 
 @media (max-width: 720px) {
+  .command-center-shell.workspace-page-document,
   .command-center-shell.workspace-page-share {
     padding-bottom: 0;
   }
 
+  .command-center-shell.workspace-page-document .linear-workspace-layout,
+  .command-center-shell.workspace-page-document .command-viewport,
   .command-center-shell.workspace-page-share .linear-workspace-layout,
   .command-center-shell.workspace-page-share .command-viewport {
     min-height: 0;
     height: auto;
   }
 
+  .command-center-shell:has(.workspace-document-page) .command-main,
   .command-center-shell:has(.workspace-share-page) .command-main {
     padding-top: 14px;
     padding-bottom: 8px;
   }
 
+  .command-center-shell:has(.workspace-document-page) .workspace-step-page,
   .command-center-shell:has(.workspace-share-page) .workspace-step-page {
     width: min(100% - 20px, 1180px);
   }
 
+  .command-center-shell:has(.workspace-document-page) .workspace-side-nav,
   .command-center-shell:has(.workspace-share-page) .workspace-side-nav {
     padding: 8px;
   }
 
+  .command-center-shell:has(.workspace-document-page) .workspace-side-group:first-child,
   .command-center-shell:has(.workspace-share-page) .workspace-side-group:first-child {
     gap: 6px;
     padding: 8px;
   }
 
+  .command-center-shell:has(.workspace-document-page) .workspace-side-group:first-child > span,
   .command-center-shell:has(.workspace-share-page) .workspace-side-group:first-child > span {
     display: none;
   }
 
+  .command-center-shell:has(.workspace-document-page) .workspace-side-group:first-child button,
   .command-center-shell:has(.workspace-share-page) .workspace-side-group:first-child button {
     min-height: 44px;
     padding: 8px;

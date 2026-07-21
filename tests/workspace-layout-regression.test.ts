@@ -1834,6 +1834,97 @@ describe("workspace layout regression", () => {
     expect(await page.locator(".document-workbench").count()).toBe(1);
   }, 90_000);
 
+  it("keeps the generated documents review cockpit before full editor drilldown", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    const sample = buildSampleWorkpack();
+    await page.addInitScript(() => {
+      window.localStorage.setItem("safeclaw.aiMode", "template");
+    });
+    await page.route("**/api/weather?**", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, weather: null })
+      });
+    });
+    await page.route("**/api/ask", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(sample)
+      });
+    });
+
+    await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-windy&theme=day`, { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: /안전 문서 생성/ }).click();
+    await page.locator(".workspace-document-page").waitFor({ state: "visible", timeout: 60_000 });
+    await page.getByText(/12\/12 생성|안전 문서팩 3종 준비 완료/u).first().waitFor({ timeout: 60_000 });
+
+    const metrics = await page.evaluate(async () => {
+      await document.fonts.ready;
+      await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      const rect = (selector: string) => {
+        const element = document.querySelector<HTMLElement>(selector);
+        if (!element) throw new Error(`Missing documents cockpit target: ${selector}`);
+        const box = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        return {
+          top: Math.round(box.top),
+          bottom: Math.round(box.bottom),
+          left: Math.round(box.left),
+          right: Math.round(box.right),
+          width: Math.round(box.width),
+          height: Math.round(box.height),
+          display: style.display,
+        };
+      };
+      const visible = (selector: string) => Array.from(document.querySelectorAll<HTMLElement>(selector)).filter((element) => {
+        const box = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        return box.width > 0 && box.height > 0 && style.display !== "none" && style.visibility !== "hidden";
+      }).length;
+      const outside = Array.from(document.querySelectorAll<HTMLElement>("body *")).filter((element) => {
+        const box = element.getBoundingClientRect();
+        return box.width > 0 && box.height > 0 && (box.left < -1 || box.right > window.innerWidth + 1);
+      }).length;
+      const deepReview = document.querySelector<HTMLDetailsElement>(".document-deep-review");
+      return {
+        viewportHeight: window.innerHeight,
+        viewportWidth: window.innerWidth,
+        bodyHeight: document.documentElement.scrollHeight,
+        scrollWidth: document.documentElement.scrollWidth,
+        outside,
+        workbench: rect(".document-workbench"),
+        safetyBrief: rect(".safety-brief-dashboard"),
+        riskEditCta: rect(".safety-brief-edit-action"),
+        shareCta: rect(".safety-brief-share-action"),
+        provenanceSummary: rect(".document-provenance-drawer > summary"),
+        deepReviewSummary: rect(".document-deep-review > summary"),
+        visibleDocumentPreviews: visible(".document-preview-pane"),
+        deepReviewOpen: Boolean(deepReview?.open),
+        safetyBriefText: document.querySelector(".safety-brief-dashboard")?.textContent?.replace(/\s+/gu, " ").trim() || "",
+        secondaryText: document.querySelector(".document-secondary-actions")?.textContent?.replace(/\s+/gu, " ").trim() || "",
+      };
+    });
+
+    expect(metrics.bodyHeight).toBeLessThanOrEqual(Math.ceil(metrics.viewportHeight * 1.05));
+    expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewportWidth + 1);
+    expect(metrics.outside).toBe(0);
+    expect(metrics.workbench.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
+    expect(metrics.safetyBrief.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
+    expect(metrics.riskEditCta.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
+    expect(metrics.shareCta.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
+    expect(metrics.provenanceSummary.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
+    expect(metrics.deepReviewSummary.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
+    expect(metrics.deepReviewOpen).toBe(false);
+    expect(metrics.visibleDocumentPreviews).toBe(0);
+    expect(metrics.safetyBriefText).toContain("핵심 위험");
+    expect(metrics.safetyBriefText).toContain("위험성평가");
+    expect(metrics.secondaryText).toContain("근거");
+    expect(metrics.secondaryText).toContain("문서 깊게 보기");
+  }, 90_000);
+
   it("preserves edited workpack through reload, concurrent revalidation, and responsive share gating", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
