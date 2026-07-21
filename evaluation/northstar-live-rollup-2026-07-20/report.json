@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-20T22:01:25.038Z",
-  "head": "bd78d47bab789ceb486a939f16b93d694d33aea6",
+  "generatedAt": "2026-07-21T02:25:20.916Z",
+  "head": "0a43fd1ed8362fc344c724c806da3f43f3855d6e",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "addae84665db7435759163ebdac777a1e5ac5864",
+    "commitSha": "0a43fd1ed8362fc344c724c806da3f43f3855d6e",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-oojgnlugi-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-jkrrczda7-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -36,8 +36,8 @@
     {
       "id": "ui_documents_share_cockpit",
       "state": "proven",
-      "artifact": "evaluation\\documents-field-first-affordance-2026-07-21\\report.json",
-      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch."
+      "artifact": "evaluation\\share-desktop-short-cockpit-2026-07-21\\report.json",
+      "detail": "Production evidence closes /documents mobile raw height, exact one-viewport Documents review cockpit, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, and mobile Share exact 844px viewport containment. It does not claim provider live dispatch."
     },
     {
       "id": "dispatch_standalone_cockpit",
@@ -98,7 +98,7 @@
   },
   "workspaceGeometry": {
     "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-    "productionCommit": "560dc6ad50aad22c89f7a7f7b56f3ac1b67d95f2",
+    "productionCommit": "0ccefc5745147b136939214df0aabf28dcfb1d4a",
     "mobileDocumentDeepReviewOpen": false,
     "mobileVisibleDocumentPreviews": 0
   },
@@ -133,22 +133,22 @@
     ]
   },
   "kosha": {
-    "artifact": "evaluation\\kosha-current-northstar-regression-2026-07-21\\report.json",
-    "verdict": "PASS",
+    "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
+    "verdict": "pass_current_kosha_exact_trust_and_corpus_gate",
     "exactPins": [
-      "D-C-13-2026",
-      "D-C-7-2026",
-      "B-E-10-2026"
+      "D-C-13",
+      "D-C-7",
+      "B-E-10"
     ],
-    "localCorpusItems": null
+    "localCorpusItems": 234
   },
   "evidence": [
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "bd78d47bab789ceb486a939f16b93d694d33aea6",
-      "sourceStatus": "exact",
-      "productionCommit": "bd78d47bab789ceb486a939f16b93d694d33aea6",
+      "sourceCommit": "2ff7f35f3855b0e864e7bd5cdd1820804d8227a3",
+      "sourceStatus": "ancestor",
+      "productionCommit": "2ff7f35f3855b0e864e7bd5cdd1820804d8227a3",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -169,11 +169,11 @@
     },
     {
       "id": "kosha_exact_trust_registry",
-      "artifact": "evaluation\\kosha-current-northstar-regression-2026-07-21\\report.json",
-      "sourceCommit": "aedc3d4b607af8316b5d9276b6cd6a49c1bb2488",
-      "sourceStatus": "ancestor",
-      "productionCommit": null,
-      "productionStatus": "missing"
+      "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
+      "sourceCommit": "0a43fd1ed8362fc344c724c806da3f43f3855d6e",
+      "sourceStatus": "exact",
+      "productionCommit": "0a43fd1ed8362fc344c724c806da3f43f3855d6e",
+      "productionStatus": "matches_live"
     },
     {
       "id": "rls_llm_wiki_approval_preflight",
@@ -212,7 +212,7 @@
       "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
       "sourceCommit": null,
       "sourceStatus": "missing",
-      "productionCommit": "560dc6ad50aad22c89f7a7f7b56f3ac1b67d95f2",
+      "productionCommit": "0ccefc5745147b136939214df0aabf28dcfb1d4a",
       "productionStatus": "ancestor_of_head"
     },
     {

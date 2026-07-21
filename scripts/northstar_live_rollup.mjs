@@ -18,7 +18,7 @@ const ARTIFACTS = Object.freeze({
   final99: path.join("evaluation", "final-99-gate-current-2026-07-21", "report.json"),
   final99NoticeCarry: path.join("evaluation", "final-99-gate-current-2026-07-21", "notice-carry.json"),
   liveHarness: path.join("evaluation", "live-harness-quality-probe-current-2026-07-20", "report.json"),
-  kosha: path.join("evaluation", "kosha-current-northstar-regression-2026-07-21", "report.json"),
+  kosha: path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json"),
   rlsWiki: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
   sifEmbedding: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
   liveCritical: path.join("evaluation", "live-critical-surface-current-2026-07-20-rerun", "report.json"),
