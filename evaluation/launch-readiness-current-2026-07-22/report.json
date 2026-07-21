@@ -1,10 +1,10 @@
 {
   "schemaVersion": "safeclaw-launch-readiness-current/v2",
-  "generatedAt": "2026-07-21T23:26:43.140Z",
+  "generatedAt": "2026-07-21T23:32:22.649Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceCommit": "daba5722be2d0b504b6a4552ea9c39efcb77499f",
-  "productionCommit": "daba5722be2d0b504b6a4552ea9c39efcb77499f",
-  "runtimeSmokeCommit": "daba5722be2d0b504b6a4552ea9c39efcb77499f",
+  "sourceCommit": "9e6f06bfbbf5236923e1fcc53ee661bbfe6cc029",
+  "productionCommit": "9e6f06bfbbf5236923e1fcc53ee661bbfe6cc029",
+  "runtimeSmokeCommit": "9e6f06bfbbf5236923e1fcc53ee661bbfe6cc029",
   "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
   "safeLaunchDemoClaimAllowed": true,
   "guidedPilotClaimAllowed": true,
@@ -15,7 +15,7 @@
   "apiAsk": {
     "status": 200,
     "ok": true,
-    "elapsedMs": 21198
+    "elapsedMs": 20380
   },
   "scenario": {
     "companyName": "도시가스공사",
@@ -133,9 +133,9 @@
     "overall": "pass_with_notice",
     "noticeCount": 2,
     "runtimeSmokeCommit": "6a95c23ffc57542f6a9a9aa14612b3466127a0ad",
-    "evidenceCommit": "daba5722be2d0b504b6a4552ea9c39efcb77499f",
+    "evidenceCommit": "9e6f06bfbbf5236923e1fcc53ee661bbfe6cc029",
     "fullyAutomatedLaunchClaimAllowed": false,
-    "note": "Final-99 was executed against production 6a95c23f before later evidence-only refreshes; this launch audit smoke was executed after production advanced to daba5722."
+    "note": "Final-99 was executed against production 6a95c23f before later evidence-only refreshes; this launch audit smoke was executed after production advanced to 9e6f06bf."
   },
   "northstarOverall": "open",
   "uiVerdict": "IA_BLOCKER_REFINED_CURRENT_LIVE",
@@ -167,10 +167,10 @@
     ]
   },
   "productionBuild": {
-    "commitSha": "daba5722be2d0b504b6a4552ea9c39efcb77499f",
+    "commitSha": "9e6f06bfbbf5236923e1fcc53ee661bbfe6cc029",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-9nwo6exjv-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-kjq1ca1on-seojaehongs-projects.vercel.app"
   },
   "connectedSurfaces": [
     "Law.go / korean-law-mcp: 연결됨",
