@@ -1,9 +1,10 @@
 {
   "schemaVersion": 1,
   "gate": "share-desktop-short-cockpit-2026-07-21",
-  "verdict": "PASS_CURRENT_SOURCE",
-  "checkedAt": "2026-07-21T01:47:56.705Z",
+  "verdict": "PASS_LIVE_PRODUCTION",
+  "checkedAt": "2026-07-21T01:54:10.526Z",
   "sourceHead": "91190690e1d8984fda7f81933fd3db693f0492a3",
+  "evidenceHead": "abba06e3de862267c3aff417bfb6628ea46f7f75",
   "providerDispatchLiveClaimed": false,
   "routeSplitAloneAcceptedAsFix": false,
   "contract": {
@@ -72,6 +73,32 @@
         "horizontalOverflow": 0,
         "outsideHorizontalElements": 0
       }
+    },
+    "liveProductionGeometry": {
+      "command": "SAFECLAW_BASE_URL=https://www.safeclaw.kr node evaluation\\workspace-docs-share-production-gate-2026-07-20\\run-current-geometry-probe.mjs",
+      "build": {
+        "commitSha": "abba06e3de862267c3aff417bfb6628ea46f7f75",
+        "branch": "master",
+        "environment": "production",
+        "deploymentUrl": "safeguard-contest-3vwmz532n-seojaehongs-projects.vercel.app"
+      },
+      "share": {
+        "bodyHeight": 750,
+        "viewportHeight": 723,
+        "heightRatio": 1.04,
+        "shareRootTop": 195,
+        "shareRootBottom": 750,
+        "shareFormBottom": 689,
+        "shareTargetCardBottom": 535,
+        "shareLanguageCardBottom": 535,
+        "shareChannelCardBottom": 689,
+        "sharePreviewLeft": 781,
+        "sharePreviewWidth": 520,
+        "sharePreviewBottom": 605,
+        "primaryCtaBottom": 389,
+        "horizontalOverflow": 0,
+        "outsideHorizontalElements": 0
+      }
     }
   },
   "checks": [
@@ -105,7 +132,6 @@
     }
   ],
   "remainingDebt": [
-    "Live production promotion is pending until /api/build-info advances past the product commit and live geometry is rerun.",
     "Provider live dispatch remains approval-gated and is not claimed.",
     "Exact bodyHeight <= viewport is not claimed for long translated message fixtures; the preview content is retained in a bounded scroll area."
   ]

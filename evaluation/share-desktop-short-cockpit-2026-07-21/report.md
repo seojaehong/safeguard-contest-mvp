@@ -1,8 +1,9 @@
 # Share Desktop-Short Cockpit Evidence
 
-- Verdict: `PASS_CURRENT_SOURCE`
+- Verdict: `PASS_LIVE_PRODUCTION`
 - Source commit: `91190690e1d8984fda7f81933fd3db693f0492a3`
-- Checked at: `2026-07-21T01:47:56.705Z`
+- Evidence commit: `abba06e3de862267c3aff417bfb6628ea46f7f75`
+- Checked at: `2026-07-21T01:54:10.526Z`
 - Scope: `/workspace` Share cockpit at desktop-short `1440x723`, plus regression coverage for ordinary desktop and mobile.
 
 ## Product Contract
@@ -54,6 +55,22 @@ The retained Vietnamese message text can extend the document scroll metric, so t
 - horizontal overflow: `0`
 - outside horizontal elements: `0`
 
+### Live Production Geometry Probe
+
+`SAFECLAW_BASE_URL=https://www.safeclaw.kr node evaluation\workspace-docs-share-production-gate-2026-07-20\run-current-geometry-probe.mjs`
+
+- live `/api/build-info`: `abba06e3de862267c3aff417bfb6628ea46f7f75`
+- `share bodyHeight`: `750 / 723 = 1.04x`
+- `shareRoot`: top `195`, height `555`, bottom `750`
+- `shareForm`: bottom `689`
+- `shareTargetCard`: bottom `535`
+- `shareLanguageCard`: bottom `535`
+- `shareChannelCard`: bottom `689`
+- `sharePreview`: left `781`, width `520`, bottom `605`
+- `primary CTA`: bottom `389`
+- horizontal overflow: `0`
+- outside horizontal elements: `0`
+
 ## Verification Commands
 
 - `npm.cmd test -- tests\workspace-share-simplification.test.ts --maxWorkers=1 --fileParallelism=false` -> PASS, 1 file / 11 tests
@@ -65,7 +82,7 @@ The retained Vietnamese message text can extend the document scroll metric, so t
 
 ## Remaining Boundaries
 
-- This is current-source/local-production evidence, not live-production promotion.
+- This is live-production evidence for commit `abba06e3de862267c3aff417bfb6628ea46f7f75`.
 - Mobile Documents and Share exact viewport gates remain separately live-proven from prior waves.
 - The Share desktop-short body is reduced and first-viewport task surfaces are bounded, but a generated user-specific live session can still require separate reproduction if the user reports a stale or unusual saved state.
 - Provider live dispatch remains unclaimed and approval-gated.
