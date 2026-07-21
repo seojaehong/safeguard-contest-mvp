@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-21T23:40:16.702Z
-Source HEAD at generation: 57f0d42533dba15c9cd3f6e5c7d08e40b23ee313
-Live commit at generation: 57f0d42533dba15c9cd3f6e5c7d08e40b23ee313
+Generated at: 2026-07-21T23:44:14.276Z
+Source HEAD at generation: ab87eca2949e10a0df10c993c76a01ad6cc8eada
+Live commit at generation: ab87eca2949e10a0df10c993c76a01ad6cc8eada
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -51,7 +51,7 @@ Overall: `northstar_open_approval_gated`
 | sif_embedding_preflight | ancestor | missing | evaluation\sif-embedding-gate\approval-preflight-report.json |
 | live_critical_surface | ancestor | ancestor_of_head | evaluation\live-critical-surface-current-2026-07-20-rerun\report.json |
 | mobile_p0_workspace | ancestor | ancestor_of_head | evaluation\mobile-p0-workspace-gate-2026-07-20\report.json |
-| workspace_docs_share_geometry | exact | matches_live | evaluation\workspace-docs-share-production-gate-2026-07-20\current-geometry.json |
+| workspace_docs_share_geometry | ancestor | ancestor_of_head | evaluation\workspace-docs-share-production-gate-2026-07-20\current-geometry.json |
 | dispatch_standalone_cockpit | ancestor | ancestor_of_head | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
 | provider_dispatch_persistence | ancestor | ancestor_of_head | evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json |
 | northstar_approval_runway | ancestor | ancestor_of_head | evaluation\northstar-approval-runway-2026-07-21\report.json |
