@@ -19824,7 +19824,16 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .field-workspace.field-workspace-editor-focus .document-editor,
 .command-center-shell.workspace-theme-day .field-workspace.field-workspace-editor-focus .document-editor,
-.command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .document-editor,
+.command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .document-editor {
+  min-height: 0;
+  max-height: calc(100svh - 124px);
+  overflow-y: auto;
+}
+
+.command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .document-editor.editor-focus-cue {
+  overflow: visible;
+}
+
 .command-center-shell .field-workspace.field-workspace-editor-focus .workpack-sidebar,
 .command-center-shell.workspace-theme-day .field-workspace.field-workspace-editor-focus .workpack-sidebar,
 .command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .workpack-sidebar {
