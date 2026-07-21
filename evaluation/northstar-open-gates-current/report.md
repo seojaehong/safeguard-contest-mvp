@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-21T05:45:12.937Z
-Source SHA: `5591d2662e6d5207e18e320c99d1cbea0c4dc1b4`
+Generated at: 2026-07-21T10:59:18.761Z
+Source SHA: `3c667f9301291c768393b237b950017f2f1beed8`
 Overall: `open`
 
 ## Gate Matrix
@@ -10,7 +10,7 @@ Overall: `open`
 | --- | --- | --- | --- |
 | final_99_gate | notice | evaluation\final-99-gate-current-2026-07-21\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate-current-2026-07-21\notice-carry.json. |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json | Live harness probe passed with zero failed contracts. |
-| ui_documents_share_cockpit | proven | evaluation\workspace-ia-live-f67-2026-07-21\report.json | Production evidence closes default /workspace Documents and Share cockpits, /documents mobile raw height, exact one-viewport Documents review cockpit, selected-document context/summary layers, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, and mobile Share exact 844px viewport containment. Latest IA refinement still carries selected editor/detail landing as OPEN and treats desktop Share perceived narrow-card composition as a follow-up; it does not claim provider live dispatch. |
+| ui_documents_share_cockpit | proven | evaluation\workspace-editor-detail-landing-2026-07-21\report.json | Production evidence closes default /workspace Documents and Share cockpits, /documents mobile raw height, exact one-viewport Documents review cockpit, selected-document context/summary layers, selected editor/detail field-level risk-row landing, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, and mobile Share exact 844px viewport containment. Latest IA refinement still keeps raw textarea/full long-form editing as secondary drilldown and treats desktop Share perceived narrow-card composition as a follow-up; it does not claim provider live dispatch. |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json | Production /dispatch seeded desktop and sample shell routes are no longer mobile-stacked: seeded pageHeight 1116 (1.24x), sample panels 635px/413px in distinct desktop regions, overflow false/outside 0. |
 | share_result_fixture_cockpit | proven | evaluation\share-result-drilldown-2026-07-21\report.json | Generated provider-result fixture proof is bounded: desktop page 900/900, result panel 606px with 2 x-ranges, mobile summary/preview/CTA/result inside 844px, closed summary shows channel status, dispatch POST count 1, provider live dispatch unclaimed. |
 | supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Read-only RLS approval preflight passed at source SHA f7090e45107cbb7e1a8f4ec3d2c90b2c055035b9, but live RLS catalog and tenant A/B isolation are not proven. |
@@ -39,7 +39,7 @@ Overall: `open`
 
 - final_99_gate: Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment.
 - ui_documents_share_cockpit: Keep the production live geometry recorded for default Documents/Share cockpits and 12-document cockpit slices; do not expand them into a full 12-document field-first authoring claim.
-- ui_documents_share_cockpit: Add a selected editor/detail landing gate before claiming the document edit surface itself feels short.
+- ui_documents_share_cockpit: Keep raw textarea and deeper row/all-document authoring as secondary drilldown follow-up; do not claim the full document edit surface itself is short.
 - ui_documents_share_cockpit: Keep /share generated-result and perceived full-workbench refinements as separate gates when user-visible sessions reproduce the complaint.
 - dispatch_standalone_cockpit: Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved.
 - share_result_fixture_cockpit: Keep real provider dispatch gated until persistent idempotency and provider-result persistence are approved and live verified.

@@ -1,13 +1,13 @@
 {
-  "checkedAt": "2026-07-21T05:24:46.237Z",
+  "checkedAt": "2026-07-21T10:59:16.730Z",
   "build": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f67a63286251b1e4611b4234c0059be043f80f8e",
+    "commitSha": "d66536560659571afba9671a63644d5610ab30d2",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-24dhkemui-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-igq2pqa59-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "inputText": "서울 성수동 외벽 도장 작업, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보. 이동식 비계와 자재 양중 동선 확인 필요.",
@@ -114,6 +114,13 @@
         "documentDeepReviewOpen": false,
         "visibleDocumentPreviews": 0,
         "documentEditor": null,
+        "documentToolbar": null,
+        "documentFieldStrip": null,
+        "documentSectionActions": null,
+        "riskRowsEditor": null,
+        "firstRiskRowHeader": null,
+        "firstRiskHazardField": null,
+        "firstRiskRowHeaderText": "",
         "documentTextarea": null,
         "sharePage": null,
         "shareRoot": null,
@@ -166,6 +173,49 @@
           "h": 599,
           "bottom": 695
         },
+        "documentToolbar": {
+          "x": 443,
+          "y": 113,
+          "w": 850,
+          "h": 82,
+          "bottom": 195
+        },
+        "documentFieldStrip": {
+          "x": 443,
+          "y": 1002,
+          "w": 850,
+          "h": 48,
+          "bottom": 1050
+        },
+        "documentSectionActions": {
+          "x": 443,
+          "y": 1050,
+          "w": 850,
+          "h": 44,
+          "bottom": 1094
+        },
+        "riskRowsEditor": {
+          "x": 443,
+          "y": 355,
+          "w": 850,
+          "h": 581,
+          "bottom": 936
+        },
+        "firstRiskRowHeader": {
+          "x": 456,
+          "y": 522,
+          "w": 824,
+          "h": 57,
+          "bottom": 579
+        },
+        "firstRiskHazardField": {
+          "x": 456,
+          "y": 615,
+          "w": 824,
+          "h": 60,
+          "bottom": 675
+        },
+        "firstRiskRowHeaderText": "01외벽 도장 작업추락 · 위험등급 high · 근거 2건 · 확인 확인 예정×",
         "documentTextarea": {
           "x": 443,
           "y": 1094,
@@ -260,6 +310,13 @@
         "documentDeepReviewOpen": false,
         "visibleDocumentPreviews": 0,
         "documentEditor": null,
+        "documentToolbar": null,
+        "documentFieldStrip": null,
+        "documentSectionActions": null,
+        "riskRowsEditor": null,
+        "firstRiskRowHeader": null,
+        "firstRiskHazardField": null,
+        "firstRiskRowHeaderText": "",
         "documentTextarea": null,
         "sharePage": {
           "x": 130,
@@ -437,6 +494,13 @@
         "documentDeepReviewOpen": false,
         "visibleDocumentPreviews": 0,
         "documentEditor": null,
+        "documentToolbar": null,
+        "documentFieldStrip": null,
+        "documentSectionActions": null,
+        "riskRowsEditor": null,
+        "firstRiskRowHeader": null,
+        "firstRiskHazardField": null,
+        "firstRiskRowHeaderText": "",
         "documentTextarea": null,
         "sharePage": null,
         "shareRoot": null,
@@ -489,6 +553,49 @@
           "h": 776,
           "bottom": 839
         },
+        "documentToolbar": {
+          "x": 499,
+          "y": 80,
+          "w": 738,
+          "h": 104,
+          "bottom": 184
+        },
+        "documentFieldStrip": {
+          "x": 499,
+          "y": 991,
+          "w": 738,
+          "h": 48,
+          "bottom": 1039
+        },
+        "documentSectionActions": {
+          "x": 499,
+          "y": 1039,
+          "w": 738,
+          "h": 44,
+          "bottom": 1083
+        },
+        "riskRowsEditor": {
+          "x": 499,
+          "y": 343,
+          "w": 738,
+          "h": 581,
+          "bottom": 925
+        },
+        "firstRiskRowHeader": {
+          "x": 512,
+          "y": 510,
+          "w": 712,
+          "h": 57,
+          "bottom": 567
+        },
+        "firstRiskHazardField": {
+          "x": 512,
+          "y": 604,
+          "w": 712,
+          "h": 60,
+          "bottom": 664
+        },
+        "firstRiskRowHeaderText": "01외벽 도장 작업추락 · 위험등급 high · 근거 2건 · 확인 확인 예정×",
         "documentTextarea": {
           "x": 499,
           "y": 1083,
@@ -583,6 +690,13 @@
         "documentDeepReviewOpen": false,
         "visibleDocumentPreviews": 0,
         "documentEditor": null,
+        "documentToolbar": null,
+        "documentFieldStrip": null,
+        "documentSectionActions": null,
+        "riskRowsEditor": null,
+        "firstRiskRowHeader": null,
+        "firstRiskHazardField": null,
+        "firstRiskRowHeaderText": "",
         "documentTextarea": null,
         "sharePage": {
           "x": 130,
@@ -760,6 +874,13 @@
         "documentDeepReviewOpen": false,
         "visibleDocumentPreviews": 0,
         "documentEditor": null,
+        "documentToolbar": null,
+        "documentFieldStrip": null,
+        "documentSectionActions": null,
+        "riskRowsEditor": null,
+        "firstRiskRowHeader": null,
+        "firstRiskHazardField": null,
+        "firstRiskRowHeaderText": "",
         "documentTextarea": null,
         "sharePage": null,
         "shareRoot": null,
@@ -812,6 +933,49 @@
           "h": 748,
           "bottom": 818
         },
+        "documentToolbar": {
+          "x": 40,
+          "y": 83,
+          "w": 310,
+          "h": 125,
+          "bottom": 208
+        },
+        "documentFieldStrip": {
+          "x": 40,
+          "y": 895,
+          "w": 310,
+          "h": 48,
+          "bottom": 943
+        },
+        "documentSectionActions": {
+          "x": 40,
+          "y": 943,
+          "w": 310,
+          "h": 44,
+          "bottom": 987
+        },
+        "riskRowsEditor": {
+          "x": 40,
+          "y": 352,
+          "w": 310,
+          "h": 493,
+          "bottom": 845
+        },
+        "firstRiskRowHeader": {
+          "x": 47,
+          "y": 526,
+          "w": 296,
+          "h": 57,
+          "bottom": 583
+        },
+        "firstRiskHazardField": {
+          "x": 47,
+          "y": 607,
+          "w": 296,
+          "h": 50,
+          "bottom": 657
+        },
+        "firstRiskRowHeaderText": "01외벽 도장 작업추락 · 위험등급 high · 근거 2건 · 확인 확인 예정×",
         "documentTextarea": {
           "x": 40,
           "y": 987,
@@ -906,6 +1070,13 @@
         "documentDeepReviewOpen": false,
         "visibleDocumentPreviews": 0,
         "documentEditor": null,
+        "documentToolbar": null,
+        "documentFieldStrip": null,
+        "documentSectionActions": null,
+        "riskRowsEditor": null,
+        "firstRiskRowHeader": null,
+        "firstRiskHazardField": null,
+        "firstRiskRowHeaderText": "",
         "documentTextarea": null,
         "sharePage": {
           "x": 27,

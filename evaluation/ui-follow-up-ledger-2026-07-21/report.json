@@ -94,6 +94,47 @@
       "desktop Share follow-up should judge full-workbench perception, not raw two-column existence"
     ]
   },
+  "workspaceEditorDetailLandingRefinement": {
+    "checkedAt": "2026-07-21T14:55:06+09:00",
+    "artifact": "evaluation/workspace-editor-detail-landing-2026-07-21/report.json",
+    "productionMarker": "d66536560659571afba9671a63644d5610ab30d2",
+    "verdict": "PASS_LIVE_PRODUCTION_FIELD_LEVEL",
+    "routeSplitAloneAcceptedAsFix": false,
+    "providerDispatchLiveClaimed": false,
+    "selectedEditorFieldLevelLandingProven": true,
+    "fullRawTextareaVisibilityClaimed": false,
+    "desktopShort1440x723": {
+      "viewportHeight": 723,
+      "editorBodyHeight": 882,
+      "firstRiskRowHeaderTop": 522,
+      "firstRiskRowHeaderBottom": 579,
+      "firstRiskHazardFieldTop": 615,
+      "firstRiskHazardFieldBottom": 675,
+      "documentTextareaTop": 1094,
+      "documentTextareaBottom": 1267
+    },
+    "desktop1440x900": {
+      "viewportHeight": 900,
+      "editorBodyHeight": 1129,
+      "firstRiskRowHeaderTop": 510,
+      "firstRiskRowHeaderBottom": 567,
+      "firstRiskHazardFieldTop": 604,
+      "firstRiskHazardFieldBottom": 664,
+      "documentTextareaTop": 1083,
+      "documentTextareaBottom": 1256
+    },
+    "mobile390x844": {
+      "viewportHeight": 844,
+      "editorBodyHeight": 1067,
+      "firstRiskRowHeaderTop": 526,
+      "firstRiskRowHeaderBottom": 583,
+      "firstRiskHazardFieldTop": 607,
+      "firstRiskHazardFieldBottom": 657,
+      "documentTextareaTop": 987,
+      "documentTextareaBottom": 1160
+    },
+    "remainingDebt": "raw textarea and full long-form editing remain secondary drilldown; do not claim the full document edit surface is globally short"
+  },
   "liveGeometryRecheckAfterShortcutDeploy": {
     "productionMarker": "552424531ae1bd9f6219cc27431509f4494e22e1",
     "documentsDesktop1440x723": {

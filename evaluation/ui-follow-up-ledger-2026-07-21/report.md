@@ -307,6 +307,21 @@ Share nuance:
 
 Interpretation: current live evidence closes the default cockpit page-height issue. It does not close selected document editor/detail landing or every perceived Share composition concern. Route/page split alone remains rejected as a sufficient fix; the required structure is step split plus first-viewport cockpit plus bounded drilldown/detail.
 
+## 2026-07-21 Workspace Editor Detail Landing Refinement
+
+Live production field-level proof:
+
+- Artifact: `evaluation/workspace-editor-detail-landing-2026-07-21/report.md`
+- Live marker: `d66536560659571afba9671a63644d5610ab30d2`
+- The previous selected-editor blocker was too broad if it was judged only by raw textarea position.
+- Current live `/workspace` editor/detail still has a long raw textarea below the viewport, but the first meaningful risk-row work surface is visible immediately:
+  - Desktop short `1440x723`: first risk row header `522-579`, first hazard field `615-675`, raw textarea `1094-1267`.
+  - Desktop `1440x900`: first risk row header `510-567`, first hazard field `604-664`, raw textarea `1083-1256`.
+  - Mobile `390x844`: first risk row header `526-583`, first hazard field `607-657`, raw textarea `987-1160`.
+- Row header text includes `근거` and `확인`, so evidence/recheck context is present in the first visible work surface.
+
+Interpretation: selected document editor/detail field-level landing is production-proven. The remaining debt is not "the user cannot find the first editable risk field"; it is that full raw textarea/long-form editing remains a secondary long drilldown. Do not claim the full document edit surface is globally short.
+
 ## 2026-07-21 Dispatch Sample Shell Update
 
 Current-source bounded gate:

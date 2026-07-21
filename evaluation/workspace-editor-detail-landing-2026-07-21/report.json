@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "gate": "workspace-editor-detail-landing-2026-07-21",
+  "verdict": "PASS_LIVE_PRODUCTION_FIELD_LEVEL",
+  "checkedAt": "2026-07-21T14:55:06+09:00",
+  "liveCommitChecked": "d66536560659571afba9671a63644d5610ab30d2",
+  "routeSplitAloneAcceptedAsFix": false,
+  "providerDispatchLiveClaimed": false,
+  "fullRawTextareaVisibilityClaimed": false,
+  "selectedEditorFieldLevelLandingProven": true,
+  "longRawTextareaRemainsSecondary": true,
+  "liveMetrics": {
+    "desktopShort1440x723": {
+      "viewportHeight": 723,
+      "editorBodyHeight": 882,
+      "documentEditorBottom": 695,
+      "toolbarTop": 113,
+      "toolbarBottom": 195,
+      "firstRiskRowHeaderTop": 522,
+      "firstRiskRowHeaderBottom": 579,
+      "firstRiskHazardFieldTop": 615,
+      "firstRiskHazardFieldBottom": 675,
+      "documentTextareaTop": 1094,
+      "documentTextareaBottom": 1267,
+      "rowHeaderTextContainsEvidence": true,
+      "rowHeaderTextContainsVerification": true
+    },
+    "desktop1440x900": {
+      "viewportHeight": 900,
+      "editorBodyHeight": 1129,
+      "documentEditorBottom": 839,
+      "toolbarTop": 80,
+      "toolbarBottom": 184,
+      "firstRiskRowHeaderTop": 510,
+      "firstRiskRowHeaderBottom": 567,
+      "firstRiskHazardFieldTop": 604,
+      "firstRiskHazardFieldBottom": 664,
+      "documentTextareaTop": 1083,
+      "documentTextareaBottom": 1256,
+      "rowHeaderTextContainsEvidence": true,
+      "rowHeaderTextContainsVerification": true
+    },
+    "mobile390x844": {
+      "viewportHeight": 844,
+      "editorBodyHeight": 1067,
+      "documentEditorBottom": 818,
+      "toolbarTop": 83,
+      "toolbarBottom": 208,
+      "firstRiskRowHeaderTop": 526,
+      "firstRiskRowHeaderBottom": 583,
+      "firstRiskHazardFieldTop": 607,
+      "firstRiskHazardFieldBottom": 657,
+      "documentTextareaTop": 987,
+      "documentTextareaBottom": 1160,
+      "rowHeaderTextContainsEvidence": true,
+      "rowHeaderTextContainsVerification": true
+    }
+  },
+  "acceptance": {
+    "riskRowHeaderInsideViewport": true,
+    "firstHazardFieldInsideViewport": true,
+    "rowHeaderShowsEvidenceAndVerification": true,
+    "textareaSecondaryBelowFirstWorkSurface": true,
+    "backendProviderExportContractsTouched": false
+  },
+  "remainingDebt": [
+    "full raw textarea visibility is not claimed",
+    "deeper row editing and all-document authoring depth remain product follow-up",
+    "Share perceived full-workbench composition remains separate if reproduced"
+  ]
+}

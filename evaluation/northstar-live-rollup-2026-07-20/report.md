@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-21T05:45:15.409Z
-Source HEAD at generation: 5591d2662e6d5207e18e320c99d1cbea0c4dc1b4
-Live commit at generation: 647b4d945125bddfaa07cbfb5f5e3f64c1f81dce
+Generated at: 2026-07-21T10:59:19.080Z
+Source HEAD at generation: 3c667f9301291c768393b237b950017f2f1beed8
+Live commit at generation: d66536560659571afba9671a63644d5610ab30d2
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -30,7 +30,7 @@ Overall: `northstar_open_approval_gated`
 | --- | --- | --- |
 | final_99_gate | notice | evaluation\final-99-gate-current-2026-07-21\report.json |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
-| ui_documents_share_cockpit | proven | evaluation\workspace-ia-live-f67-2026-07-21\report.json |
+| ui_documents_share_cockpit | proven | evaluation\workspace-editor-detail-landing-2026-07-21\report.json |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
 | share_result_fixture_cockpit | proven | evaluation\share-result-drilldown-2026-07-21\report.json |
 | kosha_exact_trust_registry | proven | evaluation\kosha-current-northstar-regression-2026-07-21\report.json |
@@ -50,7 +50,7 @@ Overall: `northstar_open_approval_gated`
 | sif_embedding_preflight | ancestor | missing | evaluation\sif-embedding-gate\approval-preflight-report.json |
 | live_critical_surface | missing | ancestor_of_head | evaluation\live-critical-surface-current-2026-07-20-rerun\report.json |
 | mobile_p0_workspace | missing | ancestor_of_head | evaluation\mobile-p0-workspace-gate-2026-07-20\report.json |
-| workspace_docs_share_geometry | missing | ancestor_of_head | evaluation\workspace-docs-share-production-gate-2026-07-20\current-geometry.json |
+| workspace_docs_share_geometry | missing | matches_live | evaluation\workspace-docs-share-production-gate-2026-07-20\current-geometry.json |
 | dispatch_standalone_cockpit | ancestor | ancestor_of_head | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
 
 ## Carried Notices
