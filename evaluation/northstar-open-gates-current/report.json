@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-21T01:36:49.293Z",
-  "sourceSha": "3670420e88ee3130073c38721d120521e6fe8894",
+  "generatedAt": "2026-07-21T02:00:34.246Z",
+  "sourceSha": "f43e520916cbd1cdf718ee7695f5de758f8dcdcb",
   "overall": "open",
   "gates": [
     {
@@ -26,8 +26,8 @@
       "id": "ui_documents_share_cockpit",
       "state": "proven",
       "label": "Documents and Share cockpit UI",
-      "evidencePath": "evaluation\\documents-mobile-exact-cockpit-2026-07-21\\report.json",
-      "detail": "Production evidence closes /documents mobile raw height, exact one-viewport Documents review cockpit, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, and mobile Share exact 844px viewport containment. It does not claim provider live dispatch.",
+      "evidencePath": "evaluation\\share-desktop-short-cockpit-2026-07-21\\report.json",
+      "detail": "Production evidence closes /documents mobile raw height, exact one-viewport Documents review cockpit, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, and mobile Share exact 844px viewport containment. It does not claim provider live dispatch.",
       "nextActions": [
         "Keep the production live geometry recorded for the exact Documents review cockpit and 12-document cockpit slices; do not expand them into a full 12-document field-first authoring claim.",
         "Keep /share generated-result refinements as a separate gate when user-visible sessions reproduce the complaint."
