@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T14:48:02.353Z",
-  "head": "7567576b96057e9be3a3a9adf43a0c143af6d011",
+  "generatedAt": "2026-07-21T14:52:50.200Z",
+  "head": "2d990e180e5c8d46ee35ec64f714dd008cd1aac3",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "7567576b96057e9be3a3a9adf43a0c143af6d011",
+    "commitSha": "2d990e180e5c8d46ee35ec64f714dd008cd1aac3",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-bpr7r2q9h-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-geqy2a649-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -81,7 +81,7 @@
       "id": "sif_embedding_runtime",
       "state": "approval_gated",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 8a72abe1d80e7058a8a7074bf70894ee9edf7532."
+      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 7567576b96057e9be3a3a9adf43a0c143af6d011."
     }
   ],
   "mobileP0": {
@@ -151,7 +151,7 @@
   "final99": {
     "artifact": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
     "overall": "pass_with_notice",
-    "productionCommit": "a95439b4422f3422fd1f22266c24ef5a0de6cfa6",
+    "productionCommit": "2d990e180e5c8d46ee35ec64f714dd008cd1aac3",
     "noticeCarry": [
       {
         "gate": "auth-history-reuse",
@@ -181,18 +181,18 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "a95439b4422f3422fd1f22266c24ef5a0de6cfa6",
+      "sourceCommit": "7567576b96057e9be3a3a9adf43a0c143af6d011",
       "sourceStatus": "ancestor",
-      "productionCommit": "a95439b4422f3422fd1f22266c24ef5a0de6cfa6",
+      "productionCommit": "7567576b96057e9be3a3a9adf43a0c143af6d011",
       "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
       "artifact": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
-      "sourceCommit": "a95439b4422f3422fd1f22266c24ef5a0de6cfa6",
-      "sourceStatus": "ancestor",
-      "productionCommit": "a95439b4422f3422fd1f22266c24ef5a0de6cfa6",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "2d990e180e5c8d46ee35ec64f714dd008cd1aac3",
+      "sourceStatus": "exact",
+      "productionCommit": "2d990e180e5c8d46ee35ec64f714dd008cd1aac3",
+      "productionStatus": "matches_live"
     },
     {
       "id": "live_harness_quality",
@@ -222,7 +222,7 @@
       "id": "sif_embedding_preflight",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
       "sourceCommit": "7567576b96057e9be3a3a9adf43a0c143af6d011",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },
@@ -269,10 +269,10 @@
     {
       "id": "northstar_approval_runway",
       "artifact": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
-      "sourceCommit": "a95439b4422f3422fd1f22266c24ef5a0de6cfa6",
-      "sourceStatus": "ancestor",
-      "productionCommit": "a95439b4422f3422fd1f22266c24ef5a0de6cfa6",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "2d990e180e5c8d46ee35ec64f714dd008cd1aac3",
+      "sourceStatus": "exact",
+      "productionCommit": "2d990e180e5c8d46ee35ec64f714dd008cd1aac3",
+      "productionStatus": "matches_live"
     }
   ],
   "contradictions": [],

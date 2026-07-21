@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-07-21T14:41:32.878Z",
+  "generatedAt": "2026-07-21T14:52:27.614Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "commit": "a95439b4",
-  "sourceCommit": "a95439b4422f3422fd1f22266c24ef5a0de6cfa6",
+  "commit": "2d990e18",
+  "sourceCommit": "2d990e180e5c8d46ee35ec64f714dd008cd1aac3",
   "productionBuild": {
     "ok": true,
     "status": 200,
-    "commitSha": "a95439b4422f3422fd1f22266c24ef5a0de6cfa6",
+    "commitSha": "2d990e180e5c8d46ee35ec64f714dd008cd1aac3",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-9ugg131q1-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-geqy2a649-seojaehongs-projects.vercel.app"
   },
   "overall": "pass_with_notice",
-  "elapsedMs": 80712,
+  "elapsedMs": 83168,
   "gates": [
     {
       "name": "ask-orchestration",
@@ -88,7 +88,7 @@
       "count": 6,
       "message": "KOSHA 오프라인 보조근거와 Supabase 안전 지식 DB에서 참고자료를 조회했습니다. 공식 KOSHA 정확 본문 번들로 partial DB 본문을 대체했습니다."
     },
-    "textPreview": "[보완 제안: 강풍 대비 및 신규 투입자 교육] - 강풍 예보 시 작업 전 반드시 풍속 확인 및 작업중지 기준을 작업반장에게 재공지한다. - 신규 투입자 포함 모든 작업자 대상 오늘 작업 위험요인과 보호구 착용, 강풍 시 행동수칙 안전보건교육을 완료한다. - 이동식 비계 사용 시 바퀴 잠금, 아웃트리거 설치 및 안전난간 점검을 작업 시작 전 반드시 수행한다. - 지게차 동선 인접 작업 구간에 신호수 배치와 보행자 접근 금지 표시를 확인 및 기록한다. - 작업 종료 후 TBM 회의에서 작업 상태와 강풍에 따른 조치 이행 상황을 기록하여 보관한다. 확인자/근거 확인: 작업 반장 및 안전관리자가 교육 이수 확인과 TBM 회의록 작성으로 조치 완료 여부 점검. 근거: 이동식 비계 안전조치 및 강풍 작업중지 기준 현장 적용 기록 반영.",
+    "textPreview": "[보완 제안: 위험성평가 및 TBM·안전보건교육 기록 강화] - 작업 시작 전 이동식 비계 작업발판, 안전난간, 바퀴 잠금, 아웃트리거 상태를 반드시 점검하고 기록할 것 - 신규 투입자 대상 작업 특성, 보호구 착용, 추락 및 강풍 작업중지 기준에 관한 안전보건교육을 실시하고 교육 기록을 작성할 것 - 강풍 등 기상악화 시 작업중지 기준을 명확히 안내하고 현장 TBM에서 재확인할 것 - 지게차와 작업자 동선 분리를 위해 신호수 배치 및 접근금지 표시를 점검하고 TBM 및 위험성평가에 반영할 것 - 오늘 작업에 맞춘 위험성평가 결과와 TBM, 안전보건교육 기록은 작업반장과 관리감독자가 확인·서명할 것 확인자/근거확인: 작업반장 및 관리감독자의 서명·기록 내역 검토 / 이동식 비계 상태 점검기록, TBM 브리핑, 교육 실시 확인서 반영 근거",
     "sourceCount": 5,
     "policy": "AI 보완은 자동 덮어쓰기가 아니라 제안, 사용자 편집, 삽입 흐름으로만 인정합니다."
   },
