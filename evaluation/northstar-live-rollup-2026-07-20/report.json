@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T02:27:26.779Z",
-  "head": "fd5b8a3e1531d464db5ffa05000f2e4d7961c0d5",
+  "generatedAt": "2026-07-21T02:40:24.847Z",
+  "head": "9992f23aa4c32b6eb29cf9798650e3a5ee1a8cb8",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "fd5b8a3e1531d464db5ffa05000f2e4d7961c0d5",
+    "commitSha": "9992f23aa4c32b6eb29cf9798650e3a5ee1a8cb8",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-br44bvy3t-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-gsrxvdvy9-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -75,7 +75,7 @@
       "id": "sif_embedding_runtime",
       "state": "approval_gated",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 4dd391e1ed773469627fe81bebe0f8a250766373."
+      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 9992f23aa4c32b6eb29cf9798650e3a5ee1a8cb8."
     }
   ],
   "mobileP0": {
@@ -98,7 +98,7 @@
   },
   "workspaceGeometry": {
     "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-    "productionCommit": "0ccefc5745147b136939214df0aabf28dcfb1d4a",
+    "productionCommit": "293a6d3f47124b937c663531ffe48ed8650837c8",
     "mobileDocumentDeepReviewOpen": false,
     "mobileVisibleDocumentPreviews": 0
   },
@@ -146,9 +146,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "fd5b8a3e1531d464db5ffa05000f2e4d7961c0d5",
+      "sourceCommit": "9992f23aa4c32b6eb29cf9798650e3a5ee1a8cb8",
       "sourceStatus": "exact",
-      "productionCommit": "fd5b8a3e1531d464db5ffa05000f2e4d7961c0d5",
+      "productionCommit": "9992f23aa4c32b6eb29cf9798650e3a5ee1a8cb8",
       "productionStatus": "matches_live"
     },
     {
@@ -179,15 +179,15 @@
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
       "sourceCommit": "fd5b8a3e1531d464db5ffa05000f2e4d7961c0d5",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },
     {
       "id": "sif_embedding_preflight",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "sourceCommit": "4dd391e1ed773469627fe81bebe0f8a250766373",
-      "sourceStatus": "ancestor",
+      "sourceCommit": "9992f23aa4c32b6eb29cf9798650e3a5ee1a8cb8",
+      "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
     },
@@ -212,7 +212,7 @@
       "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
       "sourceCommit": null,
       "sourceStatus": "missing",
-      "productionCommit": "0ccefc5745147b136939214df0aabf28dcfb1d4a",
+      "productionCommit": "293a6d3f47124b937c663531ffe48ed8650837c8",
       "productionStatus": "ancestor_of_head"
     },
     {

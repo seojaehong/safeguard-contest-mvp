@@ -356,6 +356,6 @@ describe("SIF embedding gate status", () => {
     const canonicalFixture = JSON.stringify(canonicalizeMachineFixture(jsonValue));
     const fixtureHash = createHash("sha256").update(canonicalFixture).digest("hex");
 
-    expect(fixtureHash).toBe("c365220706751f69774ff2ecc126b51ce39b216fc6098952881722312fcea8b4");
+    expect(fixtureHash).toBe("290f4cea57f9ce7c72717cdd738a9dbfdb79f2a9b2624385d40623d5a7d09ade");
   });
 });
