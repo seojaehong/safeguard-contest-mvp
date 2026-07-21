@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-launch-readiness-current/v1",
-  "generatedAt": "2026-07-21T17:23:47.496Z",
+  "generatedAt": "2026-07-21T19:23:37.666Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceCommit": "7ec43bf5683bdd19265c23645f3b4a35c6bcced5",
-  "productionCommit": "7ec43bf5683bdd19265c23645f3b4a35c6bcced5",
+  "sourceCommit": "de956e853f5d310f374f55729ace77dcccc57221",
+  "productionCommit": "de956e853f5d310f374f55729ace77dcccc57221",
   "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
   "safeLaunchDemoClaimAllowed": true,
   "guidedPilotClaimAllowed": true,
@@ -14,7 +14,7 @@
   "apiAsk": {
     "status": 200,
     "ok": true,
-    "elapsedMs": 21839
+    "elapsedMs": 19650
   },
   "scenario": {
     "companyName": "도시가스공사",
@@ -87,7 +87,8 @@
     "koshaLiveGate": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
     "providerDispatchReadiness": "evaluation\\provider-dispatch-readiness-2026-07-21\\report.json",
     "sifEmbeddingPreflight": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-    "rlsWikiPreflight": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json"
+    "rlsWikiPreflight": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
+    "approvalRunway": "evaluation\\northstar-approval-runway-2026-07-21\\report.json"
   },
   "approvalGatedBoundaries": [
     {
