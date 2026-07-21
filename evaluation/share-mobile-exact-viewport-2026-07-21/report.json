@@ -1,0 +1,135 @@
+{
+  "verdict": "PASS_LIVE_PRODUCTION",
+  "sourceCommit": "be254e5d45806c79fba960449c54302dfcab9901",
+  "evidenceCommitAtVerification": "963b24e92d121359ca90505478da40131ccc876e",
+  "productionLiveClaimed": true,
+  "providerDispatchLiveClaimed": false,
+  "routeSplitAloneAcceptedAsFix": false,
+  "localBuildInfo": {
+    "commitSha": "be254e5d45806c79fba960449c54302dfcab9901",
+    "branch": "master",
+    "environment": "production"
+  },
+  "liveBuildInfo": {
+    "commitSha": "963b24e92d121359ca90505478da40131ccc876e",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-brwzw7e9z-seojaehongs-projects.vercel.app"
+  },
+  "mobile390Day": {
+    "previousLive": {
+      "pageHeight": 980,
+      "viewportHeight": 844,
+      "heightRatio": 1.16,
+      "shareRootBottom": 836,
+      "shareRootHeight": 552,
+      "previewBottom": 648,
+      "primaryBottom": 707,
+      "horizontalOverflow": 0
+    },
+    "currentSource": {
+      "pageHeight": 844,
+      "viewportHeight": 844,
+      "heightRatio": 1,
+      "shareRootBottom": 810,
+      "shareRootHeight": 491,
+      "previewBottom": 683,
+      "primaryBottom": 742,
+      "horizontalOverflow": 0
+    },
+    "liveProduction": {
+      "pageHeight": 844,
+      "viewportHeight": 844,
+      "heightRatio": 1,
+      "shareRootBottom": 810,
+      "shareRootHeight": 491,
+      "summaryBottom": 485,
+      "previewBottom": 683,
+      "primaryBottom": 742,
+      "configToggleBottom": 801,
+      "stageRailDisplay": "none",
+      "configCardDisplays": [
+        "none",
+        "none",
+        "none"
+      ],
+      "horizontalOverflow": 0
+    }
+  },
+  "unchangedSurfaces": {
+    "desktopShare": {
+      "pageHeight": 946,
+      "viewportHeight": 900,
+      "heightRatio": 1.05
+    },
+    "desktopShortShare": {
+      "pageHeight": 946,
+      "viewportHeight": 723,
+      "heightRatio": 1.31
+    },
+    "mobileDocuments": {
+      "pageHeight": 980,
+      "viewportHeight": 844,
+      "heightRatio": 1.16
+    },
+    "mobileEditor": {
+      "pageHeight": 1131,
+      "viewportHeight": 844,
+      "heightRatio": 1.34
+    }
+  },
+  "checks": [
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts -t \"keeps localized worker dispatch previews bounded|keeps generated provider-result details in bounded desktop and mobile drilldown\" --maxWorkers=1 --fileParallelism=false --hookTimeout=180000",
+      "result": "PASS",
+      "files": 1,
+      "testsPassed": 1,
+      "testsSkipped": 3
+    },
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts -t \"keeps generated provider-result details in bounded desktop and mobile drilldown\" --maxWorkers=1 --fileParallelism=false --hookTimeout=180000",
+      "result": "PASS",
+      "files": 1,
+      "testsPassed": 1,
+      "testsSkipped": 3
+    },
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-simplification.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "testsPassed": 11
+    },
+    {
+      "command": "npm.cmd run build",
+      "result": "PASS",
+      "staticPages": 28
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    },
+    {
+      "command": "SAFECLAW_BASE_URL=http://127.0.0.1:3050 node evaluation\\workspace-docs-share-production-gate-2026-07-20\\run-current-geometry-probe.mjs",
+      "result": "PASS"
+    },
+    {
+      "command": "node evaluation\\workspace-docs-share-production-gate-2026-07-20\\run-current-geometry-probe.mjs",
+      "result": "PASS_LIVE_PRODUCTION",
+      "baseUrl": "https://www.safeclaw.kr"
+    },
+    {
+      "command": "live Playwright thin DOM probe for /workspace?share 390x844",
+      "result": "PASS_LIVE_PRODUCTION",
+      "assertions": {
+        "pageHeightEqualsViewport": true,
+        "stageRailHidden": true,
+        "configCardsCollapsed": true,
+        "summaryPreviewPrimaryAndToggleInsideViewport": true,
+        "horizontalOverflowClosed": true
+      }
+    }
+  ],
+  "remainingDebt": [
+    "Provider live dispatch remains outside this gate."
+  ]
+}

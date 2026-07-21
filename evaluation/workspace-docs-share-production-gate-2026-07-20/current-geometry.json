@@ -1,13 +1,13 @@
 {
-  "checkedAt": "2026-07-21T01:01:40.007Z",
+  "checkedAt": "2026-07-21T01:12:33.520Z",
   "build": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "3b86df0135f54076d93a91c119c8c4237c43ed2a",
+    "commitSha": "963b24e92d121359ca90505478da40131ccc876e",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-71wswsdau-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-brwzw7e9z-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "inputText": "서울 성수동 외벽 도장 작업, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보. 이동식 비계와 자재 양중 동선 확인 필요.",
@@ -883,7 +883,7 @@
         "body": {
           "width": 390,
           "clientWidth": 390,
-          "height": 980,
+          "height": 844,
           "clientHeight": 844,
           "overflowX": false
         },
@@ -909,31 +909,31 @@
         "documentTextarea": null,
         "sharePage": {
           "x": 27,
-          "y": 284,
+          "y": 319,
           "w": 336,
-          "h": 552,
-          "bottom": 836
+          "h": 491,
+          "bottom": 810
         },
         "shareRoot": {
           "x": 27,
-          "y": 284,
+          "y": 319,
           "w": 336,
-          "h": 552,
-          "bottom": 836
+          "h": 491,
+          "bottom": 810
         },
         "shareMobileSummary": {
           "x": 36,
-          "y": 402,
+          "y": 437,
           "w": 318,
           "h": 48,
-          "bottom": 450
+          "bottom": 485
         },
         "shareForm": {
           "x": 36,
-          "y": 654,
+          "y": 689,
           "w": 318,
           "h": 62,
-          "bottom": 716
+          "bottom": 751
         },
         "shareTargetCard": {
           "x": 0,
@@ -958,24 +958,24 @@
         },
         "sharePreview": {
           "x": 36,
-          "y": 456,
+          "y": 491,
           "w": 318,
           "h": 192,
-          "bottom": 648
+          "bottom": 683
         },
         "primaryShareCta": {
           "x": 45,
-          "y": 663,
+          "y": 698,
           "w": 300,
           "h": 44,
-          "bottom": 707
+          "bottom": 742
         },
         "primaryShareCtas": 1,
         "stickyLike": [
           {
             "selector": "command-actions share-primary-action-row",
             "position": "sticky",
-            "y": 654,
+            "y": 689,
             "h": 62
           }
         ]

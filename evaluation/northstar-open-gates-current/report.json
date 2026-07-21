@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-21T01:08:44.501Z",
-  "sourceSha": "be254e5d45806c79fba960449c54302dfcab9901",
+  "generatedAt": "2026-07-21T01:13:59.378Z",
+  "sourceSha": "963b24e92d121359ca90505478da40131ccc876e",
   "overall": "open",
   "gates": [
     {
@@ -26,11 +26,11 @@
       "id": "ui_documents_share_cockpit",
       "state": "proven",
       "label": "Documents and Share cockpit UI",
-      "evidencePath": "evaluation\\share-mobile-stage-rail-collapse-2026-07-21\\report.json",
-      "detail": "Production evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, and provider-result summary inside the first viewport. It does not claim provider live dispatch.",
+      "evidencePath": "evaluation\\share-mobile-exact-viewport-2026-07-21\\report.json",
+      "detail": "Production evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, and mobile Share exact 844px viewport containment. It does not claim provider live dispatch.",
       "nextActions": [
         "Keep the production live geometry recorded for the 12-document cockpit slice; do not expand it into a full 12-document field-first authoring claim.",
-        "Keep /share generated-result and exact one-viewport mobile Share improvements as separate gates when user-visible sessions reproduce the complaint."
+        "Keep /share generated-result refinements as a separate gate when user-visible sessions reproduce the complaint."
       ]
     },
     {
