@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-launch-readiness-current/v1",
-  "generatedAt": "2026-07-21T17:08:53.335Z",
+  "generatedAt": "2026-07-21T17:23:47.496Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceCommit": "a626aca46740df20a356486cb84f8355bcb17ace",
-  "productionCommit": "a626aca46740df20a356486cb84f8355bcb17ace",
+  "sourceCommit": "7ec43bf5683bdd19265c23645f3b4a35c6bcced5",
+  "productionCommit": "7ec43bf5683bdd19265c23645f3b4a35c6bcced5",
   "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
   "safeLaunchDemoClaimAllowed": true,
   "guidedPilotClaimAllowed": true,
@@ -14,7 +14,7 @@
   "apiAsk": {
     "status": 200,
     "ok": true,
-    "elapsedMs": 22195
+    "elapsedMs": 21839
   },
   "scenario": {
     "companyName": "도시가스공사",
@@ -78,10 +78,11 @@
   ],
   "currentEvidence": {
     "rawAudit": "evaluation\\launch-readiness-current-2026-07-22\\api-connection-audit.json",
-    "final99": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
+    "final99Gate": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
     "northstarOpenGates": "evaluation\\northstar-open-gates-current\\report.json",
     "northstarLiveRollup": "evaluation\\northstar-live-rollup-2026-07-20\\report.json",
     "uiCockpitEvidence": "evaluation\\workspace-ia-live-64e-2026-07-22\\report.json",
+    "workspaceIaRecommendation": "evaluation\\workspace-information-architecture-2026-07-21\\report.json",
     "koshaRegression": "evaluation\\kosha-current-northstar-regression-2026-07-21\\report.json",
     "koshaLiveGate": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
     "providerDispatchReadiness": "evaluation\\provider-dispatch-readiness-2026-07-21\\report.json",

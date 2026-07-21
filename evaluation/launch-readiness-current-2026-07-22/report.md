@@ -1,10 +1,10 @@
 # Launch Readiness Current Boundary
 
-Generated: 2026-07-21T17:08:53.335Z
+Generated: 2026-07-21T17:23:47.496Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source / production commit: `a626aca46740df20a356486cb84f8355bcb17ace`
+Source / production commit: `7ec43bf5683bdd19265c23645f3b4a35c6bcced5`
 
 ## Verdict
 
@@ -17,7 +17,7 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 `scripts/launch_readiness_audit.mjs` was run against production with `SAFETYGUARD_AUDIT_DISPATCH=false`.
 
 - `/api/ask`: 200 OK
-- elapsed: 22195 ms
+- elapsed: 21839 ms
 - dispatch call: not run
 - generated documents: 11 / 11
 - scenario: `도시가스공사 열수송관 굴착공사`, workers 7
@@ -65,6 +65,7 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 - North Star open gates: `evaluation\northstar-open-gates-current\report.json`
 - North Star live rollup: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - UI cockpit evidence: `evaluation\workspace-ia-live-64e-2026-07-22\report.json`
+- Workspace IA recommendation: `evaluation\workspace-information-architecture-2026-07-21\report.json`
 - KOSHA regression: `evaluation\kosha-current-northstar-regression-2026-07-21\report.json`
 - KOSHA live gate: `evaluation\kosha-current-live-gate-2026-07-20\report.json`
 - Provider dispatch readiness: `evaluation\provider-dispatch-readiness-2026-07-21\report.json`
