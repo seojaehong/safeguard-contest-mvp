@@ -1678,6 +1678,24 @@ describe("documents editor layout", () => {
         title: "비상대응 절차",
         cockpitTestId: "emergency-document-cockpit",
         requiredText: ["비상대응 cockpit", "즉시 중지 기준", "보고 역할", "현장보존"]
+      },
+      {
+        key: "photoEvidenceDraft",
+        title: "사진/증빙",
+        cockpitTestId: "photo-document-cockpit",
+        requiredText: ["사진·증빙 cockpit", "촬영 우선순위", "보관 확인", "연결 근거"]
+      },
+      {
+        key: "foreignWorkerTransmission",
+        title: "외국인 근로자 전송본",
+        cockpitTestId: "transmission-document-cockpit",
+        requiredText: ["전송 cockpit", "언어 대상", "전송 전 확인", "미리보기 핵심"]
+      },
+      {
+        key: "kakaoMessage",
+        title: "현장 공유 메시지",
+        cockpitTestId: "transmission-document-cockpit",
+        requiredText: ["전송 cockpit", "전송 채널", "공유 · 복창", "미리보기 핵심"]
       }
     ] as const;
 

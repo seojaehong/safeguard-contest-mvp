@@ -387,6 +387,14 @@ function isEmergencyDocumentKey(key: DocumentKey) {
   return key === "emergencyResponseDraft";
 }
 
+function isPhotoEvidenceDocumentKey(key: DocumentKey) {
+  return key === "photoEvidenceDraft";
+}
+
+function isTransmissionDocumentKey(key: DocumentKey) {
+  return key === "foreignWorkerTransmission" || key === "kakaoMessage";
+}
+
 function compactList(items: readonly string[], fallback: string, limit: number) {
   const compacted = items.map((item) => item.trim()).filter(Boolean);
   return (compacted.length ? compacted : [fallback]).slice(0, limit);
@@ -625,6 +633,132 @@ function EmergencyDocumentCockpit({ data, documentKey }: { data: AskResponse; do
             <li>추가 접근 통제와 2차 위험 확인</li>
             <li>사진·TBM·조치 기록을 같은 문서팩에 보관</li>
             <li>{data.riskSummary.immediateActions[0] || "재발방지 조치 담당자 지정"}</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PhotoEvidenceDocumentCockpit({ data, documentKey }: { data: AskResponse; documentKey: DocumentKey }) {
+  if (!isPhotoEvidenceDocumentKey(documentKey)) return null;
+  const evidenceTargets = compactList(
+    [
+      data.riskSummary.topRisk,
+      ...data.riskSummary.immediateActions,
+      "TBM 참석·교육 확인"
+    ],
+    "작업 전·후 사진과 조치 확인",
+    3
+  );
+  const capturePlan = compactList(
+    [
+      "작업 전 위험구역·보호구·통제 상태",
+      "조치 후 개선상태·표지·차단 확인",
+      "TBM·교육 참석 또는 모바일 기록"
+    ],
+    "작업 전·후 사진과 확인자 기록",
+    3
+  );
+  const storageSignals = compactList(
+    [
+      "파일명에 공종·일자·위치 포함",
+      "문서팩·작업일지·모바일 앱 보관 위치 기록",
+      "확인자와 재점검 필요 여부 표시"
+    ],
+    "증빙 보관 위치와 확인자 기록",
+    3
+  );
+
+  return (
+    <section className={styles.tbmCockpit} data-testid="photo-document-cockpit" aria-label="사진 증빙 진행 요약">
+      <div className={styles.tbmCockpitHeader}>
+        <div>
+          <span className="eyebrow">사진·증빙 cockpit</span>
+          <strong>촬영 · 보관 · 연결 근거</strong>
+        </div>
+        <span>{data.scenario.siteName} · {data.scenario.workerCount.toLocaleString("ko-KR")}명</span>
+      </div>
+      <div className={styles.tbmCockpitGrid}>
+        <article>
+          <b>촬영 우선순위</b>
+          <strong>{evidenceTargets[0]}</strong>
+          <small>{capturePlan[0]}</small>
+        </article>
+        <article>
+          <b>보관 확인</b>
+          <strong>문서팩과 현장 기록 위치 연결</strong>
+          <small>{storageSignals[0]}</small>
+        </article>
+      </div>
+      <div className={styles.tbmCockpitColumns}>
+        <div>
+          <b>촬영 항목</b>
+          <ol>
+            {capturePlan.map((item) => <li key={item}>{item}</li>)}
+          </ol>
+        </div>
+        <div>
+          <b>연결 근거</b>
+          <ol>
+            {storageSignals.map((item) => <li key={item}>{item}</li>)}
+          </ol>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TransmissionDocumentCockpit({ data, documentKey }: { data: AskResponse; documentKey: DocumentKey }) {
+  if (!isTransmissionDocumentKey(documentKey)) return null;
+  const isForeignTransmission = documentKey === "foreignWorkerTransmission";
+  const languages = compactList(
+    data.deliverables.foreignWorkerLanguages.map((language) => `${language.label} / ${language.nativeLabel}`),
+    "쉬운 한국어",
+    3
+  );
+  const sourceMessage = isForeignTransmission ? data.deliverables.foreignWorkerTransmission : data.deliverables.kakaoMessage;
+  const messageLines = compactList(
+    sourceMessage.split(/\r?\n/u),
+    data.riskSummary.topRisk,
+    3
+  );
+  const channelFlow = isForeignTransmission
+    ? ["대상 언어 확인", "짧은 전송본 복사", "관리자 확인 후 전파"]
+    : ["단체방 붙여넣기", "TBM에서 다시 읽기", "작업 전 이해 확인"];
+
+  return (
+    <section className={styles.tbmCockpit} data-testid="transmission-document-cockpit" aria-label="전송 진행 요약">
+      <div className={styles.tbmCockpitHeader}>
+        <div>
+          <span className="eyebrow">전송 cockpit</span>
+          <strong>{isForeignTransmission ? "언어 · 대상 · 확인 흐름" : "공유 · 복창 · 시작 전 확인"}</strong>
+        </div>
+        <span>{isForeignTransmission ? `${languages.length.toLocaleString("ko-KR")}개 언어 우선` : "카카오·문자·밴드"}</span>
+      </div>
+      <div className={styles.tbmCockpitGrid}>
+        <article>
+          <b>{isForeignTransmission ? "언어 대상" : "전송 채널"}</b>
+          <strong>{isForeignTransmission ? languages.join(" · ") : "현장 단체방 / 문자"}</strong>
+          <small>{isForeignTransmission ? "최종 발송 전 통역·관리자 확인" : "실제 발송 전 현장 책임자 승인"}</small>
+        </article>
+        <article>
+          <b>핵심 위험</b>
+          <strong>{data.riskSummary.topRisk}</strong>
+          <small>{data.riskSummary.immediateActions[0] || data.scenario.weatherNote}</small>
+        </article>
+      </div>
+      <div className={styles.tbmCockpitColumns}>
+        <div>
+          <b>전송 전 확인</b>
+          <ol>
+            {channelFlow.map((item) => <li key={item}>{item}</li>)}
+          </ol>
+        </div>
+        <div>
+          <b>미리보기 핵심</b>
+          <ol>
+            {messageLines.map((item) => <li key={item}>{item}</li>)}
           </ol>
         </div>
       </div>
@@ -2915,6 +3049,20 @@ export function WorkpackEditor({
       alignPaneTargetBelowToolbar(emergencyCockpitTarget);
       return;
     }
+    const photoCockpitTarget = isPhotoEvidenceDocumentKey(selected.key)
+      ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="photo-document-cockpit"]') || null
+      : null;
+    if (photoCockpitTarget) {
+      alignPaneTargetBelowToolbar(photoCockpitTarget);
+      return;
+    }
+    const transmissionCockpitTarget = isTransmissionDocumentKey(selected.key)
+      ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="transmission-document-cockpit"]') || null
+      : null;
+    if (transmissionCockpitTarget) {
+      alignPaneTargetBelowToolbar(transmissionCockpitTarget);
+      return;
+    }
     const activeSection = Array.from(
       documentBodyRef.current?.querySelectorAll<HTMLElement>("[data-section-id]") || []
     ).find((section) => section.dataset.sectionId === expandedStructuredSectionId) || null;
@@ -2946,6 +3094,14 @@ export function WorkpackEditor({
             || null
         : isEmergencyDocumentKey(selected.key)
           ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="emergency-document-cockpit"]')
+            || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
+            || null
+        : isPhotoEvidenceDocumentKey(selected.key)
+          ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="photo-document-cockpit"]')
+            || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
+            || null
+        : isTransmissionDocumentKey(selected.key)
+          ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="transmission-document-cockpit"]')
             || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
             || null
         : documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
@@ -3582,6 +3738,12 @@ export function WorkpackEditor({
               ) : null}
               {isEmergencyDocumentKey(selected.key) ? (
                 <EmergencyDocumentCockpit data={data} documentKey={selected.key} />
+              ) : null}
+              {isPhotoEvidenceDocumentKey(selected.key) ? (
+                <PhotoEvidenceDocumentCockpit data={data} documentKey={selected.key} />
+              ) : null}
+              {isTransmissionDocumentKey(selected.key) ? (
+                <TransmissionDocumentCockpit data={data} documentKey={selected.key} />
               ) : null}
               {structuredDocument.body.map((section, index) => {
                 const inputId = `document-section-${selected.key}-${index}`;
