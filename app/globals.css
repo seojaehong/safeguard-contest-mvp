@@ -17155,8 +17155,13 @@ body:has(.safeclaw-landing) :is(
   }
 
   .share-panel.workflow-panel {
-    gap: 8px;
-    padding: 12px;
+    max-height: min(552px, calc(100svh - 292px));
+    contain: layout paint;
+    gap: 6px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 8px;
   }
 
   .share-panel.workflow-panel > [data-share-preview] {
@@ -17177,15 +17182,25 @@ body:has(.safeclaw-landing) :is(
 
   .share-panel.workflow-panel > .share-inline-note,
   .share-panel.workflow-panel > .share-readiness-warning {
-    order: 4;
-  }
-
-  .share-panel.workflow-panel > .workflow-result {
     order: 6;
   }
 
-  .share-panel.workflow-panel > .command-actions {
+  .share-panel.workflow-panel > .workflow-result {
     order: 5;
+  }
+
+  .share-panel.workflow-panel:has([data-share-result-drilldown]) > .workflow-result {
+    order: 3;
+    margin-top: -16px;
+  }
+
+  .share-panel.workflow-panel:has([data-share-result-drilldown]) > .share-mobile-config-toggle,
+  .share-panel.workflow-panel:has([data-share-result-drilldown]) > .share-readiness-warning {
+    display: none;
+  }
+
+  .share-panel.workflow-panel > .command-actions {
+    order: 4;
   }
 
   .share-panel.workflow-panel .share-primary-action-row {
@@ -17216,12 +17231,12 @@ body:has(.safeclaw-landing) :is(
     display: grid;
     gap: 2px;
     min-width: 0;
-    min-height: 44px;
+    min-height: 40px;
     align-content: center;
     border: 1px solid var(--share-line);
     border-radius: 4px;
     background: var(--share-surface);
-    padding: 7px 8px;
+    padding: 5px 7px;
   }
 
   .share-mobile-cockpit-summary b {
@@ -17246,7 +17261,7 @@ body:has(.safeclaw-landing) :is(
   }
 
   .share-stage-rail {
-    display: grid;
+    display: none;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
   }
@@ -17300,12 +17315,17 @@ body:has(.safeclaw-landing) :is(
   }
 
   .share-workflow-header {
-    gap: 8px;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .share-workflow-header > div:first-child {
+    gap: 2px;
   }
 
   .share-status-pill {
     min-height: 44px;
-    padding: 8px 10px;
+    padding: 6px 8px;
     gap: 2px;
   }
 
@@ -17332,8 +17352,8 @@ body:has(.safeclaw-landing) :is(
 
   .share-form-card,
   .message-preview-panel {
-    gap: 6px;
-    padding: 9px;
+    gap: 5px;
+    padding: 8px;
   }
 
   .share-panel.workflow-panel .channel-card {
@@ -17349,10 +17369,10 @@ body:has(.safeclaw-landing) :is(
   }
 
   [data-share-preview] .message-preview-lines {
-    max-height: 132px;
+    max-height: 108px;
     overflow: auto;
     gap: 2px;
-    padding-top: 6px;
+    padding-top: 5px;
   }
 
   [data-share-preview] .message-preview-lines p {
