@@ -2,9 +2,9 @@
 
 Verdict: `ROUTE_SPLIT_ALONE_IS_NOT_ENOUGH`
 
-Live commit checked: `7ec43bf5683bdd19265c23645f3b4a35c6bcced5`
+Live commit checked: `8d3ec7c649789bc87a15ceca9d7f2d332be8dfda`
 
-Current source/evidence HEAD at report generation: `57eb02a0302f0cac1758bef17ecd48a19958851d`
+Current source/evidence HEAD at report generation: `8d3ec7c649789bc87a15ceca9d7f2d332be8dfda`
 
 Live geometry artifact: `evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json`
 
@@ -12,7 +12,7 @@ This report answers whether SafeClaw should split the workspace into more pages,
 
 ## Current live geometry
 
-`https://www.safeclaw.kr` now serves runtime commit `7ec43bf5683bdd19265c23645f3b4a35c6bcced5`. The current report/evidence refresh source is `57eb02a0302f0cac1758bef17ecd48a19958851d`; it is an evidence/ledger refresh and does not imply a new UI runtime delta beyond the live geometry probe.
+`https://www.safeclaw.kr` now serves runtime commit `8d3ec7c649789bc87a15ceca9d7f2d332be8dfda`. The current report/evidence refresh source is `8d3ec7c649789bc87a15ceca9d7f2d332be8dfda`; it is an evidence/ledger refresh and does not imply a new UI runtime delta beyond the live geometry probe.
 
 | Viewport | Stage | Page height | Viewport | Ratio | Horizontal overflow | Outside viewport |
 | --- | --- | ---: | ---: | ---: | --- | ---: |

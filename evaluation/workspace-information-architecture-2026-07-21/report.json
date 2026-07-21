@@ -1,7 +1,7 @@
 {
   "verdict": "ROUTE_SPLIT_ALONE_IS_NOT_ENOUGH",
-  "liveCommitChecked": "7ec43bf5683bdd19265c23645f3b4a35c6bcced5",
-  "sourceHeadAtReportGeneration": "57eb02a0302f0cac1758bef17ecd48a19958851d",
+  "liveCommitChecked": "8d3ec7c649789bc87a15ceca9d7f2d332be8dfda",
+  "sourceHeadAtReportGeneration": "8d3ec7c649789bc87a15ceca9d7f2d332be8dfda",
   "liveGeometryArtifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
   "routeSplitAloneAcceptedAsFix": false,
   "recommendedArchitecture": "task route/step split plus first-viewport cockpit plus bounded drilldown/detail panes",
