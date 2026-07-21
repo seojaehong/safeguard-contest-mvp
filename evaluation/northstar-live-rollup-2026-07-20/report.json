@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T05:19:53.989Z",
-  "head": "75da5bba77051b382d6f355bd0cab10a1fd81ace",
+  "generatedAt": "2026-07-21T05:45:15.409Z",
+  "head": "5591d2662e6d5207e18e320c99d1cbea0c4dc1b4",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "75da5bba77051b382d6f355bd0cab10a1fd81ace",
+    "commitSha": "647b4d945125bddfaa07cbfb5f5e3f64c1f81dce",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-3a5dvlivf-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-pwtrprdcn-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -36,8 +36,8 @@
     {
       "id": "ui_documents_share_cockpit",
       "state": "proven",
-      "artifact": "evaluation\\share-desktop-short-cockpit-2026-07-21\\report.json",
-      "detail": "Production evidence closes /documents mobile raw height, exact one-viewport Documents review cockpit, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, and mobile Share exact 844px viewport containment. It does not claim provider live dispatch."
+      "artifact": "evaluation\\workspace-ia-live-f67-2026-07-21\\report.json",
+      "detail": "Production evidence closes default /workspace Documents and Share cockpits, /documents mobile raw height, exact one-viewport Documents review cockpit, selected-document context/summary layers, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, and mobile Share exact 844px viewport containment. Latest IA refinement still carries selected editor/detail landing as OPEN and treats desktop Share perceived narrow-card composition as a follow-up; it does not claim provider live dispatch."
     },
     {
       "id": "dispatch_standalone_cockpit",
@@ -82,12 +82,21 @@
     "artifact": "evaluation\\mobile-p0-workspace-gate-2026-07-20\\report.json",
     "verdict": "MOBILE_FIXED",
     "productionCommit": "928244cb28a575a23d951e621624ea8b014d77a1",
-    "documentsHeightRatio": 1.5,
-    "firstUsefulReviewY": 262,
+    "currentGeometryArtifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
+    "currentGeometryCommit": "f67a63286251b1e4611b4234c0059be043f80f8e",
+    "documentsHeightRatio": 1,
+    "documentsBodyHeight": 844,
+    "documentsViewportHeight": 844,
+    "documentWorkbenchBottom": 786,
+    "firstUsefulReviewY": 294,
     "documentDeepReviewOpen": false,
     "visibleDocumentPreviews": 0,
-    "shareHeightRatio": 1.72,
-    "sharePreviewY": 380,
+    "shareHeightRatio": 1,
+    "shareBodyHeight": 844,
+    "shareViewportHeight": 844,
+    "shareRootBottom": 810,
+    "sharePreviewBottom": 683,
+    "sharePreviewY": 491,
     "hardBlockersClosed": true
   },
   "liveCritical": {
@@ -98,7 +107,7 @@
   },
   "workspaceGeometry": {
     "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-    "productionCommit": "293a6d3f47124b937c663531ffe48ed8650837c8",
+    "productionCommit": "f67a63286251b1e4611b4234c0059be043f80f8e",
     "mobileDocumentDeepReviewOpen": false,
     "mobileVisibleDocumentPreviews": 0
   },
@@ -146,18 +155,18 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "75da5bba77051b382d6f355bd0cab10a1fd81ace",
+      "sourceCommit": "5591d2662e6d5207e18e320c99d1cbea0c4dc1b4",
       "sourceStatus": "exact",
-      "productionCommit": "75da5bba77051b382d6f355bd0cab10a1fd81ace",
-      "productionStatus": "matches_live"
+      "productionCommit": "5591d2662e6d5207e18e320c99d1cbea0c4dc1b4",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
       "artifact": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
       "sourceCommit": "75da5bba77051b382d6f355bd0cab10a1fd81ace",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "75da5bba77051b382d6f355bd0cab10a1fd81ace",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "live_harness_quality",
@@ -212,7 +221,7 @@
       "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
       "sourceCommit": null,
       "sourceStatus": "missing",
-      "productionCommit": "293a6d3f47124b937c663531ffe48ed8650837c8",
+      "productionCommit": "f67a63286251b1e4611b4234c0059be043f80f8e",
       "productionStatus": "ancestor_of_head"
     },
     {
