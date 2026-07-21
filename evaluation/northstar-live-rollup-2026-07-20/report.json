@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T21:38:22.226Z",
-  "head": "dbe9fed5896150ff2977d68303771764f41e82d6",
+  "generatedAt": "2026-07-21T21:44:12.194Z",
+  "head": "a17f3543944b9d234ea1cc691a54c9e47d50a3fd",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "dbe9fed5896150ff2977d68303771764f41e82d6",
+    "commitSha": "a17f3543944b9d234ea1cc691a54c9e47d50a3fd",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-nogtsw82g-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-d0e56duqv-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -55,7 +55,7 @@
       "id": "kosha_exact_trust_registry",
       "state": "proven",
       "artifact": "evaluation\\kosha-current-northstar-regression-2026-07-22\\report.json",
-      "detail": "Current source confirms 3 exact KOSHA pins (D-C-13-2026, D-C-7-2026, B-E-10-2026), structured materialization, grounded generation, and live harness quality: 223 tests plus typecheck PASS; no DB/schema/Supabase/embedding writes."
+      "detail": "Current source confirms 3 exact KOSHA pins (D-C-13-2026, D-C-7-2026, B-E-10-2026), structured materialization, grounded generation, and live harness quality: 226 tests plus typecheck PASS; no DB/schema/Supabase/embedding writes."
     }
   ],
   "approvalGated": [
@@ -182,9 +182,9 @@
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
       "sourceCommit": "dbe9fed5896150ff2977d68303771764f41e82d6",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "dbe9fed5896150ff2977d68303771764f41e82d6",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -206,9 +206,9 @@
       "id": "kosha_exact_trust_registry",
       "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
       "sourceCommit": "dbe9fed5896150ff2977d68303771764f41e82d6",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "dbe9fed5896150ff2977d68303771764f41e82d6",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "rls_llm_wiki_approval_preflight",

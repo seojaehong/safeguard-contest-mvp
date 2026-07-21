@@ -1,6 +1,6 @@
 # SafeClaw Hermes / OpenClaw Runtime Current Gate
 
-Checked at: 2026-07-21T20:36:42.048Z
+Checked at: 2026-07-21T21:43:39.908Z
 
 ## Verdict
 
@@ -10,9 +10,9 @@ Live production runtime execution is still not claimed. The live `/api/agent/cha
 
 ## Authority
 
-- Source SHA for focused tests: `80a8c68891c2b33a09234fe95da597263c747ce6`
-- Production build-info observed during live smoke: `80a8c68891c2b33a09234fe95da597263c747ce6`
-- Live deployment URL: `safeguard-contest-exwnl3a6l-seojaehongs-projects.vercel.app`
+- Source SHA for focused tests: `a17f3543944b9d234ea1cc691a54c9e47d50a3fd`
+- Production build-info observed during live smoke: `a17f3543944b9d234ea1cc691a54c9e47d50a3fd`
+- Live deployment URL: `safeguard-contest-d0e56duqv-seojaehongs-projects.vercel.app`
 - Worktree: `C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\recipient-foreign-live-gate-20260720`
 - Branch: `chore/recipient-foreign-live-gate-20260720`
 
@@ -28,7 +28,7 @@ Result:
 
 - Test files: 13 passed / 13
 - Tests: 289 passed / 289
-- Duration: 14.63s
+- Duration: 13.83s
 
 Live unauthenticated broker smoke:
 
