@@ -35,6 +35,17 @@ The draft creates `provider_dispatch_attempts` as a server-side reservation tabl
 
 This explicitly avoids the legacy `dispatch_logs` anti-patterns identified in the Supabase RLS audit: null-organization reachability, broad owner `FOR ALL`, and child rows that do not prove same-tenant relationships.
 
+## Scope Boundary
+
+This draft is an attempt-level reservation slice. It does not yet prove channel-level exactly-once result persistence.
+
+The current draft stores `channels text[]` and `provider_result jsonb` on one attempt row. Before claiming channel-level exactly-once persistence, a later approved route/migration design must do one of the following:
+
+1. Add a `provider_dispatch_attempt_channels` child table with a unique `(attempt_id, channel)` or `(organization_id, idempotency_key, channel)` contract.
+2. Explicitly define `provider_result` JSONB as the canonical per-channel ledger and add route tests proving reservation-before-provider-call, duplicate replay behavior, and per-channel result retention.
+
+`updated_at` is present in this draft, but no trigger is included. A later applied migration must either add an `updated_at` trigger or require route code to own every status-update timestamp.
+
 ## Required Before Enabling Live Dispatch
 
 1. User approves the migration scope.
@@ -42,8 +53,9 @@ This explicitly avoids the legacy `dispatch_logs` anti-patterns identified in th
 3. Runtime probe confirms table, unique index, forced RLS, policies, and cross-tenant negative cases.
 4. Route changes reserve the idempotency key before calling the provider.
 5. Route changes treat duplicate keys as an existing attempt, not a new provider call.
-6. Provider dry run proves webhook idempotency and retry behavior without unintended real messages.
-7. Only after those gates should `PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED` become true.
+6. Route/migration design proves channel-level result persistence through a child table or canonical JSONB ledger tests.
+7. Provider dry run proves webhook idempotency and retry behavior without unintended real messages.
+8. Only after those gates should `PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED` become true.
 
 ## Non-Actions
 

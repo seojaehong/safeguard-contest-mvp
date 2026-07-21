@@ -11,6 +11,7 @@
   "draftMigration": {
     "path": "evaluation/provider-dispatch-idempotency-gate-2026-07-19/provider-dispatch-idempotency-draft.sql",
     "table": "provider_dispatch_attempts",
+    "scope": "attempt_level_reservation_only",
     "uniqueIndex": "provider_dispatch_attempts_org_idempotency_key_unique",
     "forceRls": true,
     "tenantTupleRequired": [
@@ -30,6 +31,19 @@
       "provider_dispatch_attempts_owner_insert",
       "provider_dispatch_attempts_owner_update"
     ]
+  },
+  "channelResultPersistence": {
+    "channelLevelExactlyOnceProven": false,
+    "currentShape": "channels text[] plus provider_result jsonb on one attempt row",
+    "requiredBeforeClaimingExactlyOnce": [
+      "add provider_dispatch_attempt_channels with unique attempt/channel or organization/idempotency/channel",
+      "or define provider_result jsonb as the canonical per-channel ledger and test reservation-before-provider-call, duplicate replay, and per-channel result retention"
+    ]
+  },
+  "timestampBoundary": {
+    "updatedAtColumnPresent": true,
+    "updatedAtTriggerIncluded": false,
+    "requiredBeforeAppliedMigration": "add an updated_at trigger or require route code to own every status-update timestamp"
   },
   "safetyLocks": {
     "dbMigrationApplied": false,

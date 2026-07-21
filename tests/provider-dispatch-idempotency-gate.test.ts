@@ -14,10 +14,21 @@ const report = JSON.parse(readFileSync(join(artifactDir, "report.json"), "utf8")
     liveDispatchUnlocked: boolean;
   };
   draftMigration: {
+    scope: string;
     table: string;
     uniqueIndex: string;
     forceRls: boolean;
     ownerPolicies: string[];
+  };
+  channelResultPersistence: {
+    channelLevelExactlyOnceProven: boolean;
+    currentShape: string;
+    requiredBeforeClaimingExactlyOnce: string[];
+  };
+  timestampBoundary: {
+    updatedAtColumnPresent: boolean;
+    updatedAtTriggerIncluded: boolean;
+    requiredBeforeAppliedMigration: string;
   };
 };
 
@@ -34,6 +45,7 @@ describe("provider dispatch idempotency approval gate", () => {
 
   it("drafts a persistent idempotency reservation table without applying it as a migration", () => {
     expect(report.draftMigration.table).toBe("provider_dispatch_attempts");
+    expect(report.draftMigration.scope).toBe("attempt_level_reservation_only");
     expect(sql).toContain("create table if not exists provider_dispatch_attempts");
     expect(sql).toContain("organization_id uuid not null references organizations(id) on delete cascade");
     expect(sql).toContain("site_id uuid not null references sites(id) on delete cascade");
@@ -75,5 +87,24 @@ describe("provider dispatch idempotency approval gate", () => {
     expect(sql).toContain("workpack_share_sessions.organization_id = provider_dispatch_attempts.organization_id");
     expect(sql).toContain("workpack_share_sessions.site_id = provider_dispatch_attempts.site_id");
     expect(sql).toContain("workpack_share_sessions.workpack_id = provider_dispatch_attempts.workpack_id");
+  });
+
+  it("does not overclaim channel-level exactly-once result persistence", () => {
+    expect(report.channelResultPersistence.channelLevelExactlyOnceProven).toBe(false);
+    expect(report.channelResultPersistence.currentShape).toContain("provider_result jsonb");
+    expect(report.channelResultPersistence.requiredBeforeClaimingExactlyOnce.join("\n")).toContain("provider_dispatch_attempt_channels");
+    expect(report.channelResultPersistence.requiredBeforeClaimingExactlyOnce.join("\n")).toContain("canonical per-channel ledger");
+    expect(sql).toContain("channels text[] not null default array[]::text[]");
+    expect(sql).toContain("provider_result jsonb not null default '{}'::jsonb");
+    expect(sql).not.toContain("provider_dispatch_attempt_channels");
+  });
+
+  it("keeps updated_at ownership explicit before applying the draft", () => {
+    expect(report.timestampBoundary).toEqual({
+      updatedAtColumnPresent: true,
+      updatedAtTriggerIncluded: false,
+      requiredBeforeAppliedMigration: "add an updated_at trigger or require route code to own every status-update timestamp"
+    });
+    expect(sql).toContain("updated_at timestamptz not null default now()");
   });
 });
