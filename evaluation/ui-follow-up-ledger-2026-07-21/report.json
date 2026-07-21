@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-21T23:06:00+09:00",
+  "checkedAt": "2026-07-21T23:28:43+09:00",
   "verdict": {
     "workspaceDocumentsDefaultCockpit": "PASS_LIVE_DEFAULT_HEIGHT_CLOSED",
     "workspaceSelectedEditorDetail": "SPLIT_FIELD_SUMMARY_PASS_RAW_TEXTAREA_OPEN",
@@ -13,9 +13,9 @@
   "currentDeploymentAndStructureNote": {
     "defaultWorkspaceIaArtifact": "evaluation/workspace-ia-live-293-2026-07-21/report.json",
     "selectedEditorDetailArtifact": "evaluation/workspace-editor-detail-landing-2026-07-21/report.json",
-    "latestRefreshedLiveGeometryMarker": "be64c3b15a8cb55bb132fa065ec485ffb700f652",
-    "selectedEditorLandingLiveMarker": "be64c3b15a8cb55bb132fa065ec485ffb700f652",
-    "latestReportRefreshSourceMarkerBeforeThisLedgerUpdate": "b005b968fb519180fb1f93dbdb434aee07f24f69",
+    "latestRefreshedLiveGeometryMarker": "934e445fa10d6e23c6e133a70ef9586f148b00af",
+    "selectedEditorLandingLiveMarker": "934e445fa10d6e23c6e133a70ef9586f148b00af",
+    "latestReportRefreshSourceMarkerBeforeThisLedgerUpdate": "934e445fa10d6e23c6e133a70ef9586f148b00af",
     "defaultDocumentsAndShareCockpitHeightClosed": true,
     "selectedEditorFieldLevelLandingClosed": true,
     "selectedEditorFieldSummaryLandingClosed": true,
@@ -32,9 +32,9 @@
     ]
   },
   "latestLiveGeometryRefresh": {
-    "checkedAt": "2026-07-21T13:56:14.722Z",
-    "artifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
-    "productionMarker": "be64c3b15a8cb55bb132fa065ec485ffb700f652",
+    "checkedAt": "2026-07-21T14:28:43.373Z",
+    "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
+    "productionMarker": "934e445fa10d6e23c6e133a70ef9586f148b00af",
     "defaultDocumentsCockpitClosed": true,
     "selectedEditorFieldLevelLandingClosed": true,
     "selectedEditorFieldSummaryLandingClosed": true,
@@ -226,7 +226,7 @@
     },
     "documentsMobile390x844": {
       "outerPageHeight": 844,
-      "heightRatio": 1.0,
+      "heightRatio": 1,
       "horizontalOverflow": 0,
       "workpackPaneHeight": 320,
       "workpackPaneScrollHeight": 1294,
@@ -234,7 +234,7 @@
     },
     "dispatchDesktop1440x723": {
       "outerPageHeight": 723,
-      "heightRatio": 1.0,
+      "heightRatio": 1,
       "horizontalOverflow": 0
     },
     "dispatchMobile390x844BeforeCurrentPatch": {
@@ -248,7 +248,10 @@
       "outerPageHeight": 893,
       "heightRatio": 1.06,
       "gridBottom": 845,
-      "samplePanelBottoms": [641, 844],
+      "samplePanelBottoms": [
+        641,
+        844
+      ],
       "horizontalOverflow": 0,
       "providerDispatchLiveClaimed": false
     },
@@ -570,7 +573,10 @@
         "gridHeight": 109,
         "firstPanelWidth": 635,
         "secondPanelWidth": 413,
-        "distinctXBuckets": [280, 960],
+        "distinctXBuckets": [
+          280,
+          960
+        ],
         "horizontalOverflow": 0
       },
       "mobile390x844": {
@@ -589,8 +595,16 @@
       "sharePreviewBottom": 510,
       "primaryShareCtaBottom": 571,
       "configToggleBottom": 632,
-      "configCardDisplays": ["none", "none", "none"],
-      "expandedCardDisplays": ["grid", "grid", "grid"],
+      "configCardDisplays": [
+        "none",
+        "none",
+        "none"
+      ],
+      "expandedCardDisplays": [
+        "grid",
+        "grid",
+        "grid"
+      ],
       "horizontalOverflow": 0
     },
     "independentGeneratedFlow390x844": {
@@ -601,23 +615,49 @@
       "configToggleBottom": 726,
       "configToggleHeight": 44,
       "mobileConfigExpanded": false,
-      "configCardDisplays": ["none", "none", "none"],
-      "configCardHeights": [0, 0, 0],
+      "configCardDisplays": [
+        "none",
+        "none",
+        "none"
+      ],
+      "configCardHeights": [
+        0,
+        0,
+        0
+      ],
       "horizontalOverflow": 0
     },
     "desktopPreservation": {
       "workspacePreviewRightOfPrimary": true,
       "workspaceChannelCards": [
-        { "width": 172, "height": 44 },
-        { "width": 172, "height": 44 },
-        { "width": 172, "height": 44 }
+        {
+          "width": 172,
+          "height": 44
+        },
+        {
+          "width": 172,
+          "height": 44
+        },
+        {
+          "width": 172,
+          "height": 44
+        }
       ],
       "standaloneDispatchRootWidth": 1156,
       "standaloneDispatchPreviewRightOfPrimary": true,
       "standaloneDispatchChannelCards": [
-        { "width": 164, "height": 44 },
-        { "width": 164, "height": 44 },
-        { "width": 164, "height": 44 }
+        {
+          "width": 164,
+          "height": 44
+        },
+        {
+          "width": 164,
+          "height": 44
+        },
+        {
+          "width": 164,
+          "height": 44
+        }
       ]
     }
   },
@@ -627,7 +667,7 @@
     "artifact": "evaluation/documents-mobile-internal-pane-2026-07-21/report.json",
     "documentsMobile390x844": {
       "bodyHeight": 844,
-      "heightRatio": 1.0,
+      "heightRatio": 1,
       "currentWorkStripVisible": true,
       "currentWorkStripBottom": 297,
       "mobileCoreLauncherBottom": 468,
@@ -797,7 +837,9 @@
         "bodyHeight": 844,
         "horizontalOverflow": 0,
         "openSectionCount": 1,
-        "openIndexes": [1],
+        "openIndexes": [
+          1
+        ],
         "toolbarBottom": 572,
         "openTextareaTop": 580,
         "openTextareaBottom": 711,
@@ -859,7 +901,10 @@
         "resultSummaryBottom": 772,
         "resultBottom": 784,
         "resultPanelWidth": 606,
-        "distinctFirstViewportXRanges": [160, 800],
+        "distinctFirstViewportXRanges": [
+          160,
+          800
+        ],
         "dispatchPostCount": 1,
         "resultOpenByDefault": false,
         "openedChannelResultCount": 2
@@ -918,7 +963,10 @@
     "scope": "standalone /dispatch default sample shell desktop composition",
     "baselineProductionDebt": {
       "productionMarker": "ca273fe5a09fa098a6d12867624850a332c53761",
-      "desktopPanelWidthsApprox": [1108, 1108],
+      "desktopPanelWidthsApprox": [
+        1108,
+        1108
+      ],
       "interpretation": "wide stacked module panels remained in the sample shell"
     },
     "currentSourceContract": {
