@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-21T11:13:29.140Z
-Source HEAD at generation: 71db29b273ec9056e133e8b46b70ec90e967dc01
-Live commit at generation: 71db29b273ec9056e133e8b46b70ec90e967dc01
+Generated at: 2026-07-21T11:18:11.553Z
+Source HEAD at generation: 316f8d9d0a7a269ea12c18a5fca732b12f047948
+Live commit at generation: 316f8d9d0a7a269ea12c18a5fca732b12f047948
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -45,9 +45,9 @@ Overall: `northstar_open_approval_gated`
 | open_gate | ancestor | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-21\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
-| kosha_exact_trust_registry | ancestor | ancestor_of_head | evaluation\kosha-current-live-gate-2026-07-20\report.json |
+| kosha_exact_trust_registry | exact | matches_live | evaluation\kosha-current-live-gate-2026-07-20\report.json |
 | rls_llm_wiki_approval_preflight | ancestor | missing | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
-| sif_embedding_preflight | exact | missing | evaluation\sif-embedding-gate\approval-preflight-report.json |
+| sif_embedding_preflight | ancestor | missing | evaluation\sif-embedding-gate\approval-preflight-report.json |
 | live_critical_surface | missing | ancestor_of_head | evaluation\live-critical-surface-current-2026-07-20-rerun\report.json |
 | mobile_p0_workspace | missing | ancestor_of_head | evaluation\mobile-p0-workspace-gate-2026-07-20\report.json |
 | workspace_docs_share_geometry | missing | ancestor_of_head | evaluation\workspace-docs-share-production-gate-2026-07-20\current-geometry.json |
@@ -62,4 +62,4 @@ Overall: `northstar_open_approval_gated`
 
 - supabase_rls_launch_isolation: Read-only RLS approval preflight passed at source SHA 83a9f88db4d1d9481bacb26bef727fa599b98ea1, but live RLS catalog and tenant A/B isolation are not proven.
 - llm_wiki_publication: Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 83a9f88db4d1d9481bacb26bef727fa599b98ea1.
-- sif_embedding_runtime: SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 9992f23aa4c32b6eb29cf9798650e3a5ee1a8cb8.
+- sif_embedding_runtime: SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 71db29b273ec9056e133e8b46b70ec90e967dc01.
