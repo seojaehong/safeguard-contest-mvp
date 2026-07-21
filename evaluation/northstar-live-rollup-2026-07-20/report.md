@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-21T17:57:08.465Z
-Source HEAD at generation: 8799b707923228487d056f4c2037daf07c8fa218
-Live commit at generation: 8799b707923228487d056f4c2037daf07c8fa218
+Generated at: 2026-07-21T18:03:18.785Z
+Source HEAD at generation: 8b24019fe9ccf0ac693abaae85dd374118f4d06e
+Live commit at generation: 8b24019fe9ccf0ac693abaae85dd374118f4d06e
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -46,7 +46,7 @@ Overall: `northstar_open_approval_gated`
 | open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-21\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
-| kosha_exact_trust_registry | ancestor | ancestor_of_head | evaluation\kosha-current-live-gate-2026-07-20\report.json |
+| kosha_exact_trust_registry | exact | matches_live | evaluation\kosha-current-live-gate-2026-07-20\report.json |
 | rls_llm_wiki_approval_preflight | ancestor | missing | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
 | sif_embedding_preflight | ancestor | missing | evaluation\sif-embedding-gate\approval-preflight-report.json |
 | live_critical_surface | ancestor | ancestor_of_head | evaluation\live-critical-surface-current-2026-07-20-rerun\report.json |
