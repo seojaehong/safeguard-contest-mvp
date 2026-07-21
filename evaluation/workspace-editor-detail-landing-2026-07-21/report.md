@@ -2,9 +2,9 @@
 
 Verdict: `PASS_LIVE_PRODUCTION_FIELD_LEVEL`
 
-Live production marker: `cd3d46a822bf3dbec4eb4bc3c839b9165c29b2ea`
+Live production marker: `c463f64b7977cf7a71ffe69cb3e6fb4e2671acb0`
 
-Freshness note: the same selector geometry was re-probed on live production after the Final 99 evidence marker advanced to `cd3d46a8`.
+Freshness note: the same selector geometry was re-probed on live production after the RLS / LLM Wiki approval-preflight evidence marker advanced to `c463f64b`.
 
 ## Scope
 
@@ -46,7 +46,7 @@ It does **not** claim that the full long-form document editor or raw textarea is
 
 ## Interpretation
 
-The user's broader structural diagnosis remains correct: page split alone is not the fix. The current live editor/detail path is still a long-form drilldown, and the raw textarea remains below the viewport by design. The launch UX acceptance is field-level landing, not raw textarea first-viewport visibility.
+The user's broader structural diagnosis remains correct: page split alone is not the fix. The current live editor/detail path is still a long-form drilldown, and the raw textarea remains below the viewport by design. The launch UX acceptance is field-level landing, not raw textarea first-viewport visibility; reading only the raw textarea coordinates from the common geometry file would overstate this as a fresh RED.
 
 The specific selected-editor landing acceptance is now field-level green:
 
