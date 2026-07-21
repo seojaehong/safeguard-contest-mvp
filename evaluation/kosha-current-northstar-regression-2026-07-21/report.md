@@ -1,7 +1,7 @@
 # KOSHA Current North Star Regression Gate
 
-- Checked at: 2026-07-21T21:30:12+09:00
-- Source HEAD before commit: 46ee47eff433d00d16b34fe3f248e05a6ed41a31
+- Checked at: 2026-07-21T22:47:19+09:00
+- Source HEAD before commit: 8d4f8a1151e91525b66ed5d2fa4dbef78615925a
 - Branch: chore/recipient-foreign-live-gate-20260720
 - DB/schema/Supabase writes: none
 - Embedding generation/upload: none
@@ -32,13 +32,19 @@ Structured materialization:
 npm.cmd test -- tests\kosha-materialization-matrix.test.ts tests\grounded-generation-contract.test.ts tests\live-harness-quality-probe.test.ts --maxWorkers=1 --fileParallelism=false
 ```
 
-Result: PASS, 3 files / 50 tests, duration 5.12s.
+Result: PASS, 3 files / 50 tests, duration 5.45s.
 
 ```powershell
 npm.cmd test -- tests\exact-trusted-kosha-grounding.test.ts tests\exact-trusted-kosha-registry-wave2.test.ts tests\kosha-grounding-fail-closed.test.ts tests\kosha-current-review-run-ask.test.ts tests\kosha-guide-corpus-audit.test.ts --maxWorkers=1 --fileParallelism=false
 ```
 
-Result: PASS, 5 files / 173 tests, duration 24.64s.
+Result: PASS, 5 files / 173 tests, duration 23.27s.
+
+```powershell
+npm.cmd test -- tests\kosha-current-live-gate.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=60000
+```
+
+Result: PASS, 1 file / 3 tests, duration 2.23s.
 
 ```powershell
 npm.cmd run typecheck

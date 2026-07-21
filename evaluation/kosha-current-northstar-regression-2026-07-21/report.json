@@ -1,7 +1,7 @@
 {
   "title": "KOSHA Current North Star Regression Gate",
-  "checkedAt": "2026-07-21T21:30:12+09:00",
-  "sourceHeadBeforeCommit": "46ee47eff433d00d16b34fe3f248e05a6ed41a31",
+  "checkedAt": "2026-07-21T22:47:19+09:00",
+  "sourceHeadBeforeCommit": "8d4f8a1151e91525b66ed5d2fa4dbef78615925a",
   "branch": "chore/recipient-foreign-live-gate-20260720",
   "verdict": "PASS",
   "dbSchemaChanged": false,
@@ -26,14 +26,21 @@
       "status": "PASS",
       "filesPassed": 3,
       "testsPassed": 50,
-      "durationSeconds": 5.12
+      "durationSeconds": 5.45
     },
     "exactTrustAndCorpus": {
       "command": "npm.cmd test -- tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\kosha-grounding-fail-closed.test.ts tests\\kosha-current-review-run-ask.test.ts tests\\kosha-guide-corpus-audit.test.ts --maxWorkers=1 --fileParallelism=false",
       "status": "PASS",
       "filesPassed": 5,
       "testsPassed": 173,
-      "durationSeconds": 24.64
+      "durationSeconds": 23.27
+    },
+    "liveGate": {
+      "command": "npm.cmd test -- tests\\kosha-current-live-gate.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=60000",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 3,
+      "durationSeconds": 2.23
     },
     "typecheck": {
       "command": "npm.cmd run typecheck",
