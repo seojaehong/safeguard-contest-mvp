@@ -622,7 +622,7 @@ describe("workflow share component wiring", () => {
     expect(fs.existsSync(cssPath)).toBe(true);
     const css = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, "utf8") : "";
     expect(source).toContain('import styles from "@/components/WorkflowSharePanel.module.css"');
-    expect(source).toContain('className={`share-panel workflow-panel ${styles.panel}`}');
+    expect(source).toContain('className={`share-panel workflow-panel ${mobileConfigExpanded ? "share-config-expanded" : "share-config-collapsed"} ${styles.panel}`}');
     expect(source).toContain("useReducer(");
     expect(source).toContain('type: "scope_changed"');
     expect(source).toContain("buildProviderDispatchIdempotencyKey");

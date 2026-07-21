@@ -91,6 +91,7 @@ function createFixtureRoot(): { root: string; head: string } {
       capability: false,
       mode: "preview_only",
       reason: "persistent_idempotency_unavailable",
+      productionCommitSha: "TO_FILL",
     },
     draftMigration: { scope: "attempt_level_reservation_only" },
     channelResultPersistence: { channelLevelExactlyOnceProven: false },
@@ -222,7 +223,7 @@ describe("northstar live rollup", () => {
     expect(report.liveCritical.findings).toBe(0);
     expect(report.evidence.find((item) => item.id === "open_gate")?.productionStatus).toBe("matches_live");
     expect(report.evidence.find((item) => item.id === "provider_dispatch_persistence")?.sourceStatus).toBe("ancestor");
-    expect(report.evidence.find((item) => item.id === "provider_dispatch_persistence")?.productionStatus).toBe("missing");
+    expect(report.evidence.find((item) => item.id === "provider_dispatch_persistence")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "northstar_approval_runway")?.sourceStatus).toBe("ancestor");
     expect(report.evidence.find((item) => item.id === "northstar_approval_runway")?.productionStatus).toBe("ancestor_of_head");
     expect(report.contradictions).toHaveLength(0);

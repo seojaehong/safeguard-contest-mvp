@@ -151,6 +151,9 @@ function extractProductionCommit(report) {
   if (isRecord(report.buildInfo)) {
     return asString(report.buildInfo.commitSha);
   }
+  if (isRecord(report.liveDispatchState)) {
+    return asString(report.liveDispatchState.productionCommitSha);
+  }
   if (typeof report.liveCommitAtDraft === "string") {
     return asString(report.liveCommitAtDraft);
   }

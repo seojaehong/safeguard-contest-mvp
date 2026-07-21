@@ -1,13 +1,29 @@
 {
   "generatedAt": "2026-07-19T00:30:00+09:00",
-  "sourceSha": "cb2b440f31893362773fd6a32fcecb0e5e2225d0",
+  "refreshedAt": "2026-07-21T22:21:56+09:00",
+  "sourceSha": "9032dc9972bb4d618bd01ca5a6f44f194dd0ac08",
   "scope": "provider_dispatch_idempotency_gate",
   "status": "approval_required",
   "liveDispatchState": {
     "capability": false,
     "mode": "preview_only",
     "reason": "persistent_idempotency_unavailable",
-    "codeLock": "PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false"
+    "codeLock": "PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false",
+    "productionCommitSha": "9032dc9972bb4d618bd01ca5a6f44f194dd0ac08",
+    "channels": {
+      "email": {
+        "capability": false,
+        "reason": "persistent_idempotency_unavailable"
+      },
+      "sms": {
+        "capability": false,
+        "reason": "persistent_idempotency_unavailable"
+      },
+      "kakao": {
+        "capability": false,
+        "reason": "persistent_idempotency_unavailable"
+      }
+    }
   },
   "draftMigration": {
     "path": "evaluation/provider-dispatch-idempotency-gate-2026-07-19/provider-dispatch-idempotency-draft.sql",
@@ -59,14 +75,18 @@
   },
   "verification": [
     {
-      "command": "npm.cmd test -- tests\\provider-dispatch-idempotency-gate.test.ts --maxWorkers=1 --fileParallelism=false",
+      "command": "npm.cmd test -- tests\\provider-dispatch-idempotency-gate.test.ts tests\\workflow-dispatch-capability-policy.test.ts tests\\workflow-share-client.test.ts tests\\workflow-share-capability-browser.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000 --hookTimeout=180000",
       "status": "passed",
-      "files": 1,
-      "tests": 6
+      "files": 4,
+      "tests": 44
     },
     {
-      "command": "npm.cmd run typecheck",
-      "status": "passed"
+      "command": "GET https://www.safeclaw.kr/api/workflow/dispatch",
+      "status": "passed",
+      "mode": "preview_only",
+      "reason": "persistent_idempotency_unavailable",
+      "externalDispatchPerformed": false,
+      "dbMutationPerformed": false
     }
   ]
 }

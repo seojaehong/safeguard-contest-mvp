@@ -79,6 +79,14 @@ async function openSharePanel(page: Page): Promise<void> {
   await page.locator("[data-share-root]").waitFor({ state: "visible" });
 }
 
+async function expandMobileShareConfigIfCollapsed(page: Page): Promise<void> {
+  const toggle = page.locator("[data-share-mobile-config-toggle]");
+  if (await toggle.isVisible()) {
+    const expanded = await toggle.getAttribute("aria-expanded");
+    if (expanded !== "true") await toggle.click();
+  }
+}
+
 function countContainmentPosts(page: Page): { read: () => number } {
   let count = 0;
   page.on("request", (request) => {
@@ -213,6 +221,7 @@ describe("workflow share capability browser containment", () => {
     try {
       await openSharePanel(page);
       await expect.poll(() => page.getByText("상태 확인 실패", { exact: true }).count()).toBeGreaterThan(0);
+      await expandMobileShareConfigIfCollapsed(page);
       expect(await page.getByRole("link", { name: "발송 채널 준비 안내" }).getAttribute("href")).toBe("/settings");
       const languageSelect = page.locator("#workflow-language-select");
       const preview = page.locator("[data-share-preview]");

@@ -2,7 +2,9 @@
 
 Generated at: 2026-07-19 KST
 
-Source marker for approval packet wiring: `cb2b440f31893362773fd6a32fcecb0e5e2225d0`
+Current refresh: 2026-07-21T22:21:56+09:00
+
+Source marker for approval packet wiring: `9032dc9972bb4d618bd01ca5a6f44f194dd0ac08`
 
 ## Purpose
 
@@ -19,6 +21,8 @@ Live `/api/workflow/dispatch` returns:
 - `reason=persistent_idempotency_unavailable`
 
 The route keeps real provider dispatch locked with `PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false`.
+
+Current production marker at refresh: `9032dc9972bb4d618bd01ca5a6f44f194dd0ac08`.
 
 ## Drafted Approval Artifact
 
@@ -68,5 +72,5 @@ The current draft stores `channels text[]` and `provider_result jsonb` on one at
 
 ## Verification
 
-- `npm.cmd test -- tests\provider-dispatch-idempotency-gate.test.ts --maxWorkers=1 --fileParallelism=false`: PASS, 1 file / 6 tests.
-- `npm.cmd run typecheck`: PASS.
+- `npm.cmd test -- tests\provider-dispatch-idempotency-gate.test.ts tests\workflow-dispatch-capability-policy.test.ts tests\workflow-share-client.test.ts tests\workflow-share-capability-browser.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000 --hookTimeout=180000`: PASS, 4 files / 44 tests.
+- Live `GET https://www.safeclaw.kr/api/workflow/dispatch`: PASS, `preview_only`, reason `persistent_idempotency_unavailable`, email/SMS/Kakao all capability `false`.
