@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T19:16:05.586Z",
-  "head": "de956e853f5d310f374f55729ace77dcccc57221",
+  "generatedAt": "2026-07-21T19:19:49.882Z",
+  "head": "034cd0021ae1d6832597f742fa0c69a5afb33852",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
@@ -81,7 +81,7 @@
       "id": "sif_embedding_runtime",
       "state": "approval_gated",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 41ed9626d07c60ef7b876b888bb0c8ac6dea075c."
+      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: de956e853f5d310f374f55729ace77dcccc57221."
     }
   ],
   "mobileP0": {
@@ -182,7 +182,7 @@
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
       "sourceCommit": "de956e853f5d310f374f55729ace77dcccc57221",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "de956e853f5d310f374f55729ace77dcccc57221",
       "productionStatus": "matches_live"
     },
@@ -222,7 +222,7 @@
       "id": "sif_embedding_preflight",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
       "sourceCommit": "de956e853f5d310f374f55729ace77dcccc57221",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },
@@ -269,10 +269,10 @@
     {
       "id": "northstar_approval_runway",
       "artifact": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
-      "sourceCommit": "3ecb323ef9d66bc2f20fadfa559053ad07a80df9",
-      "sourceStatus": "ancestor",
-      "productionCommit": "3ecb323ef9d66bc2f20fadfa559053ad07a80df9",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "034cd0021ae1d6832597f742fa0c69a5afb33852",
+      "sourceStatus": "exact",
+      "productionCommit": "de956e853f5d310f374f55729ace77dcccc57221",
+      "productionStatus": "matches_live_source_mismatch"
     }
   ],
   "contradictions": [],
