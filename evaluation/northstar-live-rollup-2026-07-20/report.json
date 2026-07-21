@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T14:19:39.294Z",
-  "head": "eb0f80b42c94ba3e06ca56271d5dbfdf89fc6837",
+  "generatedAt": "2026-07-21T14:21:38.609Z",
+  "head": "a744b3ba204e401c8e6b297a55cbdade5a77602e",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "721c80be47c81e100b7d89866898a09f3fcaddb7",
+    "commitSha": "eb0f80b42c94ba3e06ca56271d5dbfdf89fc6837",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-m85i1c672-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-ikd5uxesx-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -181,9 +181,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "721c80be47c81e100b7d89866898a09f3fcaddb7",
+      "sourceCommit": "eb0f80b42c94ba3e06ca56271d5dbfdf89fc6837",
       "sourceStatus": "ancestor",
-      "productionCommit": "721c80be47c81e100b7d89866898a09f3fcaddb7",
+      "productionCommit": "eb0f80b42c94ba3e06ca56271d5dbfdf89fc6837",
       "productionStatus": "matches_live"
     },
     {
@@ -192,7 +192,7 @@
       "sourceCommit": "721c80be47c81e100b7d89866898a09f3fcaddb7",
       "sourceStatus": "ancestor",
       "productionCommit": "721c80be47c81e100b7d89866898a09f3fcaddb7",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "live_harness_quality",
@@ -270,9 +270,9 @@
       "id": "northstar_approval_runway",
       "artifact": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
       "sourceCommit": "eb0f80b42c94ba3e06ca56271d5dbfdf89fc6837",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "721c80be47c81e100b7d89866898a09f3fcaddb7",
-      "productionStatus": "matches_live_source_mismatch"
+      "productionStatus": "ancestor_of_head"
     }
   ],
   "contradictions": [],
