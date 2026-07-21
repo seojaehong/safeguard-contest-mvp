@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-rls-llm-wiki-approval-preflight/v1",
-  "generatedAt": "2026-07-21T18:13:13.676Z",
-  "sourceSha": "25fb245652e0e89734be42dae7135b7f3427dd7b",
+  "generatedAt": "2026-07-21T19:04:58.405Z",
+  "sourceSha": "8011cb29683a691ee39026cc8c19015fc3ca8759",
   "overall": "approval_ready_open",
   "launchReadiness": false,
   "dbMutationPerformed": false,
@@ -71,7 +71,7 @@
     {
       "path": "evaluation/northstar-open-gates-current/report.json",
       "bytes": 8812,
-      "sha256": "07d675b5c5d4a5721d7bf866fa2d290bcfdca1b2e41d3894fab75b2f6ee44a5a"
+      "sha256": "f432d6246c73c6ff547f2fdfbe01902129ba7ea3bcc3b2429d53dd5782de2026"
     }
   ],
   "checks": [

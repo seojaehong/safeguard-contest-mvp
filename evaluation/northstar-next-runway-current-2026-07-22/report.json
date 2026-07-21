@@ -1,15 +1,16 @@
 {
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "54d3870b1f1b2a51a3504cb6a88173cffb56168a",
+  "sourceHead": "8011cb29683a691ee39026cc8c19015fc3ca8759",
   "productionCommit": "54d3870b1f1b2a51a3504cb6a88173cffb56168a",
-  "latestEvidenceCommitLive": true,
+  "latestEvidenceCommitLive": false,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
     "liveRollup": "evaluation\\northstar-live-rollup-2026-07-20\\report.json",
     "final99": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
     "workspaceInformationArchitecture": "evaluation\\workspace-information-architecture-2026-07-21\\report.json",
     "hermesOpenclawRuntime": "evaluation\\hermes-openclaw-runtime-current-gate-2026-07-20\\report.json",
+    "rlsLlmWikiApprovalPreflight": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
     "approvalRunway": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
     "sifEmbeddingPreflight": "evaluation\\sif-embedding-gate\\approval-preflight-report.json"
   },
@@ -21,7 +22,8 @@
     "share_result_fixture_cockpit",
     "hermes_openclaw_adapter_boundary",
     "sif_embedding_approval_preflight",
-    "northstar_approval_runway"
+    "northstar_approval_runway",
+    "rls_llm_wiki_approval_preflight_current_source"
   ],
   "noticeState": [
     {
