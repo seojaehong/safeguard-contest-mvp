@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-07-21T14:17:01.653Z",
+  "generatedAt": "2026-07-21T14:41:32.878Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "commit": "721c80be",
-  "sourceCommit": "721c80be47c81e100b7d89866898a09f3fcaddb7",
+  "commit": "a95439b4",
+  "sourceCommit": "a95439b4422f3422fd1f22266c24ef5a0de6cfa6",
   "productionBuild": {
     "ok": true,
     "status": 200,
-    "commitSha": "721c80be47c81e100b7d89866898a09f3fcaddb7",
+    "commitSha": "a95439b4422f3422fd1f22266c24ef5a0de6cfa6",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-m85i1c672-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-9ugg131q1-seojaehongs-projects.vercel.app"
   },
   "overall": "pass_with_notice",
-  "elapsedMs": 83546,
+  "elapsedMs": 80712,
   "gates": [
     {
       "name": "ask-orchestration",
@@ -88,7 +88,7 @@
       "count": 6,
       "message": "KOSHA 오프라인 보조근거와 Supabase 안전 지식 DB에서 참고자료를 조회했습니다. 공식 KOSHA 정확 본문 번들로 partial DB 본문을 대체했습니다."
     },
-    "textPreview": "[보완 제안: 외벽 도장 작업 안전점검 및 교육 이행 확인] - 작업 전 이동식 비계의 작업발판 폭, 안전난간, 바퀴 잠금, 아웃트리거 상태 점검 - 작업자 전원 안전대 체결 여부 및 하부 출입통제 상태 확인 - 신규 투입자 대상 작업 전 안전보건교육(작업발판·난간 사용법, 추락 방지 절차 포함) 실시 - 강풍 예보 시 작업중지 기준 공유 및 작업반별 TBM 회의에서 재확인 - TBM 및 안전보건교육 기록에 점검 결과와 교육 참석자 명단 기록 확인자/근거 확인: 작업반장, 작업 전 현장 점검 및 교육 기록 반영 근거로 확인 완료",
+    "textPreview": "[보완 제안: 강풍 대비 및 신규 투입자 교육] - 강풍 예보 시 작업 전 반드시 풍속 확인 및 작업중지 기준을 작업반장에게 재공지한다. - 신규 투입자 포함 모든 작업자 대상 오늘 작업 위험요인과 보호구 착용, 강풍 시 행동수칙 안전보건교육을 완료한다. - 이동식 비계 사용 시 바퀴 잠금, 아웃트리거 설치 및 안전난간 점검을 작업 시작 전 반드시 수행한다. - 지게차 동선 인접 작업 구간에 신호수 배치와 보행자 접근 금지 표시를 확인 및 기록한다. - 작업 종료 후 TBM 회의에서 작업 상태와 강풍에 따른 조치 이행 상황을 기록하여 보관한다. 확인자/근거 확인: 작업 반장 및 안전관리자가 교육 이수 확인과 TBM 회의록 작성으로 조치 완료 여부 점검. 근거: 이동식 비계 안전조치 및 강풍 작업중지 기준 현장 적용 기록 반영.",
     "sourceCount": 5,
     "policy": "AI 보완은 자동 덮어쓰기가 아니라 제안, 사용자 편집, 삽입 흐름으로만 인정합니다."
   },
