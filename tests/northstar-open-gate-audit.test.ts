@@ -690,6 +690,46 @@ function createFixtureRoot(): string {
       },
     },
   });
+  writeJson(rootDir, path.join("evaluation", "workspace-editor-detail-landing-2026-07-21", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_FIELD_LEVEL",
+    liveCommitChecked: "fixture-sha",
+    routeSplitAloneAcceptedAsFix: false,
+    providerDispatchLiveClaimed: false,
+    fullRawTextareaVisibilityClaimed: false,
+    selectedEditorFieldLevelLandingProven: true,
+    longRawTextareaRemainsSecondary: true,
+    liveMetrics: {
+      desktopShort1440x723: {
+        viewportHeight: 723,
+        editorBodyHeight: 882,
+        documentEditorBottom: 695,
+        toolbarBottom: 195,
+        firstRiskRowHeaderBottom: 579,
+        firstRiskHazardFieldBottom: 675,
+        documentTextareaTop: 1094,
+        rowHeaderTextContainsEvidence: true,
+        rowHeaderTextContainsVerification: true,
+      },
+      mobile390x844: {
+        viewportHeight: 844,
+        editorBodyHeight: 1067,
+        documentEditorBottom: 818,
+        toolbarBottom: 208,
+        firstRiskRowHeaderBottom: 583,
+        firstRiskHazardFieldBottom: 657,
+        documentTextareaTop: 987,
+        rowHeaderTextContainsEvidence: true,
+        rowHeaderTextContainsVerification: true,
+      },
+    },
+    acceptance: {
+      riskRowHeaderInsideViewport: true,
+      firstHazardFieldInsideViewport: true,
+      rowHeaderShowsEvidenceAndVerification: true,
+      textareaSecondaryBelowFirstWorkSurface: true,
+      backendProviderExportContractsTouched: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "documents-mobile-exact-cockpit-2026-07-21", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION",
     productCommit: "fixture-sha",
@@ -932,12 +972,13 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("live mobile selected-summary");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exact 844px viewport");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exact one-viewport Documents");
-    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("selected editor/detail landing as OPEN");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("selected editor/detail field-level risk-row landing");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("raw textarea/full long-form editing as secondary drilldown");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("perceived narrow-card composition");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.evidencePath).toBe(
-      path.join("evaluation", "workspace-ia-live-f67-2026-07-21", "report.json"),
+      path.join("evaluation", "workspace-editor-detail-landing-2026-07-21", "report.json"),
     );
-    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("selected editor/detail landing gate");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("raw textarea and deeper row/all-document authoring");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).not.toContain("Promote the Share staged rail");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "share_result_fixture_cockpit")?.state).toBe("proven");

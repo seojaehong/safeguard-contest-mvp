@@ -1606,6 +1606,11 @@ describe("workspace layout regression", () => {
       const navigator = readRect(".workpack-sidebar");
       const editor = readRect(".document-editor");
       const textarea = readRect(".document-textarea");
+      const fieldStrip = readRect('[data-testid="document-section-field-strip"]');
+      const sectionActions = readRect('[data-testid="document-section-actions"]');
+      const riskRowsEditor = readRect('[data-testid="risk-rows-editor"]');
+      const firstRiskRowHeader = readRect('[data-testid="risk-row-editor-row"] summary');
+      const firstRiskHazardField = readRect('[aria-label="행 1 유해·위험요인"]');
       const activeTab = readRect(".doc-tab.active");
       const desktopTabs = document.querySelector(".doc-tab-list");
       const mobilePicker = document.querySelector('select[aria-label="편집 문서 선택"]')?.parentElement;
@@ -1648,6 +1653,13 @@ describe("workspace layout regression", () => {
         navigator,
         editor,
         textarea,
+        fieldStrip,
+        sectionActions,
+        riskRowsEditor,
+        firstRiskRowHeader,
+        firstRiskHazardField,
+        firstRiskRowHeaderText: document.querySelector('[data-testid="risk-row-editor-row"] summary')?.textContent?.replace(/\s+/gu, " ").trim() || "",
+        selectedDocumentTitle: document.querySelector(".document-toolbar .h2")?.textContent?.trim() || "",
         activeTab,
         compactHeadOverlaps,
         largestCompactHeadHeight: maxHeight(".field-workspace .compact-head"),
@@ -1707,6 +1719,16 @@ describe("workspace layout regression", () => {
     expect(metrics.textarea.borderTopWidth).toBeGreaterThanOrEqual(1);
     expect(metrics.textarea.lineHeight / metrics.textarea.fontSize).toBeGreaterThanOrEqual(1.68);
     expect(metrics.textarea.width).toBeGreaterThanOrEqual(Math.floor(metrics.editor.width * 0.8));
+    expect(metrics.selectedDocumentTitle).toBe("위험성평가표");
+    expect(metrics.firstRiskRowHeaderText).toContain("근거");
+    expect(metrics.firstRiskRowHeaderText).toContain("확인");
+    expect(metrics.riskRowsEditor.top).toBeLessThan(metrics.shell.bottom);
+    expect(metrics.firstRiskRowHeader.top).toBeGreaterThanOrEqual(metrics.shell.top);
+    expect(metrics.firstRiskRowHeader.bottom).toBeLessThanOrEqual(metrics.shell.bottom);
+    expect(metrics.firstRiskHazardField.top).toBeLessThan(metrics.shell.bottom);
+    expect(Math.min(metrics.firstRiskHazardField.bottom, metrics.shell.bottom) - metrics.firstRiskHazardField.top).toBeGreaterThanOrEqual(50);
+    expect(metrics.fieldStrip.top).toBeGreaterThanOrEqual(metrics.firstRiskRowHeader.bottom);
+    expect(metrics.sectionActions.top).toBeGreaterThanOrEqual(metrics.fieldStrip.bottom);
     expect(metrics.activeTab.backgroundColor).not.toBe("rgb(108, 111, 247)");
     expect(metrics.activeTab.color).not.toBe("rgb(255, 255, 255)");
     expect(focusMessageBackground).not.toBe("rgba(14, 14, 18, 0.78)");

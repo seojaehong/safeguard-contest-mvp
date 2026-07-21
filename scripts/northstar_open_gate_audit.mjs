@@ -51,6 +51,7 @@ const EVIDENCE_PATHS = Object.freeze({
   shareResultDrilldown: path.join("evaluation", "share-result-drilldown-2026-07-21", "report.json"),
   dispatchStandalone: path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"),
   workspaceIaLiveRefinement: path.join("evaluation", "workspace-ia-live-f67-2026-07-21", "report.json"),
+  workspaceEditorDetailLanding: path.join("evaluation", "workspace-editor-detail-landing-2026-07-21", "report.json"),
   koshaCurrentNorthstarRegression: path.join("evaluation", "kosha-current-northstar-regression-2026-07-21", "report.json"),
   koshaCurrentGate: path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json"),
   koshaCurrentReconciliation: path.join("evaluation", "kosha-current-master-reconciliation-2026-07-19", "report.json"),
@@ -546,6 +547,7 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const shareMobileStageRailCollapsePath = EVIDENCE_PATHS.shareMobileStageRailCollapse;
   const shareMobileExactViewportPath = EVIDENCE_PATHS.shareMobileExactViewport;
   const workspaceIaLiveRefinementPath = EVIDENCE_PATHS.workspaceIaLiveRefinement;
+  const workspaceEditorDetailLandingPath = EVIDENCE_PATHS.workspaceEditorDetailLanding;
   const internalPane = readJsonFile(rootDir, internalPanePath);
   const paneContext = readJsonFile(rootDir, paneContextPath);
   const drilldown = readJsonFile(rootDir, drilldownPath);
@@ -566,15 +568,16 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const shareMobileStageRailCollapse = readJsonFile(rootDir, shareMobileStageRailCollapsePath);
   const shareMobileExactViewport = readJsonFile(rootDir, shareMobileExactViewportPath);
   const workspaceIaLiveRefinement = readJsonFile(rootDir, workspaceIaLiveRefinementPath);
+  const workspaceEditorDetailLanding = readJsonFile(rootDir, workspaceEditorDetailLandingPath);
 
-  if (!isRecord(internalPane) || !isRecord(paneContext) || !isRecord(drilldown) || !isRecord(innerPaneDepth) || !isRecord(fieldFirst) || !isRecord(riskRowCockpit) || !isRecord(tbmCockpit) || !isRecord(firstViewSplit) || !isRecord(educationCockpit) || !isRecord(emergencyCockpit) || !isRecord(completeCockpits) || !isRecord(completeCockpitsLive) || !isRecord(documentsMobileExactCockpit) || !isRecord(shareDesktop) || !isRecord(shareDesktopShort) || !isRecord(share) || !isRecord(shareStageRail) || !isRecord(shareMobileStageRailCollapse) || !isRecord(shareMobileExactViewport) || !isRecord(workspaceIaLiveRefinement)) {
+  if (!isRecord(internalPane) || !isRecord(paneContext) || !isRecord(drilldown) || !isRecord(innerPaneDepth) || !isRecord(fieldFirst) || !isRecord(riskRowCockpit) || !isRecord(tbmCockpit) || !isRecord(firstViewSplit) || !isRecord(educationCockpit) || !isRecord(emergencyCockpit) || !isRecord(completeCockpits) || !isRecord(completeCockpitsLive) || !isRecord(documentsMobileExactCockpit) || !isRecord(shareDesktop) || !isRecord(shareDesktopShort) || !isRecord(share) || !isRecord(shareStageRail) || !isRecord(shareMobileStageRailCollapse) || !isRecord(shareMobileExactViewport) || !isRecord(workspaceIaLiveRefinement) || !isRecord(workspaceEditorDetailLanding)) {
     return gateResult({
       id: "ui_documents_share_cockpit",
       label: "Documents and Share cockpit UI",
       state: "missing",
-      evidencePath: !isRecord(internalPane) ? internalPanePath : !isRecord(paneContext) ? paneContextPath : !isRecord(drilldown) ? drilldownPath : !isRecord(innerPaneDepth) ? innerPaneDepthPath : !isRecord(fieldFirst) ? fieldFirstPath : !isRecord(riskRowCockpit) ? riskRowCockpitPath : !isRecord(tbmCockpit) ? tbmCockpitPath : !isRecord(firstViewSplit) ? firstViewSplitPath : !isRecord(educationCockpit) ? educationCockpitPath : !isRecord(emergencyCockpit) ? emergencyCockpitPath : !isRecord(completeCockpits) ? completeCockpitsPath : !isRecord(completeCockpitsLive) ? completeCockpitsLivePath : !isRecord(documentsMobileExactCockpit) ? documentsMobileExactCockpitPath : !isRecord(shareDesktop) ? shareDesktopPath : !isRecord(shareDesktopShort) ? shareDesktopShortPath : !isRecord(share) ? sharePath : !isRecord(shareStageRail) ? shareStageRailPath : !isRecord(shareMobileStageRailCollapse) ? shareMobileStageRailCollapsePath : !isRecord(shareMobileExactViewport) ? shareMobileExactViewportPath : workspaceIaLiveRefinementPath,
+      evidencePath: !isRecord(internalPane) ? internalPanePath : !isRecord(paneContext) ? paneContextPath : !isRecord(drilldown) ? drilldownPath : !isRecord(innerPaneDepth) ? innerPaneDepthPath : !isRecord(fieldFirst) ? fieldFirstPath : !isRecord(riskRowCockpit) ? riskRowCockpitPath : !isRecord(tbmCockpit) ? tbmCockpitPath : !isRecord(firstViewSplit) ? firstViewSplitPath : !isRecord(educationCockpit) ? educationCockpitPath : !isRecord(emergencyCockpit) ? emergencyCockpitPath : !isRecord(completeCockpits) ? completeCockpitsPath : !isRecord(completeCockpitsLive) ? completeCockpitsLivePath : !isRecord(documentsMobileExactCockpit) ? documentsMobileExactCockpitPath : !isRecord(shareDesktop) ? shareDesktopPath : !isRecord(shareDesktopShort) ? shareDesktopShortPath : !isRecord(share) ? sharePath : !isRecord(shareStageRail) ? shareStageRailPath : !isRecord(shareMobileStageRailCollapse) ? shareMobileStageRailCollapsePath : !isRecord(shareMobileExactViewport) ? shareMobileExactViewportPath : !isRecord(workspaceIaLiveRefinement) ? workspaceIaLiveRefinementPath : workspaceEditorDetailLandingPath,
       detail: "Documents/share cockpit evidence is missing or invalid.",
-      nextActions: ["Regenerate documents mobile internal-pane, pane-context, drilldown-depth, inner-pane-depth, field-first-affordance, risk-row/TBM/first-view/education/emergency/complete cockpit, live complete cockpit, live exact Documents cockpit, share desktop/mobile, desktop-short Share, share staged-flow, live mobile share boundary, exact viewport evidence, and the latest workspace IA refinement evidence."],
+      nextActions: ["Regenerate documents mobile internal-pane, pane-context, drilldown-depth, inner-pane-depth, field-first-affordance, risk-row/TBM/first-view/education/emergency/complete cockpit, live complete cockpit, live exact Documents cockpit, share desktop/mobile, desktop-short Share, share staged-flow, live mobile share boundary, exact viewport evidence, latest workspace IA refinement evidence, and workspace editor detail landing evidence."],
     });
   }
 
@@ -716,6 +719,20 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     : {};
   const workspaceIaLiveSha = readString(workspaceIaLiveRefinement.liveCommitChecked);
   const workspaceIaLiveCurrent = isGitAncestor(rootDir, workspaceIaLiveSha);
+  const editorDetailMetrics = isRecord(workspaceEditorDetailLanding.liveMetrics)
+    ? workspaceEditorDetailLanding.liveMetrics
+    : {};
+  const editorDetailDesktopShort = isRecord(editorDetailMetrics.desktopShort1440x723)
+    ? editorDetailMetrics.desktopShort1440x723
+    : {};
+  const editorDetailMobile = isRecord(editorDetailMetrics.mobile390x844)
+    ? editorDetailMetrics.mobile390x844
+    : {};
+  const editorDetailAcceptance = isRecord(workspaceEditorDetailLanding.acceptance)
+    ? workspaceEditorDetailLanding.acceptance
+    : {};
+  const editorDetailLiveSha = readString(workspaceEditorDetailLanding.liveCommitChecked);
+  const editorDetailLiveCurrent = isGitAncestor(rootDir, editorDetailLiveSha);
   const shareMobile = isRecord(share.mobile390x844Day)
     ? share.mobile390x844Day
     : isRecord(share.mobile390x844)
@@ -1165,16 +1182,41 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     && readNumber(workspaceIaSelectedEditorMobile.documentTextareaBottom) > 844
     && readBoolean(workspaceIaShareNarrowCard.rawGeometryClosed) === true;
 
-  if (documentsPass && sharePass && workspaceIaRefinementPass) {
+  const workspaceEditorDetailLandingPass = readString(workspaceEditorDetailLanding.verdict) === "PASS_LIVE_PRODUCTION_FIELD_LEVEL"
+    && editorDetailLiveCurrent
+    && readBoolean(workspaceEditorDetailLanding.routeSplitAloneAcceptedAsFix) === false
+    && readBoolean(workspaceEditorDetailLanding.providerDispatchLiveClaimed) === false
+    && readBoolean(workspaceEditorDetailLanding.fullRawTextareaVisibilityClaimed) === false
+    && readBoolean(workspaceEditorDetailLanding.selectedEditorFieldLevelLandingProven) === true
+    && readBoolean(workspaceEditorDetailLanding.longRawTextareaRemainsSecondary) === true
+    && readNumber(editorDetailDesktopShort.viewportHeight) === 723
+    && readNumber(editorDetailDesktopShort.firstRiskRowHeaderBottom) <= 723
+    && readNumber(editorDetailDesktopShort.firstRiskHazardFieldBottom) <= 723
+    && readNumber(editorDetailDesktopShort.documentTextareaTop) > 723
+    && readBoolean(editorDetailDesktopShort.rowHeaderTextContainsEvidence) === true
+    && readBoolean(editorDetailDesktopShort.rowHeaderTextContainsVerification) === true
+    && readNumber(editorDetailMobile.viewportHeight) === 844
+    && readNumber(editorDetailMobile.firstRiskRowHeaderBottom) <= 844
+    && readNumber(editorDetailMobile.firstRiskHazardFieldBottom) <= 844
+    && readNumber(editorDetailMobile.documentTextareaTop) > 844
+    && readBoolean(editorDetailMobile.rowHeaderTextContainsEvidence) === true
+    && readBoolean(editorDetailMobile.rowHeaderTextContainsVerification) === true
+    && editorDetailAcceptance.riskRowHeaderInsideViewport === true
+    && editorDetailAcceptance.firstHazardFieldInsideViewport === true
+    && editorDetailAcceptance.rowHeaderShowsEvidenceAndVerification === true
+    && editorDetailAcceptance.textareaSecondaryBelowFirstWorkSurface === true
+    && editorDetailAcceptance.backendProviderExportContractsTouched === false;
+
+  if (documentsPass && sharePass && workspaceIaRefinementPass && workspaceEditorDetailLandingPass) {
     return gateResult({
       id: "ui_documents_share_cockpit",
       label: "Documents and Share cockpit UI",
       state: "proven",
-      evidencePath: workspaceIaLiveRefinementPath,
-      detail: "Production evidence closes default /workspace Documents and Share cockpits, /documents mobile raw height, exact one-viewport Documents review cockpit, selected-document context/summary layers, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, and mobile Share exact 844px viewport containment. Latest IA refinement still carries selected editor/detail landing as OPEN and treats desktop Share perceived narrow-card composition as a follow-up; it does not claim provider live dispatch.",
+      evidencePath: workspaceEditorDetailLandingPath,
+      detail: "Production evidence closes default /workspace Documents and Share cockpits, /documents mobile raw height, exact one-viewport Documents review cockpit, selected-document context/summary layers, selected editor/detail field-level risk-row landing, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, and mobile Share exact 844px viewport containment. Latest IA refinement still keeps raw textarea/full long-form editing as secondary drilldown and treats desktop Share perceived narrow-card composition as a follow-up; it does not claim provider live dispatch.",
       nextActions: [
         "Keep the production live geometry recorded for default Documents/Share cockpits and 12-document cockpit slices; do not expand them into a full 12-document field-first authoring claim.",
-        "Add a selected editor/detail landing gate before claiming the document edit surface itself feels short.",
+        "Keep raw textarea and deeper row/all-document authoring as secondary drilldown follow-up; do not claim the full document edit surface itself is short.",
         "Keep /share generated-result and perceived full-workbench refinements as separate gates when user-visible sessions reproduce the complaint.",
       ],
     });
@@ -1184,9 +1226,9 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     id: "ui_documents_share_cockpit",
     label: "Documents and Share cockpit UI",
     state: "contradicted",
-    evidencePath: !workspaceIaRefinementPass ? workspaceIaLiveRefinementPath : documentsPass ? shareDesktopShortPath : documentsMobileExactCockpitPath,
-    detail: "Documents/share cockpit evidence no longer proves bounded page height, exact mobile Documents cockpit, visible selected-document pane context, first-viewport share action, and the latest selected editor/detail IA refinement together.",
-    nextActions: ["Re-run documents/share browser geometry gates, promote exact Documents cockpit only after live production verification, refresh the workspace IA refinement evidence, and fix any UI cockpit regression."],
+    evidencePath: !workspaceIaRefinementPass ? workspaceIaLiveRefinementPath : !workspaceEditorDetailLandingPass ? workspaceEditorDetailLandingPath : documentsPass ? shareDesktopShortPath : documentsMobileExactCockpitPath,
+    detail: "Documents/share cockpit evidence no longer proves bounded page height, exact mobile Documents cockpit, visible selected-document pane context, field-level selected editor/detail landing, first-viewport share action, and the latest IA refinement together.",
+    nextActions: ["Re-run documents/share browser geometry gates, promote exact Documents cockpit only after live production verification, refresh the workspace IA refinement and editor detail landing evidence, and fix any UI cockpit regression."],
   });
 }
 
