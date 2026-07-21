@@ -1,9 +1,9 @@
 # SafeClaw Live Harness Quality Probe
 
 - Overall: PASS
-- Generated: 2026-07-21T17:38:12.173Z
-- Source HEAD at generation: 569c2fc0674a331a9ee53e73dc77e95af4c139a4
-- Live commit at generation: 569c2fc0674a331a9ee53e73dc77e95af4c139a4
+- Generated: 2026-07-21T21:08:57.736Z
+- Source HEAD at generation: 2b82c00c2f3cd2f89544a1a07b94972bf98154e9
+- Live commit at generation: 2b82c00c2f3cd2f89544a1a07b94972bf98154e9
 - Note: this artifact is generated before it is committed. A later evidence-only commit can contain this report without changing the measured runtime surface.
 - Base URL: https://www.safeclaw.kr
 - Request: POST /api/ask (enhanced)

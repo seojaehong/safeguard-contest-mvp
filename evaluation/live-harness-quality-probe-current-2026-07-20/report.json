@@ -1,17 +1,17 @@
 {
   "schemaVersion": "safeclaw-live-harness-quality-probe/v1",
-  "generatedAt": "2026-07-21T17:38:12.173Z",
-  "startedAt": "2026-07-21T17:37:49.240Z",
-  "sourceSha": "569c2fc0674a331a9ee53e73dc77e95af4c139a4",
+  "generatedAt": "2026-07-21T21:08:57.736Z",
+  "startedAt": "2026-07-21T21:08:36.858Z",
+  "sourceSha": "2b82c00c2f3cd2f89544a1a07b94972bf98154e9",
   "liveBuildInfo": {
     "ok": true,
     "status": 200,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "569c2fc0674a331a9ee53e73dc77e95af4c139a4",
+    "commitSha": "2b82c00c2f3cd2f89544a1a07b94972bf98154e9",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-h7cf3bhss-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-49qoaojsf-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "baseUrl": "https://www.safeclaw.kr",
@@ -32,7 +32,7 @@
     "ok": true,
     "status": 200,
     "timeoutMs": 90000,
-    "elapsedMs": 22435,
+    "elapsedMs": 20445,
     "contentType": "application/json"
   },
   "operations": [
@@ -306,51 +306,51 @@
         "mode": "live",
         "locationLabel": "서울",
         "summary": "단시간 흐림, 강수없음, 기온 25℃, 풍속 0.1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선 반영)",
-        "forecastTime": "20260722 0200",
+        "forecastTime": "20260722 0600",
         "temperatureC": "25",
         "windSpeedMps": "0.1",
         "actions": [
           "기상특보가 확인되어 작업 전 작업중지 기준과 옥외·고소작업 허용 여부를 관리감독자가 재판단"
         ],
-        "detail": "기상청 초단기실황 호출 성공 (서울, base 20260722 0100) / 기상청 초단기예보 호출 성공 (서울, base 20260722 0130) / 기상청 단기예보 호출 성공 (서울, base 20260722 0200) / 기상청 기상특보 조회 성공 (전국, 202607220225) / 기상청 영향예보 연결 점검 필요: NO_DATA / 기상청 생활기상지수 자외선 조회 성공 (서울, areaNo 1100000000) / 기상청 생활기상지수 체감온도 연결 점검 필요: NO_DATA / 한국에너지기술연구원 실시간 홍반자외선 연결 점검 필요: NO_DATA totalCount 0",
+        "detail": "기상청 초단기실황 호출 성공 (서울, base 20260722 0500) / 기상청 초단기예보 호출 성공 (서울, base 20260722 0530) / 기상청 단기예보 호출 성공 (서울, base 20260722 0500) / 기상청 기상특보 조회 성공 (전국, 202607220600) / 기상청 영향예보 연결 점검 필요: NO_DATA / 기상청 생활기상지수 자외선 조회 성공 (서울, areaNo 1100000000) / 기상청 생활기상지수 체감온도 연결 점검 필요: NO_DATA / 한국에너지기술연구원 실시간 홍반자외선 연결 점검 필요: NO_DATA totalCount 0",
         "signals": [
           {
             "endpoint": "초단기실황",
             "mode": "live",
-            "summary": "현재 강수없음, 기온 24.7℃, 풍속 0.4m/s, 1시간 강수 0mm",
-            "forecastTime": "20260722 0100",
-            "temperatureC": "24.7",
-            "windSpeedMps": "0.4",
+            "summary": "현재 강수없음, 기온 24.4℃, 풍속 0.1m/s, 1시간 강수 0mm",
+            "forecastTime": "20260722 0500",
+            "temperatureC": "24.4",
+            "windSpeedMps": "0.1",
             "precipitationType": "강수없음",
-            "detail": "기상청 초단기실황 호출 성공 (서울, base 20260722 0100)"
+            "detail": "기상청 초단기실황 호출 성공 (서울, base 20260722 0500)"
           },
           {
             "endpoint": "초단기예보",
             "mode": "live",
             "summary": "단시간 흐림, 강수없음, 기온 25℃, 풍속 0.1m/s",
-            "forecastTime": "20260722 0200",
+            "forecastTime": "20260722 0600",
             "temperatureC": "25",
             "windSpeedMps": "0.1",
             "precipitationType": "강수없음",
-            "detail": "기상청 초단기예보 호출 성공 (서울, base 20260722 0130)"
+            "detail": "기상청 초단기예보 호출 성공 (서울, base 20260722 0530)"
           },
           {
             "endpoint": "단기예보",
             "mode": "live",
-            "summary": "흐림, 강수없음, 기온 25℃, 풍속 0.7m/s, 강수확률 30%",
-            "forecastTime": "20260722 0300",
-            "temperatureC": "25",
+            "summary": "흐림, 강수없음, 기온 24℃, 풍속 0.7m/s, 강수확률 30%",
+            "forecastTime": "20260722 0600",
+            "temperatureC": "24",
             "windSpeedMps": "0.7",
             "precipitationProbability": "30",
             "precipitationType": "강수없음",
-            "detail": "기상청 단기예보 호출 성공 (서울, base 20260722 0200)"
+            "detail": "기상청 단기예보 호출 성공 (서울, base 20260722 0500)"
           },
           {
             "endpoint": "기상특보",
             "mode": "live",
-            "summary": "최근 특보 확인: [특보] 제07-366호 : 2026.07.22.02:25 / 호우주의보 발표 (*)",
-            "forecastTime": 202607220225,
-            "detail": "기상청 기상특보 조회 성공 (전국, 202607220225)"
+            "summary": "최근 특보 확인: [특보] 제07-375호 : 2026.07.22.06:00 / 호우경보 해제 (*)",
+            "forecastTime": 202607220600,
+            "detail": "기상청 기상특보 조회 성공 (전국, 202607220600)"
           },
           {
             "endpoint": "영향예보",
@@ -362,7 +362,7 @@
             "endpoint": "생활기상 자외선",
             "mode": "live",
             "summary": "자외선지수 1 (낮음)",
-            "forecastTime": "2026072118",
+            "forecastTime": "2026072206",
             "uvIndex": "1",
             "detail": "기상청 생활기상지수 자외선 조회 성공 (서울, areaNo 1100000000)"
           },
@@ -1776,13 +1776,13 @@
       "work24": "live",
       "kosha": "live",
       "summary": "연결됨",
-      "detail": "Law.go와 OpenAI 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 초단기실황 호출 성공 (서울, base 20260722 0100) / 기상청 초단기예보 호출 성공 (서울, base 20260722 0130) / 기상청 단기예보 호출 성공 (서울, base 20260722 0200) / 기상청 기상특보 조회 성공 (전국, 202607220225) / 기상청 영향예보 연결 점검 필요: NO_DATA / 기상청 생활기상지수 자외선 조회 성공 (서울, areaNo 1100000000) / 기상청 생활기상지수 체감온도 연결 점검 필요: NO_DATA / 한국에너지기술연구원 실시간 홍반자외선 연결 점검 필요: NO_DATA totalCount 0 / 고용24 사업주훈련 호출 성공 (지역코드 11). 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 7건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 지식 DB 매칭 4건 / Supabase 카탈로그 매칭 8건 (configured=true) / structured 위험성평가 rows 5건, 검증 이슈 0건 (structured rows=고정 근거 기반) / TBM-risk 연결 5건 (TBM-risk links=고정 근거 기반) / TBM structured=규칙 기반 from risk rows / 생성 모드: 강화 (고정 근거 위험요인 표 우선: 위험성평가 row 확정, TBM 구조 규칙 기반 조립)",
+      "detail": "Law.go와 OpenAI 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 초단기실황 호출 성공 (서울, base 20260722 0500) / 기상청 초단기예보 호출 성공 (서울, base 20260722 0530) / 기상청 단기예보 호출 성공 (서울, base 20260722 0500) / 기상청 기상특보 조회 성공 (전국, 202607220600) / 기상청 영향예보 연결 점검 필요: NO_DATA / 기상청 생활기상지수 자외선 조회 성공 (서울, areaNo 1100000000) / 기상청 생활기상지수 체감온도 연결 점검 필요: NO_DATA / 한국에너지기술연구원 실시간 홍반자외선 연결 점검 필요: NO_DATA totalCount 0 / 고용24 사업주훈련 호출 성공 (지역코드 11). 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 7건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 지식 DB 매칭 4건 / Supabase 카탈로그 매칭 8건 (configured=true) / structured 위험성평가 rows 5건, 검증 이슈 0건 (structured rows=고정 근거 기반) / TBM-risk 연결 5건 (TBM-risk links=고정 근거 기반) / TBM structured=규칙 기반 from risk rows / 생성 모드: 강화 (고정 근거 위험요인 표 우선: 위험성평가 row 확정, TBM 구조 규칙 기반 조립)",
       "policyNote": "OpenAI 응답은 timeout 20000ms, retry 없음, 실패 시 보조 응답 정책을 따릅니다."
     },
     "qualityContract": {
       "overall": "ready",
       "summary": "실시간 근거, 온톨로지, 증빙, 구조화 산출물이 통합 준비 상태입니다.",
-      "generatedAt": "2026-07-21T17:38:11.773Z",
+      "generatedAt": "2026-07-21T21:08:57.296Z",
       "items": [
         {
           "key": "fallback",
@@ -1943,7 +1943,7 @@
     },
     "generationMode": "enhanced",
     "generationTrace": {
-      "traceId": "b5c5ddfd-e854-465b-8145-b71708d9a9a9",
+      "traceId": "e08d6a32-df42-4f3f-a63d-962002f78119",
       "askMode": "enhanced",
       "answer": {
         "provider": "safeclaw",
@@ -3393,7 +3393,7 @@
           }
         },
         "generationTrace": {
-          "traceId": "b5c5ddfd-e854-465b-8145-b71708d9a9a9",
+          "traceId": "e08d6a32-df42-4f3f-a63d-962002f78119",
           "askMode": "enhanced",
           "answer": {
             "provider": "safeclaw",
@@ -3504,10 +3504,10 @@
           },
           "fallbackUsed": true
         },
-        "responseContentDigest": "sha256:c8y4Yu0SzUgzZjtzVvOL8LFg71_acyspF0lpMHToDf0",
-        "generatedAt": "2026-07-21T17:38:11.774Z"
+        "responseContentDigest": "sha256:Wdsy4DB8ybk4buWSHLCHJ3M3W1VBm9BpOLXMgBqN0m0",
+        "generatedAt": "2026-07-21T21:08:57.296Z"
       },
-      "signature": "sYhGpmhFvgAmww5ISFBkO9g_8Bur-uC4NlDZRP67ulo"
+      "signature": "PBGcoj0cjsuc3wvyG_Om_SrFBx9rM8b_hDHF0djUH4k"
     }
   }
 }
