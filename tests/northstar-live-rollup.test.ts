@@ -52,6 +52,7 @@ function createFixtureRoot(): { root: string; head: string } {
     gates: [
       { id: "final_99_gate", state: "notice", evidencePath: "evaluation/final-99-gate-current-2026-07-21/report.json", detail: "notice carried" },
       { id: "live_harness_quality", state: "proven", evidencePath: "evaluation/live-harness-quality-probe-current-2026-07-20/report.json", detail: "passed" },
+      { id: "provider_dispatch_persistence", state: "approval_gated", evidencePath: "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json", detail: "preview only" },
       { id: "supabase_rls_launch_isolation", state: "approval_gated", evidencePath: "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", detail: "approval required" },
       { id: "llm_wiki_publication", state: "approval_gated", evidencePath: "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", detail: "approval required" },
       { id: "sif_embedding_runtime", state: "approval_gated", evidencePath: "evaluation/sif-embedding-gate/approval-preflight-report.json", detail: "approval required" },
@@ -81,6 +82,21 @@ function createFixtureRoot(): { root: string; head: string } {
     liveStatus: {
       exactTrustRegistry: { stableDocumentKeys: ["D-C-13", "D-C-7", "B-E-10"] },
       localCorpus: { itemCount: 234 },
+    },
+  });
+  writeJson(root, "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json", {
+    sourceSha: "TO_FILL",
+    status: "approval_required",
+    liveDispatchState: {
+      capability: false,
+      mode: "preview_only",
+      reason: "persistent_idempotency_unavailable",
+    },
+    draftMigration: { scope: "attempt_level_reservation_only" },
+    channelResultPersistence: { channelLevelExactlyOnceProven: false },
+    safetyLocks: {
+      providerMessageSent: false,
+      liveDispatchUnlocked: false,
     },
   });
   writeJson(root, "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", {
@@ -144,6 +160,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/final-99-gate-current-2026-07-21/report.json",
     "evaluation/live-harness-quality-probe-current-2026-07-20/report.json",
     "evaluation/kosha-current-live-gate-2026-07-20/report.json",
+    "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json",
     "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json",
     "evaluation/sif-embedding-gate/approval-preflight-report.json",
     "evaluation/live-critical-surface-current-2026-07-20-rerun/report.json",
@@ -187,6 +204,8 @@ describe("northstar live rollup", () => {
     expect(report.mobileP0.shareHeightRatio).toBe(1);
     expect(report.liveCritical.findings).toBe(0);
     expect(report.evidence.find((item) => item.id === "open_gate")?.productionStatus).toBe("matches_live");
+    expect(report.evidence.find((item) => item.id === "provider_dispatch_persistence")?.sourceStatus).toBe("ancestor");
+    expect(report.evidence.find((item) => item.id === "provider_dispatch_persistence")?.productionStatus).toBe("missing");
     expect(report.contradictions).toHaveLength(0);
   });
 

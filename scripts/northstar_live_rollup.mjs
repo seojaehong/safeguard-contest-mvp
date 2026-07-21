@@ -25,6 +25,7 @@ const ARTIFACTS = Object.freeze({
   mobileP0: path.join("evaluation", "mobile-p0-workspace-gate-2026-07-20", "report.json"),
   workspaceGeometry: path.join("evaluation", "workspace-docs-share-production-gate-2026-07-20", "current-geometry.json"),
   dispatchStandalone: path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"),
+  providerDispatchIdempotency: path.join("evaluation", "provider-dispatch-idempotency-gate-2026-07-19", "report.json"),
 });
 
 /**
@@ -280,6 +281,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const mobileP0 = tryReadJson(rootDir, ARTIFACTS.mobileP0);
   const workspaceGeometry = tryReadJson(rootDir, ARTIFACTS.workspaceGeometry);
   const dispatchStandalone = tryReadJson(rootDir, ARTIFACTS.dispatchStandalone);
+  const providerDispatchIdempotency = tryReadJson(rootDir, ARTIFACTS.providerDispatchIdempotency);
 
   const openGates = isRecord(openGate) && Array.isArray(openGate.gates) ? openGate.gates : [];
   const provenGates = [];
@@ -346,6 +348,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "mobile_p0_workspace", ARTIFACTS.mobileP0, mobileP0),
     evidenceStatus(rootDir, currentHead, liveCommit, "workspace_docs_share_geometry", ARTIFACTS.workspaceGeometry, workspaceGeometry),
     evidenceStatus(rootDir, currentHead, liveCommit, "dispatch_standalone_cockpit", ARTIFACTS.dispatchStandalone, dispatchStandalone),
+    evidenceStatus(rootDir, currentHead, liveCommit, "provider_dispatch_persistence", ARTIFACTS.providerDispatchIdempotency, providerDispatchIdempotency),
   ];
 
   const contradictions = evidence.filter((item) => (
@@ -423,6 +426,16 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       previewBottom: asNumber(recordAt(dispatchStandalone, "metrics")?.previewBottom),
       primaryBottom: asNumber(recordAt(dispatchStandalone, "metrics")?.primaryBottom),
       horizontalOverflow: asNumber(recordAt(dispatchStandalone, "metrics")?.horizontalOverflow),
+    },
+    providerDispatchPersistence: {
+      artifact: ARTIFACTS.providerDispatchIdempotency,
+      status: isRecord(providerDispatchIdempotency) ? asString(providerDispatchIdempotency.status) : "missing",
+      mode: asString(recordAt(providerDispatchIdempotency, "liveDispatchState")?.mode),
+      reason: asString(recordAt(providerDispatchIdempotency, "liveDispatchState")?.reason),
+      draftScope: asString(recordAt(providerDispatchIdempotency, "draftMigration")?.scope),
+      channelLevelExactlyOnceProven: recordAt(providerDispatchIdempotency, "channelResultPersistence")?.channelLevelExactlyOnceProven === true,
+      providerMessageSent: recordAt(providerDispatchIdempotency, "safetyLocks")?.providerMessageSent === true,
+      liveDispatchUnlocked: recordAt(providerDispatchIdempotency, "safetyLocks")?.liveDispatchUnlocked === true,
     },
     final99: {
       artifact: ARTIFACTS.final99,

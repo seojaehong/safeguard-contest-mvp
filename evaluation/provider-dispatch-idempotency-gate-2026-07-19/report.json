@@ -1,5 +1,6 @@
 {
   "generatedAt": "2026-07-19T00:30:00+09:00",
+  "sourceSha": "cb2b440f31893362773fd6a32fcecb0e5e2225d0",
   "scope": "provider_dispatch_idempotency_gate",
   "status": "approval_required",
   "liveDispatchState": {

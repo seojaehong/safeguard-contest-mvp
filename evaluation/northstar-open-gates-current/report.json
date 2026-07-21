@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-21T11:18:12.627Z",
-  "sourceSha": "316f8d9d0a7a269ea12c18a5fca732b12f047948",
+  "generatedAt": "2026-07-21T11:32:34.077Z",
+  "sourceSha": "cb2b440f31893362773fd6a32fcecb0e5e2225d0",
   "overall": "open",
   "gates": [
     {
@@ -52,6 +52,18 @@
       "detail": "Generated provider-result fixture proof is bounded: desktop page 900/900, result panel 606px with 2 x-ranges, mobile summary/preview/CTA/result inside 844px, closed summary shows channel status, dispatch POST count 1, provider live dispatch unclaimed.",
       "nextActions": [
         "Keep real provider dispatch gated until persistent idempotency and provider-result persistence are approved and live verified."
+      ]
+    },
+    {
+      "id": "provider_dispatch_persistence",
+      "state": "approval_gated",
+      "label": "Provider dispatch persistence approval",
+      "evidencePath": "evaluation\\provider-dispatch-idempotency-gate-2026-07-19\\report.json",
+      "detail": "Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred.",
+      "nextActions": [
+        "Keep PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false until route-level reservation-before-provider-call and duplicate replay behavior are tested.",
+        "Approve either a per-channel dispatch child table or a tested canonical provider_result JSONB ledger before claiming channel-level exactly-once persistence.",
+        "Add an updated_at trigger or route-owned timestamp update contract before applying the migration."
       ]
     },
     {

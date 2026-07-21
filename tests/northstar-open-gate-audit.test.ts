@@ -68,6 +68,43 @@ function writeText(rootDir: string, relativePath: string, value: string): void {
   fs.writeFileSync(absolutePath, value, "utf8");
 }
 
+function createProviderDispatchIdempotencyFixture(): Record<string, unknown> {
+  return {
+    status: "approval_required",
+    liveDispatchState: {
+      capability: false,
+      mode: "preview_only",
+      reason: "persistent_idempotency_unavailable",
+      codeLock: "PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false",
+    },
+    draftMigration: {
+      scope: "attempt_level_reservation_only",
+      table: "provider_dispatch_attempts",
+      uniqueIndex: "provider_dispatch_attempts_org_idempotency_key_unique",
+      forceRls: true,
+    },
+    channelResultPersistence: {
+      channelLevelExactlyOnceProven: false,
+      currentShape: "channels text[] plus provider_result jsonb on one attempt row",
+      requiredBeforeClaimingExactlyOnce: [
+        "add provider_dispatch_attempt_channels with unique attempt/channel or organization/idempotency/channel",
+        "or define provider_result jsonb as the canonical per-channel ledger and test reservation-before-provider-call, duplicate replay, and per-channel result retention",
+      ],
+    },
+    timestampBoundary: {
+      updatedAtColumnPresent: true,
+      updatedAtTriggerIncluded: false,
+      requiredBeforeAppliedMigration: "add an updated_at trigger or require route code to own every status-update timestamp",
+    },
+    safetyLocks: {
+      dbMigrationApplied: false,
+      dbMutationPerformed: false,
+      providerMessageSent: false,
+      liveDispatchUnlocked: false,
+    },
+  };
+}
+
 function createFixtureRoot(): string {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "safeclaw-northstar-open-gate-"));
   execFileSync("git", ["init"], { cwd: rootDir, stdio: "ignore" });
@@ -123,6 +160,11 @@ function createFixtureRoot(): string {
     uploaded: false,
     corpusCount: 6032,
   });
+  writeJson(
+    rootDir,
+    path.join("evaluation", "provider-dispatch-idempotency-gate-2026-07-19", "report.json"),
+    createProviderDispatchIdempotencyFixture(),
+  );
   writeJson(rootDir, path.join("evaluation", "documents-mobile-internal-pane-2026-07-21", "report.json"), {
     verdict: "PASS_CURRENT_SOURCE",
     currentSourceGeometry: {
@@ -982,6 +1024,12 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).not.toContain("Promote the Share staged rail");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "share_result_fixture_cockpit")?.state).toBe("proven");
+    expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.state).toBe("approval_gated");
+    expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.detail).toContain("attempt-level idempotency reservation");
+    expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.detail).toContain("per-channel result persistence");
+    expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.evidencePath).toBe(
+      path.join("evaluation", "provider-dispatch-idempotency-gate-2026-07-19", "report.json"),
+    );
     expect(audit.gates.find((gate) => gate.id === "supabase_rls_launch_isolation")?.state).toBe("approval_gated");
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_publication")?.state).toBe("approval_gated");
     expect(audit.gates.find((gate) => gate.id === "sif_embedding_runtime")?.state).toBe("approval_gated");
@@ -1124,6 +1172,57 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_trust_registry")?.state).toBe("contradicted");
   });
 
+  it("contradicts provider dispatch persistence when live dispatch unlock is claimed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join("evaluation", "provider-dispatch-idempotency-gate-2026-07-19", "report.json");
+    const report = JSON.parse(fs.readFileSync(path.join(rootDir, reportPath), "utf8")) as Record<string, unknown>;
+    report.liveDispatchState = {
+      capability: true,
+      mode: "live",
+      reason: "enabled",
+      codeLock: "PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=true",
+    };
+    report.safetyLocks = {
+      dbMigrationApplied: false,
+      dbMutationPerformed: false,
+      providerMessageSent: true,
+      liveDispatchUnlocked: true,
+    };
+    writeJson(rootDir, reportPath, report);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.overall).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.state).toBe("contradicted");
+  });
+
+  it("contradicts provider dispatch persistence when channel-level exactly-once is overclaimed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join("evaluation", "provider-dispatch-idempotency-gate-2026-07-19", "report.json");
+    const report = JSON.parse(fs.readFileSync(path.join(rootDir, reportPath), "utf8")) as Record<string, unknown>;
+    report.channelResultPersistence = {
+      channelLevelExactlyOnceProven: true,
+      currentShape: "channels text[] plus provider_result jsonb on one attempt row",
+      requiredBeforeClaimingExactlyOnce: [],
+    };
+    writeJson(rootDir, reportPath, report);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.overall).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.state).toBe("contradicted");
+  });
+
   it("contradicts stale SIF embedding preflight evidence from outside the current history", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
@@ -1221,6 +1320,7 @@ describe("northstar open gate audit", () => {
     const markdown = renderNorthstarOpenGateMarkdown(audit);
 
     expect(markdown).toContain("| llm_wiki_publication | approval_gated |");
+    expect(markdown).toContain("| provider_dispatch_persistence | approval_gated |");
     expect(markdown).toContain("| kosha_exact_trust_registry | proven |");
     expect(markdown).toContain("LLM Wiki publishes itself.");
     expect(markdown).toContain("SafeClaw fixes SIF/KOSHA/current work-history evidence before LLM wording.");

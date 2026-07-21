@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T11:18:11.553Z",
-  "head": "316f8d9d0a7a269ea12c18a5fca732b12f047948",
+  "generatedAt": "2026-07-21T11:32:32.284Z",
+  "head": "cb2b440f31893362773fd6a32fcecb0e5e2225d0",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "316f8d9d0a7a269ea12c18a5fca732b12f047948",
+    "commitSha": "cb2b440f31893362773fd6a32fcecb0e5e2225d0",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-8bt2xqcxg-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-2ylw0z3co-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 9
+    "gateCount": 10
   },
   "provenGates": [
     {
@@ -59,6 +59,12 @@
     }
   ],
   "approvalGated": [
+    {
+      "id": "provider_dispatch_persistence",
+      "state": "approval_gated",
+      "artifact": "evaluation\\provider-dispatch-idempotency-gate-2026-07-19\\report.json",
+      "detail": "Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred."
+    },
     {
       "id": "supabase_rls_launch_isolation",
       "state": "approval_gated",
@@ -122,6 +128,16 @@
     "primaryBottom": 544.390625,
     "horizontalOverflow": 0
   },
+  "providerDispatchPersistence": {
+    "artifact": "evaluation\\provider-dispatch-idempotency-gate-2026-07-19\\report.json",
+    "status": "approval_required",
+    "mode": "preview_only",
+    "reason": "persistent_idempotency_unavailable",
+    "draftScope": "attempt_level_reservation_only",
+    "channelLevelExactlyOnceProven": false,
+    "providerMessageSent": false,
+    "liveDispatchUnlocked": false
+  },
   "final99": {
     "artifact": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
     "overall": "pass_with_notice",
@@ -155,10 +171,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "71db29b273ec9056e133e8b46b70ec90e967dc01",
-      "sourceStatus": "ancestor",
-      "productionCommit": "71db29b273ec9056e133e8b46b70ec90e967dc01",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "cb2b440f31893362773fd6a32fcecb0e5e2225d0",
+      "sourceStatus": "exact",
+      "productionCommit": "cb2b440f31893362773fd6a32fcecb0e5e2225d0",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -180,9 +196,9 @@
       "id": "kosha_exact_trust_registry",
       "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
       "sourceCommit": "316f8d9d0a7a269ea12c18a5fca732b12f047948",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "316f8d9d0a7a269ea12c18a5fca732b12f047948",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "rls_llm_wiki_approval_preflight",
@@ -231,6 +247,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": "2346cf1291304920bc8007b0efbceaf809a11ba3",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "provider_dispatch_persistence",
+      "artifact": "evaluation\\provider-dispatch-idempotency-gate-2026-07-19\\report.json",
+      "sourceCommit": "cb2b440f31893362773fd6a32fcecb0e5e2225d0",
+      "sourceStatus": "exact",
+      "productionCommit": null,
+      "productionStatus": "missing"
     }
   ],
   "contradictions": [],

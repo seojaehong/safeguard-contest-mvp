@@ -50,6 +50,7 @@ const EVIDENCE_PATHS = Object.freeze({
   shareMobileExactViewport: path.join("evaluation", "share-mobile-exact-viewport-2026-07-21", "report.json"),
   shareResultDrilldown: path.join("evaluation", "share-result-drilldown-2026-07-21", "report.json"),
   dispatchStandalone: path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"),
+  providerDispatchIdempotency: path.join("evaluation", "provider-dispatch-idempotency-gate-2026-07-19", "report.json"),
   workspaceIaLiveRefinement: path.join("evaluation", "workspace-ia-live-f67-2026-07-21", "report.json"),
   workspaceEditorDetailLanding: path.join("evaluation", "workspace-editor-detail-landing-2026-07-21", "report.json"),
   koshaCurrentNorthstarRegression: path.join("evaluation", "kosha-current-northstar-regression-2026-07-21", "report.json"),
@@ -1409,6 +1410,90 @@ function evaluateShareResultFixtureCockpitGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluateProviderDispatchPersistenceGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.providerDispatchIdempotency;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "provider_dispatch_persistence",
+      label: "Provider dispatch persistence approval",
+      state: "missing",
+      evidencePath,
+      detail: "Provider dispatch idempotency approval packet is missing or invalid.",
+      nextActions: ["Regenerate the provider dispatch idempotency approval packet before dispatch launch claims."],
+    });
+  }
+
+  const liveDispatchState = isRecord(report.liveDispatchState) ? report.liveDispatchState : {};
+  const draftMigration = isRecord(report.draftMigration) ? report.draftMigration : {};
+  const channelResultPersistence = isRecord(report.channelResultPersistence) ? report.channelResultPersistence : {};
+  const timestampBoundary = isRecord(report.timestampBoundary) ? report.timestampBoundary : {};
+  const safetyLocks = isRecord(report.safetyLocks) ? report.safetyLocks : {};
+  const requiredBeforeClaimingExactlyOnce = readStringArray(channelResultPersistence.requiredBeforeClaimingExactlyOnce);
+  const hasChannelTableOption = requiredBeforeClaimingExactlyOnce.some((item) => (
+    item.includes("provider_dispatch_attempt_channels")
+      && item.includes("organization/idempotency/channel")
+  ));
+  const hasJsonLedgerOption = requiredBeforeClaimingExactlyOnce.some((item) => (
+    item.includes("provider_result jsonb")
+      && item.includes("canonical per-channel ledger")
+  ));
+  const attemptOnlyReservation = readString(draftMigration.scope) === "attempt_level_reservation_only"
+    && readString(draftMigration.table) === "provider_dispatch_attempts"
+    && readString(draftMigration.uniqueIndex) === "provider_dispatch_attempts_org_idempotency_key_unique"
+    && draftMigration.forceRls === true;
+  const previewLocked = liveDispatchState.capability === false
+    && readString(liveDispatchState.mode) === "preview_only"
+    && readString(liveDispatchState.reason) === "persistent_idempotency_unavailable"
+    && readString(liveDispatchState.codeLock) === "PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false";
+  const noMutationOrSend = safetyLocks.dbMigrationApplied === false
+    && safetyLocks.dbMutationPerformed === false
+    && safetyLocks.providerMessageSent === false
+    && safetyLocks.liveDispatchUnlocked === false;
+  const channelLedgerStillOpen = channelResultPersistence.channelLevelExactlyOnceProven === false
+    && readString(channelResultPersistence.currentShape).includes("channels text[]")
+    && readString(channelResultPersistence.currentShape).includes("provider_result jsonb")
+    && hasChannelTableOption
+    && hasJsonLedgerOption;
+  const timestampBoundaryOpen = timestampBoundary.updatedAtColumnPresent === true
+    && timestampBoundary.updatedAtTriggerIncluded === false
+    && readString(timestampBoundary.requiredBeforeAppliedMigration).includes("updated_at");
+  const pass = readString(report.status) === "approval_required"
+    && attemptOnlyReservation
+    && previewLocked
+    && noMutationOrSend
+    && channelLedgerStillOpen
+    && timestampBoundaryOpen;
+
+  if (pass) {
+    return gateResult({
+      id: "provider_dispatch_persistence",
+      label: "Provider dispatch persistence approval",
+      state: "approval_gated",
+      evidencePath,
+      detail: "Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred.",
+      nextActions: [
+        "Keep PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false until route-level reservation-before-provider-call and duplicate replay behavior are tested.",
+        "Approve either a per-channel dispatch child table or a tested canonical provider_result JSONB ledger before claiming channel-level exactly-once persistence.",
+        "Add an updated_at trigger or route-owned timestamp update contract before applying the migration.",
+      ],
+    });
+  }
+
+  return gateResult({
+    id: "provider_dispatch_persistence",
+    label: "Provider dispatch persistence approval",
+    state: "contradicted",
+    evidencePath,
+    detail: "Provider dispatch approval packet no longer preserves the preview-only/no-mutation boundary and attempt-only-versus-channel-ledger distinction.",
+    nextActions: ["Re-run the provider dispatch idempotency approval packet and inspect live dispatch, safety lock, and channel-result ledger fields."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateKoshaExactTrustGate(rootDir) {
   const evidence = readFirstJsonFile(rootDir, [
     EVIDENCE_PATHS.koshaCurrentNorthstarRegression,
@@ -1613,6 +1698,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateUiDocumentsShareCockpitGate(rootDir),
     evaluateDispatchStandaloneCockpitGate(rootDir),
     evaluateShareResultFixtureCockpitGate(rootDir),
+    evaluateProviderDispatchPersistenceGate(rootDir),
     evaluateRlsApprovalGate(rootDir),
     evaluateLlmWikiGate(rootDir),
     evaluateSifEmbeddingGate(rootDir),

@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-21T11:18:11.553Z
-Source HEAD at generation: 316f8d9d0a7a269ea12c18a5fca732b12f047948
-Live commit at generation: 316f8d9d0a7a269ea12c18a5fca732b12f047948
+Generated at: 2026-07-21T11:32:32.284Z
+Source HEAD at generation: cb2b440f31893362773fd6a32fcecb0e5e2225d0
+Live commit at generation: cb2b440f31893362773fd6a32fcecb0e5e2225d0
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -34,6 +34,7 @@ Overall: `northstar_open_approval_gated`
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
 | share_result_fixture_cockpit | proven | evaluation\share-result-drilldown-2026-07-21\report.json |
 | kosha_exact_trust_registry | proven | evaluation\kosha-current-northstar-regression-2026-07-21\report.json |
+| provider_dispatch_persistence | approval_gated | evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json |
 | supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
 | llm_wiki_publication | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
 | sif_embedding_runtime | approval_gated | evaluation\sif-embedding-gate\approval-preflight-report.json |
@@ -42,16 +43,17 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | ancestor | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-21\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
-| kosha_exact_trust_registry | exact | matches_live | evaluation\kosha-current-live-gate-2026-07-20\report.json |
+| kosha_exact_trust_registry | ancestor | ancestor_of_head | evaluation\kosha-current-live-gate-2026-07-20\report.json |
 | rls_llm_wiki_approval_preflight | ancestor | missing | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
 | sif_embedding_preflight | ancestor | missing | evaluation\sif-embedding-gate\approval-preflight-report.json |
 | live_critical_surface | missing | ancestor_of_head | evaluation\live-critical-surface-current-2026-07-20-rerun\report.json |
 | mobile_p0_workspace | missing | ancestor_of_head | evaluation\mobile-p0-workspace-gate-2026-07-20\report.json |
 | workspace_docs_share_geometry | missing | ancestor_of_head | evaluation\workspace-docs-share-production-gate-2026-07-20\current-geometry.json |
 | dispatch_standalone_cockpit | ancestor | ancestor_of_head | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
+| provider_dispatch_persistence | exact | missing | evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json |
 
 ## Carried Notices
 
@@ -60,6 +62,7 @@ Overall: `northstar_open_approval_gated`
 
 ## Approval-Gated Work
 
+- provider_dispatch_persistence: Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred.
 - supabase_rls_launch_isolation: Read-only RLS approval preflight passed at source SHA 83a9f88db4d1d9481bacb26bef727fa599b98ea1, but live RLS catalog and tenant A/B isolation are not proven.
 - llm_wiki_publication: Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 83a9f88db4d1d9481bacb26bef727fa599b98ea1.
 - sif_embedding_runtime: SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 71db29b273ec9056e133e8b46b70ec90e967dc01.

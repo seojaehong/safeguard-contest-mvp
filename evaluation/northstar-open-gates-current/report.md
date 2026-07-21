@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-21T11:18:12.627Z
-Source SHA: `316f8d9d0a7a269ea12c18a5fca732b12f047948`
+Generated at: 2026-07-21T11:32:34.077Z
+Source SHA: `cb2b440f31893362773fd6a32fcecb0e5e2225d0`
 Overall: `open`
 
 ## Gate Matrix
@@ -13,6 +13,7 @@ Overall: `open`
 | ui_documents_share_cockpit | proven | evaluation\workspace-editor-detail-landing-2026-07-21\report.json | Production evidence closes default /workspace Documents and Share cockpits, /documents mobile raw height, exact one-viewport Documents review cockpit, selected-document context/summary layers, selected editor/detail field-level risk-row landing, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, and mobile Share exact 844px viewport containment. Latest IA refinement still keeps raw textarea/full long-form editing as secondary drilldown and treats desktop Share perceived narrow-card composition as a follow-up; it does not claim provider live dispatch. |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json | Production /dispatch seeded desktop and sample shell routes are no longer mobile-stacked: seeded pageHeight 1116 (1.24x), sample panels 635px/413px in distinct desktop regions, overflow false/outside 0. |
 | share_result_fixture_cockpit | proven | evaluation\share-result-drilldown-2026-07-21\report.json | Generated provider-result fixture proof is bounded: desktop page 900/900, result panel 606px with 2 x-ranges, mobile summary/preview/CTA/result inside 844px, closed summary shows channel status, dispatch POST count 1, provider live dispatch unclaimed. |
+| provider_dispatch_persistence | approval_gated | evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json | Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred. |
 | supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Read-only RLS approval preflight passed at source SHA 83a9f88db4d1d9481bacb26bef727fa599b98ea1, but live RLS catalog and tenant A/B isolation are not proven. |
 | llm_wiki_publication | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 83a9f88db4d1d9481bacb26bef727fa599b98ea1. |
 | sif_embedding_runtime | approval_gated | evaluation\sif-embedding-gate\approval-preflight-report.json | SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 71db29b273ec9056e133e8b46b70ec90e967dc01. |
@@ -43,6 +44,9 @@ Overall: `open`
 - ui_documents_share_cockpit: Keep /share generated-result and perceived full-workbench refinements as separate gates when user-visible sessions reproduce the complaint.
 - dispatch_standalone_cockpit: Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved.
 - share_result_fixture_cockpit: Keep real provider dispatch gated until persistent idempotency and provider-result persistence are approved and live verified.
+- provider_dispatch_persistence: Keep PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false until route-level reservation-before-provider-call and duplicate replay behavior are tested.
+- provider_dispatch_persistence: Approve either a per-channel dispatch child table or a tested canonical provider_result JSONB ledger before claiming channel-level exactly-once persistence.
+- provider_dispatch_persistence: Add an updated_at trigger or route-owned timestamp update contract before applying the migration.
 - supabase_rls_launch_isolation: Approve authoritative project and credential provenance.
 - supabase_rls_launch_isolation: Run read-only live catalog capture.
 - supabase_rls_launch_isolation: Run disposable tenant A/B negative tests before production migration claims.

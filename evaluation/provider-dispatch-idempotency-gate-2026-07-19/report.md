@@ -2,6 +2,8 @@
 
 Generated at: 2026-07-19 KST
 
+Source marker for approval packet wiring: `cb2b440f31893362773fd6a32fcecb0e5e2225d0`
+
 ## Purpose
 
 Live provider dispatch is intentionally preview-only until SafeClaw can prove a persistent duplicate-prevention contract.
