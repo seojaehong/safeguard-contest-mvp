@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "gate": "short-desktop-doc-share-live-2026-07-21",
+  "verdict": "PASS_LIVE_PRODUCTION",
+  "checkedAt": "2026-07-21T02:10:00+09:00",
+  "productCommit": "db6ac612b8ba4d83000d31b7f4f35d2bb66ffa6b",
+  "evidenceBaseCommit": "0ccefc57",
+  "routeSplitAloneAcceptedAsFix": false,
+  "providerDispatchLiveClaimed": false,
+  "liveBuild": {
+    "commitSha": "db6ac612b8ba4d83000d31b7f4f35d2bb66ffa6b",
+    "branch": "master",
+    "environment": "production"
+  },
+  "viewport": {
+    "name": "desktop-short-day",
+    "width": 1440,
+    "height": 723
+  },
+  "metrics": {
+    "documents": {
+      "bodyHeight": 723,
+      "viewportHeight": 723,
+      "heightRatio": 1,
+      "workbenchBottom": 710,
+      "secondaryActionsBottom": 699,
+      "overflowX": false,
+      "outsideHorizontalElements": 0
+    },
+    "share": {
+      "bodyHeight": 723,
+      "viewportHeight": 723,
+      "heightRatio": 1,
+      "shareRootBottom": 716,
+      "previewBottom": 571,
+      "primaryCtaBottom": 389,
+      "overflowX": false,
+      "outsideHorizontalElements": 0
+    }
+  },
+  "checks": [
+    {
+      "command": "npm.cmd test -- tests\\workspace-layout-regression.test.ts --maxWorkers=1 --fileParallelism=false --hookTimeout=180000",
+      "result": "PASS",
+      "testsPassed": 29,
+      "testsSkipped": 1
+    },
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false --hookTimeout=180000",
+      "result": "PASS",
+      "testsPassed": 4
+    },
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-simplification.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "testsPassed": 11
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    },
+    {
+      "command": "npm.cmd run build",
+      "result": "PASS",
+      "staticPages": 28
+    },
+    {
+      "command": "SAFECLAW_BASE_URL=https://www.safeclaw.kr node evaluation\\workspace-docs-share-production-gate-2026-07-20\\run-current-geometry-probe.mjs",
+      "result": "PASS"
+    }
+  ],
+  "remainingBoundaries": [
+    "Provider live dispatch remains approval-gated and is not claimed.",
+    "Deep editor/detail drilldowns may intentionally scroll internally; this gate covers the default generated Documents and Share cockpits."
+  ]
+}
