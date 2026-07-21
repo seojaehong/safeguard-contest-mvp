@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-22 00:35 KST",
+  "checkedAt": "2026-07-22 02:15 KST",
   "verdict": {
     "workspaceDocumentsDefaultCockpit": "PASS_LIVE_DEFAULT_HEIGHT_CLOSED",
     "workspaceSelectedEditorDetail": "SPLIT_FIELD_SUMMARY_PASS_RAW_TEXTAREA_OPEN",
@@ -11,11 +11,11 @@
     "dispatchStandaloneSampleShell": "PASS_SAMPLE_GEOMETRY"
   },
   "currentDeploymentAndStructureNote": {
-    "defaultWorkspaceIaArtifact": "evaluation/workspace-ia-live-293-2026-07-21/report.json",
-    "selectedEditorDetailArtifact": "evaluation/workspace-editor-detail-landing-2026-07-21/report.json",
-    "latestRefreshedLiveGeometryMarker": "f297fe04497ea79f0fa1f8a9f95510fea6ab6759",
-    "selectedEditorLandingLiveMarker": "cd3d46a822bf3dbec4eb4bc3c839b9165c29b2ea",
-    "latestReportRefreshSourceMarkerBeforeThisLedgerUpdate": "cd3d46a822bf3dbec4eb4bc3c839b9165c29b2ea",
+    "defaultWorkspaceIaArtifact": "evaluation/workspace-ia-live-64e-2026-07-22/report.json",
+    "selectedEditorDetailArtifact": "evaluation/workspace-ia-live-64e-2026-07-22/report.json",
+    "latestRefreshedLiveGeometryMarker": "64e80b218134f4e840453c2b4f77a5cccfc92999",
+    "selectedEditorLandingLiveMarker": "64e80b218134f4e840453c2b4f77a5cccfc92999",
+    "latestLaunchReadinessEvidenceMarkerNowLive": "7ec43bf5683bdd19265c23645f3b4a35c6bcced5",
     "defaultDocumentsAndShareCockpitHeightClosed": true,
     "selectedEditorFieldLevelLandingClosed": true,
     "selectedEditorFieldSummaryLandingClosed": true,
@@ -30,12 +30,12 @@
       "bounded panes, accordions, drawers, or drilldown routes for long content",
       "measure primary CTA/status/result bottom, selected editor/panel y-position, default-open details count, desktop column split, horizontal overflow, and sticky overlap"
     ],
-    "defaultWorkspaceIaSplitArtifact": "evaluation/workspace-ia-live-f297-2026-07-22/report.json",
-    "selectedEditorFieldLevelLandingArtifact": "evaluation/workspace-ia-live-f297-2026-07-22/report.json",
-    "latestCheckedLiveMarkerForSelectedEditorLanding": "f297fe04497ea79f0fa1f8a9f95510fea6ab6759"
+    "defaultWorkspaceIaSplitArtifact": "evaluation/workspace-ia-live-64e-2026-07-22/report.json",
+    "selectedEditorFieldLevelLandingArtifact": "evaluation/workspace-ia-live-64e-2026-07-22/report.json",
+    "latestCheckedLiveMarkerForSelectedEditorLanding": "64e80b218134f4e840453c2b4f77a5cccfc92999"
   },
   "latestLiveGeometryRefresh": {
-    "marker": "f297fe04497ea79f0fa1f8a9f95510fea6ab6759",
+    "marker": "64e80b218134f4e840453c2b4f77a5cccfc92999",
     "artifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
     "workspaceDocumentsDefaultCockpit": {
       "desktopShort1440x723": {
