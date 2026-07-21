@@ -23240,3 +23240,21 @@ body:has(.safeclaw-landing) :is(
     padding: 8px;
   }
 }
+
+/* Workspace Documents review cockpit final guard: production theme media rules
+   appear after the route-scoped rules above, so keep the generated Documents
+   review step sized by its cockpit content instead of the generic workspace
+   min-height. Full document editing remains an explicit drilldown/editor mode. */
+@media (max-width: 720px) {
+  .command-center-shell.workspace-page-document > .command-viewport,
+  .command-center-shell.workspace-page-document .linear-workspace-layout,
+  .command-center-shell.workspace-page-document .linear-workspace-layout .command-main,
+  .command-center-shell.workspace-page-document .linear-workspace-layout .workspace-step-page {
+    min-height: 0;
+    height: auto;
+  }
+
+  .command-center-shell.workspace-page-document .linear-workspace-layout {
+    align-content: start;
+  }
+}
