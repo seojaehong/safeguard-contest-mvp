@@ -1014,8 +1014,8 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("live mobile selected-summary");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exact 844px viewport");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exact one-viewport Documents");
-    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("selected editor/detail field-level risk-row landing");
-    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("raw textarea/full long-form editing as secondary drilldown");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("selected editor/detail field-summary risk-row landing");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("raw textarea/full long-form editing below the first viewport as open secondary drilldown");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("perceived narrow-card composition");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.evidencePath).toBe(
       path.join("evaluation", "workspace-editor-detail-landing-2026-07-21", "report.json"),
