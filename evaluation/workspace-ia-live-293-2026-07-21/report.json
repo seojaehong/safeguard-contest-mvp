@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "gate": "workspace-ia-live-293-2026-07-21",
+  "verdict": "IA_BLOCKER_REFINED",
+  "checkedAt": "2026-07-21T11:34:38+09:00",
+  "liveCommitChecked": "293a6d3f47124b937c663531ffe48ed8650837c8",
+  "routeSplitAloneAcceptedAsFix": false,
+  "providerDispatchLiveClaimed": false,
+  "closedOrMostlyClosed": {
+    "workspaceDocumentsDefaultCockpit": {
+      "desktopShort1440x723": {
+        "bodyHeight": 723,
+        "viewportHeight": 723,
+        "documentWorkbenchBottom": 710,
+        "visibleDocumentPreviews": 0,
+        "overflowX": false,
+        "outside": 0
+      },
+      "mobile390x844": {
+        "bodyHeight": 844,
+        "viewportHeight": 844,
+        "documentWorkbenchBottom": 786,
+        "visibleDocumentPreviews": 0,
+        "overflowX": false,
+        "outside": 0
+      }
+    },
+    "workspaceShareDefaultCockpit": {
+      "desktopShort1440x723": {
+        "bodyHeight": 723,
+        "viewportHeight": 723,
+        "shareRootBottom": 716,
+        "previewBottom": 571,
+        "primaryCtaBottom": 389,
+        "overflowX": false,
+        "outside": 0
+      },
+      "desktop1440x900": {
+        "bodyHeight": 946,
+        "viewportHeight": 900,
+        "shareRootBottom": 882,
+        "previewBottom": 757,
+        "primaryCtaBottom": 401,
+        "overflowX": false,
+        "outside": 0
+      },
+      "mobile390x844": {
+        "bodyHeight": 844,
+        "viewportHeight": 844,
+        "shareRootBottom": 810,
+        "previewBottom": 683,
+        "primaryCtaBottom": 742,
+        "overflowX": false,
+        "outside": 0
+      }
+    },
+    "standaloneDispatchSample": {
+      "desktopShort1440x723": {
+        "bodyHeight": 723,
+        "viewportHeight": 723,
+        "panelX": [284, 979],
+        "panelWidths": [635, 413],
+        "overflowX": false
+      },
+      "mobile390x844": {
+        "bodyHeight": 893,
+        "viewportHeight": 844,
+        "singleColumn": true,
+        "overflowX": false
+      }
+    }
+  },
+  "openBlockers": {
+    "selectedDocumentEditorDetailLanding": {
+      "workspaceEditor": {
+        "desktopShort1440x723": {
+          "bodyHeight": 882,
+          "viewportHeight": 723,
+          "heightRatio": 1.22
+        },
+        "desktop1440x900": {
+          "bodyHeight": 1129,
+          "viewportHeight": 900,
+          "heightRatio": 1.25
+        },
+        "mobile390x844": {
+          "bodyHeight": 1067,
+          "viewportHeight": 844,
+          "heightRatio": 1.26
+        }
+      },
+      "standaloneDocumentsInnerPane": {
+        "desktopShort1440x723": {
+          "workpackShellClientHeight": 386,
+          "workpackShellScrollHeight": 1619,
+          "firstTextareaTop": 937,
+          "firstTextareaBottom": 1038
+        },
+        "mobile390x844": {
+          "workpackShellClientHeight": 320,
+          "workpackShellScrollHeight": 1494,
+          "firstTextareaTop": 1048,
+          "firstTextareaBottom": 1143
+        }
+      }
+    },
+    "shareDesktopPerceivedNarrowCard": {
+      "rawGeometryClosed": true,
+      "followUp": "If users still perceive desktop Share as mobile-like, test deliberate full-workbench composition rather than raw two-column existence."
+    }
+  },
+  "nextDocumentsAcceptance": [
+    "Default Documents cockpit remains bounded and keeps core 3 document affordance.",
+    "After selecting risk-assessment edit/detail, the first meaningful editable content or field summary intersects the visible viewport or bounded pane immediately.",
+    "Selected editor/detail has sticky local context and no toolbar or pane-edge overlap.",
+    "Long raw textarea/document body is explicitly secondary drilldown.",
+    "WorkpackEditor export and canonical contracts remain unchanged."
+  ],
+  "structuralConclusion": "Page split helps orientation but is insufficient. The launch UX contract is step split plus first-viewport cockpit plus bounded drilldown/detail with persistent local context."
+}
