@@ -2,9 +2,9 @@
 
 Verdict: `ROUTE_SPLIT_ALONE_IS_NOT_ENOUGH`
 
-Live commit checked: `8d3ec7c649789bc87a15ceca9d7f2d332be8dfda`
+Live commit checked: `419ca8ca944c3667c24fa29407151f06a26564b6`
 
-Current source/evidence HEAD at report generation: `8d3ec7c649789bc87a15ceca9d7f2d332be8dfda`
+Current source/evidence HEAD at report generation: `419ca8ca944c3667c24fa29407151f06a26564b6`
 
 Live geometry artifact: `evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json`
 
@@ -12,7 +12,7 @@ This report answers whether SafeClaw should split the workspace into more pages,
 
 ## Current live geometry
 
-`https://www.safeclaw.kr` now serves runtime commit `8d3ec7c649789bc87a15ceca9d7f2d332be8dfda`. The current report/evidence refresh source is `8d3ec7c649789bc87a15ceca9d7f2d332be8dfda`; it is an evidence/ledger refresh and does not imply a new UI runtime delta beyond the live geometry probe.
+`https://www.safeclaw.kr` now serves runtime commit `419ca8ca944c3667c24fa29407151f06a26564b6`. The current report/evidence refresh source is `419ca8ca944c3667c24fa29407151f06a26564b6`; it is an evidence/ledger refresh and does not imply a new UI runtime delta beyond the live geometry probe.
 
 | Viewport | Stage | Page height | Viewport | Ratio | Horizontal overflow | Outside viewport |
 | --- | --- | ---: | ---: | ---: | --- | ---: |
@@ -46,7 +46,7 @@ Current selected editor evidence makes the distinction concrete:
 
 - Desktop short editor: first risk row header `522-579`, first hazard field `615-675`, but raw textarea `1094-1267`.
 - Mobile editor: first risk row header `526-583`, first hazard field `607-657`, but raw textarea `987-1160`.
-- Share desktop is already raw two-column geometry with form/preview widths `636/520` at 1440x723; any remaining "mobile-like" complaint should be treated as perceived workbench composition, not literal one-column stacking.
+- Share desktop is already raw two-column geometry with form/preview widths `636/520` at 1440x723; any remaining mobile-like complaint should be treated as perceived workbench composition, not literal one-column stacking.
 
 ## Recommended structure
 
@@ -57,7 +57,7 @@ Use four task-level screens, not just three marketing-level steps:
 3. `Documents`: a document index/detail model. Default shows the core three documents only; support documents stay collapsed. Selecting a document opens a focused detail/editor route or panel where field summaries and row-level controls land before raw textarea.
 4. `Share`: one viewport dispatch cockpit. Advanced target/channel/language configuration remains collapsed unless the user opens it.
 
-This preserves the user's mental model of input -> documents -> share, but internally separates "review a generated pack" from "edit a specific document." That is the split that actually reduces height.
+This preserves the user's mental model of input -> documents -> share, but internally separates review a generated pack from edit a specific document. That is the split that actually reduces height.
 
 ## Implementation recommendation
 

@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T22:36:32.463Z",
-  "head": "00754eaf792223b9e1063fefd030c56237dbbb6e",
+  "generatedAt": "2026-07-21T22:49:09.968Z",
+  "head": "419ca8ca944c3667c24fa29407151f06a26564b6",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "00754eaf792223b9e1063fefd030c56237dbbb6e",
+    "commitSha": "419ca8ca944c3667c24fa29407151f06a26564b6",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-3x2i32c6h-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-crdq2zaxf-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -36,7 +36,7 @@
     {
       "id": "ui_documents_share_cockpit",
       "state": "proven",
-      "artifact": "evaluation\\workspace-ia-live-2b82-2026-07-22\\report.json",
+      "artifact": "evaluation\\workspace-ia-live-419-2026-07-22\\report.json",
       "detail": "Production evidence closes default /workspace Documents and Share cockpits, /documents mobile raw height, exact one-viewport Documents review cockpit, selected-document context/summary layers, selected editor/detail field-summary risk-row landing, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, and mobile Share exact 844px viewport containment. Latest IA refinement still keeps raw textarea/full long-form editing below the first viewport as open secondary drilldown and treats desktop Share perceived narrow-card composition as a follow-up; it does not claim provider live dispatch."
     },
     {
@@ -89,7 +89,7 @@
     "verdict": "MOBILE_FIXED",
     "productionCommit": "be64c3b15a8cb55bb132fa065ec485ffb700f652",
     "currentGeometryArtifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-    "currentGeometryCommit": "2b82c00c2f3cd2f89544a1a07b94972bf98154e9",
+    "currentGeometryCommit": "419ca8ca944c3667c24fa29407151f06a26564b6",
     "documentsHeightRatio": 1,
     "documentsBodyHeight": 844,
     "documentsViewportHeight": 844,
@@ -113,7 +113,7 @@
   },
   "workspaceGeometry": {
     "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-    "productionCommit": "2b82c00c2f3cd2f89544a1a07b94972bf98154e9",
+    "productionCommit": "419ca8ca944c3667c24fa29407151f06a26564b6",
     "mobileDocumentDeepReviewOpen": false,
     "mobileVisibleDocumentPreviews": 0
   },
@@ -181,9 +181,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "00754eaf792223b9e1063fefd030c56237dbbb6e",
+      "sourceCommit": "419ca8ca944c3667c24fa29407151f06a26564b6",
       "sourceStatus": "exact",
-      "productionCommit": "00754eaf792223b9e1063fefd030c56237dbbb6e",
+      "productionCommit": "419ca8ca944c3667c24fa29407151f06a26564b6",
       "productionStatus": "matches_live"
     },
     {
@@ -245,10 +245,10 @@
     {
       "id": "workspace_docs_share_geometry",
       "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-      "sourceCommit": "4095a38a1fad34035cbec7783834e47c9df26ce2",
-      "sourceStatus": "ancestor",
-      "productionCommit": "2b82c00c2f3cd2f89544a1a07b94972bf98154e9",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "419ca8ca944c3667c24fa29407151f06a26564b6",
+      "sourceStatus": "exact",
+      "productionCommit": "419ca8ca944c3667c24fa29407151f06a26564b6",
+      "productionStatus": "matches_live"
     },
     {
       "id": "dispatch_standalone_cockpit",

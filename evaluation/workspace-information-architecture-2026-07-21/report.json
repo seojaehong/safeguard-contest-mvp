@@ -1,7 +1,7 @@
 {
   "verdict": "ROUTE_SPLIT_ALONE_IS_NOT_ENOUGH",
-  "liveCommitChecked": "8d3ec7c649789bc87a15ceca9d7f2d332be8dfda",
-  "sourceHeadAtReportGeneration": "8d3ec7c649789bc87a15ceca9d7f2d332be8dfda",
+  "liveCommitChecked": "419ca8ca944c3667c24fa29407151f06a26564b6",
+  "sourceHeadAtReportGeneration": "419ca8ca944c3667c24fa29407151f06a26564b6",
   "liveGeometryArtifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
   "routeSplitAloneAcceptedAsFix": false,
   "recommendedArchitecture": "task route/step split plus first-viewport cockpit plus bounded drilldown/detail panes",
@@ -20,12 +20,12 @@
         "heightRatio": 1.22,
         "horizontalOverflow": false,
         "outside": 0,
-        "firstRiskRowHeaderTop": 522,
         "firstRiskRowHeaderBottom": 579,
-        "firstRiskHazardFieldTop": 615,
         "firstRiskHazardFieldBottom": 675,
-        "documentTextareaTop": 1094,
-        "documentTextareaBottom": 1267
+        "documentTextareaBottom": 1267,
+        "firstRiskRowHeaderTop": 522,
+        "firstRiskHazardFieldTop": 615,
+        "documentTextareaTop": 1094
       },
       "share": {
         "pageHeight": 723,
@@ -76,12 +76,12 @@
         "heightRatio": 1.26,
         "horizontalOverflow": false,
         "outside": 0,
-        "firstRiskRowHeaderTop": 526,
         "firstRiskRowHeaderBottom": 583,
-        "firstRiskHazardFieldTop": 607,
         "firstRiskHazardFieldBottom": 657,
-        "documentTextareaTop": 987,
-        "documentTextareaBottom": 1160
+        "documentTextareaBottom": 1160,
+        "firstRiskRowHeaderTop": 526,
+        "firstRiskHazardFieldTop": 607,
+        "documentTextareaTop": 987
       },
       "share": {
         "pageHeight": 844,
