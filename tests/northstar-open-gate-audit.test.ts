@@ -772,7 +772,7 @@ function createFixtureRoot(): string {
       backendProviderExportContractsTouched: false,
     },
   });
-  writeJson(rootDir, path.join("evaluation", "workspace-ia-live-f297-2026-07-22", "report.json"), {
+  writeJson(rootDir, path.join("evaluation", "workspace-ia-live-a212-2026-07-22", "report.json"), {
     verdict: "IA_BLOCKER_REFINED_CURRENT_LIVE",
     liveCommitChecked: "fixture-sha",
     routeSplitAloneAcceptedAsFix: false,
@@ -1092,7 +1092,7 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("raw textarea/full long-form editing below the first viewport as open secondary drilldown");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("perceived narrow-card composition");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.evidencePath).toBe(
-      path.join("evaluation", "workspace-ia-live-f297-2026-07-22", "report.json"),
+      path.join("evaluation", "workspace-ia-live-a212-2026-07-22", "report.json"),
     );
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("raw textarea and deeper row/all-document authoring");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).not.toContain("Promote the Share staged rail");
