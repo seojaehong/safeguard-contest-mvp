@@ -1,19 +1,19 @@
 {
   "schemaVersion": "safeclaw-hermes-openclaw-runtime-current-gate/v1",
-  "checkedAt": "2026-07-20T05:35:58.000Z",
-  "sourceShaForFocusedTests": "f60a39e315c7445af20328e883b2039fbeb4243d",
+  "checkedAt": "2026-07-21T18:10:00.994Z",
+  "sourceShaForFocusedTests": "f3e2960cbd56be119bcf72f8177f68d9e53ada92",
   "productionBuildInfoAtLiveSmoke": {
-    "commitSha": "f60a39e315c7445af20328e883b2039fbeb4243d",
+    "commitSha": "f3e2960cbd56be119bcf72f8177f68d9e53ada92",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-qvuj9yecg-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-miydxbfb0-seojaehongs-projects.vercel.app"
   },
   "verdict": "adapter_boundary_pass_live_execution_not_claimed",
   "focusedTests": {
     "command": "npm.cmd test -- tests\\engine-adapter.test.ts tests\\hermes-engine-adapter.test.ts tests\\openclaw-hermes-route.test.ts tests\\openclaw-chat.test.ts tests\\openclaw-broker-ui-context.test.ts tests\\remote-hermes-contract.test.ts tests\\remote-hermes-runtime.test.ts tests\\remote-hermes-route.test.ts tests\\remote-hermes-https-transport.test.ts tests\\remote-hermes-service-auth.test.ts tests\\remote-engine-protocol.test.ts tests\\engine-runtime-readiness-policy.test.ts tests\\ai-provider-policy.test.ts --maxWorkers=1 --fileParallelism=false",
     "testFilesPassed": 13,
     "testsPassed": 289,
-    "durationSeconds": 13.80,
+    "durationSeconds": 14.13,
     "status": "pass"
   },
   "liveUnauthenticatedBrokerSmoke": {

@@ -19,6 +19,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Documents and Share cockpit UI is proven for the current evidence scope.
 - Standalone Dispatch cockpit is proven for the current evidence scope.
 - Generated Share result fixture cockpit is proven without claiming real provider dispatch.
+- Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level without claiming live production engine execution.
 - Final-99 is `pass_with_notice`, not clean launch-complete. The notices are carried explicitly in `evaluation\final-99-gate-current-2026-07-21\notice-carry.json`.
 
 ## Approval-Gated Boundaries
@@ -47,6 +48,6 @@ Route/page split alone is not accepted as the UX fix. The accepted structure is 
 
 1. Keep refreshing source/live exact evidence when production marker advances.
 2. Keep UI follow-up strictly scoped to drilldown readability or perceived desktop workbench composition.
-3. Keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
-4. Do not convert `pass_with_notice` into a full launch claim until admin-auth history reuse and approved provider dispatch are verified in a secure environment.
-
+3. Keep Hermes/OpenClaw as a bounded external runtime/adapter path until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven.
+4. Keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
+5. Do not convert `pass_with_notice` into a full launch claim until admin-auth history reuse and approved provider dispatch are verified in a secure environment.

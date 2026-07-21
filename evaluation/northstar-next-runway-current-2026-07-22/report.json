@@ -7,14 +7,16 @@
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
     "liveRollup": "evaluation\\northstar-live-rollup-2026-07-20\\report.json",
     "final99": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
-    "workspaceInformationArchitecture": "evaluation\\workspace-information-architecture-2026-07-21\\report.json"
+    "workspaceInformationArchitecture": "evaluation\\workspace-information-architecture-2026-07-21\\report.json",
+    "hermesOpenclawRuntime": "evaluation\\hermes-openclaw-runtime-current-gate-2026-07-20\\report.json"
   },
   "provenCurrentState": [
     "live_harness_quality",
     "kosha_exact_trust_registry",
     "ui_documents_share_cockpit",
     "dispatch_standalone_cockpit",
-    "share_result_fixture_cockpit"
+    "share_result_fixture_cockpit",
+    "hermes_openclaw_adapter_boundary"
   ],
   "noticeState": [
     {
@@ -47,11 +49,13 @@
     "documentsDefaultCockpit": "closed for raw route height in current live geometry",
     "selectedEditorDetail": "first risk-row header and hazard field land in the first viewport; raw long-form textarea remains secondary drilldown",
     "shareDesktop": "raw geometry is two-column; perceived full-workbench composition remains a follow-up only if reproduced",
-    "shareMobile": "current compact cockpit remains first-viewport bounded in current evidence"
+    "shareMobile": "current compact cockpit remains first-viewport bounded in current evidence",
+    "hermesOpenclaw": "adapter and fail-closed auth boundary current-proven; live production engine execution remains unclaimed"
   },
   "nextSafeWorkWithoutApproval": [
     "refresh source/live exact evidence when production marker advances",
     "keep UI follow-up scoped to drilldown readability or perceived desktop workbench composition",
+    "keep Hermes/OpenClaw as a bounded external runtime/adapter path until tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
     "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
     "do not claim full launch completion while final-99 remains pass_with_notice"
   ],
