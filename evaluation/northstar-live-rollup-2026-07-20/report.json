@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T21:26:51.936Z",
-  "head": "dff2263838bf562351c33696d0553fde49bd756b",
+  "generatedAt": "2026-07-21T21:31:01.675Z",
+  "head": "47f994d94eeb1c6ec8f1cef9eea52273e210b5be",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "dff2263838bf562351c33696d0553fde49bd756b",
+    "commitSha": "47f994d94eeb1c6ec8f1cef9eea52273e210b5be",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-qk2wdvxxc-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-of892ch67-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -24,8 +24,8 @@
     {
       "id": "final_99_gate",
       "state": "notice",
-      "artifact": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
-      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-21\\notice-carry.json."
+      "artifact": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
+      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-22\\notice-carry.json."
     },
     {
       "id": "live_harness_quality",
@@ -181,18 +181,18 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "086dc9398167cb8ae417f651c9b40dd298c79107",
+      "sourceCommit": "dff2263838bf562351c33696d0553fde49bd756b",
       "sourceStatus": "ancestor",
-      "productionCommit": "086dc9398167cb8ae417f651c9b40dd298c79107",
+      "productionCommit": "dff2263838bf562351c33696d0553fde49bd756b",
       "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
       "artifact": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
       "sourceCommit": "dff2263838bf562351c33696d0553fde49bd756b",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "dff2263838bf562351c33696d0553fde49bd756b",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "live_harness_quality",
