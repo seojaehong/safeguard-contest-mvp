@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-21T11:13:15.191Z",
+  "generatedAt": "2026-07-21T11:59:45.657Z",
   "scope": "sif_embedding_next_approval_gate_preflight",
-  "sourceSha": "71db29b273ec9056e133e8b46b70ec90e967dc01",
+  "sourceSha": "9da4a0622078d5e90436b23414573e3b542c0ec0",
   "ok": true,
   "approvalHeld": true,
   "dbMutationPerformed": false,
@@ -136,7 +136,7 @@
       "id": "preflight_source_sha_recorded",
       "passed": true,
       "evidence": {
-        "sourceSha": "71db29b273ec9056e133e8b46b70ec90e967dc01"
+        "sourceSha": "9da4a0622078d5e90436b23414573e3b542c0ec0"
       }
     },
     {
@@ -165,18 +165,16 @@
   ],
   "failedCheckIds": [],
   "env": {
-    "openaiApiKeyPresent": true,
+    "openaiApiKeyPresent": false,
     "supabaseUrlPresent": true,
     "supabaseServiceRolePresent": true,
     "vectorFeatureFlagEnabled": false,
-    "executionEnvReady": true,
-    "requireExecutionEnv": true,
+    "executionEnvReady": false,
+    "requireExecutionEnv": false,
     "envFailure": false
   },
-  "envFilesLoaded": [
-    "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\.env.local"
-  ],
-  "executionReadyAfterApproval": true,
+  "envFilesLoaded": [],
+  "executionReadyAfterApproval": false,
   "nextApprovalDecisions": [
     "Approve and apply the SIF-only embedding migration, or explicitly choose the broader 010_commercial_operations.sql gate.",
     "Confirm OPENAI_API_KEY and Supabase service role are available in the execution environment.",
