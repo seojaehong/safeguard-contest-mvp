@@ -1,18 +1,18 @@
 {
   "baseUrl": "https://www.safeclaw.kr",
-  "generatedAt": "2026-07-21T15:22:19.177Z",
-  "elapsedMs": 25546,
+  "generatedAt": "2026-07-21T15:50:16.515Z",
+  "elapsedMs": 24293,
   "question": "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.",
   "weather": {
     "status": 200,
-    "elapsedMs": 1673,
+    "elapsedMs": 1846,
     "mode": "live",
-    "summary": "단시간 흐림, 강수없음, 기온 25℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선 반영)",
+    "summary": "단시간 흐림, 강수없음, 기온 25℃, 풍속 0.1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선 반영)",
     "signalCount": 8
   },
   "ask": {
     "status": 200,
-    "elapsedMs": 19756,
+    "elapsedMs": 19185,
     "mode": "live",
     "statusSummary": "연결됨",
     "documentCount": 11
@@ -31,7 +31,7 @@
         "TBM 기상 신호",
         "작업중지 기준"
       ],
-      "evidence": "단시간 흐림, 강수없음, 기온 25℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선 반영)",
+      "evidence": "단시간 흐림, 강수없음, 기온 25℃, 풍속 0.1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선 반영)",
       "count": 8
     },
     {
@@ -213,7 +213,7 @@
     {
       "format": "PDF",
       "file": "evaluation\\final-99-gate-current-2026-07-21\\orchestration-download\\files\\세이프건설-risk-assessment.pdf",
-      "bytes": 314973,
+      "bytes": 315317,
       "ok": true
     },
     {
@@ -225,19 +225,19 @@
     {
       "format": "ALL_TXT",
       "file": "evaluation\\final-99-gate-current-2026-07-21\\orchestration-download\\files\\세이프건설-safeguard-workpack.txt",
-      "bytes": 75286,
+      "bytes": 75290,
       "ok": true
     },
     {
       "format": "ALL_CSV",
       "file": "evaluation\\final-99-gate-current-2026-07-21\\orchestration-download\\files\\세이프건설-safeguard-workpack.csv",
-      "bytes": 111665,
+      "bytes": 111669,
       "ok": true
     },
     {
       "format": "ALL_XLS",
       "file": "evaluation\\final-99-gate-current-2026-07-21\\orchestration-download\\files\\세이프건설-safeguard-workpack.xls",
-      "bytes": 173081,
+      "bytes": 173085,
       "ok": true
     }
   ],
