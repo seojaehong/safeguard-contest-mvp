@@ -1,15 +1,15 @@
 {
-  "checkedAt": "2026-07-21T12:04:49.025Z",
+  "checkedAt": "2026-07-21T12:39:14.535Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceSha": "4cb5b1651af2792aa4f03469181d308ce3c661ab",
+  "sourceSha": "7e35c211637f830350f7414a7ba9c8a958c20d39",
   "buildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "4cb5b1651af2792aa4f03469181d308ce3c661ab",
+    "commitSha": "7e35c211637f830350f7414a7ba9c8a958c20d39",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-6p0q41k3a-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-obb3emmho-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "routes": [
@@ -43,10 +43,10 @@
       "url": "https://www.safeclaw.kr/",
       "screenshot": "screenshots/desktop-root.png",
       "title": "SafeClaw | 안전 문서팩 생성",
-      "scrollHeight": 5628,
+      "scrollHeight": 5604,
       "scrollWidth": 1440,
       "clientWidth": 1440,
-      "heightRatio": 6.25,
+      "heightRatio": 6.23,
       "horizontalOverflow": false,
       "outsideCount": 0,
       "under44Count": 1,
