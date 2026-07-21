@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T14:17:14.313Z",
-  "head": "721c80be47c81e100b7d89866898a09f3fcaddb7",
+  "generatedAt": "2026-07-21T14:19:39.294Z",
+  "head": "eb0f80b42c94ba3e06ca56271d5dbfdf89fc6837",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
@@ -181,16 +181,16 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "4aa1e7c064f5c954005cbb750aefa4f1bc99d466",
+      "sourceCommit": "721c80be47c81e100b7d89866898a09f3fcaddb7",
       "sourceStatus": "ancestor",
-      "productionCommit": "4aa1e7c064f5c954005cbb750aefa4f1bc99d466",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "721c80be47c81e100b7d89866898a09f3fcaddb7",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
       "artifact": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
       "sourceCommit": "721c80be47c81e100b7d89866898a09f3fcaddb7",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "721c80be47c81e100b7d89866898a09f3fcaddb7",
       "productionStatus": "matches_live"
     },
@@ -269,10 +269,10 @@
     {
       "id": "northstar_approval_runway",
       "artifact": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
-      "sourceCommit": "721c80be47c81e100b7d89866898a09f3fcaddb7",
+      "sourceCommit": "eb0f80b42c94ba3e06ca56271d5dbfdf89fc6837",
       "sourceStatus": "exact",
       "productionCommit": "721c80be47c81e100b7d89866898a09f3fcaddb7",
-      "productionStatus": "matches_live"
+      "productionStatus": "matches_live_source_mismatch"
     }
   ],
   "contradictions": [],
