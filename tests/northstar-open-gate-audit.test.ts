@@ -408,6 +408,56 @@ function createFixtureRoot(): string {
       { status: "PASS" },
     ],
   });
+  const liveDocumentRows = [
+    "workpackSummaryDraft",
+    "riskAssessmentDraft",
+    "workPlanDraft",
+    "workPermitDraft",
+    "tbmBriefing",
+    "tbmLogDraft",
+    "safetyEducationRecordDraft",
+    "foreignWorkerBriefing",
+    "emergencyResponseDraft",
+    "photoEvidenceDraft",
+    "foreignWorkerTransmission",
+    "kakaoMessage",
+  ].map((key) => ({
+    key,
+    missing: false,
+    pageHeight: 844,
+    viewportHeight: 844,
+    horizontalOverflow: false,
+    targetVisibleInPane: true,
+    targetBelowToolbar: true,
+    toolbarCoversTarget: false,
+    requiredTextPresent: true,
+  }));
+  writeJson(rootDir, path.join("evaluation", "documents-complete-cockpits-live-2026-07-21", "report.json"), {
+    verdict: "PASS_PRODUCTION",
+    buildInfo: {
+      commitSha: "c651301742183e4b7644147570d4ae33d42c5dbc",
+      branch: "master",
+      environment: "production",
+    },
+    scope: {
+      route: "/documents",
+      surface: "12 document first-task cockpits",
+      providerDispatchLiveClaimed: false,
+      exportContractsChanged: false,
+    },
+    mobile390x844: liveDocumentRows,
+    desktop1440x723: liveDocumentRows,
+    assertions: {
+      productionMarkerMatchesCompleteCockpitEvidence: true,
+      allTargetsPresent: true,
+      allTargetsVisibleInPane: true,
+      allTargetsBelowToolbar: true,
+      noToolbarTargetOverlap: true,
+      requiredTextPresent: true,
+      mobilePageHeightBounded: true,
+      horizontalOverflowClosed: true,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "share-desktop-composition-2026-07-21", "report.json"), {
     verdict: "PASS_PRODUCTION",
     scope: {
