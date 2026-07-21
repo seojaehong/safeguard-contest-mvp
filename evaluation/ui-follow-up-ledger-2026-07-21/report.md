@@ -18,13 +18,13 @@ Latest current evidence represented by this ledger:
 
 - Default workspace IA split artifact: `evaluation/workspace-ia-live-293-2026-07-21/report.json`
 - Selected editor field-level landing artifact: `evaluation/workspace-editor-detail-landing-2026-07-21/report.json`
-- Latest refreshed live geometry marker: `b0641a19b7a8c9d767744218635df5ab55df7e8b`
-- Latest checked live marker for selected editor landing: `b0641a19b7a8c9d767744218635df5ab55df7e8b`
-- Latest report-refresh source marker before this ledger update: `b0641a19b7a8c9d767744218635df5ab55df7e8b`
+- Latest refreshed live geometry marker: `e1ae6667f70144d72da94b175d72045713748898`
+- Latest checked live marker for selected editor landing: `e1ae6667f70144d72da94b175d72045713748898`
+- Latest report-refresh source marker before this ledger update: `e1ae6667f70144d72da94b175d72045713748898`
 
 Interpretation: the user's refined reading is correct. The default Documents cockpit and Share cockpit are no longer best described as stale or raw long-page failures. The remaining Documents complaint belongs to selected editor/detail depth: the first meaningful risk-row field is now visible, while the full raw textarea is intentionally below the first work surface. The remaining Share complaint, if reproduced, should be tested as perceived desktop workbench composition rather than as a literal one-column/mobile-stack geometry failure.
 
-Latest live geometry refresh at `b0641a19b7a8c9d767744218635df5ab55df7e8b` keeps that split:
+Latest live geometry refresh at `e1ae6667f70144d72da94b175d72045713748898` keeps that split:
 
 - `/workspace` Documents default cockpit: desktop-short `723/723`, mobile `844/844`, workbench bottoms `710/786`, `visibleDocumentPreviews=0`, overflow `0`.
 - `/workspace` selected editor/detail: field-level landing remains green, but raw textarea remains secondary below the first viewport: desktop-short risk row header `522-579`, hazard field `615-675`, raw textarea `1094-1267`; mobile risk row header `526-583`, hazard field `607-657`, raw textarea `987-1160`.
@@ -319,7 +319,7 @@ Interpretation: current live evidence closes the default cockpit page-height iss
 Live production field-level proof:
 
 - Artifact: `evaluation/workspace-editor-detail-landing-2026-07-21/report.md`
-- Live marker: `d66536560659571afba9671a63644d5610ab30d2`
+- Live marker: `e1ae6667f70144d72da94b175d72045713748898`
 - The previous selected-editor blocker was too broad if it was judged only by raw textarea position.
 - Current live `/workspace` editor/detail still has a long raw textarea below the viewport, but the first meaningful risk-row work surface is visible immediately:
   - Desktop short `1440x723`: first risk row header `522-579`, first hazard field `615-675`, raw textarea `1094-1267`.

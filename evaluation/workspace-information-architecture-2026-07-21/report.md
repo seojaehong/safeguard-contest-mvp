@@ -2,15 +2,15 @@
 
 Verdict: `ROUTE_SPLIT_ALONE_IS_NOT_ENOUGH`
 
-Live commit checked: `b0641a19b7a8c9d767744218635df5ab55df7e8b`
+Live commit checked: `e1ae6667f70144d72da94b175d72045713748898`
 
-Current source/evidence HEAD at report generation: `b0641a19b7a8c9d767744218635df5ab55df7e8b`
+Current source/evidence HEAD at report generation: `e1ae6667f70144d72da94b175d72045713748898`
 
 This report answers whether SafeClaw should split the workspace into more pages, and whether that would actually solve the long Document and Share screens.
 
 ## Current live geometry
 
-`https://www.safeclaw.kr` now serves commit `b0641a19b7a8c9d767744218635df5ab55df7e8b`.
+`https://www.safeclaw.kr` now serves commit `e1ae6667f70144d72da94b175d72045713748898`.
 
 | Viewport | Stage | Page height | Viewport | Ratio | Horizontal overflow | Outside viewport |
 | --- | --- | ---: | ---: | ---: | --- | ---: |
@@ -63,7 +63,7 @@ Do not launch a broad route rewrite. Use bounded TDD waves:
 
 1. Keep the live Share mobile fix as done and evidence-backed.
 2. Keep the current Documents default cockpit as closed for raw page height.
-3. For selected editor/detail, require the first meaningful editable content or field summary to intersect the visible viewport or bounded pane immediately, while raw textarea remains explicit secondary drilldown.
+3. For selected editor/detail, keep requiring the first meaningful editable content or field summary to intersect the visible viewport or bounded pane immediately. Current live evidence satisfies that with the first risk row header and hazard field; raw textarea remains explicit secondary drilldown.
 4. Add route or URL state only after the cockpit/detail split is green. Candidate URLs:
    - `/workspace?step=review`
    - `/workspace?step=documents`
