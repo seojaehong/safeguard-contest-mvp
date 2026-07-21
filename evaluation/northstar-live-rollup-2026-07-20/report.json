@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T19:28:20.062Z",
-  "head": "2ac6f1b0a0c2f42dd16ab4f4c4c3d68d4ec03d08",
+  "generatedAt": "2026-07-21T19:33:54.418Z",
+  "head": "8ce8ac38d94024b7cc808fc577e7809f913122c0",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "2ac6f1b0a0c2f42dd16ab4f4c4c3d68d4ec03d08",
+    "commitSha": "8ce8ac38d94024b7cc808fc577e7809f913122c0",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-o6itg61ea-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-hleu10y87-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -181,9 +181,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "de956e853f5d310f374f55729ace77dcccc57221",
+      "sourceCommit": "2ac6f1b0a0c2f42dd16ab4f4c4c3d68d4ec03d08",
       "sourceStatus": "ancestor",
-      "productionCommit": "de956e853f5d310f374f55729ace77dcccc57221",
+      "productionCommit": "2ac6f1b0a0c2f42dd16ab4f4c4c3d68d4ec03d08",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -205,9 +205,9 @@
     {
       "id": "kosha_exact_trust_registry",
       "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
-      "sourceCommit": "2ac6f1b0a0c2f42dd16ab4f4c4c3d68d4ec03d08",
+      "sourceCommit": "8ce8ac38d94024b7cc808fc577e7809f913122c0",
       "sourceStatus": "exact",
-      "productionCommit": "2ac6f1b0a0c2f42dd16ab4f4c4c3d68d4ec03d08",
+      "productionCommit": "8ce8ac38d94024b7cc808fc577e7809f913122c0",
       "productionStatus": "matches_live"
     },
     {
@@ -269,9 +269,9 @@
     {
       "id": "northstar_approval_runway",
       "artifact": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
-      "sourceCommit": "034cd0021ae1d6832597f742fa0c69a5afb33852",
+      "sourceCommit": "2ac6f1b0a0c2f42dd16ab4f4c4c3d68d4ec03d08",
       "sourceStatus": "ancestor",
-      "productionCommit": "de956e853f5d310f374f55729ace77dcccc57221",
+      "productionCommit": "2ac6f1b0a0c2f42dd16ab4f4c4c3d68d4ec03d08",
       "productionStatus": "ancestor_of_head"
     }
   ],

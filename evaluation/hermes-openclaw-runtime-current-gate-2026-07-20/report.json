@@ -1,19 +1,19 @@
 {
   "schemaVersion": "safeclaw-hermes-openclaw-runtime-current-gate/v1",
-  "checkedAt": "2026-07-22T04:01:53.5908812+09:00",
-  "sourceShaForFocusedTests": "54d3870b1f1b2a51a3504cb6a88173cffb56168a",
+  "checkedAt": "2026-07-21T19:33:01.756Z",
+  "sourceShaForFocusedTests": "8ce8ac38d94024b7cc808fc577e7809f913122c0",
   "productionBuildInfoAtLiveSmoke": {
-    "commitSha": "54d3870b1f1b2a51a3504cb6a88173cffb56168a",
+    "commitSha": "8ce8ac38d94024b7cc808fc577e7809f913122c0",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-6i6ggi2s6-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-hleu10y87-seojaehongs-projects.vercel.app"
   },
   "verdict": "adapter_boundary_pass_live_execution_not_claimed",
   "focusedTests": {
-    "command": "npm.cmd test -- tests\\engine-adapter.test.ts tests\\hermes-engine-adapter.test.ts tests\\openclaw-hermes-route.test.ts tests\\openclaw-chat.test.ts tests\\openclaw-broker-ui-context.test.ts tests\\remote-hermes-contract.test.ts tests\\remote-hermes-runtime.test.ts tests\\remote-hermes-route.test.ts tests\\remote-hermes-https-transport.test.ts tests\\remote-hermes-service-auth.test.ts tests\\remote-engine-protocol.test.ts tests\\engine-runtime-readiness-policy.test.ts tests\\ai-provider-policy.test.ts --maxWorkers=1 --fileParallelism=false",
+    "command": "npm.cmd test -- tests\\engine-adapter.test.ts tests\\hermes-engine-adapter.test.ts tests\\openclaw-hermes-route.test.ts tests\\openclaw-chat.test.ts tests\\openclaw-broker-ui-context.test.ts tests\\remote-hermes-contract.test.ts tests\\remote-hermes-runtime.test.ts tests\\remote-hermes-route.test.ts tests\\remote-hermes-https-transport.test.ts tests\\remote-hermes-service-auth.test.ts tests\\remote-engine-protocol.test.ts tests\\engine-runtime-readiness-policy.test.ts tests\\ai-provider-policy.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000",
     "testFilesPassed": 13,
     "testsPassed": 289,
-    "durationSeconds": 23.44,
+    "durationSeconds": 15.71,
     "status": "pass"
   },
   "liveUnauthenticatedBrokerSmoke": {

@@ -1,6 +1,6 @@
 # SafeClaw Hermes / OpenClaw Runtime Current Gate
 
-Checked at: 2026-07-22T04:01:53.5908812+09:00
+Checked at: 2026-07-21T19:33:01.756Z
 
 ## Verdict
 
@@ -10,9 +10,9 @@ Live production runtime execution is still not claimed. The live `/api/agent/cha
 
 ## Authority
 
-- Source SHA for focused tests: `54d3870b1f1b2a51a3504cb6a88173cffb56168a`
-- Production build-info observed during live smoke: `54d3870b1f1b2a51a3504cb6a88173cffb56168a`
-- Live deployment URL: `safeguard-contest-6i6ggi2s6-seojaehongs-projects.vercel.app`
+- Source SHA for focused tests: `8ce8ac38d94024b7cc808fc577e7809f913122c0`
+- Production build-info observed during live smoke: `8ce8ac38d94024b7cc808fc577e7809f913122c0`
+- Live deployment URL: `safeguard-contest-hleu10y87-seojaehongs-projects.vercel.app`
 - Worktree: `C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\recipient-foreign-live-gate-20260720`
 - Branch: `chore/recipient-foreign-live-gate-20260720`
 
@@ -21,14 +21,14 @@ Live production runtime execution is still not claimed. The live `/api/agent/cha
 Command:
 
 ```powershell
-npm.cmd test -- tests\engine-adapter.test.ts tests\hermes-engine-adapter.test.ts tests\openclaw-hermes-route.test.ts tests\openclaw-chat.test.ts tests\openclaw-broker-ui-context.test.ts tests\remote-hermes-contract.test.ts tests\remote-hermes-runtime.test.ts tests\remote-hermes-route.test.ts tests\remote-hermes-https-transport.test.ts tests\remote-hermes-service-auth.test.ts tests\remote-engine-protocol.test.ts tests\engine-runtime-readiness-policy.test.ts tests\ai-provider-policy.test.ts --maxWorkers=1 --fileParallelism=false
+npm.cmd test -- tests\engine-adapter.test.ts tests\hermes-engine-adapter.test.ts tests\openclaw-hermes-route.test.ts tests\openclaw-chat.test.ts tests\openclaw-broker-ui-context.test.ts tests\remote-hermes-contract.test.ts tests\remote-hermes-runtime.test.ts tests\remote-hermes-route.test.ts tests\remote-hermes-https-transport.test.ts tests\remote-hermes-service-auth.test.ts tests\remote-engine-protocol.test.ts tests\engine-runtime-readiness-policy.test.ts tests\ai-provider-policy.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000
 ```
 
 Result:
 
 - Test files: 13 passed / 13
 - Tests: 289 passed / 289
-- Duration: 23.44s
+- Duration: 15.71s
 
 Live unauthenticated broker smoke:
 
