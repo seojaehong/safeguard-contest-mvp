@@ -1396,6 +1396,10 @@
     padding: 8px;
   }
 
+  .tbmCockpit[data-density="compact"] {
+    max-height: 76px;
+  }
+
   .tbmCockpitHeader,
   .tbmCockpitGrid {
     grid-template-columns: 1fr;

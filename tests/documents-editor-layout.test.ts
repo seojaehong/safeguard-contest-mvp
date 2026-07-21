@@ -1656,6 +1656,12 @@ describe("documents editor layout", () => {
     const documentSelect = page.locator('select[aria-label="편집 문서 선택"]');
     const cases = [
       {
+        key: "workpackSummaryDraft",
+        title: "점검결과 요약",
+        cockpitTestId: "summary-document-cockpit",
+        requiredText: ["요약 cockpit", "오늘 작업", "핵심 위험", "근거 상태"]
+      },
+      {
         key: "workPlanDraft",
         title: "작업계획서",
         cockpitTestId: "execution-document-cockpit",
@@ -1686,6 +1692,18 @@ describe("documents editor layout", () => {
         requiredText: ["사진·증빙 cockpit", "촬영 우선순위", "보관 확인", "연결 근거"]
       },
       {
+        key: "foreignWorkerBriefing",
+        title: "외국인 근로자 출력본",
+        cockpitTestId: "transmission-document-cockpit",
+        requiredText: ["전송 cockpit", "언어 대상", "전송 전 확인", "미리보기 핵심"]
+      },
+      {
+        key: "foreignWorkerBriefing",
+        title: "외국인 근로자 출력본",
+        cockpitTestId: "education-document-cockpit",
+        requiredText: ["교육 진행 cockpit", "교육 내용", "이해 확인", "TBM 연계"]
+      },
+      {
         key: "foreignWorkerTransmission",
         title: "외국인 근로자 전송본",
         cockpitTestId: "transmission-document-cockpit",
@@ -1706,6 +1724,26 @@ describe("documents editor layout", () => {
         const toolbar = document.querySelector<HTMLElement>(".document-toolbar");
         return toolbar?.textContent?.includes(expectedTitle);
       }, item.title);
+      await page.waitForFunction((cockpitTestId) => {
+        const shell = document.querySelector<HTMLElement>(".workpack-shell");
+        const toolbar = document.querySelector<HTMLElement>(".document-toolbar");
+        const cockpit = document.querySelector<HTMLElement>(`[data-testid="${cockpitTestId}"]`);
+        if (!shell || !toolbar || !cockpit) return false;
+        const shellRect = shell.getBoundingClientRect();
+        const toolbarRect = toolbar.getBoundingClientRect();
+        const cockpitRect = cockpit.getBoundingClientRect();
+        return cockpitRect.top >= toolbarRect.bottom - 1 && cockpitRect.bottom < shellRect.bottom;
+      }, item.cockpitTestId);
+      await page.waitForFunction((cockpitTestId) => {
+        const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
+        const toolbar = document.querySelector<HTMLElement>(".document-toolbar");
+        const cockpit = document.querySelector<HTMLElement>(`[data-testid="${cockpitTestId}"]`);
+        if (!workpackShell || !toolbar || !cockpit) return false;
+        const shellRect = workpackShell.getBoundingClientRect();
+        const toolbarRect = toolbar.getBoundingClientRect();
+        const cockpitRect = cockpit.getBoundingClientRect();
+        return cockpitRect.top >= toolbarRect.bottom - 1 && cockpitRect.bottom < shellRect.bottom;
+      }, item.cockpitTestId, { timeout: 2_000 });
 
       const metrics = await page.evaluate((cockpitTestId) => {
         const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
@@ -1757,7 +1795,7 @@ describe("documents editor layout", () => {
       expect(metrics.cockpitVisibleInPane).toBe(true);
       expect(metrics.cockpitBelowToolbar).toBe(true);
       expect(metrics.cockpitTop).toBeGreaterThanOrEqual(metrics.toolbarBottom - 1);
-      expect(metrics.cockpitBottom).toBeLessThan(metrics.shellBottom);
+      expect(metrics.cockpitBottom, item.title).toBeLessThan(metrics.shellBottom);
       item.requiredText.forEach((text) => expect(metrics.cockpitText).toContain(text));
       expect(metrics.textareaTop).toBeGreaterThanOrEqual(metrics.cockpitBottom);
       expect(metrics.fieldStripTop).toBeGreaterThanOrEqual(metrics.cockpitBottom);
