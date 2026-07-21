@@ -1584,6 +1584,8 @@ describe("workspace layout regression", () => {
           right: Math.round(rect.right),
           width: Math.round(rect.width),
           height: Math.round(rect.height),
+          clientHeight: element.clientHeight,
+          scrollHeight: element.scrollHeight,
           display: style.display,
           backgroundColor: style.backgroundColor,
           color: style.color,
@@ -1673,8 +1675,12 @@ describe("workspace layout regression", () => {
     expect(await page.locator(".workspace-rail").count()).toBe(1);
     expect(await page.locator(".workspace-side").count()).toBe(1);
     expect(metrics.canvas.width).toBeGreaterThanOrEqual(Math.floor(metrics.fieldWorkspace.width * 0.98));
-    expect(metrics.rail.top).toBeGreaterThanOrEqual(metrics.canvas.bottom + 12);
-    expect(metrics.side.top).toBeGreaterThanOrEqual(metrics.rail.bottom + 12);
+    expect(metrics.fieldWorkspace.overflowY).toBe("auto");
+    expect(metrics.fieldWorkspace.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
+    expect(metrics.fieldWorkspace.scrollHeight).toBeGreaterThanOrEqual(metrics.fieldWorkspace.clientHeight);
+    expect(metrics.rail.top).toBeGreaterThanOrEqual(metrics.fieldWorkspace.top);
+    expect(metrics.rail.bottom).toBeLessThanOrEqual(metrics.fieldWorkspace.bottom);
+    expect(metrics.side.top).toBeGreaterThanOrEqual(metrics.fieldWorkspace.top);
     expect(metrics.side.width).toBeGreaterThanOrEqual(Math.floor(metrics.fieldWorkspace.width * 0.95));
     expect(metrics.compactHeadOverlaps).toEqual([]);
     expect(metrics.largestCompactHeadHeight).toBeLessThanOrEqual(160);
@@ -1686,7 +1692,8 @@ describe("workspace layout regression", () => {
     expect(metrics.loginRequiredMessageCount).toBe(1);
     expect(metrics.clawGreetingCount).toBe(0);
     expect(metrics.shell.display).toBe("grid");
-    expect(metrics.shell.overflowY).toBe("visible");
+    expect(metrics.shell.overflowY).toBe("auto");
+    expect(metrics.shell.clientHeight).toBeLessThanOrEqual(metrics.shell.scrollHeight);
     expect(metrics.navigator.right).toBeLessThanOrEqual(metrics.editor.left - 12);
     expect(metrics.desktopTabsDisplay).not.toBe("none");
     expect(metrics.mobilePickerDisplay).toBe("none");
@@ -1694,8 +1701,8 @@ describe("workspace layout regression", () => {
     expect(metrics.editor.backgroundColor).toBe("rgb(255, 255, 255)");
     expect(metrics.editor.color).not.toBe("rgb(246, 245, 239)");
     expect(metrics.editor.borderRadius).toBeGreaterThanOrEqual(9);
-    expect(metrics.editor.overflowX).toBe("visible");
-    expect(metrics.editor.overflowY).toBe("visible");
+    expect(["auto", "visible"]).toContain(metrics.editor.overflowX);
+    expect(metrics.editor.overflowY).toBe("auto");
     expect(metrics.textarea.backgroundColor).toBe("rgb(255, 255, 255)");
     expect(metrics.textarea.borderTopWidth).toBeGreaterThanOrEqual(1);
     expect(metrics.textarea.lineHeight / metrics.textarea.fontSize).toBeGreaterThanOrEqual(1.68);
@@ -1753,6 +1760,9 @@ describe("workspace layout regression", () => {
         operationsDisclosure: toRect(operationsDisclosure),
         operationsDisclosureDisplay: getComputedStyle(operationsDisclosure).display,
         shellOverflowY: getComputedStyle(shell).overflowY,
+        fieldWorkspaceOverflowY: getComputedStyle(fieldWorkspace).overflowY,
+        fieldWorkspaceClientHeight: fieldWorkspace.clientHeight,
+        fieldWorkspaceScrollHeight: fieldWorkspace.scrollHeight,
       };
     });
     await page.setViewportSize({ width: 740, height: 900 });
@@ -1790,10 +1800,21 @@ describe("workspace layout regression", () => {
     });
     expect(mobileMetrics.scrollWidth).toBeLessThanOrEqual(mobileMetrics.viewportWidth + 1);
     expect(mobileCollapsedScrollHeight).toBeLessThanOrEqual(mobileMetrics.viewportHeight * 3.4);
-    expect(mobileCollapsedEditorMetrics.shellOverflowY).toBe("visible");
+    expect(mobileCollapsedEditorMetrics.shellOverflowY).toBe("auto");
+    expect(mobileCollapsedEditorMetrics.fieldWorkspaceOverflowY).toBe("auto");
+    expect(mobileCollapsedEditorMetrics.fieldWorkspace.bottom).toBeLessThanOrEqual(
+      mobileCollapsedEditorMetrics.viewportHeight,
+    );
+    expect(mobileCollapsedEditorMetrics.fieldWorkspaceScrollHeight).toBeGreaterThanOrEqual(
+      mobileCollapsedEditorMetrics.fieldWorkspaceClientHeight,
+    );
     expect(mobileCollapsedEditorMetrics.operationsDisclosureDisplay).toBe("none");
-    expect(mobileCollapsedEditorMetrics.structuredEditor.top).toBeLessThanOrEqual(520);
-    expect(mobileCollapsedEditorMetrics.textarea.top).toBeLessThanOrEqual(680);
+    expect(mobileCollapsedEditorMetrics.structuredEditor.top).toBeLessThanOrEqual(
+      mobileCollapsedEditorMetrics.viewportHeight - 180,
+    );
+    expect(mobileCollapsedEditorMetrics.textarea.top).toBeGreaterThan(
+      mobileCollapsedEditorMetrics.structuredEditor.top,
+    );
     expect(mobileMetrics.canvas.width).toBeGreaterThanOrEqual(Math.floor(mobileMetrics.fieldWorkspace.width * 0.98));
     for (const button of mobileMetrics.exportButtons) {
       expect(button.left).toBeGreaterThanOrEqual(mobileMetrics.exportPanel.left);

@@ -19717,11 +19717,18 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .command-main.workspace-view-document:has(.field-workspace-editor-focus),
 .command-center-shell .workspace-step-page.workspace-document-page:has(.field-workspace-editor-focus),
 .command-center-shell .document-editor-surface:has(.field-workspace-editor-focus),
-.command-center-shell .field-workspace.field-workspace-editor-focus,
 .command-center-shell .field-workspace.field-workspace-editor-focus .workspace-canvas {
   min-height: 0;
   max-height: calc(100svh - 24px);
   overflow: hidden;
+}
+
+.command-center-shell .field-workspace.field-workspace-editor-focus {
+  min-height: 0;
+  max-height: calc(100svh - 24px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .command-center-shell .field-workspace.field-workspace-editor-focus .document-editor,
@@ -19745,8 +19752,11 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell .command-main.workspace-view-document:has(.field-workspace-editor-focus),
   .command-center-shell .workspace-step-page.workspace-document-page:has(.field-workspace-editor-focus),
   .command-center-shell .document-editor-surface:has(.field-workspace-editor-focus),
-  .command-center-shell .field-workspace.field-workspace-editor-focus,
   .command-center-shell .field-workspace.field-workspace-editor-focus .workspace-canvas {
+    max-height: calc(100svh - 8px);
+  }
+
+  .command-center-shell .field-workspace.field-workspace-editor-focus {
     max-height: calc(100svh - 8px);
   }
 
@@ -20614,16 +20624,18 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell .field-workspace-editor-focus .workpack-shell {
-  max-height: none;
-  overflow: visible;
-  overscroll-behavior: auto;
+  max-height: calc(100svh - 92px);
+  overflow-x: visible;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .command-center-shell.workspace-theme-day .field-workspace.field-workspace-editor-focus .workpack-shell,
 .command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .workpack-shell {
-  max-height: none;
-  overflow: visible;
-  overscroll-behavior: auto;
+  max-height: calc(100svh - 92px);
+  overflow-x: visible;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .command-center-shell .field-workspace-editor-focus .document-editor {
