@@ -23386,15 +23386,15 @@ body:has(.safeclaw-landing) :is(
   }
 
   .command-center-shell.workspace-page-share .share-panel.workflow-panel {
-    max-height: calc(100svh - 168px);
+    max-height: calc(100svh - 202px);
     overflow-y: auto;
     overscroll-behavior: contain;
   }
 
   .command-center-shell.workspace-page-share [data-share-preview] {
-    height: min(260px, calc(100svh - 318px));
-    min-height: 156px;
-    max-height: calc(100svh - 286px);
+    height: min(226px, calc(100svh - 352px));
+    min-height: 144px;
+    max-height: calc(100svh - 320px);
   }
 }
 
