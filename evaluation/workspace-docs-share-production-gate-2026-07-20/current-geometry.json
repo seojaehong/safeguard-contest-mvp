@@ -1,13 +1,13 @@
 {
-  "checkedAt": "2026-07-20T23:30:48.315Z",
+  "checkedAt": "2026-07-21T00:36:07.287Z",
   "build": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "ab66cec1e4ce7d6876237c28ae6ad6671f7f9bf3",
+    "commitSha": "703e4a031a9c19f78f986b863d647f367e123cf8",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-7fzvrocsx-seojaehongs-projects.vercel.app",
+    "deploymentUrl": null,
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "inputText": "서울 성수동 외벽 도장 작업, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보. 이동식 비계와 자재 양중 동선 확인 필요.",
@@ -131,7 +131,7 @@
         "body": {
           "width": 1440,
           "clientWidth": 1440,
-          "height": 2533,
+          "height": 952,
           "clientHeight": 723,
           "overflowX": false
         },
@@ -144,8 +144,8 @@
           "x": 186,
           "y": -9,
           "w": 1068,
-          "h": 2176,
-          "bottom": 2167
+          "h": 699,
+          "bottom": 690
         },
         "documentWorkbench": null,
         "documentWorkbenchHead": null,
@@ -163,8 +163,8 @@
           "x": 482,
           "y": 63,
           "w": 772,
-          "h": 1756,
-          "bottom": 1819
+          "h": 599,
+          "bottom": 662
         },
         "documentTextarea": {
           "x": 499,
@@ -237,7 +237,7 @@
         "body": {
           "width": 1440,
           "clientWidth": 1440,
-          "height": 918,
+          "height": 946,
           "clientHeight": 723,
           "overflowX": false
         },
@@ -265,15 +265,15 @@
           "x": 130,
           "y": 189,
           "w": 1180,
-          "h": 665,
-          "bottom": 854
+          "h": 693,
+          "bottom": 882
         },
         "shareRoot": {
           "x": 130,
           "y": 189,
           "w": 1180,
-          "h": 665,
-          "bottom": 854
+          "h": 693,
+          "bottom": 882
         },
         "shareMobileSummary": {
           "x": 0,
@@ -283,53 +283,53 @@
           "bottom": 0
         },
         "shareForm": {
-          "x": 149,
-          "y": 305,
-          "w": 606,
+          "x": 143,
+          "y": 357,
+          "w": 624,
           "h": 368,
-          "bottom": 673
+          "bottom": 725
         },
         "shareTargetCard": {
-          "x": 149,
-          "y": 361,
-          "w": 400,
+          "x": 143,
+          "y": 413,
+          "w": 412,
           "h": 150,
-          "bottom": 511
+          "bottom": 563
         },
         "shareChannelCard": {
-          "x": 149,
-          "y": 523,
-          "w": 606,
+          "x": 143,
+          "y": 575,
+          "w": 624,
           "h": 150,
-          "bottom": 673
+          "bottom": 725
         },
         "shareLanguageCard": {
-          "x": 561,
-          "y": 361,
-          "w": 194,
+          "x": 567,
+          "y": 413,
+          "w": 200,
           "h": 150,
-          "bottom": 511
+          "bottom": 563
         },
         "sharePreview": {
-          "x": 771,
-          "y": 305,
+          "x": 777,
+          "y": 357,
           "w": 520,
           "h": 400,
-          "bottom": 705
+          "bottom": 757
         },
         "primaryShareCta": {
-          "x": 149,
-          "y": 305,
-          "w": 606,
+          "x": 143,
+          "y": 357,
+          "w": 624,
           "h": 44,
-          "bottom": 349
+          "bottom": 401
         },
         "primaryShareCtas": 1,
         "stickyLike": [
           {
             "selector": "message-preview-panel",
             "position": "sticky",
-            "y": 305,
+            "y": 357,
             "h": 400
           }
         ]
@@ -454,7 +454,7 @@
         "body": {
           "width": 1440,
           "clientWidth": 1440,
-          "height": 2533,
+          "height": 1129,
           "clientHeight": 900,
           "overflowX": false
         },
@@ -467,8 +467,8 @@
           "x": 186,
           "y": -9,
           "w": 1068,
-          "h": 2176,
-          "bottom": 2167
+          "h": 876,
+          "bottom": 867
         },
         "documentWorkbench": null,
         "documentWorkbenchHead": null,
@@ -486,8 +486,8 @@
           "x": 482,
           "y": 63,
           "w": 772,
-          "h": 1756,
-          "bottom": 1819
+          "h": 776,
+          "bottom": 839
         },
         "documentTextarea": {
           "x": 499,
@@ -560,7 +560,7 @@
         "body": {
           "width": 1440,
           "clientWidth": 1440,
-          "height": 918,
+          "height": 946,
           "clientHeight": 900,
           "overflowX": false
         },
@@ -588,15 +588,15 @@
           "x": 130,
           "y": 189,
           "w": 1180,
-          "h": 665,
-          "bottom": 854
+          "h": 693,
+          "bottom": 882
         },
         "shareRoot": {
           "x": 130,
           "y": 189,
           "w": 1180,
-          "h": 665,
-          "bottom": 854
+          "h": 693,
+          "bottom": 882
         },
         "shareMobileSummary": {
           "x": 0,
@@ -606,53 +606,53 @@
           "bottom": 0
         },
         "shareForm": {
-          "x": 149,
-          "y": 305,
-          "w": 606,
+          "x": 143,
+          "y": 357,
+          "w": 624,
           "h": 368,
-          "bottom": 673
+          "bottom": 725
         },
         "shareTargetCard": {
-          "x": 149,
-          "y": 361,
-          "w": 400,
+          "x": 143,
+          "y": 413,
+          "w": 412,
           "h": 150,
-          "bottom": 511
+          "bottom": 563
         },
         "shareChannelCard": {
-          "x": 149,
-          "y": 523,
-          "w": 606,
+          "x": 143,
+          "y": 575,
+          "w": 624,
           "h": 150,
-          "bottom": 673
+          "bottom": 725
         },
         "shareLanguageCard": {
-          "x": 561,
-          "y": 361,
-          "w": 194,
+          "x": 567,
+          "y": 413,
+          "w": 200,
           "h": 150,
-          "bottom": 511
+          "bottom": 563
         },
         "sharePreview": {
-          "x": 771,
-          "y": 305,
+          "x": 777,
+          "y": 357,
           "w": 520,
           "h": 400,
-          "bottom": 705
+          "bottom": 757
         },
         "primaryShareCta": {
-          "x": 149,
-          "y": 305,
-          "w": 606,
+          "x": 143,
+          "y": 357,
+          "w": 624,
           "h": 44,
-          "bottom": 349
+          "bottom": 401
         },
         "primaryShareCtas": 1,
         "stickyLike": [
           {
             "selector": "message-preview-panel",
             "position": "sticky",
-            "y": 305,
+            "y": 357,
             "h": 400
           }
         ]
@@ -777,7 +777,7 @@
         "body": {
           "width": 390,
           "clientWidth": 390,
-          "height": 2288,
+          "height": 1131,
           "clientHeight": 844,
           "overflowX": false
         },
@@ -788,10 +788,10 @@
         "inputPage": null,
         "documentPage": {
           "x": 27,
-          "y": -215,
+          "y": -67,
           "w": 336,
-          "h": 1921,
-          "bottom": 1706
+          "h": 836,
+          "bottom": 769
         },
         "documentWorkbench": null,
         "documentWorkbenchHead": null,
@@ -809,8 +809,8 @@
           "x": 27,
           "y": 63,
           "w": 336,
-          "h": 1581,
-          "bottom": 1644
+          "h": 748,
+          "bottom": 811
         },
         "documentTextarea": {
           "x": 40,
@@ -883,7 +883,7 @@
         "body": {
           "width": 390,
           "clientWidth": 390,
-          "height": 993,
+          "height": 1107,
           "clientHeight": 844,
           "overflowX": false
         },
@@ -911,15 +911,15 @@
           "x": 27,
           "y": 244,
           "w": 336,
-          "h": 644,
-          "bottom": 888
+          "h": 758,
+          "bottom": 1002
         },
         "shareRoot": {
           "x": 27,
           "y": 244,
           "w": 336,
-          "h": 644,
-          "bottom": 888
+          "h": 758,
+          "bottom": 1002
         },
         "shareMobileSummary": {
           "x": 40,
@@ -930,10 +930,10 @@
         },
         "shareForm": {
           "x": 40,
-          "y": 667,
+          "y": 781,
           "w": 310,
           "h": 62,
-          "bottom": 729
+          "bottom": 843
         },
         "shareTargetCard": {
           "x": 0,
@@ -958,24 +958,24 @@
         },
         "sharePreview": {
           "x": 40,
-          "y": 440,
+          "y": 554,
           "w": 310,
           "h": 219,
-          "bottom": 659
+          "bottom": 773
         },
         "primaryShareCta": {
           "x": 49,
-          "y": 676,
+          "y": 790,
           "w": 292,
           "h": 44,
-          "bottom": 720
+          "bottom": 834
         },
         "primaryShareCtas": 1,
         "stickyLike": [
           {
             "selector": "command-actions share-primary-action-row",
             "position": "sticky",
-            "y": 667,
+            "y": 781,
             "h": 62
           }
         ]

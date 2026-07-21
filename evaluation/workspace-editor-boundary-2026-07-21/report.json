@@ -1,0 +1,99 @@
+{
+  "verdict": "PASS_LOCAL_PRODUCTION_CURRENT_HEAD_WITH_LIVE_STALE",
+  "checkedAt": "2026-07-21T00:26:38.487Z",
+  "liveBuildInfoAtStart": {
+    "commitSha": "bebc66e3ef6abda86972a83fd666e86f4a5fd656"
+  },
+  "localBuildInfo": {
+    "commitSha": "703e4a031a9c19f78f986b863d647f367e123cf8",
+    "branch": "master",
+    "environment": "production"
+  },
+  "productCommit": "703e4a031a9c19f78f986b863d647f367e123cf8",
+  "geometry": {
+    "before": {
+      "editorDesktopShort": {
+        "height": 2533,
+        "clientHeight": 723,
+        "ratio": 3.5
+      },
+      "editorDesktop": {
+        "height": 2533,
+        "clientHeight": 900,
+        "ratio": 2.81
+      },
+      "editorMobile": {
+        "height": 2288,
+        "clientHeight": 844,
+        "ratio": 2.71
+      }
+    },
+    "after": {
+      "editorDesktopShort": {
+        "height": 952,
+        "clientHeight": 723,
+        "ratio": 1.32,
+        "outsideCount": 0,
+        "overflowX": false
+      },
+      "editorDesktop": {
+        "height": 1129,
+        "clientHeight": 900,
+        "ratio": 1.25,
+        "outsideCount": 0,
+        "overflowX": false
+      },
+      "editorMobile": {
+        "height": 1131,
+        "clientHeight": 844,
+        "ratio": 1.34,
+        "outsideCount": 0,
+        "overflowX": false
+      },
+      "shareDesktopShort": {
+        "height": 946,
+        "clientHeight": 723,
+        "ratio": 1.31,
+        "outsideCount": 0,
+        "overflowX": false
+      },
+      "shareDesktop": {
+        "height": 946,
+        "clientHeight": 900,
+        "ratio": 1.05,
+        "outsideCount": 0,
+        "overflowX": false
+      },
+      "shareMobile": {
+        "height": 1107,
+        "clientHeight": 844,
+        "ratio": 1.31,
+        "outsideCount": 0,
+        "overflowX": false
+      }
+    }
+  },
+  "verification": {
+    "focusedDocumentsEditorLayout": {
+      "status": "PASS",
+      "files": 1,
+      "tests": 2
+    },
+    "focusedWorkspaceLayoutRegression": {
+      "status": "PASS",
+      "files": 1,
+      "tests": 1
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "staticPages": 28
+    },
+    "diffCheck": "PASS",
+    "localProductionGeometryProbe": "PASS"
+  },
+  "remaining": [
+    "Live production deployment was stale at the start of verification; rerun live browser probe after build-info reaches the product commit or later.",
+    "Share mobile is within the current first-view threshold but remains 1.31 screens tall; a stricter follow-up can collapse secondary share rails."
+  ]
+}
