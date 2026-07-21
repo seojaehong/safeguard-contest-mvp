@@ -1,10 +1,10 @@
 # SafeClaw North Star Approval Runway
 
-Generated at: 2026-07-21T12:39:31.843Z
+Generated at: 2026-07-21T12:43:15.723Z
 
-Source HEAD at draft: `7e35c211637f830350f7414a7ba9c8a958c20d39`
+Source HEAD at draft: `ef1c0bd8deae4b750e8b7470d25f363350ee91fd`
 
-Live commit at draft: `7e35c211637f830350f7414a7ba9c8a958c20d39`
+Live commit at draft: `ef1c0bd8deae4b750e8b7470d25f363350ee91fd`
 
 Overall: `approval_runway_ready_open`
 
