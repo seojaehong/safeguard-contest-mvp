@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-21T21:16:10.809Z
-Source HEAD at generation: 4095a38a1fad34035cbec7783834e47c9df26ce2
-Live commit at generation: 4095a38a1fad34035cbec7783834e47c9df26ce2
+Generated at: 2026-07-21T21:20:39.107Z
+Source HEAD at generation: 086dc9398167cb8ae417f651c9b40dd298c79107
+Live commit at generation: 086dc9398167cb8ae417f651c9b40dd298c79107
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -30,7 +30,7 @@ Overall: `northstar_open_approval_gated`
 | --- | --- | --- |
 | final_99_gate | notice | evaluation\final-99-gate-current-2026-07-21\report.json |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
-| ui_documents_share_cockpit | proven | evaluation\workspace-ia-live-cdfc-2026-07-22\report.json |
+| ui_documents_share_cockpit | proven | evaluation\workspace-ia-live-2b82-2026-07-22\report.json |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
 | share_result_fixture_cockpit | proven | evaluation\share-result-drilldown-2026-07-21\report.json |
 | kosha_exact_trust_registry | proven | evaluation\kosha-current-northstar-regression-2026-07-22\report.json |
@@ -51,7 +51,7 @@ Overall: `northstar_open_approval_gated`
 | sif_embedding_preflight | ancestor | missing | evaluation\sif-embedding-gate\approval-preflight-report.json |
 | live_critical_surface | ancestor | ancestor_of_head | evaluation\live-critical-surface-current-2026-07-20-rerun\report.json |
 | mobile_p0_workspace | ancestor | ancestor_of_head | evaluation\mobile-p0-workspace-gate-2026-07-20\report.json |
-| workspace_docs_share_geometry | exact | ancestor_of_head | evaluation\workspace-docs-share-production-gate-2026-07-20\current-geometry.json |
+| workspace_docs_share_geometry | ancestor | ancestor_of_head | evaluation\workspace-docs-share-production-gate-2026-07-20\current-geometry.json |
 | dispatch_standalone_cockpit | ancestor | ancestor_of_head | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
 | provider_dispatch_persistence | ancestor | ancestor_of_head | evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json |
 | northstar_approval_runway | ancestor | ancestor_of_head | evaluation\northstar-approval-runway-2026-07-21\report.json |

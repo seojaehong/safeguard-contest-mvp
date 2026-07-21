@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T21:16:10.809Z",
-  "head": "4095a38a1fad34035cbec7783834e47c9df26ce2",
+  "generatedAt": "2026-07-21T21:20:39.107Z",
+  "head": "086dc9398167cb8ae417f651c9b40dd298c79107",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "4095a38a1fad34035cbec7783834e47c9df26ce2",
+    "commitSha": "086dc9398167cb8ae417f651c9b40dd298c79107",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-4dcim9wwk-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-89zq45a6s-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -36,7 +36,7 @@
     {
       "id": "ui_documents_share_cockpit",
       "state": "proven",
-      "artifact": "evaluation\\workspace-ia-live-cdfc-2026-07-22\\report.json",
+      "artifact": "evaluation\\workspace-ia-live-2b82-2026-07-22\\report.json",
       "detail": "Production evidence closes default /workspace Documents and Share cockpits, /documents mobile raw height, exact one-viewport Documents review cockpit, selected-document context/summary layers, selected editor/detail field-summary risk-row landing, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, and mobile Share exact 844px viewport containment. Latest IA refinement still keeps raw textarea/full long-form editing below the first viewport as open secondary drilldown and treats desktop Share perceived narrow-card composition as a follow-up; it does not claim provider live dispatch."
     },
     {
@@ -181,9 +181,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "2b82c00c2f3cd2f89544a1a07b94972bf98154e9",
+      "sourceCommit": "4095a38a1fad34035cbec7783834e47c9df26ce2",
       "sourceStatus": "ancestor",
-      "productionCommit": "2b82c00c2f3cd2f89544a1a07b94972bf98154e9",
+      "productionCommit": "4095a38a1fad34035cbec7783834e47c9df26ce2",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -246,7 +246,7 @@
       "id": "workspace_docs_share_geometry",
       "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
       "sourceCommit": "4095a38a1fad34035cbec7783834e47c9df26ce2",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "2b82c00c2f3cd2f89544a1a07b94972bf98154e9",
       "productionStatus": "ancestor_of_head"
     },
