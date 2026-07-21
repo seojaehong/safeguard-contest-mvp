@@ -1,9 +1,9 @@
 {
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "0ca62223e5af7073f83a6031906b2b9c3236eb2f",
-  "productionCommit": "0ca62223e5af7073f83a6031906b2b9c3236eb2f",
-  "latestEvidenceCommitLive": false,
+  "sourceHead": "54d3870b1f1b2a51a3504cb6a88173cffb56168a",
+  "productionCommit": "54d3870b1f1b2a51a3504cb6a88173cffb56168a",
+  "latestEvidenceCommitLive": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
     "liveRollup": "evaluation\\northstar-live-rollup-2026-07-20\\report.json",

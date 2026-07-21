@@ -4,11 +4,11 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `0ca62223e5af7073f83a6031906b2b9c3236eb2f`
+Source HEAD: `54d3870b1f1b2a51a3504cb6a88173cffb56168a`
 
-Production `/api/build-info`: `0ca62223e5af7073f83a6031906b2b9c3236eb2f`
+Production `/api/build-info`: `54d3870b1f1b2a51a3504cb6a88173cffb56168a`
 
-Note: source HEAD `0ca62223e5af7073f83a6031906b2b9c3236eb2f` is now production-visible and remains the live-exact marker recorded by the current live rollup. The latest runway evidence commit after this artifact may still be marker-pending until `/api/build-info` advances again.
+Note: source HEAD `54d3870b1f1b2a51a3504cb6a88173cffb56168a` is now production-visible and is the live-exact marker recorded by the current live rollup. Any later evidence-only commit after this artifact must be checked separately through `/api/build-info`.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -21,7 +21,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Documents and Share cockpit UI is proven for the current evidence scope.
 - Standalone Dispatch cockpit is proven for the current evidence scope.
 - Generated Share result fixture cockpit is proven without claiming real provider dispatch.
-- Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level on source/live marker `0ca62223e5af7073f83a6031906b2b9c3236eb2f` without claiming live production engine execution. Live unauthenticated broker smoke still returns `AUTH_REQUIRED` before engine execution.
+- Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level on source/live marker `54d3870b1f1b2a51a3504cb6a88173cffb56168a` without claiming live production engine execution. Live unauthenticated broker smoke still returns `AUTH_REQUIRED` before engine execution.
 - SIF embedding approval preflight is current and live-visible as approval-held evidence: corpus 6,032 records, no embedding generation, no upload, and vector runtime disabled until approval.
 - North Star approval runway is current and production-visible: the remaining runtime/provider/database/vector gates are explicitly separated from ordinary UI/evidence iteration.
 - Final-99 is `pass_with_notice`, not clean launch-complete. The notices are carried explicitly in `evaluation\final-99-gate-current-2026-07-21\notice-carry.json`.
