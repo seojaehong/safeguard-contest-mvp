@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "gate": "share-desktop-short-cockpit-2026-07-21",
+  "verdict": "PASS_CURRENT_SOURCE",
+  "checkedAt": "2026-07-21T01:47:56.705Z",
+  "sourceHead": "91190690e1d8984fda7f81933fd3db693f0492a3",
+  "providerDispatchLiveClaimed": false,
+  "routeSplitAloneAcceptedAsFix": false,
+  "contract": {
+    "viewportCockpitRequired": true,
+    "boundedPreviewScrollRequired": true,
+    "desktopShortViewport": {
+      "width": 1440,
+      "height": 723
+    }
+  },
+  "baseline": {
+    "source": "live/current geometry before this slice",
+    "share": {
+      "bodyHeight": 946,
+      "viewportHeight": 723,
+      "heightRatio": 1.31,
+      "shareRootTop": 189,
+      "shareRootBottom": 882,
+      "shareFormBottom": 725,
+      "sharePreviewBottom": 757,
+      "primaryCtaBottom": 401,
+      "horizontalOverflow": 0
+    }
+  },
+  "currentSource": {
+    "localizedPreviewFixture": {
+      "test": "tests/workspace-share-mobile-browser.test.ts",
+      "scenario": "desktop-short day/night",
+      "pageHeight": 888,
+      "viewportHeight": 723,
+      "heightRatio": 1.23,
+      "stageRailBottom": 333,
+      "primaryCtaBottom": 383,
+      "previewLeft": 781,
+      "previewBottom": 679,
+      "primaryRight": 775,
+      "previewRightPane": true,
+      "configCardBottoms": [529, 683, 529],
+      "channelCards": [
+        { "width": 202, "height": 40 },
+        { "width": 202, "height": 40 },
+        { "width": 202, "height": 40 }
+      ],
+      "linesClientHeight": 266,
+      "linesScrollHeight": 408,
+      "linesOverflowY": "auto",
+      "horizontalOverflow": 0,
+      "visibleCockpitInViewport": true
+    },
+    "localProductionGeometry": {
+      "command": "SAFECLAW_BASE_URL=http://127.0.0.1:3057 node evaluation\\workspace-docs-share-production-gate-2026-07-20\\run-current-geometry-probe.mjs",
+      "share": {
+        "bodyHeight": 750,
+        "viewportHeight": 723,
+        "heightRatio": 1.04,
+        "shareRootTop": 195,
+        "shareRootBottom": 750,
+        "shareFormBottom": 689,
+        "shareTargetCardBottom": 535,
+        "shareLanguageCardBottom": 535,
+        "shareChannelCardBottom": 689,
+        "sharePreviewLeft": 781,
+        "sharePreviewWidth": 520,
+        "sharePreviewBottom": 605,
+        "primaryCtaBottom": 389,
+        "horizontalOverflow": 0,
+        "outsideHorizontalElements": 0
+      }
+    }
+  },
+  "checks": [
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-simplification.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "tests": 11
+    },
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts -t \"renders every Vietnamese paragraph\" --maxWorkers=1 --fileParallelism=false --hookTimeout=180000",
+      "result": "PASS",
+      "files": 1,
+      "tests": 1
+    },
+    {
+      "command": "npm.cmd test -- tests\\workspace-layout-regression.test.ts -t \"keeps short desktop Documents and Share cockpits bounded before drilldowns\" --maxWorkers=1 --fileParallelism=false --hookTimeout=180000",
+      "result": "PASS",
+      "files": 1,
+      "tests": 1
+    },
+    {
+      "command": "npm.cmd run build",
+      "result": "PASS",
+      "staticPages": 28
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS",
+      "note": "Rerun after build; parallel build/typecheck can race .next/types."
+    }
+  ],
+  "remainingDebt": [
+    "Live production promotion is pending until /api/build-info advances past the product commit and live geometry is rerun.",
+    "Provider live dispatch remains approval-gated and is not claimed.",
+    "Exact bodyHeight <= viewport is not claimed for long translated message fixtures; the preview content is retained in a bounded scroll area."
+  ]
+}
