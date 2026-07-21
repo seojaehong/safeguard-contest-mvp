@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-kosha-current-live-gate/v1",
-  "generatedAt": "2026-07-21T16:08:00.864Z",
-  "sourceSha": "338c6c4b13d6c90626f59205b199b31efa076df2",
+  "generatedAt": "2026-07-21T16:47:57.932Z",
+  "sourceSha": "31b0e9440c5080f93d381f2983b7f0a62ff833ef",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "1d89c1a686856155cb3140e626f9907c8219373b",
+    "commitSha": "31b0e9440c5080f93d381f2983b7f0a62ff833ef",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-5z8a6wzw2-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-npbiyqfwr-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "verdict": "pass_current_kosha_exact_trust_and_corpus_gate",

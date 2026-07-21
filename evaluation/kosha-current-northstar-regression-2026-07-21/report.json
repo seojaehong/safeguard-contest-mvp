@@ -1,7 +1,7 @@
 {
   "title": "KOSHA Current North Star Regression Gate",
-  "checkedAt": "2026-07-22T01:10:52+09:00",
-  "sourceHeadBeforeCommit": "338c6c4b13d6c90626f59205b199b31efa076df2",
+  "checkedAt": "2026-07-22T01:48:20+09:00",
+  "sourceHeadBeforeCommit": "31b0e9440c5080f93d381f2983b7f0a62ff833ef",
   "branch": "chore/recipient-foreign-live-gate-20260720",
   "verdict": "PASS",
   "dbSchemaChanged": false,
@@ -18,7 +18,8 @@
     "KOSHA guide corpus audit remains green",
     "structured riskAssessmentRows preserve exact KOSHA evidenceRefs",
     "structured tbmRiskLinks preserve exact KOSHA evidenceRefs",
-    "grounded generation and live harness quality gates still pass"
+    "grounded generation and live harness quality gates still pass",
+    "live KOSHA status reports 9,920 catalog items, 1,040 technical rows, and the 3-pin exact trust registry at the current production commit"
   ],
   "verification": {
     "structuredMaterializationAndHarness": {
@@ -26,28 +27,28 @@
       "status": "PASS",
       "filesPassed": 3,
       "testsPassed": 50,
-      "durationSeconds": 4.78
+      "durationSeconds": 6.12
     },
     "exactTrustAndCorpus": {
       "command": "npm.cmd test -- tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\kosha-grounding-fail-closed.test.ts tests\\kosha-current-review-run-ask.test.ts tests\\kosha-guide-corpus-audit.test.ts --maxWorkers=1 --fileParallelism=false",
       "status": "PASS",
       "filesPassed": 5,
       "testsPassed": 173,
-      "durationSeconds": 23.26
+      "durationSeconds": 21.69
     },
     "liveGate": {
       "command": "npm.cmd test -- tests\\kosha-current-live-gate.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=60000",
       "status": "PASS",
       "filesPassed": 1,
       "testsPassed": 3,
-      "durationSeconds": 2.4
+      "durationSeconds": 2.48
     },
     "liveProductionGate": {
       "command": "node scripts\\kosha_current_live_gate.mjs --output evaluation\\kosha-current-live-gate-2026-07-20 --base-url https://www.safeclaw.kr",
       "status": "PASS",
       "verdict": "pass_current_kosha_exact_trust_and_corpus_gate",
-      "sourceSha": "338c6c4b13d6c90626f59205b199b31efa076df2",
-      "liveCommit": "1d89c1a686856155cb3140e626f9907c8219373b",
+      "sourceSha": "31b0e9440c5080f93d381f2983b7f0a62ff833ef",
+      "liveCommit": "31b0e9440c5080f93d381f2983b7f0a62ff833ef",
       "failedCheckIds": [],
       "evidencePath": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json"
     },
@@ -55,6 +56,25 @@
       "command": "npm.cmd run typecheck",
       "status": "PASS"
     }
+  },
+  "liveStatusSummary": {
+    "catalogItems": 9920,
+    "technicalTotal": 1040,
+    "technicalGuidelines": 803,
+    "technicalSupportRegulations": 237,
+    "localCorpusItems": 234,
+    "localCorpusChunks": 7127,
+    "localCorpusFailures": 0,
+    "exactTrustRegistryVersions": [
+      "D-C-13-2026",
+      "D-C-7-2026",
+      "B-E-10-2026"
+    ],
+    "exactTrustRegistryStableKeys": [
+      "D-C-13",
+      "D-C-7",
+      "B-E-10"
+    ]
   },
   "boundaries": [
     "Does not claim every KOSHA guide in the broader corpus is exact-published production evidence.",
