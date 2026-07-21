@@ -24,6 +24,9 @@ type MobileP0Report = {
       heightRatio: number;
       messagePreviewY: number;
       primaryShareCtas: number;
+      stickyLikeCount: number;
+      allowedStickyLikeCount: number;
+      unsafeStickyLikeCount: number;
     };
   };
 };
@@ -34,7 +37,7 @@ function writeJson(root: string, relativePath: string, value: unknown): void {
   fs.writeFileSync(absolutePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
-function geometry(visibleDocumentPreviews = 0): Record<string, unknown> {
+function geometry(visibleDocumentPreviews = 0, shareStickyLike: unknown[] = []): Record<string, unknown> {
   return {
     build: {
       commitSha: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -65,7 +68,7 @@ function geometry(visibleDocumentPreviews = 0): Record<string, unknown> {
         share: {
           body: { height: 1451, overflowX: false },
           outside: 0,
-          stickyLike: [],
+          stickyLike: shareStickyLike,
           sharePage: { y: 244 },
           shareRoot: { w: 336 },
           sharePreview: { y: 380, bottom: 599 },
@@ -98,9 +101,9 @@ function runReport(root: string): MobileP0Report {
   return JSON.parse(fs.readFileSync(path.join(root, "evaluation", "mobile-p0-test", "report.json"), "utf8")) as MobileP0Report;
 }
 
-function createRoot(visibleDocumentPreviews = 0, findings: unknown[] = []): string {
+function createRoot(visibleDocumentPreviews = 0, findings: unknown[] = [], shareStickyLike: unknown[] = []): string {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "safeclaw-mobile-p0-"));
-  writeJson(root, "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json", geometry(visibleDocumentPreviews));
+  writeJson(root, "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json", geometry(visibleDocumentPreviews, shareStickyLike));
   writeJson(root, "evaluation/live-critical-surface-current-2026-07-20-rerun/report.json", liveCritical(findings));
   return root;
 }
@@ -121,6 +124,17 @@ describe("mobile P0 report from geometry", () => {
     expect(report.mobileFlow.share.heightRatio).toBe(1.72);
     expect(report.mobileFlow.share.messagePreviewY).toBe(380);
     expect(report.mobileFlow.share.primaryShareCtas).toBe(1);
+  });
+
+  it("allows the mobile share primary action row sticky affordance without reopening P0", () => {
+    const root = createRoot(0, [], [{ selector: "command-actions share-primary-action-row", position: "sticky", y: 689, h: 62 }]);
+    const report = runReport(root);
+
+    expect(report.verdict).toBe("MOBILE_FIXED");
+    expect(report.hardBlockersClosed).toBe(true);
+    expect(report.mobileFlow.share.stickyLikeCount).toBe(1);
+    expect(report.mobileFlow.share.allowedStickyLikeCount).toBe(1);
+    expect(report.mobileFlow.share.unsafeStickyLikeCount).toBe(0);
   });
 
   it("fails closed when a hidden document preview is still visibly rendered", () => {

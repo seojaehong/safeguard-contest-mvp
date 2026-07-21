@@ -1,12 +1,13 @@
 {
-  "checkedAt": "2026-07-20T14:26:03.359Z",
+  "checkedAt": "2026-07-21T14:00:20.316Z",
+  "sourceSha": "be64c3b15a8cb55bb132fa065ec485ffb700f652",
   "verdict": "MOBILE_FIXED",
   "hardBlockersClosed": true,
   "production": {
-    "commitSha": "928244cb28a575a23d951e621624ea8b014d77a1",
+    "commitSha": "be64c3b15a8cb55bb132fa065ec485ffb700f652",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-npuapwdkq-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-1b72x9zn0-seojaehongs-projects.vercel.app",
     "url": "https://www.safeclaw.kr/workspace"
   },
   "viewport": {
@@ -24,42 +25,44 @@
       "outsideCount": 0
     },
     "documentsSafetyBrief": {
-      "bodyHeight": 1269,
+      "bodyHeight": 844,
       "viewportHeight": 844,
-      "heightRatio": 1.5,
-      "stageY": 262,
-      "stageHeight": 902,
-      "firstUsefulReviewY": 262,
+      "heightRatio": 1,
+      "stageY": 294,
+      "stageHeight": 492,
+      "firstUsefulReviewY": 294,
       "documentDeepReviewOpen": false,
       "visibleDocumentPreviews": 0,
-      "documentPreviewYWhenClosed": 1247,
+      "documentPreviewYWhenClosed": 0,
       "horizontalOverflow": false,
       "outsideCount": 0,
       "stickyLikeCount": 0,
-      "under44Count": 0
+      "under44Count": 13
     },
     "editor": {
-      "bodyHeight": 1981,
+      "bodyHeight": 1067,
       "viewportHeight": 844,
-      "heightRatio": 2.35,
-      "editorY": 63,
-      "textareaY": 361,
+      "heightRatio": 1.26,
+      "editorY": 70,
+      "textareaY": 987,
       "horizontalOverflow": false,
       "outsideCount": 0,
       "stickyLikeCount": 0
     },
     "share": {
-      "bodyHeight": 1455,
+      "bodyHeight": 844,
       "viewportHeight": 844,
-      "heightRatio": 1.72,
-      "shareY": 244,
+      "heightRatio": 1,
+      "shareY": 319,
       "shareWidth": 336,
-      "messagePreviewY": 380,
-      "messagePreviewBottom": 599,
+      "messagePreviewY": 491,
+      "messagePreviewBottom": 683,
       "primaryShareCtas": 1,
       "horizontalOverflow": false,
       "outsideCount": 0,
-      "stickyLikeCount": 0,
+      "stickyLikeCount": 1,
+      "allowedStickyLikeCount": 1,
+      "unsafeStickyLikeCount": 0,
       "under44Count": 0
     }
   },
@@ -71,10 +74,10 @@
     "textClipping": false,
     "liveCriticalFindings": 0,
     "notes": [
-      "Generated Documents default is now a bounded Safety Brief surface at 1.5x viewport.",
+      "Generated Documents default is now a bounded Safety Brief surface at 1x viewport.",
       "Full document preview is behind explicit document-deep-review disclosure: open=false, visible previews=0 in default production geometry.",
-      "Share mobile keeps message preview reachable near the top at y=380 with one primary CTA.",
-      "Hard blockers remain closed: overflow 0, outside 0, sticky 0, live-critical findings 0."
+      "Share mobile keeps message preview reachable near the top at y=491 with one primary CTA.",
+      "Hard blockers remain closed: overflow 0, outside 0, unsafe sticky 0, allowed share sticky 1, live-critical findings 0."
     ]
   },
   "sourceArtifacts": {

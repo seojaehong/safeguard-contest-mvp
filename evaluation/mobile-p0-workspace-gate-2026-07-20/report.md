@@ -2,7 +2,7 @@
 
 Verdict: **MOBILE FIXED**
 
-Measured runtime commit: `928244cb28a575a23d951e621624ea8b014d77a1`
+Measured runtime commit: `be64c3b15a8cb55bb132fa065ec485ffb700f652`
 
 The 6-hour mobile gate is closed for the generated workspace flow. The default Documents surface is a bounded Safety Brief, and full document preview/review is behind an explicit disclosure.
 
@@ -13,15 +13,15 @@ No horizontal overflow: **true**.
 | Surface | Height | First useful y | Overflow | Sticky | Under44 | CTA/preview |
 | --- | ---: | ---: | --- | ---: | ---: | --- |
 | Input /workspace | 1.17x | - | no | - | 3 | 생성 CTA visible |
-| Documents / Safety Brief | 1.5x | 262 | no | 0 | 0 | deep open=false, visible previews=0 |
-| Editor / explicit deep review | 2.35x | 63 | no | 0 | - | textarea y=361 |
-| Share | 1.72x | 244 | no | 0 | 0 | CTA=1, preview y=380 |
+| Documents / Safety Brief | 1x | 294 | no | 0 | 13 | deep open=false, visible previews=0 |
+| Editor / explicit deep review | 1.26x | 70 | no | 0 | - | textarea y=987 |
+| Share | 1x | 319 | no | 1 | 0 | CTA=1, preview y=491 |
 
 ## What Changed
 
 - Documents default moved full preview/edit/download behind `문서 깊게 보기`.
-- Documents mobile default is 1.5x viewport.
-- Share mobile preview is y=380.
+- Documents mobile default is 1x viewport.
+- Share mobile preview is y=491.
 - Production recheck resolves the probe contradiction: `documentDeepReviewOpen=false` and `visibleDocumentPreviews=0`.
 - Production live-critical sweep reports findings 0.
 

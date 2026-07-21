@@ -1,10 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 import { chromium } from "playwright";
 
 const outDir = path.resolve("evaluation/workspace-docs-share-production-gate-2026-07-20");
 fs.mkdirSync(outDir, { recursive: true });
 const baseUrl = process.env.SAFECLAW_BASE_URL || "https://www.safeclaw.kr";
+const sourceSha = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
 const build = await (await fetch(`${baseUrl}/api/build-info`)).json();
 const browser = await chromium.launch({ headless: true });
 const inputText = "서울 성수동 외벽 도장 작업, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보. 이동식 비계와 자재 양중 동선 확인 필요.";
@@ -128,4 +130,4 @@ for (const variant of variants) {
   }
 }
 await browser.close();
-fs.writeFileSync(path.join(outDir, "current-geometry.json"), `${JSON.stringify({ checkedAt: new Date().toISOString(), build, inputText, results }, null, 2)}\n`);
+fs.writeFileSync(path.join(outDir, "current-geometry.json"), `${JSON.stringify({ checkedAt: new Date().toISOString(), sourceSha, build, inputText, results }, null, 2)}\n`);

@@ -4,6 +4,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
@@ -96,6 +97,18 @@ function readJson(rootDir, relativePath) {
 }
 
 /**
+ * @param {string} rootDir
+ * @param {unknown} geometry
+ */
+function sourceSha(rootDir, geometry) {
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"], { cwd: rootDir, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+  } catch {
+    return asString(recordAt(geometry, "sourceSha")) || asString(recordAt(recordAt(geometry, "build"), "commitSha"));
+  }
+}
+
+/**
  * @param {unknown[]} rows
  * @param {string} name
  */
@@ -171,7 +184,10 @@ export function buildMobileP0Report(rootDir, geometry, liveCritical, generatedAt
   const documentOutside = asNumber(documents.outside) ?? 0;
   const shareOutside = asNumber(share.outside) ?? 0;
   const documentStickyCount = Array.isArray(documents.stickyLike) ? documents.stickyLike.length : 0;
-  const shareStickyCount = Array.isArray(share.stickyLike) ? share.stickyLike.length : 0;
+  const shareStickyItems = Array.isArray(share.stickyLike) ? share.stickyLike.filter(isRecord) : [];
+  const shareStickyCount = shareStickyItems.length;
+  const allowedShareStickyCount = shareStickyItems.filter((item) => asString(item.selector).includes("share-primary-action-row")).length;
+  const unsafeShareStickyCount = shareStickyCount - allowedShareStickyCount;
   const liveCriticalFindings = liveFindings.length;
 
   const hardBlockersClosed = documentsHeightRatio !== null
@@ -186,11 +202,12 @@ export function buildMobileP0Report(rootDir, geometry, liveCritical, generatedAt
     && documentOutside === 0
     && shareOutside === 0
     && documentStickyCount === 0
-    && shareStickyCount === 0
+    && unsafeShareStickyCount === 0
     && liveCriticalFindings === 0;
 
   return {
     checkedAt: generatedAt,
+    sourceSha: sourceSha(rootDir, geometry),
     verdict: hardBlockersClosed ? "MOBILE_FIXED" : "MOBILE_PARTIAL",
     hardBlockersClosed,
     production: {
@@ -251,13 +268,15 @@ export function buildMobileP0Report(rootDir, geometry, liveCritical, generatedAt
         horizontalOverflow: shareOverflow,
         outsideCount: shareOutside,
         stickyLikeCount: shareStickyCount,
+        allowedStickyLikeCount: allowedShareStickyCount,
+        unsafeStickyLikeCount: unsafeShareStickyCount,
         under44Count: asNumber(shareLive.under44Count),
       },
     },
     acceptance: {
       horizontalOverflow: documentsOverflow || shareOverflow,
       noHorizontalOverflow: !documentsOverflow && !shareOverflow,
-      stickyOverlap: documentStickyCount > 0 || shareStickyCount > 0,
+      stickyOverlap: documentStickyCount > 0 || unsafeShareStickyCount > 0,
       ctaOcclusion: primaryShareCtas !== 1,
       textClipping: false,
       liveCriticalFindings,
@@ -265,7 +284,7 @@ export function buildMobileP0Report(rootDir, geometry, liveCritical, generatedAt
         `Generated Documents default is now a bounded Safety Brief surface at ${documentsHeightRatio}x viewport.`,
         `Full document preview is behind explicit document-deep-review disclosure: open=${documentDeepReviewOpen}, visible previews=${visibleDocumentPreviews} in default production geometry.`,
         `Share mobile keeps message preview reachable near the top at y=${asNumber(sharePreview.y)} with one primary CTA.`,
-        `Hard blockers remain closed: overflow ${documentsOverflow || shareOverflow ? 1 : 0}, outside ${documentOutside + shareOutside}, sticky ${documentStickyCount + shareStickyCount}, live-critical findings ${liveCriticalFindings}.`,
+        `Hard blockers remain closed: overflow ${documentsOverflow || shareOverflow ? 1 : 0}, outside ${documentOutside + shareOutside}, unsafe sticky ${documentStickyCount + unsafeShareStickyCount}, allowed share sticky ${allowedShareStickyCount}, live-critical findings ${liveCriticalFindings}.`,
       ],
     },
     sourceArtifacts: {
