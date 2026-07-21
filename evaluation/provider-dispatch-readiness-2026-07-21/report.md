@@ -4,15 +4,15 @@
 
 PREVIEW-ONLY on current production.
 
-Refreshed at: `2026-07-21T22:21:56+09:00`
+Refreshed at: `2026-07-22T01:26:15+09:00`
 
 The Share UI, recipient portal, and language-specific preview contracts are passing, but live provider dispatch is intentionally gated in production. The current blocker is persistent idempotency support, not the mobile/desktop share cockpit.
 
 ## Production Probe
 
 - URL: `https://www.safeclaw.kr/api/workflow/dispatch`
-- Production marker at probe time: `9032dc9972bb4d618bd01ca5a6f44f194dd0ac08`
-- Source marker at refresh: `9032dc9972bb4d618bd01ca5a6f44f194dd0ac08`
+- Production marker at probe time: `fe5b1e2a8b672a8f752f851f686ae543b34232eb`
+- Source marker at refresh: `fe5b1e2a8b672a8f752f851f686ae543b34232eb`
 - Method: `GET`
 - External dispatch performed: no
 - DB/schema/Supabase writes: none
@@ -63,7 +63,7 @@ Result:
 
 - Test files: `4 passed / 4`
 - Tests: `44 passed / 44`
-- Duration: `37.25s`
+- Duration: `39.22s`
 
 Source-level conclusion:
 

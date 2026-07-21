@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-07-19T00:30:00+09:00",
-  "refreshedAt": "2026-07-21T22:21:56+09:00",
-  "sourceSha": "9032dc9972bb4d618bd01ca5a6f44f194dd0ac08",
+  "refreshedAt": "2026-07-22T01:26:15+09:00",
+  "sourceSha": "fe5b1e2a8b672a8f752f851f686ae543b34232eb",
   "scope": "provider_dispatch_idempotency_gate",
   "status": "approval_required",
   "liveDispatchState": {
@@ -9,7 +9,7 @@
     "mode": "preview_only",
     "reason": "persistent_idempotency_unavailable",
     "codeLock": "PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false",
-    "productionCommitSha": "9032dc9972bb4d618bd01ca5a6f44f194dd0ac08",
+    "productionCommitSha": "fe5b1e2a8b672a8f752f851f686ae543b34232eb",
     "channels": {
       "email": {
         "capability": false,

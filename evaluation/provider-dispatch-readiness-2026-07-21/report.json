@@ -1,10 +1,10 @@
 {
   "verdict": "PREVIEW_ONLY",
-  "checkedAt": "2026-07-21T22:21:56+09:00",
+  "checkedAt": "2026-07-22T01:26:15+09:00",
   "production": {
     "url": "https://www.safeclaw.kr/api/workflow/dispatch",
-    "commitSha": "9032dc9972bb4d618bd01ca5a6f44f194dd0ac08",
-    "sourceSha": "9032dc9972bb4d618bd01ca5a6f44f194dd0ac08",
+    "commitSha": "fe5b1e2a8b672a8f752f851f686ae543b34232eb",
+    "sourceSha": "fe5b1e2a8b672a8f752f851f686ae543b34232eb",
     "method": "GET"
   },
   "externalDispatchPerformed": false,
@@ -39,7 +39,7 @@
     "status": "PASS",
     "files": 4,
     "tests": 44,
-    "durationSeconds": 37.25,
+    "durationSeconds": 39.22,
     "conclusion": [
       "PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED remains false.",
       "Live dispatch before persistent idempotency returns 409 with providerCalled false.",
