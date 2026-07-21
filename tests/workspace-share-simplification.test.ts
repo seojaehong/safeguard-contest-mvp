@@ -144,6 +144,16 @@ describe("workspace share simplification", () => {
     expect(desktopShareBlock).toContain("grid-row: 1;");
     expect(desktopShareBlock).toContain("order: -1;");
     expect(desktopShareBlock).toContain(".share-primary-action-row .button {\n    flex: 1 1 0;");
+
+    const desktopShortShareBlock = css.slice(
+      css.indexOf("@media (min-width: 960px) and (max-height: 760px)"),
+      css.indexOf(".share-workflow-header,", css.indexOf("@media (min-width: 960px) and (max-height: 760px)"))
+    );
+    expect(desktopShortShareBlock).toContain(".share-workflow-header p {\n    display: none;");
+    expect(desktopShortShareBlock).toContain(".share-form-card {\n    min-height: 108px;\n    padding: 8px;");
+    expect(desktopShortShareBlock).toContain(".channel-card {\n    min-height: 40px;\n    padding: 6px;");
+    expect(desktopShortShareBlock).toContain("height: min(340px, calc(100vh - 238px));");
+    expect(desktopShortShareBlock).toContain("max-height: calc(100vh - 190px);");
   });
 
   it("keeps the localized message heading compact on mobile", () => {

@@ -15083,6 +15083,53 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
+@media (min-width: 960px) and (max-height: 760px) {
+  .command-center-shell.workspace-page-share .share-panel.workflow-panel {
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .command-center-shell.workspace-page-share .share-workflow-header {
+    gap: 8px;
+  }
+
+  .command-center-shell.workspace-page-share .share-workflow-header p {
+    display: none;
+  }
+
+  .command-center-shell.workspace-page-share .share-stage-rail {
+    gap: 6px;
+  }
+
+  .command-center-shell.workspace-page-share .share-stage-rail span {
+    padding: 5px 8px;
+  }
+
+  .command-center-shell.workspace-page-share .share-form-card {
+    min-height: 108px;
+    padding: 8px;
+  }
+
+  .command-center-shell.workspace-page-share .recipient-chip-list {
+    max-height: 34px;
+  }
+
+  .command-center-shell.workspace-page-share .share-panel.workflow-panel .channel-card {
+    min-height: 40px;
+    padding: 6px;
+  }
+
+  .command-center-shell.workspace-page-share [data-share-preview] {
+    height: min(340px, calc(100vh - 238px));
+    min-height: min(340px, calc(100vh - 238px));
+    max-height: calc(100vh - 190px);
+  }
+
+  .command-center-shell.workspace-page-share [data-share-preview] .message-preview-lines {
+    max-height: calc(100vh - 350px);
+  }
+}
+
 .share-workflow-header,
 .share-workbench-title,
 .operation-capture-head {
@@ -23238,6 +23285,107 @@ body:has(.safeclaw-landing) :is(
     min-height: 40px;
     gap: 8px;
     padding: 8px;
+  }
+}
+
+/* Short desktop cockpit guard: route splitting alone does not shorten long
+   Documents/Share content, so keep the stage chrome in the viewport and move
+   long review/share detail into the explicit panel drilldown area. */
+@media (min-width: 901px) and (max-height: 760px) {
+  .command-center-shell.workspace-page-document,
+  .command-center-shell.workspace-page-share {
+    min-height: 100svh;
+    padding-top: 8px;
+    padding-bottom: 0;
+    align-content: start;
+  }
+
+  .command-center-shell.workspace-page-document > .command-topbar,
+  .command-center-shell.workspace-page-share > .command-topbar {
+    min-height: 0;
+    gap: 12px;
+    padding: 8px 10px;
+  }
+
+  .command-center-shell.workspace-page-document .brand-lockup small,
+  .command-center-shell.workspace-page-document .topbar-status span,
+  .command-center-shell.workspace-page-share .brand-lockup small,
+  .command-center-shell.workspace-page-share .topbar-status span {
+    display: none;
+  }
+
+  .command-center-shell.workspace-page-document > .command-viewport,
+  .command-center-shell.workspace-page-share > .command-viewport,
+  .command-center-shell.workspace-page-document .linear-workspace-layout,
+  .command-center-shell.workspace-page-share .linear-workspace-layout,
+  .command-center-shell.workspace-page-document .linear-workspace-layout .command-main,
+  .command-center-shell.workspace-page-share .linear-workspace-layout .command-main,
+  .command-center-shell.workspace-page-document .linear-workspace-layout .workspace-step-page,
+  .command-center-shell.workspace-page-share .linear-workspace-layout .workspace-step-page {
+    min-height: 0;
+    height: auto;
+  }
+
+  .command-center-shell.workspace-page-document > .command-viewport,
+  .command-center-shell.workspace-page-share > .command-viewport {
+    margin-top: 6px;
+  }
+
+  .command-center-shell.workspace-page-document .linear-workspace-layout,
+  .command-center-shell.workspace-page-share .linear-workspace-layout {
+    align-content: start;
+  }
+
+  .command-center-shell.workspace-page-document .workspace-side-nav,
+  .command-center-shell.workspace-page-share .workspace-side-nav {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .command-center-shell.workspace-page-document .workspace-side-group,
+  .command-center-shell.workspace-page-share .workspace-side-group {
+    gap: 8px;
+  }
+
+  .command-center-shell.workspace-page-document .workspace-side-group > span,
+  .command-center-shell.workspace-page-share .workspace-side-group > span {
+    display: none;
+  }
+
+  .command-center-shell.workspace-page-document .workspace-side-group button,
+  .command-center-shell.workspace-page-document .workspace-source-status p,
+  .command-center-shell.workspace-page-share .workspace-side-group button,
+  .command-center-shell.workspace-page-share .workspace-source-status p {
+    min-height: 44px;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .command-center-shell.workspace-page-document .workspace-current-brief,
+  .command-center-shell.workspace-page-share .workspace-current-brief {
+    padding: 10px 8px;
+  }
+
+  .command-center-shell.workspace-page-document .linear-workspace-layout .command-main,
+  .command-center-shell.workspace-page-share .linear-workspace-layout .command-main {
+    padding: 12px 0 0;
+  }
+
+  .command-center-shell.workspace-page-document .workspace-document-page,
+  .command-center-shell.workspace-page-share .workspace-share-page {
+    gap: 12px;
+  }
+
+  .command-center-shell.workspace-page-share .share-panel.workflow-panel {
+    max-height: calc(100svh - 168px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .command-center-shell.workspace-page-share [data-share-preview] {
+    height: min(260px, calc(100svh - 318px));
+    min-height: 156px;
+    max-height: calc(100svh - 286px);
   }
 }
 

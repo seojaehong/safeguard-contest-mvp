@@ -1925,6 +1925,84 @@ describe("workspace layout regression", () => {
     expect(metrics.secondaryText).toContain("문서 깊게 보기");
   }, 90_000);
 
+  it("keeps short desktop Documents and Share cockpits bounded before drilldowns", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 723 } });
+    const sample = buildSampleWorkpack();
+    await page.addInitScript(() => {
+      window.localStorage.setItem("safeclaw.aiMode", "template");
+    });
+    await page.route("**/api/weather?**", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, weather: null })
+      });
+    });
+    await page.route("**/api/ask", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(sample)
+      });
+    });
+
+    const readStageMetrics = async (rootSelector: string) => page.evaluate(async (selector) => {
+      await document.fonts.ready;
+      await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      const root = document.querySelector<HTMLElement>(selector);
+      if (!root) throw new Error(`Missing short desktop cockpit root: ${selector}`);
+      const box = root.getBoundingClientRect();
+      const outside = Array.from(document.querySelectorAll<HTMLElement>("body *")).filter((element) => {
+        const rect = element.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0 && (rect.left < -1 || rect.right > window.innerWidth + 1);
+      }).length;
+      const visibleShareTargets = [
+        document.querySelector<HTMLElement>("[data-share-stage-rail]"),
+        document.querySelector<HTMLElement>("[data-share-primary]"),
+        document.querySelector<HTMLElement>("[data-share-preview]"),
+        ...Array.from(document.querySelectorAll<HTMLElement>(".share-config-card")),
+      ].filter((element): element is HTMLElement => Boolean(element));
+      const visibleShareBottom = visibleShareTargets.reduce((bottom, element) => {
+        const style = getComputedStyle(element);
+        if (style.display === "none" || style.visibility === "hidden") return bottom;
+        return Math.max(bottom, element.getBoundingClientRect().bottom);
+      }, 0);
+      return {
+        viewportHeight: window.innerHeight,
+        viewportWidth: window.innerWidth,
+        bodyHeight: document.documentElement.scrollHeight,
+        scrollWidth: document.documentElement.scrollWidth,
+        outside,
+        visibleShareBottom: Math.round(visibleShareBottom),
+        root: {
+          top: Math.round(box.top),
+          bottom: Math.round(box.bottom),
+          height: Math.round(box.height),
+        },
+      };
+    }, rootSelector);
+
+    await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-windy&theme=day`, { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: /안전 문서 생성/ }).click();
+    await page.locator(".workspace-document-page").waitFor({ state: "visible", timeout: 60_000 });
+    await page.getByText(/12\/12 생성|안전 문서팩 3종 준비 완료/u).first().waitFor({ timeout: 60_000 });
+
+    const documents = await readStageMetrics(".document-workbench");
+    expect(documents.bodyHeight).toBeLessThanOrEqual(Math.ceil(documents.viewportHeight * 1.25));
+    expect(documents.scrollWidth).toBeLessThanOrEqual(documents.viewportWidth + 1);
+    expect(documents.outside).toBe(0);
+    expect(documents.root.bottom).toBeLessThanOrEqual(documents.viewportHeight);
+
+    await page.getByRole("button", { name: /다음: 공유|공유 단계로 이동/ }).first().click();
+    await page.locator(".workspace-share-page").waitFor({ state: "visible", timeout: 20_000 });
+    const share = await readStageMetrics("[data-share-root]");
+    expect(share.bodyHeight).toBeLessThanOrEqual(Math.ceil(share.viewportHeight * 1.25));
+    expect(share.scrollWidth).toBeLessThanOrEqual(share.viewportWidth + 1);
+    expect(share.outside).toBe(0);
+    expect(share.visibleShareBottom).toBeLessThanOrEqual(share.viewportHeight);
+  }, 90_000);
+
   it("preserves edited workpack through reload, concurrent revalidation, and responsive share gating", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });

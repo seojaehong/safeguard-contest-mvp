@@ -294,6 +294,7 @@ describe("workspace mobile share presentation", () => {
     const stored = buildStoredCurrentWorkpack(data, { workerSnapshot });
     const scenarios = [
       { label: "desktop", width: 1440, height: 900 },
+      { label: "desktop-short", width: 1440, height: 723 },
       { label: "mobile-390", width: 390, height: 844 }
     ] as const;
 
@@ -459,7 +460,11 @@ describe("workspace mobile share presentation", () => {
             expect.soft(metrics.primaryBottom, `${scenario.label} ${theme} desktop CTA in first viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
             expect.soft(metrics.previewBottom, `${scenario.label} ${theme} desktop preview in first viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
             expect.soft(metrics.previewLeft, `${scenario.label} ${theme} desktop preview right pane`).toBeGreaterThanOrEqual(metrics.primaryRight);
-            expect.soft(metrics.pageHeight, `${scenario.label} ${theme} desktop share task distance`).toBeLessThanOrEqual(metrics.viewportHeight * 1.35);
+            expect.soft(metrics.stageRailBottom, `${scenario.label} ${theme} desktop stage rail in first viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
+            for (const card of metrics.configCards) {
+              expect.soft(card.bottom, `${scenario.label} ${theme} desktop config card in first viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
+            }
+            expect.soft(metrics.pageHeight, `${scenario.label} ${theme} desktop share bounded task distance`).toBeLessThanOrEqual(metrics.viewportHeight * (scenario.label === "desktop-short" ? 1.25 : 1.35));
             expect.soft(metrics.lastParagraphBottom, `${scenario.label} ${theme} desktop paragraph is bounded by preview`).toBeGreaterThanOrEqual(metrics.linesBottom);
             expect.soft(metrics.channelCards.length, `${scenario.label} ${theme} channel card count`).toBe(3);
             for (const card of metrics.channelCards) {
