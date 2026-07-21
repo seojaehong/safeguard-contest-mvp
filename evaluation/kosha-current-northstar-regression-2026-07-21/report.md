@@ -1,7 +1,7 @@
 # KOSHA Current North Star Regression Gate
 
-- Checked at: 2026-07-21T02:38:45+09:00
-- Source HEAD before commit: aedc3d4b607af8316b5d9276b6cd6a49c1bb2488
+- Checked at: 2026-07-21T11:19:35+09:00
+- Source HEAD before commit: 25e7a9181b09081826b0aba6f6d625a76c339bc0
 - Branch: chore/recipient-foreign-live-gate-20260720
 - DB/schema/Supabase writes: none
 - Embedding generation/upload: none
