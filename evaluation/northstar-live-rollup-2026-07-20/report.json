@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T20:20:39.546Z",
-  "head": "45731921a8e4d6e8fb0bb9d8269e98f9a5bb47c5",
+  "generatedAt": "2026-07-21T20:24:00.521Z",
+  "head": "3e54dea44d3021c17a6015f871dae8a82e2d19bd",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
@@ -69,13 +69,13 @@
       "id": "supabase_rls_launch_isolation",
       "state": "approval_gated",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Read-only RLS approval preflight passed at source SHA 8011cb29683a691ee39026cc8c19015fc3ca8759, but live RLS catalog and tenant A/B isolation are not proven."
+      "detail": "Read-only RLS approval preflight passed at source SHA 3e54dea44d3021c17a6015f871dae8a82e2d19bd, but live RLS catalog and tenant A/B isolation are not proven."
     },
     {
       "id": "llm_wiki_publication",
       "state": "approval_gated",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 8011cb29683a691ee39026cc8c19015fc3ca8759."
+      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 3e54dea44d3021c17a6015f871dae8a82e2d19bd."
     },
     {
       "id": "sif_embedding_runtime",
@@ -181,10 +181,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "45731921a8e4d6e8fb0bb9d8269e98f9a5bb47c5",
+      "sourceCommit": "3e54dea44d3021c17a6015f871dae8a82e2d19bd",
       "sourceStatus": "exact",
-      "productionCommit": "45731921a8e4d6e8fb0bb9d8269e98f9a5bb47c5",
-      "productionStatus": "matches_live"
+      "productionCommit": "3e54dea44d3021c17a6015f871dae8a82e2d19bd",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -206,15 +206,15 @@
       "id": "kosha_exact_trust_registry",
       "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
       "sourceCommit": "45731921a8e4d6e8fb0bb9d8269e98f9a5bb47c5",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "45731921a8e4d6e8fb0bb9d8269e98f9a5bb47c5",
       "productionStatus": "matches_live"
     },
     {
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "sourceCommit": "8011cb29683a691ee39026cc8c19015fc3ca8759",
-      "sourceStatus": "ancestor",
+      "sourceCommit": "3e54dea44d3021c17a6015f871dae8a82e2d19bd",
+      "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
     },

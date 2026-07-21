@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-21T20:20:42.264Z",
+  "generatedAt": "2026-07-21T20:24:03.333Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "45731921a8e4d6e8fb0bb9d8269e98f9a5bb47c5",
+  "sourceHead": "3e54dea44d3021c17a6015f871dae8a82e2d19bd",
   "productionCommit": "45731921a8e4d6e8fb0bb9d8269e98f9a5bb47c5",
   "liveBuildInfo": {
     "ok": true,
@@ -15,11 +15,11 @@
     "deploymentUrl": "safeguard-contest-3sqzjfo7v-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": true,
+  "latestEvidenceCommitLive": false,
   "currentHeadIsEvidenceOnlyPending": false,
-  "liveExactEvidenceCommit": "45731921a8e4d6e8fb0bb9d8269e98f9a5bb47c5",
+  "liveExactEvidenceCommit": "3e54dea44d3021c17a6015f871dae8a82e2d19bd",
   "liveRollupLiveCommit": "45731921a8e4d6e8fb0bb9d8269e98f9a5bb47c5",
-  "liveRollupMatchesProduction": true,
+  "liveRollupMatchesProduction": false,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
     "liveRollup": "evaluation\\northstar-live-rollup-2026-07-20\\report.json",
