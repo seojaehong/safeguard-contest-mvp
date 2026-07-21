@@ -1,8 +1,15 @@
 {
-  "verdict": "PASS_CURRENT_SOURCE",
+  "verdict": "PASS_LIVE_PRODUCTION",
   "sourceHead": "2d173b48d35c9e7936d2656ddfb2dbf8ec5097f4",
   "productCommit": "2d173b48d35c9e7936d2656ddfb2dbf8ec5097f4",
-  "productionLiveClaimed": false,
+  "evidenceCommit": "3b86df0135f54076d93a91c119c8c4237c43ed2a",
+  "productionLiveClaimed": true,
+  "liveBuildInfo": {
+    "commitSha": "3b86df0135f54076d93a91c119c8c4237c43ed2a",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-71wswsdau-seojaehongs-projects.vercel.app"
+  },
   "providerDispatchLiveClaimed": false,
   "routeSplitAloneAcceptedAsFix": false,
   "structuralConclusion": "Route splitting helps orientation, but Share still needs a first-viewport cockpit with bounded/collapsed details. This wave removes the duplicate mobile stage rail from the default mobile cockpit and keeps detailed configuration collapsed.",
@@ -152,10 +159,13 @@
     {
       "command": "npm.cmd run typecheck",
       "result": "PASS"
+    },
+    {
+      "command": "SAFECLAW_BASE_URL=https://www.safeclaw.kr node evaluation\\workspace-docs-share-production-gate-2026-07-20\\run-current-geometry-probe.mjs",
+      "result": "PASS"
     }
   ],
   "remainingDebt": [
-    "Live production verification is pending until /api/build-info reports this source commit or a later deployed commit.",
     "Mobile Share is reduced to 1.16 viewports and keeps primary surfaces in the first viewport, but it is not claimed as an exactly one-viewport route.",
     "Provider live dispatch remains gated by the separate persistent idempotency/provider-result ledger approval path.",
     "A stricter future wave can collapse additional secondary share rails/details if product acceptance requires a hard 1.00x mobile route."
