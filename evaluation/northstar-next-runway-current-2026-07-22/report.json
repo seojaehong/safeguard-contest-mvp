@@ -2,7 +2,7 @@
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "d094d9c55b278684137dd568679f53a36773b3d2",
+  "sourceHead": "5a94351c57d83c8a265d649686517666f6f7f2f1",
   "productionCommit": "d094d9c55b278684137dd568679f53a36773b3d2",
   "liveBuildInfo": {
     "ok": true,
@@ -14,8 +14,8 @@
     "deploymentUrl": "safeguard-contest-r1pqouxcl-seojaehongs-projects.vercel.app",
     "message": "ë°°í¬ ì»¤ë° ìë³ìë¥¼ íì¸íìµëë¤."
   },
-  "latestEvidenceCommitLive": true,
-  "currentHeadIsEvidenceOnlyPending": false,
+  "latestEvidenceCommitLive": false,
+  "currentHeadIsEvidenceOnlyPending": true,
   "liveExactEvidenceCommit": "d094d9c55b278684137dd568679f53a36773b3d2",
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
