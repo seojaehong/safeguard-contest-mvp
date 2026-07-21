@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `8799b707923228487d056f4c2037daf07c8fa218`
+Source HEAD: `2bc348daa0799d55e13e1efea3f27fe69016b4a3`
 
-Production `/api/build-info`: `8799b707923228487d056f4c2037daf07c8fa218`
+Production `/api/build-info`: `2bc348daa0799d55e13e1efea3f27fe69016b4a3`
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -20,6 +20,8 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Standalone Dispatch cockpit is proven for the current evidence scope.
 - Generated Share result fixture cockpit is proven without claiming real provider dispatch.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level without claiming live production engine execution.
+- SIF embedding approval preflight is current and live-visible as approval-held evidence: corpus 6,032 records, no embedding generation, no upload, and vector runtime disabled until approval.
+- North Star approval runway is current and production-visible: the remaining runtime/provider/database/vector gates are explicitly separated from ordinary UI/evidence iteration.
 - Final-99 is `pass_with_notice`, not clean launch-complete. The notices are carried explicitly in `evaluation\final-99-gate-current-2026-07-21\notice-carry.json`.
 
 ## Approval-Gated Boundaries

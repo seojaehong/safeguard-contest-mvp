@@ -1,14 +1,16 @@
 {
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "8799b707923228487d056f4c2037daf07c8fa218",
-  "productionCommit": "8799b707923228487d056f4c2037daf07c8fa218",
+  "sourceHead": "2bc348daa0799d55e13e1efea3f27fe69016b4a3",
+  "productionCommit": "2bc348daa0799d55e13e1efea3f27fe69016b4a3",
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
     "liveRollup": "evaluation\\northstar-live-rollup-2026-07-20\\report.json",
     "final99": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
     "workspaceInformationArchitecture": "evaluation\\workspace-information-architecture-2026-07-21\\report.json",
-    "hermesOpenclawRuntime": "evaluation\\hermes-openclaw-runtime-current-gate-2026-07-20\\report.json"
+    "hermesOpenclawRuntime": "evaluation\\hermes-openclaw-runtime-current-gate-2026-07-20\\report.json",
+    "approvalRunway": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
+    "sifEmbeddingPreflight": "evaluation\\sif-embedding-gate\\approval-preflight-report.json"
   },
   "provenCurrentState": [
     "live_harness_quality",
@@ -16,7 +18,9 @@
     "ui_documents_share_cockpit",
     "dispatch_standalone_cockpit",
     "share_result_fixture_cockpit",
-    "hermes_openclaw_adapter_boundary"
+    "hermes_openclaw_adapter_boundary",
+    "sif_embedding_approval_preflight",
+    "northstar_approval_runway"
   ],
   "noticeState": [
     {
