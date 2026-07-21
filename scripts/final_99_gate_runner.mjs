@@ -95,6 +95,7 @@ function ensureDir(dir) {
 }
 
 function loadLocalEnv() {
+  if (process.env.SAFEGUARD_LOAD_LOCAL_ENV === "0") return;
   const envPath = path.join(rootDir, ".env.local");
   if (!fs.existsSync(envPath)) return;
   const lines = fs.readFileSync(envPath, "utf8").split(/\r?\n/);

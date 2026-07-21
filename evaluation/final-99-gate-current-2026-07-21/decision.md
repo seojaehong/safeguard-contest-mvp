@@ -1,10 +1,10 @@
 # SafeClaw final-99-gate decision
 
-- Generated at: 2026-07-21T17:44:23.833Z
+- Generated at: 2026-07-21T21:02:52.417Z
 - Base URL: https://www.safeclaw.kr
-- Commit: e53417f2
+- Commit: 5bc92d50
 - Overall: pass_with_notice
-- Elapsed: 73062ms
+- Elapsed: 96183ms
 
 ## Gate Results
 
