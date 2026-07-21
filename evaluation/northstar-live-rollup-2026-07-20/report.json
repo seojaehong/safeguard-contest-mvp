@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T11:53:06.850Z",
-  "head": "e3f76d4cda9e7a3f3fd5e515a4b5875a023d9cf5",
+  "generatedAt": "2026-07-21T11:57:19.695Z",
+  "head": "758b6ab9bd19d303db1cf76edffd1efca23763bf",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "e3f76d4cda9e7a3f3fd5e515a4b5875a023d9cf5",
+    "commitSha": "758b6ab9bd19d303db1cf76edffd1efca23763bf",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ge56f8c3r-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-1fkqp0r2m-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -181,10 +181,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "655b6ac699bc2f4e1c7bb1af0dca191e7b2e9f14",
-      "sourceStatus": "ancestor",
-      "productionCommit": "655b6ac699bc2f4e1c7bb1af0dca191e7b2e9f14",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "758b6ab9bd19d303db1cf76edffd1efca23763bf",
+      "sourceStatus": "exact",
+      "productionCommit": "758b6ab9bd19d303db1cf76edffd1efca23763bf",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -269,9 +269,9 @@
     {
       "id": "northstar_approval_runway",
       "artifact": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
-      "sourceCommit": "e3f76d4cda9e7a3f3fd5e515a4b5875a023d9cf5",
+      "sourceCommit": "758b6ab9bd19d303db1cf76edffd1efca23763bf",
       "sourceStatus": "exact",
-      "productionCommit": "e3f76d4cda9e7a3f3fd5e515a4b5875a023d9cf5",
+      "productionCommit": "758b6ab9bd19d303db1cf76edffd1efca23763bf",
       "productionStatus": "matches_live"
     }
   ],
