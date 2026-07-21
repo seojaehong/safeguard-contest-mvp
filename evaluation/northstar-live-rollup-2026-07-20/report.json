@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T20:24:00.521Z",
-  "head": "3e54dea44d3021c17a6015f871dae8a82e2d19bd",
+  "generatedAt": "2026-07-21T20:37:10.635Z",
+  "head": "80a8c68891c2b33a09234fe95da597263c747ce6",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "45731921a8e4d6e8fb0bb9d8269e98f9a5bb47c5",
+    "commitSha": "80a8c68891c2b33a09234fe95da597263c747ce6",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-3sqzjfo7v-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-exwnl3a6l-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -36,7 +36,7 @@
     {
       "id": "ui_documents_share_cockpit",
       "state": "proven",
-      "artifact": "evaluation\\workspace-ia-live-643-2026-07-22\\report.json",
+      "artifact": "evaluation\\workspace-ia-live-cdfc-2026-07-22\\report.json",
       "detail": "Production evidence closes default /workspace Documents and Share cockpits, /documents mobile raw height, exact one-viewport Documents review cockpit, selected-document context/summary layers, selected editor/detail field-summary risk-row landing, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, and mobile Share exact 844px viewport containment. Latest IA refinement still keeps raw textarea/full long-form editing below the first viewport as open secondary drilldown and treats desktop Share perceived narrow-card composition as a follow-up; it does not claim provider live dispatch."
     },
     {
@@ -89,7 +89,7 @@
     "verdict": "MOBILE_FIXED",
     "productionCommit": "be64c3b15a8cb55bb132fa065ec485ffb700f652",
     "currentGeometryArtifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-    "currentGeometryCommit": "64392d2b663e2b7de89b06269ee648596b68a186",
+    "currentGeometryCommit": "cdfc8d886659b25273bac8e243de181a630f8b2f",
     "documentsHeightRatio": 1,
     "documentsBodyHeight": 844,
     "documentsViewportHeight": 844,
@@ -113,7 +113,7 @@
   },
   "workspaceGeometry": {
     "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-    "productionCommit": "64392d2b663e2b7de89b06269ee648596b68a186",
+    "productionCommit": "cdfc8d886659b25273bac8e243de181a630f8b2f",
     "mobileDocumentDeepReviewOpen": false,
     "mobileVisibleDocumentPreviews": 0
   },
@@ -181,9 +181,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "3e54dea44d3021c17a6015f871dae8a82e2d19bd",
-      "sourceStatus": "exact",
-      "productionCommit": "3e54dea44d3021c17a6015f871dae8a82e2d19bd",
+      "sourceCommit": "cdfc8d886659b25273bac8e243de181a630f8b2f",
+      "sourceStatus": "ancestor",
+      "productionCommit": "cdfc8d886659b25273bac8e243de181a630f8b2f",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -208,13 +208,13 @@
       "sourceCommit": "45731921a8e4d6e8fb0bb9d8269e98f9a5bb47c5",
       "sourceStatus": "ancestor",
       "productionCommit": "45731921a8e4d6e8fb0bb9d8269e98f9a5bb47c5",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
       "sourceCommit": "3e54dea44d3021c17a6015f871dae8a82e2d19bd",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },
@@ -245,9 +245,9 @@
     {
       "id": "workspace_docs_share_geometry",
       "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-      "sourceCommit": "64392d2b663e2b7de89b06269ee648596b68a186",
+      "sourceCommit": "cdfc8d886659b25273bac8e243de181a630f8b2f",
       "sourceStatus": "ancestor",
-      "productionCommit": "64392d2b663e2b7de89b06269ee648596b68a186",
+      "productionCommit": "cdfc8d886659b25273bac8e243de181a630f8b2f",
       "productionStatus": "ancestor_of_head"
     },
     {
