@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T18:45:40.739Z",
-  "head": "b22ac8109b64e9c1727fcf125cf93f0d14791fe9",
+  "generatedAt": "2026-07-21T18:51:43.914Z",
+  "head": "1fff9dc7855f46c12c21562a57dca89030bfccc7",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "3dda49a4641a9af8c64959a4dd7a50a102863728",
+    "commitSha": "1fff9dc7855f46c12c21562a57dca89030bfccc7",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-hc7sorafn-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-bd70fkuew-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -208,7 +208,7 @@
       "sourceCommit": "3dda49a4641a9af8c64959a4dd7a50a102863728",
       "sourceStatus": "ancestor",
       "productionCommit": "3dda49a4641a9af8c64959a4dd7a50a102863728",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "rls_llm_wiki_approval_preflight",
