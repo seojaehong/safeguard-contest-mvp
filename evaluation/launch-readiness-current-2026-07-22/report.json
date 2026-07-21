@@ -1,0 +1,118 @@
+{
+  "schemaVersion": "safeclaw-launch-readiness-current/v1",
+  "generatedAt": "2026-07-21T15:56:31.692Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceCommit": "2aedfa44b5e33d4b254100d08d8b58cd79e0f9e1",
+  "productionCommit": "2aedfa44b5e33d4b254100d08d8b58cd79e0f9e1",
+  "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
+  "safeLaunchDemoClaimAllowed": true,
+  "fullyAutomatedLaunchClaimAllowed": false,
+  "providerDispatchLiveClaimed": false,
+  "dispatchCalled": false,
+  "apiAsk": {
+    "status": 200,
+    "ok": true,
+    "elapsedMs": 20512
+  },
+  "scenario": {
+    "companyName": "도시가스공사",
+    "companyType": "건설업",
+    "siteName": "도시가스공사 열수송관 굴착공사 현장",
+    "workSummary": "도시가스공사 열수송관 굴착공사",
+    "workerCount": 7
+  },
+  "documentCoverage": {
+    "expectedCount": 11,
+    "presentCount": 11,
+    "missing": [],
+    "present": [
+      "workpackSummaryDraft",
+      "riskAssessmentDraft",
+      "workPlanDraft",
+      "tbmBriefing",
+      "tbmLogDraft",
+      "safetyEducationRecordDraft",
+      "emergencyResponseDraft",
+      "photoEvidenceDraft",
+      "foreignWorkerBriefing",
+      "foreignWorkerTransmission",
+      "kakaoMessage"
+    ]
+  },
+  "liveConnections": [
+    {
+      "name": "Law.go / korean-law-mcp",
+      "liveStatus": "연결됨"
+    },
+    {
+      "name": "Gemini",
+      "liveStatus": "연결됨"
+    },
+    {
+      "name": "기상청",
+      "liveStatus": "연결됨"
+    },
+    {
+      "name": "Work24",
+      "liveStatus": "연결됨"
+    },
+    {
+      "name": "KOSHA 교육",
+      "liveStatus": "연결됨"
+    },
+    {
+      "name": "KOSHA 공식자료",
+      "liveStatus": "연결됨"
+    },
+    {
+      "name": "KOSHA 재해사례",
+      "liveStatus": "연결됨"
+    },
+    {
+      "name": "n8n dispatch",
+      "liveStatus": "설정 점검만 수행"
+    }
+  ],
+  "currentEvidence": {
+    "rawAudit": "evaluation\\launch-readiness-current-2026-07-22\\api-connection-audit.json",
+    "final99": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
+    "northstarOpenGates": "evaluation\\northstar-open-gates-current\\report.json",
+    "uiCockpitEvidence": "evaluation\\workspace-ia-live-f297-2026-07-22\\report.json",
+    "koshaRegression": "evaluation\\kosha-current-northstar-regression-2026-07-21\\report.json"
+  },
+  "approvalGatedBoundaries": [
+    {
+      "id": "provider_dispatch_persistence",
+      "reason": "Provider dispatch remains preview-only until persistent idempotency and provider-result persistence are approved and verified."
+    },
+    {
+      "id": "supabase_rls_launch_isolation",
+      "reason": "Live RLS catalog and disposable tenant A/B isolation are not production-proven."
+    },
+    {
+      "id": "llm_wiki_publication",
+      "reason": "LLM Wiki candidates remain unpublished until approved RPC/RLS/ledger canary evidence exists."
+    },
+    {
+      "id": "sif_embedding_runtime",
+      "reason": "SIF vector runtime remains held until migration, embedding cost, upload, and runtime enablement are separately approved."
+    },
+    {
+      "id": "admin_auth_save_reopen",
+      "reason": "Final-99 still carries admin-auth live save/reopen as a notice without secure auth token execution."
+    }
+  ],
+  "safeClaims": [
+    "Live /api/ask can generate the expected 11-document workpack for the audited construction scenario.",
+    "Law.go, Gemini, KMA weather, Work24, KOSHA education, KOSHA official material, and KOSHA accident-case connections returned user-facing connected status in the live smoke.",
+    "Default Documents and Share cockpits are production-proven as viewport-bounded decision surfaces.",
+    "A safe launch demo or guided pilot can be claimed with the explicit provider-dispatch and admin-auth notices."
+  ],
+  "forbiddenClaims": [
+    "Fully automated self-serve launch readiness is complete.",
+    "Real provider dispatch is production-live for any channel.",
+    "Provider idempotency and per-channel result persistence are production-proven.",
+    "SIF vector retrieval or LLM Wiki publication is production-active.",
+    "Live Supabase RLS tenant isolation is launch-proven."
+  ]
+}

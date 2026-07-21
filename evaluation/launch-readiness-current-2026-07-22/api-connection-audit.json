@@ -1,0 +1,120 @@
+{
+  "generatedAt": "2026-07-21T15:56:31.692Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "elapsedMs": 20512,
+  "apiAskStatus": 200,
+  "apiAskOk": true,
+  "dispatchStatus": null,
+  "dispatchOk": null,
+  "scenario": {
+    "companyName": "도시가스공사",
+    "companyType": "건설업",
+    "siteName": "도시가스공사 열수송관 굴착공사 현장",
+    "workSummary": "도시가스공사 열수송관 굴착공사",
+    "workerCount": 7,
+    "weatherNote": "옥외 굴착 조건, 굴착면 붕괴·매설물 접촉·중장비 작업반경 확인 필요"
+  },
+  "documents": {
+    "workpackSummaryDraft": true,
+    "riskAssessmentDraft": true,
+    "workPlanDraft": true,
+    "tbmBriefing": true,
+    "tbmLogDraft": true,
+    "safetyEducationRecordDraft": true,
+    "emergencyResponseDraft": true,
+    "photoEvidenceDraft": true,
+    "foreignWorkerBriefing": true,
+    "foreignWorkerTransmission": true,
+    "kakaoMessage": true
+  },
+  "connections": [
+    {
+      "name": "Law.go / korean-law-mcp",
+      "keyPresent": false,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "위험성평가표",
+        "작업계획서",
+        "TBM",
+        "안전보건교육",
+        "사진/증빙"
+      ],
+      "detail": "Law.go와 OpenAI 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 초단기실황 호출 성공 (서울, base 20260722 0000) / 기상청 초단기예보 호출 성공 (서울, base 20260722 0030) / 기상청 단기예보 호출 성공 (서울, base 20260721 2300) / 기상청 기상특보 조회 성공 (전국, 202607211600) / 기상청 영향예보 연결 점검 필요: NO_DATA / 고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 지식 DB 매칭 2건 / Supabase 카탈로그 매칭 8건 (configured=true) / structured 위험성평가 rows 5건, 검증 이슈 0건 (structured rows=고정 근거 기반) / TBM-risk 연결 5건 (TBM-risk links=고정 근거 기반) / TBM structured=규칙 기반 from risk rows / 생성 모드: 강화 (고정 근거 위험요인 표 우선: 위험성평가 row 확정, TBM 구조 규칙 기반 조립)"
+    },
+    {
+      "name": "Gemini",
+      "keyPresent": true,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "핵심 판단",
+        "문서팩 본문"
+      ],
+      "detail": "OpenAI 응답은 timeout 20000ms, retry 없음, 실패 시 보조 응답 정책을 따릅니다."
+    },
+    {
+      "name": "기상청",
+      "keyPresent": false,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "위험성평가표",
+        "작업계획서",
+        "TBM"
+      ],
+      "detail": "기상청 초단기실황 호출 성공 (서울, base 20260722 0000) / 기상청 초단기예보 호출 성공 (서울, base 20260722 0030) / 기상청 단기예보 호출 성공 (서울, base 20260721 2300) / 기상청 기상특보 조회 성공 (전국, 202607211600) / 기상청 영향예보 연결 점검 필요: NO_DATA"
+    },
+    {
+      "name": "Work24",
+      "keyPresent": false,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "안전보건교육",
+        "후속 교육"
+      ],
+      "detail": "고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다."
+    },
+    {
+      "name": "KOSHA 교육",
+      "keyPresent": true,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "안전보건교육",
+        "후속 교육"
+      ],
+      "detail": "KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다."
+    },
+    {
+      "name": "KOSHA 공식자료",
+      "keyPresent": true,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "위험성평가표",
+        "TBM",
+        "안전보건교육"
+      ],
+      "detail": "KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다."
+    },
+    {
+      "name": "KOSHA 재해사례",
+      "keyPresent": false,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "TBM",
+        "안전보건교육",
+        "비상대응",
+        "사진/증빙"
+      ],
+      "detail": "KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다."
+    },
+    {
+      "name": "n8n dispatch",
+      "keyPresent": false,
+      "liveStatus": "설정 점검만 수행",
+      "reflectedIn": [
+        "현장 전파"
+      ],
+      "detail": "로컬/서버 내부에서는 N8N_INTERNAL_BASE를 사용할 수 있습니다."
+    }
+  ],
+  "userFacingStatusPolicy": "연결됨 / 일부 근거 보류 / 연결 점검 필요",
+  "rawStatusDetail": "Law.go와 OpenAI 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 초단기실황 호출 성공 (서울, base 20260722 0000) / 기상청 초단기예보 호출 성공 (서울, base 20260722 0030) / 기상청 단기예보 호출 성공 (서울, base 20260721 2300) / 기상청 기상특보 조회 성공 (전국, 202607211600) / 기상청 영향예보 연결 점검 필요: NO_DATA / 고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 지식 DB 매칭 2건 / Supabase 카탈로그 매칭 8건 (configured=true) / structured 위험성평가 rows 5건, 검증 이슈 0건 (structured rows=고정 근거 기반) / TBM-risk 연결 5건 (TBM-risk links=고정 근거 기반) / TBM structured=규칙 기반 from risk rows / 생성 모드: 강화 (고정 근거 위험요인 표 우선: 위험성평가 row 확정, TBM 구조 규칙 기반 조립)"
+}
