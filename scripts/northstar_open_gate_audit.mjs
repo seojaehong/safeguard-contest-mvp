@@ -53,6 +53,7 @@ const EVIDENCE_PATHS = Object.freeze({
   providerDispatchIdempotency: path.join("evaluation", "provider-dispatch-idempotency-gate-2026-07-19", "report.json"),
   workspaceIaLiveRefinement: path.join("evaluation", "workspace-ia-live-f67-2026-07-21", "report.json"),
   workspaceEditorDetailLanding: path.join("evaluation", "workspace-editor-detail-landing-2026-07-21", "report.json"),
+  workspaceIaLiveCurrent: path.join("evaluation", "workspace-ia-live-f297-2026-07-22", "report.json"),
   koshaCurrentNorthstarRegression: path.join("evaluation", "kosha-current-northstar-regression-2026-07-21", "report.json"),
   koshaCurrentGate: path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json"),
   koshaCurrentReconciliation: path.join("evaluation", "kosha-current-master-reconciliation-2026-07-19", "report.json"),
@@ -549,6 +550,7 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const shareMobileExactViewportPath = EVIDENCE_PATHS.shareMobileExactViewport;
   const workspaceIaLiveRefinementPath = EVIDENCE_PATHS.workspaceIaLiveRefinement;
   const workspaceEditorDetailLandingPath = EVIDENCE_PATHS.workspaceEditorDetailLanding;
+  const workspaceIaLiveCurrentPath = EVIDENCE_PATHS.workspaceIaLiveCurrent;
   const internalPane = readJsonFile(rootDir, internalPanePath);
   const paneContext = readJsonFile(rootDir, paneContextPath);
   const drilldown = readJsonFile(rootDir, drilldownPath);
@@ -570,15 +572,16 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const shareMobileExactViewport = readJsonFile(rootDir, shareMobileExactViewportPath);
   const workspaceIaLiveRefinement = readJsonFile(rootDir, workspaceIaLiveRefinementPath);
   const workspaceEditorDetailLanding = readJsonFile(rootDir, workspaceEditorDetailLandingPath);
+  const workspaceIaCurrentReport = readJsonFile(rootDir, workspaceIaLiveCurrentPath);
 
-  if (!isRecord(internalPane) || !isRecord(paneContext) || !isRecord(drilldown) || !isRecord(innerPaneDepth) || !isRecord(fieldFirst) || !isRecord(riskRowCockpit) || !isRecord(tbmCockpit) || !isRecord(firstViewSplit) || !isRecord(educationCockpit) || !isRecord(emergencyCockpit) || !isRecord(completeCockpits) || !isRecord(completeCockpitsLive) || !isRecord(documentsMobileExactCockpit) || !isRecord(shareDesktop) || !isRecord(shareDesktopShort) || !isRecord(share) || !isRecord(shareStageRail) || !isRecord(shareMobileStageRailCollapse) || !isRecord(shareMobileExactViewport) || !isRecord(workspaceIaLiveRefinement) || !isRecord(workspaceEditorDetailLanding)) {
+  if (!isRecord(internalPane) || !isRecord(paneContext) || !isRecord(drilldown) || !isRecord(innerPaneDepth) || !isRecord(fieldFirst) || !isRecord(riskRowCockpit) || !isRecord(tbmCockpit) || !isRecord(firstViewSplit) || !isRecord(educationCockpit) || !isRecord(emergencyCockpit) || !isRecord(completeCockpits) || !isRecord(completeCockpitsLive) || !isRecord(documentsMobileExactCockpit) || !isRecord(shareDesktop) || !isRecord(shareDesktopShort) || !isRecord(share) || !isRecord(shareStageRail) || !isRecord(shareMobileStageRailCollapse) || !isRecord(shareMobileExactViewport) || !isRecord(workspaceIaLiveRefinement) || !isRecord(workspaceEditorDetailLanding) || !isRecord(workspaceIaCurrentReport)) {
     return gateResult({
       id: "ui_documents_share_cockpit",
       label: "Documents and Share cockpit UI",
       state: "missing",
-      evidencePath: !isRecord(internalPane) ? internalPanePath : !isRecord(paneContext) ? paneContextPath : !isRecord(drilldown) ? drilldownPath : !isRecord(innerPaneDepth) ? innerPaneDepthPath : !isRecord(fieldFirst) ? fieldFirstPath : !isRecord(riskRowCockpit) ? riskRowCockpitPath : !isRecord(tbmCockpit) ? tbmCockpitPath : !isRecord(firstViewSplit) ? firstViewSplitPath : !isRecord(educationCockpit) ? educationCockpitPath : !isRecord(emergencyCockpit) ? emergencyCockpitPath : !isRecord(completeCockpits) ? completeCockpitsPath : !isRecord(completeCockpitsLive) ? completeCockpitsLivePath : !isRecord(documentsMobileExactCockpit) ? documentsMobileExactCockpitPath : !isRecord(shareDesktop) ? shareDesktopPath : !isRecord(shareDesktopShort) ? shareDesktopShortPath : !isRecord(share) ? sharePath : !isRecord(shareStageRail) ? shareStageRailPath : !isRecord(shareMobileStageRailCollapse) ? shareMobileStageRailCollapsePath : !isRecord(shareMobileExactViewport) ? shareMobileExactViewportPath : !isRecord(workspaceIaLiveRefinement) ? workspaceIaLiveRefinementPath : workspaceEditorDetailLandingPath,
+      evidencePath: !isRecord(internalPane) ? internalPanePath : !isRecord(paneContext) ? paneContextPath : !isRecord(drilldown) ? drilldownPath : !isRecord(innerPaneDepth) ? innerPaneDepthPath : !isRecord(fieldFirst) ? fieldFirstPath : !isRecord(riskRowCockpit) ? riskRowCockpitPath : !isRecord(tbmCockpit) ? tbmCockpitPath : !isRecord(firstViewSplit) ? firstViewSplitPath : !isRecord(educationCockpit) ? educationCockpitPath : !isRecord(emergencyCockpit) ? emergencyCockpitPath : !isRecord(completeCockpits) ? completeCockpitsPath : !isRecord(completeCockpitsLive) ? completeCockpitsLivePath : !isRecord(documentsMobileExactCockpit) ? documentsMobileExactCockpitPath : !isRecord(shareDesktop) ? shareDesktopPath : !isRecord(shareDesktopShort) ? shareDesktopShortPath : !isRecord(share) ? sharePath : !isRecord(shareStageRail) ? shareStageRailPath : !isRecord(shareMobileStageRailCollapse) ? shareMobileStageRailCollapsePath : !isRecord(shareMobileExactViewport) ? shareMobileExactViewportPath : !isRecord(workspaceIaLiveRefinement) ? workspaceIaLiveRefinementPath : !isRecord(workspaceEditorDetailLanding) ? workspaceEditorDetailLandingPath : workspaceIaLiveCurrentPath,
       detail: "Documents/share cockpit evidence is missing or invalid.",
-      nextActions: ["Regenerate documents mobile internal-pane, pane-context, drilldown-depth, inner-pane-depth, field-first-affordance, risk-row/TBM/first-view/education/emergency/complete cockpit, live complete cockpit, live exact Documents cockpit, share desktop/mobile, desktop-short Share, share staged-flow, live mobile share boundary, exact viewport evidence, latest workspace IA refinement evidence, and workspace editor detail landing evidence."],
+      nextActions: ["Regenerate documents mobile internal-pane, pane-context, drilldown-depth, inner-pane-depth, field-first-affordance, risk-row/TBM/first-view/education/emergency/complete cockpit, live complete cockpit, live exact Documents cockpit, share desktop/mobile, desktop-short Share, share staged-flow, live mobile share boundary, exact viewport evidence, latest workspace IA refinement evidence, workspace editor detail landing evidence, and the current live workspace IA split evidence."],
     });
   }
 
@@ -734,6 +737,47 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     : {};
   const editorDetailLiveSha = readString(workspaceEditorDetailLanding.liveCommitChecked);
   const editorDetailLiveCurrent = isGitAncestor(rootDir, editorDetailLiveSha);
+  const workspaceIaCurrentClosed = isRecord(workspaceIaCurrentReport.closed)
+    ? workspaceIaCurrentReport.closed
+    : {};
+  const workspaceIaCurrentOpen = isRecord(workspaceIaCurrentReport.open)
+    ? workspaceIaCurrentReport.open
+    : {};
+  const workspaceIaCurrentDocs = isRecord(workspaceIaCurrentClosed.defaultDocumentsCockpit)
+    ? workspaceIaCurrentClosed.defaultDocumentsCockpit
+    : {};
+  const workspaceIaCurrentDocsDesktopShort = isRecord(workspaceIaCurrentDocs.desktopShort1440x723)
+    ? workspaceIaCurrentDocs.desktopShort1440x723
+    : {};
+  const workspaceIaCurrentDocsMobile = isRecord(workspaceIaCurrentDocs.mobile390x844)
+    ? workspaceIaCurrentDocs.mobile390x844
+    : {};
+  const workspaceIaCurrentShare = isRecord(workspaceIaCurrentClosed.defaultShareCockpit)
+    ? workspaceIaCurrentClosed.defaultShareCockpit
+    : {};
+  const workspaceIaCurrentShareDesktopShort = isRecord(workspaceIaCurrentShare.desktopShort1440x723)
+    ? workspaceIaCurrentShare.desktopShort1440x723
+    : {};
+  const workspaceIaCurrentShareMobile = isRecord(workspaceIaCurrentShare.mobile390x844)
+    ? workspaceIaCurrentShare.mobile390x844
+    : {};
+  const workspaceIaCurrentSelectedEditor = isRecord(workspaceIaCurrentClosed.selectedEditorFieldLevelLanding)
+    ? workspaceIaCurrentClosed.selectedEditorFieldLevelLanding
+    : {};
+  const workspaceIaCurrentSelectedEditorDesktopShort = isRecord(workspaceIaCurrentSelectedEditor.desktopShort1440x723)
+    ? workspaceIaCurrentSelectedEditor.desktopShort1440x723
+    : {};
+  const workspaceIaCurrentSelectedEditorMobile = isRecord(workspaceIaCurrentSelectedEditor.mobile390x844)
+    ? workspaceIaCurrentSelectedEditor.mobile390x844
+    : {};
+  const workspaceIaCurrentRawTextareaDepth = isRecord(workspaceIaCurrentOpen.selectedEditorRawTextareaDepth)
+    ? workspaceIaCurrentOpen.selectedEditorRawTextareaDepth
+    : {};
+  const workspaceIaCurrentShareNarrowWorkbench = isRecord(workspaceIaCurrentOpen.shareDesktopPerceivedNarrowWorkbench)
+    ? workspaceIaCurrentOpen.shareDesktopPerceivedNarrowWorkbench
+    : {};
+  const workspaceIaCurrentLiveSha = readString(workspaceIaCurrentReport.liveCommitChecked);
+  const workspaceIaCurrentLiveIsAncestor = isGitAncestor(rootDir, workspaceIaCurrentLiveSha);
   const shareMobile = isRecord(share.mobile390x844Day)
     ? share.mobile390x844Day
     : isRecord(share.mobile390x844)
@@ -1208,12 +1252,59 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     && editorDetailAcceptance.textareaSecondaryBelowFirstWorkSurface === true
     && editorDetailAcceptance.backendProviderExportContractsTouched === false;
 
-  if (documentsPass && sharePass && workspaceIaRefinementPass && workspaceEditorDetailLandingPass) {
+  const workspaceIaCurrentPass = readString(workspaceIaCurrentReport.verdict) === "IA_BLOCKER_REFINED_CURRENT_LIVE"
+    && workspaceIaCurrentLiveIsAncestor
+    && readBoolean(workspaceIaCurrentReport.routeSplitAloneAcceptedAsFix) === false
+    && readBoolean(workspaceIaCurrentReport.providerDispatchLiveClaimed) === false
+    && readNumber(workspaceIaCurrentDocsDesktopShort.bodyHeight) === 723
+    && readNumber(workspaceIaCurrentDocsDesktopShort.viewportHeight) === 723
+    && readNumber(workspaceIaCurrentDocsDesktopShort.documentWorkbenchBottom) <= 723
+    && readNumber(workspaceIaCurrentDocsDesktopShort.visibleDocumentPreviews) === 0
+    && readBoolean(workspaceIaCurrentDocsDesktopShort.overflowX) === false
+    && readNumber(workspaceIaCurrentDocsDesktopShort.outside) === 0
+    && readNumber(workspaceIaCurrentDocsMobile.bodyHeight) === 844
+    && readNumber(workspaceIaCurrentDocsMobile.viewportHeight) === 844
+    && readNumber(workspaceIaCurrentDocsMobile.documentWorkbenchBottom) <= 844
+    && readNumber(workspaceIaCurrentDocsMobile.visibleDocumentPreviews) === 0
+    && readBoolean(workspaceIaCurrentDocsMobile.overflowX) === false
+    && readNumber(workspaceIaCurrentDocsMobile.outside) === 0
+    && readNumber(workspaceIaCurrentShareDesktopShort.bodyHeight) === 723
+    && readNumber(workspaceIaCurrentShareDesktopShort.viewportHeight) === 723
+    && readNumber(workspaceIaCurrentShareDesktopShort.shareRootBottom) <= 723
+    && readNumber(workspaceIaCurrentShareDesktopShort.shareFormWidth) >= 600
+    && readNumber(workspaceIaCurrentShareDesktopShort.sharePreviewWidth) >= 500
+    && readNumber(workspaceIaCurrentShareDesktopShort.previewBottom) <= 723
+    && readNumber(workspaceIaCurrentShareDesktopShort.primaryCtaBottom) <= 723
+    && readBoolean(workspaceIaCurrentShareDesktopShort.overflowX) === false
+    && readNumber(workspaceIaCurrentShareDesktopShort.outside) === 0
+    && readNumber(workspaceIaCurrentShareMobile.bodyHeight) === 844
+    && readNumber(workspaceIaCurrentShareMobile.viewportHeight) === 844
+    && readNumber(workspaceIaCurrentShareMobile.shareRootBottom) <= 844
+    && readNumber(workspaceIaCurrentShareMobile.previewBottom) <= 844
+    && readNumber(workspaceIaCurrentShareMobile.primaryCtaBottom) <= 844
+    && readBoolean(workspaceIaCurrentShareMobile.overflowX) === false
+    && readNumber(workspaceIaCurrentShareMobile.outside) === 0
+    && readNumber(workspaceIaCurrentSelectedEditorDesktopShort.viewportHeight) === 723
+    && readNumber(workspaceIaCurrentSelectedEditorDesktopShort.firstRiskRowHeaderBottom) <= 723
+    && readNumber(workspaceIaCurrentSelectedEditorDesktopShort.firstRiskHazardFieldBottom) <= 723
+    && readBoolean(workspaceIaCurrentSelectedEditorDesktopShort.rowHeaderTextContainsEvidence) === true
+    && readBoolean(workspaceIaCurrentSelectedEditorDesktopShort.rowHeaderTextContainsVerification) === true
+    && readNumber(workspaceIaCurrentSelectedEditorDesktopShort.rawTextareaTop) > 723
+    && readNumber(workspaceIaCurrentSelectedEditorMobile.viewportHeight) === 844
+    && readNumber(workspaceIaCurrentSelectedEditorMobile.firstRiskRowHeaderBottom) <= 844
+    && readNumber(workspaceIaCurrentSelectedEditorMobile.firstRiskHazardFieldBottom) <= 844
+    && readBoolean(workspaceIaCurrentSelectedEditorMobile.rowHeaderTextContainsEvidence) === true
+    && readBoolean(workspaceIaCurrentSelectedEditorMobile.rowHeaderTextContainsVerification) === true
+    && readNumber(workspaceIaCurrentSelectedEditorMobile.rawTextareaTop) > 844
+    && readString(workspaceIaCurrentRawTextareaDepth.status) === "open_secondary_drilldown"
+    && readString(workspaceIaCurrentShareNarrowWorkbench.status) === "optional_follow_up_if_reproduced";
+
+  if (documentsPass && sharePass && workspaceIaRefinementPass && workspaceEditorDetailLandingPass && workspaceIaCurrentPass) {
     return gateResult({
       id: "ui_documents_share_cockpit",
       label: "Documents and Share cockpit UI",
       state: "proven",
-      evidencePath: workspaceEditorDetailLandingPath,
+      evidencePath: workspaceIaLiveCurrentPath,
       detail: "Production evidence closes default /workspace Documents and Share cockpits, /documents mobile raw height, exact one-viewport Documents review cockpit, selected-document context/summary layers, selected editor/detail field-summary risk-row landing, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, and mobile Share exact 844px viewport containment. Latest IA refinement still keeps raw textarea/full long-form editing below the first viewport as open secondary drilldown and treats desktop Share perceived narrow-card composition as a follow-up; it does not claim provider live dispatch.",
       nextActions: [
         "Keep the production live geometry recorded for default Documents/Share cockpits and 12-document cockpit slices; do not expand them into a full 12-document field-first authoring claim.",
@@ -1227,7 +1318,7 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     id: "ui_documents_share_cockpit",
     label: "Documents and Share cockpit UI",
     state: "contradicted",
-    evidencePath: !workspaceIaRefinementPass ? workspaceIaLiveRefinementPath : !workspaceEditorDetailLandingPass ? workspaceEditorDetailLandingPath : documentsPass ? shareDesktopShortPath : documentsMobileExactCockpitPath,
+    evidencePath: !workspaceIaRefinementPass ? workspaceIaLiveRefinementPath : !workspaceEditorDetailLandingPass ? workspaceEditorDetailLandingPath : !workspaceIaCurrentPass ? workspaceIaLiveCurrentPath : documentsPass ? shareDesktopShortPath : documentsMobileExactCockpitPath,
     detail: "Documents/share cockpit evidence no longer proves bounded page height, exact mobile Documents cockpit, visible selected-document pane context, selected editor/detail field-summary landing with raw textarea kept secondary, first-viewport share action, and the latest IA refinement together.",
     nextActions: ["Re-run documents/share browser geometry gates, promote exact Documents cockpit only after live production verification, refresh the workspace IA refinement and editor detail landing evidence, and fix any UI cockpit regression."],
   });

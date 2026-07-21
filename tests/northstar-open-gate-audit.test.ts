@@ -772,6 +772,80 @@ function createFixtureRoot(): string {
       backendProviderExportContractsTouched: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "workspace-ia-live-f297-2026-07-22", "report.json"), {
+    verdict: "IA_BLOCKER_REFINED_CURRENT_LIVE",
+    liveCommitChecked: "fixture-sha",
+    routeSplitAloneAcceptedAsFix: false,
+    providerDispatchLiveClaimed: false,
+    closed: {
+      defaultDocumentsCockpit: {
+        desktopShort1440x723: {
+          bodyHeight: 723,
+          viewportHeight: 723,
+          documentWorkbenchBottom: 710,
+          visibleDocumentPreviews: 0,
+          overflowX: false,
+          outside: 0,
+        },
+        mobile390x844: {
+          bodyHeight: 844,
+          viewportHeight: 844,
+          documentWorkbenchBottom: 786,
+          visibleDocumentPreviews: 0,
+          overflowX: false,
+          outside: 0,
+        },
+      },
+      defaultShareCockpit: {
+        desktopShort1440x723: {
+          bodyHeight: 723,
+          viewportHeight: 723,
+          shareRootBottom: 716,
+          shareFormWidth: 636,
+          sharePreviewWidth: 520,
+          previewBottom: 571,
+          primaryCtaBottom: 389,
+          overflowX: false,
+          outside: 0,
+        },
+        mobile390x844: {
+          bodyHeight: 844,
+          viewportHeight: 844,
+          shareRootBottom: 810,
+          previewBottom: 683,
+          primaryCtaBottom: 742,
+          overflowX: false,
+          outside: 0,
+        },
+      },
+      selectedEditorFieldLevelLanding: {
+        desktopShort1440x723: {
+          viewportHeight: 723,
+          firstRiskRowHeaderBottom: 579,
+          firstRiskHazardFieldBottom: 675,
+          rowHeaderTextContainsEvidence: true,
+          rowHeaderTextContainsVerification: true,
+          rawTextareaTop: 1094,
+        },
+        mobile390x844: {
+          viewportHeight: 844,
+          firstRiskRowHeaderBottom: 583,
+          firstRiskHazardFieldBottom: 657,
+          rowHeaderTextContainsEvidence: true,
+          rowHeaderTextContainsVerification: true,
+          rawTextareaTop: 987,
+        },
+      },
+    },
+    open: {
+      selectedEditorRawTextareaDepth: {
+        status: "open_secondary_drilldown",
+      },
+      shareDesktopPerceivedNarrowWorkbench: {
+        status: "optional_follow_up_if_reproduced",
+      },
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "documents-mobile-exact-cockpit-2026-07-21", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION",
     productCommit: "fixture-sha",
@@ -1018,7 +1092,7 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("raw textarea/full long-form editing below the first viewport as open secondary drilldown");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("perceived narrow-card composition");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.evidencePath).toBe(
-      path.join("evaluation", "workspace-editor-detail-landing-2026-07-21", "report.json"),
+      path.join("evaluation", "workspace-ia-live-f297-2026-07-22", "report.json"),
     );
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("raw textarea and deeper row/all-document authoring");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).not.toContain("Promote the Share staged rail");
