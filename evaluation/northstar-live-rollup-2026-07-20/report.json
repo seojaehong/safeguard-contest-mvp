@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T13:38:04.780Z",
-  "head": "d6d13d78c2fe4f2fdfcd44f72f6b5b2e788fc40f",
+  "generatedAt": "2026-07-21T13:42:41.521Z",
+  "head": "e16141ace29d606879f1d6786f1a8f87fc9092e8",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "d6d13d78c2fe4f2fdfcd44f72f6b5b2e788fc40f",
+    "commitSha": "e16141ace29d606879f1d6786f1a8f87fc9092e8",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-dlbmpz0d5-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-oj2pa2hsr-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -69,13 +69,13 @@
       "id": "supabase_rls_launch_isolation",
       "state": "approval_gated",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Read-only RLS approval preflight passed at source SHA 517b9c39cd376d744fde9e5eeea1b7481b6be646, but live RLS catalog and tenant A/B isolation are not proven."
+      "detail": "Read-only RLS approval preflight passed at source SHA d6d13d78c2fe4f2fdfcd44f72f6b5b2e788fc40f, but live RLS catalog and tenant A/B isolation are not proven."
     },
     {
       "id": "llm_wiki_publication",
       "state": "approval_gated",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 517b9c39cd376d744fde9e5eeea1b7481b6be646."
+      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA d6d13d78c2fe4f2fdfcd44f72f6b5b2e788fc40f."
     },
     {
       "id": "sif_embedding_runtime",
@@ -151,7 +151,7 @@
   "final99": {
     "artifact": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
     "overall": "pass_with_notice",
-    "productionCommit": "75da5bba77051b382d6f355bd0cab10a1fd81ace",
+    "productionCommit": "e16141ace29d606879f1d6786f1a8f87fc9092e8",
     "noticeCarry": [
       {
         "gate": "auth-history-reuse",
@@ -181,18 +181,18 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "8a72abe1d80e7058a8a7074bf70894ee9edf7532",
-      "sourceStatus": "ancestor",
-      "productionCommit": "8a72abe1d80e7058a8a7074bf70894ee9edf7532",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "e16141ace29d606879f1d6786f1a8f87fc9092e8",
+      "sourceStatus": "exact",
+      "productionCommit": "e16141ace29d606879f1d6786f1a8f87fc9092e8",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
       "artifact": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
-      "sourceCommit": "75da5bba77051b382d6f355bd0cab10a1fd81ace",
-      "sourceStatus": "ancestor",
-      "productionCommit": "75da5bba77051b382d6f355bd0cab10a1fd81ace",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "e16141ace29d606879f1d6786f1a8f87fc9092e8",
+      "sourceStatus": "exact",
+      "productionCommit": "e16141ace29d606879f1d6786f1a8f87fc9092e8",
+      "productionStatus": "matches_live"
     },
     {
       "id": "live_harness_quality",
@@ -214,7 +214,7 @@
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
       "sourceCommit": "d6d13d78c2fe4f2fdfcd44f72f6b5b2e788fc40f",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },
@@ -269,9 +269,9 @@
     {
       "id": "northstar_approval_runway",
       "artifact": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
-      "sourceCommit": "d6d13d78c2fe4f2fdfcd44f72f6b5b2e788fc40f",
+      "sourceCommit": "e16141ace29d606879f1d6786f1a8f87fc9092e8",
       "sourceStatus": "exact",
-      "productionCommit": "d6d13d78c2fe4f2fdfcd44f72f6b5b2e788fc40f",
+      "productionCommit": "e16141ace29d606879f1d6786f1a8f87fc9092e8",
       "productionStatus": "matches_live"
     }
   ],
