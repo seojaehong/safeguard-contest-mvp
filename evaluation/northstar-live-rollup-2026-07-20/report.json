@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T02:25:20.916Z",
-  "head": "0a43fd1ed8362fc344c724c806da3f43f3855d6e",
+  "generatedAt": "2026-07-21T02:27:26.779Z",
+  "head": "fd5b8a3e1531d464db5ffa05000f2e4d7961c0d5",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "0a43fd1ed8362fc344c724c806da3f43f3855d6e",
+    "commitSha": "fd5b8a3e1531d464db5ffa05000f2e4d7961c0d5",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-jkrrczda7-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-br44bvy3t-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -63,13 +63,13 @@
       "id": "supabase_rls_launch_isolation",
       "state": "approval_gated",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Read-only RLS approval preflight passed at source SHA cbb134c52185aab4e0ac3f9d648eee82aee2634f, but live RLS catalog and tenant A/B isolation are not proven."
+      "detail": "Read-only RLS approval preflight passed at source SHA fd5b8a3e1531d464db5ffa05000f2e4d7961c0d5, but live RLS catalog and tenant A/B isolation are not proven."
     },
     {
       "id": "llm_wiki_publication",
       "state": "approval_gated",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA cbb134c52185aab4e0ac3f9d648eee82aee2634f."
+      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA fd5b8a3e1531d464db5ffa05000f2e4d7961c0d5."
     },
     {
       "id": "sif_embedding_runtime",
@@ -146,10 +146,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "2ff7f35f3855b0e864e7bd5cdd1820804d8227a3",
-      "sourceStatus": "ancestor",
-      "productionCommit": "2ff7f35f3855b0e864e7bd5cdd1820804d8227a3",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "fd5b8a3e1531d464db5ffa05000f2e4d7961c0d5",
+      "sourceStatus": "exact",
+      "productionCommit": "fd5b8a3e1531d464db5ffa05000f2e4d7961c0d5",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -171,15 +171,15 @@
       "id": "kosha_exact_trust_registry",
       "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
       "sourceCommit": "0a43fd1ed8362fc344c724c806da3f43f3855d6e",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "0a43fd1ed8362fc344c724c806da3f43f3855d6e",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "sourceCommit": "cbb134c52185aab4e0ac3f9d648eee82aee2634f",
-      "sourceStatus": "ancestor",
+      "sourceCommit": "fd5b8a3e1531d464db5ffa05000f2e4d7961c0d5",
+      "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
     },
