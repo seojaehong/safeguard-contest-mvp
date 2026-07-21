@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-21T18:21:32.364Z
-Source HEAD at generation: a82fcdfe5cc5b3f2ef504b2a47bf9966fff92bd7
-Live commit at generation: 142f5e03820415cacfaeed79ba460d3acdadcfa6
+Generated at: 2026-07-21T18:24:48.297Z
+Source HEAD at generation: 5eab4a3ceb16c27832272ce3ba3d259a3097332c
+Live commit at generation: b5ea0bbbea4d0608028a6bdab987fc6ecca154a2
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -66,4 +66,4 @@ Overall: `northstar_open_approval_gated`
 - provider_dispatch_persistence: Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred.
 - supabase_rls_launch_isolation: Read-only RLS approval preflight passed at source SHA 25fb245652e0e89734be42dae7135b7f3427dd7b, but live RLS catalog and tenant A/B isolation are not proven.
 - llm_wiki_publication: Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 25fb245652e0e89734be42dae7135b7f3427dd7b.
-- sif_embedding_runtime: SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 0aa7c013427af80346e31436904a66cc90d2067f.
+- sif_embedding_runtime: SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: b5ea0bbbea4d0608028a6bdab987fc6ecca154a2.
