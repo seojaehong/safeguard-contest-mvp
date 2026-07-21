@@ -1,14 +1,15 @@
 {
-  "checkedAt": "2026-07-20T17:44:32.332Z",
+  "checkedAt": "2026-07-21T12:04:49.025Z",
   "baseUrl": "https://www.safeclaw.kr",
+  "sourceSha": "4cb5b1651af2792aa4f03469181d308ce3c661ab",
   "buildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "ba91572412b49bd61d463119f58382e4ca77396c",
+    "commitSha": "4cb5b1651af2792aa4f03469181d308ce3c661ab",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ngd21zsu3-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-6p0q41k3a-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "routes": [
@@ -42,10 +43,10 @@
       "url": "https://www.safeclaw.kr/",
       "screenshot": "screenshots/desktop-root.png",
       "title": "SafeClaw | 안전 문서팩 생성",
-      "scrollHeight": 5604,
+      "scrollHeight": 5628,
       "scrollWidth": 1440,
       "clientWidth": 1440,
-      "heightRatio": 6.23,
+      "heightRatio": 6.25,
       "horizontalOverflow": false,
       "outsideCount": 0,
       "under44Count": 1,
@@ -299,10 +300,10 @@
       "url": "https://www.safeclaw.kr/documents",
       "screenshot": "screenshots/desktop-documents.png",
       "title": "SafeClaw | 안전 문서팩 생성",
-      "scrollHeight": 1698,
+      "scrollHeight": 2173,
       "scrollWidth": 1440,
       "clientWidth": 1440,
-      "heightRatio": 1.89,
+      "heightRatio": 2.41,
       "horizontalOverflow": false,
       "outsideCount": 0,
       "under44Count": 29,
@@ -357,7 +358,7 @@
         }
       ],
       "internalTerms": [],
-      "bodySample": "본문으로 건너뛰기\nSafeClaw\n메뉴\n\n현장 안전 문서팩\n\n주요 메뉴\n01\n작업공간\n입력 · 생성\n02\n문서\n위험성평가 · TBM\n03\n리포트\n주간 · 월간\n04\n근거\nDB · 온톨로지\n05\n이력\n증빙 · 파일\n06\n설정\nAI · 현장\n문서 관련\n01\nTBM 모드\n02\n작업자 · 교육\n03\n현장 전파\n04\n작업자 열람\n SITE 기본 현장\n공공 근거 Law.go · KOSHA · 기상청\n바로 사용\nDay\nNight\n문서팩\n문서 편집.\n\n위험성평가표, 작업계획서, TBM, 안전보건교육 기록을 한 화면에서 편집하고 PDF, XLS, HWPX 제출본으로 출력합니다.\n\n업무 범위\n편집 · 보완 · PDF/XLS/HWPX 출력\n새 문서팩 만들기\n기본 예시 표시\n아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입력 후 진행합니다.\n오늘 문서\n핵심 3종\n위험성평가표TBM 브리핑TBM 기록\n문서 9종 · 제출 정보\n문서팩\n오늘 문서\n\n12개 문서 · 브라우저 자동 저장\n\n01\n점검결과 요약\n현장명, 작업조건, 핵심 위험, 즉시조치, 연결 상태를 첫 장으로 정리합니다.\n02\n위험성평가표\nKOSHA 절차에 맞춰 사전준비, 위험요인, "
+      "bodySample": "본문으로 건너뛰기\nSafeClaw\n메뉴\n\n현장 안전 문서팩\n\n주요 메뉴\n01\n작업공간\n입력 · 생성\n02\n문서\n위험성평가 · TBM\n03\n리포트\n주간 · 월간\n04\n근거\nDB · 온톨로지\n05\n이력\n증빙 · 파일\n06\n설정\nAI · 현장\n문서 관련\n01\nTBM 모드\n02\n작업자 · 교육\n03\n현장 전파\n04\n작업자 열람\n SITE 기본 현장\n공공 근거 Law.go · KOSHA · 기상청\n바로 사용\nDay\nNight\n문서팩\n문서 편집.\n\n위험성평가표, 작업계획서, TBM, 안전보건교육 기록을 한 화면에서 편집하고 PDF, XLS, HWPX 제출본으로 출력합니다.\n\n업무 범위\n편집 · 보완 · PDF/XLS/HWPX 출력\n새 문서팩 만들기\n기본 예시 표시\n아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입력 후 진행합니다.\n오늘 문서\n핵심 3종\n위험성평가표TBM 브리핑TBM 기록\n문서 9종 · 제출 정보\n문서팩\n오늘 문서\n\n12개 문서 · 브라우저 자동 저장\n\n02\n위험성평가표\nKOSHA 절차에 맞춰 사전준비, 위험요인, 감소대책, 조치 확인을 정리합니다.\n05\nTBM/작업 전 안전점검회의\n작업내용, 위험요인, 안전대책"
     },
     {
       "route": "/reports",
@@ -561,10 +562,59 @@
       "heightRatio": 1,
       "horizontalOverflow": false,
       "outsideCount": 0,
-      "under44Count": 0,
-      "under44Samples": [],
+      "under44Count": 13,
+      "under44Samples": [
+        {
+          "text": "+위험 항목",
+          "w": 97,
+          "h": 40,
+          "visible": true
+        },
+        {
+          "text": "행 상세 편집",
+          "w": 275,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "행 상세 편집",
+          "w": 275,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "행 상세 편집",
+          "w": 275,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "01기본 정보1줄 · 편집 중",
+          "w": 289,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "021. 외벽 도장 작업22줄 · 펼치기",
+          "w": 289,
+          "h": 36,
+          "visible": true
+        },
+        {
+          "text": "032. 강풍 시 비계 전도와 공구·자재 낙하22줄 · 펼치기",
+          "w": 289,
+          "h": 40,
+          "visible": true
+        },
+        {
+          "text": "043. 지게차 동선 인접 구간에서 작업자 충돌22줄 · 펼치기",
+          "w": 289,
+          "h": 40,
+          "visible": true
+        }
+      ],
       "internalTerms": [],
-      "bodySample": "본문으로 건너뛰기\nSafeClaw\n메뉴\n SITE 기본 현장\n바로 사용\nDay\nNight\n문서팩\n문서 편집.\n아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입력 후 진행합니다.\n오늘 문서\n위험성평가표\nTBM 브리핑\nTBM 기록\n문서 9종 · 제출 정보\n편집 문서\n점검결과 요약\n위험성평가표\n작업계획서\n안전작업허가 확인서\nTBM/작업 전 안전점검회의\nTBM 기록\n안전보건교육 기록\n비상대응 절차\n사진/증빙\n외국인 근로자 출력본\n외국인 근로자 전송본\n현장 공유 메시지\n문서 유형\n점검 요약\n구조화\n원문\n01\n요약 본문\n02\n특수 대상/조건\n03\n핵심 판단\n04\n즉시 조치\n05\n문서팩 구성\n근거 4건 · 확인 필요 1건\n내보내기\n정식 제출본과 호환 형식\nPDF · XLSX · HWP\n제출 양식 미리보기\n표, 결재선, 인쇄 레이아웃\n인쇄물"
+      "bodySample": "본문으로 건너뛰기\nSafeClaw\n메뉴\n SITE 기본 현장\n바로 사용\nDay\nNight\n문서팩\n문서 편집.\n아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입력 후 진행합니다.\n오늘 문서\n위험성평가표\nTBM 브리핑\nTBM 기록\n문서 9종 · 제출 정보\n편집 문서\n점검결과 요약\n위험성평가표\n작업계획서\n안전작업허가 확인서\nTBM/작업 전 안전점검회의\nTBM 기록\n안전보건교육 기록\n비상대응 절차\n사진/증빙\n외국인 근로자 출력본\n외국인 근로자 전송본\n현장 공유 메시지\n지원 문서 9종\n제출·교육·전송 세부 문서\n위험성평가표\n자동 저장\n4섹션 · 근거 4건 · 확인 1건\n1,906자\n문서 유형\n위험성평가\n구조화\n원문\n평가 행\n3개 위험 항목\n+\n위험 항목\n01\n외벽 도장 작업\n추락 · 위험등급 high · 근거 2건 · 확인 확인 예정\n×\n유해·위험요인\n행 상세 편집\n02\n강풍 시 비계 전도와 공구·자재 낙하\n추락 · 위험등급 medium · 근거 2건 · 확인 재확인 필요\n×\n03\n지게차 동선 인접 구간에서 작업자 충돌\n충돌·맞음 · 위험등급 medium · 근거 2건 · 확인 재확인 필요\n×\n01\n기본 정보\n1줄 · 편집 "
     },
     {
       "route": "/reports",

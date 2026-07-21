@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 import { chromium } from "playwright";
 
 const outDir = path.dirname(new URL(import.meta.url).pathname).replace(/^\/([A-Za-z]:)/u, "$1");
@@ -7,6 +8,7 @@ const screenshotDir = path.join(outDir, "screenshots");
 fs.mkdirSync(screenshotDir, { recursive: true });
 
 const baseUrl = "https://www.safeclaw.kr";
+const repoRoot = path.resolve(outDir, "..", "..");
 const routes = [
   "/",
   "/workspace",
@@ -29,6 +31,18 @@ function normalizeRouteName(route) {
 async function readBuildInfo() {
   const response = await fetch(`${baseUrl}/api/build-info`);
   return await response.json();
+}
+
+function readSourceSha() {
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"], {
+      cwd: repoRoot,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return "unknown";
+  }
 }
 
 async function measurePage(page) {
@@ -117,6 +131,7 @@ try {
 const report = {
   checkedAt: new Date().toISOString(),
   baseUrl,
+  sourceSha: readSourceSha(),
   buildInfo,
   routes,
   viewports,
