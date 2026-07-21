@@ -1,10 +1,10 @@
 # Launch Readiness Current Boundary
 
-Generated: 2026-07-21T19:33:43.468Z
+Generated: 2026-07-21T19:38:26.231Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source / production commit: `8ce8ac38d94024b7cc808fc577e7809f913122c0`
+Source / production commit: `2174831b65432e6b7f98977f5efcd49a915431ac`
 
 ## Verdict
 
@@ -17,7 +17,7 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 `scripts/launch_readiness_audit.mjs` was run against production with `SAFETYGUARD_AUDIT_DISPATCH=false`.
 
 - `/api/ask`: 200 OK
-- elapsed: 22679 ms
+- elapsed: 19181 ms
 - dispatch call: not run
 - generated documents: 11 / 11
 - scenario: `도시가스공사 열수송관 굴착공사`, workers 7

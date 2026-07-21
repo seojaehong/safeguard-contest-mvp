@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T19:33:54.418Z",
-  "head": "8ce8ac38d94024b7cc808fc577e7809f913122c0",
+  "generatedAt": "2026-07-21T19:38:31.951Z",
+  "head": "2174831b65432e6b7f98977f5efcd49a915431ac",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "8ce8ac38d94024b7cc808fc577e7809f913122c0",
+    "commitSha": "2174831b65432e6b7f98977f5efcd49a915431ac",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-hleu10y87-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-2sj8pcrgm-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -181,10 +181,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "2ac6f1b0a0c2f42dd16ab4f4c4c3d68d4ec03d08",
-      "sourceStatus": "ancestor",
-      "productionCommit": "2ac6f1b0a0c2f42dd16ab4f4c4c3d68d4ec03d08",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "2174831b65432e6b7f98977f5efcd49a915431ac",
+      "sourceStatus": "exact",
+      "productionCommit": "2174831b65432e6b7f98977f5efcd49a915431ac",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -205,9 +205,9 @@
     {
       "id": "kosha_exact_trust_registry",
       "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
-      "sourceCommit": "8ce8ac38d94024b7cc808fc577e7809f913122c0",
+      "sourceCommit": "2174831b65432e6b7f98977f5efcd49a915431ac",
       "sourceStatus": "exact",
-      "productionCommit": "8ce8ac38d94024b7cc808fc577e7809f913122c0",
+      "productionCommit": "2174831b65432e6b7f98977f5efcd49a915431ac",
       "productionStatus": "matches_live"
     },
     {
@@ -269,10 +269,10 @@
     {
       "id": "northstar_approval_runway",
       "artifact": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
-      "sourceCommit": "2ac6f1b0a0c2f42dd16ab4f4c4c3d68d4ec03d08",
-      "sourceStatus": "ancestor",
-      "productionCommit": "2ac6f1b0a0c2f42dd16ab4f4c4c3d68d4ec03d08",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "2174831b65432e6b7f98977f5efcd49a915431ac",
+      "sourceStatus": "exact",
+      "productionCommit": "2174831b65432e6b7f98977f5efcd49a915431ac",
+      "productionStatus": "matches_live"
     }
   ],
   "contradictions": [],

@@ -1,6 +1,6 @@
 # SafeClaw Hermes / OpenClaw Runtime Current Gate
 
-Checked at: 2026-07-21T19:33:01.756Z
+Checked at: 2026-07-21T19:38:28.699Z
 
 ## Verdict
 
@@ -10,9 +10,9 @@ Live production runtime execution is still not claimed. The live `/api/agent/cha
 
 ## Authority
 
-- Source SHA for focused tests: `8ce8ac38d94024b7cc808fc577e7809f913122c0`
-- Production build-info observed during live smoke: `8ce8ac38d94024b7cc808fc577e7809f913122c0`
-- Live deployment URL: `safeguard-contest-hleu10y87-seojaehongs-projects.vercel.app`
+- Source SHA for focused tests: `2174831b65432e6b7f98977f5efcd49a915431ac`
+- Production build-info observed during live smoke: `2174831b65432e6b7f98977f5efcd49a915431ac`
+- Live deployment URL: `safeguard-contest-2sj8pcrgm-seojaehongs-projects.vercel.app`
 - Worktree: `C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\recipient-foreign-live-gate-20260720`
 - Branch: `chore/recipient-foreign-live-gate-20260720`
 

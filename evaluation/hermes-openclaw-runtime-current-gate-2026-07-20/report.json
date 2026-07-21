@@ -1,12 +1,12 @@
 {
   "schemaVersion": "safeclaw-hermes-openclaw-runtime-current-gate/v1",
-  "checkedAt": "2026-07-21T19:33:01.756Z",
-  "sourceShaForFocusedTests": "8ce8ac38d94024b7cc808fc577e7809f913122c0",
+  "checkedAt": "2026-07-21T19:38:28.699Z",
+  "sourceShaForFocusedTests": "2174831b65432e6b7f98977f5efcd49a915431ac",
   "productionBuildInfoAtLiveSmoke": {
-    "commitSha": "8ce8ac38d94024b7cc808fc577e7809f913122c0",
+    "commitSha": "2174831b65432e6b7f98977f5efcd49a915431ac",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-hleu10y87-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-2sj8pcrgm-seojaehongs-projects.vercel.app"
   },
   "verdict": "adapter_boundary_pass_live_execution_not_claimed",
   "focusedTests": {
