@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T21:09:09.334Z",
-  "head": "2b82c00c2f3cd2f89544a1a07b94972bf98154e9",
+  "generatedAt": "2026-07-21T21:16:10.809Z",
+  "head": "4095a38a1fad34035cbec7783834e47c9df26ce2",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "2b82c00c2f3cd2f89544a1a07b94972bf98154e9",
+    "commitSha": "4095a38a1fad34035cbec7783834e47c9df26ce2",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-49qoaojsf-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-4dcim9wwk-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -89,7 +89,7 @@
     "verdict": "MOBILE_FIXED",
     "productionCommit": "be64c3b15a8cb55bb132fa065ec485ffb700f652",
     "currentGeometryArtifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-    "currentGeometryCommit": "cdfc8d886659b25273bac8e243de181a630f8b2f",
+    "currentGeometryCommit": "2b82c00c2f3cd2f89544a1a07b94972bf98154e9",
     "documentsHeightRatio": 1,
     "documentsBodyHeight": 844,
     "documentsViewportHeight": 844,
@@ -113,7 +113,7 @@
   },
   "workspaceGeometry": {
     "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-    "productionCommit": "cdfc8d886659b25273bac8e243de181a630f8b2f",
+    "productionCommit": "2b82c00c2f3cd2f89544a1a07b94972bf98154e9",
     "mobileDocumentDeepReviewOpen": false,
     "mobileVisibleDocumentPreviews": 0
   },
@@ -182,9 +182,9 @@
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
       "sourceCommit": "2b82c00c2f3cd2f89544a1a07b94972bf98154e9",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "2b82c00c2f3cd2f89544a1a07b94972bf98154e9",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -198,9 +198,9 @@
       "id": "live_harness_quality",
       "artifact": "evaluation\\live-harness-quality-probe-current-2026-07-20\\report.json",
       "sourceCommit": "2b82c00c2f3cd2f89544a1a07b94972bf98154e9",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "2b82c00c2f3cd2f89544a1a07b94972bf98154e9",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "kosha_exact_trust_registry",
@@ -245,9 +245,9 @@
     {
       "id": "workspace_docs_share_geometry",
       "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-      "sourceCommit": "cdfc8d886659b25273bac8e243de181a630f8b2f",
-      "sourceStatus": "ancestor",
-      "productionCommit": "cdfc8d886659b25273bac8e243de181a630f8b2f",
+      "sourceCommit": "4095a38a1fad34035cbec7783834e47c9df26ce2",
+      "sourceStatus": "exact",
+      "productionCommit": "2b82c00c2f3cd2f89544a1a07b94972bf98154e9",
       "productionStatus": "ancestor_of_head"
     },
     {

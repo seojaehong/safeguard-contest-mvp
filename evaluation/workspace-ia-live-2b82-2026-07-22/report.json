@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "gate": "workspace-ia-live-2b82-2026-07-22",
+  "verdict": "IA_BLOCKER_REFINED_CURRENT_LIVE",
+  "checkedAt": "2026-07-22 KST",
+  "liveCommitChecked": "2b82c00c2f3cd2f89544a1a07b94972bf98154e9",
+  "geometryArtifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
+  "routeSplitAloneAcceptedAsFix": false,
+  "providerDispatchLiveClaimed": false,
+  "closed": {
+    "defaultDocumentsCockpit": {
+      "desktopShort1440x723": {
+        "bodyHeight": 723,
+        "viewportHeight": 723,
+        "documentWorkbenchBottom": 710,
+        "visibleDocumentPreviews": 0,
+        "overflowX": false,
+        "outside": 0
+      },
+      "mobile390x844": {
+        "bodyHeight": 844,
+        "viewportHeight": 844,
+        "documentWorkbenchBottom": 786,
+        "visibleDocumentPreviews": 0,
+        "overflowX": false,
+        "outside": 0
+      }
+    },
+    "defaultShareCockpit": {
+      "desktopShort1440x723": {
+        "bodyHeight": 723,
+        "viewportHeight": 723,
+        "shareRootBottom": 716,
+        "shareFormWidth": 636,
+        "sharePreviewWidth": 520,
+        "previewBottom": 571,
+        "primaryCtaBottom": 389,
+        "overflowX": false,
+        "outside": 0
+      },
+      "desktop1440x900": {
+        "bodyHeight": 946,
+        "viewportHeight": 900,
+        "shareRootBottom": 882,
+        "shareFormWidth": 624,
+        "sharePreviewWidth": 520,
+        "previewBottom": 757,
+        "primaryCtaBottom": 401,
+        "overflowX": false,
+        "outside": 0
+      },
+      "mobile390x844": {
+        "bodyHeight": 844,
+        "viewportHeight": 844,
+        "shareRootBottom": 810,
+        "sharePreviewWidth": 318,
+        "previewBottom": 683,
+        "primaryCtaBottom": 742,
+        "overflowX": false,
+        "outside": 0
+      }
+    },
+    "selectedEditorFieldLevelLanding": {
+      "desktopShort1440x723": {
+        "editorBodyHeight": 882,
+        "viewportHeight": 723,
+        "documentEditorBottom": 695,
+        "firstRiskRowHeaderTop": 522,
+        "firstRiskRowHeaderBottom": 579,
+        "firstRiskHazardFieldTop": 615,
+        "firstRiskHazardFieldBottom": 675,
+        "rowHeaderTextContainsEvidence": true,
+        "rowHeaderTextContainsVerification": true,
+        "rawTextareaTop": 1094,
+        "rawTextareaBottom": 1267
+      },
+      "desktop1440x900": {
+        "editorBodyHeight": 1129,
+        "viewportHeight": 900,
+        "documentEditorBottom": 839,
+        "firstRiskRowHeaderTop": 510,
+        "firstRiskRowHeaderBottom": 567,
+        "firstRiskHazardFieldTop": 604,
+        "firstRiskHazardFieldBottom": 664,
+        "rowHeaderTextContainsEvidence": true,
+        "rowHeaderTextContainsVerification": true,
+        "rawTextareaTop": 1083,
+        "rawTextareaBottom": 1256
+      },
+      "mobile390x844": {
+        "editorBodyHeight": 1067,
+        "viewportHeight": 844,
+        "documentEditorBottom": 818,
+        "firstRiskRowHeaderTop": 526,
+        "firstRiskRowHeaderBottom": 583,
+        "firstRiskHazardFieldTop": 607,
+        "firstRiskHazardFieldBottom": 657,
+        "rowHeaderTextContainsEvidence": true,
+        "rowHeaderTextContainsVerification": true,
+        "rawTextareaTop": 987,
+        "rawTextareaBottom": 1160
+      }
+    }
+  },
+  "open": {
+    "selectedEditorRawTextareaDepth": {
+      "status": "open_secondary_drilldown",
+      "reason": "The first row-level work surface is visible, but the raw long-form textarea remains below the viewport by design."
+    },
+    "shareDesktopPerceivedNarrowWorkbench": {
+      "status": "optional_follow_up_if_reproduced",
+      "reason": "Raw live geometry is two-column and first-viewport bounded; if users still perceive it as mobile-like, judge visual workbench breadth rather than one-column layout."
+    }
+  },
+  "ledgerWording": [
+    "Documents default page height is closed for the current live cockpit.",
+    "Documents selected editor/detail raw textarea depth remains open, while first risk-row field landing is closed.",
+    "Share mobile compact flow is closed in the current live first-viewport cockpit.",
+    "Share desktop raw geometry is closed for literal mobile stack; perceived narrow-card workbench composition remains optional follow-up if reproduced.",
+    "Route split alone is not accepted as the UX fix."
+  ],
+  "structuralConclusion": "Page or route split helps orientation but does not solve long Documents/Share content by itself. The launch UX contract is first-viewport cockpit plus bounded drilldown/detail. Current live evidence closes the default cockpit and selected risk-row field landing; raw textarea/full authoring depth remains explicit secondary drilldown."
+}
