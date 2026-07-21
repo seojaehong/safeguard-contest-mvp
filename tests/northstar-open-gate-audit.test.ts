@@ -619,6 +619,77 @@ function createFixtureRoot(): string {
       },
     },
   });
+  writeJson(rootDir, path.join("evaluation", "workspace-ia-live-f67-2026-07-21", "report.json"), {
+    verdict: "IA_BLOCKER_REFINED",
+    liveCommitChecked: "fixture-sha",
+    routeSplitAloneAcceptedAsFix: false,
+    providerDispatchLiveClaimed: false,
+    closedOrMostlyClosed: {
+      workspaceDocumentsDefaultCockpit: {
+        desktopShort1440x723: {
+          bodyHeight: 723,
+          viewportHeight: 723,
+          documentPageBottom: 710,
+          documentWorkbenchBottom: 710,
+          overflowX: false,
+          outside: 0,
+        },
+        mobile390x844: {
+          bodyHeight: 844,
+          viewportHeight: 844,
+          documentPageBottom: 786,
+          documentWorkbenchBottom: 786,
+          overflowX: false,
+          outside: 0,
+        },
+      },
+      workspaceShareDefaultCockpit: {
+        desktopShort1440x723: {
+          bodyHeight: 723,
+          viewportHeight: 723,
+          shareRootBottom: 716,
+          shareFormWidth: 636,
+          sharePreviewWidth: 520,
+          previewBottom: 571,
+          primaryCtaBottom: 389,
+          overflowX: false,
+          outside: 0,
+        },
+        mobile390x844: {
+          bodyHeight: 844,
+          viewportHeight: 844,
+          shareRootBottom: 810,
+          shareFormWidth: 318,
+          sharePreviewWidth: 318,
+          previewBottom: 683,
+          primaryCtaBottom: 742,
+          overflowX: false,
+          outside: 0,
+        },
+      },
+    },
+    openBlockers: {
+      selectedDocumentEditorDetailLanding: {
+        workspaceEditor: {
+          desktopShort1440x723: {
+            bodyHeight: 882,
+            viewportHeight: 723,
+            documentEditorBottom: 695,
+            documentTextareaBottom: 1267,
+          },
+          mobile390x844: {
+            bodyHeight: 1067,
+            viewportHeight: 844,
+            documentEditorBottom: 818,
+            documentTextareaBottom: 1160,
+          },
+        },
+      },
+      shareDesktopPerceivedNarrowCard: {
+        rawGeometryClosed: true,
+      },
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "documents-mobile-exact-cockpit-2026-07-21", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION",
     productCommit: "fixture-sha",
@@ -861,9 +932,12 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("live mobile selected-summary");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exact 844px viewport");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exact one-viewport Documents");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("selected editor/detail landing as OPEN");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("perceived narrow-card composition");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.evidencePath).toBe(
-      path.join("evaluation", "share-desktop-short-cockpit-2026-07-21", "report.json"),
+      path.join("evaluation", "workspace-ia-live-f67-2026-07-21", "report.json"),
     );
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("selected editor/detail landing gate");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).not.toContain("Promote the Share staged rail");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "share_result_fixture_cockpit")?.state).toBe("proven");

@@ -15,6 +15,7 @@ type RollupReport = {
     documentDeepReviewOpen: boolean;
     visibleDocumentPreviews: number;
     documentsHeightRatio: number;
+    shareHeightRatio: number;
   };
   liveCritical: {
     findings: number;
@@ -117,9 +118,17 @@ function createFixtureRoot(): { root: string; head: string } {
     results: [
       {
         name: "mobile-day",
+        viewport: { width: 390, height: 844 },
         documents: {
+          body: { height: 844 },
+          documentWorkbench: { y: 294, bottom: 786 },
           documentDeepReviewOpen: false,
           visibleDocumentPreviews: 0,
+        },
+        share: {
+          body: { height: 844 },
+          shareRoot: { bottom: 810 },
+          sharePreview: { y: 486, bottom: 683 },
         },
       },
     ],
@@ -174,7 +183,8 @@ describe("northstar live rollup", () => {
     expect(report.mobileP0.verdict).toBe("MOBILE_FIXED");
     expect(report.mobileP0.documentDeepReviewOpen).toBe(false);
     expect(report.mobileP0.visibleDocumentPreviews).toBe(0);
-    expect(report.mobileP0.documentsHeightRatio).toBe(1.5);
+    expect(report.mobileP0.documentsHeightRatio).toBe(1);
+    expect(report.mobileP0.shareHeightRatio).toBe(1);
     expect(report.liveCritical.findings).toBe(0);
     expect(report.evidence.find((item) => item.id === "open_gate")?.productionStatus).toBe("matches_live");
     expect(report.contradictions).toHaveLength(0);

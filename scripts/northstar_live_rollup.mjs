@@ -311,7 +311,22 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     ? workspaceGeometry.results
     : [];
   const mobileGeometry = geometryResults.find((row) => isRecord(row) && row.name === "mobile-day");
+  const mobileViewport = isRecord(mobileGeometry) ? recordAt(mobileGeometry, "viewport") : null;
+  const mobileViewportHeight = asNumber(mobileViewport?.height);
   const mobileDocuments = isRecord(mobileGeometry) ? recordAt(mobileGeometry, "documents") : null;
+  const mobileDocumentsBody = mobileDocuments ? recordAt(mobileDocuments, "body") : null;
+  const mobileDocumentWorkbench = mobileDocuments ? recordAt(mobileDocuments, "documentWorkbench") : null;
+  const mobileShareGeometry = isRecord(mobileGeometry) ? recordAt(mobileGeometry, "share") : null;
+  const mobileShareBody = mobileShareGeometry ? recordAt(mobileShareGeometry, "body") : null;
+  const mobileSharePreview = mobileShareGeometry ? recordAt(mobileShareGeometry, "sharePreview") : null;
+  const geometryDocumentsHeight = asNumber(mobileDocumentsBody?.height);
+  const geometryShareHeight = asNumber(mobileShareBody?.height);
+  const geometryDocumentsHeightRatio = geometryDocumentsHeight !== null && mobileViewportHeight
+    ? Number((geometryDocumentsHeight / mobileViewportHeight).toFixed(2))
+    : null;
+  const geometryShareHeightRatio = geometryShareHeight !== null && mobileViewportHeight
+    ? Number((geometryShareHeight / mobileViewportHeight).toFixed(2))
+    : null;
   const liveCriticalRows = isRecord(liveCritical) && Array.isArray(liveCritical.rows) ? liveCritical.rows : [];
   const koshaLiveStatus = recordAt(kosha, "liveStatus");
   const koshaExactTrustRegistry = recordAt(koshaLiveStatus, "exactTrustRegistry");
@@ -369,12 +384,21 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       artifact: ARTIFACTS.mobileP0,
       verdict: isRecord(mobileP0) ? asString(mobileP0.verdict) : "missing",
       productionCommit: extractProductionCommit(mobileP0),
-      documentsHeightRatio: documentsSafetyBrief ? asNumber(documentsSafetyBrief.heightRatio) : null,
-      firstUsefulReviewY: documentsSafetyBrief ? asNumber(documentsSafetyBrief.firstUsefulReviewY) : null,
-      documentDeepReviewOpen: documentsSafetyBrief ? documentsSafetyBrief.documentDeepReviewOpen === true : null,
-      visibleDocumentPreviews: documentsSafetyBrief ? asNumber(documentsSafetyBrief.visibleDocumentPreviews) : null,
-      shareHeightRatio: share ? asNumber(share.heightRatio) : null,
-      sharePreviewY: share ? asNumber(share.messagePreviewY) : null,
+      currentGeometryArtifact: ARTIFACTS.workspaceGeometry,
+      currentGeometryCommit: extractProductionCommit(workspaceGeometry),
+      documentsHeightRatio: geometryDocumentsHeightRatio ?? (documentsSafetyBrief ? asNumber(documentsSafetyBrief.heightRatio) : null),
+      documentsBodyHeight: geometryDocumentsHeight,
+      documentsViewportHeight: mobileViewportHeight,
+      documentWorkbenchBottom: asNumber(mobileDocumentWorkbench?.bottom),
+      firstUsefulReviewY: asNumber(mobileDocumentWorkbench?.y) ?? (documentsSafetyBrief ? asNumber(documentsSafetyBrief.firstUsefulReviewY) : null),
+      documentDeepReviewOpen: mobileDocuments ? mobileDocuments.documentDeepReviewOpen === true : documentsSafetyBrief ? documentsSafetyBrief.documentDeepReviewOpen === true : null,
+      visibleDocumentPreviews: mobileDocuments ? asNumber(mobileDocuments.visibleDocumentPreviews) : documentsSafetyBrief ? asNumber(documentsSafetyBrief.visibleDocumentPreviews) : null,
+      shareHeightRatio: geometryShareHeightRatio ?? (share ? asNumber(share.heightRatio) : null),
+      shareBodyHeight: geometryShareHeight,
+      shareViewportHeight: mobileViewportHeight,
+      shareRootBottom: asNumber(recordAt(mobileShareGeometry, "shareRoot")?.bottom),
+      sharePreviewBottom: asNumber(mobileSharePreview?.bottom),
+      sharePreviewY: asNumber(mobileSharePreview?.y) ?? (share ? asNumber(share.messagePreviewY) : null),
       hardBlockersClosed: isRecord(mobileP0) ? mobileP0.hardBlockersClosed === true : false,
     },
     liveCritical: {
@@ -437,13 +461,14 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     "Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.",
     `Overall: \`${rollup.overall}\``,
     "",
-    "## Current Mobile P0",
+    "## Current Workspace Mobile Geometry",
     "",
     `- Verdict: \`${rollup.mobileP0.verdict}\``,
-    `- Documents: ${rollup.mobileP0.documentsHeightRatio}x viewport, first useful y=${rollup.mobileP0.firstUsefulReviewY}`,
+    `- Geometry artifact: ${rollup.mobileP0.currentGeometryArtifact}`,
+    `- Documents: ${rollup.mobileP0.documentsBodyHeight ?? "unknown"}/${rollup.mobileP0.documentsViewportHeight ?? "unknown"} (${rollup.mobileP0.documentsHeightRatio}x viewport), workbench bottom=${rollup.mobileP0.documentWorkbenchBottom}, first useful y=${rollup.mobileP0.firstUsefulReviewY}`,
     `- Deep review closed: ${rollup.mobileP0.documentDeepReviewOpen === false ? "yes" : "no"}`,
     `- Visible full previews while closed: ${rollup.mobileP0.visibleDocumentPreviews}`,
-    `- Share: ${rollup.mobileP0.shareHeightRatio}x viewport, preview y=${rollup.mobileP0.sharePreviewY}`,
+    `- Share: ${rollup.mobileP0.shareBodyHeight ?? "unknown"}/${rollup.mobileP0.shareViewportHeight ?? "unknown"} (${rollup.mobileP0.shareHeightRatio}x viewport), root bottom=${rollup.mobileP0.shareRootBottom}, preview bottom=${rollup.mobileP0.sharePreviewBottom}, preview y=${rollup.mobileP0.sharePreviewY}`,
     "",
     "## Dispatch Standalone Cockpit",
     "",
