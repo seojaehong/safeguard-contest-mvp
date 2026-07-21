@@ -1,9 +1,10 @@
 {
-  "schemaVersion": "safeclaw-launch-readiness-current/v1",
-  "generatedAt": "2026-07-21T20:41:10.660Z",
+  "schemaVersion": "safeclaw-launch-readiness-current/v2",
+  "generatedAt": "2026-07-21T23:17:59.328Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceCommit": "5cbcd7a9f6bca539b7bf5aaa154d39261dd67a73",
-  "productionCommit": "5cbcd7a9f6bca539b7bf5aaa154d39261dd67a73",
+  "sourceCommit": "7d685baa6da23d2bc1e88f00d85d8a744985db36",
+  "productionCommit": "7d685baa6da23d2bc1e88f00d85d8a744985db36",
+  "runtimeSmokeCommit": "7d685baa6da23d2bc1e88f00d85d8a744985db36",
   "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
   "safeLaunchDemoClaimAllowed": true,
   "guidedPilotClaimAllowed": true,
@@ -14,7 +15,7 @@
   "apiAsk": {
     "status": 200,
     "ok": true,
-    "elapsedMs": 21314
+    "elapsedMs": 28910
   },
   "scenario": {
     "companyName": "도시가스공사",
@@ -78,14 +79,15 @@
   ],
   "currentEvidence": {
     "rawAudit": "evaluation\\launch-readiness-current-2026-07-22\\api-connection-audit.json",
-    "final99Gate": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
+    "final99Gate": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
+    "final99NoticeCarry": "evaluation\\final-99-gate-current-2026-07-22\\notice-carry.json",
     "northstarOpenGates": "evaluation\\northstar-open-gates-current\\report.json",
     "northstarLiveRollup": "evaluation\\northstar-live-rollup-2026-07-20\\report.json",
-    "uiCockpitEvidence": "evaluation\\workspace-ia-live-cdfc-2026-07-22\\report.json",
+    "uiCockpitEvidence": "evaluation\\workspace-ia-live-7b36-2026-07-22\\report.json",
     "workspaceIaRecommendation": "evaluation\\workspace-information-architecture-2026-07-21\\report.json",
     "koshaRegression": "evaluation\\kosha-current-northstar-regression-2026-07-22\\report.json",
     "koshaLiveGate": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
-    "providerDispatchReadiness": "evaluation\\provider-dispatch-readiness-2026-07-21\\report.json",
+    "providerDispatchReadiness": "evaluation\\provider-dispatch-idempotency-gate-2026-07-19\\report.json",
     "sifEmbeddingPreflight": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
     "rlsWikiPreflight": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
     "approvalRunway": "evaluation\\northstar-approval-runway-2026-07-21\\report.json"
@@ -115,8 +117,8 @@
   "safeClaims": [
     "Live /api/ask can generate the expected 11-document workpack for the audited construction scenario.",
     "Law.go, Gemini/OpenAI-compatible generation, KMA weather, Work24, KOSHA education, KOSHA official material, and KOSHA accident-case connections returned user-facing connected status in the live smoke.",
-    "Default Documents and Share cockpits are production-proven as viewport-bounded decision surfaces; selected editor raw long-form text remains a secondary drilldown.",
-    "KOSHA exact trust registry, current regression, and live corpus status are current at the production commit.",
+    "Default Documents and Share cockpits are production-proven as viewport-bounded decision surfaces; selected editor field-summary/row landing is the accepted first task surface, while raw long-form text remains a secondary drilldown.",
+    "KOSHA exact trust registry, current regression, and live corpus status are current in the North Star evidence set.",
     "A safe launch demo or guided pilot can be claimed with the explicit provider-dispatch, RLS, LLM Wiki, SIF vector, and admin-auth notices."
   ],
   "forbiddenClaims": [
@@ -126,5 +128,48 @@
     "SIF vector retrieval or LLM Wiki publication is production-active.",
     "Live Supabase RLS tenant isolation is launch-proven.",
     "All KOSHA guide rows are exact direct evidence."
-  ]
+  ],
+  "final99Boundary": {
+    "overall": "pass_with_notice",
+    "noticeCount": 2,
+    "runtimeSmokeCommit": "6a95c23ffc57542f6a9a9aa14612b3466127a0ad",
+    "evidenceCommit": "7d685baa6da23d2bc1e88f00d85d8a744985db36",
+    "fullyAutomatedLaunchClaimAllowed": false,
+    "note": "Final-99 was executed against production 6a95c23f before the evidence-only 7d685baa commit; this launch audit smoke was executed after production advanced to 7d685baa."
+  },
+  "northstarOverall": "open",
+  "uiVerdict": "IA_BLOCKER_REFINED_CURRENT_LIVE",
+  "uiArchitectureBoundary": {
+    "routeSplitAloneAcceptedAsFix": false,
+    "acceptedStructure": "step split plus first-viewport cockpit plus bounded drilldown/detail panes",
+    "documentsDefaultCockpit": {
+      "state": "closed_current_live",
+      "detail": "Default Documents cockpit raw page height and overflow are no longer the primary blocker in current live evidence."
+    },
+    "documentsSelectedEditorDetail": {
+      "state": "split",
+      "closed": "First meaningful field summary / risk-row landing is accepted when it intersects the visible viewport or bounded pane immediately.",
+      "open": "Raw textarea and full long-form document authoring remain secondary drilldown/readability debt and should not be described as a short editor surface."
+    },
+    "shareDesktop": {
+      "state": "raw_layout_closed_optional_visual_followup",
+      "closed": "Current raw geometry is two-column and not a literal mobile stack.",
+      "open": "If reproduced in a user-visible session, perceived narrow-card/full-workbench composition should be handled as a visual IA follow-up rather than a page-count fix."
+    },
+    "shareMobile": {
+      "state": "closed_current_live_compact_flow",
+      "detail": "Mobile Share keeps selected summary, bounded preview, primary CTA, and collapsed details inside the current first-viewport contract."
+    },
+    "nextAcceptance": [
+      "Do not use page count alone as a UX fix.",
+      "For selected editor/detail work, require first meaningful editable content or field summary to intersect the visible viewport or bounded pane immediately.",
+      "For Share desktop perception follow-up, measure deliberate workbench breadth/x-ranges, preview/form balance, horizontal overflow, and first CTA/status/result y positions."
+    ]
+  },
+  "productionBuild": {
+    "commitSha": "7d685baa6da23d2bc1e88f00d85d8a744985db36",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-muo7iwulm-seojaehongs-projects.vercel.app"
+  }
 }

@@ -1,10 +1,14 @@
 # Launch Readiness Current Boundary
 
-Generated: 2026-07-21T20:41:10.660Z
+Generated: 2026-07-21T23:17:59.328Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source / production commit: `5cbcd7a9f6bca539b7bf5aaa154d39261dd67a73`
+Source/evidence commit: `7d685baa6da23d2bc1e88f00d85d8a744985db36`
+
+Runtime smoke commit: `7d685baa6da23d2bc1e88f00d85d8a744985db36`
+
+Final-99 runtime smoke commit: `6a95c23ffc57542f6a9a9aa14612b3466127a0ad`
 
 ## Verdict
 
@@ -17,7 +21,7 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 `scripts/launch_readiness_audit.mjs` was run against production with `SAFETYGUARD_AUDIT_DISPATCH=false`.
 
 - `/api/ask`: 200 OK
-- elapsed: 21314 ms
+- elapsed: 28910 ms
 - dispatch call: not run
 - generated documents: 11 / 11
 - scenario: `도시가스공사 열수송관 굴착공사`, workers 7
@@ -37,9 +41,20 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 
 - Live /api/ask can generate the expected 11-document workpack for the audited construction scenario.
 - Law.go, Gemini/OpenAI-compatible generation, KMA weather, Work24, KOSHA education, KOSHA official material, and KOSHA accident-case connections returned user-facing connected status in the live smoke.
-- Default Documents and Share cockpits are production-proven as viewport-bounded decision surfaces; selected editor raw long-form text remains a secondary drilldown.
-- KOSHA exact trust registry, current regression, and live corpus status are current at the production commit.
+- Default Documents and Share cockpits are production-proven as viewport-bounded decision surfaces; selected editor field-summary/row landing is the accepted first task surface, while raw long-form text remains a secondary drilldown.
+- KOSHA exact trust registry, current regression, and live corpus status are current in the North Star evidence set.
 - A safe launch demo or guided pilot can be claimed with the explicit provider-dispatch, RLS, LLM Wiki, SIF vector, and admin-auth notices.
+
+## UI / IA Boundary
+
+Route/page split alone is not accepted as the UX fix. The accepted structure is step split plus first-viewport cockpit plus bounded drilldown/detail panes.
+
+- Documents default cockpit: `closed_current_live`. Default raw page height and overflow are no longer the primary blocker in current live evidence.
+- Documents selected editor/detail: `split`. First meaningful field summary / risk-row landing is the accepted first task surface; raw textarea and full long-form document authoring remain secondary drilldown/readability debt.
+- Share desktop: `raw_layout_closed_optional_visual_followup`. Current raw geometry is two-column and not a literal mobile stack; if a user-visible session still feels narrow-card, treat that as a reproduced full-workbench composition follow-up.
+- Share mobile: `closed_current_live_compact_flow`. Selected summary, bounded preview, primary CTA, and collapsed details remain inside the current first-viewport contract.
+
+Next UI acceptance should keep measuring first meaningful editable content or field-summary landing, primary CTA/status/result bottom, desktop x-ranges and column balance, horizontal overflow, and default-open detail count. It should not treat page count alone as the fix.
 
 ## Forbidden Claims
 
@@ -60,15 +75,16 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 
 ## Evidence
 
-- Raw live smoke: `evaluation\launch-readiness-current-2026-07-22\api-connection-audit.json`
-- Final 99 gate: `evaluation\final-99-gate-current-2026-07-21\report.json`
-- North Star open gates: `evaluation\northstar-open-gates-current\report.json`
-- North Star live rollup: `evaluation\northstar-live-rollup-2026-07-20\report.json`
-- Approval runway: `evaluation\northstar-approval-runway-2026-07-21\report.json`
-- UI cockpit evidence: `evaluation\workspace-ia-live-cdfc-2026-07-22\report.json`
-- Workspace IA recommendation: `evaluation\workspace-information-architecture-2026-07-21\report.json`
-- KOSHA regression: `evaluation\kosha-current-northstar-regression-2026-07-22\report.json`
-- KOSHA live gate: `evaluation\kosha-current-live-gate-2026-07-20\report.json`
-- Provider dispatch readiness: `evaluation\provider-dispatch-readiness-2026-07-21\report.json`
-- SIF embedding preflight: `evaluation\sif-embedding-gate\approval-preflight-report.json`
-- RLS / LLM Wiki preflight: `evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json`
+- rawAudit: `evaluation\launch-readiness-current-2026-07-22\api-connection-audit.json`
+- final99Gate: `evaluation\final-99-gate-current-2026-07-22\report.json`
+- final99NoticeCarry: `evaluation\final-99-gate-current-2026-07-22\notice-carry.json`
+- northstarOpenGates: `evaluation\northstar-open-gates-current\report.json`
+- northstarLiveRollup: `evaluation\northstar-live-rollup-2026-07-20\report.json`
+- uiCockpitEvidence: `evaluation\workspace-ia-live-7b36-2026-07-22\report.json`
+- workspaceIaRecommendation: `evaluation\workspace-information-architecture-2026-07-21\report.json`
+- koshaRegression: `evaluation\kosha-current-northstar-regression-2026-07-22\report.json`
+- koshaLiveGate: `evaluation\kosha-current-live-gate-2026-07-20\report.json`
+- providerDispatchReadiness: `evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json`
+- sifEmbeddingPreflight: `evaluation\sif-embedding-gate\approval-preflight-report.json`
+- rlsWikiPreflight: `evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json`
+- approvalRunway: `evaluation\northstar-approval-runway-2026-07-21\report.json`
