@@ -1,0 +1,97 @@
+{
+  "verdict": "ROUTE_SPLIT_ALONE_IS_NOT_ENOUGH",
+  "liveCommitChecked": "963b24e92d121359ca90505478da40131ccc876e",
+  "sourceHeadAtReportCommit": "52d12965fa5d67b9a7f7536f71c9f0ce718059c2",
+  "routeSplitAloneAcceptedAsFix": false,
+  "recommendedArchitecture": "task route/step split plus first-viewport cockpit plus bounded drilldown/detail panes",
+  "liveGeometry": {
+    "desktopShort": {
+      "documents": {
+        "pageHeight": 876,
+        "viewportHeight": 723,
+        "heightRatio": 1.21,
+        "horizontalOverflow": false,
+        "outside": 0
+      },
+      "editor": {
+        "pageHeight": 952,
+        "viewportHeight": 723,
+        "heightRatio": 1.32,
+        "horizontalOverflow": false,
+        "outside": 0
+      },
+      "share": {
+        "pageHeight": 946,
+        "viewportHeight": 723,
+        "heightRatio": 1.31,
+        "horizontalOverflow": false,
+        "outside": 0
+      }
+    },
+    "desktop": {
+      "documents": {
+        "pageHeight": 1053,
+        "viewportHeight": 900,
+        "heightRatio": 1.17,
+        "horizontalOverflow": false,
+        "outside": 0
+      },
+      "editor": {
+        "pageHeight": 1129,
+        "viewportHeight": 900,
+        "heightRatio": 1.25,
+        "horizontalOverflow": false,
+        "outside": 0
+      },
+      "share": {
+        "pageHeight": 946,
+        "viewportHeight": 900,
+        "heightRatio": 1.05,
+        "horizontalOverflow": false,
+        "outside": 0
+      }
+    },
+    "mobile": {
+      "documents": {
+        "pageHeight": 980,
+        "viewportHeight": 844,
+        "heightRatio": 1.16,
+        "horizontalOverflow": false,
+        "outside": 0
+      },
+      "editor": {
+        "pageHeight": 1131,
+        "viewportHeight": 844,
+        "heightRatio": 1.34,
+        "horizontalOverflow": false,
+        "outside": 0
+      },
+      "share": {
+        "pageHeight": 844,
+        "viewportHeight": 844,
+        "heightRatio": 1,
+        "horizontalOverflow": false,
+        "outside": 0
+      }
+    }
+  },
+  "closedInCurrentEvidence": [
+    "Mobile Share default cockpit is exactly one 390x844 viewport on live production.",
+    "Desktop Share keeps two-pane/staged composition and no horizontal overflow.",
+    "Documents have first-task cockpit evidence, but remain longer than Share in default generated workspace flow."
+  ],
+  "remainingUiDebt": [
+    "Default Documents review page should become more decision-oriented before opening the full editor.",
+    "Selected document editing can remain scrollable as intentional drilldown.",
+    "Generated result/provider dispatch live delivery remains a separate approval-gated boundary."
+  ],
+  "recommendedNextBoundedWave": {
+    "target": "Documents review cockpit",
+    "acceptance": [
+      "Default mobile Documents step moves materially closer to one viewport without hiding core-3 document affordance.",
+      "Risk assessment, TBM briefing, TBM log, evidence/readiness, and next CTA are visible before full editor drilldown.",
+      "Full WorkpackEditor/raw document editing remains opt-in detail and preserves existing export/canonical contracts.",
+      "Horizontal overflow remains false and outside count remains 0."
+    ]
+  }
+}

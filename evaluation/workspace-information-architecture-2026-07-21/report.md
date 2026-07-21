@@ -2,7 +2,9 @@
 
 Verdict: `ROUTE_SPLIT_ALONE_IS_NOT_ENOUGH`
 
-Live/source commit checked: `963b24e92d121359ca90505478da40131ccc876e`
+Live commit checked: `963b24e92d121359ca90505478da40131ccc876e`
+
+Current source/evidence HEAD at report commit: `52d12965fa5d67b9a7f7536f71c9f0ce718059c2`
 
 This report answers whether SafeClaw should split the workspace into more pages, and whether that would actually solve the long Document and Share screens.
 
@@ -53,7 +55,7 @@ This preserves the user's mental model of input -> documents -> share, but inter
 Do not launch a broad route rewrite. Use bounded TDD waves:
 
 1. Keep the live Share mobile fix as done and evidence-backed.
-2. Add a Documents mobile cockpit test requiring the default mobile Documents page to fit within 1.05x viewport while exposing:
+2. Add a Documents mobile cockpit test requiring the default mobile Documents page to move materially closer to one viewport while exposing:
    - risk assessment,
    - TBM briefing,
    - TBM log,
