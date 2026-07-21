@@ -980,7 +980,7 @@ function createFixtureRoot(): string {
       },
     },
   });
-  writeJson(rootDir, path.join("evaluation", "kosha-current-northstar-regression-2026-07-21", "report.json"), {
+  writeJson(rootDir, path.join("evaluation", "kosha-current-northstar-regression-2026-07-22", "report.json"), {
     title: "KOSHA Current North Star Regression Gate",
     verdict: "PASS",
     dbSchemaChanged: false,
@@ -1213,7 +1213,7 @@ describe("northstar open gate audit", () => {
   it("contradicts the KOSHA exact trust gate when live exact pins are stale", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
-    const reportPath = path.join("evaluation", "kosha-current-northstar-regression-2026-07-21", "report.json");
+    const reportPath = path.join("evaluation", "kosha-current-northstar-regression-2026-07-22", "report.json");
     const report = JSON.parse(fs.readFileSync(path.join(rootDir, reportPath), "utf8")) as Record<string, unknown>;
     report.coveredExactPins = ["D-C-13-2026", "D-C-7-2026"];
     writeJson(rootDir, reportPath, report);
@@ -1231,7 +1231,7 @@ describe("northstar open gate audit", () => {
   it("contradicts the KOSHA exact trust gate when mutation safety is lost", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
-    const reportPath = path.join("evaluation", "kosha-current-northstar-regression-2026-07-21", "report.json");
+    const reportPath = path.join("evaluation", "kosha-current-northstar-regression-2026-07-22", "report.json");
     const report = JSON.parse(fs.readFileSync(path.join(rootDir, reportPath), "utf8")) as Record<string, unknown>;
     report.supabaseWrites = true;
     writeJson(rootDir, reportPath, report);
@@ -1360,7 +1360,7 @@ describe("northstar open gate audit", () => {
   it("fails evidence completeness when the current KOSHA reconciliation is missing", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
-    fs.rmSync(path.join(rootDir, "evaluation", "kosha-current-northstar-regression-2026-07-21"), {
+    fs.rmSync(path.join(rootDir, "evaluation", "kosha-current-northstar-regression-2026-07-22"), {
       recursive: true,
       force: true,
     });

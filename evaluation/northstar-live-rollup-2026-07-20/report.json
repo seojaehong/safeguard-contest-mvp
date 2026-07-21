@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T20:10:06.362Z",
-  "head": "64392d2b663e2b7de89b06269ee648596b68a186",
+  "generatedAt": "2026-07-21T20:16:41.527Z",
+  "head": "bd4b4c936072be099d401e25a29edc24fb45ee2e",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "64392d2b663e2b7de89b06269ee648596b68a186",
+    "commitSha": "bd4b4c936072be099d401e25a29edc24fb45ee2e",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-isvtu9bui-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-er6unjudb-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -54,7 +54,7 @@
     {
       "id": "kosha_exact_trust_registry",
       "state": "proven",
-      "artifact": "evaluation\\kosha-current-northstar-regression-2026-07-21\\report.json",
+      "artifact": "evaluation\\kosha-current-northstar-regression-2026-07-22\\report.json",
       "detail": "Current source confirms 3 exact KOSHA pins (D-C-13-2026, D-C-7-2026, B-E-10-2026), structured materialization, grounded generation, and live harness quality: 223 tests plus typecheck PASS; no DB/schema/Supabase/embedding writes."
     }
   ],
@@ -181,9 +181,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "64392d2b663e2b7de89b06269ee648596b68a186",
+      "sourceCommit": "bd4b4c936072be099d401e25a29edc24fb45ee2e",
       "sourceStatus": "exact",
-      "productionCommit": "64392d2b663e2b7de89b06269ee648596b68a186",
+      "productionCommit": "bd4b4c936072be099d401e25a29edc24fb45ee2e",
       "productionStatus": "matches_live"
     },
     {
@@ -205,10 +205,10 @@
     {
       "id": "kosha_exact_trust_registry",
       "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
-      "sourceCommit": "771cdf08b311e97ac3a13df335f5a7e5b3dc4e06",
-      "sourceStatus": "ancestor",
-      "productionCommit": "771cdf08b311e97ac3a13df335f5a7e5b3dc4e06",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "bd4b4c936072be099d401e25a29edc24fb45ee2e",
+      "sourceStatus": "exact",
+      "productionCommit": "bd4b4c936072be099d401e25a29edc24fb45ee2e",
+      "productionStatus": "matches_live"
     },
     {
       "id": "rls_llm_wiki_approval_preflight",
@@ -246,9 +246,9 @@
       "id": "workspace_docs_share_geometry",
       "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
       "sourceCommit": "64392d2b663e2b7de89b06269ee648596b68a186",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "64392d2b663e2b7de89b06269ee648596b68a186",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "dispatch_standalone_cockpit",
