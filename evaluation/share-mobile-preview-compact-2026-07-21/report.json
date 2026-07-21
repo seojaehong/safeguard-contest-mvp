@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "gate": "share-mobile-preview-compact-2026-07-21",
+  "verdict": "PASS_CURRENT_SOURCE",
+  "checkedAt": "2026-07-21T02:04:27.916Z",
+  "productCommit": "db6ac612b8ba4d83000d31b7f4f35d2bb66ffa6b",
+  "providerDispatchLiveClaimed": false,
+  "routeSplitAloneAcceptedAsFix": false,
+  "scope": {
+    "route": "/workspace?share",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "surface": "mobile share preview and provider-result containment"
+  },
+  "currentSourceMetrics": {
+    "localizedPreview": {
+      "pageHeight": 844,
+      "viewportHeight": 844,
+      "heightRatio": 1,
+      "mobileSummaryBottom": 464.75,
+      "previewBottom": 689.75,
+      "primaryTop": 704.75,
+      "primaryBottom": 748.75,
+      "configToggleBottom": 807.75,
+      "linesClientHeight": 107,
+      "linesScrollHeight": 473,
+      "linesOverflowY": "auto",
+      "configCardsCollapsed": true,
+      "horizontalOverflow": 0
+    },
+    "generatedProviderResultFixture": {
+      "pageHeight": 844,
+      "viewportHeight": 844,
+      "heightRatio": 1,
+      "rootBottom": 825,
+      "previewBottom": 664,
+      "primaryBottom": 723,
+      "resultSummaryBottom": 828,
+      "resultOpen": false,
+      "resultSummaryText": "전송 결과 / 미리 확인 / 검증 전용 · 2개 채널",
+      "dispatchPostCount": 1,
+      "horizontalOverflow": 0
+    }
+  },
+  "checks": [
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts -t \"renders every Vietnamese paragraph\" --maxWorkers=1 --fileParallelism=false --hookTimeout=180000",
+      "result": "PASS",
+      "files": 1,
+      "tests": 1
+    },
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts -t \"keeps generated provider-result details in bounded desktop and mobile drilldown\" --maxWorkers=1 --fileParallelism=false --hookTimeout=180000",
+      "result": "PASS",
+      "files": 1,
+      "tests": 1
+    },
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-simplification.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "tests": 11
+    },
+    {
+      "command": "npm.cmd run build",
+      "result": "PASS",
+      "staticPages": 28
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    }
+  ],
+  "remainingDebt": [
+    "Live production promotion is pending until /api/build-info reaches db6ac612b8ba4d83000d31b7f4f35d2bb66ffa6b or later and live geometry is rerun.",
+    "Provider live dispatch remains approval-gated and is not claimed."
+  ]
+}
