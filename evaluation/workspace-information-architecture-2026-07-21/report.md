@@ -4,7 +4,7 @@ Verdict: `ROUTE_SPLIT_ALONE_IS_NOT_ENOUGH`
 
 Live commit checked: `963b24e92d121359ca90505478da40131ccc876e`
 
-Current source/evidence HEAD at report commit: `52d12965fa5d67b9a7f7536f71c9f0ce718059c2`
+Current source/evidence HEAD at report generation: `0b53c223c376114a3e68b8dc54573cf5f9fac7e6`
 
 This report answers whether SafeClaw should split the workspace into more pages, and whether that would actually solve the long Document and Share screens.
 

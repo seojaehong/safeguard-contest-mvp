@@ -1,7 +1,7 @@
 {
   "verdict": "ROUTE_SPLIT_ALONE_IS_NOT_ENOUGH",
   "liveCommitChecked": "963b24e92d121359ca90505478da40131ccc876e",
-  "sourceHeadAtReportCommit": "700c2a22e1de0e5608cb5cacd9cde4d054f5c92f",
+  "sourceHeadAtReportGeneration": "0b53c223c376114a3e68b8dc54573cf5f9fac7e6",
   "routeSplitAloneAcceptedAsFix": false,
   "recommendedArchitecture": "task route/step split plus first-viewport cockpit plus bounded drilldown/detail panes",
   "liveGeometry": {
