@@ -1,9 +1,9 @@
 {
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "8011cb29683a691ee39026cc8c19015fc3ca8759",
-  "productionCommit": "54d3870b1f1b2a51a3504cb6a88173cffb56168a",
-  "latestEvidenceCommitLive": false,
+  "sourceHead": "41ed9626d07c60ef7b876b888bb0c8ac6dea075c",
+  "productionCommit": "41ed9626d07c60ef7b876b888bb0c8ac6dea075c",
+  "latestEvidenceCommitLive": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
     "liveRollup": "evaluation\\northstar-live-rollup-2026-07-20\\report.json",
@@ -23,7 +23,8 @@
     "hermes_openclaw_adapter_boundary",
     "sif_embedding_approval_preflight",
     "northstar_approval_runway",
-    "rls_llm_wiki_approval_preflight_current_source"
+    "rls_llm_wiki_approval_preflight_current_source",
+    "sif_embedding_approval_preflight_current_source"
   ],
   "noticeState": [
     {

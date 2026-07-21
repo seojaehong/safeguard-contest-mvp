@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-21T19:05:22.740Z
-Source SHA: `8011cb29683a691ee39026cc8c19015fc3ca8759`
+Generated at: 2026-07-21T19:09:21.184Z
+Source SHA: `41ed9626d07c60ef7b876b888bb0c8ac6dea075c`
 Overall: `open`
 
 ## Gate Matrix
@@ -16,7 +16,7 @@ Overall: `open`
 | provider_dispatch_persistence | approval_gated | evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json | Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred. |
 | supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Read-only RLS approval preflight passed at source SHA 8011cb29683a691ee39026cc8c19015fc3ca8759, but live RLS catalog and tenant A/B isolation are not proven. |
 | llm_wiki_publication | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 8011cb29683a691ee39026cc8c19015fc3ca8759. |
-| sif_embedding_runtime | approval_gated | evaluation\sif-embedding-gate\approval-preflight-report.json | SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: b5ea0bbbea4d0608028a6bdab987fc6ecca154a2. |
+| sif_embedding_runtime | approval_gated | evaluation\sif-embedding-gate\approval-preflight-report.json | SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 41ed9626d07c60ef7b876b888bb0c8ac6dea075c. |
 | kosha_exact_trust_registry | proven | evaluation\kosha-current-northstar-regression-2026-07-21\report.json | Current source confirms 3 exact KOSHA pins (D-C-13-2026, D-C-7-2026, B-E-10-2026), structured materialization, grounded generation, and live harness quality: 223 tests plus typecheck PASS; no DB/schema/Supabase/embedding writes. |
 
 ## Safe Demo Claims

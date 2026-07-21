@@ -4,11 +4,11 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `8011cb29683a691ee39026cc8c19015fc3ca8759`
+Source HEAD: `41ed9626d07c60ef7b876b888bb0c8ac6dea075c`
 
-Production `/api/build-info`: `54d3870b1f1b2a51a3504cb6a88173cffb56168a`
+Production `/api/build-info`: `41ed9626d07c60ef7b876b888bb0c8ac6dea075c`
 
-Note: source HEAD `8011cb29683a691ee39026cc8c19015fc3ca8759` is pushed locally in this evidence wave, while production currently reports `54d3870b1f1b2a51a3504cb6a88173cffb56168a`. The live rollup records this source/live state without claiming the new evidence commit is deployed until `/api/build-info` advances.
+Note: source HEAD `41ed9626d07c60ef7b876b888bb0c8ac6dea075c` is production-visible and is the live-exact marker recorded by the current live rollup. Any later evidence-only commit after this artifact must be checked separately through `/api/build-info`.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -22,7 +22,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Standalone Dispatch cockpit is proven for the current evidence scope.
 - Generated Share result fixture cockpit is proven without claiming real provider dispatch.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level on source/live marker `54d3870b1f1b2a51a3504cb6a88173cffb56168a` without claiming live production engine execution. Live unauthenticated broker smoke still returns `AUTH_REQUIRED` before engine execution.
-- SIF embedding approval preflight is current and live-visible as approval-held evidence: corpus 6,032 records, no embedding generation, no upload, and vector runtime disabled until approval.
+- SIF embedding approval preflight is current and live-visible as approval-held evidence: corpus 6,032 records, no embedding generation, no upload, and vector runtime disabled until approval. Current-source SIF preflight at `41ed9626d07c60ef7b876b888bb0c8ac6dea075c` keeps DB mutation, embedding generation, upload, and launch readiness false.
 - North Star approval runway is current and production-visible: the remaining runtime/provider/database/vector gates are explicitly separated from ordinary UI/evidence iteration.
 - RLS / LLM Wiki approval preflight is current-source ready for operator review with failed checks `0`, no DB mutation, no network opening, and no launch-readiness claim.
 - Final-99 is `pass_with_notice`, not clean launch-complete. The notices are carried explicitly in `evaluation\final-99-gate-current-2026-07-21\notice-carry.json`.
