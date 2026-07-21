@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-launch-readiness-current/v1",
-  "generatedAt": "2026-07-21T20:02:55.491Z",
+  "generatedAt": "2026-07-21T20:41:10.660Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceCommit": "771cdf08b311e97ac3a13df335f5a7e5b3dc4e06",
-  "productionCommit": "771cdf08b311e97ac3a13df335f5a7e5b3dc4e06",
+  "sourceCommit": "5cbcd7a9f6bca539b7bf5aaa154d39261dd67a73",
+  "productionCommit": "5cbcd7a9f6bca539b7bf5aaa154d39261dd67a73",
   "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
   "safeLaunchDemoClaimAllowed": true,
   "guidedPilotClaimAllowed": true,
@@ -14,7 +14,7 @@
   "apiAsk": {
     "status": 200,
     "ok": true,
-    "elapsedMs": 20873
+    "elapsedMs": 21314
   },
   "scenario": {
     "companyName": "도시가스공사",
@@ -81,9 +81,9 @@
     "final99Gate": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
     "northstarOpenGates": "evaluation\\northstar-open-gates-current\\report.json",
     "northstarLiveRollup": "evaluation\\northstar-live-rollup-2026-07-20\\report.json",
-    "uiCockpitEvidence": "evaluation\\workspace-ia-live-64e-2026-07-22\\report.json",
+    "uiCockpitEvidence": "evaluation\\workspace-ia-live-cdfc-2026-07-22\\report.json",
     "workspaceIaRecommendation": "evaluation\\workspace-information-architecture-2026-07-21\\report.json",
-    "koshaRegression": "evaluation\\kosha-current-northstar-regression-2026-07-21\\report.json",
+    "koshaRegression": "evaluation\\kosha-current-northstar-regression-2026-07-22\\report.json",
     "koshaLiveGate": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
     "providerDispatchReadiness": "evaluation\\provider-dispatch-readiness-2026-07-21\\report.json",
     "sifEmbeddingPreflight": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
@@ -116,7 +116,7 @@
     "Live /api/ask can generate the expected 11-document workpack for the audited construction scenario.",
     "Law.go, Gemini/OpenAI-compatible generation, KMA weather, Work24, KOSHA education, KOSHA official material, and KOSHA accident-case connections returned user-facing connected status in the live smoke.",
     "Default Documents and Share cockpits are production-proven as viewport-bounded decision surfaces; selected editor raw long-form text remains a secondary drilldown.",
-    "KOSHA exact trust registry and live corpus status are current at the production commit.",
+    "KOSHA exact trust registry, current regression, and live corpus status are current at the production commit.",
     "A safe launch demo or guided pilot can be claimed with the explicit provider-dispatch, RLS, LLM Wiki, SIF vector, and admin-auth notices."
   ],
   "forbiddenClaims": [

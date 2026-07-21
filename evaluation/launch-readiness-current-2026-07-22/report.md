@@ -1,10 +1,10 @@
 # Launch Readiness Current Boundary
 
-Generated: 2026-07-21T20:02:55.491Z
+Generated: 2026-07-21T20:41:10.660Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source / production commit: `771cdf08b311e97ac3a13df335f5a7e5b3dc4e06`
+Source / production commit: `5cbcd7a9f6bca539b7bf5aaa154d39261dd67a73`
 
 ## Verdict
 
@@ -17,7 +17,7 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 `scripts/launch_readiness_audit.mjs` was run against production with `SAFETYGUARD_AUDIT_DISPATCH=false`.
 
 - `/api/ask`: 200 OK
-- elapsed: 20873 ms
+- elapsed: 21314 ms
 - dispatch call: not run
 - generated documents: 11 / 11
 - scenario: `도시가스공사 열수송관 굴착공사`, workers 7
@@ -38,7 +38,7 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 - Live /api/ask can generate the expected 11-document workpack for the audited construction scenario.
 - Law.go, Gemini/OpenAI-compatible generation, KMA weather, Work24, KOSHA education, KOSHA official material, and KOSHA accident-case connections returned user-facing connected status in the live smoke.
 - Default Documents and Share cockpits are production-proven as viewport-bounded decision surfaces; selected editor raw long-form text remains a secondary drilldown.
-- KOSHA exact trust registry and live corpus status are current at the production commit.
+- KOSHA exact trust registry, current regression, and live corpus status are current at the production commit.
 - A safe launch demo or guided pilot can be claimed with the explicit provider-dispatch, RLS, LLM Wiki, SIF vector, and admin-auth notices.
 
 ## Forbidden Claims
@@ -65,9 +65,9 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 - North Star open gates: `evaluation\northstar-open-gates-current\report.json`
 - North Star live rollup: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Approval runway: `evaluation\northstar-approval-runway-2026-07-21\report.json`
-- UI cockpit evidence: `evaluation\workspace-ia-live-64e-2026-07-22\report.json`
+- UI cockpit evidence: `evaluation\workspace-ia-live-cdfc-2026-07-22\report.json`
 - Workspace IA recommendation: `evaluation\workspace-information-architecture-2026-07-21\report.json`
-- KOSHA regression: `evaluation\kosha-current-northstar-regression-2026-07-21\report.json`
+- KOSHA regression: `evaluation\kosha-current-northstar-regression-2026-07-22\report.json`
 - KOSHA live gate: `evaluation\kosha-current-live-gate-2026-07-20\report.json`
 - Provider dispatch readiness: `evaluation\provider-dispatch-readiness-2026-07-21\report.json`
 - SIF embedding preflight: `evaluation\sif-embedding-gate\approval-preflight-report.json`
