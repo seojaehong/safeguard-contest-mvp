@@ -2,15 +2,16 @@
 
 ## Verdict
 
-PASS_LOCAL_PRODUCTION_CURRENT_HEAD_WITH_LIVE_STALE.
+PASS_LIVE_PRODUCTION_CURRENT_HEAD.
 
-The generated document editor was still behaving like a long single-page surface after the first document cockpit split. Current production live was stale at the start of this gate, so this report only claims local production verification for commit `703e4a031a9c19f78f986b863d647f367e123cf8`.
+The generated document editor was still behaving like a long single-page surface after the first document cockpit split. Current production was stale at the start of this gate, but live production later advanced to the pushed evidence commit and the browser geometry probe passed against `https://www.safeclaw.kr`.
 
 ## Build identity
 
 - Live `/api/build-info` at start: `bebc66e3ef6abda86972a83fd666e86f4a5fd656`
 - Local production `/api/build-info`: `703e4a031a9c19f78f986b863d647f367e123cf8`
 - Product commit: `703e4a031a9c19f78f986b863d647f367e123cf8`
+- Live verified `/api/build-info`: `1413eb73960dc9ccdea5f5688b1a4be4b3e23373`
 
 ## What changed
 
@@ -36,10 +37,11 @@ The generated document editor was still behaving like a long single-page surface
 - `npm.cmd run typecheck` → PASS
 - `npm.cmd run build` → PASS, 28/28 static pages
 - `git diff --check` → PASS
-- `node evaluation\workspace-docs-share-production-gate-2026-07-20\run-current-geometry-probe.mjs` with `SAFECLAW_BASE_URL=http://127.0.0.1:3042` → PASS
+- `node evaluation\workspace-docs-share-production-gate-2026-07-20\run-current-geometry-probe.mjs` with `SAFECLAW_BASE_URL=http://127.0.0.1:3044` → PASS
+- `node evaluation\workspace-docs-share-production-gate-2026-07-20\run-current-geometry-probe.mjs` with `SAFECLAW_BASE_URL=https://www.safeclaw.kr` → PASS
 
 ## Remaining notes
 
-- Do not claim live production fixed until `/api/build-info` reaches `703e4a031a9c19f78f986b863d647f367e123cf8` or later and the browser probe is rerun against live.
+- Live production now reports `1413eb73960dc9ccdea5f5688b1a4be4b3e23373`, and the browser geometry probe has been rerun against live.
 - Splitting pages alone is not enough if internal document/share panels remain normal-flow long content. The durable structure should be step-shell plus bounded internal scroll regions: summary rail, active task panel, evidence/details drawer, and collapsed secondary document sections.
 - Share mobile is now within the existing first-view threshold, but still 1.31 screens tall. A stricter follow-up can reduce `shareRoot` below one viewport by collapsing secondary rails and keeping only primary CTA plus preview in the first screen.

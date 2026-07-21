@@ -1,6 +1,6 @@
 {
-  "verdict": "PASS_LOCAL_PRODUCTION_CURRENT_HEAD_WITH_LIVE_STALE",
-  "checkedAt": "2026-07-21T00:26:38.487Z",
+  "verdict": "PASS_LIVE_PRODUCTION_CURRENT_HEAD",
+  "checkedAt": "2026-07-21T00:40:24.551Z",
   "liveBuildInfoAtStart": {
     "commitSha": "bebc66e3ef6abda86972a83fd666e86f4a5fd656"
   },
@@ -8,6 +8,12 @@
     "commitSha": "703e4a031a9c19f78f986b863d647f367e123cf8",
     "branch": "master",
     "environment": "production"
+  },
+  "liveVerifiedBuildInfo": {
+    "commitSha": "1413eb73960dc9ccdea5f5688b1a4be4b3e23373",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-fk40k0hzk-seojaehongs-projects.vercel.app"
   },
   "productCommit": "703e4a031a9c19f78f986b863d647f367e123cf8",
   "geometry": {
@@ -90,10 +96,11 @@
       "staticPages": 28
     },
     "diffCheck": "PASS",
-    "localProductionGeometryProbe": "PASS"
+    "localProductionGeometryProbe": "PASS",
+    "liveProductionGeometryProbe": "PASS"
   },
   "remaining": [
-    "Live production deployment was stale at the start of verification; rerun live browser probe after build-info reaches the product commit or later.",
+    "Live production deployment is now verified at the pushed evidence commit.",
     "Share mobile is within the current first-view threshold but remains 1.31 screens tall; a stricter follow-up can collapse secondary share rails."
   ]
 }

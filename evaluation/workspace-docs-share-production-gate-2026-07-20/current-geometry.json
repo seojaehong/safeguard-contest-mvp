@@ -1,13 +1,13 @@
 {
-  "checkedAt": "2026-07-21T00:36:07.287Z",
+  "checkedAt": "2026-07-21T00:40:24.551Z",
   "build": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "703e4a031a9c19f78f986b863d647f367e123cf8",
+    "commitSha": "1413eb73960dc9ccdea5f5688b1a4be4b3e23373",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": null,
+    "deploymentUrl": "safeguard-contest-fk40k0hzk-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "inputText": "서울 성수동 외벽 도장 작업, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보. 이동식 비계와 자재 양중 동선 확인 필요.",
@@ -807,17 +807,17 @@
         "visibleDocumentPreviews": 0,
         "documentEditor": {
           "x": 27,
-          "y": 63,
+          "y": 4,
           "w": 336,
           "h": 748,
-          "bottom": 811
+          "bottom": 752
         },
         "documentTextarea": {
           "x": 40,
-          "y": 980,
+          "y": 921,
           "w": 310,
           "h": 173,
-          "bottom": 1153
+          "bottom": 1094
         },
         "sharePage": null,
         "shareRoot": {
