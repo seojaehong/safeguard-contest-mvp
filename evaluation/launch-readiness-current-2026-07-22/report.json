@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-launch-readiness-current/v1",
-  "generatedAt": "2026-07-21T19:56:12.999Z",
+  "generatedAt": "2026-07-21T20:02:55.491Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceCommit": "b45cef2810b7996f6366654903e3bba3d0c1b106",
-  "productionCommit": "b45cef2810b7996f6366654903e3bba3d0c1b106",
+  "sourceCommit": "771cdf08b311e97ac3a13df335f5a7e5b3dc4e06",
+  "productionCommit": "771cdf08b311e97ac3a13df335f5a7e5b3dc4e06",
   "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
   "safeLaunchDemoClaimAllowed": true,
   "guidedPilotClaimAllowed": true,
@@ -14,7 +14,7 @@
   "apiAsk": {
     "status": 200,
     "ok": true,
-    "elapsedMs": 23207
+    "elapsedMs": 20873
   },
   "scenario": {
     "companyName": "도시가스공사",
