@@ -35,6 +35,7 @@
     "smoke:final-e2e-matrix": "node ./scripts/final_e2e_matrix_runner.mjs",
     "smoke:final-99-gate": "node ./scripts/final_99_gate_runner.mjs",
     "rollup:northstar-live": "node ./scripts/northstar_live_rollup.mjs",
+    "gate:northstar-approval-runway": "node ./scripts/northstar_approval_runway.mjs",
     "gate:kosha-live": "node ./scripts/kosha_current_live_gate.mjs",
     "gate:mobile-p0": "node ./scripts/mobile_p0_report_from_geometry.mjs",
     "hwpx:inventory": "node ./scripts/hwpx_template_inventory.mjs",

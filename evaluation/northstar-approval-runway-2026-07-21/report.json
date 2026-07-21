@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-northstar-approval-runway/v1",
-  "generatedAt": "2026-07-21T20:42:00+09:00",
-  "sourceHeadAtDraft": "baa0c32514d54802001d2c0101ad3d231445ff41",
-  "liveCommitAtDraft": "baa0c32514d54802001d2c0101ad3d231445ff41",
+  "generatedAt": "2026-07-21T11:52:58.033Z",
+  "sourceHeadAtDraft": "e3f76d4cda9e7a3f3fd5e515a4b5875a023d9cf5",
+  "liveCommitAtDraft": "e3f76d4cda9e7a3f3fd5e515a4b5875a023d9cf5",
   "overall": "approval_runway_ready_open",
   "launchReadiness": false,
   "dbMutationPerformed": false,

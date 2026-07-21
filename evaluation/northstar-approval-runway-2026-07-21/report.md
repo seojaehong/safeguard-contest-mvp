@@ -1,10 +1,10 @@
 # SafeClaw North Star Approval Runway
 
-Generated at: 2026-07-21 20:42 KST
+Generated at: 2026-07-21T11:52:58.033Z
 
-Source HEAD at draft: `baa0c32514d54802001d2c0101ad3d231445ff41`
+Source HEAD at draft: `e3f76d4cda9e7a3f3fd5e515a4b5875a023d9cf5`
 
-Live commit at draft: `baa0c32514d54802001d2c0101ad3d231445ff41`
+Live commit at draft: `e3f76d4cda9e7a3f3fd5e515a4b5875a023d9cf5`
 
 Overall: `approval_runway_ready_open`
 
@@ -20,17 +20,25 @@ No DB migration, DB mutation, embedding generation, upload, provider send, or li
 
 | Gate | State | Evidence | Current Lock | Approval Needed |
 | --- | --- | --- | --- | --- |
-| `provider_dispatch_persistence` | `approval_gated` | `evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json` | `preview_only` | Approve persistent idempotency migration scope, choose per-channel child table or canonical `provider_result` JSONB ledger, add `updated_at` trigger or route-owned timestamp contract, and test reservation-before-provider-call plus duplicate replay. |
-| `supabase_rls_launch_isolation` | `approval_gated` | `evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json` | `read_only_preflight` | Approve authoritative Supabase project/credential provenance, live catalog capture, disposable tenant A/B negative matrix, Storage isolation, and service-role invariants. |
-| `llm_wiki_publication` | `approval_gated` | `evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json` | `candidate_unpublished` | Approve DDL/RPC/grants/append-only ledger, graph pointer, threat model, and isolated publication canary with atomicity/idempotency/rollback/leak tests. |
-| `sif_embedding_runtime` | `approval_gated` | `evaluation/sif-embedding-gate/approval-preflight-report.json` | `approval_held_no_vectors` | Approve SIF-only migration, embedding cost, upload, and post-upload vector runtime verification before enabling vector search. |
+| `provider_dispatch_persistence` | `approval_gated` | `evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json` | `preview_only` | approve persistent idempotency migration scope; choose per-channel child table or canonical provider_result JSONB ledger; add updated_at trigger or route-owned timestamp contract; test reservation-before-provider-call, duplicate replay, and per-channel result retention |
+| `supabase_rls_launch_isolation` | `approval_gated` | `evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json` | `read_only_preflight` | approve authoritative Supabase project and credential provenance; run read-only live catalog capture; run disposable tenant A/B negative matrix; verify Storage object isolation and service-role route invariants |
+| `llm_wiki_publication` | `approval_gated` | `evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json` | `candidate_unpublished` | approve final DDL, RPC, grants, and append-only ledger; approve graph pointer and publication threat model; run isolated publication canary with atomicity, idempotency, rollback, and leak tests |
+| `sif_embedding_runtime` | `approval_gated` | `evaluation/sif-embedding-gate/approval-preflight-report.json` | `approval_held_no_vectors` | approve SIF-only embedding migration; approve embedding cost and upload; run post-upload vector runtime verification; keep SAFETY_REFERENCE_VECTOR_SEARCH disabled until upload is verified |
 
 ## Forbidden Until Approved
 
-- Real provider dispatch, `PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=true`, or channel-level exactly-once persistence claims.
-- RLS launch isolation proven, production migration approved, or service-role safety claims based only on table RLS.
-- LLM Wiki publication availability or self-publication claims.
-- SIF vector retrieval production-active, embedding/upload completed, or broader corpus DB persistence claims.
+- real provider dispatch
+- PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=true
+- channel-level exactly-once persistence claim
+- RLS launch isolation proven
+- production migration approved
+- service-role routes safe because table RLS exists
+- LLM Wiki publication available
+- LLM Wiki publishes itself
+- generated wiki candidates published without human confirmation and RPC evidence
+- SIF vector retrieval production-active
+- embedding/upload completed
+- broader corpus exact-publishing or DB persistence claim
 
 ## Operator Sequence
 
@@ -39,14 +47,14 @@ No DB migration, DB mutation, embedding generation, upload, provider send, or li
 3. Approve or reject LLM Wiki isolated publication canary.
 4. Approve or reject SIF embedding migration, cost, and upload as a separate gate.
 5. Approve or reject provider dispatch persistence migration and route-level replay tests.
-6. After each approved gate has post-approval evidence, regenerate `evaluation/northstar-open-gates-current` and `evaluation/northstar-live-rollup-2026-07-20`.
+6. Only after each gate has post-approval evidence, regenerate northstar-open-gates-current and northstar-live-rollup.
 
 ## Still Safe Without Approval
 
 - UI/UX cockpit and drilldown refinements.
 - KOSHA exact-trust evidence refreshes without DB writes.
-- Read-only live geometry probes.
-- Approval packet validation and report hygiene.
+- read-only live geometry probes.
+- approval packet validation and report hygiene.
 
 ## Boundary
 
