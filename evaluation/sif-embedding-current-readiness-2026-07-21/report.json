@@ -1,6 +1,6 @@
 {
-  "checkedAt": "2026-07-21T01:31:00+09:00",
-  "sourceHead": "4dd391e1ed773469627fe81bebe0f8a250766373",
+  "checkedAt": "2026-07-21T23:45:34+09:00",
+  "sourceHead": "7567576b96057e9be3a3a9adf43a0c143af6d011",
   "branch": "chore/recipient-foreign-live-gate-20260720",
   "verdict": "APPROVAL_GATED_READY",
   "dbMutationPerformed": false,
@@ -30,6 +30,7 @@
   },
   "nextApprovalGate": [
     "Approve/apply SIF-only migration before upload verification.",
+    "Confirm OPENAI_API_KEY and Supabase service role are present in the approved execution environment.",
     "Run embedding generation only with explicit approved embedding flag.",
     "Run upload only with explicit approved upload flag.",
     "Verify 6032 uploaded rows before enabling vector retrieval."

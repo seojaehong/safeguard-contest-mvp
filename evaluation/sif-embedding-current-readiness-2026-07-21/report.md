@@ -1,7 +1,9 @@
 # SIF Embedding Current Readiness Gate
 
-Checked at: 2026-07-21 01:31 KST  
-Source HEAD before this evidence: `4dd391e1ed773469627fe81bebe0f8a250766373`  
+Checked at: 2026-07-21 23:45 KST
+
+Source HEAD before this evidence: `7567576b96057e9be3a3a9adf43a0c143af6d011`
+
 Branch: `chore/recipient-foreign-live-gate-20260720`
 
 ## Verdict
@@ -22,7 +24,7 @@ The SIF corpus and approval packet remain ready, but runtime vector retrieval is
 - Embedding generated: False
 - Uploaded: False
 - Vector feature flag enabled: False
-- Execution environment ready after approval: True
+- Execution environment ready after approval: False in the no-env-file preflight; execution still requires an approved environment with `OPENAI_API_KEY` and Supabase service role.
 
 ## Runtime DB Probe
 
@@ -37,8 +39,8 @@ This means the current production database still needs the approved SIF-only mig
 
 - `npm.cmd run knowledge:sif-embedding-runtime-probe -- --env-file C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\backend-harness-gate\.env.local --output evaluation\sif-embedding-gate\runtime-db-probe.json`  
   PASS: read-only probe completed, `dbMutationPerformed=false`, status `migration-required`.
-- `npm.cmd run knowledge:sif-embedding-preflight -- --env-file C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\backend-harness-gate\.env.local --output evaluation\sif-embedding-gate\approval-preflight-report.json`  
-  PASS: preflight ok=true, failed checks 0.
+- `npm.cmd run knowledge:sif-embedding-preflight -- --no-env-file --output evaluation\sif-embedding-gate\approval-preflight-report.json`
+  PASS: preflight ok=true, failed checks 0, approval-held command only; no embedding/upload execution environment was assumed.
 - `npm.cmd test -- tests\sif-embedding-preflight.test.ts tests\sif-embedding-runtime-probe.test.ts tests\sif-embedding-gate-status.test.ts tests\sif-embedding-approval-packet.test.ts --maxWorkers=1 --fileParallelism=false`  
   PASS: 4 files / 12 tests.
 
@@ -47,6 +49,7 @@ This means the current production database still needs the approved SIF-only mig
 Do not run embedding generation/upload yet. Required next approval remains:
 
 1. Approve/apply `evaluation/sif-embedding-gate/sif-embedding-only-migration.sql` or equivalent SIF-only production migration.
-2. Run embedding generation only with --embed --approved-embedding.
-3. Run upload only with --embed --approved-embedding --upload --approved-upload.
-4. Verify uploaded row count equals 6,032 before enabling vector retrieval.
+2. Confirm `OPENAI_API_KEY` and Supabase service role in the approved execution environment.
+3. Run embedding generation only with --embed --approved-embedding.
+4. Run upload only with --embed --approved-embedding --upload --approved-upload.
+5. Verify uploaded row count equals 6,032 before enabling vector retrieval.
