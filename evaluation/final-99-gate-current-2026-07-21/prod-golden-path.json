@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-07-21T14:52:27.614Z",
+  "generatedAt": "2026-07-21T15:22:29.217Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "commit": "2d990e18",
-  "sourceCommit": "2d990e180e5c8d46ee35ec64f714dd008cd1aac3",
+  "commit": "08a08935",
+  "sourceCommit": "08a08935f4bef5758709bbcc75e4a701269e0657",
   "productionBuild": {
     "ok": true,
     "status": 200,
-    "commitSha": "2d990e180e5c8d46ee35ec64f714dd008cd1aac3",
+    "commitSha": "08a08935f4bef5758709bbcc75e4a701269e0657",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-geqy2a649-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-d9fj4v8y6-seojaehongs-projects.vercel.app"
   },
   "overall": "pass_with_notice",
-  "elapsedMs": 83168,
+  "elapsedMs": 79020,
   "gates": [
     {
       "name": "ask-orchestration",
@@ -88,7 +88,7 @@
       "count": 6,
       "message": "KOSHA 오프라인 보조근거와 Supabase 안전 지식 DB에서 참고자료를 조회했습니다. 공식 KOSHA 정확 본문 번들로 partial DB 본문을 대체했습니다."
     },
-    "textPreview": "[보완 제안: 위험성평가 및 TBM·안전보건교육 기록 강화] - 작업 시작 전 이동식 비계 작업발판, 안전난간, 바퀴 잠금, 아웃트리거 상태를 반드시 점검하고 기록할 것 - 신규 투입자 대상 작업 특성, 보호구 착용, 추락 및 강풍 작업중지 기준에 관한 안전보건교육을 실시하고 교육 기록을 작성할 것 - 강풍 등 기상악화 시 작업중지 기준을 명확히 안내하고 현장 TBM에서 재확인할 것 - 지게차와 작업자 동선 분리를 위해 신호수 배치 및 접근금지 표시를 점검하고 TBM 및 위험성평가에 반영할 것 - 오늘 작업에 맞춘 위험성평가 결과와 TBM, 안전보건교육 기록은 작업반장과 관리감독자가 확인·서명할 것 확인자/근거확인: 작업반장 및 관리감독자의 서명·기록 내역 검토 / 이동식 비계 상태 점검기록, TBM 브리핑, 교육 실시 확인서 반영 근거",
+    "textPreview": "[보완 제안: 강풍 대응 및 신규 투입자 교육 강화] - 강풍 예보 시 작업 전 풍속 확인 및 작업중지 기준 재점검 - 이동식 비계 바퀴 잠금과 아웃트리거 상태를 작업 시작 전 반드시 점검 - 신규 투입자에 대한 작업안전교육 및 위험요인 브리핑 필수 실시 - 지게차 동선 주변 작업자 출입 통제 및 신호수 배치 상황 재확인 - TBM 회의 시 강풍·추락·지게차 동선 위험성 강조 및 안전보건교육 기록 작성 확인자/근거 확인: 작업반장이 강풍·추락·지게차 위험성별 조치 이행 여부 TBM, 안전보건교육 기록에 반영 근거: 작업 전 비계 안전점검 및 강풍 시 작업중지 기준 공유",
     "sourceCount": 5,
     "policy": "AI 보완은 자동 덮어쓰기가 아니라 제안, 사용자 편집, 삽입 흐름으로만 인정합니다."
   },
