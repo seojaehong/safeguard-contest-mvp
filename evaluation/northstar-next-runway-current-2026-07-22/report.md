@@ -4,13 +4,13 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `0cf291a801fd79c190873c5227022797169eccf4`
+Source HEAD: `6158d2c04587d8fa8a1f23bf375eb4cadfdff39f`
 
-Production `/api/build-info`: `0cf291a801fd79c190873c5227022797169eccf4`
+Production `/api/build-info`: `6158d2c04587d8fa8a1f23bf375eb4cadfdff39f`
 
 Latest evidence commit live: `true`
 
-Live-exact evidence commit: `0cf291a801fd79c190873c5227022797169eccf4`
+Live-exact evidence commit: `6158d2c04587d8fa8a1f23bf375eb4cadfdff39f`
 
 Live rollup matches production: `true`
 
