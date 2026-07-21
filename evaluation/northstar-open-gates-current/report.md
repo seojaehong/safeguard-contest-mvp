@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-21T12:59:54.800Z
-Source SHA: `f9346f3e6ec57a40cdc4fbde24c49179d3eba9a4`
+Generated at: 2026-07-21T13:04:50.674Z
+Source SHA: `197339d4ee4207c2240c81a4e31c39a905dd7596`
 Overall: `open`
 
 ## Gate Matrix
