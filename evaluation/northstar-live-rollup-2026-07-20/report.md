@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-21T21:55:15.568Z
-Source HEAD at generation: 4fcd064bfe9c6d6d98df7873a3091550dddca0c5
-Live commit at generation: 243767662ae740cc1fca09af267dcf46519764ef
+Generated at: 2026-07-21T21:56:49.732Z
+Source HEAD at generation: cbcaf5aec41071837641ec6c2cca3349f647a8bb
+Live commit at generation: 4fcd064bfe9c6d6d98df7873a3091550dddca0c5
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -48,7 +48,7 @@ Overall: `northstar_open_approval_gated`
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
 | kosha_exact_trust_registry | ancestor | ancestor_of_head | evaluation\kosha-current-live-gate-2026-07-20\report.json |
 | rls_llm_wiki_approval_preflight | ancestor | missing | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
-| sif_embedding_preflight | exact | missing | evaluation\sif-embedding-gate\approval-preflight-report.json |
+| sif_embedding_preflight | ancestor | missing | evaluation\sif-embedding-gate\approval-preflight-report.json |
 | live_critical_surface | ancestor | ancestor_of_head | evaluation\live-critical-surface-current-2026-07-20-rerun\report.json |
 | mobile_p0_workspace | ancestor | ancestor_of_head | evaluation\mobile-p0-workspace-gate-2026-07-20\report.json |
 | workspace_docs_share_geometry | ancestor | ancestor_of_head | evaluation\workspace-docs-share-production-gate-2026-07-20\current-geometry.json |
