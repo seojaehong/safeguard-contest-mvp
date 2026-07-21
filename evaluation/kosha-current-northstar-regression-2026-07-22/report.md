@@ -2,9 +2,9 @@
 
 Verdict: `PASS`
 
-Checked at: `2026-07-21T21:35:00.706Z`
+Checked at: `2026-07-21T22:13:31.410Z`
 
-Source/live commit: `dbe9fed5896150ff2977d68303771764f41e82d6`
+Source/live commit: `350f2d33111971b3e3148b57c6819299a474fdcc`
 
 ## What This Proves
 
@@ -19,11 +19,11 @@ Source/live commit: `dbe9fed5896150ff2977d68303771764f41e82d6`
 
 | Check | Command | Result |
 | --- | --- | --- |
-| Structured materialization + harness | `npm.cmd test -- tests\kosha-materialization-matrix.test.ts tests\grounded-generation-contract.test.ts tests\live-harness-quality-probe.test.ts --maxWorkers=1 --fileParallelism=false` | PASS, 3 files / 50 tests |
-| Exact trust + corpus | `npm.cmd test -- tests\exact-trusted-kosha-grounding.test.ts tests\exact-trusted-kosha-registry-wave2.test.ts tests\kosha-grounding-fail-closed.test.ts tests\kosha-current-review-run-ask.test.ts tests\kosha-guide-corpus-audit.test.ts --maxWorkers=1 --fileParallelism=false` | PASS, 5 files / 173 tests |
-| Live gate unit | `npm.cmd test -- tests\kosha-current-live-gate.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000` | PASS, 1 file / 3 tests |
-| Combined focused regression | `npm.cmd test -- tests\kosha-materialization-matrix.test.ts tests\grounded-generation-contract.test.ts tests\live-harness-quality-probe.test.ts tests\exact-trusted-kosha-grounding.test.ts tests\exact-trusted-kosha-registry-wave2.test.ts tests\kosha-grounding-fail-closed.test.ts tests\kosha-current-review-run-ask.test.ts tests\kosha-guide-corpus-audit.test.ts tests\kosha-current-live-gate.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000` | PASS, 9 files / 226 tests |
-| Live production KOSHA gate | `npm.cmd run gate:kosha-live -- --output evaluation\kosha-current-live-gate-2026-07-20 --base-url https://www.safeclaw.kr` | PASS, failedCheckIds `[]` |
+| Structured materialization + harness | `npm.cmd test -- tests\kosha-materialization-matrix.test.ts tests\grounded-generation-contract.test.ts tests\live-harness-quality-probe.test.ts --maxWorkers=1 --fileParallelism=false` | Covered inside combined focused regression |
+| Exact trust + corpus | `npm.cmd test -- tests\exact-trusted-kosha-grounding.test.ts tests\exact-trusted-kosha-registry-wave2.test.ts tests\kosha-grounding-fail-closed.test.ts tests\kosha-current-review-run-ask.test.ts tests\kosha-guide-corpus-audit.test.ts --maxWorkers=1 --fileParallelism=false` | Covered inside combined focused regression |
+| Live gate unit | `npm.cmd test -- tests\kosha-current-live-gate.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000` | Covered inside combined focused regression |
+| Combined focused regression | `npm.cmd test -- tests\kosha-materialization-matrix.test.ts tests\grounded-generation-contract.test.ts tests\live-harness-quality-probe.test.ts tests\exact-trusted-kosha-grounding.test.ts tests\exact-trusted-kosha-registry-wave2.test.ts tests\kosha-grounding-fail-closed.test.ts tests\kosha-current-review-run-ask.test.ts tests\kosha-guide-corpus-audit.test.ts tests\kosha-current-live-gate.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000` | PASS, 9 files / 226 tests, 29.60s |
+| Live production KOSHA gate | `npm.cmd run gate:kosha-live -- --output evaluation\kosha-current-live-gate-2026-07-20 --base-url https://www.safeclaw.kr` | PASS, failedCheckIds `[]`, source/live `350f2d33111971b3e3148b57c6819299a474fdcc` |
 | TypeScript | `npm.cmd run typecheck` | PASS |
 
 ## Live Runtime Summary

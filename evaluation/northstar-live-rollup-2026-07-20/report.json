@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T22:08:32.949Z",
-  "head": "39e8998133d7bc17327833ee5833ab9cbfa5c398",
+  "generatedAt": "2026-07-21T22:15:54.115Z",
+  "head": "350f2d33111971b3e3148b57c6819299a474fdcc",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "39e8998133d7bc17327833ee5833ab9cbfa5c398",
+    "commitSha": "350f2d33111971b3e3148b57c6819299a474fdcc",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-9auf8fbom-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-i8cphl8rj-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -182,9 +182,9 @@
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
       "sourceCommit": "39e8998133d7bc17327833ee5833ab9cbfa5c398",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "39e8998133d7bc17327833ee5833ab9cbfa5c398",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -205,10 +205,10 @@
     {
       "id": "kosha_exact_trust_registry",
       "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
-      "sourceCommit": "dbe9fed5896150ff2977d68303771764f41e82d6",
-      "sourceStatus": "ancestor",
-      "productionCommit": "dbe9fed5896150ff2977d68303771764f41e82d6",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "350f2d33111971b3e3148b57c6819299a474fdcc",
+      "sourceStatus": "exact",
+      "productionCommit": "350f2d33111971b3e3148b57c6819299a474fdcc",
+      "productionStatus": "matches_live"
     },
     {
       "id": "rls_llm_wiki_approval_preflight",
@@ -270,9 +270,9 @@
       "id": "northstar_approval_runway",
       "artifact": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
       "sourceCommit": "39e8998133d7bc17327833ee5833ab9cbfa5c398",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "39e8998133d7bc17327833ee5833ab9cbfa5c398",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     }
   ],
   "contradictions": [],
