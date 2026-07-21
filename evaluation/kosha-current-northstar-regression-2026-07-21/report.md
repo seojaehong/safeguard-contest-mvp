@@ -1,7 +1,7 @@
 # KOSHA Current North Star Regression Gate
 
-- Checked at: 2026-07-22T00:30:02+09:00
-- Source HEAD before commit: c72c7607f14879dd7f804e985e7f7c4133895d9a
+- Checked at: 2026-07-22T01:10:52+09:00
+- Source HEAD before commit: 338c6c4b13d6c90626f59205b199b31efa076df2
 - Branch: chore/recipient-foreign-live-gate-20260720
 - DB/schema/Supabase writes: none
 - Embedding generation/upload: none
@@ -32,25 +32,27 @@ Structured materialization:
 npm.cmd test -- tests\kosha-materialization-matrix.test.ts tests\grounded-generation-contract.test.ts tests\live-harness-quality-probe.test.ts --maxWorkers=1 --fileParallelism=false
 ```
 
-Result: PASS, 3 files / 50 tests, duration 6.15s.
+Result: PASS, 3 files / 50 tests, duration 4.78s.
 
 ```powershell
 npm.cmd test -- tests\exact-trusted-kosha-grounding.test.ts tests\exact-trusted-kosha-registry-wave2.test.ts tests\kosha-grounding-fail-closed.test.ts tests\kosha-current-review-run-ask.test.ts tests\kosha-guide-corpus-audit.test.ts --maxWorkers=1 --fileParallelism=false
 ```
 
-Result: PASS, 5 files / 173 tests, duration 22.76s.
+Result: PASS, 5 files / 173 tests, duration 23.26s.
 
 ```powershell
 npm.cmd test -- tests\kosha-current-live-gate.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=60000
 ```
 
-Result: PASS, 1 file / 3 tests, duration 2.41s.
+Result: PASS, 1 file / 3 tests, duration 2.40s.
 
 ```powershell
 node scripts\kosha_current_live_gate.mjs --output evaluation\kosha-current-live-gate-2026-07-20 --base-url https://www.safeclaw.kr
 ```
 
-Result: PASS, verdict `pass_current_kosha_exact_trust_and_corpus_gate`, source/live `c72c7607f14879dd7f804e985e7f7c4133895d9a`, failed checks `[]`.
+Result: PASS, verdict `pass_current_kosha_exact_trust_and_corpus_gate`, source `338c6c4b13d6c90626f59205b199b31efa076df2`, live `1d89c1a686856155cb3140e626f9907c8219373b`, failed checks `[]`.
+
+Note: the live commit is one evidence-only commit behind the source HEAD at this check. The KOSHA live runtime gate still passed against production, and this report does not claim a runtime delta from the evidence-only commits.
 
 Live KOSHA evidence at `evaluation\kosha-current-live-gate-2026-07-20\report.json` records catalog `9,920` items, technical support split `803` guidelines / `237` technical support regulations, local corpus `234` items / `7,127` chunks / `0` failures, and exact trust registry versions `D-C-13-2026`, `D-C-7-2026`, `B-E-10-2026`.
 
