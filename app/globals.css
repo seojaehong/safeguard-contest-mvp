@@ -19701,15 +19701,63 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
-/* Workspace edit mode should scroll as one page, not as a nested document shell.
-   This late scoped override protects the launch UX gate from older module bridges. */
+/* Workspace edit mode is a bounded cockpit/editor pane. Theme bridges above can
+   intentionally set generated editors to overflow: visible; this launch guard
+   wins only in /workspace editor focus so long document utilities scroll inside
+   the editor instead of extending the whole page. */
 .command-center-shell .field-workspace.field-workspace-editor-focus .workpack-shell,
 .command-center-shell.workspace-theme-day .field-workspace.field-workspace-editor-focus .workpack-shell,
 .command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .workpack-shell {
-  max-height: none;
+  max-height: calc(100svh - 92px);
   overflow-x: visible;
-  overflow-y: visible;
-  overscroll-behavior: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.command-center-shell .command-main.workspace-view-document:has(.field-workspace-editor-focus),
+.command-center-shell .workspace-step-page.workspace-document-page:has(.field-workspace-editor-focus),
+.command-center-shell .document-editor-surface:has(.field-workspace-editor-focus),
+.command-center-shell .field-workspace.field-workspace-editor-focus,
+.command-center-shell .field-workspace.field-workspace-editor-focus .workspace-canvas {
+  min-height: 0;
+  max-height: calc(100svh - 24px);
+  overflow: hidden;
+}
+
+.command-center-shell .field-workspace.field-workspace-editor-focus .document-editor,
+.command-center-shell.workspace-theme-day .field-workspace.field-workspace-editor-focus .document-editor,
+.command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .document-editor,
+.command-center-shell .field-workspace.field-workspace-editor-focus .workpack-sidebar,
+.command-center-shell.workspace-theme-day .field-workspace.field-workspace-editor-focus .workpack-sidebar,
+.command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .workpack-sidebar {
+  min-height: 0;
+  max-height: calc(100svh - 124px);
+  overflow-y: auto;
+}
+
+@media (max-width: 720px) {
+  .command-center-shell .field-workspace.field-workspace-editor-focus .workpack-shell,
+  .command-center-shell.workspace-theme-day .field-workspace.field-workspace-editor-focus .workpack-shell,
+  .command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .workpack-shell {
+    max-height: calc(100svh - 72px);
+  }
+
+  .command-center-shell .command-main.workspace-view-document:has(.field-workspace-editor-focus),
+  .command-center-shell .workspace-step-page.workspace-document-page:has(.field-workspace-editor-focus),
+  .command-center-shell .document-editor-surface:has(.field-workspace-editor-focus),
+  .command-center-shell .field-workspace.field-workspace-editor-focus,
+  .command-center-shell .field-workspace.field-workspace-editor-focus .workspace-canvas {
+    max-height: calc(100svh - 8px);
+  }
+
+  .command-center-shell .field-workspace.field-workspace-editor-focus .document-editor,
+  .command-center-shell.workspace-theme-day .field-workspace.field-workspace-editor-focus .document-editor,
+  .command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .document-editor,
+  .command-center-shell .field-workspace.field-workspace-editor-focus .workpack-sidebar,
+  .command-center-shell.workspace-theme-day .field-workspace.field-workspace-editor-focus .workpack-sidebar,
+  .command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .workpack-sidebar {
+    max-height: calc(100svh - 96px);
+  }
 }
 
 @media (max-width: 720px) {

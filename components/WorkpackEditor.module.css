@@ -1224,6 +1224,20 @@
   }
 }
 
+:global(.command-center-shell .field-workspace-editor-focus) .workspace {
+  max-height: calc(100svh - 92px);
+  overflow-x: visible;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+:global(.command-center-shell .field-workspace-editor-focus) .navigator,
+:global(.command-center-shell .field-workspace-editor-focus) .editor {
+  min-height: 0;
+  max-height: calc(100svh - 124px);
+  overflow-y: auto;
+}
+
 @media (max-width: 900px) {
   .workspace {
     grid-template-columns: minmax(0, 1fr);
@@ -1233,6 +1247,17 @@
     position: static;
     max-height: none;
     overflow: visible;
+  }
+
+  :global(.command-center-shell .field-workspace-editor-focus) .workspace {
+    max-height: calc(100svh - 72px);
+    overflow-y: auto;
+  }
+
+  :global(.command-center-shell .field-workspace-editor-focus) .navigator,
+  :global(.command-center-shell .field-workspace-editor-focus) .editor {
+    max-height: calc(100svh - 96px);
+    overflow-y: auto;
   }
 
   .mobileDocumentPicker {
