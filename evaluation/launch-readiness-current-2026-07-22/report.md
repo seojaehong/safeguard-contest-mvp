@@ -1,10 +1,10 @@
 # Launch Readiness Current Boundary
 
-Generated: 2026-07-21T15:56:31.692Z
+Generated: 2026-07-21T16:52:58.790Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source / production commit: `2aedfa44b5e33d4b254100d08d8b58cd79e0f9e1`
+Source / production commit: `96583c5ec6035032c2e804a4fa1e0a45513d145e`
 
 ## Verdict
 
@@ -17,7 +17,7 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 `scripts/launch_readiness_audit.mjs` was run against production with `SAFETYGUARD_AUDIT_DISPATCH=false`.
 
 - `/api/ask`: 200 OK
-- elapsed: 20512 ms
+- elapsed: 24062 ms
 - dispatch call: not run
 - generated documents: 11 / 11
 - scenario: `도시가스공사 열수송관 굴착공사`, workers 7
@@ -35,10 +35,11 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 
 ## Safe Claims
 
-- Live `/api/ask` can generate the expected 11-document workpack for the audited construction scenario.
-- Law.go, Gemini, KMA weather, Work24, KOSHA education, KOSHA official material, and KOSHA accident-case connections returned user-facing connected status in the live smoke.
-- Default Documents and Share cockpits are production-proven as viewport-bounded decision surfaces.
-- A safe launch demo or guided pilot can be claimed with the explicit provider-dispatch and admin-auth notices.
+- Live /api/ask can generate the expected 11-document workpack for the audited construction scenario.
+- Law.go, Gemini/OpenAI-compatible generation, KMA weather, Work24, KOSHA education, KOSHA official material, and KOSHA accident-case connections returned user-facing connected status in the live smoke.
+- Default Documents and Share cockpits are production-proven as viewport-bounded decision surfaces; selected editor raw long-form text remains a secondary drilldown.
+- KOSHA exact trust registry and live corpus status are current at the production commit.
+- A safe launch demo or guided pilot can be claimed with the explicit provider-dispatch, RLS, LLM Wiki, SIF vector, and admin-auth notices.
 
 ## Forbidden Claims
 
@@ -47,6 +48,7 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 - Provider idempotency and per-channel result persistence are production-proven.
 - SIF vector retrieval or LLM Wiki publication is production-active.
 - Live Supabase RLS tenant isolation is launch-proven.
+- All KOSHA guide rows are exact direct evidence.
 
 ## Approval-Gated Boundaries
 
@@ -61,5 +63,10 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 - Raw live smoke: `evaluation\launch-readiness-current-2026-07-22\api-connection-audit.json`
 - Final 99 gate: `evaluation\final-99-gate-current-2026-07-21\report.json`
 - North Star open gates: `evaluation\northstar-open-gates-current\report.json`
-- UI cockpit evidence: `evaluation\workspace-ia-live-f297-2026-07-22\report.json`
+- North Star live rollup: `evaluation\northstar-live-rollup-2026-07-20\report.json`
+- UI cockpit evidence: `evaluation\workspace-ia-live-e034-2026-07-22\report.json`
 - KOSHA regression: `evaluation\kosha-current-northstar-regression-2026-07-21\report.json`
+- KOSHA live gate: `evaluation\kosha-current-live-gate-2026-07-20\report.json`
+- Provider dispatch readiness: `evaluation\provider-dispatch-readiness-2026-07-21\report.json`
+- SIF embedding preflight: `evaluation\sif-embedding-gate\approval-preflight-report.json`
+- RLS / LLM Wiki preflight: `evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json`
