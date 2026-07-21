@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T19:38:31.951Z",
-  "head": "2174831b65432e6b7f98977f5efcd49a915431ac",
+  "generatedAt": "2026-07-21T19:44:28.303Z",
+  "head": "d094d9c55b278684137dd568679f53a36773b3d2",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "2174831b65432e6b7f98977f5efcd49a915431ac",
+    "commitSha": "d094d9c55b278684137dd568679f53a36773b3d2",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-2sj8pcrgm-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-r1pqouxcl-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -181,9 +181,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "2174831b65432e6b7f98977f5efcd49a915431ac",
+      "sourceCommit": "d094d9c55b278684137dd568679f53a36773b3d2",
       "sourceStatus": "exact",
-      "productionCommit": "2174831b65432e6b7f98977f5efcd49a915431ac",
+      "productionCommit": "d094d9c55b278684137dd568679f53a36773b3d2",
       "productionStatus": "matches_live"
     },
     {
@@ -205,9 +205,9 @@
     {
       "id": "kosha_exact_trust_registry",
       "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
-      "sourceCommit": "2174831b65432e6b7f98977f5efcd49a915431ac",
+      "sourceCommit": "d094d9c55b278684137dd568679f53a36773b3d2",
       "sourceStatus": "exact",
-      "productionCommit": "2174831b65432e6b7f98977f5efcd49a915431ac",
+      "productionCommit": "d094d9c55b278684137dd568679f53a36773b3d2",
       "productionStatus": "matches_live"
     },
     {
@@ -269,9 +269,9 @@
     {
       "id": "northstar_approval_runway",
       "artifact": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
-      "sourceCommit": "2174831b65432e6b7f98977f5efcd49a915431ac",
+      "sourceCommit": "d094d9c55b278684137dd568679f53a36773b3d2",
       "sourceStatus": "exact",
-      "productionCommit": "2174831b65432e6b7f98977f5efcd49a915431ac",
+      "productionCommit": "d094d9c55b278684137dd568679f53a36773b3d2",
       "productionStatus": "matches_live"
     }
   ],

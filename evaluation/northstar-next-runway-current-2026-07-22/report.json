@@ -1,15 +1,29 @@
 {
+  "schemaVersion": "safeclaw-northstar-next-runway/v2",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "41ed9626d07c60ef7b876b888bb0c8ac6dea075c",
-  "productionCommit": "41ed9626d07c60ef7b876b888bb0c8ac6dea075c",
+  "sourceHead": "d094d9c55b278684137dd568679f53a36773b3d2",
+  "productionCommit": "d094d9c55b278684137dd568679f53a36773b3d2",
+  "liveBuildInfo": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "d094d9c55b278684137dd568679f53a36773b3d2",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-r1pqouxcl-seojaehongs-projects.vercel.app",
+    "message": "ë°°í¬ ì»¤ë° ìë³ìë¥¼ íì¸íìµëë¤."
+  },
   "latestEvidenceCommitLive": true,
+  "currentHeadIsEvidenceOnlyPending": false,
+  "liveExactEvidenceCommit": "d094d9c55b278684137dd568679f53a36773b3d2",
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
     "liveRollup": "evaluation\\northstar-live-rollup-2026-07-20\\report.json",
     "final99": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
     "workspaceInformationArchitecture": "evaluation\\workspace-information-architecture-2026-07-21\\report.json",
     "hermesOpenclawRuntime": "evaluation\\hermes-openclaw-runtime-current-gate-2026-07-20\\report.json",
+    "launchReadiness": "evaluation\\launch-readiness-current-2026-07-22\\report.json",
     "rlsLlmWikiApprovalPreflight": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
     "approvalRunway": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
     "sifEmbeddingPreflight": "evaluation\\sif-embedding-gate\\approval-preflight-report.json"
@@ -23,8 +37,7 @@
     "hermes_openclaw_adapter_boundary",
     "sif_embedding_approval_preflight",
     "northstar_approval_runway",
-    "rls_llm_wiki_approval_preflight_current_source",
-    "sif_embedding_approval_preflight_current_source"
+    "rls_llm_wiki_approval_preflight_current_source"
   ],
   "noticeState": [
     {
@@ -36,21 +49,104 @@
   "approvalGated": [
     {
       "gate": "provider_dispatch_persistence",
-      "reason": "persistent idempotency and provider-result persistence are not approved or live verified"
+      "state": "approval_gated",
+      "evidencePath": "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json",
+      "readyForOperatorReview": true,
+      "currentSafetyLock": "preview_only",
+      "approvalNeeded": [
+        "approve persistent idempotency migration scope",
+        "choose per-channel child table or canonical provider_result JSONB ledger",
+        "add updated_at trigger or route-owned timestamp contract",
+        "test reservation-before-provider-call, duplicate replay, and per-channel result retention"
+      ],
+      "forbiddenUntilApproved": [
+        "real provider dispatch",
+        "PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=true",
+        "channel-level exactly-once persistence claim"
+      ]
     },
     {
       "gate": "supabase_rls_launch_isolation",
-      "reason": "live catalog and disposable tenant A/B isolation proof are not approved"
+      "state": "approval_gated",
+      "evidencePath": "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json",
+      "readyForOperatorReview": true,
+      "currentSafetyLock": "read_only_preflight",
+      "approvalNeeded": [
+        "approve authoritative Supabase project and credential provenance",
+        "run read-only live catalog capture",
+        "run disposable tenant A/B negative matrix",
+        "verify Storage object isolation and service-role route invariants"
+      ],
+      "forbiddenUntilApproved": [
+        "RLS launch isolation proven",
+        "production migration approved",
+        "service-role routes safe because table RLS exists"
+      ]
     },
     {
       "gate": "llm_wiki_publication",
-      "reason": "publication RPC/RLS/ledger approval and canary are not complete"
+      "state": "approval_gated",
+      "evidencePath": "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json",
+      "readyForOperatorReview": true,
+      "currentSafetyLock": "candidate_unpublished",
+      "approvalNeeded": [
+        "approve final DDL, RPC, grants, and append-only ledger",
+        "approve graph pointer and publication threat model",
+        "run isolated publication canary with atomicity, idempotency, rollback, and leak tests"
+      ],
+      "forbiddenUntilApproved": [
+        "LLM Wiki publication available",
+        "LLM Wiki publishes itself",
+        "generated wiki candidates published without human confirmation and RPC evidence"
+      ]
     },
     {
       "gate": "sif_embedding_runtime",
-      "reason": "migration, embedding cost, upload, and vector runtime approval remain separate"
+      "state": "approval_gated",
+      "evidencePath": "evaluation/sif-embedding-gate/approval-preflight-report.json",
+      "readyForOperatorReview": true,
+      "currentSafetyLock": "approval_held_no_vectors",
+      "approvalNeeded": [
+        "approve SIF-only embedding migration",
+        "approve embedding cost and upload",
+        "run post-upload vector runtime verification",
+        "keep SAFETY_REFERENCE_VECTOR_SEARCH disabled until upload is verified"
+      ],
+      "forbiddenUntilApproved": [
+        "SIF vector retrieval production-active",
+        "embedding/upload completed",
+        "broader corpus exact-publishing or DB persistence claim"
+      ]
     }
   ],
+  "launchReadiness": {
+    "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
+    "safeLaunchDemoClaimAllowed": true,
+    "guidedPilotClaimAllowed": true,
+    "fullyAutomatedLaunchClaimAllowed": false,
+    "selfServeSaasLaunchClaimAllowed": false,
+    "providerDispatchLiveClaimed": false,
+    "apiAskOk": true,
+    "dispatchCalled": false,
+    "documentCoverage": {
+      "expectedCount": 11,
+      "presentCount": 11,
+      "missing": [],
+      "present": [
+        "workpackSummaryDraft",
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ]
+    }
+  },
   "uiInterpretation": {
     "routeSplitAloneAcceptedAsFix": false,
     "acceptedStructure": "step split plus first-viewport cockpit plus bounded drilldown/detail panes",
@@ -58,14 +154,39 @@
     "selectedEditorDetail": "first risk-row header and hazard field land in the first viewport; raw long-form textarea remains secondary drilldown",
     "shareDesktop": "raw geometry is two-column; perceived full-workbench composition remains a follow-up only if reproduced",
     "shareMobile": "current compact cockpit remains first-viewport bounded in current evidence",
-    "hermesOpenclaw": "adapter and fail-closed auth boundary current-proven on source HEAD; live production unauthenticated broker smoke still returns AUTH_REQUIRED before engine execution"
+    "hermesOpenclaw": "adapter and fail-closed auth boundary current-proven; live unauthenticated broker smoke returns AUTH_REQUIRED before engine execution"
+  },
+  "hermesOpenclaw": {
+    "verdict": "adapter_boundary_pass_live_execution_not_claimed",
+    "focusedTests": {
+      "command": "npm.cmd test -- tests\\engine-adapter.test.ts tests\\hermes-engine-adapter.test.ts tests\\openclaw-hermes-route.test.ts tests\\openclaw-chat.test.ts tests\\openclaw-broker-ui-context.test.ts tests\\remote-hermes-contract.test.ts tests\\remote-hermes-runtime.test.ts tests\\remote-hermes-route.test.ts tests\\remote-hermes-https-transport.test.ts tests\\remote-hermes-service-auth.test.ts tests\\remote-engine-protocol.test.ts tests\\engine-runtime-readiness-policy.test.ts tests\\ai-provider-policy.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000",
+      "testFilesPassed": 13,
+      "testsPassed": 289,
+      "durationSeconds": 15.71,
+      "status": "pass"
+    },
+    "liveUnauthenticatedBrokerSmoke": {
+      "endpoint": "https://www.safeclaw.kr/api/agent/chat",
+      "httpStatus": 401,
+      "code": "AUTH_REQUIRED",
+      "engineExecutionReached": false,
+      "status": "pass"
+    },
+    "liveExecutionClaimed": false
+  },
+  "sifEmbeddingRuntime": {
+    "approvalHeld": true,
+    "dbMutationPerformed": false,
+    "embeddingGenerated": false,
+    "uploaded": false,
+    "failedCheckIds": []
   },
   "nextSafeWorkWithoutApproval": [
-    "refresh source/live exact evidence when production marker advances",
-    "keep UI follow-up scoped to drilldown readability or perceived desktop workbench composition",
-    "keep Hermes/OpenClaw as a bounded external runtime/adapter path until tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
+    "refresh source/live exact evidence when production marker advances to the evidence-only head",
+    "keep UI follow-up scoped to selected-editor/detail readability or reproduced desktop share perception issues",
+    "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
     "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
-    "do not claim full launch completion while final-99 remains pass_with_notice"
+    "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held"
   ],
   "providerLiveDispatchClaimed": false,
   "dbMutationPerformed": false
