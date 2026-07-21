@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-21T16:31:28.154Z",
-  "head": "4fbc4183f6a9989e7e2c139f57126bc3873793e6",
+  "generatedAt": "2026-07-21T16:34:27.105Z",
+  "head": "0aa7c013427af80346e31436904a66cc90d2067f",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "4fbc4183f6a9989e7e2c139f57126bc3873793e6",
+    "commitSha": "0aa7c013427af80346e31436904a66cc90d2067f",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-4sxo634ag-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-193thkqcj-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -182,9 +182,9 @@
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
       "sourceCommit": "4fbc4183f6a9989e7e2c139f57126bc3873793e6",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "4fbc4183f6a9989e7e2c139f57126bc3873793e6",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -214,15 +214,15 @@
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
       "sourceCommit": "4fbc4183f6a9989e7e2c139f57126bc3873793e6",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },
     {
       "id": "sif_embedding_preflight",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "sourceCommit": "76092bbab280aa0f5da2afcb466c72f7a9a9fb25",
-      "sourceStatus": "ancestor",
+      "sourceCommit": "0aa7c013427af80346e31436904a66cc90d2067f",
+      "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
     },
