@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-21T16:34:27.105Z
-Source HEAD at generation: 0aa7c013427af80346e31436904a66cc90d2067f
-Live commit at generation: 0aa7c013427af80346e31436904a66cc90d2067f
+Generated at: 2026-07-21T16:44:05.225Z
+Source HEAD at generation: e034cc73c9b34dce49eabf4e026f5b41a504845e
+Live commit at generation: e034cc73c9b34dce49eabf4e026f5b41a504845e
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -48,10 +48,10 @@ Overall: `northstar_open_approval_gated`
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
 | kosha_exact_trust_registry | ancestor | ancestor_of_head | evaluation\kosha-current-live-gate-2026-07-20\report.json |
 | rls_llm_wiki_approval_preflight | ancestor | missing | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
-| sif_embedding_preflight | exact | missing | evaluation\sif-embedding-gate\approval-preflight-report.json |
+| sif_embedding_preflight | ancestor | missing | evaluation\sif-embedding-gate\approval-preflight-report.json |
 | live_critical_surface | ancestor | ancestor_of_head | evaluation\live-critical-surface-current-2026-07-20-rerun\report.json |
 | mobile_p0_workspace | ancestor | ancestor_of_head | evaluation\mobile-p0-workspace-gate-2026-07-20\report.json |
-| workspace_docs_share_geometry | ancestor | ancestor_of_head | evaluation\workspace-docs-share-production-gate-2026-07-20\current-geometry.json |
+| workspace_docs_share_geometry | exact | matches_live | evaluation\workspace-docs-share-production-gate-2026-07-20\current-geometry.json |
 | dispatch_standalone_cockpit | ancestor | ancestor_of_head | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
 | provider_dispatch_persistence | ancestor | ancestor_of_head | evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json |
 | northstar_approval_runway | ancestor | ancestor_of_head | evaluation\northstar-approval-runway-2026-07-21\report.json |
@@ -66,4 +66,4 @@ Overall: `northstar_open_approval_gated`
 - provider_dispatch_persistence: Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred.
 - supabase_rls_launch_isolation: Read-only RLS approval preflight passed at source SHA 4fbc4183f6a9989e7e2c139f57126bc3873793e6, but live RLS catalog and tenant A/B isolation are not proven.
 - llm_wiki_publication: Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 4fbc4183f6a9989e7e2c139f57126bc3873793e6.
-- sif_embedding_runtime: SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 76092bbab280aa0f5da2afcb466c72f7a9a9fb25.
+- sif_embedding_runtime: SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 0aa7c013427af80346e31436904a66cc90d2067f.
