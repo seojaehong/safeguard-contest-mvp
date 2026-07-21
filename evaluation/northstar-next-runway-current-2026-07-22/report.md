@@ -4,15 +4,15 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `08e19842cd791440eb1ad55b4aa0ddac790f33e3`
+Source HEAD: `7b36e4be67a10c644a9b659d6a645b8f77bb1b12`
 
-Production `/api/build-info`: `08e19842cd791440eb1ad55b4aa0ddac790f33e3`
+Production `/api/build-info`: `7b36e4be67a10c644a9b659d6a645b8f77bb1b12`
 
 Latest evidence commit live: `true`
 
 Live-exact evidence commit: `08e19842cd791440eb1ad55b4aa0ddac790f33e3`
 
-Live rollup matches production: `true`
+Live rollup matches production: `false`
 
 Note: source HEAD and production marker match for this artifact.
 
