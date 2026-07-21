@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-21T20:06:52+09:00",
+  "checkedAt": "2026-07-21T21:20:23+09:00",
   "verdict": {
     "workspaceDocumentsDefaultCockpit": "PASS_LIVE_DEFAULT_HEIGHT_CLOSED",
     "workspaceSelectedEditorDetail": "PASS_FIELD_LEVEL_LANDING_ONLY",
@@ -12,8 +12,9 @@
   "currentDeploymentAndStructureNote": {
     "defaultWorkspaceIaArtifact": "evaluation/workspace-ia-live-293-2026-07-21/report.json",
     "selectedEditorDetailArtifact": "evaluation/workspace-editor-detail-landing-2026-07-21/report.json",
-    "selectedEditorLandingLiveMarker": "d66536560659571afba9671a63644d5610ab30d2",
-    "latestReportRefreshSourceMarkerBeforeThisLedgerUpdate": "86169341e01a1090054d94f0e847c3f8cd941280",
+    "latestRefreshedLiveGeometryMarker": "b0641a19b7a8c9d767744218635df5ab55df7e8b",
+    "selectedEditorLandingLiveMarker": "b0641a19b7a8c9d767744218635df5ab55df7e8b",
+    "latestReportRefreshSourceMarkerBeforeThisLedgerUpdate": "b0641a19b7a8c9d767744218635df5ab55df7e8b",
     "defaultDocumentsAndShareCockpitHeightClosed": true,
     "selectedEditorFieldLevelLandingClosed": true,
     "selectedEditorFullRawTextareaShortClaimed": false,
@@ -26,6 +27,73 @@
       "bounded panes, accordions, drawers, or drilldown routes for long content",
       "measure primary CTA/status/result bottom, selected editor/panel y-position, default-open details count, desktop column split, horizontal overflow, and sticky overlap"
     ]
+  },
+  "latestLiveGeometryRefresh": {
+    "checkedAt": "2026-07-21T12:20:23.522Z",
+    "artifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
+    "productionMarker": "b0641a19b7a8c9d767744218635df5ab55df7e8b",
+    "defaultDocumentsCockpitClosed": true,
+    "selectedEditorFieldLevelLandingClosed": true,
+    "selectedEditorFullRawTextareaShortClaimed": false,
+    "shareDesktopLiteralMobileStackReproduced": false,
+    "documentsDesktopShort1440x723": {
+      "bodyHeight": 723,
+      "viewportHeight": 723,
+      "documentWorkbenchBottom": 710,
+      "visibleDocumentPreviews": 0,
+      "horizontalOverflow": false,
+      "outside": 0
+    },
+    "documentsMobile390x844": {
+      "bodyHeight": 844,
+      "viewportHeight": 844,
+      "documentWorkbenchBottom": 786,
+      "visibleDocumentPreviews": 0,
+      "horizontalOverflow": false,
+      "outside": 0
+    },
+    "selectedEditorDesktopShort1440x723": {
+      "bodyHeight": 882,
+      "viewportHeight": 723,
+      "documentEditorBottom": 695,
+      "firstRiskRowHeaderTop": 522,
+      "firstRiskRowHeaderBottom": 579,
+      "firstRiskHazardFieldTop": 615,
+      "firstRiskHazardFieldBottom": 675,
+      "documentTextareaTop": 1094,
+      "documentTextareaBottom": 1267
+    },
+    "selectedEditorMobile390x844": {
+      "bodyHeight": 1067,
+      "viewportHeight": 844,
+      "documentEditorBottom": 818,
+      "firstRiskRowHeaderTop": 526,
+      "firstRiskRowHeaderBottom": 583,
+      "firstRiskHazardFieldTop": 607,
+      "firstRiskHazardFieldBottom": 657,
+      "documentTextareaTop": 987,
+      "documentTextareaBottom": 1160
+    },
+    "shareDesktopShort1440x723": {
+      "bodyHeight": 723,
+      "viewportHeight": 723,
+      "shareFormWidth": 636,
+      "sharePreviewWidth": 520,
+      "previewBottom": 571,
+      "primaryCtaBottom": 389,
+      "horizontalOverflow": false,
+      "outside": 0
+    },
+    "shareMobile390x844": {
+      "bodyHeight": 844,
+      "viewportHeight": 844,
+      "shareRootBottom": 810,
+      "previewBottom": 683,
+      "primaryCtaBottom": 742,
+      "horizontalOverflow": false,
+      "outside": 0
+    },
+    "interpretation": "Default Documents and Share cockpits are live-closed for raw height/overflow. Selected editor/detail has field-level landing, while full raw textarea remains secondary drilldown. Share desktop is raw two-column, so any remaining complaint should be tested as perceived full-workbench composition rather than literal mobile stacking."
   },
   "workspaceIaLiveF67Refinement": {
     "checkedAt": "2026-07-21T14:26:21.1708333+09:00",

@@ -1,6 +1,6 @@
 # UI Follow-Up Ledger
 
-Checked at: 2026-07-21 20:06 KST
+Checked at: 2026-07-21 21:20 KST
 
 ## Current Split Verdict
 
@@ -18,10 +18,17 @@ Latest current evidence represented by this ledger:
 
 - Default workspace IA split artifact: `evaluation/workspace-ia-live-293-2026-07-21/report.json`
 - Selected editor field-level landing artifact: `evaluation/workspace-editor-detail-landing-2026-07-21/report.json`
-- Latest checked live marker for selected editor landing: `d66536560659571afba9671a63644d5610ab30d2`
-- Latest report-refresh source marker before this ledger update: `86169341e01a1090054d94f0e847c3f8cd941280`
+- Latest refreshed live geometry marker: `b0641a19b7a8c9d767744218635df5ab55df7e8b`
+- Latest checked live marker for selected editor landing: `b0641a19b7a8c9d767744218635df5ab55df7e8b`
+- Latest report-refresh source marker before this ledger update: `b0641a19b7a8c9d767744218635df5ab55df7e8b`
 
 Interpretation: the user's refined reading is correct. The default Documents cockpit and Share cockpit are no longer best described as stale or raw long-page failures. The remaining Documents complaint belongs to selected editor/detail depth: the first meaningful risk-row field is now visible, while the full raw textarea is intentionally below the first work surface. The remaining Share complaint, if reproduced, should be tested as perceived desktop workbench composition rather than as a literal one-column/mobile-stack geometry failure.
+
+Latest live geometry refresh at `b0641a19b7a8c9d767744218635df5ab55df7e8b` keeps that split:
+
+- `/workspace` Documents default cockpit: desktop-short `723/723`, mobile `844/844`, workbench bottoms `710/786`, `visibleDocumentPreviews=0`, overflow `0`.
+- `/workspace` selected editor/detail: field-level landing remains green, but raw textarea remains secondary below the first viewport: desktop-short risk row header `522-579`, hazard field `615-675`, raw textarea `1094-1267`; mobile risk row header `526-583`, hazard field `607-657`, raw textarea `987-1160`.
+- `/workspace` Share: desktop is raw two-column geometry, not a literal mobile stack: desktop-short form/preview widths `636/520`, CTA bottom `389`, preview bottom `571`; mobile is compact first-viewport flow with preview/CTA bottoms `683/742`.
 
 The remaining structural contract is still:
 
