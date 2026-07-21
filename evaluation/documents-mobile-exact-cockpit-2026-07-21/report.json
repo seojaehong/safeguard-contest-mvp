@@ -1,0 +1,99 @@
+{
+  "verdict": "PASS_LOCAL_PRODUCTION_CURRENT_SOURCE",
+  "productCommit": "625d839a404ac2daeec495b7aff47d49303d212d",
+  "productionLiveClaimed": false,
+  "providerDispatchLiveClaimed": false,
+  "routeSplitAloneAcceptedAsFix": false,
+  "localBuildInfo": {
+    "commitSha": "625d839a404ac2daeec495b7aff47d49303d212d",
+    "branch": "chore/recipient-foreign-live-gate-20260720",
+    "environment": "production",
+    "deploymentUrl": "local-3052"
+  },
+  "mobile390Day": {
+    "previousLive": {
+      "documentsPageHeight": 980,
+      "documentsViewportHeight": 844,
+      "documentsHeightRatio": 1.16,
+      "editorPageHeight": 1131,
+      "editorViewportHeight": 844,
+      "editorHeightRatio": 1.34,
+      "sharePageHeight": 844,
+      "shareViewportHeight": 844,
+      "shareHeightRatio": 1
+    },
+    "currentSource": {
+      "documentsPageHeight": 844,
+      "documentsViewportHeight": 844,
+      "documentsHeightRatio": 1,
+      "documentsHorizontalOverflow": false,
+      "documentsOutsideViewport": 0,
+      "documentWorkbenchTop": 318,
+      "documentWorkbenchBottom": 786,
+      "documentWorkbenchHeight": 492,
+      "documentDeepReviewOpen": false,
+      "visibleDocumentPreviews": 0,
+      "editorPageHeight": 1067,
+      "editorViewportHeight": 844,
+      "editorHeightRatio": 1.26,
+      "editorHorizontalOverflow": false,
+      "editorOutsideViewport": 0,
+      "sharePageHeight": 844,
+      "shareViewportHeight": 844,
+      "shareHeightRatio": 1,
+      "shareHorizontalOverflow": false,
+      "shareOutsideViewport": 0
+    }
+  },
+  "desktopSurfacesNotTargeted": {
+    "desktopShortDocuments": {
+      "pageHeight": 876,
+      "viewportHeight": 723,
+      "heightRatio": 1.21
+    },
+    "desktopDocuments": {
+      "pageHeight": 1053,
+      "viewportHeight": 900,
+      "heightRatio": 1.17
+    },
+    "desktopShare": {
+      "pageHeight": 946,
+      "viewportHeight": 900,
+      "heightRatio": 1.05
+    }
+  },
+  "checks": [
+    {
+      "command": "npm.cmd test -- tests\\workspace-layout-regression.test.ts -t \"keeps the generated documents review cockpit before full editor drilldown\" --maxWorkers=1 --fileParallelism=false --hookTimeout=180000",
+      "result": "PASS",
+      "files": 1,
+      "testsPassed": 1,
+      "testsSkipped": 28
+    },
+    {
+      "command": "npm.cmd test -- tests\\workspace-layout-regression.test.ts -t \"keeps the generated document edit flow inside the workspace design system\" --maxWorkers=1 --fileParallelism=false --hookTimeout=180000",
+      "result": "PASS",
+      "files": 1,
+      "testsPassed": 1,
+      "testsSkipped": 27
+    },
+    {
+      "command": "npm.cmd run build",
+      "result": "PASS",
+      "staticPages": 28
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    },
+    {
+      "command": "SAFECLAW_BASE_URL=http://127.0.0.1:3052 node evaluation\\workspace-docs-share-production-gate-2026-07-20\\run-current-geometry-probe.mjs",
+      "result": "PASS"
+    }
+  ],
+  "remainingDebt": [
+    "Live production verification is pending until /api/build-info reaches the product commit or a later deployed commit.",
+    "Full editor drilldown remains scrollable by design.",
+    "Provider live dispatch remains outside this gate."
+  ]
+}
