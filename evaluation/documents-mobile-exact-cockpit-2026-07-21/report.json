@@ -1,7 +1,9 @@
 {
-  "verdict": "PASS_LOCAL_PRODUCTION_CURRENT_SOURCE",
+  "verdict": "PASS_LIVE_PRODUCTION",
   "productCommit": "625d839a404ac2daeec495b7aff47d49303d212d",
-  "productionLiveClaimed": false,
+  "liveProductionCommit": "3670420e88ee3130073c38721d120521e6fe8894",
+  "evidenceCommitAtVerification": "3670420e88ee3130073c38721d120521e6fe8894",
+  "productionLiveClaimed": true,
   "providerDispatchLiveClaimed": false,
   "routeSplitAloneAcceptedAsFix": false,
   "localBuildInfo": {
@@ -9,6 +11,12 @@
     "branch": "chore/recipient-foreign-live-gate-20260720",
     "environment": "production",
     "deploymentUrl": "local-3052"
+  },
+  "liveBuildInfo": {
+    "commitSha": "3670420e88ee3130073c38721d120521e6fe8894",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-fr74ipxd9-seojaehongs-projects.vercel.app"
   },
   "mobile390Day": {
     "previousLive": {
@@ -22,13 +30,13 @@
       "shareViewportHeight": 844,
       "shareHeightRatio": 1
     },
-    "currentSource": {
+    "liveProduction": {
       "documentsPageHeight": 844,
       "documentsViewportHeight": 844,
       "documentsHeightRatio": 1,
       "documentsHorizontalOverflow": false,
       "documentsOutsideViewport": 0,
-      "documentWorkbenchTop": 318,
+      "documentWorkbenchTop": 294,
       "documentWorkbenchBottom": 786,
       "documentWorkbenchHeight": 492,
       "documentDeepReviewOpen": false,
@@ -87,12 +95,11 @@
       "result": "PASS"
     },
     {
-      "command": "SAFECLAW_BASE_URL=http://127.0.0.1:3052 node evaluation\\workspace-docs-share-production-gate-2026-07-20\\run-current-geometry-probe.mjs",
+      "command": "node evaluation\\workspace-docs-share-production-gate-2026-07-20\\run-current-geometry-probe.mjs",
       "result": "PASS"
     }
   ],
   "remainingDebt": [
-    "Live production verification is pending until /api/build-info reaches the product commit or a later deployed commit.",
     "Full editor drilldown remains scrollable by design.",
     "Provider live dispatch remains outside this gate."
   ]
