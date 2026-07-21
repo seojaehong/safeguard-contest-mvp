@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-21T00:17:42.260Z
-Source SHA: `a0fe5f33e014fd5e75899560c81ac08582b3d4dd`
+Generated at: 2026-07-21T01:06:10.364Z
+Source SHA: `14a67c5577d7326816180be71461c365c640e77c`
 Overall: `open`
 
 ## Gate Matrix
@@ -10,7 +10,7 @@ Overall: `open`
 | --- | --- | --- | --- |
 | final_99_gate | notice | evaluation\final-99-gate-current-2026-07-21\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate-current-2026-07-21\notice-carry.json. |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json | Live harness probe passed with zero failed contracts. |
-| ui_documents_share_cockpit | proven | evaluation\documents-complete-cockpits-live-2026-07-21\report.json | Production evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, staged Share rail, selected-summary, preview, primary CTA, and collapsed mobile configuration stack. It does not claim provider live dispatch or production live Share rail geometry. |
+| ui_documents_share_cockpit | proven | evaluation\share-mobile-stage-rail-collapse-2026-07-21\report.json | Production evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, and provider-result summary inside the first viewport. It does not claim provider live dispatch. |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json | Production /dispatch seeded desktop and sample shell routes are no longer mobile-stacked: seeded pageHeight 1116 (1.24x), sample panels 635px/413px in distinct desktop regions, overflow false/outside 0. |
 | share_result_fixture_cockpit | proven | evaluation\share-result-drilldown-2026-07-21\report.json | Generated provider-result fixture proof is bounded: desktop page 900/900, result panel 606px with 2 x-ranges, mobile summary/preview/CTA/result inside 844px, closed summary shows channel status, dispatch POST count 1, provider live dispatch unclaimed. |
 | supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Read-only RLS approval preflight passed at source SHA cbb134c52185aab4e0ac3f9d648eee82aee2634f, but live RLS catalog and tenant A/B isolation are not proven. |
@@ -39,8 +39,7 @@ Overall: `open`
 
 - final_99_gate: Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment.
 - ui_documents_share_cockpit: Keep the production live geometry recorded for the 12-document cockpit slice; do not expand it into a full 12-document field-first authoring claim.
-- ui_documents_share_cockpit: Promote the Share staged rail to production evidence only after build-info reaches the staged-rail commit and live geometry is probed.
-- ui_documents_share_cockpit: Keep /share generated-result and mobile stepper improvements as separate gates when user-visible sessions reproduce the complaint.
+- ui_documents_share_cockpit: Keep /share generated-result and exact one-viewport mobile Share improvements as separate gates when user-visible sessions reproduce the complaint.
 - dispatch_standalone_cockpit: Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved.
 - share_result_fixture_cockpit: Keep real provider dispatch gated until persistent idempotency and provider-result persistence are approved and live verified.
 - supabase_rls_launch_isolation: Approve authoritative project and credential provenance.

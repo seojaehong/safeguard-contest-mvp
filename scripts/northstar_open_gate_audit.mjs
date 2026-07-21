@@ -44,6 +44,7 @@ const EVIDENCE_PATHS = Object.freeze({
   shareDesktopComposition: path.join("evaluation", "share-desktop-composition-2026-07-21", "report.json"),
   shareMobileFullFlow: path.join("evaluation", "share-mobile-full-flow-2026-07-21", "report.json"),
   shareStagedFlowRail: path.join("evaluation", "share-staged-flow-rail-2026-07-21", "report.json"),
+  shareMobileStageRailCollapse: path.join("evaluation", "share-mobile-stage-rail-collapse-2026-07-21", "report.json"),
   shareResultDrilldown: path.join("evaluation", "share-result-drilldown-2026-07-21", "report.json"),
   dispatchStandalone: path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"),
   koshaCurrentNorthstarRegression: path.join("evaluation", "kosha-current-northstar-regression-2026-07-21", "report.json"),
@@ -536,6 +537,7 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const shareDesktopPath = EVIDENCE_PATHS.shareDesktopComposition;
   const sharePath = EVIDENCE_PATHS.shareMobileFullFlow;
   const shareStageRailPath = EVIDENCE_PATHS.shareStagedFlowRail;
+  const shareMobileStageRailCollapsePath = EVIDENCE_PATHS.shareMobileStageRailCollapse;
   const internalPane = readJsonFile(rootDir, internalPanePath);
   const paneContext = readJsonFile(rootDir, paneContextPath);
   const drilldown = readJsonFile(rootDir, drilldownPath);
@@ -551,15 +553,16 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const shareDesktop = readJsonFile(rootDir, shareDesktopPath);
   const share = readJsonFile(rootDir, sharePath);
   const shareStageRail = readJsonFile(rootDir, shareStageRailPath);
+  const shareMobileStageRailCollapse = readJsonFile(rootDir, shareMobileStageRailCollapsePath);
 
-  if (!isRecord(internalPane) || !isRecord(paneContext) || !isRecord(drilldown) || !isRecord(innerPaneDepth) || !isRecord(fieldFirst) || !isRecord(riskRowCockpit) || !isRecord(tbmCockpit) || !isRecord(firstViewSplit) || !isRecord(educationCockpit) || !isRecord(emergencyCockpit) || !isRecord(completeCockpits) || !isRecord(completeCockpitsLive) || !isRecord(shareDesktop) || !isRecord(share) || !isRecord(shareStageRail)) {
+  if (!isRecord(internalPane) || !isRecord(paneContext) || !isRecord(drilldown) || !isRecord(innerPaneDepth) || !isRecord(fieldFirst) || !isRecord(riskRowCockpit) || !isRecord(tbmCockpit) || !isRecord(firstViewSplit) || !isRecord(educationCockpit) || !isRecord(emergencyCockpit) || !isRecord(completeCockpits) || !isRecord(completeCockpitsLive) || !isRecord(shareDesktop) || !isRecord(share) || !isRecord(shareStageRail) || !isRecord(shareMobileStageRailCollapse)) {
     return gateResult({
       id: "ui_documents_share_cockpit",
       label: "Documents and Share cockpit UI",
       state: "missing",
-      evidencePath: !isRecord(internalPane) ? internalPanePath : !isRecord(paneContext) ? paneContextPath : !isRecord(drilldown) ? drilldownPath : !isRecord(innerPaneDepth) ? innerPaneDepthPath : !isRecord(fieldFirst) ? fieldFirstPath : !isRecord(riskRowCockpit) ? riskRowCockpitPath : !isRecord(tbmCockpit) ? tbmCockpitPath : !isRecord(firstViewSplit) ? firstViewSplitPath : !isRecord(educationCockpit) ? educationCockpitPath : !isRecord(emergencyCockpit) ? emergencyCockpitPath : !isRecord(completeCockpits) ? completeCockpitsPath : !isRecord(completeCockpitsLive) ? completeCockpitsLivePath : !isRecord(shareDesktop) ? shareDesktopPath : !isRecord(share) ? sharePath : shareStageRailPath,
+      evidencePath: !isRecord(internalPane) ? internalPanePath : !isRecord(paneContext) ? paneContextPath : !isRecord(drilldown) ? drilldownPath : !isRecord(innerPaneDepth) ? innerPaneDepthPath : !isRecord(fieldFirst) ? fieldFirstPath : !isRecord(riskRowCockpit) ? riskRowCockpitPath : !isRecord(tbmCockpit) ? tbmCockpitPath : !isRecord(firstViewSplit) ? firstViewSplitPath : !isRecord(educationCockpit) ? educationCockpitPath : !isRecord(emergencyCockpit) ? emergencyCockpitPath : !isRecord(completeCockpits) ? completeCockpitsPath : !isRecord(completeCockpitsLive) ? completeCockpitsLivePath : !isRecord(shareDesktop) ? shareDesktopPath : !isRecord(share) ? sharePath : !isRecord(shareStageRail) ? shareStageRailPath : shareMobileStageRailCollapsePath,
       detail: "Documents/share cockpit evidence is missing or invalid.",
-      nextActions: ["Regenerate documents mobile internal-pane, pane-context, drilldown-depth, inner-pane-depth, field-first-affordance, risk-row/TBM/first-view/education/emergency/complete cockpit, live complete cockpit, share desktop/mobile, and share staged-flow evidence."],
+      nextActions: ["Regenerate documents mobile internal-pane, pane-context, drilldown-depth, inner-pane-depth, field-first-affordance, risk-row/TBM/first-view/education/emergency/complete cockpit, live complete cockpit, share desktop/mobile, share staged-flow, and live mobile share boundary evidence."],
     });
   }
 
@@ -619,6 +622,21 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     ? shareStageGeometry.standaloneDispatchDesktop1440x900
     : {};
   const shareStageSource = isRecord(shareStageRail.source) ? shareStageRail.source : {};
+  const shareMobileBoundaryBuild = isRecord(shareMobileStageRailCollapse.liveBuildInfo)
+    ? shareMobileStageRailCollapse.liveBuildInfo
+    : {};
+  const shareMobileBoundaryMetrics = isRecord(shareMobileStageRailCollapse.currentSourceMetrics)
+    ? shareMobileStageRailCollapse.currentSourceMetrics
+    : {};
+  const shareMobileBoundaryMobileDay = isRecord(shareMobileBoundaryMetrics.mobile390Day)
+    ? shareMobileBoundaryMetrics.mobile390Day
+    : {};
+  const shareMobileBoundaryDesktopDay = isRecord(shareMobileBoundaryMetrics.desktopDay)
+    ? shareMobileBoundaryMetrics.desktopDay
+    : {};
+  const shareMobileBoundaryGeneratedMobile = isRecord(shareMobileBoundaryMetrics.generatedResultMobileFixture)
+    ? shareMobileBoundaryMetrics.generatedResultMobileFixture
+    : {};
   const shareMobile = isRecord(share.mobile390x844Day)
     ? share.mobile390x844Day
     : isRecord(share.mobile390x844)
@@ -651,6 +669,10 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const completeCockpitsSourceCurrent = isGitAncestor(rootDir, completeCockpitsSourceSha);
   const shareStageSourceSha = readString(shareStageSource.productCommit);
   const shareStageSourceCurrent = isGitAncestor(rootDir, shareStageSourceSha);
+  const shareMobileBoundaryProductSha = readString(shareMobileStageRailCollapse.productCommit);
+  const shareMobileBoundaryEvidenceSha = readString(shareMobileStageRailCollapse.evidenceCommit);
+  const shareMobileBoundaryProductCurrent = isGitAncestor(rootDir, shareMobileBoundaryProductSha);
+  const shareMobileBoundaryEvidenceCurrent = isGitAncestor(rootDir, shareMobileBoundaryEvidenceSha);
   const fieldFirstMobileShellHeight = readFirstNumber(fieldFirstMobile, [
     "workpackShellClientHeight",
     "workpackShellHeight",
@@ -928,19 +950,47 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     && readNumber(shareStageDispatch.primaryBottom) <= 900
     && readNumber(shareStageDispatch.previewBottom) !== null
     && readNumber(shareStageDispatch.previewBottom) <= 900
-    && readNumber(shareStageDispatch.horizontalOverflow) === 0;
+    && readNumber(shareStageDispatch.horizontalOverflow) === 0
+    && readString(shareMobileStageRailCollapse.verdict) === "PASS_LIVE_PRODUCTION"
+    && readBoolean(shareMobileStageRailCollapse.productionLiveClaimed) === true
+    && readBoolean(shareMobileStageRailCollapse.providerDispatchLiveClaimed) === false
+    && readBoolean(shareMobileStageRailCollapse.routeSplitAloneAcceptedAsFix) === false
+    && shareMobileBoundaryProductCurrent
+    && shareMobileBoundaryEvidenceCurrent
+    && readString(shareMobileBoundaryBuild.commitSha) === shareMobileBoundaryEvidenceSha
+    && readString(shareMobileBoundaryBuild.branch) === "master"
+    && readString(shareMobileBoundaryBuild.environment) === "production"
+    && readNumber(shareMobileBoundaryMobileDay.pageHeight) !== null
+    && readNumber(shareMobileBoundaryMobileDay.viewportHeight) === 844
+    && readNumber(shareMobileBoundaryMobileDay.pageHeight) <= 844 * 1.2
+    && readNumber(shareMobileBoundaryMobileDay.summaryBottom) <= 844
+    && readNumber(shareMobileBoundaryMobileDay.previewBottom) <= 844
+    && readNumber(shareMobileBoundaryMobileDay.primaryBottom) <= 844
+    && readNumber(shareMobileBoundaryMobileDay.configToggleBottom) <= 844
+    && readString(shareMobileBoundaryMobileDay.stageRailDisplay) === "none"
+    && Array.isArray(shareMobileBoundaryMobileDay.configCardDisplays)
+    && shareMobileBoundaryMobileDay.configCardDisplays.length === 3
+    && shareMobileBoundaryMobileDay.configCardDisplays.every((display) => display === "none")
+    && readNumber(shareMobileBoundaryMobileDay.horizontalOverflow) === 0
+    && readString(shareMobileBoundaryDesktopDay.stageRailDisplay) === "grid"
+    && readNumber(shareMobileBoundaryDesktopDay.stageColumns) === 4
+    && readNumber(shareMobileBoundaryDesktopDay.previewBottom) <= 900
+    && readNumber(shareMobileBoundaryDesktopDay.primaryBottom) <= 900
+    && readNumber(shareMobileBoundaryDesktopDay.horizontalOverflow) === 0
+    && readNumber(shareMobileBoundaryGeneratedMobile.resultSummaryBottom) <= 844
+    && readBoolean(shareMobileBoundaryGeneratedMobile.resultClosedByDefault) === true
+    && readNumber(shareMobileBoundaryGeneratedMobile.horizontalOverflow) === 0;
 
   if (documentsPass && sharePass) {
     return gateResult({
       id: "ui_documents_share_cockpit",
       label: "Documents and Share cockpit UI",
       state: "proven",
-      evidencePath: completeCockpitsLivePath,
-      detail: "Production evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, staged Share rail, selected-summary, preview, primary CTA, and collapsed mobile configuration stack. It does not claim provider live dispatch or production live Share rail geometry.",
+      evidencePath: shareMobileStageRailCollapsePath,
+      detail: "Production evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, and provider-result summary inside the first viewport. It does not claim provider live dispatch.",
       nextActions: [
         "Keep the production live geometry recorded for the 12-document cockpit slice; do not expand it into a full 12-document field-first authoring claim.",
-        "Promote the Share staged rail to production evidence only after build-info reaches the staged-rail commit and live geometry is probed.",
-        "Keep /share generated-result and mobile stepper improvements as separate gates when user-visible sessions reproduce the complaint.",
+        "Keep /share generated-result and exact one-viewport mobile Share improvements as separate gates when user-visible sessions reproduce the complaint.",
       ],
     });
   }

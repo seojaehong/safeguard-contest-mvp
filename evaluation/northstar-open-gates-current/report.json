@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-21T00:17:42.260Z",
-  "sourceSha": "a0fe5f33e014fd5e75899560c81ac08582b3d4dd",
+  "generatedAt": "2026-07-21T01:06:10.364Z",
+  "sourceSha": "14a67c5577d7326816180be71461c365c640e77c",
   "overall": "open",
   "gates": [
     {
@@ -26,12 +26,11 @@
       "id": "ui_documents_share_cockpit",
       "state": "proven",
       "label": "Documents and Share cockpit UI",
-      "evidencePath": "evaluation\\documents-complete-cockpits-live-2026-07-21\\report.json",
-      "detail": "Production evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, staged Share rail, selected-summary, preview, primary CTA, and collapsed mobile configuration stack. It does not claim provider live dispatch or production live Share rail geometry.",
+      "evidencePath": "evaluation\\share-mobile-stage-rail-collapse-2026-07-21\\report.json",
+      "detail": "Production evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, and provider-result summary inside the first viewport. It does not claim provider live dispatch.",
       "nextActions": [
         "Keep the production live geometry recorded for the 12-document cockpit slice; do not expand it into a full 12-document field-first authoring claim.",
-        "Promote the Share staged rail to production evidence only after build-info reaches the staged-rail commit and live geometry is probed.",
-        "Keep /share generated-result and mobile stepper improvements as separate gates when user-visible sessions reproduce the complaint."
+        "Keep /share generated-result and exact one-viewport mobile Share improvements as separate gates when user-visible sessions reproduce the complaint."
       ]
     },
     {
