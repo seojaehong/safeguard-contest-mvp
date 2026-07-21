@@ -279,6 +279,34 @@ Interpretation: this is a result-depth containment layer plus a fixture-generate
 
 Product-depth update: the closed result summary now exposes `검증 전용 · 2개 채널`, and the fixture proof still opens the drilldown to verify retained channel results. A later UX wave can refine this further with save-state labels or richer provider-result ledger UX without changing provider dispatch contracts.
 
+## 2026-07-21 Workspace IA Live `f67a6328` Refinement
+
+Live production evidence:
+
+- Artifact: `evaluation/workspace-ia-live-f67-2026-07-21/report.md`
+- Live marker: `f67a63286251b1e4611b4234c0059be043f80f8e`
+- `/workspace` default Documents cockpit is bounded:
+  - Desktop short `1440x723`: body `723/723`, document page/workbench bottom `710`, overflow `0`.
+  - Mobile `390x844`: body `844/844`, document page/workbench bottom `786`, overflow `0`.
+- `/workspace` default Share cockpit is bounded:
+  - Desktop short `1440x723`: body `723/723`, share root bottom `716`, preview bottom `571`, primary CTA bottom `389`, form/preview widths `636/520`, overflow `0`.
+  - Mobile `390x844`: body `844/844`, share root bottom `810`, preview bottom `683`, primary CTA bottom `742`, overflow `0`.
+
+Open IA blocker:
+
+- Selected document editor/detail still explains the user's "Documents feels long" complaint:
+  - Desktop short editor body `882/723`, first textarea bottom `1267`.
+  - Desktop editor body `1129/900`, first textarea bottom `1256`.
+  - Mobile editor body `1067/844`, first textarea bottom `1160`.
+- Next `/documents` acceptance should target selected editor/detail landing: after the risk-assessment edit/detail action, the first meaningful editable content or field summary must intersect the visible viewport or bounded pane immediately.
+
+Share nuance:
+
+- Raw desktop Share geometry is not a literal mobile stack; it has a form column and a `520px` preview column with no horizontal overflow.
+- If users still perceive Share as mobile-like, treat that as a design/workbench composition follow-up: the desktop surface should feel like full recipient/channel/provenance/action plus preview work regions, not just a centered card with two columns.
+
+Interpretation: current live evidence closes the default cockpit page-height issue. It does not close selected document editor/detail landing or every perceived Share composition concern. Route/page split alone remains rejected as a sufficient fix; the required structure is step split plus first-viewport cockpit plus bounded drilldown/detail.
+
 ## 2026-07-21 Dispatch Sample Shell Update
 
 Current-source bounded gate:
