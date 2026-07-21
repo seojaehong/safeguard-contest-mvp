@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-07-20T21:05:43.023Z",
+  "generatedAt": "2026-07-21T05:18:54.938Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "commit": "8ec4db66",
-  "sourceCommit": "8ec4db66eefc85e17efc28b6137a90526698f275",
+  "commit": "75da5bba",
+  "sourceCommit": "75da5bba77051b382d6f355bd0cab10a1fd81ace",
   "productionBuild": {
     "ok": true,
     "status": 200,
-    "commitSha": "552424531ae1bd9f6219cc27431509f4494e22e1",
+    "commitSha": "75da5bba77051b382d6f355bd0cab10a1fd81ace",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-uv2xjentv-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-3a5dvlivf-seojaehongs-projects.vercel.app"
   },
   "overall": "pass_with_notice",
-  "elapsedMs": 70853,
+  "elapsedMs": 137383,
   "gates": [
     {
       "name": "ask-orchestration",
@@ -88,7 +88,7 @@
       "count": 6,
       "message": "KOSHA 오프라인 보조근거와 Supabase 안전 지식 DB에서 참고자료를 조회했습니다. 공식 KOSHA 정확 본문 번들로 partial DB 본문을 대체했습니다."
     },
-    "textPreview": "[보완 제안: 위험성평가·TBM·교육 기록 및 담당자 이행 확인] - 작업 전 이동식 비계의 작업발판, 안전난간, 바퀴 잠금, 아웃트리거 상태 점검 완료 여부 확인 - 강풍 체감 시 작업중지와 안전대 체결, 하부 출입 통제 조치 이행 확인 - 지게차 동선 인접 구간 안전관리(동선 분리, 신호수 배치, 사각지대 점검) 실시 여부 점검 - 신규 투입자 대상 작업내용 및 작업중지 기준에 관한 안전보건교육 기록 작성 및 확인 - 작업개시 전 TBM 실시, 위험요인 및 대책 공유와 참석자 서명 기록 완료 여부 점검 확인자/근거 확인: 관리감독자 및 작업반장이 각 조치 이행·교육 기록을 확인하며, 위험성평가표·TBM·안전보건교육 기록에 반영 근거로 명시한다.",
+    "textPreview": "[보완 제안: 강풍 대응 및 안전교육 기록 강화] - 작업 전 오후 강풍 예보 여부를 작업반장과 전 작업자가 함께 확인한다. - 강풍 체감 시 즉시 작업 중지 및 이동식 비계 고정 상태 점검을 실시한다. - 작업 시작 전 신규 투입자에 대해 강풍·추락 위험 교육을 별도로 진행하고 기록한다. - 지게차 동선 인접 작업 구역은 별도 신호수 배치 및 작업자 위치 표지판 설치 여부를 확인한다. - TBM 미팅 시 오늘 작업 위험요인(추락, 강풍, 지게차 동선) 및 대처방안 사전 공유를 필수로 기록한다. 확인자/근거 확인: 작업전 TBM 기록과 안전보건교육 명단에 반영하여 현장 점검 및 문서화 완료 여부 점검.",
     "sourceCount": 5,
     "policy": "AI 보완은 자동 덮어쓰기가 아니라 제안, 사용자 편집, 삽입 흐름으로만 인정합니다."
   },

@@ -1,18 +1,18 @@
 {
   "baseUrl": "https://www.safeclaw.kr",
-  "generatedAt": "2026-07-20T21:05:36.505Z",
-  "elapsedMs": 30897,
+  "generatedAt": "2026-07-21T05:18:29.463Z",
+  "elapsedMs": 52558,
   "question": "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.",
   "weather": {
     "status": 200,
-    "elapsedMs": 10394,
+    "elapsedMs": 17431,
     "mode": "live",
-    "summary": "단시간 흐림, 빗방울, 기온 26℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선 반영)",
+    "summary": "단시간 흐림, 비, 기온 25℃, 풍속 2m/s (초단기실황/초단기예보/기상특보/영향예보/생활기상 자외선 반영)",
     "signalCount": 8
   },
   "ask": {
     "status": 200,
-    "elapsedMs": 17918,
+    "elapsedMs": 21975,
     "mode": "live",
     "statusSummary": "연결됨",
     "documentCount": 11
@@ -31,7 +31,7 @@
         "TBM 기상 신호",
         "작업중지 기준"
       ],
-      "evidence": "단시간 흐림, 빗방울, 기온 26℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선 반영)",
+      "evidence": "단시간 흐림, 비, 기온 25℃, 풍속 2m/s (초단기실황/초단기예보/단기예보/기상특보/영향예보/생활기상 자외선 반영)",
       "count": 8
     },
     {
@@ -141,43 +141,43 @@
     {
       "format": "TXT",
       "file": "evaluation\\final-99-gate-current-2026-07-21\\orchestration-download\\files\\세이프건설-risk-assessment.txt",
-      "bytes": 10184,
+      "bytes": 10528,
       "ok": true
     },
     {
       "format": "JSON",
       "file": "evaluation\\final-99-gate-current-2026-07-21\\orchestration-download\\files\\세이프건설-risk-assessment.json",
-      "bytes": 10743,
+      "bytes": 11097,
       "ok": true
     },
     {
       "format": "CSV",
       "file": "evaluation\\final-99-gate-current-2026-07-21\\orchestration-download\\files\\세이프건설-risk-assessment.csv",
-      "bytes": 14827,
+      "bytes": 17565,
       "ok": true
     },
     {
       "format": "XLS",
       "file": "evaluation\\final-99-gate-current-2026-07-21\\orchestration-download\\files\\세이프건설-risk-assessment.xls",
-      "bytes": 26111,
+      "bytes": 28359,
       "ok": true
     },
     {
       "format": "DOC",
       "file": "evaluation\\final-99-gate-current-2026-07-21\\orchestration-download\\files\\세이프건설-risk-assessment.doc",
-      "bytes": 15353,
+      "bytes": 15794,
       "ok": true
     },
     {
       "format": "HTML",
       "file": "evaluation\\final-99-gate-current-2026-07-21\\orchestration-download\\files\\세이프건설-risk-assessment.html",
-      "bytes": 10762,
+      "bytes": 11106,
       "ok": true
     },
     {
       "format": "HWPX",
       "file": "evaluation\\final-99-gate-current-2026-07-21\\orchestration-download\\files\\세이프건설-risk-assessment.hwpx",
-      "bytes": 12054,
+      "bytes": 11921,
       "ok": true
     },
     {
@@ -193,7 +193,7 @@
         },
         {
           "kind": "body",
-          "rows": 90,
+          "rows": 109,
           "cols": 4
         }
       ],
@@ -202,7 +202,7 @@
     {
       "format": "XLSX_OOXML",
       "file": "evaluation\\final-99-gate-current-2026-07-21\\orchestration-download\\files\\세이프건설-risk-assessment.xlsx",
-      "bytes": 13307,
+      "bytes": 13662,
       "ok": true,
       "sheetNames": [
         "위험성평가표"
@@ -213,31 +213,31 @@
     {
       "format": "PDF",
       "file": "evaluation\\final-99-gate-current-2026-07-21\\orchestration-download\\files\\세이프건설-risk-assessment.pdf",
-      "bytes": 314707,
+      "bytes": 315722,
       "ok": true
     },
     {
       "format": "JPG",
       "file": "evaluation\\final-99-gate-current-2026-07-21\\orchestration-download\\files\\세이프건설-risk-assessment.jpg",
-      "bytes": 184259,
+      "bytes": 166857,
       "ok": true
     },
     {
       "format": "ALL_TXT",
       "file": "evaluation\\final-99-gate-current-2026-07-21\\orchestration-download\\files\\세이프건설-safeguard-workpack.txt",
-      "bytes": 75302,
+      "bytes": 75358,
       "ok": true
     },
     {
       "format": "ALL_CSV",
       "file": "evaluation\\final-99-gate-current-2026-07-21\\orchestration-download\\files\\세이프건설-safeguard-workpack.csv",
-      "bytes": 109287,
+      "bytes": 111737,
       "ok": true
     },
     {
       "format": "ALL_XLS",
       "file": "evaluation\\final-99-gate-current-2026-07-21\\orchestration-download\\files\\세이프건설-safeguard-workpack.xls",
-      "bytes": 171290,
+      "bytes": 173153,
       "ok": true
     }
   ],
