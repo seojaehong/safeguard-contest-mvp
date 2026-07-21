@@ -1,0 +1,163 @@
+{
+  "verdict": "PASS_CURRENT_SOURCE",
+  "sourceHead": "2d173b48d35c9e7936d2656ddfb2dbf8ec5097f4",
+  "productCommit": "2d173b48d35c9e7936d2656ddfb2dbf8ec5097f4",
+  "productionLiveClaimed": false,
+  "providerDispatchLiveClaimed": false,
+  "routeSplitAloneAcceptedAsFix": false,
+  "structuralConclusion": "Route splitting helps orientation, but Share still needs a first-viewport cockpit with bounded/collapsed details. This wave removes the duplicate mobile stage rail from the default mobile cockpit and keeps detailed configuration collapsed.",
+  "scope": {
+    "changedProductFiles": [
+      "app/globals.css"
+    ],
+    "routesCovered": [
+      "/workspace?share",
+      "/dispatch?theme=day"
+    ],
+    "notClaimed": [
+      "live production deployment",
+      "provider live dispatch",
+      "full one-viewport mobile share route",
+      "new backend/provider behavior"
+    ]
+  },
+  "currentSourceMetrics": {
+    "mobile390Day": {
+      "artifact": "evaluation/share-mobile-p1/mobile-390-day-share-config-collapse-metrics.json",
+      "verdict": "PASS",
+      "viewportHeight": 844,
+      "pageHeight": 980,
+      "heightRatio": 1.16,
+      "summaryBottom": 391.5,
+      "previewBottom": 616.5,
+      "primaryBottom": 675.5,
+      "configToggleBottom": 734.5,
+      "stageRailDisplay": "none",
+      "configCardDisplays": [
+        "none",
+        "none",
+        "none"
+      ],
+      "horizontalOverflow": 0
+    },
+    "mobile390Night": {
+      "artifact": "evaluation/share-mobile-p1/mobile-390-night-share-config-collapse-metrics.json",
+      "verdict": "PASS",
+      "viewportHeight": 844,
+      "pageHeight": 980,
+      "heightRatio": 1.16,
+      "summaryBottom": 391.5,
+      "previewBottom": 616.5,
+      "primaryBottom": 675.5,
+      "configToggleBottom": 734.5,
+      "stageRailDisplay": "none",
+      "configCardDisplays": [
+        "none",
+        "none",
+        "none"
+      ],
+      "horizontalOverflow": 0
+    },
+    "desktopDay": {
+      "artifact": "evaluation/share-mobile-p1/desktop-day-share-config-collapse-metrics.json",
+      "verdict": "PASS",
+      "viewportHeight": 900,
+      "pageHeight": 946,
+      "heightRatio": 1.05,
+      "previewBottom": 757,
+      "primaryBottom": 401,
+      "stageRailDisplay": "grid",
+      "stageColumns": 4,
+      "configCardDisplays": [
+        "grid",
+        "grid",
+        "grid"
+      ],
+      "horizontalOverflow": 0
+    },
+    "desktopNight": {
+      "artifact": "evaluation/share-mobile-p1/desktop-night-share-config-collapse-metrics.json",
+      "verdict": "PASS",
+      "viewportHeight": 900,
+      "pageHeight": 946,
+      "heightRatio": 1.05,
+      "previewBottom": 757,
+      "primaryBottom": 401,
+      "stageRailDisplay": "grid",
+      "stageColumns": 4,
+      "configCardDisplays": [
+        "grid",
+        "grid",
+        "grid"
+      ],
+      "horizontalOverflow": 0
+    },
+    "generatedResultMobileFixture": {
+      "artifact": "evaluation/share-mobile-p1/generated-result-mobile-provider-result-fixture-metrics.json",
+      "verdict": "PASS",
+      "fixtureGeneratedProviderResultProof": true,
+      "providerDispatchLiveClaimed": false,
+      "viewportHeight": 844,
+      "pageHeight": 980,
+      "heightRatio": 1.16,
+      "previewBottom": 675,
+      "primaryBottom": 734,
+      "resultSummaryBottom": 839,
+      "resultClosedByDefault": true,
+      "horizontalOverflow": 0
+    },
+    "generatedResultDesktopFixture": {
+      "artifact": "evaluation/share-mobile-p1/generated-result-desktop-provider-result-fixture-metrics.json",
+      "verdict": "PASS",
+      "fixtureGeneratedProviderResultProof": true,
+      "providerDispatchLiveClaimed": false,
+      "viewportHeight": 900,
+      "pageHeight": 928,
+      "heightRatio": 1.03,
+      "previewBottom": 785,
+      "primaryBottom": 429,
+      "resultSummaryBottom": 819,
+      "resultClosedByDefault": true,
+      "horizontalOverflow": 0
+    }
+  },
+  "checks": [
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts -t \"renders every Vietnamese paragraph\" --maxWorkers=1 --fileParallelism=false --hookTimeout=180000",
+      "result": "PASS",
+      "files": 1,
+      "testsPassed": 1,
+      "testsSkipped": 3
+    },
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts -t \"keeps generated provider-result details\" --maxWorkers=1 --fileParallelism=false --hookTimeout=180000",
+      "result": "PASS",
+      "files": 1,
+      "testsPassed": 1,
+      "testsSkipped": 3
+    },
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts -t \"standalone dispatch|keeps generated provider-result details\" --maxWorkers=1 --fileParallelism=false --hookTimeout=180000",
+      "result": "PASS",
+      "files": 1,
+      "testsPassed": 3,
+      "testsSkipped": 1
+    },
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-simplification.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "testsPassed": 11
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    }
+  ],
+  "remainingDebt": [
+    "Live production verification is pending until /api/build-info reports this source commit or a later deployed commit.",
+    "Mobile Share is reduced to 1.16 viewports and keeps primary surfaces in the first viewport, but it is not claimed as an exactly one-viewport route.",
+    "Provider live dispatch remains gated by the separate persistent idempotency/provider-result ledger approval path.",
+    "A stricter future wave can collapse additional secondary share rails/details if product acceptance requires a hard 1.00x mobile route."
+  ]
+}

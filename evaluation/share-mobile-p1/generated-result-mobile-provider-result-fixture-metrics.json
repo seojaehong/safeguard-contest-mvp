@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-20T23:38:52.933Z",
+  "checkedAt": "2026-07-21T00:54:23.769Z",
   "route": "/workspace?share",
   "scenario": {
     "label": "generated-result-mobile",
@@ -10,57 +10,57 @@
   "fixtureGeneratedProviderResultProof": true,
   "providerDispatchLiveClaimed": false,
   "dispatchPostCount": 1,
-  "dispatchPostIdempotencyKey": "provider-dispatch-v1-3fddede8-3e94-44e2-9bdc-c7a21f5a5075-09e3d48b",
+  "dispatchPostIdempotencyKey": "provider-dispatch-v1-dc1890e3-ea50-466e-b55a-3512ac7ebd83-ee7dd23f",
   "metrics": {
     "viewportWidth": 390,
     "viewportHeight": 844,
-    "pageHeight": 1052,
+    "pageHeight": 980,
     "root": {
       "left": 27,
       "right": 363,
-      "top": 135,
-      "bottom": 838,
+      "top": 284,
+      "bottom": 836,
       "width": 336,
-      "height": 703
+      "height": 552
     },
     "preview": {
-      "left": 40,
-      "right": 350,
-      "top": 331,
-      "bottom": 577,
-      "width": 310,
-      "height": 246
+      "left": 36,
+      "right": 354,
+      "top": 456,
+      "bottom": 675,
+      "width": 318,
+      "height": 219
     },
     "primary": {
-      "left": 49,
-      "right": 341,
-      "top": 594,
-      "bottom": 638,
-      "width": 292,
+      "left": 45,
+      "right": 345,
+      "top": 690,
+      "bottom": 734,
+      "width": 300,
       "height": 44
     },
     "result": {
-      "left": 40,
-      "right": 350,
-      "top": 757,
-      "bottom": 825,
-      "width": 310,
+      "left": 36,
+      "right": 354,
+      "top": 783,
+      "bottom": 851,
+      "width": 318,
       "height": 68
     },
     "resultSummary": {
-      "left": 52,
-      "right": 338,
-      "top": 769,
-      "bottom": 813,
-      "width": 286,
+      "left": 48,
+      "right": 342,
+      "top": 795,
+      "bottom": 839,
+      "width": 294,
       "height": 44
     },
     "resultDetail": {
-      "left": 52,
-      "right": 338,
-      "top": 813,
-      "bottom": 1058,
-      "width": 286,
+      "left": 48,
+      "right": 342,
+      "top": 839,
+      "bottom": 1084,
+      "width": 294,
       "height": 245
     },
     "resultOpen": false,
@@ -103,7 +103,8 @@
       }
     ],
     "distinctFirstViewportXRanges": [
-      80
+      80,
+      0
     ],
     "horizontalOverflow": 0
   },

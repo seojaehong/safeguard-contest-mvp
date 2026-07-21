@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-20T23:38:48.359Z",
+  "checkedAt": "2026-07-21T00:54:18.946Z",
   "route": "/workspace?share",
   "scenario": {
     "label": "generated-result-desktop",
@@ -10,7 +10,7 @@
   "fixtureGeneratedProviderResultProof": true,
   "providerDispatchLiveClaimed": false,
   "dispatchPostCount": 1,
-  "dispatchPostIdempotencyKey": "provider-dispatch-v1-fb446384-aee8-4e75-8af3-cc6317ed17e1-5076ab14",
+  "dispatchPostIdempotencyKey": "provider-dispatch-v1-cd44d876-ac46-451e-950b-c344876d66af-7d9581b8",
   "metrics": {
     "viewportWidth": 1440,
     "viewportHeight": 900,
@@ -26,40 +26,40 @@
     "preview": {
       "left": 777,
       "right": 1297,
-      "top": 399,
-      "bottom": 799,
+      "top": 385,
+      "bottom": 785,
       "width": 520,
       "height": 400
     },
     "primary": {
       "left": 143,
       "right": 449,
-      "top": 399,
-      "bottom": 443,
+      "top": 385,
+      "bottom": 429,
       "width": 306,
       "height": 44
     },
     "result": {
       "left": 143,
       "right": 767,
-      "top": 321,
-      "bottom": 389,
+      "top": 763,
+      "bottom": 831,
       "width": 624,
       "height": 68
     },
     "resultSummary": {
       "left": 155,
       "right": 755,
-      "top": 333,
-      "bottom": 377,
+      "top": 775,
+      "bottom": 819,
       "width": 600,
       "height": 44
     },
     "resultDetail": {
       "left": 155,
       "right": 755,
-      "top": 377,
-      "bottom": 569,
+      "top": 819,
+      "bottom": 1011,
       "width": 600,
       "height": 192
     },
@@ -75,17 +75,17 @@
       {
         "display": "grid",
         "height": 150,
-        "bottom": 605
+        "bottom": 591
       },
       {
         "display": "grid",
         "height": 150,
-        "bottom": 767
+        "bottom": 753
       },
       {
         "display": "grid",
         "height": 150,
-        "bottom": 605
+        "bottom": 591
       }
     ],
     "channelCards": [
