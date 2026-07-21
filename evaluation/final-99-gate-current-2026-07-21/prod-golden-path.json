@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-07-21T13:42:01.867Z",
+  "generatedAt": "2026-07-21T14:17:01.653Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "commit": "e16141ac",
-  "sourceCommit": "e16141ace29d606879f1d6786f1a8f87fc9092e8",
+  "commit": "721c80be",
+  "sourceCommit": "721c80be47c81e100b7d89866898a09f3fcaddb7",
   "productionBuild": {
     "ok": true,
     "status": 200,
-    "commitSha": "e16141ace29d606879f1d6786f1a8f87fc9092e8",
+    "commitSha": "721c80be47c81e100b7d89866898a09f3fcaddb7",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-oj2pa2hsr-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-m85i1c672-seojaehongs-projects.vercel.app"
   },
   "overall": "pass_with_notice",
-  "elapsedMs": 85751,
+  "elapsedMs": 83546,
   "gates": [
     {
       "name": "ask-orchestration",
@@ -88,7 +88,7 @@
       "count": 6,
       "message": "KOSHA 오프라인 보조근거와 Supabase 안전 지식 DB에서 참고자료를 조회했습니다. 공식 KOSHA 정확 본문 번들로 partial DB 본문을 대체했습니다."
     },
-    "textPreview": "[보완 제안: 강풍 관련 비계 안전관리 및 작업중지 기준] - 작업 전 오후 강풍 예보 확인 및 TBM에서 전파 여부 점검 - 강풍 체감 시 즉시 작업 중지, 비계 고정 상태 및 아웃트리거 재점검 - 작업 중 강풍 시 작업반장 지시에 따른 안전대 착용 및 하부 출입 통제 실시 - 신규 투입자 대상으로 강풍 시 작업중지 및 안전수칙 교육 필수 이수 - 작업 재개 전 비계 구조물 및 바퀴 잠금 상태 현장 확인 반드시 완료 확인자/근거 확인: 작업반장, TBM 기록 및 안전보건교육 기록에 반영 근거 확인.",
+    "textPreview": "[보완 제안: 외벽 도장 작업 안전점검 및 교육 이행 확인] - 작업 전 이동식 비계의 작업발판 폭, 안전난간, 바퀴 잠금, 아웃트리거 상태 점검 - 작업자 전원 안전대 체결 여부 및 하부 출입통제 상태 확인 - 신규 투입자 대상 작업 전 안전보건교육(작업발판·난간 사용법, 추락 방지 절차 포함) 실시 - 강풍 예보 시 작업중지 기준 공유 및 작업반별 TBM 회의에서 재확인 - TBM 및 안전보건교육 기록에 점검 결과와 교육 참석자 명단 기록 확인자/근거 확인: 작업반장, 작업 전 현장 점검 및 교육 기록 반영 근거로 확인 완료",
     "sourceCount": 5,
     "policy": "AI 보완은 자동 덮어쓰기가 아니라 제안, 사용자 편집, 삽입 흐름으로만 인정합니다."
   },
