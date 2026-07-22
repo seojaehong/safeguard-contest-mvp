@@ -11,6 +11,8 @@ const checkedAt = new Date().toISOString();
 const sourceHead = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
 const buildInfo = await fetch(`${baseUrl}/api/build-info?codexCacheBust=bounded-workbench-${Date.now()}`)
   .then((response) => response.json());
+const baseHostname = new URL(baseUrl).hostname;
+const isLiveProductionBase = baseHostname === "www.safeclaw.kr" || baseHostname === "safeclaw.kr";
 
 const viewports = [
   { label: "desktop-short-1440x723", width: 1440, height: 723 },
@@ -451,10 +453,17 @@ const missingExactSavedSession = {
 
 const documentFailures = documentRows.filter((row) => row.verdicts.overallVerdict !== "PASS");
 const shareFailures = shareRows.filter((row) => row.verdicts.overallVerdict === "RED" || row.verdicts.overallVerdict === "ERROR");
+const passVerdict = isLiveProductionBase
+  ? "PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP"
+  : "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP";
+const redVerdict = isLiveProductionBase
+  ? "PARTIAL_OR_RED_LIVE_PRODUCTION_MEASURED"
+  : "PARTIAL_OR_RED_CURRENT_SOURCE_LOCAL_PRODUCTION_MEASURED";
 const report = {
   schemaVersion: "safeclaw-workspace-bounded-workbench-current/v1",
   checkedAt,
   baseUrl,
+  measurementMode: isLiveProductionBase ? "live-production" : "current-source-local-production",
   sourceHead,
   productionCommit: buildInfo.commitSha || "",
   productionBuild: buildInfo,
@@ -462,9 +471,7 @@ const report = {
   providerDispatchLiveClaimed: false,
   externalProviderCalled: false,
   dbMutationPerformed: false,
-  verdict: documentFailures.length === 0 && shareFailures.length === 0
-    ? "PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP"
-    : "PARTIAL_OR_RED_LIVE_PRODUCTION_MEASURED",
+  verdict: documentFailures.length === 0 && shareFailures.length === 0 ? passVerdict : redVerdict,
   interpretation: "This gate measures the bounded-workbench contract directly. Route/page split is orientation only; PASS requires first-task visibility and bounded simultaneous scope, while exact saved Share sessions remain separate evidence.",
   acceptance: {
     documents: {
