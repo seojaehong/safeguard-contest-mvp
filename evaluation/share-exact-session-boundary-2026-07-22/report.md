@@ -1,12 +1,12 @@
 # Share Exact Session Boundary Gate
 
-Checked at: 2026-07-22T17:40:25.867Z
+Checked at: 2026-07-22T17:50:31.160Z
 
-Base URL: `http://127.0.0.1:3074`
+Base URL: `https://www.safeclaw.kr`
 
-Source HEAD: `7d29def426bc612f8711ae12053a4f4f34f6e7ac`
+Source HEAD: `e5945fe891d06cd1de95f097e29de4428bae78f2`
 
-Live `/api/build-info`: `unknown`
+Live `/api/build-info`: `b3e8070bf705cbb3e75f7f81c43381d48e9ca1f6`
 
 Verdict: `MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED`
 
