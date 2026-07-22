@@ -47,6 +47,11 @@ async function startFixtureServer(): Promise<FixtureServer> {
         response.end(JSON.stringify({ message: "mutation fixture", ok: true }));
         return;
       }
+      if (request.url.includes("not-a-valid-session")) {
+        response.writeHead(400, { "content-type": "application/json" });
+        response.end(JSON.stringify({ message: "invalid fixture session id", ok: false }));
+        return;
+      }
       response.writeHead(404, { "content-type": "application/json" });
       response.end(JSON.stringify({ message: "missing fixture session", ok: false }));
       return;
@@ -174,6 +179,7 @@ describe("share exact session boundary runner", () => {
         exactSavedUserSessionReproduced: false,
         liveCommit: "fixture-live-commit",
         safeMissingSessionReadVerdict: "PASS_FAIL_CLOSED",
+        safeInvalidSessionReadVerdict: "PASS_INVALID_ID_FAIL_CLOSED",
         sessionKind: "missing-exact",
         verdict: "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
       });

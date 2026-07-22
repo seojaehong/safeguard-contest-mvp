@@ -10,6 +10,7 @@ import { chromium } from "playwright";
 const OUT_DIR = path.join("evaluation", "share-exact-session-boundary-2026-07-22");
 const DEFAULT_BASE_URL = "https://www.safeclaw.kr";
 const SAFE_MISSING_SESSION_ID = "00000000-0000-4000-8000-000000000000";
+const SAFE_INVALID_SESSION_ID = "not-a-valid-session";
 const SAFE_MISSING_WORKER_ID = "00000000-0000-4000-8000-000000000001";
 const EXACT_VIEWPORTS = [
   { label: "desktop-short-1440x723", width: 1440, height: 723 },
@@ -107,6 +108,39 @@ async function probeMissingSessionGet(baseUrl) {
       attempted: true,
       method: "GET",
       urlPath: `/api/share-sessions/${SAFE_MISSING_SESSION_ID}?workerId=${SAFE_MISSING_WORKER_ID}`,
+      status: null,
+      ok: false,
+      bodyOk: false,
+      message: error instanceof Error ? error.message : String(error),
+      mutationPerformed: false,
+    };
+  }
+}
+
+/**
+ * @param {string} baseUrl
+ */
+async function probeInvalidSessionGet(baseUrl) {
+  try {
+    const url = new URL(`/api/share-sessions/${encodeURIComponent(SAFE_INVALID_SESSION_ID)}`, baseUrl);
+    url.searchParams.set("workerId", SAFE_MISSING_WORKER_ID);
+    const response = await fetch(url, { cache: "no-store" });
+    const body = await response.json().catch(() => ({}));
+    return {
+      attempted: true,
+      method: "GET",
+      urlPath: `${url.pathname}?workerId=${SAFE_MISSING_WORKER_ID}`,
+      status: response.status,
+      ok: response.ok,
+      bodyOk: body?.ok === true,
+      message: typeof body?.message === "string" ? body.message : "",
+      mutationPerformed: false,
+    };
+  } catch (error) {
+    return {
+      attempted: true,
+      method: "GET",
+      urlPath: `/api/share-sessions/${SAFE_INVALID_SESSION_ID}?workerId=${SAFE_MISSING_WORKER_ID}`,
       status: null,
       ok: false,
       bodyOk: false,
@@ -277,13 +311,25 @@ function classifySafeMissingSessionRead(status) {
   return "RED_UNEXPECTED_SAFE_READ_STATUS";
 }
 
+/**
+ * @param {number | null} status
+ */
+function classifySafeInvalidSessionRead(status) {
+  if (status === 400) return "PASS_INVALID_ID_FAIL_CLOSED";
+  if (typeof status === "number" && status >= 500) return "RED_INVALID_ID_SERVER_ERROR";
+  if (typeof status === "number" && status >= 400) return "PARTIAL_INVALID_ID_CLIENT_ERROR";
+  return "RED_UNEXPECTED_INVALID_ID_STATUS";
+}
+
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   const checkedAt = new Date().toISOString();
   const sourceHead = gitHead();
   const buildInfo = await readBuildInfo(options.baseUrl);
   const missingSessionGet = await probeMissingSessionGet(options.baseUrl);
+  const invalidSessionGet = await probeInvalidSessionGet(options.baseUrl);
   const safeMissingSessionReadVerdict = classifySafeMissingSessionRead(missingSessionGet.status);
+  const safeInvalidSessionReadVerdict = classifySafeInvalidSessionRead(invalidSessionGet.status);
   const exactSessionUrl = normalizeExactShareUrl(options.exactUrl, options.baseUrl);
   const exactSessionPayloadPath = process.env.SAFECLAW_EXACT_SHARE_SESSION_PAYLOAD || "";
   const exactSessionGeometry = exactSessionUrl
@@ -338,7 +384,9 @@ async function main() {
       },
     },
     safeReadProbe: missingSessionGet,
+    invalidReadProbe: invalidSessionGet,
     safeMissingSessionReadVerdict,
+    safeInvalidSessionReadVerdict,
     boundary: {
       fixtureProofAcceptedAsExactSavedSession: false,
       generatedWorkspaceProofAcceptedAsExactSavedSession: false,
@@ -356,6 +404,7 @@ async function main() {
       "or an approved safe creation flow for a manager-owned workpack/share session",
       "then rerun desktop 1440x723/1440x900 and mobile 390x723 geometry with sessionKind=saved-exact",
       "keep the deliberately missing share-session GET fail-closed; a 5xx safe-read shape is a launch-quality debt separate from exact saved-session geometry",
+      "keep invalid share-session ids fail-closed at 400 so URL validation debt is separated from storage-backed missing-session debt",
     ],
     forbiddenClaims: [
       "Fixture or generated /workspace Share proof closes the exact saved /share/[sessionId] user complaint.",
@@ -395,6 +444,9 @@ DB mutation performed: \`${report.boundary.dbMutationPerformed}\`
 - Safe missing-session GET status: \`${missingSessionGet.status ?? "error"}\`
 - Safe missing-session read verdict: \`${report.safeMissingSessionReadVerdict}\`
 - Safe missing-session GET mutation performed: \`false\`
+- Safe invalid-session GET status: \`${invalidSessionGet.status ?? "error"}\`
+- Safe invalid-session read verdict: \`${report.safeInvalidSessionReadVerdict}\`
+- Safe invalid-session GET mutation performed: \`false\`
 - Exact saved URL provided: \`${Boolean(exactSessionUrl)}\`
 - Exact saved geometry rows: \`${exactSessionGeometry.length}\`
 - Exact saved mutation request count: \`${exactSessionMutationRequests.length}\`
@@ -433,6 +485,7 @@ ${report.forbiddenClaims.map((item) => `- ${item}`).join("\n")}
     sourceHead,
     liveCommit: buildInfo.commitSha,
     safeReadStatus: missingSessionGet.status,
+    invalidReadStatus: invalidSessionGet.status,
     dbMutationPerformed: report.boundary.dbMutationPerformed,
     exactSavedUserSessionReproduced: report.exactSavedUserSessionReproduced,
   }));

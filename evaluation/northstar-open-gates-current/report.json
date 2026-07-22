@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-22T16:14:46.090Z",
-  "sourceSha": "b2976cbfccf5ec7c06b9a020d470ba8da5e00bca",
+  "generatedAt": "2026-07-22T16:18:37.909Z",
+  "sourceSha": "dbc6a49e6c8a6dc9ba5f2554614cc0b1469f7899",
   "overall": "open",
   "gates": [
     {
@@ -64,11 +64,12 @@
       "state": "notice",
       "label": "Exact saved Share session boundary",
       "evidencePath": "evaluation\\share-exact-session-boundary-2026-07-22\\report.json",
-      "detail": "Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass. Safe missing-session read verdict is RED_SERVER_ERROR_SHAPED_MISSING_SESSION and remains separate from exact saved-session geometry.",
+      "detail": "Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass. Safe missing-session read verdict is RED_SERVER_ERROR_SHAPED_MISSING_SESSION and invalid-id read verdict is PASS_INVALID_ID_FAIL_CLOSED; both remain separate from exact saved-session geometry.",
       "nextActions": [
         "Obtain a concrete production /share/[sessionId]?workerId=... URL or approved safe creation flow before closing the user's desktop mobile-like Share complaint.",
         "Rerun desktop 1440x723/1440x900 and mobile 390x723 geometry with sessionKind=saved-exact, root width ratio, x-region count, first action, preview/status visibility, and overflow metrics.",
-        "Keep the deliberately missing share-session GET fail-closed; if it returns a 5xx shape, track that as launch-quality debt rather than exact saved-session proof."
+        "Keep the deliberately missing share-session GET fail-closed; if it returns a 5xx shape, track that as launch-quality debt rather than exact saved-session proof.",
+        "Keep invalid share-session ids fail-closed at 400 so URL validation remains separated from storage-backed missing-session read debt."
       ]
     },
     {

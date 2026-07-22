@@ -254,6 +254,7 @@ function shareGeneratedSessionSummary(shareGenerated) {
 function shareExactSessionBoundarySummary(shareExact) {
   if (!isRecord(shareExact)) return {};
   const safeReadProbe = isRecord(shareExact.safeReadProbe) ? shareExact.safeReadProbe : {};
+  const invalidReadProbe = isRecord(shareExact.invalidReadProbe) ? shareExact.invalidReadProbe : {};
   const boundary = isRecord(shareExact.boundary) ? shareExact.boundary : {};
   return {
     verdict: asString(shareExact.verdict),
@@ -267,6 +268,9 @@ function shareExactSessionBoundarySummary(shareExact) {
     safeReadStatus: typeof safeReadProbe.status === "number" ? safeReadProbe.status : null,
     safeReadMessage: asString(safeReadProbe.message),
     safeMissingSessionReadVerdict: asString(shareExact.safeMissingSessionReadVerdict),
+    invalidReadStatus: typeof invalidReadProbe.status === "number" ? invalidReadProbe.status : null,
+    invalidReadMessage: asString(invalidReadProbe.message),
+    safeInvalidSessionReadVerdict: asString(shareExact.safeInvalidSessionReadVerdict),
   };
 }
 
@@ -746,7 +750,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Share desktop: current measured Workspace Share and invited recipient fixture routes pass scoped desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
 - Share route evidence split: invited recipient \`/share/[sessionId]\` fixture route, exact saved/generated \`/share/[sessionId]\`, and manager/workspace share-result route remain separate proof layers. A fixture pass cannot close a user-specific exact saved/session complaint.
-- Share exact-session boundary: \`${report.shareExactSessionBoundary.verdict || "missing"}\`; exact saved reproduced is \`${report.shareExactSessionBoundary.exactSavedUserSessionReproduced === true}\`, safe missing-session GET status is \`${report.shareExactSessionBoundary.safeReadStatus ?? "unknown"}\`, safe-read verdict is \`${report.shareExactSessionBoundary.safeMissingSessionReadVerdict || "unknown"}\`, and DB/provider mutations remain \`false\`.
+- Share exact-session boundary: \`${report.shareExactSessionBoundary.verdict || "missing"}\`; exact saved reproduced is \`${report.shareExactSessionBoundary.exactSavedUserSessionReproduced === true}\`, safe missing-session GET status is \`${report.shareExactSessionBoundary.safeReadStatus ?? "unknown"}\`, safe-read verdict is \`${report.shareExactSessionBoundary.safeMissingSessionReadVerdict || "unknown"}\`, invalid-id GET status is \`${report.shareExactSessionBoundary.invalidReadStatus ?? "unknown"}\`, invalid-id verdict is \`${report.shareExactSessionBoundary.safeInvalidSessionReadVerdict || "unknown"}\`, and DB/provider mutations remain \`false\`.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
 
 Route/page split alone is not accepted as the UX fix. Page count only moves long documents/messages to another URL if the route body still unfolds the full artifact. The accepted structure is a three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes for long documents, messages, logs, and raw metadata.

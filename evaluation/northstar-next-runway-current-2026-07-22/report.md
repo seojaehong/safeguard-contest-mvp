@@ -4,21 +4,21 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `b2976cbfccf5ec7c06b9a020d470ba8da5e00bca`
+Source HEAD: `dbc6a49e6c8a6dc9ba5f2554614cc0b1469f7899`
 
-Production `/api/build-info`: `df097ae743eb26cc199f168fd5b7f3490905a3e7`
+Production `/api/build-info`: `dbc6a49e6c8a6dc9ba5f2554614cc0b1469f7899`
 
-Latest evidence commit live: `false`
+Latest evidence commit live: `true`
 
-Source head live pending: `true`
+Source head live pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `b2976cbfccf5ec7c06b9a020d470ba8da5e00bca`
+Live rollup source head: `dbc6a49e6c8a6dc9ba5f2554614cc0b1469f7899`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `b2976cbfccf5ec7c06b9a020d470ba8da5e00bca` is an evidence-only refresh pushed after the live-exact artifact set. Production is still `df097ae743eb26cc199f168fd5b7f3490905a3e7`, and the live rollup remains exact for that deployed marker.
+Note: source HEAD and production marker match for this artifact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -67,7 +67,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Share desktop: current measured Workspace Share and invited recipient fixture routes pass scoped desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
 - Share route evidence split: invited recipient `/share/[sessionId]` fixture route, exact saved/generated `/share/[sessionId]`, and manager/workspace share-result route remain separate proof layers. A fixture pass cannot close a user-specific exact saved/session complaint.
-- Share exact-session boundary: `MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED`; exact saved reproduced is `false`, safe missing-session GET status is `500`, safe-read verdict is `RED_SERVER_ERROR_SHAPED_MISSING_SESSION`, and DB/provider mutations remain `false`.
+- Share exact-session boundary: `MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED`; exact saved reproduced is `false`, safe missing-session GET status is `500`, safe-read verdict is `RED_SERVER_ERROR_SHAPED_MISSING_SESSION`, invalid-id GET status is `400`, invalid-id verdict is `PASS_INVALID_ID_FAIL_CLOSED`, and DB/provider mutations remain `false`.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
 
 Route/page split alone is not accepted as the UX fix. Page count only moves long documents/messages to another URL if the route body still unfolds the full artifact. The accepted structure is a three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes for long documents, messages, logs, and raw metadata.
