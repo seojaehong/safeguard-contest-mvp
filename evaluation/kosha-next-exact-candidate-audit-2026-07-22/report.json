@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-kosha-next-exact-candidate-audit/v1",
-  "generatedAt": "2026-07-22T08:37:56.475Z",
-  "sourceHead": "80b8a8cb47b01345f3ce92e452a1c3639854d409",
+  "generatedAt": "2026-07-22T14:49:29.929Z",
+  "sourceHead": "988aae915ec78f3a1e1d78780bea5065bed10021",
   "liveBuildInfoAtAudit": {
-    "commitSha": "80b8a8cb47b01345f3ce92e452a1c3639854d409",
+    "commitSha": "988aae915ec78f3a1e1d78780bea5065bed10021",
     "branch": "master",
     "environment": "production"
   },
