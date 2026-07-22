@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T18:06:32.903Z",
-  "head": "215bf43dc40fc2810471068d80754f0e2300f439",
+  "generatedAt": "2026-07-22T18:09:30.947Z",
+  "head": "a0edc41b0c2232a9824ffe651188c66bfdf667cf",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
@@ -87,7 +87,7 @@
       "id": "sif_embedding_runtime",
       "state": "approval_gated",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 841ca96545dcbea43bdf93a9e2b236a57f386ced."
+      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 215bf43dc40fc2810471068d80754f0e2300f439."
     },
     {
       "id": "kosha_exact_promotion_review_gate",
@@ -193,10 +193,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "0300946e22f233bb6e7bf7d3e412499497b77d32",
+      "sourceCommit": "215bf43dc40fc2810471068d80754f0e2300f439",
       "sourceStatus": "ancestor",
-      "productionCommit": "0300946e22f233bb6e7bf7d3e412499497b77d32",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "215bf43dc40fc2810471068d80754f0e2300f439",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -234,7 +234,7 @@
       "id": "sif_embedding_preflight",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
       "sourceCommit": "215bf43dc40fc2810471068d80754f0e2300f439",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },
