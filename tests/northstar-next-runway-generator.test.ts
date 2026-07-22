@@ -48,6 +48,7 @@ type NextRunwayReport = {
     documentsDefaultCockpit: string;
     documentsRemainingDebt: string;
     selectedEditorDetail: string;
+    documentsContainment: string;
     shareDesktop: string;
     shareMobile: string;
     stepShell: {

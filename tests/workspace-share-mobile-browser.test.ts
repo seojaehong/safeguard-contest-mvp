@@ -641,6 +641,7 @@ describe("workspace mobile share presentation", () => {
     });
     const stored = buildStoredCurrentWorkpack(data, { workerSnapshot });
     const scenarios = [
+      { label: "generated-result-desktop-short", width: 1440, height: 723 },
       { label: "generated-result-desktop", width: 1440, height: 900 },
       { label: "generated-result-mobile", width: 390, height: 844 }
     ] as const;

@@ -15105,6 +15105,10 @@ body:has(.safeclaw-landing) :is(
     padding: 5px 8px;
   }
 
+  .command-center-shell.workspace-page-share .share-panel.workflow-panel:has([data-share-result-drilldown]) .share-stage-rail {
+    display: none;
+  }
+
   .command-center-shell.workspace-page-share .share-form-card {
     min-height: 108px;
     padding: 8px;
