@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T19:02:05.131Z",
-  "head": "f3b1997488855fd68a023b660c55fca82cd2d2f8",
+  "generatedAt": "2026-07-22T19:05:01.665Z",
+  "head": "642275280f970580e369c3396b7bb3a08b5f80b2",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
@@ -194,7 +194,7 @@
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
       "sourceCommit": "f3b1997488855fd68a023b660c55fca82cd2d2f8",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "f3b1997488855fd68a023b660c55fca82cd2d2f8",
       "productionStatus": "matches_live"
     },

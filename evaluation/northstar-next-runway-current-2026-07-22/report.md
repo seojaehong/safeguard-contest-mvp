@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `f3b1997488855fd68a023b660c55fca82cd2d2f8`
+Source HEAD: `642275280f970580e369c3396b7bb3a08b5f80b2`
 
 Production `/api/build-info`: `f3b1997488855fd68a023b660c55fca82cd2d2f8`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `none`
+Source pending changed paths: `evaluation/northstar-live-rollup-2026-07-20/report.json`, `evaluation/northstar-live-rollup-2026-07-20/report.md`, `evaluation/northstar-next-runway-current-2026-07-22/report.json`, `evaluation/northstar-next-runway-current-2026-07-22/report.md`, `evaluation/northstar-open-gates-current/report.json`, `evaluation/northstar-open-gates-current/report.md`, `evaluation/share-exact-session-boundary-2026-07-22/report.json`, `evaluation/share-exact-session-boundary-2026-07-22/report.md`, `evaluation/share-public-session-storage-approval-2026-07-23/report.json`, `evaluation/share-public-session-storage-approval-2026-07-23/report.md`, `evaluation/share-public-session-storage-readiness-2026-07-23/report.json`, `evaluation/share-public-session-storage-readiness-2026-07-23/report.md`, `evaluation/share-public-session-storage-readiness-2026-07-23/run-share-public-session-storage-readiness.mjs`
 
-Current head is evidence-only pending: `false`
+Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `f3b1997488855fd68a023b660c55fca82cd2d2f8`
+Live rollup source head: `642275280f970580e369c3396b7bb3a08b5f80b2`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `642275280f970580e369c3396b7bb3a08b5f80b2` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `f3b1997488855fd68a023b660c55fca82cd2d2f8`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
