@@ -28,6 +28,7 @@ const ARTIFACTS = Object.freeze({
   sifEmbeddingPreflight: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
   shareGeneratedSessionPerception: path.join("evaluation", "share-generated-session-perception-2026-07-22", "report.json"),
   shareExactSessionBoundary: path.join("evaluation", "share-exact-session-boundary-2026-07-22", "report.json"),
+  shareRecipientAckApprovalPreflight: path.join("evaluation", "share-recipient-ack-approval-preflight-current-2026-07-19", "report.json"),
   sharePublicSessionStorageReadiness: path.join("evaluation", "share-public-session-storage-readiness-2026-07-23", "report.json"),
   sharePublicSessionStorageApproval: path.join("evaluation", "share-public-session-storage-approval-2026-07-23", "report.json"),
   documentsCockpitWorkbenchGeometry: path.join("evaluation", "documents-cockpit-workbench-geometry-2026-07-22", "report.json"),
@@ -330,6 +331,24 @@ function shareExactSessionBoundarySummary(shareExact) {
     invalidReadStatus: typeof invalidReadProbe.status === "number" ? invalidReadProbe.status : null,
     invalidReadMessage: asString(invalidReadProbe.message),
     safeInvalidSessionReadVerdict: asString(shareExact.safeInvalidSessionReadVerdict),
+  };
+}
+
+/**
+ * @param {unknown} ack
+ */
+function shareRecipientAckApprovalSummary(ack) {
+  if (!isRecord(ack)) return {};
+  return {
+    overall: asString(ack.overall),
+    sourceSha: asString(ack.sourceSha),
+    approvalRequired: asBoolean(ack.approvalRequired),
+    liveDataMutationApproved: asBoolean(ack.liveDataMutationApproved),
+    dbMutationPerformed: asBoolean(ack.dbMutationPerformed),
+    providerMessageSent: asBoolean(ack.providerMessageSent),
+    productionShareSessionCreated: asBoolean(ack.productionShareSessionCreated),
+    productionReadConfirmationInserted: asBoolean(ack.productionReadConfirmationInserted),
+    failedCheckIds: Array.isArray(ack.failedCheckIds) ? ack.failedCheckIds.map(asString).filter(Boolean) : [],
   };
 }
 
@@ -660,6 +679,7 @@ export function buildNorthstarNextRunway(options) {
   const sif = readJson(options.rootDir, ARTIFACTS.sifEmbeddingPreflight);
   const shareGenerated = readJson(options.rootDir, ARTIFACTS.shareGeneratedSessionPerception);
   const shareExactBoundary = readJson(options.rootDir, ARTIFACTS.shareExactSessionBoundary);
+  const shareRecipientAckApproval = readOptionalJson(options.rootDir, ARTIFACTS.shareRecipientAckApprovalPreflight);
   const sharePublicSessionStorageReadiness = readOptionalJson(options.rootDir, ARTIFACTS.sharePublicSessionStorageReadiness);
   const sharePublicSessionStorageApproval = readOptionalJson(options.rootDir, ARTIFACTS.sharePublicSessionStorageApproval);
   const documentsCockpitGeometry = readOptionalJson(options.rootDir, ARTIFACTS.documentsCockpitWorkbenchGeometry);
@@ -758,6 +778,7 @@ export function buildNorthstarNextRunway(options) {
     sifEmbeddingRuntime: sifSummary(sif),
     shareGeneratedSessionPerception: shareGeneratedSessionSummary(shareGenerated),
     shareExactSessionBoundary: shareExactSessionBoundarySummary(shareExactBoundary),
+    shareRecipientAckApproval: shareRecipientAckApprovalSummary(shareRecipientAckApproval),
     sharePublicSessionStorageReadiness: sharePublicSessionStorageReadinessSummary(sharePublicSessionStorageReadiness),
     sharePublicSessionStorageApproval: sharePublicSessionStorageApprovalSummary(sharePublicSessionStorageApproval),
     documentsCockpitWorkbenchGeometry: documentsCockpitWorkbenchGeometrySummary(documentsCockpitGeometry),
@@ -779,6 +800,7 @@ export function buildNorthstarNextRunway(options) {
       "keep Share UI evidence split by route: invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result state each need their own geometry before closing user-specific mobile-like complaints",
       "resolve public Share storage readiness before exact saved-session closure: current evidence shows workpacks readable but workpack_share_sessions missing from production PostgREST schema cache",
       "do not create a production saved Share session unless the user supplies a concrete existing URL or explicitly approves DB-backed share-session creation; POST /api/workpacks/[id]/share-sessions inserts workpack_share_sessions",
+      "keep invited-recipient ACK canary approval-gated: production workpack_share_sessions and workpack_read_confirmations rows require explicit live-data mutation approval before any real ACK readback claim",
       "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
       "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
       "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held",
@@ -887,6 +909,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
 - Share route evidence split: invited recipient \`/share/[sessionId]\` fixture route, exact saved/generated \`/share/[sessionId]\`, and manager/workspace share-result route remain separate proof layers. A fixture pass cannot close a user-specific exact saved/session complaint.
 - Share exact-session boundary: \`${report.shareExactSessionBoundary.verdict || "missing"}\`; exact saved reproduced is \`${report.shareExactSessionBoundary.exactSavedUserSessionReproduced === true}\`, safe missing-session GET status is \`${report.shareExactSessionBoundary.safeReadStatus ?? "unknown"}\`, safe-read verdict is \`${report.shareExactSessionBoundary.safeMissingSessionReadVerdict || "unknown"}\`, invalid-id GET status is \`${report.shareExactSessionBoundary.invalidReadStatus ?? "unknown"}\`, invalid-id verdict is \`${report.shareExactSessionBoundary.safeInvalidSessionReadVerdict || "unknown"}\`, and DB/provider mutations remain \`false\`.
+- Share recipient ACK approval: \`${report.shareRecipientAckApproval.overall || "missing"}\`; approval required is \`${report.shareRecipientAckApproval.approvalRequired === true}\`, live-data mutation approved is \`${report.shareRecipientAckApproval.liveDataMutationApproved === true}\`, production share session created is \`${report.shareRecipientAckApproval.productionShareSessionCreated === true}\`, read confirmation inserted is \`${report.shareRecipientAckApproval.productionReadConfirmationInserted === true}\`, DB mutation performed is \`${report.shareRecipientAckApproval.dbMutationPerformed === true}\`, and provider message sent is \`${report.shareRecipientAckApproval.providerMessageSent === true}\`.
 - Share public-session storage readiness: \`${report.sharePublicSessionStorageReadiness.verdict || "missing"}\`; live public API status is \`${report.sharePublicSessionStorageReadiness.livePublicApiStatus ?? "unknown"}\`, service-role workpacks readable is \`${report.sharePublicSessionStorageReadiness.workpacksReadable === true}\`, workpack_share_sessions readable is \`${report.sharePublicSessionStorageReadiness.shareSessionsReadable === true}\`, and share-session read error is \`${report.sharePublicSessionStorageReadiness.shareSessionsErrorCode || "unknown"}\`.
 - Share public-session storage approval: \`${report.sharePublicSessionStorageApproval.verdict || "missing"}\`; exact saved Share remains \`${report.sharePublicSessionStorageApproval.exactSavedShareSessionVerdict || "unknown"}\`, operator approval required is \`${report.sharePublicSessionStorageApproval.operatorApprovalRequiredBeforeMigration === true}\`, share-session creation would insert storage is \`${report.sharePublicSessionStorageApproval.shareSessionCreationWouldInsertWorkpackShareSessions === true}\`, DB mutation performed is \`${report.sharePublicSessionStorageApproval.dbMutationPerformed === true}\`, and migration path is \`${report.sharePublicSessionStorageApproval.migrationPath || "unknown"}\`.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.

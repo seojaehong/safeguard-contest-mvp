@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `65a5b044cc562c56a9789f3011a4b2ef3d64e303`
+Source HEAD: `33d0fd154f00322cfd5e2c5ae04015ab097f96ce`
 
-Production `/api/build-info`: `65a5b044cc562c56a9789f3011a4b2ef3d64e303`
+Production `/api/build-info`: `33d0fd154f00322cfd5e2c5ae04015ab097f96ce`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `65a5b044cc562c56a9789f3011a4b2ef3d64e303`
+Live rollup source head: `33d0fd154f00322cfd5e2c5ae04015ab097f96ce`
 
 Live rollup matches production: `true`
 
@@ -75,6 +75,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
 - Share route evidence split: invited recipient `/share/[sessionId]` fixture route, exact saved/generated `/share/[sessionId]`, and manager/workspace share-result route remain separate proof layers. A fixture pass cannot close a user-specific exact saved/session complaint.
 - Share exact-session boundary: `MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED`; exact saved reproduced is `false`, safe missing-session GET status is `404`, safe-read verdict is `PASS_FAIL_CLOSED`, invalid-id GET status is `400`, invalid-id verdict is `PASS_INVALID_ID_FAIL_CLOSED`, and DB/provider mutations remain `false`.
+- Share recipient ACK approval: `approval_ready_open`; approval required is `true`, live-data mutation approved is `false`, production share session created is `false`, read confirmation inserted is `false`, DB mutation performed is `false`, and provider message sent is `false`.
 - Share public-session storage readiness: `RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION`; live public API status is `404`, service-role workpacks readable is `true`, workpack_share_sessions readable is `false`, and share-session read error is `PGRST205`.
 - Share public-session storage approval: `APPROVAL_REQUIRED_PUBLIC_SHARE_SESSION_STORAGE_MIGRATION_NO_MUTATION`; exact saved Share remains `MISSING_EVIDENCE`, operator approval required is `true`, share-session creation would insert storage is `true`, DB mutation performed is `false`, and migration path is `supabase/migrations/010_commercial_operations.sql`.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
@@ -103,9 +104,10 @@ Required first-task containment:
 12. keep Share UI evidence split by route: invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result state each need their own geometry before closing user-specific mobile-like complaints.
 13. resolve public Share storage readiness before exact saved-session closure: current evidence shows workpacks readable but workpack_share_sessions missing from production PostgREST schema cache.
 14. do not create a production saved Share session unless the user supplies a concrete existing URL or explicitly approves DB-backed share-session creation; POST /api/workpacks/[id]/share-sessions inserts workpack_share_sessions.
-15. keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven.
-16. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
-17. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
+15. keep invited-recipient ACK canary approval-gated: production workpack_share_sessions and workpack_read_confirmations rows require explicit live-data mutation approval before any real ACK readback claim.
+16. keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven.
+17. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
+18. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
 
 ## KOSHA Candidate Boundary
 

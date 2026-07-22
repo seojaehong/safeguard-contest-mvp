@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-22T23:25:10.409Z",
-  "sourceSha": "65a5b044cc562c56a9789f3011a4b2ef3d64e303",
+  "generatedAt": "2026-07-22T23:30:06.251Z",
+  "sourceSha": "33d0fd154f00322cfd5e2c5ae04015ab097f96ce",
   "overall": "open",
   "gates": [
     {
@@ -84,6 +84,17 @@
         "Keep invalid share-session ids fail-closed at 400 so URL validation remains separated from storage-backed missing-session read debt.",
         "Resolve production public share storage readiness so workpack_share_sessions is visible in the PostgREST schema cache before exact saved-session closure.",
         "Do not call POST /api/workpacks/[id]/share-sessions without explicit DB-backed share-session creation approval; that path inserts workpack_share_sessions."
+      ]
+    },
+    {
+      "id": "share_recipient_ack_approval",
+      "state": "approval_gated",
+      "label": "Share recipient ACK live-data approval",
+      "evidencePath": "evaluation\\share-recipient-ack-approval-preflight-current-2026-07-19\\report.json",
+      "detail": "Recipient ACK route/test preflight is operator-ready, but a real production invited-recipient ACK canary would create workpack_share_sessions and workpack_read_confirmations rows, so it remains approval-gated with no DB mutation or provider message sent.",
+      "nextActions": [
+        "Use the approval preflight to prepare a disposable workpack/worker ACK canary only after explicit live-data mutation approval.",
+        "Do not claim real invited-recipient ACK readback until production share-session creation and read-confirmation insertion are approved and measured."
       ]
     },
     {

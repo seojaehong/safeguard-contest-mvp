@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T23:25:14.520Z",
+  "generatedAt": "2026-07-22T23:30:10.497Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "65a5b044cc562c56a9789f3011a4b2ef3d64e303",
-  "productionCommit": "65a5b044cc562c56a9789f3011a4b2ef3d64e303",
+  "sourceHead": "33d0fd154f00322cfd5e2c5ae04015ab097f96ce",
+  "productionCommit": "33d0fd154f00322cfd5e2c5ae04015ab097f96ce",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "65a5b044cc562c56a9789f3011a4b2ef3d64e303",
+    "commitSha": "33d0fd154f00322cfd5e2c5ae04015ab097f96ce",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-mxjisuh7w-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-o8b5z20tq-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "65a5b044cc562c56a9789f3011a4b2ef3d64e303",
-  "liveRollupLiveCommit": "65a5b044cc562c56a9789f3011a4b2ef3d64e303",
+  "liveExactEvidenceCommit": "33d0fd154f00322cfd5e2c5ae04015ab097f96ce",
+  "liveRollupLiveCommit": "33d0fd154f00322cfd5e2c5ae04015ab097f96ce",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -40,6 +40,7 @@
     "sifEmbeddingPreflight": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
     "shareGeneratedSessionPerception": "evaluation\\share-generated-session-perception-2026-07-22\\report.json",
     "shareExactSessionBoundary": "evaluation\\share-exact-session-boundary-2026-07-22\\report.json",
+    "shareRecipientAckApprovalPreflight": "evaluation\\share-recipient-ack-approval-preflight-current-2026-07-19\\report.json",
     "sharePublicSessionStorageReadiness": "evaluation\\share-public-session-storage-readiness-2026-07-23\\report.json",
     "sharePublicSessionStorageApproval": "evaluation\\share-public-session-storage-approval-2026-07-23\\report.json",
     "documentsCockpitWorkbenchGeometry": "evaluation\\documents-cockpit-workbench-geometry-2026-07-22\\report.json",
@@ -349,6 +350,17 @@
     "invalidReadMessage": "공유 세션 식별 형식이 올바르지 않습니다.",
     "safeInvalidSessionReadVerdict": "PASS_INVALID_ID_FAIL_CLOSED"
   },
+  "shareRecipientAckApproval": {
+    "overall": "approval_ready_open",
+    "sourceSha": "33d0fd154f00322cfd5e2c5ae04015ab097f96ce",
+    "approvalRequired": true,
+    "liveDataMutationApproved": false,
+    "dbMutationPerformed": false,
+    "providerMessageSent": false,
+    "productionShareSessionCreated": false,
+    "productionReadConfirmationInserted": false,
+    "failedCheckIds": []
+  },
   "sharePublicSessionStorageReadiness": {
     "verdict": "RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION",
     "sourceHead": "f66a8c5e9bb0ac74a0831f07cc6f2bd9af1ae6c6",
@@ -626,6 +638,7 @@
     "keep Share UI evidence split by route: invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result state each need their own geometry before closing user-specific mobile-like complaints",
     "resolve public Share storage readiness before exact saved-session closure: current evidence shows workpacks readable but workpack_share_sessions missing from production PostgREST schema cache",
     "do not create a production saved Share session unless the user supplies a concrete existing URL or explicitly approves DB-backed share-session creation; POST /api/workpacks/[id]/share-sessions inserts workpack_share_sessions",
+    "keep invited-recipient ACK canary approval-gated: production workpack_share_sessions and workpack_read_confirmations rows require explicit live-data mutation approval before any real ACK readback claim",
     "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
     "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
     "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held"

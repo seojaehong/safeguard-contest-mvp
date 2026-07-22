@@ -57,6 +57,7 @@ const EVIDENCE_PATHS = Object.freeze({
   shareRecipientCockpit: path.join("evaluation", "share-recipient-cockpit-2026-07-22", "report.json"),
   shareResultDrilldown: path.join("evaluation", "share-result-drilldown-2026-07-21", "report.json"),
   shareExactSessionBoundary: path.join("evaluation", "share-exact-session-boundary-2026-07-22", "report.json"),
+  shareRecipientAckApprovalPreflight: path.join("evaluation", "share-recipient-ack-approval-preflight-current-2026-07-19", "report.json"),
   sharePublicSessionStorageReadiness: path.join("evaluation", "share-public-session-storage-readiness-2026-07-23", "report.json"),
   sharePublicSessionStorageApproval: path.join("evaluation", "share-public-session-storage-approval-2026-07-23", "report.json"),
   dispatchStandalone: path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"),
@@ -310,6 +311,58 @@ function evaluateLiveHarnessGate(rootDir) {
     evidencePath,
     detail: `Live harness verdict is ${verdict || "unknown"} with failedContracts=${failedContracts ?? "unknown"}.`,
     nextActions: ["Fix harness quality failures before recording North Star progress."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateShareRecipientAckApprovalGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.shareRecipientAckApprovalPreflight;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "share_recipient_ack_approval",
+      label: "Share recipient ACK live-data approval",
+      state: "missing",
+      evidencePath,
+      detail: "Share recipient ACK approval preflight evidence is missing.",
+      nextActions: ["Run `node scripts\\share_recipient_ack_approval_preflight.mjs` before any production ACK canary."],
+    });
+  }
+
+  const safe = readString(report.overall) === "approval_ready_open"
+    && report.approvalRequired === true
+    && report.liveDataMutationApproved === false
+    && report.dbMutationPerformed === false
+    && report.providerMessageSent === false
+    && report.productionShareSessionCreated === false
+    && report.productionReadConfirmationInserted === false
+    && Array.isArray(report.failedCheckIds)
+    && report.failedCheckIds.length === 0;
+
+  if (safe) {
+    return gateResult({
+      id: "share_recipient_ack_approval",
+      label: "Share recipient ACK live-data approval",
+      state: "approval_gated",
+      evidencePath,
+      detail: "Recipient ACK route/test preflight is operator-ready, but a real production invited-recipient ACK canary would create workpack_share_sessions and workpack_read_confirmations rows, so it remains approval-gated with no DB mutation or provider message sent.",
+      nextActions: [
+        "Use the approval preflight to prepare a disposable workpack/worker ACK canary only after explicit live-data mutation approval.",
+        "Do not claim real invited-recipient ACK readback until production share-session creation and read-confirmation insertion are approved and measured.",
+      ],
+    });
+  }
+
+  return gateResult({
+    id: "share_recipient_ack_approval",
+    label: "Share recipient ACK live-data approval",
+    state: "contradicted",
+    evidencePath,
+    detail: "Share recipient ACK preflight no longer preserves approval-required, no-mutation, or no-provider-message boundaries.",
+    nextActions: ["Restore the approval-held recipient ACK preflight before any live-data canary."],
   });
 }
 
@@ -2222,6 +2275,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateDispatchStandaloneCockpitGate(rootDir),
     evaluateShareResultFixtureCockpitGate(rootDir),
     evaluateShareExactSessionBoundaryGate(rootDir),
+    evaluateShareRecipientAckApprovalGate(rootDir),
     evaluateProviderDispatchPersistenceGate(rootDir),
     evaluateRlsApprovalGate(rootDir),
     evaluateLlmWikiGate(rootDir),

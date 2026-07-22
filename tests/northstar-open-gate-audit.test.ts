@@ -1065,6 +1065,17 @@ function createFixtureRoot(): string {
       exactSessionMutationRequestCount: 0,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "share-recipient-ack-approval-preflight-current-2026-07-19", "report.json"), {
+    schemaVersion: "safeclaw-share-recipient-ack-approval-preflight/v1",
+    overall: "approval_ready_open",
+    approvalRequired: true,
+    liveDataMutationApproved: false,
+    dbMutationPerformed: false,
+    providerMessageSent: false,
+    productionShareSessionCreated: false,
+    productionReadConfirmationInserted: false,
+    failedCheckIds: [],
+  });
   writeJson(rootDir, path.join("evaluation", "share-public-session-storage-readiness-2026-07-23", "report.json"), {
     verdict: "RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION",
     dbMutationPerformed: false,
