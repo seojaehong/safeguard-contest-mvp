@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-22T01:12:34.424Z
-Source HEAD at generation: e6475342d9ba5a0a9be2d9409e9b687bc37c6759
-Live commit at generation: e6475342d9ba5a0a9be2d9409e9b687bc37c6759
+Generated at: 2026-07-22T01:45:42.978Z
+Source HEAD at generation: f8207646fee7e841fa3b6c2f1277bfe9f0b249c0
+Live commit at generation: f8207646fee7e841fa3b6c2f1277bfe9f0b249c0
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -38,12 +38,13 @@ Overall: `northstar_open_approval_gated`
 | supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
 | llm_wiki_publication | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
 | sif_embedding_runtime | approval_gated | evaluation\sif-embedding-gate\approval-preflight-report.json |
+| kosha_exact_promotion_review_gate | approval_gated | evaluation\kosha-exact-promotion-review-gate-2026-07-22\report.json |
 
 ## Evidence Freshness
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | ancestor | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
 | kosha_exact_trust_registry | ancestor | ancestor_of_head | evaluation\kosha-current-live-gate-2026-07-20\report.json |
@@ -67,3 +68,4 @@ Overall: `northstar_open_approval_gated`
 - supabase_rls_launch_isolation: Read-only RLS approval preflight passed at source SHA df829d5a9c5736467eeddbd72c4dccbf6327816f, but live RLS catalog and tenant A/B isolation are not proven.
 - llm_wiki_publication: Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA df829d5a9c5736467eeddbd72c4dccbf6327816f.
 - sif_embedding_runtime: SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 4fcd064bfe9c6d6d98df7873a3091550dddca0c5.
+- kosha_exact_promotion_review_gate: Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval.
