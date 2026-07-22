@@ -1,23 +1,23 @@
 {
   "schemaVersion": "safeclaw-documents-long-form-ia/v1",
-  "checkedAt": "2026-07-22T04:46:59.934Z",
-  "baseUrl": "http://127.0.0.1:3063",
-  "sourceHead": "8eb4474aa2bb0c583cf9c204507198f8dad8b5a7",
+  "checkedAt": "2026-07-22T04:49:40.870Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceHead": "8168ad83af5041446af6ea8f076015b158271814",
   "productionBuild": {
     "ok": true,
-    "configured": false,
-    "source": "unavailable",
-    "commitSha": null,
-    "branch": null,
-    "environment": null,
-    "deploymentUrl": null,
-    "message": "배포 커밋 식별자가 런타임 환경에 노출되지 않았습니다."
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "8168ad83af5041446af6ea8f076015b158271814",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-qt756z8d6-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
   },
   "providerDispatchLiveClaimed": false,
   "dbMutationPerformed": false,
   "routeSplitAloneAcceptedAsFix": false,
   "routeSplitVerdict": "PASS_ORIENTATION_ONLY",
-  "verdict": "PARTIAL_CURRENT_SOURCE_LOCAL_PRODUCTION",
+  "verdict": "PARTIAL_LIVE_PRODUCTION_MEASURED",
   "interpretation": "This gate separates first-action cockpit proof from the user's perceived long Documents concern. It does not claim the whole Documents page is short merely because the first risk-assessment action is visible.",
   "verdictModel": {
     "routeSplitVerdict": "route/page split can pass for orientation but is not accepted as the length fix",
@@ -416,8 +416,8 @@
         "workpackShellScrollHeight": 1651,
         "workpackShellOverflowY": "auto",
         "toolbar": {
-          "top": -913,
-          "bottom": -809,
+          "top": -931,
+          "bottom": -827,
           "left": 621,
           "right": 1356,
           "width": 735,
@@ -427,10 +427,10 @@
           "overflowY": "visible",
           "position": "static"
         },
-        "toolbarBottom": -809,
+        "toolbarBottom": -827,
         "fieldStrip": {
-          "top": -701,
-          "bottom": -653,
+          "top": -719,
+          "bottom": -671,
           "left": 621,
           "right": 1356,
           "width": 735,
@@ -440,10 +440,10 @@
           "overflowY": "visible",
           "position": "static"
         },
-        "fieldStripBottom": -653,
+        "fieldStripBottom": -671,
         "sectionActions": {
-          "top": -637,
-          "bottom": -593,
+          "top": -655,
+          "bottom": -611,
           "left": 621,
           "right": 1356,
           "width": 735,
@@ -453,10 +453,10 @@
           "overflowY": "visible",
           "position": "static"
         },
-        "sectionActionsBottom": -593,
+        "sectionActionsBottom": -611,
         "firstRiskRowHeader": {
-          "top": -492,
-          "bottom": -432,
+          "top": -510,
+          "bottom": -450,
           "left": 634,
           "right": 1343,
           "width": 709,
@@ -466,11 +466,11 @@
           "overflowY": "visible",
           "position": "static"
         },
-        "firstRiskRowHeaderBottom": -432,
+        "firstRiskRowHeaderBottom": -450,
         "firstRiskRowHeaderText": "01외벽 도장 작업추락 · 위험등급 high · 근거 2건 · 확인 확인 예정×",
         "firstRiskHazardField": {
-          "top": -396,
-          "bottom": -336,
+          "top": -414,
+          "bottom": -354,
           "left": 634,
           "right": 1343,
           "width": 709,
@@ -480,11 +480,11 @@
           "overflowY": "auto",
           "position": "static"
         },
-        "firstRiskHazardFieldTop": -396,
-        "firstRiskHazardFieldBottom": -336,
+        "firstRiskHazardFieldTop": -414,
+        "firstRiskHazardFieldBottom": -354,
         "rawTextarea": {
-          "top": -4,
-          "bottom": 97,
+          "top": -22,
+          "bottom": 79,
           "left": 621,
           "right": 1356,
           "width": 735,
@@ -494,8 +494,8 @@
           "overflowY": "hidden",
           "position": "static"
         },
-        "rawTextareaTop": -4,
-        "rawTextareaBottom": 97,
+        "rawTextareaTop": -22,
+        "rawTextareaBottom": 79,
         "rawTextareaSecondary": false,
         "sameDocumentReselectMeasured": false,
         "renderedTextareas": 4,
@@ -542,8 +542,8 @@
           },
           {
             "className": "workpack-sidebar card list WorkpackEditor_navigator__1_oN_",
-            "top": -318,
-            "bottom": 693,
+            "top": -336,
+            "bottom": 675,
             "position": "sticky"
           }
         ]
@@ -557,9 +557,9 @@
         "bodyRatio": 1.07,
         "shell": "289-675/1651",
         "selected": "위험성평가표",
-        "actionsBottom": -593,
-        "hazardBottom": -336,
-        "rawTextareaTop": -4,
+        "actionsBottom": -611,
+        "hazardBottom": -354,
+        "rawTextareaTop": -22,
         "textareas": 4,
         "inViewportBodies": 1,
         "supportingOpen": true,

@@ -1,14 +1,14 @@
 # Documents Long-Form IA Probe
 
-Checked at: 2026-07-22T04:46:59.934Z
+Checked at: 2026-07-22T04:49:40.870Z
 
-Base URL: `http://127.0.0.1:3063`
+Base URL: `https://www.safeclaw.kr`
 
-Source HEAD: `8eb4474aa2bb0c583cf9c204507198f8dad8b5a7`
+Source HEAD: `8168ad83af5041446af6ea8f076015b158271814`
 
-Production commit: `unknown`
+Production commit: `8168ad83af5041446af6ea8f076015b158271814`
 
-Verdict: `PARTIAL_CURRENT_SOURCE_LOCAL_PRODUCTION`
+Verdict: `PARTIAL_LIVE_PRODUCTION_MEASURED`
 
 Provider live dispatch claimed: `false`
 
@@ -30,7 +30,7 @@ Allowed claim: selected risk-assessment cockpit and first field/action surfaces 
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | default overview/cockpit | desktop-short-1440x723 | PARTIAL | PASS | PASS | n/a | RED | PASS | 1.07 | 452 | 709 | 1041 | 0 | false | 1651 | false | 0 |
 | same-document riskAssessmentDraft reselect landing | desktop-short-1440x723 | PARTIAL | PASS | PASS | PASS | RED | PASS | 1.07 | 452 | 709 | 1041 | 0 | false | 1651 | false | 0 |
-| all 12 document launcher exposure | desktop-short-1440x723 | PASS | n/a | n/a | n/a | RED | PASS | 1.07 | -593 | -336 | -4 | 1 | true | 1651 | false | 0 |
+| all 12 document launcher exposure | desktop-short-1440x723 | PASS | n/a | n/a | n/a | RED | PASS | 1.07 | -611 | -354 | -22 | 1 | true | 1651 | false | 0 |
 | default overview/cockpit | desktop-1440x900 | RED | RED | RED | n/a | RED | PASS | 2.45 | 871 | 1128 | 1461 | 0 | false | 1651 | false | 0 |
 | same-document riskAssessmentDraft reselect landing | desktop-1440x900 | RED | RED | RED | RED | RED | PASS | 2.45 | 871 | 1128 | 1461 | 0 | false | 1651 | false | 0 |
 | all 12 document launcher exposure | desktop-1440x900 | PASS | n/a | n/a | n/a | RED | PASS | 2.45 | 833 | 1090 | 1423 | 0 | true | 1651 | false | 0 |
@@ -40,7 +40,7 @@ Allowed claim: selected risk-assessment cockpit and first field/action surfaces 
 
 ## Remaining UX Boundary
 
-- Product commit `8eb4474a` is a scoped risk-assessment cockpit remediation: desktop-short and mobile same-document risk reselect now record first action, field-first, and reselect landing PASS when the table above shows PASS. It does not close desktop 1440x900 layout behavior or all-12 document containment.
+- Product commit `8168ad83` is a scoped risk-assessment cockpit remediation: desktop-short and mobile same-document risk reselect now record first action, field-first, and reselect landing PASS when the table above shows PASS. It does not close desktop 1440x900 layout behavior or all-12 document containment.
 - If `allDocumentLongFormVerdict` is RED or PARTIAL, product work should stay bounded to the documents route/component shell: master-detail, selected-only detail, accordion, local scroll, or drawer.
 - Supporting document launcher visibility is not itself the launch fix. Default closed supporting nav is acceptable, but the all-12 exposure state remains a follow-up when it still behaves like a long serial document surface rather than bounded navigation.
 - Do not use page count as the fix. Route split only helps orientation; long bodies must be locally contained.
