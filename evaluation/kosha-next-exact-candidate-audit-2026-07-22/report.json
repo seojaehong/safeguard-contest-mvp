@@ -1,0 +1,143 @@
+{
+  "schemaVersion": "safeclaw-kosha-next-exact-candidate-audit/v1",
+  "generatedAt": "2026-07-22T09:06:57.1148646+09:00",
+  "sourceHead": "cdfa010c13cb7e45f11736e91d56dd35ef0c9347",
+  "liveBuildInfoAtAudit": {
+    "commitSha": "7389f22eb06e8d3f7724d15d9d172a9d9800cb7e",
+    "branch": "master",
+    "environment": "production"
+  },
+  "verdict": "NEXT_EXACT_TRUST_CANDIDATES_IDENTIFIED_APPROVAL_FREE",
+  "scope": "read-only audit of KOSHA exact trust boundary and next immutable-acquisition candidates",
+  "mutationPerformed": false,
+  "networkAcquisitionPerformed": false,
+  "dbMutationPerformed": false,
+  "embeddingGenerationPerformed": false,
+  "exactTrustRegistryCurrent": {
+    "status": "proven",
+    "count": 3,
+    "versions": [
+      "B-E-10-2026",
+      "D-C-13-2026",
+      "D-C-7-2026"
+    ],
+    "evidence": [
+      "evaluation/kosha-current-northstar-regression-2026-07-22/report.json",
+      "evaluation/kosha-current-live-gate-2026-07-20/report.json",
+      "evaluation/kosha-current-3pin-gate-2026-07-21/report.json",
+      "data/safety-knowledge/exact-kosha/"
+    ]
+  },
+  "verifiedSubsetCurrent": {
+    "snapshotId": "e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12",
+    "scopeId": "technical-support-regulation-current-native",
+    "sourceInventoryCount": 1040,
+    "acceptedCount": 234,
+    "outOfScopeCount": 806,
+    "bodyKinds": [
+      "native"
+    ],
+    "officialStatuses": [
+      "current"
+    ],
+    "itemsCount": 234,
+    "chunksCount": 7127,
+    "failures": 0,
+    "networkCallsPerformed": false,
+    "ocrPerformed": false,
+    "dbMutationPerformed": false,
+    "provenanceComplete": true
+  },
+  "officialMetadataRegistry": {
+    "path": "data/safety-knowledge/kosha-official-metadata/official-metadata-2026-07-15.jsonl",
+    "metadataRows": 234,
+    "currentRows": 234,
+    "completeRows": 234,
+    "completeCurrentRows": 234,
+    "metadataVerifiedNotExact": 231,
+    "completeCurrentByCategory": {
+      "A": 23,
+      "B": 59,
+      "C": 93,
+      "D": 15,
+      "E": 44
+    }
+  },
+  "sampleNextCandidates": [
+    {
+      "stableKey": "A-G-1",
+      "version": "A-G-1-2025",
+      "category": "A",
+      "publishedAt": "2025-03-26",
+      "officialFileId": "FL00021379766",
+      "bodySha256Prefix": "55fa0e40cfd6",
+      "pdfSha256Prefix": "adac02929d30"
+    },
+    {
+      "stableKey": "A-G-10",
+      "version": "A-G-10-2025",
+      "category": "A",
+      "publishedAt": "2025-03-26",
+      "officialFileId": "FL00021380042",
+      "bodySha256Prefix": "f9c5477b0a5f",
+      "pdfSha256Prefix": "95e78c316018"
+    },
+    {
+      "stableKey": "A-G-11",
+      "version": "A-G-11-2025",
+      "category": "A",
+      "publishedAt": "2025-03-26",
+      "officialFileId": "FL00021380051",
+      "bodySha256Prefix": "d5131de569d2",
+      "pdfSha256Prefix": "4f04f447a744"
+    },
+    {
+      "stableKey": "A-G-12",
+      "version": "A-G-12-2026",
+      "category": "A",
+      "publishedAt": "2026-01-30",
+      "officialFileId": "CTC2026012909222643246624",
+      "bodySha256Prefix": "86ba7e0668bb",
+      "pdfSha256Prefix": "d35d6957d1b9"
+    },
+    {
+      "stableKey": "A-G-13",
+      "version": "A-G-13-2026",
+      "category": "A",
+      "publishedAt": "2026-01-30",
+      "officialFileId": "CTC2026012909351050697115",
+      "bodySha256Prefix": "27a1a51378a8",
+      "pdfSha256Prefix": "930fab89b07a"
+    }
+  ],
+  "interpretation": {
+    "closed": [
+      "The exact trust registry remains proven for the three accepted pins.",
+      "A read-only verified subset exists for 234 current native technical-support regulations with complete official metadata and no snapshot failures.",
+      "The next candidate pool is identifiable without DB writes, embedding generation, or provider changes."
+    ],
+    "open": [
+      "The 231 metadata-verified non-exact candidates are not yet exact production evidence.",
+      "The broader 1,040-row Guide corpus must not be described as fully authoritative-grounding ready.",
+      "Exact trust promotion still requires separate immutable acquisition/review and fail-closed tests per promoted item."
+    ]
+  },
+  "requiredBeforePromotingAdditionalExactPins": [
+    "Select a bounded candidate set from the 231 metadata-verified non-exact current native rows.",
+    "Persist exact-kosha reference JSON only after immutable body/pdf/provenance hashes are reviewed and matched to official URL, file ID, version, publication date, and stable key.",
+    "Add registry tests proving each new pin fails closed on stale version, hash mismatch, missing lifecycle, missing human confirmation, and metadata contradiction.",
+    "Run exact-trusted grounding, KOSHA current live gate, North Star open-gate audit, and launch-readiness boundary tests after promotion.",
+    "Keep KOSHA Guide vector/embedding/runtime claims separate until approved SIF/KOSHA vector gates are executed."
+  ],
+  "safeClaims": [
+    "KOSHA exact trust is current and proven for the accepted three-pin slice.",
+    "A 234-item current native technical-support regulation subset is reproducible and complete as a candidate pool.",
+    "Additional exact pins can be proposed from the verified subset, but only after separate immutable acquisition/review."
+  ],
+  "forbiddenClaims": [
+    "All 1,040 KOSHA Guide rows are exact direct evidence.",
+    "The 231 metadata-verified non-exact candidates are already exact production evidence.",
+    "KOSHA Guide embeddings or vector retrieval are production-active.",
+    "This audit performed DB mutation, embedding generation, upload, or provider dispatch."
+  ]
+}
