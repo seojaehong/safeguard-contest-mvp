@@ -1410,8 +1410,16 @@
   }
 
   .riskRowsEditor {
-    gap: 4px;
+    gap: 3px;
     padding-bottom: 0;
+  }
+
+  .riskRowsHeader {
+    order: 2;
+  }
+
+  .riskRowsFieldset {
+    order: 1;
   }
 
   .documentSectionFieldStrip {
@@ -1490,17 +1498,48 @@
     gap: 4px;
   }
 
+  .riskRowsHeader small {
+    overflow: hidden;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .riskRowsHeader strong {
+    overflow: hidden;
+    max-width: 96px;
+    border: 1px solid var(--workspace-rule);
+    border-radius: var(--radius-control);
+    padding: 1px 5px;
+    background: var(--workspace-surface-2);
+    font-family: var(--font-hud);
+    font-size: var(--text-hud);
+    line-height: 1.1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .addRiskRowButton {
-    min-height: 40px;
-    padding: 0 10px;
+    min-height: 32px;
+    padding: 0 8px;
+  }
+
+  .addRiskRowButton span {
+    font-size: 16px;
   }
 
   .riskRow {
-    padding: 3px 6px;
+    padding: 2px 6px;
   }
 
   .riskRowHeader {
-    min-height: 26px;
+    min-height: 22px;
+  }
+
+  .riskRowHeader > div {
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
 
   .riskRowHeader strong,
@@ -1510,11 +1549,19 @@
     white-space: nowrap;
   }
 
+  .riskRowHeader strong {
+    max-width: 112px;
+  }
+
+  .riskRowSummaryMeta {
+    max-width: 148px;
+  }
+
   .riskRowPrimaryGrid,
   .riskRowDetailGrid,
   .riskScaleGrid {
     grid-template-columns: minmax(0, 1fr);
-    gap: 4px;
+    gap: 2px;
   }
 
   .riskRowWideField {
@@ -1523,7 +1570,7 @@
 
   .riskRow label,
   .riskLevelValue {
-    gap: 1px;
+    gap: 0;
   }
 
   .riskRow label > span {
