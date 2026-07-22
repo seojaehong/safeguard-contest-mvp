@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T17:59:21.471Z",
-  "head": "db5595c6e5bdfa87fc2a7da7563fd8cb8013742d",
+  "generatedAt": "2026-07-22T18:03:01.429Z",
+  "head": "0300946e22f233bb6e7bf7d3e412499497b77d32",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
@@ -75,13 +75,13 @@
       "id": "supabase_rls_launch_isolation",
       "state": "approval_gated",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Read-only RLS approval preflight passed at source SHA 1b82bd6bd3ac79b5205d4cf79ede8d634f2b436f, but live RLS catalog and tenant A/B isolation are not proven."
+      "detail": "Read-only RLS approval preflight passed at source SHA db5595c6e5bdfa87fc2a7da7563fd8cb8013742d, but live RLS catalog and tenant A/B isolation are not proven."
     },
     {
       "id": "llm_wiki_publication",
       "state": "approval_gated",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 1b82bd6bd3ac79b5205d4cf79ede8d634f2b436f."
+      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA db5595c6e5bdfa87fc2a7da7563fd8cb8013742d."
     },
     {
       "id": "sif_embedding_runtime",
@@ -193,10 +193,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "12bf0e3d77f9b8a569da9b150b411aa371c92119",
+      "sourceCommit": "db5595c6e5bdfa87fc2a7da7563fd8cb8013742d",
       "sourceStatus": "ancestor",
-      "productionCommit": "12bf0e3d77f9b8a569da9b150b411aa371c92119",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "db5595c6e5bdfa87fc2a7da7563fd8cb8013742d",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -225,7 +225,7 @@
     {
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "sourceCommit": "db5595c6e5bdfa87fc2a7da7563fd8cb8013742d",
+      "sourceCommit": "0300946e22f233bb6e7bf7d3e412499497b77d32",
       "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
