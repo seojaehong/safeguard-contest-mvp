@@ -3395,6 +3395,7 @@ export function WorkpackEditor({
   function handleSupportingDocumentsToggle(open: boolean) {
     setSupportingDocumentsOpen(open);
     const realignSelectedDocument = () => {
+      if (window.matchMedia("(max-width: 900px)").matches) return;
       if (selected.key === "riskAssessmentDraft") {
         alignRiskCockpitBelowToolbar();
         return;
