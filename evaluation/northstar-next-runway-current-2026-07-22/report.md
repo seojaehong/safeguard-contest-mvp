@@ -4,21 +4,21 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `add65dbd647ad902af38f16043e3de7291efe7c9`
+Source HEAD: `d57d5a9c76d35a2b22e5a094b29361ddba211ec8`
 
-Production `/api/build-info`: `087b38393ea9da0bef3aced26ef514cac12a0635`
+Production `/api/build-info`: `d57d5a9c76d35a2b22e5a094b29361ddba211ec8`
 
-Latest evidence commit live: `false`
+Latest evidence commit live: `true`
 
-Source head live pending: `true`
+Source head live pending: `false`
 
-Bounded workbench current live pending: `true`
+Bounded workbench current live pending: `false`
 
-Live rollup source head: `473e7a9fe7613f164506c5adec01896232541e89`
+Live rollup source head: `d57d5a9c76d35a2b22e5a094b29361ddba211ec8`
 
-Live rollup matches production: `false`
+Live rollup matches production: `true`
 
-Note: current HEAD `add65dbd647ad902af38f16043e3de7291efe7c9` is ahead of production `087b38393ea9da0bef3aced26ef514cac12a0635`. Product/evidence changes are source-local verified and live-pending until production advances and the live probe is rerun.
+Note: source HEAD and production marker match for this artifact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -61,7 +61,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.
 - Bounded workbench DoD: route split alone is not accepted; desktop Documents hard-REDs above the recorded screen threshold, /share/result desktop requires multi-region workbench geometry, and generated fixture evidence must stay separate from exact saved/session proof.
 - Legacy workspace-layout regression: remains a broad no-overflow/editor-flow smoke only, not a long-form UX PASS gate; the DoD and route-specific evidence own first-task distance.
-- Current bounded-workbench source/local gate: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP`; Documents 390x723 rows are PASS in current-source local production evidence, but live promotion remains pending when `boundedWorkbenchCurrentLivePending` is `true`. Share rows remain scoped if exact saved session evidence is missing.
+- Current bounded-workbench source/local gate: `PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP`; Documents 390x723 rows are PASS in current-source local production evidence, but live promotion remains pending when `boundedWorkbenchCurrentLivePending` is `true`. Share rows remain scoped if exact saved session evidence is missing.
 - Share desktop: current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
