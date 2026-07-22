@@ -1,23 +1,34 @@
 {
   "schemaVersion": "safeclaw-final-99-no-approval-boundary/v1",
-  "generatedAt": "2026-07-23T04:35:02.7360831+09:00",
-  "sourceHead": "0deca54f2b54f810dd65b91c73cc6b7f56814831",
+  "generatedAt": "2026-07-22T20:55:48.320Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceHead": "f5b3467690cea9377915f37f87755d6512b13751",
   "productionBuildInfoAtReview": {
-    "commitSha": "da5dcc02497bbdbab1b072f26e37118260360de7",
+    "ok": true,
+    "configured": true,
     "source": "vercel-system-env",
-    "environment": "production",
+    "commitSha": "f5b3467690cea9377915f37f87755d6512b13751",
     "branch": "master",
-    "deploymentUrl": "safeguard-contest-a32qfjzak-seojaehongs-projects.vercel.app"
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-kyqsztbtq-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
   },
+  "productionCommit": "f5b3467690cea9377915f37f87755d6512b13751",
   "verdict": "NO_APPROVAL_FINAL_99_RERUN_BLOCKED_BOUNDARY_DOCUMENTED",
   "dbMutationPerformed": false,
   "providerDispatchLiveClaimed": false,
-  "final99CurrentReportPath": "evaluation/final-99-gate-current-2026-07-22/report.json",
+  "final99CurrentReportPath": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
   "currentFinal99Overall": "pass_with_notice",
   "currentCarriedNoticeCount": 2,
+  "currentNoticeGateIds": [
+    "auth-history-reuse",
+    "dispatch-policy"
+  ],
+  "fullyAutomatedLaunchClaimAllowed": false,
+  "safeLaunchDemoClaimAllowed": true,
   "currentAllowedClaim": "safe launch demo with explicit approval/auth/provider boundaries",
   "currentForbiddenClaim": "fully automated launch or approved live provider dispatch is complete",
-  "runnerPath": "scripts/final_99_gate_runner.mjs",
+  "runnerPath": "scripts\\final_99_gate_runner.mjs",
   "runnerNoApprovalRisk": {
     "safeWhenSafeguardAuthTokenAbsent": true,
     "authTokenPresentInThisReview": false,
@@ -27,18 +38,15 @@
   },
   "sourceLineEvidence": [
     {
-      "path": "scripts/final_99_gate_runner.mjs",
-      "lines": "502-518",
+      "path": "scripts\\final_99_gate_runner.mjs",
       "meaning": "SAFEGUARD_AUTH_TOKEN absence creates pass_with_notice and skips live admin save/reopen."
     },
     {
-      "path": "scripts/final_99_gate_runner.mjs",
-      "lines": "524-570",
+      "path": "scripts\\final_99_gate_runner.mjs",
       "meaning": "When SAFEGUARD_AUTH_TOKEN is present, the runner POSTs workers, workpacks, and education records."
     },
     {
-      "path": "scripts/final_99_gate_runner.mjs",
-      "lines": "575-607",
+      "path": "scripts\\final_99_gate_runner.mjs",
       "meaning": "When a workpack exists, the runner POSTs dispatch logs and reads dispatch-log archive state."
     }
   ],
