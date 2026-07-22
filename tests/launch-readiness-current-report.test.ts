@@ -190,6 +190,8 @@ describe("launch readiness current report", () => {
     expect(report.forbiddenClaims).toContain("Real provider dispatch is production-live for any channel.");
     expect(markdown).toContain("SAFETYGUARD_AUDIT_DISPATCH=false");
     expect(markdown).toContain("Exact saved user share session reproduced: `false`");
+    expect(markdown).toContain("Final-99 remains `pass_with_notice`; 2 notices are carried.");
+    expect(markdown).not.toContain("Final-99 remains `undefined`");
     expect(markdown).toContain("Fully automated self-serve launch and real provider dispatch readiness are not allowed.");
   });
 
