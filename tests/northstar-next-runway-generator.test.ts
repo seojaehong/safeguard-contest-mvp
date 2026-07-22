@@ -11,6 +11,8 @@ type NextRunwayReport = {
   latestEvidenceCommitLive: boolean;
   sourceHeadLivePending: boolean;
   currentHeadIsEvidenceOnlyPending: boolean;
+  sourceHeadHasProductChanges: boolean;
+  sourcePendingChangedPaths: string[];
   liveExactEvidenceCommit: string;
   liveRollupMatchesProduction: boolean;
   boundedWorkbenchSourceIncludedInLive: boolean;
@@ -1062,6 +1064,30 @@ describe("northstar next runway generator", () => {
     expect(report.latestEvidenceCommitLive).toBe(false);
     expect(report.currentHeadIsEvidenceOnlyPending).toBe(true);
     expect(report.liveRollupMatchesProduction).toBe(true);
+  });
+
+  it("does not label a pending product source head as evidence-only", async () => {
+    const { buildNorthstarNextRunway, renderNorthstarNextRunwayMarkdown } = await loadNextRunwayModule();
+    const { root, secondHead } = createFixtureRoot();
+    fs.mkdirSync(path.join(root, "lib"), { recursive: true });
+    fs.writeFileSync(path.join(root, "lib", "runtime-product-change.ts"), "export const value = true;\n", "utf8");
+    const thirdHead = commitAll(root, "product fix");
+    pointLiveRollupAtHeadWithLive(root, thirdHead, secondHead);
+    const report = buildNorthstarNextRunway({
+      rootDir: root,
+      buildInfo: { commitSha: secondHead },
+    });
+    const markdown = renderNorthstarNextRunwayMarkdown(report);
+
+    expect(report.sourceHead).toBe(thirdHead);
+    expect(report.productionCommit).toBe(secondHead);
+    expect(report.latestEvidenceCommitLive).toBe(false);
+    expect(report.sourceHeadLivePending).toBe(true);
+    expect(report.sourceHeadHasProductChanges).toBe(true);
+    expect(report.sourcePendingChangedPaths).toContain("lib/runtime-product-change.ts");
+    expect(report.currentHeadIsEvidenceOnlyPending).toBe(false);
+    expect(report.liveRollupMatchesProduction).toBe(true);
+    expect(markdown).toContain("includes product/runtime file changes that are not live yet");
   });
 
   it("does not call the runway live-exact when production advances beyond the live rollup", async () => {

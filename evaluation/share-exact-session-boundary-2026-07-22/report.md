@@ -1,12 +1,12 @@
 # Share Exact Session Boundary Gate
 
-Checked at: 2026-07-22T17:33:43.114Z
+Checked at: 2026-07-22T17:40:25.867Z
 
-Base URL: `https://www.safeclaw.kr`
+Base URL: `http://127.0.0.1:3074`
 
-Source HEAD: `34a86b1ea0b79cbd4654da5ea9cc165ade677190`
+Source HEAD: `7d29def426bc612f8711ae12053a4f4f34f6e7ac`
 
-Live `/api/build-info`: `34a86b1ea0b79cbd4654da5ea9cc165ade677190`
+Live `/api/build-info`: `unknown`
 
 Verdict: `MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED`
 
@@ -23,8 +23,8 @@ DB mutation performed: `false`
 - Recipient page exists: `true`
 - Recipient API exists: `true`
 - Manager share-session create API exists: `true`
-- Safe missing-session GET status: `500`
-- Safe missing-session read verdict: `RED_SERVER_ERROR_SHAPED_MISSING_SESSION`
+- Safe missing-session GET status: `404`
+- Safe missing-session read verdict: `PASS_FAIL_CLOSED`
 - Safe missing-session GET mutation performed: `false`
 - Safe invalid-session GET status: `400`
 - Safe invalid-session read verdict: `PASS_INVALID_ID_FAIL_CLOSED`

@@ -1,19 +1,19 @@
 {
   "schemaVersion": "safeclaw-share-exact-session-boundary/v1",
-  "checkedAt": "2026-07-22T17:33:43.114Z",
-  "baseUrl": "https://www.safeclaw.kr",
-  "sourceHead": "34a86b1ea0b79cbd4654da5ea9cc165ade677190",
+  "checkedAt": "2026-07-22T17:40:25.867Z",
+  "baseUrl": "http://127.0.0.1:3074",
+  "sourceHead": "7d29def426bc612f8711ae12053a4f4f34f6e7ac",
   "liveBuildInfo": {
     "ok": true,
-    "configured": true,
-    "source": "vercel-system-env",
-    "commitSha": "34a86b1ea0b79cbd4654da5ea9cc165ade677190",
-    "branch": "master",
-    "environment": "production",
-    "deploymentUrl": "safeguard-contest-ar4f8gbnq-seojaehongs-projects.vercel.app",
-    "message": "배포 커밋 식별자를 확인했습니다."
+    "configured": false,
+    "source": "unavailable",
+    "commitSha": null,
+    "branch": null,
+    "environment": null,
+    "deploymentUrl": null,
+    "message": "배포 커밋 식별자가 런타임 환경에 노출되지 않았습니다."
   },
-  "liveCommit": "34a86b1ea0b79cbd4654da5ea9cc165ade677190",
+  "liveCommit": "",
   "verdict": "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
   "exactSavedUserSessionReproduced": false,
   "exactSavedSessionUrlProvided": false,
@@ -51,10 +51,10 @@
     "attempted": true,
     "method": "GET",
     "urlPath": "/api/share-sessions/00000000-0000-4000-8000-000000000000?workerId=00000000-0000-4000-8000-000000000001",
-    "status": 500,
+    "status": 404,
     "ok": false,
     "bodyOk": false,
-    "message": "공유 세션을 확인하지 못했습니다.",
+    "message": "유효한 공유 세션을 찾지 못했습니다.",
     "mutationPerformed": false
   },
   "invalidReadProbe": {
@@ -67,7 +67,7 @@
     "message": "공유 세션 식별 형식이 올바르지 않습니다.",
     "mutationPerformed": false
   },
-  "safeMissingSessionReadVerdict": "RED_SERVER_ERROR_SHAPED_MISSING_SESSION",
+  "safeMissingSessionReadVerdict": "PASS_FAIL_CLOSED",
   "safeInvalidSessionReadVerdict": "PASS_INVALID_ID_FAIL_CLOSED",
   "boundary": {
     "fixtureProofAcceptedAsExactSavedSession": false,

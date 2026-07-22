@@ -91,6 +91,36 @@ function gitIsAncestor(rootDir, possibleAncestor, descendant) {
 }
 
 /**
+ * @param {string} filePath
+ */
+function isEvidenceOrToolingPath(filePath) {
+  const normalized = filePath.replace(/\\/g, "/");
+  return normalized.startsWith("evaluation/")
+    || normalized.startsWith("docs/")
+    || normalized.startsWith("scripts/")
+    || normalized.startsWith("tests/");
+}
+
+/**
+ * @param {string} rootDir
+ * @param {string} baseCommit
+ * @param {string} headCommit
+ */
+function gitChangedPaths(rootDir, baseCommit, headCommit) {
+  if (!baseCommit || !headCommit) return [];
+  try {
+    const output = execFileSync("git", ["diff", "--name-only", `${baseCommit}..${headCommit}`], {
+      cwd: rootDir,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    return output ? output.split(/\r?\n/u).map((item) => item.trim()).filter(Boolean) : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
  * @param {string} rootDir
  * @param {string} relativePath
  */
@@ -615,7 +645,9 @@ export function buildNorthstarNextRunway(options) {
   const liveRollupHeadMatchesKnownState = liveExactEvidenceCommit === liveCommit || liveExactEvidenceCommit === sourceHead;
   const liveRollupMatchesProduction = liveRollupHeadMatchesKnownState && liveRollupLiveCommit === liveCommit;
   const latestEvidenceCommitLive = sourceHead === liveCommit;
-  const currentHeadIsEvidenceOnlyPending = sourceHead !== liveCommit && liveRollupMatchesProduction;
+  const sourcePendingChangedPaths = sourceHead !== liveCommit ? gitChangedPaths(options.rootDir, liveCommit, sourceHead) : [];
+  const sourceHeadHasProductChanges = sourcePendingChangedPaths.some((item) => !isEvidenceOrToolingPath(item));
+  const currentHeadIsEvidenceOnlyPending = sourceHead !== liveCommit && liveRollupMatchesProduction && !sourceHeadHasProductChanges;
   const sourceHeadLivePending = sourceHead !== liveCommit;
   const boundedCurrentSourceHead = isRecord(boundedCurrent) ? asString(boundedCurrent.sourceHead) : "";
   const boundedWorkbenchSourceIncludedInLive = boundedCurrentSourceHead !== ""
@@ -640,6 +672,8 @@ export function buildNorthstarNextRunway(options) {
     latestEvidenceCommitLive,
     currentHeadIsEvidenceOnlyPending,
     sourceHeadLivePending,
+    sourceHeadHasProductChanges,
+    sourcePendingChangedPaths,
     boundedWorkbenchSourceIncludedInLive,
     boundedWorkbenchCurrentLivePending,
     liveExactEvidenceCommit,
@@ -744,7 +778,9 @@ export function renderNorthstarNextRunwayMarkdown(report) {
   const liveNote = report.latestEvidenceCommitLive
     ? "Note: source HEAD and production marker match for this artifact."
     : report.liveRollupMatchesProduction
-      ? `Note: current HEAD \`${report.sourceHead}\` is an evidence-only refresh pushed after the live-exact artifact set. Production is still \`${report.productionCommit}\`, and the live rollup remains exact for that deployed marker.`
+      ? report.sourceHeadHasProductChanges
+        ? `Note: current HEAD \`${report.sourceHead}\` includes product/runtime file changes that are not live yet. Production is still \`${report.productionCommit}\`, and the live rollup remains exact for that deployed marker.`
+        : `Note: current HEAD \`${report.sourceHead}\` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still \`${report.productionCommit}\`, and the live rollup remains exact for that deployed marker.`
       : `Note: current HEAD \`${report.sourceHead}\` is ahead of production \`${report.productionCommit}\`. Product/evidence changes are source-local verified and live-pending until production advances and the live probe is rerun.`;
 
   return `# North Star Next Runway
@@ -760,6 +796,12 @@ Production \`/api/build-info\`: \`${report.productionCommit}\`
 Latest evidence commit live: \`${report.latestEvidenceCommitLive}\`
 
 Source head live pending: \`${report.sourceHeadLivePending}\`
+
+Source head has product changes: \`${report.sourceHeadHasProductChanges}\`
+
+Source pending changed paths: ${report.sourcePendingChangedPaths.length ? report.sourcePendingChangedPaths.map((item) => `\`${item}\``).join(", ") : "`none`"}
+
+Current head is evidence-only pending: \`${report.currentHeadIsEvidenceOnlyPending}\`
 
 Bounded workbench current live pending: \`${report.boundedWorkbenchCurrentLivePending}\`
 

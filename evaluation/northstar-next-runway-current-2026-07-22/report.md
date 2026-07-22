@@ -4,21 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `34a86b1ea0b79cbd4654da5ea9cc165ade677190`
+Source HEAD: `7d29def426bc612f8711ae12053a4f4f34f6e7ac`
 
-Production `/api/build-info`: `34a86b1ea0b79cbd4654da5ea9cc165ade677190`
+Production `/api/build-info`: `5afad5be7cdfddc03267c0e89ffb85b29cbf7ae9`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
+
+Source head has product changes: `true`
+
+Source pending changed paths: `lib/workpack-commercial-store.ts`, `tests/workpack-commercial-tenant-hardening.test.ts`
+
+Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `34a86b1ea0b79cbd4654da5ea9cc165ade677190`
+Live rollup source head: `7d29def426bc612f8711ae12053a4f4f34f6e7ac`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `7d29def426bc612f8711ae12053a4f4f34f6e7ac` includes product/runtime file changes that are not live yet. Production is still `5afad5be7cdfddc03267c0e89ffb85b29cbf7ae9`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -67,7 +73,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Share desktop: current measured Workspace Share and invited recipient fixture routes pass scoped desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
 - Share route evidence split: invited recipient `/share/[sessionId]` fixture route, exact saved/generated `/share/[sessionId]`, and manager/workspace share-result route remain separate proof layers. A fixture pass cannot close a user-specific exact saved/session complaint.
-- Share exact-session boundary: `MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED`; exact saved reproduced is `false`, safe missing-session GET status is `500`, safe-read verdict is `RED_SERVER_ERROR_SHAPED_MISSING_SESSION`, invalid-id GET status is `400`, invalid-id verdict is `PASS_INVALID_ID_FAIL_CLOSED`, and DB/provider mutations remain `false`.
+- Share exact-session boundary: `MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED`; exact saved reproduced is `false`, safe missing-session GET status is `404`, safe-read verdict is `PASS_FAIL_CLOSED`, invalid-id GET status is `400`, invalid-id verdict is `PASS_INVALID_ID_FAIL_CLOSED`, and DB/provider mutations remain `false`.
 - Share public-session storage readiness: `RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION`; live public API status is `500`, service-role workpacks readable is `true`, workpack_share_sessions readable is `false`, and share-session read error is `PGRST205`.
 - Share public-session storage approval: `APPROVAL_REQUIRED_PUBLIC_SHARE_SESSION_STORAGE_MIGRATION_NO_MUTATION`; exact saved Share remains `MISSING_EVIDENCE`, operator approval required is `true`, share-session creation would insert storage is `true`, DB mutation performed is `false`, and migration path is `supabase/migrations/010_commercial_operations.sql`.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
