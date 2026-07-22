@@ -249,7 +249,7 @@ describe("northstar next runway generator", () => {
       "The exact-kosha registry was expanded by this packet.",
     );
     expect(report.nextSafeWorkWithoutApproval).toContain(
-      "use the KOSHA exact promotion packet as the bounded operator-review set before any exact-trust promotion",
+      "use the KOSHA exact promotion packet as the bounded operator-review set and run scripts/kosha_exact_promotion_review_gate.mjs on the human review input before any exact-trust promotion",
     );
   });
 

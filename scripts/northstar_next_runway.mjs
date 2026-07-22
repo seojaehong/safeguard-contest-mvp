@@ -320,7 +320,7 @@ export function buildNorthstarNextRunway(options) {
     nextSafeWorkWithoutApproval: [
       "refresh source/live exact evidence when production marker advances to the evidence-only head",
       "refresh live rollup before claiming live-exact if production advances beyond the current live rollup head",
-      "use the KOSHA exact promotion packet as the bounded operator-review set before any exact-trust promotion",
+      "use the KOSHA exact promotion packet as the bounded operator-review set and run scripts/kosha_exact_promotion_review_gate.mjs on the human review input before any exact-trust promotion",
       "keep UI follow-up scoped to selected-editor/detail readability or reproduced desktop share perception issues",
       "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
       "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
@@ -372,6 +372,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - KOSHA exact trust registry is proven for the accepted exact-trust slice.
 - KOSHA next exact candidate audit identifies the 234-item current native technical-support subset and 231 metadata-verified non-exact candidates without mutation.
 - KOSHA exact promotion packet selects a bounded operator-review set without exact-trust registry mutation.
+- KOSHA exact promotion review gate is available to fail closed on incomplete or mismatched human checklist input before any separate approval step.
 - Documents and Share cockpit UI is proven for the current evidence scope.
 - Standalone Dispatch cockpit is proven for the current evidence scope.
 - Generated Share result fixture cockpit is proven without claiming real provider dispatch.
