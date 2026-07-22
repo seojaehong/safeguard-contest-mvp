@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-22T11:51:15.343Z
-Source HEAD at generation: 37371202e90713c221ae12c80430f533ddaffe1d
-Live commit at generation: 63c8784ca4b09351487e59fad1fa24af4ec7786d
+Generated at: 2026-07-22T11:59:48.104Z
+Source HEAD at generation: 39f373ed55a413768093df05868310b87b18ecbe
+Live commit at generation: 39e8f203d954ac6af3c53dec7b805156447edc71
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -45,7 +45,7 @@ Overall: `northstar_open_approval_gated`
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
 | open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
-| final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
+| final_99_gate | ancestor | matches_live | evaluation\final-99-gate-current-2026-07-22\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
 | kosha_exact_trust_registry | ancestor | ancestor_of_head | evaluation\kosha-current-live-gate-2026-07-20\report.json |
 | rls_llm_wiki_approval_preflight | ancestor | missing | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
@@ -55,7 +55,7 @@ Overall: `northstar_open_approval_gated`
 | workspace_docs_share_geometry | ancestor | ancestor_of_head | evaluation\workspace-docs-share-production-gate-2026-07-20\current-geometry.json |
 | dispatch_standalone_cockpit | ancestor | ancestor_of_head | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
 | provider_dispatch_persistence | ancestor | ancestor_of_head | evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json |
-| northstar_approval_runway | ancestor | matches_live | evaluation\northstar-approval-runway-2026-07-21\report.json |
+| northstar_approval_runway | ancestor | ancestor_of_head | evaluation\northstar-approval-runway-2026-07-21\report.json |
 
 ## Carried Notices
 
