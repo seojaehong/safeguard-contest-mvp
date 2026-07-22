@@ -221,12 +221,21 @@ function koshaCandidateAuditSummary(koshaCandidateAudit) {
  */
 function koshaPromotionPacketSummary(koshaPromotionPacket) {
   if (!isRecord(koshaPromotionPacket)) return {};
+  const reviewReadiness = isRecord(koshaPromotionPacket.operatorReviewReadiness)
+    ? koshaPromotionPacket.operatorReviewReadiness
+    : {};
   return {
     verdict: asString(koshaPromotionPacket.verdict),
     candidateCount: typeof koshaPromotionPacket.candidateCount === "number" ? koshaPromotionPacket.candidateCount : undefined,
     selectedStableKeys: isRecord(koshaPromotionPacket.selectionPolicy) && Array.isArray(koshaPromotionPacket.selectionPolicy.selectedStableKeys)
       ? koshaPromotionPacket.selectionPolicy.selectedStableKeys.map(asString).filter(Boolean)
       : [],
+    packetReadyForReview: asBoolean(reviewReadiness.packetReadyForReview),
+    reviewChecklistComplete: asBoolean(reviewReadiness.reviewChecklistComplete),
+    exactTrustPromotionBlockedUntilChecklistComplete: asBoolean(reviewReadiness.exactTrustPromotionBlockedUntilChecklistComplete),
+    perCandidateRequiredCheckCount: typeof reviewReadiness.perCandidateRequiredCheckCount === "number"
+      ? reviewReadiness.perCandidateRequiredCheckCount
+      : undefined,
     mutationPerformed: asBoolean(koshaPromotionPacket.mutationPerformed),
     dbMutationPerformed: asBoolean(koshaPromotionPacket.dbMutationPerformed),
     embeddingGenerationPerformed: asBoolean(koshaPromotionPacket.embeddingGenerationPerformed),
@@ -401,6 +410,9 @@ ${report.nextSafeWorkWithoutApproval.map((item, index) => `${index + 1}. ${item}
 - Candidate pool: ${report.koshaNextExactCandidateAudit.acceptedSubsetItems || "unknown"} current native technical-support items.
 - Metadata-verified non-exact candidates: ${report.koshaNextExactCandidateAudit.metadataVerifiedNotExact || "unknown"}.
 - Operator-review packet candidates: ${report.koshaExactPromotionPacket.candidateCount || "unknown"} (${Array.isArray(report.koshaExactPromotionPacket.selectedStableKeys) ? report.koshaExactPromotionPacket.selectedStableKeys.join(", ") : "unknown"}).
+- Operator-review packet ready: ${report.koshaExactPromotionPacket.packetReadyForReview === true}.
+- Review checklist complete: ${report.koshaExactPromotionPacket.reviewChecklistComplete === true}.
+- Exact-trust promotion blocked until checklist complete: ${report.koshaExactPromotionPacket.exactTrustPromotionBlockedUntilChecklistComplete === true}.
 - Mutation performed by candidate audit: ${report.koshaNextExactCandidateAudit.mutationPerformed === true}.
 - Exact promotion performed by packet: ${report.koshaExactPromotionPacket.exactPromotionPerformed === true}.
 - Forbidden claim remains: metadata-verified candidates are not exact production evidence until separately promoted through immutable acquisition/review.

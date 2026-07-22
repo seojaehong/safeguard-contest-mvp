@@ -31,6 +31,10 @@ type NextRunwayReport = {
     verdict: string;
     candidateCount: number;
     selectedStableKeys: string[];
+    packetReadyForReview: boolean;
+    reviewChecklistComplete: boolean;
+    exactTrustPromotionBlockedUntilChecklistComplete: boolean;
+    perCandidateRequiredCheckCount: number;
     mutationPerformed: boolean;
     dbMutationPerformed: boolean;
     embeddingGenerationPerformed: boolean;
@@ -156,6 +160,12 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     embeddingGenerationPerformed: false,
     exactPromotionPerformed: false,
     candidateCount: 8,
+    operatorReviewReadiness: {
+      packetReadyForReview: true,
+      reviewChecklistComplete: false,
+      exactTrustPromotionBlockedUntilChecklistComplete: true,
+      perCandidateRequiredCheckCount: 5,
+    },
     selectionPolicy: {
       selectedStableKeys: ["D-C-10", "D-C-11", "A-G-1", "A-G-15", "B-E-11", "B-E-9", "D-C-4", "E-G-4"],
     },
@@ -226,6 +236,10 @@ describe("northstar next runway generator", () => {
       verdict: "EXACT_PROMOTION_PACKET_READY_FOR_OPERATOR_REVIEW",
       candidateCount: 8,
       selectedStableKeys: ["D-C-10", "D-C-11", "A-G-1", "A-G-15", "B-E-11", "B-E-9", "D-C-4", "E-G-4"],
+      packetReadyForReview: true,
+      reviewChecklistComplete: false,
+      exactTrustPromotionBlockedUntilChecklistComplete: true,
+      perCandidateRequiredCheckCount: 5,
       mutationPerformed: false,
       dbMutationPerformed: false,
       embeddingGenerationPerformed: false,
