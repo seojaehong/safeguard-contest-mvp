@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T11:35:00.704Z",
-  "head": "b4c56dd17bcfde0533ddc34085fef0acd8584de5",
+  "generatedAt": "2026-07-22T11:40:38.932Z",
+  "head": "7ba40a323bb93719c82c3dc4a34848d12e97eaba",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "c7590f846bf878d1d3afca58985be45c2b8e7316",
+    "commitSha": "1a2ee6a973e3fb963cb616a425ca5735ccfee9ff",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-q9k1429s9-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-esph2drlq-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -69,19 +69,19 @@
       "id": "supabase_rls_launch_isolation",
       "state": "approval_gated",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Read-only RLS approval preflight passed at source SHA b57d51df4245f898c35d41ae6f78c29536a0960c, but live RLS catalog and tenant A/B isolation are not proven."
+      "detail": "Read-only RLS approval preflight passed at source SHA 1a2ee6a973e3fb963cb616a425ca5735ccfee9ff, but live RLS catalog and tenant A/B isolation are not proven."
     },
     {
       "id": "llm_wiki_publication",
       "state": "approval_gated",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA b57d51df4245f898c35d41ae6f78c29536a0960c."
+      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 1a2ee6a973e3fb963cb616a425ca5735ccfee9ff."
     },
     {
       "id": "sif_embedding_runtime",
       "state": "approval_gated",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 22b357341e755fb5a4a2e1057dde412e20e92b9e."
+      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 1a2ee6a973e3fb963cb616a425ca5735ccfee9ff."
     },
     {
       "id": "kosha_exact_promotion_review_gate",
@@ -187,9 +187,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "b4c56dd17bcfde0533ddc34085fef0acd8584de5",
+      "sourceCommit": "7ba40a323bb93719c82c3dc4a34848d12e97eaba",
       "sourceStatus": "exact",
-      "productionCommit": "b4c56dd17bcfde0533ddc34085fef0acd8584de5",
+      "productionCommit": "7ba40a323bb93719c82c3dc4a34848d12e97eaba",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -198,7 +198,7 @@
       "sourceCommit": "c7590f846bf878d1d3afca58985be45c2b8e7316",
       "sourceStatus": "ancestor",
       "productionCommit": "c7590f846bf878d1d3afca58985be45c2b8e7316",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "live_harness_quality",
@@ -219,7 +219,7 @@
     {
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "sourceCommit": "b57d51df4245f898c35d41ae6f78c29536a0960c",
+      "sourceCommit": "1a2ee6a973e3fb963cb616a425ca5735ccfee9ff",
       "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
@@ -227,7 +227,7 @@
     {
       "id": "sif_embedding_preflight",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "sourceCommit": "22b357341e755fb5a4a2e1057dde412e20e92b9e",
+      "sourceCommit": "1a2ee6a973e3fb963cb616a425ca5735ccfee9ff",
       "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"

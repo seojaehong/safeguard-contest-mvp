@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-22T11:35:00.704Z
-Source HEAD at generation: b4c56dd17bcfde0533ddc34085fef0acd8584de5
-Live commit at generation: c7590f846bf878d1d3afca58985be45c2b8e7316
+Generated at: 2026-07-22T11:40:38.932Z
+Source HEAD at generation: 7ba40a323bb93719c82c3dc4a34848d12e97eaba
+Live commit at generation: 1a2ee6a973e3fb963cb616a425ca5735ccfee9ff
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -45,7 +45,7 @@ Overall: `northstar_open_approval_gated`
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
 | open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
-| final_99_gate | ancestor | matches_live | evaluation\final-99-gate-current-2026-07-22\report.json |
+| final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
 | kosha_exact_trust_registry | ancestor | ancestor_of_head | evaluation\kosha-current-live-gate-2026-07-20\report.json |
 | rls_llm_wiki_approval_preflight | ancestor | missing | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
@@ -65,7 +65,7 @@ Overall: `northstar_open_approval_gated`
 ## Approval-Gated Work
 
 - provider_dispatch_persistence: Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred.
-- supabase_rls_launch_isolation: Read-only RLS approval preflight passed at source SHA b57d51df4245f898c35d41ae6f78c29536a0960c, but live RLS catalog and tenant A/B isolation are not proven.
-- llm_wiki_publication: Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA b57d51df4245f898c35d41ae6f78c29536a0960c.
-- sif_embedding_runtime: SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 22b357341e755fb5a4a2e1057dde412e20e92b9e.
+- supabase_rls_launch_isolation: Read-only RLS approval preflight passed at source SHA 1a2ee6a973e3fb963cb616a425ca5735ccfee9ff, but live RLS catalog and tenant A/B isolation are not proven.
+- llm_wiki_publication: Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 1a2ee6a973e3fb963cb616a425ca5735ccfee9ff.
+- sif_embedding_runtime: SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 1a2ee6a973e3fb963cb616a425ca5735ccfee9ff.
 - kosha_exact_promotion_review_gate: Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval.
