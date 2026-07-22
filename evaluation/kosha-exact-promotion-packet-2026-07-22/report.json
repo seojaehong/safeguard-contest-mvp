@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-packet/v1",
-  "generatedAt": "2026-07-22T00:46:15.288Z",
-  "sourceHead": "aeec9fc39bfe859e30fa26d56aeeafcb2b98d406",
+  "generatedAt": "2026-07-22T00:52:32.635Z",
+  "sourceHead": "af31eea941856d70a5414a6cee753bebc1d9dfa6",
   "liveBuildInfoAtPacket": {
-    "commitSha": "aeec9fc39bfe859e30fa26d56aeeafcb2b98d406",
+    "commitSha": "262c77c71426487d471fc862a0c34858131fa895",
     "branch": "master",
     "environment": "production"
   },
@@ -15,6 +15,12 @@
   "embeddingGenerationPerformed": false,
   "exactPromotionPerformed": false,
   "candidateCount": 8,
+  "operatorReviewReadiness": {
+    "packetReadyForReview": true,
+    "reviewChecklistComplete": false,
+    "exactTrustPromotionBlockedUntilChecklistComplete": true,
+    "perCandidateRequiredCheckCount": 5
+  },
   "selectionPolicy": {
     "sourcePool": "metadata-verified current native technical-support regulations",
     "selectedStableKeys": [
@@ -66,6 +72,14 @@
       "normalizedCharCount": 40234,
       "pageCount": 70,
       "rationale": "construction equipment work-plan coverage for mobile crane, pile driver, and tower-crane scenarios",
+      "requiredReviewChecks": [
+        "official URL opens the expected KOSHA file for the selected stable key",
+        "official file id, version, and publication date match metadata and body-corpus provenance",
+        "body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence",
+        "operator confirms lifecycle/current status and excludes stale superseded versions",
+        "human confirmation is recorded before any exact-kosha registry JSON is created"
+      ],
+      "reviewChecklistComplete": false,
       "reviewRequiredBeforeExactTrust": true
     },
     {
@@ -82,6 +96,14 @@
       "normalizedCharCount": 43211,
       "pageCount": 68,
       "rationale": "excavation and earthwork coverage for common civil/construction hazard inputs",
+      "requiredReviewChecks": [
+        "official URL opens the expected KOSHA file for the selected stable key",
+        "official file id, version, and publication date match metadata and body-corpus provenance",
+        "body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence",
+        "operator confirms lifecycle/current status and excludes stale superseded versions",
+        "human confirmation is recorded before any exact-kosha registry JSON is created"
+      ],
+      "reviewChecklistComplete": false,
       "reviewRequiredBeforeExactTrust": true
     },
     {
@@ -98,6 +120,14 @@
       "normalizedCharCount": 10322,
       "pageCount": 18,
       "rationale": "fall-prevention net coverage that complements the current scaffold and exterior-paint exact pins",
+      "requiredReviewChecks": [
+        "official URL opens the expected KOSHA file for the selected stable key",
+        "official file id, version, and publication date match metadata and body-corpus provenance",
+        "body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence",
+        "operator confirms lifecycle/current status and excludes stale superseded versions",
+        "human confirmation is recorded before any exact-kosha registry JSON is created"
+      ],
+      "reviewChecklistComplete": false,
       "reviewRequiredBeforeExactTrust": true
     },
     {
@@ -114,6 +144,14 @@
       "normalizedCharCount": 23570,
       "pageCount": 42,
       "rationale": "emergency action planning coverage for first-screen stop/report/preserve document flows",
+      "requiredReviewChecks": [
+        "official URL opens the expected KOSHA file for the selected stable key",
+        "official file id, version, and publication date match metadata and body-corpus provenance",
+        "body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence",
+        "operator confirms lifecycle/current status and excludes stale superseded versions",
+        "human confirmation is recorded before any exact-kosha registry JSON is created"
+      ],
+      "reviewChecklistComplete": false,
       "reviewRequiredBeforeExactTrust": true
     },
     {
@@ -130,6 +168,14 @@
       "normalizedCharCount": 20850,
       "pageCount": 31,
       "rationale": "live electrical work coverage paired with the existing de-energized electrical exact pin",
+      "requiredReviewChecks": [
+        "official URL opens the expected KOSHA file for the selected stable key",
+        "official file id, version, and publication date match metadata and body-corpus provenance",
+        "body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence",
+        "operator confirms lifecycle/current status and excludes stale superseded versions",
+        "human confirmation is recorded before any exact-kosha registry JSON is created"
+      ],
+      "reviewChecklistComplete": false,
       "reviewRequiredBeforeExactTrust": true
     },
     {
@@ -146,6 +192,14 @@
       "normalizedCharCount": 32583,
       "pageCount": 51,
       "rationale": "grounding equipment coverage paired with electrical isolation and live-part controls",
+      "requiredReviewChecks": [
+        "official URL opens the expected KOSHA file for the selected stable key",
+        "official file id, version, and publication date match metadata and body-corpus provenance",
+        "body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence",
+        "operator confirms lifecycle/current status and excludes stale superseded versions",
+        "human confirmation is recorded before any exact-kosha registry JSON is created"
+      ],
+      "reviewChecklistComplete": false,
       "reviewRequiredBeforeExactTrust": true
     },
     {
@@ -162,6 +216,14 @@
       "normalizedCharCount": 16180,
       "pageCount": 32,
       "rationale": "excavator task coverage for construction-equipment and work-plan hazard rows",
+      "requiredReviewChecks": [
+        "official URL opens the expected KOSHA file for the selected stable key",
+        "official file id, version, and publication date match metadata and body-corpus provenance",
+        "body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence",
+        "operator confirms lifecycle/current status and excludes stale superseded versions",
+        "human confirmation is recorded before any exact-kosha registry JSON is created"
+      ],
+      "reviewChecklistComplete": false,
       "reviewRequiredBeforeExactTrust": true
     },
     {
@@ -178,6 +240,14 @@
       "normalizedCharCount": 30647,
       "pageCount": 54,
       "rationale": "musculoskeletal prevention coverage for manual handling and repetitive work evidence",
+      "requiredReviewChecks": [
+        "official URL opens the expected KOSHA file for the selected stable key",
+        "official file id, version, and publication date match metadata and body-corpus provenance",
+        "body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence",
+        "operator confirms lifecycle/current status and excludes stale superseded versions",
+        "human confirmation is recorded before any exact-kosha registry JSON is created"
+      ],
+      "reviewChecklistComplete": false,
       "reviewRequiredBeforeExactTrust": true
     }
   ],
