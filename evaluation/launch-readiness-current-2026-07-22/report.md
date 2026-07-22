@@ -1,14 +1,14 @@
 # Launch Readiness Current Boundary
 
-Generated: 2026-07-22T07:19:33.249Z
+Generated: 2026-07-22T08:58:59.562Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD at generation: `140991153ab2bdf18a7e4a113d4874b53c9e3ea0`
+Source HEAD at generation: `39fd2aa9ba8f0a0459b2e06ece48d793218e83d1`
 
-Production runtime smoke commit: `1371ca52d11525e7b26ae26402be4006e44a4a57`
+Production runtime smoke commit: `39fd2aa9ba8f0a0459b2e06ece48d793218e83d1`
 
-Current HEAD is evidence-only pending relative to production: `true`
+Current HEAD is evidence-only pending relative to production: `false`
 
 ## Verdict
 
@@ -21,7 +21,7 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 `scripts/launch_readiness_audit.mjs` was run against production with `SAFETYGUARD_AUDIT_DISPATCH=false`.
 
 - `/api/ask`: 200 OK
-- elapsed: 19744 ms
+- elapsed: 20976 ms
 - dispatch call: not run
 - generated documents: 11 / 11
 - connection verdict: `PASS_CONNECTED_NO_DISPATCH` (7 connected, 0 bounded fallback, 0 check-required)
@@ -42,8 +42,8 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 
 Final-99 remains `pass_with_notice`; 2 notices are carried. These are approval/auth gates, not safe no-approval cleanup tasks.
 
-- `auth-history-reuse`: operator-auth-gated. Allowed: 관리자 인증 없는 환경에서도 비회원 임시 저장과 로그인 필요 상태가 방어된다. Forbidden: 관리자 서버 저장과 이력 재열기를 live에서 실행 완료했다.
-- `dispatch-policy`: provider-approval-gated. Allowed: 메일·문자는 관리자 인증과 서버 소유 세션에서만 전송 가능한 정책으로 잠겨 있다. Forbidden: 카카오·밴드 또는 모든 provider 전파가 실제 승인 채널로 live 완료됐다.
+- `auth-history-reuse`: operator-auth-gated. Allowed: 관리자 인증 없는 환경에서도 비회원 임시 저장과 로그인 필요 상태가 방어된다.. Forbidden: 관리자 서버 저장과 이력 재열기를 live에서 실행 완료했다..
+- `dispatch-policy`: provider-approval-gated. Allowed: 메일·문자는 관리자 인증과 서버 소유 세션에서만 전송 가능한 정책으로 잠겨 있다.. Forbidden: 카카오·밴드 또는 모든 provider 전파가 실제 승인 채널로 live 완료됐다..
 
 ## Safe Claims
 

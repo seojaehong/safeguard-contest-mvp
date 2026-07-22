@@ -1,12 +1,12 @@
 {
   "schemaVersion": "safeclaw-launch-readiness-current/v3",
-  "generatedAt": "2026-07-22T07:19:33.249Z",
+  "generatedAt": "2026-07-22T08:58:59.562Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHeadAtGeneration": "140991153ab2bdf18a7e4a113d4874b53c9e3ea0",
-  "productionCommit": "1371ca52d11525e7b26ae26402be4006e44a4a57",
-  "runtimeSmokeCommit": "1371ca52d11525e7b26ae26402be4006e44a4a57",
-  "evidenceHeadBeforeThisReport": "140991153ab2bdf18a7e4a113d4874b53c9e3ea0",
-  "currentHeadIsEvidenceOnlyPending": true,
+  "sourceHeadAtGeneration": "39fd2aa9ba8f0a0459b2e06ece48d793218e83d1",
+  "productionCommit": "39fd2aa9ba8f0a0459b2e06ece48d793218e83d1",
+  "runtimeSmokeCommit": "39fd2aa9ba8f0a0459b2e06ece48d793218e83d1",
+  "evidenceHeadBeforeThisReport": "39fd2aa9ba8f0a0459b2e06ece48d793218e83d1",
+  "currentHeadIsEvidenceOnlyPending": false,
   "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
   "safeLaunchDemoClaimAllowed": true,
   "guidedPilotClaimAllowed": true,
@@ -17,7 +17,7 @@
   "apiAsk": {
     "status": 200,
     "ok": true,
-    "elapsedMs": 19744
+    "elapsedMs": 20976
   },
   "scenario": {
     "companyName": "도시가스공사",
@@ -197,10 +197,10 @@
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "1371ca52d11525e7b26ae26402be4006e44a4a57",
+    "commitSha": "39fd2aa9ba8f0a0459b2e06ece48d793218e83d1",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-2of6xntcb-seojaehongs-projects.vercel.app",
-    "message": "배포 커밋 식별자를 확인했습니다."
+    "deploymentUrl": "safeguard-contest-r78wqm5oo-seojaehongs-projects.vercel.app",
+    "message": "ë°°í¬ ì»¤ë° ìë³ìë¥¼ íì¸íìµëë¤."
   }
 }
