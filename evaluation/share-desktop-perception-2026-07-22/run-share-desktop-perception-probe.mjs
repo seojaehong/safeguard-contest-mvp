@@ -421,7 +421,7 @@ const report = {
   routeSplitAloneAcceptedAsFix: false,
   verdict: failed.length === 0 ? "PASS_LIVE_PRODUCTION_MEASURED" : "RED_REPRODUCED_OR_ERROR",
   interpretation: failed.length === 0
-    ? "Workspace Share and invited recipient Share use first-viewport desktop workbench geometry in the measured live routes; the user complaint should stay open only as a session-specific or visual-polish repro if a different generated state shows a narrow card."
+    ? "Current measured live Workspace Share and invited recipient Share routes use first-viewport desktop workbench geometry. This does not disprove a different user-visible saved/generated session; if that exact session still looks like a narrow mobile card, reproduce it with this width-ratio/grid gate before changing product code."
     : "At least one measured route failed the full-workbench perception gate. Literal two-column geometry and perceived full-workbench breadth are separated: a route can have two columns and still fail if the root/content width is too narrow for a 1440px desktop.",
   acceptance: {
     desktop: [
@@ -488,6 +488,7 @@ ${rows.join("\n")}
 
 ## Remaining UX Boundary
 
+- This PASS covers the measured live Workspace Share flow and invited recipient fixture, not every possible saved/generated user session.
 - If a user-visible session still looks like a narrow mobile card on desktop, reproduce that exact state with this width-ratio/grid gate before changing product code.
 - Documents long-form editing remains a separate selected-detail/drilldown IA debt.
 - Provider live dispatch remains approval-gated.

@@ -1,12 +1,12 @@
 # Share Desktop Perception Probe
 
-Checked at: 2026-07-22T03:47:55.589Z
+Checked at: 2026-07-22T04:53:35.457Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD: `37e48b405d8e5da3e04cbd1dec17e91f1b3090ce`
+Source HEAD: `e82e250c16227b1437fb315a4c2974064d1ee9ec`
 
-Production commit: `37e48b405d8e5da3e04cbd1dec17e91f1b3090ce`
+Production commit: `e82e250c16227b1437fb315a4c2974064d1ee9ec`
 
 Verdict: `PASS_LIVE_PRODUCTION_MEASURED`
 
@@ -18,7 +18,7 @@ Route/page split alone accepted as fix: `false`
 
 ## Interpretation
 
-Workspace Share and invited recipient Share use first-viewport desktop workbench geometry in the measured live routes; the user complaint should stay open only as a session-specific or visual-polish repro if a different generated state shows a narrow card.
+Current measured live Workspace Share and invited recipient Share routes use first-viewport desktop workbench geometry. This does not disprove a different user-visible saved/generated session; if that exact session still looks like a narrow mobile card, reproduce it with this width-ratio/grid gate before changing product code.
 
 This artifact separates measured geometry from user perception. A route only passes when the actual first viewport uses enough desktop width, exposes meaningful distinct regions, keeps the primary action visible, and has no horizontal overflow. It does not claim provider dispatch readiness.
 
@@ -37,6 +37,7 @@ Literal two-column and perceived full-workbench breadth are separate checks. A r
 
 ## Remaining UX Boundary
 
+- This PASS covers the measured live Workspace Share flow and invited recipient fixture, not every possible saved/generated user session.
 - If a user-visible session still looks like a narrow mobile card on desktop, reproduce that exact state with this width-ratio/grid gate before changing product code.
 - Documents long-form editing remains a separate selected-detail/drilldown IA debt.
 - Provider live dispatch remains approval-gated.

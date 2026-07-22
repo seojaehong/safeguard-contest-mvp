@@ -1,23 +1,23 @@
 {
   "schemaVersion": "safeclaw-share-desktop-perception/v1",
-  "checkedAt": "2026-07-22T03:47:55.589Z",
+  "checkedAt": "2026-07-22T04:53:35.457Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHead": "37e48b405d8e5da3e04cbd1dec17e91f1b3090ce",
+  "sourceHead": "e82e250c16227b1437fb315a4c2974064d1ee9ec",
   "productionBuild": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "37e48b405d8e5da3e04cbd1dec17e91f1b3090ce",
+    "commitSha": "e82e250c16227b1437fb315a4c2974064d1ee9ec",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-iczczypdl-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-6dnrvhgkd-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "providerDispatchLiveClaimed": false,
   "dbMutationPerformed": false,
   "routeSplitAloneAcceptedAsFix": false,
   "verdict": "PASS_LIVE_PRODUCTION_MEASURED",
-  "interpretation": "Workspace Share and invited recipient Share use first-viewport desktop workbench geometry in the measured live routes; the user complaint should stay open only as a session-specific or visual-polish repro if a different generated state shows a narrow card.",
+  "interpretation": "Current measured live Workspace Share and invited recipient Share routes use first-viewport desktop workbench geometry. This does not disprove a different user-visible saved/generated session; if that exact session still looks like a narrow mobile card, reproduce it with this width-ratio/grid gate before changing product code.",
   "acceptance": {
     "desktop": [
       "root/content width ratio >= 0.78",
