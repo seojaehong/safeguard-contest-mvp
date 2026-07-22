@@ -1,14 +1,14 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-22T19:31:24.557Z
-Source SHA: `da5dcc02497bbdbab1b072f26e37118260360de7`
+Generated at: 2026-07-22T19:37:17.604Z
+Source SHA: `e5270d0aa054a0e24a02adc70b786516f0fb03d7`
 Overall: `open`
 
 ## Gate Matrix
 
 | Gate | State | Evidence | Detail |
 | --- | --- | --- | --- |
-| final_99_gate | notice | evaluation\final-99-gate-current-2026-07-22\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate-current-2026-07-22\notice-carry.json: auth-history-reuse=operator-auth-gated, dispatch-policy=provider-approval-gated. Fully automated launch remains forbidden until those approval/auth gates are proven. |
+| final_99_gate | notice | evaluation\final-99-gate-current-2026-07-22\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate-current-2026-07-22\notice-carry.json: auth-history-reuse=operator-auth-gated, dispatch-policy=provider-approval-gated. Fully automated launch remains forbidden until those approval/auth gates are proven. Full final-99 rerun is not treated as no-approval cleanup; evaluation\final-99-no-approval-boundary-2026-07-23\report.json records the mutation boundary. |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json | Live harness probe passed with zero failed contracts. |
 | ui_documents_share_cockpit | proven | evaluation\documents-cockpit-workbench-geometry-2026-07-22\report.json | Scoped first-task cockpit proof only, not full Documents/Share IA completion: live /documents?theme=day geometry now directly proves the selected-document cockpit/workbench is not the stale stacked layout at 1440x723 and 390x723, while default /workspace Documents and Share cockpits, /documents mobile first-action containment, exact one-viewport Documents review cockpit, selected-document context/summary layers, selected editor/detail field-summary risk-row landing, selected-editor field summary plus evidence/recheck CTA before raw textarea, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors remain scoped. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, mobile Share exact 844px viewport containment, and /share/[sessionId] desktop recipient confirmation cockpit with mobile confirmation CTA before document details. This is not a claim that the whole Documents page is short; raw textarea/full long-form editing remains open secondary drilldown. It also does not prove exact saved/generated Share, provider live dispatch, or route/page split alone as the UX fix. |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json | Production /dispatch seeded desktop and sample shell routes are no longer mobile-stacked: seeded pageHeight 1116 (1.24x), sample panels 635px/413px in distinct desktop regions, overflow false/outside 0. |
@@ -42,6 +42,7 @@ Overall: `open`
 ## Next Actions
 
 - final_99_gate: Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment.
+- final_99_gate: Do not rerun full final-99 as a no-approval cleanup when SAFEGUARD_AUTH_TOKEN is configured.
 - ui_documents_share_cockpit: Keep the production live geometry recorded for first-action Documents/Share cockpits and 12-document cockpit slices; do not phrase it as documents page height fixed or expand it into a full 12-document field-first authoring claim.
 - ui_documents_share_cockpit: Keep raw textarea and deeper row/all-document authoring as secondary drilldown follow-up; selected-editor evidence/recheck CTA is live-proven before raw textarea, but the full 12-document edit surface itself is not claimed short.
 - ui_documents_share_cockpit: Keep the next Documents product wave framed as bounded IA/density with a default exposure budget and local workbench shell ratio target <= 3; do not use route split alone as the fix.

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-22T19:31:24.557Z",
-  "sourceSha": "da5dcc02497bbdbab1b072f26e37118260360de7",
+  "generatedAt": "2026-07-22T19:37:17.604Z",
+  "sourceSha": "e5270d0aa054a0e24a02adc70b786516f0fb03d7",
   "overall": "open",
   "gates": [
     {
@@ -9,9 +9,10 @@
       "state": "notice",
       "label": "Final 99 evidence gate",
       "evidencePath": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
-      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-22\\notice-carry.json: auth-history-reuse=operator-auth-gated, dispatch-policy=provider-approval-gated. Fully automated launch remains forbidden until those approval/auth gates are proven.",
+      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-22\\notice-carry.json: auth-history-reuse=operator-auth-gated, dispatch-policy=provider-approval-gated. Fully automated launch remains forbidden until those approval/auth gates are proven. Full final-99 rerun is not treated as no-approval cleanup; evaluation\\final-99-no-approval-boundary-2026-07-23\\report.json records the mutation boundary.",
       "nextActions": [
-        "Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment."
+        "Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment.",
+        "Do not rerun full final-99 as a no-approval cleanup when SAFEGUARD_AUTH_TOKEN is configured."
       ]
     },
     {

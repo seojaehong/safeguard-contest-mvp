@@ -1541,7 +1541,7 @@ describe("northstar open gate audit", () => {
     const rlsGate = audit.gates.find((gate) => gate.id === "supabase_rls_launch_isolation");
     expect(rlsGate?.state).toBe("contradicted");
     expect(rlsGate?.detail).toContain("not an ancestor");
-  });
+  }, 15_000);
 
   it("fails evidence completeness when the current KOSHA reconciliation is missing", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();

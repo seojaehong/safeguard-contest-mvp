@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T19:31:25.507Z",
-  "head": "da5dcc02497bbdbab1b072f26e37118260360de7",
+  "generatedAt": "2026-07-22T19:37:18.822Z",
+  "head": "e5270d0aa054a0e24a02adc70b786516f0fb03d7",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "da5dcc02497bbdbab1b072f26e37118260360de7",
+    "commitSha": "0deca54f2b54f810dd65b91c73cc6b7f56814831",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-a32qfjzak-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-6kkacjyhg-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -25,7 +25,7 @@
       "id": "final_99_gate",
       "state": "notice",
       "artifact": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
-      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-22\\notice-carry.json: auth-history-reuse=operator-auth-gated, dispatch-policy=provider-approval-gated. Fully automated launch remains forbidden until those approval/auth gates are proven."
+      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-22\\notice-carry.json: auth-history-reuse=operator-auth-gated, dispatch-policy=provider-approval-gated. Fully automated launch remains forbidden until those approval/auth gates are proven. Full final-99 rerun is not treated as no-approval cleanup; evaluation\\final-99-no-approval-boundary-2026-07-23\\report.json records the mutation boundary."
     },
     {
       "id": "live_harness_quality",
@@ -193,10 +193,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "da5dcc02497bbdbab1b072f26e37118260360de7",
+      "sourceCommit": "e5270d0aa054a0e24a02adc70b786516f0fb03d7",
       "sourceStatus": "exact",
-      "productionCommit": "da5dcc02497bbdbab1b072f26e37118260360de7",
-      "productionStatus": "matches_live"
+      "productionCommit": "e5270d0aa054a0e24a02adc70b786516f0fb03d7",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
