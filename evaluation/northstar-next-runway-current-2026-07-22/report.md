@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `b3d4c12933e54d85ac4359e8e4764f0c4daf4076`
+Source HEAD: `fcb9af730a2fbcd4a0b7b68c18f675c72a3624ec`
 
-Production `/api/build-info`: `ab717b6e83878956fe2b550b3edfe2f7a23b35b7`
+Production `/api/build-info`: `b3d4c12933e54d85ac4359e8e4764f0c4daf4076`
 
 Latest evidence commit live: `false`
 
@@ -14,17 +14,17 @@ Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/northstar-live-rollup-2026-07-20/report.json`, `evaluation/northstar-live-rollup-2026-07-20/report.md`, `evaluation/northstar-next-runway-current-2026-07-22/report.json`, `evaluation/northstar-next-runway-current-2026-07-22/report.md`, `evaluation/northstar-open-gates-current/report.json`, `evaluation/northstar-open-gates-current/report.md`, `evaluation/sif-embedding-gate/approval-preflight-report.json`
+Source pending changed paths: `evaluation/northstar-live-rollup-2026-07-20/report.json`, `evaluation/northstar-live-rollup-2026-07-20/report.md`, `evaluation/northstar-next-runway-current-2026-07-22/report.json`, `evaluation/northstar-next-runway-current-2026-07-22/report.md`, `evaluation/northstar-open-gates-current/report.json`, `evaluation/northstar-open-gates-current/report.md`
 
 Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `b3d4c12933e54d85ac4359e8e4764f0c4daf4076`
+Live rollup source head: `fcb9af730a2fbcd4a0b7b68c18f675c72a3624ec`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `b3d4c12933e54d85ac4359e8e4764f0c4daf4076` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `ab717b6e83878956fe2b550b3edfe2f7a23b35b7`, and the live rollup remains exact for that deployed marker.
+Note: current HEAD `fcb9af730a2fbcd4a0b7b68c18f675c72a3624ec` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `b3d4c12933e54d85ac4359e8e4764f0c4daf4076`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
