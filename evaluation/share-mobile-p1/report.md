@@ -1,5 +1,7 @@
 # Mobile Share P1 Verification
 
+> Legacy evidence note (2026-07-22): this report is retained as the original Share mobile P1 browser artifact. The authoritative current generated-result fixture proof is `evaluation/share-generated-session-perception-2026-07-22/report.md|json`; exact saved/generated `/share/[sessionId]` remains `MISSING_EVIDENCE` until a concrete session URL/payload is supplied or an approved safe creation flow is run.
+
 ## Scope
 
 - Base commit: `008196d3a6e255894afdfcc4e97848cd530104e8`
