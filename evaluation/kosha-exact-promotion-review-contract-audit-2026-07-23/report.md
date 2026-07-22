@@ -1,12 +1,12 @@
 # KOSHA Exact Promotion Review Contract Audit
 
-Generated at: `2026-07-22T21:41:23.324Z`
+Generated at: `2026-07-22T22:13:53.118Z`
 
 Verdict: `PASS_CURRENT_SOURCE_REVIEW_GATE_CONTRACT_NO_MUTATION`
 
-Source HEAD: `9f0d0b8cb96fe3a2a38ec75bab0a70a6eec5fce7`
+Source HEAD: `f8b12b4ba67334aa1cb46e2f4c48fe596808b093`
 
-Production `/api/build-info`: `9f0d0b8cb96fe3a2a38ec75bab0a70a6eec5fce7`
+Production `/api/build-info`: `f8b12b4ba67334aa1cb46e2f4c48fe596808b093`
 
 ## Boundary
 
@@ -15,7 +15,7 @@ This is an approval-free static and focused-test audit of the KOSHA exact-promot
 The current committed review-gate artifact remains a blocked operator template snapshot:
 
 - Artifact: `evaluation\kosha-exact-promotion-review-gate-2026-07-22\report.json`
-- Artifact source: `9f0d0b8cb96fe3a2a38ec75bab0a70a6eec5fce7`
+- Artifact source: `f8b12b4ba67334aa1cb46e2f4c48fe596808b093`
 - Artifact verdict: `REVIEW_CHECKLIST_INCOMPLETE_BLOCKED`
 - Review rows: `8`
 - Passed rows: `0`
