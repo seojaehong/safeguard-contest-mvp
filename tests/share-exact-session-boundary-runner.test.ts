@@ -220,6 +220,25 @@ describe("share exact session boundary runner", () => {
     }
   }, 30_000);
 
+  it("rejects non-recipient share surfaces as exact saved session evidence", async () => {
+    const server = await startFixtureServer();
+    try {
+      const result = await runBoundaryScript([
+        "--base-url",
+        server.baseUrl,
+        "--exact-url",
+        `${server.baseUrl}/workspace?share=1`,
+      ]);
+
+      expect(result.code).not.toBe(0);
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toContain("Exact share URL must point to /share/[sessionId]");
+      expect(fs.existsSync(path.join(result.outputDir, "report.json"))).toBe(false);
+    } finally {
+      await server.close();
+    }
+  });
+
   it("rejects exact saved recipient geometry when the page issues share-session mutation requests", async () => {
     const server = await startFixtureServer();
     try {
