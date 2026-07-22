@@ -140,6 +140,7 @@ function summarizeFailures(failures) {
     candidateReviewCountMismatch: 0,
     missingReviewRows: 0,
     unexpectedReviewRows: 0,
+    duplicateReviewRows: 0,
     metadataMismatches: 0,
     missingRequiredChecks: 0,
     unconfirmedRequiredChecks: 0,
@@ -155,6 +156,7 @@ function summarizeFailures(failures) {
     if (failure.startsWith("candidate-review-count-mismatch:")) summary.candidateReviewCountMismatch += 1;
     else if (failure.startsWith("missing-review:")) summary.missingReviewRows += 1;
     else if (failure.startsWith("unexpected-review:")) summary.unexpectedReviewRows += 1;
+    else if (failure.startsWith("duplicate-review:")) summary.duplicateReviewRows += 1;
     else if (failure.startsWith("review-metadata-mismatch:")) summary.metadataMismatches += 1;
     else if (failure.startsWith("missing-required-check:")) summary.missingRequiredChecks += 1;
     else if (failure.startsWith("unconfirmed-required-check:")) summary.unconfirmedRequiredChecks += 1;
@@ -198,8 +200,13 @@ export function buildKoshaExactPromotionReviewGate(options) {
     failures.push(`candidate-review-count-mismatch:${candidateReviews.length}:${candidates.length}`);
   }
 
+  const seenReviewKeys = new Set();
   for (const reviewRow of candidateReviews) {
     const stableKey = reviewKey(reviewRow);
+    if (stableKey && seenReviewKeys.has(stableKey)) {
+      failures.push(`duplicate-review:${stableKey}`);
+    }
+    if (stableKey) seenReviewKeys.add(stableKey);
     if (!stableKey || !candidateKeySet.has(stableKey)) {
       failures.push(`unexpected-review:${stableKey || "missing-stable-key"}`);
     }
@@ -258,7 +265,8 @@ export function buildKoshaExactPromotionReviewGate(options) {
   const packetCandidateSetMatchesReview =
     failureSummary.candidateReviewCountMismatch === 0 &&
     failureSummary.missingReviewRows === 0 &&
-    failureSummary.unexpectedReviewRows === 0;
+    failureSummary.unexpectedReviewRows === 0 &&
+    failureSummary.duplicateReviewRows === 0;
   return {
     schemaVersion: SCHEMA_VERSION,
     generatedAt: options.generatedAt || new Date().toISOString(),

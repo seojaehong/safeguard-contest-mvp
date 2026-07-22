@@ -44,6 +44,7 @@ type ReviewGateReport = {
     candidateReviewCountMismatch: number;
     missingReviewRows: number;
     unexpectedReviewRows: number;
+    duplicateReviewRows: number;
     metadataMismatches: number;
     missingRequiredChecks: number;
     unconfirmedRequiredChecks: number;
@@ -332,6 +333,30 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.failureSummary.missingReviewRows).toBe(1);
     expect(report.failureSummary.unexpectedReviewRows).toBe(1);
     expect(report.failureSummary.candidateReviewCountMismatch).toBe(0);
+    expect(report.exactPromotionPerformed).toBe(false);
+    expect(report.exactRegistryWriteArtifactCreated).toBe(false);
+  });
+
+  it("fails closed and identifies duplicate stable keys in review rows", async () => {
+    const { root, packetPath, reviewPath } = writeFixtureRoot();
+    const review = JSON.parse(fs.readFileSync(path.join(root, reviewPath), "utf8")) as {
+      candidateReviews: Array<Record<string, unknown>>;
+    };
+    review.candidateReviews[1] = {
+      ...review.candidateReviews[1],
+      stableKey: "D-C-10",
+    };
+    writeJson(root, reviewPath, review);
+    const module = await loadReviewGateModule();
+    const report = module.buildKoshaExactPromotionReviewGate({ rootDir: root, packetPath, reviewPath });
+
+    expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
+    expect(report.reviewChecklistComplete).toBe(false);
+    expect(report.packetCandidateSetMatchesReview).toBe(false);
+    expect(report.failures).toContain("duplicate-review:D-C-10");
+    expect(report.failures).toContain("missing-review:A-G-15");
+    expect(report.failureSummary.duplicateReviewRows).toBe(1);
+    expect(report.failureSummary.missingReviewRows).toBe(1);
     expect(report.exactPromotionPerformed).toBe(false);
     expect(report.exactRegistryWriteArtifactCreated).toBe(false);
   });
