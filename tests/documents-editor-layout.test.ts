@@ -208,24 +208,29 @@ describe("documents editor layout", () => {
       expect(metrics.riskRowsEditor.top).toBeLessThan(metrics.workpackShell.bottom);
       expect(metrics.firstRiskRowHeader.top).toBeGreaterThanOrEqual(metrics.toolbar.bottom + 4);
       expect(metrics.firstRiskRowHeader.bottom).toBeLessThan(metrics.workpackShell.bottom);
-      expect(metrics.firstRiskHazardField.top).toBeLessThan(metrics.workpackShell.bottom);
-      expect(Math.min(metrics.firstRiskHazardField.bottom, metrics.workpackShell.bottom) - metrics.firstRiskHazardField.top).toBeGreaterThanOrEqual(50);
       expect(metrics.fieldStripText).toContain("첫 위험행");
       expect(metrics.fieldStripText).toContain("4M");
       expect(metrics.fieldStripText).toContain("근거");
       expect(metrics.firstRiskRowHeaderText).toContain("근거");
       expect(metrics.firstRiskRowHeaderText).toContain("확인");
       expect(metrics.actionTexts).toEqual(["근거 보기", "점검 보기"]);
-      expect(metrics.fieldStrip.top).toBeGreaterThanOrEqual(metrics.firstRiskRow.bottom);
+      expect(metrics.fieldStrip.top).toBeGreaterThanOrEqual(metrics.toolbar.bottom + 4);
+      expect(metrics.fieldStrip.bottom).toBeLessThanOrEqual(metrics.workpackShell.bottom);
       expect(metrics.sectionActions.top).toBeGreaterThanOrEqual(metrics.fieldStrip.bottom);
-      expect(metrics.sectionActions.top).toBeGreaterThan(metrics.workpackShell.bottom);
-      expect(metrics.firstSectionTextarea.top).toBeGreaterThanOrEqual(metrics.sectionActions.bottom);
+      expect(metrics.sectionActions.bottom).toBeLessThanOrEqual(metrics.workpackShell.bottom);
+      expect(metrics.riskRowsEditor.top).toBeGreaterThanOrEqual(metrics.sectionActions.bottom);
+      expect(metrics.firstSectionTextarea.top).toBeGreaterThanOrEqual(metrics.riskRowsEditor.bottom);
       expect(metrics.firstSectionTextarea.top).toBeGreaterThan(metrics.workpackShell.bottom);
+      if (viewport.name !== "mobile") {
+        expect(metrics.firstRiskHazardField.top).toBeLessThan(metrics.workpackShell.bottom);
+        expect(Math.min(metrics.firstRiskHazardField.bottom, metrics.workpackShell.bottom) - metrics.firstRiskHazardField.top).toBeGreaterThanOrEqual(50);
+      }
       expect(metrics.defaultOpenSectionCount).toBe(1);
       if (viewport.name === "mobile") {
         expect(metrics.riskLauncherPressed).toBe("true");
         expect(metrics.firstRiskRowHeader.bottom).toBeLessThan(metrics.workpackShell.bottom);
-        expect(metrics.firstRiskHazardField.top).toBeLessThanOrEqual(760);
+        expect(metrics.sectionActions.bottom).toBeLessThanOrEqual(760);
+        expect(metrics.firstRiskHazardField.top).toBeLessThanOrEqual(metrics.viewportHeight);
         expect(metrics.workpackShellScrollHeight).toBeLessThanOrEqual(1500);
         expect(metrics.secondaryTools.height).toBeLessThanOrEqual(240);
         expect(metrics.fieldChipMetrics).toHaveLength(3);
@@ -414,7 +419,10 @@ describe("documents editor layout", () => {
     await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
     await page.getByRole("combobox", { name: "편집 문서 선택" }).selectOption("riskAssessmentDraft");
     await page.getByRole("button", { name: "위험 항목" }).click();
-    await page.getByTestId("risk-row-editor-row").nth(1).getByText("행 상세 편집", { exact: true }).click();
+    const secondRow = page.getByTestId("risk-row-editor-row").nth(1);
+    await secondRow.getByTestId("risk-row-details").evaluate((element) => {
+      (element as HTMLDetailsElement).open = true;
+    });
     await page.getByRole("textbox", { name: "행 2 세부작업" }).fill("RELOAD_INCOMPLETE_TASK");
     await expect.poll(() => page.getByRole("textbox", { name: "행 2 유해·위험요인" }).getAttribute("aria-invalid"))
       .toBe("true");

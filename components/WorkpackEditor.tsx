@@ -3053,7 +3053,7 @@ export function WorkpackEditor({
       : shellRect.top;
     const comfortableTargetTop = Math.min(
       shellRect.bottom - 80,
-      visibleTop + Math.max(32, shell.clientHeight * 0.18)
+      visibleTop + Math.max(24, shell.clientHeight * 0.06)
     );
     const targetIsVisible = targetRect.bottom > visibleTop
       && targetRect.top >= visibleTop
@@ -3074,7 +3074,9 @@ export function WorkpackEditor({
     const firstSectionId = structuredDocument.body[0]?.id ?? null;
     const shouldPreferRiskRow = selected.key === "riskAssessmentDraft" && expandedStructuredSectionId === firstSectionId;
     const riskRowTarget = shouldPreferRiskRow
-      ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="risk-row-editor-row"]')
+      ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
+        || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-actions"]')
+        || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="risk-row-editor-row"]')
         || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="risk-rows-editor"]')
         || null
       : null;
@@ -3144,9 +3146,10 @@ export function WorkpackEditor({
   useLayoutEffect(() => {
     const alignSelectedDocument = () => {
       const target = selected.key === "riskAssessmentDraft"
-        ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="risk-row-editor-row"]')
+        ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
+          || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-actions"]')
+          || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="risk-row-editor-row"]')
           || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="risk-rows-editor"]')
-          || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
           || null
         : isSummaryDocumentKey(selected.key)
           ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="summary-document-cockpit"]')
@@ -3787,6 +3790,38 @@ export function WorkpackEditor({
               data-testid="document-structured-editor"
               data-editor-kind={structuredDocument.profile.kind}
             >
+              {selected.key === "riskAssessmentDraft" && structuredDocument.body[0] ? (
+                <div className={styles.documentSectionFieldStrip} data-testid="document-section-field-strip">
+                  <span>
+                    <b>첫 위험행</b>
+                    <strong>{canonicalRiskRows[0]?.task || canonicalRiskRows[0]?.hazard || structuredDocument.body[0].label}</strong>
+                  </span>
+                  <span>
+                    <b>4M/등급</b>
+                    <strong>
+                      {canonicalRiskRows[0]
+                        ? `${canonicalRiskRows[0].fourM} · ${canonicalRiskRows[0].riskLevel}`
+                        : `${selectedRows.length.toLocaleString("ko-KR")}건 연결`}
+                    </strong>
+                  </span>
+                  <span>
+                    <b>근거/점검</b>
+                    <strong>
+                      {(canonicalRiskRows[0]?.evidenceRefs.length ?? selectedRows.length).toLocaleString("ko-KR")}건 · {selectedUsesEditedText ? "재확인" : "초안"}
+                    </strong>
+                  </span>
+                </div>
+              ) : null}
+              {selected.key === "riskAssessmentDraft" ? (
+                <div className={styles.documentSectionActions} data-testid="document-section-actions">
+                  <button type="button" onClick={() => openDocumentUtilityPanel("editor-evidence-panel")}>
+                    근거 보기
+                  </button>
+                  <button type="button" onClick={() => openDocumentUtilityPanel("editor-quality-panel")}>
+                    점검 보기
+                  </button>
+                </div>
+              ) : null}
               {selected.key === "riskAssessmentDraft" ? (
                 <RiskAssessmentRowsEditor
                   rows={canonicalRiskRows}
@@ -3856,35 +3891,23 @@ export function WorkpackEditor({
                         {sectionLineCount.toLocaleString("ko-KR")}줄 · {isSectionOpen ? "편집 중" : "펼치기"}
                       </em>
                     </summary>
-                    {isSectionOpen ? (
+                    {isSectionOpen && selected.key !== "riskAssessmentDraft" ? (
                       <div className={styles.documentSectionFieldStrip} data-testid="document-section-field-strip">
                         <span>
-                          <b>{selected.key === "riskAssessmentDraft" ? "첫 위험행" : "현재 편집 필드"}</b>
-                          <strong>
-                            {selected.key === "riskAssessmentDraft"
-                              ? canonicalRiskRows[0]?.task || canonicalRiskRows[0]?.hazard || section.label
-                              : section.label}
-                          </strong>
+                          <b>현재 편집 필드</b>
+                          <strong>{section.label}</strong>
                         </span>
                         <span>
-                          <b>{selected.key === "riskAssessmentDraft" ? "4M/등급" : "근거"}</b>
-                          <strong>
-                            {selected.key === "riskAssessmentDraft" && canonicalRiskRows[0]
-                              ? `${canonicalRiskRows[0].fourM} · ${canonicalRiskRows[0].riskLevel}`
-                              : `${selectedRows.length.toLocaleString("ko-KR")}건 연결`}
-                          </strong>
+                          <b>근거</b>
+                          <strong>{selectedRows.length.toLocaleString("ko-KR")}건 연결</strong>
                         </span>
                         <span>
-                          <b>{selected.key === "riskAssessmentDraft" ? "근거/점검" : "점검"}</b>
-                          <strong>
-                            {selected.key === "riskAssessmentDraft"
-                              ? `${(canonicalRiskRows[0]?.evidenceRefs.length ?? selectedRows.length).toLocaleString("ko-KR")}건 · ${selectedUsesEditedText ? "재확인" : "초안"}`
-                              : selectedUsesEditedText ? "수정본 재확인" : "초안 확인"}
-                          </strong>
+                          <b>점검</b>
+                          <strong>{selectedUsesEditedText ? "수정본 재확인" : "초안 확인"}</strong>
                         </span>
                       </div>
                     ) : null}
-                    {isSectionOpen ? (
+                    {isSectionOpen && selected.key !== "riskAssessmentDraft" ? (
                       <div className={styles.documentSectionActions} data-testid="document-section-actions">
                         <button type="button" onClick={() => openDocumentUtilityPanel("editor-evidence-panel")}>
                           근거 보기

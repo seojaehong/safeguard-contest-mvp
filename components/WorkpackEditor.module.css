@@ -1414,6 +1414,24 @@
     padding-bottom: 0;
   }
 
+  .documentSectionFieldStrip {
+    gap: 4px;
+  }
+
+  .documentSectionFieldStrip span {
+    min-height: 36px;
+    padding: 3px 8px;
+  }
+
+  .documentSectionActions {
+    gap: 4px;
+  }
+
+  .documentSectionActions button {
+    min-height: 36px;
+    padding: 0 10px;
+  }
+
   .tbmCockpit {
     gap: 6px;
     max-height: 132px;

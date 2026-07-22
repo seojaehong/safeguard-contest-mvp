@@ -1605,6 +1605,7 @@ describe("workspace layout regression", () => {
       const shell = readRect(".workpack-shell");
       const navigator = readRect(".workpack-sidebar");
       const editor = readRect(".document-editor");
+      const toolbar = readRect(".document-toolbar");
       const textarea = readRect(".document-textarea");
       const fieldStrip = readRect('[data-testid="document-section-field-strip"]');
       const sectionActions = readRect('[data-testid="document-section-actions"]');
@@ -1652,6 +1653,7 @@ describe("workspace layout regression", () => {
         shell,
         navigator,
         editor,
+        toolbar,
         textarea,
         fieldStrip,
         sectionActions,
@@ -1723,12 +1725,15 @@ describe("workspace layout regression", () => {
     expect(metrics.firstRiskRowHeaderText).toContain("근거");
     expect(metrics.firstRiskRowHeaderText).toContain("확인");
     expect(metrics.riskRowsEditor.top).toBeLessThan(metrics.shell.bottom);
+    expect(metrics.fieldStrip.top).toBeGreaterThanOrEqual(metrics.toolbar.bottom + 4);
+    expect(metrics.fieldStrip.bottom).toBeLessThanOrEqual(metrics.shell.bottom);
+    expect(metrics.sectionActions.top).toBeGreaterThanOrEqual(metrics.fieldStrip.bottom);
+    expect(metrics.sectionActions.bottom).toBeLessThanOrEqual(metrics.shell.bottom);
+    expect(metrics.riskRowsEditor.top).toBeGreaterThanOrEqual(metrics.sectionActions.bottom);
     expect(metrics.firstRiskRowHeader.top).toBeGreaterThanOrEqual(metrics.shell.top);
     expect(metrics.firstRiskRowHeader.bottom).toBeLessThanOrEqual(metrics.shell.bottom);
     expect(metrics.firstRiskHazardField.top).toBeLessThan(metrics.shell.bottom);
     expect(Math.min(metrics.firstRiskHazardField.bottom, metrics.shell.bottom) - metrics.firstRiskHazardField.top).toBeGreaterThanOrEqual(50);
-    expect(metrics.fieldStrip.top).toBeGreaterThanOrEqual(metrics.firstRiskRowHeader.bottom);
-    expect(metrics.sectionActions.top).toBeGreaterThanOrEqual(metrics.fieldStrip.bottom);
     expect(metrics.activeTab.backgroundColor).not.toBe("rgb(108, 111, 247)");
     expect(metrics.activeTab.color).not.toBe("rgb(255, 255, 255)");
     expect(focusMessageBackground).not.toBe("rgba(14, 14, 18, 0.78)");
