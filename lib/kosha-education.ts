@@ -33,7 +33,8 @@ type KoshaEduApiResponse = {
 
 const BASE_URL = "https://edu.kosha.or.kr";
 const API_BASE = `${BASE_URL}/api/portal24/bizG/p/GETEA02001`;
-const TIMEOUT_MS = 5_000;
+const TIMEOUT_MS = 20_000;
+const MAX_ATTEMPTS = 2;
 
 function hasAny(value: string, keywords: string[]) {
   return keywords.some((keyword) => value.includes(keyword));
@@ -54,34 +55,45 @@ function compactDate(value: string) {
 }
 
 async function postKoshaEdu(endpoint: string, body: Record<string, unknown>) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  let lastError: unknown = null;
 
-  try {
-    const response = await fetch(`${API_BASE}/${endpoint}`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "origin": BASE_URL,
-        "referer": `${BASE_URL}/`,
-        "user-agent": "SafeClaw safety-workpack"
-      },
-      body: JSON.stringify(body),
-      signal: controller.signal,
-      cache: "no-store"
-    });
-    const text = await response.text();
-    if (!response.ok) {
-      throw new Error(`KOSHA EDU ${endpoint} returned ${response.status}: ${text.slice(0, 160)}`);
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+    try {
+      const response = await fetch(`${API_BASE}/${endpoint}`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "origin": BASE_URL,
+          "referer": `${BASE_URL}/`,
+          "user-agent": "SafeClaw safety-workpack"
+        },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+        cache: "no-store"
+      });
+      const text = await response.text();
+      if (!response.ok) {
+        throw new Error(`KOSHA EDU ${endpoint} returned ${response.status}: ${text.slice(0, 160)}`);
+      }
+      const parsed = JSON.parse(text) as unknown;
+      if (!isRecord(parsed)) {
+        throw new Error(`KOSHA EDU ${endpoint} returned non-object response`);
+      }
+      return parsed as KoshaEduApiResponse;
+    } catch (error) {
+      lastError = error;
+      if (attempt >= MAX_ATTEMPTS) {
+        throw error;
+      }
+    } finally {
+      clearTimeout(timeout);
     }
-    const parsed = JSON.parse(text) as unknown;
-    if (!isRecord(parsed)) {
-      throw new Error(`KOSHA EDU ${endpoint} returned non-object response`);
-    }
-    return parsed as KoshaEduApiResponse;
-  } finally {
-    clearTimeout(timeout);
   }
+
+  throw lastError instanceof Error ? lastError : new Error(`KOSHA EDU ${endpoint} failed`);
 }
 
 function classifyQuestion(question: string) {
