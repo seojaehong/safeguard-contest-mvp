@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `51fbe6296c19d42b1fe2161e82876f8d6423d01f`
+Source HEAD: `cf6285ea23dfd6f84efe220437e4ea4fa28dbe03`
 
-Production `/api/build-info`: `51fbe6296c19d42b1fe2161e82876f8d6423d01f`
+Production `/api/build-info`: `cf6285ea23dfd6f84efe220437e4ea4fa28dbe03`
 
 Latest evidence commit live: `true`
 
@@ -14,7 +14,7 @@ Source head live pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `51fbe6296c19d42b1fe2161e82876f8d6423d01f`
+Live rollup source head: `cf6285ea23dfd6f84efe220437e4ea4fa28dbe03`
 
 Live rollup matches production: `true`
 
@@ -62,8 +62,9 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Bounded workbench DoD: route split alone is not accepted; desktop Documents hard-REDs above the recorded screen threshold, /share/result desktop requires multi-region workbench geometry, and generated fixture evidence must stay separate from exact saved/session proof.
 - Legacy workspace-layout regression: remains a broad no-overflow/editor-flow smoke only, not a long-form UX PASS gate; the DoD and route-specific evidence own first-task distance.
 - Current bounded-workbench gate: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP`; first-task/body containment rows pass, and no Documents rows carry local workbench detail-depth debt. Share rows remain scoped if exact saved session evidence is missing.
-- Share desktop: current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
+- Share desktop: current measured Workspace Share and invited recipient fixture routes pass scoped desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
+- Share route evidence split: invited recipient `/share/[sessionId]` fixture route, exact saved/generated `/share/[sessionId]`, and manager/workspace share-result route remain separate proof layers. A fixture pass cannot close a user-specific exact saved/session complaint.
 - Share exact-session boundary: `MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED`; exact saved reproduced is `false`, safe missing-session GET status is `500`, and DB/provider mutations remain `false`.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
 
@@ -85,9 +86,10 @@ Required first-task containment:
 6. promote the bounded-workbench current-source proof to live only after production /api/build-info reaches the product/evidence head and the live probe is rerun.
 7. reproduce an exact saved/generated Share session before using fixture or generated /workspace share evidence to close the user's exact Share complaint.
 8. treat the Share exact-session boundary as open until a concrete session URL/payload is provided; the current no-mutation boundary audit only proves route presence and missing exact evidence.
-9. keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven.
-10. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
-11. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
+9. keep Share UI evidence split by route: invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result state each need their own geometry before closing user-specific mobile-like complaints.
+10. keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven.
+11. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
+12. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
 
 ## KOSHA Candidate Boundary
 

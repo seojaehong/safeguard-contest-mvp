@@ -598,8 +598,9 @@ describe("northstar next runway generator", () => {
       acceptedStructure: "three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes",
       documentsDefaultCockpit: "first actionable cockpit is live-proven; do not phrase this as documents page height fixed or the whole Documents page shortened",
       documentsRemainingDebt: "full 12-document authoring polish remains; the all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content and the local workbench shell ratio target remains <= 3",
-      shareDesktop: "current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes, and desktop must not regress into a mobile card stack",
+      shareDesktop: "current measured Workspace Share and invited recipient fixture routes pass scoped desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes, and desktop must not regress into a mobile card stack",
       shareGeneratedResult: "current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported",
+      shareRouteEvidenceBoundary: "separate Share evidence into invited recipient fixture pass, exact saved/generated /share/[sessionId] missing evidence, and manager/workspace share-result route repro; do not use one route's pass to close another route's mobile-like complaint",
     });
     expect(report.shareGeneratedSessionPerception).toMatchObject({
       verdict: "PASS_CURRENT_SOURCE_GENERATED_RESULT_FIXTURE",
@@ -709,6 +710,9 @@ describe("northstar next runway generator", () => {
     );
     expect(report.nextSafeWorkWithoutApproval).toContain(
       "treat the Share exact-session boundary as open until a concrete session URL/payload is provided; the current no-mutation boundary audit only proves route presence and missing exact evidence",
+    );
+    expect(report.nextSafeWorkWithoutApproval).toContain(
+      "keep Share UI evidence split by route: invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result state each need their own geometry before closing user-specific mobile-like complaints",
     );
     expect(report.sourceHeadLivePending).toBe(false);
     expect(report.boundedWorkbenchSourceIncludedInLive).toBe(false);

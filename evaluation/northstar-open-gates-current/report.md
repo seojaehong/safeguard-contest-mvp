@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-22T10:16:06.325Z
-Source SHA: `51fbe6296c19d42b1fe2161e82876f8d6423d01f`
+Generated at: 2026-07-22T10:25:54.386Z
+Source SHA: `cf6285ea23dfd6f84efe220437e4ea4fa28dbe03`
 Overall: `open`
 
 ## Gate Matrix
@@ -46,6 +46,7 @@ Overall: `open`
 - ui_documents_share_cockpit: Keep the next Documents product wave framed as bounded IA/density with a default exposure budget and local workbench shell ratio target <= 3; do not use route split alone as the fix.
 - ui_documents_share_cockpit: Keep route/page split framed as orientation only; the UX contract is three-step app shell plus first-viewport cockpit plus bounded drilldown/detail containment.
 - ui_documents_share_cockpit: Keep /share generated-result and desktop full-workbench perception refinements as separate gates with desktop width-ratio/grid metrics when user-visible sessions reproduce the complaint; /share/[sessionId] recipient cockpit geometry is live-proven for the invited-session fixture, not a broad desktop workbench polish claim.
+- ui_documents_share_cockpit: Keep Share UI evidence split by route/state: invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result each need their own geometry before closing user-specific mobile-like complaints.
 - dispatch_standalone_cockpit: Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved.
 - share_result_fixture_cockpit: Keep real provider dispatch gated until persistent idempotency and provider-result persistence are approved and live verified.
 - provider_dispatch_persistence: Keep PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false until route-level reservation-before-provider-call and duplicate replay behavior are tested.
