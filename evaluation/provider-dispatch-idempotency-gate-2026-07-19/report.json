@@ -1,17 +1,17 @@
 {
   "generatedAt": "2026-07-19T00:30:00+09:00",
-  "refreshedAt": "2026-07-23T06:57:59+09:00",
-  "sourceSha": "43fbe4b0cb7d7563996bb249ce558eba7e5a993b",
+  "refreshedAt": "2026-07-22T22:31:04.757Z",
+  "sourceSha": "63b5a9af7acb20456b750acc004e0bb258aa34c4",
   "scope": "provider_dispatch_idempotency_gate",
   "status": "approval_required",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "43fbe4b0cb7d7563996bb249ce558eba7e5a993b",
+    "commitSha": "63b5a9af7acb20456b750acc004e0bb258aa34c4",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-czo6ecwy4-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-5udp7do3s-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "liveDispatchState": {
@@ -19,7 +19,7 @@
     "mode": "preview_only",
     "reason": "persistent_idempotency_unavailable",
     "codeLock": "PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false",
-    "productionCommitSha": "43fbe4b0cb7d7563996bb249ce558eba7e5a993b",
+    "productionCommitSha": "63b5a9af7acb20456b750acc004e0bb258aa34c4",
     "channels": {
       "email": {
         "capability": false,
@@ -87,8 +87,20 @@
     {
       "command": "npm.cmd test -- tests\\provider-dispatch-idempotency-gate.test.ts tests\\workflow-dispatch-capability-policy.test.ts tests\\workflow-share-client.test.ts tests\\workflow-share-capability-browser.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000 --hookTimeout=180000",
       "status": "passed",
+      "exitStatus": 0,
+      "signal": null,
+      "error": null,
       "files": 4,
-      "tests": 44
+      "tests": 44,
+      "stdoutTail": [
+        "> vitest run tests\\provider-dispatch-idempotency-gate.test.ts tests\\workflow-dispatch-capability-policy.test.ts tests\\workflow-share-client.test.ts tests\\workflow-share-capability-browser.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000 --hookTimeout=180000",
+        " RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/recipient-foreign-live-gate-20260720",
+        " Test Files  4 passed (4)",
+        "      Tests  44 passed (44)",
+        "   Start at  07:31:05",
+        "   Duration  22.15s (transform 375ms, setup 0ms, import 828ms, tests 20.39s, environment 0ms)"
+      ],
+      "stderrTail": []
     },
     {
       "command": "GET https://www.safeclaw.kr/api/workflow/dispatch",
