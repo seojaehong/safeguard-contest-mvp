@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `addab53c868443564dee2e6ded2f67b6923c1051`
+Source HEAD: `c58c67cf05d8e726605cf75085f0e87f9eb00e28`
 
-Production `/api/build-info`: `addab53c868443564dee2e6ded2f67b6923c1051`
+Production `/api/build-info`: `c58c67cf05d8e726605cf75085f0e87f9eb00e28`
 
 Latest evidence commit live: `true`
 
@@ -52,8 +52,8 @@ These require explicit approval before runtime mutation or live claims:
 The user's Documents/Share concern remains framed as information architecture, not page-count alone:
 
 - Default Documents cockpit: first actionable cockpit is live-proven; do not phrase this as "Documents page height fixed" or "the whole Documents page is short".
-- Documents selected editor/detail: risk-assessment default and same-document reselect land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown.
-- Documents remaining debt: full 12-document long-form IA remains; supporting 9 and raw/full document bodies must not become serial page content when users expand all launchers.
+- Documents selected editor/detail: risk-assessment default, same-document reselect, and all-12 launcher exposure land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown.
+- Documents remaining debt: full 12-document authoring polish remains. The all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content.
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.
 - Share desktop: current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
@@ -72,7 +72,7 @@ Required first-task containment:
 1. refresh source/live exact evidence when production marker advances to the evidence-only head.
 2. refresh live rollup before claiming live-exact if production advances beyond the current live rollup head.
 3. use the KOSHA exact promotion packet as the bounded operator-review set and run scripts/kosha_exact_promotion_review_gate.mjs on the human review input before any exact-trust promotion.
-4. keep UI follow-up scoped to all-12 Documents selected-only containment or reproduced exact-session desktop Share full-workbench perception issues.
+4. keep UI follow-up scoped to full 12-document authoring polish or reproduced exact-session desktop Share full-workbench perception issues.
 5. keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven.
 6. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
 7. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.

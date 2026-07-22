@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T05:23:49.710Z",
+  "generatedAt": "2026-07-22T06:26:58.427Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "addab53c868443564dee2e6ded2f67b6923c1051",
-  "productionCommit": "addab53c868443564dee2e6ded2f67b6923c1051",
+  "sourceHead": "c58c67cf05d8e726605cf75085f0e87f9eb00e28",
+  "productionCommit": "c58c67cf05d8e726605cf75085f0e87f9eb00e28",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "addab53c868443564dee2e6ded2f67b6923c1051",
+    "commitSha": "c58c67cf05d8e726605cf75085f0e87f9eb00e28",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-8jrs0kk17-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-d4lnw6g1k-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -32,7 +32,8 @@
     "rlsLlmWikiApprovalPreflight": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
     "approvalRunway": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
     "sifEmbeddingPreflight": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-    "shareGeneratedSessionPerception": "evaluation\\share-generated-session-perception-2026-07-22\\report.json"
+    "shareGeneratedSessionPerception": "evaluation\\share-generated-session-perception-2026-07-22\\report.json",
+    "documentsLongFormIA": "evaluation\\documents-long-form-ia-2026-07-22\\report.json"
   },
   "provenCurrentState": [
     "live_harness_quality",
@@ -164,8 +165,8 @@
       "share": "recipient/channel/language summary, preview/result status, and primary confirmation first; long messages, logs, provenance, and raw metadata remain collapsed/detail content"
     },
     "documentsDefaultCockpit": "first actionable cockpit is live-proven; do not phrase this as documents page height fixed or the whole Documents page shortened",
-    "documentsRemainingDebt": "full 12-document long-form IA remains; supporting 9 and raw/full document bodies must not become serial page content when users expand all launchers",
-    "selectedEditorDetail": "risk-assessment default and same-document reselect now land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown",
+    "documentsRemainingDebt": "full 12-document authoring polish remains; the all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content",
+    "selectedEditorDetail": "risk-assessment default, same-document reselect, and all-12 launcher exposure now land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown",
     "documentsContainment": "route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation",
     "shareDesktop": "current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes",
     "shareGeneratedResult": "current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported",
@@ -273,11 +274,60 @@
       }
     ]
   },
+  "documentsLongFormIA": {
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION",
+    "sourceHead": "c7ef001130dc637c43dbc6a60bb968666f6f2261",
+    "routeSplitAloneAcceptedAsFix": false,
+    "routeSplitVerdict": "PASS_ORIENTATION_ONLY",
+    "providerDispatchLiveClaimed": false,
+    "dbMutationPerformed": false,
+    "allLauncherExposure": [
+      {
+        "viewport": "desktop-short-1440x723",
+        "launcherExposureVerdict": "PASS",
+        "allDocumentLongFormVerdict": "PASS",
+        "selectedEditorDepthVerdict": "PASS",
+        "coreDocButtonCount": 3,
+        "allDocTabButtonCount": 12,
+        "supportingLauncherMovesEditorOutOfView": false,
+        "actionsBottom": 405,
+        "hazardBottom": null,
+        "horizontalOverflow": false,
+        "stickyOverlapCount": 0
+      },
+      {
+        "viewport": "desktop-1440x900",
+        "launcherExposureVerdict": "PASS",
+        "allDocumentLongFormVerdict": "PASS",
+        "selectedEditorDepthVerdict": "PASS",
+        "coreDocButtonCount": 3,
+        "allDocTabButtonCount": 12,
+        "supportingLauncherMovesEditorOutOfView": false,
+        "actionsBottom": 452,
+        "hazardBottom": null,
+        "horizontalOverflow": false,
+        "stickyOverlapCount": 0
+      },
+      {
+        "viewport": "mobile-390x844",
+        "launcherExposureVerdict": "PASS",
+        "allDocumentLongFormVerdict": "PASS",
+        "selectedEditorDepthVerdict": "PASS",
+        "coreDocButtonCount": 3,
+        "allDocTabButtonCount": 12,
+        "supportingLauncherMovesEditorOutOfView": false,
+        "actionsBottom": 667,
+        "hazardBottom": null,
+        "horizontalOverflow": false,
+        "stickyOverlapCount": 0
+      }
+    ]
+  },
   "nextSafeWorkWithoutApproval": [
     "refresh source/live exact evidence when production marker advances to the evidence-only head",
     "refresh live rollup before claiming live-exact if production advances beyond the current live rollup head",
     "use the KOSHA exact promotion packet as the bounded operator-review set and run scripts/kosha_exact_promotion_review_gate.mjs on the human review input before any exact-trust promotion",
-    "keep UI follow-up scoped to all-12 Documents selected-only containment or reproduced exact-session desktop Share full-workbench perception issues",
+    "keep UI follow-up scoped to full 12-document authoring polish or reproduced exact-session desktop Share full-workbench perception issues",
     "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
     "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
     "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held"

@@ -73,6 +73,27 @@ type NextRunwayReport = {
       resultSummaryBottom: number | null;
     }>;
   };
+  documentsLongFormIA: {
+    verdict: string;
+    sourceHead: string;
+    routeSplitAloneAcceptedAsFix: boolean;
+    routeSplitVerdict: string;
+    providerDispatchLiveClaimed: boolean;
+    dbMutationPerformed: boolean;
+    allLauncherExposure: Array<{
+      viewport: string;
+      launcherExposureVerdict: string;
+      allDocumentLongFormVerdict: string;
+      selectedEditorDepthVerdict: string;
+      coreDocButtonCount: number | null;
+      allDocTabButtonCount: number | null;
+      supportingLauncherMovesEditorOutOfView: boolean;
+      actionsBottom: number | null;
+      hazardBottom: number | null;
+      horizontalOverflow: boolean;
+      stickyOverlapCount: number | null;
+    }>;
+  };
   nextSafeWorkWithoutApproval: string[];
 };
 
@@ -242,6 +263,70 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       },
     ],
   });
+  writeJson(root, "evaluation/documents-long-form-ia-2026-07-22/report.json", {
+    verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION",
+    sourceHead: "TO_FILL",
+    providerDispatchLiveClaimed: false,
+    dbMutationPerformed: false,
+    routeSplitAloneAcceptedAsFix: false,
+    routeSplitVerdict: "PASS_ORIENTATION_ONLY",
+    results: [
+      {
+        state: "all 12 document launcher exposure",
+        viewport: { label: "desktop-short-1440x723", width: 1440, height: 723 },
+        verdicts: {
+          launcherExposureVerdict: "PASS",
+          allDocumentLongFormVerdict: "PASS",
+          selectedEditorDepthVerdict: "PASS",
+        },
+        metrics: {
+          coreDocButtonCount: 3,
+          allDocTabButtonCount: 12,
+          supportingLauncherMovesEditorOutOfView: false,
+          sectionActionsBottom: 405,
+          firstHazardFieldBottom: 662,
+          horizontalOverflow: false,
+          stickyOverlapCount: 0,
+        },
+      },
+      {
+        state: "all 12 document launcher exposure",
+        viewport: { label: "desktop-1440x900", width: 1440, height: 900 },
+        verdicts: {
+          launcherExposureVerdict: "PASS",
+          allDocumentLongFormVerdict: "PASS",
+          selectedEditorDepthVerdict: "PASS",
+        },
+        metrics: {
+          coreDocButtonCount: 3,
+          allDocTabButtonCount: 12,
+          supportingLauncherMovesEditorOutOfView: false,
+          sectionActionsBottom: 452,
+          firstHazardFieldBottom: 709,
+          horizontalOverflow: false,
+          stickyOverlapCount: 0,
+        },
+      },
+      {
+        state: "all 12 document launcher exposure",
+        viewport: { label: "mobile-390x844", width: 390, height: 844 },
+        verdicts: {
+          launcherExposureVerdict: "PASS",
+          allDocumentLongFormVerdict: "PASS",
+          selectedEditorDepthVerdict: "PASS",
+        },
+        metrics: {
+          coreDocButtonCount: 3,
+          allDocTabButtonCount: 12,
+          supportingLauncherMovesEditorOutOfView: false,
+          sectionActionsBottom: 667,
+          firstHazardFieldBottom: 793,
+          horizontalOverflow: false,
+          stickyOverlapCount: 0,
+        },
+      },
+    ],
+  });
 
   const firstHead = commitAll(root, "seed");
   const liveRollupPath = path.join(root, "evaluation/northstar-live-rollup-2026-07-20/report.json");
@@ -315,7 +400,7 @@ describe("northstar next runway generator", () => {
       routeSplitAloneAcceptedAsFix: false,
       acceptedStructure: "three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes",
       documentsDefaultCockpit: "first actionable cockpit is live-proven; do not phrase this as documents page height fixed or the whole Documents page shortened",
-      documentsRemainingDebt: "full 12-document long-form IA remains; supporting 9 and raw/full document bodies must not become serial page content when users expand all launchers",
+      documentsRemainingDebt: "full 12-document authoring polish remains; the all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content",
       shareDesktop: "current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes",
       shareGeneratedResult: "current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported",
     });
@@ -336,8 +421,29 @@ describe("northstar next runway generator", () => {
     expect(report.uiInterpretation.selectedEditorDetail).toContain("desktop 1440x900");
     expect(report.uiInterpretation.structuralAnswer).toContain("page count alone only moves long documents/messages to another URL");
     expect(report.uiInterpretation.stepShell.documents).toContain("full 12-document bodies remain selected-only drilldown");
+    expect(report.documentsLongFormIA).toMatchObject({
+      verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION",
+      routeSplitAloneAcceptedAsFix: false,
+      routeSplitVerdict: "PASS_ORIENTATION_ONLY",
+      providerDispatchLiveClaimed: false,
+      dbMutationPerformed: false,
+    });
+    expect(report.documentsLongFormIA.allLauncherExposure).toHaveLength(3);
+    expect(report.documentsLongFormIA.allLauncherExposure).toContainEqual(expect.objectContaining({
+      viewport: "mobile-390x844",
+      launcherExposureVerdict: "PASS",
+      allDocumentLongFormVerdict: "PASS",
+      selectedEditorDepthVerdict: "PASS",
+      coreDocButtonCount: 3,
+      allDocTabButtonCount: 12,
+      supportingLauncherMovesEditorOutOfView: false,
+      actionsBottom: 667,
+      hazardBottom: 793,
+      horizontalOverflow: false,
+      stickyOverlapCount: 0,
+    }));
     expect(report.nextSafeWorkWithoutApproval).toContain(
-      "keep UI follow-up scoped to all-12 Documents selected-only containment or reproduced exact-session desktop Share full-workbench perception issues",
+      "keep UI follow-up scoped to full 12-document authoring polish or reproduced exact-session desktop Share full-workbench perception issues",
     );
   });
 
