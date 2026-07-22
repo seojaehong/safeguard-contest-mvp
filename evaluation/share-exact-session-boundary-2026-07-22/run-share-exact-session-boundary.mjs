@@ -348,7 +348,7 @@ async function main() {
       "Fixture or generated /workspace Share proof closes the exact saved /share/[sessionId] user complaint.",
       "A live provider dispatch was performed.",
     "A share session was created or mutated by this boundary audit.",
-    "Exact saved Share is proven when non-GET /api/share-sessions requests occurred during the probe.",
+    "Exact saved Share is proven despite non-GET /api/share-sessions requests occurring during the probe.",
   ],
   };
 

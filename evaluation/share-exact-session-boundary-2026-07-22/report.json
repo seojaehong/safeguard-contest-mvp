@@ -1,19 +1,19 @@
 {
   "schemaVersion": "safeclaw-share-exact-session-boundary/v1",
-  "checkedAt": "2026-07-22T15:14:46.434Z",
+  "checkedAt": "2026-07-22T15:53:17.753Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHead": "0f69b0deb85839be0a415b1b32868f12c5eaeb2c",
+  "sourceHead": "fbfc51420d86d73eb6ee5fb5671a78399c9bec6e",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "9783901710ac9c03f5c0586783b65cbab6162a75",
+    "commitSha": "fbfc51420d86d73eb6ee5fb5671a78399c9bec6e",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-mwwgadktw-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-jx1rpq2oz-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "liveCommit": "9783901710ac9c03f5c0586783b65cbab6162a75",
+  "liveCommit": "fbfc51420d86d73eb6ee5fb5671a78399c9bec6e",
   "verdict": "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
   "exactSavedUserSessionReproduced": false,
   "exactSavedSessionUrlProvided": false,
@@ -78,6 +78,6 @@
     "Fixture or generated /workspace Share proof closes the exact saved /share/[sessionId] user complaint.",
     "A live provider dispatch was performed.",
     "A share session was created or mutated by this boundary audit.",
-    "Exact saved Share is proven when non-GET /api/share-sessions requests occurred during the probe."
+    "Exact saved Share is proven despite non-GET /api/share-sessions requests occurring during the probe."
   ]
 }

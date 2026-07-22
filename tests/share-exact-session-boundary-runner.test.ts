@@ -177,6 +177,8 @@ describe("share exact session boundary runner", () => {
         verdict: "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
       });
       expect((report.boundary as Record<string, unknown>).dbMutationPerformed).toBe(false);
+      expect(report.forbiddenClaims).toContain("Exact saved Share is proven despite non-GET /api/share-sessions requests occurring during the probe.");
+      expect(report.forbiddenClaims).not.toContain("Exact saved Share is proven when non-GET /api/share-sessions requests occurred during the probe.");
     } finally {
       await server.close();
     }
