@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T21:19:58.666Z",
-  "head": "df1f46e2f87660fb072989d2e03a38479134434a",
+  "generatedAt": "2026-07-22T21:23:46.530Z",
+  "head": "66714888eff0eba995f770f72955efb06c7271a5",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "9226534c8dcab1b55b5a26754e9e278f4c01ff67",
+    "commitSha": "66714888eff0eba995f770f72955efb06c7271a5",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-jw4darwy9-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-o364bujeo-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -193,10 +193,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "df1f46e2f87660fb072989d2e03a38479134434a",
+      "sourceCommit": "66714888eff0eba995f770f72955efb06c7271a5",
       "sourceStatus": "exact",
-      "productionCommit": "df1f46e2f87660fb072989d2e03a38479134434a",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "66714888eff0eba995f770f72955efb06c7271a5",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -217,10 +217,10 @@
     {
       "id": "kosha_exact_trust_registry",
       "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
-      "sourceCommit": "bcf5118c400bc47cfe5d454dbfd2a228abc99e8e",
-      "sourceStatus": "ancestor",
-      "productionCommit": "bcf5118c400bc47cfe5d454dbfd2a228abc99e8e",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "66714888eff0eba995f770f72955efb06c7271a5",
+      "sourceStatus": "exact",
+      "productionCommit": "66714888eff0eba995f770f72955efb06c7271a5",
+      "productionStatus": "matches_live"
     },
     {
       "id": "rls_llm_wiki_approval_preflight",
@@ -234,7 +234,7 @@
       "id": "sif_embedding_preflight",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
       "sourceCommit": "df1f46e2f87660fb072989d2e03a38479134434a",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },
