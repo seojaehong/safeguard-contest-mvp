@@ -644,8 +644,10 @@ describe("northstar next runway generator", () => {
       "keep UI follow-up scoped to full 12-document authoring polish or reproduced exact-session desktop Share full-workbench perception issues",
     );
     expect(report.nextSafeWorkWithoutApproval).toContain(
-      "close the live 390x723 Documents first-task RED from evaluation/workspace-bounded-workbench-current-2026-07-22/report.json before any broad mobile Documents UX pass claim",
+      "promote the bounded-workbench current-source proof to live only after production /api/build-info reaches the product/evidence head and the live probe is rerun",
     );
+    expect(report.sourceHeadLivePending).toBe(false);
+    expect(report.boundedWorkbenchCurrentLivePending).toBe(true);
   });
 
   it("keeps broad workspace height smoke separate from the bounded workbench DoD", () => {

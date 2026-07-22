@@ -436,6 +436,9 @@ export function buildNorthstarNextRunway(options) {
   const liveRollupMatchesProduction = liveExactEvidenceCommit === liveCommit && liveRollupLiveCommit === liveCommit;
   const latestEvidenceCommitLive = sourceHead === liveCommit;
   const currentHeadIsEvidenceOnlyPending = sourceHead !== liveCommit && liveRollupMatchesProduction;
+  const sourceHeadLivePending = sourceHead !== liveCommit;
+  const boundedCurrentSourceHead = isRecord(boundedCurrent) ? asString(boundedCurrent.sourceHead) : "";
+  const boundedWorkbenchCurrentLivePending = boundedCurrentSourceHead !== "" && boundedCurrentSourceHead !== liveCommit;
 
   return {
     schemaVersion: SCHEMA_VERSION,
@@ -447,6 +450,8 @@ export function buildNorthstarNextRunway(options) {
     liveBuildInfo: options.buildInfo,
     latestEvidenceCommitLive,
     currentHeadIsEvidenceOnlyPending,
+    sourceHeadLivePending,
+    boundedWorkbenchCurrentLivePending,
     liveExactEvidenceCommit,
     liveRollupLiveCommit,
     liveRollupMatchesProduction,
@@ -501,11 +506,11 @@ export function buildNorthstarNextRunway(options) {
     boundedWorkbenchDod: boundedWorkbenchDodSummary(boundedDod),
     boundedWorkbenchCurrent: boundedWorkbenchCurrentSummary(boundedCurrent),
     nextSafeWorkWithoutApproval: [
-      "refresh source/live exact evidence when production marker advances to the evidence-only head",
+      "refresh source/live exact evidence when production marker advances to the current source head",
       "refresh live rollup before claiming live-exact if production advances beyond the current live rollup head",
       "use the KOSHA exact promotion packet as the bounded operator-review set and run scripts/kosha_exact_promotion_review_gate.mjs on the human review input before any exact-trust promotion",
       "keep UI follow-up scoped to full 12-document authoring polish or reproduced exact-session desktop Share full-workbench perception issues",
-      "close the live 390x723 Documents first-task RED from evaluation/workspace-bounded-workbench-current-2026-07-22/report.json before any broad mobile Documents UX pass claim",
+      "promote the bounded-workbench current-source proof to live only after production /api/build-info reaches the product/evidence head and the live probe is rerun",
       "reproduce an exact saved/generated Share session before using fixture or generated /workspace share evidence to close the user's exact Share complaint",
       "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
       "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
@@ -523,11 +528,17 @@ export function renderNorthstarNextRunwayMarkdown(report) {
   const approvalRows = report.approvalGated.map((gate) => (
     `| ${gate.gate} | \`${gate.state}\` | \`${gate.currentSafetyLock}\` | ${gate.approvalNeeded.join("; ")} |`
   ));
+  const boundedDocumentRedRows = Array.isArray(report.boundedWorkbenchCurrent.documentRedRows)
+    ? report.boundedWorkbenchCurrent.documentRedRows.length
+    : 0;
+  const boundedWorkbenchNote = boundedDocumentRedRows === 0
+    ? `Current bounded-workbench source/local gate: \`${report.boundedWorkbenchCurrent.verdict}\`; Documents 390x723 rows are PASS in current-source local production evidence, but live promotion remains pending when \`boundedWorkbenchCurrentLivePending\` is \`true\`. Share rows remain scoped if exact saved session evidence is missing.`
+    : `Current bounded-workbench source/local gate: \`${report.boundedWorkbenchCurrent.verdict}\`; ${boundedDocumentRedRows} Documents row(s) remain RED in the artifact, while Share rows remain scoped if exact saved session evidence is missing.`;
   const liveNote = report.latestEvidenceCommitLive
     ? "Note: source HEAD and production marker match for this artifact."
     : report.liveRollupMatchesProduction
       ? `Note: current HEAD \`${report.sourceHead}\` is an evidence-only refresh pushed after the live-exact artifact set. Production is still \`${report.productionCommit}\`, and the live rollup remains exact for that deployed marker.`
-      : `Note: current HEAD \`${report.sourceHead}\` is ahead of production \`${report.productionCommit}\`, and the live rollup head \`${report.liveExactEvidenceCommit}\` does not yet match production. Refresh live rollup before claiming live-exact.`;
+      : `Note: current HEAD \`${report.sourceHead}\` is ahead of production \`${report.productionCommit}\`. Product/evidence changes are source-local verified and live-pending until production advances and the live probe is rerun.`;
 
   return `# North Star Next Runway
 
@@ -541,7 +552,11 @@ Production \`/api/build-info\`: \`${report.productionCommit}\`
 
 Latest evidence commit live: \`${report.latestEvidenceCommitLive}\`
 
-Live-exact evidence commit: \`${report.liveExactEvidenceCommit}\`
+Source head live pending: \`${report.sourceHeadLivePending}\`
+
+Bounded workbench current live pending: \`${report.boundedWorkbenchCurrentLivePending}\`
+
+Live rollup source head: \`${report.liveExactEvidenceCommit}\`
 
 Live rollup matches production: \`${report.liveRollupMatchesProduction}\`
 
@@ -558,7 +573,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - KOSHA next exact candidate audit identifies the 234-item current native technical-support subset and 231 metadata-verified non-exact candidates without mutation.
 - KOSHA exact promotion packet selects a bounded operator-review set without exact-trust registry mutation.
 - KOSHA exact promotion review gate is available to fail closed on incomplete or mismatched human checklist input before any separate approval step.
-- Documents and Share cockpit UI is proven for the current evidence scope.
+- Documents and Share cockpit UI is proven only for the current evidence scope.
 - Standalone Dispatch cockpit is proven for the current evidence scope.
 - Generated Share result fixture cockpit is proven without claiming real provider dispatch.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level, without claiming live production engine execution.
@@ -585,7 +600,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.
 - Bounded workbench DoD: route split alone is not accepted; desktop Documents hard-REDs above the recorded screen threshold, /share/result desktop requires multi-region workbench geometry, and generated fixture evidence must stay separate from exact saved/session proof.
 - Legacy workspace-layout regression: remains a broad no-overflow/editor-flow smoke only, not a long-form UX PASS gate; the DoD and route-specific evidence own first-task distance.
-- Current bounded-workbench live gate: \`${report.boundedWorkbenchCurrent.verdict}\`; mobile 390x723 Documents rows remain RED when listed in the artifact, while Share rows remain scoped if exact saved session evidence is missing.
+- ${boundedWorkbenchNote}
 - Share desktop: current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
