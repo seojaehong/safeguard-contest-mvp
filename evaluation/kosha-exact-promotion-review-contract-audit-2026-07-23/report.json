@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-review-contract-audit/v1",
-  "generatedAt": "2026-07-23T04:44:22.2108556+09:00",
-  "sourceHead": "e2bca58c6b9e74ba81db94bd07120a479a56a34d",
+  "generatedAt": "2026-07-22T20:35:37.289Z",
+  "sourceHead": "6c5a666f18eacf3ba85e67b1d472e86b2f390e04",
   "productionBuildInfo": {
-    "commitSha": "e2bca58c6b9e74ba81db94bd07120a479a56a34d",
+    "commitSha": "6c5a666f18eacf3ba85e67b1d472e86b2f390e04",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-2i6qonczr-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-6cwkno6d8-seojaehongs-projects.vercel.app"
   },
   "verdict": "PASS_CURRENT_SOURCE_REVIEW_GATE_CONTRACT_NO_MUTATION",
   "auditScope": "approval-free static and focused-test audit of KOSHA exact-promotion review gate behavior",
   "scriptUnderAudit": "scripts/kosha_exact_promotion_review_gate.mjs",
   "currentReviewGateArtifact": "evaluation/kosha-exact-promotion-review-gate-2026-07-22/report.json",
-  "currentReviewGateArtifactSourceHead": "77ab06ce6a771569216d3f8ab18fa9234779546b",
+  "currentReviewGateArtifactSourceHead": "6c5a666f18eacf3ba85e67b1d472e86b2f390e04",
   "currentReviewGateArtifactVerdict": "REVIEW_CHECKLIST_INCOMPLETE_BLOCKED",
   "reviewChecklistComplete": false,
   "reviewRows": 8,

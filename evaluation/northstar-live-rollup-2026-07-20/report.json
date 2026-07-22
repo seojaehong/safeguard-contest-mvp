@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T20:29:11.813Z",
-  "head": "7b08a7b6f566aec92be1259550dd8e50c2fbdb22",
+  "generatedAt": "2026-07-22T20:35:48.951Z",
+  "head": "6c5a666f18eacf3ba85e67b1d472e86b2f390e04",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "7b08a7b6f566aec92be1259550dd8e50c2fbdb22",
+    "commitSha": "6c5a666f18eacf3ba85e67b1d472e86b2f390e04",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-2dbo6yq71-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-6cwkno6d8-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -193,9 +193,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "7b08a7b6f566aec92be1259550dd8e50c2fbdb22",
+      "sourceCommit": "6c5a666f18eacf3ba85e67b1d472e86b2f390e04",
       "sourceStatus": "exact",
-      "productionCommit": "7b08a7b6f566aec92be1259550dd8e50c2fbdb22",
+      "productionCommit": "6c5a666f18eacf3ba85e67b1d472e86b2f390e04",
       "productionStatus": "matches_live"
     },
     {
@@ -226,7 +226,7 @@
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
       "sourceCommit": "7b08a7b6f566aec92be1259550dd8e50c2fbdb22",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },
@@ -234,7 +234,7 @@
       "id": "sif_embedding_preflight",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
       "sourceCommit": "7b08a7b6f566aec92be1259550dd8e50c2fbdb22",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },
