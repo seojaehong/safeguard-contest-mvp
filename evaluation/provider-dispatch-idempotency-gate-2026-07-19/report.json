@@ -1,17 +1,17 @@
 {
   "generatedAt": "2026-07-19T00:30:00+09:00",
-  "refreshedAt": "2026-07-22T22:31:04.757Z",
-  "sourceSha": "63b5a9af7acb20456b750acc004e0bb258aa34c4",
+  "refreshedAt": "2026-07-22T23:48:04.078Z",
+  "sourceSha": "5891ddcd07c5ddd598129de0ce33b73391d90a1d",
   "scope": "provider_dispatch_idempotency_gate",
   "status": "approval_required",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "63b5a9af7acb20456b750acc004e0bb258aa34c4",
+    "commitSha": "5891ddcd07c5ddd598129de0ce33b73391d90a1d",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-5udp7do3s-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-qw6s38gms-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "liveDispatchState": {
@@ -19,7 +19,7 @@
     "mode": "preview_only",
     "reason": "persistent_idempotency_unavailable",
     "codeLock": "PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false",
-    "productionCommitSha": "63b5a9af7acb20456b750acc004e0bb258aa34c4",
+    "productionCommitSha": "5891ddcd07c5ddd598129de0ce33b73391d90a1d",
     "channels": {
       "email": {
         "capability": false,
@@ -97,8 +97,8 @@
         " RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/recipient-foreign-live-gate-20260720",
         " Test Files  4 passed (4)",
         "      Tests  44 passed (44)",
-        "   Start at  07:31:05",
-        "   Duration  22.15s (transform 375ms, setup 0ms, import 828ms, tests 20.39s, environment 0ms)"
+        "   Start at  08:48:06",
+        "   Duration  27.56s (transform 287ms, setup 0ms, import 734ms, tests 25.81s, environment 0ms)"
       ],
       "stderrTail": []
     },
