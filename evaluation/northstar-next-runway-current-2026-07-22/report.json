@@ -1,24 +1,24 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T07:31:04.291Z",
+  "generatedAt": "2026-07-22T07:44:02.149Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "ccda0b64c413330a0238f4d9a2cfc7a50984e0f7",
-  "productionCommit": "29b7fb1bc773cf6775d10381e1a072d3c3e46714",
+  "sourceHead": "885995076505e31c9fa27d8cdf35f6384fcc2f1a",
+  "productionCommit": "1dbfc4ddfd99d06afecdf8f642cffc2b1f523c91",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "29b7fb1bc773cf6775d10381e1a072d3c3e46714",
+    "commitSha": "1dbfc4ddfd99d06afecdf8f642cffc2b1f523c91",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-9mpmoacz9-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-ibwkw2xd9-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": false,
   "currentHeadIsEvidenceOnlyPending": true,
-  "liveExactEvidenceCommit": "29b7fb1bc773cf6775d10381e1a072d3c3e46714",
-  "liveRollupLiveCommit": "29b7fb1bc773cf6775d10381e1a072d3c3e46714",
+  "liveExactEvidenceCommit": "1dbfc4ddfd99d06afecdf8f642cffc2b1f523c91",
+  "liveRollupLiveCommit": "1dbfc4ddfd99d06afecdf8f642cffc2b1f523c91",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -34,7 +34,8 @@
     "sifEmbeddingPreflight": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
     "shareGeneratedSessionPerception": "evaluation\\share-generated-session-perception-2026-07-22\\report.json",
     "documentsLongFormIA": "evaluation\\documents-long-form-ia-2026-07-22\\report.json",
-    "boundedWorkbenchDod": "evaluation\\workspace-bounded-workbench-dod-2026-07-22\\report.json"
+    "boundedWorkbenchDod": "evaluation\\workspace-bounded-workbench-dod-2026-07-22\\report.json",
+    "boundedWorkbenchCurrent": "evaluation\\workspace-bounded-workbench-current-2026-07-22\\report.json"
   },
   "provenCurrentState": [
     "live_harness_quality",
@@ -353,11 +354,198 @@
       "companionDodRequired": true
     }
   },
+  "boundedWorkbenchCurrent": {
+    "verdict": "PARTIAL_OR_RED_LIVE_PRODUCTION_MEASURED",
+    "sourceHead": "1dbfc4ddfd99d06afecdf8f642cffc2b1f523c91",
+    "productionCommit": "1dbfc4ddfd99d06afecdf8f642cffc2b1f523c91",
+    "routeSplitAloneAcceptedAsFix": false,
+    "providerDispatchLiveClaimed": false,
+    "externalProviderCalled": false,
+    "dbMutationPerformed": false,
+    "documentRedRows": [
+      {
+        "route": "/documents?theme=day",
+        "theme": "day",
+        "state": "default",
+        "viewport": "390x723",
+        "firstTaskVerdict": "RED",
+        "bodyHeightVerdict": "PASS",
+        "longContentContainmentVerdict": "PASS",
+        "bodyHeightRatio": 1,
+        "firstActionBottom": 662,
+        "firstHazardBottom": 788,
+        "firstHazardVisibleHeight": 0
+      },
+      {
+        "route": "/documents?theme=day",
+        "theme": "day",
+        "state": "selected-riskAssessmentDraft",
+        "viewport": "390x723",
+        "firstTaskVerdict": "RED",
+        "bodyHeightVerdict": "PASS",
+        "longContentContainmentVerdict": "PASS",
+        "bodyHeightRatio": 1,
+        "firstActionBottom": 662,
+        "firstHazardBottom": 788,
+        "firstHazardVisibleHeight": 0
+      },
+      {
+        "route": "/documents?theme=day",
+        "theme": "day",
+        "state": "supporting-9-expanded-index",
+        "viewport": "390x723",
+        "firstTaskVerdict": "RED",
+        "bodyHeightVerdict": "PASS",
+        "longContentContainmentVerdict": "PASS",
+        "bodyHeightRatio": 1,
+        "firstActionBottom": 662,
+        "firstHazardBottom": 788,
+        "firstHazardVisibleHeight": 0
+      },
+      {
+        "route": "/documents?theme=night",
+        "theme": "night",
+        "state": "default",
+        "viewport": "390x723",
+        "firstTaskVerdict": "RED",
+        "bodyHeightVerdict": "PASS",
+        "longContentContainmentVerdict": "PASS",
+        "bodyHeightRatio": 1,
+        "firstActionBottom": 662,
+        "firstHazardBottom": 788,
+        "firstHazardVisibleHeight": 0
+      },
+      {
+        "route": "/documents?theme=night",
+        "theme": "night",
+        "state": "selected-riskAssessmentDraft",
+        "viewport": "390x723",
+        "firstTaskVerdict": "RED",
+        "bodyHeightVerdict": "PASS",
+        "longContentContainmentVerdict": "PASS",
+        "bodyHeightRatio": 1,
+        "firstActionBottom": 662,
+        "firstHazardBottom": 788,
+        "firstHazardVisibleHeight": 0
+      },
+      {
+        "route": "/documents?theme=night",
+        "theme": "night",
+        "state": "supporting-9-expanded-index",
+        "viewport": "390x723",
+        "firstTaskVerdict": "RED",
+        "bodyHeightVerdict": "PASS",
+        "longContentContainmentVerdict": "PASS",
+        "bodyHeightRatio": 1,
+        "firstActionBottom": 662,
+        "firstHazardBottom": 788,
+        "firstHazardVisibleHeight": 0
+      }
+    ],
+    "shareScopedRows": [
+      {
+        "route": "/workspace?share&theme=day",
+        "theme": "day",
+        "sessionKind": "generated",
+        "viewport": "1440x723",
+        "overallVerdict": "PASS_SCOPED",
+        "exactSavedSessionVerdict": "MISSING_EVIDENCE",
+        "rootWidthRatio": 0.82,
+        "desktopXRegionCount": 3,
+        "primaryBottom": 389
+      },
+      {
+        "route": "/share/sessionId?workerId=workerId&theme=day",
+        "theme": "day",
+        "sessionKind": "fixture",
+        "viewport": "1440x723",
+        "overallVerdict": "PASS_SCOPED",
+        "exactSavedSessionVerdict": "MISSING_EVIDENCE",
+        "rootWidthRatio": 0.84,
+        "desktopXRegionCount": 2,
+        "primaryBottom": 529
+      },
+      {
+        "route": "/workspace?share&theme=day",
+        "theme": "day",
+        "sessionKind": "generated",
+        "viewport": "390x723",
+        "overallVerdict": "PASS_SCOPED",
+        "exactSavedSessionVerdict": "MISSING_EVIDENCE",
+        "rootWidthRatio": 0.86,
+        "desktopXRegionCount": 2,
+        "primaryBottom": 696
+      },
+      {
+        "route": "/share/sessionId?workerId=workerId&theme=day",
+        "theme": "day",
+        "sessionKind": "fixture",
+        "viewport": "390x723",
+        "overallVerdict": "PASS_SCOPED",
+        "exactSavedSessionVerdict": "MISSING_EVIDENCE",
+        "rootWidthRatio": 1,
+        "desktopXRegionCount": 1,
+        "primaryBottom": 707
+      },
+      {
+        "route": "/workspace?share&theme=night",
+        "theme": "night",
+        "sessionKind": "generated",
+        "viewport": "1440x723",
+        "overallVerdict": "PASS_SCOPED",
+        "exactSavedSessionVerdict": "MISSING_EVIDENCE",
+        "rootWidthRatio": 0.82,
+        "desktopXRegionCount": 3,
+        "primaryBottom": 389
+      },
+      {
+        "route": "/share/sessionId?workerId=workerId&theme=night",
+        "theme": "night",
+        "sessionKind": "fixture",
+        "viewport": "1440x723",
+        "overallVerdict": "PASS_SCOPED",
+        "exactSavedSessionVerdict": "MISSING_EVIDENCE",
+        "rootWidthRatio": 0.84,
+        "desktopXRegionCount": 2,
+        "primaryBottom": 529
+      },
+      {
+        "route": "/workspace?share&theme=night",
+        "theme": "night",
+        "sessionKind": "generated",
+        "viewport": "390x723",
+        "overallVerdict": "PASS_SCOPED",
+        "exactSavedSessionVerdict": "MISSING_EVIDENCE",
+        "rootWidthRatio": 0.86,
+        "desktopXRegionCount": 2,
+        "primaryBottom": 696
+      },
+      {
+        "route": "/share/sessionId?workerId=workerId&theme=night",
+        "theme": "night",
+        "sessionKind": "fixture",
+        "viewport": "390x723",
+        "overallVerdict": "PASS_SCOPED",
+        "exactSavedSessionVerdict": "MISSING_EVIDENCE",
+        "rootWidthRatio": 1,
+        "desktopXRegionCount": 1,
+        "primaryBottom": 707
+      }
+    ],
+    "exactSavedSession": {
+      "verdict": "MISSING_EVIDENCE",
+      "sessionKind": "saved-exact",
+      "exactSavedUserSessionReproduced": false,
+      "reason": "No concrete production share session URL, saved session id, or user-observed generated payload was available. Fixture/generated PASS remains scoped and cannot close the exact user complaint."
+    }
+  },
   "nextSafeWorkWithoutApproval": [
     "refresh source/live exact evidence when production marker advances to the evidence-only head",
     "refresh live rollup before claiming live-exact if production advances beyond the current live rollup head",
     "use the KOSHA exact promotion packet as the bounded operator-review set and run scripts/kosha_exact_promotion_review_gate.mjs on the human review input before any exact-trust promotion",
     "keep UI follow-up scoped to full 12-document authoring polish or reproduced exact-session desktop Share full-workbench perception issues",
+    "close the live 390x723 Documents first-task RED from evaluation/workspace-bounded-workbench-current-2026-07-22/report.json before any broad mobile Documents UX pass claim",
+    "reproduce an exact saved/generated Share session before using fixture or generated /workspace share evidence to close the user's exact Share complaint",
     "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
     "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
     "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held"

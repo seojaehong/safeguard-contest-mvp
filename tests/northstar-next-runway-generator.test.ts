@@ -117,6 +117,45 @@ type NextRunwayReport = {
       companionDodRequired: boolean;
     };
   };
+  boundedWorkbenchCurrent: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    routeSplitAloneAcceptedAsFix: boolean;
+    providerDispatchLiveClaimed: boolean;
+    externalProviderCalled: boolean;
+    dbMutationPerformed: boolean;
+    documentRedRows: Array<{
+      route: string;
+      theme: string;
+      state: string;
+      viewport: string;
+      firstTaskVerdict: string;
+      bodyHeightVerdict: string;
+      longContentContainmentVerdict: string;
+      bodyHeightRatio: number | null;
+      firstActionBottom: number | null;
+      firstHazardBottom: number | null;
+      firstHazardVisibleHeight: number | null;
+    }>;
+    shareScopedRows: Array<{
+      route: string;
+      theme: string;
+      sessionKind: string;
+      viewport: string;
+      overallVerdict: string;
+      exactSavedSessionVerdict: string;
+      rootWidthRatio: number | null;
+      desktopXRegionCount: number | null;
+      primaryBottom: number | null;
+    }>;
+    exactSavedSession: {
+      verdict: string;
+      sessionKind: string;
+      exactSavedUserSessionReproduced: boolean;
+      reason: string;
+    };
+  };
   nextSafeWorkWithoutApproval: string[];
 };
 
@@ -383,6 +422,60 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       companionDodRequired: true,
     },
   });
+  writeJson(root, "evaluation/workspace-bounded-workbench-current-2026-07-22/report.json", {
+    verdict: "PARTIAL_OR_RED_LIVE_PRODUCTION_MEASURED",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    productionBuild: { commitSha: "TO_FILL" },
+    routeSplitAloneAcceptedAsFix: false,
+    providerDispatchLiveClaimed: false,
+    externalProviderCalled: false,
+    dbMutationPerformed: false,
+    documents: [
+      {
+        metrics: {
+          route: "/documents?theme=day",
+          theme: "day",
+          state: "default",
+          viewport: "390x723",
+          bodyHeightRatio: 1,
+          firstActionBottom: 662,
+          firstHazardBottom: 788,
+          firstHazardVisibleHeight: 0,
+        },
+        verdicts: {
+          overallVerdict: "RED",
+          firstTaskVerdict: "RED",
+          bodyHeightVerdict: "PASS",
+          longContentContainmentVerdict: "PASS",
+        },
+      },
+    ],
+    share: [
+      {
+        metrics: {
+          route: "/workspace?share&theme=day",
+          theme: "day",
+          sessionKind: "generated",
+          viewport: "1440x723",
+          rootWidthRatio: 0.82,
+          desktopXRegionCount: 3,
+          primaryBottom: 389,
+        },
+        verdicts: {
+          overallVerdict: "PASS_SCOPED",
+          desktopWorkbenchVerdict: "PASS",
+          exactSavedSessionVerdict: "MISSING_EVIDENCE",
+        },
+      },
+    ],
+    exactSavedSession: {
+      sessionKind: "saved-exact",
+      exactSavedUserSessionReproduced: false,
+      verdict: "MISSING_EVIDENCE",
+      reason: "No concrete production share session URL was available.",
+    },
+  });
 
   const firstHead = commitAll(root, "seed");
   const liveRollupPath = path.join(root, "evaluation/northstar-live-rollup-2026-07-20/report.json");
@@ -518,8 +611,40 @@ describe("northstar next runway generator", () => {
       companionDodRequired: true,
     });
     expect(report.boundedWorkbenchDod.legacyBroadRegressionBoundary.role).toContain("not a Documents long-form UX pass gate");
+    expect(report.boundedWorkbenchCurrent).toMatchObject({
+      verdict: "PARTIAL_OR_RED_LIVE_PRODUCTION_MEASURED",
+      productionCommit: "TO_FILL",
+      routeSplitAloneAcceptedAsFix: false,
+      providerDispatchLiveClaimed: false,
+      externalProviderCalled: false,
+      dbMutationPerformed: false,
+    });
+    expect(report.boundedWorkbenchCurrent.documentRedRows).toContainEqual(expect.objectContaining({
+      route: "/documents?theme=day",
+      viewport: "390x723",
+      firstTaskVerdict: "RED",
+      bodyHeightVerdict: "PASS",
+      longContentContainmentVerdict: "PASS",
+      firstHazardVisibleHeight: 0,
+    }));
+    expect(report.boundedWorkbenchCurrent.shareScopedRows).toContainEqual(expect.objectContaining({
+      route: "/workspace?share&theme=day",
+      sessionKind: "generated",
+      overallVerdict: "PASS_SCOPED",
+      exactSavedSessionVerdict: "MISSING_EVIDENCE",
+      rootWidthRatio: 0.82,
+      desktopXRegionCount: 3,
+    }));
+    expect(report.boundedWorkbenchCurrent.exactSavedSession).toMatchObject({
+      verdict: "MISSING_EVIDENCE",
+      sessionKind: "saved-exact",
+      exactSavedUserSessionReproduced: false,
+    });
     expect(report.nextSafeWorkWithoutApproval).toContain(
       "keep UI follow-up scoped to full 12-document authoring polish or reproduced exact-session desktop Share full-workbench perception issues",
+    );
+    expect(report.nextSafeWorkWithoutApproval).toContain(
+      "close the live 390x723 Documents first-task RED from evaluation/workspace-bounded-workbench-current-2026-07-22/report.json before any broad mobile Documents UX pass claim",
     );
   });
 

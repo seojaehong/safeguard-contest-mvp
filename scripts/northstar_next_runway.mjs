@@ -28,6 +28,7 @@ const ARTIFACTS = Object.freeze({
   shareGeneratedSessionPerception: path.join("evaluation", "share-generated-session-perception-2026-07-22", "report.json"),
   documentsLongFormIA: path.join("evaluation", "documents-long-form-ia-2026-07-22", "report.json"),
   boundedWorkbenchDod: path.join("evaluation", "workspace-bounded-workbench-dod-2026-07-22", "report.json"),
+  boundedWorkbenchCurrent: path.join("evaluation", "workspace-bounded-workbench-current-2026-07-22", "report.json"),
 });
 
 /**
@@ -288,6 +289,71 @@ function boundedWorkbenchDodSummary(dod) {
 }
 
 /**
+ * @param {unknown} current
+ */
+function boundedWorkbenchCurrentSummary(current) {
+  if (!isRecord(current)) return {};
+  const documentRows = Array.isArray(current.documents) ? current.documents.filter(isRecord) : [];
+  const shareRows = Array.isArray(current.share) ? current.share.filter(isRecord) : [];
+  const exactSavedSession = isRecord(current.exactSavedSession) ? current.exactSavedSession : {};
+  return {
+    verdict: asString(current.verdict),
+    sourceHead: asString(current.sourceHead),
+    productionCommit: asString(current.productionCommit)
+      || (isRecord(current.productionBuild) ? asString(current.productionBuild.commitSha) : ""),
+    routeSplitAloneAcceptedAsFix: asBoolean(current.routeSplitAloneAcceptedAsFix),
+    providerDispatchLiveClaimed: asBoolean(current.providerDispatchLiveClaimed),
+    externalProviderCalled: asBoolean(current.externalProviderCalled),
+    dbMutationPerformed: asBoolean(current.dbMutationPerformed),
+    documentRedRows: documentRows.filter((row) => {
+      const verdicts = isRecord(row.verdicts) ? row.verdicts : {};
+      return asString(verdicts.overallVerdict) === "RED";
+    }).map((row) => {
+      const metrics = isRecord(row.metrics) ? row.metrics : {};
+      const verdicts = isRecord(row.verdicts) ? row.verdicts : {};
+      return {
+        route: asString(metrics.route),
+        theme: asString(metrics.theme),
+        state: asString(metrics.state),
+        viewport: asString(metrics.viewport),
+        firstTaskVerdict: asString(verdicts.firstTaskVerdict),
+        bodyHeightVerdict: asString(verdicts.bodyHeightVerdict),
+        longContentContainmentVerdict: asString(verdicts.longContentContainmentVerdict),
+        bodyHeightRatio: typeof metrics.bodyHeightRatio === "number" ? metrics.bodyHeightRatio : null,
+        firstActionBottom: typeof metrics.firstActionBottom === "number" ? metrics.firstActionBottom : null,
+        firstHazardBottom: typeof metrics.firstHazardBottom === "number" ? metrics.firstHazardBottom : null,
+        firstHazardVisibleHeight: typeof metrics.firstHazardVisibleHeight === "number" ? metrics.firstHazardVisibleHeight : null,
+      };
+    }),
+    shareScopedRows: shareRows.map((row) => {
+      const metrics = isRecord(row.metrics) ? row.metrics : {};
+      const verdicts = isRecord(row.verdicts) ? row.verdicts : {};
+      return {
+        route: asString(metrics.route),
+        theme: asString(metrics.theme),
+        sessionKind: asString(metrics.sessionKind),
+        viewport: asString(metrics.viewport),
+        overallVerdict: asString(verdicts.overallVerdict),
+        exactSavedSessionVerdict: asString(verdicts.exactSavedSessionVerdict),
+        rootWidthRatio: typeof metrics.rootWidthRatio === "number" ? metrics.rootWidthRatio : null,
+        desktopXRegionCount: typeof metrics.desktopXRegionCount === "number" ? metrics.desktopXRegionCount : null,
+        primaryBottom: typeof metrics.primaryBottom === "number"
+          ? metrics.primaryBottom
+          : typeof metrics.confirmButtonBottom === "number"
+            ? metrics.confirmButtonBottom
+            : null,
+      };
+    }),
+    exactSavedSession: {
+      verdict: asString(exactSavedSession.verdict),
+      sessionKind: asString(exactSavedSession.sessionKind),
+      exactSavedUserSessionReproduced: asBoolean(exactSavedSession.exactSavedUserSessionReproduced),
+      reason: asString(exactSavedSession.reason),
+    },
+  };
+}
+
+/**
  * @param {unknown} koshaCandidateAudit
  */
 function koshaCandidateAuditSummary(koshaCandidateAudit) {
@@ -362,6 +428,7 @@ export function buildNorthstarNextRunway(options) {
   const shareGenerated = readJson(options.rootDir, ARTIFACTS.shareGeneratedSessionPerception);
   const documentsIa = readJson(options.rootDir, ARTIFACTS.documentsLongFormIA);
   const boundedDod = readJson(options.rootDir, ARTIFACTS.boundedWorkbenchDod);
+  const boundedCurrent = readJson(options.rootDir, ARTIFACTS.boundedWorkbenchCurrent);
   const liveExactEvidenceCommit = isRecord(liveRollup) ? asString(liveRollup.head) : "";
   const liveRollupLiveCommit = isRecord(liveRollup) && isRecord(liveRollup.liveBuildInfo)
     ? asString(liveRollup.liveBuildInfo.commitSha)
@@ -432,11 +499,14 @@ export function buildNorthstarNextRunway(options) {
     shareGeneratedSessionPerception: shareGeneratedSessionSummary(shareGenerated),
     documentsLongFormIA: documentsLongFormIASummary(documentsIa),
     boundedWorkbenchDod: boundedWorkbenchDodSummary(boundedDod),
+    boundedWorkbenchCurrent: boundedWorkbenchCurrentSummary(boundedCurrent),
     nextSafeWorkWithoutApproval: [
       "refresh source/live exact evidence when production marker advances to the evidence-only head",
       "refresh live rollup before claiming live-exact if production advances beyond the current live rollup head",
       "use the KOSHA exact promotion packet as the bounded operator-review set and run scripts/kosha_exact_promotion_review_gate.mjs on the human review input before any exact-trust promotion",
       "keep UI follow-up scoped to full 12-document authoring polish or reproduced exact-session desktop Share full-workbench perception issues",
+      "close the live 390x723 Documents first-task RED from evaluation/workspace-bounded-workbench-current-2026-07-22/report.json before any broad mobile Documents UX pass claim",
+      "reproduce an exact saved/generated Share session before using fixture or generated /workspace share evidence to close the user's exact Share complaint",
       "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
       "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
       "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held",
@@ -515,6 +585,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.
 - Bounded workbench DoD: route split alone is not accepted; desktop Documents hard-REDs above the recorded screen threshold, /share/result desktop requires multi-region workbench geometry, and generated fixture evidence must stay separate from exact saved/session proof.
 - Legacy workspace-layout regression: remains a broad no-overflow/editor-flow smoke only, not a long-form UX PASS gate; the DoD and route-specific evidence own first-task distance.
+- Current bounded-workbench live gate: \`${report.boundedWorkbenchCurrent.verdict}\`; mobile 390x723 Documents rows remain RED when listed in the artifact, while Share rows remain scoped if exact saved session evidence is missing.
 - Share desktop: current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
