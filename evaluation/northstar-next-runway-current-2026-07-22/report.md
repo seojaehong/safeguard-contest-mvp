@@ -4,21 +4,21 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `c73fc787f87e38a8772aea72a375f78e6fe44ea4`
+Source HEAD: `5571972002e4dabe5853d9eab9b1cc225500bdc6`
 
-Production `/api/build-info`: `c73fc787f87e38a8772aea72a375f78e6fe44ea4`
+Production `/api/build-info`: `a5bb9e2c937bbd3ac80958d264d7c993bb7e194e`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `c73fc787f87e38a8772aea72a375f78e6fe44ea4`
+Live rollup source head: `5571972002e4dabe5853d9eab9b1cc225500bdc6`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `5571972002e4dabe5853d9eab9b1cc225500bdc6` is an evidence-only refresh pushed after the live-exact artifact set. Production is still `a5bb9e2c937bbd3ac80958d264d7c993bb7e194e`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-review-gate/v1",
-  "generatedAt": "2026-07-22T08:46:55.902Z",
-  "sourceHead": "459cd633af74bc3876743b63ac52247b1ca8f766",
+  "generatedAt": "2026-07-22T11:10:43.167Z",
+  "sourceHead": "5571972002e4dabe5853d9eab9b1cc225500bdc6",
   "packetPath": "evaluation\\kosha-exact-promotion-packet-2026-07-22\\report.json",
   "reviewPath": "evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\review-template.json",
   "verdict": "REVIEW_CHECKLIST_INCOMPLETE_BLOCKED",
@@ -16,6 +16,7 @@
   "reviewChecklistComplete": false,
   "exactTrustPromotionBlockedUntilChecklistComplete": true,
   "exactTrustPromotionStillRequiresSeparateApproval": true,
+  "approvalRequiredBeforeExactPromotion": true,
   "passedStableKeys": [],
   "failures": [
     "unconfirmed-required-check:D-C-10:official URL opens the expected KOSHA file for the selected stable key",
@@ -86,6 +87,7 @@
   "forbiddenClaims": [
     "This review gate mutated the exact-kosha registry.",
     "KOSHA vector retrieval or embeddings are production-active because of this review gate.",
-    "Operator checklist completion alone approves exact-trust promotion."
+    "Operator checklist completion alone approves exact-trust promotion.",
+    "Completed human review alone writes an exact-kosha registry artifact."
   ]
 }

@@ -1,10 +1,10 @@
 # KOSHA Exact Promotion Review Gate
 
-Generated at: 2026-07-22T08:46:55.902Z
+Generated at: 2026-07-22T11:10:43.167Z
 
 Verdict: `REVIEW_CHECKLIST_INCOMPLETE_BLOCKED`
 
-Source HEAD: `459cd633af74bc3876743b63ac52247b1ca8f766`
+Source HEAD: `5571972002e4dabe5853d9eab9b1cc225500bdc6`
 
 Packet: `evaluation\kosha-exact-promotion-packet-2026-07-22\report.json`
 
@@ -94,3 +94,4 @@ Exact trust promotion still requires separate approval: `true`
 - This review gate mutated the exact-kosha registry.
 - KOSHA vector retrieval or embeddings are production-active because of this review gate.
 - Operator checklist completion alone approves exact-trust promotion.
+- Completed human review alone writes an exact-kosha registry artifact.
