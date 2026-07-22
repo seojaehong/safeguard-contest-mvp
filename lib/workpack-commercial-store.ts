@@ -242,6 +242,13 @@ function isShareSessionCompatibilitySelectError(error: unknown): boolean {
   return message.includes("share_scope") || message.includes("access_policy");
 }
 
+function isPostgrestSchemaCacheMissingShareSessions(error: unknown): boolean {
+  if (!isRecord(error)) return false;
+  const code = typeof error.code === "string" ? error.code : "";
+  const message = typeof error.message === "string" ? error.message.toLowerCase() : "";
+  return code === "PGRST205" && message.includes("workpack_share_sessions");
+}
+
 function readPublicString(value: unknown, maxLength = 2_400): string {
   if (typeof value !== "string") return "";
   return value
@@ -348,6 +355,10 @@ export async function loadActivePublicShareSession(
 
   if (resolvedError) {
     if (isPostgrestNoRowsError(resolvedError)) {
+      return { ok: false, status: 404, message: "유효한 공유 세션을 찾지 못했습니다." };
+    }
+    if (isPostgrestSchemaCacheMissingShareSessions(resolvedError)) {
+      console.warn("public share session storage is not visible in PostgREST schema cache", resolvedError);
       return { ok: false, status: 404, message: "유효한 공유 세션을 찾지 못했습니다." };
     }
     console.error("public share session fetch failed", resolvedError);

@@ -570,6 +570,33 @@ describe("commercial workpack service-role tenant hardening", () => {
     });
   });
 
+  it("fails closed when public share session storage is absent from the PostgREST schema cache", async () => {
+    const store = await vi.importActual<typeof import("@/lib/workpack-commercial-store")>(
+      "@/lib/workpack-commercial-store"
+    );
+    const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const client = createQueryErrorClient({
+      code: "PGRST205",
+      message: "Could not find the table 'public.workpack_share_sessions' in the schema cache"
+    });
+
+    const result = await store.loadActivePublicShareSession(client as never, {
+      shareSessionId: "33333333-3333-4333-8333-333333333333",
+      workerId: "11111111-1111-4111-8111-111111111111"
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      status: 404,
+      message: "유효한 공유 세션을 찾지 못했습니다."
+    });
+    expect(consoleSpy).toHaveBeenCalledWith(
+      "public share session storage is not visible in PostgREST schema cache",
+      expect.objectContaining({ code: "PGRST205" })
+    );
+    consoleSpy.mockRestore();
+  });
+
   it("keeps public share session storage errors visible as server errors", async () => {
     const store = await vi.importActual<typeof import("@/lib/workpack-commercial-store")>(
       "@/lib/workpack-commercial-store"
