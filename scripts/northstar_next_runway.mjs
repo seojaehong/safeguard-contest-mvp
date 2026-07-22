@@ -70,6 +70,24 @@ function gitHead(rootDir) {
 
 /**
  * @param {string} rootDir
+ * @param {string} possibleAncestor
+ * @param {string} descendant
+ */
+function gitIsAncestor(rootDir, possibleAncestor, descendant) {
+  if (!possibleAncestor || !descendant) return false;
+  try {
+    execFileSync("git", ["merge-base", "--is-ancestor", possibleAncestor, descendant], {
+      cwd: rootDir,
+      stdio: "ignore",
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * @param {string} rootDir
  * @param {string} relativePath
  */
 function readJson(rootDir, relativePath) {
@@ -439,7 +457,9 @@ export function buildNorthstarNextRunway(options) {
   const currentHeadIsEvidenceOnlyPending = sourceHead !== liveCommit && liveRollupMatchesProduction;
   const sourceHeadLivePending = sourceHead !== liveCommit;
   const boundedCurrentSourceHead = isRecord(boundedCurrent) ? asString(boundedCurrent.sourceHead) : "";
-  const boundedWorkbenchCurrentLivePending = boundedCurrentSourceHead !== "" && boundedCurrentSourceHead !== liveCommit;
+  const boundedWorkbenchSourceIncludedInLive = boundedCurrentSourceHead !== ""
+    && (boundedCurrentSourceHead === liveCommit || gitIsAncestor(options.rootDir, boundedCurrentSourceHead, liveCommit));
+  const boundedWorkbenchCurrentLivePending = boundedCurrentSourceHead !== "" && !boundedWorkbenchSourceIncludedInLive;
 
   return {
     schemaVersion: SCHEMA_VERSION,
@@ -452,6 +472,7 @@ export function buildNorthstarNextRunway(options) {
     latestEvidenceCommitLive,
     currentHeadIsEvidenceOnlyPending,
     sourceHeadLivePending,
+    boundedWorkbenchSourceIncludedInLive,
     boundedWorkbenchCurrentLivePending,
     liveExactEvidenceCommit,
     liveRollupLiveCommit,

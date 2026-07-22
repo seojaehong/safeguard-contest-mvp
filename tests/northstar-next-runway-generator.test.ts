@@ -12,6 +12,8 @@ type NextRunwayReport = {
   currentHeadIsEvidenceOnlyPending: boolean;
   liveExactEvidenceCommit: string;
   liveRollupMatchesProduction: boolean;
+  boundedWorkbenchSourceIncludedInLive: boolean;
+  boundedWorkbenchCurrentLivePending: boolean;
   approvalGated: Array<{
     gate: string;
     state: string;
@@ -654,7 +656,46 @@ describe("northstar next runway generator", () => {
       "promote the bounded-workbench current-source proof to live only after production /api/build-info reaches the product/evidence head and the live probe is rerun",
     );
     expect(report.sourceHeadLivePending).toBe(false);
+    expect(report.boundedWorkbenchSourceIncludedInLive).toBe(false);
     expect(report.boundedWorkbenchCurrentLivePending).toBe(true);
+  });
+
+  it("treats a bounded-workbench source ancestor as included in live", async () => {
+    const { buildNorthstarNextRunway } = await loadNextRunwayModule();
+    const { root, firstHead, secondHead } = createFixtureRoot();
+    pointLiveRollupAt(root, secondHead);
+    writeJson(root, "evaluation/workspace-bounded-workbench-current-2026-07-22/report.json", {
+      verdict: "PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP",
+      sourceHead: firstHead,
+      productionCommit: firstHead,
+      productionBuild: { commitSha: firstHead },
+      routeSplitAloneAcceptedAsFix: false,
+      providerDispatchLiveClaimed: false,
+      externalProviderCalled: false,
+      dbMutationPerformed: false,
+      documents: [],
+      share: [],
+      exactSavedSession: {
+        sessionKind: "saved-exact",
+        exactSavedUserSessionReproduced: false,
+        verdict: "MISSING_EVIDENCE",
+        reason: "No concrete production share session URL was available.",
+      },
+    });
+    const report = buildNorthstarNextRunway({
+      rootDir: root,
+      buildInfo: { commitSha: secondHead },
+      generatedAt: "2026-07-22T00:00:00.000Z",
+    });
+
+    expect(report.productionCommit).toBe(secondHead);
+    expect(report.boundedWorkbenchCurrent.sourceHead).toBe(firstHead);
+    expect(report.boundedWorkbenchSourceIncludedInLive).toBe(true);
+    expect(report.boundedWorkbenchCurrentLivePending).toBe(false);
+    expect(report.boundedWorkbenchCurrent.exactSavedSession).toMatchObject({
+      verdict: "MISSING_EVIDENCE",
+      exactSavedUserSessionReproduced: false,
+    });
   });
 
   it("keeps broad workspace height smoke separate from the bounded workbench DoD", () => {
