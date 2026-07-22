@@ -1,0 +1,193 @@
+{
+  "title": "Documents Selected Editor Cockpit Gate",
+  "checkedAt": "2026-07-22T12:20:00+09:00",
+  "verdict": "PASS_CURRENT_SOURCE",
+  "sourceHead": "39bd637c8c8b388cf36865fd44503fad78a437bd",
+  "branch": "chore/recipient-foreign-live-gate-20260720",
+  "scope": {
+    "routes": [
+      "/documents",
+      "/workspace"
+    ],
+    "document": "riskAssessmentDraft",
+    "claim": "selected editor/detail now surfaces field summary plus evidence/recheck CTAs before the long raw document body",
+    "providerDispatchLiveClaimed": false,
+    "productionLiveClaimed": false,
+    "fullDocumentIaClaimed": false,
+    "routeSplitAloneAcceptedAsFix": false
+  },
+  "structureDecision": {
+    "routeSplitAloneIsInsufficient": true,
+    "acceptedPattern": "stage route plus first-viewport cockpit plus locally bounded drilldown",
+    "notes": [
+      "Splitting pages does not solve long document/share artifacts if the same raw text or result details stay in normal body flow.",
+      "This slice keeps the selected document editor as a bounded cockpit: summary, evidence/recheck CTAs, and risk-row context appear before raw textarea.",
+      "Long risk rows, raw textarea, and secondary utilities remain component-local scroll/drilldown content."
+    ]
+  },
+  "currentSourceLocalProduction": {
+    "baseUrl": "http://127.0.0.1:3058",
+    "buildInfo": {
+      "ok": true,
+      "configured": false,
+      "commitSha": null,
+      "message": "local production build did not expose build-info commit, so sourceHead is git rev-parse HEAD"
+    },
+    "desktopShort1440x723": {
+      "bodyHeight": 882,
+      "viewportHeight": 723,
+      "heightRatio": 1.22,
+      "pageBottom": 723,
+      "editorBottom": 695,
+      "toolbarBottom": 195,
+      "fieldStrip": {
+        "top": 355,
+        "bottom": 403,
+        "height": 48
+      },
+      "sectionActions": {
+        "top": 419,
+        "bottom": 463,
+        "height": 44
+      },
+      "riskRowsEditor": {
+        "top": 479,
+        "bottom": 1060
+      },
+      "firstRiskRowHeader": {
+        "top": 646,
+        "bottom": 703
+      },
+      "firstRiskHazardField": {
+        "top": 739,
+        "bottom": 799
+      },
+      "rawTextarea": {
+        "top": 1126,
+        "bottom": 1299
+      },
+      "horizontalOverflow": false,
+      "outsideHorizontalElements": 0
+    },
+    "desktop1440x900": {
+      "bodyHeight": 1129,
+      "viewportHeight": 900,
+      "heightRatio": 1.25,
+      "pageBottom": 867,
+      "editorBottom": 839,
+      "toolbarBottom": 184,
+      "fieldStrip": {
+        "top": 343,
+        "bottom": 391,
+        "height": 48
+      },
+      "sectionActions": {
+        "top": 407,
+        "bottom": 451,
+        "height": 44
+      },
+      "riskRowsEditor": {
+        "top": 467,
+        "bottom": 1049
+      },
+      "firstRiskRowHeader": {
+        "top": 634,
+        "bottom": 691
+      },
+      "firstRiskHazardField": {
+        "top": 728,
+        "bottom": 788
+      },
+      "rawTextarea": {
+        "top": 1115,
+        "bottom": 1288
+      },
+      "horizontalOverflow": false,
+      "outsideHorizontalElements": 0
+    },
+    "mobile390x844": {
+      "bodyHeight": 1067,
+      "viewportHeight": 844,
+      "heightRatio": 1.26,
+      "pageBottom": 835,
+      "editorBottom": 818,
+      "toolbarBottom": 208,
+      "fieldStrip": {
+        "top": 352,
+        "bottom": 396,
+        "height": 44
+      },
+      "sectionActions": {
+        "top": 404,
+        "bottom": 440,
+        "height": 36
+      },
+      "riskRowsEditor": {
+        "top": 448,
+        "bottom": 941
+      },
+      "firstRiskRowHeader": {
+        "top": 622,
+        "bottom": 679
+      },
+      "firstRiskHazardField": {
+        "top": 703,
+        "bottom": 753
+      },
+      "rawTextarea": {
+        "top": 991,
+        "bottom": 1164
+      },
+      "horizontalOverflow": false,
+      "outsideHorizontalElements": 0
+    }
+  },
+  "contracts": {
+    "fieldSummaryBeforeRawTextarea": true,
+    "evidenceRecheckActionsBeforeRawTextarea": true,
+    "mobileActionsBottomWithinFirstViewport": true,
+    "mobileActionsBottomTarget": 760,
+    "riskRowHeaderBeforeRawTextarea": true,
+    "rawTextareaSecondary": true,
+    "horizontalOverflowClosed": true,
+    "canonicalRiskRowContractsPreserved": true
+  },
+  "commands": [
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"bounds the default documents route editor\" --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "result": "1 passed / 31 skipped"
+    },
+    {
+      "command": "npm.cmd test -- tests\\workspace-layout-regression.test.ts -t \"keeps the generated document edit flow inside the workspace design system\" --maxWorkers=1 --fileParallelism=false --hookTimeout=180000",
+      "status": "PASS",
+      "result": "1 passed / 29 skipped"
+    },
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"canonical risk rows|incomplete new risk row|locks structured editing|row identity\" --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "result": "4 passed / 28 skipped"
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS",
+      "result": "tsc --noEmit --incremental false"
+    },
+    {
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "result": "28/28 static pages"
+    },
+    {
+      "command": "SAFECLAW_BASE_URL=http://127.0.0.1:3058 node evaluation\\workspace-docs-share-production-gate-2026-07-20\\run-current-geometry-probe.mjs",
+      "status": "PASS",
+      "result": "current-source local production geometry recorded"
+    }
+  ],
+  "remainingDebt": [
+    "/documents route-level cockpit and selected-editor verification CTA landing are improved, but full long-form editor IA is not claimed complete.",
+    "Mobile editor body remains 1.26x viewport because risk rows and raw textarea are intentionally drilldown/scroll content.",
+    "Full 12-document row/field-first authoring and deeper editor detail affordance remain bounded follow-up work.",
+    "/share/[sessionId] recipient cockpit is live-proven separately; provider live dispatch remains approval-gated."
+  ]
+}
