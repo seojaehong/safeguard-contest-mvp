@@ -39,6 +39,15 @@ function asBoolean(value) {
 }
 
 /**
+ * @param {string} value
+ */
+function isIsoTimestamp(value) {
+  if (!value) return false;
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) && /^\d{4}-\d{2}-\d{2}T/.test(value);
+}
+
+/**
  * @param {string} rootDir
  */
 function gitHead(rootDir) {
@@ -139,6 +148,7 @@ function summarizeFailures(failures) {
     missingHumanConfirmations: 0,
     missingReviewers: 0,
     missingReviewedAt: 0,
+    invalidReviewedAt: 0,
     other: 0,
   };
   for (const failure of failures) {
@@ -153,6 +163,7 @@ function summarizeFailures(failures) {
     else if (failure.startsWith("missing-human-confirmation:")) summary.missingHumanConfirmations += 1;
     else if (failure.startsWith("missing-reviewer:")) summary.missingReviewers += 1;
     else if (failure.startsWith("missing-reviewed-at:")) summary.missingReviewedAt += 1;
+    else if (failure.startsWith("invalid-reviewed-at:")) summary.invalidReviewedAt += 1;
     else summary.other += 1;
   }
   return summary;
@@ -234,8 +245,10 @@ export function buildKoshaExactPromotionReviewGate(options) {
     }
     if (!asBoolean(reviewRow.humanConfirmed)) failures.push(`missing-human-confirmation:${stableKey}`);
     if (!asString(reviewRow.reviewer)) failures.push(`missing-reviewer:${stableKey}`);
-    if (!asString(reviewRow.reviewedAt)) failures.push(`missing-reviewed-at:${stableKey}`);
-    if (mismatches.length === 0 && requiredChecks.every((checkText) => asBoolean(checkedByText.get(checkText)?.confirmed)) && asBoolean(reviewRow.humanConfirmed) && asString(reviewRow.reviewer) && asString(reviewRow.reviewedAt)) {
+    const reviewedAt = asString(reviewRow.reviewedAt);
+    if (!reviewedAt) failures.push(`missing-reviewed-at:${stableKey}`);
+    else if (!isIsoTimestamp(reviewedAt)) failures.push(`invalid-reviewed-at:${stableKey}`);
+    if (mismatches.length === 0 && requiredChecks.every((checkText) => asBoolean(checkedByText.get(checkText)?.confirmed)) && asBoolean(reviewRow.humanConfirmed) && asString(reviewRow.reviewer) && isIsoTimestamp(reviewedAt)) {
       passed.push(stableKey);
     }
   }

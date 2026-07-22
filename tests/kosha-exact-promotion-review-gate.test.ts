@@ -52,6 +52,7 @@ type ReviewGateReport = {
     missingHumanConfirmations: number;
     missingReviewers: number;
     missingReviewedAt: number;
+    invalidReviewedAt: number;
     other: number;
   };
   failures: string[];
@@ -251,6 +252,27 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.failures).toContain("review-metadata-mismatch:A-G-15:bodySha256");
     expect(report.failureSummary.metadataMismatches).toBe(1);
     expect(report.exactPromotionPerformed).toBe(false);
+  });
+
+  it("fails closed when reviewedAt is not an ISO timestamp", async () => {
+    const { root, packetPath, reviewPath } = writeFixtureRoot();
+    const review = JSON.parse(fs.readFileSync(path.join(root, reviewPath), "utf8")) as {
+      candidateReviews: Array<{ stableKey: string; reviewedAt: string }>;
+    };
+    const target = review.candidateReviews.find((row) => row.stableKey === "D-C-10");
+    if (!target) throw new Error("fixture-missing-d-c-10");
+    target.reviewedAt = "operator said it was reviewed";
+    writeJson(root, reviewPath, review);
+    const module = await loadReviewGateModule();
+    const report = module.buildKoshaExactPromotionReviewGate({ rootDir: root, packetPath, reviewPath });
+
+    expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
+    expect(report.reviewChecklistComplete).toBe(false);
+    expect(report.passedCandidateCount).toBe(1);
+    expect(report.failures).toContain("invalid-reviewed-at:D-C-10");
+    expect(report.failureSummary.invalidReviewedAt).toBe(1);
+    expect(report.exactPromotionPerformed).toBe(false);
+    expect(report.exactRegistryWriteArtifactCreated).toBe(false);
   });
 
   it("fails closed when review input includes a row outside the packet candidate set", async () => {

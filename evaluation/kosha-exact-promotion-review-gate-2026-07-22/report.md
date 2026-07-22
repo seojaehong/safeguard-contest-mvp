@@ -1,10 +1,10 @@
 # KOSHA Exact Promotion Review Gate
 
-Generated at: 2026-07-22T15:06:50.307Z
+Generated at: 2026-07-22T15:41:59.444Z
 
 Verdict: `REVIEW_CHECKLIST_INCOMPLETE_BLOCKED`
 
-Source HEAD: `ef5b50239f0b4dd45939196d0e715d62967de7a9`
+Source HEAD: `9e770da3dd6987565f34041b0b8f550fcc1f660d`
 
 Packet: `evaluation\kosha-exact-promotion-packet-2026-07-22\report.json`
 
@@ -40,6 +40,7 @@ Exact registry write artifact created: `false`
 - missingHumanConfirmations: 8
 - missingReviewers: 8
 - missingReviewedAt: 8
+- invalidReviewedAt: 0
 - other: 0
 
 ## Failures
