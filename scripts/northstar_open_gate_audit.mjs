@@ -26,6 +26,7 @@ const EVIDENCE_PATHS = Object.freeze({
     path.join("evaluation", "final-99-gate-current-2026-07-20", "notice-carry.json"),
     path.join("evaluation", "final-99-gate", "notice-carry.json"),
   ]),
+  final99NoApprovalBoundary: path.join("evaluation", "final-99-no-approval-boundary-2026-07-23", "report.json"),
   liveHarness: path.join("evaluation", "live-harness-quality-probe-current-2026-07-20", "report.json"),
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
   llmWikiApproval: path.join("evaluation", "llm-wiki-rls-approval-2026-07-17", "report.md"),
@@ -230,17 +231,27 @@ function evaluateFinal99Gate(rootDir) {
       && noticeCarry.verdict === "carried"
       && carriedNoticeCount >= 2
       && noticeCarry.fullyAutomatedLaunchClaimAllowed === false;
+    const noApprovalBoundary = readJsonFile(rootDir, EVIDENCE_PATHS.final99NoApprovalBoundary);
+    const noApprovalBoundaryReady = isRecord(noApprovalBoundary)
+      && readString(noApprovalBoundary.verdict) === "NO_APPROVAL_FINAL_99_RERUN_BLOCKED_BOUNDARY_DOCUMENTED"
+      && noApprovalBoundary.dbMutationPerformed === false;
+    const noApprovalBoundaryDetail = noApprovalBoundaryReady
+      ? ` Full final-99 rerun is not treated as no-approval cleanup; ${EVIDENCE_PATHS.final99NoApprovalBoundary} records the mutation boundary.`
+      : "";
     return gateResult({
       id: "final_99_gate",
       label: "Final 99 evidence gate",
       state: overall === "pass" ? "proven" : "notice",
       evidencePath,
       detail: overall === "pass_with_notice" && noticeCarryReady
-        ? `final-99 overall is ${overall}; ${carriedNoticeCount} notices are explicitly carried in ${noticeCarryPath}: ${noticeImpacts}. Fully automated launch remains forbidden until those approval/auth gates are proven.`
+        ? `final-99 overall is ${overall}; ${carriedNoticeCount} notices are explicitly carried in ${noticeCarryPath}: ${noticeImpacts}. Fully automated launch remains forbidden until those approval/auth gates are proven.${noApprovalBoundaryDetail}`
         : `final-99 overall is ${overall}.`,
       nextActions: overall === "pass_with_notice"
         ? noticeCarryReady
-          ? ["Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment."]
+          ? [
+            "Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment.",
+            ...(noApprovalBoundaryReady ? ["Do not rerun full final-99 as a no-approval cleanup when SAFEGUARD_AUTH_TOKEN is configured."] : []),
+          ]
           : ["Resolve or explicitly carry each notice before claiming fully automated launch readiness."]
         : [],
     });

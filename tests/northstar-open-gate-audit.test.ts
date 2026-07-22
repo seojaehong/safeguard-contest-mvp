@@ -1326,6 +1326,10 @@ describe("northstar open gate audit", () => {
         },
       ],
     });
+    writeJson(rootDir, path.join("evaluation", "final-99-no-approval-boundary-2026-07-23", "report.json"), {
+      verdict: "NO_APPROVAL_FINAL_99_RERUN_BLOCKED_BOUNDARY_DOCUMENTED",
+      dbMutationPerformed: false,
+    });
 
     const audit = buildNorthstarOpenGateAudit({
       rootDir,
@@ -1341,8 +1345,11 @@ describe("northstar open gate audit", () => {
     expect(finalGate?.detail).toContain("auth-history-reuse=operator-auth-gated");
     expect(finalGate?.detail).toContain("dispatch-policy=provider-approval-gated");
     expect(finalGate?.detail).toContain("Fully automated launch remains forbidden");
+    expect(finalGate?.detail).toContain("Full final-99 rerun is not treated as no-approval cleanup");
+    expect(finalGate?.detail).toContain(path.join("evaluation", "final-99-no-approval-boundary-2026-07-23", "report.json"));
     expect(finalGate?.nextActions).toEqual([
       "Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment.",
+      "Do not rerun full final-99 as a no-approval cleanup when SAFEGUARD_AUTH_TOKEN is configured.",
     ]);
     expect(markdown).toContain("notice-carry.json");
     expect(markdown).toContain("Do not claim fully automated launch readiness");
