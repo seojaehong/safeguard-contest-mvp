@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T15:07:07.425Z",
+  "generatedAt": "2026-07-22T15:09:42.190Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "ef5b50239f0b4dd45939196d0e715d62967de7a9",
+  "sourceHead": "4564454f6f0c2ade3d33951bb6cbca90937956f2",
   "productionCommit": "43d9864506f152d82d1b18cba434d7a894de9025",
   "liveBuildInfo": {
     "ok": true,
@@ -20,7 +20,7 @@
   "sourceHeadLivePending": true,
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "ef5b50239f0b4dd45939196d0e715d62967de7a9",
+  "liveExactEvidenceCommit": "4564454f6f0c2ade3d33951bb6cbca90937956f2",
   "liveRollupLiveCommit": "43d9864506f152d82d1b18cba434d7a894de9025",
   "liveRollupMatchesProduction": true,
   "artifacts": {
