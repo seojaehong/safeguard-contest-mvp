@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-review-gate/v1",
-  "generatedAt": "2026-07-22T14:49:46.789Z",
-  "sourceHead": "988aae915ec78f3a1e1d78780bea5065bed10021",
+  "generatedAt": "2026-07-22T15:06:50.307Z",
+  "sourceHead": "ef5b50239f0b4dd45939196d0e715d62967de7a9",
   "packetPath": "evaluation\\kosha-exact-promotion-packet-2026-07-22\\report.json",
   "reviewPath": "evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\review-template.json",
   "verdict": "REVIEW_CHECKLIST_INCOMPLETE_BLOCKED",
