@@ -102,9 +102,13 @@ describe("provider dispatch idempotency approval gate", () => {
   it("keeps updated_at ownership explicit before applying the draft", () => {
     expect(report.timestampBoundary).toEqual({
       updatedAtColumnPresent: true,
-      updatedAtTriggerIncluded: false,
-      requiredBeforeAppliedMigration: "add an updated_at trigger or require route code to own every status-update timestamp"
+      updatedAtTriggerIncluded: true,
+      requiredBeforeAppliedMigration: "runtime approval must verify the provider_dispatch_attempts_set_updated_at trigger is present and that route status updates preserve updated_at ownership"
     });
     expect(sql).toContain("updated_at timestamptz not null default now()");
+    expect(sql).toContain("create or replace function set_provider_dispatch_attempts_updated_at()");
+    expect(sql).toContain("drop trigger if exists provider_dispatch_attempts_set_updated_at on provider_dispatch_attempts");
+    expect(sql).toContain("create trigger provider_dispatch_attempts_set_updated_at");
+    expect(sql).toContain("before update on provider_dispatch_attempts");
   });
 });

@@ -30,6 +30,22 @@ create index if not exists provider_dispatch_attempts_workpack_created_idx
 create index if not exists provider_dispatch_attempts_share_session_idx
   on provider_dispatch_attempts(share_session_id);
 
+create or replace function set_provider_dispatch_attempts_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists provider_dispatch_attempts_set_updated_at on provider_dispatch_attempts;
+create trigger provider_dispatch_attempts_set_updated_at
+  before update on provider_dispatch_attempts
+  for each row
+  execute function set_provider_dispatch_attempts_updated_at();
+
 alter table provider_dispatch_attempts enable row level security;
 alter table provider_dispatch_attempts force row level security;
 

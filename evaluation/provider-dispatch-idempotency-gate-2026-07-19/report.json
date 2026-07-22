@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-07-19T00:30:00+09:00",
-  "refreshedAt": "2026-07-22T01:26:15+09:00",
-  "sourceSha": "fe5b1e2a8b672a8f752f851f686ae543b34232eb",
+  "refreshedAt": "2026-07-23T04:52:30+09:00",
+  "sourceSha": "0d2608b29eb4b72a1f8e0b06a4f51e45e0e489b4",
   "scope": "provider_dispatch_idempotency_gate",
   "status": "approval_required",
   "liveDispatchState": {
@@ -9,7 +9,7 @@
     "mode": "preview_only",
     "reason": "persistent_idempotency_unavailable",
     "codeLock": "PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false",
-    "productionCommitSha": "fe5b1e2a8b672a8f752f851f686ae543b34232eb",
+    "productionCommitSha": "e2bca58c6b9e74ba81db94bd07120a479a56a34d",
     "channels": {
       "email": {
         "capability": false,
@@ -59,8 +59,8 @@
   },
   "timestampBoundary": {
     "updatedAtColumnPresent": true,
-    "updatedAtTriggerIncluded": false,
-    "requiredBeforeAppliedMigration": "add an updated_at trigger or require route code to own every status-update timestamp"
+    "updatedAtTriggerIncluded": true,
+    "requiredBeforeAppliedMigration": "runtime approval must verify the provider_dispatch_attempts_set_updated_at trigger is present and that route status updates preserve updated_at ownership"
   },
   "safetyLocks": {
     "dbMigrationApplied": false,

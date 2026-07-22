@@ -2,9 +2,9 @@
 
 Generated at: 2026-07-19 KST
 
-Current refresh: 2026-07-22T01:26:15+09:00
+Current refresh: 2026-07-23T04:52:30+09:00
 
-Source marker for approval packet wiring: `fe5b1e2a8b672a8f752f851f686ae543b34232eb`
+Source marker for approval packet wiring: `0d2608b29eb4b72a1f8e0b06a4f51e45e0e489b4`
 
 ## Purpose
 
@@ -22,7 +22,7 @@ Live `/api/workflow/dispatch` returns:
 
 The route keeps real provider dispatch locked with `PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false`.
 
-Current production marker at refresh: `fe5b1e2a8b672a8f752f851f686ae543b34232eb`.
+Current production marker at refresh: `e2bca58c6b9e74ba81db94bd07120a479a56a34d`.
 
 ## Drafted Approval Artifact
 
@@ -36,6 +36,7 @@ The draft creates `provider_dispatch_attempts` as a server-side reservation tabl
 - provider call state: `reserved`, `provider_called`, `accepted`, `failed`, `uncertain`
 - `provider_called` and `request_hash` fields for retry safety
 - RLS enabled and forced
+- `updated_at` trigger included in the draft
 - owner-scoped SELECT/INSERT/UPDATE policies
 - no nullable organization branch, no `FOR ALL`, and no owner DELETE policy
 
@@ -50,7 +51,7 @@ The current draft stores `channels text[]` and `provider_result jsonb` on one at
 1. Add a `provider_dispatch_attempt_channels` child table with a unique `(attempt_id, channel)` or `(organization_id, idempotency_key, channel)` contract.
 2. Explicitly define `provider_result` JSONB as the canonical per-channel ledger and add route tests proving reservation-before-provider-call, duplicate replay behavior, and per-channel result retention.
 
-`updated_at` is present in this draft, but no trigger is included. A later applied migration must either add an `updated_at` trigger or require route code to own every status-update timestamp.
+`updated_at` is present and the draft includes `provider_dispatch_attempts_set_updated_at`. A later applied migration must still verify the trigger exists in the target Supabase project and that route status updates preserve `updated_at` ownership.
 
 ## Required Before Enabling Live Dispatch
 
