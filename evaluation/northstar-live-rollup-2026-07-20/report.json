@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T06:34:15.321Z",
-  "head": "c771d335e86bf068115163ccaaa1fe4dc2744351",
+  "generatedAt": "2026-07-22T06:39:45.544Z",
+  "head": "052464794facd7c417b2bba80d7f3e347579f3ad",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "c771d335e86bf068115163ccaaa1fe4dc2744351",
+    "commitSha": "052464794facd7c417b2bba80d7f3e347579f3ad",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-610ser8c6-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-jjm20jk0g-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
