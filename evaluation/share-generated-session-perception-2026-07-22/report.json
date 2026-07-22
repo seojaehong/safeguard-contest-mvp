@@ -1,7 +1,18 @@
 {
   "schemaVersion": "safeclaw-share-generated-session-perception/v1",
-  "checkedAt": "2026-07-22T06:36:04.437Z",
-  "sourceHead": "c771d335e86bf068115163ccaaa1fe4dc2744351",
+  "checkedAt": "2026-07-22T08:10:40.562Z",
+  "sourceHead": "13b312433b8aeb97ee4bbbfb05287e54300e01f9",
+  "productionCommit": "13b312433b8aeb97ee4bbbfb05287e54300e01f9",
+  "productionBuild": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "13b312433b8aeb97ee4bbbfb05287e54300e01f9",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-msqwfsy1q-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
   "baseEvidence": "evaluation/share-mobile-p1",
   "route": "/workspace?share",
   "routeSplitAloneAcceptedAsFix": false,
@@ -82,8 +93,7 @@
         "top": 303,
         "bottom": 347,
         "width": 612,
-        "height": 44,
-        "text": "전송 결과\n미리 확인\n검증 전용 · 2개 채널"
+        "height": 44
       },
       "distinctFirstViewportXRanges": [
         160,
@@ -91,6 +101,8 @@
       ],
       "horizontalOverflow": 0,
       "dispatchPostCount": 1,
+      "dispatchPostIdempotencyKey": "provider-dispatch-v1-8490daba-0bfc-47a1-8827-9f47b7db789f-cedb895e",
+      "providerDispatchLiveClaimed": false,
       "channelResultCountWhenOpened": 2,
       "resultClosedByDefault": true,
       "closedSummaryShowsChannelStatus": true
@@ -136,8 +148,7 @@
         "top": 775,
         "bottom": 819,
         "width": 600,
-        "height": 44,
-        "text": "전송 결과\n미리 확인\n검증 전용 · 2개 채널"
+        "height": 44
       },
       "distinctFirstViewportXRanges": [
         160,
@@ -145,6 +156,8 @@
       ],
       "horizontalOverflow": 0,
       "dispatchPostCount": 1,
+      "dispatchPostIdempotencyKey": "provider-dispatch-v1-6122a23e-ebb2-4909-b550-fc1fed6fbb8a-96a3203e",
+      "providerDispatchLiveClaimed": false,
       "channelResultCountWhenOpened": 2,
       "resultClosedByDefault": true,
       "closedSummaryShowsChannelStatus": true
@@ -190,8 +203,7 @@
         "top": 784,
         "bottom": 828,
         "width": 294,
-        "height": 44,
-        "text": "전송 결과\n미리 확인\n검증 전용 · 2개 채널"
+        "height": 44
       },
       "distinctFirstViewportXRanges": [
         80,
@@ -199,9 +211,23 @@
       ],
       "horizontalOverflow": 0,
       "dispatchPostCount": 1,
+      "dispatchPostIdempotencyKey": "provider-dispatch-v1-8b989a3c-67d7-476d-a0ea-db52c6f2d6d1-16d28c27",
+      "providerDispatchLiveClaimed": false,
       "channelResultCountWhenOpened": 2,
       "resultClosedByDefault": true,
       "closedSummaryShowsChannelStatus": true
     }
+  ],
+  "tests": [
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts -t \"keeps generated provider-result details in bounded desktop and mobile drilldown\" --maxWorkers=1 --fileParallelism=false --hookTimeout=180000",
+      "result": "PASS 1 file / 1 passed / 3 skipped"
+    }
+  ],
+  "remainingBoundary": [
+    "Route/page split alone is not accepted as the UX fix; the Share result must remain a desktop workbench with bounded result drilldown.",
+    "This fixture proves current generated provider-result UI geometry only.",
+    "If the user sees a saved/generated production session that still feels mobile-like, reproduce that exact session URL/payload separately before changing product code.",
+    "Provider live dispatch remains approval-gated."
   ]
 }
