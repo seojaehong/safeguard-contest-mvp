@@ -322,6 +322,31 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     apiAsk: { ok: true },
     documentCoverage: { expectedCount: 11, presentCount: 11, missing: [] },
   });
+  writeJson(root, "evaluation/document-quality-grounding-current-gate-2026-07-19/report.json", {
+    verdict: "PASS_CURRENT_SOURCE_DOCUMENT_QUALITY_GROUNDING_CONTRACT",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    focusedTests: {
+      status: "pass",
+      testsPassed: 135,
+    },
+    verifiedContracts: {
+      sifKoshaLawBeforeLlmProse: true,
+      llmRoleNaturalizeOnly: true,
+      providerAuthoredUnsupportedHazardsRejected: true,
+      qualityContractBlocksIncompleteOutputs: true,
+      koshaSupportingEvidenceIsNotLawMandate: true,
+      exactKoshaMaterializationCovered: true,
+    },
+    boundaries: {
+      liveModelSampleExcellenceClaimed: false,
+      providerDispatchLiveClaimed: false,
+      dbMutationPerformed: false,
+      schemaMigrationPerformed: false,
+      llmWikiPublicationPerformed: false,
+      exactKoshaRegistryMutationPerformed: false,
+    },
+  });
   writeJson(root, "evaluation/kosha-next-exact-candidate-audit-2026-07-22/report.json", {
     verdict: "NEXT_EXACT_TRUST_CANDIDATES_IDENTIFIED_APPROVAL_FREE",
     mutationPerformed: false,

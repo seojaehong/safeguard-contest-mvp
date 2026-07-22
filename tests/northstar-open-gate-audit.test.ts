@@ -123,6 +123,31 @@ function createFixtureRoot(): string {
       ],
     },
   });
+  writeJson(rootDir, path.join("evaluation", "document-quality-grounding-current-gate-2026-07-19", "report.json"), {
+    verdict: "PASS_CURRENT_SOURCE_DOCUMENT_QUALITY_GROUNDING_CONTRACT",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    focusedTests: {
+      status: "pass",
+      testsPassed: 135,
+    },
+    verifiedContracts: {
+      sifKoshaLawBeforeLlmProse: true,
+      llmRoleNaturalizeOnly: true,
+      providerAuthoredUnsupportedHazardsRejected: true,
+      qualityContractBlocksIncompleteOutputs: true,
+      koshaSupportingEvidenceIsNotLawMandate: true,
+      exactKoshaMaterializationCovered: true,
+    },
+    boundaries: {
+      liveModelSampleExcellenceClaimed: false,
+      providerDispatchLiveClaimed: false,
+      dbMutationPerformed: false,
+      schemaMigrationPerformed: false,
+      llmWikiPublicationPerformed: false,
+      exactKoshaRegistryMutationPerformed: false,
+    },
+  });
   writeText(rootDir, path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"), [
     "# Supabase RLS Approval Audit",
     "Status: `approval_required`",

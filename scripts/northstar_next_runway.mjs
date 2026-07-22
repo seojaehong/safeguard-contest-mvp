@@ -20,6 +20,7 @@ const ARTIFACTS = Object.freeze({
   workspaceInformationArchitecture: path.join("evaluation", "workspace-information-architecture-2026-07-21", "report.json"),
   hermesOpenclawRuntime: path.join("evaluation", "hermes-openclaw-runtime-current-gate-2026-07-20", "report.json"),
   launchReadiness: path.join("evaluation", "launch-readiness-current-2026-07-22", "report.json"),
+  documentQualityGrounding: path.join("evaluation", "document-quality-grounding-current-gate-2026-07-19", "report.json"),
   koshaNextExactCandidateAudit: path.join("evaluation", "kosha-next-exact-candidate-audit-2026-07-22", "report.json"),
   koshaExactPromotionPacket: path.join("evaluation", "kosha-exact-promotion-packet-2026-07-22", "report.json"),
   rlsLlmWikiApprovalPreflight: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
@@ -221,6 +222,32 @@ function launchReadinessSummary(launch) {
     apiAskOk: isRecord(launch.apiAsk) && asBoolean(launch.apiAsk.ok),
     dispatchCalled: asBoolean(launch.dispatchCalled),
     documentCoverage: isRecord(launch.documentCoverage) ? launch.documentCoverage : {},
+  };
+}
+
+/**
+ * @param {unknown} quality
+ */
+function documentQualityGroundingSummary(quality) {
+  if (!isRecord(quality)) return {};
+  const tests = isRecord(quality.focusedTests) ? quality.focusedTests : {};
+  const boundaries = isRecord(quality.boundaries) ? quality.boundaries : {};
+  const contracts = isRecord(quality.verifiedContracts) ? quality.verifiedContracts : {};
+  return {
+    verdict: asString(quality.verdict),
+    sourceHead: asString(quality.sourceHead),
+    productionCommit: asString(quality.productionCommit),
+    testsStatus: asString(tests.status),
+    testsPassed: typeof tests.testsPassed === "number" ? tests.testsPassed : 0,
+    sifKoshaLawBeforeLlmProse: asBoolean(contracts.sifKoshaLawBeforeLlmProse),
+    llmRoleNaturalizeOnly: asBoolean(contracts.llmRoleNaturalizeOnly),
+    unsupportedProviderHazardsRejected: asBoolean(contracts.providerAuthoredUnsupportedHazardsRejected),
+    qualityContractBlocksIncompleteOutputs: asBoolean(contracts.qualityContractBlocksIncompleteOutputs),
+    koshaSupportNotLawMandate: asBoolean(contracts.koshaSupportingEvidenceIsNotLawMandate),
+    exactKoshaMaterializationCovered: asBoolean(contracts.exactKoshaMaterializationCovered),
+    liveModelSampleExcellenceClaimed: asBoolean(boundaries.liveModelSampleExcellenceClaimed),
+    dbMutationPerformed: asBoolean(boundaries.dbMutationPerformed),
+    providerDispatchLiveClaimed: asBoolean(boundaries.providerDispatchLiveClaimed),
   };
 }
 
@@ -627,6 +654,7 @@ export function buildNorthstarNextRunway(options) {
   const approvalRunway = readJson(options.rootDir, ARTIFACTS.approvalRunway);
   const hermes = readJson(options.rootDir, ARTIFACTS.hermesOpenclawRuntime);
   const launch = readJson(options.rootDir, ARTIFACTS.launchReadiness);
+  const documentQuality = readOptionalJson(options.rootDir, ARTIFACTS.documentQualityGrounding);
   const koshaCandidateAudit = readJson(options.rootDir, ARTIFACTS.koshaNextExactCandidateAudit);
   const koshaPromotionPacket = readJson(options.rootDir, ARTIFACTS.koshaExactPromotionPacket);
   const sif = readJson(options.rootDir, ARTIFACTS.sifEmbeddingPreflight);
@@ -689,6 +717,7 @@ export function buildNorthstarNextRunway(options) {
       "ui_documents_share_cockpit",
       "dispatch_standalone_cockpit",
       "share_result_fixture_cockpit",
+      "document_quality_grounding_contract",
       "hermes_openclaw_adapter_boundary",
       "sif_embedding_approval_preflight",
       "northstar_approval_runway",
@@ -723,6 +752,7 @@ export function buildNorthstarNextRunway(options) {
       hermesOpenclaw: "adapter and fail-closed auth boundary current-proven; live unauthenticated broker smoke returns AUTH_REQUIRED before engine execution",
     },
     hermesOpenclaw: hermesSummary(hermes),
+    documentQualityGrounding: documentQualityGroundingSummary(documentQuality),
     koshaNextExactCandidateAudit: koshaCandidateAuditSummary(koshaCandidateAudit),
     koshaExactPromotionPacket: koshaPromotionPacketSummary(koshaPromotionPacket),
     sifEmbeddingRuntime: sifSummary(sif),
@@ -740,6 +770,7 @@ export function buildNorthstarNextRunway(options) {
       "use the KOSHA exact promotion packet as the bounded operator-review set and run scripts/kosha_exact_promotion_review_gate.mjs on the human review input before any exact-trust promotion",
       "keep the next UI product wave framed as bounded IA/density: default exposure budget, selected-only Documents workbench, Documents shell ratio <= 3, and exact-session desktop Share workbench proof",
       "keep Documents acceptance tied to simultaneous exposure, not page count: current status, core 3 launcher, selected document workbench, validation/recheck action, and local-scroll/drilldown for long source, section, evidence, and supporting-9 content",
+      "keep document-quality grounding separate from live sample excellence: the focused contract proves SIF/KOSHA/law before LLM prose, naturalize_only model role, qualityContract blocking, and KOSHA support-not-law separation, while human wording review remains separate",
       "keep Share acceptance split by viewport and session kind: desktop must be a 2-3 region cockpit with selected language/message preview and send/export lock, while mobile single-column summaries are allowed only on mobile",
       uiFollowUpScope,
       "promote the bounded-workbench current-source proof to live only after production /api/build-info reaches the product/evidence head and the live probe is rerun",
@@ -825,6 +856,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Documents and Share cockpit UI is proven only for the current evidence scope.
 - Standalone Dispatch cockpit is proven for the current evidence scope.
 - Generated Share result fixture cockpit is proven without claiming real provider dispatch.
+- Document quality grounding is proven for the focused contract: \`${report.documentQualityGrounding.verdict || "missing"}\`, tests passed \`${report.documentQualityGrounding.testsPassed ?? 0}\`, SIF/KOSHA/law evidence remains before LLM prose, and KOSHA support is not promoted to statutory mandate. Live model sample excellence remains a separate human-review proof.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level, without claiming live production engine execution.
 - SIF embedding approval preflight is approval-held: no embedding generation, no upload, and vector runtime disabled until approval.
 - North Star approval runway is current and separates runtime/provider/database/vector gates from ordinary UI/evidence iteration.

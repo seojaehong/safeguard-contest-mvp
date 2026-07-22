@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `9f84a0f7d6276f0d9ab1a6a097f922525e6587e7`
+Source HEAD: `3143714527613e4abd2effc642f7586ed768a880`
 
-Production `/api/build-info`: `9f84a0f7d6276f0d9ab1a6a097f922525e6587e7`
+Production `/api/build-info`: `3143714527613e4abd2effc642f7586ed768a880`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `9f84a0f7d6276f0d9ab1a6a097f922525e6587e7`
+Live rollup source head: `3143714527613e4abd2effc642f7586ed768a880`
 
 Live rollup matches production: `true`
 
@@ -40,6 +40,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Documents and Share cockpit UI is proven only for the current evidence scope.
 - Standalone Dispatch cockpit is proven for the current evidence scope.
 - Generated Share result fixture cockpit is proven without claiming real provider dispatch.
+- Document quality grounding is proven for the focused contract: `PASS_CURRENT_SOURCE_DOCUMENT_QUALITY_GROUNDING_CONTRACT`, tests passed `135`, SIF/KOSHA/law evidence remains before LLM prose, and KOSHA support is not promoted to statutory mandate. Live model sample excellence remains a separate human-review proof.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level, without claiming live production engine execution.
 - SIF embedding approval preflight is approval-held: no embedding generation, no upload, and vector runtime disabled until approval.
 - North Star approval runway is current and separates runtime/provider/database/vector gates from ordinary UI/evidence iteration.
@@ -93,17 +94,18 @@ Required first-task containment:
 3. use the KOSHA exact promotion packet as the bounded operator-review set and run scripts/kosha_exact_promotion_review_gate.mjs on the human review input before any exact-trust promotion.
 4. keep the next UI product wave framed as bounded IA/density: default exposure budget, selected-only Documents workbench, Documents shell ratio <= 3, and exact-session desktop Share workbench proof.
 5. keep Documents acceptance tied to simultaneous exposure, not page count: current status, core 3 launcher, selected document workbench, validation/recheck action, and local-scroll/drilldown for long source, section, evidence, and supporting-9 content.
-6. keep Share acceptance split by viewport and session kind: desktop must be a 2-3 region cockpit with selected language/message preview and send/export lock, while mobile single-column summaries are allowed only on mobile.
-7. keep UI follow-up scoped to reproduced exact-session desktop Share full-workbench perception issues while preserving the Documents bounded workbench shell-ratio <= 3 contract.
-8. promote the bounded-workbench current-source proof to live only after production /api/build-info reaches the product/evidence head and the live probe is rerun.
-9. reproduce an exact saved/generated Share session before using fixture or generated /workspace share evidence to close the user's exact Share complaint.
-10. treat the Share exact-session boundary as open until a concrete session URL/payload is provided; the current no-mutation boundary audit only proves route presence and missing exact evidence.
-11. keep Share UI evidence split by route: invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result state each need their own geometry before closing user-specific mobile-like complaints.
-12. resolve public Share storage readiness before exact saved-session closure: current evidence shows workpacks readable but workpack_share_sessions missing from production PostgREST schema cache.
-13. do not create a production saved Share session unless the user supplies a concrete existing URL or explicitly approves DB-backed share-session creation; POST /api/workpacks/[id]/share-sessions inserts workpack_share_sessions.
-14. keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven.
-15. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
-16. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
+6. keep document-quality grounding separate from live sample excellence: the focused contract proves SIF/KOSHA/law before LLM prose, naturalize_only model role, qualityContract blocking, and KOSHA support-not-law separation, while human wording review remains separate.
+7. keep Share acceptance split by viewport and session kind: desktop must be a 2-3 region cockpit with selected language/message preview and send/export lock, while mobile single-column summaries are allowed only on mobile.
+8. keep UI follow-up scoped to reproduced exact-session desktop Share full-workbench perception issues while preserving the Documents bounded workbench shell-ratio <= 3 contract.
+9. promote the bounded-workbench current-source proof to live only after production /api/build-info reaches the product/evidence head and the live probe is rerun.
+10. reproduce an exact saved/generated Share session before using fixture or generated /workspace share evidence to close the user's exact Share complaint.
+11. treat the Share exact-session boundary as open until a concrete session URL/payload is provided; the current no-mutation boundary audit only proves route presence and missing exact evidence.
+12. keep Share UI evidence split by route: invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result state each need their own geometry before closing user-specific mobile-like complaints.
+13. resolve public Share storage readiness before exact saved-session closure: current evidence shows workpacks readable but workpack_share_sessions missing from production PostgREST schema cache.
+14. do not create a production saved Share session unless the user supplies a concrete existing URL or explicitly approves DB-backed share-session creation; POST /api/workpacks/[id]/share-sessions inserts workpack_share_sessions.
+15. keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven.
+16. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
+17. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
 
 ## KOSHA Candidate Boundary
 

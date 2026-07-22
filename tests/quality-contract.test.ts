@@ -246,7 +246,8 @@ describe("qualityContract", () => {
     expect(response.qualityContract?.fallback.hasFallback).toBe(true);
     expect(response.qualityContract?.evidence.mappedCount).toBe(response.qualityContract?.evidence.requiredCount);
     expect(response.qualityContract?.ontology.status).toBe("degraded");
-    expect(response.qualityContract?.structured.status).toBe("blocked");
+    expect(response.qualityContract?.structured.status).toBe("degraded");
+    expect(response.qualityContract?.structured.readyCount).toBeLessThan(response.qualityContract?.structured.requiredCount ?? 0);
     expect(response.qualityContract?.dbHarness.status).toBe("blocked");
     expect(response.qualityContract?.structured.detail).not.toContain("fallback");
     expect(response.qualityContract?.items.map((item) => item.label)).toContain("문서 구조 검수");

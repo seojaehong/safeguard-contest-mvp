@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-22T23:02:45.165Z",
-  "sourceSha": "9f84a0f7d6276f0d9ab1a6a097f922525e6587e7",
+  "generatedAt": "2026-07-22T23:14:26.255Z",
+  "sourceSha": "3143714527613e4abd2effc642f7586ed768a880",
   "overall": "open",
   "gates": [
     {
@@ -22,6 +22,17 @@
       "evidencePath": "evaluation\\live-harness-quality-probe-current-2026-07-20\\report.json",
       "detail": "Live harness probe passed with zero failed contracts.",
       "nextActions": []
+    },
+    {
+      "id": "document_quality_grounding",
+      "state": "proven",
+      "label": "Document quality grounding contract",
+      "evidencePath": "evaluation\\document-quality-grounding-current-gate-2026-07-19\\report.json",
+      "detail": "Current source proves the document-quality grounding contract with 135 focused tests: SIF/KOSHA/law evidence stays before LLM prose, LLM role remains naturalize_only, unsupported provider hazards are rejected, qualityContract blocks incomplete outputs, and KOSHA support is not promoted to statutory mandate. This is not a claim that every live model sample is excellent.",
+      "nextActions": [
+        "Keep live model sample excellence separate from the deterministic document-quality grounding contract.",
+        "Continue requiring human review for wording quality, concision, and field usability before broad launch claims."
+      ]
     },
     {
       "id": "ui_documents_share_cockpit",

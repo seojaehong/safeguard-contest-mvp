@@ -28,6 +28,7 @@ const EVIDENCE_PATHS = Object.freeze({
   ]),
   final99NoApprovalBoundary: path.join("evaluation", "final-99-no-approval-boundary-2026-07-23", "report.json"),
   liveHarness: path.join("evaluation", "live-harness-quality-probe-current-2026-07-20", "report.json"),
+  documentQualityGrounding: path.join("evaluation", "document-quality-grounding-current-gate-2026-07-19", "report.json"),
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
   llmWikiApproval: path.join("evaluation", "llm-wiki-rls-approval-2026-07-17", "report.md"),
   rlsLlmWikiApprovalPreflight: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
@@ -309,6 +310,70 @@ function evaluateLiveHarnessGate(rootDir) {
     evidencePath,
     detail: `Live harness verdict is ${verdict || "unknown"} with failedContracts=${failedContracts ?? "unknown"}.`,
     nextActions: ["Fix harness quality failures before recording North Star progress."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateDocumentQualityGroundingGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.documentQualityGrounding;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "document_quality_grounding",
+      label: "Document quality grounding contract",
+      state: "missing",
+      evidencePath,
+      detail: "Document quality grounding report is missing or invalid.",
+      nextActions: ["Run `node evaluation\\document-quality-grounding-current-gate-2026-07-19\\run-document-quality-grounding-current-gate.mjs --base-url https://www.safeclaw.kr`."],
+    });
+  }
+
+  const verdict = readString(report.verdict);
+  const focusedTests = isRecord(report.focusedTests) ? report.focusedTests : {};
+  const testsStatus = readString(focusedTests.status);
+  const testsPassed = readNumber(focusedTests.testsPassed);
+  const boundaries = isRecord(report.boundaries) ? report.boundaries : {};
+  const noMutation = boundaries.dbMutationPerformed === false
+    && boundaries.schemaMigrationPerformed === false
+    && boundaries.providerDispatchLiveClaimed === false
+    && boundaries.llmWikiPublicationPerformed === false
+    && boundaries.exactKoshaRegistryMutationPerformed === false;
+  const contracts = isRecord(report.verifiedContracts) ? report.verifiedContracts : {};
+  const requiredContractsReady = contracts.sifKoshaLawBeforeLlmProse === true
+    && contracts.llmRoleNaturalizeOnly === true
+    && contracts.providerAuthoredUnsupportedHazardsRejected === true
+    && contracts.qualityContractBlocksIncompleteOutputs === true
+    && contracts.koshaSupportingEvidenceIsNotLawMandate === true
+    && contracts.exactKoshaMaterializationCovered === true;
+
+  if (verdict === "PASS_CURRENT_SOURCE_DOCUMENT_QUALITY_GROUNDING_CONTRACT"
+    && testsStatus === "pass"
+    && testsPassed > 0
+    && noMutation
+    && requiredContractsReady) {
+    return gateResult({
+      id: "document_quality_grounding",
+      label: "Document quality grounding contract",
+      state: "proven",
+      evidencePath,
+      detail: `Current source proves the document-quality grounding contract with ${testsPassed} focused tests: SIF/KOSHA/law evidence stays before LLM prose, LLM role remains naturalize_only, unsupported provider hazards are rejected, qualityContract blocks incomplete outputs, and KOSHA support is not promoted to statutory mandate. This is not a claim that every live model sample is excellent.`,
+      nextActions: [
+        "Keep live model sample excellence separate from the deterministic document-quality grounding contract.",
+        "Continue requiring human review for wording quality, concision, and field usability before broad launch claims.",
+      ],
+    });
+  }
+
+  return gateResult({
+    id: "document_quality_grounding",
+    label: "Document quality grounding contract",
+    state: "contradicted",
+    evidencePath,
+    detail: `Document quality grounding verdict is ${verdict || "unknown"} with tests=${testsStatus || "unknown"} and noMutation=${noMutation}.`,
+    nextActions: ["Fix the focused document-quality grounding suite before claiming 99+ document-quality progress."],
   });
 }
 
@@ -2152,6 +2217,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
   const gates = [
     evaluateFinal99Gate(rootDir),
     evaluateLiveHarnessGate(rootDir),
+    evaluateDocumentQualityGroundingGate(rootDir),
     evaluateUiDocumentsShareCockpitGate(rootDir),
     evaluateDispatchStandaloneCockpitGate(rootDir),
     evaluateShareResultFixtureCockpitGate(rootDir),

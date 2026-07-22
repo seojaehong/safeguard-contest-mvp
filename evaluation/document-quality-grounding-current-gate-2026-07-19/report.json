@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "safeclaw-document-quality-grounding-current-gate/v1",
+  "checkedAt": "2026-07-22T23:13:53.726Z",
+  "date": "2026-07-19",
+  "sourceHead": "3143714527613e4abd2effc642f7586ed768a880",
+  "baseUrl": "https://www.safeclaw.kr",
+  "productionBuildInfo": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "3143714527613e4abd2effc642f7586ed768a880",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-sn17ec7xj-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "productionCommit": "3143714527613e4abd2effc642f7586ed768a880",
+  "verdict": "PASS_CURRENT_SOURCE_DOCUMENT_QUALITY_GROUNDING_CONTRACT",
+  "focusedTests": {
+    "command": "npm.cmd test -- tests\\ai-deliverables-generation-trace.test.ts tests\\ai-deliverables-scope.test.ts tests\\grounded-generation-contract.test.ts tests\\quality-contract.test.ts tests\\workpack-ontology-qa.test.ts tests\\commercial-harness.test.ts tests\\kosha-materialization-matrix.test.ts tests\\kosha-guide-supporting-row-relevance.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000 --hookTimeout=180000",
+    "testFilesPassed": 8,
+    "testsPassed": 135,
+    "durationSeconds": 22.01,
+    "status": "pass",
+    "exitStatus": 0,
+    "signal": null,
+    "error": null,
+    "stdoutTail": [
+      "> safeclaw@0.1.0 test",
+      "> vitest run tests\\ai-deliverables-generation-trace.test.ts tests\\ai-deliverables-scope.test.ts tests\\grounded-generation-contract.test.ts tests\\quality-contract.test.ts tests\\workpack-ontology-qa.test.ts tests\\commercial-harness.test.ts tests\\kosha-materialization-matrix.test.ts tests\\kosha-guide-supporting-row-relevance.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000 --hookTimeout=180000",
+      " RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/recipient-foreign-live-gate-20260720",
+      " Test Files  8 passed (8)",
+      "      Tests  135 passed (135)",
+      "   Start at  08:13:54",
+      "   Duration  22.01s (transform 1.13s, setup 0ms, import 3.27s, tests 16.99s, environment 1ms)"
+    ],
+    "stderrTail": []
+  },
+  "verifiedContracts": {
+    "sifKoshaLawBeforeLlmProse": true,
+    "llmRoleNaturalizeOnly": true,
+    "providerAuthoredUnsupportedHazardsRejected": true,
+    "multiProcessRiskRowsPreserved": true,
+    "qualityContractBlocksIncompleteOutputs": true,
+    "ontologyQaBoundaryPreserved": true,
+    "koshaSupportingEvidenceIsNotLawMandate": true,
+    "exactKoshaMaterializationCovered": true
+  },
+  "boundaries": {
+    "liveModelSampleExcellenceClaimed": false,
+    "providerDispatchLiveClaimed": false,
+    "dbMutationPerformed": false,
+    "schemaMigrationPerformed": false,
+    "exactKoshaRegistryMutationPerformed": false,
+    "llmWikiPublicationPerformed": false
+  },
+  "forbiddenClaims": [
+    "Every live model sample is excellent because this focused contract suite passed.",
+    "KOSHA technical guidance is a statutory mandate.",
+    "Provider prose may introduce unsupported hazards or controls outside the grounded packet.",
+    "Exact KOSHA trust registry was expanded by this gate.",
+    "DB mutation, provider dispatch, or LLM Wiki publication was performed by this gate."
+  ],
+  "nextEvidenceNeeded": [
+    "fresh live /api/ask samples for each demo scenario",
+    "human review of wording quality, concision, and field usability",
+    "exact saved /share/[sessionId] geometry only after a concrete URL or approved safe creation flow exists",
+    "separate approval before DB/RLS/SIF embedding/LLM Wiki publication gates"
+  ]
+}

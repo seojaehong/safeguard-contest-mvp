@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T23:02:46.280Z",
-  "head": "9f84a0f7d6276f0d9ab1a6a097f922525e6587e7",
+  "generatedAt": "2026-07-22T23:14:26.996Z",
+  "head": "3143714527613e4abd2effc642f7586ed768a880",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "9f84a0f7d6276f0d9ab1a6a097f922525e6587e7",
+    "commitSha": "3143714527613e4abd2effc642f7586ed768a880",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-lddqufpiu-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-sn17ec7xj-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 12
+    "gateCount": 13
   },
   "provenGates": [
     {
@@ -32,6 +32,12 @@
       "state": "proven",
       "artifact": "evaluation\\live-harness-quality-probe-current-2026-07-20\\report.json",
       "detail": "Live harness probe passed with zero failed contracts."
+    },
+    {
+      "id": "document_quality_grounding",
+      "state": "proven",
+      "artifact": "evaluation\\document-quality-grounding-current-gate-2026-07-19\\report.json",
+      "detail": "Current source proves the document-quality grounding contract with 135 focused tests: SIF/KOSHA/law evidence stays before LLM prose, LLM role remains naturalize_only, unsupported provider hazards are rejected, qualityContract blocks incomplete outputs, and KOSHA support is not promoted to statutory mandate. This is not a claim that every live model sample is excellent."
     },
     {
       "id": "ui_documents_share_cockpit",
@@ -193,9 +199,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "9f84a0f7d6276f0d9ab1a6a097f922525e6587e7",
+      "sourceCommit": "3143714527613e4abd2effc642f7586ed768a880",
       "sourceStatus": "exact",
-      "productionCommit": "9f84a0f7d6276f0d9ab1a6a097f922525e6587e7",
+      "productionCommit": "3143714527613e4abd2effc642f7586ed768a880",
       "productionStatus": "matches_live"
     },
     {
