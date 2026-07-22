@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T21:46:46.049Z",
-  "head": "84fb40643d70cbf68d677a8edcbaee3a67b297c2",
+  "generatedAt": "2026-07-22T21:49:58.004Z",
+  "head": "b37a31e5b8de5599548c446a666c4d4e02713807",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "3e0265d71017bf3760861e54f0937e9d4036f83a",
+    "commitSha": "b37a31e5b8de5599548c446a666c4d4e02713807",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-c6vskok91-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-9w8hq4ttc-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -193,10 +193,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "3e0265d71017bf3760861e54f0937e9d4036f83a",
+      "sourceCommit": "84fb40643d70cbf68d677a8edcbaee3a67b297c2",
       "sourceStatus": "ancestor",
-      "productionCommit": "3e0265d71017bf3760861e54f0937e9d4036f83a",
-      "productionStatus": "matches_live"
+      "productionCommit": "84fb40643d70cbf68d677a8edcbaee3a67b297c2",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -225,16 +225,16 @@
     {
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "sourceCommit": "9226534c8dcab1b55b5a26754e9e278f4c01ff67",
-      "sourceStatus": "ancestor",
+      "sourceCommit": "b37a31e5b8de5599548c446a666c4d4e02713807",
+      "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
     },
     {
       "id": "sif_embedding_preflight",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "sourceCommit": "df1f46e2f87660fb072989d2e03a38479134434a",
-      "sourceStatus": "ancestor",
+      "sourceCommit": "b37a31e5b8de5599548c446a666c4d4e02713807",
+      "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
     },
