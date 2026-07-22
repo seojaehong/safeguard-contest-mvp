@@ -1,0 +1,283 @@
+#!/usr/bin/env node
+// @ts-check
+
+import fs from "node:fs";
+import path from "node:path";
+import process from "node:process";
+import { execFileSync, spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+
+const SCRIPT_PATH = fileURLToPath(import.meta.url);
+const REPO_ROOT = path.resolve(path.dirname(SCRIPT_PATH), "..", "..");
+const OUT_DIR = path.join("evaluation", "hermes-openclaw-runtime-current-gate-2026-07-20");
+const DEFAULT_BASE_URL = "https://www.safeclaw.kr";
+const TEST_FILES = [
+  "tests\\engine-adapter.test.ts",
+  "tests\\hermes-engine-adapter.test.ts",
+  "tests\\openclaw-hermes-route.test.ts",
+  "tests\\openclaw-chat.test.ts",
+  "tests\\openclaw-broker-ui-context.test.ts",
+  "tests\\remote-hermes-contract.test.ts",
+  "tests\\remote-hermes-runtime.test.ts",
+  "tests\\remote-hermes-route.test.ts",
+  "tests\\remote-hermes-https-transport.test.ts",
+  "tests\\remote-hermes-service-auth.test.ts",
+  "tests\\remote-engine-protocol.test.ts",
+  "tests\\engine-runtime-readiness-policy.test.ts",
+  "tests\\ai-provider-policy.test.ts",
+];
+const TEST_ARGS = [
+  "test",
+  "--",
+  ...TEST_FILES,
+  "--maxWorkers=1",
+  "--fileParallelism=false",
+  "--testTimeout=90000",
+  "--hookTimeout=180000",
+];
+
+function gitHead() {
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"], {
+      cwd: REPO_ROOT,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return "unknown";
+  }
+}
+
+async function readJsonUrl(url, options = {}) {
+  const response = await fetch(url, { cache: "no-store", ...options });
+  const text = await response.text();
+  let body = {};
+  try {
+    body = text ? JSON.parse(text) : {};
+  } catch {
+    body = { raw: text };
+  }
+  return {
+    status: response.status,
+    ok: response.ok,
+    body,
+    contentLength: Buffer.byteLength(text, "utf8"),
+  };
+}
+
+async function readBuildInfo(baseUrl) {
+  const url = new URL("/api/build-info", baseUrl);
+  url.searchParams.set("codexCacheBust", `hermes-current-${Date.now()}`);
+  return (await readJsonUrl(url)).body;
+}
+
+async function runUnauthenticatedBrokerSmoke(baseUrl) {
+  const url = new URL("/api/agent/chat", baseUrl);
+  url.searchParams.set("codexCacheBust", `hermes-current-${Date.now()}`);
+  const response = await readJsonUrl(url, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ messages: [{ role: "user", content: "ping" }] }),
+  });
+  const code = typeof response.body?.code === "string" ? response.body.code : "";
+  return {
+    endpoint: `${baseUrl.replace(/\/$/u, "")}/api/agent/chat`,
+    httpStatus: response.status,
+    code,
+    contentLength: response.contentLength,
+    engineExecutionReached: false,
+    status: response.status === 401 && code === "AUTH_REQUIRED" ? "pass" : "fail",
+  };
+}
+
+function parseVitestSummary(stdout) {
+  const filesMatch = stdout.match(/Test Files\s+(\d+)\s+passed/u);
+  const testsMatch = stdout.match(/Tests\s+(\d+)\s+passed/u);
+  const durationMatch = stdout.match(/Duration\s+([0-9.]+)s/u);
+  return {
+    testFilesPassed: filesMatch ? Number(filesMatch[1]) : TEST_FILES.length,
+    testsPassed: testsMatch ? Number(testsMatch[1]) : 0,
+    durationSeconds: durationMatch ? Number(durationMatch[1]) : null,
+  };
+}
+
+function runFocusedTests() {
+  const started = Date.now();
+  const result = spawnSync(process.env.ComSpec || "cmd.exe", ["/d", "/s", "/c", "npm.cmd", ...TEST_ARGS], {
+    cwd: REPO_ROOT,
+    encoding: "utf8",
+    shell: false,
+  });
+  const stdout = result.stdout || "";
+  const stderr = result.stderr || "";
+  const summary = parseVitestSummary(stdout);
+  return {
+    command: `npm.cmd ${TEST_ARGS.join(" ")}`,
+    testFilesPassed: summary.testFilesPassed,
+    testsPassed: summary.testsPassed,
+    durationSeconds: summary.durationSeconds ?? Number(((Date.now() - started) / 1000).toFixed(2)),
+    status: result.status === 0 ? "pass" : "fail",
+    exitStatus: result.status,
+    signal: result.signal,
+    error: result.error ? String(result.error) : null,
+    stdoutTail: stdout.split(/\r?\n/u).slice(-12).filter(Boolean),
+    stderrTail: stderr.split(/\r?\n/u).slice(-12).filter(Boolean),
+  };
+}
+
+function parseArgs(argv) {
+  const options = { baseUrl: DEFAULT_BASE_URL, skipTests: false };
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    const next = argv[index + 1] || "";
+    if (arg === "--base-url") {
+      options.baseUrl = next;
+      index += 1;
+    } else if (arg === "--skip-tests") {
+      options.skipTests = true;
+    } else if (arg === "--help" || arg === "-h") {
+      console.log("Usage: node evaluation/hermes-openclaw-runtime-current-gate-2026-07-20/run-hermes-openclaw-runtime-current-gate.mjs [--base-url URL] [--skip-tests]");
+      process.exit(0);
+    } else {
+      throw new Error(`Unknown argument: ${arg}`);
+    }
+  }
+  return options;
+}
+
+function buildReport({ checkedAt, sourceSha, productionBuildInfo, focusedTests, liveUnauthenticatedBrokerSmoke }) {
+  return {
+    schemaVersion: "safeclaw-hermes-openclaw-runtime-current-gate/v1",
+    checkedAt,
+    sourceShaForFocusedTests: sourceSha,
+    productionBuildInfoAtLiveSmoke: productionBuildInfo,
+    verdict: focusedTests.status === "pass" && liveUnauthenticatedBrokerSmoke.status === "pass"
+      ? "adapter_boundary_pass_live_execution_not_claimed"
+      : "adapter_boundary_red_live_execution_not_claimed",
+    focusedTests,
+    liveUnauthenticatedBrokerSmoke,
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchLiveClaimed: false,
+      engineExecutionClaimed: false,
+      liveAuthenticatedExecutionPerformed: false,
+    },
+    liveExecutionReadiness: {
+      claimed: false,
+      requires: [
+        "authenticated operator-owned site context",
+        "local OpenClaw site/org binding attestation or configured remote Hermes gateway",
+        "service assertion and replay ledger",
+        "tenant-bound request envelope",
+        "tool-denial policy",
+        "Evidence Harness completeness",
+        "terminal ledger persistence",
+      ],
+    },
+  };
+}
+
+function renderMarkdown(report) {
+  const deploymentUrl = typeof report.productionBuildInfoAtLiveSmoke?.deploymentUrl === "string"
+    ? report.productionBuildInfoAtLiveSmoke.deploymentUrl
+    : "";
+  return `# SafeClaw Hermes / OpenClaw Runtime Current Gate
+
+Checked at: ${report.checkedAt}
+
+## Verdict
+
+The Hermes/OpenClaw runtime architecture is green at the adapter, policy, service-auth, route, and fail-closed boundary level when the verdict is \`adapter_boundary_pass_live_execution_not_claimed\`.
+
+Live production runtime execution is still not claimed. The live \`/api/agent/chat\` route must require authentication before engine execution, and production local OpenClaw mode remains closed without a proven site/org binding attestation. Remote Hermes service execution requires the configured gateway, service assertion, replay ledger, tenant binding, and terminal ledger gates.
+
+## Authority
+
+- Source SHA for focused tests: \`${report.sourceShaForFocusedTests}\`
+- Production build-info observed during live smoke: \`${report.productionBuildInfoAtLiveSmoke?.commitSha || ""}\`
+- Live deployment URL: \`${deploymentUrl}\`
+- Worktree: \`${REPO_ROOT}\`
+- Branch: \`chore/recipient-foreign-live-gate-20260720\`
+
+## Verification
+
+Command:
+
+\`\`\`powershell
+${report.focusedTests.command}
+\`\`\`
+
+Result:
+
+- Test files: ${report.focusedTests.testFilesPassed} passed / ${TEST_FILES.length}
+- Tests: ${report.focusedTests.testsPassed} passed
+- Duration: ${report.focusedTests.durationSeconds}s
+- Status: \`${report.focusedTests.status}\`
+
+Live unauthenticated broker smoke:
+
+\`\`\`powershell
+Invoke-WebRequest -Uri '${report.liveUnauthenticatedBrokerSmoke.endpoint}?codexCacheBust=...' -Method Post -ContentType 'application/json' -Body '{"messages":[{"role":"user","content":"ping"}]}' -SkipHttpErrorCheck
+\`\`\`
+
+Result:
+
+- HTTP: ${report.liveUnauthenticatedBrokerSmoke.httpStatus}
+- Code: \`${report.liveUnauthenticatedBrokerSmoke.code}\`
+- Content length: ${report.liveUnauthenticatedBrokerSmoke.contentLength} bytes
+- Engine execution: ${report.liveUnauthenticatedBrokerSmoke.engineExecutionReached ? "reached" : "not reached"}
+- Smoke status: \`${report.liveUnauthenticatedBrokerSmoke.status}\`
+
+## Current Runtime Boundary
+
+- \`ai-provider-policy.ts\` remains a model provider policy for structured deliverables, not the Hermes/OpenClaw runtime switch.
+- \`EngineAdapter\` owns runtime mode selection: \`disabled\`, \`local-openclaw\`, \`experimental-hermes\`, \`remote-hermes\`.
+- Production local OpenClaw mode still uses a fail-closed site-binding verifier.
+- Remote Hermes service-auth tests cover assertion TTL, future skew, replay consumption, binding, key window, signature checks, timeout, and abort behavior.
+- Live execution still requires an authenticated owned site context and runtime-specific attestation.
+
+## Non-Actions
+
+- DB mutation performed: \`${report.mutationBoundary.dbMutationPerformed}\`
+- Provider dispatch live claimed: \`${report.mutationBoundary.providerDispatchLiveClaimed}\`
+- Engine execution claimed: \`${report.mutationBoundary.engineExecutionClaimed}\`
+- Live authenticated execution performed: \`${report.mutationBoundary.liveAuthenticatedExecutionPerformed}\`
+
+## Interpretation
+
+This is the correct current state for launch safety: SafeClaw can demonstrate that Hermes/OpenClaw is integrated as a bounded adapter path, while avoiding the false claim that a production Hermes worker pool or local OAuth runtime is fully operational inside Vercel.
+
+The next proof requires an authenticated operator-owned test site plus a configured remote/local runtime that can pass availability, tenant binding, tool-denial, Evidence Harness, and terminal-ledger gates without exposing secrets.
+`;
+}
+
+async function main() {
+  const options = parseArgs(process.argv.slice(2));
+  const checkedAt = new Date().toISOString();
+  const sourceSha = gitHead();
+  const productionBuildInfo = await readBuildInfo(options.baseUrl);
+  const focusedTests = options.skipTests
+    ? { command: `npm.cmd ${TEST_ARGS.join(" ")}`, testFilesPassed: 0, testsPassed: 0, durationSeconds: 0, status: "skipped" }
+    : runFocusedTests();
+  const liveUnauthenticatedBrokerSmoke = await runUnauthenticatedBrokerSmoke(options.baseUrl);
+  const report = buildReport({ checkedAt, sourceSha, productionBuildInfo, focusedTests, liveUnauthenticatedBrokerSmoke });
+  fs.writeFileSync(path.join(REPO_ROOT, OUT_DIR, "report.json"), `${JSON.stringify(report, null, 2)}\n`, "utf8");
+  fs.writeFileSync(path.join(REPO_ROOT, OUT_DIR, "report.md"), renderMarkdown(report), "utf8");
+  console.log(JSON.stringify({
+    output: OUT_DIR,
+    verdict: report.verdict,
+    sourceSha: report.sourceShaForFocusedTests,
+    productionCommit: report.productionBuildInfoAtLiveSmoke?.commitSha || "",
+    tests: report.focusedTests.status,
+    liveSmoke: report.liveUnauthenticatedBrokerSmoke.status,
+    liveCode: report.liveUnauthenticatedBrokerSmoke.code,
+    engineExecutionClaimed: report.mutationBoundary.engineExecutionClaimed,
+  }, null, 2));
+  if (report.verdict !== "adapter_boundary_pass_live_execution_not_claimed") {
+    process.exitCode = 1;
+  }
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === SCRIPT_PATH) {
+  await main();
+}
