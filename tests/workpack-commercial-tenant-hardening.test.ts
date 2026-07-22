@@ -102,6 +102,9 @@ function createFixtureClient(tables: FixtureTables) {
             filters.push({ method: "in", column, value });
             return query;
           },
+          limit() {
+            return query;
+          },
           async order() {
             return { data: executeRows(tables[table] || [], filters), error: null };
           },
@@ -124,7 +127,7 @@ function createFixtureClient(tables: FixtureTables) {
   };
 }
 
-function createMaybeSingleErrorClient(error: Record<string, unknown>) {
+function createQueryErrorClient(error: Record<string, unknown>) {
   return {
     from() {
       const query = {
@@ -134,8 +137,17 @@ function createMaybeSingleErrorClient(error: Record<string, unknown>) {
         eq() {
           return query;
         },
+        limit() {
+          return query;
+        },
         async maybeSingle() {
           return { data: null, error };
+        },
+        then<TResult1 = { data: null; error: Record<string, unknown> }, TResult2 = never>(
+          onFulfilled?: ((value: { data: null; error: Record<string, unknown> }) => TResult1 | PromiseLike<TResult1>) | null,
+          onRejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null
+        ) {
+          return Promise.resolve({ data: null, error }).then(onFulfilled, onRejected);
         }
       };
       return query;
@@ -466,7 +478,25 @@ describe("commercial workpack service-role tenant hardening", () => {
     const store = await vi.importActual<typeof import("@/lib/workpack-commercial-store")>(
       "@/lib/workpack-commercial-store"
     );
-    const client = createMaybeSingleErrorClient({
+    const fake = createFixtureClient({ workpack_share_sessions: [] });
+
+    const result = await store.loadActivePublicShareSession(fake.client as never, {
+      shareSessionId: "33333333-3333-4333-8333-333333333333",
+      workerId: "11111111-1111-4111-8111-111111111111"
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      status: 404,
+      message: "유효한 공유 세션을 찾지 못했습니다."
+    });
+  });
+
+  it("treats a PostgREST no-row public share session error as fail-closed not found", async () => {
+    const store = await vi.importActual<typeof import("@/lib/workpack-commercial-store")>(
+      "@/lib/workpack-commercial-store"
+    );
+    const client = createQueryErrorClient({
       code: "PGRST116",
       message: "JSON object requested, multiple (or no) rows returned"
     });
@@ -488,7 +518,7 @@ describe("commercial workpack service-role tenant hardening", () => {
       "@/lib/workpack-commercial-store"
     );
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const client = createMaybeSingleErrorClient({
+    const client = createQueryErrorClient({
       code: "42P01",
       message: "relation workpack_share_sessions does not exist"
     });

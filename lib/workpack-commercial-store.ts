@@ -314,11 +314,11 @@ export async function loadActivePublicShareSession(
     return { ok: false, status: 400, message: "공유 세션 식별 형식이 올바르지 않습니다." };
   }
 
-  const { data: sessionData, error } = await client
+  const { data: sessionRows, error } = await client
     .from("workpack_share_sessions")
     .select("id,organization_id,site_id,workpack_id,share_scope,recipients_snapshot,access_policy,status,expires_at")
     .eq("id", input.shareSessionId)
-    .maybeSingle();
+    .limit(1);
 
   if (error) {
     if (isPostgrestNoRowsError(error)) {
@@ -328,6 +328,7 @@ export async function loadActivePublicShareSession(
     return { ok: false, status: 500, message: "공유 세션을 확인하지 못했습니다." };
   }
 
+  const sessionData = Array.isArray(sessionRows) ? sessionRows[0] : null;
   if (!sessionData || sessionData.status !== "active") {
     return { ok: false, status: 404, message: "유효한 공유 세션을 찾지 못했습니다." };
   }
