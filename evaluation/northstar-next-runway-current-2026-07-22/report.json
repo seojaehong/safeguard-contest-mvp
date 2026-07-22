@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T18:37:02.097Z",
+  "generatedAt": "2026-07-22T18:39:42.775Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "73423c3c7d32986954346927d6058763a2e8c2e4",
+  "sourceHead": "e391c476917bc6309dd45ff3372dd80838f8f80c",
   "productionCommit": "73423c3c7d32986954346927d6058763a2e8c2e4",
   "liveBuildInfo": {
     "ok": true,
@@ -15,11 +15,19 @@
     "deploymentUrl": "safeguard-contest-2lt9ztccd-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": true,
-  "currentHeadIsEvidenceOnlyPending": false,
-  "sourceHeadLivePending": false,
+  "latestEvidenceCommitLive": false,
+  "currentHeadIsEvidenceOnlyPending": true,
+  "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
-  "sourcePendingChangedPaths": [],
+  "sourcePendingChangedPaths": [
+    "evaluation/northstar-live-rollup-2026-07-20/report.json",
+    "evaluation/northstar-live-rollup-2026-07-20/report.md",
+    "evaluation/northstar-next-runway-current-2026-07-22/report.json",
+    "evaluation/northstar-next-runway-current-2026-07-22/report.md",
+    "evaluation/northstar-open-gates-current/report.json",
+    "evaluation/northstar-open-gates-current/report.md",
+    "evaluation/sif-embedding-gate/approval-preflight-report.json"
+  ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
   "liveExactEvidenceCommit": "73423c3c7d32986954346927d6058763a2e8c2e4",
@@ -305,8 +313,8 @@
   },
   "shareExactSessionBoundary": {
     "verdict": "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
-    "sourceHead": "12bf0e3d77f9b8a569da9b150b411aa371c92119",
-    "liveCommit": "e5945fe891d06cd1de95f097e29de4428bae78f2",
+    "sourceHead": "e391c476917bc6309dd45ff3372dd80838f8f80c",
+    "liveCommit": "73423c3c7d32986954346927d6058763a2e8c2e4",
     "exactSavedUserSessionReproduced": false,
     "exactSavedSessionRequiredForUserSpecificPass": true,
     "dbMutationPerformed": false,
