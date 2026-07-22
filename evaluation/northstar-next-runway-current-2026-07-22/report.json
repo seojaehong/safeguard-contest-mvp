@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T19:47:33.131Z",
+  "generatedAt": "2026-07-22T19:53:19.126Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "f3d01911d66e6b9eb45aaf1f81be564ce0058532",
-  "productionCommit": "e2bca58c6b9e74ba81db94bd07120a479a56a34d",
+  "sourceHead": "d43c624d22aa6bec75fb8395cede8f2641ba6102",
+  "productionCommit": "0d2608b29eb4b72a1f8e0b06a4f51e45e0e489b4",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "e2bca58c6b9e74ba81db94bd07120a479a56a34d",
+    "commitSha": "0d2608b29eb4b72a1f8e0b06a4f51e45e0e489b4",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-2i6qonczr-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-msd5kdog4-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": false,
@@ -20,15 +20,15 @@
   "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
   "sourcePendingChangedPaths": [
-    "evaluation/kosha-exact-promotion-review-contract-audit-2026-07-23/report.json",
-    "evaluation/kosha-exact-promotion-review-contract-audit-2026-07-23/report.md",
-    "scripts/northstar_open_gate_audit.mjs",
-    "tests/northstar-open-gate-audit.test.ts"
+    "evaluation/provider-dispatch-idempotency-gate-2026-07-19/provider-dispatch-idempotency-draft.sql",
+    "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json",
+    "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.md",
+    "tests/provider-dispatch-idempotency-gate.test.ts"
   ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "f3d01911d66e6b9eb45aaf1f81be564ce0058532",
-  "liveRollupLiveCommit": "e2bca58c6b9e74ba81db94bd07120a479a56a34d",
+  "liveExactEvidenceCommit": "d43c624d22aa6bec75fb8395cede8f2641ba6102",
+  "liveRollupLiveCommit": "0d2608b29eb4b72a1f8e0b06a4f51e45e0e489b4",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",

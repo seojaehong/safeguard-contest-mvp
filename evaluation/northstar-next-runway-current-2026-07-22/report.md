@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `f3d01911d66e6b9eb45aaf1f81be564ce0058532`
+Source HEAD: `d43c624d22aa6bec75fb8395cede8f2641ba6102`
 
-Production `/api/build-info`: `e2bca58c6b9e74ba81db94bd07120a479a56a34d`
+Production `/api/build-info`: `0d2608b29eb4b72a1f8e0b06a4f51e45e0e489b4`
 
 Latest evidence commit live: `false`
 
@@ -14,17 +14,17 @@ Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/kosha-exact-promotion-review-contract-audit-2026-07-23/report.json`, `evaluation/kosha-exact-promotion-review-contract-audit-2026-07-23/report.md`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-open-gate-audit.test.ts`
+Source pending changed paths: `evaluation/provider-dispatch-idempotency-gate-2026-07-19/provider-dispatch-idempotency-draft.sql`, `evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json`, `evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.md`, `tests/provider-dispatch-idempotency-gate.test.ts`
 
 Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `f3d01911d66e6b9eb45aaf1f81be564ce0058532`
+Live rollup source head: `d43c624d22aa6bec75fb8395cede8f2641ba6102`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `f3d01911d66e6b9eb45aaf1f81be564ce0058532` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `e2bca58c6b9e74ba81db94bd07120a479a56a34d`, and the live rollup remains exact for that deployed marker.
+Note: current HEAD `d43c624d22aa6bec75fb8395cede8f2641ba6102` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `0d2608b29eb4b72a1f8e0b06a4f51e45e0e489b4`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 

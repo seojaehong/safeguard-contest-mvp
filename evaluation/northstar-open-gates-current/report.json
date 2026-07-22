@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-22T19:47:28.858Z",
-  "sourceSha": "f3d01911d66e6b9eb45aaf1f81be564ce0058532",
+  "generatedAt": "2026-07-22T19:53:15.097Z",
+  "sourceSha": "d43c624d22aa6bec75fb8395cede8f2641ba6102",
   "overall": "open",
   "gates": [
     {
@@ -80,11 +80,11 @@
       "state": "approval_gated",
       "label": "Provider dispatch persistence approval",
       "evidencePath": "evaluation\\provider-dispatch-idempotency-gate-2026-07-19\\report.json",
-      "detail": "Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred.",
+      "detail": "Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists with an updated_at trigger, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred.",
       "nextActions": [
         "Keep PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false until route-level reservation-before-provider-call and duplicate replay behavior are tested.",
         "Approve either a per-channel dispatch child table or a tested canonical provider_result JSONB ledger before claiming channel-level exactly-once persistence.",
-        "Add an updated_at trigger or route-owned timestamp update contract before applying the migration."
+        "During approved migration rollout, verify provider_dispatch_attempts_set_updated_at exists in the target project before enabling live dispatch."
       ]
     },
     {

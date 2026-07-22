@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-22T19:47:28.858Z
-Source SHA: `f3d01911d66e6b9eb45aaf1f81be564ce0058532`
+Generated at: 2026-07-22T19:53:15.097Z
+Source SHA: `d43c624d22aa6bec75fb8395cede8f2641ba6102`
 Overall: `open`
 
 ## Gate Matrix
@@ -14,7 +14,7 @@ Overall: `open`
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json | Production /dispatch seeded desktop and sample shell routes are no longer mobile-stacked: seeded pageHeight 1116 (1.24x), sample panels 635px/413px in distinct desktop regions, overflow false/outside 0. |
 | share_result_fixture_cockpit | proven | evaluation\share-result-drilldown-2026-07-21\report.json | Generated provider-result fixture proof is bounded: desktop page 900/900, result panel 606px with 2 x-ranges, mobile summary/preview/CTA/result inside 844px, closed summary shows channel status, dispatch POST count 1, provider live dispatch unclaimed. |
 | share_exact_saved_session_boundary | notice | evaluation\share-exact-session-boundary-2026-07-22\report.json | Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass. Safe missing-session read verdict is PASS_FAIL_CLOSED and invalid-id read verdict is PASS_INVALID_ID_FAIL_CLOSED; both remain separate from exact saved-session geometry. Public share storage readiness is RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION with share-session read error PGRST205. Storage approval packet is APPROVAL_REQUIRED_PUBLIC_SHARE_SESSION_STORAGE_MIGRATION_NO_MUTATION; operator approval required is true and share-session creation would insert storage is true. |
-| provider_dispatch_persistence | approval_gated | evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json | Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred. |
+| provider_dispatch_persistence | approval_gated | evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json | Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists with an updated_at trigger, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred. |
 | supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Read-only RLS approval preflight passed at source SHA cf1558910eb0163cca82b31b81033fb878148628, but live RLS catalog and tenant A/B isolation are not proven. |
 | llm_wiki_publication | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA cf1558910eb0163cca82b31b81033fb878148628. |
 | sif_embedding_runtime | approval_gated | evaluation\sif-embedding-gate\approval-preflight-report.json | SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: cf1558910eb0163cca82b31b81033fb878148628. |
@@ -61,7 +61,7 @@ Overall: `open`
 - share_exact_saved_session_boundary: Do not call POST /api/workpacks/[id]/share-sessions without explicit DB-backed share-session creation approval; that path inserts workpack_share_sessions.
 - provider_dispatch_persistence: Keep PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false until route-level reservation-before-provider-call and duplicate replay behavior are tested.
 - provider_dispatch_persistence: Approve either a per-channel dispatch child table or a tested canonical provider_result JSONB ledger before claiming channel-level exactly-once persistence.
-- provider_dispatch_persistence: Add an updated_at trigger or route-owned timestamp update contract before applying the migration.
+- provider_dispatch_persistence: During approved migration rollout, verify provider_dispatch_attempts_set_updated_at exists in the target project before enabling live dispatch.
 - supabase_rls_launch_isolation: Approve authoritative project and credential provenance.
 - supabase_rls_launch_isolation: Run read-only live catalog capture.
 - supabase_rls_launch_isolation: Run disposable tenant A/B negative tests before production migration claims.

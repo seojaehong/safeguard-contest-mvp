@@ -93,8 +93,8 @@ function createProviderDispatchIdempotencyFixture(): Record<string, unknown> {
     },
     timestampBoundary: {
       updatedAtColumnPresent: true,
-      updatedAtTriggerIncluded: false,
-      requiredBeforeAppliedMigration: "add an updated_at trigger or require route code to own every status-update timestamp",
+      updatedAtTriggerIncluded: true,
+      requiredBeforeAppliedMigration: "runtime approval must verify the provider_dispatch_attempts_set_updated_at trigger is present and that route status updates preserve updated_at ownership",
     },
     safetyLocks: {
       dbMigrationApplied: false,

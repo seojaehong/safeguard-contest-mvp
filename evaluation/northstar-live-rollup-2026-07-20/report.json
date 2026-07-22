@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T19:47:29.900Z",
-  "head": "f3d01911d66e6b9eb45aaf1f81be564ce0058532",
+  "generatedAt": "2026-07-22T19:53:16.158Z",
+  "head": "d43c624d22aa6bec75fb8395cede8f2641ba6102",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "e2bca58c6b9e74ba81db94bd07120a479a56a34d",
+    "commitSha": "0d2608b29eb4b72a1f8e0b06a4f51e45e0e489b4",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-2i6qonczr-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-msd5kdog4-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -69,7 +69,7 @@
       "id": "provider_dispatch_persistence",
       "state": "approval_gated",
       "artifact": "evaluation\\provider-dispatch-idempotency-gate-2026-07-19\\report.json",
-      "detail": "Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred."
+      "detail": "Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists with an updated_at trigger, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred."
     },
     {
       "id": "supabase_rls_launch_isolation",
@@ -193,9 +193,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "f3d01911d66e6b9eb45aaf1f81be564ce0058532",
+      "sourceCommit": "d43c624d22aa6bec75fb8395cede8f2641ba6102",
       "sourceStatus": "exact",
-      "productionCommit": "f3d01911d66e6b9eb45aaf1f81be564ce0058532",
+      "productionCommit": "d43c624d22aa6bec75fb8395cede8f2641ba6102",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -273,9 +273,9 @@
     {
       "id": "provider_dispatch_persistence",
       "artifact": "evaluation\\provider-dispatch-idempotency-gate-2026-07-19\\report.json",
-      "sourceCommit": "fe5b1e2a8b672a8f752f851f686ae543b34232eb",
+      "sourceCommit": "0d2608b29eb4b72a1f8e0b06a4f51e45e0e489b4",
       "sourceStatus": "ancestor",
-      "productionCommit": "fe5b1e2a8b672a8f752f851f686ae543b34232eb",
+      "productionCommit": "e2bca58c6b9e74ba81db94bd07120a479a56a34d",
       "productionStatus": "ancestor_of_head"
     },
     {

@@ -1800,8 +1800,8 @@ function evaluateProviderDispatchPersistenceGate(rootDir) {
     && hasChannelTableOption
     && hasJsonLedgerOption;
   const timestampBoundaryOpen = timestampBoundary.updatedAtColumnPresent === true
-    && timestampBoundary.updatedAtTriggerIncluded === false
-    && readString(timestampBoundary.requiredBeforeAppliedMigration).includes("updated_at");
+    && timestampBoundary.updatedAtTriggerIncluded === true
+    && readString(timestampBoundary.requiredBeforeAppliedMigration).includes("provider_dispatch_attempts_set_updated_at");
   const pass = readString(report.status) === "approval_required"
     && attemptOnlyReservation
     && previewLocked
@@ -1815,11 +1815,11 @@ function evaluateProviderDispatchPersistenceGate(rootDir) {
       label: "Provider dispatch persistence approval",
       state: "approval_gated",
       evidencePath,
-      detail: "Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred.",
+      detail: "Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists with an updated_at trigger, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred.",
       nextActions: [
         "Keep PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false until route-level reservation-before-provider-call and duplicate replay behavior are tested.",
         "Approve either a per-channel dispatch child table or a tested canonical provider_result JSONB ledger before claiming channel-level exactly-once persistence.",
-        "Add an updated_at trigger or route-owned timestamp update contract before applying the migration.",
+        "During approved migration rollout, verify provider_dispatch_attempts_set_updated_at exists in the target project before enabling live dispatch.",
       ],
     });
   }
