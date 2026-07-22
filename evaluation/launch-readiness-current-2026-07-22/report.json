@@ -1,11 +1,11 @@
 {
   "schemaVersion": "safeclaw-launch-readiness-current/v3",
-  "generatedAt": "2026-07-22T08:58:59.562Z",
+  "generatedAt": "2026-07-22T10:33:10.691Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHeadAtGeneration": "39fd2aa9ba8f0a0459b2e06ece48d793218e83d1",
-  "productionCommit": "39fd2aa9ba8f0a0459b2e06ece48d793218e83d1",
-  "runtimeSmokeCommit": "39fd2aa9ba8f0a0459b2e06ece48d793218e83d1",
-  "evidenceHeadBeforeThisReport": "39fd2aa9ba8f0a0459b2e06ece48d793218e83d1",
+  "sourceHeadAtGeneration": "955b2c4d03a34dbb8b64a4a525e23b7091276b0d",
+  "productionCommit": "955b2c4d03a34dbb8b64a4a525e23b7091276b0d",
+  "runtimeSmokeCommit": "955b2c4d03a34dbb8b64a4a525e23b7091276b0d",
+  "evidenceHeadBeforeThisReport": "955b2c4d03a34dbb8b64a4a525e23b7091276b0d",
   "currentHeadIsEvidenceOnlyPending": false,
   "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
   "safeLaunchDemoClaimAllowed": true,
@@ -17,7 +17,7 @@
   "apiAsk": {
     "status": 200,
     "ok": true,
-    "elapsedMs": 20976
+    "elapsedMs": 20270
   },
   "scenario": {
     "companyName": "도시가스공사",
@@ -190,6 +190,7 @@
     "share": {
       "scopedGeneratedFixtureVerdict": "PASS_CURRENT_SOURCE_GENERATED_RESULT_FIXTURE",
       "exactSavedUserSessionReproduced": false,
+      "routeEvidenceBoundary": "invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result states are separate proof layers.",
       "open": "If a user-visible saved/generated session still feels mobile-like, reproduce that exact session with desktop width-ratio/grid metrics before product changes or broad PASS claims."
     }
   },
@@ -197,10 +198,10 @@
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "39fd2aa9ba8f0a0459b2e06ece48d793218e83d1",
+    "commitSha": "955b2c4d03a34dbb8b64a4a525e23b7091276b0d",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-r78wqm5oo-seojaehongs-projects.vercel.app",
-    "message": "ë°°í¬ ì»¤ë° ìë³ìë¥¼ íì¸íìµëë¤."
+    "deploymentUrl": "safeguard-contest-5hjfdsqnf-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
   }
 }

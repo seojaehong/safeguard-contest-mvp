@@ -1,12 +1,12 @@
 # Launch Readiness Current Boundary
 
-Generated: 2026-07-22T08:58:59.562Z
+Generated: 2026-07-22T10:33:10.691Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD at generation: `39fd2aa9ba8f0a0459b2e06ece48d793218e83d1`
+Source HEAD at generation: `955b2c4d03a34dbb8b64a4a525e23b7091276b0d`
 
-Production runtime smoke commit: `39fd2aa9ba8f0a0459b2e06ece48d793218e83d1`
+Production runtime smoke commit: `955b2c4d03a34dbb8b64a4a525e23b7091276b0d`
 
 Current HEAD is evidence-only pending relative to production: `false`
 
@@ -21,7 +21,7 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 `scripts/launch_readiness_audit.mjs` was run against production with `SAFETYGUARD_AUDIT_DISPATCH=false`.
 
 - `/api/ask`: 200 OK
-- elapsed: 20976 ms
+- elapsed: 20270 ms
 - dispatch call: not run
 - generated documents: 11 / 11
 - connection verdict: `PASS_CONNECTED_NO_DISPATCH` (7 connected, 0 bounded fallback, 0 check-required)
@@ -59,6 +59,7 @@ Route/page split alone is not accepted as the UX fix. The accepted structure is 
 - Documents scoped evidence verdict: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION`
 - Share generated fixture verdict: `PASS_CURRENT_SOURCE_GENERATED_RESULT_FIXTURE`
 - Exact saved user share session reproduced: `false`
+- Share route evidence boundary: invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result states are separate proof layers.
 
 ## Forbidden Claims
 
