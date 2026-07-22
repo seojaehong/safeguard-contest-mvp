@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `a02ab622b20fc10a1974dc8bdd54fa74da02e3e6`
+Source HEAD: `ffe12736bebfa07ed667d414723ca21ff6b1645a`
 
-Production `/api/build-info`: `264060d009b00f6489b7476dfdace033ef15e524`
+Production `/api/build-info`: `748d980b7b9db82d2b4e066cec1aab6260d50c85`
 
 Latest evidence commit live: `false`
 
@@ -14,11 +14,11 @@ Source head live pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `a02ab622b20fc10a1974dc8bdd54fa74da02e3e6`
+Live rollup source head: `ffe12736bebfa07ed667d414723ca21ff6b1645a`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `a02ab622b20fc10a1974dc8bdd54fa74da02e3e6` is an evidence-only refresh pushed after the live-exact artifact set. Production is still `264060d009b00f6489b7476dfdace033ef15e524`, and the live rollup remains exact for that deployed marker.
+Note: current HEAD `ffe12736bebfa07ed667d414723ca21ff6b1645a` is an evidence-only refresh pushed after the live-exact artifact set. Production is still `748d980b7b9db82d2b4e066cec1aab6260d50c85`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -82,14 +82,16 @@ Required first-task containment:
 2. refresh live rollup before claiming live-exact if production advances beyond the current live rollup head.
 3. use the KOSHA exact promotion packet as the bounded operator-review set and run scripts/kosha_exact_promotion_review_gate.mjs on the human review input before any exact-trust promotion.
 4. keep the next UI product wave framed as bounded IA/density: default exposure budget, selected-only Documents workbench, Documents shell ratio <= 3, and exact-session desktop Share workbench proof.
-5. keep UI follow-up scoped to reproduced exact-session desktop Share full-workbench perception issues while preserving the Documents bounded workbench shell-ratio <= 3 contract.
-6. promote the bounded-workbench current-source proof to live only after production /api/build-info reaches the product/evidence head and the live probe is rerun.
-7. reproduce an exact saved/generated Share session before using fixture or generated /workspace share evidence to close the user's exact Share complaint.
-8. treat the Share exact-session boundary as open until a concrete session URL/payload is provided; the current no-mutation boundary audit only proves route presence and missing exact evidence.
-9. keep Share UI evidence split by route: invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result state each need their own geometry before closing user-specific mobile-like complaints.
-10. keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven.
-11. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
-12. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
+5. keep Documents acceptance tied to simultaneous exposure, not page count: current status, core 3 launcher, selected document workbench, validation/recheck action, and local-scroll/drilldown for long source, section, evidence, and supporting-9 content.
+6. keep Share acceptance split by viewport and session kind: desktop must be a 2-3 region cockpit with selected language/message preview and send/export lock, while mobile single-column summaries are allowed only on mobile.
+7. keep UI follow-up scoped to reproduced exact-session desktop Share full-workbench perception issues while preserving the Documents bounded workbench shell-ratio <= 3 contract.
+8. promote the bounded-workbench current-source proof to live only after production /api/build-info reaches the product/evidence head and the live probe is rerun.
+9. reproduce an exact saved/generated Share session before using fixture or generated /workspace share evidence to close the user's exact Share complaint.
+10. treat the Share exact-session boundary as open until a concrete session URL/payload is provided; the current no-mutation boundary audit only proves route presence and missing exact evidence.
+11. keep Share UI evidence split by route: invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result state each need their own geometry before closing user-specific mobile-like complaints.
+12. keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven.
+13. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
+14. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
 
 ## KOSHA Candidate Boundary
 

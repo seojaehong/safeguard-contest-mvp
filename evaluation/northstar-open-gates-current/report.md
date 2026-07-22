@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-22T11:15:49.000Z
-Source SHA: `a02ab622b20fc10a1974dc8bdd54fa74da02e3e6`
+Generated at: 2026-07-22T11:21:03.047Z
+Source SHA: `ffe12736bebfa07ed667d414723ca21ff6b1645a`
 Overall: `open`
 
 ## Gate Matrix
@@ -44,8 +44,10 @@ Overall: `open`
 - ui_documents_share_cockpit: Keep the production live geometry recorded for first-action Documents/Share cockpits and 12-document cockpit slices; do not phrase it as documents page height fixed or expand it into a full 12-document field-first authoring claim.
 - ui_documents_share_cockpit: Keep raw textarea and deeper row/all-document authoring as secondary drilldown follow-up; selected-editor evidence/recheck CTA is live-proven before raw textarea, but the full 12-document edit surface itself is not claimed short.
 - ui_documents_share_cockpit: Keep the next Documents product wave framed as bounded IA/density with a default exposure budget and local workbench shell ratio target <= 3; do not use route split alone as the fix.
+- ui_documents_share_cockpit: Keep Documents acceptance focused on simultaneous exposure: first viewport shows current status, core 3 launcher, selected document workbench, validation/recheck action, and only local-scroll/drilldown for long source, section, evidence, and supporting-9 content.
 - ui_documents_share_cockpit: Keep route/page split framed as orientation only; the UX contract is three-step app shell plus first-viewport cockpit plus bounded drilldown/detail containment.
 - ui_documents_share_cockpit: Keep /share generated-result and desktop full-workbench perception refinements as separate gates with desktop width-ratio/grid metrics when user-visible sessions reproduce the complaint; /share/[sessionId] recipient cockpit geometry is live-proven for the invited-session fixture, not a broad desktop workbench polish claim.
+- ui_documents_share_cockpit: Keep Share desktop acceptance as a 2-3 region cockpit for recipient/channel/status/provenance, selected language/message preview, and send/export lock; mobile single-column summaries are allowed only under mobile breakpoints.
 - ui_documents_share_cockpit: Keep Share UI evidence split by route/state: invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result each need their own geometry before closing user-specific mobile-like complaints.
 - dispatch_standalone_cockpit: Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved.
 - share_result_fixture_cockpit: Keep real provider dispatch gated until persistent idempotency and provider-result persistence are approved and live verified.
