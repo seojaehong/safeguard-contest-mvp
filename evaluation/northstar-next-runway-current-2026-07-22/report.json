@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T16:08:12.511Z",
+  "generatedAt": "2026-07-22T16:12:03.502Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "ed677db72d4784c47aba8eb7fd33e94cc96a4d4e",
+  "sourceHead": "df097ae743eb26cc199f168fd5b7f3490905a3e7",
   "productionCommit": "ed677db72d4784c47aba8eb7fd33e94cc96a4d4e",
   "liveBuildInfo": {
     "ok": true,
@@ -15,12 +15,12 @@
     "deploymentUrl": "safeguard-contest-qvbrf0mog-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": true,
-  "currentHeadIsEvidenceOnlyPending": false,
-  "sourceHeadLivePending": false,
+  "latestEvidenceCommitLive": false,
+  "currentHeadIsEvidenceOnlyPending": true,
+  "sourceHeadLivePending": true,
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "ed677db72d4784c47aba8eb7fd33e94cc96a4d4e",
+  "liveExactEvidenceCommit": "df097ae743eb26cc199f168fd5b7f3490905a3e7",
   "liveRollupLiveCommit": "ed677db72d4784c47aba8eb7fd33e94cc96a4d4e",
   "liveRollupMatchesProduction": true,
   "artifacts": {
@@ -301,8 +301,8 @@
   },
   "shareExactSessionBoundary": {
     "verdict": "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
-    "sourceHead": "a02e5101fda10a830e610b543fb69d1dd87691a5",
-    "liveCommit": "a02e5101fda10a830e610b543fb69d1dd87691a5",
+    "sourceHead": "df097ae743eb26cc199f168fd5b7f3490905a3e7",
+    "liveCommit": "ed677db72d4784c47aba8eb7fd33e94cc96a4d4e",
     "exactSavedUserSessionReproduced": false,
     "exactSavedSessionRequiredForUserSpecificPass": true,
     "dbMutationPerformed": false,
