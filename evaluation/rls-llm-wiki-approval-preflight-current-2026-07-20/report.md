@@ -1,7 +1,7 @@
 # RLS / LLM Wiki Approval Preflight
 
-Generated: `2026-07-22T08:53:17.518Z`
-Source SHA: `b57d51df4245f898c35d41ae6f78c29536a0960c`
+Generated: `2026-07-22T11:38:45.879Z`
+Source SHA: `1a2ee6a973e3fb963cb616a425ca5735ccfee9ff`
 Overall: `approval_ready_open`
 Launch readiness: `false`
 DB mutation performed: `false`
