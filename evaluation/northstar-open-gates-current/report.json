@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-22T18:12:47.687Z",
-  "sourceSha": "f4385b028310843d86f05d695a78b5c8ba9a57b0",
+  "generatedAt": "2026-07-22T18:17:30.721Z",
+  "sourceSha": "1e28d04df134584caa3677f162a4797ee55d0285",
   "overall": "open",
   "gates": [
     {

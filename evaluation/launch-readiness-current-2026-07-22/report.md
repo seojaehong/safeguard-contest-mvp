@@ -1,12 +1,12 @@
 # Launch Readiness Current Boundary
 
-Generated: 2026-07-22T17:22:58.344Z
+Generated: 2026-07-22T18:17:18.883Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD at generation: `8a64c3e8147c4c71f118c42a09991f454dc055fc`
+Source HEAD at generation: `1e28d04df134584caa3677f162a4797ee55d0285`
 
-Production runtime smoke commit: `8a64c3e8147c4c71f118c42a09991f454dc055fc`
+Production runtime smoke commit: `1e28d04df134584caa3677f162a4797ee55d0285`
 
 Current HEAD is evidence-only pending relative to production: `false`
 
@@ -21,7 +21,7 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 `scripts/launch_readiness_audit.mjs` was run against production with `SAFETYGUARD_AUDIT_DISPATCH=false`.
 
 - `/api/ask`: 200 OK
-- elapsed: 25147 ms
+- elapsed: 21847 ms
 - dispatch call: not run
 - generated documents: 11 / 11
 - connection verdict: `PASS_CONNECTED_NO_DISPATCH` (7 connected, 0 bounded fallback, 0 check-required)
