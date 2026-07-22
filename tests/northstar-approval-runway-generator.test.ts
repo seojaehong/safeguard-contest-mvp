@@ -11,12 +11,26 @@ type ApprovalRunwayReport = {
   liveCommitAtDraft: string;
   launchReadiness: boolean;
   providerMessageSent: boolean;
+  viewportArchitectureGate: {
+    routeSplitAloneAcceptedAsFix: boolean;
+    acceptedStructure: string;
+    documentsContract: string[];
+    shareContract: string[];
+    requiredGeometry: string[];
+  };
   approvalGates: Array<{
     id: string;
     state: string;
     evidencePath: string;
     currentSafetyLock: string;
     forbiddenUntilApproved: string[];
+  }>;
+  launchControlNotices: Array<{
+    id: string;
+    state: string;
+    evidencePath: string;
+    currentSafetyLock: string;
+    forbiddenUntilProven: string[];
   }>;
 };
 
@@ -52,10 +66,13 @@ function createFixtureRoot(): { root: string; head: string } {
   writeJson(root, "evaluation/northstar-open-gates-current/report.json", {
     overall: "open",
     gates: [
+      { id: "final_99_gate", state: "notice", evidencePath: "evaluation\\final-99-gate-current-2026-07-22\\report.json" },
+      { id: "share_exact_saved_session_boundary", state: "notice", evidencePath: "evaluation\\share-exact-session-boundary-2026-07-22\\report.json" },
       { id: "provider_dispatch_persistence", state: "approval_gated", evidencePath: "evaluation\\provider-dispatch-idempotency-gate-2026-07-19\\report.json" },
       { id: "supabase_rls_launch_isolation", state: "approval_gated", evidencePath: "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json" },
       { id: "llm_wiki_publication", state: "approval_gated", evidencePath: "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json" },
       { id: "sif_embedding_runtime", state: "approval_gated", evidencePath: "evaluation\\sif-embedding-gate\\approval-preflight-report.json" },
+      { id: "kosha_exact_promotion_review_gate", state: "approval_gated", evidencePath: "evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\report.json" },
     ],
   });
   execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
@@ -80,14 +97,33 @@ describe("northstar approval runway generator", () => {
     expect(report.liveCommitAtDraft).toBe(head);
     expect(report.launchReadiness).toBe(false);
     expect(report.providerMessageSent).toBe(false);
+    expect(report.viewportArchitectureGate.routeSplitAloneAcceptedAsFix).toBe(false);
+    expect(report.viewportArchitectureGate.acceptedStructure).toContain("first-viewport cockpit");
+    expect(report.viewportArchitectureGate.acceptedStructure).toContain("selected-only bounded workbench");
+    expect(report.viewportArchitectureGate.documentsContract.join("\n")).toContain("core 3 document launcher");
+    expect(report.viewportArchitectureGate.documentsContract.join("\n")).toContain("supporting 9 documents stay collapsed");
+    expect(report.viewportArchitectureGate.shareContract.join("\n")).toContain("2-3 region cockpit");
+    expect(report.viewportArchitectureGate.shareContract.join("\n")).toContain("exact saved/generated /share/[sessionId]");
+    expect(report.viewportArchitectureGate.requiredGeometry.join("\n")).toContain("documents 1440x723 and 390x723");
+    expect(report.viewportArchitectureGate.requiredGeometry.join("\n")).toContain("desktop narrow-stack verdict");
     expect(report.approvalGates.map((gate) => gate.id)).toEqual([
       "provider_dispatch_persistence",
       "supabase_rls_launch_isolation",
       "llm_wiki_publication",
       "sif_embedding_runtime",
+      "kosha_exact_promotion_review_gate",
+    ]);
+    expect(report.launchControlNotices.map((gate) => gate.id)).toEqual([
+      "final_99_gate",
+      "share_exact_saved_session_boundary",
     ]);
     expect(report.approvalGates.find((gate) => gate.id === "provider_dispatch_persistence")?.currentSafetyLock).toBe("preview_only");
     expect(report.approvalGates.find((gate) => gate.id === "provider_dispatch_persistence")?.evidencePath).toBe("evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json");
+    expect(report.approvalGates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.currentSafetyLock).toBe("human_review_incomplete_no_mutation");
+    expect(report.launchControlNotices.find((gate) => gate.id === "final_99_gate")?.currentSafetyLock).toBe("pass_with_notice_not_clean_launch");
+    expect(report.launchControlNotices.find((gate) => gate.id === "share_exact_saved_session_boundary")?.forbiddenUntilProven).toContain(
+      "fixture/generated Share proof closes the exact saved /share/[sessionId] complaint",
+    );
   });
 
   it("fails closed when a required approval gate is missing", async () => {
@@ -120,5 +156,22 @@ describe("northstar approval runway generator", () => {
       openGatePath: path.join("evaluation", "northstar-open-gates-current", "report.json"),
       buildInfo: { commitSha: head },
     })).toThrow(/provider_dispatch_persistence must remain approval_gated/u);
+  });
+
+  it("fails closed when a launch-control notice is accidentally marked proven", async () => {
+    const { buildNorthstarApprovalRunway } = await loadRunwayModule();
+    const { root, head } = createFixtureRoot();
+    const openGatePath = path.join(root, "evaluation", "northstar-open-gates-current", "report.json");
+    const openGate = JSON.parse(fs.readFileSync(openGatePath, "utf8")) as { gates: Array<{ id: string; state: string }> };
+    const exactShareGate = openGate.gates.find((gate) => gate.id === "share_exact_saved_session_boundary");
+    if (!exactShareGate) throw new Error("fixture missing exact share gate");
+    exactShareGate.state = "proven";
+    fs.writeFileSync(openGatePath, `${JSON.stringify(openGate, null, 2)}\n`, "utf8");
+
+    expect(() => buildNorthstarApprovalRunway({
+      rootDir: root,
+      openGatePath: path.join("evaluation", "northstar-open-gates-current", "report.json"),
+      buildInfo: { commitSha: head },
+    })).toThrow(/share_exact_saved_session_boundary must remain notice/u);
   });
 });

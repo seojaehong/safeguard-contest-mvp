@@ -261,6 +261,15 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
         approvalNeeded: ["approve embedding cost and upload"],
         forbiddenUntilApproved: ["SIF vector retrieval production-active"],
       },
+      {
+        id: "kosha_exact_promotion_review_gate",
+        state: "approval_gated",
+        evidencePath: "evaluation/kosha-exact-promotion-review-gate-2026-07-22/report.json",
+        readyForOperatorReview: true,
+        currentSafetyLock: "human_review_incomplete_no_mutation",
+        approvalNeeded: ["complete every required candidate review checklist"],
+        forbiddenUntilApproved: ["KOSHA exact-trust registry expanded beyond current exact pins"],
+      },
     ],
   });
   writeJson(root, "evaluation/hermes-openclaw-runtime-current-gate-2026-07-20/report.json", {
@@ -561,6 +570,7 @@ describe("northstar next runway generator", () => {
       "supabase_rls_launch_isolation",
       "llm_wiki_publication",
       "sif_embedding_runtime",
+      "kosha_exact_promotion_review_gate",
     ]);
     expect(report.koshaNextExactCandidateAudit).toMatchObject({
       verdict: "NEXT_EXACT_TRUST_CANDIDATES_IDENTIFIED_APPROVAL_FREE",

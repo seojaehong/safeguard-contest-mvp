@@ -27,6 +27,15 @@ type ApprovalRunwayGate = {
   batchCount?: number;
 };
 
+type LaunchControlNotice = {
+  id: string;
+  state: GateState;
+  evidencePath: string;
+  currentSafetyLock: string;
+  evidenceNeeded: string[];
+  forbiddenUntilProven: string[];
+};
+
 type ApprovalRunwayReport = {
   schemaVersion: string;
   overall: string;
@@ -36,7 +45,15 @@ type ApprovalRunwayReport = {
   embeddingGenerated: boolean;
   uploaded: boolean;
   routeSplitAloneAcceptedAsUxFix: boolean;
+  viewportArchitectureGate: {
+    routeSplitAloneAcceptedAsFix: boolean;
+    acceptedStructure: string;
+    documentsContract: string[];
+    shareContract: string[];
+    requiredGeometry: string[];
+  };
   approvalGates: ApprovalRunwayGate[];
+  launchControlNotices: LaunchControlNotice[];
   operatorSequence: string[];
   nonApprovalWorkStillAllowed: string[];
   completionBoundary: string;
@@ -57,6 +74,11 @@ describe("northstar approval runway", () => {
       "supabase_rls_launch_isolation",
       "llm_wiki_publication",
       "sif_embedding_runtime",
+      "kosha_exact_promotion_review_gate",
+    ];
+    const noticeGateIds = [
+      "final_99_gate",
+      "share_exact_saved_session_boundary",
     ];
 
     expect(runway.schemaVersion).toBe("safeclaw-northstar-approval-runway/v1");
@@ -68,6 +90,7 @@ describe("northstar approval runway", () => {
     expect(runway.uploaded).toBe(false);
     expect(runway.routeSplitAloneAcceptedAsUxFix).toBe(false);
     expect(runway.approvalGates.map((gate) => gate.id)).toEqual(approvalGateIds);
+    expect(runway.launchControlNotices.map((gate) => gate.id)).toEqual(noticeGateIds);
 
     for (const gateId of approvalGateIds) {
       const runwayGate = runway.approvalGates.find((gate) => gate.id === gateId);
@@ -77,6 +100,15 @@ describe("northstar approval runway", () => {
       expect(runwayGate?.approvalNeeded.length, gateId).toBeGreaterThanOrEqual(2);
       expect(runwayGate?.forbiddenUntilApproved.length, gateId).toBeGreaterThanOrEqual(2);
       expect(openGateEntry?.state, gateId).toBe("approval_gated");
+      expect(runwayGate?.evidencePath, gateId).toBe(openGateEntry?.evidencePath.replaceAll("\\", "/"));
+    }
+    for (const gateId of noticeGateIds) {
+      const runwayGate = runway.launchControlNotices.find((gate) => gate.id === gateId);
+      const openGateEntry = openGate.gates.find((gate) => gate.id === gateId);
+      expect(runwayGate?.state, gateId).toBe("notice");
+      expect(runwayGate?.evidenceNeeded.length, gateId).toBeGreaterThanOrEqual(2);
+      expect(runwayGate?.forbiddenUntilProven.length, gateId).toBeGreaterThanOrEqual(2);
+      expect(openGateEntry?.state, gateId).toBe("notice");
       expect(runwayGate?.evidencePath, gateId).toBe(openGateEntry?.evidencePath.replaceAll("\\", "/"));
     }
   });
@@ -101,6 +133,24 @@ describe("northstar approval runway", () => {
     expect(byId.get("sif_embedding_runtime")?.corpusCount).toBe(6032);
     expect(byId.get("sif_embedding_runtime")?.batchCount).toBe(61);
     expect(byId.get("sif_embedding_runtime")?.forbiddenUntilApproved.join("\n")).toContain("SIF vector retrieval production-active");
+
+    expect(byId.get("kosha_exact_promotion_review_gate")?.currentSafetyLock).toBe("human_review_incomplete_no_mutation");
+    expect(byId.get("kosha_exact_promotion_review_gate")?.forbiddenUntilApproved.join("\n")).toContain("exact-trust registry expanded");
+    expect(byId.get("kosha_exact_promotion_review_gate")?.forbiddenUntilApproved.join("\n")).toContain("checklist completion alone");
+  });
+
+  it("records the documents/share viewport architecture contract separately from route count", () => {
+    const runway = readJson<ApprovalRunwayReport>("evaluation/northstar-approval-runway-2026-07-21/report.json");
+
+    expect(runway.viewportArchitectureGate.routeSplitAloneAcceptedAsFix).toBe(false);
+    expect(runway.viewportArchitectureGate.acceptedStructure).toContain("first-viewport cockpit");
+    expect(runway.viewportArchitectureGate.acceptedStructure).toContain("selected-only bounded workbench");
+    expect(runway.viewportArchitectureGate.documentsContract.join("\n")).toContain("supporting 9 documents stay collapsed");
+    expect(runway.viewportArchitectureGate.documentsContract.join("\n")).toContain("only one selected document");
+    expect(runway.viewportArchitectureGate.shareContract.join("\n")).toContain("2-3 region cockpit");
+    expect(runway.viewportArchitectureGate.shareContract.join("\n")).toContain("exact saved/generated /share/[sessionId]");
+    expect(runway.viewportArchitectureGate.requiredGeometry.join("\n")).toContain("documents 1440x723 and 390x723");
+    expect(runway.viewportArchitectureGate.requiredGeometry.join("\n")).toContain("desktop narrow-stack verdict");
   });
 
   it("keeps non-approval work separate from runtime launch approval", () => {

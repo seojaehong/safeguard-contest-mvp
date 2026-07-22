@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-northstar-approval-runway/v1",
-  "generatedAt": "2026-07-22T11:50:25.557Z",
-  "sourceHeadAtDraft": "63c8784ca4b09351487e59fad1fa24af4ec7786d",
-  "liveCommitAtDraft": "63c8784ca4b09351487e59fad1fa24af4ec7786d",
+  "generatedAt": "2026-07-22T13:16:24.008Z",
+  "sourceHeadAtDraft": "28fef06ada4eea925cbb9ba52d5eb72e96c9944a",
+  "liveCommitAtDraft": "28fef06ada4eea925cbb9ba52d5eb72e96c9944a",
   "overall": "approval_runway_ready_open",
   "launchReadiness": false,
   "dbMutationPerformed": false,
@@ -10,6 +10,26 @@
   "embeddingGenerated": false,
   "uploaded": false,
   "routeSplitAloneAcceptedAsUxFix": false,
+  "viewportArchitectureGate": {
+    "id": "documents_share_viewport_architecture",
+    "routeSplitAloneAcceptedAsFix": false,
+    "acceptedStructure": "three-step shell plus first-viewport cockpit plus selected-only bounded workbench plus progressive drilldown/local scroll",
+    "documentsContract": [
+      "first viewport shows current status, core 3 document launcher, selected document, review state, and next action",
+      "supporting 9 documents stay collapsed as library/index/drawer content",
+      "only one selected document editor/preview is mounted as the default workbench",
+      "long source text, evidence, and section details move into local scroll, drawer, modal, or detail route"
+    ],
+    "shareContract": [
+      "desktop uses a 2-3 region cockpit for recipients, channel/language controls, provenance/status, selected preview, and send/export lock",
+      "mobile single-column stack is allowed only below the mobile breakpoint",
+      "exact saved/generated /share/[sessionId] requires a concrete saved session URL or approved safe creation flow before user-specific PASS"
+    ],
+    "requiredGeometry": [
+      "documents 1440x723 and 390x723 first actionable editor/control y, body/root scroll split, sticky overlap, selected editor count",
+      "share 1440x723 and 390x723 x-region count, first action y, preview/status visibility, page height ratio, desktop narrow-stack verdict"
+    ]
+  },
   "approvalGates": [
     {
       "id": "provider_dispatch_persistence",
@@ -83,14 +103,65 @@
         "embedding/upload completed",
         "broader corpus exact-publishing or DB persistence claim"
       ]
+    },
+    {
+      "id": "kosha_exact_promotion_review_gate",
+      "state": "approval_gated",
+      "evidencePath": "evaluation/kosha-exact-promotion-review-gate-2026-07-22/report.json",
+      "readyForOperatorReview": true,
+      "currentSafetyLock": "human_review_incomplete_no_mutation",
+      "approvalNeeded": [
+        "complete every required candidate review checklist",
+        "record reviewer, reviewedAt, and humanConfirmed for each candidate",
+        "seek separate explicit approval before exact-trust registry changes"
+      ],
+      "forbiddenUntilApproved": [
+        "KOSHA exact-trust registry expanded beyond current exact pins",
+        "operator checklist completion alone approves exact-trust promotion",
+        "exact registry write artifact created before separate approval"
+      ]
+    }
+  ],
+  "launchControlNotices": [
+    {
+      "id": "final_99_gate",
+      "state": "notice",
+      "evidencePath": "evaluation/final-99-gate-current-2026-07-22/report.json",
+      "currentSafetyLock": "pass_with_notice_not_clean_launch",
+      "evidenceNeeded": [
+        "secure SAFEGUARD_AUTH_TOKEN operator run for server save/reopen",
+        "approved provider dispatch run in an operator-owned workpack/share session"
+      ],
+      "forbiddenUntilProven": [
+        "fully automated launch readiness",
+        "admin server save/reopen completed live",
+        "Kakao/Band or all-provider dispatch approved and live-complete"
+      ]
+    },
+    {
+      "id": "share_exact_saved_session_boundary",
+      "state": "notice",
+      "evidencePath": "evaluation/share-exact-session-boundary-2026-07-22/report.json",
+      "currentSafetyLock": "missing_exact_saved_session_geometry",
+      "evidenceNeeded": [
+        "concrete production /share/[sessionId]?workerId=... URL or approved safe creation flow",
+        "desktop 1440x723/1440x900 and mobile 390x723 geometry with sessionKind=saved-exact"
+      ],
+      "forbiddenUntilProven": [
+        "fixture/generated Share proof closes the exact saved /share/[sessionId] complaint",
+        "exact saved user Share session reproduced",
+        "desktop mobile-like Share complaint closed for user-specific saved sessions"
+      ]
     }
   ],
   "operatorSequence": [
     "Confirm target production/staging project and secret-free evidence boundaries.",
+    "Close or explicitly carry launch-control notices before fully automated launch claims.",
     "Approve or reject RLS live catalog and tenant A/B read-only probes.",
     "Approve or reject LLM Wiki isolated publication canary.",
     "Approve or reject SIF embedding migration, cost, and upload as a separate gate.",
     "Approve or reject provider dispatch persistence migration and route-level replay tests.",
+    "Approve or reject KOSHA exact promotion only after human review is complete.",
     "Only after each gate has post-approval evidence, regenerate northstar-open-gates-current and northstar-live-rollup."
   ],
   "nonApprovalWorkStillAllowed": [
@@ -99,5 +170,5 @@
     "read-only live geometry probes",
     "approval packet validation and report hygiene"
   ],
-  "completionBoundary": "North Star remains open until approval-gated runtime/database/provider/vector publication checks are approved and verified. This runway is a launch-control artifact, not a launch-complete claim."
+  "completionBoundary": "North Star remains open until launch-control notices have exact evidence and approval-gated runtime/database/provider/vector/KOSHA promotion checks are approved and verified. This runway is a launch-control artifact, not a launch-complete claim."
 }

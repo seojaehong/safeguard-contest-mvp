@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `d79f4893360e5e88326f4b8770cef67dbb45826e`
+Source HEAD: `28fef06ada4eea925cbb9ba52d5eb72e96c9944a`
 
-Production `/api/build-info`: `d79f4893360e5e88326f4b8770cef67dbb45826e`
+Production `/api/build-info`: `28fef06ada4eea925cbb9ba52d5eb72e96c9944a`
 
 Latest evidence commit live: `true`
 
@@ -14,7 +14,7 @@ Source head live pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `d79f4893360e5e88326f4b8770cef67dbb45826e`
+Live rollup source head: `28fef06ada4eea925cbb9ba52d5eb72e96c9944a`
 
 Live rollup matches production: `true`
 
@@ -50,6 +50,7 @@ These require explicit approval before runtime mutation or live claims:
 | supabase_rls_launch_isolation | `approval_gated` | `read_only_preflight` | approve authoritative Supabase project and credential provenance; run read-only live catalog capture; run disposable tenant A/B negative matrix; verify Storage object isolation and service-role route invariants |
 | llm_wiki_publication | `approval_gated` | `candidate_unpublished` | approve final DDL, RPC, grants, and append-only ledger; approve graph pointer and publication threat model; run isolated publication canary with atomicity, idempotency, rollback, and leak tests |
 | sif_embedding_runtime | `approval_gated` | `approval_held_no_vectors` | approve SIF-only embedding migration; approve embedding cost and upload; run post-upload vector runtime verification; keep SAFETY_REFERENCE_VECTOR_SEARCH disabled until upload is verified |
+| kosha_exact_promotion_review_gate | `approval_gated` | `human_review_incomplete_no_mutation` | complete every required candidate review checklist; record reviewer, reviewedAt, and humanConfirmed for each candidate; seek separate explicit approval before exact-trust registry changes |
 
 ## UI/UX Follow-Up Boundary
 
