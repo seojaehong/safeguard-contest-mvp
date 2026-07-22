@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-22T17:12:52.567Z
-Source SHA: `0e7fd41f89d9f71ca515c6fa7f6bd89e36a67f0a`
+Generated at: 2026-07-22T17:15:46.545Z
+Source SHA: `1b82bd6bd3ac79b5205d4cf79ede8d634f2b436f`
 Overall: `open`
 
 ## Gate Matrix
@@ -15,8 +15,8 @@ Overall: `open`
 | share_result_fixture_cockpit | proven | evaluation\share-result-drilldown-2026-07-21\report.json | Generated provider-result fixture proof is bounded: desktop page 900/900, result panel 606px with 2 x-ranges, mobile summary/preview/CTA/result inside 844px, closed summary shows channel status, dispatch POST count 1, provider live dispatch unclaimed. |
 | share_exact_saved_session_boundary | notice | evaluation\share-exact-session-boundary-2026-07-22\report.json | Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass. Safe missing-session read verdict is RED_SERVER_ERROR_SHAPED_MISSING_SESSION and invalid-id read verdict is PASS_INVALID_ID_FAIL_CLOSED; both remain separate from exact saved-session geometry. Public share storage readiness is RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION with share-session read error PGRST205. Storage approval packet is APPROVAL_REQUIRED_PUBLIC_SHARE_SESSION_STORAGE_MIGRATION_NO_MUTATION; operator approval required is true and share-session creation would insert storage is true. |
 | provider_dispatch_persistence | approval_gated | evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json | Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred. |
-| supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Read-only RLS approval preflight passed at source SHA 6cea28a5ba545e3e7e2c9662cc7654674869721f, but live RLS catalog and tenant A/B isolation are not proven. |
-| llm_wiki_publication | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 6cea28a5ba545e3e7e2c9662cc7654674869721f. |
+| supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Read-only RLS approval preflight passed at source SHA 1b82bd6bd3ac79b5205d4cf79ede8d634f2b436f, but live RLS catalog and tenant A/B isolation are not proven. |
+| llm_wiki_publication | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 1b82bd6bd3ac79b5205d4cf79ede8d634f2b436f. |
 | sif_embedding_runtime | approval_gated | evaluation\sif-embedding-gate\approval-preflight-report.json | SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 6cea28a5ba545e3e7e2c9662cc7654674869721f. |
 | kosha_exact_trust_registry | proven | evaluation\kosha-current-northstar-regression-2026-07-22\report.json | Current source confirms 3 exact KOSHA pins (D-C-13-2026, D-C-7-2026, B-E-10-2026), structured materialization, grounded generation, and live harness quality: 226 tests plus typecheck PASS; no DB/schema/Supabase/embedding writes. |
 | kosha_exact_promotion_review_gate | approval_gated | evaluation\kosha-exact-promotion-review-gate-2026-07-22\report.json | Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. |
