@@ -1,12 +1,12 @@
 # Workspace Bounded Workbench Current Gate
 
-Checked at: 2026-07-22T08:03:18.033Z
+Checked at: 2026-07-22T09:02:29.400Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD: `d57d5a9c76d35a2b22e5a094b29361ddba211ec8`
+Source HEAD: `2ced9a0315121d616704f6ed9713ddb61cf45062`
 
-Production `/api/build-info`: `d57d5a9c76d35a2b22e5a094b29361ddba211ec8`
+Production `/api/build-info`: `2ced9a0315121d616704f6ed9713ddb61cf45062`
 
 Verdict: `PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP`
 
@@ -30,13 +30,13 @@ Allowed claim: measured routes can pass the scoped bounded-workbench contract wh
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | /documents?theme=day | day | default | 1440x723 | PASS | PASS | PASS | PASS | 1.07 | 4.28 | 452 | 709 | 1 | 1 | false | false | 0 | false |
 | /documents?theme=day | day | selected-riskAssessmentDraft | 1440x723 | PASS | PASS | PASS | PASS | 1.07 | 4.28 | 452 | 709 | 1 | 1 | false | false | 0 | false |
-| /documents?theme=day | day | supporting-9-expanded-index | 1440x723 | PASS | PASS | PASS | PASS | 1.07 | 4.28 | 409 | 666 | 1 | 1 | true | false | 0 | false |
+| /documents?theme=day | day | supporting-9-expanded-index | 1440x723 | PASS | PASS | PASS | PASS | 1.07 | 4.28 | 405 | 662 | 1 | 1 | true | false | 0 | false |
 | /documents?theme=day | day | default | 390x723 | PASS | PASS | PASS | PASS | 1 | 4.25 | 528 | 654 | 1 | 1 | false | false | 0 | false |
 | /documents?theme=day | day | selected-riskAssessmentDraft | 390x723 | PASS | PASS | PASS | PASS | 1 | 4.25 | 528 | 654 | 1 | 1 | false | false | 0 | false |
 | /documents?theme=day | day | supporting-9-expanded-index | 390x723 | PASS | PASS | PASS | PASS | 1 | 4.25 | 528 | 654 | 1 | 1 | false | false | 0 | false |
 | /documents?theme=night | night | default | 1440x723 | PASS | PASS | PASS | PASS | 1.07 | 4.28 | 452 | 709 | 1 | 1 | false | false | 0 | false |
 | /documents?theme=night | night | selected-riskAssessmentDraft | 1440x723 | PASS | PASS | PASS | PASS | 1.07 | 4.28 | 452 | 709 | 1 | 1 | false | false | 0 | false |
-| /documents?theme=night | night | supporting-9-expanded-index | 1440x723 | PASS | PASS | PASS | PASS | 1.07 | 4.28 | 414 | 671 | 1 | 1 | true | false | 0 | false |
+| /documents?theme=night | night | supporting-9-expanded-index | 1440x723 | PASS | PASS | PASS | PASS | 1.07 | 4.28 | 409 | 666 | 1 | 1 | true | false | 0 | false |
 | /documents?theme=night | night | default | 390x723 | PASS | PASS | PASS | PASS | 1 | 4.25 | 528 | 654 | 1 | 1 | false | false | 0 | false |
 | /documents?theme=night | night | selected-riskAssessmentDraft | 390x723 | PASS | PASS | PASS | PASS | 1 | 4.25 | 528 | 654 | 1 | 1 | false | false | 0 | false |
 | /documents?theme=night | night | supporting-9-expanded-index | 390x723 | PASS | PASS | PASS | PASS | 1 | 4.25 | 528 | 654 | 1 | 1 | false | false | 0 | false |
