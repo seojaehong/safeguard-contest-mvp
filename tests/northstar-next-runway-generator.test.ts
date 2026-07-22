@@ -27,6 +27,16 @@ type NextRunwayReport = {
     embeddingGenerationPerformed: boolean;
     forbiddenClaims: string[];
   };
+  koshaExactPromotionPacket: {
+    verdict: string;
+    candidateCount: number;
+    selectedStableKeys: string[];
+    mutationPerformed: boolean;
+    dbMutationPerformed: boolean;
+    embeddingGenerationPerformed: boolean;
+    exactPromotionPerformed: boolean;
+    forbiddenClaims: string[];
+  };
   nextSafeWorkWithoutApproval: string[];
 };
 
@@ -139,6 +149,21 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       "The metadata-verified non-exact candidates are already exact production evidence.",
     ],
   });
+  writeJson(root, "evaluation/kosha-exact-promotion-packet-2026-07-22/report.json", {
+    verdict: "EXACT_PROMOTION_PACKET_READY_FOR_OPERATOR_REVIEW",
+    mutationPerformed: false,
+    dbMutationPerformed: false,
+    embeddingGenerationPerformed: false,
+    exactPromotionPerformed: false,
+    candidateCount: 8,
+    selectionPolicy: {
+      selectedStableKeys: ["D-C-10", "D-C-11", "A-G-1", "A-G-15", "B-E-11", "B-E-9", "D-C-4", "E-G-4"],
+    },
+    forbiddenClaims: [
+      "These candidates are already exact production evidence.",
+      "The exact-kosha registry was expanded by this packet.",
+    ],
+  });
   writeJson(root, "evaluation/sif-embedding-gate/approval-preflight-report.json", {
     approvalHeld: true,
     dbMutationPerformed: false,
@@ -197,8 +222,20 @@ describe("northstar next runway generator", () => {
     expect(report.koshaNextExactCandidateAudit.forbiddenClaims).toContain(
       "The metadata-verified non-exact candidates are already exact production evidence.",
     );
+    expect(report.koshaExactPromotionPacket).toMatchObject({
+      verdict: "EXACT_PROMOTION_PACKET_READY_FOR_OPERATOR_REVIEW",
+      candidateCount: 8,
+      selectedStableKeys: ["D-C-10", "D-C-11", "A-G-1", "A-G-15", "B-E-11", "B-E-9", "D-C-4", "E-G-4"],
+      mutationPerformed: false,
+      dbMutationPerformed: false,
+      embeddingGenerationPerformed: false,
+      exactPromotionPerformed: false,
+    });
+    expect(report.koshaExactPromotionPacket.forbiddenClaims).toContain(
+      "The exact-kosha registry was expanded by this packet.",
+    );
     expect(report.nextSafeWorkWithoutApproval).toContain(
-      "use the KOSHA next exact candidate audit to select a bounded metadata-verified candidate set before any exact-trust promotion",
+      "use the KOSHA exact promotion packet as the bounded operator-review set before any exact-trust promotion",
     );
   });
 

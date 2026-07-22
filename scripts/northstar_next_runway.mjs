@@ -21,6 +21,7 @@ const ARTIFACTS = Object.freeze({
   hermesOpenclawRuntime: path.join("evaluation", "hermes-openclaw-runtime-current-gate-2026-07-20", "report.json"),
   launchReadiness: path.join("evaluation", "launch-readiness-current-2026-07-22", "report.json"),
   koshaNextExactCandidateAudit: path.join("evaluation", "kosha-next-exact-candidate-audit-2026-07-22", "report.json"),
+  koshaExactPromotionPacket: path.join("evaluation", "kosha-exact-promotion-packet-2026-07-22", "report.json"),
   rlsLlmWikiApprovalPreflight: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
   approvalRunway: path.join("evaluation", "northstar-approval-runway-2026-07-21", "report.json"),
   sifEmbeddingPreflight: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
@@ -216,6 +217,27 @@ function koshaCandidateAuditSummary(koshaCandidateAudit) {
 }
 
 /**
+ * @param {unknown} koshaPromotionPacket
+ */
+function koshaPromotionPacketSummary(koshaPromotionPacket) {
+  if (!isRecord(koshaPromotionPacket)) return {};
+  return {
+    verdict: asString(koshaPromotionPacket.verdict),
+    candidateCount: typeof koshaPromotionPacket.candidateCount === "number" ? koshaPromotionPacket.candidateCount : undefined,
+    selectedStableKeys: isRecord(koshaPromotionPacket.selectionPolicy) && Array.isArray(koshaPromotionPacket.selectionPolicy.selectedStableKeys)
+      ? koshaPromotionPacket.selectionPolicy.selectedStableKeys.map(asString).filter(Boolean)
+      : [],
+    mutationPerformed: asBoolean(koshaPromotionPacket.mutationPerformed),
+    dbMutationPerformed: asBoolean(koshaPromotionPacket.dbMutationPerformed),
+    embeddingGenerationPerformed: asBoolean(koshaPromotionPacket.embeddingGenerationPerformed),
+    exactPromotionPerformed: asBoolean(koshaPromotionPacket.exactPromotionPerformed),
+    forbiddenClaims: Array.isArray(koshaPromotionPacket.forbiddenClaims)
+      ? koshaPromotionPacket.forbiddenClaims.map(asString).filter(Boolean)
+      : [],
+  };
+}
+
+/**
  * @param {{ rootDir: string, buildInfo: unknown, generatedAt?: string }} options
  */
 export function buildNorthstarNextRunway(options) {
@@ -226,6 +248,7 @@ export function buildNorthstarNextRunway(options) {
   const hermes = readJson(options.rootDir, ARTIFACTS.hermesOpenclawRuntime);
   const launch = readJson(options.rootDir, ARTIFACTS.launchReadiness);
   const koshaCandidateAudit = readJson(options.rootDir, ARTIFACTS.koshaNextExactCandidateAudit);
+  const koshaPromotionPacket = readJson(options.rootDir, ARTIFACTS.koshaExactPromotionPacket);
   const sif = readJson(options.rootDir, ARTIFACTS.sifEmbeddingPreflight);
   const liveExactEvidenceCommit = isRecord(liveRollup) ? asString(liveRollup.head) : "";
   const liveRollupLiveCommit = isRecord(liveRollup) && isRecord(liveRollup.liveBuildInfo)
@@ -254,6 +277,7 @@ export function buildNorthstarNextRunway(options) {
     provenCurrentState: [
       "live_harness_quality",
       "kosha_exact_trust_registry",
+      "kosha_exact_promotion_packet_ready_for_review",
       "ui_documents_share_cockpit",
       "dispatch_standalone_cockpit",
       "share_result_fixture_cockpit",
@@ -282,11 +306,12 @@ export function buildNorthstarNextRunway(options) {
     },
     hermesOpenclaw: hermesSummary(hermes),
     koshaNextExactCandidateAudit: koshaCandidateAuditSummary(koshaCandidateAudit),
+    koshaExactPromotionPacket: koshaPromotionPacketSummary(koshaPromotionPacket),
     sifEmbeddingRuntime: sifSummary(sif),
     nextSafeWorkWithoutApproval: [
       "refresh source/live exact evidence when production marker advances to the evidence-only head",
       "refresh live rollup before claiming live-exact if production advances beyond the current live rollup head",
-      "use the KOSHA next exact candidate audit to select a bounded metadata-verified candidate set before any exact-trust promotion",
+      "use the KOSHA exact promotion packet as the bounded operator-review set before any exact-trust promotion",
       "keep UI follow-up scoped to selected-editor/detail readability or reproduced desktop share perception issues",
       "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
       "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
@@ -337,6 +362,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Live harness quality is proven.
 - KOSHA exact trust registry is proven for the accepted exact-trust slice.
 - KOSHA next exact candidate audit identifies the 234-item current native technical-support subset and 231 metadata-verified non-exact candidates without mutation.
+- KOSHA exact promotion packet selects a bounded operator-review set without exact-trust registry mutation.
 - Documents and Share cockpit UI is proven for the current evidence scope.
 - Standalone Dispatch cockpit is proven for the current evidence scope.
 - Generated Share result fixture cockpit is proven without claiming real provider dispatch.
@@ -374,7 +400,9 @@ ${report.nextSafeWorkWithoutApproval.map((item, index) => `${index + 1}. ${item}
 - Exact trust remains proven only for the accepted exact pins.
 - Candidate pool: ${report.koshaNextExactCandidateAudit.acceptedSubsetItems || "unknown"} current native technical-support items.
 - Metadata-verified non-exact candidates: ${report.koshaNextExactCandidateAudit.metadataVerifiedNotExact || "unknown"}.
+- Operator-review packet candidates: ${report.koshaExactPromotionPacket.candidateCount || "unknown"} (${Array.isArray(report.koshaExactPromotionPacket.selectedStableKeys) ? report.koshaExactPromotionPacket.selectedStableKeys.join(", ") : "unknown"}).
 - Mutation performed by candidate audit: ${report.koshaNextExactCandidateAudit.mutationPerformed === true}.
+- Exact promotion performed by packet: ${report.koshaExactPromotionPacket.exactPromotionPerformed === true}.
 - Forbidden claim remains: metadata-verified candidates are not exact production evidence until separately promoted through immutable acquisition/review.
 `;
 }
