@@ -19358,6 +19358,13 @@ body:has(.safeclaw-landing) :is(
   overflow: visible;
 }
 
+.safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-documents-workbench {
+  display: grid;
+  width: min(100% - 24px, 1180px);
+  margin: 8px auto 0;
+  gap: 8px;
+}
+
 .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] :is(
   .safeclaw-doc-index,
   .safeclaw-doc-primary,
@@ -20518,13 +20525,42 @@ body:has(.safeclaw-landing) :is(
     margin-top: 8px;
   }
 
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-documents-workbench {
+    width: min(100% - 32px, 1360px);
+    grid-template-columns: minmax(220px, 252px) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-documents-workbench .safeclaw-document-cockpit,
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-documents-workbench .workpack-shell {
+    width: 100%;
+    margin-top: 0;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-documents-workbench .safeclaw-mobile-document-priority {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    max-height: min(448px, calc(100vh - 260px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-documents-workbench .safeclaw-mobile-document-priority > span,
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-documents-workbench .safeclaw-mobile-document-priority > h2,
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-documents-workbench .safeclaw-mobile-core-list,
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-documents-workbench .safeclaw-mobile-document-details {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-mobile-document-priority {
     gap: 8px;
     padding: 10px;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .workpack-shell {
-    max-height: min(386px, calc(100vh - 334px));
+    max-height: min(448px, calc(100vh - 260px));
     margin-top: 8px;
     overflow-y: auto;
     overscroll-behavior: contain;

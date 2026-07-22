@@ -964,19 +964,21 @@ export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
           ) : null}
         </section>
       ) : null}
-      <DocumentCockpit
-        data={current.data}
-        selectedDocumentKey={selectedDocumentKey}
-        onSelectDocument={selectDocument}
-      />
-      <WorkpackEditor
-        data={current.data}
-        generationFingerprint={current.generationFingerprint}
-        focusToken={focusToken}
-        requestedDocumentKey={requestedDocumentKey}
-        onSelectedDocumentChange={setSelectedDocumentKey}
-        onDeliverablesChange={updateCurrentDeliverables}
-      />
+      <section className="safeclaw-documents-workbench" aria-label="선택 문서 작업대">
+        <DocumentCockpit
+          data={current.data}
+          selectedDocumentKey={selectedDocumentKey}
+          onSelectDocument={selectDocument}
+        />
+        <WorkpackEditor
+          data={current.data}
+          generationFingerprint={current.generationFingerprint}
+          focusToken={focusToken}
+          requestedDocumentKey={requestedDocumentKey}
+          onSelectedDocumentChange={setSelectedDocumentKey}
+          onDeliverablesChange={updateCurrentDeliverables}
+        />
+      </section>
     </>
   );
 }

@@ -727,12 +727,14 @@ describe("documents editor layout", () => {
       const details = document.querySelector<HTMLDetailsElement>(".safeclaw-mobile-document-details");
       const banner = document.querySelector(".safeclaw-current-workpack");
       const editorWorkspace = document.querySelector('[data-testid="workpack-editor-workspace"]');
-      if (!cockpit || !index || !primary || !exportPanel || !compactLauncher || !coreList || !details || !banner || !editorWorkspace) {
+      const workbench = document.querySelector(".safeclaw-documents-workbench");
+      if (!cockpit || !index || !primary || !exportPanel || !compactLauncher || !coreList || !details || !banner || !editorWorkspace || !workbench) {
         throw new Error("Missing desktop document cockpit target");
       }
 
       const cockpitStyle = getComputedStyle(cockpit);
       const launcherStyle = getComputedStyle(compactLauncher);
+      const workbenchStyle = getComputedStyle(workbench);
       const indexRect = index.getBoundingClientRect();
       const primaryRect = primary.getBoundingClientRect();
       const exportRect = exportPanel.getBoundingClientRect();
@@ -740,7 +742,11 @@ describe("documents editor layout", () => {
       const coreRect = coreList.getBoundingClientRect();
       const detailsRect = details.getBoundingClientRect();
       const editorRect = editorWorkspace.getBoundingClientRect();
+      const workbenchRect = workbench.getBoundingClientRect();
       return {
+        workbenchDisplay: workbenchStyle.display,
+        workbenchColumns: workbenchStyle.gridTemplateColumns.split(" ").filter(Boolean).length,
+        workbenchWidth: Math.round(workbenchRect.width),
         cockpitDisplay: cockpitStyle.display,
         launcherDisplay: launcherStyle.display,
         cockpitText: cockpit.textContent || "",
@@ -758,13 +764,19 @@ describe("documents editor layout", () => {
         launcherBottom: Math.round(launcherRect.bottom),
         coreRight: Math.round(coreRect.right),
         detailsLeft: Math.round(detailsRect.left),
+        launcherRight: Math.round(launcherRect.right),
         editorTop: Math.round(editorRect.top),
+        editorLeft: Math.round(editorRect.left),
+        editorRight: Math.round(editorRect.right),
         coreButtons: coreList.querySelectorAll("button").length,
         detailFacts: compactLauncher.querySelectorAll("[data-testid='mobile-submission-facts'] dd").length,
         bannerWorkspaceCtas: banner.querySelectorAll('a[href="/workspace"]').length
       };
     });
 
+    expect(contract.workbenchDisplay).toBe("grid");
+    expect(contract.workbenchColumns).toBe(2);
+    expect(contract.workbenchWidth).toBeGreaterThanOrEqual(1040);
     expect(contract.cockpitDisplay).toBe("block");
     expect(contract.launcherDisplay).toBe("grid");
     expect(contract.indexDisplay).toBe("none");
@@ -774,9 +786,9 @@ describe("documents editor layout", () => {
     expect(contract.detailFacts).toBe(3);
     expect(contract.compactHeading).toBe("핵심 3종");
     expect(contract.detailsOpen).toBe(false);
-    expect(contract.coreRight).toBeLessThanOrEqual(contract.detailsLeft);
-    expect(contract.editorTop).toBeGreaterThan(contract.launcherBottom);
-    expect(contract.editorTop - contract.launcherBottom).toBeLessThanOrEqual(48);
+    expect(contract.editorLeft).toBeGreaterThanOrEqual(contract.launcherRight);
+    expect(Math.abs(contract.editorTop - contract.launcherTop)).toBeLessThanOrEqual(4);
+    expect(contract.editorRight).toBeGreaterThan(contract.editorLeft);
     expect(contract.cockpitText).not.toMatch(/(?:11|12)종/u);
     expect(contract.bannerWorkspaceCtas).toBe(0);
   }, 90_000);
