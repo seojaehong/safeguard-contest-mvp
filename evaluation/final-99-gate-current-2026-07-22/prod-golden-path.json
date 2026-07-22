@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-07-21T23:12:25.856Z",
+  "generatedAt": "2026-07-22T11:32:47.979Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "commit": "6a95c23f",
-  "sourceCommit": "6a95c23ffc57542f6a9a9aa14612b3466127a0ad",
+  "commit": "c7590f84",
+  "sourceCommit": "c7590f846bf878d1d3afca58985be45c2b8e7316",
   "productionBuild": {
     "ok": true,
     "status": 200,
-    "commitSha": "6a95c23ffc57542f6a9a9aa14612b3466127a0ad",
+    "commitSha": "c7590f846bf878d1d3afca58985be45c2b8e7316",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-rmszvus2f-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-q9k1429s9-seojaehongs-projects.vercel.app"
   },
   "overall": "pass_with_notice",
-  "elapsedMs": 85906,
+  "elapsedMs": 92126,
   "gates": [
     {
       "name": "ask-orchestration",
@@ -88,7 +88,7 @@
       "count": 6,
       "message": "KOSHA 오프라인 보조근거와 Supabase 안전 지식 DB에서 참고자료를 조회했습니다. 공식 KOSHA 정확 본문 번들로 partial DB 본문을 대체했습니다."
     },
-    "textPreview": "[보완 제안: 외벽 도장 작업 및 강풍 위험성 추가 점검] - 이동식 비계 작업 전 작업발판, 안전난간, 바퀴 잠금, 아웃트리거 상태를 반드시 점검한다. - 강풍 예보 시 작업 개시 전 풍속 확인 및 체감풍 속도를 점검해 작업중지 여부를 결정한다. - 신규 투입자에 대해 작업 전 외벽 도장 작업 관련 위험성과 안전조치 사항을 교육하고 서명한다. - 지게차 동선 주변 작업 구역은 별도 표시 및 접근금지 기준을 마련하고, 신호수 배치 여부를 확인한다. - 오늘 작업에 대한 위험성평가 결과는 TBM 회의에서 공유하고, 교육·점검 기록과 사진을 확보한다. 확인자/근거 확인: 작업반장, 오늘 강풍 예보·신규 투입자 교육 및 비계 상태 점검 현장 사진과 TBM 기록 보관 반영 근거: 이동식 비계 점검 및 강풍 작업중지 기준 적용, 신규 투입자 안전교육 기록, 지게차 동선 통제 안전관리 지침",
+    "textPreview": "[보완 제안: 위험성평가 및 TBM·안전보건교육 기록 보완] - 작업 전 이동식 비계의 작업발판 폭·고정 상태, 안전난간 및 발끝막이판 설치 여부, 바퀴 잠금과 아웃트리거 고정 상태를 반드시 점검할 것 - 강풍 예보 시 풍속 측정 및 체감 돌풍 발생 시 즉시 작업중지 후 안전한 장소로 대피 조치 여부 확인 - 지게차 동선 주변 작업자 대피 및 신호수 배치, 사각지대 모니터링 실시 여부 점검 - 신규 투입자 대상 안전보건교육 실시 기록에 작업별 위험요인 설명, 보호구 착용 및 작업중지 기준 안내 반영 - 오늘 작업 전 TBM 회의에서 위 점검 사항 공유 및 결과 기록, 작업 전 사진 증거 확보 필수 확인자/반영 근거: 작업반장/이동식 비계 상태 점검, 강풍 대책, 지게차 동선 안전관리, 신규자 교육 기록 반영 근거 반영",
     "sourceCount": 5,
     "policy": "AI 보완은 자동 덮어쓰기가 아니라 제안, 사용자 편집, 삽입 흐름으로만 인정합니다."
   },
