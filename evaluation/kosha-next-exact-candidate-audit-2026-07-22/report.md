@@ -1,6 +1,6 @@
 # KOSHA Next Exact Candidate Audit
 
-Generated at: 2026-07-22T09:06:57.1148646+09:00
+Generated at: 2026-07-22T00:14:18.056Z
 
 Verdict: `NEXT_EXACT_TRUST_CANDIDATES_IDENTIFIED_APPROVAL_FREE`
 
@@ -8,31 +8,21 @@ This is a read-only audit. It did not perform DB mutation, embedding generation,
 
 ## Current Boundary
 
-The current exact KOSHA trust registry is proven for three pins only:
+The current exact KOSHA trust registry is proven for 3 pins only:
 
 - `B-E-10-2026`
 - `D-C-13-2026`
 - `D-C-7-2026`
 
-Evidence:
-
-- `evaluation/kosha-current-northstar-regression-2026-07-22/report.json`
-- `evaluation/kosha-current-live-gate-2026-07-20/report.json`
-- `evaluation/kosha-current-3pin-gate-2026-07-21/report.json`
-- `data/safety-knowledge/exact-kosha/`
-
 This remains enough to claim the accepted exact-trust slice. It is not enough to claim that every KOSHA Guide row is exact direct evidence.
 
 ## Candidate Pool
 
-The current offline verified subset is stronger than the older broad 1,040-row approval packet, but it is still a candidate pool rather than an exact registry expansion.
-
 | Item | Count |
 | --- | ---: |
-| Source inventory | 1,040 |
+| Source inventory | 1040 |
 | Current native technical-support regulation subset | 234 |
-| Accepted subset items | 234 |
-| Generated chunks | 7,127 |
+| Generated chunks | 7127 |
 | Snapshot failures | 0 |
 | Out of scope rows | 806 |
 | Existing exact pins | 3 |
@@ -50,7 +40,7 @@ Subset properties:
 
 ## Metadata Coverage
 
-`data/safety-knowledge/kosha-official-metadata/official-metadata-2026-07-15.jsonl` contains 234 complete current metadata rows.
+`data\safety-knowledge\kosha-official-metadata\official-metadata-2026-07-15.jsonl` contains 234 complete current metadata rows.
 
 | Category | Complete current rows |
 | --- | ---: |
@@ -74,7 +64,7 @@ These rows are not exact production evidence yet. They are next-promotion candid
 
 ## Required Before Promotion
 
-1. Select a bounded candidate set from the 231 metadata-verified non-exact current native rows.
+1. Select a bounded candidate set from the metadata-verified non-exact current native rows.
 2. Persist exact-kosha reference JSON only after immutable body/pdf/provenance hashes are reviewed and matched to official URL, file ID, version, publication date, and stable key.
 3. Add registry tests proving each new pin fails closed on stale version, hash mismatch, missing lifecycle, missing human confirmation, and metadata contradiction.
 4. Run exact-trusted grounding, KOSHA current live gate, North Star open-gate audit, and launch-readiness boundary tests after promotion.
@@ -82,13 +72,13 @@ These rows are not exact production evidence yet. They are next-promotion candid
 
 ## Safe Claims
 
-- KOSHA exact trust is current and proven for the accepted three-pin slice.
+- KOSHA exact trust is current and proven for the accepted 3-pin slice.
 - A 234-item current native technical-support regulation subset is reproducible and complete as a candidate pool.
 - Additional exact pins can be proposed from the verified subset, but only after separate immutable acquisition/review.
 
 ## Forbidden Claims
 
 - All 1,040 KOSHA Guide rows are exact direct evidence.
-- The 231 metadata-verified non-exact candidates are already exact production evidence.
+- The metadata-verified non-exact candidates are already exact production evidence.
 - KOSHA Guide embeddings or vector retrieval are production-active.
 - This audit performed DB mutation, embedding generation, upload, or provider dispatch.

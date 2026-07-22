@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-kosha-next-exact-candidate-audit/v1",
-  "generatedAt": "2026-07-22T09:06:57.1148646+09:00",
-  "sourceHead": "cdfa010c13cb7e45f11736e91d56dd35ef0c9347",
+  "generatedAt": "2026-07-22T00:14:18.056Z",
+  "sourceHead": "795a6634733fd6d59ad37859598427947a8d7f47",
   "liveBuildInfoAtAudit": {
-    "commitSha": "7389f22eb06e8d3f7724d15d9d172a9d9800cb7e",
+    "commitSha": "8035f65ccb8db69a3bef1e95e538c424ada8fa22",
     "branch": "master",
     "environment": "production"
   },
@@ -49,7 +49,7 @@
     "provenanceComplete": true
   },
   "officialMetadataRegistry": {
-    "path": "data/safety-knowledge/kosha-official-metadata/official-metadata-2026-07-15.jsonl",
+    "path": "data\\safety-knowledge\\kosha-official-metadata\\official-metadata-2026-07-15.jsonl",
     "metadataRows": 234,
     "currentRows": 234,
     "completeRows": 234,
@@ -112,31 +112,31 @@
   ],
   "interpretation": {
     "closed": [
-      "The exact trust registry remains proven for the three accepted pins.",
-      "A read-only verified subset exists for 234 current native technical-support regulations with complete official metadata and no snapshot failures.",
+      "The exact trust registry remains proven for the accepted pins.",
+      "A read-only verified subset exists for current native technical-support regulations with complete official metadata and no snapshot failures.",
       "The next candidate pool is identifiable without DB writes, embedding generation, or provider changes."
     ],
     "open": [
-      "The 231 metadata-verified non-exact candidates are not yet exact production evidence.",
+      "The metadata-verified non-exact candidates are not yet exact production evidence.",
       "The broader 1,040-row Guide corpus must not be described as fully authoritative-grounding ready.",
       "Exact trust promotion still requires separate immutable acquisition/review and fail-closed tests per promoted item."
     ]
   },
   "requiredBeforePromotingAdditionalExactPins": [
-    "Select a bounded candidate set from the 231 metadata-verified non-exact current native rows.",
+    "Select a bounded candidate set from the metadata-verified non-exact current native rows.",
     "Persist exact-kosha reference JSON only after immutable body/pdf/provenance hashes are reviewed and matched to official URL, file ID, version, publication date, and stable key.",
     "Add registry tests proving each new pin fails closed on stale version, hash mismatch, missing lifecycle, missing human confirmation, and metadata contradiction.",
     "Run exact-trusted grounding, KOSHA current live gate, North Star open-gate audit, and launch-readiness boundary tests after promotion.",
     "Keep KOSHA Guide vector/embedding/runtime claims separate until approved SIF/KOSHA vector gates are executed."
   ],
   "safeClaims": [
-    "KOSHA exact trust is current and proven for the accepted three-pin slice.",
+    "KOSHA exact trust is current and proven for the accepted 3-pin slice.",
     "A 234-item current native technical-support regulation subset is reproducible and complete as a candidate pool.",
     "Additional exact pins can be proposed from the verified subset, but only after separate immutable acquisition/review."
   ],
   "forbiddenClaims": [
     "All 1,040 KOSHA Guide rows are exact direct evidence.",
-    "The 231 metadata-verified non-exact candidates are already exact production evidence.",
+    "The metadata-verified non-exact candidates are already exact production evidence.",
     "KOSHA Guide embeddings or vector retrieval are production-active.",
     "This audit performed DB mutation, embedding generation, upload, or provider dispatch."
   ]
