@@ -13,6 +13,8 @@ const REPO_ROOT = path.resolve(path.dirname(SCRIPT_PATH), "..");
 const DEFAULT_PACKET_PATH = path.join("evaluation", "kosha-exact-promotion-packet-2026-07-22", "report.json");
 const DEFAULT_OUTPUT_DIR = path.join("evaluation", "kosha-exact-promotion-review-gate-2026-07-22");
 const REVIEW_SCHEMA_VERSION = "safeclaw-kosha-exact-promotion-review/v1";
+const REVIEW_COMPLETE_VERDICT = "HUMAN_REVIEW_COMPLETE_APPROVAL_REQUIRED_NO_MUTATION";
+const REVIEW_INCOMPLETE_VERDICT = "REVIEW_CHECKLIST_INCOMPLETE_BLOCKED";
 
 /**
  * @param {unknown} value
@@ -142,11 +144,19 @@ export function buildKoshaExactPromotionReviewGate(options) {
   const candidates = /** @type {Record<string, unknown>[]} */ (packetRecord.candidates);
   const candidateReviews = /** @type {Record<string, unknown>[]} */ (reviewRecord.candidateReviews);
   const reviewByStableKey = new Map(candidateReviews.map((row) => [reviewKey(row), row]));
+  const candidateKeySet = new Set(candidates.map(candidateKey).filter(Boolean));
   const failures = [];
   const passed = [];
 
   if (candidateReviews.length !== candidates.length) {
     failures.push(`candidate-review-count-mismatch:${candidateReviews.length}:${candidates.length}`);
+  }
+
+  for (const reviewRow of candidateReviews) {
+    const stableKey = reviewKey(reviewRow);
+    if (!stableKey || !candidateKeySet.has(stableKey)) {
+      failures.push(`unexpected-review:${stableKey || "missing-stable-key"}`);
+    }
   }
 
   for (const candidate of candidates) {
@@ -169,12 +179,19 @@ export function buildKoshaExactPromotionReviewGate(options) {
       : [];
     const checkRows = requiredReviewChecks(reviewRow);
     const checkedByText = new Map(checkRows.map((row) => [asString(row.text), row]));
+    const requiredCheckSet = new Set(requiredChecks);
     for (const checkText of requiredChecks) {
       const checkRow = checkedByText.get(checkText);
       if (!checkRow) {
         failures.push(`missing-required-check:${stableKey}:${checkText}`);
       } else if (!asBoolean(checkRow.confirmed)) {
         failures.push(`unconfirmed-required-check:${stableKey}:${checkText}`);
+      }
+    }
+    for (const checkRow of checkRows) {
+      const checkText = asString(checkRow.text);
+      if (!checkText || !requiredCheckSet.has(checkText)) {
+        failures.push(`unexpected-required-check:${stableKey}:${checkText || "missing-text"}`);
       }
     }
     if (checkRows.length !== requiredChecks.length) {
@@ -195,7 +212,7 @@ export function buildKoshaExactPromotionReviewGate(options) {
     sourceHead: gitHead(rootDir),
     packetPath,
     reviewPath: options.reviewPath,
-    verdict: reviewChecklistComplete ? "REVIEW_CHECKLIST_COMPLETE_READY_FOR_SEPARATE_APPROVAL" : "REVIEW_CHECKLIST_INCOMPLETE_BLOCKED",
+    verdict: reviewChecklistComplete ? REVIEW_COMPLETE_VERDICT : REVIEW_INCOMPLETE_VERDICT,
     mutationPerformed: false,
     dbMutationPerformed: false,
     embeddingGenerationPerformed: false,
@@ -207,12 +224,14 @@ export function buildKoshaExactPromotionReviewGate(options) {
     reviewChecklistComplete,
     exactTrustPromotionBlockedUntilChecklistComplete: !reviewChecklistComplete,
     exactTrustPromotionStillRequiresSeparateApproval: true,
+    approvalRequiredBeforeExactPromotion: true,
     passedStableKeys: passed,
     failures,
     forbiddenClaims: [
       "This review gate mutated the exact-kosha registry.",
       "KOSHA vector retrieval or embeddings are production-active because of this review gate.",
       "Operator checklist completion alone approves exact-trust promotion.",
+      "Completed human review alone writes an exact-kosha registry artifact.",
     ],
   };
 }
@@ -245,11 +264,19 @@ export function buildKoshaExactPromotionReviewTemplate(options) {
       "Run scripts/kosha_exact_promotion_review_gate.mjs with this filled review file before any separate exact-trust promotion approval.",
     ],
     candidateReviews: candidates.map((candidate) => ({
+      order: typeof candidate.order === "number" && Number.isFinite(candidate.order) ? candidate.order : null,
       stableKey: asString(candidate.stableKey),
       version: asString(candidate.version),
+      title: asString(candidate.title),
+      category: asString(candidate.category),
+      publishedAt: asString(candidate.publishedAt),
       officialFileId: asString(candidate.officialFileId),
+      officialUrl: asString(candidate.officialUrl),
       bodySha256: asString(candidate.bodySha256),
       pdfSha256: asString(candidate.pdfSha256),
+      normalizedCharCount: typeof candidate.normalizedCharCount === "number" && Number.isFinite(candidate.normalizedCharCount) ? candidate.normalizedCharCount : null,
+      pageCount: typeof candidate.pageCount === "number" && Number.isFinite(candidate.pageCount) ? candidate.pageCount : null,
+      rationale: asString(candidate.rationale),
       reviewer: "",
       reviewedAt: "",
       humanConfirmed: false,

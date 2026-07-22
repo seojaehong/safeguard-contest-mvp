@@ -6,11 +6,19 @@ import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 
 type Candidate = {
+  order: number;
   stableKey: string;
   version: string;
+  title: string;
+  category: string;
+  publishedAt: string;
   officialFileId: string;
+  officialUrl: string;
   bodySha256: string;
   pdfSha256: string;
+  normalizedCharCount: number;
+  pageCount: number;
+  rationale: string;
   requiredReviewChecks: string[];
 };
 
@@ -27,6 +35,7 @@ type ReviewGateReport = {
   reviewChecklistComplete: boolean;
   exactTrustPromotionBlockedUntilChecklistComplete: boolean;
   exactTrustPromotionStillRequiresSeparateApproval: boolean;
+  approvalRequiredBeforeExactPromotion: boolean;
   failures: string[];
   forbiddenClaims: string[];
 };
@@ -47,7 +56,15 @@ type ReviewGateModule = {
     reviewTemplateOnly: boolean;
     exactPromotionPerformed: boolean;
     candidateReviews: Array<{
+      order: number | null;
       stableKey: string;
+      title: string;
+      category: string;
+      publishedAt: string;
+      officialUrl: string;
+      normalizedCharCount: number | null;
+      pageCount: number | null;
+      rationale: string;
       reviewer: string;
       reviewedAt: string;
       humanConfirmed: boolean;
@@ -69,11 +86,19 @@ function writeJson(root: string, relativePath: string, value: unknown): void {
 
 function candidate(stableKey: string, index: number): Candidate {
   return {
+    order: index,
     stableKey,
     version: `${stableKey}-2026`,
+    title: `KOSHA guide ${stableKey}`,
+    category: "KOSHA Guide",
+    publishedAt: "2026-01-01",
     officialFileId: `FILE-${index}`,
+    officialUrl: `https://kosha.example.test/${stableKey}.pdf`,
     bodySha256: `${index}`.repeat(64).slice(0, 64),
     pdfSha256: `${index + 1}`.repeat(64).slice(0, 64),
+    normalizedCharCount: 1000 + index,
+    pageCount: 20 + index,
+    rationale: `Candidate ${stableKey} has stable official metadata and immutable hashes.`,
     requiredReviewChecks: [
       "official URL opens the expected KOSHA file for the selected stable key",
       "official file id, version, and publication date match metadata and body-corpus provenance",
@@ -125,10 +150,11 @@ describe("KOSHA exact promotion review gate", () => {
       generatedAt: "2026-07-22T00:00:00.000Z",
     });
 
-    expect(report.verdict).toBe("REVIEW_CHECKLIST_COMPLETE_READY_FOR_SEPARATE_APPROVAL");
+    expect(report.verdict).toBe("HUMAN_REVIEW_COMPLETE_APPROVAL_REQUIRED_NO_MUTATION");
     expect(report.reviewChecklistComplete).toBe(true);
     expect(report.exactTrustPromotionBlockedUntilChecklistComplete).toBe(false);
     expect(report.exactTrustPromotionStillRequiresSeparateApproval).toBe(true);
+    expect(report.approvalRequiredBeforeExactPromotion).toBe(true);
     expect(report.candidateCount).toBe(2);
     expect(report.reviewedCandidateCount).toBe(2);
     expect(report.passedCandidateCount).toBe(2);
@@ -139,6 +165,7 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.exactPromotionPerformed).toBe(false);
     expect(report.providerDispatchLiveClaimed).toBe(false);
     expect(report.forbiddenClaims).toContain("Operator checklist completion alone approves exact-trust promotion.");
+    expect(report.forbiddenClaims).toContain("Completed human review alone writes an exact-kosha registry artifact.");
   });
 
   it("fails closed when a required check is not confirmed", async () => {
@@ -172,6 +199,80 @@ describe("KOSHA exact promotion review gate", () => {
 
     expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
     expect(report.failures).toContain("review-metadata-mismatch:A-G-15:bodySha256");
+    expect(report.exactPromotionPerformed).toBe(false);
+  });
+
+  it("fails closed when review input includes a row outside the packet candidate set", async () => {
+    const { root, packetPath, reviewPath, candidates } = writeFixtureRoot();
+    const review = JSON.parse(fs.readFileSync(path.join(root, reviewPath), "utf8")) as {
+      candidateReviews: Array<Record<string, unknown>>;
+    };
+    review.candidateReviews.push({
+      stableKey: "EXTRA-1",
+      version: "EXTRA-1-2026",
+      officialFileId: "FILE-EXTRA",
+      bodySha256: "e".repeat(64),
+      pdfSha256: "f".repeat(64),
+      reviewer: "operator@example.com",
+      reviewedAt: "2026-07-22T00:00:00.000Z",
+      humanConfirmed: true,
+      requiredReviewChecks: candidates[0].requiredReviewChecks.map((text) => ({ text, confirmed: true })),
+    });
+    writeJson(root, reviewPath, review);
+    const module = await loadReviewGateModule();
+    const report = module.buildKoshaExactPromotionReviewGate({ rootDir: root, packetPath, reviewPath });
+
+    expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
+    expect(report.reviewChecklistComplete).toBe(false);
+    expect(report.failures).toContain("candidate-review-count-mismatch:3:2");
+    expect(report.failures).toContain("unexpected-review:EXTRA-1");
+    expect(report.exactPromotionPerformed).toBe(false);
+  });
+
+  it("writes only review reports for a completed review and never creates exact registry artifacts", () => {
+    const { root, packetPath, reviewPath } = writeFixtureRoot();
+
+    execFileSync("node", [
+      path.resolve("scripts", "kosha_exact_promotion_review_gate.mjs"),
+      "--root",
+      root,
+      "--packet",
+      packetPath,
+      "--review",
+      reviewPath,
+      "--output",
+      "evaluation/kosha-exact-promotion-review-gate-2026-07-22/complete",
+      "--generated-at",
+      "2026-07-22T00:00:00.000Z",
+    ], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+
+    const outputDir = path.join(root, "evaluation/kosha-exact-promotion-review-gate-2026-07-22/complete");
+    const outputFiles = fs.readdirSync(outputDir).sort();
+    const report = JSON.parse(fs.readFileSync(path.join(outputDir, "report.json"), "utf8")) as ReviewGateReport;
+    expect(report.verdict).toBe("HUMAN_REVIEW_COMPLETE_APPROVAL_REQUIRED_NO_MUTATION");
+    expect(report.reviewChecklistComplete).toBe(true);
+    expect(report.exactPromotionPerformed).toBe(false);
+    expect(report.approvalRequiredBeforeExactPromotion).toBe(true);
+    expect(outputFiles).toEqual(["report.json", "report.md"]);
+    expect(outputFiles.some((file) => /exact|registry|promotion/i.test(file) && file !== "report.json" && file !== "report.md")).toBe(false);
+  });
+
+  it("fails closed when required check text does not match the packet", async () => {
+    const { root, packetPath, reviewPath } = writeFixtureRoot();
+    const review = JSON.parse(fs.readFileSync(path.join(root, reviewPath), "utf8")) as {
+      candidateReviews: Array<{ stableKey: string; requiredReviewChecks: Array<{ text: string; confirmed: boolean }> }>;
+    };
+    const target = review.candidateReviews.find((row) => row.stableKey === "D-C-10");
+    if (!target) throw new Error("fixture-missing-d-c-10");
+    target.requiredReviewChecks[0].text = "shallow reviewer confirmation only";
+    writeJson(root, reviewPath, review);
+    const module = await loadReviewGateModule();
+    const report = module.buildKoshaExactPromotionReviewGate({ rootDir: root, packetPath, reviewPath });
+
+    expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
+    expect(report.reviewChecklistComplete).toBe(false);
+    expect(report.failures.some((failure) => failure.startsWith("missing-required-check:D-C-10:official URL opens"))).toBe(true);
+    expect(report.failures).toContain("unexpected-required-check:D-C-10:shallow reviewer confirmation only");
     expect(report.exactPromotionPerformed).toBe(false);
   });
 
@@ -234,6 +335,14 @@ describe("KOSHA exact promotion review gate", () => {
     expect(template.reviewTemplateOnly).toBe(true);
     expect(template.exactPromotionPerformed).toBe(false);
     expect(template.candidateReviews).toHaveLength(2);
+    expect(template.candidateReviews[0].order).toBe(1);
+    expect(template.candidateReviews[0].title).toBe("KOSHA guide D-C-10");
+    expect(template.candidateReviews[0].category).toBe("KOSHA Guide");
+    expect(template.candidateReviews[0].publishedAt).toBe("2026-01-01");
+    expect(template.candidateReviews[0].officialUrl).toBe("https://kosha.example.test/D-C-10.pdf");
+    expect(template.candidateReviews[0].normalizedCharCount).toBe(1001);
+    expect(template.candidateReviews[0].pageCount).toBe(21);
+    expect(template.candidateReviews[0].rationale).toContain("stable official metadata");
     expect(template.candidateReviews.every((row) => row.reviewer === "")).toBe(true);
     expect(template.candidateReviews.every((row) => row.reviewedAt === "")).toBe(true);
     expect(template.candidateReviews.every((row) => row.humanConfirmed === false)).toBe(true);
