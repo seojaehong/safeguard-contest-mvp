@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T23:39:54.960Z",
-  "head": "bf6c69d56a5a578a5510213816523140d493db9f",
+  "generatedAt": "2026-07-22T23:43:44.443Z",
+  "head": "cface73f309c2794196775735b8cdd4957887852",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "bf6c69d56a5a578a5510213816523140d493db9f",
+    "commitSha": "cface73f309c2794196775735b8cdd4957887852",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-dbdb5suz1-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-lnijskw6p-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -87,19 +87,19 @@
       "id": "supabase_rls_launch_isolation",
       "state": "approval_gated",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Read-only RLS approval preflight passed at source SHA 65a5b044cc562c56a9789f3011a4b2ef3d64e303, but live RLS catalog and tenant A/B isolation are not proven."
+      "detail": "Read-only RLS approval preflight passed at source SHA cface73f309c2794196775735b8cdd4957887852, but live RLS catalog and tenant A/B isolation are not proven."
     },
     {
       "id": "llm_wiki_publication",
       "state": "approval_gated",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 65a5b044cc562c56a9789f3011a4b2ef3d64e303."
+      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA cface73f309c2794196775735b8cdd4957887852."
     },
     {
       "id": "sif_embedding_runtime",
       "state": "approval_gated",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 65a5b044cc562c56a9789f3011a4b2ef3d64e303."
+      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: cface73f309c2794196775735b8cdd4957887852."
     },
     {
       "id": "kosha_exact_promotion_review_gate",
@@ -205,9 +205,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "bf6c69d56a5a578a5510213816523140d493db9f",
+      "sourceCommit": "cface73f309c2794196775735b8cdd4957887852",
       "sourceStatus": "exact",
-      "productionCommit": "bf6c69d56a5a578a5510213816523140d493db9f",
+      "productionCommit": "cface73f309c2794196775735b8cdd4957887852",
       "productionStatus": "matches_live"
     },
     {
@@ -237,16 +237,16 @@
     {
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "sourceCommit": "65a5b044cc562c56a9789f3011a4b2ef3d64e303",
-      "sourceStatus": "ancestor",
+      "sourceCommit": "cface73f309c2794196775735b8cdd4957887852",
+      "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
     },
     {
       "id": "sif_embedding_preflight",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "sourceCommit": "65a5b044cc562c56a9789f3011a4b2ef3d64e303",
-      "sourceStatus": "ancestor",
+      "sourceCommit": "cface73f309c2794196775735b8cdd4957887852",
+      "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
     },
