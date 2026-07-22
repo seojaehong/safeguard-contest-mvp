@@ -60,6 +60,7 @@ const EVIDENCE_PATHS = Object.freeze({
   koshaCurrentGate: path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json"),
   koshaCurrentReconciliation: path.join("evaluation", "kosha-current-master-reconciliation-2026-07-19", "report.json"),
   koshaCurrentLive: path.join("evaluation", "kosha-exact-trust-current-live-2026-07-19", "report.md"),
+  koshaExactPromotionReviewGate: path.join("evaluation", "kosha-exact-promotion-review-gate-2026-07-22", "report.json"),
 });
 
 /**
@@ -1787,6 +1788,96 @@ function evaluateKoshaExactTrustGate(rootDir) {
 }
 
 /**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateKoshaExactPromotionReviewGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.koshaExactPromotionReviewGate;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "kosha_exact_promotion_review_gate",
+      label: "KOSHA exact promotion review gate",
+      state: "missing",
+      evidencePath,
+      detail: "KOSHA exact promotion review-gate evidence is missing. Additional exact-trust promotion cannot be claimed.",
+      nextActions: [
+        "Generate the review template and run scripts\\kosha_exact_promotion_review_gate.mjs against the operator review input before any exact-trust promotion.",
+      ],
+    });
+  }
+
+  const failures = Array.isArray(report.failures)
+    ? report.failures.map(readString).filter(Boolean)
+    : [];
+  const noMutation = report.mutationPerformed === false
+    && report.dbMutationPerformed === false
+    && report.embeddingGenerationPerformed === false
+    && report.exactPromotionPerformed === false
+    && report.providerDispatchLiveClaimed === false;
+  const separateApprovalRequired = report.exactTrustPromotionStillRequiresSeparateApproval === true;
+  const candidateCount = readNumber(report.candidateCount);
+  const reviewedCandidateCount = readNumber(report.reviewedCandidateCount);
+  const passedCandidateCount = readNumber(report.passedCandidateCount);
+  const blockedTemplate = readString(report.schemaVersion) === "safeclaw-kosha-exact-promotion-review-gate/v1"
+    && readString(report.verdict) === "REVIEW_CHECKLIST_INCOMPLETE_BLOCKED"
+    && report.reviewChecklistComplete === false
+    && report.exactTrustPromotionBlockedUntilChecklistComplete === true
+    && separateApprovalRequired
+    && noMutation
+    && candidateCount === 8
+    && reviewedCandidateCount === 8
+    && passedCandidateCount === 0
+    && failures.length >= 8;
+
+  if (blockedTemplate) {
+    return gateResult({
+      id: "kosha_exact_promotion_review_gate",
+      label: "KOSHA exact promotion review gate",
+      state: "approval_gated",
+      evidencePath,
+      detail: `Review template covers ${candidateCount} KOSHA candidates and is blocked by default (${failures.length} checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval.`,
+      nextActions: [
+        "Fill the generated KOSHA review template with reviewer, reviewedAt, humanConfirmed, and every required check before promotion.",
+        "Re-run scripts\\kosha_exact_promotion_review_gate.mjs on the completed review input, then seek separate explicit approval before writing any exact-trust registry changes.",
+      ],
+    });
+  }
+
+  const completedButStillApprovalGated = readString(report.schemaVersion) === "safeclaw-kosha-exact-promotion-review-gate/v1"
+    && report.reviewChecklistComplete === true
+    && separateApprovalRequired
+    && noMutation
+    && candidateCount !== null
+    && reviewedCandidateCount === candidateCount
+    && passedCandidateCount === candidateCount;
+
+  if (completedButStillApprovalGated) {
+    return gateResult({
+      id: "kosha_exact_promotion_review_gate",
+      label: "KOSHA exact promotion review gate",
+      state: "approval_gated",
+      evidencePath,
+      detail: `Human checklist is complete for ${candidateCount} KOSHA candidates, but exact-trust promotion remains approval-gated and no mutation has been performed.`,
+      nextActions: [
+        "Request explicit approval for the bounded exact-trust promotion before writing registry, DB, embedding, or production runtime changes.",
+      ],
+    });
+  }
+
+  return gateResult({
+    id: "kosha_exact_promotion_review_gate",
+    label: "KOSHA exact promotion review gate",
+    state: "contradicted",
+    evidencePath,
+    detail: "KOSHA exact promotion review evidence no longer preserves the fail-closed checklist, no-mutation boundary, or separate-approval requirement.",
+    nextActions: [
+      "Re-run scripts\\kosha_exact_promotion_review_gate.mjs with a valid review input and verify that exact promotion remains blocked until completed review plus separate approval.",
+    ],
+  });
+}
+
+/**
  * @param {{ rootDir?: string, generatedAt?: string, sourceSha?: string }} [options]
  * @returns {NorthstarAudit}
  */
@@ -1803,6 +1894,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateLlmWikiGate(rootDir),
     evaluateSifEmbeddingGate(rootDir),
     evaluateKoshaExactTrustGate(rootDir),
+    evaluateKoshaExactPromotionReviewGate(rootDir),
   ];
 
   const hasContradiction = gates.some((gate) => gate.state === "contradicted");
@@ -1827,6 +1919,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
       "OpenClaw learns or mutates DB facts automatically.",
       "SIF vector retrieval is production-active before the approved migration/upload/runtime gate.",
       "All KOSHA metadata-verified candidates are exact production evidence.",
+      "KOSHA operator checklist completion alone approves exact-trust promotion.",
       "Live Supabase RLS tenant isolation is launch-proven before catalog and tenant A/B evidence.",
       "Real provider dispatch is production-live for any channel before persistent idempotency and provider result persistence approval.",
     ],

@@ -1064,6 +1064,22 @@ function createFixtureRoot(): string {
       { command: "npm.cmd run typecheck", result: "pass" },
     ],
   });
+  writeJson(rootDir, path.join("evaluation", "kosha-exact-promotion-review-gate-2026-07-22", "report.json"), {
+    schemaVersion: "safeclaw-kosha-exact-promotion-review-gate/v1",
+    verdict: "REVIEW_CHECKLIST_INCOMPLETE_BLOCKED",
+    mutationPerformed: false,
+    dbMutationPerformed: false,
+    embeddingGenerationPerformed: false,
+    exactPromotionPerformed: false,
+    providerDispatchLiveClaimed: false,
+    candidateCount: 8,
+    reviewedCandidateCount: 8,
+    passedCandidateCount: 0,
+    reviewChecklistComplete: false,
+    exactTrustPromotionBlockedUntilChecklistComplete: true,
+    exactTrustPromotionStillRequiresSeparateApproval: true,
+    failures: Array.from({ length: 64 }, (_, index) => `unconfirmed-required-check:${index}`),
+  });
   execFileSync("git", ["add", "."], { cwd: rootDir, stdio: "ignore" });
   execFileSync("git", ["commit", "-m", "fixture"], { cwd: rootDir, stdio: "ignore" });
   return rootDir;
@@ -1112,8 +1128,15 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_trust_registry")?.nextActions).toContain(
       "Use evaluation\\kosha-exact-promotion-packet-2026-07-22\\report.json as the bounded operator-review set before any exact-trust promotion.",
     );
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("approval_gated");
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("blocked by default");
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("separate approval");
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.nextActions.join("\n")).toContain(
+      "Re-run scripts\\kosha_exact_promotion_review_gate.mjs",
+    );
     expect(audit.forbiddenClaims).toContain("LLM Wiki publishes itself.");
     expect(audit.forbiddenClaims).toContain("All KOSHA metadata-verified candidates are exact production evidence.");
+    expect(audit.forbiddenClaims).toContain("KOSHA operator checklist completion alone approves exact-trust promotion.");
     expect(audit.forbiddenClaims).toContain("Real provider dispatch is production-live for any channel before persistent idempotency and provider result persistence approval.");
     expect(audit.safeDemoClaims).toContain("Photo hazard analysis readiness supports up to 10 images and keeps Before/After improvements as reviewed operation memory.");
   });
@@ -1387,6 +1410,25 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_trust_registry")?.state).toBe("missing");
   });
 
+  it("fails closed when the KOSHA exact promotion review gate is missing", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    fs.rmSync(path.join(rootDir, "evaluation", "kosha-exact-promotion-review-gate-2026-07-22"), {
+      recursive: true,
+      force: true,
+    });
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.overall).toBe("evidence_missing");
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_trust_registry")?.state).toBe("proven");
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("missing");
+  });
+
   it("renders the approval boundary and forbidden claims in the Markdown report", async () => {
     const { buildNorthstarOpenGateAudit, renderNorthstarOpenGateMarkdown } = await loadAuditModule();
     const rootDir = createFixtureRoot();
@@ -1400,6 +1442,7 @@ describe("northstar open gate audit", () => {
     expect(markdown).toContain("| llm_wiki_publication | approval_gated |");
     expect(markdown).toContain("| provider_dispatch_persistence | approval_gated |");
     expect(markdown).toContain("| kosha_exact_trust_registry | proven |");
+    expect(markdown).toContain("| kosha_exact_promotion_review_gate | approval_gated |");
     expect(markdown).toContain("LLM Wiki publishes itself.");
     expect(markdown).toContain("SafeClaw fixes SIF/KOSHA/current work-history evidence before LLM wording.");
   });
