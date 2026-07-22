@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "safeclaw-share-exact-session-boundary/v1",
+  "checkedAt": "2026-07-22T10:06:47.513Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceHead": "d1a985cdfc52e879664fe63dbc2b1560d3b511ea",
+  "liveBuildInfo": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "d1a985cdfc52e879664fe63dbc2b1560d3b511ea",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-4fuk1bcya-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "liveCommit": "d1a985cdfc52e879664fe63dbc2b1560d3b511ea",
+  "verdict": "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
+  "exactSavedUserSessionReproduced": false,
+  "exactSavedSessionUrlProvided": false,
+  "exactSavedSessionPayloadProvided": false,
+  "sessionKind": "missing-exact",
+  "routeFiles": {
+    "recipientPage": {
+      "path": "app/share/[sessionId]/page.tsx",
+      "exists": true
+    },
+    "recipientApi": {
+      "path": "app/api/share-sessions/[sessionId]/route.ts",
+      "exists": true
+    },
+    "managerSessionCreateApi": {
+      "path": "app/api/workpacks/[id]/share-sessions/route.ts",
+      "exists": true
+    }
+  },
+  "safeReadProbe": {
+    "attempted": true,
+    "method": "GET",
+    "urlPath": "/api/share-sessions/00000000-0000-4000-8000-000000000000?workerId=00000000-0000-4000-8000-000000000001",
+    "status": 500,
+    "ok": false,
+    "bodyOk": false,
+    "message": "공유 세션을 확인하지 못했습니다.",
+    "mutationPerformed": false
+  },
+  "boundary": {
+    "fixtureProofAcceptedAsExactSavedSession": false,
+    "generatedWorkspaceProofAcceptedAsExactSavedSession": false,
+    "exactSavedSessionRequiredForUserSpecificPass": true,
+    "sessionCreationRequiresAuthenticatedManagerWorkpackFlow": true,
+    "sessionCreationWouldRequireDbMutation": true,
+    "providerDispatchLiveClaimed": false,
+    "externalProviderCalled": false,
+    "dbMutationPerformed": false,
+    "dispatchMutationPerformed": false
+  },
+  "nextEvidenceNeeded": [
+    "concrete production /share/[sessionId]?workerId=... URL from the user-observed session",
+    "or an approved safe creation flow for a manager-owned workpack/share session",
+    "then rerun desktop 1440x723/1440x900 and mobile 390x723 geometry with sessionKind=saved-exact"
+  ],
+  "forbiddenClaims": [
+    "Fixture or generated /workspace Share proof closes the exact saved /share/[sessionId] user complaint.",
+    "A live provider dispatch was performed.",
+    "A share session was created or mutated by this boundary audit."
+  ]
+}

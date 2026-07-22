@@ -76,6 +76,18 @@ type NextRunwayReport = {
       resultSummaryBottom: number | null;
     }>;
   };
+  shareExactSessionBoundary: {
+    verdict: string;
+    sourceHead: string;
+    liveCommit: string;
+    exactSavedUserSessionReproduced: boolean;
+    exactSavedSessionRequiredForUserSpecificPass: boolean;
+    dbMutationPerformed: boolean;
+    providerDispatchLiveClaimed: boolean;
+    externalProviderCalled: boolean;
+    safeReadStatus: number | null;
+    safeReadMessage: string;
+  };
   documentsLongFormIA: {
     verdict: string;
     sourceHead: string;
@@ -338,6 +350,22 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       },
     ],
   });
+  writeJson(root, "evaluation/share-exact-session-boundary-2026-07-22/report.json", {
+    verdict: "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
+    sourceHead: "TO_FILL",
+    liveCommit: "TO_FILL",
+    exactSavedUserSessionReproduced: false,
+    safeReadProbe: {
+      status: 500,
+      message: "공유 세션을 확인하지 못했습니다.",
+    },
+    boundary: {
+      exactSavedSessionRequiredForUserSpecificPass: true,
+      providerDispatchLiveClaimed: false,
+      externalProviderCalled: false,
+      dbMutationPerformed: false,
+    },
+  });
   writeJson(root, "evaluation/documents-long-form-ia-2026-07-22/report.json", {
     verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION",
     sourceHead: "TO_FILL",
@@ -586,6 +614,15 @@ describe("northstar next runway generator", () => {
       resultSummaryTop: 303,
       resultSummaryBottom: 347,
     });
+    expect(report.shareExactSessionBoundary).toMatchObject({
+      verdict: "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
+      exactSavedUserSessionReproduced: false,
+      exactSavedSessionRequiredForUserSpecificPass: true,
+      providerDispatchLiveClaimed: false,
+      externalProviderCalled: false,
+      dbMutationPerformed: false,
+      safeReadStatus: 500,
+    });
     expect(report.uiInterpretation.documentsContainment).toContain("selected-only bounded workbench");
     expect(report.uiInterpretation.selectedEditorDetail).toContain("desktop 1440x900");
     expect(report.uiInterpretation.structuralAnswer).toContain("bounded IA/density wave");
@@ -669,6 +706,9 @@ describe("northstar next runway generator", () => {
     );
     expect(report.nextSafeWorkWithoutApproval).toContain(
       "promote the bounded-workbench current-source proof to live only after production /api/build-info reaches the product/evidence head and the live probe is rerun",
+    );
+    expect(report.nextSafeWorkWithoutApproval).toContain(
+      "treat the Share exact-session boundary as open until a concrete session URL/payload is provided; the current no-mutation boundary audit only proves route presence and missing exact evidence",
     );
     expect(report.sourceHeadLivePending).toBe(false);
     expect(report.boundedWorkbenchSourceIncludedInLive).toBe(false);

@@ -26,6 +26,7 @@ const ARTIFACTS = Object.freeze({
   approvalRunway: path.join("evaluation", "northstar-approval-runway-2026-07-21", "report.json"),
   sifEmbeddingPreflight: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
   shareGeneratedSessionPerception: path.join("evaluation", "share-generated-session-perception-2026-07-22", "report.json"),
+  shareExactSessionBoundary: path.join("evaluation", "share-exact-session-boundary-2026-07-22", "report.json"),
   documentsLongFormIA: path.join("evaluation", "documents-long-form-ia-2026-07-22", "report.json"),
   boundedWorkbenchDod: path.join("evaluation", "workspace-bounded-workbench-dod-2026-07-22", "report.json"),
   boundedWorkbenchCurrent: path.join("evaluation", "workspace-bounded-workbench-current-2026-07-22", "report.json"),
@@ -233,6 +234,27 @@ function shareGeneratedSessionSummary(shareGenerated) {
         resultSummaryBottom: typeof resultSummary.bottom === "number" ? resultSummary.bottom : null,
       };
     }),
+  };
+}
+
+/**
+ * @param {unknown} shareExact
+ */
+function shareExactSessionBoundarySummary(shareExact) {
+  if (!isRecord(shareExact)) return {};
+  const safeReadProbe = isRecord(shareExact.safeReadProbe) ? shareExact.safeReadProbe : {};
+  const boundary = isRecord(shareExact.boundary) ? shareExact.boundary : {};
+  return {
+    verdict: asString(shareExact.verdict),
+    sourceHead: asString(shareExact.sourceHead),
+    liveCommit: asString(shareExact.liveCommit),
+    exactSavedUserSessionReproduced: asBoolean(shareExact.exactSavedUserSessionReproduced),
+    exactSavedSessionRequiredForUserSpecificPass: asBoolean(boundary.exactSavedSessionRequiredForUserSpecificPass),
+    dbMutationPerformed: asBoolean(boundary.dbMutationPerformed),
+    providerDispatchLiveClaimed: asBoolean(boundary.providerDispatchLiveClaimed),
+    externalProviderCalled: asBoolean(boundary.externalProviderCalled),
+    safeReadStatus: typeof safeReadProbe.status === "number" ? safeReadProbe.status : null,
+    safeReadMessage: asString(safeReadProbe.message),
   };
 }
 
@@ -470,6 +492,7 @@ export function buildNorthstarNextRunway(options) {
   const koshaPromotionPacket = readJson(options.rootDir, ARTIFACTS.koshaExactPromotionPacket);
   const sif = readJson(options.rootDir, ARTIFACTS.sifEmbeddingPreflight);
   const shareGenerated = readJson(options.rootDir, ARTIFACTS.shareGeneratedSessionPerception);
+  const shareExactBoundary = readJson(options.rootDir, ARTIFACTS.shareExactSessionBoundary);
   const documentsIa = readJson(options.rootDir, ARTIFACTS.documentsLongFormIA);
   const boundedDod = readJson(options.rootDir, ARTIFACTS.boundedWorkbenchDod);
   const boundedCurrent = readJson(options.rootDir, ARTIFACTS.boundedWorkbenchCurrent);
@@ -550,6 +573,7 @@ export function buildNorthstarNextRunway(options) {
     koshaExactPromotionPacket: koshaPromotionPacketSummary(koshaPromotionPacket),
     sifEmbeddingRuntime: sifSummary(sif),
     shareGeneratedSessionPerception: shareGeneratedSessionSummary(shareGenerated),
+    shareExactSessionBoundary: shareExactSessionBoundarySummary(shareExactBoundary),
     documentsLongFormIA: documentsLongFormIASummary(documentsIa),
     boundedWorkbenchDod: boundedWorkbenchDodSummary(boundedDod),
     boundedWorkbenchCurrent: boundedWorkbenchCurrentSummary(boundedCurrent),
@@ -561,6 +585,7 @@ export function buildNorthstarNextRunway(options) {
       "keep UI follow-up scoped to mobile Documents detail-depth debt or reproduced exact-session desktop Share full-workbench perception issues",
       "promote the bounded-workbench current-source proof to live only after production /api/build-info reaches the product/evidence head and the live probe is rerun",
       "reproduce an exact saved/generated Share session before using fixture or generated /workspace share evidence to close the user's exact Share complaint",
+      "treat the Share exact-session boundary as open until a concrete session URL/payload is provided; the current no-mutation boundary audit only proves route presence and missing exact evidence",
       "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
       "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
       "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held",
@@ -655,6 +680,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - ${boundedWorkbenchNote}
 - Share desktop: current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
+- Share exact-session boundary: \`${report.shareExactSessionBoundary.verdict || "missing"}\`; exact saved reproduced is \`${report.shareExactSessionBoundary.exactSavedUserSessionReproduced === true}\`, safe missing-session GET status is \`${report.shareExactSessionBoundary.safeReadStatus ?? "unknown"}\`, and DB/provider mutations remain \`false\`.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
 
 Route/page split alone is not accepted as the UX fix. Page count only moves long documents/messages to another URL if the route body still unfolds the full artifact. The accepted structure is a three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes for long documents, messages, logs, and raw metadata.

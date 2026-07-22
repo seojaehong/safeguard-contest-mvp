@@ -4,21 +4,21 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `36642d6327bb27dea67ea4bb6f90f4cfea67ac17`
+Source HEAD: `d1a985cdfc52e879664fe63dbc2b1560d3b511ea`
 
-Production `/api/build-info`: `a0877d1d1dac1cf3c6a3b7a2632c1369152f58d5`
+Production `/api/build-info`: `d1a985cdfc52e879664fe63dbc2b1560d3b511ea`
 
-Latest evidence commit live: `false`
+Latest evidence commit live: `true`
 
-Source head live pending: `true`
+Source head live pending: `false`
 
-Bounded workbench current live pending: `true`
+Bounded workbench current live pending: `false`
 
-Live rollup source head: `36642d6327bb27dea67ea4bb6f90f4cfea67ac17`
+Live rollup source head: `d1a985cdfc52e879664fe63dbc2b1560d3b511ea`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `36642d6327bb27dea67ea4bb6f90f4cfea67ac17` is an evidence-only refresh pushed after the live-exact artifact set. Production is still `a0877d1d1dac1cf3c6a3b7a2632c1369152f58d5`, and the live rollup remains exact for that deployed marker.
+Note: source HEAD and production marker match for this artifact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -64,6 +64,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Current bounded-workbench gate: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP`; first-task/body containment rows pass, but 0 Documents row(s) carry local workbench detail-depth debt when `detailDepthDebt` is `true`. Share rows remain scoped if exact saved session evidence is missing.
 - Share desktop: current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
+- Share exact-session boundary: `MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED`; exact saved reproduced is `false`, safe missing-session GET status is `500`, and DB/provider mutations remain `false`.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
 
 Route/page split alone is not accepted as the UX fix. Page count only moves long documents/messages to another URL if the route body still unfolds the full artifact. The accepted structure is a three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes for long documents, messages, logs, and raw metadata.
@@ -83,9 +84,10 @@ Required first-task containment:
 5. keep UI follow-up scoped to mobile Documents detail-depth debt or reproduced exact-session desktop Share full-workbench perception issues.
 6. promote the bounded-workbench current-source proof to live only after production /api/build-info reaches the product/evidence head and the live probe is rerun.
 7. reproduce an exact saved/generated Share session before using fixture or generated /workspace share evidence to close the user's exact Share complaint.
-8. keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven.
-9. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
-10. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
+8. treat the Share exact-session boundary as open until a concrete session URL/payload is provided; the current no-mutation boundary audit only proves route presence and missing exact evidence.
+9. keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven.
+10. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
+11. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
 
 ## KOSHA Candidate Boundary
 

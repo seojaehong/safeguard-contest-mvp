@@ -1,27 +1,27 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T10:02:36.849Z",
+  "generatedAt": "2026-07-22T10:11:55.865Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "36642d6327bb27dea67ea4bb6f90f4cfea67ac17",
-  "productionCommit": "a0877d1d1dac1cf3c6a3b7a2632c1369152f58d5",
+  "sourceHead": "d1a985cdfc52e879664fe63dbc2b1560d3b511ea",
+  "productionCommit": "d1a985cdfc52e879664fe63dbc2b1560d3b511ea",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "a0877d1d1dac1cf3c6a3b7a2632c1369152f58d5",
+    "commitSha": "d1a985cdfc52e879664fe63dbc2b1560d3b511ea",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-8fxmr9h2v-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-4fuk1bcya-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": false,
-  "currentHeadIsEvidenceOnlyPending": true,
-  "sourceHeadLivePending": true,
-  "boundedWorkbenchSourceIncludedInLive": false,
-  "boundedWorkbenchCurrentLivePending": true,
-  "liveExactEvidenceCommit": "36642d6327bb27dea67ea4bb6f90f4cfea67ac17",
-  "liveRollupLiveCommit": "a0877d1d1dac1cf3c6a3b7a2632c1369152f58d5",
+  "latestEvidenceCommitLive": true,
+  "currentHeadIsEvidenceOnlyPending": false,
+  "sourceHeadLivePending": false,
+  "boundedWorkbenchSourceIncludedInLive": true,
+  "boundedWorkbenchCurrentLivePending": false,
+  "liveExactEvidenceCommit": "d1a985cdfc52e879664fe63dbc2b1560d3b511ea",
+  "liveRollupLiveCommit": "d1a985cdfc52e879664fe63dbc2b1560d3b511ea",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -36,6 +36,7 @@
     "approvalRunway": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
     "sifEmbeddingPreflight": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
     "shareGeneratedSessionPerception": "evaluation\\share-generated-session-perception-2026-07-22\\report.json",
+    "shareExactSessionBoundary": "evaluation\\share-exact-session-boundary-2026-07-22\\report.json",
     "documentsLongFormIA": "evaluation\\documents-long-form-ia-2026-07-22\\report.json",
     "boundedWorkbenchDod": "evaluation\\workspace-bounded-workbench-dod-2026-07-22\\report.json",
     "boundedWorkbenchCurrent": "evaluation\\workspace-bounded-workbench-current-2026-07-22\\report.json"
@@ -279,6 +280,18 @@
       }
     ]
   },
+  "shareExactSessionBoundary": {
+    "verdict": "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
+    "sourceHead": "d1a985cdfc52e879664fe63dbc2b1560d3b511ea",
+    "liveCommit": "d1a985cdfc52e879664fe63dbc2b1560d3b511ea",
+    "exactSavedUserSessionReproduced": false,
+    "exactSavedSessionRequiredForUserSpecificPass": true,
+    "dbMutationPerformed": false,
+    "providerDispatchLiveClaimed": false,
+    "externalProviderCalled": false,
+    "safeReadStatus": 500,
+    "safeReadMessage": "공유 세션을 확인하지 못했습니다."
+  },
   "documentsLongFormIA": {
     "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION",
     "sourceHead": "c7ef001130dc637c43dbc6a60bb968666f6f2261",
@@ -473,6 +486,7 @@
     "keep UI follow-up scoped to mobile Documents detail-depth debt or reproduced exact-session desktop Share full-workbench perception issues",
     "promote the bounded-workbench current-source proof to live only after production /api/build-info reaches the product/evidence head and the live probe is rerun",
     "reproduce an exact saved/generated Share session before using fixture or generated /workspace share evidence to close the user's exact Share complaint",
+    "treat the Share exact-session boundary as open until a concrete session URL/payload is provided; the current no-mutation boundary audit only proves route presence and missing exact evidence",
     "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
     "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
     "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held"
