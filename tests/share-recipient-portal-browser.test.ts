@@ -241,6 +241,7 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
         minimumControlHeight: Math.min(...controls.map((item) => item.getBoundingClientRect().height)),
         minimumDocumentSummaryHeight: Math.min(...documentSummaries.map((item) => item.getBoundingClientRect().height)),
         confirmationTop: Math.round(confirmButton?.getBoundingClientRect().top ?? 0),
+        confirmationBottom: Math.round(confirmButton?.getBoundingClientRect().bottom ?? 0),
         documentsTop: Math.round(documentsCard?.getBoundingClientRect().top ?? 0),
         collapsedDocumentCount: closedDocuments.length,
         decisionActionWidth: Math.round(decisionAction?.getBoundingClientRect().width ?? 0),
@@ -256,6 +257,7 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
     expect(metrics.minimumControlHeight).toBeGreaterThanOrEqual(44);
     expect(metrics.minimumDocumentSummaryHeight).toBeGreaterThanOrEqual(44);
     expect(metrics.confirmationTop).toBeLessThan(metrics.documentsTop);
+    expect(metrics.confirmationBottom).toBeLessThanOrEqual(760);
     expect(metrics.collapsedDocumentCount).toBe(3);
     expect(metrics.decisionActionWidth).toBeGreaterThanOrEqual(300);
     expect(metrics.reviewHeadingLeft).toBeGreaterThanOrEqual(16);
@@ -272,6 +274,84 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
       languageCode: "vi"
     });
     await page.close();
+  }, 90_000);
+
+  it("uses a desktop recipient confirmation workbench instead of a stretched mobile stack", async () => {
+    if (!browser || !harness) throw new Error("Browser harness was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 723 } });
+    await page.route("**/api/share-sessions/**", async (route) => {
+      if (route.request().method() === "POST") {
+        await fulfillJson(route, {
+          ok: true,
+          configured: true,
+          confirmationId: "confirmation-desktop",
+          message: "작업자 열람 확인을 저장했습니다."
+        });
+        return;
+      }
+      await fulfillJson(route, sessionPayload);
+    });
+
+    try {
+      const response = await page.goto(`${harness.baseUrl}/share/${SESSION_ID}?workerId=${WORKER_ID}`, { waitUntil: "networkidle" });
+      if (!response || response.status() >= 400) {
+        throw new Error(`share page returned ${response?.status() ?? "no response"}\n${await page.locator("body").innerText().catch(() => "")}\n${harness.readServerOutput()}`);
+      }
+      await expect.poll(() => page.locator("body").innerText()).toContain("Kiểm tra gói tài liệu");
+      await expect.poll(() => page.locator("body").innerText()).toContain("Thông báo an toàn");
+
+      const metrics = await page.evaluate(() => {
+        const pageRoot = document.querySelector<HTMLElement>(".safeclaw-share-recipient-page");
+        const confirmation = [...document.querySelectorAll<HTMLElement>(".safeclaw-share-recipient-card")]
+          .find((item) => item.innerText.includes("Tôi đã xem"));
+        const notice = document.querySelector<HTMLElement>(".safeclaw-share-recipient-card-emphasis");
+        const documentsCard = [...document.querySelectorAll<HTMLElement>(".safeclaw-share-recipient-card")]
+          .find((item) => item.innerText.includes("3 tài liệu chính"));
+        const confirmRect = confirmation?.getBoundingClientRect();
+        const noticeRect = notice?.getBoundingClientRect();
+        const documentsRect = documentsCard?.getBoundingClientRect();
+        const rootRect = pageRoot?.getBoundingClientRect();
+        const cards = [...document.querySelectorAll<HTMLElement>(".safeclaw-share-recipient-card")];
+        const distinctLefts = Array.from(new Set(cards
+          .map((item) => Math.round(item.getBoundingClientRect().left / 40) * 40)
+          .filter((left) => left > 0)))
+          .sort((a, b) => a - b);
+        return {
+          rootWidth: Math.round(rootRect?.width ?? 0),
+          rootBottom: Math.round(rootRect?.bottom ?? 0),
+          confirmationLeft: Math.round(confirmRect?.left ?? 0),
+          confirmationRight: Math.round(confirmRect?.right ?? 0),
+          confirmationBottom: Math.round(confirmRect?.bottom ?? 0),
+          noticeLeft: Math.round(noticeRect?.left ?? 0),
+          noticeWidth: Math.round(noticeRect?.width ?? 0),
+          noticeBottom: Math.round(noticeRect?.bottom ?? 0),
+          documentsLeft: Math.round(documentsRect?.left ?? 0),
+          documentsBottom: Math.round(documentsRect?.bottom ?? 0),
+          distinctLefts,
+          scrollWidth: document.documentElement.scrollWidth,
+          viewportWidth: document.documentElement.clientWidth,
+          bodyHeight: document.body.scrollHeight,
+          viewportHeight: window.innerHeight,
+          outsideCards: cards.filter((item) => {
+            const rect = item.getBoundingClientRect();
+            return rect.left < -0.5 || rect.right > window.innerWidth + 0.5;
+          }).length
+        };
+      });
+
+      expect(metrics.rootWidth).toBeGreaterThanOrEqual(1040);
+      expect(metrics.distinctLefts.length).toBeGreaterThanOrEqual(2);
+      expect(metrics.noticeLeft).toBeGreaterThan(metrics.confirmationRight);
+      expect(metrics.documentsLeft).toBeGreaterThan(metrics.confirmationLeft);
+      expect(metrics.noticeWidth).toBeGreaterThanOrEqual(420);
+      expect(metrics.confirmationBottom).toBeLessThanOrEqual(metrics.viewportHeight);
+      expect(metrics.noticeBottom).toBeLessThanOrEqual(metrics.viewportHeight);
+      expect(metrics.rootBottom).toBeLessThanOrEqual(Math.ceil(metrics.viewportHeight * 1.25));
+      expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewportWidth);
+      expect(metrics.outsideCards).toBe(0);
+    } finally {
+      await page.close();
+    }
   }, 90_000);
 
   it("keeps unsupported foreign recipients on an English portal chrome fallback", async () => {

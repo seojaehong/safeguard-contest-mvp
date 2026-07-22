@@ -15683,6 +15683,51 @@ body:has(.safeclaw-landing) :is(
   letter-spacing: var(--tracking-body);
 }
 
+@media (min-width: 900px) {
+  .safeclaw-share-recipient-page {
+    max-width: min(1204px, calc(100vw - 48px));
+    grid-template-columns: minmax(360px, 0.82fr) minmax(460px, 1fr);
+    align-items: start;
+    column-gap: 18px;
+    row-gap: 8px;
+  }
+
+  .safeclaw-share-recipient-page > h2,
+  .safeclaw-share-recipient-page > .safeclaw-subtitle,
+  .safeclaw-share-recipient-page > .safeclaw-hint {
+    grid-column: 1 / -1;
+  }
+
+  .safeclaw-share-recipient-card-task,
+  .safeclaw-share-recipient-card-identity,
+  .safeclaw-share-recipient-card-confirm,
+  .safeclaw-share-recipient-card-anonymous {
+    grid-column: 1;
+  }
+
+  .safeclaw-share-recipient-card-confirm {
+    grid-row: 3;
+  }
+
+  .safeclaw-share-recipient-card-task {
+    grid-row: 4;
+  }
+
+  .safeclaw-share-recipient-card-notice,
+  .safeclaw-share-recipient-card-documents {
+    grid-column: 2;
+  }
+
+  .safeclaw-share-recipient-card-confirm {
+    position: sticky;
+    top: 88px;
+  }
+
+  .safeclaw-share-recipient-card-documents {
+    grid-row: 4 / span 2;
+  }
+}
+
 .safeclaw-input,
 .safeclaw-select {
   width: 100%;
@@ -15780,8 +15825,44 @@ body:has(.safeclaw-landing) :is(
     padding: 0 var(--space-4) var(--space-8);
   }
 
+  .safeclaw-share-recipient-card-task {
+    order: 2;
+  }
+
+  .safeclaw-share-recipient-card-identity {
+    order: 1;
+  }
+
+  .safeclaw-share-recipient-card-confirm {
+    order: 1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 10px;
+  }
+
+  .safeclaw-share-recipient-card-confirm h3,
+  .safeclaw-share-recipient-card-confirm .safeclaw-button,
+  .safeclaw-share-recipient-card-confirm .safeclaw-note {
+    grid-column: 1 / -1;
+  }
+
+  .safeclaw-share-recipient-card-notice {
+    order: 4;
+  }
+
+  .safeclaw-share-recipient-card-anonymous {
+    order: 5;
+  }
+
+  .safeclaw-share-recipient-card-documents {
+    order: 6;
+  }
+
   .safeclaw-share-recipient-card {
     padding: 14px;
+  }
+
+  .safeclaw-share-recipient-card-notice .safeclaw-share-recipient-preview {
+    max-height: 150px;
   }
 }
 

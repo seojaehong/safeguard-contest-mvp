@@ -634,7 +634,7 @@ export default function ShareRecipientPage() {
         <p className="safeclaw-subtitle">
           {isAnonymousOpenSession ? copy.anonymousSubtitle : copy.invitedSubtitle}
         </p>
-        <article className="safeclaw-share-recipient-card">
+        <article className="safeclaw-share-recipient-card safeclaw-share-recipient-card-task">
           <h3>{copy.currentTaskTitle}</h3>
           <p>{question}</p>
           {sessionPayload?.expiresAt ? <p>{copy.expiresPrefix}: {formatIsoTime(sessionPayload.expiresAt)}</p> : null}
@@ -654,7 +654,7 @@ export default function ShareRecipientPage() {
         ) : (
           <>
             {sessionPayload.recipientMessage ? (
-              <article className="safeclaw-share-recipient-card safeclaw-share-recipient-card-emphasis">
+              <article className="safeclaw-share-recipient-card safeclaw-share-recipient-card-emphasis safeclaw-share-recipient-card-notice">
                 <h3>{copy.workerNoticeTitle}</h3>
                 <p className="safeclaw-note">{copy.workerNoticeNote}</p>
                 <pre className="safeclaw-share-recipient-preview">{buildPreviewText(sessionPayload.recipientMessage.body, 900)}</pre>
@@ -662,7 +662,7 @@ export default function ShareRecipientPage() {
             ) : null}
 
             {needsManualWorkerIdentity ? (
-              <article className="safeclaw-share-recipient-card">
+              <article className="safeclaw-share-recipient-card safeclaw-share-recipient-card-identity">
                 <h3>{copy.inviteInfoTitle}</h3>
                 <label>
                   {copy.workerIdLabel}
@@ -680,7 +680,7 @@ export default function ShareRecipientPage() {
               </article>
             ) : null}
 
-          <article className="safeclaw-share-recipient-card">
+          <article className="safeclaw-share-recipient-card safeclaw-share-recipient-card-confirm">
                 <h3>{copy.confirmationTitle}</h3>
               <label>
                 {copy.displayNameLabel}
@@ -730,14 +730,14 @@ export default function ShareRecipientPage() {
               ) : null}
             </article>
             {isAnonymousOpenSession ? (
-              <article className="safeclaw-share-recipient-card">
+              <article className="safeclaw-share-recipient-card safeclaw-share-recipient-card-anonymous">
                 <h3>{copy.anonymousGuideTitle}</h3>
                 <p>{copy.anonymousGuideBody}</p>
               </article>
             ) : null}
 
             {documents.length ? (
-              <article className="safeclaw-share-recipient-card">
+              <article className="safeclaw-share-recipient-card safeclaw-share-recipient-card-documents">
                 <h3>{copy.documentsTitle}</h3>
                 <p className="safeclaw-note">{copy.documentsNote}</p>
                 <div className="safeclaw-share-recipient-documents">
@@ -750,7 +750,7 @@ export default function ShareRecipientPage() {
                 </div>
               </article>
             ) : (
-              <article className="safeclaw-share-recipient-card">
+              <article className="safeclaw-share-recipient-card safeclaw-share-recipient-card-documents">
                 <h3>{copy.documentsLoadingTitle}</h3>
                 <p>{copy.documentsLoadingBody}</p>
               </article>
