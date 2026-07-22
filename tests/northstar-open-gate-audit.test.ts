@@ -808,6 +808,45 @@ function createFixtureRoot(): string {
       backendProviderExportContractsTouched: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "documents-selected-editor-cockpit-2026-07-22", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION",
+    sourceHead: "fixture-sha",
+    scope: {
+      productionLiveClaimed: true,
+      providerDispatchLiveClaimed: false,
+      fullDocumentIaClaimed: false,
+      routeSplitAloneAcceptedAsFix: false,
+    },
+    liveProduction: {
+      buildInfo: {
+        commitSha: "fixture-sha",
+        branch: "master",
+        environment: "production",
+      },
+      desktopShort1440x723: {
+        viewportHeight: 723,
+        sectionActions: { bottom: 463 },
+        rawTextarea: { top: 1126 },
+        horizontalOverflow: false,
+        outsideHorizontalElements: 0,
+      },
+      mobile390x844: {
+        viewportHeight: 844,
+        sectionActions: { bottom: 440 },
+        firstRiskHazardField: { bottom: 753 },
+        rawTextarea: { top: 991 },
+        horizontalOverflow: false,
+        outsideHorizontalElements: 0,
+      },
+    },
+    contracts: {
+      fieldSummaryBeforeRawTextarea: true,
+      evidenceRecheckActionsBeforeRawTextarea: true,
+      mobileActionsBottomWithinFirstViewport: true,
+      rawTextareaSecondary: true,
+      canonicalRiskRowContractsPreserved: true,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "workspace-ia-live-7b36-2026-07-22", "report.json"), {
     verdict: "IA_BLOCKER_REFINED_CURRENT_LIVE",
     liveCommitChecked: "fixture-sha",
@@ -1142,6 +1181,7 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exact 844px viewport");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exact one-viewport Documents");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("selected editor/detail field-summary risk-row landing");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("selected-editor field summary plus evidence/recheck CTA before raw textarea");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("raw textarea/full long-form editing below the first viewport as open secondary drilldown");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("/share/[sessionId] desktop recipient confirmation");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("mobile confirmation CTA before document details");
@@ -1149,6 +1189,7 @@ describe("northstar open gate audit", () => {
       path.join("evaluation", "workspace-ia-live-7b36-2026-07-22", "report.json"),
     );
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("raw textarea and deeper row/all-document authoring");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("selected-editor evidence/recheck CTA is live-proven before raw textarea");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("/share/[sessionId] recipient cockpit geometry is now live-proven");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).not.toContain("Promote the Share staged rail");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.state).toBe("proven");

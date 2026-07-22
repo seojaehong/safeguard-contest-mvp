@@ -1,10 +1,10 @@
 # Documents Selected Editor Cockpit Gate
 
-Verdict: `PASS_CURRENT_SOURCE`
+Verdict: `PASS_LIVE_PRODUCTION`
 
-Source head: `39bd637c8c8b388cf36865fd44503fad78a437bd`
+Source head: `21076b0ab67f1cb5bdde7dc9f490874e1f59acb5`
 
-Production live claim: `false`
+Production live claim: `true`
 
 Provider dispatch live claim: `false`
 
@@ -16,7 +16,7 @@ This slice targets the selected `/documents` editor/detail landing. The selected
 
 ## Geometry Evidence
 
-Measured against local production current source at `http://127.0.0.1:3058`.
+Measured against live production `https://www.safeclaw.kr` after `/api/build-info` returned `21076b0ab67f1cb5bdde7dc9f490874e1f59acb5`.
 
 | Surface | Body / viewport | Field strip | Evidence/recheck CTA | First risk row header | First hazard field | Raw textarea | Overflow |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
@@ -41,3 +41,5 @@ Mobile CTA bottom is `440`, inside the first viewport and before raw document te
 - Mobile selected editor remains `1.26x` by body height because long risk rows and raw text remain drilldown content.
 - Next bounded work should continue field/row-first authoring depth without moving long content back into page body flow.
 - Provider live dispatch remains approval-gated.
+
+Live build-info: 21076b0ab67f1cb5bdde7dc9f490874e1f59acb5, branch master, environment production, deployment safeguard-contest-63iobmteq-seojaehongs-projects.vercel.app.

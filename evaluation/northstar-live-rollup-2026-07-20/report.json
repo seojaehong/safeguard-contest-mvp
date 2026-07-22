@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T03:01:28.738Z",
-  "head": "a0a5d310e3f1257bb30204e7cd85398aa02356a0",
+  "generatedAt": "2026-07-22T03:30:12.823Z",
+  "head": "21076b0ab67f1cb5bdde7dc9f490874e1f59acb5",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "6b03c8e01f83700f71727edf18dbdbfe0da0c66a",
+    "commitSha": "21076b0ab67f1cb5bdde7dc9f490874e1f59acb5",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-g4dqmc3co-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-63iobmteq-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -37,7 +37,7 @@
       "id": "ui_documents_share_cockpit",
       "state": "proven",
       "artifact": "evaluation\\workspace-ia-live-7b36-2026-07-22\\report.json",
-      "detail": "Production evidence closes default /workspace Documents and Share cockpits, /documents mobile raw height, exact one-viewport Documents review cockpit, selected-document context/summary layers, selected editor/detail field-summary risk-row landing, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, mobile Share exact 844px viewport containment, and /share/[sessionId] desktop recipient confirmation as a two-column cockpit with mobile confirmation CTA before document details. Latest IA refinement still keeps raw textarea/full long-form editing below the first viewport as open secondary drilldown; it does not claim provider live dispatch."
+      "detail": "Production evidence closes default /workspace Documents and Share cockpits, /documents mobile raw height, exact one-viewport Documents review cockpit, selected-document context/summary layers, selected editor/detail field-summary risk-row landing, selected-editor field summary plus evidence/recheck CTA before raw textarea, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, mobile Share exact 844px viewport containment, and /share/[sessionId] desktop recipient confirmation as a two-column cockpit with mobile confirmation CTA before document details. Latest IA refinement still keeps raw textarea/full long-form editing below the first viewport as open secondary drilldown; it does not claim provider live dispatch."
     },
     {
       "id": "dispatch_standalone_cockpit",
@@ -95,7 +95,7 @@
     "verdict": "MOBILE_FIXED",
     "productionCommit": "be64c3b15a8cb55bb132fa065ec485ffb700f652",
     "currentGeometryArtifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-    "currentGeometryCommit": "806537ec7c081b967adfc649d9c79046866601db",
+    "currentGeometryCommit": "21076b0ab67f1cb5bdde7dc9f490874e1f59acb5",
     "documentsHeightRatio": 1,
     "documentsBodyHeight": 844,
     "documentsViewportHeight": 844,
@@ -119,7 +119,7 @@
   },
   "workspaceGeometry": {
     "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-    "productionCommit": "806537ec7c081b967adfc649d9c79046866601db",
+    "productionCommit": "21076b0ab67f1cb5bdde7dc9f490874e1f59acb5",
     "mobileDocumentDeepReviewOpen": false,
     "mobileVisibleDocumentPreviews": 0
   },
@@ -187,10 +187,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "a0a5d310e3f1257bb30204e7cd85398aa02356a0",
+      "sourceCommit": "21076b0ab67f1cb5bdde7dc9f490874e1f59acb5",
       "sourceStatus": "exact",
-      "productionCommit": "a0a5d310e3f1257bb30204e7cd85398aa02356a0",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "21076b0ab67f1cb5bdde7dc9f490874e1f59acb5",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -251,10 +251,10 @@
     {
       "id": "workspace_docs_share_geometry",
       "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-      "sourceCommit": "806537ec7c081b967adfc649d9c79046866601db",
-      "sourceStatus": "ancestor",
-      "productionCommit": "806537ec7c081b967adfc649d9c79046866601db",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "21076b0ab67f1cb5bdde7dc9f490874e1f59acb5",
+      "sourceStatus": "exact",
+      "productionCommit": "21076b0ab67f1cb5bdde7dc9f490874e1f59acb5",
+      "productionStatus": "matches_live"
     },
     {
       "id": "dispatch_standalone_cockpit",

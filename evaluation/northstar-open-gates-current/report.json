@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-22T03:01:28.443Z",
-  "sourceSha": "a0a5d310e3f1257bb30204e7cd85398aa02356a0",
+  "generatedAt": "2026-07-22T03:29:56.525Z",
+  "sourceSha": "21076b0ab67f1cb5bdde7dc9f490874e1f59acb5",
   "overall": "open",
   "gates": [
     {
@@ -27,10 +27,10 @@
       "state": "proven",
       "label": "Documents and Share cockpit UI",
       "evidencePath": "evaluation\\workspace-ia-live-7b36-2026-07-22\\report.json",
-      "detail": "Production evidence closes default /workspace Documents and Share cockpits, /documents mobile raw height, exact one-viewport Documents review cockpit, selected-document context/summary layers, selected editor/detail field-summary risk-row landing, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, mobile Share exact 844px viewport containment, and /share/[sessionId] desktop recipient confirmation as a two-column cockpit with mobile confirmation CTA before document details. Latest IA refinement still keeps raw textarea/full long-form editing below the first viewport as open secondary drilldown; it does not claim provider live dispatch.",
+      "detail": "Production evidence closes default /workspace Documents and Share cockpits, /documents mobile raw height, exact one-viewport Documents review cockpit, selected-document context/summary layers, selected editor/detail field-summary risk-row landing, selected-editor field summary plus evidence/recheck CTA before raw textarea, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, mobile Share exact 844px viewport containment, and /share/[sessionId] desktop recipient confirmation as a two-column cockpit with mobile confirmation CTA before document details. Latest IA refinement still keeps raw textarea/full long-form editing below the first viewport as open secondary drilldown; it does not claim provider live dispatch.",
       "nextActions": [
         "Keep the production live geometry recorded for default Documents/Share cockpits and 12-document cockpit slices; do not expand them into a full 12-document field-first authoring claim.",
-        "Keep raw textarea and deeper row/all-document authoring as secondary drilldown follow-up; do not claim the full document edit surface itself is short.",
+        "Keep raw textarea and deeper row/all-document authoring as secondary drilldown follow-up; selected-editor evidence/recheck CTA is live-proven before raw textarea, but the full document edit surface itself is not claimed short.",
         "Keep /share generated-result refinements as separate gates when user-visible sessions reproduce the complaint; /share/[sessionId] recipient cockpit geometry is now live-proven for the invited-session fixture."
       ]
     },
