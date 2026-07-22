@@ -433,7 +433,8 @@ export function buildNorthstarNextRunway(options) {
   const liveRollupLiveCommit = isRecord(liveRollup) && isRecord(liveRollup.liveBuildInfo)
     ? asString(liveRollup.liveBuildInfo.commitSha)
     : "";
-  const liveRollupMatchesProduction = liveExactEvidenceCommit === liveCommit && liveRollupLiveCommit === liveCommit;
+  const liveRollupHeadMatchesKnownState = liveExactEvidenceCommit === liveCommit || liveExactEvidenceCommit === sourceHead;
+  const liveRollupMatchesProduction = liveRollupHeadMatchesKnownState && liveRollupLiveCommit === liveCommit;
   const latestEvidenceCommitLive = sourceHead === liveCommit;
   const currentHeadIsEvidenceOnlyPending = sourceHead !== liveCommit && liveRollupMatchesProduction;
   const sourceHeadLivePending = sourceHead !== liveCommit;

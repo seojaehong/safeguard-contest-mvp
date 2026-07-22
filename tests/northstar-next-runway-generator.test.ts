@@ -492,6 +492,13 @@ function pointLiveRollupAt(root: string, commit: string): void {
   });
 }
 
+function pointLiveRollupAtHeadWithLive(root: string, head: string, liveCommit: string): void {
+  writeJson(root, "evaluation/northstar-live-rollup-2026-07-20/report.json", {
+    head,
+    liveBuildInfo: { commitSha: liveCommit },
+  });
+}
+
 describe("northstar next runway generator", () => {
   it("marks the latest evidence commit as live when source, production, and live rollup align", async () => {
     const { buildNorthstarNextRunway } = await loadNextRunwayModule();
@@ -691,6 +698,24 @@ describe("northstar next runway generator", () => {
     const { root, secondHead } = createFixtureRoot();
     pointLiveRollupAt(root, secondHead);
     const thirdHead = commitAll(root, "evidence only");
+    const report = buildNorthstarNextRunway({
+      rootDir: root,
+      buildInfo: { commitSha: secondHead },
+    });
+
+    expect(report.sourceHead).toBe(thirdHead);
+    expect(report.productionCommit).toBe(secondHead);
+    expect(report.latestEvidenceCommitLive).toBe(false);
+    expect(report.currentHeadIsEvidenceOnlyPending).toBe(true);
+    expect(report.liveRollupMatchesProduction).toBe(true);
+  });
+
+  it("keeps an evidence-only source head pending after refreshing the rollup from that source head", async () => {
+    const { buildNorthstarNextRunway } = await loadNextRunwayModule();
+    const { root, secondHead } = createFixtureRoot();
+    writeJson(root, "evaluation/evidence-pointer/report.json", { sourceHead: secondHead });
+    const thirdHead = commitAll(root, "evidence only");
+    pointLiveRollupAtHeadWithLive(root, thirdHead, secondHead);
     const report = buildNorthstarNextRunway({
       rootDir: root,
       buildInfo: { commitSha: secondHead },
