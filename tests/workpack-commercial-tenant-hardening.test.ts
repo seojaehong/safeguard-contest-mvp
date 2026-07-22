@@ -124,6 +124,25 @@ function createFixtureClient(tables: FixtureTables) {
   };
 }
 
+function createMaybeSingleErrorClient(error: Record<string, unknown>) {
+  return {
+    from() {
+      const query = {
+        select() {
+          return query;
+        },
+        eq() {
+          return query;
+        },
+        async maybeSingle() {
+          return { data: null, error };
+        }
+      };
+      return query;
+    }
+  };
+}
+
 function ownedContext(siteId: string | null) {
   return {
     ok: true,
@@ -441,6 +460,54 @@ describe("commercial workpack service-role tenant hardening", () => {
         }
       }
     });
+  });
+
+  it("treats a missing public share session row as fail-closed not found", async () => {
+    const store = await vi.importActual<typeof import("@/lib/workpack-commercial-store")>(
+      "@/lib/workpack-commercial-store"
+    );
+    const client = createMaybeSingleErrorClient({
+      code: "PGRST116",
+      message: "JSON object requested, multiple (or no) rows returned"
+    });
+
+    const result = await store.loadActivePublicShareSession(client as never, {
+      shareSessionId: "33333333-3333-4333-8333-333333333333",
+      workerId: "11111111-1111-4111-8111-111111111111"
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      status: 404,
+      message: "유효한 공유 세션을 찾지 못했습니다."
+    });
+  });
+
+  it("keeps public share session storage errors visible as server errors", async () => {
+    const store = await vi.importActual<typeof import("@/lib/workpack-commercial-store")>(
+      "@/lib/workpack-commercial-store"
+    );
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const client = createMaybeSingleErrorClient({
+      code: "42P01",
+      message: "relation workpack_share_sessions does not exist"
+    });
+
+    const result = await store.loadActivePublicShareSession(client as never, {
+      shareSessionId: "33333333-3333-4333-8333-333333333333",
+      workerId: "11111111-1111-4111-8111-111111111111"
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      status: 500,
+      message: "공유 세션을 확인하지 못했습니다."
+    });
+    expect(consoleSpy).toHaveBeenCalledWith(
+      "public share session fetch failed",
+      expect.objectContaining({ code: "42P01" })
+    );
+    consoleSpy.mockRestore();
   });
 
   it("returns only full-tuple share sessions and confirmations", async () => {

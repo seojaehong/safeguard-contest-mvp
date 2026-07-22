@@ -230,6 +230,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
+function isPostgrestNoRowsError(error: unknown): boolean {
+  return isRecord(error) && error.code === "PGRST116";
+}
+
 function readPublicString(value: unknown, maxLength = 2_400): string {
   if (typeof value !== "string") return "";
   return value
@@ -317,6 +321,9 @@ export async function loadActivePublicShareSession(
     .maybeSingle();
 
   if (error) {
+    if (isPostgrestNoRowsError(error)) {
+      return { ok: false, status: 404, message: "유효한 공유 세션을 찾지 못했습니다." };
+    }
     console.error("public share session fetch failed", error);
     return { ok: false, status: 500, message: "공유 세션을 확인하지 못했습니다." };
   }
