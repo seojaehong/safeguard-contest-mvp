@@ -27,6 +27,7 @@ const ARTIFACTS = Object.freeze({
   sifEmbeddingPreflight: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
   shareGeneratedSessionPerception: path.join("evaluation", "share-generated-session-perception-2026-07-22", "report.json"),
   documentsLongFormIA: path.join("evaluation", "documents-long-form-ia-2026-07-22", "report.json"),
+  boundedWorkbenchDod: path.join("evaluation", "workspace-bounded-workbench-dod-2026-07-22", "report.json"),
 });
 
 /**
@@ -252,6 +253,31 @@ function documentsLongFormIASummary(documentsIa) {
 }
 
 /**
+ * @param {unknown} dod
+ */
+function boundedWorkbenchDodSummary(dod) {
+  if (!isRecord(dod)) return {};
+  const acceptance = isRecord(dod.acceptance) ? dod.acceptance : {};
+  const documents = isRecord(acceptance.documents) ? acceptance.documents : {};
+  const share = isRecord(acceptance.shareResult) ? acceptance.shareResult : {};
+  const evidence = isRecord(dod.evidenceRequirements) ? dod.evidenceRequirements : {};
+  return {
+    verdict: asString(dod.verdict),
+    routeSplitAloneAcceptedAsFix: asBoolean(dod.routeSplitAloneAcceptedAsFix),
+    acceptedStructure: asString(dod.acceptedStructure),
+    designSystemTokenContract: asString(dod.designSystemTokenContract),
+    documentsDesktopMaxScreens: typeof documents.desktopMaxScreens === "number" ? documents.desktopMaxScreens : null,
+    documentsDesktopHardRedScreens: typeof documents.desktopHardRedScreens === "number" ? documents.desktopHardRedScreens : null,
+    documentsMobileViewport: asString(documents.mobileViewport),
+    shareDesktopMinColumns: typeof share.desktopMinColumns === "number" ? share.desktopMinColumns : null,
+    shareMobileStackAllowed: asBoolean(share.mobileStackAllowed),
+    requiredViewports: Array.isArray(evidence.requiredViewports) ? evidence.requiredViewports.map(asString).filter(Boolean) : [],
+    requiredThemes: Array.isArray(evidence.requiredThemes) ? evidence.requiredThemes.map(asString).filter(Boolean) : [],
+    generatedFixtureAndSavedSessionSeparated: asBoolean(evidence.generatedFixtureAndSavedSessionSeparated),
+  };
+}
+
+/**
  * @param {unknown} koshaCandidateAudit
  */
 function koshaCandidateAuditSummary(koshaCandidateAudit) {
@@ -325,6 +351,7 @@ export function buildNorthstarNextRunway(options) {
   const sif = readJson(options.rootDir, ARTIFACTS.sifEmbeddingPreflight);
   const shareGenerated = readJson(options.rootDir, ARTIFACTS.shareGeneratedSessionPerception);
   const documentsIa = readJson(options.rootDir, ARTIFACTS.documentsLongFormIA);
+  const boundedDod = readJson(options.rootDir, ARTIFACTS.boundedWorkbenchDod);
   const liveExactEvidenceCommit = isRecord(liveRollup) ? asString(liveRollup.head) : "";
   const liveRollupLiveCommit = isRecord(liveRollup) && isRecord(liveRollup.liveBuildInfo)
     ? asString(liveRollup.liveBuildInfo.commitSha)
@@ -394,6 +421,7 @@ export function buildNorthstarNextRunway(options) {
     sifEmbeddingRuntime: sifSummary(sif),
     shareGeneratedSessionPerception: shareGeneratedSessionSummary(shareGenerated),
     documentsLongFormIA: documentsLongFormIASummary(documentsIa),
+    boundedWorkbenchDod: boundedWorkbenchDodSummary(boundedDod),
     nextSafeWorkWithoutApproval: [
       "refresh source/live exact evidence when production marker advances to the evidence-only head",
       "refresh live rollup before claiming live-exact if production advances beyond the current live rollup head",
@@ -475,6 +503,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Documents selected editor/detail: risk-assessment default, same-document reselect, and all-12 launcher exposure land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown.
 - Documents remaining debt: full 12-document authoring polish remains. The all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content.
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.
+- Bounded workbench DoD: route split alone is not accepted; desktop Documents hard-REDs above the recorded screen threshold, /share/result desktop requires multi-region workbench geometry, and generated fixture evidence must stay separate from exact saved/session proof.
 - Share desktop: current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.

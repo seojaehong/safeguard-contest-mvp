@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "safeclaw-workspace-bounded-workbench-dod/v1",
+  "generatedAt": "2026-07-22T07:16:37.0846423Z",
+  "sourceHead": "1371ca52d11525e7b26ae26402be4006e44a4a57",
+  "verdict": "DOD_RECORDED_NOT_A_PASS_CLAIM",
+  "routeSplitAloneAcceptedAsFix": false,
+  "acceptedStructure": "three-step shell plus first-viewport cockpit plus selected-only bounded workbench plus progressive drilldown",
+  "userQuestion": "페이지를 더 나눠도 문서나 공유페이지가 긴 건 똑같지 않나?",
+  "productAnswer": "페이지 수가 아니라 simultaneous visible scope를 줄이는 것이 해결책이다. Index는 전체를 보여도 작업대는 선택된 1개만 보여야 하고, 긴 원문/결과/근거는 drilldown/detail/local scroll로 격리한다.",
+  "designSystemTokenContract": "Use existing primitive-to-semantic-to-component tokens for shell, rail, card, editor, detail-pane, and action-rail surfaces; no wholesale globals/component rewrite, raw px/hex proliferation, or typography/radius drift.",
+  "acceptance": {
+    "routeSplit": {
+      "state": "orientation_only",
+      "passCondition": "Input, Documents, and Share/Result may be separate routes or steps, but this alone never closes long-form UX.",
+      "redCondition": "Any route renders long document/message/provenance content as serial body stack before the primary task is visible."
+    },
+    "input": {
+      "firstViewportMustShow": ["site/work summary", "AI mode or preset", "photo/evidence status", "next generation CTA"],
+      "longContentPolicy": "Previous generations, evidence details, and secondary history must be summary rail, drawer, or drilldown."
+    },
+    "documents": {
+      "desktopViewport": "1440x723",
+      "desktopMaxScreens": 1.5,
+      "desktopHardRedScreens": 2,
+      "mobileViewport": "390x723",
+      "firstViewportMustShow": ["current step", "selected document name", "core-3 launcher or selector", "primary action", "review/status state"],
+      "coreDocuments": ["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"],
+      "supportingDocumentsPolicy": "supporting 9 are collapsed/index/detail/drawer/local-scroll navigation, not serial full-body content above the selected editor",
+      "selectedEditorPolicy": "exactly one selected editor/detail is visible as the workbench body; full/raw textarea remains secondary drilldown",
+      "riskAssessmentFirstTask": ["basic info strip", "action row", "first risk row summary", "first hazard field"],
+      "redConditions": [
+        "document.body scrollHeight exceeds 2 viewport screens at 1440x723",
+        "12 full editor/body surfaces are simultaneously DOM-visible as a vertical stack",
+        "selected document editor or first practical body starts after 1.5 screens on 390x723",
+        "sticky header/sidebar/input overlaps primary CTA or selected editor"
+      ]
+    },
+    "shareResult": {
+      "desktopViewport": "1440x723",
+      "desktopMinColumns": 2,
+      "desktopTarget": "preview/document selector plus recipient/channel/action/provenance pane as a 2-pane or 3-pane workbench",
+      "mobileViewport": "390x723",
+      "mobileStackAllowed": true,
+      "stickyLocalRailRequired": ["source mode", "scope", "savedAt", "provenance"],
+      "redConditions": [
+        "desktop uses a mobile single-column stacked card layout",
+        "generated fixture route PASS is used as proof for exact saved/generated user session without separate measurement",
+        "primary action is hidden below first viewport in short desktop or mobile",
+        "provenance/status disappears after scroll instead of remaining in sticky/local rail or visible pane"
+      ]
+    }
+  },
+  "evidenceRequirements": {
+    "requiredViewports": ["1440x723", "390x723"],
+    "recommendedAdditionalViewports": ["1440x900", "390x844"],
+    "requiredThemes": ["day", "night"],
+    "generatedFixtureAndSavedSessionSeparated": true,
+    "requiredMetrics": [
+      "route",
+      "sessionKind: fixture/generated/saved-exact/live",
+      "viewport",
+      "theme",
+      "scrollHeightRatio",
+      "visibleSelectedEditorCount",
+      "fullDocumentBodyVisibleCount",
+      "supportingDocsCollapsed",
+      "stickyOverlapCount",
+      "horizontalOverflow",
+      "hiddenPrimaryCta",
+      "shareDesktopColumnCount",
+      "shareFirstViewportXRegionCount",
+      "designTokenSurfaceCoverage"
+    ]
+  },
+  "currentEvidenceBoundary": {
+    "documentsLongFormIA": "evaluation\\documents-long-form-ia-2026-07-22\\report.json",
+    "shareGeneratedSessionPerception": "evaluation\\share-generated-session-perception-2026-07-22\\report.json",
+    "note": "Existing PASS artifacts remain scoped to their measured route/session states. A user-visible exact saved/generated session that still feels mobile-like requires separate repro before broad PASS claims."
+  }
+}

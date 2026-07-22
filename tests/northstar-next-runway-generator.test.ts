@@ -94,6 +94,20 @@ type NextRunwayReport = {
       stickyOverlapCount: number | null;
     }>;
   };
+  boundedWorkbenchDod: {
+    verdict: string;
+    routeSplitAloneAcceptedAsFix: boolean;
+    acceptedStructure: string;
+    designSystemTokenContract: string;
+    documentsDesktopMaxScreens: number | null;
+    documentsDesktopHardRedScreens: number | null;
+    documentsMobileViewport: string;
+    shareDesktopMinColumns: number | null;
+    shareMobileStackAllowed: boolean;
+    requiredViewports: string[];
+    requiredThemes: string[];
+    generatedFixtureAndSavedSessionSeparated: boolean;
+  };
   nextSafeWorkWithoutApproval: string[];
 };
 
@@ -327,6 +341,30 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       },
     ],
   });
+  writeJson(root, "evaluation/workspace-bounded-workbench-dod-2026-07-22/report.json", {
+    verdict: "DOD_RECORDED_NOT_A_PASS_CLAIM",
+    routeSplitAloneAcceptedAsFix: false,
+    acceptedStructure: "three-step shell plus first-viewport cockpit plus selected-only bounded workbench plus progressive drilldown",
+    designSystemTokenContract: "Use existing primitive-to-semantic-to-component tokens for shell, rail, card, editor, detail-pane, and action-rail surfaces; no wholesale globals rewrite.",
+    acceptance: {
+      documents: {
+        desktopViewport: "1440x723",
+        desktopMaxScreens: 1.5,
+        desktopHardRedScreens: 2,
+        mobileViewport: "390x723",
+      },
+      shareResult: {
+        desktopViewport: "1440x723",
+        desktopMinColumns: 2,
+        mobileStackAllowed: true,
+      },
+    },
+    evidenceRequirements: {
+      requiredViewports: ["1440x723", "390x723"],
+      requiredThemes: ["day", "night"],
+      generatedFixtureAndSavedSessionSeparated: true,
+    },
+  });
 
   const firstHead = commitAll(root, "seed");
   const liveRollupPath = path.join(root, "evaluation/northstar-live-rollup-2026-07-20/report.json");
@@ -442,6 +480,17 @@ describe("northstar next runway generator", () => {
       horizontalOverflow: false,
       stickyOverlapCount: 0,
     }));
+    expect(report.boundedWorkbenchDod).toMatchObject({
+      verdict: "DOD_RECORDED_NOT_A_PASS_CLAIM",
+      routeSplitAloneAcceptedAsFix: false,
+      documentsDesktopMaxScreens: 1.5,
+      documentsDesktopHardRedScreens: 2,
+      documentsMobileViewport: "390x723",
+      shareDesktopMinColumns: 2,
+      shareMobileStackAllowed: true,
+      generatedFixtureAndSavedSessionSeparated: true,
+    });
+    expect(report.boundedWorkbenchDod.requiredThemes).toEqual(["day", "night"]);
     expect(report.nextSafeWorkWithoutApproval).toContain(
       "keep UI follow-up scoped to full 12-document authoring polish or reproduced exact-session desktop Share full-workbench perception issues",
     );
