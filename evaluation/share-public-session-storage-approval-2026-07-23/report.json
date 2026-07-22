@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-share-public-session-storage-approval/v1",
-  "generatedAt": "2026-07-22T21:26:53.217Z",
-  "sourceHead": "47c37eddc7b735f32ebb105601e2612a0503072a",
-  "productionCommit": "47c37eddc7b735f32ebb105601e2612a0503072a",
+  "generatedAt": "2026-07-22T22:10:09.772Z",
+  "sourceHead": "f66a8c5e9bb0ac74a0831f07cc6f2bd9af1ae6c6",
+  "productionCommit": "f66a8c5e9bb0ac74a0831f07cc6f2bd9af1ae6c6",
   "verdict": "APPROVAL_REQUIRED_PUBLIC_SHARE_SESSION_STORAGE_MIGRATION_NO_MUTATION",
   "exactSavedShareSessionVerdict": "MISSING_EVIDENCE",
   "storageReadinessArtifact": "evaluation/share-public-session-storage-readiness-2026-07-23/report.json",
