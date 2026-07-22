@@ -32,10 +32,10 @@
     ],
     "defaultWorkspaceIaSplitArtifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
     "selectedEditorFieldLevelLandingArtifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
-    "latestCheckedLiveMarkerForSelectedEditorLanding": "6158d2c04587d8fa8a1f23bf375eb4cadfdff39f"
+    "latestCheckedLiveMarkerForSelectedEditorLanding": "7389f22eb06e8d3f7724d15d9d172a9d9800cb7e"
   },
   "latestLiveGeometryRefresh": {
-    "marker": "6158d2c04587d8fa8a1f23bf375eb4cadfdff39f",
+    "marker": "7389f22eb06e8d3f7724d15d9d172a9d9800cb7e",
     "artifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
     "checkedAt": "2026-07-21T23:52:21.719Z",
     "workspaceDocumentsDefaultCockpit": {

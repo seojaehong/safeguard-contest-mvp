@@ -18,13 +18,13 @@ Latest current evidence represented by this ledger:
 
 - Default workspace IA split artifact: `evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json`
 - Selected editor field-level landing artifact: `evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json`
-- Latest refreshed live geometry marker: `6158d2c04587d8fa8a1f23bf375eb4cadfdff39f`
-- Latest checked live marker for selected editor landing: `6158d2c04587d8fa8a1f23bf375eb4cadfdff39f`
-- Latest launch-readiness evidence marker now live: `6158d2c04587d8fa8a1f23bf375eb4cadfdff39f`
+- Latest refreshed live geometry marker: `7389f22eb06e8d3f7724d15d9d172a9d9800cb7e`
+- Latest checked live marker for selected editor landing: `7389f22eb06e8d3f7724d15d9d172a9d9800cb7e`
+- Latest launch-readiness evidence marker now live: `7389f22eb06e8d3f7724d15d9d172a9d9800cb7e`
 
-Interpretation: the user's refined reading is correct and remains current at production `6158d2c0`. The default Documents cockpit and Share cockpit are no longer best described as stale or raw long-page failures. The remaining Documents complaint belongs to selected editor/detail depth: the first meaningful risk-row field/summary is now visible, while the full raw textarea starts below the first viewport and stays OPEN as a drilldown/readability issue. The remaining Share complaint, if reproduced, should be tested as perceived desktop workbench composition rather than as a literal one-column/mobile-stack geometry failure.
+Interpretation: the user's refined reading is correct and remains current at production `7389f22e`. The default Documents cockpit and Share cockpit are no longer best described as stale or raw long-page failures. The remaining Documents complaint belongs to selected editor/detail depth: the first meaningful risk-row field/summary is now visible, while the full raw textarea starts below the first viewport and stays OPEN as a drilldown/readability issue. The remaining Share complaint, if reproduced, should be tested as perceived desktop workbench composition rather than as a literal one-column/mobile-stack geometry failure.
 
-Latest live geometry refresh at `6158d2c04587d8fa8a1f23bf375eb4cadfdff39f` keeps that split:
+Latest live geometry refresh at `7389f22eb06e8d3f7724d15d9d172a9d9800cb7e` keeps that split:
 
 - `/workspace` Documents default cockpit: desktop-short `723/723`, mobile `844/844`, workbench bottoms `710/786`, `visibleDocumentPreviews=0`, overflow `0`.
 - `/workspace` selected editor/detail: field-level landing remains green, but raw textarea/detail landing remains open: desktop-short risk row header `522-579`, hazard field `615-675`, raw textarea `1094-1267`; mobile risk row header `526-583`, hazard field `607-657`, raw textarea `987-1160`.
