@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T13:18:07.134Z",
+  "generatedAt": "2026-07-22T14:05:53.594Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "28fef06ada4eea925cbb9ba52d5eb72e96c9944a",
-  "productionCommit": "28fef06ada4eea925cbb9ba52d5eb72e96c9944a",
+  "sourceHead": "036ca7e40fc19d7f0676e62468f5edd42967f31a",
+  "productionCommit": "036ca7e40fc19d7f0676e62468f5edd42967f31a",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "28fef06ada4eea925cbb9ba52d5eb72e96c9944a",
+    "commitSha": "036ca7e40fc19d7f0676e62468f5edd42967f31a",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-bvlqwg54w-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-gjl3y726r-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -20,8 +20,8 @@
   "sourceHeadLivePending": false,
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "28fef06ada4eea925cbb9ba52d5eb72e96c9944a",
-  "liveRollupLiveCommit": "28fef06ada4eea925cbb9ba52d5eb72e96c9944a",
+  "liveExactEvidenceCommit": "036ca7e40fc19d7f0676e62468f5edd42967f31a",
+  "liveRollupLiveCommit": "036ca7e40fc19d7f0676e62468f5edd42967f31a",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -37,6 +37,7 @@
     "sifEmbeddingPreflight": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
     "shareGeneratedSessionPerception": "evaluation\\share-generated-session-perception-2026-07-22\\report.json",
     "shareExactSessionBoundary": "evaluation\\share-exact-session-boundary-2026-07-22\\report.json",
+    "documentsCockpitWorkbenchGeometry": "evaluation\\documents-cockpit-workbench-geometry-2026-07-22\\report.json",
     "documentsLongFormIA": "evaluation\\documents-long-form-ia-2026-07-22\\report.json",
     "boundedWorkbenchDod": "evaluation\\workspace-bounded-workbench-dod-2026-07-22\\report.json",
     "boundedWorkbenchCurrent": "evaluation\\workspace-bounded-workbench-current-2026-07-22\\report.json"
@@ -300,8 +301,8 @@
   },
   "shareExactSessionBoundary": {
     "verdict": "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
-    "sourceHead": "e6cc23794461e21f943a96dcf1fcd44789df136d",
-    "liveCommit": "e6cc23794461e21f943a96dcf1fcd44789df136d",
+    "sourceHead": "402007e3ceefb3f7dacb6012f1a135f40a83a64a",
+    "liveCommit": "0448587087263a4ec7f0ca6fbf7032948d6283a1",
     "exactSavedUserSessionReproduced": false,
     "exactSavedSessionRequiredForUserSpecificPass": true,
     "dbMutationPerformed": false,
@@ -309,6 +310,50 @@
     "externalProviderCalled": false,
     "safeReadStatus": 500,
     "safeReadMessage": "공유 세션을 확인하지 못했습니다."
+  },
+  "documentsCockpitWorkbenchGeometry": {
+    "verdict": "PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH",
+    "sourceHead": "0448587087263a4ec7f0ca6fbf7032948d6283a1",
+    "productionCommit": "0448587087263a4ec7f0ca6fbf7032948d6283a1",
+    "baseUrl": "https://www.safeclaw.kr",
+    "staleDevRedExplained": true,
+    "routeSplitAloneAcceptedAsFix": false,
+    "rows": [
+      {
+        "viewport": "1440x723",
+        "overallVerdict": "PASS",
+        "bodyHeight": 723,
+        "horizontalOverflow": false,
+        "workbenchDisplay": "grid",
+        "workbenchColumnCount": 2,
+        "workbenchGridTemplateColumns": "252px 912px",
+        "launcherTop": 205,
+        "launcherBottom": 386,
+        "launcherRight": 504,
+        "editorTop": 205,
+        "editorBottom": 653,
+        "editorLeft": 512,
+        "coreButtons": 3,
+        "detailsOpen": false
+      },
+      {
+        "viewport": "390x723",
+        "overallVerdict": "PASS",
+        "bodyHeight": 728,
+        "horizontalOverflow": false,
+        "workbenchDisplay": "grid",
+        "workbenchColumnCount": 1,
+        "workbenchGridTemplateColumns": "366px",
+        "launcherTop": 207,
+        "launcherBottom": 336,
+        "launcherRight": 354,
+        "editorTop": 348,
+        "editorBottom": 680,
+        "editorLeft": 24,
+        "coreButtons": 3,
+        "detailsOpen": false
+      }
+    ]
   },
   "documentsLongFormIA": {
     "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION",
@@ -389,9 +434,9 @@
     }
   },
   "boundedWorkbenchCurrent": {
-    "verdict": "PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP",
-    "sourceHead": "f6c4d777a1731ca8fdf9115ef0b4d5a3ef6b1b72",
-    "productionCommit": "f6c4d777a1731ca8fdf9115ef0b4d5a3ef6b1b72",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP",
+    "sourceHead": "37d06a5e6e0ecf74bfaf59094dc169d8f12d0d9e",
+    "productionCommit": "",
     "routeSplitAloneAcceptedAsFix": false,
     "providerDispatchLiveClaimed": false,
     "externalProviderCalled": false,

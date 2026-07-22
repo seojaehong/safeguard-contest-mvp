@@ -27,6 +27,7 @@ const ARTIFACTS = Object.freeze({
   sifEmbeddingPreflight: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
   shareGeneratedSessionPerception: path.join("evaluation", "share-generated-session-perception-2026-07-22", "report.json"),
   shareExactSessionBoundary: path.join("evaluation", "share-exact-session-boundary-2026-07-22", "report.json"),
+  documentsCockpitWorkbenchGeometry: path.join("evaluation", "documents-cockpit-workbench-geometry-2026-07-22", "report.json"),
   documentsLongFormIA: path.join("evaluation", "documents-long-form-ia-2026-07-22", "report.json"),
   boundedWorkbenchDod: path.join("evaluation", "workspace-bounded-workbench-dod-2026-07-22", "report.json"),
   boundedWorkbenchCurrent: path.join("evaluation", "workspace-bounded-workbench-current-2026-07-22", "report.json"),
@@ -93,6 +94,16 @@ function gitIsAncestor(rootDir, possibleAncestor, descendant) {
  */
 function readJson(rootDir, relativePath) {
   return JSON.parse(fs.readFileSync(path.join(rootDir, relativePath), "utf8"));
+}
+
+/**
+ * @param {string} rootDir
+ * @param {string} relativePath
+ */
+function readOptionalJson(rootDir, relativePath) {
+  const absolutePath = path.join(rootDir, relativePath);
+  if (!fs.existsSync(absolutePath)) return {};
+  return JSON.parse(fs.readFileSync(absolutePath, "utf8"));
 }
 
 /**
@@ -255,6 +266,43 @@ function shareExactSessionBoundarySummary(shareExact) {
     externalProviderCalled: asBoolean(boundary.externalProviderCalled),
     safeReadStatus: typeof safeReadProbe.status === "number" ? safeReadProbe.status : null,
     safeReadMessage: asString(safeReadProbe.message),
+  };
+}
+
+/**
+ * @param {unknown} documentsGeometry
+ */
+function documentsCockpitWorkbenchGeometrySummary(documentsGeometry) {
+  if (!isRecord(documentsGeometry)) return {};
+  const rows = Array.isArray(documentsGeometry.rows) ? documentsGeometry.rows.filter(isRecord) : [];
+  return {
+    verdict: asString(documentsGeometry.verdict),
+    sourceHead: asString(documentsGeometry.sourceHead),
+    productionCommit: isRecord(documentsGeometry.productionBuild) ? asString(documentsGeometry.productionBuild.commitSha) : "",
+    baseUrl: asString(documentsGeometry.baseUrl),
+    staleDevRedExplained: asBoolean(documentsGeometry.staleDevRedExplained),
+    routeSplitAloneAcceptedAsFix: asBoolean(documentsGeometry.routeSplitAloneAcceptedAsFix),
+    rows: rows.map((row) => {
+      const metrics = isRecord(row.metrics) ? row.metrics : {};
+      const verdicts = isRecord(row.verdicts) ? row.verdicts : {};
+      return {
+        viewport: asString(row.viewport),
+        overallVerdict: asString(verdicts.overallVerdict),
+        bodyHeight: typeof metrics.bodyHeight === "number" ? metrics.bodyHeight : null,
+        horizontalOverflow: asBoolean(metrics.horizontalOverflow),
+        workbenchDisplay: asString(metrics.workbenchDisplay),
+        workbenchColumnCount: typeof metrics.workbenchColumnCount === "number" ? metrics.workbenchColumnCount : null,
+        workbenchGridTemplateColumns: asString(metrics.workbenchGridTemplateColumns),
+        launcherTop: typeof metrics.launcherTop === "number" ? metrics.launcherTop : null,
+        launcherBottom: typeof metrics.launcherBottom === "number" ? metrics.launcherBottom : null,
+        launcherRight: typeof metrics.launcherRight === "number" ? metrics.launcherRight : null,
+        editorTop: typeof metrics.editorTop === "number" ? metrics.editorTop : null,
+        editorBottom: typeof metrics.editorBottom === "number" ? metrics.editorBottom : null,
+        editorLeft: typeof metrics.editorLeft === "number" ? metrics.editorLeft : null,
+        coreButtons: typeof metrics.coreButtons === "number" ? metrics.coreButtons : null,
+        detailsOpen: metrics.detailsOpen === true || metrics.detailsOpen === false ? metrics.detailsOpen : null,
+      };
+    }),
   };
 }
 
@@ -493,6 +541,7 @@ export function buildNorthstarNextRunway(options) {
   const sif = readJson(options.rootDir, ARTIFACTS.sifEmbeddingPreflight);
   const shareGenerated = readJson(options.rootDir, ARTIFACTS.shareGeneratedSessionPerception);
   const shareExactBoundary = readJson(options.rootDir, ARTIFACTS.shareExactSessionBoundary);
+  const documentsCockpitGeometry = readOptionalJson(options.rootDir, ARTIFACTS.documentsCockpitWorkbenchGeometry);
   const documentsIa = readJson(options.rootDir, ARTIFACTS.documentsLongFormIA);
   const boundedDod = readJson(options.rootDir, ARTIFACTS.boundedWorkbenchDod);
   const boundedCurrent = readJson(options.rootDir, ARTIFACTS.boundedWorkbenchCurrent);
@@ -582,6 +631,7 @@ export function buildNorthstarNextRunway(options) {
     sifEmbeddingRuntime: sifSummary(sif),
     shareGeneratedSessionPerception: shareGeneratedSessionSummary(shareGenerated),
     shareExactSessionBoundary: shareExactSessionBoundarySummary(shareExactBoundary),
+    documentsCockpitWorkbenchGeometry: documentsCockpitWorkbenchGeometrySummary(documentsCockpitGeometry),
     documentsLongFormIA: documentsLongFormIASummary(documentsIa),
     boundedWorkbenchDod: boundedWorkbenchDodSummary(boundedDod),
     boundedWorkbenchCurrent: boundedCurrentSummary,
@@ -685,6 +735,7 @@ ${approvalRows.join("\n")}
 The user's Documents/Share concern remains framed as information architecture, not page-count alone:
 
 - Default Documents cockpit: first actionable cockpit is live-proven; do not phrase this as "Documents page height fixed" or "the whole Documents page is short".
+- Documents cockpit workbench geometry: \`${report.documentsCockpitWorkbenchGeometry.verdict || "missing"}\`; 1440x723 and 390x723 rows must show grid workbench, core buttons 3, no horizontal overflow, and route split alone remains \`false\`.
 - Documents selected editor/detail: risk-assessment default, same-document reselect, and all-12 launcher exposure land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown.
 - Documents remaining debt: full 12-document authoring polish remains. The all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content.
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.
