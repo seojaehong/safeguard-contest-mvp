@@ -1,12 +1,12 @@
 {
   "schemaVersion": "safeclaw-launch-readiness-current/v3",
-  "generatedAt": "2026-07-22T21:17:17.748Z",
+  "generatedAt": "2026-07-22T21:20:02.367Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHeadAtGeneration": "9226534c8dcab1b55b5a26754e9e278f4c01ff67",
+  "sourceHeadAtGeneration": "df1f46e2f87660fb072989d2e03a38479134434a",
   "productionCommit": "9226534c8dcab1b55b5a26754e9e278f4c01ff67",
   "runtimeSmokeCommit": "9226534c8dcab1b55b5a26754e9e278f4c01ff67",
-  "evidenceHeadBeforeThisReport": "9226534c8dcab1b55b5a26754e9e278f4c01ff67",
-  "currentHeadIsEvidenceOnlyPending": false,
+  "evidenceHeadBeforeThisReport": "df1f46e2f87660fb072989d2e03a38479134434a",
+  "currentHeadIsEvidenceOnlyPending": true,
   "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
   "safeLaunchDemoClaimAllowed": true,
   "guidedPilotClaimAllowed": true,
@@ -197,9 +197,9 @@
     "verdict": "open"
   },
   "northstarLiveRollupOverall": {
-    "sourceHeadAtGeneration": "9226534c8dcab1b55b5a26754e9e278f4c01ff67",
+    "sourceHeadAtGeneration": "df1f46e2f87660fb072989d2e03a38479134434a",
     "liveCommitAtGeneration": "9226534c8dcab1b55b5a26754e9e278f4c01ff67",
-    "liveCommitMatchesSourceHead": true
+    "liveCommitMatchesSourceHead": false
   },
   "approvalGatedBoundaries": [
     {
