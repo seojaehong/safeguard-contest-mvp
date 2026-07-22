@@ -1,16 +1,16 @@
 # Workspace Documents / Share Production Gate
 
-Checked at: 2026-07-20 KST
+Checked at: 2026-07-22 KST
 
 ## Verdict
 
-**CURRENT DEFAULT GEOMETRY: Documents desktop cockpit PASS, Documents mobile PARTIAL, Share desktop PASS.**
+**PASS_LIVE_PRODUCTION_CURRENT_SCOPE.** Current live geometry keeps the default Documents cockpit and Share cockpit viewport-bounded, while preserving the known selected-editor/detail distinction: the first risk-row work surface is visible immediately, but the raw long-form textarea remains secondary drilldown content below the first viewport.
 
-The previous stale report claimed a broad fixed state from older production commits. This report is refreshed to match the current geometry probe and keeps the verdicts separate.
+This report is intentionally scoped to geometry and information-architecture containment. It does not claim provider live dispatch, full 12-document field-first authoring perfection, Supabase RLS live isolation, LLM Wiki publication, or SIF vector runtime.
 
 ## Product Answer
 
-Page splitting alone does not solve long content. The fix is viewport-first information architecture: each stage must expose the decision summary, critical controls, and primary action in the first viewport, while long documents, evidence, history, logs, and all 12 outputs stay behind explicit details or deep-review surfaces.
+Page splitting alone is not the length fix. `/workspace`, `/documents`, and `/share` are useful for orientation, but long safety documents and dispatch/result content must be handled as first-viewport cockpit plus bounded drilldown/detail panes. The live state now supports that contract for the default Documents/Share cockpit; selected editor raw textarea depth remains an honest secondary authoring follow-up.
 
 ## Flow Tested
 
@@ -26,37 +26,53 @@ Browser path:
 4. Click `안전 문서 생성`.
 5. Wait for `.workspace-document-page` and generated-ready text.
 6. Measure the default Documents closed state.
-7. Click `위험성평가표 편집` and measure editor state.
+7. Click `위험성평가표 편집` and measure selected editor/detail state.
 8. Navigate to Share and measure Share state.
 
-## Documents Current Geometry
+## Live Marker
 
-| Variant | Viewport | Body | Workbench | Safety brief | Risk edit CTA | Share CTA | Detail cluster | Provenance | Deep review | Overflow | Outside |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | ---: |
-| desktop-short-day | 1440x723 | 876 / 1.21x | bottom 722 | bottom 649 | bottom 391 | bottom 441 | bottom 711 | bottom 702 | bottom 710 | false | 0 |
-| desktop-day | 1440x900 | 1053 / 1.17x | bottom 810 | bottom 723 | bottom 419 | bottom 469 | bottom 797 | bottom 788 | bottom 796 | false | 0 |
-| mobile-day | 390x844 | 1205 / 1.43x | bottom 1100 | bottom 981 | bottom 542 | bottom 543 | bottom 1089 | bottom 1034 | bottom 1088 | false | 0 |
+- Probe source checkout: `806537ec7c081b967adfc649d9c79046866601db`
+- Live `/api/build-info`: `806537ec7c081b967adfc649d9c79046866601db`
+- Environment: production / master
+- Raw geometry: `evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json`
 
-Documents desktop short-height cockpit is PASS because the safety brief, risk assessment edit CTA, share CTA, provenance summary, and deep-review summary all fit inside the `723px` fold. Full document previews remain hidden while deep review is closed (`visibleDocumentPreviews = 0`).
+## Current Geometry
 
-Documents mobile remains PARTIAL because the primary CTAs are visible early, but the full safety brief and detail entrypoints still extend beyond the first viewport.
+| Variant | Documents body | Editor body | Share body | Overflow | Outside |
+| --- | ---: | ---: | ---: | --- | ---: |
+| desktop-short-day 1440x723 | 723 / 723 | 882 / 723 | 723 / 723 | false / false / false | 0 / 0 / 0 |
+| desktop-day 1440x900 | 1053 / 900 | 1129 / 900 | 946 / 900 | false / false / false | 0 / 0 / 0 |
+| mobile-day 390x844 | 844 / 844 | 1067 / 844 | 844 / 844 | false / false / false | 0 / 0 / 0 |
 
-## Share Current Geometry
+## Documents Interpretation
 
-| Variant | Viewport | Body | Preview | Primary CTA | Form | Overflow | Outside |
-| --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
-| desktop-short-day | 1440x723 | 920 / 1.27x | y 305, bottom 705, width 520 | bottom 349 | bottom 675 | false | 0 |
-| desktop-day | 1440x900 | 920 / 1.02x | y 305, bottom 705, width 520 | bottom 349 | bottom 675 | false | 0 |
-| mobile-day | 390x844 | 1455 / 1.72x | y 380, bottom 599, width 310 | bottom 1243 | bottom 1243 | false | 0 |
+Default Documents cockpit is closed for the raw page-height complaint:
 
-Share desktop remains PASS: it is a true desktop two-pane cockpit, not a narrow mobile-card-like preview. Mobile Share remains a longer single-column flow and is not claimed as a full mobile cockpit pass.
+- desktop-short: body `723/723`, document page/workbench bottom `710`, visible full previews `0`.
+- mobile: body `844/844`, document page/workbench bottom `786`, visible full previews `0`.
+
+Selected editor/detail is still intentionally split:
+
+- desktop-short: first risk-row header `522-579`, hazard field `615-675`, raw textarea `1094-1267`.
+- desktop: first risk-row header `510-567`, hazard field `604-664`, raw textarea `1083-1256`.
+- mobile: first risk-row header `526-583`, hazard field `607-657`, raw textarea `987-1160`.
+
+Interpretation: the first meaningful editable risk-row surface lands in the viewport. The full raw textarea remains below the first viewport as secondary long-form authoring, so it must not be used as evidence that the full editor is globally short.
+
+## Share Interpretation
+
+Share is not a literal mobile stack in the measured desktop geometry:
+
+- desktop-short: form width `636`, preview `x=781 / w=520 / bottom=571`, primary CTA bottom `389`.
+- desktop: form width `624`, preview `x=777 / w=520 / bottom=757`, primary CTA bottom `401`.
+- mobile: preview `x=36 / w=318 / bottom=683`, primary CTA bottom `742`.
+
+If a user still perceives desktop Share as narrow-card-like, that should remain a reproduced design composition follow-up rather than a raw one-column layout failure. Provider live dispatch remains unclaimed.
 
 ## Verification
 
-- `npm.cmd run build`: PASS, 28/28 app pages.
-- `npm.cmd test -- tests\north-star-document-ux.test.ts tests\workspace-layout-regression.test.ts tests\frontend-workbench-visual-contract.test.ts`: PASS, 3 files, 43 tests passed, 1 skipped.
-
-Note: `evaluation/north-star-document-ux-24h-2026-07-14/browser-metrics.json` is explicit deep-review/editor-mode evidence. It is not the default closed-state cockpit proof.
+- Live geometry probe: `SAFECLAW_BASE_URL=https://www.safeclaw.kr node evaluation\workspace-docs-share-production-gate-2026-07-20\run-current-geometry-probe.mjs`
+- Output: `evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json`
 
 ## Evidence
 
@@ -64,14 +80,18 @@ Note: `evaluation/north-star-document-ux-24h-2026-07-14/browser-metrics.json` is
 - Probe script: `evaluation/workspace-docs-share-production-gate-2026-07-20/run-current-geometry-probe.mjs`
 - Screenshots:
   - `evaluation/workspace-docs-share-production-gate-2026-07-20/desktop-short-day-current-documents.png`
-  - `evaluation/workspace-docs-share-production-gate-2026-07-20/desktop-day-current-documents.png`
-  - `evaluation/workspace-docs-share-production-gate-2026-07-20/mobile-day-current-documents.png`
+  - `evaluation/workspace-docs-share-production-gate-2026-07-20/desktop-short-day-current-editor.png`
   - `evaluation/workspace-docs-share-production-gate-2026-07-20/desktop-short-day-current-share.png`
+  - `evaluation/workspace-docs-share-production-gate-2026-07-20/desktop-day-current-documents.png`
+  - `evaluation/workspace-docs-share-production-gate-2026-07-20/desktop-day-current-editor.png`
   - `evaluation/workspace-docs-share-production-gate-2026-07-20/desktop-day-current-share.png`
+  - `evaluation/workspace-docs-share-production-gate-2026-07-20/mobile-day-current-documents.png`
+  - `evaluation/workspace-docs-share-production-gate-2026-07-20/mobile-day-current-editor.png`
   - `evaluation/workspace-docs-share-production-gate-2026-07-20/mobile-day-current-share.png`
 
 ## Remaining Risk
 
-- Documents mobile density is still a follow-up if the goal is a full first-viewport mobile cockpit.
-- Document-specific field editors remain separate product depth work.
-- This gate does not close unrelated live issues such as ontology graph density, terminology, or legal/KOSHA source readiness.
+- Selected editor raw textarea/full long-form editing remains a secondary drilldown and is not fully first-viewport.
+- Full 12-document field-first authoring is still product-depth work.
+- Share desktop perceived full-workbench composition should be tested only if reproduced in the user-seen session.
+- Provider dispatch, Supabase RLS live isolation, LLM Wiki publication, and SIF vector runtime remain approval-gated.

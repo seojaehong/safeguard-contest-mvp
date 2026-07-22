@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T01:45:42.978Z",
-  "head": "f8207646fee7e841fa3b6c2f1277bfe9f0b249c0",
+  "generatedAt": "2026-07-22T01:53:52.086Z",
+  "head": "806537ec7c081b967adfc649d9c79046866601db",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f8207646fee7e841fa3b6c2f1277bfe9f0b249c0",
+    "commitSha": "806537ec7c081b967adfc649d9c79046866601db",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-py2sk8m6n-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-ioly0qtvc-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -95,7 +95,7 @@
     "verdict": "MOBILE_FIXED",
     "productionCommit": "be64c3b15a8cb55bb132fa065ec485ffb700f652",
     "currentGeometryArtifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-    "currentGeometryCommit": "cda2905724cebcd7c8ed800fa5e1befe836b8602",
+    "currentGeometryCommit": "806537ec7c081b967adfc649d9c79046866601db",
     "documentsHeightRatio": 1,
     "documentsBodyHeight": 844,
     "documentsViewportHeight": 844,
@@ -119,7 +119,7 @@
   },
   "workspaceGeometry": {
     "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-    "productionCommit": "cda2905724cebcd7c8ed800fa5e1befe836b8602",
+    "productionCommit": "806537ec7c081b967adfc649d9c79046866601db",
     "mobileDocumentDeepReviewOpen": false,
     "mobileVisibleDocumentPreviews": 0
   },
@@ -187,9 +187,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "3d2aed11eae8dd0fdd2c37ddb83eca797ca2ecdc",
+      "sourceCommit": "f8207646fee7e841fa3b6c2f1277bfe9f0b249c0",
       "sourceStatus": "ancestor",
-      "productionCommit": "3d2aed11eae8dd0fdd2c37ddb83eca797ca2ecdc",
+      "productionCommit": "f8207646fee7e841fa3b6c2f1277bfe9f0b249c0",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -251,10 +251,10 @@
     {
       "id": "workspace_docs_share_geometry",
       "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-      "sourceCommit": "cda2905724cebcd7c8ed800fa5e1befe836b8602",
-      "sourceStatus": "ancestor",
-      "productionCommit": "cda2905724cebcd7c8ed800fa5e1befe836b8602",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "806537ec7c081b967adfc649d9c79046866601db",
+      "sourceStatus": "exact",
+      "productionCommit": "806537ec7c081b967adfc649d9c79046866601db",
+      "productionStatus": "matches_live"
     },
     {
       "id": "dispatch_standalone_cockpit",
