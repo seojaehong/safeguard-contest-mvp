@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-review/v1",
-  "generatedAt": "2026-07-22T06:42:30.556Z",
-  "sourceHead": "1087590eed91bde8503f239592614d565bf66b0c",
+  "generatedAt": "2026-07-22T08:46:55.726Z",
+  "sourceHead": "459cd633af74bc3876743b63ac52247b1ca8f766",
   "packetPath": "evaluation\\kosha-exact-promotion-packet-2026-07-22\\report.json",
   "reviewTemplateOnly": true,
   "exactPromotionPerformed": false,
