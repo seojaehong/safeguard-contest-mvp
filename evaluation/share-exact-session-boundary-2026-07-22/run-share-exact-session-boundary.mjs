@@ -230,13 +230,14 @@ async function measureExactSavedSessionGeometry(exactUrl) {
           );
         const firstActionPass = metrics.confirmButtonBottom !== null
           && metrics.confirmButtonBottom <= viewport.height;
+        const noMutationPass = mutationRequests.length === 0;
         rows.push({
           apiRequests,
           error: null,
           httpStatus: response?.status() ?? null,
           metrics,
           mutationRequests,
-          verdict: desktopPass && firstActionPass ? "PASS_EXACT_SAVED_SESSION_GEOMETRY_NO_MUTATION" : "RED_EXACT_SAVED_SESSION_GEOMETRY",
+          verdict: desktopPass && firstActionPass && noMutationPass ? "PASS_EXACT_SAVED_SESSION_GEOMETRY_NO_MUTATION" : "RED_EXACT_SAVED_SESSION_GEOMETRY",
           viewport: viewport.label,
         });
       } catch (error) {
@@ -279,7 +280,8 @@ async function main() {
     : [];
   const exactSessionMutationRequests = exactSessionGeometry.flatMap((row) => row.mutationRequests || []);
   const exactGeometryPass = exactSessionGeometry.length > 0
-    && exactSessionGeometry.every((row) => row.verdict === "PASS_EXACT_SAVED_SESSION_GEOMETRY_NO_MUTATION");
+    && exactSessionGeometry.every((row) => row.verdict === "PASS_EXACT_SAVED_SESSION_GEOMETRY_NO_MUTATION")
+    && exactSessionMutationRequests.length === 0;
   const exactGeometryErrors = exactSessionGeometry.filter((row) => row.verdict.startsWith("ERROR"));
 
   const report = {
@@ -300,6 +302,15 @@ async function main() {
     exactSavedSessionUrlProvided: Boolean(exactSessionUrl),
     exactSavedSessionPayloadProvided: Boolean(exactSessionPayloadPath),
     sessionKind: exactSessionUrl ? "saved-exact" : "missing-exact",
+    exactSessionAcceptance: {
+      requiredViewports: EXACT_VIEWPORTS.map((viewport) => viewport.label),
+      desktopRootWidthRatioMin: 0.72,
+      desktopColumnCountMin: 2,
+      firstActionMustBeInViewport: true,
+      horizontalOverflowAllowed: false,
+      mutationRequestCountMustBeZero: true,
+      mobileSingleColumnAllowedOnlyBelowWidth: 900,
+    },
     exactSessionGeometry,
     routeFiles: {
       recipientPage: {
@@ -373,6 +384,17 @@ DB mutation performed: \`${report.boundary.dbMutationPerformed}\`
 - Exact saved URL provided: \`${Boolean(exactSessionUrl)}\`
 - Exact saved geometry rows: \`${exactSessionGeometry.length}\`
 - Exact saved mutation request count: \`${exactSessionMutationRequests.length}\`
+- Exact saved session kind: \`${report.sessionKind}\`
+
+## Exact Session Acceptance
+
+- Required viewports: ${report.exactSessionAcceptance.requiredViewports.map((item) => `\`${item}\``).join(", ")}
+- Desktop root width ratio min: \`${report.exactSessionAcceptance.desktopRootWidthRatioMin}\`
+- Desktop column count min: \`${report.exactSessionAcceptance.desktopColumnCountMin}\`
+- First action must be in viewport: \`${report.exactSessionAcceptance.firstActionMustBeInViewport}\`
+- Horizontal overflow allowed: \`${report.exactSessionAcceptance.horizontalOverflowAllowed}\`
+- Mutation request count must be zero: \`${report.exactSessionAcceptance.mutationRequestCountMustBeZero}\`
+- Mobile single-column allowed only below width: \`${report.exactSessionAcceptance.mobileSingleColumnAllowedOnlyBelowWidth}\`
 
 ## Interpretation
 
@@ -397,8 +419,8 @@ ${report.forbiddenClaims.map((item) => `- ${item}`).join("\n")}
     sourceHead,
     liveCommit: buildInfo.commitSha,
     safeReadStatus: missingSessionGet.status,
-    dbMutationPerformed: false,
-    exactSavedUserSessionReproduced: false,
+    dbMutationPerformed: report.boundary.dbMutationPerformed,
+    exactSavedUserSessionReproduced: report.exactSavedUserSessionReproduced,
   }));
 }
 

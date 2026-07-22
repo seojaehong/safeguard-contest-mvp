@@ -42,11 +42,19 @@ async function startFixtureServer(): Promise<FixtureServer> {
       return;
     }
     if (request.url?.startsWith("/api/share-sessions/")) {
+      if (request.method === "POST") {
+        response.writeHead(200, { "content-type": "application/json" });
+        response.end(JSON.stringify({ message: "mutation fixture", ok: true }));
+        return;
+      }
       response.writeHead(404, { "content-type": "application/json" });
       response.end(JSON.stringify({ message: "missing fixture session", ok: false }));
       return;
     }
-    if (request.url?.startsWith("/share/saved-session")) {
+    if (request.url?.startsWith("/share/saved-session") || request.url?.startsWith("/share/mutating-session")) {
+      const mutatingScript = request.url.startsWith("/share/mutating-session")
+        ? "<script>fetch('/api/share-sessions/mutating-session', { method: 'POST' }).catch(() => {});</script>"
+        : "";
       response.writeHead(200, { "content-type": "text/html" });
       response.end(`<!doctype html>
         <html>
@@ -81,6 +89,7 @@ async function startFixtureServer(): Promise<FixtureServer> {
                 <p>Selected preview and provenance.</p>
               </section>
             </main>
+            ${mutatingScript}
           </body>
         </html>`);
       return;
@@ -159,6 +168,7 @@ describe("share exact session boundary runner", () => {
 
       expect(result.code).toBe(0);
       expect(result.stderr).toBe("");
+      expect(result.stdout).toContain("\"exactSavedUserSessionReproduced\": false");
       expect(report).toMatchObject({
         exactSavedSessionUrlProvided: false,
         exactSavedUserSessionReproduced: false,
@@ -186,6 +196,7 @@ describe("share exact session boundary runner", () => {
 
       expect(result.code).toBe(0);
       expect(result.stderr).toBe("");
+      expect(result.stdout).toContain("\"exactSavedUserSessionReproduced\": true");
       expect(report).toMatchObject({
         exactSavedSessionUrlProvided: true,
         exactSavedUserSessionReproduced: true,
@@ -195,9 +206,46 @@ describe("share exact session boundary runner", () => {
       });
       expect((report.boundary as Record<string, unknown>).dbMutationPerformed).toBe(false);
       expect((report.boundary as Record<string, unknown>).exactSessionMutationRequestCount).toBe(0);
+      expect(report.exactSessionAcceptance as Record<string, unknown>).toMatchObject({
+        desktopColumnCountMin: 2,
+        desktopRootWidthRatioMin: 0.72,
+        firstActionMustBeInViewport: true,
+        mutationRequestCountMustBeZero: true,
+      });
       const rows = report.exactSessionGeometry as Array<{ verdict: string }>;
       expect(rows).toHaveLength(3);
       expect(rows.every((row) => row.verdict === "PASS_EXACT_SAVED_SESSION_GEOMETRY_NO_MUTATION")).toBe(true);
+    } finally {
+      await server.close();
+    }
+  }, 30_000);
+
+  it("rejects exact saved recipient geometry when the page issues share-session mutation requests", async () => {
+    const server = await startFixtureServer();
+    try {
+      const exactUrl = `${server.baseUrl}/share/mutating-session?workerId=worker-1`;
+      const result = await runBoundaryScript([
+        "--base-url",
+        server.baseUrl,
+        "--exact-url",
+        exactUrl,
+      ]);
+      const report = readReport(result.outputDir);
+
+      expect(result.code).toBe(0);
+      expect(result.stderr).toBe("");
+      expect(report).toMatchObject({
+        exactSavedSessionUrlProvided: true,
+        exactSavedUserSessionReproduced: false,
+        liveCommit: "fixture-live-commit",
+        sessionKind: "saved-exact",
+        verdict: "RED_EXACT_SAVED_SESSION_GEOMETRY_NO_MUTATION",
+      });
+      expect((report.boundary as Record<string, unknown>).dbMutationPerformed).toBe(true);
+      expect((report.boundary as Record<string, unknown>).exactSessionMutationRequestCount).toBeGreaterThan(0);
+      const rows = report.exactSessionGeometry as Array<{ mutationRequests: unknown[]; verdict: string }>;
+      expect(rows.some((row) => row.mutationRequests.length > 0)).toBe(true);
+      expect(rows.some((row) => row.verdict === "RED_EXACT_SAVED_SESSION_GEOMETRY")).toBe(true);
     } finally {
       await server.close();
     }
