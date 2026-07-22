@@ -3990,7 +3990,7 @@ export function WorkpackEditor({
               {isTransmissionDocumentKey(selected.key) ? (
                 <TransmissionDocumentCockpit data={data} documentKey={selected.key} />
               ) : null}
-              {structuredDocument.body.map((section, index) => {
+              {selected.key === "riskAssessmentDraft" ? null : structuredDocument.body.map((section, index) => {
                 const inputId = `document-section-${selected.key}-${index}`;
                 const sectionLineCount = section.value.split(/\r?\n/u).filter((line) => line.trim().length > 0).length;
                 const lineCount = Math.min(5, Math.max(3, section.value.split(/\r?\n/u).length + 1));

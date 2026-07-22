@@ -1556,6 +1556,10 @@
     padding: 2px 6px;
   }
 
+  .riskRow:not([open]) {
+    padding-block: 0;
+  }
+
   .riskRowHeader {
     min-height: 22px;
   }

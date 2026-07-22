@@ -152,6 +152,18 @@ describe("documents editor layout", () => {
             overflowY: style.overflowY
           };
         };
+        const optionalRect = (selector: string) => {
+          const element = document.querySelector(selector);
+          if (!element) return null;
+          const bounds = element.getBoundingClientRect();
+          const style = window.getComputedStyle(element);
+          return {
+            top: Math.round(bounds.top),
+            bottom: Math.round(bounds.bottom),
+            height: Math.round(bounds.height),
+            overflowY: style.overflowY
+          };
+        };
 
         return {
           viewportHeight: window.innerHeight,
@@ -164,7 +176,7 @@ describe("documents editor layout", () => {
           toolbar: rect(".document-toolbar"),
           fieldStrip: rect('[data-testid="document-section-field-strip"]'),
           sectionActions: rect('[data-testid="document-section-actions"]'),
-          firstSectionTextarea: rect(".document-section-textarea"),
+          firstSectionTextarea: optionalRect(".document-section-textarea"),
           riskRowsEditor: rect('[data-testid="risk-rows-editor"]'),
           firstRiskRow: rect('[data-testid="risk-row-editor-row"]'),
           firstRiskRowHeader: rect('[data-testid="risk-row-editor-row"] summary'),
@@ -176,6 +188,7 @@ describe("documents editor layout", () => {
           ).filter((section) => section.open).length,
           fieldStripText: document.querySelector('[data-testid="document-section-field-strip"]')?.textContent?.replace(/\s+/gu, " ").trim() || "",
           firstRiskRowHeaderText: document.querySelector('[data-testid="risk-row-editor-row"] summary')?.textContent?.replace(/\s+/gu, " ").trim() || "",
+          sourceSectionDrawerOpen: document.querySelector<HTMLDetailsElement>('[data-testid="risk-source-section-drawer"]')?.open ?? null,
           actionTexts: Array.from(document.querySelectorAll<HTMLElement>('[data-testid="document-section-actions"] button'))
             .map((button) => button.textContent?.replace(/\s+/gu, " ").trim()),
           fieldChipMetrics: Array.from(document.querySelectorAll<HTMLElement>('[data-testid="document-section-field-strip"] span'))
@@ -219,13 +232,13 @@ describe("documents editor layout", () => {
       expect(metrics.sectionActions.top).toBeGreaterThanOrEqual(metrics.fieldStrip.bottom);
       expect(metrics.sectionActions.bottom).toBeLessThanOrEqual(metrics.workpackShell.bottom);
       expect(metrics.riskRowsEditor.top).toBeGreaterThanOrEqual(metrics.sectionActions.bottom);
-      expect(metrics.firstSectionTextarea.top).toBeGreaterThanOrEqual(metrics.riskRowsEditor.bottom);
-      expect(metrics.firstSectionTextarea.top).toBeGreaterThan(metrics.workpackShell.bottom);
+      expect(metrics.firstSectionTextarea).toBeNull();
       if (viewport.name !== "mobile") {
         expect(metrics.firstRiskHazardField.top).toBeLessThan(metrics.workpackShell.bottom);
         expect(Math.min(metrics.firstRiskHazardField.bottom, metrics.workpackShell.bottom) - metrics.firstRiskHazardField.top).toBeGreaterThanOrEqual(50);
       }
-      expect(metrics.defaultOpenSectionCount).toBe(1);
+      expect(metrics.defaultOpenSectionCount).toBe(0);
+      expect(metrics.sourceSectionDrawerOpen).toBeNull();
       if (viewport.name === "mobile") {
         expect(metrics.riskLauncherPressed).toBe("true");
         expect(metrics.firstRiskRowHeader.bottom).toBeLessThan(metrics.workpackShell.bottom);
@@ -272,6 +285,18 @@ describe("documents editor layout", () => {
             height: Math.round(bounds.height)
           };
         };
+        const optionalRect = (selector: string) => {
+          const element = document.querySelector(selector);
+          if (!element) return null;
+          const bounds = element.getBoundingClientRect();
+          const style = window.getComputedStyle(element);
+          return {
+            top: Math.round(bounds.top),
+            bottom: Math.round(bounds.bottom),
+            height: Math.round(bounds.height),
+            overflowY: style.overflowY
+          };
+        };
         return {
           viewportHeight: window.innerHeight,
           workpackShell: rect(".workpack-shell"),
@@ -280,7 +305,7 @@ describe("documents editor layout", () => {
           sectionActions: rect('[data-testid="document-section-actions"]'),
           firstRiskRowHeader: rect('[data-testid="risk-row-editor-row"] summary'),
           firstRiskHazardField: rect('[aria-label="행 1 유해·위험요인"]'),
-          firstSectionTextarea: rect(".document-section-textarea"),
+          firstSectionTextarea: optionalRect(".document-section-textarea"),
           selectedDocumentTitle: document.querySelector(".document-toolbar .h2")?.textContent?.trim() || "",
           workpackShellScrollHeight: document.querySelector<HTMLElement>(".workpack-shell")?.scrollHeight || 0
         };
@@ -290,7 +315,7 @@ describe("documents editor layout", () => {
       expect(reselectMetrics.sectionActions.bottom).toBeLessThanOrEqual(reselectMetrics.workpackShell.bottom);
       expect(reselectMetrics.firstRiskRowHeader.bottom).toBeLessThanOrEqual(reselectMetrics.viewportHeight);
       expect(reselectMetrics.firstRiskHazardField.top).toBeLessThanOrEqual(reselectMetrics.viewportHeight);
-      expect(reselectMetrics.firstRiskHazardField.top).toBeLessThan(reselectMetrics.firstSectionTextarea.top);
+      expect(reselectMetrics.firstSectionTextarea).toBeNull();
       if (viewport.name === "mobile") {
         expect(reselectMetrics.sectionActions.bottom).toBeLessThanOrEqual(760);
         expect(reselectMetrics.workpackShellScrollHeight).toBeLessThanOrEqual(1500);

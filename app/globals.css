@@ -20530,6 +20530,24 @@ body:has(.safeclaw-landing) :is(
     overscroll-behavior: contain;
     scrollbar-gutter: stable;
   }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-secondary-tools"] {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-secondary-tools"] summary {
+    min-height: 36px;
+    padding-block: 4px;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-secondary-tools"] summary small,
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-secondary-tools"] summary em,
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .document-editor .muted.small[class*="documentFootnote"] {
+    display: none;
+  }
 }
 
 /* Submission guard: keep /workspace geometry stable across browser zoom,
@@ -21917,12 +21935,16 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-secondary-tools"] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 4px;
-    padding: 6px 8px;
+    overflow-x: hidden;
+    padding: 4px;
+    scrollbar-gutter: stable;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-secondary-tools"] summary {
-    min-height: 40px;
+    min-height: 34px;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-secondary-tools"] summary small,
