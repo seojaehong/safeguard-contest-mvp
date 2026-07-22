@@ -183,6 +183,17 @@ function writeFixtureRoot(): string {
   return root;
 }
 
+function readFixtureMetadataRows(root: string): MetadataRow[] {
+  const metadataPath = path.join(root, "data/safety-knowledge/kosha-official-metadata/official-metadata-2026-07-15.jsonl");
+  return fs.readFileSync(metadataPath, "utf8").trim().split(/\r?\n/u).map((line) => JSON.parse(line) as MetadataRow);
+}
+
+function readFixtureItems(root: string): Array<Record<string, unknown>> {
+  const itemsPath = path.join(root, "data/safety-knowledge/kosha-guide-corpus/snapshots/test-snapshot/items.jsonl.gz");
+  const text = zlib.gunzipSync(fs.readFileSync(itemsPath)).toString("utf8").trim();
+  return text.split(/\r?\n/u).map((line) => JSON.parse(line) as Record<string, unknown>);
+}
+
 describe("KOSHA exact promotion packet", () => {
   it("selects a bounded non-mutating operator review packet from verified candidates", async () => {
     const root = writeFixtureRoot();
@@ -231,6 +242,68 @@ describe("KOSHA exact promotion packet", () => {
       buildInfo: {},
       generatedAt: "2026-07-22T00:00:00.000Z",
     })).toThrow(/kosha-promotion-packet-already-exact:D-C-13/u);
+  });
+
+  it("fails closed when candidate body provenance does not match metadata", async () => {
+    const root = writeFixtureRoot();
+    const items = readFixtureItems(root);
+    const target = items.find((item) => item.stable_key === "D-C-10");
+    if (!target || typeof target.official_provenance !== "object" || target.official_provenance === null) {
+      throw new Error("fixture-missing-d-c-10");
+    }
+    (target.official_provenance as Record<string, unknown>).body_sha256 = "0".repeat(64);
+    writeGzipJsonl(root, "data/safety-knowledge/kosha-guide-corpus/snapshots/test-snapshot/items.jsonl.gz", items);
+    const module = await loadPromotionPacketModule();
+
+    expect(() => module.buildKoshaExactPromotionPacket({
+      rootDir: root,
+      candidateKeys: ["D-C-10"],
+      buildInfo: {},
+      generatedAt: "2026-07-22T00:00:00.000Z",
+    })).toThrow(/kosha-promotion-packet-body-hash-mismatch:D-C-10/u);
+  });
+
+  it("fails closed when candidate metadata is no longer current", async () => {
+    const root = writeFixtureRoot();
+    const metadataRows = readFixtureMetadataRows(root);
+    const target = metadataRows.find((row) => row.stable_key === "A-G-15");
+    if (!target) throw new Error("fixture-missing-a-g-15");
+    target.official_status = "archived";
+    writeJsonl(root, "data/safety-knowledge/kosha-official-metadata/official-metadata-2026-07-15.jsonl", metadataRows);
+    const module = await loadPromotionPacketModule();
+
+    expect(() => module.buildKoshaExactPromotionPacket({
+      rootDir: root,
+      candidateKeys: ["A-G-15"],
+      buildInfo: {},
+      generatedAt: "2026-07-22T00:00:00.000Z",
+    })).toThrow(/kosha-promotion-packet-not-current:A-G-15/u);
+  });
+
+  it("fails closed when verified subset provenance is no longer complete", async () => {
+    const root = writeFixtureRoot();
+    writeJson(root, "data/safety-knowledge/kosha-guide-corpus/snapshots/test-snapshot/manifest.json", {
+      schema_version: "safeclaw-kosha-verified-subset/v1",
+      snapshot_id: "test-snapshot",
+      coverage_scope: {
+        scope_id: "technical-support-regulation-current-native",
+        accepted_count: 5,
+        body_kinds: ["native"],
+        official_statuses: ["current"],
+      },
+      launch_gate: { provenance_complete: false },
+      network_calls_performed: false,
+      ocr_performed: false,
+      db_mutation_performed: false,
+    });
+    const module = await loadPromotionPacketModule();
+
+    expect(() => module.buildKoshaExactPromotionPacket({
+      rootDir: root,
+      candidateKeys: ["D-C-10"],
+      buildInfo: {},
+      generatedAt: "2026-07-22T00:00:00.000Z",
+    })).toThrow(/kosha-promotion-packet-provenance-incomplete/u);
   });
 
   it("writes markdown and JSON without claiming exact promotion", () => {
