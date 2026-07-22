@@ -1,15 +1,25 @@
 {
   "generatedAt": "2026-07-19T00:30:00+09:00",
-  "refreshedAt": "2026-07-23T06:12:48+09:00",
-  "sourceSha": "f003d2bfde540161f7df36ee7ab242ed61209418",
+  "refreshedAt": "2026-07-23T06:57:59+09:00",
+  "sourceSha": "43fbe4b0cb7d7563996bb249ce558eba7e5a993b",
   "scope": "provider_dispatch_idempotency_gate",
   "status": "approval_required",
+  "liveBuildInfo": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "43fbe4b0cb7d7563996bb249ce558eba7e5a993b",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-czo6ecwy4-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
   "liveDispatchState": {
     "capability": false,
     "mode": "preview_only",
     "reason": "persistent_idempotency_unavailable",
     "codeLock": "PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false",
-    "productionCommitSha": "f003d2bfde540161f7df36ee7ab242ed61209418",
+    "productionCommitSha": "43fbe4b0cb7d7563996bb249ce558eba7e5a993b",
     "channels": {
       "email": {
         "capability": false,
@@ -83,6 +93,7 @@
     {
       "command": "GET https://www.safeclaw.kr/api/workflow/dispatch",
       "status": "passed",
+      "httpStatus": 200,
       "mode": "preview_only",
       "reason": "persistent_idempotency_unavailable",
       "externalDispatchPerformed": false,
