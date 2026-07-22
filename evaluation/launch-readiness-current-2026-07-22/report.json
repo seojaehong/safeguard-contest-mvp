@@ -1,11 +1,11 @@
 {
   "schemaVersion": "safeclaw-launch-readiness-current/v3",
-  "generatedAt": "2026-07-22T10:33:10.691Z",
+  "generatedAt": "2026-07-22T10:43:52.637Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHeadAtGeneration": "955b2c4d03a34dbb8b64a4a525e23b7091276b0d",
-  "productionCommit": "955b2c4d03a34dbb8b64a4a525e23b7091276b0d",
-  "runtimeSmokeCommit": "955b2c4d03a34dbb8b64a4a525e23b7091276b0d",
-  "evidenceHeadBeforeThisReport": "955b2c4d03a34dbb8b64a4a525e23b7091276b0d",
+  "sourceHeadAtGeneration": "f150c8cadee7c494f93ecf17d18750ee896d127d",
+  "productionCommit": "f150c8cadee7c494f93ecf17d18750ee896d127d",
+  "runtimeSmokeCommit": "f150c8cadee7c494f93ecf17d18750ee896d127d",
+  "evidenceHeadBeforeThisReport": "f150c8cadee7c494f93ecf17d18750ee896d127d",
   "currentHeadIsEvidenceOnlyPending": false,
   "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
   "safeLaunchDemoClaimAllowed": true,
@@ -54,35 +54,89 @@
   "liveConnections": [
     {
       "name": "Law.go / korean-law-mcp",
-      "liveStatus": "연결됨"
+      "keyPresent": false,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "위험성평가표",
+        "작업계획서",
+        "TBM",
+        "안전보건교육",
+        "사진/증빙"
+      ],
+      "detail": "Law.go와 OpenAI 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 초단기실황 호출 성공 (서울, base 20260722 1800) / 기상청 초단기예보 호출 성공 (서울, base 20260722 1830) / 기상청 단기예보 호출 성공 (서울, base 20260722 1700) / 기상청 기상특보 조회 성공 (전국, 202607221905) / 기상청 영향예보 조회 성공 (군산옥도면(어청도 제외), 보건(일반인)) / 고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: raw-query:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 지식 DB 매칭 2건 / Supabase 카탈로그 매칭 8건 (configured=true) / structured 위험성평가 rows 5건, 검증 이슈 0건 (structured rows=고정 근거 기반) / TBM-risk 연결 5건 (TBM-risk links=고정 근거 기반) / TBM structured=규칙 기반 from risk rows / 생성 모드: 강화 (고정 근거 위험요인 표 우선: 위험성평가 row 확정, TBM 구조 규칙 기반 조립)"
     },
     {
       "name": "Gemini",
-      "liveStatus": "연결됨"
+      "keyPresent": true,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "핵심 판단",
+        "문서팩 본문"
+      ],
+      "detail": "OpenAI 응답은 timeout 20000ms, retry 없음, 실패 시 보조 응답 정책을 따릅니다."
     },
     {
       "name": "기상청",
-      "liveStatus": "연결됨"
+      "keyPresent": false,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "위험성평가표",
+        "작업계획서",
+        "TBM"
+      ],
+      "detail": "기상청 초단기실황 호출 성공 (서울, base 20260722 1800) / 기상청 초단기예보 호출 성공 (서울, base 20260722 1830) / 기상청 단기예보 호출 성공 (서울, base 20260722 1700) / 기상청 기상특보 조회 성공 (전국, 202607221905) / 기상청 영향예보 조회 성공 (군산옥도면(어청도 제외), 보건(일반인))"
     },
     {
       "name": "Work24",
-      "liveStatus": "연결됨"
+      "keyPresent": false,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "안전보건교육",
+        "후속 교육"
+      ],
+      "detail": "고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다."
     },
     {
       "name": "KOSHA 교육",
-      "liveStatus": "연결됨"
+      "keyPresent": true,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "안전보건교육",
+        "후속 교육"
+      ],
+      "detail": "KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다."
     },
     {
       "name": "KOSHA 공식자료",
-      "liveStatus": "연결됨"
+      "keyPresent": true,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "위험성평가표",
+        "TBM",
+        "안전보건교육"
+      ],
+      "detail": "KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다."
     },
     {
       "name": "KOSHA 재해사례",
-      "liveStatus": "연결됨"
+      "keyPresent": false,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "TBM",
+        "안전보건교육",
+        "비상대응",
+        "사진/증빙"
+      ],
+      "detail": "KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: raw-query:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다."
     },
     {
       "name": "n8n dispatch",
-      "liveStatus": "설정 점검만 수행"
+      "keyPresent": false,
+      "liveStatus": "설정 점검만 수행",
+      "reflectedIn": [
+        "현장 전파"
+      ],
+      "detail": "로컬/서버 내부에서는 N8N_INTERNAL_BASE를 사용할 수 있습니다."
     }
   ],
   "connectedSurfaces": [
@@ -137,36 +191,51 @@
         "forbiddenClaim": "카카오·밴드 또는 모든 provider 전파가 실제 승인 채널로 live 완료됐다.",
         "nextSecureProof": "Configure approved providers and run authenticated provider dispatch in an operator-owned workpack/share session."
       }
-    ],
-    "note": "Final-99 remains pass_with_notice. The notices are carried as operator-auth and provider-approval boundaries, not code cleanup tasks."
+    ]
   },
-  "northstarOverall": "open",
-  "northstarLiveRollupOverall": "northstar_open_approval_gated",
+  "northstarOverall": {
+    "verdict": "open"
+  },
+  "northstarLiveRollupOverall": {
+    "sourceHeadAtGeneration": "f150c8cadee7c494f93ecf17d18750ee896d127d",
+    "liveCommitAtGeneration": "f150c8cadee7c494f93ecf17d18750ee896d127d",
+    "liveCommitMatchesSourceHead": true
+  },
   "approvalGatedBoundaries": [
     {
-      "id": "admin_auth_save_reopen",
+      "gate": "admin_auth_save_reopen",
+      "state": "approval_gated",
+      "currentSafetyLock": "operator_auth_required",
       "reason": "Final-99 auth-history-reuse notice remains until a secure SAFEGUARD_AUTH_TOKEN operator run proves server save/reopen."
     },
     {
-      "id": "provider_dispatch_persistence",
+      "gate": "provider_dispatch_persistence",
+      "state": "approval_gated",
+      "currentSafetyLock": "preview_policy_gated",
       "reason": "Provider dispatch remains preview/policy-gated until approved providers and authenticated server-owned workpack/share-session proof exist."
     },
     {
-      "id": "supabase_rls_launch_isolation",
+      "gate": "supabase_rls_launch_isolation",
+      "state": "approval_gated",
+      "currentSafetyLock": "read_only_preflight",
       "reason": "Live RLS catalog and disposable tenant A/B isolation are not production-proven."
     },
     {
-      "id": "llm_wiki_publication",
+      "gate": "llm_wiki_publication",
+      "state": "approval_gated",
+      "currentSafetyLock": "candidate_unpublished",
       "reason": "LLM Wiki candidates remain unpublished until approved RPC/RLS/ledger canary evidence exists."
     },
     {
-      "id": "sif_embedding_runtime",
+      "gate": "sif_embedding_runtime",
+      "state": "approval_gated",
+      "currentSafetyLock": "approval_held_no_vectors",
       "reason": "SIF vector runtime remains held until migration, embedding cost, upload, and runtime enablement are separately approved."
     }
   ],
   "safeClaims": [
     "Live /api/ask generated the expected 11-document workpack for the audited construction scenario.",
-    "Live public-data/AI surfaces returned connected statuses for Law.go, Gemini, KMA weather, Work24, KOSHA education, KOSHA official material, and KOSHA accident-case connections in this smoke.",
+    "Live public-data/AI surfaces returned connected statuses for 7 connection surface(s) in this smoke.",
     "A safe launch demo or guided pilot can be claimed with explicit provider-dispatch, RLS, LLM Wiki, SIF vector, and admin-auth boundaries.",
     "Documents selected-only bounded workbench evidence is current in scoped artifacts; route split alone is not accepted as the UX fix."
   ],
@@ -181,27 +250,20 @@
   ],
   "uiArchitectureBoundary": {
     "routeSplitAloneAcceptedAsFix": false,
-    "acceptedStructure": "route split plus selected-only bounded workbench: first-viewport cockpit, one selected detail/editor, and long raw/provenance content in local scroll, drawer, accordion, or drilldown.",
-    "documents": {
-      "scopedEvidenceVerdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION",
-      "closed": "Core-3/supporting-9 selected-only bounded workbench evidence is scoped and current in documents-long-form IA artifacts.",
-      "open": "Do not claim every long-form authoring surface is inherently short; raw/full editor content remains secondary drilldown by design."
-    },
-    "share": {
-      "scopedGeneratedFixtureVerdict": "PASS_CURRENT_SOURCE_GENERATED_RESULT_FIXTURE",
-      "exactSavedUserSessionReproduced": false,
-      "routeEvidenceBoundary": "invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result states are separate proof layers.",
-      "open": "If a user-visible saved/generated session still feels mobile-like, reproduce that exact session with desktop width-ratio/grid metrics before product changes or broad PASS claims."
-    }
+    "acceptedStructure": "route split plus selected-only bounded workbench: first-viewport cockpit, one selected detail/editor, and long raw/provenance content in local scroll, drawer, accordion, or drilldown",
+    "documentsScopedEvidenceVerdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION",
+    "shareGeneratedFixtureVerdict": "PASS_CURRENT_SOURCE_GENERATED_RESULT_FIXTURE",
+    "exactSavedUserShareSessionReproduced": false,
+    "shareRouteEvidenceBoundary": "separate Share evidence into invited recipient fixture pass, exact saved/generated /share/[sessionId] missing evidence, and manager/workspace share-result route repro; do not use one route's pass to close another route's mobile-like complaint"
   },
   "productionBuild": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "955b2c4d03a34dbb8b64a4a525e23b7091276b0d",
+    "commitSha": "f150c8cadee7c494f93ecf17d18750ee896d127d",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-5hjfdsqnf-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-hph61v7f5-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   }
 }

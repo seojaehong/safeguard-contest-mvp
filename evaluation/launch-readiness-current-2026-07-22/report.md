@@ -1,12 +1,12 @@
 # Launch Readiness Current Boundary
 
-Generated: 2026-07-22T10:33:10.691Z
+Generated: 2026-07-22T10:43:52.637Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD at generation: `955b2c4d03a34dbb8b64a4a525e23b7091276b0d`
+Source HEAD at generation: `f150c8cadee7c494f93ecf17d18750ee896d127d`
 
-Production runtime smoke commit: `955b2c4d03a34dbb8b64a4a525e23b7091276b0d`
+Production runtime smoke commit: `f150c8cadee7c494f93ecf17d18750ee896d127d`
 
 Current HEAD is evidence-only pending relative to production: `false`
 
@@ -48,7 +48,7 @@ Final-99 remains `pass_with_notice`; 2 notices are carried. These are approval/a
 ## Safe Claims
 
 - Live /api/ask generated the expected 11-document workpack for the audited construction scenario.
-- Live public-data/AI surfaces returned connected statuses for Law.go, Gemini, KMA weather, Work24, KOSHA education, KOSHA official material, and KOSHA accident-case connections in this smoke.
+- Live public-data/AI surfaces returned connected statuses for 7 connection surface(s) in this smoke.
 - A safe launch demo or guided pilot can be claimed with explicit provider-dispatch, RLS, LLM Wiki, SIF vector, and admin-auth boundaries.
 - Documents selected-only bounded workbench evidence is current in scoped artifacts; route split alone is not accepted as the UX fix.
 
@@ -59,7 +59,7 @@ Route/page split alone is not accepted as the UX fix. The accepted structure is 
 - Documents scoped evidence verdict: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION`
 - Share generated fixture verdict: `PASS_CURRENT_SOURCE_GENERATED_RESULT_FIXTURE`
 - Exact saved user share session reproduced: `false`
-- Share route evidence boundary: invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result states are separate proof layers.
+- Share route evidence boundary: separate Share evidence into invited recipient fixture pass, exact saved/generated /share/[sessionId] missing evidence, and manager/workspace share-result route repro; do not use one route's pass to close another route's mobile-like complaint
 
 ## Forbidden Claims
 

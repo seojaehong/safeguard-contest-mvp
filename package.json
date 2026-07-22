@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit --incremental false",
     "e2e:scenarios": "node ./scripts/e2e_scenario_runner.mjs",
     "audit:launch": "node ./scripts/launch_readiness_audit.mjs",
+    "report:launch-readiness-current": "node ./scripts/launch_readiness_current_report.mjs",
     "audit:sif-causality": "node ./scripts/audit_sif_causality.mjs",
     "audit:kosha-guides": "node ./scripts/audit_kosha_guides.mjs",
     "audit:release-scale": "node ./scripts/final_release_scale_audit.mjs",
