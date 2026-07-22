@@ -17,6 +17,16 @@ type NextRunwayReport = {
     state: string;
     currentSafetyLock: string;
   }>;
+  koshaNextExactCandidateAudit: {
+    verdict: string;
+    exactPins: number;
+    acceptedSubsetItems: number;
+    metadataVerifiedNotExact: number;
+    mutationPerformed: boolean;
+    dbMutationPerformed: boolean;
+    embeddingGenerationPerformed: boolean;
+    forbiddenClaims: string[];
+  };
   nextSafeWorkWithoutApproval: string[];
 };
 
@@ -116,6 +126,19 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     apiAsk: { ok: true },
     documentCoverage: { expectedCount: 11, presentCount: 11, missing: [] },
   });
+  writeJson(root, "evaluation/kosha-next-exact-candidate-audit-2026-07-22/report.json", {
+    verdict: "NEXT_EXACT_TRUST_CANDIDATES_IDENTIFIED_APPROVAL_FREE",
+    mutationPerformed: false,
+    dbMutationPerformed: false,
+    embeddingGenerationPerformed: false,
+    exactTrustRegistryCurrent: { count: 3 },
+    verifiedSubsetCurrent: { acceptedCount: 234, chunksCount: 7127 },
+    officialMetadataRegistry: { metadataVerifiedNotExact: 231 },
+    forbiddenClaims: [
+      "All 1,040 KOSHA Guide rows are exact direct evidence.",
+      "The metadata-verified non-exact candidates are already exact production evidence.",
+    ],
+  });
   writeJson(root, "evaluation/sif-embedding-gate/approval-preflight-report.json", {
     approvalHeld: true,
     dbMutationPerformed: false,
@@ -162,6 +185,21 @@ describe("northstar next runway generator", () => {
       "llm_wiki_publication",
       "sif_embedding_runtime",
     ]);
+    expect(report.koshaNextExactCandidateAudit).toMatchObject({
+      verdict: "NEXT_EXACT_TRUST_CANDIDATES_IDENTIFIED_APPROVAL_FREE",
+      exactPins: 3,
+      acceptedSubsetItems: 234,
+      metadataVerifiedNotExact: 231,
+      mutationPerformed: false,
+      dbMutationPerformed: false,
+      embeddingGenerationPerformed: false,
+    });
+    expect(report.koshaNextExactCandidateAudit.forbiddenClaims).toContain(
+      "The metadata-verified non-exact candidates are already exact production evidence.",
+    );
+    expect(report.nextSafeWorkWithoutApproval).toContain(
+      "use the KOSHA next exact candidate audit to select a bounded metadata-verified candidate set before any exact-trust promotion",
+    );
   });
 
   it("marks an evidence-only source head as pending when the live rollup still matches production", async () => {

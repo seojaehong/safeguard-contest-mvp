@@ -20,6 +20,7 @@ const ARTIFACTS = Object.freeze({
   workspaceInformationArchitecture: path.join("evaluation", "workspace-information-architecture-2026-07-21", "report.json"),
   hermesOpenclawRuntime: path.join("evaluation", "hermes-openclaw-runtime-current-gate-2026-07-20", "report.json"),
   launchReadiness: path.join("evaluation", "launch-readiness-current-2026-07-22", "report.json"),
+  koshaNextExactCandidateAudit: path.join("evaluation", "kosha-next-exact-candidate-audit-2026-07-22", "report.json"),
   rlsLlmWikiApprovalPreflight: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
   approvalRunway: path.join("evaluation", "northstar-approval-runway-2026-07-21", "report.json"),
   sifEmbeddingPreflight: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
@@ -186,6 +187,35 @@ function sifSummary(sif) {
 }
 
 /**
+ * @param {unknown} koshaCandidateAudit
+ */
+function koshaCandidateAuditSummary(koshaCandidateAudit) {
+  if (!isRecord(koshaCandidateAudit)) return {};
+  const exact = isRecord(koshaCandidateAudit.exactTrustRegistryCurrent)
+    ? koshaCandidateAudit.exactTrustRegistryCurrent
+    : {};
+  const subset = isRecord(koshaCandidateAudit.verifiedSubsetCurrent)
+    ? koshaCandidateAudit.verifiedSubsetCurrent
+    : {};
+  const metadata = isRecord(koshaCandidateAudit.officialMetadataRegistry)
+    ? koshaCandidateAudit.officialMetadataRegistry
+    : {};
+  return {
+    verdict: asString(koshaCandidateAudit.verdict),
+    exactPins: typeof exact.count === "number" ? exact.count : undefined,
+    acceptedSubsetItems: typeof subset.acceptedCount === "number" ? subset.acceptedCount : undefined,
+    generatedChunks: typeof subset.chunksCount === "number" ? subset.chunksCount : undefined,
+    metadataVerifiedNotExact: typeof metadata.metadataVerifiedNotExact === "number" ? metadata.metadataVerifiedNotExact : undefined,
+    mutationPerformed: asBoolean(koshaCandidateAudit.mutationPerformed),
+    dbMutationPerformed: asBoolean(koshaCandidateAudit.dbMutationPerformed),
+    embeddingGenerationPerformed: asBoolean(koshaCandidateAudit.embeddingGenerationPerformed),
+    forbiddenClaims: Array.isArray(koshaCandidateAudit.forbiddenClaims)
+      ? koshaCandidateAudit.forbiddenClaims.map(asString).filter(Boolean)
+      : [],
+  };
+}
+
+/**
  * @param {{ rootDir: string, buildInfo: unknown, generatedAt?: string }} options
  */
 export function buildNorthstarNextRunway(options) {
@@ -195,6 +225,7 @@ export function buildNorthstarNextRunway(options) {
   const approvalRunway = readJson(options.rootDir, ARTIFACTS.approvalRunway);
   const hermes = readJson(options.rootDir, ARTIFACTS.hermesOpenclawRuntime);
   const launch = readJson(options.rootDir, ARTIFACTS.launchReadiness);
+  const koshaCandidateAudit = readJson(options.rootDir, ARTIFACTS.koshaNextExactCandidateAudit);
   const sif = readJson(options.rootDir, ARTIFACTS.sifEmbeddingPreflight);
   const liveExactEvidenceCommit = isRecord(liveRollup) ? asString(liveRollup.head) : "";
   const liveRollupLiveCommit = isRecord(liveRollup) && isRecord(liveRollup.liveBuildInfo)
@@ -250,10 +281,12 @@ export function buildNorthstarNextRunway(options) {
       hermesOpenclaw: "adapter and fail-closed auth boundary current-proven; live unauthenticated broker smoke returns AUTH_REQUIRED before engine execution",
     },
     hermesOpenclaw: hermesSummary(hermes),
+    koshaNextExactCandidateAudit: koshaCandidateAuditSummary(koshaCandidateAudit),
     sifEmbeddingRuntime: sifSummary(sif),
     nextSafeWorkWithoutApproval: [
       "refresh source/live exact evidence when production marker advances to the evidence-only head",
       "refresh live rollup before claiming live-exact if production advances beyond the current live rollup head",
+      "use the KOSHA next exact candidate audit to select a bounded metadata-verified candidate set before any exact-trust promotion",
       "keep UI follow-up scoped to selected-editor/detail readability or reproduced desktop share perception issues",
       "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
       "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
@@ -303,6 +336,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 
 - Live harness quality is proven.
 - KOSHA exact trust registry is proven for the accepted exact-trust slice.
+- KOSHA next exact candidate audit identifies the 234-item current native technical-support subset and 231 metadata-verified non-exact candidates without mutation.
 - Documents and Share cockpit UI is proven for the current evidence scope.
 - Standalone Dispatch cockpit is proven for the current evidence scope.
 - Generated Share result fixture cockpit is proven without claiming real provider dispatch.
@@ -334,6 +368,14 @@ Route/page split alone is not accepted as the UX fix. The accepted structure is 
 ## Next Safe Work Without Approval
 
 ${report.nextSafeWorkWithoutApproval.map((item, index) => `${index + 1}. ${item}.`).join("\n")}
+
+## KOSHA Candidate Boundary
+
+- Exact trust remains proven only for the accepted exact pins.
+- Candidate pool: ${report.koshaNextExactCandidateAudit.acceptedSubsetItems || "unknown"} current native technical-support items.
+- Metadata-verified non-exact candidates: ${report.koshaNextExactCandidateAudit.metadataVerifiedNotExact || "unknown"}.
+- Mutation performed by candidate audit: ${report.koshaNextExactCandidateAudit.mutationPerformed === true}.
+- Forbidden claim remains: metadata-verified candidates are not exact production evidence until separately promoted through immutable acquisition/review.
 `;
 }
 
