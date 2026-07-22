@@ -155,6 +155,36 @@ function createQueryErrorClient(error: Record<string, unknown>) {
   };
 }
 
+function createQueuedQueryResponseClient(
+  responses: Array<{ data: FixtureRow[] | null; error: Record<string, unknown> | null }>
+) {
+  let index = 0;
+  return {
+    from() {
+      const query = {
+        select() {
+          return query;
+        },
+        eq() {
+          return query;
+        },
+        limit() {
+          return query;
+        },
+        then<TResult1 = { data: FixtureRow[] | null; error: Record<string, unknown> | null }, TResult2 = never>(
+          onFulfilled?: ((value: { data: FixtureRow[] | null; error: Record<string, unknown> | null }) => TResult1 | PromiseLike<TResult1>) | null,
+          onRejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null
+        ) {
+          const response = responses[Math.min(index, responses.length - 1)] || { data: null, error: null };
+          index += 1;
+          return Promise.resolve(response).then(onFulfilled, onRejected);
+        }
+      };
+      return query;
+    }
+  };
+}
+
 function ownedContext(siteId: string | null) {
   return {
     ok: true,
@@ -500,6 +530,33 @@ describe("commercial workpack service-role tenant hardening", () => {
       code: "PGRST116",
       message: "JSON object requested, multiple (or no) rows returned"
     });
+
+    const result = await store.loadActivePublicShareSession(client as never, {
+      shareSessionId: "33333333-3333-4333-8333-333333333333",
+      workerId: "11111111-1111-4111-8111-111111111111"
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      status: 404,
+      message: "유효한 공유 세션을 찾지 못했습니다."
+    });
+  });
+
+  it("falls back to a secure legacy public share session read when newer policy columns are unavailable", async () => {
+    const store = await vi.importActual<typeof import("@/lib/workpack-commercial-store")>(
+      "@/lib/workpack-commercial-store"
+    );
+    const client = createQueuedQueryResponseClient([
+      {
+        data: null,
+        error: {
+          code: "42703",
+          message: "column workpack_share_sessions.access_policy does not exist"
+        }
+      },
+      { data: [], error: null }
+    ]);
 
     const result = await store.loadActivePublicShareSession(client as never, {
       shareSessionId: "33333333-3333-4333-8333-333333333333",

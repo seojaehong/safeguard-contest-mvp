@@ -234,6 +234,14 @@ function isPostgrestNoRowsError(error: unknown): boolean {
   return isRecord(error) && error.code === "PGRST116";
 }
 
+function isShareSessionCompatibilitySelectError(error: unknown): boolean {
+  if (!isRecord(error)) return false;
+  const code = typeof error.code === "string" ? error.code : "";
+  if (code === "42703" || code === "PGRST204") return true;
+  const message = typeof error.message === "string" ? error.message.toLowerCase() : "";
+  return message.includes("share_scope") || message.includes("access_policy");
+}
+
 function readPublicString(value: unknown, maxLength = 2_400): string {
   if (typeof value !== "string") return "";
   return value
@@ -320,15 +328,33 @@ export async function loadActivePublicShareSession(
     .eq("id", input.shareSessionId)
     .limit(1);
 
-  if (error) {
-    if (isPostgrestNoRowsError(error)) {
+  let resolvedSessionRows = sessionRows;
+  let resolvedError = error;
+  if (resolvedError && isShareSessionCompatibilitySelectError(resolvedError)) {
+    const fallback = await client
+      .from("workpack_share_sessions")
+      .select("id,organization_id,site_id,workpack_id,recipients_snapshot,status,expires_at")
+      .eq("id", input.shareSessionId)
+      .limit(1);
+    resolvedSessionRows = Array.isArray(fallback.data)
+      ? fallback.data.map((row) => ({
+        ...row,
+        share_scope: "invited",
+        access_policy: null
+      }))
+      : fallback.data;
+    resolvedError = fallback.error;
+  }
+
+  if (resolvedError) {
+    if (isPostgrestNoRowsError(resolvedError)) {
       return { ok: false, status: 404, message: "유효한 공유 세션을 찾지 못했습니다." };
     }
-    console.error("public share session fetch failed", error);
+    console.error("public share session fetch failed", resolvedError);
     return { ok: false, status: 500, message: "공유 세션을 확인하지 못했습니다." };
   }
 
-  const sessionData = Array.isArray(sessionRows) ? sessionRows[0] : null;
+  const sessionData = Array.isArray(resolvedSessionRows) ? resolvedSessionRows[0] : null;
   if (!sessionData || sessionData.status !== "active") {
     return { ok: false, status: 404, message: "유효한 공유 세션을 찾지 못했습니다." };
   }
