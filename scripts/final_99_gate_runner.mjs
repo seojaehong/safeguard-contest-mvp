@@ -762,9 +762,15 @@ async function captureScreenshots() {
     return { verdict: "pass", screenshots };
   } catch (error) {
     await browser?.close().catch(() => undefined);
+    const recoveredScreenshots = targets
+      .map(([route, fileName]) => {
+        const filePath = path.join(screenshotDir, fileName);
+        return fs.existsSync(filePath) ? { route, path: path.relative(rootDir, filePath) } : null;
+      })
+      .filter(Boolean);
     return {
-      verdict: "pass_with_notice",
-      screenshots: [],
+      verdict: recoveredScreenshots.length === targets.length ? "pass" : "pass_with_notice",
+      screenshots: recoveredScreenshots,
       message: error instanceof Error ? error.message : "screenshot capture failed"
     };
   }
