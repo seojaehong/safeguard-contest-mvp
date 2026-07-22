@@ -1,11 +1,11 @@
 {
   "schemaVersion": "safeclaw-launch-readiness-current/v3",
-  "generatedAt": "2026-07-22T20:13:08.106Z",
+  "generatedAt": "2026-07-22T20:16:34.185Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHeadAtGeneration": "a4efca4a612a616dd6260e11cd78358aa0b13a2c",
-  "productionCommit": "a4efca4a612a616dd6260e11cd78358aa0b13a2c",
-  "runtimeSmokeCommit": "a4efca4a612a616dd6260e11cd78358aa0b13a2c",
-  "evidenceHeadBeforeThisReport": "a4efca4a612a616dd6260e11cd78358aa0b13a2c",
+  "sourceHeadAtGeneration": "bcf5118c400bc47cfe5d454dbfd2a228abc99e8e",
+  "productionCommit": "bcf5118c400bc47cfe5d454dbfd2a228abc99e8e",
+  "runtimeSmokeCommit": "bcf5118c400bc47cfe5d454dbfd2a228abc99e8e",
+  "evidenceHeadBeforeThisReport": "bcf5118c400bc47cfe5d454dbfd2a228abc99e8e",
   "currentHeadIsEvidenceOnlyPending": false,
   "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
   "safeLaunchDemoClaimAllowed": true,
@@ -260,10 +260,10 @@
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "a4efca4a612a616dd6260e11cd78358aa0b13a2c",
+    "commitSha": "bcf5118c400bc47cfe5d454dbfd2a228abc99e8e",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-77ctfii1d-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-nw3yuwlz1-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   }
 }

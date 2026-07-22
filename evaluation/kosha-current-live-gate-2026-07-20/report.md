@@ -1,8 +1,8 @@
 # SafeClaw KOSHA Current Live Gate
 
-Generated at: 2026-07-22T18:12:28.128Z
-Source HEAD at generation: f4385b028310843d86f05d695a78b5c8ba9a57b0
-Live commit at generation: f4385b028310843d86f05d695a78b5c8ba9a57b0
+Generated at: 2026-07-22T20:16:23.386Z
+Source HEAD at generation: bcf5118c400bc47cfe5d454dbfd2a228abc99e8e
+Live commit at generation: bcf5118c400bc47cfe5d454dbfd2a228abc99e8e
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Verdict: `pass_current_kosha_exact_trust_and_corpus_gate`
