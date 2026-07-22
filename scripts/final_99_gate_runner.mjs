@@ -742,21 +742,26 @@ async function captureScreenshots() {
     ["/evidence", "04-evidence.png"],
     ["/dispatch", "05-dispatch.png"]
   ];
+  let browser = null;
   try {
     const { chromium } = await import("playwright");
-    const browser = await chromium.launch({ headless: true });
+    browser = await chromium.launch({ headless: true });
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
     const screenshots = [];
     for (const [route, fileName] of targets) {
       const url = `${baseUrl}${route}`;
-      await page.goto(url, { waitUntil: "networkidle", timeout: 30_000 });
+      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30_000 });
+      await page.locator("body").waitFor({ state: "visible", timeout: 10_000 });
+      await page.waitForLoadState("load", { timeout: 10_000 }).catch(() => undefined);
       const filePath = path.join(screenshotDir, fileName);
       await page.screenshot({ path: filePath, fullPage: false });
       screenshots.push({ route, path: path.relative(rootDir, filePath) });
     }
     await browser.close();
+    browser = null;
     return { verdict: "pass", screenshots };
   } catch (error) {
+    await browser?.close().catch(() => undefined);
     return {
       verdict: "pass_with_notice",
       screenshots: [],
