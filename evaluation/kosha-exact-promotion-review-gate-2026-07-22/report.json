@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-review-gate/v1",
-  "generatedAt": "2026-07-22T17:03:27.609Z",
-  "sourceHead": "c1f61ae0d87e1b4bfe19b95fb00b0fb686b8d3cc",
+  "generatedAt": "2026-07-23T02:29:40.000Z",
+  "sourceHead": "5ca418779fa5711c3937b1ead418299e9903b68b",
   "packetPath": "evaluation\\kosha-exact-promotion-packet-2026-07-22\\report.json",
   "reviewPath": "evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\review-template.json",
   "verdict": "REVIEW_CHECKLIST_INCOMPLETE_BLOCKED",
@@ -17,8 +17,11 @@
   "exactTrustPromotionBlockedUntilChecklistComplete": true,
   "exactTrustPromotionStillRequiresSeparateApproval": true,
   "approvalRequiredBeforeExactPromotion": true,
+  "promotionApprovalInputProvided": false,
+  "reviewCompletionIsPromotionApproval": false,
   "exactTrustPromotionApproved": false,
   "exactRegistryWriteArtifactCreated": false,
+  "completedReviewCreatesRegistryArtifact": false,
   "exactRegistryWriteArtifactPath": null,
   "packetCandidateSetMatchesReview": true,
   "failureSummary": {

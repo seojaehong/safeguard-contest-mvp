@@ -36,8 +36,11 @@ type ReviewGateReport = {
   exactTrustPromotionBlockedUntilChecklistComplete: boolean;
   exactTrustPromotionStillRequiresSeparateApproval: boolean;
   approvalRequiredBeforeExactPromotion: boolean;
+  promotionApprovalInputProvided: boolean;
+  reviewCompletionIsPromotionApproval: boolean;
   exactTrustPromotionApproved: boolean;
   exactRegistryWriteArtifactCreated: boolean;
+  completedReviewCreatesRegistryArtifact: boolean;
   exactRegistryWriteArtifactPath: string | null;
   packetCandidateSetMatchesReview: boolean;
   failureSummary: {
@@ -175,8 +178,11 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.exactTrustPromotionBlockedUntilChecklistComplete).toBe(false);
     expect(report.exactTrustPromotionStillRequiresSeparateApproval).toBe(true);
     expect(report.approvalRequiredBeforeExactPromotion).toBe(true);
+    expect(report.promotionApprovalInputProvided).toBe(false);
+    expect(report.reviewCompletionIsPromotionApproval).toBe(false);
     expect(report.exactTrustPromotionApproved).toBe(false);
     expect(report.exactRegistryWriteArtifactCreated).toBe(false);
+    expect(report.completedReviewCreatesRegistryArtifact).toBe(false);
     expect(report.exactRegistryWriteArtifactPath).toBeNull();
     expect(report.packetCandidateSetMatchesReview).toBe(true);
     expect(Object.values(report.failureSummary).every((value) => value === 0)).toBe(true);
@@ -385,8 +391,11 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.reviewChecklistComplete).toBe(true);
     expect(report.exactPromotionPerformed).toBe(false);
     expect(report.approvalRequiredBeforeExactPromotion).toBe(true);
+    expect(report.promotionApprovalInputProvided).toBe(false);
+    expect(report.reviewCompletionIsPromotionApproval).toBe(false);
     expect(report.exactTrustPromotionApproved).toBe(false);
     expect(report.exactRegistryWriteArtifactCreated).toBe(false);
+    expect(report.completedReviewCreatesRegistryArtifact).toBe(false);
     expect(report.exactRegistryWriteArtifactPath).toBeNull();
     expect(outputFiles).toEqual(["report.json", "report.md"]);
     expect(outputFiles.some((file) => /exact|registry|promotion/i.test(file) && file !== "report.json" && file !== "report.md")).toBe(false);
@@ -457,7 +466,10 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.failures).toContain("missing-human-confirmation:A-G-15");
     expect(report.failureSummary.missingHumanConfirmations).toBe(1);
     expect(markdown).toContain("Exact trust promotion still requires separate approval: `true`");
+    expect(markdown).toContain("Review completion is promotion approval: `false`");
+    expect(markdown).toContain("Promotion approval input provided: `false`");
     expect(markdown).toContain("Exact registry write artifact created: `false`");
+    expect(markdown).toContain("Completed review creates registry artifact: `false`");
     expect(markdown).toContain("- missingHumanConfirmations: 1");
     expect(markdown).toContain("missing-human-confirmation:A-G-15");
   });

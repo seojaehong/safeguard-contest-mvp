@@ -286,8 +286,11 @@ export function buildKoshaExactPromotionReviewGate(options) {
     exactTrustPromotionBlockedUntilChecklistComplete: !reviewChecklistComplete,
     exactTrustPromotionStillRequiresSeparateApproval: true,
     approvalRequiredBeforeExactPromotion: true,
+    promotionApprovalInputProvided: false,
+    reviewCompletionIsPromotionApproval: false,
     exactTrustPromotionApproved: false,
     exactRegistryWriteArtifactCreated: false,
+    completedReviewCreatesRegistryArtifact: false,
     exactRegistryWriteArtifactPath: null,
     packetCandidateSetMatchesReview,
     failureSummary,
@@ -378,9 +381,15 @@ Exact promotion performed: \`${report.exactPromotionPerformed}\`
 
 Exact trust promotion still requires separate approval: \`${report.exactTrustPromotionStillRequiresSeparateApproval}\`
 
+Review completion is promotion approval: \`${report.reviewCompletionIsPromotionApproval}\`
+
+Promotion approval input provided: \`${report.promotionApprovalInputProvided}\`
+
 Exact trust promotion approved: \`${report.exactTrustPromotionApproved}\`
 
 Exact registry write artifact created: \`${report.exactRegistryWriteArtifactCreated}\`
+
+Completed review creates registry artifact: \`${report.completedReviewCreatesRegistryArtifact}\`
 
 ## Candidate Review Counts
 
