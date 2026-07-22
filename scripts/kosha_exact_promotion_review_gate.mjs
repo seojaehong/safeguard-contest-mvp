@@ -12,6 +12,7 @@ const SCRIPT_PATH = fileURLToPath(import.meta.url);
 const REPO_ROOT = path.resolve(path.dirname(SCRIPT_PATH), "..");
 const DEFAULT_PACKET_PATH = path.join("evaluation", "kosha-exact-promotion-packet-2026-07-22", "report.json");
 const DEFAULT_OUTPUT_DIR = path.join("evaluation", "kosha-exact-promotion-review-gate-2026-07-22");
+const REVIEW_SCHEMA_VERSION = "safeclaw-kosha-exact-promotion-review/v1";
 
 /**
  * @param {unknown} value
@@ -217,6 +218,49 @@ export function buildKoshaExactPromotionReviewGate(options) {
 }
 
 /**
+ * @param {{
+ *   rootDir: string;
+ *   packetPath?: string;
+ *   generatedAt?: string;
+ * }} options
+ */
+export function buildKoshaExactPromotionReviewTemplate(options) {
+  const rootDir = options.rootDir;
+  const packetPath = options.packetPath || DEFAULT_PACKET_PATH;
+  const packet = readJson(resolveInsideRoot(rootDir, packetPath));
+  assertPacketShape(packet);
+  const packetRecord = /** @type {Record<string, unknown>} */ (packet);
+  const candidates = /** @type {Record<string, unknown>[]} */ (packetRecord.candidates);
+  return {
+    schemaVersion: REVIEW_SCHEMA_VERSION,
+    generatedAt: options.generatedAt || new Date().toISOString(),
+    sourceHead: gitHead(rootDir),
+    packetPath,
+    reviewTemplateOnly: true,
+    exactPromotionPerformed: false,
+    instructions: [
+      "Fill reviewer and reviewedAt for each candidate.",
+      "Confirm every requiredReviewChecks entry only after comparing official URL, file ID, version, body hash, PDF hash, lifecycle/current status, and immutable acquisition evidence.",
+      "Set humanConfirmed true only after the full candidate review is complete.",
+      "Run scripts/kosha_exact_promotion_review_gate.mjs with this filled review file before any separate exact-trust promotion approval.",
+    ],
+    candidateReviews: candidates.map((candidate) => ({
+      stableKey: asString(candidate.stableKey),
+      version: asString(candidate.version),
+      officialFileId: asString(candidate.officialFileId),
+      bodySha256: asString(candidate.bodySha256),
+      pdfSha256: asString(candidate.pdfSha256),
+      reviewer: "",
+      reviewedAt: "",
+      humanConfirmed: false,
+      requiredReviewChecks: Array.isArray(candidate.requiredReviewChecks)
+        ? candidate.requiredReviewChecks.map((text) => ({ text: asString(text), confirmed: false }))
+        : [],
+    })),
+  };
+}
+
+/**
  * @param {ReturnType<typeof buildKoshaExactPromotionReviewGate>} report
  */
 function renderMarkdown(report) {
@@ -261,13 +305,14 @@ ${report.forbiddenClaims.map((claim) => `- ${claim}`).join("\n")}
  * @param {string[]} args
  */
 function parseArgs(args) {
-  /** @type {{ rootDir: string; packet: string; review: string; output: string; generatedAt: string }} */
+  /** @type {{ rootDir: string; packet: string; review: string; output: string; generatedAt: string; writeTemplate: boolean }} */
   const parsed = {
     rootDir: REPO_ROOT,
     packet: DEFAULT_PACKET_PATH,
     review: "",
     output: DEFAULT_OUTPUT_DIR,
     generatedAt: "",
+    writeTemplate: false,
   };
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
@@ -287,24 +332,36 @@ function parseArgs(args) {
     } else if (arg === "--generated-at") {
       parsed.generatedAt = next;
       index += 1;
+    } else if (arg === "--write-template") {
+      parsed.writeTemplate = true;
     } else {
       throw new Error(`Unknown argument: ${arg}`);
     }
   }
-  if (!parsed.review) throw new Error("missing-required-argument:--review");
+  if (!parsed.review && !parsed.writeTemplate) throw new Error("missing-required-argument:--review");
   return parsed;
 }
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+  const outputDir = resolveInsideRoot(args.rootDir, args.output);
+  fs.mkdirSync(outputDir, { recursive: true });
+  if (args.writeTemplate) {
+    const template = buildKoshaExactPromotionReviewTemplate({
+      rootDir: args.rootDir,
+      packetPath: args.packet,
+      generatedAt: args.generatedAt || undefined,
+    });
+    fs.writeFileSync(path.join(outputDir, "review-template.json"), `${JSON.stringify(template, null, 2)}\n`, "utf8");
+    console.log(JSON.stringify({ output: args.output, template: "review-template.json", candidateCount: template.candidateReviews.length }, null, 2));
+    return;
+  }
   const report = buildKoshaExactPromotionReviewGate({
     rootDir: args.rootDir,
     packetPath: args.packet,
     reviewPath: args.review,
     generatedAt: args.generatedAt || undefined,
   });
-  const outputDir = resolveInsideRoot(args.rootDir, args.output);
-  fs.mkdirSync(outputDir, { recursive: true });
   fs.writeFileSync(path.join(outputDir, "report.json"), `${JSON.stringify(report, null, 2)}\n`, "utf8");
   fs.writeFileSync(path.join(outputDir, "report.md"), renderMarkdown(report), "utf8");
   console.log(JSON.stringify({ output: args.output, verdict: report.verdict, failureCount: report.failures.length }, null, 2));

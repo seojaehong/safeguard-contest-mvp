@@ -38,6 +38,22 @@ type ReviewGateModule = {
     reviewPath: string;
     generatedAt?: string;
   }) => ReviewGateReport;
+  buildKoshaExactPromotionReviewTemplate: (options: {
+    rootDir: string;
+    packetPath?: string;
+    generatedAt?: string;
+  }) => {
+    schemaVersion: string;
+    reviewTemplateOnly: boolean;
+    exactPromotionPerformed: boolean;
+    candidateReviews: Array<{
+      stableKey: string;
+      reviewer: string;
+      reviewedAt: string;
+      humanConfirmed: boolean;
+      requiredReviewChecks: Array<{ text: string; confirmed: boolean }>;
+    }>;
+  };
 };
 
 async function loadReviewGateModule(): Promise<ReviewGateModule> {
@@ -203,5 +219,69 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.failures).toContain("missing-human-confirmation:A-G-15");
     expect(markdown).toContain("Exact trust promotion still requires separate approval: `true`");
     expect(markdown).toContain("missing-human-confirmation:A-G-15");
+  });
+
+  it("writes a review template that is blocked by default until an operator fills it", async () => {
+    const { root, packetPath } = writeFixtureRoot();
+    const module = await loadReviewGateModule();
+    const template = module.buildKoshaExactPromotionReviewTemplate({
+      rootDir: root,
+      packetPath,
+      generatedAt: "2026-07-22T00:00:00.000Z",
+    });
+
+    expect(template.schemaVersion).toBe("safeclaw-kosha-exact-promotion-review/v1");
+    expect(template.reviewTemplateOnly).toBe(true);
+    expect(template.exactPromotionPerformed).toBe(false);
+    expect(template.candidateReviews).toHaveLength(2);
+    expect(template.candidateReviews.every((row) => row.reviewer === "")).toBe(true);
+    expect(template.candidateReviews.every((row) => row.reviewedAt === "")).toBe(true);
+    expect(template.candidateReviews.every((row) => row.humanConfirmed === false)).toBe(true);
+    expect(template.candidateReviews.every((row) => row.requiredReviewChecks.length === 5)).toBe(true);
+    expect(template.candidateReviews.every((row) => row.requiredReviewChecks.every((check) => check.confirmed === false))).toBe(true);
+
+    execFileSync("node", [
+      path.resolve("scripts", "kosha_exact_promotion_review_gate.mjs"),
+      "--root",
+      root,
+      "--packet",
+      packetPath,
+      "--output",
+      "evaluation/kosha-exact-promotion-review-gate-2026-07-22",
+      "--generated-at",
+      "2026-07-22T00:00:00.000Z",
+      "--write-template",
+    ], { encoding: "utf8" });
+
+    const templatePath = path.join(root, "evaluation/kosha-exact-promotion-review-gate-2026-07-22/review-template.json");
+    expect(fs.existsSync(templatePath)).toBe(true);
+    let exitStatus = 0;
+    try {
+      execFileSync("node", [
+        path.resolve("scripts", "kosha_exact_promotion_review_gate.mjs"),
+        "--root",
+        root,
+        "--packet",
+        packetPath,
+        "--review",
+        "evaluation/kosha-exact-promotion-review-gate-2026-07-22/review-template.json",
+        "--output",
+        "evaluation/kosha-exact-promotion-review-gate-2026-07-22/blocked",
+      ], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "status" in error && typeof error.status === "number") {
+        exitStatus = error.status;
+      } else {
+        throw error;
+      }
+    }
+    const report = JSON.parse(fs.readFileSync(
+      path.join(root, "evaluation/kosha-exact-promotion-review-gate-2026-07-22/blocked/report.json"),
+      "utf8",
+    )) as ReviewGateReport;
+    expect(exitStatus).toBe(2);
+    expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
+    expect(report.failures).toContain("missing-human-confirmation:D-C-10");
+    expect(report.failures.some((failure) => failure.startsWith("unconfirmed-required-check:D-C-10"))).toBe(true);
   });
 });
