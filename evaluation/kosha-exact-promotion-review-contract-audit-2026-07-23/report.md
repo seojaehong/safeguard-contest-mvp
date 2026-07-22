@@ -1,12 +1,12 @@
 # KOSHA Exact Promotion Review Contract Audit
 
-Generated at: `2026-07-22T20:35:37.289Z`
+Generated at: `2026-07-22T21:08:47.093Z`
 
 Verdict: `PASS_CURRENT_SOURCE_REVIEW_GATE_CONTRACT_NO_MUTATION`
 
-Source HEAD: `6c5a666f18eacf3ba85e67b1d472e86b2f390e04`
+Source HEAD: `b8e63bf7e4c6bb9b4c802d6f66a09cacc86c7e8d`
 
-Production `/api/build-info`: `6c5a666f18eacf3ba85e67b1d472e86b2f390e04`
+Production `/api/build-info`: `b8e63bf7e4c6bb9b4c802d6f66a09cacc86c7e8d`
 
 ## Boundary
 
@@ -14,8 +14,8 @@ This is an approval-free static and focused-test audit of the KOSHA exact-promot
 
 The current committed review-gate artifact remains a blocked operator template snapshot:
 
-- Artifact: `evaluation/kosha-exact-promotion-review-gate-2026-07-22/report.json`
-- Artifact source: `6c5a666f18eacf3ba85e67b1d472e86b2f390e04`
+- Artifact: `evaluation\kosha-exact-promotion-review-gate-2026-07-22\report.json`
+- Artifact source: `b8e63bf7e4c6bb9b4c802d6f66a09cacc86c7e8d`
 - Artifact verdict: `REVIEW_CHECKLIST_INCOMPLETE_BLOCKED`
 - Review rows: `8`
 - Passed rows: `0`
@@ -53,8 +53,14 @@ The current committed review-gate artifact remains a blocked operator template s
 
 ## Forbidden Claims
 
-- KOSHA exact trust promotion has been approved.\n- KOSHA exact-kosha registry was expanded by this audit.\n- Completed checklist review alone is exact-trust promotion approval.\n- Shallow reviewer/reviewedAt/humanConfirmed fields are sufficient without required check text and provenance/hash confirmation.\n- Embeddings, vector retrieval, DB mutation, or network acquisition were performed by this audit.
+- KOSHA exact trust promotion has been approved.
+- KOSHA exact-kosha registry was expanded by this audit.
+- Completed checklist review alone is exact-trust promotion approval.
+- Shallow reviewer/reviewedAt/humanConfirmed fields are sufficient without required check text and provenance/hash confirmation.
+- Embeddings, vector retrieval, DB mutation, or network acquisition were performed by this audit.
 
 ## Next Approval Boundary
 
-1. A human operator must complete all 8 candidate review rows and every packet-matched required check.\n2. Even after review checklist completion, a separate explicit exact-trust promotion approval is required.\n3. Registry write or embedding/vector activation remains outside this no-approval audit.
+1. A human operator must complete all 8 candidate review rows and every packet-matched required check.
+2. Even after review checklist completion, a separate explicit exact-trust promotion approval is required.
+3. Registry write or embedding/vector activation remains outside this no-approval audit.

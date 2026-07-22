@@ -1,18 +1,22 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-review-contract-audit/v1",
-  "generatedAt": "2026-07-22T20:35:37.289Z",
-  "sourceHead": "6c5a666f18eacf3ba85e67b1d472e86b2f390e04",
+  "generatedAt": "2026-07-22T21:08:47.093Z",
+  "sourceHead": "b8e63bf7e4c6bb9b4c802d6f66a09cacc86c7e8d",
   "productionBuildInfo": {
-    "commitSha": "6c5a666f18eacf3ba85e67b1d472e86b2f390e04",
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "b8e63bf7e4c6bb9b4c802d6f66a09cacc86c7e8d",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-6cwkno6d8-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-591jg0l3k-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
   },
   "verdict": "PASS_CURRENT_SOURCE_REVIEW_GATE_CONTRACT_NO_MUTATION",
   "auditScope": "approval-free static and focused-test audit of KOSHA exact-promotion review gate behavior",
-  "scriptUnderAudit": "scripts/kosha_exact_promotion_review_gate.mjs",
-  "currentReviewGateArtifact": "evaluation/kosha-exact-promotion-review-gate-2026-07-22/report.json",
-  "currentReviewGateArtifactSourceHead": "6c5a666f18eacf3ba85e67b1d472e86b2f390e04",
+  "scriptUnderAudit": "scripts\\kosha_exact_promotion_review_gate.mjs",
+  "currentReviewGateArtifact": "evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\report.json",
+  "currentReviewGateArtifactSourceHead": "b8e63bf7e4c6bb9b4c802d6f66a09cacc86c7e8d",
   "currentReviewGateArtifactVerdict": "REVIEW_CHECKLIST_INCOMPLETE_BLOCKED",
   "reviewChecklistComplete": false,
   "reviewRows": 8,
@@ -63,6 +67,7 @@
     "focusedTests": {
       "command": "npm.cmd test -- tests\\kosha-exact-promotion-review-gate.test.ts --maxWorkers=1 --fileParallelism=false",
       "passed": true,
+      "skipped": false,
       "testFilesPassed": 1,
       "testsPassed": 12
     }
