@@ -4,17 +4,17 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `140991153ab2bdf18a7e4a113d4874b53c9e3ea0`
+Source HEAD: `ccda0b64c413330a0238f4d9a2cfc7a50984e0f7`
 
-Production `/api/build-info`: `1371ca52d11525e7b26ae26402be4006e44a4a57`
+Production `/api/build-info`: `29b7fb1bc773cf6775d10381e1a072d3c3e46714`
 
 Latest evidence commit live: `false`
 
-Live-exact evidence commit: `140991153ab2bdf18a7e4a113d4874b53c9e3ea0`
+Live-exact evidence commit: `29b7fb1bc773cf6775d10381e1a072d3c3e46714`
 
-Live rollup matches production: `false`
+Live rollup matches production: `true`
 
-Note: current HEAD `140991153ab2bdf18a7e4a113d4874b53c9e3ea0` is ahead of production `1371ca52d11525e7b26ae26402be4006e44a4a57`, and the live rollup head `140991153ab2bdf18a7e4a113d4874b53c9e3ea0` does not yet match production. Refresh live rollup before claiming live-exact.
+Note: current HEAD `ccda0b64c413330a0238f4d9a2cfc7a50984e0f7` is an evidence-only refresh pushed after the live-exact artifact set. Production is still `29b7fb1bc773cf6775d10381e1a072d3c3e46714`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -56,6 +56,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Documents remaining debt: full 12-document authoring polish remains. The all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content.
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.
 - Bounded workbench DoD: route split alone is not accepted; desktop Documents hard-REDs above the recorded screen threshold, /share/result desktop requires multi-region workbench geometry, and generated fixture evidence must stay separate from exact saved/session proof.
+- Legacy workspace-layout regression: remains a broad no-overflow/editor-flow smoke only, not a long-form UX PASS gate; the DoD and route-specific evidence own first-task distance.
 - Share desktop: current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
