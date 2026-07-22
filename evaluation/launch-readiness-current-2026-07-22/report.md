@@ -1,14 +1,14 @@
 # Launch Readiness Current Boundary
 
-Generated: 2026-07-22T07:07:19.925Z
+Generated: 2026-07-22T07:19:33.249Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD at generation: `ec7e81b9e983f0b9a9994a0dd9c65cca27b6624e`
+Source HEAD at generation: `140991153ab2bdf18a7e4a113d4874b53c9e3ea0`
 
-Production runtime smoke commit: `ec7e81b9e983f0b9a9994a0dd9c65cca27b6624e`
+Production runtime smoke commit: `1371ca52d11525e7b26ae26402be4006e44a4a57`
 
-Current HEAD is evidence-only pending relative to production: `false`
+Current HEAD is evidence-only pending relative to production: `true`
 
 ## Verdict
 
@@ -21,10 +21,10 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 `scripts/launch_readiness_audit.mjs` was run against production with `SAFETYGUARD_AUDIT_DISPATCH=false`.
 
 - `/api/ask`: 200 OK
-- elapsed: 23117 ms
+- elapsed: 19744 ms
 - dispatch call: not run
 - generated documents: 11 / 11
-- connection verdict: `PASS_WITH_BOUNDED_FALLBACK` (6 connected, 1 bounded fallback, 0 check-required)
+- connection verdict: `PASS_CONNECTED_NO_DISPATCH` (7 connected, 0 bounded fallback, 0 check-required)
 - scenario: `도시가스공사 열수송관 굴착공사`
 
 ## Connected Surfaces
@@ -33,7 +33,7 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 - Gemini: 연결됨
 - 기상청: 연결됨
 - Work24: 연결됨
-- KOSHA 교육: 일부 근거 보류
+- KOSHA 교육: 연결됨
 - KOSHA 공식자료: 연결됨
 - KOSHA 재해사례: 연결됨
 - n8n dispatch: 설정 점검만 수행
@@ -48,7 +48,7 @@ Final-99 remains `pass_with_notice`; 2 notices are carried. These are approval/a
 ## Safe Claims
 
 - Live /api/ask generated the expected 11-document workpack for the audited construction scenario.
-- Live public-data/AI surfaces returned user-facing connected or bounded fallback statuses; no connection returned 연결 점검 필요 in this smoke.
+- Live public-data/AI surfaces returned connected statuses for Law.go, Gemini, KMA weather, Work24, KOSHA education, KOSHA official material, and KOSHA accident-case connections in this smoke.
 - A safe launch demo or guided pilot can be claimed with explicit provider-dispatch, RLS, LLM Wiki, SIF vector, and admin-auth boundaries.
 - Documents selected-only bounded workbench evidence is current in scoped artifacts; route split alone is not accepted as the UX fix.
 
@@ -68,7 +68,7 @@ Route/page split alone is not accepted as the UX fix. The accepted structure is 
 - SIF vector retrieval or LLM Wiki publication is production-active.
 - Live Supabase RLS tenant isolation is launch-proven.
 - Exact saved/generated user share session has been reproduced unless a concrete session URL/state is measured.
-- Every external data surface was fully connected without fallback in the latest smoke.
+- n8n/provider dispatch was executed in the latest launch-readiness smoke.
 
 ## Approval-Gated Boundaries
 

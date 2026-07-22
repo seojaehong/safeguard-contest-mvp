@@ -1,6 +1,6 @@
 # KOSHA Education Portal Retry Evidence
 
-Generated: 2026-07-22T07:13:17.1890215Z
+Generated: 2026-07-22T07:19:51.883Z
 
 Source HEAD: $head
 
@@ -30,3 +30,7 @@ pm.cmd run typecheck -> PASS
 This is a current-source resilience proof only. Live production must catch this SHA before launch-readiness smoke can be promoted. It does not claim provider live dispatch, fully automated launch readiness, or any UI/IA completion.
 
 Route/page split alone is still not accepted as the UX fix. Documents/share remain governed by selected-only bounded workbench and progressive disclosure contracts.
+
+## Live Promotion
+
+Production `/api/build-info` reached `1371ca52d11525e7b26ae26402be4006e44a4a57`, which includes product commit `03b56e7d`. The no-dispatch launch-readiness smoke now reports `KOSHA 교육: 연결됨`. Provider dispatch was not called.

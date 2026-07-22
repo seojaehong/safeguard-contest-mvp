@@ -4,17 +4,17 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `ec7e81b9e983f0b9a9994a0dd9c65cca27b6624e`
+Source HEAD: `140991153ab2bdf18a7e4a113d4874b53c9e3ea0`
 
-Production `/api/build-info`: `ec7e81b9e983f0b9a9994a0dd9c65cca27b6624e`
+Production `/api/build-info`: `1371ca52d11525e7b26ae26402be4006e44a4a57`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Live-exact evidence commit: `ec7e81b9e983f0b9a9994a0dd9c65cca27b6624e`
+Live-exact evidence commit: `140991153ab2bdf18a7e4a113d4874b53c9e3ea0`
 
-Live rollup matches production: `true`
+Live rollup matches production: `false`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `140991153ab2bdf18a7e4a113d4874b53c9e3ea0` is ahead of production `1371ca52d11525e7b26ae26402be4006e44a4a57`, and the live rollup head `140991153ab2bdf18a7e4a113d4874b53c9e3ea0` does not yet match production. Refresh live rollup before claiming live-exact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -55,6 +55,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Documents selected editor/detail: risk-assessment default, same-document reselect, and all-12 launcher exposure land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown.
 - Documents remaining debt: full 12-document authoring polish remains. The all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content.
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.
+- Bounded workbench DoD: route split alone is not accepted; desktop Documents hard-REDs above the recorded screen threshold, /share/result desktop requires multi-region workbench geometry, and generated fixture evidence must stay separate from exact saved/session proof.
 - Share desktop: current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.

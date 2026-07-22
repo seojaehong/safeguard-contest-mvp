@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-kosha-education-retry/v1",
-  "generatedAt": "2026-07-22T07:13:17.1890215Z",
-  "sourceHead": "03b56e7d3ace6e3df3fd053625a58c10dd30dcca",
-  "verdict": "PASS_CURRENT_SOURCE_UNIT_CONTRACT",
-  "productionLiveClaimed": false,
+  "generatedAt": "2026-07-22T07:19:51.883Z",
+  "sourceHead": "140991153ab2bdf18a7e4a113d4874b53c9e3ea0",
+  "verdict": "PASS_LIVE_PRODUCTION_SMOKE",
+  "productionLiveClaimed": true,
   "problemObservedInPriorLiveSmoke": {
     "source": "evaluation\\launch-readiness-current-2026-07-22\\api-connection-audit.json",
     "surface": "KOSHA 교육",
@@ -35,7 +35,14 @@
     "uiIaNote": "This evidence only covers KOSHA education portal fetch resilience. Documents/share IA remains governed by route split plus selected-only bounded workbench, not route count alone."
   },
   "nextVerification": [
-    "After production build-info reaches this product SHA or later, rerun no-dispatch launch-readiness smoke and check whether KOSHA 교육 returns 연결됨 instead of 일부 근거 보류.",
-    "Do not claim fully automated launch readiness or provider dispatch from this retry proof."
-  ]
+    "Keep KOSHA education portal retry covered by focused unit test and no-dispatch launch-readiness smoke.",
+    "Do not claim provider dispatch, fully automated launch readiness, or DB/runtime approvals from this proof."
+  ],
+  "productionCommit": "1371ca52d11525e7b26ae26402be4006e44a4a57",
+  "liveVerification": {
+    "source": "evaluation\\launch-readiness-current-2026-07-22\\api-connection-audit.json",
+    "productionCommit": "1371ca52d11525e7b26ae26402be4006e44a4a57",
+    "koshaEducationStatus": "연결됨",
+    "dispatchCalled": false
+  }
 }

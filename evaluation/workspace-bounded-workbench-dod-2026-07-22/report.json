@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-workspace-bounded-workbench-dod/v1",
-  "generatedAt": "2026-07-22T07:16:37.0846423Z",
-  "sourceHead": "1371ca52d11525e7b26ae26402be4006e44a4a57",
+  "generatedAt": "2026-07-22T07:18:28.493Z",
+  "sourceHead": "140991153ab2bdf18a7e4a113d4874b53c9e3ea0",
   "verdict": "DOD_RECORDED_NOT_A_PASS_CLAIM",
   "routeSplitAloneAcceptedAsFix": false,
   "acceptedStructure": "three-step shell plus first-viewport cockpit plus selected-only bounded workbench plus progressive drilldown",
@@ -15,7 +15,12 @@
       "redCondition": "Any route renders long document/message/provenance content as serial body stack before the primary task is visible."
     },
     "input": {
-      "firstViewportMustShow": ["site/work summary", "AI mode or preset", "photo/evidence status", "next generation CTA"],
+      "firstViewportMustShow": [
+        "site/work summary",
+        "AI mode or preset",
+        "photo/evidence status",
+        "next generation CTA"
+      ],
       "longContentPolicy": "Previous generations, evidence details, and secondary history must be summary rail, drawer, or drilldown."
     },
     "documents": {
@@ -23,11 +28,26 @@
       "desktopMaxScreens": 1.5,
       "desktopHardRedScreens": 2,
       "mobileViewport": "390x723",
-      "firstViewportMustShow": ["current step", "selected document name", "core-3 launcher or selector", "primary action", "review/status state"],
-      "coreDocuments": ["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"],
+      "firstViewportMustShow": [
+        "current step",
+        "selected document name",
+        "core-3 launcher or selector",
+        "primary action",
+        "review/status state"
+      ],
+      "coreDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "tbmLogDraft"
+      ],
       "supportingDocumentsPolicy": "supporting 9 are collapsed/index/detail/drawer/local-scroll navigation, not serial full-body content above the selected editor",
       "selectedEditorPolicy": "exactly one selected editor/detail is visible as the workbench body; full/raw textarea remains secondary drilldown",
-      "riskAssessmentFirstTask": ["basic info strip", "action row", "first risk row summary", "first hazard field"],
+      "riskAssessmentFirstTask": [
+        "basic info strip",
+        "action row",
+        "first risk row summary",
+        "first hazard field"
+      ],
       "redConditions": [
         "document.body scrollHeight exceeds 2 viewport screens at 1440x723",
         "12 full editor/body surfaces are simultaneously DOM-visible as a vertical stack",
@@ -41,7 +61,12 @@
       "desktopTarget": "preview/document selector plus recipient/channel/action/provenance pane as a 2-pane or 3-pane workbench",
       "mobileViewport": "390x723",
       "mobileStackAllowed": true,
-      "stickyLocalRailRequired": ["source mode", "scope", "savedAt", "provenance"],
+      "stickyLocalRailRequired": [
+        "source mode",
+        "scope",
+        "savedAt",
+        "provenance"
+      ],
       "redConditions": [
         "desktop uses a mobile single-column stacked card layout",
         "generated fixture route PASS is used as proof for exact saved/generated user session without separate measurement",
@@ -51,9 +76,18 @@
     }
   },
   "evidenceRequirements": {
-    "requiredViewports": ["1440x723", "390x723"],
-    "recommendedAdditionalViewports": ["1440x900", "390x844"],
-    "requiredThemes": ["day", "night"],
+    "requiredViewports": [
+      "1440x723",
+      "390x723"
+    ],
+    "recommendedAdditionalViewports": [
+      "1440x900",
+      "390x844"
+    ],
+    "requiredThemes": [
+      "day",
+      "night"
+    ],
     "generatedFixtureAndSavedSessionSeparated": true,
     "requiredMetrics": [
       "route",

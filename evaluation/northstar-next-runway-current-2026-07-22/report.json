@@ -1,25 +1,25 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T07:08:19.444Z",
+  "generatedAt": "2026-07-22T07:20:18.035Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "ec7e81b9e983f0b9a9994a0dd9c65cca27b6624e",
-  "productionCommit": "ec7e81b9e983f0b9a9994a0dd9c65cca27b6624e",
+  "sourceHead": "140991153ab2bdf18a7e4a113d4874b53c9e3ea0",
+  "productionCommit": "1371ca52d11525e7b26ae26402be4006e44a4a57",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "ec7e81b9e983f0b9a9994a0dd9c65cca27b6624e",
+    "commitSha": "1371ca52d11525e7b26ae26402be4006e44a4a57",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-oxlmokt89-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-2of6xntcb-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": true,
+  "latestEvidenceCommitLive": false,
   "currentHeadIsEvidenceOnlyPending": false,
-  "liveExactEvidenceCommit": "ec7e81b9e983f0b9a9994a0dd9c65cca27b6624e",
-  "liveRollupLiveCommit": "ec7e81b9e983f0b9a9994a0dd9c65cca27b6624e",
-  "liveRollupMatchesProduction": true,
+  "liveExactEvidenceCommit": "140991153ab2bdf18a7e4a113d4874b53c9e3ea0",
+  "liveRollupLiveCommit": "1371ca52d11525e7b26ae26402be4006e44a4a57",
+  "liveRollupMatchesProduction": false,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
     "liveRollup": "evaluation\\northstar-live-rollup-2026-07-20\\report.json",
@@ -33,7 +33,8 @@
     "approvalRunway": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
     "sifEmbeddingPreflight": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
     "shareGeneratedSessionPerception": "evaluation\\share-generated-session-perception-2026-07-22\\report.json",
-    "documentsLongFormIA": "evaluation\\documents-long-form-ia-2026-07-22\\report.json"
+    "documentsLongFormIA": "evaluation\\documents-long-form-ia-2026-07-22\\report.json",
+    "boundedWorkbenchDod": "evaluation\\workspace-bounded-workbench-dod-2026-07-22\\report.json"
   },
   "provenCurrentState": [
     "live_harness_quality",
@@ -322,6 +323,26 @@
         "stickyOverlapCount": 0
       }
     ]
+  },
+  "boundedWorkbenchDod": {
+    "verdict": "DOD_RECORDED_NOT_A_PASS_CLAIM",
+    "routeSplitAloneAcceptedAsFix": false,
+    "acceptedStructure": "three-step shell plus first-viewport cockpit plus selected-only bounded workbench plus progressive drilldown",
+    "designSystemTokenContract": "Use existing primitive-to-semantic-to-component tokens for shell, rail, card, editor, detail-pane, and action-rail surfaces; no wholesale globals/component rewrite, raw px/hex proliferation, or typography/radius drift.",
+    "documentsDesktopMaxScreens": 1.5,
+    "documentsDesktopHardRedScreens": 2,
+    "documentsMobileViewport": "390x723",
+    "shareDesktopMinColumns": 2,
+    "shareMobileStackAllowed": true,
+    "requiredViewports": [
+      "1440x723",
+      "390x723"
+    ],
+    "requiredThemes": [
+      "day",
+      "night"
+    ],
+    "generatedFixtureAndSavedSessionSeparated": true
   },
   "nextSafeWorkWithoutApproval": [
     "refresh source/live exact evidence when production marker advances to the evidence-only head",

@@ -1,12 +1,12 @@
 {
   "schemaVersion": "safeclaw-launch-readiness-current/v3",
-  "generatedAt": "2026-07-22T07:07:19.925Z",
+  "generatedAt": "2026-07-22T07:19:33.249Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHeadAtGeneration": "ec7e81b9e983f0b9a9994a0dd9c65cca27b6624e",
-  "productionCommit": "ec7e81b9e983f0b9a9994a0dd9c65cca27b6624e",
-  "runtimeSmokeCommit": "ec7e81b9e983f0b9a9994a0dd9c65cca27b6624e",
-  "evidenceHeadBeforeThisReport": "ec7e81b9e983f0b9a9994a0dd9c65cca27b6624e",
-  "currentHeadIsEvidenceOnlyPending": false,
+  "sourceHeadAtGeneration": "140991153ab2bdf18a7e4a113d4874b53c9e3ea0",
+  "productionCommit": "1371ca52d11525e7b26ae26402be4006e44a4a57",
+  "runtimeSmokeCommit": "1371ca52d11525e7b26ae26402be4006e44a4a57",
+  "evidenceHeadBeforeThisReport": "140991153ab2bdf18a7e4a113d4874b53c9e3ea0",
+  "currentHeadIsEvidenceOnlyPending": true,
   "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
   "safeLaunchDemoClaimAllowed": true,
   "guidedPilotClaimAllowed": true,
@@ -17,7 +17,7 @@
   "apiAsk": {
     "status": 200,
     "ok": true,
-    "elapsedMs": 23117
+    "elapsedMs": 19744
   },
   "scenario": {
     "companyName": "도시가스공사",
@@ -45,10 +45,10 @@
       "kakaoMessage"
     ]
   },
-  "connectionVerdict": "PASS_WITH_BOUNDED_FALLBACK",
+  "connectionVerdict": "PASS_CONNECTED_NO_DISPATCH",
   "connectionSummary": {
-    "connectedCount": 6,
-    "partialCount": 1,
+    "connectedCount": 7,
+    "partialCount": 0,
     "needsCheckCount": 0
   },
   "liveConnections": [
@@ -70,7 +70,7 @@
     },
     {
       "name": "KOSHA 교육",
-      "liveStatus": "일부 근거 보류"
+      "liveStatus": "연결됨"
     },
     {
       "name": "KOSHA 공식자료",
@@ -90,7 +90,7 @@
     "Gemini: 연결됨",
     "기상청: 연결됨",
     "Work24: 연결됨",
-    "KOSHA 교육: 일부 근거 보류",
+    "KOSHA 교육: 연결됨",
     "KOSHA 공식자료: 연결됨",
     "KOSHA 재해사례: 연결됨",
     "n8n dispatch: 설정 점검만 수행"
@@ -166,7 +166,7 @@
   ],
   "safeClaims": [
     "Live /api/ask generated the expected 11-document workpack for the audited construction scenario.",
-    "Live public-data/AI surfaces returned user-facing connected or bounded fallback statuses; no connection returned 연결 점검 필요 in this smoke.",
+    "Live public-data/AI surfaces returned connected statuses for Law.go, Gemini, KMA weather, Work24, KOSHA education, KOSHA official material, and KOSHA accident-case connections in this smoke.",
     "A safe launch demo or guided pilot can be claimed with explicit provider-dispatch, RLS, LLM Wiki, SIF vector, and admin-auth boundaries.",
     "Documents selected-only bounded workbench evidence is current in scoped artifacts; route split alone is not accepted as the UX fix."
   ],
@@ -177,7 +177,7 @@
     "SIF vector retrieval or LLM Wiki publication is production-active.",
     "Live Supabase RLS tenant isolation is launch-proven.",
     "Exact saved/generated user share session has been reproduced unless a concrete session URL/state is measured.",
-    "Every external data surface was fully connected without fallback in the latest smoke."
+    "n8n/provider dispatch was executed in the latest launch-readiness smoke."
   ],
   "uiArchitectureBoundary": {
     "routeSplitAloneAcceptedAsFix": false,
@@ -197,10 +197,10 @@
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "ec7e81b9e983f0b9a9994a0dd9c65cca27b6624e",
+    "commitSha": "1371ca52d11525e7b26ae26402be4006e44a4a57",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-oxlmokt89-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-2of6xntcb-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   }
 }
