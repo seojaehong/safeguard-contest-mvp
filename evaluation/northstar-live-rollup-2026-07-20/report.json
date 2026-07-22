@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T11:27:18.026Z",
-  "head": "712237dab1729965c2658e27c985c5c0b19aeab0",
+  "generatedAt": "2026-07-22T11:35:00.704Z",
+  "head": "b4c56dd17bcfde0533ddc34085fef0acd8584de5",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "93586c1d2b9d53014c04473ee19d2f497283b3a6",
+    "commitSha": "c7590f846bf878d1d3afca58985be45c2b8e7316",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-nvwdzhl6k-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-q9k1429s9-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -157,7 +157,7 @@
   "final99": {
     "artifact": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
     "overall": "pass_with_notice",
-    "productionCommit": "6a95c23ffc57542f6a9a9aa14612b3466127a0ad",
+    "productionCommit": "c7590f846bf878d1d3afca58985be45c2b8e7316",
     "noticeCarry": [
       {
         "gate": "auth-history-reuse",
@@ -187,18 +187,18 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "ffe12736bebfa07ed667d414723ca21ff6b1645a",
-      "sourceStatus": "ancestor",
-      "productionCommit": "ffe12736bebfa07ed667d414723ca21ff6b1645a",
+      "sourceCommit": "b4c56dd17bcfde0533ddc34085fef0acd8584de5",
+      "sourceStatus": "exact",
+      "productionCommit": "b4c56dd17bcfde0533ddc34085fef0acd8584de5",
       "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
       "artifact": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
-      "sourceCommit": "6a95c23ffc57542f6a9a9aa14612b3466127a0ad",
+      "sourceCommit": "c7590f846bf878d1d3afca58985be45c2b8e7316",
       "sourceStatus": "ancestor",
-      "productionCommit": "6a95c23ffc57542f6a9a9aa14612b3466127a0ad",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "c7590f846bf878d1d3afca58985be45c2b8e7316",
+      "productionStatus": "matches_live"
     },
     {
       "id": "live_harness_quality",
