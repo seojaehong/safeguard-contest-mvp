@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-21T00:54:23.769Z",
+  "checkedAt": "2026-07-22T05:16:50.878Z",
   "route": "/workspace?share",
   "scenario": {
     "label": "generated-result-mobile",
@@ -10,56 +10,56 @@
   "fixtureGeneratedProviderResultProof": true,
   "providerDispatchLiveClaimed": false,
   "dispatchPostCount": 1,
-  "dispatchPostIdempotencyKey": "provider-dispatch-v1-dc1890e3-ea50-466e-b55a-3512ac7ebd83-ee7dd23f",
+  "dispatchPostIdempotencyKey": "provider-dispatch-v1-b29ee0b3-e103-4ffb-9acf-b8c3a308caad-bd699ef8",
   "metrics": {
     "viewportWidth": 390,
     "viewportHeight": 844,
-    "pageHeight": 980,
+    "pageHeight": 844,
     "root": {
       "left": 27,
       "right": 363,
-      "top": 284,
-      "bottom": 836,
+      "top": 273,
+      "bottom": 825,
       "width": 336,
       "height": 552
     },
     "preview": {
       "left": 36,
       "right": 354,
-      "top": 456,
-      "bottom": 675,
+      "top": 445,
+      "bottom": 664,
       "width": 318,
       "height": 219
     },
     "primary": {
       "left": 45,
       "right": 345,
-      "top": 690,
-      "bottom": 734,
+      "top": 679,
+      "bottom": 723,
       "width": 300,
       "height": 44
     },
     "result": {
       "left": 36,
       "right": 354,
-      "top": 783,
-      "bottom": 851,
+      "top": 772,
+      "bottom": 840,
       "width": 318,
       "height": 68
     },
     "resultSummary": {
       "left": 48,
       "right": 342,
-      "top": 795,
-      "bottom": 839,
+      "top": 784,
+      "bottom": 828,
       "width": 294,
       "height": 44
     },
     "resultDetail": {
       "left": 48,
       "right": 342,
-      "top": 839,
-      "bottom": 1084,
+      "top": 828,
+      "bottom": 1073,
       "width": 294,
       "height": 245
     },

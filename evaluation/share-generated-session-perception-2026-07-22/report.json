@@ -1,0 +1,183 @@
+{
+  "schemaVersion": "safeclaw-share-generated-session-perception/v1",
+  "checkedAt": "2026-07-22T05:16:50.878Z",
+  "sourceHead": "00538f0db4fefd4267292f68d51c0bacc24f17d7",
+  "baseEvidence": "evaluation/share-mobile-p1",
+  "route": "/workspace?share",
+  "routeSplitAloneAcceptedAsFix": false,
+  "providerDispatchLiveClaimed": false,
+  "externalProviderCalled": false,
+  "dbMutationPerformed": false,
+  "fixtureBoundary": "Browser route mocks block workpack/session/dispatch/log APIs; this is generated current-workpack provider-result UI proof, not live external dispatch proof.",
+  "exactSavedUserSessionReproduced": false,
+  "exactSavedUserSessionReason": "No concrete saved production share session id or user-observed session payload was available in the workspace. The gate uses the closest generated workspace share result state with provider dispatch blocked by Playwright route mocks.",
+  "verdict": "PASS_CURRENT_SOURCE_GENERATED_RESULT_FIXTURE",
+  "priorRedReproduction": {
+    "checkedAt": "2026-07-22T05:08:52.863Z",
+    "viewport": "desktop-short-1440x723",
+    "verdict": "RED_GENERATED_PROVIDER_RESULT_SHORT_DESKTOP",
+    "resultSummaryTop": 707,
+    "resultSummaryBottom": 751,
+    "viewportHeight": 723,
+    "resultSummaryInsideViewport": false,
+    "interpretation": "Generated provider-result summary was below the short desktop fold even though root width, preview right pane, distinct x ranges, and horizontal overflow were healthy."
+  },
+  "remediation": {
+    "scope": "short desktop workspace share-result landing only",
+    "productCommit": "00538f0db4fefd4267292f68d51c0bacc24f17d7",
+    "productFiles": [
+      "app/globals.css"
+    ],
+    "testFiles": [
+      "tests/workspace-share-mobile-browser.test.ts",
+      "tests/northstar-next-runway-generator.test.ts"
+    ],
+    "change": "When a provider-result drilldown exists in the short-height workspace share step, the four-step stage rail is hidden so the result summary becomes the first-viewport status surface.",
+    "notChanged": [
+      "provider dispatch route",
+      "share recipient API",
+      "database contracts",
+      "mobile share config collapse behavior"
+    ]
+  },
+  "results": [
+    {
+      "label": "generated-result-desktop-short",
+      "viewport": {
+        "label": "generated-result-desktop-short",
+        "width": 1440,
+        "height": 723
+      },
+      "metricsPath": "evaluation/share-mobile-p1/generated-result-desktop-short-provider-result-fixture-metrics.json",
+      "screenshotPath": "evaluation/share-mobile-p1/screenshots/generated-result-desktop-short-provider-result-fixture.png",
+      "verdict": "PASS",
+      "pageHeight": 723,
+      "root": {
+        "left": 130,
+        "right": 1310,
+        "width": 1180,
+        "bottom": 716
+      },
+      "primary": {
+        "left": 139,
+        "right": 451,
+        "bottom": 409
+      },
+      "preview": {
+        "left": 781,
+        "right": 1301,
+        "bottom": 591
+      },
+      "resultSummary": {
+        "top": 303,
+        "bottom": 347,
+        "text": "전송 결과 / 미리 확인 / 검증 전용 · 2개 채널"
+      },
+      "distinctFirstViewportXRanges": [
+        160,
+        800
+      ],
+      "horizontalOverflow": 0,
+      "dispatchPostCount": 1,
+      "channelResultCountWhenOpened": 2,
+      "resultClosedByDefault": true,
+      "closedSummaryShowsChannelStatus": true
+    },
+    {
+      "label": "generated-result-desktop",
+      "viewport": {
+        "label": "generated-result-desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "metricsPath": "evaluation/share-mobile-p1/generated-result-desktop-provider-result-fixture-metrics.json",
+      "screenshotPath": "evaluation/share-mobile-p1/screenshots/generated-result-desktop-provider-result-fixture.png",
+      "verdict": "PASS",
+      "pageHeight": 928,
+      "root": {
+        "left": 130,
+        "right": 1310,
+        "width": 1180,
+        "bottom": 864
+      },
+      "primary": {
+        "left": 143,
+        "right": 449,
+        "bottom": 429
+      },
+      "preview": {
+        "left": 777,
+        "right": 1297,
+        "bottom": 785
+      },
+      "resultSummary": {
+        "top": 775,
+        "bottom": 819,
+        "text": "전송 결과 / 미리 확인 / 검증 전용 · 2개 채널"
+      },
+      "distinctFirstViewportXRanges": [
+        160,
+        800
+      ],
+      "horizontalOverflow": 0,
+      "dispatchPostCount": 1,
+      "channelResultCountWhenOpened": 2,
+      "resultClosedByDefault": true,
+      "closedSummaryShowsChannelStatus": true
+    },
+    {
+      "label": "generated-result-mobile",
+      "viewport": {
+        "label": "generated-result-mobile",
+        "width": 390,
+        "height": 844
+      },
+      "metricsPath": "evaluation/share-mobile-p1/generated-result-mobile-provider-result-fixture-metrics.json",
+      "screenshotPath": "evaluation/share-mobile-p1/screenshots/generated-result-mobile-provider-result-fixture.png",
+      "verdict": "PASS",
+      "pageHeight": 844,
+      "root": {
+        "left": 27,
+        "right": 363,
+        "width": 336,
+        "bottom": 825
+      },
+      "primary": {
+        "left": 45,
+        "right": 345,
+        "bottom": 723
+      },
+      "preview": {
+        "left": 36,
+        "right": 354,
+        "bottom": 664
+      },
+      "resultSummary": {
+        "top": 784,
+        "bottom": 828,
+        "text": "전송 결과 / 미리 확인 / 검증 전용 · 2개 채널"
+      },
+      "distinctFirstViewportXRanges": [
+        80,
+        0
+      ],
+      "horizontalOverflow": 0,
+      "dispatchPostCount": 1,
+      "channelResultCountWhenOpened": 2,
+      "resultClosedByDefault": true,
+      "closedSummaryShowsChannelStatus": true
+    }
+  ],
+  "acceptance": {
+    "desktopGeneratedResultWorkbench": "PASS: root width 1180, preview remains right pane, distinct x ranges [160,800], result panel does not monopolize width, horizontal overflow 0.",
+    "shortDesktopResultLanding": "PASS: generated result summary is visible in 1440x723 after remediation.",
+    "mobileGeneratedResultPriority": "PASS: preview, primary CTA, and closed result summary remain inside 390x844; config cards are collapsed.",
+    "providerLiveDispatch": "NOT_CLAIMED",
+    "exactSavedUserSession": "NOT_REPRODUCED_WITH_REAL_SESSION_ID"
+  },
+  "remainingDebt": [
+    "If a user-provided saved production share session still feels mobile-like, run this same width-ratio/grid gate against that exact session payload before product changes.",
+    "All-12 Documents selected-only bounded workbench remains separate open IA debt.",
+    "Provider live dispatch remains approval-gated."
+  ]
+}

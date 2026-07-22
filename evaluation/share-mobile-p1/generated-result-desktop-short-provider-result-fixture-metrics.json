@@ -1,66 +1,66 @@
 {
-  "checkedAt": "2026-07-22T05:16:44.228Z",
+  "checkedAt": "2026-07-22T05:16:36.444Z",
   "route": "/workspace?share",
   "scenario": {
-    "label": "generated-result-desktop",
+    "label": "generated-result-desktop-short",
     "width": 1440,
-    "height": 900
+    "height": 723
   },
   "verdict": "PASS",
   "fixtureGeneratedProviderResultProof": true,
   "providerDispatchLiveClaimed": false,
   "dispatchPostCount": 1,
-  "dispatchPostIdempotencyKey": "provider-dispatch-v1-768adc09-2b5c-416d-a1f1-4f159676a3b8-b7cc36dd",
+  "dispatchPostIdempotencyKey": "provider-dispatch-v1-84a5d7d0-747a-4def-8e72-d17ac48240d6-afaf9118",
   "metrics": {
     "viewportWidth": 1440,
-    "viewportHeight": 900,
-    "pageHeight": 928,
+    "viewportHeight": 723,
+    "pageHeight": 723,
     "root": {
       "left": 130,
       "right": 1310,
-      "top": 189,
-      "bottom": 864,
+      "top": 195,
+      "bottom": 716,
       "width": 1180,
-      "height": 675
+      "height": 521
     },
     "preview": {
-      "left": 777,
-      "right": 1297,
-      "top": 385,
-      "bottom": 785,
+      "left": 781,
+      "right": 1301,
+      "top": 365,
+      "bottom": 591,
       "width": 520,
-      "height": 400
+      "height": 226
     },
     "primary": {
-      "left": 143,
-      "right": 449,
-      "top": 385,
-      "bottom": 429,
-      "width": 306,
+      "left": 139,
+      "right": 451,
+      "top": 365,
+      "bottom": 409,
+      "width": 312,
       "height": 44
     },
     "result": {
-      "left": 143,
-      "right": 767,
-      "top": 763,
-      "bottom": 831,
-      "width": 624,
+      "left": 139,
+      "right": 775,
+      "top": 291,
+      "bottom": 359,
+      "width": 636,
       "height": 68
     },
     "resultSummary": {
-      "left": 155,
-      "right": 755,
-      "top": 775,
-      "bottom": 819,
-      "width": 600,
+      "left": 151,
+      "right": 763,
+      "top": 303,
+      "bottom": 347,
+      "width": 612,
       "height": 44
     },
     "resultDetail": {
-      "left": 155,
-      "right": 755,
-      "top": 819,
-      "bottom": 1011,
-      "width": 600,
+      "left": 151,
+      "right": 763,
+      "top": 347,
+      "bottom": 539,
+      "width": 612,
       "height": 192
     },
     "resultOpen": false,
@@ -74,32 +74,32 @@
     "configCards": [
       {
         "display": "grid",
-        "height": 150,
-        "bottom": 591
+        "height": 134,
+        "bottom": 555
       },
       {
         "display": "grid",
-        "height": 150,
-        "bottom": 753
+        "height": 142,
+        "bottom": 709
       },
       {
         "display": "grid",
-        "height": 150,
-        "bottom": 591
+        "height": 134,
+        "bottom": 555
       }
     ],
     "channelCards": [
       {
-        "width": 197,
-        "height": 44
+        "width": 202,
+        "height": 40
       },
       {
-        "width": 197,
-        "height": 44
+        "width": 202,
+        "height": 40
       },
       {
-        "width": 197,
-        "height": 44
+        "width": 202,
+        "height": 40
       }
     ],
     "distinctFirstViewportXRanges": [
