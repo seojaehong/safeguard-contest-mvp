@@ -1,14 +1,14 @@
 # Launch Readiness Current Boundary
 
-Generated: 2026-07-22T22:14:14.156Z
+Generated: 2026-07-22T22:16:53.766Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD at generation: `f8b12b4ba67334aa1cb46e2f4c48fe596808b093`
+Source HEAD at generation: `8cbd9f1ecc7965eca0775f2750309cf7f6c9b072`
 
 Production runtime smoke commit: `f8b12b4ba67334aa1cb46e2f4c48fe596808b093`
 
-Current HEAD is evidence-only pending relative to production: `false`
+Current HEAD is evidence-only pending relative to production: `true`
 
 ## Verdict
 
