@@ -1,26 +1,26 @@
 {
   "schemaVersion": "safeclaw-workspace-bounded-workbench-current/v1",
-  "checkedAt": "2026-07-22T09:02:29.400Z",
+  "checkedAt": "2026-07-22T09:08:01.405Z",
   "baseUrl": "https://www.safeclaw.kr",
   "measurementMode": "live-production",
-  "sourceHead": "2ced9a0315121d616704f6ed9713ddb61cf45062",
-  "productionCommit": "2ced9a0315121d616704f6ed9713ddb61cf45062",
+  "sourceHead": "6863bd81877c094c384a4e8d457e1be119a34ef9",
+  "productionCommit": "6863bd81877c094c384a4e8d457e1be119a34ef9",
   "productionBuild": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "2ced9a0315121d616704f6ed9713ddb61cf45062",
+    "commitSha": "6863bd81877c094c384a4e8d457e1be119a34ef9",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-myh2ijw4s-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-aaw4zjszi-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "routeSplitAloneAcceptedAsFix": false,
   "providerDispatchLiveClaimed": false,
   "externalProviderCalled": false,
   "dbMutationPerformed": false,
-  "verdict": "PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP",
-  "interpretation": "This gate measures the bounded-workbench contract directly. Route/page split is orientation only; PASS requires first-task visibility and bounded simultaneous scope, while exact saved Share sessions remain separate evidence.",
+  "verdict": "PARTIAL_LIVE_PRODUCTION_SCOPED_DETAIL_DEPTH_DEBT_WITH_EXACT_SESSION_GAP",
+  "interpretation": "This gate measures the bounded-workbench contract directly. Route/page split is orientation only; PASS requires first-task visibility and bounded simultaneous scope, while exact saved Share sessions remain separate evidence. Detail-depth debt tracks whether long work moved into a local shell that can still feel long even when body-level page height is bounded.",
   "acceptance": {
     "documents": {
       "desktopTargetScreens": 1.5,
@@ -78,6 +78,7 @@
         "firstTaskVerdict": "PASS",
         "bodyHeightVerdict": "PASS",
         "longContentContainmentVerdict": "PASS",
+        "detailDepthVerdict": "PARTIAL",
         "overallVerdict": "PASS"
       }
     },
@@ -124,6 +125,7 @@
         "firstTaskVerdict": "PASS",
         "bodyHeightVerdict": "PASS",
         "longContentContainmentVerdict": "PASS",
+        "detailDepthVerdict": "PARTIAL",
         "overallVerdict": "PASS"
       }
     },
@@ -170,6 +172,7 @@
         "firstTaskVerdict": "PASS",
         "bodyHeightVerdict": "PASS",
         "longContentContainmentVerdict": "PASS",
+        "detailDepthVerdict": "PARTIAL",
         "overallVerdict": "PASS"
       }
     },
@@ -216,6 +219,7 @@
         "firstTaskVerdict": "PASS",
         "bodyHeightVerdict": "PASS",
         "longContentContainmentVerdict": "PASS",
+        "detailDepthVerdict": "PARTIAL",
         "overallVerdict": "PASS"
       }
     },
@@ -262,6 +266,7 @@
         "firstTaskVerdict": "PASS",
         "bodyHeightVerdict": "PASS",
         "longContentContainmentVerdict": "PASS",
+        "detailDepthVerdict": "PARTIAL",
         "overallVerdict": "PASS"
       }
     },
@@ -308,6 +313,7 @@
         "firstTaskVerdict": "PASS",
         "bodyHeightVerdict": "PASS",
         "longContentContainmentVerdict": "PASS",
+        "detailDepthVerdict": "PARTIAL",
         "overallVerdict": "PASS"
       }
     },
@@ -354,6 +360,7 @@
         "firstTaskVerdict": "PASS",
         "bodyHeightVerdict": "PASS",
         "longContentContainmentVerdict": "PASS",
+        "detailDepthVerdict": "PARTIAL",
         "overallVerdict": "PASS"
       }
     },
@@ -400,6 +407,7 @@
         "firstTaskVerdict": "PASS",
         "bodyHeightVerdict": "PASS",
         "longContentContainmentVerdict": "PASS",
+        "detailDepthVerdict": "PARTIAL",
         "overallVerdict": "PASS"
       }
     },
@@ -446,6 +454,7 @@
         "firstTaskVerdict": "PASS",
         "bodyHeightVerdict": "PASS",
         "longContentContainmentVerdict": "PASS",
+        "detailDepthVerdict": "PARTIAL",
         "overallVerdict": "PASS"
       }
     },
@@ -492,6 +501,7 @@
         "firstTaskVerdict": "PASS",
         "bodyHeightVerdict": "PASS",
         "longContentContainmentVerdict": "PASS",
+        "detailDepthVerdict": "PARTIAL",
         "overallVerdict": "PASS"
       }
     },
@@ -538,6 +548,7 @@
         "firstTaskVerdict": "PASS",
         "bodyHeightVerdict": "PASS",
         "longContentContainmentVerdict": "PASS",
+        "detailDepthVerdict": "PARTIAL",
         "overallVerdict": "PASS"
       }
     },
@@ -584,8 +595,107 @@
         "firstTaskVerdict": "PASS",
         "bodyHeightVerdict": "PASS",
         "longContentContainmentVerdict": "PASS",
+        "detailDepthVerdict": "PARTIAL",
         "overallVerdict": "PASS"
       }
+    }
+  ],
+  "documentDetailDepthDebts": [
+    {
+      "route": "/documents?theme=day",
+      "theme": "day",
+      "state": "default",
+      "viewport": "1440x723",
+      "workpackShellScrollRatio": 4.28,
+      "detailDepthVerdict": "PARTIAL"
+    },
+    {
+      "route": "/documents?theme=day",
+      "theme": "day",
+      "state": "selected-riskAssessmentDraft",
+      "viewport": "1440x723",
+      "workpackShellScrollRatio": 4.28,
+      "detailDepthVerdict": "PARTIAL"
+    },
+    {
+      "route": "/documents?theme=day",
+      "theme": "day",
+      "state": "supporting-9-expanded-index",
+      "viewport": "1440x723",
+      "workpackShellScrollRatio": 4.28,
+      "detailDepthVerdict": "PARTIAL"
+    },
+    {
+      "route": "/documents?theme=day",
+      "theme": "day",
+      "state": "default",
+      "viewport": "390x723",
+      "workpackShellScrollRatio": 4.25,
+      "detailDepthVerdict": "PARTIAL"
+    },
+    {
+      "route": "/documents?theme=day",
+      "theme": "day",
+      "state": "selected-riskAssessmentDraft",
+      "viewport": "390x723",
+      "workpackShellScrollRatio": 4.25,
+      "detailDepthVerdict": "PARTIAL"
+    },
+    {
+      "route": "/documents?theme=day",
+      "theme": "day",
+      "state": "supporting-9-expanded-index",
+      "viewport": "390x723",
+      "workpackShellScrollRatio": 4.25,
+      "detailDepthVerdict": "PARTIAL"
+    },
+    {
+      "route": "/documents?theme=night",
+      "theme": "night",
+      "state": "default",
+      "viewport": "1440x723",
+      "workpackShellScrollRatio": 4.28,
+      "detailDepthVerdict": "PARTIAL"
+    },
+    {
+      "route": "/documents?theme=night",
+      "theme": "night",
+      "state": "selected-riskAssessmentDraft",
+      "viewport": "1440x723",
+      "workpackShellScrollRatio": 4.28,
+      "detailDepthVerdict": "PARTIAL"
+    },
+    {
+      "route": "/documents?theme=night",
+      "theme": "night",
+      "state": "supporting-9-expanded-index",
+      "viewport": "1440x723",
+      "workpackShellScrollRatio": 4.28,
+      "detailDepthVerdict": "PARTIAL"
+    },
+    {
+      "route": "/documents?theme=night",
+      "theme": "night",
+      "state": "default",
+      "viewport": "390x723",
+      "workpackShellScrollRatio": 4.25,
+      "detailDepthVerdict": "PARTIAL"
+    },
+    {
+      "route": "/documents?theme=night",
+      "theme": "night",
+      "state": "selected-riskAssessmentDraft",
+      "viewport": "390x723",
+      "workpackShellScrollRatio": 4.25,
+      "detailDepthVerdict": "PARTIAL"
+    },
+    {
+      "route": "/documents?theme=night",
+      "theme": "night",
+      "state": "supporting-9-expanded-index",
+      "viewport": "390x723",
+      "workpackShellScrollRatio": 4.25,
+      "detailDepthVerdict": "PARTIAL"
     }
   ],
   "share": [

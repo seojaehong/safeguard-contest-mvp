@@ -203,6 +203,7 @@ function documentsVerdict(metrics) {
     firstTaskVerdict: firstTaskPass ? "PASS" : "RED",
     bodyHeightVerdict: metrics.bodyTargetPass ? "PASS" : metrics.bodyHardRed ? "RED" : "PARTIAL",
     longContentContainmentVerdict: longContentContained ? "PASS" : "RED",
+    detailDepthVerdict: metrics.workpackShellScrollRatio <= 3 ? "PASS" : metrics.workpackShellScrollRatio <= 5 ? "PARTIAL" : "RED",
     overallVerdict: firstTaskPass && longContentContained && !metrics.bodyHardRed ? "PASS" : "RED",
   };
 }
@@ -452,10 +453,14 @@ const missingExactSavedSession = {
 };
 
 const documentFailures = documentRows.filter((row) => row.verdicts.overallVerdict !== "PASS");
+const documentDetailDepthDebts = documentRows.filter((row) => row.verdicts.detailDepthVerdict && row.verdicts.detailDepthVerdict !== "PASS");
 const shareFailures = shareRows.filter((row) => row.verdicts.overallVerdict === "RED" || row.verdicts.overallVerdict === "ERROR");
 const passVerdict = isLiveProductionBase
   ? "PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP"
   : "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP";
+const partialDetailDepthVerdict = isLiveProductionBase
+  ? "PARTIAL_LIVE_PRODUCTION_SCOPED_DETAIL_DEPTH_DEBT_WITH_EXACT_SESSION_GAP"
+  : "PARTIAL_CURRENT_SOURCE_LOCAL_PRODUCTION_SCOPED_DETAIL_DEPTH_DEBT_WITH_EXACT_SESSION_GAP";
 const redVerdict = isLiveProductionBase
   ? "PARTIAL_OR_RED_LIVE_PRODUCTION_MEASURED"
   : "PARTIAL_OR_RED_CURRENT_SOURCE_LOCAL_PRODUCTION_MEASURED";
@@ -471,8 +476,10 @@ const report = {
   providerDispatchLiveClaimed: false,
   externalProviderCalled: false,
   dbMutationPerformed: false,
-  verdict: documentFailures.length === 0 && shareFailures.length === 0 ? passVerdict : redVerdict,
-  interpretation: "This gate measures the bounded-workbench contract directly. Route/page split is orientation only; PASS requires first-task visibility and bounded simultaneous scope, while exact saved Share sessions remain separate evidence.",
+  verdict: documentFailures.length === 0 && shareFailures.length === 0
+    ? documentDetailDepthDebts.length === 0 ? passVerdict : partialDetailDepthVerdict
+    : redVerdict,
+  interpretation: "This gate measures the bounded-workbench contract directly. Route/page split is orientation only; PASS requires first-task visibility and bounded simultaneous scope, while exact saved Share sessions remain separate evidence. Detail-depth debt tracks whether long work moved into a local shell that can still feel long even when body-level page height is bounded.",
   acceptance: {
     documents: {
       desktopTargetScreens: 1.5,
@@ -487,6 +494,14 @@ const report = {
     },
   },
   documents: documentRows,
+  documentDetailDepthDebts: documentDetailDepthDebts.map((row) => ({
+    route: row.metrics.route,
+    theme: row.metrics.theme,
+    state: row.metrics.state,
+    viewport: row.metrics.viewport,
+    workpackShellScrollRatio: row.metrics.workpackShellScrollRatio,
+    detailDepthVerdict: row.verdicts.detailDepthVerdict,
+  })),
   share: shareRows,
   exactSavedSession: missingExactSavedSession,
 };
@@ -496,7 +511,7 @@ fs.writeFileSync(path.join(outDir, "report.json"), `${JSON.stringify(report, nul
 function documentsRow(row) {
   const metrics = row.metrics;
   const verdicts = row.verdicts;
-  return `| ${metrics.route} | ${metrics.theme} | ${metrics.state} | ${metrics.viewport} | ${verdicts.overallVerdict} | ${verdicts.firstTaskVerdict || "n/a"} | ${verdicts.bodyHeightVerdict || "n/a"} | ${verdicts.longContentContainmentVerdict || "n/a"} | ${metrics.bodyHeightRatio ?? "n/a"} | ${metrics.workpackShellScrollRatio ?? "n/a"} | ${metrics.firstActionBottom ?? "n/a"} | ${metrics.firstHazardBottom ?? "n/a"} | ${metrics.visibleSelectedEditorCount ?? "n/a"} | ${metrics.visibleFullDocumentBodyCount ?? "n/a"} | ${metrics.supportingDocsOpenDefault ?? "n/a"} | ${metrics.supportingLauncherMovesEditorOutOfView ?? "n/a"} | ${metrics.stickyOverlapCount ?? "n/a"} | ${metrics.horizontalOverflow ?? "n/a"} |`;
+  return `| ${metrics.route} | ${metrics.theme} | ${metrics.state} | ${metrics.viewport} | ${verdicts.overallVerdict} | ${verdicts.firstTaskVerdict || "n/a"} | ${verdicts.bodyHeightVerdict || "n/a"} | ${verdicts.longContentContainmentVerdict || "n/a"} | ${verdicts.detailDepthVerdict || "n/a"} | ${metrics.bodyHeightRatio ?? "n/a"} | ${metrics.workpackShellScrollRatio ?? "n/a"} | ${metrics.firstActionBottom ?? "n/a"} | ${metrics.firstHazardBottom ?? "n/a"} | ${metrics.visibleSelectedEditorCount ?? "n/a"} | ${metrics.visibleFullDocumentBodyCount ?? "n/a"} | ${metrics.supportingDocsOpenDefault ?? "n/a"} | ${metrics.supportingLauncherMovesEditorOutOfView ?? "n/a"} | ${metrics.stickyOverlapCount ?? "n/a"} | ${metrics.horizontalOverflow ?? "n/a"} |`;
 }
 
 function shareRow(row) {
@@ -533,9 +548,15 @@ Allowed claim: measured routes can pass the scoped bounded-workbench contract wh
 
 ## Documents
 
-| Route | Theme | State | Viewport | Overall | First task | Body height | Long containment | Body ratio | Shell scroll ratio | First action bottom | Hazard bottom | Selected editors | Full bodies visible | Supporting open | Support moves editor | Sticky overlap | OverflowX |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Route | Theme | State | Viewport | Overall | First task | Body height | Long containment | Detail depth | Body ratio | Shell scroll ratio | First action bottom | Hazard bottom | Selected editors | Full bodies visible | Supporting open | Support moves editor | Sticky overlap | OverflowX |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 ${documentRows.map(documentsRow).join("\n")}
+
+## Documents Detail-Depth Debt
+
+${documentDetailDepthDebts.length
+    ? documentDetailDepthDebts.map((row) => `- ${row.metrics.route} ${row.metrics.theme} ${row.metrics.state} ${row.metrics.viewport}: shell scroll ratio ${row.metrics.workpackShellScrollRatio} => ${row.verdicts.detailDepthVerdict}`).join("\n")
+    : "- none"}
 
 ## Share / Result
 
@@ -565,6 +586,14 @@ console.log(JSON.stringify({
     state: row.metrics.state,
     viewport: row.metrics.viewport,
     verdicts: row.verdicts,
+  })),
+  documentDetailDepthDebts: documentDetailDepthDebts.map((row) => ({
+    route: row.metrics.route,
+    theme: row.metrics.theme,
+    state: row.metrics.state,
+    viewport: row.metrics.viewport,
+    workpackShellScrollRatio: row.metrics.workpackShellScrollRatio,
+    detailDepthVerdict: row.verdicts.detailDepthVerdict,
   })),
   shareFailures: shareFailures.map((row) => ({
     route: row.metrics.route,

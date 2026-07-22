@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T09:04:05.861Z",
+  "generatedAt": "2026-07-22T09:10:29.682Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "2ced9a0315121d616704f6ed9713ddb61cf45062",
-  "productionCommit": "2ced9a0315121d616704f6ed9713ddb61cf45062",
+  "sourceHead": "6863bd81877c094c384a4e8d457e1be119a34ef9",
+  "productionCommit": "6863bd81877c094c384a4e8d457e1be119a34ef9",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "2ced9a0315121d616704f6ed9713ddb61cf45062",
+    "commitSha": "6863bd81877c094c384a4e8d457e1be119a34ef9",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-myh2ijw4s-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-aaw4zjszi-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -20,8 +20,8 @@
   "sourceHeadLivePending": false,
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "2ced9a0315121d616704f6ed9713ddb61cf45062",
-  "liveRollupLiveCommit": "2ced9a0315121d616704f6ed9713ddb61cf45062",
+  "liveExactEvidenceCommit": "6863bd81877c094c384a4e8d457e1be119a34ef9",
+  "liveRollupLiveCommit": "6863bd81877c094c384a4e8d457e1be119a34ef9",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -358,9 +358,9 @@
     }
   },
   "boundedWorkbenchCurrent": {
-    "verdict": "PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP",
-    "sourceHead": "2ced9a0315121d616704f6ed9713ddb61cf45062",
-    "productionCommit": "2ced9a0315121d616704f6ed9713ddb61cf45062",
+    "verdict": "PARTIAL_LIVE_PRODUCTION_SCOPED_DETAIL_DEPTH_DEBT_WITH_EXACT_SESSION_GAP",
+    "sourceHead": "6863bd81877c094c384a4e8d457e1be119a34ef9",
+    "productionCommit": "6863bd81877c094c384a4e8d457e1be119a34ef9",
     "routeSplitAloneAcceptedAsFix": false,
     "providerDispatchLiveClaimed": false,
     "externalProviderCalled": false,
@@ -454,6 +454,105 @@
         "rootWidthRatio": 1,
         "desktopXRegionCount": 1,
         "primaryBottom": 707
+      }
+    ],
+    "detailDepthDebt": true,
+    "documentDetailDepthDebts": [
+      {
+        "route": "/documents?theme=day",
+        "theme": "day",
+        "state": "default",
+        "viewport": "1440x723",
+        "workpackShellScrollRatio": 4.28,
+        "detailDepthVerdict": "PARTIAL"
+      },
+      {
+        "route": "/documents?theme=day",
+        "theme": "day",
+        "state": "selected-riskAssessmentDraft",
+        "viewport": "1440x723",
+        "workpackShellScrollRatio": 4.28,
+        "detailDepthVerdict": "PARTIAL"
+      },
+      {
+        "route": "/documents?theme=day",
+        "theme": "day",
+        "state": "supporting-9-expanded-index",
+        "viewport": "1440x723",
+        "workpackShellScrollRatio": 4.28,
+        "detailDepthVerdict": "PARTIAL"
+      },
+      {
+        "route": "/documents?theme=day",
+        "theme": "day",
+        "state": "default",
+        "viewport": "390x723",
+        "workpackShellScrollRatio": 4.25,
+        "detailDepthVerdict": "PARTIAL"
+      },
+      {
+        "route": "/documents?theme=day",
+        "theme": "day",
+        "state": "selected-riskAssessmentDraft",
+        "viewport": "390x723",
+        "workpackShellScrollRatio": 4.25,
+        "detailDepthVerdict": "PARTIAL"
+      },
+      {
+        "route": "/documents?theme=day",
+        "theme": "day",
+        "state": "supporting-9-expanded-index",
+        "viewport": "390x723",
+        "workpackShellScrollRatio": 4.25,
+        "detailDepthVerdict": "PARTIAL"
+      },
+      {
+        "route": "/documents?theme=night",
+        "theme": "night",
+        "state": "default",
+        "viewport": "1440x723",
+        "workpackShellScrollRatio": 4.28,
+        "detailDepthVerdict": "PARTIAL"
+      },
+      {
+        "route": "/documents?theme=night",
+        "theme": "night",
+        "state": "selected-riskAssessmentDraft",
+        "viewport": "1440x723",
+        "workpackShellScrollRatio": 4.28,
+        "detailDepthVerdict": "PARTIAL"
+      },
+      {
+        "route": "/documents?theme=night",
+        "theme": "night",
+        "state": "supporting-9-expanded-index",
+        "viewport": "1440x723",
+        "workpackShellScrollRatio": 4.28,
+        "detailDepthVerdict": "PARTIAL"
+      },
+      {
+        "route": "/documents?theme=night",
+        "theme": "night",
+        "state": "default",
+        "viewport": "390x723",
+        "workpackShellScrollRatio": 4.25,
+        "detailDepthVerdict": "PARTIAL"
+      },
+      {
+        "route": "/documents?theme=night",
+        "theme": "night",
+        "state": "selected-riskAssessmentDraft",
+        "viewport": "390x723",
+        "workpackShellScrollRatio": 4.25,
+        "detailDepthVerdict": "PARTIAL"
+      },
+      {
+        "route": "/documents?theme=night",
+        "theme": "night",
+        "state": "supporting-9-expanded-index",
+        "viewport": "390x723",
+        "workpackShellScrollRatio": 4.25,
+        "detailDepthVerdict": "PARTIAL"
       }
     ],
     "exactSavedSession": {

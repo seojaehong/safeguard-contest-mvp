@@ -698,6 +698,106 @@ describe("northstar next runway generator", () => {
     });
   });
 
+  it("keeps bounded workbench detail-depth debt separate from first-task pass and exact saved Share evidence", async () => {
+    const { buildNorthstarNextRunway, renderNorthstarNextRunwayMarkdown } = await loadNextRunwayModule();
+    const { root, secondHead } = createFixtureRoot();
+    pointLiveRollupAt(root, secondHead);
+    writeJson(root, "evaluation/workspace-bounded-workbench-current-2026-07-22/report.json", {
+      verdict: "PARTIAL_LIVE_PRODUCTION_SCOPED_DETAIL_DEPTH_DEBT_WITH_EXACT_SESSION_GAP",
+      sourceHead: secondHead,
+      productionCommit: secondHead,
+      productionBuild: { commitSha: secondHead },
+      routeSplitAloneAcceptedAsFix: false,
+      providerDispatchLiveClaimed: false,
+      externalProviderCalled: false,
+      dbMutationPerformed: false,
+      documents: [
+        {
+          metrics: {
+            route: "/documents?theme=day",
+            theme: "day",
+            state: "default",
+            viewport: "1440x723",
+            bodyHeightRatio: 1.07,
+            workpackShellScrollRatio: 4.28,
+            firstActionBottom: 452,
+            firstHazardBottom: 709,
+            firstHazardVisibleHeight: 50,
+          },
+          verdicts: {
+            overallVerdict: "PASS",
+            firstTaskVerdict: "PASS",
+            bodyHeightVerdict: "PASS",
+            longContentContainmentVerdict: "PASS",
+            detailDepthVerdict: "PARTIAL",
+          },
+        },
+      ],
+      documentDetailDepthDebts: [
+        {
+          route: "/documents?theme=day",
+          theme: "day",
+          state: "default",
+          viewport: "1440x723",
+          workpackShellScrollRatio: 4.28,
+          detailDepthVerdict: "PARTIAL",
+        },
+      ],
+      share: [
+        {
+          metrics: {
+            route: "/workspace?share&theme=day",
+            theme: "day",
+            sessionKind: "generated",
+            viewport: "1440x723",
+            rootWidthRatio: 0.82,
+            desktopXRegionCount: 3,
+            primaryBottom: 389,
+          },
+          verdicts: {
+            overallVerdict: "PASS_SCOPED",
+            desktopWorkbenchVerdict: "PASS",
+            exactSavedSessionVerdict: "MISSING_EVIDENCE",
+          },
+        },
+      ],
+      exactSavedSession: {
+        sessionKind: "saved-exact",
+        exactSavedUserSessionReproduced: false,
+        verdict: "MISSING_EVIDENCE",
+        reason: "No concrete production share session URL was available.",
+      },
+    });
+
+    const report = buildNorthstarNextRunway({
+      rootDir: root,
+      buildInfo: { commitSha: secondHead },
+      generatedAt: "2026-07-22T00:00:00.000Z",
+    });
+    const markdown = renderNorthstarNextRunwayMarkdown(report);
+
+    expect(report.boundedWorkbenchCurrent).toMatchObject({
+      verdict: "PARTIAL_LIVE_PRODUCTION_SCOPED_DETAIL_DEPTH_DEBT_WITH_EXACT_SESSION_GAP",
+      detailDepthDebt: true,
+      documentRedRows: [],
+    });
+    expect(report.boundedWorkbenchCurrent.documentDetailDepthDebts).toContainEqual({
+      route: "/documents?theme=day",
+      theme: "day",
+      state: "default",
+      viewport: "1440x723",
+      workpackShellScrollRatio: 4.28,
+      detailDepthVerdict: "PARTIAL",
+    });
+    expect(report.boundedWorkbenchCurrent.exactSavedSession).toMatchObject({
+      verdict: "MISSING_EVIDENCE",
+      exactSavedUserSessionReproduced: false,
+    });
+    expect(markdown).toContain("first-task/body containment rows pass");
+    expect(markdown).toContain("local workbench detail-depth debt");
+    expect(markdown).toContain("exact saved session evidence is missing");
+  });
+
   it("keeps broad workspace height smoke separate from the bounded workbench DoD", () => {
     const workspaceRegression = fs.readFileSync(
       path.resolve("tests", "workspace-layout-regression.test.ts"),

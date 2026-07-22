@@ -313,6 +313,23 @@ function boundedWorkbenchCurrentSummary(current) {
   if (!isRecord(current)) return {};
   const documentRows = Array.isArray(current.documents) ? current.documents.filter(isRecord) : [];
   const shareRows = Array.isArray(current.share) ? current.share.filter(isRecord) : [];
+  const documentDetailDepthDebts = Array.isArray(current.documentDetailDepthDebts)
+    ? current.documentDetailDepthDebts.filter(isRecord)
+    : documentRows.filter((row) => {
+      const verdicts = isRecord(row.verdicts) ? row.verdicts : {};
+      return asString(verdicts.detailDepthVerdict) && asString(verdicts.detailDepthVerdict) !== "PASS";
+    }).map((row) => {
+      const metrics = isRecord(row.metrics) ? row.metrics : {};
+      const verdicts = isRecord(row.verdicts) ? row.verdicts : {};
+      return {
+        route: asString(metrics.route),
+        theme: asString(metrics.theme),
+        state: asString(metrics.state),
+        viewport: asString(metrics.viewport),
+        workpackShellScrollRatio: typeof metrics.workpackShellScrollRatio === "number" ? metrics.workpackShellScrollRatio : null,
+        detailDepthVerdict: asString(verdicts.detailDepthVerdict),
+      };
+    });
   const exactSavedSession = isRecord(current.exactSavedSession) ? current.exactSavedSession : {};
   return {
     verdict: asString(current.verdict),
@@ -362,6 +379,15 @@ function boundedWorkbenchCurrentSummary(current) {
             : null,
       };
     }),
+    detailDepthDebt: documentDetailDepthDebts.length > 0,
+    documentDetailDepthDebts: documentDetailDepthDebts.map((row) => ({
+      route: asString(row.route),
+      theme: asString(row.theme),
+      state: asString(row.state),
+      viewport: asString(row.viewport),
+      workpackShellScrollRatio: typeof row.workpackShellScrollRatio === "number" ? row.workpackShellScrollRatio : null,
+      detailDepthVerdict: asString(row.detailDepthVerdict),
+    })),
     exactSavedSession: {
       verdict: asString(exactSavedSession.verdict),
       sessionKind: asString(exactSavedSession.sessionKind),
@@ -553,8 +579,11 @@ export function renderNorthstarNextRunwayMarkdown(report) {
   const boundedDocumentRedRows = Array.isArray(report.boundedWorkbenchCurrent.documentRedRows)
     ? report.boundedWorkbenchCurrent.documentRedRows.length
     : 0;
+  const boundedDetailDepthDebtRows = Array.isArray(report.boundedWorkbenchCurrent.documentDetailDepthDebts)
+    ? report.boundedWorkbenchCurrent.documentDetailDepthDebts.length
+    : 0;
   const boundedWorkbenchNote = boundedDocumentRedRows === 0
-    ? `Current bounded-workbench source/local gate: \`${report.boundedWorkbenchCurrent.verdict}\`; Documents 390x723 rows are PASS in current-source local production evidence, but live promotion remains pending when \`boundedWorkbenchCurrentLivePending\` is \`true\`. Share rows remain scoped if exact saved session evidence is missing.`
+    ? `Current bounded-workbench gate: \`${report.boundedWorkbenchCurrent.verdict}\`; first-task/body containment rows pass, but ${boundedDetailDepthDebtRows} Documents row(s) carry local workbench detail-depth debt when \`detailDepthDebt\` is \`true\`. Share rows remain scoped if exact saved session evidence is missing.`
     : `Current bounded-workbench source/local gate: \`${report.boundedWorkbenchCurrent.verdict}\`; ${boundedDocumentRedRows} Documents row(s) remain RED in the artifact, while Share rows remain scoped if exact saved session evidence is missing.`;
   const liveNote = report.latestEvidenceCommitLive
     ? "Note: source HEAD and production marker match for this artifact."

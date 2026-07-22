@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `2ced9a0315121d616704f6ed9713ddb61cf45062`
+Source HEAD: `6863bd81877c094c384a4e8d457e1be119a34ef9`
 
-Production `/api/build-info`: `2ced9a0315121d616704f6ed9713ddb61cf45062`
+Production `/api/build-info`: `6863bd81877c094c384a4e8d457e1be119a34ef9`
 
 Latest evidence commit live: `true`
 
@@ -14,7 +14,7 @@ Source head live pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `2ced9a0315121d616704f6ed9713ddb61cf45062`
+Live rollup source head: `6863bd81877c094c384a4e8d457e1be119a34ef9`
 
 Live rollup matches production: `true`
 
@@ -61,7 +61,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.
 - Bounded workbench DoD: route split alone is not accepted; desktop Documents hard-REDs above the recorded screen threshold, /share/result desktop requires multi-region workbench geometry, and generated fixture evidence must stay separate from exact saved/session proof.
 - Legacy workspace-layout regression: remains a broad no-overflow/editor-flow smoke only, not a long-form UX PASS gate; the DoD and route-specific evidence own first-task distance.
-- Current bounded-workbench source/local gate: `PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP`; Documents 390x723 rows are PASS in current-source local production evidence, but live promotion remains pending when `boundedWorkbenchCurrentLivePending` is `true`. Share rows remain scoped if exact saved session evidence is missing.
+- Current bounded-workbench gate: `PARTIAL_LIVE_PRODUCTION_SCOPED_DETAIL_DEPTH_DEBT_WITH_EXACT_SESSION_GAP`; first-task/body containment rows pass, but 12 Documents row(s) carry local workbench detail-depth debt when `detailDepthDebt` is `true`. Share rows remain scoped if exact saved session evidence is missing.
 - Share desktop: current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
