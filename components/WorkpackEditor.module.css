@@ -1204,6 +1204,13 @@
     display: none;
   }
 
+  .supportingDocumentGroup {
+    max-height: 44px;
+    overflow: hidden;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
   .documentHeader {
     flex-direction: column;
   }
@@ -1300,6 +1307,13 @@
 
   .documentTabs {
     display: none;
+  }
+
+  .supportingDocumentGroup {
+    max-height: 44px;
+    overflow: hidden;
+    pointer-events: none;
+    visibility: hidden;
   }
 
   .documentHeader {

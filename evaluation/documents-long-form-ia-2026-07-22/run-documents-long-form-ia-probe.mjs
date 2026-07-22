@@ -318,8 +318,13 @@ for (const viewport of viewports) {
 
     const supportSummary = page.locator('[data-testid="supporting-document-group"] > summary').first();
     if (await supportSummary.count()) {
+      const isVisible = await supportSummary.evaluate((element) => {
+        const box = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        return box.width > 0 && box.height > 0 && style.display !== "none" && style.visibility !== "hidden";
+      });
       const isOpen = await page.locator('[data-testid="supporting-document-group"]').evaluate((element) => element instanceof HTMLDetailsElement && element.open);
-      if (!isOpen) {
+      if (isVisible && !isOpen) {
         await supportSummary.click();
         await settle(page);
       }
