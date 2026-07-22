@@ -1204,6 +1204,19 @@ function createFixtureRoot(): string {
     exactTrustPromotionStillRequiresSeparateApproval: true,
     failures: Array.from({ length: 64 }, (_, index) => `unconfirmed-required-check:${index}`),
   });
+  writeJson(rootDir, path.join("evaluation", "kosha-exact-promotion-review-contract-audit-2026-07-23", "report.json"), {
+    schemaVersion: "safeclaw-kosha-exact-promotion-review-contract-audit/v1",
+    verdict: "PASS_CURRENT_SOURCE_REVIEW_GATE_CONTRACT_NO_MUTATION",
+    contractEvidence: {
+      shallowHumanConfirmationBlocked: true,
+      completedReviewStillRequiresSeparateApproval: true,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      exactPromotionPerformed: false,
+      exactRegistryWriteArtifactCreated: false,
+    },
+  });
   execFileSync("git", ["add", "."], { cwd: rootDir, stdio: "ignore" });
   execFileSync("git", ["commit", "-m", "fixture"], { cwd: rootDir, stdio: "ignore" });
   return rootDir;
@@ -1278,6 +1291,8 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("approval_gated");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("blocked by default");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("separate approval");
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("shallow human-confirmation-only reviews are blocked");
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("completed review remains no-mutation plus separate approval");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.nextActions.join("\n")).toContain(
       "Re-run scripts\\kosha_exact_promotion_review_gate.mjs",
     );
@@ -1602,6 +1617,7 @@ describe("northstar open gate audit", () => {
     expect(markdown).toContain("| provider_dispatch_persistence | approval_gated |");
     expect(markdown).toContain("| kosha_exact_trust_registry | proven |");
     expect(markdown).toContain("| kosha_exact_promotion_review_gate | approval_gated |");
+    expect(markdown).toContain("shallow human-confirmation-only reviews are blocked");
     expect(markdown).toContain("LLM Wiki publishes itself.");
     expect(markdown).toContain("SafeClaw fixes SIF/KOSHA/current work-history evidence before LLM wording.");
   });

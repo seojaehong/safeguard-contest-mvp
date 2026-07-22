@@ -68,6 +68,7 @@ const EVIDENCE_PATHS = Object.freeze({
   koshaCurrentReconciliation: path.join("evaluation", "kosha-current-master-reconciliation-2026-07-19", "report.json"),
   koshaCurrentLive: path.join("evaluation", "kosha-exact-trust-current-live-2026-07-19", "report.md"),
   koshaExactPromotionReviewGate: path.join("evaluation", "kosha-exact-promotion-review-gate-2026-07-22", "report.json"),
+  koshaExactPromotionReviewContractAudit: path.join("evaluation", "kosha-exact-promotion-review-contract-audit-2026-07-23", "report.json"),
 });
 
 /**
@@ -2043,6 +2044,22 @@ function evaluateKoshaExactTrustGate(rootDir) {
 function evaluateKoshaExactPromotionReviewGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.koshaExactPromotionReviewGate;
   const report = readJsonFile(rootDir, evidencePath);
+  const contractAuditPath = EVIDENCE_PATHS.koshaExactPromotionReviewContractAudit;
+  const contractAudit = readJsonFile(rootDir, contractAuditPath);
+  const contractAuditProvesNoMutation = isRecord(contractAudit)
+    && readString(contractAudit.verdict) === "PASS_CURRENT_SOURCE_REVIEW_GATE_CONTRACT_NO_MUTATION"
+    && contractAudit.mutationBoundary
+    && isRecord(contractAudit.mutationBoundary)
+    && contractAudit.mutationBoundary.dbMutationPerformed === false
+    && contractAudit.mutationBoundary.exactPromotionPerformed === false
+    && contractAudit.mutationBoundary.exactRegistryWriteArtifactCreated === false
+    && contractAudit.contractEvidence
+    && isRecord(contractAudit.contractEvidence)
+    && contractAudit.contractEvidence.shallowHumanConfirmationBlocked === true
+    && contractAudit.contractEvidence.completedReviewStillRequiresSeparateApproval === true;
+  const contractAuditDetail = contractAuditProvesNoMutation
+    ? ` Contract audit ${contractAuditPath} confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval.`
+    : "";
   if (!isRecord(report)) {
     return gateResult({
       id: "kosha_exact_promotion_review_gate",
@@ -2085,7 +2102,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
       label: "KOSHA exact promotion review gate",
       state: "approval_gated",
       evidencePath,
-      detail: `Review template covers ${candidateCount} KOSHA candidates and is blocked by default (${failures.length} checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval.`,
+      detail: `Review template covers ${candidateCount} KOSHA candidates and is blocked by default (${failures.length} checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval.${contractAuditDetail}`,
       nextActions: [
         "Fill the generated KOSHA review template with reviewer, reviewedAt, humanConfirmed, and every required check before promotion.",
         "Re-run scripts\\kosha_exact_promotion_review_gate.mjs on the completed review input, then seek separate explicit approval before writing any exact-trust registry changes.",
@@ -2107,7 +2124,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
       label: "KOSHA exact promotion review gate",
       state: "approval_gated",
       evidencePath,
-      detail: `Human checklist is complete for ${candidateCount} KOSHA candidates, but exact-trust promotion remains approval-gated and no mutation has been performed.`,
+      detail: `Human checklist is complete for ${candidateCount} KOSHA candidates, but exact-trust promotion remains approval-gated and no mutation has been performed.${contractAuditDetail}`,
       nextActions: [
         "Request explicit approval for the bounded exact-trust promotion before writing registry, DB, embedding, or production runtime changes.",
       ],

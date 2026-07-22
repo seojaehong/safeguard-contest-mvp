@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "safeclaw-kosha-exact-promotion-review-contract-audit/v1",
+  "generatedAt": "2026-07-23T04:44:22.2108556+09:00",
+  "sourceHead": "e2bca58c6b9e74ba81db94bd07120a479a56a34d",
+  "productionBuildInfo": {
+    "commitSha": "e2bca58c6b9e74ba81db94bd07120a479a56a34d",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-2i6qonczr-seojaehongs-projects.vercel.app"
+  },
+  "verdict": "PASS_CURRENT_SOURCE_REVIEW_GATE_CONTRACT_NO_MUTATION",
+  "auditScope": "approval-free static and focused-test audit of KOSHA exact-promotion review gate behavior",
+  "scriptUnderAudit": "scripts/kosha_exact_promotion_review_gate.mjs",
+  "currentReviewGateArtifact": "evaluation/kosha-exact-promotion-review-gate-2026-07-22/report.json",
+  "currentReviewGateArtifactSourceHead": "77ab06ce6a771569216d3f8ab18fa9234779546b",
+  "currentReviewGateArtifactVerdict": "REVIEW_CHECKLIST_INCOMPLETE_BLOCKED",
+  "reviewChecklistComplete": false,
+  "reviewRows": 8,
+  "packetCandidates": 8,
+  "passedReviewRows": 0,
+  "failureCount": 64,
+  "failureSummary": {
+    "candidateReviewCountMismatch": 0,
+    "missingReviewRows": 0,
+    "unexpectedReviewRows": 0,
+    "duplicateReviewRows": 0,
+    "metadataMismatches": 0,
+    "missingRequiredChecks": 0,
+    "unconfirmedRequiredChecks": 40,
+    "unexpectedRequiredChecks": 0,
+    "requiredCheckCountMismatches": 0,
+    "missingHumanConfirmations": 8,
+    "missingReviewers": 8,
+    "missingReviewedAt": 8,
+    "invalidReviewedAt": 0,
+    "other": 0
+  },
+  "contractEvidence": {
+    "completedReviewVerdict": "HUMAN_REVIEW_COMPLETE_APPROVAL_REQUIRED_NO_MUTATION",
+    "incompleteReviewVerdict": "REVIEW_CHECKLIST_INCOMPLETE_BLOCKED",
+    "shallowHumanConfirmationBlocked": true,
+    "requiredCheckTextMustMatchPacket": true,
+    "metadataHashAndProvenanceMismatchBlocked": true,
+    "extraMissingDuplicateStableKeysBlocked": true,
+    "completedReviewStillRequiresSeparateApproval": true,
+    "completedReviewCreatesRegistryArtifact": false,
+    "exactTrustPromotionApprovedWithoutSeparateApproval": false
+  },
+  "mutationBoundary": {
+    "mutationPerformed": false,
+    "dbMutationPerformed": false,
+    "embeddingGenerationPerformed": false,
+    "exactPromotionPerformed": false,
+    "exactRegistryWriteArtifactCreated": false,
+    "networkAcquisitionPerformed": false,
+    "providerDispatchLiveClaimed": false
+  },
+  "verification": {
+    "nodeCheck": {
+      "command": "node --check scripts\\kosha_exact_promotion_review_gate.mjs",
+      "passed": true
+    },
+    "focusedTests": {
+      "command": "npm.cmd test -- tests\\kosha-exact-promotion-review-gate.test.ts --maxWorkers=1 --fileParallelism=false",
+      "passed": true,
+      "testFilesPassed": 1,
+      "testsPassed": 12
+    }
+  },
+  "forbiddenClaims": [
+    "KOSHA exact trust promotion has been approved.",
+    "KOSHA exact-kosha registry was expanded by this audit.",
+    "Completed checklist review alone is exact-trust promotion approval.",
+    "Shallow reviewer/reviewedAt/humanConfirmed fields are sufficient without required check text and provenance/hash confirmation.",
+    "Embeddings, vector retrieval, DB mutation, or network acquisition were performed by this audit."
+  ],
+  "nextApprovalBoundary": [
+    "A human operator must complete all 8 candidate review rows and every packet-matched required check.",
+    "Even after review checklist completion, a separate explicit exact-trust promotion approval is required.",
+    "Registry write or embedding/vector activation remains outside this no-approval audit."
+  ]
+}
