@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "safeclaw-kosha-education-retry/v1",
+  "generatedAt": "2026-07-22T07:13:17.1890215Z",
+  "sourceHead": "03b56e7d3ace6e3df3fd053625a58c10dd30dcca",
+  "verdict": "PASS_CURRENT_SOURCE_UNIT_CONTRACT",
+  "productionLiveClaimed": false,
+  "problemObservedInPriorLiveSmoke": {
+    "source": "evaluation\\launch-readiness-current-2026-07-22\\api-connection-audit.json",
+    "surface": "KOSHA 교육",
+    "status": "일부 근거 보류",
+    "detail": "KOSHA 교육포털 연결 점검 필요: fetch failed"
+  },
+  "change": {
+    "file": "lib\\kosha-education.ts",
+    "timeoutMs": 20000,
+    "maxAttempts": 2,
+    "reason": "KOSHA 교육포털은 공공 API 성격의 live surface이므로 transient fetch failure에 대해 20s timeout and one retry policy를 적용한다."
+  },
+  "tests": [
+    {
+      "command": "npm.cmd test -- tests\\kosha-education.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "coverage": "selectEduTrgt transient fetch failure is retried once and recovers to live metadata recommendations."
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS",
+      "coverage": "TypeScript strict compile remains clean after retry helper and test additions."
+    }
+  ],
+  "launchBoundary": {
+    "providerDispatchLiveClaimed": false,
+    "dbMutationPerformed": false,
+    "routeSplitAloneAcceptedAsFix": false,
+    "uiIaNote": "This evidence only covers KOSHA education portal fetch resilience. Documents/share IA remains governed by route split plus selected-only bounded workbench, not route count alone."
+  },
+  "nextVerification": [
+    "After production build-info reaches this product SHA or later, rerun no-dispatch launch-readiness smoke and check whether KOSHA 교육 returns 연결됨 instead of 일부 근거 보류.",
+    "Do not claim fully automated launch readiness or provider dispatch from this retry proof."
+  ]
+}
