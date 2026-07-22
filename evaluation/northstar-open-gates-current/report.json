@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-22T16:46:13.877Z",
-  "sourceSha": "a85d3faeea726e6f07a3bf3a80f3ee2bc8ad3894",
+  "generatedAt": "2026-07-22T16:56:24.907Z",
+  "sourceSha": "cc5422bace80ad8e98f83e02bc73fdda9217ea3c",
   "overall": "open",
   "gates": [
     {
@@ -64,13 +64,14 @@
       "state": "notice",
       "label": "Exact saved Share session boundary",
       "evidencePath": "evaluation\\share-exact-session-boundary-2026-07-22\\report.json",
-      "detail": "Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass. Safe missing-session read verdict is RED_SERVER_ERROR_SHAPED_MISSING_SESSION and invalid-id read verdict is PASS_INVALID_ID_FAIL_CLOSED; both remain separate from exact saved-session geometry. Public share storage readiness is RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION with share-session read error PGRST205.",
+      "detail": "Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass. Safe missing-session read verdict is RED_SERVER_ERROR_SHAPED_MISSING_SESSION and invalid-id read verdict is PASS_INVALID_ID_FAIL_CLOSED; both remain separate from exact saved-session geometry. Public share storage readiness is RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION with share-session read error PGRST205. Storage approval packet is APPROVAL_REQUIRED_PUBLIC_SHARE_SESSION_STORAGE_MIGRATION_NO_MUTATION; operator approval required is true and share-session creation would insert storage is true.",
       "nextActions": [
         "Obtain a concrete production /share/[sessionId]?workerId=... URL or approved safe creation flow before closing the user's desktop mobile-like Share complaint.",
         "Rerun desktop 1440x723/1440x900 and mobile 390x723 geometry with sessionKind=saved-exact, root width ratio, x-region count, first action, preview/status visibility, and overflow metrics.",
         "Keep the deliberately missing share-session GET fail-closed; if it returns a 5xx shape, track that as launch-quality debt rather than exact saved-session proof.",
         "Keep invalid share-session ids fail-closed at 400 so URL validation remains separated from storage-backed missing-session read debt.",
-        "Resolve production public share storage readiness so workpack_share_sessions is visible in the PostgREST schema cache before exact saved-session closure."
+        "Resolve production public share storage readiness so workpack_share_sessions is visible in the PostgREST schema cache before exact saved-session closure.",
+        "Do not call POST /api/workpacks/[id]/share-sessions without explicit DB-backed share-session creation approval; that path inserts workpack_share_sessions."
       ]
     },
     {

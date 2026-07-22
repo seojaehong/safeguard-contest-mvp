@@ -101,6 +101,24 @@ type NextRunwayReport = {
     shareSessionsErrorCode: string;
     shareSessionsErrorMessage: string;
   };
+  sharePublicSessionStorageApproval: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    exactSavedShareSessionVerdict: string;
+    migrationPath: string;
+    broadMigrationRequiresOperatorReview: boolean;
+    operatorApprovalRequiredBeforeMigration: boolean;
+    schemaMutationAuthorized: boolean;
+    dbMutationPerformed: boolean;
+    shareSessionCreated: boolean;
+    shareSessionCreationWouldInsertWorkpackShareSessions: boolean;
+    concreteProductionShareUrlProvided: boolean;
+    providerDispatchLiveClaimed: boolean;
+    externalProviderCalled: boolean;
+    workpackShareSessionsReadable: boolean;
+    workpackShareSessionsErrorCode: string;
+  };
   documentsLongFormIA: {
     verdict: string;
     sourceHead: string;
@@ -421,6 +439,31 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       },
     },
   });
+  writeJson(root, "evaluation/share-public-session-storage-approval-2026-07-23/report.json", {
+    verdict: "APPROVAL_REQUIRED_PUBLIC_SHARE_SESSION_STORAGE_MIGRATION_NO_MUTATION",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    exactSavedShareSessionVerdict: "MISSING_EVIDENCE",
+    migration: {
+      path: "supabase/migrations/010_commercial_operations.sql",
+      sha256: "fixture-sha256",
+      broadMigrationRequiresOperatorReview: true,
+    },
+    readinessBlocker: {
+      workpackShareSessionsReadable: false,
+      workpackShareSessionsErrorCode: "PGRST205",
+    },
+    approvalBoundary: {
+      operatorApprovalRequiredBeforeMigration: true,
+      schemaMutationAuthorized: false,
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      shareSessionCreationWouldInsertWorkpackShareSessions: true,
+      concreteProductionShareUrlProvided: false,
+      providerDispatchLiveClaimed: false,
+      externalProviderCalled: false,
+    },
+  });
   writeJson(root, "evaluation/documents-long-form-ia-2026-07-22/report.json", {
     verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION",
     sourceHead: "TO_FILL",
@@ -691,6 +734,23 @@ describe("northstar next runway generator", () => {
       shareSessionsErrorCode: "PGRST205",
       dbMutationPerformed: false,
     });
+    expect(report.sharePublicSessionStorageApproval).toMatchObject({
+      verdict: "APPROVAL_REQUIRED_PUBLIC_SHARE_SESSION_STORAGE_MIGRATION_NO_MUTATION",
+      exactSavedShareSessionVerdict: "MISSING_EVIDENCE",
+      migrationPath: "supabase/migrations/010_commercial_operations.sql",
+      broadMigrationRequiresOperatorReview: true,
+      operatorApprovalRequiredBeforeMigration: true,
+      schemaMutationAuthorized: false,
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      shareSessionCreationWouldInsertWorkpackShareSessions: true,
+      concreteProductionShareUrlProvided: false,
+      providerDispatchLiveClaimed: false,
+      externalProviderCalled: false,
+      workpackShareSessionsReadable: false,
+      workpackShareSessionsErrorCode: "PGRST205",
+    });
+    expect(report.nextSafeWorkWithoutApproval.join("\n")).toContain("do not create a production saved Share session");
     expect(report.uiInterpretation.documentsContainment).toContain("selected-only bounded workbench");
     expect(report.uiInterpretation.selectedEditorDetail).toContain("desktop 1440x900");
     expect(report.uiInterpretation.structuralAnswer).toContain("bounded IA/density wave");

@@ -1055,6 +1055,17 @@ function createFixtureRoot(): string {
       },
     },
   });
+  writeJson(rootDir, path.join("evaluation", "share-public-session-storage-approval-2026-07-23", "report.json"), {
+    verdict: "APPROVAL_REQUIRED_PUBLIC_SHARE_SESSION_STORAGE_MIGRATION_NO_MUTATION",
+    approvalBoundary: {
+      operatorApprovalRequiredBeforeMigration: true,
+      shareSessionCreationWouldInsertWorkpackShareSessions: true,
+      dbMutationPerformed: false,
+      schemaMutationAuthorized: false,
+      providerDispatchLiveClaimed: false,
+      externalProviderCalled: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"), {
     verdict: "PASS_PRODUCTION",
     acceptance: {
@@ -1245,9 +1256,12 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.detail).toContain("fixture or generated /workspace Share proof is explicitly not accepted");
     expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.detail).toContain("PGRST205");
+    expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.detail).toContain("APPROVAL_REQUIRED_PUBLIC_SHARE_SESSION_STORAGE_MIGRATION_NO_MUTATION");
+    expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.detail).toContain("share-session creation would insert storage is true");
     expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.nextActions.join("\n")).toContain("concrete production /share/[sessionId]?workerId=...");
     expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.nextActions.join("\n")).toContain("sessionKind=saved-exact");
     expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.nextActions.join("\n")).toContain("PostgREST schema cache");
+    expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.nextActions.join("\n")).toContain("Do not call POST /api/workpacks/[id]/share-sessions without explicit DB-backed share-session creation approval");
     expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.state).toBe("approval_gated");
     expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.detail).toContain("attempt-level idempotency reservation");
     expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.detail).toContain("per-channel result persistence");

@@ -28,6 +28,7 @@ const ARTIFACTS = Object.freeze({
   shareGeneratedSessionPerception: path.join("evaluation", "share-generated-session-perception-2026-07-22", "report.json"),
   shareExactSessionBoundary: path.join("evaluation", "share-exact-session-boundary-2026-07-22", "report.json"),
   sharePublicSessionStorageReadiness: path.join("evaluation", "share-public-session-storage-readiness-2026-07-23", "report.json"),
+  sharePublicSessionStorageApproval: path.join("evaluation", "share-public-session-storage-approval-2026-07-23", "report.json"),
   documentsCockpitWorkbenchGeometry: path.join("evaluation", "documents-cockpit-workbench-geometry-2026-07-22", "report.json"),
   documentsLongFormIA: path.join("evaluation", "documents-long-form-ia-2026-07-22", "report.json"),
   boundedWorkbenchDod: path.join("evaluation", "workspace-bounded-workbench-dod-2026-07-22", "report.json"),
@@ -297,6 +298,35 @@ function sharePublicSessionStorageReadinessSummary(storageReadiness) {
     shareSessionsReadable: asBoolean(fullSelect.readable),
     shareSessionsErrorCode: asString(fullError.code),
     shareSessionsErrorMessage: asString(fullError.message),
+  };
+}
+
+/**
+ * @param {unknown} storageApproval
+ */
+function sharePublicSessionStorageApprovalSummary(storageApproval) {
+  if (!isRecord(storageApproval)) return {};
+  const migration = isRecord(storageApproval.migration) ? storageApproval.migration : {};
+  const approvalBoundary = isRecord(storageApproval.approvalBoundary) ? storageApproval.approvalBoundary : {};
+  const readinessBlocker = isRecord(storageApproval.readinessBlocker) ? storageApproval.readinessBlocker : {};
+  return {
+    verdict: asString(storageApproval.verdict),
+    sourceHead: asString(storageApproval.sourceHead),
+    productionCommit: asString(storageApproval.productionCommit),
+    exactSavedShareSessionVerdict: asString(storageApproval.exactSavedShareSessionVerdict),
+    migrationPath: asString(migration.path),
+    migrationSha256: asString(migration.sha256),
+    broadMigrationRequiresOperatorReview: asBoolean(migration.broadMigrationRequiresOperatorReview),
+    operatorApprovalRequiredBeforeMigration: asBoolean(approvalBoundary.operatorApprovalRequiredBeforeMigration),
+    schemaMutationAuthorized: asBoolean(approvalBoundary.schemaMutationAuthorized),
+    dbMutationPerformed: asBoolean(approvalBoundary.dbMutationPerformed),
+    shareSessionCreated: asBoolean(approvalBoundary.shareSessionCreated),
+    shareSessionCreationWouldInsertWorkpackShareSessions: asBoolean(approvalBoundary.shareSessionCreationWouldInsertWorkpackShareSessions),
+    concreteProductionShareUrlProvided: asBoolean(approvalBoundary.concreteProductionShareUrlProvided),
+    providerDispatchLiveClaimed: asBoolean(approvalBoundary.providerDispatchLiveClaimed),
+    externalProviderCalled: asBoolean(approvalBoundary.externalProviderCalled),
+    workpackShareSessionsReadable: asBoolean(readinessBlocker.workpackShareSessionsReadable),
+    workpackShareSessionsErrorCode: asString(readinessBlocker.workpackShareSessionsErrorCode),
   };
 }
 
@@ -573,6 +603,7 @@ export function buildNorthstarNextRunway(options) {
   const shareGenerated = readJson(options.rootDir, ARTIFACTS.shareGeneratedSessionPerception);
   const shareExactBoundary = readJson(options.rootDir, ARTIFACTS.shareExactSessionBoundary);
   const sharePublicSessionStorageReadiness = readOptionalJson(options.rootDir, ARTIFACTS.sharePublicSessionStorageReadiness);
+  const sharePublicSessionStorageApproval = readOptionalJson(options.rootDir, ARTIFACTS.sharePublicSessionStorageApproval);
   const documentsCockpitGeometry = readOptionalJson(options.rootDir, ARTIFACTS.documentsCockpitWorkbenchGeometry);
   const documentsIa = readJson(options.rootDir, ARTIFACTS.documentsLongFormIA);
   const boundedDod = readJson(options.rootDir, ARTIFACTS.boundedWorkbenchDod);
@@ -664,6 +695,7 @@ export function buildNorthstarNextRunway(options) {
     shareGeneratedSessionPerception: shareGeneratedSessionSummary(shareGenerated),
     shareExactSessionBoundary: shareExactSessionBoundarySummary(shareExactBoundary),
     sharePublicSessionStorageReadiness: sharePublicSessionStorageReadinessSummary(sharePublicSessionStorageReadiness),
+    sharePublicSessionStorageApproval: sharePublicSessionStorageApprovalSummary(sharePublicSessionStorageApproval),
     documentsCockpitWorkbenchGeometry: documentsCockpitWorkbenchGeometrySummary(documentsCockpitGeometry),
     documentsLongFormIA: documentsLongFormIASummary(documentsIa),
     boundedWorkbenchDod: boundedWorkbenchDodSummary(boundedDod),
@@ -681,6 +713,7 @@ export function buildNorthstarNextRunway(options) {
       "treat the Share exact-session boundary as open until a concrete session URL/payload is provided; the current no-mutation boundary audit only proves route presence and missing exact evidence",
       "keep Share UI evidence split by route: invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result state each need their own geometry before closing user-specific mobile-like complaints",
       "resolve public Share storage readiness before exact saved-session closure: current evidence shows workpacks readable but workpack_share_sessions missing from production PostgREST schema cache",
+      "do not create a production saved Share session unless the user supplies a concrete existing URL or explicitly approves DB-backed share-session creation; POST /api/workpacks/[id]/share-sessions inserts workpack_share_sessions",
       "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
       "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
       "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held",
@@ -781,6 +814,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Share route evidence split: invited recipient \`/share/[sessionId]\` fixture route, exact saved/generated \`/share/[sessionId]\`, and manager/workspace share-result route remain separate proof layers. A fixture pass cannot close a user-specific exact saved/session complaint.
 - Share exact-session boundary: \`${report.shareExactSessionBoundary.verdict || "missing"}\`; exact saved reproduced is \`${report.shareExactSessionBoundary.exactSavedUserSessionReproduced === true}\`, safe missing-session GET status is \`${report.shareExactSessionBoundary.safeReadStatus ?? "unknown"}\`, safe-read verdict is \`${report.shareExactSessionBoundary.safeMissingSessionReadVerdict || "unknown"}\`, invalid-id GET status is \`${report.shareExactSessionBoundary.invalidReadStatus ?? "unknown"}\`, invalid-id verdict is \`${report.shareExactSessionBoundary.safeInvalidSessionReadVerdict || "unknown"}\`, and DB/provider mutations remain \`false\`.
 - Share public-session storage readiness: \`${report.sharePublicSessionStorageReadiness.verdict || "missing"}\`; live public API status is \`${report.sharePublicSessionStorageReadiness.livePublicApiStatus ?? "unknown"}\`, service-role workpacks readable is \`${report.sharePublicSessionStorageReadiness.workpacksReadable === true}\`, workpack_share_sessions readable is \`${report.sharePublicSessionStorageReadiness.shareSessionsReadable === true}\`, and share-session read error is \`${report.sharePublicSessionStorageReadiness.shareSessionsErrorCode || "unknown"}\`.
+- Share public-session storage approval: \`${report.sharePublicSessionStorageApproval.verdict || "missing"}\`; exact saved Share remains \`${report.sharePublicSessionStorageApproval.exactSavedShareSessionVerdict || "unknown"}\`, operator approval required is \`${report.sharePublicSessionStorageApproval.operatorApprovalRequiredBeforeMigration === true}\`, share-session creation would insert storage is \`${report.sharePublicSessionStorageApproval.shareSessionCreationWouldInsertWorkpackShareSessions === true}\`, DB mutation performed is \`${report.sharePublicSessionStorageApproval.dbMutationPerformed === true}\`, and migration path is \`${report.sharePublicSessionStorageApproval.migrationPath || "unknown"}\`.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
 
 Route/page split alone is not accepted as the UX fix. Page count only moves long documents/messages to another URL if the route body still unfolds the full artifact. The accepted structure is a three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes for long documents, messages, logs, and raw metadata.
