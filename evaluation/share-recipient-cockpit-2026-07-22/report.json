@@ -1,11 +1,18 @@
 {
   "schemaVersion": "safeclaw-share-recipient-cockpit/v1",
-  "generatedAt": "2026-07-22T02:50:59.3669408Z",
+  "generatedAt": "2026-07-22T02:57:51.6298647Z",
   "sourceHead": "6ddde9a2587055967b69842ee974f83afbc981fb",
-  "verdict": "PASS_CURRENT_SOURCE",
-  "productionLiveClaimed": false,
+  "evidenceCommitAtVerification": "6b03c8e01f83700f71727edf18dbdbfe0da0c66a",
+  "verdict": "PASS_LIVE_PRODUCTION",
+  "productionLiveClaimed": true,
   "providerDispatchLiveClaimed": false,
   "routeSplitAloneAcceptedAsFix": false,
+  "liveBuildInfo": {
+    "commitSha": "6b03c8e01f83700f71727edf18dbdbfe0da0c66a",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-g4dqmc3co-seojaehongs-projects.vercel.app"
+  },
   "structuralContract": "first-viewport primary recipient confirmation task plus bounded/collapsed message and document details",
   "scope": [
     "app/share/[sessionId]/page.tsx",
@@ -13,105 +20,115 @@
     "tests/share-recipient-portal-browser.test.ts"
   ],
   "metrics": {
-    "mobile390x844": {
-      "outsideCards": 0,
-      "distinctColumns": 1,
-      "notice": {
-        "left": 16,
-        "bottom": 1176,
-        "width": 358,
-        "top": 984
-      },
-      "documents": {
-        "left": 16,
-        "bottom": 1492,
-        "width": 358,
-        "top": 1186
-      },
-      "gridTemplateColumns": "358px",
-      "horizontalOverflow": false,
-      "viewportHeight": 844,
-      "bodyHeight": 1572,
-      "ratio": 1.86,
-      "confirmation": {
-        "left": 16,
-        "bottom": 755,
-        "width": 358,
-        "top": 533
-      },
-      "documentsCollapsedByDefault": true,
-      "confirmButton": {
-        "bottom": 707,
-        "width": 328,
-        "top": 663
-      },
-      "root": {
-        "left": 0,
-        "bottom": 1524,
-        "width": 390,
-        "height": 1086,
-        "top": 438
-      }
-    },
     "desktop1440x723": {
-      "outsideCards": 0,
-      "distinctColumns": 2,
-      "notice": {
-        "left": 788,
-        "bottom": 449,
-        "width": 652,
-        "top": 275
-      },
-      "documents": {
-        "left": 788,
+      "bodyHeight": 945,
+      "viewportHeight": 723,
+      "ratio": 1.31,
+      "scrollWidth": 1440,
+      "viewportWidth": 1440,
+      "horizontalOverflow": false,
+      "root": {
+        "top": 201,
         "bottom": 897,
-        "width": 652,
-        "top": 586
-      },
-      "confirmation": {
         "left": 236,
-        "bottom": 578,
-        "width": 534,
-        "top": 275
+        "width": 1204,
+        "height": 695
       },
       "gridTemplateColumns": "534.344px 651.656px",
-      "horizontalOverflow": false,
-      "viewportHeight": 723,
-      "bodyHeight": 945,
-      "ratio": 1.31,
       "distinctLefts": [
         240,
         800
       ],
-      "confirmButton": {
-        "bottom": 529,
-        "width": 500,
-        "top": 485
-      },
-      "root": {
+      "distinctColumns": 2,
+      "confirmation": {
+        "top": 275,
+        "bottom": 578,
         "left": 236,
+        "width": 534
+      },
+      "confirmButton": {
+        "top": 485,
+        "bottom": 529,
+        "width": 500
+      },
+      "notice": {
+        "top": 275,
+        "bottom": 449,
+        "left": 788,
+        "width": 652
+      },
+      "documents": {
+        "top": 586,
         "bottom": 897,
-        "width": 1204,
-        "height": 695,
-        "top": 201
-      }
+        "left": 788,
+        "width": 652
+      },
+      "closedDocumentCount": 3,
+      "outsideCards": 0
+    },
+    "mobile390x844": {
+      "bodyHeight": 1572,
+      "viewportHeight": 844,
+      "ratio": 1.86,
+      "scrollWidth": 390,
+      "viewportWidth": 390,
+      "horizontalOverflow": false,
+      "root": {
+        "top": 438,
+        "bottom": 1524,
+        "left": 0,
+        "width": 390,
+        "height": 1086
+      },
+      "gridTemplateColumns": "358px",
+      "distinctColumns": 1,
+      "confirmation": {
+        "top": 533,
+        "bottom": 755,
+        "left": 16,
+        "width": 358
+      },
+      "confirmButton": {
+        "top": 663,
+        "bottom": 707,
+        "width": 328
+      },
+      "notice": {
+        "top": 984,
+        "bottom": 1176,
+        "left": 16,
+        "width": 358
+      },
+      "documents": {
+        "top": 1186,
+        "bottom": 1492,
+        "left": 16,
+        "width": 358
+      },
+      "closedDocumentCount": 3,
+      "outsideCards": 0,
+      "documentsCollapsedByDefault": true
     }
   },
   "tests": [
     {
-      "result": "PASS",
-      "tests": 6,
       "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts --maxWorkers=1 --fileParallelism=false --hookTimeout=180000",
-      "files": 1
+      "result": "PASS",
+      "files": 1,
+      "tests": 6
     },
     {
       "command": "npm.cmd run typecheck",
       "result": "PASS"
     },
     {
-      "result": "PASS",
       "command": "npm.cmd run build",
+      "result": "PASS",
       "staticPages": 28
+    },
+    {
+      "command": "live Playwright route-mocked probe against https://www.safeclaw.kr/share/[sessionId]",
+      "result": "PASS"
     }
   ],
   "closed": [

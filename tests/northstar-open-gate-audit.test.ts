@@ -661,6 +661,42 @@ function createFixtureRoot(): string {
       },
     },
   });
+  writeJson(rootDir, path.join("evaluation", "share-recipient-cockpit-2026-07-22", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION",
+    sourceHead: "fixture-sha",
+    productionLiveClaimed: true,
+    providerDispatchLiveClaimed: false,
+    routeSplitAloneAcceptedAsFix: false,
+    scope: [
+      "app/share/[sessionId]/page.tsx",
+      "app/globals.css",
+      "tests/share-recipient-portal-browser.test.ts",
+    ],
+    metrics: {
+      desktop1440x723: {
+        bodyHeight: 945,
+        viewportHeight: 723,
+        ratio: 1.31,
+        distinctColumns: 2,
+        horizontalOverflow: false,
+        outsideCards: 0,
+        confirmButton: {
+          bottom: 529,
+        },
+      },
+      mobile390x844: {
+        bodyHeight: 1572,
+        viewportHeight: 844,
+        ratio: 1.86,
+        horizontalOverflow: false,
+        outsideCards: 0,
+        documentsCollapsedByDefault: true,
+        confirmButton: {
+          bottom: 707,
+        },
+      },
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "workspace-ia-live-f67-2026-07-21", "report.json"), {
     verdict: "IA_BLOCKER_REFINED",
     liveCommitChecked: "fixture-sha",
@@ -1107,11 +1143,13 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exact one-viewport Documents");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("selected editor/detail field-summary risk-row landing");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("raw textarea/full long-form editing below the first viewport as open secondary drilldown");
-    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("perceived narrow-card composition");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("/share/[sessionId] desktop recipient confirmation");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("mobile confirmation CTA before document details");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.evidencePath).toBe(
       path.join("evaluation", "workspace-ia-live-7b36-2026-07-22", "report.json"),
     );
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("raw textarea and deeper row/all-document authoring");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("/share/[sessionId] recipient cockpit geometry is now live-proven");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).not.toContain("Promote the Share staged rail");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "share_result_fixture_cockpit")?.state).toBe("proven");
