@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-22T18:26:22.293Z",
-  "sourceSha": "9922783985464aa8e2fc4ab6cc79105032d6a654",
+  "generatedAt": "2026-07-22T18:33:57.859Z",
+  "sourceSha": "9eb13e1d18519b08a2ec65490c65dbc438cb6780",
   "overall": "open",
   "gates": [
     {
@@ -91,7 +91,7 @@
       "state": "approval_gated",
       "label": "Supabase RLS launch isolation",
       "evidencePath": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Read-only RLS approval preflight passed at source SHA 0300946e22f233bb6e7bf7d3e412499497b77d32, but live RLS catalog and tenant A/B isolation are not proven.",
+      "detail": "Read-only RLS approval preflight passed at source SHA 9eb13e1d18519b08a2ec65490c65dbc438cb6780, but live RLS catalog and tenant A/B isolation are not proven.",
       "nextActions": [
         "Approve authoritative project and credential provenance.",
         "Run read-only live catalog capture.",
@@ -103,7 +103,7 @@
       "state": "approval_gated",
       "label": "LLM Wiki publication",
       "evidencePath": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 0300946e22f233bb6e7bf7d3e412499497b77d32.",
+      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 9eb13e1d18519b08a2ec65490c65dbc438cb6780.",
       "nextActions": [
         "Approve final DDL, append-only ledger, graph pointer, and RPC threat model.",
         "Run approved publication canary in an isolated project.",
