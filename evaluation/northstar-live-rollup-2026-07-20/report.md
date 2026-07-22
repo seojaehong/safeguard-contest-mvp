@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-22T12:39:42.331Z
-Source HEAD at generation: 9258020c4d4417c936e896d70589db598c306bd3
-Live commit at generation: 0197af7555936aec2bfb2835204c0025d0c80e3a
+Generated at: 2026-07-22T12:43:42.554Z
+Source HEAD at generation: 2cd06554be3a2f6945a0e8d00517adfe04c0b4f7
+Live commit at generation: 2cd06554be3a2f6945a0e8d00517adfe04c0b4f7
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -44,12 +44,12 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | ancestor | matches_live | evaluation\northstar-open-gates-current\report.json |
-| final_99_gate | exact | matches_live_source_mismatch | evaluation\final-99-gate-current-2026-07-22\report.json |
+| open_gate | ancestor | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
+| final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
 | kosha_exact_trust_registry | ancestor | ancestor_of_head | evaluation\kosha-current-live-gate-2026-07-20\report.json |
-| rls_llm_wiki_approval_preflight | ancestor | missing | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
-| sif_embedding_preflight | ancestor | missing | evaluation\sif-embedding-gate\approval-preflight-report.json |
+| rls_llm_wiki_approval_preflight | exact | missing | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
+| sif_embedding_preflight | exact | missing | evaluation\sif-embedding-gate\approval-preflight-report.json |
 | live_critical_surface | ancestor | ancestor_of_head | evaluation\live-critical-surface-current-2026-07-20-rerun\report.json |
 | mobile_p0_workspace | ancestor | ancestor_of_head | evaluation\mobile-p0-workspace-gate-2026-07-20\report.json |
 | workspace_docs_share_geometry | ancestor | ancestor_of_head | evaluation\workspace-docs-share-production-gate-2026-07-20\current-geometry.json |
