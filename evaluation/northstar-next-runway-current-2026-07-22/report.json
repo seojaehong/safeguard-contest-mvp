@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T14:35:26.506Z",
+  "generatedAt": "2026-07-22T14:38:28.202Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "c1f21c7804a56eec9debe151b13fe81774590ccc",
+  "sourceHead": "6d873304917811e7df93c79f1d6cdfdb059f356b",
   "productionCommit": "c1f21c7804a56eec9debe151b13fe81774590ccc",
   "liveBuildInfo": {
     "ok": true,
@@ -15,12 +15,12 @@
     "deploymentUrl": "safeguard-contest-80d3whjxg-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": true,
-  "currentHeadIsEvidenceOnlyPending": false,
-  "sourceHeadLivePending": false,
+  "latestEvidenceCommitLive": false,
+  "currentHeadIsEvidenceOnlyPending": true,
+  "sourceHeadLivePending": true,
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "c1f21c7804a56eec9debe151b13fe81774590ccc",
+  "liveExactEvidenceCommit": "6d873304917811e7df93c79f1d6cdfdb059f356b",
   "liveRollupLiveCommit": "c1f21c7804a56eec9debe151b13fe81774590ccc",
   "liveRollupMatchesProduction": true,
   "artifacts": {
