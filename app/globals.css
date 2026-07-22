@@ -20480,7 +20480,7 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
-@media (min-width: 901px) and (max-height: 760px) {
+@media (min-width: 901px) {
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-page-decision-header {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 12px;
