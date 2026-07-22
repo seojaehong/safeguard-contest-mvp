@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-22T01:12:33.942Z",
-  "sourceSha": "e6475342d9ba5a0a9be2d9409e9b687bc37c6759",
+  "generatedAt": "2026-07-22T01:37:13.999Z",
+  "sourceSha": "d7303b9c3472b04296330309174e8e03331b52d1",
   "overall": "open",
   "gates": [
     {
@@ -112,6 +112,17 @@
         "Promote additional metadata-verified KOSHA candidates to exact trust only through separate immutable acquisition/review.",
         "Keep broader corpus exact-publishing, SIF vector retrieval, and DB persistence approval-gated."
       ]
+    },
+    {
+      "id": "kosha_exact_promotion_review_gate",
+      "state": "approval_gated",
+      "label": "KOSHA exact promotion review gate",
+      "evidencePath": "evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\report.json",
+      "detail": "Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval.",
+      "nextActions": [
+        "Fill the generated KOSHA review template with reviewer, reviewedAt, humanConfirmed, and every required check before promotion.",
+        "Re-run scripts\\kosha_exact_promotion_review_gate.mjs on the completed review input, then seek separate explicit approval before writing any exact-trust registry changes."
+      ]
     }
   ],
   "safeDemoClaims": [
@@ -126,6 +137,7 @@
     "OpenClaw learns or mutates DB facts automatically.",
     "SIF vector retrieval is production-active before the approved migration/upload/runtime gate.",
     "All KOSHA metadata-verified candidates are exact production evidence.",
+    "KOSHA operator checklist completion alone approves exact-trust promotion.",
     "Live Supabase RLS tenant isolation is launch-proven before catalog and tenant A/B evidence.",
     "Real provider dispatch is production-live for any channel before persistent idempotency and provider result persistence approval."
   ]

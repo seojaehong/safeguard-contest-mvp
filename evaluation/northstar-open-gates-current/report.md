@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-22T01:12:33.942Z
-Source SHA: `e6475342d9ba5a0a9be2d9409e9b687bc37c6759`
+Generated at: 2026-07-22T01:37:13.999Z
+Source SHA: `d7303b9c3472b04296330309174e8e03331b52d1`
 Overall: `open`
 
 ## Gate Matrix
@@ -18,6 +18,7 @@ Overall: `open`
 | llm_wiki_publication | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA df829d5a9c5736467eeddbd72c4dccbf6327816f. |
 | sif_embedding_runtime | approval_gated | evaluation\sif-embedding-gate\approval-preflight-report.json | SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 4fcd064bfe9c6d6d98df7873a3091550dddca0c5. |
 | kosha_exact_trust_registry | proven | evaluation\kosha-current-northstar-regression-2026-07-22\report.json | Current source confirms 3 exact KOSHA pins (D-C-13-2026, D-C-7-2026, B-E-10-2026), structured materialization, grounded generation, and live harness quality: 226 tests plus typecheck PASS; no DB/schema/Supabase/embedding writes. |
+| kosha_exact_promotion_review_gate | approval_gated | evaluation\kosha-exact-promotion-review-gate-2026-07-22\report.json | Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. |
 
 ## Safe Demo Claims
 
@@ -33,6 +34,7 @@ Overall: `open`
 - OpenClaw learns or mutates DB facts automatically.
 - SIF vector retrieval is production-active before the approved migration/upload/runtime gate.
 - All KOSHA metadata-verified candidates are exact production evidence.
+- KOSHA operator checklist completion alone approves exact-trust promotion.
 - Live Supabase RLS tenant isolation is launch-proven before catalog and tenant A/B evidence.
 - Real provider dispatch is production-live for any channel before persistent idempotency and provider result persistence approval.
 
@@ -58,3 +60,5 @@ Overall: `open`
 - kosha_exact_trust_registry: Use evaluation\kosha-exact-promotion-packet-2026-07-22\report.json as the bounded operator-review set before any exact-trust promotion.
 - kosha_exact_trust_registry: Promote additional metadata-verified KOSHA candidates to exact trust only through separate immutable acquisition/review.
 - kosha_exact_trust_registry: Keep broader corpus exact-publishing, SIF vector retrieval, and DB persistence approval-gated.
+- kosha_exact_promotion_review_gate: Fill the generated KOSHA review template with reviewer, reviewedAt, humanConfirmed, and every required check before promotion.
+- kosha_exact_promotion_review_gate: Re-run scripts\kosha_exact_promotion_review_gate.mjs on the completed review input, then seek separate explicit approval before writing any exact-trust registry changes.
