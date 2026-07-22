@@ -43,6 +43,14 @@ const CANDIDATE_RATIONALES = Object.freeze({
   "E-G-4": "musculoskeletal prevention coverage for manual handling and repetitive work evidence",
 });
 
+const REQUIRED_REVIEW_CHECKS = Object.freeze([
+  "official URL opens the expected KOSHA file for the selected stable key",
+  "official file id, version, and publication date match metadata and body-corpus provenance",
+  "body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence",
+  "operator confirms lifecycle/current status and excludes stale superseded versions",
+  "human confirmation is recorded before any exact-kosha registry JSON is created",
+]);
+
 /**
  * @param {unknown} value
  * @returns {value is Record<string, unknown>}
@@ -267,6 +275,8 @@ export function buildKoshaExactPromotionPacket(options) {
       normalizedCharCount: asNumber(item.normalized_char_count) ?? 0,
       pageCount: asNumber(item.page_count) ?? 0,
       rationale: CANDIDATE_RATIONALES[stableKey] || "metadata-verified current native technical-support candidate",
+      requiredReviewChecks: REQUIRED_REVIEW_CHECKS,
+      reviewChecklistComplete: false,
       reviewRequiredBeforeExactTrust: true,
     };
   });
@@ -284,6 +294,12 @@ export function buildKoshaExactPromotionPacket(options) {
     embeddingGenerationPerformed: false,
     exactPromotionPerformed: false,
     candidateCount: candidates.length,
+    operatorReviewReadiness: {
+      packetReadyForReview: true,
+      reviewChecklistComplete: false,
+      exactTrustPromotionBlockedUntilChecklistComplete: true,
+      perCandidateRequiredCheckCount: REQUIRED_REVIEW_CHECKS.length,
+    },
     selectionPolicy: {
       sourcePool: "metadata-verified current native technical-support regulations",
       selectedStableKeys: candidateKeys,
@@ -333,7 +349,7 @@ export function buildKoshaExactPromotionPacket(options) {
  */
 function renderMarkdown(report) {
   const rows = report.candidates.map((candidate) => (
-    `| ${candidate.order} | ${candidate.stableKey} | ${candidate.version} | ${candidate.title} | ${candidate.officialFileId} | ${candidate.bodySha256.slice(0, 12)} | ${candidate.pdfSha256.slice(0, 12)} |`
+    `| ${candidate.order} | ${candidate.stableKey} | ${candidate.version} | ${candidate.title} | ${candidate.officialFileId} | ${candidate.bodySha256.slice(0, 12)} | ${candidate.pdfSha256.slice(0, 12)} | ${candidate.rationale} |`
   )).join("\n");
   return `# KOSHA Exact Promotion Packet
 
@@ -351,6 +367,8 @@ Mutation performed: \`${report.mutationPerformed}\`
 
 Exact promotion performed: \`${report.exactPromotionPerformed}\`
 
+Review checklist complete: \`${report.operatorReviewReadiness.reviewChecklistComplete}\`
+
 ## Selection Policy
 
 - Source pool: \`${report.selectionPolicy.sourcePool}\`
@@ -360,9 +378,13 @@ Exact promotion performed: \`${report.exactPromotionPerformed}\`
 
 ## Candidate Packet
 
-| # | Stable key | Version | Title | Official file id | Body hash | PDF hash |
-| --- | --- | --- | --- | --- | --- | --- |
+| # | Stable key | Version | Title | Official file id | Body hash | PDF hash | Why this candidate |
+| --- | --- | --- | --- | --- | --- | --- | --- |
 ${rows}
+
+## Per-Candidate Review Checks
+
+${report.candidates[0]?.requiredReviewChecks.map((item) => `- ${item}`).join("\n") || "- No candidate checks were generated."}
 
 ## Review Required Before Promotion
 

@@ -13,6 +13,12 @@ type PromotionPacket = {
   embeddingGenerationPerformed: boolean;
   exactPromotionPerformed: boolean;
   candidateCount: number;
+  operatorReviewReadiness: {
+    packetReadyForReview: boolean;
+    reviewChecklistComplete: boolean;
+    exactTrustPromotionBlockedUntilChecklistComplete: boolean;
+    perCandidateRequiredCheckCount: number;
+  };
   selectionPolicy: {
     selectedStableKeys: string[];
   };
@@ -27,6 +33,8 @@ type PromotionPacket = {
     title: string;
     bodySha256: string;
     pdfSha256: string;
+    requiredReviewChecks: string[];
+    reviewChecklistComplete: boolean;
     reviewRequiredBeforeExactTrust: boolean;
   }>;
   forbiddenClaims: string[];
@@ -194,6 +202,14 @@ describe("KOSHA exact promotion packet", () => {
     expect(report.verifiedSubsetCurrent.provenanceComplete).toBe(true);
     expect(report.candidates.map((candidate) => candidate.stableKey)).toEqual(["D-C-10", "A-G-15"]);
     expect(report.candidates.every((candidate) => candidate.reviewRequiredBeforeExactTrust)).toBe(true);
+    expect(report.candidates.every((candidate) => candidate.reviewChecklistComplete === false)).toBe(true);
+    expect(report.candidates.every((candidate) => candidate.requiredReviewChecks.length >= 5)).toBe(true);
+    expect(report.operatorReviewReadiness).toMatchObject({
+      packetReadyForReview: true,
+      reviewChecklistComplete: false,
+      exactTrustPromotionBlockedUntilChecklistComplete: true,
+      perCandidateRequiredCheckCount: 5,
+    });
     expect(report.candidates[0].title).toContain("D-C-10-2026");
     expect(report.candidates[0].bodySha256).toHaveLength(64);
     expect(report.candidates[0].pdfSha256).toHaveLength(64);
@@ -241,6 +257,8 @@ describe("KOSHA exact promotion packet", () => {
     expect(report.candidateCount).toBe(2);
     expect(report.exactPromotionPerformed).toBe(false);
     expect(markdown).toContain("Exact promotion performed: `false`");
+    expect(markdown).toContain("Review checklist complete: `false`");
+    expect(markdown).toContain("human confirmation is recorded before any exact-kosha registry JSON is created");
     expect(markdown).toContain("D-C-10-2026");
     expect(markdown).toContain("These candidates are already exact production evidence.");
   });
