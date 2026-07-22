@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T14:50:09.570Z",
-  "head": "988aae915ec78f3a1e1d78780bea5065bed10021",
+  "generatedAt": "2026-07-22T14:55:10.694Z",
+  "head": "b17f59371b90cd9fbe334374e0243e021adbe6f3",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "988aae915ec78f3a1e1d78780bea5065bed10021",
+    "commitSha": "b17f59371b90cd9fbe334374e0243e021adbe6f3",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-bp0piheh5-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-dclg8uofh-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -163,7 +163,7 @@
   "final99": {
     "artifact": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
     "overall": "pass_with_notice",
-    "productionCommit": "0197af7555936aec2bfb2835204c0025d0c80e3a",
+    "productionCommit": "b17f59371b90cd9fbe334374e0243e021adbe6f3",
     "noticeCarry": [
       {
         "gate": "auth-history-reuse",
@@ -193,18 +193,18 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "988aae915ec78f3a1e1d78780bea5065bed10021",
+      "sourceCommit": "b17f59371b90cd9fbe334374e0243e021adbe6f3",
       "sourceStatus": "exact",
-      "productionCommit": "988aae915ec78f3a1e1d78780bea5065bed10021",
+      "productionCommit": "b17f59371b90cd9fbe334374e0243e021adbe6f3",
       "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
       "artifact": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
-      "sourceCommit": "9258020c4d4417c936e896d70589db598c306bd3",
-      "sourceStatus": "ancestor",
-      "productionCommit": "0197af7555936aec2bfb2835204c0025d0c80e3a",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "b17f59371b90cd9fbe334374e0243e021adbe6f3",
+      "sourceStatus": "exact",
+      "productionCommit": "b17f59371b90cd9fbe334374e0243e021adbe6f3",
+      "productionStatus": "matches_live"
     },
     {
       "id": "live_harness_quality",
