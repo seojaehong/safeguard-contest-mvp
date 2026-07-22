@@ -1,16 +1,16 @@
 # SafeGuard API 조합 및 다운로드 스모크
 
-- 생성시각: 2026-07-22T11:58:00.322Z
+- 생성시각: 2026-07-22T12:10:39.599Z
 - 대상 URL: https://www.safeclaw.kr
 - 질문: 세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.
-- 기상 선조회: live / 단시간 흐림, 비, 기온 25℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/영향예보/생활기상 자외선 반영)
+- 기상 선조회: live / 단시간 흐림, 비, 기온 26℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/영향예보/생활기상 자외선 반영)
 - /api/ask: live / 문서 11종
 
 ## API 반영 맵
 
 | API | 호출 경로 | 상태 | 반영 위치 | 건수/신호 | 증거 |
 | --- | --- | --- | --- | ---: | --- |
-| 기상청 현재/초단기/단기/특보/영향예보 | /api/weather 선조회<br>/api/ask 내부 fetchWeatherSignal | live | 현장 브리프 날씨<br>위험성평가표 작업조건<br>TBM 기상 신호<br>작업중지 기준 | 8 | 단시간 흐림, 비, 기온 25℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/영향예보/생활기상 자외선 반영) |
+| 기상청 현재/초단기/단기/특보/영향예보 | /api/weather 선조회<br>/api/ask 내부 fetchWeatherSignal | live | 현장 브리프 날씨<br>위험성평가표 작업조건<br>TBM 기상 신호<br>작업중지 기준 | 8 | 단시간 흐림, 비, 기온 26℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선 반영) |
 | Law.go + korean-law-mcp | /api/ask 내부 searchLegalSources | live | 근거 출처<br>위험성평가표 반영 근거<br>TBM 기록 반영 근거<br>사진/증빙 확인 근거 | 6 | korean-law-mcp 비활성화 |
 | Gemini | /api/ask 내부 generateAnswer | live | 점검결과 요약<br>위험성평가표<br>TBM<br>안전보건교육<br>외국인 전송본 | 11 | 1) 하네스 판단
 - 직접 근거: D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정 / D-C-7-2026 비계 구조 및 안전작업에 관한 기술지원규정
@@ -19,23 +19,23 @@
 | KOSHA 안전보건교육포털 | /api/ask 내부 fetchKoshaEducationRecommendations | live | 후속 교육<br>안전보건교육 기록<br>KOSHA 교육 카드 | 3 | KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다. |
 | KOSHA 공식자료/가이드 | /api/ask 내부 fetchKoshaReferences | live | 위험성평가 절차<br>TBM 기록 항목<br>안전보건교육 서식 | 7 | KOSHA·고용노동부 공식 자료 URL 7건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. |
 | KOSHA 스마트검색/자료링크/MSDS/건설업 일별 중대재해 | /api/ask 내부 fetchKoshaOpenApiEvidence | live | 문서 반영 근거<br>위험성평가표<br>안전보건교육<br>TBM | 3 | KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. |
-| KOSHA 국내재해사례/첨부파일/사고사망 | /api/ask 내부 fetchAccidentCases | live | 유사 재해사례<br>TBM 예방 포인트<br>교육 사례 | 3 | KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. |
+| KOSHA 국내재해사례/첨부파일/사고사망 | /api/ask 내부 fetchAccidentCases | live | 유사 재해사례<br>TBM 예방 포인트<br>교육 사례 | 3 | KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: raw-query:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. |
 
 ## 다운로드 생성 결과
 
 | 형식 | 결과 | 바이트 | 파일 |
 | --- | --- | ---: | --- |
-| TXT | ok | 10549 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.txt |
-| JSON | ok | 11118 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.json |
-| CSV | ok | 17586 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.csv |
-| XLS | ok | 28380 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.xls |
-| DOC | ok | 15815 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.doc |
-| HTML | ok | 11127 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.html |
-| HWPX | ok | 11938 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.hwpx |
+| TXT | ok | 10512 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.txt |
+| JSON | ok | 11081 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.json |
+| CSV | ok | 17549 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.csv |
+| XLS | ok | 28343 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.xls |
+| DOC | ok | 15778 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.doc |
+| HTML | ok | 11090 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.html |
+| HWPX | ok | 11906 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.hwpx |
 | HWP_TABLE | ok | 19968 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.hwp |
-| XLSX_OOXML | ok | 13677 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.xlsx |
-| PDF | ok | 316119 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.pdf |
+| XLSX_OOXML | ok | 13645 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.xlsx |
+| PDF | ok | 314992 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.pdf |
 | JPG | ok | 166857 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-risk-assessment.jpg |
-| ALL_TXT | ok | 75359 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-safeguard-workpack.txt |
-| ALL_CSV | ok | 111684 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-safeguard-workpack.csv |
-| ALL_XLS | ok | 173036 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-safeguard-workpack.xls |
+| ALL_TXT | ok | 75185 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-safeguard-workpack.txt |
+| ALL_CSV | ok | 111510 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-safeguard-workpack.csv |
+| ALL_XLS | ok | 172862 | evaluation\final-99-gate-current-2026-07-22\orchestration-download\files\세이프건설-safeguard-workpack.xls |

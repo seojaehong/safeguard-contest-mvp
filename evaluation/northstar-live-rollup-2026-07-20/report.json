@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T12:05:52.149Z",
-  "head": "f6c4d777a1731ca8fdf9115ef0b4d5a3ef6b1b72",
+  "generatedAt": "2026-07-22T12:11:21.940Z",
+  "head": "08d52aa51a6ede03b30b2a82c6ad0cfabc9af480",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f6c4d777a1731ca8fdf9115ef0b4d5a3ef6b1b72",
+    "commitSha": "08d52aa51a6ede03b30b2a82c6ad0cfabc9af480",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-1ca0lg9m7-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-7d2w7qfr7-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -157,7 +157,7 @@
   "final99": {
     "artifact": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
     "overall": "pass_with_notice",
-    "productionCommit": "39e8f203d954ac6af3c53dec7b805156447edc71",
+    "productionCommit": "08d52aa51a6ede03b30b2a82c6ad0cfabc9af480",
     "noticeCarry": [
       {
         "gate": "auth-history-reuse",
@@ -187,18 +187,18 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "f6c4d777a1731ca8fdf9115ef0b4d5a3ef6b1b72",
+      "sourceCommit": "08d52aa51a6ede03b30b2a82c6ad0cfabc9af480",
       "sourceStatus": "exact",
-      "productionCommit": "f6c4d777a1731ca8fdf9115ef0b4d5a3ef6b1b72",
+      "productionCommit": "08d52aa51a6ede03b30b2a82c6ad0cfabc9af480",
       "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
       "artifact": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
-      "sourceCommit": "39e8f203d954ac6af3c53dec7b805156447edc71",
-      "sourceStatus": "ancestor",
-      "productionCommit": "39e8f203d954ac6af3c53dec7b805156447edc71",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "08d52aa51a6ede03b30b2a82c6ad0cfabc9af480",
+      "sourceStatus": "exact",
+      "productionCommit": "08d52aa51a6ede03b30b2a82c6ad0cfabc9af480",
+      "productionStatus": "matches_live"
     },
     {
       "id": "live_harness_quality",
