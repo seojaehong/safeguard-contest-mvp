@@ -1,14 +1,14 @@
 # Launch Readiness Current Boundary
 
-Generated: 2026-07-22T02:18:12.431Z
+Generated: 2026-07-22T07:07:19.925Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source/evidence commit: `94d108f30918d35ff3ee54f132b9660be6b63395`
+Source HEAD at generation: `ec7e81b9e983f0b9a9994a0dd9c65cca27b6624e`
 
-Runtime smoke commit: `94d108f30918d35ff3ee54f132b9660be6b63395`
+Production runtime smoke commit: `ec7e81b9e983f0b9a9994a0dd9c65cca27b6624e`
 
-Final-99 runtime smoke commit: `6a95c23ffc57542f6a9a9aa14612b3466127a0ad`
+Current HEAD is evidence-only pending relative to production: `false`
 
 ## Verdict
 
@@ -21,10 +21,11 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 `scripts/launch_readiness_audit.mjs` was run against production with `SAFETYGUARD_AUDIT_DISPATCH=false`.
 
 - `/api/ask`: 200 OK
-- elapsed: 23504 ms
+- elapsed: 23117 ms
 - dispatch call: not run
 - generated documents: 11 / 11
-- scenario: `도시가스공사 열수송관 굴착공사`, workers 7
+- connection verdict: `PASS_WITH_BOUNDED_FALLBACK` (6 connected, 1 bounded fallback, 0 check-required)
+- scenario: `도시가스공사 열수송관 굴착공사`
 
 ## Connected Surfaces
 
@@ -32,29 +33,32 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 - Gemini: 연결됨
 - 기상청: 연결됨
 - Work24: 연결됨
-- KOSHA 교육: 연결됨
+- KOSHA 교육: 일부 근거 보류
 - KOSHA 공식자료: 연결됨
 - KOSHA 재해사례: 연결됨
 - n8n dispatch: 설정 점검만 수행
 
+## Final-99 Notices
+
+Final-99 remains `pass_with_notice`; 2 notices are carried. These are approval/auth gates, not safe no-approval cleanup tasks.
+
+- `auth-history-reuse`: operator-auth-gated. Allowed: 관리자 인증 없는 환경에서도 비회원 임시 저장과 로그인 필요 상태가 방어된다. Forbidden: 관리자 서버 저장과 이력 재열기를 live에서 실행 완료했다.
+- `dispatch-policy`: provider-approval-gated. Allowed: 메일·문자는 관리자 인증과 서버 소유 세션에서만 전송 가능한 정책으로 잠겨 있다. Forbidden: 카카오·밴드 또는 모든 provider 전파가 실제 승인 채널로 live 완료됐다.
+
 ## Safe Claims
 
-- Live /api/ask can generate the expected 11-document workpack for the audited construction scenario.
-- Law.go, Gemini/OpenAI-compatible generation, KMA weather, Work24, KOSHA education, KOSHA official material, and KOSHA accident-case connections returned user-facing connected status in the live smoke.
-- Default Documents and Share cockpits are production-proven as viewport-bounded decision surfaces; selected editor field-summary/row landing is the accepted first task surface, while raw long-form text remains a secondary drilldown.
-- KOSHA exact trust registry, current regression, and live corpus status are current in the North Star evidence set.
-- A safe launch demo or guided pilot can be claimed with the explicit provider-dispatch, RLS, LLM Wiki, SIF vector, and admin-auth notices.
+- Live /api/ask generated the expected 11-document workpack for the audited construction scenario.
+- Live public-data/AI surfaces returned user-facing connected or bounded fallback statuses; no connection returned 연결 점검 필요 in this smoke.
+- A safe launch demo or guided pilot can be claimed with explicit provider-dispatch, RLS, LLM Wiki, SIF vector, and admin-auth boundaries.
+- Documents selected-only bounded workbench evidence is current in scoped artifacts; route split alone is not accepted as the UX fix.
 
 ## UI / IA Boundary
 
-Route/page split alone is not accepted as the UX fix. The accepted structure is step split plus first-viewport cockpit plus bounded drilldown/detail panes.
+Route/page split alone is not accepted as the UX fix. The accepted structure is route split plus selected-only bounded workbench: first-viewport cockpit, one selected detail/editor, and long raw/provenance content in local scroll, drawer, accordion, or drilldown.
 
-- Documents default cockpit: `closed_current_live`. Default raw page height and overflow are no longer the primary blocker in current live evidence.
-- Documents selected editor/detail: `split`. First meaningful field summary / risk-row landing is the accepted first task surface; raw textarea and full long-form document authoring remain secondary drilldown/readability debt.
-- Share desktop: `raw_layout_closed_optional_visual_followup`. Current raw geometry is two-column and not a literal mobile stack; if a user-visible session still feels narrow-card, treat that as a reproduced full-workbench composition follow-up.
-- Share mobile: `closed_current_live_compact_flow`. Selected summary, bounded preview, primary CTA, and collapsed details remain inside the current first-viewport contract.
-
-Next UI acceptance should keep measuring first meaningful editable content or field-summary landing, primary CTA/status/result bottom, desktop x-ranges and column balance, horizontal overflow, and default-open detail count. It should not treat page count alone as the fix.
+- Documents scoped evidence verdict: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION`
+- Share generated fixture verdict: `PASS_CURRENT_SOURCE_GENERATED_RESULT_FIXTURE`
+- Exact saved user share session reproduced: `false`
 
 ## Forbidden Claims
 
@@ -63,15 +67,16 @@ Next UI acceptance should keep measuring first meaningful editable content or fi
 - Provider idempotency and per-channel result persistence are production-proven.
 - SIF vector retrieval or LLM Wiki publication is production-active.
 - Live Supabase RLS tenant isolation is launch-proven.
-- All KOSHA guide rows are exact direct evidence.
+- Exact saved/generated user share session has been reproduced unless a concrete session URL/state is measured.
+- Every external data surface was fully connected without fallback in the latest smoke.
 
 ## Approval-Gated Boundaries
 
-- `provider_dispatch_persistence`: Provider dispatch remains preview-only until persistent idempotency and provider-result persistence are approved and verified.
+- `admin_auth_save_reopen`: Final-99 auth-history-reuse notice remains until a secure SAFEGUARD_AUTH_TOKEN operator run proves server save/reopen.
+- `provider_dispatch_persistence`: Provider dispatch remains preview/policy-gated until approved providers and authenticated server-owned workpack/share-session proof exist.
 - `supabase_rls_launch_isolation`: Live RLS catalog and disposable tenant A/B isolation are not production-proven.
 - `llm_wiki_publication`: LLM Wiki candidates remain unpublished until approved RPC/RLS/ledger canary evidence exists.
 - `sif_embedding_runtime`: SIF vector runtime remains held until migration, embedding cost, upload, and runtime enablement are separately approved.
-- `admin_auth_save_reopen`: Final-99 still carries admin-auth live save/reopen as a notice without secure auth token execution.
 
 ## Evidence
 
@@ -80,8 +85,9 @@ Next UI acceptance should keep measuring first meaningful editable content or fi
 - final99NoticeCarry: `evaluation\final-99-gate-current-2026-07-22\notice-carry.json`
 - northstarOpenGates: `evaluation\northstar-open-gates-current\report.json`
 - northstarLiveRollup: `evaluation\northstar-live-rollup-2026-07-20\report.json`
-- uiCockpitEvidence: `evaluation\workspace-ia-live-7b36-2026-07-22\report.json`
-- workspaceIaRecommendation: `evaluation\workspace-information-architecture-2026-07-21\report.json`
+- northstarNextRunway: `evaluation\northstar-next-runway-current-2026-07-22\report.json`
+- documentsLongFormIA: `evaluation\documents-long-form-ia-2026-07-22\report.json`
+- shareGeneratedSessionPerception: `evaluation\share-generated-session-perception-2026-07-22\report.json`
 - koshaRegression: `evaluation\kosha-current-northstar-regression-2026-07-22\report.json`
 - koshaLiveGate: `evaluation\kosha-current-live-gate-2026-07-20\report.json`
 - providerDispatchReadiness: `evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json`
