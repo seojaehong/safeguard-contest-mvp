@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `5825a71f5a274a95f6b31a02810826736689d206`
+Source HEAD: `f3b1997488855fd68a023b660c55fca82cd2d2f8`
 
-Production `/api/build-info`: `5825a71f5a274a95f6b31a02810826736689d206`
+Production `/api/build-info`: `f3b1997488855fd68a023b660c55fca82cd2d2f8`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `5825a71f5a274a95f6b31a02810826736689d206`
+Live rollup source head: `f3b1997488855fd68a023b660c55fca82cd2d2f8`
 
 Live rollup matches production: `true`
 
@@ -74,7 +74,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
 - Share route evidence split: invited recipient `/share/[sessionId]` fixture route, exact saved/generated `/share/[sessionId]`, and manager/workspace share-result route remain separate proof layers. A fixture pass cannot close a user-specific exact saved/session complaint.
 - Share exact-session boundary: `MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED`; exact saved reproduced is `false`, safe missing-session GET status is `404`, safe-read verdict is `PASS_FAIL_CLOSED`, invalid-id GET status is `400`, invalid-id verdict is `PASS_INVALID_ID_FAIL_CLOSED`, and DB/provider mutations remain `false`.
-- Share public-session storage readiness: `RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION`; live public API status is `500`, service-role workpacks readable is `true`, workpack_share_sessions readable is `false`, and share-session read error is `PGRST205`.
+- Share public-session storage readiness: `RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION`; live public API status is `404`, service-role workpacks readable is `true`, workpack_share_sessions readable is `false`, and share-session read error is `PGRST205`.
 - Share public-session storage approval: `APPROVAL_REQUIRED_PUBLIC_SHARE_SESSION_STORAGE_MIGRATION_NO_MUTATION`; exact saved Share remains `MISSING_EVIDENCE`, operator approval required is `true`, share-session creation would insert storage is `true`, DB mutation performed is `false`, and migration path is `supabase/migrations/010_commercial_operations.sql`.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
 

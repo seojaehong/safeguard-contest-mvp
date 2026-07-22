@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-share-public-session-storage-readiness/v1",
-  "checkedAt": "2026-07-23T01:43:22.8264275+09:00",
-  "sourceHead": "a85d3faeea726e6f07a3bf3a80f3ee2bc8ad3894",
-  "productionCommit": "e03bad0b665782281286350abc8c3cb8bdabbc0f",
+  "checkedAt": "2026-07-22T19:02:00.395Z",
+  "sourceHead": "f3b1997488855fd68a023b660c55fca82cd2d2f8",
+  "productionCommit": "f3b1997488855fd68a023b660c55fca82cd2d2f8",
   "baseUrl": "https://www.safeclaw.kr",
   "verdict": "RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION",
   "dbMutationPerformed": false,
@@ -16,8 +16,8 @@
   "livePublicApiProbe": {
     "method": "GET",
     "path": "/api/share-sessions/00000000-0000-4000-8000-000000000000?workerId=00000000-0000-4000-8000-000000000001",
-    "status": 500,
-    "message": "공유 세션을 확인하지 못했습니다.",
+    "status": 404,
+    "message": "유효한 공유 세션을 찾지 못했습니다.",
     "mutationPerformed": false
   },
   "serviceRoleReadOnlyProbe": {
@@ -48,23 +48,20 @@
     }
   },
   "interpretation": {
-    "publicShareMissingSession500Cause": "Production Supabase/PostgREST schema cache cannot see public.workpack_share_sessions while the same service-role client can read public.workpacks.",
-    "codeFallbackResult": "Application fallback for single-row/no-row and legacy-column compatibility is deployed, but it cannot compensate for the table missing from the production schema cache.",
+    "publicShareMissingSessionShape": "Missing public share-session GET fails closed at 404 for the deliberately missing UUID.",
+    "storageReadiness": "Production Supabase/PostgREST schema cache still cannot see public.workpack_share_sessions while the same service-role client can read public.workpacks.",
     "exactSavedSessionGeometry": "MISSING_EVIDENCE",
     "fixtureProofAcceptedAsExactSavedSession": false
   },
   "nextActions": [
     "Do not create a share session or mutate production data without explicit approval.",
     "Run an approved read-only production DB/schema migration status check for workpack_share_sessions.",
-    "If the commercial operations migration is missing, apply it only after explicit DB migration approval.",
-    "After the table is visible in production schema cache, rerun evaluation/share-exact-session-boundary-2026-07-22/run-share-exact-session-boundary.mjs and require the safe missing-session GET to fail closed at 404/410 rather than 500.",
     "Keep exact saved/generated /share/[sessionId] geometry as MISSING_EVIDENCE until a concrete production URL/payload or approved safe creation flow exists."
   ],
   "forbiddenClaims": [
     "Exact saved/generated Share session geometry is proven.",
     "A production share session was created.",
     "Provider dispatch was performed.",
-    "The public share storage readiness issue is only a stale deploy/cache problem.",
-    "The workpack_share_sessions production DB table is confirmed ready."
+    "The workpack_share_sessions production DB table is confirmed ready when read-only probes still report PGRST205."
   ]
 }
