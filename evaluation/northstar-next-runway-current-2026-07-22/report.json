@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T17:07:33.083Z",
+  "generatedAt": "2026-07-22T17:13:00.050Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "540c17743e45edab459221345c280a8856aabd16",
-  "productionCommit": "540c17743e45edab459221345c280a8856aabd16",
+  "sourceHead": "0e7fd41f89d9f71ca515c6fa7f6bd89e36a67f0a",
+  "productionCommit": "0e7fd41f89d9f71ca515c6fa7f6bd89e36a67f0a",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "540c17743e45edab459221345c280a8856aabd16",
+    "commitSha": "0e7fd41f89d9f71ca515c6fa7f6bd89e36a67f0a",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-mh28jgg4j-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-a6ptbebxq-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -20,8 +20,8 @@
   "sourceHeadLivePending": false,
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "540c17743e45edab459221345c280a8856aabd16",
-  "liveRollupLiveCommit": "540c17743e45edab459221345c280a8856aabd16",
+  "liveExactEvidenceCommit": "0e7fd41f89d9f71ca515c6fa7f6bd89e36a67f0a",
+  "liveRollupLiveCommit": "0e7fd41f89d9f71ca515c6fa7f6bd89e36a67f0a",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -206,7 +206,7 @@
       "command": "npm.cmd test -- tests\\engine-adapter.test.ts tests\\hermes-engine-adapter.test.ts tests\\openclaw-hermes-route.test.ts tests\\openclaw-chat.test.ts tests\\openclaw-broker-ui-context.test.ts tests\\remote-hermes-contract.test.ts tests\\remote-hermes-runtime.test.ts tests\\remote-hermes-route.test.ts tests\\remote-hermes-https-transport.test.ts tests\\remote-hermes-service-auth.test.ts tests\\remote-engine-protocol.test.ts tests\\engine-runtime-readiness-policy.test.ts tests\\ai-provider-policy.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000",
       "testFilesPassed": 13,
       "testsPassed": 289,
-      "durationSeconds": 16.18,
+      "durationSeconds": 16.02,
       "status": "pass"
     },
     "liveUnauthenticatedBrokerSmoke": {
