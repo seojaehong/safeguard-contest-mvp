@@ -4,7 +4,7 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `7d29def426bc612f8711ae12053a4f4f34f6e7ac`
+Source HEAD: `b3e8070bf705cbb3e75f7f81c43381d48e9ca1f6`
 
 Production `/api/build-info`: `5afad5be7cdfddc03267c0e89ffb85b29cbf7ae9`
 
@@ -14,17 +14,17 @@ Source head live pending: `true`
 
 Source head has product changes: `true`
 
-Source pending changed paths: `lib/workpack-commercial-store.ts`, `tests/workpack-commercial-tenant-hardening.test.ts`
+Source pending changed paths: `evaluation/northstar-live-rollup-2026-07-20/report.json`, `evaluation/northstar-live-rollup-2026-07-20/report.md`, `evaluation/northstar-next-runway-current-2026-07-22/report.json`, `evaluation/northstar-next-runway-current-2026-07-22/report.md`, `evaluation/northstar-open-gates-current/report.json`, `evaluation/northstar-open-gates-current/report.md`, `evaluation/share-exact-session-boundary-2026-07-22/report.json`, `evaluation/share-exact-session-boundary-2026-07-22/report.md`, `lib/workpack-commercial-store.ts`, `scripts/northstar_next_runway.mjs`, `tests/northstar-next-runway-generator.test.ts`, `tests/workpack-commercial-tenant-hardening.test.ts`
 
 Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `7d29def426bc612f8711ae12053a4f4f34f6e7ac`
+Live rollup source head: `b3e8070bf705cbb3e75f7f81c43381d48e9ca1f6`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `7d29def426bc612f8711ae12053a4f4f34f6e7ac` includes product/runtime file changes that are not live yet. Production is still `5afad5be7cdfddc03267c0e89ffb85b29cbf7ae9`, and the live rollup remains exact for that deployed marker.
+Note: current HEAD `b3e8070bf705cbb3e75f7f81c43381d48e9ca1f6` includes product/runtime file changes that are not live yet. Production is still `5afad5be7cdfddc03267c0e89ffb85b29cbf7ae9`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 

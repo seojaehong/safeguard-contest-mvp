@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T17:41:01.929Z",
-  "head": "7d29def426bc612f8711ae12053a4f4f34f6e7ac",
+  "generatedAt": "2026-07-22T17:48:38.523Z",
+  "head": "b3e8070bf705cbb3e75f7f81c43381d48e9ca1f6",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
@@ -55,7 +55,7 @@
       "id": "share_exact_saved_session_boundary",
       "state": "notice",
       "artifact": "evaluation\\share-exact-session-boundary-2026-07-22\\report.json",
-      "detail": "Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass. Safe missing-session read verdict is RED_SERVER_ERROR_SHAPED_MISSING_SESSION and invalid-id read verdict is PASS_INVALID_ID_FAIL_CLOSED; both remain separate from exact saved-session geometry. Public share storage readiness is RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION with share-session read error PGRST205. Storage approval packet is APPROVAL_REQUIRED_PUBLIC_SHARE_SESSION_STORAGE_MIGRATION_NO_MUTATION; operator approval required is true and share-session creation would insert storage is true."
+      "detail": "Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass. Safe missing-session read verdict is PASS_FAIL_CLOSED and invalid-id read verdict is PASS_INVALID_ID_FAIL_CLOSED; both remain separate from exact saved-session geometry. Public share storage readiness is RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION with share-session read error PGRST205. Storage approval packet is APPROVAL_REQUIRED_PUBLIC_SHARE_SESSION_STORAGE_MIGRATION_NO_MUTATION; operator approval required is true and share-session creation would insert storage is true."
     },
     {
       "id": "kosha_exact_trust_registry",
@@ -193,9 +193,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "34a86b1ea0b79cbd4654da5ea9cc165ade677190",
+      "sourceCommit": "7d29def426bc612f8711ae12053a4f4f34f6e7ac",
       "sourceStatus": "ancestor",
-      "productionCommit": "34a86b1ea0b79cbd4654da5ea9cc165ade677190",
+      "productionCommit": "7d29def426bc612f8711ae12053a4f4f34f6e7ac",
       "productionStatus": "ancestor_of_head"
     },
     {
