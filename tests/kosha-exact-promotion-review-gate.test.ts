@@ -257,6 +257,37 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.exactPromotionPerformed).toBe(false);
   });
 
+  it("fails closed when the review omits a packet candidate and substitutes a mismatched stable key", async () => {
+    const { root, packetPath, reviewPath, candidates } = writeFixtureRoot();
+    const review = JSON.parse(fs.readFileSync(path.join(root, reviewPath), "utf8")) as {
+      candidateReviews: Array<Record<string, unknown>>;
+    };
+    const replacement = {
+      ...review.candidateReviews[1],
+      stableKey: "D-C-11",
+      version: "D-C-11-2026",
+      officialFileId: "FILE-D-C-11",
+      bodySha256: "d".repeat(64),
+      pdfSha256: "c".repeat(64),
+      requiredReviewChecks: candidates[1].requiredReviewChecks.map((text) => ({ text, confirmed: true })),
+    };
+    review.candidateReviews[1] = replacement;
+    writeJson(root, reviewPath, review);
+    const module = await loadReviewGateModule();
+    const report = module.buildKoshaExactPromotionReviewGate({ rootDir: root, packetPath, reviewPath });
+
+    expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
+    expect(report.reviewChecklistComplete).toBe(false);
+    expect(report.packetCandidateSetMatchesReview).toBe(false);
+    expect(report.failures).toContain("missing-review:A-G-15");
+    expect(report.failures).toContain("unexpected-review:D-C-11");
+    expect(report.failureSummary.missingReviewRows).toBe(1);
+    expect(report.failureSummary.unexpectedReviewRows).toBe(1);
+    expect(report.failureSummary.candidateReviewCountMismatch).toBe(0);
+    expect(report.exactPromotionPerformed).toBe(false);
+    expect(report.exactRegistryWriteArtifactCreated).toBe(false);
+  });
+
   it("writes only review reports for a completed review and never creates exact registry artifacts", () => {
     const { root, packetPath, reviewPath } = writeFixtureRoot();
 
