@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T19:10:10.498Z",
+  "generatedAt": "2026-07-22T19:12:38.092Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "ab717b6e83878956fe2b550b3edfe2f7a23b35b7",
-  "productionCommit": "305f9fc29795789b99866ab9ea1e7cb2d42da8ad",
+  "sourceHead": "b3d4c12933e54d85ac4359e8e4764f0c4daf4076",
+  "productionCommit": "ab717b6e83878956fe2b550b3edfe2f7a23b35b7",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "305f9fc29795789b99866ab9ea1e7cb2d42da8ad",
+    "commitSha": "ab717b6e83878956fe2b550b3edfe2f7a23b35b7",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-cfdt2u10n-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-ktvg1qz4w-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": false,
@@ -26,13 +26,12 @@
     "evaluation/northstar-next-runway-current-2026-07-22/report.md",
     "evaluation/northstar-open-gates-current/report.json",
     "evaluation/northstar-open-gates-current/report.md",
-    "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json",
-    "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.md"
+    "evaluation/sif-embedding-gate/approval-preflight-report.json"
   ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "ab717b6e83878956fe2b550b3edfe2f7a23b35b7",
-  "liveRollupLiveCommit": "305f9fc29795789b99866ab9ea1e7cb2d42da8ad",
+  "liveExactEvidenceCommit": "b3d4c12933e54d85ac4359e8e4764f0c4daf4076",
+  "liveRollupLiveCommit": "ab717b6e83878956fe2b550b3edfe2f7a23b35b7",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
