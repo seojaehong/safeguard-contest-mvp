@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T19:56:43.079Z",
-  "head": "5fc1d1ff89e1c7db45c1f23d49a66fa6a804cbff",
+  "generatedAt": "2026-07-22T20:00:21.375Z",
+  "head": "a1202816a47ce363fa6c429dd04412543cb6ad95",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "1afa4a835ccc7802d543cadbd98cb2137f31a050",
+    "commitSha": "fecc7dd19de32facc15c22629b6d6bf7789835a6",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-3jrftuhrh-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-91hdywvh8-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -87,7 +87,7 @@
       "id": "sif_embedding_runtime",
       "state": "approval_gated",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: cf1558910eb0163cca82b31b81033fb878148628."
+      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: fecc7dd19de32facc15c22629b6d6bf7789835a6."
     },
     {
       "id": "kosha_exact_promotion_review_gate",
@@ -193,9 +193,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "5fc1d1ff89e1c7db45c1f23d49a66fa6a804cbff",
+      "sourceCommit": "a1202816a47ce363fa6c429dd04412543cb6ad95",
       "sourceStatus": "exact",
-      "productionCommit": "5fc1d1ff89e1c7db45c1f23d49a66fa6a804cbff",
+      "productionCommit": "a1202816a47ce363fa6c429dd04412543cb6ad95",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -233,7 +233,7 @@
     {
       "id": "sif_embedding_preflight",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "sourceCommit": "cf1558910eb0163cca82b31b81033fb878148628",
+      "sourceCommit": "fecc7dd19de32facc15c22629b6d6bf7789835a6",
       "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"

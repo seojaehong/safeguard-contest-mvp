@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-22T19:56:43.079Z
-Source HEAD at generation: 5fc1d1ff89e1c7db45c1f23d49a66fa6a804cbff
-Live commit at generation: 1afa4a835ccc7802d543cadbd98cb2137f31a050
+Generated at: 2026-07-22T20:00:21.375Z
+Source HEAD at generation: a1202816a47ce363fa6c429dd04412543cb6ad95
+Live commit at generation: fecc7dd19de32facc15c22629b6d6bf7789835a6
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -68,5 +68,5 @@ Overall: `northstar_open_approval_gated`
 - provider_dispatch_persistence: Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists with an updated_at trigger, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred.
 - supabase_rls_launch_isolation: Read-only RLS approval preflight passed at source SHA 1afa4a835ccc7802d543cadbd98cb2137f31a050, but live RLS catalog and tenant A/B isolation are not proven.
 - llm_wiki_publication: Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 1afa4a835ccc7802d543cadbd98cb2137f31a050.
-- sif_embedding_runtime: SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: cf1558910eb0163cca82b31b81033fb878148628.
+- sif_embedding_runtime: SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: fecc7dd19de32facc15c22629b6d6bf7789835a6.
 - kosha_exact_promotion_review_gate: Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Contract audit evaluation\kosha-exact-promotion-review-contract-audit-2026-07-23\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval.

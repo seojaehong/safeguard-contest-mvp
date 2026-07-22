@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T19:56:45.925Z",
+  "generatedAt": "2026-07-22T20:00:24.431Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "5fc1d1ff89e1c7db45c1f23d49a66fa6a804cbff",
-  "productionCommit": "1afa4a835ccc7802d543cadbd98cb2137f31a050",
+  "sourceHead": "a1202816a47ce363fa6c429dd04412543cb6ad95",
+  "productionCommit": "fecc7dd19de32facc15c22629b6d6bf7789835a6",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "1afa4a835ccc7802d543cadbd98cb2137f31a050",
+    "commitSha": "fecc7dd19de32facc15c22629b6d6bf7789835a6",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-3jrftuhrh-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-91hdywvh8-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": false,
@@ -20,13 +20,12 @@
   "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
   "sourcePendingChangedPaths": [
-    "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json",
-    "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.md"
+    "evaluation/sif-embedding-gate/approval-preflight-report.json"
   ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "5fc1d1ff89e1c7db45c1f23d49a66fa6a804cbff",
-  "liveRollupLiveCommit": "1afa4a835ccc7802d543cadbd98cb2137f31a050",
+  "liveExactEvidenceCommit": "a1202816a47ce363fa6c429dd04412543cb6ad95",
+  "liveRollupLiveCommit": "fecc7dd19de32facc15c22629b6d6bf7789835a6",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
