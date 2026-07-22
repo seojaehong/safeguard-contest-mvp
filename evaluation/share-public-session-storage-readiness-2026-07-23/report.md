@@ -1,10 +1,10 @@
 # Share Public Session Storage Readiness
 
-Checked at: `2026-07-22T22:10:09.772Z`
+Checked at: `2026-07-22T23:55:02.745Z`
 
-Source HEAD: `f66a8c5e9bb0ac74a0831f07cc6f2bd9af1ae6c6`
+Source HEAD: `309ead31767800245a1b410f285cd351ef0c09a9`
 
-Production `/api/build-info`: `f66a8c5e9bb0ac74a0831f07cc6f2bd9af1ae6c6`
+Production `/api/build-info`: `309ead31767800245a1b410f285cd351ef0c09a9`
 
 Verdict: `RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION`
 
