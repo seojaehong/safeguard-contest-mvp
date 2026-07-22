@@ -1,25 +1,25 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T00:02:32.066Z",
+  "generatedAt": "2026-07-22T00:23:45.590Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "7389f22eb06e8d3f7724d15d9d172a9d9800cb7e",
-  "productionCommit": "7389f22eb06e8d3f7724d15d9d172a9d9800cb7e",
+  "sourceHead": "cdb69e56460010c1a779273ed993794fa0f9ef36",
+  "productionCommit": "c545b7eac4cd54d572f5266c582d274f96a5af7d",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "7389f22eb06e8d3f7724d15d9d172a9d9800cb7e",
+    "commitSha": "c545b7eac4cd54d572f5266c582d274f96a5af7d",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-jvd6gqrlr-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-bk6s1djgm-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": true,
+  "latestEvidenceCommitLive": false,
   "currentHeadIsEvidenceOnlyPending": false,
-  "liveExactEvidenceCommit": "7389f22eb06e8d3f7724d15d9d172a9d9800cb7e",
-  "liveRollupLiveCommit": "7389f22eb06e8d3f7724d15d9d172a9d9800cb7e",
-  "liveRollupMatchesProduction": true,
+  "liveExactEvidenceCommit": "cdb69e56460010c1a779273ed993794fa0f9ef36",
+  "liveRollupLiveCommit": "c545b7eac4cd54d572f5266c582d274f96a5af7d",
+  "liveRollupMatchesProduction": false,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
     "liveRollup": "evaluation\\northstar-live-rollup-2026-07-20\\report.json",
@@ -27,6 +27,7 @@
     "workspaceInformationArchitecture": "evaluation\\workspace-information-architecture-2026-07-21\\report.json",
     "hermesOpenclawRuntime": "evaluation\\hermes-openclaw-runtime-current-gate-2026-07-20\\report.json",
     "launchReadiness": "evaluation\\launch-readiness-current-2026-07-22\\report.json",
+    "koshaNextExactCandidateAudit": "evaluation\\kosha-next-exact-candidate-audit-2026-07-22\\report.json",
     "rlsLlmWikiApprovalPreflight": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
     "approvalRunway": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
     "sifEmbeddingPreflight": "evaluation\\sif-embedding-gate\\approval-preflight-report.json"
@@ -178,6 +179,22 @@
     },
     "liveExecutionClaimed": false
   },
+  "koshaNextExactCandidateAudit": {
+    "verdict": "NEXT_EXACT_TRUST_CANDIDATES_IDENTIFIED_APPROVAL_FREE",
+    "exactPins": 3,
+    "acceptedSubsetItems": 234,
+    "generatedChunks": 7127,
+    "metadataVerifiedNotExact": 231,
+    "mutationPerformed": false,
+    "dbMutationPerformed": false,
+    "embeddingGenerationPerformed": false,
+    "forbiddenClaims": [
+      "All 1,040 KOSHA Guide rows are exact direct evidence.",
+      "The metadata-verified non-exact candidates are already exact production evidence.",
+      "KOSHA Guide embeddings or vector retrieval are production-active.",
+      "This audit performed DB mutation, embedding generation, upload, or provider dispatch."
+    ]
+  },
   "sifEmbeddingRuntime": {
     "approvalHeld": true,
     "dbMutationPerformed": false,
@@ -188,6 +205,7 @@
   "nextSafeWorkWithoutApproval": [
     "refresh source/live exact evidence when production marker advances to the evidence-only head",
     "refresh live rollup before claiming live-exact if production advances beyond the current live rollup head",
+    "use the KOSHA next exact candidate audit to select a bounded metadata-verified candidate set before any exact-trust promotion",
     "keep UI follow-up scoped to selected-editor/detail readability or reproduced desktop share perception issues",
     "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
     "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
