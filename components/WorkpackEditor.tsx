@@ -3392,6 +3392,19 @@ export function WorkpackEditor({
     window.setTimeout(() => focusSelectedDocumentTarget(key), 80);
   }
 
+  function handleSupportingDocumentsToggle(open: boolean) {
+    setSupportingDocumentsOpen(open);
+    const realignSelectedDocument = () => {
+      if (selected.key === "riskAssessmentDraft") {
+        alignRiskCockpitBelowToolbar();
+        return;
+      }
+      alignPaneTargetBelowToolbar(getDocumentLandingTarget(selected.key) || documentBodyRef.current);
+    };
+    window.requestAnimationFrame(realignSelectedDocument);
+    window.setTimeout(realignSelectedDocument, 80);
+  }
+
   function handleDocumentTabKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>, key: DocumentKey, keys: readonly DocumentKey[]) {
     let nextIndex: number | null = null;
     const index = keys.indexOf(key);
@@ -3829,7 +3842,7 @@ export function WorkpackEditor({
           className={styles.supportingDocumentGroup}
           data-testid="supporting-document-group"
           open={supportingDocumentsOpen || selectedSupportingDocument}
-          onToggle={(event) => setSupportingDocumentsOpen(event.currentTarget.open)}
+          onToggle={(event) => handleSupportingDocumentsToggle(event.currentTarget.open)}
         >
           <summary>
             <span>지원 문서 {supportingDocumentMeta.length.toLocaleString("ko-KR")}종</span>
