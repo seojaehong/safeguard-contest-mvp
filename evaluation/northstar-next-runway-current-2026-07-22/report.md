@@ -4,15 +4,15 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `1a8e5928ad142a36ce6c37b9b6d5e10ffb32c6b2`
+Source HEAD: `7d5bec94ff190b4940b5b9754460f04a28aa755b`
 
-Production `/api/build-info`: `1a8e5928ad142a36ce6c37b9b6d5e10ffb32c6b2`
+Production `/api/build-info`: `7d5bec94ff190b4940b5b9754460f04a28aa755b`
 
 Latest evidence commit live: `true`
 
 Live-exact evidence commit: `1a8e5928ad142a36ce6c37b9b6d5e10ffb32c6b2`
 
-Live rollup matches production: `true`
+Live rollup matches production: `false`
 
 Note: source HEAD and production marker match for this artifact.
 
@@ -52,9 +52,10 @@ These require explicit approval before runtime mutation or live claims:
 The user's Documents/Share concern remains framed as information architecture, not page-count alone:
 
 - Default Documents cockpit: first actionable cockpit is live-proven; do not phrase this as "Documents page height fixed" or "the whole Documents page is short".
-- Documents remaining debt: full 12-document long-form IA remains; raw textarea and supporting documents must stay contained by selected-only detail, accordions, local scroll, or drawers.
-- Selected editor/detail: first risk-row header, evidence/recheck CTA, and hazard field land before raw long-form textarea; raw textarea remains a secondary drilldown.
-- Share desktop: recipient cockpit is live-proven; desktop full-workbench composition remains a separate reproduced geometry/design follow-up if users still perceive a narrow mobile card.
+- Documents selected editor/detail: risk-assessment default and same-document reselect land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown.
+- Documents remaining debt: full 12-document long-form IA remains; supporting 9 and raw/full document bodies must not become serial page content when users expand all launchers.
+- Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.
+- Share desktop: current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
 
 Route/page split alone is not accepted as the UX fix. Page count only moves long documents/messages to another URL if the route body still unfolds the full artifact. The accepted structure is a three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes for long documents, messages, logs, and raw metadata.
@@ -70,7 +71,7 @@ Required first-task containment:
 1. refresh source/live exact evidence when production marker advances to the evidence-only head.
 2. refresh live rollup before claiming live-exact if production advances beyond the current live rollup head.
 3. use the KOSHA exact promotion packet as the bounded operator-review set and run scripts/kosha_exact_promotion_review_gate.mjs on the human review input before any exact-trust promotion.
-4. keep UI follow-up scoped to documents selected-editor/detail field-first readability, all-document drilldown depth, or reproduced desktop share full-workbench perception issues.
+4. keep UI follow-up scoped to all-12 Documents selected-only containment or reproduced exact-session desktop Share full-workbench perception issues.
 5. keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven.
 6. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
 7. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.

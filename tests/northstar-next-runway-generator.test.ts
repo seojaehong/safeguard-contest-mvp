@@ -270,13 +270,15 @@ describe("northstar next runway generator", () => {
       routeSplitAloneAcceptedAsFix: false,
       acceptedStructure: "three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes",
       documentsDefaultCockpit: "first actionable cockpit is live-proven; do not phrase this as documents page height fixed or the whole Documents page shortened",
-      documentsRemainingDebt: "full 12-document long-form IA remains; raw textarea and supporting documents must stay contained by selected-only detail, accordions, local scroll, or drawers",
-      shareDesktop: "recipient cockpit is live-proven; desktop full-workbench composition remains a separate reproduced geometry/design follow-up if users still perceive a narrow mobile card",
+      documentsRemainingDebt: "full 12-document long-form IA remains; supporting 9 and raw/full document bodies must not become serial page content when users expand all launchers",
+      shareDesktop: "current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes",
     });
+    expect(report.uiInterpretation.documentsContainment).toContain("selected-only bounded workbench");
+    expect(report.uiInterpretation.selectedEditorDetail).toContain("desktop 1440x900");
     expect(report.uiInterpretation.structuralAnswer).toContain("page count alone only moves long documents/messages to another URL");
     expect(report.uiInterpretation.stepShell.documents).toContain("full 12-document bodies remain selected-only drilldown");
     expect(report.nextSafeWorkWithoutApproval).toContain(
-      "keep UI follow-up scoped to documents selected-editor/detail field-first readability, all-document drilldown depth, or reproduced desktop share full-workbench perception issues",
+      "keep UI follow-up scoped to all-12 Documents selected-only containment or reproduced exact-session desktop Share full-workbench perception issues",
     );
   });
 
