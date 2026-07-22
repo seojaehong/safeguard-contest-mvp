@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T16:56:22.659Z",
-  "head": "cc5422bace80ad8e98f83e02bc73fdda9217ea3c",
+  "generatedAt": "2026-07-22T17:03:48.415Z",
+  "head": "c1f61ae0d87e1b4bfe19b95fb00b0fb686b8d3cc",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "cc5422bace80ad8e98f83e02bc73fdda9217ea3c",
+    "commitSha": "c1f61ae0d87e1b4bfe19b95fb00b0fb686b8d3cc",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-n8izbtgpg-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-8md3oa31e-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -55,7 +55,7 @@
       "id": "share_exact_saved_session_boundary",
       "state": "notice",
       "artifact": "evaluation\\share-exact-session-boundary-2026-07-22\\report.json",
-      "detail": "Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass. Safe missing-session read verdict is RED_SERVER_ERROR_SHAPED_MISSING_SESSION and invalid-id read verdict is PASS_INVALID_ID_FAIL_CLOSED; both remain separate from exact saved-session geometry. Public share storage readiness is RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION with share-session read error PGRST205."
+      "detail": "Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass. Safe missing-session read verdict is RED_SERVER_ERROR_SHAPED_MISSING_SESSION and invalid-id read verdict is PASS_INVALID_ID_FAIL_CLOSED; both remain separate from exact saved-session geometry. Public share storage readiness is RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION with share-session read error PGRST205. Storage approval packet is APPROVAL_REQUIRED_PUBLIC_SHARE_SESSION_STORAGE_MIGRATION_NO_MUTATION; operator approval required is true and share-session creation would insert storage is true."
     },
     {
       "id": "kosha_exact_trust_registry",
@@ -193,9 +193,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "a85d3faeea726e6f07a3bf3a80f3ee2bc8ad3894",
+      "sourceCommit": "cc5422bace80ad8e98f83e02bc73fdda9217ea3c",
       "sourceStatus": "ancestor",
-      "productionCommit": "a85d3faeea726e6f07a3bf3a80f3ee2bc8ad3894",
+      "productionCommit": "cc5422bace80ad8e98f83e02bc73fdda9217ea3c",
       "productionStatus": "ancestor_of_head"
     },
     {
