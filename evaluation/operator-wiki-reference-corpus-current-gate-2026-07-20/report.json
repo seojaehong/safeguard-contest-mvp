@@ -1,23 +1,39 @@
 {
+  "schemaVersion": "safeclaw-operator-wiki-reference-corpus-current-gate/v1",
   "verdict": "pass_publication_approval_gated",
   "date": "2026-07-20",
-  "checkedAt": "2026-07-20T04:21:59.100Z",
+  "checkedAt": "2026-07-22T22:57:02.726Z",
   "worktree": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\recipient-foreign-live-gate-20260720",
   "branch": "chore/recipient-foreign-live-gate-20260720",
-  "head": "b93d5b9815a718a271a72adec5b03c3bd6404898",
+  "head": "92f34353e4f0eabd51a2d56f0d3dc8ef545c40fe",
   "productionBuildInfo": {
-    "commitSha": "b93d5b9815a718a271a72adec5b03c3bd6404898",
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "92f34353e4f0eabd51a2d56f0d3dc8ef545c40fe",
     "branch": "master",
     "environment": "production",
-    "source": "vercel-system-env",
-    "deploymentUrl": "safeguard-contest-jhm7qrz7s-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-ba3ahp1xl-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
   },
   "focusedTests": {
-    "command": "npm.cmd test -- tests\\knowledge-governance.test.ts tests\\knowledge-governance-ui-contract.test.ts tests\\knowledge-page-layout.test.ts tests\\knowledge-mobile-ia-browser.test.ts tests\\knowledge-review-actions.test.ts tests\\knowledge-review-route.test.ts tests\\knowledge-review-prepare.test.ts tests\\knowledge-review-prepare-route.test.ts tests\\knowledge-review-inbox-browser.test.ts tests\\knowledge-promotion-gate.test.ts tests\\knowledge-runtime-smoke.test.ts tests\\ontology-knowledge-tool.test.ts tests\\ontology-graph-store.test.ts tests\\ontology-query.test.ts tests\\safety-reference-status-route.test.ts tests\\safety-reference-status-bundled-corpus.test.ts tests\\workpack-commercial-tenant-hardening.test.ts tests\\reporting-downloads.test.ts --maxWorkers=1 --fileParallelism=false",
+    "command": "npm.cmd test -- tests\\knowledge-governance.test.ts tests\\knowledge-governance-ui-contract.test.ts tests\\knowledge-page-layout.test.ts tests\\knowledge-mobile-ia-browser.test.ts tests\\knowledge-review-actions.test.ts tests\\knowledge-review-route.test.ts tests\\knowledge-review-prepare.test.ts tests\\knowledge-review-prepare-route.test.ts tests\\knowledge-review-inbox-browser.test.ts tests\\knowledge-promotion-gate.test.ts tests\\knowledge-runtime-smoke.test.ts tests\\ontology-knowledge-tool.test.ts tests\\ontology-graph-store.test.ts tests\\ontology-query.test.ts tests\\safety-reference-status-route.test.ts tests\\safety-reference-status-bundled-corpus.test.ts tests\\workpack-commercial-tenant-hardening.test.ts tests\\reporting-downloads.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000 --hookTimeout=180000",
     "testFilesPassed": 18,
-    "testsPassed": 208,
-    "durationSeconds": 116.66,
-    "status": "pass"
+    "testsPassed": 213,
+    "durationSeconds": 87.62,
+    "status": "pass",
+    "exitStatus": 0,
+    "signal": null,
+    "error": null,
+    "stdoutTail": [
+      "> vitest run tests\\knowledge-governance.test.ts tests\\knowledge-governance-ui-contract.test.ts tests\\knowledge-page-layout.test.ts tests\\knowledge-mobile-ia-browser.test.ts tests\\knowledge-review-actions.test.ts tests\\knowledge-review-route.test.ts tests\\knowledge-review-prepare.test.ts tests\\knowledge-review-prepare-route.test.ts tests\\knowledge-review-inbox-browser.test.ts tests\\knowledge-promotion-gate.test.ts tests\\knowledge-runtime-smoke.test.ts tests\\ontology-knowledge-tool.test.ts tests\\ontology-graph-store.test.ts tests\\ontology-query.test.ts tests\\safety-reference-status-route.test.ts tests\\safety-reference-status-bundled-corpus.test.ts tests\\workpack-commercial-tenant-hardening.test.ts tests\\reporting-downloads.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000 --hookTimeout=180000",
+      " RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/recipient-foreign-live-gate-20260720",
+      " Test Files  18 passed (18)",
+      "      Tests  213 passed (213)",
+      "   Start at  07:57:04",
+      "   Duration  87.62s (transform 1.81s, setup 0ms, import 2.91s, tests 80.63s, environment 1ms)"
+    ],
+    "stderrTail": []
   },
   "liveApiEvidence": {
     "safetyReferenceStatus": {
@@ -46,6 +62,22 @@
       "firstStageLabel": "원본 이벤트",
       "firstAuthorityLaneId": "sif",
       "firstAuthorityLaneLabel": "SIF 재해·통제 근거",
+      "authorityLaneIds": [
+        "sif",
+        "kosha",
+        "law",
+        "organization_history",
+        "site_history",
+        "hermes_llm"
+      ],
+      "legalDutyRoles": [
+        "non_statutory_reference",
+        "non_statutory_reference",
+        "statutory_source",
+        "operational_evidence_only",
+        "operational_evidence_only",
+        "no_authority"
+      ],
       "mutationPolicy": {
         "llmDbMutationAllowed": false,
         "llmPublishAllowed": false,
@@ -63,13 +95,12 @@
       "uncitedDroppedNodes": 0,
       "uncitedDroppedEdges": 0,
       "nodeCountsByKind": {
-        "Control": 64,
-        "Task": 10,
-        "Hazard": 31,
-        "Duty": 2,
         "Article": 56,
-        "Accident": 0,
-        "Document": 3
+        "Control": 64,
+        "Document": 3,
+        "Duty": 2,
+        "Hazard": 31,
+        "Task": 10
       },
       "advisoryNoticePresent": true
     }

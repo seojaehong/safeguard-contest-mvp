@@ -1,6 +1,6 @@
 # Operator Wiki / Reference Corpus Current Gate
 
-Checked at: 2026-07-20T04:21:59.100Z
+Checked at: 2026-07-22T22:57:02.726Z
 
 ## Verdict
 
@@ -19,8 +19,8 @@ This does not claim that organization-specific wiki publication, live tenant A/B
 
 - Worktree: `C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\recipient-foreign-live-gate-20260720`
 - Branch: `chore/recipient-foreign-live-gate-20260720`
-- Source HEAD: `b93d5b9815a718a271a72adec5b03c3bd6404898`
-- Production build-info at live checks: `b93d5b9815a718a271a72adec5b03c3bd6404898`
+- Source HEAD: `92f34353e4f0eabd51a2d56f0d3dc8ef545c40fe`
+- Production build-info at live checks: `92f34353e4f0eabd51a2d56f0d3dc8ef545c40fe`
 - Production branch: `master`
 
 ## Focused Tests
@@ -28,14 +28,15 @@ This does not claim that organization-specific wiki publication, live tenant A/B
 Command:
 
 ```powershell
-npm.cmd test -- tests\knowledge-governance.test.ts tests\knowledge-governance-ui-contract.test.ts tests\knowledge-page-layout.test.ts tests\knowledge-mobile-ia-browser.test.ts tests\knowledge-review-actions.test.ts tests\knowledge-review-route.test.ts tests\knowledge-review-prepare.test.ts tests\knowledge-review-prepare-route.test.ts tests\knowledge-review-inbox-browser.test.ts tests\knowledge-promotion-gate.test.ts tests\knowledge-runtime-smoke.test.ts tests\ontology-knowledge-tool.test.ts tests\ontology-graph-store.test.ts tests\ontology-query.test.ts tests\safety-reference-status-route.test.ts tests\safety-reference-status-bundled-corpus.test.ts tests\workpack-commercial-tenant-hardening.test.ts tests\reporting-downloads.test.ts --maxWorkers=1 --fileParallelism=false
+npm.cmd test -- tests\knowledge-governance.test.ts tests\knowledge-governance-ui-contract.test.ts tests\knowledge-page-layout.test.ts tests\knowledge-mobile-ia-browser.test.ts tests\knowledge-review-actions.test.ts tests\knowledge-review-route.test.ts tests\knowledge-review-prepare.test.ts tests\knowledge-review-prepare-route.test.ts tests\knowledge-review-inbox-browser.test.ts tests\knowledge-promotion-gate.test.ts tests\knowledge-runtime-smoke.test.ts tests\ontology-knowledge-tool.test.ts tests\ontology-graph-store.test.ts tests\ontology-query.test.ts tests\safety-reference-status-route.test.ts tests\safety-reference-status-bundled-corpus.test.ts tests\workpack-commercial-tenant-hardening.test.ts tests\reporting-downloads.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000 --hookTimeout=180000
 ```
 
 Result:
 
 - Test files: 18 passed / 18
-- Tests: 208 passed / 208
-- Duration: 116.66s
+- Tests: 213 passed
+- Duration: 87.62s
+- Status: `pass`
 
 ## Live API Evidence
 
@@ -48,6 +49,7 @@ Result:
 - `technicalSupportRegulations`: 237
 - `technicalGuidelines`: 803
 - `searchReady`: `true`
+- Local corpus items/chunks: 234 / 7127
 - Exact trusted KOSHA pins: D-C-13, D-C-7, B-E-10
 
 ### Knowledge Governance
@@ -57,6 +59,8 @@ Result:
 - Authority lanes: 6
 - First stage: `knowledge_event` / `원본 이벤트`
 - First authority lane: `sif` / `SIF 재해·통제 근거`
+- Authority lane IDs: sif, kosha, law, organization_history, site_history, hermes_llm
+- Legal duty roles: non_statutory_reference, non_statutory_reference, statutory_source, operational_evidence_only, operational_evidence_only, no_authority
 - `llmDbMutationAllowed`: `false`
 - `llmPublishAllowed`: `false`
 - `humanReviewRequired`: `true`
@@ -76,7 +80,6 @@ Result:
 
 Node counts by kind:
 
-- Accident: 0
 - Article: 56
 - Control: 64
 - Document: 3
