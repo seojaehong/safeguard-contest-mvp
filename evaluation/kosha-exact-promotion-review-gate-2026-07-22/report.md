@@ -1,0 +1,96 @@
+# KOSHA Exact Promotion Review Gate
+
+Generated at: 2026-07-22T01:35:00.000Z
+
+Verdict: `REVIEW_CHECKLIST_INCOMPLETE_BLOCKED`
+
+Source HEAD: `26e82285ea55a04bcc04ff15dcde9e2e22a4c921`
+
+Packet: `evaluation\kosha-exact-promotion-packet-2026-07-22\report.json`
+
+Review input: `evaluation\kosha-exact-promotion-review-gate-2026-07-22\review-template.json`
+
+Checklist complete: `false`
+
+Exact promotion performed: `false`
+
+Exact trust promotion still requires separate approval: `true`
+
+## Candidate Review Counts
+
+- Packet candidates: 8
+- Review rows: 8
+- Passed rows: 0
+
+## Failures
+
+- unconfirmed-required-check:D-C-10:official URL opens the expected KOSHA file for the selected stable key
+- unconfirmed-required-check:D-C-10:official file id, version, and publication date match metadata and body-corpus provenance
+- unconfirmed-required-check:D-C-10:body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence
+- unconfirmed-required-check:D-C-10:operator confirms lifecycle/current status and excludes stale superseded versions
+- unconfirmed-required-check:D-C-10:human confirmation is recorded before any exact-kosha registry JSON is created
+- missing-human-confirmation:D-C-10
+- missing-reviewer:D-C-10
+- missing-reviewed-at:D-C-10
+- unconfirmed-required-check:D-C-11:official URL opens the expected KOSHA file for the selected stable key
+- unconfirmed-required-check:D-C-11:official file id, version, and publication date match metadata and body-corpus provenance
+- unconfirmed-required-check:D-C-11:body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence
+- unconfirmed-required-check:D-C-11:operator confirms lifecycle/current status and excludes stale superseded versions
+- unconfirmed-required-check:D-C-11:human confirmation is recorded before any exact-kosha registry JSON is created
+- missing-human-confirmation:D-C-11
+- missing-reviewer:D-C-11
+- missing-reviewed-at:D-C-11
+- unconfirmed-required-check:A-G-1:official URL opens the expected KOSHA file for the selected stable key
+- unconfirmed-required-check:A-G-1:official file id, version, and publication date match metadata and body-corpus provenance
+- unconfirmed-required-check:A-G-1:body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence
+- unconfirmed-required-check:A-G-1:operator confirms lifecycle/current status and excludes stale superseded versions
+- unconfirmed-required-check:A-G-1:human confirmation is recorded before any exact-kosha registry JSON is created
+- missing-human-confirmation:A-G-1
+- missing-reviewer:A-G-1
+- missing-reviewed-at:A-G-1
+- unconfirmed-required-check:A-G-15:official URL opens the expected KOSHA file for the selected stable key
+- unconfirmed-required-check:A-G-15:official file id, version, and publication date match metadata and body-corpus provenance
+- unconfirmed-required-check:A-G-15:body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence
+- unconfirmed-required-check:A-G-15:operator confirms lifecycle/current status and excludes stale superseded versions
+- unconfirmed-required-check:A-G-15:human confirmation is recorded before any exact-kosha registry JSON is created
+- missing-human-confirmation:A-G-15
+- missing-reviewer:A-G-15
+- missing-reviewed-at:A-G-15
+- unconfirmed-required-check:B-E-11:official URL opens the expected KOSHA file for the selected stable key
+- unconfirmed-required-check:B-E-11:official file id, version, and publication date match metadata and body-corpus provenance
+- unconfirmed-required-check:B-E-11:body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence
+- unconfirmed-required-check:B-E-11:operator confirms lifecycle/current status and excludes stale superseded versions
+- unconfirmed-required-check:B-E-11:human confirmation is recorded before any exact-kosha registry JSON is created
+- missing-human-confirmation:B-E-11
+- missing-reviewer:B-E-11
+- missing-reviewed-at:B-E-11
+- unconfirmed-required-check:B-E-9:official URL opens the expected KOSHA file for the selected stable key
+- unconfirmed-required-check:B-E-9:official file id, version, and publication date match metadata and body-corpus provenance
+- unconfirmed-required-check:B-E-9:body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence
+- unconfirmed-required-check:B-E-9:operator confirms lifecycle/current status and excludes stale superseded versions
+- unconfirmed-required-check:B-E-9:human confirmation is recorded before any exact-kosha registry JSON is created
+- missing-human-confirmation:B-E-9
+- missing-reviewer:B-E-9
+- missing-reviewed-at:B-E-9
+- unconfirmed-required-check:D-C-4:official URL opens the expected KOSHA file for the selected stable key
+- unconfirmed-required-check:D-C-4:official file id, version, and publication date match metadata and body-corpus provenance
+- unconfirmed-required-check:D-C-4:body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence
+- unconfirmed-required-check:D-C-4:operator confirms lifecycle/current status and excludes stale superseded versions
+- unconfirmed-required-check:D-C-4:human confirmation is recorded before any exact-kosha registry JSON is created
+- missing-human-confirmation:D-C-4
+- missing-reviewer:D-C-4
+- missing-reviewed-at:D-C-4
+- unconfirmed-required-check:E-G-4:official URL opens the expected KOSHA file for the selected stable key
+- unconfirmed-required-check:E-G-4:official file id, version, and publication date match metadata and body-corpus provenance
+- unconfirmed-required-check:E-G-4:body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence
+- unconfirmed-required-check:E-G-4:operator confirms lifecycle/current status and excludes stale superseded versions
+- unconfirmed-required-check:E-G-4:human confirmation is recorded before any exact-kosha registry JSON is created
+- missing-human-confirmation:E-G-4
+- missing-reviewer:E-G-4
+- missing-reviewed-at:E-G-4
+
+## Forbidden Claims
+
+- This review gate mutated the exact-kosha registry.
+- KOSHA vector retrieval or embeddings are production-active because of this review gate.
+- Operator checklist completion alone approves exact-trust promotion.
