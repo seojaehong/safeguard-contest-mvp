@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `8cbd9f1ecc7965eca0775f2750309cf7f6c9b072`
+Source HEAD: `ef3988ecffbd1149bedad4e4d3c756fb2c0cb9d9`
 
-Production `/api/build-info`: `f8b12b4ba67334aa1cb46e2f4c48fe596808b093`
+Production `/api/build-info`: `ef3988ecffbd1149bedad4e4d3c756fb2c0cb9d9`
 
-Latest evidence commit live: `false`
+Latest evidence commit live: `true`
 
-Source head live pending: `true`
+Source head live pending: `false`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/kosha-exact-promotion-review-contract-audit-2026-07-23/report.json`, `evaluation/kosha-exact-promotion-review-contract-audit-2026-07-23/report.md`, `evaluation/kosha-exact-promotion-review-gate-2026-07-22/report.json`, `evaluation/kosha-exact-promotion-review-gate-2026-07-22/report.md`, `evaluation/kosha-exact-promotion-review-gate-2026-07-22/review-template.json`, `evaluation/launch-readiness-current-2026-07-22/report.json`, `evaluation/launch-readiness-current-2026-07-22/report.md`, `evaluation/northstar-live-rollup-2026-07-20/report.json`, `evaluation/northstar-live-rollup-2026-07-20/report.md`, `evaluation/northstar-next-runway-current-2026-07-22/report.json`, `evaluation/northstar-next-runway-current-2026-07-22/report.md`, `evaluation/northstar-open-gates-current/report.json`, `evaluation/northstar-open-gates-current/report.md`
+Source pending changed paths: `none`
 
-Current head is evidence-only pending: `true`
+Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `8cbd9f1ecc7965eca0775f2750309cf7f6c9b072`
+Live rollup source head: `ef3988ecffbd1149bedad4e4d3c756fb2c0cb9d9`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `8cbd9f1ecc7965eca0775f2750309cf7f6c9b072` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `f8b12b4ba67334aa1cb46e2f4c48fe596808b093`, and the live rollup remains exact for that deployed marker.
+Note: source HEAD and production marker match for this artifact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
