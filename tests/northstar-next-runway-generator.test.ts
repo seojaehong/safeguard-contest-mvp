@@ -41,6 +41,21 @@ type NextRunwayReport = {
     exactPromotionPerformed: boolean;
     forbiddenClaims: string[];
   };
+  uiInterpretation: {
+    routeSplitAloneAcceptedAsFix: boolean;
+    acceptedStructure: string;
+    structuralAnswer: string;
+    documentsDefaultCockpit: string;
+    documentsRemainingDebt: string;
+    selectedEditorDetail: string;
+    shareDesktop: string;
+    shareMobile: string;
+    stepShell: {
+      input: string;
+      documents: string;
+      share: string;
+    };
+  };
   nextSafeWorkWithoutApproval: string[];
 };
 
@@ -250,6 +265,18 @@ describe("northstar next runway generator", () => {
     );
     expect(report.nextSafeWorkWithoutApproval).toContain(
       "use the KOSHA exact promotion packet as the bounded operator-review set and run scripts/kosha_exact_promotion_review_gate.mjs on the human review input before any exact-trust promotion",
+    );
+    expect(report.uiInterpretation).toMatchObject({
+      routeSplitAloneAcceptedAsFix: false,
+      acceptedStructure: "three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes",
+      documentsDefaultCockpit: "first actionable cockpit is live-proven; do not phrase this as documents page height fixed or the whole Documents page shortened",
+      documentsRemainingDebt: "full 12-document long-form IA remains; raw textarea and supporting documents must stay contained by selected-only detail, accordions, local scroll, or drawers",
+      shareDesktop: "recipient cockpit is live-proven; desktop full-workbench composition remains a separate reproduced geometry/design follow-up if users still perceive a narrow mobile card",
+    });
+    expect(report.uiInterpretation.structuralAnswer).toContain("page count alone only moves long documents/messages to another URL");
+    expect(report.uiInterpretation.stepShell.documents).toContain("full 12-document bodies remain selected-only drilldown");
+    expect(report.nextSafeWorkWithoutApproval).toContain(
+      "keep UI follow-up scoped to documents selected-editor/detail field-first readability, all-document drilldown depth, or reproduced desktop share full-workbench perception issues",
     );
   });
 

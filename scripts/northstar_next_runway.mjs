@@ -306,10 +306,17 @@ export function buildNorthstarNextRunway(options) {
     launchReadiness: launchReadinessSummary(launch),
     uiInterpretation: {
       routeSplitAloneAcceptedAsFix: false,
-      acceptedStructure: "step split plus first-viewport cockpit plus bounded drilldown/detail panes",
-      documentsDefaultCockpit: "closed for raw route height in current live geometry",
-      selectedEditorDetail: "first risk-row header and hazard field land in the first viewport; raw long-form textarea remains secondary drilldown",
-      shareDesktop: "raw geometry is two-column; perceived full-workbench composition remains a follow-up only if reproduced",
+      acceptedStructure: "three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes",
+      structuralAnswer: "page count alone only moves long documents/messages to another URL; each step must expose one primary task first and keep long bodies in local panes, accordions, drawers, or detail routes",
+      stepShell: {
+        input: "work description, mode/preset, evidence attach, and generation CTA first",
+        documents: "core 3 status, selected document header, evidence/recheck CTA, and next action first; full 12-document bodies remain selected-only drilldown",
+        share: "recipient/channel/language summary, preview/result status, and primary confirmation first; long messages, logs, provenance, and raw metadata remain collapsed/detail content",
+      },
+      documentsDefaultCockpit: "first actionable cockpit is live-proven; do not phrase this as documents page height fixed or the whole Documents page shortened",
+      documentsRemainingDebt: "full 12-document long-form IA remains; raw textarea and supporting documents must stay contained by selected-only detail, accordions, local scroll, or drawers",
+      selectedEditorDetail: "first risk-row header, evidence/recheck CTA, and hazard field land before raw long-form textarea; raw textarea remains secondary drilldown",
+      shareDesktop: "recipient cockpit is live-proven; desktop full-workbench composition remains a separate reproduced geometry/design follow-up if users still perceive a narrow mobile card",
       shareMobile: "current compact cockpit remains first-viewport bounded in current evidence",
       hermesOpenclaw: "adapter and fail-closed auth boundary current-proven; live unauthenticated broker smoke returns AUTH_REQUIRED before engine execution",
     },
@@ -321,7 +328,7 @@ export function buildNorthstarNextRunway(options) {
       "refresh source/live exact evidence when production marker advances to the evidence-only head",
       "refresh live rollup before claiming live-exact if production advances beyond the current live rollup head",
       "use the KOSHA exact promotion packet as the bounded operator-review set and run scripts/kosha_exact_promotion_review_gate.mjs on the human review input before any exact-trust promotion",
-      "keep UI follow-up scoped to selected-editor/detail readability or reproduced desktop share perception issues",
+      "keep UI follow-up scoped to documents selected-editor/detail field-first readability, all-document drilldown depth, or reproduced desktop share full-workbench perception issues",
       "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
       "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
       "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held",
@@ -394,12 +401,19 @@ ${approvalRows.join("\n")}
 
 The user's Documents/Share concern remains framed as information architecture, not page-count alone:
 
-- Default Documents cockpit: raw route height is closed in current live geometry.
-- Selected editor/detail: first risk-row header and hazard field land in the first viewport; raw long-form textarea remains a secondary drilldown.
-- Share desktop: raw geometry is two-column, not a literal mobile stack; any remaining discomfort should be treated as a reproduced visual full-workbench composition follow-up.
+- Default Documents cockpit: first actionable cockpit is live-proven; do not phrase this as "Documents page height fixed" or "the whole Documents page is short".
+- Documents remaining debt: full 12-document long-form IA remains; raw textarea and supporting documents must stay contained by selected-only detail, accordions, local scroll, or drawers.
+- Selected editor/detail: first risk-row header, evidence/recheck CTA, and hazard field land before raw long-form textarea; raw textarea remains a secondary drilldown.
+- Share desktop: recipient cockpit is live-proven; desktop full-workbench composition remains a separate reproduced geometry/design follow-up if users still perceive a narrow mobile card.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
 
-Route/page split alone is not accepted as the UX fix. The accepted structure is step split plus first-viewport cockpit plus bounded drilldown/detail panes for long documents, messages, logs, and raw metadata.
+Route/page split alone is not accepted as the UX fix. Page count only moves long documents/messages to another URL if the route body still unfolds the full artifact. The accepted structure is a three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes for long documents, messages, logs, and raw metadata.
+
+Required first-task containment:
+
+- Input: work description, mode/preset, evidence attach, and generation CTA first.
+- Documents: core 3 status, selected document header, evidence/recheck CTA, and next action first; full 12-document bodies remain selected-only drilldown.
+- Share: recipient/channel/language summary, preview/result status, and primary confirmation first; long messages, logs, provenance, and raw metadata remain collapsed/detail content.
 
 ## Next Safe Work Without Approval
 
