@@ -4,17 +4,17 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `af31eea941856d70a5414a6cee753bebc1d9dfa6`
+Source HEAD: `f92d94f6ef6701d4e181dca9ff21654e1439f8db`
 
-Production `/api/build-info`: `262c77c71426487d471fc862a0c34858131fa895`
+Production `/api/build-info`: `87c1fdbcb07f2024d4890c44ba26cb59fd401644`
 
 Latest evidence commit live: `false`
 
-Live-exact evidence commit: `af31eea941856d70a5414a6cee753bebc1d9dfa6`
+Live-exact evidence commit: `f92d94f6ef6701d4e181dca9ff21654e1439f8db`
 
 Live rollup matches production: `false`
 
-Note: current HEAD `af31eea941856d70a5414a6cee753bebc1d9dfa6` is ahead of production `262c77c71426487d471fc862a0c34858131fa895`, and the live rollup head `af31eea941856d70a5414a6cee753bebc1d9dfa6` does not yet match production. Refresh live rollup before claiming live-exact.
+Note: current HEAD `f92d94f6ef6701d4e181dca9ff21654e1439f8db` is ahead of production `87c1fdbcb07f2024d4890c44ba26cb59fd401644`, and the live rollup head `f92d94f6ef6701d4e181dca9ff21654e1439f8db` does not yet match production. Refresh live rollup before claiming live-exact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -73,6 +73,9 @@ Route/page split alone is not accepted as the UX fix. The accepted structure is 
 - Candidate pool: 234 current native technical-support items.
 - Metadata-verified non-exact candidates: 231.
 - Operator-review packet candidates: 8 (D-C-10, D-C-11, A-G-1, A-G-15, B-E-11, B-E-9, D-C-4, E-G-4).
+- Operator-review packet ready: true.
+- Review checklist complete: false.
+- Exact-trust promotion blocked until checklist complete: true.
 - Mutation performed by candidate audit: false.
 - Exact promotion performed by packet: false.
 - Forbidden claim remains: metadata-verified candidates are not exact production evidence until separately promoted through immutable acquisition/review.
