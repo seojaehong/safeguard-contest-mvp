@@ -9,6 +9,7 @@ type NextRunwayReport = {
   sourceHead: string;
   productionCommit: string;
   latestEvidenceCommitLive: boolean;
+  sourceHeadLivePending: boolean;
   currentHeadIsEvidenceOnlyPending: boolean;
   liveExactEvidenceCommit: string;
   liveRollupMatchesProduction: boolean;
@@ -127,6 +128,7 @@ type NextRunwayReport = {
     providerDispatchLiveClaimed: boolean;
     externalProviderCalled: boolean;
     dbMutationPerformed: boolean;
+    detailDepthDebt: boolean;
     documentRedRows: Array<{
       route: string;
       theme: string;
@@ -139,6 +141,14 @@ type NextRunwayReport = {
       firstActionBottom: number | null;
       firstHazardBottom: number | null;
       firstHazardVisibleHeight: number | null;
+    }>;
+    documentDetailDepthDebts: Array<{
+      route: string;
+      theme: string;
+      state: string;
+      viewport: string;
+      workpackShellScrollRatio: number | null;
+      detailDepthVerdict: string;
     }>;
     shareScopedRows: Array<{
       route: string;
@@ -167,6 +177,7 @@ type NextRunwayModule = {
     buildInfo: unknown;
     generatedAt?: string;
   }) => NextRunwayReport;
+  renderNorthstarNextRunwayMarkdown: (report: NextRunwayReport) => string;
 };
 
 async function loadNextRunwayModule(): Promise<NextRunwayModule> {

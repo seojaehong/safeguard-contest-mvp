@@ -1,14 +1,14 @@
 # Workspace Bounded Workbench Current Gate
 
-Checked at: 2026-07-22T09:08:01.405Z
+Checked at: 2026-07-22T09:40:29.848Z
 
-Base URL: `https://www.safeclaw.kr`
+Base URL: `http://127.0.0.1:3072`
 
-Source HEAD: `6863bd81877c094c384a4e8d457e1be119a34ef9`
+Source HEAD: `ff0af0105d1a7bf3651ce6af459183b5cdf7d99c`
 
-Production `/api/build-info`: `6863bd81877c094c384a4e8d457e1be119a34ef9`
+Production `/api/build-info`: `unknown`
 
-Verdict: `PARTIAL_LIVE_PRODUCTION_SCOPED_DETAIL_DEPTH_DEBT_WITH_EXACT_SESSION_GAP`
+Verdict: `PARTIAL_CURRENT_SOURCE_LOCAL_PRODUCTION_SCOPED_DETAIL_DEPTH_DEBT_WITH_EXACT_SESSION_GAP`
 
 Route split alone accepted as fix: `false`
 
@@ -28,33 +28,27 @@ Allowed claim: measured routes can pass the scoped bounded-workbench contract wh
 
 | Route | Theme | State | Viewport | Overall | First task | Body height | Long containment | Detail depth | Body ratio | Shell scroll ratio | First action bottom | Hazard bottom | Selected editors | Full bodies visible | Supporting open | Support moves editor | Sticky overlap | OverflowX |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| /documents?theme=day | day | default | 1440x723 | PASS | PASS | PASS | PASS | PARTIAL | 1.07 | 4.28 | 452 | 709 | 1 | 1 | false | false | 0 | false |
-| /documents?theme=day | day | selected-riskAssessmentDraft | 1440x723 | PASS | PASS | PASS | PASS | PARTIAL | 1.07 | 4.28 | 452 | 709 | 1 | 1 | false | false | 0 | false |
-| /documents?theme=day | day | supporting-9-expanded-index | 1440x723 | PASS | PASS | PASS | PASS | PARTIAL | 1.07 | 4.28 | 405 | 662 | 1 | 1 | true | false | 0 | false |
-| /documents?theme=day | day | default | 390x723 | PASS | PASS | PASS | PASS | PARTIAL | 1 | 4.25 | 528 | 654 | 1 | 1 | false | false | 0 | false |
-| /documents?theme=day | day | selected-riskAssessmentDraft | 390x723 | PASS | PASS | PASS | PASS | PARTIAL | 1 | 4.25 | 528 | 654 | 1 | 1 | false | false | 0 | false |
-| /documents?theme=day | day | supporting-9-expanded-index | 390x723 | PASS | PASS | PASS | PASS | PARTIAL | 1 | 4.25 | 528 | 654 | 1 | 1 | false | false | 0 | false |
-| /documents?theme=night | night | default | 1440x723 | PASS | PASS | PASS | PASS | PARTIAL | 1.07 | 4.28 | 452 | 709 | 1 | 1 | false | false | 0 | false |
-| /documents?theme=night | night | selected-riskAssessmentDraft | 1440x723 | PASS | PASS | PASS | PASS | PARTIAL | 1.07 | 4.28 | 452 | 709 | 1 | 1 | false | false | 0 | false |
-| /documents?theme=night | night | supporting-9-expanded-index | 1440x723 | PASS | PASS | PASS | PASS | PARTIAL | 1.07 | 4.28 | 409 | 666 | 1 | 1 | true | false | 0 | false |
-| /documents?theme=night | night | default | 390x723 | PASS | PASS | PASS | PASS | PARTIAL | 1 | 4.25 | 528 | 654 | 1 | 1 | false | false | 0 | false |
-| /documents?theme=night | night | selected-riskAssessmentDraft | 390x723 | PASS | PASS | PASS | PASS | PARTIAL | 1 | 4.25 | 528 | 654 | 1 | 1 | false | false | 0 | false |
-| /documents?theme=night | night | supporting-9-expanded-index | 390x723 | PASS | PASS | PASS | PASS | PARTIAL | 1 | 4.25 | 528 | 654 | 1 | 1 | false | false | 0 | false |
+| /documents?theme=day | day | default | 1440x723 | PASS | PASS | PASS | PASS | PASS | 1.07 | 2.74 | 452 | 709 | 1 | 1 | false | false | 0 | false |
+| /documents?theme=day | day | selected-riskAssessmentDraft | 1440x723 | PASS | PASS | PASS | PASS | PASS | 1.07 | 2.74 | 452 | 709 | 1 | 1 | false | false | 0 | false |
+| /documents?theme=day | day | supporting-9-expanded-index | 1440x723 | PASS | PASS | PASS | PASS | PASS | 1.07 | 2.74 | 452 | 709 | 1 | 1 | true | false | 0 | false |
+| /documents?theme=day | day | default | 390x723 | PASS | PASS | PASS | PASS | PARTIAL | 1 | 3.33 | 528 | 654 | 1 | 1 | false | false | 0 | false |
+| /documents?theme=day | day | selected-riskAssessmentDraft | 390x723 | PASS | PASS | PASS | PASS | PARTIAL | 1 | 3.33 | 528 | 654 | 1 | 1 | false | false | 0 | false |
+| /documents?theme=day | day | supporting-9-expanded-index | 390x723 | PASS | PASS | PASS | PASS | PARTIAL | 1 | 3.33 | 528 | 654 | 1 | 1 | false | false | 0 | false |
+| /documents?theme=night | night | default | 1440x723 | PASS | PASS | PASS | PASS | PASS | 1.07 | 2.74 | 452 | 709 | 1 | 1 | false | false | 0 | false |
+| /documents?theme=night | night | selected-riskAssessmentDraft | 1440x723 | PASS | PASS | PASS | PASS | PASS | 1.07 | 2.74 | 452 | 709 | 1 | 1 | false | false | 0 | false |
+| /documents?theme=night | night | supporting-9-expanded-index | 1440x723 | PASS | PASS | PASS | PASS | PASS | 1.07 | 2.74 | 452 | 709 | 1 | 1 | true | false | 0 | false |
+| /documents?theme=night | night | default | 390x723 | PASS | PASS | PASS | PASS | PARTIAL | 1 | 3.33 | 528 | 654 | 1 | 1 | false | false | 0 | false |
+| /documents?theme=night | night | selected-riskAssessmentDraft | 390x723 | PASS | PASS | PASS | PASS | PARTIAL | 1 | 3.33 | 528 | 654 | 1 | 1 | false | false | 0 | false |
+| /documents?theme=night | night | supporting-9-expanded-index | 390x723 | PASS | PASS | PASS | PASS | PARTIAL | 1 | 3.33 | 528 | 654 | 1 | 1 | false | false | 0 | false |
 
 ## Documents Detail-Depth Debt
 
-- /documents?theme=day day default 1440x723: shell scroll ratio 4.28 => PARTIAL
-- /documents?theme=day day selected-riskAssessmentDraft 1440x723: shell scroll ratio 4.28 => PARTIAL
-- /documents?theme=day day supporting-9-expanded-index 1440x723: shell scroll ratio 4.28 => PARTIAL
-- /documents?theme=day day default 390x723: shell scroll ratio 4.25 => PARTIAL
-- /documents?theme=day day selected-riskAssessmentDraft 390x723: shell scroll ratio 4.25 => PARTIAL
-- /documents?theme=day day supporting-9-expanded-index 390x723: shell scroll ratio 4.25 => PARTIAL
-- /documents?theme=night night default 1440x723: shell scroll ratio 4.28 => PARTIAL
-- /documents?theme=night night selected-riskAssessmentDraft 1440x723: shell scroll ratio 4.28 => PARTIAL
-- /documents?theme=night night supporting-9-expanded-index 1440x723: shell scroll ratio 4.28 => PARTIAL
-- /documents?theme=night night default 390x723: shell scroll ratio 4.25 => PARTIAL
-- /documents?theme=night night selected-riskAssessmentDraft 390x723: shell scroll ratio 4.25 => PARTIAL
-- /documents?theme=night night supporting-9-expanded-index 390x723: shell scroll ratio 4.25 => PARTIAL
+- /documents?theme=day day default 390x723: shell scroll ratio 3.33 => PARTIAL
+- /documents?theme=day day selected-riskAssessmentDraft 390x723: shell scroll ratio 3.33 => PARTIAL
+- /documents?theme=day day supporting-9-expanded-index 390x723: shell scroll ratio 3.33 => PARTIAL
+- /documents?theme=night night default 390x723: shell scroll ratio 3.33 => PARTIAL
+- /documents?theme=night night selected-riskAssessmentDraft 390x723: shell scroll ratio 3.33 => PARTIAL
+- /documents?theme=night night supporting-9-expanded-index 390x723: shell scroll ratio 3.33 => PARTIAL
 
 ## Share / Result
 

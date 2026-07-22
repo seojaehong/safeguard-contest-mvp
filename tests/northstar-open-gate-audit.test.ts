@@ -1174,6 +1174,7 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "final_99_gate")?.state).toBe("notice");
     expect(audit.gates.find((gate) => gate.id === "live_harness_quality")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.state).toBe("proven");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("Scoped first-task cockpit proof only, not full Documents/Share IA completion");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("12 document first-task cockpits");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("staged Share rail");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("desktop-short 1440x723");
