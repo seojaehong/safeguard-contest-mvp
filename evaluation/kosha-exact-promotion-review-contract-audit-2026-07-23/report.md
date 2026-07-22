@@ -1,12 +1,12 @@
 # KOSHA Exact Promotion Review Contract Audit
 
-Generated at: `2026-07-22T22:42:19.788Z`
+Generated at: `2026-07-22T23:36:52.348Z`
 
 Verdict: `PASS_CURRENT_SOURCE_REVIEW_GATE_CONTRACT_NO_MUTATION`
 
-Source HEAD: `5fc951fe61f53e6ae76d2bb825e00c2baff1620a`
+Source HEAD: `05b382051811f48335f79e8d749213a3dbe39480`
 
-Production `/api/build-info`: `5fc951fe61f53e6ae76d2bb825e00c2baff1620a`
+Production `/api/build-info`: `05b382051811f48335f79e8d749213a3dbe39480`
 
 ## Boundary
 
