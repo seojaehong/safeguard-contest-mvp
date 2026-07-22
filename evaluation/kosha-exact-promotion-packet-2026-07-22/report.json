@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-packet/v1",
-  "generatedAt": "2026-07-22T20:34:21.052Z",
-  "sourceHead": "6c5a666f18eacf3ba85e67b1d472e86b2f390e04",
+  "generatedAt": "2026-07-22T21:41:13.374Z",
+  "sourceHead": "9f0d0b8cb96fe3a2a38ec75bab0a70a6eec5fce7",
   "liveBuildInfoAtPacket": {
-    "commitSha": "6c5a666f18eacf3ba85e67b1d472e86b2f390e04",
+    "commitSha": "9f0d0b8cb96fe3a2a38ec75bab0a70a6eec5fce7",
     "branch": "master",
     "environment": "production"
   },
