@@ -1,10 +1,10 @@
 # Workspace Bounded Workbench Current Gate
 
-Checked at: 2026-07-22T09:40:29.848Z
+Checked at: 2026-07-22T09:51:12.148Z
 
 Base URL: `http://127.0.0.1:3072`
 
-Source HEAD: `ff0af0105d1a7bf3651ce6af459183b5cdf7d99c`
+Source HEAD: `d70cb09fc5ee29b7c7dbc9cb078c2dbe7fe2e5af`
 
 Production `/api/build-info`: `unknown`
 
@@ -20,7 +20,7 @@ DB mutation performed: `false`
 
 ## Interpretation
 
-This gate measures the bounded-workbench contract directly. Route/page split is orientation only; PASS requires first-task visibility and bounded simultaneous scope, while exact saved Share sessions remain separate evidence. Detail-depth debt tracks whether long work moved into a local shell that can still feel long even when body-level page height is bounded.
+This gate measures the bounded-workbench contract directly. Route/page split is orientation only; PASS requires first-task visibility, a default exposure budget, and bounded simultaneous scope, while exact saved Share sessions remain separate evidence. Detail-depth debt tracks whether long work moved into a local shell that can still feel long even when body-level page height is bounded.
 
 Allowed claim: measured routes can pass the scoped bounded-workbench contract when their rows pass. Forbidden claim: page split alone fixes the long-page issue, or fixture/generated Share proof closes an exact saved user session.
 
@@ -71,4 +71,4 @@ Allowed claim: measured routes can pass the scoped bounded-workbench contract wh
 
 ## Product Structure Decision
 
-사용자 질문에 대한 답은 유지한다: 페이지 수를 늘리는 것만으로는 해결이 아니다. 실제 해결은 route split plus first-viewport cockpit plus selected-only bounded workbench plus drilldown/local scroll이다. Documents는 core-3/supporting-9 index와 선택 문서 1개 작업대여야 하고, Share/Result는 desktop에서 2-3 region workbench여야 한다.
+사용자 질문에 대한 답은 유지한다: 페이지 수를 늘리는 것만으로는 해결이 아니다. 실제 해결은 bounded IA/density wave다: route split plus first-viewport cockpit plus default exposure budget plus selected-only bounded workbench plus drilldown/local scroll. Documents는 core-3/supporting-9 index와 선택 문서 1개 작업대여야 하고, 기본 화면에서 12종 전체나 선택 문서의 raw/section 전문을 inline mount하지 않는다. Documents local workbench depth target은 shell scroll ratio <= 3이다. Share/Result는 desktop에서 recipient/channel/language/action과 selected preview가 첫 viewport의 2-3 region workbench에 있어야 하며, exact saved/generated /share/[sessionId] evidence 없이는 fixture PASS로 사용자 complaint를 닫지 않는다.

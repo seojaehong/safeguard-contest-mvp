@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `ff0af0105d1a7bf3651ce6af459183b5cdf7d99c`
+Source HEAD: `d70cb09fc5ee29b7c7dbc9cb078c2dbe7fe2e5af`
 
-Production `/api/build-info`: `e2a37b801b79640f3fff6f7352fc5414cf49cf47`
+Production `/api/build-info`: `0b9527b2dca370815c7e69ff5b2c09f2c9051e16`
 
 Latest evidence commit live: `false`
 
@@ -14,11 +14,11 @@ Source head live pending: `true`
 
 Bounded workbench current live pending: `true`
 
-Live rollup source head: `ff0af0105d1a7bf3651ce6af459183b5cdf7d99c`
+Live rollup source head: `d70cb09fc5ee29b7c7dbc9cb078c2dbe7fe2e5af`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `ff0af0105d1a7bf3651ce6af459183b5cdf7d99c` is an evidence-only refresh pushed after the live-exact artifact set. Production is still `e2a37b801b79640f3fff6f7352fc5414cf49cf47`, and the live rollup remains exact for that deployed marker.
+Note: current HEAD `d70cb09fc5ee29b7c7dbc9cb078c2dbe7fe2e5af` is an evidence-only refresh pushed after the live-exact artifact set. Production is still `0b9527b2dca370815c7e69ff5b2c09f2c9051e16`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -79,12 +79,13 @@ Required first-task containment:
 1. refresh source/live exact evidence when production marker advances to the current source head.
 2. refresh live rollup before claiming live-exact if production advances beyond the current live rollup head.
 3. use the KOSHA exact promotion packet as the bounded operator-review set and run scripts/kosha_exact_promotion_review_gate.mjs on the human review input before any exact-trust promotion.
-4. keep UI follow-up scoped to full 12-document authoring polish or reproduced exact-session desktop Share full-workbench perception issues.
-5. promote the bounded-workbench current-source proof to live only after production /api/build-info reaches the product/evidence head and the live probe is rerun.
-6. reproduce an exact saved/generated Share session before using fixture or generated /workspace share evidence to close the user's exact Share complaint.
-7. keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven.
-8. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
-9. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
+4. keep the next UI product wave framed as bounded IA/density: default exposure budget, selected-only Documents workbench, Documents shell ratio <= 3, and exact-session desktop Share workbench proof.
+5. keep UI follow-up scoped to mobile Documents detail-depth debt or reproduced exact-session desktop Share full-workbench perception issues.
+6. promote the bounded-workbench current-source proof to live only after production /api/build-info reaches the product/evidence head and the live probe is rerun.
+7. reproduce an exact saved/generated Share session before using fixture or generated /workspace share evidence to close the user's exact Share complaint.
+8. keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven.
+9. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
+10. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
 
 ## KOSHA Candidate Boundary
 

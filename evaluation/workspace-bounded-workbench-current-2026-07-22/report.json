@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-workspace-bounded-workbench-current/v1",
-  "checkedAt": "2026-07-22T09:40:29.848Z",
+  "checkedAt": "2026-07-22T09:51:12.148Z",
   "baseUrl": "http://127.0.0.1:3072",
   "measurementMode": "current-source-local-production",
-  "sourceHead": "ff0af0105d1a7bf3651ce6af459183b5cdf7d99c",
+  "sourceHead": "d70cb09fc5ee29b7c7dbc9cb078c2dbe7fe2e5af",
   "productionCommit": "",
   "productionBuild": {
     "ok": true,
@@ -20,11 +20,12 @@
   "externalProviderCalled": false,
   "dbMutationPerformed": false,
   "verdict": "PARTIAL_CURRENT_SOURCE_LOCAL_PRODUCTION_SCOPED_DETAIL_DEPTH_DEBT_WITH_EXACT_SESSION_GAP",
-  "interpretation": "This gate measures the bounded-workbench contract directly. Route/page split is orientation only; PASS requires first-task visibility and bounded simultaneous scope, while exact saved Share sessions remain separate evidence. Detail-depth debt tracks whether long work moved into a local shell that can still feel long even when body-level page height is bounded.",
+  "interpretation": "This gate measures the bounded-workbench contract directly. Route/page split is orientation only; PASS requires first-task visibility, a default exposure budget, and bounded simultaneous scope, while exact saved Share sessions remain separate evidence. Detail-depth debt tracks whether long work moved into a local shell that can still feel long even when body-level page height is bounded.",
   "acceptance": {
     "documents": {
       "desktopTargetScreens": 1.5,
       "desktopHardRedScreens": 2,
+      "localWorkbenchDepthTargetScreens": 3,
       "mobileViewport": "390x723",
       "primaryTask": "selected risk-assessment action row and first hazard field inside viewport; only one selected editor/body visible; supporting 9 must not move the selected editor out of view"
     },

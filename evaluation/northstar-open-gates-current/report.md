@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-22T09:43:41.808Z
-Source SHA: `ff0af0105d1a7bf3651ce6af459183b5cdf7d99c`
+Generated at: 2026-07-22T09:51:14.656Z
+Source SHA: `d70cb09fc5ee29b7c7dbc9cb078c2dbe7fe2e5af`
 Overall: `open`
 
 ## Gate Matrix
@@ -43,6 +43,7 @@ Overall: `open`
 - final_99_gate: Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment.
 - ui_documents_share_cockpit: Keep the production live geometry recorded for first-action Documents/Share cockpits and 12-document cockpit slices; do not phrase it as documents page height fixed or expand it into a full 12-document field-first authoring claim.
 - ui_documents_share_cockpit: Keep raw textarea and deeper row/all-document authoring as secondary drilldown follow-up; selected-editor evidence/recheck CTA is live-proven before raw textarea, but the full 12-document edit surface itself is not claimed short.
+- ui_documents_share_cockpit: Keep the next Documents product wave framed as bounded IA/density with a default exposure budget and local workbench shell ratio target <= 3; do not use route split alone as the fix.
 - ui_documents_share_cockpit: Keep route/page split framed as orientation only; the UX contract is three-step app shell plus first-viewport cockpit plus bounded drilldown/detail containment.
 - ui_documents_share_cockpit: Keep /share generated-result and desktop full-workbench perception refinements as separate gates with desktop width-ratio/grid metrics when user-visible sessions reproduce the complaint; /share/[sessionId] recipient cockpit geometry is live-proven for the invited-session fixture, not a broad desktop workbench polish claim.
 - dispatch_standalone_cockpit: Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved.
