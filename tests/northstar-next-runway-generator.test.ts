@@ -50,12 +50,28 @@ type NextRunwayReport = {
     selectedEditorDetail: string;
     documentsContainment: string;
     shareDesktop: string;
+    shareGeneratedResult: string;
     shareMobile: string;
     stepShell: {
       input: string;
       documents: string;
       share: string;
     };
+  };
+  shareGeneratedSessionPerception: {
+    verdict: string;
+    sourceHead: string;
+    providerDispatchLiveClaimed: boolean;
+    externalProviderCalled: boolean;
+    exactSavedUserSessionReproduced: boolean;
+    fixtureBoundary: string;
+    resultLanding: Array<{
+      label: string;
+      verdict: string;
+      viewport: string;
+      resultSummaryTop: number | null;
+      resultSummaryBottom: number | null;
+    }>;
   };
   nextSafeWorkWithoutApproval: string[];
 };
@@ -198,6 +214,34 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     corpus: { corpusCount: 6032 },
     failedCheckIds: [],
   });
+  writeJson(root, "evaluation/share-generated-session-perception-2026-07-22/report.json", {
+    verdict: "PASS_CURRENT_SOURCE_GENERATED_RESULT_FIXTURE",
+    sourceHead: "TO_FILL",
+    providerDispatchLiveClaimed: false,
+    externalProviderCalled: false,
+    exactSavedUserSessionReproduced: false,
+    fixtureBoundary: "Browser route mocks block workpack/session/dispatch/log APIs.",
+    results: [
+      {
+        label: "generated-result-desktop-short",
+        verdict: "PASS",
+        viewport: { width: 1440, height: 723 },
+        resultSummary: { top: 303, bottom: 347 },
+      },
+      {
+        label: "generated-result-desktop",
+        verdict: "PASS",
+        viewport: { width: 1440, height: 900 },
+        resultSummary: { top: 775, bottom: 819 },
+      },
+      {
+        label: "generated-result-mobile",
+        verdict: "PASS",
+        viewport: { width: 390, height: 844 },
+        resultSummary: { top: 784, bottom: 828 },
+      },
+    ],
+  });
 
   const firstHead = commitAll(root, "seed");
   const liveRollupPath = path.join(root, "evaluation/northstar-live-rollup-2026-07-20/report.json");
@@ -273,6 +317,20 @@ describe("northstar next runway generator", () => {
       documentsDefaultCockpit: "first actionable cockpit is live-proven; do not phrase this as documents page height fixed or the whole Documents page shortened",
       documentsRemainingDebt: "full 12-document long-form IA remains; supporting 9 and raw/full document bodies must not become serial page content when users expand all launchers",
       shareDesktop: "current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes",
+      shareGeneratedResult: "current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported",
+    });
+    expect(report.shareGeneratedSessionPerception).toMatchObject({
+      verdict: "PASS_CURRENT_SOURCE_GENERATED_RESULT_FIXTURE",
+      providerDispatchLiveClaimed: false,
+      externalProviderCalled: false,
+      exactSavedUserSessionReproduced: false,
+    });
+    expect(report.shareGeneratedSessionPerception.resultLanding).toContainEqual({
+      label: "generated-result-desktop-short",
+      verdict: "PASS",
+      viewport: "1440x723",
+      resultSummaryTop: 303,
+      resultSummaryBottom: 347,
     });
     expect(report.uiInterpretation.documentsContainment).toContain("selected-only bounded workbench");
     expect(report.uiInterpretation.selectedEditorDetail).toContain("desktop 1440x900");

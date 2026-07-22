@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T05:02:58.153Z",
+  "generatedAt": "2026-07-22T05:23:49.710Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "7d5bec94ff190b4940b5b9754460f04a28aa755b",
-  "productionCommit": "7d5bec94ff190b4940b5b9754460f04a28aa755b",
+  "sourceHead": "addab53c868443564dee2e6ded2f67b6923c1051",
+  "productionCommit": "addab53c868443564dee2e6ded2f67b6923c1051",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "7d5bec94ff190b4940b5b9754460f04a28aa755b",
+    "commitSha": "addab53c868443564dee2e6ded2f67b6923c1051",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-n6bps4is0-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-8jrs0kk17-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -31,7 +31,8 @@
     "koshaExactPromotionPacket": "evaluation\\kosha-exact-promotion-packet-2026-07-22\\report.json",
     "rlsLlmWikiApprovalPreflight": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
     "approvalRunway": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
-    "sifEmbeddingPreflight": "evaluation\\sif-embedding-gate\\approval-preflight-report.json"
+    "sifEmbeddingPreflight": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
+    "shareGeneratedSessionPerception": "evaluation\\share-generated-session-perception-2026-07-22\\report.json"
   },
   "provenCurrentState": [
     "live_harness_quality",
@@ -167,6 +168,7 @@
     "selectedEditorDetail": "risk-assessment default and same-document reselect now land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown",
     "documentsContainment": "route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation",
     "shareDesktop": "current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes",
+    "shareGeneratedResult": "current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported",
     "shareMobile": "current compact cockpit remains first-viewport bounded in current evidence",
     "hermesOpenclaw": "adapter and fail-closed auth boundary current-proven; live unauthenticated broker smoke returns AUTH_REQUIRED before engine execution"
   },
@@ -239,6 +241,37 @@
     "embeddingGenerated": false,
     "uploaded": false,
     "failedCheckIds": []
+  },
+  "shareGeneratedSessionPerception": {
+    "verdict": "PASS_CURRENT_SOURCE_GENERATED_RESULT_FIXTURE",
+    "sourceHead": "00538f0db4fefd4267292f68d51c0bacc24f17d7",
+    "providerDispatchLiveClaimed": false,
+    "externalProviderCalled": false,
+    "exactSavedUserSessionReproduced": false,
+    "fixtureBoundary": "Browser route mocks block workpack/session/dispatch/log APIs; this is generated current-workpack provider-result UI proof, not live external dispatch proof.",
+    "resultLanding": [
+      {
+        "label": "generated-result-desktop-short",
+        "verdict": "PASS",
+        "viewport": "1440x723",
+        "resultSummaryTop": 303,
+        "resultSummaryBottom": 347
+      },
+      {
+        "label": "generated-result-desktop",
+        "verdict": "PASS",
+        "viewport": "1440x900",
+        "resultSummaryTop": 775,
+        "resultSummaryBottom": 819
+      },
+      {
+        "label": "generated-result-mobile",
+        "verdict": "PASS",
+        "viewport": "390x844",
+        "resultSummaryTop": 784,
+        "resultSummaryBottom": 828
+      }
+    ]
   },
   "nextSafeWorkWithoutApproval": [
     "refresh source/live exact evidence when production marker advances to the evidence-only head",

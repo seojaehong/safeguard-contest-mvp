@@ -25,6 +25,7 @@ const ARTIFACTS = Object.freeze({
   rlsLlmWikiApprovalPreflight: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
   approvalRunway: path.join("evaluation", "northstar-approval-runway-2026-07-21", "report.json"),
   sifEmbeddingPreflight: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
+  shareGeneratedSessionPerception: path.join("evaluation", "share-generated-session-perception-2026-07-22", "report.json"),
 });
 
 /**
@@ -188,6 +189,33 @@ function sifSummary(sif) {
 }
 
 /**
+ * @param {unknown} shareGenerated
+ */
+function shareGeneratedSessionSummary(shareGenerated) {
+  if (!isRecord(shareGenerated)) return {};
+  const results = Array.isArray(shareGenerated.results) ? shareGenerated.results.filter(isRecord) : [];
+  return {
+    verdict: asString(shareGenerated.verdict),
+    sourceHead: asString(shareGenerated.sourceHead),
+    providerDispatchLiveClaimed: asBoolean(shareGenerated.providerDispatchLiveClaimed),
+    externalProviderCalled: asBoolean(shareGenerated.externalProviderCalled),
+    exactSavedUserSessionReproduced: asBoolean(shareGenerated.exactSavedUserSessionReproduced),
+    fixtureBoundary: asString(shareGenerated.fixtureBoundary),
+    resultLanding: results.map((item) => {
+      const viewport = isRecord(item.viewport) ? item.viewport : {};
+      const resultSummary = isRecord(item.resultSummary) ? item.resultSummary : {};
+      return {
+        label: asString(item.label),
+        verdict: asString(item.verdict),
+        viewport: `${typeof viewport.width === "number" ? viewport.width : "unknown"}x${typeof viewport.height === "number" ? viewport.height : "unknown"}`,
+        resultSummaryTop: typeof resultSummary.top === "number" ? resultSummary.top : null,
+        resultSummaryBottom: typeof resultSummary.bottom === "number" ? resultSummary.bottom : null,
+      };
+    }),
+  };
+}
+
+/**
  * @param {unknown} koshaCandidateAudit
  */
 function koshaCandidateAuditSummary(koshaCandidateAudit) {
@@ -259,6 +287,7 @@ export function buildNorthstarNextRunway(options) {
   const koshaCandidateAudit = readJson(options.rootDir, ARTIFACTS.koshaNextExactCandidateAudit);
   const koshaPromotionPacket = readJson(options.rootDir, ARTIFACTS.koshaExactPromotionPacket);
   const sif = readJson(options.rootDir, ARTIFACTS.sifEmbeddingPreflight);
+  const shareGenerated = readJson(options.rootDir, ARTIFACTS.shareGeneratedSessionPerception);
   const liveExactEvidenceCommit = isRecord(liveRollup) ? asString(liveRollup.head) : "";
   const liveRollupLiveCommit = isRecord(liveRollup) && isRecord(liveRollup.liveBuildInfo)
     ? asString(liveRollup.liveBuildInfo.commitSha)
@@ -318,6 +347,7 @@ export function buildNorthstarNextRunway(options) {
       selectedEditorDetail: "risk-assessment default and same-document reselect now land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown",
       documentsContainment: "route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation",
       shareDesktop: "current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes",
+      shareGeneratedResult: "current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported",
       shareMobile: "current compact cockpit remains first-viewport bounded in current evidence",
       hermesOpenclaw: "adapter and fail-closed auth boundary current-proven; live unauthenticated broker smoke returns AUTH_REQUIRED before engine execution",
     },
@@ -325,6 +355,7 @@ export function buildNorthstarNextRunway(options) {
     koshaNextExactCandidateAudit: koshaCandidateAuditSummary(koshaCandidateAudit),
     koshaExactPromotionPacket: koshaPromotionPacketSummary(koshaPromotionPacket),
     sifEmbeddingRuntime: sifSummary(sif),
+    shareGeneratedSessionPerception: shareGeneratedSessionSummary(shareGenerated),
     nextSafeWorkWithoutApproval: [
       "refresh source/live exact evidence when production marker advances to the evidence-only head",
       "refresh live rollup before claiming live-exact if production advances beyond the current live rollup head",
@@ -407,6 +438,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Documents remaining debt: full 12-document long-form IA remains; supporting 9 and raw/full document bodies must not become serial page content when users expand all launchers.
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.
 - Share desktop: current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
+- Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
 
 Route/page split alone is not accepted as the UX fix. Page count only moves long documents/messages to another URL if the route body still unfolds the full artifact. The accepted structure is a three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes for long documents, messages, logs, and raw metadata.

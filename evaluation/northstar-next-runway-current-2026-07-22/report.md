@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `7d5bec94ff190b4940b5b9754460f04a28aa755b`
+Source HEAD: `addab53c868443564dee2e6ded2f67b6923c1051`
 
-Production `/api/build-info`: `7d5bec94ff190b4940b5b9754460f04a28aa755b`
+Production `/api/build-info`: `addab53c868443564dee2e6ded2f67b6923c1051`
 
 Latest evidence commit live: `true`
 
@@ -56,6 +56,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Documents remaining debt: full 12-document long-form IA remains; supporting 9 and raw/full document bodies must not become serial page content when users expand all launchers.
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.
 - Share desktop: current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
+- Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
 
 Route/page split alone is not accepted as the UX fix. Page count only moves long documents/messages to another URL if the route body still unfolds the full artifact. The accepted structure is a three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes for long documents, messages, logs, and raw metadata.
