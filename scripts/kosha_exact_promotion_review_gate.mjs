@@ -124,6 +124,41 @@ function requiredReviewChecks(review) {
 }
 
 /**
+ * @param {string[]} failures
+ */
+function summarizeFailures(failures) {
+  const summary = {
+    candidateReviewCountMismatch: 0,
+    missingReviewRows: 0,
+    unexpectedReviewRows: 0,
+    metadataMismatches: 0,
+    missingRequiredChecks: 0,
+    unconfirmedRequiredChecks: 0,
+    unexpectedRequiredChecks: 0,
+    requiredCheckCountMismatches: 0,
+    missingHumanConfirmations: 0,
+    missingReviewers: 0,
+    missingReviewedAt: 0,
+    other: 0,
+  };
+  for (const failure of failures) {
+    if (failure.startsWith("candidate-review-count-mismatch:")) summary.candidateReviewCountMismatch += 1;
+    else if (failure.startsWith("missing-review:")) summary.missingReviewRows += 1;
+    else if (failure.startsWith("unexpected-review:")) summary.unexpectedReviewRows += 1;
+    else if (failure.startsWith("review-metadata-mismatch:")) summary.metadataMismatches += 1;
+    else if (failure.startsWith("missing-required-check:")) summary.missingRequiredChecks += 1;
+    else if (failure.startsWith("unconfirmed-required-check:")) summary.unconfirmedRequiredChecks += 1;
+    else if (failure.startsWith("unexpected-required-check:")) summary.unexpectedRequiredChecks += 1;
+    else if (failure.startsWith("required-check-count-mismatch:")) summary.requiredCheckCountMismatches += 1;
+    else if (failure.startsWith("missing-human-confirmation:")) summary.missingHumanConfirmations += 1;
+    else if (failure.startsWith("missing-reviewer:")) summary.missingReviewers += 1;
+    else if (failure.startsWith("missing-reviewed-at:")) summary.missingReviewedAt += 1;
+    else summary.other += 1;
+  }
+  return summary;
+}
+
+/**
  * @param {{
  *   rootDir: string;
  *   packetPath?: string;
@@ -206,6 +241,11 @@ export function buildKoshaExactPromotionReviewGate(options) {
   }
 
   const reviewChecklistComplete = failures.length === 0 && passed.length === candidates.length;
+  const failureSummary = summarizeFailures(failures);
+  const packetCandidateSetMatchesReview =
+    failureSummary.candidateReviewCountMismatch === 0 &&
+    failureSummary.missingReviewRows === 0 &&
+    failureSummary.unexpectedReviewRows === 0;
   return {
     schemaVersion: SCHEMA_VERSION,
     generatedAt: options.generatedAt || new Date().toISOString(),
@@ -225,6 +265,11 @@ export function buildKoshaExactPromotionReviewGate(options) {
     exactTrustPromotionBlockedUntilChecklistComplete: !reviewChecklistComplete,
     exactTrustPromotionStillRequiresSeparateApproval: true,
     approvalRequiredBeforeExactPromotion: true,
+    exactTrustPromotionApproved: false,
+    exactRegistryWriteArtifactCreated: false,
+    exactRegistryWriteArtifactPath: null,
+    packetCandidateSetMatchesReview,
+    failureSummary,
     passedStableKeys: passed,
     failures,
     forbiddenClaims: [
@@ -312,11 +357,20 @@ Exact promotion performed: \`${report.exactPromotionPerformed}\`
 
 Exact trust promotion still requires separate approval: \`${report.exactTrustPromotionStillRequiresSeparateApproval}\`
 
+Exact trust promotion approved: \`${report.exactTrustPromotionApproved}\`
+
+Exact registry write artifact created: \`${report.exactRegistryWriteArtifactCreated}\`
+
 ## Candidate Review Counts
 
 - Packet candidates: ${report.candidateCount}
 - Review rows: ${report.reviewedCandidateCount}
 - Passed rows: ${report.passedCandidateCount}
+- Packet/review set matches: ${report.packetCandidateSetMatchesReview}
+
+## Failure Summary
+
+${Object.entries(report.failureSummary).map(([key, value]) => `- ${key}: ${value}`).join("\n")}
 
 ## Failures
 

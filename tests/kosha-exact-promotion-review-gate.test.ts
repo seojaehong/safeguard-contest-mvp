@@ -36,6 +36,24 @@ type ReviewGateReport = {
   exactTrustPromotionBlockedUntilChecklistComplete: boolean;
   exactTrustPromotionStillRequiresSeparateApproval: boolean;
   approvalRequiredBeforeExactPromotion: boolean;
+  exactTrustPromotionApproved: boolean;
+  exactRegistryWriteArtifactCreated: boolean;
+  exactRegistryWriteArtifactPath: string | null;
+  packetCandidateSetMatchesReview: boolean;
+  failureSummary: {
+    candidateReviewCountMismatch: number;
+    missingReviewRows: number;
+    unexpectedReviewRows: number;
+    metadataMismatches: number;
+    missingRequiredChecks: number;
+    unconfirmedRequiredChecks: number;
+    unexpectedRequiredChecks: number;
+    requiredCheckCountMismatches: number;
+    missingHumanConfirmations: number;
+    missingReviewers: number;
+    missingReviewedAt: number;
+    other: number;
+  };
   failures: string[];
   forbiddenClaims: string[];
 };
@@ -155,6 +173,11 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.exactTrustPromotionBlockedUntilChecklistComplete).toBe(false);
     expect(report.exactTrustPromotionStillRequiresSeparateApproval).toBe(true);
     expect(report.approvalRequiredBeforeExactPromotion).toBe(true);
+    expect(report.exactTrustPromotionApproved).toBe(false);
+    expect(report.exactRegistryWriteArtifactCreated).toBe(false);
+    expect(report.exactRegistryWriteArtifactPath).toBeNull();
+    expect(report.packetCandidateSetMatchesReview).toBe(true);
+    expect(Object.values(report.failureSummary).every((value) => value === 0)).toBe(true);
     expect(report.candidateCount).toBe(2);
     expect(report.reviewedCandidateCount).toBe(2);
     expect(report.passedCandidateCount).toBe(2);
@@ -182,6 +205,7 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.reviewChecklistComplete).toBe(false);
     expect(report.exactTrustPromotionBlockedUntilChecklistComplete).toBe(true);
     expect(report.failures.some((failure) => failure.startsWith("unconfirmed-required-check:D-C-10"))).toBe(true);
+    expect(report.failureSummary.unconfirmedRequiredChecks).toBe(1);
     expect(report.exactPromotionPerformed).toBe(false);
   });
 
@@ -199,6 +223,7 @@ describe("KOSHA exact promotion review gate", () => {
 
     expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
     expect(report.failures).toContain("review-metadata-mismatch:A-G-15:bodySha256");
+    expect(report.failureSummary.metadataMismatches).toBe(1);
     expect(report.exactPromotionPerformed).toBe(false);
   });
 
@@ -226,6 +251,9 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.reviewChecklistComplete).toBe(false);
     expect(report.failures).toContain("candidate-review-count-mismatch:3:2");
     expect(report.failures).toContain("unexpected-review:EXTRA-1");
+    expect(report.packetCandidateSetMatchesReview).toBe(false);
+    expect(report.failureSummary.candidateReviewCountMismatch).toBe(1);
+    expect(report.failureSummary.unexpectedReviewRows).toBe(1);
     expect(report.exactPromotionPerformed).toBe(false);
   });
 
@@ -253,6 +281,9 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.reviewChecklistComplete).toBe(true);
     expect(report.exactPromotionPerformed).toBe(false);
     expect(report.approvalRequiredBeforeExactPromotion).toBe(true);
+    expect(report.exactTrustPromotionApproved).toBe(false);
+    expect(report.exactRegistryWriteArtifactCreated).toBe(false);
+    expect(report.exactRegistryWriteArtifactPath).toBeNull();
     expect(outputFiles).toEqual(["report.json", "report.md"]);
     expect(outputFiles.some((file) => /exact|registry|promotion/i.test(file) && file !== "report.json" && file !== "report.md")).toBe(false);
   });
@@ -273,6 +304,8 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.reviewChecklistComplete).toBe(false);
     expect(report.failures.some((failure) => failure.startsWith("missing-required-check:D-C-10:official URL opens"))).toBe(true);
     expect(report.failures).toContain("unexpected-required-check:D-C-10:shallow reviewer confirmation only");
+    expect(report.failureSummary.missingRequiredChecks).toBe(1);
+    expect(report.failureSummary.unexpectedRequiredChecks).toBe(1);
     expect(report.exactPromotionPerformed).toBe(false);
   });
 
@@ -318,7 +351,10 @@ describe("KOSHA exact promotion review gate", () => {
     expect(exitStatus).toBe(2);
     expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
     expect(report.failures).toContain("missing-human-confirmation:A-G-15");
+    expect(report.failureSummary.missingHumanConfirmations).toBe(1);
     expect(markdown).toContain("Exact trust promotion still requires separate approval: `true`");
+    expect(markdown).toContain("Exact registry write artifact created: `false`");
+    expect(markdown).toContain("- missingHumanConfirmations: 1");
     expect(markdown).toContain("missing-human-confirmation:A-G-15");
   });
 
@@ -392,5 +428,6 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
     expect(report.failures).toContain("missing-human-confirmation:D-C-10");
     expect(report.failures.some((failure) => failure.startsWith("unconfirmed-required-check:D-C-10"))).toBe(true);
+    expect(report.exactRegistryWriteArtifactCreated).toBe(false);
   });
 });
