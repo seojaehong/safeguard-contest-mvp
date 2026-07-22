@@ -1,11 +1,11 @@
 {
   "schemaVersion": "safeclaw-launch-readiness-current/v3",
-  "generatedAt": "2026-07-22T18:50:33.511Z",
+  "generatedAt": "2026-07-22T19:31:22.172Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHeadAtGeneration": "5825a71f5a274a95f6b31a02810826736689d206",
-  "productionCommit": "5825a71f5a274a95f6b31a02810826736689d206",
-  "runtimeSmokeCommit": "5825a71f5a274a95f6b31a02810826736689d206",
-  "evidenceHeadBeforeThisReport": "5825a71f5a274a95f6b31a02810826736689d206",
+  "sourceHeadAtGeneration": "da5dcc02497bbdbab1b072f26e37118260360de7",
+  "productionCommit": "da5dcc02497bbdbab1b072f26e37118260360de7",
+  "runtimeSmokeCommit": "da5dcc02497bbdbab1b072f26e37118260360de7",
+  "evidenceHeadBeforeThisReport": "da5dcc02497bbdbab1b072f26e37118260360de7",
   "currentHeadIsEvidenceOnlyPending": false,
   "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
   "safeLaunchDemoClaimAllowed": true,
@@ -17,7 +17,7 @@
   "apiAsk": {
     "status": 200,
     "ok": true,
-    "elapsedMs": 30299
+    "elapsedMs": 22994
   },
   "scenario": {
     "companyName": "도시가스공사",
@@ -197,9 +197,9 @@
     "verdict": "open"
   },
   "northstarLiveRollupOverall": {
-    "sourceHeadAtGeneration": "ac07e7e838bafd08aae4c3575023a6066872b8d9",
-    "liveCommitAtGeneration": "fb086f244721142ba4b0f1e45d53c2ac6985aaec",
-    "liveCommitMatchesSourceHead": false
+    "sourceHeadAtGeneration": "cf1558910eb0163cca82b31b81033fb878148628",
+    "liveCommitAtGeneration": "cf1558910eb0163cca82b31b81033fb878148628",
+    "liveCommitMatchesSourceHead": true
   },
   "approvalGatedBoundaries": [
     {
@@ -260,10 +260,10 @@
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "5825a71f5a274a95f6b31a02810826736689d206",
+    "commitSha": "da5dcc02497bbdbab1b072f26e37118260360de7",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-8tx7hsljg-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-a32qfjzak-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   }
 }
