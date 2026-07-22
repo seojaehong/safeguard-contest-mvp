@@ -1646,6 +1646,7 @@ function evaluateKoshaExactTrustGate(rootDir) {
         evidencePath,
         detail: `Current source confirms ${coveredPins.length} exact KOSHA pins (${coveredPins.join(", ")}), structured materialization, grounded generation, and live harness quality: ${totalTests} tests plus typecheck PASS; no DB/schema/Supabase/embedding writes.`,
         nextActions: [
+          "Use evaluation\\kosha-exact-promotion-packet-2026-07-22\\report.json as the bounded operator-review set before any exact-trust promotion.",
           "Promote additional metadata-verified KOSHA candidates to exact trust only through separate immutable acquisition/review.",
           "Keep broader corpus exact-publishing, SIF vector retrieval, and DB persistence approval-gated.",
         ],
@@ -1695,6 +1696,7 @@ function evaluateKoshaExactTrustGate(rootDir) {
         evidencePath,
         detail: `Current live runtime has ${exactCount} exact KOSHA pins (${exactKeys.join(", ")}), local corpus ${localCorpusCount} items/${localChunkCount} chunks, and focused KOSHA tests passed on the current HEAD.`,
         nextActions: [
+          "Use evaluation\\kosha-exact-promotion-packet-2026-07-22\\report.json as the bounded operator-review set before any exact-trust promotion.",
           "Promote additional metadata-verified KOSHA candidates to exact trust only through separate immutable acquisition/review.",
         ],
       });
@@ -1768,6 +1770,7 @@ function evaluateKoshaExactTrustGate(rootDir) {
       evidencePath,
       detail: `Current runtime has ${productionPins.length} exact KOSHA pins (${productionPins.join(", ")}), local corpus ${localCorpusCount} items/${localChunkCount} chunks, and zero DB/corpus mutations.`,
       nextActions: [
+        "Use evaluation\\kosha-exact-promotion-packet-2026-07-22\\report.json as the bounded operator-review set before any exact-trust promotion.",
         "Promote additional metadata-verified KOSHA candidates to exact trust only through separate immutable acquisition/review.",
       ],
     });
