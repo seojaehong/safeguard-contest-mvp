@@ -479,11 +479,12 @@ const report = {
   verdict: documentFailures.length === 0 && shareFailures.length === 0
     ? documentDetailDepthDebts.length === 0 ? passVerdict : partialDetailDepthVerdict
     : redVerdict,
-  interpretation: "This gate measures the bounded-workbench contract directly. Route/page split is orientation only; PASS requires first-task visibility and bounded simultaneous scope, while exact saved Share sessions remain separate evidence. Detail-depth debt tracks whether long work moved into a local shell that can still feel long even when body-level page height is bounded.",
+  interpretation: "This gate measures the bounded-workbench contract directly. Route/page split is orientation only; PASS requires first-task visibility, a default exposure budget, and bounded simultaneous scope, while exact saved Share sessions remain separate evidence. Detail-depth debt tracks whether long work moved into a local shell that can still feel long even when body-level page height is bounded.",
   acceptance: {
     documents: {
       desktopTargetScreens: 1.5,
       desktopHardRedScreens: 2,
+      localWorkbenchDepthTargetScreens: 3,
       mobileViewport: "390x723",
       primaryTask: "selected risk-assessment action row and first hazard field inside viewport; only one selected editor/body visible; supporting 9 must not move the selected editor out of view",
     },
@@ -572,7 +573,7 @@ ${shareRows.map(shareRow).join("\n")}
 
 ## Product Structure Decision
 
-사용자 질문에 대한 답은 유지한다: 페이지 수를 늘리는 것만으로는 해결이 아니다. 실제 해결은 route split plus first-viewport cockpit plus selected-only bounded workbench plus drilldown/local scroll이다. Documents는 core-3/supporting-9 index와 선택 문서 1개 작업대여야 하고, Share/Result는 desktop에서 2-3 region workbench여야 한다.
+사용자 질문에 대한 답은 유지한다: 페이지 수를 늘리는 것만으로는 해결이 아니다. 실제 해결은 bounded IA/density wave다: route split plus first-viewport cockpit plus default exposure budget plus selected-only bounded workbench plus drilldown/local scroll. Documents는 core-3/supporting-9 index와 선택 문서 1개 작업대여야 하고, 기본 화면에서 12종 전체나 선택 문서의 raw/section 전문을 inline mount하지 않는다. Documents local workbench depth target은 shell scroll ratio <= 3이다. Share/Result는 desktop에서 recipient/channel/language/action과 selected preview가 첫 viewport의 2-3 region workbench에 있어야 하며, exact saved/generated /share/[sessionId] evidence 없이는 fixture PASS로 사용자 complaint를 닫지 않는다.
 `, "utf8");
 
 console.log(JSON.stringify({

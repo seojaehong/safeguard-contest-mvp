@@ -569,8 +569,8 @@ describe("northstar next runway generator", () => {
       routeSplitAloneAcceptedAsFix: false,
       acceptedStructure: "three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes",
       documentsDefaultCockpit: "first actionable cockpit is live-proven; do not phrase this as documents page height fixed or the whole Documents page shortened",
-      documentsRemainingDebt: "full 12-document authoring polish remains; the all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content",
-      shareDesktop: "current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes",
+      documentsRemainingDebt: "full 12-document authoring polish remains; the all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content and the local workbench shell ratio target remains <= 3",
+      shareDesktop: "current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes, and desktop must not regress into a mobile card stack",
       shareGeneratedResult: "current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported",
     });
     expect(report.shareGeneratedSessionPerception).toMatchObject({
@@ -588,7 +588,8 @@ describe("northstar next runway generator", () => {
     });
     expect(report.uiInterpretation.documentsContainment).toContain("selected-only bounded workbench");
     expect(report.uiInterpretation.selectedEditorDetail).toContain("desktop 1440x900");
-    expect(report.uiInterpretation.structuralAnswer).toContain("page count alone only moves long documents/messages to another URL");
+    expect(report.uiInterpretation.structuralAnswer).toContain("bounded IA/density wave");
+    expect(report.uiInterpretation.structuralAnswer).toContain("default exposure budget");
     expect(report.uiInterpretation.stepShell.documents).toContain("full 12-document bodies remain selected-only drilldown");
     expect(report.documentsLongFormIA).toMatchObject({
       verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION",
@@ -661,7 +662,10 @@ describe("northstar next runway generator", () => {
       exactSavedUserSessionReproduced: false,
     });
     expect(report.nextSafeWorkWithoutApproval).toContain(
-      "keep UI follow-up scoped to full 12-document authoring polish or reproduced exact-session desktop Share full-workbench perception issues",
+      "keep the next UI product wave framed as bounded IA/density: default exposure budget, selected-only Documents workbench, Documents shell ratio <= 3, and exact-session desktop Share workbench proof",
+    );
+    expect(report.nextSafeWorkWithoutApproval).toContain(
+      "keep UI follow-up scoped to mobile Documents detail-depth debt or reproduced exact-session desktop Share full-workbench perception issues",
     );
     expect(report.nextSafeWorkWithoutApproval).toContain(
       "promote the bounded-workbench current-source proof to live only after production /api/build-info reaches the product/evidence head and the live probe is rerun",

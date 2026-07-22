@@ -1411,6 +1411,7 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
       nextActions: [
         "Keep the production live geometry recorded for first-action Documents/Share cockpits and 12-document cockpit slices; do not phrase it as documents page height fixed or expand it into a full 12-document field-first authoring claim.",
         "Keep raw textarea and deeper row/all-document authoring as secondary drilldown follow-up; selected-editor evidence/recheck CTA is live-proven before raw textarea, but the full 12-document edit surface itself is not claimed short.",
+        "Keep the next Documents product wave framed as bounded IA/density with a default exposure budget and local workbench shell ratio target <= 3; do not use route split alone as the fix.",
         "Keep route/page split framed as orientation only; the UX contract is three-step app shell plus first-viewport cockpit plus bounded drilldown/detail containment.",
         "Keep /share generated-result and desktop full-workbench perception refinements as separate gates with desktop width-ratio/grid metrics when user-visible sessions reproduce the complaint; /share/[sessionId] recipient cockpit geometry is live-proven for the invited-session fixture, not a broad desktop workbench polish claim.",
       ],
