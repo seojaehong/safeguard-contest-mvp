@@ -1,10 +1,10 @@
 # KOSHA Exact Promotion Review Gate
 
-Generated at: 2026-07-22T12:52:12.516Z
+Generated at: 2026-07-22T14:09:09.074Z
 
 Verdict: `REVIEW_CHECKLIST_INCOMPLETE_BLOCKED`
 
-Source HEAD: `9a04d7d8c6e3627bb50db5e3dbad26493d8db2c9`
+Source HEAD: `211992613fdfaeca9a281c035c170e1ca6753cf9`
 
 Packet: `evaluation\kosha-exact-promotion-packet-2026-07-22\report.json`
 
