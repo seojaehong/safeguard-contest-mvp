@@ -21958,6 +21958,23 @@ body:has(.safeclaw-landing) :is(
     padding-block: 6px;
   }
 
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .workpack-sidebar {
+    display: block;
+    padding: 4px 8px;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .workpack-sidebar :is(.eyebrow, .h2, p, .doc-tab-list, details) {
+    display: none;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .workpack-sidebar label:has(select[aria-label="편집 문서 선택"]) {
+    gap: 0;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .workpack-sidebar label:has(select[aria-label="편집 문서 선택"]) > span {
+    display: none;
+  }
+
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .workpack-shell {
     position: relative;
     max-height: min(332px, calc(100vh - 390px));
