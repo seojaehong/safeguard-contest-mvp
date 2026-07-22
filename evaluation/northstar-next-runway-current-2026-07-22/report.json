@@ -1,24 +1,24 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T00:23:45.590Z",
+  "generatedAt": "2026-07-22T00:39:04.546Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "cdb69e56460010c1a779273ed993794fa0f9ef36",
-  "productionCommit": "c545b7eac4cd54d572f5266c582d274f96a5af7d",
+  "sourceHead": "0c285801431565aba6bd2fb2fc9aba5d7b160f0f",
+  "productionCommit": "12aaf1b7ffb30a99489a7984dd939cea2f552774",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "c545b7eac4cd54d572f5266c582d274f96a5af7d",
+    "commitSha": "12aaf1b7ffb30a99489a7984dd939cea2f552774",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-bk6s1djgm-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-lyt54krki-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": false,
   "currentHeadIsEvidenceOnlyPending": false,
-  "liveExactEvidenceCommit": "cdb69e56460010c1a779273ed993794fa0f9ef36",
-  "liveRollupLiveCommit": "c545b7eac4cd54d572f5266c582d274f96a5af7d",
+  "liveExactEvidenceCommit": "0c285801431565aba6bd2fb2fc9aba5d7b160f0f",
+  "liveRollupLiveCommit": "12aaf1b7ffb30a99489a7984dd939cea2f552774",
   "liveRollupMatchesProduction": false,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -28,6 +28,7 @@
     "hermesOpenclawRuntime": "evaluation\\hermes-openclaw-runtime-current-gate-2026-07-20\\report.json",
     "launchReadiness": "evaluation\\launch-readiness-current-2026-07-22\\report.json",
     "koshaNextExactCandidateAudit": "evaluation\\kosha-next-exact-candidate-audit-2026-07-22\\report.json",
+    "koshaExactPromotionPacket": "evaluation\\kosha-exact-promotion-packet-2026-07-22\\report.json",
     "rlsLlmWikiApprovalPreflight": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
     "approvalRunway": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
     "sifEmbeddingPreflight": "evaluation\\sif-embedding-gate\\approval-preflight-report.json"
@@ -35,6 +36,7 @@
   "provenCurrentState": [
     "live_harness_quality",
     "kosha_exact_trust_registry",
+    "kosha_exact_promotion_packet_ready_for_review",
     "ui_documents_share_cockpit",
     "dispatch_standalone_cockpit",
     "share_result_fixture_cockpit",
@@ -195,6 +197,30 @@
       "This audit performed DB mutation, embedding generation, upload, or provider dispatch."
     ]
   },
+  "koshaExactPromotionPacket": {
+    "verdict": "EXACT_PROMOTION_PACKET_READY_FOR_OPERATOR_REVIEW",
+    "candidateCount": 8,
+    "selectedStableKeys": [
+      "D-C-10",
+      "D-C-11",
+      "A-G-1",
+      "A-G-15",
+      "B-E-11",
+      "B-E-9",
+      "D-C-4",
+      "E-G-4"
+    ],
+    "mutationPerformed": false,
+    "dbMutationPerformed": false,
+    "embeddingGenerationPerformed": false,
+    "exactPromotionPerformed": false,
+    "forbiddenClaims": [
+      "These candidates are already exact production evidence.",
+      "The exact-kosha registry was expanded by this packet.",
+      "All KOSHA Guide rows are exact direct evidence.",
+      "KOSHA vector retrieval or embeddings are production-active because of this packet."
+    ]
+  },
   "sifEmbeddingRuntime": {
     "approvalHeld": true,
     "dbMutationPerformed": false,
@@ -205,7 +231,7 @@
   "nextSafeWorkWithoutApproval": [
     "refresh source/live exact evidence when production marker advances to the evidence-only head",
     "refresh live rollup before claiming live-exact if production advances beyond the current live rollup head",
-    "use the KOSHA next exact candidate audit to select a bounded metadata-verified candidate set before any exact-trust promotion",
+    "use the KOSHA exact promotion packet as the bounded operator-review set before any exact-trust promotion",
     "keep UI follow-up scoped to selected-editor/detail readability or reproduced desktop share perception issues",
     "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
     "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",

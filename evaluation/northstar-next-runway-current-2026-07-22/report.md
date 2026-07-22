@@ -4,17 +4,17 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `cdb69e56460010c1a779273ed993794fa0f9ef36`
+Source HEAD: `0c285801431565aba6bd2fb2fc9aba5d7b160f0f`
 
-Production `/api/build-info`: `c545b7eac4cd54d572f5266c582d274f96a5af7d`
+Production `/api/build-info`: `12aaf1b7ffb30a99489a7984dd939cea2f552774`
 
 Latest evidence commit live: `false`
 
-Live-exact evidence commit: `cdb69e56460010c1a779273ed993794fa0f9ef36`
+Live-exact evidence commit: `0c285801431565aba6bd2fb2fc9aba5d7b160f0f`
 
 Live rollup matches production: `false`
 
-Note: current HEAD `cdb69e56460010c1a779273ed993794fa0f9ef36` is ahead of production `c545b7eac4cd54d572f5266c582d274f96a5af7d`, and the live rollup head `cdb69e56460010c1a779273ed993794fa0f9ef36` does not yet match production. Refresh live rollup before claiming live-exact.
+Note: current HEAD `0c285801431565aba6bd2fb2fc9aba5d7b160f0f` is ahead of production `12aaf1b7ffb30a99489a7984dd939cea2f552774`, and the live rollup head `0c285801431565aba6bd2fb2fc9aba5d7b160f0f` does not yet match production. Refresh live rollup before claiming live-exact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -25,6 +25,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live harness quality is proven.
 - KOSHA exact trust registry is proven for the accepted exact-trust slice.
 - KOSHA next exact candidate audit identifies the 234-item current native technical-support subset and 231 metadata-verified non-exact candidates without mutation.
+- KOSHA exact promotion packet selects a bounded operator-review set without exact-trust registry mutation.
 - Documents and Share cockpit UI is proven for the current evidence scope.
 - Standalone Dispatch cockpit is proven for the current evidence scope.
 - Generated Share result fixture cockpit is proven without claiming real provider dispatch.
@@ -60,7 +61,7 @@ Route/page split alone is not accepted as the UX fix. The accepted structure is 
 
 1. refresh source/live exact evidence when production marker advances to the evidence-only head.
 2. refresh live rollup before claiming live-exact if production advances beyond the current live rollup head.
-3. use the KOSHA next exact candidate audit to select a bounded metadata-verified candidate set before any exact-trust promotion.
+3. use the KOSHA exact promotion packet as the bounded operator-review set before any exact-trust promotion.
 4. keep UI follow-up scoped to selected-editor/detail readability or reproduced desktop share perception issues.
 5. keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven.
 6. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
@@ -71,5 +72,7 @@ Route/page split alone is not accepted as the UX fix. The accepted structure is 
 - Exact trust remains proven only for the accepted exact pins.
 - Candidate pool: 234 current native technical-support items.
 - Metadata-verified non-exact candidates: 231.
+- Operator-review packet candidates: 8 (D-C-10, D-C-11, A-G-1, A-G-15, B-E-11, B-E-9, D-C-4, E-G-4).
 - Mutation performed by candidate audit: false.
+- Exact promotion performed by packet: false.
 - Forbidden claim remains: metadata-verified candidates are not exact production evidence until separately promoted through immutable acquisition/review.

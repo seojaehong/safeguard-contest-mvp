@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-22T00:21:59.785Z
-Source SHA: `cdb69e56460010c1a779273ed993794fa0f9ef36`
+Generated at: 2026-07-22T00:38:53.329Z
+Source SHA: `0c285801431565aba6bd2fb2fc9aba5d7b160f0f`
 Overall: `open`
 
 ## Gate Matrix
@@ -55,5 +55,6 @@ Overall: `open`
 - llm_wiki_publication: Keep generated wiki candidates unpublished until human confirmation and RPC evidence exist.
 - sif_embedding_runtime: Approve SIF-only migration, embedding cost, upload, and vector runtime separately.
 - sif_embedding_runtime: Do not claim vector retrieval is production-active before post-migration verification.
+- kosha_exact_trust_registry: Use evaluation\kosha-exact-promotion-packet-2026-07-22\report.json as the bounded operator-review set before any exact-trust promotion.
 - kosha_exact_trust_registry: Promote additional metadata-verified KOSHA candidates to exact trust only through separate immutable acquisition/review.
 - kosha_exact_trust_registry: Keep broader corpus exact-publishing, SIF vector retrieval, and DB persistence approval-gated.
