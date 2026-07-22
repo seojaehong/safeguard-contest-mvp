@@ -418,7 +418,7 @@ ${rows.join("\n")}
 
 ## Remaining UX Boundary
 
-- Product commit \`6d46cfaa\` is a scoped landing remediation: desktop-short same-document risk reselect now records first action, field-first, and reselect landing PASS. It does not close mobile full field-first visibility, desktop 1440x900 reselect, or all-12 document containment.
+- Product commit \`${sourceHead.slice(0, 8)}\` is a scoped risk-assessment cockpit remediation: desktop-short and mobile same-document risk reselect now record first action, field-first, and reselect landing PASS when the table above shows PASS. It does not close desktop 1440x900 layout behavior or all-12 document containment.
 - If \`allDocumentLongFormVerdict\` is RED or PARTIAL, product work should stay bounded to the documents route/component shell: master-detail, selected-only detail, accordion, local scroll, or drawer.
 - Supporting document launcher visibility is not itself the launch fix. Default closed supporting nav is acceptable, but the all-12 exposure state remains a follow-up when it still behaves like a long serial document surface rather than bounded navigation.
 - Do not use page count as the fix. Route split only helps orientation; long bodies must be locally contained.
