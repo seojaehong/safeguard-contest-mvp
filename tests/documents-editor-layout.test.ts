@@ -1571,6 +1571,21 @@ describe("documents editor layout", () => {
       expect(sectionAccordionAfterSecondOpen.actionTexts).toEqual(["근거 보기", "점검 보기"]);
 
       await page.getByTestId("document-section-actions").getByRole("button", { name: "근거 보기" }).click();
+      await page.waitForFunction(() => {
+        const drawer = document.querySelector<HTMLDetailsElement>('[data-testid="editor-provenance-drawer"]');
+        const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
+        const toolbar = document.querySelector<HTMLElement>(".document-toolbar");
+        const evidencePanel = document.querySelector<HTMLElement>('[data-testid="editor-evidence-panel"]');
+        if (!drawer || !workpackShell || !toolbar || !evidencePanel) return false;
+        const shellRect = workpackShell.getBoundingClientRect();
+        const toolbarRect = toolbar.getBoundingClientRect();
+        const evidenceRect = evidencePanel.getBoundingClientRect();
+        return drawer.open
+          && (document.activeElement as HTMLElement | null)?.dataset?.testid === "editor-evidence-panel"
+          && evidenceRect.bottom > shellRect.top
+          && evidenceRect.top < shellRect.bottom
+          && evidenceRect.top >= toolbarRect.bottom - 1;
+      }, undefined, { timeout: 1_000 });
       const evidenceActionLanding = await page.evaluate(async () => {
         await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
         const drawer = document.querySelector<HTMLDetailsElement>('[data-testid="editor-provenance-drawer"]');

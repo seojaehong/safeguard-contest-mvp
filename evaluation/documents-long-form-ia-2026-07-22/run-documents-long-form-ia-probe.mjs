@@ -82,9 +82,10 @@ function evaluateVerdicts(metrics) {
     && metrics.firstRiskRowHeaderText.includes("근거")
     && metrics.firstRiskRowHeaderText.includes("확인");
   const allDocumentLongFormPass = metrics.visibleFullDocumentBodiesInViewport <= 1
-    && metrics.supportingDocumentsOpenDefault === false
-    && metrics.supportingDocButtonsVisibleDefault === 0
-    && metrics.fullDocumentBodiesRenderedSerially === false;
+    && metrics.fullDocumentBodiesRenderedSerially === false
+    && metrics.supportingLauncherMovesEditorOutOfView === false
+    && metrics.horizontalOverflow === false
+    && metrics.outsideElements === 0;
   const selectedEditorDepthPass = metrics.workpackShellScrollHeight <= (desktop ? 1700 : 1500)
     && metrics.renderedTextareas <= 4
     && metrics.defaultOpenSectionCount <= 1;
@@ -116,6 +117,7 @@ function summarizeMetric(metrics) {
     inViewportBodies: metrics.visibleFullDocumentBodiesInViewport,
     supportingOpen: metrics.supportingDocumentsOpenDefault,
     supportingVisibleButtons: metrics.supportingDocButtonsVisibleDefault,
+    supportingMovesEditor: metrics.supportingLauncherMovesEditorOutOfView,
   };
 }
 
@@ -169,6 +171,8 @@ async function readMetrics(page, stateLabel) {
       ["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"].includes(button.getAttribute("data-document-key") || "")
     );
     const textareas = [...document.querySelectorAll(".document-textarea")];
+    const documentBodies = [...document.querySelectorAll('[data-testid="editor-document-body"], [role="tabpanel"]')];
+    const rawTextareas = [...document.querySelectorAll(".document-source-textarea, .document-section-textarea")];
     const sectionAccordions = [...document.querySelectorAll('[data-testid="document-section-accordion"]')];
     const stickyCandidates = [...document.querySelectorAll("body *")].filter((element) => {
       const style = getComputedStyle(element);
@@ -183,10 +187,19 @@ async function readMetrics(page, stateLabel) {
     };
     const rawRect = rawTextarea?.getBoundingClientRect();
     const shellRect = shell?.getBoundingClientRect();
-    const visibleFullDocumentBodiesInViewport = textareas.filter(inViewport).length;
+    const visibleTextareaInputsInViewport = textareas.filter(inViewport).length;
+    const visibleDocumentBodyPanelsInViewport = documentBodies.filter(inViewport).length;
+    const visibleRawEditorsInViewport = rawTextareas.filter(inViewport).length;
     const supportGroupOpen = supportingGroup instanceof HTMLDetailsElement ? supportingGroup.open : false;
     const supportVisibleButtons = supportingButtons.filter(isVisible).length;
+    const mobilePickerOptionCount = document.querySelectorAll('select[aria-label="편집 문서 선택"] option').length;
     const firstRiskHeaderText = document.querySelector('[data-testid="risk-row-editor-row"] summary')?.textContent?.replace(/\s+/gu, " ").trim() || "";
+    const shellBottom = Math.round(shellRect?.bottom ?? 0);
+    const sectionActionsBottom = Math.round(actions?.getBoundingClientRect().bottom ?? 0);
+    const hazardTop = Math.round(hazard?.getBoundingClientRect().top ?? 0);
+    const hazardBottom = Math.round(hazard?.getBoundingClientRect().bottom ?? 0);
+    const supportingLauncherMovesEditorOutOfView = supportGroupOpen
+      && (sectionActionsBottom > window.innerHeight || hazardBottom > window.innerHeight || hazardTop < 0);
     return {
       stateLabel: label,
       viewportWidth: window.innerWidth,
@@ -200,7 +213,7 @@ async function readMetrics(page, stateLabel) {
       selectedDocumentTitle: document.querySelector(".document-toolbar .h2")?.textContent?.trim() || "",
       selectedDocumentSummary: document.querySelector('[data-testid="selected-document-drilldown-summary"]')?.textContent?.replace(/\s+/gu, " ").trim() || "",
       workpackShellTop: Math.round(shellRect?.top ?? 0),
-      workpackShellBottom: Math.round(shellRect?.bottom ?? 0),
+      workpackShellBottom: shellBottom,
       workpackShellHeight: Math.round(shellRect?.height ?? 0),
       workpackShellClientHeight: shell?.clientHeight ?? 0,
       workpackShellScrollHeight: shell?.scrollHeight ?? 0,
@@ -210,27 +223,32 @@ async function readMetrics(page, stateLabel) {
       fieldStrip: rect('[data-testid="document-section-field-strip"]'),
       fieldStripBottom: Math.round(fieldStrip?.getBoundingClientRect().bottom ?? 0),
       sectionActions: rect('[data-testid="document-section-actions"]'),
-      sectionActionsBottom: Math.round(actions?.getBoundingClientRect().bottom ?? 0),
+      sectionActionsBottom,
       firstRiskRowHeader: rect('[data-testid="risk-row-editor-row"] summary'),
       firstRiskRowHeaderBottom: Math.round(document.querySelector('[data-testid="risk-row-editor-row"] summary')?.getBoundingClientRect().bottom ?? 0),
       firstRiskRowHeaderText: firstRiskHeaderText,
       firstRiskHazardField: rect('[aria-label="행 1 유해·위험요인"]'),
-      firstRiskHazardFieldTop: Math.round(hazard?.getBoundingClientRect().top ?? 0),
-      firstRiskHazardFieldBottom: Math.round(hazard?.getBoundingClientRect().bottom ?? 0),
+      firstRiskHazardFieldTop: hazardTop,
+      firstRiskHazardFieldBottom: hazardBottom,
       rawTextarea: rect(".document-source-textarea, .document-section-textarea"),
       rawTextareaTop: Math.round(rawRect?.top ?? 0),
       rawTextareaBottom: Math.round(rawRect?.bottom ?? 0),
       rawTextareaSecondary: Boolean(rawRect && shellRect && rawRect.top > shellRect.bottom),
       sameDocumentReselectMeasured: label === "same-document-reselect-riskAssessmentDraft",
       renderedTextareas: textareas.length,
-      visibleFullDocumentBodiesInViewport,
-      fullDocumentBodiesRenderedSerially: textareas.length > 2 || visibleFullDocumentBodiesInViewport > 1,
+      visibleTextareaInputsInViewport,
+      visibleFullDocumentBodiesInViewport: visibleDocumentBodyPanelsInViewport,
+      visibleDocumentBodyPanelsInViewport,
+      visibleRawEditorsInViewport,
+      fullDocumentBodiesRenderedSerially: visibleDocumentBodyPanelsInViewport > 1 || visibleRawEditorsInViewport > 1,
+      supportingLauncherMovesEditorOutOfView,
       defaultOpenSectionCount: sectionAccordions.filter((item) => item.open).length,
       supportingDocumentsOpenDefault: supportGroupOpen,
       supportingDocButtonsVisibleDefault: supportVisibleButtons,
       supportingDocButtonCount: supportingButtons.length,
       allDocTabButtonCount: allTabButtons.length,
       coreDocButtonCount: coreButtons.length,
+      mobilePickerOptionCount,
       mobileCoreLauncher: rect('[data-testid="mobile-core-document-launcher"]'),
       riskLauncherPressed: document.querySelector('[data-testid="mobile-core-document-launcher"] button[data-document-key="riskAssessmentDraft"]')?.getAttribute("aria-pressed") || "",
       stickyOverlapCount: stickyCandidates.filter((item) => rawTextarea ? overlap(item, rawTextarea) : false).length,
@@ -317,13 +335,16 @@ for (const viewport of viewports) {
       viewport,
       metrics: expandedMetrics,
       verdicts: {
-        launcherExposureVerdict: expandedMetrics.allDocTabButtonCount >= 12
-          && expandedMetrics.supportingDocButtonsVisibleDefault >= 9
+        launcherExposureVerdict: (expandedMetrics.allDocTabButtonCount >= 12 || expandedMetrics.mobilePickerOptionCount >= 12)
+          && expandedMetrics.coreDocButtonCount >= (viewport.width >= 1000 ? 3 : 0)
+          && expandedMetrics.supportingDocButtonCount >= 9
           && expandedMetrics.visibleFullDocumentBodiesInViewport <= 1
+          && expandedMetrics.supportingLauncherMovesEditorOutOfView === false
           && expandedMetrics.horizontalOverflow === false
+          && expandedMetrics.outsideElements === 0
           ? "PASS"
           : "RED",
-        allDocumentLongFormVerdict: expandedMetrics.fullDocumentBodiesRenderedSerially ? "RED" : "PASS",
+        allDocumentLongFormVerdict: expandedMetrics.fullDocumentBodiesRenderedSerially || expandedMetrics.supportingLauncherMovesEditorOutOfView ? "RED" : "PASS",
         selectedEditorDepthVerdict: expandedMetrics.workpackShellScrollHeight <= (viewport.width >= 1000 ? 1700 : 1500)
           ? "PASS"
           : "RED",
@@ -369,7 +390,7 @@ const report = {
     firstActionCockpitVerdict: "selected document header, field strip, evidence/recheck CTA, shell containment, sticky overlap 0, and no horizontal overflow",
     selectedEditorFieldFirstVerdict: "risk row header and hazard field appear before raw textarea; row header carries evidence and verification context",
     sameDocumentReselectLandingVerdict: "same risk document launcher/reselect settles inside one second with action row, first risk row header, and hazard field top before raw textarea; full field visibility remains covered by Field-first",
-    allDocumentLongFormVerdict: "RED if many full bodies/raw editors render serially by default, supporting docs are open by default, or all-12 launcher exposure behaves like a long page instead of bounded navigation",
+    allDocumentLongFormVerdict: "RED if multiple document bodies/raw editors render serially or if all-12 launcher exposure pushes the selected editor action/hazard out of the viewport instead of staying bounded navigation",
     selectedEditorDepthVerdict: "RED if the selected document editor shell remains deeper than the bounded target even though the first action is visible",
     overallDocumentsIAVerdict: "PASS only when first-action cockpit, selected field-first editor, all-document containment, and selected-editor depth all pass",
   },

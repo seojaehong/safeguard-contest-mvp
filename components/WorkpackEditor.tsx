@@ -3014,6 +3014,39 @@ export function WorkpackEditor({
     setSaveAnnouncement("");
   }, [canonicalRiskRows, canonicalRiskRowsAreCurrent, canonicalRiskText, dirtyDocumentKeys, hydratedStorageKey, lastEditedAt, riskRowIds, storageKey, values]);
 
+  function focusSelectedDocumentTarget(key: DocumentKey) {
+    const tab = document.getElementById(documentTabId(key));
+    const tabIsVisible = tab
+      ? tab.getClientRects().length > 0 && getComputedStyle(tab).display !== "none" && getComputedStyle(tab).visibility !== "hidden"
+      : false;
+    (tabIsVisible ? tab : textareaRef.current)?.focus({ preventScroll: true });
+  }
+
+  function getDocumentLandingTarget(key: DocumentKey) {
+    if (isSummaryDocumentKey(key)) {
+      return documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="summary-document-cockpit"]') || null;
+    }
+    if (isTbmDocumentKey(key)) {
+      return documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="tbm-document-cockpit"]') || null;
+    }
+    if (isExecutionDocumentKey(key)) {
+      return documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="execution-document-cockpit"]') || null;
+    }
+    if (isEducationDocumentKey(key)) {
+      return documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="education-document-cockpit"]') || null;
+    }
+    if (key === "emergencyResponseDraft") {
+      return documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="emergency-document-cockpit"]') || null;
+    }
+    if (key === "photoEvidenceDraft") {
+      return documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="photo-document-cockpit"]') || null;
+    }
+    if (isTransmissionDocumentKey(key)) {
+      return documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="transmission-document-cockpit"]') || null;
+    }
+    return null;
+  }
+
   useEffect(() => {
     if (!focusToken) return;
 
@@ -3029,16 +3062,16 @@ export function WorkpackEditor({
     const alignRequestedDocument = () => {
       if (requestedDocumentKey === "riskAssessmentDraft") {
         alignRiskCockpitBelowToolbar();
-        document.getElementById(documentTabId(requestedDocumentKey))?.focus({ preventScroll: true });
+        focusSelectedDocumentTarget(requestedDocumentKey);
         return;
       }
       const target = requestedDocumentKey
-        ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
+        ? getDocumentLandingTarget(requestedDocumentKey)
+          || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
           || documentBodyRef.current
         : textareaRef.current;
       alignPaneTargetBelowToolbar(target || null);
-      (requestedDocumentKey ? document.getElementById(documentTabId(requestedDocumentKey)) : textareaRef.current)
-        ?.focus({ preventScroll: true });
+      requestedDocumentKey ? focusSelectedDocumentTarget(requestedDocumentKey) : textareaRef.current?.focus({ preventScroll: true });
     };
     const focusFrame = window.requestAnimationFrame(alignRequestedDocument);
     const focusTimer = window.setTimeout(alignRequestedDocument, 120);
@@ -3192,6 +3225,12 @@ export function WorkpackEditor({
       || activeSection
       || null;
     alignPaneTargetBelowToolbar(target);
+    const alignFrame = window.requestAnimationFrame(() => alignPaneTargetBelowToolbar(target));
+    const alignTimer = window.setTimeout(() => alignPaneTargetBelowToolbar(target), 80);
+    return () => {
+      window.cancelAnimationFrame(alignFrame);
+      window.clearTimeout(alignTimer);
+    };
   }, [expandedStructuredSectionId, selected.key, structuredDocument.body]);
 
   useLayoutEffect(() => {
@@ -3305,15 +3344,22 @@ export function WorkpackEditor({
   function openDocumentUtilityPanel(targetTestId: "editor-evidence-panel" | "editor-quality-panel") {
     const root = workpackShellRef.current || documentBodyRef.current;
     const drawer = root?.querySelector<HTMLDetailsElement>('[data-testid="editor-provenance-drawer"]');
-    if (drawer) drawer.open = true;
-    window.requestAnimationFrame(() => {
+    if (drawer) {
+      drawer.open = true;
+      void drawer.offsetHeight;
+    }
+    const alignTarget = () => {
       const target = root?.querySelector<HTMLElement>(`[data-testid="${targetTestId}"]`) || null;
       alignPaneTargetBelowToolbar(target);
       target?.focus({ preventScroll: true });
-    });
+    };
+    alignTarget();
+    window.requestAnimationFrame(alignTarget);
+    window.setTimeout(alignTarget, 80);
   }
 
   function selectDocumentKey(key: DocumentKey) {
+    setShowFocusCue(key !== "riskAssessmentDraft");
     if (supportingDocumentMeta.some((item) => item.key === key)) {
       setSupportingDocumentsOpen(true);
     }
@@ -3332,7 +3378,7 @@ export function WorkpackEditor({
             || documentBodyRef.current;
           alignPaneTargetBelowToolbar(target || null);
         }
-        document.getElementById(documentTabId(key))?.focus({ preventScroll: true });
+        focusSelectedDocumentTarget(key);
       };
       window.requestAnimationFrame(alignReselectedDocument);
       window.setTimeout(alignReselectedDocument, 80);
@@ -3341,8 +3387,9 @@ export function WorkpackEditor({
     }
     setSelectedKey(key);
     window.requestAnimationFrame(() => {
-      document.getElementById(documentTabId(key))?.focus({ preventScroll: true });
+      focusSelectedDocumentTarget(key);
     });
+    window.setTimeout(() => focusSelectedDocumentTarget(key), 80);
   }
 
   function handleDocumentTabKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>, key: DocumentKey, keys: readonly DocumentKey[]) {
@@ -3730,6 +3777,7 @@ export function WorkpackEditor({
       <button
         key={item.key}
         id={documentTabId(item.key)}
+        data-document-key={item.key}
         type="button"
         role="tab"
         className={`doc-tab ${item.key === selected.key ? "active" : ""}`}
@@ -3883,7 +3931,7 @@ export function WorkpackEditor({
                   </span>
                 </div>
               ) : null}
-              {selected.key === "riskAssessmentDraft" ? (
+              {selected.key === "riskAssessmentDraft" && expandedStructuredSectionId === structuredDocument.body[0]?.id ? (
                 <div className={styles.documentSectionActions} data-testid="document-section-actions">
                   <button type="button" onClick={() => openDocumentUtilityPanel("editor-evidence-panel")}>
                     근거 보기
@@ -3962,7 +4010,7 @@ export function WorkpackEditor({
                         {sectionLineCount.toLocaleString("ko-KR")}줄 · {isSectionOpen ? "편집 중" : "펼치기"}
                       </em>
                     </summary>
-                    {isSectionOpen && selected.key !== "riskAssessmentDraft" ? (
+                    {isSectionOpen && !(selected.key === "riskAssessmentDraft" && index === 0) ? (
                       <div className={styles.documentSectionFieldStrip} data-testid="document-section-field-strip">
                         <span>
                           <b>현재 편집 필드</b>
@@ -3978,7 +4026,7 @@ export function WorkpackEditor({
                         </span>
                       </div>
                     ) : null}
-                    {isSectionOpen && selected.key !== "riskAssessmentDraft" ? (
+                    {isSectionOpen && !(selected.key === "riskAssessmentDraft" && index === 0) ? (
                       <div className={styles.documentSectionActions} data-testid="document-section-actions">
                         <button type="button" onClick={() => openDocumentUtilityPanel("editor-evidence-panel")}>
                           근거 보기

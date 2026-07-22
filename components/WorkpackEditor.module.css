@@ -12,6 +12,10 @@
   display: grid;
   align-content: start;
   gap: var(--space-4);
+  min-height: 0;
+  max-height: min(520px, calc(100svh - 96px));
+  overflow: auto;
+  overscroll-behavior: contain;
   padding: var(--space-4);
 }
 
@@ -154,6 +158,10 @@
 }
 
 .supportingDocumentTabs {
+  min-height: 0;
+  max-height: min(300px, calc(100svh - 340px));
+  overflow: auto;
+  overscroll-behavior: contain;
   padding-top: var(--space-1);
 }
 
