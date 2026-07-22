@@ -1,6 +1,6 @@
 # KOSHA Next Exact Candidate Audit
 
-Generated at: 2026-07-22T00:14:18.056Z
+Generated at: 2026-07-22T08:37:56.475Z
 
 Verdict: `NEXT_EXACT_TRUST_CANDIDATES_IDENTIFIED_APPROVAL_FREE`
 
