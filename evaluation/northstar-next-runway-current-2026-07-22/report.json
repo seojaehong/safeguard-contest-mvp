@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T17:50:54.888Z",
+  "generatedAt": "2026-07-22T17:54:10.625Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "e5945fe891d06cd1de95f097e29de4428bae78f2",
-  "productionCommit": "b3e8070bf705cbb3e75f7f81c43381d48e9ca1f6",
+  "sourceHead": "12bf0e3d77f9b8a569da9b150b411aa371c92119",
+  "productionCommit": "e5945fe891d06cd1de95f097e29de4428bae78f2",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "b3e8070bf705cbb3e75f7f81c43381d48e9ca1f6",
+    "commitSha": "e5945fe891d06cd1de95f097e29de4428bae78f2",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-dqcfuhqyb-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-64hpdjj8o-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": false,
@@ -25,12 +25,14 @@
     "evaluation/northstar-next-runway-current-2026-07-22/report.json",
     "evaluation/northstar-next-runway-current-2026-07-22/report.md",
     "evaluation/northstar-open-gates-current/report.json",
-    "evaluation/northstar-open-gates-current/report.md"
+    "evaluation/northstar-open-gates-current/report.md",
+    "evaluation/share-exact-session-boundary-2026-07-22/report.json",
+    "evaluation/share-exact-session-boundary-2026-07-22/report.md"
   ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "e5945fe891d06cd1de95f097e29de4428bae78f2",
-  "liveRollupLiveCommit": "b3e8070bf705cbb3e75f7f81c43381d48e9ca1f6",
+  "liveExactEvidenceCommit": "12bf0e3d77f9b8a569da9b150b411aa371c92119",
+  "liveRollupLiveCommit": "e5945fe891d06cd1de95f097e29de4428bae78f2",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -312,8 +314,8 @@
   },
   "shareExactSessionBoundary": {
     "verdict": "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
-    "sourceHead": "e5945fe891d06cd1de95f097e29de4428bae78f2",
-    "liveCommit": "b3e8070bf705cbb3e75f7f81c43381d48e9ca1f6",
+    "sourceHead": "12bf0e3d77f9b8a569da9b150b411aa371c92119",
+    "liveCommit": "e5945fe891d06cd1de95f097e29de4428bae78f2",
     "exactSavedUserSessionReproduced": false,
     "exactSavedSessionRequiredForUserSpecificPass": true,
     "dbMutationPerformed": false,
