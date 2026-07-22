@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T20:58:48.528Z",
-  "head": "c89f4a3dc20ab8281ddab37daea58e39b07db9cb",
+  "generatedAt": "2026-07-22T21:02:31.066Z",
+  "head": "02a7e52ed7166d6a0881823b8d29480d5d9208fa",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
@@ -87,7 +87,7 @@
       "id": "sif_embedding_runtime",
       "state": "approval_gated",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 7b08a7b6f566aec92be1259550dd8e50c2fbdb22."
+      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 02a7e52ed7166d6a0881823b8d29480d5d9208fa."
     },
     {
       "id": "kosha_exact_promotion_review_gate",
@@ -193,10 +193,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "c89f4a3dc20ab8281ddab37daea58e39b07db9cb",
+      "sourceCommit": "02a7e52ed7166d6a0881823b8d29480d5d9208fa",
       "sourceStatus": "exact",
-      "productionCommit": "c89f4a3dc20ab8281ddab37daea58e39b07db9cb",
-      "productionStatus": "matches_live"
+      "productionCommit": "02a7e52ed7166d6a0881823b8d29480d5d9208fa",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -226,15 +226,15 @@
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
       "sourceCommit": "c89f4a3dc20ab8281ddab37daea58e39b07db9cb",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },
     {
       "id": "sif_embedding_preflight",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "sourceCommit": "7b08a7b6f566aec92be1259550dd8e50c2fbdb22",
-      "sourceStatus": "ancestor",
+      "sourceCommit": "02a7e52ed7166d6a0881823b8d29480d5d9208fa",
+      "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
     },
