@@ -1017,6 +1017,29 @@ function createFixtureRoot(): string {
       },
     },
   });
+  writeJson(rootDir, path.join("evaluation", "share-exact-session-boundary-2026-07-22", "report.json"), {
+    schemaVersion: "safeclaw-share-exact-session-boundary/v1",
+    verdict: "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
+    exactSavedUserSessionReproduced: false,
+    exactSavedSessionUrlProvided: false,
+    exactSavedSessionPayloadProvided: false,
+    sessionKind: "missing-exact",
+    exactSessionAcceptance: {
+      desktopColumnCountMin: 2,
+      firstActionMustBeInViewport: true,
+      horizontalOverflowAllowed: false,
+    },
+    boundary: {
+      fixtureProofAcceptedAsExactSavedSession: false,
+      generatedWorkspaceProofAcceptedAsExactSavedSession: false,
+      exactSavedSessionRequiredForUserSpecificPass: true,
+      providerDispatchLiveClaimed: false,
+      externalProviderCalled: false,
+      dbMutationPerformed: false,
+      dispatchMutationPerformed: false,
+      exactSessionMutationRequestCount: 0,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"), {
     verdict: "PASS_PRODUCTION",
     acceptance: {
@@ -1203,6 +1226,11 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).not.toContain("Promote the Share staged rail");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "share_result_fixture_cockpit")?.state).toBe("proven");
+    expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.state).toBe("notice");
+    expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.detail).toContain("fixture or generated /workspace Share proof is explicitly not accepted");
+    expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.nextActions.join("\n")).toContain("concrete production /share/[sessionId]?workerId=...");
+    expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.nextActions.join("\n")).toContain("sessionKind=saved-exact");
     expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.state).toBe("approval_gated");
     expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.detail).toContain("attempt-level idempotency reservation");
     expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.detail).toContain("per-channel result persistence");

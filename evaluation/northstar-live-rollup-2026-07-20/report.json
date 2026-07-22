@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T12:52:38.044Z",
-  "head": "9a04d7d8c6e3627bb50db5e3dbad26493d8db2c9",
+  "generatedAt": "2026-07-22T12:59:38.353Z",
+  "head": "2ce87f27a358fe2204212e28a854e61326af668c",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "96d4440fca74e4840ffee48936cd37c748604941",
+    "commitSha": "2ce87f27a358fe2204212e28a854e61326af668c",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-8hcghjqvt-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-lmhdcz545-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 11
+    "gateCount": 12
   },
   "provenGates": [
     {
@@ -50,6 +50,12 @@
       "state": "proven",
       "artifact": "evaluation\\share-result-drilldown-2026-07-21\\report.json",
       "detail": "Generated provider-result fixture proof is bounded: desktop page 900/900, result panel 606px with 2 x-ranges, mobile summary/preview/CTA/result inside 844px, closed summary shows channel status, dispatch POST count 1, provider live dispatch unclaimed."
+    },
+    {
+      "id": "share_exact_saved_session_boundary",
+      "state": "notice",
+      "artifact": "evaluation\\share-exact-session-boundary-2026-07-22\\report.json",
+      "detail": "Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass."
     },
     {
       "id": "kosha_exact_trust_registry",
@@ -187,9 +193,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "96d4440fca74e4840ffee48936cd37c748604941",
-      "sourceStatus": "ancestor",
-      "productionCommit": "96d4440fca74e4840ffee48936cd37c748604941",
+      "sourceCommit": "2ce87f27a358fe2204212e28a854e61326af668c",
+      "sourceStatus": "exact",
+      "productionCommit": "2ce87f27a358fe2204212e28a854e61326af668c",
       "productionStatus": "matches_live"
     },
     {

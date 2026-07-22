@@ -53,6 +53,7 @@ const EVIDENCE_PATHS = Object.freeze({
   shareMobileExactViewport: path.join("evaluation", "share-mobile-exact-viewport-2026-07-21", "report.json"),
   shareRecipientCockpit: path.join("evaluation", "share-recipient-cockpit-2026-07-22", "report.json"),
   shareResultDrilldown: path.join("evaluation", "share-result-drilldown-2026-07-21", "report.json"),
+  shareExactSessionBoundary: path.join("evaluation", "share-exact-session-boundary-2026-07-22", "report.json"),
   dispatchStandalone: path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"),
   providerDispatchIdempotency: path.join("evaluation", "provider-dispatch-idempotency-gate-2026-07-19", "report.json"),
   workspaceIaLiveRefinement: path.join("evaluation", "workspace-ia-live-f67-2026-07-21", "report.json"),
@@ -1608,6 +1609,87 @@ function evaluateShareResultFixtureCockpitGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluateShareExactSessionBoundaryGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.shareExactSessionBoundary;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "share_exact_saved_session_boundary",
+      label: "Exact saved Share session boundary",
+      state: "missing",
+      evidencePath,
+      detail: "Exact saved/generated /share/[sessionId] boundary report is missing; fixture Share proof cannot close the user-observed saved-session complaint.",
+      nextActions: [
+        "Run evaluation\\share-exact-session-boundary-2026-07-22\\run-share-exact-session-boundary.mjs with no mutation first, then rerun with a concrete saved session URL only when supplied or approved.",
+      ],
+    });
+  }
+
+  const boundary = isRecord(report.boundary) ? report.boundary : {};
+  const acceptance = isRecord(report.exactSessionAcceptance) ? report.exactSessionAcceptance : {};
+  const noMutation = boundary.dbMutationPerformed === false
+    && boundary.dispatchMutationPerformed === false
+    && boundary.providerDispatchLiveClaimed === false
+    && boundary.externalProviderCalled === false
+    && readNumber(boundary.exactSessionMutationRequestCount) === 0;
+  const fixtureNotAccepted = boundary.fixtureProofAcceptedAsExactSavedSession === false
+    && boundary.generatedWorkspaceProofAcceptedAsExactSavedSession === false
+    && boundary.exactSavedSessionRequiredForUserSpecificPass === true;
+  const desktopContractPresent = readNumber(acceptance.desktopColumnCountMin) !== null
+    && readNumber(acceptance.desktopColumnCountMin) >= 2
+    && acceptance.firstActionMustBeInViewport === true
+    && acceptance.horizontalOverflowAllowed === false;
+
+  if (report.exactSavedUserSessionReproduced === true && noMutation && fixtureNotAccepted && desktopContractPresent) {
+    return gateResult({
+      id: "share_exact_saved_session_boundary",
+      label: "Exact saved Share session boundary",
+      state: "proven",
+      evidencePath,
+      detail: "Exact saved/generated /share/[sessionId] geometry has been reproduced under the desktop/mobile saved-session contract without provider dispatch or DB mutation.",
+      nextActions: [
+        "Keep fixture/generated Share rows separate from saved-exact rows in future UX reports.",
+      ],
+    });
+  }
+
+  if (readString(report.verdict) === "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED"
+    && report.exactSavedUserSessionReproduced === false
+    && report.exactSavedSessionUrlProvided === false
+    && report.exactSavedSessionPayloadProvided === false
+    && readString(report.sessionKind) === "missing-exact"
+    && noMutation
+    && fixtureNotAccepted
+    && desktopContractPresent) {
+    return gateResult({
+      id: "share_exact_saved_session_boundary",
+      label: "Exact saved Share session boundary",
+      state: "notice",
+      evidencePath,
+      detail: "Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass.",
+      nextActions: [
+        "Obtain a concrete production /share/[sessionId]?workerId=... URL or approved safe creation flow before closing the user's desktop mobile-like Share complaint.",
+        "Rerun desktop 1440x723/1440x900 and mobile 390x723 geometry with sessionKind=saved-exact, root width ratio, x-region count, first action, preview/status visibility, and overflow metrics.",
+      ],
+    });
+  }
+
+  return gateResult({
+    id: "share_exact_saved_session_boundary",
+    label: "Exact saved Share session boundary",
+    state: "contradicted",
+    evidencePath,
+    detail: "Share exact-session boundary no longer preserves no-mutation safety, fixture-vs-exact separation, or the desktop saved-session geometry contract.",
+    nextActions: [
+      "Re-run the exact-session boundary audit without provider dispatch or DB mutation and restore MISSING_EVIDENCE unless a concrete saved session is supplied or approved.",
+    ],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateProviderDispatchPersistenceGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.providerDispatchIdempotency;
   const report = readJsonFile(rootDir, evidencePath);
@@ -1993,6 +2075,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateUiDocumentsShareCockpitGate(rootDir),
     evaluateDispatchStandaloneCockpitGate(rootDir),
     evaluateShareResultFixtureCockpitGate(rootDir),
+    evaluateShareExactSessionBoundaryGate(rootDir),
     evaluateProviderDispatchPersistenceGate(rootDir),
     evaluateRlsApprovalGate(rootDir),
     evaluateLlmWikiGate(rootDir),

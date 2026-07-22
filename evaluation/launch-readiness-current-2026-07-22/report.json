@@ -1,12 +1,12 @@
 {
   "schemaVersion": "safeclaw-launch-readiness-current/v3",
-  "generatedAt": "2026-07-22T12:52:38.097Z",
+  "generatedAt": "2026-07-22T12:59:42.583Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHeadAtGeneration": "9a04d7d8c6e3627bb50db5e3dbad26493d8db2c9",
-  "productionCommit": "96d4440fca74e4840ffee48936cd37c748604941",
-  "runtimeSmokeCommit": "96d4440fca74e4840ffee48936cd37c748604941",
-  "evidenceHeadBeforeThisReport": "9a04d7d8c6e3627bb50db5e3dbad26493d8db2c9",
-  "currentHeadIsEvidenceOnlyPending": true,
+  "sourceHeadAtGeneration": "2ce87f27a358fe2204212e28a854e61326af668c",
+  "productionCommit": "2ce87f27a358fe2204212e28a854e61326af668c",
+  "runtimeSmokeCommit": "2ce87f27a358fe2204212e28a854e61326af668c",
+  "evidenceHeadBeforeThisReport": "2ce87f27a358fe2204212e28a854e61326af668c",
+  "currentHeadIsEvidenceOnlyPending": false,
   "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
   "safeLaunchDemoClaimAllowed": true,
   "guidedPilotClaimAllowed": true,
@@ -197,8 +197,8 @@
     "verdict": "open"
   },
   "northstarLiveRollupOverall": {
-    "sourceHeadAtGeneration": "96d4440fca74e4840ffee48936cd37c748604941",
-    "liveCommitAtGeneration": "96d4440fca74e4840ffee48936cd37c748604941",
+    "sourceHeadAtGeneration": "2ce87f27a358fe2204212e28a854e61326af668c",
+    "liveCommitAtGeneration": "2ce87f27a358fe2204212e28a854e61326af668c",
     "liveCommitMatchesSourceHead": true
   },
   "approvalGatedBoundaries": [
@@ -260,10 +260,10 @@
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "96d4440fca74e4840ffee48936cd37c748604941",
+    "commitSha": "2ce87f27a358fe2204212e28a854e61326af668c",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-8hcghjqvt-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-lmhdcz545-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   }
 }
