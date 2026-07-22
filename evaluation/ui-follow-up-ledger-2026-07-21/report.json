@@ -13,9 +13,9 @@
   "currentDeploymentAndStructureNote": {
     "defaultWorkspaceIaArtifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
     "selectedEditorDetailArtifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
-    "latestRefreshedLiveGeometryMarker": "6158d2c04587d8fa8a1f23bf375eb4cadfdff39f",
-    "selectedEditorLandingLiveMarker": "6158d2c04587d8fa8a1f23bf375eb4cadfdff39f",
-    "latestLaunchReadinessEvidenceMarkerNowLive": "6158d2c04587d8fa8a1f23bf375eb4cadfdff39f",
+    "latestRefreshedLiveGeometryMarker": "cda2905724cebcd7c8ed800fa5e1befe836b8602",
+    "selectedEditorLandingLiveMarker": "cda2905724cebcd7c8ed800fa5e1befe836b8602",
+    "latestLaunchReadinessEvidenceMarkerNowLive": "cda2905724cebcd7c8ed800fa5e1befe836b8602",
     "defaultDocumentsAndShareCockpitHeightClosed": true,
     "selectedEditorFieldLevelLandingClosed": true,
     "selectedEditorFieldSummaryLandingClosed": true,
@@ -24,7 +24,7 @@
     "shareDesktopLiteralMobileStackReproduced": false,
     "shareDesktopPerceivedNarrowCardFollowUp": true,
     "routeSplitAloneAcceptedAsFix": false,
-    "interpretation": "Default Documents and Share cockpits remain current-live bounded at production 6158d2c0. Selected editor/detail is split: first risk-row header and first hazard field are visible immediately, while the raw long-form textarea remains below the viewport as secondary drilldown. Share desktop raw geometry remains two-column; perceived narrow-card workbench composition is only a follow-up if reproduced in the user session.",
+    "interpretation": "Default Documents and Share cockpits remain current-live bounded at production cda29057. Selected editor/detail is split: first risk-row header and first hazard field are visible immediately, while the raw long-form textarea remains below the viewport as secondary drilldown. Share desktop raw geometry remains two-column; perceived narrow-card workbench composition is only a follow-up if reproduced in the user session.",
     "remainingStructuralContract": [
       "first-viewport cockpit per route",
       "bounded panes, accordions, drawers, or drilldown routes for long content",
@@ -32,12 +32,12 @@
     ],
     "defaultWorkspaceIaSplitArtifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
     "selectedEditorFieldLevelLandingArtifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
-    "latestCheckedLiveMarkerForSelectedEditorLanding": "7389f22eb06e8d3f7724d15d9d172a9d9800cb7e"
+    "latestCheckedLiveMarkerForSelectedEditorLanding": "cda2905724cebcd7c8ed800fa5e1befe836b8602"
   },
   "latestLiveGeometryRefresh": {
-    "marker": "7389f22eb06e8d3f7724d15d9d172a9d9800cb7e",
+    "marker": "cda2905724cebcd7c8ed800fa5e1befe836b8602",
     "artifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
-    "checkedAt": "2026-07-21T23:52:21.719Z",
+    "checkedAt": "2026-07-22T01:07:16.207Z",
     "workspaceDocumentsDefaultCockpit": {
       "desktopShort1440x723": {
         "bodyHeight": 723,

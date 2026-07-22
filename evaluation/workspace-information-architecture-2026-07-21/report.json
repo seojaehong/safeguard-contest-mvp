@@ -1,7 +1,7 @@
 {
   "verdict": "ROUTE_SPLIT_ALONE_IS_NOT_ENOUGH",
-  "liveCommitChecked": "419ca8ca944c3667c24fa29407151f06a26564b6",
-  "sourceHeadAtReportGeneration": "419ca8ca944c3667c24fa29407151f06a26564b6",
+  "liveCommitChecked": "cda2905724cebcd7c8ed800fa5e1befe836b8602",
+  "sourceHeadAtReportGeneration": "cda2905724cebcd7c8ed800fa5e1befe836b8602",
   "liveGeometryArtifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
   "routeSplitAloneAcceptedAsFix": false,
   "recommendedArchitecture": "task route/step split plus first-viewport cockpit plus bounded drilldown/detail panes",
@@ -99,8 +99,8 @@
     "Selected editor/detail has first risk-row header and hazard field visible before the raw textarea."
   ],
   "remainingUiDebt": [
-    "Selected document raw textarea and full long-form editing remain secondary drilldown and should not be claimed globally short.",
-    "If desktop Share still feels mobile-like, treat it as perceived full-workbench composition follow-up rather than literal one-column geometry failure.",
+    "Selected editor/detail raw textarea and full long-form editing remain secondary drilldown and should not be claimed globally short.",
+    "If desktop Share still feels mobile-like, treat it as perceived full-workbench composition follow-up caused by column proportion or fixed preview width, not literal one-column geometry failure.",
     "Generated result/provider dispatch live delivery remains a separate approval-gated boundary."
   ],
   "recommendedNextBoundedWave": {

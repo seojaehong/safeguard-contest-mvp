@@ -2,9 +2,9 @@
 
 Verdict: `ROUTE_SPLIT_ALONE_IS_NOT_ENOUGH`
 
-Live commit checked: `419ca8ca944c3667c24fa29407151f06a26564b6`
+Live commit checked: `cda2905724cebcd7c8ed800fa5e1befe836b8602`
 
-Current source/evidence HEAD at report generation: `419ca8ca944c3667c24fa29407151f06a26564b6`
+Current source/evidence HEAD at report generation: `cda2905724cebcd7c8ed800fa5e1befe836b8602`
 
 Live geometry artifact: `evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json`
 
@@ -12,7 +12,7 @@ This report answers whether SafeClaw should split the workspace into more pages,
 
 ## Current live geometry
 
-`https://www.safeclaw.kr` now serves runtime commit `419ca8ca944c3667c24fa29407151f06a26564b6`. The current report/evidence refresh source is `419ca8ca944c3667c24fa29407151f06a26564b6`; it is an evidence/ledger refresh and does not imply a new UI runtime delta beyond the live geometry probe.
+`https://www.safeclaw.kr` now serves runtime commit `cda2905724cebcd7c8ed800fa5e1befe836b8602`. The current report/evidence refresh source is `cda2905724cebcd7c8ed800fa5e1befe836b8602`; it is an evidence/ledger refresh and does not imply a new UI runtime delta beyond the live geometry probe.
 
 | Viewport | Stage | Page height | Viewport | Ratio | Horizontal overflow | Outside viewport |
 | --- | --- | ---: | ---: | ---: | --- | ---: |
@@ -28,7 +28,7 @@ This report answers whether SafeClaw should split the workspace into more pages,
 
 ## Diagnosis
 
-The default Documents cockpit and mobile Share cockpit are no longer the raw page-height blockers: both are exactly one viewport tall in the current short/mobile checks.
+The default Documents cockpit and mobile Share cockpit are no longer the raw page-height blockers: both are exactly one viewport tall in the current short/mobile checks. This means the user's remaining "Documents still feels long" complaint should be classified against the selected editor/detail surface, not the default Documents cockpit.
 
 The remaining problem is information architecture, not just CSS. The selected Editor/detail is still long because it combines several different jobs after the user opens a document:
 
@@ -46,7 +46,7 @@ Current selected editor evidence makes the distinction concrete:
 
 - Desktop short editor: first risk row header `522-579`, first hazard field `615-675`, but raw textarea `1094-1267`.
 - Mobile editor: first risk row header `526-583`, first hazard field `607-657`, but raw textarea `987-1160`.
-- Share desktop is already raw two-column geometry with form/preview widths `636/520` at 1440x723; any remaining mobile-like complaint should be treated as perceived workbench composition, not literal one-column stacking.
+- Share desktop is already raw two-column geometry with form/preview widths `636/520` at 1440x723; any remaining mobile-like complaint should be treated as perceived full-workbench composition, not literal one-column stacking. A follow-up should judge whether the fixed `520px` preview column feels too card-like on wide screens.
 
 ## Recommended structure
 
