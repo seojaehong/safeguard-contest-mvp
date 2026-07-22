@@ -703,6 +703,12 @@ describe("northstar next runway generator", () => {
       "keep the next UI product wave framed as bounded IA/density: default exposure budget, selected-only Documents workbench, Documents shell ratio <= 3, and exact-session desktop Share workbench proof",
     );
     expect(report.nextSafeWorkWithoutApproval).toContain(
+      "keep Documents acceptance tied to simultaneous exposure, not page count: current status, core 3 launcher, selected document workbench, validation/recheck action, and local-scroll/drilldown for long source, section, evidence, and supporting-9 content",
+    );
+    expect(report.nextSafeWorkWithoutApproval).toContain(
+      "keep Share acceptance split by viewport and session kind: desktop must be a 2-3 region cockpit with selected language/message preview and send/export lock, while mobile single-column summaries are allowed only on mobile",
+    );
+    expect(report.nextSafeWorkWithoutApproval).toContain(
       "keep UI follow-up scoped to reproduced exact-session desktop Share full-workbench perception issues while preserving the Documents bounded workbench shell-ratio <= 3 contract",
     );
     expect(report.nextSafeWorkWithoutApproval).toContain(
