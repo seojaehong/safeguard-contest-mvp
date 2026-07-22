@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "safeclaw-share-recipient-cockpit/v1",
+  "generatedAt": "2026-07-22T02:50:59.3669408Z",
+  "sourceHead": "6ddde9a2587055967b69842ee974f83afbc981fb",
+  "verdict": "PASS_CURRENT_SOURCE",
+  "productionLiveClaimed": false,
+  "providerDispatchLiveClaimed": false,
+  "routeSplitAloneAcceptedAsFix": false,
+  "structuralContract": "first-viewport primary recipient confirmation task plus bounded/collapsed message and document details",
+  "scope": [
+    "app/share/[sessionId]/page.tsx",
+    "app/globals.css",
+    "tests/share-recipient-portal-browser.test.ts"
+  ],
+  "metrics": {
+    "mobile390x844": {
+      "outsideCards": 0,
+      "distinctColumns": 1,
+      "notice": {
+        "left": 16,
+        "bottom": 1176,
+        "width": 358,
+        "top": 984
+      },
+      "documents": {
+        "left": 16,
+        "bottom": 1492,
+        "width": 358,
+        "top": 1186
+      },
+      "gridTemplateColumns": "358px",
+      "horizontalOverflow": false,
+      "viewportHeight": 844,
+      "bodyHeight": 1572,
+      "ratio": 1.86,
+      "confirmation": {
+        "left": 16,
+        "bottom": 755,
+        "width": 358,
+        "top": 533
+      },
+      "documentsCollapsedByDefault": true,
+      "confirmButton": {
+        "bottom": 707,
+        "width": 328,
+        "top": 663
+      },
+      "root": {
+        "left": 0,
+        "bottom": 1524,
+        "width": 390,
+        "height": 1086,
+        "top": 438
+      }
+    },
+    "desktop1440x723": {
+      "outsideCards": 0,
+      "distinctColumns": 2,
+      "notice": {
+        "left": 788,
+        "bottom": 449,
+        "width": 652,
+        "top": 275
+      },
+      "documents": {
+        "left": 788,
+        "bottom": 897,
+        "width": 652,
+        "top": 586
+      },
+      "confirmation": {
+        "left": 236,
+        "bottom": 578,
+        "width": 534,
+        "top": 275
+      },
+      "gridTemplateColumns": "534.344px 651.656px",
+      "horizontalOverflow": false,
+      "viewportHeight": 723,
+      "bodyHeight": 945,
+      "ratio": 1.31,
+      "distinctLefts": [
+        240,
+        800
+      ],
+      "confirmButton": {
+        "bottom": 529,
+        "width": 500,
+        "top": 485
+      },
+      "root": {
+        "left": 236,
+        "bottom": 897,
+        "width": 1204,
+        "height": 695,
+        "top": 201
+      }
+    }
+  },
+  "tests": [
+    {
+      "result": "PASS",
+      "tests": 6,
+      "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts --maxWorkers=1 --fileParallelism=false --hookTimeout=180000",
+      "files": 1
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    },
+    {
+      "result": "PASS",
+      "command": "npm.cmd run build",
+      "staticPages": 28
+    }
+  ],
+  "closed": [
+    "desktop /share/[sessionId] no longer renders as a single stretched mobile stack for an invited recipient session fixture",
+    "desktop confirmation CTA and worker notice are first-viewport visible with two distinct x ranges",
+    "mobile confirmation CTA appears before notice/document details and remains inside the first viewport",
+    "recipient localization/security browser contracts remain green"
+  ],
+  "remainingDebt": [
+    "/documents route-level cockpit is closed in current evidence, but selected editor/detail can still feel long and remains a future bounded wave",
+    "mobile /share/[sessionId] remains a long worker review page by content length; the accepted fix is CTA priority plus collapsed details, not exact one-viewport body height",
+    "provider live dispatch remains approval-gated and is not claimed by this recipient portal UI change"
+  ]
+}
