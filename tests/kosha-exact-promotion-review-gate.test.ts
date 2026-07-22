@@ -209,6 +209,32 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.exactPromotionPerformed).toBe(false);
   });
 
+  it("fails closed when a review only fills shallow human confirmation fields", async () => {
+    const { root, packetPath, reviewPath } = writeFixtureRoot();
+    const review = JSON.parse(fs.readFileSync(path.join(root, reviewPath), "utf8")) as {
+      candidateReviews: Array<{ requiredReviewChecks?: Array<{ text: string; confirmed: boolean }> }>;
+    };
+    for (const row of review.candidateReviews) {
+      delete row.requiredReviewChecks;
+    }
+    writeJson(root, reviewPath, review);
+    const module = await loadReviewGateModule();
+    const report = module.buildKoshaExactPromotionReviewGate({ rootDir: root, packetPath, reviewPath });
+
+    expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
+    expect(report.reviewChecklistComplete).toBe(false);
+    expect(report.exactTrustPromotionBlockedUntilChecklistComplete).toBe(true);
+    expect(report.failureSummary.missingRequiredChecks).toBe(10);
+    expect(report.failureSummary.requiredCheckCountMismatches).toBe(2);
+    expect(report.failureSummary.missingHumanConfirmations).toBe(0);
+    expect(report.failureSummary.missingReviewers).toBe(0);
+    expect(report.failureSummary.missingReviewedAt).toBe(0);
+    expect(report.failures).toContain("missing-required-check:D-C-10:official URL opens the expected KOSHA file for the selected stable key");
+    expect(report.exactPromotionPerformed).toBe(false);
+    expect(report.exactTrustPromotionApproved).toBe(false);
+    expect(report.exactRegistryWriteArtifactCreated).toBe(false);
+  });
+
   it("fails closed when review metadata does not match the packet", async () => {
     const { root, packetPath, reviewPath } = writeFixtureRoot();
     const review = JSON.parse(fs.readFileSync(path.join(root, reviewPath), "utf8")) as {
