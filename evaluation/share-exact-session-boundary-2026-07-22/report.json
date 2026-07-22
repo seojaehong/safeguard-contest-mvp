@@ -1,19 +1,19 @@
 {
   "schemaVersion": "safeclaw-share-exact-session-boundary/v1",
-  "checkedAt": "2026-07-22T20:09:12.662Z",
+  "checkedAt": "2026-07-22T20:51:37.021Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHead": "fe237000cd5576009edaab5d88cf1a67844c1902",
+  "sourceHead": "18eaad2955d910db963cbeb271ec637e0d17d907",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "fe237000cd5576009edaab5d88cf1a67844c1902",
+    "commitSha": "18eaad2955d910db963cbeb271ec637e0d17d907",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-8yptqh4yw-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-rh5w03bmb-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "liveCommit": "fe237000cd5576009edaab5d88cf1a67844c1902",
+  "liveCommit": "18eaad2955d910db963cbeb271ec637e0d17d907",
   "verdict": "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
   "exactSavedUserSessionReproduced": false,
   "exactSavedSessionUrlProvided": false,
@@ -47,6 +47,20 @@
       "exists": true
     }
   },
+  "concreteProductionShareUrlSearch": {
+    "performed": true,
+    "concreteProductionShareUrlFound": false,
+    "concreteMatchCount": 0,
+    "fixtureOrHistoricalMatchCount": 9,
+    "matchCount": 9,
+    "pattern": "https://www.safeclaw.kr/share/<uuid>?workerId=..."
+  },
+  "managerShareSessionCreateRoute": {
+    "path": "app\\api\\workpacks\\[id]\\share-sessions\\route.ts",
+    "exists": true,
+    "writesWorkpackShareSessions": true,
+    "requiresApprovalForSafeExactSessionCreation": true
+  },
   "safeReadProbe": {
     "attempted": true,
     "method": "GET",
@@ -75,6 +89,8 @@
     "exactSavedSessionRequiredForUserSpecificPass": true,
     "sessionCreationRequiresAuthenticatedManagerWorkpackFlow": true,
     "sessionCreationWouldRequireDbMutation": true,
+    "sessionCreationRouteWritesWorkpackShareSessions": true,
+    "concreteProductionShareUrlFoundInSourceSearch": false,
     "providerDispatchLiveClaimed": false,
     "externalProviderCalled": false,
     "dbMutationPerformed": false,

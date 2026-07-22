@@ -58,6 +58,56 @@ function fileExists(filePath) {
   return fs.existsSync(filePath);
 }
 
+function inspectManagerShareSessionCreateRoute() {
+  const routePath = path.join("app", "api", "workpacks", "[id]", "share-sessions", "route.ts");
+  const source = fileExists(routePath) ? fs.readFileSync(routePath, "utf8") : "";
+  return {
+    path: routePath,
+    exists: source.length > 0,
+    writesWorkpackShareSessions: source.includes(".from(\"workpack_share_sessions\")")
+      && source.includes(".insert("),
+    requiresApprovalForSafeExactSessionCreation: true,
+  };
+}
+
+function searchConcreteProductionShareUrls() {
+  const fixtureTokenPattern = /\/share\/(?:0{8}|1{8}|2{8}|3{8}|a{8}|b{8}|c{8}|d{8}|e{8}|f{8})-/iu;
+  try {
+    const output = execFileSync("git", [
+      "grep",
+      "-n",
+      "-E",
+      "https://www\\.safeclaw\\.kr/share/[0-9a-fA-F-]{36}\\?workerId=",
+      "--",
+      ".",
+    ], { encoding: "utf8" }).trim();
+    const matches = output
+      ? output.split(/\r?\n/u).filter((line) => line.trim().length > 0)
+      : [];
+    const concreteMatches = matches.filter((line) => {
+      const normalized = line.toLowerCase();
+      return !normalized.startsWith("tests/")
+        && !normalized.includes("fixture")
+        && !fixtureTokenPattern.test(normalized);
+    });
+    return {
+      performed: true,
+      concreteProductionShareUrlFound: concreteMatches.length > 0,
+      concreteMatchCount: concreteMatches.length,
+      fixtureOrHistoricalMatchCount: matches.length - concreteMatches.length,
+      matchCount: matches.length,
+      pattern: "https://www.safeclaw.kr/share/<uuid>?workerId=...",
+    };
+  } catch {
+    return {
+      performed: true,
+      concreteProductionShareUrlFound: false,
+      matchCount: 0,
+      pattern: "https://www.safeclaw.kr/share/<uuid>?workerId=...",
+    };
+  }
+}
+
 /**
  * @param {string} baseUrl
  */
@@ -328,6 +378,8 @@ async function main() {
   const buildInfo = await readBuildInfo(options.baseUrl);
   const missingSessionGet = await probeMissingSessionGet(options.baseUrl);
   const invalidSessionGet = await probeInvalidSessionGet(options.baseUrl);
+  const managerShareSessionCreateRoute = inspectManagerShareSessionCreateRoute();
+  const concreteProductionShareUrlSearch = searchConcreteProductionShareUrls();
   const safeMissingSessionReadVerdict = classifySafeMissingSessionRead(missingSessionGet.status);
   const safeInvalidSessionReadVerdict = classifySafeInvalidSessionRead(invalidSessionGet.status);
   const exactSessionUrl = normalizeExactShareUrl(options.exactUrl, options.baseUrl);
@@ -383,6 +435,8 @@ async function main() {
         exists: fileExists(path.join("app", "api", "workpacks", "[id]", "share-sessions", "route.ts")),
       },
     },
+    concreteProductionShareUrlSearch,
+    managerShareSessionCreateRoute,
     safeReadProbe: missingSessionGet,
     invalidReadProbe: invalidSessionGet,
     safeMissingSessionReadVerdict,
@@ -393,6 +447,8 @@ async function main() {
       exactSavedSessionRequiredForUserSpecificPass: true,
       sessionCreationRequiresAuthenticatedManagerWorkpackFlow: true,
       sessionCreationWouldRequireDbMutation: true,
+      sessionCreationRouteWritesWorkpackShareSessions: managerShareSessionCreateRoute.writesWorkpackShareSessions,
+      concreteProductionShareUrlFoundInSourceSearch: concreteProductionShareUrlSearch.concreteProductionShareUrlFound,
       providerDispatchLiveClaimed: false,
       externalProviderCalled: false,
       dbMutationPerformed: exactSessionMutationRequests.length > 0,
@@ -441,6 +497,10 @@ DB mutation performed: \`${report.boundary.dbMutationPerformed}\`
 - Recipient page exists: \`${report.routeFiles.recipientPage.exists}\`
 - Recipient API exists: \`${report.routeFiles.recipientApi.exists}\`
 - Manager share-session create API exists: \`${report.routeFiles.managerSessionCreateApi.exists}\`
+- Concrete production saved-share URL found in source search: \`${report.concreteProductionShareUrlSearch.concreteProductionShareUrlFound}\`
+- Concrete production saved-share URL concrete matches: \`${report.concreteProductionShareUrlSearch.concreteMatchCount ?? 0}\`
+- Fixture/historical saved-share URL source-search matches: \`${report.concreteProductionShareUrlSearch.fixtureOrHistoricalMatchCount ?? 0}\`
+- Manager create route writes workpack_share_sessions: \`${report.managerShareSessionCreateRoute.writesWorkpackShareSessions}\`
 - Safe missing-session GET status: \`${missingSessionGet.status ?? "error"}\`
 - Safe missing-session read verdict: \`${report.safeMissingSessionReadVerdict}\`
 - Safe missing-session GET mutation performed: \`false\`
@@ -468,7 +528,7 @@ ${exactSessionUrl
     ? "A concrete exact saved/generated `/share/[sessionId]` URL was provided, so this audit measured the recipient route geometry without clicking confirmation or sending provider messages. Any non-GET `/api/share-sessions` request keeps the result non-claimable."
     : "Exact saved/generated `/share/[sessionId]` remains missing because no concrete production session URL, saved session id, user-observed generated payload, or approved safe creation flow was provided. Fixture and generated `/workspace?share` proofs remain useful scoped layout evidence, but they are not accepted as exact saved-session proof for the user's desktop mobile-like Share complaint."}
 
-Creating a real share session is not approval-free: the manager route is an authenticated workpack flow and would create or read persisted share-session state. This audit therefore performs only a safe read of a deliberately missing UUID and records \`dbMutationPerformed=false\`.
+Creating a real share session is not approval-free: the manager route is an authenticated workpack flow and the current source inspection confirms it writes \`workpack_share_sessions\`. This audit therefore performs only a safe read of a deliberately missing UUID and records \`dbMutationPerformed=false\`.
 
 ## Next Evidence Needed
 

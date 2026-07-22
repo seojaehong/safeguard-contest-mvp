@@ -175,15 +175,25 @@ describe("share exact session boundary runner", () => {
       expect(result.stderr).toBe("");
       expect(result.stdout).toContain("\"exactSavedUserSessionReproduced\": false");
       expect(report).toMatchObject({
+        concreteProductionShareUrlSearch: {
+          concreteProductionShareUrlFound: false,
+          performed: true,
+        },
         exactSavedSessionUrlProvided: false,
         exactSavedUserSessionReproduced: false,
         liveCommit: "fixture-live-commit",
+        managerShareSessionCreateRoute: {
+          requiresApprovalForSafeExactSessionCreation: true,
+          writesWorkpackShareSessions: true,
+        },
         safeMissingSessionReadVerdict: "PASS_FAIL_CLOSED",
         safeInvalidSessionReadVerdict: "PASS_INVALID_ID_FAIL_CLOSED",
         sessionKind: "missing-exact",
         verdict: "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
       });
       expect((report.boundary as Record<string, unknown>).dbMutationPerformed).toBe(false);
+      expect((report.boundary as Record<string, unknown>).sessionCreationRouteWritesWorkpackShareSessions).toBe(true);
+      expect((report.boundary as Record<string, unknown>).concreteProductionShareUrlFoundInSourceSearch).toBe(false);
       expect(report.forbiddenClaims).toContain("Exact saved Share is proven despite non-GET /api/share-sessions requests occurring during the probe.");
       expect(report.forbiddenClaims).not.toContain("Exact saved Share is proven when non-GET /api/share-sessions requests occurred during the probe.");
     } finally {
