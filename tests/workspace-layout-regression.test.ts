@@ -1680,6 +1680,8 @@ describe("workspace layout regression", () => {
     });
 
     expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewportWidth + 1);
+    // Broad editor-flow smoke only: this catches runaway overflow while the
+    // workspace-bounded-workbench DoD owns first-task distance and long-form UX.
     expect(collapsedScrollHeight).toBeLessThanOrEqual(metrics.viewportHeight * 6.5);
     expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.viewportHeight * 10);
     expect(metrics.structuredSectionCount).toBeGreaterThanOrEqual(4);
@@ -1826,6 +1828,8 @@ describe("workspace layout regression", () => {
       };
     });
     expect(mobileMetrics.scrollWidth).toBeLessThanOrEqual(mobileMetrics.viewportWidth + 1);
+    // Broad editor-flow smoke only; do not read this as a mobile Documents UX
+    // cockpit pass. The DoD/evidence gates use stricter route-specific metrics.
     expect(mobileCollapsedScrollHeight).toBeLessThanOrEqual(mobileMetrics.viewportHeight * 3.4);
     expect(mobileCollapsedEditorMetrics.shellOverflowY).toBe("auto");
     expect(mobileCollapsedEditorMetrics.fieldWorkspaceOverflowY).toBe("auto");

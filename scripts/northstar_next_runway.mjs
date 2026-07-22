@@ -261,6 +261,7 @@ function boundedWorkbenchDodSummary(dod) {
   const documents = isRecord(acceptance.documents) ? acceptance.documents : {};
   const share = isRecord(acceptance.shareResult) ? acceptance.shareResult : {};
   const evidence = isRecord(dod.evidenceRequirements) ? dod.evidenceRequirements : {};
+  const legacy = isRecord(dod.legacyBroadRegressionBoundary) ? dod.legacyBroadRegressionBoundary : {};
   return {
     verdict: asString(dod.verdict),
     routeSplitAloneAcceptedAsFix: asBoolean(dod.routeSplitAloneAcceptedAsFix),
@@ -274,6 +275,15 @@ function boundedWorkbenchDodSummary(dod) {
     requiredViewports: Array.isArray(evidence.requiredViewports) ? evidence.requiredViewports.map(asString).filter(Boolean) : [],
     requiredThemes: Array.isArray(evidence.requiredThemes) ? evidence.requiredThemes.map(asString).filter(Boolean) : [],
     generatedFixtureAndSavedSessionSeparated: asBoolean(evidence.generatedFixtureAndSavedSessionSeparated),
+    legacyBroadRegressionBoundary: {
+      testFile: asString(legacy.testFile),
+      role: asString(legacy.role),
+      notAcceptedAsUxPassGate: asBoolean(legacy.notAcceptedAsUxPassGate),
+      desktopCollapsedSmokeScreens: typeof legacy.desktopCollapsedSmokeScreens === "number" ? legacy.desktopCollapsedSmokeScreens : null,
+      desktopExpandedSmokeScreens: typeof legacy.desktopExpandedSmokeScreens === "number" ? legacy.desktopExpandedSmokeScreens : null,
+      mobileCollapsedSmokeScreens: typeof legacy.mobileCollapsedSmokeScreens === "number" ? legacy.mobileCollapsedSmokeScreens : null,
+      companionDodRequired: asBoolean(legacy.companionDodRequired),
+    },
   };
 }
 
@@ -504,6 +514,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Documents remaining debt: full 12-document authoring polish remains. The all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content.
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.
 - Bounded workbench DoD: route split alone is not accepted; desktop Documents hard-REDs above the recorded screen threshold, /share/result desktop requires multi-region workbench geometry, and generated fixture evidence must stay separate from exact saved/session proof.
+- Legacy workspace-layout regression: remains a broad no-overflow/editor-flow smoke only, not a long-form UX PASS gate; the DoD and route-specific evidence own first-task distance.
 - Share desktop: current measured Workspace Share and invited recipient routes pass desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.

@@ -110,5 +110,19 @@
     "documentsLongFormIA": "evaluation\\documents-long-form-ia-2026-07-22\\report.json",
     "shareGeneratedSessionPerception": "evaluation\\share-generated-session-perception-2026-07-22\\report.json",
     "note": "Existing PASS artifacts remain scoped to their measured route/session states. A user-visible exact saved/generated session that still feels mobile-like requires separate repro before broad PASS claims."
+  },
+  "legacyBroadRegressionBoundary": {
+    "testFile": "tests\\workspace-layout-regression.test.ts",
+    "role": "broad no-overflow/editor-flow smoke, not a Documents long-form UX pass gate",
+    "notAcceptedAsUxPassGate": true,
+    "desktopCollapsedSmokeScreens": 6.5,
+    "desktopExpandedSmokeScreens": 10,
+    "mobileCollapsedSmokeScreens": 3.4,
+    "companionDodRequired": true,
+    "companionEvidence": [
+      "evaluation\\documents-long-form-ia-2026-07-22\\report.json",
+      "evaluation\\share-generated-session-perception-2026-07-22\\report.json"
+    ],
+    "reason": "A user-observed 2.9-screen document surface can still pass the historical smoke thresholds, so those thresholds must never be reported as cockpit or selected-only bounded workbench proof."
   }
 }

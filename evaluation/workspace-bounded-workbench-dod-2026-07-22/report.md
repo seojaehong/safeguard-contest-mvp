@@ -37,3 +37,7 @@ Use existing primitive-to-semantic-to-component tokens for shell, rail, card, ed
 ## Required Evidence
 
 Measure day and night at `1440x723` and `390x723`; keep `1440x900` and `390x844` as recommended supporting viewports. Report route, session kind, scrollHeight ratio, visible selected editor count, full document body visible count, supporting-doc collapsed state, sticky overlap, horizontal overflow, hidden primary CTA, share desktop column count, share first-viewport x-region count, and design-token surface coverage.
+
+## Legacy Regression Boundary
+
+`tests\workspace-layout-regression.test.ts` remains a broad no-overflow/editor-flow smoke, not a Documents long-form UX pass gate. Its historical thresholds (`6.5x` collapsed desktop, `10x` expanded desktop, `3.4x` collapsed mobile) can allow a user-visible multi-screen document surface, so they must be paired with the stricter Documents/Share DoD evidence before any cockpit or selected-only bounded workbench claim.

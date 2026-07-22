@@ -107,6 +107,15 @@ type NextRunwayReport = {
     requiredViewports: string[];
     requiredThemes: string[];
     generatedFixtureAndSavedSessionSeparated: boolean;
+    legacyBroadRegressionBoundary: {
+      testFile: string;
+      role: string;
+      notAcceptedAsUxPassGate: boolean;
+      desktopCollapsedSmokeScreens: number | null;
+      desktopExpandedSmokeScreens: number | null;
+      mobileCollapsedSmokeScreens: number | null;
+      companionDodRequired: boolean;
+    };
   };
   nextSafeWorkWithoutApproval: string[];
 };
@@ -364,6 +373,15 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       requiredThemes: ["day", "night"],
       generatedFixtureAndSavedSessionSeparated: true,
     },
+    legacyBroadRegressionBoundary: {
+      testFile: "tests\\workspace-layout-regression.test.ts",
+      role: "broad no-overflow/editor-flow smoke, not a Documents long-form UX pass gate",
+      notAcceptedAsUxPassGate: true,
+      desktopCollapsedSmokeScreens: 6.5,
+      desktopExpandedSmokeScreens: 10,
+      mobileCollapsedSmokeScreens: 3.4,
+      companionDodRequired: true,
+    },
   });
 
   const firstHead = commitAll(root, "seed");
@@ -491,8 +509,53 @@ describe("northstar next runway generator", () => {
       generatedFixtureAndSavedSessionSeparated: true,
     });
     expect(report.boundedWorkbenchDod.requiredThemes).toEqual(["day", "night"]);
+    expect(report.boundedWorkbenchDod.legacyBroadRegressionBoundary).toMatchObject({
+      testFile: "tests\\workspace-layout-regression.test.ts",
+      notAcceptedAsUxPassGate: true,
+      desktopCollapsedSmokeScreens: 6.5,
+      desktopExpandedSmokeScreens: 10,
+      mobileCollapsedSmokeScreens: 3.4,
+      companionDodRequired: true,
+    });
+    expect(report.boundedWorkbenchDod.legacyBroadRegressionBoundary.role).toContain("not a Documents long-form UX pass gate");
     expect(report.nextSafeWorkWithoutApproval).toContain(
       "keep UI follow-up scoped to full 12-document authoring polish or reproduced exact-session desktop Share full-workbench perception issues",
+    );
+  });
+
+  it("keeps broad workspace height smoke separate from the bounded workbench DoD", () => {
+    const workspaceRegression = fs.readFileSync(
+      path.resolve("tests", "workspace-layout-regression.test.ts"),
+      "utf8",
+    );
+    const dod = JSON.parse(fs.readFileSync(
+      path.resolve("evaluation", "workspace-bounded-workbench-dod-2026-07-22", "report.json"),
+      "utf8",
+    )) as {
+      routeSplitAloneAcceptedAsFix: boolean;
+      acceptance: {
+        documents: {
+          desktopHardRedScreens: number;
+        };
+      };
+      legacyBroadRegressionBoundary: {
+        notAcceptedAsUxPassGate: boolean;
+        desktopExpandedSmokeScreens: number;
+        companionDodRequired: boolean;
+      };
+    };
+
+    expect(workspaceRegression).toContain("viewportHeight * 10");
+    expect(workspaceRegression).toContain("Broad editor-flow smoke only");
+    expect(dod.routeSplitAloneAcceptedAsFix).toBe(false);
+    expect(dod.acceptance.documents.desktopHardRedScreens).toBe(2);
+    expect(dod.legacyBroadRegressionBoundary).toMatchObject({
+      notAcceptedAsUxPassGate: true,
+      desktopExpandedSmokeScreens: 10,
+      companionDodRequired: true,
+    });
+    expect(dod.legacyBroadRegressionBoundary.desktopExpandedSmokeScreens).toBeGreaterThan(
+      dod.acceptance.documents.desktopHardRedScreens,
     );
   });
 
