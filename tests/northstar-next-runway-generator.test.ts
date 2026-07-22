@@ -88,6 +88,19 @@ type NextRunwayReport = {
     safeReadStatus: number | null;
     safeReadMessage: string;
   };
+  sharePublicSessionStorageReadiness: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    dbMutationPerformed: boolean;
+    providerDispatchLiveClaimed: boolean;
+    externalProviderCalled: boolean;
+    livePublicApiStatus: number | null;
+    workpacksReadable: boolean;
+    shareSessionsReadable: boolean;
+    shareSessionsErrorCode: string;
+    shareSessionsErrorMessage: string;
+  };
   documentsLongFormIA: {
     verdict: string;
     sourceHead: string;
@@ -381,6 +394,33 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       dbMutationPerformed: false,
     },
   });
+  writeJson(root, "evaluation/share-public-session-storage-readiness-2026-07-23/report.json", {
+    verdict: "RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    dbMutationPerformed: false,
+    providerDispatchLiveClaimed: false,
+    externalProviderCalled: false,
+    livePublicApiProbe: {
+      status: 500,
+      message: "공유 세션을 확인하지 못했습니다.",
+    },
+    serviceRoleReadOnlyProbe: {
+      workpacks: {
+        readable: true,
+        dataLen: 1,
+        error: null,
+      },
+      workpackShareSessionsFullSelect: {
+        readable: false,
+        dataLen: null,
+        error: {
+          code: "PGRST205",
+          message: "Could not find the table 'public.workpack_share_sessions' in the schema cache",
+        },
+      },
+    },
+  });
   writeJson(root, "evaluation/documents-long-form-ia-2026-07-22/report.json", {
     verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION",
     sourceHead: "TO_FILL",
@@ -642,6 +682,14 @@ describe("northstar next runway generator", () => {
       safeMissingSessionReadVerdict: "RED_SERVER_ERROR_SHAPED_MISSING_SESSION",
       invalidReadStatus: 400,
       safeInvalidSessionReadVerdict: "PASS_INVALID_ID_FAIL_CLOSED",
+    });
+    expect(report.sharePublicSessionStorageReadiness).toMatchObject({
+      verdict: "RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION",
+      livePublicApiStatus: 500,
+      workpacksReadable: true,
+      shareSessionsReadable: false,
+      shareSessionsErrorCode: "PGRST205",
+      dbMutationPerformed: false,
     });
     expect(report.uiInterpretation.documentsContainment).toContain("selected-only bounded workbench");
     expect(report.uiInterpretation.selectedEditorDetail).toContain("desktop 1440x900");

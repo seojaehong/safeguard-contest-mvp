@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T16:39:41.119Z",
+  "generatedAt": "2026-07-22T16:46:35.268Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "e03bad0b665782281286350abc8c3cb8bdabbc0f",
-  "productionCommit": "e03bad0b665782281286350abc8c3cb8bdabbc0f",
+  "sourceHead": "a85d3faeea726e6f07a3bf3a80f3ee2bc8ad3894",
+  "productionCommit": "a85d3faeea726e6f07a3bf3a80f3ee2bc8ad3894",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "e03bad0b665782281286350abc8c3cb8bdabbc0f",
+    "commitSha": "a85d3faeea726e6f07a3bf3a80f3ee2bc8ad3894",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-qxdq0f1rm-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-6ndw2kw1d-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -20,8 +20,8 @@
   "sourceHeadLivePending": false,
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "e03bad0b665782281286350abc8c3cb8bdabbc0f",
-  "liveRollupLiveCommit": "e03bad0b665782281286350abc8c3cb8bdabbc0f",
+  "liveExactEvidenceCommit": "a85d3faeea726e6f07a3bf3a80f3ee2bc8ad3894",
+  "liveRollupLiveCommit": "a85d3faeea726e6f07a3bf3a80f3ee2bc8ad3894",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -37,6 +37,7 @@
     "sifEmbeddingPreflight": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
     "shareGeneratedSessionPerception": "evaluation\\share-generated-session-perception-2026-07-22\\report.json",
     "shareExactSessionBoundary": "evaluation\\share-exact-session-boundary-2026-07-22\\report.json",
+    "sharePublicSessionStorageReadiness": "evaluation\\share-public-session-storage-readiness-2026-07-23\\report.json",
     "documentsCockpitWorkbenchGeometry": "evaluation\\documents-cockpit-workbench-geometry-2026-07-22\\report.json",
     "documentsLongFormIA": "evaluation\\documents-long-form-ia-2026-07-22\\report.json",
     "boundedWorkbenchDod": "evaluation\\workspace-bounded-workbench-dod-2026-07-22\\report.json",
@@ -315,6 +316,19 @@
     "invalidReadMessage": "공유 세션 식별 형식이 올바르지 않습니다.",
     "safeInvalidSessionReadVerdict": "PASS_INVALID_ID_FAIL_CLOSED"
   },
+  "sharePublicSessionStorageReadiness": {
+    "verdict": "RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION",
+    "sourceHead": "a85d3faeea726e6f07a3bf3a80f3ee2bc8ad3894",
+    "productionCommit": "e03bad0b665782281286350abc8c3cb8bdabbc0f",
+    "dbMutationPerformed": false,
+    "providerDispatchLiveClaimed": false,
+    "externalProviderCalled": false,
+    "livePublicApiStatus": 500,
+    "workpacksReadable": true,
+    "shareSessionsReadable": false,
+    "shareSessionsErrorCode": "PGRST205",
+    "shareSessionsErrorMessage": "Could not find the table 'public.workpack_share_sessions' in the schema cache"
+  },
   "documentsCockpitWorkbenchGeometry": {
     "verdict": "PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH",
     "sourceHead": "e4908c1e9ab18ac27f42770e3cb94a7059487b97",
@@ -557,6 +571,7 @@
     "reproduce an exact saved/generated Share session before using fixture or generated /workspace share evidence to close the user's exact Share complaint",
     "treat the Share exact-session boundary as open until a concrete session URL/payload is provided; the current no-mutation boundary audit only proves route presence and missing exact evidence",
     "keep Share UI evidence split by route: invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result state each need their own geometry before closing user-specific mobile-like complaints",
+    "resolve public Share storage readiness before exact saved-session closure: current evidence shows workpacks readable but workpack_share_sessions missing from production PostgREST schema cache",
     "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
     "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
     "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held"

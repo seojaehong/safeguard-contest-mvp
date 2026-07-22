@@ -55,6 +55,7 @@ const EVIDENCE_PATHS = Object.freeze({
   shareRecipientCockpit: path.join("evaluation", "share-recipient-cockpit-2026-07-22", "report.json"),
   shareResultDrilldown: path.join("evaluation", "share-result-drilldown-2026-07-21", "report.json"),
   shareExactSessionBoundary: path.join("evaluation", "share-exact-session-boundary-2026-07-22", "report.json"),
+  sharePublicSessionStorageReadiness: path.join("evaluation", "share-public-session-storage-readiness-2026-07-23", "report.json"),
   dispatchStandalone: path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"),
   providerDispatchIdempotency: path.join("evaluation", "provider-dispatch-idempotency-gate-2026-07-19", "report.json"),
   workspaceIaLiveRefinement: path.join("evaluation", "workspace-ia-live-f67-2026-07-21", "report.json"),
@@ -1656,6 +1657,16 @@ function evaluateShareExactSessionBoundaryGate(rootDir) {
   const acceptance = isRecord(report.exactSessionAcceptance) ? report.exactSessionAcceptance : {};
   const safeMissingSessionReadVerdict = readString(report.safeMissingSessionReadVerdict);
   const safeInvalidSessionReadVerdict = readString(report.safeInvalidSessionReadVerdict);
+  const storageReadiness = readJsonFile(rootDir, EVIDENCE_PATHS.sharePublicSessionStorageReadiness);
+  const storageVerdict = isRecord(storageReadiness) ? readString(storageReadiness.verdict) : "";
+  const storageProbe = isRecord(storageReadiness) && isRecord(storageReadiness.serviceRoleReadOnlyProbe)
+    ? storageReadiness.serviceRoleReadOnlyProbe
+    : {};
+  const storageShareProbe = isRecord(storageProbe) && isRecord(storageProbe.workpackShareSessionsFullSelect)
+    ? storageProbe.workpackShareSessionsFullSelect
+    : {};
+  const storageShareError = isRecord(storageShareProbe.error) ? storageShareProbe.error : {};
+  const storageErrorCode = readString(storageShareError.code);
   const noMutation = boundary.dbMutationPerformed === false
     && boundary.dispatchMutationPerformed === false
     && boundary.providerDispatchLiveClaimed === false
@@ -1695,12 +1706,13 @@ function evaluateShareExactSessionBoundaryGate(rootDir) {
       label: "Exact saved Share session boundary",
       state: "notice",
       evidencePath,
-      detail: `Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass. Safe missing-session read verdict is ${safeMissingSessionReadVerdict || "unknown"} and invalid-id read verdict is ${safeInvalidSessionReadVerdict || "unknown"}; both remain separate from exact saved-session geometry.`,
+      detail: `Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass. Safe missing-session read verdict is ${safeMissingSessionReadVerdict || "unknown"} and invalid-id read verdict is ${safeInvalidSessionReadVerdict || "unknown"}; both remain separate from exact saved-session geometry. Public share storage readiness is ${storageVerdict || "missing"} with share-session read error ${storageErrorCode || "unknown"}.`,
       nextActions: [
         "Obtain a concrete production /share/[sessionId]?workerId=... URL or approved safe creation flow before closing the user's desktop mobile-like Share complaint.",
         "Rerun desktop 1440x723/1440x900 and mobile 390x723 geometry with sessionKind=saved-exact, root width ratio, x-region count, first action, preview/status visibility, and overflow metrics.",
         "Keep the deliberately missing share-session GET fail-closed; if it returns a 5xx shape, track that as launch-quality debt rather than exact saved-session proof.",
         "Keep invalid share-session ids fail-closed at 400 so URL validation remains separated from storage-backed missing-session read debt.",
+        "Resolve production public share storage readiness so workpack_share_sessions is visible in the PostgREST schema cache before exact saved-session closure.",
       ],
     });
   }

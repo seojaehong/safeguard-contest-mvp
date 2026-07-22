@@ -1040,6 +1040,21 @@ function createFixtureRoot(): string {
       exactSessionMutationRequestCount: 0,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "share-public-session-storage-readiness-2026-07-23", "report.json"), {
+    verdict: "RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION",
+    dbMutationPerformed: false,
+    providerDispatchLiveClaimed: false,
+    externalProviderCalled: false,
+    serviceRoleReadOnlyProbe: {
+      workpackShareSessionsFullSelect: {
+        readable: false,
+        error: {
+          code: "PGRST205",
+          message: "Could not find the table 'public.workpack_share_sessions' in the schema cache",
+        },
+      },
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"), {
     verdict: "PASS_PRODUCTION",
     acceptance: {
@@ -1229,8 +1244,10 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.state).toBe("notice");
     expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.detail).toContain("fixture or generated /workspace Share proof is explicitly not accepted");
+    expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.detail).toContain("PGRST205");
     expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.nextActions.join("\n")).toContain("concrete production /share/[sessionId]?workerId=...");
     expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.nextActions.join("\n")).toContain("sessionKind=saved-exact");
+    expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.nextActions.join("\n")).toContain("PostgREST schema cache");
     expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.state).toBe("approval_gated");
     expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.detail).toContain("attempt-level idempotency reservation");
     expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.detail).toContain("per-channel result persistence");

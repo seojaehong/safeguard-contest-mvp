@@ -27,6 +27,7 @@ const ARTIFACTS = Object.freeze({
   sifEmbeddingPreflight: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
   shareGeneratedSessionPerception: path.join("evaluation", "share-generated-session-perception-2026-07-22", "report.json"),
   shareExactSessionBoundary: path.join("evaluation", "share-exact-session-boundary-2026-07-22", "report.json"),
+  sharePublicSessionStorageReadiness: path.join("evaluation", "share-public-session-storage-readiness-2026-07-23", "report.json"),
   documentsCockpitWorkbenchGeometry: path.join("evaluation", "documents-cockpit-workbench-geometry-2026-07-22", "report.json"),
   documentsLongFormIA: path.join("evaluation", "documents-long-form-ia-2026-07-22", "report.json"),
   boundedWorkbenchDod: path.join("evaluation", "workspace-bounded-workbench-dod-2026-07-22", "report.json"),
@@ -271,6 +272,31 @@ function shareExactSessionBoundarySummary(shareExact) {
     invalidReadStatus: typeof invalidReadProbe.status === "number" ? invalidReadProbe.status : null,
     invalidReadMessage: asString(invalidReadProbe.message),
     safeInvalidSessionReadVerdict: asString(shareExact.safeInvalidSessionReadVerdict),
+  };
+}
+
+/**
+ * @param {unknown} storageReadiness
+ */
+function sharePublicSessionStorageReadinessSummary(storageReadiness) {
+  if (!isRecord(storageReadiness)) return {};
+  const livePublicApiProbe = isRecord(storageReadiness.livePublicApiProbe) ? storageReadiness.livePublicApiProbe : {};
+  const serviceProbe = isRecord(storageReadiness.serviceRoleReadOnlyProbe) ? storageReadiness.serviceRoleReadOnlyProbe : {};
+  const workpacks = isRecord(serviceProbe.workpacks) ? serviceProbe.workpacks : {};
+  const fullSelect = isRecord(serviceProbe.workpackShareSessionsFullSelect) ? serviceProbe.workpackShareSessionsFullSelect : {};
+  const fullError = isRecord(fullSelect.error) ? fullSelect.error : {};
+  return {
+    verdict: asString(storageReadiness.verdict),
+    sourceHead: asString(storageReadiness.sourceHead),
+    productionCommit: asString(storageReadiness.productionCommit),
+    dbMutationPerformed: asBoolean(storageReadiness.dbMutationPerformed),
+    providerDispatchLiveClaimed: asBoolean(storageReadiness.providerDispatchLiveClaimed),
+    externalProviderCalled: asBoolean(storageReadiness.externalProviderCalled),
+    livePublicApiStatus: typeof livePublicApiProbe.status === "number" ? livePublicApiProbe.status : null,
+    workpacksReadable: asBoolean(workpacks.readable),
+    shareSessionsReadable: asBoolean(fullSelect.readable),
+    shareSessionsErrorCode: asString(fullError.code),
+    shareSessionsErrorMessage: asString(fullError.message),
   };
 }
 
@@ -546,6 +572,7 @@ export function buildNorthstarNextRunway(options) {
   const sif = readJson(options.rootDir, ARTIFACTS.sifEmbeddingPreflight);
   const shareGenerated = readJson(options.rootDir, ARTIFACTS.shareGeneratedSessionPerception);
   const shareExactBoundary = readJson(options.rootDir, ARTIFACTS.shareExactSessionBoundary);
+  const sharePublicSessionStorageReadiness = readOptionalJson(options.rootDir, ARTIFACTS.sharePublicSessionStorageReadiness);
   const documentsCockpitGeometry = readOptionalJson(options.rootDir, ARTIFACTS.documentsCockpitWorkbenchGeometry);
   const documentsIa = readJson(options.rootDir, ARTIFACTS.documentsLongFormIA);
   const boundedDod = readJson(options.rootDir, ARTIFACTS.boundedWorkbenchDod);
@@ -636,6 +663,7 @@ export function buildNorthstarNextRunway(options) {
     sifEmbeddingRuntime: sifSummary(sif),
     shareGeneratedSessionPerception: shareGeneratedSessionSummary(shareGenerated),
     shareExactSessionBoundary: shareExactSessionBoundarySummary(shareExactBoundary),
+    sharePublicSessionStorageReadiness: sharePublicSessionStorageReadinessSummary(sharePublicSessionStorageReadiness),
     documentsCockpitWorkbenchGeometry: documentsCockpitWorkbenchGeometrySummary(documentsCockpitGeometry),
     documentsLongFormIA: documentsLongFormIASummary(documentsIa),
     boundedWorkbenchDod: boundedWorkbenchDodSummary(boundedDod),
@@ -652,6 +680,7 @@ export function buildNorthstarNextRunway(options) {
       "reproduce an exact saved/generated Share session before using fixture or generated /workspace share evidence to close the user's exact Share complaint",
       "treat the Share exact-session boundary as open until a concrete session URL/payload is provided; the current no-mutation boundary audit only proves route presence and missing exact evidence",
       "keep Share UI evidence split by route: invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result state each need their own geometry before closing user-specific mobile-like complaints",
+      "resolve public Share storage readiness before exact saved-session closure: current evidence shows workpacks readable but workpack_share_sessions missing from production PostgREST schema cache",
       "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
       "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
       "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held",
@@ -751,6 +780,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
 - Share route evidence split: invited recipient \`/share/[sessionId]\` fixture route, exact saved/generated \`/share/[sessionId]\`, and manager/workspace share-result route remain separate proof layers. A fixture pass cannot close a user-specific exact saved/session complaint.
 - Share exact-session boundary: \`${report.shareExactSessionBoundary.verdict || "missing"}\`; exact saved reproduced is \`${report.shareExactSessionBoundary.exactSavedUserSessionReproduced === true}\`, safe missing-session GET status is \`${report.shareExactSessionBoundary.safeReadStatus ?? "unknown"}\`, safe-read verdict is \`${report.shareExactSessionBoundary.safeMissingSessionReadVerdict || "unknown"}\`, invalid-id GET status is \`${report.shareExactSessionBoundary.invalidReadStatus ?? "unknown"}\`, invalid-id verdict is \`${report.shareExactSessionBoundary.safeInvalidSessionReadVerdict || "unknown"}\`, and DB/provider mutations remain \`false\`.
+- Share public-session storage readiness: \`${report.sharePublicSessionStorageReadiness.verdict || "missing"}\`; live public API status is \`${report.sharePublicSessionStorageReadiness.livePublicApiStatus ?? "unknown"}\`, service-role workpacks readable is \`${report.sharePublicSessionStorageReadiness.workpacksReadable === true}\`, workpack_share_sessions readable is \`${report.sharePublicSessionStorageReadiness.shareSessionsReadable === true}\`, and share-session read error is \`${report.sharePublicSessionStorageReadiness.shareSessionsErrorCode || "unknown"}\`.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
 
 Route/page split alone is not accepted as the UX fix. Page count only moves long documents/messages to another URL if the route body still unfolds the full artifact. The accepted structure is a three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes for long documents, messages, logs, and raw metadata.
