@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-22T08:47:56.668Z",
-  "sourceSha": "25ca080e651ba20f5d6931b77e2e19e06c1b4825",
+  "generatedAt": "2026-07-22T08:51:04.992Z",
+  "sourceSha": "22b357341e755fb5a4a2e1057dde412e20e92b9e",
   "overall": "open",
   "gates": [
     {
@@ -96,7 +96,7 @@
       "state": "approval_gated",
       "label": "SIF embedding runtime",
       "evidencePath": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 4fcd064bfe9c6d6d98df7873a3091550dddca0c5.",
+      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 22b357341e755fb5a4a2e1057dde412e20e92b9e.",
       "nextActions": [
         "Approve SIF-only migration, embedding cost, upload, and vector runtime separately.",
         "Do not claim vector retrieval is production-active before post-migration verification."
