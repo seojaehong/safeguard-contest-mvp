@@ -1,10 +1,10 @@
 # KOSHA Exact Promotion Review Gate
 
-Generated at: 2026-07-22T11:10:43.167Z
+Generated at: 2026-07-22T11:15:38.849Z
 
 Verdict: `REVIEW_CHECKLIST_INCOMPLETE_BLOCKED`
 
-Source HEAD: `5571972002e4dabe5853d9eab9b1cc225500bdc6`
+Source HEAD: `a02ab622b20fc10a1974dc8bdd54fa74da02e3e6`
 
 Packet: `evaluation\kosha-exact-promotion-packet-2026-07-22\report.json`
 
@@ -16,11 +16,31 @@ Exact promotion performed: `false`
 
 Exact trust promotion still requires separate approval: `true`
 
+Exact trust promotion approved: `false`
+
+Exact registry write artifact created: `false`
+
 ## Candidate Review Counts
 
 - Packet candidates: 8
 - Review rows: 8
 - Passed rows: 0
+- Packet/review set matches: true
+
+## Failure Summary
+
+- candidateReviewCountMismatch: 0
+- missingReviewRows: 0
+- unexpectedReviewRows: 0
+- metadataMismatches: 0
+- missingRequiredChecks: 0
+- unconfirmedRequiredChecks: 40
+- unexpectedRequiredChecks: 0
+- requiredCheckCountMismatches: 0
+- missingHumanConfirmations: 8
+- missingReviewers: 8
+- missingReviewedAt: 8
+- other: 0
 
 ## Failures
 
