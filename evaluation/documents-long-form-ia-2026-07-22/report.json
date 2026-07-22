@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-documents-long-form-ia/v1",
-  "checkedAt": "2026-07-22T04:58:33.682Z",
-  "baseUrl": "http://127.0.0.1:3064",
-  "sourceHead": "197ebf33cc980f0ec387e5477e2297716355599f",
+  "checkedAt": "2026-07-22T06:05:44.791Z",
+  "baseUrl": "http://127.0.0.1:3065",
+  "sourceHead": "6a7e675e02676f1883318fdb198fd7dbb12cc482",
   "productionBuild": {
     "ok": true,
     "configured": false,
@@ -12,6 +12,12 @@
     "environment": null,
     "deploymentUrl": null,
     "message": "배포 커밋 식별자가 런타임 환경에 노출되지 않았습니다."
+  },
+  "localProductionProbe": {
+    "launchedAfterLocalBuildFromRepoHead": "6a7e675e02676f1883318fdb198fd7dbb12cc482",
+    "baseUrl": "http://127.0.0.1:3065",
+    "buildInfoMarkerUnavailable": true,
+    "buildInfoLimitation": "Local next start served the built app, but /api/build-info did not expose a commit marker. The evidence source is therefore the git sourceHead captured by the probe, not a build-info exact marker."
   },
   "providerDispatchLiveClaimed": false,
   "dbMutationPerformed": false,
@@ -24,7 +30,7 @@
     "firstActionCockpitVerdict": "selected document header, field strip, evidence/recheck CTA, shell containment, sticky overlap 0, and no horizontal overflow",
     "selectedEditorFieldFirstVerdict": "risk row header and hazard field appear before raw textarea; row header carries evidence and verification context",
     "sameDocumentReselectLandingVerdict": "same risk document launcher/reselect settles inside one second with action row, first risk row header, and hazard field top before raw textarea; full field visibility remains covered by Field-first",
-    "allDocumentLongFormVerdict": "RED if many full bodies/raw editors render serially by default, supporting docs are open by default, or all-12 launcher exposure behaves like a long page instead of bounded navigation",
+    "allDocumentLongFormVerdict": "RED if multiple document bodies/raw editors render serially or if all-12 launcher exposure pushes the selected editor action/hazard out of the viewport instead of staying bounded navigation",
     "selectedEditorDepthVerdict": "RED if the selected document editor shell remains deeper than the bounded target even though the first action is visible",
     "overallDocumentsIAVerdict": "PASS only when first-action cockpit, selected field-first editor, all-document containment, and selected-editor depth all pass"
   },
@@ -139,14 +145,19 @@
         "rawTextareaSecondary": true,
         "sameDocumentReselectMeasured": false,
         "renderedTextareas": 4,
-        "visibleFullDocumentBodiesInViewport": 0,
-        "fullDocumentBodiesRenderedSerially": true,
+        "visibleTextareaInputsInViewport": 0,
+        "visibleFullDocumentBodiesInViewport": 1,
+        "visibleDocumentBodyPanelsInViewport": 1,
+        "visibleRawEditorsInViewport": 0,
+        "fullDocumentBodiesRenderedSerially": false,
+        "supportingLauncherMovesEditorOutOfView": false,
         "defaultOpenSectionCount": 1,
         "supportingDocumentsOpenDefault": false,
         "supportingDocButtonsVisibleDefault": 0,
         "supportingDocButtonCount": 9,
         "allDocTabButtonCount": 12,
-        "coreDocButtonCount": 0,
+        "coreDocButtonCount": 3,
+        "mobilePickerOptionCount": 12,
         "mobileCoreLauncher": {
           "top": 205,
           "bottom": 328,
@@ -192,9 +203,9 @@
         "firstActionCockpitVerdict": "PASS",
         "selectedEditorFieldFirstVerdict": "PASS",
         "sameDocumentReselectLandingVerdict": "n/a",
-        "allDocumentLongFormVerdict": "RED",
+        "allDocumentLongFormVerdict": "PASS",
         "selectedEditorDepthVerdict": "PASS",
-        "overallDocumentsIAVerdict": "PARTIAL"
+        "overallDocumentsIAVerdict": "PASS"
       },
       "summary": {
         "bodyRatio": 1.07,
@@ -204,9 +215,10 @@
         "hazardBottom": 709,
         "rawTextareaTop": 1041,
         "textareas": 4,
-        "inViewportBodies": 0,
+        "inViewportBodies": 1,
         "supportingOpen": false,
-        "supportingVisibleButtons": 0
+        "supportingVisibleButtons": 0,
+        "supportingMovesEditor": false
       }
     },
     {
@@ -319,14 +331,19 @@
         "rawTextareaSecondary": true,
         "sameDocumentReselectMeasured": true,
         "renderedTextareas": 4,
-        "visibleFullDocumentBodiesInViewport": 0,
-        "fullDocumentBodiesRenderedSerially": true,
+        "visibleTextareaInputsInViewport": 0,
+        "visibleFullDocumentBodiesInViewport": 1,
+        "visibleDocumentBodyPanelsInViewport": 1,
+        "visibleRawEditorsInViewport": 0,
+        "fullDocumentBodiesRenderedSerially": false,
+        "supportingLauncherMovesEditorOutOfView": false,
         "defaultOpenSectionCount": 1,
         "supportingDocumentsOpenDefault": false,
         "supportingDocButtonsVisibleDefault": 0,
         "supportingDocButtonCount": 9,
         "allDocTabButtonCount": 12,
-        "coreDocButtonCount": 0,
+        "coreDocButtonCount": 3,
+        "mobilePickerOptionCount": 12,
         "mobileCoreLauncher": {
           "top": 205,
           "bottom": 328,
@@ -372,9 +389,9 @@
         "firstActionCockpitVerdict": "PASS",
         "selectedEditorFieldFirstVerdict": "PASS",
         "sameDocumentReselectLandingVerdict": "PASS",
-        "allDocumentLongFormVerdict": "RED",
+        "allDocumentLongFormVerdict": "PASS",
         "selectedEditorDepthVerdict": "PASS",
-        "overallDocumentsIAVerdict": "PARTIAL"
+        "overallDocumentsIAVerdict": "PASS"
       },
       "summary": {
         "bodyRatio": 1.07,
@@ -384,9 +401,10 @@
         "hazardBottom": 709,
         "rawTextareaTop": 1041,
         "textareas": 4,
-        "inViewportBodies": 0,
+        "inViewportBodies": 1,
         "supportingOpen": false,
-        "supportingVisibleButtons": 0
+        "supportingVisibleButtons": 0,
+        "supportingMovesEditor": false
       }
     },
     {
@@ -409,15 +427,15 @@
         "outsideElements": 0,
         "selectedDocumentTitle": "위험성평가표",
         "selectedDocumentSummary": "4섹션 · 근거 4건 · 확인 1건",
-        "workpackShellTop": 289,
-        "workpackShellBottom": 675,
+        "workpackShellTop": 293,
+        "workpackShellBottom": 679,
         "workpackShellHeight": 386,
         "workpackShellClientHeight": 386,
         "workpackShellScrollHeight": 1651,
         "workpackShellOverflowY": "auto",
         "toolbar": {
-          "top": -913,
-          "bottom": -809,
+          "top": -927,
+          "bottom": -823,
           "left": 621,
           "right": 1356,
           "width": 735,
@@ -427,10 +445,10 @@
           "overflowY": "visible",
           "position": "static"
         },
-        "toolbarBottom": -809,
+        "toolbarBottom": -823,
         "fieldStrip": {
-          "top": -701,
-          "bottom": -653,
+          "top": -715,
+          "bottom": -667,
           "left": 621,
           "right": 1356,
           "width": 735,
@@ -440,10 +458,10 @@
           "overflowY": "visible",
           "position": "static"
         },
-        "fieldStripBottom": -653,
+        "fieldStripBottom": -667,
         "sectionActions": {
-          "top": -637,
-          "bottom": -593,
+          "top": -651,
+          "bottom": -607,
           "left": 621,
           "right": 1356,
           "width": 735,
@@ -453,10 +471,10 @@
           "overflowY": "visible",
           "position": "static"
         },
-        "sectionActionsBottom": -593,
+        "sectionActionsBottom": -607,
         "firstRiskRowHeader": {
-          "top": -492,
-          "bottom": -432,
+          "top": -506,
+          "bottom": -446,
           "left": 634,
           "right": 1343,
           "width": 709,
@@ -466,11 +484,11 @@
           "overflowY": "visible",
           "position": "static"
         },
-        "firstRiskRowHeaderBottom": -432,
+        "firstRiskRowHeaderBottom": -446,
         "firstRiskRowHeaderText": "01외벽 도장 작업추락 · 위험등급 high · 근거 2건 · 확인 확인 예정×",
         "firstRiskHazardField": {
-          "top": -396,
-          "bottom": -336,
+          "top": -410,
+          "bottom": -350,
           "left": 634,
           "right": 1343,
           "width": 709,
@@ -480,11 +498,11 @@
           "overflowY": "auto",
           "position": "static"
         },
-        "firstRiskHazardFieldTop": -396,
-        "firstRiskHazardFieldBottom": -336,
+        "firstRiskHazardFieldTop": -410,
+        "firstRiskHazardFieldBottom": -350,
         "rawTextarea": {
-          "top": -4,
-          "bottom": 97,
+          "top": -18,
+          "bottom": 83,
           "left": 621,
           "right": 1356,
           "width": 735,
@@ -494,22 +512,27 @@
           "overflowY": "hidden",
           "position": "static"
         },
-        "rawTextareaTop": -4,
-        "rawTextareaBottom": 97,
+        "rawTextareaTop": -18,
+        "rawTextareaBottom": 83,
         "rawTextareaSecondary": false,
         "sameDocumentReselectMeasured": false,
         "renderedTextareas": 4,
+        "visibleTextareaInputsInViewport": 1,
         "visibleFullDocumentBodiesInViewport": 1,
-        "fullDocumentBodiesRenderedSerially": true,
+        "visibleDocumentBodyPanelsInViewport": 1,
+        "visibleRawEditorsInViewport": 1,
+        "fullDocumentBodiesRenderedSerially": false,
+        "supportingLauncherMovesEditorOutOfView": true,
         "defaultOpenSectionCount": 1,
         "supportingDocumentsOpenDefault": true,
         "supportingDocButtonsVisibleDefault": 9,
         "supportingDocButtonCount": 9,
         "allDocTabButtonCount": 12,
-        "coreDocButtonCount": 0,
+        "coreDocButtonCount": 3,
+        "mobilePickerOptionCount": 12,
         "mobileCoreLauncher": {
-          "top": 158,
-          "bottom": 281,
+          "top": 162,
+          "bottom": 285,
           "left": 260,
           "right": 1416,
           "width": 1156,
@@ -542,28 +565,29 @@
           },
           {
             "className": "workpack-sidebar card list WorkpackEditor_navigator__1_oN_",
-            "top": -318,
-            "bottom": 693,
+            "top": 159,
+            "bottom": 679,
             "position": "sticky"
           }
         ]
       },
       "verdicts": {
-        "launcherExposureVerdict": "PASS",
+        "launcherExposureVerdict": "RED",
         "allDocumentLongFormVerdict": "RED",
         "selectedEditorDepthVerdict": "PASS"
       },
       "summary": {
         "bodyRatio": 1.07,
-        "shell": "289-675/1651",
+        "shell": "293-679/1651",
         "selected": "위험성평가표",
-        "actionsBottom": -593,
-        "hazardBottom": -336,
-        "rawTextareaTop": -4,
+        "actionsBottom": -607,
+        "hazardBottom": -350,
+        "rawTextareaTop": -18,
         "textareas": 4,
         "inViewportBodies": 1,
         "supportingOpen": true,
-        "supportingVisibleButtons": 9
+        "supportingVisibleButtons": 9,
+        "supportingMovesEditor": true
       }
     },
     {
@@ -676,14 +700,19 @@
         "rawTextareaSecondary": true,
         "sameDocumentReselectMeasured": false,
         "renderedTextareas": 4,
-        "visibleFullDocumentBodiesInViewport": 0,
-        "fullDocumentBodiesRenderedSerially": true,
+        "visibleTextareaInputsInViewport": 0,
+        "visibleFullDocumentBodiesInViewport": 1,
+        "visibleDocumentBodyPanelsInViewport": 1,
+        "visibleRawEditorsInViewport": 0,
+        "fullDocumentBodiesRenderedSerially": false,
+        "supportingLauncherMovesEditorOutOfView": false,
         "defaultOpenSectionCount": 1,
         "supportingDocumentsOpenDefault": false,
         "supportingDocButtonsVisibleDefault": 0,
         "supportingDocButtonCount": 9,
         "allDocTabButtonCount": 12,
-        "coreDocButtonCount": 0,
+        "coreDocButtonCount": 3,
+        "mobilePickerOptionCount": 12,
         "mobileCoreLauncher": {
           "top": 205,
           "bottom": 328,
@@ -729,9 +758,9 @@
         "firstActionCockpitVerdict": "PASS",
         "selectedEditorFieldFirstVerdict": "PASS",
         "sameDocumentReselectLandingVerdict": "n/a",
-        "allDocumentLongFormVerdict": "RED",
+        "allDocumentLongFormVerdict": "PASS",
         "selectedEditorDepthVerdict": "PASS",
-        "overallDocumentsIAVerdict": "PARTIAL"
+        "overallDocumentsIAVerdict": "PASS"
       },
       "summary": {
         "bodyRatio": 1,
@@ -741,9 +770,10 @@
         "hazardBottom": 709,
         "rawTextareaTop": 1041,
         "textareas": 4,
-        "inViewportBodies": 0,
+        "inViewportBodies": 1,
         "supportingOpen": false,
-        "supportingVisibleButtons": 0
+        "supportingVisibleButtons": 0,
+        "supportingMovesEditor": false
       }
     },
     {
@@ -856,14 +886,19 @@
         "rawTextareaSecondary": true,
         "sameDocumentReselectMeasured": true,
         "renderedTextareas": 4,
-        "visibleFullDocumentBodiesInViewport": 0,
-        "fullDocumentBodiesRenderedSerially": true,
+        "visibleTextareaInputsInViewport": 0,
+        "visibleFullDocumentBodiesInViewport": 1,
+        "visibleDocumentBodyPanelsInViewport": 1,
+        "visibleRawEditorsInViewport": 0,
+        "fullDocumentBodiesRenderedSerially": false,
+        "supportingLauncherMovesEditorOutOfView": false,
         "defaultOpenSectionCount": 1,
         "supportingDocumentsOpenDefault": false,
         "supportingDocButtonsVisibleDefault": 0,
         "supportingDocButtonCount": 9,
         "allDocTabButtonCount": 12,
-        "coreDocButtonCount": 0,
+        "coreDocButtonCount": 3,
+        "mobilePickerOptionCount": 12,
         "mobileCoreLauncher": {
           "top": 205,
           "bottom": 328,
@@ -909,9 +944,9 @@
         "firstActionCockpitVerdict": "PASS",
         "selectedEditorFieldFirstVerdict": "PASS",
         "sameDocumentReselectLandingVerdict": "PASS",
-        "allDocumentLongFormVerdict": "RED",
+        "allDocumentLongFormVerdict": "PASS",
         "selectedEditorDepthVerdict": "PASS",
-        "overallDocumentsIAVerdict": "PARTIAL"
+        "overallDocumentsIAVerdict": "PASS"
       },
       "summary": {
         "bodyRatio": 1,
@@ -921,9 +956,10 @@
         "hazardBottom": 709,
         "rawTextareaTop": 1041,
         "textareas": 4,
-        "inViewportBodies": 0,
+        "inViewportBodies": 1,
         "supportingOpen": false,
-        "supportingVisibleButtons": 0
+        "supportingVisibleButtons": 0,
+        "supportingMovesEditor": false
       }
     },
     {
@@ -1036,14 +1072,19 @@
         "rawTextareaSecondary": false,
         "sameDocumentReselectMeasured": false,
         "renderedTextareas": 4,
+        "visibleTextareaInputsInViewport": 1,
         "visibleFullDocumentBodiesInViewport": 1,
-        "fullDocumentBodiesRenderedSerially": true,
+        "visibleDocumentBodyPanelsInViewport": 1,
+        "visibleRawEditorsInViewport": 1,
+        "fullDocumentBodiesRenderedSerially": false,
+        "supportingLauncherMovesEditorOutOfView": true,
         "defaultOpenSectionCount": 1,
         "supportingDocumentsOpenDefault": true,
         "supportingDocButtonsVisibleDefault": 9,
         "supportingDocButtonCount": 9,
         "allDocTabButtonCount": 12,
-        "coreDocButtonCount": 0,
+        "coreDocButtonCount": 3,
+        "mobilePickerOptionCount": 12,
         "mobileCoreLauncher": {
           "top": 205,
           "bottom": 328,
@@ -1079,14 +1120,14 @@
           },
           {
             "className": "workpack-sidebar card list WorkpackEditor_navigator__1_oN_",
-            "top": -289,
+            "top": 202,
             "bottom": 722,
             "position": "sticky"
           }
         ]
       },
       "verdicts": {
-        "launcherExposureVerdict": "PASS",
+        "launcherExposureVerdict": "RED",
         "allDocumentLongFormVerdict": "RED",
         "selectedEditorDepthVerdict": "PASS"
       },
@@ -1100,7 +1141,8 @@
         "textareas": 4,
         "inViewportBodies": 1,
         "supportingOpen": true,
-        "supportingVisibleButtons": 9
+        "supportingVisibleButtons": 9,
+        "supportingMovesEditor": true
       }
     },
     {
@@ -1115,8 +1157,8 @@
         "stateLabel": "default-documents-overview",
         "viewportWidth": 390,
         "viewportHeight": 844,
-        "bodyHeight": 856,
-        "bodyHeightRatio": 1.01,
+        "bodyHeight": 844,
+        "bodyHeightRatio": 1,
         "scrollWidth": 390,
         "clientWidth": 390,
         "horizontalOverflow": false,
@@ -1124,9 +1166,9 @@
         "selectedDocumentTitle": "위험성평가표",
         "selectedDocumentSummary": "4섹션 · 근거 4건 · 확인 1건",
         "workpackShellTop": 476,
-        "workpackShellBottom": 808,
-        "workpackShellHeight": 332,
-        "workpackShellClientHeight": 332,
+        "workpackShellBottom": 796,
+        "workpackShellHeight": 320,
+        "workpackShellClientHeight": 320,
         "workpackShellScrollHeight": 1435,
         "workpackShellOverflowY": "auto",
         "toolbar": {
@@ -1213,14 +1255,19 @@
         "rawTextareaSecondary": true,
         "sameDocumentReselectMeasured": false,
         "renderedTextareas": 4,
-        "visibleFullDocumentBodiesInViewport": 0,
-        "fullDocumentBodiesRenderedSerially": true,
+        "visibleTextareaInputsInViewport": 0,
+        "visibleFullDocumentBodiesInViewport": 1,
+        "visibleDocumentBodyPanelsInViewport": 1,
+        "visibleRawEditorsInViewport": 0,
+        "fullDocumentBodiesRenderedSerially": false,
+        "supportingLauncherMovesEditorOutOfView": false,
         "defaultOpenSectionCount": 1,
         "supportingDocumentsOpenDefault": false,
         "supportingDocButtonsVisibleDefault": 0,
         "supportingDocButtonCount": 9,
         "allDocTabButtonCount": 12,
-        "coreDocButtonCount": 0,
+        "coreDocButtonCount": 3,
+        "mobilePickerOptionCount": 12,
         "mobileCoreLauncher": {
           "top": 305,
           "bottom": 468,
@@ -1254,21 +1301,22 @@
         "firstActionCockpitVerdict": "PASS",
         "selectedEditorFieldFirstVerdict": "PASS",
         "sameDocumentReselectLandingVerdict": "n/a",
-        "allDocumentLongFormVerdict": "RED",
+        "allDocumentLongFormVerdict": "PASS",
         "selectedEditorDepthVerdict": "PASS",
-        "overallDocumentsIAVerdict": "PARTIAL"
+        "overallDocumentsIAVerdict": "PASS"
       },
       "summary": {
-        "bodyRatio": 1.01,
-        "shell": "476-808/1435",
+        "bodyRatio": 1,
+        "shell": "476-796/1435",
         "selected": "위험성평가표",
         "actionsBottom": 667,
         "hazardBottom": 793,
         "rawTextareaTop": 1033,
         "textareas": 4,
-        "inViewportBodies": 0,
+        "inViewportBodies": 1,
         "supportingOpen": false,
-        "supportingVisibleButtons": 0
+        "supportingVisibleButtons": 0,
+        "supportingMovesEditor": false
       }
     },
     {
@@ -1283,8 +1331,8 @@
         "stateLabel": "same-document-reselect-riskAssessmentDraft",
         "viewportWidth": 390,
         "viewportHeight": 844,
-        "bodyHeight": 856,
-        "bodyHeightRatio": 1.01,
+        "bodyHeight": 844,
+        "bodyHeightRatio": 1,
         "scrollWidth": 390,
         "clientWidth": 390,
         "horizontalOverflow": false,
@@ -1292,9 +1340,9 @@
         "selectedDocumentTitle": "위험성평가표",
         "selectedDocumentSummary": "4섹션 · 근거 4건 · 확인 1건",
         "workpackShellTop": 476,
-        "workpackShellBottom": 808,
-        "workpackShellHeight": 332,
-        "workpackShellClientHeight": 332,
+        "workpackShellBottom": 796,
+        "workpackShellHeight": 320,
+        "workpackShellClientHeight": 320,
         "workpackShellScrollHeight": 1435,
         "workpackShellOverflowY": "auto",
         "toolbar": {
@@ -1381,14 +1429,19 @@
         "rawTextareaSecondary": true,
         "sameDocumentReselectMeasured": true,
         "renderedTextareas": 4,
-        "visibleFullDocumentBodiesInViewport": 0,
-        "fullDocumentBodiesRenderedSerially": true,
+        "visibleTextareaInputsInViewport": 0,
+        "visibleFullDocumentBodiesInViewport": 1,
+        "visibleDocumentBodyPanelsInViewport": 1,
+        "visibleRawEditorsInViewport": 0,
+        "fullDocumentBodiesRenderedSerially": false,
+        "supportingLauncherMovesEditorOutOfView": false,
         "defaultOpenSectionCount": 1,
         "supportingDocumentsOpenDefault": false,
         "supportingDocButtonsVisibleDefault": 0,
         "supportingDocButtonCount": 9,
         "allDocTabButtonCount": 12,
-        "coreDocButtonCount": 0,
+        "coreDocButtonCount": 3,
+        "mobilePickerOptionCount": 12,
         "mobileCoreLauncher": {
           "top": 305,
           "bottom": 468,
@@ -1422,21 +1475,22 @@
         "firstActionCockpitVerdict": "PASS",
         "selectedEditorFieldFirstVerdict": "PASS",
         "sameDocumentReselectLandingVerdict": "PASS",
-        "allDocumentLongFormVerdict": "RED",
+        "allDocumentLongFormVerdict": "PASS",
         "selectedEditorDepthVerdict": "PASS",
-        "overallDocumentsIAVerdict": "PARTIAL"
+        "overallDocumentsIAVerdict": "PASS"
       },
       "summary": {
-        "bodyRatio": 1.01,
-        "shell": "476-808/1435",
+        "bodyRatio": 1,
+        "shell": "476-796/1435",
         "selected": "위험성평가표",
         "actionsBottom": 667,
         "hazardBottom": 793,
         "rawTextareaTop": 1033,
         "textareas": 4,
-        "inViewportBodies": 0,
+        "inViewportBodies": 1,
         "supportingOpen": false,
-        "supportingVisibleButtons": 0
+        "supportingVisibleButtons": 0,
+        "supportingMovesEditor": false
       }
     },
     {
@@ -1451,8 +1505,8 @@
         "stateLabel": "all-document-launcher-expanded",
         "viewportWidth": 390,
         "viewportHeight": 844,
-        "bodyHeight": 856,
-        "bodyHeightRatio": 1.01,
+        "bodyHeight": 844,
+        "bodyHeightRatio": 1,
         "scrollWidth": 390,
         "clientWidth": 390,
         "horizontalOverflow": false,
@@ -1460,9 +1514,9 @@
         "selectedDocumentTitle": "위험성평가표",
         "selectedDocumentSummary": "4섹션 · 근거 4건 · 확인 1건",
         "workpackShellTop": 476,
-        "workpackShellBottom": 808,
-        "workpackShellHeight": 332,
-        "workpackShellClientHeight": 332,
+        "workpackShellBottom": 796,
+        "workpackShellHeight": 320,
+        "workpackShellClientHeight": 320,
         "workpackShellScrollHeight": 1435,
         "workpackShellOverflowY": "auto",
         "toolbar": {
@@ -1549,14 +1603,19 @@
         "rawTextareaSecondary": true,
         "sameDocumentReselectMeasured": false,
         "renderedTextareas": 4,
-        "visibleFullDocumentBodiesInViewport": 0,
-        "fullDocumentBodiesRenderedSerially": true,
+        "visibleTextareaInputsInViewport": 0,
+        "visibleFullDocumentBodiesInViewport": 1,
+        "visibleDocumentBodyPanelsInViewport": 1,
+        "visibleRawEditorsInViewport": 0,
+        "fullDocumentBodiesRenderedSerially": false,
+        "supportingLauncherMovesEditorOutOfView": true,
         "defaultOpenSectionCount": 1,
         "supportingDocumentsOpenDefault": true,
         "supportingDocButtonsVisibleDefault": 0,
         "supportingDocButtonCount": 9,
         "allDocTabButtonCount": 12,
-        "coreDocButtonCount": 0,
+        "coreDocButtonCount": 3,
+        "mobilePickerOptionCount": 12,
         "mobileCoreLauncher": {
           "top": 305,
           "bottom": 468,
@@ -1592,16 +1651,17 @@
         "selectedEditorDepthVerdict": "PASS"
       },
       "summary": {
-        "bodyRatio": 1.01,
-        "shell": "476-808/1435",
+        "bodyRatio": 1,
+        "shell": "476-796/1435",
         "selected": "위험성평가표",
         "actionsBottom": 1028,
         "hazardBottom": 1154,
         "rawTextareaTop": 1394,
         "textareas": 4,
-        "inViewportBodies": 0,
+        "inViewportBodies": 1,
         "supportingOpen": true,
-        "supportingVisibleButtons": 0
+        "supportingVisibleButtons": 0,
+        "supportingMovesEditor": true
       }
     }
   ]
