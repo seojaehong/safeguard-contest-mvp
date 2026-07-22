@@ -5,11 +5,17 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { execFileSync } from "node:child_process";
+import { chromium } from "playwright";
 
 const OUT_DIR = path.join("evaluation", "share-exact-session-boundary-2026-07-22");
 const DEFAULT_BASE_URL = "https://www.safeclaw.kr";
 const SAFE_MISSING_SESSION_ID = "00000000-0000-4000-8000-000000000000";
 const SAFE_MISSING_WORKER_ID = "00000000-0000-4000-8000-000000000001";
+const EXACT_VIEWPORTS = [
+  { label: "desktop-short-1440x723", width: 1440, height: 723 },
+  { label: "desktop-1440x900", width: 1440, height: 900 },
+  { label: "mobile-390x723", width: 390, height: 723 },
+];
 
 /**
  * @param {string[]} argv
@@ -17,12 +23,16 @@ const SAFE_MISSING_WORKER_ID = "00000000-0000-4000-8000-000000000001";
 function parseArgs(argv) {
   const options = {
     baseUrl: process.env.SAFECLAW_BASE_URL || DEFAULT_BASE_URL,
+    exactUrl: process.env.SAFECLAW_EXACT_SHARE_SESSION_URL || "",
     outputDir: OUT_DIR,
   };
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--base-url") {
       options.baseUrl = argv[index + 1] || options.baseUrl;
+      index += 1;
+    } else if (arg === "--exact-url") {
+      options.exactUrl = argv[index + 1] || options.exactUrl;
       index += 1;
     } else if (arg === "--output") {
       options.outputDir = argv[index + 1] || options.outputDir;
@@ -107,6 +117,149 @@ async function probeMissingSessionGet(baseUrl) {
 }
 
 /**
+ * @param {string} exactUrl
+ * @param {string} baseUrl
+ */
+function normalizeExactShareUrl(exactUrl, baseUrl) {
+  if (!exactUrl.trim()) return null;
+  const parsed = new URL(exactUrl, baseUrl);
+  if (!/^\/share\/[^/]+$/u.test(parsed.pathname)) {
+    throw new Error(`Exact share URL must point to /share/[sessionId], got ${parsed.pathname}`);
+  }
+  return parsed.toString();
+}
+
+/**
+ * @param {import("playwright").Page} page
+ */
+async function settle(page) {
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  });
+}
+
+/**
+ * @param {string} exactUrl
+ */
+async function measureExactSavedSessionGeometry(exactUrl) {
+  const browser = await chromium.launch({ headless: true });
+  const rows = [];
+  try {
+    for (const viewport of EXACT_VIEWPORTS) {
+      const page = await browser.newPage({
+        deviceScaleFactor: 1,
+        viewport: { width: viewport.width, height: viewport.height },
+      });
+      const apiRequests = [];
+      const mutationRequests = [];
+      page.on("request", (request) => {
+        const method = request.method();
+        const url = request.url();
+        if (url.includes("/api/share-sessions/")) {
+          apiRequests.push({ method, url });
+          if (!["GET", "HEAD", "OPTIONS"].includes(method)) mutationRequests.push({ method, url });
+        }
+      });
+      try {
+        const response = await page.goto(exactUrl, { waitUntil: "networkidle", timeout: 60_000 });
+        await settle(page);
+        const metrics = await page.evaluate(() => {
+          const rect = (selector) => {
+            const element = document.querySelector(selector);
+            if (!element) return null;
+            const box = element.getBoundingClientRect();
+            const style = getComputedStyle(element);
+            return {
+              bottom: Math.round(box.bottom),
+              display: style.display,
+              height: Math.round(box.height),
+              left: Math.round(box.left),
+              right: Math.round(box.right),
+              top: Math.round(box.top),
+              width: Math.round(box.width),
+            };
+          };
+          const root = rect(".safeclaw-share-recipient-page");
+          const cards = [...document.querySelectorAll(".safeclaw-share-recipient-card")]
+            .map((element) => {
+              const box = element.getBoundingClientRect();
+              return {
+                bottom: Math.round(box.bottom),
+                left: Math.round(box.left),
+                right: Math.round(box.right),
+                top: Math.round(box.top),
+                width: Math.round(box.width),
+              };
+            })
+            .filter((box) => box.width > 0 && box.bottom > 0 && box.top < window.innerHeight);
+          const distinctLefts = [...new Set(cards.map((box) => box.left))];
+          const confirmButton = [...document.querySelectorAll("button")]
+            .find((item) => /확인|Tôi đã xem|I have reviewed|已查看/u.test(item.textContent || ""));
+          const confirmRect = confirmButton ? (() => {
+            const box = confirmButton.getBoundingClientRect();
+            return {
+              bottom: Math.round(box.bottom),
+              top: Math.round(box.top),
+            };
+          })() : null;
+          const outsideElements = [...document.querySelectorAll("body *")].filter((element) => {
+            const box = element.getBoundingClientRect();
+            return box.width > 0 && box.height > 0 && (box.left < -1 || box.right > window.innerWidth + 1);
+          }).length;
+          return {
+            bodyHeight: document.documentElement.scrollHeight,
+            bodyHeightRatio: Number((document.documentElement.scrollHeight / window.innerHeight).toFixed(2)),
+            confirmButtonBottom: confirmRect?.bottom ?? null,
+            desktopColumnCount: window.innerWidth >= 900 ? distinctLefts.length : 1,
+            horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+            outsideElements,
+            rootBottom: root?.bottom ?? null,
+            rootWidth: root?.width ?? null,
+            rootWidthRatio: root ? Number((root.width / window.innerWidth).toFixed(2)) : null,
+            viewport: `${window.innerWidth}x${window.innerHeight}`,
+          };
+        });
+        const desktopPass = viewport.width < 900
+          || (
+            metrics.rootWidthRatio !== null
+            && metrics.rootWidthRatio >= 0.72
+            && metrics.desktopColumnCount >= 2
+            && metrics.horizontalOverflow === false
+            && metrics.outsideElements === 0
+          );
+        const firstActionPass = metrics.confirmButtonBottom !== null
+          && metrics.confirmButtonBottom <= viewport.height;
+        rows.push({
+          apiRequests,
+          error: null,
+          httpStatus: response?.status() ?? null,
+          metrics,
+          mutationRequests,
+          verdict: desktopPass && firstActionPass ? "PASS_EXACT_SAVED_SESSION_GEOMETRY_NO_MUTATION" : "RED_EXACT_SAVED_SESSION_GEOMETRY",
+          viewport: viewport.label,
+        });
+      } catch (error) {
+        rows.push({
+          apiRequests,
+          error: error instanceof Error ? error.message : String(error),
+          httpStatus: null,
+          metrics: null,
+          mutationRequests,
+          verdict: "ERROR_EXACT_SAVED_SESSION_GEOMETRY",
+          viewport: viewport.label,
+        });
+      } finally {
+        await page.close();
+      }
+    }
+  } finally {
+    await browser.close();
+  }
+  return rows;
+}
+
+/**
  * @param {unknown} value
  */
 function json(value) {
@@ -119,8 +272,15 @@ async function main() {
   const sourceHead = gitHead();
   const buildInfo = await readBuildInfo(options.baseUrl);
   const missingSessionGet = await probeMissingSessionGet(options.baseUrl);
-  const exactSessionUrl = process.env.SAFECLAW_EXACT_SHARE_SESSION_URL || "";
+  const exactSessionUrl = normalizeExactShareUrl(options.exactUrl, options.baseUrl);
   const exactSessionPayloadPath = process.env.SAFECLAW_EXACT_SHARE_SESSION_PAYLOAD || "";
+  const exactSessionGeometry = exactSessionUrl
+    ? await measureExactSavedSessionGeometry(exactSessionUrl)
+    : [];
+  const exactSessionMutationRequests = exactSessionGeometry.flatMap((row) => row.mutationRequests || []);
+  const exactGeometryPass = exactSessionGeometry.length > 0
+    && exactSessionGeometry.every((row) => row.verdict === "PASS_EXACT_SAVED_SESSION_GEOMETRY_NO_MUTATION");
+  const exactGeometryErrors = exactSessionGeometry.filter((row) => row.verdict.startsWith("ERROR"));
 
   const report = {
     schemaVersion: "safeclaw-share-exact-session-boundary/v1",
@@ -129,13 +289,18 @@ async function main() {
     sourceHead,
     liveBuildInfo: buildInfo.body,
     liveCommit: buildInfo.commitSha,
-    verdict: exactSessionUrl || exactSessionPayloadPath
-      ? "EXACT_SESSION_INPUT_PRESENT_REQUIRES_SEPARATE_GEOMETRY_PROBE"
+    verdict: exactSessionUrl
+      ? exactGeometryPass
+        ? "PASS_EXACT_SAVED_SESSION_GEOMETRY_NO_MUTATION"
+        : exactGeometryErrors.length > 0
+          ? "ERROR_EXACT_SAVED_SESSION_GEOMETRY_NO_MUTATION"
+          : "RED_EXACT_SAVED_SESSION_GEOMETRY_NO_MUTATION"
       : "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
-    exactSavedUserSessionReproduced: false,
+    exactSavedUserSessionReproduced: exactGeometryPass,
     exactSavedSessionUrlProvided: Boolean(exactSessionUrl),
     exactSavedSessionPayloadProvided: Boolean(exactSessionPayloadPath),
-    sessionKind: "missing-exact",
+    sessionKind: exactSessionUrl ? "saved-exact" : "missing-exact",
+    exactSessionGeometry,
     routeFiles: {
       recipientPage: {
         path: "app/share/[sessionId]/page.tsx",
@@ -159,8 +324,9 @@ async function main() {
       sessionCreationWouldRequireDbMutation: true,
       providerDispatchLiveClaimed: false,
       externalProviderCalled: false,
-      dbMutationPerformed: false,
+      dbMutationPerformed: exactSessionMutationRequests.length > 0,
       dispatchMutationPerformed: false,
+      exactSessionMutationRequestCount: exactSessionMutationRequests.length,
     },
     nextEvidenceNeeded: [
       "concrete production /share/[sessionId]?workerId=... URL from the user-observed session",
@@ -170,8 +336,9 @@ async function main() {
     forbiddenClaims: [
       "Fixture or generated /workspace Share proof closes the exact saved /share/[sessionId] user complaint.",
       "A live provider dispatch was performed.",
-      "A share session was created or mutated by this boundary audit.",
-    ],
+    "A share session was created or mutated by this boundary audit.",
+    "Exact saved Share is proven when non-GET /api/share-sessions requests occurred during the probe.",
+  ],
   };
 
   fs.mkdirSync(options.outputDir, { recursive: true });
@@ -188,13 +355,13 @@ Live \`/api/build-info\`: \`${buildInfo.commitSha || "unknown"}\`
 
 Verdict: \`${report.verdict}\`
 
-Exact saved user session reproduced: \`false\`
+Exact saved user session reproduced: \`${report.exactSavedUserSessionReproduced}\`
 
 Provider live dispatch claimed: \`false\`
 
 External provider called: \`false\`
 
-DB mutation performed: \`false\`
+DB mutation performed: \`${report.boundary.dbMutationPerformed}\`
 
 ## Boundary
 
@@ -203,10 +370,15 @@ DB mutation performed: \`false\`
 - Manager share-session create API exists: \`${report.routeFiles.managerSessionCreateApi.exists}\`
 - Safe missing-session GET status: \`${missingSessionGet.status ?? "error"}\`
 - Safe missing-session GET mutation performed: \`false\`
+- Exact saved URL provided: \`${Boolean(exactSessionUrl)}\`
+- Exact saved geometry rows: \`${exactSessionGeometry.length}\`
+- Exact saved mutation request count: \`${exactSessionMutationRequests.length}\`
 
 ## Interpretation
 
-Exact saved/generated \`/share/[sessionId]\` remains missing because no concrete production session URL, saved session id, user-observed generated payload, or approved safe creation flow was provided. Fixture and generated \`/workspace?share\` proofs remain useful scoped layout evidence, but they are not accepted as exact saved-session proof for the user's desktop mobile-like Share complaint.
+${exactSessionUrl
+    ? "A concrete exact saved/generated `/share/[sessionId]` URL was provided, so this audit measured the recipient route geometry without clicking confirmation or sending provider messages. Any non-GET `/api/share-sessions` request keeps the result non-claimable."
+    : "Exact saved/generated `/share/[sessionId]` remains missing because no concrete production session URL, saved session id, user-observed generated payload, or approved safe creation flow was provided. Fixture and generated `/workspace?share` proofs remain useful scoped layout evidence, but they are not accepted as exact saved-session proof for the user's desktop mobile-like Share complaint."}
 
 Creating a real share session is not approval-free: the manager route is an authenticated workpack flow and would create or read persisted share-session state. This audit therefore performs only a safe read of a deliberately missing UUID and records \`dbMutationPerformed=false\`.
 

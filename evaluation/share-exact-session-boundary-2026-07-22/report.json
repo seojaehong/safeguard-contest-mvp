@@ -1,24 +1,25 @@
 {
   "schemaVersion": "safeclaw-share-exact-session-boundary/v1",
-  "checkedAt": "2026-07-22T10:17:06.808Z",
+  "checkedAt": "2026-07-22T10:56:55.843Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHead": "51fbe6296c19d42b1fe2161e82876f8d6423d01f",
+  "sourceHead": "ef0dbbb84863d506a53dd016ab9bd54632076499",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "51fbe6296c19d42b1fe2161e82876f8d6423d01f",
+    "commitSha": "ef0dbbb84863d506a53dd016ab9bd54632076499",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-hiagz7f7c-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-jojetj9hw-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "liveCommit": "51fbe6296c19d42b1fe2161e82876f8d6423d01f",
+  "liveCommit": "ef0dbbb84863d506a53dd016ab9bd54632076499",
   "verdict": "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
   "exactSavedUserSessionReproduced": false,
   "exactSavedSessionUrlProvided": false,
   "exactSavedSessionPayloadProvided": false,
   "sessionKind": "missing-exact",
+  "exactSessionGeometry": [],
   "routeFiles": {
     "recipientPage": {
       "path": "app/share/[sessionId]/page.tsx",
@@ -52,7 +53,8 @@
     "providerDispatchLiveClaimed": false,
     "externalProviderCalled": false,
     "dbMutationPerformed": false,
-    "dispatchMutationPerformed": false
+    "dispatchMutationPerformed": false,
+    "exactSessionMutationRequestCount": 0
   },
   "nextEvidenceNeeded": [
     "concrete production /share/[sessionId]?workerId=... URL from the user-observed session",
@@ -62,6 +64,7 @@
   "forbiddenClaims": [
     "Fixture or generated /workspace Share proof closes the exact saved /share/[sessionId] user complaint.",
     "A live provider dispatch was performed.",
-    "A share session was created or mutated by this boundary audit."
+    "A share session was created or mutated by this boundary audit.",
+    "Exact saved Share is proven when non-GET /api/share-sessions requests occurred during the probe."
   ]
 }

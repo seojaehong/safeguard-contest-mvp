@@ -1,12 +1,12 @@
 # Share Exact Session Boundary Gate
 
-Checked at: 2026-07-22T10:17:06.808Z
+Checked at: 2026-07-22T10:56:55.843Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD: `51fbe6296c19d42b1fe2161e82876f8d6423d01f`
+Source HEAD: `ef0dbbb84863d506a53dd016ab9bd54632076499`
 
-Live `/api/build-info`: `51fbe6296c19d42b1fe2161e82876f8d6423d01f`
+Live `/api/build-info`: `ef0dbbb84863d506a53dd016ab9bd54632076499`
 
 Verdict: `MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED`
 
@@ -25,6 +25,9 @@ DB mutation performed: `false`
 - Manager share-session create API exists: `true`
 - Safe missing-session GET status: `500`
 - Safe missing-session GET mutation performed: `false`
+- Exact saved URL provided: `false`
+- Exact saved geometry rows: `0`
+- Exact saved mutation request count: `0`
 
 ## Interpretation
 
@@ -43,3 +46,4 @@ Creating a real share session is not approval-free: the manager route is an auth
 - Fixture or generated /workspace Share proof closes the exact saved /share/[sessionId] user complaint.
 - A live provider dispatch was performed.
 - A share session was created or mutated by this boundary audit.
+- Exact saved Share is proven when non-GET /api/share-sessions requests occurred during the probe.
