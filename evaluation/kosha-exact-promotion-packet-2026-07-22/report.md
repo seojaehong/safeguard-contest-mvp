@@ -1,12 +1,12 @@
 # KOSHA Exact Promotion Packet
 
-Generated at: 2026-07-22T00:58:46.597Z
+Generated at: 2026-07-22T01:12:31.457Z
 
 Verdict: `EXACT_PROMOTION_PACKET_READY_FOR_OPERATOR_REVIEW`
 
-Source HEAD: `f92d94f6ef6701d4e181dca9ff21654e1439f8db`
+Source HEAD: `e6475342d9ba5a0a9be2d9409e9b687bc37c6759`
 
-Live commit at packet generation: `87c1fdbcb07f2024d4890c44ba26cb59fd401644`
+Live commit at packet generation: `e6475342d9ba5a0a9be2d9409e9b687bc37c6759`
 
 Scope: read-only bounded selection packet for future KOSHA exact-trust promotion review
 
