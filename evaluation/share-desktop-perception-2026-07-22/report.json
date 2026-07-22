@@ -1,16 +1,16 @@
 {
   "schemaVersion": "safeclaw-share-desktop-perception/v1",
-  "checkedAt": "2026-07-22T04:53:35.457Z",
+  "checkedAt": "2026-07-22T06:30:20.605Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHead": "e82e250c16227b1437fb315a4c2974064d1ee9ec",
+  "sourceHead": "b584ddffbcaeacf32ea775fdd7914fc40c01ebdc",
   "productionBuild": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "e82e250c16227b1437fb315a4c2974064d1ee9ec",
+    "commitSha": "b584ddffbcaeacf32ea775fdd7914fc40c01ebdc",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-6dnrvhgkd-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-l9fikj7o8-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "providerDispatchLiveClaimed": false,
