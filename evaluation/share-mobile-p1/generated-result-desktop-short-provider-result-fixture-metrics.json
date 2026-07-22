@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-22T05:16:36.444Z",
+  "checkedAt": "2026-07-22T06:34:58.604Z",
   "route": "/workspace?share",
   "scenario": {
     "label": "generated-result-desktop-short",
@@ -10,7 +10,7 @@
   "fixtureGeneratedProviderResultProof": true,
   "providerDispatchLiveClaimed": false,
   "dispatchPostCount": 1,
-  "dispatchPostIdempotencyKey": "provider-dispatch-v1-84a5d7d0-747a-4def-8e72-d17ac48240d6-afaf9118",
+  "dispatchPostIdempotencyKey": "provider-dispatch-v1-1f3b274b-3509-458c-b055-6ec08e799ce6-a007e76f",
   "metrics": {
     "viewportWidth": 1440,
     "viewportHeight": 723,

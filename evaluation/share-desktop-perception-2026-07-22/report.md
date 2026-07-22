@@ -1,12 +1,12 @@
 # Share Desktop Perception Probe
 
-Checked at: 2026-07-22T06:30:20.605Z
+Checked at: 2026-07-22T06:33:40.406Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD: `b584ddffbcaeacf32ea775fdd7914fc40c01ebdc`
+Source HEAD: `c771d335e86bf068115163ccaaa1fe4dc2744351`
 
-Production commit: `b584ddffbcaeacf32ea775fdd7914fc40c01ebdc`
+Production commit: `c771d335e86bf068115163ccaaa1fe4dc2744351`
 
 Verdict: `PASS_LIVE_PRODUCTION_MEASURED`
 

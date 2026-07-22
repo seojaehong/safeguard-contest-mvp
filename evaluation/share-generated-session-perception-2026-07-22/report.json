@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-share-generated-session-perception/v1",
-  "checkedAt": "2026-07-22T05:16:50.878Z",
-  "sourceHead": "00538f0db4fefd4267292f68d51c0bacc24f17d7",
+  "checkedAt": "2026-07-22T06:36:04.437Z",
+  "sourceHead": "c771d335e86bf068115163ccaaa1fe4dc2744351",
   "baseEvidence": "evaluation/share-mobile-p1",
   "route": "/workspace?share",
   "routeSplitAloneAcceptedAsFix": false,
@@ -55,23 +55,35 @@
       "root": {
         "left": 130,
         "right": 1310,
+        "top": 195,
+        "bottom": 716,
         "width": 1180,
-        "bottom": 716
+        "height": 521
       },
       "primary": {
         "left": 139,
         "right": 451,
-        "bottom": 409
+        "top": 365,
+        "bottom": 409,
+        "width": 312,
+        "height": 44
       },
       "preview": {
         "left": 781,
         "right": 1301,
-        "bottom": 591
+        "top": 365,
+        "bottom": 591,
+        "width": 520,
+        "height": 226
       },
       "resultSummary": {
+        "left": 151,
+        "right": 763,
         "top": 303,
         "bottom": 347,
-        "text": "전송 결과 / 미리 확인 / 검증 전용 · 2개 채널"
+        "width": 612,
+        "height": 44,
+        "text": "전송 결과\n미리 확인\n검증 전용 · 2개 채널"
       },
       "distinctFirstViewportXRanges": [
         160,
@@ -97,23 +109,35 @@
       "root": {
         "left": 130,
         "right": 1310,
+        "top": 189,
+        "bottom": 864,
         "width": 1180,
-        "bottom": 864
+        "height": 675
       },
       "primary": {
         "left": 143,
         "right": 449,
-        "bottom": 429
+        "top": 385,
+        "bottom": 429,
+        "width": 306,
+        "height": 44
       },
       "preview": {
         "left": 777,
         "right": 1297,
-        "bottom": 785
+        "top": 385,
+        "bottom": 785,
+        "width": 520,
+        "height": 400
       },
       "resultSummary": {
+        "left": 155,
+        "right": 755,
         "top": 775,
         "bottom": 819,
-        "text": "전송 결과 / 미리 확인 / 검증 전용 · 2개 채널"
+        "width": 600,
+        "height": 44,
+        "text": "전송 결과\n미리 확인\n검증 전용 · 2개 채널"
       },
       "distinctFirstViewportXRanges": [
         160,
@@ -139,23 +163,35 @@
       "root": {
         "left": 27,
         "right": 363,
+        "top": 273,
+        "bottom": 825,
         "width": 336,
-        "bottom": 825
+        "height": 552
       },
       "primary": {
         "left": 45,
         "right": 345,
-        "bottom": 723
+        "top": 679,
+        "bottom": 723,
+        "width": 300,
+        "height": 44
       },
       "preview": {
         "left": 36,
         "right": 354,
-        "bottom": 664
+        "top": 445,
+        "bottom": 664,
+        "width": 318,
+        "height": 219
       },
       "resultSummary": {
+        "left": 48,
+        "right": 342,
         "top": 784,
         "bottom": 828,
-        "text": "전송 결과 / 미리 확인 / 검증 전용 · 2개 채널"
+        "width": 294,
+        "height": 44,
+        "text": "전송 결과\n미리 확인\n검증 전용 · 2개 채널"
       },
       "distinctFirstViewportXRanges": [
         80,
@@ -167,17 +203,5 @@
       "resultClosedByDefault": true,
       "closedSummaryShowsChannelStatus": true
     }
-  ],
-  "acceptance": {
-    "desktopGeneratedResultWorkbench": "PASS: root width 1180, preview remains right pane, distinct x ranges [160,800], result panel does not monopolize width, horizontal overflow 0.",
-    "shortDesktopResultLanding": "PASS: generated result summary is visible in 1440x723 after remediation.",
-    "mobileGeneratedResultPriority": "PASS: preview, primary CTA, and closed result summary remain inside 390x844; config cards are collapsed.",
-    "providerLiveDispatch": "NOT_CLAIMED",
-    "exactSavedUserSession": "NOT_REPRODUCED_WITH_REAL_SESSION_ID"
-  },
-  "remainingDebt": [
-    "If a user-provided saved production share session still feels mobile-like, run this same width-ratio/grid gate against that exact session payload before product changes.",
-    "All-12 Documents selected-only bounded workbench remains separate open IA debt.",
-    "Provider live dispatch remains approval-gated."
   ]
 }
