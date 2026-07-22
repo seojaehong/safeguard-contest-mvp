@@ -1,24 +1,37 @@
 {
   "schemaVersion": "safeclaw-share-exact-session-boundary/v1",
-  "checkedAt": "2026-07-22T11:01:15.260Z",
+  "checkedAt": "2026-07-22T11:27:08.376Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHead": "c73fc787f87e38a8772aea72a375f78e6fe44ea4",
+  "sourceHead": "712237dab1729965c2658e27c985c5c0b19aeab0",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "c73fc787f87e38a8772aea72a375f78e6fe44ea4",
+    "commitSha": "93586c1d2b9d53014c04473ee19d2f497283b3a6",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-46rkfi29g-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-nvwdzhl6k-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "liveCommit": "c73fc787f87e38a8772aea72a375f78e6fe44ea4",
+  "liveCommit": "93586c1d2b9d53014c04473ee19d2f497283b3a6",
   "verdict": "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
   "exactSavedUserSessionReproduced": false,
   "exactSavedSessionUrlProvided": false,
   "exactSavedSessionPayloadProvided": false,
   "sessionKind": "missing-exact",
+  "exactSessionAcceptance": {
+    "requiredViewports": [
+      "desktop-short-1440x723",
+      "desktop-1440x900",
+      "mobile-390x723"
+    ],
+    "desktopRootWidthRatioMin": 0.72,
+    "desktopColumnCountMin": 2,
+    "firstActionMustBeInViewport": true,
+    "horizontalOverflowAllowed": false,
+    "mutationRequestCountMustBeZero": true,
+    "mobileSingleColumnAllowedOnlyBelowWidth": 900
+  },
   "exactSessionGeometry": [],
   "routeFiles": {
     "recipientPage": {

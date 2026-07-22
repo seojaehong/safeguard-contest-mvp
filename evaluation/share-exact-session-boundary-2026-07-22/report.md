@@ -1,12 +1,12 @@
 # Share Exact Session Boundary Gate
 
-Checked at: 2026-07-22T11:01:15.260Z
+Checked at: 2026-07-22T11:27:08.376Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD: `c73fc787f87e38a8772aea72a375f78e6fe44ea4`
+Source HEAD: `712237dab1729965c2658e27c985c5c0b19aeab0`
 
-Live `/api/build-info`: `c73fc787f87e38a8772aea72a375f78e6fe44ea4`
+Live `/api/build-info`: `93586c1d2b9d53014c04473ee19d2f497283b3a6`
 
 Verdict: `MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED`
 
@@ -28,6 +28,17 @@ DB mutation performed: `false`
 - Exact saved URL provided: `false`
 - Exact saved geometry rows: `0`
 - Exact saved mutation request count: `0`
+- Exact saved session kind: `missing-exact`
+
+## Exact Session Acceptance
+
+- Required viewports: `desktop-short-1440x723`, `desktop-1440x900`, `mobile-390x723`
+- Desktop root width ratio min: `0.72`
+- Desktop column count min: `2`
+- First action must be in viewport: `true`
+- Horizontal overflow allowed: `false`
+- Mutation request count must be zero: `true`
+- Mobile single-column allowed only below width: `900`
 
 ## Interpretation
 
