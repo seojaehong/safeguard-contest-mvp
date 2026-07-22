@@ -1,10 +1,10 @@
 {
   "schemaVersion": "safeclaw-launch-readiness-current/v2",
-  "generatedAt": "2026-07-21T23:58:41.513Z",
+  "generatedAt": "2026-07-22T02:18:12.431Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceCommit": "7389f22eb06e8d3f7724d15d9d172a9d9800cb7e",
-  "productionCommit": "7389f22eb06e8d3f7724d15d9d172a9d9800cb7e",
-  "runtimeSmokeCommit": "7389f22eb06e8d3f7724d15d9d172a9d9800cb7e",
+  "sourceCommit": "94d108f30918d35ff3ee54f132b9660be6b63395",
+  "productionCommit": "94d108f30918d35ff3ee54f132b9660be6b63395",
+  "runtimeSmokeCommit": "94d108f30918d35ff3ee54f132b9660be6b63395",
   "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
   "safeLaunchDemoClaimAllowed": true,
   "guidedPilotClaimAllowed": true,
@@ -15,7 +15,7 @@
   "apiAsk": {
     "status": 200,
     "ok": true,
-    "elapsedMs": 17960
+    "elapsedMs": 23504
   },
   "scenario": {
     "companyName": "도시가스공사",
@@ -133,11 +133,12 @@
     "overall": "pass_with_notice",
     "noticeCount": 2,
     "runtimeSmokeCommit": "6a95c23ffc57542f6a9a9aa14612b3466127a0ad",
-    "evidenceCommit": "7389f22eb06e8d3f7724d15d9d172a9d9800cb7e",
+    "evidenceCommit": "6a95c23ffc57542f6a9a9aa14612b3466127a0ad",
     "fullyAutomatedLaunchClaimAllowed": false,
-    "note": "Final-99 was executed against production 6a95c23f before later evidence-only refreshes; this launch audit smoke was executed after production advanced to 7389f22e."
+    "note": "Final-99 remains pass_with_notice; this launch audit smoke was refreshed after production advanced to 94d108f30918d35ff3ee54f132b9660be6b63395."
   },
   "northstarOverall": "open",
+  "northstarLiveRollupOverall": "northstar_open_approval_gated",
   "uiVerdict": "IA_BLOCKER_REFINED_CURRENT_LIVE",
   "uiArchitectureBoundary": {
     "routeSplitAloneAcceptedAsFix": false,
@@ -167,10 +168,14 @@
     ]
   },
   "productionBuild": {
-    "commitSha": "7389f22eb06e8d3f7724d15d9d172a9d9800cb7e",
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "94d108f30918d35ff3ee54f132b9660be6b63395",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ccer4wo0l-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-1egc3r9lr-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
   },
   "connectedSurfaces": [
     "Law.go / korean-law-mcp: 연결됨",
