@@ -1307,6 +1307,9 @@ describe("northstar open gate audit", () => {
     expect(audit.overall).toBe("open");
     expect(finalGate?.state).toBe("notice");
     expect(finalGate?.detail).toContain("2 notices are explicitly carried");
+    expect(finalGate?.detail).toContain("auth-history-reuse=operator-auth-gated");
+    expect(finalGate?.detail).toContain("dispatch-policy=provider-approval-gated");
+    expect(finalGate?.detail).toContain("Fully automated launch remains forbidden");
     expect(finalGate?.nextActions).toEqual([
       "Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment.",
     ]);
@@ -1351,6 +1354,8 @@ describe("northstar open gate audit", () => {
     expect(finalGate?.state).toBe("notice");
     expect(finalGate?.evidencePath).toBe(path.join("evaluation", "final-99-gate-current-2026-07-22", "report.json"));
     expect(finalGate?.detail).toContain(path.join("evaluation", "final-99-gate-current-2026-07-22", "notice-carry.json"));
+    expect(finalGate?.detail).toContain("auth-history-reuse=operator-auth-gated");
+    expect(finalGate?.detail).toContain("dispatch-policy=provider-approval-gated");
   });
 
   it("contradicts the KOSHA exact trust gate when live exact pins are stale", async () => {

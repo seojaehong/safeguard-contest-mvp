@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-22T13:02:36.532Z",
-  "sourceSha": "cf04395f02fa4bf773fa39a349cd17e1226782a5",
+  "generatedAt": "2026-07-22T13:10:42.451Z",
+  "sourceSha": "d79f4893360e5e88326f4b8770cef67dbb45826e",
   "overall": "open",
   "gates": [
     {
@@ -9,7 +9,7 @@
       "state": "notice",
       "label": "Final 99 evidence gate",
       "evidencePath": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
-      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-22\\notice-carry.json.",
+      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-22\\notice-carry.json: auth-history-reuse=operator-auth-gated, dispatch-policy=provider-approval-gated. Fully automated launch remains forbidden until those approval/auth gates are proven.",
       "nextActions": [
         "Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment."
       ]

@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T13:07:12.438Z",
-  "head": "ff663ec2379efb25c509381152d5e08d62732b58",
+  "generatedAt": "2026-07-22T13:10:43.604Z",
+  "head": "d79f4893360e5e88326f4b8770cef67dbb45826e",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "7d3f142015cc22c0df837093a5e299fa8c131874",
+    "commitSha": "d79f4893360e5e88326f4b8770cef67dbb45826e",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-drp67n4gx-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-crejaipnm-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -25,7 +25,7 @@
       "id": "final_99_gate",
       "state": "notice",
       "artifact": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
-      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-22\\notice-carry.json."
+      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-22\\notice-carry.json: auth-history-reuse=operator-auth-gated, dispatch-policy=provider-approval-gated. Fully automated launch remains forbidden until those approval/auth gates are proven."
     },
     {
       "id": "live_harness_quality",
@@ -193,10 +193,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "cf04395f02fa4bf773fa39a349cd17e1226782a5",
-      "sourceStatus": "ancestor",
-      "productionCommit": "cf04395f02fa4bf773fa39a349cd17e1226782a5",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "d79f4893360e5e88326f4b8770cef67dbb45826e",
+      "sourceStatus": "exact",
+      "productionCommit": "d79f4893360e5e88326f4b8770cef67dbb45826e",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",

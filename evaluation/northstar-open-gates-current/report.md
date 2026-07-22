@@ -1,14 +1,14 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-22T13:02:36.532Z
-Source SHA: `cf04395f02fa4bf773fa39a349cd17e1226782a5`
+Generated at: 2026-07-22T13:10:42.451Z
+Source SHA: `d79f4893360e5e88326f4b8770cef67dbb45826e`
 Overall: `open`
 
 ## Gate Matrix
 
 | Gate | State | Evidence | Detail |
 | --- | --- | --- | --- |
-| final_99_gate | notice | evaluation\final-99-gate-current-2026-07-22\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate-current-2026-07-22\notice-carry.json. |
+| final_99_gate | notice | evaluation\final-99-gate-current-2026-07-22\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate-current-2026-07-22\notice-carry.json: auth-history-reuse=operator-auth-gated, dispatch-policy=provider-approval-gated. Fully automated launch remains forbidden until those approval/auth gates are proven. |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json | Live harness probe passed with zero failed contracts. |
 | ui_documents_share_cockpit | proven | evaluation\workspace-ia-live-7b36-2026-07-22\report.json | Scoped first-task cockpit proof only, not full Documents/Share IA completion: default /workspace Documents and Share cockpits, /documents mobile first-action containment, exact one-viewport Documents review cockpit, selected-document context/summary layers, selected editor/detail field-summary risk-row landing, selected-editor field summary plus evidence/recheck CTA before raw textarea, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, mobile Share exact 844px viewport containment, and /share/[sessionId] desktop recipient confirmation cockpit with mobile confirmation CTA before document details. This is not a claim that the whole Documents page is short or that full 12-document long-form IA is solved; raw textarea/full long-form editing remains open secondary drilldown. It does not claim provider live dispatch. |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json | Production /dispatch seeded desktop and sample shell routes are no longer mobile-stacked: seeded pageHeight 1116 (1.24x), sample panels 635px/413px in distinct desktop regions, overflow false/outside 0. |

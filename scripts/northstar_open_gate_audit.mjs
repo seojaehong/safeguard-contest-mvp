@@ -215,9 +215,14 @@ function evaluateFinal99Gate(rootDir) {
     const noticeCarry = noticeCarryEvidence?.report;
     const noticeCarryPath = noticeCarryEvidence?.path || EVIDENCE_PATHS.final99NoticeCarryCandidates[0];
     const notices = Array.isArray(noticeCarry?.notices) ? noticeCarry.notices : [];
-    const carriedNoticeCount = notices.filter((notice) => (
+    const carriedNotices = notices.filter((notice) => (
       isRecord(notice) && notice.carried === true && readString(notice.launchImpact)
-    )).length;
+    ));
+    const carriedNoticeCount = carriedNotices.length;
+    const noticeImpacts = carriedNotices
+      .map((notice) => `${readString(notice.gate) || "unknown"}=${readString(notice.launchImpact) || "notice"}`)
+      .filter(Boolean)
+      .join(", ");
     const noticeCarryReady = isRecord(noticeCarry)
       && noticeCarry.verdict === "carried"
       && carriedNoticeCount >= 2
@@ -228,7 +233,7 @@ function evaluateFinal99Gate(rootDir) {
       state: overall === "pass" ? "proven" : "notice",
       evidencePath,
       detail: overall === "pass_with_notice" && noticeCarryReady
-        ? `final-99 overall is ${overall}; ${carriedNoticeCount} notices are explicitly carried in ${noticeCarryPath}.`
+        ? `final-99 overall is ${overall}; ${carriedNoticeCount} notices are explicitly carried in ${noticeCarryPath}: ${noticeImpacts}. Fully automated launch remains forbidden until those approval/auth gates are proven.`
         : `final-99 overall is ${overall}.`,
       nextActions: overall === "pass_with_notice"
         ? noticeCarryReady
