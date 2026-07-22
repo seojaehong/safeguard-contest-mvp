@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-07-22T12:29:54.323Z",
+  "generatedAt": "2026-07-22T12:39:30.660Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "commit": "7fa199e9",
-  "sourceCommit": "7fa199e9620615846268e82517bf461fed049cc0",
+  "commit": "9258020c",
+  "sourceCommit": "9258020c4d4417c936e896d70589db598c306bd3",
   "productionBuild": {
     "ok": true,
     "status": 200,
-    "commitSha": "7fa199e9620615846268e82517bf461fed049cc0",
+    "commitSha": "0197af7555936aec2bfb2835204c0025d0c80e3a",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ojwqm1j4m-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-hhsdt9coz-seojaehongs-projects.vercel.app"
   },
   "overall": "pass_with_notice",
-  "elapsedMs": 70834,
+  "elapsedMs": 85281,
   "gates": [
     {
       "name": "ask-orchestration",
@@ -88,7 +88,7 @@
       "count": 6,
       "message": "KOSHA 오프라인 보조근거와 Supabase 안전 지식 DB에서 참고자료를 조회했습니다. 공식 KOSHA 정확 본문 번들로 partial DB 본문을 대체했습니다."
     },
-    "textPreview": "[보완 제안: 강풍 예보에 따른 작업중지 및 비계 전도 예방] - 작업 전 기상예보(특히 강풍 여부)를 반드시 확인한다. - 풍속 임계치 도달 시 작업 즉시 중지하고 비계를 안전하게 고정 및 잠금 조치한다. - 강풍 시 모든 공구·자재 낙하 위험 방지를 위해 비계 주변 정리 및 하부 통제를 강화한다. - 작업자 전원에게 강풍 상황 시 대피 위치 및 비상연락 체계를 미리 안내한다. - 작업중지 및 재개 여부를 작업반장과 관리감독자가 공동 판단하여 기록한다. 확인자/근거 확인: TBM 회의록과 현장 기상예보 확인란에 반영, 관리감독자 및 작업반장 확인 완료 여부 기록.",
+    "textPreview": "[보완 제안: 외벽 도장 작업 이동식 비계 안전관리] - 작업 전 이동식 비계 작업발판의 폭, 고정 상태 및 안전난간, 발끝막이판 설치 여부 확인 - 비계 바퀴 잠금 및 아웃트리거 상태 점검 완료 확인 - 작업자 전원 안전대 체결 여부 점검 및 하부 출입 통제 실시 - 신규 투입자 대상 안전보건교육 실시 및 작업 내용, 보호구 착용 강조 - 오후 강풍 예보 시 작업 중단 기준과 신속 보고 절차 공유 확인자/근거 확인: 작업반장 - 이동식 비계 상태 및 교육 기록, TBM 체크리스트 반영 근거 [보완 제안: 강풍 대비 비계 전도 및 자재 낙하 위험관리] - 기상청 강풍 예보 시 작업 전 풍속 및 돌풍 체감 여부 점검 필수 - 강풍 조건 확인 시 즉시 작업 중지 및 안전한 지상 대기 조치 - 바람에 취약한 공구 및 자재 고정 상태 주기적 점검 - 작업반장 및 현장 안전 담당자 강풍 발생 시 신속 대처와 상황 공유 책임 지정 확인자/근거 확인: 작업반장 - 풍속 확인 및 작업중지 기록, ",
     "sourceCount": 5,
     "policy": "AI 보완은 자동 덮어쓰기가 아니라 제안, 사용자 편집, 삽입 흐름으로만 인정합니다."
   },
@@ -170,6 +170,6 @@
         "path": "evaluation\\final-99-gate-current-2026-07-22\\screenshots\\05-dispatch.png"
       }
     ],
-    "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://www.safeclaw.kr/documents\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    "message": "all screenshots recovered after transient navigation warning"
   }
 }
