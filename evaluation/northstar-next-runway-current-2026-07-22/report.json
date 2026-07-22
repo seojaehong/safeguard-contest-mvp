@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T07:57:09.264Z",
+  "generatedAt": "2026-07-22T08:00:49.103Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "473e7a9fe7613f164506c5adec01896232541e89",
+  "sourceHead": "add65dbd647ad902af38f16043e3de7291efe7c9",
   "productionCommit": "087b38393ea9da0bef3aced26ef514cac12a0635",
   "liveBuildInfo": {
     "ok": true,
@@ -17,6 +17,8 @@
   },
   "latestEvidenceCommitLive": false,
   "currentHeadIsEvidenceOnlyPending": false,
+  "sourceHeadLivePending": true,
+  "boundedWorkbenchCurrentLivePending": true,
   "liveExactEvidenceCommit": "473e7a9fe7613f164506c5adec01896232541e89",
   "liveRollupLiveCommit": "087b38393ea9da0bef3aced26ef514cac12a0635",
   "liveRollupMatchesProduction": false,
@@ -461,11 +463,11 @@
     }
   },
   "nextSafeWorkWithoutApproval": [
-    "refresh source/live exact evidence when production marker advances to the evidence-only head",
+    "refresh source/live exact evidence when production marker advances to the current source head",
     "refresh live rollup before claiming live-exact if production advances beyond the current live rollup head",
     "use the KOSHA exact promotion packet as the bounded operator-review set and run scripts/kosha_exact_promotion_review_gate.mjs on the human review input before any exact-trust promotion",
     "keep UI follow-up scoped to full 12-document authoring polish or reproduced exact-session desktop Share full-workbench perception issues",
-    "close the live 390x723 Documents first-task RED from evaluation/workspace-bounded-workbench-current-2026-07-22/report.json before any broad mobile Documents UX pass claim",
+    "promote the bounded-workbench current-source proof to live only after production /api/build-info reaches the product/evidence head and the live probe is rerun",
     "reproduce an exact saved/generated Share session before using fixture or generated /workspace share evidence to close the user's exact Share complaint",
     "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
     "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
