@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `77594ecb3b2b448a6174779a88121a3eddb353ab`
+Source HEAD: `56beef31269319f57c415535baa5a191862fe0b9`
 
-Production `/api/build-info`: `e391c476917bc6309dd45ff3372dd80838f8f80c`
+Production `/api/build-info`: `77594ecb3b2b448a6174779a88121a3eddb353ab`
 
 Latest evidence commit live: `false`
 
@@ -14,17 +14,17 @@ Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/northstar-live-rollup-2026-07-20/report.json`, `evaluation/northstar-live-rollup-2026-07-20/report.md`, `evaluation/northstar-next-runway-current-2026-07-22/report.json`, `evaluation/northstar-next-runway-current-2026-07-22/report.md`, `evaluation/northstar-open-gates-current/report.json`, `evaluation/northstar-open-gates-current/report.md`, `evaluation/share-exact-session-boundary-2026-07-22/report.json`, `evaluation/share-exact-session-boundary-2026-07-22/report.md`
+Source pending changed paths: `evaluation/northstar-live-rollup-2026-07-20/report.json`, `evaluation/northstar-live-rollup-2026-07-20/report.md`, `evaluation/northstar-next-runway-current-2026-07-22/report.json`, `evaluation/northstar-next-runway-current-2026-07-22/report.md`
 
 Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `77594ecb3b2b448a6174779a88121a3eddb353ab`
+Live rollup source head: `56beef31269319f57c415535baa5a191862fe0b9`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `77594ecb3b2b448a6174779a88121a3eddb353ab` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `e391c476917bc6309dd45ff3372dd80838f8f80c`, and the live rollup remains exact for that deployed marker.
+Note: current HEAD `56beef31269319f57c415535baa5a191862fe0b9` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `77594ecb3b2b448a6174779a88121a3eddb353ab`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
