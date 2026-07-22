@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T19:07:35.021Z",
-  "head": "305f9fc29795789b99866ab9ea1e7cb2d42da8ad",
+  "generatedAt": "2026-07-22T19:10:07.758Z",
+  "head": "ab717b6e83878956fe2b550b3edfe2f7a23b35b7",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "642275280f970580e369c3396b7bb3a08b5f80b2",
+    "commitSha": "305f9fc29795789b99866ab9ea1e7cb2d42da8ad",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-29iis8se5-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-cfdt2u10n-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -87,7 +87,7 @@
       "id": "sif_embedding_runtime",
       "state": "approval_gated",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 73423c3c7d32986954346927d6058763a2e8c2e4."
+      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: ab717b6e83878956fe2b550b3edfe2f7a23b35b7."
     },
     {
       "id": "kosha_exact_promotion_review_gate",
@@ -193,9 +193,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "305f9fc29795789b99866ab9ea1e7cb2d42da8ad",
+      "sourceCommit": "ab717b6e83878956fe2b550b3edfe2f7a23b35b7",
       "sourceStatus": "exact",
-      "productionCommit": "305f9fc29795789b99866ab9ea1e7cb2d42da8ad",
+      "productionCommit": "ab717b6e83878956fe2b550b3edfe2f7a23b35b7",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -226,15 +226,15 @@
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
       "sourceCommit": "305f9fc29795789b99866ab9ea1e7cb2d42da8ad",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },
     {
       "id": "sif_embedding_preflight",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "sourceCommit": "73423c3c7d32986954346927d6058763a2e8c2e4",
-      "sourceStatus": "ancestor",
+      "sourceCommit": "ab717b6e83878956fe2b550b3edfe2f7a23b35b7",
+      "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
     },
