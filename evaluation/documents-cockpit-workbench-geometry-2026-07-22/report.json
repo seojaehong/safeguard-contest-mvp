@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "safeclaw-documents-cockpit-workbench-geometry/v1",
+  "checkedAt": "2026-07-22T13:49:26.321Z",
+  "sourceHead": "23ace0f257ad34f783a5903af92e657381b67337",
+  "baseUrl": "http://127.0.0.1:3073",
+  "productionBuild": {
+    "ok": true,
+    "configured": false,
+    "source": "unavailable",
+    "commitSha": null,
+    "branch": null,
+    "environment": null,
+    "deploymentUrl": null,
+    "message": "배포 커밋 식별자가 런타임 환경에 노출되지 않았습니다."
+  },
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_DOCUMENTS_WORKBENCH",
+  "staleDevRedExplained": true,
+  "staleDevRedExplanation": "A sibling probe initially reported block/one-column geometry from a stale dev/HMR server. This gate records the clean local production geometry after rebuild/restart and directly measures the workbench display, column count, and editor-vs-launcher alignment.",
+  "routeSplitAloneAcceptedAsFix": false,
+  "rows": [
+    {
+      "viewport": "1440x723",
+      "metrics": {
+        "route": "/documents?theme=day",
+        "viewportWidth": 1440,
+        "viewportHeight": 723,
+        "bodyHeight": 723,
+        "scrollWidth": 1440,
+        "horizontalOverflow": false,
+        "shellClass": "safeclaw-module-shell module-variant-document",
+        "shellRoute": "/documents",
+        "workbenchDisplay": "grid",
+        "workbenchGridTemplateColumns": "252px 912px",
+        "workbenchColumnCount": 2,
+        "workbenchTop": 205,
+        "workbenchBottom": 653,
+        "workbenchWidth": 1172,
+        "workbenchHeight": 448,
+        "launcherTop": 205,
+        "launcherRight": 504,
+        "launcherBottom": 386,
+        "editorTop": 205,
+        "editorLeft": 512,
+        "editorRight": 1424,
+        "editorBottom": 653,
+        "coreButtons": 3,
+        "detailsOpen": false
+      },
+      "verdicts": {
+        "workbenchVerdict": "PASS",
+        "viewportVerdict": "PASS",
+        "overallVerdict": "PASS"
+      }
+    },
+    {
+      "viewport": "390x723",
+      "metrics": {
+        "route": "/documents?theme=day",
+        "viewportWidth": 390,
+        "viewportHeight": 723,
+        "bodyHeight": 728,
+        "scrollWidth": 390,
+        "horizontalOverflow": false,
+        "shellClass": "safeclaw-module-shell module-variant-document",
+        "shellRoute": "/documents",
+        "workbenchDisplay": "grid",
+        "workbenchGridTemplateColumns": "366px",
+        "workbenchColumnCount": 1,
+        "workbenchTop": 203,
+        "workbenchBottom": 680,
+        "workbenchWidth": 366,
+        "workbenchHeight": 477,
+        "launcherTop": 207,
+        "launcherRight": 354,
+        "launcherBottom": 336,
+        "editorTop": 348,
+        "editorLeft": 24,
+        "editorRight": 366,
+        "editorBottom": 680,
+        "coreButtons": 3,
+        "detailsOpen": false
+      },
+      "verdicts": {
+        "workbenchVerdict": "PASS",
+        "viewportVerdict": "PASS",
+        "overallVerdict": "PASS"
+      }
+    }
+  ]
+}
