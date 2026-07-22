@@ -368,6 +368,7 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       status: 500,
       message: "공유 세션을 확인하지 못했습니다.",
     },
+    safeMissingSessionReadVerdict: "RED_SERVER_ERROR_SHAPED_MISSING_SESSION",
     boundary: {
       exactSavedSessionRequiredForUserSpecificPass: true,
       providerDispatchLiveClaimed: false,
@@ -633,6 +634,7 @@ describe("northstar next runway generator", () => {
       externalProviderCalled: false,
       dbMutationPerformed: false,
       safeReadStatus: 500,
+      safeMissingSessionReadVerdict: "RED_SERVER_ERROR_SHAPED_MISSING_SESSION",
     });
     expect(report.uiInterpretation.documentsContainment).toContain("selected-only bounded workbench");
     expect(report.uiInterpretation.selectedEditorDetail).toContain("desktop 1440x900");

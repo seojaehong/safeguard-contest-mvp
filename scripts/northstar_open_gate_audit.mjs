@@ -1654,6 +1654,7 @@ function evaluateShareExactSessionBoundaryGate(rootDir) {
 
   const boundary = isRecord(report.boundary) ? report.boundary : {};
   const acceptance = isRecord(report.exactSessionAcceptance) ? report.exactSessionAcceptance : {};
+  const safeMissingSessionReadVerdict = readString(report.safeMissingSessionReadVerdict);
   const noMutation = boundary.dbMutationPerformed === false
     && boundary.dispatchMutationPerformed === false
     && boundary.providerDispatchLiveClaimed === false
@@ -1693,10 +1694,11 @@ function evaluateShareExactSessionBoundaryGate(rootDir) {
       label: "Exact saved Share session boundary",
       state: "notice",
       evidencePath,
-      detail: "Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass.",
+      detail: `Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass. Safe missing-session read verdict is ${safeMissingSessionReadVerdict || "unknown"} and remains separate from exact saved-session geometry.`,
       nextActions: [
         "Obtain a concrete production /share/[sessionId]?workerId=... URL or approved safe creation flow before closing the user's desktop mobile-like Share complaint.",
         "Rerun desktop 1440x723/1440x900 and mobile 390x723 geometry with sessionKind=saved-exact, root width ratio, x-region count, first action, preview/status visibility, and overflow metrics.",
+        "Keep the deliberately missing share-session GET fail-closed; if it returns a 5xx shape, track that as launch-quality debt rather than exact saved-session proof.",
       ],
     });
   }

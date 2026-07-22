@@ -1,19 +1,19 @@
 {
   "schemaVersion": "safeclaw-share-exact-session-boundary/v1",
-  "checkedAt": "2026-07-22T15:57:40.306Z",
+  "checkedAt": "2026-07-22T16:04:05.236Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHead": "f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd",
+  "sourceHead": "a02e5101fda10a830e610b543fb69d1dd87691a5",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd",
+    "commitSha": "a02e5101fda10a830e610b543fb69d1dd87691a5",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-2m71cvtad-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-owmah5w8h-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "liveCommit": "f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd",
+  "liveCommit": "a02e5101fda10a830e610b543fb69d1dd87691a5",
   "verdict": "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
   "exactSavedUserSessionReproduced": false,
   "exactSavedSessionUrlProvided": false,
@@ -57,6 +57,7 @@
     "message": "공유 세션을 확인하지 못했습니다.",
     "mutationPerformed": false
   },
+  "safeMissingSessionReadVerdict": "RED_SERVER_ERROR_SHAPED_MISSING_SESSION",
   "boundary": {
     "fixtureProofAcceptedAsExactSavedSession": false,
     "generatedWorkspaceProofAcceptedAsExactSavedSession": false,
@@ -72,7 +73,8 @@
   "nextEvidenceNeeded": [
     "concrete production /share/[sessionId]?workerId=... URL from the user-observed session",
     "or an approved safe creation flow for a manager-owned workpack/share session",
-    "then rerun desktop 1440x723/1440x900 and mobile 390x723 geometry with sessionKind=saved-exact"
+    "then rerun desktop 1440x723/1440x900 and mobile 390x723 geometry with sessionKind=saved-exact",
+    "keep the deliberately missing share-session GET fail-closed; a 5xx safe-read shape is a launch-quality debt separate from exact saved-session geometry"
   ],
   "forbiddenClaims": [
     "Fixture or generated /workspace Share proof closes the exact saved /share/[sessionId] user complaint.",

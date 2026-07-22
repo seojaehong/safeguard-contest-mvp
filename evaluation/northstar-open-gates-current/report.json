@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-22T15:58:10.859Z",
-  "sourceSha": "f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd",
+  "generatedAt": "2026-07-22T16:04:09.858Z",
+  "sourceSha": "a02e5101fda10a830e610b543fb69d1dd87691a5",
   "overall": "open",
   "gates": [
     {
@@ -64,10 +64,11 @@
       "state": "notice",
       "label": "Exact saved Share session boundary",
       "evidencePath": "evaluation\\share-exact-session-boundary-2026-07-22\\report.json",
-      "detail": "Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass.",
+      "detail": "Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass. Safe missing-session read verdict is RED_SERVER_ERROR_SHAPED_MISSING_SESSION and remains separate from exact saved-session geometry.",
       "nextActions": [
         "Obtain a concrete production /share/[sessionId]?workerId=... URL or approved safe creation flow before closing the user's desktop mobile-like Share complaint.",
-        "Rerun desktop 1440x723/1440x900 and mobile 390x723 geometry with sessionKind=saved-exact, root width ratio, x-region count, first action, preview/status visibility, and overflow metrics."
+        "Rerun desktop 1440x723/1440x900 and mobile 390x723 geometry with sessionKind=saved-exact, root width ratio, x-region count, first action, preview/status visibility, and overflow metrics.",
+        "Keep the deliberately missing share-session GET fail-closed; if it returns a 5xx shape, track that as launch-quality debt rather than exact saved-session proof."
       ]
     },
     {

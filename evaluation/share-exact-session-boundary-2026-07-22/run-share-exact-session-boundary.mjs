@@ -267,12 +267,23 @@ function json(value) {
   return `${JSON.stringify(value, null, 2)}\n`;
 }
 
+/**
+ * @param {number | null} status
+ */
+function classifySafeMissingSessionRead(status) {
+  if (status === 404 || status === 410) return "PASS_FAIL_CLOSED";
+  if (typeof status === "number" && status >= 500) return "RED_SERVER_ERROR_SHAPED_MISSING_SESSION";
+  if (typeof status === "number" && status >= 400) return "PARTIAL_CLIENT_ERROR_FAIL_CLOSED";
+  return "RED_UNEXPECTED_SAFE_READ_STATUS";
+}
+
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   const checkedAt = new Date().toISOString();
   const sourceHead = gitHead();
   const buildInfo = await readBuildInfo(options.baseUrl);
   const missingSessionGet = await probeMissingSessionGet(options.baseUrl);
+  const safeMissingSessionReadVerdict = classifySafeMissingSessionRead(missingSessionGet.status);
   const exactSessionUrl = normalizeExactShareUrl(options.exactUrl, options.baseUrl);
   const exactSessionPayloadPath = process.env.SAFECLAW_EXACT_SHARE_SESSION_PAYLOAD || "";
   const exactSessionGeometry = exactSessionUrl
@@ -327,6 +338,7 @@ async function main() {
       },
     },
     safeReadProbe: missingSessionGet,
+    safeMissingSessionReadVerdict,
     boundary: {
       fixtureProofAcceptedAsExactSavedSession: false,
       generatedWorkspaceProofAcceptedAsExactSavedSession: false,
@@ -343,6 +355,7 @@ async function main() {
       "concrete production /share/[sessionId]?workerId=... URL from the user-observed session",
       "or an approved safe creation flow for a manager-owned workpack/share session",
       "then rerun desktop 1440x723/1440x900 and mobile 390x723 geometry with sessionKind=saved-exact",
+      "keep the deliberately missing share-session GET fail-closed; a 5xx safe-read shape is a launch-quality debt separate from exact saved-session geometry",
     ],
     forbiddenClaims: [
       "Fixture or generated /workspace Share proof closes the exact saved /share/[sessionId] user complaint.",
@@ -380,6 +393,7 @@ DB mutation performed: \`${report.boundary.dbMutationPerformed}\`
 - Recipient API exists: \`${report.routeFiles.recipientApi.exists}\`
 - Manager share-session create API exists: \`${report.routeFiles.managerSessionCreateApi.exists}\`
 - Safe missing-session GET status: \`${missingSessionGet.status ?? "error"}\`
+- Safe missing-session read verdict: \`${report.safeMissingSessionReadVerdict}\`
 - Safe missing-session GET mutation performed: \`false\`
 - Exact saved URL provided: \`${Boolean(exactSessionUrl)}\`
 - Exact saved geometry rows: \`${exactSessionGeometry.length}\`

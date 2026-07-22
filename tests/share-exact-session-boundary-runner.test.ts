@@ -173,6 +173,7 @@ describe("share exact session boundary runner", () => {
         exactSavedSessionUrlProvided: false,
         exactSavedUserSessionReproduced: false,
         liveCommit: "fixture-live-commit",
+        safeMissingSessionReadVerdict: "PASS_FAIL_CLOSED",
         sessionKind: "missing-exact",
         verdict: "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
       });

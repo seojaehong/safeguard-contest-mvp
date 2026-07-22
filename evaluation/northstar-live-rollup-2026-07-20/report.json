@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T15:58:11.247Z",
-  "head": "f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd",
+  "generatedAt": "2026-07-22T16:04:10.399Z",
+  "head": "a02e5101fda10a830e610b543fb69d1dd87691a5",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd",
+    "commitSha": "a02e5101fda10a830e610b543fb69d1dd87691a5",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-2m71cvtad-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-owmah5w8h-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -55,7 +55,7 @@
       "id": "share_exact_saved_session_boundary",
       "state": "notice",
       "artifact": "evaluation\\share-exact-session-boundary-2026-07-22\\report.json",
-      "detail": "Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass."
+      "detail": "Exact saved/generated /share/[sessionId] user-session geometry remains MISSING_EVIDENCE; fixture or generated /workspace Share proof is explicitly not accepted as the user-specific saved-session pass. Safe missing-session read verdict is RED_SERVER_ERROR_SHAPED_MISSING_SESSION and remains separate from exact saved-session geometry."
     },
     {
       "id": "kosha_exact_trust_registry",
@@ -193,9 +193,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd",
+      "sourceCommit": "a02e5101fda10a830e610b543fb69d1dd87691a5",
       "sourceStatus": "exact",
-      "productionCommit": "f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd",
+      "productionCommit": "a02e5101fda10a830e610b543fb69d1dd87691a5",
       "productionStatus": "matches_live"
     },
     {

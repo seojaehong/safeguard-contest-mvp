@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T15:58:14.460Z",
+  "generatedAt": "2026-07-22T16:04:12.817Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd",
-  "productionCommit": "f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd",
+  "sourceHead": "a02e5101fda10a830e610b543fb69d1dd87691a5",
+  "productionCommit": "a02e5101fda10a830e610b543fb69d1dd87691a5",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd",
+    "commitSha": "a02e5101fda10a830e610b543fb69d1dd87691a5",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-2m71cvtad-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-owmah5w8h-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -20,8 +20,8 @@
   "sourceHeadLivePending": false,
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd",
-  "liveRollupLiveCommit": "f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd",
+  "liveExactEvidenceCommit": "a02e5101fda10a830e610b543fb69d1dd87691a5",
+  "liveRollupLiveCommit": "a02e5101fda10a830e610b543fb69d1dd87691a5",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -301,15 +301,16 @@
   },
   "shareExactSessionBoundary": {
     "verdict": "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
-    "sourceHead": "f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd",
-    "liveCommit": "f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd",
+    "sourceHead": "a02e5101fda10a830e610b543fb69d1dd87691a5",
+    "liveCommit": "a02e5101fda10a830e610b543fb69d1dd87691a5",
     "exactSavedUserSessionReproduced": false,
     "exactSavedSessionRequiredForUserSpecificPass": true,
     "dbMutationPerformed": false,
     "providerDispatchLiveClaimed": false,
     "externalProviderCalled": false,
     "safeReadStatus": 500,
-    "safeReadMessage": "공유 세션을 확인하지 못했습니다."
+    "safeReadMessage": "공유 세션을 확인하지 못했습니다.",
+    "safeMissingSessionReadVerdict": "RED_SERVER_ERROR_SHAPED_MISSING_SESSION"
   },
   "documentsCockpitWorkbenchGeometry": {
     "verdict": "PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH",

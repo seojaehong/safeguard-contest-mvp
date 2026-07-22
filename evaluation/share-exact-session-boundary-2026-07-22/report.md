@@ -1,12 +1,12 @@
 # Share Exact Session Boundary Gate
 
-Checked at: 2026-07-22T15:57:40.306Z
+Checked at: 2026-07-22T16:04:05.236Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD: `f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd`
+Source HEAD: `a02e5101fda10a830e610b543fb69d1dd87691a5`
 
-Live `/api/build-info`: `f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd`
+Live `/api/build-info`: `a02e5101fda10a830e610b543fb69d1dd87691a5`
 
 Verdict: `MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED`
 
@@ -24,6 +24,7 @@ DB mutation performed: `false`
 - Recipient API exists: `true`
 - Manager share-session create API exists: `true`
 - Safe missing-session GET status: `500`
+- Safe missing-session read verdict: `RED_SERVER_ERROR_SHAPED_MISSING_SESSION`
 - Safe missing-session GET mutation performed: `false`
 - Exact saved URL provided: `false`
 - Exact saved geometry rows: `0`
@@ -51,6 +52,7 @@ Creating a real share session is not approval-free: the manager route is an auth
 - concrete production /share/[sessionId]?workerId=... URL from the user-observed session
 - or an approved safe creation flow for a manager-owned workpack/share session
 - then rerun desktop 1440x723/1440x900 and mobile 390x723 geometry with sessionKind=saved-exact
+- keep the deliberately missing share-session GET fail-closed; a 5xx safe-read shape is a launch-quality debt separate from exact saved-session geometry
 
 ## Forbidden Claims
 

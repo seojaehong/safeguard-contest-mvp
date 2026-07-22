@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd`
+Source HEAD: `a02e5101fda10a830e610b543fb69d1dd87691a5`
 
-Production `/api/build-info`: `f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd`
+Production `/api/build-info`: `a02e5101fda10a830e610b543fb69d1dd87691a5`
 
 Latest evidence commit live: `true`
 
@@ -14,7 +14,7 @@ Source head live pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `f33242fbc41d111cf9224aa2f1e3b65c01bdcdcd`
+Live rollup source head: `a02e5101fda10a830e610b543fb69d1dd87691a5`
 
 Live rollup matches production: `true`
 
@@ -67,7 +67,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Share desktop: current measured Workspace Share and invited recipient fixture routes pass scoped desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
 - Share route evidence split: invited recipient `/share/[sessionId]` fixture route, exact saved/generated `/share/[sessionId]`, and manager/workspace share-result route remain separate proof layers. A fixture pass cannot close a user-specific exact saved/session complaint.
-- Share exact-session boundary: `MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED`; exact saved reproduced is `false`, safe missing-session GET status is `500`, and DB/provider mutations remain `false`.
+- Share exact-session boundary: `MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED`; exact saved reproduced is `false`, safe missing-session GET status is `500`, safe-read verdict is `RED_SERVER_ERROR_SHAPED_MISSING_SESSION`, and DB/provider mutations remain `false`.
 - Share mobile: compact cockpit remains first-viewport bounded in current evidence.
 
 Route/page split alone is not accepted as the UX fix. Page count only moves long documents/messages to another URL if the route body still unfolds the full artifact. The accepted structure is a three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes for long documents, messages, logs, and raw metadata.
