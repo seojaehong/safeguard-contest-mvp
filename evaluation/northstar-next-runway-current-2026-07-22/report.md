@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `9413320c7add0cab203ff2184646ab45d55a9a6a`
+Source HEAD: `26b29ce5d716e451f6c8c9fce268e6e0b33bf420`
 
-Production `/api/build-info`: `63b5a9af7acb20456b750acc004e0bb258aa34c4`
+Production `/api/build-info`: `26b29ce5d716e451f6c8c9fce268e6e0b33bf420`
 
-Latest evidence commit live: `false`
+Latest evidence commit live: `true`
 
-Source head live pending: `true`
+Source head live pending: `false`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/launch-readiness-current-2026-07-22/report.json`, `evaluation/launch-readiness-current-2026-07-22/report.md`, `evaluation/northstar-live-rollup-2026-07-20/report.json`, `evaluation/northstar-live-rollup-2026-07-20/report.md`, `evaluation/northstar-next-runway-current-2026-07-22/report.json`, `evaluation/northstar-next-runway-current-2026-07-22/report.md`, `evaluation/northstar-open-gates-current/report.json`, `evaluation/northstar-open-gates-current/report.md`, `evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json`, `evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.md`, `evaluation/provider-dispatch-idempotency-gate-2026-07-19/run-provider-dispatch-idempotency-gate.mjs`
+Source pending changed paths: `none`
 
-Current head is evidence-only pending: `true`
+Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `9413320c7add0cab203ff2184646ab45d55a9a6a`
+Live rollup source head: `26b29ce5d716e451f6c8c9fce268e6e0b33bf420`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `9413320c7add0cab203ff2184646ab45d55a9a6a` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `63b5a9af7acb20456b750acc004e0bb258aa34c4`, and the live rollup remains exact for that deployed marker.
+Note: source HEAD and production marker match for this artifact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
