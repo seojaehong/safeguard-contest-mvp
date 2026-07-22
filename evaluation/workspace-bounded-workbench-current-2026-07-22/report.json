@@ -1,25 +1,25 @@
 {
   "schemaVersion": "safeclaw-workspace-bounded-workbench-current/v1",
-  "checkedAt": "2026-07-22T10:01:28.482Z",
-  "baseUrl": "http://127.0.0.1:3073",
-  "measurementMode": "current-source-local-production",
-  "sourceHead": "36642d6327bb27dea67ea4bb6f90f4cfea67ac17",
-  "productionCommit": "",
+  "checkedAt": "2026-07-22T10:48:46.616Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "measurementMode": "live-production",
+  "sourceHead": "c0e2327661ee456fd30c8ffe020752d0e4ccfdb3",
+  "productionCommit": "c0e2327661ee456fd30c8ffe020752d0e4ccfdb3",
   "productionBuild": {
     "ok": true,
-    "configured": false,
-    "source": "unavailable",
-    "commitSha": null,
-    "branch": null,
-    "environment": null,
-    "deploymentUrl": null,
-    "message": "배포 커밋 식별자가 런타임 환경에 노출되지 않았습니다."
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "c0e2327661ee456fd30c8ffe020752d0e4ccfdb3",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-opm15cjbx-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
   },
   "routeSplitAloneAcceptedAsFix": false,
   "providerDispatchLiveClaimed": false,
   "externalProviderCalled": false,
   "dbMutationPerformed": false,
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP",
+  "verdict": "PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP",
   "interpretation": "This gate measures the bounded-workbench contract directly. Route/page split is orientation only; PASS requires first-task visibility, a default exposure budget, and bounded simultaneous scope, while exact saved Share sessions remain separate evidence. Detail-depth debt tracks whether long work moved into a local shell that can still feel long even when body-level page height is bounded.",
   "acceptance": {
     "documents": {

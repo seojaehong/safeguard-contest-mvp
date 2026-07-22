@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T10:44:14.432Z",
+  "generatedAt": "2026-07-22T10:50:29.494Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "f150c8cadee7c494f93ecf17d18750ee896d127d",
-  "productionCommit": "f150c8cadee7c494f93ecf17d18750ee896d127d",
+  "sourceHead": "c0e2327661ee456fd30c8ffe020752d0e4ccfdb3",
+  "productionCommit": "c0e2327661ee456fd30c8ffe020752d0e4ccfdb3",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f150c8cadee7c494f93ecf17d18750ee896d127d",
+    "commitSha": "c0e2327661ee456fd30c8ffe020752d0e4ccfdb3",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-hph61v7f5-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-opm15cjbx-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -20,8 +20,8 @@
   "sourceHeadLivePending": false,
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "f150c8cadee7c494f93ecf17d18750ee896d127d",
-  "liveRollupLiveCommit": "f150c8cadee7c494f93ecf17d18750ee896d127d",
+  "liveExactEvidenceCommit": "c0e2327661ee456fd30c8ffe020752d0e4ccfdb3",
+  "liveRollupLiveCommit": "c0e2327661ee456fd30c8ffe020752d0e4ccfdb3",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -372,9 +372,9 @@
     }
   },
   "boundedWorkbenchCurrent": {
-    "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP",
-    "sourceHead": "36642d6327bb27dea67ea4bb6f90f4cfea67ac17",
-    "productionCommit": "",
+    "verdict": "PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP",
+    "sourceHead": "c0e2327661ee456fd30c8ffe020752d0e4ccfdb3",
+    "productionCommit": "c0e2327661ee456fd30c8ffe020752d0e4ccfdb3",
     "routeSplitAloneAcceptedAsFix": false,
     "providerDispatchLiveClaimed": false,
     "externalProviderCalled": false,
