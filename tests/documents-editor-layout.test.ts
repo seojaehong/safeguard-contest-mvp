@@ -240,6 +240,62 @@ describe("documents editor layout", () => {
         });
       }
 
+      await page.locator('[data-testid="mobile-core-document-launcher"] button[data-document-key="riskAssessmentDraft"]').click();
+      await page.waitForFunction(() => {
+        const shell = document.querySelector(".workpack-shell")?.getBoundingClientRect();
+        const toolbar = document.querySelector(".document-toolbar")?.getBoundingClientRect();
+        const fieldStrip = document.querySelector('[data-testid="document-section-field-strip"]')?.getBoundingClientRect();
+        const actions = document.querySelector('[data-testid="document-section-actions"]')?.getBoundingClientRect();
+        const firstRiskRowHeader = document.querySelector('[data-testid="risk-row-editor-row"] summary')?.getBoundingClientRect();
+        const firstRiskHazardField = document.querySelector('[aria-label="행 1 유해·위험요인"]')?.getBoundingClientRect();
+        return Boolean(
+          shell
+            && toolbar
+            && fieldStrip
+            && actions
+            && firstRiskRowHeader
+            && firstRiskHazardField
+            && fieldStrip.top >= toolbar.bottom + 4
+            && actions.bottom <= shell.bottom
+            && firstRiskRowHeader.bottom <= window.innerHeight
+            && firstRiskHazardField.top <= window.innerHeight
+        );
+      }, undefined, { timeout: 1_000 });
+      const reselectMetrics = await page.evaluate(() => {
+        const rect = (selector: string) => {
+          const element = document.querySelector(selector);
+          if (!element) throw new Error(`Missing reselect selector: ${selector}`);
+          const bounds = element.getBoundingClientRect();
+          return {
+            top: Math.round(bounds.top),
+            bottom: Math.round(bounds.bottom),
+            height: Math.round(bounds.height)
+          };
+        };
+        return {
+          viewportHeight: window.innerHeight,
+          workpackShell: rect(".workpack-shell"),
+          toolbar: rect(".document-toolbar"),
+          fieldStrip: rect('[data-testid="document-section-field-strip"]'),
+          sectionActions: rect('[data-testid="document-section-actions"]'),
+          firstRiskRowHeader: rect('[data-testid="risk-row-editor-row"] summary'),
+          firstRiskHazardField: rect('[aria-label="행 1 유해·위험요인"]'),
+          firstSectionTextarea: rect(".document-section-textarea"),
+          selectedDocumentTitle: document.querySelector(".document-toolbar .h2")?.textContent?.trim() || "",
+          workpackShellScrollHeight: document.querySelector<HTMLElement>(".workpack-shell")?.scrollHeight || 0
+        };
+      });
+      expect(reselectMetrics.selectedDocumentTitle).toBe("위험성평가표");
+      expect(reselectMetrics.fieldStrip.top).toBeGreaterThanOrEqual(reselectMetrics.toolbar.bottom + 4);
+      expect(reselectMetrics.sectionActions.bottom).toBeLessThanOrEqual(reselectMetrics.workpackShell.bottom);
+      expect(reselectMetrics.firstRiskRowHeader.bottom).toBeLessThanOrEqual(reselectMetrics.viewportHeight);
+      expect(reselectMetrics.firstRiskHazardField.top).toBeLessThanOrEqual(reselectMetrics.viewportHeight);
+      expect(reselectMetrics.firstRiskHazardField.top).toBeLessThan(reselectMetrics.firstSectionTextarea.top);
+      if (viewport.name === "mobile") {
+        expect(reselectMetrics.sectionActions.bottom).toBeLessThanOrEqual(760);
+        expect(reselectMetrics.workpackShellScrollHeight).toBeLessThanOrEqual(1500);
+      }
+
       await page.close();
     }
   }, 90_000);

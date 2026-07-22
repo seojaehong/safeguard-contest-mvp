@@ -3020,17 +3020,29 @@ export function WorkpackEditor({
     if (requestedDocumentKey) {
       setSelectedKey(requestedDocumentKey);
     }
-    setShowFocusCue(true);
+    setShowFocusCue(requestedDocumentKey !== "riskAssessmentDraft");
     const root = document.documentElement;
     const previousScrollBehavior = root.style.scrollBehavior;
     root.style.scrollBehavior = "auto";
-    documentBodyRef.current?.scrollIntoView({ behavior: "auto", block: "start" });
+    window.scrollTo({ top: 0, behavior: "auto" });
     root.style.scrollBehavior = previousScrollBehavior;
-    const focusFrame = window.requestAnimationFrame(() => {
-      textareaRef.current?.focus({ preventScroll: true });
-    });
-    const focusTimer = window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 120);
-    const backupFocusTimer = window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 320);
+    const alignRequestedDocument = () => {
+      if (requestedDocumentKey === "riskAssessmentDraft") {
+        alignRiskCockpitBelowToolbar();
+        document.getElementById(documentTabId(requestedDocumentKey))?.focus({ preventScroll: true });
+        return;
+      }
+      const target = requestedDocumentKey
+        ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
+          || documentBodyRef.current
+        : textareaRef.current;
+      alignPaneTargetBelowToolbar(target || null);
+      (requestedDocumentKey ? document.getElementById(documentTabId(requestedDocumentKey)) : textareaRef.current)
+        ?.focus({ preventScroll: true });
+    };
+    const focusFrame = window.requestAnimationFrame(alignRequestedDocument);
+    const focusTimer = window.setTimeout(alignRequestedDocument, 120);
+    const backupFocusTimer = window.setTimeout(alignRequestedDocument, 320);
     const timer = window.setTimeout(() => setShowFocusCue(false), 2200);
     return () => {
       window.cancelAnimationFrame(focusFrame);
@@ -3069,6 +3081,45 @@ export function WorkpackEditor({
     });
   }
 
+  function alignRiskCockpitBelowToolbar() {
+    const shell = workpackShellRef.current;
+    const fieldStrip = documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]') || null;
+    const sectionActions = documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-actions"]') || null;
+    const firstRiskRowHeader = documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="risk-row-editor-row"] summary') || null;
+    const firstRiskHazardField = documentBodyRef.current?.querySelector<HTMLElement>('[aria-label="행 1 유해·위험요인"]') || null;
+    if (!shell || !fieldStrip || !sectionActions) {
+      alignPaneTargetBelowToolbar(fieldStrip || sectionActions);
+      return;
+    }
+
+    alignPaneTargetBelowToolbar(fieldStrip);
+
+    const shellRect = shell.getBoundingClientRect();
+    const toolbar = documentBodyRef.current?.querySelector<HTMLElement>(".document-toolbar") || null;
+    const toolbarRect = toolbar?.getBoundingClientRect();
+    const visibleTop = toolbarRect && toolbarRect.bottom > shellRect.top && toolbarRect.top < shellRect.bottom
+      ? toolbarRect.bottom
+      : shellRect.top;
+    const fieldRect = fieldStrip.getBoundingClientRect();
+    const actionsRect = sectionActions.getBoundingClientRect();
+    const firstRiskRowHeaderRect = firstRiskRowHeader?.getBoundingClientRect();
+    const firstRiskHazardFieldRect = firstRiskHazardField?.getBoundingClientRect();
+    const overflow = Math.max(
+      0,
+      actionsRect.bottom - shellRect.bottom,
+      firstRiskRowHeaderRect ? firstRiskRowHeaderRect.bottom - window.innerHeight : 0,
+      firstRiskHazardFieldRect ? firstRiskHazardFieldRect.top - window.innerHeight : 0
+    );
+    const topAllowance = Math.max(0, fieldRect.top - visibleTop - 4);
+    const additionalScroll = Math.min(overflow, topAllowance);
+    if (additionalScroll > 0) {
+      shell.scrollTo({
+        top: shell.scrollTop + additionalScroll,
+        behavior: "auto"
+      });
+    }
+  }
+
   useLayoutEffect(() => {
     if (!expandedStructuredSectionId) return;
     const firstSectionId = structuredDocument.body[0]?.id ?? null;
@@ -3081,7 +3132,7 @@ export function WorkpackEditor({
         || null
       : null;
     if (riskRowTarget) {
-      alignPaneTargetBelowToolbar(riskRowTarget);
+      alignRiskCockpitBelowToolbar();
       return;
     }
     const summaryCockpitTarget = isSummaryDocumentKey(selected.key)
@@ -3145,13 +3196,11 @@ export function WorkpackEditor({
 
   useLayoutEffect(() => {
     const alignSelectedDocument = () => {
-      const target = selected.key === "riskAssessmentDraft"
-        ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
-          || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-actions"]')
-          || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="risk-row-editor-row"]')
-          || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="risk-rows-editor"]')
-          || null
-        : isSummaryDocumentKey(selected.key)
+      if (selected.key === "riskAssessmentDraft") {
+        alignRiskCockpitBelowToolbar();
+        return;
+      }
+      const target = isSummaryDocumentKey(selected.key)
           ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="summary-document-cockpit"]')
             || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
             || null
@@ -3268,9 +3317,31 @@ export function WorkpackEditor({
     if (supportingDocumentMeta.some((item) => item.key === key)) {
       setSupportingDocumentsOpen(true);
     }
+    if (key === selected.key) {
+      const root = document.documentElement;
+      const previousScrollBehavior = root.style.scrollBehavior;
+      root.style.scrollBehavior = "auto";
+      window.scrollTo({ top: 0, behavior: "auto" });
+      root.style.scrollBehavior = previousScrollBehavior;
+      workpackShellRef.current?.scrollTo({ top: 0, behavior: "auto" });
+      const alignReselectedDocument = () => {
+        if (key === "riskAssessmentDraft") {
+          alignRiskCockpitBelowToolbar();
+        } else {
+          const target = documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
+            || documentBodyRef.current;
+          alignPaneTargetBelowToolbar(target || null);
+        }
+        document.getElementById(documentTabId(key))?.focus({ preventScroll: true });
+      };
+      window.requestAnimationFrame(alignReselectedDocument);
+      window.setTimeout(alignReselectedDocument, 80);
+      window.setTimeout(alignReselectedDocument, 240);
+      return;
+    }
     setSelectedKey(key);
     window.requestAnimationFrame(() => {
-      document.getElementById(documentTabId(key))?.focus();
+      document.getElementById(documentTabId(key))?.focus({ preventScroll: true });
     });
   }
 
