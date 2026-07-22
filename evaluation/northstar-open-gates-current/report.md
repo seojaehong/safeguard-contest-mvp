@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-22T19:37:17.604Z
-Source SHA: `e5270d0aa054a0e24a02adc70b786516f0fb03d7`
+Generated at: 2026-07-22T19:47:28.858Z
+Source SHA: `f3d01911d66e6b9eb45aaf1f81be564ce0058532`
 Overall: `open`
 
 ## Gate Matrix
@@ -19,7 +19,7 @@ Overall: `open`
 | llm_wiki_publication | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA cf1558910eb0163cca82b31b81033fb878148628. |
 | sif_embedding_runtime | approval_gated | evaluation\sif-embedding-gate\approval-preflight-report.json | SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: cf1558910eb0163cca82b31b81033fb878148628. |
 | kosha_exact_trust_registry | proven | evaluation\kosha-current-northstar-regression-2026-07-22\report.json | Current source confirms 3 exact KOSHA pins (D-C-13-2026, D-C-7-2026, B-E-10-2026), structured materialization, grounded generation, and live harness quality: 226 tests plus typecheck PASS; no DB/schema/Supabase/embedding writes. |
-| kosha_exact_promotion_review_gate | approval_gated | evaluation\kosha-exact-promotion-review-gate-2026-07-22\report.json | Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. |
+| kosha_exact_promotion_review_gate | approval_gated | evaluation\kosha-exact-promotion-review-gate-2026-07-22\report.json | Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Contract audit evaluation\kosha-exact-promotion-review-contract-audit-2026-07-23\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval. |
 
 ## Safe Demo Claims
 

@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-22T19:37:18.822Z
-Source HEAD at generation: e5270d0aa054a0e24a02adc70b786516f0fb03d7
-Live commit at generation: 0deca54f2b54f810dd65b91c73cc6b7f56814831
+Generated at: 2026-07-22T19:47:29.900Z
+Source HEAD at generation: f3d01911d66e6b9eb45aaf1f81be564ce0058532
+Live commit at generation: e2bca58c6b9e74ba81db94bd07120a479a56a34d
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -69,4 +69,4 @@ Overall: `northstar_open_approval_gated`
 - supabase_rls_launch_isolation: Read-only RLS approval preflight passed at source SHA cf1558910eb0163cca82b31b81033fb878148628, but live RLS catalog and tenant A/B isolation are not proven.
 - llm_wiki_publication: Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA cf1558910eb0163cca82b31b81033fb878148628.
 - sif_embedding_runtime: SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: cf1558910eb0163cca82b31b81033fb878148628.
-- kosha_exact_promotion_review_gate: Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval.
+- kosha_exact_promotion_review_gate: Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Contract audit evaluation\kosha-exact-promotion-review-contract-audit-2026-07-23\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval.

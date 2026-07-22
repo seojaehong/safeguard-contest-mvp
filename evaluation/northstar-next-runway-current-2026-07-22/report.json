@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-22T19:37:22.239Z",
+  "generatedAt": "2026-07-22T19:47:33.131Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "e5270d0aa054a0e24a02adc70b786516f0fb03d7",
-  "productionCommit": "0deca54f2b54f810dd65b91c73cc6b7f56814831",
+  "sourceHead": "f3d01911d66e6b9eb45aaf1f81be564ce0058532",
+  "productionCommit": "e2bca58c6b9e74ba81db94bd07120a479a56a34d",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "0deca54f2b54f810dd65b91c73cc6b7f56814831",
+    "commitSha": "e2bca58c6b9e74ba81db94bd07120a479a56a34d",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-6kkacjyhg-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-2i6qonczr-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": false,
@@ -20,15 +20,15 @@
   "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
   "sourcePendingChangedPaths": [
-    "evaluation/final-99-no-approval-boundary-2026-07-23/report.json",
-    "evaluation/final-99-no-approval-boundary-2026-07-23/report.md",
+    "evaluation/kosha-exact-promotion-review-contract-audit-2026-07-23/report.json",
+    "evaluation/kosha-exact-promotion-review-contract-audit-2026-07-23/report.md",
     "scripts/northstar_open_gate_audit.mjs",
     "tests/northstar-open-gate-audit.test.ts"
   ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "e5270d0aa054a0e24a02adc70b786516f0fb03d7",
-  "liveRollupLiveCommit": "0deca54f2b54f810dd65b91c73cc6b7f56814831",
+  "liveExactEvidenceCommit": "f3d01911d66e6b9eb45aaf1f81be564ce0058532",
+  "liveRollupLiveCommit": "e2bca58c6b9e74ba81db94bd07120a479a56a34d",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",

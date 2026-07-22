@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-22T19:37:18.822Z",
-  "head": "e5270d0aa054a0e24a02adc70b786516f0fb03d7",
+  "generatedAt": "2026-07-22T19:47:29.900Z",
+  "head": "f3d01911d66e6b9eb45aaf1f81be564ce0058532",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "0deca54f2b54f810dd65b91c73cc6b7f56814831",
+    "commitSha": "e2bca58c6b9e74ba81db94bd07120a479a56a34d",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-6kkacjyhg-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-2i6qonczr-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -93,7 +93,7 @@
       "id": "kosha_exact_promotion_review_gate",
       "state": "approval_gated",
       "artifact": "evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\report.json",
-      "detail": "Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval."
+      "detail": "Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Contract audit evaluation\\kosha-exact-promotion-review-contract-audit-2026-07-23\\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval."
     }
   ],
   "mobileP0": {
@@ -193,9 +193,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "e5270d0aa054a0e24a02adc70b786516f0fb03d7",
+      "sourceCommit": "f3d01911d66e6b9eb45aaf1f81be564ce0058532",
       "sourceStatus": "exact",
-      "productionCommit": "e5270d0aa054a0e24a02adc70b786516f0fb03d7",
+      "productionCommit": "f3d01911d66e6b9eb45aaf1f81be564ce0058532",
       "productionStatus": "ancestor_of_head"
     },
     {

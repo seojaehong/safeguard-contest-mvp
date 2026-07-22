@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-22T19:37:17.604Z",
-  "sourceSha": "e5270d0aa054a0e24a02adc70b786516f0fb03d7",
+  "generatedAt": "2026-07-22T19:47:28.858Z",
+  "sourceSha": "f3d01911d66e6b9eb45aaf1f81be564ce0058532",
   "overall": "open",
   "gates": [
     {
@@ -139,7 +139,7 @@
       "state": "approval_gated",
       "label": "KOSHA exact promotion review gate",
       "evidencePath": "evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\report.json",
-      "detail": "Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval.",
+      "detail": "Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Contract audit evaluation\\kosha-exact-promotion-review-contract-audit-2026-07-23\\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval.",
       "nextActions": [
         "Fill the generated KOSHA review template with reviewer, reviewedAt, humanConfirmed, and every required check before promotion.",
         "Re-run scripts\\kosha_exact_promotion_review_gate.mjs on the completed review input, then seek separate explicit approval before writing any exact-trust registry changes."
