@@ -702,7 +702,7 @@ describe("northstar next runway generator", () => {
       "keep the next UI product wave framed as bounded IA/density: default exposure budget, selected-only Documents workbench, Documents shell ratio <= 3, and exact-session desktop Share workbench proof",
     );
     expect(report.nextSafeWorkWithoutApproval).toContain(
-      "keep UI follow-up scoped to mobile Documents detail-depth debt or reproduced exact-session desktop Share full-workbench perception issues",
+      "keep UI follow-up scoped to reproduced exact-session desktop Share full-workbench perception issues while preserving the Documents bounded workbench shell-ratio <= 3 contract",
     );
     expect(report.nextSafeWorkWithoutApproval).toContain(
       "promote the bounded-workbench current-source proof to live only after production /api/build-info reaches the product/evidence head and the live probe is rerun",
@@ -716,7 +716,7 @@ describe("northstar next runway generator", () => {
   });
 
   it("treats a bounded-workbench source ancestor as included in live", async () => {
-    const { buildNorthstarNextRunway } = await loadNextRunwayModule();
+    const { buildNorthstarNextRunway, renderNorthstarNextRunwayMarkdown } = await loadNextRunwayModule();
     const { root, firstHead, secondHead } = createFixtureRoot();
     pointLiveRollupAt(root, secondHead);
     writeJson(root, "evaluation/workspace-bounded-workbench-current-2026-07-22/report.json", {
@@ -742,6 +742,7 @@ describe("northstar next runway generator", () => {
       buildInfo: { commitSha: secondHead },
       generatedAt: "2026-07-22T00:00:00.000Z",
     });
+    const markdown = renderNorthstarNextRunwayMarkdown(report);
 
     expect(report.productionCommit).toBe(secondHead);
     expect(report.boundedWorkbenchCurrent.sourceHead).toBe(firstHead);
@@ -751,6 +752,8 @@ describe("northstar next runway generator", () => {
       verdict: "MISSING_EVIDENCE",
       exactSavedUserSessionReproduced: false,
     });
+    expect(markdown).toContain("first-task/body containment rows pass, and no Documents rows carry local workbench detail-depth debt");
+    expect(markdown).not.toContain("but 0 Documents row(s) carry local workbench detail-depth debt");
   });
 
   it("keeps bounded workbench detail-depth debt separate from first-task pass and exact saved Share evidence", async () => {

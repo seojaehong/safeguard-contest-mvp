@@ -509,6 +509,13 @@ export function buildNorthstarNextRunway(options) {
   const boundedWorkbenchSourceIncludedInLive = boundedCurrentSourceHead !== ""
     && (boundedCurrentSourceHead === liveCommit || gitIsAncestor(options.rootDir, boundedCurrentSourceHead, liveCommit));
   const boundedWorkbenchCurrentLivePending = boundedCurrentSourceHead !== "" && !boundedWorkbenchSourceIncludedInLive;
+  const boundedCurrentSummary = boundedWorkbenchCurrentSummary(boundedCurrent);
+  const boundedDetailDepthDebtRows = Array.isArray(boundedCurrentSummary.documentDetailDepthDebts)
+    ? boundedCurrentSummary.documentDetailDepthDebts.length
+    : 0;
+  const uiFollowUpScope = boundedDetailDepthDebtRows > 0
+    ? "keep UI follow-up scoped to remaining Documents detail-depth debt or reproduced exact-session desktop Share full-workbench perception issues"
+    : "keep UI follow-up scoped to reproduced exact-session desktop Share full-workbench perception issues while preserving the Documents bounded workbench shell-ratio <= 3 contract";
 
   return {
     schemaVersion: SCHEMA_VERSION,
@@ -576,13 +583,13 @@ export function buildNorthstarNextRunway(options) {
     shareExactSessionBoundary: shareExactSessionBoundarySummary(shareExactBoundary),
     documentsLongFormIA: documentsLongFormIASummary(documentsIa),
     boundedWorkbenchDod: boundedWorkbenchDodSummary(boundedDod),
-    boundedWorkbenchCurrent: boundedWorkbenchCurrentSummary(boundedCurrent),
+    boundedWorkbenchCurrent: boundedCurrentSummary,
     nextSafeWorkWithoutApproval: [
       "refresh source/live exact evidence when production marker advances to the current source head",
       "refresh live rollup before claiming live-exact if production advances beyond the current live rollup head",
       "use the KOSHA exact promotion packet as the bounded operator-review set and run scripts/kosha_exact_promotion_review_gate.mjs on the human review input before any exact-trust promotion",
       "keep the next UI product wave framed as bounded IA/density: default exposure budget, selected-only Documents workbench, Documents shell ratio <= 3, and exact-session desktop Share workbench proof",
-      "keep UI follow-up scoped to mobile Documents detail-depth debt or reproduced exact-session desktop Share full-workbench perception issues",
+      uiFollowUpScope,
       "promote the bounded-workbench current-source proof to live only after production /api/build-info reaches the product/evidence head and the live probe is rerun",
       "reproduce an exact saved/generated Share session before using fixture or generated /workspace share evidence to close the user's exact Share complaint",
       "treat the Share exact-session boundary as open until a concrete session URL/payload is provided; the current no-mutation boundary audit only proves route presence and missing exact evidence",
@@ -609,7 +616,9 @@ export function renderNorthstarNextRunwayMarkdown(report) {
     ? report.boundedWorkbenchCurrent.documentDetailDepthDebts.length
     : 0;
   const boundedWorkbenchNote = boundedDocumentRedRows === 0
-    ? `Current bounded-workbench gate: \`${report.boundedWorkbenchCurrent.verdict}\`; first-task/body containment rows pass, but ${boundedDetailDepthDebtRows} Documents row(s) carry local workbench detail-depth debt when \`detailDepthDebt\` is \`true\`. Share rows remain scoped if exact saved session evidence is missing.`
+    ? boundedDetailDepthDebtRows === 0
+      ? `Current bounded-workbench gate: \`${report.boundedWorkbenchCurrent.verdict}\`; first-task/body containment rows pass, and no Documents rows carry local workbench detail-depth debt. Share rows remain scoped if exact saved session evidence is missing.`
+      : `Current bounded-workbench gate: \`${report.boundedWorkbenchCurrent.verdict}\`; first-task/body containment rows pass, but ${boundedDetailDepthDebtRows} Documents row(s) carry local workbench detail-depth debt when \`detailDepthDebt\` is \`true\`. Share rows remain scoped if exact saved session evidence is missing.`
     : `Current bounded-workbench source/local gate: \`${report.boundedWorkbenchCurrent.verdict}\`; ${boundedDocumentRedRows} Documents row(s) remain RED in the artifact, while Share rows remain scoped if exact saved session evidence is missing.`;
   const liveNote = report.latestEvidenceCommitLive
     ? "Note: source HEAD and production marker match for this artifact."
