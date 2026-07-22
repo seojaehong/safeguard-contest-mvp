@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-22T14:35:09.566Z",
+  "generatedAt": "2026-07-22T15:49:19.460Z",
   "scope": "sif_embedding_next_approval_gate_preflight",
-  "sourceSha": "c1f21c7804a56eec9debe151b13fe81774590ccc",
+  "sourceSha": "6cea28a5ba545e3e7e2c9662cc7654674869721f",
   "ok": true,
   "approvalHeld": true,
   "dbMutationPerformed": false,
@@ -136,7 +136,7 @@
       "id": "preflight_source_sha_recorded",
       "passed": true,
       "evidence": {
-        "sourceSha": "c1f21c7804a56eec9debe151b13fe81774590ccc"
+        "sourceSha": "6cea28a5ba545e3e7e2c9662cc7654674869721f"
       }
     },
     {
