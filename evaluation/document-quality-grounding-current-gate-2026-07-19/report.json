@@ -1,26 +1,26 @@
 {
   "schemaVersion": "safeclaw-document-quality-grounding-current-gate/v1",
-  "checkedAt": "2026-07-23T02:26:30.663Z",
+  "checkedAt": "2026-07-23T02:40:28.549Z",
   "date": "2026-07-19",
-  "sourceHead": "d2217e5136c5898db2ea6c74aa19336b4202b5f2",
+  "sourceHead": "c2139b39441117ff59922a590f238ba86a84b90b",
   "baseUrl": "https://www.safeclaw.kr",
   "productionBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "d2217e5136c5898db2ea6c74aa19336b4202b5f2",
+    "commitSha": "c2139b39441117ff59922a590f238ba86a84b90b",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-96qo0tbg7-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-d9svmyqt4-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "productionCommit": "d2217e5136c5898db2ea6c74aa19336b4202b5f2",
+  "productionCommit": "c2139b39441117ff59922a590f238ba86a84b90b",
   "verdict": "PASS_CURRENT_SOURCE_DOCUMENT_QUALITY_GROUNDING_CONTRACT",
   "focusedTests": {
     "command": "npm.cmd test -- tests\\ai-deliverables-generation-trace.test.ts tests\\ai-deliverables-scope.test.ts tests\\grounded-generation-contract.test.ts tests\\quality-contract.test.ts tests\\workpack-ontology-qa.test.ts tests\\commercial-harness.test.ts tests\\kosha-materialization-matrix.test.ts tests\\kosha-guide-supporting-row-relevance.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000 --hookTimeout=180000",
     "testFilesPassed": 8,
     "testsPassed": 135,
-    "durationSeconds": 23.69,
+    "durationSeconds": 22.64,
     "status": "pass",
     "exitStatus": 0,
     "signal": null,
@@ -31,8 +31,8 @@
       " RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/recipient-foreign-live-gate-20260720",
       " Test Files  8 passed (8)",
       "      Tests  135 passed (135)",
-      "   Start at  11:26:31",
-      "   Duration  23.69s (transform 1.82s, setup 0ms, import 4.33s, tests 17.54s, environment 1ms)"
+      "   Start at  11:40:29",
+      "   Duration  22.64s (transform 1.30s, setup 0ms, import 3.80s, tests 16.84s, environment 1ms)"
     ],
     "stderrTail": []
   },
