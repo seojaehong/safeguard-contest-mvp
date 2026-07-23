@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-share-recipient-ack-approval-preflight/v1",
-  "generatedAt": "2026-07-23T00:26:04.168Z",
-  "sourceSha": "7f62bfd6b59c63c7b392752b34b80d229816790d",
+  "generatedAt": "2026-07-23T01:06:43.652Z",
+  "sourceSha": "3d24cd0544d07256dfc4429625115f97a32f198e",
   "overall": "approval_ready_open",
   "approvalRequired": true,
   "liveDataMutationApproved": false,
