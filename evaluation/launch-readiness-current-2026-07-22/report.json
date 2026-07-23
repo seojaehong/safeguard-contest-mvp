@@ -1,11 +1,11 @@
 {
   "schemaVersion": "safeclaw-launch-readiness-current/v3",
-  "generatedAt": "2026-07-23T01:25:02.597Z",
+  "generatedAt": "2026-07-23T01:42:59.857Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHeadAtGeneration": "03fac3a721e0a1a6234feaa9aa62f632b1f1cd7c",
-  "productionCommit": "03fac3a721e0a1a6234feaa9aa62f632b1f1cd7c",
-  "runtimeSmokeCommit": "03fac3a721e0a1a6234feaa9aa62f632b1f1cd7c",
-  "evidenceHeadBeforeThisReport": "03fac3a721e0a1a6234feaa9aa62f632b1f1cd7c",
+  "sourceHeadAtGeneration": "ed829feafd4a09528ecbbf6c3529ae67882a015a",
+  "productionCommit": "ed829feafd4a09528ecbbf6c3529ae67882a015a",
+  "runtimeSmokeCommit": "ed829feafd4a09528ecbbf6c3529ae67882a015a",
+  "evidenceHeadBeforeThisReport": "ed829feafd4a09528ecbbf6c3529ae67882a015a",
   "currentHeadIsEvidenceOnlyPending": false,
   "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
   "safeLaunchDemoClaimAllowed": true,
@@ -17,7 +17,7 @@
   "apiAsk": {
     "status": 200,
     "ok": true,
-    "elapsedMs": 19277
+    "elapsedMs": 19088
   },
   "scenario": {
     "companyName": "도시가스공사",
@@ -63,7 +63,7 @@
         "안전보건교육",
         "사진/증빙"
       ],
-      "detail": "Law.go와 OpenAI 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 초단기실황 호출 성공 (서울, base 20260723 0900) / 기상청 초단기예보 호출 성공 (서울, base 20260723 0930) / 기상청 단기예보 호출 성공 (서울, base 20260723 0800) / 기상청 기상특보 조회 성공 (전국, 202607231000) / 기상청 영향예보 조회 성공 (서울서북권, 보건(일반인)) / 고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 지식 DB 매칭 2건 / Supabase 카탈로그 매칭 8건 (configured=true) / structured 위험성평가 rows 5건, 검증 이슈 0건 (structured rows=고정 근거 기반) / TBM-risk 연결 5건 (TBM-risk links=고정 근거 기반) / TBM structured=규칙 기반 from risk rows / 생성 모드: 강화 (고정 근거 위험요인 표 우선: 위험성평가 row 확정, TBM 구조 규칙 기반 조립)"
+      "detail": "Law.go와 OpenAI 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 초단기실황 연결 점검 필요: This operation was aborted / 기상청 초단기예보 호출 성공 (서울, base 20260723 0930) / 기상청 단기예보 연결 점검 필요: This operation was aborted / 기상청 기상특보 연결 점검 필요: This operation was aborted / 기상청 영향예보 조회 성공 (서울서북권, 보건(일반인)) / 고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: raw-query:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 지식 DB 매칭 2건 / Supabase 카탈로그 매칭 8건 (configured=true) / structured 위험성평가 rows 5건, 검증 이슈 0건 (structured rows=고정 근거 기반) / TBM-risk 연결 5건 (TBM-risk links=고정 근거 기반) / TBM structured=규칙 기반 from risk rows / 생성 모드: 강화 (고정 근거 위험요인 표 우선: 위험성평가 row 확정, TBM 구조 규칙 기반 조립)"
     },
     {
       "name": "Gemini",
@@ -84,7 +84,7 @@
         "작업계획서",
         "TBM"
       ],
-      "detail": "기상청 초단기실황 호출 성공 (서울, base 20260723 0900) / 기상청 초단기예보 호출 성공 (서울, base 20260723 0930) / 기상청 단기예보 호출 성공 (서울, base 20260723 0800) / 기상청 기상특보 조회 성공 (전국, 202607231000) / 기상청 영향예보 조회 성공 (서울서북권, 보건(일반인))"
+      "detail": "기상청 초단기실황 연결 점검 필요: This operation was aborted / 기상청 초단기예보 호출 성공 (서울, base 20260723 0930) / 기상청 단기예보 연결 점검 필요: This operation was aborted / 기상청 기상특보 연결 점검 필요: This operation was aborted / 기상청 영향예보 조회 성공 (서울서북권, 보건(일반인))"
     },
     {
       "name": "Work24",
@@ -127,7 +127,7 @@
         "비상대응",
         "사진/증빙"
       ],
-      "detail": "KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다."
+      "detail": "KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: raw-query:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다."
     },
     {
       "name": "n8n dispatch",
@@ -197,9 +197,9 @@
     "verdict": "open"
   },
   "northstarLiveRollupOverall": {
-    "sourceHeadAtGeneration": "7c912a55149a0ff003236adf8be358816d6ba2b6",
-    "liveCommitAtGeneration": "50207172d019d082010bf62813ce614134b22e61",
-    "liveCommitMatchesSourceHead": false
+    "sourceHeadAtGeneration": "b497813f744f7e8c912d051bb987045b77ae0dc1",
+    "liveCommitAtGeneration": "b497813f744f7e8c912d051bb987045b77ae0dc1",
+    "liveCommitMatchesSourceHead": true
   },
   "approvalGatedBoundaries": [
     {
@@ -260,10 +260,10 @@
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "03fac3a721e0a1a6234feaa9aa62f632b1f1cd7c",
+    "commitSha": "ed829feafd4a09528ecbbf6c3529ae67882a015a",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-8euxwdnk1-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-ba16yuxqd-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   }
 }
