@@ -92,13 +92,15 @@ function runFocusedTests(skipTests) {
   const args = process.platform === "win32"
     ? ["/c", "npm.cmd", "test", "--", FOCUSED_TEST, "--maxWorkers=1", "--fileParallelism=false"]
     : ["test", "--", FOCUSED_TEST, "--maxWorkers=1", "--fileParallelism=false"];
-  execFileSync(executable, args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+  const output = execFileSync(executable, args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+  const fileMatch = /Test Files\s+(\d+) passed/iu.exec(output);
+  const testMatch = /Tests\s+(\d+) passed/iu.exec(output);
   return {
     command,
     passed: true,
     skipped: false,
-    testFilesPassed: 1,
-    testsPassed: 12,
+    testFilesPassed: fileMatch ? Number(fileMatch[1]) : 1,
+    testsPassed: testMatch ? Number(testMatch[1]) : 0,
   };
 }
 

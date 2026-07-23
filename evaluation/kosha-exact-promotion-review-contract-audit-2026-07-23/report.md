@@ -1,12 +1,12 @@
 # KOSHA Exact Promotion Review Contract Audit
 
-Generated at: `2026-07-23T01:14:26.429Z`
+Generated at: `2026-07-23T02:19:50.932Z`
 
 Verdict: `PASS_CURRENT_SOURCE_REVIEW_GATE_CONTRACT_NO_MUTATION`
 
-Source HEAD: `7aa245cacc35c173d118bcd1a6f540abc5f74b88`
+Source HEAD: `3b200cfc728aedc4b0dccadf3797c41ee52250b5`
 
-Production `/api/build-info`: `7aa245cacc35c173d118bcd1a6f540abc5f74b88`
+Production `/api/build-info`: `3b200cfc728aedc4b0dccadf3797c41ee52250b5`
 
 ## Boundary
 
@@ -15,7 +15,7 @@ This is an approval-free static and focused-test audit of the KOSHA exact-promot
 The current committed review-gate artifact remains a blocked operator template snapshot:
 
 - Artifact: `evaluation\kosha-exact-promotion-review-gate-2026-07-22\report.json`
-- Artifact source: `28c94c32507e82c53418741ef87a43169ec14c60`
+- Artifact source: `802d0705b98750972f597da60b960885ff609d89`
 - Artifact verdict: `REVIEW_CHECKLIST_INCOMPLETE_BLOCKED`
 - Review rows: `8`
 - Passed rows: `0`
@@ -49,7 +49,7 @@ The current committed review-gate artifact remains a blocked operator template s
 | Check | Result |
 | --- | --- |
 | `node --check scripts\kosha_exact_promotion_review_gate.mjs` | PASS |
-| `npm.cmd test -- tests\kosha-exact-promotion-review-gate.test.ts --maxWorkers=1 --fileParallelism=false` | PASS, 1 file / 12 tests |
+| `npm.cmd test -- tests\kosha-exact-promotion-review-gate.test.ts --maxWorkers=1 --fileParallelism=false` | PASS, 1 file / 14 tests |
 
 ## Forbidden Claims
 
