@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `3d5cbde16f17209195341af429622056817c4121`
+Source HEAD: `af02bc7cd37a7ccf7e45838ebd7e8fdace32c587`
 
-Production `/api/build-info`: `01e07a1e36e24810909411aa2c8045e73edab8ec`
+Production `/api/build-info`: `af02bc7cd37a7ccf7e45838ebd7e8fdace32c587`
 
-Latest evidence commit live: `false`
+Latest evidence commit live: `true`
 
-Source head live pending: `true`
+Source head live pending: `false`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/launch-readiness-current-2026-07-22/report.json`, `evaluation/launch-readiness-current-2026-07-22/report.md`, `evaluation/northstar-live-rollup-2026-07-20/report.json`, `evaluation/northstar-live-rollup-2026-07-20/report.md`, `evaluation/northstar-next-runway-current-2026-07-22/report.json`, `evaluation/northstar-next-runway-current-2026-07-22/report.md`, `evaluation/northstar-open-gates-current/report.json`, `evaluation/northstar-open-gates-current/report.md`, `evaluation/share-exact-session-boundary-2026-07-22/report.json`, `evaluation/share-exact-session-boundary-2026-07-22/report.md`, `evaluation/share-public-session-storage-approval-2026-07-23/report.json`, `evaluation/share-public-session-storage-approval-2026-07-23/report.md`, `evaluation/share-public-session-storage-readiness-2026-07-23/report.json`, `evaluation/share-public-session-storage-readiness-2026-07-23/report.md`
+Source pending changed paths: `none`
 
-Current head is evidence-only pending: `true`
+Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `3d5cbde16f17209195341af429622056817c4121`
+Live rollup source head: `af02bc7cd37a7ccf7e45838ebd7e8fdace32c587`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `3d5cbde16f17209195341af429622056817c4121` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `01e07a1e36e24810909411aa2c8045e73edab8ec`, and the live rollup remains exact for that deployed marker.
+Note: source HEAD and production marker match for this artifact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
