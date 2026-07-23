@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-23T00:52:29.000Z",
+  "generatedAt": "2026-07-23T00:55:34.232Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "28c94c32507e82c53418741ef87a43169ec14c60",
+  "sourceHead": "48ea06c8d326ceb3d26d342675f971180a7dd175",
   "productionCommit": "28c94c32507e82c53418741ef87a43169ec14c60",
   "liveBuildInfo": {
     "ok": true,
@@ -15,14 +15,26 @@
     "deploymentUrl": "safeguard-contest-izdsoezaf-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": true,
-  "currentHeadIsEvidenceOnlyPending": false,
-  "sourceHeadLivePending": false,
+  "latestEvidenceCommitLive": false,
+  "currentHeadIsEvidenceOnlyPending": true,
+  "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
-  "sourcePendingChangedPaths": [],
+  "sourcePendingChangedPaths": [
+    "evaluation/kosha-exact-promotion-packet-2026-07-22/report.json",
+    "evaluation/kosha-exact-promotion-packet-2026-07-22/report.md",
+    "evaluation/kosha-exact-promotion-review-gate-2026-07-22/report.json",
+    "evaluation/kosha-exact-promotion-review-gate-2026-07-22/report.md",
+    "evaluation/kosha-exact-promotion-review-gate-2026-07-22/review-template.json",
+    "evaluation/northstar-live-rollup-2026-07-20/report.json",
+    "evaluation/northstar-live-rollup-2026-07-20/report.md",
+    "evaluation/northstar-next-runway-current-2026-07-22/report.json",
+    "evaluation/northstar-next-runway-current-2026-07-22/report.md",
+    "evaluation/northstar-open-gates-current/report.json",
+    "evaluation/northstar-open-gates-current/report.md"
+  ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "28c94c32507e82c53418741ef87a43169ec14c60",
+  "liveExactEvidenceCommit": "48ea06c8d326ceb3d26d342675f971180a7dd175",
   "liveRollupLiveCommit": "28c94c32507e82c53418741ef87a43169ec14c60",
   "liveRollupMatchesProduction": true,
   "artifacts": {
