@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-hermes-openclaw-runtime-current-gate/v1",
-  "checkedAt": "2026-07-22T22:49:50.468Z",
-  "sourceShaForFocusedTests": "4fe73315c156f7398aea76ca86d9e90579e79e7f",
+  "checkedAt": "2026-07-23T03:08:12.912Z",
+  "sourceShaForFocusedTests": "c5f933d4ac553ae1dfe3b8416292cf75eecf2e95",
   "productionBuildInfoAtLiveSmoke": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "4fe73315c156f7398aea76ca86d9e90579e79e7f",
+    "commitSha": "c5f933d4ac553ae1dfe3b8416292cf75eecf2e95",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-aj76j8cr3-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-ph8j8w5s4-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "verdict": "adapter_boundary_pass_live_execution_not_claimed",
@@ -17,7 +17,7 @@
     "command": "npm.cmd test -- tests\\engine-adapter.test.ts tests\\hermes-engine-adapter.test.ts tests\\openclaw-hermes-route.test.ts tests\\openclaw-chat.test.ts tests\\openclaw-broker-ui-context.test.ts tests\\remote-hermes-contract.test.ts tests\\remote-hermes-runtime.test.ts tests\\remote-hermes-route.test.ts tests\\remote-hermes-https-transport.test.ts tests\\remote-hermes-service-auth.test.ts tests\\remote-engine-protocol.test.ts tests\\engine-runtime-readiness-policy.test.ts tests\\ai-provider-policy.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000 --hookTimeout=180000",
     "testFilesPassed": 13,
     "testsPassed": 289,
-    "durationSeconds": 16.11,
+    "durationSeconds": 16.47,
     "status": "pass",
     "exitStatus": 0,
     "signal": null,
@@ -27,8 +27,8 @@
       " RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/recipient-foreign-live-gate-20260720",
       " Test Files  13 passed (13)",
       "      Tests  289 passed (289)",
-      "   Start at  07:49:52",
-      "   Duration  16.11s (transform 1.35s, setup 0ms, import 4.84s, tests 8.03s, environment 1ms)"
+      "   Start at  12:08:14",
+      "   Duration  16.47s (transform 1.47s, setup 0ms, import 4.86s, tests 8.65s, environment 1ms)"
     ],
     "stderrTail": []
   },

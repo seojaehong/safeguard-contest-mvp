@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-23T03:03:28.310Z",
+  "generatedAt": "2026-07-23T03:09:04.176Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "3d31b179f168fe9deec05eeba649663c983149fc",
-  "productionCommit": "3d31b179f168fe9deec05eeba649663c983149fc",
+  "sourceHead": "c5f933d4ac553ae1dfe3b8416292cf75eecf2e95",
+  "productionCommit": "c5f933d4ac553ae1dfe3b8416292cf75eecf2e95",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "3d31b179f168fe9deec05eeba649663c983149fc",
+    "commitSha": "c5f933d4ac553ae1dfe3b8416292cf75eecf2e95",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-o7xp82f48-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-ph8j8w5s4-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "3d31b179f168fe9deec05eeba649663c983149fc",
-  "liveRollupLiveCommit": "3d31b179f168fe9deec05eeba649663c983149fc",
+  "liveExactEvidenceCommit": "c5f933d4ac553ae1dfe3b8416292cf75eecf2e95",
+  "liveRollupLiveCommit": "c5f933d4ac553ae1dfe3b8416292cf75eecf2e95",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -211,7 +211,7 @@
       "command": "npm.cmd test -- tests\\engine-adapter.test.ts tests\\hermes-engine-adapter.test.ts tests\\openclaw-hermes-route.test.ts tests\\openclaw-chat.test.ts tests\\openclaw-broker-ui-context.test.ts tests\\remote-hermes-contract.test.ts tests\\remote-hermes-runtime.test.ts tests\\remote-hermes-route.test.ts tests\\remote-hermes-https-transport.test.ts tests\\remote-hermes-service-auth.test.ts tests\\remote-engine-protocol.test.ts tests\\engine-runtime-readiness-policy.test.ts tests\\ai-provider-policy.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000 --hookTimeout=180000",
       "testFilesPassed": 13,
       "testsPassed": 289,
-      "durationSeconds": 16.11,
+      "durationSeconds": 16.47,
       "status": "pass",
       "exitStatus": 0,
       "signal": null,
@@ -221,8 +221,8 @@
         " RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/recipient-foreign-live-gate-20260720",
         " Test Files  13 passed (13)",
         "      Tests  289 passed (289)",
-        "   Start at  07:49:52",
-        "   Duration  16.11s (transform 1.35s, setup 0ms, import 4.84s, tests 8.03s, environment 1ms)"
+        "   Start at  12:08:14",
+        "   Duration  16.47s (transform 1.47s, setup 0ms, import 4.86s, tests 8.65s, environment 1ms)"
       ],
       "stderrTail": []
     },
