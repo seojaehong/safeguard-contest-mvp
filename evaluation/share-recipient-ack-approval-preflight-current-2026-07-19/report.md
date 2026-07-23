@@ -1,7 +1,7 @@
 # Share Recipient ACK Approval Preflight
 
-Generated: `2026-07-22T23:30:03.156Z`
-Source SHA: `33d0fd154f00322cfd5e2c5ae04015ab097f96ce`
+Generated: `2026-07-23T00:26:04.168Z`
+Source SHA: `7f62bfd6b59c63c7b392752b34b80d229816790d`
 Overall: `approval_ready_open`
 Approval required: `true`
 DB mutation performed: `false`
