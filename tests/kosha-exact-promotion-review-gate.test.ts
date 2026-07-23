@@ -282,6 +282,30 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.exactRegistryWriteArtifactCreated).toBe(false);
   });
 
+  it.each([
+    ["calendar rollover", "2026-02-31T00:00:00.000Z"],
+    ["missing timezone", "2026-07-22T00:00:00.000"],
+  ])("fails closed when reviewedAt has %s", async (_label, reviewedAt) => {
+    const { root, packetPath, reviewPath } = writeFixtureRoot();
+    const review = JSON.parse(fs.readFileSync(path.join(root, reviewPath), "utf8")) as {
+      candidateReviews: Array<{ stableKey: string; reviewedAt: string }>;
+    };
+    const target = review.candidateReviews.find((row) => row.stableKey === "D-C-10");
+    if (!target) throw new Error("fixture-missing-d-c-10");
+    target.reviewedAt = reviewedAt;
+    writeJson(root, reviewPath, review);
+    const module = await loadReviewGateModule();
+    const report = module.buildKoshaExactPromotionReviewGate({ rootDir: root, packetPath, reviewPath });
+
+    expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
+    expect(report.reviewChecklistComplete).toBe(false);
+    expect(report.failures).toContain("invalid-reviewed-at:D-C-10");
+    expect(report.failureSummary.invalidReviewedAt).toBe(1);
+    expect(report.exactPromotionPerformed).toBe(false);
+    expect(report.exactRegistryWriteArtifactCreated).toBe(false);
+    expect(report.completedReviewCreatesRegistryArtifact).toBe(false);
+  });
+
   it("fails closed when review input includes a row outside the packet candidate set", async () => {
     const { root, packetPath, reviewPath, candidates } = writeFixtureRoot();
     const review = JSON.parse(fs.readFileSync(path.join(root, reviewPath), "utf8")) as {
