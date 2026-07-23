@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-23T02:12:41.786Z",
-  "head": "802d0705b98750972f597da60b960885ff609d89",
+  "generatedAt": "2026-07-23T02:16:12.266Z",
+  "head": "9c462a36f7d1fe2c98e49d7257178831276b11f2",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "9c59863d37dd253fd55079a924169a5e1db73af6",
+    "commitSha": "9c462a36f7d1fe2c98e49d7257178831276b11f2",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-7lzgrb6b4-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-9sq69pm48-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -205,9 +205,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "401fde47b6ab36c17a1b2412d070d5cd6bb28b4e",
+      "sourceCommit": "802d0705b98750972f597da60b960885ff609d89",
       "sourceStatus": "ancestor",
-      "productionCommit": "401fde47b6ab36c17a1b2412d070d5cd6bb28b4e",
+      "productionCommit": "802d0705b98750972f597da60b960885ff609d89",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -237,16 +237,16 @@
     {
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "sourceCommit": "de369b990bb7017f48b7cdc4baece8e06abb08e9",
-      "sourceStatus": "ancestor",
+      "sourceCommit": "9c462a36f7d1fe2c98e49d7257178831276b11f2",
+      "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
     },
     {
       "id": "sif_embedding_preflight",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
-      "sourceCommit": "fc3e8e7f18c87e577a9f9dcaf4ead447adda2cb4",
-      "sourceStatus": "ancestor",
+      "sourceCommit": "9c462a36f7d1fe2c98e49d7257178831276b11f2",
+      "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
     },
