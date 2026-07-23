@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `48ea06c8d326ceb3d26d342675f971180a7dd175`
+Source HEAD: `93462306316d049ee5d2ea516da17cdd2c3cf84b`
 
-Production `/api/build-info`: `28c94c32507e82c53418741ef87a43169ec14c60`
+Production `/api/build-info`: `93462306316d049ee5d2ea516da17cdd2c3cf84b`
 
-Latest evidence commit live: `false`
+Latest evidence commit live: `true`
 
-Source head live pending: `true`
+Source head live pending: `false`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/kosha-exact-promotion-packet-2026-07-22/report.json`, `evaluation/kosha-exact-promotion-packet-2026-07-22/report.md`, `evaluation/kosha-exact-promotion-review-gate-2026-07-22/report.json`, `evaluation/kosha-exact-promotion-review-gate-2026-07-22/report.md`, `evaluation/kosha-exact-promotion-review-gate-2026-07-22/review-template.json`, `evaluation/northstar-live-rollup-2026-07-20/report.json`, `evaluation/northstar-live-rollup-2026-07-20/report.md`, `evaluation/northstar-next-runway-current-2026-07-22/report.json`, `evaluation/northstar-next-runway-current-2026-07-22/report.md`, `evaluation/northstar-open-gates-current/report.json`, `evaluation/northstar-open-gates-current/report.md`
+Source pending changed paths: `none`
 
-Current head is evidence-only pending: `true`
+Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `48ea06c8d326ceb3d26d342675f971180a7dd175`
+Live rollup source head: `93462306316d049ee5d2ea516da17cdd2c3cf84b`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `48ea06c8d326ceb3d26d342675f971180a7dd175` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `28c94c32507e82c53418741ef87a43169ec14c60`, and the live rollup remains exact for that deployed marker.
+Note: source HEAD and production marker match for this artifact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
