@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-share-public-session-storage-readiness/v1",
-  "checkedAt": "2026-07-23T00:00:02.152Z",
-  "sourceHead": "01e07a1e36e24810909411aa2c8045e73edab8ec",
-  "productionCommit": "01e07a1e36e24810909411aa2c8045e73edab8ec",
+  "checkedAt": "2026-07-23T02:02:46.489Z",
+  "sourceHead": "5874d750a76b71bb923bb760b8be06710dcab15d",
+  "productionCommit": "5874d750a76b71bb923bb760b8be06710dcab15d",
   "baseUrl": "https://www.safeclaw.kr",
   "verdict": "RED_PUBLIC_SHARE_SESSION_TABLE_MISSING_FROM_SCHEMA_CACHE_NO_MUTATION",
   "dbMutationPerformed": false,
