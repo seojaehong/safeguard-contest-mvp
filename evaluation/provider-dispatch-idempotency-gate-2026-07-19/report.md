@@ -2,9 +2,9 @@
 
 Generated at: 2026-07-19 KST
 
-Current refresh: 2026-07-22T23:48:04.078Z
+Current refresh: 2026-07-23T00:21:24.059Z
 
-Source marker for approval packet wiring: `5891ddcd07c5ddd598129de0ce33b73391d90a1d`
+Source marker for approval packet wiring: `a31106f53e432f23a73446cba6d2273465b3b7ea`
 
 ## Purpose
 
@@ -22,7 +22,7 @@ Live `/api/workflow/dispatch` returns:
 
 The route keeps real provider dispatch locked with `PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false`.
 
-Current production marker at refresh: `5891ddcd07c5ddd598129de0ce33b73391d90a1d`.
+Current production marker at refresh: `a31106f53e432f23a73446cba6d2273465b3b7ea`.
 
 ## Drafted Approval Artifact
 
