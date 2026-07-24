@@ -178,7 +178,7 @@ describe("workspace share simplification", () => {
   });
 
   it("separates authored documents from the total deliverable output count", () => {
-    expect(commandCenter).toContain("작성 문서 9종(핵심 3종 + 지원 6종) · 총 산출물 12개");
+    expect(commandCenter).toContain("작성 문서 12종(핵심 3종 + 지원 9종)");
     expect(commandCenter).toContain("개 추가 산출물 보기");
     expect(commandCenter).not.toContain("문서 12종 + 외국인 안내문");
   });

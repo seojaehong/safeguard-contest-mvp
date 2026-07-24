@@ -26,9 +26,12 @@ function verdictFor(metrics) {
       && metrics.workbenchWidth >= 1040
       && metrics.editorLeft >= metrics.launcherRight
       && Math.abs(metrics.editorTop - metrics.launcherTop) <= 4
+      && metrics.innerNavigatorDisplay === "none"
+      && metrics.selectedEditorPaneWidth >= metrics.editorWidth * 0.95
     : metrics.workbenchDisplay === "grid"
       && metrics.workbenchColumnCount === 1
-      && metrics.launcherBottom < metrics.editorTop;
+      && metrics.launcherBottom < metrics.editorTop
+      && metrics.innerNavigatorDisplay === "none";
   const viewportPass = metrics.bodyHeight <= metrics.viewportHeight + 8
     && metrics.horizontalOverflow === false
     && metrics.coreButtons === 3
@@ -73,6 +76,8 @@ async function measure(page, viewport) {
     const workbench = document.querySelector(".safeclaw-documents-workbench");
     const launcher = document.querySelector('[data-testid="mobile-core-document-launcher"]');
     const editor = document.querySelector('[data-testid="workpack-editor-workspace"]');
+    const innerNavigator = editor?.querySelector(".workpack-sidebar");
+    const selectedEditorPane = editor?.querySelector(".document-editor");
     const shell = document.querySelector(".safeclaw-module-shell");
     const details = document.querySelector('[data-testid="mobile-document-details"]');
     const style = workbench ? getComputedStyle(workbench) : null;
@@ -80,6 +85,7 @@ async function measure(page, viewport) {
     const workbenchRect = rect(workbench);
     const launcherRect = rect(launcher);
     const editorRect = rect(editor);
+    const selectedEditorPaneRect = rect(selectedEditorPane);
     const visibleElements = (selector) => [...document.querySelectorAll(selector)]
       .filter((element) => {
         const box = element.getBoundingClientRect();
@@ -122,6 +128,10 @@ async function measure(page, viewport) {
       editorLeft: editorRect?.left ?? 0,
       editorRight: editorRect?.right ?? 0,
       editorBottom: editorRect?.bottom ?? 0,
+      editorWidth: editorRect?.width ?? 0,
+      innerNavigatorDisplay: innerNavigator ? getComputedStyle(innerNavigator).display : "missing",
+      innerNavigatorWidth: rect(innerNavigator)?.width ?? 0,
+      selectedEditorPaneWidth: selectedEditorPaneRect?.width ?? 0,
       editorClientHeight: editor?.clientHeight ?? 0,
       editorScrollHeight: editor?.scrollHeight ?? 0,
       editorScrollRatio: editor?.clientHeight ? Number((editor.scrollHeight / editor.clientHeight).toFixed(2)) : 0,
@@ -157,7 +167,7 @@ const liveProductionMeasured = baseUrl.includes("safeclaw.kr") && buildInfo.comm
 const verdictPrefix = allRowsPass ? "PASS" : "RED";
 const verdictScope = liveProductionMeasured ? "LIVE_PRODUCTION" : "CURRENT_SOURCE_LOCAL_PRODUCTION";
 const report = {
-  schemaVersion: "safeclaw-documents-cockpit-workbench-geometry/v1",
+  schemaVersion: "safeclaw-documents-cockpit-workbench-geometry/v2",
   checkedAt,
   sourceHead,
   baseUrl,
@@ -174,7 +184,7 @@ fs.writeFileSync(path.join(outDir, "report.json"), `${JSON.stringify(report, nul
 const tableRows = rows.map((row) => {
   const metrics = row.metrics;
   const verdicts = row.verdicts;
-  return `| ${row.viewport} | ${verdicts.overallVerdict} | ${metrics.bodyHeight} | ${metrics.horizontalOverflow} | ${metrics.workbenchDisplay} | ${metrics.workbenchColumnCount} | ${metrics.workbenchGridTemplateColumns} | ${metrics.launcherTop}-${metrics.launcherBottom} | ${metrics.editorTop}-${metrics.editorBottom} | ${metrics.launcherRight} | ${metrics.editorLeft} | ${metrics.visibleSelectedEditorCount} | ${metrics.visibleFullDocumentBodyCount} | ${metrics.firstActionTop}-${metrics.firstActionBottom} | ${metrics.editorClientHeight}/${metrics.editorScrollHeight} (${metrics.editorScrollRatio}) | ${metrics.coreButtons} | ${metrics.detailsOpen} |`;
+  return `| ${row.viewport} | ${verdicts.overallVerdict} | ${metrics.bodyHeight} | ${metrics.horizontalOverflow} | ${metrics.workbenchDisplay} | ${metrics.workbenchColumnCount} | ${metrics.workbenchGridTemplateColumns} | ${metrics.launcherTop}-${metrics.launcherBottom} | ${metrics.editorTop}-${metrics.editorBottom} | ${metrics.launcherRight} | ${metrics.editorLeft} | ${metrics.innerNavigatorDisplay}/${metrics.innerNavigatorWidth} | ${metrics.selectedEditorPaneWidth}/${metrics.editorWidth} | ${metrics.visibleSelectedEditorCount} | ${metrics.visibleFullDocumentBodyCount} | ${metrics.firstActionTop}-${metrics.firstActionBottom} | ${metrics.editorClientHeight}/${metrics.editorScrollHeight} (${metrics.editorScrollRatio}) | ${metrics.coreButtons} | ${metrics.detailsOpen} |`;
 }).join("\n");
 
 fs.writeFileSync(path.join(outDir, "report.md"), `# Documents Cockpit Workbench Geometry
@@ -197,13 +207,13 @@ Sibling verification first saw \`display:block\` / one-column geometry from a st
 
 ## Geometry
 
-| Viewport | Overall | Body height | OverflowX | Workbench display | Columns | Column template | Launcher top-bottom | Editor top-bottom | Launcher right | Editor left | Visible selected editors | Visible full bodies | First action top-bottom | Editor client/scroll (ratio) | Core buttons | Details open |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Viewport | Overall | Body height | OverflowX | Workbench display | Columns | Column template | Launcher top-bottom | Editor top-bottom | Launcher right | Editor left | Inner nav display/width | Selected pane/editor width | Visible selected editors | Visible full bodies | First action top-bottom | Editor client/scroll (ratio) | Core buttons | Details open |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 ${tableRows}
 
 ## Product Boundary
 
-This proves the measured \`/documents?theme=day\` route uses one visible selected-document editor, keeps full-body textareas out of the default surface, exposes the first document action in the viewport, and contains long detail in the editor workbench. It does not close exact saved/generated \`/share/[sessionId]\` evidence, provider dispatch, or route split alone as a UX fix.
+This proves the measured \`/documents?theme=day\` route uses one visible selected-document editor, removes the duplicated inner document navigator, lets the selected editor pane fill its workbench column, keeps full-body textareas out of the default surface, exposes the first document action in the viewport, and contains long detail in the editor workbench. It does not close exact saved/generated \`/share/[sessionId]\` evidence, provider dispatch, or route split alone as a UX fix.
 `, "utf8");
 
 console.log(JSON.stringify({
@@ -218,6 +228,9 @@ console.log(JSON.stringify({
     columns: row.metrics.workbenchColumnCount,
     editorLeft: row.metrics.editorLeft,
     launcherRight: row.metrics.launcherRight,
+    innerNavigatorDisplay: row.metrics.innerNavigatorDisplay,
+    selectedEditorPaneWidth: row.metrics.selectedEditorPaneWidth,
+    editorWidth: row.metrics.editorWidth,
     bodyHeight: row.metrics.bodyHeight,
     overflowX: row.metrics.horizontalOverflow,
     visibleSelectedEditors: row.metrics.visibleSelectedEditorCount,

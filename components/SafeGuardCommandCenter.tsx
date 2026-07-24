@@ -2236,7 +2236,7 @@ export function SafeGuardCommandCenter({
                   />
                   <span>
                     <strong>풀 AI (전체 문서 생성)</strong>
-                    <small>응답 +30–60초 · 작성 문서 9종(핵심 3종 + 지원 6종) · 총 산출물 12개</small>
+                    <small>응답 +30–60초 · 작성 문서 12종(핵심 3종 + 지원 9종)</small>
                   </span>
                 </label>
               </fieldset>

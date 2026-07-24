@@ -83,6 +83,20 @@ async function selectDocumentFromWorkbench(page: Page, key: string) {
   const documentSelect = page.locator('select[aria-label="편집 문서 선택"]');
   if (await documentSelect.inputValue() === key) return;
 
+  const cockpit = page.locator(".safeclaw-document-cockpit");
+  const cockpitButton = cockpit.locator(`button[data-document-key="${key}"]`);
+  if (await cockpitButton.count() > 0) {
+    const details = cockpit.getByTestId("mobile-document-details");
+    if (
+      await details.locator(`button[data-document-key="${key}"]`).count() > 0
+      && !await details.evaluate((element) => (element as HTMLDetailsElement).open)
+    ) {
+      await details.locator(":scope > summary").click();
+    }
+    await cockpit.locator(`button[data-document-key="${key}"]:visible`).first().click();
+    return;
+  }
+
   const supportingGroup = page.getByTestId("supporting-document-group");
   const supportingButton = supportingGroup.locator(`button[data-document-key="${key}"]`);
   if (await supportingButton.count() > 0) {
@@ -472,7 +486,7 @@ describe("documents editor layout", () => {
     }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
 
     await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
-    await page.getByRole("tab", { name: /위험성평가표/u }).click();
+    await selectDocumentFromWorkbench(page, "riskAssessmentDraft");
     await page.getByRole("button", { name: "구조 편집으로 전환" }).click();
     const hazardInput = page.getByRole("textbox", { name: "행 1 유해·위험요인" });
     await hazardInput.fill("CANONICAL_UI_EDITED_HAZARD");
@@ -699,7 +713,8 @@ describe("documents editor layout", () => {
           borderTopWidth: Number.parseFloat(style.borderTopWidth),
           overflowX: style.overflowX,
           lineHeight: Number.parseFloat(style.lineHeight),
-          fontSize: Number.parseFloat(style.fontSize)
+          fontSize: Number.parseFloat(style.fontSize),
+          gridTemplateColumns: style.gridTemplateColumns
         };
       }
 
@@ -733,7 +748,10 @@ describe("documents editor layout", () => {
     expect(metrics.sidebar.backgroundColor).toBe("rgb(255, 255, 255)");
     expect(metrics.editor.backgroundColor).toBe("rgb(255, 255, 255)");
     expect(metrics.editor.color).not.toBe("rgb(246, 245, 239)");
-    expect(metrics.sidebar.right).toBeLessThanOrEqual(metrics.editor.left - 12);
+    expect(metrics.sidebar.display).toBe("none");
+    expect(metrics.shell.gridTemplateColumns.split(" ").filter(Boolean)).toHaveLength(1);
+    expect(metrics.editor.left).toBeGreaterThanOrEqual(metrics.shell.left);
+    expect(metrics.editor.width).toBeGreaterThanOrEqual(Math.floor(metrics.shell.width * 0.98));
     expect(metrics.editor.borderRadius).toBeGreaterThanOrEqual(6);
     expect(metrics.editor.borderRadius).toBeLessThanOrEqual(8);
     expect(metrics.textarea.backgroundColor).toBe("rgb(255, 255, 255)");
@@ -787,6 +805,7 @@ describe("documents editor layout", () => {
         launcherDisplay: launcherStyle.display,
         cockpitText: cockpit.textContent || "",
         compactHeading: compactLauncher.querySelector("h2")?.textContent,
+        detailsLabel: details.querySelector(":scope > summary")?.textContent?.trim() || "",
         detailsOpen: details.open,
         indexLeft: Math.round(indexRect.left),
         indexRight: Math.round(indexRect.right),
@@ -825,7 +844,8 @@ describe("documents editor layout", () => {
     expect(contract.editorLeft).toBeGreaterThanOrEqual(contract.launcherRight);
     expect(Math.abs(contract.editorTop - contract.launcherTop)).toBeLessThanOrEqual(4);
     expect(contract.editorRight).toBeGreaterThan(contract.editorLeft);
-    expect(contract.cockpitText).not.toMatch(/(?:11|12)종/u);
+    expect(contract.detailsLabel).toBe("문서 12종 · 제출 정보");
+    expect(contract.cockpitText).not.toContain("문서 9종");
     expect(contract.bannerWorkspaceCtas).toBe(0);
   }, 90_000);
 
@@ -840,13 +860,13 @@ describe("documents editor layout", () => {
     await page.locator(".safeclaw-current-workpack.live").waitFor({ state: "visible" });
 
     const writtenCount = page.getByTestId("mobile-submission-facts").locator("dd").first();
-    await expect.poll(() => writtenCount.textContent()).toBe("9/9종");
+    await expect.poll(() => writtenCount.textContent()).toBe("12/12종");
 
     await page.getByTestId("mobile-core-document-launcher").getByRole("button", { name: "위험성평가표" }).click();
     await page.getByRole("button", { name: "원문" }).click();
     await page.getByRole("textbox", { name: "위험성평가표 전체 원문 편집" }).fill("");
 
-    await expect.poll(() => writtenCount.textContent()).toBe("8/9종");
+    await expect.poll(() => writtenCount.textContent()).toBe("11/12종");
   }, 90_000);
 
   it("keeps sample display counts aligned without promoting the sample to a current workpack", async () => {
@@ -856,19 +876,19 @@ describe("documents editor layout", () => {
     await page.locator(".safeclaw-current-workpack.sample").waitFor({ state: "visible" });
 
     const writtenCount = page.getByTestId("mobile-submission-facts").locator("dd").first();
-    await expect.poll(() => writtenCount.textContent()).toBe("9/9종");
+    await expect.poll(() => writtenCount.textContent()).toBe("12/12종");
 
     await page.getByTestId("mobile-core-document-launcher").getByRole("button", { name: "위험성평가표" }).click();
     const editor = await openSourceEditor(page, "위험성평가표");
     await editor.fill("");
 
-    await expect.poll(() => writtenCount.textContent()).toBe("8/9종");
+    await expect.poll(() => writtenCount.textContent()).toBe("11/12종");
     expect(await page.locator(".safeclaw-current-workpack.sample").count()).toBe(1);
     expect(await page.evaluate((storageKey) => window.localStorage.getItem(storageKey), CURRENT_WORKPACK_STORAGE_KEY)).toBeNull();
 
     await page.reload({ waitUntil: "networkidle" });
     await page.locator(".safeclaw-current-workpack.sample").waitFor({ state: "visible" });
-    await expect.poll(() => page.getByTestId("mobile-submission-facts").locator("dd").first().textContent()).toBe("8/9종");
+    await expect.poll(() => page.getByTestId("mobile-submission-facts").locator("dd").first().textContent()).toBe("11/12종");
     await page.getByTestId("mobile-core-document-launcher").getByRole("button", { name: "위험성평가표" }).click();
     const restoredSource = await openSourceEditor(page, "위험성평가표");
     await expect.poll(() => restoredSource.inputValue()).toBe("");
@@ -986,7 +1006,7 @@ describe("documents editor layout", () => {
     const sentinel = "SAFECLAW_RELOAD_DRAFT_PRESERVED";
 
     await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
-    await page.getByRole("tab", { name: /위험성평가표/ }).click();
+    await selectDocumentFromWorkbench(page, "riskAssessmentDraft");
     const editor = await openSourceEditor(page, "위험성평가표");
     const editedValue = `${await editor.inputValue()}\n${sentinel}`;
     await editor.fill(editedValue);
@@ -1000,7 +1020,7 @@ describe("documents editor layout", () => {
     ));
 
     await page.reload({ waitUntil: "networkidle" });
-    await page.getByRole("tab", { name: /위험성평가표/ }).click();
+    await selectDocumentFromWorkbench(page, "riskAssessmentDraft");
     const restoredEditor = await openSourceEditor(page, "위험성평가표");
     await expect.poll(() => restoredEditor.inputValue()).toBe(editedValue);
     const keysAfterReload = await page.evaluate(() => (
@@ -1283,58 +1303,30 @@ describe("documents editor layout", () => {
     }
   }, 90_000);
 
-  it("supports roving keyboard navigation across document tabs", async () => {
+  it("selects core and supporting documents from the route-level cockpit", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
-    await page.locator('[data-testid="workpack-editor-workspace"]').scrollIntoViewIfNeeded();
-
-    const tabs = page.getByRole("tab");
-    expect(await tabs.count()).toBe(3);
-    expect(await tabs.evaluateAll((items) => items.map((item) => item.tabIndex))).toEqual([
-      0, -1, -1
-    ]);
-
-    const riskTab = page.getByRole("tab", { name: /위험성평가표/ });
-    const tbmBriefingTab = page.getByRole("tab", { name: /TBM\/작업 전 안전점검회의/ });
-    const tbmLogTab = page.getByRole("tab", { name: /TBM 기록/ });
-    const supportGroup = page.getByTestId("supporting-document-group");
+    const cockpit = page.locator(".safeclaw-document-cockpit");
+    const coreLauncher = cockpit.getByTestId("mobile-core-document-launcher");
+    const details = cockpit.getByTestId("mobile-document-details");
     const documentSelect = page.locator('select[aria-label="편집 문서 선택"]');
-    const panel = page.locator('[data-testid="editor-document-body"]');
 
-    expect(await supportGroup.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(false);
-    expect(await supportGroup.locator("summary").textContent()).toContain("지원 문서 9종");
+    expect(await coreLauncher.locator(".safeclaw-mobile-core-list button").count()).toBe(3);
+    expect(await details.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(false);
 
-    await riskTab.focus();
-    await riskTab.press("End");
+    const tbmLogButton = coreLauncher.locator('button[data-document-key="tbmLogDraft"]');
+    await tbmLogButton.click();
     expect(await documentSelect.inputValue()).toBe("tbmLogDraft");
-    expect(await tbmLogTab.evaluate((element) => document.activeElement === element)).toBe(true);
+    expect(await tbmLogButton.getAttribute("aria-pressed")).toBe("true");
 
-    await tbmLogTab.press("Home");
-    expect(await documentSelect.inputValue()).toBe("riskAssessmentDraft");
-    expect(await riskTab.evaluate((element) => document.activeElement === element)).toBe(true);
-
-    await riskTab.press("ArrowRight");
-    expect(await documentSelect.inputValue()).toBe("tbmBriefing");
-    await tbmBriefingTab.press("ArrowDown");
-    expect(await documentSelect.inputValue()).toBe("tbmLogDraft");
-    await tbmLogTab.press("ArrowLeft");
-    expect(await documentSelect.inputValue()).toBe("tbmBriefing");
-    await tbmBriefingTab.press("ArrowUp");
-    expect(await documentSelect.inputValue()).toBe("riskAssessmentDraft");
-
-    await supportGroup.locator("summary").click();
-    expect(await supportGroup.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
-    expect(await page.getByRole("tab").count()).toBe(12);
-    const summaryTab = page.getByRole("tab", { name: /점검결과 요약/ });
-    const messageTab = page.getByRole("tab", { name: /현장 공유 메시지/ });
-    await summaryTab.focus();
-    await summaryTab.press("End");
-    expect(await documentSelect.inputValue()).toBe("kakaoMessage");
-    expect(await messageTab.evaluate((element) => document.activeElement === element)).toBe(true);
-
-    expect(await panel.getAttribute("aria-labelledby")).toBe("workpack-document-tab-kakaoMessage");
-    expect(await supportGroup.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
+    await details.locator(":scope > summary").click();
+    expect(await details.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
+    const summaryButton = details.locator('button[data-document-key="workpackSummaryDraft"]');
+    await summaryButton.click();
+    expect(await documentSelect.inputValue()).toBe("workpackSummaryDraft");
+    expect(await summaryButton.getAttribute("aria-pressed")).toBe("true");
+    expect(await details.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
   }, 90_000);
 
   it.each(["day", "night"] as const)(
@@ -1400,9 +1392,9 @@ describe("documents editor layout", () => {
       expect(initial.coreHeights.every((height) => height >= 44)).toBe(true);
       expect(initial.detailsOpen).toBe(false);
       expect(initial.detailsCount).toBe(1);
-      expect(initial.detailsLabel).toBe("문서 9종 · 제출 정보");
+      expect(initial.detailsLabel).toBe("문서 12종 · 제출 정보");
       expect(initial.desktopPanelDisplays).toEqual(["none", "none", "none"]);
-      expect(initial.cockpitText).not.toMatch(/(?:11|12)종/u);
+      expect(initial.cockpitText).not.toContain("문서 9종");
       expect(initial.cockpitText).toContain("오늘 문서");
       expect(initial.cockpitText).toContain("핵심 3종");
       expect(initial.bannerWorkspaceCtas).toBe(0);
@@ -1720,13 +1712,16 @@ describe("documents editor layout", () => {
       expect(expanded.remainingLabels).toEqual([
         "외국인 전송본",
         "작업계획서",
+        "안전작업허가 확인서",
         "안전보건교육 기록",
         "점검결과 요약",
         "비상대응 절차",
-        "사진·증빙"
+        "사진·증빙",
+        "외국인 근로자 출력본",
+        "현장 공유 메시지"
       ]);
       expect(expanded.controlHeights.every((height) => height >= 44)).toBe(true);
-      expect(expanded.uniqueLaunchKeys).toHaveLength(9);
+      expect(expanded.uniqueLaunchKeys).toHaveLength(12);
       expect(expanded.previewCount).toBe(3);
       expect(expanded.factCount).toBe(3);
       expect(expanded.actionCount).toBe(2);

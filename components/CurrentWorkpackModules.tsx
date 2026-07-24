@@ -134,6 +134,13 @@ const launchDocuments: LaunchDocument[] = [
     description: "작업순서, 중지기준, 확인 근거를 묶습니다."
   },
   {
+    key: "workPermitDraft",
+    title: "안전작업허가 확인서",
+    tier: "제출",
+    owner: "작업 허가",
+    description: "위험작업 허가, 격리·차단, 종료 확인을 정리합니다."
+  },
+  {
     key: "safetyEducationRecordDraft",
     title: "안전보건교육 기록",
     tier: "제출",
@@ -167,6 +174,20 @@ const launchDocuments: LaunchDocument[] = [
     tier: "보조",
     owner: "증빙 보관",
     description: "촬영자, 확인자, 보관 위치를 남깁니다."
+  },
+  {
+    key: "foreignWorkerBriefing",
+    title: "외국인 근로자 출력본",
+    tier: "제출",
+    owner: "교육 출력",
+    description: "쉬운 한국어와 기본 다국어 교육본을 확인합니다."
+  },
+  {
+    key: "kakaoMessage",
+    title: "현장 공유 메시지",
+    tier: "보조",
+    owner: "현장 공유",
+    description: "메신저와 단체방에 사용할 축약본을 확인합니다."
   }
 ];
 
@@ -854,7 +875,7 @@ function DocumentCockpit({
 
       <aside className="safeclaw-doc-index">
         <span>문서 인덱스</span>
-        <h2>3종 핵심. 6종 추가.</h2>
+        <h2>3종 핵심. 9종 추가.</h2>
         <div className="safeclaw-doc-index-list">
           {launchDocuments.map((item, index) => (
             <button key={item.key} type="button" data-document-key={item.key} onClick={() => onSelectDocument(item.key)}>
