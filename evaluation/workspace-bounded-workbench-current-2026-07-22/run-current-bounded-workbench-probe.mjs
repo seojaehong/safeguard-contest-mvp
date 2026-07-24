@@ -107,9 +107,25 @@ async function measureDocuments(page, state, theme) {
       const box = element.getBoundingClientRect();
       return visible(element) && box.bottom > 0 && box.top < window.innerHeight;
     };
+    const clippedByHorizontalScrollAncestor = (element) => {
+      let ancestor = element.parentElement;
+      while (ancestor && ancestor !== document.body) {
+        const style = getComputedStyle(ancestor);
+        const overflowX = style.overflowX;
+        if ((overflowX === "auto" || overflowX === "scroll") && ancestor.scrollWidth > ancestor.clientWidth) {
+          const ancestorBox = ancestor.getBoundingClientRect();
+          return ancestorBox.left >= -1 && ancestorBox.right <= window.innerWidth + 1;
+        }
+        ancestor = ancestor.parentElement;
+      }
+      return false;
+    };
     const outsideElementNodes = [...document.querySelectorAll("body *")].filter((element) => {
       const box = element.getBoundingClientRect();
-      return box.width > 0 && box.height > 0 && (box.left < -1 || box.right > window.innerWidth + 1);
+      return box.width > 0
+        && box.height > 0
+        && (box.left < -1 || box.right > window.innerWidth + 1)
+        && !clippedByHorizontalScrollAncestor(element);
     });
     const outsideElementDetails = outsideElementNodes.slice(0, 12).map((element) => {
       const box = element.getBoundingClientRect();
