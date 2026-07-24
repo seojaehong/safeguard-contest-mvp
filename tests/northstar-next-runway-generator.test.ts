@@ -159,6 +159,21 @@ type NextRunwayReport = {
     humanReviewCompleted: boolean;
     exactSavedShareVerdict: string;
   };
+  liveDocumentEditorialNearClassification: {
+    verdict: string;
+    beforeNearDuplicateLineOveruseCount: number;
+    beforeHumanReviewRequiredCount: number;
+    livePassed: number;
+    liveFailed: number;
+    liveNearDuplicateLineOveruseCount: number;
+    liveHumanReviewRequiredCount: number;
+    rolePrefixVariantCount: number;
+    independentContextCount: number;
+    hazardConsistencyCount: number;
+    controlConsistencyCount: number;
+    humanReviewCompleted: boolean;
+    exactSavedShareVerdict: string;
+  };
   productCapabilityTruth: {
     verdict: string;
     dispatchMode: string;
@@ -831,6 +846,48 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       broadHumanWordingReviewRequired: true,
     },
   });
+  writeJson(root, "evaluation/live-document-editorial-near-classification-2026-07-25/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_EDITORIAL_NEAR_DUPLICATE_CLASSIFICATION_REVIEWER_READY",
+    sourceHead: "fixture-runner-sha",
+    productionCommit: "fixture-sha",
+    before: {
+      nearDuplicateLineOveruseCount: 100,
+      nearCategories: { "human-review-required": 54, "document-role-prefix-variant": 46 },
+    },
+    afterLive: {
+      sourceHead: "fixture-runner-sha",
+      productionCommit: "fixture-sha",
+      total: 5,
+      pass: 5,
+      fail: 0,
+      genericTemplateOveruseCount: 0,
+      nearDuplicateLineOveruseCount: 100,
+      nearCategories: {
+        "document-role-prefix-variant": 81,
+        "independent-document-context": 9,
+        "cross-document-hazard-consistency": 8,
+        "cross-document-control-consistency": 2,
+        "human-review-required": 0,
+      },
+      humanReviewCompleted: false,
+    },
+    classificationContract: {
+      findingsHiddenOrRemoved: false,
+      genericTemplateOveruseFailsClosed: true,
+      safetyConsistencyAutomaticallyFails: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+    },
+    remainingBoundaries: {
+      humanReviewCompleted: false,
+      broadHumanWordingReviewRequired: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/product-capability-truth-2026-07-25/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH",
     sourceHead: "fixture-sha",
@@ -1491,6 +1548,21 @@ describe("northstar next runway generator", () => {
       liveGenericTemplateOveruseCount: 0,
       exactLineOveruseCount: 31,
       nearDuplicateLineOveruseCount: 100,
+      humanReviewCompleted: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.liveDocumentEditorialNearClassification).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_EDITORIAL_NEAR_DUPLICATE_CLASSIFICATION_REVIEWER_READY",
+      beforeNearDuplicateLineOveruseCount: 100,
+      beforeHumanReviewRequiredCount: 54,
+      livePassed: 5,
+      liveFailed: 0,
+      liveNearDuplicateLineOveruseCount: 100,
+      liveHumanReviewRequiredCount: 0,
+      rolePrefixVariantCount: 81,
+      independentContextCount: 9,
+      hazardConsistencyCount: 8,
+      controlConsistencyCount: 2,
       humanReviewCompleted: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });

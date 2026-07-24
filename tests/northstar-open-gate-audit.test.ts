@@ -355,6 +355,48 @@ function createFixtureRoot(): string {
       broadHumanWordingReviewRequired: true,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_EDITORIAL_NEAR_DUPLICATE_CLASSIFICATION_REVIEWER_READY",
+    sourceHead: "fixture-runner-sha",
+    productionCommit: "fixture-sha",
+    before: {
+      nearDuplicateLineOveruseCount: 100,
+      nearCategories: { "human-review-required": 54, "document-role-prefix-variant": 46 },
+    },
+    afterLive: {
+      sourceHead: "fixture-runner-sha",
+      productionCommit: "fixture-sha",
+      total: 5,
+      pass: 5,
+      fail: 0,
+      genericTemplateOveruseCount: 0,
+      nearDuplicateLineOveruseCount: 100,
+      nearCategories: {
+        "document-role-prefix-variant": 81,
+        "independent-document-context": 9,
+        "cross-document-hazard-consistency": 8,
+        "cross-document-control-consistency": 2,
+        "human-review-required": 0,
+      },
+      humanReviewCompleted: false,
+    },
+    classificationContract: {
+      findingsHiddenOrRemoved: false,
+      genericTemplateOveruseFailsClosed: true,
+      safetyConsistencyAutomaticallyFails: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+    },
+    remainingBoundaries: {
+      humanReviewCompleted: false,
+      broadHumanWordingReviewRequired: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH",
     sourceHead: "fixture-sha",
@@ -1769,6 +1811,7 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("generic-template overuse 4->0");
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("exact=31");
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("near=100");
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("unclassified human-review-required 54->0");
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("humanReviewCompleted=false");
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")).toMatchObject({
@@ -2051,6 +2094,34 @@ describe("northstar open gate audit", () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("generic=1");
+  });
+
+  it("fails the editorial gate closed when near findings are hidden instead of classified", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "live-document-editorial-near-classification-2026-07-25",
+      "report.json",
+    );
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      afterLive: { nearDuplicateLineOveruseCount: number };
+    };
+    report.afterLive.nearDuplicateLineOveruseCount = 99;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.overall).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("nearClassificationReady=false");
   });
 
   it("fails product capability truth closed when a provider call is claimed", async () => {

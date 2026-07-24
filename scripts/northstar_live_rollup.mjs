@@ -26,6 +26,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
   liveDocumentEditorialReview: path.join("evaluation", "live-document-editorial-review-2026-07-25", "report.json"),
   liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
+  liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
@@ -311,6 +312,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const liveDocumentBroadReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentBroadReview);
   const liveDocumentEditorialReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialReview);
   const liveDocumentEditorialDuplicateClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialDuplicateClassification);
+  const liveDocumentEditorialNearClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialNearClassification);
   const productCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.productCapabilityTruth);
   const liveDocumentSecondaryGrounding = tryReadJson(rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
   const liveDocumentSeedProfileIsolation = tryReadJson(rootDir, ARTIFACTS.liveDocumentSeedProfileIsolation);
@@ -390,6 +392,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_broad_review", ARTIFACTS.liveDocumentBroadReview, liveDocumentBroadReview),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_review", ARTIFACTS.liveDocumentEditorialReview, liveDocumentEditorialReview),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_duplicate_classification", ARTIFACTS.liveDocumentEditorialDuplicateClassification, liveDocumentEditorialDuplicateClassification),
+    evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_near_classification", ARTIFACTS.liveDocumentEditorialNearClassification, liveDocumentEditorialNearClassification),
     evidenceStatus(rootDir, currentHead, liveCommit, "product_capability_truth", ARTIFACTS.productCapabilityTruth, productCapabilityTruth),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_secondary_grounding", ARTIFACTS.liveDocumentSecondaryGrounding, liveDocumentSecondaryGrounding),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_seed_profile_isolation", ARTIFACTS.liveDocumentSeedProfileIsolation, liveDocumentSeedProfileIsolation),
@@ -603,6 +606,40 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       exactSavedShareReproduced: recordAt(liveDocumentEditorialDuplicateClassification, "mutationBoundary")?.exactSavedShareReproduced === true,
       exactSavedShareVerdict: asString(recordAt(liveDocumentEditorialDuplicateClassification, "remainingBoundaries")?.exactSavedShareVerdict),
     },
+    liveDocumentEditorialNearClassification: {
+      artifact: ARTIFACTS.liveDocumentEditorialNearClassification,
+      verdict: isRecord(liveDocumentEditorialNearClassification)
+        ? asString(liveDocumentEditorialNearClassification.verdict)
+        : "missing",
+      sourceHead: isRecord(liveDocumentEditorialNearClassification)
+        ? asString(liveDocumentEditorialNearClassification.sourceHead)
+        : "",
+      productionCommit: extractProductionCommit(liveDocumentEditorialNearClassification),
+      beforeNearDuplicateLineOveruseCount: asNumber(recordAt(liveDocumentEditorialNearClassification, "before")?.nearDuplicateLineOveruseCount),
+      beforeHumanReviewRequiredCount: asNumber(
+        recordAt(recordAt(liveDocumentEditorialNearClassification, "before"), "nearCategories")?.["human-review-required"],
+      ),
+      livePassed: asNumber(recordAt(liveDocumentEditorialNearClassification, "afterLive")?.pass),
+      liveFailed: asNumber(recordAt(liveDocumentEditorialNearClassification, "afterLive")?.fail),
+      liveNearDuplicateLineOveruseCount: asNumber(recordAt(liveDocumentEditorialNearClassification, "afterLive")?.nearDuplicateLineOveruseCount),
+      liveHumanReviewRequiredCount: asNumber(
+        recordAt(recordAt(liveDocumentEditorialNearClassification, "afterLive"), "nearCategories")?.["human-review-required"],
+      ),
+      rolePrefixVariantCount: asNumber(
+        recordAt(recordAt(liveDocumentEditorialNearClassification, "afterLive"), "nearCategories")?.["document-role-prefix-variant"],
+      ),
+      independentContextCount: asNumber(
+        recordAt(recordAt(liveDocumentEditorialNearClassification, "afterLive"), "nearCategories")?.["independent-document-context"],
+      ),
+      hazardConsistencyCount: asNumber(
+        recordAt(recordAt(liveDocumentEditorialNearClassification, "afterLive"), "nearCategories")?.["cross-document-hazard-consistency"],
+      ),
+      controlConsistencyCount: asNumber(
+        recordAt(recordAt(liveDocumentEditorialNearClassification, "afterLive"), "nearCategories")?.["cross-document-control-consistency"],
+      ),
+      humanReviewCompleted: recordAt(liveDocumentEditorialNearClassification, "afterLive")?.humanReviewCompleted === true,
+      exactSavedShareVerdict: asString(recordAt(liveDocumentEditorialNearClassification, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
     productCapabilityTruth: {
       artifact: ARTIFACTS.productCapabilityTruth,
       verdict: isRecord(productCapabilityTruth) ? asString(productCapabilityTruth.verdict) : "missing",
@@ -793,6 +830,15 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- DB mutation: ${rollup.liveDocumentEditorialDuplicateClassification.dbMutationPerformed}; Share session created: ${rollup.liveDocumentEditorialDuplicateClassification.shareSessionCreated}; provider dispatch: ${rollup.liveDocumentEditorialDuplicateClassification.providerDispatchCalled}`,
     `- Exact saved Share: ${rollup.liveDocumentEditorialDuplicateClassification.exactSavedShareVerdict || "MISSING_EVIDENCE"}; reproduced=${rollup.liveDocumentEditorialDuplicateClassification.exactSavedShareReproduced}`,
     "- Boundary: only generic template overuse fails automatically; safety-control and legal-reference repetition remains reviewer-visible.",
+    "",
+    "## Live Editorial Near-Duplicate Classification",
+    "",
+    `- Verdict: \`${rollup.liveDocumentEditorialNearClassification.verdict}\``,
+    `- Near findings retained: ${rollup.liveDocumentEditorialNearClassification.beforeNearDuplicateLineOveruseCount}->${rollup.liveDocumentEditorialNearClassification.liveNearDuplicateLineOveruseCount}`,
+    `- Unclassified human-review-required: ${rollup.liveDocumentEditorialNearClassification.beforeHumanReviewRequiredCount}->${rollup.liveDocumentEditorialNearClassification.liveHumanReviewRequiredCount}`,
+    `- Classified as role-prefix/context/hazard/control: ${rollup.liveDocumentEditorialNearClassification.rolePrefixVariantCount}/${rollup.liveDocumentEditorialNearClassification.independentContextCount}/${rollup.liveDocumentEditorialNearClassification.hazardConsistencyCount}/${rollup.liveDocumentEditorialNearClassification.controlConsistencyCount}`,
+    `- Human review completed: ${rollup.liveDocumentEditorialNearClassification.humanReviewCompleted}; exact saved Share: ${rollup.liveDocumentEditorialNearClassification.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "- Boundary: classification improves reviewer precision without hiding findings or claiming completed human review.",
     "",
     "## Live Product Capability Truth",
     "",

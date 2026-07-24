@@ -113,6 +113,21 @@ type RollupReport = {
     humanReviewCompleted: boolean;
     exactSavedShareVerdict: string;
   };
+  liveDocumentEditorialNearClassification: {
+    verdict: string;
+    beforeNearDuplicateLineOveruseCount: number;
+    beforeHumanReviewRequiredCount: number;
+    livePassed: number;
+    liveFailed: number;
+    liveNearDuplicateLineOveruseCount: number;
+    liveHumanReviewRequiredCount: number;
+    rolePrefixVariantCount: number;
+    independentContextCount: number;
+    hazardConsistencyCount: number;
+    controlConsistencyCount: number;
+    humanReviewCompleted: boolean;
+    exactSavedShareVerdict: string;
+  };
   productCapabilityTruth: {
     verdict: string;
     dispatchMode: string;
@@ -413,6 +428,48 @@ function createFixtureRoot(): { root: string; head: string } {
       broadHumanWordingReviewRequired: true,
     },
   });
+  writeJson(root, "evaluation/live-document-editorial-near-classification-2026-07-25/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_EDITORIAL_NEAR_DUPLICATE_CLASSIFICATION_REVIEWER_READY",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    before: {
+      nearDuplicateLineOveruseCount: 100,
+      nearCategories: { "human-review-required": 54, "document-role-prefix-variant": 46 },
+    },
+    afterLive: {
+      sourceHead: "TO_FILL",
+      productionCommit: "TO_FILL",
+      total: 5,
+      pass: 5,
+      fail: 0,
+      genericTemplateOveruseCount: 0,
+      nearDuplicateLineOveruseCount: 100,
+      nearCategories: {
+        "document-role-prefix-variant": 81,
+        "independent-document-context": 9,
+        "cross-document-hazard-consistency": 8,
+        "cross-document-control-consistency": 2,
+        "human-review-required": 0,
+      },
+      humanReviewCompleted: false,
+    },
+    classificationContract: {
+      findingsHiddenOrRemoved: false,
+      genericTemplateOveruseFailsClosed: true,
+      safetyConsistencyAutomaticallyFails: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+    },
+    remainingBoundaries: {
+      humanReviewCompleted: false,
+      broadHumanWordingReviewRequired: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/product-capability-truth-2026-07-25/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH",
     sourceHead: "TO_FILL",
@@ -566,6 +623,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-document-broad-review-2026-07-25/report.json",
     "evaluation/live-document-editorial-review-2026-07-25/report.json",
     "evaluation/live-document-editorial-duplicate-classification-2026-07-25/report.json",
+    "evaluation/live-document-editorial-near-classification-2026-07-25/report.json",
     "evaluation/product-capability-truth-2026-07-25/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
     "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json",
@@ -699,6 +757,22 @@ describe("northstar live rollup", () => {
       humanReviewCompleted: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
+    expect(report.liveDocumentEditorialNearClassification).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_EDITORIAL_NEAR_DUPLICATE_CLASSIFICATION_REVIEWER_READY",
+      beforeNearDuplicateLineOveruseCount: 100,
+      beforeHumanReviewRequiredCount: 54,
+      livePassed: 5,
+      liveFailed: 0,
+      liveNearDuplicateLineOveruseCount: 100,
+      liveHumanReviewRequiredCount: 0,
+      rolePrefixVariantCount: 81,
+      independentContextCount: 9,
+      hazardConsistencyCount: 8,
+      controlConsistencyCount: 2,
+      humanReviewCompleted: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "live_document_editorial_near_classification")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "live_document_editorial_review")?.productionStatus).toBe("ancestor_of_head");
     expect(report.productCapabilityTruth).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH",
@@ -770,7 +844,7 @@ describe("northstar live rollup", () => {
     const report = JSON.parse(fs.readFileSync(path.join(root, "evaluation/northstar-live-rollup-test/report.json"), "utf8")) as RollupReport;
     expect(report.overall).toBe("northstar_evidence_contradicted");
     expect(report.evidence.find((item) => item.id === "mobile_p0_workspace")?.productionStatus).toBe("not_ancestor");
-  });
+  }, 15_000);
 
   it("does not mark source-ahead final-99 evidence as live-exact", () => {
     const { root, head } = createFixtureRoot();
