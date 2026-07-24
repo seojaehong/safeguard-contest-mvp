@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-07-25T05:00:19+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SEED_PROFILE_ISOLATION_LIVE_PENDING",
+  "generatedAt": "2026-07-25T05:04:53+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION",
   "productCommit": "597dec777e0467cd9f8aadce611fbb7b1a8f3b72",
-  "liveAfterDeploymentPending": true,
+  "liveAfterDeploymentPending": false,
   "contract": {
     "scenarioCount": 5,
     "documentCountPerScenario": 12,
@@ -40,7 +40,19 @@
     "secondaryGroundingReviewed": 30,
     "missingUnexpectedCount": 0
   },
-  "afterLive": null,
+  "afterLive": {
+    "path": "evaluation/live-document-seed-profile-isolation-2026-07-25/after-live/report.json",
+    "sourceHead": "2444b44b4e42a2b442b64b856104b1d93c7e21b7",
+    "productionCommit": "2444b44b4e42a2b442b64b856104b1d93c7e21b7",
+    "deploymentUrl": "safeguard-contest-gsgwwegrm-seojaehongs-projects.vercel.app",
+    "total": 5,
+    "pass": 5,
+    "fail": 0,
+    "seedProfileLeakageCount": 0,
+    "secondaryGroundingPassed": 30,
+    "secondaryGroundingReviewed": 30,
+    "missingUnexpectedCount": 0
+  },
   "mutationBoundary": {
     "dbMutationPerformed": false,
     "shareSessionCreated": false,
