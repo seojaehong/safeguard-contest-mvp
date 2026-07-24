@@ -22,6 +22,41 @@ const canonicalDocuments = [
 ];
 const permitRequiredTerms = ["허가", "격리", "차단", "종료", "작업시간", "보호구"];
 const permitScenarioPattern = /(화학|세척|SDS|GHS|화기|용접|절단|불꽃|밀폐|탱크|맨홀|질식|고소|비계|추락|지붕|외벽|전기|감전|분전반|재통전|정전|크레인|지게차|굴삭|양중|중장비|정비|끼임|컨베이어|방호장치|설비)/iu;
+const secondaryDocumentContracts = {
+  workpackSummaryDraft: [
+    ["작업", "공정"],
+    ["위험", "유해"],
+    ["조치", "통제", "대책"]
+  ],
+  workPermitDraft: [
+    ["허가", "작업허가"],
+    ["격리"],
+    ["차단"],
+    ["종료"],
+    ["보호구"]
+  ],
+  photoEvidenceDraft: [
+    ["사진", "증빙"],
+    ["조치 전", "개선 전", "Before"],
+    ["조치 후", "개선 후", "After"],
+    ["확인", "보관", "기록"]
+  ],
+  foreignWorkerBriefing: [
+    ["외국인", "쉬운 한국어"],
+    ["보호구", "PPE"],
+    ["멈", "중지", "STOP"]
+  ],
+  foreignWorkerTransmission: [
+    ["외국인", "안전공지"],
+    ["보호구", "PPE"],
+    ["멈", "중지", "STOP"]
+  ],
+  kakaoMessage: [
+    ["현장", "작업"],
+    ["위험", "주의"],
+    ["확인", "중지", "조치"]
+  ]
+};
 
 const casesPath = path.resolve(
   process.env.SAFECLAW_BROAD_DOCUMENT_CASES_PATH
@@ -49,6 +84,10 @@ function asArray(value) {
 
 function text(value) {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function includesTerm(value, term) {
+  return text(value).toLocaleLowerCase().includes(text(term).toLocaleLowerCase());
 }
 
 function buildCases(matrix) {
@@ -99,11 +138,82 @@ export function classifyDeliverablePresence(value) {
   return { status: "presentNonEmpty", reason: "" };
 }
 
-export function reviewDeliverableMatrix(payload, question) {
+export function reviewSecondaryDocumentGrounding(payload, expected = {}) {
+  const deliverables = payload?.deliverables && typeof payload.deliverables === "object"
+    ? payload.deliverables
+    : {};
+  const scenarioTerms = asArray(expected.fieldIsolationTerms).map(text).filter(Boolean);
+  const supportingScenarioTerms = [
+    text(expected.region),
+    text(expected.workType),
+    ...asArray(expected.hazards).map(text),
+    ...asArray(expected.workerSignals).map(text)
+  ].filter(Boolean);
+  const otherProfiles = [
+    ...asArray(expected.otherFieldIsolationProfiles),
+    ...asArray(expected.forbiddenFieldTerms)
+  ].map((profile) => ({
+    id: text(profile?.id) || "other-scenario",
+    terms: asArray(profile?.terms).map(text).filter(Boolean)
+  }));
+  const ownTermSet = new Set(scenarioTerms.map((term) => term.toLocaleLowerCase()));
+  const documents = Object.entries(secondaryDocumentContracts).map(([key, semanticGroups]) => {
+    const value = text(deliverables[key]);
+    const presence = classifyDeliverablePresence(value);
+    if (presence.status === "explicitNotApplicable") {
+      return {
+        key,
+        status: presence.status,
+        matchedScenarioTerms: [],
+        matchedSupportingScenarioTerms: [],
+        missingSemanticGroups: [],
+        crossScenarioLeakage: [],
+        verdict: "PASS"
+      };
+    }
+    const matchedScenarioTerms = scenarioTerms.filter((term) => includesTerm(value, term));
+    const matchedSupportingScenarioTerms = supportingScenarioTerms.filter((term) => includesTerm(value, term));
+    const missingSemanticGroups = semanticGroups
+      .filter((group) => !group.some((term) => includesTerm(value, term)));
+    const crossScenarioLeakage = otherProfiles.flatMap((profile) => {
+      const matchedTerms = profile.terms
+        .filter((term) => !ownTermSet.has(term.toLocaleLowerCase()) && includesTerm(value, term));
+      return matchedTerms.length >= 2
+        ? matchedTerms.map((term) => ({ profileId: profile.id, term }))
+        : [];
+    });
+    const verdict = value
+      && (matchedScenarioTerms.length > 0 || matchedSupportingScenarioTerms.length >= 2)
+      && missingSemanticGroups.length === 0
+      && crossScenarioLeakage.length === 0
+      ? "PASS"
+      : "RED";
+    return {
+      key,
+      status: presence.status,
+      matchedScenarioTerms,
+      matchedSupportingScenarioTerms,
+      missingSemanticGroups,
+      crossScenarioLeakage,
+      verdict
+    };
+  });
+  return {
+    ok: documents.every((item) => item.verdict === "PASS"),
+    reviewedDocumentCount: documents.length,
+    passedDocumentCount: documents.filter((item) => item.verdict === "PASS").length,
+    crossScenarioLeakageCount: documents.reduce((sum, item) => sum + item.crossScenarioLeakage.length, 0),
+    documents
+  };
+}
+
+export function reviewDeliverableMatrix(payload, question, expected = {}) {
   const deliverables = payload?.deliverables && typeof payload.deliverables === "object"
     ? payload.deliverables
     : {};
   const permitRequired = permitScenarioPattern.test(text(question));
+  const secondaryGrounding = reviewSecondaryDocumentGrounding(payload, expected);
+  const secondaryByKey = new Map(secondaryGrounding.documents.map((item) => [item.key, item]));
   const documents = canonicalDocuments.map(([key, title]) => {
     const raw = deliverables[key];
     const normalized = text(raw);
@@ -117,6 +227,8 @@ export function reviewDeliverableMatrix(payload, question) {
     if (required && presence.status === "explicitNotApplicable") failures.push("requiredButNotApplicable");
     if (presence.status === "presentNonEmpty" && normalized.length < 40) failures.push("tooShort");
     if (missingRequiredTerms.length) failures.push("missingRequiredTerms");
+    const grounding = secondaryByKey.get(key);
+    if (grounding?.verdict === "RED") failures.push("secondaryScenarioGrounding");
     return {
       key,
       title,
@@ -125,6 +237,10 @@ export function reviewDeliverableMatrix(payload, question) {
       charCount: normalized.length,
       required,
       missingRequiredTerms,
+      matchedScenarioTerms: grounding?.matchedScenarioTerms ?? [],
+      matchedSupportingScenarioTerms: grounding?.matchedSupportingScenarioTerms ?? [],
+      missingSemanticGroups: grounding?.missingSemanticGroups ?? [],
+      crossScenarioLeakage: grounding?.crossScenarioLeakage ?? [],
       verdict: failures.length ? "RED" : "PASS",
       failures
     };
@@ -140,6 +256,7 @@ export function reviewDeliverableMatrix(payload, question) {
       key: item.key,
       reason: item.reason
     })),
+    secondaryGrounding,
     documents
   };
 }
@@ -202,7 +319,7 @@ async function readBuildInfo() {
 
 function writeMarkdown(report) {
   const rows = report.cases.flatMap((testCase) => testCase.documents.map((document) => (
-    `| ${testCase.id} | ${document.key} | ${document.status} | ${document.required ? "yes" : "no"} | ${document.charCount} | ${document.verdict} | ${document.failures.join(", ") || "-"} |`
+    `| ${testCase.id} | ${document.key} | ${document.status} | ${document.required ? "yes" : "no"} | ${document.charCount} | ${[...document.matchedScenarioTerms, ...document.matchedSupportingScenarioTerms].join(", ") || "-"} | ${document.crossScenarioLeakage.map((item) => `${item.profileId}:${item.term}`).join(", ") || "-"} | ${document.verdict} | ${document.failures.join(", ") || "-"} |`
   ))).join("\n");
   const markdown = `# Live 12-Deliverable Broad Review
 
@@ -220,10 +337,12 @@ function writeMarkdown(report) {
 - DB mutation performed: \`false\`
 - Share session created: \`false\`
 - Provider dispatch called: \`false\`
+- Secondary document grounding: ${report.secondaryGroundingPassed}/${report.secondaryGroundingReviewed}
+- Cross-scenario leakage findings: ${report.secondaryCrossScenarioLeakageCount}
 - Exact saved Share reproduced: \`false\`
 
-| Case | Deliverable | Classification | Required | Characters | Verdict | Failures |
-|---|---|---|---:|---:|---:|---|
+| Case | Deliverable | Classification | Required | Characters | Grounding terms | Cross-scenario leakage | Verdict | Failures |
+|---|---|---|---:|---:|---|---|---:|---|
 ${rows}
 
 ## Classification Contract
@@ -232,6 +351,7 @@ ${rows}
 - \`explicitNotApplicable\`: raw API deliverable visibly states \`해당 없음\` and includes a user-readable reason.
 - \`missingUnexpected\`: the raw deliverable is absent, blank, or says \`해당 없음\` without a reason. UI fallback text never upgrades this state.
 - Permit-like chemical, hot-work, confined-space, height, electrical, heavy-equipment, and maintenance scenarios require a non-empty \`workPermitDraft\`.
+- The six secondary deliverables must reflect the current scenario, satisfy their document-specific semantic groups, and contain no other scenario fingerprint.
 
 ## Boundary
 
@@ -267,7 +387,7 @@ async function main() {
     } catch (error) {
       runnerError = error instanceof Error ? error.message : String(error);
     }
-    const matrixReview = reviewDeliverableMatrix(payload, testCase.question);
+    const matrixReview = reviewDeliverableMatrix(payload, testCase.question, testCase.expected);
     const wordingReview = runnerError
       ? {
         ok: false,
@@ -285,6 +405,7 @@ async function main() {
       permitRequired: matrixReview.permitRequired,
       missingUnexpected: matrixReview.missingUnexpected,
       explicitNotApplicable: matrixReview.explicitNotApplicable,
+      secondaryGrounding: matrixReview.secondaryGrounding,
       documents: matrixReview.documents,
       wordingFailedChecks: wordingReview.checks.filter((check) => !check.ok)
     });
@@ -299,6 +420,18 @@ async function main() {
     caseId: item.id,
     ...entry
   })));
+  const secondaryGroundingReviewed = results.reduce(
+    (sum, item) => sum + item.secondaryGrounding.reviewedDocumentCount,
+    0
+  );
+  const secondaryGroundingPassed = results.reduce(
+    (sum, item) => sum + item.secondaryGrounding.passedDocumentCount,
+    0
+  );
+  const secondaryCrossScenarioLeakageCount = results.reduce(
+    (sum, item) => sum + item.secondaryGrounding.crossScenarioLeakageCount,
+    0
+  );
   const report = {
     generatedAt: new Date().toISOString(),
     elapsedMs: Date.now() - startedAt,
@@ -327,6 +460,9 @@ async function main() {
     missingUnexpected,
     explicitNotApplicableCount: explicitNotApplicable.length,
     explicitNotApplicable,
+    secondaryGroundingReviewed,
+    secondaryGroundingPassed,
+    secondaryCrossScenarioLeakageCount,
     mutationBoundary: {
       dbMutationPerformed: false,
       shareSessionCreated: false,
