@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `2fe85e2d3317773bb6ce0de9b9f19a22c31377a4`
+Source HEAD: `4ac567ea32f0df2992c7109230464867e25096af`
 
-Production `/api/build-info`: `e7c4d9fcf68d54dac534c9f89d130a0ae16158c3`
+Production `/api/build-info`: `fdf0ac38da3bceb9ed70cc4f662923704279193e`
 
 Latest evidence commit live: `false`
 
@@ -14,17 +14,17 @@ Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/live-document-quality-stress-matrix-2026-07-24/report.json`, `evaluation/live-document-quality-stress-matrix-2026-07-24/report.md`, `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
+Source pending changed paths: `evaluation/documents-cockpit-workbench-geometry-2026-07-22/documents-workbench-desktop-short-1440x723.png`, `evaluation/documents-cockpit-workbench-geometry-2026-07-22/report.json`, `evaluation/documents-cockpit-workbench-geometry-2026-07-22/report.md`, `evaluation/share-desktop-perception-2026-07-22/recipient-share-desktop-short-1440x723.png`, `evaluation/share-desktop-perception-2026-07-22/recipient-share-mobile-390x844.png`, `evaluation/share-desktop-perception-2026-07-22/report.json`, `evaluation/share-desktop-perception-2026-07-22/report.md`, `evaluation/share-desktop-perception-2026-07-22/workspace-share-mobile-390x844.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-default-day-desktop-short-1440x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-default-day-mobile-390x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-default-night-desktop-short-1440x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-default-night-mobile-390x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-generated-current-workpack-day-desktop-short-1440x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-generated-current-workpack-day-mobile-390x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-generated-current-workpack-night-desktop-short-1440x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-generated-current-workpack-night-mobile-390x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-supporting-expanded-day-desktop-short-1440x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-supporting-expanded-day-mobile-390x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-supporting-expanded-night-desktop-short-1440x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-supporting-expanded-night-mobile-390x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/report.json`, `evaluation/workspace-bounded-workbench-current-2026-07-22/report.md`, `evaluation/workspace-bounded-workbench-current-2026-07-22/run-current-bounded-workbench-probe.mjs`, `scripts/northstar_next_runway.mjs`, `tests/northstar-next-runway-generator.test.ts`
 
 Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `2fe85e2d3317773bb6ce0de9b9f19a22c31377a4`
+Live rollup source head: `4ac567ea32f0df2992c7109230464867e25096af`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `2fe85e2d3317773bb6ce0de9b9f19a22c31377a4` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `e7c4d9fcf68d54dac534c9f89d130a0ae16158c3`, and the live rollup remains exact for that deployed marker.
+Note: current HEAD `4ac567ea32f0df2992c7109230464867e25096af` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `fdf0ac38da3bceb9ed70cc4f662923704279193e`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -72,7 +72,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.
 - Bounded workbench DoD: route split alone is not accepted; desktop Documents hard-REDs above the recorded screen threshold, /share/result desktop requires multi-region workbench geometry, and generated fixture evidence must stay separate from exact saved/session proof.
 - Legacy workspace-layout regression: remains a broad no-overflow/editor-flow smoke only, not a long-form UX PASS gate; the DoD and route-specific evidence own first-task distance.
-- Current bounded-workbench gate: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP`; first-task/body containment rows pass, and no Documents rows carry local workbench detail-depth debt. Share rows remain scoped if exact saved session evidence is missing.
+- Current bounded-workbench gate: `PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP`; first-task/body containment rows pass, and no Documents rows carry local workbench detail-depth debt. Share rows remain scoped if exact saved session evidence is missing.
 - Share desktop: current measured Workspace Share and invited recipient fixture routes pass scoped desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
 - Share route evidence split: invited recipient `/share/[sessionId]` fixture route, exact saved/generated `/share/[sessionId]`, and manager/workspace share-result route remain separate proof layers. A fixture pass cannot close a user-specific exact saved/session complaint.
