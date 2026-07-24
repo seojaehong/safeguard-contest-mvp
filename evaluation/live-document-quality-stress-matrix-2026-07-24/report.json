@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "safeclaw-live-document-quality-stress-matrix/v1",
+  "generatedAt": "2026-07-24T13:53:50.081Z",
+  "verdict": "HONEST_RED_LIVE_PRODUCTION_STRESS_MATRIX",
+  "sourceBaseBeforeCommit": "6a86dc33",
+  "scenarioManifest": "evaluation/live-document-quality-stress-matrix-2026-07-24/scenarios.json",
+  "runnerChange": {
+    "contentContractsAdded": true,
+    "requiredAnyGroupsSupported": true,
+    "forbiddenAnySupported": true,
+    "productCodeChanged": false
+  },
+  "localDeterministic": {
+    "artifact": "evaluation/live-document-quality-stress-matrix-2026-07-24/local-deterministic/report.json",
+    "total": 5,
+    "pass": 2,
+    "fail": 3,
+    "failedScenarioIds": [
+      "pyeongtaek-simultaneous-overhead-hotwork__stress",
+      "gumi-kosha-guidance-boundary__stress",
+      "jeju-overnight-electrical-repair__stress"
+    ],
+    "failedContracts": [
+      "simultaneous-work-separation",
+      "kosha-guidance-not-statutory-overclaim",
+      "overnight-handover-and-reenergization"
+    ]
+  },
+  "liveBefore": {
+    "artifact": "evaluation/live-document-quality-stress-matrix-2026-07-24/live-before/report.json",
+    "baseUrl": "https://www.safeclaw.kr",
+    "total": 5,
+    "pass": 0,
+    "fail": 5,
+    "failedScenarioIds": [
+      "ulsan-chemical-cleaning-sds__stress",
+      "pyeongtaek-simultaneous-overhead-hotwork__stress",
+      "daejeon-vulnerable-night-maintenance__stress",
+      "gumi-kosha-guidance-boundary__stress",
+      "jeju-overnight-electrical-repair__stress"
+    ],
+    "liveExecuted": 5
+  },
+  "verification": {
+    "runnerTests": {
+      "files": 1,
+      "passed": 2,
+      "failed": 0
+    }
+  },
+  "boundaries": {
+    "mode": "local-deterministic-and-live-before",
+    "apiCallsPerformed": 5,
+    "liveProductionClaimed": false,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchPerformed": false,
+    "exactSavedShareSessionReproduced": false
+  },
+  "nextActions": [
+    "Do not weaken the stress matrix thresholds to hide the three RED scenarios.",
+    "Use the RED contracts to drive bounded product remediation for simultaneous-work separation, KOSHA guidance phrasing, and overnight handover/re-energization controls.",
+    "After remediation, rerun the stress matrix against current-source local production and then live production before claiming PASS."
+  ]
+}

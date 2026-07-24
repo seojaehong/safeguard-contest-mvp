@@ -1,0 +1,396 @@
+{
+  "generatedAt": "2026-07-24T13:55:59.868Z",
+  "elapsedMs": 103016,
+  "mode": "mixed-live",
+  "baseUrl": "https://www.safeclaw.kr",
+  "casesPath": "evaluation\\live-document-quality-stress-matrix-2026-07-24\\scenarios.json",
+  "total": 5,
+  "pass": 0,
+  "fail": 5,
+  "live": {
+    "enabled": true,
+    "requested": 5,
+    "executed": 5,
+    "timeoutMs": 60000
+  },
+  "matrix": {
+    "baseScenarios": 5,
+    "variants": 1
+  },
+  "failureSamples": [
+    {
+      "id": "ulsan-chemical-cleaning-sds__stress",
+      "mode": "live",
+      "expected": {
+        "region": "울산",
+        "industry": "제조",
+        "workType": "화학세척"
+      },
+      "failedChecks": [
+        {
+          "name": "reflection:hazards",
+          "ok": false,
+          "message": "hazards not reflected: 미확인 화학물질, GHS 경고표지, 비산"
+        },
+        {
+          "name": "contract:chemical-identity-before-work:required:1",
+          "ok": false,
+          "message": "chemical-identity-before-work missing required semantic group: GHS | 경고표지"
+        }
+      ]
+    },
+    {
+      "id": "pyeongtaek-simultaneous-overhead-hotwork__stress",
+      "mode": "live",
+      "expected": {
+        "region": "경기",
+        "industry": "건설",
+        "workType": "양중·화기 동시작업"
+      },
+      "failedChecks": [
+        {
+          "name": "reflection:hazards",
+          "ok": false,
+          "message": "hazards not reflected: 동시작업, 상하부 작업"
+        },
+        {
+          "name": "contract:simultaneous-work-separation:required:0",
+          "ok": false,
+          "message": "simultaneous-work-separation missing required semantic group: 동시작업 | 동시 작업"
+        },
+        {
+          "name": "contract:simultaneous-work-separation:required:1",
+          "ok": false,
+          "message": "simultaneous-work-separation missing required semantic group: 작업구역 분리 | 출입 통제 | 통제구역"
+        }
+      ]
+    },
+    {
+      "id": "daejeon-vulnerable-night-maintenance__stress",
+      "mode": "live",
+      "expected": {
+        "region": "대전",
+        "industry": "제조",
+        "workType": "야간 컨베이어 정비"
+      },
+      "failedChecks": [
+        {
+          "name": "reflection:hazards",
+          "ok": false,
+          "message": "hazards not reflected: 야간, 조도, 의사소통, 피로"
+        },
+        {
+          "name": "reflection:workers",
+          "ok": false,
+          "message": "worker signals not reflected: 청각장애"
+        },
+        {
+          "name": "contract:vulnerable-worker-communication:required:1",
+          "ok": false,
+          "message": "vulnerable-worker-communication missing required semantic group: 청각장애 | 청각 장애"
+        }
+      ]
+    },
+    {
+      "id": "gumi-kosha-guidance-boundary__stress",
+      "mode": "live",
+      "expected": {
+        "region": "경북",
+        "industry": "제조",
+        "workType": "방호장치 개선·정비"
+      },
+      "failedChecks": [
+        {
+          "name": "reflection:hazards",
+          "ok": false,
+          "message": "hazards not reflected: 방호장치, 예기치 않은 기동"
+        },
+        {
+          "name": "reflection:workers",
+          "ok": false,
+          "message": "worker signals not reflected: 정비원"
+        }
+      ]
+    },
+    {
+      "id": "jeju-overnight-electrical-repair__stress",
+      "mode": "live",
+      "expected": {
+        "region": "제주",
+        "industry": "시설관리",
+        "workType": "심야 전기설비 복구"
+      },
+      "failedChecks": [
+        {
+          "name": "reflection:hazards",
+          "ok": false,
+          "message": "hazards not reflected: 야간, 조도, 피로, 단독작업"
+        },
+        {
+          "name": "reflection:workers",
+          "ok": false,
+          "message": "worker signals not reflected: 야간조, 인수인계"
+        },
+        {
+          "name": "contract:overnight-handover-and-reenergization:required:0",
+          "ok": false,
+          "message": "overnight-handover-and-reenergization missing required semantic group: 인수인계 | 교대"
+        },
+        {
+          "name": "contract:overnight-handover-and-reenergization:required:2",
+          "ok": false,
+          "message": "overnight-handover-and-reenergization missing required semantic group: 2인 1조 | 단독작업 금지 | 단독 작업 금지"
+        }
+      ]
+    }
+  ],
+  "byDimension": {
+    "region": {
+      "울산": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "경기": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "대전": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "경북": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "제주": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      }
+    },
+    "industry": {
+      "제조": {
+        "total": 3,
+        "pass": 0,
+        "fail": 3
+      },
+      "건설": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "시설관리": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      }
+    },
+    "workType": {
+      "화학세척": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "양중·화기 동시작업": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "야간 컨베이어 정비": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "방호장치 개선·정비": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "심야 전기설비 복구": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      }
+    },
+    "hazards": {
+      "미확인 화학물질": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "SDS": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "GHS 경고표지": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "환기": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "비산": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "동시작업": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "상하부 작업": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "낙하물": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "화기작업": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "양중": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "야간": {
+        "total": 2,
+        "pass": 0,
+        "fail": 2
+      },
+      "조도": {
+        "total": 2,
+        "pass": 0,
+        "fail": 2
+      },
+      "끼임": {
+        "total": 2,
+        "pass": 0,
+        "fail": 2
+      },
+      "의사소통": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "피로": {
+        "total": 2,
+        "pass": 0,
+        "fail": 2
+      },
+      "방호장치": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "예기치 않은 기동": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "LOTO": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "감전": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "단독작업": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      }
+    },
+    "requiredDocuments": {
+      "riskAssessmentDraft": {
+        "total": 5,
+        "pass": 0,
+        "fail": 5
+      },
+      "workPlanDraft": {
+        "total": 5,
+        "pass": 0,
+        "fail": 5
+      },
+      "tbmBriefing": {
+        "total": 5,
+        "pass": 0,
+        "fail": 5
+      },
+      "safetyEducationRecordDraft": {
+        "total": 3,
+        "pass": 0,
+        "fail": 3
+      },
+      "emergencyResponseDraft": {
+        "total": 3,
+        "pass": 0,
+        "fail": 3
+      },
+      "workPermit": {
+        "total": 3,
+        "pass": 0,
+        "fail": 3
+      },
+      "tbmLogDraft": {
+        "total": 2,
+        "pass": 0,
+        "fail": 2
+      }
+    },
+    "workerSignals": {
+      "신호수": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "고령": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "청각장애": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "신규": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "정비원": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "야간조": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "인수인계": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      }
+    }
+  }
+}

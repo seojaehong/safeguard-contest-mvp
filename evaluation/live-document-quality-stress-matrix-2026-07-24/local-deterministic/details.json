@@ -1,0 +1,341 @@
+[
+  {
+    "id": "ulsan-chemical-cleaning-sds__stress",
+    "baseId": "ulsan-chemical-cleaning-sds",
+    "variantId": "stress",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 1,
+    "expected": {
+      "region": "울산",
+      "industry": "제조",
+      "workType": "화학세척",
+      "hazards": [
+        "미확인 화학물질",
+        "SDS",
+        "GHS 경고표지",
+        "환기",
+        "비산"
+      ],
+      "workerSignals": [],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "emergencyResponseDraft",
+        "workPermit"
+      ],
+      "contentContracts": [
+        {
+          "id": "chemical-identity-before-work",
+          "documents": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "tbmBriefing"
+          ],
+          "requiredAnyGroups": [
+            [
+              "SDS",
+              "물질안전보건자료"
+            ],
+            [
+              "GHS",
+              "경고표지"
+            ],
+            [
+              "작업중지",
+              "작업 보류",
+              "사용 금지"
+            ]
+          ]
+        }
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 19
+  },
+  {
+    "id": "pyeongtaek-simultaneous-overhead-hotwork__stress",
+    "baseId": "pyeongtaek-simultaneous-overhead-hotwork",
+    "variantId": "stress",
+    "mode": "local-deterministic",
+    "ok": false,
+    "elapsedMs": 1,
+    "expected": {
+      "region": "경기",
+      "industry": "건설",
+      "workType": "양중·화기 동시작업",
+      "hazards": [
+        "동시작업",
+        "상하부 작업",
+        "낙하물",
+        "화기작업",
+        "양중"
+      ],
+      "workerSignals": [
+        "신호수"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "workPermit",
+        "emergencyResponseDraft"
+      ],
+      "contentContracts": [
+        {
+          "id": "simultaneous-work-separation",
+          "documents": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "tbmBriefing"
+          ],
+          "requiredAnyGroups": [
+            [
+              "동시작업",
+              "동시 작업"
+            ],
+            [
+              "작업구역 분리",
+              "출입 통제",
+              "통제구역"
+            ],
+            [
+              "작업순서",
+              "시간 분리",
+              "공정 조정"
+            ]
+          ]
+        }
+      ]
+    },
+    "api": null,
+    "failedChecks": [
+      {
+        "name": "contract:simultaneous-work-separation:required:1",
+        "ok": false,
+        "message": "simultaneous-work-separation missing required semantic group: 작업구역 분리 | 출입 통제 | 통제구역"
+      }
+    ],
+    "checkCount": 17
+  },
+  {
+    "id": "daejeon-vulnerable-night-maintenance__stress",
+    "baseId": "daejeon-vulnerable-night-maintenance",
+    "variantId": "stress",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 1,
+    "expected": {
+      "region": "대전",
+      "industry": "제조",
+      "workType": "야간 컨베이어 정비",
+      "hazards": [
+        "야간",
+        "조도",
+        "끼임",
+        "의사소통",
+        "피로"
+      ],
+      "workerSignals": [
+        "고령",
+        "청각장애",
+        "신규"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft"
+      ],
+      "contentContracts": [
+        {
+          "id": "vulnerable-worker-communication",
+          "documents": [
+            "tbmBriefing",
+            "tbmLogDraft",
+            "safetyEducationRecordDraft"
+          ],
+          "requiredAnyGroups": [
+            [
+              "고령"
+            ],
+            [
+              "청각장애",
+              "청각 장애"
+            ],
+            [
+              "시각 신호",
+              "수신호",
+              "복창",
+              "이해 확인"
+            ]
+          ]
+        }
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 17
+  },
+  {
+    "id": "gumi-kosha-guidance-boundary__stress",
+    "baseId": "gumi-kosha-guidance-boundary",
+    "variantId": "stress",
+    "mode": "local-deterministic",
+    "ok": false,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경북",
+      "industry": "제조",
+      "workType": "방호장치 개선·정비",
+      "hazards": [
+        "방호장치",
+        "끼임",
+        "예기치 않은 기동",
+        "LOTO"
+      ],
+      "workerSignals": [
+        "정비원"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft"
+      ],
+      "contentContracts": [
+        {
+          "id": "kosha-guidance-not-statutory-overclaim",
+          "documents": [
+            "workpackSummaryDraft",
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "tbmBriefing"
+          ],
+          "requiredAnyGroups": [
+            [
+              "KOSHA",
+              "안전보건공단"
+            ],
+            [
+              "기술지침",
+              "가이드",
+              "참고"
+            ],
+            [
+              "법령 확인",
+              "적용 여부 확인",
+              "현장 확인 필요"
+            ]
+          ],
+          "forbiddenAny": [
+            "KOSHA 가이드는 법적 의무입니다",
+            "KOSHA Guide 준수는 법적 의무",
+            "법적 의무로 확정"
+          ]
+        }
+      ]
+    },
+    "api": null,
+    "failedChecks": [
+      {
+        "name": "contract:kosha-guidance-not-statutory-overclaim:required:0",
+        "ok": false,
+        "message": "kosha-guidance-not-statutory-overclaim missing required semantic group: KOSHA | 안전보건공단"
+      },
+      {
+        "name": "contract:kosha-guidance-not-statutory-overclaim:required:1",
+        "ok": false,
+        "message": "kosha-guidance-not-statutory-overclaim missing required semantic group: 기술지침 | 가이드 | 참고"
+      }
+    ],
+    "checkCount": 16
+  },
+  {
+    "id": "jeju-overnight-electrical-repair__stress",
+    "baseId": "jeju-overnight-electrical-repair",
+    "variantId": "stress",
+    "mode": "local-deterministic",
+    "ok": false,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "제주",
+      "industry": "시설관리",
+      "workType": "심야 전기설비 복구",
+      "hazards": [
+        "야간",
+        "조도",
+        "감전",
+        "피로",
+        "단독작업"
+      ],
+      "workerSignals": [
+        "야간조",
+        "인수인계"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "tbmLogDraft",
+        "emergencyResponseDraft",
+        "workPermit"
+      ],
+      "contentContracts": [
+        {
+          "id": "overnight-handover-and-reenergization",
+          "documents": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "tbmBriefing",
+            "tbmLogDraft"
+          ],
+          "requiredAnyGroups": [
+            [
+              "인수인계",
+              "교대"
+            ],
+            [
+              "재통전",
+              "전원 투입",
+              "통전"
+            ],
+            [
+              "2인 1조",
+              "단독작업 금지",
+              "단독 작업 금지"
+            ]
+          ]
+        }
+      ]
+    },
+    "api": null,
+    "failedChecks": [
+      {
+        "name": "contract:overnight-handover-and-reenergization:required:1",
+        "ok": false,
+        "message": "overnight-handover-and-reenergization missing required semantic group: 재통전 | 전원 투입 | 통전"
+      },
+      {
+        "name": "contract:overnight-handover-and-reenergization:required:2",
+        "ok": false,
+        "message": "overnight-handover-and-reenergization missing required semantic group: 2인 1조 | 단독작업 금지 | 단독 작업 금지"
+      }
+    ],
+    "checkCount": 19
+  }
+]

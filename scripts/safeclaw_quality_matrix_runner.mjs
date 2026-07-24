@@ -476,6 +476,46 @@ function checkForeignLanguageReflection(payload, expected) {
   }];
 }
 
+function checkContentContracts(payload, expected) {
+  return asArray(expected.contentContracts).flatMap((contract, contractIndex) => {
+    if (!contract || typeof contract !== "object") {
+      return [{
+        name: `contract:${contractIndex}:schema`,
+        ok: false,
+        message: "content contract must be an object"
+      }];
+    }
+    const id = typeof contract.id === "string" && contract.id.trim()
+      ? contract.id.trim()
+      : `contract-${contractIndex}`;
+    const documents = asArray(contract.documents);
+    const documentKeys = documents.length ? documents : canonicalDocuments;
+    const text = documentKeys.map((key) => readAliasedDocument(payload, key)).join("\n");
+    const requiredGroups = asArray(contract.requiredAnyGroups);
+    const requiredChecks = requiredGroups.map((group, groupIndex) => {
+      const terms = asArray(group).map(String).filter(Boolean);
+      const ok = terms.length > 0 && includesAny(text, terms);
+      return {
+        name: `contract:${id}:required:${groupIndex}`,
+        ok,
+        message: ok ? "" : `${id} missing required semantic group: ${terms.join(" | ")}`
+      };
+    });
+    const forbiddenTerms = asArray(contract.forbiddenAny).map(String).filter(Boolean);
+    const matchedForbidden = forbiddenTerms.filter((term) => includesAny(text, [term]));
+    const forbiddenChecks = forbiddenTerms.length
+      ? [{
+        name: `contract:${id}:forbidden`,
+        ok: matchedForbidden.length === 0,
+        message: matchedForbidden.length
+          ? `${id} contains forbidden wording: ${matchedForbidden.join(" | ")}`
+          : ""
+      }]
+      : [];
+    return [...requiredChecks, ...forbiddenChecks];
+  });
+}
+
 function checkCase(testCase, payload, api) {
   const failures = checkExpectedSchema(testCase.expected).map((message) => ({ name: "expected:schema", ok: false, message }));
   if (!payload || typeof payload !== "object") {
@@ -493,7 +533,8 @@ function checkCase(testCase, payload, api) {
     ...checkHazardReflection(payload, testCase.expected),
     ...checkWeatherReflection(payload, testCase.expected),
     ...checkWorkerReflection(payload, testCase.expected),
-    ...checkForeignLanguageReflection(payload, testCase.expected)
+    ...checkForeignLanguageReflection(payload, testCase.expected),
+    ...checkContentContracts(payload, testCase.expected)
   ];
   return { checks, ok: checks.every((item) => item.ok) };
 }

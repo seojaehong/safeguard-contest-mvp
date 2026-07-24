@@ -1,0 +1,413 @@
+[
+  {
+    "id": "ulsan-chemical-cleaning-sds__stress",
+    "baseId": "ulsan-chemical-cleaning-sds",
+    "variantId": "stress",
+    "mode": "live",
+    "ok": false,
+    "elapsedMs": 20179,
+    "expected": {
+      "region": "울산",
+      "industry": "제조",
+      "workType": "화학세척",
+      "hazards": [
+        "미확인 화학물질",
+        "SDS",
+        "GHS 경고표지",
+        "환기",
+        "비산"
+      ],
+      "workerSignals": [],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "emergencyResponseDraft",
+        "workPermit"
+      ],
+      "contentContracts": [
+        {
+          "id": "chemical-identity-before-work",
+          "documents": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "tbmBriefing"
+          ],
+          "requiredAnyGroups": [
+            [
+              "SDS",
+              "물질안전보건자료"
+            ],
+            [
+              "GHS",
+              "경고표지"
+            ],
+            [
+              "작업중지",
+              "작업 보류",
+              "사용 금지"
+            ]
+          ]
+        }
+      ]
+    },
+    "api": {
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 20173,
+      "rawPreview": "{\"question\":\"울산 도금공장 탱크 외부 화학세척 작업. 세척제 용기 라벨이 훼손되어 물질이 확정되지 않았고 SDS와 GHS 경고표지를 먼저 확인해야 한다. 국소배기 불량과 비산·피부접촉 우려가 있다. 현장에 없는 사실은 만들지 말고, 확인되지 않은 사항은 현장 확인 필요로 표시해줘.\",\"answer\":\"1) 하네스 판단\\n- 직접 근거: 빌딩 · 판넬 등 외부마감작업 · 판넬 등 외부마감 시공 / 빌딩 · 판넬 등 외"
+    },
+    "failedChecks": [
+      {
+        "name": "reflection:hazards",
+        "ok": false,
+        "message": "hazards not reflected: 미확인 화학물질, GHS 경고표지, 비산"
+      },
+      {
+        "name": "contract:chemical-identity-before-work:required:1",
+        "ok": false,
+        "message": "chemical-identity-before-work missing required semantic group: GHS | 경고표지"
+      }
+    ],
+    "checkCount": 22
+  },
+  {
+    "id": "pyeongtaek-simultaneous-overhead-hotwork__stress",
+    "baseId": "pyeongtaek-simultaneous-overhead-hotwork",
+    "variantId": "stress",
+    "mode": "live",
+    "ok": false,
+    "elapsedMs": 23091,
+    "expected": {
+      "region": "경기",
+      "industry": "건설",
+      "workType": "양중·화기 동시작업",
+      "hazards": [
+        "동시작업",
+        "상하부 작업",
+        "낙하물",
+        "화기작업",
+        "양중"
+      ],
+      "workerSignals": [
+        "신호수"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "workPermit",
+        "emergencyResponseDraft"
+      ],
+      "contentContracts": [
+        {
+          "id": "simultaneous-work-separation",
+          "documents": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "tbmBriefing"
+          ],
+          "requiredAnyGroups": [
+            [
+              "동시작업",
+              "동시 작업"
+            ],
+            [
+              "작업구역 분리",
+              "출입 통제",
+              "통제구역"
+            ],
+            [
+              "작업순서",
+              "시간 분리",
+              "공정 조정"
+            ]
+          ]
+        }
+      ]
+    },
+    "api": {
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 23088,
+      "rawPreview": "{\"question\":\"평택 물류창고 증축 현장. 상부에서는 크레인 양중, 하부에서는 배관 화기작업을 동시에 계획하고 있어 낙하물과 불티 교차위험이 있다. 작업구역 분리와 공정 간 작업순서 조정, 신호수 배치가 필요하다. 현장에 없는 사실은 만들지 말고, 확인되지 않은 사항은 현장 확인 필요로 표시해줘.\",\"answer\":\"1) 하네스 판단\\n- SIF 유사사례: 물류창고에서 택배박스를 1층에서 2층으로 옮기기 위해 일반작업용"
+    },
+    "failedChecks": [
+      {
+        "name": "reflection:hazards",
+        "ok": false,
+        "message": "hazards not reflected: 동시작업, 상하부 작업"
+      },
+      {
+        "name": "contract:simultaneous-work-separation:required:0",
+        "ok": false,
+        "message": "simultaneous-work-separation missing required semantic group: 동시작업 | 동시 작업"
+      },
+      {
+        "name": "contract:simultaneous-work-separation:required:1",
+        "ok": false,
+        "message": "simultaneous-work-separation missing required semantic group: 작업구역 분리 | 출입 통제 | 통제구역"
+      }
+    ],
+    "checkCount": 20
+  },
+  {
+    "id": "daejeon-vulnerable-night-maintenance__stress",
+    "baseId": "daejeon-vulnerable-night-maintenance",
+    "variantId": "stress",
+    "mode": "live",
+    "ok": false,
+    "elapsedMs": 19490,
+    "expected": {
+      "region": "대전",
+      "industry": "제조",
+      "workType": "야간 컨베이어 정비",
+      "hazards": [
+        "야간",
+        "조도",
+        "끼임",
+        "의사소통",
+        "피로"
+      ],
+      "workerSignals": [
+        "고령",
+        "청각장애",
+        "신규"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft"
+      ],
+      "contentContracts": [
+        {
+          "id": "vulnerable-worker-communication",
+          "documents": [
+            "tbmBriefing",
+            "tbmLogDraft",
+            "safetyEducationRecordDraft"
+          ],
+          "requiredAnyGroups": [
+            [
+              "고령"
+            ],
+            [
+              "청각장애",
+              "청각 장애"
+            ],
+            [
+              "시각 신호",
+              "수신호",
+              "복창",
+              "이해 확인"
+            ]
+          ]
+        }
+      ]
+    },
+    "api": {
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 19488,
+      "rawPreview": "{\"question\":\"대전 식품공장 야간 컨베이어 정비. 고령 작업자 1명, 청각장애 작업자 1명, 신규 작업자 1명이 포함되고 조도가 낮다. 설비 끼임과 의사소통 실패, 피로 누적을 고려해야 한다. 현장에 없는 사실은 만들지 말고, 확인되지 않은 사항은 현장 확인 필요로 표시해줘.\",\"answer\":\"1) 하네스 판단\\n- 직접 근거: 133 · 제조업 · 전기기계기구·정밀기구·전자제품제조업 · 기타전기기계기구제조업\\n- "
+    },
+    "failedChecks": [
+      {
+        "name": "reflection:hazards",
+        "ok": false,
+        "message": "hazards not reflected: 야간, 조도, 의사소통, 피로"
+      },
+      {
+        "name": "reflection:workers",
+        "ok": false,
+        "message": "worker signals not reflected: 청각장애"
+      },
+      {
+        "name": "contract:vulnerable-worker-communication:required:1",
+        "ok": false,
+        "message": "vulnerable-worker-communication missing required semantic group: 청각장애 | 청각 장애"
+      }
+    ],
+    "checkCount": 20
+  },
+  {
+    "id": "gumi-kosha-guidance-boundary__stress",
+    "baseId": "gumi-kosha-guidance-boundary",
+    "variantId": "stress",
+    "mode": "live",
+    "ok": false,
+    "elapsedMs": 17775,
+    "expected": {
+      "region": "경북",
+      "industry": "제조",
+      "workType": "방호장치 개선·정비",
+      "hazards": [
+        "방호장치",
+        "끼임",
+        "예기치 않은 기동",
+        "LOTO"
+      ],
+      "workerSignals": [
+        "정비원"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft"
+      ],
+      "contentContracts": [
+        {
+          "id": "kosha-guidance-not-statutory-overclaim",
+          "documents": [
+            "workpackSummaryDraft",
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "tbmBriefing"
+          ],
+          "requiredAnyGroups": [
+            [
+              "KOSHA",
+              "안전보건공단"
+            ],
+            [
+              "기술지침",
+              "가이드",
+              "참고"
+            ],
+            [
+              "법령 확인",
+              "적용 여부 확인",
+              "현장 확인 필요"
+            ]
+          ],
+          "forbiddenAny": [
+            "KOSHA 가이드는 법적 의무입니다",
+            "KOSHA Guide 준수는 법적 의무",
+            "법적 의무로 확정"
+          ]
+        }
+      ]
+    },
+    "api": {
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 17774,
+      "rawPreview": "{\"question\":\"구미 전자부품 공장 자동화설비 방호장치 개선과 정비 작업. 끼임과 예기치 않은 기동을 다루되 KOSHA Guide는 기술지침으로 참고하고, 개별 조항 검토 없이 곧바로 법적 의무라고 단정하지 말아줘. 현장에 없는 사실은 만들지 말고, 확인되지 않은 사항은 현장 확인 필요로 표시해줘.\",\"answer\":\"1) 하네스 판단\\n- 직접 근거: 632 · 제조업 · 목재및종이제품제조업 · 골판지및종이용기제조업 "
+    },
+    "failedChecks": [
+      {
+        "name": "reflection:hazards",
+        "ok": false,
+        "message": "hazards not reflected: 방호장치, 예기치 않은 기동"
+      },
+      {
+        "name": "reflection:workers",
+        "ok": false,
+        "message": "worker signals not reflected: 정비원"
+      }
+    ],
+    "checkCount": 19
+  },
+  {
+    "id": "jeju-overnight-electrical-repair__stress",
+    "baseId": "jeju-overnight-electrical-repair",
+    "variantId": "stress",
+    "mode": "live",
+    "ok": false,
+    "elapsedMs": 22478,
+    "expected": {
+      "region": "제주",
+      "industry": "시설관리",
+      "workType": "심야 전기설비 복구",
+      "hazards": [
+        "야간",
+        "조도",
+        "감전",
+        "피로",
+        "단독작업"
+      ],
+      "workerSignals": [
+        "야간조",
+        "인수인계"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "tbmLogDraft",
+        "emergencyResponseDraft",
+        "workPermit"
+      ],
+      "contentContracts": [
+        {
+          "id": "overnight-handover-and-reenergization",
+          "documents": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "tbmBriefing",
+            "tbmLogDraft"
+          ],
+          "requiredAnyGroups": [
+            [
+              "인수인계",
+              "교대"
+            ],
+            [
+              "재통전",
+              "전원 투입",
+              "통전"
+            ],
+            [
+              "2인 1조",
+              "단독작업 금지",
+              "단독 작업 금지"
+            ]
+          ]
+        }
+      ]
+    },
+    "api": {
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 22475,
+      "rawPreview": "{\"question\":\"제주 리조트 심야 전기설비 긴급복구. 야간조 2명이 제한된 조명 아래 분전반을 점검하며 감전, 피로, 단독작업 전환 위험이 있다. 교대 인수인계와 재통전 확인 절차가 필요하다. 현장에 없는 사실은 만들지 말고, 확인되지 않은 사항은 현장 확인 필요로 표시해줘.\",\"answer\":\"1) 하네스 판단\\n- SIF 유사사례: 리조트에서 재하자가 소형 작업차 적재함에 탑승하여 이동중 차량이 넘어지면서 1.7m "
+    },
+    "failedChecks": [
+      {
+        "name": "reflection:hazards",
+        "ok": false,
+        "message": "hazards not reflected: 야간, 조도, 피로, 단독작업"
+      },
+      {
+        "name": "reflection:workers",
+        "ok": false,
+        "message": "worker signals not reflected: 야간조, 인수인계"
+      },
+      {
+        "name": "contract:overnight-handover-and-reenergization:required:0",
+        "ok": false,
+        "message": "overnight-handover-and-reenergization missing required semantic group: 인수인계 | 교대"
+      },
+      {
+        "name": "contract:overnight-handover-and-reenergization:required:2",
+        "ok": false,
+        "message": "overnight-handover-and-reenergization missing required semantic group: 2인 1조 | 단독작업 금지 | 단독 작업 금지"
+      }
+    ],
+    "checkCount": 22
+  }
+]
