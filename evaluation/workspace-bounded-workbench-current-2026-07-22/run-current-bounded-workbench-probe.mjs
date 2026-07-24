@@ -208,7 +208,7 @@ function documentsVerdict(metrics) {
   };
 }
 
-async function measureWorkspaceShare(page, theme) {
+async function generateWorkspace(page, theme) {
   await page.addInitScript(() => {
     window.localStorage.clear();
     window.localStorage.setItem("safeclaw.aiMode", "template");
@@ -218,6 +218,17 @@ async function measureWorkspaceShare(page, theme) {
   await page.getByRole("button", { name: /안전 문서 생성/u }).click();
   await page.locator(".workspace-document-page").waitFor({ state: "visible", timeout: 60_000 });
   await page.getByText(/12\/12 생성|안전 문서팩 3종 준비 완료/u).first().waitFor({ timeout: 60_000 });
+}
+
+async function measureGeneratedDocuments(page, theme) {
+  await generateWorkspace(page, theme);
+  await page.goto(`${baseUrl}/documents?theme=${theme}`, { waitUntil: "networkidle", timeout: 60_000 });
+  await page.locator(".workpack-shell").waitFor({ state: "visible", timeout: 30_000 });
+  return measureDocuments(page, "generated-current-workpack", theme);
+}
+
+async function measureWorkspaceShare(page, theme) {
+  await generateWorkspace(page, theme);
   await page.getByLabel("작업공간 메뉴").getByRole("button").filter({ hasText: "공유" }).click();
   await page.locator("[data-share-root]").waitFor({ state: "visible", timeout: 30_000 });
   await settle(page);
@@ -412,6 +423,23 @@ for (const theme of themes) {
       await docPage.close();
     }
 
+    const generatedDocPage = await browser.newPage({ viewport: { width: viewport.width, height: viewport.height }, deviceScaleFactor: 1 });
+    try {
+      const generatedMetrics = await measureGeneratedDocuments(generatedDocPage, theme);
+      documentRows.push({ metrics: generatedMetrics, verdicts: documentsVerdict(generatedMetrics) });
+      await generatedDocPage.screenshot({
+        path: path.join(outDir, `documents-generated-current-workpack-${theme}-${viewport.label}.png`),
+        fullPage: true,
+      });
+    } catch (error) {
+      documentRows.push({
+        metrics: { route: `/documents?theme=${theme}`, theme, state: "generated-current-workpack-error", viewport: `${viewport.width}x${viewport.height}` },
+        verdicts: { overallVerdict: "ERROR", error: error instanceof Error ? error.message : String(error) },
+      });
+    } finally {
+      await generatedDocPage.close();
+    }
+
     const sharePage = await browser.newPage({ viewport: { width: viewport.width, height: viewport.height }, deviceScaleFactor: 1 });
     try {
       const metrics = await measureWorkspaceShare(sharePage, theme);
@@ -480,6 +508,7 @@ const report = {
     ? documentDetailDepthDebts.length === 0 ? passVerdict : partialDetailDepthVerdict
     : redVerdict,
   interpretation: "This gate measures the bounded-workbench contract directly. Route/page split is orientation only; PASS requires first-task visibility, a default exposure budget, and bounded simultaneous scope, while exact saved Share sessions remain separate evidence. Detail-depth debt tracks whether long work moved into a local shell that can still feel long even when body-level page height is bounded.",
+  generatedCurrentWorkpackMeasured: documentRows.some((row) => row.metrics.state === "generated-current-workpack"),
   acceptance: {
     documents: {
       desktopTargetScreens: 1.5,
@@ -534,6 +563,8 @@ Production \`/api/build-info\`: \`${report.productionCommit || "unknown"}\`
 Verdict: \`${report.verdict}\`
 
 Route split alone accepted as fix: \`false\`
+
+Generated current workpack measured: \`${report.generatedCurrentWorkpackMeasured}\`
 
 Provider live dispatch claimed: \`false\`
 

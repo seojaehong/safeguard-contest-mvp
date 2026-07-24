@@ -84,6 +84,7 @@ type NextRunwayReport = {
     documentsRemainingDebt: string;
     selectedEditorDetail: string;
     documentsContainment: string;
+    documentsGeneratedCurrentWorkpack: string;
     shareDesktop: string;
     shareGeneratedResult: string;
     shareMobile: string;
@@ -203,6 +204,19 @@ type NextRunwayReport = {
     providerDispatchLiveClaimed: boolean;
     externalProviderCalled: boolean;
     dbMutationPerformed: boolean;
+    generatedCurrentWorkpackMeasured: boolean;
+    generatedDocumentRows: Array<{
+      route: string;
+      theme: string;
+      viewport: string;
+      overallVerdict: string;
+      bodyHeightRatio: number | null;
+      workpackShellScrollRatio: number | null;
+      firstActionBottom: number | null;
+      firstHazardBottom: number | null;
+      stickyOverlapCount: number | null;
+      supportingDocsOpenDefault: boolean;
+    }>;
     detailDepthDebt: boolean;
     documentRedRows: Array<{
       route: string;
@@ -677,6 +691,7 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     providerDispatchLiveClaimed: false,
     externalProviderCalled: false,
     dbMutationPerformed: false,
+    generatedCurrentWorkpackMeasured: true,
     documents: [
       {
         metrics: {
@@ -694,6 +709,27 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
           firstTaskVerdict: "RED",
           bodyHeightVerdict: "PASS",
           longContentContainmentVerdict: "PASS",
+        },
+      },
+      {
+        metrics: {
+          route: "/documents?theme=day",
+          theme: "day",
+          state: "generated-current-workpack",
+          viewport: "1440x723",
+          bodyHeightRatio: 1,
+          workpackShellScrollRatio: 2.31,
+          firstActionBottom: 321,
+          firstHazardBottom: 578,
+          stickyOverlapCount: 0,
+          supportingDocsOpenDefault: false,
+        },
+        verdicts: {
+          overallVerdict: "PASS",
+          firstTaskVerdict: "PASS",
+          bodyHeightVerdict: "PASS",
+          longContentContainmentVerdict: "PASS",
+          detailDepthVerdict: "PASS",
         },
       },
     ],
@@ -884,6 +920,24 @@ describe("northstar next runway generator", () => {
     });
     expect(report.nextSafeWorkWithoutApproval.join("\n")).toContain("do not create a production saved Share session");
     expect(report.uiInterpretation.documentsContainment).toContain("selected-only bounded workbench");
+    expect(report.uiInterpretation.documentsGeneratedCurrentWorkpack).toContain("generated-current-workpack");
+    expect(report.boundedWorkbenchCurrent).toMatchObject({
+      generatedCurrentWorkpackMeasured: true,
+      generatedDocumentRows: [
+        {
+          route: "/documents?theme=day",
+          theme: "day",
+          viewport: "1440x723",
+          overallVerdict: "PASS",
+          bodyHeightRatio: 1,
+          workpackShellScrollRatio: 2.31,
+          firstActionBottom: 321,
+          firstHazardBottom: 578,
+          stickyOverlapCount: 0,
+          supportingDocsOpenDefault: false,
+        },
+      ],
+    });
     expect(report.uiInterpretation.selectedEditorDetail).toContain("desktop 1440x900");
     expect(report.uiInterpretation.structuralAnswer).toContain("bounded IA/density wave");
     expect(report.uiInterpretation.structuralAnswer).toContain("default exposure budget");

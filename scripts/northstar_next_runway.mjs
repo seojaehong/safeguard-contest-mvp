@@ -569,6 +569,10 @@ function boundedWorkbenchDodSummary(dod) {
 function boundedWorkbenchCurrentSummary(current) {
   if (!isRecord(current)) return {};
   const documentRows = Array.isArray(current.documents) ? current.documents.filter(isRecord) : [];
+  const generatedDocumentRows = documentRows.filter((row) => {
+    const metrics = isRecord(row.metrics) ? row.metrics : {};
+    return asString(metrics.state) === "generated-current-workpack";
+  });
   const shareRows = Array.isArray(current.share) ? current.share.filter(isRecord) : [];
   const documentDetailDepthDebts = Array.isArray(current.documentDetailDepthDebts)
     ? current.documentDetailDepthDebts.filter(isRecord)
@@ -597,6 +601,23 @@ function boundedWorkbenchCurrentSummary(current) {
     providerDispatchLiveClaimed: asBoolean(current.providerDispatchLiveClaimed),
     externalProviderCalled: asBoolean(current.externalProviderCalled),
     dbMutationPerformed: asBoolean(current.dbMutationPerformed),
+    generatedCurrentWorkpackMeasured: asBoolean(current.generatedCurrentWorkpackMeasured),
+    generatedDocumentRows: generatedDocumentRows.map((row) => {
+      const metrics = isRecord(row.metrics) ? row.metrics : {};
+      const verdicts = isRecord(row.verdicts) ? row.verdicts : {};
+      return {
+        route: asString(metrics.route),
+        theme: asString(metrics.theme),
+        viewport: asString(metrics.viewport),
+        overallVerdict: asString(verdicts.overallVerdict),
+        bodyHeightRatio: typeof metrics.bodyHeightRatio === "number" ? metrics.bodyHeightRatio : null,
+        workpackShellScrollRatio: typeof metrics.workpackShellScrollRatio === "number" ? metrics.workpackShellScrollRatio : null,
+        firstActionBottom: typeof metrics.firstActionBottom === "number" ? metrics.firstActionBottom : null,
+        firstHazardBottom: typeof metrics.firstHazardBottom === "number" ? metrics.firstHazardBottom : null,
+        stickyOverlapCount: typeof metrics.stickyOverlapCount === "number" ? metrics.stickyOverlapCount : null,
+        supportingDocsOpenDefault: metrics.supportingDocsOpenDefault === true,
+      };
+    }),
     documentRedRows: documentRows.filter((row) => {
       const verdicts = isRecord(row.verdicts) ? row.verdicts : {};
       return asString(verdicts.overallVerdict) === "RED";
@@ -817,6 +838,7 @@ export function buildNorthstarNextRunway(options) {
       documentsRemainingDebt: "full 12-document authoring polish remains; the all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content and the local workbench shell ratio target remains <= 3",
       selectedEditorDetail: "risk-assessment default, same-document reselect, and all-12 launcher exposure now land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown",
       documentsContainment: "route/page split is only orientation; /documents must remain a selected-only bounded workbench with a default exposure budget, core 3/supporting 9 as index or collapsed navigation, and long source/section/provenance content in drilldown",
+      documentsGeneratedCurrentWorkpack: "live generated-current-workpack state is measured separately from default/example Documents; desktop and mobile must keep body containment, first action/hazard visibility, supporting-9 collapsed by default, sticky overlap 0, and local shell ratio <= 3",
       shareDesktop: "current measured Workspace Share and invited recipient fixture routes pass scoped desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes, and desktop must not regress into a mobile card stack",
       shareGeneratedResult: "current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported",
       shareRouteEvidenceBoundary: "separate Share evidence into invited recipient fixture pass, exact saved/generated /share/[sessionId] missing evidence, and manager/workspace share-result route repro; do not use one route's pass to close another route's mobile-like complaint",
