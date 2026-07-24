@@ -24,6 +24,7 @@ const ARTIFACTS = Object.freeze({
   liveKoshaExactMaterialization: path.join("evaluation", "live-kosha-exact-materialization-2026-07-25", "report.json"),
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
+  liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   kosha: path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json"),
   rlsWiki: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
   sifEmbedding: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
@@ -304,6 +305,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const liveKoshaExactMaterialization = tryReadJson(rootDir, ARTIFACTS.liveKoshaExactMaterialization);
   const liveDocumentWordingReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentWordingReview);
   const liveDocumentBroadReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentBroadReview);
+  const liveDocumentSecondaryGrounding = tryReadJson(rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
   const kosha = tryReadJson(rootDir, ARTIFACTS.kosha);
   const rlsWiki = tryReadJson(rootDir, ARTIFACTS.rlsWiki);
   const sifEmbedding = tryReadJson(rootDir, ARTIFACTS.sifEmbedding);
@@ -378,6 +380,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "live_kosha_exact_materialization", ARTIFACTS.liveKoshaExactMaterialization, liveKoshaExactMaterialization),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_wording_review", ARTIFACTS.liveDocumentWordingReview, liveDocumentWordingReview),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_broad_review", ARTIFACTS.liveDocumentBroadReview, liveDocumentBroadReview),
+    evidenceStatus(rootDir, currentHead, liveCommit, "live_document_secondary_grounding", ARTIFACTS.liveDocumentSecondaryGrounding, liveDocumentSecondaryGrounding),
     evidenceStatus(rootDir, currentHead, liveCommit, "kosha_exact_trust_registry", ARTIFACTS.kosha, kosha),
     evidenceStatus(rootDir, currentHead, liveCommit, "rls_llm_wiki_approval_preflight", ARTIFACTS.rlsWiki, rlsWiki),
     evidenceStatus(rootDir, currentHead, liveCommit, "sif_embedding_preflight", ARTIFACTS.sifEmbedding, sifEmbedding),
@@ -545,6 +548,23 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       exactSavedShareReproduced: recordAt(liveDocumentBroadReview, "mutationBoundary")?.exactSavedShareReproduced === true,
       exactSavedShareVerdict: asString(recordAt(liveDocumentBroadReview, "mutationBoundary")?.exactSavedShareVerdict),
     },
+    liveDocumentSecondaryGrounding: {
+      artifact: ARTIFACTS.liveDocumentSecondaryGrounding,
+      verdict: isRecord(liveDocumentSecondaryGrounding) ? asString(liveDocumentSecondaryGrounding.verdict) : "missing",
+      sourceHead: isRecord(liveDocumentSecondaryGrounding) ? asString(liveDocumentSecondaryGrounding.sourceHead) : "",
+      productionCommit: extractProductionCommit(liveDocumentSecondaryGrounding),
+      livePassed: asNumber(recordAt(recordAt(liveDocumentSecondaryGrounding, "stages"), "afterLive")?.pass),
+      liveFailed: asNumber(recordAt(recordAt(liveDocumentSecondaryGrounding, "stages"), "afterLive")?.fail),
+      secondaryReviewed: asNumber(recordAt(recordAt(liveDocumentSecondaryGrounding, "stages"), "afterLive")?.secondaryReviewed),
+      secondaryPassed: asNumber(recordAt(recordAt(liveDocumentSecondaryGrounding, "stages"), "afterLive")?.secondaryPassed),
+      crossScenarioLeakageCount: asNumber(recordAt(recordAt(liveDocumentSecondaryGrounding, "stages"), "afterLive")?.crossScenarioLeakageCount),
+      missingUnexpectedCount: asNumber(recordAt(recordAt(liveDocumentSecondaryGrounding, "stages"), "afterLive")?.missingUnexpectedCount),
+      dbMutationPerformed: recordAt(liveDocumentSecondaryGrounding, "mutationBoundary")?.dbMutationPerformed === true,
+      shareSessionCreated: recordAt(liveDocumentSecondaryGrounding, "mutationBoundary")?.shareSessionCreated === true,
+      providerDispatchCalled: recordAt(liveDocumentSecondaryGrounding, "mutationBoundary")?.providerDispatchCalled === true,
+      exactSavedShareReproduced: recordAt(liveDocumentSecondaryGrounding, "mutationBoundary")?.exactSavedShareReproduced === true,
+      exactSavedShareVerdict: asString(recordAt(liveDocumentSecondaryGrounding, "mutationBoundary")?.exactSavedShareVerdict),
+    },
     providerDispatchPersistence: {
       artifact: ARTIFACTS.providerDispatchIdempotency,
       status: isRecord(providerDispatchIdempotency) ? asString(providerDispatchIdempotency.status) : "missing",
@@ -660,6 +680,16 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- DB mutation: ${rollup.liveDocumentBroadReview.dbMutationPerformed}; Share session created: ${rollup.liveDocumentBroadReview.shareSessionCreated}; provider dispatch: ${rollup.liveDocumentBroadReview.providerDispatchCalled}`,
     `- Exact saved Share: ${rollup.liveDocumentBroadReview.exactSavedShareVerdict || "MISSING_EVIDENCE"}; reproduced=${rollup.liveDocumentBroadReview.exactSavedShareReproduced}`,
     "- Boundary: the six-document synthetic wording gate is not 12-document deliverable coverage.",
+    "",
+    "## Live Secondary Document Grounding",
+    "",
+    `- Verdict: \`${rollup.liveDocumentSecondaryGrounding.verdict}\``,
+    `- Live scenarios passed: ${rollup.liveDocumentSecondaryGrounding.livePassed ?? "unknown"}/5; failed=${rollup.liveDocumentSecondaryGrounding.liveFailed ?? "unknown"}`,
+    `- Supporting documents passed: ${rollup.liveDocumentSecondaryGrounding.secondaryPassed ?? "unknown"}/${rollup.liveDocumentSecondaryGrounding.secondaryReviewed ?? "unknown"}`,
+    `- Cross-scenario leakage: ${rollup.liveDocumentSecondaryGrounding.crossScenarioLeakageCount ?? "unknown"}; missingUnexpected=${rollup.liveDocumentSecondaryGrounding.missingUnexpectedCount ?? "unknown"}`,
+    `- DB mutation: ${rollup.liveDocumentSecondaryGrounding.dbMutationPerformed}; Share session created: ${rollup.liveDocumentSecondaryGrounding.shareSessionCreated}; provider dispatch: ${rollup.liveDocumentSecondaryGrounding.providerDispatchCalled}`,
+    `- Exact saved Share: ${rollup.liveDocumentSecondaryGrounding.exactSavedShareVerdict || "MISSING_EVIDENCE"}; reproduced=${rollup.liveDocumentSecondaryGrounding.exactSavedShareReproduced}`,
+    "- Boundary: this six-secondary-document scenario-grounding contract is separate from the six-document wording gate, 12-document presence/applicability gate, broad human review, and exact saved Share evidence.",
     "",
     "## Gate Matrix",
     "",

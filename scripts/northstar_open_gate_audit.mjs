@@ -35,6 +35,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveKoshaExactMaterialization: path.join("evaluation", "live-kosha-exact-materialization-2026-07-25", "report.json"),
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
+  liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
   llmWikiApproval: path.join("evaluation", "llm-wiki-rls-approval-2026-07-17", "report.md"),
   rlsLlmWikiApprovalPreflight: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
@@ -794,6 +795,65 @@ function evaluateLiveDocumentBroadReviewGate(rootDir) {
     evidencePath,
     detail: `Broad review verdict=${readString(report.verdict) || "unknown"}, ui=${readNumber(report.uiDocumentCount)}, integrity=${readNumber(report.integrityRequiredCount)}, reviewed=${readNumber(report.reviewedDocumentCount)}, before=${readNumber(before.pass)}/${readNumber(before.fail)}, live=${readNumber(afterLive.pass)}/${readNumber(afterLive.fail)}, liveMissing=${readNumber(afterLive.missingUnexpectedCount)}, workPermit=${livePermitPass}/5, sourceMatchesProduction=${readString(report.sourceHead).length > 0 && readString(report.sourceHead) === readString(report.productionCommit)}, noMutation=${noMutation}.`,
     nextActions: ["Fix missing, silent not-applicable, or permit-applicability failures and rerun the unchanged 12-deliverable gate."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateLiveDocumentSecondaryGroundingGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.liveDocumentSecondaryGrounding;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "live_document_secondary_grounding",
+      label: "Live secondary document grounding",
+      state: "missing",
+      evidencePath,
+      detail: "Live supporting-document scenario grounding evidence is missing or invalid.",
+      nextActions: ["Run the unchanged six-document secondary grounding contract across the five live stress scenarios."],
+    });
+  }
+
+  const stages = isRecord(report.stages) ? report.stages : {};
+  const afterLive = isRecord(stages.afterLive) ? stages.afterLive : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.exactSavedShareReproduced === false;
+  const sourceMatchesProduction = readString(report.sourceHead).length > 0
+    && readString(report.sourceHead) === readString(report.productionCommit);
+  const liveReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT"
+    && sourceMatchesProduction
+    && readNumber(afterLive.cases) === 5
+    && readNumber(afterLive.pass) === 5
+    && readNumber(afterLive.fail) === 0
+    && readNumber(afterLive.secondaryReviewed) === 30
+    && readNumber(afterLive.secondaryPassed) === 30
+    && readNumber(afterLive.crossScenarioLeakageCount) === 0
+    && readNumber(afterLive.missingUnexpectedCount) === 0
+    && noMutation;
+
+  if (liveReady) {
+    return gateResult({
+      id: "live_document_secondary_grounding",
+      label: "Live secondary document grounding",
+      state: "proven",
+      evidencePath,
+      detail: `All six secondary deliverables pass scenario grounding across five live production scenarios: cases=5/5, documents=30/30, cross-scenario leakage=0, missingUnexpected=0. DB/share/provider mutation is false and exact saved Share remains ${readString(mutationBoundary.exactSavedShareVerdict) || "MISSING_EVIDENCE"}. This deterministic contract does not replace the six-document wording gate, 12-document presence gate, or broad human review.`,
+      nextActions: ["Keep broad human review and exact saved Share evidence separate from this deterministic supporting-document contract."],
+    });
+  }
+
+  return gateResult({
+    id: "live_document_secondary_grounding",
+    label: "Live secondary document grounding",
+    state: "contradicted",
+    evidencePath,
+    detail: `Secondary grounding verdict=${readString(report.verdict) || "unknown"}, live=${readNumber(afterLive.pass)}/${readNumber(afterLive.cases)}, documents=${readNumber(afterLive.secondaryPassed)}/${readNumber(afterLive.secondaryReviewed)}, leakage=${readNumber(afterLive.crossScenarioLeakageCount)}, missing=${readNumber(afterLive.missingUnexpectedCount)}, sourceMatchesProduction=${sourceMatchesProduction}, noMutation=${noMutation}.`,
+    nextActions: ["Fix scenario grounding, semantic-group, or cross-scenario leakage failures and rerun the unchanged live contract."],
   });
 }
 
@@ -2725,6 +2785,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateLiveKoshaExactMaterializationGate(rootDir),
     evaluateLiveDocumentWordingReviewGate(rootDir),
     evaluateLiveDocumentBroadReviewGate(rootDir),
+    evaluateLiveDocumentSecondaryGroundingGate(rootDir),
     evaluateUiDocumentsShareCockpitGate(rootDir),
     evaluateDispatchStandaloneCockpitGate(rootDir),
     evaluateShareResultFixtureCockpitGate(rootDir),

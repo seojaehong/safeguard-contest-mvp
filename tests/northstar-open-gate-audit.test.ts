@@ -264,6 +264,29 @@ function createFixtureRoot(): string {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    stages: {
+      afterLive: {
+        cases: 5,
+        pass: 5,
+        fail: 0,
+        secondaryReviewed: 30,
+        secondaryPassed: 30,
+        crossScenarioLeakageCount: 0,
+        missingUnexpectedCount: 0,
+      },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeText(rootDir, path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"), [
     "# Supabase RLS Approval Audit",
     "Status: `approval_required`",
@@ -1474,6 +1497,13 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "live_document_broad_review")?.detail).toContain("workPermitDraft presentNonEmpty=5/5");
     expect(audit.gates.find((gate) => gate.id === "live_document_broad_review")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "live_document_broad_review")?.detail).toContain("six-document synthetic wording gate is not used");
+    expect(audit.gates.find((gate) => gate.id === "live_document_secondary_grounding")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_document_secondary_grounding")?.detail).toContain("documents=30/30");
+    expect(audit.gates.find((gate) => gate.id === "live_document_secondary_grounding")?.detail).toContain("cross-scenario leakage=0");
+    expect(audit.gates.find((gate) => gate.id === "live_document_secondary_grounding")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("Scoped first-task cockpit proof only, not full Documents/Share IA completion");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("12 document first-task cockpits");
@@ -1672,6 +1702,37 @@ describe("northstar open gate audit", () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "live_document_broad_review")?.detail).toContain("workPermit=4/5");
+  });
+
+  it("fails secondary document grounding closed when one supporting document is not grounded", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "live-document-secondary-grounding-2026-07-25", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      stages: {
+        afterLive: {
+          pass: number;
+          fail: number;
+          secondaryPassed: number;
+        };
+      };
+    };
+    report.stages.afterLive.pass = 4;
+    report.stages.afterLive.fail = 1;
+    report.stages.afterLive.secondaryPassed = 29;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.overall).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "live_document_secondary_grounding")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_document_secondary_grounding")?.detail).toContain("documents=29/30");
   });
 
   it("fails evidence completeness when the LLM Wiki publication packet is missing", async () => {

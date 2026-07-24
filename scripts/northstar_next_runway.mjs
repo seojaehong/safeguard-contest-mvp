@@ -27,6 +27,7 @@ const ARTIFACTS = Object.freeze({
   liveKoshaExactMaterialization: path.join("evaluation", "live-kosha-exact-materialization-2026-07-25", "report.json"),
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
+  liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   koshaNextExactCandidateAudit: path.join("evaluation", "kosha-next-exact-candidate-audit-2026-07-22", "report.json"),
   koshaExactPromotionPacket: path.join("evaluation", "kosha-exact-promotion-packet-2026-07-22", "report.json"),
   rlsLlmWikiApprovalPreflight: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
@@ -407,6 +408,36 @@ function liveDocumentBroadReviewSummary(review) {
     workPermitPresentNonEmpty: permits.filter((item) => (
       item.status === "presentNonEmpty" && item.verdict === "PASS"
     )).length,
+    dbMutationPerformed: asBoolean(mutationBoundary.dbMutationPerformed),
+    shareSessionCreated: asBoolean(mutationBoundary.shareSessionCreated),
+    providerDispatchCalled: asBoolean(mutationBoundary.providerDispatchCalled),
+    exactSavedShareReproduced: asBoolean(mutationBoundary.exactSavedShareReproduced),
+    exactSavedShareVerdict: asString(mutationBoundary.exactSavedShareVerdict),
+  };
+}
+
+/**
+ * @param {unknown} review
+ */
+function liveDocumentSecondaryGroundingSummary(review) {
+  if (!isRecord(review)) return {};
+  const stages = isRecord(review.stages) ? review.stages : {};
+  const afterLive = isRecord(stages.afterLive) ? stages.afterLive : {};
+  const mutationBoundary = isRecord(review.mutationBoundary) ? review.mutationBoundary : {};
+  return {
+    verdict: asString(review.verdict),
+    sourceHead: asString(review.sourceHead),
+    productionCommit: asString(review.productionCommit),
+    livePassed: typeof afterLive.pass === "number" ? afterLive.pass : 0,
+    liveFailed: typeof afterLive.fail === "number" ? afterLive.fail : 0,
+    secondaryReviewed: typeof afterLive.secondaryReviewed === "number" ? afterLive.secondaryReviewed : 0,
+    secondaryPassed: typeof afterLive.secondaryPassed === "number" ? afterLive.secondaryPassed : 0,
+    crossScenarioLeakageCount: typeof afterLive.crossScenarioLeakageCount === "number"
+      ? afterLive.crossScenarioLeakageCount
+      : 0,
+    missingUnexpectedCount: typeof afterLive.missingUnexpectedCount === "number"
+      ? afterLive.missingUnexpectedCount
+      : 0,
     dbMutationPerformed: asBoolean(mutationBoundary.dbMutationPerformed),
     shareSessionCreated: asBoolean(mutationBoundary.shareSessionCreated),
     providerDispatchCalled: asBoolean(mutationBoundary.providerDispatchCalled),
@@ -937,6 +968,7 @@ export function buildNorthstarNextRunway(options) {
   const liveKoshaExactMaterialization = readOptionalJson(options.rootDir, ARTIFACTS.liveKoshaExactMaterialization);
   const liveDocumentWordingReview = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentWordingReview);
   const liveDocumentBroadReview = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentBroadReview);
+  const liveDocumentSecondaryGrounding = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
   const koshaCandidateAudit = readJson(options.rootDir, ARTIFACTS.koshaNextExactCandidateAudit);
   const koshaPromotionPacket = readJson(options.rootDir, ARTIFACTS.koshaExactPromotionPacket);
   const sif = readJson(options.rootDir, ARTIFACTS.sifEmbeddingPreflight);
@@ -998,6 +1030,7 @@ export function buildNorthstarNextRunway(options) {
       "live_harness_quality",
       "kosha_exact_trust_registry",
       "live_kosha_exact_materialization",
+      "live_document_secondary_grounding",
       "kosha_exact_promotion_packet_ready_for_review",
       "ui_documents_share_cockpit",
       "dispatch_standalone_cockpit",
@@ -1046,6 +1079,7 @@ export function buildNorthstarNextRunway(options) {
     liveKoshaExactMaterialization: liveKoshaExactMaterializationSummary(liveKoshaExactMaterialization),
     liveDocumentWordingReview: liveDocumentWordingReviewSummary(liveDocumentWordingReview),
     liveDocumentBroadReview: liveDocumentBroadReviewSummary(liveDocumentBroadReview),
+    liveDocumentSecondaryGrounding: liveDocumentSecondaryGroundingSummary(liveDocumentSecondaryGrounding),
     koshaNextExactCandidateAudit: koshaCandidateAuditSummary(koshaCandidateAudit),
     koshaExactPromotionPacket: koshaPromotionPacketSummary(koshaPromotionPacket),
     sifEmbeddingRuntime: sifSummary(sif),
@@ -1159,6 +1193,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Live KOSHA exact-pin materialization is measured separately: \`${report.liveKoshaExactMaterialization.verdict || "missing"}\`, live scenarios passed \`${report.liveKoshaExactMaterialization.livePassed ?? 0}/3\`, product-in-production \`${report.liveKoshaExactMaterialization.productCommitMatchesProduction === true}\`. This proves only the current three exact pins in relevant structured rows; registry expansion still requires completed human review and separate approval.
 - Live synthetic wording and field usability are measured separately: \`${report.liveDocumentWordingReview.verdict || "missing"}\`, live scenarios passed \`${report.liveDocumentWordingReview.livePassed ?? 0}/5\`, live pending \`${report.liveDocumentWordingReview.liveAfterDeploymentPending === true}\`. This gate catches fixed-profile field leakage and selected-document wording defects, while broad human review and exact saved Share evidence remain separate.
 - Live 12-deliverable presence and applicability are measured separately: \`${report.liveDocumentBroadReview.verdict || "missing"}\`, UI/integrity/reviewed documents \`${report.liveDocumentBroadReview.uiDocumentCount ?? 0}/${report.liveDocumentBroadReview.integrityRequiredCount ?? 0}/${report.liveDocumentBroadReview.reviewedDocumentCount ?? 0}\`, before missingUnexpected \`${report.liveDocumentBroadReview.beforeMissingUnexpected ?? 0}\`, live missingUnexpected \`${report.liveDocumentBroadReview.liveMissingUnexpected ?? 0}\`, and workPermitDraft presentNonEmpty \`${report.liveDocumentBroadReview.workPermitPresentNonEmpty ?? 0}/5\`. The six-document synthetic wording gate is not accepted as 12-document deliverable coverage; exact saved Share remains \`${report.liveDocumentBroadReview.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
+- Live supporting-document scenario grounding is measured separately: \`${report.liveDocumentSecondaryGrounding.verdict || "missing"}\`, live cases \`${report.liveDocumentSecondaryGrounding.livePassed ?? 0}/5\`, supporting documents \`${report.liveDocumentSecondaryGrounding.secondaryPassed ?? 0}/${report.liveDocumentSecondaryGrounding.secondaryReviewed ?? 0}\`, cross-scenario leakage \`${report.liveDocumentSecondaryGrounding.crossScenarioLeakageCount ?? 0}\`, and missingUnexpected \`${report.liveDocumentSecondaryGrounding.missingUnexpectedCount ?? 0}\`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains \`${report.liveDocumentSecondaryGrounding.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level, without claiming live production engine execution.
 - SIF embedding approval preflight is approval-held: no embedding generation, no upload, and vector runtime disabled until approval.
 - North Star approval runway is current and separates runtime/provider/database/vector gates from ordinary UI/evidence iteration.

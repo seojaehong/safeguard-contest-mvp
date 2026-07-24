@@ -6,6 +6,7 @@ import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 
 type NextRunwayReport = {
+  provenCurrentState: string[];
   sourceHead: string;
   productionCommit: string;
   latestEvidenceCommitLive: boolean;
@@ -111,6 +112,22 @@ type NextRunwayReport = {
     liveFailed: number;
     liveMissingUnexpected: number;
     workPermitPresentNonEmpty: number;
+    dbMutationPerformed: boolean;
+    shareSessionCreated: boolean;
+    providerDispatchCalled: boolean;
+    exactSavedShareReproduced: boolean;
+    exactSavedShareVerdict: string;
+  };
+  liveDocumentSecondaryGrounding: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    livePassed: number;
+    liveFailed: number;
+    secondaryReviewed: number;
+    secondaryPassed: number;
+    crossScenarioLeakageCount: number;
+    missingUnexpectedCount: number;
     dbMutationPerformed: boolean;
     shareSessionCreated: boolean;
     providerDispatchCalled: boolean;
@@ -640,6 +657,29 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       status: "presentNonEmpty",
       verdict: "PASS",
     })),
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
+  writeJson(root, "evaluation/live-document-secondary-grounding-2026-07-25/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    stages: {
+      afterLive: {
+        cases: 5,
+        pass: 5,
+        fail: 0,
+        secondaryReviewed: 30,
+        secondaryPassed: 30,
+        crossScenarioLeakageCount: 0,
+        missingUnexpectedCount: 0,
+      },
+    },
     mutationBoundary: {
       dbMutationPerformed: false,
       shareSessionCreated: false,
@@ -1178,6 +1218,21 @@ describe("northstar next runway generator", () => {
       exactSavedShareReproduced: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
+    expect(report.liveDocumentSecondaryGrounding).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT",
+      livePassed: 5,
+      liveFailed: 0,
+      secondaryReviewed: 30,
+      secondaryPassed: 30,
+      crossScenarioLeakageCount: 0,
+      missingUnexpectedCount: 0,
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.provenCurrentState).toContain("live_document_secondary_grounding");
     expect(report.koshaNextExactCandidateAudit.forbiddenClaims).toContain(
       "The metadata-verified non-exact candidates are already exact production evidence.",
     );
