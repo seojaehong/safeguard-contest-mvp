@@ -1,0 +1,321 @@
+{
+  "generatedAt": "2026-07-24T13:30:19.948Z",
+  "elapsedMs": 123182,
+  "mode": "mixed-live",
+  "baseUrl": "https://www.safeclaw.kr",
+  "casesPath": "evaluation\\live-document-quality-matrix-2026-07-24\\scenarios.json",
+  "total": 5,
+  "pass": 4,
+  "fail": 1,
+  "live": {
+    "enabled": true,
+    "requested": 5,
+    "executed": 5,
+    "timeoutMs": 90000
+  },
+  "matrix": {
+    "baseScenarios": 5,
+    "variants": 1
+  },
+  "failureSamples": [
+    {
+      "id": "ansan-hotwork-foreign__field-ready",
+      "mode": "live",
+      "expected": {
+        "region": "경기",
+        "industry": "제조",
+        "workType": "용접 절단"
+      },
+      "failedChecks": [
+        {
+          "name": "reflection:foreignWorkerScenarioRelevance",
+          "ok": false,
+          "message": "foreign worker output contains generic unrelated hazard phrases: 8"
+        }
+      ]
+    }
+  ],
+  "byDimension": {
+    "region": {
+      "인천": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "경기": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "부산": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "경남": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "세종": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      }
+    },
+    "industry": {
+      "물류": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "제조": {
+        "total": 2,
+        "pass": 1,
+        "fail": 1
+      },
+      "시설관리": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "건설": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      }
+    },
+    "workType": {
+      "지게차 상하차": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "용접 절단": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "배수펌프 점검": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "프레스 보전": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "도로 굴착": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      }
+    },
+    "hazards": {
+      "지게차": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "충돌": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "미끄럼": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "우천": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "화재": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "용접": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "환기": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "고온": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "가연물": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "밀폐공간": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "감전": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "산소결핍": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "누수": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "끼임": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "LOTO": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "예기치 않은 기동": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "프레스": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "굴착": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "붕괴": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "매설물": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "차량충돌": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      }
+    },
+    "workerSignals": {
+      "보행자": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "외국인": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "신규": {
+        "total": 2,
+        "pass": 1,
+        "fail": 1
+      },
+      "보전원": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "신호수": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      }
+    },
+    "weatherSignals": {
+      "우천": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "고온": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "호우": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      }
+    },
+    "requiredDocuments": {
+      "riskAssessmentDraft": {
+        "total": 5,
+        "pass": 4,
+        "fail": 1
+      },
+      "workPlanDraft": {
+        "total": 5,
+        "pass": 4,
+        "fail": 1
+      },
+      "tbmBriefing": {
+        "total": 5,
+        "pass": 4,
+        "fail": 1
+      },
+      "safetyEducationRecordDraft": {
+        "total": 3,
+        "pass": 2,
+        "fail": 1
+      },
+      "photoEvidenceDraft": {
+        "total": 4,
+        "pass": 4,
+        "fail": 0
+      },
+      "foreignWorkerBriefing": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "foreignWorkerTransmission": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      },
+      "workPermit": {
+        "total": 3,
+        "pass": 2,
+        "fail": 1
+      },
+      "emergencyResponseDraft": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      }
+    },
+    "foreignLanguageSignals": {
+      "외국인": {
+        "total": 1,
+        "pass": 0,
+        "fail": 1
+      }
+    }
+  }
+}

@@ -1,0 +1,215 @@
+[
+  {
+    "id": "incheon-logistics-forklift__field-ready",
+    "baseId": "incheon-logistics-forklift",
+    "variantId": "field-ready",
+    "mode": "live",
+    "ok": true,
+    "elapsedMs": 28298,
+    "expected": {
+      "region": "인천",
+      "industry": "물류",
+      "workType": "지게차 상하차",
+      "hazards": [
+        "지게차",
+        "충돌",
+        "미끄럼",
+        "우천"
+      ],
+      "workerSignals": [
+        "보행자"
+      ],
+      "weatherSignals": [
+        "우천"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": {
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 28293,
+      "rawPreview": "{\"question\":\"한빛로지스 인천 남동공단 물류센터 지게차 상하차 작업. 피킹 인력과 보행 동선이 겹치고 우천 후 출입구 바닥이 젖어 있다. 현장에 없는 위험을 임의로 추가하지 말고, 불확실한 항목은 현장 확인 필요로 표시해줘.\",\"answer\":\"1) 하네스 판단\\n- 직접 근거: 469 · 운수·창고및통신업 · 철도·항공·창고·운수관련서비스업 · 창고업 / 351 · 제조업 · 기계기구·금속·비금속광물제품제조업 · 선"
+    },
+    "failedChecks": [],
+    "checkCount": 17
+  },
+  {
+    "id": "ansan-hotwork-foreign__field-ready",
+    "baseId": "ansan-hotwork-foreign",
+    "variantId": "field-ready",
+    "mode": "live",
+    "ok": false,
+    "elapsedMs": 18586,
+    "expected": {
+      "region": "경기",
+      "industry": "제조",
+      "workType": "용접 절단",
+      "hazards": [
+        "화재",
+        "용접",
+        "환기",
+        "고온",
+        "가연물"
+      ],
+      "workerSignals": [
+        "외국인",
+        "신규"
+      ],
+      "weatherSignals": [
+        "고온"
+      ],
+      "foreignLanguageSignals": [
+        "외국인"
+      ],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "workPermit"
+      ]
+    },
+    "api": {
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 18584,
+      "rawPreview": "{\"question\":\"그린메탈 경기 안산 공장 배관 용접·절단 화기작업. 외국인 근로자 2명과 신규 작업자 1명, 실내 고온과 환기 불량, 가연물 인접. 현장에 없는 위험을 임의로 추가하지 말고, 불확실한 항목은 현장 확인 필요로 표시해줘.\",\"answer\":\"1) 하네스 판단\\n- SIF 유사사례: 섬유공장에서 설비(정경기 1호기와 2호기) 사이 공간을 지나가던 중 바지가 설비의(정경기 1호기) 회전축에 말림 사례 / OO"
+    },
+    "failedChecks": [
+      {
+        "name": "reflection:foreignWorkerScenarioRelevance",
+        "ok": false,
+        "message": "foreign worker output contains generic unrelated hazard phrases: 8"
+      }
+    ],
+    "checkCount": 22
+  },
+  {
+    "id": "busan-confined-pump__field-ready",
+    "baseId": "busan-confined-pump",
+    "variantId": "field-ready",
+    "mode": "live",
+    "ok": true,
+    "elapsedMs": 25180,
+    "expected": {
+      "region": "부산",
+      "industry": "시설관리",
+      "workType": "배수펌프 점검",
+      "hazards": [
+        "밀폐공간",
+        "감전",
+        "산소결핍",
+        "누수"
+      ],
+      "workerSignals": [],
+      "weatherSignals": [
+        "호우"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "workPermit"
+      ]
+    },
+    "api": {
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 25178,
+      "rawPreview": "{\"question\":\"이지시설관리 부산 해운대 복합건물 지하 기계실 배수펌프 점검. 집중호우 후 누수, 밀폐공간 가능성, 감전과 산소결핍 우려. 현장에 없는 위험을 임의로 추가하지 말고, 불확실한 항목은 현장 확인 필요로 표시해줘.\",\"answer\":\"1) 하네스 판단\\n- SIF 유사사례: 방수로 배수갑문에서 작업자 3명이 배수갑문 하부 지수고무 및 지수 철판 정비·보수가 가능한지 확인하기 위해 배수갑문 확인 및 치수 측정"
+    },
+    "failedChecks": [],
+    "checkCount": 19
+  },
+  {
+    "id": "changwon-press-maintenance__field-ready",
+    "baseId": "changwon-press-maintenance",
+    "variantId": "field-ready",
+    "mode": "live",
+    "ok": true,
+    "elapsedMs": 22296,
+    "expected": {
+      "region": "경남",
+      "industry": "제조",
+      "workType": "프레스 보전",
+      "hazards": [
+        "끼임",
+        "LOTO",
+        "예기치 않은 기동",
+        "프레스"
+      ],
+      "workerSignals": [
+        "신규",
+        "보전원"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": {
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 22296,
+      "rawPreview": "{\"question\":\"창원 자동차부품 공장 프레스 설비 보전. 끼임, 예기치 않은 기동, LOTO 필요, 신규 보전원 포함. 현장에 없는 위험을 임의로 추가하지 말고, 불확실한 항목은 현장 확인 필요로 표시해줘.\",\"answer\":\"1) 하네스 판단\\n- 직접 근거: 113 · 제조업 · 기계기구·금속·비금속광물제품제조업 · 제강압연업 / 146 · 제조업 · 목재및종이제품제조업 · 기타목재및목제품제조업 / 522 · 운수·"
+    },
+    "failedChecks": [],
+    "checkCount": 17
+  },
+  {
+    "id": "sejong-excavation__field-ready",
+    "baseId": "sejong-excavation",
+    "variantId": "field-ready",
+    "mode": "live",
+    "ok": true,
+    "elapsedMs": 28819,
+    "expected": {
+      "region": "세종",
+      "industry": "건설",
+      "workType": "도로 굴착",
+      "hazards": [
+        "굴착",
+        "붕괴",
+        "매설물",
+        "차량충돌"
+      ],
+      "workerSignals": [
+        "신호수"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "photoEvidenceDraft",
+        "workPermit"
+      ]
+    },
+    "api": {
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 28818,
+      "rawPreview": "{\"question\":\"세종 도로 굴착 보수 작업. 굴착면 붕괴, 매설물 접촉, 차량 통행 인접, 신호수 배치 필요. 현장에 없는 위험을 임의로 추가하지 말고, 불확실한 항목은 현장 확인 필요로 표시해줘.\",\"answer\":\"1) 하네스 판단\\n- SIF 유사사례: ○○ 현장에서 소속 담장 하부(굴착저면)에서 골재 고르기 중 굴착법면 및 상부 담장이 붕괴되면서 사망 사례 / ○○현장에서 흙막이지보공 파일을 인발하기 위해 굴삭기"
+    },
+    "failedChecks": [],
+    "checkCount": 17
+  }
+]

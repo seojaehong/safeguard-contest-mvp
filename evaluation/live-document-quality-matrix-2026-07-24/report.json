@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "safeclaw-live-document-quality-matrix-remediation/v1",
+  "generatedAt": "2026-07-24T13:33:02.1457821Z",
+  "verdict": "PASS_LIVE_PRODUCTION_MULTI_SCENARIO_DOCUMENT_QUALITY",
+  "sourceHead": "74d7fe3c13c5f757b0feec67760438a83ad5cc77",
+  "productCommit": "74d7fe3c13c5f757b0feec67760438a83ad5cc77",
+  "productionCommitAtGeneration": "74d7fe3c13c5f757b0feec67760438a83ad5cc77",
+  "sourceHeadMatchesProduction": true,
+  "scenarioManifest": "evaluation/live-document-quality-matrix-2026-07-24/scenarios.json",
+  "scenarios": [
+    "incheon-logistics-forklift",
+    "ansan-hotwork-foreign",
+    "busan-confined-pump",
+    "changwon-press-maintenance",
+    "sejong-excavation"
+  ],
+  "before": {
+    "scope": "live production before remediation with strengthened contracts",
+    "baseUrl": "https://www.safeclaw.kr",
+    "productionCommit": "8c76632aef46344b9eece7785a83244906d0d558",
+    "artifact": "evaluation/live-document-quality-matrix-2026-07-24-before-remediation/report.json",
+    "generatedAt": "2026-07-24T13:30:19.948Z",
+    "elapsedMs": 123182,
+    "total": 5,
+    "pass": 4,
+    "fail": 1,
+    "failedScenarioIds": [
+      "ansan-hotwork-foreign__field-ready"
+    ],
+    "failedChecks": [
+      "reflection:foreignWorkerScenarioRelevance"
+    ],
+    "unrelatedGenericForeignHazardPhraseCount": 8
+  },
+  "afterLocal": {
+    "scope": "current-source local production server after remediation",
+    "baseUrl": "http://127.0.0.1:3076",
+    "buildInfoMarkerAvailable": false,
+    "sourceHead": "74d7fe3c13c5f757b0feec67760438a83ad5cc77",
+    "artifact": "evaluation/live-document-quality-matrix-2026-07-24-after-local/report.json",
+    "generatedAt": "2026-07-24T13:31:31.153Z",
+    "elapsedMs": 27783,
+    "total": 5,
+    "pass": 5,
+    "fail": 0,
+    "failedScenarioIds": [],
+    "structuredRiskRowsPresent": true,
+    "structuredRiskControlsDistinct": true,
+    "foreignWorkerScenarioRelevance": true
+  },
+  "afterLive": {
+    "scope": "live production after remediation",
+    "baseUrl": "https://www.safeclaw.kr",
+    "productionCommit": "74d7fe3c13c5f757b0feec67760438a83ad5cc77",
+    "deploymentUrl": "safeguard-contest-66ahyzxsn-seojaehongs-projects.vercel.app",
+    "artifact": "evaluation/live-document-quality-matrix-2026-07-24-after-live/report.json",
+    "generatedAt": "2026-07-24T13:35:59.226Z",
+    "elapsedMs": 115836,
+    "total": 5,
+    "pass": 5,
+    "fail": 0,
+    "failedScenarioIds": [],
+    "structuredRiskRowsPresent": true,
+    "structuredRiskControlsDistinct": true,
+    "foreignWorkerScenarioRelevance": true
+  },
+  "verification": {
+    "focusedTests": {
+      "files": 4,
+      "passed": 79,
+      "failed": 0
+    },
+    "build": "PASS",
+    "typecheck": "PASS",
+    "diffCheck": "PASS"
+  },
+  "boundaries": {
+    "apiPath": "/api/ask",
+    "apiCallsBefore": 5,
+    "apiCallsAfterLocal": 5,
+    "apiCallsAfterLive": 5,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchLiveClaimed": false,
+    "externalProviderCalled": false,
+    "exactSavedShareSessionReproduced": false,
+    "liveAfterDeploymentPending": false
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "description": "Five approval-free live document quality scenarios across distinct work domains.",
+  "variants": [
+    {
+      "id": "field-ready",
+      "label": "field ready",
+      "promptSuffix": "현장에 없는 위험을 임의로 추가하지 말고, 불확실한 항목은 현장 확인 필요로 표시해줘.",
+      "expected": {
+        "requiredDocuments": []
+      }
+    }
+  ],
+  "baseScenarios": [
+    {
+      "id": "incheon-logistics-forklift",
+      "question": "한빛로지스 인천 남동공단 물류센터 지게차 상하차 작업. 피킹 인력과 보행 동선이 겹치고 우천 후 출입구 바닥이 젖어 있다.",
+      "expected": {
+        "region": "인천",
+        "industry": "물류",
+        "workType": "지게차 상하차",
+        "hazards": ["지게차", "충돌", "미끄럼", "우천"],
+        "workerSignals": ["보행자"],
+        "weatherSignals": ["우천"],
+        "foreignLanguageSignals": [],
+        "requiredDocuments": ["riskAssessmentDraft", "workPlanDraft", "tbmBriefing", "safetyEducationRecordDraft", "photoEvidenceDraft"]
+      }
+    },
+    {
+      "id": "ansan-hotwork-foreign",
+      "question": "그린메탈 경기 안산 공장 배관 용접·절단 화기작업. 외국인 근로자 2명과 신규 작업자 1명, 실내 고온과 환기 불량, 가연물 인접.",
+      "expected": {
+        "region": "경기",
+        "industry": "제조",
+        "workType": "용접 절단",
+        "hazards": ["화재", "용접", "환기", "고온", "가연물"],
+        "workerSignals": ["외국인", "신규"],
+        "weatherSignals": ["고온"],
+        "foreignLanguageSignals": ["외국인"],
+        "requiredDocuments": ["riskAssessmentDraft", "workPlanDraft", "tbmBriefing", "safetyEducationRecordDraft", "foreignWorkerBriefing", "foreignWorkerTransmission", "workPermit"]
+      }
+    },
+    {
+      "id": "busan-confined-pump",
+      "question": "이지시설관리 부산 해운대 복합건물 지하 기계실 배수펌프 점검. 집중호우 후 누수, 밀폐공간 가능성, 감전과 산소결핍 우려.",
+      "expected": {
+        "region": "부산",
+        "industry": "시설관리",
+        "workType": "배수펌프 점검",
+        "hazards": ["밀폐공간", "감전", "산소결핍", "누수"],
+        "workerSignals": [],
+        "weatherSignals": ["호우"],
+        "foreignLanguageSignals": [],
+        "requiredDocuments": ["riskAssessmentDraft", "workPlanDraft", "tbmBriefing", "emergencyResponseDraft", "photoEvidenceDraft", "workPermit"]
+      }
+    },
+    {
+      "id": "changwon-press-maintenance",
+      "question": "창원 자동차부품 공장 프레스 설비 보전. 끼임, 예기치 않은 기동, LOTO 필요, 신규 보전원 포함.",
+      "expected": {
+        "region": "경남",
+        "industry": "제조",
+        "workType": "프레스 보전",
+        "hazards": ["끼임", "LOTO", "예기치 않은 기동", "프레스"],
+        "workerSignals": ["신규", "보전원"],
+        "weatherSignals": [],
+        "foreignLanguageSignals": [],
+        "requiredDocuments": ["riskAssessmentDraft", "workPlanDraft", "tbmBriefing", "safetyEducationRecordDraft", "photoEvidenceDraft"]
+      }
+    },
+    {
+      "id": "sejong-excavation",
+      "question": "세종 도로 굴착 보수 작업. 굴착면 붕괴, 매설물 접촉, 차량 통행 인접, 신호수 배치 필요.",
+      "expected": {
+        "region": "세종",
+        "industry": "건설",
+        "workType": "도로 굴착",
+        "hazards": ["굴착", "붕괴", "매설물", "차량충돌"],
+        "workerSignals": ["신호수"],
+        "weatherSignals": [],
+        "foreignLanguageSignals": [],
+        "requiredDocuments": ["riskAssessmentDraft", "workPlanDraft", "tbmBriefing", "photoEvidenceDraft", "workPermit"]
+      }
+    }
+  ]
+}
