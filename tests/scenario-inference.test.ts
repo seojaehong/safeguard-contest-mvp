@@ -230,6 +230,56 @@ describe("inferScenario", () => {
     expect(surface).not.toContain("KOSHA 가이드는 법적 의무입니다");
   });
 
+  it("does not treat chemical spray wording as rain or retain the generic floor-cleaning seed", () => {
+    const question = "울산 도금공장 탱크 외부 화학세척 작업. 용기 라벨이 훼손되어 SDS와 GHS 경고표지를 확인해야 하고 비산·피부접촉 우려가 있다.";
+    const scenario = inferScenario(question);
+    const response = buildMockAskResponse(question, [], "mock", "test");
+    const surface = [
+      response.deliverables.workpackSummaryDraft,
+      response.deliverables.workPlanDraft,
+      response.deliverables.workPermitDraft,
+      response.deliverables.kakaoMessage,
+    ].join("\n");
+
+    expect(scenario.companyType).toBe("제조업");
+    expect(scenario.profile.workName).toBe("탱크 외부 화학세척 작업");
+    expect(scenario.siteName).toContain("울산");
+    expect(scenario.weatherNote).toContain("화학물질 식별 전 작업 보류");
+    expect(scenario.weatherNote).not.toMatch(/우천|젖은 바닥/);
+    expect(surface).toContain("탱크 외부 화학세척 작업");
+    expect(surface).not.toContain("공장 바닥 세척");
+    expect(surface).not.toContain("우천 후 바닥 젖음");
+  });
+
+  it("keeps tank chemical cleaning specific without requiring an SDS or GHS token", () => {
+    const question = "울산 도금공장 탱크 외부 화학세척 작업. 국소배기 불량과 비산·피부접촉 우려가 있다.";
+    const response = buildMockAskResponse(question, [], "mock", "test");
+    const surface = Object.values(response.deliverables).join("\n");
+
+    expect(surface).toContain("탱크 외부 화학세척 작업");
+    expect(surface).not.toContain("공장 바닥 세척");
+    expect(surface).not.toContain("우천 후 바닥 젖음");
+  });
+
+  it("does not retain the warehouse heat seed for overhead lifting and hot-work coordination", () => {
+    const question = "평택 물류창고 증축 현장. 상부에서는 크레인 양중, 하부에서는 배관 화기작업을 동시에 계획해 낙하물과 불티 교차위험이 있다.";
+    const scenario = inferScenario(question);
+    const response = buildMockAskResponse(question, [], "mock", "test");
+    const surface = [
+      response.deliverables.workpackSummaryDraft,
+      response.deliverables.workPlanDraft,
+      response.deliverables.workPermitDraft,
+      response.deliverables.kakaoMessage,
+    ].join("\n");
+
+    expect(scenario.profile.workName).toBe("크레인 양중·배관 화기 동시작업");
+    expect(scenario.siteName).toContain("평택");
+    expect(scenario.weatherNote).toContain("상하부 동시작업");
+    expect(surface).toContain("크레인 양중·배관 화기 동시작업");
+    expect(surface).not.toContain("고중량 박스");
+    expect(surface).not.toMatch(/폭염|온열질환/);
+  });
+
   it.each([
     {
       label: "press maintenance",

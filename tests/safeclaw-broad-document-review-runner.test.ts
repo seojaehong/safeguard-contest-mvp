@@ -17,6 +17,7 @@ type BroadReport = {
   secondaryGroundingReviewed: number;
   secondaryGroundingPassed: number;
   secondaryCrossScenarioLeakageCount: number;
+  seedProfileLeakageCount: number;
   cases: Array<{
     permitRequired: boolean;
     documents: Array<{
@@ -24,6 +25,7 @@ type BroadReport = {
       status: string;
       verdict: string;
       missingRequiredTerms: string[];
+      matchedForbiddenDocumentFragments: string[];
       matchedScenarioTerms: string[];
       matchedSupportingScenarioTerms: string[];
       missingSemanticGroups: string[][];
@@ -73,6 +75,7 @@ function runFixture(input: {
   fieldTerms: string[];
   hazards?: string[];
   workerSignals?: string[];
+  forbiddenDocumentFragments?: string[];
   payload: Record<string, unknown>;
 }): { status: number | null; report: BroadReport } {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "safeclaw-broad-review-"));
@@ -91,6 +94,7 @@ function runFixture(input: {
         fieldIsolationTerms: input.fieldTerms,
         hazards: input.hazards ?? [],
         workerSignals: input.workerSignals ?? [],
+        forbiddenDocumentFragments: input.forbiddenDocumentFragments ?? [],
         forbiddenFieldTerms: [{
           id: "other-exterior-work",
           terms: ["외벽도장", "이동식 비계", "성수동"]
@@ -163,7 +167,8 @@ describe("SafeClaw 12-deliverable broad review", () => {
     expect(result.report).toMatchObject({
       secondaryGroundingReviewed: 6,
       secondaryGroundingPassed: 6,
-      secondaryCrossScenarioLeakageCount: 0
+      secondaryCrossScenarioLeakageCount: 0,
+      seedProfileLeakageCount: 0
     });
     expect(result.report.cases[0]?.documents).toHaveLength(12);
     expect(result.report.cases[0]?.documents.find((item) => item.key === "workPermitDraft")).toMatchObject({
@@ -225,6 +230,33 @@ describe("SafeClaw 12-deliverable broad review", () => {
     expect(photo?.crossScenarioLeakage).toContainEqual({
       profileId: "other-exterior-work",
       term: "이동식 비계"
+    });
+  });
+
+  it("fails closed when one forbidden seed fragment remains in one deliverable", () => {
+    const permit = [
+      "안전작업허가 확인서",
+      "화학세척 SDS 작업",
+      "허가 및 작업시간을 확인한다.",
+      "격리와 차단 상태, 보호구를 확인하고 종료 후 기록한다."
+    ].join("\n");
+    const documents = buildDocuments(permit);
+    documents.workpackSummaryDraft += "\n작업조건: 우천 후 바닥 젖음";
+    const result = runFixture({
+      question: "울산 화학세척 SDS 확인 작업",
+      fieldTerms: ["화학세척", "SDS"],
+      forbiddenDocumentFragments: ["우천 후 바닥 젖음"],
+      payload: {
+        deliverables: documents,
+        structured: { riskAssessmentRows: [riskRow("울산", "화학세척 SDS 확인")] }
+      }
+    });
+
+    expect(result.status).toBe(1);
+    expect(result.report.seedProfileLeakageCount).toBe(1);
+    expect(result.report.cases[0]?.documents.find((item) => item.key === "workpackSummaryDraft")).toMatchObject({
+      verdict: "RED",
+      matchedForbiddenDocumentFragments: ["우천 후 바닥 젖음"]
     });
   });
 

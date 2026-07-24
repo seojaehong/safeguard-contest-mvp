@@ -410,7 +410,7 @@ const knownStandaloneLocationTokens = new Set([
   "해운대", "부산해운대", "하남산단", "광주하남산단", "달서구", "대구달서구"
 ]);
 
-const nonCompanyLeadTokens = new Set(["오늘", "작업", "현장"]);
+const nonCompanyLeadTokens = new Set(["오늘", "작업", "현장", "상부", "하부"]);
 const knownCityLocationTokens = new Set([
   "평택", "구미", "창원", "포항", "안산", "화성", "수원", "성남", "고양",
   "용인", "김해", "여수", "순천", "광양", "청주", "천안", "아산", "전주",
@@ -449,7 +449,7 @@ function findSpecificLocationRule(question: string) {
   );
 }
 
-const workDescriptorCompanyNames = /^(?:굴착|보수|굴착보수|열수송관굴착|도로굴착보수)공사$/;
+const workDescriptorCompanyNames = /^(?:(?:굴착|보수|굴착보수|열수송관굴착|도로굴착보수)공사|물류창고|도금공장|식품공장|제조공장|전자부품공장)$/;
 
 function isWorkDescriptorCompanyName(candidate: string) {
   return workDescriptorCompanyNames.test(candidate.replace(/\s+/g, ""));
@@ -513,6 +513,14 @@ function inferCustomWorkName(question: string) {
   return "비정형 현장 작업";
 }
 
+function hasRainCondition(question: string) {
+  return /우천|강수|비\s*(?:예보|소식|온|옴|내림|오는|내리는|가\s*옴)|젖은?\s*(?:바닥|노면)|바닥\s*젖음/.test(question);
+}
+
+function hasHighRiskChemicalCleaningIdentity(question: string) {
+  return /(?:SDS|MSDS|물질안전보건자료|GHS|경고표지|라벨).*(?:화학|세척|용기)|(?:화학|세척|용기).*(?:SDS|MSDS|물질안전보건자료|GHS|경고표지|라벨)|화학\s*세척|화학세척|탱크.{0,20}세척|도금.{0,40}세척|비산.{0,20}피부접촉|국소배기.{0,30}세척/i.test(question);
+}
+
 function inferSpecialContext(question: string): string[] {
   const notes: string[] = [];
   const foreignWorkerCount = question.match(/외국인\s*(?:근로자|작업자)?\s*(\d+)\s*명/)?.[1];
@@ -524,7 +532,7 @@ function inferSpecialContext(question: string): string[] {
     notes.push(`${newWorkerCount ? `신규 투입자 ${newWorkerCount}명 포함` : "신규 작업자 포함"} — 작업중지 기준과 보호구 착용을 별도 복창 확인`);
   }
   if (/화재감시자/.test(question)) notes.push("화재감시자 지정 — 화기작업 중 불티 비산과 가연물 상태를 상시 확인");
-  if (/우천|젖음|비|강수/.test(question)) notes.push("우천·젖은 바닥 조건 — 미끄럼과 보행/장비 동선 분리 확인");
+  if (hasRainCondition(question)) notes.push("우천·젖은 바닥 조건 — 미끄럼과 보행/장비 동선 분리 확인");
   if (/강풍|돌풍/.test(question)) notes.push("강풍 조건 — 작업중지 기준과 대피 위치를 작업 전 공유");
   return notes;
 }
@@ -790,6 +798,11 @@ function applyQuestionSpecificity(question: string, source: ScenarioProfile): Sc
   const workerTargets: string[] = [];
   let workName = source.workName;
   let processName = source.processName;
+  let weatherNote = source.weatherNote;
+  let companyType = source.companyType;
+  let educationName = source.educationName;
+  let educationTargets = source.educationTargets;
+  let replaceBaseRisk = false;
 
   if (/비계.{0,20}(?:조립|해체)|(?:조립|해체).{0,20}비계/.test(question)) {
     workName = "이동식 비계 조립·해체 작업";
@@ -815,13 +828,44 @@ function applyQuestionSpecificity(question: string, source: ScenarioProfile): Sc
     processName = "자동화설비 방호장치 개선, 전원 차단·LOTO, 예기치 않은 기동 방지, 시험가동 통제";
   }
 
-  if (/(?:SDS|MSDS|물질안전보건자료|GHS|경고표지|라벨).*(?:화학|세척|용기)|(?:화학|세척|용기).*(?:SDS|MSDS|물질안전보건자료|GHS|경고표지|라벨)/i.test(question)) {
-    hazards.push("미확인 화학물질의 SDS·GHS 경고표지 미확인과 비산·피부접촉·환기 불량 위험");
-    actions.push("용기 라벨과 SDS(물질안전보건자료)·GHS 경고표지로 물질을 확인하고, 확인 전 사용 금지·작업 보류 후 국소배기와 보호구를 지정");
+  if (hasHighRiskChemicalCleaningIdentity(question)) {
+    workName = /탱크/.test(question) ? "탱크 외부 화학세척 작업" : "화학물질 세척 작업";
+    processName = "세척물질 식별, SDS·GHS 경고표지 확인, 국소배기·비산 통제, 보호구 확인 후 화학세척";
+    weatherNote = "화학물질 식별 전 작업 보류, 국소배기·비산·피부접촉 통제 상태 확인 필요";
+    if (/도금\s*공장|제조\s*공장|제조업/.test(question)) companyType = "제조업";
+    educationName = "화학물질 식별·세척 작업 안전교육";
+    educationTargets = "화학세척 작업자, 감시자, 관리감독자";
+    replaceBaseRisk = true;
+    hazards.push(
+      "미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험",
+      "화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험",
+      "국소배기 불량으로 인한 증기·미스트 흡입 위험"
+    );
+    actions.push(
+      "용기 라벨과 SDS(물질안전보건자료)·GHS 경고표지로 물질을 확인하고 확인 전 사용 금지·작업 보류",
+      "보안경·내화학장갑·보호복을 물질 특성에 맞게 지정하고 세안·세척 수단을 작업 전 확인",
+      "국소배기를 가동하고 비산구역을 통제하며 이상 냄새·자극 증상 발생 시 즉시 작업중지"
+    );
   }
   if (/동시\s*작업|동시작업|상하부\s*작업|상부.*하부|하부.*상부/.test(question)) {
-    hazards.push("상하부 동시작업 중 양중 낙하물과 화기 불티가 교차하는 위험");
-    actions.push("상하부 작업구역을 분리·출입 통제하고 양중과 화기 공정의 작업순서·시간을 조정한 뒤 신호수 단일 지휘로 착수");
+    workName = /크레인|양중/.test(question) && /화기|용접|절단|불티/.test(question)
+      ? "크레인 양중·배관 화기 동시작업"
+      : "상하부 동시작업";
+    processName = "상하부 작업구역 분리, 양중·화기 공정 순서와 시간 조정, 신호수 단일 지휘, 낙하물·불티 통제";
+    weatherNote = "상하부 동시작업, 작업구역·시간 분리와 양중·화기 교차위험 통제 필요";
+    educationName = "양중·화기 동시작업 교차위험 통제 교육";
+    educationTargets = "양중 작업자, 화기 작업자, 신호수, 화재감시자, 관리감독자";
+    replaceBaseRisk = true;
+    hazards.push(
+      "상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험",
+      "하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험",
+      "양중 신호와 화기작업 통제가 분리되어 작업순서·중지 지시가 충돌하는 위험"
+    );
+    actions.push(
+      "상하부 작업구역을 분리하고 양중 하부와 불티 비산구역을 출입 통제한 뒤 작업순서·시간을 조정",
+      "양중과 화기 공정의 작업순서·시간을 분리하고 동시 진행이 불가피하면 관리감독자가 교차위험을 재확인",
+      "신호수와 화재감시자를 지정하고 단일 지휘·작업중지 신호와 비상연락 절차를 작업 전 복창"
+    );
   }
   if (/청각\s*장애|청각장애|고령/.test(question)) {
     hazards.push("고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험");
@@ -854,12 +898,19 @@ function applyQuestionSpecificity(question: string, source: ScenarioProfile): Sc
   const nextTargets = [...new Set(workerTargets)].join(", ");
   return {
     ...source,
+    companyType,
     workName,
     processName,
-    topRisk: hazards.length ? `${hazards.join("; ")}. ${source.topRisk}` : source.topRisk,
+    weatherNote,
+    topRisk: hazards.length
+      ? replaceBaseRisk
+        ? hazards.join("; ")
+        : `${hazards.join("; ")}. ${source.topRisk}`
+      : source.topRisk,
     hazards: nextHazards,
     actions: nextActions,
-    educationTargets: nextTargets ? `${source.educationTargets}, ${nextTargets}` : source.educationTargets,
+    educationName,
+    educationTargets: nextTargets ? `${educationTargets}, ${nextTargets}` : educationTargets,
     questions: mergeProfileTriple(
       actions.map((action) => `${action} 절차를 누가 확인했는가?`),
       source.questions
@@ -975,7 +1026,7 @@ export function inferScenario(question: string) {
     workerCount,
     weatherNote: normalized.includes("강풍")
       ? "오후 강풍 예보, 작업중지 기준 공유 필요"
-      : /우천|젖음|비|강수/.test(normalized)
+      : hasRainCondition(normalized)
         ? "우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요"
         : /고온|폭염|온열/.test(normalized)
         ? "고온 작업조건, 온열질환 예방과 휴식 기준 공유 필요"

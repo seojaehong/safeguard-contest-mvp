@@ -212,6 +212,9 @@ export function reviewDeliverableMatrix(payload, question, expected = {}) {
     ? payload.deliverables
     : {};
   const permitRequired = permitScenarioPattern.test(text(question));
+  const forbiddenDocumentFragments = asArray(expected?.forbiddenDocumentFragments)
+    .map((item) => text(item))
+    .filter(Boolean);
   const secondaryGrounding = reviewSecondaryDocumentGrounding(payload, expected);
   const secondaryByKey = new Map(secondaryGrounding.documents.map((item) => [item.key, item]));
   const documents = canonicalDocuments.map(([key, title]) => {
@@ -222,11 +225,15 @@ export function reviewDeliverableMatrix(payload, question, expected = {}) {
     const missingRequiredTerms = key === "workPermitDraft" && presence.status === "presentNonEmpty"
       ? permitRequiredTerms.filter((term) => !normalized.includes(term))
       : [];
+    const matchedForbiddenDocumentFragments = forbiddenDocumentFragments.filter((fragment) => (
+      includesTerm(normalized, fragment)
+    ));
     const failures = [];
     if (presence.status === "missingUnexpected") failures.push("missingUnexpected");
     if (required && presence.status === "explicitNotApplicable") failures.push("requiredButNotApplicable");
     if (presence.status === "presentNonEmpty" && normalized.length < 40) failures.push("tooShort");
     if (missingRequiredTerms.length) failures.push("missingRequiredTerms");
+    if (matchedForbiddenDocumentFragments.length) failures.push("seedProfileLeakage");
     const grounding = secondaryByKey.get(key);
     if (grounding?.verdict === "RED") failures.push("secondaryScenarioGrounding");
     return {
@@ -237,6 +244,7 @@ export function reviewDeliverableMatrix(payload, question, expected = {}) {
       charCount: normalized.length,
       required,
       missingRequiredTerms,
+      matchedForbiddenDocumentFragments,
       matchedScenarioTerms: grounding?.matchedScenarioTerms ?? [],
       matchedSupportingScenarioTerms: grounding?.matchedSupportingScenarioTerms ?? [],
       missingSemanticGroups: grounding?.missingSemanticGroups ?? [],
@@ -256,6 +264,10 @@ export function reviewDeliverableMatrix(payload, question, expected = {}) {
       key: item.key,
       reason: item.reason
     })),
+    seedProfileLeakageCount: documents.reduce(
+      (sum, item) => sum + item.matchedForbiddenDocumentFragments.length,
+      0
+    ),
     secondaryGrounding,
     documents
   };
@@ -319,7 +331,7 @@ async function readBuildInfo() {
 
 function writeMarkdown(report) {
   const rows = report.cases.flatMap((testCase) => testCase.documents.map((document) => (
-    `| ${testCase.id} | ${document.key} | ${document.status} | ${document.required ? "yes" : "no"} | ${document.charCount} | ${[...document.matchedScenarioTerms, ...document.matchedSupportingScenarioTerms].join(", ") || "-"} | ${document.crossScenarioLeakage.map((item) => `${item.profileId}:${item.term}`).join(", ") || "-"} | ${document.verdict} | ${document.failures.join(", ") || "-"} |`
+    `| ${testCase.id} | ${document.key} | ${document.status} | ${document.required ? "yes" : "no"} | ${document.charCount} | ${[...document.matchedScenarioTerms, ...document.matchedSupportingScenarioTerms].join(", ") || "-"} | ${document.crossScenarioLeakage.map((item) => `${item.profileId}:${item.term}`).join(", ") || "-"} | ${document.matchedForbiddenDocumentFragments.join(", ") || "-"} | ${document.verdict} | ${document.failures.join(", ") || "-"} |`
   ))).join("\n");
   const markdown = `# Live 12-Deliverable Broad Review
 
@@ -339,10 +351,11 @@ function writeMarkdown(report) {
 - Provider dispatch called: \`false\`
 - Secondary document grounding: ${report.secondaryGroundingPassed}/${report.secondaryGroundingReviewed}
 - Cross-scenario leakage findings: ${report.secondaryCrossScenarioLeakageCount}
+- Seed-profile leakage findings: ${report.seedProfileLeakageCount}
 - Exact saved Share reproduced: \`false\`
 
-| Case | Deliverable | Classification | Required | Characters | Grounding terms | Cross-scenario leakage | Verdict | Failures |
-|---|---|---|---:|---:|---|---|---:|---|
+| Case | Deliverable | Classification | Required | Characters | Grounding terms | Cross-scenario leakage | Forbidden seed fragments | Verdict | Failures |
+|---|---|---|---:|---:|---|---|---|---:|---|
 ${rows}
 
 ## Classification Contract
@@ -405,6 +418,7 @@ async function main() {
       permitRequired: matrixReview.permitRequired,
       missingUnexpected: matrixReview.missingUnexpected,
       explicitNotApplicable: matrixReview.explicitNotApplicable,
+      seedProfileLeakageCount: matrixReview.seedProfileLeakageCount,
       secondaryGrounding: matrixReview.secondaryGrounding,
       documents: matrixReview.documents,
       wordingFailedChecks: wordingReview.checks.filter((check) => !check.ok)
@@ -430,6 +444,10 @@ async function main() {
   );
   const secondaryCrossScenarioLeakageCount = results.reduce(
     (sum, item) => sum + item.secondaryGrounding.crossScenarioLeakageCount,
+    0
+  );
+  const seedProfileLeakageCount = results.reduce(
+    (sum, item) => sum + item.seedProfileLeakageCount,
     0
   );
   const report = {
@@ -463,6 +481,7 @@ async function main() {
     secondaryGroundingReviewed,
     secondaryGroundingPassed,
     secondaryCrossScenarioLeakageCount,
+    seedProfileLeakageCount,
     mutationBoundary: {
       dbMutationPerformed: false,
       shareSessionCreated: false,
