@@ -13,6 +13,7 @@ import {
   type WorkspaceUser
 } from "@/lib/supabase-admin";
 import { isRecord } from "@/lib/workspace-api";
+import { resolveBriefingEmailDispatchStatus } from "@/lib/server/briefing-dispatch-status";
 
 export const dynamic = "force-dynamic";
 
@@ -50,11 +51,13 @@ async function findOwnedSite(client: SupabaseClient<WorkspaceDatabase>, user: Wo
 }
 
 export async function GET(request: NextRequest) {
+  const dispatch = resolveBriefingEmailDispatchStatus();
   const client = createSupabaseAdminClient();
   if (!client) {
     return NextResponse.json({
       ok: false,
       configured: false,
+      dispatch,
       settings: DEFAULT_SETTINGS,
       message: "Supabase 저장소가 아직 설정되지 않았습니다."
     });
@@ -65,6 +68,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       ok: false,
       configured: true,
+      dispatch,
       settings: DEFAULT_SETTINGS,
       message: "관리자 로그인이 필요합니다."
     }, { status: 401 });
@@ -75,6 +79,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       ok: true,
       configured: true,
+      dispatch,
       siteName: site?.name || null,
       settings: site
         ? {
@@ -90,6 +95,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       ok: false,
       configured: true,
+      dispatch,
       settings: DEFAULT_SETTINGS,
       message: "브리핑 설정을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."
     }, { status: 500 });
@@ -97,14 +103,15 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const dispatch = resolveBriefingEmailDispatchStatus();
   const client = createSupabaseAdminClient();
   if (!client) {
-    return NextResponse.json({ ok: false, configured: false, message: "Supabase 저장소가 아직 설정되지 않았습니다." });
+    return NextResponse.json({ ok: false, configured: false, dispatch, message: "Supabase 저장소가 아직 설정되지 않았습니다." });
   }
 
   const user = await getWorkspaceUser(client, request.headers);
   if (!user) {
-    return NextResponse.json({ ok: false, configured: true, message: "관리자 로그인이 필요합니다." }, { status: 401 });
+    return NextResponse.json({ ok: false, configured: true, dispatch, message: "관리자 로그인이 필요합니다." }, { status: 401 });
   }
 
   const parsed = await request.json().catch((): unknown => ({}));
@@ -118,6 +125,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       ok: false,
       configured: true,
+      dispatch,
       message: "브리핑을 켜려면 작업 설명과 유효한 수신 이메일이 필요합니다."
     }, { status: 400 });
   }
@@ -140,9 +148,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       ok: true,
       configured: true,
+      dispatch,
       settings: { enabled, question, email },
       message: enabled
-        ? "아침 브리핑을 켰습니다. 매일 06:00(KST)에 문서팩 생성과 이메일 발송이 실행됩니다."
+        ? dispatch.emailReady
+          ? "아침 브리핑을 켰습니다. 매일 06:00(KST)에 문서팩 생성과 이메일 발송이 실행됩니다."
+          : "아침 문서팩 자동 생성을 켰습니다. 이메일 실제 발송은 중복 방지 저장 계약 승인 전까지 잠겨 있습니다."
         : "아침 브리핑 설정을 저장했습니다(현재 꺼짐)."
     });
   } catch (error) {
@@ -150,6 +161,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       ok: false,
       configured: true,
+      dispatch,
       message: "브리핑 설정 저장에 실패했습니다. 마이그레이션(005_briefing_settings.sql) 적용 여부를 확인해 주세요."
     }, { status: 500 });
   }

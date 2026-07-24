@@ -20,6 +20,7 @@ import { createSupabaseAdminClient, type WorkspaceDatabase } from "@/lib/supabas
 import { saveAskResponseAsWorkpack } from "@/lib/workpack-store";
 import { isLiveDispatchEnabled, postWebhookWithTimeout, resolveWebhookConfig } from "@/lib/n8n-webhook";
 import { createLogger } from "@/lib/logger";
+import { resolveBriefingEmailDispatchStatus } from "@/lib/server/briefing-dispatch-status";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // enhanced 모드 N개 사이트 순차 생성 여유
@@ -71,6 +72,14 @@ async function sendBriefingEmail(
   workpack: Record<string, unknown>,
   recipient: string
 ): Promise<{ sent: boolean; message: string }> {
+  const dispatchStatus = resolveBriefingEmailDispatchStatus();
+  if (!dispatchStatus.emailReady) {
+    return {
+      sent: false,
+      message: `email: skipped (${dispatchStatus.reason || "provider dispatch unavailable"})`
+    };
+  }
+
   const webhookConfig = resolveWebhookConfig();
   if (!webhookConfig.url || !webhookConfig.token) {
     return { sent: false, message: "email: skipped (n8n webhook not configured)" };

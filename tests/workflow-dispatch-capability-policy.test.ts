@@ -1,8 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveProviderDispatchCapability } from "@/lib/server/workflow-dispatch-capability-policy";
+import {
+  PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED,
+  resolveProviderDispatchCapability
+} from "@/lib/server/workflow-dispatch-capability-policy";
 
 describe("workflow dispatch capability policy", () => {
+  it("keeps provider dispatch idempotency fail-closed until the persistence gate is approved", () => {
+    expect(PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED).toBe(false);
+  });
+
   it("reports every channel as preview-only when persistent idempotency is unavailable", () => {
     expect(resolveProviderDispatchCapability({
       persistentIdempotencySupported: false,

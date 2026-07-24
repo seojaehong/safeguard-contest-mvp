@@ -20,6 +20,8 @@ export type ProviderDispatchPolicyInput = {
 
 const CHANNELS: ProviderDispatchChannel[] = ["email", "sms", "kakao"];
 
+export const PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED = false;
+
 function blockedChannels(reason: ProviderDispatchReason): ProviderDispatchCapability["channels"] {
   return Object.fromEntries(CHANNELS.map((channel) => [
     channel,

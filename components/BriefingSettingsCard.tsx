@@ -24,6 +24,11 @@ type SettingsResponse = {
   ok: boolean;
   siteName?: string | null;
   settings?: { enabled: boolean; question: string; email: string };
+  dispatch?: {
+    emailReady: boolean;
+    mode: "live" | "preview_only";
+    reason: string | null;
+  };
   message?: string;
 };
 
@@ -35,6 +40,7 @@ export function BriefingSettingsCard() {
   const [question, setQuestion] = useState("");
   const [email, setEmail] = useState("");
   const [siteName, setSiteName] = useState<string | null>(null);
+  const [emailDispatchReady, setEmailDispatchReady] = useState(false);
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
@@ -68,6 +74,7 @@ export function BriefingSettingsCard() {
         setEmail(payload.settings.email);
       }
       setSiteName(payload.siteName || null);
+      setEmailDispatchReady(payload.dispatch?.emailReady === true);
       if (!payload.ok && payload.message) setMessage(payload.message);
     } catch (error) {
       console.warn("briefing settings load failed", error);
@@ -95,6 +102,7 @@ export function BriefingSettingsCard() {
         body: JSON.stringify({ enabled, question, email })
       });
       const payload = await response.json() as SettingsResponse;
+      setEmailDispatchReady(payload.dispatch?.emailReady === true);
       setMessage(payload.message || (payload.ok ? "저장했습니다." : "저장에 실패했습니다."));
     } catch (error) {
       console.error("briefing settings save failed", error);
@@ -107,12 +115,16 @@ export function BriefingSettingsCard() {
   return (
     <article className="briefing-settings-card" aria-label="아침 브리핑 설정">
       <h2 className="safeclaw-section-title">아침 브리핑</h2>
-      <p className="safeclaw-setting-description">매일 06:00(KST) 문서팩 자동 생성 + 이메일 발송</p>
+      <p className="safeclaw-setting-description">
+        매일 06:00(KST) 문서팩 자동 생성
+        {emailDispatchReady ? " + 이메일 발송" : " · 이메일 실제 발송은 승인 전 잠금"}
+      </p>
       {!client || (sessionChecked && !session) ? (
         <div>
           <p className="muted">
             아침 브리핑 설정은 관리자 로그인 후 저장할 수 있습니다. 활성화하면 등록한 작업
-            설명으로 매일 아침 문서팩을 생성하고, 수신 이메일로 기상·위험 요약을 보냅니다.
+            설명으로 매일 아침 문서팩을 생성합니다. 이메일 실제 발송은 중복 방지 저장 계약이
+            승인된 뒤 활성화됩니다.
           </p>
           <Link href="/login">관리자 로그인</Link>
         </div>
@@ -125,7 +137,7 @@ export function BriefingSettingsCard() {
               checked={enabled}
               onChange={(event) => setEnabled(event.target.checked)}
             />
-            아침 브리핑 활성화
+            아침 문서팩 자동 생성 활성화
           </label>
           <label htmlFor="briefing-question">작업 설명 (문서팩 생성 질문)</label>
           <textarea
@@ -135,7 +147,9 @@ export function BriefingSettingsCard() {
             rows={3}
             placeholder="예: 안산 제조공장 용접 및 지게차 상하차 작업, 외국인 근로자 3명 포함 작업자 6명"
           />
-          <label htmlFor="briefing-email">수신 이메일</label>
+          <label htmlFor="briefing-email">
+            수신 이메일{emailDispatchReady ? "" : " (실제 발송 준비 후 사용)"}
+          </label>
           <input
             id="briefing-email"
             type="email"

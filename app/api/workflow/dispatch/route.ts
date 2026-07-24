@@ -10,7 +10,10 @@ import {
   getCanonicalDispatchLanguageCodes,
   validateWorkflowDispatchMessage
 } from "@/lib/workflow-share-client";
-import { resolveProviderDispatchCapability } from "@/lib/server/workflow-dispatch-capability-policy";
+import {
+  PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED,
+  resolveProviderDispatchCapability
+} from "@/lib/server/workflow-dispatch-capability-policy";
 import {
   loadActiveOwnedShareSession,
   loadOwnedWorkpackOperationContext
@@ -65,7 +68,6 @@ type WorkflowSummary = {
 
 const ACTIVE_CHANNELS: ActiveWorkflowChannel[] = ["email", "sms", "kakao"];
 const LOCKED_CHANNELS: WorkflowChannel[] = ["band"];
-const PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED = false;
 const PROVIDER_IDEMPOTENCY_KEY_PATTERN = /^provider-dispatch-v1-[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}-[0-9a-f]{8}$/i;
 
 function isKakaoDispatchEnabled() {
