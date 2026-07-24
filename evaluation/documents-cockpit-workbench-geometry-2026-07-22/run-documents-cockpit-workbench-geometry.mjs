@@ -32,7 +32,12 @@ function verdictFor(metrics) {
   const viewportPass = metrics.bodyHeight <= metrics.viewportHeight + 8
     && metrics.horizontalOverflow === false
     && metrics.coreButtons === 3
-    && metrics.detailsOpen === false;
+    && metrics.detailsOpen === false
+    && metrics.visibleSelectedEditorCount === 1
+    && metrics.visibleFullDocumentBodyCount <= 1
+    && metrics.firstActionBottom > 0
+    && metrics.firstActionBottom <= metrics.viewportHeight
+    && metrics.editorOverflowY === "auto";
   return {
     workbenchVerdict: workbenchPass ? "PASS" : "RED",
     viewportVerdict: viewportPass ? "PASS" : "RED",
@@ -75,6 +80,19 @@ async function measure(page, viewport) {
     const workbenchRect = rect(workbench);
     const launcherRect = rect(launcher);
     const editorRect = rect(editor);
+    const visibleElements = (selector) => [...document.querySelectorAll(selector)]
+      .filter((element) => {
+        const box = element.getBoundingClientRect();
+        const elementStyle = getComputedStyle(element);
+        return box.width > 0
+          && box.height > 0
+          && elementStyle.display !== "none"
+          && elementStyle.visibility !== "hidden";
+      });
+    const visibleSelectedEditors = visibleElements('[data-testid="workpack-editor-workspace"]');
+    const visibleFullDocumentBodies = visibleElements(".document-section-textarea, .document-source-textarea");
+    const firstAction = visibleElements('[data-testid="document-section-actions"] button')[0] || null;
+    const firstActionRect = rect(firstAction);
     const coreButtons = [...document.querySelectorAll('[data-testid="mobile-core-document-launcher"] .safeclaw-mobile-core-list button[data-document-key]')]
       .filter((button) => {
         const box = button.getBoundingClientRect();
@@ -104,6 +122,14 @@ async function measure(page, viewport) {
       editorLeft: editorRect?.left ?? 0,
       editorRight: editorRect?.right ?? 0,
       editorBottom: editorRect?.bottom ?? 0,
+      editorClientHeight: editor?.clientHeight ?? 0,
+      editorScrollHeight: editor?.scrollHeight ?? 0,
+      editorScrollRatio: editor?.clientHeight ? Number((editor.scrollHeight / editor.clientHeight).toFixed(2)) : 0,
+      editorOverflowY: editor ? getComputedStyle(editor).overflowY : "missing",
+      visibleSelectedEditorCount: visibleSelectedEditors.length,
+      visibleFullDocumentBodyCount: visibleFullDocumentBodies.length,
+      firstActionTop: firstActionRect?.top ?? 0,
+      firstActionBottom: firstActionRect?.bottom ?? 0,
       coreButtons: coreButtons.length,
       detailsOpen: details instanceof HTMLDetailsElement ? details.open : null,
     };
@@ -148,7 +174,7 @@ fs.writeFileSync(path.join(outDir, "report.json"), `${JSON.stringify(report, nul
 const tableRows = rows.map((row) => {
   const metrics = row.metrics;
   const verdicts = row.verdicts;
-  return `| ${row.viewport} | ${verdicts.overallVerdict} | ${metrics.bodyHeight} | ${metrics.horizontalOverflow} | ${metrics.workbenchDisplay} | ${metrics.workbenchColumnCount} | ${metrics.workbenchGridTemplateColumns} | ${metrics.launcherTop}-${metrics.launcherBottom} | ${metrics.editorTop}-${metrics.editorBottom} | ${metrics.launcherRight} | ${metrics.editorLeft} | ${metrics.coreButtons} | ${metrics.detailsOpen} |`;
+  return `| ${row.viewport} | ${verdicts.overallVerdict} | ${metrics.bodyHeight} | ${metrics.horizontalOverflow} | ${metrics.workbenchDisplay} | ${metrics.workbenchColumnCount} | ${metrics.workbenchGridTemplateColumns} | ${metrics.launcherTop}-${metrics.launcherBottom} | ${metrics.editorTop}-${metrics.editorBottom} | ${metrics.launcherRight} | ${metrics.editorLeft} | ${metrics.visibleSelectedEditorCount} | ${metrics.visibleFullDocumentBodyCount} | ${metrics.firstActionTop}-${metrics.firstActionBottom} | ${metrics.editorClientHeight}/${metrics.editorScrollHeight} (${metrics.editorScrollRatio}) | ${metrics.coreButtons} | ${metrics.detailsOpen} |`;
 }).join("\n");
 
 fs.writeFileSync(path.join(outDir, "report.md"), `# Documents Cockpit Workbench Geometry
@@ -171,13 +197,13 @@ Sibling verification first saw \`display:block\` / one-column geometry from a st
 
 ## Geometry
 
-| Viewport | Overall | Body height | OverflowX | Workbench display | Columns | Column template | Launcher top-bottom | Editor top-bottom | Launcher right | Editor left | Core buttons | Details open |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Viewport | Overall | Body height | OverflowX | Workbench display | Columns | Column template | Launcher top-bottom | Editor top-bottom | Launcher right | Editor left | Visible selected editors | Visible full bodies | First action top-bottom | Editor client/scroll (ratio) | Core buttons | Details open |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 ${tableRows}
 
 ## Product Boundary
 
-This proves the measured \`/documents?theme=day\` route uses a selected-document cockpit/workbench instead of a stale stacked layout. It does not close exact saved/generated \`/share/[sessionId]\` evidence, provider dispatch, or route split alone as a UX fix.
+This proves the measured \`/documents?theme=day\` route uses one visible selected-document editor, keeps full-body textareas out of the default surface, exposes the first document action in the viewport, and contains long detail in the editor workbench. It does not close exact saved/generated \`/share/[sessionId]\` evidence, provider dispatch, or route split alone as a UX fix.
 `, "utf8");
 
 console.log(JSON.stringify({
@@ -194,5 +220,9 @@ console.log(JSON.stringify({
     launcherRight: row.metrics.launcherRight,
     bodyHeight: row.metrics.bodyHeight,
     overflowX: row.metrics.horizontalOverflow,
+    visibleSelectedEditors: row.metrics.visibleSelectedEditorCount,
+    visibleFullBodies: row.metrics.visibleFullDocumentBodyCount,
+    firstActionBottom: row.metrics.firstActionBottom,
+    editorScrollRatio: row.metrics.editorScrollRatio,
   })),
 }, null, 2));

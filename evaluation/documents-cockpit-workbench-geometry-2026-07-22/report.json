@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-documents-cockpit-workbench-geometry/v1",
-  "checkedAt": "2026-07-24T10:45:45.138Z",
-  "sourceHead": "772016d6ab1ebe89ea636627c8d0f933645d4985",
+  "checkedAt": "2026-07-24T11:02:10.275Z",
+  "sourceHead": "e70be8ef7a3735a18078a0576b83aefc1e64cef3",
   "baseUrl": "https://www.safeclaw.kr",
   "productionBuild": {
     "ok": true,
@@ -13,7 +13,7 @@
     "deploymentUrl": "safeguard-contest-dm8fwb2vs-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "verdict": "PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_DOCUMENTS_WORKBENCH",
   "staleDevRedExplained": true,
   "staleDevRedExplanation": "A sibling probe initially reported block/one-column geometry from a stale dev/HMR server. This gate records the clean local production geometry after rebuild/restart and directly measures the workbench display, column count, and editor-vs-launcher alignment.",
   "routeSplitAloneAcceptedAsFix": false,
@@ -43,6 +43,14 @@
         "editorLeft": 512,
         "editorRight": 1424,
         "editorBottom": 653,
+        "editorClientHeight": 448,
+        "editorScrollHeight": 1219,
+        "editorScrollRatio": 2.72,
+        "editorOverflowY": "auto",
+        "visibleSelectedEditorCount": 1,
+        "visibleFullDocumentBodyCount": 0,
+        "firstActionTop": 277,
+        "firstActionBottom": 321,
         "coreButtons": 3,
         "detailsOpen": false
       },
@@ -77,6 +85,14 @@
         "editorLeft": 24,
         "editorRight": 366,
         "editorBottom": 680,
+        "editorClientHeight": 332,
+        "editorScrollHeight": 979,
+        "editorScrollRatio": 2.95,
+        "editorOverflowY": "auto",
+        "visibleSelectedEditorCount": 1,
+        "visibleFullDocumentBodyCount": 0,
+        "firstActionTop": 502,
+        "firstActionBottom": 538,
         "coreButtons": 3,
         "detailsOpen": false
       },
