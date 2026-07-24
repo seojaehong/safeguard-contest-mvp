@@ -1,0 +1,58 @@
+{
+  "generatedAt": "2026-07-24T19:29:52.067Z",
+  "verdict": "PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT",
+  "sourceHead": "9c46d60dee1ef7c319269953a3145a3a2359e9f7",
+  "productionCommit": "9c46d60dee1ef7c319269953a3145a3a2359e9f7",
+  "baseUrl": "https://www.safeclaw.kr",
+  "secondaryDocumentKeys": [
+    "workpackSummaryDraft",
+    "workPermitDraft",
+    "photoEvidenceDraft",
+    "foreignWorkerBriefing",
+    "foreignWorkerTransmission",
+    "kakaoMessage"
+  ],
+  "contract": {
+    "scenarioGrounding": "at least one exact scenario fingerprint or at least two supporting region, work type, hazard, or worker signals",
+    "semanticGroupsRequired": true,
+    "crossScenarioProfileMatchThreshold": 2,
+    "existingSixDocumentWordingGatePreserved": true
+  },
+  "stages": {
+    "beforeContractCalibration": {
+      "artifact": "evaluation/live-document-secondary-grounding-2026-07-25/after-contract-calibration/report.json",
+      "sourceHead": "05953d03dbc657b7199022aedbe552da25d47969",
+      "productionCommit": "05953d03dbc657b7199022aedbe552da25d47969",
+      "cases": 5,
+      "pass": 4,
+      "fail": 1,
+      "secondaryReviewed": 30,
+      "secondaryPassed": 28,
+      "crossScenarioLeakageCount": 0,
+      "interpretation": "Exact substring matching missed valid electrical synonyms even though the documents contained multiple grounded hazard and worker signals."
+    },
+    "afterLive": {
+      "artifact": "evaluation/live-document-secondary-grounding-2026-07-25/after-live-current-contract/report.json",
+      "sourceHead": "9c46d60dee1ef7c319269953a3145a3a2359e9f7",
+      "productionCommit": "9c46d60dee1ef7c319269953a3145a3a2359e9f7",
+      "cases": 5,
+      "pass": 5,
+      "fail": 0,
+      "secondaryReviewed": 30,
+      "secondaryPassed": 30,
+      "crossScenarioLeakageCount": 0,
+      "missingUnexpectedCount": 0
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "exactSavedShareReproduced": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "claimBoundary": {
+    "allowed": "Five live production scenarios pass the deterministic secondary-document grounding contract for all 30 measured supporting deliverables.",
+    "forbidden": "This deterministic contract replaces broad human wording review or proves an exact saved Share session."
+  }
+}

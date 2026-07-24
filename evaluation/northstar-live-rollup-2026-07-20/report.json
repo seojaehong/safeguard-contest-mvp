@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-24T19:10:47.336Z",
-  "head": "53486a65f67ca5da5c6486c3c1dc9f428437ea56",
+  "generatedAt": "2026-07-24T19:38:54.296Z",
+  "head": "91fd6f588aed79c667c0de18a76983b002b9897d",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "53486a65f67ca5da5c6486c3c1dc9f428437ea56",
+    "commitSha": "91fd6f588aed79c667c0de18a76983b002b9897d",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-nxcfpma9d-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-g97zblrqf-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 21
+    "gateCount": 22
   },
   "provenGates": [
     {
@@ -74,6 +74,12 @@
       "state": "proven",
       "artifact": "evaluation\\live-document-broad-review-2026-07-25\\report.json",
       "detail": "All 12 canonical UI deliverables are enumerated and classified across five live production scenarios: uiDocumentCount=12, integrityRequiredCount=12, reviewedDocumentCount=12, before missingUnexpected=5, after-live missingUnexpected=0, and workPermitDraft presentNonEmpty=5/5. DB/share/provider mutation is false and exact saved Share remains MISSING_EVIDENCE. The older six-document synthetic wording gate is not used as 12-document coverage proof."
+    },
+    {
+      "id": "live_document_secondary_grounding",
+      "state": "proven",
+      "artifact": "evaluation\\live-document-secondary-grounding-2026-07-25\\report.json",
+      "detail": "All six secondary deliverables pass scenario grounding across five live production scenarios: cases=5/5, documents=30/30, cross-scenario leakage=0, missingUnexpected=0. DB/share/provider mutation is false and exact saved Share remains MISSING_EVIDENCE. This deterministic contract does not replace the six-document wording gate, 12-document presence gate, or broad human review."
     },
     {
       "id": "ui_documents_share_cockpit",
@@ -263,6 +269,23 @@
     "exactSavedShareReproduced": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
+  "liveDocumentSecondaryGrounding": {
+    "artifact": "evaluation\\live-document-secondary-grounding-2026-07-25\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT",
+    "sourceHead": "9c46d60dee1ef7c319269953a3145a3a2359e9f7",
+    "productionCommit": "9c46d60dee1ef7c319269953a3145a3a2359e9f7",
+    "livePassed": 5,
+    "liveFailed": 0,
+    "secondaryReviewed": 30,
+    "secondaryPassed": 30,
+    "crossScenarioLeakageCount": 0,
+    "missingUnexpectedCount": 0,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "exactSavedShareReproduced": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
   "providerDispatchPersistence": {
     "artifact": "evaluation\\provider-dispatch-idempotency-gate-2026-07-19\\report.json",
     "status": "approval_required",
@@ -316,10 +339,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "f877a1e5024c9a266506436ca712765735b72f94",
-      "sourceStatus": "ancestor",
-      "productionCommit": "f877a1e5024c9a266506436ca712765735b72f94",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "91fd6f588aed79c667c0de18a76983b002b9897d",
+      "sourceStatus": "exact",
+      "productionCommit": "91fd6f588aed79c667c0de18a76983b002b9897d",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -383,6 +406,14 @@
       "sourceCommit": "47da015ff501dc8125dbbf215989104a35da3aa7",
       "sourceStatus": "ancestor",
       "productionCommit": "47da015ff501dc8125dbbf215989104a35da3aa7",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "live_document_secondary_grounding",
+      "artifact": "evaluation\\live-document-secondary-grounding-2026-07-25\\report.json",
+      "sourceCommit": "9c46d60dee1ef7c319269953a3145a3a2359e9f7",
+      "sourceStatus": "ancestor",
+      "productionCommit": "9c46d60dee1ef7c319269953a3145a3a2359e9f7",
       "productionStatus": "ancestor_of_head"
     },
     {

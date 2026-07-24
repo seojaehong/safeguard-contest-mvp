@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `53486a65f67ca5da5c6486c3c1dc9f428437ea56`
+Source HEAD: `91fd6f588aed79c667c0de18a76983b002b9897d`
 
-Production `/api/build-info`: `53486a65f67ca5da5c6486c3c1dc9f428437ea56`
+Production `/api/build-info`: `91fd6f588aed79c667c0de18a76983b002b9897d`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `53486a65f67ca5da5c6486c3c1dc9f428437ea56`
+Live rollup source head: `91fd6f588aed79c667c0de18a76983b002b9897d`
 
 Live rollup matches production: `true`
 
@@ -47,6 +47,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live KOSHA exact-pin materialization is measured separately: `PASS_LIVE_PRODUCTION_KOSHA_EXACT_MATERIALIZATION`, live scenarios passed `3/3`, product-in-production `true`. This proves only the current three exact pins in relevant structured rows; registry expansion still requires completed human review and separate approval.
 - Live synthetic wording and field usability are measured separately: `PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW`, live scenarios passed `5/5`, live pending `false`. This gate catches fixed-profile field leakage and selected-document wording defects, while broad human review and exact saved Share evidence remain separate.
 - Live 12-deliverable presence and applicability are measured separately: `PASS_LIVE_PRODUCTION_12_DELIVERABLE_BROAD_REVIEW`, UI/integrity/reviewed documents `12/12/12`, before missingUnexpected `5`, live missingUnexpected `0`, and workPermitDraft presentNonEmpty `5/5`. The six-document synthetic wording gate is not accepted as 12-document deliverable coverage; exact saved Share remains `MISSING_EVIDENCE`.
+- Live supporting-document scenario grounding is measured separately: `PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT`, live cases `5/5`, supporting documents `30/30`, cross-scenario leakage `0`, and missingUnexpected `0`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains `MISSING_EVIDENCE`.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level, without claiming live production engine execution.
 - SIF embedding approval preflight is approval-held: no embedding generation, no upload, and vector runtime disabled until approval.
 - North Star approval runway is current and separates runtime/provider/database/vector gates from ordinary UI/evidence iteration.

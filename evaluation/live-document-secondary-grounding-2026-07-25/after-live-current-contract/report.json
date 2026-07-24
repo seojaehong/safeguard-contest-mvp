@@ -1,0 +1,1975 @@
+{
+  "generatedAt": "2026-07-24T19:29:52.067Z",
+  "elapsedMs": 95595,
+  "verdict": "PASS_LIVE_PRODUCTION_12_DELIVERABLE_BROAD_REVIEW",
+  "mode": "live-production",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceHead": "9c46d60dee1ef7c319269953a3145a3a2359e9f7",
+  "productionBuild": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "9c46d60dee1ef7c319269953a3145a3a2359e9f7",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-9pck8nkk3-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "uiDocumentCount": 12,
+  "integrityRequiredCount": 12,
+  "reviewedDocumentCount": 12,
+  "total": 5,
+  "pass": 5,
+  "fail": 0,
+  "missingUnexpectedCount": 0,
+  "missingUnexpected": [],
+  "explicitNotApplicableCount": 0,
+  "explicitNotApplicable": [],
+  "secondaryGroundingReviewed": 30,
+  "secondaryGroundingPassed": 30,
+  "secondaryCrossScenarioLeakageCount": 0,
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "exactSavedShareReproduced": false
+  },
+  "cases": [
+    {
+      "id": "ulsan-chemical-cleaning-sds__stress",
+      "verdict": "PASS",
+      "elapsedMs": 17650,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 17645
+      },
+      "permitRequired": true,
+      "missingUnexpected": [],
+      "explicitNotApplicable": [],
+      "secondaryGrounding": {
+        "ok": true,
+        "reviewedDocumentCount": 6,
+        "passedDocumentCount": 6,
+        "crossScenarioLeakageCount": 0,
+        "documents": [
+          {
+            "key": "workpackSummaryDraft",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "SDS"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "울산",
+              "미확인 화학물질",
+              "SDS",
+              "GHS 경고표지",
+              "환기",
+              "비산"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "workPermitDraft",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "화학세척",
+              "SDS"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "울산",
+              "화학세척",
+              "미확인 화학물질",
+              "SDS",
+              "GHS 경고표지",
+              "환기",
+              "비산"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "photoEvidenceDraft",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "SDS"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "울산",
+              "미확인 화학물질",
+              "SDS",
+              "GHS 경고표지",
+              "환기",
+              "비산"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "foreignWorkerBriefing",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "화학세척",
+              "SDS"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "울산",
+              "화학세척",
+              "미확인 화학물질",
+              "SDS",
+              "GHS 경고표지",
+              "환기",
+              "비산"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "foreignWorkerTransmission",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "화학세척",
+              "SDS"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "울산",
+              "화학세척",
+              "미확인 화학물질",
+              "SDS",
+              "GHS 경고표지",
+              "환기",
+              "비산"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "kakaoMessage",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "화학세척",
+              "SDS"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "울산",
+              "화학세척",
+              "미확인 화학물질",
+              "SDS",
+              "GHS 경고표지",
+              "환기",
+              "비산"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          }
+        ]
+      },
+      "documents": [
+        {
+          "key": "workpackSummaryDraft",
+          "title": "점검결과 요약",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 752,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "SDS"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "울산",
+            "미확인 화학물질",
+            "SDS",
+            "GHS 경고표지",
+            "환기",
+            "비산"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "riskAssessmentDraft",
+          "title": "위험성평가표",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3462,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPlanDraft",
+          "title": "작업계획서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1010,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPermitDraft",
+          "title": "안전작업허가 확인서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1194,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "화학세척",
+            "SDS"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "울산",
+            "화학세척",
+            "미확인 화학물질",
+            "SDS",
+            "GHS 경고표지",
+            "환기",
+            "비산"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmBriefing",
+          "title": "TBM 브리핑",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1963,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmLogDraft",
+          "title": "TBM 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1981,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "safetyEducationRecordDraft",
+          "title": "안전보건교육 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 2315,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "emergencyResponseDraft",
+          "title": "비상대응 절차",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1580,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "photoEvidenceDraft",
+          "title": "사진·증빙",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1174,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "SDS"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "울산",
+            "미확인 화학물질",
+            "SDS",
+            "GHS 경고표지",
+            "환기",
+            "비산"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerBriefing",
+          "title": "외국인 근로자 출력본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3201,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "화학세척",
+            "SDS"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "울산",
+            "화학세척",
+            "미확인 화학물질",
+            "SDS",
+            "GHS 경고표지",
+            "환기",
+            "비산"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerTransmission",
+          "title": "외국인 전송본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3533,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "화학세척",
+            "SDS"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "울산",
+            "화학세척",
+            "미확인 화학물질",
+            "SDS",
+            "GHS 경고표지",
+            "환기",
+            "비산"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "kakaoMessage",
+          "title": "현장 공유 메시지",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 672,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "화학세척",
+            "SDS"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "울산",
+            "화학세척",
+            "미확인 화학물질",
+            "SDS",
+            "GHS 경고표지",
+            "환기",
+            "비산"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        }
+      ],
+      "wordingFailedChecks": []
+    },
+    {
+      "id": "pyeongtaek-simultaneous-overhead-hotwork__stress",
+      "verdict": "PASS",
+      "elapsedMs": 20053,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 20050
+      },
+      "permitRequired": true,
+      "missingUnexpected": [],
+      "explicitNotApplicable": [],
+      "secondaryGrounding": {
+        "ok": true,
+        "reviewedDocumentCount": 6,
+        "passedDocumentCount": 6,
+        "crossScenarioLeakageCount": 0,
+        "documents": [
+          {
+            "key": "workpackSummaryDraft",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "동시작업"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "동시작업",
+              "상하부 작업",
+              "낙하물",
+              "양중",
+              "신호수"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "workPermitDraft",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "동시작업",
+              "크레인 양중",
+              "배관 화기작업"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "동시작업",
+              "상하부 작업",
+              "낙하물",
+              "화기작업",
+              "양중",
+              "신호수"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "photoEvidenceDraft",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "동시작업"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "동시작업",
+              "상하부 작업",
+              "낙하물",
+              "양중",
+              "신호수"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "foreignWorkerBriefing",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "동시작업",
+              "크레인 양중",
+              "배관 화기작업"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "동시작업",
+              "상하부 작업",
+              "낙하물",
+              "화기작업",
+              "양중",
+              "신호수"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "foreignWorkerTransmission",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "동시작업",
+              "크레인 양중",
+              "배관 화기작업"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "동시작업",
+              "낙하물",
+              "화기작업",
+              "양중"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "kakaoMessage",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "동시작업",
+              "크레인 양중",
+              "배관 화기작업"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "동시작업",
+              "상하부 작업",
+              "낙하물",
+              "화기작업",
+              "양중",
+              "신호수"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          }
+        ]
+      },
+      "documents": [
+        {
+          "key": "workpackSummaryDraft",
+          "title": "점검결과 요약",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 684,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "동시작업"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "동시작업",
+            "상하부 작업",
+            "낙하물",
+            "양중",
+            "신호수"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "riskAssessmentDraft",
+          "title": "위험성평가표",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3948,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPlanDraft",
+          "title": "작업계획서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1436,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPermitDraft",
+          "title": "안전작업허가 확인서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1205,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "동시작업",
+            "크레인 양중",
+            "배관 화기작업"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "동시작업",
+            "상하부 작업",
+            "낙하물",
+            "화기작업",
+            "양중",
+            "신호수"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmBriefing",
+          "title": "TBM 브리핑",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 2266,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmLogDraft",
+          "title": "TBM 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 2158,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "safetyEducationRecordDraft",
+          "title": "안전보건교육 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 2788,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "emergencyResponseDraft",
+          "title": "비상대응 절차",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1944,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "photoEvidenceDraft",
+          "title": "사진·증빙",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1130,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "동시작업"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "동시작업",
+            "상하부 작업",
+            "낙하물",
+            "양중",
+            "신호수"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerBriefing",
+          "title": "외국인 근로자 출력본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3527,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "동시작업",
+            "크레인 양중",
+            "배관 화기작업"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "동시작업",
+            "상하부 작업",
+            "낙하물",
+            "화기작업",
+            "양중",
+            "신호수"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerTransmission",
+          "title": "외국인 전송본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3907,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "동시작업",
+            "크레인 양중",
+            "배관 화기작업"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "동시작업",
+            "낙하물",
+            "화기작업",
+            "양중"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "kakaoMessage",
+          "title": "현장 공유 메시지",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 629,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "동시작업",
+            "크레인 양중",
+            "배관 화기작업"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "동시작업",
+            "상하부 작업",
+            "낙하물",
+            "화기작업",
+            "양중",
+            "신호수"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        }
+      ],
+      "wordingFailedChecks": []
+    },
+    {
+      "id": "daejeon-vulnerable-night-maintenance__stress",
+      "verdict": "PASS",
+      "elapsedMs": 18312,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 18309
+      },
+      "permitRequired": true,
+      "missingUnexpected": [],
+      "explicitNotApplicable": [],
+      "secondaryGrounding": {
+        "ok": true,
+        "reviewedDocumentCount": 6,
+        "passedDocumentCount": 6,
+        "crossScenarioLeakageCount": 0,
+        "documents": [
+          {
+            "key": "workpackSummaryDraft",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "컨베이어",
+              "조도"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "대전",
+              "야간 컨베이어 정비",
+              "야간",
+              "조도",
+              "끼임",
+              "의사소통",
+              "피로",
+              "고령",
+              "청각장애",
+              "신규"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "workPermitDraft",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "컨베이어",
+              "조도"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "대전",
+              "야간 컨베이어 정비",
+              "야간",
+              "조도",
+              "끼임",
+              "의사소통",
+              "피로",
+              "고령",
+              "청각장애",
+              "신규"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "photoEvidenceDraft",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "컨베이어",
+              "조도"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "대전",
+              "야간 컨베이어 정비",
+              "야간",
+              "조도",
+              "끼임",
+              "의사소통",
+              "피로",
+              "고령",
+              "청각장애",
+              "신규"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "foreignWorkerBriefing",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "컨베이어",
+              "조도"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "대전",
+              "야간 컨베이어 정비",
+              "야간",
+              "조도",
+              "끼임",
+              "의사소통",
+              "피로",
+              "고령",
+              "청각장애",
+              "신규"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "foreignWorkerTransmission",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "컨베이어",
+              "조도"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "대전",
+              "야간 컨베이어 정비",
+              "야간",
+              "조도",
+              "끼임",
+              "의사소통",
+              "피로",
+              "고령",
+              "청각장애",
+              "신규"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "kakaoMessage",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "컨베이어",
+              "조도"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "대전",
+              "야간 컨베이어 정비",
+              "야간",
+              "조도",
+              "끼임",
+              "의사소통",
+              "피로",
+              "고령",
+              "청각장애",
+              "신규"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          }
+        ]
+      },
+      "documents": [
+        {
+          "key": "workpackSummaryDraft",
+          "title": "점검결과 요약",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 851,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "컨베이어",
+            "조도"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "대전",
+            "야간 컨베이어 정비",
+            "야간",
+            "조도",
+            "끼임",
+            "의사소통",
+            "피로",
+            "고령",
+            "청각장애",
+            "신규"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "riskAssessmentDraft",
+          "title": "위험성평가표",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3738,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPlanDraft",
+          "title": "작업계획서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1150,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPermitDraft",
+          "title": "안전작업허가 확인서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1268,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "컨베이어",
+            "조도"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "대전",
+            "야간 컨베이어 정비",
+            "야간",
+            "조도",
+            "끼임",
+            "의사소통",
+            "피로",
+            "고령",
+            "청각장애",
+            "신규"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmBriefing",
+          "title": "TBM 브리핑",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 2032,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmLogDraft",
+          "title": "TBM 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 2021,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "safetyEducationRecordDraft",
+          "title": "안전보건교육 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 2404,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "emergencyResponseDraft",
+          "title": "비상대응 절차",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1602,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "photoEvidenceDraft",
+          "title": "사진·증빙",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1196,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "컨베이어",
+            "조도"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "대전",
+            "야간 컨베이어 정비",
+            "야간",
+            "조도",
+            "끼임",
+            "의사소통",
+            "피로",
+            "고령",
+            "청각장애",
+            "신규"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerBriefing",
+          "title": "외국인 근로자 출력본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 6808,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "컨베이어",
+            "조도"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "대전",
+            "야간 컨베이어 정비",
+            "야간",
+            "조도",
+            "끼임",
+            "의사소통",
+            "피로",
+            "고령",
+            "청각장애",
+            "신규"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerTransmission",
+          "title": "외국인 전송본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 7853,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "컨베이어",
+            "조도"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "대전",
+            "야간 컨베이어 정비",
+            "야간",
+            "조도",
+            "끼임",
+            "의사소통",
+            "피로",
+            "고령",
+            "청각장애",
+            "신규"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "kakaoMessage",
+          "title": "현장 공유 메시지",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 792,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "컨베이어",
+            "조도"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "대전",
+            "야간 컨베이어 정비",
+            "야간",
+            "조도",
+            "끼임",
+            "의사소통",
+            "피로",
+            "고령",
+            "청각장애",
+            "신규"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        }
+      ],
+      "wordingFailedChecks": []
+    },
+    {
+      "id": "gumi-kosha-guidance-boundary__stress",
+      "verdict": "PASS",
+      "elapsedMs": 17817,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 17813
+      },
+      "permitRequired": true,
+      "missingUnexpected": [],
+      "explicitNotApplicable": [],
+      "secondaryGrounding": {
+        "ok": true,
+        "reviewedDocumentCount": 6,
+        "passedDocumentCount": 6,
+        "crossScenarioLeakageCount": 0,
+        "documents": [
+          {
+            "key": "workpackSummaryDraft",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "방호장치",
+              "자동화설비",
+              "기동"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "방호장치 개선·정비",
+              "방호장치",
+              "끼임",
+              "예기치 않은 기동",
+              "LOTO"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "workPermitDraft",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "방호장치",
+              "자동화설비",
+              "기동"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "방호장치 개선·정비",
+              "방호장치",
+              "끼임",
+              "예기치 않은 기동",
+              "LOTO"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "photoEvidenceDraft",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "방호장치",
+              "자동화설비",
+              "기동"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "방호장치 개선·정비",
+              "방호장치",
+              "끼임",
+              "예기치 않은 기동",
+              "LOTO"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "foreignWorkerBriefing",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "방호장치",
+              "자동화설비",
+              "기동"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "방호장치 개선·정비",
+              "방호장치",
+              "끼임",
+              "예기치 않은 기동",
+              "LOTO"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "foreignWorkerTransmission",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "방호장치",
+              "자동화설비",
+              "기동"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "방호장치 개선·정비",
+              "방호장치",
+              "끼임",
+              "예기치 않은 기동"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "kakaoMessage",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "방호장치",
+              "자동화설비",
+              "기동"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "방호장치 개선·정비",
+              "방호장치",
+              "끼임",
+              "예기치 않은 기동",
+              "LOTO"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          }
+        ]
+      },
+      "documents": [
+        {
+          "key": "workpackSummaryDraft",
+          "title": "점검결과 요약",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 783,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "방호장치",
+            "자동화설비",
+            "기동"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "방호장치 개선·정비",
+            "방호장치",
+            "끼임",
+            "예기치 않은 기동",
+            "LOTO"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "riskAssessmentDraft",
+          "title": "위험성평가표",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3619,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPlanDraft",
+          "title": "작업계획서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1117,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPermitDraft",
+          "title": "안전작업허가 확인서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1249,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "방호장치",
+            "자동화설비",
+            "기동"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "방호장치 개선·정비",
+            "방호장치",
+            "끼임",
+            "예기치 않은 기동",
+            "LOTO"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmBriefing",
+          "title": "TBM 브리핑",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1999,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmLogDraft",
+          "title": "TBM 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1990,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "safetyEducationRecordDraft",
+          "title": "안전보건교육 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 2350,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "emergencyResponseDraft",
+          "title": "비상대응 절차",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1545,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "photoEvidenceDraft",
+          "title": "사진·증빙",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1156,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "방호장치",
+            "자동화설비",
+            "기동"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "방호장치 개선·정비",
+            "방호장치",
+            "끼임",
+            "예기치 않은 기동",
+            "LOTO"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerBriefing",
+          "title": "외국인 근로자 출력본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3482,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "방호장치",
+            "자동화설비",
+            "기동"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "방호장치 개선·정비",
+            "방호장치",
+            "끼임",
+            "예기치 않은 기동",
+            "LOTO"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerTransmission",
+          "title": "외국인 전송본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3785,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "방호장치",
+            "자동화설비",
+            "기동"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "방호장치 개선·정비",
+            "방호장치",
+            "끼임",
+            "예기치 않은 기동"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "kakaoMessage",
+          "title": "현장 공유 메시지",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 699,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "방호장치",
+            "자동화설비",
+            "기동"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "방호장치 개선·정비",
+            "방호장치",
+            "끼임",
+            "예기치 않은 기동",
+            "LOTO"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        }
+      ],
+      "wordingFailedChecks": []
+    },
+    {
+      "id": "jeju-overnight-electrical-repair__stress",
+      "verdict": "PASS",
+      "elapsedMs": 21293,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 21291
+      },
+      "permitRequired": true,
+      "missingUnexpected": [],
+      "explicitNotApplicable": [],
+      "secondaryGrounding": {
+        "ok": true,
+        "reviewedDocumentCount": 6,
+        "passedDocumentCount": 6,
+        "crossScenarioLeakageCount": 0,
+        "documents": [
+          {
+            "key": "workpackSummaryDraft",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "전기설비"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "제주",
+              "야간",
+              "조도",
+              "감전",
+              "피로",
+              "단독작업",
+              "야간조",
+              "인수인계"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "workPermitDraft",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [],
+            "matchedSupportingScenarioTerms": [
+              "제주",
+              "야간",
+              "조도",
+              "감전",
+              "피로",
+              "단독작업",
+              "야간조",
+              "인수인계"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "photoEvidenceDraft",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "전기설비"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "제주",
+              "야간",
+              "조도",
+              "감전",
+              "피로",
+              "단독작업",
+              "야간조",
+              "인수인계"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "foreignWorkerBriefing",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [],
+            "matchedSupportingScenarioTerms": [
+              "제주",
+              "야간",
+              "조도",
+              "감전",
+              "피로",
+              "단독작업",
+              "야간조",
+              "인수인계"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "foreignWorkerTransmission",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "전기설비"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "제주",
+              "야간",
+              "조도",
+              "감전",
+              "피로",
+              "단독작업"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          },
+          {
+            "key": "kakaoMessage",
+            "status": "presentNonEmpty",
+            "matchedScenarioTerms": [
+              "전기설비"
+            ],
+            "matchedSupportingScenarioTerms": [
+              "제주",
+              "야간",
+              "조도",
+              "감전",
+              "피로",
+              "단독작업",
+              "야간조",
+              "인수인계"
+            ],
+            "missingSemanticGroups": [],
+            "crossScenarioLeakage": [],
+            "verdict": "PASS"
+          }
+        ]
+      },
+      "documents": [
+        {
+          "key": "workpackSummaryDraft",
+          "title": "점검결과 요약",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 776,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "전기설비"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "제주",
+            "야간",
+            "조도",
+            "감전",
+            "피로",
+            "단독작업",
+            "야간조",
+            "인수인계"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "riskAssessmentDraft",
+          "title": "위험성평가표",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 4048,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPlanDraft",
+          "title": "작업계획서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1676,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPermitDraft",
+          "title": "안전작업허가 확인서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1206,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [
+            "제주",
+            "야간",
+            "조도",
+            "감전",
+            "피로",
+            "단독작업",
+            "야간조",
+            "인수인계"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmBriefing",
+          "title": "TBM 브리핑",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 2314,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmLogDraft",
+          "title": "TBM 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 2279,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "safetyEducationRecordDraft",
+          "title": "안전보건교육 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 2999,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "emergencyResponseDraft",
+          "title": "비상대응 절차",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 2135,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "photoEvidenceDraft",
+          "title": "사진·증빙",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1146,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "전기설비"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "제주",
+            "야간",
+            "조도",
+            "감전",
+            "피로",
+            "단독작업",
+            "야간조",
+            "인수인계"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerBriefing",
+          "title": "외국인 근로자 출력본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3358,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [],
+          "matchedSupportingScenarioTerms": [
+            "제주",
+            "야간",
+            "조도",
+            "감전",
+            "피로",
+            "단독작업",
+            "야간조",
+            "인수인계"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerTransmission",
+          "title": "외국인 전송본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3656,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "전기설비"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "제주",
+            "야간",
+            "조도",
+            "감전",
+            "피로",
+            "단독작업"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "kakaoMessage",
+          "title": "현장 공유 메시지",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 696,
+          "required": true,
+          "missingRequiredTerms": [],
+          "matchedScenarioTerms": [
+            "전기설비"
+          ],
+          "matchedSupportingScenarioTerms": [
+            "제주",
+            "야간",
+            "조도",
+            "감전",
+            "피로",
+            "단독작업",
+            "야간조",
+            "인수인계"
+          ],
+          "missingSemanticGroups": [],
+          "crossScenarioLeakage": [],
+          "verdict": "PASS",
+          "failures": []
+        }
+      ],
+      "wordingFailedChecks": []
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-24T18:58:05.484Z",
-  "sourceSha": "f877a1e5024c9a266506436ca712765735b72f94",
+  "generatedAt": "2026-07-24T19:38:53.025Z",
+  "sourceSha": "91fd6f588aed79c667c0de18a76983b002b9897d",
   "overall": "open",
   "gates": [
     {
@@ -93,6 +93,16 @@
       "nextActions": [
         "Keep presence/applicability coverage separate from broad human wording review of real user documents.",
         "Keep exact saved Share evidence separate; this gate performs no DB/share/provider mutation."
+      ]
+    },
+    {
+      "id": "live_document_secondary_grounding",
+      "state": "proven",
+      "label": "Live secondary document grounding",
+      "evidencePath": "evaluation\\live-document-secondary-grounding-2026-07-25\\report.json",
+      "detail": "All six secondary deliverables pass scenario grounding across five live production scenarios: cases=5/5, documents=30/30, cross-scenario leakage=0, missingUnexpected=0. DB/share/provider mutation is false and exact saved Share remains MISSING_EVIDENCE. This deterministic contract does not replace the six-document wording gate, 12-document presence gate, or broad human review.",
+      "nextActions": [
+        "Keep broad human review and exact saved Share evidence separate from this deterministic supporting-document contract."
       ]
     },
     {
