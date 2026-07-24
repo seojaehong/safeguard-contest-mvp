@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-24T15:50:27.938Z",
-  "sourceSha": "d8b0b27a59a3c1bc480a2b58aa7dc3985d13d432",
+  "generatedAt": "2026-07-24T16:21:59.989Z",
+  "sourceSha": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
   "overall": "open",
   "gates": [
     {
@@ -52,6 +52,16 @@
       "detail": "Five live production stress scenarios preserve SDS/GHS identity, simultaneous-work separation, vulnerable-worker communication, KOSHA guidance boundaries, and overnight handover/re-energization controls. No DB/share-session/provider mutation occurred; broad human wording review remains separate.",
       "nextActions": [
         "Keep the unchanged stress contracts in the release gate and preserve broad human wording review as a separate boundary."
+      ]
+    },
+    {
+      "id": "live_document_field_isolation",
+      "state": "proven",
+      "label": "Live document scenario field isolation",
+      "evidencePath": "evaluation\\live-document-field-isolation-2026-07-25\\report.json",
+      "detail": "Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate.",
+      "nextActions": [
+        "Keep the 10-scenario field-isolation gate in release evidence and preserve broad human wording review as a separate boundary."
       ]
     },
     {

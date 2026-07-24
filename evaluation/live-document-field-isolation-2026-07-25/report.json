@@ -1,9 +1,18 @@
 {
-  "generatedAt": "2026-07-24T16:10:26.908Z",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_FIELD_ISOLATION_LIVE_PENDING",
+  "generatedAt": "2026-07-24T16:16:37.989Z",
+  "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_FIELD_ISOLATION",
   "sourceHead": "94d0f8538b303fd7d1885cc73a4cc97159965f1c",
-  "productionCommitAtLocalVerification": null,
-  "liveAfterDeploymentPending": true,
+  "evidenceHeadAtLiveVerification": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
+  "productionCommitAtLiveVerification": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
+  "deploymentUrl": "safeguard-contest-81j97euu2-seojaehongs-projects.vercel.app",
+  "productionBuild": {
+    "configured": true,
+    "commitSha": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-81j97euu2-seojaehongs-projects.vercel.app"
+  },
+  "liveAfterDeploymentPending": false,
   "itemCount": 10,
   "successCount": 10,
   "failureCount": 0,
@@ -42,6 +51,23 @@
       "fail": 0,
       "elapsedMs": 27215,
       "report": "stress-after-local/report.json"
+    }
+  },
+  "afterLive": {
+    "baseUrl": "https://www.safeclaw.kr",
+    "normal": {
+      "total": 5,
+      "pass": 5,
+      "fail": 0,
+      "elapsedMs": 110521,
+      "report": "normal-after-live/report.json"
+    },
+    "stress": {
+      "total": 5,
+      "pass": 5,
+      "fail": 0,
+      "elapsedMs": 114229,
+      "report": "stress-after-live/report.json"
     }
   },
   "fixedFailures": [

@@ -47,6 +47,19 @@ type NextRunwayReport = {
     providerDispatchPerformed: boolean;
     exactSavedShareSessionReproduced: boolean;
   };
+  liveDocumentFieldIsolation: {
+    verdict: string;
+    sourceHead: string;
+    evidenceHeadAtLiveVerification: string;
+    productionCommit: string;
+    livePassed: number;
+    liveFailed: number;
+    liveAfterDeploymentPending: boolean;
+    dbMutationPerformed: boolean;
+    shareSessionCreated: boolean;
+    providerDispatchCalled: boolean;
+    exactSavedShareSessionReproduced: boolean;
+  };
   liveDocumentWordingReview: {
     verdict: string;
     sourceHead: string;
@@ -441,6 +454,23 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       dbMutationPerformed: false,
       shareSessionCreated: false,
       providerDispatchPerformed: false,
+      exactSavedShareSessionReproduced: false,
+    },
+  });
+  writeJson(root, "evaluation/live-document-field-isolation-2026-07-25/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_FIELD_ISOLATION",
+    sourceHead: "TO_FILL",
+    evidenceHeadAtLiveVerification: "TO_FILL",
+    productionCommitAtLiveVerification: "TO_FILL",
+    liveAfterDeploymentPending: false,
+    afterLive: {
+      normal: { total: 5, pass: 5, fail: 0 },
+      stress: { total: 5, pass: 5, fail: 0 },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
       exactSavedShareSessionReproduced: false,
     },
   });
@@ -871,6 +901,16 @@ describe("northstar next runway generator", () => {
       dbMutationPerformed: false,
       shareSessionCreated: false,
       providerDispatchPerformed: false,
+      exactSavedShareSessionReproduced: false,
+    });
+    expect(report.liveDocumentFieldIsolation).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_FIELD_ISOLATION",
+      livePassed: 10,
+      liveFailed: 0,
+      liveAfterDeploymentPending: false,
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
       exactSavedShareSessionReproduced: false,
     });
     expect(report.liveDocumentWordingReview).toMatchObject({

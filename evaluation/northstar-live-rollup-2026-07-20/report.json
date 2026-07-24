@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-24T15:50:28.374Z",
-  "head": "d8b0b27a59a3c1bc480a2b58aa7dc3985d13d432",
+  "generatedAt": "2026-07-24T16:22:00.358Z",
+  "head": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "d8b0b27a59a3c1bc480a2b58aa7dc3985d13d432",
+    "commitSha": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-80tab9nag-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-81j97euu2-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 17
+    "gateCount": 18
   },
   "provenGates": [
     {
@@ -50,6 +50,12 @@
       "state": "proven",
       "artifact": "evaluation\\live-document-quality-stress-matrix-2026-07-24\\report.json",
       "detail": "Five live production stress scenarios preserve SDS/GHS identity, simultaneous-work separation, vulnerable-worker communication, KOSHA guidance boundaries, and overnight handover/re-energization controls. No DB/share-session/provider mutation occurred; broad human wording review remains separate."
+    },
+    {
+      "id": "live_document_field_isolation",
+      "state": "proven",
+      "artifact": "evaluation\\live-document-field-isolation-2026-07-25\\report.json",
+      "detail": "Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate."
     },
     {
       "id": "live_document_wording_review",
@@ -194,6 +200,17 @@
     "dbMutationPerformed": false,
     "providerDispatchPerformed": false
   },
+  "liveDocumentFieldIsolation": {
+    "artifact": "evaluation\\live-document-field-isolation-2026-07-25\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_FIELD_ISOLATION",
+    "sourceHead": "94d0f8538b303fd7d1885cc73a4cc97159965f1c",
+    "productionCommit": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
+    "livePassed": 10,
+    "liveFailed": 0,
+    "liveAfterDeploymentPending": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false
+  },
   "liveDocumentWordingReview": {
     "artifact": "evaluation\\live-document-wording-review-2026-07-24\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW",
@@ -259,9 +276,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "d8b0b27a59a3c1bc480a2b58aa7dc3985d13d432",
+      "sourceCommit": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
       "sourceStatus": "exact",
-      "productionCommit": "d8b0b27a59a3c1bc480a2b58aa7dc3985d13d432",
+      "productionCommit": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
       "productionStatus": "matches_live"
     },
     {
@@ -295,6 +312,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": "fa5aa4de49990dafe12f65ea3488c580e96c157f",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "live_document_field_isolation",
+      "artifact": "evaluation\\live-document-field-isolation-2026-07-25\\report.json",
+      "sourceCommit": "94d0f8538b303fd7d1885cc73a4cc97159965f1c",
+      "sourceStatus": "ancestor",
+      "productionCommit": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
+      "productionStatus": "matches_live_source_mismatch"
     },
     {
       "id": "live_document_wording_review",

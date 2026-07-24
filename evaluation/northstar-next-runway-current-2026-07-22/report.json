@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-24T15:50:32.654Z",
+  "generatedAt": "2026-07-24T16:22:04.162Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "d8b0b27a59a3c1bc480a2b58aa7dc3985d13d432",
-  "productionCommit": "d8b0b27a59a3c1bc480a2b58aa7dc3985d13d432",
+  "sourceHead": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
+  "productionCommit": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "d8b0b27a59a3c1bc480a2b58aa7dc3985d13d432",
+    "commitSha": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-80tab9nag-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-81j97euu2-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "d8b0b27a59a3c1bc480a2b58aa7dc3985d13d432",
-  "liveRollupLiveCommit": "d8b0b27a59a3c1bc480a2b58aa7dc3985d13d432",
+  "liveExactEvidenceCommit": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
+  "liveRollupLiveCommit": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -35,6 +35,7 @@
     "documentQualityGrounding": "evaluation\\document-quality-grounding-current-gate-2026-07-19\\report.json",
     "liveDocumentQualityMatrix": "evaluation\\live-document-quality-matrix-2026-07-24\\report.json",
     "liveDocumentQualityStressMatrix": "evaluation\\live-document-quality-stress-matrix-2026-07-24\\report.json",
+    "liveDocumentFieldIsolation": "evaluation\\live-document-field-isolation-2026-07-25\\report.json",
     "liveDocumentWordingReview": "evaluation\\live-document-wording-review-2026-07-24\\report.json",
     "koshaNextExactCandidateAudit": "evaluation\\kosha-next-exact-candidate-audit-2026-07-22\\report.json",
     "koshaExactPromotionPacket": "evaluation\\kosha-exact-promotion-packet-2026-07-22\\report.json",
@@ -284,6 +285,19 @@
     "dbMutationPerformed": false,
     "shareSessionCreated": false,
     "providerDispatchPerformed": false,
+    "exactSavedShareSessionReproduced": false
+  },
+  "liveDocumentFieldIsolation": {
+    "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_FIELD_ISOLATION",
+    "sourceHead": "94d0f8538b303fd7d1885cc73a4cc97159965f1c",
+    "evidenceHeadAtLiveVerification": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
+    "productionCommit": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
+    "livePassed": 10,
+    "liveFailed": 0,
+    "liveAfterDeploymentPending": false,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
     "exactSavedShareSessionReproduced": false
   },
   "liveDocumentWordingReview": {

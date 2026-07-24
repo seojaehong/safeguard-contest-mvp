@@ -36,6 +36,14 @@ type RollupReport = {
     dbMutationPerformed: boolean;
     providerDispatchPerformed: boolean;
   };
+  liveDocumentFieldIsolation: {
+    verdict: string;
+    livePassed: number;
+    liveFailed: number;
+    liveAfterDeploymentPending: boolean;
+    dbMutationPerformed: boolean;
+    providerDispatchCalled: boolean;
+  };
   liveDocumentWordingReview: {
     verdict: string;
     livePassed: number;
@@ -78,6 +86,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "live_harness_quality", state: "proven", evidencePath: "evaluation/live-harness-quality-probe-current-2026-07-20/report.json", detail: "passed" },
       { id: "live_document_quality_matrix", state: "proven", evidencePath: "evaluation/live-document-quality-matrix-2026-07-24/report.json", detail: "five live scenarios passed" },
       { id: "live_document_quality_stress_matrix", state: "proven", evidencePath: "evaluation/live-document-quality-stress-matrix-2026-07-24/report.json", detail: "five high-risk stress scenarios passed" },
+      { id: "live_document_field_isolation", state: "proven", evidencePath: "evaluation/live-document-field-isolation-2026-07-25/report.json", detail: "ten field-isolation scenarios passed" },
       { id: "live_document_wording_review", state: "proven", evidencePath: "evaluation/live-document-wording-review-2026-07-24/report.json", detail: "five synthetic wording scenarios passed" },
       { id: "provider_dispatch_persistence", state: "approval_gated", evidencePath: "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json", detail: "preview only" },
       { id: "supabase_rls_launch_isolation", state: "approval_gated", evidencePath: "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", detail: "approval required" },
@@ -140,6 +149,22 @@ function createFixtureRoot(): { root: string; head: string } {
     boundaries: {
       dbMutationPerformed: false,
       providerDispatchPerformed: false,
+    },
+  });
+  writeJson(root, "evaluation/live-document-field-isolation-2026-07-25/report.json", {
+    sourceHead: "TO_FILL",
+    productionBuild: { commitSha: "TO_FILL" },
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_FIELD_ISOLATION",
+    liveAfterDeploymentPending: false,
+    afterLive: {
+      normal: { total: 5, pass: 5, fail: 0 },
+      stress: { total: 5, pass: 5, fail: 0 },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareSessionReproduced: false,
     },
   });
   writeJson(root, "evaluation/live-document-wording-review-2026-07-24/report.json", {
@@ -254,6 +279,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-harness-quality-probe-current-2026-07-20/report.json",
     "evaluation/live-document-quality-matrix-2026-07-24/report.json",
     "evaluation/live-document-quality-stress-matrix-2026-07-24/report.json",
+    "evaluation/live-document-field-isolation-2026-07-25/report.json",
     "evaluation/live-document-wording-review-2026-07-24/report.json",
     "evaluation/kosha-current-live-gate-2026-07-20/report.json",
     "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json",
@@ -318,6 +344,15 @@ describe("northstar live rollup", () => {
       providerDispatchPerformed: false,
     });
     expect(report.evidence.find((item) => item.id === "live_document_quality_stress_matrix")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.liveDocumentFieldIsolation).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_FIELD_ISOLATION",
+      livePassed: 10,
+      liveFailed: 0,
+      liveAfterDeploymentPending: false,
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+    });
+    expect(report.evidence.find((item) => item.id === "live_document_field_isolation")?.productionStatus).toBe("ancestor_of_head");
     expect(report.liveDocumentWordingReview).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW",
       livePassed: 5,

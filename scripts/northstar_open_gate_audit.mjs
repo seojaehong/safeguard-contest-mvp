@@ -31,6 +31,7 @@ const EVIDENCE_PATHS = Object.freeze({
   documentQualityGrounding: path.join("evaluation", "document-quality-grounding-current-gate-2026-07-19", "report.json"),
   liveDocumentQualityMatrix: path.join("evaluation", "live-document-quality-matrix-2026-07-24", "report.json"),
   liveDocumentQualityStressMatrix: path.join("evaluation", "live-document-quality-stress-matrix-2026-07-24", "report.json"),
+  liveDocumentFieldIsolation: path.join("evaluation", "live-document-field-isolation-2026-07-25", "report.json"),
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
   llmWikiApproval: path.join("evaluation", "llm-wiki-rls-approval-2026-07-17", "report.md"),
@@ -550,6 +551,61 @@ function evaluateLiveDocumentQualityStressMatrixGate(rootDir) {
     evidencePath,
     detail: `Stress matrix verdict=${readString(report.verdict) || "unknown"}, live=${livePass}/${liveTotal}, failed=${liveFail}, productIncludedInProduction=${report.productCommitIncludedInProduction === true}, noMutation=${noMutation}.`,
     nextActions: ["Fix the failing high-risk scenario contracts and rerun the unchanged stress matrix without weakening its semantic checks."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateLiveDocumentFieldIsolationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.liveDocumentFieldIsolation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "live_document_field_isolation",
+      label: "Live document scenario field isolation",
+      state: "missing",
+      evidencePath,
+      detail: "Live process/task/equipment field-isolation evidence is missing or invalid.",
+      nextActions: ["Run the normal and stress field-isolation matrices against production without weakening scenario fingerprints."],
+    });
+  }
+
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const normal = isRecord(afterLive.normal) ? afterLive.normal : {};
+  const stress = isRecord(afterLive.stress) ? afterLive.stress : {};
+  const boundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const livePass = readNumber(normal.pass) + readNumber(stress.pass);
+  const liveFail = readNumber(normal.fail) + readNumber(stress.fail);
+  const noMutation = boundary.dbMutationPerformed === false
+    && boundary.shareSessionCreated === false
+    && boundary.providerDispatchCalled === false
+    && boundary.exactSavedShareSessionReproduced === false;
+  const liveReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_DOCUMENT_FIELD_ISOLATION"
+    && livePass === 10
+    && liveFail === 0
+    && report.liveAfterDeploymentPending === false
+    && noMutation;
+
+  if (liveReady) {
+    return gateResult({
+      id: "live_document_field_isolation",
+      label: "Live document scenario field isolation",
+      state: "proven",
+      evidencePath,
+      detail: "Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate.",
+      nextActions: ["Keep the 10-scenario field-isolation gate in release evidence and preserve broad human wording review as a separate boundary."],
+    });
+  }
+
+  return gateResult({
+    id: "live_document_field_isolation",
+    label: "Live document scenario field isolation",
+    state: "contradicted",
+    evidencePath,
+    detail: `Field-isolation verdict=${readString(report.verdict) || "unknown"}, live=${livePass}/10, failed=${liveFail}, livePending=${report.liveAfterDeploymentPending === true}, noMutation=${noMutation}.`,
+    nextActions: ["Fix process/task/equipment grounding or cross-scenario leakage and rerun the unchanged normal and stress matrices."],
   });
 }
 
@@ -2453,6 +2509,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateDocumentQualityGroundingGate(rootDir),
     evaluateLiveDocumentQualityMatrixGate(rootDir),
     evaluateLiveDocumentQualityStressMatrixGate(rootDir),
+    evaluateLiveDocumentFieldIsolationGate(rootDir),
     evaluateLiveDocumentWordingReviewGate(rootDir),
     evaluateUiDocumentsShareCockpitGate(rootDir),
     evaluateDispatchStandaloneCockpitGate(rootDir),

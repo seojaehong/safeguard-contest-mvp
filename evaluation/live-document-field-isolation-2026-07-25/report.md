@@ -1,20 +1,23 @@
 # Live Document Field Isolation Gate
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_FIELD_ISOLATION_LIVE_PENDING`
+- Verdict: `PASS_LIVE_PRODUCTION_DOCUMENT_FIELD_ISOLATION`
 - Product source: `94d0f8538b303fd7d1885cc73a4cc97159965f1c`
+- Live production/evidence head: `2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6`
+- Deployment: `safeguard-contest-81j97euu2-seojaehongs-projects.vercel.app`
 - Current-source local production: 10 scenarios, 10 PASS, 0 RED
+- Live production: 10 scenarios, 10 PASS, 0 RED
 - Local base URL: `http://127.0.0.1:3079`
-- Live after deployment: pending
+- Live base URL: `https://www.safeclaw.kr`
 - DB mutation: `false`
 - Share session creation: `false`
 - Provider dispatch: `false`
 
 ## Result
 
-| Matrix | Before live | Current-source local | Scope |
-|---|---:|---:|---|
-| Normal | 4/5 PASS | 5/5 PASS | process/task/equipment grounding and cross-scenario leakage |
-| Stress | 1/5 PASS | 5/5 PASS | high-risk process/task/equipment grounding and cross-scenario leakage |
+| Matrix | Before live | Current-source local | After live | Scope |
+|---|---:|---:|---:|---|
+| Normal | 4/5 PASS | 5/5 PASS | 5/5 PASS | process/task/equipment grounding and cross-scenario leakage |
+| Stress | 1/5 PASS | 5/5 PASS | 5/5 PASS | high-risk process/task/equipment grounding and cross-scenario leakage |
 
 The before-live discovery caught a real Changwon-to-Busan profile leak: a press maintenance request containing LOTO was classified as a pump/confined-space job, and every generated process field named the basement pump task. It also caught missing structured-row identity for the Daejeon conveyor and Gumi automated-equipment scenarios.
 
@@ -28,7 +31,7 @@ Each scenario must:
 2. carry its own scenario fingerprint in `process`, `task`, or `equipment`;
 3. avoid fingerprints exclusive to every other matrix scenario.
 
-The current source passes all 10 normal and stress cases in a production build. This is not a live-production PASS until the product commit is deployed and the same matrices are rerun against `https://www.safeclaw.kr`.
+The deployed production passes all 10 normal and stress cases after the product commit reached live.
 
 ## Boundary
 

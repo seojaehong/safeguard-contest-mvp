@@ -184,6 +184,20 @@ function createFixtureRoot(): string {
       exactSavedShareSessionReproduced: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "live-document-field-isolation-2026-07-25", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_FIELD_ISOLATION",
+    liveAfterDeploymentPending: false,
+    afterLive: {
+      normal: { total: 5, pass: 5, fail: 0 },
+      stress: { total: 5, pass: 5, fail: 0 },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareSessionReproduced: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW",
     productCommit: "fixture-product",
@@ -1336,6 +1350,12 @@ describe("northstar open gate audit", () => {
     });
     expect(audit.gates.find((gate) => gate.id === "live_document_quality_stress_matrix")?.detail).toContain("SDS/GHS identity");
     expect(audit.gates.find((gate) => gate.id === "live_document_quality_stress_matrix")?.detail).toContain("broad human wording review remains separate");
+    expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "live-document-field-isolation-2026-07-25", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("process/task/equipment");
+    expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("exact saved Share geometry remain separate");
     expect(audit.gates.find((gate) => gate.id === "live_document_wording_review")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
