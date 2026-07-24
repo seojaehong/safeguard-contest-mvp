@@ -1,0 +1,214 @@
+{
+  "generatedAt": "2026-07-24T16:10:26.908Z",
+  "elapsedMs": 27215,
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SYNTHETIC_WORDING_REVIEW",
+  "mode": "current-source-local-production",
+  "baseUrl": "http://127.0.0.1:3079",
+  "sourceHead": "94d0f8538b303fd7d1885cc73a4cc97159965f1c",
+  "productionBuild": {
+    "ok": true,
+    "configured": false,
+    "source": "unavailable",
+    "commitSha": null,
+    "branch": null,
+    "environment": null,
+    "deploymentUrl": null,
+    "message": "배포 커밋 식별자가 런타임 환경에 노출되지 않았습니다."
+  },
+  "total": 5,
+  "pass": 5,
+  "fail": 0,
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false
+  },
+  "cases": [
+    {
+      "id": "ulsan-chemical-cleaning-sds__stress",
+      "verdict": "PASS",
+      "elapsedMs": 6184,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 6181
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6,
+        "scenarioSnapshot": {
+          "region": "울산",
+          "workType": "화학세척",
+          "fieldIsolationTerms": [
+            "화학세척",
+            "세척제",
+            "SDS"
+          ],
+          "matchedFieldIsolationTerms": [
+            "화학세척"
+          ]
+        },
+        "uniqueProcessValues": [
+          "서비스업 공장 바닥 세척 및 화학세제 사용"
+        ],
+        "uniqueEquipmentValues": [
+          "빌딩, 판넬 등 외부마감작업",
+          "아카이브(제조업등)",
+          "작업 장비·공구·보호구",
+          "기상청 현재·예보, 작업중지 기준표"
+        ],
+        "fieldLeakageFlags": []
+      },
+      "failedChecks": []
+    },
+    {
+      "id": "pyeongtaek-simultaneous-overhead-hotwork__stress",
+      "verdict": "PASS",
+      "elapsedMs": 5228,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 5226
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6,
+        "scenarioSnapshot": {
+          "region": "경기",
+          "workType": "양중·화기 동시작업",
+          "fieldIsolationTerms": [
+            "동시작업",
+            "크레인 양중",
+            "배관 화기작업"
+          ],
+          "matchedFieldIsolationTerms": [
+            "크레인 양중",
+            "배관 화기작업"
+          ]
+        },
+        "uniqueProcessValues": [
+          "창고업 고중량 박스 적재 및 수작업 운반"
+        ],
+        "uniqueEquipmentValues": [
+          "아카이브(제조업등)",
+          "아카이브(건설업)",
+          "작업 장비·공구·보호구",
+          "기상청 현재·예보, 작업중지 기준표",
+          "작업 장비, 공구, 방호장치"
+        ],
+        "fieldLeakageFlags": []
+      },
+      "failedChecks": []
+    },
+    {
+      "id": "daejeon-vulnerable-night-maintenance__stress",
+      "verdict": "PASS",
+      "elapsedMs": 5149,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 5147
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6,
+        "scenarioSnapshot": {
+          "region": "대전",
+          "workType": "야간 컨베이어 정비",
+          "fieldIsolationTerms": [
+            "컨베이어",
+            "야간 정비",
+            "조도"
+          ],
+          "matchedFieldIsolationTerms": [
+            "컨베이어"
+          ]
+        },
+        "uniqueProcessValues": [
+          "현장 유지보수 야간 컨베이어 정비 작업"
+        ],
+        "uniqueEquipmentValues": [
+          "아카이브(제조업등)",
+          "133, 제조업",
+          "작업 장비·공구·보호구"
+        ],
+        "fieldLeakageFlags": []
+      },
+      "failedChecks": []
+    },
+    {
+      "id": "gumi-kosha-guidance-boundary__stress",
+      "verdict": "PASS",
+      "elapsedMs": 5873,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 5872
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6,
+        "scenarioSnapshot": {
+          "region": "경북",
+          "workType": "방호장치 개선·정비",
+          "fieldIsolationTerms": [
+            "방호장치",
+            "자동화설비",
+            "기동"
+          ],
+          "matchedFieldIsolationTerms": [
+            "방호장치",
+            "자동화설비"
+          ]
+        },
+        "uniqueProcessValues": [
+          "현장 유지보수 자동화설비 방호장치 개선·정비 작업"
+        ],
+        "uniqueEquipmentValues": [
+          "아카이브(제조업등)",
+          "632, 제조업",
+          "작업 장비·공구·보호구"
+        ],
+        "fieldLeakageFlags": []
+      },
+      "failedChecks": []
+    },
+    {
+      "id": "jeju-overnight-electrical-repair__stress",
+      "verdict": "PASS",
+      "elapsedMs": 4612,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 4611
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6,
+        "scenarioSnapshot": {
+          "region": "제주",
+          "workType": "심야 전기설비 복구",
+          "fieldIsolationTerms": [
+            "전기설비",
+            "분전반",
+            "심야 복구"
+          ],
+          "matchedFieldIsolationTerms": [
+            "전기설비"
+          ]
+        },
+        "uniqueProcessValues": [
+          "전기설비 점검 정전전로 인근 배전반 점검 작업"
+        ],
+        "uniqueEquipmentValues": [
+          "아카이브(제조업등)",
+          "작업 장비·공구·보호구",
+          "기상청 현재·예보, 작업중지 기준표",
+          "작업 장비, 공구, 방호장치"
+        ],
+        "fieldLeakageFlags": []
+      },
+      "failedChecks": []
+    }
+  ]
+}

@@ -1,0 +1,194 @@
+[
+  {
+    "id": "incheon-logistics-forklift__field-ready",
+    "verdict": "PASS",
+    "elapsedMs": 6590,
+    "api": {
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 6587
+    },
+    "metrics": {
+      "riskRowCount": 5,
+      "reviewedDocumentCount": 6,
+      "scenarioSnapshot": {
+        "region": "인천",
+        "workType": "지게차 상하차",
+        "fieldIsolationTerms": [
+          "지게차",
+          "상하차",
+          "피킹"
+        ],
+        "matchedFieldIsolationTerms": [
+          "지게차",
+          "상하차",
+          "피킹"
+        ]
+      },
+      "uniqueProcessValues": [
+        "물류업 상하차 및 피킹 작업"
+      ],
+      "uniqueEquipmentValues": [
+        "469, 운수·창고및통신업",
+        "아카이브(제조업등)",
+        "351, 제조업",
+        "지게차, 팔레트, 하역구역 표지"
+      ],
+      "fieldLeakageFlags": []
+    },
+    "failedChecks": []
+  },
+  {
+    "id": "ansan-hotwork-foreign__field-ready",
+    "verdict": "PASS",
+    "elapsedMs": 5413,
+    "api": {
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 5410
+    },
+    "metrics": {
+      "riskRowCount": 5,
+      "reviewedDocumentCount": 6,
+      "scenarioSnapshot": {
+        "region": "경기",
+        "workType": "용접 절단",
+        "fieldIsolationTerms": [
+          "용접",
+          "절단",
+          "화기작업"
+        ],
+        "matchedFieldIsolationTerms": [
+          "용접",
+          "절단",
+          "화기작업"
+        ]
+      },
+      "uniqueProcessValues": [
+        "제조업 용접·절단 화기작업"
+      ],
+      "uniqueEquipmentValues": [
+        "아카이브(제조업등)",
+        "아카이브(건설업)",
+        "작업 장비·공구·보호구",
+        "기상청 현재·예보, 작업중지 기준표"
+      ],
+      "fieldLeakageFlags": []
+    },
+    "failedChecks": []
+  },
+  {
+    "id": "busan-confined-pump__field-ready",
+    "verdict": "PASS",
+    "elapsedMs": 4530,
+    "api": {
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 4528
+    },
+    "metrics": {
+      "riskRowCount": 5,
+      "reviewedDocumentCount": 6,
+      "scenarioSnapshot": {
+        "region": "부산",
+        "workType": "배수펌프 점검",
+        "fieldIsolationTerms": [
+          "배수펌프",
+          "기계실",
+          "밀폐공간"
+        ],
+        "matchedFieldIsolationTerms": [
+          "배수펌프",
+          "기계실"
+        ]
+      },
+      "uniqueProcessValues": [
+        "시설관리·기계설비 점검 지하 기계실 배수펌프 점검"
+      ],
+      "uniqueEquipmentValues": [
+        "아카이브(건설업)",
+        "아카이브(제조업등)",
+        "작업 장비·공구·보호구",
+        "기상청 현재·예보, 작업중지 기준표"
+      ],
+      "fieldLeakageFlags": []
+    },
+    "failedChecks": []
+  },
+  {
+    "id": "changwon-press-maintenance__field-ready",
+    "verdict": "PASS",
+    "elapsedMs": 4844,
+    "api": {
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 4842
+    },
+    "metrics": {
+      "riskRowCount": 5,
+      "reviewedDocumentCount": 6,
+      "scenarioSnapshot": {
+        "region": "경남",
+        "workType": "프레스 보전",
+        "fieldIsolationTerms": [
+          "프레스",
+          "설비 보전",
+          "보전 작업"
+        ],
+        "matchedFieldIsolationTerms": [
+          "프레스",
+          "설비 보전",
+          "보전 작업"
+        ]
+      },
+      "uniqueProcessValues": [
+        "현장 유지보수 프레스 설비 보전 작업"
+      ],
+      "uniqueEquipmentValues": [
+        "113, 제조업",
+        "아카이브(제조업등)",
+        "작업 장비·공구·보호구",
+        "기상청 현재·예보, 작업중지 기준표"
+      ],
+      "fieldLeakageFlags": []
+    },
+    "failedChecks": []
+  },
+  {
+    "id": "sejong-excavation__field-ready",
+    "verdict": "PASS",
+    "elapsedMs": 3712,
+    "api": {
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 3710
+    },
+    "metrics": {
+      "riskRowCount": 5,
+      "reviewedDocumentCount": 6,
+      "scenarioSnapshot": {
+        "region": "세종",
+        "workType": "도로 굴착",
+        "fieldIsolationTerms": [
+          "도로 굴착",
+          "굴착면",
+          "매설물"
+        ],
+        "matchedFieldIsolationTerms": [
+          "도로 굴착"
+        ]
+      },
+      "uniqueProcessValues": [
+        "건설업 열수송관 굴착공사"
+      ],
+      "uniqueEquipmentValues": [
+        "아카이브(건설업)",
+        "작업 장비·공구·보호구",
+        "기상청 현재·예보, 작업중지 기준표",
+        "작업 장비, 공구, 방호장치"
+      ],
+      "fieldLeakageFlags": []
+    },
+    "failedChecks": []
+  }
+]

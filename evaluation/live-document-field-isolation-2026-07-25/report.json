@@ -1,0 +1,70 @@
+{
+  "generatedAt": "2026-07-24T16:10:26.908Z",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_FIELD_ISOLATION_LIVE_PENDING",
+  "sourceHead": "94d0f8538b303fd7d1885cc73a4cc97159965f1c",
+  "productionCommitAtLocalVerification": null,
+  "liveAfterDeploymentPending": true,
+  "itemCount": 10,
+  "successCount": 10,
+  "failureCount": 0,
+  "elapsedMs": 52434,
+  "before": {
+    "normal": {
+      "sourceHead": "fa559d16092a80564c3d15f8ffdd39b2f0ff8bd4",
+      "productionCommit": "fa559d16092a80564c3d15f8ffdd39b2f0ff8bd4",
+      "total": 5,
+      "pass": 4,
+      "fail": 1,
+      "report": "normal-live-before/report.json"
+    },
+    "stress": {
+      "sourceHead": "fa559d16092a80564c3d15f8ffdd39b2f0ff8bd4",
+      "productionCommit": "fa559d16092a80564c3d15f8ffdd39b2f0ff8bd4",
+      "total": 5,
+      "pass": 1,
+      "fail": 4,
+      "report": "stress-live-before/report.json",
+      "note": "The discovery baseline predates the exclusive-term refinement; two generic guard-device matches were contract false positives, while Daejeon and Gumi were real field-grounding failures."
+    }
+  },
+  "afterLocal": {
+    "baseUrl": "http://127.0.0.1:3079",
+    "normal": {
+      "total": 5,
+      "pass": 5,
+      "fail": 0,
+      "elapsedMs": 25219,
+      "report": "normal-after-local/report.json"
+    },
+    "stress": {
+      "total": 5,
+      "pass": 5,
+      "fail": 0,
+      "elapsedMs": 27215,
+      "report": "stress-after-local/report.json"
+    }
+  },
+  "fixedFailures": [
+    {
+      "scenario": "changwon-press-maintenance",
+      "before": "LOTO incorrectly selected the Busan pump/confined-space profile and leaked 배수펌프/기계실 into every process field.",
+      "after": "The pump classifier requires pump/confined-space identity, and press rows use a press maintenance process and task."
+    },
+    {
+      "scenario": "daejeon-vulnerable-night-maintenance",
+      "before": "Structured rows used generic nonstandard-maintenance process/task fields.",
+      "after": "Structured rows carry night conveyor maintenance identity and process controls."
+    },
+    {
+      "scenario": "gumi-kosha-guidance-boundary",
+      "before": "Structured rows used generic nonstandard-maintenance process/task fields.",
+      "after": "Structured rows carry automated-equipment guard improvement and maintenance identity."
+    }
+  ],
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "exactSavedShareSessionReproduced": false
+  }
+}

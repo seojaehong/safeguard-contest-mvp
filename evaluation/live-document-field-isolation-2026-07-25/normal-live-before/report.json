@@ -1,0 +1,354 @@
+{
+  "generatedAt": "2026-07-24T15:57:01.223Z",
+  "elapsedMs": 110247,
+  "verdict": "RED_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW",
+  "mode": "live-production",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceHead": "fa559d16092a80564c3d15f8ffdd39b2f0ff8bd4",
+  "productionBuild": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "fa559d16092a80564c3d15f8ffdd39b2f0ff8bd4",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-hjhl36lr4-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "total": 5,
+  "pass": 4,
+  "fail": 1,
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false
+  },
+  "cases": [
+    {
+      "id": "incheon-logistics-forklift__field-ready",
+      "verdict": "PASS",
+      "elapsedMs": 23696,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 23692
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6,
+        "scenarioSnapshot": {
+          "region": "인천",
+          "workType": "지게차 상하차",
+          "fieldIsolationTerms": [
+            "지게차",
+            "상하차",
+            "피킹"
+          ],
+          "matchedFieldIsolationTerms": [
+            "지게차",
+            "상하차",
+            "피킹"
+          ]
+        },
+        "uniqueProcessValues": [
+          "물류업 상하차 및 피킹 작업"
+        ],
+        "uniqueEquipmentValues": [
+          "469, 운수·창고및통신업",
+          "아카이브(제조업등)",
+          "351, 제조업",
+          "지게차, 팔레트, 하역구역 표지"
+        ],
+        "fieldLeakageFlags": []
+      },
+      "failedChecks": []
+    },
+    {
+      "id": "ansan-hotwork-foreign__field-ready",
+      "verdict": "PASS",
+      "elapsedMs": 18581,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 18579
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6,
+        "scenarioSnapshot": {
+          "region": "경기",
+          "workType": "용접 절단",
+          "fieldIsolationTerms": [
+            "용접",
+            "절단",
+            "화기작업"
+          ],
+          "matchedFieldIsolationTerms": [
+            "용접",
+            "절단",
+            "화기작업"
+          ]
+        },
+        "uniqueProcessValues": [
+          "제조업 용접·절단 화기작업"
+        ],
+        "uniqueEquipmentValues": [
+          "아카이브(제조업등)",
+          "아카이브(건설업)",
+          "작업 장비·공구·보호구",
+          "기상청 현재·예보, 작업중지 기준표"
+        ],
+        "fieldLeakageFlags": []
+      },
+      "failedChecks": []
+    },
+    {
+      "id": "busan-confined-pump__field-ready",
+      "verdict": "PASS",
+      "elapsedMs": 23353,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 23351
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6,
+        "scenarioSnapshot": {
+          "region": "부산",
+          "workType": "배수펌프 점검",
+          "fieldIsolationTerms": [
+            "배수펌프",
+            "기계실",
+            "밀폐공간"
+          ],
+          "matchedFieldIsolationTerms": [
+            "배수펌프",
+            "기계실"
+          ]
+        },
+        "uniqueProcessValues": [
+          "시설관리·기계설비 점검 지하 기계실 배수펌프 점검"
+        ],
+        "uniqueEquipmentValues": [
+          "아카이브(건설업)",
+          "아카이브(제조업등)",
+          "작업 장비·공구·보호구",
+          "기상청 현재·예보, 작업중지 기준표"
+        ],
+        "fieldLeakageFlags": []
+      },
+      "failedChecks": []
+    },
+    {
+      "id": "changwon-press-maintenance__field-ready",
+      "verdict": "RED",
+      "elapsedMs": 25244,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 25242
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6,
+        "scenarioSnapshot": {
+          "region": "경남",
+          "workType": "프레스 보전",
+          "fieldIsolationTerms": [
+            "프레스",
+            "설비 보전",
+            "보전 작업"
+          ],
+          "matchedFieldIsolationTerms": [
+            "프레스",
+            "설비 보전"
+          ]
+        },
+        "uniqueProcessValues": [
+          "시설관리·기계설비 점검 지하 기계실 배수펌프 점검"
+        ],
+        "uniqueEquipmentValues": [
+          "113, 제조업",
+          "아카이브(제조업등)",
+          "작업 장비·공구·보호구",
+          "기상청 현재·예보, 작업중지 기준표"
+        ],
+        "fieldLeakageFlags": [
+          {
+            "row": 0,
+            "field": "process",
+            "value": "시설관리·기계설비 점검 지하 기계실 배수펌프 점검",
+            "matchedProfile": "busan-confined-pump",
+            "matchedTerm": "배수펌프"
+          },
+          {
+            "row": 0,
+            "field": "process",
+            "value": "시설관리·기계설비 점검 지하 기계실 배수펌프 점검",
+            "matchedProfile": "busan-confined-pump",
+            "matchedTerm": "기계실"
+          },
+          {
+            "row": 1,
+            "field": "process",
+            "value": "시설관리·기계설비 점검 지하 기계실 배수펌프 점검",
+            "matchedProfile": "busan-confined-pump",
+            "matchedTerm": "배수펌프"
+          },
+          {
+            "row": 1,
+            "field": "process",
+            "value": "시설관리·기계설비 점검 지하 기계실 배수펌프 점검",
+            "matchedProfile": "busan-confined-pump",
+            "matchedTerm": "기계실"
+          },
+          {
+            "row": 2,
+            "field": "process",
+            "value": "시설관리·기계설비 점검 지하 기계실 배수펌프 점검",
+            "matchedProfile": "busan-confined-pump",
+            "matchedTerm": "배수펌프"
+          },
+          {
+            "row": 2,
+            "field": "process",
+            "value": "시설관리·기계설비 점검 지하 기계실 배수펌프 점검",
+            "matchedProfile": "busan-confined-pump",
+            "matchedTerm": "기계실"
+          },
+          {
+            "row": 3,
+            "field": "process",
+            "value": "시설관리·기계설비 점검 지하 기계실 배수펌프 점검",
+            "matchedProfile": "busan-confined-pump",
+            "matchedTerm": "배수펌프"
+          },
+          {
+            "row": 3,
+            "field": "process",
+            "value": "시설관리·기계설비 점검 지하 기계실 배수펌프 점검",
+            "matchedProfile": "busan-confined-pump",
+            "matchedTerm": "기계실"
+          },
+          {
+            "row": 4,
+            "field": "process",
+            "value": "시설관리·기계설비 점검 지하 기계실 배수펌프 점검",
+            "matchedProfile": "busan-confined-pump",
+            "matchedTerm": "배수펌프"
+          },
+          {
+            "row": 4,
+            "field": "process",
+            "value": "시설관리·기계설비 점검 지하 기계실 배수펌프 점검",
+            "matchedProfile": "busan-confined-pump",
+            "matchedTerm": "기계실"
+          }
+        ]
+      },
+      "failedChecks": [
+        {
+          "id": "riskRows:crossScenarioFieldLeakage",
+          "ok": false,
+          "detail": "10 process/task/equipment field value(s) contain another scenario fingerprint",
+          "samples": [
+            {
+              "row": 0,
+              "field": "process",
+              "value": "시설관리·기계설비 점검 지하 기계실 배수펌프 점검",
+              "matchedProfile": "busan-confined-pump",
+              "matchedTerm": "배수펌프"
+            },
+            {
+              "row": 0,
+              "field": "process",
+              "value": "시설관리·기계설비 점검 지하 기계실 배수펌프 점검",
+              "matchedProfile": "busan-confined-pump",
+              "matchedTerm": "기계실"
+            },
+            {
+              "row": 1,
+              "field": "process",
+              "value": "시설관리·기계설비 점검 지하 기계실 배수펌프 점검",
+              "matchedProfile": "busan-confined-pump",
+              "matchedTerm": "배수펌프"
+            },
+            {
+              "row": 1,
+              "field": "process",
+              "value": "시설관리·기계설비 점검 지하 기계실 배수펌프 점검",
+              "matchedProfile": "busan-confined-pump",
+              "matchedTerm": "기계실"
+            },
+            {
+              "row": 2,
+              "field": "process",
+              "value": "시설관리·기계설비 점검 지하 기계실 배수펌프 점검",
+              "matchedProfile": "busan-confined-pump",
+              "matchedTerm": "배수펌프"
+            },
+            {
+              "row": 2,
+              "field": "process",
+              "value": "시설관리·기계설비 점검 지하 기계실 배수펌프 점검",
+              "matchedProfile": "busan-confined-pump",
+              "matchedTerm": "기계실"
+            },
+            {
+              "row": 3,
+              "field": "process",
+              "value": "시설관리·기계설비 점검 지하 기계실 배수펌프 점검",
+              "matchedProfile": "busan-confined-pump",
+              "matchedTerm": "배수펌프"
+            },
+            {
+              "row": 3,
+              "field": "process",
+              "value": "시설관리·기계설비 점검 지하 기계실 배수펌프 점검",
+              "matchedProfile": "busan-confined-pump",
+              "matchedTerm": "기계실"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sejong-excavation__field-ready",
+      "verdict": "PASS",
+      "elapsedMs": 18600,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 18599
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6,
+        "scenarioSnapshot": {
+          "region": "세종",
+          "workType": "도로 굴착",
+          "fieldIsolationTerms": [
+            "도로 굴착",
+            "굴착면",
+            "매설물"
+          ],
+          "matchedFieldIsolationTerms": [
+            "도로 굴착"
+          ]
+        },
+        "uniqueProcessValues": [
+          "건설업 열수송관 굴착공사"
+        ],
+        "uniqueEquipmentValues": [
+          "아카이브(건설업)",
+          "작업 장비·공구·보호구",
+          "기상청 현재·예보, 작업중지 기준표",
+          "작업 장비, 공구, 방호장치"
+        ],
+        "fieldLeakageFlags": []
+      },
+      "failedChecks": []
+    }
+  ]
+}
