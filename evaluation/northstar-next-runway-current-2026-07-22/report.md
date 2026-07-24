@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `772016d6ab1ebe89ea636627c8d0f933645d4985`
+Source HEAD: `356cc6946779d85b988f82a5e179f173b34567f5`
 
-Production `/api/build-info`: `772016d6ab1ebe89ea636627c8d0f933645d4985`
+Production `/api/build-info`: `356cc6946779d85b988f82a5e179f173b34567f5`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `772016d6ab1ebe89ea636627c8d0f933645d4985`
+Live rollup source head: `356cc6946779d85b988f82a5e179f173b34567f5`
 
 Live rollup matches production: `true`
 
@@ -64,7 +64,7 @@ These require explicit approval before runtime mutation or live claims:
 The user's Documents/Share concern remains framed as information architecture, not page-count alone:
 
 - Default Documents cockpit: first actionable cockpit is live-proven; do not phrase this as "Documents page height fixed" or "the whole Documents page is short".
-- Documents cockpit workbench geometry: `PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH`; 1440x723 and 390x723 rows must show grid workbench, core buttons 3, no horizontal overflow, and route split alone remains `false`.
+- Documents cockpit workbench geometry: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_DOCUMENTS_WORKBENCH`; 1440x723 and 390x723 rows must show grid workbench, core buttons 3, no horizontal overflow, and route split alone remains `false`.
 - Documents selected editor/detail: risk-assessment default, same-document reselect, and all-12 launcher exposure land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown.
 - Documents remaining debt: full 12-document authoring polish remains. The all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content.
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.
