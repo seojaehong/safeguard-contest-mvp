@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-24T20:15:45.383Z",
-  "head": "f280959e5221dee73e38908fc0d3edcc4b686eb6",
+  "generatedAt": "2026-07-24T20:39:38.068Z",
+  "head": "070b5993f05bf7b777572adc619753afe96a9083",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f280959e5221dee73e38908fc0d3edcc4b686eb6",
+    "commitSha": "6fe34fe4f4806aa49a3e84ba6a63fef4f4d90f1a",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-g5jsssh6m-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-8lh6ggfsq-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -91,7 +91,7 @@
       "id": "ui_documents_share_cockpit",
       "state": "proven",
       "artifact": "evaluation\\documents-cockpit-workbench-geometry-2026-07-22\\report.json",
-      "detail": "Scoped first-task cockpit proof only, not full Documents/Share IA completion: live /documents?theme=day geometry now directly proves the selected-document cockpit/workbench is not the stale stacked layout at 1440x723 and 390x723, while default /workspace Documents and Share cockpits, /documents mobile first-action containment, exact one-viewport Documents review cockpit, selected-document context/summary layers, selected editor/detail field-summary risk-row landing, selected-editor field summary plus evidence/recheck CTA before raw textarea, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors remain scoped. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, mobile Share exact 844px viewport containment, and /share/[sessionId] desktop recipient confirmation cockpit with mobile confirmation CTA before document details. This is not a claim that the whole Documents page is short; raw textarea/full long-form editing remains open secondary drilldown. It also does not prove exact saved/generated Share, provider live dispatch, or route/page split alone as the UX fix."
+      "detail": "Scoped first-task cockpit proof only, not full Documents/Share IA completion: live /documents?theme=day geometry now directly proves the selected-document cockpit/workbench is not the stale stacked layout at 1440x723 and 390x723, with 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers kept inside the closed disclosure, 0 visible supporting launchers by default, and the legacy document index hidden. Default /workspace Documents and Share cockpits, /documents mobile first-action containment, exact one-viewport Documents review cockpit, selected-document context/summary layers, selected editor/detail field-summary risk-row landing, selected-editor field summary plus evidence/recheck CTA before raw textarea, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors remain scoped. It also keeps /share desktop two-pane channel composition, desktop-short 1440x723 first-viewport Share cockpit, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, mobile Share exact 844px viewport containment, and /share/[sessionId] desktop recipient confirmation cockpit with mobile confirmation CTA before document details. This is not a claim that the whole Documents page is short; raw textarea/full long-form editing remains open secondary drilldown. It also does not prove exact saved/generated Share, provider live dispatch, or route/page split alone as the UX fix."
     },
     {
       "id": "dispatch_standalone_cockpit",
@@ -366,10 +366,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "f280959e5221dee73e38908fc0d3edcc4b686eb6",
+      "sourceCommit": "070b5993f05bf7b777572adc619753afe96a9083",
       "sourceStatus": "exact",
-      "productionCommit": "f280959e5221dee73e38908fc0d3edcc4b686eb6",
-      "productionStatus": "matches_live"
+      "productionCommit": "070b5993f05bf7b777572adc619753afe96a9083",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",

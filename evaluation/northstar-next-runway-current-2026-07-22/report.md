@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `f280959e5221dee73e38908fc0d3edcc4b686eb6`
+Source HEAD: `070b5993f05bf7b777572adc619753afe96a9083`
 
-Production `/api/build-info`: `f280959e5221dee73e38908fc0d3edcc4b686eb6`
+Production `/api/build-info`: `6fe34fe4f4806aa49a3e84ba6a63fef4f4d90f1a`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `none`
+Source pending changed paths: `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
 
-Current head is evidence-only pending: `false`
+Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `f280959e5221dee73e38908fc0d3edcc4b686eb6`
+Live rollup source head: `070b5993f05bf7b777572adc619753afe96a9083`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `070b5993f05bf7b777572adc619753afe96a9083` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `6fe34fe4f4806aa49a3e84ba6a63fef4f4d90f1a`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -72,7 +72,7 @@ These require explicit approval before runtime mutation or live claims:
 The user's Documents/Share concern remains framed as information architecture, not page-count alone:
 
 - Default Documents cockpit: first actionable cockpit is live-proven; do not phrase this as "Documents page height fixed" or "the whole Documents page is short".
-- Documents cockpit workbench geometry: `PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH`; 1440x723 and 390x723 rows must show grid workbench, core buttons 3, no horizontal overflow, and route split alone remains `false`.
+- Documents cockpit workbench geometry: `PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH`; 1440x723 and 390x723 rows must show grid workbench, 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers closed by default, 0 visible supporting launchers, the legacy document index hidden, no horizontal overflow, and route split alone remains `false`.
 - Documents selected editor/detail: risk-assessment default, same-document reselect, and all-12 launcher exposure land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown.
 - Documents remaining debt: full 12-document authoring polish remains. The all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content.
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.

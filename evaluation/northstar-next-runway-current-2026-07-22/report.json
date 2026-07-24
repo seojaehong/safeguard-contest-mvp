@@ -1,29 +1,34 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-24T20:15:51.028Z",
+  "generatedAt": "2026-07-24T20:39:44.287Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "f280959e5221dee73e38908fc0d3edcc4b686eb6",
-  "productionCommit": "f280959e5221dee73e38908fc0d3edcc4b686eb6",
+  "sourceHead": "070b5993f05bf7b777572adc619753afe96a9083",
+  "productionCommit": "6fe34fe4f4806aa49a3e84ba6a63fef4f4d90f1a",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f280959e5221dee73e38908fc0d3edcc4b686eb6",
+    "commitSha": "6fe34fe4f4806aa49a3e84ba6a63fef4f4d90f1a",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-g5jsssh6m-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-8lh6ggfsq-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": true,
-  "currentHeadIsEvidenceOnlyPending": false,
-  "sourceHeadLivePending": false,
+  "latestEvidenceCommitLive": false,
+  "currentHeadIsEvidenceOnlyPending": true,
+  "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
-  "sourcePendingChangedPaths": [],
+  "sourcePendingChangedPaths": [
+    "scripts/northstar_next_runway.mjs",
+    "scripts/northstar_open_gate_audit.mjs",
+    "tests/northstar-next-runway-generator.test.ts",
+    "tests/northstar-open-gate-audit.test.ts"
+  ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "f280959e5221dee73e38908fc0d3edcc4b686eb6",
-  "liveRollupLiveCommit": "f280959e5221dee73e38908fc0d3edcc4b686eb6",
+  "liveExactEvidenceCommit": "070b5993f05bf7b777572adc619753afe96a9083",
+  "liveRollupLiveCommit": "6fe34fe4f4806aa49a3e84ba6a63fef4f4d90f1a",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -208,7 +213,7 @@
       "documents": "core 3 status, selected document header, evidence/recheck CTA, and next action first; full 12-document bodies remain selected-only drilldown",
       "share": "recipient/channel/language summary, preview/result status, and primary confirmation first; long messages, logs, provenance, and raw metadata remain collapsed/detail content"
     },
-    "documentsDefaultCockpit": "first actionable cockpit is live-proven; do not phrase this as documents page height fixed or the whole Documents page shortened",
+    "documentsDefaultCockpit": "first actionable cockpit is live-proven with 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers closed by default, 0 visible supporting launchers, and the legacy document index hidden; do not phrase this as the whole Documents page shortened",
     "documentsRemainingDebt": "full 12-document authoring polish remains; the all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content and the local workbench shell ratio target remains <= 3",
     "selectedEditorDetail": "risk-assessment default, same-document reselect, and all-12 launcher exposure now land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown",
     "documentsContainment": "route/page split is only orientation; /documents must remain a selected-only bounded workbench with a default exposure budget, core 3/supporting 9 as index or collapsed navigation, and long source/section/provenance content in drilldown",
@@ -653,8 +658,8 @@
   },
   "documentsCockpitWorkbenchGeometry": {
     "verdict": "PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH",
-    "sourceHead": "24638e425fcf44a339ad9cf310b2f9fb6c0fdf9e",
-    "productionCommit": "2444b44b4e42a2b442b64b856104b1d93c7e21b7",
+    "sourceHead": "f9a56f1e958814a0f7d27ab81a6d829c7184be7f",
+    "productionCommit": "f9a56f1e958814a0f7d27ab81a6d829c7184be7f",
     "baseUrl": "https://www.safeclaw.kr",
     "staleDevRedExplained": true,
     "routeSplitAloneAcceptedAsFix": false,
@@ -674,6 +679,11 @@
         "editorBottom": 653,
         "editorLeft": 512,
         "coreButtons": 3,
+        "uniqueDocumentKeyCount": 12,
+        "visibleDocumentButtonCount": 3,
+        "supportingButtonCount": 9,
+        "visibleSupportingButtonCount": 0,
+        "legacyIndexDisplay": "none",
         "detailsOpen": false
       },
       {
@@ -691,6 +701,11 @@
         "editorBottom": 680,
         "editorLeft": 24,
         "coreButtons": 3,
+        "uniqueDocumentKeyCount": 12,
+        "visibleDocumentButtonCount": 3,
+        "supportingButtonCount": 9,
+        "visibleSupportingButtonCount": 0,
+        "legacyIndexDisplay": "none",
         "detailsOpen": false
       }
     ]
