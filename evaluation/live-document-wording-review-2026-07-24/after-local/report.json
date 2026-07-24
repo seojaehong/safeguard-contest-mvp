@@ -1,0 +1,103 @@
+{
+  "generatedAt": "2026-07-24T14:51:58.499Z",
+  "elapsedMs": 20804,
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SYNTHETIC_WORDING_REVIEW",
+  "mode": "current-source-local-production",
+  "baseUrl": "http://127.0.0.1:3078",
+  "sourceHead": "ffecaa61aafb7c32086096de0f2b64c43f02852e",
+  "productionBuild": {
+    "ok": true,
+    "configured": false,
+    "source": "unavailable",
+    "commitSha": null,
+    "branch": null,
+    "environment": null,
+    "deploymentUrl": null,
+    "message": "배포 커밋 식별자가 런타임 환경에 노출되지 않았습니다."
+  },
+  "total": 5,
+  "pass": 5,
+  "fail": 0,
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false
+  },
+  "cases": [
+    {
+      "id": "ulsan-chemical-cleaning-sds__stress",
+      "verdict": "PASS",
+      "elapsedMs": 4025,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 4020
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6
+      },
+      "failedChecks": []
+    },
+    {
+      "id": "pyeongtaek-simultaneous-overhead-hotwork__stress",
+      "verdict": "PASS",
+      "elapsedMs": 3917,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 3913
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6
+      },
+      "failedChecks": []
+    },
+    {
+      "id": "daejeon-vulnerable-night-maintenance__stress",
+      "verdict": "PASS",
+      "elapsedMs": 3869,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 3868
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6
+      },
+      "failedChecks": []
+    },
+    {
+      "id": "gumi-kosha-guidance-boundary__stress",
+      "verdict": "PASS",
+      "elapsedMs": 4617,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 4615
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6
+      },
+      "failedChecks": []
+    },
+    {
+      "id": "jeju-overnight-electrical-repair__stress",
+      "verdict": "PASS",
+      "elapsedMs": 4097,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 4095
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6
+      },
+      "failedChecks": []
+    }
+  ]
+}

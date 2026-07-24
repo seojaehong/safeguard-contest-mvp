@@ -19,6 +19,7 @@ const payloadsPath = process.env.SAFECLAW_WORDING_PAYLOADS_PATH
 const baseUrl = process.env.SAFECLAW_WORDING_BASE_URL || "https://www.safeclaw.kr";
 const liveEnabled = process.env.SAFECLAW_WORDING_LIVE === "1";
 const timeoutMs = Number.parseInt(process.env.SAFECLAW_WORDING_TIMEOUT_MS || "60000", 10);
+const localProduction = /^https?:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?(?:\/|$)/i.test(baseUrl);
 
 const reviewedDocumentKeys = [
   "riskAssessmentDraft",
@@ -430,12 +431,16 @@ async function main() {
     elapsedMs: Date.now() - startedAt,
     verdict: pass === results.length
       ? liveEnabled
-        ? "PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW"
+        ? localProduction
+          ? "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SYNTHETIC_WORDING_REVIEW"
+          : "PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW"
         : "PASS_FIXTURE_SYNTHETIC_WORDING_REVIEW"
       : liveEnabled
-        ? "RED_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW"
+        ? localProduction
+          ? "RED_CURRENT_SOURCE_LOCAL_PRODUCTION_SYNTHETIC_WORDING_REVIEW"
+          : "RED_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW"
         : "RED_FIXTURE_SYNTHETIC_WORDING_REVIEW",
-    mode: liveEnabled ? "live" : "fixture",
+    mode: liveEnabled ? localProduction ? "current-source-local-production" : "live-production" : "fixture",
     baseUrl: liveEnabled ? baseUrl : null,
     sourceHead,
     productionBuild,

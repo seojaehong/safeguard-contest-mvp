@@ -1,0 +1,46 @@
+{
+  "generatedAt": "2026-07-24T14:51:58.499Z",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SYNTHETIC_WORDING_REVIEW_LIVE_PENDING",
+  "productCommit": "ffecaa61aafb7c32086096de0f2b64c43f02852e",
+  "productionCommitAtBeforeRun": "85d8938dc20c296bbc1e42cf61ac17396f779e0b",
+  "liveAfterDeploymentPending": true,
+  "before": {
+    "path": "evaluation/live-document-wording-review-2026-07-24/before-remediation/report.json",
+    "mode": "live-production",
+    "total": 5,
+    "pass": 0,
+    "fail": 5,
+    "elapsedMs": 101130,
+    "failedContract": "riskRows:scenarioLocation",
+    "failedRows": 25
+  },
+  "afterLocal": {
+    "path": "evaluation/live-document-wording-review-2026-07-24/after-local/report.json",
+    "mode": "current-source-local-production",
+    "baseUrl": "http://127.0.0.1:3078",
+    "total": 5,
+    "pass": 5,
+    "fail": 0,
+    "elapsedMs": 20804
+  },
+  "verification": {
+    "testFiles": 5,
+    "testsPassed": 104,
+    "typecheckPassed": true,
+    "productionBuildPassed": true,
+    "staticPagesGenerated": 28
+  },
+  "mutationBoundary": {
+    "apiAskCallsBefore": 5,
+    "apiAskCallsAfterLocal": 5,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "exactSavedShareReproduced": false
+  },
+  "claimBoundary": {
+    "allowed": "Five synthetic high-risk scenarios preserve the requested location in current-source local production structured risk rows.",
+    "forbidden": "Live production wording review is complete before the product commit is deployed and remeasured.",
+    "humanReviewStillRequired": true
+  }
+}
