@@ -1125,6 +1125,42 @@ function createFixtureRoot(): string {
       },
     },
   });
+  writeJson(rootDir, path.join("evaluation", "share-recipient-long-content-fixture-2026-07-25", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_LONG_CONTENT_FIXTURE_EXACT_SAVED_MISSING",
+    route: "/share/[sessionId]",
+    sessionKind: "long-content-fixture",
+    exactSavedUserSessionReproduced: false,
+    exactSavedSessionVerdict: "MISSING_EVIDENCE",
+    dbMutationPerformed: false,
+    shareSessionCreated: false,
+    providerDispatchLiveClaimed: false,
+    externalProviderCalled: false,
+    rows: [
+      ["day", "desktop-short-1440x723", 1440, 723, 529, 2],
+      ["day", "desktop-1440x900", 1440, 900, 529, 2],
+      ["day", "mobile-390x723", 390, 723, 707, 1],
+      ["night", "desktop-short-1440x723", 1440, 723, 529, 2],
+      ["night", "desktop-1440x900", 1440, 900, 529, 2],
+      ["night", "mobile-390x723", 390, 723, 707, 1],
+    ].map(([theme, viewport, viewportWidth, viewportHeight, confirmationBottom, desktopXRegionCount]) => ({
+      metrics: {
+        theme,
+        viewport,
+        viewportWidth,
+        viewportHeight,
+        confirmationBottom,
+        desktopXRegionCount,
+        previewContainedCount: 4,
+        collapsedDocumentCount: 3,
+        outsideCards: 0,
+        horizontalOverflow: false,
+      },
+      verdicts: {
+        overallVerdict: "PASS_SCOPED",
+        exactSavedSessionVerdict: "MISSING_EVIDENCE",
+      },
+    })),
+  });
   writeJson(rootDir, path.join("evaluation", "share-exact-session-boundary-2026-07-22", "report.json"), {
     schemaVersion: "safeclaw-share-exact-session-boundary/v1",
     verdict: "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
@@ -1414,6 +1450,12 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).not.toContain("Promote the Share staged rail");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "share_result_fixture_cockpit")?.state).toBe("proven");
+    expect(audit.gates.find((gate) => gate.id === "share_recipient_long_content_fixture")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "share-recipient-long-content-fixture-2026-07-25", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "share_recipient_long_content_fixture")?.detail).toContain("six day/night");
+    expect(audit.gates.find((gate) => gate.id === "share_recipient_long_content_fixture")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.state).toBe("notice");
     expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.detail).toContain("fixture or generated /workspace Share proof is explicitly not accepted");

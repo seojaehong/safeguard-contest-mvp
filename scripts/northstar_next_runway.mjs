@@ -32,6 +32,7 @@ const ARTIFACTS = Object.freeze({
   approvalRunway: path.join("evaluation", "northstar-approval-runway-2026-07-21", "report.json"),
   sifEmbeddingPreflight: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
   shareGeneratedSessionPerception: path.join("evaluation", "share-generated-session-perception-2026-07-22", "report.json"),
+  shareRecipientLongContentFixture: path.join("evaluation", "share-recipient-long-content-fixture-2026-07-25", "report.json"),
   shareExactSessionBoundary: path.join("evaluation", "share-exact-session-boundary-2026-07-22", "report.json"),
   shareRecipientAckApprovalPreflight: path.join("evaluation", "share-recipient-ack-approval-preflight-current-2026-07-19", "report.json"),
   sharePublicSessionStorageReadiness: path.join("evaluation", "share-public-session-storage-readiness-2026-07-23", "report.json"),
@@ -429,6 +430,43 @@ function shareGeneratedSessionSummary(shareGenerated) {
         viewport: `${typeof viewport.width === "number" ? viewport.width : "unknown"}x${typeof viewport.height === "number" ? viewport.height : "unknown"}`,
         resultSummaryTop: typeof resultSummary.top === "number" ? resultSummary.top : null,
         resultSummaryBottom: typeof resultSummary.bottom === "number" ? resultSummary.bottom : null,
+      };
+    }),
+  };
+}
+
+/**
+ * @param {unknown} shareFixture
+ */
+function shareRecipientLongContentFixtureSummary(shareFixture) {
+  if (!isRecord(shareFixture)) return {};
+  const productionBuild = isRecord(shareFixture.productionBuild) ? shareFixture.productionBuild : {};
+  const rows = Array.isArray(shareFixture.rows) ? shareFixture.rows.filter(isRecord) : [];
+  return {
+    verdict: asString(shareFixture.verdict),
+    sourceHead: asString(shareFixture.sourceHead),
+    productionCommit: asString(productionBuild.commitSha),
+    route: asString(shareFixture.route),
+    sessionKind: asString(shareFixture.sessionKind),
+    exactSavedUserSessionReproduced: asBoolean(shareFixture.exactSavedUserSessionReproduced),
+    exactSavedSessionVerdict: asString(shareFixture.exactSavedSessionVerdict),
+    dbMutationPerformed: asBoolean(shareFixture.dbMutationPerformed),
+    shareSessionCreated: asBoolean(shareFixture.shareSessionCreated),
+    providerDispatchLiveClaimed: asBoolean(shareFixture.providerDispatchLiveClaimed),
+    externalProviderCalled: asBoolean(shareFixture.externalProviderCalled),
+    rows: rows.map((row) => {
+      const metrics = isRecord(row.metrics) ? row.metrics : {};
+      const verdicts = isRecord(row.verdicts) ? row.verdicts : {};
+      return {
+        theme: asString(metrics.theme),
+        viewport: asString(metrics.viewport),
+        overallVerdict: asString(verdicts.overallVerdict),
+        exactSavedSessionVerdict: asString(verdicts.exactSavedSessionVerdict),
+        rootWidthRatio: typeof metrics.rootWidthRatio === "number" ? metrics.rootWidthRatio : null,
+        desktopXRegionCount: typeof metrics.desktopXRegionCount === "number" ? metrics.desktopXRegionCount : null,
+        confirmationBottom: typeof metrics.confirmationBottom === "number" ? metrics.confirmationBottom : null,
+        previewContainedCount: typeof metrics.previewContainedCount === "number" ? metrics.previewContainedCount : null,
+        collapsedDocumentCount: typeof metrics.collapsedDocumentCount === "number" ? metrics.collapsedDocumentCount : null,
       };
     }),
   };
@@ -851,6 +889,7 @@ export function buildNorthstarNextRunway(options) {
   const koshaPromotionPacket = readJson(options.rootDir, ARTIFACTS.koshaExactPromotionPacket);
   const sif = readJson(options.rootDir, ARTIFACTS.sifEmbeddingPreflight);
   const shareGenerated = readJson(options.rootDir, ARTIFACTS.shareGeneratedSessionPerception);
+  const shareRecipientLongContentFixture = readOptionalJson(options.rootDir, ARTIFACTS.shareRecipientLongContentFixture);
   const shareExactBoundary = readJson(options.rootDir, ARTIFACTS.shareExactSessionBoundary);
   const shareRecipientAckApproval = readOptionalJson(options.rootDir, ARTIFACTS.shareRecipientAckApprovalPreflight);
   const sharePublicSessionStorageReadiness = readOptionalJson(options.rootDir, ARTIFACTS.sharePublicSessionStorageReadiness);
@@ -942,6 +981,7 @@ export function buildNorthstarNextRunway(options) {
       documentsGeneratedCurrentWorkpack: "live generated-current-workpack state is measured separately from default/example Documents; desktop and mobile must keep body containment, first action/hazard visibility, supporting-9 collapsed by default, sticky overlap 0, and local shell ratio <= 3",
       shareDesktop: "current measured Workspace Share and invited recipient fixture routes pass scoped desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes, and desktop must not regress into a mobile card stack",
       shareGeneratedResult: "current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported",
+      shareRecipientLongContent: "live route-controlled long-content fixture keeps desktop recipient Share in two regions and mobile confirmation in the first viewport while long previews stay locally contained and documents stay collapsed; this is not exact saved-session proof",
       shareRouteEvidenceBoundary: "separate Share evidence into invited recipient fixture pass, exact saved/generated /share/[sessionId] missing evidence, and manager/workspace share-result route repro; do not use one route's pass to close another route's mobile-like complaint",
       shareMobile: "current compact cockpit remains first-viewport bounded in current evidence",
       hermesOpenclaw: "adapter and fail-closed auth boundary current-proven; live unauthenticated broker smoke returns AUTH_REQUIRED before engine execution",
@@ -957,6 +997,7 @@ export function buildNorthstarNextRunway(options) {
     koshaExactPromotionPacket: koshaPromotionPacketSummary(koshaPromotionPacket),
     sifEmbeddingRuntime: sifSummary(sif),
     shareGeneratedSessionPerception: shareGeneratedSessionSummary(shareGenerated),
+    shareRecipientLongContentFixture: shareRecipientLongContentFixtureSummary(shareRecipientLongContentFixture),
     shareExactSessionBoundary: shareExactSessionBoundarySummary(shareExactBoundary),
     shareRecipientAckApproval: shareRecipientAckApprovalSummary(shareRecipientAckApproval),
     sharePublicSessionStorageReadiness: sharePublicSessionStorageReadinessSummary(sharePublicSessionStorageReadiness),
@@ -1092,6 +1133,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - ${boundedWorkbenchNote}
 - Share desktop: current measured Workspace Share and invited recipient fixture routes pass scoped desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
+- Share recipient long-content fixture: \`${report.shareRecipientLongContentFixture.verdict || "missing"}\`; ${report.shareRecipientLongContentFixture.rows?.length || 0} route-controlled day/night rows preserve scoped containment, while exact saved reproduced remains \`${report.shareRecipientLongContentFixture.exactSavedUserSessionReproduced === true}\` and exact-session verdict remains \`${report.shareRecipientLongContentFixture.exactSavedSessionVerdict || "missing"}\`.
 - Share route evidence split: invited recipient \`/share/[sessionId]\` fixture route, exact saved/generated \`/share/[sessionId]\`, and manager/workspace share-result route remain separate proof layers. A fixture pass cannot close a user-specific exact saved/session complaint.
 - Share exact-session boundary: \`${report.shareExactSessionBoundary.verdict || "missing"}\`; exact saved reproduced is \`${report.shareExactSessionBoundary.exactSavedUserSessionReproduced === true}\`, safe missing-session GET status is \`${report.shareExactSessionBoundary.safeReadStatus ?? "unknown"}\`, safe-read verdict is \`${report.shareExactSessionBoundary.safeMissingSessionReadVerdict || "unknown"}\`, invalid-id GET status is \`${report.shareExactSessionBoundary.invalidReadStatus ?? "unknown"}\`, invalid-id verdict is \`${report.shareExactSessionBoundary.safeInvalidSessionReadVerdict || "unknown"}\`, and DB/provider mutations remain \`false\`.
 - Share recipient ACK approval: \`${report.shareRecipientAckApproval.overall || "missing"}\`; approval required is \`${report.shareRecipientAckApproval.approvalRequired === true}\`, live-data mutation approved is \`${report.shareRecipientAckApproval.liveDataMutationApproved === true}\`, production share session created is \`${report.shareRecipientAckApproval.productionShareSessionCreated === true}\`, read confirmation inserted is \`${report.shareRecipientAckApproval.productionReadConfirmationInserted === true}\`, DB mutation performed is \`${report.shareRecipientAckApproval.dbMutationPerformed === true}\`, and provider message sent is \`${report.shareRecipientAckApproval.providerMessageSent === true}\`.

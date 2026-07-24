@@ -128,6 +128,7 @@ type NextRunwayReport = {
     documentsGeneratedCurrentWorkpack: string;
     shareDesktop: string;
     shareGeneratedResult: string;
+    shareRecipientLongContent: string;
     shareMobile: string;
     stepShell: {
       input: string;
@@ -148,6 +149,30 @@ type NextRunwayReport = {
       viewport: string;
       resultSummaryTop: number | null;
       resultSummaryBottom: number | null;
+    }>;
+  };
+  shareRecipientLongContentFixture: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    route: string;
+    sessionKind: string;
+    exactSavedUserSessionReproduced: boolean;
+    exactSavedSessionVerdict: string;
+    dbMutationPerformed: boolean;
+    shareSessionCreated: boolean;
+    providerDispatchLiveClaimed: boolean;
+    externalProviderCalled: boolean;
+    rows: Array<{
+      theme: string;
+      viewport: string;
+      overallVerdict: string;
+      exactSavedSessionVerdict: string;
+      rootWidthRatio: number | null;
+      desktopXRegionCount: number | null;
+      confirmationBottom: number | null;
+      previewContainedCount: number | null;
+      collapsedDocumentCount: number | null;
     }>;
   };
   shareExactSessionBoundary: {
@@ -607,6 +632,36 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       },
     ],
   });
+  writeJson(root, "evaluation/share-recipient-long-content-fixture-2026-07-25/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_LONG_CONTENT_FIXTURE_EXACT_SAVED_MISSING",
+    sourceHead: "TO_FILL",
+    productionBuild: { commitSha: "TO_FILL" },
+    route: "/share/[sessionId]",
+    sessionKind: "long-content-fixture",
+    exactSavedUserSessionReproduced: false,
+    exactSavedSessionVerdict: "MISSING_EVIDENCE",
+    dbMutationPerformed: false,
+    shareSessionCreated: false,
+    providerDispatchLiveClaimed: false,
+    externalProviderCalled: false,
+    rows: [
+      {
+        metrics: {
+          theme: "day",
+          viewport: "desktop-short-1440x723",
+          rootWidthRatio: 0.84,
+          desktopXRegionCount: 2,
+          confirmationBottom: 529,
+          previewContainedCount: 4,
+          collapsedDocumentCount: 3,
+        },
+        verdicts: {
+          overallVerdict: "PASS_SCOPED",
+          exactSavedSessionVerdict: "MISSING_EVIDENCE",
+        },
+      },
+    ],
+  });
   writeJson(root, "evaluation/share-exact-session-boundary-2026-07-22/report.json", {
     verdict: "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
     sourceHead: "TO_FILL",
@@ -1028,6 +1083,7 @@ describe("northstar next runway generator", () => {
       documentsRemainingDebt: "full 12-document authoring polish remains; the all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content and the local workbench shell ratio target remains <= 3",
       shareDesktop: "current measured Workspace Share and invited recipient fixture routes pass scoped desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes, and desktop must not regress into a mobile card stack",
       shareGeneratedResult: "current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported",
+      shareRecipientLongContent: "live route-controlled long-content fixture keeps desktop recipient Share in two regions and mobile confirmation in the first viewport while long previews stay locally contained and documents stay collapsed; this is not exact saved-session proof",
       shareRouteEvidenceBoundary: "separate Share evidence into invited recipient fixture pass, exact saved/generated /share/[sessionId] missing evidence, and manager/workspace share-result route repro; do not use one route's pass to close another route's mobile-like complaint",
     });
     expect(report.shareGeneratedSessionPerception).toMatchObject({
@@ -1042,6 +1098,28 @@ describe("northstar next runway generator", () => {
       viewport: "1440x723",
       resultSummaryTop: 303,
       resultSummaryBottom: 347,
+    });
+    expect(report.shareRecipientLongContentFixture).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_LONG_CONTENT_FIXTURE_EXACT_SAVED_MISSING",
+      route: "/share/[sessionId]",
+      sessionKind: "long-content-fixture",
+      exactSavedUserSessionReproduced: false,
+      exactSavedSessionVerdict: "MISSING_EVIDENCE",
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchLiveClaimed: false,
+      externalProviderCalled: false,
+    });
+    expect(report.shareRecipientLongContentFixture.rows).toContainEqual({
+      theme: "day",
+      viewport: "desktop-short-1440x723",
+      overallVerdict: "PASS_SCOPED",
+      exactSavedSessionVerdict: "MISSING_EVIDENCE",
+      rootWidthRatio: 0.84,
+      desktopXRegionCount: 2,
+      confirmationBottom: 529,
+      previewContainedCount: 4,
+      collapsedDocumentCount: 3,
     });
     expect(report.shareExactSessionBoundary).toMatchObject({
       verdict: "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",

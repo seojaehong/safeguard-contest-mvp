@@ -61,6 +61,7 @@ const EVIDENCE_PATHS = Object.freeze({
   shareMobileExactViewport: path.join("evaluation", "share-mobile-exact-viewport-2026-07-21", "report.json"),
   shareRecipientCockpit: path.join("evaluation", "share-recipient-cockpit-2026-07-22", "report.json"),
   shareResultDrilldown: path.join("evaluation", "share-result-drilldown-2026-07-21", "report.json"),
+  shareRecipientLongContentFixture: path.join("evaluation", "share-recipient-long-content-fixture-2026-07-25", "report.json"),
   shareExactSessionBoundary: path.join("evaluation", "share-exact-session-boundary-2026-07-22", "report.json"),
   shareRecipientAckApprovalPreflight: path.join("evaluation", "share-recipient-ack-approval-preflight-current-2026-07-19", "report.json"),
   sharePublicSessionStorageReadiness: path.join("evaluation", "share-public-session-storage-readiness-2026-07-23", "report.json"),
@@ -2061,6 +2062,73 @@ function evaluateShareResultFixtureCockpitGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluateShareRecipientLongContentFixtureGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.shareRecipientLongContentFixture;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "share_recipient_long_content_fixture",
+      label: "Recipient Share long-content fixture",
+      state: "missing",
+      evidencePath,
+      detail: "Recipient Share long-content fixture report is missing or invalid.",
+      nextActions: ["Run the route-controlled recipient long-content fixture before claiming maximum-content layout resilience."],
+    });
+  }
+
+  const rows = Array.isArray(report.rows) ? report.rows.filter(isRecord) : [];
+  const rowsPass = rows.length === 6 && rows.every((row) => {
+    const metrics = isRecord(row.metrics) ? row.metrics : {};
+    const verdicts = isRecord(row.verdicts) ? row.verdicts : {};
+    const isDesktop = readNumber(metrics.viewportWidth) === 1440;
+    return readString(verdicts.overallVerdict) === "PASS_SCOPED"
+      && readString(verdicts.exactSavedSessionVerdict) === "MISSING_EVIDENCE"
+      && readNumber(metrics.confirmationBottom) !== null
+      && (readNumber(metrics.confirmationBottom) || 0) <= (readNumber(metrics.viewportHeight) || 0)
+      && readNumber(metrics.previewContainedCount) === 4
+      && readNumber(metrics.collapsedDocumentCount) === 3
+      && readNumber(metrics.outsideCards) === 0
+      && metrics.horizontalOverflow === false
+      && (!isDesktop || readNumber(metrics.desktopXRegionCount) === 2);
+  });
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_LONG_CONTENT_FIXTURE_EXACT_SAVED_MISSING"
+    && readString(report.route) === "/share/[sessionId]"
+    && readString(report.sessionKind) === "long-content-fixture"
+    && report.exactSavedUserSessionReproduced === false
+    && readString(report.exactSavedSessionVerdict) === "MISSING_EVIDENCE"
+    && report.dbMutationPerformed === false
+    && report.shareSessionCreated === false
+    && report.providerDispatchLiveClaimed === false
+    && report.externalProviderCalled === false
+    && rowsPass;
+
+  if (pass) {
+    return gateResult({
+      id: "share_recipient_long_content_fixture",
+      label: "Recipient Share long-content fixture",
+      state: "proven",
+      evidencePath,
+      detail: "Live recipient UI kept six day/night long-content fixture rows scoped PASS: desktop stayed two-region, mobile kept confirmation in the first viewport, four previews were locally contained, three documents stayed collapsed, and exact saved-session evidence remains MISSING_EVIDENCE with no mutation or provider dispatch.",
+      nextActions: [
+        "Keep exact saved/generated /share/[sessionId] open until a concrete production URL is supplied or DB-backed session creation is explicitly approved.",
+      ],
+    });
+  }
+
+  return gateResult({
+    id: "share_recipient_long_content_fixture",
+    label: "Recipient Share long-content fixture",
+    state: "contradicted",
+    evidencePath,
+    detail: "Recipient Share long-content fixture no longer proves scoped desktop/mobile containment together with the exact-session no-mutation boundary.",
+    nextActions: ["Re-run the long-content fixture and preserve exact saved-session MISSING_EVIDENCE separately."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateShareExactSessionBoundaryGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.shareExactSessionBoundary;
   const report = readJsonFile(rootDir, evidencePath);
@@ -2572,6 +2640,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateUiDocumentsShareCockpitGate(rootDir),
     evaluateDispatchStandaloneCockpitGate(rootDir),
     evaluateShareResultFixtureCockpitGate(rootDir),
+    evaluateShareRecipientLongContentFixtureGate(rootDir),
     evaluateShareExactSessionBoundaryGate(rootDir),
     evaluateShareRecipientAckApprovalGate(rootDir),
     evaluateProviderDispatchPersistenceGate(rootDir),
