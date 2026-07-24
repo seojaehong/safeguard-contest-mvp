@@ -1044,6 +1044,48 @@ function createFixtureRoot(): string {
       canonicalRiskRowContractsPreserved: true,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "documents-cockpit-workbench-geometry-2026-07-22", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", branch: "master", environment: "production" },
+    routeSplitAloneAcceptedAsFix: false,
+    rows: [
+      {
+        viewport: "1440x723",
+        metrics: {
+          viewportWidth: 1440,
+          workbenchDisplay: "grid",
+          workbenchColumnCount: 2,
+          horizontalOverflow: false,
+          coreButtons: 3,
+          uniqueDocumentKeyCount: 12,
+          visibleDocumentButtonCount: 3,
+          supportingButtonCount: 9,
+          visibleSupportingButtonCount: 0,
+          legacyIndexDisplay: "none",
+          detailsOpen: false,
+        },
+        verdicts: { overallVerdict: "PASS" },
+      },
+      {
+        viewport: "390x723",
+        metrics: {
+          viewportWidth: 390,
+          workbenchDisplay: "grid",
+          workbenchColumnCount: 1,
+          horizontalOverflow: false,
+          coreButtons: 3,
+          uniqueDocumentKeyCount: 12,
+          visibleDocumentButtonCount: 3,
+          supportingButtonCount: 9,
+          visibleSupportingButtonCount: 0,
+          legacyIndexDisplay: "none",
+          detailsOpen: false,
+        },
+        verdicts: { overallVerdict: "PASS" },
+      },
+    ],
+  });
   writeJson(rootDir, path.join("evaluation", "workspace-ia-live-7b36-2026-07-22", "report.json"), {
     verdict: "IA_BLOCKER_REFINED_CURRENT_LIVE",
     liveCommitChecked: "fixture-sha",
@@ -1546,6 +1588,10 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "live_document_seed_profile_isolation")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("Scoped first-task cockpit proof only, not full Documents/Share IA completion");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("12 unique document keys");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exactly 3 visible core launchers");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("0 visible supporting launchers");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("legacy document index hidden");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("12 document first-task cockpits");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("staged Share rail");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("desktop-short 1440x723");
@@ -1559,7 +1605,7 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("/share/[sessionId] desktop recipient confirmation");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("mobile confirmation CTA before document details");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.evidencePath).toBe(
-      path.join("evaluation", "workspace-ia-live-7b36-2026-07-22", "report.json"),
+      path.join("evaluation", "documents-cockpit-workbench-geometry-2026-07-22", "report.json"),
     );
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("raw textarea and deeper row/all-document authoring");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("selected-editor evidence/recheck CTA is live-proven before raw textarea");
@@ -1773,6 +1819,27 @@ describe("northstar open gate audit", () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "live_document_secondary_grounding")?.detail).toContain("documents=29/30");
+  });
+
+  it("contradicts the UI gate when a supporting document launcher is visible by default", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const geometryPath = path.join(rootDir, "evaluation", "documents-cockpit-workbench-geometry-2026-07-22", "report.json");
+    const geometry = JSON.parse(fs.readFileSync(geometryPath, "utf8")) as {
+      rows: Array<{ metrics: { visibleSupportingButtonCount: number } }>;
+    };
+    geometry.rows[0].metrics.visibleSupportingButtonCount = 1;
+    fs.writeFileSync(geometryPath, `${JSON.stringify(geometry, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+    const gate = audit.gates.find((item) => item.id === "ui_documents_share_cockpit");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.evidencePath).toBe(path.join("evaluation", "documents-cockpit-workbench-geometry-2026-07-22", "report.json"));
+    expect(gate?.detail).toContain("12/3/9/0 default document exposure budget");
   });
 
   it("fails seed-profile isolation closed when one forbidden fragment remains live", async () => {

@@ -725,6 +725,11 @@ function documentsCockpitWorkbenchGeometrySummary(documentsGeometry) {
         editorBottom: typeof metrics.editorBottom === "number" ? metrics.editorBottom : null,
         editorLeft: typeof metrics.editorLeft === "number" ? metrics.editorLeft : null,
         coreButtons: typeof metrics.coreButtons === "number" ? metrics.coreButtons : null,
+        uniqueDocumentKeyCount: typeof metrics.uniqueDocumentKeyCount === "number" ? metrics.uniqueDocumentKeyCount : null,
+        visibleDocumentButtonCount: typeof metrics.visibleDocumentButtonCount === "number" ? metrics.visibleDocumentButtonCount : null,
+        supportingButtonCount: typeof metrics.supportingButtonCount === "number" ? metrics.supportingButtonCount : null,
+        visibleSupportingButtonCount: typeof metrics.visibleSupportingButtonCount === "number" ? metrics.visibleSupportingButtonCount : null,
+        legacyIndexDisplay: asString(metrics.legacyIndexDisplay),
         detailsOpen: metrics.detailsOpen === true || metrics.detailsOpen === false ? metrics.detailsOpen : null,
       };
     }),
@@ -1103,7 +1108,7 @@ export function buildNorthstarNextRunway(options) {
         documents: "core 3 status, selected document header, evidence/recheck CTA, and next action first; full 12-document bodies remain selected-only drilldown",
         share: "recipient/channel/language summary, preview/result status, and primary confirmation first; long messages, logs, provenance, and raw metadata remain collapsed/detail content",
       },
-      documentsDefaultCockpit: "first actionable cockpit is live-proven; do not phrase this as documents page height fixed or the whole Documents page shortened",
+      documentsDefaultCockpit: "first actionable cockpit is live-proven with 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers closed by default, 0 visible supporting launchers, and the legacy document index hidden; do not phrase this as the whole Documents page shortened",
       documentsRemainingDebt: "full 12-document authoring polish remains; the all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content and the local workbench shell ratio target remains <= 3",
       selectedEditorDetail: "risk-assessment default, same-document reselect, and all-12 launcher exposure now land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown",
       documentsContainment: "route/page split is only orientation; /documents must remain a selected-only bounded workbench with a default exposure budget, core 3/supporting 9 as index or collapsed navigation, and long source/section/provenance content in drilldown",
@@ -1259,7 +1264,7 @@ ${approvalRows.join("\n")}
 The user's Documents/Share concern remains framed as information architecture, not page-count alone:
 
 - Default Documents cockpit: first actionable cockpit is live-proven; do not phrase this as "Documents page height fixed" or "the whole Documents page is short".
-- Documents cockpit workbench geometry: \`${report.documentsCockpitWorkbenchGeometry.verdict || "missing"}\`; 1440x723 and 390x723 rows must show grid workbench, core buttons 3, no horizontal overflow, and route split alone remains \`false\`.
+- Documents cockpit workbench geometry: \`${report.documentsCockpitWorkbenchGeometry.verdict || "missing"}\`; 1440x723 and 390x723 rows must show grid workbench, 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers closed by default, 0 visible supporting launchers, the legacy document index hidden, no horizontal overflow, and route split alone remains \`false\`.
 - Documents selected editor/detail: risk-assessment default, same-document reselect, and all-12 launcher exposure land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown.
 - Documents remaining debt: full 12-document authoring polish remains. The all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content.
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.

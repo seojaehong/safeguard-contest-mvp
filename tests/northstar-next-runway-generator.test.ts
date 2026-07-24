@@ -202,6 +202,23 @@ type NextRunwayReport = {
       share: string;
     };
   };
+  documentsCockpitWorkbenchGeometry: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    routeSplitAloneAcceptedAsFix: boolean;
+    rows: Array<{
+      viewport: string;
+      overallVerdict: string;
+      coreButtons: number | null;
+      uniqueDocumentKeyCount: number | null;
+      visibleDocumentButtonCount: number | null;
+      supportingButtonCount: number | null;
+      visibleSupportingButtonCount: number | null;
+      legacyIndexDisplay: string;
+      detailsOpen: boolean | null;
+    }>;
+  };
   shareGeneratedSessionPerception: {
     verdict: string;
     sourceHead: string;
@@ -999,6 +1016,48 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       },
     ],
   });
+  writeJson(root, "evaluation/documents-cockpit-workbench-geometry-2026-07-22/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH",
+    sourceHead: "TO_FILL",
+    productionBuild: { commitSha: "TO_FILL", branch: "master", environment: "production" },
+    routeSplitAloneAcceptedAsFix: false,
+    rows: [
+      {
+        viewport: "1440x723",
+        metrics: {
+          bodyHeight: 723,
+          horizontalOverflow: false,
+          workbenchDisplay: "grid",
+          workbenchColumnCount: 2,
+          coreButtons: 3,
+          uniqueDocumentKeyCount: 12,
+          visibleDocumentButtonCount: 3,
+          supportingButtonCount: 9,
+          visibleSupportingButtonCount: 0,
+          legacyIndexDisplay: "none",
+          detailsOpen: false,
+        },
+        verdicts: { overallVerdict: "PASS" },
+      },
+      {
+        viewport: "390x723",
+        metrics: {
+          bodyHeight: 728,
+          horizontalOverflow: false,
+          workbenchDisplay: "grid",
+          workbenchColumnCount: 1,
+          coreButtons: 3,
+          uniqueDocumentKeyCount: 12,
+          visibleDocumentButtonCount: 3,
+          supportingButtonCount: 9,
+          visibleSupportingButtonCount: 0,
+          legacyIndexDisplay: "none",
+          detailsOpen: false,
+        },
+        verdicts: { overallVerdict: "PASS" },
+      },
+    ],
+  });
   writeJson(root, "evaluation/workspace-bounded-workbench-dod-2026-07-22/report.json", {
     verdict: "DOD_RECORDED_NOT_A_PASS_CLAIM",
     routeSplitAloneAcceptedAsFix: false,
@@ -1324,7 +1383,7 @@ describe("northstar next runway generator", () => {
     expect(report.uiInterpretation).toMatchObject({
       routeSplitAloneAcceptedAsFix: false,
       acceptedStructure: "three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes",
-      documentsDefaultCockpit: "first actionable cockpit is live-proven; do not phrase this as documents page height fixed or the whole Documents page shortened",
+      documentsDefaultCockpit: "first actionable cockpit is live-proven with 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers closed by default, 0 visible supporting launchers, and the legacy document index hidden; do not phrase this as the whole Documents page shortened",
       documentsRemainingDebt: "full 12-document authoring polish remains; the all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content and the local workbench shell ratio target remains <= 3",
       shareDesktop: "current measured Workspace Share and invited recipient fixture routes pass scoped desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes, and desktop must not regress into a mobile card stack",
       shareGeneratedResult: "current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported",
@@ -1417,6 +1476,36 @@ describe("northstar next runway generator", () => {
       workpackShareSessionsErrorCode: "PGRST205",
     });
     expect(report.nextSafeWorkWithoutApproval.join("\n")).toContain("do not create a production saved Share session");
+    expect(report.documentsCockpitWorkbenchGeometry).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH",
+      routeSplitAloneAcceptedAsFix: false,
+      rows: [
+        {
+          viewport: "1440x723",
+          overallVerdict: "PASS",
+          coreButtons: 3,
+          uniqueDocumentKeyCount: 12,
+          visibleDocumentButtonCount: 3,
+          supportingButtonCount: 9,
+          visibleSupportingButtonCount: 0,
+          legacyIndexDisplay: "none",
+          detailsOpen: false,
+        },
+        {
+          viewport: "390x723",
+          overallVerdict: "PASS",
+          coreButtons: 3,
+          uniqueDocumentKeyCount: 12,
+          visibleDocumentButtonCount: 3,
+          supportingButtonCount: 9,
+          visibleSupportingButtonCount: 0,
+          legacyIndexDisplay: "none",
+          detailsOpen: false,
+        },
+      ],
+    });
+    expect(report.uiInterpretation.documentsDefaultCockpit).toContain("exactly 3 visible core launchers");
+    expect(report.uiInterpretation.documentsDefaultCockpit).toContain("0 visible supporting launchers");
     expect(report.uiInterpretation.documentsContainment).toContain("selected-only bounded workbench");
     expect(report.uiInterpretation.documentsGeneratedCurrentWorkpack).toContain("generated-current-workpack");
     expect(report.boundedWorkbenchCurrent).toMatchObject({
