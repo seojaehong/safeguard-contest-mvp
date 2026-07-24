@@ -15,6 +15,7 @@ const isLiveProductionBase = /^https:\/\/(?:www\.)?safeclaw\.kr(?:\/|$)/u.test(b
 const viewports = [
   { label: "desktop-short-1440x723", width: 1440, height: 723 },
   { label: "desktop-1440x900", width: 1440, height: 900 },
+  { label: "mobile-short-390x723", width: 390, height: 723 },
   { label: "mobile-390x844", width: 390, height: 844 },
 ];
 
@@ -69,15 +70,15 @@ function evaluateVerdicts(metrics) {
     && metrics.sectionActionsBottom <= Math.min(metrics.workpackShellBottom, firstActionLimit)
     && metrics.firstRiskRowHeaderBottom <= metrics.viewportHeight
     && metrics.firstRiskHazardFieldTop <= metrics.viewportHeight
-    && metrics.firstRiskHazardFieldTop < metrics.rawTextareaTop
+    && (metrics.rawTextareaMounted === false || metrics.firstRiskHazardFieldTop < metrics.rawTextareaTop)
     && metrics.horizontalOverflow === false
     && metrics.outsideElements === 0;
   const selectedEditorFieldFirstPass = metrics.selectedDocumentTitle === "위험성평가표"
     && metrics.firstRiskRowHeaderBottom <= metrics.viewportHeight
     && metrics.firstRiskHazardFieldTop <= metrics.viewportHeight
     && hazardVisibleHeight >= 44
-    && metrics.firstRiskHazardFieldTop < metrics.rawTextareaTop
-    && metrics.sectionActionsBottom < metrics.rawTextareaTop
+    && (metrics.rawTextareaMounted === false || metrics.firstRiskHazardFieldTop < metrics.rawTextareaTop)
+    && (metrics.rawTextareaMounted === false || metrics.sectionActionsBottom < metrics.rawTextareaTop)
     && metrics.rawTextareaSecondary === true
     && metrics.firstRiskRowHeaderText.includes("근거")
     && metrics.firstRiskRowHeaderText.includes("확인");
@@ -87,6 +88,7 @@ function evaluateVerdicts(metrics) {
     && metrics.horizontalOverflow === false
     && metrics.outsideElements === 0;
   const selectedEditorDepthPass = metrics.workpackShellScrollHeight <= (desktop ? 1700 : 1500)
+    && metrics.workpackShellScrollRatio <= 3
     && metrics.renderedTextareas <= 4
     && metrics.defaultOpenSectionCount <= 1;
   return {
@@ -109,6 +111,7 @@ function summarizeMetric(metrics) {
   return {
     bodyRatio: metrics.bodyHeightRatio,
     shell: `${metrics.workpackShellTop}-${metrics.workpackShellBottom}/${metrics.workpackShellScrollHeight}`,
+    shellRatio: metrics.workpackShellScrollRatio,
     selected: metrics.selectedDocumentTitle,
     actionsBottom: metrics.sectionActionsBottom,
     hazardBottom: metrics.firstRiskHazardFieldBottom,
@@ -171,7 +174,7 @@ async function readMetrics(page, stateLabel) {
       ["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"].includes(button.getAttribute("data-document-key") || "")
     );
     const textareas = [...document.querySelectorAll(".document-textarea")];
-    const documentBodies = [...document.querySelectorAll('[data-testid="editor-document-body"], [role="tabpanel"]')];
+    const documentBodies = [...document.querySelectorAll('[data-testid="editor-document-body"]')];
     const rawTextareas = [...document.querySelectorAll(".document-source-textarea, .document-section-textarea")];
     const sectionAccordions = [...document.querySelectorAll('[data-testid="document-section-accordion"]')];
     const stickyCandidates = [...document.querySelectorAll("body *")].filter((element) => {
@@ -195,6 +198,8 @@ async function readMetrics(page, stateLabel) {
     const mobilePickerOptionCount = document.querySelectorAll('select[aria-label="편집 문서 선택"] option').length;
     const firstRiskHeaderText = document.querySelector('[data-testid="risk-row-editor-row"] summary')?.textContent?.replace(/\s+/gu, " ").trim() || "";
     const shellBottom = Math.round(shellRect?.bottom ?? 0);
+    const shellClientHeight = shell?.clientHeight ?? 0;
+    const shellScrollHeight = shell?.scrollHeight ?? 0;
     const sectionActionsBottom = Math.round(actions?.getBoundingClientRect().bottom ?? 0);
     const hazardTop = Math.round(hazard?.getBoundingClientRect().top ?? 0);
     const hazardBottom = Math.round(hazard?.getBoundingClientRect().bottom ?? 0);
@@ -215,8 +220,11 @@ async function readMetrics(page, stateLabel) {
       workpackShellTop: Math.round(shellRect?.top ?? 0),
       workpackShellBottom: shellBottom,
       workpackShellHeight: Math.round(shellRect?.height ?? 0),
-      workpackShellClientHeight: shell?.clientHeight ?? 0,
-      workpackShellScrollHeight: shell?.scrollHeight ?? 0,
+      workpackShellClientHeight: shellClientHeight,
+      workpackShellScrollHeight: shellScrollHeight,
+      workpackShellScrollRatio: shellClientHeight > 0
+        ? Number((shellScrollHeight / shellClientHeight).toFixed(2))
+        : 0,
       workpackShellOverflowY: shell ? getComputedStyle(shell).overflowY : "",
       toolbar: rect(".document-toolbar"),
       toolbarBottom: Math.round(toolbar?.getBoundingClientRect().bottom ?? 0),
@@ -231,9 +239,10 @@ async function readMetrics(page, stateLabel) {
       firstRiskHazardFieldTop: hazardTop,
       firstRiskHazardFieldBottom: hazardBottom,
       rawTextarea: rect(".document-source-textarea, .document-section-textarea"),
-      rawTextareaTop: Math.round(rawRect?.top ?? 0),
-      rawTextareaBottom: Math.round(rawRect?.bottom ?? 0),
-      rawTextareaSecondary: Boolean(rawRect && shellRect && rawRect.top > shellRect.bottom),
+      rawTextareaMounted: Boolean(rawRect),
+      rawTextareaTop: rawRect ? Math.round(rawRect.top) : null,
+      rawTextareaBottom: rawRect ? Math.round(rawRect.bottom) : null,
+      rawTextareaSecondary: !rawRect || Boolean(shellRect && rawRect.top > shellRect.bottom),
       sameDocumentReselectMeasured: label === "same-document-reselect-riskAssessmentDraft",
       renderedTextareas: textareas.length,
       visibleTextareaInputsInViewport,
@@ -351,6 +360,7 @@ for (const viewport of viewports) {
           : "RED",
         allDocumentLongFormVerdict: expandedMetrics.fullDocumentBodiesRenderedSerially || expandedMetrics.supportingLauncherMovesEditorOutOfView ? "RED" : "PASS",
         selectedEditorDepthVerdict: expandedMetrics.workpackShellScrollHeight <= (viewport.width >= 1000 ? 1700 : 1500)
+          && expandedMetrics.workpackShellScrollRatio <= 3
           ? "PASS"
           : "RED",
       },
@@ -396,7 +406,7 @@ const report = {
     selectedEditorFieldFirstVerdict: "risk row header and hazard field appear before raw textarea; row header carries evidence and verification context",
     sameDocumentReselectLandingVerdict: "same risk document launcher/reselect settles inside one second with action row, first risk row header, and hazard field top before raw textarea; full field visibility remains covered by Field-first",
     allDocumentLongFormVerdict: "RED if multiple document bodies/raw editors render serially or if all-12 launcher exposure pushes the selected editor action/hazard out of the viewport instead of staying bounded navigation",
-    selectedEditorDepthVerdict: "RED if the selected document editor shell remains deeper than the bounded target even though the first action is visible",
+    selectedEditorDepthVerdict: "RED if the selected document editor shell exceeds 3 local screens or the bounded absolute target even though the first action is visible",
     overallDocumentsIAVerdict: "PASS only when first-action cockpit, selected field-first editor, all-document containment, and selected-editor depth all pass",
   },
   results,
@@ -407,7 +417,7 @@ fs.writeFileSync(path.join(outDir, "report.json"), `${JSON.stringify(report, nul
 const rows = results.map((item) => {
   const metrics = item.metrics || {};
   const verdicts = item.verdicts || {};
-  return `| ${item.state} | ${item.viewport.label} | ${verdicts.overallDocumentsIAVerdict || verdicts.launcherExposureVerdict || "n/a"} | ${verdicts.firstActionCockpitVerdict || "n/a"} | ${verdicts.selectedEditorFieldFirstVerdict || "n/a"} | ${verdicts.sameDocumentReselectLandingVerdict || "n/a"} | ${verdicts.allDocumentLongFormVerdict || "n/a"} | ${verdicts.selectedEditorDepthVerdict || "n/a"} | ${metrics.bodyHeightRatio ?? "n/a"} | ${metrics.sectionActionsBottom ?? "n/a"} | ${metrics.firstRiskHazardFieldBottom ?? "n/a"} | ${metrics.rawTextareaTop ?? "n/a"} | ${metrics.visibleFullDocumentBodiesInViewport ?? "n/a"} | ${metrics.supportingDocumentsOpenDefault ?? "n/a"} | ${metrics.workpackShellScrollHeight ?? "n/a"} | ${metrics.horizontalOverflow ?? "n/a"} | ${metrics.outsideElements ?? "n/a"} |`;
+  return `| ${item.state} | ${item.viewport.label} | ${verdicts.overallDocumentsIAVerdict || verdicts.launcherExposureVerdict || "n/a"} | ${verdicts.firstActionCockpitVerdict || "n/a"} | ${verdicts.selectedEditorFieldFirstVerdict || "n/a"} | ${verdicts.sameDocumentReselectLandingVerdict || "n/a"} | ${verdicts.allDocumentLongFormVerdict || "n/a"} | ${verdicts.selectedEditorDepthVerdict || "n/a"} | ${metrics.bodyHeightRatio ?? "n/a"} | ${metrics.workpackShellScrollRatio ?? "n/a"} | ${metrics.sectionActionsBottom ?? "n/a"} | ${metrics.firstRiskHazardFieldBottom ?? "n/a"} | ${metrics.rawTextareaTop ?? "n/a"} | ${metrics.visibleFullDocumentBodiesInViewport ?? "n/a"} | ${metrics.supportingDocumentsOpenDefault ?? "n/a"} | ${metrics.workpackShellScrollHeight ?? "n/a"} | ${metrics.horizontalOverflow ?? "n/a"} | ${metrics.outsideElements ?? "n/a"} |`;
 });
 
 fs.writeFileSync(path.join(outDir, "report.md"), `# Documents Long-Form IA Probe
@@ -438,8 +448,8 @@ Allowed claim: selected risk-assessment cockpit and first field/action surfaces 
 
 ## Metrics
 
-| State | Viewport | Overall/launcher | First action | Field-first | Reselect landing | All-doc containment | Selected-editor depth | Body ratio | CTA bottom | Hazard bottom | Raw textarea top | Bodies in viewport | Supporting open | Shell scrollHeight | OverflowX | Outside |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| State | Viewport | Overall/launcher | First action | Field-first | Reselect landing | All-doc containment | Selected-editor depth | Body ratio | Shell ratio | CTA bottom | Hazard bottom | Raw textarea top | Bodies in viewport | Supporting open | Shell scrollHeight | OverflowX | Outside |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 ${rows.join("\n")}
 
 ## Remaining UX Boundary
