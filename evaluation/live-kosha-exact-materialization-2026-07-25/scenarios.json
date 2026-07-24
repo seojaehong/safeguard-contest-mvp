@@ -1,0 +1,49 @@
+{
+  "variants": [
+    {
+      "id": "exact-materialization",
+      "promptSuffix": "위험성평가와 TBM 문서팩을 만들어줘.",
+      "expected": {
+        "requiredDocuments": []
+      }
+    }
+  ],
+  "baseScenarios": [
+    {
+      "id": "dc13-exterior-wall-repair",
+      "question": "서울 성수동 외벽도장 보수공사. 달비계와 작업발판의 추락 위험, 작업줄과 안전대 체결을 반영해줘.",
+      "expected": {
+        "region": "서울",
+        "workType": "외벽도장 보수공사",
+        "fieldIsolationTerms": ["외벽 도장", "달비계", "작업발판"],
+        "fieldIsolationExclusiveTerms": ["외벽 도장", "달비계"],
+        "exactKoshaPin": "D-C-13",
+        "allowedExactKoshaPins": ["D-C-13"]
+      }
+    },
+    {
+      "id": "dc7-scaffold-assembly",
+      "question": "서울 건설현장 이동식 비계 조립과 해체 작업. 비계 구조, 안전난간, 작업발판과 추락 위험을 반영해줘.",
+      "expected": {
+        "region": "서울",
+        "workType": "비계 조립·해체",
+        "fieldIsolationTerms": ["비계", "안전난간", "작업발판"],
+        "fieldIsolationExclusiveTerms": ["비계 조립", "안전난간"],
+        "exactKoshaPin": "D-C-7",
+        "allowedExactKoshaPins": ["D-C-7"]
+      }
+    },
+    {
+      "id": "be10-deenergized-electrical",
+      "question": "부산 상가 정전전로 인근 배전반 점검 작업. 전원 차단, 잠금표지, 검전, 무전압 확인과 절연보호구를 반영해줘.",
+      "expected": {
+        "region": "부산",
+        "workType": "정전전로 전기작업",
+        "fieldIsolationTerms": ["정전전로", "배전반", "검전"],
+        "fieldIsolationExclusiveTerms": ["정전전로", "배전반"],
+        "exactKoshaPin": "B-E-10",
+        "allowedExactKoshaPins": ["B-E-10"]
+      }
+    }
+  ]
+}

@@ -61,6 +61,7 @@ const actionTerms = [
   "금지"
 ];
 const vagueTerms = ["적절히", "철저히", "충분히", "주의한다", "유의한다", "필요시", "필요 시"];
+const exactKoshaPins = ["D-C-13", "D-C-7", "B-E-10"];
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -339,6 +340,74 @@ function checkScenarioFieldIsolation(payload, expected) {
   };
 }
 
+function checkExactKoshaMaterialization(payload, expected) {
+  const expectedPin = text(expected.exactKoshaPin);
+  if (!expectedPin) {
+    return {
+      checks: [],
+      metrics: {
+        expectedExactKoshaPin: "",
+        exactKoshaPinsInStructuredRows: [],
+        exactKoshaRowsWithExpectedPin: 0,
+        koshaStatutoryOverclaimSamples: []
+      }
+    };
+  }
+
+  const rows = readRiskRows(payload);
+  const allowedPins = new Set([
+    expectedPin,
+    ...asArray(expected.allowedExactKoshaPins).map(text).filter(Boolean)
+  ]);
+  const rowPinMatches = rows.map((row, rowIndex) => {
+    const refs = asArray(row?.evidenceRefs).map(text).filter(Boolean);
+    const pins = exactKoshaPins.filter((pin) => refs.some((ref) => includesAny(ref, [pin])));
+    return { row: rowIndex, refs, pins };
+  });
+  const unexpectedPins = rowPinMatches.flatMap(({ row, pins }) => (
+    pins.filter((pin) => !allowedPins.has(pin)).map((pin) => ({ row, pin }))
+  ));
+  const rowsWithExpectedPin = rowPinMatches.filter(({ pins }) => pins.includes(expectedPin)).length;
+  const overclaimPattern = /KOSHA(?:\s*(?:Guide|가이드|기술지침|기술지원규정))?.{0,28}(?:법적\s*의무|법률상\s*의무|강제\s*의무|법으로\s*강제)/iu;
+  const overclaimSamples = reviewedDocumentKeys.flatMap((key) => (
+    readDocument(payload, key)
+      .split(/\r?\n/u)
+      .map((line) => ({ key, text: text(line) }))
+      .filter(({ text: line }) => overclaimPattern.test(line))
+  ));
+
+  return {
+    checks: [
+      {
+        id: "kosha:expectedExactPinInStructuredRows",
+        ok: rows.length > 0 && rowsWithExpectedPin > 0,
+        detail: rows.length > 0 && rowsWithExpectedPin > 0
+          ? ""
+          : `${rowsWithExpectedPin}/${rows.length} structured risk row(s) cite ${expectedPin}`,
+        samples: rowPinMatches.slice(0, 8)
+      },
+      {
+        id: "kosha:unexpectedExactPinInRiskRows",
+        ok: unexpectedPins.length === 0,
+        detail: unexpectedPins.length ? `${unexpectedPins.length} unexpected exact KOSHA pin citation(s)` : "",
+        samples: unexpectedPins.slice(0, 8)
+      },
+      {
+        id: "kosha:guidanceNotStatutoryOverclaim",
+        ok: overclaimSamples.length === 0,
+        detail: overclaimSamples.length ? `${overclaimSamples.length} KOSHA guidance statutory overclaim(s)` : "",
+        samples: overclaimSamples.slice(0, 8)
+      }
+    ],
+    metrics: {
+      expectedExactKoshaPin: expectedPin,
+      exactKoshaPinsInStructuredRows: [...new Set(rowPinMatches.flatMap(({ pins }) => pins))],
+      exactKoshaRowsWithExpectedPin: rowsWithExpectedPin,
+      koshaStatutoryOverclaimSamples: overclaimSamples.slice(0, 20)
+    }
+  };
+}
+
 export function reviewPayload(payload, expected, question = "") {
   if (!payload || typeof payload !== "object") {
     return {
@@ -348,10 +417,12 @@ export function reviewPayload(payload, expected, question = "") {
     };
   }
   const fieldIsolation = checkScenarioFieldIsolation(payload, expected);
+  const exactKosha = checkExactKoshaMaterialization(payload, expected);
   const checks = [
     ...checkDocumentUsability(payload),
     ...checkRiskRows(payload, expected, question),
-    ...fieldIsolation.checks
+    ...fieldIsolation.checks,
+    ...exactKosha.checks
   ];
   return {
     ok: checks.every((check) => check.ok),
@@ -359,7 +430,8 @@ export function reviewPayload(payload, expected, question = "") {
     metrics: {
       riskRowCount: readRiskRows(payload).length,
       reviewedDocumentCount: reviewedDocumentKeys.filter((key) => readDocument(payload, key).length >= 40).length,
-      ...fieldIsolation.metrics
+      ...fieldIsolation.metrics,
+      ...exactKosha.metrics
     }
   };
 }

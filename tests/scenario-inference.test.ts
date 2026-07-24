@@ -245,4 +245,19 @@ describe("inferScenario", () => {
     expect(rows.every((row) => !forbiddenProcess.test(row.process))).toBe(true);
     expect(rows[0]?.task).toMatch(expectedProcess);
   });
+
+  it("keeps scaffold assembly out of the exterior-painting work identity", () => {
+    const response = buildMockAskResponse(
+      "서울 건설현장 이동식 비계 조립과 해체 작업. 비계 구조, 안전난간, 작업발판과 추락 위험을 반영해줘.",
+      [],
+      "mock",
+      "test"
+    );
+    const rows = response.structured?.riskAssessmentRows ?? [];
+
+    expect(rows).toHaveLength(3);
+    expect(rows.every((row) => /비계 조립·해체/.test(row.process))).toBe(true);
+    expect(rows.every((row) => !/외벽 도장/.test(`${row.process} ${row.task}`))).toBe(true);
+    expect(rows.map((row) => row.hazard).join(" ")).toMatch(/추락.*전도.*낙하/);
+  });
 });

@@ -13,6 +13,8 @@ type WordingReport = {
     failedChecks: Array<{ id: string; detail: string }>;
     metrics: {
       fieldLeakageFlags: Array<{ field: string; matchedProfile: string }>;
+      exactKoshaPinsInStructuredRows: string[];
+      exactKoshaRowsWithExpectedPin: number;
     };
   }>;
 };
@@ -43,7 +45,7 @@ function goodRow(): Record<string, unknown> {
   };
 }
 
-function runFixture(payload: Record<string, unknown>): {
+function runFixture(payload: Record<string, unknown>, expectedOverrides: Record<string, unknown> = {}): {
   status: number | null;
   report: WordingReport;
 } {
@@ -65,6 +67,7 @@ function runFixture(payload: Record<string, unknown>): {
           id: "default-exterior-paint",
           terms: ["외벽 도장", "이동식 비계", "성수동"]
         }],
+        ...expectedOverrides,
         requiredDocuments: []
       }
     }]
@@ -130,6 +133,46 @@ describe("SafeClaw wording review runner", () => {
     ]));
     expect(result.report.cases[0]?.metrics.fieldLeakageFlags).toEqual(expect.arrayContaining([
       expect.objectContaining({ matchedProfile: "default-exterior-paint" })
+    ]));
+  });
+
+  it("fails closed unless a structured row cites the expected exact KOSHA pin without overclaim", () => {
+    const expected = {
+      exactKoshaPin: "D-C-13",
+      allowedExactKoshaPins: ["D-C-13"]
+    };
+    const passing = runFixture({
+      deliverables: buildDocuments(),
+      structured: {
+        riskAssessmentRows: [{
+          ...goodRow(),
+          evidenceRefs: ["KOSHA D-C-13-2026 외벽도장보수공사 기술지원규정"]
+        }]
+      }
+    }, expected);
+    expect(passing.status).toBe(0);
+    expect(passing.report.cases[0]?.metrics).toMatchObject({
+      exactKoshaPinsInStructuredRows: ["D-C-13"],
+      exactKoshaRowsWithExpectedPin: 1
+    });
+
+    const failing = runFixture({
+      deliverables: {
+        ...buildDocuments(),
+        tbmBriefing: `${buildDocuments().tbmBriefing}\nKOSHA 기술지침은 법적 의무로 강제된다.`
+      },
+      structured: {
+        riskAssessmentRows: [{
+          ...goodRow(),
+          evidenceRefs: ["KOSHA B-E-10-2026 정전전로 기술지원규정"]
+        }]
+      }
+    }, expected);
+    expect(failing.status).toBe(1);
+    expect(failing.report.cases[0]?.failedChecks.map((check) => check.id)).toEqual(expect.arrayContaining([
+      "kosha:expectedExactPinInStructuredRows",
+      "kosha:unexpectedExactPinInRiskRows",
+      "kosha:guidanceNotStatutoryOverclaim"
     ]));
   });
 });

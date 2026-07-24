@@ -791,7 +791,20 @@ function applyQuestionSpecificity(question: string, source: ScenarioProfile): Sc
   let workName = source.workName;
   let processName = source.processName;
 
-  if (/프레스/.test(question)) {
+  if (/비계.{0,20}(?:조립|해체)|(?:조립|해체).{0,20}비계/.test(question)) {
+    workName = "이동식 비계 조립·해체 작업";
+    processName = "이동식 비계 조립·해체, 작업발판·안전난간 설치, 바퀴 잠금·전도 방지, 하부 출입통제";
+    hazards.push(
+      "이동식 비계 조립·해체 중 작업발판 또는 구조부에서 추락",
+      "연결부·바퀴 잠금·전도 방지 조치 미흡으로 비계가 흔들리거나 전도",
+      "부재·공구 낙하와 하부 출입통제 미흡으로 작업자 충돌"
+    );
+    actions.push(
+      "조립·해체 순서와 작업반경을 정하고 작업발판·안전난간 설치 상태를 관리감독자가 확인",
+      "연결부·고정핀·바퀴 잠금과 전도 방지 지지 상태를 점검한 뒤 사용",
+      "하부 출입을 통제하고 부재·공구 낙하 방지와 보호구 체결 상태를 상호 확인"
+    );
+  } else if (/프레스/.test(question)) {
     workName = "프레스 설비 보전 작업";
     processName = "프레스 설비 보전, 전원 차단·LOTO, 금형·구동부 점검, 방호장치 복구";
   } else if (/컨베이어/.test(question)) {
