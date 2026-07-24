@@ -18,6 +18,10 @@ import {
   type CurrentDispatchSnapshot,
   type CurrentWorkerSnapshot
 } from "@/lib/current-workpack";
+import {
+  classifyDeliverablePresence,
+  type DeliverablePresenceStatus
+} from "@/lib/deliverable-integrity-policy";
 import type { AskResponse } from "@/lib/types";
 import { formatDispatchProviderStatus } from "@/lib/web-safe-presentation";
 import { applyWorkpackDeliverablesChange } from "@/lib/workpack-readiness";
@@ -630,8 +634,30 @@ function buildDerivedDocumentText(data: AskResponse, key: DocumentKey) {
   const storedDraft = data.deliverables[key];
   if (typeof storedDraft === "string" && storedDraft.trim()) return storedDraft;
 
-  const actions = data.riskSummary.immediateActions.slice(0, 2).join(" / ");
-  return `허가대상 작업: ${data.scenario.workSummary}. 핵심위험: ${data.riskSummary.topRisk}. 작업 전 허가조건: ${actions}`;
+  return "생성 누락 · 재생성 필요";
+}
+
+function documentPresenceLabel(data: AskResponse, key: DocumentKey): {
+  status: DeliverablePresenceStatus;
+  label: string;
+} {
+  const presence = classifyDeliverablePresence(data.deliverables[key]);
+  if (presence.status === "explicitNotApplicable") {
+    return {
+      status: presence.status,
+      label: `해당 없음 · ${excerpt(presence.reason, 34)}`
+    };
+  }
+  if (presence.status === "missingUnexpected") {
+    return {
+      status: presence.status,
+      label: "생성 누락 · 재생성 필요"
+    };
+  }
+  return {
+    status: presence.status,
+    label: ""
+  };
 }
 
 function buildDeliverablePatch(values: WorkpackDocumentValues) {
@@ -816,17 +842,23 @@ function DocumentCockpit({
         <span>오늘 문서</span>
         <h2>핵심 3종</h2>
         <div className="safeclaw-mobile-core-list">
-          {primaryDocuments.map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              data-document-key={item.key}
-              aria-pressed={selectedDocumentKey === item.key}
-              onClick={() => onSelectDocument(item.key)}
-            >
-              {item.title}
-            </button>
-          ))}
+          {primaryDocuments.map((item) => {
+            const presence = documentPresenceLabel(data, item.key);
+            return (
+              <button
+                key={item.key}
+                type="button"
+                data-document-key={item.key}
+                data-document-presence={presence.status}
+                aria-label={item.title}
+                aria-pressed={selectedDocumentKey === item.key}
+                onClick={() => onSelectDocument(item.key)}
+              >
+                <strong>{item.title}</strong>
+                {presence.label ? <small>{presence.label}</small> : null}
+              </button>
+            );
+          })}
         </div>
 
         <details
@@ -836,21 +868,27 @@ function DocumentCockpit({
         >
           <summary>문서 {launchDocuments.length}종 · 제출 정보</summary>
           <div className="safeclaw-mobile-remaining-list">
-            {remainingDocuments.map((item) => (
-              <button
-                key={item.key}
-                type="button"
-                data-document-key={item.key}
-                aria-pressed={selectedDocumentKey === item.key}
-                onClick={() => {
-                  onSelectDocument(item.key);
-                  if (remainingDetailsRef.current) remainingDetailsRef.current.open = false;
-                }}
-              >
-                <small>{item.tier} · {item.owner}</small>
-                <strong>{item.title}</strong>
-              </button>
-            ))}
+            {remainingDocuments.map((item) => {
+              const presence = documentPresenceLabel(data, item.key);
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  data-document-key={item.key}
+                  data-document-presence={presence.status}
+                  aria-label={item.title}
+                  aria-pressed={selectedDocumentKey === item.key}
+                  onClick={() => {
+                    onSelectDocument(item.key);
+                    if (remainingDetailsRef.current) remainingDetailsRef.current.open = false;
+                  }}
+                >
+                  <small>{item.tier} · {item.owner}</small>
+                  <strong>{item.title}</strong>
+                  {presence.label ? <small className="safeclaw-document-presence">{presence.label}</small> : null}
+                </button>
+              );
+            })}
           </div>
           <div className="safeclaw-mobile-primary-preview" data-testid="mobile-primary-preview">
             {primaryDocuments.map((item) => (

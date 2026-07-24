@@ -1395,6 +1395,29 @@ describe("documents editor layout", () => {
     expect(await details.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(false);
   }, 90_000);
 
+  it("distinguishes a missing document from an explicit not-applicable document in the launcher", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 723 } });
+    const sample = buildSampleWorkpack();
+    sample.deliverables.workPermitDraft = "";
+    sample.deliverables.photoEvidenceDraft = "해당 없음: 사무실 TBM 안내만 수행하여 별도 사진 증빙 대상이 아닙니다.";
+    const stored = buildStoredCurrentWorkpack(sample);
+    await page.addInitScript(({ storageKey, serialized }) => {
+      window.localStorage.setItem(storageKey, serialized);
+    }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
+    await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
+
+    const details = page.getByTestId("mobile-document-details");
+    await details.locator(":scope > summary").click();
+    const permitButton = details.locator('button[data-document-key="workPermitDraft"]');
+    const photoButton = details.locator('button[data-document-key="photoEvidenceDraft"]');
+
+    await expect.poll(() => permitButton.getAttribute("data-document-presence")).toBe("missingUnexpected");
+    expect(await permitButton.textContent()).toContain("생성 누락 · 재생성 필요");
+    expect(await photoButton.getAttribute("data-document-presence")).toBe("explicitNotApplicable");
+    expect(await photoButton.textContent()).toContain("해당 없음 · 사무실 TBM 안내만 수행");
+  }, 90_000);
+
   it.each(["day", "night"] as const)(
     "puts the core launcher before the mobile editor in %s mode",
     async (theme) => {
@@ -1438,7 +1461,8 @@ describe("documents editor layout", () => {
           launcherTop: Math.round(launcherRect.top + window.scrollY),
           editorTop: Math.round(editorRect.top + window.scrollY),
           coreGap: Number.parseFloat(getComputedStyle(launcherList).rowGap),
-          coreLabels: Array.from(launcherList.querySelectorAll("button"), (button) => button.textContent?.trim()),
+          coreLabels: Array.from(launcherList.querySelectorAll("button"), (button) => button.querySelector("strong")?.textContent?.trim()),
+          corePresence: Array.from(launcherList.querySelectorAll("button"), (button) => button.getAttribute("data-document-presence")),
           coreHeights: Array.from(launcherList.querySelectorAll("button"), (button) => Math.round(button.getBoundingClientRect().height)),
           detailsOpen: detailsElement.open,
           detailsCount: document.querySelectorAll('[data-testid="mobile-document-details"]').length,
@@ -1455,6 +1479,7 @@ describe("documents editor layout", () => {
       expect(initial.launcherTop).toBeLessThan(initial.editorTop);
       expect(initial.coreGap).toBe(4);
       expect(initial.coreLabels).toEqual(["위험성평가표", "TBM 브리핑", "TBM 기록"]);
+      expect(initial.corePresence).toEqual(["presentNonEmpty", "presentNonEmpty", "presentNonEmpty"]);
       expect(initial.coreHeights.every((height) => height >= 44)).toBe(true);
       expect(initial.detailsOpen).toBe(false);
       expect(initial.detailsCount).toBe(1);

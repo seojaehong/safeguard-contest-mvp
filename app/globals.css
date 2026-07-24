@@ -22140,12 +22140,37 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-mobile-core-list button {
+    display: grid;
+    gap: var(--space-1);
     font-size: var(--text-control);
     font-weight: 700;
     line-height: var(--leading-control);
     text-align: center;
     letter-spacing: var(--tracking-body);
 }
+
+  .safeclaw-mobile-core-list button strong {
+    font: inherit;
+  }
+
+  .safeclaw-mobile-core-list button small,
+  .safeclaw-document-presence {
+    color: var(--workspace-muted);
+    font-size: var(--text-caption);
+    font-weight: 600;
+    line-height: var(--leading-caption);
+    letter-spacing: 0;
+  }
+
+  .safeclaw-module-shell.module-variant-document button[data-document-presence="missingUnexpected"] small,
+  .safeclaw-module-shell.module-variant-document button[data-document-presence="missingUnexpected"] .safeclaw-document-presence {
+    color: var(--sc-danger);
+  }
+
+  .safeclaw-module-shell.module-variant-document button[data-document-presence="explicitNotApplicable"] small,
+  .safeclaw-module-shell.module-variant-document button[data-document-presence="explicitNotApplicable"] .safeclaw-document-presence {
+    color: var(--workspace-accent-text);
+  }
 
   .safeclaw-mobile-document-details {
     min-width: 0;

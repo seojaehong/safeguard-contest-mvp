@@ -3,6 +3,19 @@ import { describe, expect, it } from "vitest";
 import { buildMockAskResponse, inferScenario } from "@/lib/mock-data";
 
 describe("inferScenario", () => {
+  it.each([
+    ["울산 도금공장 탱크 외부 화학세척 작업 SDS 확인", "화학물질 작업", ["허가", "SDS", "보호구", "종료"]],
+    ["평택 물류창고 증축 현장 용접과 크레인 동시작업", "화기작업", ["허가", "격리", "차단", "종료"]],
+    ["제주 리조트 심야 전기설비 긴급복구", "전기작업", ["허가", "잠금", "재가동", "종료"]]
+  ])("generates a scenario-specific work permit for %s", (question, category, expectedTerms) => {
+    const response = buildMockAskResponse(question, [], "mock", "test");
+    const permit = response.deliverables.workPermitDraft;
+
+    expect(permit).toContain(`허가구분: ${category}`);
+    expectedTerms.forEach((term) => expect(permit).toContain(term));
+    expect(permit).toContain("작업시간");
+  });
+
   it("classifies an explicit '제조공장' site as 제조업, not 물류업, even when action verbs like 상하차 co-occur", () => {
     const scenario = inferScenario(
       "안산 제조공장 용접 및 지게차 상하차 작업, 외국인 근로자 3명 포함 작업자 6명"
