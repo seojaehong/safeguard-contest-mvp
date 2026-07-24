@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-24T20:39:38.068Z",
-  "head": "070b5993f05bf7b777572adc619753afe96a9083",
+  "generatedAt": "2026-07-24T21:12:58.761Z",
+  "head": "aa3587b7bf2fe2ce1cc085965678af66245b1cc3",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "6fe34fe4f4806aa49a3e84ba6a63fef4f4d90f1a",
+    "commitSha": "e8818e29213f84ba00891da5b517776027e0d041",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-8lh6ggfsq-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-ae6qw6bj7-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 23
+    "gateCount": 24
   },
   "provenGates": [
     {
@@ -74,6 +74,12 @@
       "state": "proven",
       "artifact": "evaluation\\live-document-broad-review-2026-07-25\\report.json",
       "detail": "All 12 canonical UI deliverables are enumerated and classified across five live production scenarios: uiDocumentCount=12, integrityRequiredCount=12, reviewedDocumentCount=12, before missingUnexpected=5, after-live missingUnexpected=0, and workPermitDraft presentNonEmpty=5/5. DB/share/provider mutation is false and exact saved Share remains MISSING_EVIDENCE. The older six-document synthetic wording gate is not used as 12-document coverage proof."
+    },
+    {
+      "id": "live_document_editorial_review",
+      "state": "proven",
+      "artifact": "evaluation\\live-document-editorial-review-2026-07-25\\report.json",
+      "detail": "Five live production scenarios and all 60 canonical document surfaces pass the automated editorial contract: placeholder=0, legal overclaim=0, awkward composition 20->0, and evidence-domain mismatch 1->0. Exact repeated-line groups=38 and near-duplicate pairs=100 remain visible human-review findings. humanReviewCompleted=false, the six-core wording and 12-presence gates are not combined as a human PASS, no DB/share/provider mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "live_document_secondary_grounding",
@@ -275,6 +281,28 @@
     "exactSavedShareReproduced": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
+  "liveDocumentEditorialReview": {
+    "artifact": "evaluation\\live-document-editorial-review-2026-07-25\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+    "productCommit": "1cbb51dce13baf9f4809f4a0793b9d3ae3c088be",
+    "productionCommit": "1cbb51dce13baf9f4809f4a0793b9d3ae3c088be",
+    "scenarioCount": 5,
+    "reviewedDocumentSurfaceCount": 60,
+    "livePassed": 5,
+    "liveFailed": 0,
+    "placeholderFindingCount": 0,
+    "legalOverclaimFindingCount": 0,
+    "awkwardCompositionFindingCount": 0,
+    "evidenceDomainMismatchCount": 0,
+    "exactLineOveruseCount": 38,
+    "nearDuplicateLineOveruseCount": 100,
+    "humanReviewCompleted": false,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "exactSavedShareReproduced": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
   "liveDocumentSecondaryGrounding": {
     "artifact": "evaluation\\live-document-secondary-grounding-2026-07-25\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT",
@@ -366,9 +394,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "070b5993f05bf7b777572adc619753afe96a9083",
+      "sourceCommit": "aa3587b7bf2fe2ce1cc085965678af66245b1cc3",
       "sourceStatus": "exact",
-      "productionCommit": "070b5993f05bf7b777572adc619753afe96a9083",
+      "productionCommit": "aa3587b7bf2fe2ce1cc085965678af66245b1cc3",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -433,6 +461,14 @@
       "sourceCommit": "47da015ff501dc8125dbbf215989104a35da3aa7",
       "sourceStatus": "ancestor",
       "productionCommit": "47da015ff501dc8125dbbf215989104a35da3aa7",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "live_document_editorial_review",
+      "artifact": "evaluation\\live-document-editorial-review-2026-07-25\\report.json",
+      "sourceCommit": null,
+      "sourceStatus": "missing",
+      "productionCommit": "1cbb51dce13baf9f4809f4a0793b9d3ae3c088be",
       "productionStatus": "ancestor_of_head"
     },
     {

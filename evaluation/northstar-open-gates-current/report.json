@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-24T20:39:36.357Z",
-  "sourceSha": "070b5993f05bf7b777572adc619753afe96a9083",
+  "generatedAt": "2026-07-24T21:12:57.535Z",
+  "sourceSha": "aa3587b7bf2fe2ce1cc085965678af66245b1cc3",
   "overall": "open",
   "gates": [
     {
@@ -93,6 +93,17 @@
       "nextActions": [
         "Keep presence/applicability coverage separate from broad human wording review of real user documents.",
         "Keep exact saved Share evidence separate; this gate performs no DB/share/provider mutation."
+      ]
+    },
+    {
+      "id": "live_document_editorial_review",
+      "state": "proven",
+      "label": "Live 12-deliverable editorial contract review",
+      "evidencePath": "evaluation\\live-document-editorial-review-2026-07-25\\report.json",
+      "detail": "Five live production scenarios and all 60 canonical document surfaces pass the automated editorial contract: placeholder=0, legal overclaim=0, awkward composition 20->0, and evidence-domain mismatch 1->0. Exact repeated-line groups=38 and near-duplicate pairs=100 remain visible human-review findings. humanReviewCompleted=false, the six-core wording and 12-presence gates are not combined as a human PASS, no DB/share/provider mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Perform a separate human editorial review for the recorded duplicate-line findings.",
+        "Keep Documents/Share viewport IA and exact saved Share geometry as separate product/evidence boundaries."
       ]
     },
     {

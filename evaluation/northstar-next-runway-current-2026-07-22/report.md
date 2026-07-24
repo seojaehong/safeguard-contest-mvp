@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `070b5993f05bf7b777572adc619753afe96a9083`
+Source HEAD: `aa3587b7bf2fe2ce1cc085965678af66245b1cc3`
 
-Production `/api/build-info`: `6fe34fe4f4806aa49a3e84ba6a63fef4f4d90f1a`
+Production `/api/build-info`: `e8818e29213f84ba00891da5b517776027e0d041`
 
 Latest evidence commit live: `false`
 
@@ -14,17 +14,17 @@ Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
+Source pending changed paths: `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
 
 Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `070b5993f05bf7b777572adc619753afe96a9083`
+Live rollup source head: `aa3587b7bf2fe2ce1cc085965678af66245b1cc3`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `070b5993f05bf7b777572adc619753afe96a9083` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `6fe34fe4f4806aa49a3e84ba6a63fef4f4d90f1a`, and the live rollup remains exact for that deployed marker.
+Note: current HEAD `aa3587b7bf2fe2ce1cc085965678af66245b1cc3` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `e8818e29213f84ba00891da5b517776027e0d041`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -47,6 +47,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live KOSHA exact-pin materialization is measured separately: `PASS_LIVE_PRODUCTION_KOSHA_EXACT_MATERIALIZATION`, live scenarios passed `3/3`, product-in-production `true`. This proves only the current three exact pins in relevant structured rows; registry expansion still requires completed human review and separate approval.
 - Live synthetic wording and field usability are measured separately: `PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW`, live scenarios passed `5/5`, live pending `false`. This gate catches fixed-profile field leakage and selected-document wording defects, while broad human review and exact saved Share evidence remain separate.
 - Live 12-deliverable presence and applicability are measured separately: `PASS_LIVE_PRODUCTION_12_DELIVERABLE_BROAD_REVIEW`, UI/integrity/reviewed documents `12/12/12`, before missingUnexpected `5`, live missingUnexpected `0`, and workPermitDraft presentNonEmpty `5/5`. The six-document synthetic wording gate is not accepted as 12-document deliverable coverage; exact saved Share remains `MISSING_EVIDENCE`.
+- Live 12-deliverable automated editorial quality is measured separately: `PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY`, live scenarios `5/5`, reviewed document surface `60`, placeholder/legal/awkward/evidence mismatch `0/0/0/0`, and duplicate findings exact/near `38/100`. This is reviewer-ready automated evidence with humanReviewCompleted=`false`, not a combined human PASS; exact saved Share remains `MISSING_EVIDENCE`.
 - Live supporting-document scenario grounding is measured separately: `PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT`, live cases `5/5`, supporting documents `30/30`, cross-scenario leakage `0`, and missingUnexpected `0`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains `MISSING_EVIDENCE`.
 - Live document seed-profile isolation is measured separately: `PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION`, before forbidden fragments `90`, live forbidden fragments `0`, reviewed document surface `60`, and secondary grounding `30/30`. This deterministic gate does not replace broad human wording review or exact saved Share evidence; exact saved Share remains `MISSING_EVIDENCE`.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level, without claiming live production engine execution.
