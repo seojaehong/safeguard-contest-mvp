@@ -1,6 +1,6 @@
 # Live Document Quality Stress Matrix
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LIVE_PENDING`
+- Verdict: `PASS_LIVE_PRODUCTION_STRESS_MATRIX`
 - Source base before commit: `6a86dc33`
 - Product commit: `6ddf66b58952674be29924064b061a0f6e7e5241`
 - Scenario manifest: `evaluation/live-document-quality-stress-matrix-2026-07-24/scenarios.json`
@@ -55,6 +55,16 @@ Raw evidence: `evaluation/live-document-quality-stress-matrix-2026-07-24/after-l
 
 The local run used a production build from product commit `6ddf66b5` after the scenario-specificity fix and the corrected Gumi manifest contract. Local runtime build-info was unavailable, so this is source/build-bound evidence rather than a deployed marker claim. It called only the local `/api/ask` endpoint and did not create saved Share data.
 
+## Live production after remediation
+
+Raw evidence: `evaluation/live-document-quality-stress-matrix-2026-07-24/after-live/report.json`.
+
+| Scope | Cases | Result |
+| --- | ---: | --- |
+| Live production stress matrix | 5 | 5 PASS / 0 RED |
+
+Production `/api/build-info` reached `fa5aa4de49990dafe12f65ea3488c580e96c157f`, and the same five stress scenarios then passed against `https://www.safeclaw.kr`.
+
 ## Verification
 
 - `npm.cmd test -- tests\safeclaw-quality-matrix-runner.test.ts --maxWorkers=1 --fileParallelism=false`
@@ -67,8 +77,8 @@ The local run used a production build from product commit `6ddf66b5` after the s
 
 ## Claim boundary
 
-This is a current-source local PASS artifact, not a live production PASS.
+This is a live production stress-matrix PASS for the five measured scenarios.
 
-Live production calls were limited to the five before-remediation `POST /api/ask` requests. Current-source after-remediation calls were local only. No DB mutation, Share session creation, provider dispatch, or exact saved `/share/[sessionId]` reproduction was performed.
+Live production calls were limited to ten `POST /api/ask` requests: five before-remediation RED calls and five after-remediation PASS calls. Current-source after-remediation calls were local only. No DB mutation, Share session creation, provider dispatch, or exact saved `/share/[sessionId]` reproduction was performed.
 
-Next step after deployment is to rerun the same stress matrix against `https://www.safeclaw.kr` and only then upgrade the verdict to live production PASS if all five scenarios remain green.
+This five-scenario stress PASS does not replace broad human wording review, exact saved Share geometry, provider dispatch approval, or DB/RLS approval gates.

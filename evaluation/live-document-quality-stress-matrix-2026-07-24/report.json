@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-live-document-quality-stress-matrix/v1",
   "generatedAt": "2026-07-24T14:04:56.071Z",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LIVE_PENDING",
+  "verdict": "PASS_LIVE_PRODUCTION_STRESS_MATRIX",
   "sourceBaseBeforeCommit": "6a86dc33",
   "productCommit": "6ddf66b58952674be29924064b061a0f6e7e5241",
   "scenarioManifest": "evaluation/live-document-quality-stress-matrix-2026-07-24/scenarios.json",
@@ -52,6 +52,15 @@
     "fail": 0,
     "liveExecuted": 5
   },
+  "afterLive": {
+    "artifact": "evaluation/live-document-quality-stress-matrix-2026-07-24/after-live/report.json",
+    "baseUrl": "https://www.safeclaw.kr",
+    "productionCommit": "fa5aa4de49990dafe12f65ea3488c580e96c157f",
+    "total": 5,
+    "pass": 5,
+    "fail": 0,
+    "liveExecuted": 5
+  },
   "verification": {
     "runnerTests": {
       "files": 1,
@@ -72,10 +81,10 @@
     "build": "PASS"
   },
   "boundaries": {
-    "mode": "local-deterministic-live-before-and-current-source-local",
-    "apiCallsPerformed": 10,
-    "liveProductionClaimed": false,
-    "liveAfterDeploymentPending": true,
+    "mode": "local-deterministic-live-before-current-source-local-and-live-after",
+    "apiCallsPerformed": 15,
+    "liveProductionClaimed": true,
+    "liveAfterDeploymentPending": false,
     "dbMutationPerformed": false,
     "shareSessionCreated": false,
     "providerDispatchPerformed": false,
@@ -83,7 +92,7 @@
   },
   "nextActions": [
     "Keep the local deterministic 2/5 and live-before 0/5 RED results as discovery baselines; do not weaken the stress contracts to hide them.",
-    "Do not claim live production PASS until production deploys the current-source product fix and the same stress matrix passes against https://www.safeclaw.kr.",
-    "After deployment, rerun the stress matrix live without weakening the runner or creating DB/share/provider side effects."
+    "Keep this stress matrix in the release gate so future scenario-specific regressions fail closed.",
+    "Do not use this five-scenario stress PASS as a replacement for broad human wording review or exact saved Share geometry."
   ]
 }

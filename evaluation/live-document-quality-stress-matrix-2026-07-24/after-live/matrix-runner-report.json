@@ -1,0 +1,265 @@
+{
+  "generatedAt": "2026-07-24T14:11:25.200Z",
+  "elapsedMs": 120264,
+  "mode": "mixed-live",
+  "baseUrl": "https://www.safeclaw.kr",
+  "casesPath": "evaluation\\live-document-quality-stress-matrix-2026-07-24\\scenarios.json",
+  "total": 5,
+  "pass": 5,
+  "fail": 0,
+  "live": {
+    "enabled": true,
+    "requested": 5,
+    "executed": 5,
+    "timeoutMs": 60000
+  },
+  "matrix": {
+    "baseScenarios": 5,
+    "variants": 1
+  },
+  "failureSamples": [],
+  "byDimension": {
+    "region": {
+      "울산": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "경기": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "대전": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "경북": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "제주": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      }
+    },
+    "industry": {
+      "제조": {
+        "total": 3,
+        "pass": 3,
+        "fail": 0
+      },
+      "건설": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "시설관리": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      }
+    },
+    "workType": {
+      "화학세척": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "양중·화기 동시작업": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "야간 컨베이어 정비": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "방호장치 개선·정비": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "심야 전기설비 복구": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      }
+    },
+    "hazards": {
+      "미확인 화학물질": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "SDS": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "GHS 경고표지": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "환기": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "비산": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "동시작업": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "상하부 작업": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "낙하물": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "화기작업": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "양중": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "야간": {
+        "total": 2,
+        "pass": 2,
+        "fail": 0
+      },
+      "조도": {
+        "total": 2,
+        "pass": 2,
+        "fail": 0
+      },
+      "끼임": {
+        "total": 2,
+        "pass": 2,
+        "fail": 0
+      },
+      "의사소통": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "피로": {
+        "total": 2,
+        "pass": 2,
+        "fail": 0
+      },
+      "방호장치": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "예기치 않은 기동": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "LOTO": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "감전": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "단독작업": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      }
+    },
+    "requiredDocuments": {
+      "riskAssessmentDraft": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "workPlanDraft": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "tbmBriefing": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "safetyEducationRecordDraft": {
+        "total": 3,
+        "pass": 3,
+        "fail": 0
+      },
+      "emergencyResponseDraft": {
+        "total": 3,
+        "pass": 3,
+        "fail": 0
+      },
+      "workPermit": {
+        "total": 3,
+        "pass": 3,
+        "fail": 0
+      },
+      "tbmLogDraft": {
+        "total": 2,
+        "pass": 2,
+        "fail": 0
+      }
+    },
+    "workerSignals": {
+      "신호수": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "고령": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "청각장애": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "신규": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "야간조": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      },
+      "인수인계": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0
+      }
+    }
+  }
+}
