@@ -107,10 +107,22 @@ async function measureDocuments(page, state, theme) {
       const box = element.getBoundingClientRect();
       return visible(element) && box.bottom > 0 && box.top < window.innerHeight;
     };
-    const outsideElements = [...document.querySelectorAll("body *")].filter((element) => {
+    const outsideElementNodes = [...document.querySelectorAll("body *")].filter((element) => {
       const box = element.getBoundingClientRect();
       return box.width > 0 && box.height > 0 && (box.left < -1 || box.right > window.innerWidth + 1);
-    }).length;
+    });
+    const outsideElementDetails = outsideElementNodes.slice(0, 12).map((element) => {
+      const box = element.getBoundingClientRect();
+      return {
+        tag: element.tagName.toLowerCase(),
+        className: typeof element.className === "string" ? element.className : "",
+        testId: element.getAttribute("data-testid") || "",
+        left: Math.round(box.left),
+        right: Math.round(box.right),
+        width: Math.round(box.width),
+      };
+    });
+    const outsideElements = outsideElementNodes.length;
     const shell = document.querySelector(".workpack-shell");
     const actions = document.querySelector('[data-testid="document-section-actions"]');
     const hazard = document.querySelector('[aria-label="행 1 유해·위험요인"]');
@@ -121,8 +133,12 @@ async function measureDocuments(page, state, theme) {
       ["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"].includes(button.getAttribute("data-document-key") || "")
     );
     const mobileOptions = [...document.querySelectorAll('select[aria-label="편집 문서 선택"] option')];
-    const documentBodies = [...document.querySelectorAll('[data-testid="editor-document-body"], [role="tabpanel"]')];
+    const documentBodies = [...document.querySelectorAll('[data-testid="editor-document-body"]')];
     const rawEditors = [...document.querySelectorAll(".document-source-textarea, .document-section-textarea")];
+    const sectionTabs = [...document.querySelectorAll('[data-testid="document-section-tab"]')];
+    const sectionDetails = [...document.querySelectorAll('[data-testid="document-section-detail"]')];
+    const sectionTextareas = [...document.querySelectorAll(".document-section-textarea")];
+    const sourceTextareas = [...document.querySelectorAll(".document-source-textarea")];
     const stickyCandidates = [...document.querySelectorAll("body *")].filter((element) => {
       const style = getComputedStyle(element);
       const box = element.getBoundingClientRect();
@@ -144,6 +160,13 @@ async function measureDocuments(page, state, theme) {
     const supportOpen = supportingGroup instanceof HTMLDetailsElement ? supportingGroup.open : false;
     const actionsBottom = Math.round(actions?.getBoundingClientRect().bottom ?? 0);
     const hazardBottom = Math.round(hazardRect?.bottom ?? 0);
+    const selectedEditor = document.querySelector(".document-editor");
+    const selectedEditorRect = selectedEditor?.getBoundingClientRect();
+    const supportingLauncherMovesEditorOutOfView = supportOpen && (
+      stateLabel === "selected-workPlanDraft-section-detail"
+        ? !selectedEditorRect || selectedEditorRect.bottom <= 0 || selectedEditorRect.top >= window.innerHeight
+        : actionsBottom > window.innerHeight || hazardBottom > window.innerHeight || (hazardRect?.top ?? 0) < 0
+    );
     const bodyHeightRatio = Number((document.documentElement.scrollHeight / window.innerHeight).toFixed(2));
     const localScrollRatio = shell ? Number((shell.scrollHeight / Math.max(1, shell.clientHeight)).toFixed(2)) : null;
     return {
@@ -160,6 +183,7 @@ async function measureDocuments(page, state, theme) {
       bodyHardRed: bodyHeightRatio > 2,
       horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
       outsideElements,
+      outsideElementDetails,
       selectedDocumentTitle: document.querySelector(".document-toolbar .h2")?.textContent?.trim() || "",
       selectedEditorTop: Math.round(document.querySelector(".document-editor")?.getBoundingClientRect().top ?? 0),
       selectedEditorBottom: Math.round(document.querySelector(".document-editor")?.getBoundingClientRect().bottom ?? 0),
@@ -172,30 +196,47 @@ async function measureDocuments(page, state, theme) {
       firstHazardBottom: hazardBottom,
       firstHazardVisibleHeight: Math.round(hazardVisibleHeight),
       rawTextareaTop: Math.round(rawTextarea?.getBoundingClientRect().top ?? 0),
-      visibleSelectedEditorCount: document.querySelector(".document-editor") && visible(document.querySelector(".document-editor")) ? 1 : 0,
+      visibleSelectedEditorCount: selectedEditor && visible(selectedEditor) ? 1 : 0,
       visibleFullDocumentBodyCount: documentBodies.filter(inViewport).length,
       visibleRawEditorCount: rawEditors.filter(inViewport).length,
       fullDocumentBodiesSeriallyVisible: documentBodies.filter(inViewport).length > 1 || rawEditors.filter(inViewport).length > 1,
+      sectionTabCount: sectionTabs.length,
+      selectedSectionTabCount: sectionTabs.filter((tab) => tab.getAttribute("aria-selected") === "true").length,
+      mountedSectionDetailCount: sectionDetails.length,
+      mountedSectionTextareaCount: sectionTextareas.length,
+      mountedSourceTextareaCount: sourceTextareas.length,
       supportingDocsOpenDefault: supportOpen,
       supportingDocButtonCount: document.querySelectorAll('[data-testid="supporting-document-group"] button').length,
       supportingDocButtonsVisible: [...document.querySelectorAll('[data-testid="supporting-document-group"] button')].filter(visible).length,
       allDocumentLauncherCount: allTabButtons.length || mobileOptions.length,
       coreDocButtonCount: coreButtons.length || mobileOptions.filter((option) => ["위험성평가표", "TBM 브리핑", "TBM 기록"].includes(option.textContent?.trim() || "")).length,
       stickyOverlapCount: stickyCandidates.filter((element) => rawTextarea ? overlap(element, rawTextarea) : false).length,
-      supportingLauncherMovesEditorOutOfView: supportOpen && (actionsBottom > window.innerHeight || hazardBottom > window.innerHeight || (hazardRect?.top ?? 0) < 0),
+      supportingLauncherMovesEditorOutOfView,
     };
   }, { stateLabel: state, themeName: theme });
 }
 
 function documentsVerdict(metrics) {
-  const firstTaskPass = metrics.selectedDocumentTitle === "위험성평가표"
-    && metrics.firstActionBottom <= metrics.viewportHeight
-    && metrics.firstHazardBottom <= metrics.viewportHeight
-    && metrics.firstHazardVisibleHeight >= 44
-    && metrics.visibleSelectedEditorCount === 1
-    && metrics.horizontalOverflow === false
-    && metrics.outsideElements === 0
-    && metrics.stickyOverlapCount === 0;
+  const sectionDetailState = metrics.state === "selected-workPlanDraft-section-detail";
+  const firstTaskPass = sectionDetailState
+    ? metrics.selectedDocumentTitle === "작업계획서"
+      && metrics.sectionTabCount >= 2
+      && metrics.selectedSectionTabCount === 1
+      && metrics.mountedSectionDetailCount === 1
+      && metrics.mountedSectionTextareaCount === 1
+      && metrics.mountedSourceTextareaCount === 0
+      && metrics.visibleSelectedEditorCount === 1
+      && metrics.horizontalOverflow === false
+      && metrics.outsideElements === 0
+      && metrics.stickyOverlapCount === 0
+    : metrics.selectedDocumentTitle === "위험성평가표"
+      && metrics.firstActionBottom <= metrics.viewportHeight
+      && metrics.firstHazardBottom <= metrics.viewportHeight
+      && metrics.firstHazardVisibleHeight >= 44
+      && metrics.visibleSelectedEditorCount === 1
+      && metrics.horizontalOverflow === false
+      && metrics.outsideElements === 0
+      && metrics.stickyOverlapCount === 0;
   const longContentContained = metrics.fullDocumentBodiesSeriallyVisible === false
     && metrics.supportingLauncherMovesEditorOutOfView === false
     && metrics.visibleFullDocumentBodyCount <= 1;
@@ -218,6 +259,15 @@ async function generateWorkspace(page, theme) {
   await page.getByRole("button", { name: /안전 문서 생성/u }).click();
   await page.locator(".workspace-document-page").waitFor({ state: "visible", timeout: 60_000 });
   await page.getByText(/12\/12 생성|안전 문서팩 3종 준비 완료/u).first().waitFor({ timeout: 60_000 });
+}
+
+async function selectDocument(page, documentKey) {
+  const picker = page.locator('select[aria-label="편집 문서 선택"]').first();
+  await picker.selectOption(documentKey, { force: true });
+  await page.waitForFunction((expectedKey) => (
+    document.querySelector('select[aria-label="편집 문서 선택"]')?.value === expectedKey
+  ), documentKey);
+  await settle(page);
 }
 
 async function measureGeneratedDocuments(page, theme) {
@@ -396,6 +446,15 @@ for (const theme of themes) {
       const selectedMetrics = await measureDocuments(docPage, "selected-riskAssessmentDraft", theme);
       documentRows.push({ metrics: selectedMetrics, verdicts: documentsVerdict(selectedMetrics) });
 
+      await selectDocument(docPage, "workPlanDraft");
+      const sectionDetailMetrics = await measureDocuments(docPage, "selected-workPlanDraft-section-detail", theme);
+      documentRows.push({ metrics: sectionDetailMetrics, verdicts: documentsVerdict(sectionDetailMetrics) });
+      await docPage.screenshot({
+        path: path.join(outDir, `documents-work-plan-section-detail-${theme}-${viewport.label}.png`),
+        fullPage: true,
+      });
+      await selectDocument(docPage, "riskAssessmentDraft");
+
       const supportSummary = docPage.locator('[data-testid="supporting-document-group"] > summary').first();
       if (await supportSummary.count()) {
         const visible = await supportSummary.evaluate((element) => {
@@ -541,7 +600,7 @@ fs.writeFileSync(path.join(outDir, "report.json"), `${JSON.stringify(report, nul
 function documentsRow(row) {
   const metrics = row.metrics;
   const verdicts = row.verdicts;
-  return `| ${metrics.route} | ${metrics.theme} | ${metrics.state} | ${metrics.viewport} | ${verdicts.overallVerdict} | ${verdicts.firstTaskVerdict || "n/a"} | ${verdicts.bodyHeightVerdict || "n/a"} | ${verdicts.longContentContainmentVerdict || "n/a"} | ${verdicts.detailDepthVerdict || "n/a"} | ${metrics.bodyHeightRatio ?? "n/a"} | ${metrics.workpackShellScrollRatio ?? "n/a"} | ${metrics.firstActionBottom ?? "n/a"} | ${metrics.firstHazardBottom ?? "n/a"} | ${metrics.visibleSelectedEditorCount ?? "n/a"} | ${metrics.visibleFullDocumentBodyCount ?? "n/a"} | ${metrics.supportingDocsOpenDefault ?? "n/a"} | ${metrics.supportingLauncherMovesEditorOutOfView ?? "n/a"} | ${metrics.stickyOverlapCount ?? "n/a"} | ${metrics.horizontalOverflow ?? "n/a"} |`;
+  return `| ${metrics.route} | ${metrics.theme} | ${metrics.state} | ${metrics.viewport} | ${verdicts.overallVerdict} | ${verdicts.firstTaskVerdict || "n/a"} | ${verdicts.bodyHeightVerdict || "n/a"} | ${verdicts.longContentContainmentVerdict || "n/a"} | ${verdicts.detailDepthVerdict || "n/a"} | ${metrics.bodyHeightRatio ?? "n/a"} | ${metrics.workpackShellScrollRatio ?? "n/a"} | ${metrics.firstActionBottom ?? "n/a"} | ${metrics.firstHazardBottom ?? "n/a"} | ${metrics.visibleSelectedEditorCount ?? "n/a"} | ${metrics.visibleFullDocumentBodyCount ?? "n/a"} | ${metrics.sectionTabCount ?? "n/a"} | ${metrics.selectedSectionTabCount ?? "n/a"} | ${metrics.mountedSectionDetailCount ?? "n/a"} | ${metrics.mountedSectionTextareaCount ?? "n/a"} | ${metrics.mountedSourceTextareaCount ?? "n/a"} | ${metrics.supportingDocsOpenDefault ?? "n/a"} | ${metrics.supportingLauncherMovesEditorOutOfView ?? "n/a"} | ${metrics.stickyOverlapCount ?? "n/a"} | ${metrics.horizontalOverflow ?? "n/a"} |`;
 }
 
 function shareRow(row) {
@@ -580,8 +639,8 @@ Allowed claim: measured routes can pass the scoped bounded-workbench contract wh
 
 ## Documents
 
-| Route | Theme | State | Viewport | Overall | First task | Body height | Long containment | Detail depth | Body ratio | Shell scroll ratio | First action bottom | Hazard bottom | Selected editors | Full bodies visible | Supporting open | Support moves editor | Sticky overlap | OverflowX |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Route | Theme | State | Viewport | Overall | First task | Body height | Long containment | Detail depth | Body ratio | Shell scroll ratio | First action bottom | Hazard bottom | Selected editors | Full bodies visible | Section tabs | Selected section tabs | Mounted section details | Mounted section textareas | Mounted source textareas | Supporting open | Support moves editor | Sticky overlap | OverflowX |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 ${documentRows.map(documentsRow).join("\n")}
 
 ## Documents Detail-Depth Debt
