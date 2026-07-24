@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-24T17:32:03.012Z",
-  "head": "81b7c304c72e4b2e5a2f139c7d26b31bc1f2922d",
+  "generatedAt": "2026-07-24T17:53:18.203Z",
+  "head": "26d5673d27247222d2648fa1edab79009d248212",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "421024036b18929354e2399f1342154db682c82b",
+    "commitSha": "e53d3d8025a200933303c909f92ebfb7058077d4",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-kc8bbbuze-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-ojhb5ou4o-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -91,7 +91,7 @@
       "id": "share_recipient_long_content_fixture",
       "state": "proven",
       "artifact": "evaluation\\share-recipient-long-content-fixture-2026-07-25\\report.json",
-      "detail": "Live recipient UI kept six day/night long-content fixture rows scoped PASS: desktop stayed two-region, mobile kept confirmation in the first viewport, four previews were locally contained, three documents stayed collapsed, and exact saved-session evidence remains MISSING_EVIDENCE with no mutation or provider dispatch."
+      "detail": "Live recipient UI kept six day/night long-content fixture rows scoped PASS: desktop stayed two-region, mobile recipient root stayed within 1.5 viewports with confirmation in the first viewport, the long task used local scroll, the document group stayed collapsed by default, and exact saved-session evidence remains MISSING_EVIDENCE with no mutation or provider dispatch. Route split alone remains explicitly insufficient."
     },
     {
       "id": "share_exact_saved_session_boundary",
@@ -288,9 +288,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "81b7c304c72e4b2e5a2f139c7d26b31bc1f2922d",
+      "sourceCommit": "26d5673d27247222d2648fa1edab79009d248212",
       "sourceStatus": "exact",
-      "productionCommit": "81b7c304c72e4b2e5a2f139c7d26b31bc1f2922d",
+      "productionCommit": "26d5673d27247222d2648fa1edab79009d248212",
       "productionStatus": "ancestor_of_head"
     },
     {

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-24T17:32:02.099Z",
-  "sourceSha": "81b7c304c72e4b2e5a2f139c7d26b31bc1f2922d",
+  "generatedAt": "2026-07-24T17:53:17.373Z",
+  "sourceSha": "26d5673d27247222d2648fa1edab79009d248212",
   "overall": "open",
   "gates": [
     {
@@ -126,7 +126,7 @@
       "state": "proven",
       "label": "Recipient Share long-content fixture",
       "evidencePath": "evaluation\\share-recipient-long-content-fixture-2026-07-25\\report.json",
-      "detail": "Live recipient UI kept six day/night long-content fixture rows scoped PASS: desktop stayed two-region, mobile kept confirmation in the first viewport, four previews were locally contained, three documents stayed collapsed, and exact saved-session evidence remains MISSING_EVIDENCE with no mutation or provider dispatch.",
+      "detail": "Live recipient UI kept six day/night long-content fixture rows scoped PASS: desktop stayed two-region, mobile recipient root stayed within 1.5 viewports with confirmation in the first viewport, the long task used local scroll, the document group stayed collapsed by default, and exact saved-session evidence remains MISSING_EVIDENCE with no mutation or provider dispatch. Route split alone remains explicitly insufficient.",
       "nextActions": [
         "Keep exact saved/generated /share/[sessionId] open until a concrete production URL is supplied or DB-backed session creation is explicitly approved."
       ]
