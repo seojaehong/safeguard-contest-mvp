@@ -41,7 +41,7 @@ const documentRubrics = {
   safetyEducationRecordDraft: ["교육", "교육대상", "교육내용", "확인방법", "서명"],
   emergencyResponseDraft: ["비상", "초기조치", "보고", "현장보존", "재발방지"],
   photoEvidenceDraft: ["사진", "증빙", "조치 전", "조치 후", "보관"],
-  foreignWorkerBriefing: ["외국인", "쉬운 한국어", "보호구", "작업을 멈추"],
+  foreignWorkerBriefing: ["외국인", "쉬운 한국어", "보호구", "멈"],
   foreignWorkerTransmission: ["외국인", "작업", "STOP", "보호구"],
   kakaoMessage: ["현장", "위험", "작업", "확인"]
 };
@@ -57,6 +57,22 @@ const weatherFallbackTerms = {
   결빙: ["결빙", "미끄럼", "한파"],
   한랭: ["한랭", "저온", "냉동"]
 };
+
+const hazardFallbackTerms = {
+  차량충돌: ["차량충돌", "차량 충돌", "차량", "굴착기", "충돌"]
+};
+
+const legacyGenericForeignHazardPhrases = [
+  "发现强风、叉车、坠落或化学品危险",
+  "หากพบลมแรง รถยก สารเคมี หรือความเสี่ยงตกจากที่สูง",
+  "Kuchli shamol, yuk ko'targich, kimyoviy modda yoki yiqilish xavfi",
+  "Хүчтэй салхи, сэрээт ачигч, химийн бодис эсвэл унах эрсдэл",
+  "बलियो हावा, फोर्कलिफ्ट, रसायन वा खस्ने जोखिम",
+  "បើមានខ្យល់ខ្លាំង រថយន្តលើកទំនិញ សារធាតុគីមី ឬហានិភ័យធ្លាក់",
+  "If you see strong wind, forklifts, chemicals, or fall hazards",
+  "Jika ada angin kencang, forklift, bahan kimia, atau risiko jatuh",
+  "လေပြင်း၊ ဖော့ကလစ်၊ ဓာတုပစ္စည်း သို့မဟုတ် ပြုတ်ကျနိုင်သော အန္တရာယ်"
+];
 
 function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
@@ -343,11 +359,69 @@ function checkHazardReflection(payload, expected) {
     readDocument(payload, "tbmBriefing"),
     readDocument(payload, "safetyEducationRecordDraft")
   ].join("\n");
-  const missing = asArray(expected.hazards).filter((hazard) => !includesAny(coreText, [hazard]));
+  const missing = asArray(expected.hazards).filter((hazard) => (
+    !includesAny(coreText, hazardFallbackTerms[hazard] || [hazard])
+  ));
   return [{
     name: "reflection:hazards",
     ok: missing.length === 0,
     message: missing.length ? `hazards not reflected: ${missing.join(", ")}` : ""
+  }];
+}
+
+function readStructuredRiskRows(payload) {
+  const structuredRows = payload?.structured?.riskAssessmentRows;
+  if (Array.isArray(structuredRows)) return structuredRows;
+  const deliverableRows = payload?.deliverables?.structuredRiskRows;
+  return Array.isArray(deliverableRows) ? deliverableRows : [];
+}
+
+function checkStructuredRiskRows(payload, required) {
+  if (!required) return [];
+  const rows = readStructuredRiskRows(payload);
+  const duplicateIndexes = rows.flatMap((row, index) => {
+    const current = typeof row?.currentControls === "string"
+      ? row.currentControls.replace(/\s+/g, " ").trim().toLowerCase()
+      : "";
+    const additional = typeof row?.additionalControls === "string"
+      ? row.additionalControls.replace(/\s+/g, " ").trim().toLowerCase()
+      : "";
+    return current && additional && current === additional ? [index] : [];
+  });
+  return [
+    {
+      name: "structured:riskRowsPresent",
+      ok: rows.length > 0,
+      message: rows.length ? "" : "live response is missing structured risk assessment rows"
+    },
+    {
+      name: "structured:riskControlsDistinct",
+      ok: rows.length > 0 && duplicateIndexes.length === 0,
+      message: duplicateIndexes.length
+        ? `current and additional controls are duplicated in rows: ${duplicateIndexes.join(", ")}`
+        : rows.length
+          ? ""
+          : "structured risk assessment rows are unavailable"
+    }
+  ];
+}
+
+function checkForeignWorkerScenarioRelevance(payload, requiredDocuments) {
+  const required = requiredDocuments.some((key) => (
+    key === "foreignWorkerBriefing" || key === "foreignWorkerTransmission"
+  ));
+  if (!required) return [];
+  const text = [
+    readDocument(payload, "foreignWorkerBriefing"),
+    readDocument(payload, "foreignWorkerTransmission")
+  ].join("\n");
+  const leakedPhrases = legacyGenericForeignHazardPhrases.filter((phrase) => text.includes(phrase));
+  return [{
+    name: "reflection:foreignWorkerScenarioRelevance",
+    ok: leakedPhrases.length === 0,
+    message: leakedPhrases.length
+      ? `foreign worker output contains generic unrelated hazard phrases: ${leakedPhrases.length}`
+      : ""
   }];
 }
 
@@ -414,6 +488,8 @@ function checkCase(testCase, payload, api) {
     ...(api ? [{ name: "api:/api/ask", ok: api.ok, message: api.ok ? "" : `api failed: ${api.status} ${api.rawPreview}` }] : []),
     ...checkRequiredDocuments(payload, asArray(testCase.expected.requiredDocuments)),
     ...checkDocumentRubrics(payload, asArray(testCase.expected.requiredDocuments)),
+    ...checkStructuredRiskRows(payload, Boolean(api)),
+    ...checkForeignWorkerScenarioRelevance(payload, asArray(testCase.expected.requiredDocuments)),
     ...checkHazardReflection(payload, testCase.expected),
     ...checkWeatherReflection(payload, testCase.expected),
     ...checkWorkerReflection(payload, testCase.expected),

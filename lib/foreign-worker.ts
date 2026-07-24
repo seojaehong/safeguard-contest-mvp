@@ -66,7 +66,7 @@ const languageTemplates: LanguageTemplate[] = [
     keywords: ["베트남", "vietnam", "vietnamese", "tiếng việt"],
     lines: [
       "Trước khi làm việc, hãy kiểm tra khu vực nguy hiểm và thiết bị bảo hộ.",
-      "Nếu thấy nguy hiểm, gió mạnh, xe nâng hoặc hóa chất, hãy dừng công việc và báo ngay.",
+      "Nếu thấy tình trạng không an toàn, hãy dừng công việc và báo ngay.",
       "Hãy làm theo hướng dẫn của quản lý và xác nhận lại nếu chưa hiểu."
     ]
   },
@@ -78,7 +78,7 @@ const languageTemplates: LanguageTemplate[] = [
     keywords: ["중국", "중국어", "china", "chinese", "中文"],
     lines: [
       "作业前请确认危险区域和个人防护用品。",
-      "发现强风、叉车、坠落或化学品危险时，请立即停止作业并报告。",
+      "发现不安全情况时，请立即停止作业并报告。",
       "如未完全理解，请向现场负责人再次确认。"
     ]
   },
@@ -90,7 +90,7 @@ const languageTemplates: LanguageTemplate[] = [
     keywords: ["태국", "태국어", "thai", "thailand", "ภาษาไทย"],
     lines: [
       "ก่อนเริ่มงาน ให้ตรวจพื้นที่เสี่ยงและอุปกรณ์ป้องกันส่วนบุคคล",
-      "หากพบลมแรง รถยก สารเคมี หรือความเสี่ยงตกจากที่สูง ให้หยุดงานและแจ้งหัวหน้างานทันที",
+      "หากพบสภาพไม่ปลอดภัย ให้หยุดงานและแจ้งหัวหน้างานทันที",
       "หากไม่เข้าใจ ให้ขอให้หัวหน้างานอธิบายซ้ำ"
     ]
   },
@@ -102,7 +102,7 @@ const languageTemplates: LanguageTemplate[] = [
     keywords: ["우즈벡", "우즈베키스탄", "uzbek", "o'zbek"],
     lines: [
       "Ish boshlashdan oldin xavfli joylar va himoya vositalarini tekshiring.",
-      "Kuchli shamol, yuk ko'targich, kimyoviy modda yoki yiqilish xavfi bo'lsa, ishni to'xtating va darhol xabar bering.",
+      "Xavfli holat bo'lsa, ishni to'xtating va darhol xabar bering.",
       "Tushunmagan bo'lsangiz, rahbardan yana tushuntirishni so'rang."
     ]
   },
@@ -114,7 +114,7 @@ const languageTemplates: LanguageTemplate[] = [
     keywords: ["몽골", "몽골어", "mongol", "mongolian", "монгол"],
     lines: [
       "Ажил эхлэхээс өмнө аюултай бүс болон хамгаалах хэрэгслийг шалгана уу.",
-      "Хүчтэй салхи, сэрээт ачигч, химийн бодис эсвэл унах эрсдэл байвал ажлыг зогсоож шууд мэдэгдэнэ үү.",
+      "Аюултай нөхцөл илэрвэл ажлыг зогсоож шууд мэдэгдэнэ үү.",
       "Ойлгоогүй бол ахлагчаас дахин тайлбарлуулах хэрэгтэй."
     ]
   },
@@ -126,7 +126,7 @@ const languageTemplates: LanguageTemplate[] = [
     keywords: ["네팔", "네팔어", "nepal", "nepali", "नेपाली"],
     lines: [
       "काम सुरु गर्नु अघि जोखिम क्षेत्र र सुरक्षा उपकरण जाँच गर्नुहोस्।",
-      "बलियो हावा, फोर्कलिफ्ट, रसायन वा खस्ने जोखिम भए काम रोक्नुहोस् र तुरुन्त रिपोर्ट गर्नुहोस्।",
+      "असुरक्षित अवस्था देखिएमा काम रोक्नुहोस् र तुरुन्त रिपोर्ट गर्नुहोस्।",
       "नबुझेमा सुपरभाइजरसँग फेरि पुष्टि गर्नुहोस्।"
     ]
   },
@@ -138,7 +138,7 @@ const languageTemplates: LanguageTemplate[] = [
     keywords: ["캄보디아", "크메르", "khmer", "cambodia", "ភាសាខ្មែរ"],
     lines: [
       "មុនចាប់ផ្តើមការងារ សូមពិនិត្យតំបន់គ្រោះថ្នាក់ និងឧបករណ៍ការពារ។",
-      "បើមានខ្យល់ខ្លាំង រថយន្តលើកទំនិញ សារធាតុគីមី ឬហានិភ័យធ្លាក់ សូមឈប់ការងារ ហើយរាយការណ៍ភ្លាមៗ។",
+      "បើឃើញស្ថានភាពមិនមានសុវត្ថិភាព សូមឈប់ការងារ ហើយរាយការណ៍ភ្លាមៗ។",
       "បើមិនយល់ សូមសួរអ្នកគ្រប់គ្រងឱ្យពន្យល់ម្តងទៀត។"
     ]
   },
@@ -150,7 +150,7 @@ const languageTemplates: LanguageTemplate[] = [
     keywords: ["영어", "필리핀", "미국", "english", "philippines", "tagalog"],
     lines: [
       "Before work, check the danger zone and personal protective equipment.",
-      "If you see strong wind, forklifts, chemicals, or fall hazards, stop work and report immediately.",
+      "If you see an unsafe condition, stop work and report it immediately.",
       "If you do not understand, ask the supervisor to explain again."
     ]
   },
@@ -162,7 +162,7 @@ const languageTemplates: LanguageTemplate[] = [
     keywords: ["인도네시아", "indonesia", "bahasa"],
     lines: [
       "Sebelum bekerja, periksa area berbahaya dan alat pelindung diri.",
-      "Jika ada angin kencang, forklift, bahan kimia, atau risiko jatuh, hentikan pekerjaan dan segera laporkan.",
+      "Jika ada kondisi tidak aman, hentikan pekerjaan dan segera laporkan.",
       "Jika belum paham, minta supervisor menjelaskan lagi."
     ]
   },
@@ -174,7 +174,7 @@ const languageTemplates: LanguageTemplate[] = [
     keywords: ["미얀마", "버마", "myanmar", "burmese", "မြန်မာ"],
     lines: [
       "အလုပ်မစတင်မီ အန္တရာယ်ရှိသောနေရာနှင့် ကာကွယ်ရေးပစ္စည်းများကို စစ်ဆေးပါ။",
-      "လေပြင်း၊ ဖော့ကလစ်၊ ဓာတုပစ္စည်း သို့မဟုတ် ပြုတ်ကျနိုင်သော အန္တရာယ်ရှိပါက အလုပ်ရပ်ပြီး ချက်ချင်းတိုင်ကြားပါ။",
+      "မလုံခြုံသောအခြေအနေတွေ့ပါက အလုပ်ရပ်ပြီး ချက်ချင်းတိုင်ကြားပါ။",
       "နားမလည်ပါက ကြီးကြပ်သူကို ထပ်မံရှင်းပြရန် မေးပါ။"
     ]
   }

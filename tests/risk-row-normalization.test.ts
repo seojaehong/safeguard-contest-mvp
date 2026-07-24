@@ -54,6 +54,25 @@ describe("risk row normalization", () => {
     expect(finalValidation.issues).toEqual([]);
   });
 
+  it("replaces duplicated current and additional controls with a distinct field verification action", () => {
+    const duplicatedControl = "매설물 도면 확인과 시험굴착 결과를 작업 전에 확인합니다.";
+    const finalValidation = normalizeAndValidateRiskAssessmentRows([
+      row({
+        hazard: "지하 매설물 파손",
+        currentControls: duplicatedControl,
+        additionalControls: duplicatedControl,
+        riskLevel: "high"
+      })
+    ]);
+
+    expect(finalValidation.rows).toHaveLength(1);
+    expect(finalValidation.rows[0].currentControls).toBe(duplicatedControl);
+    expect(finalValidation.rows[0].additionalControls).toContain("현장 반영 여부");
+    expect(finalValidation.rows[0].additionalControls).toContain("미반영 시 작업을 보류");
+    expect(finalValidation.rows[0].additionalControls).not.toBe(duplicatedControl);
+    expect(finalValidation.issues).toEqual([]);
+  });
+
   it("preserves an optional canonical controlId through schema validation", () => {
     const validation = validateRiskAssessmentRows({
       rows: [row({ controlId: "fall-work-platform", riskLevel: "high" })],

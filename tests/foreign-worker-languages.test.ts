@@ -228,3 +228,39 @@ describe("foreign worker transmission context", () => {
     expect(transmission).toContain("도장");
   });
 });
+
+describe("foreign worker generic fallback relevance", () => {
+  it("uses neutral stop-and-report fallbacks without adding unrelated named hazards", () => {
+    const input = {
+      question: "그린메탈 경기 안산 공장 배관 용접·절단 화기작업. 외국인 근로자와 신규 작업자 포함, 실내 고온과 환기 불량, 가연물 인접.",
+      scenario: {
+        siteName: "경기 안산 공장",
+        companyName: "그린메탈",
+        companyType: "제조업",
+        workSummary: "배관 용접·절단 화기작업",
+        workerCount: 3,
+        weatherNote: "실내 고온과 환기 불량 확인 필요"
+      },
+      riskSummary: {
+        title: "고온·환기불량 화기작업",
+        riskLevel: "상" as const,
+        topRisk: "용접 불티와 가연물로 인한 화재 및 환기 불량에 따른 흡입 위험",
+        immediateActions: [
+          "가연물을 제거하고 화재감시자를 배치합니다.",
+          "환기 상태를 확인합니다.",
+          "보호구를 확인합니다."
+        ]
+      }
+    };
+
+    const messages = buildForeignWorkerLanguages(input)
+      .map((language) => buildForeignWorkerLanguageMessage(input, language))
+      .join("\n");
+
+    expect(messages).not.toContain("strong wind");
+    expect(messages).not.toContain("forklifts");
+    expect(messages).not.toContain("发现强风");
+    expect(messages).not.toContain("Kuchli shamol");
+    expect(messages).not.toContain("လေပြင်း");
+  });
+});

@@ -336,7 +336,15 @@ export function normalizeAndValidateRiskAssessmentRows(rows: RiskAssessmentRow[]
   rows: RiskAssessmentRow[];
   issues: RiskAssessmentValidationIssue[];
 } {
-  const normalized = normalizeRiskAssessmentRiskLevels(rows);
+  const normalized = normalizeRiskAssessmentRiskLevels(rows).map((row) => {
+    const currentControls = row.currentControls.replace(/\s+/g, " ").trim().toLocaleLowerCase("ko-KR");
+    const additionalControls = row.additionalControls.replace(/\s+/g, " ").trim().toLocaleLowerCase("ko-KR");
+    if (currentControls !== additionalControls) return row;
+    return {
+      ...row,
+      additionalControls: `관리감독자가 작업 전 ${row.hazard} 관련 현재 안전조치의 현장 반영 여부를 확인하고 미반영 시 작업을 보류합니다.`
+    };
+  });
   const validation = validateRiskAssessmentRows(normalized);
   return { rows: validation.rows, issues: validation.issues };
 }
