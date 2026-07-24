@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-live-harness-quality-probe/v1",
-  "generatedAt": "2026-07-24T13:08:58.236Z",
-  "startedAt": "2026-07-24T13:08:28.511Z",
+  "generatedAt": "2026-07-24T13:06:35.515Z",
+  "startedAt": "2026-07-24T13:06:10.050Z",
   "sourceSha": "5a91a1f5659c748143cb8c52ef670c5949b22401",
   "liveBuildInfo": {
     "ok": true,
@@ -32,7 +32,7 @@
     "ok": true,
     "status": 200,
     "timeoutMs": 180000,
-    "elapsedMs": 29626,
+    "elapsedMs": 25366,
     "contentType": "application/json"
   },
   "operations": [
@@ -331,7 +331,7 @@
           "기상특보가 확인되어 작업 전 작업중지 기준과 옥외·고소작업 허용 여부를 관리감독자가 재판단",
           "폭염·한파 영향예보가 확인되어 휴식, 음수, 보온·냉방, 취약 작업자 배치를 별도 점검"
         ],
-        "detail": "기상청 초단기실황 호출 성공 (서울, base 20260724 2100) / 기상청 초단기예보 호출 성공 (서울, base 20260724 2130) / 기상청 단기예보 호출 성공 (서울, base 20260724 2000) / 기상청 기상특보 조회 성공 (전국, 202607241800) / 기상청 영향예보 조회 성공 (봉화군평지, 보건(일반인)) / 기상청 생활기상지수 자외선 조회 성공 (서울, areaNo 1100000000) / 기상청 생활기상지수 체감온도 연결 점검 필요: NO_DATA / 한국에너지기술연구원 실시간 홍반자외선 연결 점검 필요: NO_DATA totalCount 0 / in-memory cache",
+        "detail": "기상청 초단기실황 호출 성공 (서울, base 20260724 2100) / 기상청 초단기예보 호출 성공 (서울, base 20260724 2130) / 기상청 단기예보 호출 성공 (서울, base 20260724 2000) / 기상청 기상특보 조회 성공 (전국, 202607241800) / 기상청 영향예보 조회 성공 (봉화군평지, 보건(일반인)) / 기상청 생활기상지수 자외선 조회 성공 (서울, areaNo 1100000000) / 기상청 생활기상지수 체감온도 연결 점검 필요: NO_DATA / 한국에너지기술연구원 실시간 홍반자외선 연결 점검 필요: NO_DATA totalCount 0",
         "signals": [
           {
             "endpoint": "초단기실황",
@@ -1796,13 +1796,13 @@
       "work24": "live",
       "kosha": "live",
       "summary": "연결됨",
-      "detail": "Law.go와 OpenAI 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 초단기실황 호출 성공 (서울, base 20260724 2100) / 기상청 초단기예보 호출 성공 (서울, base 20260724 2130) / 기상청 단기예보 호출 성공 (서울, base 20260724 2000) / 기상청 기상특보 조회 성공 (전국, 202607241800) / 기상청 영향예보 조회 성공 (봉화군평지, 보건(일반인)) / 기상청 생활기상지수 자외선 조회 성공 (서울, areaNo 1100000000) / 기상청 생활기상지수 체감온도 연결 점검 필요: NO_DATA / 한국에너지기술연구원 실시간 홍반자외선 연결 점검 필요: NO_DATA totalCount 0 / in-memory cache / 고용24 사업주훈련 호출 성공 (지역코드 11). 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 7건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 지식 DB 매칭 4건 / Supabase 카탈로그 매칭 8건 (configured=true) / structured 위험성평가 rows 5건, 검증 이슈 0건 (structured rows=고정 근거 기반) / TBM-risk 연결 5건 (TBM-risk links=고정 근거 기반) / TBM structured=규칙 기반 from risk rows / 생성 모드: 강화 (고정 근거 위험요인 표 우선: 위험성평가 row 확정, TBM 구조 규칙 기반 조립)",
+      "detail": "Law.go와 OpenAI 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 초단기실황 호출 성공 (서울, base 20260724 2100) / 기상청 초단기예보 호출 성공 (서울, base 20260724 2130) / 기상청 단기예보 호출 성공 (서울, base 20260724 2000) / 기상청 기상특보 조회 성공 (전국, 202607241800) / 기상청 영향예보 조회 성공 (봉화군평지, 보건(일반인)) / 기상청 생활기상지수 자외선 조회 성공 (서울, areaNo 1100000000) / 기상청 생활기상지수 체감온도 연결 점검 필요: NO_DATA / 한국에너지기술연구원 실시간 홍반자외선 연결 점검 필요: NO_DATA totalCount 0 / 고용24 사업주훈련 호출 성공 (지역코드 11). 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 7건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 지식 DB 매칭 4건 / Supabase 카탈로그 매칭 8건 (configured=true) / structured 위험성평가 rows 5건, 검증 이슈 0건 (structured rows=고정 근거 기반) / TBM-risk 연결 5건 (TBM-risk links=고정 근거 기반) / TBM structured=규칙 기반 from risk rows / 생성 모드: 강화 (고정 근거 위험요인 표 우선: 위험성평가 row 확정, TBM 구조 규칙 기반 조립)",
       "policyNote": "OpenAI 응답은 timeout 20000ms, retry 없음, 실패 시 보조 응답 정책을 따릅니다."
     },
     "qualityContract": {
       "overall": "ready",
       "summary": "실시간 근거, 온톨로지, 증빙, 구조화 산출물이 통합 준비 상태입니다.",
-      "generatedAt": "2026-07-24T13:08:58.316Z",
+      "generatedAt": "2026-07-24T13:06:35.583Z",
       "items": [
         {
           "key": "fallback",
@@ -1963,7 +1963,7 @@
     },
     "generationMode": "enhanced",
     "generationTrace": {
-      "traceId": "bc3782b4-4641-424d-9a86-c00f746923eb",
+      "traceId": "7d94f60e-d3b4-401e-8088-8469c2f1a4ee",
       "askMode": "enhanced",
       "answer": {
         "provider": "safeclaw",
@@ -3413,7 +3413,7 @@
           }
         },
         "generationTrace": {
-          "traceId": "bc3782b4-4641-424d-9a86-c00f746923eb",
+          "traceId": "7d94f60e-d3b4-401e-8088-8469c2f1a4ee",
           "askMode": "enhanced",
           "answer": {
             "provider": "safeclaw",
@@ -3524,10 +3524,10 @@
           },
           "fallbackUsed": true
         },
-        "responseContentDigest": "sha256:rXOkQk5x5zayL2C0HYgdQe5R8jIwz2VK5YlzbL5a5cc",
-        "generatedAt": "2026-07-24T13:08:58.316Z"
+        "responseContentDigest": "sha256:lN6j5ooo9oE_ZBaprxl0v48_rKrSm82d812_ZL9dqDw",
+        "generatedAt": "2026-07-24T13:06:35.584Z"
       },
-      "signature": "HzAsVkllWrokuqFw0EnjJ5QOGAVwl7CZvLICiIOaVHA"
+      "signature": "lafEVkvg-e12romVzdpmqLnb5Nrfu_H0slJd77TlOSI"
     }
   }
 }

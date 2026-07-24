@@ -1,9 +1,9 @@
 # SafeClaw Live Harness Quality Probe
 
-- Overall: PASS
-- Generated: 2026-07-24T13:08:58.236Z
-- Source HEAD at generation: 5a91a1f5659c748143cb8c52ef670c5949b22401
-- Live commit at generation: 5a91a1f5659c748143cb8c52ef670c5949b22401
+- Overall: FAIL
+- Generated: 2026-07-24T13:02:07.530Z
+- Source HEAD at generation: 94aad39a07671cafdc68d3910226c022782cff14
+- Live commit at generation: 94aad39a07671cafdc68d3910226c022782cff14
 - Note: this artifact is generated before it is committed. A later evidence-only commit can contain this report without changing the measured runtime surface.
 - Base URL: https://www.safeclaw.kr
 - Request: POST /api/ask (enhanced)
@@ -20,7 +20,7 @@
 | generation_evidence_sealed | PASS | version: safeclaw-generation-evidence/v1; algorithm: HMAC-SHA256; snapshot packet: matches; signature: structural presence only; server secret is not read by this probe |
 | db_harness_first | PASS | mode: db_harness_first; evidence authority: db_harness; LLM role: naturalize_only; fallback chain: false |
 | evidence_sets_present | PASS | direct: present; sif: present; supporting: present |
-| evidence_labels_clean | PASS | repeated evidence identities: none |
+| evidence_labels_clean | FAIL | supporting[0]: D-C-13-2026 D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정; supporting[1]: A-R-1-2026 A-R-1-2026 자율안전보건체계 구축 및 운영에 관한 기술지원규정; answer[13]: - 기술 보조지침 후보(근거 부족): D-C-13-2026 D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정 / A-R-1-2026 A-R-1-2026 자율안전보건체계 구축 및 운영에 관한 기술지원규정 |
 | structured_risk_tbm_links | PASS | risk rows: present; TBM links: present; row validation: ready |
 | risk_control_fields_distinct | PASS | duplicate current/additional controls: none |
 | scenario_controls_present | PASS | fall: structured.riskAssessmentRows[0]; scaffold: structured.riskAssessmentRows[0]; wind: structured.riskAssessmentRows[0]; traffic: structured.riskAssessmentRows[1]; additional evidence in JSON |

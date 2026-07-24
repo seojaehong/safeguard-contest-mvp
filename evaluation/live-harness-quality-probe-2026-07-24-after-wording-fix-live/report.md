@@ -1,7 +1,7 @@
 # SafeClaw Live Harness Quality Probe
 
 - Overall: PASS
-- Generated: 2026-07-24T13:08:58.236Z
+- Generated: 2026-07-24T13:06:35.515Z
 - Source HEAD at generation: 5a91a1f5659c748143cb8c52ef670c5949b22401
 - Live commit at generation: 5a91a1f5659c748143cb8c52ef670c5949b22401
 - Note: this artifact is generated before it is committed. A later evidence-only commit can contain this report without changing the measured runtime surface.

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "safeclaw-live-harness-quality-probe-summary/v1",
-  "generatedAt": "2026-07-20T02:37:43.983Z",
+  "generatedAt": "2026-07-24T13:08:58.236Z",
   "baseUrl": "https://www.safeclaw.kr",
   "request": "POST /api/ask (enhanced)",
   "httpStatus": 200,
@@ -14,7 +14,9 @@
     "generation_evidence_sealed",
     "db_harness_first",
     "evidence_sets_present",
+    "evidence_labels_clean",
     "structured_risk_tbm_links",
+    "risk_control_fields_distinct",
     "scenario_controls_present",
     "irrelevant_controls_absent",
     "quality_state_ready",

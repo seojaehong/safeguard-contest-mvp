@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-24T11:05:12.775Z",
+  "generatedAt": "2026-07-24T13:09:53.684Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "356cc6946779d85b988f82a5e179f173b34567f5",
-  "productionCommit": "356cc6946779d85b988f82a5e179f173b34567f5",
+  "sourceHead": "5a91a1f5659c748143cb8c52ef670c5949b22401",
+  "productionCommit": "5a91a1f5659c748143cb8c52ef670c5949b22401",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "356cc6946779d85b988f82a5e179f173b34567f5",
+    "commitSha": "5a91a1f5659c748143cb8c52ef670c5949b22401",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-l8k5jp3dg-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-97fkjt94j-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "356cc6946779d85b988f82a5e179f173b34567f5",
-  "liveRollupLiveCommit": "356cc6946779d85b988f82a5e179f173b34567f5",
+  "liveExactEvidenceCommit": "5a91a1f5659c748143cb8c52ef670c5949b22401",
+  "liveRollupLiveCommit": "5a91a1f5659c748143cb8c52ef670c5949b22401",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -336,8 +336,8 @@
   },
   "shareExactSessionBoundary": {
     "verdict": "MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED",
-    "sourceHead": "eb891f33ed38b91e426273af8c089d20da7ae47b",
-    "liveCommit": "772016d6ab1ebe89ea636627c8d0f933645d4985",
+    "sourceHead": "3a41a1c8b41033378e5d56265a2703227be88a60",
+    "liveCommit": "3a41a1c8b41033378e5d56265a2703227be88a60",
     "exactSavedUserSessionReproduced": false,
     "exactSavedSessionRequiredForUserSpecificPass": true,
     "dbMutationPerformed": false,
@@ -394,9 +394,9 @@
     "workpackShareSessionsErrorCode": "PGRST205"
   },
   "documentsCockpitWorkbenchGeometry": {
-    "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_DOCUMENTS_WORKBENCH",
-    "sourceHead": "e70be8ef7a3735a18078a0576b83aefc1e64cef3",
-    "productionCommit": "772016d6ab1ebe89ea636627c8d0f933645d4985",
+    "verdict": "PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH",
+    "sourceHead": "3a41a1c8b41033378e5d56265a2703227be88a60",
+    "productionCommit": "3a41a1c8b41033378e5d56265a2703227be88a60",
     "baseUrl": "https://www.safeclaw.kr",
     "staleDevRedExplained": true,
     "routeSplitAloneAcceptedAsFix": false,

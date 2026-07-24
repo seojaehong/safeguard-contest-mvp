@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "safeclaw-document-wording-quality-remediation/v1",
+  "checkedAt": "2026-07-24T13:07:24.930Z",
+  "productCommit": "5a91a1f5659c748143cb8c52ef670c5949b22401",
+  "productionCommit": "5a91a1f5659c748143cb8c52ef670c5949b22401",
+  "verdict": "PASS_LIVE_PRODUCTION_GROUNDED_DOCUMENT_FIELD_QUALITY",
+  "beforeLive": {
+    "artifact": "evaluation/live-harness-quality-probe-2026-07-24-before-wording-fix/report.json",
+    "productionCommit": "94aad39a07671cafdc68d3910226c022782cff14",
+    "verdict": "fail",
+    "failedContracts": [
+      "evidence_labels_clean"
+    ],
+    "observedRepeatedLabels": 3
+  },
+  "afterLocal": {
+    "artifact": "evaluation/live-harness-quality-probe-2026-07-24-after-wording-fix-local/report.json",
+    "targetContracts": {
+      "evidence_labels_clean": "pass",
+      "risk_control_fields_distinct": "pass"
+    },
+    "overallVerdict": "fail",
+    "overallVerdictBoundary": "Local runtime lacked the production generation-evidence signing configuration and reported degraded overall quality. This local result is not used as a production PASS."
+  },
+  "afterLive": {
+    "artifact": "evaluation/live-harness-quality-probe-2026-07-24-after-wording-fix-live/report.json",
+    "httpStatus": 200,
+    "qualityState": "ready",
+    "verdict": "pass",
+    "failedContracts": [],
+    "evidenceLabelsClean": true,
+    "riskControlFieldsDistinct": true
+  },
+  "shortScenarioLive": {
+    "questionKind": "exterior paint, mobile scaffold, five workers, one new worker, strong-wind forecast",
+    "httpStatus": 200,
+    "generationMode": "enhanced",
+    "qualityState": "ready",
+    "riskRowCount": 5,
+    "duplicateCurrentAdditionalControlRows": 0,
+    "repeatedEvidenceIdentityLines": 0,
+    "candidateLine": "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정 / D-C-7-2026 비계 구조 및 안전작업에 관한 기술지원규정"
+  },
+  "verification": {
+    "focusedTests": {
+      "files": 6,
+      "passed": 169,
+      "failed": 0
+    },
+    "aggregateGeneratorTests": {
+      "files": 3,
+      "passed": 25,
+      "failed": 0
+    },
+    "typecheck": "pass",
+    "productionBuild": "pass",
+    "jsonDiffCheck": "pass"
+  },
+  "safetyBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchPerformed": false,
+    "shareSessionCreated": false,
+    "evidenceAuthorityChanged": false,
+    "internalHarnessDiagnosticsRemovedFromApi": false,
+    "publicDisplaySanitizationPreserved": true
+  }
+}
