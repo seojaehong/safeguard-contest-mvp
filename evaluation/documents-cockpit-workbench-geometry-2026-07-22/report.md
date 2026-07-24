@@ -1,16 +1,16 @@
 # Documents Cockpit Workbench Geometry
 
-Checked at: 2026-07-24T15:47:37.585Z
+Checked at: 2026-07-24T15:50:12.560Z
 
-Base URL: `http://127.0.0.1:3078`
+Base URL: `https://www.safeclaw.kr`
 
-Source HEAD: `1b6b87801feecfe8d942869b1c9767d313e97dc6`
+Source HEAD: `d8b0b27a59a3c1bc480a2b58aa7dc3985d13d432`
 
-Production `/api/build-info`: `unknown`
+Production `/api/build-info`: `d8b0b27a59a3c1bc480a2b58aa7dc3985d13d432`
 
-Source HEAD matches production: `false`
+Source HEAD matches production: `true`
 
-Verdict: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_DOCUMENTS_WORKBENCH`
+Verdict: `PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH`
 
 Route split alone accepted as fix: `false`
 
