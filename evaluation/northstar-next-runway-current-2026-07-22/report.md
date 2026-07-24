@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `aa3587b7bf2fe2ce1cc085965678af66245b1cc3`
+Source HEAD: `7f74a6740820151b7dd1777cde4ad4fefc6a99f7`
 
-Production `/api/build-info`: `e8818e29213f84ba00891da5b517776027e0d041`
+Production `/api/build-info`: `a0facf7c427be37db7c029ecb9092ed810e8fd31`
 
 Latest evidence commit live: `false`
 
@@ -20,11 +20,11 @@ Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `aa3587b7bf2fe2ce1cc085965678af66245b1cc3`
+Live rollup source head: `7f74a6740820151b7dd1777cde4ad4fefc6a99f7`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `aa3587b7bf2fe2ce1cc085965678af66245b1cc3` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `e8818e29213f84ba00891da5b517776027e0d041`, and the live rollup remains exact for that deployed marker.
+Note: current HEAD `7f74a6740820151b7dd1777cde4ad4fefc6a99f7` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `a0facf7c427be37db7c029ecb9092ed810e8fd31`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -48,6 +48,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live synthetic wording and field usability are measured separately: `PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW`, live scenarios passed `5/5`, live pending `false`. This gate catches fixed-profile field leakage and selected-document wording defects, while broad human review and exact saved Share evidence remain separate.
 - Live 12-deliverable presence and applicability are measured separately: `PASS_LIVE_PRODUCTION_12_DELIVERABLE_BROAD_REVIEW`, UI/integrity/reviewed documents `12/12/12`, before missingUnexpected `5`, live missingUnexpected `0`, and workPermitDraft presentNonEmpty `5/5`. The six-document synthetic wording gate is not accepted as 12-document deliverable coverage; exact saved Share remains `MISSING_EVIDENCE`.
 - Live 12-deliverable automated editorial quality is measured separately: `PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY`, live scenarios `5/5`, reviewed document surface `60`, placeholder/legal/awkward/evidence mismatch `0/0/0/0`, and duplicate findings exact/near `38/100`. This is reviewer-ready automated evidence with humanReviewCompleted=`false`, not a combined human PASS; exact saved Share remains `MISSING_EVIDENCE`.
+- Live product capability truth is measured separately: `PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH`; manual/provider dispatch is `preview_only` with reason `persistent_idempotency_unavailable`, scheduled briefing email ready=`false`, photo Vision/OCR ready/accepted-only=`true/true`, and AI modes are `template, enhanced, full`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains `MISSING_EVIDENCE` and Documents/Share IA remains `OPEN_SEPARATE_VIEWPORT_IA_WAVE`.
 - Live supporting-document scenario grounding is measured separately: `PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT`, live cases `5/5`, supporting documents `30/30`, cross-scenario leakage `0`, and missingUnexpected `0`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains `MISSING_EVIDENCE`.
 - Live document seed-profile isolation is measured separately: `PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION`, before forbidden fragments `90`, live forbidden fragments `0`, reviewed document surface `60`, and secondary grounding `30/30`. This deterministic gate does not replace broad human wording review or exact saved Share evidence; exact saved Share remains `MISSING_EVIDENCE`.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level, without claiming live production engine execution.

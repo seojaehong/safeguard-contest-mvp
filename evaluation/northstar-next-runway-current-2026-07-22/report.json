@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-24T21:13:04.718Z",
+  "generatedAt": "2026-07-24T21:37:23.167Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "aa3587b7bf2fe2ce1cc085965678af66245b1cc3",
-  "productionCommit": "e8818e29213f84ba00891da5b517776027e0d041",
+  "sourceHead": "7f74a6740820151b7dd1777cde4ad4fefc6a99f7",
+  "productionCommit": "a0facf7c427be37db7c029ecb9092ed810e8fd31",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "e8818e29213f84ba00891da5b517776027e0d041",
+    "commitSha": "a0facf7c427be37db7c029ecb9092ed810e8fd31",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ae6qw6bj7-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-ibf6wq07f-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": false,
@@ -29,8 +29,8 @@
   ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "aa3587b7bf2fe2ce1cc085965678af66245b1cc3",
-  "liveRollupLiveCommit": "e8818e29213f84ba00891da5b517776027e0d041",
+  "liveExactEvidenceCommit": "7f74a6740820151b7dd1777cde4ad4fefc6a99f7",
+  "liveRollupLiveCommit": "a0facf7c427be37db7c029ecb9092ed810e8fd31",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -47,6 +47,7 @@
     "liveDocumentWordingReview": "evaluation\\live-document-wording-review-2026-07-24\\report.json",
     "liveDocumentBroadReview": "evaluation\\live-document-broad-review-2026-07-25\\report.json",
     "liveDocumentEditorialReview": "evaluation\\live-document-editorial-review-2026-07-25\\report.json",
+    "productCapabilityTruth": "evaluation\\product-capability-truth-2026-07-25\\report.json",
     "liveDocumentSecondaryGrounding": "evaluation\\live-document-secondary-grounding-2026-07-25\\report.json",
     "liveDocumentSeedProfileIsolation": "evaluation\\live-document-seed-profile-isolation-2026-07-25\\report.json",
     "koshaNextExactCandidateAudit": "evaluation\\kosha-next-exact-candidate-audit-2026-07-22\\report.json",
@@ -72,6 +73,7 @@
     "live_document_secondary_grounding",
     "live_document_seed_profile_isolation",
     "live_document_editorial_review",
+    "product_capability_truth",
     "kosha_exact_promotion_packet_ready_for_review",
     "ui_documents_share_cockpit",
     "dispatch_standalone_cockpit",
@@ -388,6 +390,25 @@
     "providerDispatchCalled": false,
     "exactSavedShareReproduced": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "productCapabilityTruth": {
+    "verdict": "PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH",
+    "sourceHead": "0e09f9e8b2d8a413e0d500919424b4b918a6cd83",
+    "productionCommit": "0e09f9e8b2d8a413e0d500919424b4b918a6cd83",
+    "dispatchMode": "preview_only",
+    "dispatchReason": "persistent_idempotency_unavailable",
+    "briefingEmailReady": false,
+    "photoVisionReady": true,
+    "photoAcceptedOnly": true,
+    "aiModes": [
+      "template",
+      "enhanced",
+      "full"
+    ],
+    "providerDispatchCalled": false,
+    "photoAnalysisPostCalled": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "documentsShareIaVerdict": "OPEN_SEPARATE_VIEWPORT_IA_WAVE"
   },
   "liveDocumentSecondaryGrounding": {
     "verdict": "PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT",

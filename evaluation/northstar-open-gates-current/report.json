@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-24T21:12:57.535Z",
-  "sourceSha": "aa3587b7bf2fe2ce1cc085965678af66245b1cc3",
+  "generatedAt": "2026-07-24T21:37:15.012Z",
+  "sourceSha": "7f74a6740820151b7dd1777cde4ad4fefc6a99f7",
   "overall": "open",
   "gates": [
     {
@@ -104,6 +104,17 @@
       "nextActions": [
         "Perform a separate human editorial review for the recorded duplicate-line findings.",
         "Keep Documents/Share viewport IA and exact saved Share geometry as separate product/evidence boundaries."
+      ]
+    },
+    {
+      "id": "product_capability_truth",
+      "state": "proven",
+      "label": "Live product capability truth",
+      "evidencePath": "evaluation\\product-capability-truth-2026-07-25\\report.json",
+      "detail": "Manual email/SMS/Kakao and scheduled briefing email are fail-closed preview-only because persistent idempotency is unavailable. Live photo Vision/OCR readiness is accepted-only, AI generation modes are template/enhanced/full, and no DB/share/provider/photo POST mutation occurred. This does not grant provider dispatch approval: exact saved Share remains MISSING_EVIDENCE and Documents/Share IA remains OPEN_SEPARATE_VIEWPORT_IA_WAVE.",
+      "nextActions": [
+        "Keep provider dispatch persistence approval-gated.",
+        "Measure exact saved Share and Documents/Share viewport IA in their separate gates."
       ]
     },
     {
