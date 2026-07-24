@@ -3,7 +3,10 @@
   "generatedAt": "2026-07-24T14:04:56.071Z",
   "verdict": "PASS_LIVE_PRODUCTION_STRESS_MATRIX",
   "sourceBaseBeforeCommit": "6a86dc33",
+  "sourceHead": "6ddf66b58952674be29924064b061a0f6e7e5241",
   "productCommit": "6ddf66b58952674be29924064b061a0f6e7e5241",
+  "productionCommitAtGeneration": "fa5aa4de49990dafe12f65ea3488c580e96c157f",
+  "productCommitIncludedInProduction": true,
   "scenarioManifest": "evaluation/live-document-quality-stress-matrix-2026-07-24/scenarios.json",
   "runnerChange": {
     "contentContractsAdded": true,

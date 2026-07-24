@@ -3,6 +3,8 @@
 - Verdict: `PASS_LIVE_PRODUCTION_STRESS_MATRIX`
 - Source base before commit: `6a86dc33`
 - Product commit: `6ddf66b58952674be29924064b061a0f6e7e5241`
+- Production commit at live verification: `fa5aa4de49990dafe12f65ea3488c580e96c157f`
+- Product commit included in production lineage: `true`
 - Scenario manifest: `evaluation/live-document-quality-stress-matrix-2026-07-24/scenarios.json`
 - Runner scope: content-contract checks only; no product code changed.
 

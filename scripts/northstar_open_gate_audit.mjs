@@ -30,6 +30,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveHarness: path.join("evaluation", "live-harness-quality-probe-current-2026-07-20", "report.json"),
   documentQualityGrounding: path.join("evaluation", "document-quality-grounding-current-gate-2026-07-19", "report.json"),
   liveDocumentQualityMatrix: path.join("evaluation", "live-document-quality-matrix-2026-07-24", "report.json"),
+  liveDocumentQualityStressMatrix: path.join("evaluation", "live-document-quality-stress-matrix-2026-07-24", "report.json"),
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
   llmWikiApproval: path.join("evaluation", "llm-wiki-rls-approval-2026-07-17", "report.md"),
   rlsLlmWikiApprovalPreflight: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
@@ -491,6 +492,63 @@ function evaluateLiveDocumentQualityMatrixGate(rootDir) {
     evidencePath,
     detail: `Live matrix verdict=${readString(report.verdict) || "unknown"}, scenarios=${scenarioCount}, live=${livePass}/${liveTotal}, failed=${liveFail}, sourceMatchesProduction=${report.sourceHeadMatchesProduction === true}, noMutation=${noMutation}.`,
     nextActions: ["Fix the failing live scenario contracts and rerun the before/local/live matrix without weakening the runner."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateLiveDocumentQualityStressMatrixGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.liveDocumentQualityStressMatrix;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "live_document_quality_stress_matrix",
+      label: "Live high-risk document quality stress matrix",
+      state: "missing",
+      evidencePath,
+      detail: "Live high-risk document quality stress report is missing or invalid.",
+      nextActions: ["Run the unchanged five-scenario stress matrix against production and commit the before/local/live evidence."],
+    });
+  }
+
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const boundaries = isRecord(report.boundaries) ? report.boundaries : {};
+  const liveTotal = readNumber(afterLive.total);
+  const livePass = readNumber(afterLive.pass);
+  const liveFail = readNumber(afterLive.fail);
+  const noMutation = boundaries.dbMutationPerformed === false
+    && boundaries.shareSessionCreated === false
+    && boundaries.providerDispatchPerformed === false
+    && boundaries.exactSavedShareSessionReproduced === false;
+  const liveReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_STRESS_MATRIX"
+    && report.productCommitIncludedInProduction === true
+    && liveTotal === 5
+    && livePass === 5
+    && liveFail === 0
+    && boundaries.liveProductionClaimed === true
+    && boundaries.liveAfterDeploymentPending === false
+    && noMutation;
+
+  if (liveReady) {
+    return gateResult({
+      id: "live_document_quality_stress_matrix",
+      label: "Live high-risk document quality stress matrix",
+      state: "proven",
+      evidencePath,
+      detail: "Five live production stress scenarios preserve SDS/GHS identity, simultaneous-work separation, vulnerable-worker communication, KOSHA guidance boundaries, and overnight handover/re-energization controls. No DB/share-session/provider mutation occurred; broad human wording review remains separate.",
+      nextActions: ["Keep the unchanged stress contracts in the release gate and preserve broad human wording review as a separate boundary."],
+    });
+  }
+
+  return gateResult({
+    id: "live_document_quality_stress_matrix",
+    label: "Live high-risk document quality stress matrix",
+    state: "contradicted",
+    evidencePath,
+    detail: `Stress matrix verdict=${readString(report.verdict) || "unknown"}, live=${livePass}/${liveTotal}, failed=${liveFail}, productIncludedInProduction=${report.productCommitIncludedInProduction === true}, noMutation=${noMutation}.`,
+    nextActions: ["Fix the failing high-risk scenario contracts and rerun the unchanged stress matrix without weakening its semantic checks."],
   });
 }
 
@@ -2336,6 +2394,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateLiveHarnessGate(rootDir),
     evaluateDocumentQualityGroundingGate(rootDir),
     evaluateLiveDocumentQualityMatrixGate(rootDir),
+    evaluateLiveDocumentQualityStressMatrixGate(rootDir),
     evaluateUiDocumentsShareCockpitGate(rootDir),
     evaluateDispatchStandaloneCockpitGate(rootDir),
     evaluateShareResultFixtureCockpitGate(rootDir),

@@ -34,6 +34,19 @@ type NextRunwayReport = {
     externalProviderCalled: boolean;
     exactSavedShareSessionReproduced: boolean;
   };
+  liveDocumentQualityStressMatrix: {
+    verdict: string;
+    sourceHead: string;
+    productCommit: string;
+    productionCommit: string;
+    productCommitIncludedInProduction: boolean;
+    livePassed: number;
+    liveFailed: number;
+    dbMutationPerformed: boolean;
+    shareSessionCreated: boolean;
+    providerDispatchPerformed: boolean;
+    exactSavedShareSessionReproduced: boolean;
+  };
   approvalGated: Array<{
     gate: string;
     state: string;
@@ -382,6 +395,24 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       shareSessionCreated: false,
       providerDispatchLiveClaimed: false,
       externalProviderCalled: false,
+      exactSavedShareSessionReproduced: false,
+    },
+  });
+  writeJson(root, "evaluation/live-document-quality-stress-matrix-2026-07-24/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_STRESS_MATRIX",
+    sourceHead: "TO_FILL",
+    productCommit: "TO_FILL",
+    productionCommitAtGeneration: "TO_FILL",
+    productCommitIncludedInProduction: true,
+    afterLive: {
+      total: 5,
+      pass: 5,
+      fail: 0,
+    },
+    boundaries: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchPerformed: false,
       exactSavedShareSessionReproduced: false,
     },
   });
@@ -759,6 +790,16 @@ describe("northstar next runway generator", () => {
       shareSessionCreated: false,
       providerDispatchLiveClaimed: false,
       externalProviderCalled: false,
+      exactSavedShareSessionReproduced: false,
+    });
+    expect(report.liveDocumentQualityStressMatrix).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_STRESS_MATRIX",
+      productCommitIncludedInProduction: true,
+      livePassed: 5,
+      liveFailed: 0,
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchPerformed: false,
       exactSavedShareSessionReproduced: false,
     });
     expect(report.koshaNextExactCandidateAudit.forbiddenClaims).toContain(
