@@ -1,0 +1,2350 @@
+{
+  "generatedAt": "2026-07-24T23:04:11.547Z",
+  "elapsedMs": 23596,
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+  "mode": "current-source-local-production",
+  "baseUrl": "http://127.0.0.1:3082",
+  "sourceHead": "7a77ab02fc719829b96bd998ca26827eb31a8b67",
+  "productionBuild": {
+    "ok": true,
+    "configured": false,
+    "source": "unavailable",
+    "commitSha": null,
+    "branch": null,
+    "environment": null,
+    "deploymentUrl": null,
+    "message": "배포 커밋 식별자가 런타임 환경에 노출되지 않았습니다."
+  },
+  "total": 5,
+  "pass": 5,
+  "fail": 0,
+  "canonicalDocumentCount": 12,
+  "reviewedDocumentSurfaceCount": 60,
+  "placeholderFindingCount": 0,
+  "legalOverclaimFindingCount": 0,
+  "awkwardCompositionFindingCount": 0,
+  "evidenceDomainMismatchCount": 0,
+  "exactLineOveruseCount": 31,
+  "displayedExactLineOveruseCount": 31,
+  "nearDuplicateLineOveruseCount": 100,
+  "genericTemplateOveruseCount": 0,
+  "duplicateReviewCategoryCounts": {
+    "exact": {
+      "cross-document-control-consistency": 15,
+      "legal-reference-consistency": 16
+    },
+    "near": {
+      "human-review-required": 54,
+      "document-role-prefix-variant": 46
+    }
+  },
+  "humanReviewCompleted": false,
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "exactSavedShareReproduced": false
+  },
+  "evidenceBoundary": {
+    "sixCoreWordingGateCombinedAsHumanPass": false,
+    "twelveDeliverablePresenceGateCombinedAsHumanPass": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "cases": [
+    {
+      "id": "ulsan-chemical-cleaning-sds__stress",
+      "verdict": "PASS",
+      "elapsedMs": 7921,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 7836
+      },
+      "runnerError": "",
+      "ok": true,
+      "reviewedDocumentCount": 12,
+      "passedDocumentCount": 12,
+      "failedDocumentCount": 0,
+      "placeholderFindingCount": 0,
+      "legalOverclaimFindingCount": 0,
+      "awkwardCompositionFindingCount": 0,
+      "evidenceDomainMismatchCount": 0,
+      "exactLineOveruseCount": 3,
+      "displayedExactLineOveruseCount": 3,
+      "nearDuplicateLineOveruseCount": 20,
+      "genericTemplateOveruseCount": 0,
+      "duplicateReviewCategoryCounts": {
+        "exact": {
+          "cross-document-control-consistency": 3
+        },
+        "near": {
+          "human-review-required": 11,
+          "document-role-prefix-variant": 9
+        }
+      },
+      "exactLineOveruse": [
+        {
+          "line": "용기 라벨과 SDS(물질안전보건자료)·GHS 경고표지로 물질을 확인하고 확인 전 사용 금지·작업 보류",
+          "documentKeys": [
+            "workpackSummaryDraft",
+            "tbmBriefing",
+            "tbmLogDraft",
+            "safetyEducationRecordDraft",
+            "foreignWorkerBriefing"
+          ],
+          "reviewCategory": "cross-document-control-consistency",
+          "reviewRationale": "동일 통제조치가 실행·교육·기록 문서에 일관되게 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "보안경·내화학장갑·보호복을 물질 특성에 맞게 지정하고 세안·세척 수단을 작업 전 확인",
+          "documentKeys": [
+            "workpackSummaryDraft",
+            "tbmBriefing",
+            "tbmLogDraft",
+            "safetyEducationRecordDraft",
+            "foreignWorkerBriefing"
+          ],
+          "reviewCategory": "cross-document-control-consistency",
+          "reviewRationale": "동일 통제조치가 실행·교육·기록 문서에 일관되게 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "국소배기를 가동하고 비산구역을 통제하며 이상 냄새·자극 증상 발생 시 즉시 작업중지",
+          "documentKeys": [
+            "workpackSummaryDraft",
+            "tbmBriefing",
+            "tbmLogDraft",
+            "safetyEducationRecordDraft",
+            "foreignWorkerBriefing"
+          ],
+          "reviewCategory": "cross-document-control-consistency",
+          "reviewRationale": "동일 통제조치가 실행·교육·기록 문서에 일관되게 반복됩니다.",
+          "humanReviewRequired": true
+        }
+      ],
+      "nearDuplicateLineOveruse": [
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "foreignWorkerBriefing",
+          "similarity": 0.923,
+          "leftLine": "작업조건 판단: 화학물질 식별 전 작업 보류, 국소배기·비산·피부접촉 통제 상태 확인 필요",
+          "rightLine": "작업조건: 화학물질 식별 전 작업 보류, 국소배기·비산·피부접촉 통제 상태 확인 필요",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "foreignWorkerTransmission",
+          "similarity": 0.923,
+          "leftLine": "작업조건 판단: 화학물질 식별 전 작업 보류, 국소배기·비산·피부접촉 통제 상태 확인 필요",
+          "rightLine": "작업조건: 화학물질 식별 전 작업 보류, 국소배기·비산·피부접촉 통제 상태 확인 필요",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "kakaoMessage",
+          "similarity": 0.923,
+          "leftLine": "작업조건 판단: 화학물질 식별 전 작업 보류, 국소배기·비산·피부접촉 통제 상태 확인 필요",
+          "rightLine": "작업조건: 화학물질 식별 전 작업 보류, 국소배기·비산·피부접촉 통제 상태 확인 필요",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "safetyEducationRecordDraft",
+          "similarity": 0.955,
+          "leftLine": "핵심 위험: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험; 화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험; 국소배기 불량으로 인한 증기·미스트 흡입 위험",
+          "rightLine": "핵심 위험요인: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험, 화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험, 국소배기 불량으로 인한 증기·미스트 흡입 위험",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "foreignWorkerBriefing",
+          "similarity": 0.909,
+          "leftLine": "핵심 위험: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험; 화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험; 국소배기 불량으로 인한 증기·미스트 흡입 위험",
+          "rightLine": "가장 큰 위험: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험; 화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험; 국소배기 불량으로 인한 증기·미스트 흡입 위험",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "foreignWorkerTransmission",
+          "similarity": 1,
+          "leftLine": "핵심 위험: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험; 화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험; 국소배기 불량으로 인한 증기·미스트 흡입 위험",
+          "rightLine": "⚠️ 핵심 위험: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험; 화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험; 국소배기 불량으로 인한 증기·미스트 흡입 위험",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "kakaoMessage",
+          "similarity": 0.909,
+          "leftLine": "핵심 위험: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험; 화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험; 국소배기 불량으로 인한 증기·미스트 흡입 위험",
+          "rightLine": "핵심위험: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험; 화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험; 국소배기 불량으로 인한 증기·미스트 흡입 위험",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "kakaoMessage",
+          "similarity": 1,
+          "leftLine": "핵심 위험: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험; 화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험; 국소배기 불량으로 인한 증기·미스트 흡입 위험",
+          "rightLine": "⚠️ 핵심 위험: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험; 화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험; 국소배기 불량으로 인한 증기·미스트 흡입 위험",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.929,
+          "leftLine": "용기 라벨과 SDS(물질안전보건자료)·GHS 경고표지로 물질을 확인하고 확인 전 사용 금지·작업 보류",
+          "rightLine": "안전조치 1: 용기 라벨과 SDS(물질안전보건자료)·GHS 경고표지로 물질을 확인하고 확인 전 사용 금지·작업 보류",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.929,
+          "leftLine": "용기 라벨과 SDS(물질안전보건자료)·GHS 경고표지로 물질을 확인하고 확인 전 사용 금지·작업 보류",
+          "rightLine": "조치내용: 용기 라벨과 SDS(물질안전보건자료)·GHS 경고표지로 물질을 확인하고 확인 전 사용 금지·작업 보류",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.923,
+          "leftLine": "보안경·내화학장갑·보호복을 물질 특성에 맞게 지정하고 세안·세척 수단을 작업 전 확인",
+          "rightLine": "안전조치 2: 보안경·내화학장갑·보호복을 물질 특성에 맞게 지정하고 세안·세척 수단을 작업 전 확인",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.923,
+          "leftLine": "보안경·내화학장갑·보호복을 물질 특성에 맞게 지정하고 세안·세척 수단을 작업 전 확인",
+          "rightLine": "조치내용: 보안경·내화학장갑·보호복을 물질 특성에 맞게 지정하고 세안·세척 수단을 작업 전 확인",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.917,
+          "leftLine": "국소배기를 가동하고 비산구역을 통제하며 이상 냄새·자극 증상 발생 시 즉시 작업중지",
+          "rightLine": "안전조치 3: 국소배기를 가동하고 비산구역을 통제하며 이상 냄새·자극 증상 발생 시 즉시 작업중지",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.917,
+          "leftLine": "유해·위험요인: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험",
+          "rightLine": "위험요인 1: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.933,
+          "leftLine": "현재 안전조치: 용기 라벨과 SDS(물질안전보건자료)·GHS 경고표지로 물질을 확인하고 확인 전 사용 금지·작업 보류",
+          "rightLine": "안전조치 1: 용기 라벨과 SDS(물질안전보건자료)·GHS 경고표지로 물질을 확인하고 확인 전 사용 금지·작업 보류",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "tbmBriefing",
+          "similarity": 1,
+          "leftLine": "[2. 화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험]",
+          "rightLine": "화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "tbmLogDraft",
+          "similarity": 1,
+          "leftLine": "[2. 화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험]",
+          "rightLine": "화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.929,
+          "leftLine": "현재 안전조치: 보안경·내화학장갑·보호복을 물질 특성에 맞게 지정하고 세안·세척 수단을 작업 전 확인",
+          "rightLine": "안전조치 2: 보안경·내화학장갑·보호복을 물질 특성에 맞게 지정하고 세안·세척 수단을 작업 전 확인",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.923,
+          "leftLine": "현재 안전조치: 국소배기를 가동하고 비산구역을 통제하며 이상 냄새·자극 증상 발생 시 즉시 작업중지",
+          "rightLine": "안전조치 3: 국소배기를 가동하고 비산구역을 통제하며 이상 냄새·자극 증상 발생 시 즉시 작업중지",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workPlanDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.923,
+          "leftLine": "작업 전 조건확인: 화학물질 식별 전 작업 보류, 국소배기·비산·피부접촉 통제 상태 확인 필요",
+          "rightLine": "허가 전 조건확인: 화학물질 식별 전 작업 보류, 국소배기·비산·피부접촉 통제 상태 확인 필요",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        }
+      ],
+      "documents": [
+        {
+          "key": "workpackSummaryDraft",
+          "title": "점검결과 요약",
+          "charCount": 750,
+          "excerpt": "점검결과 요약(초안) 현장 문서팩 첫 장 · 작업 전 검토용 업체명: 클린온 업종: 제조업 현장명: 울산 탱크 외부 화학세척 작업 현장 작업명: 탱크 외부 화학세척 작업 작업인원: 5명 작업조건 판단: 화학물질 식별 전 작업 보류, 국소배기·비산·피부접촉 통제 상태 확인 필요 [핵심 판단] - 위험수준: 중 - 핵심 위험: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험; 화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험; 국소배기 불량으로 인한 증기·미스트 흡입 위험 [즉시 조치] 1. 용기 라벨과 SDS(물질안전보건자료)·GHS …",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "riskAssessmentDraft",
+          "title": "위험성평가표",
+          "charCount": 3317,
+          "excerpt": "[오늘 개선·이력 반영 - 위험성평가] - 공유 전 보완: TBM 기록 근거 위험성평가표(구조화 편집본) [1. 탱크 외부 화학세척 작업] 관리번호: RA-cleaning-chemical-1 작업장소: 울산 탱크 외부 화학세척 작업 현장 공정: 세척물질 식별, SDS·GHS 경고표지 확인, 국소배기·비산 통제, 보호구 확인 후 화학세척 세부작업: 탱크 외부 화학세척 작업 장비/도구: 현장 장비 및 보호구 유해·위험요인: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험 4M: Man 재해형태: other 현재 안전조치: 용기 라벨과 SDS(…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPlanDraft",
+          "title": "작업계획서",
+          "charCount": 1112,
+          "excerpt": "작업계획서(초안) 현장 서식 기준: 작업구간, 작업순서, 장비·인원, 허가·첨부, 확인자 중심 공사명: 울산 탱크 외부 화학세척 작업 현장 작업구간: 세척물질 식별, SDS·GHS 경고표지 확인, 국소배기·비산 통제, 보호구 확인 후 화학세척 작성자: 관리감독자 / 작업반장 확인자: 현장소장 / 안전관리자 작성일: 작업 시작 전 [1. 작업개요] - 작업명: 탱크 외부 화학세척 작업 - 작업내용: 울산 도금공장 탱크 외부 화학세척 작업 - 작업인원: 5명 - 작업 전 조건확인: 화학물질 식별 전 작업 보류, 국소배기·비산·피부접촉 통제 상태 확인 필요 [2. 작업순…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPermitDraft",
+          "title": "안전작업허가 확인서",
+          "charCount": 1260,
+          "excerpt": "안전작업허가 확인서(초안) 현장 적용 전 관리감독자와 허가권자가 작업조건을 최종 확인합니다. [1. 허가 기본정보] - 현장명: 울산 탱크 외부 화학세척 작업 현장 - 허가대상 작업: 탱크 외부 화학세척 작업 - 허가구분: 화학물질 작업 - 작업내용: 울산 도금공장 탱크 외부 화학세척 작업 - 작업인원: 5명 - 작업시간: 작업 시작 전 허가 시각부터 종료 확인 시각까지 - 허가상태: 작업 전 조건 확인 및 허가권자 승인 필요 [2. 작업 전 허가조건] - 핵심 위험: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험; 화학세척 중 비산·피…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmBriefing",
+          "title": "TBM 브리핑",
+          "charCount": 2041,
+          "excerpt": "[오늘 개선·이력 반영 - TBM] - 공유 전 보완: TBM 기록 근거 작업 전 안전점검회의(TBM) 브리핑(초안) 공식자료 기반: KOSHA TBM OPS 및 고용노동부 TBM 교육시간 인정 안내 참고 일시: 작업 시작 전 장소: 울산 탱크 외부 화학세척 작업 현장 업체명: 클린온 오늘 작업: 탱크 외부 화학세척 작업 참석 대상: 작업자 5명, 작업반장, 관리감독자 [1. 작업내용] - 울산 도금공장 탱크 외부 화학세척 작업 - TBM 조건확인: 화학물질 식별 전 작업 보류, 국소배기·비산·피부접촉 통제 상태 확인 필요 - 위험성평가 주요 유해·위험요인을 오늘 …",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmLogDraft",
+          "title": "TBM 기록",
+          "charCount": 2007,
+          "excerpt": "[오늘 개선·이력 반영 - 확인 기록] - 공유 전 보완: TBM 기록 근거 작업 전 안전점검회의(TBM) 기록(초안) 공식자료 기반: 작업일지·모바일 앱·사진·영상 등 다양한 기록 인정 취지 참고 일시: 2026-04-25 08:00 업체명: 클린온 작업장소: 울산 탱크 외부 화학세척 작업 현장 작업내용: 울산 도금공장 탱크 외부 화학세척 작업 참석인원: 5명 실시자: 작업반장 / 관리감독자 위험성평가 실시여부: □ 예 □ 아니오 작업날짜와 TBM 일시 동일 여부: □ 예 □ 아니오 [작업내용] - 탱크 외부 화학세척 작업 - TBM 기록조건: 화학물질 식별 전 …",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "safetyEducationRecordDraft",
+          "title": "안전보건교육 기록",
+          "charCount": 1902,
+          "excerpt": "안전보건교육 기록(초안) 공식자료 기반: 산업안전보건교육 가이드북 및 TBM 교육시간 인정 안내 참고 교육명: 화학물질 식별·세척 작업 안전교육 교육구분: 당일 작업 전 안전보건교육 및 TBM 연계 기록 교육일시: 작업 시작 전 15분 교육장소: 울산 탱크 외부 화학세척 작업 현장 교육대상: 화학세척 작업자, 감시자, 관리감독자, 총 5명 교육 실시자: 현장소장 / 관리감독자 확인자: 작업반장 / 작업자 대표 [교육대상] - 화학세척 작업자, 감시자, 관리감독자, 총 5명 - 신규 투입자, 외국인 근로자, 작업변경자는 이해 여부를 별도 확인합니다. [교육내용] - …",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "emergencyResponseDraft",
+          "title": "비상대응 절차",
+          "charCount": 1349,
+          "excerpt": "비상대응 절차(초안) 중대재해·산업재해 발생 대비 현장 초기대응 기록 업체명: 클린온 현장명: 울산 탱크 외부 화학세척 작업 현장 작업명: 탱크 외부 화학세척 작업 비상대응 조건: 화학물질 식별 전 작업 보류, 국소배기·비산·피부접촉 통제 상태 확인 필요 적용대상: 현장소장, 관리감독자, 작업반장, 작업자, 협력업체 [1. 사고 징후 및 즉시 중지] - 핵심 위험: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험; 화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험; 국소배기 불량으로 인한 증기·미스트 흡입 위험 - 사고 징후, 아차사…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "photoEvidenceDraft",
+          "title": "사진·증빙",
+          "charCount": 1176,
+          "excerpt": "사진/증빙 기록(초안) 현장 점검 및 제출 대응용 첨부 슬롯 업체명: 클린온 현장명: 울산 탱크 외부 화학세척 작업 현장 작업명: 탱크 외부 화학세척 작업 촬영 확인조건: 화학물질 식별 전 작업 보류, 국소배기·비산·피부접촉 통제 상태 확인 필요 [1. 작업 전 사진] - 작업구역 전경: - 보호구 착용 상태: - 장비/도구 점검 상태: - 위험구역 출입통제 상태: [2. 조치 전·후 사진] - 위험요인 1: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험 - 조치 전 사진: 위험구역 상태, 방호조치 전 상태, 접근통제 전 상태 - 조치내…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerBriefing",
+          "title": "외국인 근로자 출력본",
+          "charCount": 3154,
+          "excerpt": "외국인 근로자용 쉬운 한국어 브리핑 현장: 울산 탱크 외부 화학세척 작업 현장 오늘 작업: 울산 도금공장 탱크 외부 화학세척 작업 작업조건: 화학물질 식별 전 작업 보류, 국소배기·비산·피부접촉 통제 상태 확인 필요 우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요. 가장 큰 위험: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험; 화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험; 국소배기 불량으로 인한 증기·미스트 흡입 위험 [작업 전 꼭 확인] 1. 용기 라벨과 SDS(물질안전보건자료)·GHS 경고표지로 물질을 확인하…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerTransmission",
+          "title": "외국인 전송본",
+          "charCount": 3450,
+          "excerpt": "[SafeClaw 외국인 근로자 안전공지] 클린온 현장: 울산 탱크 외부 화학세척 작업 현장 오늘 작업: 울산 도금공장 탱크 외부 화학세척 작업 작업조건: 화학물질 식별 전 작업 보류, 국소배기·비산·피부접촉 통제 상태 확인 필요 우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요. ⚠️ 핵심 위험: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험; 화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험; 국소배기 불량으로 인한 증기·미스트 흡입 위험 쉬운 한국어: ✋ 위험하면 작업을 멈추고 바로 관리자에게 말하세요. 🦺 보호구…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "kakaoMessage",
+          "title": "현장 공유 메시지",
+          "charCount": 659,
+          "excerpt": "[오늘 작업 안전공지] 클린온 현장: 울산 탱크 외부 화학세척 작업 현장 작업: 탱크 외부 화학세척 작업 핵심위험: 미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험; 화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험; 국소배기 불량으로 인한 증기·미스트 흡입 위험 필수조치: 용기 라벨과 SDS(물질안전보건자료)·GHS 경고표지로 물질을 확인하고 확인 전 사용 금지·작업 보류 / 보안경·내화학장갑·보호복을 물질 특성에 맞게 지정하고 세안·세척 수단을 작업 전 확인 / 국소배기를 가동하고 비산구역을 통제하며 이상 냄새·자극 증상 발생 시…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        }
+      ]
+    },
+    {
+      "id": "pyeongtaek-simultaneous-overhead-hotwork__stress",
+      "verdict": "PASS",
+      "elapsedMs": 3895,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 3863
+      },
+      "runnerError": "",
+      "ok": true,
+      "reviewedDocumentCount": 12,
+      "passedDocumentCount": 12,
+      "failedDocumentCount": 0,
+      "placeholderFindingCount": 0,
+      "legalOverclaimFindingCount": 0,
+      "awkwardCompositionFindingCount": 0,
+      "evidenceDomainMismatchCount": 0,
+      "exactLineOveruseCount": 9,
+      "displayedExactLineOveruseCount": 9,
+      "nearDuplicateLineOveruseCount": 20,
+      "genericTemplateOveruseCount": 0,
+      "duplicateReviewCategoryCounts": {
+        "exact": {
+          "cross-document-control-consistency": 3,
+          "legal-reference-consistency": 6
+        },
+        "near": {
+          "human-review-required": 11,
+          "document-role-prefix-variant": 9
+        }
+      },
+      "exactLineOveruse": [
+        {
+          "line": "상하부 작업구역을 분리하고 양중 하부와 불티 비산구역을 출입 통제한 뒤 작업순서·시간을 조정",
+          "documentKeys": [
+            "workpackSummaryDraft",
+            "tbmBriefing",
+            "tbmLogDraft",
+            "safetyEducationRecordDraft",
+            "foreignWorkerBriefing"
+          ],
+          "reviewCategory": "cross-document-control-consistency",
+          "reviewRationale": "동일 통제조치가 실행·교육·기록 문서에 일관되게 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "양중과 화기 공정의 작업순서·시간을 분리하고 동시 진행이 불가피하면 관리감독자가 교차위험을 재확인",
+          "documentKeys": [
+            "workpackSummaryDraft",
+            "tbmBriefing",
+            "tbmLogDraft",
+            "safetyEducationRecordDraft",
+            "foreignWorkerBriefing"
+          ],
+          "reviewCategory": "cross-document-control-consistency",
+          "reviewRationale": "동일 통제조치가 실행·교육·기록 문서에 일관되게 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "신호수와 화재감시자를 지정하고 단일 지휘·작업중지 신호와 비상연락 절차를 작업 전 복창",
+          "documentKeys": [
+            "workpackSummaryDraft",
+            "tbmBriefing",
+            "tbmLogDraft",
+            "safetyEducationRecordDraft",
+            "foreignWorkerBriefing"
+          ],
+          "reviewCategory": "cross-document-control-consistency",
+          "reviewRationale": "동일 통제조치가 실행·교육·기록 문서에 일관되게 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "필수 안전조치 반영: 용접방화포·불티비산방지덮개 설치 (기준규칙 제241조(화재위험작업 시의 준수사항))",
+          "documentKeys": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "safetyEducationRecordDraft",
+            "emergencyResponseDraft"
+          ],
+          "reviewCategory": "legal-reference-consistency",
+          "reviewRationale": "법령·필수조치 근거가 독립 문서 사이에서 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "필수 안전조치 반영: 차광보안면·방열복 착용 (기준규칙 제32조(보호구의 지급 등))",
+          "documentKeys": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "safetyEducationRecordDraft",
+            "emergencyResponseDraft"
+          ],
+          "reviewCategory": "legal-reference-consistency",
+          "reviewRationale": "법령·필수조치 근거가 독립 문서 사이에서 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "관련 조문 확인: 기준규칙 제236조(화재 위험이 있는 작업의 장소 등)",
+          "documentKeys": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "safetyEducationRecordDraft",
+            "emergencyResponseDraft"
+          ],
+          "reviewCategory": "legal-reference-consistency",
+          "reviewRationale": "법령·필수조치 근거가 독립 문서 사이에서 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "관련 조문 확인: 기준규칙 제241조(화재위험작업 시의 준수사항)",
+          "documentKeys": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "safetyEducationRecordDraft",
+            "emergencyResponseDraft"
+          ],
+          "reviewCategory": "legal-reference-consistency",
+          "reviewRationale": "법령·필수조치 근거가 독립 문서 사이에서 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "관련 조문 확인: 기준규칙 제241조의2(화재감시자)",
+          "documentKeys": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "safetyEducationRecordDraft",
+            "emergencyResponseDraft"
+          ],
+          "reviewCategory": "legal-reference-consistency",
+          "reviewRationale": "법령·필수조치 근거가 독립 문서 사이에서 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "관련 조문 확인: 기준규칙 제32조(보호구의 지급 등)",
+          "documentKeys": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "safetyEducationRecordDraft",
+            "emergencyResponseDraft"
+          ],
+          "reviewCategory": "legal-reference-consistency",
+          "reviewRationale": "법령·필수조치 근거가 독립 문서 사이에서 반복됩니다.",
+          "humanReviewRequired": true
+        }
+      ],
+      "nearDuplicateLineOveruse": [
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "foreignWorkerBriefing",
+          "similarity": 0.917,
+          "leftLine": "작업조건 판단: 상하부 동시작업, 작업구역·시간 분리와 양중·화기 교차위험 통제 필요",
+          "rightLine": "작업조건: 상하부 동시작업, 작업구역·시간 분리와 양중·화기 교차위험 통제 필요",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "foreignWorkerTransmission",
+          "similarity": 0.917,
+          "leftLine": "작업조건 판단: 상하부 동시작업, 작업구역·시간 분리와 양중·화기 교차위험 통제 필요",
+          "rightLine": "작업조건: 상하부 동시작업, 작업구역·시간 분리와 양중·화기 교차위험 통제 필요",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "kakaoMessage",
+          "similarity": 0.917,
+          "leftLine": "작업조건 판단: 상하부 동시작업, 작업구역·시간 분리와 양중·화기 교차위험 통제 필요",
+          "rightLine": "작업조건: 상하부 동시작업, 작업구역·시간 분리와 양중·화기 교차위험 통제 필요",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "safetyEducationRecordDraft",
+          "similarity": 0.957,
+          "leftLine": "핵심 위험: 상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험; 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험; 양중 신호와 화기작업 통제가 분리되어 작업순서·중지 지시가 충돌하는 위험",
+          "rightLine": "핵심 위험요인: 상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험, 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험, 양중 신호와 화기작업 통제가 분리되어 작업순서·중지 지시가 충돌하는 위험",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "foreignWorkerBriefing",
+          "similarity": 0.913,
+          "leftLine": "핵심 위험: 상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험; 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험; 양중 신호와 화기작업 통제가 분리되어 작업순서·중지 지시가 충돌하는 위험",
+          "rightLine": "가장 큰 위험: 상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험; 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험; 양중 신호와 화기작업 통제가 분리되어 작업순서·중지 지시가 충돌하는 위험",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "foreignWorkerTransmission",
+          "similarity": 1,
+          "leftLine": "핵심 위험: 상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험; 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험; 양중 신호와 화기작업 통제가 분리되어 작업순서·중지 지시가 충돌하는 위험",
+          "rightLine": "⚠️ 핵심 위험: 상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험; 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험; 양중 신호와 화기작업 통제가 분리되어 작업순서·중지 지시가 충돌하는 위험",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "kakaoMessage",
+          "similarity": 0.913,
+          "leftLine": "핵심 위험: 상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험; 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험; 양중 신호와 화기작업 통제가 분리되어 작업순서·중지 지시가 충돌하는 위험",
+          "rightLine": "핵심위험: 상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험; 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험; 양중 신호와 화기작업 통제가 분리되어 작업순서·중지 지시가 충돌하는 위험",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "kakaoMessage",
+          "similarity": 1,
+          "leftLine": "핵심 위험: 상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험; 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험; 양중 신호와 화기작업 통제가 분리되어 작업순서·중지 지시가 충돌하는 위험",
+          "rightLine": "⚠️ 핵심 위험: 상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험; 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험; 양중 신호와 화기작업 통제가 분리되어 작업순서·중지 지시가 충돌하는 위험",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.923,
+          "leftLine": "상하부 작업구역을 분리하고 양중 하부와 불티 비산구역을 출입 통제한 뒤 작업순서·시간을 조정",
+          "rightLine": "안전조치 1: 상하부 작업구역을 분리하고 양중 하부와 불티 비산구역을 출입 통제한 뒤 작업순서·시간을 조정",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.923,
+          "leftLine": "상하부 작업구역을 분리하고 양중 하부와 불티 비산구역을 출입 통제한 뒤 작업순서·시간을 조정",
+          "rightLine": "조치내용: 상하부 작업구역을 분리하고 양중 하부와 불티 비산구역을 출입 통제한 뒤 작업순서·시간을 조정",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.923,
+          "leftLine": "양중과 화기 공정의 작업순서·시간을 분리하고 동시 진행이 불가피하면 관리감독자가 교차위험을 재확인",
+          "rightLine": "안전조치 2: 양중과 화기 공정의 작업순서·시간을 분리하고 동시 진행이 불가피하면 관리감독자가 교차위험을 재확인",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.923,
+          "leftLine": "양중과 화기 공정의 작업순서·시간을 분리하고 동시 진행이 불가피하면 관리감독자가 교차위험을 재확인",
+          "rightLine": "조치내용: 양중과 화기 공정의 작업순서·시간을 분리하고 동시 진행이 불가피하면 관리감독자가 교차위험을 재확인",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.917,
+          "leftLine": "신호수와 화재감시자를 지정하고 단일 지휘·작업중지 신호와 비상연락 절차를 작업 전 복창",
+          "rightLine": "안전조치 3: 신호수와 화재감시자를 지정하고 단일 지휘·작업중지 신호와 비상연락 절차를 작업 전 복창",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "workPlanDraft",
+          "similarity": 0.938,
+          "leftLine": "공정: 상하부 작업구역 분리, 양중·화기 공정 순서와 시간 조정, 신호수 단일 지휘, 낙하물·불티 통제",
+          "rightLine": "작업구간: 상하부 작업구역 분리, 양중·화기 공정 순서와 시간 조정, 신호수 단일 지휘, 낙하물·불티 통제",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.9,
+          "leftLine": "유해·위험요인: 상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험",
+          "rightLine": "위험요인 1: 상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.929,
+          "leftLine": "현재 안전조치: 상하부 작업구역을 분리하고 양중 하부와 불티 비산구역을 출입 통제한 뒤 작업순서·시간을 조정",
+          "rightLine": "안전조치 1: 상하부 작업구역을 분리하고 양중 하부와 불티 비산구역을 출입 통제한 뒤 작업순서·시간을 조정",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "tbmBriefing",
+          "similarity": 1,
+          "leftLine": "[2. 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험]",
+          "rightLine": "하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "tbmLogDraft",
+          "similarity": 1,
+          "leftLine": "[2. 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험]",
+          "rightLine": "하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.909,
+          "leftLine": "[2. 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험]",
+          "rightLine": "위험요인 2: 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "tbmBriefing",
+          "similarity": 0.909,
+          "leftLine": "세부작업: 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험",
+          "rightLine": "하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        }
+      ],
+      "documents": [
+        {
+          "key": "workpackSummaryDraft",
+          "title": "점검결과 요약",
+          "charCount": 775,
+          "excerpt": "점검결과 요약(초안) 현장 문서팩 첫 장 · 작업 전 검토용 업체명: 대성창고 업종: 창고업 현장명: 평택 크레인 양중·배관 화기 동시작업 현장 작업명: 크레인 양중·배관 화기 동시작업 작업인원: 5명 작업조건 판단: 상하부 동시작업, 작업구역·시간 분리와 양중·화기 교차위험 통제 필요 [핵심 판단] - 위험수준: 중 - 핵심 위험: 상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험; 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험; 양중 신호와 화기작업 통제가 분리되어 작업순서·중지 지시가 충돌하는 위험 [즉시 조치] 1. 상하부 …",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "riskAssessmentDraft",
+          "title": "위험성평가표",
+          "charCount": 3923,
+          "excerpt": "[오늘 개선·이력 반영 - 위험성평가] - 공유 전 보완: TBM 브리핑 근거 - 공유 전 보완: TBM 기록 근거 위험성평가표(구조화 편집본) [1. 크레인 양중·배관 화기 동시작업] 관리번호: RA-warehouse-heat-1 작업장소: 평택 크레인 양중·배관 화기 동시작업 현장 공정: 상하부 작업구역 분리, 양중·화기 공정 순서와 시간 조정, 신호수 단일 지휘, 낙하물·불티 통제 세부작업: 크레인 양중·배관 화기 동시작업 장비/도구: 용접기, 절단기, 소화기, 차폐막 유해·위험요인: 상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험 4M: Mach…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPlanDraft",
+          "title": "작업계획서",
+          "charCount": 1614,
+          "excerpt": "작업계획서(초안) 현장 서식 기준: 작업구간, 작업순서, 장비·인원, 허가·첨부, 확인자 중심 공사명: 평택 크레인 양중·배관 화기 동시작업 현장 작업구간: 상하부 작업구역 분리, 양중·화기 공정 순서와 시간 조정, 신호수 단일 지휘, 낙하물·불티 통제 작성자: 관리감독자 / 작업반장 확인자: 현장소장 / 안전관리자 작성일: 작업 시작 전 [1. 작업개요] - 작업명: 크레인 양중·배관 화기 동시작업 - 작업내용: 상부에서는 크레인 양중, 하부에서는 배관 화기작업을 동시에 계획하고 있어 낙하물과 불티 교차위험이 있다 - 작업인원: 5명 - 작업 전 조건확인: 상하부…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPermitDraft",
+          "title": "안전작업허가 확인서",
+          "charCount": 1325,
+          "excerpt": "안전작업허가 확인서(초안) 현장 적용 전 관리감독자와 허가권자가 작업조건을 최종 확인합니다. [1. 허가 기본정보] - 현장명: 평택 크레인 양중·배관 화기 동시작업 현장 - 허가대상 작업: 크레인 양중·배관 화기 동시작업 - 허가구분: 화기작업 - 작업내용: 상부에서는 크레인 양중, 하부에서는 배관 화기작업을 동시에 계획하고 있어 낙하물과 불티 교차위험이 있다 - 작업인원: 5명 - 작업시간: 작업 시작 전 허가 시각부터 종료 확인 시각까지 - 허가상태: 작업 전 조건 확인 및 허가권자 승인 필요 [2. 작업 전 허가조건] - 핵심 위험: 상부 양중 중 낙하물이 …",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmBriefing",
+          "title": "TBM 브리핑",
+          "charCount": 2420,
+          "excerpt": "[오늘 개선·이력 반영 - TBM] - 공유 전 보완: TBM 브리핑 근거 - 공유 전 보완: TBM 기록 근거 작업 전 안전점검회의(TBM) 브리핑(초안) 공식자료 기반: KOSHA TBM OPS 및 고용노동부 TBM 교육시간 인정 안내 참고 일시: 작업 시작 전 장소: 평택 크레인 양중·배관 화기 동시작업 현장 업체명: 대성창고 오늘 작업: 크레인 양중·배관 화기 동시작업 참석 대상: 작업자 5명, 작업반장, 관리감독자 [1. 작업내용] - 상부에서는 크레인 양중, 하부에서는 배관 화기작업을 동시에 계획하고 있어 낙하물과 불티 교차위험이 있다 - TBM 조건확인…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmLogDraft",
+          "title": "TBM 기록",
+          "charCount": 2270,
+          "excerpt": "[오늘 개선·이력 반영 - 확인 기록] - 공유 전 보완: TBM 브리핑 근거 - 공유 전 보완: TBM 기록 근거 작업 전 안전점검회의(TBM) 기록(초안) 공식자료 기반: 작업일지·모바일 앱·사진·영상 등 다양한 기록 인정 취지 참고 일시: 2026-04-25 08:00 업체명: 대성창고 작업장소: 평택 크레인 양중·배관 화기 동시작업 현장 작업내용: 상부에서는 크레인 양중, 하부에서는 배관 화기작업을 동시에 계획하고 있어 낙하물과 불티 교차위험이 있다 참석인원: 5명 실시자: 작업반장 / 관리감독자 위험성평가 실시여부: □ 예 □ 아니오 작업날짜와 TBM 일시…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "safetyEducationRecordDraft",
+          "title": "안전보건교육 기록",
+          "charCount": 2444,
+          "excerpt": "안전보건교육 기록(초안) 공식자료 기반: 산업안전보건교육 가이드북 및 TBM 교육시간 인정 안내 참고 교육명: 양중·화기 동시작업 교차위험 통제 교육 교육구분: 당일 작업 전 안전보건교육 및 TBM 연계 기록 교육일시: 작업 시작 전 15분 교육장소: 평택 크레인 양중·배관 화기 동시작업 현장 교육대상: 양중 작업자, 화기 작업자, 신호수, 화재감시자, 관리감독자, 총 5명 교육 실시자: 현장소장 / 관리감독자 확인자: 작업반장 / 작업자 대표 [교육대상] - 양중 작업자, 화기 작업자, 신호수, 화재감시자, 관리감독자, 총 5명 - 신규 투입자, 외국인 근로자, …",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "emergencyResponseDraft",
+          "title": "비상대응 절차",
+          "charCount": 1818,
+          "excerpt": "비상대응 절차(초안) 중대재해·산업재해 발생 대비 현장 초기대응 기록 업체명: 대성창고 현장명: 평택 크레인 양중·배관 화기 동시작업 현장 작업명: 크레인 양중·배관 화기 동시작업 비상대응 조건: 상하부 동시작업, 작업구역·시간 분리와 양중·화기 교차위험 통제 필요 적용대상: 현장소장, 관리감독자, 작업반장, 작업자, 협력업체 [1. 사고 징후 및 즉시 중지] - 핵심 위험: 상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험; 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험; 양중 신호와 화기작업 통제가 분리되어 작업순서·중지 지시가…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "photoEvidenceDraft",
+          "title": "사진·증빙",
+          "charCount": 1199,
+          "excerpt": "사진/증빙 기록(초안) 현장 점검 및 제출 대응용 첨부 슬롯 업체명: 대성창고 현장명: 평택 크레인 양중·배관 화기 동시작업 현장 작업명: 크레인 양중·배관 화기 동시작업 촬영 확인조건: 상하부 동시작업, 작업구역·시간 분리와 양중·화기 교차위험 통제 필요 [1. 작업 전 사진] - 작업구역 전경: - 보호구 착용 상태: - 장비/도구 점검 상태: - 위험구역 출입통제 상태: [2. 조치 전·후 사진] - 위험요인 1: 상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험 - 조치 전 사진: 위험구역 상태, 방호조치 전 상태, 접근통제 전 상태 - 조치내용:…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerBriefing",
+          "title": "외국인 근로자 출력본",
+          "charCount": 3479,
+          "excerpt": "외국인 근로자용 쉬운 한국어 브리핑 현장: 평택 크레인 양중·배관 화기 동시작업 현장 오늘 작업: 상부에서는 크레인 양중, 하부에서는 배관 화기작업을 동시에 계획하고 있어 낙하물과 불티 교차위험이 있다 작업조건: 상하부 동시작업, 작업구역·시간 분리와 양중·화기 교차위험 통제 필요 가장 큰 위험: 상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험; 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험; 양중 신호와 화기작업 통제가 분리되어 작업순서·중지 지시가 충돌하는 위험 [작업 전 꼭 확인] 1. 상하부 작업구역을 분리하고 양중 하부와…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerTransmission",
+          "title": "외국인 전송본",
+          "charCount": 3808,
+          "excerpt": "[SafeClaw 외국인 근로자 안전공지] 대성창고 현장: 평택 크레인 양중·배관 화기 동시작업 현장 오늘 작업: 상부에서는 크레인 양중, 하부에서는 배관 화기작업을 동시에 계획하고 있어 낙하물과 불티 교차위험이 있다 작업조건: 상하부 동시작업, 작업구역·시간 분리와 양중·화기 교차위험 통제 필요 ⚠️ 핵심 위험: 상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험; 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험; 양중 신호와 화기작업 통제가 분리되어 작업순서·중지 지시가 충돌하는 위험 쉬운 한국어: ✋ 위험하면 작업을 멈추고 바로 …",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "kakaoMessage",
+          "title": "현장 공유 메시지",
+          "charCount": 735,
+          "excerpt": "[오늘 작업 안전공지] 대성창고 현장: 평택 크레인 양중·배관 화기 동시작업 현장 작업: 크레인 양중·배관 화기 동시작업 핵심위험: 상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험; 하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험; 양중 신호와 화기작업 통제가 분리되어 작업순서·중지 지시가 충돌하는 위험 필수조치: 상하부 작업구역을 분리하고 양중 하부와 불티 비산구역을 출입 통제한 뒤 작업순서·시간을 조정 / 양중과 화기 공정의 작업순서·시간을 분리하고 동시 진행이 불가피하면 관리감독자가 교차위험을 재확인 / 신호수와 화재감시자를 …",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        }
+      ]
+    },
+    {
+      "id": "daejeon-vulnerable-night-maintenance__stress",
+      "verdict": "PASS",
+      "elapsedMs": 3797,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 3681
+      },
+      "runnerError": "",
+      "ok": true,
+      "reviewedDocumentCount": 12,
+      "passedDocumentCount": 12,
+      "failedDocumentCount": 0,
+      "placeholderFindingCount": 0,
+      "legalOverclaimFindingCount": 0,
+      "awkwardCompositionFindingCount": 0,
+      "evidenceDomainMismatchCount": 0,
+      "exactLineOveruseCount": 3,
+      "displayedExactLineOveruseCount": 3,
+      "nearDuplicateLineOveruseCount": 20,
+      "genericTemplateOveruseCount": 0,
+      "duplicateReviewCategoryCounts": {
+        "exact": {
+          "cross-document-control-consistency": 3
+        },
+        "near": {
+          "document-role-prefix-variant": 8,
+          "human-review-required": 12
+        }
+      },
+      "exactLineOveruse": [
+        {
+          "line": "고령·청각장애·신규 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지",
+          "documentKeys": [
+            "workpackSummaryDraft",
+            "tbmBriefing",
+            "tbmLogDraft",
+            "safetyEducationRecordDraft",
+            "foreignWorkerBriefing"
+          ],
+          "reviewCategory": "cross-document-control-consistency",
+          "reviewRationale": "동일 통제조치가 실행·교육·기록 문서에 일관되게 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전",
+          "documentKeys": [
+            "workpackSummaryDraft",
+            "tbmBriefing",
+            "tbmLogDraft",
+            "safetyEducationRecordDraft",
+            "foreignWorkerBriefing"
+          ],
+          "reviewCategory": "cross-document-control-consistency",
+          "reviewRationale": "동일 통제조치가 실행·교육·기록 문서에 일관되게 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "작업 전 작업방법, 위험구역, 작업중지 기준을 작업반장 승인으로 확정",
+          "documentKeys": [
+            "workpackSummaryDraft",
+            "tbmBriefing",
+            "tbmLogDraft",
+            "foreignWorkerBriefing"
+          ],
+          "reviewCategory": "cross-document-control-consistency",
+          "reviewRationale": "동일 통제조치가 실행·교육·기록 문서에 일관되게 반복됩니다.",
+          "humanReviewRequired": true
+        }
+      ],
+      "nearDuplicateLineOveruse": [
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "foreignWorkerBriefing",
+          "similarity": 0.938,
+          "leftLine": "핵심 위험: 고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험; 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "rightLine": "가장 큰 위험: 고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험; 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "foreignWorkerTransmission",
+          "similarity": 1,
+          "leftLine": "핵심 위험: 고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험; 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "rightLine": "⚠️ 핵심 위험: 고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험; 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "kakaoMessage",
+          "similarity": 0.938,
+          "leftLine": "핵심 위험: 고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험; 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "rightLine": "핵심위험: 고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험; 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "kakaoMessage",
+          "similarity": 1,
+          "leftLine": "핵심 위험: 고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험; 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "rightLine": "⚠️ 핵심 위험: 고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험; 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.933,
+          "leftLine": "고령·청각장애·신규 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지",
+          "rightLine": "안전조치 1: 고령·청각장애·신규 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.933,
+          "leftLine": "고령·청각장애·신규 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지",
+          "rightLine": "조치내용: 고령·청각장애·신규 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.938,
+          "leftLine": "야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전",
+          "rightLine": "안전조치 2: 야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.938,
+          "leftLine": "야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전",
+          "rightLine": "조치내용: 야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.909,
+          "leftLine": "유해·위험요인: 고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험",
+          "rightLine": "위험요인 1: 고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.938,
+          "leftLine": "현재 안전조치: 고령·청각장애·신규 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지",
+          "rightLine": "안전조치 1: 고령·청각장애·신규 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "tbmBriefing",
+          "similarity": 1,
+          "leftLine": "[2. 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험]",
+          "rightLine": "야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "tbmLogDraft",
+          "similarity": 1,
+          "leftLine": "[2. 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험]",
+          "rightLine": "야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.9,
+          "leftLine": "[2. 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험]",
+          "rightLine": "위험요인 2: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "tbmBriefing",
+          "similarity": 0.9,
+          "leftLine": "세부작업: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험",
+          "rightLine": "야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "tbmLogDraft",
+          "similarity": 0.9,
+          "leftLine": "세부작업: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험",
+          "rightLine": "야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.909,
+          "leftLine": "유해·위험요인: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험",
+          "rightLine": "위험요인 2: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.941,
+          "leftLine": "현재 안전조치: 야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전",
+          "rightLine": "안전조치 2: 야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.9,
+          "leftLine": "현재 안전조치: 작업 전 작업방법, 위험구역, 작업중지 기준을 작업반장 승인으로 확정",
+          "rightLine": "안전조치 3: 작업 전 작업방법, 위험구역, 작업중지 기준을 작업반장 승인으로 확정",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workPlanDraft",
+          "rightDocumentKey": "safetyEducationRecordDraft",
+          "similarity": 0.923,
+          "leftLine": "단계별 안전조치: 고령·청각장애·신규 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지 / 야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전 / 작업 전 작업방법, 위험구역, 작업중지 기준을 작…",
+          "rightLine": "즉시 조치: 고령·청각장애·신규 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지, 야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전, 작업 전 작업방법, 위험구역, 작업중지 기준을 작업반장 승…",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workPlanDraft",
+          "rightDocumentKey": "kakaoMessage",
+          "similarity": 0.923,
+          "leftLine": "단계별 안전조치: 고령·청각장애·신규 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지 / 야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전 / 작업 전 작업방법, 위험구역, 작업중지 기준을 작…",
+          "rightLine": "필수조치: 고령·청각장애·신규 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지 / 야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전 / 작업 전 작업방법, 위험구역, 작업중지 기준을 작업반장 …",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        }
+      ],
+      "documents": [
+        {
+          "key": "workpackSummaryDraft",
+          "title": "점검결과 요약",
+          "charCount": 835,
+          "excerpt": "점검결과 요약(초안) 현장 문서팩 첫 장 · 작업 전 검토용 업체명: 현장 업체 업종: 현장 유지보수 현장명: 대전 야간 컨베이어 정비 작업 현장 작업명: 야간 컨베이어 정비 작업 작업인원: 1명 작업조건 판단: 미입력 환경조건은 작업 전 확인하여 오늘 작업조건으로 확정 [특수 대상/조건] - 신규 투입자 1명 포함 — 작업중지 기준과 보호구 착용을 별도 복창 확인 [핵심 판단] - 위험수준: 상 - 핵심 위험: 고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험; 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 비정형 작업에서 작업방법·작업…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "riskAssessmentDraft",
+          "title": "위험성평가표",
+          "charCount": 3505,
+          "excerpt": "위험성평가표(구조화 편집본) [1. 야간 컨베이어 정비 작업] 관리번호: RA-custom-maintenance-1 작업장소: 대전 야간 컨베이어 정비 작업 현장 공정: 컨베이어 구동부 정비, 전원 차단·LOTO, 방호장치 점검, 조도·작업자 신호 확인 세부작업: 야간 컨베이어 정비 작업 장비/도구: 현장 장비 및 보호구 유해·위험요인: 고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험 4M: Man 재해형태: other 현재 안전조치: 고령·청각장애·신규 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지 가능성: 3 중대…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPlanDraft",
+          "title": "작업계획서",
+          "charCount": 1124,
+          "excerpt": "작업계획서(초안) 현장 서식 기준: 작업구간, 작업순서, 장비·인원, 허가·첨부, 확인자 중심 공사명: 대전 야간 컨베이어 정비 작업 현장 작업구간: 컨베이어 구동부 정비, 전원 차단·LOTO, 방호장치 점검, 조도·작업자 신호 확인 작성자: 관리감독자 / 작업반장 확인자: 현장소장 / 안전관리자 작성일: 작업 시작 전 [1. 작업개요] - 작업명: 야간 컨베이어 정비 작업 - 작업내용: 야간 컨베이어 정비 작업 - 작업인원: 1명 - 작업 전 조건확인: 작업반장이 실제 환경을 확인하고 작업순서·통제구역을 확정 [2. 작업순서 및 안전조치] - 작업 전 작업구역 설…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPermitDraft",
+          "title": "안전작업허가 확인서",
+          "charCount": 1294,
+          "excerpt": "안전작업허가 확인서(초안) 현장 적용 전 관리감독자와 허가권자가 작업조건을 최종 확인합니다. [1. 허가 기본정보] - 현장명: 대전 야간 컨베이어 정비 작업 현장 - 허가대상 작업: 야간 컨베이어 정비 작업 - 허가구분: 전기작업 - 작업내용: 야간 컨베이어 정비 작업 - 작업인원: 1명 - 작업시간: 작업 시작 전 허가 시각부터 종료 확인 시각까지 - 허가상태: 작업 전 조건 확인 및 허가권자 승인 필요 [2. 작업 전 허가조건] - 핵심 위험: 고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험; 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmBriefing",
+          "title": "TBM 브리핑",
+          "charCount": 2015,
+          "excerpt": "작업 전 안전점검회의(TBM) 브리핑(초안) 공식자료 기반: KOSHA TBM OPS 및 고용노동부 TBM 교육시간 인정 안내 참고 일시: 작업 시작 전 장소: 대전 야간 컨베이어 정비 작업 현장 업체명: 현장 업체 오늘 작업: 야간 컨베이어 정비 작업 참석 대상: 작업자 1명, 작업반장, 관리감독자 [1. 작업내용] - 야간 컨베이어 정비 작업 - TBM 조건확인: 작업 전 실제 환경을 확인한 뒤 변경 위험과 작업중지 기준을 전원에게 전달 - 위험성평가 주요 유해·위험요인을 오늘 TBM 전달 항목으로 연결합니다. [2. 위험요인] 1. 고령·청각장애·신규 작업자의…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmLogDraft",
+          "title": "TBM 기록",
+          "charCount": 2004,
+          "excerpt": "작업 전 안전점검회의(TBM) 기록(초안) 공식자료 기반: 작업일지·모바일 앱·사진·영상 등 다양한 기록 인정 취지 참고 일시: 2026-04-25 08:00 업체명: 현장 업체 작업장소: 대전 야간 컨베이어 정비 작업 현장 작업내용: 야간 컨베이어 정비 작업 참석인원: 1명 실시자: 작업반장 / 관리감독자 위험성평가 실시여부: □ 예 □ 아니오 작업날짜와 TBM 일시 동일 여부: □ 예 □ 아니오 [작업내용] - 야간 컨베이어 정비 작업 - TBM 기록조건: 실제 환경 확인 결과와 변경된 통제조치를 TBM 기록에 남김 [잠재위험요인 / 중점위험요인] - 고령·청각…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "safetyEducationRecordDraft",
+          "title": "안전보건교육 기록",
+          "charCount": 1938,
+          "excerpt": "안전보건교육 기록(초안) 공식자료 기반: 산업안전보건교육 가이드북 및 TBM 교육시간 인정 안내 참고 교육명: 비정형 유지보수 작업 전 안전교육 교육구분: 당일 작업 전 안전보건교육 및 TBM 연계 기록 교육일시: 작업 시작 전 15분 교육장소: 대전 야간 컨베이어 정비 작업 현장 교육대상: 작업자 2인, 작업반장, 관리감독자, 고령 작업자, 청각장애 작업자, 신규 작업자, 총 1명 교육 실시자: 현장소장 / 관리감독자 확인자: 작업반장 / 작업자 대표 [교육대상] - 작업자 2인, 작업반장, 관리감독자, 고령 작업자, 청각장애 작업자, 신규 작업자, 총 1명 - …",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "emergencyResponseDraft",
+          "title": "비상대응 절차",
+          "charCount": 1415,
+          "excerpt": "비상대응 절차(초안) 중대재해·산업재해 발생 대비 현장 초기대응 기록 업체명: 현장 업체 현장명: 대전 야간 컨베이어 정비 작업 현장 작업명: 야간 컨베이어 정비 작업 비상대응 조건: 실제 환경을 확인하여 대피경로·비상연락·구조 접근조건을 확정 특수 대상/조건: 신규 투입자 1명 포함 — 작업중지 기준과 보호구 착용을 별도 복창 확인 적용대상: 현장소장, 관리감독자, 작업반장, 작업자, 협력업체 [1. 사고 징후 및 즉시 중지] - 핵심 위험: 고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험; 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "photoEvidenceDraft",
+          "title": "사진·증빙",
+          "charCount": 1187,
+          "excerpt": "사진/증빙 기록(초안) 현장 점검 및 제출 대응용 첨부 슬롯 업체명: 현장 업체 현장명: 대전 야간 컨베이어 정비 작업 현장 작업명: 야간 컨베이어 정비 작업 촬영 확인조건: 실제 환경과 통제 전·후 상태를 촬영하고 확인자 기록을 남김 특수 대상/조건: 신규 투입자 1명 포함 — 작업중지 기준과 보호구 착용을 별도 복창 확인 [1. 작업 전 사진] - 작업구역 전경: - 보호구 착용 상태: - 장비/도구 점검 상태: - 위험구역 출입통제 상태: [2. 조치 전·후 사진] - 위험요인 1: 고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험 - 조치 전 사진…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerBriefing",
+          "title": "외국인 근로자 출력본",
+          "charCount": 6805,
+          "excerpt": "외국인 근로자용 쉬운 한국어 브리핑 현장: 대전 야간 컨베이어 정비 작업 현장 오늘 작업: 야간 컨베이어 정비 작업 작업조건: 현장 조건 미지정, 작업 전 실제 환경 확인 필요 우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요. 가장 큰 위험: 고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험; 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음 [작업 전 꼭 확인] 1. 고령·청각장애·신규 작업자에게 시각 신호·수신호와 복창 확…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerTransmission",
+          "title": "외국인 전송본",
+          "charCount": 7850,
+          "excerpt": "[SafeClaw 외국인 근로자 안전공지] 현장 업체 현장: 대전 야간 컨베이어 정비 작업 현장 오늘 작업: 야간 컨베이어 정비 작업 작업조건: 현장 조건 미지정, 작업 전 실제 환경 확인 필요 우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요. ⚠️ 핵심 위험: 고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험; 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음 쉬운 한국어: ✋ 위험하면 작업을 멈추고 바로 관리자에게 말하세요…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "kakaoMessage",
+          "title": "현장 공유 메시지",
+          "charCount": 753,
+          "excerpt": "[오늘 작업 안전공지] 현장 업체 현장: 대전 야간 컨베이어 정비 작업 현장 작업: 야간 컨베이어 정비 작업 특수 대상/조건: 신규 투입자 1명 포함 — 작업중지 기준과 보호구 착용을 별도 복창 확인 핵심위험: 고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험; 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음 필수조치: 고령·청각장애·신규 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지 / 야간조는 2인…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        }
+      ]
+    },
+    {
+      "id": "gumi-kosha-guidance-boundary__stress",
+      "verdict": "PASS",
+      "elapsedMs": 4095,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 4011
+      },
+      "runnerError": "",
+      "ok": true,
+      "reviewedDocumentCount": 12,
+      "passedDocumentCount": 12,
+      "failedDocumentCount": 0,
+      "placeholderFindingCount": 0,
+      "legalOverclaimFindingCount": 0,
+      "awkwardCompositionFindingCount": 0,
+      "evidenceDomainMismatchCount": 0,
+      "exactLineOveruseCount": 3,
+      "displayedExactLineOveruseCount": 3,
+      "nearDuplicateLineOveruseCount": 20,
+      "genericTemplateOveruseCount": 0,
+      "duplicateReviewCategoryCounts": {
+        "exact": {
+          "cross-document-control-consistency": 3
+        },
+        "near": {
+          "document-role-prefix-variant": 12,
+          "human-review-required": 8
+        }
+      },
+      "exactLineOveruse": [
+        {
+          "line": "정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통제",
+          "documentKeys": [
+            "workpackSummaryDraft",
+            "tbmBriefing",
+            "tbmLogDraft",
+            "safetyEducationRecordDraft",
+            "foreignWorkerBriefing"
+          ],
+          "reviewCategory": "cross-document-control-consistency",
+          "reviewRationale": "동일 통제조치가 실행·교육·기록 문서에 일관되게 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "KOSHA Guide는 기술지침으로 참고하고 관련 법령의 적용 여부와 현장 조건은 별도 확인 필요로 기록",
+          "documentKeys": [
+            "workpackSummaryDraft",
+            "tbmBriefing",
+            "tbmLogDraft",
+            "safetyEducationRecordDraft",
+            "foreignWorkerBriefing"
+          ],
+          "reviewCategory": "cross-document-control-consistency",
+          "reviewRationale": "동일 통제조치가 실행·교육·기록 문서에 일관되게 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "작업 전 작업방법, 위험구역, 작업중지 기준을 작업반장 승인으로 확정",
+          "documentKeys": [
+            "workpackSummaryDraft",
+            "tbmBriefing",
+            "tbmLogDraft",
+            "foreignWorkerBriefing"
+          ],
+          "reviewCategory": "cross-document-control-consistency",
+          "reviewRationale": "동일 통제조치가 실행·교육·기록 문서에 일관되게 반복됩니다.",
+          "humanReviewRequired": true
+        }
+      ],
+      "nearDuplicateLineOveruse": [
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "foreignWorkerBriefing",
+          "similarity": 0.917,
+          "leftLine": "핵심 위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "rightLine": "가장 큰 위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "foreignWorkerTransmission",
+          "similarity": 1,
+          "leftLine": "핵심 위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "rightLine": "⚠️ 핵심 위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "kakaoMessage",
+          "similarity": 0.917,
+          "leftLine": "핵심 위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "rightLine": "핵심위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "kakaoMessage",
+          "similarity": 1,
+          "leftLine": "핵심 위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "rightLine": "⚠️ 핵심 위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.929,
+          "leftLine": "정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통제",
+          "rightLine": "안전조치 1: 정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통제",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.929,
+          "leftLine": "정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통제",
+          "rightLine": "조치내용: 정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통제",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.933,
+          "leftLine": "KOSHA Guide는 기술지침으로 참고하고 관련 법령의 적용 여부와 현장 조건은 별도 확인 필요로 기록",
+          "rightLine": "안전조치 2: KOSHA Guide는 기술지침으로 참고하고 관련 법령의 적용 여부와 현장 조건은 별도 확인 필요로 기록",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.933,
+          "leftLine": "KOSHA Guide는 기술지침으로 참고하고 관련 법령의 적용 여부와 현장 조건은 별도 확인 필요로 기록",
+          "rightLine": "조치내용: KOSHA Guide는 기술지침으로 참고하고 관련 법령의 적용 여부와 현장 조건은 별도 확인 필요로 기록",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.909,
+          "leftLine": "유해·위험요인: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험",
+          "rightLine": "위험요인 1: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.933,
+          "leftLine": "현재 안전조치: 정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통제",
+          "rightLine": "안전조치 1: 정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통제",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.938,
+          "leftLine": "현재 안전조치: KOSHA Guide는 기술지침으로 참고하고 관련 법령의 적용 여부와 현장 조건은 별도 확인 필요로 기록",
+          "rightLine": "안전조치 2: KOSHA Guide는 기술지침으로 참고하고 관련 법령의 적용 여부와 현장 조건은 별도 확인 필요로 기록",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.9,
+          "leftLine": "현재 안전조치: 작업 전 작업방법, 위험구역, 작업중지 기준을 작업반장 승인으로 확정",
+          "rightLine": "안전조치 3: 작업 전 작업방법, 위험구역, 작업중지 기준을 작업반장 승인으로 확정",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workPlanDraft",
+          "rightDocumentKey": "kakaoMessage",
+          "similarity": 0.921,
+          "leftLine": "단계별 안전조치: 정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통제 / KOSHA Guide는 기술지침으로 참고하고 관련 법령의 적용 여부와 현장 조건은 별도 확인 필요로 기록 / 작업 전 작업방법, 위험구역, 작업중지 기준을 작…",
+          "rightLine": "필수조치: 정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통제 / KOSHA Guide는 기술지침으로 참고하고 관련 법령의 적용 여부와 현장 조건은 별도 확인 필요로 기록 / 작업 전 작업방법, 위험구역, 작업중지 기준을 작업반장 …",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workPlanDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.9,
+          "leftLine": "조치 완료 여부를 누가 확인했는가? (정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통제)",
+          "rightLine": "작업중지 기준: 조치 완료 여부를 누가 확인했는가? (정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통제)",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workPlanDraft",
+          "rightDocumentKey": "tbmLogDraft",
+          "similarity": 0.9,
+          "leftLine": "조치 완료 여부를 누가 확인했는가? (정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통제)",
+          "rightLine": "작업중지 기준: 조치 완료 여부를 누가 확인했는가? (정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통제)",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workPlanDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.95,
+          "leftLine": "조치 완료 여부를 누가 확인했는가? (KOSHA Guide는 기술지침으로 참고하고 관련 법령의 적용 여부와 현장 조건은 별도 확인 필요로 기록)",
+          "rightLine": "변경관리 확인: 조치 완료 여부를 누가 확인했는가? (KOSHA Guide는 기술지침으로 참고하고 관련 법령의 적용 여부와 현장 조건은 별도 확인 필요로 기록)",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workPermitDraft",
+          "rightDocumentKey": "foreignWorkerBriefing",
+          "similarity": 0.917,
+          "leftLine": "핵심 위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "rightLine": "가장 큰 위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workPermitDraft",
+          "rightDocumentKey": "foreignWorkerTransmission",
+          "similarity": 1,
+          "leftLine": "핵심 위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "rightLine": "⚠️ 핵심 위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workPermitDraft",
+          "rightDocumentKey": "kakaoMessage",
+          "similarity": 0.917,
+          "leftLine": "핵심 위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "rightLine": "핵심위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workPermitDraft",
+          "rightDocumentKey": "kakaoMessage",
+          "similarity": 1,
+          "leftLine": "핵심 위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "rightLine": "⚠️ 핵심 위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        }
+      ],
+      "documents": [
+        {
+          "key": "workpackSummaryDraft",
+          "title": "점검결과 요약",
+          "charCount": 755,
+          "excerpt": "점검결과 요약(초안) 현장 문서팩 첫 장 · 작업 전 검토용 업체명: 자동화설비 업종: 현장 유지보수 현장명: 구미 자동화설비 방호장치 개선·정비 작업 현장 작업명: 자동화설비 방호장치 개선·정비 작업 작업인원: 5명 작업조건 판단: 미입력 환경조건은 작업 전 확인하여 오늘 작업조건으로 확정 [핵심 판단] - 위험수준: 상 - 핵심 위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음 [즉시 조치] 1. 정비 전 전원을 차단하고 LOTO(잠금표지)·…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "riskAssessmentDraft",
+          "title": "위험성평가표",
+          "charCount": 3375,
+          "excerpt": "위험성평가표(구조화 편집본) [1. 자동화설비 방호장치 개선·정비 작업] 관리번호: RA-custom-maintenance-1 작업장소: 구미 자동화설비 방호장치 개선·정비 작업 현장 공정: 자동화설비 방호장치 개선, 전원 차단·LOTO, 예기치 않은 기동 방지, 시험가동 통제 세부작업: 자동화설비 방호장치 개선·정비 작업 장비/도구: 현장 장비 및 보호구 유해·위험요인: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험 4M: Machine 재해형태: other 현재 안전조치: 정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPlanDraft",
+          "title": "작업계획서",
+          "charCount": 1091,
+          "excerpt": "작업계획서(초안) 현장 서식 기준: 작업구간, 작업순서, 장비·인원, 허가·첨부, 확인자 중심 공사명: 구미 자동화설비 방호장치 개선·정비 작업 현장 작업구간: 자동화설비 방호장치 개선, 전원 차단·LOTO, 예기치 않은 기동 방지, 시험가동 통제 작성자: 관리감독자 / 작업반장 확인자: 현장소장 / 안전관리자 작성일: 작업 시작 전 [1. 작업개요] - 작업명: 자동화설비 방호장치 개선·정비 작업 - 작업내용: 자동화설비 방호장치 개선·정비 작업 - 작업인원: 5명 - 작업 전 조건확인: 작업반장이 실제 환경을 확인하고 작업순서·통제구역을 확정 [2. 작업순서 및…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPermitDraft",
+          "title": "안전작업허가 확인서",
+          "charCount": 1275,
+          "excerpt": "안전작업허가 확인서(초안) 현장 적용 전 관리감독자와 허가권자가 작업조건을 최종 확인합니다. [1. 허가 기본정보] - 현장명: 구미 자동화설비 방호장치 개선·정비 작업 현장 - 허가대상 작업: 자동화설비 방호장치 개선·정비 작업 - 허가구분: 전기작업 - 작업내용: 자동화설비 방호장치 개선·정비 작업 - 작업인원: 5명 - 작업시간: 작업 시작 전 허가 시각부터 종료 확인 시각까지 - 허가상태: 작업 전 조건 확인 및 허가권자 승인 필요 [2. 작업 전 허가조건] - 핵심 위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmBriefing",
+          "title": "TBM 브리핑",
+          "charCount": 1982,
+          "excerpt": "작업 전 안전점검회의(TBM) 브리핑(초안) 공식자료 기반: KOSHA TBM OPS 및 고용노동부 TBM 교육시간 인정 안내 참고 일시: 작업 시작 전 장소: 구미 자동화설비 방호장치 개선·정비 작업 현장 업체명: 자동화설비 오늘 작업: 자동화설비 방호장치 개선·정비 작업 참석 대상: 작업자 5명, 작업반장, 관리감독자 [1. 작업내용] - 자동화설비 방호장치 개선·정비 작업 - TBM 조건확인: 작업 전 실제 환경을 확인한 뒤 변경 위험과 작업중지 기준을 전원에게 전달 - 위험성평가 주요 유해·위험요인을 오늘 TBM 전달 항목으로 연결합니다. [2. 위험요인] …",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmLogDraft",
+          "title": "TBM 기록",
+          "charCount": 1973,
+          "excerpt": "작업 전 안전점검회의(TBM) 기록(초안) 공식자료 기반: 작업일지·모바일 앱·사진·영상 등 다양한 기록 인정 취지 참고 일시: 2026-04-25 08:00 업체명: 자동화설비 작업장소: 구미 자동화설비 방호장치 개선·정비 작업 현장 작업내용: 자동화설비 방호장치 개선·정비 작업 참석인원: 5명 실시자: 작업반장 / 관리감독자 위험성평가 실시여부: □ 예 □ 아니오 작업날짜와 TBM 일시 동일 여부: □ 예 □ 아니오 [작업내용] - 자동화설비 방호장치 개선·정비 작업 - TBM 기록조건: 실제 환경 확인 결과와 변경된 통제조치를 TBM 기록에 남김 [잠재위험요인…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "safetyEducationRecordDraft",
+          "title": "안전보건교육 기록",
+          "charCount": 1884,
+          "excerpt": "안전보건교육 기록(초안) 공식자료 기반: 산업안전보건교육 가이드북 및 TBM 교육시간 인정 안내 참고 교육명: 비정형 유지보수 작업 전 안전교육 교육구분: 당일 작업 전 안전보건교육 및 TBM 연계 기록 교육일시: 작업 시작 전 15분 교육장소: 구미 자동화설비 방호장치 개선·정비 작업 현장 교육대상: 작업자 2인, 작업반장, 관리감독자, 총 5명 교육 실시자: 현장소장 / 관리감독자 확인자: 작업반장 / 작업자 대표 [교육대상] - 작업자 2인, 작업반장, 관리감독자, 총 5명 - 신규 투입자, 외국인 근로자, 작업변경자는 이해 여부를 별도 확인합니다. [교육내용…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "emergencyResponseDraft",
+          "title": "비상대응 절차",
+          "charCount": 1339,
+          "excerpt": "비상대응 절차(초안) 중대재해·산업재해 발생 대비 현장 초기대응 기록 업체명: 자동화설비 현장명: 구미 자동화설비 방호장치 개선·정비 작업 현장 작업명: 자동화설비 방호장치 개선·정비 작업 비상대응 조건: 실제 환경을 확인하여 대피경로·비상연락·구조 접근조건을 확정 적용대상: 현장소장, 관리감독자, 작업반장, 작업자, 협력업체 [1. 사고 징후 및 즉시 중지] - 핵심 위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음 - 사고 징후, 아차사고, …",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "photoEvidenceDraft",
+          "title": "사진·증빙",
+          "charCount": 1139,
+          "excerpt": "사진/증빙 기록(초안) 현장 점검 및 제출 대응용 첨부 슬롯 업체명: 자동화설비 현장명: 구미 자동화설비 방호장치 개선·정비 작업 현장 작업명: 자동화설비 방호장치 개선·정비 작업 촬영 확인조건: 실제 환경과 통제 전·후 상태를 촬영하고 확인자 기록을 남김 [1. 작업 전 사진] - 작업구역 전경: - 보호구 착용 상태: - 장비/도구 점검 상태: - 위험구역 출입통제 상태: [2. 조치 전·후 사진] - 위험요인 1: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험 - 조치 전 사진: 위험구역 상태, 방호조치 전 상태, 접근통제 전 상태 - 조치내용: 정…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerBriefing",
+          "title": "외국인 근로자 출력본",
+          "charCount": 3479,
+          "excerpt": "외국인 근로자용 쉬운 한국어 브리핑 현장: 구미 자동화설비 방호장치 개선·정비 작업 현장 오늘 작업: 자동화설비 방호장치 개선·정비 작업 작업조건: 현장 조건 미지정, 작업 전 실제 환경 확인 필요 우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요. 가장 큰 위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음 [작업 전 꼭 확인] 1. 정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerTransmission",
+          "title": "외국인 전송본",
+          "charCount": 3782,
+          "excerpt": "[SafeClaw 외국인 근로자 안전공지] 자동화설비 현장: 구미 자동화설비 방호장치 개선·정비 작업 현장 오늘 작업: 자동화설비 방호장치 개선·정비 작업 작업조건: 현장 조건 미지정, 작업 전 실제 환경 확인 필요 우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요. ⚠️ 핵심 위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음 쉬운 한국어: ✋ 위험하면 작업을 멈추고 바로 관리자에게 말하세요. 🦺 보호구를 착용하고, 지시를 이해한 뒤…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "kakaoMessage",
+          "title": "현장 공유 메시지",
+          "charCount": 652,
+          "excerpt": "[오늘 작업 안전공지] 자동화설비 현장: 구미 자동화설비 방호장치 개선·정비 작업 현장 작업: 자동화설비 방호장치 개선·정비 작업 핵심위험: 방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험. 비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음 필수조치: 정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통제 / KOSHA Guide는 기술지침으로 참고하고 관련 법령의 적용 여부와 현장 조건은 별도 확인 필요로 기록 / 작업 전 작업방법, 위험구역, 작업중…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        }
+      ]
+    },
+    {
+      "id": "jeju-overnight-electrical-repair__stress",
+      "verdict": "PASS",
+      "elapsedMs": 3773,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 3735
+      },
+      "runnerError": "",
+      "ok": true,
+      "reviewedDocumentCount": 12,
+      "passedDocumentCount": 12,
+      "failedDocumentCount": 0,
+      "placeholderFindingCount": 0,
+      "legalOverclaimFindingCount": 0,
+      "awkwardCompositionFindingCount": 0,
+      "evidenceDomainMismatchCount": 0,
+      "exactLineOveruseCount": 13,
+      "displayedExactLineOveruseCount": 13,
+      "nearDuplicateLineOveruseCount": 20,
+      "genericTemplateOveruseCount": 0,
+      "duplicateReviewCategoryCounts": {
+        "exact": {
+          "cross-document-control-consistency": 3,
+          "legal-reference-consistency": 10
+        },
+        "near": {
+          "human-review-required": 12,
+          "document-role-prefix-variant": 8
+        }
+      },
+      "exactLineOveruse": [
+        {
+          "line": "야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전",
+          "documentKeys": [
+            "workpackSummaryDraft",
+            "tbmBriefing",
+            "tbmLogDraft",
+            "safetyEducationRecordDraft",
+            "foreignWorkerBriefing"
+          ],
+          "reviewCategory": "cross-document-control-consistency",
+          "reviewRationale": "동일 통제조치가 실행·교육·기록 문서에 일관되게 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "작업 전 정전 범위와 차단 위치를 표시하고 전원 차단·잠금표지 상태를 관리감독자가 확인",
+          "documentKeys": [
+            "workpackSummaryDraft",
+            "tbmBriefing",
+            "tbmLogDraft",
+            "foreignWorkerBriefing"
+          ],
+          "reviewCategory": "cross-document-control-consistency",
+          "reviewRationale": "동일 통제조치가 실행·교육·기록 문서에 일관되게 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "검전기로 무전압을 확인하고 잔류전하 방전 후 배전반 점검을 시작",
+          "documentKeys": [
+            "workpackSummaryDraft",
+            "tbmBriefing",
+            "tbmLogDraft",
+            "foreignWorkerBriefing"
+          ],
+          "reviewCategory": "cross-document-control-consistency",
+          "reviewRationale": "동일 통제조치가 실행·교육·기록 문서에 일관되게 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "필수 안전조치 반영: 절연용 보호구·방호구 사용 (기준규칙 제323조(절연용 보호구 등의 사용))",
+          "documentKeys": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "safetyEducationRecordDraft",
+            "emergencyResponseDraft"
+          ],
+          "reviewCategory": "legal-reference-consistency",
+          "reviewRationale": "법령·필수조치 근거가 독립 문서 사이에서 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "필수 안전조치 반영: 절연용 보호구 지급·착용 (기준규칙 제32조(보호구의 지급 등))",
+          "documentKeys": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "safetyEducationRecordDraft",
+            "emergencyResponseDraft"
+          ],
+          "reviewCategory": "legal-reference-consistency",
+          "reviewRationale": "법령·필수조치 근거가 독립 문서 사이에서 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "필수 안전조치 반영: 정전작업(전로차단·잠금·꼬리표·검전·방전) (기준규칙 제319조(정전전로에서의 전기작업))",
+          "documentKeys": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "safetyEducationRecordDraft",
+            "emergencyResponseDraft"
+          ],
+          "reviewCategory": "legal-reference-consistency",
+          "reviewRationale": "법령·필수조치 근거가 독립 문서 사이에서 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "필수 안전조치 반영: 충전부 방호(폐쇄형 외함·절연덮개) (기준규칙 제301조(전기 기계·기구 등의 충전부 방호))",
+          "documentKeys": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "safetyEducationRecordDraft",
+            "emergencyResponseDraft"
+          ],
+          "reviewCategory": "legal-reference-consistency",
+          "reviewRationale": "법령·필수조치 근거가 독립 문서 사이에서 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "관련 조문 확인: 기준규칙 제301조(전기 기계·기구 등의 충전부 방호)",
+          "documentKeys": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "safetyEducationRecordDraft",
+            "emergencyResponseDraft"
+          ],
+          "reviewCategory": "legal-reference-consistency",
+          "reviewRationale": "법령·필수조치 근거가 독립 문서 사이에서 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "관련 조문 확인: 기준규칙 제302조(전기 기계·기구의 접지)",
+          "documentKeys": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "safetyEducationRecordDraft",
+            "emergencyResponseDraft"
+          ],
+          "reviewCategory": "legal-reference-consistency",
+          "reviewRationale": "법령·필수조치 근거가 독립 문서 사이에서 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "관련 조문 확인: 기준규칙 제319조(정전전로에서의 전기작업)",
+          "documentKeys": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "safetyEducationRecordDraft",
+            "emergencyResponseDraft"
+          ],
+          "reviewCategory": "legal-reference-consistency",
+          "reviewRationale": "법령·필수조치 근거가 독립 문서 사이에서 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "관련 조문 확인: 기준규칙 제32조(보호구의 지급 등)",
+          "documentKeys": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "safetyEducationRecordDraft",
+            "emergencyResponseDraft"
+          ],
+          "reviewCategory": "legal-reference-consistency",
+          "reviewRationale": "법령·필수조치 근거가 독립 문서 사이에서 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "관련 조문 확인: 기준규칙 제321조(충전전로에서의 전기작업)",
+          "documentKeys": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "safetyEducationRecordDraft",
+            "emergencyResponseDraft"
+          ],
+          "reviewCategory": "legal-reference-consistency",
+          "reviewRationale": "법령·필수조치 근거가 독립 문서 사이에서 반복됩니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "line": "관련 조문 확인: 기준규칙 제323조(절연용 보호구 등의 사용)",
+          "documentKeys": [
+            "riskAssessmentDraft",
+            "workPlanDraft",
+            "safetyEducationRecordDraft",
+            "emergencyResponseDraft"
+          ],
+          "reviewCategory": "legal-reference-consistency",
+          "reviewRationale": "법령·필수조치 근거가 독립 문서 사이에서 반복됩니다.",
+          "humanReviewRequired": true
+        }
+      ],
+      "nearDuplicateLineOveruse": [
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "foreignWorkerBriefing",
+          "similarity": 0.917,
+          "leftLine": "작업조건 판단: 정전전로 및 그 인근 전기작업 조건, 통전 가능성·잔류전하·접근통제 확인 필요",
+          "rightLine": "작업조건: 정전전로 및 그 인근 전기작업 조건, 통전 가능성·잔류전하·접근통제 확인 필요",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "foreignWorkerTransmission",
+          "similarity": 0.917,
+          "leftLine": "작업조건 판단: 정전전로 및 그 인근 전기작업 조건, 통전 가능성·잔류전하·접근통제 확인 필요",
+          "rightLine": "작업조건: 정전전로 및 그 인근 전기작업 조건, 통전 가능성·잔류전하·접근통제 확인 필요",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "kakaoMessage",
+          "similarity": 0.917,
+          "leftLine": "작업조건 판단: 정전전로 및 그 인근 전기작업 조건, 통전 가능성·잔류전하·접근통제 확인 필요",
+          "rightLine": "작업조건: 정전전로 및 그 인근 전기작업 조건, 통전 가능성·잔류전하·접근통제 확인 필요",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "foreignWorkerBriefing",
+          "similarity": 0.926,
+          "leftLine": "핵심 위험: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 정전전로 인근 배전반 점검 중 전원 차단·검전·절연보호구 확인이 미흡하면 감전 또는 아크 화상 위험이 발생할 수 있음",
+          "rightLine": "가장 큰 위험: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 정전전로 인근 배전반 점검 중 전원 차단·검전·절연보호구 확인이 미흡하면 감전 또는 아크 화상 위험이 발생할 수 있음",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "foreignWorkerTransmission",
+          "similarity": 1,
+          "leftLine": "핵심 위험: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 정전전로 인근 배전반 점검 중 전원 차단·검전·절연보호구 확인이 미흡하면 감전 또는 아크 화상 위험이 발생할 수 있음",
+          "rightLine": "⚠️ 핵심 위험: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 정전전로 인근 배전반 점검 중 전원 차단·검전·절연보호구 확인이 미흡하면 감전 또는 아크 화상 위험이 발생할 수 있음",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "kakaoMessage",
+          "similarity": 0.926,
+          "leftLine": "핵심 위험: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 정전전로 인근 배전반 점검 중 전원 차단·검전·절연보호구 확인이 미흡하면 감전 또는 아크 화상 위험이 발생할 수 있음",
+          "rightLine": "핵심위험: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 정전전로 인근 배전반 점검 중 전원 차단·검전·절연보호구 확인이 미흡하면 감전 또는 아크 화상 위험이 발생할 수 있음",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "kakaoMessage",
+          "similarity": 1,
+          "leftLine": "핵심 위험: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 정전전로 인근 배전반 점검 중 전원 차단·검전·절연보호구 확인이 미흡하면 감전 또는 아크 화상 위험이 발생할 수 있음",
+          "rightLine": "⚠️ 핵심 위험: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 정전전로 인근 배전반 점검 중 전원 차단·검전·절연보호구 확인이 미흡하면 감전 또는 아크 화상 위험이 발생할 수 있음",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.938,
+          "leftLine": "야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전",
+          "rightLine": "안전조치 1: 야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.938,
+          "leftLine": "야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전",
+          "rightLine": "조치내용: 야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.917,
+          "leftLine": "작업 전 정전 범위와 차단 위치를 표시하고 전원 차단·잠금표지 상태를 관리감독자가 확인",
+          "rightLine": "안전조치 2: 작업 전 정전 범위와 차단 위치를 표시하고 전원 차단·잠금표지 상태를 관리감독자가 확인",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "workpackSummaryDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.917,
+          "leftLine": "작업 전 정전 범위와 차단 위치를 표시하고 전원 차단·잠금표지 상태를 관리감독자가 확인",
+          "rightLine": "조치내용: 작업 전 정전 범위와 차단 위치를 표시하고 전원 차단·잠금표지 상태를 관리감독자가 확인",
+          "reviewCategory": "document-role-prefix-variant",
+          "reviewRationale": "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.909,
+          "leftLine": "유해·위험요인: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험",
+          "rightLine": "위험요인 1: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.941,
+          "leftLine": "현재 안전조치: 야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전",
+          "rightLine": "안전조치 1: 야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "tbmBriefing",
+          "similarity": 1,
+          "leftLine": "[2. 정전전로 범위 오인 또는 잔류전하 확인 미흡으로 인한 감전]",
+          "rightLine": "정전전로 범위 오인 또는 잔류전하 확인 미흡으로 인한 감전",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "tbmLogDraft",
+          "similarity": 1,
+          "leftLine": "[2. 정전전로 범위 오인 또는 잔류전하 확인 미흡으로 인한 감전]",
+          "rightLine": "정전전로 범위 오인 또는 잔류전하 확인 미흡으로 인한 감전",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.9,
+          "leftLine": "[2. 정전전로 범위 오인 또는 잔류전하 확인 미흡으로 인한 감전]",
+          "rightLine": "위험요인 2: 정전전로 범위 오인 또는 잔류전하 확인 미흡으로 인한 감전",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "tbmBriefing",
+          "similarity": 0.9,
+          "leftLine": "세부작업: 정전전로 범위 오인 또는 잔류전하 확인 미흡으로 인한 감전",
+          "rightLine": "정전전로 범위 오인 또는 잔류전하 확인 미흡으로 인한 감전",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "tbmLogDraft",
+          "similarity": 0.9,
+          "leftLine": "세부작업: 정전전로 범위 오인 또는 잔류전하 확인 미흡으로 인한 감전",
+          "rightLine": "정전전로 범위 오인 또는 잔류전하 확인 미흡으로 인한 감전",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "photoEvidenceDraft",
+          "similarity": 0.909,
+          "leftLine": "유해·위험요인: 정전전로 범위 오인 또는 잔류전하 확인 미흡으로 인한 감전",
+          "rightLine": "위험요인 2: 정전전로 범위 오인 또는 잔류전하 확인 미흡으로 인한 감전",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        },
+        {
+          "leftDocumentKey": "riskAssessmentDraft",
+          "rightDocumentKey": "workPermitDraft",
+          "similarity": 0.923,
+          "leftLine": "현재 안전조치: 작업 전 정전 범위와 차단 위치를 표시하고 전원 차단·잠금표지 상태를 관리감독자가 확인",
+          "rightLine": "안전조치 2: 작업 전 정전 범위와 차단 위치를 표시하고 전원 차단·잠금표지 상태를 관리감독자가 확인",
+          "reviewCategory": "human-review-required",
+          "reviewRationale": "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다.",
+          "humanReviewRequired": true
+        }
+      ],
+      "documents": [
+        {
+          "key": "workpackSummaryDraft",
+          "title": "점검결과 요약",
+          "charCount": 759,
+          "excerpt": "점검결과 요약(초안) 현장 문서팩 첫 장 · 작업 전 검토용 업체명: 전기설비 업종: 전기설비 점검 현장명: 제주 정전전로 인근 배전반 점검 작업 현장 작업명: 정전전로 인근 배전반 점검 작업 작업인원: 2명 작업조건 판단: 정전전로 및 그 인근 전기작업 조건, 통전 가능성·잔류전하·접근통제 확인 필요 [핵심 판단] - 위험수준: 상 - 핵심 위험: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 정전전로 인근 배전반 점검 중 전원 차단·검전·절연보호구 확인이 미흡하면 감전 또는 아크 화상 위험이 발생할 수 있음 [즉시 조치] 1. 야간조는 2인 1조…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "riskAssessmentDraft",
+          "title": "위험성평가표",
+          "charCount": 3673,
+          "excerpt": "[오늘 개선·이력 반영 - 위험성평가] - 공유 전 보완: TBM 브리핑 근거 - 공유 전 보완: TBM 기록 근거 위험성평가표(구조화 편집본) [1. 정전전로 인근 배전반 점검 작업] 관리번호: RA-custom-maintenance-1 작업장소: 제주 정전전로 인근 배전반 점검 작업 현장 공정: 정전전로 범위 확인, 전원 차단·잠금표지, 검전·무전압 확인, 배전반 점검, 절연보호구 착용 세부작업: 정전전로 인근 배전반 점검 작업 장비/도구: 현장 장비 및 보호구 유해·위험요인: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험 4M: Man 재해형태:…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPlanDraft",
+          "title": "작업계획서",
+          "charCount": 1663,
+          "excerpt": "작업계획서(초안) 현장 서식 기준: 작업구간, 작업순서, 장비·인원, 허가·첨부, 확인자 중심 공사명: 제주 정전전로 인근 배전반 점검 작업 현장 작업구간: 정전전로 범위 확인, 전원 차단·잠금표지, 검전·무전압 확인, 배전반 점검, 절연보호구 착용 작성자: 관리감독자 / 작업반장 확인자: 현장소장 / 안전관리자 작성일: 작업 시작 전 [1. 작업개요] - 작업명: 정전전로 인근 배전반 점검 작업 - 작업내용: 정전전로 인근 배전반 점검 작업 - 작업인원: 2명 - 작업 전 조건확인: 정전전로 및 그 인근 전기작업 조건, 통전 가능성·잔류전하·접근통제 확인 필요 […",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPermitDraft",
+          "title": "안전작업허가 확인서",
+          "charCount": 1232,
+          "excerpt": "안전작업허가 확인서(초안) 현장 적용 전 관리감독자와 허가권자가 작업조건을 최종 확인합니다. [1. 허가 기본정보] - 현장명: 제주 정전전로 인근 배전반 점검 작업 현장 - 허가대상 작업: 정전전로 인근 배전반 점검 작업 - 허가구분: 전기작업 - 작업내용: 정전전로 인근 배전반 점검 작업 - 작업인원: 2명 - 작업시간: 작업 시작 전 허가 시각부터 종료 확인 시각까지 - 허가상태: 작업 전 조건 확인 및 허가권자 승인 필요 [2. 작업 전 허가조건] - 핵심 위험: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 정전전로 인근 배전반 점검 중 전…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmBriefing",
+          "title": "TBM 브리핑",
+          "charCount": 2355,
+          "excerpt": "[오늘 개선·이력 반영 - TBM] - 공유 전 보완: TBM 브리핑 근거 - 공유 전 보완: TBM 기록 근거 작업 전 안전점검회의(TBM) 브리핑(초안) 공식자료 기반: KOSHA TBM OPS 및 고용노동부 TBM 교육시간 인정 안내 참고 일시: 작업 시작 전 장소: 제주 정전전로 인근 배전반 점검 작업 현장 업체명: 전기설비 오늘 작업: 정전전로 인근 배전반 점검 작업 참석 대상: 작업자 2명, 작업반장, 관리감독자 [1. 작업내용] - 정전전로 인근 배전반 점검 작업 - TBM 조건확인: 정전전로 및 그 인근 전기작업 조건, 통전 가능성·잔류전하·접근통제 …",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmLogDraft",
+          "title": "TBM 기록",
+          "charCount": 2330,
+          "excerpt": "[오늘 개선·이력 반영 - 확인 기록] - 공유 전 보완: TBM 브리핑 근거 - 공유 전 보완: TBM 기록 근거 작업 전 안전점검회의(TBM) 기록(초안) 공식자료 기반: 작업일지·모바일 앱·사진·영상 등 다양한 기록 인정 취지 참고 일시: 2026-04-25 08:00 업체명: 전기설비 작업장소: 제주 정전전로 인근 배전반 점검 작업 현장 작업내용: 정전전로 인근 배전반 점검 작업 참석인원: 2명 실시자: 작업반장 / 관리감독자 위험성평가 실시여부: □ 예 □ 아니오 작업날짜와 TBM 일시 동일 여부: □ 예 □ 아니오 [작업내용] - 정전전로 인근 배전반 점…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "safetyEducationRecordDraft",
+          "title": "안전보건교육 기록",
+          "charCount": 2553,
+          "excerpt": "안전보건교육 기록(초안) 공식자료 기반: 산업안전보건교육 가이드북 및 TBM 교육시간 인정 안내 참고 교육명: 정전전로 인근 배전반 점검 전 감전 예방 TBM 교육구분: 당일 작업 전 안전보건교육 및 TBM 연계 기록 교육일시: 작업 시작 전 15분 교육장소: 제주 정전전로 인근 배전반 점검 작업 현장 교육대상: 전기 작업자, 작업반장, 관리감독자, 야간조, 교대 인수인계 담당자, 총 2명 교육 실시자: 현장소장 / 관리감독자 확인자: 작업반장 / 작업자 대표 [교육대상] - 전기 작업자, 작업반장, 관리감독자, 야간조, 교대 인수인계 담당자, 총 2명 - 신규 투…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "emergencyResponseDraft",
+          "title": "비상대응 절차",
+          "charCount": 1974,
+          "excerpt": "비상대응 절차(초안) 중대재해·산업재해 발생 대비 현장 초기대응 기록 업체명: 전기설비 현장명: 제주 정전전로 인근 배전반 점검 작업 현장 작업명: 정전전로 인근 배전반 점검 작업 비상대응 조건: 정전전로 및 그 인근 전기작업 조건, 통전 가능성·잔류전하·접근통제 확인 필요 적용대상: 현장소장, 관리감독자, 작업반장, 작업자, 협력업체 [1. 사고 징후 및 즉시 중지] - 핵심 위험: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 정전전로 인근 배전반 점검 중 전원 차단·검전·절연보호구 확인이 미흡하면 감전 또는 아크 화상 위험이 발생할 수 있음 -…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "photoEvidenceDraft",
+          "title": "사진·증빙",
+          "charCount": 1205,
+          "excerpt": "사진/증빙 기록(초안) 현장 점검 및 제출 대응용 첨부 슬롯 업체명: 전기설비 현장명: 제주 정전전로 인근 배전반 점검 작업 현장 작업명: 정전전로 인근 배전반 점검 작업 촬영 확인조건: 정전전로 및 그 인근 전기작업 조건, 통전 가능성·잔류전하·접근통제 확인 필요 [1. 작업 전 사진] - 작업구역 전경: - 보호구 착용 상태: - 장비/도구 점검 상태: - 위험구역 출입통제 상태: [2. 조치 전·후 사진] - 위험요인 1: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험 - 조치 전 사진: 위험구역 상태, 방호조치 전 상태, 접근통제 전 상태 - …",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerBriefing",
+          "title": "외국인 근로자 출력본",
+          "charCount": 3371,
+          "excerpt": "외국인 근로자용 쉬운 한국어 브리핑 현장: 제주 정전전로 인근 배전반 점검 작업 현장 오늘 작업: 정전전로 인근 배전반 점검 작업 작업조건: 정전전로 및 그 인근 전기작업 조건, 통전 가능성·잔류전하·접근통제 확인 필요 우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요. 가장 큰 위험: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 정전전로 인근 배전반 점검 중 전원 차단·검전·절연보호구 확인이 미흡하면 감전 또는 아크 화상 위험이 발생할 수 있음 [작업 전 꼭 확인] 1. 야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerTransmission",
+          "title": "외국인 전송본",
+          "charCount": 3669,
+          "excerpt": "[SafeClaw 외국인 근로자 안전공지] 전기설비 현장: 제주 정전전로 인근 배전반 점검 작업 현장 오늘 작업: 정전전로 인근 배전반 점검 작업 작업조건: 정전전로 및 그 인근 전기작업 조건, 통전 가능성·잔류전하·접근통제 확인 필요 우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요. ⚠️ 핵심 위험: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 정전전로 인근 배전반 점검 중 전원 차단·검전·절연보호구 확인이 미흡하면 감전 또는 아크 화상 위험이 발생할 수 있음 쉬운 한국어: ✋ 위험하면 작업을 멈추고 바로 관리자에게 말하세요. 🦺 …",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "kakaoMessage",
+          "title": "현장 공유 메시지",
+          "charCount": 665,
+          "excerpt": "[오늘 작업 안전공지] 전기설비 현장: 제주 정전전로 인근 배전반 점검 작업 현장 작업: 정전전로 인근 배전반 점검 작업 핵심위험: 야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험. 정전전로 인근 배전반 점검 중 전원 차단·검전·절연보호구 확인이 미흡하면 감전 또는 아크 화상 위험이 발생할 수 있음 필수조치: 야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전 / 작업 전 정전 범위와 차단 위치를 표시하고 전원 차단·잠금표지 상태를 관리감독자가 확인 / 검전기로 무전압을 확인하고 잔류전하 방전 후…",
+          "placeholderFindings": [],
+          "legalOverclaimFindings": [],
+          "awkwardCompositionFindings": [],
+          "evidenceDomainMismatches": [],
+          "verdict": "PASS",
+          "failures": []
+        }
+      ]
+    }
+  ]
+}
