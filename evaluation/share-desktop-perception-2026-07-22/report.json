@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-share-desktop-perception/v1",
-  "checkedAt": "2026-07-24T10:45:56.589Z",
+  "checkedAt": "2026-07-24T11:02:32.470Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHead": "772016d6ab1ebe89ea636627c8d0f933645d4985",
+  "sourceHead": "e70be8ef7a3735a18078a0576b83aefc1e64cef3",
   "productionBuild": {
     "ok": true,
     "configured": true,
@@ -16,7 +16,7 @@
   "providerDispatchLiveClaimed": false,
   "dbMutationPerformed": false,
   "routeSplitAloneAcceptedAsFix": false,
-  "verdict": "PASS_LIVE_PRODUCTION_MEASURED",
+  "verdict": "PASS_LIVE_PRODUCTION_SCOPED_WORKSPACE_AND_INVITED_FIXTURE",
   "interpretation": "Current measured live Workspace Share and invited recipient Share routes use first-viewport desktop workbench geometry. This does not disprove a different user-visible saved/generated session; if that exact session still looks like a narrow mobile card, reproduce it with this width-ratio/grid gate before changing product code.",
   "acceptance": {
     "desktop": [

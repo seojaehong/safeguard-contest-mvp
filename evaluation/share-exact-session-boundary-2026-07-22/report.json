@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-share-exact-session-boundary/v1",
-  "checkedAt": "2026-07-24T10:46:15.768Z",
+  "checkedAt": "2026-07-24T11:02:49.862Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHead": "772016d6ab1ebe89ea636627c8d0f933645d4985",
+  "sourceHead": "eb891f33ed38b91e426273af8c089d20da7ae47b",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,

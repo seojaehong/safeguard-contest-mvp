@@ -1,10 +1,10 @@
 # Share Exact Session Boundary Gate
 
-Checked at: 2026-07-24T10:46:15.768Z
+Checked at: 2026-07-24T11:02:49.862Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD: `772016d6ab1ebe89ea636627c8d0f933645d4985`
+Source HEAD: `eb891f33ed38b91e426273af8c089d20da7ae47b`
 
 Live `/api/build-info`: `772016d6ab1ebe89ea636627c8d0f933645d4985`
 
