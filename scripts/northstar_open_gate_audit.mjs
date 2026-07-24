@@ -36,6 +36,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
   liveDocumentEditorialReview: path.join("evaluation", "live-document-editorial-review-2026-07-25", "report.json"),
+  liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
@@ -868,14 +869,16 @@ function evaluateLiveDocumentSecondaryGroundingGate(rootDir) {
 function evaluateLiveDocumentEditorialReviewGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.liveDocumentEditorialReview;
   const report = readJsonFile(rootDir, evidencePath);
-  if (!isRecord(report)) {
+  const duplicateEvidencePath = EVIDENCE_PATHS.liveDocumentEditorialDuplicateClassification;
+  const duplicateReport = readJsonFile(rootDir, duplicateEvidencePath);
+  if (!isRecord(report) || !isRecord(duplicateReport)) {
     return gateResult({
       id: "live_document_editorial_review",
       label: "Live 12-deliverable editorial contract review",
       state: "missing",
       evidencePath,
-      detail: "Live 12-deliverable automated editorial contract evidence is missing or invalid.",
-      nextActions: ["Run the fail-closed five-by-twelve editorial contract without combining existing wording and presence gates."],
+      detail: "Live 12-deliverable automated editorial contract or duplicate-classification evidence is missing or invalid.",
+      nextActions: ["Run both fail-closed five-by-twelve editorial contracts without combining existing wording and presence gates."],
     });
   }
 
@@ -883,12 +886,39 @@ function evaluateLiveDocumentEditorialReviewGate(rootDir) {
   const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
   const evidenceBoundary = isRecord(report.evidenceBoundary) ? report.evidenceBoundary : {};
   const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const duplicateBeforeLive = isRecord(duplicateReport.beforeLive) ? duplicateReport.beforeLive : {};
+  const duplicateAfterLive = isRecord(duplicateReport.afterLive) ? duplicateReport.afterLive : {};
+  const duplicateMutationBoundary = isRecord(duplicateReport.mutationBoundary) ? duplicateReport.mutationBoundary : {};
+  const duplicateRemainingBoundaries = isRecord(duplicateReport.remainingBoundaries) ? duplicateReport.remainingBoundaries : {};
   const sourceMatchesProduction = readString(report.productCommit).length > 0
     && readString(report.productCommit) === readString(report.productionCommit);
   const noMutation = mutationBoundary.dbMutationPerformed === false
     && mutationBoundary.shareSessionCreated === false
     && mutationBoundary.providerDispatchCalled === false
     && mutationBoundary.exactSavedShareReproduced === false;
+  const duplicateSourceMatchesProduction = readString(duplicateReport.productionCommit).length > 0
+    && readString(duplicateReport.productionCommit) === readString(duplicateAfterLive.sourceHead);
+  const duplicateNoMutation = duplicateMutationBoundary.dbMutationPerformed === false
+    && duplicateMutationBoundary.shareSessionCreated === false
+    && duplicateMutationBoundary.providerDispatchCalled === false
+    && duplicateMutationBoundary.exactSavedShareReproduced === false;
+  const duplicateReady = readString(duplicateReport.verdict) === "PASS_LIVE_PRODUCTION_EDITORIAL_DUPLICATE_CLASSIFICATION_REVIEWER_READY"
+    && duplicateSourceMatchesProduction
+    && readNumber(duplicateReport.canonicalDocumentCount) === 12
+    && readNumber(duplicateReport.caseCount) === 5
+    && readNumber(duplicateReport.reviewedDocumentSurfaceCount) === 60
+    && duplicateReport.humanReviewCompleted === false
+    && readNumber(duplicateBeforeLive.pass) === 1
+    && readNumber(duplicateBeforeLive.fail) === 4
+    && readNumber(duplicateBeforeLive.genericTemplateOveruseCount) === 4
+    && readNumber(duplicateAfterLive.pass) === 5
+    && readNumber(duplicateAfterLive.fail) === 0
+    && readNumber(duplicateAfterLive.genericTemplateOveruseCount) === 0
+    && readNumber(duplicateAfterLive.exactLineOveruseCount) > 0
+    && readNumber(duplicateAfterLive.nearDuplicateLineOveruseCount) > 0
+    && readString(duplicateRemainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && duplicateRemainingBoundaries.broadHumanWordingReviewRequired === true
+    && duplicateNoMutation;
   const liveReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY"
     && sourceMatchesProduction
     && readNumber(report.canonicalDocumentCount) === 12
@@ -912,7 +942,8 @@ function evaluateLiveDocumentEditorialReviewGate(rootDir) {
     && evidenceBoundary.twelveDeliverablePresenceGateCombinedAsHumanPass === false
     && evidenceBoundary.duplicateFindingsRemainForHumanReview === true
     && readString(evidenceBoundary.exactSavedShareVerdict) === "MISSING_EVIDENCE"
-    && noMutation;
+    && noMutation
+    && duplicateReady;
 
   if (liveReady) {
     return gateResult({
@@ -920,7 +951,7 @@ function evaluateLiveDocumentEditorialReviewGate(rootDir) {
       label: "Live 12-deliverable editorial contract review",
       state: "proven",
       evidencePath,
-      detail: `Five live production scenarios and all 60 canonical document surfaces pass the automated editorial contract: placeholder=0, legal overclaim=0, awkward composition ${readNumber(beforeLive.awkwardCompositionFindingCount)}->0, and evidence-domain mismatch ${readNumber(beforeLive.evidenceDomainMismatchCount)}->0. Exact repeated-line groups=${readNumber(afterLive.exactLineOveruseCount)} and near-duplicate pairs=${readNumber(afterLive.nearDuplicateLineOveruseCount)} remain visible human-review findings. humanReviewCompleted=false, the six-core wording and 12-presence gates are not combined as a human PASS, no DB/share/provider mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`,
+      detail: `Five live production scenarios and all 60 canonical document surfaces pass the automated editorial contract: placeholder=0, legal overclaim=0, awkward composition ${readNumber(beforeLive.awkwardCompositionFindingCount)}->0, and evidence-domain mismatch ${readNumber(beforeLive.evidenceDomainMismatchCount)}->0. The companion duplicate classifier reduces generic-template overuse ${readNumber(duplicateBeforeLive.genericTemplateOveruseCount)}->0 while retaining exact=${readNumber(duplicateAfterLive.exactLineOveruseCount)} and near=${readNumber(duplicateAfterLive.nearDuplicateLineOveruseCount)} reviewer findings. humanReviewCompleted=false, the six-core wording and 12-presence gates are not combined as a human PASS, no DB/share/provider mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`,
       nextActions: [
         "Perform a separate human editorial review for the recorded duplicate-line findings.",
         "Keep Documents/Share viewport IA and exact saved Share geometry as separate product/evidence boundaries.",
@@ -933,7 +964,7 @@ function evaluateLiveDocumentEditorialReviewGate(rootDir) {
     label: "Live 12-deliverable editorial contract review",
     state: "contradicted",
     evidencePath,
-    detail: `Editorial verdict=${readString(report.verdict) || "unknown"}, live=${readNumber(afterLive.pass)}/5, reviewed=${readNumber(report.reviewedDocumentSurfaceCount)}, placeholder=${readNumber(afterLive.placeholderFindingCount)}, legal=${readNumber(afterLive.legalOverclaimFindingCount)}, awkward=${readNumber(afterLive.awkwardCompositionFindingCount)}, evidenceMismatch=${readNumber(afterLive.evidenceDomainMismatchCount)}, humanReviewCompleted=${report.humanReviewCompleted === true}, sourceMatchesProduction=${sourceMatchesProduction}, noMutation=${noMutation}.`,
+    detail: `Editorial verdict=${readString(report.verdict) || "unknown"}, live=${readNumber(afterLive.pass)}/5, reviewed=${readNumber(report.reviewedDocumentSurfaceCount)}, placeholder=${readNumber(afterLive.placeholderFindingCount)}, legal=${readNumber(afterLive.legalOverclaimFindingCount)}, awkward=${readNumber(afterLive.awkwardCompositionFindingCount)}, evidenceMismatch=${readNumber(afterLive.evidenceDomainMismatchCount)}, duplicateVerdict=${readString(duplicateReport.verdict) || "unknown"}, generic=${readNumber(duplicateAfterLive.genericTemplateOveruseCount)}, duplicateSourceMatchesProduction=${duplicateSourceMatchesProduction}, humanReviewCompleted=${report.humanReviewCompleted === true}, sourceMatchesProduction=${sourceMatchesProduction}, noMutation=${noMutation && duplicateNoMutation}.`,
     nextActions: ["Fix the editorial or evidence-domain findings and rerun the unchanged five-by-twelve live contract."],
   });
 }

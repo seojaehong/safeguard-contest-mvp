@@ -1,8 +1,10 @@
 {
-  "generatedAt": "2026-07-24T23:04:11.547Z",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_EDITORIAL_DUPLICATE_CLASSIFICATION_LIVE_PENDING",
+  "generatedAt": "2026-07-24T23:10:39.380Z",
+  "verdict": "PASS_LIVE_PRODUCTION_EDITORIAL_DUPLICATE_CLASSIFICATION_REVIEWER_READY",
+  "sourceHead": "715029f2364e8a547390c1e1105597f32e1fe911",
   "productCommit": "7a77ab02fc719829b96bd998ca26827eb31a8b67",
-  "liveAfterDeploymentPending": true,
+  "productionCommit": "715029f2364e8a547390c1e1105597f32e1fe911",
+  "liveAfterDeploymentPending": false,
   "canonicalDocumentCount": 12,
   "caseCount": 5,
   "reviewedDocumentSurfaceCount": 60,
@@ -21,6 +23,28 @@
     "artifact": "evaluation/live-document-editorial-duplicate-classification-2026-07-25/after-local/report.json",
     "sourceHead": "7a77ab02fc719829b96bd998ca26827eb31a8b67",
     "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+    "pass": 5,
+    "fail": 0,
+    "genericTemplateOveruseCount": 0,
+    "exactLineOveruseCount": 31,
+    "displayedExactLineOveruseCount": 31,
+    "nearDuplicateLineOveruseCount": 100,
+    "duplicateReviewCategoryCounts": {
+      "exact": {
+        "cross-document-control-consistency": 15,
+        "legal-reference-consistency": 16
+      },
+      "near": {
+        "human-review-required": 54,
+        "document-role-prefix-variant": 46
+      }
+    }
+  },
+  "afterLive": {
+    "artifact": "evaluation/live-document-editorial-duplicate-classification-2026-07-25/after-live/report.json",
+    "sourceHead": "715029f2364e8a547390c1e1105597f32e1fe911",
+    "productionCommit": "715029f2364e8a547390c1e1105597f32e1fe911",
+    "verdict": "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
     "pass": 5,
     "fail": 0,
     "genericTemplateOveruseCount": 0,
@@ -62,7 +86,7 @@
   },
   "remainingBoundaries": {
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
-    "liveAfterDeploymentRequired": true,
+    "liveAfterDeploymentRequired": false,
     "broadHumanWordingReviewRequired": true
   }
 }

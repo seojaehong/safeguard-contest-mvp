@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-24T22:45:35.370Z",
-  "head": "c3672b1346e03378318089448595a6dc6fe53077",
+  "generatedAt": "2026-07-24T23:19:06.118Z",
+  "head": "715029f2364e8a547390c1e1105597f32e1fe911",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "c3672b1346e03378318089448595a6dc6fe53077",
+    "commitSha": "715029f2364e8a547390c1e1105597f32e1fe911",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-zkcnkcec3-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-k33b4qsur-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -79,7 +79,7 @@
       "id": "live_document_editorial_review",
       "state": "proven",
       "artifact": "evaluation\\live-document-editorial-review-2026-07-25\\report.json",
-      "detail": "Five live production scenarios and all 60 canonical document surfaces pass the automated editorial contract: placeholder=0, legal overclaim=0, awkward composition 20->0, and evidence-domain mismatch 1->0. Exact repeated-line groups=38 and near-duplicate pairs=100 remain visible human-review findings. humanReviewCompleted=false, the six-core wording and 12-presence gates are not combined as a human PASS, no DB/share/provider mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Five live production scenarios and all 60 canonical document surfaces pass the automated editorial contract: placeholder=0, legal overclaim=0, awkward composition 20->0, and evidence-domain mismatch 1->0. The companion duplicate classifier reduces generic-template overuse 4->0 while retaining exact=31 and near=100 reviewer findings. humanReviewCompleted=false, the six-core wording and 12-presence gates are not combined as a human PASS, no DB/share/provider mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "product_capability_truth",
@@ -309,6 +309,23 @@
     "exactSavedShareReproduced": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
+  "liveDocumentEditorialDuplicateClassification": {
+    "artifact": "evaluation\\live-document-editorial-duplicate-classification-2026-07-25\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_EDITORIAL_DUPLICATE_CLASSIFICATION_REVIEWER_READY",
+    "productCommit": "7a77ab02fc719829b96bd998ca26827eb31a8b67",
+    "productionCommit": "715029f2364e8a547390c1e1105597f32e1fe911",
+    "reviewedDocumentSurfaceCount": 60,
+    "beforeGenericTemplateOveruseCount": 4,
+    "liveGenericTemplateOveruseCount": 0,
+    "exactLineOveruseCount": 31,
+    "nearDuplicateLineOveruseCount": 100,
+    "humanReviewCompleted": false,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "exactSavedShareReproduced": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
   "productCapabilityTruth": {
     "artifact": "evaluation\\product-capability-truth-2026-07-25\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH",
@@ -420,9 +437,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "c3672b1346e03378318089448595a6dc6fe53077",
+      "sourceCommit": "715029f2364e8a547390c1e1105597f32e1fe911",
       "sourceStatus": "exact",
-      "productionCommit": "c3672b1346e03378318089448595a6dc6fe53077",
+      "productionCommit": "715029f2364e8a547390c1e1105597f32e1fe911",
       "productionStatus": "matches_live"
     },
     {
@@ -496,6 +513,14 @@
       "sourceStatus": "missing",
       "productionCommit": "1cbb51dce13baf9f4809f4a0793b9d3ae3c088be",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "live_document_editorial_duplicate_classification",
+      "artifact": "evaluation\\live-document-editorial-duplicate-classification-2026-07-25\\report.json",
+      "sourceCommit": "715029f2364e8a547390c1e1105597f32e1fe911",
+      "sourceStatus": "exact",
+      "productionCommit": "715029f2364e8a547390c1e1105597f32e1fe911",
+      "productionStatus": "matches_live"
     },
     {
       "id": "product_capability_truth",

@@ -28,6 +28,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
   liveDocumentEditorialReview: path.join("evaluation", "live-document-editorial-review-2026-07-25", "report.json"),
+  liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
@@ -479,6 +480,43 @@ function liveDocumentEditorialReviewSummary(review) {
     providerDispatchCalled: asBoolean(mutationBoundary.providerDispatchCalled),
     exactSavedShareReproduced: asBoolean(mutationBoundary.exactSavedShareReproduced),
     exactSavedShareVerdict: asString(evidenceBoundary.exactSavedShareVerdict),
+  };
+}
+
+/**
+ * @param {unknown} review
+ */
+function liveDocumentEditorialDuplicateClassificationSummary(review) {
+  if (!isRecord(review)) return {};
+  const beforeLive = isRecord(review.beforeLive) ? review.beforeLive : {};
+  const afterLive = isRecord(review.afterLive) ? review.afterLive : {};
+  const mutationBoundary = isRecord(review.mutationBoundary) ? review.mutationBoundary : {};
+  const remainingBoundaries = isRecord(review.remainingBoundaries) ? review.remainingBoundaries : {};
+  return {
+    verdict: asString(review.verdict),
+    productCommit: asString(review.productCommit),
+    productionCommit: asString(review.productionCommit),
+    reviewedDocumentSurfaceCount: typeof review.reviewedDocumentSurfaceCount === "number"
+      ? review.reviewedDocumentSurfaceCount
+      : 0,
+    beforeGenericTemplateOveruseCount: typeof beforeLive.genericTemplateOveruseCount === "number"
+      ? beforeLive.genericTemplateOveruseCount
+      : 0,
+    liveGenericTemplateOveruseCount: typeof afterLive.genericTemplateOveruseCount === "number"
+      ? afterLive.genericTemplateOveruseCount
+      : 0,
+    exactLineOveruseCount: typeof afterLive.exactLineOveruseCount === "number"
+      ? afterLive.exactLineOveruseCount
+      : 0,
+    nearDuplicateLineOveruseCount: typeof afterLive.nearDuplicateLineOveruseCount === "number"
+      ? afterLive.nearDuplicateLineOveruseCount
+      : 0,
+    humanReviewCompleted: asBoolean(review.humanReviewCompleted),
+    dbMutationPerformed: asBoolean(mutationBoundary.dbMutationPerformed),
+    shareSessionCreated: asBoolean(mutationBoundary.shareSessionCreated),
+    providerDispatchCalled: asBoolean(mutationBoundary.providerDispatchCalled),
+    exactSavedShareReproduced: asBoolean(mutationBoundary.exactSavedShareReproduced),
+    exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
   };
 }
 
@@ -1083,6 +1121,10 @@ export function buildNorthstarNextRunway(options) {
   const liveDocumentWordingReview = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentWordingReview);
   const liveDocumentBroadReview = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentBroadReview);
   const liveDocumentEditorialReview = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentEditorialReview);
+  const liveDocumentEditorialDuplicateClassification = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.liveDocumentEditorialDuplicateClassification,
+  );
   const productCapabilityTruth = readOptionalJson(options.rootDir, ARTIFACTS.productCapabilityTruth);
   const liveDocumentSecondaryGrounding = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
   const liveDocumentSeedProfileIsolation = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSeedProfileIsolation);
@@ -1200,6 +1242,9 @@ export function buildNorthstarNextRunway(options) {
     liveDocumentWordingReview: liveDocumentWordingReviewSummary(liveDocumentWordingReview),
     liveDocumentBroadReview: liveDocumentBroadReviewSummary(liveDocumentBroadReview),
     liveDocumentEditorialReview: liveDocumentEditorialReviewSummary(liveDocumentEditorialReview),
+    liveDocumentEditorialDuplicateClassification: liveDocumentEditorialDuplicateClassificationSummary(
+      liveDocumentEditorialDuplicateClassification,
+    ),
     productCapabilityTruth: productCapabilityTruthSummary(productCapabilityTruth),
     liveDocumentSecondaryGrounding: liveDocumentSecondaryGroundingSummary(liveDocumentSecondaryGrounding),
     liveDocumentSeedProfileIsolation: liveDocumentSeedProfileIsolationSummary(liveDocumentSeedProfileIsolation),
@@ -1317,6 +1362,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Live synthetic wording and field usability are measured separately: \`${report.liveDocumentWordingReview.verdict || "missing"}\`, live scenarios passed \`${report.liveDocumentWordingReview.livePassed ?? 0}/5\`, live pending \`${report.liveDocumentWordingReview.liveAfterDeploymentPending === true}\`. This gate catches fixed-profile field leakage and selected-document wording defects, while broad human review and exact saved Share evidence remain separate.
 - Live 12-deliverable presence and applicability are measured separately: \`${report.liveDocumentBroadReview.verdict || "missing"}\`, UI/integrity/reviewed documents \`${report.liveDocumentBroadReview.uiDocumentCount ?? 0}/${report.liveDocumentBroadReview.integrityRequiredCount ?? 0}/${report.liveDocumentBroadReview.reviewedDocumentCount ?? 0}\`, before missingUnexpected \`${report.liveDocumentBroadReview.beforeMissingUnexpected ?? 0}\`, live missingUnexpected \`${report.liveDocumentBroadReview.liveMissingUnexpected ?? 0}\`, and workPermitDraft presentNonEmpty \`${report.liveDocumentBroadReview.workPermitPresentNonEmpty ?? 0}/5\`. The six-document synthetic wording gate is not accepted as 12-document deliverable coverage; exact saved Share remains \`${report.liveDocumentBroadReview.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live 12-deliverable automated editorial quality is measured separately: \`${report.liveDocumentEditorialReview.verdict || "missing"}\`, live scenarios \`${report.liveDocumentEditorialReview.livePassed ?? 0}/${report.liveDocumentEditorialReview.scenarioCount ?? 0}\`, reviewed document surface \`${report.liveDocumentEditorialReview.reviewedDocumentSurfaceCount ?? 0}\`, placeholder/legal/awkward/evidence mismatch \`${report.liveDocumentEditorialReview.placeholderFindingCount ?? 0}/${report.liveDocumentEditorialReview.legalOverclaimFindingCount ?? 0}/${report.liveDocumentEditorialReview.awkwardCompositionFindingCount ?? 0}/${report.liveDocumentEditorialReview.evidenceDomainMismatchCount ?? 0}\`, and duplicate findings exact/near \`${report.liveDocumentEditorialReview.exactLineOveruseCount ?? 0}/${report.liveDocumentEditorialReview.nearDuplicateLineOveruseCount ?? 0}\`. This is reviewer-ready automated evidence with humanReviewCompleted=\`${report.liveDocumentEditorialReview.humanReviewCompleted === true}\`, not a combined human PASS; exact saved Share remains \`${report.liveDocumentEditorialReview.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
+- Live editorial duplicate classification is measured separately: \`${report.liveDocumentEditorialDuplicateClassification.verdict || "missing"}\`, generic template overuse \`${report.liveDocumentEditorialDuplicateClassification.beforeGenericTemplateOveruseCount ?? 0}->${report.liveDocumentEditorialDuplicateClassification.liveGenericTemplateOveruseCount ?? 0}\`, retained reviewer findings exact/near \`${report.liveDocumentEditorialDuplicateClassification.exactLineOveruseCount ?? 0}/${report.liveDocumentEditorialDuplicateClassification.nearDuplicateLineOveruseCount ?? 0}\`, and humanReviewCompleted=\`${report.liveDocumentEditorialDuplicateClassification.humanReviewCompleted === true}\`. Only generic template overuse fails automatically; safety-control and legal-reference repetition remains visible, and exact saved Share remains \`${report.liveDocumentEditorialDuplicateClassification.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live product capability truth is measured separately: \`${report.productCapabilityTruth.verdict || "missing"}\`; manual/provider dispatch is \`${report.productCapabilityTruth.dispatchMode || "unknown"}\` with reason \`${report.productCapabilityTruth.dispatchReason || "unknown"}\`, scheduled briefing email ready=\`${report.productCapabilityTruth.briefingEmailReady === true}\`, photo Vision/OCR ready/accepted-only=\`${report.productCapabilityTruth.photoVisionReady === true}/${report.productCapabilityTruth.photoAcceptedOnly === true}\`, and AI modes are \`${report.productCapabilityTruth.aiModes?.join(", ") || "missing"}\`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains \`${report.productCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}\` and Documents/Share IA remains \`${report.productCapabilityTruth.documentsShareIaVerdict || "OPEN_SEPARATE_VIEWPORT_IA_WAVE"}\`.
 - Live supporting-document scenario grounding is measured separately: \`${report.liveDocumentSecondaryGrounding.verdict || "missing"}\`, live cases \`${report.liveDocumentSecondaryGrounding.livePassed ?? 0}/5\`, supporting documents \`${report.liveDocumentSecondaryGrounding.secondaryPassed ?? 0}/${report.liveDocumentSecondaryGrounding.secondaryReviewed ?? 0}\`, cross-scenario leakage \`${report.liveDocumentSecondaryGrounding.crossScenarioLeakageCount ?? 0}\`, and missingUnexpected \`${report.liveDocumentSecondaryGrounding.missingUnexpectedCount ?? 0}\`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains \`${report.liveDocumentSecondaryGrounding.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live document seed-profile isolation is measured separately: \`${report.liveDocumentSeedProfileIsolation.verdict || "missing"}\`, before forbidden fragments \`${report.liveDocumentSeedProfileIsolation.beforeSeedProfileLeakageCount ?? 0}\`, live forbidden fragments \`${report.liveDocumentSeedProfileIsolation.liveSeedProfileLeakageCount ?? 0}\`, reviewed document surface \`${report.liveDocumentSeedProfileIsolation.reviewedDocumentSurfaceCount ?? 0}\`, and secondary grounding \`${report.liveDocumentSeedProfileIsolation.secondaryGroundingPassed ?? 0}/${report.liveDocumentSeedProfileIsolation.secondaryGroundingReviewed ?? 0}\`. This deterministic gate does not replace broad human wording review or exact saved Share evidence; exact saved Share remains \`${report.liveDocumentSeedProfileIsolation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.

@@ -327,6 +327,34 @@ function createFixtureRoot(): string {
       exactSavedShareReproduced: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_EDITORIAL_DUPLICATE_CLASSIFICATION_REVIEWER_READY",
+    productCommit: "fixture-product-sha",
+    productionCommit: "fixture-sha",
+    canonicalDocumentCount: 12,
+    caseCount: 5,
+    reviewedDocumentSurfaceCount: 60,
+    humanReviewCompleted: false,
+    beforeLive: { pass: 1, fail: 4, genericTemplateOveruseCount: 4 },
+    afterLive: {
+      sourceHead: "fixture-sha",
+      pass: 5,
+      fail: 0,
+      genericTemplateOveruseCount: 0,
+      exactLineOveruseCount: 31,
+      nearDuplicateLineOveruseCount: 100,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      broadHumanWordingReviewRequired: true,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH",
     sourceHead: "fixture-sha",
@@ -1738,7 +1766,9 @@ describe("northstar open gate audit", () => {
       evidencePath: path.join("evaluation", "live-document-editorial-review-2026-07-25", "report.json"),
     });
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("all 60 canonical document surfaces");
-    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("Exact repeated-line groups=38");
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("generic-template overuse 4->0");
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("exact=31");
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("near=100");
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("humanReviewCompleted=false");
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")).toMatchObject({
@@ -1993,6 +2023,34 @@ describe("northstar open gate audit", () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("humanReviewCompleted=true");
+  });
+
+  it("fails the editorial gate closed when live generic template overuse returns", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "live-document-editorial-duplicate-classification-2026-07-25",
+      "report.json",
+    );
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      afterLive: { genericTemplateOveruseCount: number };
+    };
+    report.afterLive.genericTemplateOveruseCount = 1;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.overall).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("generic=1");
   });
 
   it("fails product capability truth closed when a provider call is claimed", async () => {

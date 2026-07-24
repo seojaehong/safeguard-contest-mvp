@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-24T22:45:35.370Z
-Source HEAD at generation: c3672b1346e03378318089448595a6dc6fe53077
-Live commit at generation: c3672b1346e03378318089448595a6dc6fe53077
+Generated at: 2026-07-24T23:19:06.118Z
+Source HEAD at generation: 715029f2364e8a547390c1e1105597f32e1fe911
+Live commit at generation: 715029f2364e8a547390c1e1105597f32e1fe911
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -73,6 +73,15 @@ Overall: `northstar_open_approval_gated`
 - DB mutation: false; Share session created: false; provider dispatch: false
 - Exact saved Share: MISSING_EVIDENCE; reproduced=false
 - Boundary: this automated reviewer-ready contract does not combine the six-core wording and 12-deliverable presence gates into completed human review.
+
+## Live Editorial Duplicate Classification
+
+- Verdict: `PASS_LIVE_PRODUCTION_EDITORIAL_DUPLICATE_CLASSIFICATION_REVIEWER_READY`
+- Generic template overuse: 4->0
+- Reviewer findings retained: exact=31, near=100; human review completed=false
+- DB mutation: false; Share session created: false; provider dispatch: false
+- Exact saved Share: MISSING_EVIDENCE; reproduced=false
+- Boundary: only generic template overuse fails automatically; safety-control and legal-reference repetition remains reviewer-visible.
 
 ## Live Product Capability Truth
 
@@ -149,6 +158,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_wording_review | ancestor | ancestor_of_head | evaluation\live-document-wording-review-2026-07-24\report.json |
 | live_document_broad_review | ancestor | ancestor_of_head | evaluation\live-document-broad-review-2026-07-25\report.json |
 | live_document_editorial_review | missing | ancestor_of_head | evaluation\live-document-editorial-review-2026-07-25\report.json |
+| live_document_editorial_duplicate_classification | exact | matches_live | evaluation\live-document-editorial-duplicate-classification-2026-07-25\report.json |
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |
 | live_document_secondary_grounding | ancestor | ancestor_of_head | evaluation\live-document-secondary-grounding-2026-07-25\report.json |
 | live_document_seed_profile_isolation | ancestor | ancestor_of_head | evaluation\live-document-seed-profile-isolation-2026-07-25\report.json |

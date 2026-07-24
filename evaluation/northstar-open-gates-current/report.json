@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-24T22:45:34.567Z",
-  "sourceSha": "c3672b1346e03378318089448595a6dc6fe53077",
+  "generatedAt": "2026-07-24T23:18:32.651Z",
+  "sourceSha": "715029f2364e8a547390c1e1105597f32e1fe911",
   "overall": "open",
   "gates": [
     {
@@ -100,7 +100,7 @@
       "state": "proven",
       "label": "Live 12-deliverable editorial contract review",
       "evidencePath": "evaluation\\live-document-editorial-review-2026-07-25\\report.json",
-      "detail": "Five live production scenarios and all 60 canonical document surfaces pass the automated editorial contract: placeholder=0, legal overclaim=0, awkward composition 20->0, and evidence-domain mismatch 1->0. Exact repeated-line groups=38 and near-duplicate pairs=100 remain visible human-review findings. humanReviewCompleted=false, the six-core wording and 12-presence gates are not combined as a human PASS, no DB/share/provider mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Five live production scenarios and all 60 canonical document surfaces pass the automated editorial contract: placeholder=0, legal overclaim=0, awkward composition 20->0, and evidence-domain mismatch 1->0. The companion duplicate classifier reduces generic-template overuse 4->0 while retaining exact=31 and near=100 reviewer findings. humanReviewCompleted=false, the six-core wording and 12-presence gates are not combined as a human PASS, no DB/share/provider mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Perform a separate human editorial review for the recorded duplicate-line findings.",
         "Keep Documents/Share viewport IA and exact saved Share geometry as separate product/evidence boundaries."

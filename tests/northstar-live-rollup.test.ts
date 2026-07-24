@@ -103,6 +103,16 @@ type RollupReport = {
     exactSavedShareReproduced: boolean;
     exactSavedShareVerdict: string;
   };
+  liveDocumentEditorialDuplicateClassification: {
+    verdict: string;
+    reviewedDocumentSurfaceCount: number;
+    beforeGenericTemplateOveruseCount: number;
+    liveGenericTemplateOveruseCount: number;
+    exactLineOveruseCount: number;
+    nearDuplicateLineOveruseCount: number;
+    humanReviewCompleted: boolean;
+    exactSavedShareVerdict: string;
+  };
   productCapabilityTruth: {
     verdict: string;
     dispatchMode: string;
@@ -375,6 +385,34 @@ function createFixtureRoot(): { root: string; head: string } {
       exactSavedShareReproduced: false,
     },
   });
+  writeJson(root, "evaluation/live-document-editorial-duplicate-classification-2026-07-25/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_EDITORIAL_DUPLICATE_CLASSIFICATION_REVIEWER_READY",
+    productCommit: "TO_FILL",
+    productionCommit: "TO_FILL",
+    canonicalDocumentCount: 12,
+    caseCount: 5,
+    reviewedDocumentSurfaceCount: 60,
+    humanReviewCompleted: false,
+    beforeLive: { pass: 1, fail: 4, genericTemplateOveruseCount: 4 },
+    afterLive: {
+      sourceHead: "TO_FILL",
+      pass: 5,
+      fail: 0,
+      genericTemplateOveruseCount: 0,
+      exactLineOveruseCount: 31,
+      nearDuplicateLineOveruseCount: 100,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      broadHumanWordingReviewRequired: true,
+    },
+  });
   writeJson(root, "evaluation/product-capability-truth-2026-07-25/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH",
     sourceHead: "TO_FILL",
@@ -527,6 +565,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-document-wording-review-2026-07-24/report.json",
     "evaluation/live-document-broad-review-2026-07-25/report.json",
     "evaluation/live-document-editorial-review-2026-07-25/report.json",
+    "evaluation/live-document-editorial-duplicate-classification-2026-07-25/report.json",
     "evaluation/product-capability-truth-2026-07-25/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
     "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json",
@@ -648,6 +687,16 @@ describe("northstar live rollup", () => {
       shareSessionCreated: false,
       providerDispatchCalled: false,
       exactSavedShareReproduced: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.liveDocumentEditorialDuplicateClassification).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_EDITORIAL_DUPLICATE_CLASSIFICATION_REVIEWER_READY",
+      reviewedDocumentSurfaceCount: 60,
+      beforeGenericTemplateOveruseCount: 4,
+      liveGenericTemplateOveruseCount: 0,
+      exactLineOveruseCount: 31,
+      nearDuplicateLineOveruseCount: 100,
+      humanReviewCompleted: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.evidence.find((item) => item.id === "live_document_editorial_review")?.productionStatus).toBe("ancestor_of_head");

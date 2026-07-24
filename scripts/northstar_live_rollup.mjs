@@ -25,6 +25,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
   liveDocumentEditorialReview: path.join("evaluation", "live-document-editorial-review-2026-07-25", "report.json"),
+  liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
@@ -309,6 +310,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const liveDocumentWordingReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentWordingReview);
   const liveDocumentBroadReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentBroadReview);
   const liveDocumentEditorialReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialReview);
+  const liveDocumentEditorialDuplicateClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialDuplicateClassification);
   const productCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.productCapabilityTruth);
   const liveDocumentSecondaryGrounding = tryReadJson(rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
   const liveDocumentSeedProfileIsolation = tryReadJson(rootDir, ARTIFACTS.liveDocumentSeedProfileIsolation);
@@ -387,6 +389,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_wording_review", ARTIFACTS.liveDocumentWordingReview, liveDocumentWordingReview),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_broad_review", ARTIFACTS.liveDocumentBroadReview, liveDocumentBroadReview),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_review", ARTIFACTS.liveDocumentEditorialReview, liveDocumentEditorialReview),
+    evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_duplicate_classification", ARTIFACTS.liveDocumentEditorialDuplicateClassification, liveDocumentEditorialDuplicateClassification),
     evidenceStatus(rootDir, currentHead, liveCommit, "product_capability_truth", ARTIFACTS.productCapabilityTruth, productCapabilityTruth),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_secondary_grounding", ARTIFACTS.liveDocumentSecondaryGrounding, liveDocumentSecondaryGrounding),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_seed_profile_isolation", ARTIFACTS.liveDocumentSeedProfileIsolation, liveDocumentSeedProfileIsolation),
@@ -579,6 +582,27 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       exactSavedShareReproduced: recordAt(liveDocumentEditorialReview, "mutationBoundary")?.exactSavedShareReproduced === true,
       exactSavedShareVerdict: asString(recordAt(liveDocumentEditorialReview, "evidenceBoundary")?.exactSavedShareVerdict),
     },
+    liveDocumentEditorialDuplicateClassification: {
+      artifact: ARTIFACTS.liveDocumentEditorialDuplicateClassification,
+      verdict: isRecord(liveDocumentEditorialDuplicateClassification)
+        ? asString(liveDocumentEditorialDuplicateClassification.verdict)
+        : "missing",
+      productCommit: isRecord(liveDocumentEditorialDuplicateClassification)
+        ? asString(liveDocumentEditorialDuplicateClassification.productCommit)
+        : "",
+      productionCommit: extractProductionCommit(liveDocumentEditorialDuplicateClassification),
+      reviewedDocumentSurfaceCount: asNumber(liveDocumentEditorialDuplicateClassification?.reviewedDocumentSurfaceCount),
+      beforeGenericTemplateOveruseCount: asNumber(recordAt(liveDocumentEditorialDuplicateClassification, "beforeLive")?.genericTemplateOveruseCount),
+      liveGenericTemplateOveruseCount: asNumber(recordAt(liveDocumentEditorialDuplicateClassification, "afterLive")?.genericTemplateOveruseCount),
+      exactLineOveruseCount: asNumber(recordAt(liveDocumentEditorialDuplicateClassification, "afterLive")?.exactLineOveruseCount),
+      nearDuplicateLineOveruseCount: asNumber(recordAt(liveDocumentEditorialDuplicateClassification, "afterLive")?.nearDuplicateLineOveruseCount),
+      humanReviewCompleted: liveDocumentEditorialDuplicateClassification?.humanReviewCompleted === true,
+      dbMutationPerformed: recordAt(liveDocumentEditorialDuplicateClassification, "mutationBoundary")?.dbMutationPerformed === true,
+      shareSessionCreated: recordAt(liveDocumentEditorialDuplicateClassification, "mutationBoundary")?.shareSessionCreated === true,
+      providerDispatchCalled: recordAt(liveDocumentEditorialDuplicateClassification, "mutationBoundary")?.providerDispatchCalled === true,
+      exactSavedShareReproduced: recordAt(liveDocumentEditorialDuplicateClassification, "mutationBoundary")?.exactSavedShareReproduced === true,
+      exactSavedShareVerdict: asString(recordAt(liveDocumentEditorialDuplicateClassification, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
     productCapabilityTruth: {
       artifact: ARTIFACTS.productCapabilityTruth,
       verdict: isRecord(productCapabilityTruth) ? asString(productCapabilityTruth.verdict) : "missing",
@@ -760,6 +784,15 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- DB mutation: ${rollup.liveDocumentEditorialReview.dbMutationPerformed}; Share session created: ${rollup.liveDocumentEditorialReview.shareSessionCreated}; provider dispatch: ${rollup.liveDocumentEditorialReview.providerDispatchCalled}`,
     `- Exact saved Share: ${rollup.liveDocumentEditorialReview.exactSavedShareVerdict || "MISSING_EVIDENCE"}; reproduced=${rollup.liveDocumentEditorialReview.exactSavedShareReproduced}`,
     "- Boundary: this automated reviewer-ready contract does not combine the six-core wording and 12-deliverable presence gates into completed human review.",
+    "",
+    "## Live Editorial Duplicate Classification",
+    "",
+    `- Verdict: \`${rollup.liveDocumentEditorialDuplicateClassification.verdict}\``,
+    `- Generic template overuse: ${rollup.liveDocumentEditorialDuplicateClassification.beforeGenericTemplateOveruseCount}->${rollup.liveDocumentEditorialDuplicateClassification.liveGenericTemplateOveruseCount}`,
+    `- Reviewer findings retained: exact=${rollup.liveDocumentEditorialDuplicateClassification.exactLineOveruseCount}, near=${rollup.liveDocumentEditorialDuplicateClassification.nearDuplicateLineOveruseCount}; human review completed=${rollup.liveDocumentEditorialDuplicateClassification.humanReviewCompleted}`,
+    `- DB mutation: ${rollup.liveDocumentEditorialDuplicateClassification.dbMutationPerformed}; Share session created: ${rollup.liveDocumentEditorialDuplicateClassification.shareSessionCreated}; provider dispatch: ${rollup.liveDocumentEditorialDuplicateClassification.providerDispatchCalled}`,
+    `- Exact saved Share: ${rollup.liveDocumentEditorialDuplicateClassification.exactSavedShareVerdict || "MISSING_EVIDENCE"}; reproduced=${rollup.liveDocumentEditorialDuplicateClassification.exactSavedShareReproduced}`,
+    "- Boundary: only generic template overuse fails automatically; safety-control and legal-reference repetition remains reviewer-visible.",
     "",
     "## Live Product Capability Truth",
     "",

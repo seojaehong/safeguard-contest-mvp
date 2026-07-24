@@ -149,6 +149,16 @@ type NextRunwayReport = {
     humanReviewCompleted: boolean;
     exactSavedShareVerdict: string;
   };
+  liveDocumentEditorialDuplicateClassification: {
+    verdict: string;
+    reviewedDocumentSurfaceCount: number;
+    beforeGenericTemplateOveruseCount: number;
+    liveGenericTemplateOveruseCount: number;
+    exactLineOveruseCount: number;
+    nearDuplicateLineOveruseCount: number;
+    humanReviewCompleted: boolean;
+    exactSavedShareVerdict: string;
+  };
   productCapabilityTruth: {
     verdict: string;
     dispatchMode: string;
@@ -791,6 +801,34 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       shareSessionCreated: false,
       providerDispatchCalled: false,
       exactSavedShareReproduced: false,
+    },
+  });
+  writeJson(root, "evaluation/live-document-editorial-duplicate-classification-2026-07-25/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_EDITORIAL_DUPLICATE_CLASSIFICATION_REVIEWER_READY",
+    productCommit: "TO_FILL",
+    productionCommit: "TO_FILL",
+    canonicalDocumentCount: 12,
+    caseCount: 5,
+    reviewedDocumentSurfaceCount: 60,
+    humanReviewCompleted: false,
+    beforeLive: { pass: 1, fail: 4, genericTemplateOveruseCount: 4 },
+    afterLive: {
+      sourceHead: "TO_FILL",
+      pass: 5,
+      fail: 0,
+      genericTemplateOveruseCount: 0,
+      exactLineOveruseCount: 31,
+      nearDuplicateLineOveruseCount: 100,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      broadHumanWordingReviewRequired: true,
     },
   });
   writeJson(root, "evaluation/product-capability-truth-2026-07-25/report.json", {
@@ -1442,6 +1480,16 @@ describe("northstar next runway generator", () => {
       awkwardCompositionFindingCount: 0,
       evidenceDomainMismatchCount: 0,
       exactLineOveruseCount: 38,
+      nearDuplicateLineOveruseCount: 100,
+      humanReviewCompleted: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.liveDocumentEditorialDuplicateClassification).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_EDITORIAL_DUPLICATE_CLASSIFICATION_REVIEWER_READY",
+      reviewedDocumentSurfaceCount: 60,
+      beforeGenericTemplateOveruseCount: 4,
+      liveGenericTemplateOveruseCount: 0,
+      exactLineOveruseCount: 31,
       nearDuplicateLineOveruseCount: 100,
       humanReviewCompleted: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
