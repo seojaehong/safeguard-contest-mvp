@@ -22184,6 +22184,26 @@ body:has(.safeclaw-landing) :is(
     gap: 6px;
   }
 
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="document-section-index"] {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: thin;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="document-section-index"] button {
+    flex: 0 0 118px;
+    min-height: 36px;
+    padding: 4px 7px;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="document-section-index"] button strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="document-section-accordion"] > summary {
     min-height: 36px;
   }

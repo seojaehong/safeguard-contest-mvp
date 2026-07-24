@@ -448,13 +448,17 @@ describe("documents editor layout", () => {
       const metrics = await page.evaluate(() => {
         const shell = document.querySelector<HTMLElement>(".workpack-shell");
         const actions = document.querySelector<HTMLElement>('[data-testid="document-section-actions"]');
+        const sectionIndex = document.querySelector<HTMLElement>('[data-testid="document-section-index"]');
         const sectionDetails = document.querySelectorAll('[data-testid="document-section-detail"]');
         const sectionTextareas = document.querySelectorAll(".document-section-textarea");
-        if (!shell || !actions) throw new Error("Selected section cockpit is unavailable");
+        if (!shell || !actions || !sectionIndex) throw new Error("Selected section cockpit is unavailable");
         return {
           viewportHeight: window.innerHeight,
           shellBottom: Math.round(shell.getBoundingClientRect().bottom),
           actionBottom: Math.round(actions.getBoundingClientRect().bottom),
+          sectionIndexDisplay: window.getComputedStyle(sectionIndex).display,
+          sectionIndexClientWidth: sectionIndex.clientWidth,
+          sectionIndexScrollWidth: sectionIndex.scrollWidth,
           sectionDetailCount: sectionDetails.length,
           sectionTextareaCount: sectionTextareas.length,
           horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth
@@ -463,6 +467,10 @@ describe("documents editor layout", () => {
 
       expect(metrics.actionBottom).toBeLessThanOrEqual(metrics.viewportHeight);
       expect(metrics.actionBottom).toBeLessThanOrEqual(metrics.shellBottom);
+      expect(metrics.sectionIndexDisplay).toBe("flex");
+      if (viewport.width === 390) {
+        expect(metrics.sectionIndexScrollWidth).toBeGreaterThan(metrics.sectionIndexClientWidth);
+      }
       expect(metrics.sectionDetailCount).toBe(1);
       expect(metrics.sectionTextareaCount).toBe(1);
       expect(metrics.horizontalOverflow).toBe(false);
