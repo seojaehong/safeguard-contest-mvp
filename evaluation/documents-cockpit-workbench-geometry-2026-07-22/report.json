@@ -1,19 +1,19 @@
 {
   "schemaVersion": "safeclaw-documents-cockpit-workbench-geometry/v2",
-  "checkedAt": "2026-07-24T20:06:18.067Z",
-  "sourceHead": "24638e425fcf44a339ad9cf310b2f9fb6c0fdf9e",
+  "checkedAt": "2026-07-24T20:31:11.875Z",
+  "sourceHead": "f9a56f1e958814a0f7d27ab81a6d829c7184be7f",
   "baseUrl": "https://www.safeclaw.kr",
   "productionBuild": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "2444b44b4e42a2b442b64b856104b1d93c7e21b7",
+    "commitSha": "f9a56f1e958814a0f7d27ab81a6d829c7184be7f",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-gsgwwegrm-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-kdkiamrkj-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "sourceHeadMatchesProduction": false,
+  "sourceHeadMatchesProduction": true,
   "verdict": "PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH",
   "staleDevRedExplained": true,
   "staleDevRedExplanation": "A sibling probe initially reported block/one-column geometry from a stale dev/HMR server. This gate records the clean local production geometry after rebuild/restart and directly measures the workbench display, column count, and editor-vs-launcher alignment.",
@@ -59,6 +59,11 @@
         "firstActionTop": 273,
         "firstActionBottom": 317,
         "coreButtons": 3,
+        "uniqueDocumentKeyCount": 12,
+        "visibleDocumentButtonCount": 3,
+        "supportingButtonCount": 9,
+        "visibleSupportingButtonCount": 0,
+        "legacyIndexDisplay": "none",
         "detailsOpen": false
       },
       "verdicts": {
@@ -107,6 +112,11 @@
         "firstActionTop": 498,
         "firstActionBottom": 534,
         "coreButtons": 3,
+        "uniqueDocumentKeyCount": 12,
+        "visibleDocumentButtonCount": 3,
+        "supportingButtonCount": 9,
+        "visibleSupportingButtonCount": 0,
+        "legacyIndexDisplay": "none",
         "detailsOpen": false
       },
       "verdicts": {
