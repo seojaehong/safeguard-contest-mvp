@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-24T13:42:01.349Z",
-  "sourceSha": "c157ec5b09073d7543d09c4b8c3d0015c6ef45c6",
+  "generatedAt": "2026-07-24T14:18:21.323Z",
+  "sourceSha": "2fe85e2d3317773bb6ce0de9b9f19a22c31377a4",
   "overall": "open",
   "gates": [
     {
@@ -42,6 +42,16 @@
       "detail": "Five live production scenarios pass the measured document-quality matrix: structured risk rows are present, current/additional controls remain distinct, foreign-worker briefing stays scenario-relevant, and no DB/share-session/provider mutation occurred. This scoped matrix does not replace broad human wording review.",
       "nextActions": [
         "Keep broad wording, concision, and field-usability review as a separate human-review boundary beyond the measured five-scenario matrix."
+      ]
+    },
+    {
+      "id": "live_document_quality_stress_matrix",
+      "state": "proven",
+      "label": "Live high-risk document quality stress matrix",
+      "evidencePath": "evaluation\\live-document-quality-stress-matrix-2026-07-24\\report.json",
+      "detail": "Five live production stress scenarios preserve SDS/GHS identity, simultaneous-work separation, vulnerable-worker communication, KOSHA guidance boundaries, and overnight handover/re-energization controls. No DB/share-session/provider mutation occurred; broad human wording review remains separate.",
+      "nextActions": [
+        "Keep the unchanged stress contracts in the release gate and preserve broad human wording review as a separate boundary."
       ]
     },
     {

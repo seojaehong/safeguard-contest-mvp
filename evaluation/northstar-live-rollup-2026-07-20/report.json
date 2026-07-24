@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-24T13:42:01.868Z",
-  "head": "c157ec5b09073d7543d09c4b8c3d0015c6ef45c6",
+  "generatedAt": "2026-07-24T14:18:17.792Z",
+  "head": "2fe85e2d3317773bb6ce0de9b9f19a22c31377a4",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "74d7fe3c13c5f757b0feec67760438a83ad5cc77",
+    "commitSha": "e7c4d9fcf68d54dac534c9f89d130a0ae16158c3",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-66ahyzxsn-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-9ig0akrlq-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 15
+    "gateCount": 16
   },
   "provenGates": [
     {
@@ -44,6 +44,12 @@
       "state": "proven",
       "artifact": "evaluation\\live-document-quality-matrix-2026-07-24\\report.json",
       "detail": "Five live production scenarios pass the measured document-quality matrix: structured risk rows are present, current/additional controls remain distinct, foreign-worker briefing stays scenario-relevant, and no DB/share-session/provider mutation occurred. This scoped matrix does not replace broad human wording review."
+    },
+    {
+      "id": "live_document_quality_stress_matrix",
+      "state": "proven",
+      "artifact": "evaluation\\live-document-quality-stress-matrix-2026-07-24\\report.json",
+      "detail": "Five live production stress scenarios preserve SDS/GHS identity, simultaneous-work separation, vulnerable-worker communication, KOSHA guidance boundaries, and overnight handover/re-energization controls. No DB/share-session/provider mutation occurred; broad human wording review remains separate."
     },
     {
       "id": "ui_documents_share_cockpit",
@@ -171,6 +177,17 @@
     "dbMutationPerformed": false,
     "providerDispatchLiveClaimed": false
   },
+  "liveDocumentQualityStressMatrix": {
+    "artifact": "evaluation\\live-document-quality-stress-matrix-2026-07-24\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_STRESS_MATRIX",
+    "sourceHead": "6ddf66b58952674be29924064b061a0f6e7e5241",
+    "productionCommit": "fa5aa4de49990dafe12f65ea3488c580e96c157f",
+    "productCommitIncludedInProduction": true,
+    "livePassed": 5,
+    "liveFailed": 0,
+    "dbMutationPerformed": false,
+    "providerDispatchPerformed": false
+  },
   "providerDispatchPersistence": {
     "artifact": "evaluation\\provider-dispatch-idempotency-gate-2026-07-19\\report.json",
     "status": "approval_required",
@@ -224,9 +241,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "c157ec5b09073d7543d09c4b8c3d0015c6ef45c6",
+      "sourceCommit": "2fe85e2d3317773bb6ce0de9b9f19a22c31377a4",
       "sourceStatus": "exact",
-      "productionCommit": "c157ec5b09073d7543d09c4b8c3d0015c6ef45c6",
+      "productionCommit": "2fe85e2d3317773bb6ce0de9b9f19a22c31377a4",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -251,7 +268,15 @@
       "sourceCommit": "74d7fe3c13c5f757b0feec67760438a83ad5cc77",
       "sourceStatus": "ancestor",
       "productionCommit": "74d7fe3c13c5f757b0feec67760438a83ad5cc77",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "live_document_quality_stress_matrix",
+      "artifact": "evaluation\\live-document-quality-stress-matrix-2026-07-24\\report.json",
+      "sourceCommit": "6ddf66b58952674be29924064b061a0f6e7e5241",
+      "sourceStatus": "ancestor",
+      "productionCommit": "fa5aa4de49990dafe12f65ea3488c580e96c157f",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "kosha_exact_trust_registry",

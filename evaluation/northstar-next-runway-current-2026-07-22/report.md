@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `c157ec5b09073d7543d09c4b8c3d0015c6ef45c6`
+Source HEAD: `2fe85e2d3317773bb6ce0de9b9f19a22c31377a4`
 
-Production `/api/build-info`: `74d7fe3c13c5f757b0feec67760438a83ad5cc77`
+Production `/api/build-info`: `e7c4d9fcf68d54dac534c9f89d130a0ae16158c3`
 
 Latest evidence commit live: `false`
 
@@ -14,17 +14,17 @@ Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/live-document-quality-matrix-2026-07-24-after-live/details.json`, `evaluation/live-document-quality-matrix-2026-07-24-after-live/matrix-runner-report.json`, `evaluation/live-document-quality-matrix-2026-07-24-after-live/report.json`, `evaluation/live-document-quality-matrix-2026-07-24-after-local/details.json`, `evaluation/live-document-quality-matrix-2026-07-24-after-local/matrix-runner-report.json`, `evaluation/live-document-quality-matrix-2026-07-24-after-local/report.json`, `evaluation/live-document-quality-matrix-2026-07-24-before-remediation/details.json`, `evaluation/live-document-quality-matrix-2026-07-24-before-remediation/matrix-runner-report.json`, `evaluation/live-document-quality-matrix-2026-07-24-before-remediation/report.json`, `evaluation/live-document-quality-matrix-2026-07-24/report.json`, `evaluation/live-document-quality-matrix-2026-07-24/report.md`, `evaluation/live-document-quality-matrix-2026-07-24/scenarios.json`
+Source pending changed paths: `evaluation/live-document-quality-stress-matrix-2026-07-24/report.json`, `evaluation/live-document-quality-stress-matrix-2026-07-24/report.md`, `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
 
 Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `c157ec5b09073d7543d09c4b8c3d0015c6ef45c6`
+Live rollup source head: `2fe85e2d3317773bb6ce0de9b9f19a22c31377a4`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `c157ec5b09073d7543d09c4b8c3d0015c6ef45c6` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `74d7fe3c13c5f757b0feec67760438a83ad5cc77`, and the live rollup remains exact for that deployed marker.
+Note: current HEAD `2fe85e2d3317773bb6ce0de9b9f19a22c31377a4` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `e7c4d9fcf68d54dac534c9f89d130a0ae16158c3`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -42,6 +42,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Generated Share result fixture cockpit is proven without claiming real provider dispatch.
 - Document quality grounding is proven for the focused contract: `PASS_CURRENT_SOURCE_DOCUMENT_QUALITY_GROUNDING_CONTRACT`, tests passed `135`, SIF/KOSHA/law evidence remains before LLM prose, and KOSHA support is not promoted to statutory mandate. Live model sample excellence remains a separate human-review proof.
 - Live multi-scenario document quality is measured separately: `PASS_LIVE_PRODUCTION_MULTI_SCENARIO_DOCUMENT_QUALITY`, live scenarios passed `5/5`, structured risk controls remain distinct, and foreign-worker briefing stays scenario-relevant. This five-scenario proof does not replace broad human wording review.
+- Live high-risk document quality stress coverage is measured separately: `PASS_LIVE_PRODUCTION_STRESS_MATRIX`, live scenarios passed `5/5`, with product-in-production `true`. This stress proof does not replace broad human wording review or exact saved Share evidence.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level, without claiming live production engine execution.
 - SIF embedding approval preflight is approval-held: no embedding generation, no upload, and vector runtime disabled until approval.
 - North Star approval runway is current and separates runtime/provider/database/vector gates from ordinary UI/evidence iteration.
