@@ -1,0 +1,69 @@
+{
+  "generatedAt": "2026-07-24T18:42:03.761Z",
+  "verdict": "PASS_LIVE_PRODUCTION_12_DELIVERABLE_BROAD_REVIEW",
+  "productCommit": "970dc706caa7576b0d8418e18e175493cef07d1e",
+  "sourceHeadAtLiveReview": "47da015ff501dc8125dbbf215989104a35da3aa7",
+  "productionCommitAtLiveReview": "47da015ff501dc8125dbbf215989104a35da3aa7",
+  "uiDocumentCount": 12,
+  "integrityRequiredCount": 12,
+  "reviewedDocumentCount": 12,
+  "stages": {
+    "beforeRemediation": {
+      "path": "evaluation/live-document-broad-review-2026-07-25/before-remediation/report.json",
+      "sourceHead": "ca9392442f51a11f894aba10e6d0ed4a39c6815b",
+      "productionCommit": "ca9392442f51a11f894aba10e6d0ed4a39c6815b",
+      "total": 5,
+      "pass": 0,
+      "fail": 5,
+      "missingUnexpectedCount": 5,
+      "elapsedMs": 106490
+    },
+    "afterLocal": {
+      "path": "evaluation/live-document-broad-review-2026-07-25/after-local/report.json",
+      "sourceHead": "970dc706caa7576b0d8418e18e175493cef07d1e",
+      "total": 5,
+      "pass": 5,
+      "fail": 0,
+      "missingUnexpectedCount": 0,
+      "elapsedMs": 22416
+    },
+    "afterLive": {
+      "path": "evaluation/live-document-broad-review-2026-07-25/after-live/report.json",
+      "sourceHead": "47da015ff501dc8125dbbf215989104a35da3aa7",
+      "productionCommit": "47da015ff501dc8125dbbf215989104a35da3aa7",
+      "total": 5,
+      "pass": 5,
+      "fail": 0,
+      "missingUnexpectedCount": 0,
+      "elapsedMs": 115575
+    }
+  },
+  "liveDocumentMatrix": [
+    { "key": "workpackSummaryDraft", "presentNonEmpty": 5, "explicitNotApplicable": 0, "missingUnexpected": 0, "pass": 5 },
+    { "key": "riskAssessmentDraft", "presentNonEmpty": 5, "explicitNotApplicable": 0, "missingUnexpected": 0, "pass": 5 },
+    { "key": "workPlanDraft", "presentNonEmpty": 5, "explicitNotApplicable": 0, "missingUnexpected": 0, "pass": 5 },
+    { "key": "workPermitDraft", "presentNonEmpty": 5, "explicitNotApplicable": 0, "missingUnexpected": 0, "pass": 5 },
+    { "key": "tbmBriefing", "presentNonEmpty": 5, "explicitNotApplicable": 0, "missingUnexpected": 0, "pass": 5 },
+    { "key": "tbmLogDraft", "presentNonEmpty": 5, "explicitNotApplicable": 0, "missingUnexpected": 0, "pass": 5 },
+    { "key": "safetyEducationRecordDraft", "presentNonEmpty": 5, "explicitNotApplicable": 0, "missingUnexpected": 0, "pass": 5 },
+    { "key": "emergencyResponseDraft", "presentNonEmpty": 5, "explicitNotApplicable": 0, "missingUnexpected": 0, "pass": 5 },
+    { "key": "photoEvidenceDraft", "presentNonEmpty": 5, "explicitNotApplicable": 0, "missingUnexpected": 0, "pass": 5 },
+    { "key": "foreignWorkerBriefing", "presentNonEmpty": 5, "explicitNotApplicable": 0, "missingUnexpected": 0, "pass": 5 },
+    { "key": "foreignWorkerTransmission", "presentNonEmpty": 5, "explicitNotApplicable": 0, "missingUnexpected": 0, "pass": 5 },
+    { "key": "kakaoMessage", "presentNonEmpty": 5, "explicitNotApplicable": 0, "missingUnexpected": 0, "pass": 5 }
+  ],
+  "workPermitMatrix": [
+    { "caseId": "ulsan-chemical-cleaning-sds__stress", "permitRequired": true, "status": "presentNonEmpty", "charCount": 1194, "missingRequiredTerms": [], "verdict": "PASS" },
+    { "caseId": "pyeongtaek-simultaneous-overhead-hotwork__stress", "permitRequired": true, "status": "presentNonEmpty", "charCount": 1205, "missingRequiredTerms": [], "verdict": "PASS" },
+    { "caseId": "daejeon-vulnerable-night-maintenance__stress", "permitRequired": true, "status": "presentNonEmpty", "charCount": 1268, "missingRequiredTerms": [], "verdict": "PASS" },
+    { "caseId": "gumi-kosha-guidance-boundary__stress", "permitRequired": true, "status": "presentNonEmpty", "charCount": 1249, "missingRequiredTerms": [], "verdict": "PASS" },
+    { "caseId": "jeju-overnight-electrical-repair__stress", "permitRequired": true, "status": "presentNonEmpty", "charCount": 1206, "missingRequiredTerms": [], "verdict": "PASS" }
+  ],
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "exactSavedShareReproduced": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  }
+}
