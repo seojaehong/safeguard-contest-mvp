@@ -21967,6 +21967,17 @@ body:has(.safeclaw-landing) :is(
     padding: 6px 0;
   }
 
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-mode-bar"] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-mode-bar"] [role="group"] {
+    width: auto;
+  }
+
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-document-body"] [class*="structuredEditor"] {
     gap: 6px;
   }
@@ -21985,7 +21996,11 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-secondary-tools"] summary {
+    box-sizing: border-box;
     min-height: 34px;
+    max-height: 44px;
+    overflow: hidden;
+    padding: 4px 8px;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-secondary-tools"] summary small,
@@ -21996,7 +22011,12 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-export-panel"] > summary,
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .submission-preview-panel > summary {
     min-height: 40px;
-    padding-block: 6px;
+    max-height: 44px;
+    padding: 4px 8px;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-secondary-tools"] .submission-preview-panel {
+    grid-column: 1 / -1;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .workpack-sidebar {

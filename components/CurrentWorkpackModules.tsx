@@ -808,6 +808,7 @@ function DocumentCockpit({
   const primaryDocuments = launchDocuments.filter((item) => item.tier === "핵심");
   const remainingDocuments = launchDocuments.filter((item) => item.tier !== "핵심");
   const readyDocumentCount = countLaunchDocuments(data);
+  const remainingDetailsRef = useRef<HTMLDetailsElement>(null);
 
   return (
     <section className="safeclaw-document-cockpit" aria-label="문서팩 운영 요약">
@@ -828,7 +829,11 @@ function DocumentCockpit({
           ))}
         </div>
 
-        <details className="safeclaw-mobile-document-details" data-testid="mobile-document-details">
+        <details
+          ref={remainingDetailsRef}
+          className="safeclaw-mobile-document-details"
+          data-testid="mobile-document-details"
+        >
           <summary>문서 {launchDocuments.length}종 · 제출 정보</summary>
           <div className="safeclaw-mobile-remaining-list">
             {remainingDocuments.map((item) => (
@@ -837,7 +842,10 @@ function DocumentCockpit({
                 type="button"
                 data-document-key={item.key}
                 aria-pressed={selectedDocumentKey === item.key}
-                onClick={() => onSelectDocument(item.key)}
+                onClick={() => {
+                  onSelectDocument(item.key);
+                  if (remainingDetailsRef.current) remainingDetailsRef.current.open = false;
+                }}
               >
                 <small>{item.tier} · {item.owner}</small>
                 <strong>{item.title}</strong>

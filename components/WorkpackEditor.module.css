@@ -485,6 +485,61 @@
   min-width: 0;
 }
 
+.riskRowTabs {
+  display: flex;
+  gap: var(--space-2);
+  min-width: 0;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+}
+
+.riskRowTabs button {
+  display: grid;
+  grid-template-columns: auto minmax(72px, 1fr);
+  align-items: center;
+  gap: 2px var(--space-2);
+  min-width: 132px;
+  max-width: 220px;
+  min-height: 44px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 6px;
+  background: var(--workspace-surface-1);
+  color: var(--workspace-ink);
+  padding: 5px 8px;
+  text-align: left;
+}
+
+.riskRowTabs button[aria-selected="true"] {
+  border-color: var(--workspace-ink);
+  box-shadow: inset 0 -2px 0 var(--workspace-ink);
+}
+
+.riskRowTabs span {
+  color: var(--workspace-subtle);
+  font-family: var(--font-hud);
+  font-size: var(--text-hud);
+  font-weight: 700;
+}
+
+.riskRowTabs strong,
+.riskRowTabs em {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.riskRowTabs strong {
+  font-size: var(--text-caption);
+}
+
+.riskRowTabs em {
+  grid-column: 2;
+  color: var(--workspace-danger, #a83224);
+  font-size: var(--text-hud);
+  font-style: normal;
+}
+
 .riskRowsFieldset {
   min-width: 0;
   margin: 0;
@@ -1439,11 +1494,15 @@
   }
 
   .riskRowsHeader {
-    order: 2;
+    order: 3;
   }
 
   .riskRowsFieldset {
     order: 1;
+  }
+
+  .riskRowTabs {
+    order: 2;
   }
 
   .documentSectionFieldStrip {
@@ -1515,6 +1574,16 @@
 
   .riskRowsList {
     gap: 4px;
+  }
+
+  .riskRowTabs {
+    gap: 4px;
+  }
+
+  .riskRowTabs button {
+    min-width: 112px;
+    min-height: 36px;
+    padding: 3px 6px;
   }
 
   .riskRowsHeader,

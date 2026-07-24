@@ -37,7 +37,10 @@ function verdictFor(metrics) {
     && metrics.coreButtons === 3
     && metrics.detailsOpen === false
     && metrics.visibleSelectedEditorCount === 1
-    && metrics.visibleFullDocumentBodyCount <= 1
+    && metrics.visibleFullDocumentBodyCount === 0
+    && metrics.riskRowSelectorCount >= 1
+    && metrics.mountedRiskRowPanelCount === 1
+    && metrics.editorScrollRatio <= (desktop ? 2.05 : 2.25)
     && metrics.firstActionBottom > 0
     && metrics.firstActionBottom <= metrics.viewportHeight
     && metrics.editorOverflowY === "auto";
@@ -138,6 +141,8 @@ async function measure(page, viewport) {
       editorOverflowY: editor ? getComputedStyle(editor).overflowY : "missing",
       visibleSelectedEditorCount: visibleSelectedEditors.length,
       visibleFullDocumentBodyCount: visibleFullDocumentBodies.length,
+      riskRowSelectorCount: document.querySelectorAll('[data-testid="risk-row-selector"]').length,
+      mountedRiskRowPanelCount: document.querySelectorAll('[data-testid="risk-row-editor-row"]').length,
       firstActionTop: firstActionRect?.top ?? 0,
       firstActionBottom: firstActionRect?.bottom ?? 0,
       coreButtons: coreButtons.length,
@@ -186,7 +191,7 @@ fs.writeFileSync(path.join(outDir, "report.json"), `${JSON.stringify(report, nul
 const tableRows = rows.map((row) => {
   const metrics = row.metrics;
   const verdicts = row.verdicts;
-  return `| ${row.viewport} | ${verdicts.overallVerdict} | ${metrics.bodyHeight} | ${metrics.horizontalOverflow} | ${metrics.workbenchDisplay} | ${metrics.workbenchColumnCount} | ${metrics.workbenchGridTemplateColumns} | ${metrics.launcherTop}-${metrics.launcherBottom} | ${metrics.editorTop}-${metrics.editorBottom} | ${metrics.launcherRight} | ${metrics.editorLeft} | ${metrics.innerNavigatorDisplay}/${metrics.innerNavigatorWidth} | ${metrics.selectedEditorPaneWidth}/${metrics.editorWidth} | ${metrics.visibleSelectedEditorCount} | ${metrics.visibleFullDocumentBodyCount} | ${metrics.firstActionTop}-${metrics.firstActionBottom} | ${metrics.editorClientHeight}/${metrics.editorScrollHeight} (${metrics.editorScrollRatio}) | ${metrics.coreButtons} | ${metrics.detailsOpen} |`;
+  return `| ${row.viewport} | ${verdicts.overallVerdict} | ${metrics.bodyHeight} | ${metrics.horizontalOverflow} | ${metrics.workbenchDisplay} | ${metrics.workbenchColumnCount} | ${metrics.workbenchGridTemplateColumns} | ${metrics.launcherTop}-${metrics.launcherBottom} | ${metrics.editorTop}-${metrics.editorBottom} | ${metrics.launcherRight} | ${metrics.editorLeft} | ${metrics.innerNavigatorDisplay}/${metrics.innerNavigatorWidth} | ${metrics.selectedEditorPaneWidth}/${metrics.editorWidth} | ${metrics.visibleSelectedEditorCount} | ${metrics.visibleFullDocumentBodyCount} | ${metrics.riskRowSelectorCount}/${metrics.mountedRiskRowPanelCount} | ${metrics.firstActionTop}-${metrics.firstActionBottom} | ${metrics.editorClientHeight}/${metrics.editorScrollHeight} (${metrics.editorScrollRatio}) | ${metrics.coreButtons} | ${metrics.detailsOpen} |`;
 }).join("\n");
 
 fs.writeFileSync(path.join(outDir, "report.md"), `# Documents Cockpit Workbench Geometry
@@ -211,8 +216,8 @@ Sibling verification first saw \`display:block\` / one-column geometry from a st
 
 ## Geometry
 
-| Viewport | Overall | Body height | OverflowX | Workbench display | Columns | Column template | Launcher top-bottom | Editor top-bottom | Launcher right | Editor left | Inner nav display/width | Selected pane/editor width | Visible selected editors | Visible full bodies | First action top-bottom | Editor client/scroll (ratio) | Core buttons | Details open |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Viewport | Overall | Body height | OverflowX | Workbench display | Columns | Column template | Launcher top-bottom | Editor top-bottom | Launcher right | Editor left | Inner nav display/width | Selected pane/editor width | Visible selected editors | Visible full bodies | Risk selectors/mounted panels | First action top-bottom | Editor client/scroll (ratio) | Core buttons | Details open |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 ${tableRows}
 
 ## Product Boundary
@@ -239,6 +244,8 @@ console.log(JSON.stringify({
     overflowX: row.metrics.horizontalOverflow,
     visibleSelectedEditors: row.metrics.visibleSelectedEditorCount,
     visibleFullBodies: row.metrics.visibleFullDocumentBodyCount,
+    riskRowSelectors: row.metrics.riskRowSelectorCount,
+    mountedRiskRowPanels: row.metrics.mountedRiskRowPanelCount,
     firstActionBottom: row.metrics.firstActionBottom,
     editorScrollRatio: row.metrics.editorScrollRatio,
   })),

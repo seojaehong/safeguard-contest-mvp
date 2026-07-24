@@ -232,6 +232,8 @@ describe("documents editor layout", () => {
           firstRiskHazardField: rect('[aria-label="행 1 유해·위험요인"]'),
           secondaryTools: rect('[data-testid="editor-secondary-tools"]'),
           workpackShellScrollHeight: document.querySelector<HTMLElement>(".workpack-shell")?.scrollHeight || 0,
+          riskRowSelectorCount: document.querySelectorAll('[data-testid="risk-row-selector"]').length,
+          mountedRiskRowPanelCount: document.querySelectorAll('[data-testid="risk-row-editor-row"]').length,
           defaultOpenSectionCount: Array.from(
             document.querySelectorAll<HTMLDetailsElement>('[data-testid="document-section-accordion"]')
           ).filter((section) => section.open).length,
@@ -288,13 +290,18 @@ describe("documents editor layout", () => {
       }
       expect(metrics.defaultOpenSectionCount).toBe(0);
       expect(metrics.sourceSectionDrawerOpen).toBeNull();
+      expect(metrics.riskRowSelectorCount).toBeGreaterThanOrEqual(1);
+      expect(metrics.mountedRiskRowPanelCount).toBe(1);
+      expect(metrics.workpackShellScrollHeight / metrics.workpackShell.height).toBeLessThanOrEqual(
+        viewport.name === "mobile" ? 2.25 : 2.05
+      );
       if (viewport.name === "mobile") {
         expect(metrics.riskLauncherPressed).toBe("true");
         expect(metrics.firstRiskRowHeader.bottom).toBeLessThan(metrics.workpackShell.bottom);
         expect(metrics.sectionActions.bottom).toBeLessThanOrEqual(760);
         expect(metrics.firstRiskHazardField.top).toBeLessThanOrEqual(metrics.viewportHeight);
         expect(metrics.workpackShellScrollHeight).toBeLessThanOrEqual(1500);
-        expect(metrics.secondaryTools.height).toBeLessThanOrEqual(240);
+        expect(metrics.secondaryTools.height).toBeLessThanOrEqual(150);
         expect(metrics.fieldChipMetrics).toHaveLength(3);
         metrics.fieldChipMetrics.forEach((chip) => {
           expect(chip.width).toBeGreaterThanOrEqual(84);
@@ -401,7 +408,7 @@ describe("documents editor layout", () => {
     ];
 
     for (const documentCase of cases) {
-      await page.locator('select[aria-label="편집 문서 선택"]').selectOption(documentCase.key);
+      await selectDocumentFromWorkbench(page, documentCase.key);
       const editor = page.getByTestId("document-structured-editor");
       await editor.waitFor({ state: "visible" });
       await expect.poll(() => editor.locator('[data-section-kind="body"] summary strong').allTextContents())
@@ -547,9 +554,10 @@ describe("documents editor layout", () => {
     }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
 
     await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
-    await page.getByRole("combobox", { name: "편집 문서 선택" }).selectOption("riskAssessmentDraft");
+    await selectDocumentFromWorkbench(page, "riskAssessmentDraft");
     await page.getByRole("button", { name: "위험 항목" }).click();
-    const secondRow = page.getByTestId("risk-row-editor-row").nth(1);
+    await page.getByTestId("risk-row-selector").nth(1).click();
+    const secondRow = page.getByTestId("risk-row-editor-row");
     await secondRow.getByTestId("risk-row-details").evaluate((element) => {
       (element as HTMLDetailsElement).open = true;
     });
@@ -559,10 +567,15 @@ describe("documents editor layout", () => {
     const describedBy = await page.getByRole("textbox", { name: "행 2 유해·위험요인" }).getAttribute("aria-describedby");
     expect(describedBy).toBeTruthy();
     expect(await page.locator(`#${describedBy}`).isVisible()).toBe(true);
+    await expect.poll(() => page.evaluate((storageKey) => (
+      window.localStorage.getItem(storageKey)?.includes("RELOAD_INCOMPLETE_TASK") ?? false
+    ), CURRENT_WORKPACK_STORAGE_KEY)).toBe(true);
 
     await page.reload({ waitUntil: "networkidle" });
-    await page.getByRole("combobox", { name: "편집 문서 선택" }).selectOption("riskAssessmentDraft");
-    const reloadedSecondRow = page.getByTestId("risk-row-editor-row").nth(1);
+    await selectDocumentFromWorkbench(page, "riskAssessmentDraft");
+    await expect.poll(() => page.getByTestId("risk-row-selector").count()).toBeGreaterThanOrEqual(2);
+    await page.getByTestId("risk-row-selector").nth(1).click();
+    const reloadedSecondRow = page.getByTestId("risk-row-editor-row");
     await reloadedSecondRow.getByTestId("risk-row-details").evaluate((element) => {
       (element as HTMLDetailsElement).open = true;
     });
@@ -615,7 +628,7 @@ describe("documents editor layout", () => {
     }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
 
     await page.goto(`${baseUrl}/documents?theme=night`, { waitUntil: "networkidle" });
-    await page.getByRole("combobox", { name: "편집 문서 선택" }).selectOption("riskAssessmentDraft");
+    await selectDocumentFromWorkbench(page, "riskAssessmentDraft");
     const hazard = page.getByRole("textbox", { name: "행 1 유해·위험요인" });
     await expect.poll(() => hazard.isDisabled()).toBe(true);
     await expect.poll(() => page.getByRole("button", { name: "구조 편집으로 전환" }).isVisible()).toBe(true);
@@ -669,7 +682,7 @@ describe("documents editor layout", () => {
     }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
 
     await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
-    await page.getByRole("combobox", { name: "편집 문서 선택" }).selectOption("riskAssessmentDraft");
+    await selectDocumentFromWorkbench(page, "riskAssessmentDraft");
     const row = page.getByTestId("risk-row-editor-row").first();
     const details = row.getByTestId("risk-row-details");
     await details.locator("summary").click({ force: true });
@@ -1326,7 +1339,7 @@ describe("documents editor layout", () => {
     await summaryButton.click();
     expect(await documentSelect.inputValue()).toBe("workpackSummaryDraft");
     expect(await summaryButton.getAttribute("aria-pressed")).toBe("true");
-    expect(await details.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
+    expect(await details.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(false);
   }, 90_000);
 
   it.each(["day", "night"] as const)(
@@ -1797,7 +1810,7 @@ describe("documents editor layout", () => {
     ] as const;
 
     for (const item of cases) {
-      await documentSelect.selectOption(item.key);
+      await selectDocumentFromWorkbench(page, item.key);
       await expect.poll(async () => documentSelect.inputValue()).toBe(item.key);
       await page.waitForFunction((expectedTitle) => {
         const toolbar = document.querySelector<HTMLElement>(".document-toolbar");
@@ -1886,14 +1899,31 @@ describe("documents editor layout", () => {
     await page.close();
   }, 90_000);
 
+  it("keeps every risk row reachable while mounting only the selected row editor", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 723 } });
+    await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+
+    const selectors = page.getByTestId("risk-row-selector");
+    await expect.poll(() => selectors.count()).toBeGreaterThanOrEqual(2);
+    await expect.poll(() => page.getByTestId("risk-row-editor-row").count()).toBe(1);
+    await expect.poll(() => page.getByRole("textbox", { name: "행 1 유해·위험요인" }).count()).toBe(1);
+
+    await selectors.nth(1).click();
+
+    await expect.poll(() => selectors.nth(1).getAttribute("aria-selected")).toBe("true");
+    await expect.poll(() => page.getByTestId("risk-row-editor-row").count()).toBe(1);
+    await expect.poll(() => page.getByRole("textbox", { name: "행 1 유해·위험요인" }).count()).toBe(0);
+    await expect.poll(() => page.getByRole("textbox", { name: "행 2 유해·위험요인" }).count()).toBe(1);
+  }, 90_000);
+
   it("keeps the editor workspace and expanded tools contained at 390px", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
     await page.locator('[data-testid="workpack-editor-workspace"]').scrollIntoViewIfNeeded();
 
-    const documentSelect = page.locator('select[aria-label="편집 문서 선택"]');
-    await documentSelect.selectOption("tbmBriefing");
+    await selectDocumentFromWorkbench(page, "tbmBriefing");
     await page.locator('[data-testid="editor-provenance-drawer"] > summary').click();
     await page.locator('[data-testid="editor-export-panel"] > summary').click();
 
@@ -1903,7 +1933,6 @@ describe("documents editor layout", () => {
         '[data-testid="workpack-editor-workspace"]',
         '[data-testid="editor-document-body"]',
         '[data-testid="editor-secondary-tools"]',
-        'select[aria-label="편집 문서 선택"]',
         ".document-textarea",
         '[data-testid="editor-evidence-panel"]',
         '[data-testid="editor-quality-panel"]',

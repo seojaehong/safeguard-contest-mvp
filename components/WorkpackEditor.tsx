@@ -2463,15 +2463,16 @@ function RiskAssessmentRowsEditor({
   onRemove: (rowIndex: number) => void;
 }) {
   const rowIdSignature = rowIds.join("\u001f");
-  const [expandedRiskRowIds, setExpandedRiskRowIds] = useState<Set<string>>(() => (
-    new Set(rowIds[0] ? [rowIds[0]] : [])
-  ));
+  const [activeRiskRowIndex, setActiveRiskRowIndex] = useState(0);
+  const selectNewestRowRef = useRef(false);
 
   useEffect(() => {
-    const currentRowIds = new Set(rowIds);
-    setExpandedRiskRowIds((current) => {
-      const retained = Array.from(current).filter((id) => currentRowIds.has(id));
-      return new Set(retained.length ? retained : rowIds[0] ? [rowIds[0]] : []);
+    setActiveRiskRowIndex((current) => {
+      if (selectNewestRowRef.current) {
+        selectNewestRowRef.current = false;
+        return Math.max(0, rowIds.length - 1);
+      }
+      return Math.min(current, Math.max(0, rowIds.length - 1));
     });
   }, [rowIdSignature]);
 
@@ -2496,7 +2497,15 @@ function RiskAssessmentRowsEditor({
             {validation.ok && isCurrent ? "미리보기·내보내기 동기화됨" : "구조행 내보내기 보류 · 필수값 또는 원문 일치 확인"}
           </small>
         </div>
-        <button type="button" className={styles.addRiskRowButton} onClick={onAdd} disabled={isLocked}>
+        <button
+          type="button"
+          className={styles.addRiskRowButton}
+          onClick={() => {
+            selectNewestRowRef.current = true;
+            onAdd();
+          }}
+          disabled={isLocked}
+        >
           <span aria-hidden="true">+</span>
           위험 항목
         </button>
@@ -2509,6 +2518,29 @@ function RiskAssessmentRowsEditor({
         </div>
       ) : null}
 
+      <div className={styles.riskRowTabs} role="tablist" aria-label="위험 항목 선택">
+        {rows.map((row, rowIndex) => {
+          const rowId = rowIds[rowIndex] ?? `risk-row-${rowIndex}`;
+          const rowIssueCount = validation.issues.filter((issue) => issue.rowIndex === rowIndex).length;
+          return (
+            <button
+              key={rowId}
+              type="button"
+              role="tab"
+              data-testid="risk-row-selector"
+              aria-selected={activeRiskRowIndex === rowIndex}
+              aria-controls={`risk-row-panel-${rowId}`}
+              aria-label={`위험 항목 ${rowIndex + 1} 선택: ${row.task || row.hazard || "새 위험 항목"}`}
+              onClick={() => setActiveRiskRowIndex(rowIndex)}
+            >
+              <span>{String(rowIndex + 1).padStart(2, "0")}</span>
+              <strong>{row.task || row.hazard || "새 위험 항목"}</strong>
+              {rowIssueCount ? <em>{rowIssueCount}건 확인</em> : null}
+            </button>
+          );
+        })}
+      </div>
+
       <fieldset
         className={styles.riskRowsFieldset}
         disabled={isLocked}
@@ -2519,25 +2551,21 @@ function RiskAssessmentRowsEditor({
       <div className={styles.riskRowsList}>
         {rows.map((row, rowIndex) => {
           const rowId = rowIds[rowIndex] ?? `risk-row-${rowIndex}`;
+          if (rowIndex !== activeRiskRowIndex) return null;
           const rowIssues = validation.issues.filter((issue) => issue.rowIndex === rowIndex);
-          const isExpanded = rowIssues.length > 0 || expandedRiskRowIds.has(rowId);
           return (
             <details
               className={styles.riskRow}
               key={rowId}
               data-testid="risk-row-editor-row"
-              open={rowIndex === 0 || isExpanded}
-              onToggle={(event) => {
-                const isOpen = event.currentTarget.open;
-                setExpandedRiskRowIds((current) => {
-                  const next = new Set(current);
-                  if (isOpen || rowIssues.length > 0) next.add(rowId);
-                  else next.delete(rowId);
-                  return next;
-                });
-              }}
+              id={`risk-row-panel-${rowId}`}
+              role="tabpanel"
+              open
             >
-              <summary className={styles.riskRowHeader}>
+              <summary
+                className={styles.riskRowHeader}
+                onClick={(event) => event.preventDefault()}
+              >
                 <div>
                   <span>{String(rowIndex + 1).padStart(2, "0")}</span>
                   <strong>{row.task || row.hazard || "새 위험 항목"}</strong>
@@ -2553,6 +2581,7 @@ function RiskAssessmentRowsEditor({
                   onClick={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
+                    setActiveRiskRowIndex(Math.min(rowIndex, Math.max(0, rows.length - 2)));
                     onRemove(rowIndex);
                   }}
                 >
@@ -3137,11 +3166,12 @@ export function WorkpackEditor({
     const actionsRect = sectionActions.getBoundingClientRect();
     const firstRiskRowHeaderRect = firstRiskRowHeader?.getBoundingClientRect();
     const firstRiskHazardFieldRect = firstRiskHazardField?.getBoundingClientRect();
+    const visibleBottom = Math.min(shellRect.bottom, window.innerHeight);
     const overflow = Math.max(
       0,
       actionsRect.bottom - shellRect.bottom,
       firstRiskRowHeaderRect ? firstRiskRowHeaderRect.bottom - window.innerHeight : 0,
-      firstRiskHazardFieldRect ? firstRiskHazardFieldRect.top - window.innerHeight : 0
+      firstRiskHazardFieldRect ? firstRiskHazardFieldRect.bottom - (visibleBottom - 40) : 0
     );
     const topAllowance = Math.max(0, fieldRect.top - visibleTop - 4);
     const additionalScroll = Math.min(overflow, topAllowance);
@@ -3894,7 +3924,7 @@ export function WorkpackEditor({
             </p>
           ) : null}
 
-          <div className={styles.editorModeBar}>
+          <div className={styles.editorModeBar} data-testid="editor-mode-bar">
             <div>
               <span className="eyebrow">문서 유형</span>
               <strong>{structuredDocument.profile.label}</strong>
