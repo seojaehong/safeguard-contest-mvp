@@ -1,6 +1,8 @@
 {
   "generatedAt": "2026-07-24T18:42:03.761Z",
   "verdict": "PASS_LIVE_PRODUCTION_12_DELIVERABLE_BROAD_REVIEW",
+  "sourceHead": "47da015ff501dc8125dbbf215989104a35da3aa7",
+  "productionCommit": "47da015ff501dc8125dbbf215989104a35da3aa7",
   "productCommit": "970dc706caa7576b0d8418e18e175493cef07d1e",
   "sourceHeadAtLiveReview": "47da015ff501dc8125dbbf215989104a35da3aa7",
   "productionCommitAtLiveReview": "47da015ff501dc8125dbbf215989104a35da3aa7",

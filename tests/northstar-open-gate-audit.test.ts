@@ -231,6 +231,39 @@ function createFixtureRoot(): string {
       exactSavedShareReproduced: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_12_DELIVERABLE_BROAD_REVIEW",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    productCommit: "fixture-product",
+    uiDocumentCount: 12,
+    integrityRequiredCount: 12,
+    reviewedDocumentCount: 12,
+    stages: {
+      beforeRemediation: {
+        pass: 0,
+        fail: 5,
+        missingUnexpectedCount: 5,
+      },
+      afterLive: {
+        pass: 5,
+        fail: 0,
+        missingUnexpectedCount: 0,
+      },
+    },
+    workPermitMatrix: Array.from({ length: 5 }, (_, index) => ({
+      caseId: `case-${index + 1}`,
+      status: "presentNonEmpty",
+      verdict: "PASS",
+    })),
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeText(rootDir, path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"), [
     "# Supabase RLS Approval Audit",
     "Status: `approval_required`",
@@ -1433,6 +1466,14 @@ describe("northstar open gate audit", () => {
     });
     expect(audit.gates.find((gate) => gate.id === "live_document_wording_review")?.detail).toContain("fixed-profile location leakage");
     expect(audit.gates.find((gate) => gate.id === "live_document_wording_review")?.detail).toContain("broad human review");
+    expect(audit.gates.find((gate) => gate.id === "live_document_broad_review")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_document_broad_review")?.detail).toContain("uiDocumentCount=12");
+    expect(audit.gates.find((gate) => gate.id === "live_document_broad_review")?.detail).toContain("workPermitDraft presentNonEmpty=5/5");
+    expect(audit.gates.find((gate) => gate.id === "live_document_broad_review")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "live_document_broad_review")?.detail).toContain("six-document synthetic wording gate is not used");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("Scoped first-task cockpit proof only, not full Documents/Share IA completion");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("12 document first-task cockpits");
@@ -1605,6 +1646,32 @@ describe("northstar open gate audit", () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "live_document_wording_review")?.detail).toContain("live=4/5");
+  });
+
+  it("fails the 12-deliverable broad review closed when one work permit is not present", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "live-document-broad-review-2026-07-25", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      workPermitMatrix: Array<{ status: string; verdict: string }>;
+    };
+    report.workPermitMatrix[4] = {
+      status: "missingUnexpected",
+      verdict: "RED",
+    };
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.overall).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "live_document_broad_review")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_document_broad_review")?.detail).toContain("workPermit=4/5");
   });
 
   it("fails evidence completeness when the LLM Wiki publication packet is missing", async () => {

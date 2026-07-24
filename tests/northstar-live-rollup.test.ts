@@ -52,6 +52,24 @@ type RollupReport = {
     dbMutationPerformed: boolean;
     providerDispatchCalled: boolean;
   };
+  liveDocumentBroadReview: {
+    verdict: string;
+    uiDocumentCount: number;
+    integrityRequiredCount: number;
+    reviewedDocumentCount: number;
+    beforePassed: number;
+    beforeFailed: number;
+    beforeMissingUnexpected: number;
+    livePassed: number;
+    liveFailed: number;
+    liveMissingUnexpected: number;
+    workPermitPresentNonEmpty: number;
+    dbMutationPerformed: boolean;
+    shareSessionCreated: boolean;
+    providerDispatchCalled: boolean;
+    exactSavedShareReproduced: boolean;
+    exactSavedShareVerdict: string;
+  };
   evidence: Array<{
     id: string;
     sourceStatus: string;
@@ -89,6 +107,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "live_document_field_isolation", state: "proven", evidencePath: "evaluation/live-document-field-isolation-2026-07-25/report.json", detail: "ten field-isolation scenarios passed" },
       { id: "live_kosha_exact_materialization", state: "proven", evidencePath: "evaluation/live-kosha-exact-materialization-2026-07-25/report.json", detail: "three exact KOSHA pins materialized" },
       { id: "live_document_wording_review", state: "proven", evidencePath: "evaluation/live-document-wording-review-2026-07-24/report.json", detail: "five synthetic wording scenarios passed" },
+      { id: "live_document_broad_review", state: "proven", evidencePath: "evaluation/live-document-broad-review-2026-07-25/report.json", detail: "all 12 deliverables passed" },
       { id: "provider_dispatch_persistence", state: "approval_gated", evidencePath: "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json", detail: "preview only" },
       { id: "supabase_rls_launch_isolation", state: "approval_gated", evidencePath: "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", detail: "approval required" },
       { id: "llm_wiki_publication", state: "approval_gated", evidencePath: "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", detail: "approval required" },
@@ -201,6 +220,31 @@ function createFixtureRoot(): { root: string; head: string } {
       exactSavedShareReproduced: false,
     },
   });
+  writeJson(root, "evaluation/live-document-broad-review-2026-07-25/report.json", {
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    productCommit: "TO_FILL",
+    verdict: "PASS_LIVE_PRODUCTION_12_DELIVERABLE_BROAD_REVIEW",
+    uiDocumentCount: 12,
+    integrityRequiredCount: 12,
+    reviewedDocumentCount: 12,
+    stages: {
+      beforeRemediation: { pass: 0, fail: 5, missingUnexpectedCount: 5 },
+      afterLive: { pass: 5, fail: 0, missingUnexpectedCount: 0 },
+    },
+    workPermitMatrix: Array.from({ length: 5 }, (_, index) => ({
+      caseId: `case-${index + 1}`,
+      status: "presentNonEmpty",
+      verdict: "PASS",
+    })),
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json", {
     sourceSha: "TO_FILL",
     status: "approval_required",
@@ -298,6 +342,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-document-field-isolation-2026-07-25/report.json",
     "evaluation/live-kosha-exact-materialization-2026-07-25/report.json",
     "evaluation/live-document-wording-review-2026-07-24/report.json",
+    "evaluation/live-document-broad-review-2026-07-25/report.json",
     "evaluation/kosha-current-live-gate-2026-07-20/report.json",
     "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json",
     "evaluation/northstar-approval-runway-2026-07-21/report.json",
@@ -380,6 +425,25 @@ describe("northstar live rollup", () => {
       providerDispatchCalled: false,
     });
     expect(report.evidence.find((item) => item.id === "live_document_wording_review")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.liveDocumentBroadReview).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_12_DELIVERABLE_BROAD_REVIEW",
+      uiDocumentCount: 12,
+      integrityRequiredCount: 12,
+      reviewedDocumentCount: 12,
+      beforePassed: 0,
+      beforeFailed: 5,
+      beforeMissingUnexpected: 5,
+      livePassed: 5,
+      liveFailed: 0,
+      liveMissingUnexpected: 0,
+      workPermitPresentNonEmpty: 5,
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "live_document_broad_review")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "open_gate")?.productionStatus).toBe("matches_live");
     expect(report.evidence.find((item) => item.id === "provider_dispatch_persistence")?.sourceStatus).toBe("ancestor");
     expect(report.evidence.find((item) => item.id === "provider_dispatch_persistence")?.productionStatus).toBe("ancestor_of_head");

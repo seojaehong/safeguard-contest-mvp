@@ -88,6 +88,27 @@ type NextRunwayReport = {
     exactSavedShareReproduced: boolean;
     humanReviewStillRequired: boolean;
   };
+  liveDocumentBroadReview: {
+    verdict: string;
+    sourceHead: string;
+    productCommit: string;
+    productionCommit: string;
+    uiDocumentCount: number;
+    integrityRequiredCount: number;
+    reviewedDocumentCount: number;
+    beforePassed: number;
+    beforeFailed: number;
+    beforeMissingUnexpected: number;
+    livePassed: number;
+    liveFailed: number;
+    liveMissingUnexpected: number;
+    workPermitPresentNonEmpty: number;
+    dbMutationPerformed: boolean;
+    shareSessionCreated: boolean;
+    providerDispatchCalled: boolean;
+    exactSavedShareReproduced: boolean;
+    exactSavedShareVerdict: string;
+  };
   approvalGated: Array<{
     gate: string;
     state: string;
@@ -574,6 +595,31 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     },
     claimBoundary: {
       humanReviewStillRequired: true,
+    },
+  });
+  writeJson(root, "evaluation/live-document-broad-review-2026-07-25/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_12_DELIVERABLE_BROAD_REVIEW",
+    sourceHead: "TO_FILL",
+    productCommit: "TO_FILL",
+    productionCommit: "TO_FILL",
+    uiDocumentCount: 12,
+    integrityRequiredCount: 12,
+    reviewedDocumentCount: 12,
+    stages: {
+      beforeRemediation: { pass: 0, fail: 5, missingUnexpectedCount: 5 },
+      afterLive: { pass: 5, fail: 0, missingUnexpectedCount: 0 },
+    },
+    workPermitMatrix: Array.from({ length: 5 }, (_, index) => ({
+      caseId: `case-${index + 1}`,
+      status: "presentNonEmpty",
+      verdict: "PASS",
+    })),
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
   writeJson(root, "evaluation/kosha-next-exact-candidate-audit-2026-07-22/report.json", {
@@ -1081,6 +1127,24 @@ describe("northstar next runway generator", () => {
       providerDispatchCalled: false,
       exactSavedShareReproduced: false,
       humanReviewStillRequired: true,
+    });
+    expect(report.liveDocumentBroadReview).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_12_DELIVERABLE_BROAD_REVIEW",
+      uiDocumentCount: 12,
+      integrityRequiredCount: 12,
+      reviewedDocumentCount: 12,
+      beforePassed: 0,
+      beforeFailed: 5,
+      beforeMissingUnexpected: 5,
+      livePassed: 5,
+      liveFailed: 0,
+      liveMissingUnexpected: 0,
+      workPermitPresentNonEmpty: 5,
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.koshaNextExactCandidateAudit.forbiddenClaims).toContain(
       "The metadata-verified non-exact candidates are already exact production evidence.",

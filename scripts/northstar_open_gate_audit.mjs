@@ -34,6 +34,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveDocumentFieldIsolation: path.join("evaluation", "live-document-field-isolation-2026-07-25", "report.json"),
   liveKoshaExactMaterialization: path.join("evaluation", "live-kosha-exact-materialization-2026-07-25", "report.json"),
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
+  liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
   llmWikiApproval: path.join("evaluation", "llm-wiki-rls-approval-2026-07-17", "report.md"),
   rlsLlmWikiApprovalPreflight: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
@@ -721,6 +722,78 @@ function evaluateLiveDocumentWordingReviewGate(rootDir) {
     evidencePath,
     detail: `Wording review verdict=${readString(report.verdict) || "unknown"}, live=${livePass}/${liveTotal}, failed=${liveFail}, livePending=${report.liveAfterDeploymentPending !== false}, noMutation=${noMutation}.`,
     nextActions: ["Fix the failing wording or field-usability checks and rerun the unchanged five-scenario live gate."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateLiveDocumentBroadReviewGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.liveDocumentBroadReview;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "live_document_broad_review",
+      label: "Live 12-deliverable broad review",
+      state: "missing",
+      evidencePath,
+      detail: "Live 12-deliverable presence and applicability review is missing or invalid.",
+      nextActions: ["Run the fail-closed 12-deliverable gate against production and preserve before/local/live evidence."],
+    });
+  }
+
+  const stages = isRecord(report.stages) ? report.stages : {};
+  const before = isRecord(stages.beforeRemediation) ? stages.beforeRemediation : {};
+  const afterLive = isRecord(stages.afterLive) ? stages.afterLive : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const workPermitMatrix = Array.isArray(report.workPermitMatrix)
+    ? report.workPermitMatrix.filter(isRecord)
+    : [];
+  const livePermitPass = workPermitMatrix.filter((item) => (
+    item.status === "presentNonEmpty" && item.verdict === "PASS"
+  )).length;
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.exactSavedShareReproduced === false;
+  const liveReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_12_DELIVERABLE_BROAD_REVIEW"
+    && readNumber(report.uiDocumentCount) === 12
+    && readNumber(report.integrityRequiredCount) === 12
+    && readNumber(report.reviewedDocumentCount) === 12
+    && readNumber(before.pass) === 0
+    && readNumber(before.fail) === 5
+    && readNumber(before.missingUnexpectedCount) === 5
+    && readNumber(afterLive.pass) === 5
+    && readNumber(afterLive.fail) === 0
+    && readNumber(afterLive.missingUnexpectedCount) === 0
+    && livePermitPass === 5
+    && readString(report.productCommit).length > 0
+    && readString(report.sourceHead).length > 0
+    && readString(report.sourceHead) === readString(report.productionCommit)
+    && noMutation;
+
+  if (liveReady) {
+    return gateResult({
+      id: "live_document_broad_review",
+      label: "Live 12-deliverable broad review",
+      state: "proven",
+      evidencePath,
+      detail: `All 12 canonical UI deliverables are enumerated and classified across five live production scenarios: uiDocumentCount=12, integrityRequiredCount=12, reviewedDocumentCount=12, before missingUnexpected=5, after-live missingUnexpected=0, and workPermitDraft presentNonEmpty=${livePermitPass}/5. DB/share/provider mutation is false and exact saved Share remains ${readString(mutationBoundary.exactSavedShareVerdict) || "MISSING_EVIDENCE"}. The older six-document synthetic wording gate is not used as 12-document coverage proof.`,
+      nextActions: [
+        "Keep presence/applicability coverage separate from broad human wording review of real user documents.",
+        "Keep exact saved Share evidence separate; this gate performs no DB/share/provider mutation.",
+      ],
+    });
+  }
+
+  return gateResult({
+    id: "live_document_broad_review",
+    label: "Live 12-deliverable broad review",
+    state: "contradicted",
+    evidencePath,
+    detail: `Broad review verdict=${readString(report.verdict) || "unknown"}, ui=${readNumber(report.uiDocumentCount)}, integrity=${readNumber(report.integrityRequiredCount)}, reviewed=${readNumber(report.reviewedDocumentCount)}, before=${readNumber(before.pass)}/${readNumber(before.fail)}, live=${readNumber(afterLive.pass)}/${readNumber(afterLive.fail)}, liveMissing=${readNumber(afterLive.missingUnexpectedCount)}, workPermit=${livePermitPass}/5, sourceMatchesProduction=${readString(report.sourceHead).length > 0 && readString(report.sourceHead) === readString(report.productionCommit)}, noMutation=${noMutation}.`,
+    nextActions: ["Fix missing, silent not-applicable, or permit-applicability failures and rerun the unchanged 12-deliverable gate."],
   });
 }
 
@@ -2651,6 +2724,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateLiveDocumentFieldIsolationGate(rootDir),
     evaluateLiveKoshaExactMaterializationGate(rootDir),
     evaluateLiveDocumentWordingReviewGate(rootDir),
+    evaluateLiveDocumentBroadReviewGate(rootDir),
     evaluateUiDocumentsShareCockpitGate(rootDir),
     evaluateDispatchStandaloneCockpitGate(rootDir),
     evaluateShareResultFixtureCockpitGate(rootDir),
