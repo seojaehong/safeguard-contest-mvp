@@ -411,6 +411,11 @@ const knownStandaloneLocationTokens = new Set([
 ]);
 
 const nonCompanyLeadTokens = new Set(["오늘", "작업", "현장"]);
+const knownCityLocationTokens = new Set([
+  "평택", "구미", "창원", "포항", "안산", "화성", "수원", "성남", "고양",
+  "용인", "김해", "여수", "순천", "광양", "청주", "천안", "아산", "전주",
+  "군산", "익산"
+]);
 
 function normalizeStandaloneToken(token: string) {
   return token.replace(/^[^가-힣A-Za-z0-9]+|[^가-힣A-Za-z0-9]+$/g, "");
@@ -421,6 +426,14 @@ function tokenizeStandaloneTerms(question: string) {
     .split(/\s+/)
     .map(normalizeStandaloneToken)
     .filter((token) => token.length > 0);
+}
+
+function inferLeadingLocationToken(question: string) {
+  const tokens = tokenizeStandaloneTerms(question);
+  const first = tokens[0] || "";
+  if (!first || nonCompanyLeadTokens.has(first)) return null;
+  if (topLevelRegionTokens.has(first) || knownCityLocationTokens.has(first)) return first;
+  return null;
 }
 
 function containsTokenSequence(tokens: string[], sequence: string[]) {
@@ -453,7 +466,11 @@ function inferCompanyName(question: string) {
   const firstToken = normalizeStandaloneToken(trimmed.split(/\s+/)[0] || "");
   const looksLikeBarePlaceName =
     firstToken &&
-    (knownStandaloneLocationTokens.has(firstToken) || nonCompanyLeadTokens.has(firstToken));
+    (
+      knownStandaloneLocationTokens.has(firstToken)
+      || nonCompanyLeadTokens.has(firstToken)
+      || inferLeadingLocationToken(trimmed) === firstToken
+    );
   if (firstToken && !looksLikeBarePlaceName && !isWorkDescriptorCompanyName(firstToken)) {
     return firstToken.replace(/[,.]$/, "");
   }
@@ -478,7 +495,9 @@ function inferKnownLocationPrefix(question: string) {
   const specificLocation = findSpecificLocationRule(question);
   if (specificLocation) return specificLocation.locationPrefix;
 
-  return tokenizeStandaloneTerms(question).find((token) => topLevelRegionTokens.has(token)) || null;
+  return inferLeadingLocationToken(question)
+    || tokenizeStandaloneTerms(question).find((token) => topLevelRegionTokens.has(token))
+    || null;
 }
 
 function inferCustomWorkName(question: string) {
@@ -510,11 +529,13 @@ function inferSpecialContext(question: string): string[] {
   return notes;
 }
 
-function inferSiteName(question: string, fallback: string) {
+function inferSiteName(question: string, fallback: string, workName: string) {
   if (hasExcavationWorkIdentity(question)) return fallback;
 
   const matchedRule = findSpecificLocationRule(question);
   if (matchedRule) return matchedRule.siteName;
+  const locationPrefix = inferKnownLocationPrefix(question);
+  if (locationPrefix) return `${locationPrefix} ${workName} 현장`;
   return fallback;
 }
 
@@ -921,7 +942,7 @@ export function inferScenario(question: string) {
   return {
     companyName: inferredCompanyName === "현장 업체" ? profile.companyName : inferredCompanyName,
     companyType: profile.companyType,
-    siteName: inferSiteName(normalized, profile.siteName),
+    siteName: inferSiteName(normalized, profile.siteName, profile.workName),
     workSummary,
     workerCount,
     weatherNote: normalized.includes("강풍")

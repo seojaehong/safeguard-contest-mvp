@@ -32,6 +32,19 @@ describe("inferScenario", () => {
     expect(scenario.companyName).toBe("그린메탈");
   });
 
+  it.each([
+    ["울산 도금공장 탱크 외부 화학세척 작업", "울산"],
+    ["평택 물류창고 증축 현장 상하부 동시작업", "평택"],
+    ["대전 식품공장 야간 컨베이어 정비", "대전"],
+    ["구미 전자부품 공장 자동화설비 정비", "구미"],
+    ["제주 리조트 심야 전기설비 긴급복구", "제주"],
+  ])("keeps the explicit leading location in the generated site: %s", (question, location) => {
+    const scenario = inferScenario(question);
+
+    expect(scenario.siteName).toContain(location);
+    expect(scenario.companyName).not.toBe(location);
+  });
+
   it("keeps an excavation job out of a profile matched only by worker attributes", () => {
     const question =
       "도시가스공사 열수송관 굴착공사. 작업자 7명, 외국인 근로자 2명, 신규 투입자 1명, 이동식 크레인과 굴착기 사용, 매설물 확인 필요. 오늘 작업 전 문서팩을 만들어줘.";
