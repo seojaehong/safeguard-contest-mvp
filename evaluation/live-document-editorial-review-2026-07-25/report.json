@@ -1,0 +1,65 @@
+{
+  "generatedAt": "2026-07-24T21:04:22.210Z",
+  "verdict": "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+  "productCommit": "1cbb51dce13baf9f4809f4a0793b9d3ae3c088be",
+  "productionCommit": "1cbb51dce13baf9f4809f4a0793b9d3ae3c088be",
+  "deploymentUrl": "safeguard-contest-kj95luoai-seojaehongs-projects.vercel.app",
+  "canonicalDocumentCount": 12,
+  "scenarioCount": 5,
+  "reviewedDocumentSurfaceCount": 60,
+  "humanReviewCompleted": false,
+  "beforeLive": {
+    "path": "evaluation/live-document-editorial-review-2026-07-25/before-live/report.json",
+    "sourceHead": "117f2ecf016922c5a62b818ea57e08062a3a23da",
+    "productionCommit": "117f2ecf016922c5a62b818ea57e08062a3a23da",
+    "verdict": "RED_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT",
+    "pass": 0,
+    "fail": 5,
+    "awkwardCompositionFindingCount": 20,
+    "evidenceDomainMismatchCount": 1
+  },
+  "afterLocal": {
+    "path": "evaluation/live-document-editorial-review-2026-07-25/after-local/report.json",
+    "sourceHead": "1cbb51dce13baf9f4809f4a0793b9d3ae3c088be",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+    "pass": 5,
+    "fail": 0,
+    "awkwardCompositionFindingCount": 0,
+    "evidenceDomainMismatchCount": 0
+  },
+  "afterLive": {
+    "path": "evaluation/live-document-editorial-review-2026-07-25/after-live/report.json",
+    "sourceHead": "1cbb51dce13baf9f4809f4a0793b9d3ae3c088be",
+    "productionCommit": "1cbb51dce13baf9f4809f4a0793b9d3ae3c088be",
+    "verdict": "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+    "pass": 5,
+    "fail": 0,
+    "placeholderFindingCount": 0,
+    "legalOverclaimFindingCount": 0,
+    "awkwardCompositionFindingCount": 0,
+    "evidenceDomainMismatchCount": 0,
+    "exactLineOveruseCount": 38,
+    "nearDuplicateLineOveruseCount": 100
+  },
+  "remediation": {
+    "grammarDefect": "Completed control sentences are presented as quoted actions under a separate verification question.",
+    "evidenceContamination": "Vehicle-rollover references require vehicle or mobile-equipment identity in the user query; location-only overlap is insufficient.",
+    "forbiddenShortcut": "No keyword allowlist suppresses the observed vehicle evidence after selection."
+  },
+  "evidenceBoundary": {
+    "automatedEditorialContract": true,
+    "reviewerReady": true,
+    "humanReviewCompleted": false,
+    "sixCoreWordingGateCombinedAsHumanPass": false,
+    "twelveDeliverablePresenceGateCombinedAsHumanPass": false,
+    "duplicateFindingsRemainForHumanReview": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "mutationBoundary": {
+    "apiAskRequestsOnly": true,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "exactSavedShareReproduced": false
+  }
+}
