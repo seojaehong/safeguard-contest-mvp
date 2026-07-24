@@ -295,6 +295,7 @@ describe("workspace mobile share presentation", () => {
     const scenarios = [
       { label: "desktop", width: 1440, height: 900 },
       { label: "desktop-short", width: 1440, height: 723 },
+      { label: "mobile-short-390", width: 390, height: 723 },
       { label: "mobile-390", width: 390, height: 844 }
     ] as const;
 
@@ -332,6 +333,7 @@ describe("workspace mobile share presentation", () => {
             const primary = primaryActions[0];
             const mobileSummary = document.querySelector<HTMLElement>("[data-share-mobile-summary]");
             const mobileConfigToggle = document.querySelector<HTMLElement>("[data-share-mobile-config-toggle]");
+            const desktopStatusRail = document.querySelector<HTMLElement>("[data-share-desktop-status-rail]");
             const paragraphs = [...document.querySelectorAll<HTMLElement>(".message-preview-lines p")];
             const toggles = [...document.querySelectorAll<HTMLElement>(".workspace-theme-toggle button")];
             const channelCards = [...document.querySelectorAll<HTMLElement>(".channel-grid .channel-card")];
@@ -346,10 +348,12 @@ describe("workspace mobile share presentation", () => {
             const lastParagraphRect = paragraphs.at(-1)?.getBoundingClientRect();
             const mobileSummaryRect = mobileSummary?.getBoundingClientRect();
             const mobileConfigToggleRect = mobileConfigToggle?.getBoundingClientRect();
+            const desktopStatusRailRect = desktopStatusRail?.getBoundingClientRect();
             return {
               viewportHeight: window.innerHeight,
               pageHeight: document.documentElement.scrollHeight,
               previewLeft: previewRect.left,
+              previewRight: previewRect.right,
               previewBottom: previewRect.bottom,
               primaryRight: primaryRect.right,
               primaryTop: primaryRect.top,
@@ -366,6 +370,11 @@ describe("workspace mobile share presentation", () => {
               mobileConfigToggleBottom: mobileConfigToggleRect?.bottom ?? 0,
               mobileConfigToggleHeight: mobileConfigToggleRect?.height ?? 0,
               mobileConfigExpanded: mobileConfigToggle?.getAttribute("aria-expanded") === "true",
+              desktopStatusRailDisplay: desktopStatusRail ? getComputedStyle(desktopStatusRail).display : "missing",
+              desktopStatusRailLeft: desktopStatusRailRect?.left ?? 0,
+              desktopStatusRailRight: desktopStatusRailRect?.right ?? 0,
+              desktopStatusRailBottom: desktopStatusRailRect?.bottom ?? 0,
+              desktopStatusRailText: desktopStatusRail?.innerText ?? "",
               stageRailText: stageRail.innerText,
               stageRailDisplay: getComputedStyle(stageRail).display,
               stageRailBottom: Math.round(stageRailRect.bottom),
@@ -424,6 +433,7 @@ describe("workspace mobile share presentation", () => {
             expect.soft(metrics.mobileSummaryText, `${scenario.label} ${theme} selected language summary`).toContain("베트남어");
             expect.soft(metrics.mobileConfigToggleText, `${scenario.label} ${theme} config toggle label`).toContain("상세 설정");
             expect.soft(metrics.mobileConfigExpanded, `${scenario.label} ${theme} config collapsed by default`).toBe(false);
+            expect.soft(metrics.desktopStatusRailDisplay, `${scenario.label} ${theme} desktop rail hidden on mobile`).toBe("none");
             expect.soft(metrics.configCards.length, `${scenario.label} ${theme} mobile config card count`).toBe(3);
             for (const card of metrics.configCards) {
               expect.soft(card.display, `${scenario.label} ${theme} mobile config card collapsed`).toBe("none");
@@ -460,6 +470,12 @@ describe("workspace mobile share presentation", () => {
             expect.soft(metrics.primaryBottom, `${scenario.label} ${theme} desktop CTA in first viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
             expect.soft(metrics.previewBottom, `${scenario.label} ${theme} desktop preview in first viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
             expect.soft(metrics.previewLeft, `${scenario.label} ${theme} desktop preview right pane`).toBeGreaterThanOrEqual(metrics.primaryRight);
+            expect.soft(metrics.desktopStatusRailDisplay, `${scenario.label} ${theme} desktop status rail visible`).toBe("grid");
+            expect.soft(metrics.desktopStatusRailLeft, `${scenario.label} ${theme} status rail right of preview`).toBeGreaterThanOrEqual(metrics.previewRight);
+            expect.soft(metrics.desktopStatusRailRight, `${scenario.label} ${theme} status rail within viewport`).toBeLessThanOrEqual(scenario.width);
+            expect.soft(metrics.desktopStatusRailBottom, `${scenario.label} ${theme} status rail in first viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
+            expect.soft(metrics.desktopStatusRailText, `${scenario.label} ${theme} status rail recipient`).toContain("대상");
+            expect.soft(metrics.desktopStatusRailText, `${scenario.label} ${theme} status rail capability`).toContain("실행 경계");
             expect.soft(metrics.stageRailBottom, `${scenario.label} ${theme} desktop stage rail in first viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
             for (const card of metrics.configCards) {
               expect.soft(card.bottom, `${scenario.label} ${theme} desktop config card in first viewport`).toBeLessThanOrEqual(metrics.viewportHeight);

@@ -156,6 +156,23 @@ describe("workspace share simplification", () => {
     expect(desktopShortShareBlock).toContain("max-height: calc(100vh - 190px);");
   });
 
+  it("expands wide desktop share into controls, preview, and status zones", () => {
+    const css = readFileSync(join(root, "app", "globals.css"), "utf8").replace(/\r\n/gu, "\n");
+    const wideDesktopBlock = css.slice(
+      css.indexOf("@media (min-width: 1180px)"),
+      css.indexOf("@media (max-width: 900px)", css.indexOf("@media (min-width: 1180px)"))
+    );
+
+    expect(sharePanel).toContain('data-share-desktop-status-rail');
+    expect(sharePanel).toContain('aria-label="전송 상태와 근거"');
+    expect(wideDesktopBlock).toContain("grid-template-columns: minmax(0, 1.12fr) minmax(380px, 0.88fr) minmax(220px, 0.5fr);");
+    expect(wideDesktopBlock).toContain(".share-desktop-status-rail {");
+    expect(wideDesktopBlock).toContain("display: grid;");
+    expect(wideDesktopBlock).toContain("grid-column: 3;");
+    expect(wideDesktopBlock).toContain("grid-row: 3 / span 4;");
+    expect(wideDesktopBlock).toContain("max-height: calc(100vh - 160px);");
+  });
+
   it("keeps the localized message heading compact on mobile", () => {
     expect(sharePanel).toContain('return "한국어 메시지 미리보기"');
     expect(sharePanel).toContain('`${formatMessageTargetLabel(data, selectedTarget)} 핵심 안전 안내`');

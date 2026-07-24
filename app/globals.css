@@ -15214,6 +15214,10 @@ body:has(.safeclaw-landing) :is(
   display: none;
 }
 
+.share-desktop-status-rail {
+  display: none;
+}
+
 .share-mobile-config-toggle {
   display: none;
 }
@@ -15407,6 +15411,33 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
+@media (min-width: 1180px) {
+  .command-center-shell.workspace-page-share .share-panel.workflow-panel {
+    max-width: 1320px;
+    grid-template-columns: minmax(0, 1.12fr) minmax(380px, 0.88fr) minmax(220px, 0.5fr);
+  }
+
+  .command-center-shell.workspace-page-share .share-workflow-header,
+  .command-center-shell.workspace-page-share .share-stage-rail {
+    grid-column: 1 / -1;
+  }
+
+  .command-center-shell.workspace-page-share [data-share-preview] {
+    grid-column: 2;
+  }
+
+  .command-center-shell.workspace-page-share .share-desktop-status-rail {
+    display: grid;
+    grid-column: 3;
+    grid-row: 3 / span 4;
+    position: sticky;
+    top: 88px;
+    align-self: start;
+    max-height: calc(100vh - 160px);
+    overflow: auto;
+  }
+}
+
 @media (max-width: 900px) {
   .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-page-decision-header {
     grid-template-columns: 1fr;
@@ -15483,6 +15514,78 @@ body:has(.safeclaw-landing) :is(
   display: grid;
   gap: 8px;
   padding: 12px;
+}
+
+.share-desktop-status-rail {
+  min-width: 0;
+  align-content: start;
+  gap: 12px;
+  border-left: 1px solid var(--share-line);
+  padding: 4px 2px 4px 14px;
+}
+
+.share-desktop-status-rail dl {
+  display: grid;
+  margin: 0;
+}
+
+.share-desktop-status-rail dl > div {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 8px;
+  border-bottom: 1px solid var(--share-line);
+  padding: 9px 0;
+}
+
+.share-desktop-status-rail dt,
+.share-desktop-status-rail dd {
+  min-width: 0;
+  margin: 0;
+}
+
+.share-desktop-status-rail dt,
+.share-desktop-capability-lock span {
+  color: var(--share-muted);
+  font-size: var(--text-hud);
+  font-family: var(--font-hud);
+  font-weight: 700;
+  line-height: var(--leading-hud);
+  letter-spacing: var(--tracking-hud);
+}
+
+.share-desktop-status-rail dd {
+  overflow: hidden;
+  color: var(--share-ink);
+  font-size: var(--text-caption);
+  font-weight: 650;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.share-desktop-capability-lock {
+  display: grid;
+  gap: 5px;
+  border-top: 2px solid var(--share-line-strong);
+  padding-top: 12px;
+}
+
+.share-desktop-capability-lock strong,
+.share-desktop-capability-lock p {
+  margin: 0;
+}
+
+.share-desktop-capability-lock strong {
+  color: var(--share-ink);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+}
+
+.share-desktop-capability-lock p {
+  color: var(--share-muted);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
 }
 
 .share-recipient-card {

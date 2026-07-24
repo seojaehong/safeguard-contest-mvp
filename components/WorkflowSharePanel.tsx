@@ -1353,6 +1353,36 @@ export function WorkflowSharePanel({
         </div>
       </section>
 
+      <aside className="share-desktop-status-rail" aria-label="전송 상태와 근거" data-share-desktop-status-rail>
+        <div className="compact-head">
+          <span className="eyebrow">전송 상태</span>
+          <strong>{providerDispatchUi.statusLabel}</strong>
+        </div>
+        <dl>
+          <div>
+            <dt>대상</dt>
+            <dd>{recipientLabel}</dd>
+          </div>
+          <div>
+            <dt>채널</dt>
+            <dd>{selectedChannelLabel}</dd>
+          </div>
+          <div>
+            <dt>언어</dt>
+            <dd>{selectedLanguageLabel}</dd>
+          </div>
+          <div>
+            <dt>검수</dt>
+            <dd>{shareBlocked ? readiness?.summary || "보완 필요" : statusModel.dispatch.label}</dd>
+          </div>
+        </dl>
+        <div className="share-desktop-capability-lock">
+          <span>실행 경계</span>
+          <strong>{providerDispatchUi.canDispatch ? "전송 준비" : providerDispatchUi.reasonLabel}</strong>
+          <p>{providerDispatchUi.canDispatch ? "선택한 대상과 전송본을 마지막으로 확인합니다." : "현재 전송본은 미리보기로만 확인할 수 있습니다."}</p>
+        </div>
+      </aside>
+
       {authToken && !archiveWorkpackId ? (
         <p className="share-inline-note">
           전송을 확정하면 문서팩과 선택한 작업자를 먼저 안전하게 저장합니다.
