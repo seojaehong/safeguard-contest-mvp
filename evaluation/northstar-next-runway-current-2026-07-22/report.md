@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `26d5673d27247222d2648fa1edab79009d248212`
+Source HEAD: `6ac346bb4c69bc743b8b33689484dde414d6edec`
 
-Production `/api/build-info`: `e53d3d8025a200933303c909f92ebfb7058077d4`
+Production `/api/build-info`: `6ac346bb4c69bc743b8b33689484dde414d6edec`
 
-Latest evidence commit live: `false`
+Latest evidence commit live: `true`
 
-Source head live pending: `true`
+Source head live pending: `false`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/share-recipient-long-content-fixture-2026-07-25/day-desktop-1440x900.png`, `evaluation/share-recipient-long-content-fixture-2026-07-25/day-desktop-short-1440x723.png`, `evaluation/share-recipient-long-content-fixture-2026-07-25/day-mobile-390x723.png`, `evaluation/share-recipient-long-content-fixture-2026-07-25/night-desktop-1440x900.png`, `evaluation/share-recipient-long-content-fixture-2026-07-25/night-desktop-short-1440x723.png`, `evaluation/share-recipient-long-content-fixture-2026-07-25/night-mobile-390x723.png`, `evaluation/share-recipient-long-content-fixture-2026-07-25/report.json`, `evaluation/share-recipient-long-content-fixture-2026-07-25/report.md`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
+Source pending changed paths: `none`
 
-Current head is evidence-only pending: `true`
+Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `26d5673d27247222d2648fa1edab79009d248212`
+Live rollup source head: `6ac346bb4c69bc743b8b33689484dde414d6edec`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `26d5673d27247222d2648fa1edab79009d248212` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `e53d3d8025a200933303c909f92ebfb7058077d4`, and the live rollup remains exact for that deployed marker.
+Note: source HEAD and production marker match for this artifact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
