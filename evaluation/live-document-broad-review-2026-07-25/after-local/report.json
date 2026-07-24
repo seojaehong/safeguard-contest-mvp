@@ -1,0 +1,776 @@
+{
+  "generatedAt": "2026-07-24T18:37:35.386Z",
+  "elapsedMs": 22416,
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DELIVERABLE_BROAD_REVIEW",
+  "mode": "current-source-local-production",
+  "baseUrl": "http://127.0.0.1:3084",
+  "sourceHead": "970dc706caa7576b0d8418e18e175493cef07d1e",
+  "productionBuild": {
+    "ok": true,
+    "configured": false,
+    "source": "unavailable",
+    "commitSha": null,
+    "branch": null,
+    "environment": null,
+    "deploymentUrl": null,
+    "message": "배포 커밋 식별자가 런타임 환경에 노출되지 않았습니다."
+  },
+  "uiDocumentCount": 12,
+  "integrityRequiredCount": 12,
+  "reviewedDocumentCount": 12,
+  "total": 5,
+  "pass": 5,
+  "fail": 0,
+  "missingUnexpectedCount": 0,
+  "missingUnexpected": [],
+  "explicitNotApplicableCount": 0,
+  "explicitNotApplicable": [],
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "exactSavedShareReproduced": false
+  },
+  "cases": [
+    {
+      "id": "ulsan-chemical-cleaning-sds__stress",
+      "verdict": "PASS",
+      "elapsedMs": 7033,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 7029
+      },
+      "permitRequired": true,
+      "missingUnexpected": [],
+      "explicitNotApplicable": [],
+      "documents": [
+        {
+          "key": "workpackSummaryDraft",
+          "title": "점검결과 요약",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 767,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "riskAssessmentDraft",
+          "title": "위험성평가표",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3172,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPlanDraft",
+          "title": "작업계획서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1010,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPermitDraft",
+          "title": "안전작업허가 확인서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1194,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmBriefing",
+          "title": "TBM 브리핑",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1920,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmLogDraft",
+          "title": "TBM 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1938,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "safetyEducationRecordDraft",
+          "title": "안전보건교육 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1837,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "emergencyResponseDraft",
+          "title": "비상대응 절차",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1382,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "photoEvidenceDraft",
+          "title": "사진·증빙",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1211,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerBriefing",
+          "title": "외국인 근로자 출력본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3201,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerTransmission",
+          "title": "외국인 전송본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3533,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "kakaoMessage",
+          "title": "현장 공유 메시지",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 672,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        }
+      ],
+      "wordingFailedChecks": []
+    },
+    {
+      "id": "pyeongtaek-simultaneous-overhead-hotwork__stress",
+      "verdict": "PASS",
+      "elapsedMs": 3786,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 3783
+      },
+      "permitRequired": true,
+      "missingUnexpected": [],
+      "explicitNotApplicable": [],
+      "documents": [
+        {
+          "key": "workpackSummaryDraft",
+          "title": "점검결과 요약",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 699,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "riskAssessmentDraft",
+          "title": "위험성평가표",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3677,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPlanDraft",
+          "title": "작업계획서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1436,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPermitDraft",
+          "title": "안전작업허가 확인서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1205,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmBriefing",
+          "title": "TBM 브리핑",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 2223,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmLogDraft",
+          "title": "TBM 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 2115,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "safetyEducationRecordDraft",
+          "title": "안전보건교육 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 2310,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "emergencyResponseDraft",
+          "title": "비상대응 절차",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1758,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "photoEvidenceDraft",
+          "title": "사진·증빙",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1160,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerBriefing",
+          "title": "외국인 근로자 출력본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3527,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerTransmission",
+          "title": "외국인 전송본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3907,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "kakaoMessage",
+          "title": "현장 공유 메시지",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 629,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        }
+      ],
+      "wordingFailedChecks": []
+    },
+    {
+      "id": "daejeon-vulnerable-night-maintenance__stress",
+      "verdict": "PASS",
+      "elapsedMs": 3711,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 3709
+      },
+      "permitRequired": true,
+      "missingUnexpected": [],
+      "explicitNotApplicable": [],
+      "documents": [
+        {
+          "key": "workpackSummaryDraft",
+          "title": "점검결과 요약",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 866,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "riskAssessmentDraft",
+          "title": "위험성평가표",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3505,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPlanDraft",
+          "title": "작업계획서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1150,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPermitDraft",
+          "title": "안전작업허가 확인서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1268,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmBriefing",
+          "title": "TBM 브리핑",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1989,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmLogDraft",
+          "title": "TBM 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1978,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "safetyEducationRecordDraft",
+          "title": "안전보건교육 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1926,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "emergencyResponseDraft",
+          "title": "비상대응 절차",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1445,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "photoEvidenceDraft",
+          "title": "사진·증빙",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1217,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerBriefing",
+          "title": "외국인 근로자 출력본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 6808,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerTransmission",
+          "title": "외국인 전송본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 7853,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "kakaoMessage",
+          "title": "현장 공유 메시지",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 792,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        }
+      ],
+      "wordingFailedChecks": []
+    },
+    {
+      "id": "gumi-kosha-guidance-boundary__stress",
+      "verdict": "PASS",
+      "elapsedMs": 3862,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 3860
+      },
+      "permitRequired": true,
+      "missingUnexpected": [],
+      "explicitNotApplicable": [],
+      "documents": [
+        {
+          "key": "workpackSummaryDraft",
+          "title": "점검결과 요약",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 798,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "riskAssessmentDraft",
+          "title": "위험성평가표",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3375,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPlanDraft",
+          "title": "작업계획서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1117,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPermitDraft",
+          "title": "안전작업허가 확인서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1249,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmBriefing",
+          "title": "TBM 브리핑",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1956,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmLogDraft",
+          "title": "TBM 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1947,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "safetyEducationRecordDraft",
+          "title": "안전보건교육 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1872,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "emergencyResponseDraft",
+          "title": "비상대응 절차",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1377,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "photoEvidenceDraft",
+          "title": "사진·증빙",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1177,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerBriefing",
+          "title": "외국인 근로자 출력본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3482,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerTransmission",
+          "title": "외국인 전송본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3785,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "kakaoMessage",
+          "title": "현장 공유 메시지",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 699,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        }
+      ],
+      "wordingFailedChecks": []
+    },
+    {
+      "id": "jeju-overnight-electrical-repair__stress",
+      "verdict": "PASS",
+      "elapsedMs": 3868,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 3864
+      },
+      "permitRequired": true,
+      "missingUnexpected": [],
+      "explicitNotApplicable": [],
+      "documents": [
+        {
+          "key": "workpackSummaryDraft",
+          "title": "점검결과 요약",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 791,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "riskAssessmentDraft",
+          "title": "위험성평가표",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3820,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPlanDraft",
+          "title": "작업계획서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1676,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "workPermitDraft",
+          "title": "안전작업허가 확인서",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1206,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmBriefing",
+          "title": "TBM 브리핑",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 2271,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "tbmLogDraft",
+          "title": "TBM 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 2236,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "safetyEducationRecordDraft",
+          "title": "안전보건교육 기록",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 2521,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "emergencyResponseDraft",
+          "title": "비상대응 절차",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1987,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "photoEvidenceDraft",
+          "title": "사진·증빙",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 1176,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerBriefing",
+          "title": "외국인 근로자 출력본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3358,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "foreignWorkerTransmission",
+          "title": "외국인 전송본",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 3656,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        },
+        {
+          "key": "kakaoMessage",
+          "title": "현장 공유 메시지",
+          "status": "presentNonEmpty",
+          "reason": "",
+          "charCount": 696,
+          "required": true,
+          "missingRequiredTerms": [],
+          "verdict": "PASS",
+          "failures": []
+        }
+      ],
+      "wordingFailedChecks": []
+    }
+  ]
+}
