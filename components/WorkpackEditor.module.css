@@ -711,28 +711,46 @@
   line-height: var(--leading-table);
 }
 
-.documentSection {
+.documentSectionIndex {
   display: grid;
-  gap: 6px;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 4px;
   min-width: 0;
+  border-bottom: 1px solid var(--workspace-rule);
+  padding-bottom: var(--space-2);
 }
 
-.documentSection > summary {
+.documentSectionIndex button {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) auto;
+  grid-template-columns: 24px minmax(0, 1fr);
   align-items: center;
   gap: var(--space-2);
-  min-height: 44px;
-  color: var(--workspace-ink);
+  min-width: 0;
+  min-height: 40px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--workspace-muted);
+  padding: 5px 8px;
+  text-align: left;
   cursor: pointer;
-  list-style: none;
 }
 
-.documentSection > summary::-webkit-details-marker {
-  display: none;
+.documentSectionIndex button:hover,
+.documentSectionIndex button:focus-visible {
+  border-color: var(--workspace-rule-strong);
+  outline: 2px solid rgba(31, 77, 67, 0.2);
+  outline-offset: 1px;
 }
 
-.documentSection > summary span {
+.documentSectionIndex button[aria-selected="true"] {
+  border-color: var(--workspace-rule-strong);
+  background: var(--workspace-surface-2);
+  color: var(--workspace-ink);
+}
+
+.documentSectionIndex button span,
+.documentSectionHeading span {
   color: var(--workspace-subtle);
   font-family: var(--font-hud);
   font-size: var(--text-hud);
@@ -740,7 +758,31 @@
   font-weight: 700;
 }
 
-.documentSection > summary strong {
+.documentSectionIndex button strong {
+  overflow: hidden;
+  font-size: var(--text-caption);
+  font-weight: 700;
+  line-height: var(--leading-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.documentSection {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.documentSectionHeading {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  color: var(--workspace-ink);
+}
+
+.documentSectionHeading strong {
   font-size: var(--text-table);
   font-weight: 650;
   line-height: var(--leading-table);
@@ -1469,8 +1511,23 @@
     gap: 2px;
   }
 
-  .documentSection > summary {
+  .documentSectionIndex {
+    display: flex;
+    gap: 3px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding-bottom: 5px;
+    scroll-snap-type: x proximity;
+  }
+
+  .documentSectionIndex button {
+    flex: 0 0 min(154px, 42vw);
     min-height: 36px;
+    scroll-snap-align: start;
+  }
+
+  .documentSectionHeading {
+    min-height: 32px;
   }
 
   .editorModeBar {

@@ -411,9 +411,19 @@ describe("documents editor layout", () => {
       await selectDocumentFromWorkbench(page, documentCase.key);
       const editor = page.getByTestId("document-structured-editor");
       await editor.waitFor({ state: "visible" });
-      await expect.poll(() => editor.locator('[data-section-kind="body"] summary strong').allTextContents())
+      await expect.poll(() => editor.getByTestId("document-section-tab").locator("strong").allTextContents())
         .toEqual(documentCase.labels);
-      expect(await editor.locator(".document-section-textarea").count()).toBe(documentCase.labels.length);
+      expect(await editor.locator(".document-section-textarea").count()).toBe(1);
+      await expect.poll(() => editor.getByTestId("document-section-detail").textContent())
+        .toContain(documentCase.labels[0]);
+      await editor.getByTestId("document-section-tab").last().click();
+      await expect.poll(() => editor.getByTestId("document-section-detail").textContent())
+        .toContain(documentCase.labels.at(-1) || "");
+      await editor.getByTestId("document-section-tab").last().focus();
+      await page.keyboard.press("Home");
+      await expect.poll(() => editor.getByTestId("document-section-detail").textContent())
+        .toContain(documentCase.labels[0]);
+      expect(await editor.locator(".document-section-textarea").count()).toBe(1);
     }
   }, 90_000);
 

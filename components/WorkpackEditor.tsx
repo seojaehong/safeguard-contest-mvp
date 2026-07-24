@@ -2919,6 +2919,12 @@ export function WorkpackEditor({
   }, [data.citations.length, harnessSummary, selectedEvidenceLabel]);
   const selectedEvidenceCount = evidenceStats.reduce((sum, item) => sum + item.value, 0);
   const selectedDrilldownSummary = `${structuredDocument.body.length.toLocaleString("ko-KR")}섹션 · 근거 ${selectedEvidenceCount.toLocaleString("ko-KR")}건 · 확인 ${selectedQualityIssues.toLocaleString("ko-KR")}건`;
+  const activeStructuredSection = structuredDocument.body.find(
+    (section) => section.id === expandedStructuredSectionId
+  ) ?? structuredDocument.body[0] ?? null;
+  const activeStructuredSectionIndex = activeStructuredSection
+    ? structuredDocument.body.findIndex((section) => section.id === activeStructuredSection.id)
+    : -1;
 
   useEffect(() => {
     onDeliverablesChangeRef.current = onDeliverablesChange;
@@ -3369,6 +3375,15 @@ export function WorkpackEditor({
       console.error("structured document section update failed", error);
       setSaveStatusLabel("저장 실패");
     }
+  }
+
+  function selectStructuredSectionByIndex(index: number) {
+    const section = structuredDocument.body[index];
+    if (!section) return;
+    setExpandedStructuredSectionId(section.id);
+    window.requestAnimationFrame(() => {
+      document.getElementById(`document-section-tab-${selected.key}-${index}`)?.focus({ preventScroll: true });
+    });
   }
 
   function openDocumentUtilityPanel(targetTestId: "editor-evidence-panel" | "editor-quality-panel") {
@@ -4020,78 +4035,101 @@ export function WorkpackEditor({
               {isTransmissionDocumentKey(selected.key) ? (
                 <TransmissionDocumentCockpit data={data} documentKey={selected.key} />
               ) : null}
-              {selected.key === "riskAssessmentDraft" ? null : structuredDocument.body.map((section, index) => {
-                const inputId = `document-section-${selected.key}-${index}`;
-                const sectionLineCount = section.value.split(/\r?\n/u).filter((line) => line.trim().length > 0).length;
-                const lineCount = Math.min(5, Math.max(3, section.value.split(/\r?\n/u).length + 1));
-                const isSectionOpen = expandedStructuredSectionId === section.id;
-                const selectSection = () => setExpandedStructuredSectionId(section.id);
-                return (
-                  <details
-                    key={section.id}
-                    className={styles.documentSection}
-                    data-testid="document-section-accordion"
-                    data-section-kind="body"
-                    data-section-id={section.id}
-                    data-section-open={isSectionOpen ? "true" : "false"}
-                    open={isSectionOpen}
+              {selected.key !== "riskAssessmentDraft" && activeStructuredSection ? (
+                <>
+                  <div
+                    className={styles.documentSectionIndex}
+                    role="tablist"
+                    aria-label={`${selected.title} 섹션 선택`}
+                    data-testid="document-section-index"
                   >
-                    <summary
-                      aria-expanded={isSectionOpen}
-                      onClick={(event) => {
-                        event.preventDefault();
-                        selectSection();
-                      }}
-                      onKeyDown={(event) => {
-                        if (event.key !== "Enter" && event.key !== " ") return;
-                        event.preventDefault();
-                        selectSection();
-                      }}
-                    >
-                      <span>{String(index + 1).padStart(2, "0")}</span>
-                      <strong>{section.label}</strong>
-                      <em className={styles.documentSectionMeta}>
-                        {sectionLineCount.toLocaleString("ko-KR")}줄 · {isSectionOpen ? "편집 중" : "펼치기"}
-                      </em>
-                    </summary>
-                    {isSectionOpen && !(selected.key === "riskAssessmentDraft" && index === 0) ? (
-                      <div className={styles.documentSectionFieldStrip} data-testid="document-section-field-strip">
-                        <span>
-                          <b>현재 편집 필드</b>
+                    {structuredDocument.body.map((section, index) => {
+                      const selectedSection = section.id === activeStructuredSection.id;
+                      return (
+                        <button
+                          key={section.id}
+                          id={`document-section-tab-${selected.key}-${index}`}
+                          type="button"
+                          role="tab"
+                          aria-selected={selectedSection}
+                          aria-controls={`document-section-panel-${selected.key}`}
+                          data-testid="document-section-tab"
+                          onClick={() => setExpandedStructuredSectionId(section.id)}
+                          onKeyDown={(event) => {
+                            let nextIndex = index;
+                            if (event.key === "ArrowRight") {
+                              nextIndex = (index + 1) % structuredDocument.body.length;
+                            } else if (event.key === "ArrowLeft") {
+                              nextIndex = (index - 1 + structuredDocument.body.length) % structuredDocument.body.length;
+                            } else if (event.key === "Home") {
+                              nextIndex = 0;
+                            } else if (event.key === "End") {
+                              nextIndex = structuredDocument.body.length - 1;
+                            } else {
+                              return;
+                            }
+                            event.preventDefault();
+                            selectStructuredSectionByIndex(nextIndex);
+                          }}
+                        >
+                          <span>{String(index + 1).padStart(2, "0")}</span>
                           <strong>{section.label}</strong>
-                        </span>
-                        <span>
-                          <b>근거</b>
-                          <strong>{selectedRows.length.toLocaleString("ko-KR")}건 연결</strong>
-                        </span>
-                        <span>
-                          <b>점검</b>
-                          <strong>{selectedUsesEditedText ? "수정본 재확인" : "초안 확인"}</strong>
-                        </span>
-                      </div>
-                    ) : null}
-                    {isSectionOpen && !(selected.key === "riskAssessmentDraft" && index === 0) ? (
-                      <div className={styles.documentSectionActions} data-testid="document-section-actions">
-                        <button type="button" onClick={() => openDocumentUtilityPanel("editor-evidence-panel")}>
-                          근거 보기
                         </button>
-                        <button type="button" onClick={() => openDocumentUtilityPanel("editor-quality-panel")}>
-                          점검 보기
-                        </button>
-                      </div>
-                    ) : null}
+                      );
+                    })}
+                  </div>
+                  <section
+                    id={`document-section-panel-${selected.key}`}
+                    className={styles.documentSection}
+                    role="tabpanel"
+                    aria-labelledby={`document-section-tab-${selected.key}-${activeStructuredSectionIndex}`}
+                    data-testid="document-section-detail"
+                    data-section-kind="body"
+                    data-section-id={activeStructuredSection.id}
+                  >
+                    <div className={styles.documentSectionHeading}>
+                      <span>{String(activeStructuredSectionIndex + 1).padStart(2, "0")}</span>
+                      <strong>{activeStructuredSection.label}</strong>
+                      <em className={styles.documentSectionMeta}>
+                        {activeStructuredSection.value.split(/\r?\n/u).filter((line) => line.trim().length > 0).length.toLocaleString("ko-KR")}줄 · 편집 중
+                      </em>
+                    </div>
+                    <div className={styles.documentSectionFieldStrip} data-testid="document-section-field-strip">
+                      <span>
+                        <b>현재 편집 필드</b>
+                        <strong>{activeStructuredSection.label}</strong>
+                      </span>
+                      <span>
+                        <b>근거</b>
+                        <strong>{selectedRows.length.toLocaleString("ko-KR")}건 연결</strong>
+                      </span>
+                      <span>
+                        <b>점검</b>
+                        <strong>{selectedUsesEditedText ? "수정본 재확인" : "초안 확인"}</strong>
+                      </span>
+                    </div>
+                    <div className={styles.documentSectionActions} data-testid="document-section-actions">
+                      <button type="button" onClick={() => openDocumentUtilityPanel("editor-evidence-panel")}>
+                        근거 보기
+                      </button>
+                      <button type="button" onClick={() => openDocumentUtilityPanel("editor-quality-panel")}>
+                        점검 보기
+                      </button>
+                    </div>
                     <textarea
-                      id={inputId}
-                      ref={index === 0 ? textareaRef : undefined}
+                      id={`document-section-${selected.key}-${activeStructuredSectionIndex}`}
+                      ref={textareaRef}
                       className={`document-textarea document-section-textarea ${styles.sectionTextarea}`}
-                      value={section.value}
-                      rows={lineCount}
-                      onChange={(event) => updateStructuredSection(section.id, event.target.value)}
-                      aria-label={index === 0 ? `${selected.title} 편집` : `${selected.title} ${section.label} 편집`}
+                      value={activeStructuredSection.value}
+                      rows={Math.min(5, Math.max(3, activeStructuredSection.value.split(/\r?\n/u).length + 1))}
+                      onChange={(event) => updateStructuredSection(activeStructuredSection.id, event.target.value)}
+                      aria-label={activeStructuredSectionIndex === 0
+                        ? `${selected.title} 편집`
+                        : `${selected.title} ${activeStructuredSection.label} 편집`}
                     />
-                  </details>
-                );
-              })}
+                  </section>
+                </>
+              ) : null}
             </div>
           ) : (
             <textarea
