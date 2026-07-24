@@ -1,0 +1,51 @@
+{
+  "generatedAt": "2026-07-25T05:00:19+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SEED_PROFILE_ISOLATION_LIVE_PENDING",
+  "productCommit": "597dec777e0467cd9f8aadce611fbb7b1a8f3b72",
+  "liveAfterDeploymentPending": true,
+  "contract": {
+    "scenarioCount": 5,
+    "documentCountPerScenario": 12,
+    "reviewedDocumentSurfaceCount": 60,
+    "failClosedOnAnyForbiddenFragment": true,
+    "forbiddenDocumentFragments": [
+      "공장 바닥 세척",
+      "우천 후 바닥 젖음",
+      "고중량 박스",
+      "폭염주의 수준",
+      "온열질환과 근골격계 부담"
+    ]
+  },
+  "beforeLive": {
+    "path": "evaluation/live-document-seed-profile-isolation-2026-07-25/before-live/report.json",
+    "sourceHead": "181414b9eef76178a86d02962aa4a8472525d9e1",
+    "productionCommit": "181414b9eef76178a86d02962aa4a8472525d9e1",
+    "total": 5,
+    "pass": 0,
+    "fail": 5,
+    "seedProfileLeakageCount": 90,
+    "secondaryGroundingPassed": 30,
+    "secondaryGroundingReviewed": 30,
+    "missingUnexpectedCount": 0
+  },
+  "afterLocal": {
+    "path": "evaluation/live-document-seed-profile-isolation-2026-07-25/after-local/report.json",
+    "sourceHead": "597dec777e0467cd9f8aadce611fbb7b1a8f3b72",
+    "baseUrl": "http://127.0.0.1:3078",
+    "total": 5,
+    "pass": 5,
+    "fail": 0,
+    "seedProfileLeakageCount": 0,
+    "secondaryGroundingPassed": 30,
+    "secondaryGroundingReviewed": 30,
+    "missingUnexpectedCount": 0
+  },
+  "afterLive": null,
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "exactSavedShareReproduced": false,
+    "exactSavedShareEvidence": "MISSING_EVIDENCE"
+  }
+}
