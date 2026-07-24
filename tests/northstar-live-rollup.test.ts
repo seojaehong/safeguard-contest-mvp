@@ -84,6 +84,25 @@ type RollupReport = {
     exactSavedShareReproduced: boolean;
     exactSavedShareVerdict: string;
   };
+  liveDocumentEditorialReview: {
+    verdict: string;
+    scenarioCount: number;
+    reviewedDocumentSurfaceCount: number;
+    livePassed: number;
+    liveFailed: number;
+    placeholderFindingCount: number;
+    legalOverclaimFindingCount: number;
+    awkwardCompositionFindingCount: number;
+    evidenceDomainMismatchCount: number;
+    exactLineOveruseCount: number;
+    nearDuplicateLineOveruseCount: number;
+    humanReviewCompleted: boolean;
+    dbMutationPerformed: boolean;
+    shareSessionCreated: boolean;
+    providerDispatchCalled: boolean;
+    exactSavedShareReproduced: boolean;
+    exactSavedShareVerdict: string;
+  };
   liveDocumentSeedProfileIsolation: {
     verdict: string;
     beforePassed: number;
@@ -139,6 +158,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "live_kosha_exact_materialization", state: "proven", evidencePath: "evaluation/live-kosha-exact-materialization-2026-07-25/report.json", detail: "three exact KOSHA pins materialized" },
       { id: "live_document_wording_review", state: "proven", evidencePath: "evaluation/live-document-wording-review-2026-07-24/report.json", detail: "five synthetic wording scenarios passed" },
       { id: "live_document_broad_review", state: "proven", evidencePath: "evaluation/live-document-broad-review-2026-07-25/report.json", detail: "all 12 deliverables passed" },
+      { id: "live_document_editorial_review", state: "proven", evidencePath: "evaluation/live-document-editorial-review-2026-07-25/report.json", detail: "all 60 editorial surfaces passed automated contract" },
       { id: "live_document_secondary_grounding", state: "proven", evidencePath: "evaluation/live-document-secondary-grounding-2026-07-25/report.json", detail: "all 30 supporting documents passed scenario grounding" },
       { id: "live_document_seed_profile_isolation", state: "proven", evidencePath: "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", detail: "all 60 documents passed seed-profile isolation" },
       { id: "provider_dispatch_persistence", state: "approval_gated", evidencePath: "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json", detail: "preview only" },
@@ -301,6 +321,46 @@ function createFixtureRoot(): { root: string; head: string } {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/live-document-editorial-review-2026-07-25/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+    productCommit: "TO_FILL",
+    productionCommit: "TO_FILL",
+    canonicalDocumentCount: 12,
+    scenarioCount: 5,
+    reviewedDocumentSurfaceCount: 60,
+    humanReviewCompleted: false,
+    beforeLive: {
+      pass: 0,
+      fail: 5,
+      awkwardCompositionFindingCount: 20,
+      evidenceDomainMismatchCount: 1,
+    },
+    afterLive: {
+      pass: 5,
+      fail: 0,
+      placeholderFindingCount: 0,
+      legalOverclaimFindingCount: 0,
+      awkwardCompositionFindingCount: 0,
+      evidenceDomainMismatchCount: 0,
+      exactLineOveruseCount: 38,
+      nearDuplicateLineOveruseCount: 100,
+    },
+    evidenceBoundary: {
+      automatedEditorialContract: true,
+      reviewerReady: true,
+      humanReviewCompleted: false,
+      sixCoreWordingGateCombinedAsHumanPass: false,
+      twelveDeliverablePresenceGateCombinedAsHumanPass: false,
+      duplicateFindingsRemainForHumanReview: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+    },
+  });
   writeJson(root, "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", {
     sourceHead: "TO_FILL",
     productionCommit: "TO_FILL",
@@ -428,6 +488,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-kosha-exact-materialization-2026-07-25/report.json",
     "evaluation/live-document-wording-review-2026-07-24/report.json",
     "evaluation/live-document-broad-review-2026-07-25/report.json",
+    "evaluation/live-document-editorial-review-2026-07-25/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
     "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json",
     "evaluation/kosha-current-live-gate-2026-07-20/report.json",
@@ -531,6 +592,26 @@ describe("northstar live rollup", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.evidence.find((item) => item.id === "live_document_broad_review")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.liveDocumentEditorialReview).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+      scenarioCount: 5,
+      reviewedDocumentSurfaceCount: 60,
+      livePassed: 5,
+      liveFailed: 0,
+      placeholderFindingCount: 0,
+      legalOverclaimFindingCount: 0,
+      awkwardCompositionFindingCount: 0,
+      evidenceDomainMismatchCount: 0,
+      exactLineOveruseCount: 38,
+      nearDuplicateLineOveruseCount: 100,
+      humanReviewCompleted: false,
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "live_document_editorial_review")?.productionStatus).toBe("ancestor_of_head");
     expect(report.liveDocumentSecondaryGrounding).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT",
       livePassed: 5,

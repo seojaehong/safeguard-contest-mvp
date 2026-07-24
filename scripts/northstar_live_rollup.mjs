@@ -24,6 +24,7 @@ const ARTIFACTS = Object.freeze({
   liveKoshaExactMaterialization: path.join("evaluation", "live-kosha-exact-materialization-2026-07-25", "report.json"),
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
+  liveDocumentEditorialReview: path.join("evaluation", "live-document-editorial-review-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
   kosha: path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json"),
@@ -306,6 +307,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const liveKoshaExactMaterialization = tryReadJson(rootDir, ARTIFACTS.liveKoshaExactMaterialization);
   const liveDocumentWordingReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentWordingReview);
   const liveDocumentBroadReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentBroadReview);
+  const liveDocumentEditorialReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialReview);
   const liveDocumentSecondaryGrounding = tryReadJson(rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
   const liveDocumentSeedProfileIsolation = tryReadJson(rootDir, ARTIFACTS.liveDocumentSeedProfileIsolation);
   const kosha = tryReadJson(rootDir, ARTIFACTS.kosha);
@@ -382,6 +384,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "live_kosha_exact_materialization", ARTIFACTS.liveKoshaExactMaterialization, liveKoshaExactMaterialization),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_wording_review", ARTIFACTS.liveDocumentWordingReview, liveDocumentWordingReview),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_broad_review", ARTIFACTS.liveDocumentBroadReview, liveDocumentBroadReview),
+    evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_review", ARTIFACTS.liveDocumentEditorialReview, liveDocumentEditorialReview),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_secondary_grounding", ARTIFACTS.liveDocumentSecondaryGrounding, liveDocumentSecondaryGrounding),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_seed_profile_isolation", ARTIFACTS.liveDocumentSeedProfileIsolation, liveDocumentSeedProfileIsolation),
     evidenceStatus(rootDir, currentHead, liveCommit, "kosha_exact_trust_registry", ARTIFACTS.kosha, kosha),
@@ -551,6 +554,28 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       exactSavedShareReproduced: recordAt(liveDocumentBroadReview, "mutationBoundary")?.exactSavedShareReproduced === true,
       exactSavedShareVerdict: asString(recordAt(liveDocumentBroadReview, "mutationBoundary")?.exactSavedShareVerdict),
     },
+    liveDocumentEditorialReview: {
+      artifact: ARTIFACTS.liveDocumentEditorialReview,
+      verdict: isRecord(liveDocumentEditorialReview) ? asString(liveDocumentEditorialReview.verdict) : "missing",
+      productCommit: isRecord(liveDocumentEditorialReview) ? asString(liveDocumentEditorialReview.productCommit) : "",
+      productionCommit: extractProductionCommit(liveDocumentEditorialReview),
+      scenarioCount: asNumber(liveDocumentEditorialReview?.scenarioCount),
+      reviewedDocumentSurfaceCount: asNumber(liveDocumentEditorialReview?.reviewedDocumentSurfaceCount),
+      livePassed: asNumber(recordAt(liveDocumentEditorialReview, "afterLive")?.pass),
+      liveFailed: asNumber(recordAt(liveDocumentEditorialReview, "afterLive")?.fail),
+      placeholderFindingCount: asNumber(recordAt(liveDocumentEditorialReview, "afterLive")?.placeholderFindingCount),
+      legalOverclaimFindingCount: asNumber(recordAt(liveDocumentEditorialReview, "afterLive")?.legalOverclaimFindingCount),
+      awkwardCompositionFindingCount: asNumber(recordAt(liveDocumentEditorialReview, "afterLive")?.awkwardCompositionFindingCount),
+      evidenceDomainMismatchCount: asNumber(recordAt(liveDocumentEditorialReview, "afterLive")?.evidenceDomainMismatchCount),
+      exactLineOveruseCount: asNumber(recordAt(liveDocumentEditorialReview, "afterLive")?.exactLineOveruseCount),
+      nearDuplicateLineOveruseCount: asNumber(recordAt(liveDocumentEditorialReview, "afterLive")?.nearDuplicateLineOveruseCount),
+      humanReviewCompleted: liveDocumentEditorialReview?.humanReviewCompleted === true,
+      dbMutationPerformed: recordAt(liveDocumentEditorialReview, "mutationBoundary")?.dbMutationPerformed === true,
+      shareSessionCreated: recordAt(liveDocumentEditorialReview, "mutationBoundary")?.shareSessionCreated === true,
+      providerDispatchCalled: recordAt(liveDocumentEditorialReview, "mutationBoundary")?.providerDispatchCalled === true,
+      exactSavedShareReproduced: recordAt(liveDocumentEditorialReview, "mutationBoundary")?.exactSavedShareReproduced === true,
+      exactSavedShareVerdict: asString(recordAt(liveDocumentEditorialReview, "evidenceBoundary")?.exactSavedShareVerdict),
+    },
     liveDocumentSecondaryGrounding: {
       artifact: ARTIFACTS.liveDocumentSecondaryGrounding,
       verdict: isRecord(liveDocumentSecondaryGrounding) ? asString(liveDocumentSecondaryGrounding.verdict) : "missing",
@@ -704,6 +729,16 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- DB mutation: ${rollup.liveDocumentBroadReview.dbMutationPerformed}; Share session created: ${rollup.liveDocumentBroadReview.shareSessionCreated}; provider dispatch: ${rollup.liveDocumentBroadReview.providerDispatchCalled}`,
     `- Exact saved Share: ${rollup.liveDocumentBroadReview.exactSavedShareVerdict || "MISSING_EVIDENCE"}; reproduced=${rollup.liveDocumentBroadReview.exactSavedShareReproduced}`,
     "- Boundary: the six-document synthetic wording gate is not 12-document deliverable coverage.",
+    "",
+    "## Live 12-Deliverable Editorial Contract Review",
+    "",
+    `- Verdict: \`${rollup.liveDocumentEditorialReview.verdict}\``,
+    `- Live scenarios passed: ${rollup.liveDocumentEditorialReview.livePassed ?? "unknown"}/${rollup.liveDocumentEditorialReview.scenarioCount ?? "unknown"}; failed=${rollup.liveDocumentEditorialReview.liveFailed ?? "unknown"}`,
+    `- Reviewed document surface: ${rollup.liveDocumentEditorialReview.reviewedDocumentSurfaceCount}; placeholder=${rollup.liveDocumentEditorialReview.placeholderFindingCount}, legal=${rollup.liveDocumentEditorialReview.legalOverclaimFindingCount}, awkward=${rollup.liveDocumentEditorialReview.awkwardCompositionFindingCount}, evidence mismatch=${rollup.liveDocumentEditorialReview.evidenceDomainMismatchCount}`,
+    `- Duplicate findings retained for human review: exact=${rollup.liveDocumentEditorialReview.exactLineOveruseCount}, near=${rollup.liveDocumentEditorialReview.nearDuplicateLineOveruseCount}; human review completed=${rollup.liveDocumentEditorialReview.humanReviewCompleted}`,
+    `- DB mutation: ${rollup.liveDocumentEditorialReview.dbMutationPerformed}; Share session created: ${rollup.liveDocumentEditorialReview.shareSessionCreated}; provider dispatch: ${rollup.liveDocumentEditorialReview.providerDispatchCalled}`,
+    `- Exact saved Share: ${rollup.liveDocumentEditorialReview.exactSavedShareVerdict || "MISSING_EVIDENCE"}; reproduced=${rollup.liveDocumentEditorialReview.exactSavedShareReproduced}`,
+    "- Boundary: this automated reviewer-ready contract does not combine the six-core wording and 12-deliverable presence gates into completed human review.",
     "",
     "## Live Secondary Document Grounding",
     "",

@@ -287,6 +287,46 @@ function createFixtureRoot(): string {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "live-document-editorial-review-2026-07-25", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    canonicalDocumentCount: 12,
+    scenarioCount: 5,
+    reviewedDocumentSurfaceCount: 60,
+    humanReviewCompleted: false,
+    beforeLive: {
+      pass: 0,
+      fail: 5,
+      awkwardCompositionFindingCount: 20,
+      evidenceDomainMismatchCount: 1,
+    },
+    afterLive: {
+      pass: 5,
+      fail: 0,
+      placeholderFindingCount: 0,
+      legalOverclaimFindingCount: 0,
+      awkwardCompositionFindingCount: 0,
+      evidenceDomainMismatchCount: 0,
+      exactLineOveruseCount: 38,
+      nearDuplicateLineOveruseCount: 100,
+    },
+    evidenceBoundary: {
+      automatedEditorialContract: true,
+      reviewerReady: true,
+      humanReviewCompleted: false,
+      sixCoreWordingGateCombinedAsHumanPass: false,
+      twelveDeliverablePresenceGateCombinedAsHumanPass: false,
+      duplicateFindingsRemainForHumanReview: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION",
     sourceHead: "fixture-sha",
@@ -1572,6 +1612,14 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "live_document_broad_review")?.detail).toContain("workPermitDraft presentNonEmpty=5/5");
     expect(audit.gates.find((gate) => gate.id === "live_document_broad_review")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "live_document_broad_review")?.detail).toContain("six-document synthetic wording gate is not used");
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "live-document-editorial-review-2026-07-25", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("all 60 canonical document surfaces");
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("Exact repeated-line groups=38");
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("humanReviewCompleted=false");
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "live_document_secondary_grounding")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
@@ -1788,6 +1836,31 @@ describe("northstar open gate audit", () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "live_document_broad_review")?.detail).toContain("workPermit=4/5");
+  });
+
+  it("does not promote the automated editorial contract into a completed human review", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "live-document-editorial-review-2026-07-25", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      humanReviewCompleted: boolean;
+      evidenceBoundary: { humanReviewCompleted: boolean };
+    };
+    report.humanReviewCompleted = true;
+    report.evidenceBoundary.humanReviewCompleted = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.overall).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("humanReviewCompleted=true");
   });
 
   it("fails secondary document grounding closed when one supporting document is not grounded", async () => {

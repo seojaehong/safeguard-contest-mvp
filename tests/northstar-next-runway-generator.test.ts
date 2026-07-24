@@ -134,6 +134,21 @@ type NextRunwayReport = {
     exactSavedShareReproduced: boolean;
     exactSavedShareVerdict: string;
   };
+  liveDocumentEditorialReview: {
+    verdict: string;
+    scenarioCount: number;
+    reviewedDocumentSurfaceCount: number;
+    livePassed: number;
+    liveFailed: number;
+    placeholderFindingCount: number;
+    legalOverclaimFindingCount: number;
+    awkwardCompositionFindingCount: number;
+    evidenceDomainMismatchCount: number;
+    exactLineOveruseCount: number;
+    nearDuplicateLineOveruseCount: number;
+    humanReviewCompleted: boolean;
+    exactSavedShareVerdict: string;
+  };
   liveDocumentSeedProfileIsolation: {
     verdict: string;
     sourceHead: string;
@@ -723,6 +738,46 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       providerDispatchCalled: false,
       exactSavedShareReproduced: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
+  writeJson(root, "evaluation/live-document-editorial-review-2026-07-25/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+    productCommit: "TO_FILL",
+    productionCommit: "TO_FILL",
+    canonicalDocumentCount: 12,
+    scenarioCount: 5,
+    reviewedDocumentSurfaceCount: 60,
+    humanReviewCompleted: false,
+    beforeLive: {
+      pass: 0,
+      fail: 5,
+      awkwardCompositionFindingCount: 20,
+      evidenceDomainMismatchCount: 1,
+    },
+    afterLive: {
+      pass: 5,
+      fail: 0,
+      placeholderFindingCount: 0,
+      legalOverclaimFindingCount: 0,
+      awkwardCompositionFindingCount: 0,
+      evidenceDomainMismatchCount: 0,
+      exactLineOveruseCount: 38,
+      nearDuplicateLineOveruseCount: 100,
+    },
+    evidenceBoundary: {
+      automatedEditorialContract: true,
+      reviewerReady: true,
+      humanReviewCompleted: false,
+      sixCoreWordingGateCombinedAsHumanPass: false,
+      twelveDeliverablePresenceGateCombinedAsHumanPass: false,
+      duplicateFindingsRemainForHumanReview: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
     },
   });
   writeJson(root, "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", {
@@ -1339,6 +1394,22 @@ describe("northstar next runway generator", () => {
       exactSavedShareReproduced: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
+    expect(report.liveDocumentEditorialReview).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+      scenarioCount: 5,
+      reviewedDocumentSurfaceCount: 60,
+      livePassed: 5,
+      liveFailed: 0,
+      placeholderFindingCount: 0,
+      legalOverclaimFindingCount: 0,
+      awkwardCompositionFindingCount: 0,
+      evidenceDomainMismatchCount: 0,
+      exactLineOveruseCount: 38,
+      nearDuplicateLineOveruseCount: 100,
+      humanReviewCompleted: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.provenCurrentState).toContain("live_document_editorial_review");
     expect(report.provenCurrentState).toContain("live_document_secondary_grounding");
     expect(report.liveDocumentSeedProfileIsolation).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION",
