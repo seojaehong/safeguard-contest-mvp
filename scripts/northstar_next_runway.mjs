@@ -21,6 +21,7 @@ const ARTIFACTS = Object.freeze({
   hermesOpenclawRuntime: path.join("evaluation", "hermes-openclaw-runtime-current-gate-2026-07-20", "report.json"),
   launchReadiness: path.join("evaluation", "launch-readiness-current-2026-07-22", "report.json"),
   documentQualityGrounding: path.join("evaluation", "document-quality-grounding-current-gate-2026-07-19", "report.json"),
+  liveDocumentQualityMatrix: path.join("evaluation", "live-document-quality-matrix-2026-07-24", "report.json"),
   koshaNextExactCandidateAudit: path.join("evaluation", "kosha-next-exact-candidate-audit-2026-07-22", "report.json"),
   koshaExactPromotionPacket: path.join("evaluation", "kosha-exact-promotion-packet-2026-07-22", "report.json"),
   rlsLlmWikiApprovalPreflight: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
@@ -249,6 +250,32 @@ function documentQualityGroundingSummary(quality) {
     liveModelSampleExcellenceClaimed: asBoolean(boundaries.liveModelSampleExcellenceClaimed),
     dbMutationPerformed: asBoolean(boundaries.dbMutationPerformed),
     providerDispatchLiveClaimed: asBoolean(boundaries.providerDispatchLiveClaimed),
+  };
+}
+
+/**
+ * @param {unknown} matrix
+ */
+function liveDocumentQualityMatrixSummary(matrix) {
+  if (!isRecord(matrix)) return {};
+  const afterLive = isRecord(matrix.afterLive) ? matrix.afterLive : {};
+  const boundaries = isRecord(matrix.boundaries) ? matrix.boundaries : {};
+  return {
+    verdict: asString(matrix.verdict),
+    sourceHead: asString(matrix.sourceHead),
+    productionCommit: asString(matrix.productionCommitAtGeneration),
+    sourceHeadMatchesProduction: asBoolean(matrix.sourceHeadMatchesProduction),
+    scenarioCount: Array.isArray(matrix.scenarios) ? matrix.scenarios.length : 0,
+    livePassed: typeof afterLive.pass === "number" ? afterLive.pass : 0,
+    liveFailed: typeof afterLive.fail === "number" ? afterLive.fail : 0,
+    structuredRiskRowsPresent: asBoolean(afterLive.structuredRiskRowsPresent),
+    structuredRiskControlsDistinct: asBoolean(afterLive.structuredRiskControlsDistinct),
+    foreignWorkerScenarioRelevance: asBoolean(afterLive.foreignWorkerScenarioRelevance),
+    dbMutationPerformed: asBoolean(boundaries.dbMutationPerformed),
+    shareSessionCreated: asBoolean(boundaries.shareSessionCreated),
+    providerDispatchLiveClaimed: asBoolean(boundaries.providerDispatchLiveClaimed),
+    externalProviderCalled: asBoolean(boundaries.externalProviderCalled),
+    exactSavedShareSessionReproduced: asBoolean(boundaries.exactSavedShareSessionReproduced),
   };
 }
 
@@ -674,6 +701,7 @@ export function buildNorthstarNextRunway(options) {
   const hermes = readJson(options.rootDir, ARTIFACTS.hermesOpenclawRuntime);
   const launch = readJson(options.rootDir, ARTIFACTS.launchReadiness);
   const documentQuality = readOptionalJson(options.rootDir, ARTIFACTS.documentQualityGrounding);
+  const liveDocumentQualityMatrix = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentQualityMatrix);
   const koshaCandidateAudit = readJson(options.rootDir, ARTIFACTS.koshaNextExactCandidateAudit);
   const koshaPromotionPacket = readJson(options.rootDir, ARTIFACTS.koshaExactPromotionPacket);
   const sif = readJson(options.rootDir, ARTIFACTS.sifEmbeddingPreflight);
@@ -773,6 +801,7 @@ export function buildNorthstarNextRunway(options) {
     },
     hermesOpenclaw: hermesSummary(hermes),
     documentQualityGrounding: documentQualityGroundingSummary(documentQuality),
+    liveDocumentQualityMatrix: liveDocumentQualityMatrixSummary(liveDocumentQualityMatrix),
     koshaNextExactCandidateAudit: koshaCandidateAuditSummary(koshaCandidateAudit),
     koshaExactPromotionPacket: koshaPromotionPacketSummary(koshaPromotionPacket),
     sifEmbeddingRuntime: sifSummary(sif),
@@ -879,6 +908,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Standalone Dispatch cockpit is proven for the current evidence scope.
 - Generated Share result fixture cockpit is proven without claiming real provider dispatch.
 - Document quality grounding is proven for the focused contract: \`${report.documentQualityGrounding.verdict || "missing"}\`, tests passed \`${report.documentQualityGrounding.testsPassed ?? 0}\`, SIF/KOSHA/law evidence remains before LLM prose, and KOSHA support is not promoted to statutory mandate. Live model sample excellence remains a separate human-review proof.
+- Live multi-scenario document quality is measured separately: \`${report.liveDocumentQualityMatrix.verdict || "missing"}\`, live scenarios passed \`${report.liveDocumentQualityMatrix.livePassed ?? 0}/${report.liveDocumentQualityMatrix.scenarioCount ?? 0}\`, structured risk controls remain distinct, and foreign-worker briefing stays scenario-relevant. This five-scenario proof does not replace broad human wording review.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level, without claiming live production engine execution.
 - SIF embedding approval preflight is approval-held: no embedding generation, no upload, and vector runtime disabled until approval.
 - North Star approval runway is current and separates runtime/provider/database/vector gates from ordinary UI/evidence iteration.

@@ -29,6 +29,7 @@ const EVIDENCE_PATHS = Object.freeze({
   final99NoApprovalBoundary: path.join("evaluation", "final-99-no-approval-boundary-2026-07-23", "report.json"),
   liveHarness: path.join("evaluation", "live-harness-quality-probe-current-2026-07-20", "report.json"),
   documentQualityGrounding: path.join("evaluation", "document-quality-grounding-current-gate-2026-07-19", "report.json"),
+  liveDocumentQualityMatrix: path.join("evaluation", "live-document-quality-matrix-2026-07-24", "report.json"),
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
   llmWikiApproval: path.join("evaluation", "llm-wiki-rls-approval-2026-07-17", "report.md"),
   rlsLlmWikiApprovalPreflight: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
@@ -427,6 +428,69 @@ function evaluateDocumentQualityGroundingGate(rootDir) {
     evidencePath,
     detail: `Document quality grounding verdict is ${verdict || "unknown"} with tests=${testsStatus || "unknown"} and noMutation=${noMutation}.`,
     nextActions: ["Fix the focused document-quality grounding suite before claiming 99+ document-quality progress."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateLiveDocumentQualityMatrixGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.liveDocumentQualityMatrix;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "live_document_quality_matrix",
+      label: "Live multi-scenario document quality",
+      state: "missing",
+      evidencePath,
+      detail: "Live multi-scenario document quality report is missing or invalid.",
+      nextActions: ["Run the five-scenario live document quality matrix and commit its before/local/live evidence."],
+    });
+  }
+
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const boundaries = isRecord(report.boundaries) ? report.boundaries : {};
+  const scenarioCount = Array.isArray(report.scenarios) ? report.scenarios.length : 0;
+  const liveTotal = readNumber(afterLive.total);
+  const livePass = readNumber(afterLive.pass);
+  const liveFail = readNumber(afterLive.fail);
+  const noMutation = boundaries.dbMutationPerformed === false
+    && boundaries.shareSessionCreated === false
+    && boundaries.providerDispatchLiveClaimed === false
+    && boundaries.externalProviderCalled === false;
+  const contractsReady = afterLive.structuredRiskRowsPresent === true
+    && afterLive.structuredRiskControlsDistinct === true
+    && afterLive.foreignWorkerScenarioRelevance === true;
+  const liveReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_MULTI_SCENARIO_DOCUMENT_QUALITY"
+    && report.sourceHeadMatchesProduction === true
+    && scenarioCount === 5
+    && liveTotal === 5
+    && livePass === 5
+    && liveFail === 0
+    && contractsReady
+    && noMutation;
+
+  if (liveReady) {
+    return gateResult({
+      id: "live_document_quality_matrix",
+      label: "Live multi-scenario document quality",
+      state: "proven",
+      evidencePath,
+      detail: "Five live production scenarios pass the measured document-quality matrix: structured risk rows are present, current/additional controls remain distinct, foreign-worker briefing stays scenario-relevant, and no DB/share-session/provider mutation occurred. This scoped matrix does not replace broad human wording review.",
+      nextActions: [
+        "Keep broad wording, concision, and field-usability review as a separate human-review boundary beyond the measured five-scenario matrix.",
+      ],
+    });
+  }
+
+  return gateResult({
+    id: "live_document_quality_matrix",
+    label: "Live multi-scenario document quality",
+    state: "contradicted",
+    evidencePath,
+    detail: `Live matrix verdict=${readString(report.verdict) || "unknown"}, scenarios=${scenarioCount}, live=${livePass}/${liveTotal}, failed=${liveFail}, sourceMatchesProduction=${report.sourceHeadMatchesProduction === true}, noMutation=${noMutation}.`,
+    nextActions: ["Fix the failing live scenario contracts and rerun the before/local/live matrix without weakening the runner."],
   });
 }
 
@@ -2271,6 +2335,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateFinal99Gate(rootDir),
     evaluateLiveHarnessGate(rootDir),
     evaluateDocumentQualityGroundingGate(rootDir),
+    evaluateLiveDocumentQualityMatrixGate(rootDir),
     evaluateUiDocumentsShareCockpitGate(rootDir),
     evaluateDispatchStandaloneCockpitGate(rootDir),
     evaluateShareResultFixtureCockpitGate(rootDir),

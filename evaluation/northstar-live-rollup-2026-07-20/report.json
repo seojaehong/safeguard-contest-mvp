@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-24T13:09:46.793Z",
-  "head": "5a91a1f5659c748143cb8c52ef670c5949b22401",
+  "generatedAt": "2026-07-24T13:42:01.868Z",
+  "head": "c157ec5b09073d7543d09c4b8c3d0015c6ef45c6",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "5a91a1f5659c748143cb8c52ef670c5949b22401",
+    "commitSha": "74d7fe3c13c5f757b0feec67760438a83ad5cc77",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-97fkjt94j-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-66ahyzxsn-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 14
+    "gateCount": 15
   },
   "provenGates": [
     {
@@ -38,6 +38,12 @@
       "state": "proven",
       "artifact": "evaluation\\document-quality-grounding-current-gate-2026-07-19\\report.json",
       "detail": "Current source proves the document-quality grounding contract with 135 focused tests: SIF/KOSHA/law evidence stays before LLM prose, LLM role remains naturalize_only, unsupported provider hazards are rejected, qualityContract blocks incomplete outputs, and KOSHA support is not promoted to statutory mandate. This is not a claim that every live model sample is excellent."
+    },
+    {
+      "id": "live_document_quality_matrix",
+      "state": "proven",
+      "artifact": "evaluation\\live-document-quality-matrix-2026-07-24\\report.json",
+      "detail": "Five live production scenarios pass the measured document-quality matrix: structured risk rows are present, current/additional controls remain distinct, foreign-worker briefing stays scenario-relevant, and no DB/share-session/provider mutation occurred. This scoped matrix does not replace broad human wording review."
     },
     {
       "id": "ui_documents_share_cockpit",
@@ -152,6 +158,19 @@
     "primaryBottom": 544.390625,
     "horizontalOverflow": 0
   },
+  "liveDocumentQualityMatrix": {
+    "artifact": "evaluation\\live-document-quality-matrix-2026-07-24\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_MULTI_SCENARIO_DOCUMENT_QUALITY",
+    "sourceHead": "74d7fe3c13c5f757b0feec67760438a83ad5cc77",
+    "productionCommit": "74d7fe3c13c5f757b0feec67760438a83ad5cc77",
+    "scenarioCount": 5,
+    "livePassed": 5,
+    "liveFailed": 0,
+    "structuredRiskControlsDistinct": true,
+    "foreignWorkerScenarioRelevance": true,
+    "dbMutationPerformed": false,
+    "providerDispatchLiveClaimed": false
+  },
   "providerDispatchPersistence": {
     "artifact": "evaluation\\provider-dispatch-idempotency-gate-2026-07-19\\report.json",
     "status": "approval_required",
@@ -205,10 +224,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "5a91a1f5659c748143cb8c52ef670c5949b22401",
+      "sourceCommit": "c157ec5b09073d7543d09c4b8c3d0015c6ef45c6",
       "sourceStatus": "exact",
-      "productionCommit": "5a91a1f5659c748143cb8c52ef670c5949b22401",
-      "productionStatus": "matches_live"
+      "productionCommit": "c157ec5b09073d7543d09c4b8c3d0015c6ef45c6",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -222,8 +241,16 @@
       "id": "live_harness_quality",
       "artifact": "evaluation\\live-harness-quality-probe-current-2026-07-20\\report.json",
       "sourceCommit": "5a91a1f5659c748143cb8c52ef670c5949b22401",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "5a91a1f5659c748143cb8c52ef670c5949b22401",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "live_document_quality_matrix",
+      "artifact": "evaluation\\live-document-quality-matrix-2026-07-24\\report.json",
+      "sourceCommit": "74d7fe3c13c5f757b0feec67760438a83ad5cc77",
+      "sourceStatus": "ancestor",
+      "productionCommit": "74d7fe3c13c5f757b0feec67760438a83ad5cc77",
       "productionStatus": "matches_live"
     },
     {

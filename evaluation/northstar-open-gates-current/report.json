@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-24T13:09:46.014Z",
-  "sourceSha": "5a91a1f5659c748143cb8c52ef670c5949b22401",
+  "generatedAt": "2026-07-24T13:42:01.349Z",
+  "sourceSha": "c157ec5b09073d7543d09c4b8c3d0015c6ef45c6",
   "overall": "open",
   "gates": [
     {
@@ -32,6 +32,16 @@
       "nextActions": [
         "Keep live model sample excellence separate from the deterministic document-quality grounding contract.",
         "Continue requiring human review for wording quality, concision, and field usability before broad launch claims."
+      ]
+    },
+    {
+      "id": "live_document_quality_matrix",
+      "state": "proven",
+      "label": "Live multi-scenario document quality",
+      "evidencePath": "evaluation\\live-document-quality-matrix-2026-07-24\\report.json",
+      "detail": "Five live production scenarios pass the measured document-quality matrix: structured risk rows are present, current/additional controls remain distinct, foreign-worker briefing stays scenario-relevant, and no DB/share-session/provider mutation occurred. This scoped matrix does not replace broad human wording review.",
+      "nextActions": [
+        "Keep broad wording, concision, and field-usability review as a separate human-review boundary beyond the measured five-scenario matrix."
       ]
     },
     {

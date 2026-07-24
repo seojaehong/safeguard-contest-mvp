@@ -18,6 +18,7 @@ const ARTIFACTS = Object.freeze({
   final99: path.join("evaluation", "final-99-gate-current-2026-07-22", "report.json"),
   final99NoticeCarry: path.join("evaluation", "final-99-gate-current-2026-07-22", "notice-carry.json"),
   liveHarness: path.join("evaluation", "live-harness-quality-probe-current-2026-07-20", "report.json"),
+  liveDocumentQualityMatrix: path.join("evaluation", "live-document-quality-matrix-2026-07-24", "report.json"),
   kosha: path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json"),
   rlsWiki: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
   sifEmbedding: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
@@ -157,6 +158,9 @@ function extractProductionCommit(report) {
   if (typeof report.liveCommitAtDraft === "string") {
     return asString(report.liveCommitAtDraft);
   }
+  if (typeof report.productionCommitAtGeneration === "string") {
+    return asString(report.productionCommitAtGeneration);
+  }
   return "";
 }
 
@@ -171,6 +175,7 @@ function extractSourceCommit(report) {
     || asString(report.sourceSha)
     || asString(report.sourceHeadAtDraft)
     || asString(report.sourceHeadBeforeCommit)
+    || asString(report.sourceHead)
     || asString(report.head)
     || asString(report.commitSha)
     || asString(report.commit);
@@ -282,6 +287,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const final99 = tryReadJson(rootDir, ARTIFACTS.final99);
   const final99NoticeCarry = tryReadJson(rootDir, ARTIFACTS.final99NoticeCarry);
   const liveHarness = tryReadJson(rootDir, ARTIFACTS.liveHarness);
+  const liveDocumentQualityMatrix = tryReadJson(rootDir, ARTIFACTS.liveDocumentQualityMatrix);
   const kosha = tryReadJson(rootDir, ARTIFACTS.kosha);
   const rlsWiki = tryReadJson(rootDir, ARTIFACTS.rlsWiki);
   const sifEmbedding = tryReadJson(rootDir, ARTIFACTS.sifEmbedding);
@@ -350,6 +356,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "open_gate", ARTIFACTS.openGate, openGate),
     evidenceStatus(rootDir, currentHead, liveCommit, "final_99_gate", ARTIFACTS.final99, final99),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_harness_quality", ARTIFACTS.liveHarness, liveHarness),
+    evidenceStatus(rootDir, currentHead, liveCommit, "live_document_quality_matrix", ARTIFACTS.liveDocumentQualityMatrix, liveDocumentQualityMatrix),
     evidenceStatus(rootDir, currentHead, liveCommit, "kosha_exact_trust_registry", ARTIFACTS.kosha, kosha),
     evidenceStatus(rootDir, currentHead, liveCommit, "rls_llm_wiki_approval_preflight", ARTIFACTS.rlsWiki, rlsWiki),
     evidenceStatus(rootDir, currentHead, liveCommit, "sif_embedding_preflight", ARTIFACTS.sifEmbedding, sifEmbedding),
@@ -437,6 +444,21 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       primaryBottom: asNumber(recordAt(dispatchStandalone, "metrics")?.primaryBottom),
       horizontalOverflow: asNumber(recordAt(dispatchStandalone, "metrics")?.horizontalOverflow),
     },
+    liveDocumentQualityMatrix: {
+      artifact: ARTIFACTS.liveDocumentQualityMatrix,
+      verdict: isRecord(liveDocumentQualityMatrix) ? asString(liveDocumentQualityMatrix.verdict) : "missing",
+      sourceHead: isRecord(liveDocumentQualityMatrix) ? asString(liveDocumentQualityMatrix.sourceHead) : "",
+      productionCommit: extractProductionCommit(liveDocumentQualityMatrix),
+      scenarioCount: isRecord(liveDocumentQualityMatrix) && Array.isArray(liveDocumentQualityMatrix.scenarios)
+        ? liveDocumentQualityMatrix.scenarios.length
+        : null,
+      livePassed: asNumber(recordAt(liveDocumentQualityMatrix, "afterLive")?.pass),
+      liveFailed: asNumber(recordAt(liveDocumentQualityMatrix, "afterLive")?.fail),
+      structuredRiskControlsDistinct: recordAt(liveDocumentQualityMatrix, "afterLive")?.structuredRiskControlsDistinct === true,
+      foreignWorkerScenarioRelevance: recordAt(liveDocumentQualityMatrix, "afterLive")?.foreignWorkerScenarioRelevance === true,
+      dbMutationPerformed: recordAt(liveDocumentQualityMatrix, "boundaries")?.dbMutationPerformed === true,
+      providerDispatchLiveClaimed: recordAt(liveDocumentQualityMatrix, "boundaries")?.providerDispatchLiveClaimed === true,
+    },
     providerDispatchPersistence: {
       artifact: ARTIFACTS.providerDispatchIdempotency,
       status: isRecord(providerDispatchIdempotency) ? asString(providerDispatchIdempotency.status) : "missing",
@@ -512,6 +534,14 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Preview bottom: ${rollup.dispatchStandaloneCockpit.previewBottom}`,
     `- Primary CTA bottom: ${rollup.dispatchStandaloneCockpit.primaryBottom}`,
     `- Horizontal overflow: ${rollup.dispatchStandaloneCockpit.horizontalOverflow}`,
+    "",
+    "## Live Multi-Scenario Document Quality",
+    "",
+    `- Verdict: \`${rollup.liveDocumentQualityMatrix.verdict}\``,
+    `- Live scenarios passed: ${rollup.liveDocumentQualityMatrix.livePassed ?? "unknown"}/${rollup.liveDocumentQualityMatrix.scenarioCount ?? "unknown"}; failed=${rollup.liveDocumentQualityMatrix.liveFailed ?? "unknown"}`,
+    `- Structured controls distinct: ${rollup.liveDocumentQualityMatrix.structuredRiskControlsDistinct}`,
+    `- Foreign-worker scenario relevance: ${rollup.liveDocumentQualityMatrix.foreignWorkerScenarioRelevance}`,
+    `- DB mutation: ${rollup.liveDocumentQualityMatrix.dbMutationPerformed}; provider dispatch claimed: ${rollup.liveDocumentQualityMatrix.providerDispatchLiveClaimed}`,
     "",
     "## Gate Matrix",
     "",

@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `5a91a1f5659c748143cb8c52ef670c5949b22401`
+Source HEAD: `c157ec5b09073d7543d09c4b8c3d0015c6ef45c6`
 
-Production `/api/build-info`: `5a91a1f5659c748143cb8c52ef670c5949b22401`
+Production `/api/build-info`: `74d7fe3c13c5f757b0feec67760438a83ad5cc77`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `none`
+Source pending changed paths: `evaluation/live-document-quality-matrix-2026-07-24-after-live/details.json`, `evaluation/live-document-quality-matrix-2026-07-24-after-live/matrix-runner-report.json`, `evaluation/live-document-quality-matrix-2026-07-24-after-live/report.json`, `evaluation/live-document-quality-matrix-2026-07-24-after-local/details.json`, `evaluation/live-document-quality-matrix-2026-07-24-after-local/matrix-runner-report.json`, `evaluation/live-document-quality-matrix-2026-07-24-after-local/report.json`, `evaluation/live-document-quality-matrix-2026-07-24-before-remediation/details.json`, `evaluation/live-document-quality-matrix-2026-07-24-before-remediation/matrix-runner-report.json`, `evaluation/live-document-quality-matrix-2026-07-24-before-remediation/report.json`, `evaluation/live-document-quality-matrix-2026-07-24/report.json`, `evaluation/live-document-quality-matrix-2026-07-24/report.md`, `evaluation/live-document-quality-matrix-2026-07-24/scenarios.json`
 
-Current head is evidence-only pending: `false`
+Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `5a91a1f5659c748143cb8c52ef670c5949b22401`
+Live rollup source head: `c157ec5b09073d7543d09c4b8c3d0015c6ef45c6`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `c157ec5b09073d7543d09c4b8c3d0015c6ef45c6` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `74d7fe3c13c5f757b0feec67760438a83ad5cc77`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -41,6 +41,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Standalone Dispatch cockpit is proven for the current evidence scope.
 - Generated Share result fixture cockpit is proven without claiming real provider dispatch.
 - Document quality grounding is proven for the focused contract: `PASS_CURRENT_SOURCE_DOCUMENT_QUALITY_GROUNDING_CONTRACT`, tests passed `135`, SIF/KOSHA/law evidence remains before LLM prose, and KOSHA support is not promoted to statutory mandate. Live model sample excellence remains a separate human-review proof.
+- Live multi-scenario document quality is measured separately: `PASS_LIVE_PRODUCTION_MULTI_SCENARIO_DOCUMENT_QUALITY`, live scenarios passed `5/5`, structured risk controls remain distinct, and foreign-worker briefing stays scenario-relevant. This five-scenario proof does not replace broad human wording review.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level, without claiming live production engine execution.
 - SIF embedding approval preflight is approval-held: no embedding generation, no upload, and vector runtime disabled until approval.
 - North Star approval runway is current and separates runtime/provider/database/vector gates from ordinary UI/evidence iteration.

@@ -20,6 +20,14 @@ type RollupReport = {
   liveCritical: {
     findings: number;
   };
+  liveDocumentQualityMatrix: {
+    verdict: string;
+    scenarioCount: number;
+    livePassed: number;
+    liveFailed: number;
+    structuredRiskControlsDistinct: boolean;
+    foreignWorkerScenarioRelevance: boolean;
+  };
   evidence: Array<{
     id: string;
     sourceStatus: string;
@@ -52,6 +60,7 @@ function createFixtureRoot(): { root: string; head: string } {
     gates: [
       { id: "final_99_gate", state: "notice", evidencePath: "evaluation/final-99-gate-current-2026-07-22/report.json", detail: "notice carried" },
       { id: "live_harness_quality", state: "proven", evidencePath: "evaluation/live-harness-quality-probe-current-2026-07-20/report.json", detail: "passed" },
+      { id: "live_document_quality_matrix", state: "proven", evidencePath: "evaluation/live-document-quality-matrix-2026-07-24/report.json", detail: "five live scenarios passed" },
       { id: "provider_dispatch_persistence", state: "approval_gated", evidencePath: "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json", detail: "preview only" },
       { id: "supabase_rls_launch_isolation", state: "approval_gated", evidencePath: "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", detail: "approval required" },
       { id: "llm_wiki_publication", state: "approval_gated", evidencePath: "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", detail: "approval required" },
@@ -82,6 +91,22 @@ function createFixtureRoot(): { root: string; head: string } {
     liveStatus: {
       exactTrustRegistry: { stableDocumentKeys: ["D-C-13", "D-C-7", "B-E-10"] },
       localCorpus: { itemCount: 234 },
+    },
+  });
+  writeJson(root, "evaluation/live-document-quality-matrix-2026-07-24/report.json", {
+    sourceHead: "TO_FILL",
+    productionCommitAtGeneration: "TO_FILL",
+    verdict: "PASS_LIVE_PRODUCTION_MULTI_SCENARIO_DOCUMENT_QUALITY",
+    scenarios: ["one", "two", "three", "four", "five"],
+    afterLive: {
+      pass: 5,
+      fail: 0,
+      structuredRiskControlsDistinct: true,
+      foreignWorkerScenarioRelevance: true,
+    },
+    boundaries: {
+      dbMutationPerformed: false,
+      providerDispatchLiveClaimed: false,
     },
   });
   writeJson(root, "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json", {
@@ -176,6 +201,7 @@ function createFixtureRoot(): { root: string; head: string } {
   [
     "evaluation/final-99-gate-current-2026-07-22/report.json",
     "evaluation/live-harness-quality-probe-current-2026-07-20/report.json",
+    "evaluation/live-document-quality-matrix-2026-07-24/report.json",
     "evaluation/kosha-current-live-gate-2026-07-20/report.json",
     "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json",
     "evaluation/northstar-approval-runway-2026-07-21/report.json",
@@ -221,6 +247,15 @@ describe("northstar live rollup", () => {
     expect(report.mobileP0.documentsHeightRatio).toBe(1);
     expect(report.mobileP0.shareHeightRatio).toBe(1);
     expect(report.liveCritical.findings).toBe(0);
+    expect(report.liveDocumentQualityMatrix).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_MULTI_SCENARIO_DOCUMENT_QUALITY",
+      scenarioCount: 5,
+      livePassed: 5,
+      liveFailed: 0,
+      structuredRiskControlsDistinct: true,
+      foreignWorkerScenarioRelevance: true,
+    });
+    expect(report.evidence.find((item) => item.id === "live_document_quality_matrix")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "open_gate")?.productionStatus).toBe("matches_live");
     expect(report.evidence.find((item) => item.id === "provider_dispatch_persistence")?.sourceStatus).toBe("ancestor");
     expect(report.evidence.find((item) => item.id === "provider_dispatch_persistence")?.productionStatus).toBe("ancestor_of_head");

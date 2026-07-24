@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-24T13:09:46.793Z
-Source HEAD at generation: 5a91a1f5659c748143cb8c52ef670c5949b22401
-Live commit at generation: 5a91a1f5659c748143cb8c52ef670c5949b22401
+Generated at: 2026-07-24T13:42:01.868Z
+Source HEAD at generation: c157ec5b09073d7543d09c4b8c3d0015c6ef45c6
+Live commit at generation: 74d7fe3c13c5f757b0feec67760438a83ad5cc77
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -24,6 +24,14 @@ Overall: `northstar_open_approval_gated`
 - Primary CTA bottom: 544.390625
 - Horizontal overflow: 0
 
+## Live Multi-Scenario Document Quality
+
+- Verdict: `PASS_LIVE_PRODUCTION_MULTI_SCENARIO_DOCUMENT_QUALITY`
+- Live scenarios passed: 5/5; failed=0
+- Structured controls distinct: true
+- Foreign-worker scenario relevance: true
+- DB mutation: false; provider dispatch claimed: false
+
 ## Gate Matrix
 
 | Gate | State | Artifact |
@@ -31,6 +39,7 @@ Overall: `northstar_open_approval_gated`
 | final_99_gate | notice | evaluation\final-99-gate-current-2026-07-22\report.json |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
 | document_quality_grounding | proven | evaluation\document-quality-grounding-current-gate-2026-07-19\report.json |
+| live_document_quality_matrix | proven | evaluation\live-document-quality-matrix-2026-07-24\report.json |
 | ui_documents_share_cockpit | proven | evaluation\documents-cockpit-workbench-geometry-2026-07-22\report.json |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
 | share_result_fixture_cockpit | proven | evaluation\share-result-drilldown-2026-07-21\report.json |
@@ -47,9 +56,10 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
-| live_harness_quality | exact | matches_live | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
+| live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
+| live_document_quality_matrix | ancestor | matches_live | evaluation\live-document-quality-matrix-2026-07-24\report.json |
 | kosha_exact_trust_registry | ancestor | ancestor_of_head | evaluation\kosha-current-live-gate-2026-07-20\report.json |
 | rls_llm_wiki_approval_preflight | ancestor | missing | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
 | sif_embedding_preflight | ancestor | missing | evaluation\sif-embedding-gate\approval-preflight-report.json |

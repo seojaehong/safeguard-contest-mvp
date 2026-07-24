@@ -17,6 +17,23 @@ type NextRunwayReport = {
   liveRollupMatchesProduction: boolean;
   boundedWorkbenchSourceIncludedInLive: boolean;
   boundedWorkbenchCurrentLivePending: boolean;
+  liveDocumentQualityMatrix: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    sourceHeadMatchesProduction: boolean;
+    scenarioCount: number;
+    livePassed: number;
+    liveFailed: number;
+    structuredRiskRowsPresent: boolean;
+    structuredRiskControlsDistinct: boolean;
+    foreignWorkerScenarioRelevance: boolean;
+    dbMutationPerformed: boolean;
+    shareSessionCreated: boolean;
+    providerDispatchLiveClaimed: boolean;
+    externalProviderCalled: boolean;
+    exactSavedShareSessionReproduced: boolean;
+  };
   approvalGated: Array<{
     gate: string;
     state: string;
@@ -345,6 +362,27 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       schemaMigrationPerformed: false,
       llmWikiPublicationPerformed: false,
       exactKoshaRegistryMutationPerformed: false,
+    },
+  });
+  writeJson(root, "evaluation/live-document-quality-matrix-2026-07-24/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_MULTI_SCENARIO_DOCUMENT_QUALITY",
+    sourceHead: "TO_FILL",
+    productionCommitAtGeneration: "TO_FILL",
+    sourceHeadMatchesProduction: true,
+    scenarios: ["one", "two", "three", "four", "five"],
+    afterLive: {
+      pass: 5,
+      fail: 0,
+      structuredRiskRowsPresent: true,
+      structuredRiskControlsDistinct: true,
+      foreignWorkerScenarioRelevance: true,
+    },
+    boundaries: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchLiveClaimed: false,
+      externalProviderCalled: false,
+      exactSavedShareSessionReproduced: false,
     },
   });
   writeJson(root, "evaluation/kosha-next-exact-candidate-audit-2026-07-22/report.json", {
@@ -707,6 +745,21 @@ describe("northstar next runway generator", () => {
       mutationPerformed: false,
       dbMutationPerformed: false,
       embeddingGenerationPerformed: false,
+    });
+    expect(report.liveDocumentQualityMatrix).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_MULTI_SCENARIO_DOCUMENT_QUALITY",
+      scenarioCount: 5,
+      livePassed: 5,
+      liveFailed: 0,
+      sourceHeadMatchesProduction: true,
+      structuredRiskRowsPresent: true,
+      structuredRiskControlsDistinct: true,
+      foreignWorkerScenarioRelevance: true,
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchLiveClaimed: false,
+      externalProviderCalled: false,
+      exactSavedShareSessionReproduced: false,
     });
     expect(report.koshaNextExactCandidateAudit.forbiddenClaims).toContain(
       "The metadata-verified non-exact candidates are already exact production evidence.",
