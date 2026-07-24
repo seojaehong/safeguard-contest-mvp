@@ -225,6 +225,7 @@ function documentsVerdict(metrics) {
       && metrics.mountedSectionDetailCount === 1
       && metrics.mountedSectionTextareaCount === 1
       && metrics.mountedSourceTextareaCount === 0
+      && metrics.firstActionBottom <= metrics.viewportHeight
       && metrics.visibleSelectedEditorCount === 1
       && metrics.horizontalOverflow === false
       && metrics.outsideElements === 0

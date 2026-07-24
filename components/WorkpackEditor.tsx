@@ -3149,6 +3149,37 @@ export function WorkpackEditor({
     });
   }
 
+  function alignStructuredSectionCockpitBelowToolbar(section: HTMLElement | null) {
+    const shell = workpackShellRef.current;
+    const fieldStrip = section?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]') || null;
+    const sectionActions = section?.querySelector<HTMLElement>('[data-testid="document-section-actions"]') || null;
+    if (!shell || !sectionActions) {
+      alignPaneTargetBelowToolbar(fieldStrip || section);
+      return;
+    }
+
+    alignPaneTargetBelowToolbar(fieldStrip || sectionActions);
+
+    const shellRect = shell.getBoundingClientRect();
+    const toolbar = documentBodyRef.current?.querySelector<HTMLElement>(".document-toolbar") || null;
+    const toolbarRect = toolbar?.getBoundingClientRect();
+    const visibleTop = toolbarRect && toolbarRect.bottom > shellRect.top && toolbarRect.top < shellRect.bottom
+      ? toolbarRect.bottom
+      : shellRect.top;
+    const visibleBottom = Math.min(shellRect.bottom, window.innerHeight);
+    const fieldRect = fieldStrip?.getBoundingClientRect();
+    const actionsRect = sectionActions.getBoundingClientRect();
+    const overflow = Math.max(0, actionsRect.bottom - (visibleBottom - 8));
+    const topAllowance = fieldRect ? Math.max(0, fieldRect.top - visibleTop - 4) : overflow;
+    const additionalScroll = Math.min(overflow, topAllowance);
+    if (additionalScroll > 0) {
+      shell.scrollTo({
+        top: shell.scrollTop + additionalScroll,
+        behavior: "auto"
+      });
+    }
+  }
+
   function alignRiskCockpitBelowToolbar() {
     const shell = workpackShellRef.current;
     const fieldStrip = documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]') || null;
@@ -3204,6 +3235,19 @@ export function WorkpackEditor({
       alignRiskCockpitBelowToolbar();
       return;
     }
+    const activeSection = Array.from(
+      documentBodyRef.current?.querySelectorAll<HTMLElement>("[data-section-id]") || []
+    ).find((section) => section.dataset.sectionId === expandedStructuredSectionId) || null;
+    if (selected.key === "workPlanDraft" && activeSection) {
+      const alignWorkPlanSection = () => alignStructuredSectionCockpitBelowToolbar(activeSection);
+      alignWorkPlanSection();
+      const alignFrame = window.requestAnimationFrame(alignWorkPlanSection);
+      const alignTimer = window.setTimeout(alignWorkPlanSection, 80);
+      return () => {
+        window.cancelAnimationFrame(alignFrame);
+        window.clearTimeout(alignTimer);
+      };
+    }
     const summaryCockpitTarget = isSummaryDocumentKey(selected.key)
       ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="summary-document-cockpit"]') || null
       : null;
@@ -3253,16 +3297,10 @@ export function WorkpackEditor({
       alignPaneTargetBelowToolbar(transmissionCockpitTarget);
       return;
     }
-    const activeSection = Array.from(
-      documentBodyRef.current?.querySelectorAll<HTMLElement>("[data-section-id]") || []
-    ).find((section) => section.dataset.sectionId === expandedStructuredSectionId) || null;
-    const target = activeSection?.querySelector<HTMLElement>("textarea")
-      || activeSection?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
-      || activeSection
-      || null;
-    alignPaneTargetBelowToolbar(target);
-    const alignFrame = window.requestAnimationFrame(() => alignPaneTargetBelowToolbar(target));
-    const alignTimer = window.setTimeout(() => alignPaneTargetBelowToolbar(target), 80);
+    const alignActiveSection = () => alignStructuredSectionCockpitBelowToolbar(activeSection);
+    alignActiveSection();
+    const alignFrame = window.requestAnimationFrame(alignActiveSection);
+    const alignTimer = window.setTimeout(alignActiveSection, 80);
     return () => {
       window.cancelAnimationFrame(alignFrame);
       window.clearTimeout(alignTimer);
@@ -3273,6 +3311,12 @@ export function WorkpackEditor({
     const alignSelectedDocument = () => {
       if (selected.key === "riskAssessmentDraft") {
         alignRiskCockpitBelowToolbar();
+        return;
+      }
+      if (selected.key === "workPlanDraft") {
+        alignStructuredSectionCockpitBelowToolbar(
+          documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-detail"]') || null
+        );
         return;
       }
       const target = isSummaryDocumentKey(selected.key)
@@ -3418,6 +3462,10 @@ export function WorkpackEditor({
       const alignReselectedDocument = () => {
         if (key === "riskAssessmentDraft") {
           alignRiskCockpitBelowToolbar();
+        } else if (key === "workPlanDraft") {
+          alignStructuredSectionCockpitBelowToolbar(
+            documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-detail"]') || null
+          );
         } else {
           const target = documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
             || documentBodyRef.current;
@@ -3435,6 +3483,10 @@ export function WorkpackEditor({
     const alignSelectedDocument = () => {
       if (key === "riskAssessmentDraft") {
         alignRiskCockpitBelowToolbar();
+      } else if (key === "workPlanDraft") {
+        alignStructuredSectionCockpitBelowToolbar(
+          documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-detail"]') || null
+        );
       } else {
         alignPaneTargetBelowToolbar(
           getDocumentLandingTarget(key)

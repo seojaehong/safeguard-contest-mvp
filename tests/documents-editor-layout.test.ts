@@ -427,6 +427,49 @@ describe("documents editor layout", () => {
     }
   }, 90_000);
 
+  it("keeps selected document section actions inside the short viewport", async () => {
+    if (!browser) throw new Error("Browser was not started");
+
+    for (const viewport of [
+      { width: 1440, height: 723 },
+      { width: 390, height: 723 }
+    ]) {
+      const page = await browser.newPage({ viewport });
+      await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+      await selectDocumentFromWorkbench(page, "workPlanDraft");
+      await page.getByTestId("document-section-detail").waitFor({ state: "visible" });
+      await expect.poll(() => page.evaluate(() => {
+        const shell = document.querySelector(".workpack-shell")?.getBoundingClientRect();
+        const actions = document.querySelector('[data-testid="document-section-actions"]')?.getBoundingClientRect();
+        if (!shell || !actions) return false;
+        return actions.bottom <= Math.min(shell.bottom, window.innerHeight);
+      })).toBe(true);
+
+      const metrics = await page.evaluate(() => {
+        const shell = document.querySelector<HTMLElement>(".workpack-shell");
+        const actions = document.querySelector<HTMLElement>('[data-testid="document-section-actions"]');
+        const sectionDetails = document.querySelectorAll('[data-testid="document-section-detail"]');
+        const sectionTextareas = document.querySelectorAll(".document-section-textarea");
+        if (!shell || !actions) throw new Error("Selected section cockpit is unavailable");
+        return {
+          viewportHeight: window.innerHeight,
+          shellBottom: Math.round(shell.getBoundingClientRect().bottom),
+          actionBottom: Math.round(actions.getBoundingClientRect().bottom),
+          sectionDetailCount: sectionDetails.length,
+          sectionTextareaCount: sectionTextareas.length,
+          horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth
+        };
+      });
+
+      expect(metrics.actionBottom).toBeLessThanOrEqual(metrics.viewportHeight);
+      expect(metrics.actionBottom).toBeLessThanOrEqual(metrics.shellBottom);
+      expect(metrics.sectionDetailCount).toBe(1);
+      expect(metrics.sectionTextareaCount).toBe(1);
+      expect(metrics.horizontalOverflow).toBe(false);
+      await page.close();
+    }
+  }, 90_000);
+
   it("round-trips a structured editor change into canonical XLSX rows without stale payload or truncation", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
