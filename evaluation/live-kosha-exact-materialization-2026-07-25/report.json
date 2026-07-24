@@ -1,0 +1,94 @@
+{
+  "generatedAt": "2026-07-24T16:36:34.692Z",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_KOSHA_EXACT_MATERIALIZATION_LIVE_PENDING",
+  "sourceHead": "857c52085f4b241eb0b13aec7cf51118246ff7a6",
+  "productionCommitAtBaseline": "b91dbd2e02e3ff33285f439f1c3db7fe77faa23f",
+  "sourceHeadMatchesProduction": false,
+  "liveAfterDeploymentPending": true,
+  "contract": {
+    "expectedPins": [
+      "D-C-13",
+      "D-C-7",
+      "B-E-10"
+    ],
+    "expectedPinRequiredInAtLeastOneStructuredRiskRow": true,
+    "unexpectedExactPinAllowed": false,
+    "koshaGuidanceStatutoryOverclaimAllowed": false,
+    "scenarioFieldLeakageAllowed": false
+  },
+  "beforeLive": {
+    "path": "evaluation/live-kosha-exact-materialization-2026-07-25/before-live/report.json",
+    "generatedAt": "2026-07-24T16:29:59.454Z",
+    "baseUrl": "https://www.safeclaw.kr",
+    "sourceHead": "b91dbd2e02e3ff33285f439f1c3db7fe77faa23f",
+    "productionCommit": "b91dbd2e02e3ff33285f439f1c3db7fe77faa23f",
+    "total": 3,
+    "pass": 0,
+    "fail": 3,
+    "elapsedMs": 56124,
+    "observedDebt": [
+      "The initial contract incorrectly required every risk row to cite the exact guide.",
+      "The scaffold assembly scenario leaked the exterior-painting process identity."
+    ]
+  },
+  "afterLocal": {
+    "path": "evaluation/live-kosha-exact-materialization-2026-07-25/after-local/report.json",
+    "generatedAt": "2026-07-24T16:36:34.692Z",
+    "baseUrl": "http://127.0.0.1:3080",
+    "sourceHead": "857c52085f4b241eb0b13aec7cf51118246ff7a6",
+    "productionBuildMarkerAvailable": false,
+    "total": 3,
+    "pass": 3,
+    "fail": 0,
+    "elapsedMs": 11648,
+    "rows": [
+      {
+        "scenarioId": "dc13-exterior-wall-repair__exact-materialization",
+        "expectedPin": "D-C-13",
+        "materializedPins": [
+          "D-C-13"
+        ],
+        "matchingStructuredRiskRows": 1,
+        "fieldLeakageCount": 0,
+        "verdict": "PASS"
+      },
+      {
+        "scenarioId": "dc7-scaffold-assembly__exact-materialization",
+        "expectedPin": "D-C-7",
+        "materializedPins": [
+          "D-C-7"
+        ],
+        "matchingStructuredRiskRows": 1,
+        "fieldLeakageCount": 0,
+        "verdict": "PASS"
+      },
+      {
+        "scenarioId": "be10-deenergized-electrical__exact-materialization",
+        "expectedPin": "B-E-10",
+        "materializedPins": [
+          "B-E-10"
+        ],
+        "matchingStructuredRiskRows": 1,
+        "fieldLeakageCount": 0,
+        "verdict": "PASS"
+      }
+    ]
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "exactTrustRegistryExpanded": false
+  },
+  "claimBoundary": {
+    "allowed": [
+      "Current source materializes each of the three existing exact KOSHA pins in at least one relevant structured risk row in local production.",
+      "The scaffold assembly scenario no longer leaks the exterior-painting process identity in the measured local production run."
+    ],
+    "forbiddenUntilLiveRerun": [
+      "Live production exact KOSHA materialization is complete for source 857c5208.",
+      "All KOSHA corpus rows are exact direct evidence.",
+      "KOSHA guidance is a statutory mandate."
+    ]
+  }
+}

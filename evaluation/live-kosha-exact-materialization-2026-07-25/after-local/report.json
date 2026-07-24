@@ -1,0 +1,159 @@
+{
+  "generatedAt": "2026-07-24T16:36:34.692Z",
+  "elapsedMs": 11648,
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SYNTHETIC_WORDING_REVIEW",
+  "mode": "current-source-local-production",
+  "baseUrl": "http://127.0.0.1:3080",
+  "sourceHead": "857c52085f4b241eb0b13aec7cf51118246ff7a6",
+  "productionBuild": {
+    "ok": true,
+    "configured": false,
+    "source": "unavailable",
+    "commitSha": null,
+    "branch": null,
+    "environment": null,
+    "deploymentUrl": null,
+    "message": "배포 커밋 식별자가 런타임 환경에 노출되지 않았습니다."
+  },
+  "total": 3,
+  "pass": 3,
+  "fail": 0,
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false
+  },
+  "cases": [
+    {
+      "id": "dc13-exterior-wall-repair__exact-materialization",
+      "verdict": "PASS",
+      "elapsedMs": 5614,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 5608
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6,
+        "scenarioSnapshot": {
+          "region": "서울",
+          "workType": "외벽도장 보수공사",
+          "fieldIsolationTerms": [
+            "외벽 도장",
+            "달비계",
+            "작업발판"
+          ],
+          "matchedFieldIsolationTerms": [
+            "외벽 도장"
+          ]
+        },
+        "uniqueProcessValues": [
+          "건설업 외벽 도장 작업"
+        ],
+        "uniqueEquipmentValues": [
+          "건설안전분야, 기술지원규정",
+          "아카이브(제조업등)",
+          "아카이브(건설업)",
+          "도료, 희석제, 환기장치, 소화기, 점화원 관리표지"
+        ],
+        "fieldLeakageFlags": [],
+        "expectedExactKoshaPin": "D-C-13",
+        "exactKoshaPinsInStructuredRows": [
+          "D-C-13"
+        ],
+        "exactKoshaRowsWithExpectedPin": 1,
+        "koshaStatutoryOverclaimSamples": []
+      },
+      "failedChecks": []
+    },
+    {
+      "id": "dc7-scaffold-assembly__exact-materialization",
+      "verdict": "PASS",
+      "elapsedMs": 2733,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 2730
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6,
+        "scenarioSnapshot": {
+          "region": "서울",
+          "workType": "비계 조립·해체",
+          "fieldIsolationTerms": [
+            "비계",
+            "안전난간",
+            "작업발판"
+          ],
+          "matchedFieldIsolationTerms": [
+            "비계",
+            "작업발판"
+          ]
+        },
+        "uniqueProcessValues": [
+          "건설업 이동식 비계 조립·해체 작업"
+        ],
+        "uniqueEquipmentValues": [
+          "건설안전분야, 기술지원규정",
+          "아카이브(제조업등)",
+          "아카이브(건설업)",
+          "이동식 비계, 작업발판, 보호구"
+        ],
+        "fieldLeakageFlags": [],
+        "expectedExactKoshaPin": "D-C-7",
+        "exactKoshaPinsInStructuredRows": [
+          "D-C-7"
+        ],
+        "exactKoshaRowsWithExpectedPin": 1,
+        "koshaStatutoryOverclaimSamples": []
+      },
+      "failedChecks": []
+    },
+    {
+      "id": "be10-deenergized-electrical__exact-materialization",
+      "verdict": "PASS",
+      "elapsedMs": 3097,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 3095
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6,
+        "scenarioSnapshot": {
+          "region": "부산",
+          "workType": "정전전로 전기작업",
+          "fieldIsolationTerms": [
+            "정전전로",
+            "배전반",
+            "검전"
+          ],
+          "matchedFieldIsolationTerms": [
+            "정전전로",
+            "배전반"
+          ]
+        },
+        "uniqueProcessValues": [
+          "전기설비 점검 정전전로 인근 배전반 점검 작업"
+        ],
+        "uniqueEquipmentValues": [
+          "전기안전분야, 기술지원규정",
+          "아카이브(건설업)",
+          "아카이브(제조업등)",
+          "작업 장비·공구·보호구"
+        ],
+        "fieldLeakageFlags": [],
+        "expectedExactKoshaPin": "B-E-10",
+        "exactKoshaPinsInStructuredRows": [
+          "B-E-10"
+        ],
+        "exactKoshaRowsWithExpectedPin": 1,
+        "koshaStatutoryOverclaimSamples": []
+      },
+      "failedChecks": []
+    }
+  ]
+}

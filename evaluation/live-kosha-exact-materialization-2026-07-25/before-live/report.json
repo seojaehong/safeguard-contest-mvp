@@ -1,0 +1,379 @@
+{
+  "generatedAt": "2026-07-24T16:29:59.454Z",
+  "elapsedMs": 56124,
+  "verdict": "RED_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW",
+  "mode": "live-production",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceHead": "b91dbd2e02e3ff33285f439f1c3db7fe77faa23f",
+  "productionBuild": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "b91dbd2e02e3ff33285f439f1c3db7fe77faa23f",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-npjwsyfoc-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "total": 3,
+  "pass": 0,
+  "fail": 3,
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false
+  },
+  "cases": [
+    {
+      "id": "dc13-exterior-wall-repair__exact-materialization",
+      "verdict": "RED",
+      "elapsedMs": 21840,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 21835
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6,
+        "scenarioSnapshot": {
+          "region": "서울",
+          "workType": "외벽도장 보수공사",
+          "fieldIsolationTerms": [
+            "외벽 도장",
+            "달비계",
+            "작업발판"
+          ],
+          "matchedFieldIsolationTerms": [
+            "외벽 도장"
+          ]
+        },
+        "uniqueProcessValues": [
+          "건설업 외벽 도장 작업"
+        ],
+        "uniqueEquipmentValues": [
+          "건설안전분야, 기술지원규정",
+          "아카이브(제조업등)",
+          "아카이브(건설업)",
+          "도료, 희석제, 환기장치, 소화기, 점화원 관리표지"
+        ],
+        "fieldLeakageFlags": [],
+        "expectedExactKoshaPin": "D-C-13",
+        "exactKoshaPinsInStructuredRows": [
+          "D-C-13"
+        ],
+        "exactKoshaRowsWithExpectedPin": 1,
+        "koshaStatutoryOverclaimSamples": []
+      },
+      "failedChecks": [
+        {
+          "id": "kosha:expectedExactPinInEveryRiskRow",
+          "ok": false,
+          "detail": "1/5 structured risk row(s) cite D-C-13",
+          "samples": [
+            {
+              "row": 1,
+              "refs": [
+                "고정 근거 보조근거",
+                "고위험요인 사례",
+                "OO공장에서 공드럼 상판을 절단하기 위해 산소절단기로 용단하는 순간 폭발하여 사망 사례",
+                "검색: rest"
+              ],
+              "pins": []
+            },
+            {
+              "row": 2,
+              "refs": [
+                "고정 근거 보조근거",
+                "고위험요인 사례",
+                "○○현장에서 기존 옥상면 방수도장 제거작업 후 작업장소의 그늘진 곳에 앉아 휴식하던 중 쓰러진 재해자를 발견하혀 병원치료 중 사망 사례",
+                "검색: rest"
+              ],
+              "pins": []
+            },
+            {
+              "row": 3,
+              "refs": [
+                "고정 근거 보조근거",
+                "고위험요인 사례",
+                "○○현장에서 달비계를 타고 아파트 외벽에서 크랙으로 인한 세대 방수 하자 보수작업을 마치고 내려오던 중 작업용 로프가 짧아 달비계와 함께 지상으로 떨어져… 사례",
+                "검색: rest"
+              ],
+              "pins": []
+            },
+            {
+              "row": 4,
+              "refs": [
+                "KOSHA 위험성평가",
+                "MSDS",
+                "화재·폭발 예방 조치",
+                "TBM 기록"
+              ],
+              "pins": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dc7-scaffold-assembly__exact-materialization",
+      "verdict": "RED",
+      "elapsedMs": 16772,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 16768
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6,
+        "scenarioSnapshot": {
+          "region": "서울",
+          "workType": "비계 조립·해체",
+          "fieldIsolationTerms": [
+            "비계",
+            "안전난간",
+            "작업발판"
+          ],
+          "matchedFieldIsolationTerms": [
+            "비계",
+            "작업발판"
+          ]
+        },
+        "uniqueProcessValues": [
+          "건설업 외벽 도장 작업"
+        ],
+        "uniqueEquipmentValues": [
+          "건설안전분야, 기술지원규정",
+          "아카이브(제조업등)",
+          "아카이브(건설업)",
+          "이동식 비계, 작업발판, 보호구"
+        ],
+        "fieldLeakageFlags": [
+          {
+            "row": 0,
+            "field": "process",
+            "value": "건설업 외벽 도장 작업",
+            "matchedProfile": "dc13-exterior-wall-repair",
+            "matchedTerm": "외벽 도장"
+          },
+          {
+            "row": 1,
+            "field": "process",
+            "value": "건설업 외벽 도장 작업",
+            "matchedProfile": "dc13-exterior-wall-repair",
+            "matchedTerm": "외벽 도장"
+          },
+          {
+            "row": 2,
+            "field": "process",
+            "value": "건설업 외벽 도장 작업",
+            "matchedProfile": "dc13-exterior-wall-repair",
+            "matchedTerm": "외벽 도장"
+          },
+          {
+            "row": 3,
+            "field": "process",
+            "value": "건설업 외벽 도장 작업",
+            "matchedProfile": "dc13-exterior-wall-repair",
+            "matchedTerm": "외벽 도장"
+          },
+          {
+            "row": 4,
+            "field": "process",
+            "value": "건설업 외벽 도장 작업",
+            "matchedProfile": "dc13-exterior-wall-repair",
+            "matchedTerm": "외벽 도장"
+          }
+        ],
+        "expectedExactKoshaPin": "D-C-7",
+        "exactKoshaPinsInStructuredRows": [
+          "D-C-7"
+        ],
+        "exactKoshaRowsWithExpectedPin": 1,
+        "koshaStatutoryOverclaimSamples": []
+      },
+      "failedChecks": [
+        {
+          "id": "riskRows:crossScenarioFieldLeakage",
+          "ok": false,
+          "detail": "5 process/task/equipment field value(s) contain another scenario fingerprint",
+          "samples": [
+            {
+              "row": 0,
+              "field": "process",
+              "value": "건설업 외벽 도장 작업",
+              "matchedProfile": "dc13-exterior-wall-repair",
+              "matchedTerm": "외벽 도장"
+            },
+            {
+              "row": 1,
+              "field": "process",
+              "value": "건설업 외벽 도장 작업",
+              "matchedProfile": "dc13-exterior-wall-repair",
+              "matchedTerm": "외벽 도장"
+            },
+            {
+              "row": 2,
+              "field": "process",
+              "value": "건설업 외벽 도장 작업",
+              "matchedProfile": "dc13-exterior-wall-repair",
+              "matchedTerm": "외벽 도장"
+            },
+            {
+              "row": 3,
+              "field": "process",
+              "value": "건설업 외벽 도장 작업",
+              "matchedProfile": "dc13-exterior-wall-repair",
+              "matchedTerm": "외벽 도장"
+            },
+            {
+              "row": 4,
+              "field": "process",
+              "value": "건설업 외벽 도장 작업",
+              "matchedProfile": "dc13-exterior-wall-repair",
+              "matchedTerm": "외벽 도장"
+            }
+          ]
+        },
+        {
+          "id": "kosha:expectedExactPinInEveryRiskRow",
+          "ok": false,
+          "detail": "1/5 structured risk row(s) cite D-C-7",
+          "samples": [
+            {
+              "row": 1,
+              "refs": [
+                "고정 근거 보조근거",
+                "고위험요인 사례",
+                "OO공장 이동식 사다리를 사용하여 지게차 파렛트 위로 이동 중 발을 헛디뎌 높이 약 2.15m 아래 바닥으로 추락하여 사망 사례",
+                "검색: rest"
+              ],
+              "pins": []
+            },
+            {
+              "row": 2,
+              "refs": [
+                "고정 근거 보조근거",
+                "고위험요인 사례",
+                "OO사업장 건설현장에서 트럭 정차 후 적재함으로 이동 중 후면에서 작업 중인 로더와 트럭 사이에 끼여 사망 사례",
+                "검색: rest"
+              ],
+              "pins": []
+            },
+            {
+              "row": 3,
+              "refs": [
+                "고정 근거 보조근거",
+                "고위험요인 사례",
+                "○○현장에서 옥상 경사 지붕에서 방수작업(부직포 설치) 중 몸의 중심을 잃고 지붕 단부에서 약 37m 아래 추락하여 사망 사례",
+                "검색: rest"
+              ],
+              "pins": []
+            },
+            {
+              "row": 4,
+              "refs": [
+                "산업안전보건법",
+                "KOSHA 위험성평가",
+                "문서팩 입력 조건"
+              ],
+              "pins": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "be10-deenergized-electrical__exact-materialization",
+      "verdict": "RED",
+      "elapsedMs": 17234,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 17231
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6,
+        "scenarioSnapshot": {
+          "region": "부산",
+          "workType": "정전전로 전기작업",
+          "fieldIsolationTerms": [
+            "정전전로",
+            "배전반",
+            "검전"
+          ],
+          "matchedFieldIsolationTerms": [
+            "정전전로",
+            "배전반"
+          ]
+        },
+        "uniqueProcessValues": [
+          "전기설비 점검 정전전로 인근 배전반 점검 작업"
+        ],
+        "uniqueEquipmentValues": [
+          "전기안전분야, 기술지원규정",
+          "아카이브(건설업)",
+          "아카이브(제조업등)",
+          "작업 장비·공구·보호구"
+        ],
+        "fieldLeakageFlags": [],
+        "expectedExactKoshaPin": "B-E-10",
+        "exactKoshaPinsInStructuredRows": [
+          "B-E-10"
+        ],
+        "exactKoshaRowsWithExpectedPin": 1,
+        "koshaStatutoryOverclaimSamples": []
+      },
+      "failedChecks": [
+        {
+          "id": "kosha:expectedExactPinInEveryRiskRow",
+          "ok": false,
+          "detail": "1/5 structured risk row(s) cite B-E-10",
+          "samples": [
+            {
+              "row": 1,
+              "refs": [
+                "고정 근거 보조근거",
+                "고위험요인 사례",
+                "○○현장에서 차량의 원활한 통행을 위해 앞으로 이동 중에 있던 고소작업대(차량탑재형)의 아우트리거(펼쳐진 상태)와 인근 건물 담장 사이에 가슴부위가 충돌… 사례",
+                "검색: rest"
+              ],
+              "pins": []
+            },
+            {
+              "row": 2,
+              "refs": [
+                "고정 근거 보조근거",
+                "고위험요인 사례",
+                "OO사업장 점착제 제조 공정에서 교반기 인근에서 작업 중 교반기 내 이송된 인화성액체(용매)에 화재가 발생하여 사망 사례",
+                "검색: rest"
+              ],
+              "pins": []
+            },
+            {
+              "row": 3,
+              "refs": [
+                "고정 근거 보조근거",
+                "고위험요인 사례",
+                "섬유공장에서 송풍기 수배전반(3.3kV) 점검 중 충전부 접촉으로 감전 사례",
+                "검색: rest"
+              ],
+              "pins": []
+            },
+            {
+              "row": 4,
+              "refs": [
+                "산업안전보건법",
+                "KOSHA 위험성평가",
+                "문서팩 입력 조건"
+              ],
+              "pins": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
