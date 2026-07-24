@@ -2077,6 +2077,7 @@ function evaluateShareRecipientLongContentFixtureGate(rootDir) {
   }
 
   const rows = Array.isArray(report.rows) ? report.rows.filter(isRecord) : [];
+  const acceptance = isRecord(report.acceptance) ? report.acceptance : {};
   const rowsPass = rows.length === 6 && rows.every((row) => {
     const metrics = isRecord(row.metrics) ? row.metrics : {};
     const verdicts = isRecord(row.verdicts) ? row.verdicts : {};
@@ -2085,15 +2086,28 @@ function evaluateShareRecipientLongContentFixtureGate(rootDir) {
       && readString(verdicts.exactSavedSessionVerdict) === "MISSING_EVIDENCE"
       && readNumber(metrics.confirmationBottom) !== null
       && (readNumber(metrics.confirmationBottom) || 0) <= (readNumber(metrics.viewportHeight) || 0)
+      && metrics.taskBodyContained === true
+      && metrics.documentsPanelOpen === false
       && readNumber(metrics.previewContainedCount) === 4
       && readNumber(metrics.collapsedDocumentCount) === 3
       && readNumber(metrics.outsideCards) === 0
       && metrics.horizontalOverflow === false
-      && (!isDesktop || readNumber(metrics.desktopXRegionCount) === 2);
+      && (isDesktop
+        ? readNumber(metrics.desktopXRegionCount) === 2
+        : readNumber(metrics.rootHeightRatio) !== null
+          && (readNumber(metrics.rootHeightRatio) || 0) <= 1.5);
   });
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_LONG_CONTENT_FIXTURE_EXACT_SAVED_MISSING"
     && readString(report.route) === "/share/[sessionId]"
     && readString(report.sessionKind) === "long-content-fixture"
+    && report.routeSplitAloneAcceptedAsFix === false
+    && readString(report.acceptedStructure).includes("first-viewport confirmation cockpit")
+    && readNumber(acceptance.desktopMinRegions) === 2
+    && readNumber(acceptance.mobileMaxRootHeightRatio) === 1.5
+    && acceptance.confirmationMustRemainInFirstViewport === true
+    && acceptance.longTaskMustUseLocalScroll === true
+    && acceptance.documentGroupCollapsedByDefault === true
+    && acceptance.exactSavedSessionRequiredForUserSpecificPass === true
     && report.exactSavedUserSessionReproduced === false
     && readString(report.exactSavedSessionVerdict) === "MISSING_EVIDENCE"
     && report.dbMutationPerformed === false
@@ -2108,7 +2122,7 @@ function evaluateShareRecipientLongContentFixtureGate(rootDir) {
       label: "Recipient Share long-content fixture",
       state: "proven",
       evidencePath,
-      detail: "Live recipient UI kept six day/night long-content fixture rows scoped PASS: desktop stayed two-region, mobile kept confirmation in the first viewport, four previews were locally contained, three documents stayed collapsed, and exact saved-session evidence remains MISSING_EVIDENCE with no mutation or provider dispatch.",
+      detail: "Live recipient UI kept six day/night long-content fixture rows scoped PASS: desktop stayed two-region, mobile recipient root stayed within 1.5 viewports with confirmation in the first viewport, the long task used local scroll, the document group stayed collapsed by default, and exact saved-session evidence remains MISSING_EVIDENCE with no mutation or provider dispatch. Route split alone remains explicitly insufficient.",
       nextActions: [
         "Keep exact saved/generated /share/[sessionId] open until a concrete production URL is supplied or DB-backed session creation is explicitly approved.",
       ],

@@ -441,6 +441,7 @@ function shareGeneratedSessionSummary(shareGenerated) {
 function shareRecipientLongContentFixtureSummary(shareFixture) {
   if (!isRecord(shareFixture)) return {};
   const productionBuild = isRecord(shareFixture.productionBuild) ? shareFixture.productionBuild : {};
+  const acceptance = isRecord(shareFixture.acceptance) ? shareFixture.acceptance : {};
   const rows = Array.isArray(shareFixture.rows) ? shareFixture.rows.filter(isRecord) : [];
   return {
     verdict: asString(shareFixture.verdict),
@@ -448,6 +449,16 @@ function shareRecipientLongContentFixtureSummary(shareFixture) {
     productionCommit: asString(productionBuild.commitSha),
     route: asString(shareFixture.route),
     sessionKind: asString(shareFixture.sessionKind),
+    routeSplitAloneAcceptedAsFix: asBoolean(shareFixture.routeSplitAloneAcceptedAsFix),
+    acceptedStructure: asString(shareFixture.acceptedStructure),
+    acceptance: {
+      desktopMinRegions: typeof acceptance.desktopMinRegions === "number" ? acceptance.desktopMinRegions : null,
+      mobileMaxRootHeightRatio: typeof acceptance.mobileMaxRootHeightRatio === "number" ? acceptance.mobileMaxRootHeightRatio : null,
+      confirmationMustRemainInFirstViewport: asBoolean(acceptance.confirmationMustRemainInFirstViewport),
+      longTaskMustUseLocalScroll: asBoolean(acceptance.longTaskMustUseLocalScroll),
+      documentGroupCollapsedByDefault: asBoolean(acceptance.documentGroupCollapsedByDefault),
+      exactSavedSessionRequiredForUserSpecificPass: asBoolean(acceptance.exactSavedSessionRequiredForUserSpecificPass),
+    },
     exactSavedUserSessionReproduced: asBoolean(shareFixture.exactSavedUserSessionReproduced),
     exactSavedSessionVerdict: asString(shareFixture.exactSavedSessionVerdict),
     dbMutationPerformed: asBoolean(shareFixture.dbMutationPerformed),
@@ -462,9 +473,13 @@ function shareRecipientLongContentFixtureSummary(shareFixture) {
         viewport: asString(metrics.viewport),
         overallVerdict: asString(verdicts.overallVerdict),
         exactSavedSessionVerdict: asString(verdicts.exactSavedSessionVerdict),
+        pageHeightRatio: typeof metrics.pageHeightRatio === "number" ? metrics.pageHeightRatio : null,
         rootWidthRatio: typeof metrics.rootWidthRatio === "number" ? metrics.rootWidthRatio : null,
+        rootHeightRatio: typeof metrics.rootHeightRatio === "number" ? metrics.rootHeightRatio : null,
         desktopXRegionCount: typeof metrics.desktopXRegionCount === "number" ? metrics.desktopXRegionCount : null,
         confirmationBottom: typeof metrics.confirmationBottom === "number" ? metrics.confirmationBottom : null,
+        taskBodyContained: asBoolean(metrics.taskBodyContained),
+        documentsPanelOpen: metrics.documentsPanelOpen === true,
         previewContainedCount: typeof metrics.previewContainedCount === "number" ? metrics.previewContainedCount : null,
         collapsedDocumentCount: typeof metrics.collapsedDocumentCount === "number" ? metrics.collapsedDocumentCount : null,
       };
@@ -981,7 +996,7 @@ export function buildNorthstarNextRunway(options) {
       documentsGeneratedCurrentWorkpack: "live generated-current-workpack state is measured separately from default/example Documents; desktop and mobile must keep body containment, first action/hazard visibility, supporting-9 collapsed by default, sticky overlap 0, and local shell ratio <= 3",
       shareDesktop: "current measured Workspace Share and invited recipient fixture routes pass scoped desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes, and desktop must not regress into a mobile card stack",
       shareGeneratedResult: "current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported",
-      shareRecipientLongContent: "live route-controlled long-content fixture keeps desktop recipient Share in two regions and mobile confirmation in the first viewport while long previews stay locally contained and documents stay collapsed; this is not exact saved-session proof",
+      shareRecipientLongContent: "live route-controlled long-content fixture keeps desktop recipient Share in two regions, mobile recipient root <= 1.5 viewports, confirmation in the first viewport, long task text in local scroll, and the document group collapsed by default; route split alone is insufficient and this is not exact saved-session proof",
       shareRouteEvidenceBoundary: "separate Share evidence into invited recipient fixture pass, exact saved/generated /share/[sessionId] missing evidence, and manager/workspace share-result route repro; do not use one route's pass to close another route's mobile-like complaint",
       shareMobile: "current compact cockpit remains first-viewport bounded in current evidence",
       hermesOpenclaw: "adapter and fail-closed auth boundary current-proven; live unauthenticated broker smoke returns AUTH_REQUIRED before engine execution",

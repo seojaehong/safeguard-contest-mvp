@@ -157,6 +157,16 @@ type NextRunwayReport = {
     productionCommit: string;
     route: string;
     sessionKind: string;
+    routeSplitAloneAcceptedAsFix: boolean;
+    acceptedStructure: string;
+    acceptance: {
+      desktopMinRegions: number | null;
+      mobileMaxRootHeightRatio: number | null;
+      confirmationMustRemainInFirstViewport: boolean;
+      longTaskMustUseLocalScroll: boolean;
+      documentGroupCollapsedByDefault: boolean;
+      exactSavedSessionRequiredForUserSpecificPass: boolean;
+    };
     exactSavedUserSessionReproduced: boolean;
     exactSavedSessionVerdict: string;
     dbMutationPerformed: boolean;
@@ -168,9 +178,13 @@ type NextRunwayReport = {
       viewport: string;
       overallVerdict: string;
       exactSavedSessionVerdict: string;
+      pageHeightRatio: number | null;
       rootWidthRatio: number | null;
+      rootHeightRatio: number | null;
       desktopXRegionCount: number | null;
       confirmationBottom: number | null;
+      taskBodyContained: boolean;
+      documentsPanelOpen: boolean;
       previewContainedCount: number | null;
       collapsedDocumentCount: number | null;
     }>;
@@ -638,6 +652,16 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     productionBuild: { commitSha: "TO_FILL" },
     route: "/share/[sessionId]",
     sessionKind: "long-content-fixture",
+    routeSplitAloneAcceptedAsFix: false,
+    acceptedStructure: "first-viewport confirmation cockpit plus desktop multi-region workbench plus bounded internal task/message preview and collapsed document drilldown",
+    acceptance: {
+      desktopMinRegions: 2,
+      mobileMaxRootHeightRatio: 1.5,
+      confirmationMustRemainInFirstViewport: true,
+      longTaskMustUseLocalScroll: true,
+      documentGroupCollapsedByDefault: true,
+      exactSavedSessionRequiredForUserSpecificPass: true,
+    },
     exactSavedUserSessionReproduced: false,
     exactSavedSessionVerdict: "MISSING_EVIDENCE",
     dbMutationPerformed: false,
@@ -649,9 +673,13 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
         metrics: {
           theme: "day",
           viewport: "desktop-short-1440x723",
+          pageHeightRatio: 1.33,
           rootWidthRatio: 0.84,
+          rootHeightRatio: 0.99,
           desktopXRegionCount: 2,
           confirmationBottom: 529,
+          taskBodyContained: true,
+          documentsPanelOpen: false,
           previewContainedCount: 4,
           collapsedDocumentCount: 3,
         },
@@ -1083,7 +1111,7 @@ describe("northstar next runway generator", () => {
       documentsRemainingDebt: "full 12-document authoring polish remains; the all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content and the local workbench shell ratio target remains <= 3",
       shareDesktop: "current measured Workspace Share and invited recipient fixture routes pass scoped desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes, and desktop must not regress into a mobile card stack",
       shareGeneratedResult: "current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported",
-      shareRecipientLongContent: "live route-controlled long-content fixture keeps desktop recipient Share in two regions and mobile confirmation in the first viewport while long previews stay locally contained and documents stay collapsed; this is not exact saved-session proof",
+      shareRecipientLongContent: "live route-controlled long-content fixture keeps desktop recipient Share in two regions, mobile recipient root <= 1.5 viewports, confirmation in the first viewport, long task text in local scroll, and the document group collapsed by default; route split alone is insufficient and this is not exact saved-session proof",
       shareRouteEvidenceBoundary: "separate Share evidence into invited recipient fixture pass, exact saved/generated /share/[sessionId] missing evidence, and manager/workspace share-result route repro; do not use one route's pass to close another route's mobile-like complaint",
     });
     expect(report.shareGeneratedSessionPerception).toMatchObject({
@@ -1103,6 +1131,16 @@ describe("northstar next runway generator", () => {
       verdict: "PASS_LIVE_PRODUCTION_LONG_CONTENT_FIXTURE_EXACT_SAVED_MISSING",
       route: "/share/[sessionId]",
       sessionKind: "long-content-fixture",
+      routeSplitAloneAcceptedAsFix: false,
+      acceptedStructure: "first-viewport confirmation cockpit plus desktop multi-region workbench plus bounded internal task/message preview and collapsed document drilldown",
+      acceptance: {
+        desktopMinRegions: 2,
+        mobileMaxRootHeightRatio: 1.5,
+        confirmationMustRemainInFirstViewport: true,
+        longTaskMustUseLocalScroll: true,
+        documentGroupCollapsedByDefault: true,
+        exactSavedSessionRequiredForUserSpecificPass: true,
+      },
       exactSavedUserSessionReproduced: false,
       exactSavedSessionVerdict: "MISSING_EVIDENCE",
       dbMutationPerformed: false,
@@ -1115,9 +1153,13 @@ describe("northstar next runway generator", () => {
       viewport: "desktop-short-1440x723",
       overallVerdict: "PASS_SCOPED",
       exactSavedSessionVerdict: "MISSING_EVIDENCE",
+      pageHeightRatio: 1.33,
       rootWidthRatio: 0.84,
+      rootHeightRatio: 0.99,
       desktopXRegionCount: 2,
       confirmationBottom: 529,
+      taskBodyContained: true,
+      documentsPanelOpen: false,
       previewContainedCount: 4,
       collapsedDocumentCount: 3,
     });

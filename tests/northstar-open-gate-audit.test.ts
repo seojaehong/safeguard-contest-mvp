@@ -1129,6 +1129,16 @@ function createFixtureRoot(): string {
     verdict: "PASS_LIVE_PRODUCTION_LONG_CONTENT_FIXTURE_EXACT_SAVED_MISSING",
     route: "/share/[sessionId]",
     sessionKind: "long-content-fixture",
+    routeSplitAloneAcceptedAsFix: false,
+    acceptedStructure: "first-viewport confirmation cockpit plus desktop multi-region workbench plus bounded internal task/message preview and collapsed document drilldown",
+    acceptance: {
+      desktopMinRegions: 2,
+      mobileMaxRootHeightRatio: 1.5,
+      confirmationMustRemainInFirstViewport: true,
+      longTaskMustUseLocalScroll: true,
+      documentGroupCollapsedByDefault: true,
+      exactSavedSessionRequiredForUserSpecificPass: true,
+    },
     exactSavedUserSessionReproduced: false,
     exactSavedSessionVerdict: "MISSING_EVIDENCE",
     dbMutationPerformed: false,
@@ -1150,6 +1160,9 @@ function createFixtureRoot(): string {
         viewportHeight,
         confirmationBottom,
         desktopXRegionCount,
+        rootHeightRatio: viewportWidth === 390 ? 1.4 : 0.99,
+        taskBodyContained: true,
+        documentsPanelOpen: false,
         previewContainedCount: 4,
         collapsedDocumentCount: 3,
         outsideCards: 0,
@@ -1456,6 +1469,7 @@ describe("northstar open gate audit", () => {
     });
     expect(audit.gates.find((gate) => gate.id === "share_recipient_long_content_fixture")?.detail).toContain("six day/night");
     expect(audit.gates.find((gate) => gate.id === "share_recipient_long_content_fixture")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "share_recipient_long_content_fixture")?.detail).toContain("Route split alone");
     expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.state).toBe("notice");
     expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.detail).toContain("fixture or generated /workspace Share proof is explicitly not accepted");
