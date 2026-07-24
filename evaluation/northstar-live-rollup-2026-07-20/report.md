@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-24T16:47:30.468Z
-Source HEAD at generation: e116ae7dfbc6e00ea544f7819a9a6620208b18bd
-Live commit at generation: e116ae7dfbc6e00ea544f7819a9a6620208b18bd
+Generated at: 2026-07-24T17:17:48.489Z
+Source HEAD at generation: 8b2d02d7e3f3c9843f36821e100e480cbcb5f587
+Live commit at generation: 7fe74c2ad3b2b1d3f30a2af5f01a47dbfa6641fd
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -81,13 +81,13 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
 | live_document_quality_matrix | ancestor | ancestor_of_head | evaluation\live-document-quality-matrix-2026-07-24\report.json |
 | live_document_quality_stress_matrix | ancestor | ancestor_of_head | evaluation\live-document-quality-stress-matrix-2026-07-24\report.json |
 | live_document_field_isolation | ancestor | ancestor_of_head | evaluation\live-document-field-isolation-2026-07-25\report.json |
-| live_kosha_exact_materialization | exact | ancestor_of_head | evaluation\live-kosha-exact-materialization-2026-07-25\report.json |
+| live_kosha_exact_materialization | ancestor | ancestor_of_head | evaluation\live-kosha-exact-materialization-2026-07-25\report.json |
 | live_document_wording_review | ancestor | ancestor_of_head | evaluation\live-document-wording-review-2026-07-24\report.json |
 | kosha_exact_trust_registry | ancestor | ancestor_of_head | evaluation\kosha-current-live-gate-2026-07-20\report.json |
 | rls_llm_wiki_approval_preflight | ancestor | missing | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |

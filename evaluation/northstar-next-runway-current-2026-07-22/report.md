@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `e116ae7dfbc6e00ea544f7819a9a6620208b18bd`
+Source HEAD: `8b2d02d7e3f3c9843f36821e100e480cbcb5f587`
 
-Production `/api/build-info`: `e116ae7dfbc6e00ea544f7819a9a6620208b18bd`
+Production `/api/build-info`: `7fe74c2ad3b2b1d3f30a2af5f01a47dbfa6641fd`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `none`
+Source pending changed paths: `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-default-day-mobile-390x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-generated-current-workpack-day-desktop-short-1440x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-supporting-expanded-day-mobile-390x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-work-plan-section-detail-night-desktop-short-1440x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/recipient-fixture-night-desktop-short-1440x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/report.json`, `evaluation/workspace-bounded-workbench-current-2026-07-22/report.md`, `evaluation/workspace-bounded-workbench-current-2026-07-22/workspace-share-day-mobile-390x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/workspace-share-night-mobile-390x723.png`, `scripts/northstar_next_runway.mjs`, `tests/northstar-next-runway-generator.test.ts`
 
-Current head is evidence-only pending: `false`
+Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `e116ae7dfbc6e00ea544f7819a9a6620208b18bd`
+Live rollup source head: `8b2d02d7e3f3c9843f36821e100e480cbcb5f587`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `8b2d02d7e3f3c9843f36821e100e480cbcb5f587` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `7fe74c2ad3b2b1d3f30a2af5f01a47dbfa6641fd`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
