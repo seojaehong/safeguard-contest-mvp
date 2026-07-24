@@ -754,6 +754,71 @@ function pickScenarioProfile(question: string) {
   return scored[0]?.score ? scored[0].profile : buildCustomScenarioProfile(question);
 }
 
+function mergeProfileTriple(primary: string[], fallback: [string, string, string]): [string, string, string] {
+  const merged = [...new Set([...primary, ...fallback].map((item) => item.trim()).filter(Boolean))];
+  return [
+    merged[0] || fallback[0],
+    merged[1] || fallback[1],
+    merged[2] || fallback[2]
+  ];
+}
+
+function applyQuestionSpecificity(question: string, source: ScenarioProfile): ScenarioProfile {
+  const hazards: string[] = [];
+  const actions: string[] = [];
+  const workerTargets: string[] = [];
+
+  if (/(?:SDS|MSDS|물질안전보건자료|GHS|경고표지|라벨).*(?:화학|세척|용기)|(?:화학|세척|용기).*(?:SDS|MSDS|물질안전보건자료|GHS|경고표지|라벨)/i.test(question)) {
+    hazards.push("미확인 화학물질의 SDS·GHS 경고표지 미확인과 비산·피부접촉·환기 불량 위험");
+    actions.push("용기 라벨과 SDS(물질안전보건자료)·GHS 경고표지로 물질을 확인하고, 확인 전 사용 금지·작업 보류 후 국소배기와 보호구를 지정");
+  }
+  if (/동시\s*작업|동시작업|상하부\s*작업|상부.*하부|하부.*상부/.test(question)) {
+    hazards.push("상하부 동시작업 중 양중 낙하물과 화기 불티가 교차하는 위험");
+    actions.push("상하부 작업구역을 분리·출입 통제하고 양중과 화기 공정의 작업순서·시간을 조정한 뒤 신호수 단일 지휘로 착수");
+  }
+  if (/청각\s*장애|청각장애|고령/.test(question)) {
+    hazards.push("고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험");
+    actions.push("고령·청각장애·신규 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지");
+    if (/고령/.test(question)) workerTargets.push("고령 작업자");
+    if (/청각\s*장애|청각장애/.test(question)) workerTargets.push("청각장애 작업자");
+    if (/신규/.test(question)) workerTargets.push("신규 작업자");
+  }
+  if (/방호장치|예기치 않은 기동|불시기동|LOTO|잠금표지/.test(question)) {
+    hazards.push("방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험");
+    actions.push("정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통제");
+  }
+  if (/KOSHA|안전보건공단|기술지침/.test(question)) {
+    actions.push("KOSHA Guide는 기술지침으로 참고하고 관련 법령의 적용 여부와 현장 조건은 별도 확인 필요로 기록");
+  }
+  if (/야간|심야|야간조|조도|피로|단독\s*작업|단독작업|인수인계|재통전/.test(question)) {
+    hazards.push("야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험");
+    actions.push("야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전");
+    if (/야간조/.test(question)) workerTargets.push("야간조");
+    if (/인수인계/.test(question)) workerTargets.push("교대 인수인계 담당자");
+  }
+  if (/정비원|보전원/.test(question)) workerTargets.push("정비원");
+
+  if (!hazards.length && !actions.length && !workerTargets.length) {
+    return source;
+  }
+
+  const nextHazards = mergeProfileTriple(hazards, source.hazards);
+  const nextActions = mergeProfileTriple(actions, source.actions);
+  const nextTargets = [...new Set(workerTargets)].join(", ");
+  return {
+    ...source,
+    topRisk: hazards.length ? `${hazards.join("; ")}. ${source.topRisk}` : source.topRisk,
+    hazards: nextHazards,
+    actions: nextActions,
+    educationTargets: nextTargets ? `${source.educationTargets}, ${nextTargets}` : source.educationTargets,
+    questions: mergeProfileTriple(
+      actions.map((action) => `${action} 절차를 누가 확인했는가?`),
+      source.questions
+    ),
+    educationPoints: mergeProfileTriple(actions, source.educationPoints)
+  };
+}
+
 function sanitizeWorkSummary(question: string, fallback: string) {
   if (/누수|비가\s*새|천장/.test(question)) return fallback;
   if (/비정형|유지보수|정비|점검/.test(question) && fallback) return fallback;
@@ -849,7 +914,7 @@ function buildScenarioRiskAssessmentRows(scenario: ReturnType<typeof inferScenar
 export function inferScenario(question: string) {
   const normalized = question.trim() || defaultQuestion;
   const workerCount = inferWorkerCount(normalized);
-  const profile = pickScenarioProfile(normalized);
+  const profile = applyQuestionSpecificity(normalized, pickScenarioProfile(normalized));
   const inferredCompanyName = inferCompanyName(normalized);
   const workSummary = sanitizeWorkSummary(normalized, profile.workName);
 

@@ -163,4 +163,44 @@ describe("inferScenario", () => {
     expect(documentSurface).toContain("절연보호구");
     expect(documentSurface).not.toContain("비정형 유지보수 작업");
   });
+
+  it.each([
+    {
+      label: "chemical identity",
+      question: "울산 도금공장 화학세척 작업. 용기 라벨 훼손, SDS와 GHS 경고표지 확인 전 작업 보류 필요.",
+      expected: /SDS.*GHS.*작업 보류|SDS.*GHS.*사용 금지/,
+    },
+    {
+      label: "simultaneous work",
+      question: "상부 크레인 양중과 하부 화기 동시작업. 작업구역 분리와 공정 순서 조정, 신호수 필요.",
+      expected: /작업구역.*분리.*출입 통제.*작업순서/,
+    },
+    {
+      label: "vulnerable workers",
+      question: "야간 컨베이어 정비. 고령 작업자, 청각장애 작업자, 신규 작업자가 함께 작업.",
+      expected: /청각장애.*시각 신호.*복창/,
+    },
+    {
+      label: "KOSHA guidance boundary",
+      question: "방호장치 정비. KOSHA Guide는 기술지침으로 참고하고 법령 적용 여부는 별도 확인.",
+      expected: /KOSHA Guide.*기술지침.*법령.*별도 확인/,
+    },
+    {
+      label: "overnight handover",
+      question: "심야 전기설비 복구. 야간조 2명, 단독작업 전환 위험, 교대 인수인계와 재통전 확인 필요.",
+      expected: /2인 1조.*인수인계.*재통전/,
+    },
+  ])("preserves explicit high-risk signals for $label", ({ question, expected }) => {
+    const response = buildMockAskResponse(question, [], "mock", "test");
+    const surface = [
+      response.deliverables.workpackSummaryDraft,
+      response.deliverables.riskAssessmentDraft,
+      response.deliverables.workPlanDraft,
+      response.deliverables.tbmBriefing,
+      response.deliverables.safetyEducationRecordDraft,
+    ].join("\n");
+
+    expect(surface).toMatch(expected);
+    expect(surface).not.toContain("KOSHA 가이드는 법적 의무입니다");
+  });
 });
