@@ -636,7 +636,13 @@ export default function ShareRecipientPage() {
         </p>
         <article className="safeclaw-share-recipient-card safeclaw-share-recipient-card-task">
           <h3>{copy.currentTaskTitle}</h3>
-          <p>{question}</p>
+          <p
+            className="safeclaw-share-recipient-task-body"
+            tabIndex={question.length > 240 ? 0 : undefined}
+            aria-label={question.length > 240 ? copy.currentTaskTitle : undefined}
+          >
+            {question}
+          </p>
           {sessionPayload?.expiresAt ? <p>{copy.expiresPrefix}: {formatIsoTime(sessionPayload.expiresAt)}</p> : null}
           <p>
             {copy.statusPrefix}: {formatShareStatus(sessionPayload?.status || "active", copy)}
@@ -737,8 +743,8 @@ export default function ShareRecipientPage() {
             ) : null}
 
             {documents.length ? (
-              <article className="safeclaw-share-recipient-card safeclaw-share-recipient-card-documents">
-                <h3>{copy.documentsTitle}</h3>
+              <details className="safeclaw-share-recipient-card safeclaw-share-recipient-card-documents">
+                <summary className="safeclaw-share-recipient-documents-summary">{copy.documentsTitle}</summary>
                 <p className="safeclaw-note">{copy.documentsNote}</p>
                 <div className="safeclaw-share-recipient-documents">
                   {documents.map((document) => (
@@ -748,7 +754,7 @@ export default function ShareRecipientPage() {
                     </details>
                   ))}
                 </div>
-              </article>
+              </details>
             ) : (
               <article className="safeclaw-share-recipient-card safeclaw-share-recipient-card-documents">
                 <h3>{copy.documentsLoadingTitle}</h3>

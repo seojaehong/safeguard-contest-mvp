@@ -412,6 +412,8 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
           const confirmButton = [...document.querySelectorAll<HTMLButtonElement>("button")]
             .find((item) => item.innerText.trim() === "Tôi đã xem");
           const notice = document.querySelector<HTMLElement>(".safeclaw-share-recipient-card-notice");
+          const taskBody = document.querySelector<HTMLElement>(".safeclaw-share-recipient-task-body");
+          const documentsPanel = document.querySelector<HTMLDetailsElement>(".safeclaw-share-recipient-card-documents");
           const previews = [...document.querySelectorAll<HTMLElement>(".safeclaw-share-recipient-preview")];
           const documents = [...document.querySelectorAll<HTMLDetailsElement>(".safeclaw-share-recipient-document")];
           const cards = [...document.querySelectorAll<HTMLElement>(".safeclaw-share-recipient-card")];
@@ -427,6 +429,9 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
             confirmationLeft: Math.round(confirmationRect?.left ?? 0),
             confirmationRight: Math.round(confirmationRect?.right ?? 0),
             noticeLeft: Math.round(noticeRect?.left ?? 0),
+            taskBodyClientHeight: Math.round(taskBody?.clientHeight ?? 0),
+            taskBodyScrollHeight: Math.round(taskBody?.scrollHeight ?? 0),
+            documentsPanelOpen: documentsPanel?.open ?? null,
             previewContainedCount: previews.filter((item) => item.scrollHeight > item.clientHeight && item.clientHeight <= 220).length,
             collapsedDocumentCount: documents.filter((item) => !item.open).length,
             outsideCards: cards.filter((item) => {
@@ -443,13 +448,20 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
         expect(metrics.outsideCards).toBe(0);
         expect(metrics.horizontalOverflow).toBe(false);
         expect(mutationRequestCount).toBe(0);
+        expect(metrics.taskBodyScrollHeight).toBeGreaterThan(metrics.taskBodyClientHeight);
+        expect(metrics.taskBodyClientHeight).toBeLessThanOrEqual(viewport.desktop ? 132 : 112);
+        expect(metrics.documentsPanelOpen).toBe(false);
+        expect(metrics.rootHeight).toBeLessThanOrEqual(Math.ceil(metrics.viewportHeight * 1.5));
         if (viewport.desktop) {
           expect(metrics.rootWidth).toBeGreaterThanOrEqual(1040);
           expect(metrics.noticeLeft).toBeGreaterThan(metrics.confirmationRight);
-          expect(metrics.rootHeight).toBeLessThanOrEqual(Math.ceil(metrics.viewportHeight * 1.5));
         } else {
           expect(metrics.rootWidth).toBeLessThanOrEqual(viewport.width);
         }
+        await page.locator(".safeclaw-share-recipient-card-documents > summary").click();
+        await expect.poll(() => page.locator(".safeclaw-share-recipient-card-documents").evaluate((item) => (
+          item instanceof HTMLDetailsElement && item.open
+        ))).toBe(true);
       } finally {
         await page.close();
       }

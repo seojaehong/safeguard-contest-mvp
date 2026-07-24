@@ -4,9 +4,13 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
-const outputDir = path.dirname(fileURLToPath(import.meta.url));
-const rootDir = path.resolve(outputDir, "..", "..");
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const rootDir = path.resolve(scriptDir, "..", "..");
+const outputDir = process.env.SAFECLAW_OUTPUT_DIR
+  ? path.resolve(rootDir, process.env.SAFECLAW_OUTPUT_DIR)
+  : scriptDir;
 const baseUrl = (process.env.SAFECLAW_BASE_URL || "https://www.safeclaw.kr").replace(/\/+$/u, "");
+const isLocalBase = /^https?:\/\/(?:127\.0\.0\.1|localhost)(?::|\/|$)/u.test(baseUrl);
 const sessionId = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const workerId = "11111111-1111-4111-8111-111111111111";
 const viewports = [
@@ -15,6 +19,15 @@ const viewports = [
   { label: "mobile-390x723", width: 390, height: 723 },
 ];
 const themes = ["day", "night"];
+const acceptanceContract = Object.freeze({
+  routeSplitAloneAcceptedAsFix: false,
+  desktopMinRegions: 2,
+  mobileMaxRootHeightRatio: 1.5,
+  confirmationMustRemainInFirstViewport: true,
+  longTaskMustUseLocalScroll: true,
+  documentGroupCollapsedByDefault: true,
+  exactSavedSessionRequiredForUserSpecificPass: true,
+});
 
 const documents = [
   ["riskAssessmentDraft", "위험성평가표", "추락 위험: 이동식 비계 고정과 안전대 착용을 확인합니다."],
@@ -70,6 +83,8 @@ async function readBuildInfo() {
 function evaluateRow(metrics) {
   const desktop = metrics.viewportWidth >= 900;
   const common = metrics.confirmationBottom <= metrics.viewportHeight
+    && metrics.taskBodyContained === true
+    && metrics.documentsPanelOpen === false
     && metrics.previewContainedCount >= 1
     && metrics.collapsedDocumentCount === 3
     && metrics.outsideCards === 0
@@ -81,15 +96,17 @@ function evaluateRow(metrics) {
       && metrics.noticeLeft > metrics.confirmationRight
       && metrics.rootHeightRatio <= 1.5
     : common && metrics.rootWidth <= metrics.viewportWidth;
+  const boundedMobileRoot = desktop || metrics.rootHeightRatio <= acceptanceContract.mobileMaxRootHeightRatio;
   return {
-    layoutVerdict: pass ? "PASS" : "RED",
+    layoutVerdict: pass && boundedMobileRoot ? "PASS" : "RED",
     exactSavedSessionVerdict: "MISSING_EVIDENCE",
-    overallVerdict: pass ? "PASS_SCOPED" : "RED",
+    overallVerdict: pass && boundedMobileRoot ? "PASS_SCOPED" : "RED",
   };
 }
 
 const sourceHead = readHead();
 const productionBuild = await readBuildInfo();
+fs.mkdirSync(outputDir, { recursive: true });
 const browser = await chromium.launch({ headless: true });
 const rows = [];
 
@@ -120,6 +137,8 @@ try {
             .find((item) => item.textContent?.trim() === "Tôi đã xem");
           const confirmationCard = confirmButton?.closest(".safeclaw-share-recipient-card");
           const notice = document.querySelector(".safeclaw-share-recipient-card-notice");
+          const taskBody = document.querySelector(".safeclaw-share-recipient-task-body");
+          const documentsPanel = document.querySelector(".safeclaw-share-recipient-card-documents");
           const previews = [...document.querySelectorAll(".safeclaw-share-recipient-preview")];
           const documentDetails = [...document.querySelectorAll(".safeclaw-share-recipient-document")];
           const cards = [...document.querySelectorAll(".safeclaw-share-recipient-card")];
@@ -143,6 +162,10 @@ try {
             confirmationBottom: Math.round(confirmButton?.getBoundingClientRect().bottom ?? 0),
             confirmationRight: Math.round(confirmationRect?.right ?? 0),
             noticeLeft: Math.round(noticeRect?.left ?? 0),
+            taskBodyClientHeight: Math.round(taskBody?.clientHeight ?? 0),
+            taskBodyScrollHeight: Math.round(taskBody?.scrollHeight ?? 0),
+            taskBodyContained: (taskBody?.scrollHeight ?? 0) > (taskBody?.clientHeight ?? 0),
+            documentsPanelOpen: documentsPanel?.open ?? null,
             desktopXRegionCount: new Set(firstViewportCards.map((card) => (
               Math.round(card.getBoundingClientRect().left / 80) * 80
             ))).size,
@@ -194,10 +217,17 @@ const report = {
   sourceHead,
   productionBuild,
   verdict: failures.length === 0
-    ? "PASS_LIVE_PRODUCTION_LONG_CONTENT_FIXTURE_EXACT_SAVED_MISSING"
-    : "RED_LIVE_PRODUCTION_LONG_CONTENT_FIXTURE",
+    ? isLocalBase
+      ? "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LONG_CONTENT_FIXTURE_EXACT_SAVED_MISSING"
+      : "PASS_LIVE_PRODUCTION_LONG_CONTENT_FIXTURE_EXACT_SAVED_MISSING"
+    : isLocalBase
+      ? "RED_CURRENT_SOURCE_LOCAL_PRODUCTION_LONG_CONTENT_FIXTURE"
+      : "RED_LIVE_PRODUCTION_LONG_CONTENT_FIXTURE",
   route: "/share/[sessionId]",
   sessionKind: "long-content-fixture",
+  routeSplitAloneAcceptedAsFix: acceptanceContract.routeSplitAloneAcceptedAsFix,
+  acceptedStructure: "first-viewport confirmation cockpit plus desktop multi-region workbench plus bounded internal task/message preview and collapsed document drilldown",
+  acceptance: acceptanceContract,
   exactSavedUserSessionReproduced: false,
   exactSavedSessionVerdict: "MISSING_EVIDENCE",
   dbMutationPerformed: false,
@@ -219,7 +249,9 @@ const report = {
   rows,
   failures,
   boundary: {
-    allowedClaim: "The deployed recipient UI contains a route-controlled maximum-content fixture in the expected desktop/mobile workbench geometry.",
+    allowedClaim: isLocalBase
+      ? "The current-source local production recipient UI contains a route-controlled maximum-content fixture in the expected desktop/mobile workbench geometry."
+      : "The deployed recipient UI contains a route-controlled maximum-content fixture in the expected desktop/mobile workbench geometry.",
     forbiddenClaim: "A concrete saved/generated production share session was reproduced or persisted.",
     exactEvidenceNextStep: "Provide an existing production /share/[sessionId]?workerId=... URL or approve the DB-backed share-session creation flow.",
   },
@@ -229,7 +261,7 @@ fs.writeFileSync(path.join(outputDir, "report.json"), `${JSON.stringify(report, 
 
 const tableRows = rows.map((row) => {
   const metrics = row.metrics;
-  return `| ${metrics.theme} | ${metrics.viewport} | ${row.verdicts.overallVerdict} | ${metrics.pageHeightRatio ?? "-"} | ${metrics.rootWidthRatio ?? "-"} | ${metrics.rootHeightRatio ?? "-"} | ${metrics.desktopXRegionCount ?? "-"} | ${metrics.confirmationBottom ?? "-"} | ${metrics.previewContainedCount ?? "-"} | ${metrics.collapsedDocumentCount ?? "-"} | ${metrics.outsideCards ?? "-"} | ${metrics.horizontalOverflow ?? "-"} |`;
+  return `| ${metrics.theme} | ${metrics.viewport} | ${row.verdicts.overallVerdict} | ${metrics.pageHeightRatio ?? "-"} | ${metrics.rootWidthRatio ?? "-"} | ${metrics.rootHeightRatio ?? "-"} | ${metrics.desktopXRegionCount ?? "-"} | ${metrics.confirmationBottom ?? "-"} | ${metrics.taskBodyContained ?? "-"} | ${metrics.previewContainedCount ?? "-"} | ${metrics.collapsedDocumentCount ?? "-"} | ${metrics.outsideCards ?? "-"} | ${metrics.horizontalOverflow ?? "-"} |`;
 }).join("\n");
 
 const markdown = `# Share Recipient Long-Content Fixture Gate
@@ -248,10 +280,14 @@ Exact saved/generated session: \`MISSING_EVIDENCE\`
 
 ## Scope
 
-This gate loads the deployed recipient page and replaces only the Share-session GET response with a route-controlled long-content fixture. Non-GET Share-session requests are blocked. It measures layout resilience without creating a Share session, writing to the DB, confirming receipt, or dispatching a provider message.
+This gate loads the ${isLocalBase ? "current-source local production" : "deployed"} recipient page and replaces only the Share-session GET response with a route-controlled long-content fixture. Non-GET Share-session requests are blocked. It measures layout resilience without creating a Share session, writing to the DB, confirming receipt, or dispatching a provider message.
 
-| Theme | Viewport | Overall | Page ratio | Root width ratio | Root height ratio | X regions | Confirm bottom | Contained previews | Collapsed docs | Outside cards | OverflowX |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+Route split alone accepted as the fix: \`false\`
+
+Accepted structure: ${report.acceptedStructure}
+
+| Theme | Viewport | Overall | Page ratio | Root width ratio | Root height ratio | X regions | Confirm bottom | Task contained | Contained previews | Collapsed docs | Outside cards | OverflowX |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 ${tableRows}
 
 ## Fixture Profile

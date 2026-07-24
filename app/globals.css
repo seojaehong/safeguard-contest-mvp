@@ -15635,9 +15635,34 @@ body:has(.safeclaw-landing) :is(
   overflow-wrap: anywhere;
 }
 
+.safeclaw-share-recipient-task-body {
+  max-height: 132px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding-right: var(--space-1);
+}
+
+.safeclaw-share-recipient-task-body:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--workspace-accent) 42%, transparent);
+  outline-offset: 2px;
+}
+
 .safeclaw-share-recipient-documents {
   display: grid;
   gap: 12px;
+}
+
+.safeclaw-share-recipient-documents-summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  color: var(--workspace-ink);
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
+  cursor: pointer;
 }
 
 .safeclaw-share-recipient-document {
@@ -15863,6 +15888,10 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-share-recipient-card {
     padding: 14px;
+  }
+
+  .safeclaw-share-recipient-task-body {
+    max-height: 112px;
   }
 
   .safeclaw-share-recipient-card-notice .safeclaw-share-recipient-preview {
