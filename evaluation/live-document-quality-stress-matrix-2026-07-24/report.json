@@ -1,14 +1,15 @@
 {
   "schemaVersion": "safeclaw-live-document-quality-stress-matrix/v1",
-  "generatedAt": "2026-07-24T13:53:50.081Z",
-  "verdict": "HONEST_RED_LIVE_PRODUCTION_STRESS_MATRIX",
+  "generatedAt": "2026-07-24T14:04:56.071Z",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LIVE_PENDING",
   "sourceBaseBeforeCommit": "6a86dc33",
+  "productCommit": "6ddf66b58952674be29924064b061a0f6e7e5241",
   "scenarioManifest": "evaluation/live-document-quality-stress-matrix-2026-07-24/scenarios.json",
   "runnerChange": {
     "contentContractsAdded": true,
     "requiredAnyGroupsSupported": true,
     "forbiddenAnySupported": true,
-    "productCodeChanged": false
+    "productCodeChanged": true
   },
   "localDeterministic": {
     "artifact": "evaluation/live-document-quality-stress-matrix-2026-07-24/local-deterministic/report.json",
@@ -41,25 +42,48 @@
     ],
     "liveExecuted": 5
   },
+  "afterLocal": {
+    "artifact": "evaluation/live-document-quality-stress-matrix-2026-07-24/after-local/report.json",
+    "baseUrl": "http://127.0.0.1:3077",
+    "buildInfoMarkerAvailable": false,
+    "sourceHead": "6ddf66b58952674be29924064b061a0f6e7e5241",
+    "total": 5,
+    "pass": 5,
+    "fail": 0,
+    "liveExecuted": 5
+  },
   "verification": {
     "runnerTests": {
       "files": 1,
       "passed": 2,
       "failed": 0
-    }
+    },
+    "scenarioSpecificityTests": {
+      "files": 1,
+      "passed": 32,
+      "failed": 0
+    },
+    "combinedProductRunnerTests": {
+      "files": 4,
+      "passed": 50,
+      "failed": 0
+    },
+    "typecheck": "PASS",
+    "build": "PASS"
   },
   "boundaries": {
-    "mode": "local-deterministic-and-live-before",
-    "apiCallsPerformed": 5,
+    "mode": "local-deterministic-live-before-and-current-source-local",
+    "apiCallsPerformed": 10,
     "liveProductionClaimed": false,
+    "liveAfterDeploymentPending": true,
     "dbMutationPerformed": false,
     "shareSessionCreated": false,
     "providerDispatchPerformed": false,
     "exactSavedShareSessionReproduced": false
   },
   "nextActions": [
-    "Do not weaken the stress matrix thresholds to hide the three RED scenarios.",
-    "Use the RED contracts to drive bounded product remediation for simultaneous-work separation, KOSHA guidance phrasing, and overnight handover/re-energization controls.",
-    "After remediation, rerun the stress matrix against current-source local production and then live production before claiming PASS."
+    "Keep the local deterministic 2/5 and live-before 0/5 RED results as discovery baselines; do not weaken the stress contracts to hide them.",
+    "Do not claim live production PASS until production deploys the current-source product fix and the same stress matrix passes against https://www.safeclaw.kr.",
+    "After deployment, rerun the stress matrix live without weakening the runner or creating DB/share/provider side effects."
   ]
 }

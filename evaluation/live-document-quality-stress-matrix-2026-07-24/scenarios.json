@@ -95,7 +95,7 @@
         "industry": "제조",
         "workType": "방호장치 개선·정비",
         "hazards": ["방호장치", "끼임", "예기치 않은 기동", "LOTO"],
-        "workerSignals": ["정비원"],
+        "workerSignals": [],
         "weatherSignals": [],
         "foreignLanguageSignals": [],
         "requiredDocuments": ["riskAssessmentDraft", "workPlanDraft", "tbmBriefing", "safetyEducationRecordDraft"],
@@ -106,7 +106,7 @@
             "requiredAnyGroups": [
               ["KOSHA", "안전보건공단"],
               ["기술지침", "가이드", "참고"],
-              ["법령 확인", "적용 여부 확인", "현장 확인 필요"]
+              ["법령 확인", "적용 여부", "별도 확인 필요", "현장 확인 필요"]
             ],
             "forbiddenAny": [
               "KOSHA 가이드는 법적 의무입니다",

@@ -1,7 +1,8 @@
 # Live Document Quality Stress Matrix
 
-- Verdict: `HONEST_RED_LIVE_PRODUCTION_STRESS_MATRIX`
+- Verdict: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LIVE_PENDING`
 - Source base before commit: `6a86dc33`
+- Product commit: `6ddf66b58952674be29924064b061a0f6e7e5241`
 - Scenario manifest: `evaluation/live-document-quality-stress-matrix-2026-07-24/scenarios.json`
 - Runner scope: content-contract checks only; no product code changed.
 
@@ -44,15 +45,30 @@ Live production failed all five stress scenarios. The failures are not treated a
 - KOSHA guidance boundary: missing some guarded hazard/worker reflection;
 - overnight electrical repair: missing shift handover, fatigue, no-solo-work, and re-energization controls.
 
+## Current-source local production after remediation
+
+Raw evidence: `evaluation/live-document-quality-stress-matrix-2026-07-24/after-local/report.json`.
+
+| Scope | Cases | Result |
+| --- | ---: | --- |
+| Current-source local production stress matrix | 5 | 5 PASS / 0 RED |
+
+The local run used a production build from product commit `6ddf66b5` after the scenario-specificity fix and the corrected Gumi manifest contract. Local runtime build-info was unavailable, so this is source/build-bound evidence rather than a deployed marker claim. It called only the local `/api/ask` endpoint and did not create saved Share data.
+
 ## Verification
 
 - `npm.cmd test -- tests\safeclaw-quality-matrix-runner.test.ts --maxWorkers=1 --fileParallelism=false`
 - Result: 1 file / 2 tests PASS
+- `npm.cmd test -- tests\scenario-inference.test.ts --maxWorkers=1 --fileParallelism=false`
+- Result: 1 file / 32 tests PASS
+- Combined product/runner regression: 4 files / 50 tests PASS
+- Typecheck PASS
+- Next production build PASS, 28/28 static pages
 
 ## Claim boundary
 
-This is an honest RED discovery artifact, not a launch PASS.
+This is a current-source local PASS artifact, not a live production PASS.
 
-Live production calls were limited to five `POST /api/ask` requests. No DB mutation, Share session creation, provider dispatch, or exact saved `/share/[sessionId]` reproduction was performed.
+Live production calls were limited to the five before-remediation `POST /api/ask` requests. Current-source after-remediation calls were local only. No DB mutation, Share session creation, provider dispatch, or exact saved `/share/[sessionId]` reproduction was performed.
 
-Next remediation should keep the runner strict and fix product output for the three RED semantic contracts instead of relaxing thresholds.
+Next step after deployment is to rerun the same stress matrix against `https://www.safeclaw.kr` and only then upgrade the verdict to live production PASS if all five scenarios remain green.
