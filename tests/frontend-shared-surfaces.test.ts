@@ -181,7 +181,7 @@ describe("canonical shared surface styles", () => {
         css,
         ".safeclaw-module-shell.module-variant-document .safeclaw-module-primary",
       ),
-    ).toMatchObject({ color: "var(--module-primary-color, var(--workspace-ink))" });
+    ).toMatchObject({ color: "var(--module-primary-color, var(--workspace-accent-ink, var(--workspace-ink)))" });
     expect(
       declarationsForExactSelector(
         css,
@@ -190,15 +190,15 @@ describe("canonical shared surface styles", () => {
     ).toMatchObject({ color: "var(--workspace-muted)" });
   });
 
-  it("shows every core document selector without a mobile horizontal rail", () => {
+  it("shows the three core document selectors in a bounded mobile grid without a horizontal rail", () => {
     expect(
       declarationsForExactSelector(
         css,
         ".command-center-shell .document-workbench .document-viewer-list",
       ),
     ).toMatchObject({
-      "grid-auto-flow": "row",
-      "grid-template-columns": "minmax(0, 1fr)",
+      "grid-auto-flow": "column",
+      "grid-template-columns": "repeat(3, minmax(0, 1fr))",
       "overflow-x": "visible",
     });
   });

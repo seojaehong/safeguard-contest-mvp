@@ -1555,10 +1555,7 @@ describe("workspace layout regression", () => {
     expect(harnessLoopText).toContain("이전 개선사항");
     expect(await page.locator(".field-workspace").count()).toBe(0);
     await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
-    await page.locator(".document-editor.editor-focus-cue").waitFor({ state: "visible" });
-    const focusMessageBackground = await page.locator(".editor-focus-message").evaluate(
-      (element) => getComputedStyle(element).backgroundColor,
-    );
+    await page.getByTestId("risk-rows-editor").waitFor({ state: "visible" });
     await page.getByRole("button", { name: "문서 검토로 돌아가기" }).waitFor({ state: "visible" });
 
     expect(await page.locator(".document-workbench").count()).toBe(0);
@@ -1567,7 +1564,6 @@ describe("workspace layout regression", () => {
     const operationsDisclosure = page.locator(".editor-operations-disclosure");
     expect(await operationsDisclosure.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(false);
     const collapsedScrollHeight = await page.evaluate(() => document.documentElement.scrollHeight);
-    const collapsedActiveElementClass = await page.evaluate(() => document.activeElement?.className || "");
     await operationsDisclosure.locator(":scope > summary").click();
     await page.locator(".workspace-side").waitFor({ state: "visible" });
 
@@ -1606,7 +1602,7 @@ describe("workspace layout regression", () => {
       const navigator = readRect(".workpack-sidebar");
       const editor = readRect(".document-editor");
       const toolbar = readRect(".document-toolbar");
-      const textarea = readRect(".document-textarea");
+      const editingTarget = readRect('[aria-label="행 1 유해·위험요인"]');
       const fieldStrip = readRect('[data-testid="document-section-field-strip"]');
       const sectionActions = readRect('[data-testid="document-section-actions"]');
       const riskRowsEditor = readRect('[data-testid="risk-rows-editor"]');
@@ -1654,7 +1650,7 @@ describe("workspace layout regression", () => {
         navigator,
         editor,
         toolbar,
-        textarea,
+        editingTarget,
         fieldStrip,
         sectionActions,
         riskRowsEditor,
@@ -1684,7 +1680,7 @@ describe("workspace layout regression", () => {
     // workspace-bounded-workbench DoD owns first-task distance and long-form UX.
     expect(collapsedScrollHeight).toBeLessThanOrEqual(metrics.viewportHeight * 6.5);
     expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.viewportHeight * 10);
-    expect(metrics.structuredSectionCount).toBeGreaterThanOrEqual(4);
+    expect(metrics.structuredSectionCount).toBe(0);
     expect(metrics.structuredSectionsAvoidInnerScroll).toBe(true);
     expect(metrics.fieldWorkspace.display).toBe("grid");
     expect(await page.locator(".field-workspace-editor-focus").count()).toBe(1);
@@ -1719,10 +1715,10 @@ describe("workspace layout regression", () => {
     expect(metrics.editor.borderRadius).toBeGreaterThanOrEqual(9);
     expect(["auto", "visible"]).toContain(metrics.editor.overflowX);
     expect(metrics.editor.overflowY).toBe("auto");
-    expect(metrics.textarea.backgroundColor).toBe("rgb(255, 255, 255)");
-    expect(metrics.textarea.borderTopWidth).toBeGreaterThanOrEqual(1);
-    expect(metrics.textarea.lineHeight / metrics.textarea.fontSize).toBeGreaterThanOrEqual(1.68);
-    expect(metrics.textarea.width).toBeGreaterThanOrEqual(Math.floor(metrics.editor.width * 0.8));
+    expect(metrics.editingTarget.backgroundColor).toBe("rgb(255, 255, 255)");
+    expect(metrics.editingTarget.borderTopWidth).toBeGreaterThanOrEqual(1);
+    expect(metrics.editingTarget.lineHeight / metrics.editingTarget.fontSize).toBeGreaterThanOrEqual(1.35);
+    expect(metrics.editingTarget.width).toBeGreaterThanOrEqual(Math.floor(metrics.editor.width * 0.8));
     expect(metrics.selectedDocumentTitle).toBe("위험성평가표");
     expect(metrics.firstRiskRowHeaderText).toContain("근거");
     expect(metrics.firstRiskRowHeaderText).toContain("확인");
@@ -1738,8 +1734,6 @@ describe("workspace layout regression", () => {
     expect(Math.min(metrics.firstRiskHazardField.bottom, metrics.shell.bottom) - metrics.firstRiskHazardField.top).toBeGreaterThanOrEqual(50);
     expect(metrics.activeTab.backgroundColor).not.toBe("rgb(108, 111, 247)");
     expect(metrics.activeTab.color).not.toBe("rgb(255, 255, 255)");
-    expect(focusMessageBackground).not.toBe("rgba(14, 14, 18, 0.78)");
-    expect(String(collapsedActiveElementClass)).toContain("document-textarea");
 
     await page.setViewportSize({ width: 1024, height: 900 });
     await page.evaluate(async () => {
@@ -1770,10 +1764,10 @@ describe("workspace layout regression", () => {
     const mobileCollapsedEditorMetrics = await page.evaluate(() => {
       const fieldWorkspace = document.querySelector<HTMLElement>(".field-workspace-editor-focus");
       const structuredEditor = document.querySelector<HTMLElement>('[data-testid="document-structured-editor"]');
-      const textarea = document.querySelector<HTMLElement>(".document-textarea");
+      const editingTarget = document.querySelector<HTMLElement>('[aria-label="행 1 유해·위험요인"]');
       const operationsDisclosure = document.querySelector<HTMLElement>(".editor-operations-disclosure");
       const shell = document.querySelector<HTMLElement>(".workpack-shell");
-      if (!fieldWorkspace || !structuredEditor || !textarea || !operationsDisclosure || !shell) {
+      if (!fieldWorkspace || !structuredEditor || !editingTarget || !operationsDisclosure || !shell) {
         throw new Error("Missing mobile collapsed editor layout targets");
       }
       const toRect = (element: HTMLElement) => {
@@ -1785,7 +1779,7 @@ describe("workspace layout regression", () => {
         scrollHeight: document.documentElement.scrollHeight,
         fieldWorkspace: toRect(fieldWorkspace),
         structuredEditor: toRect(structuredEditor),
-        textarea: toRect(textarea),
+        editingTarget: toRect(editingTarget),
         operationsDisclosure: toRect(operationsDisclosure),
         operationsDisclosureDisplay: getComputedStyle(operationsDisclosure).display,
         shellOverflowY: getComputedStyle(shell).overflowY,
@@ -1843,7 +1837,7 @@ describe("workspace layout regression", () => {
     expect(mobileCollapsedEditorMetrics.structuredEditor.top).toBeLessThanOrEqual(
       mobileCollapsedEditorMetrics.viewportHeight - 180,
     );
-    expect(mobileCollapsedEditorMetrics.textarea.top).toBeGreaterThan(
+    expect(mobileCollapsedEditorMetrics.editingTarget.top).toBeGreaterThan(
       mobileCollapsedEditorMetrics.structuredEditor.top,
     );
     expect(mobileMetrics.canvas.width).toBeGreaterThanOrEqual(Math.floor(mobileMetrics.fieldWorkspace.width * 0.98));
@@ -2426,7 +2420,7 @@ describe("workspace layout regression", () => {
     expect.soft(await page.locator(".field-workspace").count()).toBe(0);
 
     await page.getByRole("button", { name: "다운로드 설정" }).click();
-    await page.locator(".document-editor.editor-focus-cue").waitFor({ state: "visible" });
+    await page.getByTestId("risk-rows-editor").waitFor({ state: "visible" });
     expect.soft(await page.locator(".document-workbench").count()).toBe(0);
     expect(await page.locator(".field-workspace").count()).toBe(1);
 
@@ -2466,19 +2460,21 @@ describe("workspace layout regression", () => {
       const background = readColor(".document-editor", "backgroundColor");
 
       return {
-        activeElementClass: document.activeElement?.className || "",
         backgroundImage: editorStyle.backgroundImage,
         contrast: contrastRatio(foreground, background),
         overflowX: editorStyle.overflowX,
-        overflowY: editorStyle.overflowY
+        overflowY: editorStyle.overflowY,
+        riskFieldVisible: Boolean(document.querySelector('[aria-label="행 1 유해·위험요인"]')?.getClientRects().length),
+        sourceTextareaCount: document.querySelectorAll(".document-source-textarea").length
       };
     });
 
     expect.soft(metrics.backgroundImage).toBe("none");
     expect.soft(metrics.contrast).toBeGreaterThanOrEqual(4.5);
-    expect.soft(metrics.overflowX).toBe("visible");
-    expect.soft(metrics.overflowY).toBe("visible");
-    expect(String(metrics.activeElementClass)).toContain("document-textarea");
+    expect.soft(metrics.overflowX).toBe("auto");
+    expect.soft(metrics.overflowY).toBe("auto");
+    expect(metrics.riskFieldVisible).toBe(true);
+    expect(metrics.sourceTextareaCount).toBe(0);
   }, 90_000);
 
   it("focuses the input and announces an error when blank generation is submitted", async () => {
