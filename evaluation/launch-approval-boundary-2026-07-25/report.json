@@ -1,0 +1,164 @@
+{
+  "generatedAt": "2026-07-25T00:00:00+09:00",
+  "sourceHead": "0053cd8d47e50121a48c257ba627599f12de0bd4",
+  "productionCommit": "0053cd8d47e50121a48c257ba627599f12de0bd4",
+  "sourceArtifacts": {
+    "northstarOpenGates": "evaluation/northstar-open-gates-current/report.json",
+    "northstarNextRunway": "evaluation/northstar-next-runway-current-2026-07-22/report.json"
+  },
+  "summary": {
+    "provenGateCount": 14,
+    "noticeGateCount": 2,
+    "approvalGatedCount": 6,
+    "approvalRequiredBeforeMutation": true,
+    "exactSavedShareEvidence": "MISSING_EVIDENCE"
+  },
+  "provenGates": [
+    "live_harness_quality",
+    "document_quality_grounding",
+    "live_document_quality_matrix",
+    "live_document_quality_stress_matrix",
+    "live_document_field_isolation",
+    "live_kosha_exact_materialization",
+    "live_document_wording_review",
+    "live_document_broad_review",
+    "live_document_secondary_grounding",
+    "ui_documents_share_cockpit",
+    "dispatch_standalone_cockpit",
+    "share_result_fixture_cockpit",
+    "share_recipient_long_content_fixture",
+    "kosha_exact_trust_registry"
+  ],
+  "remainingBoundaries": [
+    {
+      "id": "final_99_gate",
+      "state": "notice",
+      "requiresApproval": true,
+      "closeRequires": [
+        "approved admin-auth live save/reopen canary",
+        "approved provider dispatch canary",
+        "fresh final-99 report preserving notice history"
+      ],
+      "doNotDoWithoutApproval": [
+        "rerun full final-99 when configured auth can be used",
+        "claim fully automated launch readiness"
+      ]
+    },
+    {
+      "id": "share_exact_saved_session_boundary",
+      "state": "notice",
+      "requiresApproval": true,
+      "closeRequires": [
+        "concrete production /share/[sessionId]?workerId=... URL or approved creation flow",
+        "saved-exact geometry at 1440x723, 1440x900, and 390x723",
+        "public share storage readiness with workpack_share_sessions visible"
+      ],
+      "doNotDoWithoutApproval": [
+        "POST /api/workpacks/[id]/share-sessions",
+        "treat fixture or generated /workspace Share proof as exact saved-session proof"
+      ]
+    },
+    {
+      "id": "share_recipient_ack_approval",
+      "state": "approval_gated",
+      "requiresApproval": true,
+      "closeRequires": [
+        "explicit live-data mutation approval",
+        "disposable workpack/worker ACK canary",
+        "production readback for share session and read confirmation"
+      ],
+      "doNotDoWithoutApproval": [
+        "create real ACK canary",
+        "claim invited-recipient ACK from fixture-only evidence"
+      ]
+    },
+    {
+      "id": "provider_dispatch_persistence",
+      "state": "approval_gated",
+      "requiresApproval": true,
+      "closeRequires": [
+        "approved per-channel child table or provider_result JSONB ledger",
+        "reservation-before-provider-call test",
+        "duplicate replay behavior test",
+        "target project trigger verification"
+      ],
+      "doNotDoWithoutApproval": [
+        "set PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=true",
+        "send live provider messages",
+        "apply dispatch persistence migrations"
+      ]
+    },
+    {
+      "id": "supabase_rls_launch_isolation",
+      "state": "approval_gated",
+      "requiresApproval": true,
+      "closeRequires": [
+        "authoritative project and credential provenance approval",
+        "read-only live catalog capture",
+        "disposable tenant A/B negative tests"
+      ],
+      "doNotDoWithoutApproval": [
+        "mutate production schema or tenant data",
+        "claim RLS launch isolation from source-only preflight"
+      ]
+    },
+    {
+      "id": "llm_wiki_publication",
+      "state": "approval_gated",
+      "requiresApproval": true,
+      "closeRequires": [
+        "final DDL approval",
+        "append-only ledger approval",
+        "graph pointer and RPC threat model approval",
+        "isolated-project publication canary",
+        "human confirmation before publication"
+      ],
+      "doNotDoWithoutApproval": [
+        "publish generated wiki candidates",
+        "run publication RPC canaries in production"
+      ]
+    },
+    {
+      "id": "sif_embedding_runtime",
+      "state": "approval_gated",
+      "requiresApproval": true,
+      "closeRequires": [
+        "SIF-only migration approval",
+        "embedding cost approval",
+        "upload approval",
+        "vector runtime enablement approval",
+        "post-migration vector retrieval verification"
+      ],
+      "doNotDoWithoutApproval": [
+        "generate embeddings",
+        "upload vector data",
+        "claim production vector retrieval"
+      ]
+    },
+    {
+      "id": "kosha_exact_promotion_review_gate",
+      "state": "approval_gated",
+      "requiresApproval": true,
+      "closeRequires": [
+        "completed KOSHA review template",
+        "reviewer and reviewedAt fields",
+        "humanConfirmed plus every required check",
+        "fresh review gate run",
+        "separate exact-trust registry write approval"
+      ],
+      "doNotDoWithoutApproval": [
+        "mutate exact-trust registry",
+        "accept shallow human confirmation as completed review"
+      ]
+    }
+  ],
+  "recommendedApprovalOrder": [
+    "share exact saved-session storage and geometry",
+    "recipient ACK canary",
+    "provider dispatch persistence and live dispatch canary",
+    "RLS live tenant isolation",
+    "LLM wiki publication canary",
+    "SIF embedding runtime",
+    "KOSHA exact promotion"
+  ]
+}
