@@ -1,27 +1,31 @@
 {
   "schemaVersion": "safeclaw-share-desktop-perception/v1",
-  "checkedAt": "2026-07-24T20:06:33.236Z",
+  "checkedAt": "2026-07-24T21:53:18.560Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHead": "24638e425fcf44a339ad9cf310b2f9fb6c0fdf9e",
+  "sourceHead": "f7d347e4b7707bd7743e1ad6951481a77fafb733",
   "productionBuild": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "2444b44b4e42a2b442b64b856104b1d93c7e21b7",
+    "commitSha": "f7d347e4b7707bd7743e1ad6951481a77fafb733",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-gsgwwegrm-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-g6b6rtpkc-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "providerDispatchLiveClaimed": false,
   "dbMutationPerformed": false,
+  "exactSavedUserSessionReproduced": false,
+  "exactSavedSessionVerdict": "MISSING_EVIDENCE",
   "routeSplitAloneAcceptedAsFix": false,
   "verdict": "PASS_LIVE_PRODUCTION_SCOPED_WORKSPACE_AND_INVITED_FIXTURE",
-  "interpretation": "Current measured live Workspace Share and invited recipient Share routes use first-viewport desktop workbench geometry. This does not disprove a different user-visible saved/generated session; if that exact session still looks like a narrow mobile card, reproduce it with this width-ratio/grid gate before changing product code.",
+  "interpretation": "Current measured live Workspace Share uses a three-zone desktop cockpit, while the invited recipient fixture uses a separate two-zone desktop workbench. This does not prove a different user-visible saved/generated session; if that exact session still looks like a narrow mobile card, reproduce it with this width-ratio/grid gate before changing product code.",
   "acceptance": {
     "desktop": [
       "root/content width ratio >= 0.78",
-      "at least two visually distinct first-viewport x regions",
+      "Workspace Share has at least three visually distinct first-viewport x regions",
+      "invited recipient fixture has at least two visually distinct first-viewport x regions",
+      "Workspace Share status/provenance rail is visible inside the first viewport",
       "primary CTA/confirmation inside first viewport",
       "preview/notice/result region inside first viewport",
       "horizontal overflow false and outside elements 0"
@@ -32,7 +36,7 @@
     ]
   },
   "perceptionModel": {
-    "literalStackPass": "distinct first-viewport x regions >= 2 and no horizontal overflow",
+    "literalStackPass": "Workspace Share requires >= 3 first-viewport x regions; invited recipient fixture requires >= 2; both require no horizontal overflow",
     "fullWorkbenchBreadthPass": "desktop root/content width ratio >= 0.78; a 980px cap on 1440px is about 0.68 and is treated as perceived narrow-card RED",
     "firstActionPass": "primary CTA/confirmation is in the first viewport",
     "finalPass": "all three pass together",
@@ -62,75 +66,85 @@
         "rootWidthRatio": 0.82,
         "form": {
           "left": 139,
-          "right": 775,
+          "right": 654,
           "top": 345,
-          "bottom": 689,
-          "width": 636,
-          "height": 344
+          "bottom": 708,
+          "width": 515,
+          "height": 363
         },
         "preview": {
-          "left": 781,
-          "right": 1301,
+          "left": 660,
+          "right": 1065,
           "top": 345,
           "bottom": 571,
-          "width": 520,
+          "width": 405,
           "height": 226
         },
         "primary": {
           "left": 139,
-          "right": 775,
+          "right": 654,
           "top": 345,
           "bottom": 389,
-          "width": 636,
+          "width": 515,
           "height": 44
         },
         "target": {
           "left": 139,
-          "right": 559,
+          "right": 478,
           "top": 401,
           "bottom": 535,
-          "width": 420,
+          "width": 339,
           "height": 134
         },
         "channel": {
           "left": 139,
-          "right": 775,
+          "right": 654,
           "top": 547,
-          "bottom": 689,
-          "width": 636,
-          "height": 142
+          "bottom": 708,
+          "width": 515,
+          "height": 161
         },
         "language": {
-          "left": 571,
-          "right": 775,
+          "left": 490,
+          "right": 654,
           "top": 401,
           "bottom": 535,
-          "width": 204,
+          "width": 164,
           "height": 134
+        },
+        "desktopStatusRail": {
+          "left": 1071,
+          "right": 1301,
+          "top": 345,
+          "bottom": 688,
+          "width": 230,
+          "height": 343
         },
         "channelCards": [
           {
-            "width": 202,
-            "height": 40,
+            "width": 162,
+            "height": 59,
             "left": 148,
-            "right": 350
+            "right": 310
           },
           {
-            "width": 202,
-            "height": 40,
-            "left": 356,
-            "right": 558
+            "width": 162,
+            "height": 59,
+            "left": 316,
+            "right": 477
           },
           {
-            "width": 202,
-            "height": 40,
-            "left": 564,
-            "right": 766
+            "width": 162,
+            "height": 59,
+            "left": 483,
+            "right": 645
           }
         ],
-        "distinctFirstViewportRegions": 3,
+        "distinctFirstViewportRegions": 4,
         "primaryBottom": 389,
         "previewBottom": 571,
+        "desktopStatusRailBottom": 688,
+        "desktopStatusRailDisplay": "grid",
         "previewRightOfPrimary": true,
         "mobileSummaryDisplay": "none",
         "horizontalOverflow": false,
@@ -242,88 +256,98 @@
       "metrics": {
         "viewportWidth": 1440,
         "viewportHeight": 900,
-        "pageHeight": 946,
-        "pageHeightRatio": 1.05,
+        "pageHeight": 963,
+        "pageHeightRatio": 1.07,
         "root": {
           "left": 130,
           "right": 1310,
           "top": 189,
-          "bottom": 882,
+          "bottom": 899,
           "width": 1180,
-          "height": 693
+          "height": 710
         },
         "rootWidthRatio": 0.82,
         "form": {
           "left": 143,
-          "right": 767,
+          "right": 651,
           "top": 357,
-          "bottom": 725,
-          "width": 624,
-          "height": 368
+          "bottom": 742,
+          "width": 508,
+          "height": 385
         },
         "preview": {
-          "left": 777,
-          "right": 1297,
+          "left": 661,
+          "right": 1060,
           "top": 357,
           "bottom": 757,
-          "width": 520,
+          "width": 399,
           "height": 400
         },
         "primary": {
           "left": 143,
-          "right": 767,
+          "right": 651,
           "top": 357,
           "bottom": 401,
-          "width": 624,
+          "width": 508,
           "height": 44
         },
         "target": {
           "left": 143,
-          "right": 555,
+          "right": 478,
           "top": 413,
           "bottom": 563,
-          "width": 412,
+          "width": 335,
           "height": 150
         },
         "channel": {
           "left": 143,
-          "right": 767,
+          "right": 651,
           "top": 575,
-          "bottom": 725,
-          "width": 624,
-          "height": 150
+          "bottom": 742,
+          "width": 508,
+          "height": 167
         },
         "language": {
-          "left": 567,
-          "right": 767,
+          "left": 490,
+          "right": 651,
           "top": 413,
           "bottom": 563,
-          "width": 200,
+          "width": 161,
           "height": 150
+        },
+        "desktopStatusRail": {
+          "left": 1070,
+          "right": 1297,
+          "top": 357,
+          "bottom": 700,
+          "width": 227,
+          "height": 343
         },
         "channelCards": [
           {
-            "width": 197,
-            "height": 44,
+            "width": 158,
+            "height": 61,
             "left": 154,
-            "right": 351
+            "right": 312
           },
           {
-            "width": 197,
-            "height": 44,
-            "left": 357,
-            "right": 553
+            "width": 158,
+            "height": 61,
+            "left": 318,
+            "right": 476
           },
           {
-            "width": 197,
-            "height": 44,
-            "left": 559,
-            "right": 756
+            "width": 158,
+            "height": 61,
+            "left": 482,
+            "right": 640
           }
         ],
-        "distinctFirstViewportRegions": 3,
+        "distinctFirstViewportRegions": 4,
         "primaryBottom": 401,
         "previewBottom": 757,
+        "desktopStatusRailBottom": 700,
+        "desktopStatusRailDisplay": "grid",
         "previewRightOfPrimary": true,
         "mobileSummaryDisplay": "none",
         "horizontalOverflow": false,
@@ -428,6 +452,209 @@
     {
       "route": "/workspace share step",
       "viewport": {
+        "label": "mobile-short-390x723",
+        "width": 390,
+        "height": 723
+      },
+      "metrics": {
+        "viewportWidth": 390,
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "pageHeightRatio": 1,
+        "root": {
+          "left": 27,
+          "right": 363,
+          "top": 273,
+          "bottom": 704,
+          "width": 336,
+          "height": 431
+        },
+        "rootWidthRatio": 0.86,
+        "form": {
+          "left": 36,
+          "right": 354,
+          "top": 643,
+          "bottom": 705,
+          "width": 318,
+          "height": 62
+        },
+        "preview": {
+          "left": 36,
+          "right": 354,
+          "top": 445,
+          "bottom": 637,
+          "width": 318,
+          "height": 192
+        },
+        "primary": {
+          "left": 45,
+          "right": 345,
+          "top": 652,
+          "bottom": 696,
+          "width": 300,
+          "height": 44
+        },
+        "target": {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
+        },
+        "channel": {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
+        },
+        "language": {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
+        },
+        "desktopStatusRail": {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
+        },
+        "channelCards": [
+          {
+            "width": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0
+          },
+          {
+            "width": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0
+          },
+          {
+            "width": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0
+          }
+        ],
+        "distinctFirstViewportRegions": 2,
+        "primaryBottom": 696,
+        "previewBottom": 637,
+        "desktopStatusRailBottom": 0,
+        "desktopStatusRailDisplay": "none",
+        "previewRightOfPrimary": false,
+        "mobileSummaryDisplay": "grid",
+        "horizontalOverflow": false,
+        "outsideElements": 0
+      },
+      "perception": {
+        "literalStackVerdict": "PASS",
+        "fullWorkbenchBreadthVerdict": "PASS",
+        "firstActionVerdict": "PASS",
+        "perceivedFullWorkbenchVerdict": "PASS",
+        "rootWidthRatioThreshold": null,
+        "rootWidthRatioInterpretation": "mobile is intentionally single-column"
+      },
+      "verdict": "PASS"
+    },
+    {
+      "route": "/share/[sessionId] invited recipient fixture",
+      "viewport": {
+        "label": "mobile-short-390x723",
+        "width": 390,
+        "height": 723
+      },
+      "metrics": {
+        "viewportWidth": 390,
+        "viewportHeight": 723,
+        "pageHeight": 1350,
+        "pageHeightRatio": 1.87,
+        "root": {
+          "left": 0,
+          "right": 390,
+          "top": 438,
+          "bottom": 1302,
+          "width": 390,
+          "height": 864
+        },
+        "rootWidthRatio": 1,
+        "task": {
+          "left": 16,
+          "right": 374,
+          "top": 765,
+          "bottom": 974,
+          "width": 358,
+          "height": 209
+        },
+        "notice": {
+          "left": 16,
+          "right": 374,
+          "top": 984,
+          "bottom": 1176,
+          "width": 358,
+          "height": 193
+        },
+        "identity": null,
+        "confirm": {
+          "left": 16,
+          "right": 374,
+          "top": 533,
+          "bottom": 755,
+          "width": 358,
+          "height": 221
+        },
+        "docs": {
+          "left": 16,
+          "right": 374,
+          "top": 1186,
+          "bottom": 1270,
+          "width": 358,
+          "height": 84
+        },
+        "confirmButton": {
+          "left": 31,
+          "right": 359,
+          "top": 663,
+          "bottom": 707,
+          "width": 328,
+          "height": 44
+        },
+        "confirmButtonBottom": 707,
+        "documentsTop": 1186,
+        "distinctFirstViewportRegions": 1,
+        "primaryLeftRegionRight": 374,
+        "primaryRightRegionLeft": 390,
+        "cardWidths": [
+          358,
+          358,
+          358,
+          358
+        ],
+        "horizontalOverflow": false,
+        "outsideElements": 0
+      },
+      "perception": {
+        "literalStackVerdict": "PASS",
+        "fullWorkbenchBreadthVerdict": "PASS",
+        "firstActionVerdict": "PASS",
+        "perceivedFullWorkbenchVerdict": "PASS",
+        "rootWidthRatioThreshold": null,
+        "rootWidthRatioInterpretation": "mobile is intentionally single-column"
+      },
+      "verdict": "PASS"
+    },
+    {
+      "route": "/workspace share step",
+      "viewport": {
         "label": "mobile-390x844",
         "width": 390,
         "height": 844
@@ -494,6 +721,14 @@
           "width": 0,
           "height": 0
         },
+        "desktopStatusRail": {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
+        },
         "channelCards": [
           {
             "width": 0,
@@ -517,6 +752,8 @@
         "distinctFirstViewportRegions": 2,
         "primaryBottom": 742,
         "previewBottom": 683,
+        "desktopStatusRailBottom": 0,
+        "desktopStatusRailDisplay": "none",
         "previewRightOfPrimary": false,
         "mobileSummaryDisplay": "grid",
         "horizontalOverflow": false,

@@ -64,6 +64,7 @@ const sessionPayload = {
 const viewports = [
   { label: "desktop-short-1440x723", width: 1440, height: 723 },
   { label: "desktop-1440x900", width: 1440, height: 900 },
+  { label: "mobile-short-390x723", width: 390, height: 723 },
   { label: "mobile-390x844", width: 390, height: 844 },
 ];
 
@@ -72,17 +73,20 @@ function passCriteria(metrics, kind) {
   if (kind === "workspaceShare") {
     return desktop
       ? metrics.rootWidthRatio >= 0.78
-        && metrics.distinctFirstViewportRegions >= 2
+        && metrics.distinctFirstViewportRegions >= 3
         && metrics.primaryBottom <= metrics.viewportHeight
         && metrics.previewBottom <= metrics.viewportHeight
+        && metrics.desktopStatusRailBottom <= metrics.viewportHeight
         && metrics.previewRightOfPrimary === true
         && metrics.horizontalOverflow === false
         && metrics.outsideElements === 0
         && metrics.mobileSummaryDisplay === "none"
+        && metrics.desktopStatusRailDisplay === "grid"
       : metrics.primaryBottom <= metrics.viewportHeight
         && metrics.previewBottom <= metrics.viewportHeight
         && metrics.horizontalOverflow === false
-        && metrics.outsideElements === 0;
+        && metrics.outsideElements === 0
+        && metrics.desktopStatusRailDisplay === "none";
   }
   return desktop
     ? metrics.rootWidthRatio >= 0.78
@@ -99,8 +103,9 @@ function passCriteria(metrics, kind) {
 
 function classifyPerception(metrics, kind) {
   const desktop = metrics.viewportWidth >= 1000;
+  const requiredRegions = kind === "workspaceShare" ? 3 : 2;
   const literalStackPass = desktop
-    ? metrics.distinctFirstViewportRegions >= 2
+    ? metrics.distinctFirstViewportRegions >= requiredRegions
       && metrics.horizontalOverflow === false
       && metrics.outsideElements === 0
     : metrics.horizontalOverflow === false && metrics.outsideElements === 0;
@@ -188,6 +193,8 @@ async function measureWorkspaceShare(page) {
     const channel = rect("[data-share-owner='channels']");
     const language = rect("[data-share-owner='language-preview']");
     const mobileSummary = document.querySelector("[data-share-mobile-summary]");
+    const desktopStatusRail = rect("[data-share-desktop-status-rail]");
+    const desktopStatusRailElement = document.querySelector("[data-share-desktop-status-rail]");
     const channelCards = [...document.querySelectorAll(".channel-grid .channel-card")].map((card) => {
       const box = card.getBoundingClientRect();
       return {
@@ -197,7 +204,7 @@ async function measureWorkspaceShare(page) {
         right: Math.round(box.right),
       };
     });
-    const firstViewportRects = [primary, preview, target, channel, language]
+    const firstViewportRects = [primary, preview, target, channel, language, desktopStatusRail]
       .filter(Boolean)
       .filter((item) => item.top < window.innerHeight && item.width > 0 && item.height > 0);
     const distinctFirstViewportRegions = new Set(firstViewportRects.map((item) => Math.round(item.left / 80) * 80)).size;
@@ -218,10 +225,15 @@ async function measureWorkspaceShare(page) {
       target,
       channel,
       language,
+      desktopStatusRail,
       channelCards,
       distinctFirstViewportRegions,
       primaryBottom: primary?.bottom ?? 0,
       previewBottom: preview?.bottom ?? 0,
+      desktopStatusRailBottom: desktopStatusRail?.bottom ?? 0,
+      desktopStatusRailDisplay: desktopStatusRailElement
+        ? getComputedStyle(desktopStatusRailElement).display
+        : "missing",
       previewRightOfPrimary: Boolean(preview && primary && preview.left > primary.right),
       mobileSummaryDisplay: mobileSummary ? getComputedStyle(mobileSummary).display : "missing",
       horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
@@ -418,17 +430,21 @@ const report = {
   productionBuild: build,
   providerDispatchLiveClaimed: false,
   dbMutationPerformed: false,
+  exactSavedUserSessionReproduced: false,
+  exactSavedSessionVerdict: "MISSING_EVIDENCE",
   routeSplitAloneAcceptedAsFix: false,
   verdict: failed.length === 0
     ? "PASS_LIVE_PRODUCTION_SCOPED_WORKSPACE_AND_INVITED_FIXTURE"
     : "RED_REPRODUCED_OR_ERROR",
   interpretation: failed.length === 0
-    ? "Current measured live Workspace Share and invited recipient Share routes use first-viewport desktop workbench geometry. This does not disprove a different user-visible saved/generated session; if that exact session still looks like a narrow mobile card, reproduce it with this width-ratio/grid gate before changing product code."
+    ? "Current measured live Workspace Share uses a three-zone desktop cockpit, while the invited recipient fixture uses a separate two-zone desktop workbench. This does not prove a different user-visible saved/generated session; if that exact session still looks like a narrow mobile card, reproduce it with this width-ratio/grid gate before changing product code."
     : "At least one measured route failed the full-workbench perception gate. Literal two-column geometry and perceived full-workbench breadth are separated: a route can have two columns and still fail if the root/content width is too narrow for a 1440px desktop.",
   acceptance: {
     desktop: [
       "root/content width ratio >= 0.78",
-      "at least two visually distinct first-viewport x regions",
+      "Workspace Share has at least three visually distinct first-viewport x regions",
+      "invited recipient fixture has at least two visually distinct first-viewport x regions",
+      "Workspace Share status/provenance rail is visible inside the first viewport",
       "primary CTA/confirmation inside first viewport",
       "preview/notice/result region inside first viewport",
       "horizontal overflow false and outside elements 0",
@@ -439,7 +455,7 @@ const report = {
     ],
   },
   perceptionModel: {
-    literalStackPass: "distinct first-viewport x regions >= 2 and no horizontal overflow",
+    literalStackPass: "Workspace Share requires >= 3 first-viewport x regions; invited recipient fixture requires >= 2; both require no horizontal overflow",
     fullWorkbenchBreadthPass: "desktop root/content width ratio >= 0.78; a 980px cap on 1440px is about 0.68 and is treated as perceived narrow-card RED",
     firstActionPass: "primary CTA/confirmation is in the first viewport",
     finalPass: "all three pass together",
@@ -491,6 +507,7 @@ ${rows.join("\n")}
 ## Remaining UX Boundary
 
 - This PASS covers the measured live Workspace Share flow and invited recipient fixture, not every possible saved/generated user session.
+- Workspace Share desktop requires a three-zone cockpit; the invited recipient fixture retains its separate two-zone workbench contract.
 - If a user-visible session still looks like a narrow mobile card on desktop, reproduce that exact state with this width-ratio/grid gate before changing product code.
 - Documents long-form editing remains a separate selected-detail/drilldown IA debt.
 - Provider live dispatch remains approval-gated.
