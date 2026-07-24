@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  CANONICAL_DELIVERABLE_KEYS,
   auditAskDeliverables,
   auditTextDocument,
+  classifyDeliverablePresence,
   summarizeIntegrityItems
 } from "@/lib/deliverable-integrity-policy";
 
@@ -48,6 +50,11 @@ describe("auditTextDocument", () => {
 });
 
 describe("auditAskDeliverables", () => {
+  it("keeps the integrity gate aligned with all 12 UI documents", () => {
+    expect(CANONICAL_DELIVERABLE_KEYS).toHaveLength(12);
+    expect(CANONICAL_DELIVERABLE_KEYS).toContain("workPermitDraft");
+  });
+
   it("blocks missing required deliverable keys and summarizes the failed set", () => {
     const items = auditAskDeliverables({
       deliverables: {
@@ -64,5 +71,19 @@ describe("auditAskDeliverables", () => {
     expect(summary.verdict).toBe("blocked");
     expect(summary.blockedCount).toBeGreaterThan(0);
     expect(items.find((item) => item.key === "tbmBriefing")?.issues[0]?.code).toBe("missing_document");
+  });
+});
+
+describe("classifyDeliverablePresence", () => {
+  it("fails closed on blank content and not-applicable text without a reason", () => {
+    expect(classifyDeliverablePresence("")).toMatchObject({ status: "missingUnexpected" });
+    expect(classifyDeliverablePresence("해당 없음")).toMatchObject({ status: "missingUnexpected" });
+  });
+
+  it("accepts only a visible not-applicable reason", () => {
+    expect(classifyDeliverablePresence("해당 없음: 단순 사무실 TBM 안내로 별도 작업허가 대상이 아닙니다.")).toEqual({
+      status: "explicitNotApplicable",
+      reason: "단순 사무실 TBM 안내로 별도 작업허가 대상이 아닙니다."
+    });
   });
 });

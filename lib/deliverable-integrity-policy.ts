@@ -47,10 +47,21 @@ export type IntegritySummary = {
   blockedCount: number;
 };
 
-export const REQUIRED_DELIVERABLE_KEYS = [
+export type DeliverablePresenceStatus =
+  | "presentNonEmpty"
+  | "explicitNotApplicable"
+  | "missingUnexpected";
+
+export type DeliverablePresence = {
+  status: DeliverablePresenceStatus;
+  reason: string;
+};
+
+export const CANONICAL_DELIVERABLE_KEYS = [
   "workpackSummaryDraft",
   "riskAssessmentDraft",
   "workPlanDraft",
+  "workPermitDraft",
   "tbmBriefing",
   "tbmLogDraft",
   "safetyEducationRecordDraft",
@@ -61,10 +72,13 @@ export const REQUIRED_DELIVERABLE_KEYS = [
   "kakaoMessage"
 ] as const;
 
+export const REQUIRED_DELIVERABLE_KEYS = CANONICAL_DELIVERABLE_KEYS;
+
 const defaultRequiredTermsByKey: Record<string, readonly string[]> = {
   workpackSummaryDraft: ["작업", "위험", "조치"],
   riskAssessmentDraft: ["위험성평가", "위험요인", "감소대책"],
   workPlanDraft: ["작업계획", "작업", "안전조치"],
+  workPermitDraft: ["허가", "격리", "차단", "종료", "작업시간", "보호구"],
   tbmBriefing: ["TBM", "위험", "확인"],
   tbmLogDraft: ["TBM", "참석", "확인"],
   safetyEducationRecordDraft: ["안전보건교육", "교육", "확인"],
@@ -91,6 +105,32 @@ const allowedBlankLinePattern = /(확인|서명|관리감독자|근로자|작성
 
 function normalizeText(value: string | undefined): string {
   return typeof value === "string" ? value.trim() : "";
+}
+
+export function classifyDeliverablePresence(value: unknown): DeliverablePresence {
+  const normalized = typeof value === "string" ? value.replace(/\s+/g, " ").trim() : "";
+  if (!normalized) {
+    return {
+      status: "missingUnexpected",
+      reason: "문서 원본이 비어 있어 재생성이 필요합니다."
+    };
+  }
+
+  const notApplicableMatch = normalized.match(/해당\s*없음\s*(?:[:：\-–—]\s*|\(\s*)(.+?)(?:\)|$)/u);
+  const reason = notApplicableMatch?.[1]?.trim() ?? "";
+  if (/해당\s*없음/u.test(normalized)) {
+    return reason.length >= 5
+      ? { status: "explicitNotApplicable", reason }
+      : {
+        status: "missingUnexpected",
+        reason: "해당 없음 표시는 있으나 사용자가 확인할 사유가 없습니다."
+      };
+  }
+
+  return {
+    status: "presentNonEmpty",
+    reason: ""
+  };
 }
 
 function countPlaceholders(text: string): number {
