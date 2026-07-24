@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-24T16:22:00.358Z",
-  "head": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
+  "generatedAt": "2026-07-24T16:47:30.468Z",
+  "head": "e116ae7dfbc6e00ea544f7819a9a6620208b18bd",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
+    "commitSha": "e116ae7dfbc6e00ea544f7819a9a6620208b18bd",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-81j97euu2-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-2znywv5ij-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 18
+    "gateCount": 19
   },
   "provenGates": [
     {
@@ -56,6 +56,12 @@
       "state": "proven",
       "artifact": "evaluation\\live-document-field-isolation-2026-07-25\\report.json",
       "detail": "Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate."
+    },
+    {
+      "id": "live_kosha_exact_materialization",
+      "state": "proven",
+      "artifact": "evaluation\\live-kosha-exact-materialization-2026-07-25\\report.json",
+      "detail": "Three live production scenarios materialize D-C-13, D-C-7, and B-E-10 in relevant structured risk rows without an unexpected exact pin, KOSHA statutory overclaim, field leakage, DB/share/provider mutation, or exact-registry expansion."
     },
     {
       "id": "live_document_wording_review",
@@ -276,9 +282,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
+      "sourceCommit": "e116ae7dfbc6e00ea544f7819a9a6620208b18bd",
       "sourceStatus": "exact",
-      "productionCommit": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
+      "productionCommit": "e116ae7dfbc6e00ea544f7819a9a6620208b18bd",
       "productionStatus": "matches_live"
     },
     {
@@ -319,7 +325,15 @@
       "sourceCommit": "94d0f8538b303fd7d1885cc73a4cc97159965f1c",
       "sourceStatus": "ancestor",
       "productionCommit": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
-      "productionStatus": "matches_live_source_mismatch"
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "live_kosha_exact_materialization",
+      "artifact": "evaluation\\live-kosha-exact-materialization-2026-07-25\\report.json",
+      "sourceCommit": "e116ae7dfbc6e00ea544f7819a9a6620208b18bd",
+      "sourceStatus": "exact",
+      "productionCommit": "857c52085f4b241eb0b13aec7cf51118246ff7a6",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "live_document_wording_review",

@@ -87,6 +87,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "live_document_quality_matrix", state: "proven", evidencePath: "evaluation/live-document-quality-matrix-2026-07-24/report.json", detail: "five live scenarios passed" },
       { id: "live_document_quality_stress_matrix", state: "proven", evidencePath: "evaluation/live-document-quality-stress-matrix-2026-07-24/report.json", detail: "five high-risk stress scenarios passed" },
       { id: "live_document_field_isolation", state: "proven", evidencePath: "evaluation/live-document-field-isolation-2026-07-25/report.json", detail: "ten field-isolation scenarios passed" },
+      { id: "live_kosha_exact_materialization", state: "proven", evidencePath: "evaluation/live-kosha-exact-materialization-2026-07-25/report.json", detail: "three exact KOSHA pins materialized" },
       { id: "live_document_wording_review", state: "proven", evidencePath: "evaluation/live-document-wording-review-2026-07-24/report.json", detail: "five synthetic wording scenarios passed" },
       { id: "provider_dispatch_persistence", state: "approval_gated", evidencePath: "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json", detail: "preview only" },
       { id: "supabase_rls_launch_isolation", state: "approval_gated", evidencePath: "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", detail: "approval required" },
@@ -165,6 +166,21 @@ function createFixtureRoot(): { root: string; head: string } {
       shareSessionCreated: false,
       providerDispatchCalled: false,
       exactSavedShareSessionReproduced: false,
+    },
+  });
+  writeJson(root, "evaluation/live-kosha-exact-materialization-2026-07-25/report.json", {
+    sourceHead: "TO_FILL",
+    productCommit: "TO_FILL",
+    productionCommit: "TO_FILL",
+    verdict: "PASS_LIVE_PRODUCTION_KOSHA_EXACT_MATERIALIZATION",
+    productCommitMatchesProduction: true,
+    liveAfterDeploymentPending: false,
+    afterLive: { total: 3, pass: 3, fail: 0 },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactTrustRegistryExpanded: false,
     },
   });
   writeJson(root, "evaluation/live-document-wording-review-2026-07-24/report.json", {
@@ -280,6 +296,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-document-quality-matrix-2026-07-24/report.json",
     "evaluation/live-document-quality-stress-matrix-2026-07-24/report.json",
     "evaluation/live-document-field-isolation-2026-07-25/report.json",
+    "evaluation/live-kosha-exact-materialization-2026-07-25/report.json",
     "evaluation/live-document-wording-review-2026-07-24/report.json",
     "evaluation/kosha-current-live-gate-2026-07-20/report.json",
     "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json",
@@ -353,6 +370,7 @@ describe("northstar live rollup", () => {
       providerDispatchCalled: false,
     });
     expect(report.evidence.find((item) => item.id === "live_document_field_isolation")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.evidence.find((item) => item.id === "live_kosha_exact_materialization")?.productionStatus).toBe("ancestor_of_head");
     expect(report.liveDocumentWordingReview).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW",
       livePassed: 5,

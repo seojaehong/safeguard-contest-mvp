@@ -198,6 +198,22 @@ function createFixtureRoot(): string {
       exactSavedShareSessionReproduced: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "live-kosha-exact-materialization-2026-07-25", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_KOSHA_EXACT_MATERIALIZATION",
+    productCommitMatchesProduction: true,
+    liveAfterDeploymentPending: false,
+    afterLive: {
+      total: 3,
+      pass: 3,
+      fail: 0,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactTrustRegistryExpanded: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW",
     productCommit: "fixture-product",
@@ -1356,6 +1372,12 @@ describe("northstar open gate audit", () => {
     });
     expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("process/task/equipment");
     expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("exact saved Share geometry remain separate");
+    expect(audit.gates.find((gate) => gate.id === "live_kosha_exact_materialization")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "live-kosha-exact-materialization-2026-07-25", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_kosha_exact_materialization")?.detail).toContain("D-C-13, D-C-7, and B-E-10");
+    expect(audit.gates.find((gate) => gate.id === "live_kosha_exact_materialization")?.detail).toContain("exact-registry expansion");
     expect(audit.gates.find((gate) => gate.id === "live_document_wording_review")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
@@ -1476,6 +1498,33 @@ describe("northstar open gate audit", () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "live_document_quality_stress_matrix")?.detail).toContain("live=4/5");
+  });
+
+  it("fails exact KOSHA materialization closed on a live failure or registry expansion", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "live-kosha-exact-materialization-2026-07-25", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      afterLive: { pass: number; fail: number };
+      mutationBoundary: { exactTrustRegistryExpanded: boolean };
+    };
+    report.afterLive.pass = 2;
+    report.afterLive.fail = 1;
+    report.mutationBoundary.exactTrustRegistryExpanded = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.overall).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "live_kosha_exact_materialization")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_kosha_exact_materialization")?.detail).toContain("live=2/3");
+    expect(audit.gates.find((gate) => gate.id === "live_kosha_exact_materialization")?.detail).toContain("noMutation=false");
   });
 
   it("fails the synthetic wording review closed when a live scenario fails", async () => {

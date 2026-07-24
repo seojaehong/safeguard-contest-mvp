@@ -32,6 +32,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveDocumentQualityMatrix: path.join("evaluation", "live-document-quality-matrix-2026-07-24", "report.json"),
   liveDocumentQualityStressMatrix: path.join("evaluation", "live-document-quality-stress-matrix-2026-07-24", "report.json"),
   liveDocumentFieldIsolation: path.join("evaluation", "live-document-field-isolation-2026-07-25", "report.json"),
+  liveKoshaExactMaterialization: path.join("evaluation", "live-kosha-exact-materialization-2026-07-25", "report.json"),
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
   llmWikiApproval: path.join("evaluation", "llm-wiki-rls-approval-2026-07-17", "report.md"),
@@ -606,6 +607,62 @@ function evaluateLiveDocumentFieldIsolationGate(rootDir) {
     evidencePath,
     detail: `Field-isolation verdict=${readString(report.verdict) || "unknown"}, live=${livePass}/10, failed=${liveFail}, livePending=${report.liveAfterDeploymentPending === true}, noMutation=${noMutation}.`,
     nextActions: ["Fix process/task/equipment grounding or cross-scenario leakage and rerun the unchanged normal and stress matrices."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateLiveKoshaExactMaterializationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.liveKoshaExactMaterialization;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "live_kosha_exact_materialization",
+      label: "Live KOSHA exact-pin materialization",
+      state: "missing",
+      evidencePath,
+      detail: "Live exact KOSHA pin materialization evidence is missing or invalid.",
+      nextActions: ["Run the unchanged three-scenario exact-pin matrix against production without expanding the exact registry."],
+    });
+  }
+
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const boundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const liveTotal = readNumber(afterLive.total);
+  const livePass = readNumber(afterLive.pass);
+  const liveFail = readNumber(afterLive.fail);
+  const noMutation = boundary.dbMutationPerformed === false
+    && boundary.shareSessionCreated === false
+    && boundary.providerDispatchCalled === false
+    && boundary.exactTrustRegistryExpanded === false;
+  const liveReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_KOSHA_EXACT_MATERIALIZATION"
+    && report.productCommitMatchesProduction === true
+    && report.liveAfterDeploymentPending === false
+    && liveTotal === 3
+    && livePass === 3
+    && liveFail === 0
+    && noMutation;
+
+  if (liveReady) {
+    return gateResult({
+      id: "live_kosha_exact_materialization",
+      label: "Live KOSHA exact-pin materialization",
+      state: "proven",
+      evidencePath,
+      detail: "Three live production scenarios materialize D-C-13, D-C-7, and B-E-10 in relevant structured risk rows without an unexpected exact pin, KOSHA statutory overclaim, field leakage, DB/share/provider mutation, or exact-registry expansion.",
+      nextActions: ["Keep this three-pin materialization gate in release evidence; any additional exact-trust promotion still requires completed human review and separate approval."],
+    });
+  }
+
+  return gateResult({
+    id: "live_kosha_exact_materialization",
+    label: "Live KOSHA exact-pin materialization",
+    state: "contradicted",
+    evidencePath,
+    detail: `Exact materialization verdict=${readString(report.verdict) || "unknown"}, live=${livePass}/${liveTotal}, failed=${liveFail}, productMatchesProduction=${report.productCommitMatchesProduction === true}, livePending=${report.liveAfterDeploymentPending === true}, noMutation=${noMutation}.`,
+    nextActions: ["Fix exact-pin materialization, field leakage, or guidance-overclaim failures and rerun the unchanged three-scenario live matrix."],
   });
 }
 
@@ -2510,6 +2567,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateLiveDocumentQualityMatrixGate(rootDir),
     evaluateLiveDocumentQualityStressMatrixGate(rootDir),
     evaluateLiveDocumentFieldIsolationGate(rootDir),
+    evaluateLiveKoshaExactMaterializationGate(rootDir),
     evaluateLiveDocumentWordingReviewGate(rootDir),
     evaluateUiDocumentsShareCockpitGate(rootDir),
     evaluateDispatchStandaloneCockpitGate(rootDir),

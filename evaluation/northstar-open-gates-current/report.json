@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-24T16:21:59.989Z",
-  "sourceSha": "2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6",
+  "generatedAt": "2026-07-24T16:47:30.003Z",
+  "sourceSha": "e116ae7dfbc6e00ea544f7819a9a6620208b18bd",
   "overall": "open",
   "gates": [
     {
@@ -62,6 +62,16 @@
       "detail": "Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate.",
       "nextActions": [
         "Keep the 10-scenario field-isolation gate in release evidence and preserve broad human wording review as a separate boundary."
+      ]
+    },
+    {
+      "id": "live_kosha_exact_materialization",
+      "state": "proven",
+      "label": "Live KOSHA exact-pin materialization",
+      "evidencePath": "evaluation\\live-kosha-exact-materialization-2026-07-25\\report.json",
+      "detail": "Three live production scenarios materialize D-C-13, D-C-7, and B-E-10 in relevant structured risk rows without an unexpected exact pin, KOSHA statutory overclaim, field leakage, DB/share/provider mutation, or exact-registry expansion.",
+      "nextActions": [
+        "Keep this three-pin materialization gate in release evidence; any additional exact-trust promotion still requires completed human review and separate approval."
       ]
     },
     {

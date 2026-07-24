@@ -60,6 +60,20 @@ type NextRunwayReport = {
     providerDispatchCalled: boolean;
     exactSavedShareSessionReproduced: boolean;
   };
+  liveKoshaExactMaterialization: {
+    verdict: string;
+    sourceHead: string;
+    productCommit: string;
+    productionCommit: string;
+    productCommitMatchesProduction: boolean;
+    livePassed: number;
+    liveFailed: number;
+    liveAfterDeploymentPending: boolean;
+    dbMutationPerformed: boolean;
+    shareSessionCreated: boolean;
+    providerDispatchCalled: boolean;
+    exactTrustRegistryExpanded: boolean;
+  };
   liveDocumentWordingReview: {
     verdict: string;
     sourceHead: string;
@@ -472,6 +486,21 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       shareSessionCreated: false,
       providerDispatchCalled: false,
       exactSavedShareSessionReproduced: false,
+    },
+  });
+  writeJson(root, "evaluation/live-kosha-exact-materialization-2026-07-25/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_KOSHA_EXACT_MATERIALIZATION",
+    sourceHead: "TO_FILL",
+    productCommit: "TO_FILL",
+    productionCommit: "TO_FILL",
+    productCommitMatchesProduction: true,
+    liveAfterDeploymentPending: false,
+    afterLive: { total: 3, pass: 3, fail: 0 },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactTrustRegistryExpanded: false,
     },
   });
   writeJson(root, "evaluation/live-document-wording-review-2026-07-24/report.json", {
@@ -912,6 +941,17 @@ describe("northstar next runway generator", () => {
       shareSessionCreated: false,
       providerDispatchCalled: false,
       exactSavedShareSessionReproduced: false,
+    });
+    expect(report.liveKoshaExactMaterialization).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_KOSHA_EXACT_MATERIALIZATION",
+      productCommitMatchesProduction: true,
+      livePassed: 3,
+      liveFailed: 0,
+      liveAfterDeploymentPending: false,
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactTrustRegistryExpanded: false,
     });
     expect(report.liveDocumentWordingReview).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW",

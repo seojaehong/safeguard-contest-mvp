@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6`
+Source HEAD: `e116ae7dfbc6e00ea544f7819a9a6620208b18bd`
 
-Production `/api/build-info`: `2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6`
+Production `/api/build-info`: `e116ae7dfbc6e00ea544f7819a9a6620208b18bd`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `2336f57ac5d5bc7910b7e9db4d57351ada7d1fd6`
+Live rollup source head: `e116ae7dfbc6e00ea544f7819a9a6620208b18bd`
 
 Live rollup matches production: `true`
 
@@ -44,6 +44,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live multi-scenario document quality is measured separately: `PASS_LIVE_PRODUCTION_MULTI_SCENARIO_DOCUMENT_QUALITY`, live scenarios passed `5/5`, structured risk controls remain distinct, and foreign-worker briefing stays scenario-relevant. This five-scenario proof does not replace broad human wording review.
 - Live high-risk document quality stress coverage is measured separately: `PASS_LIVE_PRODUCTION_STRESS_MATRIX`, live scenarios passed `5/5`, with product-in-production `true`. This stress proof does not replace broad human wording review or exact saved Share evidence.
 - Live document field isolation is measured separately: `PASS_LIVE_PRODUCTION_DOCUMENT_FIELD_ISOLATION`, live scenarios passed `10/10`, live pending `false`. This gate prevents process/task/equipment cross-scenario leakage; it does not replace broad human wording review or exact saved Share evidence.
+- Live KOSHA exact-pin materialization is measured separately: `PASS_LIVE_PRODUCTION_KOSHA_EXACT_MATERIALIZATION`, live scenarios passed `3/3`, product-in-production `true`. This proves only the current three exact pins in relevant structured rows; registry expansion still requires completed human review and separate approval.
 - Live synthetic wording and field usability are measured separately: `PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW`, live scenarios passed `5/5`, live pending `false`. This gate catches fixed-profile field leakage and selected-document wording defects, while broad human review and exact saved Share evidence remain separate.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level, without claiming live production engine execution.
 - SIF embedding approval preflight is approval-held: no embedding generation, no upload, and vector runtime disabled until approval.
