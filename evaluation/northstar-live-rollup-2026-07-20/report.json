@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-24T18:08:38.475Z",
-  "head": "6ac346bb4c69bc743b8b33689484dde414d6edec",
+  "generatedAt": "2026-07-24T18:58:06.438Z",
+  "head": "f877a1e5024c9a266506436ca712765735b72f94",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "6ac346bb4c69bc743b8b33689484dde414d6edec",
+    "commitSha": "f877a1e5024c9a266506436ca712765735b72f94",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-mltxpxa30-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-j0tuc73ei-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 20
+    "gateCount": 21
   },
   "provenGates": [
     {
@@ -68,6 +68,12 @@
       "state": "proven",
       "artifact": "evaluation\\live-document-wording-review-2026-07-24\\report.json",
       "detail": "Five live production synthetic scenarios pass fail-closed wording and field-usability checks after removing fixed-profile location leakage from structured risk rows. No DB/share-session/provider mutation occurred; broad human review and exact saved Share evidence remain separate."
+    },
+    {
+      "id": "live_document_broad_review",
+      "state": "proven",
+      "artifact": "evaluation\\live-document-broad-review-2026-07-25\\report.json",
+      "detail": "All 12 canonical UI deliverables are enumerated and classified across five live production scenarios: uiDocumentCount=12, integrityRequiredCount=12, reviewedDocumentCount=12, before missingUnexpected=5, after-live missingUnexpected=0, and workPermitDraft presentNonEmpty=5/5. DB/share/provider mutation is false and exact saved Share remains MISSING_EVIDENCE. The older six-document synthetic wording gate is not used as 12-document coverage proof."
     },
     {
       "id": "ui_documents_share_cockpit",
@@ -235,6 +241,28 @@
     "dbMutationPerformed": false,
     "providerDispatchCalled": false
   },
+  "liveDocumentBroadReview": {
+    "artifact": "evaluation\\live-document-broad-review-2026-07-25\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_12_DELIVERABLE_BROAD_REVIEW",
+    "sourceHead": "47da015ff501dc8125dbbf215989104a35da3aa7",
+    "productionCommit": "47da015ff501dc8125dbbf215989104a35da3aa7",
+    "productCommit": "970dc706caa7576b0d8418e18e175493cef07d1e",
+    "uiDocumentCount": 12,
+    "integrityRequiredCount": 12,
+    "reviewedDocumentCount": 12,
+    "beforePassed": 0,
+    "beforeFailed": 5,
+    "beforeMissingUnexpected": 5,
+    "livePassed": 5,
+    "liveFailed": 0,
+    "liveMissingUnexpected": 0,
+    "workPermitPresentNonEmpty": 5,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "exactSavedShareReproduced": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
   "providerDispatchPersistence": {
     "artifact": "evaluation\\provider-dispatch-idempotency-gate-2026-07-19\\report.json",
     "status": "approval_required",
@@ -288,9 +316,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "6ac346bb4c69bc743b8b33689484dde414d6edec",
+      "sourceCommit": "f877a1e5024c9a266506436ca712765735b72f94",
       "sourceStatus": "exact",
-      "productionCommit": "6ac346bb4c69bc743b8b33689484dde414d6edec",
+      "productionCommit": "f877a1e5024c9a266506436ca712765735b72f94",
       "productionStatus": "matches_live"
     },
     {
@@ -347,6 +375,14 @@
       "sourceCommit": "93376a341da35c4ccc27e72a770d3a39878aee01",
       "sourceStatus": "ancestor",
       "productionCommit": "93376a341da35c4ccc27e72a770d3a39878aee01",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "live_document_broad_review",
+      "artifact": "evaluation\\live-document-broad-review-2026-07-25\\report.json",
+      "sourceCommit": "47da015ff501dc8125dbbf215989104a35da3aa7",
+      "sourceStatus": "ancestor",
+      "productionCommit": "47da015ff501dc8125dbbf215989104a35da3aa7",
       "productionStatus": "ancestor_of_head"
     },
     {

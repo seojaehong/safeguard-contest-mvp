@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-24T18:08:38.475Z
-Source HEAD at generation: 6ac346bb4c69bc743b8b33689484dde414d6edec
-Live commit at generation: 6ac346bb4c69bc743b8b33689484dde414d6edec
+Generated at: 2026-07-24T18:58:06.438Z
+Source HEAD at generation: f877a1e5024c9a266506436ca712765735b72f94
+Live commit at generation: f877a1e5024c9a266506436ca712765735b72f94
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -53,6 +53,17 @@ Overall: `northstar_open_approval_gated`
 - Live after-deployment pending: false
 - DB mutation: false; provider dispatch: false
 
+## Live 12-Deliverable Broad Review
+
+- Verdict: `PASS_LIVE_PRODUCTION_12_DELIVERABLE_BROAD_REVIEW`
+- UI / integrity / reviewed documents: 12/12/12
+- Before remediation: pass=0, fail=5, missingUnexpected=5
+- Live after remediation: pass=5, fail=0, missingUnexpected=0
+- workPermitDraft presentNonEmpty: 5/5
+- DB mutation: false; Share session created: false; provider dispatch: false
+- Exact saved Share: MISSING_EVIDENCE; reproduced=false
+- Boundary: the six-document synthetic wording gate is not 12-document deliverable coverage.
+
 ## Gate Matrix
 
 | Gate | State | Artifact |
@@ -65,6 +76,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_field_isolation | proven | evaluation\live-document-field-isolation-2026-07-25\report.json |
 | live_kosha_exact_materialization | proven | evaluation\live-kosha-exact-materialization-2026-07-25\report.json |
 | live_document_wording_review | proven | evaluation\live-document-wording-review-2026-07-24\report.json |
+| live_document_broad_review | proven | evaluation\live-document-broad-review-2026-07-25\report.json |
 | ui_documents_share_cockpit | proven | evaluation\documents-cockpit-workbench-geometry-2026-07-22\report.json |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
 | share_result_fixture_cockpit | proven | evaluation\share-result-drilldown-2026-07-21\report.json |
@@ -90,6 +102,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_field_isolation | ancestor | ancestor_of_head | evaluation\live-document-field-isolation-2026-07-25\report.json |
 | live_kosha_exact_materialization | ancestor | ancestor_of_head | evaluation\live-kosha-exact-materialization-2026-07-25\report.json |
 | live_document_wording_review | ancestor | ancestor_of_head | evaluation\live-document-wording-review-2026-07-24\report.json |
+| live_document_broad_review | ancestor | ancestor_of_head | evaluation\live-document-broad-review-2026-07-25\report.json |
 | kosha_exact_trust_registry | ancestor | ancestor_of_head | evaluation\kosha-current-live-gate-2026-07-20\report.json |
 | rls_llm_wiki_approval_preflight | ancestor | missing | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
 | sif_embedding_preflight | ancestor | missing | evaluation\sif-embedding-gate\approval-preflight-report.json |

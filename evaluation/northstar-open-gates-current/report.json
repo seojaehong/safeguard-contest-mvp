@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-24T18:08:38.110Z",
-  "sourceSha": "6ac346bb4c69bc743b8b33689484dde414d6edec",
+  "generatedAt": "2026-07-24T18:58:05.484Z",
+  "sourceSha": "f877a1e5024c9a266506436ca712765735b72f94",
   "overall": "open",
   "gates": [
     {
@@ -82,6 +82,17 @@
       "detail": "Five live production synthetic scenarios pass fail-closed wording and field-usability checks after removing fixed-profile location leakage from structured risk rows. No DB/share-session/provider mutation occurred; broad human review and exact saved Share evidence remain separate.",
       "nextActions": [
         "Keep broad human review of real user documents separate from this measured synthetic wording gate."
+      ]
+    },
+    {
+      "id": "live_document_broad_review",
+      "state": "proven",
+      "label": "Live 12-deliverable broad review",
+      "evidencePath": "evaluation\\live-document-broad-review-2026-07-25\\report.json",
+      "detail": "All 12 canonical UI deliverables are enumerated and classified across five live production scenarios: uiDocumentCount=12, integrityRequiredCount=12, reviewedDocumentCount=12, before missingUnexpected=5, after-live missingUnexpected=0, and workPermitDraft presentNonEmpty=5/5. DB/share/provider mutation is false and exact saved Share remains MISSING_EVIDENCE. The older six-document synthetic wording gate is not used as 12-document coverage proof.",
+      "nextActions": [
+        "Keep presence/applicability coverage separate from broad human wording review of real user documents.",
+        "Keep exact saved Share evidence separate; this gate performs no DB/share/provider mutation."
       ]
     },
     {
