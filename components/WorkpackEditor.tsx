@@ -3431,10 +3431,22 @@ export function WorkpackEditor({
       return;
     }
     setSelectedKey(key);
-    window.requestAnimationFrame(() => {
+    workpackShellRef.current?.scrollTo({ top: 0, behavior: "auto" });
+    const alignSelectedDocument = () => {
+      if (key === "riskAssessmentDraft") {
+        alignRiskCockpitBelowToolbar();
+      } else {
+        alignPaneTargetBelowToolbar(
+          getDocumentLandingTarget(key)
+            || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
+            || documentBodyRef.current
+        );
+      }
       focusSelectedDocumentTarget(key);
-    });
-    window.setTimeout(() => focusSelectedDocumentTarget(key), 80);
+    };
+    window.requestAnimationFrame(alignSelectedDocument);
+    window.setTimeout(alignSelectedDocument, 80);
+    window.setTimeout(alignSelectedDocument, 240);
   }
 
   function handleSupportingDocumentsToggle(open: boolean) {
@@ -3872,7 +3884,7 @@ export function WorkpackEditor({
           <select
             aria-label="편집 문서 선택"
             value={selected.key}
-            onChange={(event) => setSelectedKey(event.target.value as DocumentKey)}
+            onChange={(event) => selectDocumentKey(event.target.value as DocumentKey)}
           >
             {documentMeta.map((item) => (
               <option key={item.key} value={item.key}>{item.title}</option>

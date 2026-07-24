@@ -1631,11 +1631,16 @@
   }
 
   .riskRowTabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 4px;
+    overflow-x: visible;
   }
 
   .riskRowTabs button {
-    min-width: 112px;
+    grid-template-columns: auto minmax(0, 1fr);
+    min-width: 0;
+    max-width: none;
     min-height: 36px;
     padding: 3px 6px;
   }
