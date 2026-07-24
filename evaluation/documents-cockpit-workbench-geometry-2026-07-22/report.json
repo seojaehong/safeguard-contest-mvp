@@ -1,16 +1,16 @@
 {
   "schemaVersion": "safeclaw-documents-cockpit-workbench-geometry/v1",
-  "checkedAt": "2026-07-22T15:33:37.452Z",
-  "sourceHead": "e4908c1e9ab18ac27f42770e3cb94a7059487b97",
+  "checkedAt": "2026-07-24T10:45:45.138Z",
+  "sourceHead": "772016d6ab1ebe89ea636627c8d0f933645d4985",
   "baseUrl": "https://www.safeclaw.kr",
   "productionBuild": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "e4908c1e9ab18ac27f42770e3cb94a7059487b97",
+    "commitSha": "772016d6ab1ebe89ea636627c8d0f933645d4985",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-4gpow7ywc-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-dm8fwb2vs-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "verdict": "PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH",
