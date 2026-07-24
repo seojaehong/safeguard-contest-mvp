@@ -845,6 +845,73 @@ function createFixtureRoot(): string {
       },
     },
   });
+  writeJson(rootDir, path.join("evaluation", "share-desktop-perception-2026-07-22", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_SCOPED_WORKSPACE_AND_INVITED_FIXTURE",
+    sourceHead: "fixture-sha",
+    productionBuild: {
+      commitSha: "fixture-sha",
+      branch: "master",
+      environment: "production",
+    },
+    providerDispatchLiveClaimed: false,
+    dbMutationPerformed: false,
+    routeSplitAloneAcceptedAsFix: false,
+    exactSavedUserSessionReproduced: false,
+    exactSavedSessionVerdict: "MISSING_EVIDENCE",
+    results: [
+      {
+        route: "/workspace share step",
+        viewport: { label: "desktop-short-1440x723", width: 1440, height: 723 },
+        verdict: "PASS",
+        metrics: {
+          viewportHeight: 723,
+          rootWidthRatio: 0.82,
+          distinctFirstViewportRegions: 4,
+          desktopStatusRailDisplay: "grid",
+          desktopStatusRailBottom: 688,
+          horizontalOverflow: false,
+          outsideElements: 0,
+        },
+      },
+      {
+        route: "/workspace share step",
+        viewport: { label: "desktop-1440x900", width: 1440, height: 900 },
+        verdict: "PASS",
+        metrics: {
+          viewportHeight: 900,
+          rootWidthRatio: 0.82,
+          distinctFirstViewportRegions: 4,
+          desktopStatusRailDisplay: "grid",
+          desktopStatusRailBottom: 700,
+          horizontalOverflow: false,
+          outsideElements: 0,
+        },
+      },
+      {
+        route: "/workspace share step",
+        viewport: { label: "mobile-short-390x723", width: 390, height: 723 },
+        verdict: "PASS",
+        metrics: {
+          viewportHeight: 723,
+          desktopStatusRailDisplay: "none",
+          primaryBottom: 696,
+          previewBottom: 637,
+          horizontalOverflow: false,
+          outsideElements: 0,
+        },
+      },
+      ...["desktop-short-1440x723", "desktop-1440x900"].map((label) => ({
+        route: "/share/[sessionId] invited recipient fixture",
+        viewport: { label, width: 1440, height: label.includes("723") ? 723 : 900 },
+        verdict: "PASS",
+        metrics: {
+          distinctFirstViewportRegions: 2,
+          horizontalOverflow: false,
+          outsideElements: 0,
+        },
+      })),
+    ],
+  });
   writeJson(rootDir, path.join("evaluation", "share-staged-flow-rail-2026-07-21", "report.json"), {
     verdict: "PASS_CURRENT_SOURCE",
     source: {
@@ -1704,6 +1771,9 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("12 document first-task cockpits");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("staged Share rail");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("desktop-short 1440x723");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("three-zone cockpit");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("390x723 mobile stack");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("invited recipient fixture retains a separate desktop two-zone contract");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("live mobile selected-summary");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exact 844px viewport");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exact one-viewport Documents");
@@ -1722,6 +1792,7 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("shell ratio target <= 3");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("first viewport shows current status, core 3 launcher, selected document workbench");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("2-3 region cockpit for recipient/channel/status/provenance");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("exact saved user session");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("do not phrase it as documents page height fixed");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("desktop width-ratio/grid metrics");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("/share/[sessionId] recipient cockpit geometry is live-proven");
