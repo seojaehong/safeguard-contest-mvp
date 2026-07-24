@@ -11,6 +11,9 @@ type WordingReport = {
   fail: number;
   cases: Array<{
     failedChecks: Array<{ id: string; detail: string }>;
+    metrics: {
+      fieldLeakageFlags: Array<{ field: string; matchedProfile: string }>;
+    };
   }>;
 };
 
@@ -28,6 +31,9 @@ function buildDocuments(): Record<string, string> {
 function goodRow(): Record<string, unknown> {
   return {
     location: "울산 도금공장 세척 구역",
+    process: "도금 탱크 외부 화학세척",
+    task: "세척제 라벨과 SDS 확인 후 외부 세척",
+    equipment: "국소배기장치와 내화학 보호구",
     hazard: "미확인 세척제 비산 및 피부 접촉",
     currentControls: "용기 라벨과 SDS를 작업 전 확인한다.",
     additionalControls: "물질 확인 전 사용을 금지하고 출입구를 통제한다.",
@@ -53,6 +59,12 @@ function runFixture(payload: Record<string, unknown>): {
       question: "울산 화학세척",
       expected: {
         region: "울산",
+        workType: "화학세척",
+        fieldIsolationTerms: ["화학세척", "세척제", "SDS"],
+        forbiddenFieldTerms: [{
+          id: "default-exterior-paint",
+          terms: ["외벽 도장", "이동식 비계", "성수동"]
+        }],
         requiredDocuments: []
       }
     }]
@@ -96,6 +108,9 @@ describe("SafeClaw wording review runner", () => {
         riskAssessmentRows: [{
           ...goodRow(),
           location: "광주 공장",
+          process: "외벽 도장",
+          task: "성수동 이동식 비계 작업",
+          equipment: "이동식 비계",
           currentControls: repeated,
           additionalControls: repeated
         }]
@@ -108,8 +123,13 @@ describe("SafeClaw wording review runner", () => {
     expect(failedIds).toEqual(expect.arrayContaining([
       "documents:exactDuplicateLines",
       "riskRows:scenarioLocation",
+      "riskRows:scenarioFieldGrounding",
+      "riskRows:crossScenarioFieldLeakage",
       "riskRows:distinctControls",
       "riskRows:actionableControls"
+    ]));
+    expect(result.report.cases[0]?.metrics.fieldLeakageFlags).toEqual(expect.arrayContaining([
+      expect.objectContaining({ matchedProfile: "default-exterior-paint" })
     ]));
   });
 });

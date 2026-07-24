@@ -216,4 +216,33 @@ describe("inferScenario", () => {
     expect(surface).toMatch(expected);
     expect(surface).not.toContain("KOSHA 가이드는 법적 의무입니다");
   });
+
+  it.each([
+    {
+      label: "press maintenance",
+      question: "창원 자동차부품 공장 프레스 설비 보전. 끼임, 예기치 않은 기동, LOTO 필요, 신규 보전원 포함.",
+      expectedProcess: /프레스 설비 보전/,
+      forbiddenProcess: /배수펌프|지하 기계실/,
+    },
+    {
+      label: "night conveyor maintenance",
+      question: "대전 식품공장 야간 컨베이어 정비. 고령 작업자 1명, 청각장애 작업자 1명, 신규 작업자 1명이 포함되고 조도가 낮다.",
+      expectedProcess: /컨베이어.*정비/,
+      forbiddenProcess: /비정형 유지보수/,
+    },
+    {
+      label: "automated equipment guard maintenance",
+      question: "구미 전자부품 공장 자동화설비 방호장치 개선과 정비 작업. 끼임과 예기치 않은 기동을 다뤄줘.",
+      expectedProcess: /자동화설비.*방호장치/,
+      forbiddenProcess: /비정형 유지보수/,
+    },
+  ])("grounds structured risk row fields for $label", ({ question, expectedProcess, forbiddenProcess }) => {
+    const response = buildMockAskResponse(question, [], "mock", "test");
+    const rows = response.structured?.riskAssessmentRows ?? [];
+
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.every((row) => expectedProcess.test(row.process))).toBe(true);
+    expect(rows.every((row) => !forbiddenProcess.test(row.process))).toBe(true);
+    expect(rows[0]?.task).toMatch(expectedProcess);
+  });
 });

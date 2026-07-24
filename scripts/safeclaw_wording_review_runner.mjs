@@ -95,10 +95,15 @@ function excerpt(value, limit = 160) {
 
 function buildCases(matrix) {
   const variants = asArray(matrix.variants);
-  if (!asArray(matrix.baseScenarios).length || !variants.length) {
+  const baseScenarios = asArray(matrix.baseScenarios);
+  if (!baseScenarios.length || !variants.length) {
     throw new Error("wording review requires baseScenarios and variants");
   }
-  return matrix.baseScenarios.flatMap((scenario) => variants.map((variant) => ({
+  const fieldIsolationProfiles = baseScenarios.map((scenario) => ({
+    id: scenario.id,
+    terms: asArray(scenario.expected?.fieldIsolationExclusiveTerms).map(text).filter(Boolean)
+  }));
+  return baseScenarios.flatMap((scenario) => variants.map((variant) => ({
     id: `${scenario.id}__${variant.id}`,
     question: `${scenario.question} ${variant.promptSuffix || ""}`.replace(/\s+/g, " ").trim(),
     expected: {
@@ -109,7 +114,14 @@ function buildCases(matrix) {
           ...asArray(scenario.expected?.requiredDocuments),
           ...asArray(variant.expected?.requiredDocuments)
         ])
-      ]
+      ],
+      fieldIsolationTerms: [
+        ...new Set([
+          ...asArray(scenario.expected?.fieldIsolationTerms),
+          ...asArray(variant.expected?.fieldIsolationTerms)
+        ].map(text).filter(Boolean))
+      ],
+      otherFieldIsolationProfiles: fieldIsolationProfiles.filter((profile) => profile.id !== scenario.id)
     }
   })));
 }
@@ -264,6 +276,69 @@ function checkRiskRows(payload, expected, question) {
   ];
 }
 
+function checkScenarioFieldIsolation(payload, expected) {
+  const rows = readRiskRows(payload);
+  const fields = ["process", "task", "equipment"];
+  const ownTerms = asArray(expected.fieldIsolationTerms).map(text).filter(Boolean);
+  const otherProfiles = [
+    ...asArray(expected.otherFieldIsolationProfiles),
+    ...asArray(expected.forbiddenFieldTerms)
+  ].map((profile, index) => ({
+    id: text(profile?.id) || `forbidden-profile-${index + 1}`,
+    terms: asArray(profile?.terms).map(text).filter(Boolean)
+  }));
+  const fieldValues = rows.flatMap((row, rowIndex) => fields.flatMap((field) => {
+    const value = text(row?.[field]);
+    return value ? [{ row: rowIndex, field, value }] : [];
+  }));
+  const ownTermMatches = ownTerms.filter((term) => fieldValues.some(({ value }) => includesAny(value, [term])));
+  const leakageFlags = fieldValues.flatMap(({ row, field, value }) => otherProfiles.flatMap((profile) => (
+    profile.terms
+      .filter((term) => includesAny(value, [term]))
+      .map((term) => ({
+        row,
+        field,
+        value: excerpt(value),
+        matchedProfile: profile.id,
+        matchedTerm: term
+      }))
+  )));
+
+  return {
+    checks: [
+      {
+        id: "riskRows:scenarioFieldGrounding",
+        ok: rows.length > 0 && ownTerms.length > 0 && ownTermMatches.length > 0,
+        detail: ownTerms.length === 0
+          ? "scenario field isolation terms are not configured"
+          : ownTermMatches.length === 0
+            ? "process/task/equipment fields do not reflect the requested scenario fingerprint"
+            : "",
+        samples: ownTerms.length && ownTermMatches.length === 0 ? ownTerms.slice(0, 8) : []
+      },
+      {
+        id: "riskRows:crossScenarioFieldLeakage",
+        ok: rows.length > 0 && leakageFlags.length === 0,
+        detail: leakageFlags.length
+          ? `${leakageFlags.length} process/task/equipment field value(s) contain another scenario fingerprint`
+          : "",
+        samples: leakageFlags.slice(0, 8)
+      }
+    ],
+    metrics: {
+      scenarioSnapshot: {
+        region: text(expected.region),
+        workType: text(expected.workType),
+        fieldIsolationTerms: ownTerms,
+        matchedFieldIsolationTerms: ownTermMatches
+      },
+      uniqueProcessValues: [...new Set(rows.map((row) => text(row?.process)).filter(Boolean))].slice(0, 12),
+      uniqueEquipmentValues: [...new Set(rows.map((row) => text(row?.equipment)).filter(Boolean))].slice(0, 12),
+      fieldLeakageFlags: leakageFlags.slice(0, 20)
+    }
+  };
+}
+
 export function reviewPayload(payload, expected, question = "") {
   if (!payload || typeof payload !== "object") {
     return {
@@ -272,16 +347,19 @@ export function reviewPayload(payload, expected, question = "") {
       metrics: { riskRowCount: 0, reviewedDocumentCount: 0 }
     };
   }
+  const fieldIsolation = checkScenarioFieldIsolation(payload, expected);
   const checks = [
     ...checkDocumentUsability(payload),
-    ...checkRiskRows(payload, expected, question)
+    ...checkRiskRows(payload, expected, question),
+    ...fieldIsolation.checks
   ];
   return {
     ok: checks.every((check) => check.ok),
     checks,
     metrics: {
       riskRowCount: readRiskRows(payload).length,
-      reviewedDocumentCount: reviewedDocumentKeys.filter((key) => readDocument(payload, key).length >= 40).length
+      reviewedDocumentCount: reviewedDocumentKeys.filter((key) => readDocument(payload, key).length >= 40).length,
+      ...fieldIsolation.metrics
     }
   };
 }

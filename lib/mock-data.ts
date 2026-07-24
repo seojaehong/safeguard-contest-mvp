@@ -503,7 +503,7 @@ function inferKnownLocationPrefix(question: string) {
 function inferCustomWorkName(question: string) {
   if (hasExcavationWorkIdentity(question)) return "열수송관 굴착공사";
   if (hasElectricalWorkIdentity(question)) return "정전전로 인근 배전반 점검 작업";
-  if (/배수\s*펌프|배수펌프|지하\s*기계실|밀폐공간|산소\s*농도|LOTO|잠금표지/.test(question)) {
+  if (/배수\s*펌프|배수펌프|지하\s*기계실|밀폐공간|산소\s*농도/.test(question)) {
     return "지하 기계실 배수펌프 점검";
   }
   if (/누수|비가\s*새|천장/.test(question)) return "천장 누수 유지보수 작업";
@@ -584,7 +584,7 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
   if (hasExcavationWorkIdentity(question)) return buildExcavationScenarioProfile(question, companyName);
 
   const isElectricalWork = hasElectricalWorkIdentity(question);
-  const isPumpConfinedSpace = /배수\s*펌프|배수펌프|지하\s*기계실|밀폐공간|산소\s*농도|LOTO|잠금표지/.test(question);
+  const isPumpConfinedSpace = /배수\s*펌프|배수펌프|지하\s*기계실|밀폐공간|산소\s*농도/.test(question);
   const isLeakMaintenance = /누수|비가\s*새|천장/.test(question);
   const workName = inferCustomWorkName(question);
   const companyType = isElectricalWork
@@ -788,6 +788,19 @@ function applyQuestionSpecificity(question: string, source: ScenarioProfile): Sc
   const hazards: string[] = [];
   const actions: string[] = [];
   const workerTargets: string[] = [];
+  let workName = source.workName;
+  let processName = source.processName;
+
+  if (/프레스/.test(question)) {
+    workName = "프레스 설비 보전 작업";
+    processName = "프레스 설비 보전, 전원 차단·LOTO, 금형·구동부 점검, 방호장치 복구";
+  } else if (/컨베이어/.test(question)) {
+    workName = /야간|심야/.test(question) ? "야간 컨베이어 정비 작업" : "컨베이어 정비 작업";
+    processName = "컨베이어 구동부 정비, 전원 차단·LOTO, 방호장치 점검, 조도·작업자 신호 확인";
+  } else if (/자동화\s*설비|자동화설비/.test(question)) {
+    workName = "자동화설비 방호장치 개선·정비 작업";
+    processName = "자동화설비 방호장치 개선, 전원 차단·LOTO, 예기치 않은 기동 방지, 시험가동 통제";
+  }
 
   if (/(?:SDS|MSDS|물질안전보건자료|GHS|경고표지|라벨).*(?:화학|세척|용기)|(?:화학|세척|용기).*(?:SDS|MSDS|물질안전보건자료|GHS|경고표지|라벨)/i.test(question)) {
     hazards.push("미확인 화학물질의 SDS·GHS 경고표지 미확인과 비산·피부접촉·환기 불량 위험");
@@ -828,6 +841,8 @@ function applyQuestionSpecificity(question: string, source: ScenarioProfile): Sc
   const nextTargets = [...new Set(workerTargets)].join(", ");
   return {
     ...source,
+    workName,
+    processName,
     topRisk: hazards.length ? `${hazards.join("; ")}. ${source.topRisk}` : source.topRisk,
     hazards: nextHazards,
     actions: nextActions,
