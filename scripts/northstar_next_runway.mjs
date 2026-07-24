@@ -649,6 +649,10 @@ function boundedWorkbenchCurrentSummary(current) {
     const metrics = isRecord(row.metrics) ? row.metrics : {};
     return asString(metrics.state) === "generated-current-workpack";
   });
+  const selectedSectionRows = documentRows.filter((row) => {
+    const metrics = isRecord(row.metrics) ? row.metrics : {};
+    return asString(metrics.state) === "selected-workPlanDraft-section-detail";
+  });
   const shareRows = Array.isArray(current.share) ? current.share.filter(isRecord) : [];
   const documentDetailDepthDebts = Array.isArray(current.documentDetailDepthDebts)
     ? current.documentDetailDepthDebts.filter(isRecord)
@@ -692,6 +696,23 @@ function boundedWorkbenchCurrentSummary(current) {
         firstHazardBottom: typeof metrics.firstHazardBottom === "number" ? metrics.firstHazardBottom : null,
         stickyOverlapCount: typeof metrics.stickyOverlapCount === "number" ? metrics.stickyOverlapCount : null,
         supportingDocsOpenDefault: metrics.supportingDocsOpenDefault === true,
+      };
+    }),
+    selectedSectionRows: selectedSectionRows.map((row) => {
+      const metrics = isRecord(row.metrics) ? row.metrics : {};
+      const verdicts = isRecord(row.verdicts) ? row.verdicts : {};
+      return {
+        route: asString(metrics.route),
+        theme: asString(metrics.theme),
+        viewport: asString(metrics.viewport),
+        overallVerdict: asString(verdicts.overallVerdict),
+        workpackShellScrollRatio: typeof metrics.workpackShellScrollRatio === "number" ? metrics.workpackShellScrollRatio : null,
+        sectionTabCount: typeof metrics.sectionTabCount === "number" ? metrics.sectionTabCount : null,
+        selectedSectionTabCount: typeof metrics.selectedSectionTabCount === "number" ? metrics.selectedSectionTabCount : null,
+        mountedSectionDetailCount: typeof metrics.mountedSectionDetailCount === "number" ? metrics.mountedSectionDetailCount : null,
+        mountedSectionTextareaCount: typeof metrics.mountedSectionTextareaCount === "number" ? metrics.mountedSectionTextareaCount : null,
+        mountedSourceTextareaCount: typeof metrics.mountedSourceTextareaCount === "number" ? metrics.mountedSourceTextareaCount : null,
+        outsideElements: typeof metrics.outsideElements === "number" ? metrics.outsideElements : null,
       };
     }),
     documentRedRows: documentRows.filter((row) => {

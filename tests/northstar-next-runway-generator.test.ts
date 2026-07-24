@@ -258,6 +258,19 @@ type NextRunwayReport = {
       stickyOverlapCount: number | null;
       supportingDocsOpenDefault: boolean;
     }>;
+    selectedSectionRows: Array<{
+      route: string;
+      theme: string;
+      viewport: string;
+      overallVerdict: string;
+      workpackShellScrollRatio: number | null;
+      sectionTabCount: number | null;
+      selectedSectionTabCount: number | null;
+      mountedSectionDetailCount: number | null;
+      mountedSectionTextareaCount: number | null;
+      mountedSourceTextareaCount: number | null;
+      outsideElements: number | null;
+    }>;
     detailDepthDebt: boolean;
     documentRedRows: Array<{
       route: string;
@@ -826,6 +839,28 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
           detailDepthVerdict: "PASS",
         },
       },
+      {
+        metrics: {
+          route: "/documents?theme=day",
+          theme: "day",
+          state: "selected-workPlanDraft-section-detail",
+          viewport: "390x723",
+          workpackShellScrollRatio: 2.96,
+          sectionTabCount: 6,
+          selectedSectionTabCount: 1,
+          mountedSectionDetailCount: 1,
+          mountedSectionTextareaCount: 1,
+          mountedSourceTextareaCount: 0,
+          outsideElements: 0,
+        },
+        verdicts: {
+          overallVerdict: "PASS",
+          firstTaskVerdict: "PASS",
+          bodyHeightVerdict: "PASS",
+          longContentContainmentVerdict: "PASS",
+          detailDepthVerdict: "PASS",
+        },
+      },
     ],
     share: [
       {
@@ -1061,6 +1096,21 @@ describe("northstar next runway generator", () => {
           firstHazardBottom: 578,
           stickyOverlapCount: 0,
           supportingDocsOpenDefault: false,
+        },
+      ],
+      selectedSectionRows: [
+        {
+          route: "/documents?theme=day",
+          theme: "day",
+          viewport: "390x723",
+          overallVerdict: "PASS",
+          workpackShellScrollRatio: 2.96,
+          sectionTabCount: 6,
+          selectedSectionTabCount: 1,
+          mountedSectionDetailCount: 1,
+          mountedSectionTextareaCount: 1,
+          mountedSourceTextareaCount: 0,
+          outsideElements: 0,
         },
       ],
     });
