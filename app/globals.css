@@ -22018,11 +22018,16 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .workpack-shell {
     position: relative;
+    grid-template-columns: minmax(0, 1fr);
     max-height: min(332px, calc(100vh - 390px));
     margin-top: 4px;
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-gutter: stable;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .workpack-shell .workpack-sidebar {
+    display: none;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .workpack-shell::after {
