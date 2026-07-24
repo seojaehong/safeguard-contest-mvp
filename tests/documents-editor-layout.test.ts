@@ -1454,9 +1454,7 @@ describe("documents editor layout", () => {
           shellClientHeight: Math.round(workpackShell.clientHeight),
           shellScrollHeight: Math.round(workpackShell.scrollHeight),
           shellAffordanceContent: shellAfterStyle.content.replaceAll("\"", ""),
-          shellAffordancePosition: shellAfterStyle.position,
-          shellAffordancePointerEvents: shellAfterStyle.pointerEvents,
-          shellAffordanceMinHeight: Math.round(Number.parseFloat(shellAfterStyle.minHeight))
+          shellAffordanceDisplay: shellAfterStyle.display
         };
       });
 
@@ -1485,10 +1483,8 @@ describe("documents editor layout", () => {
       expect(selected.shellOverflowY).toBe("auto");
       expect(selected.shellScrollHeight).toBeGreaterThan(selected.shellClientHeight);
       expect(selected.shellScrollTop).toBeGreaterThan(0);
-      expect(selected.shellAffordanceContent).toBe("아래로 계속");
-      expect(selected.shellAffordancePosition).toBe("sticky");
-      expect(selected.shellAffordancePointerEvents).toBe("none");
-      expect(selected.shellAffordanceMinHeight).toBeGreaterThanOrEqual(28);
+      expect(selected.shellAffordanceContent).toBe("none");
+      expect(selected.shellAffordanceDisplay).toBe("none");
       expect(selected.textareaTop).toBeGreaterThanOrEqual(selected.cockpitBottom);
       expect(selected.textareaBottom).toBeGreaterThan(selected.textareaTop);
       expect(selected.bodyTop).toBeGreaterThanOrEqual(0);
