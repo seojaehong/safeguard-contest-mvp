@@ -244,7 +244,9 @@ describe("live harness quality probe evaluator", () => {
       "generation_evidence_sealed",
       "db_harness_first",
       "evidence_sets_present",
+      "evidence_labels_clean",
       "structured_risk_tbm_links",
+      "risk_control_fields_distinct",
       "scenario_controls_present",
       "irrelevant_controls_absent",
       "quality_state_ready",
@@ -304,7 +306,7 @@ describe("live harness quality probe evaluator", () => {
       mode: "llm_first",
       directEvidence: [{
         id: "be-20-electrostatic",
-        title: "B-E-20-2026 정전도장기",
+        title: "B-E-20-2026 B-E-20-2026 정전도장기",
         item_type: "guide",
         evidence_role: "direct",
         controls: ["정전도장기 접지와 정전기 제거"],
@@ -334,7 +336,7 @@ describe("live harness quality probe evaluator", () => {
         riskAssessmentRows: [{
           hazard: "외벽 도장 작업",
           currentControls: "가동부 방호덮개와 비상정지장치 확인",
-          additionalControls: "정전도장기 접지와 방폭 상태 확인",
+          additionalControls: "가동부 방호덮개와 비상정지장치 확인",
           evidenceRefs: ["be-20-electrostatic"],
         }],
         tbmRiskLinks: [],

@@ -1180,6 +1180,38 @@ describe("DB harness packet", () => {
     expect(rowText).toContain("탱크 내부 청소 중 질식함");
     expect(rowText).not.toMatch(/연번:|재해개요:|기인물:/u);
   });
+
+  it("keeps current and additional controls distinct when evidence has one control", () => {
+    const response = buildMockAskResponse(
+      "외벽 도장 작업, 이동식 비계 사용",
+      mockSearchResults,
+      "mock",
+      "테스트"
+    );
+    const rows = buildSafetyReferenceRiskRows(response, [
+      reference({
+        id: "single-control-reference",
+        item_type: "risk-manual",
+        category: "현장안전",
+        subcategory: "이동식 비계",
+        title: "이동식 비계 현장 점검 기준",
+        summary: "이동식 비계 사용 전 고정 상태와 작업발판을 점검합니다.",
+        body: "이동식 비계 사용 전 고정 상태와 작업발판을 점검합니다.",
+        keywords: ["이동식 비계", "현장 점검"],
+        risk_tags: ["전도"],
+        controls: ["작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검"],
+        primary_documents: ["위험성평가표"],
+        evidence_role: "direct",
+        retrieval_source: "ranked"
+      })
+    ], "맑음", "외벽 도장 작업 이동식 비계");
+    const groundedRow = rows.find((row) => row.evidenceRefs.includes("이동식 비계 현장 점검 기준"));
+
+    expect(groundedRow).toBeDefined();
+    expect(groundedRow?.currentControls).toBeTruthy();
+    expect(groundedRow?.additionalControls).toContain("현장 반영 여부");
+    expect(groundedRow?.additionalControls).not.toBe(groundedRow?.currentControls);
+  });
 });
 
 describe("runAsk DB harness mode", () => {

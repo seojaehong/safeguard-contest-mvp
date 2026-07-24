@@ -227,6 +227,18 @@ describe("SIF display labels", () => {
     expect(helper.getSafetyReferenceDisplayTitle?.(readable)).toBe(readable.title);
   });
 
+  it("collapses a repeated leading evidence identity in display titles", () => {
+    const repeated = reference("repeated-evidence-identity") as SafetyReferenceItem & {
+      display_title?: string;
+    };
+    repeated.title = "D-C-13-2026 외벽도장 작업 안전지침";
+    repeated.display_title = "D-C-13-2026 D-C-13-2026 외벽도장 작업 안전지침";
+
+    expect(helper.getSafetyReferenceDisplayTitle?.(repeated)).toBe(
+      "D-C-13-2026 외벽도장 작업 안전지침",
+    );
+  });
+
   it("stops SIF overview parsing at corpus labels and strips year-month plus victim wording", () => {
     const archiveRow = reference("sif-corpus-boundaries", "supporting");
     archiveRow.title = "2020 / 제조업 / 금속제품제조업";

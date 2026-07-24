@@ -708,7 +708,8 @@ function deriveSifDisplaySummary(item: SafetyReferenceItem): string | null {
 }
 
 export function getSafetyReferenceDisplayTitle(item: SafetyReferenceItem): string {
-  return item.display_title || deriveSifDisplayTitle(item) || item.title;
+  const title = item.display_title || deriveSifDisplayTitle(item) || item.title;
+  return title.replace(/^([A-Z]-[A-Z0-9-]{2,}|\d{4,})(?:\s+\1)+(?=\s|$)/iu, "$1");
 }
 
 function stripRawSifSummaryLabels(value: string): string {

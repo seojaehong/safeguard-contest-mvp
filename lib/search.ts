@@ -801,7 +801,7 @@ export function buildSafetyReferenceRiskRows(
       "해당 근거의 필수 확인 항목을 작업 전 점검합니다.";
     const additionalControl = compactRiskCell(operationalView.controls[1], 120) ||
       compactRiskCell(item.document_reflection_label, 120) ||
-      control;
+      "관리감독자가 작업 전 이 조치의 현장 반영 여부를 확인하고 미반영 시 작업을 보류합니다.";
     const hazard = compactRiskCell(operationalView.hazard, 120);
     const dedupeKey = `${processLabel}|${hazard}|${control}`;
     if (seen.has(dedupeKey)) return null;

@@ -27,7 +27,9 @@ const CONTRACT_DEFINITIONS = [
   ["generation_evidence_sealed", "Generation evidence sealed"],
   ["db_harness_first", "DB harness first"],
   ["evidence_sets_present", "Direct, SIF, and supporting evidence"],
+  ["evidence_labels_clean", "Evidence labels clean"],
   ["structured_risk_tbm_links", "Structured risk rows and TBM links"],
+  ["risk_control_fields_distinct", "Current and additional controls distinct"],
   ["scenario_controls_present", "Fall, scaffold, wind, and traffic controls"],
   ["irrelevant_controls_absent", "Irrelevant controls absent"],
   ["quality_state_ready", "Quality state ready"],
@@ -331,6 +333,11 @@ function findIrrelevantControls(question, artifacts) {
   return flags;
 }
 
+/** @param {string} value */
+function hasRepeatedEvidenceIdentity(value) {
+  return /\b([A-Z]-[A-Z0-9-]{2,}|\d{4,})(?:\s+\1)+(?=\s|$)/iu.test(value);
+}
+
 /**
  * Deterministically evaluates a parsed `/api/ask` response. It never reads the
  * network, filesystem, environment, clock, or database.
@@ -456,6 +463,26 @@ export function evaluateHarnessResponse(responseValue, contextValue) {
     Object.entries(evidenceGroups).map(([name, items]) => `${name}: ${items.length ? "present" : "missing"}`),
   ));
 
+  const repeatedEvidenceLabels = [
+    ...Object.entries(evidenceGroups).flatMap(([group, items]) => items.flatMap((item, index) => {
+      const record = asRecord(item);
+      const label = readString(record.displayTitle) || readString(record.title);
+      return label && hasRepeatedEvidenceIdentity(label)
+        ? [`${group}[${index}]: ${label}`]
+        : [];
+    })),
+    ...readString(response.answer).split(/\r?\n/u).flatMap((line, index) => (
+      hasRepeatedEvidenceIdentity(line) ? [`answer[${index}]: ${line.trim()}`] : []
+    )),
+  ];
+  contracts.push(buildContract(
+    "evidence_labels_clean",
+    repeatedEvidenceLabels.length === 0,
+    "Evidence labels and answer lines contain no repeated stable identity.",
+    "A stable evidence identity is repeated in a user-facing label or answer line.",
+    repeatedEvidenceLabels.length ? repeatedEvidenceLabels : ["repeated evidence identities: none"],
+  ));
+
   const structuredLinksReady = riskRows.length > 0
     && riskRows.every(isStructuredRiskRow)
     && tbmLinks.length > 0
@@ -471,6 +498,20 @@ export function evaluateHarnessResponse(responseValue, contextValue) {
       `TBM links: ${tbmLinks.length ? "present" : "missing"}`,
       `row validation: ${validation.ok === true ? "ready" : "not ready"}`,
     ],
+  ));
+
+  const duplicateControlRows = riskRows.flatMap((row, index) => {
+    const record = asRecord(row);
+    const current = readString(record.currentControls).replace(/\s+/gu, " ");
+    const additional = readString(record.additionalControls).replace(/\s+/gu, " ");
+    return current && additional && current === additional ? [`risk row ${index}`] : [];
+  });
+  contracts.push(buildContract(
+    "risk_control_fields_distinct",
+    riskRows.length > 0 && duplicateControlRows.length === 0,
+    "Current controls and additional controls express distinct field content.",
+    "One or more risk rows duplicate current controls into additional controls.",
+    duplicateControlRows.length ? duplicateControlRows : ["duplicate current/additional controls: none"],
   ));
 
   const controlArtifacts = collectStructuredControlArtifacts(response);
