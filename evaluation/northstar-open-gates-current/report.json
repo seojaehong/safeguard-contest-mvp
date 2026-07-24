@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-24T14:18:21.323Z",
-  "sourceSha": "2fe85e2d3317773bb6ce0de9b9f19a22c31377a4",
+  "generatedAt": "2026-07-24T15:03:38.390Z",
+  "sourceSha": "93376a341da35c4ccc27e72a770d3a39878aee01",
   "overall": "open",
   "gates": [
     {
@@ -52,6 +52,16 @@
       "detail": "Five live production stress scenarios preserve SDS/GHS identity, simultaneous-work separation, vulnerable-worker communication, KOSHA guidance boundaries, and overnight handover/re-energization controls. No DB/share-session/provider mutation occurred; broad human wording review remains separate.",
       "nextActions": [
         "Keep the unchanged stress contracts in the release gate and preserve broad human wording review as a separate boundary."
+      ]
+    },
+    {
+      "id": "live_document_wording_review",
+      "state": "proven",
+      "label": "Live synthetic document wording review",
+      "evidencePath": "evaluation\\live-document-wording-review-2026-07-24\\report.json",
+      "detail": "Five live production synthetic scenarios pass fail-closed wording and field-usability checks after removing fixed-profile location leakage from structured risk rows. No DB/share-session/provider mutation occurred; broad human review and exact saved Share evidence remain separate.",
+      "nextActions": [
+        "Keep broad human review of real user documents separate from this measured synthetic wording gate."
       ]
     },
     {

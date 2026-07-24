@@ -1,9 +1,11 @@
 {
-  "generatedAt": "2026-07-24T14:51:58.499Z",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SYNTHETIC_WORDING_REVIEW_LIVE_PENDING",
+  "generatedAt": "2026-07-24T14:56:53.024Z",
+  "verdict": "PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW",
+  "sourceHead": "93376a341da35c4ccc27e72a770d3a39878aee01",
   "productCommit": "ffecaa61aafb7c32086096de0f2b64c43f02852e",
   "productionCommitAtBeforeRun": "85d8938dc20c296bbc1e42cf61ac17396f779e0b",
-  "liveAfterDeploymentPending": true,
+  "productionCommitAfterDeployment": "93376a341da35c4ccc27e72a770d3a39878aee01",
+  "liveAfterDeploymentPending": false,
   "before": {
     "path": "evaluation/live-document-wording-review-2026-07-24/before-remediation/report.json",
     "mode": "live-production",
@@ -23,6 +25,17 @@
     "fail": 0,
     "elapsedMs": 20804
   },
+  "afterLive": {
+    "path": "evaluation/live-document-wording-review-2026-07-24/after-live/report.json",
+    "mode": "live-production",
+    "baseUrl": "https://www.safeclaw.kr",
+    "sourceHead": "93376a341da35c4ccc27e72a770d3a39878aee01",
+    "productionCommit": "93376a341da35c4ccc27e72a770d3a39878aee01",
+    "total": 5,
+    "pass": 5,
+    "fail": 0,
+    "elapsedMs": 104890
+  },
   "verification": {
     "testFiles": 5,
     "testsPassed": 104,
@@ -33,14 +46,15 @@
   "mutationBoundary": {
     "apiAskCallsBefore": 5,
     "apiAskCallsAfterLocal": 5,
+    "apiAskCallsAfterLive": 5,
     "dbMutationPerformed": false,
     "shareSessionCreated": false,
     "providerDispatchCalled": false,
     "exactSavedShareReproduced": false
   },
   "claimBoundary": {
-    "allowed": "Five synthetic high-risk scenarios preserve the requested location in current-source local production structured risk rows.",
-    "forbidden": "Live production wording review is complete before the product commit is deployed and remeasured.",
+    "allowed": "Five synthetic high-risk scenarios preserve the requested location in live production structured risk rows.",
+    "forbidden": "The five-scenario synthetic gate replaces broad human wording review or proves exact saved Share UI behavior.",
     "humanReviewStillRequired": true
   }
 }

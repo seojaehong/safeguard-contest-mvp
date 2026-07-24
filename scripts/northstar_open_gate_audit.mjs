@@ -31,6 +31,7 @@ const EVIDENCE_PATHS = Object.freeze({
   documentQualityGrounding: path.join("evaluation", "document-quality-grounding-current-gate-2026-07-19", "report.json"),
   liveDocumentQualityMatrix: path.join("evaluation", "live-document-quality-matrix-2026-07-24", "report.json"),
   liveDocumentQualityStressMatrix: path.join("evaluation", "live-document-quality-stress-matrix-2026-07-24", "report.json"),
+  liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
   llmWikiApproval: path.join("evaluation", "llm-wiki-rls-approval-2026-07-17", "report.md"),
   rlsLlmWikiApprovalPreflight: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
@@ -549,6 +550,63 @@ function evaluateLiveDocumentQualityStressMatrixGate(rootDir) {
     evidencePath,
     detail: `Stress matrix verdict=${readString(report.verdict) || "unknown"}, live=${livePass}/${liveTotal}, failed=${liveFail}, productIncludedInProduction=${report.productCommitIncludedInProduction === true}, noMutation=${noMutation}.`,
     nextActions: ["Fix the failing high-risk scenario contracts and rerun the unchanged stress matrix without weakening its semantic checks."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateLiveDocumentWordingReviewGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.liveDocumentWordingReview;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "live_document_wording_review",
+      label: "Live synthetic document wording review",
+      state: "missing",
+      evidencePath,
+      detail: "Live synthetic wording and field-usability review is missing or invalid.",
+      nextActions: ["Run the unchanged five-scenario wording review against production without weakening its field checks."],
+    });
+  }
+
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const liveTotal = readNumber(afterLive.total);
+  const livePass = readNumber(afterLive.pass);
+  const liveFail = readNumber(afterLive.fail);
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.exactSavedShareReproduced === false;
+  const liveReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW"
+    && report.liveAfterDeploymentPending === false
+    && readString(report.productCommit).length > 0
+    && readString(report.productionCommitAfterDeployment).length > 0
+    && liveTotal === 5
+    && livePass === 5
+    && liveFail === 0
+    && noMutation;
+
+  if (liveReady) {
+    return gateResult({
+      id: "live_document_wording_review",
+      label: "Live synthetic document wording review",
+      state: "proven",
+      evidencePath,
+      detail: "Five live production synthetic scenarios pass fail-closed wording and field-usability checks after removing fixed-profile location leakage from structured risk rows. No DB/share-session/provider mutation occurred; broad human review and exact saved Share evidence remain separate.",
+      nextActions: ["Keep broad human review of real user documents separate from this measured synthetic wording gate."],
+    });
+  }
+
+  return gateResult({
+    id: "live_document_wording_review",
+    label: "Live synthetic document wording review",
+    state: "contradicted",
+    evidencePath,
+    detail: `Wording review verdict=${readString(report.verdict) || "unknown"}, live=${livePass}/${liveTotal}, failed=${liveFail}, livePending=${report.liveAfterDeploymentPending !== false}, noMutation=${noMutation}.`,
+    nextActions: ["Fix the failing wording or field-usability checks and rerun the unchanged five-scenario live gate."],
   });
 }
 
@@ -2395,6 +2453,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateDocumentQualityGroundingGate(rootDir),
     evaluateLiveDocumentQualityMatrixGate(rootDir),
     evaluateLiveDocumentQualityStressMatrixGate(rootDir),
+    evaluateLiveDocumentWordingReviewGate(rootDir),
     evaluateUiDocumentsShareCockpitGate(rootDir),
     evaluateDispatchStandaloneCockpitGate(rootDir),
     evaluateShareResultFixtureCockpitGate(rootDir),

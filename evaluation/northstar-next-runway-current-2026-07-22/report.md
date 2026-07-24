@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `4ac567ea32f0df2992c7109230464867e25096af`
+Source HEAD: `93376a341da35c4ccc27e72a770d3a39878aee01`
 
-Production `/api/build-info`: `fdf0ac38da3bceb9ed70cc4f662923704279193e`
+Production `/api/build-info`: `93376a341da35c4ccc27e72a770d3a39878aee01`
 
-Latest evidence commit live: `false`
+Latest evidence commit live: `true`
 
-Source head live pending: `true`
+Source head live pending: `false`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/documents-cockpit-workbench-geometry-2026-07-22/documents-workbench-desktop-short-1440x723.png`, `evaluation/documents-cockpit-workbench-geometry-2026-07-22/report.json`, `evaluation/documents-cockpit-workbench-geometry-2026-07-22/report.md`, `evaluation/share-desktop-perception-2026-07-22/recipient-share-desktop-short-1440x723.png`, `evaluation/share-desktop-perception-2026-07-22/recipient-share-mobile-390x844.png`, `evaluation/share-desktop-perception-2026-07-22/report.json`, `evaluation/share-desktop-perception-2026-07-22/report.md`, `evaluation/share-desktop-perception-2026-07-22/workspace-share-mobile-390x844.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-default-day-desktop-short-1440x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-default-day-mobile-390x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-default-night-desktop-short-1440x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-default-night-mobile-390x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-generated-current-workpack-day-desktop-short-1440x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-generated-current-workpack-day-mobile-390x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-generated-current-workpack-night-desktop-short-1440x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-generated-current-workpack-night-mobile-390x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-supporting-expanded-day-desktop-short-1440x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-supporting-expanded-day-mobile-390x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-supporting-expanded-night-desktop-short-1440x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-supporting-expanded-night-mobile-390x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/report.json`, `evaluation/workspace-bounded-workbench-current-2026-07-22/report.md`, `evaluation/workspace-bounded-workbench-current-2026-07-22/run-current-bounded-workbench-probe.mjs`, `scripts/northstar_next_runway.mjs`, `tests/northstar-next-runway-generator.test.ts`
+Source pending changed paths: `none`
 
-Current head is evidence-only pending: `true`
+Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `4ac567ea32f0df2992c7109230464867e25096af`
+Live rollup source head: `93376a341da35c4ccc27e72a770d3a39878aee01`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `4ac567ea32f0df2992c7109230464867e25096af` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `fdf0ac38da3bceb9ed70cc4f662923704279193e`, and the live rollup remains exact for that deployed marker.
+Note: source HEAD and production marker match for this artifact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -43,6 +43,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Document quality grounding is proven for the focused contract: `PASS_CURRENT_SOURCE_DOCUMENT_QUALITY_GROUNDING_CONTRACT`, tests passed `135`, SIF/KOSHA/law evidence remains before LLM prose, and KOSHA support is not promoted to statutory mandate. Live model sample excellence remains a separate human-review proof.
 - Live multi-scenario document quality is measured separately: `PASS_LIVE_PRODUCTION_MULTI_SCENARIO_DOCUMENT_QUALITY`, live scenarios passed `5/5`, structured risk controls remain distinct, and foreign-worker briefing stays scenario-relevant. This five-scenario proof does not replace broad human wording review.
 - Live high-risk document quality stress coverage is measured separately: `PASS_LIVE_PRODUCTION_STRESS_MATRIX`, live scenarios passed `5/5`, with product-in-production `true`. This stress proof does not replace broad human wording review or exact saved Share evidence.
+- Live synthetic wording and field usability are measured separately: `PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW`, live scenarios passed `5/5`, live pending `false`. This gate catches fixed-profile field leakage and selected-document wording defects, while broad human review and exact saved Share evidence remain separate.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level, without claiming live production engine execution.
 - SIF embedding approval preflight is approval-held: no embedding generation, no upload, and vector runtime disabled until approval.
 - North Star approval runway is current and separates runtime/provider/database/vector gates from ordinary UI/evidence iteration.

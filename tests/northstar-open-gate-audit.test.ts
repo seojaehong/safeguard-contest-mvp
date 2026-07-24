@@ -184,6 +184,23 @@ function createFixtureRoot(): string {
       exactSavedShareSessionReproduced: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW",
+    productCommit: "fixture-product",
+    productionCommitAfterDeployment: "fixture-production",
+    liveAfterDeploymentPending: false,
+    afterLive: {
+      total: 5,
+      pass: 5,
+      fail: 0,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+    },
+  });
   writeText(rootDir, path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"), [
     "# Supabase RLS Approval Audit",
     "Status: `approval_required`",
@@ -1319,6 +1336,12 @@ describe("northstar open gate audit", () => {
     });
     expect(audit.gates.find((gate) => gate.id === "live_document_quality_stress_matrix")?.detail).toContain("SDS/GHS identity");
     expect(audit.gates.find((gate) => gate.id === "live_document_quality_stress_matrix")?.detail).toContain("broad human wording review remains separate");
+    expect(audit.gates.find((gate) => gate.id === "live_document_wording_review")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_document_wording_review")?.detail).toContain("fixed-profile location leakage");
+    expect(audit.gates.find((gate) => gate.id === "live_document_wording_review")?.detail).toContain("broad human review");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("Scoped first-task cockpit proof only, not full Documents/Share IA completion");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("12 document first-task cockpits");
@@ -1433,6 +1456,30 @@ describe("northstar open gate audit", () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "live_document_quality_stress_matrix")?.detail).toContain("live=4/5");
+  });
+
+  it("fails the synthetic wording review closed when a live scenario fails", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "live-document-wording-review-2026-07-24", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      afterLive: { pass: number; fail: number };
+    };
+    report.afterLive.pass = 4;
+    report.afterLive.fail = 1;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.overall).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "live_document_wording_review")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_document_wording_review")?.detail).toContain("live=4/5");
   });
 
   it("fails evidence completeness when the LLM Wiki publication packet is missing", async () => {

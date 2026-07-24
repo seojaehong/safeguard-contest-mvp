@@ -47,6 +47,20 @@ type NextRunwayReport = {
     providerDispatchPerformed: boolean;
     exactSavedShareSessionReproduced: boolean;
   };
+  liveDocumentWordingReview: {
+    verdict: string;
+    sourceHead: string;
+    productCommit: string;
+    productionCommit: string;
+    livePassed: number;
+    liveFailed: number;
+    liveAfterDeploymentPending: boolean;
+    dbMutationPerformed: boolean;
+    shareSessionCreated: boolean;
+    providerDispatchCalled: boolean;
+    exactSavedShareReproduced: boolean;
+    humanReviewStillRequired: boolean;
+  };
   approvalGated: Array<{
     gate: string;
     state: string;
@@ -428,6 +442,27 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       shareSessionCreated: false,
       providerDispatchPerformed: false,
       exactSavedShareSessionReproduced: false,
+    },
+  });
+  writeJson(root, "evaluation/live-document-wording-review-2026-07-24/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW",
+    sourceHead: "TO_FILL",
+    productCommit: "TO_FILL",
+    productionCommitAfterDeployment: "TO_FILL",
+    liveAfterDeploymentPending: false,
+    afterLive: {
+      total: 5,
+      pass: 5,
+      fail: 0,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+    },
+    claimBoundary: {
+      humanReviewStillRequired: true,
     },
   });
   writeJson(root, "evaluation/kosha-next-exact-candidate-audit-2026-07-22/report.json", {
@@ -837,6 +872,17 @@ describe("northstar next runway generator", () => {
       shareSessionCreated: false,
       providerDispatchPerformed: false,
       exactSavedShareSessionReproduced: false,
+    });
+    expect(report.liveDocumentWordingReview).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW",
+      livePassed: 5,
+      liveFailed: 0,
+      liveAfterDeploymentPending: false,
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+      humanReviewStillRequired: true,
     });
     expect(report.koshaNextExactCandidateAudit.forbiddenClaims).toContain(
       "The metadata-verified non-exact candidates are already exact production evidence.",

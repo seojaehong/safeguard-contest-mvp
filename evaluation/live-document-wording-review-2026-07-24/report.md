@@ -1,9 +1,10 @@
 # Live Document Wording Review
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SYNTHETIC_WORDING_REVIEW_LIVE_PENDING`
+- Verdict: `PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW`
 - Product commit: `ffecaa61aafb7c32086096de0f2b64c43f02852e`
 - Production commit at before run: `85d8938dc20c296bbc1e42cf61ac17396f779e0b`
-- Live after-deployment proof pending: `true`
+- Production commit after deployment: `93376a341da35c4ccc27e72a770d3a39878aee01`
+- Live after-deployment proof pending: `false`
 
 ## Result
 
@@ -11,6 +12,7 @@
 |---|---|---:|---:|---:|---|
 | Before | live production | 5 | 0 | 5 | All 25 structured risk rows used a fixed profile location that contradicted the requested scenario location |
 | After | current-source local production | 5 | 5 | 0 | Requested locations are preserved; document and risk-field usability checks pass |
+| After | live production | 5 | 5 | 0 | Deployed production preserves requested locations and passes the same fail-closed checks |
 
 The fail-closed runner separately checks six core documents, overlong actionable lines, exact duplicate lines within each non-tabular document, structured risk-row required fields, scenario location, distinct controls, and vague controls without a concrete action.
 
@@ -23,4 +25,4 @@ The fail-closed runner separately checks six core documents, overlong actionable
 
 ## Boundary
 
-The before and after runs made five synthetic `/api/ask` requests each. They did not mutate the database, create a Share session, dispatch a provider, or reproduce an exact saved `/share/[sessionId]`. Broad human wording review remains separate. Public live PASS is not claimed until production includes the product commit and the same five-case gate is rerun.
+The before, local-after, and live-after runs made five synthetic `/api/ask` requests each. They did not mutate the database, create a Share session, dispatch a provider, or reproduce an exact saved `/share/[sessionId]`. Broad human wording review remains separate; this measured gate does not replace it.
