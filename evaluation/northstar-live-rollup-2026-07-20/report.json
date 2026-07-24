@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-24T17:17:48.489Z",
-  "head": "8b2d02d7e3f3c9843f36821e100e480cbcb5f587",
+  "generatedAt": "2026-07-24T17:32:03.012Z",
+  "head": "81b7c304c72e4b2e5a2f139c7d26b31bc1f2922d",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "7fe74c2ad3b2b1d3f30a2af5f01a47dbfa6641fd",
+    "commitSha": "421024036b18929354e2399f1342154db682c82b",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-q4v9ys448-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-kc8bbbuze-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 19
+    "gateCount": 20
   },
   "provenGates": [
     {
@@ -86,6 +86,12 @@
       "state": "proven",
       "artifact": "evaluation\\share-result-drilldown-2026-07-21\\report.json",
       "detail": "Generated provider-result fixture proof is bounded: desktop page 900/900, result panel 606px with 2 x-ranges, mobile summary/preview/CTA/result inside 844px, closed summary shows channel status, dispatch POST count 1, provider live dispatch unclaimed."
+    },
+    {
+      "id": "share_recipient_long_content_fixture",
+      "state": "proven",
+      "artifact": "evaluation\\share-recipient-long-content-fixture-2026-07-25\\report.json",
+      "detail": "Live recipient UI kept six day/night long-content fixture rows scoped PASS: desktop stayed two-region, mobile kept confirmation in the first viewport, four previews were locally contained, three documents stayed collapsed, and exact saved-session evidence remains MISSING_EVIDENCE with no mutation or provider dispatch."
     },
     {
       "id": "share_exact_saved_session_boundary",
@@ -282,9 +288,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "8b2d02d7e3f3c9843f36821e100e480cbcb5f587",
+      "sourceCommit": "81b7c304c72e4b2e5a2f139c7d26b31bc1f2922d",
       "sourceStatus": "exact",
-      "productionCommit": "8b2d02d7e3f3c9843f36821e100e480cbcb5f587",
+      "productionCommit": "81b7c304c72e4b2e5a2f139c7d26b31bc1f2922d",
       "productionStatus": "ancestor_of_head"
     },
     {

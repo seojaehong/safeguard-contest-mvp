@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `8b2d02d7e3f3c9843f36821e100e480cbcb5f587`
+Source HEAD: `81b7c304c72e4b2e5a2f139c7d26b31bc1f2922d`
 
-Production `/api/build-info`: `7fe74c2ad3b2b1d3f30a2af5f01a47dbfa6641fd`
+Production `/api/build-info`: `421024036b18929354e2399f1342154db682c82b`
 
 Latest evidence commit live: `false`
 
@@ -14,17 +14,17 @@ Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-default-day-mobile-390x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-generated-current-workpack-day-desktop-short-1440x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-supporting-expanded-day-mobile-390x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/documents-work-plan-section-detail-night-desktop-short-1440x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/recipient-fixture-night-desktop-short-1440x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/report.json`, `evaluation/workspace-bounded-workbench-current-2026-07-22/report.md`, `evaluation/workspace-bounded-workbench-current-2026-07-22/workspace-share-day-mobile-390x723.png`, `evaluation/workspace-bounded-workbench-current-2026-07-22/workspace-share-night-mobile-390x723.png`, `scripts/northstar_next_runway.mjs`, `tests/northstar-next-runway-generator.test.ts`
+Source pending changed paths: `evaluation/share-recipient-long-content-fixture-2026-07-25/day-desktop-1440x900.png`, `evaluation/share-recipient-long-content-fixture-2026-07-25/day-desktop-short-1440x723.png`, `evaluation/share-recipient-long-content-fixture-2026-07-25/day-mobile-390x723.png`, `evaluation/share-recipient-long-content-fixture-2026-07-25/night-desktop-1440x900.png`, `evaluation/share-recipient-long-content-fixture-2026-07-25/night-desktop-short-1440x723.png`, `evaluation/share-recipient-long-content-fixture-2026-07-25/night-mobile-390x723.png`, `evaluation/share-recipient-long-content-fixture-2026-07-25/report.json`, `evaluation/share-recipient-long-content-fixture-2026-07-25/report.md`, `evaluation/share-recipient-long-content-fixture-2026-07-25/run-share-recipient-long-content-fixture.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`, `tests/share-recipient-portal-browser.test.ts`
 
 Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `8b2d02d7e3f3c9843f36821e100e480cbcb5f587`
+Live rollup source head: `81b7c304c72e4b2e5a2f139c7d26b31bc1f2922d`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `8b2d02d7e3f3c9843f36821e100e480cbcb5f587` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `7fe74c2ad3b2b1d3f30a2af5f01a47dbfa6641fd`, and the live rollup remains exact for that deployed marker.
+Note: current HEAD `81b7c304c72e4b2e5a2f139c7d26b31bc1f2922d` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `421024036b18929354e2399f1342154db682c82b`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -78,6 +78,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Current bounded-workbench gate: `PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP`; first-task/body containment rows pass, and no Documents rows carry local workbench detail-depth debt. Share rows remain scoped if exact saved session evidence is missing.
 - Share desktop: current measured Workspace Share and invited recipient fixture routes pass scoped desktop workbench width/region geometry; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes.
 - Share generated-result fixture: current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported.
+- Share recipient long-content fixture: `PASS_LIVE_PRODUCTION_LONG_CONTENT_FIXTURE_EXACT_SAVED_MISSING`; 6 route-controlled day/night rows preserve scoped containment, while exact saved reproduced remains `false` and exact-session verdict remains `MISSING_EVIDENCE`.
 - Share route evidence split: invited recipient `/share/[sessionId]` fixture route, exact saved/generated `/share/[sessionId]`, and manager/workspace share-result route remain separate proof layers. A fixture pass cannot close a user-specific exact saved/session complaint.
 - Share exact-session boundary: `MISSING_EXACT_SAVED_SESSION_EVIDENCE_NO_MUTATION_BOUNDARY_CONFIRMED`; exact saved reproduced is `false`, safe missing-session GET status is `404`, safe-read verdict is `PASS_FAIL_CLOSED`, invalid-id GET status is `400`, invalid-id verdict is `PASS_INVALID_ID_FAIL_CLOSED`, and DB/provider mutations remain `false`.
 - Share recipient ACK approval: `approval_ready_open`; approval required is `true`, live-data mutation approved is `false`, production share session created is `false`, read confirmation inserted is `false`, DB mutation performed is `false`, and provider message sent is `false`.

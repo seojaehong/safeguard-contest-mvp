@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-24T17:17:47.476Z",
-  "sourceSha": "8b2d02d7e3f3c9843f36821e100e480cbcb5f587",
+  "generatedAt": "2026-07-24T17:32:02.099Z",
+  "sourceSha": "81b7c304c72e4b2e5a2f139c7d26b31bc1f2922d",
   "overall": "open",
   "gates": [
     {
@@ -119,6 +119,16 @@
       "detail": "Generated provider-result fixture proof is bounded: desktop page 900/900, result panel 606px with 2 x-ranges, mobile summary/preview/CTA/result inside 844px, closed summary shows channel status, dispatch POST count 1, provider live dispatch unclaimed.",
       "nextActions": [
         "Keep real provider dispatch gated until persistent idempotency and provider-result persistence are approved and live verified."
+      ]
+    },
+    {
+      "id": "share_recipient_long_content_fixture",
+      "state": "proven",
+      "label": "Recipient Share long-content fixture",
+      "evidencePath": "evaluation\\share-recipient-long-content-fixture-2026-07-25\\report.json",
+      "detail": "Live recipient UI kept six day/night long-content fixture rows scoped PASS: desktop stayed two-region, mobile kept confirmation in the first viewport, four previews were locally contained, three documents stayed collapsed, and exact saved-session evidence remains MISSING_EVIDENCE with no mutation or provider dispatch.",
+      "nextActions": [
+        "Keep exact saved/generated /share/[sessionId] open until a concrete production URL is supplied or DB-backed session creation is explicitly approved."
       ]
     },
     {

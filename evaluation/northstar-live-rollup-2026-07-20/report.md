@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-24T17:17:48.489Z
-Source HEAD at generation: 8b2d02d7e3f3c9843f36821e100e480cbcb5f587
-Live commit at generation: 7fe74c2ad3b2b1d3f30a2af5f01a47dbfa6641fd
+Generated at: 2026-07-24T17:32:03.012Z
+Source HEAD at generation: 81b7c304c72e4b2e5a2f139c7d26b31bc1f2922d
+Live commit at generation: 421024036b18929354e2399f1342154db682c82b
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -68,6 +68,7 @@ Overall: `northstar_open_approval_gated`
 | ui_documents_share_cockpit | proven | evaluation\documents-cockpit-workbench-geometry-2026-07-22\report.json |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
 | share_result_fixture_cockpit | proven | evaluation\share-result-drilldown-2026-07-21\report.json |
+| share_recipient_long_content_fixture | proven | evaluation\share-recipient-long-content-fixture-2026-07-25\report.json |
 | share_exact_saved_session_boundary | notice | evaluation\share-exact-session-boundary-2026-07-22\report.json |
 | kosha_exact_trust_registry | proven | evaluation\kosha-current-northstar-regression-2026-07-22\report.json |
 | share_recipient_ack_approval | approval_gated | evaluation\share-recipient-ack-approval-preflight-current-2026-07-19\report.json |
