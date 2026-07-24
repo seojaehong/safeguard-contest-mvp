@@ -2170,6 +2170,8 @@ const STRONG_RELEVANCE_ALIASES = new Set([
 
 const CONFINED_OR_PUMP_QUERY_TERMS = ["밀폐공간", "산소농도", "환기", "배수펌프", "기계실", "누수"];
 const CONFINED_OR_PUMP_INCOMPATIBLE_TERMS = ["프레스", "크레인", "영상표시단말기", "VDT", "운송용 차량"];
+const VEHICLE_OPERATION_IDENTITY = /지게차|덤프트럭|화물자동차|화물차량|화물차|트럭|작업차|차량|건설기계|굴삭기|굴착기|천공기|로더|운전|운행|주행|후진|하역/u;
+const VEHICLE_ROLLOVER_SIGNAL = /전도|전복|넘어지|굴러\s*떨어|운행경로|지반\s*지지/u;
 
 function normalizeMatchText(value: string): string {
   return value.toLowerCase().replace(/\s+/g, " ");
@@ -2238,6 +2240,11 @@ function isIncompatibleReferenceForQuery(query: string, item: SafetyReferenceIte
     }
   ];
   if (specializedGuards.some((guard) => guard.reference.test(identityText) && !guard.query.test(queryText))) {
+    return true;
+  }
+  const vehicleRolloverReference = VEHICLE_OPERATION_IDENTITY.test(text)
+    && VEHICLE_ROLLOVER_SIGNAL.test(text);
+  if (vehicleRolloverReference && !VEHICLE_OPERATION_IDENTITY.test(queryText)) {
     return true;
   }
   const confinedOrPumpQuery = CONFINED_OR_PUMP_QUERY_TERMS.some((term) => queryText.includes(normalizeMatchText(term)));

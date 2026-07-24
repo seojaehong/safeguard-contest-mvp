@@ -792,6 +792,11 @@ function mergeProfileTriple(primary: string[], fallback: [string, string, string
   ];
 }
 
+function formatActionVerificationQuestion(action: string): string {
+  const normalized = action.replace(/[.!?]+$/u, "").trim();
+  return `조치 완료 여부를 누가 확인했는가? (${normalized})`;
+}
+
 function applyQuestionSpecificity(question: string, source: ScenarioProfile): ScenarioProfile {
   const hazards: string[] = [];
   const actions: string[] = [];
@@ -912,7 +917,7 @@ function applyQuestionSpecificity(question: string, source: ScenarioProfile): Sc
     educationName,
     educationTargets: nextTargets ? `${educationTargets}, ${nextTargets}` : educationTargets,
     questions: mergeProfileTriple(
-      actions.map((action) => `${action} 절차를 누가 확인했는가?`),
+      actions.map(formatActionVerificationQuestion),
       source.questions
     ),
     educationPoints: mergeProfileTriple(actions, source.educationPoints)

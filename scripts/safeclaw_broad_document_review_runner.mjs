@@ -6,7 +6,7 @@ import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { reviewPayload } from "./safeclaw_wording_review_runner.mjs";
 
-const canonicalDocuments = [
+export const canonicalDocuments = [
   ["workpackSummaryDraft", "점검결과 요약"],
   ["riskAssessmentDraft", "위험성평가표"],
   ["workPlanDraft", "작업계획서"],

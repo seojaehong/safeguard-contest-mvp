@@ -1639,6 +1639,61 @@ describe("deriveSafetyReferenceOperationalView", () => {
 });
 
 describe("filterAndRankSafetyReferencesByQuery", () => {
+  it("rejects a resort vehicle-rollover case from an overnight electrical-repair query", () => {
+    const vehicleRollover: SafetyReferenceItem = {
+      ...reference("resort-vehicle-rollover", "supporting"),
+      title: "리조트에서 소형 작업차 적재함 탑승 이동 중 차량 전도 사망 사례",
+      summary: "리조트 내 작업차가 운행 중 넘어져 탑승자가 추락한 사례",
+      keywords: ["리조트", "소형 작업차", "차량", "전도", "추락"],
+      risk_tags: ["전도", "추락"],
+      controls: [
+        "운전자 안전띠와 전도방호 상태 확인",
+        "지반 지지력과 운행경로를 작업계획서에 반영"
+      ]
+    };
+    const electricalShock: SafetyReferenceItem = {
+      ...reference("electrical-shock", "supporting"),
+      title: "전기설비 정비 중 충전부 감전 사망 사례",
+      summary: "분전반 점검 전 전원 차단과 검전이 누락되어 감전된 사례",
+      keywords: ["전기설비", "분전반", "감전", "검전", "재통전"],
+      risk_tags: ["감전"],
+      controls: [
+        "작업 전 전원 차단·검전·접지 및 잠금표지 적용",
+        "작업자 퇴거 확인 후 재통전"
+      ]
+    };
+
+    const ranked = filterAndRankSafetyReferencesByQuery(
+      "제주 리조트 심야 전기설비 긴급복구. 분전반 감전과 재통전 위험을 확인한다.",
+      [vehicleRollover, electricalShock],
+      5
+    );
+
+    expect(ranked.map((item) => item.id)).toEqual(["electrical-shock"]);
+  });
+
+  it("keeps vehicle-rollover evidence for an explicit mobile-equipment query", () => {
+    const vehicleRollover: SafetyReferenceItem = {
+      ...reference("vehicle-rollover", "supporting"),
+      title: "건설현장 덤프트럭 운행 중 경사면 전도 사례",
+      summary: "덤프트럭이 지반 지지력을 확인하지 않고 운행하다 전도된 사례",
+      keywords: ["덤프트럭", "차량", "운행", "경사면", "전도"],
+      risk_tags: ["전도"],
+      controls: [
+        "지반 지지력과 운행경로 확인",
+        "전도방호 상태와 적재물 무게중심 확인"
+      ]
+    };
+
+    const ranked = filterAndRankSafetyReferencesByQuery(
+      "건설현장 덤프트럭 하역과 경사면 운행 중 전도 위험을 확인한다.",
+      [vehicleRollover],
+      5
+    );
+
+    expect(ranked.map((item) => item.id)).toEqual(["vehicle-rollover"]);
+  });
+
   it("promotes task-specific SIF/confined-space evidence ahead of broad KOSHA support material", () => {
     const broadSupport: SafetyReferenceItem = {
       ...reference("broad-kosha"),

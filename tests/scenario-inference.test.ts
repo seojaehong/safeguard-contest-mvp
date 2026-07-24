@@ -230,6 +230,19 @@ describe("inferScenario", () => {
     expect(surface).not.toContain("KOSHA 가이드는 법적 의무입니다");
   });
 
+  it("keeps TBM verification questions separate from completed control sentences", () => {
+    const scenario = inferScenario(
+      "울산 도금공장 탱크 외부 화학세척 작업. SDS와 GHS 경고표지를 확인하고 비산·피부접촉을 통제한다."
+    );
+
+    expect(scenario.profile.questions).toHaveLength(3);
+    expect(scenario.profile.questions.every((question) => (
+      question.startsWith("조치 완료 여부를 누가 확인했는가? (")
+      && question.endsWith(")")
+    ))).toBe(true);
+    expect(scenario.profile.questions.join(" ")).not.toContain("절차를 누가 확인했는가");
+  });
+
   it("does not treat chemical spray wording as rain or retain the generic floor-cleaning seed", () => {
     const question = "울산 도금공장 탱크 외부 화학세척 작업. 용기 라벨이 훼손되어 SDS와 GHS 경고표지를 확인해야 하고 비산·피부접촉 우려가 있다.";
     const scenario = inferScenario(question);
