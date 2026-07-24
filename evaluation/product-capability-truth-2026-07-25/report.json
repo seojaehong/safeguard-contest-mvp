@@ -1,0 +1,125 @@
+{
+  "generatedAt": "2026-07-24T21:25:23.9081208Z",
+  "verdict": "PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH",
+  "sourceHead": "0e09f9e8b2d8a413e0d500919424b4b918a6cd83",
+  "productionCommit": "0e09f9e8b2d8a413e0d500919424b4b918a6cd83",
+  "deploymentUrl": "safeguard-contest-qvs8noeun-seojaehongs-projects.vercel.app",
+  "liveChecks": {
+    "providerDispatch": {
+      "method": "GET",
+      "status": 200,
+      "capability": false,
+      "mode": "preview_only",
+      "reason": "persistent_idempotency_unavailable",
+      "channels": {
+        "email": false,
+        "sms": false,
+        "kakao": false
+      },
+      "providerCalled": false
+    },
+    "briefingSettingsUnauthenticated": {
+      "method": "GET",
+      "status": 401,
+      "authenticationFailClosed": true,
+      "emailReady": false,
+      "mode": "preview_only",
+      "reason": "persistent_idempotency_unavailable",
+      "settingsMutationPerformed": false
+    },
+    "photoVisionReadiness": {
+      "method": "GET",
+      "status": 200,
+      "ready": true,
+      "provider": "openai",
+      "model": "gpt-4.1-mini",
+      "apiKeyPresent": true,
+      "acceptedOnly": true,
+      "ocrSupported": true,
+      "maxInputPhotos": 10,
+      "photoPostAnalysisExecuted": false
+    }
+  },
+  "uiChecks": {
+    "briefingSettings": [
+      {
+        "viewport": "1440x723",
+        "screenshot": "evaluation/product-capability-truth-2026-07-25/settings-briefing-desktop-1440x723.png",
+        "containsDocumentGeneration": true,
+        "containsEmailDispatchLock": true,
+        "horizontalOverflow": false,
+        "card": {
+          "x": 848,
+          "y": 574.390625,
+          "width": 567,
+          "height": 243
+        }
+      },
+      {
+        "viewport": "390x723",
+        "screenshot": "evaluation/product-capability-truth-2026-07-25/settings-briefing-mobile-390x723.png",
+        "containsDocumentGeneration": true,
+        "containsEmailDispatchLock": true,
+        "horizontalOverflow": false,
+        "card": {
+          "x": 17,
+          "y": 1166.359375,
+          "width": 356,
+          "height": 275
+        }
+      }
+    ],
+    "aiGenerationModes": {
+      "sourceAndApiContractVerified": true,
+      "modes": [
+        "template",
+        "enhanced",
+        "full"
+      ],
+      "liveInteractiveModeSwitchExecuted": false
+    }
+  },
+  "verification": {
+    "focusedCapabilityTests": {
+      "files": 7,
+      "passed": 102,
+      "failed": 0
+    },
+    "shareCapabilityBrowserTests": {
+      "files": 2,
+      "passed": 14,
+      "failed": 0
+    },
+    "typecheck": "PASS",
+    "productionBuild": {
+      "status": "PASS",
+      "nextVersion": "15.5.15",
+      "staticPages": 28
+    },
+    "broaderFrontendSuite": {
+      "filesPassed": 7,
+      "filesFailed": 1,
+      "testsPassed": 139,
+      "testsFailed": 2,
+      "residualFailures": [
+        "frontend route evidence source identity is stale",
+        "existing globals.css canonical spacing residuals remain"
+      ],
+      "ownedByThisPatch": false
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "photoAnalysisPostCalled": false,
+    "exactSavedShareReproduced": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "documentsShareIaVerdict": "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
+    "documentsShareIaDetail": "Route split alone is not accepted. Documents density and desktop Share multi-zone presentation remain separate from capability-truth PASS.",
+    "providerDispatchApprovalRequired": true,
+    "humanEditorialReviewCompleted": false
+  }
+}
