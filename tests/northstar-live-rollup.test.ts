@@ -84,6 +84,23 @@ type RollupReport = {
     exactSavedShareReproduced: boolean;
     exactSavedShareVerdict: string;
   };
+  liveDocumentSeedProfileIsolation: {
+    verdict: string;
+    beforePassed: number;
+    beforeFailed: number;
+    beforeSeedProfileLeakageCount: number;
+    livePassed: number;
+    liveFailed: number;
+    liveSeedProfileLeakageCount: number;
+    reviewedDocumentSurfaceCount: number;
+    secondaryGroundingPassed: number;
+    secondaryGroundingReviewed: number;
+    dbMutationPerformed: boolean;
+    shareSessionCreated: boolean;
+    providerDispatchCalled: boolean;
+    exactSavedShareReproduced: boolean;
+    exactSavedShareVerdict: string;
+  };
   evidence: Array<{
     id: string;
     sourceStatus: string;
@@ -123,6 +140,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "live_document_wording_review", state: "proven", evidencePath: "evaluation/live-document-wording-review-2026-07-24/report.json", detail: "five synthetic wording scenarios passed" },
       { id: "live_document_broad_review", state: "proven", evidencePath: "evaluation/live-document-broad-review-2026-07-25/report.json", detail: "all 12 deliverables passed" },
       { id: "live_document_secondary_grounding", state: "proven", evidencePath: "evaluation/live-document-secondary-grounding-2026-07-25/report.json", detail: "all 30 supporting documents passed scenario grounding" },
+      { id: "live_document_seed_profile_isolation", state: "proven", evidencePath: "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", detail: "all 60 documents passed seed-profile isolation" },
       { id: "provider_dispatch_persistence", state: "approval_gated", evidencePath: "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json", detail: "preview only" },
       { id: "supabase_rls_launch_isolation", state: "approval_gated", evidencePath: "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", detail: "approval required" },
       { id: "llm_wiki_publication", state: "approval_gated", evidencePath: "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", detail: "approval required" },
@@ -283,6 +301,35 @@ function createFixtureRoot(): { root: string; head: string } {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", {
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    productCommit: "TO_FILL",
+    verdict: "PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION",
+    liveAfterDeploymentPending: false,
+    contract: {
+      reviewedDocumentSurfaceCount: 60,
+    },
+    beforeLive: {
+      pass: 0,
+      fail: 5,
+      seedProfileLeakageCount: 90,
+    },
+    afterLive: {
+      pass: 5,
+      fail: 0,
+      seedProfileLeakageCount: 0,
+      secondaryGroundingPassed: 30,
+      secondaryGroundingReviewed: 30,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+      exactSavedShareEvidence: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json", {
     sourceSha: "TO_FILL",
     status: "approval_required",
@@ -382,6 +429,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-document-wording-review-2026-07-24/report.json",
     "evaluation/live-document-broad-review-2026-07-25/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
+    "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json",
     "evaluation/kosha-current-live-gate-2026-07-20/report.json",
     "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json",
     "evaluation/northstar-approval-runway-2026-07-21/report.json",
@@ -498,13 +546,31 @@ describe("northstar live rollup", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.evidence.find((item) => item.id === "live_document_secondary_grounding")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.liveDocumentSeedProfileIsolation).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION",
+      beforePassed: 0,
+      beforeFailed: 5,
+      beforeSeedProfileLeakageCount: 90,
+      livePassed: 5,
+      liveFailed: 0,
+      liveSeedProfileLeakageCount: 0,
+      reviewedDocumentSurfaceCount: 60,
+      secondaryGroundingPassed: 30,
+      secondaryGroundingReviewed: 30,
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "live_document_seed_profile_isolation")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "open_gate")?.productionStatus).toBe("matches_live");
     expect(report.evidence.find((item) => item.id === "provider_dispatch_persistence")?.sourceStatus).toBe("ancestor");
     expect(report.evidence.find((item) => item.id === "provider_dispatch_persistence")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "northstar_approval_runway")?.sourceStatus).toBe("ancestor");
     expect(report.evidence.find((item) => item.id === "northstar_approval_runway")?.productionStatus).toBe("ancestor_of_head");
     expect(report.contradictions).toHaveLength(0);
-  });
+  }, 15_000);
 
   it("fails closed when an evidence packet points outside the current history", () => {
     const { root, head } = createFixtureRoot();

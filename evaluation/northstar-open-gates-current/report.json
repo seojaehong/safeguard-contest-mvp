@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-24T19:38:53.025Z",
-  "sourceSha": "91fd6f588aed79c667c0de18a76983b002b9897d",
+  "generatedAt": "2026-07-24T20:15:44.332Z",
+  "sourceSha": "f280959e5221dee73e38908fc0d3edcc4b686eb6",
   "overall": "open",
   "gates": [
     {
@@ -103,6 +103,16 @@
       "detail": "All six secondary deliverables pass scenario grounding across five live production scenarios: cases=5/5, documents=30/30, cross-scenario leakage=0, missingUnexpected=0. DB/share/provider mutation is false and exact saved Share remains MISSING_EVIDENCE. This deterministic contract does not replace the six-document wording gate, 12-document presence gate, or broad human review.",
       "nextActions": [
         "Keep broad human review and exact saved Share evidence separate from this deterministic supporting-document contract."
+      ]
+    },
+    {
+      "id": "live_document_seed_profile_isolation",
+      "state": "proven",
+      "label": "Live document seed-profile isolation",
+      "evidencePath": "evaluation\\live-document-seed-profile-isolation-2026-07-25\\report.json",
+      "detail": "Five live production scenarios pass the fail-closed 12-document seed-profile isolation contract: cases=5/5, document surface=60, forbidden fragments 90->0, secondary grounding=30/30, missingUnexpected=0. DB/share/provider mutation is false and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Keep broad human wording review and exact saved Share geometry separate from this deterministic seed-profile isolation contract."
       ]
     },
     {

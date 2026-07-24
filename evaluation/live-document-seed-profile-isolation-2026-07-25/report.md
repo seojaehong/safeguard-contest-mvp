@@ -2,6 +2,7 @@
 
 - Verdict: `PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION`
 - Product commit: `597dec777e0467cd9f8aadce611fbb7b1a8f3b72`
+- Evidence source / production commit: `2444b44b4e42a2b442b64b856104b1d93c7e21b7`
 - Contract: five scenarios x twelve raw deliverables; one forbidden seed fragment is enough to fail the case.
 - Live production commit: `2444b44b4e42a2b442b64b856104b1d93c7e21b7`
 

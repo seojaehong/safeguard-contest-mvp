@@ -36,6 +36,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
+  liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
   llmWikiApproval: path.join("evaluation", "llm-wiki-rls-approval-2026-07-17", "report.md"),
   rlsLlmWikiApprovalPreflight: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
@@ -854,6 +855,73 @@ function evaluateLiveDocumentSecondaryGroundingGate(rootDir) {
     evidencePath,
     detail: `Secondary grounding verdict=${readString(report.verdict) || "unknown"}, live=${readNumber(afterLive.pass)}/${readNumber(afterLive.cases)}, documents=${readNumber(afterLive.secondaryPassed)}/${readNumber(afterLive.secondaryReviewed)}, leakage=${readNumber(afterLive.crossScenarioLeakageCount)}, missing=${readNumber(afterLive.missingUnexpectedCount)}, sourceMatchesProduction=${sourceMatchesProduction}, noMutation=${noMutation}.`,
     nextActions: ["Fix scenario grounding, semantic-group, or cross-scenario leakage failures and rerun the unchanged live contract."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateLiveDocumentSeedProfileIsolationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.liveDocumentSeedProfileIsolation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "live_document_seed_profile_isolation",
+      label: "Live document seed-profile isolation",
+      state: "missing",
+      evidencePath,
+      detail: "Live five-scenario seed-profile isolation evidence is missing or invalid.",
+      nextActions: ["Run the fail-closed five-by-twelve forbidden-fragment contract against current production."],
+    });
+  }
+
+  const beforeLive = isRecord(report.beforeLive) ? report.beforeLive : {};
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const contract = isRecord(report.contract) ? report.contract : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const sourceMatchesProduction = readString(report.sourceHead).length > 0
+    && readString(report.sourceHead) === readString(report.productionCommit);
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.exactSavedShareReproduced === false;
+  const liveReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION"
+    && sourceMatchesProduction
+    && report.liveAfterDeploymentPending === false
+    && readNumber(contract.scenarioCount) === 5
+    && readNumber(contract.documentCountPerScenario) === 12
+    && readNumber(contract.reviewedDocumentSurfaceCount) === 60
+    && contract.failClosedOnAnyForbiddenFragment === true
+    && readNumber(beforeLive.pass) === 0
+    && readNumber(beforeLive.fail) === 5
+    && readNumber(beforeLive.seedProfileLeakageCount) > 0
+    && readNumber(afterLive.pass) === 5
+    && readNumber(afterLive.fail) === 0
+    && readNumber(afterLive.seedProfileLeakageCount) === 0
+    && readNumber(afterLive.secondaryGroundingPassed) === 30
+    && readNumber(afterLive.secondaryGroundingReviewed) === 30
+    && readNumber(afterLive.missingUnexpectedCount) === 0
+    && noMutation;
+
+  if (liveReady) {
+    return gateResult({
+      id: "live_document_seed_profile_isolation",
+      label: "Live document seed-profile isolation",
+      state: "proven",
+      evidencePath,
+      detail: `Five live production scenarios pass the fail-closed 12-document seed-profile isolation contract: cases=5/5, document surface=60, forbidden fragments ${readNumber(beforeLive.seedProfileLeakageCount)}->0, secondary grounding=30/30, missingUnexpected=0. DB/share/provider mutation is false and exact saved Share remains ${readString(mutationBoundary.exactSavedShareEvidence) || "MISSING_EVIDENCE"}.`,
+      nextActions: ["Keep broad human wording review and exact saved Share geometry separate from this deterministic seed-profile isolation contract."],
+    });
+  }
+
+  return gateResult({
+    id: "live_document_seed_profile_isolation",
+    label: "Live document seed-profile isolation",
+    state: "contradicted",
+    evidencePath,
+    detail: `Seed-profile isolation verdict=${readString(report.verdict) || "unknown"}, live=${readNumber(afterLive.pass)}/5, forbiddenFragments=${readNumber(afterLive.seedProfileLeakageCount)}, secondary=${readNumber(afterLive.secondaryGroundingPassed)}/${readNumber(afterLive.secondaryGroundingReviewed)}, missing=${readNumber(afterLive.missingUnexpectedCount)}, sourceMatchesProduction=${sourceMatchesProduction}, noMutation=${noMutation}.`,
+    nextActions: ["Remove seeded work/weather/profile fragments from generated documents and rerun the unchanged five-by-twelve live contract."],
   });
 }
 
@@ -2786,6 +2854,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateLiveDocumentWordingReviewGate(rootDir),
     evaluateLiveDocumentBroadReviewGate(rootDir),
     evaluateLiveDocumentSecondaryGroundingGate(rootDir),
+    evaluateLiveDocumentSeedProfileIsolationGate(rootDir),
     evaluateUiDocumentsShareCockpitGate(rootDir),
     evaluateDispatchStandaloneCockpitGate(rootDir),
     evaluateShareResultFixtureCockpitGate(rootDir),

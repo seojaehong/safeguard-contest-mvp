@@ -25,6 +25,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
+  liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
   kosha: path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json"),
   rlsWiki: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
   sifEmbedding: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
@@ -306,6 +307,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const liveDocumentWordingReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentWordingReview);
   const liveDocumentBroadReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentBroadReview);
   const liveDocumentSecondaryGrounding = tryReadJson(rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
+  const liveDocumentSeedProfileIsolation = tryReadJson(rootDir, ARTIFACTS.liveDocumentSeedProfileIsolation);
   const kosha = tryReadJson(rootDir, ARTIFACTS.kosha);
   const rlsWiki = tryReadJson(rootDir, ARTIFACTS.rlsWiki);
   const sifEmbedding = tryReadJson(rootDir, ARTIFACTS.sifEmbedding);
@@ -381,6 +383,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_wording_review", ARTIFACTS.liveDocumentWordingReview, liveDocumentWordingReview),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_broad_review", ARTIFACTS.liveDocumentBroadReview, liveDocumentBroadReview),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_secondary_grounding", ARTIFACTS.liveDocumentSecondaryGrounding, liveDocumentSecondaryGrounding),
+    evidenceStatus(rootDir, currentHead, liveCommit, "live_document_seed_profile_isolation", ARTIFACTS.liveDocumentSeedProfileIsolation, liveDocumentSeedProfileIsolation),
     evidenceStatus(rootDir, currentHead, liveCommit, "kosha_exact_trust_registry", ARTIFACTS.kosha, kosha),
     evidenceStatus(rootDir, currentHead, liveCommit, "rls_llm_wiki_approval_preflight", ARTIFACTS.rlsWiki, rlsWiki),
     evidenceStatus(rootDir, currentHead, liveCommit, "sif_embedding_preflight", ARTIFACTS.sifEmbedding, sifEmbedding),
@@ -565,6 +568,27 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       exactSavedShareReproduced: recordAt(liveDocumentSecondaryGrounding, "mutationBoundary")?.exactSavedShareReproduced === true,
       exactSavedShareVerdict: asString(recordAt(liveDocumentSecondaryGrounding, "mutationBoundary")?.exactSavedShareVerdict),
     },
+    liveDocumentSeedProfileIsolation: {
+      artifact: ARTIFACTS.liveDocumentSeedProfileIsolation,
+      verdict: isRecord(liveDocumentSeedProfileIsolation) ? asString(liveDocumentSeedProfileIsolation.verdict) : "missing",
+      sourceHead: isRecord(liveDocumentSeedProfileIsolation) ? asString(liveDocumentSeedProfileIsolation.sourceHead) : "",
+      productionCommit: extractProductionCommit(liveDocumentSeedProfileIsolation),
+      productCommit: isRecord(liveDocumentSeedProfileIsolation) ? asString(liveDocumentSeedProfileIsolation.productCommit) : "",
+      beforePassed: asNumber(recordAt(liveDocumentSeedProfileIsolation, "beforeLive")?.pass),
+      beforeFailed: asNumber(recordAt(liveDocumentSeedProfileIsolation, "beforeLive")?.fail),
+      beforeSeedProfileLeakageCount: asNumber(recordAt(liveDocumentSeedProfileIsolation, "beforeLive")?.seedProfileLeakageCount),
+      livePassed: asNumber(recordAt(liveDocumentSeedProfileIsolation, "afterLive")?.pass),
+      liveFailed: asNumber(recordAt(liveDocumentSeedProfileIsolation, "afterLive")?.fail),
+      liveSeedProfileLeakageCount: asNumber(recordAt(liveDocumentSeedProfileIsolation, "afterLive")?.seedProfileLeakageCount),
+      reviewedDocumentSurfaceCount: asNumber(recordAt(liveDocumentSeedProfileIsolation, "contract")?.reviewedDocumentSurfaceCount),
+      secondaryGroundingPassed: asNumber(recordAt(liveDocumentSeedProfileIsolation, "afterLive")?.secondaryGroundingPassed),
+      secondaryGroundingReviewed: asNumber(recordAt(liveDocumentSeedProfileIsolation, "afterLive")?.secondaryGroundingReviewed),
+      dbMutationPerformed: recordAt(liveDocumentSeedProfileIsolation, "mutationBoundary")?.dbMutationPerformed === true,
+      shareSessionCreated: recordAt(liveDocumentSeedProfileIsolation, "mutationBoundary")?.shareSessionCreated === true,
+      providerDispatchCalled: recordAt(liveDocumentSeedProfileIsolation, "mutationBoundary")?.providerDispatchCalled === true,
+      exactSavedShareReproduced: recordAt(liveDocumentSeedProfileIsolation, "mutationBoundary")?.exactSavedShareReproduced === true,
+      exactSavedShareVerdict: asString(recordAt(liveDocumentSeedProfileIsolation, "mutationBoundary")?.exactSavedShareEvidence),
+    },
     providerDispatchPersistence: {
       artifact: ARTIFACTS.providerDispatchIdempotency,
       status: isRecord(providerDispatchIdempotency) ? asString(providerDispatchIdempotency.status) : "missing",
@@ -690,6 +714,16 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- DB mutation: ${rollup.liveDocumentSecondaryGrounding.dbMutationPerformed}; Share session created: ${rollup.liveDocumentSecondaryGrounding.shareSessionCreated}; provider dispatch: ${rollup.liveDocumentSecondaryGrounding.providerDispatchCalled}`,
     `- Exact saved Share: ${rollup.liveDocumentSecondaryGrounding.exactSavedShareVerdict || "MISSING_EVIDENCE"}; reproduced=${rollup.liveDocumentSecondaryGrounding.exactSavedShareReproduced}`,
     "- Boundary: this six-secondary-document scenario-grounding contract is separate from the six-document wording gate, 12-document presence/applicability gate, broad human review, and exact saved Share evidence.",
+    "",
+    "## Live Document Seed-Profile Isolation",
+    "",
+    `- Verdict: \`${rollup.liveDocumentSeedProfileIsolation.verdict}\``,
+    `- Before live: pass=${rollup.liveDocumentSeedProfileIsolation.beforePassed}, fail=${rollup.liveDocumentSeedProfileIsolation.beforeFailed}, forbidden fragments=${rollup.liveDocumentSeedProfileIsolation.beforeSeedProfileLeakageCount}`,
+    `- Live after remediation: pass=${rollup.liveDocumentSeedProfileIsolation.livePassed}, fail=${rollup.liveDocumentSeedProfileIsolation.liveFailed}, forbidden fragments=${rollup.liveDocumentSeedProfileIsolation.liveSeedProfileLeakageCount}`,
+    `- Reviewed document surface: ${rollup.liveDocumentSeedProfileIsolation.reviewedDocumentSurfaceCount}; secondary grounding=${rollup.liveDocumentSeedProfileIsolation.secondaryGroundingPassed}/${rollup.liveDocumentSeedProfileIsolation.secondaryGroundingReviewed}`,
+    `- DB mutation: ${rollup.liveDocumentSeedProfileIsolation.dbMutationPerformed}; Share session created: ${rollup.liveDocumentSeedProfileIsolation.shareSessionCreated}; provider dispatch: ${rollup.liveDocumentSeedProfileIsolation.providerDispatchCalled}`,
+    `- Exact saved Share: ${rollup.liveDocumentSeedProfileIsolation.exactSavedShareVerdict || "MISSING_EVIDENCE"}; reproduced=${rollup.liveDocumentSeedProfileIsolation.exactSavedShareReproduced}`,
+    "- Boundary: this deterministic seed-profile isolation contract does not replace broad human wording review or exact saved Share geometry.",
     "",
     "## Gate Matrix",
     "",

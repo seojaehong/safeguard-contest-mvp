@@ -28,6 +28,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
+  liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
   koshaNextExactCandidateAudit: path.join("evaluation", "kosha-next-exact-candidate-audit-2026-07-22", "report.json"),
   koshaExactPromotionPacket: path.join("evaluation", "kosha-exact-promotion-packet-2026-07-22", "report.json"),
   rlsLlmWikiApprovalPreflight: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
@@ -443,6 +444,47 @@ function liveDocumentSecondaryGroundingSummary(review) {
     providerDispatchCalled: asBoolean(mutationBoundary.providerDispatchCalled),
     exactSavedShareReproduced: asBoolean(mutationBoundary.exactSavedShareReproduced),
     exactSavedShareVerdict: asString(mutationBoundary.exactSavedShareVerdict),
+  };
+}
+
+/**
+ * @param {unknown} review
+ */
+function liveDocumentSeedProfileIsolationSummary(review) {
+  if (!isRecord(review)) return {};
+  const beforeLive = isRecord(review.beforeLive) ? review.beforeLive : {};
+  const afterLive = isRecord(review.afterLive) ? review.afterLive : {};
+  const contract = isRecord(review.contract) ? review.contract : {};
+  const mutationBoundary = isRecord(review.mutationBoundary) ? review.mutationBoundary : {};
+  return {
+    verdict: asString(review.verdict),
+    sourceHead: asString(review.sourceHead),
+    productCommit: asString(review.productCommit),
+    productionCommit: asString(review.productionCommit),
+    beforePassed: typeof beforeLive.pass === "number" ? beforeLive.pass : 0,
+    beforeFailed: typeof beforeLive.fail === "number" ? beforeLive.fail : 0,
+    beforeSeedProfileLeakageCount: typeof beforeLive.seedProfileLeakageCount === "number"
+      ? beforeLive.seedProfileLeakageCount
+      : 0,
+    livePassed: typeof afterLive.pass === "number" ? afterLive.pass : 0,
+    liveFailed: typeof afterLive.fail === "number" ? afterLive.fail : 0,
+    liveSeedProfileLeakageCount: typeof afterLive.seedProfileLeakageCount === "number"
+      ? afterLive.seedProfileLeakageCount
+      : 0,
+    reviewedDocumentSurfaceCount: typeof contract.reviewedDocumentSurfaceCount === "number"
+      ? contract.reviewedDocumentSurfaceCount
+      : 0,
+    secondaryGroundingPassed: typeof afterLive.secondaryGroundingPassed === "number"
+      ? afterLive.secondaryGroundingPassed
+      : 0,
+    secondaryGroundingReviewed: typeof afterLive.secondaryGroundingReviewed === "number"
+      ? afterLive.secondaryGroundingReviewed
+      : 0,
+    dbMutationPerformed: asBoolean(mutationBoundary.dbMutationPerformed),
+    shareSessionCreated: asBoolean(mutationBoundary.shareSessionCreated),
+    providerDispatchCalled: asBoolean(mutationBoundary.providerDispatchCalled),
+    exactSavedShareReproduced: asBoolean(mutationBoundary.exactSavedShareReproduced),
+    exactSavedShareVerdict: asString(mutationBoundary.exactSavedShareEvidence),
   };
 }
 
@@ -969,6 +1011,7 @@ export function buildNorthstarNextRunway(options) {
   const liveDocumentWordingReview = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentWordingReview);
   const liveDocumentBroadReview = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentBroadReview);
   const liveDocumentSecondaryGrounding = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
+  const liveDocumentSeedProfileIsolation = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSeedProfileIsolation);
   const koshaCandidateAudit = readJson(options.rootDir, ARTIFACTS.koshaNextExactCandidateAudit);
   const koshaPromotionPacket = readJson(options.rootDir, ARTIFACTS.koshaExactPromotionPacket);
   const sif = readJson(options.rootDir, ARTIFACTS.sifEmbeddingPreflight);
@@ -1031,6 +1074,7 @@ export function buildNorthstarNextRunway(options) {
       "kosha_exact_trust_registry",
       "live_kosha_exact_materialization",
       "live_document_secondary_grounding",
+      "live_document_seed_profile_isolation",
       "kosha_exact_promotion_packet_ready_for_review",
       "ui_documents_share_cockpit",
       "dispatch_standalone_cockpit",
@@ -1080,6 +1124,7 @@ export function buildNorthstarNextRunway(options) {
     liveDocumentWordingReview: liveDocumentWordingReviewSummary(liveDocumentWordingReview),
     liveDocumentBroadReview: liveDocumentBroadReviewSummary(liveDocumentBroadReview),
     liveDocumentSecondaryGrounding: liveDocumentSecondaryGroundingSummary(liveDocumentSecondaryGrounding),
+    liveDocumentSeedProfileIsolation: liveDocumentSeedProfileIsolationSummary(liveDocumentSeedProfileIsolation),
     koshaNextExactCandidateAudit: koshaCandidateAuditSummary(koshaCandidateAudit),
     koshaExactPromotionPacket: koshaPromotionPacketSummary(koshaPromotionPacket),
     sifEmbeddingRuntime: sifSummary(sif),
@@ -1194,6 +1239,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Live synthetic wording and field usability are measured separately: \`${report.liveDocumentWordingReview.verdict || "missing"}\`, live scenarios passed \`${report.liveDocumentWordingReview.livePassed ?? 0}/5\`, live pending \`${report.liveDocumentWordingReview.liveAfterDeploymentPending === true}\`. This gate catches fixed-profile field leakage and selected-document wording defects, while broad human review and exact saved Share evidence remain separate.
 - Live 12-deliverable presence and applicability are measured separately: \`${report.liveDocumentBroadReview.verdict || "missing"}\`, UI/integrity/reviewed documents \`${report.liveDocumentBroadReview.uiDocumentCount ?? 0}/${report.liveDocumentBroadReview.integrityRequiredCount ?? 0}/${report.liveDocumentBroadReview.reviewedDocumentCount ?? 0}\`, before missingUnexpected \`${report.liveDocumentBroadReview.beforeMissingUnexpected ?? 0}\`, live missingUnexpected \`${report.liveDocumentBroadReview.liveMissingUnexpected ?? 0}\`, and workPermitDraft presentNonEmpty \`${report.liveDocumentBroadReview.workPermitPresentNonEmpty ?? 0}/5\`. The six-document synthetic wording gate is not accepted as 12-document deliverable coverage; exact saved Share remains \`${report.liveDocumentBroadReview.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live supporting-document scenario grounding is measured separately: \`${report.liveDocumentSecondaryGrounding.verdict || "missing"}\`, live cases \`${report.liveDocumentSecondaryGrounding.livePassed ?? 0}/5\`, supporting documents \`${report.liveDocumentSecondaryGrounding.secondaryPassed ?? 0}/${report.liveDocumentSecondaryGrounding.secondaryReviewed ?? 0}\`, cross-scenario leakage \`${report.liveDocumentSecondaryGrounding.crossScenarioLeakageCount ?? 0}\`, and missingUnexpected \`${report.liveDocumentSecondaryGrounding.missingUnexpectedCount ?? 0}\`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains \`${report.liveDocumentSecondaryGrounding.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
+- Live document seed-profile isolation is measured separately: \`${report.liveDocumentSeedProfileIsolation.verdict || "missing"}\`, before forbidden fragments \`${report.liveDocumentSeedProfileIsolation.beforeSeedProfileLeakageCount ?? 0}\`, live forbidden fragments \`${report.liveDocumentSeedProfileIsolation.liveSeedProfileLeakageCount ?? 0}\`, reviewed document surface \`${report.liveDocumentSeedProfileIsolation.reviewedDocumentSurfaceCount ?? 0}\`, and secondary grounding \`${report.liveDocumentSeedProfileIsolation.secondaryGroundingPassed ?? 0}/${report.liveDocumentSeedProfileIsolation.secondaryGroundingReviewed ?? 0}\`. This deterministic gate does not replace broad human wording review or exact saved Share evidence; exact saved Share remains \`${report.liveDocumentSeedProfileIsolation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level, without claiming live production engine execution.
 - SIF embedding approval preflight is approval-held: no embedding generation, no upload, and vector runtime disabled until approval.
 - North Star approval runway is current and separates runtime/provider/database/vector gates from ordinary UI/evidence iteration.

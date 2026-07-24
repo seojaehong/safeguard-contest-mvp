@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-24T19:38:54.296Z",
-  "head": "91fd6f588aed79c667c0de18a76983b002b9897d",
+  "generatedAt": "2026-07-24T20:15:45.383Z",
+  "head": "f280959e5221dee73e38908fc0d3edcc4b686eb6",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "91fd6f588aed79c667c0de18a76983b002b9897d",
+    "commitSha": "f280959e5221dee73e38908fc0d3edcc4b686eb6",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-g97zblrqf-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-g5jsssh6m-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 22
+    "gateCount": 23
   },
   "provenGates": [
     {
@@ -80,6 +80,12 @@
       "state": "proven",
       "artifact": "evaluation\\live-document-secondary-grounding-2026-07-25\\report.json",
       "detail": "All six secondary deliverables pass scenario grounding across five live production scenarios: cases=5/5, documents=30/30, cross-scenario leakage=0, missingUnexpected=0. DB/share/provider mutation is false and exact saved Share remains MISSING_EVIDENCE. This deterministic contract does not replace the six-document wording gate, 12-document presence gate, or broad human review."
+    },
+    {
+      "id": "live_document_seed_profile_isolation",
+      "state": "proven",
+      "artifact": "evaluation\\live-document-seed-profile-isolation-2026-07-25\\report.json",
+      "detail": "Five live production scenarios pass the fail-closed 12-document seed-profile isolation contract: cases=5/5, document surface=60, forbidden fragments 90->0, secondary grounding=30/30, missingUnexpected=0. DB/share/provider mutation is false and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "ui_documents_share_cockpit",
@@ -286,6 +292,27 @@
     "exactSavedShareReproduced": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
+  "liveDocumentSeedProfileIsolation": {
+    "artifact": "evaluation\\live-document-seed-profile-isolation-2026-07-25\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION",
+    "sourceHead": "2444b44b4e42a2b442b64b856104b1d93c7e21b7",
+    "productionCommit": "2444b44b4e42a2b442b64b856104b1d93c7e21b7",
+    "productCommit": "597dec777e0467cd9f8aadce611fbb7b1a8f3b72",
+    "beforePassed": 0,
+    "beforeFailed": 5,
+    "beforeSeedProfileLeakageCount": 90,
+    "livePassed": 5,
+    "liveFailed": 0,
+    "liveSeedProfileLeakageCount": 0,
+    "reviewedDocumentSurfaceCount": 60,
+    "secondaryGroundingPassed": 30,
+    "secondaryGroundingReviewed": 30,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "exactSavedShareReproduced": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
   "providerDispatchPersistence": {
     "artifact": "evaluation\\provider-dispatch-idempotency-gate-2026-07-19\\report.json",
     "status": "approval_required",
@@ -339,9 +366,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "91fd6f588aed79c667c0de18a76983b002b9897d",
+      "sourceCommit": "f280959e5221dee73e38908fc0d3edcc4b686eb6",
       "sourceStatus": "exact",
-      "productionCommit": "91fd6f588aed79c667c0de18a76983b002b9897d",
+      "productionCommit": "f280959e5221dee73e38908fc0d3edcc4b686eb6",
       "productionStatus": "matches_live"
     },
     {
@@ -414,6 +441,14 @@
       "sourceCommit": "9c46d60dee1ef7c319269953a3145a3a2359e9f7",
       "sourceStatus": "ancestor",
       "productionCommit": "9c46d60dee1ef7c319269953a3145a3a2359e9f7",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "live_document_seed_profile_isolation",
+      "artifact": "evaluation\\live-document-seed-profile-isolation-2026-07-25\\report.json",
+      "sourceCommit": "2444b44b4e42a2b442b64b856104b1d93c7e21b7",
+      "sourceStatus": "ancestor",
+      "productionCommit": "2444b44b4e42a2b442b64b856104b1d93c7e21b7",
       "productionStatus": "ancestor_of_head"
     },
     {

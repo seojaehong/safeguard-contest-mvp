@@ -134,6 +134,26 @@ type NextRunwayReport = {
     exactSavedShareReproduced: boolean;
     exactSavedShareVerdict: string;
   };
+  liveDocumentSeedProfileIsolation: {
+    verdict: string;
+    sourceHead: string;
+    productCommit: string;
+    productionCommit: string;
+    beforePassed: number;
+    beforeFailed: number;
+    beforeSeedProfileLeakageCount: number;
+    livePassed: number;
+    liveFailed: number;
+    liveSeedProfileLeakageCount: number;
+    reviewedDocumentSurfaceCount: number;
+    secondaryGroundingPassed: number;
+    secondaryGroundingReviewed: number;
+    dbMutationPerformed: boolean;
+    shareSessionCreated: boolean;
+    providerDispatchCalled: boolean;
+    exactSavedShareReproduced: boolean;
+    exactSavedShareVerdict: string;
+  };
   approvalGated: Array<{
     gate: string;
     state: string;
@@ -688,6 +708,34 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-product",
+    productionCommit: "fixture-sha",
+    contract: {
+      reviewedDocumentSurfaceCount: 60,
+    },
+    beforeLive: {
+      pass: 0,
+      fail: 5,
+      seedProfileLeakageCount: 90,
+    },
+    afterLive: {
+      pass: 5,
+      fail: 0,
+      seedProfileLeakageCount: 0,
+      secondaryGroundingPassed: 30,
+      secondaryGroundingReviewed: 30,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+      exactSavedShareEvidence: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/kosha-next-exact-candidate-audit-2026-07-22/report.json", {
     verdict: "NEXT_EXACT_TRUST_CANDIDATES_IDENTIFIED_APPROVAL_FREE",
     mutationPerformed: false,
@@ -1233,6 +1281,24 @@ describe("northstar next runway generator", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.provenCurrentState).toContain("live_document_secondary_grounding");
+    expect(report.liveDocumentSeedProfileIsolation).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION",
+      beforePassed: 0,
+      beforeFailed: 5,
+      beforeSeedProfileLeakageCount: 90,
+      livePassed: 5,
+      liveFailed: 0,
+      liveSeedProfileLeakageCount: 0,
+      reviewedDocumentSurfaceCount: 60,
+      secondaryGroundingPassed: 30,
+      secondaryGroundingReviewed: 30,
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      exactSavedShareReproduced: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.provenCurrentState).toContain("live_document_seed_profile_isolation");
     expect(report.koshaNextExactCandidateAudit.forbiddenClaims).toContain(
       "The metadata-verified non-exact candidates are already exact production evidence.",
     );
