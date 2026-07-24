@@ -155,6 +155,26 @@ describe("SafeClaw 12-deliverable editorial review", () => {
     expect(result.report.duplicateReviewCategoryCounts.exact["generic-template-overuse"]).toBe(1);
   });
 
+  it("classifies role-specific near duplicates without hiding them", () => {
+    const documents = buildDocuments();
+    documents.workpackSummaryDraft += "\n작업조건 판단: 정전전로 인근 전기작업 조건과 잔류전하 상태 확인 필요";
+    documents.foreignWorkerBriefing += "\n작업조건: 정전전로 인근 전기작업 조건과 잔류전하 상태 확인 필요";
+    documents.riskAssessmentDraft += "\n유해·위험요인: 정전 범위 오인과 잔류전하 확인 미흡으로 인한 감전 위험";
+    documents.photoEvidenceDraft += "\n위험요인 1: 정전 범위 오인과 잔류전하 확인 미흡으로 인한 감전 위험";
+    documents.workPermitDraft += "\n안전조치 1: 전원 차단과 검전 후 잠금표지 상태를 관리감독자가 확인";
+    documents.riskAssessmentDraft += "\n현재 안전조치: 전원 차단과 검전 후 잠금표지 상태를 관리감독자가 확인";
+
+    const result = runFixture("제주 심야 전기설비 복구 작업", documents);
+
+    expect(result.status).toBe(0);
+    expect(result.report.duplicateReviewCategoryCounts.near).toMatchObject({
+      "independent-document-context": 1,
+      "cross-document-hazard-consistency": 1,
+      "cross-document-control-consistency": 1
+    });
+    expect(result.report.cases[0]?.exactLineOveruse.every((finding) => finding.humanReviewRequired)).toBe(true);
+  });
+
   it("fails closed on one awkward completed-action question splice", () => {
     const documents = buildDocuments();
     documents.tbmBriefing += "\n보호구 확인 절차를 누가 확인했는가?";

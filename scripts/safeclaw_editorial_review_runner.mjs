@@ -116,7 +116,8 @@ function jaccard(left, right) {
 function stripDocumentRolePrefix(value) {
   return normalizeInline(value)
     .replace(/^[⚠️\s]*/u, "")
-    .replace(/^(?:작업조건|기상\s*및\s*작업조건|핵심\s*위험요인|핵심\s*위험|핵심위험|가장\s*큰\s*위험|안전조치\s*\d+|조치내용)\s*[:：]\s*/u, "")
+    .replace(/^\[\d+\.\s*(.+)\]$/u, "$1")
+    .replace(/^(?:작업조건\s*판단|작업조건|기상\s*및\s*작업조건|TBM\s*조건확인|TBM\s*기록조건|작업\s*전\s*조건확인|허가\s*전\s*조건확인|교육\s*전\s*조건확인|비상대응\s*조건|촬영\s*확인조건|핵심\s*위험요인|핵심\s*위험|핵심위험|가장\s*큰\s*위험|유해·위험요인|위험요인\s*\d+|현재\s*안전조치|안전조치\s*\d+|조치내용|공정|작업구간|세부작업|단계별\s*안전조치|즉시\s*조치|필수조치|작업중지\s*기준|변경관리\s*확인)\s*[:：]\s*/u, "")
     .toLocaleLowerCase();
 }
 
@@ -154,7 +155,38 @@ function classifyExactDuplicate(line) {
   };
 }
 
-function classifyNearDuplicate(leftLine, rightLine) {
+function classifyNearDuplicate(left, right) {
+  const combined = `${left.line} ${right.line}`;
+  const pair = `${left.key}->${right.key}`;
+  if (
+    /작업조건|조건확인/u.test(combined)
+    && /^workpackSummaryDraft->(?:foreignWorkerBriefing|foreignWorkerTransmission|kakaoMessage)$/u.test(pair)
+  ) {
+    return {
+      reviewCategory: "independent-document-context",
+      reviewRationale: "같은 현장조건이 요약과 작업자 전달 문서에 독립적으로 유지됩니다."
+    };
+  }
+  if (
+    /위험요인|위험\]/u.test(combined)
+    && /^(?:workpackSummaryDraft->safetyEducationRecordDraft|riskAssessmentDraft->(?:tbmBriefing|tbmLogDraft|photoEvidenceDraft))$/u.test(pair)
+  ) {
+    return {
+      reviewCategory: "cross-document-hazard-consistency",
+      reviewRationale: "같은 위험요인이 평가·교육·TBM·증빙 문서에 일관되게 전달됩니다."
+    };
+  }
+  if (
+    /안전조치|조치내용|단계별\s*안전조치|즉시\s*조치|필수조치/u.test(combined)
+    && /^(?:riskAssessmentDraft->workPermitDraft|workPlanDraft->(?:safetyEducationRecordDraft|kakaoMessage)|workPermitDraft->(?:foreignWorkerBriefing|foreignWorkerTransmission|kakaoMessage))$/u.test(pair)
+  ) {
+    return {
+      reviewCategory: "cross-document-control-consistency",
+      reviewRationale: "같은 통제조치가 계획·허가·교육·전달 문서에 일관되게 유지됩니다."
+    };
+  }
+  const leftLine = left.line;
+  const rightLine = right.line;
   if (stripDocumentRolePrefix(leftLine) === stripDocumentRolePrefix(rightLine)) {
     return {
       reviewCategory: "document-role-prefix-variant",
@@ -210,8 +242,9 @@ function duplicateFindings(documents) {
       const right = lines[rightIndex];
       if (left.key === right.key || left.normalized === right.normalized) continue;
       const similarity = jaccard(leftTokens, lineTokens(right.line));
-      if (similarity < 0.9) continue;
-      const classification = classifyNearDuplicate(left.line, right.line);
+      const roleNormalizedMatch = stripDocumentRolePrefix(left.line) === stripDocumentRolePrefix(right.line);
+      if (similarity < 0.9 && !roleNormalizedMatch) continue;
+      const classification = classifyNearDuplicate(left, right);
       nearDuplicateLineOveruse.push({
         leftDocumentKey: left.key,
         rightDocumentKey: right.key,
