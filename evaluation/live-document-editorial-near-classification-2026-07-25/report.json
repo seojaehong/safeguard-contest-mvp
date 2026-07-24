@@ -1,0 +1,74 @@
+{
+  "verdict": "PASS_LIVE_PRODUCTION_EDITORIAL_NEAR_DUPLICATE_CLASSIFICATION_REVIEWER_READY",
+  "sourceHead": "d8bfae41cb75608f2267f1fd0d97eb48c07ced64",
+  "productionCommit": "cf1749d33b8550ea1ccf7d63429581929267f3cd",
+  "evidencePath": "evaluation/live-document-editorial-near-classification-2026-07-25/after-live/report.json",
+  "scope": {
+    "cases": 5,
+    "canonicalDocumentsPerCase": 12,
+    "reviewedDocumentSurfaceCount": 60
+  },
+  "before": {
+    "evidencePath": "evaluation/live-document-editorial-duplicate-classification-2026-07-25/after-live/report.json",
+    "nearDuplicateLineOveruseCount": 100,
+    "nearCategories": {
+      "human-review-required": 54,
+      "document-role-prefix-variant": 46
+    }
+  },
+  "afterLive": {
+    "verdict": "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+    "total": 5,
+    "pass": 5,
+    "fail": 0,
+    "genericTemplateOveruseCount": 0,
+    "exactLineOveruseCount": 31,
+    "nearDuplicateLineOveruseCount": 100,
+    "nearCategories": {
+      "document-role-prefix-variant": 81,
+      "independent-document-context": 9,
+      "cross-document-hazard-consistency": 8,
+      "cross-document-control-consistency": 2,
+      "human-review-required": 0
+    },
+    "humanReviewCompleted": false
+  },
+  "classificationContract": {
+    "rawJaccardThreshold": 0.9,
+    "roleNormalizedExactMatchIncluded": true,
+    "findingsHiddenOrRemoved": false,
+    "genericTemplateOveruseFailsClosed": true,
+    "safetyConsistencyAutomaticallyFails": false
+  },
+  "verification": {
+    "focusedTests": {
+      "files": 1,
+      "tests": 7,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "initialLiveAttempt": {
+      "status": "EXCLUDED_TRANSIENT_TIMEOUT",
+      "passedCases": 4,
+      "failedCases": 1,
+      "reason": "Jeju live API request exceeded the initial 60000ms timeout and produced missingEditorialSource fail-closed rows."
+    },
+    "authoritativeLiveRetry": {
+      "timeoutMs": 120000,
+      "status": "PASS",
+      "passedCases": 5,
+      "failedCases": 0
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "exactSavedShareReproduced": false
+  },
+  "remainingBoundaries": {
+    "humanReviewCompleted": false,
+    "broadHumanWordingReviewRequired": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  }
+}
