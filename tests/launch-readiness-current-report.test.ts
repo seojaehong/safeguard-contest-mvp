@@ -12,6 +12,7 @@ type LaunchReadinessReport = {
   documentCoverage: {
     expectedCount: number;
     missing: string[];
+    present: string[];
     presentCount: number;
   };
   final99Boundary: {
@@ -103,6 +104,7 @@ function createFixtureRoot(): { head: string; rootDir: string } {
       tbmLogDraft: true,
       workpackSummaryDraft: true,
       workPlanDraft: true,
+      workPermitDraft: true,
     },
     elapsedMs: 1234,
     scenario: { workSummary: "fixture launch smoke" },
@@ -172,10 +174,11 @@ describe("launch readiness current report", () => {
       verdict: "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
     });
     expect(report.documentCoverage).toMatchObject({
-      expectedCount: 11,
+      expectedCount: 12,
       missing: [],
-      presentCount: 11,
+      presentCount: 12,
     });
+    expect(report.documentCoverage.present).toContain("workPermitDraft");
     expect(report.final99Boundary).toMatchObject({
       fullyAutomatedLaunchClaimAllowed: false,
       noticeCount: 2,

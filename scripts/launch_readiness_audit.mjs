@@ -78,6 +78,7 @@ function documentStatus(result) {
     "workpackSummaryDraft",
     "riskAssessmentDraft",
     "workPlanDraft",
+    "workPermitDraft",
     "tbmBriefing",
     "tbmLogDraft",
     "safetyEducationRecordDraft",

@@ -17,6 +17,14 @@ type NextRunwayReport = {
   liveRollupMatchesProduction: boolean;
   boundedWorkbenchSourceIncludedInLive: boolean;
   boundedWorkbenchCurrentLivePending: boolean;
+  launchReadiness: {
+    documentCoverage: {
+      expectedCount: number;
+      presentCount: number;
+      missing: string[];
+      present: string[];
+    };
+  };
   liveDocumentQualityMatrix: {
     verdict: string;
     sourceHead: string;
@@ -478,7 +486,25 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     providerDispatchLiveClaimed: false,
     dispatchCalled: false,
     apiAsk: { ok: true },
-    documentCoverage: { expectedCount: 11, presentCount: 11, missing: [] },
+    documentCoverage: {
+      expectedCount: 12,
+      presentCount: 12,
+      missing: [],
+      present: [
+        "workpackSummaryDraft",
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "workPermitDraft",
+        "tbmBriefing",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage",
+      ],
+    },
   });
   writeJson(root, "evaluation/document-quality-grounding-current-gate-2026-07-19/report.json", {
     verdict: "PASS_CURRENT_SOURCE_DOCUMENT_QUALITY_GROUNDING_CONTRACT",
@@ -1055,6 +1081,12 @@ describe("northstar next runway generator", () => {
     expect(report.latestEvidenceCommitLive).toBe(true);
     expect(report.currentHeadIsEvidenceOnlyPending).toBe(false);
     expect(report.liveRollupMatchesProduction).toBe(true);
+    expect(report.launchReadiness.documentCoverage).toMatchObject({
+      expectedCount: 12,
+      presentCount: 12,
+      missing: [],
+    });
+    expect(report.launchReadiness.documentCoverage.present).toContain("workPermitDraft");
     expect(report.approvalGated.map((gate) => gate.gate)).toEqual([
       "provider_dispatch_persistence",
       "supabase_rls_launch_isolation",

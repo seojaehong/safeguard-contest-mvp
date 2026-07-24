@@ -27,6 +27,7 @@ const EXPECTED_DOCUMENT_KEYS = [
   "workpackSummaryDraft",
   "riskAssessmentDraft",
   "workPlanDraft",
+  "workPermitDraft",
   "tbmBriefing",
   "tbmLogDraft",
   "safetyEducationRecordDraft",

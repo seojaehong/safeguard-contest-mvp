@@ -52,6 +52,7 @@ const successPayload = {
   externalData: {},
   deliverables: {
     workpackSummaryDraft: "Fixture output long enough to be marked as present.",
+    workPermitDraft: "Fixture permit output long enough to be marked as present.",
   },
 };
 
@@ -251,11 +252,16 @@ describe("launch readiness audit process lifecycle", () => {
       dispatchOk: null,
     });
     expect(result.outputFiles).toEqual(["audit.json"]);
-    expect(parseJsonObject(result.outputText ?? "")).toMatchObject({
+    const report = parseJsonObject(result.outputText ?? "");
+    expect(report).toMatchObject({
       apiAskOk: true,
       apiAskStatus: 200,
       dispatchOk: null,
       dispatchStatus: null,
+    });
+    expect(asJsonObject(report.documents)).toMatchObject({
+      workPermitDraft: true,
+      workpackSummaryDraft: true,
     });
     expectOnlyAskRequest(result);
   });
