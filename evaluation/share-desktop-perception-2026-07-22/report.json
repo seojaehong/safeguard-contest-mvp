@@ -1,16 +1,16 @@
 {
   "schemaVersion": "safeclaw-share-desktop-perception/v1",
-  "checkedAt": "2026-07-24T14:20:49.932Z",
+  "checkedAt": "2026-07-24T20:06:33.236Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHead": "fdf0ac38da3bceb9ed70cc4f662923704279193e",
+  "sourceHead": "24638e425fcf44a339ad9cf310b2f9fb6c0fdf9e",
   "productionBuild": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "fdf0ac38da3bceb9ed70cc4f662923704279193e",
+    "commitSha": "2444b44b4e42a2b442b64b856104b1d93c7e21b7",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-5q7e10kcn-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-gsgwwegrm-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "providerDispatchLiveClaimed": false,
@@ -156,15 +156,15 @@
       "metrics": {
         "viewportWidth": 1440,
         "viewportHeight": 723,
-        "pageHeight": 945,
-        "pageHeightRatio": 1.31,
+        "pageHeight": 833,
+        "pageHeightRatio": 1.15,
         "root": {
           "left": 236,
           "right": 1440,
           "top": 201,
-          "bottom": 897,
+          "bottom": 785,
           "width": 1204,
-          "height": 695
+          "height": 583
         },
         "rootWidthRatio": 0.84,
         "task": {
@@ -196,9 +196,9 @@
           "left": 788,
           "right": 1440,
           "top": 586,
-          "bottom": 897,
+          "bottom": 674,
           "width": 652,
-          "height": 310
+          "height": 88
         },
         "confirmButton": {
           "left": 253,
@@ -349,15 +349,15 @@
       "metrics": {
         "viewportWidth": 1440,
         "viewportHeight": 900,
-        "pageHeight": 945,
-        "pageHeightRatio": 1.05,
+        "pageHeight": 900,
+        "pageHeightRatio": 1,
         "root": {
           "left": 236,
           "right": 1440,
           "top": 201,
-          "bottom": 897,
+          "bottom": 785,
           "width": 1204,
-          "height": 695
+          "height": 583
         },
         "rootWidthRatio": 0.84,
         "task": {
@@ -389,9 +389,9 @@
           "left": 788,
           "right": 1440,
           "top": 586,
-          "bottom": 897,
+          "bottom": 674,
           "width": 652,
-          "height": 310
+          "height": 88
         },
         "confirmButton": {
           "left": 253,
@@ -542,15 +542,15 @@
       "metrics": {
         "viewportWidth": 390,
         "viewportHeight": 844,
-        "pageHeight": 1572,
-        "pageHeightRatio": 1.86,
+        "pageHeight": 1350,
+        "pageHeightRatio": 1.6,
         "root": {
           "left": 0,
           "right": 390,
           "top": 438,
-          "bottom": 1524,
+          "bottom": 1302,
           "width": 390,
-          "height": 1086
+          "height": 864
         },
         "rootWidthRatio": 1,
         "task": {
@@ -582,9 +582,9 @@
           "left": 16,
           "right": 374,
           "top": 1186,
-          "bottom": 1492,
+          "bottom": 1270,
           "width": 358,
-          "height": 306
+          "height": 84
         },
         "confirmButton": {
           "left": 31,
