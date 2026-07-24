@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-24T23:19:06.118Z",
-  "head": "715029f2364e8a547390c1e1105597f32e1fe911",
+  "generatedAt": "2026-07-24T23:47:07.986Z",
+  "head": "e0ba7ee589671a377b98070d2ec2c5c7b75a2b1c",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "715029f2364e8a547390c1e1105597f32e1fe911",
+    "commitSha": "1b046aa1e5023e53b52f037fdd3bee9b11294b72",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-k33b4qsur-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-ijeckkogl-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -79,7 +79,7 @@
       "id": "live_document_editorial_review",
       "state": "proven",
       "artifact": "evaluation\\live-document-editorial-review-2026-07-25\\report.json",
-      "detail": "Five live production scenarios and all 60 canonical document surfaces pass the automated editorial contract: placeholder=0, legal overclaim=0, awkward composition 20->0, and evidence-domain mismatch 1->0. The companion duplicate classifier reduces generic-template overuse 4->0 while retaining exact=31 and near=100 reviewer findings. humanReviewCompleted=false, the six-core wording and 12-presence gates are not combined as a human PASS, no DB/share/provider mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Five live production scenarios and all 60 canonical document surfaces pass the automated editorial contract: placeholder=0, legal overclaim=0, awkward composition 20->0, and evidence-domain mismatch 1->0. The companion duplicate classifier reduces generic-template overuse 4->0 while retaining exact=31 and near=100 reviewer findings. Near-classification keeps all 100 findings visible while reducing unclassified human-review-required 54->0 through role/context/hazard/control categories. humanReviewCompleted=false, the six-core wording and 12-presence gates are not combined as a human PASS, no DB/share/provider mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "product_capability_truth",
@@ -326,6 +326,24 @@
     "exactSavedShareReproduced": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
+  "liveDocumentEditorialNearClassification": {
+    "artifact": "evaluation\\live-document-editorial-near-classification-2026-07-25\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_EDITORIAL_NEAR_DUPLICATE_CLASSIFICATION_REVIEWER_READY",
+    "sourceHead": "d8bfae41cb75608f2267f1fd0d97eb48c07ced64",
+    "productionCommit": "cf1749d33b8550ea1ccf7d63429581929267f3cd",
+    "beforeNearDuplicateLineOveruseCount": 100,
+    "beforeHumanReviewRequiredCount": 54,
+    "livePassed": 5,
+    "liveFailed": 0,
+    "liveNearDuplicateLineOveruseCount": 100,
+    "liveHumanReviewRequiredCount": 0,
+    "rolePrefixVariantCount": 81,
+    "independentContextCount": 9,
+    "hazardConsistencyCount": 8,
+    "controlConsistencyCount": 2,
+    "humanReviewCompleted": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
   "productCapabilityTruth": {
     "artifact": "evaluation\\product-capability-truth-2026-07-25\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH",
@@ -437,10 +455,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "715029f2364e8a547390c1e1105597f32e1fe911",
+      "sourceCommit": "e0ba7ee589671a377b98070d2ec2c5c7b75a2b1c",
       "sourceStatus": "exact",
-      "productionCommit": "715029f2364e8a547390c1e1105597f32e1fe911",
-      "productionStatus": "matches_live"
+      "productionCommit": "e0ba7ee589671a377b98070d2ec2c5c7b75a2b1c",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -518,9 +536,17 @@
       "id": "live_document_editorial_duplicate_classification",
       "artifact": "evaluation\\live-document-editorial-duplicate-classification-2026-07-25\\report.json",
       "sourceCommit": "715029f2364e8a547390c1e1105597f32e1fe911",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "715029f2364e8a547390c1e1105597f32e1fe911",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "live_document_editorial_near_classification",
+      "artifact": "evaluation\\live-document-editorial-near-classification-2026-07-25\\report.json",
+      "sourceCommit": "d8bfae41cb75608f2267f1fd0d97eb48c07ced64",
+      "sourceStatus": "ancestor",
+      "productionCommit": "cf1749d33b8550ea1ccf7d63429581929267f3cd",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "product_capability_truth",

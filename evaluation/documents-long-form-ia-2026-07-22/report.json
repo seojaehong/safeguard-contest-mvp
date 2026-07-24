@@ -1,16 +1,16 @@
 {
   "schemaVersion": "safeclaw-documents-long-form-ia/v1",
-  "checkedAt": "2026-07-24T22:24:28.750Z",
+  "checkedAt": "2026-07-24T23:45:13.157Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHead": "a2ec27dcd8e9f06b201dc8adb8b5081fadf940ae",
+  "sourceHead": "1b046aa1e5023e53b52f037fdd3bee9b11294b72",
   "productionBuild": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "a2ec27dcd8e9f06b201dc8adb8b5081fadf940ae",
+    "commitSha": "1b046aa1e5023e53b52f037fdd3bee9b11294b72",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-m0gi203pu-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-ijeckkogl-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "providerDispatchLiveClaimed": false,

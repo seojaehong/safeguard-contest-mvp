@@ -1,12 +1,12 @@
 # Documents Long-Form IA Probe
 
-Checked at: 2026-07-24T22:24:28.750Z
+Checked at: 2026-07-24T23:45:13.157Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD: `a2ec27dcd8e9f06b201dc8adb8b5081fadf940ae`
+Source HEAD: `1b046aa1e5023e53b52f037fdd3bee9b11294b72`
 
-Production commit: `a2ec27dcd8e9f06b201dc8adb8b5081fadf940ae`
+Production commit: `1b046aa1e5023e53b52f037fdd3bee9b11294b72`
 
 Verdict: `PASS_LIVE_PRODUCTION_MEASURED`
 
@@ -43,7 +43,7 @@ Allowed claim: selected risk-assessment cockpit and first field/action surfaces 
 
 ## Remaining UX Boundary
 
-- Product commit `a2ec27dc` is a scoped risk-assessment cockpit remediation: desktop-short, desktop 1440x900, and mobile same-document risk reselect now record first action, field-first, and reselect landing PASS when the table above shows PASS. It does not close all-12 document containment or full 12-document authoring IA.
+- Product commit `1b046aa1` is a scoped risk-assessment cockpit remediation: desktop-short, desktop 1440x900, and mobile same-document risk reselect now record first action, field-first, and reselect landing PASS when the table above shows PASS. It does not close all-12 document containment or full 12-document authoring IA.
 - If `allDocumentLongFormVerdict` is RED or PARTIAL, product work should stay bounded to the documents route/component shell: master-detail, selected-only detail, accordion, local scroll, or drawer.
 - Supporting document launcher visibility is not itself the launch fix. Default closed supporting nav is acceptable, but the all-12 exposure state remains a follow-up when it still behaves like a long serial document surface rather than bounded navigation.
 - Do not use page count as the fix. Route split only helps orientation; long bodies must be locally contained.

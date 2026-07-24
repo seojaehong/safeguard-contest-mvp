@@ -18,6 +18,8 @@
   },
   "afterLive": {
     "verdict": "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+    "sourceHead": "d8bfae41cb75608f2267f1fd0d97eb48c07ced64",
+    "productionCommit": "cf1749d33b8550ea1ccf7d63429581929267f3cd",
     "total": 5,
     "pass": 5,
     "fail": 0,
