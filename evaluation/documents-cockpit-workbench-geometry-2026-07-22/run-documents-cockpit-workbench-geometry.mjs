@@ -163,7 +163,8 @@ try {
 }
 
 const allRowsPass = rows.every((row) => row.verdicts.overallVerdict === "PASS");
-const liveProductionMeasured = baseUrl.includes("safeclaw.kr") && buildInfo.commitSha === sourceHead;
+const liveProductionMeasured = baseUrl.includes("safeclaw.kr") && Boolean(buildInfo.commitSha);
+const sourceHeadMatchesProduction = buildInfo.commitSha === sourceHead;
 const verdictPrefix = allRowsPass ? "PASS" : "RED";
 const verdictScope = liveProductionMeasured ? "LIVE_PRODUCTION" : "CURRENT_SOURCE_LOCAL_PRODUCTION";
 const report = {
@@ -172,6 +173,7 @@ const report = {
   sourceHead,
   baseUrl,
   productionBuild: buildInfo,
+  sourceHeadMatchesProduction,
   verdict: `${verdictPrefix}_${verdictScope}_DOCUMENTS_WORKBENCH`,
   staleDevRedExplained: true,
   staleDevRedExplanation: "A sibling probe initially reported block/one-column geometry from a stale dev/HMR server. This gate records the clean local production geometry after rebuild/restart and directly measures the workbench display, column count, and editor-vs-launcher alignment.",
@@ -196,6 +198,8 @@ Base URL: \`${baseUrl}\`
 Source HEAD: \`${sourceHead}\`
 
 Production \`/api/build-info\`: \`${buildInfo.commitSha || "unknown"}\`
+
+Source HEAD matches production: \`${sourceHeadMatchesProduction}\`
 
 Verdict: \`${report.verdict}\`
 
