@@ -77,6 +77,29 @@ const chineseSessionPayload = {
   }
 };
 
+const longContentSessionPayload = {
+  ...sessionPayload,
+  session: {
+    ...sessionPayload.session,
+    question: "지하 기계실 배관 교체와 고소 용접 작업을 동시에 수행하며 작업구역 분리, 화재감시자 배치, 환기 상태와 비상대피 동선을 확인합니다. ".repeat(8).trim(),
+    documents: sessionPayload.session.documents.map((document) => ({
+      ...document,
+      body: `${document.body}\n${"작업 전 확인사항과 작업중지 기준을 현장 책임자와 다시 확인합니다. ".repeat(32).trim()}`
+    })),
+    recipientMessage: {
+      languageCode: "vi",
+      title: "Tiếng Việt 안내",
+      body: "Dừng công việc khi điều kiện không an toàn. Kiểm tra khu vực, thiết bị bảo hộ và lối thoát hiểm trước khi bắt đầu. ".repeat(18).trim()
+    },
+    recipients: [
+      sessionPayload.session.recipients[0],
+      { workerId: "22222222-2222-4222-8222-222222222222", displayName: "Worker Kim", languageCode: "ko" },
+      { workerId: "33333333-3333-4333-8333-333333333333", displayName: "Worker Lee", languageCode: "en" },
+      { workerId: "44444444-4444-4444-8444-444444444444", displayName: "Worker Somchai", languageCode: "th" }
+    ]
+  }
+};
+
 async function fulfillJson(route: Route, body: unknown): Promise<void> {
   await route.fulfill({
     status: 200,
@@ -351,6 +374,85 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
       expect(metrics.outsideCards).toBe(0);
     } finally {
       await page.close();
+    }
+  }, 90_000);
+
+  it("contains maximum saved-session-like content inside the recipient workbench without collapsing desktop geometry", async () => {
+    if (!browser || !harness) throw new Error("Browser harness was not started");
+    const viewports = [
+      { width: 1440, height: 723, desktop: true },
+      { width: 390, height: 723, desktop: false }
+    ];
+
+    for (const viewport of viewports) {
+      const page = await browser.newPage({ viewport });
+      let mutationRequestCount = 0;
+      await page.route("**/api/share-sessions/**", async (route) => {
+        if (route.request().method() !== "GET") {
+          mutationRequestCount += 1;
+          await route.fulfill({
+            status: 405,
+            contentType: "application/json",
+            body: JSON.stringify({ ok: false, message: "Fixture mutation is blocked." })
+          });
+          return;
+        }
+        await fulfillJson(route, longContentSessionPayload);
+      });
+
+      try {
+        const response = await page.goto(`${harness.baseUrl}/share/${SESSION_ID}?workerId=${WORKER_ID}`, { waitUntil: "networkidle" });
+        if (!response || response.status() >= 400) {
+          throw new Error(`share page returned ${response?.status() ?? "no response"}\n${await page.locator("body").innerText().catch(() => "")}\n${harness.readServerOutput()}`);
+        }
+        await expect.poll(() => page.locator("body").innerText()).toContain("Kiểm tra gói tài liệu");
+
+        const metrics = await page.evaluate(() => {
+          const root = document.querySelector<HTMLElement>(".safeclaw-share-recipient-page");
+          const confirmButton = [...document.querySelectorAll<HTMLButtonElement>("button")]
+            .find((item) => item.innerText.trim() === "Tôi đã xem");
+          const notice = document.querySelector<HTMLElement>(".safeclaw-share-recipient-card-notice");
+          const previews = [...document.querySelectorAll<HTMLElement>(".safeclaw-share-recipient-preview")];
+          const documents = [...document.querySelectorAll<HTMLDetailsElement>(".safeclaw-share-recipient-document")];
+          const cards = [...document.querySelectorAll<HTMLElement>(".safeclaw-share-recipient-card")];
+          const rootRect = root?.getBoundingClientRect();
+          const confirmationCard = confirmButton?.closest<HTMLElement>(".safeclaw-share-recipient-card");
+          const confirmationRect = confirmationCard?.getBoundingClientRect();
+          const noticeRect = notice?.getBoundingClientRect();
+          return {
+            rootWidth: Math.round(rootRect?.width ?? 0),
+            rootHeight: Math.round(rootRect?.height ?? 0),
+            viewportHeight: window.innerHeight,
+            confirmationBottom: Math.round(confirmButton?.getBoundingClientRect().bottom ?? 0),
+            confirmationLeft: Math.round(confirmationRect?.left ?? 0),
+            confirmationRight: Math.round(confirmationRect?.right ?? 0),
+            noticeLeft: Math.round(noticeRect?.left ?? 0),
+            previewContainedCount: previews.filter((item) => item.scrollHeight > item.clientHeight && item.clientHeight <= 220).length,
+            collapsedDocumentCount: documents.filter((item) => !item.open).length,
+            outsideCards: cards.filter((item) => {
+              const rect = item.getBoundingClientRect();
+              return rect.left < -0.5 || rect.right > window.innerWidth + 0.5;
+            }).length,
+            horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth
+          };
+        });
+
+        expect(metrics.confirmationBottom).toBeLessThanOrEqual(viewport.height);
+        expect(metrics.previewContainedCount).toBeGreaterThanOrEqual(1);
+        expect(metrics.collapsedDocumentCount).toBe(3);
+        expect(metrics.outsideCards).toBe(0);
+        expect(metrics.horizontalOverflow).toBe(false);
+        expect(mutationRequestCount).toBe(0);
+        if (viewport.desktop) {
+          expect(metrics.rootWidth).toBeGreaterThanOrEqual(1040);
+          expect(metrics.noticeLeft).toBeGreaterThan(metrics.confirmationRight);
+          expect(metrics.rootHeight).toBeLessThanOrEqual(Math.ceil(metrics.viewportHeight * 1.5));
+        } else {
+          expect(metrics.rootWidth).toBeLessThanOrEqual(viewport.width);
+        }
+      } finally {
+        await page.close();
+      }
     }
   }, 90_000);
 

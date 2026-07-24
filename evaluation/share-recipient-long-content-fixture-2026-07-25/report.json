@@ -1,0 +1,222 @@
+{
+  "checkedAt": "2026-07-24T17:26:27.619Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceHead": "421024036b18929354e2399f1342154db682c82b",
+  "productionBuild": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "421024036b18929354e2399f1342154db682c82b",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-kc8bbbuze-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "verdict": "PASS_LIVE_PRODUCTION_LONG_CONTENT_FIXTURE_EXACT_SAVED_MISSING",
+  "route": "/share/[sessionId]",
+  "sessionKind": "long-content-fixture",
+  "exactSavedUserSessionReproduced": false,
+  "exactSavedSessionVerdict": "MISSING_EVIDENCE",
+  "dbMutationPerformed": false,
+  "shareSessionCreated": false,
+  "providerDispatchLiveClaimed": false,
+  "externalProviderCalled": false,
+  "requestContract": {
+    "livePageLoaded": true,
+    "shareSessionGetMocked": true,
+    "nonGetShareSessionRequestsBlocked": true
+  },
+  "fixtureProfile": {
+    "documentCount": 3,
+    "recipientCount": 4,
+    "questionLength": 599,
+    "recipientMessageLength": 2069,
+    "documentBodyLengths": [
+      1248,
+      1244,
+      1246
+    ]
+  },
+  "rows": [
+    {
+      "metrics": {
+        "route": "/share/[sessionId]",
+        "sessionKind": "long-content-fixture",
+        "exactSavedUserSessionReproduced": false,
+        "theme": "day",
+        "viewport": "desktop-short-1440x723",
+        "viewportWidth": 1440,
+        "viewportHeight": 723,
+        "pageHeight": 1121,
+        "pageHeightRatio": 1.55,
+        "rootWidth": 1204,
+        "rootWidthRatio": 0.84,
+        "rootHeightRatio": 1.21,
+        "confirmationBottom": 529,
+        "confirmationRight": 770,
+        "noticeLeft": 788,
+        "desktopXRegionCount": 2,
+        "previewContainedCount": 4,
+        "collapsedDocumentCount": 3,
+        "outsideCards": 0,
+        "horizontalOverflow": false
+      },
+      "verdicts": {
+        "layoutVerdict": "PASS",
+        "exactSavedSessionVerdict": "MISSING_EVIDENCE",
+        "overallVerdict": "PASS_SCOPED"
+      }
+    },
+    {
+      "metrics": {
+        "route": "/share/[sessionId]",
+        "sessionKind": "long-content-fixture",
+        "exactSavedUserSessionReproduced": false,
+        "theme": "day",
+        "viewport": "desktop-1440x900",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "pageHeight": 1121,
+        "pageHeightRatio": 1.25,
+        "rootWidth": 1204,
+        "rootWidthRatio": 0.84,
+        "rootHeightRatio": 0.97,
+        "confirmationBottom": 529,
+        "confirmationRight": 770,
+        "noticeLeft": 788,
+        "desktopXRegionCount": 2,
+        "previewContainedCount": 4,
+        "collapsedDocumentCount": 3,
+        "outsideCards": 0,
+        "horizontalOverflow": false
+      },
+      "verdicts": {
+        "layoutVerdict": "PASS",
+        "exactSavedSessionVerdict": "MISSING_EVIDENCE",
+        "overallVerdict": "PASS_SCOPED"
+      }
+    },
+    {
+      "metrics": {
+        "route": "/share/[sessionId]",
+        "sessionKind": "long-content-fixture",
+        "exactSavedUserSessionReproduced": false,
+        "theme": "day",
+        "viewport": "mobile-390x723",
+        "viewportWidth": 390,
+        "viewportHeight": 723,
+        "pageHeight": 2077,
+        "pageHeightRatio": 2.87,
+        "rootWidth": 390,
+        "rootWidthRatio": 1,
+        "rootHeightRatio": 2.2,
+        "confirmationBottom": 707,
+        "confirmationRight": 374,
+        "noticeLeft": 16,
+        "desktopXRegionCount": 1,
+        "previewContainedCount": 4,
+        "collapsedDocumentCount": 3,
+        "outsideCards": 0,
+        "horizontalOverflow": false
+      },
+      "verdicts": {
+        "layoutVerdict": "PASS",
+        "exactSavedSessionVerdict": "MISSING_EVIDENCE",
+        "overallVerdict": "PASS_SCOPED"
+      }
+    },
+    {
+      "metrics": {
+        "route": "/share/[sessionId]",
+        "sessionKind": "long-content-fixture",
+        "exactSavedUserSessionReproduced": false,
+        "theme": "night",
+        "viewport": "desktop-short-1440x723",
+        "viewportWidth": 1440,
+        "viewportHeight": 723,
+        "pageHeight": 1121,
+        "pageHeightRatio": 1.55,
+        "rootWidth": 1204,
+        "rootWidthRatio": 0.84,
+        "rootHeightRatio": 1.21,
+        "confirmationBottom": 529,
+        "confirmationRight": 770,
+        "noticeLeft": 788,
+        "desktopXRegionCount": 2,
+        "previewContainedCount": 4,
+        "collapsedDocumentCount": 3,
+        "outsideCards": 0,
+        "horizontalOverflow": false
+      },
+      "verdicts": {
+        "layoutVerdict": "PASS",
+        "exactSavedSessionVerdict": "MISSING_EVIDENCE",
+        "overallVerdict": "PASS_SCOPED"
+      }
+    },
+    {
+      "metrics": {
+        "route": "/share/[sessionId]",
+        "sessionKind": "long-content-fixture",
+        "exactSavedUserSessionReproduced": false,
+        "theme": "night",
+        "viewport": "desktop-1440x900",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "pageHeight": 1121,
+        "pageHeightRatio": 1.25,
+        "rootWidth": 1204,
+        "rootWidthRatio": 0.84,
+        "rootHeightRatio": 0.97,
+        "confirmationBottom": 529,
+        "confirmationRight": 770,
+        "noticeLeft": 788,
+        "desktopXRegionCount": 2,
+        "previewContainedCount": 4,
+        "collapsedDocumentCount": 3,
+        "outsideCards": 0,
+        "horizontalOverflow": false
+      },
+      "verdicts": {
+        "layoutVerdict": "PASS",
+        "exactSavedSessionVerdict": "MISSING_EVIDENCE",
+        "overallVerdict": "PASS_SCOPED"
+      }
+    },
+    {
+      "metrics": {
+        "route": "/share/[sessionId]",
+        "sessionKind": "long-content-fixture",
+        "exactSavedUserSessionReproduced": false,
+        "theme": "night",
+        "viewport": "mobile-390x723",
+        "viewportWidth": 390,
+        "viewportHeight": 723,
+        "pageHeight": 2077,
+        "pageHeightRatio": 2.87,
+        "rootWidth": 390,
+        "rootWidthRatio": 1,
+        "rootHeightRatio": 2.2,
+        "confirmationBottom": 707,
+        "confirmationRight": 374,
+        "noticeLeft": 16,
+        "desktopXRegionCount": 1,
+        "previewContainedCount": 4,
+        "collapsedDocumentCount": 3,
+        "outsideCards": 0,
+        "horizontalOverflow": false
+      },
+      "verdicts": {
+        "layoutVerdict": "PASS",
+        "exactSavedSessionVerdict": "MISSING_EVIDENCE",
+        "overallVerdict": "PASS_SCOPED"
+      }
+    }
+  ],
+  "failures": [],
+  "boundary": {
+    "allowedClaim": "The deployed recipient UI contains a route-controlled maximum-content fixture in the expected desktop/mobile workbench geometry.",
+    "forbiddenClaim": "A concrete saved/generated production share session was reproduced or persisted.",
+    "exactEvidenceNextStep": "Provide an existing production /share/[sessionId]?workerId=... URL or approve the DB-backed share-session creation flow."
+  }
+}
