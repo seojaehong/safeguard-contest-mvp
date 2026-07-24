@@ -1,16 +1,16 @@
 # Documents Cockpit Workbench Geometry
 
-Checked at: 2026-07-24T14:20:40.872Z
+Checked at: 2026-07-24T15:47:37.585Z
 
-Base URL: `https://www.safeclaw.kr`
+Base URL: `http://127.0.0.1:3078`
 
-Source HEAD: `fdf0ac38da3bceb9ed70cc4f662923704279193e`
+Source HEAD: `1b6b87801feecfe8d942869b1c9767d313e97dc6`
 
-Production `/api/build-info`: `fdf0ac38da3bceb9ed70cc4f662923704279193e`
+Production `/api/build-info`: `unknown`
 
-Source HEAD matches production: `true`
+Source HEAD matches production: `false`
 
-Verdict: `PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH`
+Verdict: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_DOCUMENTS_WORKBENCH`
 
 Route split alone accepted as fix: `false`
 
@@ -20,10 +20,10 @@ Sibling verification first saw `display:block` / one-column geometry from a stal
 
 ## Geometry
 
-| Viewport | Overall | Body height | OverflowX | Workbench display | Columns | Column template | Launcher top-bottom | Editor top-bottom | Launcher right | Editor left | Inner nav display/width | Selected pane/editor width | Visible selected editors | Visible full bodies | First action top-bottom | Editor client/scroll (ratio) | Core buttons | Details open |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1440x723 | PASS | 723 | false | grid | 2 | 252px 912px | 205-386 | 205-653 | 504 | 512 | none/0 | 897/912 | 1 | 0 | 277-321 | 448/1035 (2.31) | 3 | false |
-| 390x723 | PASS | 728 | false | grid | 1 | 366px | 207-336 | 348-680 | 354 | 24 | none/0 | 327/342 | 1 | 0 | 502-538 | 332/909 (2.74) | 3 | false |
+| Viewport | Overall | Body height | OverflowX | Workbench display | Columns | Column template | Launcher top-bottom | Editor top-bottom | Launcher right | Editor left | Inner nav display/width | Selected pane/editor width | Visible selected editors | Visible full bodies | Risk selectors/mounted panels | First action top-bottom | Editor client/scroll (ratio) | Core buttons | Details open |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1440x723 | PASS | 723 | false | grid | 2 | 252px 912px | 205-386 | 205-653 | 504 | 512 | none/0 | 897/912 | 1 | 0 | 3/1 | 273-317 | 448/897 (2) | 3 | false |
+| 390x723 | PASS | 728 | false | grid | 1 | 366px | 207-336 | 348-680 | 354 | 24 | none/0 | 327/342 | 1 | 0 | 3/1 | 498-534 | 332/740 (2.23) | 3 | false |
 
 ## Product Boundary
 
