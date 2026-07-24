@@ -1,11 +1,11 @@
 {
   "schemaVersion": "safeclaw-launch-readiness-current/v3",
-  "generatedAt": "2026-07-23T02:58:45.821Z",
+  "generatedAt": "2026-07-24T19:10:46.552Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHeadAtGeneration": "850e432ea70800d2e38a311cfdb63171a10784ab",
-  "productionCommit": "850e432ea70800d2e38a311cfdb63171a10784ab",
-  "runtimeSmokeCommit": "850e432ea70800d2e38a311cfdb63171a10784ab",
-  "evidenceHeadBeforeThisReport": "850e432ea70800d2e38a311cfdb63171a10784ab",
+  "sourceHeadAtGeneration": "53486a65f67ca5da5c6486c3c1dc9f428437ea56",
+  "productionCommit": "53486a65f67ca5da5c6486c3c1dc9f428437ea56",
+  "runtimeSmokeCommit": "53486a65f67ca5da5c6486c3c1dc9f428437ea56",
+  "evidenceHeadBeforeThisReport": "53486a65f67ca5da5c6486c3c1dc9f428437ea56",
   "currentHeadIsEvidenceOnlyPending": false,
   "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
   "safeLaunchDemoClaimAllowed": true,
@@ -17,7 +17,7 @@
   "apiAsk": {
     "status": 200,
     "ok": true,
-    "elapsedMs": 22713
+    "elapsedMs": 22374
   },
   "scenario": {
     "companyName": "도시가스공사",
@@ -28,13 +28,14 @@
     "weatherNote": "옥외 굴착 조건, 굴착면 붕괴·매설물 접촉·중장비 작업반경 확인 필요"
   },
   "documentCoverage": {
-    "expectedCount": 11,
-    "presentCount": 11,
+    "expectedCount": 12,
+    "presentCount": 12,
     "missing": [],
     "present": [
       "workpackSummaryDraft",
       "riskAssessmentDraft",
       "workPlanDraft",
+      "workPermitDraft",
       "tbmBriefing",
       "tbmLogDraft",
       "safetyEducationRecordDraft",
@@ -45,10 +46,10 @@
       "kakaoMessage"
     ]
   },
-  "connectionVerdict": "REVIEW_CONNECTIONS_NO_DISPATCH",
+  "connectionVerdict": "PASS_CONNECTED_NO_DISPATCH",
   "connectionSummary": {
-    "connectedCount": 6,
-    "partialCount": 1,
+    "connectedCount": 7,
+    "partialCount": 0,
     "needsCheckCount": 0
   },
   "liveConnections": [
@@ -63,7 +64,7 @@
         "안전보건교육",
         "사진/증빙"
       ],
-      "detail": "Law.go와 OpenAI 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 초단기실황 연결 점검 필요: This operation was aborted / 기상청 초단기예보 연결 점검 필요: Error forwarding request to backend server\n / 기상청 단기예보 연결 점검 필요: Error forwarding request to backend server\n / 기상청 기상특보 연결 점검 필요: Error forwarding request to backend server\n / 기상청 영향예보 연결 점검 필요: This operation was aborted / 고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: This operation was aborted / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 지식 DB 매칭 2건 / Supabase 카탈로그 매칭 8건 (configured=true) / structured 위험성평가 rows 5건, 검증 이슈 0건 (structured rows=고정 근거 기반) / TBM-risk 연결 5건 (TBM-risk links=고정 근거 기반) / TBM structured=규칙 기반 from risk rows / 생성 모드: 강화 (고정 근거 위험요인 표 우선: 위험성평가 row 확정, TBM 구조 규칙 기반 조립)"
+      "detail": "Law.go와 OpenAI 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 초단기실황 호출 성공 (서울, base 20260725 0300) / 기상청 초단기예보 호출 성공 (서울, base 20260725 0330) / 기상청 단기예보 연결 점검 필요: This operation was aborted / 기상청 기상특보 조회 성공 (전국, 202607241800) / 기상청 영향예보 연결 점검 필요: NO_DATA / 고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 국내재해사례 후보는 보류됐지만 사고사망 게시판 live 근거를 우선 반영했습니다. 실패 상세: urlsearchparams:raw: KOSHA accident case enrichment budget (urlsearchparams:raw): This operation was aborted | raw-query:raw: KOSHA accident case enrichment budget (raw-query:raw): This operation was aborted / 지식 DB 매칭 2건 / Supabase 카탈로그 매칭 8건 (configured=true) / structured 위험성평가 rows 5건, 검증 이슈 0건 (structured rows=고정 근거 기반) / TBM-risk 연결 5건 (TBM-risk links=고정 근거 기반) / TBM structured=규칙 기반 from risk rows / 생성 모드: 강화 (고정 근거 위험요인 표 우선: 위험성평가 row 확정, TBM 구조 규칙 기반 조립)"
     },
     {
       "name": "Gemini",
@@ -78,13 +79,13 @@
     {
       "name": "기상청",
       "keyPresent": false,
-      "liveStatus": "일부 근거 보류",
+      "liveStatus": "연결됨",
       "reflectedIn": [
         "위험성평가표",
         "작업계획서",
         "TBM"
       ],
-      "detail": "기상청 초단기실황 연결 점검 필요: This operation was aborted / 기상청 초단기예보 연결 점검 필요: Error forwarding request to backend server\n / 기상청 단기예보 연결 점검 필요: Error forwarding request to backend server\n / 기상청 기상특보 연결 점검 필요: Error forwarding request to backend server\n / 기상청 영향예보 연결 점검 필요: This operation was aborted"
+      "detail": "기상청 초단기실황 호출 성공 (서울, base 20260725 0300) / 기상청 초단기예보 호출 성공 (서울, base 20260725 0330) / 기상청 단기예보 연결 점검 필요: This operation was aborted / 기상청 기상특보 조회 성공 (전국, 202607241800) / 기상청 영향예보 연결 점검 필요: NO_DATA"
     },
     {
       "name": "Work24",
@@ -127,7 +128,7 @@
         "비상대응",
         "사진/증빙"
       ],
-      "detail": "KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다."
+      "detail": "KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 국내재해사례 후보는 보류됐지만 사고사망 게시판 live 근거를 우선 반영했습니다. 실패 상세: urlsearchparams:raw: KOSHA accident case enrichment budget (urlsearchparams:raw): This operation was aborted | raw-query:raw: KOSHA accident case enrichment budget (raw-query:raw): This operation was aborted"
     },
     {
       "name": "n8n dispatch",
@@ -142,7 +143,7 @@
   "connectedSurfaces": [
     "Law.go / korean-law-mcp: 연결됨",
     "Gemini: 연결됨",
-    "기상청: 일부 근거 보류",
+    "기상청: 연결됨",
     "Work24: 연결됨",
     "KOSHA 교육: 연결됨",
     "KOSHA 공식자료: 연결됨",
@@ -197,8 +198,8 @@
     "verdict": "open"
   },
   "northstarLiveRollupOverall": {
-    "sourceHeadAtGeneration": "8c208e082adccfe6ba90d49f4b61934a994f3247",
-    "liveCommitAtGeneration": "8c208e082adccfe6ba90d49f4b61934a994f3247",
+    "sourceHeadAtGeneration": "f877a1e5024c9a266506436ca712765735b72f94",
+    "liveCommitAtGeneration": "f877a1e5024c9a266506436ca712765735b72f94",
     "liveCommitMatchesSourceHead": true
   },
   "approvalGatedBoundaries": [
@@ -234,8 +235,8 @@
     }
   ],
   "safeClaims": [
-    "Live /api/ask generated the expected 11-document workpack for the audited construction scenario.",
-    "Live public-data/AI surfaces returned connected statuses for 6 connection surface(s) in this smoke.",
+    "Live /api/ask generated the expected 12-document workpack for the audited construction scenario.",
+    "Live public-data/AI surfaces returned connected statuses for 7 connection surface(s) in this smoke.",
     "A safe launch demo or guided pilot can be claimed with explicit provider-dispatch, RLS, LLM Wiki, SIF vector, and admin-auth boundaries.",
     "Documents selected-only bounded workbench evidence is current in scoped artifacts; route split alone is not accepted as the UX fix."
   ],
@@ -260,10 +261,10 @@
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "850e432ea70800d2e38a311cfdb63171a10784ab",
+    "commitSha": "53486a65f67ca5da5c6486c3c1dc9f428437ea56",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-nrm58o10u-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-nxcfpma9d-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   }
 }

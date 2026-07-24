@@ -1,12 +1,12 @@
 # Launch Readiness Current Boundary
 
-Generated: 2026-07-23T02:58:45.821Z
+Generated: 2026-07-24T19:10:46.552Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD at generation: `850e432ea70800d2e38a311cfdb63171a10784ab`
+Source HEAD at generation: `53486a65f67ca5da5c6486c3c1dc9f428437ea56`
 
-Production runtime smoke commit: `850e432ea70800d2e38a311cfdb63171a10784ab`
+Production runtime smoke commit: `53486a65f67ca5da5c6486c3c1dc9f428437ea56`
 
 Current HEAD is evidence-only pending relative to production: `false`
 
@@ -21,17 +21,17 @@ Safe launch demo / guided pilot wording is allowed. Fully automated self-serve l
 `scripts/launch_readiness_audit.mjs` was run against production with `SAFETYGUARD_AUDIT_DISPATCH=false`.
 
 - `/api/ask`: 200 OK
-- elapsed: 22713 ms
+- elapsed: 22374 ms
 - dispatch call: not run
-- generated documents: 11 / 11
-- connection verdict: `REVIEW_CONNECTIONS_NO_DISPATCH` (6 connected, 1 bounded fallback, 0 check-required)
+- generated documents: 12 / 12
+- connection verdict: `PASS_CONNECTED_NO_DISPATCH` (7 connected, 0 bounded fallback, 0 check-required)
 - scenario: `도시가스공사 열수송관 굴착공사`
 
 ## Connected Surfaces
 
 - Law.go / korean-law-mcp: 연결됨
 - Gemini: 연결됨
-- 기상청: 일부 근거 보류
+- 기상청: 연결됨
 - Work24: 연결됨
 - KOSHA 교육: 연결됨
 - KOSHA 공식자료: 연결됨
@@ -47,8 +47,8 @@ Final-99 remains `pass_with_notice`; 2 notices are carried. These are approval/a
 
 ## Safe Claims
 
-- Live /api/ask generated the expected 11-document workpack for the audited construction scenario.
-- Live public-data/AI surfaces returned connected statuses for 6 connection surface(s) in this smoke.
+- Live /api/ask generated the expected 12-document workpack for the audited construction scenario.
+- Live public-data/AI surfaces returned connected statuses for 7 connection surface(s) in this smoke.
 - A safe launch demo or guided pilot can be claimed with explicit provider-dispatch, RLS, LLM Wiki, SIF vector, and admin-auth boundaries.
 - Documents selected-only bounded workbench evidence is current in scoped artifacts; route split alone is not accepted as the UX fix.
 
