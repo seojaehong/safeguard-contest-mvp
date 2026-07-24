@@ -1,14 +1,14 @@
 # Workspace Bounded Workbench Current Gate
 
-Checked at: 2026-07-24T17:11:36.700Z
+Checked at: 2026-07-24T17:14:39.597Z
 
-Base URL: `http://127.0.0.1:3081`
+Base URL: `https://www.safeclaw.kr`
 
-Source HEAD: `64104db1da6408e2bae73270bdc4734603373e4c`
+Source HEAD: `7fe74c2ad3b2b1d3f30a2af5f01a47dbfa6641fd`
 
-Production `/api/build-info`: `unknown`
+Production `/api/build-info`: `7fe74c2ad3b2b1d3f30a2af5f01a47dbfa6641fd`
 
-Verdict: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP`
+Verdict: `PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP`
 
 Route split alone accepted as fix: `false`
 
