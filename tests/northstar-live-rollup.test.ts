@@ -103,6 +103,19 @@ type RollupReport = {
     exactSavedShareReproduced: boolean;
     exactSavedShareVerdict: string;
   };
+  productCapabilityTruth: {
+    verdict: string;
+    dispatchMode: string;
+    dispatchReason: string;
+    briefingEmailReady: boolean;
+    photoVisionReady: boolean;
+    photoAcceptedOnly: boolean;
+    aiModes: string[];
+    providerDispatchCalled: boolean;
+    photoAnalysisPostCalled: boolean;
+    exactSavedShareVerdict: string;
+    documentsShareIaVerdict: string;
+  };
   liveDocumentSeedProfileIsolation: {
     verdict: string;
     beforePassed: number;
@@ -159,6 +172,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "live_document_wording_review", state: "proven", evidencePath: "evaluation/live-document-wording-review-2026-07-24/report.json", detail: "five synthetic wording scenarios passed" },
       { id: "live_document_broad_review", state: "proven", evidencePath: "evaluation/live-document-broad-review-2026-07-25/report.json", detail: "all 12 deliverables passed" },
       { id: "live_document_editorial_review", state: "proven", evidencePath: "evaluation/live-document-editorial-review-2026-07-25/report.json", detail: "all 60 editorial surfaces passed automated contract" },
+      { id: "product_capability_truth", state: "proven", evidencePath: "evaluation/product-capability-truth-2026-07-25/report.json", detail: "live capability truth passed without unlocking provider dispatch" },
       { id: "live_document_secondary_grounding", state: "proven", evidencePath: "evaluation/live-document-secondary-grounding-2026-07-25/report.json", detail: "all 30 supporting documents passed scenario grounding" },
       { id: "live_document_seed_profile_isolation", state: "proven", evidencePath: "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", detail: "all 60 documents passed seed-profile isolation" },
       { id: "provider_dispatch_persistence", state: "approval_gated", evidencePath: "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json", detail: "preview only" },
@@ -361,6 +375,30 @@ function createFixtureRoot(): { root: string; head: string } {
       exactSavedShareReproduced: false,
     },
   });
+  writeJson(root, "evaluation/product-capability-truth-2026-07-25/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    liveChecks: {
+      providerDispatch: {
+        mode: "preview_only",
+        reason: "persistent_idempotency_unavailable",
+      },
+      briefingSettingsUnauthenticated: { emailReady: false },
+      photoVisionReadiness: { ready: true, acceptedOnly: true },
+    },
+    uiChecks: {
+      aiGenerationModes: { modes: ["template", "enhanced", "full"] },
+    },
+    mutationBoundary: {
+      providerDispatchCalled: false,
+      photoAnalysisPostCalled: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      documentsShareIaVerdict: "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
+    },
+  });
   writeJson(root, "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", {
     sourceHead: "TO_FILL",
     productionCommit: "TO_FILL",
@@ -489,6 +527,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-document-wording-review-2026-07-24/report.json",
     "evaluation/live-document-broad-review-2026-07-25/report.json",
     "evaluation/live-document-editorial-review-2026-07-25/report.json",
+    "evaluation/product-capability-truth-2026-07-25/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
     "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json",
     "evaluation/kosha-current-live-gate-2026-07-20/report.json",
@@ -612,6 +651,20 @@ describe("northstar live rollup", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.evidence.find((item) => item.id === "live_document_editorial_review")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.productCapabilityTruth).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH",
+      dispatchMode: "preview_only",
+      dispatchReason: "persistent_idempotency_unavailable",
+      briefingEmailReady: false,
+      photoVisionReady: true,
+      photoAcceptedOnly: true,
+      aiModes: ["template", "enhanced", "full"],
+      providerDispatchCalled: false,
+      photoAnalysisPostCalled: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      documentsShareIaVerdict: "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
+    });
+    expect(report.evidence.find((item) => item.id === "product_capability_truth")?.productionStatus).toBe("ancestor_of_head");
     expect(report.liveDocumentSecondaryGrounding).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT",
       livePassed: 5,

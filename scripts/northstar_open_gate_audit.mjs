@@ -36,6 +36,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
   liveDocumentEditorialReview: path.join("evaluation", "live-document-editorial-review-2026-07-25", "report.json"),
+  productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
@@ -933,6 +934,108 @@ function evaluateLiveDocumentEditorialReviewGate(rootDir) {
     evidencePath,
     detail: `Editorial verdict=${readString(report.verdict) || "unknown"}, live=${readNumber(afterLive.pass)}/5, reviewed=${readNumber(report.reviewedDocumentSurfaceCount)}, placeholder=${readNumber(afterLive.placeholderFindingCount)}, legal=${readNumber(afterLive.legalOverclaimFindingCount)}, awkward=${readNumber(afterLive.awkwardCompositionFindingCount)}, evidenceMismatch=${readNumber(afterLive.evidenceDomainMismatchCount)}, humanReviewCompleted=${report.humanReviewCompleted === true}, sourceMatchesProduction=${sourceMatchesProduction}, noMutation=${noMutation}.`,
     nextActions: ["Fix the editorial or evidence-domain findings and rerun the unchanged five-by-twelve live contract."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateProductCapabilityTruthGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.productCapabilityTruth;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "product_capability_truth",
+      label: "Live product capability truth",
+      state: "missing",
+      evidencePath,
+      detail: "Live product capability truth evidence is missing or invalid.",
+      nextActions: ["Rerun the read-only dispatch, briefing, photo readiness, AI mode, and UI truth checks against current production."],
+    });
+  }
+
+  const liveChecks = isRecord(report.liveChecks) ? report.liveChecks : {};
+  const providerDispatch = isRecord(liveChecks.providerDispatch) ? liveChecks.providerDispatch : {};
+  const channels = isRecord(providerDispatch.channels) ? providerDispatch.channels : {};
+  const briefing = isRecord(liveChecks.briefingSettingsUnauthenticated)
+    ? liveChecks.briefingSettingsUnauthenticated
+    : {};
+  const photo = isRecord(liveChecks.photoVisionReadiness) ? liveChecks.photoVisionReadiness : {};
+  const uiChecks = isRecord(report.uiChecks) ? report.uiChecks : {};
+  const briefingRows = Array.isArray(uiChecks.briefingSettings) ? uiChecks.briefingSettings : [];
+  const aiModes = isRecord(uiChecks.aiGenerationModes) ? uiChecks.aiGenerationModes : {};
+  const sortedModes = Array.isArray(aiModes.modes)
+    ? aiModes.modes.filter((mode) => typeof mode === "string").sort().join(",")
+    : "";
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceMatchesProduction = readString(report.sourceHead).length > 0
+    && readString(report.sourceHead) === readString(report.productionCommit);
+  const uiTruthPass = briefingRows.length === 2
+    && briefingRows.every((row) => (
+      isRecord(row)
+      && row.containsDocumentGeneration === true
+      && row.containsEmailDispatchLock === true
+      && row.horizontalOverflow === false
+    ));
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.photoAnalysisPostCalled === false
+    && mutationBoundary.exactSavedShareReproduced === false;
+  const liveReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH"
+    && sourceMatchesProduction
+    && readNumber(providerDispatch.status) === 200
+    && providerDispatch.capability === false
+    && readString(providerDispatch.mode) === "preview_only"
+    && readString(providerDispatch.reason) === "persistent_idempotency_unavailable"
+    && channels.email === false
+    && channels.sms === false
+    && channels.kakao === false
+    && providerDispatch.providerCalled === false
+    && readNumber(briefing.status) === 401
+    && briefing.authenticationFailClosed === true
+    && briefing.emailReady === false
+    && readString(briefing.mode) === "preview_only"
+    && readString(briefing.reason) === "persistent_idempotency_unavailable"
+    && briefing.settingsMutationPerformed === false
+    && readNumber(photo.status) === 200
+    && photo.ready === true
+    && photo.acceptedOnly === true
+    && photo.ocrSupported === true
+    && photo.photoPostAnalysisExecuted === false
+    && uiTruthPass
+    && aiModes.sourceAndApiContractVerified === true
+    && sortedModes === "enhanced,full,template"
+    && aiModes.liveInteractiveModeSwitchExecuted === false
+    && noMutation
+    && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(remainingBoundaries.documentsShareIaVerdict) === "OPEN_SEPARATE_VIEWPORT_IA_WAVE"
+    && remainingBoundaries.providerDispatchApprovalRequired === true
+    && remainingBoundaries.humanEditorialReviewCompleted === false;
+
+  if (liveReady) {
+    return gateResult({
+      id: "product_capability_truth",
+      label: "Live product capability truth",
+      state: "proven",
+      evidencePath,
+      detail: "Manual email/SMS/Kakao and scheduled briefing email are fail-closed preview-only because persistent idempotency is unavailable. Live photo Vision/OCR readiness is accepted-only, AI generation modes are template/enhanced/full, and no DB/share/provider/photo POST mutation occurred. This does not grant provider dispatch approval: exact saved Share remains MISSING_EVIDENCE and Documents/Share IA remains OPEN_SEPARATE_VIEWPORT_IA_WAVE.",
+      nextActions: [
+        "Keep provider dispatch persistence approval-gated.",
+        "Measure exact saved Share and Documents/Share viewport IA in their separate gates.",
+      ],
+    });
+  }
+
+  return gateResult({
+    id: "product_capability_truth",
+    label: "Live product capability truth",
+    state: "contradicted",
+    evidencePath,
+    detail: `Capability verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, dispatch=${readString(providerDispatch.mode) || "unknown"}/${readString(providerDispatch.reason) || "unknown"}, providerCalled=${providerDispatch.providerCalled === true}, briefingEmailReady=${briefing.emailReady === true}, photoReady=${photo.ready === true}, photoAcceptedOnly=${photo.acceptedOnly === true}, photoPost=${photo.photoPostAnalysisExecuted === true}, uiTruthPass=${uiTruthPass}, aiModes=${sortedModes || "missing"}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, ia=${readString(remainingBoundaries.documentsShareIaVerdict) || "missing"}.`,
+    nextActions: ["Restore the fail-closed capability boundaries and rerun current-production truth evidence without mutation."],
   });
 }
 
@@ -2938,6 +3041,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateLiveDocumentWordingReviewGate(rootDir),
     evaluateLiveDocumentBroadReviewGate(rootDir),
     evaluateLiveDocumentEditorialReviewGate(rootDir),
+    evaluateProductCapabilityTruthGate(rootDir),
     evaluateLiveDocumentSecondaryGroundingGate(rootDir),
     evaluateLiveDocumentSeedProfileIsolationGate(rootDir),
     evaluateUiDocumentsShareCockpitGate(rootDir),

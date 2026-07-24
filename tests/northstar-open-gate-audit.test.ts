@@ -327,6 +327,60 @@ function createFixtureRoot(): string {
       exactSavedShareReproduced: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    liveChecks: {
+      providerDispatch: {
+        status: 200,
+        capability: false,
+        mode: "preview_only",
+        reason: "persistent_idempotency_unavailable",
+        channels: { email: false, sms: false, kakao: false },
+        providerCalled: false,
+      },
+      briefingSettingsUnauthenticated: {
+        status: 401,
+        authenticationFailClosed: true,
+        emailReady: false,
+        mode: "preview_only",
+        reason: "persistent_idempotency_unavailable",
+        settingsMutationPerformed: false,
+      },
+      photoVisionReadiness: {
+        status: 200,
+        ready: true,
+        acceptedOnly: true,
+        ocrSupported: true,
+        photoPostAnalysisExecuted: false,
+      },
+    },
+    uiChecks: {
+      briefingSettings: [
+        { containsDocumentGeneration: true, containsEmailDispatchLock: true, horizontalOverflow: false },
+        { containsDocumentGeneration: true, containsEmailDispatchLock: true, horizontalOverflow: false },
+      ],
+      aiGenerationModes: {
+        sourceAndApiContractVerified: true,
+        modes: ["template", "enhanced", "full"],
+        liveInteractiveModeSwitchExecuted: false,
+      },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      photoAnalysisPostCalled: false,
+      exactSavedShareReproduced: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      documentsShareIaVerdict: "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
+      providerDispatchApprovalRequired: true,
+      humanEditorialReviewCompleted: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION",
     sourceHead: "fixture-sha",
@@ -1620,6 +1674,13 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("Exact repeated-line groups=38");
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("humanReviewCompleted=false");
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "product_capability_truth")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("preview-only");
+    expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("OPEN_SEPARATE_VIEWPORT_IA_WAVE");
     expect(audit.gates.find((gate) => gate.id === "live_document_secondary_grounding")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
@@ -1861,6 +1922,53 @@ describe("northstar open gate audit", () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("humanReviewCompleted=true");
+  });
+
+  it("fails product capability truth closed when a provider call is claimed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "product-capability-truth-2026-07-25", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      mutationBoundary: { providerDispatchCalled: boolean };
+    };
+    report.mutationBoundary.providerDispatchCalled = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-25T00:00:00.000Z",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "product_capability_truth")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("noMutation=false");
+  });
+
+  it("fails product capability truth closed when exact Share or viewport IA is overclaimed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "product-capability-truth-2026-07-25", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remainingBoundaries: {
+        exactSavedShareVerdict: string;
+        documentsShareIaVerdict: string;
+      };
+    };
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    report.remainingBoundaries.documentsShareIaVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-25T00:00:00.000Z",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "product_capability_truth")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("exactShare=PASS");
+    expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("ia=PASS");
   });
 
   it("fails secondary document grounding closed when one supporting document is not grounded", async () => {

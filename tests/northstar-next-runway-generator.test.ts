@@ -149,6 +149,19 @@ type NextRunwayReport = {
     humanReviewCompleted: boolean;
     exactSavedShareVerdict: string;
   };
+  productCapabilityTruth: {
+    verdict: string;
+    dispatchMode: string;
+    dispatchReason: string;
+    briefingEmailReady: boolean;
+    photoVisionReady: boolean;
+    photoAcceptedOnly: boolean;
+    aiModes: string[];
+    providerDispatchCalled: boolean;
+    photoAnalysisPostCalled: boolean;
+    exactSavedShareVerdict: string;
+    documentsShareIaVerdict: string;
+  };
   liveDocumentSeedProfileIsolation: {
     verdict: string;
     sourceHead: string;
@@ -778,6 +791,30 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       shareSessionCreated: false,
       providerDispatchCalled: false,
       exactSavedShareReproduced: false,
+    },
+  });
+  writeJson(root, "evaluation/product-capability-truth-2026-07-25/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    liveChecks: {
+      providerDispatch: {
+        mode: "preview_only",
+        reason: "persistent_idempotency_unavailable",
+      },
+      briefingSettingsUnauthenticated: { emailReady: false },
+      photoVisionReadiness: { ready: true, acceptedOnly: true },
+    },
+    uiChecks: {
+      aiGenerationModes: { modes: ["template", "enhanced", "full"] },
+    },
+    mutationBoundary: {
+      providerDispatchCalled: false,
+      photoAnalysisPostCalled: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      documentsShareIaVerdict: "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
     },
   });
   writeJson(root, "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", {
@@ -1410,6 +1447,20 @@ describe("northstar next runway generator", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.provenCurrentState).toContain("live_document_editorial_review");
+    expect(report.productCapabilityTruth).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH",
+      dispatchMode: "preview_only",
+      dispatchReason: "persistent_idempotency_unavailable",
+      briefingEmailReady: false,
+      photoVisionReady: true,
+      photoAcceptedOnly: true,
+      aiModes: ["template", "enhanced", "full"],
+      providerDispatchCalled: false,
+      photoAnalysisPostCalled: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      documentsShareIaVerdict: "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
+    });
+    expect(report.provenCurrentState).toContain("product_capability_truth");
     expect(report.provenCurrentState).toContain("live_document_secondary_grounding");
     expect(report.liveDocumentSeedProfileIsolation).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION",

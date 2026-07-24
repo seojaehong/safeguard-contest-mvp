@@ -25,6 +25,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
   liveDocumentEditorialReview: path.join("evaluation", "live-document-editorial-review-2026-07-25", "report.json"),
+  productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
   kosha: path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json"),
@@ -308,6 +309,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const liveDocumentWordingReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentWordingReview);
   const liveDocumentBroadReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentBroadReview);
   const liveDocumentEditorialReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialReview);
+  const productCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.productCapabilityTruth);
   const liveDocumentSecondaryGrounding = tryReadJson(rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
   const liveDocumentSeedProfileIsolation = tryReadJson(rootDir, ARTIFACTS.liveDocumentSeedProfileIsolation);
   const kosha = tryReadJson(rootDir, ARTIFACTS.kosha);
@@ -385,6 +387,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_wording_review", ARTIFACTS.liveDocumentWordingReview, liveDocumentWordingReview),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_broad_review", ARTIFACTS.liveDocumentBroadReview, liveDocumentBroadReview),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_review", ARTIFACTS.liveDocumentEditorialReview, liveDocumentEditorialReview),
+    evidenceStatus(rootDir, currentHead, liveCommit, "product_capability_truth", ARTIFACTS.productCapabilityTruth, productCapabilityTruth),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_secondary_grounding", ARTIFACTS.liveDocumentSecondaryGrounding, liveDocumentSecondaryGrounding),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_seed_profile_isolation", ARTIFACTS.liveDocumentSeedProfileIsolation, liveDocumentSeedProfileIsolation),
     evidenceStatus(rootDir, currentHead, liveCommit, "kosha_exact_trust_registry", ARTIFACTS.kosha, kosha),
@@ -576,6 +579,24 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       exactSavedShareReproduced: recordAt(liveDocumentEditorialReview, "mutationBoundary")?.exactSavedShareReproduced === true,
       exactSavedShareVerdict: asString(recordAt(liveDocumentEditorialReview, "evidenceBoundary")?.exactSavedShareVerdict),
     },
+    productCapabilityTruth: {
+      artifact: ARTIFACTS.productCapabilityTruth,
+      verdict: isRecord(productCapabilityTruth) ? asString(productCapabilityTruth.verdict) : "missing",
+      sourceHead: isRecord(productCapabilityTruth) ? asString(productCapabilityTruth.sourceHead) : "",
+      productionCommit: extractProductionCommit(productCapabilityTruth),
+      dispatchMode: asString(recordAt(recordAt(productCapabilityTruth, "liveChecks"), "providerDispatch")?.mode),
+      dispatchReason: asString(recordAt(recordAt(productCapabilityTruth, "liveChecks"), "providerDispatch")?.reason),
+      briefingEmailReady: recordAt(recordAt(productCapabilityTruth, "liveChecks"), "briefingSettingsUnauthenticated")?.emailReady === true,
+      photoVisionReady: recordAt(recordAt(productCapabilityTruth, "liveChecks"), "photoVisionReadiness")?.ready === true,
+      photoAcceptedOnly: recordAt(recordAt(productCapabilityTruth, "liveChecks"), "photoVisionReadiness")?.acceptedOnly === true,
+      aiModes: Array.isArray(recordAt(recordAt(productCapabilityTruth, "uiChecks"), "aiGenerationModes")?.modes)
+        ? recordAt(recordAt(productCapabilityTruth, "uiChecks"), "aiGenerationModes").modes
+        : [],
+      providerDispatchCalled: recordAt(productCapabilityTruth, "mutationBoundary")?.providerDispatchCalled === true,
+      photoAnalysisPostCalled: recordAt(productCapabilityTruth, "mutationBoundary")?.photoAnalysisPostCalled === true,
+      exactSavedShareVerdict: asString(recordAt(productCapabilityTruth, "remainingBoundaries")?.exactSavedShareVerdict),
+      documentsShareIaVerdict: asString(recordAt(productCapabilityTruth, "remainingBoundaries")?.documentsShareIaVerdict),
+    },
     liveDocumentSecondaryGrounding: {
       artifact: ARTIFACTS.liveDocumentSecondaryGrounding,
       verdict: isRecord(liveDocumentSecondaryGrounding) ? asString(liveDocumentSecondaryGrounding.verdict) : "missing",
@@ -739,6 +760,17 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- DB mutation: ${rollup.liveDocumentEditorialReview.dbMutationPerformed}; Share session created: ${rollup.liveDocumentEditorialReview.shareSessionCreated}; provider dispatch: ${rollup.liveDocumentEditorialReview.providerDispatchCalled}`,
     `- Exact saved Share: ${rollup.liveDocumentEditorialReview.exactSavedShareVerdict || "MISSING_EVIDENCE"}; reproduced=${rollup.liveDocumentEditorialReview.exactSavedShareReproduced}`,
     "- Boundary: this automated reviewer-ready contract does not combine the six-core wording and 12-deliverable presence gates into completed human review.",
+    "",
+    "## Live Product Capability Truth",
+    "",
+    `- Verdict: \`${rollup.productCapabilityTruth.verdict}\``,
+    `- Manual/provider dispatch: ${rollup.productCapabilityTruth.dispatchMode || "unknown"} (${rollup.productCapabilityTruth.dispatchReason || "unknown"}); provider called=${rollup.productCapabilityTruth.providerDispatchCalled}`,
+    `- Scheduled briefing email ready: ${rollup.productCapabilityTruth.briefingEmailReady}`,
+    `- Photo Vision/OCR ready: ${rollup.productCapabilityTruth.photoVisionReady}; accepted-only=${rollup.productCapabilityTruth.photoAcceptedOnly}; photo POST executed=${rollup.productCapabilityTruth.photoAnalysisPostCalled}`,
+    `- AI generation modes: ${rollup.productCapabilityTruth.aiModes.join(", ") || "missing"}`,
+    `- Exact saved Share: ${rollup.productCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    `- Documents/Share IA: ${rollup.productCapabilityTruth.documentsShareIaVerdict || "OPEN_SEPARATE_VIEWPORT_IA_WAVE"}`,
+    "- Boundary: capability truth does not unlock provider persistence, exact saved Share, or Documents/Share viewport IA.",
     "",
     "## Live Secondary Document Grounding",
     "",

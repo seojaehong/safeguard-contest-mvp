@@ -28,6 +28,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
   liveDocumentEditorialReview: path.join("evaluation", "live-document-editorial-review-2026-07-25", "report.json"),
+  productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
   koshaNextExactCandidateAudit: path.join("evaluation", "kosha-next-exact-candidate-audit-2026-07-22", "report.json"),
@@ -478,6 +479,38 @@ function liveDocumentEditorialReviewSummary(review) {
     providerDispatchCalled: asBoolean(mutationBoundary.providerDispatchCalled),
     exactSavedShareReproduced: asBoolean(mutationBoundary.exactSavedShareReproduced),
     exactSavedShareVerdict: asString(evidenceBoundary.exactSavedShareVerdict),
+  };
+}
+
+/**
+ * @param {unknown} report
+ */
+function productCapabilityTruthSummary(report) {
+  if (!isRecord(report)) return {};
+  const liveChecks = isRecord(report.liveChecks) ? report.liveChecks : {};
+  const providerDispatch = isRecord(liveChecks.providerDispatch) ? liveChecks.providerDispatch : {};
+  const briefing = isRecord(liveChecks.briefingSettingsUnauthenticated)
+    ? liveChecks.briefingSettingsUnauthenticated
+    : {};
+  const photo = isRecord(liveChecks.photoVisionReadiness) ? liveChecks.photoVisionReadiness : {};
+  const uiChecks = isRecord(report.uiChecks) ? report.uiChecks : {};
+  const aiModes = isRecord(uiChecks.aiGenerationModes) ? uiChecks.aiGenerationModes : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(report.productionCommit),
+    dispatchMode: asString(providerDispatch.mode),
+    dispatchReason: asString(providerDispatch.reason),
+    briefingEmailReady: asBoolean(briefing.emailReady),
+    photoVisionReady: asBoolean(photo.ready),
+    photoAcceptedOnly: asBoolean(photo.acceptedOnly),
+    aiModes: Array.isArray(aiModes.modes) ? aiModes.modes.filter((mode) => typeof mode === "string") : [],
+    providerDispatchCalled: asBoolean(mutationBoundary.providerDispatchCalled),
+    photoAnalysisPostCalled: asBoolean(mutationBoundary.photoAnalysisPostCalled),
+    exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
+    documentsShareIaVerdict: asString(remainingBoundaries.documentsShareIaVerdict),
   };
 }
 
@@ -1050,6 +1083,7 @@ export function buildNorthstarNextRunway(options) {
   const liveDocumentWordingReview = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentWordingReview);
   const liveDocumentBroadReview = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentBroadReview);
   const liveDocumentEditorialReview = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentEditorialReview);
+  const productCapabilityTruth = readOptionalJson(options.rootDir, ARTIFACTS.productCapabilityTruth);
   const liveDocumentSecondaryGrounding = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
   const liveDocumentSeedProfileIsolation = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSeedProfileIsolation);
   const koshaCandidateAudit = readJson(options.rootDir, ARTIFACTS.koshaNextExactCandidateAudit);
@@ -1116,6 +1150,7 @@ export function buildNorthstarNextRunway(options) {
       "live_document_secondary_grounding",
       "live_document_seed_profile_isolation",
       "live_document_editorial_review",
+      "product_capability_truth",
       "kosha_exact_promotion_packet_ready_for_review",
       "ui_documents_share_cockpit",
       "dispatch_standalone_cockpit",
@@ -1165,6 +1200,7 @@ export function buildNorthstarNextRunway(options) {
     liveDocumentWordingReview: liveDocumentWordingReviewSummary(liveDocumentWordingReview),
     liveDocumentBroadReview: liveDocumentBroadReviewSummary(liveDocumentBroadReview),
     liveDocumentEditorialReview: liveDocumentEditorialReviewSummary(liveDocumentEditorialReview),
+    productCapabilityTruth: productCapabilityTruthSummary(productCapabilityTruth),
     liveDocumentSecondaryGrounding: liveDocumentSecondaryGroundingSummary(liveDocumentSecondaryGrounding),
     liveDocumentSeedProfileIsolation: liveDocumentSeedProfileIsolationSummary(liveDocumentSeedProfileIsolation),
     koshaNextExactCandidateAudit: koshaCandidateAuditSummary(koshaCandidateAudit),
@@ -1281,6 +1317,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Live synthetic wording and field usability are measured separately: \`${report.liveDocumentWordingReview.verdict || "missing"}\`, live scenarios passed \`${report.liveDocumentWordingReview.livePassed ?? 0}/5\`, live pending \`${report.liveDocumentWordingReview.liveAfterDeploymentPending === true}\`. This gate catches fixed-profile field leakage and selected-document wording defects, while broad human review and exact saved Share evidence remain separate.
 - Live 12-deliverable presence and applicability are measured separately: \`${report.liveDocumentBroadReview.verdict || "missing"}\`, UI/integrity/reviewed documents \`${report.liveDocumentBroadReview.uiDocumentCount ?? 0}/${report.liveDocumentBroadReview.integrityRequiredCount ?? 0}/${report.liveDocumentBroadReview.reviewedDocumentCount ?? 0}\`, before missingUnexpected \`${report.liveDocumentBroadReview.beforeMissingUnexpected ?? 0}\`, live missingUnexpected \`${report.liveDocumentBroadReview.liveMissingUnexpected ?? 0}\`, and workPermitDraft presentNonEmpty \`${report.liveDocumentBroadReview.workPermitPresentNonEmpty ?? 0}/5\`. The six-document synthetic wording gate is not accepted as 12-document deliverable coverage; exact saved Share remains \`${report.liveDocumentBroadReview.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live 12-deliverable automated editorial quality is measured separately: \`${report.liveDocumentEditorialReview.verdict || "missing"}\`, live scenarios \`${report.liveDocumentEditorialReview.livePassed ?? 0}/${report.liveDocumentEditorialReview.scenarioCount ?? 0}\`, reviewed document surface \`${report.liveDocumentEditorialReview.reviewedDocumentSurfaceCount ?? 0}\`, placeholder/legal/awkward/evidence mismatch \`${report.liveDocumentEditorialReview.placeholderFindingCount ?? 0}/${report.liveDocumentEditorialReview.legalOverclaimFindingCount ?? 0}/${report.liveDocumentEditorialReview.awkwardCompositionFindingCount ?? 0}/${report.liveDocumentEditorialReview.evidenceDomainMismatchCount ?? 0}\`, and duplicate findings exact/near \`${report.liveDocumentEditorialReview.exactLineOveruseCount ?? 0}/${report.liveDocumentEditorialReview.nearDuplicateLineOveruseCount ?? 0}\`. This is reviewer-ready automated evidence with humanReviewCompleted=\`${report.liveDocumentEditorialReview.humanReviewCompleted === true}\`, not a combined human PASS; exact saved Share remains \`${report.liveDocumentEditorialReview.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
+- Live product capability truth is measured separately: \`${report.productCapabilityTruth.verdict || "missing"}\`; manual/provider dispatch is \`${report.productCapabilityTruth.dispatchMode || "unknown"}\` with reason \`${report.productCapabilityTruth.dispatchReason || "unknown"}\`, scheduled briefing email ready=\`${report.productCapabilityTruth.briefingEmailReady === true}\`, photo Vision/OCR ready/accepted-only=\`${report.productCapabilityTruth.photoVisionReady === true}/${report.productCapabilityTruth.photoAcceptedOnly === true}\`, and AI modes are \`${report.productCapabilityTruth.aiModes?.join(", ") || "missing"}\`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains \`${report.productCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}\` and Documents/Share IA remains \`${report.productCapabilityTruth.documentsShareIaVerdict || "OPEN_SEPARATE_VIEWPORT_IA_WAVE"}\`.
 - Live supporting-document scenario grounding is measured separately: \`${report.liveDocumentSecondaryGrounding.verdict || "missing"}\`, live cases \`${report.liveDocumentSecondaryGrounding.livePassed ?? 0}/5\`, supporting documents \`${report.liveDocumentSecondaryGrounding.secondaryPassed ?? 0}/${report.liveDocumentSecondaryGrounding.secondaryReviewed ?? 0}\`, cross-scenario leakage \`${report.liveDocumentSecondaryGrounding.crossScenarioLeakageCount ?? 0}\`, and missingUnexpected \`${report.liveDocumentSecondaryGrounding.missingUnexpectedCount ?? 0}\`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains \`${report.liveDocumentSecondaryGrounding.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live document seed-profile isolation is measured separately: \`${report.liveDocumentSeedProfileIsolation.verdict || "missing"}\`, before forbidden fragments \`${report.liveDocumentSeedProfileIsolation.beforeSeedProfileLeakageCount ?? 0}\`, live forbidden fragments \`${report.liveDocumentSeedProfileIsolation.liveSeedProfileLeakageCount ?? 0}\`, reviewed document surface \`${report.liveDocumentSeedProfileIsolation.reviewedDocumentSurfaceCount ?? 0}\`, and secondary grounding \`${report.liveDocumentSeedProfileIsolation.secondaryGroundingPassed ?? 0}/${report.liveDocumentSeedProfileIsolation.secondaryGroundingReviewed ?? 0}\`. This deterministic gate does not replace broad human wording review or exact saved Share evidence; exact saved Share remains \`${report.liveDocumentSeedProfileIsolation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level, without claiming live production engine execution.
