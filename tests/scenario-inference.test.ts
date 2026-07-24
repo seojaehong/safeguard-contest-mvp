@@ -293,6 +293,33 @@ describe("inferScenario", () => {
     expect(surface).not.toMatch(/폭염|온열질환/);
   });
 
+  it("keeps unknown field conditions actionable without copying one fallback across documents", () => {
+    const response = buildMockAskResponse(
+      "구미 전자부품 공장 자동화설비 방호장치 개선과 정비 작업. 끼임과 예기치 않은 기동을 다뤄줘.",
+      [],
+      "mock",
+      "test"
+    );
+    const roleDocuments = [
+      response.deliverables.workpackSummaryDraft,
+      response.deliverables.riskAssessmentDraft,
+      response.deliverables.workPlanDraft,
+      response.deliverables.workPermitDraft,
+      response.deliverables.tbmBriefing,
+      response.deliverables.tbmLogDraft,
+      response.deliverables.safetyEducationRecordDraft,
+      response.deliverables.emergencyResponseDraft,
+      response.deliverables.photoEvidenceDraft
+    ];
+
+    const roleSurface = roleDocuments.join("\n");
+    expect(roleSurface).not.toContain("작업조건: 현장 조건 미지정, 작업 전 실제 환경 확인 필요");
+    expect(roleSurface).toContain("오늘 작업조건으로 확정");
+    expect(roleSurface).toContain("승인기록에 남김");
+    expect(roleSurface).toContain("대피경로·비상연락·구조 접근조건을 확정");
+    expect(roleSurface).toContain("통제 전·후 상태를 촬영");
+  });
+
   it.each([
     {
       label: "press maintenance",

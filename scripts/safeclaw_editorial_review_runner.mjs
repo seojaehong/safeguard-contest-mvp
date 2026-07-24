@@ -113,6 +113,67 @@ function jaccard(left, right) {
   return intersection / union.size;
 }
 
+function stripDocumentRolePrefix(value) {
+  return normalizeInline(value)
+    .replace(/^[⚠️\s]*/u, "")
+    .replace(/^(?:작업조건|기상\s*및\s*작업조건|핵심\s*위험요인|핵심\s*위험|핵심위험|가장\s*큰\s*위험|안전조치\s*\d+|조치내용)\s*[:：]\s*/u, "")
+    .toLocaleLowerCase();
+}
+
+function classifyExactDuplicate(line) {
+  if (
+    /현장\s*조건\s*미지정.{0,30}작업\s*전\s*실제\s*환경\s*확인\s*필요/u.test(line)
+    || /현장\s*여건에\s*맞는\s*담당자.{0,80}전파\s*전\s*관리자가\s*확인/u.test(line)
+  ) {
+    return {
+      reviewCategory: "generic-template-overuse",
+      reviewRationale: "역할별 판단 없이 같은 일반 확인문이 여러 독립 문서에 복제됩니다."
+    };
+  }
+  if (/^(?:필수\s*안전조치\s*반영|관련\s*조문\s*확인)\s*[:：]/u.test(line)) {
+    return {
+      reviewCategory: "legal-reference-consistency",
+      reviewRationale: "법령·필수조치 근거가 독립 문서 사이에서 반복됩니다."
+    };
+  }
+  if (/^(?:작업조건|기상\s*및\s*작업조건)\s*[:：]/u.test(line)) {
+    return {
+      reviewCategory: "independent-document-context",
+      reviewRationale: "각 독립 문서가 같은 현장조건을 자체적으로 식별합니다."
+    };
+  }
+  if (/(?:확인|통제|차단|지정|작업중지|작업\s*보류|착용|분리|복창|가동)/u.test(line)) {
+    return {
+      reviewCategory: "cross-document-control-consistency",
+      reviewRationale: "동일 통제조치가 실행·교육·기록 문서에 일관되게 반복됩니다."
+    };
+  }
+  return {
+    reviewCategory: "human-review-required",
+    reviewRationale: "문서 역할상 필요한 반복인지 템플릿 과다복제인지 사람이 확인해야 합니다."
+  };
+}
+
+function classifyNearDuplicate(leftLine, rightLine) {
+  if (stripDocumentRolePrefix(leftLine) === stripDocumentRolePrefix(rightLine)) {
+    return {
+      reviewCategory: "document-role-prefix-variant",
+      reviewRationale: "같은 사실을 문서 역할별 제목·접두어만 바꾸어 표현합니다."
+    };
+  }
+  return {
+    reviewCategory: "human-review-required",
+    reviewRationale: "높은 문장 유사도가 필요한 일관성인지 과다복제인지 사람이 확인해야 합니다."
+  };
+}
+
+function categoryCounts(findings) {
+  return findings.reduce((counts, finding) => {
+    counts[finding.reviewCategory] = (counts[finding.reviewCategory] || 0) + 1;
+    return counts;
+  }, {});
+}
+
 function duplicateFindings(documents) {
   const lines = documents.flatMap((document) => (
     [...new Set(splitReviewLines(document.rawText))].map((line) => ({
@@ -127,13 +188,18 @@ function duplicateFindings(documents) {
     group.documentKeys.add(item.key);
     exactGroups.set(item.normalized, group);
   }
-  const exactLineOveruse = [...exactGroups.values()]
+  const allExactLineOveruse = [...exactGroups.values()]
     .filter((group) => group.documentKeys.size >= 4)
-    .map((group) => ({
-      line: safeExcerpt(group.line, 180),
-      documentKeys: [...group.documentKeys]
-    }))
-    .slice(0, 20);
+    .map((group) => {
+      const classification = classifyExactDuplicate(group.line);
+      return {
+        line: safeExcerpt(group.line, 180),
+        documentKeys: [...group.documentKeys],
+        ...classification,
+        humanReviewRequired: true
+      };
+    });
+  const exactLineOveruse = allExactLineOveruse.slice(0, 20);
 
   const nearDuplicateLineOveruse = [];
   for (let leftIndex = 0; leftIndex < lines.length; leftIndex += 1) {
@@ -145,18 +211,29 @@ function duplicateFindings(documents) {
       if (left.key === right.key || left.normalized === right.normalized) continue;
       const similarity = jaccard(leftTokens, lineTokens(right.line));
       if (similarity < 0.9) continue;
+      const classification = classifyNearDuplicate(left.line, right.line);
       nearDuplicateLineOveruse.push({
         leftDocumentKey: left.key,
         rightDocumentKey: right.key,
         similarity: Number(similarity.toFixed(3)),
         leftLine: safeExcerpt(left.line, 160),
-        rightLine: safeExcerpt(right.line, 160)
+        rightLine: safeExcerpt(right.line, 160),
+        ...classification,
+        humanReviewRequired: true
       });
       if (nearDuplicateLineOveruse.length >= 20) break;
     }
     if (nearDuplicateLineOveruse.length >= 20) break;
   }
-  return { exactLineOveruse, nearDuplicateLineOveruse };
+  return {
+    exactLineOveruse,
+    allExactLineOveruse,
+    nearDuplicateLineOveruse,
+    duplicateReviewCategoryCounts: {
+      exact: categoryCounts(allExactLineOveruse),
+      near: categoryCounts(nearDuplicateLineOveruse)
+    }
+  };
 }
 
 function matchPatterns(value, patterns) {
@@ -202,8 +279,11 @@ export function reviewEditorialPayload(payload, question) {
     };
   });
   const duplicates = duplicateFindings(documents);
+  const genericTemplateOveruseCount = duplicates.allExactLineOveruse
+    .filter((finding) => finding.reviewCategory === "generic-template-overuse")
+    .length;
   return {
-    ok: documents.every((document) => document.verdict === "PASS"),
+    ok: documents.every((document) => document.verdict === "PASS") && genericTemplateOveruseCount === 0,
     reviewedDocumentCount: documents.length,
     passedDocumentCount: documents.filter((document) => document.verdict === "PASS").length,
     failedDocumentCount: documents.filter((document) => document.verdict === "RED").length,
@@ -211,8 +291,11 @@ export function reviewEditorialPayload(payload, question) {
     legalOverclaimFindingCount: documents.reduce((sum, document) => sum + document.legalOverclaimFindings.length, 0),
     awkwardCompositionFindingCount: documents.reduce((sum, document) => sum + document.awkwardCompositionFindings.length, 0),
     evidenceDomainMismatchCount: documents.reduce((sum, document) => sum + document.evidenceDomainMismatches.length, 0),
-    exactLineOveruseCount: duplicates.exactLineOveruse.length,
+    exactLineOveruseCount: duplicates.allExactLineOveruse.length,
+    displayedExactLineOveruseCount: duplicates.exactLineOveruse.length,
     nearDuplicateLineOveruseCount: duplicates.nearDuplicateLineOveruse.length,
+    genericTemplateOveruseCount,
+    duplicateReviewCategoryCounts: duplicates.duplicateReviewCategoryCounts,
     exactLineOveruse: duplicates.exactLineOveruse,
     nearDuplicateLineOveruse: duplicates.nearDuplicateLineOveruse,
     documents: documents.map(({ rawText, ...document }) => document)
@@ -294,6 +377,8 @@ function writeMarkdown(report) {
 - Scenario/evidence domain mismatches: ${report.evidenceDomainMismatchCount}
 - Exact repeated-line groups: ${report.exactLineOveruseCount} (review finding)
 - Near-duplicate line pairs: ${report.nearDuplicateLineOveruseCount} (review finding)
+- Generic template overuse groups: ${report.genericTemplateOveruseCount} (fail closed)
+- Duplicate review categories: \`${JSON.stringify(report.duplicateReviewCategoryCounts)}\`
 - Human review completed: \`false\`
 - DB mutation performed: \`false\`
 - Share session created: \`false\`
@@ -308,6 +393,7 @@ ${rows}
 
 - Every case and all 12 canonical deliverables expose a reviewer-readable excerpt from the raw API text.
 - Placeholder or template remnants, legal-duty replacement claims, awkward action/question splices, and scenario/evidence domain mismatches fail closed.
+- Generic fallback or disclaimer lines copied across four or more independent documents fail closed.
 - Exact and near-duplicate lines are recorded as reviewer findings. They do not fail automatically because bounded operational controls may intentionally repeat across documents.
 - Supporting nine documents use the same automated editorial failure budget as the core three; UI visibility is a separate layout contract.
 
@@ -386,7 +472,17 @@ async function main() {
     awkwardCompositionFindingCount: results.reduce((sum, item) => sum + item.awkwardCompositionFindingCount, 0),
     evidenceDomainMismatchCount: results.reduce((sum, item) => sum + item.evidenceDomainMismatchCount, 0),
     exactLineOveruseCount: results.reduce((sum, item) => sum + item.exactLineOveruseCount, 0),
+    displayedExactLineOveruseCount: results.reduce((sum, item) => sum + item.displayedExactLineOveruseCount, 0),
     nearDuplicateLineOveruseCount: results.reduce((sum, item) => sum + item.nearDuplicateLineOveruseCount, 0),
+    genericTemplateOveruseCount: results.reduce((sum, item) => sum + item.genericTemplateOveruseCount, 0),
+    duplicateReviewCategoryCounts: results.reduce((summary, item) => {
+      for (const [scope, counts] of Object.entries(item.duplicateReviewCategoryCounts)) {
+        for (const [category, count] of Object.entries(counts)) {
+          summary[scope][category] = (summary[scope][category] || 0) + count;
+        }
+      }
+      return summary;
+    }, { exact: {}, near: {} }),
     humanReviewCompleted: false,
     mutationBoundary: {
       dbMutationPerformed: false,

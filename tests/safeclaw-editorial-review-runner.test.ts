@@ -15,12 +15,24 @@ type EditorialReport = {
   legalOverclaimFindingCount: number;
   awkwardCompositionFindingCount: number;
   evidenceDomainMismatchCount: number;
+  genericTemplateOveruseCount: number;
+  exactLineOveruseCount: number;
+  displayedExactLineOveruseCount: number;
+  duplicateReviewCategoryCounts: {
+    exact: Record<string, number>;
+    near: Record<string, number>;
+  };
   evidenceBoundary: {
     sixCoreWordingGateCombinedAsHumanPass: boolean;
     twelveDeliverablePresenceGateCombinedAsHumanPass: boolean;
     exactSavedShareVerdict: string;
   };
   cases: Array<{
+    exactLineOveruse: Array<{
+      line: string;
+      reviewCategory: string;
+      humanReviewRequired: boolean;
+    }>;
     documents: Array<{
       key: string;
       excerpt: string;
@@ -101,6 +113,46 @@ describe("SafeClaw 12-deliverable editorial review", () => {
     });
     expect(result.report.cases[0]?.documents).toHaveLength(12);
     expect(result.report.cases[0]?.documents.every((document) => document.excerpt.length > 0)).toBe(true);
+    expect(result.report.genericTemplateOveruseCount).toBe(0);
+    expect(result.report.duplicateReviewCategoryCounts.exact["cross-document-control-consistency"]).toBeGreaterThan(0);
+    expect(result.report.cases[0]?.exactLineOveruse.every((finding) => finding.humanReviewRequired)).toBe(true);
+  });
+
+  it("fails closed when one generic fallback is copied across independent documents", () => {
+    const documents = buildDocuments();
+    const repeatedFallback = "작업조건: 현장 조건 미지정, 작업 전 실제 환경 확인 필요";
+    for (const key of ["workpackSummaryDraft", "workPlanDraft", "workPermitDraft", "emergencyResponseDraft"]) {
+      documents[key] += `\n${repeatedFallback}`;
+    }
+    const result = runFixture("구미 설비 정비 작업", documents);
+
+    expect(result.status).toBe(1);
+    expect(result.report.genericTemplateOveruseCount).toBe(1);
+    expect(result.report.duplicateReviewCategoryCounts.exact["generic-template-overuse"]).toBe(1);
+    expect(result.report.cases[0]?.exactLineOveruse).toContainEqual(expect.objectContaining({
+      line: repeatedFallback,
+      reviewCategory: "generic-template-overuse",
+      humanReviewRequired: true
+    }));
+  });
+
+  it("fails closed when generic overuse appears after the display cap", () => {
+    const documents = buildDocuments();
+    const repeatedKeys = ["workpackSummaryDraft", "workPlanDraft", "workPermitDraft", "emergencyResponseDraft"];
+    for (let index = 0; index < 21; index += 1) {
+      const benignLine = `공통 안전조치 ${String(index + 1).padStart(2, "0")}: 작업 전 통제구역과 보호구 상태를 관리감독자가 확인하고 기록합니다.`;
+      for (const key of repeatedKeys) documents[key] += `\n${benignLine}`;
+    }
+    const repeatedFallback = "작업조건: 현장 조건 미지정, 작업 전 실제 환경 확인 필요";
+    for (const key of repeatedKeys) documents[key] += `\n${repeatedFallback}`;
+
+    const result = runFixture("구미 설비 정비 작업", documents);
+
+    expect(result.status).toBe(1);
+    expect(result.report.exactLineOveruseCount).toBeGreaterThan(20);
+    expect(result.report.displayedExactLineOveruseCount).toBe(20);
+    expect(result.report.genericTemplateOveruseCount).toBe(1);
+    expect(result.report.duplicateReviewCategoryCounts.exact["generic-template-overuse"]).toBe(1);
   });
 
   it("fails closed on one awkward completed-action question splice", () => {

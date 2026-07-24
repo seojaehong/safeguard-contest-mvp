@@ -105,11 +105,27 @@ export function applyOntologyQaRemediation(
     `검수 보완 작업: ${reviewTask}`,
     ...missingHazardLines,
     ...missingControlLines,
-    ...missingArticleLines,
-    "현장 여건에 맞는 담당자·확인시각·측정값은 전파 전 관리자가 확인합니다."
+    ...missingArticleLines
   ];
 
-  if (commonLines.length <= 2) return response;
+  if (commonLines.length <= 1) return response;
+
+  const riskLines = [
+    ...commonLines,
+    "위험성평가 담당자는 현장 여건에 맞는 확인시각·측정값과 잔여 위험을 평가 기록에 남깁니다."
+  ];
+  const planLines = [
+    ...commonLines,
+    "작업계획 승인자는 현장 여건에 맞는 담당자·확인시각·측정값을 계획서 확인란에 기록합니다."
+  ];
+  const educationLines = [
+    ...commonLines,
+    "교육 실시자는 현장 측정값과 변경된 조치를 설명하고 작업자 이해 확인 결과를 교육 기록에 남깁니다."
+  ];
+  const emergencyLines = [
+    ...commonLines,
+    "비상대응 담당자는 현장 측정값을 반영해 대피·연락 조건을 확인하고 확인시각을 대응 기록에 남깁니다."
+  ];
 
   const tbmLines = [
     `검수 보완 전달: ${reviewTask}`,
@@ -128,12 +144,12 @@ export function applyOntologyQaRemediation(
       riskAssessmentDraft: appendRemediationSection(
         response.deliverables.riskAssessmentDraft,
         "[온톨로지 QA 보완 반영 - 위험성평가]",
-        commonLines
+        riskLines
       ),
       workPlanDraft: appendRemediationSection(
         response.deliverables.workPlanDraft,
         "[온톨로지 QA 보완 반영 - 작업계획]",
-        commonLines
+        planLines
       ),
       tbmBriefing: appendRemediationSection(
         response.deliverables.tbmBriefing,
@@ -148,12 +164,12 @@ export function applyOntologyQaRemediation(
       safetyEducationRecordDraft: appendRemediationSection(
         response.deliverables.safetyEducationRecordDraft,
         "[온톨로지 QA 보완 반영 - 교육]",
-        commonLines
+        educationLines
       ),
       emergencyResponseDraft: appendRemediationSection(
         response.deliverables.emergencyResponseDraft,
         "[온톨로지 QA 보완 반영 - 비상대응]",
-        commonLines
+        emergencyLines
       )
     }
   };

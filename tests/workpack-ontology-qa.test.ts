@@ -118,6 +118,25 @@ describe("web workpack ontology QA", () => {
     expect(remediated.deliverables.emergencyResponseDraft).toContain("대피용 기구(공기호흡기·사다리·섬유로프) 비치");
   });
 
+  it("records ontology remediation checks in each document role instead of one copied disclaimer", () => {
+    const response = buildMockAskResponse("부산 지하 기계실 밀폐공간 작업", mockSearchResults.slice(0, 2), "live", "test");
+    const remediated = applyOntologyQaRemediation(response, "밀폐공간 작업", qaMissing);
+    const remediatedDocuments = [
+      remediated.deliverables.riskAssessmentDraft,
+      remediated.deliverables.workPlanDraft,
+      remediated.deliverables.safetyEducationRecordDraft,
+      remediated.deliverables.emergencyResponseDraft
+    ];
+
+    expect(remediatedDocuments.every((document) => (
+      !document.includes("현장 여건에 맞는 담당자·확인시각·측정값은 전파 전 관리자가 확인합니다.")
+    ))).toBe(true);
+    expect(remediated.deliverables.riskAssessmentDraft).toContain("잔여 위험을 평가 기록에 남깁니다.");
+    expect(remediated.deliverables.workPlanDraft).toContain("계획서 확인란에 기록합니다.");
+    expect(remediated.deliverables.safetyEducationRecordDraft).toContain("교육 기록에 남깁니다.");
+    expect(remediated.deliverables.emergencyResponseDraft).toContain("대피·연락 조건을 확인");
+  });
+
   it("keeps ontology QA exception PII and secrets out of result detail and structured logs", async () => {
     const privateFailure = "resident=900101-1234567 Authorization=Bearer ontology-secret";
     vi.mocked(reviewDocpack).mockRejectedValueOnce(new Error(privateFailure));

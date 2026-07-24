@@ -1041,6 +1041,34 @@ export function inferScenario(question: string) {
   };
 }
 
+type DocumentConditionRole =
+  | "summary"
+  | "risk"
+  | "plan"
+  | "permit"
+  | "tbm"
+  | "tbmLog"
+  | "education"
+  | "emergency"
+  | "photo";
+
+function roleSpecificCondition(weatherNote: string, role: DocumentConditionRole): string {
+  if (weatherNote !== "현장 조건 미지정, 작업 전 실제 환경 확인 필요") return weatherNote;
+
+  const fallbackByRole: Record<DocumentConditionRole, string> = {
+    summary: "미입력 환경조건은 작업 전 확인하여 오늘 작업조건으로 확정",
+    risk: "평가 시작 전 실제 환경과 노출조건을 확인하여 위험성 판단에 반영",
+    plan: "작업반장이 실제 환경을 확인하고 작업순서·통제구역을 확정",
+    permit: "허가권자가 실제 환경과 에너지원 상태를 확인하고 승인기록에 남김",
+    tbm: "작업 전 실제 환경을 확인한 뒤 변경 위험과 작업중지 기준을 전원에게 전달",
+    tbmLog: "실제 환경 확인 결과와 변경된 통제조치를 TBM 기록에 남김",
+    education: "교육 실시자가 실제 환경을 확인하고 작업별 주의사항을 교육내용에 반영",
+    emergency: "실제 환경을 확인하여 대피경로·비상연락·구조 접근조건을 확정",
+    photo: "실제 환경과 통제 전·후 상태를 촬영하고 확인자 기록을 남김"
+  };
+  return fallbackByRole[role];
+}
+
 function buildWorkpackSummaryDraft(scenario: ReturnType<typeof inferScenario>) {
   const { profile } = scenario;
 
@@ -1053,7 +1081,7 @@ function buildWorkpackSummaryDraft(scenario: ReturnType<typeof inferScenario>) {
     `현장명: ${scenario.siteName}`,
     `작업명: ${profile.workName}`,
     `작업인원: ${scenario.workerCount}명`,
-    `작업조건: ${scenario.weatherNote}`,
+    `작업조건 판단: ${roleSpecificCondition(scenario.weatherNote, "summary")}`,
     ...(scenario.specialContext.length ? ["", "[특수 대상/조건]", ...scenario.specialContext.map((item) => `- ${item}`)] : []),
     "",
     "[핵심 판단]",
@@ -1088,7 +1116,7 @@ function buildOfficialStyleRiskAssessment(scenario: ReturnType<typeof inferScena
     `공정/세부작업: ${profile.processName}`,
     `작업장소: ${scenario.siteName}`,
     `작업인원: ${scenario.workerCount}명`,
-    `기상 및 작업조건: ${scenario.weatherNote}`,
+    `기상 및 작업조건: ${roleSpecificCondition(scenario.weatherNote, "risk")}`,
     "",
     "[1. 사전준비]",
     `- 평가대상 작업: ${profile.workName}`,
@@ -1162,7 +1190,7 @@ function buildOfficialStyleWorkPlan(scenario: ReturnType<typeof inferScenario>) 
     `- 작업명: ${profile.workName}`,
     `- 작업내용: ${scenario.workSummary}`,
     `- 작업인원: ${scenario.workerCount}명`,
-    `- 작업조건: ${scenario.weatherNote}`,
+    `- 작업 전 조건확인: ${roleSpecificCondition(scenario.weatherNote, "plan")}`,
     "",
     "[2. 작업순서 및 안전조치]",
     "- 작업 전 작업구역 설정, 보호구 확인, 장비 상태 점검",
@@ -1235,7 +1263,7 @@ function buildOfficialStyleWorkPermit(scenario: ReturnType<typeof inferScenario>
     `- 안전조치 1: ${profile.actions[0]}`,
     `- 안전조치 2: ${profile.actions[1]}`,
     `- 안전조치 3: ${profile.actions[2]}`,
-    `- 작업조건: ${scenario.weatherNote}`,
+    `- 허가 전 조건확인: ${roleSpecificCondition(scenario.weatherNote, "permit")}`,
     "- 보호구: 작업별 보호구의 종류, 손상 여부, 착용 상태를 작업 시작 전에 확인",
     "",
     "[3. 격리·차단 및 첨부 확인]",
@@ -1276,7 +1304,7 @@ function buildOfficialStyleTbmBriefing(scenario: ReturnType<typeof inferScenario
     "",
     "[1. 작업내용]",
     `- ${scenario.workSummary}`,
-    `- 기상 및 작업조건: ${scenario.weatherNote}`,
+    `- TBM 조건확인: ${roleSpecificCondition(scenario.weatherNote, "tbm")}`,
     "- 위험성평가 주요 유해·위험요인을 오늘 TBM 전달 항목으로 연결합니다.",
     "",
     "[2. 위험요인]",
@@ -1325,7 +1353,7 @@ function buildEmergencyResponseDraft(scenario: ReturnType<typeof inferScenario>)
     `업체명: ${scenario.companyName}`,
     `현장명: ${scenario.siteName}`,
     `작업명: ${profile.workName}`,
-    `작업조건: ${scenario.weatherNote}`,
+    `비상대응 조건: ${roleSpecificCondition(scenario.weatherNote, "emergency")}`,
     ...(scenario.specialContext.length ? [`특수 대상/조건: ${scenario.specialContext.join(" / ")}`] : []),
     "적용대상: 현장소장, 관리감독자, 작업반장, 작업자, 협력업체",
     "",
@@ -1360,7 +1388,7 @@ function buildPhotoEvidenceDraft(scenario: ReturnType<typeof inferScenario>) {
     `업체명: ${scenario.companyName}`,
     `현장명: ${scenario.siteName}`,
     `작업명: ${profile.workName}`,
-    `작업조건: ${scenario.weatherNote}`,
+    `촬영 확인조건: ${roleSpecificCondition(scenario.weatherNote, "photo")}`,
     ...(scenario.specialContext.length ? [`특수 대상/조건: ${scenario.specialContext.join(" / ")}`] : []),
     "",
     "[1. 작업 전 사진]",
@@ -1409,7 +1437,7 @@ function buildOfficialStyleTbmLog(scenario: ReturnType<typeof inferScenario>) {
     "",
     "[작업내용]",
     `- ${profile.workName}`,
-    `- 기상 및 작업조건: ${scenario.weatherNote}`,
+    `- TBM 기록조건: ${roleSpecificCondition(scenario.weatherNote, "tbmLog")}`,
     "",
     "[잠재위험요인 / 중점위험요인]",
     `- ${profile.hazards[0]}`,
@@ -1469,7 +1497,7 @@ function buildOfficialStyleSafetyEducationRecord(scenario: ReturnType<typeof inf
     "",
     "[교육내용]",
     `- 오늘 작업 개요: ${scenario.workSummary}`,
-    `- 작업 조건: ${scenario.weatherNote}`,
+    `- 교육 전 조건확인: ${roleSpecificCondition(scenario.weatherNote, "education")}`,
     `- 핵심 위험요인: ${profile.hazards.join(", ")}`,
     `- 즉시 조치: ${profile.actions.join(", ")}`,
     "",
