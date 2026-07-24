@@ -1,0 +1,243 @@
+{
+  "generatedAt": "2026-07-24T14:46:51.844Z",
+  "elapsedMs": 101130,
+  "verdict": "RED_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW",
+  "mode": "live",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceHead": "85d8938dc20c296bbc1e42cf61ac17396f779e0b",
+  "productionBuild": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "85d8938dc20c296bbc1e42cf61ac17396f779e0b",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-61qfnyh7i-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "total": 5,
+  "pass": 0,
+  "fail": 5,
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false
+  },
+  "cases": [
+    {
+      "id": "ulsan-chemical-cleaning-sds__stress",
+      "verdict": "RED",
+      "elapsedMs": 20712,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 20706
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6
+      },
+      "failedChecks": [
+        {
+          "id": "riskRows:scenarioLocation",
+          "ok": false,
+          "detail": "5 location field(s) contradict the requested region instead of staying unresolved",
+          "samples": [
+            {
+              "row": 0,
+              "text": "광주 하남산단 공장 세척 구역"
+            },
+            {
+              "row": 1,
+              "text": "광주 하남산단 공장 세척 구역"
+            },
+            {
+              "row": 2,
+              "text": "광주 하남산단 공장 세척 구역"
+            },
+            {
+              "row": 3,
+              "text": "광주 하남산단 공장 세척 구역"
+            },
+            {
+              "row": 4,
+              "text": "광주 하남산단 공장 세척 구역"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pyeongtaek-simultaneous-overhead-hotwork__stress",
+      "verdict": "RED",
+      "elapsedMs": 22931,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 22927
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6
+      },
+      "failedChecks": [
+        {
+          "id": "riskRows:scenarioLocation",
+          "ok": false,
+          "detail": "5 location field(s) contradict the requested region instead of staying unresolved",
+          "samples": [
+            {
+              "row": 0,
+              "text": "대구 달서구 물류창고"
+            },
+            {
+              "row": 1,
+              "text": "대구 달서구 물류창고"
+            },
+            {
+              "row": 2,
+              "text": "대구 달서구 물류창고"
+            },
+            {
+              "row": 3,
+              "text": "대구 달서구 물류창고"
+            },
+            {
+              "row": 4,
+              "text": "대구 달서구 물류창고"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "daejeon-vulnerable-night-maintenance__stress",
+      "verdict": "RED",
+      "elapsedMs": 20448,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 20445
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6
+      },
+      "failedChecks": [
+        {
+          "id": "riskRows:scenarioLocation",
+          "ok": false,
+          "detail": "5 location field(s) contradict the requested region instead of staying unresolved",
+          "samples": [
+            {
+              "row": 0,
+              "text": "현장 업체 비정형 작업 현장"
+            },
+            {
+              "row": 1,
+              "text": "현장 업체 비정형 작업 현장"
+            },
+            {
+              "row": 2,
+              "text": "현장 업체 비정형 작업 현장"
+            },
+            {
+              "row": 3,
+              "text": "현장 업체 비정형 작업 현장"
+            },
+            {
+              "row": 4,
+              "text": "현장 업체 비정형 작업 현장"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gumi-kosha-guidance-boundary__stress",
+      "verdict": "RED",
+      "elapsedMs": 17532,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 17531
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6
+      },
+      "failedChecks": [
+        {
+          "id": "riskRows:scenarioLocation",
+          "ok": false,
+          "detail": "5 location field(s) contradict the requested region instead of staying unresolved",
+          "samples": [
+            {
+              "row": 0,
+              "text": "자동화설비 비정형 작업 현장"
+            },
+            {
+              "row": 1,
+              "text": "자동화설비 비정형 작업 현장"
+            },
+            {
+              "row": 2,
+              "text": "자동화설비 비정형 작업 현장"
+            },
+            {
+              "row": 3,
+              "text": "자동화설비 비정형 작업 현장"
+            },
+            {
+              "row": 4,
+              "text": "자동화설비 비정형 작업 현장"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jeju-overnight-electrical-repair__stress",
+      "verdict": "RED",
+      "elapsedMs": 19254,
+      "api": {
+        "status": 200,
+        "ok": true,
+        "elapsedMs": 19252
+      },
+      "metrics": {
+        "riskRowCount": 5,
+        "reviewedDocumentCount": 6
+      },
+      "failedChecks": [
+        {
+          "id": "riskRows:scenarioLocation",
+          "ok": false,
+          "detail": "5 location field(s) contradict the requested region instead of staying unresolved",
+          "samples": [
+            {
+              "row": 0,
+              "text": "전기설비 전기설비 배전반 점검 현장"
+            },
+            {
+              "row": 1,
+              "text": "전기설비 전기설비 배전반 점검 현장"
+            },
+            {
+              "row": 2,
+              "text": "전기설비 전기설비 배전반 점검 현장"
+            },
+            {
+              "row": 3,
+              "text": "전기설비 전기설비 배전반 점검 현장"
+            },
+            {
+              "row": 4,
+              "text": "전기설비 전기설비 배전반 점검 현장"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
