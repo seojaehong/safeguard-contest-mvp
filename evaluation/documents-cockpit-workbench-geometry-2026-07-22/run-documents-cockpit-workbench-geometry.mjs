@@ -35,6 +35,11 @@ function verdictFor(metrics) {
   const viewportPass = metrics.bodyHeight <= metrics.viewportHeight + 8
     && metrics.horizontalOverflow === false
     && metrics.coreButtons === 3
+    && metrics.uniqueDocumentKeyCount === 12
+    && metrics.visibleDocumentButtonCount === 3
+    && metrics.supportingButtonCount === 9
+    && metrics.visibleSupportingButtonCount === 0
+    && metrics.legacyIndexDisplay === "none"
     && metrics.detailsOpen === false
     && metrics.visibleSelectedEditorCount === 1
     && metrics.visibleFullDocumentBodyCount === 0
@@ -83,6 +88,8 @@ async function measure(page, viewport) {
     const selectedEditorPane = editor?.querySelector(".document-editor");
     const shell = document.querySelector(".safeclaw-module-shell");
     const details = document.querySelector('[data-testid="mobile-document-details"]');
+    const cockpit = document.querySelector(".safeclaw-document-cockpit");
+    const legacyIndex = document.querySelector(".safeclaw-doc-index");
     const style = workbench ? getComputedStyle(workbench) : null;
     const columns = style?.gridTemplateColumns ? style.gridTemplateColumns.split(" ").filter(Boolean) : [];
     const workbenchRect = rect(workbench);
@@ -108,6 +115,32 @@ async function measure(page, viewport) {
         const buttonStyle = getComputedStyle(button);
         return box.width > 0 && box.height > 0 && buttonStyle.display !== "none" && buttonStyle.visibility !== "hidden";
       });
+    const documentButtons = cockpit
+      ? [...cockpit.querySelectorAll("button[data-document-key]")]
+      : [];
+    const visibleDocumentButtons = documentButtons.filter((button) => {
+      const closedDetails = button.closest("details:not([open])");
+      if (closedDetails) return false;
+      const box = button.getBoundingClientRect();
+      const buttonStyle = getComputedStyle(button);
+      return box.width > 0
+        && box.height > 0
+        && buttonStyle.display !== "none"
+        && buttonStyle.visibility !== "hidden";
+    });
+    const supportingButtons = details
+      ? [...details.querySelectorAll("button[data-document-key]")]
+      : [];
+    const visibleSupportingButtons = supportingButtons.filter((button) => {
+      const closedDetails = button.closest("details:not([open])");
+      if (closedDetails) return false;
+      const box = button.getBoundingClientRect();
+      const buttonStyle = getComputedStyle(button);
+      return box.width > 0
+        && box.height > 0
+        && buttonStyle.display !== "none"
+        && buttonStyle.visibility !== "hidden";
+    });
     return {
       route: "/documents?theme=day",
       viewportWidth: window.innerWidth,
@@ -146,6 +179,11 @@ async function measure(page, viewport) {
       firstActionTop: firstActionRect?.top ?? 0,
       firstActionBottom: firstActionRect?.bottom ?? 0,
       coreButtons: coreButtons.length,
+      uniqueDocumentKeyCount: new Set(documentButtons.map((button) => button.getAttribute("data-document-key"))).size,
+      visibleDocumentButtonCount: visibleDocumentButtons.length,
+      supportingButtonCount: supportingButtons.length,
+      visibleSupportingButtonCount: visibleSupportingButtons.length,
+      legacyIndexDisplay: legacyIndex ? getComputedStyle(legacyIndex).display : "missing",
       detailsOpen: details instanceof HTMLDetailsElement ? details.open : null,
     };
   });
@@ -191,7 +229,7 @@ fs.writeFileSync(path.join(outDir, "report.json"), `${JSON.stringify(report, nul
 const tableRows = rows.map((row) => {
   const metrics = row.metrics;
   const verdicts = row.verdicts;
-  return `| ${row.viewport} | ${verdicts.overallVerdict} | ${metrics.bodyHeight} | ${metrics.horizontalOverflow} | ${metrics.workbenchDisplay} | ${metrics.workbenchColumnCount} | ${metrics.workbenchGridTemplateColumns} | ${metrics.launcherTop}-${metrics.launcherBottom} | ${metrics.editorTop}-${metrics.editorBottom} | ${metrics.launcherRight} | ${metrics.editorLeft} | ${metrics.innerNavigatorDisplay}/${metrics.innerNavigatorWidth} | ${metrics.selectedEditorPaneWidth}/${metrics.editorWidth} | ${metrics.visibleSelectedEditorCount} | ${metrics.visibleFullDocumentBodyCount} | ${metrics.riskRowSelectorCount}/${metrics.mountedRiskRowPanelCount} | ${metrics.firstActionTop}-${metrics.firstActionBottom} | ${metrics.editorClientHeight}/${metrics.editorScrollHeight} (${metrics.editorScrollRatio}) | ${metrics.coreButtons} | ${metrics.detailsOpen} |`;
+  return `| ${row.viewport} | ${verdicts.overallVerdict} | ${metrics.bodyHeight} | ${metrics.horizontalOverflow} | ${metrics.workbenchDisplay} | ${metrics.workbenchColumnCount} | ${metrics.workbenchGridTemplateColumns} | ${metrics.launcherTop}-${metrics.launcherBottom} | ${metrics.editorTop}-${metrics.editorBottom} | ${metrics.launcherRight} | ${metrics.editorLeft} | ${metrics.innerNavigatorDisplay}/${metrics.innerNavigatorWidth} | ${metrics.selectedEditorPaneWidth}/${metrics.editorWidth} | ${metrics.visibleSelectedEditorCount} | ${metrics.visibleFullDocumentBodyCount} | ${metrics.riskRowSelectorCount}/${metrics.mountedRiskRowPanelCount} | ${metrics.firstActionTop}-${metrics.firstActionBottom} | ${metrics.editorClientHeight}/${metrics.editorScrollHeight} (${metrics.editorScrollRatio}) | ${metrics.coreButtons}/${metrics.uniqueDocumentKeyCount}/${metrics.visibleDocumentButtonCount}/${metrics.supportingButtonCount}/${metrics.visibleSupportingButtonCount} | ${metrics.legacyIndexDisplay} | ${metrics.detailsOpen} |`;
 }).join("\n");
 
 fs.writeFileSync(path.join(outDir, "report.md"), `# Documents Cockpit Workbench Geometry
@@ -216,13 +254,13 @@ Sibling verification first saw \`display:block\` / one-column geometry from a st
 
 ## Geometry
 
-| Viewport | Overall | Body height | OverflowX | Workbench display | Columns | Column template | Launcher top-bottom | Editor top-bottom | Launcher right | Editor left | Inner nav display/width | Selected pane/editor width | Visible selected editors | Visible full bodies | Risk selectors/mounted panels | First action top-bottom | Editor client/scroll (ratio) | Core buttons | Details open |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Viewport | Overall | Body height | OverflowX | Workbench display | Columns | Column template | Launcher top-bottom | Editor top-bottom | Launcher right | Editor left | Inner nav display/width | Selected pane/editor width | Visible selected editors | Visible full bodies | Risk selectors/mounted panels | First action top-bottom | Editor client/scroll (ratio) | Core/unique/visible/support/visible support | Legacy index | Details open |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 ${tableRows}
 
 ## Product Boundary
 
-This proves the measured \`/documents?theme=day\` route uses one visible selected-document editor, removes the duplicated inner document navigator, lets the selected editor pane fill its workbench column, keeps full-body textareas out of the default surface, exposes the first document action in the viewport, and contains long detail in the editor workbench. It does not close exact saved/generated \`/share/[sessionId]\` evidence, provider dispatch, or route split alone as a UX fix.
+This proves the measured \`/documents?theme=day\` route uses one visible selected-document editor, removes the duplicated inner document navigator, lets the selected editor pane fill its workbench column, keeps full-body textareas out of the default surface, exposes exactly three core document launchers while nine supporting document launchers remain inside the closed disclosure, hides the legacy document index, exposes the first document action in the viewport, and contains long detail in the editor workbench. It does not close exact saved/generated \`/share/[sessionId]\` evidence, provider dispatch, or route split alone as a UX fix.
 `, "utf8");
 
 console.log(JSON.stringify({
@@ -248,5 +286,12 @@ console.log(JSON.stringify({
     mountedRiskRowPanels: row.metrics.mountedRiskRowPanelCount,
     firstActionBottom: row.metrics.firstActionBottom,
     editorScrollRatio: row.metrics.editorScrollRatio,
+    coreButtons: row.metrics.coreButtons,
+    uniqueDocumentKeys: row.metrics.uniqueDocumentKeyCount,
+    visibleDocumentButtons: row.metrics.visibleDocumentButtonCount,
+    supportingButtons: row.metrics.supportingButtonCount,
+    visibleSupportingButtons: row.metrics.visibleSupportingButtonCount,
+    legacyIndexDisplay: row.metrics.legacyIndexDisplay,
+    detailsOpen: row.metrics.detailsOpen,
   })),
 }, null, 2));

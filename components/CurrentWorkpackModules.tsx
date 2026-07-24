@@ -866,7 +866,7 @@ function DocumentCockpit({
           className="safeclaw-mobile-document-details"
           data-testid="mobile-document-details"
         >
-          <summary>문서 {launchDocuments.length}종 · 제출 정보</summary>
+          <summary>지원 문서 {remainingDocuments.length}종 · 제출 정보</summary>
           <div className="safeclaw-mobile-remaining-list">
             {remainingDocuments.map((item) => {
               const presence = documentPresenceLabel(data, item.key);

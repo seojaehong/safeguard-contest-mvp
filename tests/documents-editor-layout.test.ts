@@ -910,8 +910,8 @@ describe("documents editor layout", () => {
     expect(contract.editorLeft).toBeGreaterThanOrEqual(contract.launcherRight);
     expect(Math.abs(contract.editorTop - contract.launcherTop)).toBeLessThanOrEqual(4);
     expect(contract.editorRight).toBeGreaterThan(contract.editorLeft);
-    expect(contract.detailsLabel).toBe("문서 12종 · 제출 정보");
-    expect(contract.cockpitText).not.toContain("문서 9종");
+    expect(contract.detailsLabel).toBe("지원 문서 9종 · 제출 정보");
+    expect(contract.cockpitText).not.toContain("핵심 문서 9종");
     expect(contract.bannerWorkspaceCtas).toBe(0);
   }, 90_000);
 
@@ -1453,6 +1453,22 @@ describe("documents editor layout", () => {
 
         const launcherRect = launcherElement.getBoundingClientRect();
         const editorRect = editor.getBoundingClientRect();
+        const documentButtons = Array.from(cockpit.querySelectorAll<HTMLButtonElement>("button[data-document-key]"));
+        const visibleDocumentButtons = documentButtons.filter((button) => {
+          const closedDetails = button.closest("details:not([open])");
+          if (closedDetails) return false;
+          const box = button.getBoundingClientRect();
+          const style = getComputedStyle(button);
+          return box.width > 0 && box.height > 0 && style.display !== "none" && style.visibility !== "hidden";
+        });
+        const supportingButtons = Array.from(detailsElement.querySelectorAll<HTMLButtonElement>("button[data-document-key]"));
+        const visibleSupportingButtons = supportingButtons.filter((button) => {
+          const closedDetails = button.closest("details:not([open])");
+          if (closedDetails) return false;
+          const box = button.getBoundingClientRect();
+          const style = getComputedStyle(button);
+          return box.width > 0 && box.height > 0 && style.display !== "none" && style.visibility !== "hidden";
+        });
         return {
           theme: document.querySelector(".safeclaw-module-shell")?.getAttribute("data-theme"),
           viewportWidth: window.innerWidth,
@@ -1467,6 +1483,10 @@ describe("documents editor layout", () => {
           detailsOpen: detailsElement.open,
           detailsCount: document.querySelectorAll('[data-testid="mobile-document-details"]').length,
           detailsLabel: detailsElement.querySelector(":scope > summary")?.textContent?.replace(/\s+/gu, " ").trim(),
+          uniqueDocumentKeyCount: new Set(documentButtons.map((button) => button.dataset.documentKey)).size,
+          visibleDocumentButtonCount: visibleDocumentButtons.length,
+          supportingButtonCount: supportingButtons.length,
+          visibleSupportingButtonCount: visibleSupportingButtons.length,
           desktopPanelDisplays: desktopPanels.map((panel) => getComputedStyle(panel as Element).display),
           cockpitText: cockpit.textContent || "",
           bannerWorkspaceCtas: document.querySelectorAll('.safeclaw-current-workpack a[href="/workspace"]').length
@@ -1483,9 +1503,13 @@ describe("documents editor layout", () => {
       expect(initial.coreHeights.every((height) => height >= 44)).toBe(true);
       expect(initial.detailsOpen).toBe(false);
       expect(initial.detailsCount).toBe(1);
-      expect(initial.detailsLabel).toBe("문서 12종 · 제출 정보");
+      expect(initial.detailsLabel).toBe("지원 문서 9종 · 제출 정보");
+      expect(initial.uniqueDocumentKeyCount).toBe(12);
+      expect(initial.visibleDocumentButtonCount).toBe(3);
+      expect(initial.supportingButtonCount).toBe(9);
+      expect(initial.visibleSupportingButtonCount).toBe(0);
       expect(initial.desktopPanelDisplays).toEqual(["none", "none", "none"]);
-      expect(initial.cockpitText).not.toContain("문서 9종");
+      expect(initial.cockpitText).not.toContain("핵심 문서 9종");
       expect(initial.cockpitText).toContain("오늘 문서");
       expect(initial.cockpitText).toContain("핵심 3종");
       expect(initial.bannerWorkspaceCtas).toBe(0);
