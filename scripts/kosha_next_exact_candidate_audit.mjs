@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // @ts-check
 
 import fs from "node:fs";
