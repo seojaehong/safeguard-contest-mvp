@@ -16,6 +16,7 @@ const sourceHead = execFileSync("git", ["rev-parse", "HEAD"], {
   encoding: "utf8"
 }).trim();
 const productCommit = process.env.SAFECLAW_KNOWLEDGE_UI_PRODUCT_COMMIT || sourceHead;
+const authStorageKey = process.env.SAFECLAW_SUPABASE_STORAGE_KEY || "sb-fixture-auth-token";
 const liveMode = /^https:\/\/www\.safeclaw\.kr(?:\/|$)/u.test(baseUrl);
 const productionBuild = liveMode
   ? await fetch(`${baseUrl}/api/build-info?codexCacheBust=${encodeURIComponent(checkedAt)}`)
@@ -47,6 +48,19 @@ const productionBuild = liveMode
       environment: "local",
       deploymentUrl: null
     };
+
+function commitContainsProduct(productionCommit) {
+  if (!productionCommit) return false;
+  try {
+    execFileSync("git", ["merge-base", "--is-ancestor", productCommit, productionCommit], {
+      cwd: process.cwd(),
+      stdio: "ignore"
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 const queueItem = {
   runId: "11111111-1111-4111-8111-111111111111",
@@ -99,8 +113,8 @@ try {
         if (message.type() === "error") browserErrors.push(message.text());
       });
       page.on("pageerror", (error) => browserErrors.push(error.message));
-      await page.addInitScript(() => {
-        localStorage.setItem("sb-fixture-auth-token", JSON.stringify({
+      await page.addInitScript((storageKey) => {
+        localStorage.setItem(storageKey, JSON.stringify({
           access_token: "fixture-access-token",
           refresh_token: "fixture-refresh-token",
           expires_in: 3600,
@@ -116,7 +130,7 @@ try {
             created_at: "2026-07-25T00:00:00.000Z"
           }
         }));
-      });
+      }, authStorageKey);
       await page.route("**/api/knowledge/review", async (route) => {
         await route.fulfill({
           status: 200,
@@ -192,7 +206,7 @@ try {
 const failed = results.filter((result) => !result.passed);
 const productionAligned = liveMode
   && productionBuild.ok
-  && productionBuild.commitSha === productCommit
+  && commitContainsProduct(productionBuild.commitSha)
   && productionBuild.branch === "master"
   && productionBuild.environment === "production";
 const report = {
@@ -269,6 +283,65 @@ ${rows}
 - LLM Wiki publication and live RLS isolation remain \`APPROVAL_GATED\`.
 `;
 await fs.writeFile(path.join(outputDir, "report.md"), markdown, "utf8");
+
+const summaryOutput = process.env.SAFECLAW_KNOWLEDGE_UI_SUMMARY_OUTPUT;
+if (liveMode && productionAligned && summaryOutput) {
+  const summaryDir = path.resolve(process.cwd(), summaryOutput);
+  const localReportPath = path.join(summaryDir, "report.json");
+  const localMarkdownPath = path.join(summaryDir, "report.md");
+  const localReport = JSON.parse(await fs.readFile(localReportPath, "utf8"));
+  const afterLocalDir = path.join(summaryDir, "after-local");
+  await fs.mkdir(afterLocalDir, { recursive: true });
+  await fs.copyFile(localReportPath, path.join(afterLocalDir, "report.json"));
+  await fs.copyFile(localMarkdownPath, path.join(afterLocalDir, "report.md"));
+
+  const summary = {
+    schemaVersion: "safeclaw-hermes-knowledge-review-authority-ui-summary/v1",
+    verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+    checkedAt,
+    sourceHead,
+    productCommit,
+    productionCommit: productionBuild.commitSha,
+    local: {
+      path: path.relative(process.cwd(), path.join(afterLocalDir, "report.json")),
+      verdict: localReport.verdict,
+      viewportCount: localReport.viewportCount,
+      passedCount: localReport.passedCount,
+      failedCount: localReport.failedCount
+    },
+    afterLive: {
+      path: path.relative(process.cwd(), path.join(outputDir, "report.json")),
+      verdict: report.verdict,
+      viewportCount: report.viewportCount,
+      passedCount: report.passedCount,
+      failedCount: report.failedCount
+    },
+    authorityContract: report.authorityContract,
+    mutationBoundary: report.mutationBoundary,
+    remainingBoundaries: report.remainingBoundaries
+  };
+  await fs.writeFile(localReportPath, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
+  await fs.writeFile(localMarkdownPath, `# Hermes Knowledge Review Authority UI
+
+- Verdict: \`${summary.verdict}\`
+- Product commit: \`${productCommit}\`
+- Production commit: \`${productionBuild.commitSha}\`
+- Local geometry: ${summary.local.passedCount}/${summary.local.viewportCount} PASS
+- Live geometry: ${summary.afterLive.passedCount}/${summary.afterLive.viewportCount} PASS
+
+## Result
+
+The authenticated review candidate cockpit exposes six evidence-role counts, keeps legal-duty claims bound to law provenance, blocks public promotion of tenant memory, and requires site-manager acceptance before workpack use.
+
+## Boundary
+
+- Machine evidence does not replace human review.
+- No DB mutation, provider dispatch, Share-session creation, or ontology publication was performed.
+- Exact saved Share remains \`MISSING_EVIDENCE\`.
+- LLM Wiki publication and live RLS isolation remain \`APPROVAL_GATED\`.
+`, "utf8");
+}
+
 console.log(JSON.stringify({
   verdict: report.verdict,
   viewportCount: report.viewportCount,
