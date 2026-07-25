@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-25T02:11:32.210Z",
-  "head": "ac7878d370f5d2e623029b7f968d5520003ceb1d",
+  "generatedAt": "2026-07-25T02:34:51.073Z",
+  "head": "e7d8f6cafa13525a6a80f4f662f8136079cf2e7c",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "a9ca3cbe87efd753bb937620e4cd56113f66e1b3",
+    "commitSha": "b174dbc3c57c5f94d861397f3daa13d887735a7b",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-iv342vjmo-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-1brf9b86m-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -183,7 +183,7 @@
       "id": "kosha_exact_promotion_review_gate",
       "state": "approval_gated",
       "artifact": "evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\report.json",
-      "detail": "Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Official PDF audit evaluation\\kosha-exact-official-pdf-audit-2026-07-25\\report.json re-downloaded and machine-verified all 8 PDF/body pairs while preserving lifecycle, human-review, and promotion boundaries. Official lifecycle audit evaluation\\kosha-exact-official-lifecycle-audit-2026-07-25\\report.json reconciles all 8 packet versions against current and retired inventories with 8 exact official-current titles; corpus source titles remain separately preserved for provenance. Reviewer-support audit evaluation\\kosha-exact-promotion-reviewer-support-2026-07-25\\report.json records bounded excerpts for 8/8 candidates and 24/24 semantic groups without completing human review or creating a registry artifact. Contract audit evaluation\\kosha-exact-promotion-review-contract-audit-2026-07-23\\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval."
+      "detail": "Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Official PDF audit evaluation\\kosha-exact-official-pdf-audit-2026-07-25\\report.json re-downloaded and machine-verified all 8 PDF/body pairs while preserving lifecycle, human-review, and promotion boundaries. Official lifecycle audit evaluation\\kosha-exact-official-lifecycle-audit-2026-07-25\\report.json reconciles all 8 packet versions against current and retired inventories with 8 exact official-current titles; corpus source titles remain separately preserved for provenance. Reviewer-support audit evaluation\\kosha-exact-promotion-reviewer-support-2026-07-25\\report.json records bounded excerpts for 8/8 candidates and 24/24 semantic groups without completing human review or creating a registry artifact. Reviewer cockpit evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\report.json presents 8 candidates, 24 bounded excerpts, and all 64 required human inputs in a viewport-contained no-mutation UI; export remains locked until complete and promotion remains separate approval. Browser geometry evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\browser-report.json preserves one visible candidate, 40 checks, and three bounded desktop/mobile cases. Contract audit evaluation\\kosha-exact-promotion-review-contract-audit-2026-07-23\\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval."
     }
   ],
   "mobileP0": {
@@ -497,9 +497,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "ac7878d370f5d2e623029b7f968d5520003ceb1d",
+      "sourceCommit": "e7d8f6cafa13525a6a80f4f662f8136079cf2e7c",
       "sourceStatus": "exact",
-      "productionCommit": "ac7878d370f5d2e623029b7f968d5520003ceb1d",
+      "productionCommit": "e7d8f6cafa13525a6a80f4f662f8136079cf2e7c",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -604,7 +604,7 @@
       "sourceCommit": "719a73792d5a3fdc9f4cfea55b92f9282c08dbf9",
       "sourceStatus": "ancestor",
       "productionCommit": "a9ca3cbe87efd753bb937620e4cd56113f66e1b3",
-      "productionStatus": "matches_live_source_mismatch"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "live_document_secondary_grounding",

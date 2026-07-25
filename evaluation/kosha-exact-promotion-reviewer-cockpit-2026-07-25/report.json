@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "safeclaw-kosha-exact-promotion-reviewer-cockpit/v1",
+  "verdict": "PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY",
+  "checkedAt": "2026-07-25T02:34:43.455Z",
+  "sourceHead": "e7d8f6cafa13525a6a80f4f662f8136079cf2e7c",
+  "candidateCount": 8,
+  "semanticGroupCount": 24,
+  "checklistInputCount": 64,
+  "initialCompletedInputCount": 0,
+  "exportInitiallyDisabled": true,
+  "outputHtml": "evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\index.html",
+  "boundary": {
+    "localReviewOnly": true,
+    "dbMutationPerformed": false,
+    "exactRegistryWriteArtifactCreated": false,
+    "exactPromotionPerformed": false,
+    "machineEvidenceReplacesHumanReview": false,
+    "separatePromotionApprovalRequired": true
+  }
+}

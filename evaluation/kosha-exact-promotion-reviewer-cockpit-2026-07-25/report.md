@@ -1,0 +1,14 @@
+# KOSHA Exact Promotion Reviewer Cockpit
+
+Verdict: `PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY`
+
+- Candidates: 8
+- Machine semantic groups: 24
+- Required human inputs: 64
+- Initial completed inputs: 0
+- Export initially disabled: true
+- HTML: `evaluation\kosha-exact-promotion-reviewer-cockpit-2026-07-25\index.html`
+
+## Boundary
+
+This cockpit stores draft input only in the operator browser and exports a local review JSON after all 64 required inputs are complete. It performs no DB, provider, Share, embedding, vector, publication, or exact-registry mutation. Completed human review remains separate from exact-trust promotion approval.

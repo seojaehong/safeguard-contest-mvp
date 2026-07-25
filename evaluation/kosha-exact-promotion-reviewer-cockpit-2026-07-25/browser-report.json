@@ -1,0 +1,253 @@
+{
+  "schemaVersion": "safeclaw-kosha-exact-promotion-reviewer-cockpit-browser/v1",
+  "verdict": "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY",
+  "checkedAt": "2026-07-25T02:34:45.086Z",
+  "sourceHead": "e7d8f6cafa13525a6a80f4f662f8136079cf2e7c",
+  "cases": 3,
+  "passedCases": 3,
+  "desktopPass": true,
+  "mobilePass": true,
+  "results": [
+    {
+      "name": "desktop-1440x723",
+      "viewport": {
+        "width": 1440,
+        "height": 723
+      },
+      "body": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "scrollHeight": 723,
+        "clientHeight": 723
+      },
+      "workspace": {
+        "x": 0,
+        "y": 75,
+        "width": 1440,
+        "height": 587,
+        "top": 75,
+        "right": 1440,
+        "bottom": 662,
+        "left": 0
+      },
+      "candidateRail": {
+        "x": 0,
+        "y": 75,
+        "width": 230,
+        "height": 587,
+        "top": 75,
+        "right": 230,
+        "bottom": 662,
+        "left": 0
+      },
+      "candidatePanel": {
+        "x": 230,
+        "y": 75,
+        "width": 1210,
+        "height": 587,
+        "top": 75,
+        "right": 1440,
+        "bottom": 662,
+        "left": 230
+      },
+      "evidencePane": {
+        "x": 230,
+        "y": 75,
+        "width": 850,
+        "height": 587,
+        "top": 75,
+        "right": 1080,
+        "bottom": 662,
+        "left": 230
+      },
+      "reviewPane": {
+        "x": 1080,
+        "y": 75,
+        "width": 360,
+        "height": 587,
+        "top": 75,
+        "right": 1440,
+        "bottom": 662,
+        "left": 1080
+      },
+      "candidatePanelColumns": "850px 360px",
+      "mobileModeDisplay": "none",
+      "evidenceDisplay": "block",
+      "reviewDisplay": "block",
+      "visibleCandidatePanelCount": 1,
+      "candidateButtonCount": 8,
+      "requiredCheckCount": 40,
+      "semanticGroupCount": 24,
+      "exportInitiallyDisabled": true,
+      "firstEvidenceBottom": 420.28125,
+      "firstCheckBottom": 224.59375,
+      "horizontalOverflow": false,
+      "screenshot": "evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\desktop-1440x723.png"
+    },
+    {
+      "name": "mobile-evidence-390x723",
+      "viewport": {
+        "width": 390,
+        "height": 723
+      },
+      "body": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "scrollHeight": 723,
+        "clientHeight": 723
+      },
+      "workspace": {
+        "x": 0,
+        "y": 68,
+        "width": 390,
+        "height": 603,
+        "top": 68,
+        "right": 390,
+        "bottom": 671,
+        "left": 0
+      },
+      "candidateRail": {
+        "x": 0,
+        "y": 68,
+        "width": 390,
+        "height": 72,
+        "top": 68,
+        "right": 390,
+        "bottom": 140,
+        "left": 0
+      },
+      "candidatePanel": {
+        "x": 0,
+        "y": 140,
+        "width": 390,
+        "height": 531,
+        "top": 140,
+        "right": 390,
+        "bottom": 671,
+        "left": 0
+      },
+      "evidencePane": {
+        "x": 0,
+        "y": 195,
+        "width": 390,
+        "height": 476,
+        "top": 195,
+        "right": 390,
+        "bottom": 671,
+        "left": 0
+      },
+      "reviewPane": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "candidatePanelColumns": "minmax(0px, 1fr) 360px",
+      "mobileModeDisplay": "grid",
+      "evidenceDisplay": "block",
+      "reviewDisplay": "none",
+      "visibleCandidatePanelCount": 1,
+      "candidateButtonCount": 8,
+      "requiredCheckCount": 40,
+      "semanticGroupCount": 24,
+      "exportInitiallyDisabled": true,
+      "firstEvidenceBottom": 703.5625,
+      "firstCheckBottom": 0,
+      "horizontalOverflow": false,
+      "screenshot": "evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\mobile-evidence-390x723.png"
+    },
+    {
+      "name": "mobile-review-390x723",
+      "viewport": {
+        "width": 390,
+        "height": 723
+      },
+      "body": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "scrollHeight": 723,
+        "clientHeight": 723
+      },
+      "workspace": {
+        "x": 0,
+        "y": 68,
+        "width": 390,
+        "height": 603,
+        "top": 68,
+        "right": 390,
+        "bottom": 671,
+        "left": 0
+      },
+      "candidateRail": {
+        "x": 0,
+        "y": 68,
+        "width": 390,
+        "height": 72,
+        "top": 68,
+        "right": 390,
+        "bottom": 140,
+        "left": 0
+      },
+      "candidatePanel": {
+        "x": 0,
+        "y": 140,
+        "width": 390,
+        "height": 531,
+        "top": 140,
+        "right": 390,
+        "bottom": 671,
+        "left": 0
+      },
+      "evidencePane": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "reviewPane": {
+        "x": 0,
+        "y": 195,
+        "width": 390,
+        "height": 476,
+        "top": 195,
+        "right": 390,
+        "bottom": 671,
+        "left": 0
+      },
+      "candidatePanelColumns": "minmax(0px, 1fr) 360px",
+      "mobileModeDisplay": "grid",
+      "evidenceDisplay": "none",
+      "reviewDisplay": "block",
+      "visibleCandidatePanelCount": 1,
+      "candidateButtonCount": 8,
+      "requiredCheckCount": 40,
+      "semanticGroupCount": 24,
+      "exportInitiallyDisabled": true,
+      "firstEvidenceBottom": 0,
+      "firstCheckBottom": 323.796875,
+      "horizontalOverflow": false,
+      "screenshot": "evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\mobile-review-390x723.png"
+    }
+  ],
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "exactTrustRegistryMutationPerformed": false,
+    "exactPromotionPerformed": false
+  },
+  "remainingBoundary": {
+    "humanReviewCompleted": false,
+    "separatePromotionApprovalRequired": true
+  }
+}

@@ -1,0 +1,763 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KOSHA exact promotion reviewer cockpit</title>
+  <style>
+    :root{color-scheme:light;--ink:#17211c;--muted:#637069;--line:#cbd4ce;--panel:#fff;--soft:#f1f5f2;--accent:#087f5b;--warn:#a75800}
+    *{box-sizing:border-box}body{margin:0;background:#e8eeea;color:var(--ink);font-family:"Segoe UI","Noto Sans KR",sans-serif;letter-spacing:0}
+    button,input{font:inherit}.shell{height:100dvh;min-height:0;overflow:hidden;display:grid;grid-template-rows:auto minmax(0,1fr) auto}.topbar{display:flex;align-items:center;gap:20px;padding:14px 20px;background:#14231c;color:#fff}
+    .topbar h1{font-size:18px;margin:0}.topbar p{margin:2px 0 0;color:#c7d5cd;font-size:13px}.metrics{margin-left:auto;display:flex;gap:16px;font-size:13px}.metrics strong{display:block;font-size:16px}
+    .workspace{display:grid;grid-template-columns:230px minmax(0,1fr);gap:0;min-height:0;height:auto}.candidate-rail{background:#f7faf8;border-right:1px solid var(--line);padding:12px;overflow:auto}
+    .rail-label{display:block;color:var(--muted);font-size:12px;font-weight:700;margin:4px 4px 10px}.candidate-list{display:grid;gap:6px}
+    .candidate-button{width:100%;border:1px solid transparent;background:transparent;text-align:left;padding:9px 10px;display:grid;grid-template-columns:1fr auto;gap:2px 8px;color:var(--ink);cursor:pointer;border-radius:6px}
+    .candidate-button:hover{background:#eaf1ed}.candidate-button[aria-pressed="true"]{background:#dcece4;border-color:#9ec5b2}.candidate-button span{font-size:12px;color:var(--muted)}.candidate-button strong{grid-column:1;font-size:13px}.candidate-button small{grid-column:2;grid-row:1/3;align-self:center;color:var(--accent);font-weight:700}
+    .content{min-width:0;min-height:0}.candidate-panel{display:grid;grid-template-columns:minmax(0,1fr) 360px;height:100%;min-height:0}.candidate-panel[hidden]{display:none}.evidence-pane,.review-pane{overflow:auto;padding:18px 20px}.review-pane{background:#f8faf9;border-left:1px solid var(--line)}
+    .candidate-heading{display:flex;gap:16px;align-items:flex-start}.candidate-heading div{min-width:0}.candidate-heading span{color:var(--accent);font-size:12px;font-weight:700}.candidate-heading h1{font-size:20px;line-height:1.35;margin:4px 0 0}.candidate-heading a{margin-left:auto;white-space:nowrap;color:#075e45;font-weight:700;font-size:13px}
+    .identity-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);margin:16px 0 12px}.identity-grid div{padding:9px 10px;border-right:1px solid var(--line)}.identity-grid div:last-child{border:0}dt{font-size:11px;color:var(--muted)}dd{margin:3px 0 0;font-size:13px;font-weight:700}
+    .rationale{border-left:3px solid var(--accent);padding:8px 12px;background:var(--soft)}.rationale p{margin:4px 0 0;font-size:13px}.evidence-stack{display:grid;gap:8px;margin-top:12px}.evidence-group{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:10px 12px}
+    .evidence-group header{display:flex;gap:10px;align-items:center;font-size:12px}.evidence-group header span{color:var(--muted)}.evidence-group p{font-size:13px;line-height:1.55;margin:8px 0 0;overflow-wrap:anywhere}.hash-details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.hash-details summary{cursor:pointer;font-size:13px;font-weight:700}.hash-details dl{display:grid;gap:8px}.hash-details dd{font-family:Consolas,monospace;font-size:11px;overflow-wrap:anywhere}
+    .review-pane>header{display:flex;justify-content:space-between;align-items:center}.review-pane>header span{font-size:12px;color:var(--muted);font-weight:700}.review-pane>header strong{font-size:13px;color:var(--warn)}.boundary-note{font-size:12px;color:#704100;background:#fff4dd;border:1px solid #e3bf75;padding:8px 10px;border-radius:6px}
+    .check-stack{display:grid;gap:6px}.check-row,.human-confirm{display:grid;grid-template-columns:18px 1fr;gap:8px;align-items:start;border:1px solid var(--line);background:#fff;padding:9px;border-radius:6px;font-size:12px;line-height:1.4}.check-row input,.human-confirm input{margin:2px 0 0;accent-color:var(--accent)}
+    .field-label{display:grid;gap:5px;margin-top:10px;font-size:12px;font-weight:700}.field-label input{width:100%;border:1px solid #aebbb3;background:#fff;padding:9px;border-radius:4px}.human-confirm{margin-top:10px;border-color:#9ec5b2;background:#eef8f2}
+    .footer-actions{display:flex;justify-content:flex-end;gap:8px;padding:8px 12px;background:#e8eeea;border-top:1px solid var(--line)}.footer-actions button{border:1px solid #295d48;padding:9px 12px;border-radius:5px;background:#fff;color:#184b38;font-weight:700;cursor:pointer}.footer-actions .primary{background:#087f5b;color:#fff;white-space:nowrap}.footer-actions button:disabled{cursor:not-allowed;opacity:.45}
+    .mobile-mode{display:none}.status-live{color:#8ce0bc}.complete .candidate-button small{color:#087f5b}
+    @media(max-width:767px){.topbar{align-items:flex-start;padding:12px;height:68px}.metrics{display:none}.workspace{display:flex;flex-direction:column;height:auto;overflow:hidden}.candidate-rail{flex:none;border-right:0;border-bottom:1px solid var(--line);padding:8px;overflow-x:auto}.rail-label{display:none}.candidate-list{display:flex;width:max-content}.candidate-button{width:132px}.content{flex:1;min-height:0}.candidate-panel{display:flex;flex-direction:column;height:100%;min-height:0}.candidate-panel[hidden]{display:none}.mobile-mode{display:grid;grid-template-columns:1fr 1fr;flex:none;border-bottom:1px solid var(--line);background:#f7faf8;padding:6px 8px}.mobile-mode button{border:0;border-bottom:2px solid transparent;background:transparent;padding:8px;color:var(--muted);font-weight:700}.mobile-mode button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}.candidate-panel[data-mobile-view="evidence"] .review-pane,.candidate-panel[data-mobile-view="review"] .evidence-pane{display:none}.evidence-pane,.review-pane{flex:1;min-height:0;overflow:auto;padding:14px 12px}.review-pane{border-left:0}.identity-grid{grid-template-columns:repeat(2,1fr)}.identity-grid div:nth-child(2){border-right:0}.candidate-heading{display:block}.candidate-heading a{display:inline-block;margin-top:8px}.footer-actions{padding:7px 8px}.footer-actions button{padding:8px 9px;font-size:13px}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div><h1>KOSHA exact promotion 검토 작업대</h1><p>기계 검증을 읽고 사람이 직접 판단하는 로컬 전용 cockpit</p></div>
+      <div class="metrics"><div><strong>8</strong>후보</div><div><strong>24</strong>근거 묶음</div><div><strong>64</strong>필수 입력</div><div><strong class="status-live">0</strong>외부 변경</div></div>
+    </header>
+    <div class="workspace">
+      <aside class="candidate-rail"><span class="rail-label">검토 후보</span><div class="candidate-list">
+    <button class="candidate-button" type="button" data-candidate-button="0" aria-pressed="true">
+      <span>D-C-10</span>
+      <strong>D-C-10-2026</strong>
+      <small data-candidate-progress="0">0/8</small>
+    </button>
+    <button class="candidate-button" type="button" data-candidate-button="1" aria-pressed="false">
+      <span>D-C-11</span>
+      <strong>D-C-11-2026</strong>
+      <small data-candidate-progress="1">0/8</small>
+    </button>
+    <button class="candidate-button" type="button" data-candidate-button="2" aria-pressed="false">
+      <span>A-G-1</span>
+      <strong>A-G-1-2025</strong>
+      <small data-candidate-progress="2">0/8</small>
+    </button>
+    <button class="candidate-button" type="button" data-candidate-button="3" aria-pressed="false">
+      <span>A-G-15</span>
+      <strong>A-G-15-2026</strong>
+      <small data-candidate-progress="3">0/8</small>
+    </button>
+    <button class="candidate-button" type="button" data-candidate-button="4" aria-pressed="false">
+      <span>B-E-11</span>
+      <strong>B-E-11-2026</strong>
+      <small data-candidate-progress="4">0/8</small>
+    </button>
+    <button class="candidate-button" type="button" data-candidate-button="5" aria-pressed="false">
+      <span>B-E-9</span>
+      <strong>B-E-9-2026</strong>
+      <small data-candidate-progress="5">0/8</small>
+    </button>
+    <button class="candidate-button" type="button" data-candidate-button="6" aria-pressed="false">
+      <span>D-C-4</span>
+      <strong>D-C-4-2025</strong>
+      <small data-candidate-progress="6">0/8</small>
+    </button>
+    <button class="candidate-button" type="button" data-candidate-button="7" aria-pressed="false">
+      <span>E-G-4</span>
+      <strong>E-G-4-2025</strong>
+      <small data-candidate-progress="7">0/8</small>
+    </button></div></aside>
+      <div class="content">
+      <section class="candidate-panel" data-candidate-panel="0" data-mobile-view="evidence" >
+        <nav class="mobile-mode" aria-label="D-C-10 검토 보기">
+          <button type="button" data-mobile-mode="0:evidence" aria-pressed="true">근거</button>
+          <button type="button" data-mobile-mode="0:review" aria-pressed="false">체크리스트</button>
+        </nav>
+        <main class="evidence-pane">
+          <header class="candidate-heading">
+            <div><span>건설안전분야</span><h1>D-C-10-2026 건설장비(이동식크레인, 항타기 및 항발기, 타워크레인) 작업계획서 작성에 관한 기술지원규정</h1></div>
+            <a href="https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914313984348485/1" target="_blank" rel="noreferrer">공식 PDF 열기</a>
+          </header>
+          <dl class="identity-grid">
+            <div><dt>현재 버전</dt><dd>D-C-10-2026</dd></div>
+            <div><dt>공식 게시일</dt><dd>2026-01-30</dd></div>
+            <div><dt>PDF 검증</dt><dd>SHA 일치</dd></div>
+            <div><dt>수명주기</dt><dd>개정</dd></div>
+          </dl>
+          <section class="rationale"><strong>선정 이유</strong><p>이동식크레인·항타기·항발기·타워크레인 작업계획서 시나리오를 보강합니다.</p></section>
+          <section class="evidence-stack" aria-label="기계 보조 근거">
+      <article class="evidence-group">
+        <header><span>근거 1</span><strong>이동식크레인 · 항타기 · 항발기 · 타워크레인</strong></header>
+        <p>KOSHAGUIDED–C–10-2026건설장비(이동식크레인,항타기및항발기,타워크레인)작업계획서작성에관한기술지원규정 2026.1. 한국산업안전보건공단기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데...</p>
+      </article>
+      <article class="evidence-group">
+        <header><span>근거 2</span><strong>작업계획서</strong></header>
+        <p>KOSHAGUIDED–C–10-2026건설장비(이동식크레인,항타기및항발기,타워크레인)작업계획서작성에관한기술지원규정 2026.1. 한국산업안전보건공단기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준향상에필요...</p>
+      </article>
+      <article class="evidence-group">
+        <header><span>근거 3</span><strong>신호수 · 작업반경 · 줄걸이 · 전도</strong></header>
+        <p>...(다)협력업체소장,협력업체명(이동식크레인,타워크레인항타기·항발기사용업체명)(라)협력업체주소,협력업체연락처(마)하역작업주체및안전교육여부(바)작업지휘자의확인사항(사)신호수의확인사항(3)협력업체(가)주소,대표전화(나)운전원이름,면허,연락처,교육이수여부(다)신호수이름연락처,교육이수여부6.2작업기준및방법(1)이동식크레인의중량물및줄걸이방...</p>
+      </article></section>
+          <details class="hash-details">
+            <summary>파일·본문 식별자</summary>
+            <dl>
+              <div><dt>공식 파일 ID</dt><dd>CTC2026012914313984348485</dd></div>
+              <div><dt>본문 SHA-256</dt><dd>1068fed72e7bbc449c48183f5c6278287eef51b292100a6cc4f308972cb36777</dd></div>
+              <div><dt>PDF SHA-256</dt><dd>085961d6b29640b6e89592c96495b1df01b086b582f5aaf4bf941082e8f594dd</dd></div>
+            </dl>
+          </details>
+        </main>
+        <aside class="review-pane" aria-label="D-C-10 사람 검토">
+          <header><span>사람 검토</span><strong data-review-status="0">8개 입력 필요</strong></header>
+          <p class="boundary-note">기계 근거는 검토를 돕지만 판단을 대신하지 않습니다.</p>
+          <div class="check-stack">
+      <label class="check-row">
+        <input type="checkbox" data-check="0:0">
+        <span title="official URL opens the expected KOSHA file for the selected stable key">공식 URL이 선택한 KOSHA 식별자의 파일을 여는지 확인</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="0:1">
+        <span title="official file id, version, and publication date match metadata and body-corpus provenance">파일 ID·버전·게시일이 메타데이터와 본문 출처에 일치</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="0:2">
+        <span title="body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence">본문·PDF SHA-256이 변경 불가 취득 증거와 일치</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="0:3">
+        <span title="operator confirms lifecycle/current status and excludes stale superseded versions">현재판 여부를 확인하고 폐기·대체 버전을 제외</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="0:4">
+        <span title="human confirmation is recorded before any exact-kosha registry JSON is created">exact-kosha registry 생성 전에 사람 확인을 기록</span>
+      </label></div>
+          <label class="field-label">검토자<input type="text" maxlength="120" autocomplete="name" data-reviewer="0"></label>
+          <label class="field-label">검토 시각<input type="datetime-local" data-reviewed-at="0"></label>
+          <label class="human-confirm">
+            <input type="checkbox" data-human-confirm="0">
+            <span>이 후보의 전체 근거와 현재성을 직접 확인했습니다.</span>
+          </label>
+        </aside>
+      </section>
+      <section class="candidate-panel" data-candidate-panel="1" data-mobile-view="evidence" hidden>
+        <nav class="mobile-mode" aria-label="D-C-11 검토 보기">
+          <button type="button" data-mobile-mode="1:evidence" aria-pressed="true">근거</button>
+          <button type="button" data-mobile-mode="1:review" aria-pressed="false">체크리스트</button>
+        </nav>
+        <main class="evidence-pane">
+          <header class="candidate-heading">
+            <div><span>건설안전분야</span><h1>D-C-11-2026 굴착 및 토공 안전작업에 관한 기술지원규정</h1></div>
+            <a href="https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914341697414755/1" target="_blank" rel="noreferrer">공식 PDF 열기</a>
+          </header>
+          <dl class="identity-grid">
+            <div><dt>현재 버전</dt><dd>D-C-11-2026</dd></div>
+            <div><dt>공식 게시일</dt><dd>2026-01-30</dd></div>
+            <div><dt>PDF 검증</dt><dd>SHA 일치</dd></div>
+            <div><dt>수명주기</dt><dd>개정</dd></div>
+          </dl>
+          <section class="rationale"><strong>선정 이유</strong><p>굴착·토공 작업에서 반복되는 건설 위험 입력을 보강합니다.</p></section>
+          <section class="evidence-stack" aria-label="기계 보조 근거">
+      <article class="evidence-group">
+        <header><span>근거 1</span><strong>굴착 · 토공</strong></header>
+        <p>KOSHAGUIDED–C–11-2026굴착및토공안전작업에관한기술지원규정 2026.1. 한국산업안전보건공단기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준...</p>
+      </article>
+      <article class="evidence-group">
+        <header><span>근거 2</span><strong>흙막이 · 굴착면 · 지보공</strong></header>
+        <p>...령(국토해양부)-건설공사의안전(건설업노동재해방지협회)-건설공사안전점검편람(한국건설기술연구원)-실무규정(Codeofpractice):굴착공사(서호주산업안전위원회)-흙막이지보공안전교육(산업안전교육원)-고용노동부고시2015-57호굴착공사표준안전작업지침-실무규정(Codeofpractice):굴착공사(서호주산업안전위원회)-OSHA§19...</p>
+      </article>
+      <article class="evidence-group">
+        <header><span>근거 3</span><strong>매설물 · 붕괴 · 토사</strong></header>
+        <p>...자:(사)고경력과학기술연우총연합회◦제.개정경과-2025년12월건설안전분야표준제정위원회심의(개정)-2026년1월표준제정위원회본위원회심의(개정) ◦관련규격및자료-지하매설물안전관리요령(국토해양부)-건설공사의안전(건설업노동재해방지협회)-건설공사안전점검편람(한국건설기술연구원)-실무규정(Codeofpractice):굴착공사(서호주산업안전...</p>
+      </article></section>
+          <details class="hash-details">
+            <summary>파일·본문 식별자</summary>
+            <dl>
+              <div><dt>공식 파일 ID</dt><dd>CTC2026012914341697414755</dd></div>
+              <div><dt>본문 SHA-256</dt><dd>b97b0cf1ac5e43bf98c412e58896f538232402167cfeedc18806ed1eead1245c</dd></div>
+              <div><dt>PDF SHA-256</dt><dd>266aca072d42bcc5c869218a84ecd189236e6cf0d426bd4a66d06010c0f2e144</dd></div>
+            </dl>
+          </details>
+        </main>
+        <aside class="review-pane" aria-label="D-C-11 사람 검토">
+          <header><span>사람 검토</span><strong data-review-status="1">8개 입력 필요</strong></header>
+          <p class="boundary-note">기계 근거는 검토를 돕지만 판단을 대신하지 않습니다.</p>
+          <div class="check-stack">
+      <label class="check-row">
+        <input type="checkbox" data-check="1:0">
+        <span title="official URL opens the expected KOSHA file for the selected stable key">공식 URL이 선택한 KOSHA 식별자의 파일을 여는지 확인</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="1:1">
+        <span title="official file id, version, and publication date match metadata and body-corpus provenance">파일 ID·버전·게시일이 메타데이터와 본문 출처에 일치</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="1:2">
+        <span title="body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence">본문·PDF SHA-256이 변경 불가 취득 증거와 일치</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="1:3">
+        <span title="operator confirms lifecycle/current status and excludes stale superseded versions">현재판 여부를 확인하고 폐기·대체 버전을 제외</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="1:4">
+        <span title="human confirmation is recorded before any exact-kosha registry JSON is created">exact-kosha registry 생성 전에 사람 확인을 기록</span>
+      </label></div>
+          <label class="field-label">검토자<input type="text" maxlength="120" autocomplete="name" data-reviewer="1"></label>
+          <label class="field-label">검토 시각<input type="datetime-local" data-reviewed-at="1"></label>
+          <label class="human-confirm">
+            <input type="checkbox" data-human-confirm="1">
+            <span>이 후보의 전체 근거와 현재성을 직접 확인했습니다.</span>
+          </label>
+        </aside>
+      </section>
+      <section class="candidate-panel" data-candidate-panel="2" data-mobile-view="evidence" hidden>
+        <nav class="mobile-mode" aria-label="A-G-1 검토 보기">
+          <button type="button" data-mobile-mode="2:evidence" aria-pressed="true">근거</button>
+          <button type="button" data-mobile-mode="2:review" aria-pressed="false">체크리스트</button>
+        </nav>
+        <main class="evidence-pane">
+          <header class="candidate-heading">
+            <div><span>산업안전일반분야</span><h1>A-G-1-2025 추락방호망 설치 기술지원규정(수직형 추락방망 설치 기술지원규정 포함)</h1></div>
+            <a href="https://portal.kosha.or.kr/openapi/v1/file/down/FL00021379766/3" target="_blank" rel="noreferrer">공식 PDF 열기</a>
+          </header>
+          <dl class="identity-grid">
+            <div><dt>현재 버전</dt><dd>A-G-1-2025</dd></div>
+            <div><dt>공식 게시일</dt><dd>2025-03-26</dd></div>
+            <div><dt>PDF 검증</dt><dd>SHA 일치</dd></div>
+            <div><dt>수명주기</dt><dd>개정</dd></div>
+          </dl>
+          <section class="rationale"><strong>선정 이유</strong><p>비계·외벽도장 exact 근거에 추락방호망 통제를 보완합니다.</p></section>
+          <section class="evidence-stack" aria-label="기계 보조 근거">
+      <article class="evidence-group">
+        <header><span>근거 1</span><strong>추락방호망 · 수직형추락방망</strong></header>
+        <p>KOSHAGUIDEA-G–1-2025추락방호망설치기술지원규정(수직형추락방망설치기술지원규정포함) 2025.3. 한국산업안전보건공단 기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하...</p>
+      </article>
+      <article class="evidence-group">
+        <header><span>근거 2</span><strong>설치 · 테두리로프 · 인장</strong></header>
+        <p>KOSHAGUIDEA-G–1-2025추락방호망설치기술지원규정(수직형추락방망설치기술지원규정포함) 2025.3. 한국산업안전보건공단 기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나...</p>
+      </article>
+      <article class="evidence-group">
+        <header><span>근거 3</span><strong>추락 · 낙하</strong></header>
+        <p>KOSHAGUIDEA-G–1-2025추락방호망설치기술지원규정(수직형추락방망설치기술지원규정포함) 2025.3. 한국산업안전보건공단 기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데...</p>
+      </article></section>
+          <details class="hash-details">
+            <summary>파일·본문 식별자</summary>
+            <dl>
+              <div><dt>공식 파일 ID</dt><dd>FL00021379766</dd></div>
+              <div><dt>본문 SHA-256</dt><dd>55fa0e40cfd6915873141bd81efe901050f4d221fa0f2e670d893fc12feb1763</dd></div>
+              <div><dt>PDF SHA-256</dt><dd>adac02929d30d8cae251bc1fd57cacc3df6579d826bf3de85bcfdaf3be1dcd5f</dd></div>
+            </dl>
+          </details>
+        </main>
+        <aside class="review-pane" aria-label="A-G-1 사람 검토">
+          <header><span>사람 검토</span><strong data-review-status="2">8개 입력 필요</strong></header>
+          <p class="boundary-note">기계 근거는 검토를 돕지만 판단을 대신하지 않습니다.</p>
+          <div class="check-stack">
+      <label class="check-row">
+        <input type="checkbox" data-check="2:0">
+        <span title="official URL opens the expected KOSHA file for the selected stable key">공식 URL이 선택한 KOSHA 식별자의 파일을 여는지 확인</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="2:1">
+        <span title="official file id, version, and publication date match metadata and body-corpus provenance">파일 ID·버전·게시일이 메타데이터와 본문 출처에 일치</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="2:2">
+        <span title="body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence">본문·PDF SHA-256이 변경 불가 취득 증거와 일치</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="2:3">
+        <span title="operator confirms lifecycle/current status and excludes stale superseded versions">현재판 여부를 확인하고 폐기·대체 버전을 제외</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="2:4">
+        <span title="human confirmation is recorded before any exact-kosha registry JSON is created">exact-kosha registry 생성 전에 사람 확인을 기록</span>
+      </label></div>
+          <label class="field-label">검토자<input type="text" maxlength="120" autocomplete="name" data-reviewer="2"></label>
+          <label class="field-label">검토 시각<input type="datetime-local" data-reviewed-at="2"></label>
+          <label class="human-confirm">
+            <input type="checkbox" data-human-confirm="2">
+            <span>이 후보의 전체 근거와 현재성을 직접 확인했습니다.</span>
+          </label>
+        </aside>
+      </section>
+      <section class="candidate-panel" data-candidate-panel="3" data-mobile-view="evidence" hidden>
+        <nav class="mobile-mode" aria-label="A-G-15 검토 보기">
+          <button type="button" data-mobile-mode="3:evidence" aria-pressed="true">근거</button>
+          <button type="button" data-mobile-mode="3:review" aria-pressed="false">체크리스트</button>
+        </nav>
+        <main class="evidence-pane">
+          <header class="candidate-heading">
+            <div><span>산업안전일반분야</span><h1>A-G-15-2026 중소규모 사업장 비상조치계획 작성에 관한 기술지원규정</h1></div>
+            <a href="https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012909391077692640/2" target="_blank" rel="noreferrer">공식 PDF 열기</a>
+          </header>
+          <dl class="identity-grid">
+            <div><dt>현재 버전</dt><dd>A-G-15-2026</dd></div>
+            <div><dt>공식 게시일</dt><dd>2026-01-30</dd></div>
+            <div><dt>PDF 검증</dt><dd>SHA 일치</dd></div>
+            <div><dt>수명주기</dt><dd>개정</dd></div>
+          </dl>
+          <section class="rationale"><strong>선정 이유</strong><p>작업중지·보고·현장보존을 포함한 비상조치계획 흐름을 보강합니다.</p></section>
+          <section class="evidence-stack" aria-label="기계 보조 근거">
+      <article class="evidence-group">
+        <header><span>근거 1</span><strong>비상조치계획</strong></header>
+        <p>...안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준향상에필요한기술적권고규정임 KOSHAGUIDEA–G–15–2026 중소규모사업장비상조치계획작성에관한기술지원규정 2026.1. 한국산업안전보건공단 기술지원규정의개요 ◦개정자:(사)고경력과학기술연우총연합회 ◦제.개정경과-2025년11월산업안전일반분야표준제...</p>
+      </article>
+      <article class="evidence-group">
+        <header><span>근거 2</span><strong>대피 · 비상연락 · 응급</strong></header>
+        <p>...···················································································56.2근로자대피··························································································...</p>
+      </article>
+      <article class="evidence-group">
+        <header><span>근거 3</span><strong>화재 · 폭발 · 누출</strong></header>
+        <p>...업장안전보건관리체계구축지원가이드.산업안전보건공단.2023◦관련법규.규칙.고시등-산업안전보건법시행령제44조(공정안전보고서의내용)-산업안전보건기준에관한규칙제241조(화재위험작업시의준수사항)◦기술지원규정의적용및문의-이기술지원규정에대한의견또는문의는한국산업안전보건공단홈페이지(www.kosha.or.kr)의기술지원규정(KOSHAGUID...</p>
+      </article></section>
+          <details class="hash-details">
+            <summary>파일·본문 식별자</summary>
+            <dl>
+              <div><dt>공식 파일 ID</dt><dd>CTC2026012909391077692640</dd></div>
+              <div><dt>본문 SHA-256</dt><dd>53b410850420b802021db72975a71647e0eecfc56d94047f2bbe524c1d405f54</dd></div>
+              <div><dt>PDF SHA-256</dt><dd>71715efb34bf516fecd43414c8d547bb2ccbcbfe1fb256de8ac5804499c66478</dd></div>
+            </dl>
+          </details>
+        </main>
+        <aside class="review-pane" aria-label="A-G-15 사람 검토">
+          <header><span>사람 검토</span><strong data-review-status="3">8개 입력 필요</strong></header>
+          <p class="boundary-note">기계 근거는 검토를 돕지만 판단을 대신하지 않습니다.</p>
+          <div class="check-stack">
+      <label class="check-row">
+        <input type="checkbox" data-check="3:0">
+        <span title="official URL opens the expected KOSHA file for the selected stable key">공식 URL이 선택한 KOSHA 식별자의 파일을 여는지 확인</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="3:1">
+        <span title="official file id, version, and publication date match metadata and body-corpus provenance">파일 ID·버전·게시일이 메타데이터와 본문 출처에 일치</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="3:2">
+        <span title="body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence">본문·PDF SHA-256이 변경 불가 취득 증거와 일치</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="3:3">
+        <span title="operator confirms lifecycle/current status and excludes stale superseded versions">현재판 여부를 확인하고 폐기·대체 버전을 제외</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="3:4">
+        <span title="human confirmation is recorded before any exact-kosha registry JSON is created">exact-kosha registry 생성 전에 사람 확인을 기록</span>
+      </label></div>
+          <label class="field-label">검토자<input type="text" maxlength="120" autocomplete="name" data-reviewer="3"></label>
+          <label class="field-label">검토 시각<input type="datetime-local" data-reviewed-at="3"></label>
+          <label class="human-confirm">
+            <input type="checkbox" data-human-confirm="3">
+            <span>이 후보의 전체 근거와 현재성을 직접 확인했습니다.</span>
+          </label>
+        </aside>
+      </section>
+      <section class="candidate-panel" data-candidate-panel="4" data-mobile-view="evidence" hidden>
+        <nav class="mobile-mode" aria-label="B-E-11 검토 보기">
+          <button type="button" data-mobile-mode="4:evidence" aria-pressed="true">근거</button>
+          <button type="button" data-mobile-mode="4:review" aria-pressed="false">체크리스트</button>
+        </nav>
+        <main class="evidence-pane">
+          <header class="candidate-heading">
+            <div><span>전기안전분야</span><h1>B-E-11-2026 충전전로 및 그 인근에서의 전기작업에 관한 기술지원규정</h1></div>
+            <a href="https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012913300640598489/1" target="_blank" rel="noreferrer">공식 PDF 열기</a>
+          </header>
+          <dl class="identity-grid">
+            <div><dt>현재 버전</dt><dd>B-E-11-2026</dd></div>
+            <div><dt>공식 게시일</dt><dd>2026-01-30</dd></div>
+            <div><dt>PDF 검증</dt><dd>SHA 일치</dd></div>
+            <div><dt>수명주기</dt><dd>개정</dd></div>
+          </dl>
+          <section class="rationale"><strong>선정 이유</strong><p>기존 정전 전기작업 exact 근거에 활선작업 통제를 보완합니다.</p></section>
+          <section class="evidence-stack" aria-label="기계 보조 근거">
+      <article class="evidence-group">
+        <header><span>근거 1</span><strong>충전전로</strong></header>
+        <p>KOSHAGUIDEB–E–11-2026충전전로및그인근에서의전기작업에관한기술지원규정 2026.1. 한국산업안전보건공단기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·...</p>
+      </article>
+      <article class="evidence-group">
+        <header><span>근거 2</span><strong>활선 · 전기작업 · 접근한계</strong></header>
+        <p>...·······················································································66.활선작업여부의평가및판단················································································...</p>
+      </article>
+      <article class="evidence-group">
+        <header><span>근거 3</span><strong>감전 · 아크 · 절연</strong></header>
+        <p>...규정1.목적이규정은「산업안전보건기준에관한규칙」제321조(충전전로에서의전기작업)에따라충전전로에서의전기작업에대하여필요한사항을정함을목적으로한다.2.적용범위(1)이규정은감전위험이있는전기기계ᆞ기구또는전로(이하&quot;전기설비&quot;라한다)의설치ᆞ해체ᆞ정비ᆞ점검(설비의유효성을도구를이용하여확인하는점검으로한정한다)등의작업(이하&quot;전기작업&quot;이라한다)을하는...</p>
+      </article></section>
+          <details class="hash-details">
+            <summary>파일·본문 식별자</summary>
+            <dl>
+              <div><dt>공식 파일 ID</dt><dd>CTC2026012913300640598489</dd></div>
+              <div><dt>본문 SHA-256</dt><dd>96632acae68db0c28296499905eec09508641debeb6065f10629667690a72acc</dd></div>
+              <div><dt>PDF SHA-256</dt><dd>4dbdee537beeb6598b834766bb179c2882d954c21ca33ccb56376ad4271e65bf</dd></div>
+            </dl>
+          </details>
+        </main>
+        <aside class="review-pane" aria-label="B-E-11 사람 검토">
+          <header><span>사람 검토</span><strong data-review-status="4">8개 입력 필요</strong></header>
+          <p class="boundary-note">기계 근거는 검토를 돕지만 판단을 대신하지 않습니다.</p>
+          <div class="check-stack">
+      <label class="check-row">
+        <input type="checkbox" data-check="4:0">
+        <span title="official URL opens the expected KOSHA file for the selected stable key">공식 URL이 선택한 KOSHA 식별자의 파일을 여는지 확인</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="4:1">
+        <span title="official file id, version, and publication date match metadata and body-corpus provenance">파일 ID·버전·게시일이 메타데이터와 본문 출처에 일치</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="4:2">
+        <span title="body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence">본문·PDF SHA-256이 변경 불가 취득 증거와 일치</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="4:3">
+        <span title="operator confirms lifecycle/current status and excludes stale superseded versions">현재판 여부를 확인하고 폐기·대체 버전을 제외</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="4:4">
+        <span title="human confirmation is recorded before any exact-kosha registry JSON is created">exact-kosha registry 생성 전에 사람 확인을 기록</span>
+      </label></div>
+          <label class="field-label">검토자<input type="text" maxlength="120" autocomplete="name" data-reviewer="4"></label>
+          <label class="field-label">검토 시각<input type="datetime-local" data-reviewed-at="4"></label>
+          <label class="human-confirm">
+            <input type="checkbox" data-human-confirm="4">
+            <span>이 후보의 전체 근거와 현재성을 직접 확인했습니다.</span>
+          </label>
+        </aside>
+      </section>
+      <section class="candidate-panel" data-candidate-panel="5" data-mobile-view="evidence" hidden>
+        <nav class="mobile-mode" aria-label="B-E-9 검토 보기">
+          <button type="button" data-mobile-mode="5:evidence" aria-pressed="true">근거</button>
+          <button type="button" data-mobile-mode="5:review" aria-pressed="false">체크리스트</button>
+        </nav>
+        <main class="evidence-pane">
+          <header class="candidate-heading">
+            <div><span>전기안전분야</span><h1>B-E-9-2026 접지설비에 관한 기술지원규정</h1></div>
+            <a href="https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012913250472771281/1" target="_blank" rel="noreferrer">공식 PDF 열기</a>
+          </header>
+          <dl class="identity-grid">
+            <div><dt>현재 버전</dt><dd>B-E-9-2026</dd></div>
+            <div><dt>공식 게시일</dt><dd>2026-01-30</dd></div>
+            <div><dt>PDF 검증</dt><dd>SHA 일치</dd></div>
+            <div><dt>수명주기</dt><dd>개정</dd></div>
+          </dl>
+          <section class="rationale"><strong>선정 이유</strong><p>전기 격리·충전부 통제와 함께 접지장치 근거를 보강합니다.</p></section>
+          <section class="evidence-stack" aria-label="기계 보조 근거">
+      <article class="evidence-group">
+        <header><span>근거 1</span><strong>접지설비</strong></header>
+        <p>KOSHAGUIDEB–E–9-2026 접지설비에관한기술지원규정 2026.1. 한국산업안전보건공단기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준향상에필요한기...</p>
+      </article>
+      <article class="evidence-group">
+        <header><span>근거 2</span><strong>접지저항 · 접지도체 · 보호접지</strong></header>
+        <p>...tion-NFPA70BRecommendedpracticeforelectricalequipmentmaintenanceCH29(Grounding)-TTAS.KO-04접지저항측정기술표준,한국정보통신기술협회-Electricalearthmonitoringandprotectiveconductorproving,BS4444◦관련법규.규칙.고시...</p>
+      </article>
+      <article class="evidence-group">
+        <header><span>근거 3</span><strong>감전 · 고장전류 · 등전위</strong></header>
+        <p>...Neutralconductor)”이라함은전력계통의중성점에접속되고전력전송에사용되는도체를말한다.(저)“보호도체(Protectiveconductor)”라함은안전을목적(감전방지등)으로설치된도체를말한다.(처)“중성선겸용보호도체(PENconductor)”라함은보호도체와중성선모두의기능을겸비한도체를말한다.(커)“다중접지(Multigroun...</p>
+      </article></section>
+          <details class="hash-details">
+            <summary>파일·본문 식별자</summary>
+            <dl>
+              <div><dt>공식 파일 ID</dt><dd>CTC2026012913250472771281</dd></div>
+              <div><dt>본문 SHA-256</dt><dd>df5f9bc7ba40f2467370a50cf41ff5d4c7dedb22bce4d38d88667d785e779576</dd></div>
+              <div><dt>PDF SHA-256</dt><dd>5a196084490078f1c3e8a03a82aea0bd528b68fcfa4c6bd190ad9c86fe1b59f9</dd></div>
+            </dl>
+          </details>
+        </main>
+        <aside class="review-pane" aria-label="B-E-9 사람 검토">
+          <header><span>사람 검토</span><strong data-review-status="5">8개 입력 필요</strong></header>
+          <p class="boundary-note">기계 근거는 검토를 돕지만 판단을 대신하지 않습니다.</p>
+          <div class="check-stack">
+      <label class="check-row">
+        <input type="checkbox" data-check="5:0">
+        <span title="official URL opens the expected KOSHA file for the selected stable key">공식 URL이 선택한 KOSHA 식별자의 파일을 여는지 확인</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="5:1">
+        <span title="official file id, version, and publication date match metadata and body-corpus provenance">파일 ID·버전·게시일이 메타데이터와 본문 출처에 일치</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="5:2">
+        <span title="body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence">본문·PDF SHA-256이 변경 불가 취득 증거와 일치</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="5:3">
+        <span title="operator confirms lifecycle/current status and excludes stale superseded versions">현재판 여부를 확인하고 폐기·대체 버전을 제외</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="5:4">
+        <span title="human confirmation is recorded before any exact-kosha registry JSON is created">exact-kosha registry 생성 전에 사람 확인을 기록</span>
+      </label></div>
+          <label class="field-label">검토자<input type="text" maxlength="120" autocomplete="name" data-reviewer="5"></label>
+          <label class="field-label">검토 시각<input type="datetime-local" data-reviewed-at="5"></label>
+          <label class="human-confirm">
+            <input type="checkbox" data-human-confirm="5">
+            <span>이 후보의 전체 근거와 현재성을 직접 확인했습니다.</span>
+          </label>
+        </aside>
+      </section>
+      <section class="candidate-panel" data-candidate-panel="6" data-mobile-view="evidence" hidden>
+        <nav class="mobile-mode" aria-label="D-C-4 검토 보기">
+          <button type="button" data-mobile-mode="6:evidence" aria-pressed="true">근거</button>
+          <button type="button" data-mobile-mode="6:review" aria-pressed="false">체크리스트</button>
+        </nav>
+        <main class="evidence-pane">
+          <header class="candidate-heading">
+            <div><span>건설안전분야</span><h1>D-C-4-2025 굴착기 안전보건작업 기술지원규정</h1></div>
+            <a href="https://portal.kosha.or.kr/openapi/v1/file/down/FL00021380674/2" target="_blank" rel="noreferrer">공식 PDF 열기</a>
+          </header>
+          <dl class="identity-grid">
+            <div><dt>현재 버전</dt><dd>D-C-4-2025</dd></div>
+            <div><dt>공식 게시일</dt><dd>2025-03-26</dd></div>
+            <div><dt>PDF 검증</dt><dd>SHA 일치</dd></div>
+            <div><dt>수명주기</dt><dd>개정</dd></div>
+          </dl>
+          <section class="rationale"><strong>선정 이유</strong><p>굴착기 작업계획과 건설장비 위험성평가 행을 보강합니다.</p></section>
+          <section class="evidence-stack" aria-label="기계 보조 근거">
+      <article class="evidence-group">
+        <header><span>근거 1</span><strong>굴착기</strong></header>
+        <p>KOSHAGUIDED-C-4-2025 굴착기안전보건작업기술지원규정 2025.3. 한국산업안전보건공단 기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준향상에...</p>
+      </article>
+      <article class="evidence-group">
+        <header><span>근거 2</span><strong>작업계획서 · 유도자 · 후진</strong></header>
+        <p>...25 -2- 4.굴착기관련법적필수사항다음은산업안전보건법령에관한사항으로써반드시준수하여야한다.4.1굴착기의위험방지안전보건규칙제20조(출입의금지등),제38조(사전조사및작업계획서의작성등),제40조(신호),제88조(기계의동력차단장치),제89조(운전시작전조치),제91조(고장난기계의정비등),제93조(방호장치의해체금지),제98조(제한속도의지정등...</p>
+      </article>
+      <article class="evidence-group">
+        <header><span>근거 3</span><strong>충돌 · 협착 · 전도</strong></header>
+        <p>...조(고장난기계의정비등),제93조(방호장치의해체금지),제98조(제한속도의지정등),제99조(운전위치이탈시의조치),차량계건설기계등(제196조~206조),제221조의2(충돌위험방지조치),3(좌석안전띠의착용),4(잠금장치의체결및5(인양작업시조치)에따라사업주는굴착기운영시필요한조치를하여야한다.1. 총칙안전보건규칙 제20조(출입의 금지 등...</p>
+      </article></section>
+          <details class="hash-details">
+            <summary>파일·본문 식별자</summary>
+            <dl>
+              <div><dt>공식 파일 ID</dt><dd>FL00021380674</dd></div>
+              <div><dt>본문 SHA-256</dt><dd>60527e44d909198acd82fa2c95129932b67640eb7e7253ad9883ba267ff262b7</dd></div>
+              <div><dt>PDF SHA-256</dt><dd>b032b3347a6f1bc107a3e605ef35d116b9917fed047b3d60a2eab75bfeab9252</dd></div>
+            </dl>
+          </details>
+        </main>
+        <aside class="review-pane" aria-label="D-C-4 사람 검토">
+          <header><span>사람 검토</span><strong data-review-status="6">8개 입력 필요</strong></header>
+          <p class="boundary-note">기계 근거는 검토를 돕지만 판단을 대신하지 않습니다.</p>
+          <div class="check-stack">
+      <label class="check-row">
+        <input type="checkbox" data-check="6:0">
+        <span title="official URL opens the expected KOSHA file for the selected stable key">공식 URL이 선택한 KOSHA 식별자의 파일을 여는지 확인</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="6:1">
+        <span title="official file id, version, and publication date match metadata and body-corpus provenance">파일 ID·버전·게시일이 메타데이터와 본문 출처에 일치</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="6:2">
+        <span title="body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence">본문·PDF SHA-256이 변경 불가 취득 증거와 일치</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="6:3">
+        <span title="operator confirms lifecycle/current status and excludes stale superseded versions">현재판 여부를 확인하고 폐기·대체 버전을 제외</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="6:4">
+        <span title="human confirmation is recorded before any exact-kosha registry JSON is created">exact-kosha registry 생성 전에 사람 확인을 기록</span>
+      </label></div>
+          <label class="field-label">검토자<input type="text" maxlength="120" autocomplete="name" data-reviewer="6"></label>
+          <label class="field-label">검토 시각<input type="datetime-local" data-reviewed-at="6"></label>
+          <label class="human-confirm">
+            <input type="checkbox" data-human-confirm="6">
+            <span>이 후보의 전체 근거와 현재성을 직접 확인했습니다.</span>
+          </label>
+        </aside>
+      </section>
+      <section class="candidate-panel" data-candidate-panel="7" data-mobile-view="evidence" hidden>
+        <nav class="mobile-mode" aria-label="E-G-4 검토 보기">
+          <button type="button" data-mobile-mode="7:evidence" aria-pressed="true">근거</button>
+          <button type="button" data-mobile-mode="7:review" aria-pressed="false">체크리스트</button>
+        </nav>
+        <main class="evidence-pane">
+          <header class="candidate-heading">
+            <div><span>산업보건일반분야</span><h1>E-G-4-2025 근골격계질환 예방을 위한 업종·직종별 기술지원규정</h1></div>
+            <a href="https://portal.kosha.or.kr/openapi/v1/file/down/FL00021380215/2" target="_blank" rel="noreferrer">공식 PDF 열기</a>
+          </header>
+          <dl class="identity-grid">
+            <div><dt>현재 버전</dt><dd>E-G-4-2025</dd></div>
+            <div><dt>공식 게시일</dt><dd>2025-03-26</dd></div>
+            <div><dt>PDF 검증</dt><dd>SHA 일치</dd></div>
+            <div><dt>수명주기</dt><dd>제정</dd></div>
+          </dl>
+          <section class="rationale"><strong>선정 이유</strong><p>중량물 취급·반복작업의 근골격계질환 예방 근거를 보강합니다.</p></section>
+          <section class="evidence-stack" aria-label="기계 보조 근거">
+      <article class="evidence-group">
+        <header><span>근거 1</span><strong>근골격계질환</strong></header>
+        <p>KOSHAGUIDEE-G-4-2025근골격계질환예방을위한업종·직종별기술지원규정 2025.3. 한국산업안전보건공단 기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건...</p>
+      </article>
+      <article class="evidence-group">
+        <header><span>근거 2</span><strong>업종 · 직종</strong></header>
+        <p>KOSHAGUIDEE-G-4-2025근골격계질환예방을위한업종·직종별기술지원규정 2025.3. 한국산업안전보건공단 기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준향상에필요...</p>
+      </article>
+      <article class="evidence-group">
+        <header><span>근거 3</span><strong>반복 · 중량물 · 부담작업 · 작업자세</strong></header>
+        <p>...·····················································································266.5반복작업························································································...</p>
+      </article></section>
+          <details class="hash-details">
+            <summary>파일·본문 식별자</summary>
+            <dl>
+              <div><dt>공식 파일 ID</dt><dd>FL00021380215</dd></div>
+              <div><dt>본문 SHA-256</dt><dd>2b0478ccea84b4fbe4d6ba32f4d492fc819abdc58ba077a05e2f22aafeaf8678</dd></div>
+              <div><dt>PDF SHA-256</dt><dd>63b2ec5e7c01e13d0da202accde8fea1596cbed77e33c7a4835c7186467c07b4</dd></div>
+            </dl>
+          </details>
+        </main>
+        <aside class="review-pane" aria-label="E-G-4 사람 검토">
+          <header><span>사람 검토</span><strong data-review-status="7">8개 입력 필요</strong></header>
+          <p class="boundary-note">기계 근거는 검토를 돕지만 판단을 대신하지 않습니다.</p>
+          <div class="check-stack">
+      <label class="check-row">
+        <input type="checkbox" data-check="7:0">
+        <span title="official URL opens the expected KOSHA file for the selected stable key">공식 URL이 선택한 KOSHA 식별자의 파일을 여는지 확인</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="7:1">
+        <span title="official file id, version, and publication date match metadata and body-corpus provenance">파일 ID·버전·게시일이 메타데이터와 본문 출처에 일치</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="7:2">
+        <span title="body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence">본문·PDF SHA-256이 변경 불가 취득 증거와 일치</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="7:3">
+        <span title="operator confirms lifecycle/current status and excludes stale superseded versions">현재판 여부를 확인하고 폐기·대체 버전을 제외</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" data-check="7:4">
+        <span title="human confirmation is recorded before any exact-kosha registry JSON is created">exact-kosha registry 생성 전에 사람 확인을 기록</span>
+      </label></div>
+          <label class="field-label">검토자<input type="text" maxlength="120" autocomplete="name" data-reviewer="7"></label>
+          <label class="field-label">검토 시각<input type="datetime-local" data-reviewed-at="7"></label>
+          <label class="human-confirm">
+            <input type="checkbox" data-human-confirm="7">
+            <span>이 후보의 전체 근거와 현재성을 직접 확인했습니다.</span>
+          </label>
+        </aside>
+      </section></div>
+    </div>
+    <div class="footer-actions">
+      <button type="button" data-reset title="이 브라우저에 저장된 입력을 모두 지웁니다">입력 초기화</button>
+      <button class="primary" type="button" data-export disabled>검토 JSON 내보내기 · 64개 입력 필요</button>
+    </div>
+  </div>
+  <script id="cockpit-data" type="application/json">{"schemaVersion":"safeclaw-kosha-exact-promotion-reviewer-cockpit/v1","candidateCount":8,"semanticGroupCount":24,"checklistInputCount":64,"candidates":[{"order":1,"stableKey":"D-C-10","version":"D-C-10-2026","title":"D-C-10-2026 건설장비(이동식크레인, 항타기 및 항발기, 타워크레인) 작업계획서 작성에 관한 기술지원규정","category":"건설안전분야","publishedAt":"2026-01-30","officialFileId":"CTC2026012914313984348485","officialUrl":"https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914313984348485/1","bodySha256":"1068fed72e7bbc449c48183f5c6278287eef51b292100a6cc4f308972cb36777","pdfSha256":"085961d6b29640b6e89592c96495b1df01b086b582f5aaf4bf941082e8f594dd","pageCount":70,"rationale":"construction equipment work-plan coverage for mobile crane, pile driver, and tower-crane scenarios","displayRationale":"이동식크레인·항타기·항발기·타워크레인 작업계획서 시나리오를 보강합니다.","machineEvidence":{"pdfVerified":true,"lifecycleVerified":true,"currentStatusLabel":"개정","currentPublishedAt":"2026-01-30","currentVersions":["D-C-10-2026"]},"semanticGroups":[{"group":1,"requiredAny":["이동식크레인","항타기","항발기","타워크레인"],"matchedTerms":["이동식크레인","항타기","항발기","타워크레인"],"excerpt":"KOSHAGUIDED–C–10-2026건설장비(이동식크레인,항타기및항발기,타워크레인)작업계획서작성에관한기술지원규정 2026.1. 한국산업안전보건공단기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데..."},{"group":2,"requiredAny":["작업계획서"],"matchedTerms":["작업계획서"],"excerpt":"KOSHAGUIDED–C–10-2026건설장비(이동식크레인,항타기및항발기,타워크레인)작업계획서작성에관한기술지원규정 2026.1. 한국산업안전보건공단기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준향상에필요..."},{"group":3,"requiredAny":["신호수","작업반경","줄걸이","전도"],"matchedTerms":["신호수","작업반경","줄걸이","전도"],"excerpt":"...(다)협력업체소장,협력업체명(이동식크레인,타워크레인항타기·항발기사용업체명)(라)협력업체주소,협력업체연락처(마)하역작업주체및안전교육여부(바)작업지휘자의확인사항(사)신호수의확인사항(3)협력업체(가)주소,대표전화(나)운전원이름,면허,연락처,교육이수여부(다)신호수이름연락처,교육이수여부6.2작업기준및방법(1)이동식크레인의중량물및줄걸이방..."}],"requiredReviewChecks":[{"text":"official URL opens the expected KOSHA file for the selected stable key","confirmed":false},{"text":"official file id, version, and publication date match metadata and body-corpus provenance","confirmed":false},{"text":"body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence","confirmed":false},{"text":"operator confirms lifecycle/current status and excludes stale superseded versions","confirmed":false},{"text":"human confirmation is recorded before any exact-kosha registry JSON is created","confirmed":false}],"reviewer":"","reviewedAt":"","humanConfirmed":false},{"order":2,"stableKey":"D-C-11","version":"D-C-11-2026","title":"D-C-11-2026 굴착 및 토공 안전작업에 관한 기술지원규정","category":"건설안전분야","publishedAt":"2026-01-30","officialFileId":"CTC2026012914341697414755","officialUrl":"https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914341697414755/1","bodySha256":"b97b0cf1ac5e43bf98c412e58896f538232402167cfeedc18806ed1eead1245c","pdfSha256":"266aca072d42bcc5c869218a84ecd189236e6cf0d426bd4a66d06010c0f2e144","pageCount":68,"rationale":"excavation and earthwork coverage for common civil/construction hazard inputs","displayRationale":"굴착·토공 작업에서 반복되는 건설 위험 입력을 보강합니다.","machineEvidence":{"pdfVerified":true,"lifecycleVerified":true,"currentStatusLabel":"개정","currentPublishedAt":"2026-01-30","currentVersions":["D-C-11-2026"]},"semanticGroups":[{"group":1,"requiredAny":["굴착","토공"],"matchedTerms":["굴착","토공"],"excerpt":"KOSHAGUIDED–C–11-2026굴착및토공안전작업에관한기술지원규정 2026.1. 한국산업안전보건공단기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준..."},{"group":2,"requiredAny":["흙막이","굴착면","지보공"],"matchedTerms":["흙막이","굴착면","지보공"],"excerpt":"...령(국토해양부)-건설공사의안전(건설업노동재해방지협회)-건설공사안전점검편람(한국건설기술연구원)-실무규정(Codeofpractice):굴착공사(서호주산업안전위원회)-흙막이지보공안전교육(산업안전교육원)-고용노동부고시2015-57호굴착공사표준안전작업지침-실무규정(Codeofpractice):굴착공사(서호주산업안전위원회)-OSHA§19..."},{"group":3,"requiredAny":["매설물","붕괴","토사"],"matchedTerms":["매설물","붕괴","토사"],"excerpt":"...자:(사)고경력과학기술연우총연합회◦제.개정경과-2025년12월건설안전분야표준제정위원회심의(개정)-2026년1월표준제정위원회본위원회심의(개정) ◦관련규격및자료-지하매설물안전관리요령(국토해양부)-건설공사의안전(건설업노동재해방지협회)-건설공사안전점검편람(한국건설기술연구원)-실무규정(Codeofpractice):굴착공사(서호주산업안전..."}],"requiredReviewChecks":[{"text":"official URL opens the expected KOSHA file for the selected stable key","confirmed":false},{"text":"official file id, version, and publication date match metadata and body-corpus provenance","confirmed":false},{"text":"body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence","confirmed":false},{"text":"operator confirms lifecycle/current status and excludes stale superseded versions","confirmed":false},{"text":"human confirmation is recorded before any exact-kosha registry JSON is created","confirmed":false}],"reviewer":"","reviewedAt":"","humanConfirmed":false},{"order":3,"stableKey":"A-G-1","version":"A-G-1-2025","title":"A-G-1-2025 추락방호망 설치 기술지원규정(수직형 추락방망 설치 기술지원규정 포함)","category":"산업안전일반분야","publishedAt":"2025-03-26","officialFileId":"FL00021379766","officialUrl":"https://portal.kosha.or.kr/openapi/v1/file/down/FL00021379766/3","bodySha256":"55fa0e40cfd6915873141bd81efe901050f4d221fa0f2e670d893fc12feb1763","pdfSha256":"adac02929d30d8cae251bc1fd57cacc3df6579d826bf3de85bcfdaf3be1dcd5f","pageCount":18,"rationale":"fall-prevention net coverage that complements the current scaffold and exterior-paint exact pins","displayRationale":"비계·외벽도장 exact 근거에 추락방호망 통제를 보완합니다.","machineEvidence":{"pdfVerified":true,"lifecycleVerified":true,"currentStatusLabel":"개정","currentPublishedAt":"2025-03-26","currentVersions":["A-G-1-2025"]},"semanticGroups":[{"group":1,"requiredAny":["추락방호망","수직형추락방망"],"matchedTerms":["추락방호망","수직형추락방망"],"excerpt":"KOSHAGUIDEA-G–1-2025추락방호망설치기술지원규정(수직형추락방망설치기술지원규정포함) 2025.3. 한국산업안전보건공단 기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하..."},{"group":2,"requiredAny":["설치","테두리로프","인장"],"matchedTerms":["설치","테두리로프","인장"],"excerpt":"KOSHAGUIDEA-G–1-2025추락방호망설치기술지원규정(수직형추락방망설치기술지원규정포함) 2025.3. 한국산업안전보건공단 기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나..."},{"group":3,"requiredAny":["추락","낙하"],"matchedTerms":["추락","낙하"],"excerpt":"KOSHAGUIDEA-G–1-2025추락방호망설치기술지원규정(수직형추락방망설치기술지원규정포함) 2025.3. 한국산업안전보건공단 기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데..."}],"requiredReviewChecks":[{"text":"official URL opens the expected KOSHA file for the selected stable key","confirmed":false},{"text":"official file id, version, and publication date match metadata and body-corpus provenance","confirmed":false},{"text":"body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence","confirmed":false},{"text":"operator confirms lifecycle/current status and excludes stale superseded versions","confirmed":false},{"text":"human confirmation is recorded before any exact-kosha registry JSON is created","confirmed":false}],"reviewer":"","reviewedAt":"","humanConfirmed":false},{"order":4,"stableKey":"A-G-15","version":"A-G-15-2026","title":"A-G-15-2026 중소규모 사업장 비상조치계획 작성에 관한 기술지원규정","category":"산업안전일반분야","publishedAt":"2026-01-30","officialFileId":"CTC2026012909391077692640","officialUrl":"https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012909391077692640/2","bodySha256":"53b410850420b802021db72975a71647e0eecfc56d94047f2bbe524c1d405f54","pdfSha256":"71715efb34bf516fecd43414c8d547bb2ccbcbfe1fb256de8ac5804499c66478","pageCount":42,"rationale":"emergency action planning coverage for first-screen stop/report/preserve document flows","displayRationale":"작업중지·보고·현장보존을 포함한 비상조치계획 흐름을 보강합니다.","machineEvidence":{"pdfVerified":true,"lifecycleVerified":true,"currentStatusLabel":"개정","currentPublishedAt":"2026-01-30","currentVersions":["A-G-15-2026"]},"semanticGroups":[{"group":1,"requiredAny":["비상조치계획"],"matchedTerms":["비상조치계획"],"excerpt":"...안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준향상에필요한기술적권고규정임 KOSHAGUIDEA–G–15–2026 중소규모사업장비상조치계획작성에관한기술지원규정 2026.1. 한국산업안전보건공단 기술지원규정의개요 ◦개정자:(사)고경력과학기술연우총연합회 ◦제.개정경과-2025년11월산업안전일반분야표준제..."},{"group":2,"requiredAny":["대피","비상연락","응급"],"matchedTerms":["대피","비상연락","응급"],"excerpt":"...···················································································56.2근로자대피··························································································..."},{"group":3,"requiredAny":["화재","폭발","누출"],"matchedTerms":["화재","폭발","누출"],"excerpt":"...업장안전보건관리체계구축지원가이드.산업안전보건공단.2023◦관련법규.규칙.고시등-산업안전보건법시행령제44조(공정안전보고서의내용)-산업안전보건기준에관한규칙제241조(화재위험작업시의준수사항)◦기술지원규정의적용및문의-이기술지원규정에대한의견또는문의는한국산업안전보건공단홈페이지(www.kosha.or.kr)의기술지원규정(KOSHAGUID..."}],"requiredReviewChecks":[{"text":"official URL opens the expected KOSHA file for the selected stable key","confirmed":false},{"text":"official file id, version, and publication date match metadata and body-corpus provenance","confirmed":false},{"text":"body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence","confirmed":false},{"text":"operator confirms lifecycle/current status and excludes stale superseded versions","confirmed":false},{"text":"human confirmation is recorded before any exact-kosha registry JSON is created","confirmed":false}],"reviewer":"","reviewedAt":"","humanConfirmed":false},{"order":5,"stableKey":"B-E-11","version":"B-E-11-2026","title":"B-E-11-2026 충전전로 및 그 인근에서의 전기작업에 관한 기술지원규정","category":"전기안전분야","publishedAt":"2026-01-30","officialFileId":"CTC2026012913300640598489","officialUrl":"https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012913300640598489/1","bodySha256":"96632acae68db0c28296499905eec09508641debeb6065f10629667690a72acc","pdfSha256":"4dbdee537beeb6598b834766bb179c2882d954c21ca33ccb56376ad4271e65bf","pageCount":31,"rationale":"live electrical work coverage paired with the existing de-energized electrical exact pin","displayRationale":"기존 정전 전기작업 exact 근거에 활선작업 통제를 보완합니다.","machineEvidence":{"pdfVerified":true,"lifecycleVerified":true,"currentStatusLabel":"개정","currentPublishedAt":"2026-01-30","currentVersions":["B-E-11-2026"]},"semanticGroups":[{"group":1,"requiredAny":["충전전로"],"matchedTerms":["충전전로"],"excerpt":"KOSHAGUIDEB–E–11-2026충전전로및그인근에서의전기작업에관한기술지원규정 2026.1. 한국산업안전보건공단기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·..."},{"group":2,"requiredAny":["활선","전기작업","접근한계"],"matchedTerms":["활선","전기작업","접근한계"],"excerpt":"...·······················································································66.활선작업여부의평가및판단················································································..."},{"group":3,"requiredAny":["감전","아크","절연"],"matchedTerms":["감전","아크","절연"],"excerpt":"...규정1.목적이규정은「산업안전보건기준에관한규칙」제321조(충전전로에서의전기작업)에따라충전전로에서의전기작업에대하여필요한사항을정함을목적으로한다.2.적용범위(1)이규정은감전위험이있는전기기계ᆞ기구또는전로(이하\"전기설비\"라한다)의설치ᆞ해체ᆞ정비ᆞ점검(설비의유효성을도구를이용하여확인하는점검으로한정한다)등의작업(이하\"전기작업\"이라한다)을하는..."}],"requiredReviewChecks":[{"text":"official URL opens the expected KOSHA file for the selected stable key","confirmed":false},{"text":"official file id, version, and publication date match metadata and body-corpus provenance","confirmed":false},{"text":"body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence","confirmed":false},{"text":"operator confirms lifecycle/current status and excludes stale superseded versions","confirmed":false},{"text":"human confirmation is recorded before any exact-kosha registry JSON is created","confirmed":false}],"reviewer":"","reviewedAt":"","humanConfirmed":false},{"order":6,"stableKey":"B-E-9","version":"B-E-9-2026","title":"B-E-9-2026 접지설비에 관한 기술지원규정","category":"전기안전분야","publishedAt":"2026-01-30","officialFileId":"CTC2026012913250472771281","officialUrl":"https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012913250472771281/1","bodySha256":"df5f9bc7ba40f2467370a50cf41ff5d4c7dedb22bce4d38d88667d785e779576","pdfSha256":"5a196084490078f1c3e8a03a82aea0bd528b68fcfa4c6bd190ad9c86fe1b59f9","pageCount":51,"rationale":"grounding equipment coverage paired with electrical isolation and live-part controls","displayRationale":"전기 격리·충전부 통제와 함께 접지장치 근거를 보강합니다.","machineEvidence":{"pdfVerified":true,"lifecycleVerified":true,"currentStatusLabel":"개정","currentPublishedAt":"2026-01-30","currentVersions":["B-E-9-2026"]},"semanticGroups":[{"group":1,"requiredAny":["접지설비"],"matchedTerms":["접지설비"],"excerpt":"KOSHAGUIDEB–E–9-2026 접지설비에관한기술지원규정 2026.1. 한국산업안전보건공단기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준향상에필요한기..."},{"group":2,"requiredAny":["접지저항","접지도체","보호접지"],"matchedTerms":["접지저항","접지도체","보호접지"],"excerpt":"...tion-NFPA70BRecommendedpracticeforelectricalequipmentmaintenanceCH29(Grounding)-TTAS.KO-04접지저항측정기술표준,한국정보통신기술협회-Electricalearthmonitoringandprotectiveconductorproving,BS4444◦관련법규.규칙.고시..."},{"group":3,"requiredAny":["감전","고장전류","등전위"],"matchedTerms":["감전","고장전류","등전위"],"excerpt":"...Neutralconductor)”이라함은전력계통의중성점에접속되고전력전송에사용되는도체를말한다.(저)“보호도체(Protectiveconductor)”라함은안전을목적(감전방지등)으로설치된도체를말한다.(처)“중성선겸용보호도체(PENconductor)”라함은보호도체와중성선모두의기능을겸비한도체를말한다.(커)“다중접지(Multigroun..."}],"requiredReviewChecks":[{"text":"official URL opens the expected KOSHA file for the selected stable key","confirmed":false},{"text":"official file id, version, and publication date match metadata and body-corpus provenance","confirmed":false},{"text":"body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence","confirmed":false},{"text":"operator confirms lifecycle/current status and excludes stale superseded versions","confirmed":false},{"text":"human confirmation is recorded before any exact-kosha registry JSON is created","confirmed":false}],"reviewer":"","reviewedAt":"","humanConfirmed":false},{"order":7,"stableKey":"D-C-4","version":"D-C-4-2025","title":"D-C-4-2025 굴착기 안전보건작업 기술지원규정","category":"건설안전분야","publishedAt":"2025-03-26","officialFileId":"FL00021380674","officialUrl":"https://portal.kosha.or.kr/openapi/v1/file/down/FL00021380674/2","bodySha256":"60527e44d909198acd82fa2c95129932b67640eb7e7253ad9883ba267ff262b7","pdfSha256":"b032b3347a6f1bc107a3e605ef35d116b9917fed047b3d60a2eab75bfeab9252","pageCount":32,"rationale":"excavator task coverage for construction-equipment and work-plan hazard rows","displayRationale":"굴착기 작업계획과 건설장비 위험성평가 행을 보강합니다.","machineEvidence":{"pdfVerified":true,"lifecycleVerified":true,"currentStatusLabel":"개정","currentPublishedAt":"2025-03-26","currentVersions":["D-C-4-2025"]},"semanticGroups":[{"group":1,"requiredAny":["굴착기"],"matchedTerms":["굴착기"],"excerpt":"KOSHAGUIDED-C-4-2025 굴착기안전보건작업기술지원규정 2025.3. 한국산업안전보건공단 기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준향상에..."},{"group":2,"requiredAny":["작업계획서","유도자","후진"],"matchedTerms":["작업계획서","유도자","후진"],"excerpt":"...25 -2- 4.굴착기관련법적필수사항다음은산업안전보건법령에관한사항으로써반드시준수하여야한다.4.1굴착기의위험방지안전보건규칙제20조(출입의금지등),제38조(사전조사및작업계획서의작성등),제40조(신호),제88조(기계의동력차단장치),제89조(운전시작전조치),제91조(고장난기계의정비등),제93조(방호장치의해체금지),제98조(제한속도의지정등..."},{"group":3,"requiredAny":["충돌","협착","전도"],"matchedTerms":["충돌","협착","전도"],"excerpt":"...조(고장난기계의정비등),제93조(방호장치의해체금지),제98조(제한속도의지정등),제99조(운전위치이탈시의조치),차량계건설기계등(제196조~206조),제221조의2(충돌위험방지조치),3(좌석안전띠의착용),4(잠금장치의체결및5(인양작업시조치)에따라사업주는굴착기운영시필요한조치를하여야한다.1. 총칙안전보건규칙 제20조(출입의 금지 등..."}],"requiredReviewChecks":[{"text":"official URL opens the expected KOSHA file for the selected stable key","confirmed":false},{"text":"official file id, version, and publication date match metadata and body-corpus provenance","confirmed":false},{"text":"body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence","confirmed":false},{"text":"operator confirms lifecycle/current status and excludes stale superseded versions","confirmed":false},{"text":"human confirmation is recorded before any exact-kosha registry JSON is created","confirmed":false}],"reviewer":"","reviewedAt":"","humanConfirmed":false},{"order":8,"stableKey":"E-G-4","version":"E-G-4-2025","title":"E-G-4-2025 근골격계질환 예방을 위한 업종·직종별 기술지원규정","category":"산업보건일반분야","publishedAt":"2025-03-26","officialFileId":"FL00021380215","officialUrl":"https://portal.kosha.or.kr/openapi/v1/file/down/FL00021380215/2","bodySha256":"2b0478ccea84b4fbe4d6ba32f4d492fc819abdc58ba077a05e2f22aafeaf8678","pdfSha256":"63b2ec5e7c01e13d0da202accde8fea1596cbed77e33c7a4835c7186467c07b4","pageCount":54,"rationale":"musculoskeletal prevention coverage for manual handling and repetitive work evidence","displayRationale":"중량물 취급·반복작업의 근골격계질환 예방 근거를 보강합니다.","machineEvidence":{"pdfVerified":true,"lifecycleVerified":true,"currentStatusLabel":"제정","currentPublishedAt":"2025-03-26","currentVersions":["E-G-4-2025"]},"semanticGroups":[{"group":1,"requiredAny":["근골격계질환"],"matchedTerms":["근골격계질환"],"excerpt":"KOSHAGUIDEE-G-4-2025근골격계질환예방을위한업종·직종별기술지원규정 2025.3. 한국산업안전보건공단 기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건..."},{"group":2,"requiredAny":["업종","직종"],"matchedTerms":["업종","직종"],"excerpt":"KOSHAGUIDEE-G-4-2025근골격계질환예방을위한업종·직종별기술지원규정 2025.3. 한국산업안전보건공단 기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준향상에필요..."},{"group":3,"requiredAny":["반복","중량물","부담작업","작업자세"],"matchedTerms":["반복","중량물","부담작업","작업자세"],"excerpt":"...·····················································································266.5반복작업························································································..."}],"requiredReviewChecks":[{"text":"official URL opens the expected KOSHA file for the selected stable key","confirmed":false},{"text":"official file id, version, and publication date match metadata and body-corpus provenance","confirmed":false},{"text":"body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence","confirmed":false},{"text":"operator confirms lifecycle/current status and excludes stale superseded versions","confirmed":false},{"text":"human confirmation is recorded before any exact-kosha registry JSON is created","confirmed":false}],"reviewer":"","reviewedAt":"","humanConfirmed":false}],"boundary":{"localReviewOnly":true,"dbMutationPerformed":false,"exactRegistryWriteArtifactCreated":false,"exactPromotionPerformed":false,"machineEvidenceReplacesHumanReview":false,"separatePromotionApprovalRequired":true},"sourceHead":"e7d8f6cafa13525a6a80f4f662f8136079cf2e7c"}</script>
+  <script>
+    (() => {
+      const payload = JSON.parse(document.getElementById("cockpit-data").textContent);
+      const storageKey = "safeclaw-kosha-reviewer-cockpit-v1";
+      const emptyState = () => payload.candidates.map((candidate) => ({
+        stableKey: candidate.stableKey,
+        reviewer: "",
+        reviewedAt: "",
+        humanConfirmed: false,
+        requiredReviewChecks: candidate.requiredReviewChecks.map((check) => ({ text: check.text, confirmed: false }))
+      }));
+      let state = emptyState();
+      try {
+        const stored = JSON.parse(localStorage.getItem(storageKey) || "null");
+        if (Array.isArray(stored) && stored.length === state.length) state = stored;
+      } catch (error) {
+        console.warn("KOSHA reviewer cockpit local state could not be restored", error);
+      }
+      const panels = [...document.querySelectorAll("[data-candidate-panel]")];
+      const buttons = [...document.querySelectorAll("[data-candidate-button]")];
+      const exportButton = document.querySelector("[data-export]");
+      const completedInputs = (row) =>
+        row.requiredReviewChecks.filter((check) => check.confirmed).length
+        + (row.reviewer.trim() ? 1 : 0)
+        + (row.reviewedAt ? 1 : 0)
+        + (row.humanConfirmed ? 1 : 0);
+      const render = () => {
+        state.forEach((row, index) => {
+          row.requiredReviewChecks.forEach((check, checkIndex) => {
+            document.querySelector('[data-check="' + index + ':' + checkIndex + '"]').checked = check.confirmed;
+          });
+          document.querySelector("[data-reviewer='" + index + "']").value = row.reviewer;
+          document.querySelector("[data-reviewed-at='" + index + "']").value = row.reviewedAt;
+          document.querySelector("[data-human-confirm='" + index + "']").checked = row.humanConfirmed;
+          const count = completedInputs(row);
+          document.querySelector("[data-candidate-progress='" + index + "']").textContent = count + "/8";
+          const status = document.querySelector("[data-review-status='" + index + "']");
+          status.textContent = count === 8 ? "입력 완료" : (8 - count) + "개 입력 필요";
+          status.style.color = count === 8 ? "#087f5b" : "#a75800";
+        });
+        const completeCount = state.reduce((sum, row) => sum + completedInputs(row), 0);
+        exportButton.disabled = completeCount !== payload.checklistInputCount;
+        exportButton.textContent = completeCount === payload.checklistInputCount
+          ? "검토 JSON 내보내기"
+          : "검토 JSON 내보내기 · " + (payload.checklistInputCount - completeCount) + "개 입력 필요";
+        localStorage.setItem(storageKey, JSON.stringify(state));
+      };
+      const selectCandidate = (index) => {
+        panels.forEach((panel, panelIndex) => { panel.hidden = panelIndex !== index; });
+        buttons.forEach((button, buttonIndex) => button.setAttribute("aria-pressed", String(buttonIndex === index)));
+      };
+      buttons.forEach((button, index) => button.addEventListener("click", () => selectCandidate(index)));
+      document.querySelectorAll("[data-mobile-mode]").forEach((button) => button.addEventListener("click", (event) => {
+        const [candidateIndex, mode] = event.currentTarget.dataset.mobileMode.split(":");
+        const panel = document.querySelector("[data-candidate-panel='" + candidateIndex + "']");
+        panel.dataset.mobileView = mode;
+        panel.querySelectorAll("[data-mobile-mode]").forEach((modeButton) => {
+          modeButton.setAttribute("aria-pressed", String(modeButton.dataset.mobileMode.endsWith(":" + mode)));
+        });
+      }));
+      document.querySelectorAll("[data-check]").forEach((input) => input.addEventListener("change", (event) => {
+        const [candidateIndex, checkIndex] = event.currentTarget.dataset.check.split(":").map(Number);
+        state[candidateIndex].requiredReviewChecks[checkIndex].confirmed = event.currentTarget.checked;
+        render();
+      }));
+      document.querySelectorAll("[data-reviewer]").forEach((input) => input.addEventListener("input", (event) => {
+        state[Number(event.currentTarget.dataset.reviewer)].reviewer = event.currentTarget.value.slice(0, 120);
+        render();
+      }));
+      document.querySelectorAll("[data-reviewed-at]").forEach((input) => input.addEventListener("input", (event) => {
+        state[Number(event.currentTarget.dataset.reviewedAt)].reviewedAt = event.currentTarget.value;
+        render();
+      }));
+      document.querySelectorAll("[data-human-confirm]").forEach((input) => input.addEventListener("change", (event) => {
+        state[Number(event.currentTarget.dataset.humanConfirm)].humanConfirmed = event.currentTarget.checked;
+        render();
+      }));
+      document.querySelector("[data-reset]").addEventListener("click", () => {
+        if (!window.confirm("이 브라우저에 저장된 KOSHA 검토 입력을 모두 지울까요?")) return;
+        state = emptyState();
+        render();
+      });
+      exportButton.addEventListener("click", () => {
+        if (exportButton.disabled) return;
+        const output = {
+          schemaVersion: "safeclaw-kosha-exact-promotion-review/v1",
+          generatedAt: new Date().toISOString(),
+          sourceHead: payload.sourceHead || "",
+          reviewTemplateOnly: false,
+          exactPromotionPerformed: false,
+          machineEvidenceReplacesHumanReview: false,
+          candidateReviews: payload.candidates.map((candidate, index) => ({
+            ...candidate,
+            reviewer: state[index].reviewer.trim(),
+            reviewedAt: new Date(state[index].reviewedAt).toISOString(),
+            humanConfirmed: state[index].humanConfirmed,
+            requiredReviewChecks: state[index].requiredReviewChecks
+          }))
+        };
+        const blob = new Blob([JSON.stringify(output, null, 2) + "\n"], { type: "application/json" });
+        const anchor = document.createElement("a");
+        anchor.href = URL.createObjectURL(blob);
+        anchor.download = "kosha-exact-promotion-human-review.json";
+        anchor.click();
+        URL.revokeObjectURL(anchor.href);
+      });
+      render();
+    })();
+  </script>
+</body>
+</html>
