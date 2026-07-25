@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-25T01:20:32.420Z",
-  "sourceSha": "602596c1bb1c728e18fc83a0177dbf5659cb89a5",
+  "generatedAt": "2026-07-25T01:32:44.948Z",
+  "sourceSha": "460d35585cade0c693316ad75f74fb04467b55af",
   "overall": "open",
   "gates": [
     {
@@ -116,6 +116,14 @@
         "Keep provider dispatch persistence approval-gated.",
         "Measure exact saved Share and Documents/Share viewport IA in their separate gates."
       ]
+    },
+    {
+      "id": "hermes_knowledge_review_authority",
+      "state": "proven",
+      "label": "Hermes knowledge review authority",
+      "evidencePath": "evaluation\\hermes-knowledge-review-contract-live-2026-07-25\\report.json",
+      "detail": "Live stateless candidate review keeps SIF -> KOSHA -> law authority roles separate, preserves organization/site memory as non-public tenant evidence, requires site-manager acceptance and human review, and performs no AI provider, DB, publication, or Share mutation. LLM Wiki publication remains APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": []
     },
     {
       "id": "live_document_secondary_grounding",

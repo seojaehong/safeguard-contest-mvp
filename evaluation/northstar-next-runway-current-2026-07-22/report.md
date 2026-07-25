@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `602596c1bb1c728e18fc83a0177dbf5659cb89a5`
+Source HEAD: `460d35585cade0c693316ad75f74fb04467b55af`
 
-Production `/api/build-info`: `79d70b983098212327c6b5d70fb43ed67d6cdef8`
+Production `/api/build-info`: `49dded5bb88a27e34014ecc4dee4e4146b2681c6`
 
 Latest evidence commit live: `false`
 
 Source head live pending: `true`
 
-Source head has product changes: `true`
+Source head has product changes: `false`
 
-Source pending changed paths: `lib/knowledge-candidate-route.ts`, `lib/knowledge-governance.ts`, `scripts/northstar_open_gate_audit.mjs`, `scripts/rls_llm_wiki_approval_preflight.mjs`, `tests/knowledge-governance.test.ts`, `tests/knowledge-regenerate-route.test.ts`, `tests/northstar-open-gate-audit.test.ts`, `tests/rls-llm-wiki-approval-preflight.test.ts`
+Source pending changed paths: `evaluation/hermes-knowledge-review-contract-live-2026-07-25/report.json`, `evaluation/hermes-knowledge-review-contract-live-2026-07-25/report.md`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
 
-Current head is evidence-only pending: `false`
+Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `602596c1bb1c728e18fc83a0177dbf5659cb89a5`
+Live rollup source head: `460d35585cade0c693316ad75f74fb04467b55af`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `602596c1bb1c728e18fc83a0177dbf5659cb89a5` includes product/runtime file changes that are not live yet. Production is still `79d70b983098212327c6b5d70fb43ed67d6cdef8`, and the live rollup remains exact for that deployed marker.
+Note: current HEAD `460d35585cade0c693316ad75f74fb04467b55af` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `49dded5bb88a27e34014ecc4dee4e4146b2681c6`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 

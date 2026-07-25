@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-25T01:20:33.519Z",
-  "head": "602596c1bb1c728e18fc83a0177dbf5659cb89a5",
+  "generatedAt": "2026-07-25T01:32:46.027Z",
+  "head": "460d35585cade0c693316ad75f74fb04467b55af",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "79d70b983098212327c6b5d70fb43ed67d6cdef8",
+    "commitSha": "49dded5bb88a27e34014ecc4dee4e4146b2681c6",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-850daeav9-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-g31cxl3un-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 25
+    "gateCount": 26
   },
   "provenGates": [
     {
@@ -86,6 +86,12 @@
       "state": "proven",
       "artifact": "evaluation\\product-capability-truth-2026-07-25\\report.json",
       "detail": "Manual email/SMS/Kakao and scheduled briefing email are fail-closed preview-only because persistent idempotency is unavailable. Live photo Vision/OCR readiness is accepted-only, AI generation modes are template/enhanced/full, and no DB/share/provider/photo POST mutation occurred. This does not grant provider dispatch approval: exact saved Share remains MISSING_EVIDENCE and Documents/Share IA remains OPEN_SEPARATE_VIEWPORT_IA_WAVE."
+    },
+    {
+      "id": "hermes_knowledge_review_authority",
+      "state": "proven",
+      "artifact": "evaluation\\hermes-knowledge-review-contract-live-2026-07-25\\report.json",
+      "detail": "Live stateless candidate review keeps SIF -> KOSHA -> law authority roles separate, preserves organization/site memory as non-public tenant evidence, requires site-manager acceptance and human review, and performs no AI provider, DB, publication, or Share mutation. LLM Wiki publication remains APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "live_document_secondary_grounding",
@@ -455,9 +461,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "602596c1bb1c728e18fc83a0177dbf5659cb89a5",
+      "sourceCommit": "460d35585cade0c693316ad75f74fb04467b55af",
       "sourceStatus": "exact",
-      "productionCommit": "602596c1bb1c728e18fc83a0177dbf5659cb89a5",
+      "productionCommit": "460d35585cade0c693316ad75f74fb04467b55af",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -584,7 +590,7 @@
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
       "sourceCommit": "602596c1bb1c728e18fc83a0177dbf5659cb89a5",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },
