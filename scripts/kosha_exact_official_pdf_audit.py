@@ -163,7 +163,7 @@ def _load_body_items(root_dir: Path, current_path: Path, body_root: Path) -> dic
 
 
 def _extract_downloaded_pdf(candidate: JsonObject, pdf_path: Path) -> JsonObject:
-    title = _text(candidate.get("title"))
+    title = _text(candidate.get("sourceTitle")) or _text(candidate.get("title"))
     entry = snapshot_kosha_guide_corpus.LocalPdfEntry(
         archive_path=None,
         archive_name="official-live-download",
@@ -210,6 +210,9 @@ def evaluate_candidate(
 ) -> JsonObject:
     stable_key = _text(candidate.get("stableKey"))
     official_file_id = _text(candidate.get("officialFileId"))
+    version = _text(candidate.get("version"))
+    official_current_title = _text(candidate.get("officialCurrentTitle"))
+    source_title = _text(candidate.get("sourceTitle"))
     provenance = body_item.get("official_provenance")
     body_provenance = provenance if isinstance(provenance, dict) else {}
     checks: JsonObject = {
@@ -230,8 +233,12 @@ def evaluate_candidate(
         "metadataPdfSha256Matches": _text(metadata.get("pdf_sha256")) == download.pdf_sha256,
         "metadataBodySha256Matches": _text(metadata.get("body_sha256")) == _text(candidate.get("bodySha256")),
         "metadataSnapshotSaysCurrent": _text(metadata.get("official_status")) == "current",
-        "bodyCorpusVersionMatches": _text(body_item.get("version_key")) == _text(candidate.get("version")),
-        "bodyCorpusTitleMatches": _text(body_item.get("title")) == _text(candidate.get("title")),
+        "packetOfficialCurrentTitlePresent": bool(official_current_title),
+        "packetTitleUsesOfficialCurrentTitle": _text(candidate.get("title"))
+        == f"{version} {official_current_title}",
+        "packetSourceTitlePresent": bool(source_title),
+        "bodyCorpusVersionMatches": _text(body_item.get("version_key")) == version,
+        "bodyCorpusSourceTitleMatches": _text(body_item.get("title")) == source_title,
         "bodyCorpusBodySha256Matches": _text(body_provenance.get("body_sha256"))
         == _text(candidate.get("bodySha256")),
         "bodyCorpusPdfSha256Matches": _text(body_provenance.get("pdf_sha256"))
@@ -239,8 +246,8 @@ def evaluate_candidate(
         "bodyCorpusOfficialFileIdMatches": _text(body_provenance.get("official_file_id"))
         == official_file_id,
         "extractedStableKeyMatches": _text(extracted.get("stableKey")) == stable_key,
-        "extractedVersionMatches": _text(extracted.get("version")) == _text(candidate.get("version")),
-        "extractedTitleMatches": _text(extracted.get("title")) == _text(candidate.get("title")),
+        "extractedVersionMatches": _text(extracted.get("version")) == version,
+        "extractedSourceTitleMatches": _text(extracted.get("title")) == source_title,
         "extractedPageCountMatches": _integer(extracted.get("pageCount")) == _integer(candidate.get("pageCount")),
         "extractedNormalizedCharCountMatches": _integer(extracted.get("normalizedCharCount"))
         == _integer(candidate.get("normalizedCharCount")),
@@ -253,6 +260,8 @@ def evaluate_candidate(
         "stableKey": stable_key,
         "version": _text(candidate.get("version")),
         "title": _text(candidate.get("title")),
+        "sourceTitle": source_title,
+        "officialCurrentTitle": official_current_title,
         "officialFileId": official_file_id,
         "officialUrl": _text(candidate.get("officialUrl")),
         "httpStatus": download.status,
