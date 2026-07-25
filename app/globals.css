@@ -18228,7 +18228,7 @@ body:has(.safeclaw-landing) :is(
   letter-spacing: var(--tracking-body);
 }
 
-.safeclaw-module-shell.module-variant-document button:not(:where(.secondary, .ghost, .document-tab, .doc-tab, .template-tab, .template-card, .safeclaw-module-chrome-button, [role="tab"], [class*="removeRiskRowButton"])),
+.safeclaw-module-shell.module-variant-document button:not(:where(.secondary, .ghost, .document-tab, .doc-tab, .template-tab, .template-card, .safeclaw-module-chrome-button, [data-testid="risk-row-selector"], [class*="removeRiskRowButton"])),
 .safeclaw-module-shell.module-variant-document .button:not(.secondary),
 .safeclaw-module-shell.module-variant-document .safeclaw-module-primary {
   border-color: var(--module-primary-border, var(--workspace-accent));
@@ -18240,7 +18240,7 @@ body:has(.safeclaw-landing) :is(
   color: var(--workspace-accent-text);
 }
 
-.safeclaw-module-shell.module-variant-document button:not(:where(.secondary, .ghost, .doc-tab, .template-card, .safeclaw-module-chrome-button, [role="tab"], [class*="removeRiskRowButton"])):hover,
+.safeclaw-module-shell.module-variant-document button:not(:where(.secondary, .ghost, .doc-tab, .template-card, .safeclaw-module-chrome-button, [data-testid="risk-row-selector"], [class*="removeRiskRowButton"])):hover,
 .safeclaw-module-shell.module-variant-document .button:not(.secondary):hover,
 .safeclaw-module-shell.module-variant-document .safeclaw-module-primary:hover {
   border-color: var(--module-primary-hover-border, var(--workspace-accent-hover));
