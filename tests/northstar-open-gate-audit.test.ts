@@ -1735,6 +1735,8 @@ function createFixtureRoot(): string {
     officialPdfAuditMachineVerified: true,
     officialLifecycleAuditMachineSupported: true,
     officialLifecycleTitleVariantFindingCount: 0,
+    reviewerSupportMachineVerified: true,
+    reviewerSupportHumanReviewCompleted: false,
     failures: Array.from({ length: 64 }, (_, index) => `unconfirmed-required-check:${index}`),
   });
   writeJson(rootDir, path.join("evaluation", "kosha-exact-official-pdf-audit-2026-07-25", "report.json"), {
@@ -1794,6 +1796,31 @@ function createFixtureRoot(): string {
       operatorLifecycleCurrentStatusConfirmed: false,
       humanConfirmed: false,
     })),
+  });
+  writeJson(rootDir, path.join("evaluation", "kosha-exact-promotion-reviewer-support-2026-07-25", "report.json"), {
+    schemaVersion: "safeclaw-kosha-exact-promotion-reviewer-support/v1",
+    verdict: "PASS_MACHINE_REVIEWER_SUPPORT_HUMAN_CONFIRMATION_REQUIRED",
+    candidateCount: 8,
+    machineSupportedCount: 8,
+    failedCount: 0,
+    semanticGroupCount: 24,
+    failedSemanticGroupCount: 0,
+    reviewBoundary: {
+      humanReviewCompleted: false,
+      reviewChecklistComplete: false,
+      machineEvidenceReplacesHumanReview: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      embeddingGenerated: false,
+      vectorUploadPerformed: false,
+      exactTrustRegistryMutationPerformed: false,
+    },
+    exactPromotionPerformed: false,
+    exactRegistryWriteArtifactCreated: false,
+    separatePromotionApprovalRequired: true,
   });
   writeJson(rootDir, path.join("evaluation", "kosha-exact-promotion-review-contract-audit-2026-07-23", "report.json"), {
     schemaVersion: "safeclaw-kosha-exact-promotion-review-contract-audit/v1",
@@ -1970,6 +1997,7 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("machine-verified all 8 PDF/body pairs");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("shallow human-confirmation-only reviews are blocked");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("completed review remains no-mutation plus separate approval");
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("24/24 semantic groups");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.nextActions.join("\n")).toContain(
       "Re-run scripts\\kosha_exact_promotion_review_gate.mjs",
     );

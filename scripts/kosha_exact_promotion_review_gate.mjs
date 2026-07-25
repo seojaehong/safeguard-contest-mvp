@@ -13,6 +13,7 @@ const REPO_ROOT = path.resolve(path.dirname(SCRIPT_PATH), "..");
 const DEFAULT_PACKET_PATH = path.join("evaluation", "kosha-exact-promotion-packet-2026-07-22", "report.json");
 const DEFAULT_OFFICIAL_PDF_AUDIT_PATH = path.join("evaluation", "kosha-exact-official-pdf-audit-2026-07-25", "report.json");
 const DEFAULT_OFFICIAL_LIFECYCLE_AUDIT_PATH = path.join("evaluation", "kosha-exact-official-lifecycle-audit-2026-07-25", "report.json");
+const DEFAULT_REVIEWER_SUPPORT_PATH = path.join("evaluation", "kosha-exact-promotion-reviewer-support-2026-07-25", "report.json");
 const DEFAULT_OUTPUT_DIR = path.join("evaluation", "kosha-exact-promotion-review-gate-2026-07-22");
 const REVIEW_SCHEMA_VERSION = "safeclaw-kosha-exact-promotion-review/v1";
 const REVIEW_COMPLETE_VERDICT = "HUMAN_REVIEW_COMPLETE_APPROVAL_REQUIRED_NO_MUTATION";
@@ -150,6 +151,19 @@ function assertOfficialLifecycleAuditShape(audit) {
 }
 
 /**
+ * @param {unknown} report
+ */
+function assertReviewerSupportShape(report) {
+  if (!isRecord(report)) throw new Error("kosha-review-gate-invalid-reviewer-support");
+  if (asString(report.schemaVersion) !== "safeclaw-kosha-exact-promotion-reviewer-support/v1") {
+    throw new Error("kosha-review-gate-invalid-reviewer-support-schema");
+  }
+  if (!Array.isArray(report.results)) {
+    throw new Error("kosha-review-gate-reviewer-support-missing-results");
+  }
+}
+
+/**
  * @param {Record<string, unknown>} candidate
  */
 function candidateKey(candidate) {
@@ -219,6 +233,7 @@ function summarizeFailures(failures) {
  *   packetPath?: string;
  *   officialPdfAuditPath?: string;
  *   officialLifecycleAuditPath?: string;
+ *   reviewerSupportPath?: string;
  *   reviewPath: string;
  *   generatedAt?: string;
  * }} options
@@ -228,26 +243,32 @@ export function buildKoshaExactPromotionReviewGate(options) {
   const packetPath = options.packetPath || DEFAULT_PACKET_PATH;
   const officialPdfAuditPath = options.officialPdfAuditPath || DEFAULT_OFFICIAL_PDF_AUDIT_PATH;
   const officialLifecycleAuditPath = options.officialLifecycleAuditPath || DEFAULT_OFFICIAL_LIFECYCLE_AUDIT_PATH;
+  const reviewerSupportPath = options.reviewerSupportPath || DEFAULT_REVIEWER_SUPPORT_PATH;
   const packet = readJson(resolveInsideRoot(rootDir, packetPath));
   const officialPdfAudit = readJson(resolveInsideRoot(rootDir, officialPdfAuditPath));
   const officialLifecycleAudit = readJson(resolveInsideRoot(rootDir, officialLifecycleAuditPath));
+  const reviewerSupport = readJson(resolveInsideRoot(rootDir, reviewerSupportPath));
   const review = readJson(resolveInsideRoot(rootDir, options.reviewPath));
   assertPacketShape(packet);
   assertOfficialPdfAuditShape(officialPdfAudit);
   assertOfficialLifecycleAuditShape(officialLifecycleAudit);
+  assertReviewerSupportShape(reviewerSupport);
   assertReviewShape(review);
 
   const packetRecord = /** @type {Record<string, unknown>} */ (packet);
   const officialPdfAuditRecord = /** @type {Record<string, unknown>} */ (officialPdfAudit);
   const officialLifecycleAuditRecord = /** @type {Record<string, unknown>} */ (officialLifecycleAudit);
+  const reviewerSupportRecord = /** @type {Record<string, unknown>} */ (reviewerSupport);
   const reviewRecord = /** @type {Record<string, unknown>} */ (review);
   const candidates = /** @type {Record<string, unknown>[]} */ (packetRecord.candidates);
   const officialPdfAuditRows = /** @type {Record<string, unknown>[]} */ (officialPdfAuditRecord.results);
   const officialLifecycleAuditRows = /** @type {Record<string, unknown>[]} */ (officialLifecycleAuditRecord.results);
+  const reviewerSupportRows = /** @type {Record<string, unknown>[]} */ (reviewerSupportRecord.results);
   const candidateReviews = /** @type {Record<string, unknown>[]} */ (reviewRecord.candidateReviews);
   const reviewByStableKey = new Map(candidateReviews.map((row) => [reviewKey(row), row]));
   const officialPdfAuditByStableKey = new Map(officialPdfAuditRows.map((row) => [asString(row.stableKey), row]));
   const officialLifecycleAuditByStableKey = new Map(officialLifecycleAuditRows.map((row) => [asString(row.stableKey), row]));
+  const reviewerSupportByStableKey = new Map(reviewerSupportRows.map((row) => [asString(row.stableKey), row]));
   const candidateKeySet = new Set(candidates.map(candidateKey).filter(Boolean));
   const failures = [];
   const passed = [];
@@ -283,6 +304,38 @@ export function buildKoshaExactPromotionReviewGate(options) {
   if (officialLifecycleAuditRows.length !== candidates.length) {
     failures.push(`official-lifecycle-audit-count-mismatch:${officialLifecycleAuditRows.length}:${candidates.length}`);
   }
+  const reviewerSupportBoundary = isRecord(reviewerSupportRecord.reviewBoundary)
+    ? reviewerSupportRecord.reviewBoundary
+    : null;
+  const reviewerSupportMutationBoundary = isRecord(reviewerSupportRecord.mutationBoundary)
+    ? reviewerSupportRecord.mutationBoundary
+    : null;
+  if (
+    asString(reviewerSupportRecord.verdict) !== "PASS_MACHINE_REVIEWER_SUPPORT_HUMAN_CONFIRMATION_REQUIRED" ||
+    reviewerSupportRecord.machineSupportedCount !== candidates.length ||
+    reviewerSupportRecord.failedCount !== 0 ||
+    reviewerSupportRecord.semanticGroupCount !== candidates.length * 3 ||
+    reviewerSupportRecord.failedSemanticGroupCount !== 0 ||
+    reviewerSupportRecord.exactPromotionPerformed !== false ||
+    reviewerSupportRecord.exactRegistryWriteArtifactCreated !== false ||
+    reviewerSupportRecord.separatePromotionApprovalRequired !== true ||
+    reviewerSupportBoundary === null ||
+    reviewerSupportBoundary.humanReviewCompleted !== false ||
+    reviewerSupportBoundary.reviewChecklistComplete !== false ||
+    reviewerSupportBoundary.machineEvidenceReplacesHumanReview !== false ||
+    reviewerSupportMutationBoundary === null ||
+    reviewerSupportMutationBoundary.dbMutationPerformed !== false ||
+    reviewerSupportMutationBoundary.providerDispatchCalled !== false ||
+    reviewerSupportMutationBoundary.shareSessionCreated !== false ||
+    reviewerSupportMutationBoundary.embeddingGenerated !== false ||
+    reviewerSupportMutationBoundary.vectorUploadPerformed !== false ||
+    reviewerSupportMutationBoundary.exactTrustRegistryMutationPerformed !== false
+  ) {
+    failures.push("reviewer-support-verdict-or-boundary-mismatch");
+  }
+  if (reviewerSupportRows.length !== candidates.length) {
+    failures.push(`reviewer-support-count-mismatch:${reviewerSupportRows.length}:${candidates.length}`);
+  }
 
   if (candidateReviews.length !== candidates.length) {
     failures.push(`candidate-review-count-mismatch:${candidateReviews.length}:${candidates.length}`);
@@ -304,9 +357,11 @@ export function buildKoshaExactPromotionReviewGate(options) {
     const stableKey = candidateKey(candidate);
     const officialPdfAuditRow = officialPdfAuditByStableKey.get(stableKey);
     const officialLifecycleAuditRow = officialLifecycleAuditByStableKey.get(stableKey);
+    const reviewerSupportRow = reviewerSupportByStableKey.get(stableKey);
     const reviewRow = reviewByStableKey.get(stableKey);
     let officialPdfAuditPass = true;
     let officialLifecycleAuditPass = true;
+    let reviewerSupportPass = true;
     if (!officialPdfAuditRow) {
       failures.push(`official-pdf-audit-missing-row:${stableKey}`);
       officialPdfAuditPass = false;
@@ -353,6 +408,28 @@ export function buildKoshaExactPromotionReviewGate(options) {
         officialLifecycleAuditPass = false;
       }
     }
+    if (!reviewerSupportRow) {
+      failures.push(`reviewer-support-missing-row:${stableKey}`);
+      reviewerSupportPass = false;
+    } else {
+      const semanticGroups = Array.isArray(reviewerSupportRow.semanticGroups)
+        ? reviewerSupportRow.semanticGroups.filter(isRecord)
+        : [];
+      const semanticGroupsPass = semanticGroups.length === 3
+        && semanticGroups.every((group) => group.machineSupported === true && Boolean(asString(group.excerpt)));
+      if (
+        asString(reviewerSupportRow.version) !== asString(candidate.version) ||
+        reviewerSupportRow.contentRationaleMachineSupported !== true ||
+        !Array.isArray(reviewerSupportRow.failedSemanticGroups) ||
+        reviewerSupportRow.failedSemanticGroups.length !== 0 ||
+        !semanticGroupsPass ||
+        reviewerSupportRow.humanReviewCompleted !== false ||
+        reviewerSupportRow.humanConfirmed !== false
+      ) {
+        failures.push(`reviewer-support-candidate-not-supported:${stableKey}`);
+        reviewerSupportPass = false;
+      }
+    }
     if (!reviewRow) {
       failures.push(`missing-review:${stableKey}`);
       continue;
@@ -393,7 +470,7 @@ export function buildKoshaExactPromotionReviewGate(options) {
     const reviewedAt = asString(reviewRow.reviewedAt);
     if (!reviewedAt) failures.push(`missing-reviewed-at:${stableKey}`);
     else if (!isIsoTimestamp(reviewedAt)) failures.push(`invalid-reviewed-at:${stableKey}`);
-    if (officialPdfAuditPass && officialLifecycleAuditPass && mismatches.length === 0 && requiredChecks.every((checkText) => asBoolean(checkedByText.get(checkText)?.confirmed)) && asBoolean(reviewRow.humanConfirmed) && asString(reviewRow.reviewer) && isIsoTimestamp(reviewedAt)) {
+    if (officialPdfAuditPass && officialLifecycleAuditPass && reviewerSupportPass && mismatches.length === 0 && requiredChecks.every((checkText) => asBoolean(checkedByText.get(checkText)?.confirmed)) && asBoolean(reviewRow.humanConfirmed) && asString(reviewRow.reviewer) && isIsoTimestamp(reviewedAt)) {
       passed.push(stableKey);
     }
   }
@@ -412,6 +489,7 @@ export function buildKoshaExactPromotionReviewGate(options) {
     packetPath,
     officialPdfAuditPath,
     officialLifecycleAuditPath,
+    reviewerSupportPath,
     reviewPath: options.reviewPath,
     verdict: reviewChecklistComplete ? REVIEW_COMPLETE_VERDICT : REVIEW_INCOMPLETE_VERDICT,
     mutationPerformed: false,
@@ -440,6 +518,10 @@ export function buildKoshaExactPromotionReviewGate(options) {
       failureSummary.officialLifecycleAuditFailures === 0 &&
       officialLifecycleAuditRows.length === candidates.length,
     officialLifecycleTitleVariantFindingCount: lifecycleTitleVariantCount,
+    reviewerSupportMachineVerified:
+      !failures.some((failure) => failure.startsWith("reviewer-support-")) &&
+      reviewerSupportRows.length === candidates.length,
+    reviewerSupportHumanReviewCompleted: reviewerSupportBoundary?.humanReviewCompleted === true,
     failureSummary,
     passedStableKeys: passed,
     failures,
@@ -524,6 +606,8 @@ Official PDF audit: \`${report.officialPdfAuditPath}\`
 
 Official lifecycle audit: \`${report.officialLifecycleAuditPath}\`
 
+Reviewer support: \`${report.reviewerSupportPath}\`
+
 Review input: \`${report.reviewPath}\`
 
 Checklist complete: \`${report.reviewChecklistComplete}\`
@@ -567,12 +651,13 @@ ${report.forbiddenClaims.map((claim) => `- ${claim}`).join("\n")}
  * @param {string[]} args
  */
 function parseArgs(args) {
-  /** @type {{ rootDir: string; packet: string; officialPdfAudit: string; officialLifecycleAudit: string; review: string; output: string; generatedAt: string; writeTemplate: boolean }} */
+  /** @type {{ rootDir: string; packet: string; officialPdfAudit: string; officialLifecycleAudit: string; reviewerSupport: string; review: string; output: string; generatedAt: string; writeTemplate: boolean }} */
   const parsed = {
     rootDir: REPO_ROOT,
     packet: DEFAULT_PACKET_PATH,
     officialPdfAudit: DEFAULT_OFFICIAL_PDF_AUDIT_PATH,
     officialLifecycleAudit: DEFAULT_OFFICIAL_LIFECYCLE_AUDIT_PATH,
+    reviewerSupport: DEFAULT_REVIEWER_SUPPORT_PATH,
     review: "",
     output: DEFAULT_OUTPUT_DIR,
     generatedAt: "",
@@ -595,6 +680,9 @@ function parseArgs(args) {
       index += 1;
     } else if (arg === "--official-lifecycle-audit") {
       parsed.officialLifecycleAudit = next;
+      index += 1;
+    } else if (arg === "--reviewer-support") {
+      parsed.reviewerSupport = next;
       index += 1;
     } else if (arg === "--output") {
       parsed.output = next;
@@ -631,6 +719,7 @@ async function main() {
     packetPath: args.packet,
     officialPdfAuditPath: args.officialPdfAudit,
     officialLifecycleAuditPath: args.officialLifecycleAudit,
+    reviewerSupportPath: args.reviewerSupport,
     reviewPath: args.review,
     generatedAt: args.generatedAt || undefined,
   });

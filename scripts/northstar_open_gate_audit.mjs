@@ -86,6 +86,7 @@ const EVIDENCE_PATHS = Object.freeze({
   koshaExactPromotionReviewGate: path.join("evaluation", "kosha-exact-promotion-review-gate-2026-07-22", "report.json"),
   koshaExactOfficialPdfAudit: path.join("evaluation", "kosha-exact-official-pdf-audit-2026-07-25", "report.json"),
   koshaExactOfficialLifecycleAudit: path.join("evaluation", "kosha-exact-official-lifecycle-audit-2026-07-25", "report.json"),
+  koshaExactPromotionReviewerSupport: path.join("evaluation", "kosha-exact-promotion-reviewer-support-2026-07-25", "report.json"),
   koshaExactPromotionReviewContractAudit: path.join("evaluation", "kosha-exact-promotion-review-contract-audit-2026-07-23", "report.json"),
 });
 
@@ -3058,6 +3059,8 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
   const officialPdfAudit = readJsonFile(rootDir, officialPdfAuditPath);
   const officialLifecycleAuditPath = EVIDENCE_PATHS.koshaExactOfficialLifecycleAudit;
   const officialLifecycleAudit = readJsonFile(rootDir, officialLifecycleAuditPath);
+  const reviewerSupportPath = EVIDENCE_PATHS.koshaExactPromotionReviewerSupport;
+  const reviewerSupport = readJsonFile(rootDir, reviewerSupportPath);
   const contractAuditPath = EVIDENCE_PATHS.koshaExactPromotionReviewContractAudit;
   const contractAudit = readJsonFile(rootDir, contractAuditPath);
   const contractAuditProvesNoMutation = isRecord(contractAudit)
@@ -3138,6 +3141,37 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
   const officialLifecycleAuditDetail = officialLifecycleAuditProvesCurrentInventory
     ? ` Official lifecycle audit ${officialLifecycleAuditPath} reconciles all 8 packet versions against current and retired inventories with 8 exact official-current titles; corpus source titles remain separately preserved for provenance.`
     : "";
+  const reviewerSupportBoundary = isRecord(reviewerSupport) && isRecord(reviewerSupport.reviewBoundary)
+    ? reviewerSupport.reviewBoundary
+    : null;
+  const reviewerSupportMutationBoundary = isRecord(reviewerSupport) && isRecord(reviewerSupport.mutationBoundary)
+    ? reviewerSupport.mutationBoundary
+    : null;
+  const reviewerSupportProvesSemanticCoverage = isRecord(reviewerSupport)
+    && readString(reviewerSupport.schemaVersion) === "safeclaw-kosha-exact-promotion-reviewer-support/v1"
+    && readString(reviewerSupport.verdict) === "PASS_MACHINE_REVIEWER_SUPPORT_HUMAN_CONFIRMATION_REQUIRED"
+    && readNumber(reviewerSupport.candidateCount) === 8
+    && readNumber(reviewerSupport.machineSupportedCount) === 8
+    && readNumber(reviewerSupport.failedCount) === 0
+    && readNumber(reviewerSupport.semanticGroupCount) === 24
+    && readNumber(reviewerSupport.failedSemanticGroupCount) === 0
+    && reviewerSupportBoundary !== null
+    && reviewerSupportBoundary.humanReviewCompleted === false
+    && reviewerSupportBoundary.reviewChecklistComplete === false
+    && reviewerSupportBoundary.machineEvidenceReplacesHumanReview === false
+    && reviewerSupportMutationBoundary !== null
+    && reviewerSupportMutationBoundary.dbMutationPerformed === false
+    && reviewerSupportMutationBoundary.providerDispatchCalled === false
+    && reviewerSupportMutationBoundary.shareSessionCreated === false
+    && reviewerSupportMutationBoundary.embeddingGenerated === false
+    && reviewerSupportMutationBoundary.vectorUploadPerformed === false
+    && reviewerSupportMutationBoundary.exactTrustRegistryMutationPerformed === false
+    && reviewerSupport.exactPromotionPerformed === false
+    && reviewerSupport.exactRegistryWriteArtifactCreated === false
+    && reviewerSupport.separatePromotionApprovalRequired === true;
+  const reviewerSupportDetail = reviewerSupportProvesSemanticCoverage
+    ? ` Reviewer-support audit ${reviewerSupportPath} records bounded excerpts for 8/8 candidates and 24/24 semantic groups without completing human review or creating a registry artifact.`
+    : "";
   if (!isRecord(report)) {
     return gateResult({
       id: "kosha_exact_promotion_review_gate",
@@ -3176,8 +3210,11 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && report.officialPdfAuditMachineVerified === true
     && report.officialLifecycleAuditMachineSupported === true
     && readNumber(report.officialLifecycleTitleVariantFindingCount) === 0
+    && report.reviewerSupportMachineVerified === true
+    && report.reviewerSupportHumanReviewCompleted === false
     && officialPdfAuditProvesBodyPair
-    && officialLifecycleAuditProvesCurrentInventory;
+    && officialLifecycleAuditProvesCurrentInventory
+    && reviewerSupportProvesSemanticCoverage;
 
   if (blockedTemplate) {
     return gateResult({
@@ -3185,7 +3222,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
       label: "KOSHA exact promotion review gate",
       state: "approval_gated",
       evidencePath,
-      detail: `Review template covers ${candidateCount} KOSHA candidates and is blocked by default (${failures.length} checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval.${officialPdfAuditDetail}${officialLifecycleAuditDetail}${contractAuditDetail}`,
+      detail: `Review template covers ${candidateCount} KOSHA candidates and is blocked by default (${failures.length} checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval.${officialPdfAuditDetail}${officialLifecycleAuditDetail}${reviewerSupportDetail}${contractAuditDetail}`,
       nextActions: [
         "Fill the generated KOSHA review template with reviewer, reviewedAt, humanConfirmed, and every required check before promotion.",
         "Re-run scripts\\kosha_exact_promotion_review_gate.mjs on the completed review input, then seek separate explicit approval before writing any exact-trust registry changes.",
@@ -3203,8 +3240,11 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && report.officialPdfAuditMachineVerified === true
     && report.officialLifecycleAuditMachineSupported === true
     && readNumber(report.officialLifecycleTitleVariantFindingCount) === 0
+    && report.reviewerSupportMachineVerified === true
+    && report.reviewerSupportHumanReviewCompleted === false
     && officialPdfAuditProvesBodyPair
-    && officialLifecycleAuditProvesCurrentInventory;
+    && officialLifecycleAuditProvesCurrentInventory
+    && reviewerSupportProvesSemanticCoverage;
 
   if (completedButStillApprovalGated) {
     return gateResult({
@@ -3212,7 +3252,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
       label: "KOSHA exact promotion review gate",
       state: "approval_gated",
       evidencePath,
-      detail: `Human checklist is complete for ${candidateCount} KOSHA candidates, but exact-trust promotion remains approval-gated and no mutation has been performed.${officialPdfAuditDetail}${officialLifecycleAuditDetail}${contractAuditDetail}`,
+      detail: `Human checklist is complete for ${candidateCount} KOSHA candidates, but exact-trust promotion remains approval-gated and no mutation has been performed.${officialPdfAuditDetail}${officialLifecycleAuditDetail}${reviewerSupportDetail}${contractAuditDetail}`,
       nextActions: [
         "Request explicit approval for the bounded exact-trust promotion before writing registry, DB, embedding, or production runtime changes.",
       ],

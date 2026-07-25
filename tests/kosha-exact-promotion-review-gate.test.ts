@@ -46,6 +46,8 @@ type ReviewGateReport = {
   officialPdfAuditMachineVerified: boolean;
   officialLifecycleAuditMachineSupported: boolean;
   officialLifecycleTitleVariantFindingCount: number;
+  reviewerSupportMachineVerified: boolean;
+  reviewerSupportHumanReviewCompleted: boolean;
   failureSummary: {
     candidateReviewCountMismatch: number;
     missingReviewRows: number;
@@ -74,6 +76,7 @@ type ReviewGateModule = {
     packetPath?: string;
     officialPdfAuditPath?: string;
     officialLifecycleAuditPath?: string;
+    reviewerSupportPath?: string;
     reviewPath: string;
     generatedAt?: string;
   }) => ReviewGateReport;
@@ -209,6 +212,45 @@ function writeFixtureRoot(): { root: string; packetPath: string; reviewPath: str
       humanConfirmed: false,
     })),
   });
+  writeJson(root, "evaluation/kosha-exact-promotion-reviewer-support-2026-07-25/report.json", {
+    schemaVersion: "safeclaw-kosha-exact-promotion-reviewer-support/v1",
+    verdict: "PASS_MACHINE_REVIEWER_SUPPORT_HUMAN_CONFIRMATION_REQUIRED",
+    candidateCount: candidates.length,
+    machineSupportedCount: candidates.length,
+    failedCount: 0,
+    semanticGroupCount: candidates.length * 3,
+    failedSemanticGroupCount: 0,
+    reviewBoundary: {
+      humanReviewCompleted: false,
+      reviewChecklistComplete: false,
+      machineEvidenceReplacesHumanReview: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      embeddingGenerated: false,
+      vectorUploadPerformed: false,
+      exactTrustRegistryMutationPerformed: false,
+    },
+    exactPromotionPerformed: false,
+    exactRegistryWriteArtifactCreated: false,
+    separatePromotionApprovalRequired: true,
+    results: candidates.map((row) => ({
+      stableKey: row.stableKey,
+      version: row.version,
+      semanticGroups: [1, 2, 3].map((group) => ({
+        group,
+        matchedTerms: [`term-${group}`],
+        excerpt: `review context ${group}`,
+        machineSupported: true,
+      })),
+      failedSemanticGroups: [],
+      contentRationaleMachineSupported: true,
+      humanReviewCompleted: false,
+      humanConfirmed: false,
+    })),
+  });
   return { root, packetPath, reviewPath, candidates };
 }
 
@@ -238,6 +280,8 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.officialPdfAuditMachineVerified).toBe(true);
     expect(report.officialLifecycleAuditMachineSupported).toBe(true);
     expect(report.officialLifecycleTitleVariantFindingCount).toBe(0);
+    expect(report.reviewerSupportMachineVerified).toBe(true);
+    expect(report.reviewerSupportHumanReviewCompleted).toBe(false);
     expect(Object.values(report.failureSummary).every((value) => value === 0)).toBe(true);
     expect(report.candidateCount).toBe(2);
     expect(report.reviewedCandidateCount).toBe(2);
@@ -312,6 +356,26 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.failures).toContain("official-lifecycle-audit-candidate-not-supported:D-C-10");
     expect(report.failureSummary.officialLifecycleAuditFailures).toBe(1);
     expect(report.exactRegistryWriteArtifactCreated).toBe(false);
+  });
+
+  it("fails closed when reviewer support omits a bounded excerpt", async () => {
+    const { root, packetPath, reviewPath } = writeFixtureRoot();
+    const supportPath = path.join(root, "evaluation/kosha-exact-promotion-reviewer-support-2026-07-25/report.json");
+    const support = JSON.parse(fs.readFileSync(supportPath, "utf8")) as {
+      results: Array<{ stableKey: string; semanticGroups: Array<{ excerpt: string }> }>;
+    };
+    const target = support.results.find((row) => row.stableKey === "D-C-10");
+    if (!target) throw new Error("fixture-missing-d-c-10-reviewer-support");
+    target.semanticGroups[0].excerpt = "";
+    writeJson(root, path.relative(root, supportPath), support);
+
+    const module = await loadReviewGateModule();
+    const report = module.buildKoshaExactPromotionReviewGate({ rootDir: root, packetPath, reviewPath });
+
+    expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
+    expect(report.reviewerSupportMachineVerified).toBe(false);
+    expect(report.failures).toContain("reviewer-support-candidate-not-supported:D-C-10");
+    expect(report.exactPromotionPerformed).toBe(false);
   });
 
   it("fails closed when a review only fills shallow human confirmation fields", async () => {
