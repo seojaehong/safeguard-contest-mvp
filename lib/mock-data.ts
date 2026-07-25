@@ -880,8 +880,18 @@ function applyQuestionSpecificity(question: string, source: ScenarioProfile): Sc
     if (/신규/.test(question)) workerTargets.push("신규 작업자");
   }
   if (/방호장치|예기치 않은 기동|불시기동|LOTO|잠금표지/.test(question)) {
-    hazards.push("방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험");
-    actions.push("정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통제");
+    const sourceHasIsolationHazard = source.hazards.some((hazard) =>
+      /LOTO|잠금표지|불시기동|예기치 않은 기동/.test(hazard)
+    );
+    const sourceHasIsolationAction = source.actions.some((action) =>
+      /LOTO|잠금표지|전원 차단|무전압/.test(action)
+    );
+    if (!sourceHasIsolationHazard) {
+      hazards.push("방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험");
+    }
+    if (!sourceHasIsolationAction) {
+      actions.push("정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통제");
+    }
   }
   if (/KOSHA|안전보건공단|기술지침/.test(question)) {
     actions.push("KOSHA Guide는 기술지침으로 참고하고 관련 법령의 적용 여부와 현장 조건은 별도 확인 필요로 기록");

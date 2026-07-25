@@ -19,6 +19,7 @@ describe("confined pump scenario inference", () => {
       expect.stringContaining("LOTO"),
       expect.stringContaining("누수 바닥")
     ]));
+    expect(scenario.profile.hazards).not.toContain("방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험");
     expect(scenario.profile.workName).not.toContain("천장");
     expect(scenario.profile.topRisk).not.toContain("천장재");
   });
