@@ -1734,7 +1734,7 @@ function createFixtureRoot(): string {
     exactTrustPromotionStillRequiresSeparateApproval: true,
     officialPdfAuditMachineVerified: true,
     officialLifecycleAuditMachineSupported: true,
-    officialLifecycleTitleVariantFindingCount: 2,
+    officialLifecycleTitleVariantFindingCount: 0,
     failures: Array.from({ length: 64 }, (_, index) => `unconfirmed-required-check:${index}`),
   });
   writeJson(rootDir, path.join("evaluation", "kosha-exact-official-pdf-audit-2026-07-25", "report.json"), {
@@ -1765,12 +1765,12 @@ function createFixtureRoot(): string {
   });
   writeJson(rootDir, path.join("evaluation", "kosha-exact-official-lifecycle-audit-2026-07-25", "report.json"), {
     schemaVersion: "safeclaw-kosha-exact-official-lifecycle-audit/v1",
-    verdict: "REVIEW_REQUIRED_OFFICIAL_CURRENT_LIFECYCLE_MACHINE_SUPPORTED_TITLE_VARIANTS_UNRESOLVED",
+    verdict: "PASS_OFFICIAL_CURRENT_LIFECYCLE_MACHINE_SUPPORTED_HUMAN_REVIEW_REQUIRED",
     candidateCount: 8,
     machineLifecycleSupportedCount: 8,
-    exactTitleIdentityMatchCount: 6,
+    exactTitleIdentityMatchCount: 8,
     failedCount: 0,
-    titleVariantFindingCount: 2,
+    titleVariantFindingCount: 0,
     exactPromotionPerformed: false,
     separatePromotionApprovalRequired: true,
     reviewChecklistImpact: {
@@ -1788,8 +1788,8 @@ function createFixtureRoot(): string {
     },
     results: Array.from({ length: 8 }, (_, index) => ({
       stableKey: index === 0 ? "A-G-1" : index === 1 ? "E-G-4" : `KEY-${index}`,
-      officialTitleExactMatch: index > 1,
-      findings: index <= 1 ? ["officialTitleVariantRequiresHumanReview"] : [],
+      officialTitleExactMatch: true,
+      findings: [],
       machineLifecycleSupported: true,
       operatorLifecycleCurrentStatusConfirmed: false,
       humanConfirmed: false,
@@ -2633,14 +2633,14 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("contradicted");
   });
 
-  it("fails closed when the KOSHA lifecycle companion audit hides a title variant", async () => {
+  it("fails closed when the KOSHA lifecycle companion audit loses exact title identity", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
     const auditPath = path.join(rootDir, "evaluation", "kosha-exact-official-lifecycle-audit-2026-07-25", "report.json");
     const lifecycleAudit = JSON.parse(fs.readFileSync(auditPath, "utf8")) as {
-      titleVariantFindingCount: number;
+      exactTitleIdentityMatchCount: number;
     };
-    lifecycleAudit.titleVariantFindingCount = 0;
+    lifecycleAudit.exactTitleIdentityMatchCount = 7;
     writeJson(rootDir, path.relative(rootDir, auditPath), lifecycleAudit);
 
     const audit = buildNorthstarOpenGateAudit({

@@ -3111,11 +3111,11 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     : null;
   const officialLifecycleAuditProvesCurrentInventory = isRecord(officialLifecycleAudit)
     && readString(officialLifecycleAudit.schemaVersion) === "safeclaw-kosha-exact-official-lifecycle-audit/v1"
-    && readString(officialLifecycleAudit.verdict) === "REVIEW_REQUIRED_OFFICIAL_CURRENT_LIFECYCLE_MACHINE_SUPPORTED_TITLE_VARIANTS_UNRESOLVED"
+    && readString(officialLifecycleAudit.verdict) === "PASS_OFFICIAL_CURRENT_LIFECYCLE_MACHINE_SUPPORTED_HUMAN_REVIEW_REQUIRED"
     && readNumber(officialLifecycleAudit.candidateCount) === 8
     && readNumber(officialLifecycleAudit.machineLifecycleSupportedCount) === 8
-    && readNumber(officialLifecycleAudit.exactTitleIdentityMatchCount) === 6
-    && readNumber(officialLifecycleAudit.titleVariantFindingCount) === 2
+    && readNumber(officialLifecycleAudit.exactTitleIdentityMatchCount) === 8
+    && readNumber(officialLifecycleAudit.titleVariantFindingCount) === 0
     && readNumber(officialLifecycleAudit.failedCount) === 0
     && lifecycleRows.length === 8
     && lifecycleRows.every((row) => row.machineLifecycleSupported === true
@@ -3136,7 +3136,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && lifecycleMutationBoundary.vectorUploadPerformed === false
     && lifecycleMutationBoundary.exactTrustRegistryMutationPerformed === false;
   const officialLifecycleAuditDetail = officialLifecycleAuditProvesCurrentInventory
-    ? ` Official lifecycle audit ${officialLifecycleAuditPath} reconciles all 8 packet versions against current and retired inventories; 6 titles match exactly and A-G-1/E-G-4 retain 2 explicit title variants for human review.`
+    ? ` Official lifecycle audit ${officialLifecycleAuditPath} reconciles all 8 packet versions against current and retired inventories with 8 exact official-current titles; corpus source titles remain separately preserved for provenance.`
     : "";
   if (!isRecord(report)) {
     return gateResult({
@@ -3175,7 +3175,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && failures.length >= 8
     && report.officialPdfAuditMachineVerified === true
     && report.officialLifecycleAuditMachineSupported === true
-    && readNumber(report.officialLifecycleTitleVariantFindingCount) === 2
+    && readNumber(report.officialLifecycleTitleVariantFindingCount) === 0
     && officialPdfAuditProvesBodyPair
     && officialLifecycleAuditProvesCurrentInventory;
 
@@ -3202,7 +3202,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && passedCandidateCount === candidateCount
     && report.officialPdfAuditMachineVerified === true
     && report.officialLifecycleAuditMachineSupported === true
-    && readNumber(report.officialLifecycleTitleVariantFindingCount) === 2
+    && readNumber(report.officialLifecycleTitleVariantFindingCount) === 0
     && officialPdfAuditProvesBodyPair
     && officialLifecycleAuditProvesCurrentInventory;
 
