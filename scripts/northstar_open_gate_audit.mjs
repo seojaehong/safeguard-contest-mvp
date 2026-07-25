@@ -1103,6 +1103,7 @@ function evaluateLiveDocumentEditorialReviewGate(rootDir) {
   const nearRemainingBoundaries = isRecord(nearClassificationReport.remainingBoundaries) ? nearClassificationReport.remainingBoundaries : {};
   const rainBeforeLive = isRecord(rainContextReport.beforeLive) ? rainContextReport.beforeLive : {};
   const rainAfterLive = isRecord(rainContextReport.afterLive) ? rainContextReport.afterLive : {};
+  const rainAfterLiveFull = isRecord(rainContextReport.afterLiveFull) ? rainContextReport.afterLiveFull : {};
   const rainMutationBoundary = isRecord(rainContextReport.mutationBoundary) ? rainContextReport.mutationBoundary : {};
   const rainRemainingBoundary = isRecord(rainContextReport.remainingBoundary) ? rainContextReport.remainingBoundary : {};
   const sourceMatchesProduction = readString(report.productCommit).length > 0
@@ -1181,6 +1182,28 @@ function evaluateLiveDocumentEditorialReviewGate(rootDir) {
     && readNumber(rainAfterLive.failedDocumentCount) === 0
     && readString(rainAfterLive.sourceHead).length > 0
     && readString(rainAfterLive.sourceHead) === readString(rainAfterLive.productionCommit)
+    && readNumber(rainContextReport.fullMatrixScenarioCount) === 5
+    && rainContextReport.fullMatrixContractAffectsRuntime === false
+    && readString(rainContextReport.fullMatrixContractCommit).length > 0
+    && readString(rainContextReport.fullMatrixContractCommit) === readString(rainAfterLiveFull.sourceHead)
+    && readString(rainContextReport.fullMatrixProductionCommit).length > 0
+    && readString(rainContextReport.fullMatrixProductionCommit) === readString(rainAfterLiveFull.productionCommit)
+    && readString(rainAfterLiveFull.verdict)
+      === "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY"
+    && readNumber(rainAfterLiveFull.pass) === 5
+    && readNumber(rainAfterLiveFull.fail) === 0
+    && readNumber(rainAfterLiveFull.reviewedDocumentSurfaceCount) === 60
+    && readNumber(rainAfterLiveFull.scenarioIrrelevantContextFindingCount) === 0
+    && readNumber(rainAfterLiveFull.failedDocumentCount) === 0
+    && readNumber(rainAfterLiveFull.matchedForbiddenDocumentFragmentCount) === 0
+    && Array.isArray(rainAfterLiveFull.forbiddenRainContextFragments)
+    && rainAfterLiveFull.forbiddenRainContextFragments.includes("우천 후 바닥 젖음")
+    && rainAfterLiveFull.forbiddenRainContextFragments.includes("우천·젖은 바닥")
+    && readNumber(rainAfterLiveFull.placeholderFindingCount) === 0
+    && readNumber(rainAfterLiveFull.legalOverclaimFindingCount) === 0
+    && readNumber(rainAfterLiveFull.awkwardCompositionFindingCount) === 0
+    && readNumber(rainAfterLiveFull.evidenceDomainMismatchCount) === 0
+    && readNumber(rainAfterLiveFull.genericTemplateOveruseCount) === 0
     && rainMutationBoundary.dbMutationPerformed === false
     && rainMutationBoundary.shareSessionCreated === false
     && rainMutationBoundary.providerDispatchCalled === false
@@ -1188,6 +1211,7 @@ function evaluateLiveDocumentEditorialReviewGate(rootDir) {
     && rainMutationBoundary.vectorUploadPerformed === false
     && rainRemainingBoundary.liveAfterDeploymentPending === false
     && rainRemainingBoundary.humanReviewCompleted === false
+    && rainRemainingBoundary.broadHumanWordingReviewRequired === true
     && readString(rainRemainingBoundary.exactSavedShareVerdict) === "MISSING_EVIDENCE";
   const liveReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY"
     && sourceMatchesProduction
@@ -1223,7 +1247,7 @@ function evaluateLiveDocumentEditorialReviewGate(rootDir) {
       label: "Live 12-deliverable editorial contract review",
       state: "proven",
       evidencePath,
-      detail: `Five live production scenarios and all 60 canonical document surfaces pass the automated editorial contract: placeholder=0, legal overclaim=0, awkward composition ${readNumber(beforeLive.awkwardCompositionFindingCount)}->0, and evidence-domain mismatch ${readNumber(beforeLive.evidenceDomainMismatchCount)}->0. The companion duplicate classifier reduces generic-template overuse ${readNumber(duplicateBeforeLive.genericTemplateOveruseCount)}->0 while retaining exact=${readNumber(duplicateAfterLive.exactLineOveruseCount)} and near=${readNumber(duplicateAfterLive.nearDuplicateLineOveruseCount)} reviewer findings. Near-classification keeps all ${readNumber(nearAfterLive.nearDuplicateLineOveruseCount)} findings visible while reducing unclassified human-review-required ${readNumber(nearBeforeCategories["human-review-required"])}->${readNumber(nearAfterCategories["human-review-required"])} through role/context/hazard/control categories. Rain-context isolation ${rainContextEvidencePath} fails production before at ${readNumber(rainBeforeLive.scenarioIrrelevantContextFindingCount)} irrelevant document findings and passes live after at ${readNumber(rainAfterLive.scenarioIrrelevantContextFindingCount)}, preventing 비산 from being treated as rain. humanReviewCompleted=false, the six-core wording and 12-presence gates are not combined as a human PASS, no DB/share/provider mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`,
+      detail: `Five live production scenarios and all 60 canonical document surfaces pass the automated editorial contract: placeholder=0, legal overclaim=0, awkward composition ${readNumber(beforeLive.awkwardCompositionFindingCount)}->0, and evidence-domain mismatch ${readNumber(beforeLive.evidenceDomainMismatchCount)}->0. The companion duplicate classifier reduces generic-template overuse ${readNumber(duplicateBeforeLive.genericTemplateOveruseCount)}->0 while retaining exact=${readNumber(duplicateAfterLive.exactLineOveruseCount)} and near=${readNumber(duplicateAfterLive.nearDuplicateLineOveruseCount)} reviewer findings. Near-classification keeps all ${readNumber(nearAfterLive.nearDuplicateLineOveruseCount)} findings visible while reducing unclassified human-review-required ${readNumber(nearBeforeCategories["human-review-required"])}->${readNumber(nearAfterCategories["human-review-required"])} through role/context/hazard/control categories. Rain-context isolation ${rainContextEvidencePath} fails the focused production-before scenario at ${readNumber(rainBeforeLive.scenarioIrrelevantContextFindingCount)} irrelevant document findings, passes the focused live-after at ${readNumber(rainAfterLive.scenarioIrrelevantContextFindingCount)}, and passes the strengthened five-scenario/60-document contract with ${readNumber(rainAfterLiveFull.matchedForbiddenDocumentFragmentCount)} forbidden rain fragments, preventing 비산 from being treated as rain. humanReviewCompleted=false, the six-core wording and 12-presence gates are not combined as a human PASS, no DB/share/provider mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`,
       nextActions: [
         "Perform a separate human editorial review for the recorded duplicate-line findings.",
         "Keep Documents/Share viewport IA and exact saved Share geometry as separate product/evidence boundaries.",

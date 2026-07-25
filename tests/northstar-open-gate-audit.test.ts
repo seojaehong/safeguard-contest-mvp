@@ -514,6 +514,10 @@ function createFixtureRoot(): string {
     schemaVersion: "safeclaw-live-document-rain-context-isolation/v1",
     verdict: "PASS_LIVE_PRODUCTION_RAIN_CONTEXT_ISOLATION",
     scenarioCount: 1,
+    fullMatrixScenarioCount: 5,
+    fullMatrixContractCommit: "fixture-contract-sha",
+    fullMatrixProductionCommit: "fixture-production-sha",
+    fullMatrixContractAffectsRuntime: false,
     canonicalDocumentCount: 12,
     beforeLive: {
       pass: 0,
@@ -531,6 +535,23 @@ function createFixtureRoot(): string {
       scenarioIrrelevantContextFindingCount: 0,
       failedDocumentCount: 0,
     },
+    afterLiveFull: {
+      verdict: "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+      sourceHead: "fixture-contract-sha",
+      productionCommit: "fixture-production-sha",
+      pass: 5,
+      fail: 0,
+      reviewedDocumentSurfaceCount: 60,
+      scenarioIrrelevantContextFindingCount: 0,
+      failedDocumentCount: 0,
+      matchedForbiddenDocumentFragmentCount: 0,
+      forbiddenRainContextFragments: ["우천 후 바닥 젖음", "우천·젖은 바닥"],
+      placeholderFindingCount: 0,
+      legalOverclaimFindingCount: 0,
+      awkwardCompositionFindingCount: 0,
+      evidenceDomainMismatchCount: 0,
+      genericTemplateOveruseCount: 0,
+    },
     mutationBoundary: {
       dbMutationPerformed: false,
       shareSessionCreated: false,
@@ -541,6 +562,7 @@ function createFixtureRoot(): string {
     remainingBoundary: {
       liveAfterDeploymentPending: false,
       humanReviewCompleted: false,
+      broadHumanWordingReviewRequired: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
@@ -2109,6 +2131,7 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("near=100");
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("unclassified human-review-required 54->0");
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("irrelevant document findings");
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("five-scenario/60-document contract");
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("preventing 비산 from being treated as rain");
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("humanReviewCompleted=false");
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
@@ -2453,6 +2476,35 @@ describe("northstar open gate audit", () => {
       afterLive: { scenarioIrrelevantContextFindingCount: number };
     };
     report.afterLive.scenarioIrrelevantContextFindingCount = 1;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain(
+      "rainContextReady=false",
+    );
+  });
+
+  it("fails the editorial gate closed when the full rain-context matrix finds a forbidden fragment", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "live-document-rain-context-isolation-2026-07-25",
+      "report.json",
+    );
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      afterLiveFull: { matchedForbiddenDocumentFragmentCount: number };
+    };
+    report.afterLiveFull.matchedForbiddenDocumentFragmentCount = 1;
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
 
     const audit = buildNorthstarOpenGateAudit({
