@@ -15827,6 +15827,7 @@ body:has(.safeclaw-landing) :is(
 
 @media (min-width: 900px) {
   .safeclaw-share-recipient-page {
+    width: min(1204px, calc(100vw - 48px));
     max-width: min(1204px, calc(100vw - 48px));
     grid-template-columns: minmax(360px, 0.82fr) minmax(460px, 1fr);
     align-items: start;

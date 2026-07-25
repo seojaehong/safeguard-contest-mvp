@@ -341,6 +341,7 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
           .sort((a, b) => a - b);
         return {
           rootWidth: Math.round(rootRect?.width ?? 0),
+          rootWidthRatio: Number(((rootRect?.width ?? 0) / window.innerWidth).toFixed(2)),
           rootBottom: Math.round(rootRect?.bottom ?? 0),
           confirmationLeft: Math.round(confirmRect?.left ?? 0),
           confirmationRight: Math.round(confirmRect?.right ?? 0),
@@ -363,6 +364,7 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
       });
 
       expect(metrics.rootWidth).toBeGreaterThanOrEqual(1040);
+      expect(metrics.rootWidthRatio).toBeGreaterThanOrEqual(0.82);
       expect(metrics.distinctLefts.length).toBeGreaterThanOrEqual(2);
       expect(metrics.noticeLeft).toBeGreaterThan(metrics.confirmationRight);
       expect(metrics.documentsLeft).toBeGreaterThan(metrics.confirmationLeft);
@@ -423,6 +425,7 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
           const noticeRect = notice?.getBoundingClientRect();
           return {
             rootWidth: Math.round(rootRect?.width ?? 0),
+            rootWidthRatio: Number(((rootRect?.width ?? 0) / window.innerWidth).toFixed(2)),
             rootHeight: Math.round(rootRect?.height ?? 0),
             viewportHeight: window.innerHeight,
             confirmationBottom: Math.round(confirmButton?.getBoundingClientRect().bottom ?? 0),
@@ -454,6 +457,7 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
         expect(metrics.rootHeight).toBeLessThanOrEqual(Math.ceil(metrics.viewportHeight * 1.5));
         if (viewport.desktop) {
           expect(metrics.rootWidth).toBeGreaterThanOrEqual(1040);
+          expect(metrics.rootWidthRatio).toBeGreaterThanOrEqual(0.82);
           expect(metrics.noticeLeft).toBeGreaterThan(metrics.confirmationRight);
         } else {
           expect(metrics.rootWidth).toBeLessThanOrEqual(viewport.width);
