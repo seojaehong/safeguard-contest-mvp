@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-rls-llm-wiki-approval-preflight/v1",
-  "generatedAt": "2026-07-25T01:08:41.479Z",
-  "sourceSha": "3c0767fd5607c9c543c5147979439a830722e332",
+  "generatedAt": "2026-07-25T01:20:28.632Z",
+  "sourceSha": "602596c1bb1c728e18fc83a0177dbf5659cb89a5",
   "overall": "approval_ready_open",
   "launchReadiness": false,
   "dbMutationPerformed": false,
@@ -74,13 +74,13 @@
     },
     {
       "path": "lib/knowledge-governance.ts",
-      "bytes": 15617,
-      "sha256": "1d2e97d9fbd576616d0bcfcb9c02fdcfc55e1c41b3e6f68aeeafbad9ffe98f68"
+      "bytes": 18388,
+      "sha256": "21ffece08dfe6ba9928e875659ba4a3905f9803a5fe0a01d2a9aa43326b48c61"
     },
     {
       "path": "lib/knowledge-candidate-route.ts",
-      "bytes": 8322,
-      "sha256": "4af2f93b712893c517770c50b63d6ead7bdbddda634c360b040d8b1e0e3a1cc4"
+      "bytes": 8911,
+      "sha256": "8b5d5943da2e37d5148c1238983d1b7536314e11cc4dcf97d6849dd408e87b28"
     },
     {
       "path": "app/api/knowledge/review/route.ts",
@@ -89,8 +89,8 @@
     },
     {
       "path": "evaluation/northstar-open-gates-current/report.json",
-      "bytes": 26213,
-      "sha256": "b3a149996a7a3a3ca631a82bd4eb2256ac5dea2836531efe54697214c8e6a82b"
+      "bytes": 26513,
+      "sha256": "6ede747b22999c56b872f2c148d7fd8998e6971bf2249934c984ab4c608b9a51"
     }
   ],
   "publicationSurfaceInventory": {
@@ -173,6 +173,21 @@
     },
     {
       "id": "hermes_llm_candidate_stays_unpublished",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "knowledge_candidate_review_authority_order",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "knowledge_candidate_review_boundary",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "knowledge_candidate_prompt_authority_separation",
       "passed": true,
       "message": "ok"
     },

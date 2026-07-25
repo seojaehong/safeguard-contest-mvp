@@ -1,7 +1,7 @@
 # RLS / LLM Wiki Approval Preflight
 
-Generated: `2026-07-25T01:08:41.479Z`
-Source SHA: `3c0767fd5607c9c543c5147979439a830722e332`
+Generated: `2026-07-25T01:20:28.632Z`
+Source SHA: `602596c1bb1c728e18fc83a0177dbf5659cb89a5`
 Overall: `approval_ready_open`
 Launch readiness: `false`
 DB mutation performed: `false`
@@ -43,6 +43,9 @@ The approval packet is internally ready for operator review, but launch readines
 | `tenant_manifest_v3` | PASS | ok |
 | `tenant_harness_no_live_adapter` | PASS | ok |
 | `hermes_llm_candidate_stays_unpublished` | PASS | ok |
+| `knowledge_candidate_review_authority_order` | PASS | ok |
+| `knowledge_candidate_review_boundary` | PASS | ok |
+| `knowledge_candidate_prompt_authority_separation` | PASS | ok |
 | `knowledge_candidate_route_non_publishing` | PASS | ok |
 | `knowledge_review_route_non_publishing` | PASS | ok |
 | `wiki_no_executable_publication_surface` | PASS | ok |
