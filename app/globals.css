@@ -6186,23 +6186,26 @@ ul {
 .workflow-result > summary span {
   color: var(--muted);
   font-size: var(--text-caption);
-  font-weight: 700;
+  font-weight: 600;
   line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .workflow-result > summary strong {
   color: inherit;
   font-size: var(--text-table);
-  font-weight: 800;
+  font-weight: 500;
   line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .workflow-result > summary em {
   color: currentColor;
   font-size: var(--text-caption);
   font-style: normal;
-  font-weight: 700;
+  font-weight: 600;
   line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
   opacity: 0.82;
   text-align: right;
 }
@@ -9864,7 +9867,7 @@ body:has(.safeclaw-landing) :is(
   letter-spacing: var(--tracking-hud);
 }
 
-.safeclaw-module-shell button:not(:where(.secondary, .ghost, .document-tab, .doc-tab, .template-tab, .template-card, .safeclaw-module-chrome-button)),
+.safeclaw-module-shell button:not(:where(.secondary, .ghost, .document-tab, .doc-tab, .template-tab, .template-card, .safeclaw-module-chrome-button, [class*="removeRiskRowButton"])),
 .safeclaw-module-shell .button:not(.secondary),
 .safeclaw-module-shell .full-button,
 .safeclaw-module-shell a.button:not(.secondary) {
@@ -15243,7 +15246,7 @@ body:has(.safeclaw-landing) :is(
   color: var(--share-muted);
   font-family: var(--font-hud);
   font-size: var(--text-hud);
-  font-weight: 800;
+  font-weight: 700;
   line-height: var(--leading-hud);
   letter-spacing: var(--tracking-hud);
 }
@@ -15253,8 +15256,9 @@ body:has(.safeclaw-landing) :is(
   overflow: hidden;
   color: var(--share-ink);
   font-size: var(--text-caption);
-  font-weight: 750;
+  font-weight: 600;
   line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -15274,7 +15278,7 @@ body:has(.safeclaw-landing) :is(
     margin: 0;
     grid-template-columns: minmax(0, 1fr) minmax(520px, 0.72fr);
     align-items: start;
-    gap: 10px;
+    gap: 8px;
     border-radius: var(--r-lg);
     padding: 12px;
   }
@@ -15309,7 +15313,7 @@ body:has(.safeclaw-landing) :is(
     grid-row: 2;
     align-content: start;
     min-height: 0;
-    padding: 10px;
+    padding: 8px;
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .share-form-card > p.muted.small,
@@ -15326,7 +15330,7 @@ body:has(.safeclaw-landing) :is(
     grid-template-columns: minmax(0, 1fr);
     align-content: start;
     align-items: start;
-    gap: 6px;
+    gap: 8px;
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .share-panel.workflow-panel .channel-card {
@@ -15337,7 +15341,7 @@ body:has(.safeclaw-landing) :is(
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    padding: 7px 6px;
+    padding: 8px;
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .share-panel.workflow-panel .channel-card strong,
@@ -15363,7 +15367,7 @@ body:has(.safeclaw-landing) :is(
     grid-column: 2;
     grid-row: 3 / span 4;
     position: sticky;
-    top: 88px;
+    top: 80px;
     align-self: start;
     height: min(300px, calc(100vh - 212px));
     min-height: min(300px, calc(100vh - 212px));
@@ -15388,7 +15392,7 @@ body:has(.safeclaw-landing) :is(
     align-items: center;
     gap: 4px 12px;
     border-right: 0;
-    padding: 10px 12px;
+    padding: 8px 12px;
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .safeclaw-module-panel:first-child {
@@ -15402,7 +15406,9 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .safeclaw-module-panel h2 {
     margin: 0;
     font-size: var(--text-component-title);
+    font-weight: 700;
     line-height: var(--leading-component-title);
+    letter-spacing: var(--tracking-component-title);
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .safeclaw-module-panel p,
@@ -15466,8 +15472,8 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .safeclaw-module-panel {
     min-height: 0;
-    gap: 6px;
-    padding: 10px 12px;
+    gap: 8px;
+    padding: 8px 12px;
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .safeclaw-module-panel p:not(.export-error),
@@ -15521,7 +15527,7 @@ body:has(.safeclaw-landing) :is(
   align-content: start;
   gap: 12px;
   border-left: 1px solid var(--share-line);
-  padding: 4px 2px 4px 14px;
+  padding: 4px 4px 4px 12px;
 }
 
 .share-desktop-status-rail dl {
@@ -15534,7 +15540,7 @@ body:has(.safeclaw-landing) :is(
   grid-template-columns: 54px minmax(0, 1fr);
   gap: 8px;
   border-bottom: 1px solid var(--share-line);
-  padding: 9px 0;
+  padding: 8px 0;
 }
 
 .share-desktop-status-rail dt,
@@ -15557,7 +15563,7 @@ body:has(.safeclaw-landing) :is(
   overflow: hidden;
   color: var(--share-ink);
   font-size: var(--text-caption);
-  font-weight: 650;
+  font-weight: 600;
   line-height: var(--leading-caption);
   letter-spacing: var(--tracking-body);
   text-overflow: ellipsis;
@@ -15566,7 +15572,7 @@ body:has(.safeclaw-landing) :is(
 
 .share-desktop-capability-lock {
   display: grid;
-  gap: 5px;
+  gap: 4px;
   border-top: 2px solid var(--share-line-strong);
   padding-top: 12px;
 }
@@ -15579,13 +15585,17 @@ body:has(.safeclaw-landing) :is(
 .share-desktop-capability-lock strong {
   color: var(--share-ink);
   font-size: var(--text-body);
+  font-weight: 500;
   line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .share-desktop-capability-lock p {
   color: var(--share-muted);
   font-size: var(--text-caption);
+  font-weight: 600;
   line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .share-recipient-card {
@@ -17198,6 +17208,7 @@ body:has(.safeclaw-landing) :is(
 
   .command-center-shell.workspace-page-document .safety-brief-head strong {
     font-size: var(--text-table);
+    font-weight: 500;
     line-height: var(--leading-table);
     letter-spacing: var(--tracking-body);
   }
@@ -17209,8 +17220,8 @@ body:has(.safeclaw-landing) :is(
 
   .command-center-shell.workspace-page-document .safety-brief-risk-card,
   .command-center-shell.workspace-page-document .safety-brief-risk-table {
-    gap: 6px;
-    padding: 10px;
+    gap: 8px;
+    padding: 8px;
   }
 
   .command-center-shell.workspace-page-document .safety-brief-risk-card ol,
@@ -17220,7 +17231,9 @@ body:has(.safeclaw-landing) :is(
 
   .command-center-shell.workspace-page-document .safety-brief-risk-card li {
     font-size: var(--text-caption);
+    font-weight: 600;
     line-height: var(--leading-caption);
+    letter-spacing: var(--tracking-body);
   }
 
   .command-center-shell.workspace-page-document .safety-brief-row {
@@ -17427,7 +17440,9 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell .document-secondary-actions > .document-provenance-drawer > summary,
   .command-center-shell .document-secondary-actions > .document-deep-review > summary {
     font-size: var(--text-caption);
+    font-weight: 600;
     line-height: var(--leading-caption);
+    letter-spacing: var(--tracking-body);
   }
 
   .command-center-shell .document-deep-review > .document-viewer-shell {
@@ -17586,7 +17601,8 @@ body:has(.safeclaw-landing) :is(
   .share-mobile-config-toggle span {
     font-size: var(--text-caption);
     line-height: var(--leading-caption);
-    font-weight: 700;
+    font-weight: 600;
+    letter-spacing: var(--tracking-body);
   }
 
   .share-mobile-config-toggle strong {
@@ -18212,7 +18228,7 @@ body:has(.safeclaw-landing) :is(
   letter-spacing: var(--tracking-body);
 }
 
-.safeclaw-module-shell.module-variant-document button:not(:where(.secondary, .ghost, .document-tab, .doc-tab, .template-tab, .template-card, .safeclaw-module-chrome-button)),
+.safeclaw-module-shell.module-variant-document button:not(:where(.secondary, .ghost, .document-tab, .doc-tab, .template-tab, .template-card, .safeclaw-module-chrome-button, [role="tab"], [class*="removeRiskRowButton"])),
 .safeclaw-module-shell.module-variant-document .button:not(.secondary),
 .safeclaw-module-shell.module-variant-document .safeclaw-module-primary {
   border-color: var(--module-primary-border, var(--workspace-accent));
@@ -18224,7 +18240,7 @@ body:has(.safeclaw-landing) :is(
   color: var(--workspace-accent-text);
 }
 
-.safeclaw-module-shell.module-variant-document button:not(:where(.secondary, .ghost, .doc-tab, .template-card, .safeclaw-module-chrome-button)):hover,
+.safeclaw-module-shell.module-variant-document button:not(:where(.secondary, .ghost, .doc-tab, .template-card, .safeclaw-module-chrome-button, [role="tab"], [class*="removeRiskRowButton"])):hover,
 .safeclaw-module-shell.module-variant-document .button:not(.secondary):hover,
 .safeclaw-module-shell.module-variant-document .safeclaw-module-primary:hover {
   border-color: var(--module-primary-hover-border, var(--workspace-accent-hover));
@@ -19486,7 +19502,7 @@ body:has(.safeclaw-landing) :is(
   margin-top: 16px;
   border: 0;
   border-radius: 0;
-  background: transparent;
+  background: var(--workspace-surface-1);
   overflow: visible;
 }
 
@@ -20718,7 +20734,9 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .document-toolbar .h2 {
     margin: 0;
     font-size: var(--text-component-title);
+    font-weight: 700;
     line-height: var(--leading-component-title);
+    letter-spacing: var(--tracking-component-title);
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .document-toolbar .editor-document-meta {
@@ -22128,12 +22146,12 @@ body:has(.safeclaw-landing) :is(
     top: 0;
     z-index: 3;
     display: grid;
-    gap: 6px;
+    gap: 8px;
     border: 1px solid var(--workspace-rule);
     border-radius: var(--radius-soft);
     background: var(--workspace-surface-1);
-    padding: 8px 10px;
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+    padding: 8px;
+    box-shadow: none;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .document-toolbar .eyebrow,
@@ -22145,7 +22163,7 @@ body:has(.safeclaw-landing) :is(
     margin: 0;
     color: var(--workspace-ink);
     font-size: var(--text-table);
-    font-weight: 800;
+    font-weight: 500;
     line-height: var(--leading-table);
     letter-spacing: var(--tracking-body);
   }
@@ -22303,7 +22321,7 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-mobile-core-list {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    column-gap: 6px;
+    column-gap: 8px;
   }
 
   .safeclaw-module-shell.module-variant-document :is(
@@ -22352,7 +22370,7 @@ body:has(.safeclaw-landing) :is(
     font-size: var(--text-caption);
     font-weight: 600;
     line-height: var(--leading-caption);
-    letter-spacing: 0;
+    letter-spacing: var(--tracking-body);
   }
 
   .safeclaw-module-shell.module-variant-document button[data-document-presence="missingUnexpected"] small,
