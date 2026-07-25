@@ -1732,7 +1732,34 @@ function createFixtureRoot(): string {
     reviewChecklistComplete: false,
     exactTrustPromotionBlockedUntilChecklistComplete: true,
     exactTrustPromotionStillRequiresSeparateApproval: true,
+    officialPdfAuditMachineVerified: true,
     failures: Array.from({ length: 64 }, (_, index) => `unconfirmed-required-check:${index}`),
+  });
+  writeJson(rootDir, path.join("evaluation", "kosha-exact-official-pdf-audit-2026-07-25", "report.json"), {
+    schemaVersion: "safeclaw-kosha-exact-official-pdf-audit/v1",
+    verdict: "PASS_OFFICIAL_PDF_AUTHENTICITY_BODY_PAIR_REVIEW_STILL_REQUIRED",
+    candidateCount: 8,
+    machineVerifiedCount: 8,
+    failedCount: 0,
+    temporaryPdfFilesRetained: 0,
+    exactPromotionPerformed: false,
+    separatePromotionApprovalRequired: true,
+    reviewChecklistImpact: {
+      officialUrlExpectedFileMachineSupported: true,
+      officialMetadataAndBodyProvenanceMachineSupported: true,
+      bodyAndPdfHashMachineRechecked: true,
+      operatorLifecycleCurrentStatusConfirmed: false,
+      humanConfirmationRecorded: false,
+      reviewChecklistComplete: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      embeddingGenerated: false,
+      vectorUploadPerformed: false,
+      exactTrustRegistryMutationPerformed: false,
+    },
   });
   writeJson(rootDir, path.join("evaluation", "kosha-exact-promotion-review-contract-audit-2026-07-23", "report.json"), {
     schemaVersion: "safeclaw-kosha-exact-promotion-review-contract-audit/v1",
@@ -1906,6 +1933,7 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("approval_gated");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("blocked by default");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("separate approval");
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("machine-verified all 8 PDF/body pairs");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("shallow human-confirmation-only reviews are blocked");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("completed review remains no-mutation plus separate approval");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.nextActions.join("\n")).toContain(
@@ -2550,6 +2578,25 @@ describe("northstar open gate audit", () => {
     expect(audit.overall).toBe("evidence_missing");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_trust_registry")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("missing");
+  });
+
+  it("fails closed when the KOSHA official PDF companion audit no longer preserves review boundaries", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const auditPath = path.join(rootDir, "evaluation", "kosha-exact-official-pdf-audit-2026-07-25", "report.json");
+    const officialPdfAudit = JSON.parse(fs.readFileSync(auditPath, "utf8")) as {
+      reviewChecklistImpact: { reviewChecklistComplete: boolean };
+    };
+    officialPdfAudit.reviewChecklistImpact.reviewChecklistComplete = true;
+    writeJson(rootDir, path.relative(rootDir, auditPath), officialPdfAudit);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("contradicted");
   });
 
   it("renders the approval boundary and forbidden claims in the Markdown report", async () => {

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-24T23:49:43.416Z",
-  "sourceSha": "fbb1577f45f0a7cfbbb2129f77daf1e563b29ac4",
+  "generatedAt": "2026-07-25T00:07:33.763Z",
+  "sourceSha": "b2285f97f6635da30aa88206fc88c07035cd2028",
   "overall": "open",
   "gates": [
     {
@@ -274,7 +274,7 @@
       "state": "approval_gated",
       "label": "KOSHA exact promotion review gate",
       "evidencePath": "evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\report.json",
-      "detail": "Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Contract audit evaluation\\kosha-exact-promotion-review-contract-audit-2026-07-23\\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval.",
+      "detail": "Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Official PDF audit evaluation\\kosha-exact-official-pdf-audit-2026-07-25\\report.json re-downloaded and machine-verified all 8 PDF/body pairs while preserving lifecycle, human-review, and promotion boundaries. Contract audit evaluation\\kosha-exact-promotion-review-contract-audit-2026-07-23\\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval.",
       "nextActions": [
         "Fill the generated KOSHA review template with reviewer, reviewedAt, humanConfirmed, and every required check before promotion.",
         "Re-run scripts\\kosha_exact_promotion_review_gate.mjs on the completed review input, then seek separate explicit approval before writing any exact-trust registry changes."
