@@ -693,6 +693,18 @@ function createFixtureRoot(): string {
     embeddingGenerated: false,
     uploaded: false,
     corpusCount: 6032,
+    corpusHash: "a".repeat(64),
+    corpusInspection: {
+      lineCount: 6032,
+      parsedRecordCount: 6032,
+      parseErrorCount: 0,
+      invalidRecordCount: 0,
+      duplicateReferenceItemIdCount: 0,
+      duplicateContentHashCount: 0,
+      computedCorpusHash: "a".repeat(64),
+      manifestBatchFailureCount: 0,
+    },
+    failedCheckIds: [],
   });
   writeJson(
     rootDir,
@@ -2912,6 +2924,28 @@ describe("northstar open gate audit", () => {
     const sifGate = audit.gates.find((gate) => gate.id === "sif_embedding_runtime");
     expect(sifGate?.state).toBe("contradicted");
     expect(sifGate?.detail).toContain("not an ancestor");
+  });
+
+  it("contradicts SIF embedding preflight when corpus row integrity is incomplete", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json");
+    const report = JSON.parse(fs.readFileSync(path.join(rootDir, reportPath), "utf8")) as {
+      corpusInspection: { invalidRecordCount: number };
+    };
+    report.corpusInspection.invalidRecordCount = 1;
+    writeJson(rootDir, reportPath, report);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.overall).toBe("contradicted");
+    const sifGate = audit.gates.find((gate) => gate.id === "sif_embedding_runtime");
+    expect(sifGate?.state).toBe("contradicted");
+    expect(sifGate?.detail).toContain("6,032-record integrity contract");
   });
 
   it("contradicts stale LLM Wiki publication preflight evidence from outside the current history", async () => {

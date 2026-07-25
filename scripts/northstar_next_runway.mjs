@@ -694,13 +694,27 @@ function hermesSummary(hermes) {
  */
 function sifSummary(sif) {
   if (!isRecord(sif)) return {};
-  const corpus = isRecord(sif.corpus) ? sif.corpus : {};
+  const corpus = isRecord(sif.corpus) ? sif.corpus : sif;
+  const corpusInspection = isRecord(sif.corpusInspection) ? sif.corpusInspection : {};
   return {
     approvalHeld: asBoolean(sif.approvalHeld),
     dbMutationPerformed: asBoolean(sif.dbMutationPerformed),
     embeddingGenerated: asBoolean(sif.embeddingGenerated),
     uploaded: asBoolean(sif.uploaded),
     corpusCount: typeof corpus.corpusCount === "number" ? corpus.corpusCount : undefined,
+    corpusInspection: {
+      parsedRecordCount: typeof corpusInspection.parsedRecordCount === "number" ? corpusInspection.parsedRecordCount : undefined,
+      invalidRecordCount: typeof corpusInspection.invalidRecordCount === "number" ? corpusInspection.invalidRecordCount : undefined,
+      duplicateReferenceItemIdCount: typeof corpusInspection.duplicateReferenceItemIdCount === "number"
+        ? corpusInspection.duplicateReferenceItemIdCount
+        : undefined,
+      duplicateContentHashCount: typeof corpusInspection.duplicateContentHashCount === "number"
+        ? corpusInspection.duplicateContentHashCount
+        : undefined,
+      manifestBatchFailureCount: typeof corpusInspection.manifestBatchFailureCount === "number"
+        ? corpusInspection.manifestBatchFailureCount
+        : undefined,
+    },
     failedCheckIds: Array.isArray(sif.failedCheckIds) ? sif.failedCheckIds.map(asString).filter(Boolean) : [],
   };
 }

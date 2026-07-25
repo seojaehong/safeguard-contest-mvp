@@ -1633,16 +1633,38 @@ function evaluateSifEmbeddingGate(rootDir) {
   const embeddingGenerated = report.embeddingGenerated === true;
   const uploaded = report.uploaded === true;
   const corpusCount = typeof report.corpusCount === "number" ? report.corpusCount : null;
+  const corpusInspection = isRecord(report.corpusInspection) ? report.corpusInspection : null;
+  const corpusInspectionPass = corpusInspection !== null
+    && corpusInspection.lineCount === 6032
+    && corpusInspection.parsedRecordCount === 6032
+    && corpusInspection.parseErrorCount === 0
+    && corpusInspection.invalidRecordCount === 0
+    && corpusInspection.duplicateReferenceItemIdCount === 0
+    && corpusInspection.duplicateContentHashCount === 0
+    && corpusInspection.manifestBatchFailureCount === 0
+    && typeof corpusInspection.computedCorpusHash === "string"
+    && corpusInspection.computedCorpusHash === report.corpusHash;
+  const failedCheckIds = Array.isArray(report.failedCheckIds) ? report.failedCheckIds : null;
   const sourceSha = readString(report.sourceSha);
   const sourceShaCurrent = isGitAncestor(rootDir, sourceSha);
 
-  if (ok && approvalHeld && !dbMutationPerformed && !embeddingGenerated && !uploaded && sourceShaCurrent) {
+  if (
+    ok
+    && approvalHeld
+    && !dbMutationPerformed
+    && !embeddingGenerated
+    && !uploaded
+    && corpusCount === 6032
+    && corpusInspectionPass
+    && failedCheckIds?.length === 0
+    && sourceShaCurrent
+  ) {
     return gateResult({
       id: "sif_embedding_runtime",
       label: "SIF embedding runtime",
       state: "approval_gated",
       evidencePath,
-      detail: `SIF corpus is ready for approval (${corpusCount ?? "unknown"} records), but embedding/upload/vector runtime is held. Source SHA: ${sourceSha || "not-recorded"}.`,
+      detail: `SIF corpus is ready for approval (${corpusCount} records; parsed ${corpusInspection.parsedRecordCount}; invalid/duplicate/manifest failures 0), but embedding/upload/vector runtime is held. Source SHA: ${sourceSha || "not-recorded"}.`,
       nextActions: [
         "Approve SIF-only migration, embedding cost, upload, and vector runtime separately.",
         "Do not claim vector retrieval is production-active before post-migration verification.",
@@ -1656,7 +1678,7 @@ function evaluateSifEmbeddingGate(rootDir) {
     state: "contradicted",
     evidencePath,
     detail: sourceShaCurrent
-      ? "SIF embedding preflight does not preserve the no-mutation approval hold."
+      ? "SIF embedding preflight does not preserve the 6,032-record integrity contract and no-mutation approval hold."
       : `SIF embedding preflight source SHA ${sourceSha} is not an ancestor of current HEAD.`,
     nextActions: ["Re-run SIF embedding preflight and inspect mutation/upload flags."],
   });

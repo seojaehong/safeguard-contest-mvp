@@ -59,15 +59,149 @@ function fileExists(filePath) {
   return fs.existsSync(filePath) && fs.statSync(filePath).isFile();
 }
 
-function countJsonlLines(filePath) {
-  if (!fileExists(filePath)) return 0;
-  const content = fs.readFileSync(filePath, "utf8").trim();
-  if (!content) return 0;
-  return content.split(/\r?\n/).length;
-}
-
 function sha256File(filePath) {
   return crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
+}
+
+function sha256Text(value) {
+  return crypto.createHash("sha256").update(value).digest("hex");
+}
+
+function isNonEmptyString(value) {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function isNonEmptyStringArray(value) {
+  return Array.isArray(value) && value.length > 0 && value.every(isNonEmptyString);
+}
+
+function isStringArray(value) {
+  return Array.isArray(value) && value.every(isNonEmptyString);
+}
+
+function inspectCorpus(filePath) {
+  const content = fs.readFileSync(filePath, "utf8").trim();
+  const lines = content ? content.split(/\r?\n/) : [];
+  const records = [];
+  const parseErrors = [];
+  const invalidRecords = [];
+
+  for (const [index, line] of lines.entries()) {
+    let record;
+    try {
+      record = JSON.parse(line);
+    } catch (error) {
+      parseErrors.push({
+        line: index + 1,
+        message: error instanceof Error ? error.message : String(error)
+      });
+      continue;
+    }
+
+    const failedFields = [];
+    if (!record || typeof record !== "object" || Array.isArray(record)) {
+      failedFields.push("record");
+    } else {
+      if (!isNonEmptyString(record.referenceItemId)) failedFields.push("referenceItemId");
+      if (record.itemType !== "sif-case") failedFields.push("itemType");
+      if (!isNonEmptyString(record.title)) failedFields.push("title");
+      if (!isNonEmptyString(record.category)) failedFields.push("category");
+      if (!isStringArray(record.riskTags)) failedFields.push("riskTags");
+      if (!isNonEmptyStringArray(record.controls)) failedFields.push("controls");
+      if (!isNonEmptyStringArray(record.primaryDocuments)) failedFields.push("primaryDocuments");
+      if (!isNonEmptyString(record.embeddingText)) failedFields.push("embeddingText");
+      if (!/^[0-9a-f]{64}$/u.test(record.contentHash || "")) failedFields.push("contentHash");
+      if (isNonEmptyString(record.embeddingText) && record.contentHash !== sha256Text(record.embeddingText)) {
+        failedFields.push("contentHashMatchesEmbeddingText");
+      }
+    }
+
+    if (failedFields.length > 0) {
+      invalidRecords.push({
+        line: index + 1,
+        referenceItemId: isNonEmptyString(record?.referenceItemId) ? record.referenceItemId : null,
+        failedFields
+      });
+    }
+    records.push(record);
+  }
+
+  const referenceItemIds = records
+    .map((record) => record?.referenceItemId)
+    .filter(isNonEmptyString);
+  const contentHashes = records
+    .map((record) => record?.contentHash)
+    .filter((value) => /^[0-9a-f]{64}$/u.test(value || ""));
+  const duplicateValues = (values) => {
+    const seen = new Set();
+    const duplicates = new Set();
+    for (const value of values) {
+      if (seen.has(value)) duplicates.add(value);
+      seen.add(value);
+    }
+    return [...duplicates];
+  };
+  const computedCorpusHash = records.length > 0
+    && parseErrors.length === 0
+    && invalidRecords.length === 0
+    ? sha256Text(records.map((record) => `${record.referenceItemId}:${record.contentHash}`).join("\n"))
+    : null;
+
+  return {
+    lineCount: lines.length,
+    records,
+    referenceItemIds,
+    contentHashes,
+    parseErrors,
+    invalidRecords,
+    duplicateReferenceItemIds: duplicateValues(referenceItemIds),
+    duplicateContentHashes: duplicateValues(contentHashes),
+    computedCorpusHash
+  };
+}
+
+function inspectManifestBatches(manifest, corpusInspection) {
+  const batches = Array.isArray(manifest.batches) ? manifest.batches : [];
+  const records = corpusInspection.records;
+  const failures = [];
+  const flattenedReferenceItemIds = [];
+
+  for (const [index, batch] of batches.entries()) {
+    const startIndex = batch?.startIndex;
+    const endIndexExclusive = batch?.endIndexExclusive;
+    const expectedRecords = Number.isInteger(startIndex) && Number.isInteger(endIndexExclusive)
+      ? records.slice(startIndex, endIndexExclusive)
+      : [];
+    const expectedIds = expectedRecords.map((record) => record?.referenceItemId);
+    const actualIds = Array.isArray(batch?.referenceItemIds) ? batch.referenceItemIds : [];
+    flattenedReferenceItemIds.push(...actualIds);
+    const expectedBatchHash = expectedRecords.length > 0
+      ? sha256Text(expectedRecords.map((record) => record?.contentHash).join("\n"))
+      : null;
+    const passed = batch?.batchId === `sif-embed-${String(index + 1).padStart(4, "0")}`
+      && startIndex === index * manifest.batchSize
+      && endIndexExclusive === Math.min(startIndex + manifest.batchSize, records.length)
+      && batch?.recordCount === expectedRecords.length
+      && JSON.stringify(actualIds) === JSON.stringify(expectedIds)
+      && batch?.contentHash === expectedBatchHash;
+    if (!passed) {
+      failures.push({
+        batchIndex: index,
+        batchId: batch?.batchId || null,
+        startIndex: startIndex ?? null,
+        endIndexExclusive: endIndexExclusive ?? null
+      });
+    }
+  }
+
+  return {
+    batchCount: batches.length,
+    failures,
+    flattenedReferenceItemIds,
+    matchesCorpus: failures.length === 0
+      && batches.length === manifest.batchCount
+      && JSON.stringify(flattenedReferenceItemIds) === JSON.stringify(corpusInspection.referenceItemIds)
+  };
 }
 
 function fileIntegrity(filePath) {
@@ -95,7 +229,7 @@ function boolEnv(name) {
   return Boolean(process.env[name]?.trim());
 }
 
-function findChecks(report, manifest, corpusLineCount, vectorsPath, migrationSql, scriptSource, migrationPath, scriptPath) {
+function findChecks(report, manifest, corpusInspection, manifestInspection, vectorsPath, migrationSql, scriptSource, migrationPath, scriptPath) {
   const lowerMigrationSql = migrationSql.toLowerCase();
   return [
     {
@@ -120,8 +254,51 @@ function findChecks(report, manifest, corpusLineCount, vectorsPath, migrationSql
     },
     {
       id: "corpus_jsonl_matches_report",
-      passed: corpusLineCount === report.corpusCount,
-      evidence: { corpusLineCount, reportCorpusCount: report.corpusCount }
+      passed: corpusInspection.lineCount === report.corpusCount,
+      evidence: { corpusLineCount: corpusInspection.lineCount, reportCorpusCount: report.corpusCount }
+    },
+    {
+      id: "corpus_record_integrity",
+      passed: corpusInspection.parseErrors.length === 0 && corpusInspection.invalidRecords.length === 0,
+      evidence: {
+        parsedRecordCount: corpusInspection.records.length,
+        parseErrorCount: corpusInspection.parseErrors.length,
+        invalidRecordCount: corpusInspection.invalidRecords.length,
+        parseErrorSamples: corpusInspection.parseErrors.slice(0, 5),
+        invalidRecordSamples: corpusInspection.invalidRecords.slice(0, 5)
+      }
+    },
+    {
+      id: "corpus_record_identity_unique",
+      passed: corpusInspection.duplicateReferenceItemIds.length === 0
+        && corpusInspection.duplicateContentHashes.length === 0,
+      evidence: {
+        duplicateReferenceItemIdCount: corpusInspection.duplicateReferenceItemIds.length,
+        duplicateContentHashCount: corpusInspection.duplicateContentHashes.length,
+        duplicateReferenceItemIdSamples: corpusInspection.duplicateReferenceItemIds.slice(0, 5),
+        duplicateContentHashSamples: corpusInspection.duplicateContentHashes.slice(0, 5)
+      }
+    },
+    {
+      id: "corpus_hash_matches_report_and_manifest",
+      passed: Boolean(corpusInspection.computedCorpusHash)
+        && corpusInspection.computedCorpusHash === report.corpusHash
+        && corpusInspection.computedCorpusHash === manifest.corpusHash,
+      evidence: {
+        computedCorpusHash: corpusInspection.computedCorpusHash,
+        reportCorpusHash: report.corpusHash,
+        manifestCorpusHash: manifest.corpusHash
+      }
+    },
+    {
+      id: "manifest_batches_match_corpus",
+      passed: manifestInspection.matchesCorpus,
+      evidence: {
+        inspectedBatchCount: manifestInspection.batchCount,
+        expectedBatchCount: manifest.batchCount,
+        failedBatchCount: manifestInspection.failures.length,
+        failedBatchSamples: manifestInspection.failures.slice(0, 5)
+      }
     },
     {
       id: "corpus_quality_gate",
@@ -226,7 +403,8 @@ function main() {
 
   const report = readJson(reportPath);
   const manifest = readJson(manifestPath);
-  const corpusLineCount = countJsonlLines(corpusPath);
+  const corpusInspection = inspectCorpus(corpusPath);
+  const manifestInspection = inspectManifestBatches(manifest, corpusInspection);
   const vectorsPath = report.vectorsPath && fileExists(report.vectorsPath) ? report.vectorsPath : null;
   const migrationSql = fs.readFileSync(options.migrationPath, "utf8");
   const scriptSource = fs.readFileSync(options.scriptPath, "utf8");
@@ -240,7 +418,7 @@ function main() {
   ];
   const env = summarizeEnv(options.requireExecutionEnv);
   const checks = [
-    ...findChecks(report, manifest, corpusLineCount, vectorsPath, migrationSql, scriptSource, options.migrationPath, options.scriptPath),
+    ...findChecks(report, manifest, corpusInspection, manifestInspection, vectorsPath, migrationSql, scriptSource, options.migrationPath, options.scriptPath),
     {
       id: "preflight_source_sha_recorded",
       passed: /^[0-9a-f]{40}$/u.test(sourceSha),
@@ -290,6 +468,16 @@ function main() {
     batchSize: report.batchSize,
     embeddingModel: report.embeddingModel,
     embeddingDimensions: report.embeddingDimensions,
+    corpusInspection: {
+      lineCount: corpusInspection.lineCount,
+      parsedRecordCount: corpusInspection.records.length,
+      parseErrorCount: corpusInspection.parseErrors.length,
+      invalidRecordCount: corpusInspection.invalidRecords.length,
+      duplicateReferenceItemIdCount: corpusInspection.duplicateReferenceItemIds.length,
+      duplicateContentHashCount: corpusInspection.duplicateContentHashes.length,
+      computedCorpusHash: corpusInspection.computedCorpusHash,
+      manifestBatchFailureCount: manifestInspection.failures.length
+    },
     artifactIntegrity,
     checks,
     failedCheckIds: failedChecks.map((check) => check.id),

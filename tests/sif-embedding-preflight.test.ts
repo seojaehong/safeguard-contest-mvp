@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -65,6 +65,15 @@ describe("SIF embedding approval preflight", () => {
     expect(saved.migrationPath).toBe("evaluation/sif-embedding-gate/sif-embedding-only-migration.sql");
     expect(saved.commandHeldUntilApproval).toBe("npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload");
     expect(asStringArray(saved.failedCheckIds)).toEqual([]);
+    expect(asRecord(saved.corpusInspection)).toMatchObject({
+      lineCount: 6032,
+      parsedRecordCount: 6032,
+      parseErrorCount: 0,
+      invalidRecordCount: 0,
+      duplicateReferenceItemIdCount: 0,
+      duplicateContentHashCount: 0,
+      manifestBatchFailureCount: 0
+    });
     expect(normalizedArtifactPaths(saved.artifactIntegrity)).toEqual(expect.arrayContaining([
       "evaluation/sif-embedding-gate/report.json",
       "evaluation/sif-embedding-gate/sif-embedding-corpus.jsonl",
@@ -184,5 +193,73 @@ describe("SIF embedding approval preflight", () => {
     expect(source).toContain("--approved-embedding");
     expect(source).toContain("--embed requires explicit --approved-embedding after embedding cost approval");
     expect(source).toContain("embeddingApprovedFlag");
+  });
+
+  it("fails closed when a corpus record no longer matches its content hash", () => {
+    const outDir = mkdtempSync(join(tmpdir(), "safeclaw-sif-preflight-tampered-"));
+    const gateDir = join(outDir, "gate");
+    const outPath = join(outDir, "approval-preflight-report.json");
+    mkdirSync(gateDir, { recursive: true });
+    cpSync("evaluation/sif-embedding-gate/report.json", join(gateDir, "report.json"), { recursive: true });
+    cpSync(
+      "evaluation/sif-embedding-gate/sif-embedding-batch-manifest.json",
+      join(gateDir, "sif-embedding-batch-manifest.json"),
+      { recursive: true }
+    );
+    cpSync(
+      "evaluation/sif-embedding-gate/sif-embedding-corpus.jsonl",
+      join(gateDir, "sif-embedding-corpus.jsonl"),
+      { recursive: true }
+    );
+    const corpusPath = join(gateDir, "sif-embedding-corpus.jsonl");
+    const lines = readFileSync(corpusPath, "utf8").trim().split(/\r?\n/u);
+    const first = asRecord(JSON.parse(lines[0]));
+    first.embeddingText = `${String(first.embeddingText)}\n변조된 입력`;
+    lines[0] = JSON.stringify(first);
+    writeFileSync(corpusPath, `${lines.join("\n")}\n`, "utf8");
+
+    let stdout = "";
+    try {
+      execFileSync(process.execPath, [
+        "scripts/sif_embedding_approval_preflight.mjs",
+        "--gate-dir",
+        gateDir,
+        "--no-env-file",
+        "--output",
+        outPath
+      ], {
+        cwd: process.cwd(),
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          OPENAI_API_KEY: "",
+          SUPABASE_SERVICE_ROLE_KEY: "",
+          SUPABASE_URL: "",
+          NEXT_PUBLIC_SUPABASE_URL: "",
+          SAFETY_REFERENCE_VECTOR_SEARCH: ""
+        }
+      });
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "stdout" in error) {
+        stdout = String((error as { stdout: unknown }).stdout);
+      } else {
+        throw error;
+      }
+    }
+
+    const result = asRecord(JSON.parse(stdout));
+    expect(result.ok).toBe(false);
+    expect(asStringArray(result.failedCheckIds)).toEqual(expect.arrayContaining([
+      "corpus_record_integrity",
+      "corpus_hash_matches_report_and_manifest"
+    ]));
+    expect(asRecord(result.corpusInspection)).toMatchObject({
+      lineCount: 6032,
+      parsedRecordCount: 6032,
+      invalidRecordCount: 1
+    });
+    expect(result.dbMutationPerformed).toBe(false);
+    expect(result.embeddingGenerated).toBe(false);
+    expect(result.uploaded).toBe(false);
   });
 });
