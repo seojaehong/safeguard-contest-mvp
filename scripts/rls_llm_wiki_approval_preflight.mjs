@@ -235,6 +235,37 @@ function buildPreflight({ root }) {
       "Hermes/LLM candidate governance must remain unpublished and non-publishing.",
     ),
     check(
+      "knowledge_candidate_review_authority_order",
+      /KNOWLEDGE_REVIEW_AUTHORITY_ORDER\s*=\s*\[[\s\S]*?"sif"[\s\S]*?"kosha"[\s\S]*?"law"[\s\S]*?"organization_history"[\s\S]*?"site_history"[\s\S]*?"external_context"/u.test(
+        knowledgeGovernanceText,
+      ),
+      "Knowledge candidate review must preserve the SIF, KOSHA, law, organization, site, and external-context authority order.",
+    ),
+    check(
+      "knowledge_candidate_review_boundary",
+      includesAll(knowledgeGovernanceText, [
+        'contractVersion: "knowledge-candidate-review.v1"',
+        'status: "human_review_required"',
+        "sifControlsAreNonStatutoryEvidence: true",
+        "koshaGuidanceIsNonStatutory: true",
+        "statutoryClaimsRequireLawProvenance: true",
+        "tenantMemoryPublicPromotionAllowed: false",
+        "siteManagerAcceptanceRequiredBeforeWorkpackUse: true",
+        "machineEvidenceReplacesHumanReview: false",
+      ]),
+      "Knowledge candidate reviewer contract must keep authority, tenant-memory, and human-review boundaries explicit.",
+    ),
+    check(
+      "knowledge_candidate_prompt_authority_separation",
+      includesAll(knowledgeCandidateRouteText, [
+        "SIF 재해·통제 근거 → KOSHA 기술지침 → 현행 법령",
+        "SIF와 KOSHA는 법적 의무가 아니며",
+        "문서팩 적용 전 현장 책임자 확인",
+        "reviewContract,",
+      ]),
+      "Knowledge candidate prompt and response must expose the ordered authority and site-review contract.",
+    ),
+    check(
       "knowledge_candidate_route_non_publishing",
       knowledgeCandidateRouteText.includes("DB 저장과 ontology publish는 수행하지 않았습니다."),
       "Knowledge candidate route must explicitly remain memory-only and non-publishing.",

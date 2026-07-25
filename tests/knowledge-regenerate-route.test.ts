@@ -155,6 +155,35 @@ describe("knowledge candidate API", () => {
         dbMutationAllowed: false,
         dbMutationPerformed: false,
         publishAllowed: false
+      },
+      reviewContract: {
+        contractVersion: "knowledge-candidate-review.v1",
+        status: "human_review_required",
+        authorityOrder: [
+          "sif",
+          "kosha",
+          "law",
+          "organization_history",
+          "site_history",
+          "external_context"
+        ],
+        presentAuthorityIds: ["law"],
+        sourceRoleCounts: {
+          sifIncidentControlEvidence: 0,
+          koshaTechnicalGuidance: 0,
+          lawStatutorySource: 1,
+          organizationPrivateMemory: 0,
+          sitePrivateMemory: 0,
+          externalContext: 0
+        },
+        statutoryClaimsRequireLawProvenance: true,
+        tenantMemoryPublicPromotionAllowed: false,
+        siteManagerAcceptanceRequiredBeforeWorkpackUse: true,
+        publicationState: "unpublished",
+        humanReviewRequired: true,
+        machineEvidenceReplacesHumanReview: false,
+        dbMutationAllowed: false,
+        publishAllowed: false
       }
     });
     expect(payload.candidate.provenance[0]).toMatchObject({
@@ -248,6 +277,16 @@ describe("knowledge candidate API", () => {
     expect(prompt).not.toContain(sensitiveUrlToken);
     expect(prompt).not.toContain("manual-event-77");
     expect(prompt).not.toContain("provenanceScope");
+    expect(prompt).toContain("SIF 재해·통제 근거 → KOSHA 기술지침 → 현행 법령");
+    expect(prompt).toContain("문서팩 적용 전 현장 책임자 확인");
+    expect(payload.reviewContract).toMatchObject({
+      presentAuthorityIds: ["site_history"],
+      sourceRoleCounts: {
+        sitePrivateMemory: 1
+      },
+      tenantMemoryPublicPromotionAllowed: false,
+      siteManagerAcceptanceRequiredBeforeWorkpackUse: true
+    });
   });
 
   it("exposes the same read-only promotion and authority contract", async () => {

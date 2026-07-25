@@ -61,8 +61,14 @@ function fixtureRoot(): string {
   writeText(root, "scripts/supabase_tenant_isolation_harness.mjs", "export const marker = 'blocked_unreviewed_live_adapter'; export const launch = 'launchProven: false';\n");
   writeText(root, "lib/knowledge-governance.ts", [
     'export const candidate = { owner: "hermes_or_llm", publicationState: "unpublished", publishAllowed: false };',
+    'export const KNOWLEDGE_REVIEW_AUTHORITY_ORDER = ["sif", "kosha", "law", "organization_history", "site_history", "external_context"];',
+    'export const review = { contractVersion: "knowledge-candidate-review.v1", status: "human_review_required", sifControlsAreNonStatutoryEvidence: true, koshaGuidanceIsNonStatutory: true, statutoryClaimsRequireLawProvenance: true, tenantMemoryPublicPromotionAllowed: false, siteManagerAcceptanceRequiredBeforeWorkpackUse: true, machineEvidenceReplacesHumanReview: false };',
   ].join("\n"));
-  writeText(root, "lib/knowledge-candidate-route.ts", 'export const message = "DB 저장과 ontology publish는 수행하지 않았습니다.";\n');
+  writeText(root, "lib/knowledge-candidate-route.ts", [
+    'export const message = "DB 저장과 ontology publish는 수행하지 않았습니다.";',
+    'export const prompt = "SIF 재해·통제 근거 → KOSHA 기술지침 → 현행 법령\\nSIF와 KOSHA는 법적 의무가 아니며\\n문서팩 적용 전 현장 책임자 확인";',
+    "export const response = { reviewContract, };",
+  ].join("\n"));
   writeText(root, "app/api/knowledge/review/route.ts", 'export const boundary = { publicationState: "unpublished", ontologyPublished: false };\n');
   writeText(root, "supabase/migrations/008_safety_ontology.sql", "create table safety_ontology_nodes(id text primary key);\n");
   execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
@@ -206,6 +212,25 @@ describe("RLS / LLM Wiki approval preflight", () => {
       readonly failedCheckIds: readonly string[];
     };
     expect(typedReport.failedCheckIds).toContain("hermes_llm_candidate_stays_unpublished");
+  });
+
+  it("fails closed when the candidate route drops the reviewer authority contract", () => {
+    const root = fixtureRoot();
+    writeText(
+      root,
+      "lib/knowledge-candidate-route.ts",
+      'export const message = "DB 저장과 ontology publish는 수행하지 않았습니다.";\n',
+    );
+
+    const { report, status } = runPreflight(root);
+
+    expect(status).toBe(1);
+    expect(report.overall).toBe("blocked_preflight_failed");
+    const typedReport = report as {
+      readonly failedCheckIds: readonly string[];
+    };
+    expect(typedReport.failedCheckIds).toContain("knowledge_candidate_prompt_authority_separation");
+    expect(typedReport.failedCheckIds).not.toContain("knowledge_candidate_route_non_publishing");
   });
 
   it("prefers the current northstar open-gate packet over the legacy dated packet", () => {

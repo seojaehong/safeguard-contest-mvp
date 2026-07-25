@@ -4,6 +4,7 @@ import {
   KNOWLEDGE_AUTHORITY_LANES,
   KNOWLEDGE_PROMOTION_STAGES,
   buildKnowledgeCandidate,
+  buildKnowledgeCandidateReviewContract,
   classifyKnowledgeEvent
 } from "@/lib/knowledge-governance";
 
@@ -197,6 +198,82 @@ describe("knowledge governance contract", () => {
       authorityId: "organization_history",
       authority: "operation_memory",
       scope: "organization_private"
+    });
+  });
+
+  it("builds an ordered reviewer contract without elevating evidence or tenant memory", () => {
+    const events: KnowledgeRawEvent[] = [
+      {
+        ...lawEvent,
+        source: "kosha-accident",
+        sourceId: "sif-1",
+        payload: { item_type: "sif-case" }
+      },
+      {
+        ...lawEvent,
+        source: "kosha",
+        sourceId: "kosha-1",
+        payload: { guideCode: "C-12" }
+      },
+      lawEvent,
+      {
+        ...lawEvent,
+        source: "manual",
+        sourceId: "organization-1",
+        payload: { provenanceScope: "organization" }
+      },
+      {
+        ...lawEvent,
+        source: "manual",
+        sourceId: "site-1",
+        payload: { provenanceScope: "site" }
+      }
+    ];
+    const candidate = buildKnowledgeCandidate({
+      question: "추락 위험 통제대책을 검토해줘",
+      rawEvents: events,
+      matchedHazardIds: ["hazard-fall"],
+      generatedText: "검토용 초안",
+      providerLabel: "Hermes",
+      tenantContext
+    });
+
+    expect(buildKnowledgeCandidateReviewContract(candidate)).toEqual({
+      contractVersion: "knowledge-candidate-review.v1",
+      status: "human_review_required",
+      authorityOrder: [
+        "sif",
+        "kosha",
+        "law",
+        "organization_history",
+        "site_history",
+        "external_context"
+      ],
+      presentAuthorityIds: [
+        "sif",
+        "kosha",
+        "law",
+        "organization_history",
+        "site_history"
+      ],
+      sourceRoleCounts: {
+        sifIncidentControlEvidence: 1,
+        koshaTechnicalGuidance: 1,
+        lawStatutorySource: 1,
+        organizationPrivateMemory: 1,
+        sitePrivateMemory: 1,
+        externalContext: 0
+      },
+      sifControlsAreNonStatutoryEvidence: true,
+      koshaGuidanceIsNonStatutory: true,
+      statutoryClaimsRequireLawProvenance: true,
+      tenantMemoryPublicPromotionAllowed: false,
+      siteManagerAcceptanceRequiredBeforeWorkpackUse: true,
+      publicationState: "unpublished",
+      humanReviewRequired: true,
+      machineEvidenceReplacesHumanReview: false,
+      dbMutationAllowed: false,
+      publishAllowed: false
     });
   });
 });

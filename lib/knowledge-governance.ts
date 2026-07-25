@@ -118,6 +118,42 @@ export type KnowledgeCandidate = {
   provenance: KnowledgeEventProvenance[];
 };
 
+export const KNOWLEDGE_REVIEW_AUTHORITY_ORDER = [
+  "sif",
+  "kosha",
+  "law",
+  "organization_history",
+  "site_history",
+  "external_context"
+] as const;
+
+type KnowledgeReviewAuthorityId = typeof KNOWLEDGE_REVIEW_AUTHORITY_ORDER[number];
+
+export type KnowledgeCandidateReviewContract = {
+  contractVersion: "knowledge-candidate-review.v1";
+  status: "human_review_required";
+  authorityOrder: readonly KnowledgeReviewAuthorityId[];
+  presentAuthorityIds: KnowledgeReviewAuthorityId[];
+  sourceRoleCounts: {
+    sifIncidentControlEvidence: number;
+    koshaTechnicalGuidance: number;
+    lawStatutorySource: number;
+    organizationPrivateMemory: number;
+    sitePrivateMemory: number;
+    externalContext: number;
+  };
+  sifControlsAreNonStatutoryEvidence: true;
+  koshaGuidanceIsNonStatutory: true;
+  statutoryClaimsRequireLawProvenance: true;
+  tenantMemoryPublicPromotionAllowed: false;
+  siteManagerAcceptanceRequiredBeforeWorkpackUse: true;
+  publicationState: "unpublished";
+  humanReviewRequired: true;
+  machineEvidenceReplacesHumanReview: false;
+  dbMutationAllowed: false;
+  publishAllowed: false;
+};
+
 export const KNOWLEDGE_PROMOTION_STAGES: readonly KnowledgePromotionStage[] = [
   {
     id: "knowledge_event",
@@ -505,5 +541,46 @@ export function buildKnowledgeCandidate(input: {
     matchedHazardIds: [...new Set(input.matchedHazardIds)],
     tenantContext: { ...input.tenantContext },
     provenance: input.rawEvents.map((event) => classifyKnowledgeEvent(event, input.tenantContext))
+  };
+}
+
+export function buildKnowledgeCandidateReviewContract(
+  candidate: KnowledgeCandidate
+): KnowledgeCandidateReviewContract {
+  const authorityCounts = new Map<KnowledgeReviewAuthorityId, number>(
+    KNOWLEDGE_REVIEW_AUTHORITY_ORDER.map((authorityId) => [authorityId, 0])
+  );
+
+  for (const provenance of candidate.provenance) {
+    const authorityId = provenance.authorityId;
+    if (authorityId === "hermes_llm") continue;
+    authorityCounts.set(authorityId, (authorityCounts.get(authorityId) ?? 0) + 1);
+  }
+
+  return {
+    contractVersion: "knowledge-candidate-review.v1",
+    status: "human_review_required",
+    authorityOrder: KNOWLEDGE_REVIEW_AUTHORITY_ORDER,
+    presentAuthorityIds: KNOWLEDGE_REVIEW_AUTHORITY_ORDER.filter(
+      (authorityId) => (authorityCounts.get(authorityId) ?? 0) > 0
+    ),
+    sourceRoleCounts: {
+      sifIncidentControlEvidence: authorityCounts.get("sif") ?? 0,
+      koshaTechnicalGuidance: authorityCounts.get("kosha") ?? 0,
+      lawStatutorySource: authorityCounts.get("law") ?? 0,
+      organizationPrivateMemory: authorityCounts.get("organization_history") ?? 0,
+      sitePrivateMemory: authorityCounts.get("site_history") ?? 0,
+      externalContext: authorityCounts.get("external_context") ?? 0
+    },
+    sifControlsAreNonStatutoryEvidence: true,
+    koshaGuidanceIsNonStatutory: true,
+    statutoryClaimsRequireLawProvenance: true,
+    tenantMemoryPublicPromotionAllowed: false,
+    siteManagerAcceptanceRequiredBeforeWorkpackUse: true,
+    publicationState: "unpublished",
+    humanReviewRequired: true,
+    machineEvidenceReplacesHumanReview: false,
+    dbMutationAllowed: false,
+    publishAllowed: false
   };
 }

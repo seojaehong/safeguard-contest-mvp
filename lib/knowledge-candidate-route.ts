@@ -7,6 +7,7 @@ import {
 } from "@/lib/safety-knowledge";
 import {
   buildKnowledgeCandidate,
+  buildKnowledgeCandidateReviewContract,
   classifyKnowledgeEvent,
   type KnowledgeCandidate,
   type KnowledgeTenantContext
@@ -125,6 +126,9 @@ export function buildKnowledgePrompt(
     "당신은 산업안전 지식 위키 편집자다.",
     "목표는 현장 문서팩 재생성에 쓸 수 있는 보수적인 지식 초안을 만드는 것이다.",
     "이 출력은 사람 검토 전 후보이며 DB 수정, 승인, 게시를 지시하거나 주장하지 않는다.",
+    "근거 역할은 SIF 재해·통제 근거 → KOSHA 기술지침 → 현행 법령 순서로 구분하라.",
+    "SIF와 KOSHA는 법적 의무가 아니며, 법적 의무 표현은 현행 법령 provenance가 있을 때만 검토 후보로 표시하라.",
+    "조직·현장 이력은 해당 tenant의 운영 증거일 뿐 공개 지식으로 승격하지 말고, 문서팩 적용 전 현장 책임자 확인을 요구하라.",
     "법적 효력 보장 표현은 쓰지 말고, 공식 근거 기반 보조자료와 현장 확인 필요를 명확히 표시하라.",
     "출력은 1) 위험요인 요약 2) 문서 반영 위치 3) 통제대책 4) 검수 필요 항목 순서로 작성하라.",
     `질문: ${bundle.question}`,
@@ -161,8 +165,9 @@ export async function buildKnowledgeCandidateDraft(
     providerLabel: generated.providerLabel,
     tenantContext: input.tenantContext
   });
+  const reviewContract = buildKnowledgeCandidateReviewContract(candidate);
 
-  return { bundle, candidate, generated };
+  return { bundle, candidate, reviewContract, generated };
 }
 
 export function createKnowledgeCandidatePostHandler(
@@ -220,7 +225,7 @@ export function createKnowledgeCandidatePostHandler(
       );
     }
 
-    const { bundle, candidate, generated } = await buildKnowledgeCandidateDraft({
+    const { bundle, candidate, reviewContract, generated } = await buildKnowledgeCandidateDraft({
       question,
       rawEvents: events,
       tenantContext,
@@ -243,6 +248,7 @@ export function createKnowledgeCandidatePostHandler(
       savedRunId: null,
       bundle: responseBundle,
       candidate,
+      reviewContract,
       aiReady: true,
       generated,
       message: "검토용 지식 후보를 메모리에서 생성했습니다. DB 저장과 ontology publish는 수행하지 않았습니다."
