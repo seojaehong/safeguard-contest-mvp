@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-25T00:57:24.201Z",
+  "generatedAt": "2026-07-25T01:08:52.679Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "75ce86dc4e1f05874134cf5a7a5fe30365912812",
-  "productionCommit": "0bf6759c7ff8ffb171e423a47dc922d8d5cbeccc",
+  "sourceHead": "3c0767fd5607c9c543c5147979439a830722e332",
+  "productionCommit": "d960989836197045939bd725c0259326d1140692",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "0bf6759c7ff8ffb171e423a47dc922d8d5cbeccc",
+    "commitSha": "d960989836197045939bd725c0259326d1140692",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-2kauh5g7p-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-3d2rzvb50-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": false,
@@ -20,13 +20,13 @@
   "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
   "sourcePendingChangedPaths": [
-    "scripts/kosha_exact_promotion_review_gate.mjs",
-    "tests/kosha-exact-promotion-review-gate.test.ts"
+    "scripts/northstar_open_gate_audit.mjs",
+    "tests/northstar-open-gate-audit.test.ts"
   ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "75ce86dc4e1f05874134cf5a7a5fe30365912812",
-  "liveRollupLiveCommit": "0bf6759c7ff8ffb171e423a47dc922d8d5cbeccc",
+  "liveExactEvidenceCommit": "3c0767fd5607c9c543c5147979439a830722e332",
+  "liveRollupLiveCommit": "d960989836197045939bd725c0259326d1140692",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",

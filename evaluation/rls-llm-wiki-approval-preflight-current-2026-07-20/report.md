@@ -1,7 +1,7 @@
 # RLS / LLM Wiki Approval Preflight
 
-Generated: `2026-07-23T02:49:36.614Z`
-Source SHA: `e226e1246c73b85464bb3572c4cd4e10801313fa`
+Generated: `2026-07-25T01:08:41.479Z`
+Source SHA: `3c0767fd5607c9c543c5147979439a830722e332`
 Overall: `approval_ready_open`
 Launch readiness: `false`
 DB mutation performed: `false`
@@ -42,6 +42,10 @@ The approval packet is internally ready for operator review, but launch readines
 | `wiki_sql_design_not_migration_path` | PASS | ok |
 | `tenant_manifest_v3` | PASS | ok |
 | `tenant_harness_no_live_adapter` | PASS | ok |
+| `hermes_llm_candidate_stays_unpublished` | PASS | ok |
+| `knowledge_candidate_route_non_publishing` | PASS | ok |
+| `knowledge_review_route_non_publishing` | PASS | ok |
+| `wiki_no_executable_publication_surface` | PASS | ok |
 | `northstar_rls_gate_approval_gated` | PASS | ok |
 | `northstar_wiki_gate_approval_gated` | PASS | ok |
 

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-rls-llm-wiki-approval-preflight/v1",
-  "generatedAt": "2026-07-23T02:49:36.614Z",
-  "sourceSha": "e226e1246c73b85464bb3572c4cd4e10801313fa",
+  "generatedAt": "2026-07-25T01:08:41.479Z",
+  "sourceSha": "3c0767fd5607c9c543c5147979439a830722e332",
   "overall": "approval_ready_open",
   "launchReadiness": false,
   "dbMutationPerformed": false,
@@ -19,6 +19,7 @@
   "forbiddenClaims": [
     "RLS launch isolation proven",
     "LLM Wiki publication available",
+    "Hermes or an LLM can publish ontology candidates directly",
     "production migration approved",
     "service-role routes are safe because table RLS exists"
   ],
@@ -30,6 +31,9 @@
     "wikiSqlDesign": "evaluation/llm-wiki-rls-approval-2026-07-17/proposed-non-executable-publication-design.sql.txt",
     "tenantHarness": "scripts/supabase_tenant_isolation_harness.mjs",
     "tenantManifest": "scripts/supabase_tenant_isolation_manifest.mjs",
+    "knowledgeGovernance": "lib/knowledge-governance.ts",
+    "knowledgeCandidateRoute": "lib/knowledge-candidate-route.ts",
+    "knowledgeReviewRoute": "app/api/knowledge/review/route.ts",
     "northstarReport": "evaluation/northstar-open-gates-current/report.json"
   },
   "artifactIntegrity": [
@@ -69,11 +73,33 @@
       "sha256": "eec4c9d449e95267c0576121fbaa3982a0926a9e02f54c80175a0c229519d751"
     },
     {
+      "path": "lib/knowledge-governance.ts",
+      "bytes": 15617,
+      "sha256": "1d2e97d9fbd576616d0bcfcb9c02fdcfc55e1c41b3e6f68aeeafbad9ffe98f68"
+    },
+    {
+      "path": "lib/knowledge-candidate-route.ts",
+      "bytes": 8322,
+      "sha256": "4af2f93b712893c517770c50b63d6ead7bdbddda634c360b040d8b1e0e3a1cc4"
+    },
+    {
+      "path": "app/api/knowledge/review/route.ts",
+      "bytes": 6853,
+      "sha256": "a0d563569a6fe3c0aee478304f7b44b6c7b4e35fced87b80c2b02680a079c485"
+    },
+    {
       "path": "evaluation/northstar-open-gates-current/report.json",
-      "bytes": 16240,
-      "sha256": "0fd43233af6516261e2488d2f2827ad596be9eeb1e819b42cbbbce29f520a3a9"
+      "bytes": 26213,
+      "sha256": "b3a149996a7a3a3ca631a82bd4eb2256ac5dea2836531efe54697214c8e6a82b"
     }
   ],
+  "publicationSurfaceInventory": {
+    "scannedFileCount": 237,
+    "publicationRpcCallHits": [],
+    "publicationSqlFunctionHits": [],
+    "publicationLedgerMigrationHits": [],
+    "publicationRoutePaths": []
+  },
   "checks": [
     {
       "id": "rls_status_approval_required",
@@ -142,6 +168,26 @@
     },
     {
       "id": "tenant_harness_no_live_adapter",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "hermes_llm_candidate_stays_unpublished",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "knowledge_candidate_route_non_publishing",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "knowledge_review_route_non_publishing",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "wiki_no_executable_publication_surface",
       "passed": true,
       "message": "ok"
     },

@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-25T00:57:17.856Z
-Source HEAD at generation: 75ce86dc4e1f05874134cf5a7a5fe30365912812
-Live commit at generation: 0bf6759c7ff8ffb171e423a47dc922d8d5cbeccc
+Generated at: 2026-07-25T01:08:46.289Z
+Source HEAD at generation: 3c0767fd5607c9c543c5147979439a830722e332
+Live commit at generation: d960989836197045939bd725c0259326d1140692
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -173,7 +173,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_secondary_grounding | ancestor | ancestor_of_head | evaluation\live-document-secondary-grounding-2026-07-25\report.json |
 | live_document_seed_profile_isolation | ancestor | ancestor_of_head | evaluation\live-document-seed-profile-isolation-2026-07-25\report.json |
 | kosha_exact_trust_registry | ancestor | ancestor_of_head | evaluation\kosha-current-live-gate-2026-07-20\report.json |
-| rls_llm_wiki_approval_preflight | ancestor | missing | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
+| rls_llm_wiki_approval_preflight | exact | missing | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
 | sif_embedding_preflight | ancestor | missing | evaluation\sif-embedding-gate\approval-preflight-report.json |
 | live_critical_surface | ancestor | ancestor_of_head | evaluation\live-critical-surface-current-2026-07-20-rerun\report.json |
 | mobile_p0_workspace | ancestor | ancestor_of_head | evaluation\mobile-p0-workspace-gate-2026-07-20\report.json |
@@ -191,7 +191,7 @@ Overall: `northstar_open_approval_gated`
 
 - share_recipient_ack_approval: Recipient ACK route/test preflight is operator-ready, but a real production invited-recipient ACK canary would create workpack_share_sessions and workpack_read_confirmations rows, so it remains approval-gated with no DB mutation or provider message sent.
 - provider_dispatch_persistence: Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists with an updated_at trigger, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred.
-- supabase_rls_launch_isolation: Read-only RLS approval preflight passed at source SHA e226e1246c73b85464bb3572c4cd4e10801313fa, but live RLS catalog and tenant A/B isolation are not proven.
-- llm_wiki_publication: Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA e226e1246c73b85464bb3572c4cd4e10801313fa.
+- supabase_rls_launch_isolation: Read-only RLS approval preflight passed at source SHA 3c0767fd5607c9c543c5147979439a830722e332, but live RLS catalog and tenant A/B isolation are not proven.
+- llm_wiki_publication: Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 3c0767fd5607c9c543c5147979439a830722e332.
 - sif_embedding_runtime: SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 8c208e082adccfe6ba90d49f4b61934a994f3247.
 - kosha_exact_promotion_review_gate: Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Official PDF audit evaluation\kosha-exact-official-pdf-audit-2026-07-25\report.json re-downloaded and machine-verified all 8 PDF/body pairs while preserving lifecycle, human-review, and promotion boundaries. Official lifecycle audit evaluation\kosha-exact-official-lifecycle-audit-2026-07-25\report.json reconciles all 8 packet versions against current and retired inventories with 8 exact official-current titles; corpus source titles remain separately preserved for provenance. Reviewer-support audit evaluation\kosha-exact-promotion-reviewer-support-2026-07-25\report.json records bounded excerpts for 8/8 candidates and 24/24 semantic groups without completing human review or creating a registry artifact. Contract audit evaluation\kosha-exact-promotion-review-contract-audit-2026-07-23\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval.
