@@ -83,11 +83,14 @@ type ReviewGateModule = {
   buildKoshaExactPromotionReviewTemplate: (options: {
     rootDir: string;
     packetPath?: string;
+    reviewerSupportPath?: string;
     generatedAt?: string;
   }) => {
     schemaVersion: string;
     reviewTemplateOnly: boolean;
     exactPromotionPerformed: boolean;
+    machineReviewerSupportIncluded: boolean;
+    machineEvidenceReplacesHumanReview: boolean;
     candidateReviews: Array<{
       order: number | null;
       stableKey: string;
@@ -98,6 +101,17 @@ type ReviewGateModule = {
       normalizedCharCount: number | null;
       pageCount: number | null;
       rationale: string;
+      machineReviewerSupport: {
+        machineEvidenceOnly: boolean;
+        humanConfirmationRequired: boolean;
+        contentRationaleMachineSupported: boolean;
+        semanticGroups: Array<{
+          group: number | null;
+          requiredAny: string[];
+          matchedTerms: string[];
+          excerpt: string;
+        }>;
+      };
       reviewer: string;
       reviewedAt: string;
       humanConfirmed: boolean;
@@ -376,6 +390,9 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.reviewerSupportMachineVerified).toBe(false);
     expect(report.failures).toContain("reviewer-support-candidate-not-supported:D-C-10");
     expect(report.exactPromotionPerformed).toBe(false);
+    expect(() => module.buildKoshaExactPromotionReviewTemplate({ rootDir: root, packetPath })).toThrow(
+      "kosha-review-template-reviewer-support-candidate-not-ready:D-C-10",
+    );
   });
 
   it("fails closed when a review only fills shallow human confirmation fields", async () => {
@@ -671,6 +688,8 @@ describe("KOSHA exact promotion review gate", () => {
     expect(template.schemaVersion).toBe("safeclaw-kosha-exact-promotion-review/v1");
     expect(template.reviewTemplateOnly).toBe(true);
     expect(template.exactPromotionPerformed).toBe(false);
+    expect(template.machineReviewerSupportIncluded).toBe(true);
+    expect(template.machineEvidenceReplacesHumanReview).toBe(false);
     expect(template.candidateReviews).toHaveLength(2);
     expect(template.candidateReviews[0].order).toBe(1);
     expect(template.candidateReviews[0].title).toBe("KOSHA guide D-C-10");
@@ -680,6 +699,10 @@ describe("KOSHA exact promotion review gate", () => {
     expect(template.candidateReviews[0].normalizedCharCount).toBe(1001);
     expect(template.candidateReviews[0].pageCount).toBe(21);
     expect(template.candidateReviews[0].rationale).toContain("stable official metadata");
+    expect(template.candidateReviews[0].machineReviewerSupport.machineEvidenceOnly).toBe(true);
+    expect(template.candidateReviews[0].machineReviewerSupport.humanConfirmationRequired).toBe(true);
+    expect(template.candidateReviews[0].machineReviewerSupport.semanticGroups).toHaveLength(3);
+    expect(template.candidateReviews[0].machineReviewerSupport.semanticGroups.every((group) => group.excerpt.length > 0)).toBe(true);
     expect(template.candidateReviews.every((row) => row.reviewer === "")).toBe(true);
     expect(template.candidateReviews.every((row) => row.reviewedAt === "")).toBe(true);
     expect(template.candidateReviews.every((row) => row.humanConfirmed === false)).toBe(true);

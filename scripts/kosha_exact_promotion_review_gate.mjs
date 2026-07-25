@@ -538,50 +538,104 @@ export function buildKoshaExactPromotionReviewGate(options) {
  * @param {{
  *   rootDir: string;
  *   packetPath?: string;
+ *   reviewerSupportPath?: string;
  *   generatedAt?: string;
  * }} options
  */
 export function buildKoshaExactPromotionReviewTemplate(options) {
   const rootDir = options.rootDir;
   const packetPath = options.packetPath || DEFAULT_PACKET_PATH;
+  const reviewerSupportPath = options.reviewerSupportPath || DEFAULT_REVIEWER_SUPPORT_PATH;
   const packet = readJson(resolveInsideRoot(rootDir, packetPath));
+  const reviewerSupport = readJson(resolveInsideRoot(rootDir, reviewerSupportPath));
   assertPacketShape(packet);
+  assertReviewerSupportShape(reviewerSupport);
   const packetRecord = /** @type {Record<string, unknown>} */ (packet);
+  const reviewerSupportRecord = /** @type {Record<string, unknown>} */ (reviewerSupport);
   const candidates = /** @type {Record<string, unknown>[]} */ (packetRecord.candidates);
+  const reviewerSupportRows = /** @type {Record<string, unknown>[]} */ (reviewerSupportRecord.results);
+  const reviewerSupportByStableKey = new Map(reviewerSupportRows.map((row) => [asString(row.stableKey), row]));
+  const reviewerSupportBoundary = isRecord(reviewerSupportRecord.reviewBoundary)
+    ? reviewerSupportRecord.reviewBoundary
+    : null;
+  if (
+    asString(reviewerSupportRecord.verdict) !== "PASS_MACHINE_REVIEWER_SUPPORT_HUMAN_CONFIRMATION_REQUIRED" ||
+    reviewerSupportRecord.machineSupportedCount !== candidates.length ||
+    reviewerSupportRecord.failedCount !== 0 ||
+    reviewerSupportRecord.failedSemanticGroupCount !== 0 ||
+    reviewerSupportRecord.exactPromotionPerformed !== false ||
+    reviewerSupportRecord.exactRegistryWriteArtifactCreated !== false ||
+    reviewerSupportBoundary === null ||
+    reviewerSupportBoundary.humanReviewCompleted !== false ||
+    reviewerSupportBoundary.machineEvidenceReplacesHumanReview !== false
+  ) {
+    throw new Error("kosha-review-template-reviewer-support-not-ready");
+  }
   return {
     schemaVersion: REVIEW_SCHEMA_VERSION,
     generatedAt: options.generatedAt || new Date().toISOString(),
     sourceHead: gitHead(rootDir),
     packetPath,
+    reviewerSupportPath,
     reviewTemplateOnly: true,
     exactPromotionPerformed: false,
+    machineReviewerSupportIncluded: true,
+    machineEvidenceReplacesHumanReview: false,
     instructions: [
       "Fill reviewer and reviewedAt for each candidate.",
+      "Use machineReviewerSupport only as read-only context; inspect the official PDF and body evidence yourself.",
       "Confirm every requiredReviewChecks entry only after comparing official URL, file ID, version, body hash, PDF hash, lifecycle/current status, and immutable acquisition evidence.",
       "Set humanConfirmed true only after the full candidate review is complete.",
       "Run scripts/kosha_exact_promotion_review_gate.mjs with this filled review file before any separate exact-trust promotion approval.",
     ],
-    candidateReviews: candidates.map((candidate) => ({
-      order: typeof candidate.order === "number" && Number.isFinite(candidate.order) ? candidate.order : null,
-      stableKey: asString(candidate.stableKey),
-      version: asString(candidate.version),
-      title: asString(candidate.title),
-      category: asString(candidate.category),
-      publishedAt: asString(candidate.publishedAt),
-      officialFileId: asString(candidate.officialFileId),
-      officialUrl: asString(candidate.officialUrl),
-      bodySha256: asString(candidate.bodySha256),
-      pdfSha256: asString(candidate.pdfSha256),
-      normalizedCharCount: typeof candidate.normalizedCharCount === "number" && Number.isFinite(candidate.normalizedCharCount) ? candidate.normalizedCharCount : null,
-      pageCount: typeof candidate.pageCount === "number" && Number.isFinite(candidate.pageCount) ? candidate.pageCount : null,
-      rationale: asString(candidate.rationale),
-      reviewer: "",
-      reviewedAt: "",
-      humanConfirmed: false,
-      requiredReviewChecks: Array.isArray(candidate.requiredReviewChecks)
-        ? candidate.requiredReviewChecks.map((text) => ({ text: asString(text), confirmed: false }))
-        : [],
-    })),
+    candidateReviews: candidates.map((candidate) => {
+      const stableKey = asString(candidate.stableKey);
+      const supportRow = reviewerSupportByStableKey.get(stableKey);
+      const semanticGroups = supportRow && Array.isArray(supportRow.semanticGroups)
+        ? supportRow.semanticGroups.filter(isRecord)
+        : [];
+      if (
+        !supportRow ||
+        asString(supportRow.version) !== asString(candidate.version) ||
+        supportRow.contentRationaleMachineSupported !== true ||
+        semanticGroups.length !== 3 ||
+        semanticGroups.some((group) => group.machineSupported !== true || !asString(group.excerpt))
+      ) {
+        throw new Error(`kosha-review-template-reviewer-support-candidate-not-ready:${stableKey}`);
+      }
+      return {
+        order: typeof candidate.order === "number" && Number.isFinite(candidate.order) ? candidate.order : null,
+        stableKey,
+        version: asString(candidate.version),
+        title: asString(candidate.title),
+        category: asString(candidate.category),
+        publishedAt: asString(candidate.publishedAt),
+        officialFileId: asString(candidate.officialFileId),
+        officialUrl: asString(candidate.officialUrl),
+        bodySha256: asString(candidate.bodySha256),
+        pdfSha256: asString(candidate.pdfSha256),
+        normalizedCharCount: typeof candidate.normalizedCharCount === "number" && Number.isFinite(candidate.normalizedCharCount) ? candidate.normalizedCharCount : null,
+        pageCount: typeof candidate.pageCount === "number" && Number.isFinite(candidate.pageCount) ? candidate.pageCount : null,
+        rationale: asString(candidate.rationale),
+        machineReviewerSupport: {
+          machineEvidenceOnly: true,
+          humanConfirmationRequired: true,
+          contentRationaleMachineSupported: true,
+          semanticGroups: semanticGroups.map((group) => ({
+            group: typeof group.group === "number" ? group.group : null,
+            requiredAny: Array.isArray(group.requiredAny) ? group.requiredAny.map(asString).filter(Boolean) : [],
+            matchedTerms: Array.isArray(group.matchedTerms) ? group.matchedTerms.map(asString).filter(Boolean) : [],
+            excerpt: asString(group.excerpt),
+          })),
+        },
+        reviewer: "",
+        reviewedAt: "",
+        humanConfirmed: false,
+        requiredReviewChecks: Array.isArray(candidate.requiredReviewChecks)
+          ? candidate.requiredReviewChecks.map((text) => ({ text: asString(text), confirmed: false }))
+          : [],
+      };
+    }),
   };
 }
 
@@ -708,6 +762,7 @@ async function main() {
     const template = buildKoshaExactPromotionReviewTemplate({
       rootDir: args.rootDir,
       packetPath: args.packet,
+      reviewerSupportPath: args.reviewerSupport,
       generatedAt: args.generatedAt || undefined,
     });
     fs.writeFileSync(path.join(outputDir, "review-template.json"), `${JSON.stringify(template, null, 2)}\n`, "utf8");
