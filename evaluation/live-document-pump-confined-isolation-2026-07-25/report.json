@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-live-document-pump-confined-isolation/v1",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PUMP_CONFINED_HAZARD_ISOLATION_LIVE_PENDING",
-  "checkedAt": "2026-07-25T03:30:00.000Z",
+  "verdict": "PASS_LIVE_PRODUCTION_PUMP_CONFINED_HAZARD_ISOLATION",
+  "checkedAt": "2026-07-25T03:33:34.717Z",
   "sourceHead": "7140d818e6732e9dfa5095d8289ee94ae95716c0",
   "productCommit": "7140d818e6732e9dfa5095d8289ee94ae95716c0",
   "scenarioCount": 1,
@@ -27,6 +27,20 @@
     ],
     "genericIsolationHazardDuplicated": false
   },
+  "afterLive": {
+    "verdict": "PASS",
+    "productionCommit": "7140d818e6732e9dfa5095d8289ee94ae95716c0",
+    "deploymentUrl": "safeguard-contest-bvvm4wjr7-seojaehongs-projects.vercel.app",
+    "status": 200,
+    "elapsedMs": 19412,
+    "questionMatched": true,
+    "riskAssessmentDraft": {
+      "hasVentilationOrOxygen": true,
+      "hasLotoOrIsolation": true,
+      "hasWetFloorOrSlip": true,
+      "hasGenericIsolationDuplicate": false
+    }
+  },
   "verification": {
     "focused": {
       "filesPassed": 3,
@@ -48,7 +62,7 @@
     "vectorUploadPerformed": false
   },
   "remainingBoundary": {
-    "liveAfterDeploymentPending": true,
+    "liveAfterDeploymentPending": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "broadHumanWordingReviewRequired": true
   }

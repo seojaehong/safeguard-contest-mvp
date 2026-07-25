@@ -1,6 +1,6 @@
 # Pump-Confined Hazard Isolation
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_PUMP_CONFINED_HAZARD_ISOLATION_LIVE_PENDING`
+- Verdict: `PASS_LIVE_PRODUCTION_PUMP_CONFINED_HAZARD_ISOLATION`
 - Product commit: `7140d818`
 - Scenario: basement drainage-pump inspection with confined-space entry, LOTO, and an explicit wet-floor hazard
 
@@ -37,10 +37,15 @@ hazard into this scenario.
 - Strict typecheck: PASS
 - Next production build: PASS, 28 static pages
 
+## After Live
+
+Production marker `7140d818` returned the same scenario from `/api/ask` with
+HTTP 200 in 19,412 ms. The live risk-assessment document contains ventilation
+or oxygen measurement, LOTO or power isolation, and wet-floor or slip risk.
+The displaced generic machinery-isolation sentence is absent.
+
 ## Boundary
 
-This is current-source local evidence. Live production verification remains
-pending until the deployment marker includes product commit `7140d818`.
 No database mutation, Share-session creation, provider dispatch, embedding, or
 vector upload was performed. Exact saved `/share/[sessionId]` remains
 `MISSING_EVIDENCE`, and broad human wording review remains separate.
