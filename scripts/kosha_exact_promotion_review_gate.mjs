@@ -12,6 +12,7 @@ const SCRIPT_PATH = fileURLToPath(import.meta.url);
 const REPO_ROOT = path.resolve(path.dirname(SCRIPT_PATH), "..");
 const DEFAULT_PACKET_PATH = path.join("evaluation", "kosha-exact-promotion-packet-2026-07-22", "report.json");
 const DEFAULT_OFFICIAL_PDF_AUDIT_PATH = path.join("evaluation", "kosha-exact-official-pdf-audit-2026-07-25", "report.json");
+const DEFAULT_OFFICIAL_LIFECYCLE_AUDIT_PATH = path.join("evaluation", "kosha-exact-official-lifecycle-audit-2026-07-25", "report.json");
 const DEFAULT_OUTPUT_DIR = path.join("evaluation", "kosha-exact-promotion-review-gate-2026-07-22");
 const REVIEW_SCHEMA_VERSION = "safeclaw-kosha-exact-promotion-review/v1";
 const REVIEW_COMPLETE_VERDICT = "HUMAN_REVIEW_COMPLETE_APPROVAL_REQUIRED_NO_MUTATION";
@@ -136,6 +137,19 @@ function assertOfficialPdfAuditShape(audit) {
 }
 
 /**
+ * @param {unknown} audit
+ */
+function assertOfficialLifecycleAuditShape(audit) {
+  if (!isRecord(audit)) throw new Error("kosha-review-gate-invalid-official-lifecycle-audit");
+  if (asString(audit.schemaVersion) !== "safeclaw-kosha-exact-official-lifecycle-audit/v1") {
+    throw new Error("kosha-review-gate-invalid-official-lifecycle-audit-schema");
+  }
+  if (!Array.isArray(audit.results)) {
+    throw new Error("kosha-review-gate-official-lifecycle-audit-missing-results");
+  }
+}
+
+/**
  * @param {Record<string, unknown>} candidate
  */
 function candidateKey(candidate) {
@@ -175,6 +189,7 @@ function summarizeFailures(failures) {
     missingReviewedAt: 0,
     invalidReviewedAt: 0,
     officialPdfAuditFailures: 0,
+    officialLifecycleAuditFailures: 0,
     other: 0,
   };
   for (const failure of failures) {
@@ -192,6 +207,7 @@ function summarizeFailures(failures) {
     else if (failure.startsWith("missing-reviewed-at:")) summary.missingReviewedAt += 1;
     else if (failure.startsWith("invalid-reviewed-at:")) summary.invalidReviewedAt += 1;
     else if (failure.startsWith("official-pdf-audit-")) summary.officialPdfAuditFailures += 1;
+    else if (failure.startsWith("official-lifecycle-audit-")) summary.officialLifecycleAuditFailures += 1;
     else summary.other += 1;
   }
   return summary;
@@ -202,6 +218,7 @@ function summarizeFailures(failures) {
  *   rootDir: string;
  *   packetPath?: string;
  *   officialPdfAuditPath?: string;
+ *   officialLifecycleAuditPath?: string;
  *   reviewPath: string;
  *   generatedAt?: string;
  * }} options
@@ -210,21 +227,27 @@ export function buildKoshaExactPromotionReviewGate(options) {
   const rootDir = options.rootDir;
   const packetPath = options.packetPath || DEFAULT_PACKET_PATH;
   const officialPdfAuditPath = options.officialPdfAuditPath || DEFAULT_OFFICIAL_PDF_AUDIT_PATH;
+  const officialLifecycleAuditPath = options.officialLifecycleAuditPath || DEFAULT_OFFICIAL_LIFECYCLE_AUDIT_PATH;
   const packet = readJson(resolveInsideRoot(rootDir, packetPath));
   const officialPdfAudit = readJson(resolveInsideRoot(rootDir, officialPdfAuditPath));
+  const officialLifecycleAudit = readJson(resolveInsideRoot(rootDir, officialLifecycleAuditPath));
   const review = readJson(resolveInsideRoot(rootDir, options.reviewPath));
   assertPacketShape(packet);
   assertOfficialPdfAuditShape(officialPdfAudit);
+  assertOfficialLifecycleAuditShape(officialLifecycleAudit);
   assertReviewShape(review);
 
   const packetRecord = /** @type {Record<string, unknown>} */ (packet);
   const officialPdfAuditRecord = /** @type {Record<string, unknown>} */ (officialPdfAudit);
+  const officialLifecycleAuditRecord = /** @type {Record<string, unknown>} */ (officialLifecycleAudit);
   const reviewRecord = /** @type {Record<string, unknown>} */ (review);
   const candidates = /** @type {Record<string, unknown>[]} */ (packetRecord.candidates);
   const officialPdfAuditRows = /** @type {Record<string, unknown>[]} */ (officialPdfAuditRecord.results);
+  const officialLifecycleAuditRows = /** @type {Record<string, unknown>[]} */ (officialLifecycleAuditRecord.results);
   const candidateReviews = /** @type {Record<string, unknown>[]} */ (reviewRecord.candidateReviews);
   const reviewByStableKey = new Map(candidateReviews.map((row) => [reviewKey(row), row]));
   const officialPdfAuditByStableKey = new Map(officialPdfAuditRows.map((row) => [asString(row.stableKey), row]));
+  const officialLifecycleAuditByStableKey = new Map(officialLifecycleAuditRows.map((row) => [asString(row.stableKey), row]));
   const candidateKeySet = new Set(candidates.map(candidateKey).filter(Boolean));
   const failures = [];
   const passed = [];
@@ -238,6 +261,27 @@ export function buildKoshaExactPromotionReviewGate(options) {
   }
   if (officialPdfAuditRows.length !== candidates.length) {
     failures.push(`official-pdf-audit-count-mismatch:${officialPdfAuditRows.length}:${candidates.length}`);
+  }
+  const lifecycleVerdict = asString(officialLifecycleAuditRecord.verdict);
+  const lifecycleTitleVariantCount = typeof officialLifecycleAuditRecord.titleVariantFindingCount === "number"
+    ? officialLifecycleAuditRecord.titleVariantFindingCount
+    : -1;
+  const lifecycleVerdictMatchesFindings =
+    (lifecycleTitleVariantCount === 0 && lifecycleVerdict === "PASS_OFFICIAL_CURRENT_LIFECYCLE_MACHINE_SUPPORTED_HUMAN_REVIEW_REQUIRED") ||
+    (lifecycleTitleVariantCount > 0 && lifecycleVerdict === "REVIEW_REQUIRED_OFFICIAL_CURRENT_LIFECYCLE_MACHINE_SUPPORTED_TITLE_VARIANTS_UNRESOLVED");
+  if (
+    !lifecycleVerdictMatchesFindings ||
+    officialLifecycleAuditRecord.exactPromotionPerformed !== false ||
+    officialLifecycleAuditRecord.separatePromotionApprovalRequired !== true ||
+    !isRecord(officialLifecycleAuditRecord.reviewChecklistImpact) ||
+    officialLifecycleAuditRecord.reviewChecklistImpact.operatorLifecycleCurrentStatusConfirmed !== false ||
+    officialLifecycleAuditRecord.reviewChecklistImpact.humanConfirmationRecorded !== false ||
+    officialLifecycleAuditRecord.reviewChecklistImpact.reviewChecklistComplete !== false
+  ) {
+    failures.push("official-lifecycle-audit-verdict-or-boundary-mismatch");
+  }
+  if (officialLifecycleAuditRows.length !== candidates.length) {
+    failures.push(`official-lifecycle-audit-count-mismatch:${officialLifecycleAuditRows.length}:${candidates.length}`);
   }
 
   if (candidateReviews.length !== candidates.length) {
@@ -259,8 +303,10 @@ export function buildKoshaExactPromotionReviewGate(options) {
   for (const candidate of candidates) {
     const stableKey = candidateKey(candidate);
     const officialPdfAuditRow = officialPdfAuditByStableKey.get(stableKey);
+    const officialLifecycleAuditRow = officialLifecycleAuditByStableKey.get(stableKey);
     const reviewRow = reviewByStableKey.get(stableKey);
     let officialPdfAuditPass = true;
+    let officialLifecycleAuditPass = true;
     if (!officialPdfAuditRow) {
       failures.push(`official-pdf-audit-missing-row:${stableKey}`);
       officialPdfAuditPass = false;
@@ -281,6 +327,30 @@ export function buildKoshaExactPromotionReviewGate(options) {
       if (officialPdfAuditRow.humanLifecycleConfirmed !== false || officialPdfAuditRow.humanConfirmed !== false) {
         failures.push(`official-pdf-audit-human-boundary-mismatch:${stableKey}`);
         officialPdfAuditPass = false;
+      }
+    }
+    if (!officialLifecycleAuditRow) {
+      failures.push(`official-lifecycle-audit-missing-row:${stableKey}`);
+      officialLifecycleAuditPass = false;
+    } else {
+      const lifecycleMismatches = [
+        ["version", asString(candidate.version), asString(officialLifecycleAuditRow.packetVersion)],
+        ["officialFileId", asString(candidate.officialFileId), asString(officialLifecycleAuditRow.currentOfficialFileId)],
+        ["publishedAt", asString(candidate.publishedAt), asString(officialLifecycleAuditRow.currentPublishedAt)],
+      ].filter(([, expected, actual]) => expected !== actual);
+      for (const [field] of lifecycleMismatches) {
+        failures.push(`official-lifecycle-audit-metadata-mismatch:${stableKey}:${field}`);
+      }
+      if (officialLifecycleAuditRow.machineLifecycleSupported !== true || lifecycleMismatches.length > 0) {
+        failures.push(`official-lifecycle-audit-candidate-not-supported:${stableKey}`);
+        officialLifecycleAuditPass = false;
+      }
+      if (
+        officialLifecycleAuditRow.operatorLifecycleCurrentStatusConfirmed !== false ||
+        officialLifecycleAuditRow.humanConfirmed !== false
+      ) {
+        failures.push(`official-lifecycle-audit-human-boundary-mismatch:${stableKey}`);
+        officialLifecycleAuditPass = false;
       }
     }
     if (!reviewRow) {
@@ -323,7 +393,7 @@ export function buildKoshaExactPromotionReviewGate(options) {
     const reviewedAt = asString(reviewRow.reviewedAt);
     if (!reviewedAt) failures.push(`missing-reviewed-at:${stableKey}`);
     else if (!isIsoTimestamp(reviewedAt)) failures.push(`invalid-reviewed-at:${stableKey}`);
-    if (officialPdfAuditPass && mismatches.length === 0 && requiredChecks.every((checkText) => asBoolean(checkedByText.get(checkText)?.confirmed)) && asBoolean(reviewRow.humanConfirmed) && asString(reviewRow.reviewer) && isIsoTimestamp(reviewedAt)) {
+    if (officialPdfAuditPass && officialLifecycleAuditPass && mismatches.length === 0 && requiredChecks.every((checkText) => asBoolean(checkedByText.get(checkText)?.confirmed)) && asBoolean(reviewRow.humanConfirmed) && asString(reviewRow.reviewer) && isIsoTimestamp(reviewedAt)) {
       passed.push(stableKey);
     }
   }
@@ -341,6 +411,7 @@ export function buildKoshaExactPromotionReviewGate(options) {
     sourceHead: gitHead(rootDir),
     packetPath,
     officialPdfAuditPath,
+    officialLifecycleAuditPath,
     reviewPath: options.reviewPath,
     verdict: reviewChecklistComplete ? REVIEW_COMPLETE_VERDICT : REVIEW_INCOMPLETE_VERDICT,
     mutationPerformed: false,
@@ -365,6 +436,10 @@ export function buildKoshaExactPromotionReviewGate(options) {
     officialPdfAuditMachineVerified:
       failureSummary.officialPdfAuditFailures === 0 &&
       officialPdfAuditRows.length === candidates.length,
+    officialLifecycleAuditMachineSupported:
+      failureSummary.officialLifecycleAuditFailures === 0 &&
+      officialLifecycleAuditRows.length === candidates.length,
+    officialLifecycleTitleVariantFindingCount: lifecycleTitleVariantCount,
     failureSummary,
     passedStableKeys: passed,
     failures,
@@ -447,6 +522,8 @@ Packet: \`${report.packetPath}\`
 
 Official PDF audit: \`${report.officialPdfAuditPath}\`
 
+Official lifecycle audit: \`${report.officialLifecycleAuditPath}\`
+
 Review input: \`${report.reviewPath}\`
 
 Checklist complete: \`${report.reviewChecklistComplete}\`
@@ -490,11 +567,12 @@ ${report.forbiddenClaims.map((claim) => `- ${claim}`).join("\n")}
  * @param {string[]} args
  */
 function parseArgs(args) {
-  /** @type {{ rootDir: string; packet: string; officialPdfAudit: string; review: string; output: string; generatedAt: string; writeTemplate: boolean }} */
+  /** @type {{ rootDir: string; packet: string; officialPdfAudit: string; officialLifecycleAudit: string; review: string; output: string; generatedAt: string; writeTemplate: boolean }} */
   const parsed = {
     rootDir: REPO_ROOT,
     packet: DEFAULT_PACKET_PATH,
     officialPdfAudit: DEFAULT_OFFICIAL_PDF_AUDIT_PATH,
+    officialLifecycleAudit: DEFAULT_OFFICIAL_LIFECYCLE_AUDIT_PATH,
     review: "",
     output: DEFAULT_OUTPUT_DIR,
     generatedAt: "",
@@ -514,6 +592,9 @@ function parseArgs(args) {
       index += 1;
     } else if (arg === "--official-pdf-audit") {
       parsed.officialPdfAudit = next;
+      index += 1;
+    } else if (arg === "--official-lifecycle-audit") {
+      parsed.officialLifecycleAudit = next;
       index += 1;
     } else if (arg === "--output") {
       parsed.output = next;
@@ -549,6 +630,7 @@ async function main() {
     rootDir: args.rootDir,
     packetPath: args.packet,
     officialPdfAuditPath: args.officialPdfAudit,
+    officialLifecycleAuditPath: args.officialLifecycleAudit,
     reviewPath: args.review,
     generatedAt: args.generatedAt || undefined,
   });

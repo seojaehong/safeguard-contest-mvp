@@ -44,6 +44,8 @@ type ReviewGateReport = {
   exactRegistryWriteArtifactPath: string | null;
   packetCandidateSetMatchesReview: boolean;
   officialPdfAuditMachineVerified: boolean;
+  officialLifecycleAuditMachineSupported: boolean;
+  officialLifecycleTitleVariantFindingCount: number;
   failureSummary: {
     candidateReviewCountMismatch: number;
     missingReviewRows: number;
@@ -59,6 +61,7 @@ type ReviewGateReport = {
     missingReviewedAt: number;
     invalidReviewedAt: number;
     officialPdfAuditFailures: number;
+    officialLifecycleAuditFailures: number;
     other: number;
   };
   failures: string[];
@@ -70,6 +73,7 @@ type ReviewGateModule = {
     rootDir: string;
     packetPath?: string;
     officialPdfAuditPath?: string;
+    officialLifecycleAuditPath?: string;
     reviewPath: string;
     generatedAt?: string;
   }) => ReviewGateReport;
@@ -178,6 +182,33 @@ function writeFixtureRoot(): { root: string; packetPath: string; reviewPath: str
       humanConfirmed: false,
     })),
   });
+  writeJson(root, "evaluation/kosha-exact-official-lifecycle-audit-2026-07-25/report.json", {
+    schemaVersion: "safeclaw-kosha-exact-official-lifecycle-audit/v1",
+    verdict: "PASS_OFFICIAL_CURRENT_LIFECYCLE_MACHINE_SUPPORTED_HUMAN_REVIEW_REQUIRED",
+    candidateCount: candidates.length,
+    machineLifecycleSupportedCount: candidates.length,
+    exactTitleIdentityMatchCount: candidates.length,
+    failedCount: 0,
+    titleVariantFindingCount: 0,
+    exactPromotionPerformed: false,
+    separatePromotionApprovalRequired: true,
+    reviewChecklistImpact: {
+      operatorLifecycleCurrentStatusConfirmed: false,
+      humanConfirmationRecorded: false,
+      reviewChecklistComplete: false,
+    },
+    results: candidates.map((row) => ({
+      stableKey: row.stableKey,
+      packetVersion: row.version,
+      currentOfficialFileId: row.officialFileId,
+      currentPublishedAt: row.publishedAt,
+      officialTitleExactMatch: true,
+      findings: [],
+      machineLifecycleSupported: true,
+      operatorLifecycleCurrentStatusConfirmed: false,
+      humanConfirmed: false,
+    })),
+  });
   return { root, packetPath, reviewPath, candidates };
 }
 
@@ -205,6 +236,8 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.exactRegistryWriteArtifactPath).toBeNull();
     expect(report.packetCandidateSetMatchesReview).toBe(true);
     expect(report.officialPdfAuditMachineVerified).toBe(true);
+    expect(report.officialLifecycleAuditMachineSupported).toBe(true);
+    expect(report.officialLifecycleTitleVariantFindingCount).toBe(0);
     expect(Object.values(report.failureSummary).every((value) => value === 0)).toBe(true);
     expect(report.candidateCount).toBe(2);
     expect(report.reviewedCandidateCount).toBe(2);
@@ -258,6 +291,27 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.failures).toContain("official-pdf-audit-candidate-not-verified:D-C-10");
     expect(report.failureSummary.officialPdfAuditFailures).toBe(2);
     expect(report.exactPromotionPerformed).toBe(false);
+  });
+
+  it("fails closed when the official lifecycle companion audit claims a competing version", async () => {
+    const { root, packetPath, reviewPath } = writeFixtureRoot();
+    const auditPath = path.join(root, "evaluation/kosha-exact-official-lifecycle-audit-2026-07-25/report.json");
+    const audit = JSON.parse(fs.readFileSync(auditPath, "utf8")) as {
+      results: Array<{ stableKey: string; machineLifecycleSupported: boolean }>;
+    };
+    const target = audit.results.find((row) => row.stableKey === "D-C-10");
+    if (!target) throw new Error("fixture-missing-d-c-10-lifecycle-audit");
+    target.machineLifecycleSupported = false;
+    writeJson(root, path.relative(root, auditPath), audit);
+
+    const module = await loadReviewGateModule();
+    const report = module.buildKoshaExactPromotionReviewGate({ rootDir: root, packetPath, reviewPath });
+
+    expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
+    expect(report.officialLifecycleAuditMachineSupported).toBe(false);
+    expect(report.failures).toContain("official-lifecycle-audit-candidate-not-supported:D-C-10");
+    expect(report.failureSummary.officialLifecycleAuditFailures).toBe(1);
+    expect(report.exactRegistryWriteArtifactCreated).toBe(false);
   });
 
   it("fails closed when a review only fills shallow human confirmation fields", async () => {
