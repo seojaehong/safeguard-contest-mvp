@@ -382,8 +382,9 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
   it("contains maximum saved-session-like content inside the recipient workbench without collapsing desktop geometry", async () => {
     if (!browser || !harness) throw new Error("Browser harness was not started");
     const viewports = [
-      { width: 1440, height: 723, desktop: true },
-      { width: 390, height: 723, desktop: false }
+      { width: 1440, height: 723, desktop: true, minimumRootWidth: 1040 },
+      { width: 1024, height: 768, desktop: true, minimumRootWidth: 976 },
+      { width: 390, height: 723, desktop: false, minimumRootWidth: 0 }
     ];
 
     for (const viewport of viewports) {
@@ -409,7 +410,11 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
         }
         await expect.poll(() => page.locator("body").innerText()).toContain("Kiểm tra gói tài liệu");
 
-        const metrics = await page.evaluate(() => {
+        const metrics = await page.evaluate(async () => {
+          window.scrollTo(0, 0);
+          await new Promise<void>((resolve) => {
+            window.requestAnimationFrame(() => resolve());
+          });
           const root = document.querySelector<HTMLElement>(".safeclaw-share-recipient-page");
           const confirmButton = [...document.querySelectorAll<HTMLButtonElement>("button")]
             .find((item) => item.innerText.trim() === "Tôi đã xem");
@@ -422,26 +427,62 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
           const rootRect = root?.getBoundingClientRect();
           const confirmationCard = confirmButton?.closest<HTMLElement>(".safeclaw-share-recipient-card");
           const confirmationRect = confirmationCard?.getBoundingClientRect();
+          const confirmButtonRect = confirmButton?.getBoundingClientRect();
           const noticeRect = notice?.getBoundingClientRect();
-          return {
+          const initialMetrics = {
             rootWidth: Math.round(rootRect?.width ?? 0),
             rootWidthRatio: Number(((rootRect?.width ?? 0) / window.innerWidth).toFixed(2)),
             rootHeight: Math.round(rootRect?.height ?? 0),
             viewportHeight: window.innerHeight,
-            confirmationBottom: Math.round(confirmButton?.getBoundingClientRect().bottom ?? 0),
+            confirmationBottom: Math.round(confirmButtonRect?.bottom ?? 0),
             confirmationLeft: Math.round(confirmationRect?.left ?? 0),
             confirmationRight: Math.round(confirmationRect?.right ?? 0),
-            noticeLeft: Math.round(noticeRect?.left ?? 0),
+            noticeLeft: Math.round(noticeRect?.left ?? 0)
+          };
+          const distinctLefts = Array.from(new Set(cards
+            .map((item) => Math.round(item.getBoundingClientRect().left / 40) * 40)
+            .filter((left) => left > 0)))
+            .sort((a, b) => a - b);
+          const outsideCardCount = cards.filter((item) => {
+            const rect = item.getBoundingClientRect();
+            return rect.left < -0.5 || rect.right > window.innerWidth + 0.5;
+          }).length;
+          const horizontalOverflow = document.documentElement.scrollWidth > document.documentElement.clientWidth;
+          window.scrollTo(0, Math.min(260, Math.max(0, document.documentElement.scrollHeight - window.innerHeight)));
+          await new Promise<void>((resolve) => {
+            window.requestAnimationFrame(() => resolve());
+          });
+          const scrolledConfirmationRect = confirmationCard?.getBoundingClientRect();
+          const overlapTargets = [
+            ...document.querySelectorAll<HTMLElement>(
+              ".safeclaw-module-nav, .safeclaw-page-decision-header, .safeclaw-shared-header, .safeclaw-module-rail, header"
+            )
+          ].filter((item) => (
+            item !== confirmationCard
+            && !(confirmationCard?.contains(item) ?? false)
+            && (confirmationCard ? !item.contains(confirmationCard) : true)
+          ));
+          const overlapsConfirmation = (item: HTMLElement): boolean => {
+            if (!scrolledConfirmationRect) return false;
+            const rect = item.getBoundingClientRect();
+            return rect.width > 0
+              && rect.height > 0
+              && rect.left < scrolledConfirmationRect.right
+              && rect.right > scrolledConfirmationRect.left
+              && rect.top < scrolledConfirmationRect.bottom
+              && rect.bottom > scrolledConfirmationRect.top;
+          };
+          return {
+            ...initialMetrics,
+            distinctLeftRegionCount: distinctLefts.length,
+            stickyHeaderOverlapCount: overlapTargets.filter(overlapsConfirmation).length,
             taskBodyClientHeight: Math.round(taskBody?.clientHeight ?? 0),
             taskBodyScrollHeight: Math.round(taskBody?.scrollHeight ?? 0),
             documentsPanelOpen: documentsPanel?.open ?? null,
             previewContainedCount: previews.filter((item) => item.scrollHeight > item.clientHeight && item.clientHeight <= 220).length,
             collapsedDocumentCount: documents.filter((item) => !item.open).length,
-            outsideCards: cards.filter((item) => {
-              const rect = item.getBoundingClientRect();
-              return rect.left < -0.5 || rect.right > window.innerWidth + 0.5;
-            }).length,
-            horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth
+            outsideCards: outsideCardCount,
+            horizontalOverflow
           };
         });
 
@@ -456,8 +497,10 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
         expect(metrics.documentsPanelOpen).toBe(false);
         expect(metrics.rootHeight).toBeLessThanOrEqual(Math.ceil(metrics.viewportHeight * 1.5));
         if (viewport.desktop) {
-          expect(metrics.rootWidth).toBeGreaterThanOrEqual(1040);
+          expect(metrics.rootWidth).toBeGreaterThanOrEqual(viewport.minimumRootWidth);
           expect(metrics.rootWidthRatio).toBeGreaterThanOrEqual(0.82);
+          expect(metrics.distinctLeftRegionCount).toBeGreaterThanOrEqual(2);
+          expect(metrics.stickyHeaderOverlapCount).toBe(0);
           expect(metrics.noticeLeft).toBeGreaterThan(metrics.confirmationRight);
         } else {
           expect(metrics.rootWidth).toBeLessThanOrEqual(viewport.width);
