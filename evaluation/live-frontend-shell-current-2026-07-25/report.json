@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "safeclaw-live-frontend-shell-current/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_SCOPED_DOCUMENTS_AND_DISPATCH_EXACT_SHARE_GAP",
+  "checkedAt": "2026-07-25T05:36:30.000Z",
+  "sourceHead": "d065aad0b5b75456e8a58a1652246202f2f567d4",
+  "productionBuild": {
+    "commitSha": "d065aad0b5b75456e8a58a1652246202f2f567d4",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-3ifnusc61-seojaehongs-projects.vercel.app"
+  },
+  "documents": {
+    "path": "/documents?theme=day",
+    "desktop1440x723": {
+      "documentHeight": 723,
+      "bodyHeight": 723,
+      "horizontalOverflow": false,
+      "cockpitTop": 205,
+      "cockpitBottom": 394,
+      "shellTop": 205,
+      "shellBottom": 653,
+      "shellClientHeight": 448,
+      "shellScrollHeight": 868,
+      "shellOverflowY": "auto"
+    },
+    "mobile390x723": {
+      "documentHeight": 728,
+      "bodyHeight": 728,
+      "horizontalOverflow": false,
+      "cockpitTop": 207,
+      "cockpitBottom": 336,
+      "coreLauncherTop": 214,
+      "coreLauncherBottom": 280,
+      "shellTop": 348,
+      "shellBottom": 680,
+      "shellClientHeight": 317,
+      "shellScrollHeight": 907,
+      "shellOverflowY": "auto",
+      "firstSectionActionBottom": 509,
+      "supportingDocumentsOpenDefault": false
+    }
+  },
+  "dispatch": {
+    "path": "/dispatch",
+    "desktop1440x723": {
+      "documentHeight": 1076,
+      "bodyHeight": 1076,
+      "horizontalOverflow": false,
+      "rootWidth": 1141,
+      "rootHeight": 616,
+      "gridTemplateColumns": "587px 520px",
+      "previewWidth": 520,
+      "channelWidths": [169.66, 169.66, 169.66],
+      "primaryActionBottom": 142.2
+    },
+    "mobile390x723": {
+      "documentHeight": 1108,
+      "bodyHeight": 1109,
+      "horizontalOverflow": false,
+      "rootWidth": 341,
+      "rootHeight": 431,
+      "gridTemplateColumns": "308px",
+      "previewWidth": 308,
+      "desktopStatusRailDisplay": "none"
+    }
+  },
+  "workspaceShareProbe": {
+    "path": "/workspace?share",
+    "freshBrowserSharePanelPresent": false,
+    "acceptedAsSavedSessionEvidence": false
+  },
+  "boundary": {
+    "routeSplitAloneAcceptedAsFix": false,
+    "exactSavedUserSessionReproduced": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false
+  }
+}
