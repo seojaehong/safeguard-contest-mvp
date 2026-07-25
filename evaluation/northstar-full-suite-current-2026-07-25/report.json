@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "safeclaw-northstar-full-suite-current/v1",
+  "verdict": "PARTIAL_CURRENT_SOURCE_KOSHA_RED_REMOVED_REMAINING_FULL_SUITE_RED",
+  "checkedAt": "2026-07-25T04:04:26.849Z",
+  "sourceHead": "8b0d7d613155b285d9ed785a1db6b86c86eca6cc",
+  "before": {
+    "command": "npm.cmd test -- --maxWorkers=1 --fileParallelism=false",
+    "testFilesPassed": 206,
+    "testFilesFailed": 10,
+    "testFilesSkipped": 10,
+    "testsPassed": 2524,
+    "testsFailed": 19,
+    "testsSkipped": 24,
+    "durationMs": 996640,
+    "logPath": "evaluation/northstar-full-suite-current-2026-07-25/vitest.log"
+  },
+  "remediation": {
+    "commit": "8b0d7d613155b285d9ed785a1db6b86c86eca6cc",
+    "rootCause": "CRLF shebangs were accepted by direct Node CLI execution but failed Vitest/Vite ESM transformation with SyntaxError before seven KOSHA direct-import contracts could execute.",
+    "changedFiles": [
+      "scripts/kosha_exact_promotion_packet.mjs",
+      "scripts/kosha_next_exact_candidate_audit.mjs"
+    ],
+    "resolvedTestFiles": [
+      "tests/kosha-exact-promotion-packet.test.ts",
+      "tests/kosha-next-exact-candidate-audit.test.ts"
+    ],
+    "resolvedFailureCount": 7
+  },
+  "afterFocused": {
+    "koshaExactDirectImport": {
+      "testFilesPassed": 2,
+      "testsPassed": 9
+    },
+    "koshaExactAdjacent": {
+      "testFilesPassed": 5,
+      "testsPassed": 64
+    },
+    "typecheck": "PASS",
+    "nodeSyntaxChecks": "PASS"
+  },
+  "remainingFullSuiteRed": {
+    "knownFailureCountBeforeFullRerun": 12,
+    "groups": {
+      "frontendRouteAndDesignContracts": 10,
+      "mcpProductMaterializationPersistence": 2
+    },
+    "fullSuiteAfterRemediationExecuted": false,
+    "nextRequiredAction": "Remediate or reconcile the remaining frontend and MCP failures, then rerun the complete suite."
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundary": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "koshaExactPromotionPerformed": false,
+    "broadHumanReviewCompleted": false
+  }
+}
