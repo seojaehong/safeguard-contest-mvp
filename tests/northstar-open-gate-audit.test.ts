@@ -508,10 +508,28 @@ function createFixtureRoot(): string {
       { id: "rls_catalog_missing_is_explicit", passed: true },
       { id: "checklist_sections_present", passed: true },
       { id: "checklist_sql_boundaries_present", passed: true },
+      { id: "wiki_verdict_red", passed: true },
+      { id: "wiki_launch_not_proven", passed: true },
+      { id: "wiki_non_mutating", passed: true },
+      { id: "wiki_publication_unavailable", passed: true },
+      { id: "wiki_sql_design_non_executable", passed: true },
+      { id: "wiki_sql_design_not_migration_path", passed: true },
       { id: "tenant_manifest_v3", passed: true },
       { id: "tenant_harness_no_live_adapter", passed: true },
+      { id: "hermes_llm_candidate_stays_unpublished", passed: true },
+      { id: "knowledge_candidate_route_non_publishing", passed: true },
+      { id: "knowledge_review_route_non_publishing", passed: true },
+      { id: "wiki_no_executable_publication_surface", passed: true },
       { id: "northstar_rls_gate_approval_gated", passed: true },
+      { id: "northstar_wiki_gate_approval_gated", passed: true },
     ],
+    publicationSurfaceInventory: {
+      scannedFileCount: 12,
+      publicationRpcCallHits: [],
+      publicationSqlFunctionHits: [],
+      publicationLedgerMigrationHits: [],
+      publicationRoutePaths: [],
+    },
   });
   writeJson(rootDir, path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"), {
     ok: true,
@@ -2575,6 +2593,32 @@ describe("northstar open gate audit", () => {
     const wikiGate = audit.gates.find((gate) => gate.id === "llm_wiki_publication");
     expect(wikiGate?.state).toBe("contradicted");
     expect(wikiGate?.detail).toContain("not an ancestor");
+  });
+
+  it("contradicts LLM Wiki preflight when executable publication surface evidence is incomplete", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json");
+    const report = JSON.parse(fs.readFileSync(path.join(rootDir, reportPath), "utf8")) as {
+      checks: Array<{ id: string; passed: boolean }>;
+      publicationSurfaceInventory: {
+        publicationRoutePaths: string[];
+      };
+    };
+    report.checks = report.checks.filter((check) => check.id !== "wiki_no_executable_publication_surface");
+    report.publicationSurfaceInventory.publicationRoutePaths = ["app/api/knowledge/publish/route.ts"];
+    writeJson(rootDir, reportPath, report);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.overall).toBe("contradicted");
+    const wikiGate = audit.gates.find((gate) => gate.id === "llm_wiki_publication");
+    expect(wikiGate?.state).toBe("contradicted");
+    expect(wikiGate?.detail).toContain("preflight is missing or failed");
   });
 
   it("contradicts stale RLS approval preflight evidence from outside the current history", async () => {

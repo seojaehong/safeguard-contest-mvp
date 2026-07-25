@@ -1283,6 +1283,38 @@ function evaluateLlmWikiGate(rootDir) {
   const unavailable = /publication remains unavailable/u.test(text);
   const preflightSourceSha = isRecord(preflight) ? readString(preflight.sourceSha) : "";
   const preflightCurrent = isGitAncestor(rootDir, preflightSourceSha);
+  const checks = isRecord(preflight) && Array.isArray(preflight.checks) ? preflight.checks : [];
+  const requiredWikiChecks = [
+    "wiki_verdict_red",
+    "wiki_launch_not_proven",
+    "wiki_non_mutating",
+    "wiki_publication_unavailable",
+    "wiki_sql_design_non_executable",
+    "wiki_sql_design_not_migration_path",
+    "hermes_llm_candidate_stays_unpublished",
+    "knowledge_candidate_route_non_publishing",
+    "knowledge_review_route_non_publishing",
+    "wiki_no_executable_publication_surface",
+    "northstar_wiki_gate_approval_gated",
+  ];
+  const passedCheckIds = new Set(checks
+    .filter((item) => isRecord(item) && item.passed === true)
+    .map((item) => readString(item.id)));
+  const publicationSurfaceInventory = isRecord(preflight)
+    && isRecord(preflight.publicationSurfaceInventory)
+    ? preflight.publicationSurfaceInventory
+    : null;
+  const publicationSurfaceInventoryPass = publicationSurfaceInventory !== null
+    && Number.isInteger(publicationSurfaceInventory.scannedFileCount)
+    && publicationSurfaceInventory.scannedFileCount > 0
+    && Array.isArray(publicationSurfaceInventory.publicationRpcCallHits)
+    && publicationSurfaceInventory.publicationRpcCallHits.length === 0
+    && Array.isArray(publicationSurfaceInventory.publicationSqlFunctionHits)
+    && publicationSurfaceInventory.publicationSqlFunctionHits.length === 0
+    && Array.isArray(publicationSurfaceInventory.publicationLedgerMigrationHits)
+    && publicationSurfaceInventory.publicationLedgerMigrationHits.length === 0
+    && Array.isArray(publicationSurfaceInventory.publicationRoutePaths)
+    && publicationSurfaceInventory.publicationRoutePaths.length === 0;
   const preflightReady = isRecord(preflight)
     && preflight.overall === "approval_ready_open"
     && preflight.launchReadiness === false
@@ -1290,6 +1322,8 @@ function evaluateLlmWikiGate(rootDir) {
     && preflight.networkOpened === false
     && Array.isArray(preflight.failedCheckIds)
     && preflight.failedCheckIds.length === 0
+    && requiredWikiChecks.every((id) => passedCheckIds.has(id))
+    && publicationSurfaceInventoryPass
     && preflightCurrent;
   if (redApproval && unavailable && preflightReady) {
     return gateResult({
