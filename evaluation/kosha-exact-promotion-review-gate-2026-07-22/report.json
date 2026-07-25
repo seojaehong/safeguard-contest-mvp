@@ -1,10 +1,11 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-review-gate/v1",
-  "generatedAt": "2026-07-25T00:33:06.894Z",
-  "sourceHead": "47aa94a969beebbf71d938e82133165b1f13682b",
+  "generatedAt": "2026-07-25T00:50:44.561Z",
+  "sourceHead": "c8e1232454e85c14ef74a1a6accc48be86dca0fb",
   "packetPath": "evaluation\\kosha-exact-promotion-packet-2026-07-22\\report.json",
   "officialPdfAuditPath": "evaluation\\kosha-exact-official-pdf-audit-2026-07-25\\report.json",
   "officialLifecycleAuditPath": "evaluation\\kosha-exact-official-lifecycle-audit-2026-07-25\\report.json",
+  "reviewerSupportPath": "evaluation\\kosha-exact-promotion-reviewer-support-2026-07-25\\report.json",
   "reviewPath": "evaluation/kosha-exact-promotion-review-gate-2026-07-22/review-template.json",
   "verdict": "REVIEW_CHECKLIST_INCOMPLETE_BLOCKED",
   "mutationPerformed": false,
@@ -29,6 +30,8 @@
   "officialPdfAuditMachineVerified": true,
   "officialLifecycleAuditMachineSupported": true,
   "officialLifecycleTitleVariantFindingCount": 0,
+  "reviewerSupportMachineVerified": true,
+  "reviewerSupportHumanReviewCompleted": false,
   "failureSummary": {
     "candidateReviewCountMismatch": 0,
     "missingReviewRows": 0,
