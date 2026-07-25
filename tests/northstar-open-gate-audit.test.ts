@@ -1939,6 +1939,63 @@ function createFixtureRoot(): string {
     exactRegistryWriteArtifactCreated: false,
     separatePromotionApprovalRequired: true,
   });
+  writeJson(rootDir, path.join("evaluation", "kosha-exact-promotion-reviewer-cockpit-2026-07-25", "report.json"), {
+    schemaVersion: "safeclaw-kosha-exact-promotion-reviewer-cockpit/v1",
+    verdict: "PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY",
+    candidateCount: 8,
+    semanticGroupCount: 24,
+    checklistInputCount: 64,
+    initialCompletedInputCount: 0,
+    exportInitiallyDisabled: true,
+    boundary: {
+      localReviewOnly: true,
+      dbMutationPerformed: false,
+      exactRegistryWriteArtifactCreated: false,
+      exactPromotionPerformed: false,
+      machineEvidenceReplacesHumanReview: false,
+      separatePromotionApprovalRequired: true,
+    },
+  });
+  writeJson(rootDir, path.join("evaluation", "kosha-exact-promotion-reviewer-cockpit-2026-07-25", "browser-report.json"), {
+    schemaVersion: "safeclaw-kosha-exact-promotion-reviewer-cockpit-browser/v1",
+    verdict: "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY",
+    cases: 3,
+    passedCases: 3,
+    desktopPass: true,
+    mobilePass: true,
+    results: [
+      { name: "desktop-1440x723", viewport: { width: 1440, height: 723 } },
+      { name: "mobile-evidence-390x723", viewport: { width: 390, height: 723 } },
+      { name: "mobile-review-390x723", viewport: { width: 390, height: 723 } },
+    ].map((row) => ({
+      ...row,
+      body: {
+        scrollWidth: row.viewport.width,
+        clientWidth: row.viewport.width,
+        scrollHeight: row.viewport.height,
+        clientHeight: row.viewport.height,
+      },
+      visibleCandidatePanelCount: 1,
+      candidateButtonCount: 8,
+      requiredCheckCount: 40,
+      semanticGroupCount: 24,
+      exportInitiallyDisabled: true,
+      horizontalOverflow: false,
+    })),
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      embeddingGenerated: false,
+      vectorUploadPerformed: false,
+      exactTrustRegistryMutationPerformed: false,
+      exactPromotionPerformed: false,
+    },
+    remainingBoundary: {
+      humanReviewCompleted: false,
+      separatePromotionApprovalRequired: true,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "kosha-exact-promotion-review-contract-audit-2026-07-23", "report.json"), {
     schemaVersion: "safeclaw-kosha-exact-promotion-review-contract-audit/v1",
     verdict: "PASS_CURRENT_SOURCE_REVIEW_GATE_CONTRACT_NO_MUTATION",
@@ -2129,6 +2186,8 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("shallow human-confirmation-only reviews are blocked");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("completed review remains no-mutation plus separate approval");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("24/24 semantic groups");
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("64 required human inputs");
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("viewport-contained no-mutation UI");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.nextActions.join("\n")).toContain(
       "Re-run scripts\\kosha_exact_promotion_review_gate.mjs",
     );
@@ -2877,6 +2936,30 @@ describe("northstar open gate audit", () => {
     };
     lifecycleAudit.exactTitleIdentityMatchCount = 7;
     writeJson(rootDir, path.relative(rootDir, auditPath), lifecycleAudit);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("contradicted");
+  });
+
+  it("fails closed when the KOSHA reviewer cockpit unlocks export before human review", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const cockpitPath = path.join(
+      rootDir,
+      "evaluation",
+      "kosha-exact-promotion-reviewer-cockpit-2026-07-25",
+      "report.json",
+    );
+    const cockpit = JSON.parse(fs.readFileSync(cockpitPath, "utf8")) as {
+      exportInitiallyDisabled: boolean;
+    };
+    cockpit.exportInitiallyDisabled = false;
+    writeJson(rootDir, path.relative(rootDir, cockpitPath), cockpit);
 
     const audit = buildNorthstarOpenGateAudit({
       rootDir,

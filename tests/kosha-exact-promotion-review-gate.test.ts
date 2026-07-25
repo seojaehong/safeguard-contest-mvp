@@ -122,7 +122,20 @@ type ReviewGateModule = {
 
 async function loadReviewGateModule(): Promise<ReviewGateModule> {
   const sourcePath = path.resolve("scripts", "kosha_exact_promotion_review_gate.mjs");
-  return await import(pathToFileURL(sourcePath).href) as ReviewGateModule;
+  const temporaryPath = path.join(
+    os.tmpdir(),
+    `kosha-review-gate-module-${process.pid}-${Date.now()}.mjs`,
+  );
+  fs.writeFileSync(
+    temporaryPath,
+    fs.readFileSync(sourcePath, "utf8").replaceAll("\r\n", "\n"),
+    "utf8",
+  );
+  try {
+    return await import(`${pathToFileURL(temporaryPath).href}?v=${Date.now()}`) as ReviewGateModule;
+  } finally {
+    fs.rmSync(temporaryPath, { force: true });
+  }
 }
 
 function writeJson(root: string, relativePath: string, value: unknown): void {

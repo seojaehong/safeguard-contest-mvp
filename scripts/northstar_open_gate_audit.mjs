@@ -89,6 +89,8 @@ const EVIDENCE_PATHS = Object.freeze({
   koshaExactOfficialPdfAudit: path.join("evaluation", "kosha-exact-official-pdf-audit-2026-07-25", "report.json"),
   koshaExactOfficialLifecycleAudit: path.join("evaluation", "kosha-exact-official-lifecycle-audit-2026-07-25", "report.json"),
   koshaExactPromotionReviewerSupport: path.join("evaluation", "kosha-exact-promotion-reviewer-support-2026-07-25", "report.json"),
+  koshaExactPromotionReviewerCockpit: path.join("evaluation", "kosha-exact-promotion-reviewer-cockpit-2026-07-25", "report.json"),
+  koshaExactPromotionReviewerCockpitBrowser: path.join("evaluation", "kosha-exact-promotion-reviewer-cockpit-2026-07-25", "browser-report.json"),
   koshaExactPromotionReviewContractAudit: path.join("evaluation", "kosha-exact-promotion-review-contract-audit-2026-07-23", "report.json"),
 });
 
@@ -3291,6 +3293,10 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
   const officialLifecycleAudit = readJsonFile(rootDir, officialLifecycleAuditPath);
   const reviewerSupportPath = EVIDENCE_PATHS.koshaExactPromotionReviewerSupport;
   const reviewerSupport = readJsonFile(rootDir, reviewerSupportPath);
+  const reviewerCockpitPath = EVIDENCE_PATHS.koshaExactPromotionReviewerCockpit;
+  const reviewerCockpit = readJsonFile(rootDir, reviewerCockpitPath);
+  const reviewerCockpitBrowserPath = EVIDENCE_PATHS.koshaExactPromotionReviewerCockpitBrowser;
+  const reviewerCockpitBrowser = readJsonFile(rootDir, reviewerCockpitBrowserPath);
   const contractAuditPath = EVIDENCE_PATHS.koshaExactPromotionReviewContractAudit;
   const contractAudit = readJsonFile(rootDir, contractAuditPath);
   const contractAuditProvesNoMutation = isRecord(contractAudit)
@@ -3402,6 +3408,72 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
   const reviewerSupportDetail = reviewerSupportProvesSemanticCoverage
     ? ` Reviewer-support audit ${reviewerSupportPath} records bounded excerpts for 8/8 candidates and 24/24 semantic groups without completing human review or creating a registry artifact.`
     : "";
+  const reviewerCockpitBoundary = isRecord(reviewerCockpit) && isRecord(reviewerCockpit.boundary)
+    ? reviewerCockpit.boundary
+    : null;
+  const reviewerCockpitPass = isRecord(reviewerCockpit)
+    && readString(reviewerCockpit.schemaVersion) === "safeclaw-kosha-exact-promotion-reviewer-cockpit/v1"
+    && readString(reviewerCockpit.verdict) === "PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY"
+    && readNumber(reviewerCockpit.candidateCount) === 8
+    && readNumber(reviewerCockpit.semanticGroupCount) === 24
+    && readNumber(reviewerCockpit.checklistInputCount) === 64
+    && readNumber(reviewerCockpit.initialCompletedInputCount) === 0
+    && reviewerCockpit.exportInitiallyDisabled === true
+    && reviewerCockpitBoundary !== null
+    && reviewerCockpitBoundary.localReviewOnly === true
+    && reviewerCockpitBoundary.dbMutationPerformed === false
+    && reviewerCockpitBoundary.exactRegistryWriteArtifactCreated === false
+    && reviewerCockpitBoundary.exactPromotionPerformed === false
+    && reviewerCockpitBoundary.machineEvidenceReplacesHumanReview === false
+    && reviewerCockpitBoundary.separatePromotionApprovalRequired === true;
+  const cockpitBrowserRows = isRecord(reviewerCockpitBrowser) && Array.isArray(reviewerCockpitBrowser.results)
+    ? reviewerCockpitBrowser.results.filter(isRecord)
+    : [];
+  const cockpitBrowserMutation = isRecord(reviewerCockpitBrowser)
+    && isRecord(reviewerCockpitBrowser.mutationBoundary)
+    ? reviewerCockpitBrowser.mutationBoundary
+    : null;
+  const cockpitBrowserBoundary = isRecord(reviewerCockpitBrowser)
+    && isRecord(reviewerCockpitBrowser.remainingBoundary)
+    ? reviewerCockpitBrowser.remainingBoundary
+    : null;
+  const reviewerCockpitBrowserPass = isRecord(reviewerCockpitBrowser)
+    && readString(reviewerCockpitBrowser.schemaVersion) === "safeclaw-kosha-exact-promotion-reviewer-cockpit-browser/v1"
+    && readString(reviewerCockpitBrowser.verdict) === "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY"
+    && readNumber(reviewerCockpitBrowser.cases) === 3
+    && readNumber(reviewerCockpitBrowser.passedCases) === 3
+    && reviewerCockpitBrowser.desktopPass === true
+    && reviewerCockpitBrowser.mobilePass === true
+    && cockpitBrowserRows.length === 3
+    && cockpitBrowserRows.every((row) => {
+      const viewport = isRecord(row.viewport) ? row.viewport : null;
+      const body = isRecord(row.body) ? row.body : null;
+      return viewport !== null
+        && body !== null
+        && readNumber(body.scrollWidth) === readNumber(body.clientWidth)
+        && readNumber(body.scrollHeight) === readNumber(viewport.height)
+        && readNumber(body.clientHeight) === readNumber(viewport.height)
+        && readNumber(row.visibleCandidatePanelCount) === 1
+        && readNumber(row.candidateButtonCount) === 8
+        && readNumber(row.requiredCheckCount) === 40
+        && readNumber(row.semanticGroupCount) === 24
+        && row.exportInitiallyDisabled === true
+        && row.horizontalOverflow === false;
+    })
+    && cockpitBrowserMutation !== null
+    && cockpitBrowserMutation.dbMutationPerformed === false
+    && cockpitBrowserMutation.providerDispatchCalled === false
+    && cockpitBrowserMutation.shareSessionCreated === false
+    && cockpitBrowserMutation.embeddingGenerated === false
+    && cockpitBrowserMutation.vectorUploadPerformed === false
+    && cockpitBrowserMutation.exactTrustRegistryMutationPerformed === false
+    && cockpitBrowserMutation.exactPromotionPerformed === false
+    && cockpitBrowserBoundary !== null
+    && cockpitBrowserBoundary.humanReviewCompleted === false
+    && cockpitBrowserBoundary.separatePromotionApprovalRequired === true;
+  const reviewerCockpitDetail = reviewerCockpitPass && reviewerCockpitBrowserPass
+    ? ` Reviewer cockpit ${reviewerCockpitPath} presents 8 candidates, 24 bounded excerpts, and all 64 required human inputs in a viewport-contained no-mutation UI; export remains locked until complete and promotion remains separate approval. Browser geometry ${reviewerCockpitBrowserPath} preserves one visible candidate, 40 checks, and three bounded desktop/mobile cases.`
+    : "";
   if (!isRecord(report)) {
     return gateResult({
       id: "kosha_exact_promotion_review_gate",
@@ -3444,7 +3516,9 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && report.reviewerSupportHumanReviewCompleted === false
     && officialPdfAuditProvesBodyPair
     && officialLifecycleAuditProvesCurrentInventory
-    && reviewerSupportProvesSemanticCoverage;
+    && reviewerSupportProvesSemanticCoverage
+    && reviewerCockpitPass
+    && reviewerCockpitBrowserPass;
 
   if (blockedTemplate) {
     return gateResult({
@@ -3452,7 +3526,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
       label: "KOSHA exact promotion review gate",
       state: "approval_gated",
       evidencePath,
-      detail: `Review template covers ${candidateCount} KOSHA candidates and is blocked by default (${failures.length} checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval.${officialPdfAuditDetail}${officialLifecycleAuditDetail}${reviewerSupportDetail}${contractAuditDetail}`,
+      detail: `Review template covers ${candidateCount} KOSHA candidates and is blocked by default (${failures.length} checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval.${officialPdfAuditDetail}${officialLifecycleAuditDetail}${reviewerSupportDetail}${reviewerCockpitDetail}${contractAuditDetail}`,
       nextActions: [
         "Fill the generated KOSHA review template with reviewer, reviewedAt, humanConfirmed, and every required check before promotion.",
         "Re-run scripts\\kosha_exact_promotion_review_gate.mjs on the completed review input, then seek separate explicit approval before writing any exact-trust registry changes.",
@@ -3474,7 +3548,9 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && report.reviewerSupportHumanReviewCompleted === false
     && officialPdfAuditProvesBodyPair
     && officialLifecycleAuditProvesCurrentInventory
-    && reviewerSupportProvesSemanticCoverage;
+    && reviewerSupportProvesSemanticCoverage
+    && reviewerCockpitPass
+    && reviewerCockpitBrowserPass;
 
   if (completedButStillApprovalGated) {
     return gateResult({
@@ -3482,7 +3558,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
       label: "KOSHA exact promotion review gate",
       state: "approval_gated",
       evidencePath,
-      detail: `Human checklist is complete for ${candidateCount} KOSHA candidates, but exact-trust promotion remains approval-gated and no mutation has been performed.${officialPdfAuditDetail}${officialLifecycleAuditDetail}${reviewerSupportDetail}${contractAuditDetail}`,
+      detail: `Human checklist is complete for ${candidateCount} KOSHA candidates, but exact-trust promotion remains approval-gated and no mutation has been performed.${officialPdfAuditDetail}${officialLifecycleAuditDetail}${reviewerSupportDetail}${reviewerCockpitDetail}${contractAuditDetail}`,
       nextActions: [
         "Request explicit approval for the bounded exact-trust promotion before writing registry, DB, embedding, or production runtime changes.",
       ],
