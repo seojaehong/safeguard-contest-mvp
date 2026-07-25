@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-25T00:23:53.607Z",
+  "generatedAt": "2026-07-25T00:25:32.498Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "65e4976dff39c282a01e345f70c434e4890b40d7",
-  "productionCommit": "22b2be6de4ab1e3f90bd799df39882c71f8b9e75",
+  "sourceHead": "98c66a0dae9b8aa336624cd026dd1c764a69360e",
+  "productionCommit": "65e4976dff39c282a01e345f70c434e4890b40d7",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "22b2be6de4ab1e3f90bd799df39882c71f8b9e75",
+    "commitSha": "65e4976dff39c282a01e345f70c434e4890b40d7",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-smthu03ox-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-p3mxt1cr7-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": false,
@@ -20,13 +20,17 @@
   "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
   "sourcePendingChangedPaths": [
-    "scripts/northstar_open_gate_audit.mjs",
-    "tests/northstar-open-gate-audit.test.ts"
+    "evaluation/northstar-live-rollup-2026-07-20/report.json",
+    "evaluation/northstar-live-rollup-2026-07-20/report.md",
+    "evaluation/northstar-next-runway-current-2026-07-22/report.json",
+    "evaluation/northstar-next-runway-current-2026-07-22/report.md",
+    "evaluation/northstar-open-gates-current/report.json",
+    "evaluation/northstar-open-gates-current/report.md"
   ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "65e4976dff39c282a01e345f70c434e4890b40d7",
-  "liveRollupLiveCommit": "22b2be6de4ab1e3f90bd799df39882c71f8b9e75",
+  "liveExactEvidenceCommit": "98c66a0dae9b8aa336624cd026dd1c764a69360e",
+  "liveRollupLiveCommit": "65e4976dff39c282a01e345f70c434e4890b40d7",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
