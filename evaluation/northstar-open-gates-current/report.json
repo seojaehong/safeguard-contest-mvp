@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-25T02:39:37.397Z",
-  "sourceSha": "7e9026050e2ae8ac20425e29204079b0f4b416dd",
+  "generatedAt": "2026-07-25T03:07:09.317Z",
+  "sourceSha": "38eddb8f6ca77ead833a9a993a7b8c459eed22bc",
   "overall": "open",
   "gates": [
     {
@@ -100,7 +100,7 @@
       "state": "proven",
       "label": "Live 12-deliverable editorial contract review",
       "evidencePath": "evaluation\\live-document-editorial-review-2026-07-25\\report.json",
-      "detail": "Five live production scenarios and all 60 canonical document surfaces pass the automated editorial contract: placeholder=0, legal overclaim=0, awkward composition 20->0, and evidence-domain mismatch 1->0. The companion duplicate classifier reduces generic-template overuse 4->0 while retaining exact=31 and near=100 reviewer findings. Near-classification keeps all 100 findings visible while reducing unclassified human-review-required 54->0 through role/context/hazard/control categories. humanReviewCompleted=false, the six-core wording and 12-presence gates are not combined as a human PASS, no DB/share/provider mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Five live production scenarios and all 60 canonical document surfaces pass the automated editorial contract: placeholder=0, legal overclaim=0, awkward composition 20->0, and evidence-domain mismatch 1->0. The companion duplicate classifier reduces generic-template overuse 4->0 while retaining exact=31 and near=100 reviewer findings. Near-classification keeps all 100 findings visible while reducing unclassified human-review-required 54->0 through role/context/hazard/control categories. Rain-context isolation evaluation\\live-document-rain-context-isolation-2026-07-25\\report.json fails production before at 3 irrelevant document findings and passes live after at 0, preventing 비산 from being treated as rain. humanReviewCompleted=false, the six-core wording and 12-presence gates are not combined as a human PASS, no DB/share/provider mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Perform a separate human editorial review for the recorded duplicate-line findings.",
         "Keep Documents/Share viewport IA and exact saved Share geometry as separate product/evidence boundaries."

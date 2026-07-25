@@ -1,9 +1,10 @@
 # Live Document Rain-Context Isolation
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_RAIN_CONTEXT_ISOLATION_LIVE_PENDING`
+- Verdict: `PASS_LIVE_PRODUCTION_RAIN_CONTEXT_ISOLATION`
 - Product commit: `166fab88501cf825c3cecd80c05b6b2fce640425`
 - Runner contract commit: `52d76ee4442dac23eb6c0eb7fe4d31c8bf9be749`
-- Measured production commit: `e0dbf20bf9d51e15cdd163c76dfa3abe85c4ec3c`
+- Before production commit: `e0dbf20bf9d51e15cdd163c76dfa3abe85c4ec3c`
+- After production commit: `9f18b7fd72391ad391df7ab31468b5af3f7159a5`
 - Scenario: Ulsan chemical cleaning with SDS/GHS and spray/skin-contact risk
 - Documents reviewed per run: 12
 
@@ -34,6 +35,15 @@ Current-source local production was PASS:
 The focused tests also preserve the positive case: explicit rain forecasts and
 wet-floor wording still add the rain context.
 
+## After Live
+
+Production deployment `9f18b7fd` passed the same focused contract:
+
+- Scenario pass/fail: `1/0`
+- Documents pass/fail: `12/0`
+- Scenario-irrelevant findings: `0`
+- Matched forbidden fragments: `0`
+
 ## Evidence Contract
 
 The editorial runner now consumes `expected.forbiddenDocumentFragments` for
@@ -53,6 +63,5 @@ budget expired, so it is not used as the product verdict.
 ## Boundary
 
 No database mutation, Share-session creation, provider dispatch, embedding, or
-vector upload was performed. Human wording review is not complete. Live
-after-deployment evidence remains pending, and exact saved
+vector upload was performed. Human wording review is not complete. Exact saved
 `/share/[sessionId]` remains `MISSING_EVIDENCE`.

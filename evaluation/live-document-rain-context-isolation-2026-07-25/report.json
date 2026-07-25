@@ -1,11 +1,12 @@
 {
   "schemaVersion": "safeclaw-live-document-rain-context-isolation/v1",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_RAIN_CONTEXT_ISOLATION_LIVE_PENDING",
-  "checkedAt": "2026-07-25T02:56:47.497Z",
+  "verdict": "PASS_LIVE_PRODUCTION_RAIN_CONTEXT_ISOLATION",
+  "checkedAt": "2026-07-25T03:00:36.000Z",
   "sourceHead": "52d76ee4442dac23eb6c0eb7fe4d31c8bf9be749",
   "productCommit": "166fab88501cf825c3cecd80c05b6b2fce640425",
-  "productionCommit": "e0dbf20bf9d51e15cdd163c76dfa3abe85c4ec3c",
-  "productionDeployment": "safeguard-contest-6f4o9ehm7-seojaehongs-projects.vercel.app",
+  "beforeProductionCommit": "e0dbf20bf9d51e15cdd163c76dfa3abe85c4ec3c",
+  "afterProductionCommit": "9f18b7fd72391ad391df7ab31468b5af3f7159a5",
+  "afterProductionDeployment": "safeguard-contest-6z6hxfit5-seojaehongs-projects.vercel.app",
   "scenarioCount": 1,
   "canonicalDocumentCount": 12,
   "beforeLive": {
@@ -25,6 +26,18 @@
   "afterLocal": {
     "path": "evaluation\\live-document-rain-context-isolation-2026-07-25\\after-local-focused\\report.json",
     "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+    "pass": 1,
+    "fail": 0,
+    "reviewedDocumentSurfaceCount": 12,
+    "scenarioIrrelevantContextFindingCount": 0,
+    "failedDocumentCount": 0,
+    "matchedDocumentKeys": []
+  },
+  "afterLive": {
+    "path": "evaluation\\live-document-rain-context-isolation-2026-07-25\\after-live\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+    "sourceHead": "9f18b7fd72391ad391df7ab31468b5af3f7159a5",
+    "productionCommit": "9f18b7fd72391ad391df7ab31468b5af3f7159a5",
     "pass": 1,
     "fail": 0,
     "reviewedDocumentSurfaceCount": 12,
@@ -55,7 +68,7 @@
     "vectorUploadPerformed": false
   },
   "remainingBoundary": {
-    "liveAfterDeploymentPending": true,
+    "liveAfterDeploymentPending": false,
     "humanReviewCompleted": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   }
