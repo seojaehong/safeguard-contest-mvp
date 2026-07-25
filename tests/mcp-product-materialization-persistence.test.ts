@@ -165,11 +165,11 @@ describe("MCP Phase A product persistence behavior", () => {
       SECRET,
     );
     if (!reopened.ok) throw new Error("expected resolver-originated workpack reopen");
-    expect(reopened.response.structured?.riskAssessmentRows ?? []).toEqual([]);
-    const serialized = JSON.stringify(reopened.response.structured) ?? "";
-    expect(serialized).not.toContain('"riskLevel":"high"');
-    expect(serialized).not.toContain('"likelihood":3');
-    expect(serialized).not.toContain('"severity":4');
+    const reopenedRows = reopened.response.structured?.riskAssessmentRows ?? [];
+    expect(reopenedRows).toHaveLength(3);
+    expect(reopenedRows.every((row) => row.verificationStatus === "needsReview")).toBe(true);
+    expect(reopenedRows.every((row) => row.verification.startsWith("review_required:"))).toBe(true);
+    expect(reopenedRows.every((row) => row.evidenceRefs.includes("phase-a-review-required"))).toBe(true);
   });
 
   test.each([
@@ -307,11 +307,11 @@ describe("MCP Phase A product persistence behavior", () => {
     });
     if (!reopened.ok) throw new Error("expected reopened Phase A workpack");
     expect(reopened.response.phaseAProduct).toEqual(initialPayload.phaseAProduct);
-    expect(reopened.response.structured?.riskAssessmentRows ?? []).toEqual([]);
-    const serialized = JSON.stringify(reopened.response.structured) ?? "";
-    expect(serialized).not.toContain('"riskLevel":"high"');
-    expect(serialized).not.toContain('"likelihood":3');
-    expect(serialized).not.toContain('"severity":4');
+    const reopenedRows = reopened.response.structured?.riskAssessmentRows ?? [];
+    expect(reopenedRows).toHaveLength(3);
+    expect(reopenedRows.every((row) => row.verificationStatus === "needsReview")).toBe(true);
+    expect(reopenedRows.every((row) => row.verification.startsWith("review_required:"))).toBe(true);
+    expect(reopenedRows.every((row) => row.evidenceRefs.includes("phase-a-review-required"))).toBe(true);
     expect(repository.reads).toEqual([
       { workpackId: "workpack-1", siteId: "site-a", organizationId: "org-a" },
     ]);

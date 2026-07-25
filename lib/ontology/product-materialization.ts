@@ -306,9 +306,18 @@ function projectExistingRiskRows(
       .map((row) => [row.controlId, row]),
   );
   return rows.map((row) => {
-    if (!row.controlId) return row;
-    const reviewRow = reviewRowsByControlId.get(row.controlId);
-    if (!reviewRow) return row;
+    const reviewRow = row.controlId ? reviewRowsByControlId.get(row.controlId) : undefined;
+    if (!reviewRow) {
+      return {
+        ...row,
+        verification: "review_required: 현장 검토 및 사람 확인 필요",
+        verificationStatus: "needsReview",
+        evidenceRefs: unique([
+          ...row.evidenceRefs,
+          "phase-a-review-required",
+        ]),
+      };
+    }
     return {
       ...row,
       verification: `review_required: ${reviewRow.stableKey}`,
