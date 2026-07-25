@@ -275,15 +275,21 @@ function matchPatterns(value, patterns) {
     .map((entry) => entry.id);
 }
 
-export function reviewEditorialPayload(payload, question) {
+export function reviewEditorialPayload(payload, question, expected = {}) {
   const deliverables = payload?.deliverables && typeof payload.deliverables === "object"
     ? payload.deliverables
     : {};
+  const forbiddenDocumentFragments = asArray(expected.forbiddenDocumentFragments)
+    .map(text)
+    .filter(Boolean);
   const documents = canonicalDocuments.map(([key, title]) => {
     const rawText = text(deliverables[key]);
+    const normalizedText = normalizeInline(rawText);
     const placeholderFindings = matchPatterns(rawText, placeholderPatterns);
     const legalOverclaimFindings = matchPatterns(rawText, legalOverclaimPatterns);
     const awkwardCompositionFindings = matchPatterns(rawText, awkwardCompositionPatterns);
+    const matchedForbiddenDocumentFragments = forbiddenDocumentFragments
+      .filter((fragment) => normalizedText.includes(normalizeInline(fragment)));
     const evidenceDomainMismatches = evidenceDomainRules
       .filter((rule) => rule.evidencePattern.test(rawText) && !rule.scenarioIdentityPattern.test(question))
       .map((rule) => ({
@@ -296,6 +302,7 @@ export function reviewEditorialPayload(payload, question) {
     if (placeholderFindings.length) failures.push("placeholderOrTemplateRemnant");
     if (legalOverclaimFindings.length) failures.push("legalOverclaim");
     if (awkwardCompositionFindings.length) failures.push("awkwardSentenceComposition");
+    if (matchedForbiddenDocumentFragments.length) failures.push("scenarioIrrelevantContext");
     if (evidenceDomainMismatches.length) failures.push("scenarioEvidenceDomainMismatch");
     return {
       key,
@@ -305,6 +312,7 @@ export function reviewEditorialPayload(payload, question) {
       placeholderFindings,
       legalOverclaimFindings,
       awkwardCompositionFindings,
+      matchedForbiddenDocumentFragments,
       evidenceDomainMismatches,
       verdict: failures.length ? "RED" : "PASS",
       failures,
@@ -323,6 +331,10 @@ export function reviewEditorialPayload(payload, question) {
     placeholderFindingCount: documents.reduce((sum, document) => sum + document.placeholderFindings.length, 0),
     legalOverclaimFindingCount: documents.reduce((sum, document) => sum + document.legalOverclaimFindings.length, 0),
     awkwardCompositionFindingCount: documents.reduce((sum, document) => sum + document.awkwardCompositionFindings.length, 0),
+    scenarioIrrelevantContextFindingCount: documents.reduce(
+      (sum, document) => sum + document.matchedForbiddenDocumentFragments.length,
+      0
+    ),
     evidenceDomainMismatchCount: documents.reduce((sum, document) => sum + document.evidenceDomainMismatches.length, 0),
     exactLineOveruseCount: duplicates.allExactLineOveruse.length,
     displayedExactLineOveruseCount: duplicates.exactLineOveruse.length,
@@ -393,7 +405,7 @@ async function readBuildInfo() {
 
 function writeMarkdown(report) {
   const rows = report.cases.flatMap((testCase) => testCase.documents.map((document) => (
-    `| ${testCase.id} | ${document.key} | ${document.excerpt.replaceAll("|", "\\|")} | ${document.placeholderFindings.join(", ") || "-"} | ${document.legalOverclaimFindings.join(", ") || "-"} | ${document.awkwardCompositionFindings.join(", ") || "-"} | ${document.evidenceDomainMismatches.map((finding) => finding.domain).join(", ") || "-"} | ${document.verdict} |`
+    `| ${testCase.id} | ${document.key} | ${document.excerpt.replaceAll("|", "\\|")} | ${document.placeholderFindings.join(", ") || "-"} | ${document.legalOverclaimFindings.join(", ") || "-"} | ${document.awkwardCompositionFindings.join(", ") || "-"} | ${document.matchedForbiddenDocumentFragments.join(", ") || "-"} | ${document.evidenceDomainMismatches.map((finding) => finding.domain).join(", ") || "-"} | ${document.verdict} |`
   ))).join("\n");
   const markdown = `# Live 12-Deliverable Editorial Contract Review
 
@@ -407,6 +419,7 @@ function writeMarkdown(report) {
 - Placeholder/template findings: ${report.placeholderFindingCount}
 - Legal overclaim findings: ${report.legalOverclaimFindingCount}
 - Awkward composition findings: ${report.awkwardCompositionFindingCount}
+- Scenario-irrelevant context findings: ${report.scenarioIrrelevantContextFindingCount}
 - Scenario/evidence domain mismatches: ${report.evidenceDomainMismatchCount}
 - Exact repeated-line groups: ${report.exactLineOveruseCount} (review finding)
 - Near-duplicate line pairs: ${report.nearDuplicateLineOveruseCount} (review finding)
@@ -418,14 +431,14 @@ function writeMarkdown(report) {
 - Provider dispatch called: \`false\`
 - Exact saved Share reproduced: \`false\`
 
-| Case | Deliverable | Reviewer excerpt | Placeholder | Legal overclaim | Awkward composition | Evidence mismatch | Verdict |
-|---|---|---|---|---|---|---|---|
+| Case | Deliverable | Reviewer excerpt | Placeholder | Legal overclaim | Awkward composition | Scenario-irrelevant context | Evidence mismatch | Verdict |
+|---|---|---|---|---|---|---|---|---|
 ${rows}
 
 ## Contract
 
 - Every case and all 12 canonical deliverables expose a reviewer-readable excerpt from the raw API text.
-- Placeholder or template remnants, legal-duty replacement claims, awkward action/question splices, and scenario/evidence domain mismatches fail closed.
+- Placeholder or template remnants, legal-duty replacement claims, awkward action/question splices, manifest-declared scenario-irrelevant context, and scenario/evidence domain mismatches fail closed.
 - Generic fallback or disclaimer lines copied across four or more independent documents fail closed.
 - Exact and near-duplicate lines are recorded as reviewer findings. They do not fail automatically because bounded operational controls may intentionally repeat across documents.
 - Supporting nine documents use the same automated editorial failure budget as the core three; UI visibility is a separate layout contract.
@@ -464,7 +477,7 @@ async function main() {
     } catch (error) {
       runnerError = error instanceof Error ? error.message : String(error);
     }
-    const review = reviewEditorialPayload(payload, testCase.question);
+    const review = reviewEditorialPayload(payload, testCase.question, testCase.expected);
     const ok = !runnerError && (!api || api.ok) && review.ok;
     results.push({
       id: testCase.id,
@@ -503,6 +516,10 @@ async function main() {
     placeholderFindingCount: results.reduce((sum, item) => sum + item.placeholderFindingCount, 0),
     legalOverclaimFindingCount: results.reduce((sum, item) => sum + item.legalOverclaimFindingCount, 0),
     awkwardCompositionFindingCount: results.reduce((sum, item) => sum + item.awkwardCompositionFindingCount, 0),
+    scenarioIrrelevantContextFindingCount: results.reduce(
+      (sum, item) => sum + item.scenarioIrrelevantContextFindingCount,
+      0
+    ),
     evidenceDomainMismatchCount: results.reduce((sum, item) => sum + item.evidenceDomainMismatchCount, 0),
     exactLineOveruseCount: results.reduce((sum, item) => sum + item.exactLineOveruseCount, 0),
     displayedExactLineOveruseCount: results.reduce((sum, item) => sum + item.displayedExactLineOveruseCount, 0),

@@ -14,6 +14,7 @@ type EditorialReport = {
   placeholderFindingCount: number;
   legalOverclaimFindingCount: number;
   awkwardCompositionFindingCount: number;
+  scenarioIrrelevantContextFindingCount: number;
   evidenceDomainMismatchCount: number;
   genericTemplateOveruseCount: number;
   exactLineOveruseCount: number;
@@ -38,6 +39,7 @@ type EditorialReport = {
       excerpt: string;
       verdict: string;
       failures: string[];
+      matchedForbiddenDocumentFragments: string[];
       evidenceDomainMismatches: Array<{
         domain: string;
         requiredScenarioIdentity: string;
@@ -68,13 +70,17 @@ function buildDocuments(): Record<string, string> {
   };
 }
 
-function runFixture(question: string, documents: Record<string, string>): { status: number | null; report: EditorialReport } {
+function runFixture(
+  question: string,
+  documents: Record<string, string>,
+  expected: Record<string, unknown> = {}
+): { status: number | null; report: EditorialReport } {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "safeclaw-editorial-review-"));
   const casesPath = path.join(root, "cases.json");
   const payloadsPath = path.join(root, "payloads.json");
   const outDir = path.join(root, "output");
   fs.writeFileSync(casesPath, `${JSON.stringify({
-    variants: [{ id: "review", expected: {} }],
+    variants: [{ id: "review", expected }],
     baseScenarios: [{ id: "editorial-case", question, expected: {} }]
   }, null, 2)}\n`, "utf8");
   fs.writeFileSync(payloadsPath, `${JSON.stringify({
@@ -197,6 +203,26 @@ describe("SafeClaw 12-deliverable editorial review", () => {
     expect(result.status).toBe(1);
     expect(result.report.placeholderFindingCount).toBe(1);
     expect(result.report.legalOverclaimFindingCount).toBe(1);
+  });
+
+  it("fails closed when one manifest-forbidden scenario fragment remains in a document", () => {
+    const documents = buildDocuments();
+    documents.foreignWorkerBriefing += "\n우천·젖은 바닥: 미끄럼과 보행 동선을 확인합니다.";
+    const result = runFixture(
+      "울산 화학세척 작업에서 SDS와 비산·피부접촉을 확인한다.",
+      documents,
+      { forbiddenDocumentFragments: ["우천·젖은 바닥"] }
+    );
+
+    expect(result.status).toBe(1);
+    expect(result.report.scenarioIrrelevantContextFindingCount).toBe(1);
+    expect(result.report.cases[0]?.documents.find(
+      (document) => document.key === "foreignWorkerBriefing"
+    )).toMatchObject({
+      verdict: "RED",
+      failures: ["scenarioIrrelevantContext"],
+      matchedForbiddenDocumentFragments: ["우천·젖은 바닥"]
+    });
   });
 
   it("reports the evidence category mismatch when location-only overlap selects vehicle rollover evidence", () => {
