@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "safeclaw-hermes-knowledge-review-contract-live/v1",
+  "checkedAt": "2026-07-25T01:23:06.9093575Z",
+  "verdict": "PASS_LIVE_PRODUCTION_HERMES_KNOWLEDGE_REVIEW_AUTHORITY_CONTRACT",
+  "sourceHead": "49dded5bb88a27e34014ecc4dee4e4146b2681c6",
+  "productCommit": "602596c1bb1c728e18fc83a0177dbf5659cb89a5",
+  "productionBuild": {
+    "commitSha": "49dded5bb88a27e34014ecc4dee4e4146b2681c6",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-g31cxl3un-seojaehongs-projects.vercel.app"
+  },
+  "probe": {
+    "endpoint": "https://www.safeclaw.kr/api/knowledge/regenerate",
+    "httpStatus": 200,
+    "requestMode": "generate_false_stateless_candidate",
+    "rawEventCount": 5,
+    "aiGenerationExecuted": false,
+    "providerCallPerformed": false,
+    "storageMode": "stateless_candidate",
+    "savedRunId": null
+  },
+  "candidate": {
+    "contractVersion": "knowledge-candidate.v2",
+    "publicationState": "unpublished",
+    "publishAllowed": false,
+    "dbMutationPerformed": false
+  },
+  "reviewContract": {
+    "contractVersion": "knowledge-candidate-review.v1",
+    "status": "human_review_required",
+    "authorityOrder": [
+      "sif",
+      "kosha",
+      "law",
+      "organization_history",
+      "site_history",
+      "external_context"
+    ],
+    "presentAuthorityIds": [
+      "sif",
+      "kosha",
+      "law",
+      "organization_history",
+      "site_history"
+    ],
+    "sourceRoleCounts": {
+      "sifIncidentControlEvidence": 1,
+      "koshaTechnicalGuidance": 1,
+      "lawStatutorySource": 1,
+      "organizationPrivateMemory": 1,
+      "sitePrivateMemory": 1,
+      "externalContext": 0
+    },
+    "tenantMemoryPublicPromotionAllowed": false,
+    "siteManagerAcceptanceRequiredBeforeWorkpackUse": true,
+    "humanReviewRequired": true,
+    "machineEvidenceReplacesHumanReview": false,
+    "dbMutationAllowed": false,
+    "publishAllowed": false
+  },
+  "verification": {
+    "focusedTestFilesPassed": 8,
+    "focusedTestsPassed": 86,
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPagesGenerated": 28
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "schemaMutationPerformed": false,
+    "candidatePersisted": false,
+    "ontologyPublished": false,
+    "providerCallPerformed": false,
+    "shareSessionCreated": false,
+    "exactSavedShareReproduced": false
+  },
+  "remainingBoundaries": {
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  }
+}
