@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-25T01:32:46.027Z
-Source HEAD at generation: 460d35585cade0c693316ad75f74fb04467b55af
-Live commit at generation: 49dded5bb88a27e34014ecc4dee4e4146b2681c6
+Generated at: 2026-07-25T02:11:32.210Z
+Source HEAD at generation: ac7878d370f5d2e623029b7f968d5520003ceb1d
+Live commit at generation: a9ca3cbe87efd753bb937620e4cd56113f66e1b3
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -103,6 +103,16 @@ Overall: `northstar_open_approval_gated`
 - Documents/Share IA: OPEN_SEPARATE_VIEWPORT_IA_WAVE
 - Boundary: capability truth does not unlock provider persistence, exact saved Share, or Documents/Share viewport IA.
 
+## Live Hermes Reviewer Authority UI
+
+- Verdict: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI`
+- Local/live viewport contracts: 8/8 and 8/8
+- Authority order: SIF -> KOSHA -> law -> organization_history -> site_history -> external_context
+- Human review required: true; machine replaces human review=false
+- Tenant-memory public promotion: false; site-manager acceptance required=true
+- Mutation boundary DB/provider/share/publication: false/false/false/false
+- Exact saved Share: MISSING_EVIDENCE; LLM Wiki/RLS: APPROVAL_GATED/APPROVAL_GATED
+
 ## Live Secondary Document Grounding
 
 - Verdict: `PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT`
@@ -139,6 +149,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_editorial_review | proven | evaluation\live-document-editorial-review-2026-07-25\report.json |
 | product_capability_truth | proven | evaluation\product-capability-truth-2026-07-25\report.json |
 | hermes_knowledge_review_authority | proven | evaluation\hermes-knowledge-review-contract-live-2026-07-25\report.json |
+| hermes_knowledge_review_ui | proven | evaluation\hermes-knowledge-review-authority-ui-2026-07-25\report.json |
 | live_document_secondary_grounding | proven | evaluation\live-document-secondary-grounding-2026-07-25\report.json |
 | live_document_seed_profile_isolation | proven | evaluation\live-document-seed-profile-isolation-2026-07-25\report.json |
 | ui_documents_share_cockpit | proven | evaluation\documents-cockpit-workbench-geometry-2026-07-22\report.json |
@@ -171,6 +182,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_editorial_duplicate_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-duplicate-classification-2026-07-25\report.json |
 | live_document_editorial_near_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-near-classification-2026-07-25\report.json |
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |
+| hermes_knowledge_review_ui | ancestor | matches_live_source_mismatch | evaluation\hermes-knowledge-review-authority-ui-2026-07-25\report.json |
 | live_document_secondary_grounding | ancestor | ancestor_of_head | evaluation\live-document-secondary-grounding-2026-07-25\report.json |
 | live_document_seed_profile_isolation | ancestor | ancestor_of_head | evaluation\live-document-seed-profile-isolation-2026-07-25\report.json |
 | kosha_exact_trust_registry | ancestor | ancestor_of_head | evaluation\kosha-current-live-gate-2026-07-20\report.json |

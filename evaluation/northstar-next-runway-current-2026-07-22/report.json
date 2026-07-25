@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-25T01:32:54.209Z",
+  "generatedAt": "2026-07-25T02:11:39.580Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "460d35585cade0c693316ad75f74fb04467b55af",
-  "productionCommit": "49dded5bb88a27e34014ecc4dee4e4146b2681c6",
+  "sourceHead": "ac7878d370f5d2e623029b7f968d5520003ceb1d",
+  "productionCommit": "a9ca3cbe87efd753bb937620e4cd56113f66e1b3",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "49dded5bb88a27e34014ecc4dee4e4146b2681c6",
+    "commitSha": "a9ca3cbe87efd753bb937620e4cd56113f66e1b3",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-g31cxl3un-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-iv342vjmo-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": false,
@@ -20,17 +20,18 @@
   "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
   "sourcePendingChangedPaths": [
-    "evaluation/hermes-knowledge-review-contract-live-2026-07-25/report.json",
-    "evaluation/hermes-knowledge-review-contract-live-2026-07-25/report.md",
+    "scripts/knowledge_review_authority_ui_runner.mjs",
+    "scripts/northstar_live_rollup.mjs",
     "scripts/northstar_next_runway.mjs",
     "scripts/northstar_open_gate_audit.mjs",
+    "tests/northstar-live-rollup.test.ts",
     "tests/northstar-next-runway-generator.test.ts",
     "tests/northstar-open-gate-audit.test.ts"
   ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "460d35585cade0c693316ad75f74fb04467b55af",
-  "liveRollupLiveCommit": "49dded5bb88a27e34014ecc4dee4e4146b2681c6",
+  "liveExactEvidenceCommit": "ac7878d370f5d2e623029b7f968d5520003ceb1d",
+  "liveRollupLiveCommit": "a9ca3cbe87efd753bb937620e4cd56113f66e1b3",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -50,6 +51,7 @@
     "liveDocumentEditorialDuplicateClassification": "evaluation\\live-document-editorial-duplicate-classification-2026-07-25\\report.json",
     "liveDocumentEditorialNearClassification": "evaluation\\live-document-editorial-near-classification-2026-07-25\\report.json",
     "productCapabilityTruth": "evaluation\\product-capability-truth-2026-07-25\\report.json",
+    "hermesKnowledgeReviewAuthorityUi": "evaluation\\hermes-knowledge-review-authority-ui-2026-07-25\\report.json",
     "liveDocumentSecondaryGrounding": "evaluation\\live-document-secondary-grounding-2026-07-25\\report.json",
     "liveDocumentSeedProfileIsolation": "evaluation\\live-document-seed-profile-isolation-2026-07-25\\report.json",
     "koshaNextExactCandidateAudit": "evaluation\\kosha-next-exact-candidate-audit-2026-07-22\\report.json",
@@ -77,6 +79,7 @@
     "live_document_editorial_review",
     "product_capability_truth",
     "hermes_knowledge_review_authority",
+    "hermes_knowledge_review_ui",
     "kosha_exact_promotion_packet_ready_for_review",
     "ui_documents_share_cockpit",
     "dispatch_standalone_cockpit",
@@ -232,7 +235,7 @@
     "shareRecipientLongContent": "live route-controlled long-content fixture keeps desktop recipient Share in two regions, mobile recipient root <= 1.5 viewports, confirmation in the first viewport, long task text in local scroll, and the document group collapsed by default; route split alone is insufficient and this is not exact saved-session proof",
     "shareRouteEvidenceBoundary": "separate Share evidence into invited recipient fixture pass, exact saved/generated /share/[sessionId] missing evidence, and manager/workspace share-result route repro; do not use one route's pass to close another route's mobile-like complaint",
     "shareMobile": "current compact cockpit remains first-viewport bounded in current evidence",
-    "hermesOpenclaw": "adapter and fail-closed auth boundary current-proven; live unauthenticated broker smoke returns AUTH_REQUIRED before engine execution; live stateless knowledge candidates expose SIF -> KOSHA -> law authority roles, tenant-memory non-promotion, site-manager acceptance, and human-review requirements without provider, DB, publication, or Share mutation"
+    "hermesOpenclaw": "adapter and fail-closed auth boundary current-proven; live unauthenticated broker smoke returns AUTH_REQUIRED before engine execution; live authenticated reviewer UI passes 8/8 viewport contracts and exposes SIF -> KOSHA -> law -> organization history -> site history -> external context authority roles, tenant-memory non-promotion, site-manager acceptance, and human-review requirements without provider, DB, publication, or Share mutation"
   },
   "hermesOpenclaw": {
     "verdict": "adapter_boundary_pass_live_execution_not_claimed",
@@ -445,6 +448,35 @@
     "photoAnalysisPostCalled": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "documentsShareIaVerdict": "OPEN_SEPARATE_VIEWPORT_IA_WAVE"
+  },
+  "hermesKnowledgeReviewAuthorityUi": {
+    "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+    "sourceHead": "719a73792d5a3fdc9f4cfea55b92f9282c08dbf9",
+    "productCommit": "a9fcde386f0d97e8b46553a9f083892f14e11799",
+    "productionCommit": "a9ca3cbe87efd753bb937620e4cd56113f66e1b3",
+    "localPassed": 8,
+    "localViewportCount": 8,
+    "livePassed": 8,
+    "liveViewportCount": 8,
+    "sourceOrder": [
+      "SIF",
+      "KOSHA",
+      "law",
+      "organization_history",
+      "site_history",
+      "external_context"
+    ],
+    "humanReviewRequired": true,
+    "machineEvidenceReplacesHumanReview": false,
+    "tenantMemoryPublicPromotionAllowed": false,
+    "siteManagerAcceptanceRequiredBeforeWorkpackUse": true,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "ontologyPublicationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
   },
   "liveDocumentSecondaryGrounding": {
     "verdict": "PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT",

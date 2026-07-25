@@ -1,0 +1,265 @@
+{
+  "schemaVersion": "safeclaw-hermes-knowledge-review-authority-ui/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+  "checkedAt": "2026-07-25T01:59:44.718Z",
+  "sourceHead": "719a73792d5a3fdc9f4cfea55b92f9282c08dbf9",
+  "productCommit": "a9fcde386f0d97e8b46553a9f083892f14e11799",
+  "baseUrl": "https://www.safeclaw.kr",
+  "mode": "live-production",
+  "productionBuild": {
+    "status": 200,
+    "ok": true,
+    "commitSha": "a9ca3cbe87efd753bb937620e4cd56113f66e1b3",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-iv342vjmo-seojaehongs-projects.vercel.app"
+  },
+  "productionAligned": true,
+  "viewportCount": 8,
+  "passedCount": 8,
+  "failedCount": 0,
+  "authorityContract": {
+    "sourceOrder": [
+      "SIF",
+      "KOSHA",
+      "law",
+      "organization_history",
+      "site_history",
+      "external_context"
+    ],
+    "statutoryClaimsRequireLawProvenance": true,
+    "tenantMemoryPublicPromotionAllowed": false,
+    "siteManagerAcceptanceRequiredBeforeWorkpackUse": true,
+    "humanReviewRequired": true,
+    "machineEvidenceReplacesHumanReview": false
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "ontologyPublicationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
+  },
+  "results": [
+    {
+      "theme": "day",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "screenshot": "knowledge-review-authority-day-desktop-1440x900.png",
+      "metrics": {
+        "bodyHeight": 5715,
+        "viewportHeight": 900,
+        "horizontalOverflow": false,
+        "rootWidth": 1164,
+        "rootWidthRatio": 0.81,
+        "rootTop": 28.21875,
+        "authorityWidth": 1130,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "actionGroupTop": 451.296875,
+        "firstActionBottom": 495.296875,
+        "firstActionDepth": 467.078125,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "day",
+      "viewport": {
+        "name": "desktop-short",
+        "width": 1440,
+        "height": 723
+      },
+      "screenshot": "knowledge-review-authority-day-desktop-short-1440x723.png",
+      "metrics": {
+        "bodyHeight": 5715,
+        "viewportHeight": 723,
+        "horizontalOverflow": false,
+        "rootWidth": 1164,
+        "rootWidthRatio": 0.81,
+        "rootTop": 28.21875,
+        "authorityWidth": 1130,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "actionGroupTop": 451.296875,
+        "firstActionBottom": 495.296875,
+        "firstActionDepth": 467.078125,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "day",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "screenshot": "knowledge-review-authority-day-mobile-390x844.png",
+      "metrics": {
+        "bodyHeight": 3667,
+        "viewportHeight": 844,
+        "horizontalOverflow": false,
+        "rootWidth": 366,
+        "rootWidthRatio": 0.94,
+        "rootTop": 633.140625,
+        "authorityWidth": 332,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "actionGroupTop": 1357.390625,
+        "firstActionBottom": 1401.390625,
+        "firstActionDepth": 768.25,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "day",
+      "viewport": {
+        "name": "mobile-short",
+        "width": 390,
+        "height": 723
+      },
+      "screenshot": "knowledge-review-authority-day-mobile-short-390x723.png",
+      "metrics": {
+        "bodyHeight": 3667,
+        "viewportHeight": 723,
+        "horizontalOverflow": false,
+        "rootWidth": 366,
+        "rootWidthRatio": 0.94,
+        "rootTop": 604.140625,
+        "authorityWidth": 332,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "actionGroupTop": 1328.390625,
+        "firstActionBottom": 1372.390625,
+        "firstActionDepth": 768.25,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "night",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "screenshot": "knowledge-review-authority-night-desktop-1440x900.png",
+      "metrics": {
+        "bodyHeight": 5715,
+        "viewportHeight": 900,
+        "horizontalOverflow": false,
+        "rootWidth": 1164,
+        "rootWidthRatio": 0.81,
+        "rootTop": 28.21875,
+        "authorityWidth": 1130,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "actionGroupTop": 451.296875,
+        "firstActionBottom": 495.296875,
+        "firstActionDepth": 467.078125,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "night",
+      "viewport": {
+        "name": "desktop-short",
+        "width": 1440,
+        "height": 723
+      },
+      "screenshot": "knowledge-review-authority-night-desktop-short-1440x723.png",
+      "metrics": {
+        "bodyHeight": 5715,
+        "viewportHeight": 723,
+        "horizontalOverflow": false,
+        "rootWidth": 1164,
+        "rootWidthRatio": 0.81,
+        "rootTop": 28.21875,
+        "authorityWidth": 1130,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "actionGroupTop": 451.296875,
+        "firstActionBottom": 495.296875,
+        "firstActionDepth": 467.078125,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "night",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "screenshot": "knowledge-review-authority-night-mobile-390x844.png",
+      "metrics": {
+        "bodyHeight": 3667,
+        "viewportHeight": 844,
+        "horizontalOverflow": false,
+        "rootWidth": 366,
+        "rootWidthRatio": 0.94,
+        "rootTop": 633.140625,
+        "authorityWidth": 332,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "actionGroupTop": 1357.390625,
+        "firstActionBottom": 1401.390625,
+        "firstActionDepth": 768.25,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "night",
+      "viewport": {
+        "name": "mobile-short",
+        "width": 390,
+        "height": 723
+      },
+      "screenshot": "knowledge-review-authority-night-mobile-short-390x723.png",
+      "metrics": {
+        "bodyHeight": 3667,
+        "viewportHeight": 723,
+        "horizontalOverflow": false,
+        "rootWidth": 366,
+        "rootWidthRatio": 0.94,
+        "rootTop": 604.140625,
+        "authorityWidth": 332,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "actionGroupTop": 1328.390625,
+        "firstActionBottom": 1372.390625,
+        "firstActionDepth": 768.25,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "browserErrors": [],
+      "passed": true
+    }
+  ]
+}

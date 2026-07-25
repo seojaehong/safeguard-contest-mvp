@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-25T01:32:44.948Z",
-  "sourceSha": "460d35585cade0c693316ad75f74fb04467b55af",
+  "generatedAt": "2026-07-25T02:11:31.368Z",
+  "sourceSha": "ac7878d370f5d2e623029b7f968d5520003ceb1d",
   "overall": "open",
   "gates": [
     {
@@ -123,6 +123,14 @@
       "label": "Hermes knowledge review authority",
       "evidencePath": "evaluation\\hermes-knowledge-review-contract-live-2026-07-25\\report.json",
       "detail": "Live stateless candidate review keeps SIF -> KOSHA -> law authority roles separate, preserves organization/site memory as non-public tenant evidence, requires site-manager acceptance and human review, and performs no AI provider, DB, publication, or Share mutation. LLM Wiki publication remains APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": []
+    },
+    {
+      "id": "hermes_knowledge_review_ui",
+      "state": "proven",
+      "label": "Hermes knowledge reviewer UI",
+      "evidencePath": "evaluation\\hermes-knowledge-review-authority-ui-2026-07-25\\report.json",
+      "detail": "Live authenticated reviewer cockpit passes 8/8 Day/Night desktop and mobile geometry cases, exposes six SIF -> KOSHA -> law -> tenant-memory evidence roles, requires law provenance and site-manager acceptance, and performs no DB, provider, publication, or Share mutation. LLM Wiki/RLS remain APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": []
     },
     {

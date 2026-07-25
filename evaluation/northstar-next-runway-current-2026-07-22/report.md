@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `460d35585cade0c693316ad75f74fb04467b55af`
+Source HEAD: `ac7878d370f5d2e623029b7f968d5520003ceb1d`
 
-Production `/api/build-info`: `49dded5bb88a27e34014ecc4dee4e4146b2681c6`
+Production `/api/build-info`: `a9ca3cbe87efd753bb937620e4cd56113f66e1b3`
 
 Latest evidence commit live: `false`
 
@@ -14,17 +14,17 @@ Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/hermes-knowledge-review-contract-live-2026-07-25/report.json`, `evaluation/hermes-knowledge-review-contract-live-2026-07-25/report.md`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
+Source pending changed paths: `scripts/knowledge_review_authority_ui_runner.mjs`, `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
 
 Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `460d35585cade0c693316ad75f74fb04467b55af`
+Live rollup source head: `ac7878d370f5d2e623029b7f968d5520003ceb1d`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `460d35585cade0c693316ad75f74fb04467b55af` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `49dded5bb88a27e34014ecc4dee4e4146b2681c6`, and the live rollup remains exact for that deployed marker.
+Note: current HEAD `ac7878d370f5d2e623029b7f968d5520003ceb1d` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `a9ca3cbe87efd753bb937620e4cd56113f66e1b3`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -51,6 +51,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live editorial duplicate classification is measured separately: `PASS_LIVE_PRODUCTION_EDITORIAL_DUPLICATE_CLASSIFICATION_REVIEWER_READY`, generic template overuse `4->0`, retained reviewer findings exact/near `31/100`, and humanReviewCompleted=`false`. Only generic template overuse fails automatically; safety-control and legal-reference repetition remains visible, and exact saved Share remains `MISSING_EVIDENCE`.
 - Live editorial near-duplicate classification preserves `100->100` findings while reducing unclassified human-review-required `54->0`. The retained role-prefix/context/hazard/control categories are `81/9/8/2`; humanReviewCompleted=`false` and exact saved Share remains `MISSING_EVIDENCE`.
 - Live product capability truth is measured separately: `PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH`; manual/provider dispatch is `preview_only` with reason `persistent_idempotency_unavailable`, scheduled briefing email ready=`false`, photo Vision/OCR ready/accepted-only=`true/true`, and AI modes are `template, enhanced, full`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains `MISSING_EVIDENCE` and Documents/Share IA remains `OPEN_SEPARATE_VIEWPORT_IA_WAVE`.
+- Live Hermes reviewer authority UI is measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI`, local/live viewport contracts `8/8` and `8/8`, with authority order `SIF -> KOSHA -> law -> organization_history -> site_history -> external_context`. Human review remains required and machine evidence does not replace it; no DB/provider/share/publication mutation is claimed. Exact saved Share remains `MISSING_EVIDENCE`, while LLM Wiki publication and Supabase RLS remain approval-gated.
 - Live supporting-document scenario grounding is measured separately: `PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT`, live cases `5/5`, supporting documents `30/30`, cross-scenario leakage `0`, and missingUnexpected `0`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains `MISSING_EVIDENCE`.
 - Live document seed-profile isolation is measured separately: `PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION`, before forbidden fragments `90`, live forbidden fragments `0`, reviewed document surface `60`, and secondary grounding `30/30`. This deterministic gate does not replace broad human wording review or exact saved Share evidence; exact saved Share remains `MISSING_EVIDENCE`.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level, without claiming live production engine execution.
