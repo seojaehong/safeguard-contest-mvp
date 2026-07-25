@@ -393,6 +393,9 @@ const report = {
   providerDispatchLiveClaimed: false,
   dbMutationPerformed: false,
   routeSplitAloneAcceptedAsFix: false,
+  wholeDocumentsPageShortClaimAllowed: false,
+  fullTwelveDocumentAuthoringIaSolvedClaimAllowed: false,
+  firstTaskCockpitProofAcceptedAsFullIaCompletion: false,
   routeSplitVerdict: "PASS_ORIENTATION_ONLY",
   verdict: allOverallPass && !anyRed
     ? isLiveProductionBase ? "PASS_LIVE_PRODUCTION_MEASURED" : "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION"
@@ -400,6 +403,17 @@ const report = {
       ? isLiveProductionBase ? "PARTIAL_LIVE_PRODUCTION_MEASURED" : "PARTIAL_CURRENT_SOURCE_LOCAL_PRODUCTION"
       : isLiveProductionBase ? "PASS_LIVE_PRODUCTION_MEASURED" : "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION",
   interpretation: "This gate separates first-action cockpit proof from the user's perceived long Documents concern. It does not claim the whole Documents page is short merely because the first risk-assessment action is visible.",
+  claimBoundary: {
+    allowed: [
+      "Selected risk-assessment cockpit and first field/action surfaces are measured when per-state metrics pass.",
+      "Route split can help orientation when routeSplitVerdict is PASS_ORIENTATION_ONLY.",
+    ],
+    forbidden: [
+      "Documents page is short based only on first-action cockpit visibility.",
+      "Full 12-document authoring IA is solved based only on selected risk-assessment cockpit proof.",
+      "Page count or route split alone fixes long-form document editing.",
+    ],
+  },
   verdictModel: {
     routeSplitVerdict: "route/page split can pass for orientation but is not accepted as the length fix",
     firstActionCockpitVerdict: "selected document header, field strip, evidence/recheck CTA, shell containment, sticky overlap 0, and no horizontal overflow",
@@ -438,6 +452,12 @@ DB mutation performed: \`false\`
 
 Route/page split alone accepted as fix: \`false\`
 
+Whole Documents page short claim allowed: \`${report.wholeDocumentsPageShortClaimAllowed}\`
+
+Full 12-document authoring IA solved claim allowed: \`${report.fullTwelveDocumentAuthoringIaSolvedClaimAllowed}\`
+
+First-task cockpit proof accepted as full IA completion: \`${report.firstTaskCockpitProofAcceptedAsFullIaCompletion}\`
+
 Route split verdict: \`${report.routeSplitVerdict}\`
 
 ## Interpretation
@@ -445,6 +465,14 @@ Route split verdict: \`${report.routeSplitVerdict}\`
 ${report.interpretation}
 
 Allowed claim: selected risk-assessment cockpit and first field/action surfaces are live-measured when the per-state metrics pass. Forbidden claim: "Documents page is short" or "full 12-document authoring IA is solved" based only on first-action visibility.
+
+## Claim Boundary
+
+Allowed:
+${report.claimBoundary.allowed.map((item) => `- ${item}`).join("\n")}
+
+Forbidden:
+${report.claimBoundary.forbidden.map((item) => `- ${item}`).join("\n")}
 
 ## Metrics
 
@@ -466,6 +494,8 @@ console.log(JSON.stringify({
   verdict: report.verdict,
   sourceHead,
   productionCommit: build.commitSha,
+  wholeDocumentsPageShortClaimAllowed: report.wholeDocumentsPageShortClaimAllowed,
+  fullTwelveDocumentAuthoringIaSolvedClaimAllowed: report.fullTwelveDocumentAuthoringIaSolvedClaimAllowed,
   summaries: results.map((item) => ({
     state: item.state,
     viewport: item.viewport.label,

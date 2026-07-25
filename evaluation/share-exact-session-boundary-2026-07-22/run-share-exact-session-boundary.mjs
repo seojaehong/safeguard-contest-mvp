@@ -411,6 +411,8 @@ async function main() {
     exactSavedSessionUrlProvided: Boolean(exactSessionUrl),
     exactSavedSessionPayloadProvided: Boolean(exactSessionPayloadPath),
     sessionKind: exactSessionUrl ? "saved-exact" : "missing-exact",
+    userDesktopMobileLikeShareComplaintClosed: exactGeometryPass,
+    scopedWorkspaceOrFixtureProofAcceptedForUserComplaintClosure: false,
     exactSessionAcceptance: {
       requiredViewports: EXACT_VIEWPORTS.map((viewport) => viewport.label),
       desktopRootWidthRatioMin: 0.72,
@@ -444,6 +446,7 @@ async function main() {
     boundary: {
       fixtureProofAcceptedAsExactSavedSession: false,
       generatedWorkspaceProofAcceptedAsExactSavedSession: false,
+      scopedWorkspaceOrFixtureProofAcceptedForUserComplaintClosure: false,
       exactSavedSessionRequiredForUserSpecificPass: true,
       sessionCreationRequiresAuthenticatedManagerWorkpackFlow: true,
       sessionCreationWouldRequireDbMutation: true,
@@ -465,9 +468,9 @@ async function main() {
     forbiddenClaims: [
       "Fixture or generated /workspace Share proof closes the exact saved /share/[sessionId] user complaint.",
       "A live provider dispatch was performed.",
-    "A share session was created or mutated by this boundary audit.",
-    "Exact saved Share is proven despite non-GET /api/share-sessions requests occurring during the probe.",
-  ],
+      "A share session was created or mutated by this boundary audit.",
+      "Exact saved Share is proven despite non-GET /api/share-sessions requests occurring during the probe.",
+    ],
   };
 
   fs.mkdirSync(options.outputDir, { recursive: true });
@@ -485,6 +488,8 @@ Live \`/api/build-info\`: \`${buildInfo.commitSha || "unknown"}\`
 Verdict: \`${report.verdict}\`
 
 Exact saved user session reproduced: \`${report.exactSavedUserSessionReproduced}\`
+
+User desktop mobile-like Share complaint closed: \`${report.userDesktopMobileLikeShareComplaintClosed}\`
 
 Provider live dispatch claimed: \`false\`
 
@@ -511,6 +516,7 @@ DB mutation performed: \`${report.boundary.dbMutationPerformed}\`
 - Exact saved geometry rows: \`${exactSessionGeometry.length}\`
 - Exact saved mutation request count: \`${exactSessionMutationRequests.length}\`
 - Exact saved session kind: \`${report.sessionKind}\`
+- Scoped Workspace/fixture proof accepted for user complaint closure: \`${report.scopedWorkspaceOrFixtureProofAcceptedForUserComplaintClosure}\`
 
 ## Exact Session Acceptance
 
@@ -548,6 +554,7 @@ ${report.forbiddenClaims.map((item) => `- ${item}`).join("\n")}
     invalidReadStatus: invalidSessionGet.status,
     dbMutationPerformed: report.boundary.dbMutationPerformed,
     exactSavedUserSessionReproduced: report.exactSavedUserSessionReproduced,
+    userDesktopMobileLikeShareComplaintClosed: report.userDesktopMobileLikeShareComplaintClosed,
   }));
 }
 
