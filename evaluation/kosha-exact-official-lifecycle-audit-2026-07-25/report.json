@@ -1,17 +1,17 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-official-lifecycle-audit/v1",
-  "generatedAt": "2026-07-25T00:19:25.042237+00:00",
-  "sourceHead": "654c24e7da59a6cacf56e31e373f64c1306384ca",
-  "verdict": "REVIEW_REQUIRED_OFFICIAL_CURRENT_LIFECYCLE_MACHINE_SUPPORTED_TITLE_VARIANTS_UNRESOLVED",
+  "generatedAt": "2026-07-25T00:33:06.716024+00:00",
+  "sourceHead": "47aa94a969beebbf71d938e82133165b1f13682b",
+  "verdict": "PASS_OFFICIAL_CURRENT_LIFECYCLE_MACHINE_SUPPORTED_HUMAN_REVIEW_REQUIRED",
   "scope": "read-only current and retired KOSHA official-list reconciliation for the bounded promotion packet",
   "officialApiUrl": "https://portal.kosha.or.kr/api/portal24/bizV/p/VCPDG08009/selectList",
   "packetPath": "evaluation/kosha-exact-promotion-packet-2026-07-22/report.json",
   "candidateCount": 8,
   "machineLifecycleSupportedCount": 8,
-  "exactTitleIdentityMatchCount": 6,
+  "exactTitleIdentityMatchCount": 8,
   "failedCount": 0,
-  "titleVariantFindingCount": 2,
-  "elapsedMs": 6750,
+  "titleVariantFindingCount": 0,
+  "elapsedMs": 8686,
   "officialInventory": {
     "current": {
       "state": "current",
@@ -120,9 +120,9 @@
     {
       "stableKey": "A-G-1",
       "packetVersion": "A-G-1-2025",
-      "packetTitle": "추락방호망 설치 기술지원규정(수직형 추락방망 설치)",
+      "packetTitle": "추락방호망 설치 기술지원규정(수직형 추락방망 설치 기술지원규정 포함)",
       "currentOfficialTitle": "추락방호망 설치 기술지원규정(수직형 추락방망 설치 기술지원규정 포함)",
-      "officialTitleExactMatch": false,
+      "officialTitleExactMatch": true,
       "currentVersions": [
         "A-G-1-2025"
       ],
@@ -143,9 +143,7 @@
         "noCompetingCurrentVersion": true
       },
       "failedChecks": [],
-      "findings": [
-        "officialTitleVariantRequiresHumanReview"
-      ],
+      "findings": [],
       "machineLifecycleSupported": true,
       "operatorLifecycleCurrentStatusConfirmed": false,
       "humanConfirmed": false
@@ -277,9 +275,9 @@
     {
       "stableKey": "E-G-4",
       "packetVersion": "E-G-4-2025",
-      "packetTitle": "근골격계질환 예방을 위한 업종직종별 기술지원규정",
+      "packetTitle": "근골격계질환 예방을 위한 업종·직종별 기술지원규정",
       "currentOfficialTitle": "근골격계질환 예방을 위한 업종·직종별 기술지원규정",
-      "officialTitleExactMatch": false,
+      "officialTitleExactMatch": true,
       "currentVersions": [
         "E-G-4-2025"
       ],
@@ -300,9 +298,7 @@
         "noCompetingCurrentVersion": true
       },
       "failedChecks": [],
-      "findings": [
-        "officialTitleVariantRequiresHumanReview"
-      ],
+      "findings": [],
       "machineLifecycleSupported": true,
       "operatorLifecycleCurrentStatusConfirmed": false,
       "humanConfirmed": false
@@ -311,7 +307,7 @@
   "reviewChecklistImpact": {
     "officialCurrentAndRetiredListsMachineReconciled": true,
     "packetVersionCurrentAndNotRetiredMachineSupported": true,
-    "officialTitleVariantsRequireHumanReview": true,
+    "officialTitleVariantsRequireHumanReview": false,
     "operatorLifecycleCurrentStatusConfirmed": false,
     "humanConfirmationRecorded": false,
     "reviewChecklistComplete": false
