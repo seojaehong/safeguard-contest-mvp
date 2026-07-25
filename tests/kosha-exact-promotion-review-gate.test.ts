@@ -43,6 +43,7 @@ type ReviewGateReport = {
   completedReviewCreatesRegistryArtifact: boolean;
   exactRegistryWriteArtifactPath: string | null;
   packetCandidateSetMatchesReview: boolean;
+  officialPdfAuditMachineVerified: boolean;
   failureSummary: {
     candidateReviewCountMismatch: number;
     missingReviewRows: number;
@@ -57,6 +58,7 @@ type ReviewGateReport = {
     missingReviewers: number;
     missingReviewedAt: number;
     invalidReviewedAt: number;
+    officialPdfAuditFailures: number;
     other: number;
   };
   failures: string[];
@@ -67,6 +69,7 @@ type ReviewGateModule = {
   buildKoshaExactPromotionReviewGate: (options: {
     rootDir: string;
     packetPath?: string;
+    officialPdfAuditPath?: string;
     reviewPath: string;
     generatedAt?: string;
   }) => ReviewGateReport;
@@ -159,6 +162,22 @@ function writeFixtureRoot(): { root: string; packetPath: string; reviewPath: str
       requiredReviewChecks: row.requiredReviewChecks.map((text) => ({ text, confirmed: true })),
     })),
   });
+  writeJson(root, "evaluation/kosha-exact-official-pdf-audit-2026-07-25/report.json", {
+    schemaVersion: "safeclaw-kosha-exact-official-pdf-audit/v1",
+    verdict: "PASS_OFFICIAL_PDF_AUTHENTICITY_BODY_PAIR_REVIEW_STILL_REQUIRED",
+    exactPromotionPerformed: false,
+    separatePromotionApprovalRequired: true,
+    results: candidates.map((row) => ({
+      stableKey: row.stableKey,
+      version: row.version,
+      officialFileId: row.officialFileId,
+      bodySha256: row.bodySha256,
+      pdfSha256: row.pdfSha256,
+      machineVerificationPassed: true,
+      humanLifecycleConfirmed: false,
+      humanConfirmed: false,
+    })),
+  });
   return { root, packetPath, reviewPath, candidates };
 }
 
@@ -185,6 +204,7 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.completedReviewCreatesRegistryArtifact).toBe(false);
     expect(report.exactRegistryWriteArtifactPath).toBeNull();
     expect(report.packetCandidateSetMatchesReview).toBe(true);
+    expect(report.officialPdfAuditMachineVerified).toBe(true);
     expect(Object.values(report.failureSummary).every((value) => value === 0)).toBe(true);
     expect(report.candidateCount).toBe(2);
     expect(report.reviewedCandidateCount).toBe(2);
@@ -214,6 +234,29 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.exactTrustPromotionBlockedUntilChecklistComplete).toBe(true);
     expect(report.failures.some((failure) => failure.startsWith("unconfirmed-required-check:D-C-10"))).toBe(true);
     expect(report.failureSummary.unconfirmedRequiredChecks).toBe(1);
+    expect(report.exactPromotionPerformed).toBe(false);
+  });
+
+  it("fails closed when the official PDF companion audit hash does not match the packet", async () => {
+    const { root, packetPath, reviewPath } = writeFixtureRoot();
+    const auditPath = path.join(root, "evaluation/kosha-exact-official-pdf-audit-2026-07-25/report.json");
+    const officialPdfAudit = JSON.parse(fs.readFileSync(auditPath, "utf8")) as {
+      results: Array<{ stableKey: string; pdfSha256: string }>;
+    };
+    const target = officialPdfAudit.results.find((row) => row.stableKey === "D-C-10");
+    if (!target) throw new Error("fixture-missing-d-c-10-audit");
+    target.pdfSha256 = "0".repeat(64);
+    writeJson(root, "evaluation/kosha-exact-official-pdf-audit-2026-07-25/report.json", officialPdfAudit);
+
+    const module = await loadReviewGateModule();
+    const report = module.buildKoshaExactPromotionReviewGate({ rootDir: root, packetPath, reviewPath });
+
+    expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
+    expect(report.reviewChecklistComplete).toBe(false);
+    expect(report.officialPdfAuditMachineVerified).toBe(false);
+    expect(report.failures).toContain("official-pdf-audit-metadata-mismatch:D-C-10:pdfSha256");
+    expect(report.failures).toContain("official-pdf-audit-candidate-not-verified:D-C-10");
+    expect(report.failureSummary.officialPdfAuditFailures).toBe(2);
     expect(report.exactPromotionPerformed).toBe(false);
   });
 

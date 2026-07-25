@@ -11,6 +11,7 @@ const SCHEMA_VERSION = "safeclaw-kosha-exact-promotion-review-gate/v1";
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
 const REPO_ROOT = path.resolve(path.dirname(SCRIPT_PATH), "..");
 const DEFAULT_PACKET_PATH = path.join("evaluation", "kosha-exact-promotion-packet-2026-07-22", "report.json");
+const DEFAULT_OFFICIAL_PDF_AUDIT_PATH = path.join("evaluation", "kosha-exact-official-pdf-audit-2026-07-25", "report.json");
 const DEFAULT_OUTPUT_DIR = path.join("evaluation", "kosha-exact-promotion-review-gate-2026-07-22");
 const REVIEW_SCHEMA_VERSION = "safeclaw-kosha-exact-promotion-review/v1";
 const REVIEW_COMPLETE_VERDICT = "HUMAN_REVIEW_COMPLETE_APPROVAL_REQUIRED_NO_MUTATION";
@@ -122,6 +123,19 @@ function assertReviewShape(review) {
 }
 
 /**
+ * @param {unknown} audit
+ */
+function assertOfficialPdfAuditShape(audit) {
+  if (!isRecord(audit)) throw new Error("kosha-review-gate-invalid-official-pdf-audit");
+  if (asString(audit.schemaVersion) !== "safeclaw-kosha-exact-official-pdf-audit/v1") {
+    throw new Error("kosha-review-gate-invalid-official-pdf-audit-schema");
+  }
+  if (!Array.isArray(audit.results)) {
+    throw new Error("kosha-review-gate-official-pdf-audit-missing-results");
+  }
+}
+
+/**
  * @param {Record<string, unknown>} candidate
  */
 function candidateKey(candidate) {
@@ -160,6 +174,7 @@ function summarizeFailures(failures) {
     missingReviewers: 0,
     missingReviewedAt: 0,
     invalidReviewedAt: 0,
+    officialPdfAuditFailures: 0,
     other: 0,
   };
   for (const failure of failures) {
@@ -176,6 +191,7 @@ function summarizeFailures(failures) {
     else if (failure.startsWith("missing-reviewer:")) summary.missingReviewers += 1;
     else if (failure.startsWith("missing-reviewed-at:")) summary.missingReviewedAt += 1;
     else if (failure.startsWith("invalid-reviewed-at:")) summary.invalidReviewedAt += 1;
+    else if (failure.startsWith("official-pdf-audit-")) summary.officialPdfAuditFailures += 1;
     else summary.other += 1;
   }
   return summary;
@@ -185,6 +201,7 @@ function summarizeFailures(failures) {
  * @param {{
  *   rootDir: string;
  *   packetPath?: string;
+ *   officialPdfAuditPath?: string;
  *   reviewPath: string;
  *   generatedAt?: string;
  * }} options
@@ -192,19 +209,36 @@ function summarizeFailures(failures) {
 export function buildKoshaExactPromotionReviewGate(options) {
   const rootDir = options.rootDir;
   const packetPath = options.packetPath || DEFAULT_PACKET_PATH;
+  const officialPdfAuditPath = options.officialPdfAuditPath || DEFAULT_OFFICIAL_PDF_AUDIT_PATH;
   const packet = readJson(resolveInsideRoot(rootDir, packetPath));
+  const officialPdfAudit = readJson(resolveInsideRoot(rootDir, officialPdfAuditPath));
   const review = readJson(resolveInsideRoot(rootDir, options.reviewPath));
   assertPacketShape(packet);
+  assertOfficialPdfAuditShape(officialPdfAudit);
   assertReviewShape(review);
 
   const packetRecord = /** @type {Record<string, unknown>} */ (packet);
+  const officialPdfAuditRecord = /** @type {Record<string, unknown>} */ (officialPdfAudit);
   const reviewRecord = /** @type {Record<string, unknown>} */ (review);
   const candidates = /** @type {Record<string, unknown>[]} */ (packetRecord.candidates);
+  const officialPdfAuditRows = /** @type {Record<string, unknown>[]} */ (officialPdfAuditRecord.results);
   const candidateReviews = /** @type {Record<string, unknown>[]} */ (reviewRecord.candidateReviews);
   const reviewByStableKey = new Map(candidateReviews.map((row) => [reviewKey(row), row]));
+  const officialPdfAuditByStableKey = new Map(officialPdfAuditRows.map((row) => [asString(row.stableKey), row]));
   const candidateKeySet = new Set(candidates.map(candidateKey).filter(Boolean));
   const failures = [];
   const passed = [];
+
+  if (
+    asString(officialPdfAuditRecord.verdict) !== "PASS_OFFICIAL_PDF_AUTHENTICITY_BODY_PAIR_REVIEW_STILL_REQUIRED" ||
+    officialPdfAuditRecord.exactPromotionPerformed !== false ||
+    officialPdfAuditRecord.separatePromotionApprovalRequired !== true
+  ) {
+    failures.push("official-pdf-audit-verdict-or-boundary-mismatch");
+  }
+  if (officialPdfAuditRows.length !== candidates.length) {
+    failures.push(`official-pdf-audit-count-mismatch:${officialPdfAuditRows.length}:${candidates.length}`);
+  }
 
   if (candidateReviews.length !== candidates.length) {
     failures.push(`candidate-review-count-mismatch:${candidateReviews.length}:${candidates.length}`);
@@ -224,7 +258,31 @@ export function buildKoshaExactPromotionReviewGate(options) {
 
   for (const candidate of candidates) {
     const stableKey = candidateKey(candidate);
+    const officialPdfAuditRow = officialPdfAuditByStableKey.get(stableKey);
     const reviewRow = reviewByStableKey.get(stableKey);
+    let officialPdfAuditPass = true;
+    if (!officialPdfAuditRow) {
+      failures.push(`official-pdf-audit-missing-row:${stableKey}`);
+      officialPdfAuditPass = false;
+    } else {
+      const auditMismatches = [
+        ["version", asString(candidate.version), asString(officialPdfAuditRow.version)],
+        ["officialFileId", asString(candidate.officialFileId), asString(officialPdfAuditRow.officialFileId)],
+        ["bodySha256", asString(candidate.bodySha256), asString(officialPdfAuditRow.bodySha256)],
+        ["pdfSha256", asString(candidate.pdfSha256), asString(officialPdfAuditRow.pdfSha256)],
+      ].filter(([, expected, actual]) => expected !== actual);
+      for (const [field] of auditMismatches) {
+        failures.push(`official-pdf-audit-metadata-mismatch:${stableKey}:${field}`);
+      }
+      if (officialPdfAuditRow.machineVerificationPassed !== true || auditMismatches.length > 0) {
+        failures.push(`official-pdf-audit-candidate-not-verified:${stableKey}`);
+        officialPdfAuditPass = false;
+      }
+      if (officialPdfAuditRow.humanLifecycleConfirmed !== false || officialPdfAuditRow.humanConfirmed !== false) {
+        failures.push(`official-pdf-audit-human-boundary-mismatch:${stableKey}`);
+        officialPdfAuditPass = false;
+      }
+    }
     if (!reviewRow) {
       failures.push(`missing-review:${stableKey}`);
       continue;
@@ -265,7 +323,7 @@ export function buildKoshaExactPromotionReviewGate(options) {
     const reviewedAt = asString(reviewRow.reviewedAt);
     if (!reviewedAt) failures.push(`missing-reviewed-at:${stableKey}`);
     else if (!isIsoTimestamp(reviewedAt)) failures.push(`invalid-reviewed-at:${stableKey}`);
-    if (mismatches.length === 0 && requiredChecks.every((checkText) => asBoolean(checkedByText.get(checkText)?.confirmed)) && asBoolean(reviewRow.humanConfirmed) && asString(reviewRow.reviewer) && isIsoTimestamp(reviewedAt)) {
+    if (officialPdfAuditPass && mismatches.length === 0 && requiredChecks.every((checkText) => asBoolean(checkedByText.get(checkText)?.confirmed)) && asBoolean(reviewRow.humanConfirmed) && asString(reviewRow.reviewer) && isIsoTimestamp(reviewedAt)) {
       passed.push(stableKey);
     }
   }
@@ -282,6 +340,7 @@ export function buildKoshaExactPromotionReviewGate(options) {
     generatedAt: options.generatedAt || new Date().toISOString(),
     sourceHead: gitHead(rootDir),
     packetPath,
+    officialPdfAuditPath,
     reviewPath: options.reviewPath,
     verdict: reviewChecklistComplete ? REVIEW_COMPLETE_VERDICT : REVIEW_INCOMPLETE_VERDICT,
     mutationPerformed: false,
@@ -303,6 +362,9 @@ export function buildKoshaExactPromotionReviewGate(options) {
     completedReviewCreatesRegistryArtifact: false,
     exactRegistryWriteArtifactPath: null,
     packetCandidateSetMatchesReview,
+    officialPdfAuditMachineVerified:
+      failureSummary.officialPdfAuditFailures === 0 &&
+      officialPdfAuditRows.length === candidates.length,
     failureSummary,
     passedStableKeys: passed,
     failures,
@@ -383,6 +445,8 @@ Source HEAD: \`${report.sourceHead}\`
 
 Packet: \`${report.packetPath}\`
 
+Official PDF audit: \`${report.officialPdfAuditPath}\`
+
 Review input: \`${report.reviewPath}\`
 
 Checklist complete: \`${report.reviewChecklistComplete}\`
@@ -426,10 +490,11 @@ ${report.forbiddenClaims.map((claim) => `- ${claim}`).join("\n")}
  * @param {string[]} args
  */
 function parseArgs(args) {
-  /** @type {{ rootDir: string; packet: string; review: string; output: string; generatedAt: string; writeTemplate: boolean }} */
+  /** @type {{ rootDir: string; packet: string; officialPdfAudit: string; review: string; output: string; generatedAt: string; writeTemplate: boolean }} */
   const parsed = {
     rootDir: REPO_ROOT,
     packet: DEFAULT_PACKET_PATH,
+    officialPdfAudit: DEFAULT_OFFICIAL_PDF_AUDIT_PATH,
     review: "",
     output: DEFAULT_OUTPUT_DIR,
     generatedAt: "",
@@ -446,6 +511,9 @@ function parseArgs(args) {
       index += 1;
     } else if (arg === "--review") {
       parsed.review = next;
+      index += 1;
+    } else if (arg === "--official-pdf-audit") {
+      parsed.officialPdfAudit = next;
       index += 1;
     } else if (arg === "--output") {
       parsed.output = next;
@@ -480,6 +548,7 @@ async function main() {
   const report = buildKoshaExactPromotionReviewGate({
     rootDir: args.rootDir,
     packetPath: args.packet,
+    officialPdfAuditPath: args.officialPdfAudit,
     reviewPath: args.review,
     generatedAt: args.generatedAt || undefined,
   });
