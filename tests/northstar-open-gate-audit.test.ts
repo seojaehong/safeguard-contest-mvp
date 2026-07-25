@@ -1733,6 +1733,8 @@ function createFixtureRoot(): string {
     exactTrustPromotionBlockedUntilChecklistComplete: true,
     exactTrustPromotionStillRequiresSeparateApproval: true,
     officialPdfAuditMachineVerified: true,
+    officialLifecycleAuditMachineSupported: true,
+    officialLifecycleTitleVariantFindingCount: 2,
     failures: Array.from({ length: 64 }, (_, index) => `unconfirmed-required-check:${index}`),
   });
   writeJson(rootDir, path.join("evaluation", "kosha-exact-official-pdf-audit-2026-07-25", "report.json"), {
@@ -1760,6 +1762,38 @@ function createFixtureRoot(): string {
       vectorUploadPerformed: false,
       exactTrustRegistryMutationPerformed: false,
     },
+  });
+  writeJson(rootDir, path.join("evaluation", "kosha-exact-official-lifecycle-audit-2026-07-25", "report.json"), {
+    schemaVersion: "safeclaw-kosha-exact-official-lifecycle-audit/v1",
+    verdict: "REVIEW_REQUIRED_OFFICIAL_CURRENT_LIFECYCLE_MACHINE_SUPPORTED_TITLE_VARIANTS_UNRESOLVED",
+    candidateCount: 8,
+    machineLifecycleSupportedCount: 8,
+    exactTitleIdentityMatchCount: 6,
+    failedCount: 0,
+    titleVariantFindingCount: 2,
+    exactPromotionPerformed: false,
+    separatePromotionApprovalRequired: true,
+    reviewChecklistImpact: {
+      operatorLifecycleCurrentStatusConfirmed: false,
+      humanConfirmationRecorded: false,
+      reviewChecklistComplete: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      embeddingGenerated: false,
+      vectorUploadPerformed: false,
+      exactTrustRegistryMutationPerformed: false,
+    },
+    results: Array.from({ length: 8 }, (_, index) => ({
+      stableKey: index === 0 ? "A-G-1" : index === 1 ? "E-G-4" : `KEY-${index}`,
+      officialTitleExactMatch: index > 1,
+      findings: index <= 1 ? ["officialTitleVariantRequiresHumanReview"] : [],
+      machineLifecycleSupported: true,
+      operatorLifecycleCurrentStatusConfirmed: false,
+      humanConfirmed: false,
+    })),
   });
   writeJson(rootDir, path.join("evaluation", "kosha-exact-promotion-review-contract-audit-2026-07-23", "report.json"), {
     schemaVersion: "safeclaw-kosha-exact-promotion-review-contract-audit/v1",
@@ -2589,6 +2623,25 @@ describe("northstar open gate audit", () => {
     };
     officialPdfAudit.reviewChecklistImpact.reviewChecklistComplete = true;
     writeJson(rootDir, path.relative(rootDir, auditPath), officialPdfAudit);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("contradicted");
+  });
+
+  it("fails closed when the KOSHA lifecycle companion audit hides a title variant", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const auditPath = path.join(rootDir, "evaluation", "kosha-exact-official-lifecycle-audit-2026-07-25", "report.json");
+    const lifecycleAudit = JSON.parse(fs.readFileSync(auditPath, "utf8")) as {
+      titleVariantFindingCount: number;
+    };
+    lifecycleAudit.titleVariantFindingCount = 0;
+    writeJson(rootDir, path.relative(rootDir, auditPath), lifecycleAudit);
 
     const audit = buildNorthstarOpenGateAudit({
       rootDir,
