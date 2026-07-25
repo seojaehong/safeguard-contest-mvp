@@ -1,0 +1,341 @@
+{
+  "schemaVersion": "safeclaw-kosha-exact-official-lifecycle-audit/v1",
+  "generatedAt": "2026-07-25T00:19:25.042237+00:00",
+  "sourceHead": "654c24e7da59a6cacf56e31e373f64c1306384ca",
+  "verdict": "REVIEW_REQUIRED_OFFICIAL_CURRENT_LIFECYCLE_MACHINE_SUPPORTED_TITLE_VARIANTS_UNRESOLVED",
+  "scope": "read-only current and retired KOSHA official-list reconciliation for the bounded promotion packet",
+  "officialApiUrl": "https://portal.kosha.or.kr/api/portal24/bizV/p/VCPDG08009/selectList",
+  "packetPath": "evaluation/kosha-exact-promotion-packet-2026-07-22/report.json",
+  "candidateCount": 8,
+  "machineLifecycleSupportedCount": 8,
+  "exactTitleIdentityMatchCount": 6,
+  "failedCount": 0,
+  "titleVariantFindingCount": 2,
+  "elapsedMs": 6750,
+  "officialInventory": {
+    "current": {
+      "state": "current",
+      "categories": [
+        "A",
+        "B",
+        "D",
+        "E"
+      ],
+      "categoryCounts": {
+        "A": 115,
+        "B": 233,
+        "D": 76,
+        "E": 381
+      },
+      "rowCount": 805,
+      "requestCount": 10,
+      "emptyPages": [],
+      "malformedRowCount": 0
+    },
+    "retired": {
+      "state": "retired",
+      "categories": [
+        "A",
+        "B",
+        "D",
+        "E"
+      ],
+      "categoryCounts": {
+        "A": 173,
+        "B": 197,
+        "D": 52,
+        "E": 152
+      },
+      "rowCount": 574,
+      "requestCount": 7,
+      "emptyPages": [],
+      "malformedRowCount": 0
+    },
+    "relevantCurrentCanonicalSha256": "9aeb61491d08517b57faba172b852647656a60062465133e5edc9029c293e59e",
+    "relevantRetiredCanonicalSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  "results": [
+    {
+      "stableKey": "D-C-10",
+      "packetVersion": "D-C-10-2026",
+      "packetTitle": "건설장비(이동식크레인, 항타기 및 항발기, 타워크레인) 작업계획서 작성에 관한 기술지원규정",
+      "currentOfficialTitle": "건설장비(이동식크레인, 항타기 및 항발기, 타워크레인) 작업계획서 작성에 관한 기술지원규정",
+      "officialTitleExactMatch": true,
+      "currentVersions": [
+        "D-C-10-2026"
+      ],
+      "retiredVersions": [],
+      "currentOfficialFileId": "CTC2026012914313984348485",
+      "currentPublishedAt": "2026-01-30",
+      "currentStatusCode": "20",
+      "currentStatusLabel": "개정",
+      "checks": {
+        "singleCurrentStableKeyRow": true,
+        "singleExactCurrentVersionRow": true,
+        "packetVersionMatchesCurrent": true,
+        "packetPublicationDateMatchesCurrent": true,
+        "packetOfficialFileIdMatchesCurrent": true,
+        "packetOfficialUrlMatchesCurrentFile": true,
+        "currentQueryStateRecorded": true,
+        "packetVersionAbsentFromRetired": true,
+        "noCompetingCurrentVersion": true
+      },
+      "failedChecks": [],
+      "findings": [],
+      "machineLifecycleSupported": true,
+      "operatorLifecycleCurrentStatusConfirmed": false,
+      "humanConfirmed": false
+    },
+    {
+      "stableKey": "D-C-11",
+      "packetVersion": "D-C-11-2026",
+      "packetTitle": "굴착 및 토공 안전작업에 관한 기술지원규정",
+      "currentOfficialTitle": "굴착 및 토공 안전작업에 관한 기술지원규정",
+      "officialTitleExactMatch": true,
+      "currentVersions": [
+        "D-C-11-2026"
+      ],
+      "retiredVersions": [],
+      "currentOfficialFileId": "CTC2026012914341697414755",
+      "currentPublishedAt": "2026-01-30",
+      "currentStatusCode": "20",
+      "currentStatusLabel": "개정",
+      "checks": {
+        "singleCurrentStableKeyRow": true,
+        "singleExactCurrentVersionRow": true,
+        "packetVersionMatchesCurrent": true,
+        "packetPublicationDateMatchesCurrent": true,
+        "packetOfficialFileIdMatchesCurrent": true,
+        "packetOfficialUrlMatchesCurrentFile": true,
+        "currentQueryStateRecorded": true,
+        "packetVersionAbsentFromRetired": true,
+        "noCompetingCurrentVersion": true
+      },
+      "failedChecks": [],
+      "findings": [],
+      "machineLifecycleSupported": true,
+      "operatorLifecycleCurrentStatusConfirmed": false,
+      "humanConfirmed": false
+    },
+    {
+      "stableKey": "A-G-1",
+      "packetVersion": "A-G-1-2025",
+      "packetTitle": "추락방호망 설치 기술지원규정(수직형 추락방망 설치)",
+      "currentOfficialTitle": "추락방호망 설치 기술지원규정(수직형 추락방망 설치 기술지원규정 포함)",
+      "officialTitleExactMatch": false,
+      "currentVersions": [
+        "A-G-1-2025"
+      ],
+      "retiredVersions": [],
+      "currentOfficialFileId": "FL00021379766",
+      "currentPublishedAt": "2025-03-26",
+      "currentStatusCode": "20",
+      "currentStatusLabel": "개정",
+      "checks": {
+        "singleCurrentStableKeyRow": true,
+        "singleExactCurrentVersionRow": true,
+        "packetVersionMatchesCurrent": true,
+        "packetPublicationDateMatchesCurrent": true,
+        "packetOfficialFileIdMatchesCurrent": true,
+        "packetOfficialUrlMatchesCurrentFile": true,
+        "currentQueryStateRecorded": true,
+        "packetVersionAbsentFromRetired": true,
+        "noCompetingCurrentVersion": true
+      },
+      "failedChecks": [],
+      "findings": [
+        "officialTitleVariantRequiresHumanReview"
+      ],
+      "machineLifecycleSupported": true,
+      "operatorLifecycleCurrentStatusConfirmed": false,
+      "humanConfirmed": false
+    },
+    {
+      "stableKey": "A-G-15",
+      "packetVersion": "A-G-15-2026",
+      "packetTitle": "중소규모 사업장 비상조치계획 작성에 관한 기술지원규정",
+      "currentOfficialTitle": "중소규모 사업장 비상조치계획 작성에 관한 기술지원규정",
+      "officialTitleExactMatch": true,
+      "currentVersions": [
+        "A-G-15-2026"
+      ],
+      "retiredVersions": [],
+      "currentOfficialFileId": "CTC2026012909391077692640",
+      "currentPublishedAt": "2026-01-30",
+      "currentStatusCode": "20",
+      "currentStatusLabel": "개정",
+      "checks": {
+        "singleCurrentStableKeyRow": true,
+        "singleExactCurrentVersionRow": true,
+        "packetVersionMatchesCurrent": true,
+        "packetPublicationDateMatchesCurrent": true,
+        "packetOfficialFileIdMatchesCurrent": true,
+        "packetOfficialUrlMatchesCurrentFile": true,
+        "currentQueryStateRecorded": true,
+        "packetVersionAbsentFromRetired": true,
+        "noCompetingCurrentVersion": true
+      },
+      "failedChecks": [],
+      "findings": [],
+      "machineLifecycleSupported": true,
+      "operatorLifecycleCurrentStatusConfirmed": false,
+      "humanConfirmed": false
+    },
+    {
+      "stableKey": "B-E-11",
+      "packetVersion": "B-E-11-2026",
+      "packetTitle": "충전전로 및 그 인근에서의 전기작업에 관한 기술지원규정",
+      "currentOfficialTitle": "충전전로 및 그 인근에서의 전기작업에 관한 기술지원규정",
+      "officialTitleExactMatch": true,
+      "currentVersions": [
+        "B-E-11-2026"
+      ],
+      "retiredVersions": [],
+      "currentOfficialFileId": "CTC2026012913300640598489",
+      "currentPublishedAt": "2026-01-30",
+      "currentStatusCode": "20",
+      "currentStatusLabel": "개정",
+      "checks": {
+        "singleCurrentStableKeyRow": true,
+        "singleExactCurrentVersionRow": true,
+        "packetVersionMatchesCurrent": true,
+        "packetPublicationDateMatchesCurrent": true,
+        "packetOfficialFileIdMatchesCurrent": true,
+        "packetOfficialUrlMatchesCurrentFile": true,
+        "currentQueryStateRecorded": true,
+        "packetVersionAbsentFromRetired": true,
+        "noCompetingCurrentVersion": true
+      },
+      "failedChecks": [],
+      "findings": [],
+      "machineLifecycleSupported": true,
+      "operatorLifecycleCurrentStatusConfirmed": false,
+      "humanConfirmed": false
+    },
+    {
+      "stableKey": "B-E-9",
+      "packetVersion": "B-E-9-2026",
+      "packetTitle": "접지설비에 관한 기술지원규정",
+      "currentOfficialTitle": "접지설비에 관한 기술지원규정",
+      "officialTitleExactMatch": true,
+      "currentVersions": [
+        "B-E-9-2026"
+      ],
+      "retiredVersions": [],
+      "currentOfficialFileId": "CTC2026012913250472771281",
+      "currentPublishedAt": "2026-01-30",
+      "currentStatusCode": "20",
+      "currentStatusLabel": "개정",
+      "checks": {
+        "singleCurrentStableKeyRow": true,
+        "singleExactCurrentVersionRow": true,
+        "packetVersionMatchesCurrent": true,
+        "packetPublicationDateMatchesCurrent": true,
+        "packetOfficialFileIdMatchesCurrent": true,
+        "packetOfficialUrlMatchesCurrentFile": true,
+        "currentQueryStateRecorded": true,
+        "packetVersionAbsentFromRetired": true,
+        "noCompetingCurrentVersion": true
+      },
+      "failedChecks": [],
+      "findings": [],
+      "machineLifecycleSupported": true,
+      "operatorLifecycleCurrentStatusConfirmed": false,
+      "humanConfirmed": false
+    },
+    {
+      "stableKey": "D-C-4",
+      "packetVersion": "D-C-4-2025",
+      "packetTitle": "굴착기 안전보건작업 기술지원규정",
+      "currentOfficialTitle": "굴착기 안전보건작업 기술지원규정",
+      "officialTitleExactMatch": true,
+      "currentVersions": [
+        "D-C-4-2025"
+      ],
+      "retiredVersions": [],
+      "currentOfficialFileId": "FL00021380674",
+      "currentPublishedAt": "2025-03-26",
+      "currentStatusCode": "20",
+      "currentStatusLabel": "개정",
+      "checks": {
+        "singleCurrentStableKeyRow": true,
+        "singleExactCurrentVersionRow": true,
+        "packetVersionMatchesCurrent": true,
+        "packetPublicationDateMatchesCurrent": true,
+        "packetOfficialFileIdMatchesCurrent": true,
+        "packetOfficialUrlMatchesCurrentFile": true,
+        "currentQueryStateRecorded": true,
+        "packetVersionAbsentFromRetired": true,
+        "noCompetingCurrentVersion": true
+      },
+      "failedChecks": [],
+      "findings": [],
+      "machineLifecycleSupported": true,
+      "operatorLifecycleCurrentStatusConfirmed": false,
+      "humanConfirmed": false
+    },
+    {
+      "stableKey": "E-G-4",
+      "packetVersion": "E-G-4-2025",
+      "packetTitle": "근골격계질환 예방을 위한 업종직종별 기술지원규정",
+      "currentOfficialTitle": "근골격계질환 예방을 위한 업종·직종별 기술지원규정",
+      "officialTitleExactMatch": false,
+      "currentVersions": [
+        "E-G-4-2025"
+      ],
+      "retiredVersions": [],
+      "currentOfficialFileId": "FL00021380215",
+      "currentPublishedAt": "2025-03-26",
+      "currentStatusCode": "10",
+      "currentStatusLabel": "제정",
+      "checks": {
+        "singleCurrentStableKeyRow": true,
+        "singleExactCurrentVersionRow": true,
+        "packetVersionMatchesCurrent": true,
+        "packetPublicationDateMatchesCurrent": true,
+        "packetOfficialFileIdMatchesCurrent": true,
+        "packetOfficialUrlMatchesCurrentFile": true,
+        "currentQueryStateRecorded": true,
+        "packetVersionAbsentFromRetired": true,
+        "noCompetingCurrentVersion": true
+      },
+      "failedChecks": [],
+      "findings": [
+        "officialTitleVariantRequiresHumanReview"
+      ],
+      "machineLifecycleSupported": true,
+      "operatorLifecycleCurrentStatusConfirmed": false,
+      "humanConfirmed": false
+    }
+  ],
+  "reviewChecklistImpact": {
+    "officialCurrentAndRetiredListsMachineReconciled": true,
+    "packetVersionCurrentAndNotRetiredMachineSupported": true,
+    "officialTitleVariantsRequireHumanReview": true,
+    "operatorLifecycleCurrentStatusConfirmed": false,
+    "humanConfirmationRecorded": false,
+    "reviewChecklistComplete": false
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "exactPromotionPerformed": false,
+  "separatePromotionApprovalRequired": true,
+  "safeClaims": [
+    "The official current and retired KOSHA lists were queried read-only for the candidate categories.",
+    "Passing candidates have one matching current version and no identical version in the retired list.",
+    "Passing current rows match packet version, publication date, file ID, and official download URL identity.",
+    "Official-list title variants remain visible for human review rather than being normalized away."
+  ],
+  "forbiddenClaims": [
+    "Operator lifecycle review is complete.",
+    "Human review is complete.",
+    "The exact-kosha registry was mutated or promoted.",
+    "Machine lifecycle support replaces separate exact-trust promotion approval."
+  ]
+}

@@ -1,9 +1,10 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-review-gate/v1",
-  "generatedAt": "2026-07-25T00:02:55.793Z",
-  "sourceHead": "6c3dc455e82a4d23f53017a3735ab7edda42bc56",
+  "generatedAt": "2026-07-25T00:19:38.536Z",
+  "sourceHead": "654c24e7da59a6cacf56e31e373f64c1306384ca",
   "packetPath": "evaluation\\kosha-exact-promotion-packet-2026-07-22\\report.json",
-  "officialPdfAuditPath": "evaluation/kosha-exact-official-pdf-audit-2026-07-25/report.json",
+  "officialPdfAuditPath": "evaluation\\kosha-exact-official-pdf-audit-2026-07-25\\report.json",
+  "officialLifecycleAuditPath": "evaluation\\kosha-exact-official-lifecycle-audit-2026-07-25\\report.json",
   "reviewPath": "evaluation/kosha-exact-promotion-review-gate-2026-07-22/review-template.json",
   "verdict": "REVIEW_CHECKLIST_INCOMPLETE_BLOCKED",
   "mutationPerformed": false,
@@ -26,6 +27,8 @@
   "exactRegistryWriteArtifactPath": null,
   "packetCandidateSetMatchesReview": true,
   "officialPdfAuditMachineVerified": true,
+  "officialLifecycleAuditMachineSupported": true,
+  "officialLifecycleTitleVariantFindingCount": 2,
   "failureSummary": {
     "candidateReviewCountMismatch": 0,
     "missingReviewRows": 0,
@@ -41,6 +44,7 @@
     "missingReviewedAt": 8,
     "invalidReviewedAt": 0,
     "officialPdfAuditFailures": 0,
+    "officialLifecycleAuditFailures": 0,
     "other": 0
   },
   "passedStableKeys": [],
