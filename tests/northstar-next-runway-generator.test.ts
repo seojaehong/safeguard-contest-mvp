@@ -1581,6 +1581,7 @@ describe("northstar next runway generator", () => {
       documentsShareIaVerdict: "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
     });
     expect(report.provenCurrentState).toContain("product_capability_truth");
+    expect(report.provenCurrentState).toContain("hermes_knowledge_review_authority");
     expect(report.provenCurrentState).toContain("live_document_secondary_grounding");
     expect(report.liveDocumentSeedProfileIsolation).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION",
