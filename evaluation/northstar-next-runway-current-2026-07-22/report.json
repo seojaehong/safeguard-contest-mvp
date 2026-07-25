@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-25T06:42:49.983Z",
+  "generatedAt": "2026-07-25T06:55:35.815Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "e6b382ec1f169934906deae4a2407adf590a6fbb",
-  "productionCommit": "c00cfed8ba0fef7d5c58512d6016f5e9ac6e6d97",
+  "sourceHead": "3c7f5e755ba4d1e60f5e70dc269b8fdd90280af8",
+  "productionCommit": "a78c99e6f3a71baac03c6589666c07908a0efc3d",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "c00cfed8ba0fef7d5c58512d6016f5e9ac6e6d97",
+    "commitSha": "a78c99e6f3a71baac03c6589666c07908a0efc3d",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-b8n54ssu2-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-8z1lmof21-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": false,
@@ -20,15 +20,16 @@
   "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
   "sourcePendingChangedPaths": [
-    "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json",
-    "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.md",
-    "scripts/rls_llm_wiki_approval_preflight.mjs",
-    "tests/rls-llm-wiki-approval-preflight.test.ts"
+    "scripts/northstar_next_runway.mjs",
+    "scripts/northstar_open_gate_audit.mjs",
+    "scripts/sif_embedding_approval_preflight.mjs",
+    "tests/northstar-open-gate-audit.test.ts",
+    "tests/sif-embedding-preflight.test.ts"
   ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "e6b382ec1f169934906deae4a2407adf590a6fbb",
-  "liveRollupLiveCommit": "c00cfed8ba0fef7d5c58512d6016f5e9ac6e6d97",
+  "liveExactEvidenceCommit": "3c7f5e755ba4d1e60f5e70dc269b8fdd90280af8",
+  "liveRollupLiveCommit": "a78c99e6f3a71baac03c6589666c07908a0efc3d",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -560,6 +561,14 @@
     "dbMutationPerformed": false,
     "embeddingGenerated": false,
     "uploaded": false,
+    "corpusCount": 6032,
+    "corpusInspection": {
+      "parsedRecordCount": 6032,
+      "invalidRecordCount": 0,
+      "duplicateReferenceItemIdCount": 0,
+      "duplicateContentHashCount": 0,
+      "manifestBatchFailureCount": 0
+    },
     "failedCheckIds": []
   },
   "shareGeneratedSessionPerception": {

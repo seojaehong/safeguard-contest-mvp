@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-23T02:54:05.638Z",
+  "generatedAt": "2026-07-25T06:55:13.261Z",
   "scope": "sif_embedding_next_approval_gate_preflight",
-  "sourceSha": "8c208e082adccfe6ba90d49f4b61934a994f3247",
+  "sourceSha": "3c7f5e755ba4d1e60f5e70dc269b8fdd90280af8",
   "ok": true,
   "approvalHeld": true,
   "dbMutationPerformed": false,
@@ -19,6 +19,16 @@
   "batchSize": 100,
   "embeddingModel": "text-embedding-3-small",
   "embeddingDimensions": 1536,
+  "corpusInspection": {
+    "lineCount": 6032,
+    "parsedRecordCount": 6032,
+    "parseErrorCount": 0,
+    "invalidRecordCount": 0,
+    "duplicateReferenceItemIdCount": 0,
+    "duplicateContentHashCount": 0,
+    "computedCorpusHash": "2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e",
+    "manifestBatchFailureCount": 0
+  },
   "artifactIntegrity": [
     {
       "path": "evaluation\\sif-embedding-gate\\report.json",
@@ -74,6 +84,46 @@
       "evidence": {
         "corpusLineCount": 6032,
         "reportCorpusCount": 6032
+      }
+    },
+    {
+      "id": "corpus_record_integrity",
+      "passed": true,
+      "evidence": {
+        "parsedRecordCount": 6032,
+        "parseErrorCount": 0,
+        "invalidRecordCount": 0,
+        "parseErrorSamples": [],
+        "invalidRecordSamples": []
+      }
+    },
+    {
+      "id": "corpus_record_identity_unique",
+      "passed": true,
+      "evidence": {
+        "duplicateReferenceItemIdCount": 0,
+        "duplicateContentHashCount": 0,
+        "duplicateReferenceItemIdSamples": [],
+        "duplicateContentHashSamples": []
+      }
+    },
+    {
+      "id": "corpus_hash_matches_report_and_manifest",
+      "passed": true,
+      "evidence": {
+        "computedCorpusHash": "2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e",
+        "reportCorpusHash": "2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e",
+        "manifestCorpusHash": "2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e"
+      }
+    },
+    {
+      "id": "manifest_batches_match_corpus",
+      "passed": true,
+      "evidence": {
+        "inspectedBatchCount": 61,
+        "expectedBatchCount": 61,
+        "failedBatchCount": 0,
+        "failedBatchSamples": []
       }
     },
     {
@@ -136,7 +186,7 @@
       "id": "preflight_source_sha_recorded",
       "passed": true,
       "evidence": {
-        "sourceSha": "8c208e082adccfe6ba90d49f4b61934a994f3247"
+        "sourceSha": "3c7f5e755ba4d1e60f5e70dc269b8fdd90280af8"
       }
     },
     {
