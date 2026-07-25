@@ -510,6 +510,40 @@ function createFixtureRoot(): string {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "live-document-rain-context-isolation-2026-07-25", "report.json"), {
+    schemaVersion: "safeclaw-live-document-rain-context-isolation/v1",
+    verdict: "PASS_LIVE_PRODUCTION_RAIN_CONTEXT_ISOLATION",
+    scenarioCount: 1,
+    canonicalDocumentCount: 12,
+    beforeLive: {
+      pass: 0,
+      fail: 1,
+      reviewedDocumentSurfaceCount: 12,
+      scenarioIrrelevantContextFindingCount: 3,
+      failedDocumentCount: 3,
+    },
+    afterLive: {
+      sourceHead: "fixture-sha",
+      productionCommit: "fixture-sha",
+      pass: 1,
+      fail: 0,
+      reviewedDocumentSurfaceCount: 12,
+      scenarioIrrelevantContextFindingCount: 0,
+      failedDocumentCount: 0,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      embeddingGenerated: false,
+      vectorUploadPerformed: false,
+    },
+    remainingBoundary: {
+      liveAfterDeploymentPending: false,
+      humanReviewCompleted: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
     sourceHead: "fixture-sha",
@@ -2074,6 +2108,8 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("exact=31");
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("near=100");
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("unclassified human-review-required 54->0");
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("irrelevant document findings");
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("preventing 비산 from being treated as rain");
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("humanReviewCompleted=false");
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")).toMatchObject({
@@ -2402,6 +2438,35 @@ describe("northstar open gate audit", () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("nearClassificationReady=false");
+  });
+
+  it("fails the editorial gate closed when rain-context contamination returns", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "live-document-rain-context-isolation-2026-07-25",
+      "report.json",
+    );
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      afterLive: { scenarioIrrelevantContextFindingCount: number };
+    };
+    report.afterLive.scenarioIrrelevantContextFindingCount = 1;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain(
+      "rainContextReady=false",
+    );
   });
 
   it("fails product capability truth closed when a provider call is claimed", async () => {
