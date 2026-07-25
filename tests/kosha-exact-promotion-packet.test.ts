@@ -31,6 +31,8 @@ type PromotionPacket = {
     stableKey: string;
     version: string;
     title: string;
+    sourceTitle: string;
+    officialCurrentTitle: string;
     bodySha256: string;
     pdfSha256: string;
     requiredReviewChecks: string[];
@@ -48,6 +50,7 @@ type PromotionPacketModule = {
     bodyCorpusCurrent?: string;
     bodyCorpusRoot?: string;
     exactKoshaDir?: string;
+    officialLifecycleAudit?: string;
     buildInfo: unknown;
     generatedAt?: string;
   }) => PromotionPacket;
@@ -180,6 +183,22 @@ function writeFixtureRoot(): string {
     branch: "master",
     environment: "production",
   });
+  writeJson(root, "evaluation/kosha-exact-official-lifecycle-audit-2026-07-25/report.json", {
+    schemaVersion: "safeclaw-kosha-exact-official-lifecycle-audit/v1",
+    verdict: "PASS_OFFICIAL_CURRENT_LIFECYCLE_MACHINE_SUPPORTED_HUMAN_REVIEW_REQUIRED",
+    failedCount: 0,
+    titleVariantFindingCount: 0,
+    exactPromotionPerformed: false,
+    separatePromotionApprovalRequired: true,
+    results: candidateRows.map((row) => ({
+      stableKey: row.stable_key,
+      packetVersion: row.official_version,
+      currentOfficialTitle: `${row.stable_key} official current title`,
+      currentOfficialFileId: row.official_file_id,
+      currentPublishedAt: row.publication_date,
+      machineLifecycleSupported: true,
+    })),
+  });
   return root;
 }
 
@@ -221,7 +240,9 @@ describe("KOSHA exact promotion packet", () => {
       exactTrustPromotionBlockedUntilChecklistComplete: true,
       perCandidateRequiredCheckCount: 5,
     });
-    expect(report.candidates[0].title).toContain("D-C-10-2026");
+    expect(report.candidates[0].title).toBe("D-C-10-2026 D-C-10 official current title");
+    expect(report.candidates[0].sourceTitle).toContain("sample title");
+    expect(report.candidates[0].officialCurrentTitle).toBe("D-C-10 official current title");
     expect(report.candidates[0].bodySha256).toHaveLength(64);
     expect(report.candidates[0].pdfSha256).toHaveLength(64);
     expect(report.exactPromotionPerformed).toBe(false);
@@ -242,6 +263,26 @@ describe("KOSHA exact promotion packet", () => {
       buildInfo: {},
       generatedAt: "2026-07-22T00:00:00.000Z",
     })).toThrow(/kosha-promotion-packet-already-exact:D-C-13/u);
+  });
+
+  it("fails closed when official lifecycle identity drifts from packet metadata", async () => {
+    const root = writeFixtureRoot();
+    const auditPath = path.join(root, "evaluation/kosha-exact-official-lifecycle-audit-2026-07-25/report.json");
+    const audit = JSON.parse(fs.readFileSync(auditPath, "utf8")) as {
+      results: Array<{ stableKey: string; currentOfficialFileId: string }>;
+    };
+    const target = audit.results.find((row) => row.stableKey === "D-C-10");
+    if (!target) throw new Error("fixture-missing-d-c-10-lifecycle");
+    target.currentOfficialFileId = "DRIFTED-FILE";
+    writeJson(root, path.relative(root, auditPath), audit);
+    const module = await loadPromotionPacketModule();
+
+    expect(() => module.buildKoshaExactPromotionPacket({
+      rootDir: root,
+      candidateKeys: ["D-C-10"],
+      buildInfo: {},
+      generatedAt: "2026-07-22T00:00:00.000Z",
+    })).toThrow(/kosha-promotion-packet-lifecycle-identity-mismatch:D-C-10:officialFileId/u);
   });
 
   it("fails closed when candidate body provenance does not match metadata", async () => {

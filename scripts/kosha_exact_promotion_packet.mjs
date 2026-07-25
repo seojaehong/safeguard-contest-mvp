@@ -19,6 +19,7 @@ const DEFAULT_PATHS = Object.freeze({
   bodyCorpusCurrent: path.join("data", "safety-knowledge", "kosha-guide-corpus", "current.json"),
   bodyCorpusRoot: path.join("data", "safety-knowledge", "kosha-guide-corpus"),
   exactKoshaDir: path.join("data", "safety-knowledge", "exact-kosha"),
+  officialLifecycleAudit: path.join("evaluation", "kosha-exact-official-lifecycle-audit-2026-07-25", "report.json"),
 });
 
 const DEFAULT_CANDIDATE_KEYS = Object.freeze([
@@ -152,6 +153,37 @@ function hasCompleteOfficialMetadata(row) {
 
 /**
  * @param {string} rootDir
+ * @param {string} relativePath
+ */
+function readOfficialLifecycleRows(rootDir, relativePath) {
+  const audit = readJson(resolveInsideRoot(rootDir, relativePath));
+  if (!isRecord(audit) || asString(audit.schemaVersion) !== "safeclaw-kosha-exact-official-lifecycle-audit/v1") {
+    throw new Error("kosha-promotion-packet-invalid-lifecycle-audit");
+  }
+  const verdict = asString(audit.verdict);
+  if (
+    verdict !== "REVIEW_REQUIRED_OFFICIAL_CURRENT_LIFECYCLE_MACHINE_SUPPORTED_TITLE_VARIANTS_UNRESOLVED" &&
+    verdict !== "PASS_OFFICIAL_CURRENT_LIFECYCLE_MACHINE_SUPPORTED_HUMAN_REVIEW_REQUIRED"
+  ) {
+    throw new Error("kosha-promotion-packet-lifecycle-audit-not-machine-supported");
+  }
+  if (
+    audit.failedCount !== 0 ||
+    audit.exactPromotionPerformed !== false ||
+    audit.separatePromotionApprovalRequired !== true ||
+    !Array.isArray(audit.results)
+  ) {
+    throw new Error("kosha-promotion-packet-lifecycle-audit-boundary-mismatch");
+  }
+  const rows = audit.results.filter(isRecord);
+  if (rows.some((row) => row.machineLifecycleSupported !== true)) {
+    throw new Error("kosha-promotion-packet-lifecycle-candidate-not-supported");
+  }
+  return rows;
+}
+
+/**
+ * @param {string} rootDir
  * @param {string} exactKoshaDir
  */
 function readExactVersions(rootDir, exactKoshaDir) {
@@ -222,6 +254,7 @@ function normalizeBuildInfo(buildInfo) {
  *   bodyCorpusCurrent?: string;
  *   bodyCorpusRoot?: string;
  *   exactKoshaDir?: string;
+ *   officialLifecycleAudit?: string;
  *   buildInfo?: unknown;
  *   generatedAt?: string;
  * }} options
@@ -230,6 +263,8 @@ export function buildKoshaExactPromotionPacket(options) {
   const rootDir = options.rootDir;
   const candidateKeys = Array.from(options.candidateKeys || DEFAULT_CANDIDATE_KEYS);
   const metadataRows = readJsonl(resolveInsideRoot(rootDir, options.officialMetadata || DEFAULT_PATHS.officialMetadata)).filter(isRecord);
+  const officialLifecycleAuditPath = options.officialLifecycleAudit || DEFAULT_PATHS.officialLifecycleAudit;
+  const lifecycleRows = readOfficialLifecycleRows(rootDir, officialLifecycleAuditPath);
   const exactVersions = readExactVersions(rootDir, options.exactKoshaDir || DEFAULT_PATHS.exactKoshaDir);
   const bodySubset = readBodyItems(
     rootDir,
@@ -244,9 +279,11 @@ export function buildKoshaExactPromotionPacket(options) {
   if (!bodySubset.provenanceComplete) throw new Error("kosha-promotion-packet-provenance-incomplete");
 
   const metadataByStableKey = new Map(metadataRows.map((row) => [asString(row.stable_key), row]));
+  const lifecycleByStableKey = new Map(lifecycleRows.map((row) => [asString(row.stableKey), row]));
   const bodyByStableKey = new Map(bodySubset.items.map((row) => [asString(row.stable_key), row]));
   const candidates = candidateKeys.map((stableKey, index) => {
     const metadata = metadataByStableKey.get(stableKey);
+    const lifecycle = lifecycleByStableKey.get(stableKey);
     const item = bodyByStableKey.get(stableKey);
     if (!metadata) throw new Error(`kosha-promotion-packet-missing-metadata:${stableKey}`);
     if (!item) throw new Error(`kosha-promotion-packet-missing-body-item:${stableKey}`);
@@ -254,9 +291,20 @@ export function buildKoshaExactPromotionPacket(options) {
     if (asString(metadata.official_status) !== "current") throw new Error(`kosha-promotion-packet-not-current:${stableKey}`);
     const version = asString(metadata.official_version);
     if (exactVersions.has(version)) throw new Error(`kosha-promotion-packet-already-exact:${stableKey}`);
+    if (!lifecycle) throw new Error(`kosha-promotion-packet-missing-lifecycle:${stableKey}`);
     const bodySha256 = asString(metadata.body_sha256);
     const pdfSha256 = asString(metadata.pdf_sha256);
     const itemProvenance = isRecord(item.official_provenance) ? item.official_provenance : {};
+    const lifecycleMismatches = [
+      ["version", version, asString(lifecycle.packetVersion)],
+      ["officialFileId", asString(metadata.official_file_id), asString(lifecycle.currentOfficialFileId)],
+      ["publishedAt", asString(metadata.publication_date), asString(lifecycle.currentPublishedAt)],
+    ].filter(([, expected, actual]) => expected !== actual);
+    if (lifecycleMismatches.length > 0) {
+      throw new Error(`kosha-promotion-packet-lifecycle-identity-mismatch:${stableKey}:${lifecycleMismatches.map(([field]) => field).join(",")}`);
+    }
+    const officialCurrentTitle = asString(lifecycle.currentOfficialTitle);
+    if (!officialCurrentTitle) throw new Error(`kosha-promotion-packet-missing-official-current-title:${stableKey}`);
     if (asString(item.version_key) !== version) throw new Error(`kosha-promotion-packet-version-mismatch:${stableKey}`);
     if (asString(itemProvenance.body_sha256) !== bodySha256) throw new Error(`kosha-promotion-packet-body-hash-mismatch:${stableKey}`);
     if (asString(itemProvenance.pdf_sha256) !== pdfSha256) throw new Error(`kosha-promotion-packet-pdf-hash-mismatch:${stableKey}`);
@@ -265,7 +313,9 @@ export function buildKoshaExactPromotionPacket(options) {
       order: index + 1,
       stableKey,
       version,
-      title: asString(item.title),
+      title: `${version} ${officialCurrentTitle}`,
+      sourceTitle: asString(item.title),
+      officialCurrentTitle,
       category: asString(item.category) || asString(metadata.official_category),
       publishedAt: asString(metadata.publication_date),
       officialFileId: asString(metadata.official_file_id),
@@ -294,6 +344,13 @@ export function buildKoshaExactPromotionPacket(options) {
     embeddingGenerationPerformed: false,
     exactPromotionPerformed: false,
     candidateCount: candidates.length,
+    officialLifecycleAuditPath,
+    titleReconciliation: {
+      sourceTitlesPreserved: true,
+      officialCurrentTitlesUsed: true,
+      reconciledCandidateCount: candidates.length,
+      changedTitleCount: candidates.filter((candidate) => candidate.title !== candidate.sourceTitle).length,
+    },
     operatorReviewReadiness: {
       packetReadyForReview: true,
       reviewChecklistComplete: false,
@@ -306,7 +363,8 @@ export function buildKoshaExactPromotionPacket(options) {
       acceptedStructure: "operator review packet only; no exact trust registry mutation",
       reasons: [
         "prioritize construction work-plan, excavation, fall, emergency, electrical, equipment, and ergonomic scenarios that complement current SafeClaw evidence flows",
-        "require complete official metadata and matching body-corpus provenance before review",
+      "require complete official metadata and matching body-corpus provenance before review",
+      "preserve corpus source titles while presenting the read-only official current-list title to reviewers",
         "exclude already exact-trusted pins",
       ],
     },
@@ -349,7 +407,7 @@ export function buildKoshaExactPromotionPacket(options) {
  */
 function renderMarkdown(report) {
   const rows = report.candidates.map((candidate) => (
-    `| ${candidate.order} | ${candidate.stableKey} | ${candidate.version} | ${candidate.title} | ${candidate.officialFileId} | ${candidate.bodySha256.slice(0, 12)} | ${candidate.pdfSha256.slice(0, 12)} | ${candidate.rationale} |`
+    `| ${candidate.order} | ${candidate.stableKey} | ${candidate.version} | ${candidate.title} | ${candidate.sourceTitle} | ${candidate.officialFileId} | ${candidate.bodySha256.slice(0, 12)} | ${candidate.pdfSha256.slice(0, 12)} | ${candidate.rationale} |`
   )).join("\n");
   return `# KOSHA Exact Promotion Packet
 
@@ -378,8 +436,8 @@ Review checklist complete: \`${report.operatorReviewReadiness.reviewChecklistCom
 
 ## Candidate Packet
 
-| # | Stable key | Version | Title | Official file id | Body hash | PDF hash | Why this candidate |
-| --- | --- | --- | --- | --- | --- | --- | --- |
+| # | Stable key | Version | Official current title | Source corpus title | Official file id | Body hash | PDF hash | Why this candidate |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
 ${rows}
 
 ## Per-Candidate Review Checks
@@ -400,12 +458,13 @@ ${report.forbiddenClaims.map((item) => `- ${item}`).join("\n")}
  * @param {string[]} args
  */
 function parseArgs(args) {
-  /** @type {{ rootDir: string; output: string; buildInfoUrl: string; buildInfoFile: string; generatedAt: string; candidateKeys: string[] }} */
+  /** @type {{ rootDir: string; output: string; buildInfoUrl: string; buildInfoFile: string; officialLifecycleAudit: string; generatedAt: string; candidateKeys: string[] }} */
   const parsed = {
     rootDir: REPO_ROOT,
     output: DEFAULT_OUTPUT_DIR,
     buildInfoUrl: DEFAULT_BUILD_INFO_URL,
     buildInfoFile: "",
+    officialLifecycleAudit: DEFAULT_PATHS.officialLifecycleAudit,
     generatedAt: "",
     candidateKeys: [],
   };
@@ -423,6 +482,9 @@ function parseArgs(args) {
       index += 1;
     } else if (arg === "--build-info-file") {
       parsed.buildInfoFile = next;
+      index += 1;
+    } else if (arg === "--official-lifecycle-audit") {
+      parsed.officialLifecycleAudit = next;
       index += 1;
     } else if (arg === "--generated-at") {
       parsed.generatedAt = next;
@@ -461,6 +523,7 @@ async function main() {
   const report = buildKoshaExactPromotionPacket({
     rootDir: args.rootDir,
     candidateKeys: args.candidateKeys.length > 0 ? args.candidateKeys : DEFAULT_CANDIDATE_KEYS,
+    officialLifecycleAudit: args.officialLifecycleAudit,
     buildInfo,
     generatedAt: args.generatedAt || undefined,
   });
