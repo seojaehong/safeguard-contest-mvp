@@ -187,6 +187,25 @@ type NextRunwayReport = {
     exactSavedShareVerdict: string;
     documentsShareIaVerdict: string;
   };
+  hermesKnowledgeReviewAuthorityUi: {
+    verdict: string;
+    localPassed: number;
+    localViewportCount: number;
+    livePassed: number;
+    liveViewportCount: number;
+    sourceOrder: string[];
+    humanReviewRequired: boolean;
+    machineEvidenceReplacesHumanReview: boolean;
+    tenantMemoryPublicPromotionAllowed: boolean;
+    siteManagerAcceptanceRequiredBeforeWorkpackUse: boolean;
+    dbMutationPerformed: boolean;
+    providerDispatchCalled: boolean;
+    shareSessionCreated: boolean;
+    ontologyPublicationPerformed: boolean;
+    exactSavedShareVerdict: string;
+    llmWikiPublication: string;
+    supabaseRlsLaunchIsolation: string;
+  };
   liveDocumentSeedProfileIsolation: {
     verdict: string;
     sourceHead: string;
@@ -912,6 +931,33 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       documentsShareIaVerdict: "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
     },
   });
+  writeJson(root, "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-product",
+    productionCommit: "fixture-sha",
+    local: { viewportCount: 8, passedCount: 8, failedCount: 0 },
+    afterLive: { viewportCount: 8, passedCount: 8, failedCount: 0 },
+    authorityContract: {
+      sourceOrder: ["SIF", "KOSHA", "law", "organization_history", "site_history", "external_context"],
+      statutoryClaimsRequireLawProvenance: true,
+      tenantMemoryPublicPromotionAllowed: false,
+      siteManagerAcceptanceRequiredBeforeWorkpackUse: true,
+      humanReviewRequired: true,
+      machineEvidenceReplacesHumanReview: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      ontologyPublicationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+    },
+  });
   writeJson(root, "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION",
     sourceHead: "fixture-sha",
@@ -1582,6 +1628,26 @@ describe("northstar next runway generator", () => {
     });
     expect(report.provenCurrentState).toContain("product_capability_truth");
     expect(report.provenCurrentState).toContain("hermes_knowledge_review_authority");
+    expect(report.provenCurrentState).toContain("hermes_knowledge_review_ui");
+    expect(report.hermesKnowledgeReviewAuthorityUi).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+      localPassed: 8,
+      localViewportCount: 8,
+      livePassed: 8,
+      liveViewportCount: 8,
+      sourceOrder: ["SIF", "KOSHA", "law", "organization_history", "site_history", "external_context"],
+      humanReviewRequired: true,
+      machineEvidenceReplacesHumanReview: false,
+      tenantMemoryPublicPromotionAllowed: false,
+      siteManagerAcceptanceRequiredBeforeWorkpackUse: true,
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      ontologyPublicationPerformed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+    });
     expect(report.provenCurrentState).toContain("live_document_secondary_grounding");
     expect(report.liveDocumentSeedProfileIsolation).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION",

@@ -40,6 +40,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
+  hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
@@ -393,6 +394,89 @@ function evaluateHermesKnowledgeReviewAuthorityGate(rootDir) {
     evidencePath,
     detail: `Hermes knowledge review authority contract failed: source=${sourceHead || "missing"}, production=${productionCommit || "missing"}, humanReview=${String(reviewContract.humanReviewRequired)}, noMutation=${String(noMutation)}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: ["Re-run the live stateless candidate probe and restore the authority, tenant-memory, human-review, and no-mutation boundaries."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.hermesKnowledgeReviewAuthorityUi;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "hermes_knowledge_review_ui",
+      label: "Hermes knowledge reviewer UI",
+      state: "missing",
+      evidencePath,
+      detail: "Live Hermes reviewer UI geometry evidence is missing.",
+      nextActions: ["Run the authenticated route-controlled reviewer cockpit probe against current production."],
+    });
+  }
+
+  const local = isRecord(report.local) ? report.local : {};
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const authorityContract = isRecord(report.authorityContract) ? report.authorityContract : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceOrder = readStringArray(authorityContract.sourceOrder);
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(report.productionCommit);
+  const expectedSourceOrder = [
+    "SIF",
+    "KOSHA",
+    "law",
+    "organization_history",
+    "site_history",
+    "external_context",
+  ];
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.ontologyPublicationPerformed === false;
+  const pass = report.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI"
+    && productCommit !== ""
+    && productionCommit !== ""
+    && isGitAncestor(rootDir, productCommit)
+    && isGitAncestor(rootDir, productionCommit)
+    && local.verdict === "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_AUTHORITY_UI"
+    && local.viewportCount === 8
+    && local.passedCount === 8
+    && local.failedCount === 0
+    && afterLive.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI"
+    && afterLive.viewportCount === 8
+    && afterLive.passedCount === 8
+    && afterLive.failedCount === 0
+    && JSON.stringify(sourceOrder) === JSON.stringify(expectedSourceOrder)
+    && authorityContract.statutoryClaimsRequireLawProvenance === true
+    && authorityContract.tenantMemoryPublicPromotionAllowed === false
+    && authorityContract.siteManagerAcceptanceRequiredBeforeWorkpackUse === true
+    && authorityContract.humanReviewRequired === true
+    && authorityContract.machineEvidenceReplacesHumanReview === false
+    && noMutation
+    && remainingBoundaries.llmWikiPublication === "APPROVAL_GATED"
+    && remainingBoundaries.supabaseRlsLaunchIsolation === "APPROVAL_GATED"
+    && remainingBoundaries.exactSavedShareVerdict === "MISSING_EVIDENCE";
+
+  if (pass) {
+    return gateResult({
+      id: "hermes_knowledge_review_ui",
+      label: "Hermes knowledge reviewer UI",
+      state: "proven",
+      evidencePath,
+      detail: "Live authenticated reviewer cockpit passes 8/8 Day/Night desktop and mobile geometry cases, exposes six SIF -> KOSHA -> law -> tenant-memory evidence roles, requires law provenance and site-manager acceptance, and performs no DB, provider, publication, or Share mutation. LLM Wiki/RLS remain APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE.",
+      nextActions: [],
+    });
+  }
+
+  return gateResult({
+    id: "hermes_knowledge_review_ui",
+    label: "Hermes knowledge reviewer UI",
+    state: "contradicted",
+    evidencePath,
+    detail: `Hermes reviewer UI contract failed: local=${readString(local.verdict) || "missing"}, live=${readString(afterLive.verdict) || "missing"}, humanReview=${String(authorityContract.humanReviewRequired)}, noMutation=${String(noMutation)}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: ["Restore the six-role reviewer cockpit, live geometry, human-review, tenant-memory, and no-mutation boundaries."],
   });
 }
 
@@ -3436,6 +3520,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateLiveDocumentEditorialReviewGate(rootDir),
     evaluateProductCapabilityTruthGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityGate(rootDir),
+    evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir),
     evaluateLiveDocumentSecondaryGroundingGate(rootDir),
     evaluateLiveDocumentSeedProfileIsolationGate(rootDir),
     evaluateUiDocumentsShareCockpitGate(rootDir),

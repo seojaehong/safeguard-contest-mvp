@@ -510,6 +510,43 @@ function createFixtureRoot(): string {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    local: {
+      verdict: "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_AUTHORITY_UI",
+      viewportCount: 8,
+      passedCount: 8,
+      failedCount: 0,
+    },
+    afterLive: {
+      verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+      viewportCount: 8,
+      passedCount: 8,
+      failedCount: 0,
+    },
+    authorityContract: {
+      sourceOrder: ["SIF", "KOSHA", "law", "organization_history", "site_history", "external_context"],
+      statutoryClaimsRequireLawProvenance: true,
+      tenantMemoryPublicPromotionAllowed: false,
+      siteManagerAcceptanceRequiredBeforeWorkpackUse: true,
+      humanReviewRequired: true,
+      machineEvidenceReplacesHumanReview: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      ontologyPublicationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION",
     sourceHead: "fixture-sha",
@@ -1996,6 +2033,13 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_authority")?.detail).toContain("SIF -> KOSHA -> law");
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_authority")?.detail).toContain("APPROVAL_GATED");
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_authority")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("8/8");
+    expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("APPROVAL_GATED");
+    expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "live_document_secondary_grounding")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
@@ -2371,6 +2415,31 @@ describe("northstar open gate audit", () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_authority")?.detail).toContain("humanReview=false");
+  });
+
+  it("fails Hermes reviewer UI closed when machine evidence replaces human review", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      authorityContract: {
+        humanReviewRequired: boolean;
+        machineEvidenceReplacesHumanReview: boolean;
+      };
+    };
+    report.authorityContract.humanReviewRequired = false;
+    report.authorityContract.machineEvidenceReplacesHumanReview = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-25T00:00:00.000Z",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("humanReview=false");
   });
 
   it("fails secondary document grounding closed when one supporting document is not grounded", async () => {

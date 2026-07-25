@@ -28,6 +28,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
+  hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
   kosha: path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json"),
@@ -314,6 +315,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const liveDocumentEditorialDuplicateClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialDuplicateClassification);
   const liveDocumentEditorialNearClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialNearClassification);
   const productCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.productCapabilityTruth);
+  const hermesKnowledgeReviewAuthorityUi = tryReadJson(rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
   const liveDocumentSecondaryGrounding = tryReadJson(rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
   const liveDocumentSeedProfileIsolation = tryReadJson(rootDir, ARTIFACTS.liveDocumentSeedProfileIsolation);
   const kosha = tryReadJson(rootDir, ARTIFACTS.kosha);
@@ -394,6 +396,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_duplicate_classification", ARTIFACTS.liveDocumentEditorialDuplicateClassification, liveDocumentEditorialDuplicateClassification),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_near_classification", ARTIFACTS.liveDocumentEditorialNearClassification, liveDocumentEditorialNearClassification),
     evidenceStatus(rootDir, currentHead, liveCommit, "product_capability_truth", ARTIFACTS.productCapabilityTruth, productCapabilityTruth),
+    evidenceStatus(rootDir, currentHead, liveCommit, "hermes_knowledge_review_ui", ARTIFACTS.hermesKnowledgeReviewAuthorityUi, hermesKnowledgeReviewAuthorityUi),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_secondary_grounding", ARTIFACTS.liveDocumentSecondaryGrounding, liveDocumentSecondaryGrounding),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_seed_profile_isolation", ARTIFACTS.liveDocumentSeedProfileIsolation, liveDocumentSeedProfileIsolation),
     evidenceStatus(rootDir, currentHead, liveCommit, "kosha_exact_trust_registry", ARTIFACTS.kosha, kosha),
@@ -658,6 +661,31 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       exactSavedShareVerdict: asString(recordAt(productCapabilityTruth, "remainingBoundaries")?.exactSavedShareVerdict),
       documentsShareIaVerdict: asString(recordAt(productCapabilityTruth, "remainingBoundaries")?.documentsShareIaVerdict),
     },
+    hermesKnowledgeReviewAuthorityUi: {
+      artifact: ARTIFACTS.hermesKnowledgeReviewAuthorityUi,
+      verdict: isRecord(hermesKnowledgeReviewAuthorityUi) ? asString(hermesKnowledgeReviewAuthorityUi.verdict) : "missing",
+      sourceHead: isRecord(hermesKnowledgeReviewAuthorityUi) ? asString(hermesKnowledgeReviewAuthorityUi.sourceHead) : "",
+      productCommit: isRecord(hermesKnowledgeReviewAuthorityUi) ? asString(hermesKnowledgeReviewAuthorityUi.productCommit) : "",
+      productionCommit: extractProductionCommit(hermesKnowledgeReviewAuthorityUi),
+      localPassed: asNumber(recordAt(hermesKnowledgeReviewAuthorityUi, "local")?.passedCount),
+      localViewportCount: asNumber(recordAt(hermesKnowledgeReviewAuthorityUi, "local")?.viewportCount),
+      livePassed: asNumber(recordAt(hermesKnowledgeReviewAuthorityUi, "afterLive")?.passedCount),
+      liveViewportCount: asNumber(recordAt(hermesKnowledgeReviewAuthorityUi, "afterLive")?.viewportCount),
+      sourceOrder: Array.isArray(recordAt(hermesKnowledgeReviewAuthorityUi, "authorityContract")?.sourceOrder)
+        ? recordAt(hermesKnowledgeReviewAuthorityUi, "authorityContract").sourceOrder
+        : [],
+      humanReviewRequired: recordAt(hermesKnowledgeReviewAuthorityUi, "authorityContract")?.humanReviewRequired === true,
+      machineEvidenceReplacesHumanReview: recordAt(hermesKnowledgeReviewAuthorityUi, "authorityContract")?.machineEvidenceReplacesHumanReview === true,
+      tenantMemoryPublicPromotionAllowed: recordAt(hermesKnowledgeReviewAuthorityUi, "authorityContract")?.tenantMemoryPublicPromotionAllowed === true,
+      siteManagerAcceptanceRequiredBeforeWorkpackUse: recordAt(hermesKnowledgeReviewAuthorityUi, "authorityContract")?.siteManagerAcceptanceRequiredBeforeWorkpackUse === true,
+      dbMutationPerformed: recordAt(hermesKnowledgeReviewAuthorityUi, "mutationBoundary")?.dbMutationPerformed === true,
+      providerDispatchCalled: recordAt(hermesKnowledgeReviewAuthorityUi, "mutationBoundary")?.providerDispatchCalled === true,
+      shareSessionCreated: recordAt(hermesKnowledgeReviewAuthorityUi, "mutationBoundary")?.shareSessionCreated === true,
+      ontologyPublicationPerformed: recordAt(hermesKnowledgeReviewAuthorityUi, "mutationBoundary")?.ontologyPublicationPerformed === true,
+      exactSavedShareVerdict: asString(recordAt(hermesKnowledgeReviewAuthorityUi, "remainingBoundaries")?.exactSavedShareVerdict),
+      llmWikiPublication: asString(recordAt(hermesKnowledgeReviewAuthorityUi, "remainingBoundaries")?.llmWikiPublication),
+      supabaseRlsLaunchIsolation: asString(recordAt(hermesKnowledgeReviewAuthorityUi, "remainingBoundaries")?.supabaseRlsLaunchIsolation),
+    },
     liveDocumentSecondaryGrounding: {
       artifact: ARTIFACTS.liveDocumentSecondaryGrounding,
       verdict: isRecord(liveDocumentSecondaryGrounding) ? asString(liveDocumentSecondaryGrounding.verdict) : "missing",
@@ -850,6 +878,16 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Exact saved Share: ${rollup.productCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     `- Documents/Share IA: ${rollup.productCapabilityTruth.documentsShareIaVerdict || "OPEN_SEPARATE_VIEWPORT_IA_WAVE"}`,
     "- Boundary: capability truth does not unlock provider persistence, exact saved Share, or Documents/Share viewport IA.",
+    "",
+    "## Live Hermes Reviewer Authority UI",
+    "",
+    `- Verdict: \`${rollup.hermesKnowledgeReviewAuthorityUi.verdict}\``,
+    `- Local/live viewport contracts: ${rollup.hermesKnowledgeReviewAuthorityUi.localPassed ?? 0}/${rollup.hermesKnowledgeReviewAuthorityUi.localViewportCount ?? 0} and ${rollup.hermesKnowledgeReviewAuthorityUi.livePassed ?? 0}/${rollup.hermesKnowledgeReviewAuthorityUi.liveViewportCount ?? 0}`,
+    `- Authority order: ${rollup.hermesKnowledgeReviewAuthorityUi.sourceOrder.join(" -> ") || "missing"}`,
+    `- Human review required: ${rollup.hermesKnowledgeReviewAuthorityUi.humanReviewRequired}; machine replaces human review=${rollup.hermesKnowledgeReviewAuthorityUi.machineEvidenceReplacesHumanReview}`,
+    `- Tenant-memory public promotion: ${rollup.hermesKnowledgeReviewAuthorityUi.tenantMemoryPublicPromotionAllowed}; site-manager acceptance required=${rollup.hermesKnowledgeReviewAuthorityUi.siteManagerAcceptanceRequiredBeforeWorkpackUse}`,
+    `- Mutation boundary DB/provider/share/publication: ${rollup.hermesKnowledgeReviewAuthorityUi.dbMutationPerformed}/${rollup.hermesKnowledgeReviewAuthorityUi.providerDispatchCalled}/${rollup.hermesKnowledgeReviewAuthorityUi.shareSessionCreated}/${rollup.hermesKnowledgeReviewAuthorityUi.ontologyPublicationPerformed}`,
+    `- Exact saved Share: ${rollup.hermesKnowledgeReviewAuthorityUi.exactSavedShareVerdict || "MISSING_EVIDENCE"}; LLM Wiki/RLS: ${rollup.hermesKnowledgeReviewAuthorityUi.llmWikiPublication || "APPROVAL_GATED"}/${rollup.hermesKnowledgeReviewAuthorityUi.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}`,
     "",
     "## Live Secondary Document Grounding",
     "",

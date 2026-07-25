@@ -31,6 +31,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
+  hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
   koshaNextExactCandidateAudit: path.join("evaluation", "kosha-next-exact-candidate-audit-2026-07-22", "report.json"),
@@ -595,6 +596,42 @@ function productCapabilityTruthSummary(report) {
     photoAnalysisPostCalled: asBoolean(mutationBoundary.photoAnalysisPostCalled),
     exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
     documentsShareIaVerdict: asString(remainingBoundaries.documentsShareIaVerdict),
+  };
+}
+
+/**
+ * @param {unknown} report
+ */
+function hermesKnowledgeReviewAuthorityUiSummary(report) {
+  if (!isRecord(report)) return {};
+  const local = isRecord(report.local) ? report.local : {};
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const authorityContract = isRecord(report.authorityContract) ? report.authorityContract : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productCommit: asString(report.productCommit),
+    productionCommit: asString(report.productionCommit),
+    localPassed: typeof local.passedCount === "number" ? local.passedCount : 0,
+    localViewportCount: typeof local.viewportCount === "number" ? local.viewportCount : 0,
+    livePassed: typeof afterLive.passedCount === "number" ? afterLive.passedCount : 0,
+    liveViewportCount: typeof afterLive.viewportCount === "number" ? afterLive.viewportCount : 0,
+    sourceOrder: Array.isArray(authorityContract.sourceOrder)
+      ? authorityContract.sourceOrder.filter((item) => typeof item === "string")
+      : [],
+    humanReviewRequired: asBoolean(authorityContract.humanReviewRequired),
+    machineEvidenceReplacesHumanReview: asBoolean(authorityContract.machineEvidenceReplacesHumanReview),
+    tenantMemoryPublicPromotionAllowed: asBoolean(authorityContract.tenantMemoryPublicPromotionAllowed),
+    siteManagerAcceptanceRequiredBeforeWorkpackUse: asBoolean(authorityContract.siteManagerAcceptanceRequiredBeforeWorkpackUse),
+    dbMutationPerformed: asBoolean(mutationBoundary.dbMutationPerformed),
+    providerDispatchCalled: asBoolean(mutationBoundary.providerDispatchCalled),
+    shareSessionCreated: asBoolean(mutationBoundary.shareSessionCreated),
+    ontologyPublicationPerformed: asBoolean(mutationBoundary.ontologyPublicationPerformed),
+    exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
+    llmWikiPublication: asString(remainingBoundaries.llmWikiPublication),
+    supabaseRlsLaunchIsolation: asString(remainingBoundaries.supabaseRlsLaunchIsolation),
   };
 }
 
@@ -1176,6 +1213,7 @@ export function buildNorthstarNextRunway(options) {
     ARTIFACTS.liveDocumentEditorialNearClassification,
   );
   const productCapabilityTruth = readOptionalJson(options.rootDir, ARTIFACTS.productCapabilityTruth);
+  const hermesKnowledgeReviewAuthorityUi = readOptionalJson(options.rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
   const liveDocumentSecondaryGrounding = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
   const liveDocumentSeedProfileIsolation = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSeedProfileIsolation);
   const koshaCandidateAudit = readJson(options.rootDir, ARTIFACTS.koshaNextExactCandidateAudit);
@@ -1244,6 +1282,7 @@ export function buildNorthstarNextRunway(options) {
       "live_document_editorial_review",
       "product_capability_truth",
       "hermes_knowledge_review_authority",
+      "hermes_knowledge_review_ui",
       "kosha_exact_promotion_packet_ready_for_review",
       "ui_documents_share_cockpit",
       "dispatch_standalone_cockpit",
@@ -1282,7 +1321,7 @@ export function buildNorthstarNextRunway(options) {
       shareRecipientLongContent: "live route-controlled long-content fixture keeps desktop recipient Share in two regions, mobile recipient root <= 1.5 viewports, confirmation in the first viewport, long task text in local scroll, and the document group collapsed by default; route split alone is insufficient and this is not exact saved-session proof",
       shareRouteEvidenceBoundary: "separate Share evidence into invited recipient fixture pass, exact saved/generated /share/[sessionId] missing evidence, and manager/workspace share-result route repro; do not use one route's pass to close another route's mobile-like complaint",
       shareMobile: "current compact cockpit remains first-viewport bounded in current evidence",
-      hermesOpenclaw: "adapter and fail-closed auth boundary current-proven; live unauthenticated broker smoke returns AUTH_REQUIRED before engine execution; live stateless knowledge candidates expose SIF -> KOSHA -> law authority roles, tenant-memory non-promotion, site-manager acceptance, and human-review requirements without provider, DB, publication, or Share mutation",
+      hermesOpenclaw: "adapter and fail-closed auth boundary current-proven; live unauthenticated broker smoke returns AUTH_REQUIRED before engine execution; live authenticated reviewer UI passes 8/8 viewport contracts and exposes SIF -> KOSHA -> law -> organization history -> site history -> external context authority roles, tenant-memory non-promotion, site-manager acceptance, and human-review requirements without provider, DB, publication, or Share mutation",
     },
     hermesOpenclaw: hermesSummary(hermes),
     documentQualityGrounding: documentQualityGroundingSummary(documentQuality),
@@ -1300,6 +1339,7 @@ export function buildNorthstarNextRunway(options) {
       liveDocumentEditorialNearClassification,
     ),
     productCapabilityTruth: productCapabilityTruthSummary(productCapabilityTruth),
+    hermesKnowledgeReviewAuthorityUi: hermesKnowledgeReviewAuthorityUiSummary(hermesKnowledgeReviewAuthorityUi),
     liveDocumentSecondaryGrounding: liveDocumentSecondaryGroundingSummary(liveDocumentSecondaryGrounding),
     liveDocumentSeedProfileIsolation: liveDocumentSeedProfileIsolationSummary(liveDocumentSeedProfileIsolation),
     koshaNextExactCandidateAudit: koshaCandidateAuditSummary(koshaCandidateAudit),
@@ -1419,6 +1459,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Live editorial duplicate classification is measured separately: \`${report.liveDocumentEditorialDuplicateClassification.verdict || "missing"}\`, generic template overuse \`${report.liveDocumentEditorialDuplicateClassification.beforeGenericTemplateOveruseCount ?? 0}->${report.liveDocumentEditorialDuplicateClassification.liveGenericTemplateOveruseCount ?? 0}\`, retained reviewer findings exact/near \`${report.liveDocumentEditorialDuplicateClassification.exactLineOveruseCount ?? 0}/${report.liveDocumentEditorialDuplicateClassification.nearDuplicateLineOveruseCount ?? 0}\`, and humanReviewCompleted=\`${report.liveDocumentEditorialDuplicateClassification.humanReviewCompleted === true}\`. Only generic template overuse fails automatically; safety-control and legal-reference repetition remains visible, and exact saved Share remains \`${report.liveDocumentEditorialDuplicateClassification.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live editorial near-duplicate classification preserves \`${report.liveDocumentEditorialNearClassification.beforeNearDuplicateLineOveruseCount ?? 0}->${report.liveDocumentEditorialNearClassification.liveNearDuplicateLineOveruseCount ?? 0}\` findings while reducing unclassified human-review-required \`${report.liveDocumentEditorialNearClassification.beforeHumanReviewRequiredCount ?? 0}->${report.liveDocumentEditorialNearClassification.liveHumanReviewRequiredCount ?? 0}\`. The retained role-prefix/context/hazard/control categories are \`${report.liveDocumentEditorialNearClassification.rolePrefixVariantCount ?? 0}/${report.liveDocumentEditorialNearClassification.independentContextCount ?? 0}/${report.liveDocumentEditorialNearClassification.hazardConsistencyCount ?? 0}/${report.liveDocumentEditorialNearClassification.controlConsistencyCount ?? 0}\`; humanReviewCompleted=\`${report.liveDocumentEditorialNearClassification.humanReviewCompleted === true}\` and exact saved Share remains \`${report.liveDocumentEditorialNearClassification.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live product capability truth is measured separately: \`${report.productCapabilityTruth.verdict || "missing"}\`; manual/provider dispatch is \`${report.productCapabilityTruth.dispatchMode || "unknown"}\` with reason \`${report.productCapabilityTruth.dispatchReason || "unknown"}\`, scheduled briefing email ready=\`${report.productCapabilityTruth.briefingEmailReady === true}\`, photo Vision/OCR ready/accepted-only=\`${report.productCapabilityTruth.photoVisionReady === true}/${report.productCapabilityTruth.photoAcceptedOnly === true}\`, and AI modes are \`${report.productCapabilityTruth.aiModes?.join(", ") || "missing"}\`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains \`${report.productCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}\` and Documents/Share IA remains \`${report.productCapabilityTruth.documentsShareIaVerdict || "OPEN_SEPARATE_VIEWPORT_IA_WAVE"}\`.
+- Live Hermes reviewer authority UI is measured separately: \`${report.hermesKnowledgeReviewAuthorityUi.verdict || "missing"}\`, local/live viewport contracts \`${report.hermesKnowledgeReviewAuthorityUi.localPassed ?? 0}/${report.hermesKnowledgeReviewAuthorityUi.localViewportCount ?? 0}\` and \`${report.hermesKnowledgeReviewAuthorityUi.livePassed ?? 0}/${report.hermesKnowledgeReviewAuthorityUi.liveViewportCount ?? 0}\`, with authority order \`${report.hermesKnowledgeReviewAuthorityUi.sourceOrder?.join(" -> ") || "missing"}\`. Human review remains required and machine evidence does not replace it; no DB/provider/share/publication mutation is claimed. Exact saved Share remains \`${report.hermesKnowledgeReviewAuthorityUi.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`, while LLM Wiki publication and Supabase RLS remain approval-gated.
 - Live supporting-document scenario grounding is measured separately: \`${report.liveDocumentSecondaryGrounding.verdict || "missing"}\`, live cases \`${report.liveDocumentSecondaryGrounding.livePassed ?? 0}/5\`, supporting documents \`${report.liveDocumentSecondaryGrounding.secondaryPassed ?? 0}/${report.liveDocumentSecondaryGrounding.secondaryReviewed ?? 0}\`, cross-scenario leakage \`${report.liveDocumentSecondaryGrounding.crossScenarioLeakageCount ?? 0}\`, and missingUnexpected \`${report.liveDocumentSecondaryGrounding.missingUnexpectedCount ?? 0}\`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains \`${report.liveDocumentSecondaryGrounding.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live document seed-profile isolation is measured separately: \`${report.liveDocumentSeedProfileIsolation.verdict || "missing"}\`, before forbidden fragments \`${report.liveDocumentSeedProfileIsolation.beforeSeedProfileLeakageCount ?? 0}\`, live forbidden fragments \`${report.liveDocumentSeedProfileIsolation.liveSeedProfileLeakageCount ?? 0}\`, reviewed document surface \`${report.liveDocumentSeedProfileIsolation.reviewedDocumentSurfaceCount ?? 0}\`, and secondary grounding \`${report.liveDocumentSeedProfileIsolation.secondaryGroundingPassed ?? 0}/${report.liveDocumentSeedProfileIsolation.secondaryGroundingReviewed ?? 0}\`. This deterministic gate does not replace broad human wording review or exact saved Share evidence; exact saved Share remains \`${report.liveDocumentSeedProfileIsolation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level, without claiming live production engine execution.
