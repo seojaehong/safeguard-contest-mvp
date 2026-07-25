@@ -1,0 +1,58 @@
+# Live Document Rain-Context Isolation
+
+- Verdict: `PASS_CURRENT_SOURCE_LOCAL_RAIN_CONTEXT_ISOLATION_LIVE_PENDING`
+- Product commit: `166fab88501cf825c3cecd80c05b6b2fce640425`
+- Runner contract commit: `52d76ee4442dac23eb6c0eb7fe4d31c8bf9be749`
+- Measured production commit: `e0dbf20bf9d51e15cdd163c76dfa3abe85c4ec3c`
+- Scenario: Ulsan chemical cleaning with SDS/GHS and spray/skin-contact risk
+- Documents reviewed per run: 12
+
+## Before Live
+
+Current production was fail-closed RED:
+
+- Scenario pass/fail: `0/1`
+- Scenario-irrelevant findings: `3`
+- Failed documents:
+  - `foreignWorkerBriefing`
+  - `foreignWorkerTransmission`
+  - `kakaoMessage`
+- Matched fragment: `우천·젖은 바닥`
+
+The source question contains `비산` (spray), not a rain or wet-floor condition.
+The previous broad regex treated the first character of `비산` as rain.
+
+## After Local
+
+Current-source local production was PASS:
+
+- Scenario pass/fail: `1/0`
+- Documents pass/fail: `12/0`
+- Scenario-irrelevant findings: `0`
+- Matched forbidden fragments: `0`
+
+The focused tests also preserve the positive case: explicit rain forecasts and
+wet-floor wording still add the rain context.
+
+## Evidence Contract
+
+The editorial runner now consumes `expected.forbiddenDocumentFragments` for
+all 12 canonical deliverables. Any matched fragment is recorded on the
+document row and fails with `scenarioIrrelevantContext`.
+
+The earlier five-scenario local attempt under `attempt-timeout/` is retained as
+diagnostic evidence only. Four API calls were aborted after the command time
+budget expired, so it is not used as the product verdict.
+
+## Verification
+
+- Focused Vitest: 3 files, 71 tests PASS
+- Strict typecheck: PASS
+- Next production build: PASS, 28 static pages
+
+## Boundary
+
+No database mutation, Share-session creation, provider dispatch, embedding, or
+vector upload was performed. Human wording review is not complete. Live
+after-deployment evidence remains pending, and exact saved
+`/share/[sessionId]` remains `MISSING_EVIDENCE`.

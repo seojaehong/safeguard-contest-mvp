@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "safeclaw-live-document-rain-context-isolation/v1",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_RAIN_CONTEXT_ISOLATION_LIVE_PENDING",
+  "checkedAt": "2026-07-25T02:56:47.497Z",
+  "sourceHead": "52d76ee4442dac23eb6c0eb7fe4d31c8bf9be749",
+  "productCommit": "166fab88501cf825c3cecd80c05b6b2fce640425",
+  "productionCommit": "e0dbf20bf9d51e15cdd163c76dfa3abe85c4ec3c",
+  "productionDeployment": "safeguard-contest-6f4o9ehm7-seojaehongs-projects.vercel.app",
+  "scenarioCount": 1,
+  "canonicalDocumentCount": 12,
+  "beforeLive": {
+    "path": "evaluation\\live-document-rain-context-isolation-2026-07-25\\before-live\\report.json",
+    "verdict": "RED_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT",
+    "pass": 0,
+    "fail": 1,
+    "reviewedDocumentSurfaceCount": 12,
+    "scenarioIrrelevantContextFindingCount": 3,
+    "failedDocumentCount": 3,
+    "matchedDocumentKeys": [
+      "foreignWorkerBriefing",
+      "foreignWorkerTransmission",
+      "kakaoMessage"
+    ]
+  },
+  "afterLocal": {
+    "path": "evaluation\\live-document-rain-context-isolation-2026-07-25\\after-local-focused\\report.json",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+    "pass": 1,
+    "fail": 0,
+    "reviewedDocumentSurfaceCount": 12,
+    "scenarioIrrelevantContextFindingCount": 0,
+    "failedDocumentCount": 0,
+    "matchedDocumentKeys": []
+  },
+  "diagnosticAttempt": {
+    "path": "evaluation\\live-document-rain-context-isolation-2026-07-25\\attempt-timeout\\report.json",
+    "verdict": "RED_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT",
+    "excludedFromProductVerdict": true,
+    "reason": "The five-scenario runner exceeded the command time budget after the first case; four requests were aborted. The focused one-scenario rerun is the authoritative after-local result."
+  },
+  "verification": {
+    "focusedTests": {
+      "filesPassed": 3,
+      "testsPassed": 71
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false
+  },
+  "remainingBoundary": {
+    "liveAfterDeploymentPending": true,
+    "humanReviewCompleted": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  }
+}
