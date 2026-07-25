@@ -227,6 +227,48 @@ describe("foreign worker transmission context", () => {
     expect(transmission).toContain("현장: 서울 성수동 근린생활시설 현장\n오늘 작업: 외벽 도장 작업");
     expect(transmission).toContain("도장");
   });
+
+  it("does not treat chemical spray wording as a rain condition", () => {
+    const chemicalInput = {
+      question: "울산 도금공장 탱크 외부 화학세척 작업. SDS와 GHS 경고표지를 확인하고 비산·피부접촉을 통제한다.",
+      scenario: {
+        siteName: "울산 탱크 외부 화학세척 작업 현장",
+        companyName: "클린온",
+        companyType: "제조업",
+        workSummary: "탱크 외부 화학세척 작업",
+        workerCount: 5,
+        weatherNote: "화학물질 식별 전 작업 보류, 국소배기·비산·피부접촉 통제 상태 확인 필요"
+      },
+      riskSummary: {
+        title: "화학세척 작업",
+        riskLevel: "중" as const,
+        topRisk: "미확인 화학물질의 비산·피부접촉 위험",
+        immediateActions: [
+          "SDS와 GHS 경고표지를 확인합니다.",
+          "국소배기를 가동합니다.",
+          "보안경과 내화학장갑을 착용합니다."
+        ]
+      }
+    };
+
+    const transmission = buildForeignWorkerTransmission(chemicalInput);
+
+    expect(transmission).not.toContain("우천·젖은 바닥");
+    expect(transmission).toContain("국소배기·비산·피부접촉");
+  });
+
+  it("keeps the rain context for an explicit wet-floor condition", () => {
+    const rainyInput = {
+      ...input,
+      question: `${input.question} 비 예보로 바닥 젖음이 예상됨.`,
+      scenario: {
+        ...input.scenario,
+        weatherNote: "비 예보, 젖은 바닥 미끄럼 주의"
+      }
+    };
+
+    expect(buildForeignWorkerTransmission(rainyInput)).toContain("우천·젖은 바닥");
+  });
 });
 
 describe("foreign worker generic fallback relevance", () => {

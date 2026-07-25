@@ -694,9 +694,13 @@ function buildTaskSpecificLines(input: BriefingInput, language: ForeignWorkerLan
   ].filter((line): line is string => Boolean(line));
 }
 
+function hasRainCondition(question: string): boolean {
+  return /우천|강수|비\s*(?:예보|소식|온|옴|내림|오는|내리는|가\s*옴)|젖은?\s*(?:바닥|노면)|바닥\s*젖음/.test(question);
+}
+
 function buildKoreanContextLines(input: BriefingInput): string[] {
   const lines = [`작업조건: ${input.scenario.weatherNote}`];
-  if (/우천|젖음|비|강수/.test(input.question)) {
+  if (hasRainCondition(input.question)) {
     lines.push("우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요.");
   }
   if (/화재감시자/.test(input.question)) {
