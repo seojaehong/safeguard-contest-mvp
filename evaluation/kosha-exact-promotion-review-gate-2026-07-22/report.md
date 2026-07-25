@@ -1,14 +1,16 @@
 # KOSHA Exact Promotion Review Gate
 
-Generated at: 2026-07-23T02:44:30.884Z
+Generated at: 2026-07-25T00:02:55.793Z
 
 Verdict: `REVIEW_CHECKLIST_INCOMPLETE_BLOCKED`
 
-Source HEAD: `529fbae854a3c0d3d89a369556375352f3ef77dc`
+Source HEAD: `6c3dc455e82a4d23f53017a3735ab7edda42bc56`
 
 Packet: `evaluation\kosha-exact-promotion-packet-2026-07-22\report.json`
 
-Review input: `evaluation\kosha-exact-promotion-review-gate-2026-07-22\review-template.json`
+Official PDF audit: `evaluation/kosha-exact-official-pdf-audit-2026-07-25/report.json`
+
+Review input: `evaluation/kosha-exact-promotion-review-gate-2026-07-22/review-template.json`
 
 Checklist complete: `false`
 
@@ -48,6 +50,7 @@ Completed review creates registry artifact: `false`
 - missingReviewers: 8
 - missingReviewedAt: 8
 - invalidReviewedAt: 0
+- officialPdfAuditFailures: 0
 - other: 0
 
 ## Failures
