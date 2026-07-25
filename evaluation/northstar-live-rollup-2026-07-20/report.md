@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-25T00:08:42.270Z
-Source HEAD at generation: 1d0b41499d0f6f350d296cdbee0a46c154ea1ea1
-Live commit at generation: b2285f97f6635da30aa88206fc88c07035cd2028
+Generated at: 2026-07-25T00:23:46.790Z
+Source HEAD at generation: 65e4976dff39c282a01e345f70c434e4890b40d7
+Live commit at generation: 22b2be6de4ab1e3f90bd799df39882c71f8b9e75
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -194,4 +194,4 @@ Overall: `northstar_open_approval_gated`
 - supabase_rls_launch_isolation: Read-only RLS approval preflight passed at source SHA e226e1246c73b85464bb3572c4cd4e10801313fa, but live RLS catalog and tenant A/B isolation are not proven.
 - llm_wiki_publication: Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA e226e1246c73b85464bb3572c4cd4e10801313fa.
 - sif_embedding_runtime: SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 8c208e082adccfe6ba90d49f4b61934a994f3247.
-- kosha_exact_promotion_review_gate: Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Official PDF audit evaluation\kosha-exact-official-pdf-audit-2026-07-25\report.json re-downloaded and machine-verified all 8 PDF/body pairs while preserving lifecycle, human-review, and promotion boundaries. Contract audit evaluation\kosha-exact-promotion-review-contract-audit-2026-07-23\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval.
+- kosha_exact_promotion_review_gate: Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Official PDF audit evaluation\kosha-exact-official-pdf-audit-2026-07-25\report.json re-downloaded and machine-verified all 8 PDF/body pairs while preserving lifecycle, human-review, and promotion boundaries. Official lifecycle audit evaluation\kosha-exact-official-lifecycle-audit-2026-07-25\report.json reconciles all 8 packet versions against current and retired inventories; 6 titles match exactly and A-G-1/E-G-4 retain 2 explicit title variants for human review. Contract audit evaluation\kosha-exact-promotion-review-contract-audit-2026-07-23\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval.

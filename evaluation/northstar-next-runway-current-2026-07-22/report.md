@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `1d0b41499d0f6f350d296cdbee0a46c154ea1ea1`
+Source HEAD: `65e4976dff39c282a01e345f70c434e4890b40d7`
 
-Production `/api/build-info`: `b2285f97f6635da30aa88206fc88c07035cd2028`
+Production `/api/build-info`: `22b2be6de4ab1e3f90bd799df39882c71f8b9e75`
 
 Latest evidence commit live: `false`
 
@@ -14,17 +14,17 @@ Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/northstar-live-rollup-2026-07-20/report.json`, `evaluation/northstar-live-rollup-2026-07-20/report.md`, `evaluation/northstar-next-runway-current-2026-07-22/report.json`, `evaluation/northstar-next-runway-current-2026-07-22/report.md`, `evaluation/northstar-open-gates-current/report.json`, `evaluation/northstar-open-gates-current/report.md`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-open-gate-audit.test.ts`
+Source pending changed paths: `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-open-gate-audit.test.ts`
 
 Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `1d0b41499d0f6f350d296cdbee0a46c154ea1ea1`
+Live rollup source head: `65e4976dff39c282a01e345f70c434e4890b40d7`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `1d0b41499d0f6f350d296cdbee0a46c154ea1ea1` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `b2285f97f6635da30aa88206fc88c07035cd2028`, and the live rollup remains exact for that deployed marker.
+Note: current HEAD `65e4976dff39c282a01e345f70c434e4890b40d7` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `22b2be6de4ab1e3f90bd799df39882c71f8b9e75`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 

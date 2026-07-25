@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-25T00:08:41.232Z",
-  "sourceSha": "1d0b41499d0f6f350d296cdbee0a46c154ea1ea1",
+  "generatedAt": "2026-07-25T00:23:45.552Z",
+  "sourceSha": "65e4976dff39c282a01e345f70c434e4890b40d7",
   "overall": "open",
   "gates": [
     {
@@ -274,7 +274,7 @@
       "state": "approval_gated",
       "label": "KOSHA exact promotion review gate",
       "evidencePath": "evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\report.json",
-      "detail": "Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Official PDF audit evaluation\\kosha-exact-official-pdf-audit-2026-07-25\\report.json re-downloaded and machine-verified all 8 PDF/body pairs while preserving lifecycle, human-review, and promotion boundaries. Contract audit evaluation\\kosha-exact-promotion-review-contract-audit-2026-07-23\\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval.",
+      "detail": "Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Official PDF audit evaluation\\kosha-exact-official-pdf-audit-2026-07-25\\report.json re-downloaded and machine-verified all 8 PDF/body pairs while preserving lifecycle, human-review, and promotion boundaries. Official lifecycle audit evaluation\\kosha-exact-official-lifecycle-audit-2026-07-25\\report.json reconciles all 8 packet versions against current and retired inventories; 6 titles match exactly and A-G-1/E-G-4 retain 2 explicit title variants for human review. Contract audit evaluation\\kosha-exact-promotion-review-contract-audit-2026-07-23\\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval.",
       "nextActions": [
         "Fill the generated KOSHA review template with reviewer, reviewedAt, humanConfirmed, and every required check before promotion.",
         "Re-run scripts\\kosha_exact_promotion_review_gate.mjs on the completed review input, then seek separate explicit approval before writing any exact-trust registry changes."
