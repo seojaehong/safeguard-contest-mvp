@@ -59,6 +59,12 @@ function fixtureRoot(): string {
   });
   writeText(root, "scripts/supabase_tenant_isolation_manifest.mjs", "export const TENANT_ISOLATION_MANIFEST = { version: 3, scenarios: [] };\n");
   writeText(root, "scripts/supabase_tenant_isolation_harness.mjs", "export const marker = 'blocked_unreviewed_live_adapter'; export const launch = 'launchProven: false';\n");
+  writeText(root, "lib/knowledge-governance.ts", [
+    'export const candidate = { owner: "hermes_or_llm", publicationState: "unpublished", publishAllowed: false };',
+  ].join("\n"));
+  writeText(root, "lib/knowledge-candidate-route.ts", 'export const message = "DB 저장과 ontology publish는 수행하지 않았습니다.";\n');
+  writeText(root, "app/api/knowledge/review/route.ts", 'export const boundary = { publicationState: "unpublished", ontologyPublished: false };\n');
+  writeText(root, "supabase/migrations/008_safety_ontology.sql", "create table safety_ontology_nodes(id text primary key);\n");
   execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
   execFileSync("git", ["commit", "-m", "fixture"], { cwd: root, stdio: "ignore" });
   return root;
@@ -124,6 +130,12 @@ describe("RLS / LLM Wiki approval preflight", () => {
       }),
     ]));
     expect(JSON.stringify(report)).toContain("publication_ddl_rpc");
+    expect(report.publicationSurfaceInventory).toMatchObject({
+      publicationRpcCallHits: [],
+      publicationSqlFunctionHits: [],
+      publicationLedgerMigrationHits: [],
+      publicationRoutePaths: [],
+    });
   });
 
   it("fails closed if a source packet claims RLS launch readiness", () => {
@@ -155,6 +167,45 @@ describe("RLS / LLM Wiki approval preflight", () => {
       readonly failedCheckIds: readonly string[];
     };
     expect(typedReport.failedCheckIds).toEqual(["wiki_sql_design_non_executable"]);
+  });
+
+  it("fails closed when an executable wiki publication RPC migration appears", () => {
+    const root = fixtureRoot();
+    writeText(root, "supabase/migrations/099_publish_wiki.sql", [
+      "create or replace function public.publish_reviewed_ontology()",
+      "returns void language sql as $$ select null; $$;",
+    ].join("\n"));
+
+    const { report, status } = runPreflight(root);
+
+    expect(status).toBe(1);
+    expect(report.overall).toBe("blocked_preflight_failed");
+    const typedReport = report as {
+      readonly failedCheckIds: readonly string[];
+      readonly publicationSurfaceInventory: {
+        readonly publicationSqlFunctionHits: readonly string[];
+      };
+    };
+    expect(typedReport.failedCheckIds).toContain("wiki_no_executable_publication_surface");
+    expect(typedReport.publicationSurfaceInventory.publicationSqlFunctionHits).toEqual([
+      "supabase/migrations/099_publish_wiki.sql",
+    ]);
+  });
+
+  it("fails closed when Hermes candidate governance becomes publishing", () => {
+    const root = fixtureRoot();
+    writeText(root, "lib/knowledge-governance.ts", [
+      'export const candidate = { owner: "hermes_or_llm", publicationState: "published", publishAllowed: true };',
+    ].join("\n"));
+
+    const { report, status } = runPreflight(root);
+
+    expect(status).toBe(1);
+    expect(report.overall).toBe("blocked_preflight_failed");
+    const typedReport = report as {
+      readonly failedCheckIds: readonly string[];
+    };
+    expect(typedReport.failedCheckIds).toContain("hermes_llm_candidate_stays_unpublished");
   });
 
   it("prefers the current northstar open-gate packet over the legacy dated packet", () => {

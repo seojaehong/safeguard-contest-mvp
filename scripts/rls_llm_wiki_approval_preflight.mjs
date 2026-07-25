@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 
@@ -14,6 +14,9 @@ const REQUIRED_FILES = Object.freeze({
   wikiSqlDesign: "evaluation/llm-wiki-rls-approval-2026-07-17/proposed-non-executable-publication-design.sql.txt",
   tenantHarness: "scripts/supabase_tenant_isolation_harness.mjs",
   tenantManifest: "scripts/supabase_tenant_isolation_manifest.mjs",
+  knowledgeGovernance: "lib/knowledge-governance.ts",
+  knowledgeCandidateRoute: "lib/knowledge-candidate-route.ts",
+  knowledgeReviewRoute: "app/api/knowledge/review/route.ts",
 });
 
 const NORTHSTAR_REPORT_CANDIDATES = Object.freeze([
@@ -108,6 +111,69 @@ function gateState(report, gateId) {
   return gates?.[gateId]?.status ?? gates?.[gateId]?.state;
 }
 
+function sourceFiles(root, relativeRoot) {
+  const absoluteRoot = resolve(root, relativeRoot);
+  if (!existsSync(absoluteRoot)) return [];
+  const files = [];
+  const visit = (directory) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const absolutePath = join(directory, entry.name);
+      if (entry.isDirectory()) visit(absolutePath);
+      else if (entry.isFile() && /\.(?:ts|tsx|js|mjs|sql)$/u.test(entry.name)) {
+        files.push({
+          absolutePath,
+          relativePath: relative(root, absolutePath).replaceAll("\\", "/"),
+        });
+      }
+    }
+  };
+  visit(absoluteRoot);
+  return files;
+}
+
+function publicationSurfaceInventory(root) {
+  const files = [
+    ...sourceFiles(root, "app"),
+    ...sourceFiles(root, "lib"),
+    ...sourceFiles(root, "supabase/migrations"),
+  ];
+  const publicationRpcCallHits = [];
+  const publicationSqlFunctionHits = [];
+  const publicationLedgerMigrationHits = [];
+  const publicationRoutePaths = [];
+  for (const file of files) {
+    const text = readFileSync(file.absolutePath, "utf8");
+    if (/\.rpc\s*\(\s*["'`](?:publish_reviewed_ontology|rollback_ontology_publication)["'`]/u.test(text)) {
+      publicationRpcCallHits.push(file.relativePath);
+    }
+    if (
+      file.relativePath.startsWith("supabase/migrations/") &&
+      /create\s+(?:or\s+replace\s+)?function\s+(?:public\.)?(?:publish_reviewed_ontology|rollback_ontology_publication)\s*\(/iu.test(text)
+    ) {
+      publicationSqlFunctionHits.push(file.relativePath);
+    }
+    if (
+      file.relativePath.startsWith("supabase/migrations/") &&
+      /create\s+table[\s\S]{0,120}(?:ontology_publication|ontology_graph_version|publication_ledger)/iu.test(text)
+    ) {
+      publicationLedgerMigrationHits.push(file.relativePath);
+    }
+    if (
+      file.relativePath.startsWith("app/api/knowledge/") &&
+      /(?:^|\/)(?:publish|publication)(?:\/|$)/iu.test(file.relativePath)
+    ) {
+      publicationRoutePaths.push(file.relativePath);
+    }
+  }
+  return {
+    scannedFileCount: files.length,
+    publicationRpcCallHits: [...new Set(publicationRpcCallHits)].sort(),
+    publicationSqlFunctionHits: [...new Set(publicationSqlFunctionHits)].sort(),
+    publicationLedgerMigrationHits: [...new Set(publicationLedgerMigrationHits)].sort(),
+    publicationRoutePaths: [...new Set(publicationRoutePaths)].sort(),
+  };
+}
+
 function buildPreflight({ root }) {
   const northstarReportPath = firstExistingPath(root, NORTHSTAR_REPORT_CANDIDATES);
   const missingFiles = Object.entries(REQUIRED_FILES)
@@ -141,6 +207,10 @@ function buildPreflight({ root }) {
   const northstarReport = readJson(root, northstarReportPath);
   const tenantManifestText = readText(root, REQUIRED_FILES.tenantManifest);
   const tenantHarnessText = readText(root, REQUIRED_FILES.tenantHarness);
+  const knowledgeGovernanceText = readText(root, REQUIRED_FILES.knowledgeGovernance);
+  const knowledgeCandidateRouteText = readText(root, REQUIRED_FILES.knowledgeCandidateRoute);
+  const knowledgeReviewRouteText = readText(root, REQUIRED_FILES.knowledgeReviewRoute);
+  const publicationSurface = publicationSurfaceInventory(root);
 
   const checks = [
     check("rls_status_approval_required", rlsReport.status === "approval_required", "Supabase RLS packet must stay approval_required."),
@@ -157,6 +227,32 @@ function buildPreflight({ root }) {
     check("wiki_sql_design_not_migration_path", !REQUIRED_FILES.wikiSqlDesign.startsWith("supabase/migrations/"), "SQL companion must not live under migrations."),
     check("tenant_manifest_v3", tenantManifestText.includes("version: 3") && tenantManifestText.includes("scenarios"), "Tenant-isolation manifest v3 must be present."),
     check("tenant_harness_no_live_adapter", tenantHarnessText.includes("blocked_unreviewed_live_adapter") && tenantHarnessText.includes("launchProven: false"), "Tenant harness must fail closed without reviewed live adapters."),
+    check(
+      "hermes_llm_candidate_stays_unpublished",
+      /owner:\s*"hermes_or_llm"[\s\S]{0,400}publicationState:\s*"unpublished"[\s\S]{0,250}publishAllowed:\s*false/u.test(
+        knowledgeGovernanceText,
+      ),
+      "Hermes/LLM candidate governance must remain unpublished and non-publishing.",
+    ),
+    check(
+      "knowledge_candidate_route_non_publishing",
+      knowledgeCandidateRouteText.includes("DB 저장과 ontology publish는 수행하지 않았습니다."),
+      "Knowledge candidate route must explicitly remain memory-only and non-publishing.",
+    ),
+    check(
+      "knowledge_review_route_non_publishing",
+      knowledgeReviewRouteText.includes('publicationState: "unpublished"') &&
+        knowledgeReviewRouteText.includes("ontologyPublished: false"),
+      "Knowledge review route must preserve unpublished, non-published responses.",
+    ),
+    check(
+      "wiki_no_executable_publication_surface",
+      publicationSurface.publicationRpcCallHits.length === 0 &&
+        publicationSurface.publicationSqlFunctionHits.length === 0 &&
+        publicationSurface.publicationLedgerMigrationHits.length === 0 &&
+        publicationSurface.publicationRoutePaths.length === 0,
+      "Executable publication RPC, migration, ledger, or route surface exists before approval.",
+    ),
     check("northstar_rls_gate_approval_gated", gateState(northstarReport, "supabase_rls_launch_isolation") === "approval_gated", "North Star RLS gate must remain approval_gated."),
     check("northstar_wiki_gate_approval_gated", gateState(northstarReport, "llm_wiki_publication") === "approval_gated", "North Star LLM Wiki gate must remain approval_gated."),
   ];
@@ -188,11 +284,13 @@ function buildPreflight({ root }) {
     forbiddenClaims: [
       "RLS launch isolation proven",
       "LLM Wiki publication available",
+      "Hermes or an LLM can publish ontology candidates directly",
       "production migration approved",
       "service-role routes are safe because table RLS exists",
     ],
     inputs,
     artifactIntegrity: artifactIntegrityRows,
+    publicationSurfaceInventory: publicationSurface,
     checks,
     failedCheckIds: failedChecks.map((item) => item.id),
   };
