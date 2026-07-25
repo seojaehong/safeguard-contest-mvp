@@ -39,6 +39,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
+  hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
@@ -284,6 +285,114 @@ function evaluateFinal99Gate(rootDir) {
     evidencePath,
     detail: `final-99 overall is ${overall || "unknown"}.`,
     nextActions: ["Fix blocked final-99 gates and regenerate the report."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateHermesKnowledgeReviewAuthorityGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.hermesKnowledgeReviewContract;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "hermes_knowledge_review_authority",
+      label: "Hermes knowledge review authority",
+      state: "missing",
+      evidencePath,
+      detail: "Live Hermes knowledge reviewer authority evidence is missing.",
+      nextActions: ["Run the stateless generate=false knowledge candidate probe against current production."],
+    });
+  }
+
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const probe = isRecord(report.probe) ? report.probe : {};
+  const candidate = isRecord(report.candidate) ? report.candidate : {};
+  const reviewContract = isRecord(report.reviewContract) ? report.reviewContract : {};
+  const sourceRoleCounts = isRecord(reviewContract.sourceRoleCounts) ? reviewContract.sourceRoleCounts : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(productionBuild.commitSha);
+  const authorityOrder = readStringArray(reviewContract.authorityOrder);
+  const presentAuthorityIds = readStringArray(reviewContract.presentAuthorityIds);
+  const expectedAuthorityOrder = [
+    "sif",
+    "kosha",
+    "law",
+    "organization_history",
+    "site_history",
+    "external_context",
+  ];
+  const expectedPresentAuthorityIds = expectedAuthorityOrder.slice(0, 5);
+  const sourceRoleCountPass = [
+    "sifIncidentControlEvidence",
+    "koshaTechnicalGuidance",
+    "lawStatutorySource",
+    "organizationPrivateMemory",
+    "sitePrivateMemory",
+  ].every((field) => readNumber(sourceRoleCounts[field]) === 1)
+    && readNumber(sourceRoleCounts.externalContext) === 0;
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.schemaMutationPerformed === false
+    && mutationBoundary.candidatePersisted === false
+    && mutationBoundary.ontologyPublished === false
+    && mutationBoundary.providerCallPerformed === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.exactSavedShareReproduced === false;
+  const pass = report.verdict === "PASS_LIVE_PRODUCTION_HERMES_KNOWLEDGE_REVIEW_AUTHORITY_CONTRACT"
+    && sourceHead !== ""
+    && productCommit !== ""
+    && productionCommit === sourceHead
+    && isGitAncestor(rootDir, sourceHead)
+    && isGitAncestor(rootDir, productCommit)
+    && probe.httpStatus === 200
+    && probe.requestMode === "generate_false_stateless_candidate"
+    && probe.rawEventCount === 5
+    && probe.aiGenerationExecuted === false
+    && probe.providerCallPerformed === false
+    && probe.storageMode === "stateless_candidate"
+    && probe.savedRunId === null
+    && candidate.contractVersion === "knowledge-candidate.v2"
+    && candidate.publicationState === "unpublished"
+    && candidate.publishAllowed === false
+    && candidate.dbMutationPerformed === false
+    && reviewContract.contractVersion === "knowledge-candidate-review.v1"
+    && reviewContract.status === "human_review_required"
+    && JSON.stringify(authorityOrder) === JSON.stringify(expectedAuthorityOrder)
+    && JSON.stringify(presentAuthorityIds) === JSON.stringify(expectedPresentAuthorityIds)
+    && sourceRoleCountPass
+    && reviewContract.tenantMemoryPublicPromotionAllowed === false
+    && reviewContract.siteManagerAcceptanceRequiredBeforeWorkpackUse === true
+    && reviewContract.humanReviewRequired === true
+    && reviewContract.machineEvidenceReplacesHumanReview === false
+    && reviewContract.dbMutationAllowed === false
+    && reviewContract.publishAllowed === false
+    && noMutation
+    && remainingBoundaries.llmWikiPublication === "APPROVAL_GATED"
+    && remainingBoundaries.supabaseRlsLaunchIsolation === "APPROVAL_GATED"
+    && remainingBoundaries.exactSavedShareVerdict === "MISSING_EVIDENCE";
+
+  if (pass) {
+    return gateResult({
+      id: "hermes_knowledge_review_authority",
+      label: "Hermes knowledge review authority",
+      state: "proven",
+      evidencePath,
+      detail: "Live stateless candidate review keeps SIF -> KOSHA -> law authority roles separate, preserves organization/site memory as non-public tenant evidence, requires site-manager acceptance and human review, and performs no AI provider, DB, publication, or Share mutation. LLM Wiki publication remains APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE.",
+      nextActions: [],
+    });
+  }
+
+  return gateResult({
+    id: "hermes_knowledge_review_authority",
+    label: "Hermes knowledge review authority",
+    state: "contradicted",
+    evidencePath,
+    detail: `Hermes knowledge review authority contract failed: source=${sourceHead || "missing"}, production=${productionCommit || "missing"}, humanReview=${String(reviewContract.humanReviewRequired)}, noMutation=${String(noMutation)}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: ["Re-run the live stateless candidate probe and restore the authority, tenant-memory, human-review, and no-mutation boundaries."],
   });
 }
 
@@ -3326,6 +3435,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateLiveDocumentBroadReviewGate(rootDir),
     evaluateLiveDocumentEditorialReviewGate(rootDir),
     evaluateProductCapabilityTruthGate(rootDir),
+    evaluateHermesKnowledgeReviewAuthorityGate(rootDir),
     evaluateLiveDocumentSecondaryGroundingGate(rootDir),
     evaluateLiveDocumentSeedProfileIsolationGate(rootDir),
     evaluateUiDocumentsShareCockpitGate(rootDir),
