@@ -7,7 +7,11 @@
   "beforeProductionCommit": "e0dbf20bf9d51e15cdd163c76dfa3abe85c4ec3c",
   "afterProductionCommit": "9f18b7fd72391ad391df7ab31468b5af3f7159a5",
   "afterProductionDeployment": "safeguard-contest-6z6hxfit5-seojaehongs-projects.vercel.app",
+  "fullMatrixContractCommit": "665bf69cd9d454b8adc15c55d8b84f1e87b64301",
+  "fullMatrixProductionCommit": "32749c5a195365a65e0be87b5df7b373ad4ae86e",
+  "fullMatrixContractAffectsRuntime": false,
   "scenarioCount": 1,
+  "fullMatrixScenarioCount": 5,
   "canonicalDocumentCount": 12,
   "beforeLive": {
     "path": "evaluation\\live-document-rain-context-isolation-2026-07-25\\before-live\\report.json",
@@ -45,6 +49,27 @@
     "failedDocumentCount": 0,
     "matchedDocumentKeys": []
   },
+  "afterLiveFull": {
+    "path": "evaluation\\live-document-rain-context-isolation-2026-07-25\\after-live-full\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+    "sourceHead": "665bf69cd9d454b8adc15c55d8b84f1e87b64301",
+    "productionCommit": "32749c5a195365a65e0be87b5df7b373ad4ae86e",
+    "pass": 5,
+    "fail": 0,
+    "reviewedDocumentSurfaceCount": 60,
+    "scenarioIrrelevantContextFindingCount": 0,
+    "failedDocumentCount": 0,
+    "matchedForbiddenDocumentFragmentCount": 0,
+    "forbiddenRainContextFragments": [
+      "우천 후 바닥 젖음",
+      "우천·젖은 바닥"
+    ],
+    "placeholderFindingCount": 0,
+    "legalOverclaimFindingCount": 0,
+    "awkwardCompositionFindingCount": 0,
+    "evidenceDomainMismatchCount": 0,
+    "genericTemplateOveruseCount": 0
+  },
   "diagnosticAttempt": {
     "path": "evaluation\\live-document-rain-context-isolation-2026-07-25\\attempt-timeout\\report.json",
     "verdict": "RED_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT",
@@ -70,6 +95,7 @@
   "remainingBoundary": {
     "liveAfterDeploymentPending": false,
     "humanReviewCompleted": false,
+    "broadHumanWordingReviewRequired": true,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   }
 }

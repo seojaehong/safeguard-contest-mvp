@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-25T03:07:20.485Z",
+  "generatedAt": "2026-07-25T03:23:49.768Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "38eddb8f6ca77ead833a9a993a7b8c459eed22bc",
-  "productionCommit": "9f18b7fd72391ad391df7ab31468b5af3f7159a5",
+  "sourceHead": "c4b0c55a49225f1ec63c10b67c76f90fb00bf14e",
+  "productionCommit": "32749c5a195365a65e0be87b5df7b373ad4ae86e",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "9f18b7fd72391ad391df7ab31468b5af3f7159a5",
+    "commitSha": "32749c5a195365a65e0be87b5df7b373ad4ae86e",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-6z6hxfit5-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-e52y7xerw-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": false,
@@ -20,13 +20,14 @@
   "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
   "sourcePendingChangedPaths": [
+    "evaluation/live-document-quality-stress-matrix-2026-07-24/scenarios.json",
     "scripts/northstar_open_gate_audit.mjs",
     "tests/northstar-open-gate-audit.test.ts"
   ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "38eddb8f6ca77ead833a9a993a7b8c459eed22bc",
-  "liveRollupLiveCommit": "9f18b7fd72391ad391df7ab31468b5af3f7159a5",
+  "liveExactEvidenceCommit": "c4b0c55a49225f1ec63c10b67c76f90fb00bf14e",
+  "liveRollupLiveCommit": "32749c5a195365a65e0be87b5df7b373ad4ae86e",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",

@@ -5,6 +5,8 @@
 - Runner contract commit: `52d76ee4442dac23eb6c0eb7fe4d31c8bf9be749`
 - Before production commit: `e0dbf20bf9d51e15cdd163c76dfa3abe85c4ec3c`
 - After production commit: `9f18b7fd72391ad391df7ab31468b5af3f7159a5`
+- Full-matrix contract commit: `665bf69cd9d454b8adc15c55d8b84f1e87b64301`
+- Full-matrix measured production commit: `32749c5a195365a65e0be87b5df7b373ad4ae86e`
 - Scenario: Ulsan chemical cleaning with SDS/GHS and spray/skin-contact risk
 - Documents reviewed per run: 12
 
@@ -44,6 +46,24 @@ Production deployment `9f18b7fd` passed the same focused contract:
 - Scenario-irrelevant findings: `0`
 - Matched forbidden fragments: `0`
 
+## After Live Full Matrix
+
+The committed contract adds both known false-rain phrases to the unchanged
+five-scenario stress manifest. Production `32749c5a` passed that current-source
+contract without changing runtime behavior:
+
+- Scenario pass/fail: `5/0`
+- Documents pass/fail: `60/0`
+- Scenario-irrelevant findings: `0`
+- Matched forbidden fragments: `0`
+- Placeholder, legal-overclaim, awkward-composition, evidence-mismatch, and
+  generic-template findings: `0`
+- Forbidden rain fragments: `우천 후 바닥 젖음`, `우천·젖은 바닥`
+
+The contract-only commit does not affect production runtime. The measured
+production contains the live product fix and the current-source manifest makes
+the 60-surface check fail closed if either false-rain phrase returns.
+
 ## Evidence Contract
 
 The editorial runner now consumes `expected.forbiddenDocumentFragments` for
@@ -63,5 +83,5 @@ budget expired, so it is not used as the product verdict.
 ## Boundary
 
 No database mutation, Share-session creation, provider dispatch, embedding, or
-vector upload was performed. Human wording review is not complete. Exact saved
+vector upload was performed. Broad human wording review is not complete. Exact saved
 `/share/[sessionId]` remains `MISSING_EVIDENCE`.
