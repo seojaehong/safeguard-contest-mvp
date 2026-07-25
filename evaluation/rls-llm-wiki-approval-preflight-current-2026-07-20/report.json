@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-rls-llm-wiki-approval-preflight/v1",
-  "generatedAt": "2026-07-25T01:20:28.632Z",
-  "sourceSha": "602596c1bb1c728e18fc83a0177dbf5659cb89a5",
+  "generatedAt": "2026-07-25T06:41:41.534Z",
+  "sourceSha": "c00cfed8ba0fef7d5c58512d6016f5e9ac6e6d97",
   "overall": "approval_ready_open",
   "launchReadiness": false,
   "dbMutationPerformed": false,
@@ -34,6 +34,7 @@
     "knowledgeGovernance": "lib/knowledge-governance.ts",
     "knowledgeCandidateRoute": "lib/knowledge-candidate-route.ts",
     "knowledgeReviewRoute": "app/api/knowledge/review/route.ts",
+    "hermesReviewAuthorityUi": "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
     "northstarReport": "evaluation/northstar-open-gates-current/report.json"
   },
   "artifactIntegrity": [
@@ -74,13 +75,13 @@
     },
     {
       "path": "lib/knowledge-governance.ts",
-      "bytes": 18388,
-      "sha256": "21ffece08dfe6ba9928e875659ba4a3905f9803a5fe0a01d2a9aa43326b48c61"
+      "bytes": 18473,
+      "sha256": "1455f357c3bc719305e604acebe7cff2c576eae3416a7a1eee0a68370b77492c"
     },
     {
       "path": "lib/knowledge-candidate-route.ts",
-      "bytes": 8911,
-      "sha256": "8b5d5943da2e37d5148c1238983d1b7536314e11cc4dcf97d6849dd408e87b28"
+      "bytes": 8934,
+      "sha256": "284c25c1b1b959dbe1caf40868265642f97e1153cc45436ce46740af8dff4521"
     },
     {
       "path": "app/api/knowledge/review/route.ts",
@@ -88,11 +89,37 @@
       "sha256": "a0d563569a6fe3c0aee478304f7b44b6c7b4e35fced87b80c2b02680a079c485"
     },
     {
+      "path": "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
+      "bytes": 1658,
+      "sha256": "8401369ad8ec4c07ab7c5aa6451fa0b02e6c114eed770b4aafa2d3c14782ca60"
+    },
+    {
       "path": "evaluation/northstar-open-gates-current/report.json",
-      "bytes": 26513,
-      "sha256": "6ede747b22999c56b872f2c148d7fd8998e6971bf2249934c984ab4c608b9a51"
+      "bytes": 28300,
+      "sha256": "899423b537c53a1c8e4d19725f38c72a9220751bc099c079b3168f2b7df887c6"
     }
   ],
+  "hermesReviewAuthorityUi": {
+    "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+    "sourceHead": "719a73792d5a3fdc9f4cfea55b92f9282c08dbf9",
+    "productCommit": "a9fcde386f0d97e8b46553a9f083892f14e11799",
+    "productionCommit": "a9ca3cbe87efd753bb937620e4cd56113f66e1b3",
+    "liveViewportCount": 8,
+    "livePassedCount": 8,
+    "authorityOrder": [
+      "SIF",
+      "KOSHA",
+      "law",
+      "organization_history",
+      "site_history",
+      "external_context"
+    ],
+    "humanReviewRequired": true,
+    "machineEvidenceReplacesHumanReview": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
+  },
   "publicationSurfaceInventory": {
     "scannedFileCount": 237,
     "publicationRpcCallHits": [],
@@ -198,6 +225,26 @@
     },
     {
       "id": "knowledge_review_route_non_publishing",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "hermes_review_authority_ui_live",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "hermes_review_authority_contract",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "hermes_review_authority_non_mutating",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "hermes_review_authority_boundaries_open",
       "passed": true,
       "message": "ok"
     },

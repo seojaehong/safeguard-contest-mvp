@@ -17,6 +17,7 @@ const REQUIRED_FILES = Object.freeze({
   knowledgeGovernance: "lib/knowledge-governance.ts",
   knowledgeCandidateRoute: "lib/knowledge-candidate-route.ts",
   knowledgeReviewRoute: "app/api/knowledge/review/route.ts",
+  hermesReviewAuthorityUi: "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
 });
 
 const NORTHSTAR_REPORT_CANDIDATES = Object.freeze([
@@ -210,7 +211,12 @@ function buildPreflight({ root }) {
   const knowledgeGovernanceText = readText(root, REQUIRED_FILES.knowledgeGovernance);
   const knowledgeCandidateRouteText = readText(root, REQUIRED_FILES.knowledgeCandidateRoute);
   const knowledgeReviewRouteText = readText(root, REQUIRED_FILES.knowledgeReviewRoute);
+  const hermesReviewAuthorityUi = readJson(root, REQUIRED_FILES.hermesReviewAuthorityUi);
   const publicationSurface = publicationSurfaceInventory(root);
+  const hermesAuthority = hermesReviewAuthorityUi.authorityContract ?? {};
+  const hermesMutation = hermesReviewAuthorityUi.mutationBoundary ?? {};
+  const hermesBoundaries = hermesReviewAuthorityUi.remainingBoundaries ?? {};
+  const hermesAfterLive = hermesReviewAuthorityUi.afterLive ?? {};
 
   const checks = [
     check("rls_status_approval_required", rlsReport.status === "approval_required", "Supabase RLS packet must stay approval_required."),
@@ -277,6 +283,47 @@ function buildPreflight({ root }) {
       "Knowledge review route must preserve unpublished, non-published responses.",
     ),
     check(
+      "hermes_review_authority_ui_live",
+      hermesReviewAuthorityUi.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI" &&
+        hermesAfterLive.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI" &&
+        hermesAfterLive.viewportCount === 8 &&
+        hermesAfterLive.passedCount === 8 &&
+        hermesAfterLive.failedCount === 0,
+      "Hermes reviewer authority UI must retain its measured 8/8 live viewport contract.",
+    ),
+    check(
+      "hermes_review_authority_contract",
+      JSON.stringify(hermesAuthority.sourceOrder) === JSON.stringify([
+        "SIF",
+        "KOSHA",
+        "law",
+        "organization_history",
+        "site_history",
+        "external_context",
+      ]) &&
+        hermesAuthority.statutoryClaimsRequireLawProvenance === true &&
+        hermesAuthority.tenantMemoryPublicPromotionAllowed === false &&
+        hermesAuthority.siteManagerAcceptanceRequiredBeforeWorkpackUse === true &&
+        hermesAuthority.humanReviewRequired === true &&
+        hermesAuthority.machineEvidenceReplacesHumanReview === false,
+      "Hermes reviewer UI must preserve authority order, law provenance, tenant-memory, and human-review boundaries.",
+    ),
+    check(
+      "hermes_review_authority_non_mutating",
+      hermesMutation.dbMutationPerformed === false &&
+        hermesMutation.providerDispatchCalled === false &&
+        hermesMutation.shareSessionCreated === false &&
+        hermesMutation.ontologyPublicationPerformed === false,
+      "Hermes reviewer UI evidence must remain non-mutating and non-publishing.",
+    ),
+    check(
+      "hermes_review_authority_boundaries_open",
+      hermesBoundaries.exactSavedShareVerdict === "MISSING_EVIDENCE" &&
+        hermesBoundaries.llmWikiPublication === "APPROVAL_GATED" &&
+        hermesBoundaries.supabaseRlsLaunchIsolation === "APPROVAL_GATED",
+      "Hermes reviewer UI evidence must not close exact Share, LLM Wiki publication, or RLS launch isolation.",
+    ),
+    check(
       "wiki_no_executable_publication_surface",
       publicationSurface.publicationRpcCallHits.length === 0 &&
         publicationSurface.publicationSqlFunctionHits.length === 0 &&
@@ -321,6 +368,20 @@ function buildPreflight({ root }) {
     ],
     inputs,
     artifactIntegrity: artifactIntegrityRows,
+    hermesReviewAuthorityUi: {
+      verdict: hermesReviewAuthorityUi.verdict ?? null,
+      sourceHead: hermesReviewAuthorityUi.sourceHead ?? null,
+      productCommit: hermesReviewAuthorityUi.productCommit ?? null,
+      productionCommit: hermesReviewAuthorityUi.productionCommit ?? null,
+      liveViewportCount: hermesAfterLive.viewportCount ?? null,
+      livePassedCount: hermesAfterLive.passedCount ?? null,
+      authorityOrder: hermesAuthority.sourceOrder ?? [],
+      humanReviewRequired: hermesAuthority.humanReviewRequired === true,
+      machineEvidenceReplacesHumanReview: hermesAuthority.machineEvidenceReplacesHumanReview === true,
+      exactSavedShareVerdict: hermesBoundaries.exactSavedShareVerdict ?? null,
+      llmWikiPublication: hermesBoundaries.llmWikiPublication ?? null,
+      supabaseRlsLaunchIsolation: hermesBoundaries.supabaseRlsLaunchIsolation ?? null,
+    },
     publicationSurfaceInventory: publicationSurface,
     checks,
     failedCheckIds: failedChecks.map((item) => item.id),
@@ -353,6 +414,16 @@ function renderMarkdown(report) {
     "## Required Approvals Still Open",
     "",
     ...approvals.map((item) => `- ${item}`),
+    "",
+    "## Hermes Reviewer Authority UI",
+    "",
+    `- Verdict: \`${report.hermesReviewAuthorityUi?.verdict ?? "missing"}\``,
+    `- Live viewports: \`${report.hermesReviewAuthorityUi?.livePassedCount ?? 0}/${report.hermesReviewAuthorityUi?.liveViewportCount ?? 0}\``,
+    `- Authority order: \`${report.hermesReviewAuthorityUi?.authorityOrder?.join(" -> ") || "missing"}\``,
+    `- Human review required: \`${report.hermesReviewAuthorityUi?.humanReviewRequired === true}\``,
+    `- Machine evidence replaces human review: \`${report.hermesReviewAuthorityUi?.machineEvidenceReplacesHumanReview === true}\``,
+    `- Exact saved Share: \`${report.hermesReviewAuthorityUi?.exactSavedShareVerdict ?? "MISSING_EVIDENCE"}\``,
+    `- LLM Wiki / RLS: \`${report.hermesReviewAuthorityUi?.llmWikiPublication ?? "APPROVAL_GATED"}\` / \`${report.hermesReviewAuthorityUi?.supabaseRlsLaunchIsolation ?? "APPROVAL_GATED"}\``,
     "",
     "## Checks",
     "",

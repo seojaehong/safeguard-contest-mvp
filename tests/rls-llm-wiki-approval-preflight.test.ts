@@ -70,6 +70,37 @@ function fixtureRoot(): string {
     "export const response = { reviewContract, };",
   ].join("\n"));
   writeText(root, "app/api/knowledge/review/route.ts", 'export const boundary = { publicationState: "unpublished", ontologyPublished: false };\n');
+  writeJson(root, "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+    sourceHead: "1111111111111111111111111111111111111111",
+    productCommit: "2222222222222222222222222222222222222222",
+    productionCommit: "3333333333333333333333333333333333333333",
+    afterLive: {
+      verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+      viewportCount: 8,
+      passedCount: 8,
+      failedCount: 0,
+    },
+    authorityContract: {
+      sourceOrder: ["SIF", "KOSHA", "law", "organization_history", "site_history", "external_context"],
+      statutoryClaimsRequireLawProvenance: true,
+      tenantMemoryPublicPromotionAllowed: false,
+      siteManagerAcceptanceRequiredBeforeWorkpackUse: true,
+      humanReviewRequired: true,
+      machineEvidenceReplacesHumanReview: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      ontologyPublicationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+    },
+  });
   writeText(root, "supabase/migrations/008_safety_ontology.sql", "create table safety_ontology_nodes(id text primary key);\n");
   execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
   execFileSync("git", ["commit", "-m", "fixture"], { cwd: root, stdio: "ignore" });
@@ -134,6 +165,11 @@ describe("RLS / LLM Wiki approval preflight", () => {
         bytes: expect.any(Number),
         sha256: expect.stringMatching(/^[0-9a-f]{64}$/u),
       }),
+      expect.objectContaining({
+        path: "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
+        bytes: expect.any(Number),
+        sha256: expect.stringMatching(/^[0-9a-f]{64}$/u),
+      }),
     ]));
     expect(JSON.stringify(report)).toContain("publication_ddl_rpc");
     expect(report.publicationSurfaceInventory).toMatchObject({
@@ -141,6 +177,17 @@ describe("RLS / LLM Wiki approval preflight", () => {
       publicationSqlFunctionHits: [],
       publicationLedgerMigrationHits: [],
       publicationRoutePaths: [],
+    });
+    expect(report.hermesReviewAuthorityUi).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+      liveViewportCount: 8,
+      livePassedCount: 8,
+      authorityOrder: ["SIF", "KOSHA", "law", "organization_history", "site_history", "external_context"],
+      humanReviewRequired: true,
+      machineEvidenceReplacesHumanReview: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
     });
   });
 
@@ -231,6 +278,31 @@ describe("RLS / LLM Wiki approval preflight", () => {
     };
     expect(typedReport.failedCheckIds).toContain("knowledge_candidate_prompt_authority_separation");
     expect(typedReport.failedCheckIds).not.toContain("knowledge_candidate_route_non_publishing");
+  });
+
+  it("fails closed when Hermes reviewer evidence claims publication or RLS completion", () => {
+    const root = fixtureRoot();
+    const reportPath = "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json";
+    const report = JSON.parse(readFileSync(join(root, reportPath), "utf8")) as {
+      remainingBoundaries: {
+        exactSavedShareVerdict: string;
+        llmWikiPublication: string;
+        supabaseRlsLaunchIsolation: string;
+      };
+    };
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    report.remainingBoundaries.llmWikiPublication = "PROVEN";
+    report.remainingBoundaries.supabaseRlsLaunchIsolation = "PROVEN";
+    writeJson(root, reportPath, report);
+
+    const { report: resultReport, status } = runPreflight(root);
+
+    expect(status).toBe(1);
+    expect(resultReport.overall).toBe("blocked_preflight_failed");
+    const typedReport = resultReport as {
+      readonly failedCheckIds: readonly string[];
+    };
+    expect(typedReport.failedCheckIds).toContain("hermes_review_authority_boundaries_open");
   });
 
   it("prefers the current northstar open-gate packet over the legacy dated packet", () => {

@@ -1,7 +1,7 @@
 # RLS / LLM Wiki Approval Preflight
 
-Generated: `2026-07-25T01:20:28.632Z`
-Source SHA: `602596c1bb1c728e18fc83a0177dbf5659cb89a5`
+Generated: `2026-07-25T06:41:41.534Z`
+Source SHA: `c00cfed8ba0fef7d5c58512d6016f5e9ac6e6d97`
 Overall: `approval_ready_open`
 Launch readiness: `false`
 DB mutation performed: `false`
@@ -23,6 +23,16 @@ The approval packet is internally ready for operator review, but launch readines
 - service_role_route_idor_and_state_invariance
 - llm_wiki_publication_ddl_rpc_and_grant_approval
 - publication_atomicity_idempotency_rollback_and_leak_tests
+
+## Hermes Reviewer Authority UI
+
+- Verdict: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI`
+- Live viewports: `8/8`
+- Authority order: `SIF -> KOSHA -> law -> organization_history -> site_history -> external_context`
+- Human review required: `true`
+- Machine evidence replaces human review: `false`
+- Exact saved Share: `MISSING_EVIDENCE`
+- LLM Wiki / RLS: `APPROVAL_GATED` / `APPROVAL_GATED`
 
 ## Checks
 
@@ -48,6 +58,10 @@ The approval packet is internally ready for operator review, but launch readines
 | `knowledge_candidate_prompt_authority_separation` | PASS | ok |
 | `knowledge_candidate_route_non_publishing` | PASS | ok |
 | `knowledge_review_route_non_publishing` | PASS | ok |
+| `hermes_review_authority_ui_live` | PASS | ok |
+| `hermes_review_authority_contract` | PASS | ok |
+| `hermes_review_authority_non_mutating` | PASS | ok |
+| `hermes_review_authority_boundaries_open` | PASS | ok |
 | `wiki_no_executable_publication_surface` | PASS | ok |
 | `northstar_rls_gate_approval_gated` | PASS | ok |
 | `northstar_wiki_gate_approval_gated` | PASS | ok |
