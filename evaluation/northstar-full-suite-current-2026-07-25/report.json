@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-northstar-full-suite-current/v1",
-  "verdict": "PARTIAL_CURRENT_SOURCE_KOSHA_RED_REMOVED_REMAINING_FULL_SUITE_RED",
-  "checkedAt": "2026-07-25T04:04:26.849Z",
-  "sourceHead": "8b0d7d613155b285d9ed785a1db6b86c86eca6cc",
+  "verdict": "PASS_CURRENT_SOURCE_FULL_VITEST_SUITE",
+  "checkedAt": "2026-07-25T05:31:10.000Z",
+  "sourceHead": "cc031129607d6baba753a2ccac62d288670026d8",
   "before": {
     "command": "npm.cmd test -- --maxWorkers=1 --fileParallelism=false",
     "testFilesPassed": 206,
@@ -14,39 +14,30 @@
     "durationMs": 996640,
     "logPath": "evaluation/northstar-full-suite-current-2026-07-25/vitest.log"
   },
-  "remediation": {
-    "commit": "8b0d7d613155b285d9ed785a1db6b86c86eca6cc",
-    "rootCause": "CRLF shebangs were accepted by direct Node CLI execution but failed Vitest/Vite ESM transformation with SyntaxError before seven KOSHA direct-import contracts could execute.",
-    "changedFiles": [
-      "scripts/kosha_exact_promotion_packet.mjs",
-      "scripts/kosha_next_exact_candidate_audit.mjs"
-    ],
-    "resolvedTestFiles": [
-      "tests/kosha-exact-promotion-packet.test.ts",
-      "tests/kosha-next-exact-candidate-audit.test.ts"
-    ],
-    "resolvedFailureCount": 7
+  "remediationCommits": [
+    "8b0d7d613155b285d9ed785a1db6b86c86eca6cc",
+    "4af96c6ef7e1d3bde1fe2bbaac055caa95470e32",
+    "f82204b2",
+    "cc031129"
+  ],
+  "afterFullSuite": {
+    "command": "npm.cmd test -- --maxWorkers=1 --fileParallelism=false",
+    "testFilesPassed": 216,
+    "testFilesFailed": 0,
+    "testFilesSkipped": 10,
+    "testsPassed": 2543,
+    "testsFailed": 0,
+    "testsSkipped": 24,
+    "durationMs": 912960,
+    "logPath": "evaluation/northstar-full-suite-current-2026-07-25/vitest-final-clean.log"
   },
-  "afterFocused": {
-    "koshaExactDirectImport": {
-      "testFilesPassed": 2,
-      "testsPassed": 9
-    },
-    "koshaExactAdjacent": {
-      "testFilesPassed": 5,
-      "testsPassed": 64
-    },
-    "typecheck": "PASS",
-    "nodeSyntaxChecks": "PASS"
-  },
-  "remainingFullSuiteRed": {
-    "knownFailureCountBeforeFullRerun": 12,
-    "groups": {
-      "frontendRouteAndDesignContracts": 10,
-      "mcpProductMaterializationPersistence": 2
-    },
-    "fullSuiteAfterRemediationExecuted": false,
-    "nextRequiredAction": "Remediate or reconcile the remaining frontend and MCP failures, then rerun the complete suite."
+  "verification": {
+    "frontendConsistencyAuditViolations": 0,
+    "frontendRouteCoverageTestsPassed": 39,
+    "documentsEditorLayoutTestsPassed": 35,
+    "productModuleShellTestsPassed": 3,
+    "reportsWave1PublishSupportTestsPassed": 12,
+    "typecheck": "PASS"
   },
   "mutationBoundary": {
     "dbMutationPerformed": false,

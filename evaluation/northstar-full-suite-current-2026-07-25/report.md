@@ -1,48 +1,42 @@
 # Northstar Full Suite Current
 
-- Verdict: `PARTIAL_CURRENT_SOURCE_KOSHA_RED_REMOVED_REMAINING_FULL_SUITE_RED`
-- Source commit: `8b0d7d613155b285d9ed785a1db6b86c86eca6cc`
+- Verdict: `PASS_CURRENT_SOURCE_FULL_VITEST_SUITE`
+- Source commit: `cc031129607d6baba753a2ccac62d288670026d8`
 
-## Full Baseline
+## Before
 
-The complete current-master Vitest run executed 226 test files:
+The initial complete run found 19 failures across KOSHA direct imports, MCP
+reopen persistence, and frontend design contracts:
 
 - Files: 206 PASS / 10 RED / 10 skipped
 - Tests: 2,524 PASS / 19 RED / 24 skipped
 - Duration: 996.64 seconds
 - Log: `evaluation/northstar-full-suite-current-2026-07-25/vitest.log`
 
-## KOSHA Remediation
+## Remediation
 
-Seven RED tests belonged to the exact-promotion packet and next-candidate audit.
-Both scripts began with a CRLF shebang. Direct `node script.mjs` execution
-accepted it, but Vitest/Vite ESM transformation failed with `SyntaxError:
-Invalid or unexpected token` before the actual KOSHA contracts ran.
+- Removed redundant CRLF shebangs that broke KOSHA scripts only under the
+  Vitest/Vite import transform.
+- Preserved reopened MCP risk rows while marking unmatched rows as
+  `review_required` and `needsReview`.
+- Completed canonical typography tuples, spacing rhythm, module surface
+  contrast, and document cockpit background contracts.
+- Scoped the primary-button color exclusion to risk-row tabs and the remove
+  control so document section keyboard and viewport behavior remains intact.
+- Regenerated the frontend static audit at zero violations.
 
-The scripts are always invoked through `node`, so the redundant shebangs were
-removed. No KOSHA selection, provenance, lifecycle, review, or promotion logic
-was changed.
+## Final Full Suite
 
-After remediation:
+The final clean-identity run completed without failures:
 
-- Direct KOSHA suites: 2 files / 9 tests PASS
-- KOSHA exact adjacent suites: 5 files / 64 tests PASS
-- Strict typecheck: PASS
-- Both scripts pass `node --check`
+- Files: 216 PASS / 0 RED / 10 skipped
+- Tests: 2,543 PASS / 0 RED / 24 skipped
+- Duration: 912.96 seconds
+- Log: `evaluation/northstar-full-suite-current-2026-07-25/vitest-final-clean.log`
 
-The passing assertions still cover current metadata, verified body provenance,
-official lifecycle identity, exact-pin exclusion, non-mutation, reviewer
-support, and Northstar approval boundaries.
-
-## Remaining RED
-
-Twelve failures remain from the pre-remediation full run:
-
-- Frontend route, typography, contrast, and module-shell contracts: 10
-- MCP product materialization persistence contracts: 2
-
-The complete suite has not yet been rerun after this KOSHA-only repair.
-Therefore this report does not claim a green full suite.
+Focused verification also passed: frontend route coverage 39/39, Documents
+editor layout 35/35, product module shell 3/3, Reports Wave 1 provenance 12/12,
+strict typecheck, and frontend consistency audit with zero violations.
 
 ## Boundary
 
