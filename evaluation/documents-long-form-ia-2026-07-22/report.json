@@ -1,24 +1,38 @@
 {
   "schemaVersion": "safeclaw-documents-long-form-ia/v1",
-  "checkedAt": "2026-07-24T23:45:13.157Z",
+  "checkedAt": "2026-07-25T02:20:08.375Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHead": "1b046aa1e5023e53b52f037fdd3bee9b11294b72",
+  "sourceHead": "b174dbc3c57c5f94d861397f3daa13d887735a7b",
   "productionBuild": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "1b046aa1e5023e53b52f037fdd3bee9b11294b72",
+    "commitSha": "b174dbc3c57c5f94d861397f3daa13d887735a7b",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ijeckkogl-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-1brf9b86m-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "providerDispatchLiveClaimed": false,
   "dbMutationPerformed": false,
   "routeSplitAloneAcceptedAsFix": false,
+  "wholeDocumentsPageShortClaimAllowed": false,
+  "fullTwelveDocumentAuthoringIaSolvedClaimAllowed": false,
+  "firstTaskCockpitProofAcceptedAsFullIaCompletion": false,
   "routeSplitVerdict": "PASS_ORIENTATION_ONLY",
   "verdict": "PASS_LIVE_PRODUCTION_MEASURED",
   "interpretation": "This gate separates first-action cockpit proof from the user's perceived long Documents concern. It does not claim the whole Documents page is short merely because the first risk-assessment action is visible.",
+  "claimBoundary": {
+    "allowed": [
+      "Selected risk-assessment cockpit and first field/action surfaces are measured when per-state metrics pass.",
+      "Route split can help orientation when routeSplitVerdict is PASS_ORIENTATION_ONLY."
+    ],
+    "forbidden": [
+      "Documents page is short based only on first-action cockpit visibility.",
+      "Full 12-document authoring IA is solved based only on selected risk-assessment cockpit proof.",
+      "Page count or route split alone fixes long-form document editing."
+    ]
+  },
   "verdictModel": {
     "routeSplitVerdict": "route/page split can pass for orientation but is not accepted as the length fix",
     "firstActionCockpitVerdict": "selected document header, field strip, evidence/recheck CTA, shell containment, sticky overlap 0, and no horizontal overflow",

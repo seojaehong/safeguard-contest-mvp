@@ -15827,6 +15827,7 @@ body:has(.safeclaw-landing) :is(
 
 @media (min-width: 900px) {
   .safeclaw-share-recipient-page {
+    width: min(1204px, calc(100vw - 48px));
     max-width: min(1204px, calc(100vw - 48px));
     grid-template-columns: minmax(360px, 0.82fr) minmax(460px, 1fr);
     align-items: start;
@@ -21325,6 +21326,20 @@ body:has(.safeclaw-landing) :is(
   --workspace-accent-text: #b5b7ff;
   --workspace-accent-hover: #8588ff;
   --workspace-success: #4fc66a;
+}
+
+@media (min-width: 901px) and (max-width: 1100px) {
+  .safeclaw-module-shell:is(.module-variant-document, .module-variant-default)[data-module-route="/share"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .safeclaw-module-shell:is(.module-variant-document, .module-variant-default)[data-module-route="/share"] .safeclaw-module-rail {
+    display: none;
+  }
+
+  .safeclaw-module-shell:is(.module-variant-document, .module-variant-default)[data-module-route="/share"] .safeclaw-module-main {
+    grid-column: 1;
+  }
 }
 
 .safeclaw-module-shell:is(.module-variant-document, .module-variant-default) :is(.card, .list) :is(h2, h3, strong),

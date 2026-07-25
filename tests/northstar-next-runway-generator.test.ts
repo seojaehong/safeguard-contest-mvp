@@ -1191,6 +1191,9 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     providerDispatchLiveClaimed: false,
     dbMutationPerformed: false,
     routeSplitAloneAcceptedAsFix: false,
+    wholeDocumentsPageShortClaimAllowed: false,
+    fullTwelveDocumentAuthoringIaSolvedClaimAllowed: false,
+    firstTaskCockpitProofAcceptedAsFullIaCompletion: false,
     routeSplitVerdict: "PASS_ORIENTATION_ONLY",
     results: [
       {

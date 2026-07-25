@@ -181,6 +181,8 @@ describe("share exact session boundary runner", () => {
         },
         exactSavedSessionUrlProvided: false,
         exactSavedUserSessionReproduced: false,
+        scopedWorkspaceOrFixtureProofAcceptedForUserComplaintClosure: false,
+        userDesktopMobileLikeShareComplaintClosed: false,
         liveCommit: "fixture-live-commit",
         managerShareSessionCreateRoute: {
           requiresApprovalForSafeExactSessionCreation: true,
@@ -194,6 +196,7 @@ describe("share exact session boundary runner", () => {
       expect((report.boundary as Record<string, unknown>).dbMutationPerformed).toBe(false);
       expect((report.boundary as Record<string, unknown>).sessionCreationRouteWritesWorkpackShareSessions).toBe(true);
       expect((report.boundary as Record<string, unknown>).concreteProductionShareUrlFoundInSourceSearch).toBe(false);
+      expect((report.boundary as Record<string, unknown>).scopedWorkspaceOrFixtureProofAcceptedForUserComplaintClosure).toBe(false);
       expect(report.forbiddenClaims).toContain("Exact saved Share is proven despite non-GET /api/share-sessions requests occurring during the probe.");
       expect(report.forbiddenClaims).not.toContain("Exact saved Share is proven when non-GET /api/share-sessions requests occurred during the probe.");
     } finally {
@@ -219,6 +222,8 @@ describe("share exact session boundary runner", () => {
       expect(report).toMatchObject({
         exactSavedSessionUrlProvided: true,
         exactSavedUserSessionReproduced: true,
+        scopedWorkspaceOrFixtureProofAcceptedForUserComplaintClosure: false,
+        userDesktopMobileLikeShareComplaintClosed: true,
         liveCommit: "fixture-live-commit",
         sessionKind: "saved-exact",
         verdict: "PASS_EXACT_SAVED_SESSION_GEOMETRY_NO_MUTATION",
@@ -275,6 +280,8 @@ describe("share exact session boundary runner", () => {
       expect(report).toMatchObject({
         exactSavedSessionUrlProvided: true,
         exactSavedUserSessionReproduced: false,
+        scopedWorkspaceOrFixtureProofAcceptedForUserComplaintClosure: false,
+        userDesktopMobileLikeShareComplaintClosed: false,
         liveCommit: "fixture-live-commit",
         sessionKind: "saved-exact",
         verdict: "RED_EXACT_SAVED_SESSION_GEOMETRY_NO_MUTATION",
