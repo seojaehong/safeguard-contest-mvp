@@ -13,7 +13,56 @@ type ReviewInboxItem = {
   providerLabel: string | null;
   candidateText: string;
   sourceEventCount: number;
+  reviewContract: {
+    contractVersion: "knowledge-candidate-review.v1";
+    status: "human_review_required";
+    presentAuthorityIds: ReviewEvidenceAuthorityId[];
+    sourceRoleCounts: Record<ReviewAuthorityId, number>;
+    statutoryClaimsRequireLawProvenance: true;
+    tenantMemoryPublicPromotionAllowed: false;
+    siteManagerAcceptanceRequiredBeforeWorkpackUse: true;
+    publicationState: "unpublished";
+    humanReviewRequired: true;
+    machineEvidenceReplacesHumanReview: false;
+  } | null;
 };
+
+type ReviewAuthorityId =
+  | "sifIncidentControlEvidence"
+  | "koshaTechnicalGuidance"
+  | "lawStatutorySource"
+  | "organizationPrivateMemory"
+  | "sitePrivateMemory"
+  | "externalContext";
+
+type ReviewEvidenceAuthorityId =
+  | "sif"
+  | "kosha"
+  | "law"
+  | "organization_history"
+  | "site_history"
+  | "external_context";
+
+const REVIEW_EVIDENCE_AUTHORITY_IDS: readonly ReviewEvidenceAuthorityId[] = [
+  "sif",
+  "kosha",
+  "law",
+  "organization_history",
+  "site_history",
+  "external_context"
+];
+
+const REVIEW_AUTHORITY_PRESENTATION: ReadonlyArray<{
+  id: ReviewAuthorityId;
+  label: string;
+}> = [
+  { id: "sifIncidentControlEvidence", label: "SIF 통제" },
+  { id: "koshaTechnicalGuidance", label: "KOSHA 지침" },
+  { id: "lawStatutorySource", label: "법령" },
+  { id: "organizationPrivateMemory", label: "조직 이력" },
+  { id: "sitePrivateMemory", label: "현장 이력" },
+  { id: "externalContext", label: "외부 맥락" }
+];
 
 const MAX_UI_TEXT_LENGTH = 12_000;
 let browserClient: SupabaseClient | null = null;
@@ -34,6 +83,46 @@ function readString(value: unknown, maxLength: number): string {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
 
+function readReviewContract(value: unknown): ReviewInboxItem["reviewContract"] {
+  if (!isRecord(value) || !isRecord(value.sourceRoleCounts)) return null;
+  const sourceRoleCounts = value.sourceRoleCounts;
+  const roleCounts = Object.fromEntries(REVIEW_AUTHORITY_PRESENTATION.map(({ id }) => {
+    const count = sourceRoleCounts[id];
+    return [id, typeof count === "number" && Number.isInteger(count) && count >= 0 && count <= 20 ? count : -1];
+  })) as Record<ReviewAuthorityId, number>;
+  const presentAuthorityIds = Array.isArray(value.presentAuthorityIds)
+    ? value.presentAuthorityIds.filter(
+        (item): item is ReviewEvidenceAuthorityId => (
+          typeof item === "string"
+          && REVIEW_EVIDENCE_AUTHORITY_IDS.includes(item as ReviewEvidenceAuthorityId)
+        )
+      )
+    : [];
+  const contractValid = value.contractVersion === "knowledge-candidate-review.v1"
+    && value.status === "human_review_required"
+    && Object.values(roleCounts).every((count) => count >= 0)
+    && value.statutoryClaimsRequireLawProvenance === true
+    && value.tenantMemoryPublicPromotionAllowed === false
+    && value.siteManagerAcceptanceRequiredBeforeWorkpackUse === true
+    && value.publicationState === "unpublished"
+    && value.humanReviewRequired === true
+    && value.machineEvidenceReplacesHumanReview === false;
+  if (!contractValid) return null;
+
+  return {
+    contractVersion: "knowledge-candidate-review.v1",
+    status: "human_review_required",
+    presentAuthorityIds,
+    sourceRoleCounts: roleCounts,
+    statutoryClaimsRequireLawProvenance: true,
+    tenantMemoryPublicPromotionAllowed: false,
+    siteManagerAcceptanceRequiredBeforeWorkpackUse: true,
+    publicationState: "unpublished",
+    humanReviewRequired: true,
+    machineEvidenceReplacesHumanReview: false
+  };
+}
+
 function parseInboxItem(value: unknown): ReviewInboxItem | null {
   if (!isRecord(value)) return null;
   const runId = readString(value.runId, 128);
@@ -44,6 +133,7 @@ function parseInboxItem(value: unknown): ReviewInboxItem | null {
 
   const candidateText = readString(value.candidateText, MAX_UI_TEXT_LENGTH);
   const candidateLabel = readString(value.candidateLabel, 500);
+  const reviewContract = status === "review_required" ? readReviewContract(value.reviewContract) : null;
   const sourceEventCount = typeof value.sourceEventCount === "number"
     && Number.isInteger(value.sourceEventCount)
     && value.sourceEventCount > 0
@@ -51,14 +141,19 @@ function parseInboxItem(value: unknown): ReviewInboxItem | null {
     ? value.sourceEventCount
     : 0;
 
-  if (!candidateLabel || sourceEventCount === 0 || (status === "review_required" && !candidateText)) return null;
+  if (
+    !candidateLabel
+    || sourceEventCount === 0
+    || (status === "review_required" && (!candidateText || !reviewContract))
+  ) return null;
   return {
     runId,
     candidateLabel,
     status,
     providerLabel: typeof value.providerLabel === "string" ? value.providerLabel.slice(0, 96) : null,
     candidateText,
-    sourceEventCount
+    sourceEventCount,
+    reviewContract
   };
 }
 
@@ -216,6 +311,29 @@ export function KnowledgeReviewInbox() {
 
                 {item.status === "review_required" ? (
                   <>
+                    <section
+                      className={styles.reviewAuthority}
+                      aria-label="후보 근거와 적용 경계"
+                      data-review-authority-contract="true"
+                    >
+                      <div className={styles.reviewAuthorityHeader}>
+                        <strong>근거 구성</strong>
+                        <span>사람 검토 필요</span>
+                      </div>
+                      <ul className={styles.reviewAuthorityCounts}>
+                        {REVIEW_AUTHORITY_PRESENTATION.map(({ id, label }) => (
+                          <li key={id} data-review-authority-role={id}>
+                            <span>{label}</span>
+                            <strong>{item.reviewContract?.sourceRoleCounts[id] ?? 0}</strong>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className={styles.reviewBoundary}>
+                        <span>법적 의무는 법령 근거 확인</span>
+                        <span>조직·현장 이력은 외부 승격 금지</span>
+                        <span>작업팩 적용 전 현장 책임자 확인</span>
+                      </div>
+                    </section>
                     <p className={styles.candidateText}>{item.candidateText}</p>
                     <div className={styles.reviewMeta}>
                       <span>법적 확정 아님</span>

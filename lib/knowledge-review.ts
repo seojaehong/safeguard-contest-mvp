@@ -12,6 +12,10 @@ import {
   readCurrentSourceBoundCandidate,
   type KnowledgeReviewSourceEventRow
 } from "@/lib/knowledge-review-prepare";
+import {
+  buildKnowledgeCandidateReviewContract,
+  type KnowledgeCandidateReviewContract
+} from "@/lib/knowledge-governance";
 import type {
   OntologyPromotionTrustedContext,
   OntologyPromotionCommand
@@ -44,6 +48,19 @@ export type KnowledgeReviewInboxPresentationDto = {
   candidateText: string;
   matchedHazardCount: number;
   providerLabel: string | null;
+  reviewContract: Pick<
+    KnowledgeCandidateReviewContract,
+    | "contractVersion"
+    | "status"
+    | "presentAuthorityIds"
+    | "sourceRoleCounts"
+    | "statutoryClaimsRequireLawProvenance"
+    | "tenantMemoryPublicPromotionAllowed"
+    | "siteManagerAcceptanceRequiredBeforeWorkpackUse"
+    | "publicationState"
+    | "humanReviewRequired"
+    | "machineEvidenceReplacesHumanReview"
+  > | null;
 };
 
 export type KnowledgeReviewFailureUpdates = {
@@ -295,6 +312,7 @@ export async function loadKnowledgeReviewInbox(
           tenantContext: { organizationId: run.organization_id, siteId: run.site_id }
         }).snapshot)
       : null;
+    const reviewContract = candidate ? buildKnowledgeCandidateReviewContract(candidate) : null;
     return {
       runId: run.id,
       status: run.status as KnowledgeReviewInboxPresentationDto["status"],
@@ -303,7 +321,19 @@ export async function loadKnowledgeReviewInbox(
       candidateLabel: candidate?.question ?? `원본 이벤트 ${sourceEventCount}건 후보 준비`,
       candidateText: candidate?.generatedText ?? "",
       matchedHazardCount: candidate?.matchedHazardIds.length ?? 0,
-      providerLabel: candidate?.providerLabel ?? null
+      providerLabel: candidate?.providerLabel ?? null,
+      reviewContract: reviewContract ? {
+        contractVersion: reviewContract.contractVersion,
+        status: reviewContract.status,
+        presentAuthorityIds: reviewContract.presentAuthorityIds,
+        sourceRoleCounts: reviewContract.sourceRoleCounts,
+        statutoryClaimsRequireLawProvenance: reviewContract.statutoryClaimsRequireLawProvenance,
+        tenantMemoryPublicPromotionAllowed: reviewContract.tenantMemoryPublicPromotionAllowed,
+        siteManagerAcceptanceRequiredBeforeWorkpackUse: reviewContract.siteManagerAcceptanceRequiredBeforeWorkpackUse,
+        publicationState: reviewContract.publicationState,
+        humanReviewRequired: reviewContract.humanReviewRequired,
+        machineEvidenceReplacesHumanReview: reviewContract.machineEvidenceReplacesHumanReview
+      } : null
     };
   });
   const includedEventIds = new Set(relationValidRuns.flatMap((item) => item.events.map((event) => event.id)));

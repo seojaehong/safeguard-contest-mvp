@@ -259,7 +259,26 @@ describe("knowledge review GET", () => {
         runId: "run-1",
         status: "review_required",
         sourceEventCount: 1,
-        candidateText: "현장 안전 지식 후보를 검토합니다."
+        candidateText: "현장 안전 지식 후보를 검토합니다.",
+        reviewContract: {
+          contractVersion: "knowledge-candidate-review.v1",
+          status: "human_review_required",
+          presentAuthorityIds: ["external_context"],
+          sourceRoleCounts: {
+            sifIncidentControlEvidence: 0,
+            koshaTechnicalGuidance: 0,
+            lawStatutorySource: 0,
+            organizationPrivateMemory: 0,
+            sitePrivateMemory: 0,
+            externalContext: 1
+          },
+          statutoryClaimsRequireLawProvenance: true,
+          tenantMemoryPublicPromotionAllowed: false,
+          siteManagerAcceptanceRequiredBeforeWorkpackUse: true,
+          publicationState: "unpublished",
+          humanReviewRequired: true,
+          machineEvidenceReplacesHumanReview: false
+        }
       }],
       dropped: {
         runCount: 0,
