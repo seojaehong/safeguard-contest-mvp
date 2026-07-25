@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "safeclaw-live-document-pump-confined-isolation/v1",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PUMP_CONFINED_HAZARD_ISOLATION_LIVE_PENDING",
+  "checkedAt": "2026-07-25T03:30:00.000Z",
+  "sourceHead": "7140d818e6732e9dfa5095d8289ee94ae95716c0",
+  "productCommit": "7140d818e6732e9dfa5095d8289ee94ae95716c0",
+  "scenarioCount": 1,
+  "expectedHazardCount": 3,
+  "beforeCi": {
+    "runId": "30141505148",
+    "testPath": "tests/pump-confined-scenario.test.ts",
+    "verdict": "RED",
+    "missingExplicitHazard": "누수 바닥",
+    "actualHazards": [
+      "방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험",
+      "밀폐공간 진입 전 환기·산소농도 측정 미흡으로 인한 질식",
+      "배수펌프 전원 차단·LOTO 미흡으로 인한 불시기동 끼임·감전"
+    ],
+    "rootCause": "A generic LOTO hazard was prepended before a three-item merge, which displaced the explicit wet-floor hazard from the pump-confined source profile."
+  },
+  "afterLocal": {
+    "verdict": "PASS",
+    "preservedHazards": [
+      "환기·산소농도",
+      "LOTO",
+      "누수 바닥"
+    ],
+    "genericIsolationHazardDuplicated": false
+  },
+  "verification": {
+    "focused": {
+      "filesPassed": 3,
+      "testsPassed": 59
+    },
+    "adjacent": {
+      "filesPassed": 4,
+      "testsPassed": 81
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false
+  },
+  "remainingBoundary": {
+    "liveAfterDeploymentPending": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "broadHumanWordingReviewRequired": true
+  }
+}
