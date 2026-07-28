@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "safeclaw-dispatch-entry-capability-truth/v1",
+  "generatedAt": "2026-07-28T02:47:20.361Z",
+  "verdict": "PASS_CURRENT_SOURCE_DISPATCH_ENTRY_CAPABILITY_TRUTH_LIVE_PENDING",
+  "sourceHead": "9eb16294ea79e8ca140634022298c5b01c46875f",
+  "productionBuild": {
+    "commitSha": "49f329f6e207be49f4053fc4920a271195767fe8",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-p4wffapkk-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": false
+  },
+  "liveBefore": {
+    "url": "https://www.safeclaw.kr/dispatch?theme=day",
+    "viewport": {
+      "width": 1440,
+      "height": 723
+    },
+    "observedDescription": "메일과 문자로 현장 공지와 외국인 안내문을 보내고, 채널별 접수 결과를 작업 기록으로 남깁니다.",
+    "providerMode": "preview_only",
+    "emailCapability": false,
+    "smsCapability": false,
+    "kakaoCapability": false,
+    "reason": "persistent_idempotency_unavailable",
+    "finding": "The first-screen description claimed sending while every channel and the primary action were preview-only."
+  },
+  "currentSource": {
+    "dispatchDescription": "작업자 언어와 채널별 공지 문안을 미리 보고, 실제 발송 가능 여부와 승인된 접수 결과를 구분해 기록합니다.",
+    "landingState": "준비",
+    "landingBoundary": "승인된 전송 결과만 기록합니다.",
+    "prototypeStatus": "partial",
+    "prototypeBoundary": "준비되지 않은 채널은 미리보기로 유지합니다.",
+    "forbiddenSendingClaimsRemainingInReviewedSurfaces": 0
+  },
+  "verification": {
+    "testFiles": 4,
+    "testsPassed": 35,
+    "testsFailed": 0,
+    "strictTypecheck": "PASS",
+    "build": "PASS",
+    "nextVersion": "15.5.15",
+    "staticPagesGenerated": 28
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "liveAfterDeploymentRequired": true,
+    "providerDispatchPersistence": "approval_gated",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  }
+}
