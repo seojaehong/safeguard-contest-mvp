@@ -1,14 +1,14 @@
 {
   "schemaVersion": "safeclaw-dependency-security-remediation/v1",
-  "generatedAt": "2026-07-28T09:02:15.5765173Z",
+  "generatedAt": "2026-07-28T10:36:00.0000000Z",
   "verdict": "PASS_LIVE_PRODUCTION_BOUNDED_DEPENDENCY_REMEDIATION_RESIDUALS_OPEN",
-  "sourceHead": "73855ccca0b7bd62e9c913a6ece4d363e7db6143",
-  "productCommit": "73855ccca0b7bd62e9c913a6ece4d363e7db6143",
+  "sourceHead": "32431e341c0fe25340be3b5e143e12829b76ca3e",
+  "productCommit": "32431e341c0fe25340be3b5e143e12829b76ca3e",
   "productionBuild": {
-    "commitSha": "73855ccca0b7bd62e9c913a6ece4d363e7db6143",
+    "commitSha": "32431e341c0fe25340be3b5e143e12829b76ca3e",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-gzgebyell-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-pao5ups1s-seojaehongs-projects.vercel.app",
     "sourceHeadMatchesProduction": true
   },
   "auditBefore": {
@@ -21,9 +21,9 @@
   "auditAfter": {
     "critical": 0,
     "high": 9,
-    "moderate": 2,
+    "moderate": 0,
     "low": 0,
-    "totalVulnerablePackages": 11,
+    "totalVulnerablePackages": 9,
     "productionOmitDevMatchesFullAudit": true,
     "automaticNonBreakingFixChangeCount": 0
   },
@@ -74,6 +74,16 @@
       "after": "0.35.3",
       "strategy": "root override with Next image optimizer compatibility verification",
       "advisoriesPresentAfter": 0
+    },
+    {
+      "package": "uuid",
+      "beforeVersions": [
+        "8.3.2",
+        "9.0.1"
+      ],
+      "after": "11.1.1",
+      "strategy": "root override with ExcelJS CommonJS and gaxios multipart compatibility verification",
+      "advisoriesPresentAfter": 0
     }
   ],
   "compatibilityBoundary": {
@@ -83,6 +93,7 @@
     "honoOverride": "2.0.12",
     "fastUriOverride": "3.1.4",
     "sharpOverride": "0.35.3",
+    "uuidOverride": "11.1.1",
     "dependencyGraphValid": true
   },
   "residuals": [
@@ -103,18 +114,6 @@
       "finding": "The latest ExcelJS 4.4.0 still pins vulnerable archive dependencies; npm proposes an unsafe downgrade to 3.4.0.",
       "reviewedReachability": "Runtime code creates workbooks from structured SafeClaw data. Reviewed runtime source does not load user-supplied XLSX files; XLSX reads are confined to tests and audit scripts.",
       "status": "OPEN_UPSTREAM_NO_SAFE_AUTOMATIC_FIX"
-    },
-    {
-      "group": "uuid-transitives",
-      "severity": "moderate",
-      "packages": [
-        "uuid",
-        "exceljs",
-        "gaxios"
-      ],
-      "finding": "Patched UUID requires a major update outside pinned upstream ranges.",
-      "reviewedReachability": "No direct UUID v3/v5/v6 buffer API call was found in SafeClaw source.",
-      "status": "OPEN_UPSTREAM_NO_SAFE_AUTOMATIC_FIX"
     }
   ],
   "verification": {
@@ -132,6 +131,25 @@
       "testFiles": 13,
       "testsPassed": 170,
       "testsFailed": 0
+    },
+    "runtimeDependencyOverrides": {
+      "testFiles": 1,
+      "testsPassed": 3,
+      "testsFailed": 0,
+      "excelJsConditionalFormattingCommonJsUuid": "PASS",
+      "gaxiosMultipartUuidBoundary": "PASS"
+    },
+    "uuidAdjacentProductContracts": {
+      "testFiles": 7,
+      "testsPassed": 70,
+      "testsFailed": 0
+    },
+    "documentsEditorRegression": {
+      "fullRunPassed": 34,
+      "fullRunTransientFailures": 1,
+      "focusedRerunPassed": 1,
+      "focusedRerunFailed": 0,
+      "failureScope": "pre-existing mobile cockpit geometry assertion outside dependency files"
     },
     "strictTypecheck": "PASS",
     "build": "PASS",
@@ -164,7 +182,7 @@
   "remainingBoundaries": {
     "liveAfterDeploymentRequired": false,
     "fullRepositorySecurityScanCompleted": false,
-    "residualVulnerablePackages": 11,
+    "residualVulnerablePackages": 9,
     "providerDispatchPersistence": "approval_gated",
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   }

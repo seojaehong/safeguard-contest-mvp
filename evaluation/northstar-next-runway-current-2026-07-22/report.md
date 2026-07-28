@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `73855ccca0b7bd62e9c913a6ece4d363e7db6143`
+Source HEAD: `32431e341c0fe25340be3b5e143e12829b76ca3e`
 
-Production `/api/build-info`: `73855ccca0b7bd62e9c913a6ece4d363e7db6143`
+Production `/api/build-info`: `32431e341c0fe25340be3b5e143e12829b76ca3e`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `73855ccca0b7bd62e9c913a6ece4d363e7db6143`
+Live rollup source head: `32431e341c0fe25340be3b5e143e12829b76ca3e`
 
 Live rollup matches production: `true`
 
@@ -123,7 +123,7 @@ Required first-task containment:
 16. keep Hermes/OpenClaw live execution held: tenant envelope, tool denial, Evidence Harness, DNS-pinned trusted transport, and terminal persistence behavior are source-proven, while the durable cross-instance attempt/terminal ledger and authenticated canary remain open.
 17. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
 18. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
-19. do not claim dependency-security completion while 11 vulnerable-package findings and the full repository security scan remain open.
+19. do not claim dependency-security completion while 9 vulnerable-package findings and the full repository security scan remain open.
 
 ## KOSHA Candidate Boundary
 

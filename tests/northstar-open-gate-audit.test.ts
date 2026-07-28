@@ -587,8 +587,8 @@ function createFixtureRoot(): string {
     },
     auditAfter: {
       high: 9,
-      moderate: 2,
-      totalVulnerablePackages: 11,
+      moderate: 0,
+      totalVulnerablePackages: 9,
       productionOmitDevMatchesFullAudit: true,
       automaticNonBreakingFixChangeCount: 0,
     },
@@ -599,10 +599,10 @@ function createFixtureRoot(): string {
       { package: "@hono/node-server", after: "2.0.12" },
       { package: "fast-uri", after: "3.1.4" },
       { package: "sharp", after: "0.35.3" },
+      { package: "uuid", after: "11.1.1" },
     ],
     residuals: [
       { group: "exceljs-archive-chain" },
-      { group: "uuid-transitives" },
     ],
     compatibilityBoundary: {
       mcpSdkKeptAt: "1.26.0",
@@ -610,6 +610,7 @@ function createFixtureRoot(): string {
       honoOverride: "2.0.12",
       fastUriOverride: "3.1.4",
       sharpOverride: "0.35.3",
+      uuidOverride: "11.1.1",
     },
     verification: {
       strictTypecheck: "PASS",
@@ -619,6 +620,10 @@ function createFixtureRoot(): string {
       mcpRuntimeContracts: {
         testFiles: 13,
         testsPassed: 170,
+      },
+      runtimeDependencyOverrides: {
+        testFiles: 1,
+        testsPassed: 3,
       },
       localRuntimeSmoke: {
         mcpUnauthenticatedStatus: 401,
@@ -637,7 +642,7 @@ function createFixtureRoot(): string {
     remainingBoundaries: {
       liveAfterDeploymentRequired: false,
       fullRepositorySecurityScanCompleted: false,
-      residualVulnerablePackages: 11,
+      residualVulnerablePackages: 9,
       providerDispatchPersistence: "approval_gated",
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
@@ -2342,7 +2347,8 @@ describe("northstar open gate audit", () => {
       state: "notice",
       evidencePath: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
     });
-    expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("19 to 11");
+    expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("19 to 9");
+    expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("ExcelJS archive chain");
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("not a zero-vulnerability");
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_authority")).toMatchObject({

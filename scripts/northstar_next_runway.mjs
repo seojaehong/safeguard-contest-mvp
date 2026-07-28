@@ -1392,7 +1392,7 @@ export function buildNorthstarNextRunway(options) {
       {
         gate: "dependency_security_remediation",
         state: "notice",
-        reason: "live bounded remediation reduced vulnerable packages from 19 to 17, but five upstream/compatibility residual groups and the full repository security scan remain open",
+        reason: `live bounded remediation reduced vulnerable packages from 19 to ${dependencySecuritySummary.liveVulnerablePackages || "residual"}, but the ExcelJS archive chain and the full repository security scan remain open`,
       },
     ],
     approvalGated: approvalGates(approvalRunway, shareRecipientAckApproval),

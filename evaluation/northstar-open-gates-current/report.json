@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-28T09:03:26.681Z",
-  "sourceSha": "73855ccca0b7bd62e9c913a6ece4d363e7db6143",
+  "generatedAt": "2026-07-28T10:35:47.680Z",
+  "sourceSha": "32431e341c0fe25340be3b5e143e12829b76ca3e",
   "overall": "open",
   "gates": [
     {
@@ -122,9 +122,9 @@
       "state": "notice",
       "label": "Runtime dependency security remediation",
       "evidencePath": "evaluation\\dependency-security-remediation-2026-07-28\\report.json",
-      "detail": "Live bounded remediation removed the direct Next.js and adm-zip advisories plus all PostCSS, AJV fast-uri, MCP/Hono static-path, and Next/Sharp advisories, reducing the production lockfile finding count from 19 to 11. Two upstream residual groups remain explicitly open; this is not a zero-vulnerability or full repository security-scan claim. No mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Live bounded remediation removed the direct Next.js and adm-zip advisories plus all PostCSS, AJV fast-uri, MCP/Hono static-path, Next/Sharp, and UUID advisories, reducing the production lockfile finding count from 19 to 9. The ExcelJS archive chain remains explicitly open; this is not a zero-vulnerability or full repository security-scan claim. No mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Track patched upstream releases for the ExcelJS archive chain and Google-auth/UUID transitives.",
+        "Track a patched upstream release for the ExcelJS archive chain.",
         "Run a separately scoped full repository security scan before any broad security-complete claim."
       ]
     },
