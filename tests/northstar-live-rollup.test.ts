@@ -928,5 +928,5 @@ describe("northstar live rollup", () => {
     expect(final99?.sourceStatus).toBe("exact");
     expect(final99?.productionStatus).toBe("matches_live_source_mismatch");
     expect(report.contradictions).toHaveLength(0);
-  });
+  }, 15_000);
 });

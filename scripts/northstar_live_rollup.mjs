@@ -38,6 +38,7 @@ const ARTIFACTS = Object.freeze({
   mobileP0: path.join("evaluation", "mobile-p0-workspace-gate-2026-07-20", "report.json"),
   workspaceGeometry: path.join("evaluation", "workspace-docs-share-production-gate-2026-07-20", "current-geometry.json"),
   dispatchStandalone: path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"),
+  dispatchStandaloneViewport: path.join("evaluation", "dispatch-standalone-viewport-2026-07-28", "report.json"),
   providerDispatchIdempotency: path.join("evaluation", "provider-dispatch-idempotency-gate-2026-07-19", "report.json"),
   approvalRunway: path.join("evaluation", "northstar-approval-runway-2026-07-21", "report.json"),
 });
@@ -325,6 +326,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const mobileP0 = tryReadJson(rootDir, ARTIFACTS.mobileP0);
   const workspaceGeometry = tryReadJson(rootDir, ARTIFACTS.workspaceGeometry);
   const dispatchStandalone = tryReadJson(rootDir, ARTIFACTS.dispatchStandalone);
+  const dispatchStandaloneViewport = tryReadJson(rootDir, ARTIFACTS.dispatchStandaloneViewport);
   const providerDispatchIdempotency = tryReadJson(rootDir, ARTIFACTS.providerDispatchIdempotency);
   const approvalRunway = tryReadJson(rootDir, ARTIFACTS.approvalRunway);
 
@@ -406,6 +408,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "mobile_p0_workspace", ARTIFACTS.mobileP0, mobileP0),
     evidenceStatus(rootDir, currentHead, liveCommit, "workspace_docs_share_geometry", ARTIFACTS.workspaceGeometry, workspaceGeometry),
     evidenceStatus(rootDir, currentHead, liveCommit, "dispatch_standalone_cockpit", ARTIFACTS.dispatchStandalone, dispatchStandalone),
+    evidenceStatus(rootDir, currentHead, liveCommit, "dispatch_standalone_viewport_companion", ARTIFACTS.dispatchStandaloneViewport, dispatchStandaloneViewport),
     evidenceStatus(rootDir, currentHead, liveCommit, "provider_dispatch_persistence", ARTIFACTS.providerDispatchIdempotency, providerDispatchIdempotency),
     evidenceStatus(rootDir, currentHead, liveCommit, "northstar_approval_runway", ARTIFACTS.approvalRunway, approvalRunway),
   ];
@@ -485,6 +488,12 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       previewBottom: asNumber(recordAt(dispatchStandalone, "metrics")?.previewBottom),
       primaryBottom: asNumber(recordAt(dispatchStandalone, "metrics")?.primaryBottom),
       horizontalOverflow: asNumber(recordAt(dispatchStandalone, "metrics")?.horizontalOverflow),
+      viewportCompanionArtifact: ARTIFACTS.dispatchStandaloneViewport,
+      viewportCompanionVerdict: isRecord(dispatchStandaloneViewport) ? asString(dispatchStandaloneViewport.verdict) : "missing",
+      desktopShort: recordAt(recordAt(dispatchStandaloneViewport, "afterLive"), "desktopShort"),
+      mobileShortDay: recordAt(recordAt(dispatchStandaloneViewport, "afterLive"), "mobileShortDay"),
+      mobileShortNight: recordAt(recordAt(dispatchStandaloneViewport, "afterLive"), "mobileShortNight"),
+      exactSavedShareVerdict: asString(recordAt(dispatchStandaloneViewport, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     liveDocumentQualityMatrix: {
       artifact: ARTIFACTS.liveDocumentQualityMatrix,
@@ -799,6 +808,10 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Preview bottom: ${rollup.dispatchStandaloneCockpit.previewBottom}`,
     `- Primary CTA bottom: ${rollup.dispatchStandaloneCockpit.primaryBottom}`,
     `- Horizontal overflow: ${rollup.dispatchStandaloneCockpit.horizontalOverflow}`,
+    `- Viewport companion: \`${rollup.dispatchStandaloneCockpit.viewportCompanionVerdict}\``,
+    `- Desktop-short preview/primary bottom: ${rollup.dispatchStandaloneCockpit.desktopShort?.previewBottom ?? "unknown"}/${rollup.dispatchStandaloneCockpit.desktopShort?.primaryBottom ?? "unknown"}`,
+    `- Mobile-short Day/Night primary bottom: ${rollup.dispatchStandaloneCockpit.mobileShortDay?.primaryBottom ?? "unknown"}/${rollup.dispatchStandaloneCockpit.mobileShortNight?.primaryBottom ?? "unknown"}`,
+    `- Exact saved Share: ${rollup.dispatchStandaloneCockpit.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "",
     "## Live Multi-Scenario Document Quality",
     "",

@@ -78,6 +78,7 @@ const EVIDENCE_PATHS = Object.freeze({
   sharePublicSessionStorageReadiness: path.join("evaluation", "share-public-session-storage-readiness-2026-07-23", "report.json"),
   sharePublicSessionStorageApproval: path.join("evaluation", "share-public-session-storage-approval-2026-07-23", "report.json"),
   dispatchStandalone: path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"),
+  dispatchStandaloneViewport: path.join("evaluation", "dispatch-standalone-viewport-2026-07-28", "report.json"),
   providerDispatchIdempotency: path.join("evaluation", "provider-dispatch-idempotency-gate-2026-07-19", "report.json"),
   workspaceIaLiveRefinement: path.join("evaluation", "workspace-ia-live-f67-2026-07-21", "report.json"),
   workspaceEditorDetailLanding: path.join("evaluation", "workspace-editor-detail-landing-2026-07-21", "report.json"),
@@ -2720,15 +2721,17 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
  */
 function evaluateDispatchStandaloneCockpitGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.dispatchStandalone;
+  const viewportEvidencePath = EVIDENCE_PATHS.dispatchStandaloneViewport;
   const report = readJsonFile(rootDir, evidencePath);
-  if (!isRecord(report)) {
+  const viewportReport = readJsonFile(rootDir, viewportEvidencePath);
+  if (!isRecord(report) || !isRecord(viewportReport)) {
     return gateResult({
       id: "dispatch_standalone_cockpit",
-      label: "Standalone dispatch desktop cockpit",
+      label: "Standalone dispatch viewport cockpit",
       state: "missing",
-      evidencePath,
-      detail: "Standalone dispatch cockpit report is missing or invalid.",
-      nextActions: ["Run the standalone /dispatch desktop cockpit gate before claiming dispatch UI closure."],
+      evidencePath: !isRecord(report) ? evidencePath : viewportEvidencePath,
+      detail: "Standalone dispatch desktop or viewport companion report is missing or invalid.",
+      nextActions: ["Run the standalone /dispatch desktop-short and mobile-short cockpit gates before claiming dispatch UI closure."],
     });
   }
 
@@ -2741,15 +2744,63 @@ function evaluateDispatchStandaloneCockpitGate(rootDir) {
     : {};
   const sampleDesktop = isRecord(sampleProduction.desktop1440x900) ? sampleProduction.desktop1440x900 : {};
   const sampleMobile = isRecord(sampleProduction.mobile390x844) ? sampleProduction.mobile390x844 : {};
+  const viewportProduction = isRecord(viewportReport.productionBuild) ? viewportReport.productionBuild : {};
+  const viewportAfterLive = isRecord(viewportReport.afterLive) ? viewportReport.afterLive : {};
+  const viewportDesktop = isRecord(viewportAfterLive.desktopShort) ? viewportAfterLive.desktopShort : {};
+  const viewportMobileDay = isRecord(viewportAfterLive.mobileShortDay) ? viewportAfterLive.mobileShortDay : {};
+  const viewportMobileNight = isRecord(viewportAfterLive.mobileShortNight) ? viewportAfterLive.mobileShortNight : {};
+  const viewportAcceptance = isRecord(viewportReport.acceptanceContract) ? viewportReport.acceptanceContract : {};
+  const viewportMutation = isRecord(viewportReport.mutationBoundary) ? viewportReport.mutationBoundary : {};
+  const viewportBoundaries = isRecord(viewportReport.remainingBoundaries) ? viewportReport.remainingBoundaries : {};
   const productionVerified = production.liveVerified === true
     && readString(production.commitSha)
     && isGitAncestor(rootDir, readString(production.commitSha));
   const sampleProductionVerified = sampleProduction.liveVerified === true
     && readString(sampleProduction.commitSha)
     && isGitAncestor(rootDir, readString(sampleProduction.commitSha));
+  const viewportProductionVerified = readString(viewportReport.sourceHead) === readString(viewportProduction.commitSha)
+    && readString(viewportProduction.commitSha)
+    && isGitAncestor(rootDir, readString(viewportProduction.commitSha));
+  const viewportPass = readString(viewportReport.verdict) === "PASS_LIVE_PRODUCTION_STANDALONE_DISPATCH_VIEWPORT_COCKPIT"
+    && viewportProductionVerified
+    && readString(viewportProduction.branch) === "master"
+    && readString(viewportProduction.environment) === "production"
+    && readNumber(viewportDesktop.viewport?.width) === 1440
+    && readNumber(viewportDesktop.viewport?.height) === 723
+    && readNumber(viewportDesktop.primaryBottom) !== null
+    && readNumber(viewportDesktop.primaryBottom) <= 723
+    && readNumber(viewportDesktop.previewBottom) !== null
+    && readNumber(viewportDesktop.previewBottom) <= 723
+    && readString(viewportDesktop.rootOverflowY) === "auto"
+    && readNumber(viewportDesktop.rootScrollHeight) !== null
+    && readNumber(viewportDesktop.rootClientHeight) !== null
+    && readNumber(viewportDesktop.rootScrollHeight) >= readNumber(viewportDesktop.rootClientHeight)
+    && readNumber(viewportDesktop.horizontalOverflow) === 0
+    && [viewportMobileDay, viewportMobileNight].every((row) => (
+      readNumber(row.viewport?.width) === 390
+      && readNumber(row.viewport?.height) === 723
+      && readNumber(row.primaryBottom) !== null
+      && readNumber(row.primaryBottom) <= 723
+      && readNumber(row.horizontalOverflow) === 0
+    ))
+    && readNumber(viewportMobileDay.visibleConfigCardCount) === 0
+    && readString(viewportMobileDay.rootOverflowY) === "auto"
+    && readBoolean(viewportAcceptance.routeSplitAloneAcceptedAsFix) === false
+    && readBoolean(viewportAcceptance.desktopRequiresTwoPaneWorkbench) === true
+    && readBoolean(viewportAcceptance.desktopPreviewContainedInFirstViewport) === true
+    && readBoolean(viewportAcceptance.mobilePrimaryActionContainedInFirstViewport) === true
+    && readBoolean(viewportAcceptance.longPreviewUsesInternalScroll) === true
+    && readBoolean(viewportAcceptance.mobileConfigurationCollapsedByDefault) === true
+    && readBoolean(viewportMutation.dbMutationPerformed) === false
+    && readBoolean(viewportMutation.shareSessionCreated) === false
+    && readBoolean(viewportMutation.providerDispatchCalled) === false
+    && readBoolean(viewportMutation.embeddingOrVectorMutationPerformed) === false
+    && readString(viewportBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readBoolean(viewportBoundaries.exactSavedShareUserSessionReproduced) === false;
   const pass = readString(report.verdict) === "PASS_PRODUCTION"
     && productionVerified
     && sampleProductionVerified
+    && viewportPass
     && acceptance.pageHeightWithin135Viewport === true
     && acceptance.rootWidthAtLeast1040 === true
     && acceptance.primaryCtaInsideViewport === true
@@ -2773,10 +2824,10 @@ function evaluateDispatchStandaloneCockpitGate(rootDir) {
     const heightRatio = readNumber(productionMetrics.heightRatio);
     return gateResult({
       id: "dispatch_standalone_cockpit",
-      label: "Standalone dispatch desktop cockpit",
+      label: "Standalone dispatch viewport cockpit",
       state: "proven",
-      evidencePath,
-      detail: `Production /dispatch seeded desktop and sample shell routes are no longer mobile-stacked: seeded pageHeight ${pageHeight ?? "unknown"} (${heightRatio ?? "unknown"}x), sample panels ${readNumber(sampleDesktop.firstPanel?.width) ?? "unknown"}px/${readNumber(sampleDesktop.secondPanel?.width) ?? "unknown"}px in distinct desktop regions, overflow false/outside 0.`,
+      evidencePath: viewportEvidencePath,
+      detail: `Production /dispatch keeps the legacy desktop/sample resilience proof and now requires the viewport companion: 1440x723 preview bottom=${readNumber(viewportDesktop.previewBottom) ?? "unknown"}, primary bottom=${readNumber(viewportDesktop.primaryBottom) ?? "unknown"}, mobile Day/Night primary bottom=${readNumber(viewportMobileDay.primaryBottom) ?? "unknown"}/${readNumber(viewportMobileNight.primaryBottom) ?? "unknown"}, local scroll retained, route split alone false, exact saved Share MISSING_EVIDENCE. Legacy seeded pageHeight ${pageHeight ?? "unknown"} (${heightRatio ?? "unknown"}x), sample panels ${readNumber(sampleDesktop.firstPanel?.width) ?? "unknown"}px/${readNumber(sampleDesktop.secondPanel?.width) ?? "unknown"}px.`,
       nextActions: [
         "Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved.",
       ],
@@ -2785,11 +2836,11 @@ function evaluateDispatchStandaloneCockpitGate(rootDir) {
 
   return gateResult({
     id: "dispatch_standalone_cockpit",
-    label: "Standalone dispatch desktop cockpit",
+    label: "Standalone dispatch viewport cockpit",
     state: "contradicted",
-    evidencePath,
-    detail: "Standalone dispatch report no longer proves desktop two-pane cockpit and compact readable channel cards in production.",
-    nextActions: ["Re-run standalone /dispatch desktop browser gate and fix the layout before claiming closure."],
+    evidencePath: viewportPass ? evidencePath : viewportEvidencePath,
+    detail: "Standalone dispatch reports no longer prove desktop two-pane, desktop-short preview containment, mobile-short first action, compact controls, and exact-session non-closure together.",
+    nextActions: ["Re-run standalone /dispatch desktop-short and mobile-short browser gates and fix the layout before claiming closure."],
   });
 }
 

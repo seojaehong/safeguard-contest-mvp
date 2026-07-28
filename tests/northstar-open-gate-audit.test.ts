@@ -2024,6 +2024,56 @@ function createFixtureRoot(): string {
       separatePromotionApprovalRequired: true,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "dispatch-standalone-viewport-2026-07-28", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_STANDALONE_DISPATCH_VIEWPORT_COCKPIT",
+    sourceHead: "fixture-sha",
+    productionBuild: {
+      commitSha: "fixture-sha",
+      branch: "master",
+      environment: "production",
+    },
+    afterLive: {
+      desktopShort: {
+        viewport: { width: 1440, height: 723 },
+        primaryBottom: 538,
+        previewBottom: 717,
+        rootClientHeight: 382,
+        rootScrollHeight: 614,
+        rootOverflowY: "auto",
+        horizontalOverflow: 0,
+      },
+      mobileShortDay: {
+        viewport: { width: 390, height: 723 },
+        primaryBottom: 581,
+        visibleConfigCardCount: 0,
+        rootOverflowY: "auto",
+        horizontalOverflow: 0,
+      },
+      mobileShortNight: {
+        viewport: { width: 390, height: 723 },
+        primaryBottom: 581,
+        horizontalOverflow: 0,
+      },
+    },
+    acceptanceContract: {
+      routeSplitAloneAcceptedAsFix: false,
+      desktopRequiresTwoPaneWorkbench: true,
+      desktopPreviewContainedInFirstViewport: true,
+      mobilePrimaryActionContainedInFirstViewport: true,
+      longPreviewUsesInternalScroll: true,
+      mobileConfigurationCollapsedByDefault: true,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      embeddingOrVectorMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      exactSavedShareUserSessionReproduced: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "kosha-exact-promotion-reviewer-cockpit-2026-07-25", "browser-report.json"), {
     schemaVersion: "safeclaw-kosha-exact-promotion-reviewer-cockpit-browser/v1",
     verdict: "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY",
@@ -2219,6 +2269,11 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).not.toContain("Promote the Share staged rail");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.state).toBe("proven");
+    expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.evidencePath).toBe(
+      path.join("evaluation", "dispatch-standalone-viewport-2026-07-28", "report.json"),
+    );
+    expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.detail).toContain("mobile Day/Night primary bottom=581/581");
+    expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.detail).toContain("exact saved Share MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "share_result_fixture_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "share_recipient_long_content_fixture")).toMatchObject({
       state: "proven",
@@ -2267,6 +2322,29 @@ describe("northstar open gate audit", () => {
     expect(audit.forbiddenClaims).toContain("KOSHA operator checklist completion alone approves exact-trust promotion.");
     expect(audit.forbiddenClaims).toContain("Real provider dispatch is production-live for any channel before persistent idempotency and provider result persistence approval.");
     expect(audit.safeDemoClaims).toContain("Photo hazard analysis readiness supports up to 10 images and keeps Before/After improvements as reviewed operation memory.");
+  });
+
+  it("fails the standalone dispatch gate closed when mobile-short leaves the first viewport", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "dispatch-standalone-viewport-2026-07-28", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      afterLive: { mobileShortDay: { primaryBottom: number } };
+    };
+    report.afterLive.mobileShortDay.primaryBottom = 724;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-28T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.overall).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")).toMatchObject({
+      state: "contradicted",
+      evidencePath: path.join("evaluation", "dispatch-standalone-viewport-2026-07-28", "report.json"),
+    });
   });
 
   it("fails the live document quality matrix closed when a live scenario fails", async () => {
