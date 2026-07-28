@@ -1,0 +1,204 @@
+{
+  "schemaVersion": "safeclaw-full-repository-security-remediation-plan/v1",
+  "checkedAt": "2026-07-29T04:07:35.4239174+09:00",
+  "verdict": "PATCH_READY_REMEDIATION_PLAN_USER_CONFIRMATION_REQUIRED",
+  "sourceHead": "fb6fdd98d51e083f189addea875bacbb0971f6b6",
+  "productionBuild": {
+    "commitSha": "fb6fdd98d51e083f189addea875bacbb0971f6b6",
+    "branch": "master",
+    "environment": "production",
+    "sourceHeadMatchesProduction": true
+  },
+  "sourceScan": {
+    "artifact": "evaluation/full-repository-security-scan-2026-07-28/report.json",
+    "fileCount": 4772,
+    "candidateCount": 21,
+    "reportableFindingCount": 18,
+    "medium": 5,
+    "low": 13,
+    "suppressedCandidateCount": 3,
+    "deferredCandidateCount": 0
+  },
+  "planningBoundary": {
+    "productPatchAuthorized": false,
+    "productChangesPerformed": false,
+    "securityCompleteClaimAllowed": false,
+    "allFindingsRemainOpen": true,
+    "userConfirmationRequiredBeforePatchWave": true
+  },
+  "waves": [
+    {
+      "id": "tenant-authorization-boundaries",
+      "priority": 1,
+      "findingCount": 2,
+      "medium": 1,
+      "low": 1,
+      "findingIds": [
+        "csf_020491733c70a16c7e0e3584",
+        "csf_1fa22cd0aee4ec11116c8bb1"
+      ],
+      "files": [
+        "app/api/briefing/run/route.ts",
+        "app/api/workpacks/route.ts"
+      ],
+      "remediation": [
+        "Persist and reuse the authenticated owner or organization identity for scheduled briefing workpack creation; briefing_email remains a delivery address only.",
+        "Constrain archive site enrichment by both site_id and the already authorized organization IDs.",
+        "Add a database invariant proposal separately, but do not create or apply a migration in this patch wave."
+      ],
+      "acceptance": [
+        "A configured foreign briefing email cannot select or create a workpack owner in another tenant.",
+        "A workpack that references a foreign site UUID cannot disclose that site's metadata.",
+        "No live DB mutation, migration, scheduled provider call, or cross-tenant exploit is executed during verification."
+      ],
+      "tests": [
+        "Focused scheduled briefing route test with an authenticated owner distinct from briefing_email.",
+        "Focused workpack archive test proving site enrichment requires organization membership.",
+        "Existing briefing, dispatch-truth, workpack archive, typecheck, and build suites remain green."
+      ]
+    },
+    {
+      "id": "spreadsheet-formula-neutralization",
+      "priority": 2,
+      "findingCount": 4,
+      "medium": 0,
+      "low": 4,
+      "findingIds": [
+        "csf_9227c8522ae1752d4659ca0e",
+        "csf_f134a8b05f34e5e1ce8ec67a",
+        "csf_713f637da86733907c5d68cb",
+        "csf_856fe15617f534b60a467d21"
+      ],
+      "files": [
+        "components/WorkpackEditor.tsx",
+        "lib/reporting-downloads.ts"
+      ],
+      "remediation": [
+        "Extract the existing tested reporting CSV formula-neutralization rule into one shared delimited-cell helper.",
+        "Route whole-workpack CSV, single-document CSV, downloaded TSV, and clipboard TSV through the shared helper.",
+        "Preserve non-spreadsheet text and all existing CSV quoting and TSV whitespace behavior."
+      ],
+      "acceptance": [
+        "Values whose first significant character is =, +, -, @, tab, or carriage return are emitted as inert spreadsheet text in every CSV and TSV mode.",
+        "Leading whitespace, Korean text, embedded quotes, commas, tabs, and line breaks preserve current export semantics.",
+        "Existing report CSV neutralization remains green and no XLSX cell value is modified by this wave."
+      ],
+      "tests": [
+        "Focused WorkpackEditor export contract covering all four independently reachable modes.",
+        "Existing reporting-downloads formula-neutralization regression.",
+        "Documents editor layout/export integrity suites remain green."
+      ]
+    },
+    {
+      "id": "public-provider-and-upstream-work-budgets",
+      "priority": 3,
+      "findingCount": 4,
+      "medium": 2,
+      "low": 2,
+      "findingIds": [
+        "csf_56e94d5af1a7088bda7deedb",
+        "csf_602a3194a53652647244cc7d",
+        "csf_1c556be46a6e411979fdc671",
+        "csf_82c8e671602027bb56acd591"
+      ],
+      "files": [
+        "app/api/knowledge/regenerate/route.ts",
+        "app/api/workpack/remediate/route.ts",
+        "app/api/weather/route.ts",
+        "lib/search.ts",
+        "lib/rate-limit.ts"
+      ],
+      "remediation": [
+        "Set explicit byte, character, collection, provider-call, and concurrency budgets before public upstream work begins.",
+        "Require a tenant-bound authenticated review capability for mutating or paid generation modes while preserving bounded read-only candidate inspection where required.",
+        "Coalesce equivalent in-flight weather lookups and keep existing timeout and retry behavior inside the total work budget.",
+        "Treat the current in-memory limiter as defense in depth, not durable distributed quota proof."
+      ],
+      "acceptance": [
+        "Oversized or over-budget requests fail before database search, public API fan-out, or model invocation.",
+        "Bounded legitimate requests retain current response contracts.",
+        "No production provider load test or paid generation is executed."
+      ],
+      "tests": [
+        "knowledge-regenerate route rejects oversized generation before provider invocation.",
+        "workpack-remediate route rejects oversized input before search/model invocation.",
+        "weather route coalesces equivalent concurrent misses and caps question length.",
+        "runAsk rejects oversized question and harness memory before downstream work."
+      ]
+    },
+    {
+      "id": "document-export-work-budgets",
+      "priority": 4,
+      "findingCount": 8,
+      "medium": 2,
+      "low": 6,
+      "findingIds": [
+        "csf_9f4d050101c5687bad6441dc",
+        "csf_bcec0c4f5c9d784eba666a36",
+        "csf_6a2c44d7d7c5ea908f1fc62d",
+        "csf_b0dbb71a9aeca1ffa150b9d9",
+        "csf_e5354308ff5ff4d402961a70",
+        "csf_21d7f195b719e0f73ad4c73a",
+        "csf_7c616e59ae8f50e96114a026",
+        "csf_90fab9d634e762871753178a"
+      ],
+      "files": [
+        "app/api/export/xlsx/route.ts",
+        "app/api/export/hwp/route.ts",
+        "app/api/export/pdf/route.ts"
+      ],
+      "remediation": [
+        "Reuse the PDF route's bounded request pattern through a shared export-budget contract where behavior truly matches.",
+        "Apply mode-specific limits for request bytes, documents, rows, nested entries, field characters, rendered cells, and output bytes before allocating workbook or HWP structures.",
+        "Return a stable 413 or 422 response without partial export output."
+      ],
+      "acceptance": [
+        "All XLSX modes and HWP table generation fail closed at deterministic limits.",
+        "Current valid export fixtures, localized content, workbook reopen, and archive runtime compatibility remain green.",
+        "Verification uses bounded fixtures only and does not run destructive load against production."
+      ],
+      "tests": [
+        "Boundary and over-limit fixtures for single, workplan, permit-inspection, TBM briefing, TBM log, education-record, and whole-workpack XLSX modes.",
+        "HWP table request byte, row, nested-item, and output-budget fixtures.",
+        "Existing xlsx-export-route, editor-export-integrity, document-export-localization, dependency archive, typecheck, and build suites remain green."
+      ]
+    }
+  ],
+  "recommendedOrder": [
+    "tenant-authorization-boundaries",
+    "spreadsheet-formula-neutralization",
+    "public-provider-and-upstream-work-budgets",
+    "document-export-work-budgets"
+  ],
+  "verificationContract": {
+    "focusedSecurityRegressionRequired": true,
+    "adjacentProductContractsRequired": true,
+    "strictTypecheckRequired": true,
+    "productionBuildRequired": true,
+    "freshSecurityDiffScanRequiredPerWave": true,
+    "fullRepositoryRescanRequiredAfterAllWaves": true,
+    "findingCountMustNotBeReducedBySuppressionWithoutCounterevidence": true
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "migrationCreatedOrApplied": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "paidProviderLoadPerformed": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "reportableFindingCount": 18,
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "providerDispatchPersistence": "approval_gated",
+    "shareRecipientAck": "approval_gated",
+    "supabaseRlsLaunchIsolation": "approval_gated",
+    "llmWikiPublication": "approval_gated",
+    "sifEmbeddingRuntime": "approval_gated",
+    "koshaExactPromotionReview": "approval_gated"
+  }
+}
