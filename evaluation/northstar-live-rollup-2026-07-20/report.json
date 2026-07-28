@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-28T02:54:03.472Z",
-  "head": "adfb93d47cc6f7cc04d07aa4ff08291453f6ceef",
+  "generatedAt": "2026-07-28T04:11:15.765Z",
+  "head": "2a5e80055f7230e15e8dc6a859e2327564b319c2",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "013b684d76ee16282afbef67c56823c99ae434ea",
+    "commitSha": "2a5e80055f7230e15e8dc6a859e2327564b319c2",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-dj9o9bnom-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-6ikr0ff1k-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -85,7 +85,7 @@
       "id": "product_capability_truth",
       "state": "proven",
       "artifact": "evaluation\\product-capability-truth-2026-07-25\\report.json",
-      "detail": "Manual email/SMS/Kakao and scheduled briefing email are fail-closed preview-only because persistent idempotency is unavailable. Live dispatch and landing entry copy also distinguishes preview/readiness from approved results (evaluation\\dispatch-entry-capability-truth-2026-07-28\\report.json). Live photo Vision/OCR readiness is accepted-only, AI generation modes are template/enhanced/full, and no DB/share/provider/photo POST mutation occurred. This does not grant provider dispatch approval: exact saved Share remains MISSING_EVIDENCE and Documents/Share IA remains OPEN_SEPARATE_VIEWPORT_IA_WAVE."
+      "detail": "Manual email/SMS/Kakao and scheduled briefing email are fail-closed preview-only because persistent idempotency is unavailable. Live dispatch entry copy distinguishes preview/readiness from approved results (evaluation\\dispatch-entry-capability-truth-2026-07-28\\report.json), and the public landing keeps safety judgment and final confirmation with a human instead of claiming role replacement (evaluation\\landing-human-review-boundary-2026-07-28\\report.json). Live photo Vision/OCR readiness is accepted-only, AI generation modes are template/enhanced/full, and no DB/share/provider/photo POST mutation occurred. This does not grant provider dispatch approval or replace broad human/legal review: exact saved Share remains MISSING_EVIDENCE and Documents/Share IA remains OPEN_SEPARATE_VIEWPORT_IA_WAVE."
     },
     {
       "id": "hermes_knowledge_review_authority",
@@ -560,10 +560,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "adfb93d47cc6f7cc04d07aa4ff08291453f6ceef",
+      "sourceCommit": "2a5e80055f7230e15e8dc6a859e2327564b319c2",
       "sourceStatus": "exact",
-      "productionCommit": "adfb93d47cc6f7cc04d07aa4ff08291453f6ceef",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "2a5e80055f7230e15e8dc6a859e2327564b319c2",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",

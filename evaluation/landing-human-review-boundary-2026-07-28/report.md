@@ -1,10 +1,10 @@
 # Landing Human Review Boundary
 
-Verdict: `PASS_CURRENT_SOURCE_LANDING_HUMAN_REVIEW_BOUNDARY_LIVE_PENDING`
+Verdict: `PASS_LIVE_PRODUCTION_LANDING_HUMAN_REVIEW_BOUNDARY`
 
 Product commit: `d41d99dc2c286261d2ab72e507fecd5fe5c45f02`
 
-Production marker at evidence creation: `5db0acf0dfbbb8d2a1da7390f616d9d41fda01fd`
+Production marker: `2a5e80055f7230e15e8dc6a859e2327564b319c2`
 
 ## Finding
 
@@ -24,7 +24,8 @@ The public landing positioning said `채용하지 않은 안전관리자 — 한
 - Strict TypeScript typecheck: `PASS`.
 - Next.js 15.5.15 production build: `PASS`.
 - Static pages: 28/28 generated.
+- Live 1440x723 landing: new human-review boundary visible, both prior replacement claims absent, horizontal overflow absent, browser console errors 0.
 
 ## Boundary
 
-This is a current-source positioning and frontend consistency PASS. Production still reports the previous marker, so live-after verification is required before upgrading the verdict. It does not replace broad human/legal review. No provider call, DB mutation, Share session creation, embedding/vector operation, or KOSHA exact-registry mutation was performed. Provider persistence remains approval-gated and exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.
+Production and evidence are aligned at `2a5e8005`. This scoped positioning PASS does not replace broad human/legal review and does not close Documents/Share IA. No provider call, DB mutation, Share session creation, embedding/vector operation, or KOSHA exact-registry mutation was performed. Provider persistence remains approval-gated and exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.
