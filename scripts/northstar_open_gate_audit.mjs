@@ -41,6 +41,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveDocumentRainContextIsolation: path.join("evaluation", "live-document-rain-context-isolation-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
   dispatchEntryCapabilityTruth: path.join("evaluation", "dispatch-entry-capability-truth-2026-07-28", "report.json"),
+  landingHumanReviewBoundary: path.join("evaluation", "landing-human-review-boundary-2026-07-28", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
@@ -1276,6 +1277,8 @@ function evaluateProductCapabilityTruthGate(rootDir) {
   const report = readJsonFile(rootDir, evidencePath);
   const entryTruthPath = EVIDENCE_PATHS.dispatchEntryCapabilityTruth;
   const entryTruth = readJsonFile(rootDir, entryTruthPath);
+  const landingTruthPath = EVIDENCE_PATHS.landingHumanReviewBoundary;
+  const landingTruth = readJsonFile(rootDir, landingTruthPath);
   if (!isRecord(report)) {
     return gateResult({
       id: "product_capability_truth",
@@ -1307,6 +1310,11 @@ function evaluateProductCapabilityTruthGate(rootDir) {
   const entryLiveAfter = isRecord(entryTruth?.liveAfter) ? entryTruth.liveAfter : {};
   const entryMutationBoundary = isRecord(entryTruth?.mutationBoundary) ? entryTruth.mutationBoundary : {};
   const entryRemainingBoundaries = isRecord(entryTruth?.remainingBoundaries) ? entryTruth.remainingBoundaries : {};
+  const landingProductionBuild = isRecord(landingTruth?.productionBuild) ? landingTruth.productionBuild : {};
+  const landingCurrentSource = isRecord(landingTruth?.currentSource) ? landingTruth.currentSource : {};
+  const landingLiveAfter = isRecord(landingTruth?.liveAfter) ? landingTruth.liveAfter : {};
+  const landingMutationBoundary = isRecord(landingTruth?.mutationBoundary) ? landingTruth.mutationBoundary : {};
+  const landingRemainingBoundaries = isRecord(landingTruth?.remainingBoundaries) ? landingTruth.remainingBoundaries : {};
   const entryTruthPass = isRecord(entryTruth)
     && readString(entryTruth.verdict) === "PASS_LIVE_PRODUCTION_DISPATCH_ENTRY_CAPABILITY_TRUTH"
     && readString(entryTruth.sourceHead).length > 0
@@ -1325,6 +1333,29 @@ function evaluateProductCapabilityTruthGate(rootDir) {
     && entryRemainingBoundaries.liveAfterDeploymentRequired === false
     && readString(entryRemainingBoundaries.providerDispatchPersistence) === "approval_gated"
     && readString(entryRemainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+  const landingTruthPass = isRecord(landingTruth)
+    && readString(landingTruth.verdict) === "PASS_LIVE_PRODUCTION_LANDING_HUMAN_REVIEW_BOUNDARY"
+    && readString(landingTruth.sourceHead).length > 0
+    && readString(landingTruth.sourceHead) === readString(landingProductionBuild.commitSha)
+    && landingProductionBuild.sourceHeadMatchesProduction === true
+    && landingCurrentSource.humanDecisionBoundaryVisible === true
+    && readNumber(landingCurrentSource.forbiddenReplacementClaimsRemaining) === 0
+    && landingLiveAfter.positioningVisible === true
+    && landingLiveAfter.humanDecisionBoundaryVisible === true
+    && landingLiveAfter.oldSafetyManagerClaimVisible === false
+    && landingLiveAfter.oldReplacementClaimVisible === false
+    && landingLiveAfter.horizontalOverflow === false
+    && readNumber(landingLiveAfter.browserConsoleErrors) === 0
+    && landingMutationBoundary.dbMutationPerformed === false
+    && landingMutationBoundary.shareSessionCreated === false
+    && landingMutationBoundary.providerDispatchCalled === false
+    && landingMutationBoundary.embeddingGenerated === false
+    && landingMutationBoundary.vectorUploadPerformed === false
+    && landingMutationBoundary.exactTrustRegistryMutationPerformed === false
+    && landingRemainingBoundaries.liveAfterDeploymentRequired === false
+    && landingRemainingBoundaries.broadHumanLegalReviewCompleted === false
+    && readString(landingRemainingBoundaries.providerDispatchPersistence) === "approval_gated"
+    && readString(landingRemainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE";
   const sourceMatchesProduction = readString(report.sourceHead).length > 0
     && readString(report.sourceHead) === readString(report.productionCommit);
   const uiTruthPass = briefingRows.length === 2
@@ -1369,7 +1400,8 @@ function evaluateProductCapabilityTruthGate(rootDir) {
     && readString(remainingBoundaries.documentsShareIaVerdict) === "OPEN_SEPARATE_VIEWPORT_IA_WAVE"
     && remainingBoundaries.providerDispatchApprovalRequired === true
     && remainingBoundaries.humanEditorialReviewCompleted === false
-    && entryTruthPass;
+    && entryTruthPass
+    && landingTruthPass;
 
   if (liveReady) {
     return gateResult({
@@ -1377,7 +1409,7 @@ function evaluateProductCapabilityTruthGate(rootDir) {
       label: "Live product capability truth",
       state: "proven",
       evidencePath,
-      detail: `Manual email/SMS/Kakao and scheduled briefing email are fail-closed preview-only because persistent idempotency is unavailable. Live dispatch and landing entry copy also distinguishes preview/readiness from approved results (${entryTruthPath}). Live photo Vision/OCR readiness is accepted-only, AI generation modes are template/enhanced/full, and no DB/share/provider/photo POST mutation occurred. This does not grant provider dispatch approval: exact saved Share remains MISSING_EVIDENCE and Documents/Share IA remains OPEN_SEPARATE_VIEWPORT_IA_WAVE.`,
+      detail: `Manual email/SMS/Kakao and scheduled briefing email are fail-closed preview-only because persistent idempotency is unavailable. Live dispatch entry copy distinguishes preview/readiness from approved results (${entryTruthPath}), and the public landing keeps safety judgment and final confirmation with a human instead of claiming role replacement (${landingTruthPath}). Live photo Vision/OCR readiness is accepted-only, AI generation modes are template/enhanced/full, and no DB/share/provider/photo POST mutation occurred. This does not grant provider dispatch approval or replace broad human/legal review: exact saved Share remains MISSING_EVIDENCE and Documents/Share IA remains OPEN_SEPARATE_VIEWPORT_IA_WAVE.`,
       nextActions: [
         "Keep provider dispatch persistence approval-gated.",
         "Measure exact saved Share and Documents/Share viewport IA in their separate gates.",
@@ -1390,7 +1422,7 @@ function evaluateProductCapabilityTruthGate(rootDir) {
     label: "Live product capability truth",
     state: "contradicted",
     evidencePath,
-    detail: `Capability verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, dispatch=${readString(providerDispatch.mode) || "unknown"}/${readString(providerDispatch.reason) || "unknown"}, providerCalled=${providerDispatch.providerCalled === true}, briefingEmailReady=${briefing.emailReady === true}, photoReady=${photo.ready === true}, photoAcceptedOnly=${photo.acceptedOnly === true}, photoPost=${photo.photoPostAnalysisExecuted === true}, uiTruthPass=${uiTruthPass}, entryTruthPass=${entryTruthPass}, aiModes=${sortedModes || "missing"}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, ia=${readString(remainingBoundaries.documentsShareIaVerdict) || "missing"}.`,
+    detail: `Capability verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, dispatch=${readString(providerDispatch.mode) || "unknown"}/${readString(providerDispatch.reason) || "unknown"}, providerCalled=${providerDispatch.providerCalled === true}, briefingEmailReady=${briefing.emailReady === true}, photoReady=${photo.ready === true}, photoAcceptedOnly=${photo.acceptedOnly === true}, photoPost=${photo.photoPostAnalysisExecuted === true}, uiTruthPass=${uiTruthPass}, entryTruthPass=${entryTruthPass}, landingTruthPass=${landingTruthPass}, aiModes=${sortedModes || "missing"}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, ia=${readString(remainingBoundaries.documentsShareIaVerdict) || "missing"}.`,
     nextActions: ["Restore the fail-closed capability boundaries and rerun current-production truth evidence without mutation."],
   });
 }

@@ -539,6 +539,40 @@ function createFixtureRoot(): string {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "landing-human-review-boundary-2026-07-28", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_LANDING_HUMAN_REVIEW_BOUNDARY",
+    sourceHead: "fixture-sha",
+    productionBuild: {
+      commitSha: "fixture-sha",
+      sourceHeadMatchesProduction: true,
+    },
+    currentSource: {
+      humanDecisionBoundaryVisible: true,
+      forbiddenReplacementClaimsRemaining: 0,
+    },
+    liveAfter: {
+      positioningVisible: true,
+      humanDecisionBoundaryVisible: true,
+      oldSafetyManagerClaimVisible: false,
+      oldReplacementClaimVisible: false,
+      horizontalOverflow: false,
+      browserConsoleErrors: 0,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      embeddingGenerated: false,
+      vectorUploadPerformed: false,
+      exactTrustRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      liveAfterDeploymentRequired: false,
+      broadHumanLegalReviewCompleted: false,
+      providerDispatchPersistence: "approval_gated",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "live-document-rain-context-isolation-2026-07-25", "report.json"), {
     schemaVersion: "safeclaw-live-document-rain-context-isolation/v1",
     verdict: "PASS_LIVE_PRODUCTION_RAIN_CONTEXT_ISOLATION",
@@ -2232,6 +2266,7 @@ describe("northstar open gate audit", () => {
     });
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("preview-only");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("dispatch-entry-capability-truth");
+    expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("landing-human-review-boundary");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("OPEN_SEPARATE_VIEWPORT_IA_WAVE");
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_authority")).toMatchObject({
@@ -2707,6 +2742,27 @@ describe("northstar open gate audit", () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("entryTruthPass=false");
+  });
+
+  it("fails product capability truth closed when landing copy claims human role replacement", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "landing-human-review-boundary-2026-07-28", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      liveAfter: { oldReplacementClaimVisible: boolean };
+    };
+    report.liveAfter.oldReplacementClaimVisible = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-28T00:00:00.000Z",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "product_capability_truth")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("landingTruthPass=false");
   });
 
   it("fails Hermes knowledge review authority closed when machine evidence replaces human review", async () => {
