@@ -515,7 +515,7 @@ describe("workspace mobile share presentation", () => {
     }
   }, 120_000);
 
-  it("keeps the standalone dispatch module as a desktop two-pane share surface", async () => {
+  it("keeps standalone dispatch as a desktop two-pane and mobile-short cockpit", async () => {
     if (!browser || !harness) throw new Error("Browser harness was not started");
 
     const sample = buildSampleWorkpack();
@@ -542,6 +542,7 @@ describe("workspace mobile share presentation", () => {
     } satisfies CurrentWorkerSnapshot;
     const stored = buildStoredCurrentWorkpack(sample, { workerSnapshot });
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const mobilePage = await browser.newPage({ viewport: { width: 390, height: 723 } });
 
     try {
       await page.addInitScript(
@@ -613,8 +614,136 @@ describe("workspace mobile share presentation", () => {
         expect.soft(card.width, "standalone dispatch channel card readable width").toBeGreaterThanOrEqual(150);
         expect.soft(card.height, "standalone dispatch channel card compact height").toBeLessThanOrEqual(80);
       }
+
+      await mobilePage.addInitScript(
+        ({ key, value }) => window.localStorage.setItem(key, value),
+        { key: CURRENT_WORKPACK_STORAGE_KEY, value: JSON.stringify(stored) }
+      );
+      await mobilePage.goto(`${harness.baseUrl}/dispatch?theme=day`, { waitUntil: "networkidle" });
+      await mobilePage.locator("[data-share-root]").waitFor({ state: "visible" });
+      await mobilePage.evaluate(async () => {
+        await document.fonts.ready;
+        await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      });
+
+      const mobileMetrics = await mobilePage.evaluate(() => {
+        const root = document.querySelector<HTMLElement>("[data-share-root]");
+        const preview = document.querySelector<HTMLElement>("[data-share-preview]");
+        const lines = document.querySelector<HTMLElement>(".message-preview-lines");
+        const primary = [...document.querySelectorAll<HTMLElement>("[data-share-primary]")]
+          .find((element) => getComputedStyle(element).display !== "none");
+        const summary = document.querySelector<HTMLElement>("[data-share-mobile-summary]");
+        const configToggle = document.querySelector<HTMLElement>("[data-share-mobile-config-toggle]");
+        const title = document.querySelector<HTMLElement>(".share-workflow-header > div:first-child > strong");
+        const statusReason = document.querySelector<HTMLElement>(".share-status-pill strong");
+        const configCards = [...document.querySelectorAll<HTMLElement>(".share-config-card")];
+        if (!root || !preview || !lines || !primary || !summary || !configToggle || !title || !statusReason) {
+          throw new Error("Missing standalone dispatch mobile presentation target");
+        }
+        const rootRect = root.getBoundingClientRect();
+        const previewRect = preview.getBoundingClientRect();
+        const primaryRect = primary.getBoundingClientRect();
+        const summaryRect = summary.getBoundingClientRect();
+        const configToggleRect = configToggle.getBoundingClientRect();
+        return {
+          viewportHeight: window.innerHeight,
+          pageHeight: document.documentElement.scrollHeight,
+          rootTop: Math.round(rootRect.top),
+          rootBottom: Math.round(rootRect.bottom),
+          rootClientHeight: root.clientHeight,
+          rootScrollHeight: root.scrollHeight,
+          rootOverflowY: getComputedStyle(root).overflowY,
+          summaryBottom: Math.round(summaryRect.bottom),
+          primaryTop: Math.round(primaryRect.top),
+          primaryBottom: Math.round(primaryRect.bottom),
+          previewTop: Math.round(previewRect.top),
+          previewBottom: Math.round(previewRect.bottom),
+          configToggleTop: Math.round(configToggleRect.top),
+          titleFontSize: Number.parseFloat(getComputedStyle(title).fontSize),
+          statusReasonFontSize: Number.parseFloat(getComputedStyle(statusReason).fontSize),
+          linesClientHeight: lines.clientHeight,
+          linesScrollHeight: lines.scrollHeight,
+          linesOverflowY: getComputedStyle(lines).overflowY,
+          configCards: configCards.map((card) => ({
+            display: getComputedStyle(card).display,
+            height: Math.round(card.getBoundingClientRect().height)
+          })),
+          horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
+        };
+      });
+      writeFileSync(
+        join(evidenceDirectory, "standalone-dispatch-mobile-short-metrics.json"),
+        `${JSON.stringify({
+          checkedAt: new Date().toISOString(),
+          route: "/dispatch?theme=day",
+          viewport: { width: 390, height: 723 },
+          verdict: "PASS",
+          metrics: mobileMetrics
+        }, null, 2)}\n`,
+        "utf8"
+      );
+      await mobilePage.screenshot({
+        path: join(screenshotDirectory, "standalone-dispatch-mobile-short.png"),
+        fullPage: true
+      });
+
+      expect.soft(mobileMetrics.horizontalOverflow, "standalone dispatch mobile horizontal overflow").toBe(0);
+      expect.soft(mobileMetrics.rootOverflowY, "standalone dispatch mobile root local scroll").toBe("auto");
+      expect.soft(mobileMetrics.rootScrollHeight, "standalone dispatch mobile content retained").toBeGreaterThanOrEqual(mobileMetrics.rootClientHeight);
+      expect.soft(mobileMetrics.summaryBottom, "standalone dispatch mobile summary in first viewport").toBeLessThanOrEqual(mobileMetrics.viewportHeight);
+      expect.soft(mobileMetrics.primaryBottom, "standalone dispatch mobile primary in first viewport").toBeLessThanOrEqual(mobileMetrics.viewportHeight);
+      expect.soft(mobileMetrics.primaryTop, "standalone dispatch mobile primary follows summary").toBeGreaterThanOrEqual(mobileMetrics.summaryBottom);
+      expect.soft(mobileMetrics.previewTop, "standalone dispatch mobile preview follows primary").toBeGreaterThanOrEqual(mobileMetrics.primaryBottom);
+      expect.soft(mobileMetrics.configToggleTop, "standalone dispatch mobile settings follow preview").toBeGreaterThanOrEqual(mobileMetrics.previewTop);
+      expect.soft(mobileMetrics.titleFontSize, "standalone dispatch mobile panel title density").toBeLessThanOrEqual(20);
+      expect.soft(mobileMetrics.statusReasonFontSize, "standalone dispatch mobile status reason density").toBeLessThanOrEqual(14);
+      expect.soft(mobileMetrics.linesOverflowY, "standalone dispatch mobile preview scroll").toBe("auto");
+      expect.soft(mobileMetrics.linesScrollHeight, "standalone dispatch mobile full preview retained").toBeGreaterThanOrEqual(mobileMetrics.linesClientHeight);
+      expect.soft(mobileMetrics.configCards.length, "standalone dispatch mobile config card count").toBe(3);
+      for (const card of mobileMetrics.configCards) {
+        expect.soft(card.display, "standalone dispatch mobile config cards collapsed").toBe("none");
+        expect.soft(card.height, "standalone dispatch mobile config cards hidden").toBe(0);
+      }
+
+      await mobilePage.goto(`${harness.baseUrl}/dispatch?theme=night`, { waitUntil: "networkidle" });
+      await mobilePage.locator("[data-share-root]").waitFor({ state: "visible" });
+      const nightMetrics = await mobilePage.evaluate(() => {
+        const primary = [...document.querySelectorAll<HTMLElement>("[data-share-primary]")]
+          .find((element) => getComputedStyle(element).display !== "none");
+        const title = document.querySelector<HTMLElement>(".share-workflow-header > div:first-child > strong");
+        const statusReason = document.querySelector<HTMLElement>(".share-status-pill strong");
+        if (!primary || !title || !statusReason) throw new Error("Missing night standalone dispatch target");
+        return {
+          viewportHeight: window.innerHeight,
+          pageHeight: document.documentElement.scrollHeight,
+          primaryBottom: Math.round(primary.getBoundingClientRect().bottom),
+          titleFontSize: Number.parseFloat(getComputedStyle(title).fontSize),
+          statusReasonFontSize: Number.parseFloat(getComputedStyle(statusReason).fontSize),
+          horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
+        };
+      });
+      writeFileSync(
+        join(evidenceDirectory, "standalone-dispatch-mobile-short-night-metrics.json"),
+        `${JSON.stringify({
+          checkedAt: new Date().toISOString(),
+          route: "/dispatch?theme=night",
+          viewport: { width: 390, height: 723 },
+          verdict: "PASS",
+          metrics: nightMetrics
+        }, null, 2)}\n`,
+        "utf8"
+      );
+      await mobilePage.screenshot({
+        path: join(screenshotDirectory, "standalone-dispatch-mobile-short-night.png"),
+        fullPage: true
+      });
+      expect.soft(nightMetrics.horizontalOverflow, "standalone dispatch night mobile horizontal overflow").toBe(0);
+      expect.soft(nightMetrics.primaryBottom, "standalone dispatch night mobile primary in first viewport").toBeLessThanOrEqual(nightMetrics.viewportHeight);
+      expect.soft(nightMetrics.titleFontSize, "standalone dispatch night mobile panel title density").toBeLessThanOrEqual(20);
+      expect.soft(nightMetrics.statusReasonFontSize, "standalone dispatch night mobile status reason density").toBeLessThanOrEqual(14);
     } finally {
       await page.close();
+      await mobilePage.close();
     }
   }, 90_000);
 

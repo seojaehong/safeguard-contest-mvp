@@ -1,0 +1,44 @@
+{
+  "checkedAt": "2026-07-28T01:08:09.545Z",
+  "route": "/dispatch?theme=day",
+  "viewport": {
+    "width": 390,
+    "height": 723
+  },
+  "verdict": "PASS",
+  "metrics": {
+    "viewportHeight": 723,
+    "pageHeight": 743,
+    "rootTop": 263,
+    "rootBottom": 694,
+    "rootClientHeight": 429,
+    "rootScrollHeight": 616,
+    "rootOverflowY": "auto",
+    "summaryBottom": 522,
+    "primaryTop": 537,
+    "primaryBottom": 581,
+    "previewTop": 596,
+    "previewBottom": 821,
+    "configToggleTop": 827,
+    "titleFontSize": 20,
+    "statusReasonFontSize": 12,
+    "linesClientHeight": 107,
+    "linesScrollHeight": 353,
+    "linesOverflowY": "auto",
+    "configCards": [
+      {
+        "display": "none",
+        "height": 0
+      },
+      {
+        "display": "none",
+        "height": 0
+      },
+      {
+        "display": "none",
+        "height": 0
+      }
+    ],
+    "horizontalOverflow": 0
+  }
+}

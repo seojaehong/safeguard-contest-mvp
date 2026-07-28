@@ -17507,6 +17507,60 @@ body:has(.safeclaw-landing) :is(
     order: 4;
   }
 
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-panel.workflow-panel > .share-form-shell {
+    display: contents;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-panel.workflow-panel .share-primary-action-row {
+    order: 1;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-panel.workflow-panel > [data-share-preview] {
+    order: 2;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-panel.workflow-panel > .share-mobile-config-toggle {
+    order: 3;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-workflow-header > div:first-child > strong {
+    font-size: var(--text-component-title);
+    line-height: var(--leading-component-title);
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-status-pill strong {
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-page-decision-action {
+    display: none;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-current-workpack {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    width: calc(100% - 32px);
+    margin-top: 8px;
+    padding: 8px 12px;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-current-workpack span {
+    display: none;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-current-workpack strong {
+    overflow: hidden;
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two:has(> .share-panel.workflow-panel) > .safeclaw-module-panel {
+    display: none;
+  }
+
   .share-panel.workflow-panel .share-primary-action-row {
     position: sticky;
     bottom: 8px;
