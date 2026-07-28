@@ -179,7 +179,6 @@ describe("remote Hermes production route", () => {
       contractReady: true,
       executionReady: false,
       issueCodes: [
-        "remote-trusted-transport-required",
         "remote-attempt-ledger-required",
       ],
     });

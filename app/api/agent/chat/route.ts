@@ -1,6 +1,7 @@
 import { createAgentChatPost, createProductionEngineAdapter } from "@/lib/openclaw-broker-route";
 import { resolveBrokerRequestContext } from "@/lib/openclaw-broker-auth";
 import { isProductionTrustedKoshaReference } from "@/lib/production-kosha-trust";
+import { createConfiguredRemoteHermesHttpsTransport } from "@/lib/remote-hermes-https-transport";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -14,6 +15,7 @@ export const POST = createAgentChatPost({
     },
     remoteHermes: {
       trustedKoshaReference: isProductionTrustedKoshaReference,
+      trustedTransport: createConfiguredRemoteHermesHttpsTransport(process.env),
     },
   }),
 });

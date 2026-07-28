@@ -110,7 +110,7 @@ export function assessEngineRuntimeReadiness(env: EnvLike): EngineRuntimeReadine
       resolvedMode: resolved,
       state: contractReady ? "remote-contract-ready" : "configuration-required",
       issueCodes: contractReady
-        ? ["remote-trusted-transport-required", "remote-attempt-ledger-required"]
+        ? ["remote-attempt-ledger-required"]
         : issueCodes,
       contractReady,
       executionReady: false,

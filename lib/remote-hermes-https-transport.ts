@@ -8,6 +8,7 @@ import {
   REMOTE_HERMES_MAX_ENVELOPE_BYTES,
   type RemoteHermesTrustedTransport,
 } from "@/lib/remote-hermes-runtime";
+import type { EnvLike } from "@/lib/engine-adapter";
 
 export const REMOTE_HERMES_MAX_OUTBOUND_BODY_BYTES = REMOTE_HERMES_MAX_ENVELOPE_BYTES;
 
@@ -61,6 +62,34 @@ export type RemoteHermesHttpsTransportOptions = {
   resolver?: RemoteHermesResolver;
   dial?: RemoteHermesHttpsDial;
 };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export function createConfiguredRemoteHermesHttpsTransport(
+  env: EnvLike,
+): RemoteHermesTrustedTransport | undefined {
+  const serviceId = env.SAFECLAW_REMOTE_HERMES_SERVICE_ID?.trim();
+  const rawAttestation = env.SAFECLAW_REMOTE_HERMES_POLICY_ATTESTATION?.trim();
+  if (!serviceId || !rawAttestation) return undefined;
+
+  try {
+    const attestation = JSON.parse(rawAttestation) as unknown;
+    if (!isRecord(attestation)
+      || attestation.serviceId !== serviceId
+      || typeof attestation.attestationDigest !== "string"
+      || !/^[a-f0-9]{64}$/u.test(attestation.attestationDigest)) {
+      return undefined;
+    }
+    return createRemoteHermesHttpsTransport({
+      serviceId,
+      policyAttestationDigest: attestation.attestationDigest,
+    });
+  } catch {
+    return undefined;
+  }
+}
 
 function abortReason(signal: AbortSignal): Error {
   return signal.reason instanceof Error ? signal.reason : new Error("remote Hermes request aborted");

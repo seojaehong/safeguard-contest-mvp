@@ -6,6 +6,7 @@ import type { DetailedPeerCertificate } from "node:tls";
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  createConfiguredRemoteHermesHttpsTransport,
   createNodeRemoteHermesHttpsDial,
   createRemoteHermesHttpsTransport,
   REMOTE_HERMES_MAX_OUTBOUND_BODY_BYTES,
@@ -74,6 +75,30 @@ function createTransport(input: {
 }
 
 describe("remote Hermes pinned HTTPS transport", () => {
+  it("constructs the production transport only from a matching attested identity", () => {
+    const policyAttestation = createRemoteHermesPolicyAttestation({
+      serviceId: "hermes-service",
+      endpointOrigin: origin,
+      issuedAt: new Date(Date.now() - 1_000).toISOString(),
+      expiresAt: new Date(Date.now() + 60_000).toISOString(),
+      keyId: "hermes-response-key",
+      signingSecret: "v".repeat(32),
+    });
+
+    expect(createConfiguredRemoteHermesHttpsTransport({
+      SAFECLAW_REMOTE_HERMES_SERVICE_ID: "hermes-service",
+      SAFECLAW_REMOTE_HERMES_POLICY_ATTESTATION: JSON.stringify(policyAttestation),
+    })).toMatchObject({ dispatch: expect.any(Function) });
+    expect(createConfiguredRemoteHermesHttpsTransport({
+      SAFECLAW_REMOTE_HERMES_SERVICE_ID: "other-service",
+      SAFECLAW_REMOTE_HERMES_POLICY_ATTESTATION: JSON.stringify(policyAttestation),
+    })).toBeUndefined();
+    expect(createConfiguredRemoteHermesHttpsTransport({
+      SAFECLAW_REMOTE_HERMES_SERVICE_ID: "hermes-service",
+      SAFECLAW_REMOTE_HERMES_POLICY_ATTESTATION: "{",
+    })).toBeUndefined();
+  });
+
   it("accepts an outbound body at the exact UTF-8 byte cap", async () => {
     const resolver = vi.fn(async () => [{ address: "93.184.216.34", family: 4 as const }]);
     const dial = vi.fn(async (input: RemoteHermesHttpsDialInput) => dialResult(input));

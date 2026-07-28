@@ -47,7 +47,7 @@ function enginePresentation(readiness: EngineRuntimeReadiness): {
     return {
       mode,
       state: "실행 계층 연결 필요",
-      detail: "원격 계약은 확인됐지만 신뢰 전송 계층과 지속 원장이 연결되지 않아 실행하지 않습니다.",
+      detail: "원격 계약과 신뢰 전송 계층은 확인됐지만 지속 실행 원장이 연결되지 않아 실행하지 않습니다.",
     };
   }
   return {
