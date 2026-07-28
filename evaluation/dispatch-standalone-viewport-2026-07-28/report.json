@@ -1,0 +1,146 @@
+{
+  "schemaVersion": "safeclaw-dispatch-standalone-viewport/v1",
+  "checkedAt": "2026-07-28T10:27:02.9209261+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_STANDALONE_DISPATCH_VIEWPORT_COCKPIT",
+  "sourceHead": "db2e88ed6b5ab652a5717e05ae3ba984da00db3e",
+  "productionBuild": {
+    "commitSha": "db2e88ed6b5ab652a5717e05ae3ba984da00db3e",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-848xlx0x5-seojaehongs-projects.vercel.app"
+  },
+  "route": "/dispatch",
+  "before": {
+    "productionCommit": "c03eaa2caba2b6be599740897c98d8b68a06db9f",
+    "mobileShort": {
+      "viewport": {
+        "width": 390,
+        "height": 723
+      },
+      "pageHeight": 1109,
+      "rootTop": 430,
+      "rootBottom": 861,
+      "primaryBottom": 1155,
+      "previewTop": 797,
+      "previewBottom": 1059,
+      "configToggleTop": 1170,
+      "titleFontSize": 32,
+      "statusReasonFontSize": 32,
+      "horizontalOverflow": 0,
+      "verdict": "RED_PRIMARY_ACTION_OUTSIDE_FIRST_VIEWPORT"
+    },
+    "desktopShort": {
+      "viewport": {
+        "width": 1440,
+        "height": 723
+      },
+      "pageHeight": 1076,
+      "rootTop": 323,
+      "rootBottom": 939,
+      "rootHeight": 616,
+      "gridTemplateColumns": "587px 520px",
+      "primaryBottom": 538,
+      "previewBottom": 794,
+      "horizontalOverflow": 0,
+      "verdict": "RED_PREVIEW_OUTSIDE_FIRST_VIEWPORT"
+    }
+  },
+  "afterLive": {
+    "desktopShort": {
+      "viewport": {
+        "width": 1440,
+        "height": 723
+      },
+      "pageHeight": 755,
+      "rootTop": 323,
+      "rootBottom": 707,
+      "rootHeight": 384,
+      "rootClientHeight": 382,
+      "rootScrollHeight": 614,
+      "rootOverflowY": "auto",
+      "gridTemplateColumns": "572px 520px",
+      "primaryBottom": 538,
+      "previewBottom": 717,
+      "channelCardWidths": [
+        165,
+        165,
+        165
+      ],
+      "horizontalOverflow": 0,
+      "verdict": "PASS"
+    },
+    "mobileShortDay": {
+      "viewport": {
+        "width": 390,
+        "height": 723
+      },
+      "pageHeight": 743,
+      "rootTop": 263,
+      "rootBottom": 694,
+      "rootClientHeight": 429,
+      "rootScrollHeight": 653,
+      "rootOverflowY": "auto",
+      "primaryTop": 537,
+      "primaryBottom": 581,
+      "previewTop": 596,
+      "previewBottom": 858,
+      "titleFontSize": 20,
+      "statusReasonFontSize": 12,
+      "configCardCount": 3,
+      "visibleConfigCardCount": 0,
+      "horizontalOverflow": 0,
+      "verdict": "PASS"
+    },
+    "mobileShortNight": {
+      "viewport": {
+        "width": 390,
+        "height": 723
+      },
+      "pageHeight": 743,
+      "rootTop": 263,
+      "rootBottom": 694,
+      "rootClientHeight": 429,
+      "rootScrollHeight": 653,
+      "primaryTop": 537,
+      "primaryBottom": 581,
+      "horizontalOverflow": 0,
+      "verdict": "PASS"
+    }
+  },
+  "verification": {
+    "browserAndStaticTestFiles": 2,
+    "browserAndStaticTestsPassed": 16,
+    "browserAndStaticTestsFailed": 0,
+    "strictTypecheck": "PASS",
+    "productionBuild": "PASS",
+    "staticPagesGenerated": 28
+  },
+  "acceptanceContract": {
+    "routeSplitAloneAcceptedAsFix": false,
+    "desktopRequiresTwoPaneWorkbench": true,
+    "desktopPreviewContainedInFirstViewport": true,
+    "mobilePrimaryActionContainedInFirstViewport": true,
+    "longPreviewUsesInternalScroll": true,
+    "mobileConfigurationCollapsedByDefault": true
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingOrVectorMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "exactSavedShareUserSessionReproduced": false,
+    "exactSavedShareRequiresConcreteUrlOrApprovedCreationFlow": true,
+    "documentsDefaultCockpitClaim": "SCOPED_SEPARATE_EVIDENCE",
+    "broadHumanWordingReviewRequired": true
+  },
+  "evidence": {
+    "localDayMetric": "evaluation/share-mobile-p1/standalone-dispatch-mobile-short-metrics.json",
+    "localNightMetric": "evaluation/share-mobile-p1/standalone-dispatch-mobile-short-night-metrics.json",
+    "localDesktopMetric": "evaluation/share-mobile-p1/standalone-dispatch-desktop-metrics.json",
+    "localDayScreenshot": "evaluation/share-mobile-p1/screenshots/standalone-dispatch-mobile-short.png",
+    "localNightScreenshot": "evaluation/share-mobile-p1/screenshots/standalone-dispatch-mobile-short-night.png"
+  }
+}
