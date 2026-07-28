@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-25T06:55:35.815Z",
+  "generatedAt": "2026-07-28T01:44:08.212Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "3c7f5e755ba4d1e60f5e70dc269b8fdd90280af8",
-  "productionCommit": "a78c99e6f3a71baac03c6589666c07908a0efc3d",
+  "sourceHead": "0f323065d6a691b03597c847de3ee4e4f3edac50",
+  "productionCommit": "7419dd2221dfc95d792449d732af1ba025a1d950",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "a78c99e6f3a71baac03c6589666c07908a0efc3d",
+    "commitSha": "7419dd2221dfc95d792449d732af1ba025a1d950",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-8z1lmof21-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-ojyypk9ug-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": false,
@@ -20,16 +20,16 @@
   "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
   "sourcePendingChangedPaths": [
+    "scripts/northstar_live_rollup.mjs",
     "scripts/northstar_next_runway.mjs",
     "scripts/northstar_open_gate_audit.mjs",
-    "scripts/sif_embedding_approval_preflight.mjs",
-    "tests/northstar-open-gate-audit.test.ts",
-    "tests/sif-embedding-preflight.test.ts"
+    "tests/northstar-live-rollup.test.ts",
+    "tests/northstar-open-gate-audit.test.ts"
   ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "3c7f5e755ba4d1e60f5e70dc269b8fdd90280af8",
-  "liveRollupLiveCommit": "a78c99e6f3a71baac03c6589666c07908a0efc3d",
+  "liveExactEvidenceCommit": "0f323065d6a691b03597c847de3ee4e4f3edac50",
+  "liveRollupLiveCommit": "7419dd2221dfc95d792449d732af1ba025a1d950",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -229,6 +229,7 @@
     "documentsContainment": "route/page split is only orientation; /documents must remain a selected-only bounded workbench with a default exposure budget, core 3/supporting 9 as index or collapsed navigation, and long source/section/provenance content in drilldown",
     "documentsGeneratedCurrentWorkpack": "live generated-current-workpack state is measured separately from default/example Documents; desktop and mobile must keep body containment, first action/hazard visibility, supporting-9 collapsed by default, sticky overlap 0, and local shell ratio <= 3",
     "shareDesktop": "current measured Workspace Share passes a scoped three-zone desktop cockpit and 390x723 mobile-stack contract, while the invited recipient fixture separately passes a two-zone desktop workbench; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes, and desktop must not regress into a mobile card stack",
+    "dispatchStandalone": "live standalone /dispatch now separately requires a 1440x723 two-pane viewport cockpit with preview and primary action inside the first viewport plus 390x723 Day/Night primary-action containment, internal scroll, default-collapsed mobile configuration, and exact saved Share MISSING_EVIDENCE",
     "shareGeneratedResult": "current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported",
     "shareRecipientLongContent": "live route-controlled long-content fixture keeps desktop recipient Share in two regions, mobile recipient root <= 1.5 viewports, confirmation in the first viewport, long task text in local scroll, and the document group collapsed by default; route split alone is insufficient and this is not exact saved-session proof",
     "shareRouteEvidenceBoundary": "separate Share evidence into invited recipient fixture pass, exact saved/generated /share/[sessionId] missing evidence, and manager/workspace share-result route repro; do not use one route's pass to close another route's mobile-like complaint",

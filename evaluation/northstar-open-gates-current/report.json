@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-25T06:55:27.078Z",
-  "sourceSha": "3c7f5e755ba4d1e60f5e70dc269b8fdd90280af8",
+  "generatedAt": "2026-07-28T01:43:57.933Z",
+  "sourceSha": "0f323065d6a691b03597c847de3ee4e4f3edac50",
   "overall": "open",
   "gates": [
     {
@@ -173,9 +173,9 @@
     {
       "id": "dispatch_standalone_cockpit",
       "state": "proven",
-      "label": "Standalone dispatch desktop cockpit",
-      "evidencePath": "evaluation\\dispatch-standalone-cockpit-2026-07-21\\report.json",
-      "detail": "Production /dispatch seeded desktop and sample shell routes are no longer mobile-stacked: seeded pageHeight 1116 (1.24x), sample panels 635px/413px in distinct desktop regions, overflow false/outside 0.",
+      "label": "Standalone dispatch viewport cockpit",
+      "evidencePath": "evaluation\\dispatch-standalone-viewport-2026-07-28\\report.json",
+      "detail": "Production /dispatch keeps the legacy desktop/sample resilience proof and now requires the viewport companion: 1440x723 preview bottom=717, primary bottom=538, mobile Day/Night primary bottom=581/581, local scroll retained, route split alone false, exact saved Share MISSING_EVIDENCE. Legacy seeded pageHeight 1116 (1.24x), sample panels 635px/413px.",
       "nextActions": [
         "Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved."
       ]
