@@ -1471,12 +1471,18 @@ describe("northstar next runway generator", () => {
     });
     expect(report.launchReadiness.documentCoverage.present).toContain("workPermitDraft");
     expect(report.approvalGated.map((gate) => gate.gate)).toEqual([
+      "share_recipient_ack_approval",
       "provider_dispatch_persistence",
       "supabase_rls_launch_isolation",
       "llm_wiki_publication",
       "sif_embedding_runtime",
       "kosha_exact_promotion_review_gate",
     ]);
+    expect(report.approvalGated[0]).toMatchObject({
+      state: "approval_gated",
+      readyForOperatorReview: true,
+      currentSafetyLock: "live_data_mutation_approval_required",
+    });
     expect(report.koshaNextExactCandidateAudit).toMatchObject({
       verdict: "NEXT_EXACT_TRUST_CANDIDATES_IDENTIFIED_APPROVAL_FREE",
       exactPins: 3,
@@ -1950,6 +1956,31 @@ describe("northstar next runway generator", () => {
     expect(report.sourceHeadLivePending).toBe(false);
     expect(report.boundedWorkbenchSourceIncludedInLive).toBe(false);
     expect(report.boundedWorkbenchCurrentLivePending).toBe(true);
+  });
+
+  it("keeps recipient ACK approval visible when its preflight is missing", async () => {
+    const { buildNorthstarNextRunway } = await loadNextRunwayModule();
+    const { root, secondHead } = createFixtureRoot();
+    pointLiveRollupAt(root, secondHead);
+    fs.unlinkSync(path.join(
+      root,
+      "evaluation",
+      "share-recipient-ack-approval-preflight-current-2026-07-19",
+      "report.json",
+    ));
+
+    const report = buildNorthstarNextRunway({
+      rootDir: root,
+      buildInfo: { commitSha: secondHead },
+      generatedAt: "2026-07-28T00:00:00.000Z",
+    });
+
+    expect(report.approvalGated[0]).toMatchObject({
+      gate: "share_recipient_ack_approval",
+      state: "approval_gated",
+      readyForOperatorReview: false,
+      currentSafetyLock: "preflight_missing_or_invalid",
+    });
   });
 
   it("treats a bounded-workbench source ancestor as included in live", async () => {

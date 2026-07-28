@@ -206,12 +206,13 @@ function parseArgs(argv) {
 
 /**
  * @param {unknown} approvalRunway
+ * @param {unknown} shareRecipientAckApproval
  */
-function approvalGates(approvalRunway) {
+function approvalGates(approvalRunway, shareRecipientAckApproval) {
   if (!isRecord(approvalRunway) || !Array.isArray(approvalRunway.approvalGates)) {
     throw new Error("Approval runway report is missing approvalGates.");
   }
-  return approvalRunway.approvalGates.filter(isRecord).map((gate) => ({
+  const gates = approvalRunway.approvalGates.filter(isRecord).map((gate) => ({
     gate: asString(gate.id),
     state: asString(gate.state),
     evidencePath: asString(gate.evidencePath),
@@ -220,6 +221,42 @@ function approvalGates(approvalRunway) {
     approvalNeeded: Array.isArray(gate.approvalNeeded) ? gate.approvalNeeded.map(asString).filter(Boolean) : [],
     forbiddenUntilApproved: Array.isArray(gate.forbiddenUntilApproved) ? gate.forbiddenUntilApproved.map(asString).filter(Boolean) : [],
   }));
+  if (gates.some((gate) => gate.gate === "share_recipient_ack_approval")) {
+    return gates;
+  }
+
+  const ack = isRecord(shareRecipientAckApproval) ? shareRecipientAckApproval : {};
+  const ackReady = asString(ack.overall) === "approval_ready_open"
+    && asBoolean(ack.approvalRequired) === true
+    && asBoolean(ack.liveDataMutationApproved) === false
+    && asBoolean(ack.dbMutationPerformed) === false
+    && asBoolean(ack.providerMessageSent) === false
+    && asBoolean(ack.productionShareSessionCreated) === false
+    && asBoolean(ack.productionReadConfirmationInserted) === false
+    && Array.isArray(ack.failedCheckIds)
+    && ack.failedCheckIds.length === 0;
+  return [
+    {
+      gate: "share_recipient_ack_approval",
+      state: "approval_gated",
+      evidencePath: ARTIFACTS.shareRecipientAckApprovalPreflight,
+      readyForOperatorReview: ackReady,
+      currentSafetyLock: ackReady
+        ? "live_data_mutation_approval_required"
+        : "preflight_missing_or_invalid",
+      approvalNeeded: [
+        "approve a disposable production workpack and worker pair",
+        "approve workpack_share_sessions and workpack_read_confirmations inserts",
+        "measure invited-recipient ACK readback without provider dispatch",
+      ],
+      forbiddenUntilApproved: [
+        "production share-session creation",
+        "production recipient read-confirmation insertion",
+        "real invited-recipient ACK readback claim",
+      ],
+    },
+    ...gates,
+  ];
 }
 
 /**
@@ -1314,7 +1351,7 @@ export function buildNorthstarNextRunway(options) {
         reason: "pass_with_notice with carried auth-history and dispatch-policy notices",
       },
     ],
-    approvalGated: approvalGates(approvalRunway),
+    approvalGated: approvalGates(approvalRunway, shareRecipientAckApproval),
     launchReadiness: launchReadinessSummary(launch),
     uiInterpretation: {
       routeSplitAloneAcceptedAsFix: false,
