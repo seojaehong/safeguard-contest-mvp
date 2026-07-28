@@ -1291,7 +1291,7 @@ ul {
   text-wrap: balance;
 }
 
-/* "채용하지 않은 안전관리자" positioning line — one restrained addition. */
+/* Human-review boundary for the landing positioning line. */
 .safeclaw-os-hero .safeclaw-hero-position {
   display: flex;
   align-items: center;
@@ -17532,12 +17532,16 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .share-workflow-header > div:first-child > strong {
     font-size: var(--text-component-title);
+    font-weight: 700;
     line-height: var(--leading-component-title);
+    letter-spacing: var(--tracking-component-title);
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .share-status-pill strong {
     font-size: var(--text-caption);
+    font-weight: 600;
     line-height: var(--leading-caption);
+    letter-spacing: var(--tracking-body);
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-page-decision-action {
@@ -17559,7 +17563,9 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-current-workpack strong {
     overflow: hidden;
     font-size: var(--text-caption);
+    font-weight: 600;
     line-height: var(--leading-caption);
+    letter-spacing: var(--tracking-body);
     text-overflow: ellipsis;
     white-space: nowrap;
   }

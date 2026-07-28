@@ -130,6 +130,15 @@ describe("shared shell hooks and accessibility", () => {
     }
   });
 
+  it("presents SafeClaw as a document assistant without replacing the human safety role", () => {
+    const source = read("components/SafeClawLanding.tsx");
+
+    expect(source).toContain("현장관리자의 문서 준비를 돕습니다");
+    expect(source).toContain("안전 판단과 최종 확인은 사람이 맡습니다.");
+    expect(source).not.toContain("채용하지 않은 안전관리자");
+    expect(source).not.toContain("한 명 몫의 문서 업무를 대신합니다");
+  });
+
   it.each(["components/SafeClawModuleShell.tsx", "components/SafeClawLanding.tsx"])(
     "requires accessible names for every icon-only control in %s",
     (relativePath) => {
