@@ -574,7 +574,7 @@ function createFixtureRoot(): string {
     },
   });
   writeJson(rootDir, path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"), {
-    verdict: "PASS_LIVE_PRODUCTION_BOUNDED_DEPENDENCY_REMEDIATION_RESIDUALS_OPEN",
+    verdict: "PASS_LIVE_PRODUCTION_DEPENDENCY_AUDIT_ZERO_FULL_SECURITY_SCAN_OPEN",
     sourceHead: "fixture-sha",
     productionBuild: {
       commitSha: "fixture-sha",
@@ -586,9 +586,10 @@ function createFixtureRoot(): string {
       totalVulnerablePackages: 19,
     },
     auditAfter: {
-      high: 9,
+      critical: 0,
+      high: 0,
       moderate: 0,
-      totalVulnerablePackages: 9,
+      totalVulnerablePackages: 0,
       productionOmitDevMatchesFullAudit: true,
       automaticNonBreakingFixChangeCount: 0,
     },
@@ -600,10 +601,10 @@ function createFixtureRoot(): string {
       { package: "fast-uri", after: "3.1.4" },
       { package: "sharp", after: "0.35.3" },
       { package: "uuid", after: "11.1.1" },
+      { package: "archiver", after: "8.0.0" },
+      { package: "unzipper", after: "0.12.1" },
     ],
-    residuals: [
-      { group: "exceljs-archive-chain" },
-    ],
+    residuals: [],
     compatibilityBoundary: {
       mcpSdkKeptAt: "1.26.0",
       dependencyGraphValid: true,
@@ -611,6 +612,8 @@ function createFixtureRoot(): string {
       fastUriOverride: "3.1.4",
       sharpOverride: "0.35.3",
       uuidOverride: "11.1.1",
+      archiverOverride: "8.0.0",
+      unzipperOverride: "0.12.1",
     },
     verification: {
       strictTypecheck: "PASS",
@@ -624,6 +627,10 @@ function createFixtureRoot(): string {
       runtimeDependencyOverrides: {
         testFiles: 1,
         testsPassed: 3,
+      },
+      archiveRuntimeContracts: {
+        testFiles: 4,
+        testsPassed: 23,
       },
       localRuntimeSmoke: {
         mcpUnauthenticatedStatus: 401,
@@ -642,7 +649,7 @@ function createFixtureRoot(): string {
     remainingBoundaries: {
       liveAfterDeploymentRequired: false,
       fullRepositorySecurityScanCompleted: false,
-      residualVulnerablePackages: 9,
+      residualVulnerablePackages: 0,
       providerDispatchPersistence: "approval_gated",
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
@@ -2344,12 +2351,11 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("OPEN_SEPARATE_VIEWPORT_IA_WAVE");
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")).toMatchObject({
-      state: "notice",
+      state: "proven",
       evidencePath: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
     });
-    expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("19 to 9");
-    expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("ExcelJS archive chain");
-    expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("not a zero-vulnerability");
+    expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("19 findings to 0");
+    expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("not a full repository security-scan");
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_authority")).toMatchObject({
       state: "proven",
@@ -2847,7 +2853,7 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("landingTruthPass=false");
   });
 
-  it("fails dependency security remediation closed when residual findings are hidden", async () => {
+  it("fails dependency security remediation closed when the zero-audit evidence is contradicted", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
     const reportPath = path.join(rootDir, "evaluation", "dependency-security-remediation-2026-07-28", "report.json");
@@ -2858,7 +2864,7 @@ describe("northstar open gate audit", () => {
       };
     };
     report.remainingBoundaries.fullRepositorySecurityScanCompleted = true;
-    report.remainingBoundaries.residualVulnerablePackages = 0;
+    report.remainingBoundaries.residualVulnerablePackages = 1;
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
 
     const audit = buildNorthstarOpenGateAudit({
@@ -2869,7 +2875,7 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")).toMatchObject({
       state: "contradicted",
     });
-    expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("residuals=0");
+    expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("residuals=1");
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("fullScan=true");
   });
 

@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-28T10:35:48.846Z
-Source HEAD at generation: 32431e341c0fe25340be3b5e143e12829b76ca3e
-Live commit at generation: 32431e341c0fe25340be3b5e143e12829b76ca3e
+Generated at: 2026-07-28T12:20:25.183Z
+Source HEAD at generation: 99321fd8b4fc815915c694853db5565d2758e5e1
+Live commit at generation: 99321fd8b4fc815915c694853db5565d2758e5e1
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -152,7 +152,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_broad_review | proven | evaluation\live-document-broad-review-2026-07-25\report.json |
 | live_document_editorial_review | proven | evaluation\live-document-editorial-review-2026-07-25\report.json |
 | product_capability_truth | proven | evaluation\product-capability-truth-2026-07-25\report.json |
-| dependency_security_remediation | notice | evaluation\dependency-security-remediation-2026-07-28\report.json |
+| dependency_security_remediation | proven | evaluation\dependency-security-remediation-2026-07-28\report.json |
 | hermes_knowledge_review_authority | proven | evaluation\hermes-knowledge-review-contract-live-2026-07-25\report.json |
 | hermes_knowledge_review_ui | proven | evaluation\hermes-knowledge-review-authority-ui-2026-07-25\report.json |
 | live_document_secondary_grounding | proven | evaluation\live-document-secondary-grounding-2026-07-25\report.json |

@@ -965,7 +965,7 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     },
   });
   writeJson(root, "evaluation/dependency-security-remediation-2026-07-28/report.json", {
-    verdict: "PASS_LIVE_PRODUCTION_BOUNDED_DEPENDENCY_REMEDIATION_RESIDUALS_OPEN",
+    verdict: "PASS_LIVE_PRODUCTION_DEPENDENCY_AUDIT_ZERO_FULL_SECURITY_SCAN_OPEN",
     sourceHead: "fixture-sha",
     productCommit: "fixture-product",
     productionBuild: {
@@ -975,8 +975,8 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       totalVulnerablePackages: 19,
     },
     auditAfter: {
-      totalVulnerablePackages: 9,
-      high: 9,
+      totalVulnerablePackages: 0,
+      high: 0,
       moderate: 0,
     },
     remainingBoundaries: {
@@ -1700,19 +1700,19 @@ describe("northstar next runway generator", () => {
         "authenticated live execution canary after durable ledger approval",
       ],
     });
-    expect(report.noticeState).toContainEqual(expect.objectContaining({
+    expect(report.noticeState).not.toContainEqual(expect.objectContaining({
       gate: "dependency_security_remediation",
-      state: "notice",
     }));
     expect(report.dependencySecurityRemediation).toMatchObject({
-      verdict: "PASS_LIVE_PRODUCTION_BOUNDED_DEPENDENCY_REMEDIATION_RESIDUALS_OPEN",
+      verdict: "PASS_LIVE_PRODUCTION_DEPENDENCY_AUDIT_ZERO_FULL_SECURITY_SCAN_OPEN",
       beforeVulnerablePackages: 19,
-      liveVulnerablePackages: 9,
-      liveHigh: 9,
+      liveVulnerablePackages: 0,
+      liveHigh: 0,
       liveModerate: 0,
       fullRepositorySecurityScanCompleted: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
+    expect(report.provenCurrentState).toContain("dependency_security_remediation");
     expect(report.provenCurrentState).toContain("hermes_knowledge_review_authority");
     expect(report.provenCurrentState).toContain("hermes_knowledge_review_ui");
     expect(report.hermesKnowledgeReviewAuthorityUi).toMatchObject({

@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-28T10:35:48.846Z",
-  "head": "32431e341c0fe25340be3b5e143e12829b76ca3e",
+  "generatedAt": "2026-07-28T12:20:25.183Z",
+  "head": "99321fd8b4fc815915c694853db5565d2758e5e1",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "32431e341c0fe25340be3b5e143e12829b76ca3e",
+    "commitSha": "99321fd8b4fc815915c694853db5565d2758e5e1",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-pao5ups1s-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-60oz5feu1-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -89,9 +89,9 @@
     },
     {
       "id": "dependency_security_remediation",
-      "state": "notice",
+      "state": "proven",
       "artifact": "evaluation\\dependency-security-remediation-2026-07-28\\report.json",
-      "detail": "Live bounded remediation removed the direct Next.js and adm-zip advisories plus all PostCSS, AJV fast-uri, MCP/Hono static-path, Next/Sharp, and UUID advisories, reducing the production lockfile finding count from 19 to 9. The ExcelJS archive chain remains explicitly open; this is not a zero-vulnerability or full repository security-scan claim. No mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Live runtime dependency remediation reduced the production lockfile audit from 19 findings to 0 while retaining ExcelJS 4.4.0 and verifying its patched archiver/unzipper write-read path. This is an npm dependency-audit claim, not a full repository security-scan or zero-risk product claim. No mutation occurred and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "hermes_knowledge_review_authority",
@@ -566,9 +566,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "32431e341c0fe25340be3b5e143e12829b76ca3e",
+      "sourceCommit": "99321fd8b4fc815915c694853db5565d2758e5e1",
       "sourceStatus": "exact",
-      "productionCommit": "32431e341c0fe25340be3b5e143e12829b76ca3e",
+      "productionCommit": "99321fd8b4fc815915c694853db5565d2758e5e1",
       "productionStatus": "matches_live"
     },
     {

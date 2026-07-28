@@ -2937,32 +2937,39 @@ function evaluateDependencySecurityRemediationGate(rootDir) {
     && mutationBoundary.embeddingGenerated === false
     && mutationBoundary.vectorUploadPerformed === false
     && mutationBoundary.exactTrustRegistryMutationPerformed === false;
-  const liveBoundedPass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_BOUNDED_DEPENDENCY_REMEDIATION_RESIDUALS_OPEN"
+  const liveBoundedPass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_DEPENDENCY_AUDIT_ZERO_FULL_SECURITY_SCAN_OPEN"
     && readString(report.sourceHead).length > 0
     && readString(report.sourceHead) === readString(productionBuild.commitSha)
     && productionBuild.sourceHeadMatchesProduction === true
     && readNumber(auditBefore.totalVulnerablePackages) === 19
     && readNumber(auditBefore.high) === 14
     && readNumber(auditBefore.moderate) === 5
-    && readNumber(auditAfter.totalVulnerablePackages) === 9
-    && readNumber(auditAfter.high) === 9
+    && readNumber(auditAfter.totalVulnerablePackages) === 0
+    && readNumber(auditAfter.high) === 0
     && readNumber(auditAfter.moderate) === 0
+    && readNumber(auditAfter.critical) === 0
     && auditAfter.productionOmitDevMatchesFullAudit === true
     && readNumber(auditAfter.automaticNonBreakingFixChangeCount) === 0
-    && updates.length === 7
+    && updates.length === 9
     && updates.some((item) => readString(item.package) === "@hono/node-server" && readString(item.after) === "2.0.12")
     && updates.some((item) => readString(item.package) === "fast-uri" && readString(item.after) === "3.1.4")
     && updates.some((item) => readString(item.package) === "sharp" && readString(item.after) === "0.35.3")
     && updates.some((item) => readString(item.package) === "uuid" && readString(item.after) === "11.1.1")
-    && residuals.length === 1
+    && updates.some((item) => readString(item.package) === "archiver" && readString(item.after) === "8.0.0")
+    && updates.some((item) => readString(item.package) === "unzipper" && readString(item.after) === "0.12.1")
+    && residuals.length === 0
     && compatibilityBoundary.dependencyGraphValid === true
     && readString(compatibilityBoundary.mcpSdkKeptAt) === "1.26.0"
     && readString(compatibilityBoundary.honoOverride) === "2.0.12"
     && readString(compatibilityBoundary.fastUriOverride) === "3.1.4"
     && readString(compatibilityBoundary.sharpOverride) === "0.35.3"
     && readString(compatibilityBoundary.uuidOverride) === "11.1.1"
+    && readString(compatibilityBoundary.archiverOverride) === "8.0.0"
+    && readString(compatibilityBoundary.unzipperOverride) === "0.12.1"
     && readNumber(verification.runtimeDependencyOverrides?.testFiles) === 1
     && readNumber(verification.runtimeDependencyOverrides?.testsPassed) === 3
+    && readNumber(verification.archiveRuntimeContracts?.testFiles) === 4
+    && readNumber(verification.archiveRuntimeContracts?.testsPassed) === 23
     && verification.strictTypecheck === "PASS"
     && verification.build === "PASS"
     && readString(verification.nextVersion) === "15.5.22"
@@ -2975,7 +2982,7 @@ function evaluateDependencySecurityRemediationGate(rootDir) {
     && noMutation
     && remainingBoundaries.liveAfterDeploymentRequired === false
     && remainingBoundaries.fullRepositorySecurityScanCompleted === false
-    && readNumber(remainingBoundaries.residualVulnerablePackages) === 9
+    && readNumber(remainingBoundaries.residualVulnerablePackages) === 0
     && readString(remainingBoundaries.providerDispatchPersistence) === "approval_gated"
     && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE";
 
@@ -2983,11 +2990,10 @@ function evaluateDependencySecurityRemediationGate(rootDir) {
     return gateResult({
       id: "dependency_security_remediation",
       label: "Runtime dependency security remediation",
-      state: "notice",
+      state: "proven",
       evidencePath,
-      detail: "Live bounded remediation removed the direct Next.js and adm-zip advisories plus all PostCSS, AJV fast-uri, MCP/Hono static-path, Next/Sharp, and UUID advisories, reducing the production lockfile finding count from 19 to 9. The ExcelJS archive chain remains explicitly open; this is not a zero-vulnerability or full repository security-scan claim. No mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
+      detail: "Live runtime dependency remediation reduced the production lockfile audit from 19 findings to 0 while retaining ExcelJS 4.4.0 and verifying its patched archiver/unzipper write-read path. This is an npm dependency-audit claim, not a full repository security-scan or zero-risk product claim. No mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
       nextActions: [
-        "Track a patched upstream release for the ExcelJS archive chain.",
         "Run a separately scoped full repository security scan before any broad security-complete claim.",
       ],
     });

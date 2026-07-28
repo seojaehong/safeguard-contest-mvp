@@ -1,14 +1,14 @@
 {
   "schemaVersion": "safeclaw-dependency-security-remediation/v1",
-  "generatedAt": "2026-07-28T10:36:00.0000000Z",
-  "verdict": "PASS_LIVE_PRODUCTION_BOUNDED_DEPENDENCY_REMEDIATION_RESIDUALS_OPEN",
-  "sourceHead": "32431e341c0fe25340be3b5e143e12829b76ca3e",
-  "productCommit": "32431e341c0fe25340be3b5e143e12829b76ca3e",
+  "generatedAt": "2026-07-28T12:25:00.0000000Z",
+  "verdict": "PASS_LIVE_PRODUCTION_DEPENDENCY_AUDIT_ZERO_FULL_SECURITY_SCAN_OPEN",
+  "sourceHead": "99321fd8b4fc815915c694853db5565d2758e5e1",
+  "productCommit": "99321fd8b4fc815915c694853db5565d2758e5e1",
   "productionBuild": {
-    "commitSha": "32431e341c0fe25340be3b5e143e12829b76ca3e",
+    "commitSha": "99321fd8b4fc815915c694853db5565d2758e5e1",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-pao5ups1s-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-60oz5feu1-seojaehongs-projects.vercel.app",
     "sourceHeadMatchesProduction": true
   },
   "auditBefore": {
@@ -20,10 +20,10 @@
   },
   "auditAfter": {
     "critical": 0,
-    "high": 9,
+    "high": 0,
     "moderate": 0,
     "low": 0,
-    "totalVulnerablePackages": 9,
+    "totalVulnerablePackages": 0,
     "productionOmitDevMatchesFullAudit": true,
     "automaticNonBreakingFixChangeCount": 0
   },
@@ -84,6 +84,20 @@
       "after": "11.1.1",
       "strategy": "root override with ExcelJS CommonJS and gaxios multipart compatibility verification",
       "advisoriesPresentAfter": 0
+    },
+    {
+      "package": "archiver",
+      "before": "5.3.2",
+      "after": "8.0.0",
+      "strategy": "root override retaining ExcelJS 4.4.0 with workbook write compatibility verification",
+      "advisoriesPresentAfter": 0
+    },
+    {
+      "package": "unzipper",
+      "before": "0.10.14",
+      "after": "0.12.1",
+      "strategy": "root override removing fstream while avoiding the static AWS SDK import introduced in 0.12.2",
+      "advisoriesPresentAfter": 0
     }
   ],
   "compatibilityBoundary": {
@@ -94,28 +108,11 @@
     "fastUriOverride": "3.1.4",
     "sharpOverride": "0.35.3",
     "uuidOverride": "11.1.1",
+    "archiverOverride": "8.0.0",
+    "unzipperOverride": "0.12.1",
     "dependencyGraphValid": true
   },
-  "residuals": [
-    {
-      "group": "exceljs-archive-chain",
-      "severity": "high",
-      "packages": [
-        "exceljs",
-        "archiver",
-        "archiver-utils",
-        "glob",
-        "minimatch",
-        "brace-expansion",
-        "readdir-glob",
-        "zip-stream",
-        "rimraf"
-      ],
-      "finding": "The latest ExcelJS 4.4.0 still pins vulnerable archive dependencies; npm proposes an unsafe downgrade to 3.4.0.",
-      "reviewedReachability": "Runtime code creates workbooks from structured SafeClaw data. Reviewed runtime source does not load user-supplied XLSX files; XLSX reads are confined to tests and audit scripts.",
-      "status": "OPEN_UPSTREAM_NO_SAFE_AUTOMATIC_FIX"
-    }
-  ],
+  "residuals": [],
   "verification": {
     "focusedProductTests": {
       "testFiles": 13,
@@ -139,6 +136,13 @@
       "excelJsConditionalFormattingCommonJsUuid": "PASS",
       "gaxiosMultipartUuidBoundary": "PASS"
     },
+    "archiveRuntimeContracts": {
+      "testFiles": 4,
+      "testsPassed": 23,
+      "testsFailed": 0,
+      "excelJsVersionRetained": "4.4.0",
+      "workbookWriteReadRoundTrip": "PASS"
+    },
     "uuidAdjacentProductContracts": {
       "testFiles": 7,
       "testsPassed": 70,
@@ -150,6 +154,14 @@
       "focusedRerunPassed": 1,
       "focusedRerunFailed": 0,
       "failureScope": "pre-existing mobile cockpit geometry assertion outside dependency files"
+    },
+    "documentsBrowserHarnessObservation": {
+      "verdict": "INCONCLUSIVE_ISOLATED_NEXT_DEV_SERVER_TIMEOUT",
+      "fullSuiteCommandTimedOut": true,
+      "targetedPassed": 2,
+      "targetedTimedOut": 6,
+      "failureClass": "download and workspace visibility waits after the isolated Next dev harness stopped responding",
+      "productDependencyEvidenceSubstituteUsed": false
     },
     "strictTypecheck": "PASS",
     "build": "PASS",
@@ -169,6 +181,14 @@
       "dispatch": 200,
       "agentManifest": 200,
       "mcpUnauthenticated": 401
+    },
+    "liveXlsxSmoke": {
+      "status": 200,
+      "contentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "bytes": 8086,
+      "worksheets": 1,
+      "sentinelRecovered": true,
+      "dbMutationPerformed": false
     }
   },
   "mutationBoundary": {
@@ -182,7 +202,7 @@
   "remainingBoundaries": {
     "liveAfterDeploymentRequired": false,
     "fullRepositorySecurityScanCompleted": false,
-    "residualVulnerablePackages": 9,
+    "residualVulnerablePackages": 0,
     "providerDispatchPersistence": "approval_gated",
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   }
