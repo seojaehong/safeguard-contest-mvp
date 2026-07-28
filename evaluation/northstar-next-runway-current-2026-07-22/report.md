@@ -4,17 +4,17 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `977bb8021b3c8b6934d6268a9b27fbedcc50bfa6`
+Source HEAD: `3ab2b41a664412cbdf1fddbde97371ecc6798cf8`
 
-Production `/api/build-info`: `977bb8021b3c8b6934d6268a9b27fbedcc50bfa6`
+Production `/api/build-info`: `1b7f53712acdfea65d2a5abc52a3e73cfb03501b`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `none`
+Source pending changed paths: `scripts/northstar_next_runway.mjs`, `tests/northstar-next-runway-generator.test.ts`
 
 Current head is evidence-only pending: `false`
 
@@ -22,9 +22,9 @@ Bounded workbench current live pending: `false`
 
 Live rollup source head: `977bb8021b3c8b6934d6268a9b27fbedcc50bfa6`
 
-Live rollup matches production: `true`
+Live rollup matches production: `false`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `3ab2b41a664412cbdf1fddbde97371ecc6798cf8` is ahead of production `1b7f53712acdfea65d2a5abc52a3e73cfb03501b`. Product/evidence changes are source-local verified and live-pending until production advances and the live probe is rerun.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -54,7 +54,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live Hermes reviewer authority UI is measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI`, local/live viewport contracts `8/8` and `8/8`, with authority order `SIF -> KOSHA -> law -> organization_history -> site_history -> external_context`. Human review remains required and machine evidence does not replace it; no DB/provider/share/publication mutation is claimed. Exact saved Share remains `MISSING_EVIDENCE`, while LLM Wiki publication and Supabase RLS remain approval-gated.
 - Live supporting-document scenario grounding is measured separately: `PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT`, live cases `5/5`, supporting documents `30/30`, cross-scenario leakage `0`, and missingUnexpected `0`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains `MISSING_EVIDENCE`.
 - Live document seed-profile isolation is measured separately: `PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION`, before forbidden fragments `90`, live forbidden fragments `0`, reviewed document surface `60`, and secondary grounding `30/30`. This deterministic gate does not replace broad human wording review or exact saved Share evidence; exact saved Share remains `MISSING_EVIDENCE`.
-- Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level, without claiming live production engine execution.
+- Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level. DNS-pinned trusted transport wired=`true`; durable attempt ledger wired=`false`; live execution claimed=`false`.
 - SIF embedding approval preflight is approval-held: no embedding generation, no upload, and vector runtime disabled until approval.
 - North Star approval runway is current and separates runtime/provider/database/vector gates from ordinary UI/evidence iteration.
 - RLS / LLM Wiki approval preflight remains operator-review ready, with no DB mutation or launch-readiness claim.
@@ -120,7 +120,7 @@ Required first-task containment:
 13. resolve public Share storage readiness before exact saved-session closure: current evidence shows workpacks readable but workpack_share_sessions missing from production PostgREST schema cache.
 14. do not create a production saved Share session unless the user supplies a concrete existing URL or explicitly approves DB-backed share-session creation; POST /api/workpacks/[id]/share-sessions inserts workpack_share_sessions.
 15. keep invited-recipient ACK canary approval-gated: production workpack_share_sessions and workpack_read_confirmations rows require explicit live-data mutation approval before any real ACK readback claim.
-16. keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven.
+16. keep Hermes/OpenClaw live execution held: tenant envelope, tool denial, Evidence Harness, DNS-pinned trusted transport, and terminal persistence behavior are source-proven, while the durable cross-instance attempt/terminal ledger and authenticated canary remain open.
 17. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
 18. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
 19. do not claim dependency-security completion while 17 vulnerable-package findings and the full repository security scan remain open.

@@ -1,6 +1,6 @@
 # SafeClaw Hermes / OpenClaw Runtime Current Gate
 
-Checked at: 2026-07-23T03:08:12.912Z
+Checked at: 2026-07-28T07:19:58.706Z
 
 ## Verdict
 
@@ -10,10 +10,10 @@ Live production runtime execution is still not claimed. The live `/api/agent/cha
 
 ## Authority
 
-- Source SHA for focused tests: `c5f933d4ac553ae1dfe3b8416292cf75eecf2e95`
-- Production build-info observed during live smoke: `c5f933d4ac553ae1dfe3b8416292cf75eecf2e95`
-- Live deployment URL: `safeguard-contest-ph8j8w5s4-seojaehongs-projects.vercel.app`
-- Worktree: `C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\recipient-foreign-live-gate-20260720`
+- Source SHA for focused tests: `3ab2b41a664412cbdf1fddbde97371ecc6798cf8`
+- Production build-info observed during live smoke: `1b7f53712acdfea65d2a5abc52a3e73cfb03501b`
+- Live deployment URL: `safeguard-contest-p63gspunn-seojaehongs-projects.vercel.app`
+- Worktree: `C:\Users\iceam\OneDrive\.codex-worktrees\safeclaw-northstar-current`
 - Branch: `chore/recipient-foreign-live-gate-20260720`
 
 ## Verification
@@ -27,8 +27,8 @@ npm.cmd test -- tests\engine-adapter.test.ts tests\hermes-engine-adapter.test.ts
 Result:
 
 - Test files: 13 passed / 13
-- Tests: 289 passed
-- Duration: 16.47s
+- Tests: 290 passed
+- Duration: 12.97s
 - Status: `pass`
 
 Live unauthenticated broker smoke:
@@ -60,8 +60,17 @@ Result:
 - Engine execution claimed: `false`
 - Live authenticated execution performed: `false`
 
+## Remote Hermes Source Contract
+
+- Production route wires configured trusted HTTPS transport: `true`
+- Configured transport fails closed on service/digest mismatch: `true`
+- Trusted transport wired: `true`
+- Durable attempt ledger wired: `false`
+- Readiness keeps the durable ledger blocker visible: `true`
+- Execution-ready claimed: `false`
+
 ## Interpretation
 
 This is the correct current state for launch safety: SafeClaw can demonstrate that Hermes/OpenClaw is integrated as a bounded adapter path, while avoiding the false claim that a production Hermes worker pool or local OAuth runtime is fully operational inside Vercel.
 
-The next proof requires an authenticated operator-owned test site plus a configured remote/local runtime that can pass availability, tenant binding, tool-denial, Evidence Harness, and terminal-ledger gates without exposing secrets.
+The production route now supplies the DNS-pinned trusted HTTPS transport. Runtime creation still fails closed because no durable cross-instance attempt/terminal ledger is wired. The next proof requires the approved durable ledger plus an authenticated operator-owned canary; this report does not substitute source wiring for live execution.

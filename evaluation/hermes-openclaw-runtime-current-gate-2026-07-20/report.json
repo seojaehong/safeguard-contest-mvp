@@ -1,34 +1,34 @@
 {
   "schemaVersion": "safeclaw-hermes-openclaw-runtime-current-gate/v1",
-  "checkedAt": "2026-07-23T03:08:12.912Z",
-  "sourceShaForFocusedTests": "c5f933d4ac553ae1dfe3b8416292cf75eecf2e95",
+  "checkedAt": "2026-07-28T07:19:58.706Z",
+  "sourceShaForFocusedTests": "3ab2b41a664412cbdf1fddbde97371ecc6798cf8",
   "productionBuildInfoAtLiveSmoke": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "c5f933d4ac553ae1dfe3b8416292cf75eecf2e95",
+    "commitSha": "1b7f53712acdfea65d2a5abc52a3e73cfb03501b",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ph8j8w5s4-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-p63gspunn-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "verdict": "adapter_boundary_pass_live_execution_not_claimed",
   "focusedTests": {
     "command": "npm.cmd test -- tests\\engine-adapter.test.ts tests\\hermes-engine-adapter.test.ts tests\\openclaw-hermes-route.test.ts tests\\openclaw-chat.test.ts tests\\openclaw-broker-ui-context.test.ts tests\\remote-hermes-contract.test.ts tests\\remote-hermes-runtime.test.ts tests\\remote-hermes-route.test.ts tests\\remote-hermes-https-transport.test.ts tests\\remote-hermes-service-auth.test.ts tests\\remote-engine-protocol.test.ts tests\\engine-runtime-readiness-policy.test.ts tests\\ai-provider-policy.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000 --hookTimeout=180000",
     "testFilesPassed": 13,
-    "testsPassed": 289,
-    "durationSeconds": 16.47,
+    "testsPassed": 290,
+    "durationSeconds": 12.97,
     "status": "pass",
     "exitStatus": 0,
     "signal": null,
     "error": null,
     "stdoutTail": [
       "> vitest run tests\\engine-adapter.test.ts tests\\hermes-engine-adapter.test.ts tests\\openclaw-hermes-route.test.ts tests\\openclaw-chat.test.ts tests\\openclaw-broker-ui-context.test.ts tests\\remote-hermes-contract.test.ts tests\\remote-hermes-runtime.test.ts tests\\remote-hermes-route.test.ts tests\\remote-hermes-https-transport.test.ts tests\\remote-hermes-service-auth.test.ts tests\\remote-engine-protocol.test.ts tests\\engine-runtime-readiness-policy.test.ts tests\\ai-provider-policy.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000 --hookTimeout=180000",
-      " RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/recipient-foreign-live-gate-20260720",
+      " RUN  v4.1.10 C:/Users/iceam/OneDrive/.codex-worktrees/safeclaw-northstar-current",
       " Test Files  13 passed (13)",
-      "      Tests  289 passed (289)",
-      "   Start at  12:08:14",
-      "   Duration  16.47s (transform 1.47s, setup 0ms, import 4.86s, tests 8.65s, environment 1ms)"
+      "      Tests  290 passed (290)",
+      "   Start at  16:20:00",
+      "   Duration  12.97s (transform 1.44s, setup 0ms, import 4.77s, tests 4.62s, environment 1ms)"
     ],
     "stderrTail": []
   },
@@ -40,6 +40,14 @@
     "engineExecutionReached": false,
     "status": "pass"
   },
+  "sourceContract": {
+    "routeWiresConfiguredTransport": true,
+    "configuredTransportFailsClosed": true,
+    "trustedTransportWired": true,
+    "durableAttemptLedgerWired": false,
+    "readinessKeepsLedgerOpen": true,
+    "executionReadyClaimed": false
+  },
   "mutationBoundary": {
     "dbMutationPerformed": false,
     "providerDispatchLiveClaimed": false,
@@ -48,14 +56,19 @@
   },
   "liveExecutionReadiness": {
     "claimed": false,
+    "proven": [
+      "authenticated route rejects unauthenticated requests before engine execution",
+      "tenant-bound request envelope and signed policy contract",
+      "deny-all remote tool policy",
+      "Evidence Harness claim allowlist and immutable evidence digest",
+      "DNS-pinned HTTPS trusted transport wired into the production route",
+      "terminal ledger interface and fail-closed terminal persistence contract"
+    ],
     "requires": [
       "authenticated operator-owned site context",
       "local OpenClaw site/org binding attestation or configured remote Hermes gateway",
-      "service assertion and replay ledger",
-      "tenant-bound request envelope",
-      "tool-denial policy",
-      "Evidence Harness completeness",
-      "terminal ledger persistence"
+      "durable cross-instance attempt and terminal ledger implementation",
+      "authenticated live execution canary after durable ledger approval"
     ]
   }
 }
