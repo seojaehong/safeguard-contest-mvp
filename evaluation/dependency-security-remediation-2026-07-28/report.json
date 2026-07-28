@@ -1,0 +1,169 @@
+{
+  "schemaVersion": "safeclaw-dependency-security-remediation/v1",
+  "generatedAt": "2026-07-28T05:38:33.5305510Z",
+  "verdict": "PASS_CURRENT_SOURCE_BOUNDED_DEPENDENCY_REMEDIATION_RESIDUALS_OPEN_LIVE_PENDING",
+  "sourceHead": "3da8ac30e4798630f6c46a411c24494f81b45c54",
+  "productionBuild": {
+    "commitSha": "f13abd3c09e70c672d38e5b1229a3c6ddcb30c5a",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-nhr45h7pi-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": false
+  },
+  "auditBefore": {
+    "critical": 0,
+    "high": 14,
+    "moderate": 5,
+    "low": 0,
+    "totalVulnerablePackages": 19
+  },
+  "auditAfter": {
+    "critical": 0,
+    "high": 12,
+    "moderate": 5,
+    "low": 0,
+    "totalVulnerablePackages": 17,
+    "productionOmitDevMatchesFullAudit": true,
+    "automaticNonBreakingFixChangeCount": 0
+  },
+  "updates": [
+    {
+      "package": "next",
+      "before": "15.5.15",
+      "after": "15.5.22",
+      "directAdvisoryCountBefore": 21,
+      "directAdvisoryCountAfter": 0,
+      "remainingAggregateFinding": "sharp"
+    },
+    {
+      "package": "adm-zip",
+      "before": "0.5.18",
+      "after": "0.6.0",
+      "advisory": "GHSA-xcpc-8h2w-3j85",
+      "advisoryPresentAfter": false
+    },
+    {
+      "package": "postcss",
+      "beforeVersions": [
+        "8.4.31",
+        "8.5.16"
+      ],
+      "after": "8.5.23",
+      "strategy": "same-major npm override",
+      "advisoryCountBefore": 3,
+      "advisoryCountAfter": 0
+    }
+  ],
+  "compatibilityBoundary": {
+    "mcpSdkKeptAt": "1.26.0",
+    "mcpHandlerPeerRequirement": "1.26.0",
+    "reason": "Updating the MCP SDK independently made the installed peer graph invalid, so the incompatible update was reverted.",
+    "dependencyGraphValid": true
+  },
+  "residuals": [
+    {
+      "group": "exceljs-archive-chain",
+      "severity": "high",
+      "packages": [
+        "exceljs",
+        "archiver",
+        "archiver-utils",
+        "glob",
+        "minimatch",
+        "brace-expansion",
+        "readdir-glob",
+        "zip-stream",
+        "rimraf"
+      ],
+      "finding": "The latest ExcelJS 4.4.0 still pins vulnerable archive dependencies; npm proposes an unsafe downgrade to 3.4.0.",
+      "reviewedReachability": "Runtime code creates workbooks from structured SafeClaw data. Reviewed runtime source does not load user-supplied XLSX files; XLSX reads are confined to tests and audit scripts.",
+      "status": "OPEN_UPSTREAM_NO_SAFE_AUTOMATIC_FIX"
+    },
+    {
+      "group": "next-sharp",
+      "severity": "high",
+      "packages": [
+        "next",
+        "sharp"
+      ],
+      "finding": "The patched Sharp release is outside Next 15.5.22's declared ^0.34.3 compatibility range.",
+      "reviewedReachability": "No next/image import was found in app, components, lib, or scripts, but runtime image-optimizer reachability was not broadly proven absent.",
+      "status": "OPEN_UPSTREAM_COMPATIBILITY_BOUNDARY"
+    },
+    {
+      "group": "mcp-hono-static",
+      "severity": "moderate",
+      "packages": [
+        "mcp-handler",
+        "@modelcontextprotocol/sdk",
+        "@hono/node-server"
+      ],
+      "finding": "The fixed Hono adapter requires a major version outside the exact mcp-handler peer contract.",
+      "reviewedReachability": "No serveStatic, serve-static, or direct @hono/node-server usage was found in reviewed product source.",
+      "status": "OPEN_NOT_REACHED_IN_REVIEWED_SURFACE"
+    },
+    {
+      "group": "ajv-fast-uri",
+      "severity": "high",
+      "packages": [
+        "@modelcontextprotocol/sdk",
+        "ajv",
+        "fast-uri"
+      ],
+      "finding": "AJV's supported fast-uri range remains on the vulnerable major.",
+      "reviewedReachability": "No direct fast-uri API use was found; schema-driven URI parsing through MCP remains an indirect dependency surface.",
+      "status": "OPEN_UPSTREAM_NO_SAFE_AUTOMATIC_FIX"
+    },
+    {
+      "group": "uuid-transitives",
+      "severity": "moderate",
+      "packages": [
+        "uuid",
+        "exceljs",
+        "gaxios"
+      ],
+      "finding": "Patched UUID requires a major update outside pinned upstream ranges.",
+      "reviewedReachability": "No direct UUID v3/v5/v6 buffer API call was found in SafeClaw source.",
+      "status": "OPEN_UPSTREAM_NO_SAFE_AUTOMATIC_FIX"
+    }
+  ],
+  "verification": {
+    "focusedProductTests": {
+      "testFiles": 10,
+      "testsPassed": 133,
+      "testsFailed": 0
+    },
+    "frontendRouteCoverage": {
+      "testFiles": 1,
+      "testsPassed": 39,
+      "testsFailed": 0
+    },
+    "strictTypecheck": "PASS",
+    "build": "PASS",
+    "nextVersion": "15.5.22",
+    "staticPagesGenerated": 28,
+    "frontendConsistencyAudit": {
+      "status": "pass",
+      "pageFiles": 33,
+      "componentFiles": 23,
+      "cssLines": 23952,
+      "coverageIssues": 0,
+      "violationCount": 0
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "liveAfterDeploymentRequired": true,
+    "fullRepositorySecurityScanCompleted": false,
+    "residualVulnerablePackages": 17,
+    "providerDispatchPersistence": "approval_gated",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  }
+}
