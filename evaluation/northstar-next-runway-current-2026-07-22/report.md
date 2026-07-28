@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `3ab2b41a664412cbdf1fddbde97371ecc6798cf8`
+Source HEAD: `73855ccca0b7bd62e9c913a6ece4d363e7db6143`
 
-Production `/api/build-info`: `1b7f53712acdfea65d2a5abc52a3e73cfb03501b`
+Production `/api/build-info`: `73855ccca0b7bd62e9c913a6ece4d363e7db6143`
 
-Latest evidence commit live: `false`
+Latest evidence commit live: `true`
 
-Source head live pending: `true`
+Source head live pending: `false`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `scripts/northstar_next_runway.mjs`, `tests/northstar-next-runway-generator.test.ts`
+Source pending changed paths: `none`
 
 Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `977bb8021b3c8b6934d6268a9b27fbedcc50bfa6`
+Live rollup source head: `73855ccca0b7bd62e9c913a6ece4d363e7db6143`
 
-Live rollup matches production: `false`
+Live rollup matches production: `true`
 
-Note: current HEAD `3ab2b41a664412cbdf1fddbde97371ecc6798cf8` is ahead of production `1b7f53712acdfea65d2a5abc52a3e73cfb03501b`. Product/evidence changes are source-local verified and live-pending until production advances and the live probe is rerun.
+Note: source HEAD and production marker match for this artifact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -123,7 +123,7 @@ Required first-task containment:
 16. keep Hermes/OpenClaw live execution held: tenant envelope, tool denial, Evidence Harness, DNS-pinned trusted transport, and terminal persistence behavior are source-proven, while the durable cross-instance attempt/terminal ledger and authenticated canary remain open.
 17. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
 18. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
-19. do not claim dependency-security completion while 17 vulnerable-package findings and the full repository security scan remain open.
+19. do not claim dependency-security completion while 11 vulnerable-package findings and the full repository security scan remain open.
 
 ## KOSHA Candidate Boundary
 

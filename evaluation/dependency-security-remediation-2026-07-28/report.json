@@ -1,14 +1,14 @@
 {
   "schemaVersion": "safeclaw-dependency-security-remediation/v1",
-  "generatedAt": "2026-07-28T05:42:34.5727963Z",
+  "generatedAt": "2026-07-28T09:02:15.5765173Z",
   "verdict": "PASS_LIVE_PRODUCTION_BOUNDED_DEPENDENCY_REMEDIATION_RESIDUALS_OPEN",
-  "sourceHead": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
-  "productCommit": "3da8ac30e4798630f6c46a411c24494f81b45c54",
+  "sourceHead": "73855ccca0b7bd62e9c913a6ece4d363e7db6143",
+  "productCommit": "73855ccca0b7bd62e9c913a6ece4d363e7db6143",
   "productionBuild": {
-    "commitSha": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
+    "commitSha": "73855ccca0b7bd62e9c913a6ece4d363e7db6143",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-kyhy6i2is-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-gzgebyell-seojaehongs-projects.vercel.app",
     "sourceHeadMatchesProduction": true
   },
   "auditBefore": {
@@ -20,10 +20,10 @@
   },
   "auditAfter": {
     "critical": 0,
-    "high": 12,
-    "moderate": 5,
+    "high": 9,
+    "moderate": 2,
     "low": 0,
-    "totalVulnerablePackages": 17,
+    "totalVulnerablePackages": 11,
     "productionOmitDevMatchesFullAudit": true,
     "automaticNonBreakingFixChangeCount": 0
   },
@@ -53,12 +53,36 @@
       "strategy": "same-major npm override",
       "advisoryCountBefore": 3,
       "advisoryCountAfter": 0
+    },
+    {
+      "package": "@hono/node-server",
+      "before": "1.19.14",
+      "after": "2.0.12",
+      "strategy": "root override with MCP route compatibility verification",
+      "advisoriesPresentAfter": 0
+    },
+    {
+      "package": "fast-uri",
+      "before": "3.1.3",
+      "after": "3.1.4",
+      "strategy": "same-major root override",
+      "advisoriesPresentAfter": 0
+    },
+    {
+      "package": "sharp",
+      "before": "0.34.5",
+      "after": "0.35.3",
+      "strategy": "root override with Next image optimizer compatibility verification",
+      "advisoriesPresentAfter": 0
     }
   ],
   "compatibilityBoundary": {
     "mcpSdkKeptAt": "1.26.0",
     "mcpHandlerPeerRequirement": "1.26.0",
-    "reason": "Updating the MCP SDK independently made the installed peer graph invalid, so the incompatible update was reverted.",
+    "reason": "The direct MCP SDK remains pinned to the mcp-handler peer contract while patched Hono and fast-uri transitives are verified through route contracts and runtime smoke.",
+    "honoOverride": "2.0.12",
+    "fastUriOverride": "3.1.4",
+    "sharpOverride": "0.35.3",
     "dependencyGraphValid": true
   },
   "residuals": [
@@ -81,41 +105,6 @@
       "status": "OPEN_UPSTREAM_NO_SAFE_AUTOMATIC_FIX"
     },
     {
-      "group": "next-sharp",
-      "severity": "high",
-      "packages": [
-        "next",
-        "sharp"
-      ],
-      "finding": "The patched Sharp release is outside Next 15.5.22's declared ^0.34.3 compatibility range.",
-      "reviewedReachability": "No next/image import was found in app, components, lib, or scripts, but runtime image-optimizer reachability was not broadly proven absent.",
-      "status": "OPEN_UPSTREAM_COMPATIBILITY_BOUNDARY"
-    },
-    {
-      "group": "mcp-hono-static",
-      "severity": "moderate",
-      "packages": [
-        "mcp-handler",
-        "@modelcontextprotocol/sdk",
-        "@hono/node-server"
-      ],
-      "finding": "The fixed Hono adapter requires a major version outside the exact mcp-handler peer contract.",
-      "reviewedReachability": "No serveStatic, serve-static, or direct @hono/node-server usage was found in reviewed product source.",
-      "status": "OPEN_NOT_REACHED_IN_REVIEWED_SURFACE"
-    },
-    {
-      "group": "ajv-fast-uri",
-      "severity": "high",
-      "packages": [
-        "@modelcontextprotocol/sdk",
-        "ajv",
-        "fast-uri"
-      ],
-      "finding": "AJV's supported fast-uri range remains on the vulnerable major.",
-      "reviewedReachability": "No direct fast-uri API use was found; schema-driven URI parsing through MCP remains an indirect dependency surface.",
-      "status": "OPEN_UPSTREAM_NO_SAFE_AUTOMATIC_FIX"
-    },
-    {
       "group": "uuid-transitives",
       "severity": "moderate",
       "packages": [
@@ -130,32 +119,38 @@
   ],
   "verification": {
     "focusedProductTests": {
-      "testFiles": 10,
-      "testsPassed": 133,
+      "testFiles": 13,
+      "testsPassed": 170,
       "testsFailed": 0
     },
-    "frontendRouteCoverage": {
-      "testFiles": 1,
-      "testsPassed": 39,
+    "northstarContractTests": {
+      "testFiles": 2,
+      "testsPassed": 49,
+      "testsFailed": 0
+    },
+    "mcpRuntimeContracts": {
+      "testFiles": 13,
+      "testsPassed": 170,
       "testsFailed": 0
     },
     "strictTypecheck": "PASS",
     "build": "PASS",
     "nextVersion": "15.5.22",
     "staticPagesGenerated": 28,
-    "frontendConsistencyAudit": {
-      "status": "pass",
-      "pageFiles": 33,
-      "componentFiles": 23,
-      "cssLines": 23952,
-      "coverageIssues": 0,
-      "violationCount": 0
+    "localRuntimeSmoke": {
+      "mcpUnauthenticatedStatus": 401,
+      "mcpUnauthenticatedCode": "invalid_token",
+      "nextImageOptimizerStatus": 200,
+      "nextImageOptimizerContentType": "image/png",
+      "nextImageOptimizerInputBytes": 91,
+      "nextImageOptimizerOutputBytes": 103
     },
     "liveRouteChecks": {
       "root": 200,
       "documents": 200,
       "dispatch": 200,
-      "agentManifest": 200
+      "agentManifest": 200,
+      "mcpUnauthenticated": 401
     }
   },
   "mutationBoundary": {
@@ -169,7 +164,7 @@
   "remainingBoundaries": {
     "liveAfterDeploymentRequired": false,
     "fullRepositorySecurityScanCompleted": false,
-    "residualVulnerablePackages": 17,
+    "residualVulnerablePackages": 11,
     "providerDispatchPersistence": "approval_gated",
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   }

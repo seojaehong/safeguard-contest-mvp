@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-28T05:51:07.216Z",
-  "head": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
+  "generatedAt": "2026-07-28T09:03:27.695Z",
+  "head": "73855ccca0b7bd62e9c913a6ece4d363e7db6143",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
+    "commitSha": "73855ccca0b7bd62e9c913a6ece4d363e7db6143",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-kyhy6i2is-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-gzgebyell-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -91,7 +91,7 @@
       "id": "dependency_security_remediation",
       "state": "notice",
       "artifact": "evaluation\\dependency-security-remediation-2026-07-28\\report.json",
-      "detail": "Live bounded remediation removed the direct Next.js and adm-zip advisories plus all PostCSS advisories, reducing the production lockfile finding count from 19 to 17. Five upstream/compatibility residual groups remain explicitly open; this is not a zero-vulnerability or full repository security-scan claim. No mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Live bounded remediation removed the direct Next.js and adm-zip advisories plus all PostCSS, AJV fast-uri, MCP/Hono static-path, and Next/Sharp advisories, reducing the production lockfile finding count from 19 to 11. Two upstream residual groups remain explicitly open; this is not a zero-vulnerability or full repository security-scan claim. No mutation occurred and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "hermes_knowledge_review_authority",
@@ -566,9 +566,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
+      "sourceCommit": "73855ccca0b7bd62e9c913a6ece4d363e7db6143",
       "sourceStatus": "exact",
-      "productionCommit": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
+      "productionCommit": "73855ccca0b7bd62e9c913a6ece4d363e7db6143",
       "productionStatus": "matches_live"
     },
     {

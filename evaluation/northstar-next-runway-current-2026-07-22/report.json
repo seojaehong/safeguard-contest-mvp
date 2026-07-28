@@ -1,33 +1,30 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-28T07:20:15.723Z",
+  "generatedAt": "2026-07-28T09:03:36.762Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "3ab2b41a664412cbdf1fddbde97371ecc6798cf8",
-  "productionCommit": "1b7f53712acdfea65d2a5abc52a3e73cfb03501b",
+  "sourceHead": "73855ccca0b7bd62e9c913a6ece4d363e7db6143",
+  "productionCommit": "73855ccca0b7bd62e9c913a6ece4d363e7db6143",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "1b7f53712acdfea65d2a5abc52a3e73cfb03501b",
+    "commitSha": "73855ccca0b7bd62e9c913a6ece4d363e7db6143",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-p63gspunn-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-gzgebyell-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": false,
+  "latestEvidenceCommitLive": true,
   "currentHeadIsEvidenceOnlyPending": false,
-  "sourceHeadLivePending": true,
+  "sourceHeadLivePending": false,
   "sourceHeadHasProductChanges": false,
-  "sourcePendingChangedPaths": [
-    "scripts/northstar_next_runway.mjs",
-    "tests/northstar-next-runway-generator.test.ts"
-  ],
+  "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
-  "liveRollupLiveCommit": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
-  "liveRollupMatchesProduction": false,
+  "liveExactEvidenceCommit": "73855ccca0b7bd62e9c913a6ece4d363e7db6143",
+  "liveRollupLiveCommit": "73855ccca0b7bd62e9c913a6ece4d363e7db6143",
+  "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
     "liveRollup": "evaluation\\northstar-live-rollup-2026-07-20\\report.json",
@@ -479,13 +476,13 @@
   },
   "dependencySecurityRemediation": {
     "verdict": "PASS_LIVE_PRODUCTION_BOUNDED_DEPENDENCY_REMEDIATION_RESIDUALS_OPEN",
-    "sourceHead": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
-    "productCommit": "3da8ac30e4798630f6c46a411c24494f81b45c54",
-    "productionCommit": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
+    "sourceHead": "73855ccca0b7bd62e9c913a6ece4d363e7db6143",
+    "productCommit": "73855ccca0b7bd62e9c913a6ece4d363e7db6143",
+    "productionCommit": "73855ccca0b7bd62e9c913a6ece4d363e7db6143",
     "beforeVulnerablePackages": 19,
-    "liveVulnerablePackages": 17,
-    "liveHigh": 12,
-    "liveModerate": 5,
+    "liveVulnerablePackages": 11,
+    "liveHigh": 9,
+    "liveModerate": 2,
     "fullRepositorySecurityScanCompleted": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
@@ -1195,7 +1192,7 @@
     "keep Hermes/OpenClaw live execution held: tenant envelope, tool denial, Evidence Harness, DNS-pinned trusted transport, and terminal persistence behavior are source-proven, while the durable cross-instance attempt/terminal ledger and authenticated canary remain open",
     "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
     "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held",
-    "do not claim dependency-security completion while 17 vulnerable-package findings and the full repository security scan remain open"
+    "do not claim dependency-security completion while 11 vulnerable-package findings and the full repository security scan remain open"
   ],
   "providerLiveDispatchClaimed": false,
   "dbMutationPerformed": false
