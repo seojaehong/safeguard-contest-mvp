@@ -40,6 +40,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   liveDocumentRainContextIsolation: path.join("evaluation", "live-document-rain-context-isolation-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
+  dispatchEntryCapabilityTruth: path.join("evaluation", "dispatch-entry-capability-truth-2026-07-28", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
@@ -1273,6 +1274,8 @@ function evaluateLiveDocumentEditorialReviewGate(rootDir) {
 function evaluateProductCapabilityTruthGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.productCapabilityTruth;
   const report = readJsonFile(rootDir, evidencePath);
+  const entryTruthPath = EVIDENCE_PATHS.dispatchEntryCapabilityTruth;
+  const entryTruth = readJsonFile(rootDir, entryTruthPath);
   if (!isRecord(report)) {
     return gateResult({
       id: "product_capability_truth",
@@ -1299,6 +1302,29 @@ function evaluateProductCapabilityTruthGate(rootDir) {
     : "";
   const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
   const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const entryProductionBuild = isRecord(entryTruth?.productionBuild) ? entryTruth.productionBuild : {};
+  const entryCurrentSource = isRecord(entryTruth?.currentSource) ? entryTruth.currentSource : {};
+  const entryLiveAfter = isRecord(entryTruth?.liveAfter) ? entryTruth.liveAfter : {};
+  const entryMutationBoundary = isRecord(entryTruth?.mutationBoundary) ? entryTruth.mutationBoundary : {};
+  const entryRemainingBoundaries = isRecord(entryTruth?.remainingBoundaries) ? entryTruth.remainingBoundaries : {};
+  const entryTruthPass = isRecord(entryTruth)
+    && readString(entryTruth.verdict) === "PASS_LIVE_PRODUCTION_DISPATCH_ENTRY_CAPABILITY_TRUTH"
+    && readString(entryTruth.sourceHead).length > 0
+    && readString(entryTruth.sourceHead) === readString(entryProductionBuild.commitSha)
+    && entryProductionBuild.sourceHeadMatchesProduction === true
+    && readNumber(entryCurrentSource.forbiddenSendingClaimsRemainingInReviewedSurfaces) === 0
+    && entryLiveAfter.dispatchDescriptionVisible === true
+    && entryLiveAfter.landingDispatchBoundaryVisible === true
+    && entryLiveAfter.sourceHeadMatchesProduction === true
+    && entryMutationBoundary.dbMutationPerformed === false
+    && entryMutationBoundary.shareSessionCreated === false
+    && entryMutationBoundary.providerDispatchCalled === false
+    && entryMutationBoundary.embeddingGenerated === false
+    && entryMutationBoundary.vectorUploadPerformed === false
+    && entryMutationBoundary.exactTrustRegistryMutationPerformed === false
+    && entryRemainingBoundaries.liveAfterDeploymentRequired === false
+    && readString(entryRemainingBoundaries.providerDispatchPersistence) === "approval_gated"
+    && readString(entryRemainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE";
   const sourceMatchesProduction = readString(report.sourceHead).length > 0
     && readString(report.sourceHead) === readString(report.productionCommit);
   const uiTruthPass = briefingRows.length === 2
@@ -1342,7 +1368,8 @@ function evaluateProductCapabilityTruthGate(rootDir) {
     && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
     && readString(remainingBoundaries.documentsShareIaVerdict) === "OPEN_SEPARATE_VIEWPORT_IA_WAVE"
     && remainingBoundaries.providerDispatchApprovalRequired === true
-    && remainingBoundaries.humanEditorialReviewCompleted === false;
+    && remainingBoundaries.humanEditorialReviewCompleted === false
+    && entryTruthPass;
 
   if (liveReady) {
     return gateResult({
@@ -1350,7 +1377,7 @@ function evaluateProductCapabilityTruthGate(rootDir) {
       label: "Live product capability truth",
       state: "proven",
       evidencePath,
-      detail: "Manual email/SMS/Kakao and scheduled briefing email are fail-closed preview-only because persistent idempotency is unavailable. Live photo Vision/OCR readiness is accepted-only, AI generation modes are template/enhanced/full, and no DB/share/provider/photo POST mutation occurred. This does not grant provider dispatch approval: exact saved Share remains MISSING_EVIDENCE and Documents/Share IA remains OPEN_SEPARATE_VIEWPORT_IA_WAVE.",
+      detail: `Manual email/SMS/Kakao and scheduled briefing email are fail-closed preview-only because persistent idempotency is unavailable. Live dispatch and landing entry copy also distinguishes preview/readiness from approved results (${entryTruthPath}). Live photo Vision/OCR readiness is accepted-only, AI generation modes are template/enhanced/full, and no DB/share/provider/photo POST mutation occurred. This does not grant provider dispatch approval: exact saved Share remains MISSING_EVIDENCE and Documents/Share IA remains OPEN_SEPARATE_VIEWPORT_IA_WAVE.`,
       nextActions: [
         "Keep provider dispatch persistence approval-gated.",
         "Measure exact saved Share and Documents/Share viewport IA in their separate gates.",
@@ -1363,7 +1390,7 @@ function evaluateProductCapabilityTruthGate(rootDir) {
     label: "Live product capability truth",
     state: "contradicted",
     evidencePath,
-    detail: `Capability verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, dispatch=${readString(providerDispatch.mode) || "unknown"}/${readString(providerDispatch.reason) || "unknown"}, providerCalled=${providerDispatch.providerCalled === true}, briefingEmailReady=${briefing.emailReady === true}, photoReady=${photo.ready === true}, photoAcceptedOnly=${photo.acceptedOnly === true}, photoPost=${photo.photoPostAnalysisExecuted === true}, uiTruthPass=${uiTruthPass}, aiModes=${sortedModes || "missing"}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, ia=${readString(remainingBoundaries.documentsShareIaVerdict) || "missing"}.`,
+    detail: `Capability verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, dispatch=${readString(providerDispatch.mode) || "unknown"}/${readString(providerDispatch.reason) || "unknown"}, providerCalled=${providerDispatch.providerCalled === true}, briefingEmailReady=${briefing.emailReady === true}, photoReady=${photo.ready === true}, photoAcceptedOnly=${photo.acceptedOnly === true}, photoPost=${photo.photoPostAnalysisExecuted === true}, uiTruthPass=${uiTruthPass}, entryTruthPass=${entryTruthPass}, aiModes=${sortedModes || "missing"}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, ia=${readString(remainingBoundaries.documentsShareIaVerdict) || "missing"}.`,
     nextActions: ["Restore the fail-closed capability boundaries and rerun current-production truth evidence without mutation."],
   });
 }
