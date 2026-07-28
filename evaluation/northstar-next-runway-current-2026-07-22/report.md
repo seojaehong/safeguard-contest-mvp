@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `0f323065d6a691b03597c847de3ee4e4f3edac50`
+Source HEAD: `97a2a834552a1b7fe178f74597ad710f95cd3923`
 
-Production `/api/build-info`: `7419dd2221dfc95d792449d732af1ba025a1d950`
+Production `/api/build-info`: `51a8db5bdb0dcc867621693e9fee9f30715aa9fa`
 
 Latest evidence commit live: `false`
 
@@ -14,17 +14,17 @@ Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-open-gate-audit.test.ts`
+Source pending changed paths: `scripts/northstar_next_runway.mjs`, `tests/northstar-next-runway-generator.test.ts`
 
 Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `0f323065d6a691b03597c847de3ee4e4f3edac50`
+Live rollup source head: `97a2a834552a1b7fe178f74597ad710f95cd3923`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `0f323065d6a691b03597c847de3ee4e4f3edac50` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `7419dd2221dfc95d792449d732af1ba025a1d950`, and the live rollup remains exact for that deployed marker.
+Note: current HEAD `97a2a834552a1b7fe178f74597ad710f95cd3923` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `51a8db5bdb0dcc867621693e9fee9f30715aa9fa`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -66,6 +66,7 @@ These require explicit approval before runtime mutation or live claims:
 
 | Gate | Current state | Safety lock | Why it remains held |
 | --- | --- | --- | --- |
+| share_recipient_ack_approval | `approval_gated` | `live_data_mutation_approval_required` | approve a disposable production workpack and worker pair; approve workpack_share_sessions and workpack_read_confirmations inserts; measure invited-recipient ACK readback without provider dispatch |
 | provider_dispatch_persistence | `approval_gated` | `preview_only` | approve persistent idempotency migration scope; choose per-channel child table or canonical provider_result JSONB ledger; add updated_at trigger or route-owned timestamp contract; test reservation-before-provider-call, duplicate replay, and per-channel result retention |
 | supabase_rls_launch_isolation | `approval_gated` | `read_only_preflight` | approve authoritative Supabase project and credential provenance; run read-only live catalog capture; run disposable tenant A/B negative matrix; verify Storage object isolation and service-role route invariants |
 | llm_wiki_publication | `approval_gated` | `candidate_unpublished` | approve final DDL, RPC, grants, and append-only ledger; approve graph pointer and publication threat model; run isolated publication canary with atomicity, idempotency, rollback, and leak tests |
