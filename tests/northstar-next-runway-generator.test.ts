@@ -201,6 +201,14 @@ type NextRunwayReport = {
     fullRepositorySecurityScanCompleted: boolean;
     exactSavedShareVerdict: string;
   };
+  hermesOpenclaw: {
+    verdict: string;
+    trustedTransportWired: boolean;
+    durableAttemptLedgerWired: boolean;
+    readinessKeepsLedgerOpen: boolean;
+    liveExecutionClaimed: boolean;
+    remainingRequirements: string[];
+  };
   hermesKnowledgeReviewAuthorityUi: {
     verdict: string;
     localPassed: number;
@@ -615,7 +623,18 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     verdict: "adapter_boundary_pass_live_execution_not_claimed",
     focusedTests: { status: "pass" },
     liveUnauthenticatedBrokerSmoke: { code: "AUTH_REQUIRED" },
-    liveExecutionReadiness: { claimed: false },
+    sourceContract: {
+      trustedTransportWired: true,
+      durableAttemptLedgerWired: false,
+      readinessKeepsLedgerOpen: true,
+    },
+    liveExecutionReadiness: {
+      claimed: false,
+      requires: [
+        "durable cross-instance attempt and terminal ledger implementation",
+        "authenticated live execution canary after durable ledger approval",
+      ],
+    },
   });
   writeJson(root, "evaluation/launch-readiness-current-2026-07-22/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
@@ -1670,6 +1689,17 @@ describe("northstar next runway generator", () => {
       documentsShareIaVerdict: "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
     });
     expect(report.provenCurrentState).toContain("product_capability_truth");
+    expect(report.hermesOpenclaw).toMatchObject({
+      verdict: "adapter_boundary_pass_live_execution_not_claimed",
+      trustedTransportWired: true,
+      durableAttemptLedgerWired: false,
+      readinessKeepsLedgerOpen: true,
+      liveExecutionClaimed: false,
+      remainingRequirements: [
+        "durable cross-instance attempt and terminal ledger implementation",
+        "authenticated live execution canary after durable ledger approval",
+      ],
+    });
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "dependency_security_remediation",
       state: "notice",
