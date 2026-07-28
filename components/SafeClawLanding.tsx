@@ -49,7 +49,7 @@ const productModules = [
   { code: "02", title: "문서", body: "위험성평가, 작업계획서, TBM, 안전교육 기록을 편집하고 출력합니다.", href: "/documents", state: "실행" },
   { code: "03", title: "근거", body: "법령, 해석례, 판례, KOSHA 자료를 문서 문장에 연결합니다.", href: "/evidence", state: "근거" },
   { code: "04", title: "작업자", body: "언어, 교육 상태, 연락처를 현장 전파에 필요한 만큼만 관리합니다.", href: "/workers", state: "관리" },
-  { code: "05", title: "전파", body: "메일과 문자로 안전공지와 외국인 안내문을 보내고 결과를 남깁니다.", href: "/dispatch", state: "전송" },
+  { code: "05", title: "전파", body: "작업자 언어와 채널별 공지 문안을 준비하고, 승인된 전송 결과만 기록합니다.", href: "/dispatch", state: "준비" },
   { code: "06", title: "이력", body: "문서팩과 전파 로그를 현장 기록으로 다시 찾습니다.", href: "/archive", state: "기록" },
   { code: "07", title: "지식 DB", body: "법령 전문, KOSHA 자료, API 스냅샷을 검색 가능한 근거층으로 유지합니다.", href: "/knowledge", state: "지식" },
   { code: "08", title: "API 상태", body: "기상청, Law.go, KOSHA, Work24, Gemini, n8n 연결을 점검합니다.", href: "/ops/api", state: "점검" }

@@ -10,7 +10,7 @@ export default function DispatchPage() {
     <SafeClawModuleShell
       eyebrow="현장 전파"
       title="현장 전파."
-      description="메일과 문자로 현장 공지와 외국인 안내문을 보내고, 채널별 접수 결과를 작업 기록으로 남깁니다."
+      description="작업자 언어와 채널별 공지 문안을 미리 보고, 실제 발송 가능 여부와 승인된 접수 결과를 구분해 기록합니다."
       status="partial"
       mappedTo="메일 · 문자 · 전파 기록"
       activeHref="/dispatch"
