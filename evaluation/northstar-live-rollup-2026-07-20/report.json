@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-28T05:06:52.346Z",
-  "head": "d8ce5a67d0528c2c7fcadd05e777142ba6563d15",
+  "generatedAt": "2026-07-28T05:51:07.216Z",
+  "head": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "d8ce5a67d0528c2c7fcadd05e777142ba6563d15",
+    "commitSha": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-nhj45d5kc-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-kyhy6i2is-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 27
+    "gateCount": 28
   },
   "provenGates": [
     {
@@ -86,6 +86,12 @@
       "state": "proven",
       "artifact": "evaluation\\product-capability-truth-2026-07-25\\report.json",
       "detail": "Manual email/SMS/Kakao and scheduled briefing email are fail-closed preview-only because persistent idempotency is unavailable. Live dispatch entry copy distinguishes preview/readiness from approved results (evaluation\\dispatch-entry-capability-truth-2026-07-28\\report.json), and the public landing keeps safety judgment and final confirmation with a human instead of claiming role replacement (evaluation\\landing-human-review-boundary-2026-07-28\\report.json). Live photo Vision/OCR readiness is accepted-only, AI generation modes are template/enhanced/full, and no DB/share/provider/photo POST mutation occurred. This does not grant provider dispatch approval or replace broad human/legal review: exact saved Share remains MISSING_EVIDENCE and Documents/Share IA remains OPEN_SEPARATE_VIEWPORT_IA_WAVE."
+    },
+    {
+      "id": "dependency_security_remediation",
+      "state": "notice",
+      "artifact": "evaluation\\dependency-security-remediation-2026-07-28\\report.json",
+      "detail": "Live bounded remediation removed the direct Next.js and adm-zip advisories plus all PostCSS advisories, reducing the production lockfile finding count from 19 to 17. Five upstream/compatibility residual groups remain explicitly open; this is not a zero-vulnerability or full repository security-scan claim. No mutation occurred and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "hermes_knowledge_review_authority",
@@ -560,9 +566,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "d8ce5a67d0528c2c7fcadd05e777142ba6563d15",
+      "sourceCommit": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
       "sourceStatus": "exact",
-      "productionCommit": "d8ce5a67d0528c2c7fcadd05e777142ba6563d15",
+      "productionCommit": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
       "productionStatus": "matches_live"
     },
     {

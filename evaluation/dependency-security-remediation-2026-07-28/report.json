@@ -1,14 +1,15 @@
 {
   "schemaVersion": "safeclaw-dependency-security-remediation/v1",
-  "generatedAt": "2026-07-28T05:38:33.5305510Z",
-  "verdict": "PASS_CURRENT_SOURCE_BOUNDED_DEPENDENCY_REMEDIATION_RESIDUALS_OPEN_LIVE_PENDING",
-  "sourceHead": "3da8ac30e4798630f6c46a411c24494f81b45c54",
+  "generatedAt": "2026-07-28T05:42:34.5727963Z",
+  "verdict": "PASS_LIVE_PRODUCTION_BOUNDED_DEPENDENCY_REMEDIATION_RESIDUALS_OPEN",
+  "sourceHead": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
+  "productCommit": "3da8ac30e4798630f6c46a411c24494f81b45c54",
   "productionBuild": {
-    "commitSha": "f13abd3c09e70c672d38e5b1229a3c6ddcb30c5a",
+    "commitSha": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-nhr45h7pi-seojaehongs-projects.vercel.app",
-    "sourceHeadMatchesProduction": false
+    "deploymentUrl": "safeguard-contest-kyhy6i2is-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
   },
   "auditBefore": {
     "critical": 0,
@@ -149,6 +150,12 @@
       "cssLines": 23952,
       "coverageIssues": 0,
       "violationCount": 0
+    },
+    "liveRouteChecks": {
+      "root": 200,
+      "documents": 200,
+      "dispatch": 200,
+      "agentManifest": 200
     }
   },
   "mutationBoundary": {
@@ -160,7 +167,7 @@
     "exactTrustRegistryMutationPerformed": false
   },
   "remainingBoundaries": {
-    "liveAfterDeploymentRequired": true,
+    "liveAfterDeploymentRequired": false,
     "fullRepositorySecurityScanCompleted": false,
     "residualVulnerablePackages": 17,
     "providerDispatchPersistence": "approval_gated",

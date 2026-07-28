@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-28T05:06:52.346Z
-Source HEAD at generation: d8ce5a67d0528c2c7fcadd05e777142ba6563d15
-Live commit at generation: d8ce5a67d0528c2c7fcadd05e777142ba6563d15
+Generated at: 2026-07-28T05:51:07.216Z
+Source HEAD at generation: 977bb8021b3c8b6934d6268a9b27fbedcc50bfa6
+Live commit at generation: 977bb8021b3c8b6934d6268a9b27fbedcc50bfa6
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -152,6 +152,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_broad_review | proven | evaluation\live-document-broad-review-2026-07-25\report.json |
 | live_document_editorial_review | proven | evaluation\live-document-editorial-review-2026-07-25\report.json |
 | product_capability_truth | proven | evaluation\product-capability-truth-2026-07-25\report.json |
+| dependency_security_remediation | notice | evaluation\dependency-security-remediation-2026-07-28\report.json |
 | hermes_knowledge_review_authority | proven | evaluation\hermes-knowledge-review-contract-live-2026-07-25\report.json |
 | hermes_knowledge_review_ui | proven | evaluation\hermes-knowledge-review-authority-ui-2026-07-25\report.json |
 | live_document_secondary_grounding | proven | evaluation\live-document-secondary-grounding-2026-07-25\report.json |

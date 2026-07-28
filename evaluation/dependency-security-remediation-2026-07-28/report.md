@@ -1,10 +1,10 @@
 # Dependency Security Remediation
 
-Verdict: `PASS_CURRENT_SOURCE_BOUNDED_DEPENDENCY_REMEDIATION_RESIDUALS_OPEN_LIVE_PENDING`
+Verdict: `PASS_LIVE_PRODUCTION_BOUNDED_DEPENDENCY_REMEDIATION_RESIDUALS_OPEN`
 
 Product commit: `3da8ac30e4798630f6c46a411c24494f81b45c54`
 
-Production marker at evidence creation: `f13abd3c09e70c672d38e5b1229a3c6ddcb30c5a`
+Production marker: `977bb8021b3c8b6934d6268a9b27fbedcc50bfa6`
 
 ## Result
 
@@ -33,7 +33,8 @@ This is not a zero-vulnerability or full security-scan claim.
 - Strict TypeScript typecheck: `PASS`.
 - Next.js 15.5.22 production build: `PASS`.
 - Static pages: 28/28 generated.
+- Live production checks: `/`, `/documents`, `/dispatch`, and `/.well-known/agent.json` all returned HTTP 200 at marker `977bb802`.
 
 ## Boundary
 
-Live-after deployment verification is pending. A full repository security scan was not performed by this bounded dependency wave. No DB, Share, provider, embedding/vector, or KOSHA exact-registry mutation occurred. Provider persistence remains approval-gated and exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.
+Production and evidence are aligned at `977bb802`. A full repository security scan was not performed by this bounded dependency wave, and 17 vulnerable-package findings remain open. No DB, Share, provider, embedding/vector, or KOSHA exact-registry mutation occurred. Provider persistence remains approval-gated and exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.

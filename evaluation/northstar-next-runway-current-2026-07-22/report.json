@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-28T05:07:01.412Z",
+  "generatedAt": "2026-07-28T05:51:16.868Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "d8ce5a67d0528c2c7fcadd05e777142ba6563d15",
-  "productionCommit": "d8ce5a67d0528c2c7fcadd05e777142ba6563d15",
+  "sourceHead": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
+  "productionCommit": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "d8ce5a67d0528c2c7fcadd05e777142ba6563d15",
+    "commitSha": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-nhj45d5kc-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-kyhy6i2is-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "d8ce5a67d0528c2c7fcadd05e777142ba6563d15",
-  "liveRollupLiveCommit": "d8ce5a67d0528c2c7fcadd05e777142ba6563d15",
+  "liveExactEvidenceCommit": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
+  "liveRollupLiveCommit": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -43,6 +43,7 @@
     "liveDocumentEditorialDuplicateClassification": "evaluation\\live-document-editorial-duplicate-classification-2026-07-25\\report.json",
     "liveDocumentEditorialNearClassification": "evaluation\\live-document-editorial-near-classification-2026-07-25\\report.json",
     "productCapabilityTruth": "evaluation\\product-capability-truth-2026-07-25\\report.json",
+    "dependencySecurityRemediation": "evaluation\\dependency-security-remediation-2026-07-28\\report.json",
     "hermesKnowledgeReviewAuthorityUi": "evaluation\\hermes-knowledge-review-authority-ui-2026-07-25\\report.json",
     "liveDocumentSecondaryGrounding": "evaluation\\live-document-secondary-grounding-2026-07-25\\report.json",
     "liveDocumentSeedProfileIsolation": "evaluation\\live-document-seed-profile-isolation-2026-07-25\\report.json",
@@ -87,6 +88,11 @@
       "gate": "final_99_gate",
       "state": "notice",
       "reason": "pass_with_notice with carried auth-history and dispatch-policy notices"
+    },
+    {
+      "gate": "dependency_security_remediation",
+      "state": "notice",
+      "reason": "live bounded remediation reduced vulnerable packages from 19 to 17, but five upstream/compatibility residual groups and the full repository security scan remain open"
     }
   ],
   "approvalGated": [
@@ -458,6 +464,18 @@
     "photoAnalysisPostCalled": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "documentsShareIaVerdict": "OPEN_SEPARATE_VIEWPORT_IA_WAVE"
+  },
+  "dependencySecurityRemediation": {
+    "verdict": "PASS_LIVE_PRODUCTION_BOUNDED_DEPENDENCY_REMEDIATION_RESIDUALS_OPEN",
+    "sourceHead": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
+    "productCommit": "3da8ac30e4798630f6c46a411c24494f81b45c54",
+    "productionCommit": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
+    "beforeVulnerablePackages": 19,
+    "liveVulnerablePackages": 17,
+    "liveHigh": 12,
+    "liveModerate": 5,
+    "fullRepositorySecurityScanCompleted": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "hermesKnowledgeReviewAuthorityUi": {
     "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
@@ -1164,7 +1182,8 @@
     "keep invited-recipient ACK canary approval-gated: production workpack_share_sessions and workpack_read_confirmations rows require explicit live-data mutation approval before any real ACK readback claim",
     "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
     "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
-    "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held"
+    "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held",
+    "do not claim dependency-security completion while 17 vulnerable-package findings and the full repository security scan remain open"
   ],
   "providerLiveDispatchClaimed": false,
   "dbMutationPerformed": false

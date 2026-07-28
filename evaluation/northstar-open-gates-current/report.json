@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-28T05:06:50.829Z",
-  "sourceSha": "d8ce5a67d0528c2c7fcadd05e777142ba6563d15",
+  "generatedAt": "2026-07-28T05:51:06.257Z",
+  "sourceSha": "977bb8021b3c8b6934d6268a9b27fbedcc50bfa6",
   "overall": "open",
   "gates": [
     {
@@ -115,6 +115,17 @@
       "nextActions": [
         "Keep provider dispatch persistence approval-gated.",
         "Measure exact saved Share and Documents/Share viewport IA in their separate gates."
+      ]
+    },
+    {
+      "id": "dependency_security_remediation",
+      "state": "notice",
+      "label": "Runtime dependency security remediation",
+      "evidencePath": "evaluation\\dependency-security-remediation-2026-07-28\\report.json",
+      "detail": "Live bounded remediation removed the direct Next.js and adm-zip advisories plus all PostCSS advisories, reducing the production lockfile finding count from 19 to 17. Five upstream/compatibility residual groups remain explicitly open; this is not a zero-vulnerability or full repository security-scan claim. No mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Track patched upstream releases for the ExcelJS archive chain, Next-compatible Sharp, MCP/Hono, AJV fast-uri, and UUID transitives.",
+        "Run a separately scoped full repository security scan before any broad security-complete claim."
       ]
     },
     {
