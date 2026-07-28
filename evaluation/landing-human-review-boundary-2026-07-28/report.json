@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "safeclaw-landing-human-review-boundary/v1",
+  "generatedAt": "2026-07-28T04:00:51.5886036Z",
+  "verdict": "PASS_CURRENT_SOURCE_LANDING_HUMAN_REVIEW_BOUNDARY_LIVE_PENDING",
+  "sourceHead": "d41d99dc2c286261d2ab72e507fecd5fe5c45f02",
+  "productionBuild": {
+    "commitSha": "5db0acf0dfbbb8d2a1da7390f616d9d41fda01fd",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-drtxdxr81-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": false
+  },
+  "liveBefore": {
+    "url": "https://www.safeclaw.kr/",
+    "observedPositioning": "채용하지 않은 안전관리자 — 한 명 몫의 문서 업무를 대신합니다.",
+    "finding": "The public positioning implied that the product replaces a human safety role."
+  },
+  "currentSource": {
+    "positioning": "현장관리자의 문서 준비를 돕습니다 — 안전 판단과 최종 확인은 사람이 맡습니다.",
+    "humanDecisionBoundaryVisible": true,
+    "forbiddenReplacementClaimsRemaining": 0
+  },
+  "frontendConsistencyAudit": {
+    "path": "evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json",
+    "status": "pass",
+    "pageFiles": 33,
+    "componentFiles": 23,
+    "cssLines": 23952,
+    "coverageIssues": 0,
+    "violationCount": 0
+  },
+  "verification": {
+    "sharedAndRouteContract": {
+      "testFiles": 2,
+      "testsPassed": 56,
+      "testsFailed": 0
+    },
+    "focusedTruthContract": {
+      "testFiles": 2,
+      "testsPassed": 21,
+      "testsFailed": 0
+    },
+    "strictTypecheck": "PASS",
+    "build": "PASS",
+    "nextVersion": "15.5.15",
+    "staticPagesGenerated": 28
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "liveAfterDeploymentRequired": true,
+    "broadHumanLegalReviewCompleted": false,
+    "providerDispatchPersistence": "approval_gated",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  }
+}
