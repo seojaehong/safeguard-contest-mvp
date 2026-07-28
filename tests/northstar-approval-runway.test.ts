@@ -70,6 +70,7 @@ describe("northstar approval runway", () => {
     const runway = readJson<ApprovalRunwayReport>("evaluation/northstar-approval-runway-2026-07-21/report.json");
     const openGate = readJson<NorthstarOpenGateReport>("evaluation/northstar-open-gates-current/report.json");
     const approvalGateIds = [
+      "share_recipient_ack_approval",
       "provider_dispatch_persistence",
       "supabase_rls_launch_isolation",
       "llm_wiki_publication",
@@ -117,6 +118,10 @@ describe("northstar approval runway", () => {
     const runway = readJson<ApprovalRunwayReport>("evaluation/northstar-approval-runway-2026-07-21/report.json");
     const byId = new Map(runway.approvalGates.map((gate) => [gate.id, gate]));
 
+    expect(byId.get("share_recipient_ack_approval")?.currentSafetyLock).toBe("live_data_mutation_approval_required");
+    expect(byId.get("share_recipient_ack_approval")?.forbiddenUntilApproved.join("\n")).toContain("production share-session creation");
+    expect(byId.get("share_recipient_ack_approval")?.forbiddenUntilApproved.join("\n")).toContain("recipient read-confirmation insertion");
+
     expect(byId.get("provider_dispatch_persistence")?.currentSafetyLock).toBe("preview_only");
     expect(byId.get("provider_dispatch_persistence")?.forbiddenUntilApproved.join("\n")).toContain("PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=true");
     expect(byId.get("provider_dispatch_persistence")?.forbiddenUntilApproved.join("\n")).toContain("channel-level exactly-once");
@@ -157,6 +162,7 @@ describe("northstar approval runway", () => {
     const runway = readJson<ApprovalRunwayReport>("evaluation/northstar-approval-runway-2026-07-21/report.json");
 
     expect(runway.operatorSequence.join("\n")).toContain("Approve or reject RLS live catalog");
+    expect(runway.operatorSequence.join("\n")).toContain("recipient ACK canary");
     expect(runway.operatorSequence.join("\n")).toContain("Approve or reject provider dispatch persistence");
     expect(runway.nonApprovalWorkStillAllowed).toContain("UI/UX cockpit and drilldown refinements");
     expect(runway.nonApprovalWorkStillAllowed).toContain("KOSHA exact-trust evidence refreshes without DB writes");

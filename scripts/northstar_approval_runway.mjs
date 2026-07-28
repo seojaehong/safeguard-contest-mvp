@@ -15,6 +15,19 @@ const DEFAULT_OPEN_GATE_PATH = path.join("evaluation", "northstar-open-gates-cur
 const DEFAULT_BUILD_INFO_URL = "https://www.safeclaw.kr/api/build-info";
 
 const APPROVAL_GATE_CONTRACTS = Object.freeze({
+  share_recipient_ack_approval: Object.freeze({
+    currentSafetyLock: "live_data_mutation_approval_required",
+    approvalNeeded: Object.freeze([
+      "approve a disposable production workpack and invited worker pair",
+      "approve workpack_share_sessions and workpack_read_confirmations inserts",
+      "measure invited-recipient ACK readback without provider dispatch",
+    ]),
+    forbiddenUntilApproved: Object.freeze([
+      "production share-session creation",
+      "production recipient read-confirmation insertion",
+      "real invited-recipient ACK readback claim",
+    ]),
+  }),
   provider_dispatch_persistence: Object.freeze({
     currentSafetyLock: "preview_only",
     approvalNeeded: Object.freeze([
@@ -300,6 +313,7 @@ export function buildNorthstarApprovalRunway(options) {
       "Approve or reject RLS live catalog and tenant A/B read-only probes.",
       "Approve or reject LLM Wiki isolated publication canary.",
       "Approve or reject SIF embedding migration, cost, and upload as a separate gate.",
+      "Approve or reject a disposable saved Share session and recipient ACK canary before any production insert.",
       "Approve or reject provider dispatch persistence migration and route-level replay tests.",
       "Approve or reject KOSHA exact promotion only after human review is complete.",
       "Only after each gate has post-approval evidence, regenerate northstar-open-gates-current and northstar-live-rollup.",
