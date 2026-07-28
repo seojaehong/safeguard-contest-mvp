@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-northstar-approval-runway/v1",
-  "generatedAt": "2026-07-22T22:23:59.938Z",
-  "sourceHeadAtDraft": "f47145e97b746d64f361297c4be326beb40def4b",
-  "liveCommitAtDraft": "6ac130033190718f23fa36822f6f2c1ce7655e1f",
+  "generatedAt": "2026-07-28T02:14:24.301Z",
+  "sourceHeadAtDraft": "f160020db6a66a08f5e0ea174aa799432383101e",
+  "liveCommitAtDraft": "dc894462967cf293b73b5014bfed258b17a170fe",
   "overall": "approval_runway_ready_open",
   "launchReadiness": false,
   "dbMutationPerformed": false,
@@ -31,6 +31,23 @@
     ]
   },
   "approvalGates": [
+    {
+      "id": "share_recipient_ack_approval",
+      "state": "approval_gated",
+      "evidencePath": "evaluation/share-recipient-ack-approval-preflight-current-2026-07-19/report.json",
+      "readyForOperatorReview": true,
+      "currentSafetyLock": "live_data_mutation_approval_required",
+      "approvalNeeded": [
+        "approve a disposable production workpack and invited worker pair",
+        "approve workpack_share_sessions and workpack_read_confirmations inserts",
+        "measure invited-recipient ACK readback without provider dispatch"
+      ],
+      "forbiddenUntilApproved": [
+        "production share-session creation",
+        "production recipient read-confirmation insertion",
+        "real invited-recipient ACK readback claim"
+      ]
+    },
     {
       "id": "provider_dispatch_persistence",
       "state": "approval_gated",
@@ -160,6 +177,7 @@
     "Approve or reject RLS live catalog and tenant A/B read-only probes.",
     "Approve or reject LLM Wiki isolated publication canary.",
     "Approve or reject SIF embedding migration, cost, and upload as a separate gate.",
+    "Approve or reject a disposable saved Share session and recipient ACK canary before any production insert.",
     "Approve or reject provider dispatch persistence migration and route-level replay tests.",
     "Approve or reject KOSHA exact promotion only after human review is complete.",
     "Only after each gate has post-approval evidence, regenerate northstar-open-gates-current and northstar-live-rollup."

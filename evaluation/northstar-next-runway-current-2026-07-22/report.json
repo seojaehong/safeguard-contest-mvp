@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-28T01:58:48.768Z",
+  "generatedAt": "2026-07-28T02:14:42.353Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "97a2a834552a1b7fe178f74597ad710f95cd3923",
-  "productionCommit": "51a8db5bdb0dcc867621693e9fee9f30715aa9fa",
+  "sourceHead": "f160020db6a66a08f5e0ea174aa799432383101e",
+  "productionCommit": "dc894462967cf293b73b5014bfed258b17a170fe",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "51a8db5bdb0dcc867621693e9fee9f30715aa9fa",
+    "commitSha": "dc894462967cf293b73b5014bfed258b17a170fe",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-qzgyhjh4s-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-7pg6mdz5w-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": false,
@@ -20,13 +20,14 @@
   "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
   "sourcePendingChangedPaths": [
-    "scripts/northstar_next_runway.mjs",
-    "tests/northstar-next-runway-generator.test.ts"
+    "scripts/northstar_approval_runway.mjs",
+    "tests/northstar-approval-runway-generator.test.ts",
+    "tests/northstar-approval-runway.test.ts"
   ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "97a2a834552a1b7fe178f74597ad710f95cd3923",
-  "liveRollupLiveCommit": "51a8db5bdb0dcc867621693e9fee9f30715aa9fa",
+  "liveExactEvidenceCommit": "f160020db6a66a08f5e0ea174aa799432383101e",
+  "liveRollupLiveCommit": "dc894462967cf293b73b5014bfed258b17a170fe",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -96,11 +97,11 @@
     {
       "gate": "share_recipient_ack_approval",
       "state": "approval_gated",
-      "evidencePath": "evaluation\\share-recipient-ack-approval-preflight-current-2026-07-19\\report.json",
+      "evidencePath": "evaluation/share-recipient-ack-approval-preflight-current-2026-07-19/report.json",
       "readyForOperatorReview": true,
       "currentSafetyLock": "live_data_mutation_approval_required",
       "approvalNeeded": [
-        "approve a disposable production workpack and worker pair",
+        "approve a disposable production workpack and invited worker pair",
         "approve workpack_share_sessions and workpack_read_confirmations inserts",
         "measure invited-recipient ACK readback without provider dispatch"
       ],

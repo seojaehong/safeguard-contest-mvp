@@ -1,10 +1,10 @@
 # SafeClaw North Star Approval Runway
 
-Generated at: 2026-07-22T22:23:59.938Z
+Generated at: 2026-07-28T02:14:24.301Z
 
-Source HEAD at draft: `f47145e97b746d64f361297c4be326beb40def4b`
+Source HEAD at draft: `f160020db6a66a08f5e0ea174aa799432383101e`
 
-Live commit at draft: `6ac130033190718f23fa36822f6f2c1ce7655e1f`
+Live commit at draft: `dc894462967cf293b73b5014bfed258b17a170fe`
 
 Overall: `approval_runway_ready_open`
 
@@ -41,6 +41,7 @@ Required geometry:
 
 | Gate | State | Evidence | Current Lock | Approval Needed |
 | --- | --- | --- | --- | --- |
+| `share_recipient_ack_approval` | `approval_gated` | `evaluation/share-recipient-ack-approval-preflight-current-2026-07-19/report.json` | `live_data_mutation_approval_required` | approve a disposable production workpack and invited worker pair; approve workpack_share_sessions and workpack_read_confirmations inserts; measure invited-recipient ACK readback without provider dispatch |
 | `provider_dispatch_persistence` | `approval_gated` | `evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json` | `preview_only` | approve persistent idempotency migration scope; choose per-channel child table or canonical provider_result JSONB ledger; add updated_at trigger or route-owned timestamp contract; test reservation-before-provider-call, duplicate replay, and per-channel result retention |
 | `supabase_rls_launch_isolation` | `approval_gated` | `evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json` | `read_only_preflight` | approve authoritative Supabase project and credential provenance; run read-only live catalog capture; run disposable tenant A/B negative matrix; verify Storage object isolation and service-role route invariants |
 | `llm_wiki_publication` | `approval_gated` | `evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json` | `candidate_unpublished` | approve final DDL, RPC, grants, and append-only ledger; approve graph pointer and publication threat model; run isolated publication canary with atomicity, idempotency, rollback, and leak tests |
@@ -56,6 +57,9 @@ Required geometry:
 
 ## Forbidden Until Approved
 
+- production share-session creation
+- production recipient read-confirmation insertion
+- real invited-recipient ACK readback claim
 - real provider dispatch
 - PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=true
 - channel-level exactly-once persistence claim
@@ -85,9 +89,10 @@ Required geometry:
 3. Approve or reject RLS live catalog and tenant A/B read-only probes.
 4. Approve or reject LLM Wiki isolated publication canary.
 5. Approve or reject SIF embedding migration, cost, and upload as a separate gate.
-6. Approve or reject provider dispatch persistence migration and route-level replay tests.
-7. Approve or reject KOSHA exact promotion only after human review is complete.
-8. Only after each gate has post-approval evidence, regenerate northstar-open-gates-current and northstar-live-rollup.
+6. Approve or reject a disposable saved Share session and recipient ACK canary before any production insert.
+7. Approve or reject provider dispatch persistence migration and route-level replay tests.
+8. Approve or reject KOSHA exact promotion only after human review is complete.
+9. Only after each gate has post-approval evidence, regenerate northstar-open-gates-current and northstar-live-rollup.
 
 ## Still Safe Without Approval
 

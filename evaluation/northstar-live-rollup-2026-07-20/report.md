@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-28T01:58:38.861Z
-Source HEAD at generation: 97a2a834552a1b7fe178f74597ad710f95cd3923
-Live commit at generation: 51a8db5bdb0dcc867621693e9fee9f30715aa9fa
+Generated at: 2026-07-28T02:14:33.058Z
+Source HEAD at generation: f160020db6a66a08f5e0ea174aa799432383101e
+Live commit at generation: dc894462967cf293b73b5014bfed258b17a170fe
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -198,7 +198,7 @@ Overall: `northstar_open_approval_gated`
 | dispatch_standalone_cockpit | ancestor | ancestor_of_head | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
 | dispatch_standalone_viewport_companion | ancestor | ancestor_of_head | evaluation\dispatch-standalone-viewport-2026-07-28\report.json |
 | provider_dispatch_persistence | ancestor | ancestor_of_head | evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json |
-| northstar_approval_runway | ancestor | ancestor_of_head | evaluation\northstar-approval-runway-2026-07-21\report.json |
+| northstar_approval_runway | exact | matches_live_source_mismatch | evaluation\northstar-approval-runway-2026-07-21\report.json |
 
 ## Carried Notices
 
