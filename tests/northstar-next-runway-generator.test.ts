@@ -975,9 +975,9 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       totalVulnerablePackages: 19,
     },
     auditAfter: {
-      totalVulnerablePackages: 17,
-      high: 12,
-      moderate: 5,
+      totalVulnerablePackages: 11,
+      high: 9,
+      moderate: 2,
     },
     remainingBoundaries: {
       fullRepositorySecurityScanCompleted: false,
@@ -1707,9 +1707,9 @@ describe("northstar next runway generator", () => {
     expect(report.dependencySecurityRemediation).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_BOUNDED_DEPENDENCY_REMEDIATION_RESIDUALS_OPEN",
       beforeVulnerablePackages: 19,
-      liveVulnerablePackages: 17,
-      liveHigh: 12,
-      liveModerate: 5,
+      liveVulnerablePackages: 11,
+      liveHigh: 9,
+      liveModerate: 2,
       fullRepositorySecurityScanCompleted: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });

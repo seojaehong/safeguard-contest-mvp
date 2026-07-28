@@ -1334,6 +1334,7 @@ export function buildNorthstarNextRunway(options) {
     && (boundedCurrentSourceHead === liveCommit || gitIsAncestor(options.rootDir, boundedCurrentSourceHead, liveCommit));
   const boundedWorkbenchCurrentLivePending = boundedCurrentSourceHead !== "" && !boundedWorkbenchSourceIncludedInLive;
   const boundedCurrentSummary = boundedWorkbenchCurrentSummary(boundedCurrent);
+  const dependencySecuritySummary = dependencySecurityRemediationSummary(dependencySecurityRemediation);
   const boundedDetailDepthDebtRows = Array.isArray(boundedCurrentSummary.documentDetailDepthDebts)
     ? boundedCurrentSummary.documentDetailDepthDebts.length
     : 0;
@@ -1434,7 +1435,7 @@ export function buildNorthstarNextRunway(options) {
       liveDocumentEditorialNearClassification,
     ),
     productCapabilityTruth: productCapabilityTruthSummary(productCapabilityTruth),
-    dependencySecurityRemediation: dependencySecurityRemediationSummary(dependencySecurityRemediation),
+    dependencySecurityRemediation: dependencySecuritySummary,
     hermesKnowledgeReviewAuthorityUi: hermesKnowledgeReviewAuthorityUiSummary(hermesKnowledgeReviewAuthorityUi),
     liveDocumentSecondaryGrounding: liveDocumentSecondaryGroundingSummary(liveDocumentSecondaryGrounding),
     liveDocumentSeedProfileIsolation: liveDocumentSeedProfileIsolationSummary(liveDocumentSeedProfileIsolation),
@@ -1470,7 +1471,7 @@ export function buildNorthstarNextRunway(options) {
       "keep Hermes/OpenClaw live execution held: tenant envelope, tool denial, Evidence Harness, DNS-pinned trusted transport, and terminal persistence behavior are source-proven, while the durable cross-instance attempt/terminal ledger and authenticated canary remain open",
       "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
       "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held",
-      "do not claim dependency-security completion while 17 vulnerable-package findings and the full repository security scan remain open",
+      `do not claim dependency-security completion while ${dependencySecuritySummary.liveVulnerablePackages || "residual"} vulnerable-package findings and the full repository security scan remain open`,
     ],
     providerLiveDispatchClaimed: false,
     dbMutationPerformed: false,

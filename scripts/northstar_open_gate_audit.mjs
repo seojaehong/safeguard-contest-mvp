@@ -2944,23 +2944,34 @@ function evaluateDependencySecurityRemediationGate(rootDir) {
     && readNumber(auditBefore.totalVulnerablePackages) === 19
     && readNumber(auditBefore.high) === 14
     && readNumber(auditBefore.moderate) === 5
-    && readNumber(auditAfter.totalVulnerablePackages) === 17
-    && readNumber(auditAfter.high) === 12
-    && readNumber(auditAfter.moderate) === 5
+    && readNumber(auditAfter.totalVulnerablePackages) === 11
+    && readNumber(auditAfter.high) === 9
+    && readNumber(auditAfter.moderate) === 2
     && auditAfter.productionOmitDevMatchesFullAudit === true
     && readNumber(auditAfter.automaticNonBreakingFixChangeCount) === 0
-    && updates.length === 3
-    && residuals.length === 5
+    && updates.length === 6
+    && updates.some((item) => readString(item.package) === "@hono/node-server" && readString(item.after) === "2.0.12")
+    && updates.some((item) => readString(item.package) === "fast-uri" && readString(item.after) === "3.1.4")
+    && updates.some((item) => readString(item.package) === "sharp" && readString(item.after) === "0.35.3")
+    && residuals.length === 2
     && compatibilityBoundary.dependencyGraphValid === true
     && readString(compatibilityBoundary.mcpSdkKeptAt) === "1.26.0"
+    && readString(compatibilityBoundary.honoOverride) === "2.0.12"
+    && readString(compatibilityBoundary.fastUriOverride) === "3.1.4"
+    && readString(compatibilityBoundary.sharpOverride) === "0.35.3"
     && verification.strictTypecheck === "PASS"
     && verification.build === "PASS"
     && readString(verification.nextVersion) === "15.5.22"
     && readNumber(verification.staticPagesGenerated) === 28
+    && readNumber(verification.mcpRuntimeContracts?.testFiles) === 13
+    && readNumber(verification.mcpRuntimeContracts?.testsPassed) === 170
+    && readNumber(verification.localRuntimeSmoke?.mcpUnauthenticatedStatus) === 401
+    && readNumber(verification.localRuntimeSmoke?.nextImageOptimizerStatus) === 200
+    && readString(verification.localRuntimeSmoke?.nextImageOptimizerContentType) === "image/png"
     && noMutation
     && remainingBoundaries.liveAfterDeploymentRequired === false
     && remainingBoundaries.fullRepositorySecurityScanCompleted === false
-    && readNumber(remainingBoundaries.residualVulnerablePackages) === 17
+    && readNumber(remainingBoundaries.residualVulnerablePackages) === 11
     && readString(remainingBoundaries.providerDispatchPersistence) === "approval_gated"
     && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE";
 
@@ -2970,9 +2981,9 @@ function evaluateDependencySecurityRemediationGate(rootDir) {
       label: "Runtime dependency security remediation",
       state: "notice",
       evidencePath,
-      detail: "Live bounded remediation removed the direct Next.js and adm-zip advisories plus all PostCSS advisories, reducing the production lockfile finding count from 19 to 17. Five upstream/compatibility residual groups remain explicitly open; this is not a zero-vulnerability or full repository security-scan claim. No mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
+      detail: "Live bounded remediation removed the direct Next.js and adm-zip advisories plus all PostCSS, AJV fast-uri, MCP/Hono static-path, and Next/Sharp advisories, reducing the production lockfile finding count from 19 to 11. Two upstream residual groups remain explicitly open; this is not a zero-vulnerability or full repository security-scan claim. No mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
       nextActions: [
-        "Track patched upstream releases for the ExcelJS archive chain, Next-compatible Sharp, MCP/Hono, AJV fast-uri, and UUID transitives.",
+        "Track patched upstream releases for the ExcelJS archive chain and Google-auth/UUID transitives.",
         "Run a separately scoped full repository security scan before any broad security-complete claim.",
       ],
     });

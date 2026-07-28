@@ -586,29 +586,45 @@ function createFixtureRoot(): string {
       totalVulnerablePackages: 19,
     },
     auditAfter: {
-      high: 12,
-      moderate: 5,
-      totalVulnerablePackages: 17,
+      high: 9,
+      moderate: 2,
+      totalVulnerablePackages: 11,
       productionOmitDevMatchesFullAudit: true,
       automaticNonBreakingFixChangeCount: 0,
     },
-    updates: [{ package: "next" }, { package: "adm-zip" }, { package: "postcss" }],
+    updates: [
+      { package: "next" },
+      { package: "adm-zip" },
+      { package: "postcss" },
+      { package: "@hono/node-server", after: "2.0.12" },
+      { package: "fast-uri", after: "3.1.4" },
+      { package: "sharp", after: "0.35.3" },
+    ],
     residuals: [
       { group: "exceljs-archive-chain" },
-      { group: "next-sharp" },
-      { group: "mcp-hono-static" },
-      { group: "ajv-fast-uri" },
       { group: "uuid-transitives" },
     ],
     compatibilityBoundary: {
       mcpSdkKeptAt: "1.26.0",
       dependencyGraphValid: true,
+      honoOverride: "2.0.12",
+      fastUriOverride: "3.1.4",
+      sharpOverride: "0.35.3",
     },
     verification: {
       strictTypecheck: "PASS",
       build: "PASS",
       nextVersion: "15.5.22",
       staticPagesGenerated: 28,
+      mcpRuntimeContracts: {
+        testFiles: 13,
+        testsPassed: 170,
+      },
+      localRuntimeSmoke: {
+        mcpUnauthenticatedStatus: 401,
+        nextImageOptimizerStatus: 200,
+        nextImageOptimizerContentType: "image/png",
+      },
     },
     mutationBoundary: {
       dbMutationPerformed: false,
@@ -621,7 +637,7 @@ function createFixtureRoot(): string {
     remainingBoundaries: {
       liveAfterDeploymentRequired: false,
       fullRepositorySecurityScanCompleted: false,
-      residualVulnerablePackages: 17,
+      residualVulnerablePackages: 11,
       providerDispatchPersistence: "approval_gated",
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
@@ -2326,7 +2342,7 @@ describe("northstar open gate audit", () => {
       state: "notice",
       evidencePath: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
     });
-    expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("19 to 17");
+    expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("19 to 11");
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("not a zero-vulnerability");
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_authority")).toMatchObject({
