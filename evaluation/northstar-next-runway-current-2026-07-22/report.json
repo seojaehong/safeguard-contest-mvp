@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-07-28T12:20:33.617Z",
+  "generatedAt": "2026-07-28T14:29:53.771Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "99321fd8b4fc815915c694853db5565d2758e5e1",
-  "productionCommit": "99321fd8b4fc815915c694853db5565d2758e5e1",
+  "sourceHead": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
+  "productionCommit": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "99321fd8b4fc815915c694853db5565d2758e5e1",
+    "commitSha": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-60oz5feu1-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-99lz8phmq-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "99321fd8b4fc815915c694853db5565d2758e5e1",
-  "liveRollupLiveCommit": "99321fd8b4fc815915c694853db5565d2758e5e1",
+  "liveExactEvidenceCommit": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
+  "liveRollupLiveCommit": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -44,6 +44,7 @@
     "liveDocumentEditorialNearClassification": "evaluation\\live-document-editorial-near-classification-2026-07-25\\report.json",
     "productCapabilityTruth": "evaluation\\product-capability-truth-2026-07-25\\report.json",
     "dependencySecurityRemediation": "evaluation\\dependency-security-remediation-2026-07-28\\report.json",
+    "fullRepositorySecurityScan": "evaluation\\full-repository-security-scan-2026-07-28\\report.json",
     "hermesKnowledgeReviewAuthorityUi": "evaluation\\hermes-knowledge-review-authority-ui-2026-07-25\\report.json",
     "liveDocumentSecondaryGrounding": "evaluation\\live-document-secondary-grounding-2026-07-25\\report.json",
     "liveDocumentSeedProfileIsolation": "evaluation\\live-document-seed-profile-isolation-2026-07-25\\report.json",
@@ -72,6 +73,7 @@
     "live_document_editorial_review",
     "product_capability_truth",
     "dependency_security_remediation",
+    "full_repository_security_scan",
     "hermes_knowledge_review_authority",
     "hermes_knowledge_review_ui",
     "kosha_exact_promotion_packet_ready_for_review",
@@ -480,6 +482,23 @@
     "liveHigh": 0,
     "liveModerate": 0,
     "fullRepositorySecurityScanCompleted": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "fullRepositorySecurityScan": {
+    "verdict": "COMPLETE_LIVE_PRODUCTION_REPOSITORY_SECURITY_SCAN_REPORTABLE_FINDINGS_OPEN",
+    "sourceHead": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
+    "productionCommit": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
+    "completeness": "complete",
+    "fileCount": 4772,
+    "candidateCount": 21,
+    "reportableFindingCount": 18,
+    "suppressedCandidateCount": 3,
+    "deferredCandidateCount": 0,
+    "medium": 5,
+    "low": 13,
+    "fullRepositorySecurityScanCompleted": true,
+    "securityCompleteClaimAllowed": false,
+    "remediationRequired": true,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "hermesKnowledgeReviewAuthorityUi": {
@@ -1188,7 +1207,7 @@
     "keep Hermes/OpenClaw live execution held: tenant envelope, tool denial, Evidence Harness, DNS-pinned trusted transport, and terminal persistence behavior are source-proven, while the durable cross-instance attempt/terminal ledger and authenticated canary remain open",
     "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
     "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held",
-    "do not claim broad security completion until the separately scoped full repository security scan is complete, even though the live runtime dependency audit is zero"
+    "remediate the 18 reportable findings from the completed full repository security scan before any broad security-complete claim; start with scheduled-briefing tenant binding, then public provider/export budgets and spreadsheet formula neutralization"
   ],
   "providerLiveDispatchClaimed": false,
   "dbMutationPerformed": false

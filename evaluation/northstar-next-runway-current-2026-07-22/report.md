@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `99321fd8b4fc815915c694853db5565d2758e5e1`
+Source HEAD: `47b07b6aff72ced25e8c1884ecd16f010e1fc170`
 
-Production `/api/build-info`: `99321fd8b4fc815915c694853db5565d2758e5e1`
+Production `/api/build-info`: `47b07b6aff72ced25e8c1884ecd16f010e1fc170`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `99321fd8b4fc815915c694853db5565d2758e5e1`
+Live rollup source head: `47b07b6aff72ced25e8c1884ecd16f010e1fc170`
 
 Live rollup matches production: `true`
 
@@ -123,7 +123,7 @@ Required first-task containment:
 16. keep Hermes/OpenClaw live execution held: tenant envelope, tool denial, Evidence Harness, DNS-pinned trusted transport, and terminal persistence behavior are source-proven, while the durable cross-instance attempt/terminal ledger and authenticated canary remain open.
 17. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
 18. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
-19. do not claim broad security completion until the separately scoped full repository security scan is complete, even though the live runtime dependency audit is zero.
+19. remediate the 18 reportable findings from the completed full repository security scan before any broad security-complete claim; start with scheduled-briefing tenant binding, then public provider/export budgets and spreadsheet formula neutralization.
 
 ## KOSHA Candidate Boundary
 

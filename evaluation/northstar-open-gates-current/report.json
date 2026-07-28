@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-28T12:20:23.814Z",
-  "sourceSha": "99321fd8b4fc815915c694853db5565d2758e5e1",
+  "generatedAt": "2026-07-28T14:29:32.495Z",
+  "sourceSha": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
   "overall": "open",
   "gates": [
     {
@@ -124,7 +124,18 @@
       "evidencePath": "evaluation\\dependency-security-remediation-2026-07-28\\report.json",
       "detail": "Live runtime dependency remediation reduced the production lockfile audit from 19 findings to 0 while retaining ExcelJS 4.4.0 and verifying its patched archiver/unzipper write-read path. This is an npm dependency-audit claim, not a full repository security-scan or zero-risk product claim. No mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Run a separately scoped full repository security scan before any broad security-complete claim."
+        "Use the separate full_repository_security_scan gate for repository-wide coverage; this dependency gate alone cannot support a broad security-complete claim."
+      ]
+    },
+    {
+      "id": "full_repository_security_scan",
+      "state": "proven",
+      "label": "Full repository security scan",
+      "evidencePath": "evaluation\\full-repository-security-scan-2026-07-28\\report.json",
+      "detail": "The immutable live production revision received complete repository coverage: 4,772 files accounted for, 21 candidates decided, 18 reportable findings retained (5 medium, 13 low), 3 Share/confirmation candidates suppressed with explicit counterevidence, and 0 deferred rows. Completion is not a security-complete claim: remediation remains required, no mutation or destructive load was performed, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Remediate the scheduled-briefing cross-tenant owner binding first, then public provider work budgets, export work budgets, and CSV/TSV formula neutralization.",
+        "Do not claim security completion until the 18 reportable findings are fixed and a follow-up scan confirms closure."
       ]
     },
     {
@@ -321,6 +332,7 @@
     "All KOSHA metadata-verified candidates are exact production evidence.",
     "KOSHA operator checklist completion alone approves exact-trust promotion.",
     "Live Supabase RLS tenant isolation is launch-proven before catalog and tenant A/B evidence.",
-    "Real provider dispatch is production-live for any channel before persistent idempotency and provider result persistence approval."
+    "Real provider dispatch is production-live for any channel before persistent idempotency and provider result persistence approval.",
+    "A completed full repository security scan means the product is security-complete while reportable findings remain open."
   ]
 }

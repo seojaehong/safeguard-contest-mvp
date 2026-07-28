@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-28T12:20:25.183Z",
-  "head": "99321fd8b4fc815915c694853db5565d2758e5e1",
+  "generatedAt": "2026-07-28T14:29:39.038Z",
+  "head": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "99321fd8b4fc815915c694853db5565d2758e5e1",
+    "commitSha": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-60oz5feu1-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-99lz8phmq-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 28
+    "gateCount": 29
   },
   "provenGates": [
     {
@@ -92,6 +92,12 @@
       "state": "proven",
       "artifact": "evaluation\\dependency-security-remediation-2026-07-28\\report.json",
       "detail": "Live runtime dependency remediation reduced the production lockfile audit from 19 findings to 0 while retaining ExcelJS 4.4.0 and verifying its patched archiver/unzipper write-read path. This is an npm dependency-audit claim, not a full repository security-scan or zero-risk product claim. No mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "full_repository_security_scan",
+      "state": "proven",
+      "artifact": "evaluation\\full-repository-security-scan-2026-07-28\\report.json",
+      "detail": "The immutable live production revision received complete repository coverage: 4,772 files accounted for, 21 candidates decided, 18 reportable findings retained (5 medium, 13 low), 3 Share/confirmation candidates suppressed with explicit counterevidence, and 0 deferred rows. Completion is not a security-complete claim: remediation remains required, no mutation or destructive load was performed, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "hermes_knowledge_review_authority",
@@ -297,6 +303,19 @@
       "horizontalOverflow": 0,
       "verdict": "PASS"
     },
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "fullRepositorySecurityScan": {
+    "artifact": "evaluation\\full-repository-security-scan-2026-07-28\\report.json",
+    "verdict": "COMPLETE_LIVE_PRODUCTION_REPOSITORY_SECURITY_SCAN_REPORTABLE_FINDINGS_OPEN",
+    "sourceHead": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
+    "productionCommit": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
+    "completeness": "complete",
+    "fileCount": 4772,
+    "reportableFindingCount": 18,
+    "medium": 5,
+    "low": 13,
+    "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "liveDocumentQualityMatrix": {
@@ -566,9 +585,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "99321fd8b4fc815915c694853db5565d2758e5e1",
+      "sourceCommit": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
       "sourceStatus": "exact",
-      "productionCommit": "99321fd8b4fc815915c694853db5565d2758e5e1",
+      "productionCommit": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
       "productionStatus": "matches_live"
     },
     {
@@ -666,6 +685,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": "0e09f9e8b2d8a413e0d500919424b4b918a6cd83",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "full_repository_security_scan",
+      "artifact": "evaluation\\full-repository-security-scan-2026-07-28\\report.json",
+      "sourceCommit": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
+      "sourceStatus": "exact",
+      "productionCommit": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
+      "productionStatus": "matches_live"
     },
     {
       "id": "hermes_knowledge_review_ui",
@@ -787,6 +814,7 @@
     "All KOSHA metadata-verified candidates are exact production evidence.",
     "KOSHA operator checklist completion alone approves exact-trust promotion.",
     "Live Supabase RLS tenant isolation is launch-proven before catalog and tenant A/B evidence.",
-    "Real provider dispatch is production-live for any channel before persistent idempotency and provider result persistence approval."
+    "Real provider dispatch is production-live for any channel before persistent idempotency and provider result persistence approval.",
+    "A completed full repository security scan means the product is security-complete while reportable findings remain open."
   ]
 }

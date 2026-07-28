@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-28T12:20:23.814Z
-Source SHA: `99321fd8b4fc815915c694853db5565d2758e5e1`
+Generated at: 2026-07-28T14:29:32.495Z
+Source SHA: `47b07b6aff72ced25e8c1884ecd16f010e1fc170`
 Overall: `open`
 
 ## Gate Matrix
@@ -20,6 +20,7 @@ Overall: `open`
 | live_document_editorial_review | proven | evaluation\live-document-editorial-review-2026-07-25\report.json | Five live production scenarios and all 60 canonical document surfaces pass the automated editorial contract: placeholder=0, legal overclaim=0, awkward composition 20->0, and evidence-domain mismatch 1->0. The companion duplicate classifier reduces generic-template overuse 4->0 while retaining exact=31 and near=100 reviewer findings. Near-classification keeps all 100 findings visible while reducing unclassified human-review-required 54->0 through role/context/hazard/control categories. Rain-context isolation evaluation\live-document-rain-context-isolation-2026-07-25\report.json fails the focused production-before scenario at 3 irrelevant document findings, passes the focused live-after at 0, and passes the strengthened five-scenario/60-document contract with 0 forbidden rain fragments, preventing 비산 from being treated as rain. humanReviewCompleted=false, the six-core wording and 12-presence gates are not combined as a human PASS, no DB/share/provider mutation occurred, and exact saved Share remains MISSING_EVIDENCE. |
 | product_capability_truth | proven | evaluation\product-capability-truth-2026-07-25\report.json | Manual email/SMS/Kakao and scheduled briefing email are fail-closed preview-only because persistent idempotency is unavailable. Live dispatch entry copy distinguishes preview/readiness from approved results (evaluation\dispatch-entry-capability-truth-2026-07-28\report.json), and the public landing keeps safety judgment and final confirmation with a human instead of claiming role replacement (evaluation\landing-human-review-boundary-2026-07-28\report.json). Live photo Vision/OCR readiness is accepted-only, AI generation modes are template/enhanced/full, and no DB/share/provider/photo POST mutation occurred. This does not grant provider dispatch approval or replace broad human/legal review: exact saved Share remains MISSING_EVIDENCE and Documents/Share IA remains OPEN_SEPARATE_VIEWPORT_IA_WAVE. |
 | dependency_security_remediation | proven | evaluation\dependency-security-remediation-2026-07-28\report.json | Live runtime dependency remediation reduced the production lockfile audit from 19 findings to 0 while retaining ExcelJS 4.4.0 and verifying its patched archiver/unzipper write-read path. This is an npm dependency-audit claim, not a full repository security-scan or zero-risk product claim. No mutation occurred and exact saved Share remains MISSING_EVIDENCE. |
+| full_repository_security_scan | proven | evaluation\full-repository-security-scan-2026-07-28\report.json | The immutable live production revision received complete repository coverage: 4,772 files accounted for, 21 candidates decided, 18 reportable findings retained (5 medium, 13 low), 3 Share/confirmation candidates suppressed with explicit counterevidence, and 0 deferred rows. Completion is not a security-complete claim: remediation remains required, no mutation or destructive load was performed, and exact saved Share remains MISSING_EVIDENCE. |
 | hermes_knowledge_review_authority | proven | evaluation\hermes-knowledge-review-contract-live-2026-07-25\report.json | Live stateless candidate review keeps SIF -> KOSHA -> law authority roles separate, preserves organization/site memory as non-public tenant evidence, requires site-manager acceptance and human review, and performs no AI provider, DB, publication, or Share mutation. LLM Wiki publication remains APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE. |
 | hermes_knowledge_review_ui | proven | evaluation\hermes-knowledge-review-authority-ui-2026-07-25\report.json | Live authenticated reviewer cockpit passes 8/8 Day/Night desktop and mobile geometry cases, exposes six SIF -> KOSHA -> law -> tenant-memory evidence roles, requires law provenance and site-manager acceptance, and performs no DB, provider, publication, or Share mutation. LLM Wiki/RLS remain APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE. |
 | live_document_secondary_grounding | proven | evaluation\live-document-secondary-grounding-2026-07-25\report.json | All six secondary deliverables pass scenario grounding across five live production scenarios: cases=5/5, documents=30/30, cross-scenario leakage=0, missingUnexpected=0. DB/share/provider mutation is false and exact saved Share remains MISSING_EVIDENCE. This deterministic contract does not replace the six-document wording gate, 12-document presence gate, or broad human review. |
@@ -54,6 +55,7 @@ Overall: `open`
 - KOSHA operator checklist completion alone approves exact-trust promotion.
 - Live Supabase RLS tenant isolation is launch-proven before catalog and tenant A/B evidence.
 - Real provider dispatch is production-live for any channel before persistent idempotency and provider result persistence approval.
+- A completed full repository security scan means the product is security-complete while reportable findings remain open.
 
 ## Next Actions
 
@@ -72,7 +74,9 @@ Overall: `open`
 - live_document_editorial_review: Keep Documents/Share viewport IA and exact saved Share geometry as separate product/evidence boundaries.
 - product_capability_truth: Keep provider dispatch persistence approval-gated.
 - product_capability_truth: Measure exact saved Share and Documents/Share viewport IA in their separate gates.
-- dependency_security_remediation: Run a separately scoped full repository security scan before any broad security-complete claim.
+- dependency_security_remediation: Use the separate full_repository_security_scan gate for repository-wide coverage; this dependency gate alone cannot support a broad security-complete claim.
+- full_repository_security_scan: Remediate the scheduled-briefing cross-tenant owner binding first, then public provider work budgets, export work budgets, and CSV/TSV formula neutralization.
+- full_repository_security_scan: Do not claim security completion until the 18 reportable findings are fixed and a follow-up scan confirms closure.
 - live_document_secondary_grounding: Keep broad human review and exact saved Share evidence separate from this deterministic supporting-document contract.
 - live_document_seed_profile_isolation: Keep broad human wording review and exact saved Share geometry separate from this deterministic seed-profile isolation contract.
 - ui_documents_share_cockpit: Keep the production live geometry recorded for first-action Documents/Share cockpits and 12-document cockpit slices; do not phrase it as documents page height fixed or expand it into a full 12-document field-first authoring claim.
