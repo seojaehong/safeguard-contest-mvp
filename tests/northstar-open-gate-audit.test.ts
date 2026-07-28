@@ -654,6 +654,56 @@ function createFixtureRoot(): string {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "full-repository-security-scan-2026-07-28", "report.json"), {
+    verdict: "COMPLETE_LIVE_PRODUCTION_REPOSITORY_SECURITY_SCAN_REPORTABLE_FINDINGS_OPEN",
+    sourceHead: "fixture-sha",
+    productionBuild: {
+      commitSha: "fixture-sha",
+      sourceHeadMatchesProduction: true,
+    },
+    scan: {
+      mode: "repository",
+      inventoryStrategy: "repository",
+      completeness: "complete",
+      targetKind: "git_revision",
+      fileCount: 4772,
+      candidateCount: 21,
+      reportableFindingCount: 18,
+      suppressedCandidateCount: 3,
+      deferredCandidateCount: 0,
+      severity: { critical: 0, high: 0, medium: 5, low: 13 },
+    },
+    findingFamilies: {
+      crossTenantAuthorization: 2,
+      publicProviderAndUpstreamResourceAbuse: 4,
+      spreadsheetFormulaInjection: 4,
+      documentExportResourceExhaustion: 8,
+    },
+    verification: {
+      focusedTestFiles: 7,
+      focusedTestsPassed: 102,
+      canonicalJsonValidated: true,
+      finalizerCompleted: true,
+      sealedArtifactCount: 16,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      embeddingGenerated: false,
+      vectorUploadPerformed: false,
+      wikiPublished: false,
+      exactTrustRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      fullRepositorySecurityScanCompleted: true,
+      securityCompleteClaimAllowed: false,
+      remediationRequired: true,
+      reportableFindingCount: 18,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      providerDispatchPersistence: "approval_gated",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "live-document-rain-context-isolation-2026-07-25", "report.json"), {
     schemaVersion: "safeclaw-live-document-rain-context-isolation/v1",
     verdict: "PASS_LIVE_PRODUCTION_RAIN_CONTEXT_ISOLATION",
@@ -2357,6 +2407,14 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("19 findings to 0");
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("not a full repository security-scan");
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "full-repository-security-scan-2026-07-28", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("4,772 files");
+    expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("18 reportable findings");
+    expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("not a security-complete claim");
+    expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_authority")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
@@ -2877,6 +2935,34 @@ describe("northstar open gate audit", () => {
     });
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("residuals=1");
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("fullScan=true");
+  });
+
+  it("fails the full repository security scan closed when findings are hidden behind a security-complete claim", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "full-repository-security-scan-2026-07-28", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      scan: { reportableFindingCount: number };
+      remainingBoundaries: {
+        securityCompleteClaimAllowed: boolean;
+        reportableFindingCount: number;
+      };
+    };
+    report.scan.reportableFindingCount = 0;
+    report.remainingBoundaries.reportableFindingCount = 0;
+    report.remainingBoundaries.securityCompleteClaimAllowed = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-28T00:00:00.000Z",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("reportable=0");
+    expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("securityComplete=true");
   });
 
   it("fails Hermes knowledge review authority closed when machine evidence replaces human review", async () => {

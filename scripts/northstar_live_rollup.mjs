@@ -28,6 +28,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
+  fullRepositorySecurityScan: path.join("evaluation", "full-repository-security-scan-2026-07-28", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
@@ -316,6 +317,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const liveDocumentEditorialDuplicateClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialDuplicateClassification);
   const liveDocumentEditorialNearClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialNearClassification);
   const productCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.productCapabilityTruth);
+  const fullRepositorySecurityScan = tryReadJson(rootDir, ARTIFACTS.fullRepositorySecurityScan);
   const hermesKnowledgeReviewAuthorityUi = tryReadJson(rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
   const liveDocumentSecondaryGrounding = tryReadJson(rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
   const liveDocumentSeedProfileIsolation = tryReadJson(rootDir, ARTIFACTS.liveDocumentSeedProfileIsolation);
@@ -398,6 +400,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_duplicate_classification", ARTIFACTS.liveDocumentEditorialDuplicateClassification, liveDocumentEditorialDuplicateClassification),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_near_classification", ARTIFACTS.liveDocumentEditorialNearClassification, liveDocumentEditorialNearClassification),
     evidenceStatus(rootDir, currentHead, liveCommit, "product_capability_truth", ARTIFACTS.productCapabilityTruth, productCapabilityTruth),
+    evidenceStatus(rootDir, currentHead, liveCommit, "full_repository_security_scan", ARTIFACTS.fullRepositorySecurityScan, fullRepositorySecurityScan),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_knowledge_review_ui", ARTIFACTS.hermesKnowledgeReviewAuthorityUi, hermesKnowledgeReviewAuthorityUi),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_secondary_grounding", ARTIFACTS.liveDocumentSecondaryGrounding, liveDocumentSecondaryGrounding),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_seed_profile_isolation", ARTIFACTS.liveDocumentSeedProfileIsolation, liveDocumentSeedProfileIsolation),
@@ -494,6 +497,41 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       mobileShortDay: recordAt(recordAt(dispatchStandaloneViewport, "afterLive"), "mobileShortDay"),
       mobileShortNight: recordAt(recordAt(dispatchStandaloneViewport, "afterLive"), "mobileShortNight"),
       exactSavedShareVerdict: asString(recordAt(dispatchStandaloneViewport, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    fullRepositorySecurityScan: {
+      artifact: ARTIFACTS.fullRepositorySecurityScan,
+      verdict: isRecord(fullRepositorySecurityScan) ? asString(fullRepositorySecurityScan.verdict) : "missing",
+      sourceHead: isRecord(fullRepositorySecurityScan) ? asString(fullRepositorySecurityScan.sourceHead) : "",
+      productionCommit: isRecord(fullRepositorySecurityScan) && isRecord(fullRepositorySecurityScan.productionBuild)
+        ? asString(fullRepositorySecurityScan.productionBuild.commitSha)
+        : "",
+      completeness: isRecord(fullRepositorySecurityScan) && isRecord(fullRepositorySecurityScan.scan)
+        ? asString(fullRepositorySecurityScan.scan.completeness)
+        : "",
+      fileCount: isRecord(fullRepositorySecurityScan) && isRecord(fullRepositorySecurityScan.scan)
+        ? asNumber(fullRepositorySecurityScan.scan.fileCount)
+        : null,
+      reportableFindingCount: isRecord(fullRepositorySecurityScan) && isRecord(fullRepositorySecurityScan.scan)
+        ? asNumber(fullRepositorySecurityScan.scan.reportableFindingCount)
+        : null,
+      medium: isRecord(fullRepositorySecurityScan)
+        && isRecord(fullRepositorySecurityScan.scan)
+        && isRecord(fullRepositorySecurityScan.scan.severity)
+        ? asNumber(fullRepositorySecurityScan.scan.severity.medium)
+        : null,
+      low: isRecord(fullRepositorySecurityScan)
+        && isRecord(fullRepositorySecurityScan.scan)
+        && isRecord(fullRepositorySecurityScan.scan.severity)
+        ? asNumber(fullRepositorySecurityScan.scan.severity.low)
+        : null,
+      securityCompleteClaimAllowed: isRecord(fullRepositorySecurityScan)
+        && isRecord(fullRepositorySecurityScan.remainingBoundaries)
+        ? fullRepositorySecurityScan.remainingBoundaries.securityCompleteClaimAllowed === true
+        : null,
+      exactSavedShareVerdict: isRecord(fullRepositorySecurityScan)
+        && isRecord(fullRepositorySecurityScan.remainingBoundaries)
+        ? asString(fullRepositorySecurityScan.remainingBoundaries.exactSavedShareVerdict)
+        : "",
     },
     liveDocumentQualityMatrix: {
       artifact: ARTIFACTS.liveDocumentQualityMatrix,

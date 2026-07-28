@@ -201,6 +201,23 @@ type NextRunwayReport = {
     fullRepositorySecurityScanCompleted: boolean;
     exactSavedShareVerdict: string;
   };
+  fullRepositorySecurityScan: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    completeness: string;
+    fileCount: number;
+    candidateCount: number;
+    reportableFindingCount: number;
+    suppressedCandidateCount: number;
+    deferredCandidateCount: number;
+    medium: number;
+    low: number;
+    fullRepositorySecurityScanCompleted: boolean;
+    securityCompleteClaimAllowed: boolean;
+    remediationRequired: boolean;
+    exactSavedShareVerdict: string;
+  };
   hermesOpenclaw: {
     verdict: string;
     trustedTransportWired: boolean;
@@ -984,6 +1001,31 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/full-repository-security-scan-2026-07-28/report.json", {
+    verdict: "COMPLETE_LIVE_PRODUCTION_REPOSITORY_SECURITY_SCAN_REPORTABLE_FINDINGS_OPEN",
+    sourceHead: "fixture-sha",
+    productionBuild: {
+      commitSha: "fixture-sha",
+    },
+    scan: {
+      completeness: "complete",
+      fileCount: 4772,
+      candidateCount: 21,
+      reportableFindingCount: 18,
+      suppressedCandidateCount: 3,
+      deferredCandidateCount: 0,
+      severity: {
+        medium: 5,
+        low: 13,
+      },
+    },
+    remainingBoundaries: {
+      fullRepositorySecurityScanCompleted: true,
+      securityCompleteClaimAllowed: false,
+      remediationRequired: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
     sourceHead: "fixture-sha",
@@ -1713,6 +1755,27 @@ describe("northstar next runway generator", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.provenCurrentState).toContain("dependency_security_remediation");
+    expect(report.fullRepositorySecurityScan).toMatchObject({
+      verdict: "COMPLETE_LIVE_PRODUCTION_REPOSITORY_SECURITY_SCAN_REPORTABLE_FINDINGS_OPEN",
+      sourceHead: "fixture-sha",
+      productionCommit: "fixture-sha",
+      completeness: "complete",
+      fileCount: 4772,
+      candidateCount: 21,
+      reportableFindingCount: 18,
+      suppressedCandidateCount: 3,
+      deferredCandidateCount: 0,
+      medium: 5,
+      low: 13,
+      fullRepositorySecurityScanCompleted: true,
+      securityCompleteClaimAllowed: false,
+      remediationRequired: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.provenCurrentState).toContain("full_repository_security_scan");
+    expect(report.nextSafeWorkWithoutApproval).toContain(
+      "remediate the 18 reportable findings from the completed full repository security scan before any broad security-complete claim; start with scheduled-briefing tenant binding, then public provider/export budgets and spreadsheet formula neutralization",
+    );
     expect(report.provenCurrentState).toContain("hermes_knowledge_review_authority");
     expect(report.provenCurrentState).toContain("hermes_knowledge_review_ui");
     expect(report.hermesKnowledgeReviewAuthorityUi).toMatchObject({

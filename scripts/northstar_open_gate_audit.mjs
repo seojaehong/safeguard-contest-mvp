@@ -43,6 +43,7 @@ const EVIDENCE_PATHS = Object.freeze({
   dispatchEntryCapabilityTruth: path.join("evaluation", "dispatch-entry-capability-truth-2026-07-28", "report.json"),
   landingHumanReviewBoundary: path.join("evaluation", "landing-human-review-boundary-2026-07-28", "report.json"),
   dependencySecurityRemediation: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
+  fullRepositorySecurityScan: path.join("evaluation", "full-repository-security-scan-2026-07-28", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
@@ -2994,7 +2995,7 @@ function evaluateDependencySecurityRemediationGate(rootDir) {
       evidencePath,
       detail: "Live runtime dependency remediation reduced the production lockfile audit from 19 findings to 0 while retaining ExcelJS 4.4.0 and verifying its patched archiver/unzipper write-read path. This is an npm dependency-audit claim, not a full repository security-scan or zero-risk product claim. No mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
       nextActions: [
-        "Run a separately scoped full repository security scan before any broad security-complete claim.",
+        "Use the separate full_repository_security_scan gate for repository-wide coverage; this dependency gate alone cannot support a broad security-complete claim.",
       ],
     });
   }
@@ -3006,6 +3007,96 @@ function evaluateDependencySecurityRemediationGate(rootDir) {
     evidencePath,
     detail: `Dependency verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${readString(report.sourceHead) === readString(productionBuild.commitSha)}, before=${readNumber(auditBefore.totalVulnerablePackages)}, after=${readNumber(auditAfter.totalVulnerablePackages)}, residuals=${readNumber(remainingBoundaries.residualVulnerablePackages)}, fullScan=${remainingBoundaries.fullRepositorySecurityScanCompleted === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: ["Restore the live bounded evidence and every unresolved dependency boundary before claiming remediation."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateFullRepositorySecurityScanGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.fullRepositorySecurityScan;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "full_repository_security_scan",
+      label: "Full repository security scan",
+      state: "missing",
+      evidencePath,
+      detail: "Full repository security scan evidence is missing or invalid.",
+      nextActions: ["Run the standard repository security scan and preserve every candidate disposition before claiming coverage completion."],
+    });
+  }
+
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const scan = isRecord(report.scan) ? report.scan : {};
+  const severity = isRecord(scan.severity) ? scan.severity : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const findingFamilies = isRecord(report.findingFamilies) ? report.findingFamilies : {};
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.embeddingGenerated === false
+    && mutationBoundary.vectorUploadPerformed === false
+    && mutationBoundary.wikiPublished === false
+    && mutationBoundary.exactTrustRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "COMPLETE_LIVE_PRODUCTION_REPOSITORY_SECURITY_SCAN_REPORTABLE_FINDINGS_OPEN"
+    && readString(report.sourceHead).length > 0
+    && readString(report.sourceHead) === readString(productionBuild.commitSha)
+    && productionBuild.sourceHeadMatchesProduction === true
+    && readString(scan.mode) === "repository"
+    && readString(scan.inventoryStrategy) === "repository"
+    && readString(scan.completeness) === "complete"
+    && readString(scan.targetKind) === "git_revision"
+    && readNumber(scan.fileCount) === 4772
+    && readNumber(scan.candidateCount) === 21
+    && readNumber(scan.reportableFindingCount) === 18
+    && readNumber(scan.suppressedCandidateCount) === 3
+    && readNumber(scan.deferredCandidateCount) === 0
+    && readNumber(severity.critical) === 0
+    && readNumber(severity.high) === 0
+    && readNumber(severity.medium) === 5
+    && readNumber(severity.low) === 13
+    && readNumber(findingFamilies.crossTenantAuthorization) === 2
+    && readNumber(findingFamilies.publicProviderAndUpstreamResourceAbuse) === 4
+    && readNumber(findingFamilies.spreadsheetFormulaInjection) === 4
+    && readNumber(findingFamilies.documentExportResourceExhaustion) === 8
+    && readNumber(verification.focusedTestFiles) === 7
+    && readNumber(verification.focusedTestsPassed) === 102
+    && verification.canonicalJsonValidated === true
+    && verification.finalizerCompleted === true
+    && readNumber(verification.sealedArtifactCount) === 16
+    && noMutation
+    && remainingBoundaries.fullRepositorySecurityScanCompleted === true
+    && remainingBoundaries.securityCompleteClaimAllowed === false
+    && remainingBoundaries.remediationRequired === true
+    && readNumber(remainingBoundaries.reportableFindingCount) === 18
+    && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(remainingBoundaries.providerDispatchPersistence) === "approval_gated";
+
+  if (pass) {
+    return gateResult({
+      id: "full_repository_security_scan",
+      label: "Full repository security scan",
+      state: "proven",
+      evidencePath,
+      detail: "The immutable live production revision received complete repository coverage: 4,772 files accounted for, 21 candidates decided, 18 reportable findings retained (5 medium, 13 low), 3 Share/confirmation candidates suppressed with explicit counterevidence, and 0 deferred rows. Completion is not a security-complete claim: remediation remains required, no mutation or destructive load was performed, and exact saved Share remains MISSING_EVIDENCE.",
+      nextActions: [
+        "Remediate the scheduled-briefing cross-tenant owner binding first, then public provider work budgets, export work budgets, and CSV/TSV formula neutralization.",
+        "Do not claim security completion until the 18 reportable findings are fixed and a follow-up scan confirms closure.",
+      ],
+    });
+  }
+
+  return gateResult({
+    id: "full_repository_security_scan",
+    label: "Full repository security scan",
+    state: "contradicted",
+    evidencePath,
+    detail: `Security scan verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${readString(report.sourceHead) === readString(productionBuild.commitSha)}, completeness=${readString(scan.completeness) || "unknown"}, files=${readNumber(scan.fileCount)}, candidates=${readNumber(scan.candidateCount)}, reportable=${readNumber(scan.reportableFindingCount)}, deferred=${readNumber(scan.deferredCandidateCount)}, securityComplete=${remainingBoundaries.securityCompleteClaimAllowed === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: ["Restore complete candidate closure and the explicit findings-open/no-mutation boundary before claiming repository scan completion."],
   });
 }
 
@@ -3891,6 +3982,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateLiveDocumentEditorialReviewGate(rootDir),
     evaluateProductCapabilityTruthGate(rootDir),
     evaluateDependencySecurityRemediationGate(rootDir),
+    evaluateFullRepositorySecurityScanGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir),
     evaluateLiveDocumentSecondaryGroundingGate(rootDir),
@@ -3934,6 +4026,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
       "KOSHA operator checklist completion alone approves exact-trust promotion.",
       "Live Supabase RLS tenant isolation is launch-proven before catalog and tenant A/B evidence.",
       "Real provider dispatch is production-live for any channel before persistent idempotency and provider result persistence approval.",
+      "A completed full repository security scan means the product is security-complete while reportable findings remain open.",
     ],
   };
 }

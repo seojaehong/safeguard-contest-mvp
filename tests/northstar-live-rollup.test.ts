@@ -141,6 +141,18 @@ type RollupReport = {
     exactSavedShareVerdict: string;
     documentsShareIaVerdict: string;
   };
+  fullRepositorySecurityScan: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    completeness: string;
+    fileCount: number | null;
+    reportableFindingCount: number | null;
+    medium: number | null;
+    low: number | null;
+    securityCompleteClaimAllowed: boolean | null;
+    exactSavedShareVerdict: string;
+  };
   hermesKnowledgeReviewAuthorityUi: {
     verdict: string;
     localPassed: number;
@@ -217,6 +229,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "live_document_broad_review", state: "proven", evidencePath: "evaluation/live-document-broad-review-2026-07-25/report.json", detail: "all 12 deliverables passed" },
       { id: "live_document_editorial_review", state: "proven", evidencePath: "evaluation/live-document-editorial-review-2026-07-25/report.json", detail: "all 60 editorial surfaces passed automated contract" },
       { id: "product_capability_truth", state: "proven", evidencePath: "evaluation/product-capability-truth-2026-07-25/report.json", detail: "live capability truth passed without unlocking provider dispatch" },
+      { id: "full_repository_security_scan", state: "proven", evidencePath: "evaluation/full-repository-security-scan-2026-07-28/report.json", detail: "complete scan with 18 reportable findings still open" },
       { id: "live_document_secondary_grounding", state: "proven", evidencePath: "evaluation/live-document-secondary-grounding-2026-07-25/report.json", detail: "all 30 supporting documents passed scenario grounding" },
       { id: "live_document_seed_profile_isolation", state: "proven", evidencePath: "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", detail: "all 60 documents passed seed-profile isolation" },
       { id: "provider_dispatch_persistence", state: "approval_gated", evidencePath: "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json", detail: "preview only" },
@@ -513,6 +526,26 @@ function createFixtureRoot(): { root: string; head: string } {
       documentsShareIaVerdict: "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
     },
   });
+  writeJson(root, "evaluation/full-repository-security-scan-2026-07-28/report.json", {
+    verdict: "COMPLETE_LIVE_PRODUCTION_REPOSITORY_SECURITY_SCAN_REPORTABLE_FINDINGS_OPEN",
+    sourceHead: "TO_FILL",
+    productionBuild: {
+      commitSha: "TO_FILL",
+    },
+    scan: {
+      completeness: "complete",
+      fileCount: 4772,
+      reportableFindingCount: 18,
+      severity: {
+        medium: 5,
+        low: 13,
+      },
+    },
+    remainingBoundaries: {
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
     sourceHead: "TO_FILL",
@@ -671,6 +704,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-document-editorial-duplicate-classification-2026-07-25/report.json",
     "evaluation/live-document-editorial-near-classification-2026-07-25/report.json",
     "evaluation/product-capability-truth-2026-07-25/report.json",
+    "evaluation/full-repository-security-scan-2026-07-28/report.json",
     "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
     "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json",
@@ -835,6 +869,17 @@ describe("northstar live rollup", () => {
       documentsShareIaVerdict: "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
     });
     expect(report.evidence.find((item) => item.id === "product_capability_truth")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.fullRepositorySecurityScan).toMatchObject({
+      verdict: "COMPLETE_LIVE_PRODUCTION_REPOSITORY_SECURITY_SCAN_REPORTABLE_FINDINGS_OPEN",
+      completeness: "complete",
+      fileCount: 4772,
+      reportableFindingCount: 18,
+      medium: 5,
+      low: 13,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "full_repository_security_scan")?.productionStatus).toBe("ancestor_of_head");
     expect(report.hermesKnowledgeReviewAuthorityUi).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
       localPassed: 8,

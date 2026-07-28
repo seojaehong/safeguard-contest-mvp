@@ -32,6 +32,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
   dependencySecurityRemediation: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
+  fullRepositorySecurityScan: path.join("evaluation", "full-repository-security-scan-2026-07-28", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
@@ -659,6 +660,33 @@ function dependencySecurityRemediationSummary(report) {
     liveHigh: typeof auditAfter.high === "number" ? auditAfter.high : 0,
     liveModerate: typeof auditAfter.moderate === "number" ? auditAfter.moderate : 0,
     fullRepositorySecurityScanCompleted: asBoolean(remainingBoundaries.fullRepositorySecurityScanCompleted),
+    exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
+  };
+}
+
+/**
+ * @param {unknown} report
+ */
+function fullRepositorySecurityScanSummary(report) {
+  if (!isRecord(report)) return {};
+  const scan = isRecord(report.scan) ? report.scan : {};
+  const severity = isRecord(scan.severity) ? scan.severity : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: isRecord(report.productionBuild) ? asString(report.productionBuild.commitSha) : "",
+    completeness: asString(scan.completeness),
+    fileCount: typeof scan.fileCount === "number" ? scan.fileCount : 0,
+    candidateCount: typeof scan.candidateCount === "number" ? scan.candidateCount : 0,
+    reportableFindingCount: typeof scan.reportableFindingCount === "number" ? scan.reportableFindingCount : 0,
+    suppressedCandidateCount: typeof scan.suppressedCandidateCount === "number" ? scan.suppressedCandidateCount : 0,
+    deferredCandidateCount: typeof scan.deferredCandidateCount === "number" ? scan.deferredCandidateCount : 0,
+    medium: typeof severity.medium === "number" ? severity.medium : 0,
+    low: typeof severity.low === "number" ? severity.low : 0,
+    fullRepositorySecurityScanCompleted: asBoolean(remainingBoundaries.fullRepositorySecurityScanCompleted),
+    securityCompleteClaimAllowed: asBoolean(remainingBoundaries.securityCompleteClaimAllowed),
+    remediationRequired: asBoolean(remainingBoundaries.remediationRequired),
     exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
   };
 }
@@ -1302,6 +1330,7 @@ export function buildNorthstarNextRunway(options) {
   );
   const productCapabilityTruth = readOptionalJson(options.rootDir, ARTIFACTS.productCapabilityTruth);
   const dependencySecurityRemediation = readOptionalJson(options.rootDir, ARTIFACTS.dependencySecurityRemediation);
+  const fullRepositorySecurityScan = readOptionalJson(options.rootDir, ARTIFACTS.fullRepositorySecurityScan);
   const hermesKnowledgeReviewAuthorityUi = readOptionalJson(options.rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
   const liveDocumentSecondaryGrounding = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
   const liveDocumentSeedProfileIsolation = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSeedProfileIsolation);
@@ -1335,6 +1364,7 @@ export function buildNorthstarNextRunway(options) {
   const boundedWorkbenchCurrentLivePending = boundedCurrentSourceHead !== "" && !boundedWorkbenchSourceIncludedInLive;
   const boundedCurrentSummary = boundedWorkbenchCurrentSummary(boundedCurrent);
   const dependencySecuritySummary = dependencySecurityRemediationSummary(dependencySecurityRemediation);
+  const fullRepositorySecuritySummary = fullRepositorySecurityScanSummary(fullRepositorySecurityScan);
   const boundedDetailDepthDebtRows = Array.isArray(boundedCurrentSummary.documentDetailDepthDebts)
     ? boundedCurrentSummary.documentDetailDepthDebts.length
     : 0;
@@ -1372,6 +1402,7 @@ export function buildNorthstarNextRunway(options) {
       "live_document_editorial_review",
       "product_capability_truth",
       "dependency_security_remediation",
+      "full_repository_security_scan",
       "hermes_knowledge_review_authority",
       "hermes_knowledge_review_ui",
       "kosha_exact_promotion_packet_ready_for_review",
@@ -1432,6 +1463,7 @@ export function buildNorthstarNextRunway(options) {
     ),
     productCapabilityTruth: productCapabilityTruthSummary(productCapabilityTruth),
     dependencySecurityRemediation: dependencySecuritySummary,
+    fullRepositorySecurityScan: fullRepositorySecuritySummary,
     hermesKnowledgeReviewAuthorityUi: hermesKnowledgeReviewAuthorityUiSummary(hermesKnowledgeReviewAuthorityUi),
     liveDocumentSecondaryGrounding: liveDocumentSecondaryGroundingSummary(liveDocumentSecondaryGrounding),
     liveDocumentSeedProfileIsolation: liveDocumentSeedProfileIsolationSummary(liveDocumentSeedProfileIsolation),
@@ -1467,7 +1499,7 @@ export function buildNorthstarNextRunway(options) {
       "keep Hermes/OpenClaw live execution held: tenant envelope, tool denial, Evidence Harness, DNS-pinned trusted transport, and terminal persistence behavior are source-proven, while the durable cross-instance attempt/terminal ledger and authenticated canary remain open",
       "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
       "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held",
-      "do not claim broad security completion until the separately scoped full repository security scan is complete, even though the live runtime dependency audit is zero",
+      "remediate the 18 reportable findings from the completed full repository security scan before any broad security-complete claim; start with scheduled-briefing tenant binding, then public provider/export budgets and spreadsheet formula neutralization",
     ],
     providerLiveDispatchClaimed: false,
     dbMutationPerformed: false,
