@@ -7,6 +7,11 @@ import { describe, expect, it } from "vitest";
 
 type NextRunwayReport = {
   provenCurrentState: string[];
+  noticeState: Array<{
+    gate: string;
+    state: string;
+    reason: string;
+  }>;
   sourceHead: string;
   productionCommit: string;
   latestEvidenceCommitLive: boolean;
@@ -186,6 +191,15 @@ type NextRunwayReport = {
     photoAnalysisPostCalled: boolean;
     exactSavedShareVerdict: string;
     documentsShareIaVerdict: string;
+  };
+  dependencySecurityRemediation: {
+    verdict: string;
+    beforeVulnerablePackages: number;
+    liveVulnerablePackages: number;
+    liveHigh: number;
+    liveModerate: number;
+    fullRepositorySecurityScanCompleted: boolean;
+    exactSavedShareVerdict: string;
   };
   hermesKnowledgeReviewAuthorityUi: {
     verdict: string;
@@ -931,6 +945,26 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       documentsShareIaVerdict: "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
     },
   });
+  writeJson(root, "evaluation/dependency-security-remediation-2026-07-28/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_BOUNDED_DEPENDENCY_REMEDIATION_RESIDUALS_OPEN",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-product",
+    productionBuild: {
+      commitSha: "fixture-sha",
+    },
+    auditBefore: {
+      totalVulnerablePackages: 19,
+    },
+    auditAfter: {
+      totalVulnerablePackages: 17,
+      high: 12,
+      moderate: 5,
+    },
+    remainingBoundaries: {
+      fullRepositorySecurityScanCompleted: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
     sourceHead: "fixture-sha",
@@ -1636,6 +1670,19 @@ describe("northstar next runway generator", () => {
       documentsShareIaVerdict: "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
     });
     expect(report.provenCurrentState).toContain("product_capability_truth");
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "dependency_security_remediation",
+      state: "notice",
+    }));
+    expect(report.dependencySecurityRemediation).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_BOUNDED_DEPENDENCY_REMEDIATION_RESIDUALS_OPEN",
+      beforeVulnerablePackages: 19,
+      liveVulnerablePackages: 17,
+      liveHigh: 12,
+      liveModerate: 5,
+      fullRepositorySecurityScanCompleted: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
     expect(report.provenCurrentState).toContain("hermes_knowledge_review_authority");
     expect(report.provenCurrentState).toContain("hermes_knowledge_review_ui");
     expect(report.hermesKnowledgeReviewAuthorityUi).toMatchObject({

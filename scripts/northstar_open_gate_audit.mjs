@@ -42,6 +42,7 @@ const EVIDENCE_PATHS = Object.freeze({
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
   dispatchEntryCapabilityTruth: path.join("evaluation", "dispatch-entry-capability-truth-2026-07-28", "report.json"),
   landingHumanReviewBoundary: path.join("evaluation", "landing-human-review-boundary-2026-07-28", "report.json"),
+  dependencySecurityRemediation: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
@@ -2907,6 +2908,90 @@ function evaluateDispatchStandaloneCockpitGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluateDependencySecurityRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.dependencySecurityRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "dependency_security_remediation",
+      label: "Runtime dependency security remediation",
+      state: "missing",
+      evidencePath,
+      detail: "Dependency security remediation evidence is missing or invalid.",
+      nextActions: ["Rerun the bounded lockfile audit and preserve every unresolved package finding."],
+    });
+  }
+
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const auditBefore = isRecord(report.auditBefore) ? report.auditBefore : {};
+  const auditAfter = isRecord(report.auditAfter) ? report.auditAfter : {};
+  const compatibilityBoundary = isRecord(report.compatibilityBoundary) ? report.compatibilityBoundary : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const updates = Array.isArray(report.updates) ? report.updates.filter(isRecord) : [];
+  const residuals = Array.isArray(report.residuals) ? report.residuals.filter(isRecord) : [];
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.embeddingGenerated === false
+    && mutationBoundary.vectorUploadPerformed === false
+    && mutationBoundary.exactTrustRegistryMutationPerformed === false;
+  const liveBoundedPass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_BOUNDED_DEPENDENCY_REMEDIATION_RESIDUALS_OPEN"
+    && readString(report.sourceHead).length > 0
+    && readString(report.sourceHead) === readString(productionBuild.commitSha)
+    && productionBuild.sourceHeadMatchesProduction === true
+    && readNumber(auditBefore.totalVulnerablePackages) === 19
+    && readNumber(auditBefore.high) === 14
+    && readNumber(auditBefore.moderate) === 5
+    && readNumber(auditAfter.totalVulnerablePackages) === 17
+    && readNumber(auditAfter.high) === 12
+    && readNumber(auditAfter.moderate) === 5
+    && auditAfter.productionOmitDevMatchesFullAudit === true
+    && readNumber(auditAfter.automaticNonBreakingFixChangeCount) === 0
+    && updates.length === 3
+    && residuals.length === 5
+    && compatibilityBoundary.dependencyGraphValid === true
+    && readString(compatibilityBoundary.mcpSdkKeptAt) === "1.26.0"
+    && verification.strictTypecheck === "PASS"
+    && verification.build === "PASS"
+    && readString(verification.nextVersion) === "15.5.22"
+    && readNumber(verification.staticPagesGenerated) === 28
+    && noMutation
+    && remainingBoundaries.liveAfterDeploymentRequired === false
+    && remainingBoundaries.fullRepositorySecurityScanCompleted === false
+    && readNumber(remainingBoundaries.residualVulnerablePackages) === 17
+    && readString(remainingBoundaries.providerDispatchPersistence) === "approval_gated"
+    && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+
+  if (liveBoundedPass) {
+    return gateResult({
+      id: "dependency_security_remediation",
+      label: "Runtime dependency security remediation",
+      state: "notice",
+      evidencePath,
+      detail: "Live bounded remediation removed the direct Next.js and adm-zip advisories plus all PostCSS advisories, reducing the production lockfile finding count from 19 to 17. Five upstream/compatibility residual groups remain explicitly open; this is not a zero-vulnerability or full repository security-scan claim. No mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
+      nextActions: [
+        "Track patched upstream releases for the ExcelJS archive chain, Next-compatible Sharp, MCP/Hono, AJV fast-uri, and UUID transitives.",
+        "Run a separately scoped full repository security scan before any broad security-complete claim.",
+      ],
+    });
+  }
+
+  return gateResult({
+    id: "dependency_security_remediation",
+    label: "Runtime dependency security remediation",
+    state: "contradicted",
+    evidencePath,
+    detail: `Dependency verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${readString(report.sourceHead) === readString(productionBuild.commitSha)}, before=${readNumber(auditBefore.totalVulnerablePackages)}, after=${readNumber(auditAfter.totalVulnerablePackages)}, residuals=${readNumber(remainingBoundaries.residualVulnerablePackages)}, fullScan=${remainingBoundaries.fullRepositorySecurityScanCompleted === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: ["Restore the live bounded evidence and every unresolved dependency boundary before claiming remediation."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateShareResultFixtureCockpitGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.shareResultDrilldown;
   const report = readJsonFile(rootDir, evidencePath);
@@ -3784,6 +3869,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateLiveDocumentBroadReviewGate(rootDir),
     evaluateLiveDocumentEditorialReviewGate(rootDir),
     evaluateProductCapabilityTruthGate(rootDir),
+    evaluateDependencySecurityRemediationGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir),
     evaluateLiveDocumentSecondaryGroundingGate(rootDir),

@@ -31,6 +31,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
+  dependencySecurityRemediation: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
@@ -633,6 +634,32 @@ function productCapabilityTruthSummary(report) {
     photoAnalysisPostCalled: asBoolean(mutationBoundary.photoAnalysisPostCalled),
     exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
     documentsShareIaVerdict: asString(remainingBoundaries.documentsShareIaVerdict),
+  };
+}
+
+/**
+ * @param {unknown} report
+ */
+function dependencySecurityRemediationSummary(report) {
+  if (!isRecord(report)) return {};
+  const auditBefore = isRecord(report.auditBefore) ? report.auditBefore : {};
+  const auditAfter = isRecord(report.auditAfter) ? report.auditAfter : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productCommit: asString(report.productCommit),
+    productionCommit: isRecord(report.productionBuild) ? asString(report.productionBuild.commitSha) : "",
+    beforeVulnerablePackages: typeof auditBefore.totalVulnerablePackages === "number"
+      ? auditBefore.totalVulnerablePackages
+      : 0,
+    liveVulnerablePackages: typeof auditAfter.totalVulnerablePackages === "number"
+      ? auditAfter.totalVulnerablePackages
+      : 0,
+    liveHigh: typeof auditAfter.high === "number" ? auditAfter.high : 0,
+    liveModerate: typeof auditAfter.moderate === "number" ? auditAfter.moderate : 0,
+    fullRepositorySecurityScanCompleted: asBoolean(remainingBoundaries.fullRepositorySecurityScanCompleted),
+    exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
   };
 }
 
@@ -1264,6 +1291,7 @@ export function buildNorthstarNextRunway(options) {
     ARTIFACTS.liveDocumentEditorialNearClassification,
   );
   const productCapabilityTruth = readOptionalJson(options.rootDir, ARTIFACTS.productCapabilityTruth);
+  const dependencySecurityRemediation = readOptionalJson(options.rootDir, ARTIFACTS.dependencySecurityRemediation);
   const hermesKnowledgeReviewAuthorityUi = readOptionalJson(options.rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
   const liveDocumentSecondaryGrounding = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
   const liveDocumentSeedProfileIsolation = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSeedProfileIsolation);
@@ -1350,6 +1378,11 @@ export function buildNorthstarNextRunway(options) {
         state: "notice",
         reason: "pass_with_notice with carried auth-history and dispatch-policy notices",
       },
+      {
+        gate: "dependency_security_remediation",
+        state: "notice",
+        reason: "live bounded remediation reduced vulnerable packages from 19 to 17, but five upstream/compatibility residual groups and the full repository security scan remain open",
+      },
     ],
     approvalGated: approvalGates(approvalRunway, shareRecipientAckApproval),
     launchReadiness: launchReadinessSummary(launch),
@@ -1391,6 +1424,7 @@ export function buildNorthstarNextRunway(options) {
       liveDocumentEditorialNearClassification,
     ),
     productCapabilityTruth: productCapabilityTruthSummary(productCapabilityTruth),
+    dependencySecurityRemediation: dependencySecurityRemediationSummary(dependencySecurityRemediation),
     hermesKnowledgeReviewAuthorityUi: hermesKnowledgeReviewAuthorityUiSummary(hermesKnowledgeReviewAuthorityUi),
     liveDocumentSecondaryGrounding: liveDocumentSecondaryGroundingSummary(liveDocumentSecondaryGrounding),
     liveDocumentSeedProfileIsolation: liveDocumentSeedProfileIsolationSummary(liveDocumentSeedProfileIsolation),
@@ -1426,6 +1460,7 @@ export function buildNorthstarNextRunway(options) {
       "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
       "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
       "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held",
+      "do not claim dependency-security completion while 17 vulnerable-package findings and the full repository security scan remain open",
     ],
     providerLiveDispatchClaimed: false,
     dbMutationPerformed: false,

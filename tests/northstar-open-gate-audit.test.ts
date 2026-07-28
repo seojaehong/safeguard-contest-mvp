@@ -573,6 +573,59 @@ function createFixtureRoot(): string {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_BOUNDED_DEPENDENCY_REMEDIATION_RESIDUALS_OPEN",
+    sourceHead: "fixture-sha",
+    productionBuild: {
+      commitSha: "fixture-sha",
+      sourceHeadMatchesProduction: true,
+    },
+    auditBefore: {
+      high: 14,
+      moderate: 5,
+      totalVulnerablePackages: 19,
+    },
+    auditAfter: {
+      high: 12,
+      moderate: 5,
+      totalVulnerablePackages: 17,
+      productionOmitDevMatchesFullAudit: true,
+      automaticNonBreakingFixChangeCount: 0,
+    },
+    updates: [{ package: "next" }, { package: "adm-zip" }, { package: "postcss" }],
+    residuals: [
+      { group: "exceljs-archive-chain" },
+      { group: "next-sharp" },
+      { group: "mcp-hono-static" },
+      { group: "ajv-fast-uri" },
+      { group: "uuid-transitives" },
+    ],
+    compatibilityBoundary: {
+      mcpSdkKeptAt: "1.26.0",
+      dependencyGraphValid: true,
+    },
+    verification: {
+      strictTypecheck: "PASS",
+      build: "PASS",
+      nextVersion: "15.5.22",
+      staticPagesGenerated: 28,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      embeddingGenerated: false,
+      vectorUploadPerformed: false,
+      exactTrustRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      liveAfterDeploymentRequired: false,
+      fullRepositorySecurityScanCompleted: false,
+      residualVulnerablePackages: 17,
+      providerDispatchPersistence: "approval_gated",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "live-document-rain-context-isolation-2026-07-25", "report.json"), {
     schemaVersion: "safeclaw-live-document-rain-context-isolation/v1",
     verdict: "PASS_LIVE_PRODUCTION_RAIN_CONTEXT_ISOLATION",
@@ -2269,6 +2322,13 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("landing-human-review-boundary");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("OPEN_SEPARATE_VIEWPORT_IA_WAVE");
+    expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")).toMatchObject({
+      state: "notice",
+      evidencePath: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("19 to 17");
+    expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("not a zero-vulnerability");
+    expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_authority")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
@@ -2763,6 +2823,32 @@ describe("northstar open gate audit", () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("landingTruthPass=false");
+  });
+
+  it("fails dependency security remediation closed when residual findings are hidden", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "dependency-security-remediation-2026-07-28", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remainingBoundaries: {
+        fullRepositorySecurityScanCompleted: boolean;
+        residualVulnerablePackages: number;
+      };
+    };
+    report.remainingBoundaries.fullRepositorySecurityScanCompleted = true;
+    report.remainingBoundaries.residualVulnerablePackages = 0;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-28T00:00:00.000Z",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("residuals=0");
+    expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("fullScan=true");
   });
 
   it("fails Hermes knowledge review authority closed when machine evidence replaces human review", async () => {
