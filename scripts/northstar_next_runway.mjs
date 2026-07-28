@@ -1467,7 +1467,7 @@ export function buildNorthstarNextRunway(options) {
       "resolve public Share storage readiness before exact saved-session closure: current evidence shows workpacks readable but workpack_share_sessions missing from production PostgREST schema cache",
       "do not create a production saved Share session unless the user supplies a concrete existing URL or explicitly approves DB-backed share-session creation; POST /api/workpacks/[id]/share-sessions inserts workpack_share_sessions",
       "keep invited-recipient ACK canary approval-gated: production workpack_share_sessions and workpack_read_confirmations rows require explicit live-data mutation approval before any real ACK readback claim",
-      "keep Hermes/OpenClaw bounded at adapter/service-auth/runtime policy until authenticated tenant-bound execution, replay ledger, tool denial, Evidence Harness, and terminal ledger gates are proven",
+      "keep Hermes/OpenClaw live execution held: tenant envelope, tool denial, Evidence Harness, DNS-pinned trusted transport, and terminal persistence behavior are source-proven, while the durable cross-instance attempt/terminal ledger and authenticated canary remain open",
       "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
       "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held",
       "do not claim dependency-security completion while 17 vulnerable-package findings and the full repository security scan remain open",

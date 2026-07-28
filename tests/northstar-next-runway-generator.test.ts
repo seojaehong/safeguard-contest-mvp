@@ -2030,6 +2030,9 @@ describe("northstar next runway generator", () => {
     expect(report.nextSafeWorkWithoutApproval).toContain(
       "keep Share UI evidence split by route: invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result state each need their own geometry before closing user-specific mobile-like complaints",
     );
+    expect(report.nextSafeWorkWithoutApproval).toContain(
+      "keep Hermes/OpenClaw live execution held: tenant envelope, tool denial, Evidence Harness, DNS-pinned trusted transport, and terminal persistence behavior are source-proven, while the durable cross-instance attempt/terminal ledger and authenticated canary remain open",
+    );
     expect(report.sourceHeadLivePending).toBe(false);
     expect(report.boundedWorkbenchSourceIncludedInLive).toBe(false);
     expect(report.boundedWorkbenchCurrentLivePending).toBe(true);
