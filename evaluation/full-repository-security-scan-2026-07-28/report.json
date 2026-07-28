@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "safeclaw-full-repository-security-scan/v1",
+  "checkedAt": "2026-07-28T23:07:57+09:00",
+  "verdict": "COMPLETE_LIVE_PRODUCTION_REPOSITORY_SECURITY_SCAN_REPORTABLE_FINDINGS_OPEN",
+  "sourceHead": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
+  "productionBuild": {
+    "commitSha": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-99lz8phmq-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
+  "scan": {
+    "id": "safeclaw-repository-security-47b07b6a-20260728",
+    "mode": "repository",
+    "inventoryStrategy": "repository",
+    "completeness": "complete",
+    "targetKind": "git_revision",
+    "fileCount": 4772,
+    "sourceTextCount": 766,
+    "structuredDocumentTextCount": 191,
+    "generatedEvidenceTextCount": 2495,
+    "binaryMetadataAccountedCount": 1309,
+    "otherFileCount": 11,
+    "candidateCount": 21,
+    "reportableFindingCount": 18,
+    "suppressedCandidateCount": 3,
+    "deferredCandidateCount": 0,
+    "severity": {
+      "critical": 0,
+      "high": 0,
+      "medium": 5,
+      "low": 13
+    },
+    "confidence": {
+      "high": 9,
+      "medium": 9,
+      "low": 0
+    }
+  },
+  "highestPriorityFindings": [
+    {
+      "title": "Scheduled briefing email can redirect workpack creation into another tenant",
+      "severity": "medium",
+      "confidence": "high",
+      "category": "Authorization bypass / cross-tenant write"
+    },
+    {
+      "title": "Public knowledge regeneration can spend provider quota without abuse controls",
+      "severity": "medium",
+      "confidence": "high",
+      "category": "Uncontrolled resource consumption"
+    },
+    {
+      "title": "Public workpack remediation can spend database and model resources without abuse controls",
+      "severity": "medium",
+      "confidence": "high",
+      "category": "Uncontrolled resource consumption"
+    }
+  ],
+  "findingFamilies": {
+    "crossTenantAuthorization": 2,
+    "publicProviderAndUpstreamResourceAbuse": 4,
+    "spreadsheetFormulaInjection": 4,
+    "documentExportResourceExhaustion": 8
+  },
+  "suppressedCandidates": {
+    "publicShareBearerContract": 2,
+    "readConfirmationDuplicateRaceWithoutCurrentSecurityImpact": 1
+  },
+  "verification": {
+    "focusedTestFiles": 7,
+    "focusedTestsPassed": 102,
+    "canonicalJsonValidated": true,
+    "finalizerCompleted": true,
+    "sealedArtifactCount": 16,
+    "destructiveLoadTestPerformed": false,
+    "paidProviderLoadPerformed": false,
+    "crossTenantMutationProofPerformed": false
+  },
+  "canonicalArtifacts": {
+    "readableReport": "evaluation/full-repository-security-scan-2026-07-28/report.md",
+    "scanManifest": "evaluation/full-repository-security-scan-2026-07-28/scan-manifest.json",
+    "findings": "evaluation/full-repository-security-scan-2026-07-28/findings.json",
+    "coverage": "evaluation/full-repository-security-scan-2026-07-28/coverage.json"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "fullRepositorySecurityScanCompleted": true,
+    "securityCompleteClaimAllowed": false,
+    "remediationRequired": true,
+    "reportableFindingCount": 18,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "providerDispatchPersistence": "approval_gated",
+    "shareRecipientAck": "approval_gated",
+    "supabaseRlsLaunchIsolation": "approval_gated",
+    "llmWikiPublication": "approval_gated",
+    "sifEmbeddingRuntime": "approval_gated",
+    "koshaExactPromotionReview": "approval_gated"
+  },
+  "boundary": "This artifact proves that the full tracked repository scope was inventoried and every security candidate was decided. It does not claim the product is security-complete: 18 reportable findings remain open, no destructive exploit was executed, and every DB, Share, provider, publication, vector, and exact-registry approval boundary remains unchanged."
+}

@@ -1,0 +1,2708 @@
+{
+  "documentType": "codex-security.findings",
+  "findings": [
+    {
+      "attackPath": {
+        "counterEvidence": "Tabs and newlines are removed and browser clipboard access requires a user action, but no formula-prefix neutralization exists; no stronger attacker-to-victim delivery workflow is proven.",
+        "dataflow": {
+          "outcome": "low",
+          "sink": "Clipboard write followed by Google Sheets paste",
+          "source": "User-edited and generated workpack row values.",
+          "summary": "Editable/generated workpack cells -> buildDelimited TSV normalization -> clipboard -> victim paste into Google Sheets."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "reachability": {
+          "attacker": "Actor able to influence exported workpack text",
+          "entrypoint": "components/WorkpackEditor.tsx",
+          "outcome": "low",
+          "preconditions": [
+            "A victim imports/pastes the exported content into formula-evaluating spreadsheet software."
+          ],
+          "summary": "Authenticated editor action is independently reachable; formula-leading values survive and execute only if the victim pastes into formula-evaluating spreadsheet software."
+        }
+      },
+      "codeEvidence": [
+        {
+          "code": "function buildDelimited(rows: SheetRow[], delimiter: \",\" | \"\\t\") {\n  const header = [\"\ubb38\uc11c\", \"\uc139\uc158\", \"\ud56d\ubaa9\", \"\ub0b4\uc6a9\"];\n  const body = rows.map((row) => [row.document, row.section, row.item, row.content]\n    .map((value) => delimiter === \",\" ? escapeCell(value) : value.replace(/\\t/g, \" \").replace(/\\r?\\n/g, \" \"))\n    .join(delimiter));\n  return [header.join(delimiter), ...body].join(\"\\n\");",
+          "endLine": 1823,
+          "explanation": "This root_control carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-1",
+          "label": "Root Control evidence",
+          "language": "typescript",
+          "path": "components/WorkpackEditor.tsx",
+          "role": "root_control",
+          "startLine": 1818
+        },
+        {
+          "code": "  async function copySheetsTsv() {\n    const confirmed = window.confirm(\"\uc0c8 Google Sheets\ub97c \uc5f4\uace0 \ud45c \ub370\uc774\ud130\ub97c \ud074\ub9bd\ubcf4\ub4dc\uc5d0 \ubcf5\uc0ac\ud569\ub2c8\ub2e4. \uc5f4\ub9b0 \ube48 \uc2dc\ud2b8\uc758 A1 \uc140\uc5d0 Ctrl+V\ub85c \ubd99\uc5ec\ub123\uc73c\uba74 \ubb38\uc11c\ud329 \ud45c\uac00 \ub4e4\uc5b4\uac11\ub2c8\ub2e4.\");\n    if (!confirmed) return;\n\n    const rows = buildLaunchSheetRows(values);\n    const sheetWindow = window.open(\"https://sheets.new\", \"_blank\", \"noopener,noreferrer\");\n    try {\n      await navigator.clipboard.writeText(buildDelimited(rows, \"\\t\"));\n      setSheetStatus(\"copied\");",
+          "endLine": 3834,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-2",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "components/WorkpackEditor.tsx",
+          "role": "sink",
+          "startLine": 3826
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Editable or generated workpack strings flow unchanged through buildDelimited into an independently triggerable spreadsheet import surface; the only transformations quote CSV or remove TSV tabs/newlines and do not neutralize formula prefixes."
+      },
+      "extensions": {
+        "candidateId": "candidate-54aed55480440f3d"
+      },
+      "findingId": "csf_9227c8522ae1752d4659ca0e",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:5e009cefcf6310f128c916a1327b3b12c8d10ec43b3b6c1bf1ee1aa4b4413253"
+      },
+      "identity": {
+        "anchor": "delimited-export-without-formula-neutralization",
+        "instance": "copysheetstsv"
+      },
+      "locations": [
+        {
+          "endLine": 1823,
+          "path": "components/WorkpackEditor.tsx",
+          "role": "root_control",
+          "startLine": 1818
+        },
+        {
+          "endLine": 3834,
+          "path": "components/WorkpackEditor.tsx",
+          "role": "sink",
+          "startLine": 3826
+        }
+      ],
+      "occurrenceId": "occ_6f17954388dfcb33601a83e6",
+      "preventiveControls": [
+        "Use one shared delimited-cell encoder for every CSV, TSV, download, and clipboard mode.",
+        "Keep export-specific security fixtures for spreadsheet applications."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Route every CSV and TSV cell through one formula-neutralization helper before quoting or joining. Prefix cells whose first significant character is `=`, `+`, `-`, `@`, tab, or carriage return with an apostrophe, and preserve the original value only in non-spreadsheet formats.",
+      "remediationTests": [
+        "Add a regression test for `copySheetsTsv` showing formula-leading editable content is emitted as inert text.",
+        "Cover leading whitespace and tab/carriage-return formula prefixes."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "summary": "Editable workpack values are copied as TSV directly to the clipboard. Pasting into the newly opened sheet can evaluate cells beginning with spreadsheet formula metacharacters."
+      },
+      "ruleId": "spreadsheet-formula-injection.delimited-export",
+      "severity": {
+        "changeConditions": "Raise only if a realistic lower-privileged attacker can plant cells into another user tenant and the supported spreadsheet client enables data exfiltration or privileged actions; ignore if all supported clients neutralize formula prefixes.",
+        "level": "low",
+        "rationale": "Spreadsheet formula execution can alter a victim-owned sheet, but requires an export/paste action and the repository does not prove credential theft, cross-tenant delivery, or a higher-impact formula workflow."
+      },
+      "summary": "Clipboard export to Google Sheets does not neutralize spreadsheet formulas.",
+      "taxonomy": {
+        "category": "Spreadsheet formula injection",
+        "cwe": [
+          "CWE-1236"
+        ]
+      },
+      "title": "Clipboard Sheets TSV permits spreadsheet formula injection",
+      "validation": {
+        "counterEvidence": [
+          "No formula-neutralization helper or spreadsheet-safe prefix is applied on this path. Existing CSV neutralization coverage belongs to a different reporting export implementation.",
+          "The exact spreadsheet application and its formula-evaluation policy affect exploit behavior, but the emitted cells remain formula-capable."
+        ],
+        "evidence": [
+          "components/WorkpackEditor.tsx:1818-1823 preserves leading =, +, -, and @ characters.",
+          "Clipboard write followed by Google Sheets paste reaches that helper and emits or copies spreadsheet-importable text.",
+          "Focused existing Vitest suites passed: 7 files, 102 tests (knowledge regeneration, workpack remediation, XLSX/HWP export, public share authority and tenant hardening, briefing)."
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "method": "static source/control/sink trace plus focused existing tests",
+        "summary": "Editable or generated workpack strings flow unchanged through buildDelimited into an independently triggerable spreadsheet import surface; the only transformations quote CSV or remove TSV tabs/newlines and do not neutralize formula prefixes."
+      }
+    },
+    {
+      "attackPath": {
+        "counterEvidence": "CSV quoting preserves data structure but not formula safety; exploitation still requires a victim to open/import the file in a formula-evaluating spreadsheet, and no cross-user delivery chain is established.",
+        "dataflow": {
+          "outcome": "low",
+          "sink": "Whole-workpack CSV download",
+          "source": "User-edited and generated workpack row values.",
+          "summary": "Editable/generated workpack cells -> buildDelimited CSV quoting -> whole-workpack CSV download -> victim opens/imports file."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "reachability": {
+          "attacker": "Actor able to influence exported workpack text",
+          "entrypoint": "components/WorkpackEditor.tsx",
+          "outcome": "low",
+          "preconditions": [
+            "A victim imports/pastes the exported content into formula-evaluating spreadsheet software."
+          ],
+          "summary": "The whole-workpack CSV mode is independently triggerable from the editor and preserves formula prefixes through the download sink."
+        }
+      },
+      "codeEvidence": [
+        {
+          "code": "function escapeCell(value: string) {\n  return `\"${value.replace(/\"/g, \"\\\"\\\"\")}\"`;\n}\n\nfunction buildDelimited(rows: SheetRow[], delimiter: \",\" | \"\\t\") {\n  const header = [\"\ubb38\uc11c\", \"\uc139\uc158\", \"\ud56d\ubaa9\", \"\ub0b4\uc6a9\"];\n  const body = rows.map((row) => [row.document, row.section, row.item, row.content]\n    .map((value) => delimiter === \",\" ? escapeCell(value) : value.replace(/\\t/g, \" \").replace(/\\r?\\n/g, \" \"))\n    .join(delimiter));\n  return [header.join(delimiter), ...body].join(\"\\n\");",
+          "endLine": 1823,
+          "explanation": "This root_control carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-1",
+          "label": "Root Control evidence",
+          "language": "typescript",
+          "path": "components/WorkpackEditor.tsx",
+          "role": "root_control",
+          "startLine": 1814
+        },
+        {
+          "code": "  function downloadAllCsv() {\n    const rows = buildLaunchSheetRows(values);\n    downloadBlob(new Blob([`\\uFEFF${buildDelimited(rows, \",\")}`], { type: \"text/csv;charset=utf-8\" }), `${sanitizeFileName(data.scenario.companyName)}-safeclaw-workpack.csv`);",
+          "endLine": 3798,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-2",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "components/WorkpackEditor.tsx",
+          "role": "sink",
+          "startLine": 3796
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Editable or generated workpack strings flow unchanged through buildDelimited into an independently triggerable spreadsheet import surface; the only transformations quote CSV or remove TSV tabs/newlines and do not neutralize formula prefixes."
+      },
+      "extensions": {
+        "candidateId": "candidate-723eb3163325c5e4"
+      },
+      "findingId": "csf_f134a8b05f34e5e1ce8ec67a",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:a9fe551d377a57c75dfa6ffd5124c0eb90dc9840e61be648d8fcce0df3a16832"
+      },
+      "identity": {
+        "anchor": "delimited-export-without-formula-neutralization",
+        "instance": "downloadallcsv"
+      },
+      "locations": [
+        {
+          "endLine": 1823,
+          "path": "components/WorkpackEditor.tsx",
+          "role": "root_control",
+          "startLine": 1814
+        },
+        {
+          "endLine": 3798,
+          "path": "components/WorkpackEditor.tsx",
+          "role": "sink",
+          "startLine": 3796
+        }
+      ],
+      "occurrenceId": "occ_2418caf6b01b98e7f3db3398",
+      "preventiveControls": [
+        "Use one shared delimited-cell encoder for every CSV, TSV, download, and clipboard mode.",
+        "Keep export-specific security fixtures for spreadsheet applications."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Route every CSV and TSV cell through one formula-neutralization helper before quoting or joining. Prefix cells whose first significant character is `=`, `+`, `-`, `@`, tab, or carriage return with an apostrophe, and preserve the original value only in non-spreadsheet formats.",
+      "remediationTests": [
+        "Add a regression test for `downloadAllCsv` showing formula-leading editable content is emitted as inert text.",
+        "Cover leading whitespace and tab/carriage-return formula prefixes."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "summary": "buildLaunchSheetRows includes editable workpack text, while buildDelimited only doubles quotes and wraps CSV fields. Formula-leading cells are preserved into the downloaded CSV."
+      },
+      "ruleId": "spreadsheet-formula-injection.delimited-export",
+      "severity": {
+        "changeConditions": "Raise if exported attacker-controlled cells are routinely delivered to a distinct privileged victim and a supported client permits exfiltrating formulas; ignore if supported importers categorically disable formulas.",
+        "level": "low",
+        "rationale": "This is a real downloadable-artifact injection boundary, but current evidence supports limited client-side integrity impact with user interaction rather than credential or tenant compromise."
+      },
+      "summary": "Whole-workpack CSV export does not neutralize spreadsheet formulas.",
+      "taxonomy": {
+        "category": "Spreadsheet formula injection",
+        "cwe": [
+          "CWE-1236"
+        ]
+      },
+      "title": "Whole-workpack CSV export permits spreadsheet formula injection",
+      "validation": {
+        "counterEvidence": [
+          "No formula-neutralization helper or spreadsheet-safe prefix is applied on this path. Existing CSV neutralization coverage belongs to a different reporting export implementation.",
+          "The exact spreadsheet application and its formula-evaluation policy affect exploit behavior, but the emitted cells remain formula-capable."
+        ],
+        "evidence": [
+          "components/WorkpackEditor.tsx:1818-1823 preserves leading =, +, -, and @ characters.",
+          "Whole-workpack CSV download reaches that helper and emits or copies spreadsheet-importable text.",
+          "Focused existing Vitest suites passed: 7 files, 102 tests (knowledge regeneration, workpack remediation, XLSX/HWP export, public share authority and tenant hardening, briefing)."
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "method": "static source/control/sink trace plus focused existing tests",
+        "summary": "Editable or generated workpack strings flow unchanged through buildDelimited into an independently triggerable spreadsheet import surface; the only transformations quote CSV or remove TSV tabs/newlines and do not neutralize formula prefixes."
+      }
+    },
+    {
+      "attackPath": {
+        "counterEvidence": "The affected content is selected/exported by the current user, CSV quoting is present, and the repository does not prove an attacker-controlled cross-user delivery workflow.",
+        "dataflow": {
+          "outcome": "low",
+          "sink": "Single-document CSV download",
+          "source": "User-edited and generated workpack row values.",
+          "summary": "Editable/generated document cells -> buildDelimited CSV quoting -> single-document CSV download -> victim opens/imports file."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "reachability": {
+          "attacker": "Actor able to influence exported workpack text",
+          "entrypoint": "components/WorkpackEditor.tsx",
+          "outcome": "low",
+          "preconditions": [
+            "A victim imports/pastes the exported content into formula-evaluating spreadsheet software."
+          ],
+          "summary": "The single-document CSV mode is independently triggerable and formula-leading document, section, item, and content fields reach the artifact unchanged."
+        }
+      },
+      "codeEvidence": [
+        {
+          "code": "function escapeCell(value: string) {\n  return `\"${value.replace(/\"/g, \"\\\"\\\"\")}\"`;\n}\n\nfunction buildDelimited(rows: SheetRow[], delimiter: \",\" | \"\\t\") {\n  const header = [\"\ubb38\uc11c\", \"\uc139\uc158\", \"\ud56d\ubaa9\", \"\ub0b4\uc6a9\"];\n  const body = rows.map((row) => [row.document, row.section, row.item, row.content]\n    .map((value) => delimiter === \",\" ? escapeCell(value) : value.replace(/\\t/g, \" \").replace(/\\r?\\n/g, \" \"))\n    .join(delimiter));\n  return [header.join(delimiter), ...body].join(\"\\n\");",
+          "endLine": 1823,
+          "explanation": "This root_control carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-1",
+          "label": "Root Control evidence",
+          "language": "typescript",
+          "path": "components/WorkpackEditor.tsx",
+          "role": "root_control",
+          "startLine": 1814
+        },
+        {
+          "code": "  function downloadCsv() {\n    const rows = buildRowsForDocument(selected, values);\n    downloadBlob(new Blob([`\\uFEFF${buildDelimited(rows, \",\")}`], { type: \"text/csv;charset=utf-8\" }), `${baseName}.csv`);",
+          "endLine": 3628,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-2",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "components/WorkpackEditor.tsx",
+          "role": "sink",
+          "startLine": 3626
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Editable or generated workpack strings flow unchanged through buildDelimited into an independently triggerable spreadsheet import surface; the only transformations quote CSV or remove TSV tabs/newlines and do not neutralize formula prefixes."
+      },
+      "extensions": {
+        "candidateId": "candidate-4e4ac39fade74115"
+      },
+      "findingId": "csf_713f637da86733907c5d68cb",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:18a2d2fecf773dcd1fc93356f5dc324b6cf0c4f6e47fbf8561a672106fc6add2"
+      },
+      "identity": {
+        "anchor": "delimited-export-without-formula-neutralization",
+        "instance": "downloadcsv"
+      },
+      "locations": [
+        {
+          "endLine": 1823,
+          "path": "components/WorkpackEditor.tsx",
+          "role": "root_control",
+          "startLine": 1814
+        },
+        {
+          "endLine": 3628,
+          "path": "components/WorkpackEditor.tsx",
+          "role": "sink",
+          "startLine": 3626
+        }
+      ],
+      "occurrenceId": "occ_feb5896a9d1feed0d8c433cd",
+      "preventiveControls": [
+        "Use one shared delimited-cell encoder for every CSV, TSV, download, and clipboard mode.",
+        "Keep export-specific security fixtures for spreadsheet applications."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Route every CSV and TSV cell through one formula-neutralization helper before quoting or joining. Prefix cells whose first significant character is `=`, `+`, `-`, `@`, tab, or carriage return with an apostrophe, and preserve the original value only in non-spreadsheet formats.",
+      "remediationTests": [
+        "Add a regression test for `downloadCsv` showing formula-leading editable content is emitted as inert text.",
+        "Cover leading whitespace and tab/carriage-return formula prefixes."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "summary": "User-editable document, section, item, and content values are only CSV-quoted. Values beginning with =, +, -, or @ remain formula-capable when the downloaded CSV is opened in spreadsheet software."
+      },
+      "ruleId": "spreadsheet-formula-injection.delimited-export",
+      "severity": {
+        "changeConditions": "Raise if another tenant or lower-privileged actor can persist the exported fields for a privileged victim and supported formulas can exfiltrate data; ignore if supported clients neutralize formulas.",
+        "level": "low",
+        "rationale": "Formula-capable cells create a low-impact artifact injection risk because exploitation depends on victim import behavior and no stronger confidentiality or authorization impact is evidenced."
+      },
+      "summary": "Single-document CSV export does not neutralize spreadsheet formulas.",
+      "taxonomy": {
+        "category": "Spreadsheet formula injection",
+        "cwe": [
+          "CWE-1236"
+        ]
+      },
+      "title": "Single-document CSV export permits spreadsheet formula injection",
+      "validation": {
+        "counterEvidence": [
+          "No formula-neutralization helper or spreadsheet-safe prefix is applied on this path. Existing CSV neutralization coverage belongs to a different reporting export implementation.",
+          "The exact spreadsheet application and its formula-evaluation policy affect exploit behavior, but the emitted cells remain formula-capable."
+        ],
+        "evidence": [
+          "components/WorkpackEditor.tsx:1818-1823 preserves leading =, +, -, and @ characters.",
+          "Single-document CSV download reaches that helper and emits or copies spreadsheet-importable text.",
+          "Focused existing Vitest suites passed: 7 files, 102 tests (knowledge regeneration, workpack remediation, XLSX/HWP export, public share authority and tenant hardening, briefing)."
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "method": "static source/control/sink trace plus focused existing tests",
+        "summary": "Editable or generated workpack strings flow unchanged through buildDelimited into an independently triggerable spreadsheet import surface; the only transformations quote CSV or remove TSV tabs/newlines and do not neutralize formula prefixes."
+      }
+    },
+    {
+      "attackPath": {
+        "counterEvidence": "TSV cleanup removes structural separators, but no formula-prefix neutralization exists; exploitation requires a separate victim import action and no higher-impact delivery chain is proven.",
+        "dataflow": {
+          "outcome": "low",
+          "sink": "Downloaded TSV import",
+          "source": "User-edited and generated workpack row values.",
+          "summary": "Editable/generated workpack cells -> TSV tab/newline cleanup -> downloaded TSV -> victim imports into Google Sheets or another spreadsheet."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "reachability": {
+          "attacker": "Actor able to influence exported workpack text",
+          "entrypoint": "components/WorkpackEditor.tsx",
+          "outcome": "low",
+          "preconditions": [
+            "A victim imports/pastes the exported content into formula-evaluating spreadsheet software."
+          ],
+          "summary": "The downloaded TSV mode is independently triggerable and preserves leading formula metacharacters."
+        }
+      },
+      "codeEvidence": [
+        {
+          "code": "function buildDelimited(rows: SheetRow[], delimiter: \",\" | \"\\t\") {\n  const header = [\"\ubb38\uc11c\", \"\uc139\uc158\", \"\ud56d\ubaa9\", \"\ub0b4\uc6a9\"];\n  const body = rows.map((row) => [row.document, row.section, row.item, row.content]\n    .map((value) => delimiter === \",\" ? escapeCell(value) : value.replace(/\\t/g, \" \").replace(/\\r?\\n/g, \" \"))\n    .join(delimiter));\n  return [header.join(delimiter), ...body].join(\"\\n\");",
+          "endLine": 1823,
+          "explanation": "This root_control carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-1",
+          "label": "Root Control evidence",
+          "language": "typescript",
+          "path": "components/WorkpackEditor.tsx",
+          "role": "root_control",
+          "startLine": 1818
+        },
+        {
+          "code": "  function downloadSheetsTsv() {\n    const rows = buildLaunchSheetRows(values);\n    downloadBlob(\n      new Blob([`\\uFEFF${buildDelimited(rows, \"\\t\")}`], { type: \"text/tab-separated-values;charset=utf-8\" }),\n      `${sanitizeFileName(data.scenario.companyName)}-google-sheets.tsv`\n    );",
+          "endLine": 3811,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-2",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "components/WorkpackEditor.tsx",
+          "role": "sink",
+          "startLine": 3806
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Editable or generated workpack strings flow unchanged through buildDelimited into an independently triggerable spreadsheet import surface; the only transformations quote CSV or remove TSV tabs/newlines and do not neutralize formula prefixes."
+      },
+      "extensions": {
+        "candidateId": "candidate-d138205a6b232e31"
+      },
+      "findingId": "csf_856fe15617f534b60a467d21",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:fae249f6276403e5ac28f2b03704da27fcd8bbf46efc0854f24a21814b09cd1b"
+      },
+      "identity": {
+        "anchor": "delimited-export-without-formula-neutralization",
+        "instance": "downloadsheetstsv"
+      },
+      "locations": [
+        {
+          "endLine": 1823,
+          "path": "components/WorkpackEditor.tsx",
+          "role": "root_control",
+          "startLine": 1818
+        },
+        {
+          "endLine": 3811,
+          "path": "components/WorkpackEditor.tsx",
+          "role": "sink",
+          "startLine": 3806
+        }
+      ],
+      "occurrenceId": "occ_2d6e59c716a582ce771a013b",
+      "preventiveControls": [
+        "Use one shared delimited-cell encoder for every CSV, TSV, download, and clipboard mode.",
+        "Keep export-specific security fixtures for spreadsheet applications."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Route every CSV and TSV cell through one formula-neutralization helper before quoting or joining. Prefix cells whose first significant character is `=`, `+`, `-`, `@`, tab, or carriage return with an apostrophe, and preserve the original value only in non-spreadsheet formats.",
+      "remediationTests": [
+        "Add a regression test for `downloadSheetsTsv` showing formula-leading editable content is emitted as inert text.",
+        "Cover leading whitespace and tab/carriage-return formula prefixes."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "summary": "The TSV branch removes tabs and line breaks but leaves formula prefixes intact before creating an importable tab-separated file from editable workpack rows."
+      },
+      "ruleId": "spreadsheet-formula-injection.delimited-export",
+      "severity": {
+        "changeConditions": "Raise if the product automatically shares this artifact with another privileged user and a supported client permits data exfiltration or privileged formula actions; ignore if formulas are disabled on import.",
+        "level": "low",
+        "rationale": "The repository proves formula-capable output but only a constrained downloadable-artifact integrity risk, so low severity matches the threat-model calibration."
+      },
+      "summary": "Downloaded Google Sheets TSV does not neutralize spreadsheet formulas.",
+      "taxonomy": {
+        "category": "Spreadsheet formula injection",
+        "cwe": [
+          "CWE-1236"
+        ]
+      },
+      "title": "Downloaded Sheets TSV permits spreadsheet formula injection",
+      "validation": {
+        "counterEvidence": [
+          "No formula-neutralization helper or spreadsheet-safe prefix is applied on this path. Existing CSV neutralization coverage belongs to a different reporting export implementation.",
+          "The exact spreadsheet application and its formula-evaluation policy affect exploit behavior, but the emitted cells remain formula-capable."
+        ],
+        "evidence": [
+          "components/WorkpackEditor.tsx:1818-1823 preserves leading =, +, -, and @ characters.",
+          "Downloaded TSV import reaches that helper and emits or copies spreadsheet-importable text.",
+          "Focused existing Vitest suites passed: 7 files, 102 tests (knowledge regeneration, workpack remediation, XLSX/HWP export, public share authority and tenant hardening, briefing)."
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "method": "static source/control/sink trace plus focused existing tests",
+        "summary": "Editable or generated workpack strings flow unchanged through buildDelimited into an independently triggerable spreadsheet import surface; the only transformations quote CSV or remove TSV tabs/newlines and do not neutralize formula prefixes."
+      }
+    },
+    {
+      "attackPath": {
+        "counterEvidence": "Schema validation, limit<=10, provider/platform quotas, and the blocked mutation gateway constrain payload shape and prevent publication, but they do not bound repeated model spend or server concurrency.",
+        "dataflow": {
+          "outcome": "medium",
+          "sink": "generateKnowledgeText provider call.",
+          "source": "Unauthenticated JSON with generate=true and valid-shaped raw events/tenant IDs.",
+          "summary": "Unauthenticated POST with generate=true and valid candidate inputs -> public knowledge candidate handler -> generateKnowledgeText -> configured AI provider."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated internet caller",
+          "entrypoint": "app/api/knowledge/regenerate/route.ts",
+          "outcome": "medium",
+          "preconditions": [
+            "AI provider is configured."
+          ],
+          "summary": "The force-dynamic route is public, has no identity or rate control, and a single accepted request reaches a paid model call when the provider is configured."
+        }
+      },
+      "codeEvidence": [
+        {
+          "code": "export const POST = createKnowledgeCandidatePostHandler({\n  generateText: generateKnowledgeText,\n  mutationGateway: BLOCKED_KNOWLEDGE_MUTATION_GATEWAY\n});",
+          "endLine": 13,
+          "explanation": "This entrypoint carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-1",
+          "label": "Entrypoint evidence",
+          "language": "typescript",
+          "path": "app/api/knowledge/regenerate/route.ts",
+          "role": "entrypoint",
+          "startLine": 10
+        },
+        {
+          "code": "  return async function post(request: NextRequest) {\n    const body = await request.json().catch(() => null) as unknown;\n    if (typeof body !== \"object\" || body === null || Array.isArray(body)) {\n      return NextResponse.json(\n        { ok: false, message: \"JSON object body is required\" },\n        { status: 400 }\n      );\n    }\n\n    const record = body as Record<string, unknown>;\n    const question = typeof record.question === \"string\" ? record.question.trim() : \"\";\n    const limit = typeof record.limit === \"number\"\n      ? Math.min(Math.max(Math.trunc(record.limit), 1), 10)\n      : 4;\n    const shouldGenerate = record.generate === true;",
+          "endLine": 194,
+          "explanation": "This entrypoint carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-2",
+          "label": "Entrypoint evidence",
+          "language": "typescript",
+          "path": "lib/knowledge-candidate-route.ts",
+          "role": "entrypoint",
+          "startLine": 180
+        },
+        {
+          "code": "    const { bundle, candidate, reviewContract, generated } = await buildKnowledgeCandidateDraft({\n      question,\n      rawEvents: events,\n      tenantContext,\n      limit,\n      generate: shouldGenerate\n    }, dependencies);",
+          "endLine": 234,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-3",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "lib/knowledge-candidate-route.ts",
+          "role": "sink",
+          "startLine": 228
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "A public POST with generate=true reaches generateKnowledgeText without authentication or rate limiting; tests confirm generation occurs while mutation remains blocked."
+      },
+      "extensions": {
+        "candidateId": "candidate-be364cfe67e48d90"
+      },
+      "findingId": "csf_56e94d5af1a7088bda7deedb",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:de69314b6a9aa9b140635d3d4575d459578aaa92c6e1c95d325aa62d1beb0e24"
+      },
+      "identity": {
+        "anchor": "public-knowledge-regeneration-without-abuse-control",
+        "instance": "knowledge-regenerate-public-model-call"
+      },
+      "locations": [
+        {
+          "endLine": 13,
+          "path": "app/api/knowledge/regenerate/route.ts",
+          "role": "entrypoint",
+          "startLine": 10
+        },
+        {
+          "endLine": 194,
+          "path": "lib/knowledge-candidate-route.ts",
+          "role": "entrypoint",
+          "startLine": 180
+        },
+        {
+          "endLine": 234,
+          "path": "lib/knowledge-candidate-route.ts",
+          "role": "sink",
+          "startLine": 228
+        }
+      ],
+      "occurrenceId": "occ_08c4ecd80dcc6c32250d884a",
+      "preventiveControls": [
+        "Track provider-call quotas by authenticated tenant and route."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Require an authenticated, tenant-bound review capability for `generate=true`, add a durable rate and concurrency budget, and cap question, event count, event payload bytes, and prompt size before calling the model. Keep stateless non-generating candidate inspection available separately if required.",
+      "remediationTests": [
+        "Verify unauthenticated `generate=true` requests are rejected without calling the provider.",
+        "Verify size and event-count budgets fail closed."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "summary": "POST /api/knowledge/regenerate directly installs createKnowledgeCandidatePostHandler. The handler accepts generate=true from any caller and invokes generateKnowledgeText, while the route has no workspace authentication and no rate limiter. The blocked mutation gateway prevents database publication but does not prevent model cost or concurrent request consumption."
+      },
+      "ruleId": "resource-exhaustion.public-ai-generation",
+      "severity": {
+        "changeConditions": "Lower if deployment disables generation or enforces durable upstream quotas; raise only with evidence of material service-wide outage or unusually large provider spend per request.",
+        "level": "medium",
+        "rationale": "A remote unauthenticated caller can repeatedly consume a configured AI provider and server time; impact is sustained cost/availability abuse without knowledge mutation or tenant data compromise."
+      },
+      "summary": "The public knowledge-regeneration route can invoke the configured language model without authentication or rate limiting.",
+      "taxonomy": {
+        "category": "Uncontrolled resource consumption",
+        "cwe": [
+          "CWE-400",
+          "CWE-770"
+        ]
+      },
+      "title": "Public knowledge regeneration can spend provider quota without abuse controls",
+      "validation": {
+        "counterEvidence": [
+          "The blocked mutation gateway prevents publication but does not prevent model cost or request-concurrency consumption.",
+          "Provider-side quota and platform concurrency controls may reduce impact but are not repository controls."
+        ],
+        "evidence": [
+          "app/api/knowledge/regenerate/route.ts directly exposes createKnowledgeCandidatePostHandler.",
+          "lib/knowledge-candidate-route.ts accepts caller-supplied tenant context and invokes the configured model when generate=true.",
+          "Focused existing Vitest suites passed: 7 files, 102 tests (knowledge regeneration, workpack remediation, XLSX/HWP export, public share authority and tenant hardening, briefing)."
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "method": "static source/control/sink trace plus focused existing tests",
+        "summary": "A public POST with generate=true reaches generateKnowledgeText without authentication or rate limiting; tests confirm generation occurs while mutation remains blocked."
+      }
+    },
+    {
+      "attackPath": {
+        "counterEvidence": "The existing request-count limiter, caches, mode/configuration fallbacks, and provider limits constrain abuse; input length and per-request downstream work remain unbounded in repository code.",
+        "dataflow": {
+          "outcome": "medium",
+          "sink": "Multi-provider/search/model runAsk pipeline.",
+          "source": "Public ask question and AI mode.",
+          "summary": "Public ask/stream question -> runAsk -> database/reference/weather/provider fan-out -> optional full-mode document generation."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3",
+          "evidence-4"
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated internet caller",
+          "entrypoint": "lib/search.ts",
+          "outcome": "medium",
+          "preconditions": [
+            "At least one costly provider or database integration is configured."
+          ],
+          "summary": "Accepted public requests reach multiple downstream operations, but a soft per-instance IP request limiter already reduces repeated use from one normalized source."
+        }
+      },
+      "codeEvidence": [
+        {
+          "code": "export async function runAsk(question: string, options: RunAskOptions = {}): Promise<AskResponse> {",
+          "endLine": 2118,
+          "explanation": "This entrypoint carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-1",
+          "label": "Entrypoint evidence",
+          "language": "typescript",
+          "path": "lib/search.ts",
+          "role": "entrypoint",
+          "startLine": 2118
+        },
+        {
+          "code": "    const accidentCasesPromise = fetchAccidentCases(question, {\n      requestTimeoutMs: 5_000,\n      retryCount: 0,\n      budgetLabel: \"KOSHA accident case enrichment budget\"\n    });\n\n    // Fix 5: decouple enhance and generateAnswer \u2014 both branch off rawCitations in parallel.\n    // enhanceLegalEvidenceMappings is a quality add-on (AI reorders citations); it no longer\n    // gates generateAnswer. generateAnswer starts as soon as raw citations arrive.\n    // citationsPromise resolves to enhanced citations when available (best-effort).\n    const rawCitationsPromise = searchLegalSources(question);\n    const rawCitationsBasePromise = rawCitationsPromise.then(async (raw) =>\n      raw.length ? raw : searchLegalSources(\"\uc0b0\uc5c5\uc548\uc804\ubcf4\uac74\ubc95\")\n    );\n    // enhanceLegalEvidenceMappings: optional quality pass, runs in parallel, best-effort.\n    const citationsPromise = rawCitationsBasePromise.then((base) =>\n      enhanceLegalEvidenceMappings(question, base, options.phaseAGrounding).catch((error) => {\n        log.error(",
+          "endLine": 2186,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-2",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "lib/search.ts",
+          "role": "sink",
+          "startLine": 2169
+        },
+        {
+          "code": "    const safetyReferencePromise = (async () => {\n      const [supportReg, guideline, sifSearch, general] = await Promise.all([\n        safeSearch({ query: question, limit: 3, itemType: \"technical-support-regulation\" }),\n        safeSearch({ query: question, limit: 3, itemType: \"technical-guideline\" }),\n        safeSearch({ query: question, limit: 3, itemType: \"sif-case\" }),\n        safeSearch({ query: question, limit: 5 })",
+          "endLine": 2256,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-3",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "lib/search.ts",
+          "role": "sink",
+          "startLine": 2251
+        },
+        {
+          "code": "    // Fix 6: Start full-mode deliverables generation as a Promise BEFORE awaiting allSettled.\n    // Scenario is derived synchronously from the question (inferScenario is pure).\n    // We chain off rawCitationsBasePromise/weather/training/kosha/accident so the\n    // full-mode Vertex calls start as soon as those resolve (~2-5s), running\n    // fully in parallel with responsePromise's Vertex call. Enhanced mode is\n    // row-first: DB/SIF/KOSHA/photo harness rows are assembled deterministically.\n    const earlyScenario = inferScenario(question);\n    const earlyScenarioParsed = {\n      companyName: earlyScenario.companyName,\n      companyType: earlyScenario.companyType,\n      siteName: earlyScenario.siteName,\n      workSummary: earlyScenario.workSummary,\n      workerCount: earlyScenario.workerCount,\n      weatherNote: earlyScenario.weatherNote\n    };\n    const deliverablesPromise: Promise<{ deliverables: Awaited<ReturnType<typeof generateAllDeliverables>>; diagnostics: Awaited<ReturnType<typeof generateAllDeliverablesWithDiagnostics>>[\"diagnostics\"] } | null> =\n      aiMode === \"full\"\n        ? Promise.all([",
+          "endLine": 2334,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-4",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "lib/search.ts",
+          "role": "sink",
+          "startLine": 2317
+        }
+      ],
+      "confidence": {
+        "level": "medium",
+        "rationale": "Public ask entrypoints accept unbounded question text and one accepted request reaches multiple database, public-data, reference, weather, and model operations. The IP limiter bounds request count but not per-request work or input size."
+      },
+      "extensions": {
+        "candidateId": "candidate-6d7f01fd7a8a3c10"
+      },
+      "findingId": "csf_602a3194a53652647244cc7d",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:7bb9de5e079089c32e02d07bb43c4f0240f45ffef32c4aa5f38152ef918cd5dd"
+      },
+      "identity": {
+        "anchor": "public-runask-fanout-without-request-budget",
+        "instance": "runask-public-fanout"
+      },
+      "locations": [
+        {
+          "endLine": 2118,
+          "path": "lib/search.ts",
+          "role": "entrypoint",
+          "startLine": 2118
+        },
+        {
+          "endLine": 2220,
+          "path": "lib/search.ts",
+          "role": "sink",
+          "startLine": 2169
+        },
+        {
+          "endLine": 2256,
+          "path": "lib/search.ts",
+          "role": "sink",
+          "startLine": 2251
+        },
+        {
+          "endLine": 2341,
+          "path": "lib/search.ts",
+          "role": "sink",
+          "startLine": 2317
+        }
+      ],
+      "occurrenceId": "occ_c2cc334fc30d8905b09068c1",
+      "preventiveControls": [
+        "Use a distributed quota for serverless public generation."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Set a byte and character limit before `runAsk`, reject oversized harness memory, and enforce a durable tenant or anonymous quota that covers all downstream provider calls rather than only per-instance request count.",
+      "remediationTests": [
+        "Verify oversized questions and harness-memory payloads fail before `runAsk`.",
+        "Verify one logical request consumes a bounded downstream-call budget."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3",
+          "evidence-4"
+        ],
+        "summary": "runAsk accepts question without a length or per-request work budget, then passes it into accident-case, legal, answer-generation, weather, training, KOSHA, KOSHA OpenAPI, and four safety-reference searches, with full-mode deliverable generation chained in parallel. Nearby public API callers pass request.question through without truncation; their soft per-instance IP limiter limits request count but does not bound attacker-selected input size or the number/cost of downstream operations performed by one accepted request."
+      },
+      "ruleId": "resource-exhaustion.public-ai-generation",
+      "severity": {
+        "changeConditions": "Raise if durable testing shows accepted requests reliably trigger costly full fan-out and bypass the soft limiter at scale; lower or ignore if platform body limits and provider-disabled modes make incremental cost negligible.",
+        "level": "low",
+        "rationale": "One accepted request can amplify work across providers, but current controls and configuration-dependent fan-out make sustained material impact less likely; the policy matrix maps medium impact and medium likelihood to low."
+      },
+      "summary": "An unbounded question can drive a high-cost multi-provider and model fan-out in runAsk.",
+      "taxonomy": {
+        "category": "Uncontrolled resource consumption",
+        "cwe": [
+          "CWE-400",
+          "CWE-770"
+        ]
+      },
+      "title": "A single public Ask request can drive an unbounded multi-provider work budget",
+      "validation": {
+        "counterEvidence": [
+          "A rate limiter exists, so this is not an entirely uncontrolled endpoint; however it does not impose a question length or downstream operation budget.",
+          "Exact provider fan-out varies by AI mode, configuration, cache state, and fallback behavior; no cost-amplification load test was run."
+        ],
+        "evidence": [
+          "app/api/ask/route.ts and stream/route.ts pass question to runAsk after only a soft per-instance IP limiter.",
+          "lib/search.ts:2118 onward fans the question into multiple searches and generation paths.",
+          "Focused existing Vitest suites passed: 7 files, 102 tests (knowledge regeneration, workpack remediation, XLSX/HWP export, public share authority and tenant hardening, briefing)."
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3",
+          "evidence-4"
+        ],
+        "method": "static source/control/sink trace plus focused existing tests",
+        "summary": "Public ask entrypoints accept unbounded question text and one accepted request reaches multiple database, public-data, reference, weather, and model operations. The IP limiter bounds request count but not per-request work or input size."
+      }
+    },
+    {
+      "attackPath": {
+        "counterEvidence": "The completed-result cache, fixed upstream destinations, fetch timeouts/retry cap, and upstream/platform quotas limit duration and target selection; no provider billing or service-wide outage is proven.",
+        "dataflow": {
+          "outcome": "low",
+          "sink": "Concurrent outbound weather fetches with retry.",
+          "source": "Unauthenticated weather query string.",
+          "summary": "Unauthenticated heat-related weather query -> cold cache miss -> up to eight signal fetches -> one retry per failed signal."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3",
+          "evidence-4",
+          "evidence-5"
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated internet caller",
+          "entrypoint": "app/api/weather/route.ts",
+          "outcome": "low",
+          "preconditions": [
+            "Weather integrations are configured and the cache key is cold."
+          ],
+          "summary": "The public GET lacks rate limiting and concurrent miss coalescing, so simultaneous cold-key requests can overlap before the completed-result cache is populated."
+        }
+      },
+      "codeEvidence": [
+        {
+          "code": "export async function GET(request: NextRequest) {\n  const question = request.nextUrl.searchParams.get(\"question\")?.trim() || \"\";\n  if (!question) {\n    return NextResponse.json(\n      { ok: false, message: \"question query is required\" },\n      { status: 400 }\n    );\n  }\n\n  try {\n    const weather = await fetchWeatherSignal(question);\n    return NextResponse.json({ ok: true, weather });",
+          "endLine": 17,
+          "explanation": "This entrypoint carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-1",
+          "label": "Entrypoint evidence",
+          "language": "typescript",
+          "path": "app/api/weather/route.ts",
+          "role": "entrypoint",
+          "startLine": 6
+        },
+        {
+          "code": "  const question = request.nextUrl.searchParams.get(\"question\")?.trim() || \"\";",
+          "endLine": 7,
+          "explanation": "This entrypoint carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-2",
+          "label": "Entrypoint evidence",
+          "language": "typescript",
+          "path": "app/api/weather/route.ts",
+          "role": "entrypoint",
+          "startLine": 7
+        },
+        {
+          "code": "async function fetchWithTimeout(url: string, label: string) {\n  let lastError: Error | null = null;\n  for (let attempt = 0; attempt <= KMA_RETRY_COUNT; attempt += 1) {\n    const controller = new AbortController();\n    const timeout = setTimeout(() => controller.abort(), KMA_TIMEOUT_MS);\n    try {\n      const response = await fetch(url, { cache: \"no-store\", signal: controller.signal });\n      const text = await response.text();\n      if (!response.ok) {\n        throw new Error(text.slice(0, 180) || `${label} HTTP ${response.status}`);\n      }\n      return text;\n    } catch (error) {\n      lastError = error instanceof Error ? error : new Error(String(error));\n    } finally {\n      clearTimeout(timeout);\n    }\n  }",
+          "endLine": 396,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-3",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "lib/weather.ts",
+          "role": "sink",
+          "startLine": 379
+        },
+        {
+          "code": "  const baseSignals = await Promise.all([\n    fetchUltraNowSignal(location),\n    fetchUltraForecastSignal(location),\n    fetchVillageForecastSignal(location),\n    fetchWarningSignal(location),\n    fetchImpactForecastSignal(location)\n  ]);\n  const outdoorSignals = outdoorHeatContext\n    ? await Promise.all([\n        fetchLivingUvSignal(location),\n        fetchLivingHeatIndexSignal(location),\n        fetchErythemalUvSignal(location)\n      ])",
+          "endLine": 895,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-4",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "lib/weather.ts",
+          "role": "sink",
+          "startLine": 883
+        },
+        {
+          "code": "export async function fetchWeatherSignal(question: string): Promise<WeatherSignal> {\n  const location = pickLocation(question);\n  const outdoorHeatContext = isOutdoorHeatContext(question);",
+          "endLine": 846,
+          "explanation": "This concrete_implementation carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-5",
+          "label": "Concrete Implementation evidence",
+          "language": "typescript",
+          "path": "lib/weather.ts",
+          "role": "concrete_implementation",
+          "startLine": 844
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "The unauthenticated weather GET lacks rate limiting and in-flight request coalescing; concurrent misses for the same heat-related query each launch the multi-signal retry-capable upstream fan-out."
+      },
+      "extensions": {
+        "candidateId": "candidate-e2b50ed728b4cf8b"
+      },
+      "findingId": "csf_1c556be46a6e411979fdc671",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:6b30d38e0054daaf452ba59187e0e6ea1a5459a512003a28b12aef5983f7b70e"
+      },
+      "identity": {
+        "anchor": "public-weather-fanout-without-abuse-control",
+        "instance": "weather-direct-route"
+      },
+      "locations": [
+        {
+          "endLine": 17,
+          "path": "app/api/weather/route.ts",
+          "role": "entrypoint",
+          "startLine": 6
+        },
+        {
+          "endLine": 7,
+          "path": "app/api/weather/route.ts",
+          "role": "entrypoint",
+          "startLine": 7
+        },
+        {
+          "endLine": 397,
+          "path": "lib/weather.ts",
+          "role": "sink",
+          "startLine": 379
+        },
+        {
+          "endLine": 895,
+          "path": "lib/weather.ts",
+          "role": "sink",
+          "startLine": 883
+        },
+        {
+          "endLine": 846,
+          "path": "lib/weather.ts",
+          "role": "concrete_implementation",
+          "startLine": 844
+        }
+      ],
+      "occurrenceId": "occ_5e68f88bb9a7a68624ef5260",
+      "preventiveControls": [
+        "Track and cap upstream weather calls per request and client."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Bound the question length, cache and coalesce equivalent weather lookups, and add a durable route-level rate and concurrency limit before starting upstream requests.",
+      "remediationTests": [
+        "Verify oversized questions are rejected before upstream fetches.",
+        "Verify concurrent identical lookups share one in-flight result."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3",
+          "evidence-4",
+          "evidence-5"
+        ],
+        "summary": "GET /api/weather accepts an arbitrary question without authentication or rate limiting. A question matching outdoor-heat terms selects eight upstream weather signals; each signal uses fetchWithTimeout with one retry. The cache is populated only after all requests finish and there is no in-flight request coalescing, so many concurrent requests for the same uncached key each launch the full five- or eight-signal fan-out before any cache entry exists."
+      },
+      "ruleId": "resource-exhaustion.external-api-fanout",
+      "severity": {
+        "changeConditions": "Raise if weather quota exhaustion materially disables safety workflows or load evidence shows service-wide resource loss; ignore if an upstream durable rate limit or request coalescing fully bounds the route.",
+        "level": "low",
+        "rationale": "Remote amplification is easy to trigger, but it is bounded to fixed public weather calls and currently supports only modest quota/concurrency impact."
+      },
+      "summary": "Unauthenticated weather requests can create a concurrent outbound-request amplification burst.",
+      "taxonomy": {
+        "category": "Uncontrolled resource consumption",
+        "cwe": [
+          "CWE-400",
+          "CWE-770"
+        ]
+      },
+      "title": "Public weather lookup can amplify requests to multiple upstream APIs",
+      "validation": {
+        "counterEvidence": [
+          "The completed-result cache limits repeated requests after the first finishes, but it does not coalesce concurrent cache misses.",
+          "Upstream and hosting concurrency limits affect the maximum amplification; no external load was generated."
+        ],
+        "evidence": [
+          "app/api/weather/route.ts forwards arbitrary question text without enforceRateLimit.",
+          "lib/weather.ts selects up to eight signals and fetches them before populating the cache; each fetch permits one retry.",
+          "Focused existing Vitest suites passed: 7 files, 102 tests (knowledge regeneration, workpack remediation, XLSX/HWP export, public share authority and tenant hardening, briefing)."
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3",
+          "evidence-4",
+          "evidence-5"
+        ],
+        "method": "static source/control/sink trace plus focused existing tests",
+        "summary": "The unauthenticated weather GET lacks rate limiting and in-flight request coalescing; concurrent misses for the same heat-related query each launch the multi-signal retry-capable upstream fan-out."
+      }
+    },
+    {
+      "attackPath": {
+        "counterEvidence": "Question/document prompt text is truncated and the endpoint does not persist workpack changes; provider quotas and platform limits may cap abuse, but no repository-level request quota exists.",
+        "dataflow": {
+          "outcome": "medium",
+          "sink": "Reference searches plus generateKnowledgeText.",
+          "source": "Unauthenticated remediation JSON.",
+          "summary": "Unauthenticated remediation POST -> bounded prompt construction plus safety-reference search -> generateKnowledgeText -> response proposal."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated internet caller",
+          "entrypoint": "app/api/workpack/remediate/route.ts",
+          "outcome": "medium",
+          "preconditions": [
+            "AI provider is configured."
+          ],
+          "summary": "The public route has no authentication or rate limiter and each valid rubric request reaches database/reference work and a configured model call under a long route budget."
+        }
+      },
+      "codeEvidence": [
+        {
+          "code": "export async function POST(request: NextRequest) {\n  const body = await request.json().catch(() => null) as unknown;\n  const parsed = readRequest(body);\n  if (!parsed.ok) {\n    return NextResponse.json({ ok: false, message: parsed.message }, { status: 400 });\n  }\n\n  const promptBundle = await buildPrompt(parsed.request);",
+          "endLine": 184,
+          "explanation": "This entrypoint carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-1",
+          "label": "Entrypoint evidence",
+          "language": "typescript",
+          "path": "app/api/workpack/remediate/route.ts",
+          "role": "entrypoint",
+          "startLine": 177
+        },
+        {
+          "code": "  const generated = await generateKnowledgeText(promptBundle.prompt);\n  const fallbackText = buildFallbackText(promptBundle.rubricItem.title, promptBundle.rubricItem.improvementAction);\n  const text = generated.text.trim() || fallbackText;",
+          "endLine": 191,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-2",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "app/api/workpack/remediate/route.ts",
+          "role": "sink",
+          "startLine": 189
+        },
+        {
+          "code": "async function buildPrompt(request: RemediationRequest) {\n  const rubricItem = publicSafetyDocumentRubric.find((item) => item.id === request.rubricItemId);\n  if (!rubricItem) return null;\n\n  const matches = matchSafetyKnowledge(request.question, 4);\n  const catalogQuery = [\n    request.question,\n    rubricItem.title,\n    rubricItem.improvementAction,\n    rubricItem.researchAction\n  ].join(\" \");\n  const catalog = await searchSafetyReferences({ query: catalogQuery, limit: 6 });\n  const evidence = matches.map((match, index) => ({",
+          "endLine": 125,
+          "explanation": "This concrete_implementation carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-3",
+          "label": "Concrete Implementation evidence",
+          "language": "typescript",
+          "path": "app/api/workpack/remediate/route.ts",
+          "role": "concrete_implementation",
+          "startLine": 113
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "The public remediation route performs safety-reference searches and a 120-second-budget model generation without authentication, rate limiting, or a request-level work budget. Prompt truncation bounds selected strings but not request frequency or provider calls."
+      },
+      "extensions": {
+        "candidateId": "candidate-2e426af665003c73"
+      },
+      "findingId": "csf_82c8e671602027bb56acd591",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:c61fc8dee8a6e7d32479a63ce83f2ebb203726bf1844146462b4bd2537a052f5"
+      },
+      "identity": {
+        "anchor": "public-workpack-remediation-without-abuse-control",
+        "instance": "workpack-remediate-public-model-call"
+      },
+      "locations": [
+        {
+          "endLine": 184,
+          "path": "app/api/workpack/remediate/route.ts",
+          "role": "entrypoint",
+          "startLine": 177
+        },
+        {
+          "endLine": 191,
+          "path": "app/api/workpack/remediate/route.ts",
+          "role": "sink",
+          "startLine": 189
+        },
+        {
+          "endLine": 125,
+          "path": "app/api/workpack/remediate/route.ts",
+          "role": "concrete_implementation",
+          "startLine": 113
+        }
+      ],
+      "occurrenceId": "occ_c8af4973522d97ccfbbbd297",
+      "preventiveControls": [
+        "Record route-level provider and database work budgets."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Require an authenticated tenant context, apply durable rate and concurrency limits, and cap question and document lengths before safety-reference searches or model generation.",
+      "remediationTests": [
+        "Verify unauthenticated remediation cannot reach database search or model generation.",
+        "Verify request and prompt budgets fail closed."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "summary": "Any caller can submit a question, document text, and rubric item. The route performs safety-reference searches, builds a large prompt, and calls generateKnowledgeText with a 120-second route budget. It has neither getWorkspaceUser nor enforceRateLimit, so repeated requests can consume provider quota and server concurrency."
+      },
+      "ruleId": "resource-exhaustion.public-ai-generation",
+      "severity": {
+        "changeConditions": "Lower if the production route is protected by durable edge quotas or generation is disabled; raise only with evidence of material service-wide outage or exceptional per-request provider cost.",
+        "level": "medium",
+        "rationale": "A remote caller can repeatedly consume model quota, database searches, and server concurrency; the route is stateless, so impact is cost/availability rather than document integrity."
+      },
+      "summary": "The public workpack-remediation route performs database searches and a language-model generation without authentication, rate limiting, or an input work budget.",
+      "taxonomy": {
+        "category": "Uncontrolled resource consumption",
+        "cwe": [
+          "CWE-400",
+          "CWE-770"
+        ]
+      },
+      "title": "Public workpack remediation can spend database and model resources without abuse controls",
+      "validation": {
+        "counterEvidence": [
+          "Prompt truncation reduces per-call text size and the endpoint does not mutate a workpack, but neither control prevents provider-cost and concurrency exhaustion.",
+          "Provider quotas and platform concurrency may bound total impact; no external provider load test was run."
+        ],
+        "evidence": [
+          "app/api/workpack/remediate/route.ts validates shape, truncates prompt fields, searches references, then invokes generateKnowledgeText.",
+          "Focused route tests confirm the generation path is reachable.",
+          "Focused existing Vitest suites passed: 7 files, 102 tests (knowledge regeneration, workpack remediation, XLSX/HWP export, public share authority and tenant hardening, briefing)."
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "method": "static source/control/sink trace plus focused existing tests",
+        "summary": "The public remediation route performs safety-reference searches and a 120-second-budget model generation without authentication, rate limiting, or a request-level work budget. Prompt truncation bounds selected strings but not request frequency or provider calls."
+      }
+    },
+    {
+      "attackPath": {
+        "counterEvidence": "Hosting request-size/memory limits provide an outer bound, input must fit transport parsing, and the route performs no provider or database side effect.",
+        "dataflow": {
+          "outcome": "low",
+          "sink": "ExcelJS education-record workbook construction and writeBuffer",
+          "source": "Unauthenticated POST JSON body.",
+          "summary": "Unauthenticated educationRecordStructured JSON -> nested curriculum/attendee parsing -> in-memory ExcelJS workbook -> writeBuffer response."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated internet caller",
+          "entrypoint": "app/api/export/xlsx/route.ts",
+          "outcome": "low",
+          "preconditions": [
+            "An attacker can repeatedly submit large but transport-accepted export requests."
+          ],
+          "summary": "This structured mode is independently selectable on the public XLSX POST route and lacks route-local byte, item-count, field-length, or rate budgets."
+        }
+      },
+      "codeEvidence": [
+        {
+          "code": "export async function POST(request: NextRequest) {\n  const parsed = await request.json().catch(() => ({}));\n  const body = isRecord(parsed) ? parsed : {};\n  const mode = readString(body.mode, \"single\");\n  const scenario = parseScenario(body.scenario);\n\n  try {\n    if (mode === \"workPlanStructured\" || mode === \"permitInspectionStructured\" || mode === \"tbmBriefingStructured\" || mode === \"tbmLogStructured\" || mode === \"educationRecordStructured\") {\n      if (!isRecord(body.structured)) {\n        return NextResponse.json(\n          { ok: false, error: \"structured must be a non-array object for structured xlsx export\" },\n          { status: 400, headers: { \"cache-control\": \"no-store\" } }\n        );\n      }\n      const editedRows = body.edited === true\n        ? parseRows(body.rows, structuredFallbackTitle(mode))\n        : undefined;\n",
+          "endLine": 180,
+          "explanation": "This entrypoint carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-1",
+          "label": "Entrypoint evidence",
+          "language": "typescript",
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "entrypoint",
+          "startLine": 163
+        },
+        {
+          "code": "      const buffer = await buildEducationRecordStructuredXlsx(scenario, body.structured, { editedRows });\n      return xlsxResponse(buffer, `${scenario.companyName}-\uc548\uc804\ubcf4\uac74\uad50\uc721-\uae30\ub85d`, \"safeclaw-education-record\");",
+          "endLine": 202,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-2",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "sink",
+          "startLine": 201
+        },
+        {
+          "code": "function parseEducationRecordStructured(value: StructuredRecord): EducationRecordStructured {\n  const curriculum = Array.isArray(value.curriculum) ? value.curriculum : [];\n  const type = readString(value.type, \"\uae30\ud0c0\");\n  const safeType: EducationRecordStructured[\"type\"] =\n    type === \"\uc815\uae30\uad50\uc721\" || type === \"\ud2b9\ubcc4\uad50\uc721\" || type === \"\uc678\uad6d\uc778\uad50\uc721\" || type === \"\uc2e0\uaddc\uc790\uad50\uc721\" || type === \"\uad00\ub9ac\uac10\ub3c5\uc790\uad50\uc721\"\n      ? type\n      : \"\uae30\ud0c0\";\n  return {\n    educationName: readString(value.educationName, \"\uc548\uc804\ubcf4\uac74\uad50\uc721\"),\n    type: safeType,\n    dateTime: readString(value.dateTime, \"\uc77c\uc2dc \ud655\uc778\"),\n    location: readString(value.location, \"\uc7a5\uc18c \ud655\uc778\"),\n    target: readString(value.target, \"\uad50\uc721\ub300\uc0c1 \ud655\uc778\"),\n    instructor: readString(value.instructor, \"\uc2e4\uc2dc\uc790 \ud655\uc778\"),\n    confirmer: readString(value.confirmer, \"\ud655\uc778\uc790 \ud655\uc778\"),\n    curriculum: curriculum.flatMap((item): EducationRecordStructured[\"curriculum\"] => {\n      if (!isRecord(item)) return [];\n      return [{",
+          "endLine": 702,
+          "explanation": "This evidence carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-3",
+          "label": "Evidence evidence",
+          "language": "typescript",
+          "path": "lib/xlsx-builder.ts",
+          "role": "evidence",
+          "startLine": 685
+        }
+      ],
+      "confidence": {
+        "level": "medium",
+        "rationale": "The public route parses attacker-sized JSON without an application-level byte, item-count, or field-length budget and expands it in memory at the concrete workbook/HWP sink. Focused functional tests confirm these modes are live and independently reachable."
+      },
+      "extensions": {
+        "candidateId": "candidate-9906cd9b60383c82"
+      },
+      "findingId": "csf_9f4d050101c5687bad6441dc",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:08f6fb2befb2de1c31446f8079d1d15402cc43f2c3449a5877a15538c42751ce"
+      },
+      "identity": {
+        "anchor": "unbounded-document-export-generation",
+        "instance": "educationrecordstructured"
+      },
+      "locations": [
+        {
+          "endLine": 202,
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "entrypoint",
+          "startLine": 163
+        },
+        {
+          "endLine": 202,
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "sink",
+          "startLine": 201
+        },
+        {
+          "endLine": 710,
+          "path": "lib/xlsx-builder.ts",
+          "role": "evidence",
+          "startLine": 685
+        }
+      ],
+      "occurrenceId": "occ_3f9a11a23d0e01df764fe628",
+      "preventiveControls": [
+        "Share one export-budget policy across PDF, XLSX, and HWP routes.",
+        "Apply durable abuse controls to unauthenticated export endpoints."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Reject oversized requests before JSON parsing where possible, then enforce mode-specific limits for document count, row count, nested array entries, field characters, rendered cells, and output bytes. Return a stable 413 or 422 response before allocating the workbook or HWP document.",
+      "remediationTests": [
+        "Add boundary and over-limit tests for the `educationRecordStructured` export mode.",
+        "Verify oversized payloads fail before workbook or HWP generation begins."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "summary": "The complete request body and curriculum array are parsed without size or count limits before every item is written and the workbook is serialized in memory."
+      },
+      "ruleId": "resource-exhaustion.document-export",
+      "severity": {
+        "changeConditions": "Raise if a small accepted payload causes disproportionate memory amplification or repeated requests materially impair the service; ignore if durable edge limits and parser caps bound all nested collections.",
+        "level": "low",
+        "rationale": "A remote caller can consume CPU and memory with accepted nested data, but the single-request expansion is transport-bounded and limited to ephemeral export availability."
+      },
+      "summary": "Structured education-record XLSX export accepts unbounded curriculum data and strings.",
+      "taxonomy": {
+        "category": "Uncontrolled resource consumption",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Education-record XLSX export accepts unbounded structured input",
+      "validation": {
+        "counterEvidence": [
+          "Hosting request-size limits provide an outer transport bound but do not cap row counts, nested item counts, cell lengths, or in-process expansion within accepted requests.",
+          "No destructive load test was run; deployment memory/concurrency limits determine the exact failure threshold."
+        ],
+        "evidence": [
+          "app/api/export/xlsx/route.ts accepts the complete JSON payload without a route-local resource budget.",
+          "Curriculum arrays and strings are expanded into worksheet rows before in-memory XLSX serialization.",
+          "Focused existing Vitest suites passed: 7 files, 102 tests (knowledge regeneration, workpack remediation, XLSX/HWP export, public share authority and tenant hardening, briefing)."
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "method": "static source/control/sink trace plus focused existing tests",
+        "summary": "The public route parses attacker-sized JSON without an application-level byte, item-count, or field-length budget and expands it in memory at the concrete workbook/HWP sink. Focused functional tests confirm these modes are live and independently reachable."
+      }
+    },
+    {
+      "attackPath": {
+        "counterEvidence": "Transport and serverless memory/time limits bound request size and duration, filenames are sanitized, and no persistent mutation occurs; however WASM document generation is a comparatively expensive concrete sink.",
+        "dataflow": {
+          "outcome": "medium",
+          "sink": "WASM HWP createTable/insertTextInCell/exportHwp",
+          "source": "Unauthenticated POST JSON body.",
+          "summary": "Unauthenticated HWP export JSON -> unbounded rows/profile arrays -> WASM HwpDocument table construction -> in-memory export buffer."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated internet caller",
+          "entrypoint": "app/api/export/hwp/route.ts",
+          "outcome": "medium",
+          "preconditions": [
+            "An attacker can repeatedly submit large but transport-accepted export requests."
+          ],
+          "summary": "The public HWP POST path initializes a server-side WASM document engine and expands every accepted row without application-level resource or rate limits."
+        }
+      },
+      "codeEvidence": [
+        {
+          "code": "export async function POST(request: NextRequest) {\n  const parsed = await request.json().catch(() => ({}));\n  const body = isRecord(parsed) ? parsed : {};\n  const title = readString(body.title, \"SafeClaw \uc548\uc804 \ubb38\uc11c\");\n  const rows = parseRows(body.rows, title);\n  const profile = parseProfile(body.profile);\n  const scenario = parseScenario(body.scenario);\n  const structuredRiskRows = body.edited === true ? [] : parseRiskRowsFromBody(body);\n\n  try {\n    const buffer = buildHwpBuffer({ title, rows, profile, scenario, structuredRiskRows });",
+          "endLine": 301,
+          "explanation": "This entrypoint carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-1",
+          "label": "Entrypoint evidence",
+          "language": "typescript",
+          "path": "app/api/export/hwp/route.ts",
+          "role": "entrypoint",
+          "startLine": 291
+        },
+        {
+          "code": "function parseRows(value: unknown, fallbackDoc: string): SheetRow[] {\n  if (!Array.isArray(value)) return [];\n  return value.flatMap((item): SheetRow[] => {\n    if (!isRecord(item)) return [];\n    const content = readString(item.content);\n    if (!content && readString(item.item) === \"\") return [];\n    return [{\n      document: readString(item.document, fallbackDoc),\n      section: readString(item.section, \"\ubcf8\ubb38\"),\n      item: readString(item.item, \"\ud655\uc778\"),\n      content\n    }];\n  });",
+          "endLine": 110,
+          "explanation": "This root_control carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-2",
+          "label": "Root Control evidence",
+          "language": "typescript",
+          "path": "app/api/export/hwp/route.ts",
+          "role": "root_control",
+          "startLine": 98
+        },
+        {
+          "code": "function insertHwpTable(document: HwpDocument, paraIdx: number, rows: readonly (readonly string[])[], label: string): number {\n  const colCount = rows[0]?.length ?? 0;\n  if (!rows.length || !colCount || rows.some((row) => row.length !== colCount)) {\n    throw new Error(`${label} \ud45c \ub370\uc774\ud130\uac00 \uc62c\ubc14\ub974\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.`);\n  }\n  const table = parseJsonResult(document.createTable(0, paraIdx, 0, rows.length, colCount));\n  if (!table?.ok || typeof table.paraIdx !== \"number\") {\n    throw new Error(`${label} \ud45c\ub97c \ub9cc\ub4e4\uc9c0 \ubabb\ud588\uc2b5\ub2c8\ub2e4.`);\n  }\n  const controlIdx = typeof table.controlIdx === \"number\" ? table.controlIdx : 0;\n  rows.forEach((row, rIdx) => {\n    row.forEach((value, cIdx) => {\n      document.insertTextInCell(0, table.paraIdx as number, controlIdx, rIdx * colCount + cIdx, 0, 0, value);\n    });",
+          "endLine": 198,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-3",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "app/api/export/hwp/route.ts",
+          "role": "sink",
+          "startLine": 185
+        }
+      ],
+      "confidence": {
+        "level": "medium",
+        "rationale": "The public route parses attacker-sized JSON without an application-level byte, item-count, or field-length budget and expands it in memory at the concrete workbook/HWP sink. Focused functional tests confirm these modes are live and independently reachable."
+      },
+      "extensions": {
+        "candidateId": "candidate-3fd3829222b4cc13"
+      },
+      "findingId": "csf_bcec0c4f5c9d784eba666a36",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:efa75e6aeaa85bcc451db2229f023a69ab2a03235afe6bebe827d4791223e052"
+      },
+      "identity": {
+        "anchor": "unbounded-document-export-generation",
+        "instance": "hwp-table"
+      },
+      "locations": [
+        {
+          "endLine": 301,
+          "path": "app/api/export/hwp/route.ts",
+          "role": "entrypoint",
+          "startLine": 291
+        },
+        {
+          "endLine": 110,
+          "path": "app/api/export/hwp/route.ts",
+          "role": "root_control",
+          "startLine": 98
+        },
+        {
+          "endLine": 198,
+          "path": "app/api/export/hwp/route.ts",
+          "role": "sink",
+          "startLine": 185
+        }
+      ],
+      "occurrenceId": "occ_87f8a717e4b197b55d4b52eb",
+      "preventiveControls": [
+        "Share one export-budget policy across PDF, XLSX, and HWP routes.",
+        "Apply durable abuse controls to unauthenticated export endpoints."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Reject oversized requests before JSON parsing where possible, then enforce mode-specific limits for document count, row count, nested array entries, field characters, rendered cells, and output bytes. Return a stable 413 or 422 response before allocating the workbook or HWP document.",
+      "remediationTests": [
+        "Add boundary and over-limit tests for the `hwp-table` export mode.",
+        "Verify oversized payloads fail before workbook or HWP generation begins."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "summary": "The public POST handler parses the entire JSON request, retains every supplied row and string, creates a table sized from the row count, and inserts every cell through WASM before exporting the document. Large inputs can exhaust CPU or memory."
+      },
+      "ruleId": "resource-exhaustion.document-export",
+      "severity": {
+        "changeConditions": "Lower if durable edge quotas and strict body limits are confirmed sufficient; raise only if bounded load evidence demonstrates a material service-wide outage or high operational cost.",
+        "level": "medium",
+        "rationale": "Public unauthenticated requests can repeatedly drive CPU/memory-heavy WASM document generation, supporting sustained availability abuse without broader compromise."
+      },
+      "summary": "HWP export has no request, row, or field resource budget.",
+      "taxonomy": {
+        "category": "Uncontrolled resource consumption",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "HWP table export accepts an unbounded work budget",
+      "validation": {
+        "counterEvidence": [
+          "Hosting request-size limits provide an outer transport bound but do not cap row counts, nested item counts, cell lengths, or in-process expansion within accepted requests.",
+          "No destructive load test was run; deployment memory/concurrency limits determine the exact failure threshold."
+        ],
+        "evidence": [
+          "app/api/export/hwp/route.ts accepts the complete JSON payload without a route-local resource budget.",
+          "The route sizes a WASM table from attacker-controlled rows and inserts every cell before exporting the document.",
+          "Focused existing Vitest suites passed: 7 files, 102 tests (knowledge regeneration, workpack remediation, XLSX/HWP export, public share authority and tenant hardening, briefing)."
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "method": "static source/control/sink trace plus focused existing tests",
+        "summary": "The public route parses attacker-sized JSON without an application-level byte, item-count, or field-length budget and expands it in memory at the concrete workbook/HWP sink. Focused functional tests confirm these modes are live and independently reachable."
+      }
+    },
+    {
+      "attackPath": {
+        "counterEvidence": "Transport/serverless limits bound accepted payload size, and the route has no database/provider side effect; exact memory amplification was not load-tested.",
+        "dataflow": {
+          "outcome": "low",
+          "sink": "ExcelJS permit workbook construction and writeBuffer",
+          "source": "Unauthenticated POST JSON body.",
+          "summary": "Unauthenticated permitInspectionStructured JSON -> nested permit arrays/string parsing -> in-memory ExcelJS workbook -> writeBuffer response."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated internet caller",
+          "entrypoint": "app/api/export/xlsx/route.ts",
+          "outcome": "low",
+          "preconditions": [
+            "An attacker can repeatedly submit large but transport-accepted export requests."
+          ],
+          "summary": "This structured permit mode is independently selectable and has no application-level workload or rate budget."
+        }
+      },
+      "codeEvidence": [
+        {
+          "code": "export async function POST(request: NextRequest) {\n  const parsed = await request.json().catch(() => ({}));\n  const body = isRecord(parsed) ? parsed : {};\n  const mode = readString(body.mode, \"single\");\n  const scenario = parseScenario(body.scenario);\n\n  try {\n    if (mode === \"workPlanStructured\" || mode === \"permitInspectionStructured\" || mode === \"tbmBriefingStructured\" || mode === \"tbmLogStructured\" || mode === \"educationRecordStructured\") {\n      if (!isRecord(body.structured)) {\n        return NextResponse.json(\n          { ok: false, error: \"structured must be a non-array object for structured xlsx export\" },\n          { status: 400, headers: { \"cache-control\": \"no-store\" } }\n        );\n      }\n      const editedRows = body.edited === true\n        ? parseRows(body.rows, structuredFallbackTitle(mode))\n        : undefined;\n",
+          "endLine": 180,
+          "explanation": "This entrypoint carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-1",
+          "label": "Entrypoint evidence",
+          "language": "typescript",
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "entrypoint",
+          "startLine": 163
+        },
+        {
+          "code": "      if (mode === \"permitInspectionStructured\") {\n        const buffer = await buildPermitInspectionStructuredXlsx(scenario, body.structured, { editedRows });\n        return xlsxResponse(buffer, `${scenario.companyName}-\uc548\uc804\uc791\uc5c5\ud5c8\uac00-\ud655\uc778\uc11c`, \"safeclaw-work-permit\");",
+          "endLine": 188,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-2",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "sink",
+          "startLine": 186
+        },
+        {
+          "code": "function parsePermitInspectionStructured(value: StructuredRecord): PermitInspectionStructured {\n  const basicInfo = isRecord(value.basicInfo) ? value.basicInfo : {};\n  const conditions = Array.isArray(value.conditions) ? value.conditions : [];\n  const attachments = Array.isArray(value.attachments) ? value.attachments : [];\n  const completionChecks = Array.isArray(value.completionChecks) ? value.completionChecks : [];\n  const approvers = isRecord(value.approvers) ? value.approvers : {};\n\n  return {\n    basicInfo: {\n      permitNo: readString(basicInfo.permitNo, \"\ud604\uc7a5 \ubc1c\uae09\"),\n      permitType: readPermitType(basicInfo.permitType),\n      workName: readString(basicInfo.workName, \"\uc791\uc5c5\uba85 \ud655\uc778\"),\n      location: readString(basicInfo.location, \"\uc791\uc5c5\uc7a5\uc18c \ud655\uc778\"),\n      workDate: readString(basicInfo.workDate, \"\uc791\uc5c5\uc77c \ud655\uc778\"),\n      workerCount: readNumber(basicInfo.workerCount, 0),\n      requester: readString(basicInfo.requester, \"\uc791\uc5c5\ubc18\uc7a5\"),\n      approver: readString(basicInfo.approver, \"\uad00\ub9ac\uac10\ub3c5\uc790\")\n    },",
+          "endLine": 780,
+          "explanation": "This evidence carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-3",
+          "label": "Evidence evidence",
+          "language": "typescript",
+          "path": "lib/xlsx-builder.ts",
+          "role": "evidence",
+          "startLine": 763
+        }
+      ],
+      "confidence": {
+        "level": "medium",
+        "rationale": "The public route parses attacker-sized JSON without an application-level byte, item-count, or field-length budget and expands it in memory at the concrete workbook/HWP sink. Focused functional tests confirm these modes are live and independently reachable."
+      },
+      "extensions": {
+        "candidateId": "candidate-d5f9825c4442fcef"
+      },
+      "findingId": "csf_6a2c44d7d7c5ea908f1fc62d",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:bf9bd07267aceac490f0c35c36199c4b52eb77f009007d9f99819136344125cc"
+      },
+      "identity": {
+        "anchor": "unbounded-document-export-generation",
+        "instance": "permitinspectionstructured"
+      },
+      "locations": [
+        {
+          "endLine": 187,
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "entrypoint",
+          "startLine": 163
+        },
+        {
+          "endLine": 188,
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "sink",
+          "startLine": 186
+        },
+        {
+          "endLine": 800,
+          "path": "lib/xlsx-builder.ts",
+          "role": "evidence",
+          "startLine": 763
+        }
+      ],
+      "occurrenceId": "occ_340079e7711b6d5cc2c45700",
+      "preventiveControls": [
+        "Share one export-budget policy across PDF, XLSX, and HWP routes.",
+        "Apply durable abuse controls to unauthenticated export endpoints."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Reject oversized requests before JSON parsing where possible, then enforce mode-specific limits for document count, row count, nested array entries, field characters, rendered cells, and output bytes. Return a stable 413 or 422 response before allocating the workbook or HWP document.",
+      "remediationTests": [
+        "Add boundary and over-limit tests for the `permitInspectionStructured` export mode.",
+        "Verify oversized payloads fail before workbook or HWP generation begins."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "summary": "The structured permit branch passes attacker-sized conditions, attachments, completion checks, and text fields into in-memory worksheet generation without request, item-count, or field-length limits."
+      },
+      "ruleId": "resource-exhaustion.document-export",
+      "severity": {
+        "changeConditions": "Raise if accepted nested data expands disproportionately or repeated requests materially impair production; ignore if durable request and collection caps are enforced upstream.",
+        "level": "low",
+        "rationale": "The public route permits resource consumption, but current evidence supports only bounded ephemeral export degradation for this mode."
+      },
+      "summary": "Structured permit XLSX export accepts unbounded nested arrays and strings.",
+      "taxonomy": {
+        "category": "Uncontrolled resource consumption",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Permit-inspection XLSX export accepts unbounded structured input",
+      "validation": {
+        "counterEvidence": [
+          "Hosting request-size limits provide an outer transport bound but do not cap row counts, nested item counts, cell lengths, or in-process expansion within accepted requests.",
+          "No destructive load test was run; deployment memory/concurrency limits determine the exact failure threshold."
+        ],
+        "evidence": [
+          "app/api/export/xlsx/route.ts accepts the complete JSON payload without a route-local resource budget.",
+          "Conditions, attachments, completion checks, and strings are expanded in memory.",
+          "Focused existing Vitest suites passed: 7 files, 102 tests (knowledge regeneration, workpack remediation, XLSX/HWP export, public share authority and tenant hardening, briefing)."
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "method": "static source/control/sink trace plus focused existing tests",
+        "summary": "The public route parses attacker-sized JSON without an application-level byte, item-count, or field-length budget and expands it in memory at the concrete workbook/HWP sink. Focused functional tests confirm these modes are live and independently reachable."
+      }
+    },
+    {
+      "attackPath": {
+        "counterEvidence": "Platform request-size and memory limits constrain the maximum payload, and only one worksheet is built with no persistent or provider side effect.",
+        "dataflow": {
+          "outcome": "low",
+          "sink": "ExcelJS single-document workbook construction and writeBuffer",
+          "source": "Unauthenticated POST JSON body.",
+          "summary": "Unauthenticated single-mode XLSX JSON -> unbounded rows/strings -> in-memory ExcelJS worksheet -> writeBuffer response."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated internet caller",
+          "entrypoint": "app/api/export/xlsx/route.ts",
+          "outcome": "low",
+          "preconditions": [
+            "An attacker can repeatedly submit large but transport-accepted export requests."
+          ],
+          "summary": "The default single-document mode is independently reachable on the public POST route and has no row, field, body, or rate budget in application code."
+        }
+      },
+      "codeEvidence": [
+        {
+          "code": "export async function POST(request: NextRequest) {\n  const parsed = await request.json().catch(() => ({}));\n  const body = isRecord(parsed) ? parsed : {};\n  const mode = readString(body.mode, \"single\");\n  const scenario = parseScenario(body.scenario);\n",
+          "endLine": 168,
+          "explanation": "This entrypoint carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-1",
+          "label": "Entrypoint evidence",
+          "language": "typescript",
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "entrypoint",
+          "startLine": 163
+        },
+        {
+          "code": "    const title = readString(body.title, \"SafeClaw \uc548\uc804 \ubb38\uc11c\");\n    const rows = parseRows(body.rows, title);\n    const profile = parseProfile(body.profile);\n    const structuredRiskRows = body.edited === true ? [] : parseRiskRowsFromBody(body);\n    const buffer = await buildXlsxForDocument({ title, rows, profile, scenario, structuredRiskRows });\n    return xlsxResponse(buffer, `${scenario.companyName}-${title}`, \"safeclaw-document\");",
+          "endLine": 234,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-2",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "sink",
+          "startLine": 229
+        },
+        {
+          "code": "  // 4) Section summary\n  const grouped = rows.reduce<Record<string, SheetRow[]>>((acc, r) => {\n    acc[r.section] = [...(acc[r.section] || []), r];\n    return acc;\n  }, {});\n  ws.mergeCells(row, 1, row, 6);\n  ws.getCell(row, 1).value = \"\uc139\uc158 \uc694\uc57d\";\n  ws.getCell(row, 1).font = { name: \"Malgun Gothic\", size: 12, bold: true };\n  row += 1;\n\n  const summaryHeader = [\"\uc139\uc158\", \"\ud56d\ubaa9 \uc218\", \"\uc8fc\uc694 \ud56d\ubaa9\"];\n  ws.getCell(row, 1).value = summaryHeader[0];\n  ws.mergeCells(row, 2, row, 3);\n  ws.getCell(row, 2).value = summaryHeader[1];\n  ws.mergeCells(row, 4, row, 6);\n  ws.getCell(row, 4).value = summaryHeader[2];\n  [1, 2, 4].forEach((c) => {\n    ws.getCell(row, c).fill = HEADER_FILL;",
+          "endLine": 1428,
+          "explanation": "This evidence carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-3",
+          "label": "Evidence evidence",
+          "language": "typescript",
+          "path": "lib/xlsx-builder.ts",
+          "role": "evidence",
+          "startLine": 1411
+        }
+      ],
+      "confidence": {
+        "level": "medium",
+        "rationale": "The public route parses attacker-sized JSON without an application-level byte, item-count, or field-length budget and expands it in memory at the concrete workbook/HWP sink. Focused functional tests confirm these modes are live and independently reachable."
+      },
+      "extensions": {
+        "candidateId": "candidate-6d26bd086ae3a39c"
+      },
+      "findingId": "csf_b0dbb71a9aeca1ffa150b9d9",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:5b1b493ca1a346d2c803dfae24e44bb3f876516a29312b8b3df36f17c4587dd6"
+      },
+      "identity": {
+        "anchor": "unbounded-document-export-generation",
+        "instance": "single"
+      },
+      "locations": [
+        {
+          "endLine": 168,
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "entrypoint",
+          "startLine": 163
+        },
+        {
+          "endLine": 234,
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "sink",
+          "startLine": 229
+        },
+        {
+          "endLine": 1499,
+          "path": "lib/xlsx-builder.ts",
+          "role": "evidence",
+          "startLine": 1411
+        }
+      ],
+      "occurrenceId": "occ_945fbb5db332eb4db5365421",
+      "preventiveControls": [
+        "Share one export-budget policy across PDF, XLSX, and HWP routes.",
+        "Apply durable abuse controls to unauthenticated export endpoints."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Reject oversized requests before JSON parsing where possible, then enforce mode-specific limits for document count, row count, nested array entries, field characters, rendered cells, and output bytes. Return a stable 413 or 422 response before allocating the workbook or HWP document.",
+      "remediationTests": [
+        "Add boundary and over-limit tests for the `single` export mode.",
+        "Verify oversized payloads fail before workbook or HWP generation begins."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "summary": "The public POST handler parses the complete JSON body, accepts an unbounded rows array and strings, then builds and serializes every worksheet row in memory. A large request can consume substantial CPU and memory before writeBuffer completes."
+      },
+      "ruleId": "resource-exhaustion.document-export",
+      "severity": {
+        "changeConditions": "Raise if a small accepted body yields disproportionate workbook memory growth or concurrent requests materially impair service; ignore if durable limits fully cap rows and fields.",
+        "level": "low",
+        "rationale": "Remote CPU/memory consumption is plausible, but single-sheet expansion is transport-bounded and presently supports low availability impact."
+      },
+      "summary": "Single-document XLSX export has no request, row, or field resource budget.",
+      "taxonomy": {
+        "category": "Uncontrolled resource consumption",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Single-document XLSX export accepts an unbounded work budget",
+      "validation": {
+        "counterEvidence": [
+          "Hosting request-size limits provide an outer transport bound but do not cap row counts, nested item counts, cell lengths, or in-process expansion within accepted requests.",
+          "No destructive load test was run; deployment memory/concurrency limits determine the exact failure threshold."
+        ],
+        "evidence": [
+          "app/api/export/xlsx/route.ts accepts the complete JSON payload without a route-local resource budget.",
+          "All accepted rows and strings are retained and serialized in memory.",
+          "Focused existing Vitest suites passed: 7 files, 102 tests (knowledge regeneration, workpack remediation, XLSX/HWP export, public share authority and tenant hardening, briefing)."
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "method": "static source/control/sink trace plus focused existing tests",
+        "summary": "The public route parses attacker-sized JSON without an application-level byte, item-count, or field-length budget and expands it in memory at the concrete workbook/HWP sink. Focused functional tests confirm these modes are live and independently reachable."
+      }
+    },
+    {
+      "attackPath": {
+        "counterEvidence": "Outer hosting limits cap accepted bytes, and generation is ephemeral with no provider/database side effects; no load threshold is proven.",
+        "dataflow": {
+          "outcome": "low",
+          "sink": "ExcelJS TBM briefing workbook construction and writeBuffer",
+          "source": "Unauthenticated POST JSON body.",
+          "summary": "Unauthenticated tbmBriefingStructured JSON -> nested hazard/control arrays -> in-memory ExcelJS workbook -> writeBuffer response."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated internet caller",
+          "entrypoint": "app/api/export/xlsx/route.ts",
+          "outcome": "low",
+          "preconditions": [
+            "An attacker can repeatedly submit large but transport-accepted export requests."
+          ],
+          "summary": "The TBM briefing mode is independently selectable and expands attacker-sized nested arrays without route-local limits."
+        }
+      },
+      "codeEvidence": [
+        {
+          "code": "export async function POST(request: NextRequest) {\n  const parsed = await request.json().catch(() => ({}));\n  const body = isRecord(parsed) ? parsed : {};\n  const mode = readString(body.mode, \"single\");\n  const scenario = parseScenario(body.scenario);\n\n  try {\n    if (mode === \"workPlanStructured\" || mode === \"permitInspectionStructured\" || mode === \"tbmBriefingStructured\" || mode === \"tbmLogStructured\" || mode === \"educationRecordStructured\") {\n      if (!isRecord(body.structured)) {\n        return NextResponse.json(\n          { ok: false, error: \"structured must be a non-array object for structured xlsx export\" },\n          { status: 400, headers: { \"cache-control\": \"no-store\" } }\n        );\n      }\n      const editedRows = body.edited === true\n        ? parseRows(body.rows, structuredFallbackTitle(mode))\n        : undefined;\n",
+          "endLine": 180,
+          "explanation": "This entrypoint carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-1",
+          "label": "Entrypoint evidence",
+          "language": "typescript",
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "entrypoint",
+          "startLine": 163
+        },
+        {
+          "code": "      if (mode === \"tbmBriefingStructured\") {\n        const buffer = await buildTbmBriefingStructuredXlsx(scenario, body.structured, { editedRows });\n        return xlsxResponse(buffer, `${scenario.companyName}-TBM-\ube0c\ub9ac\ud551`, \"safeclaw-tbm-briefing\");",
+          "endLine": 193,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-2",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "sink",
+          "startLine": 191
+        },
+        {
+          "code": "function parseTbmBriefingStructured(value: StructuredRecord): TbmBriefingStructured {\n  const meta = isRecord(value.meta) ? value.meta : {};\n  const todayWork = isRecord(value.todayWork) ? value.todayWork : {};\n  const hazards = Array.isArray(value.hazards) ? value.hazards : [];\n  const measures = Array.isArray(value.measures) ? value.measures : [];\n  return {\n    meta: {\n      dateTime: readString(meta.dateTime, \"\uc77c\uc2dc \ud655\uc778\"),\n      location: readString(meta.location, \"\uc7a5\uc18c \ud655\uc778\"),\n      target: readString(meta.target, \"\ub300\uc0c1 \ud655\uc778\"),\n      attendees: readString(meta.attendees, \"\ucc38\uc11d\uc790 \ud655\uc778\")\n    },\n    todayWork: {\n      name: readString(todayWork.name, \"\uc791\uc5c5\uba85 \ud655\uc778\"),\n      location: readString(todayWork.location, \"\uc791\uc5c5 \uc704\uce58 \ud655\uc778\"),\n      time: readString(todayWork.time, \"\uc791\uc5c5 \uc2dc\uac04 \ud655\uc778\"),\n      equipment: readStringArray(todayWork.equipment)\n    },",
+          "endLine": 587,
+          "explanation": "This evidence carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-3",
+          "label": "Evidence evidence",
+          "language": "typescript",
+          "path": "lib/xlsx-builder.ts",
+          "role": "evidence",
+          "startLine": 570
+        }
+      ],
+      "confidence": {
+        "level": "medium",
+        "rationale": "The public route parses attacker-sized JSON without an application-level byte, item-count, or field-length budget and expands it in memory at the concrete workbook/HWP sink. Focused functional tests confirm these modes are live and independently reachable."
+      },
+      "extensions": {
+        "candidateId": "candidate-707c5e6e53b9d6ab"
+      },
+      "findingId": "csf_e5354308ff5ff4d402961a70",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:8d44a970aeb8af54abaf56f3a05a7667ca01504c24fa98f55ee54d8785240dd0"
+      },
+      "identity": {
+        "anchor": "unbounded-document-export-generation",
+        "instance": "tbmbriefingstructured"
+      },
+      "locations": [
+        {
+          "endLine": 192,
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "entrypoint",
+          "startLine": 163
+        },
+        {
+          "endLine": 193,
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "sink",
+          "startLine": 191
+        },
+        {
+          "endLine": 608,
+          "path": "lib/xlsx-builder.ts",
+          "role": "evidence",
+          "startLine": 570
+        }
+      ],
+      "occurrenceId": "occ_a3e4946224fa87f4242ba985",
+      "preventiveControls": [
+        "Share one export-budget policy across PDF, XLSX, and HWP routes.",
+        "Apply durable abuse controls to unauthenticated export endpoints."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Reject oversized requests before JSON parsing where possible, then enforce mode-specific limits for document count, row count, nested array entries, field characters, rendered cells, and output bytes. Return a stable 413 or 422 response before allocating the workbook or HWP document.",
+      "remediationTests": [
+        "Add boundary and over-limit tests for the `tbmBriefingStructured` export mode.",
+        "Verify oversized payloads fail before workbook or HWP generation begins."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "summary": "Hazards, measures, stop criteria, confirmation topics, and their strings are parsed without budgets and expanded into a workbook fully in memory."
+      },
+      "ruleId": "resource-exhaustion.document-export",
+      "severity": {
+        "changeConditions": "Raise if nested expansion is shown to exhaust production memory/concurrency at low attacker cost; ignore if durable edge and collection limits are confirmed.",
+        "level": "low",
+        "rationale": "This is a reachable public resource drain, but evidence supports bounded export availability impact rather than sustained broader compromise."
+      },
+      "summary": "Structured TBM briefing XLSX export accepts unbounded nested arrays and strings.",
+      "taxonomy": {
+        "category": "Uncontrolled resource consumption",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "TBM briefing XLSX export accepts unbounded structured input",
+      "validation": {
+        "counterEvidence": [
+          "Hosting request-size limits provide an outer transport bound but do not cap row counts, nested item counts, cell lengths, or in-process expansion within accepted requests.",
+          "No destructive load test was run; deployment memory/concurrency limits determine the exact failure threshold."
+        ],
+        "evidence": [
+          "app/api/export/xlsx/route.ts accepts the complete JSON payload without a route-local resource budget.",
+          "Hazards, measures, stop criteria, confirmation topics, and strings are expanded in memory.",
+          "Focused existing Vitest suites passed: 7 files, 102 tests (knowledge regeneration, workpack remediation, XLSX/HWP export, public share authority and tenant hardening, briefing)."
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "method": "static source/control/sink trace plus focused existing tests",
+        "summary": "The public route parses attacker-sized JSON without an application-level byte, item-count, or field-length budget and expands it in memory at the concrete workbook/HWP sink. Focused functional tests confirm these modes are live and independently reachable."
+      }
+    },
+    {
+      "attackPath": {
+        "counterEvidence": "Transport/serverless limits bound total accepted bytes and the sink creates only an ephemeral file; exact amplification and production threshold remain untested.",
+        "dataflow": {
+          "outcome": "low",
+          "sink": "ExcelJS TBM log workbook construction and writeBuffer",
+          "source": "Unauthenticated POST JSON body.",
+          "summary": "Unauthenticated tbmLogStructured JSON -> attendees/hazards/confirmations/photo-location arrays -> in-memory ExcelJS workbook -> writeBuffer response."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated internet caller",
+          "entrypoint": "app/api/export/xlsx/route.ts",
+          "outcome": "low",
+          "preconditions": [
+            "An attacker can repeatedly submit large but transport-accepted export requests."
+          ],
+          "summary": "The TBM log mode is independently selectable and has no item-count, field-length, request, or rate budget."
+        }
+      },
+      "codeEvidence": [
+        {
+          "code": "export async function POST(request: NextRequest) {\n  const parsed = await request.json().catch(() => ({}));\n  const body = isRecord(parsed) ? parsed : {};\n  const mode = readString(body.mode, \"single\");\n  const scenario = parseScenario(body.scenario);\n\n  try {\n    if (mode === \"workPlanStructured\" || mode === \"permitInspectionStructured\" || mode === \"tbmBriefingStructured\" || mode === \"tbmLogStructured\" || mode === \"educationRecordStructured\") {\n      if (!isRecord(body.structured)) {\n        return NextResponse.json(\n          { ok: false, error: \"structured must be a non-array object for structured xlsx export\" },\n          { status: 400, headers: { \"cache-control\": \"no-store\" } }\n        );\n      }\n      const editedRows = body.edited === true\n        ? parseRows(body.rows, structuredFallbackTitle(mode))\n        : undefined;\n",
+          "endLine": 180,
+          "explanation": "This entrypoint carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-1",
+          "label": "Entrypoint evidence",
+          "language": "typescript",
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "entrypoint",
+          "startLine": 163
+        },
+        {
+          "code": "      if (mode === \"tbmLogStructured\") {\n        const buffer = await buildTbmLogStructuredXlsx(scenario, body.structured, { editedRows });\n        return xlsxResponse(buffer, `${scenario.companyName}-TBM-\uc77c\uc9c0`, \"safeclaw-tbm-log\");",
+          "endLine": 198,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-2",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "sink",
+          "startLine": 196
+        },
+        {
+          "code": "function parseTbmLogStructured(value: StructuredRecord): TbmLogStructured {\n  const meta = isRecord(value.meta) ? value.meta : {};\n  const attendance = isRecord(value.attendance) ? value.attendance : {};\n  const todayWork = isRecord(value.todayWork) ? value.todayWork : {};\n  const hazards = Array.isArray(value.hazardsDiscussed) ? value.hazardsDiscussed : [];\n  const safetyEducation = isRecord(value.safetyEducation) ? value.safetyEducation : {};\n  const unaddressedItems = Array.isArray(value.unaddressedItems) ? value.unaddressedItems : [];\n  const photoEvidence = isRecord(value.photoEvidence) ? value.photoEvidence : {};\n  const signatures = isRecord(value.signatures) ? value.signatures : {};\n  return {\n    meta: {\n      dateTime: readString(meta.dateTime, \"\uc77c\uc2dc \ud655\uc778\"),\n      location: readString(meta.location, \"\uc7a5\uc18c \ud655\uc778\"),\n      workType: readString(meta.workType, \"\uacf5\uc885 \ud655\uc778\"),\n      instructor: readString(meta.instructor, \"\uc9c4\ud589\uc790 \ud655\uc778\")\n    },\n    attendance: {\n      expected: readNumber(attendance.expected, 0),",
+          "endLine": 636,
+          "explanation": "This evidence carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-3",
+          "label": "Evidence evidence",
+          "language": "typescript",
+          "path": "lib/xlsx-builder.ts",
+          "role": "evidence",
+          "startLine": 619
+        }
+      ],
+      "confidence": {
+        "level": "medium",
+        "rationale": "The public route parses attacker-sized JSON without an application-level byte, item-count, or field-length budget and expands it in memory at the concrete workbook/HWP sink. Focused functional tests confirm these modes are live and independently reachable."
+      },
+      "extensions": {
+        "candidateId": "candidate-45893bbc1dffbec0"
+      },
+      "findingId": "csf_21d7f195b719e0f73ad4c73a",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:2d295b8fb4f43c8a133eb135d372731a37d714d48222ebfa63caaeb5cf192297"
+      },
+      "identity": {
+        "anchor": "unbounded-document-export-generation",
+        "instance": "tbmlogstructured"
+      },
+      "locations": [
+        {
+          "endLine": 197,
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "entrypoint",
+          "startLine": 163
+        },
+        {
+          "endLine": 198,
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "sink",
+          "startLine": 196
+        },
+        {
+          "endLine": 660,
+          "path": "lib/xlsx-builder.ts",
+          "role": "evidence",
+          "startLine": 619
+        }
+      ],
+      "occurrenceId": "occ_727d436dbf5d3f27eef88286",
+      "preventiveControls": [
+        "Share one export-budget policy across PDF, XLSX, and HWP routes.",
+        "Apply durable abuse controls to unauthenticated export endpoints."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Reject oversized requests before JSON parsing where possible, then enforce mode-specific limits for document count, row count, nested array entries, field characters, rendered cells, and output bytes. Return a stable 413 or 422 response before allocating the workbook or HWP document.",
+      "remediationTests": [
+        "Add boundary and over-limit tests for the `tbmLogStructured` export mode.",
+        "Verify oversized payloads fail before workbook or HWP generation begins."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "summary": "The handler permits attacker-sized attendees, hazards, confirmations, education items, unresolved items, photo locations, and strings, all of which can be expanded during in-memory workbook generation."
+      },
+      "ruleId": "resource-exhaustion.document-export",
+      "severity": {
+        "changeConditions": "Raise if low-volume requests reliably exhaust memory or block production concurrency; ignore if durable request and nested-item caps are present outside the repository.",
+        "level": "low",
+        "rationale": "Many nested collections increase work, but current evidence still supports a bounded public export resource drain with low impact."
+      },
+      "summary": "Structured TBM log XLSX export accepts unbounded nested arrays and strings.",
+      "taxonomy": {
+        "category": "Uncontrolled resource consumption",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "TBM log XLSX export accepts unbounded structured input",
+      "validation": {
+        "counterEvidence": [
+          "Hosting request-size limits provide an outer transport bound but do not cap row counts, nested item counts, cell lengths, or in-process expansion within accepted requests.",
+          "No destructive load test was run; deployment memory/concurrency limits determine the exact failure threshold."
+        ],
+        "evidence": [
+          "app/api/export/xlsx/route.ts accepts the complete JSON payload without a route-local resource budget.",
+          "Attendees, hazards, confirmations, education items, unresolved items, and photo locations are expanded in memory.",
+          "Focused existing Vitest suites passed: 7 files, 102 tests (knowledge regeneration, workpack remediation, XLSX/HWP export, public share authority and tenant hardening, briefing)."
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "method": "static source/control/sink trace plus focused existing tests",
+        "summary": "The public route parses attacker-sized JSON without an application-level byte, item-count, or field-length budget and expands it in memory at the concrete workbook/HWP sink. Focused functional tests confirm these modes are live and independently reachable."
+      }
+    },
+    {
+      "attackPath": {
+        "counterEvidence": "Hosting body/memory limits provide an outer bound and there is no persistent mutation, provider call, or database operation on this path.",
+        "dataflow": {
+          "outcome": "low",
+          "sink": "ExcelJS work-plan workbook construction and writeBuffer",
+          "source": "Unauthenticated POST JSON body.",
+          "summary": "Unauthenticated workPlanStructured JSON -> workSteps and nested string arrays -> in-memory ExcelJS workbook -> writeBuffer response."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated internet caller",
+          "entrypoint": "app/api/export/xlsx/route.ts",
+          "outcome": "low",
+          "preconditions": [
+            "An attacker can repeatedly submit large but transport-accepted export requests."
+          ],
+          "summary": "The work-plan structured mode is independently selectable and accepts attacker-sized collections without application-level budgets."
+        }
+      },
+      "codeEvidence": [
+        {
+          "code": "export async function POST(request: NextRequest) {\n  const parsed = await request.json().catch(() => ({}));\n  const body = isRecord(parsed) ? parsed : {};\n  const mode = readString(body.mode, \"single\");\n  const scenario = parseScenario(body.scenario);\n\n  try {\n    if (mode === \"workPlanStructured\" || mode === \"permitInspectionStructured\" || mode === \"tbmBriefingStructured\" || mode === \"tbmLogStructured\" || mode === \"educationRecordStructured\") {\n      if (!isRecord(body.structured)) {\n        return NextResponse.json(\n          { ok: false, error: \"structured must be a non-array object for structured xlsx export\" },\n          { status: 400, headers: { \"cache-control\": \"no-store\" } }\n        );\n      }\n      const editedRows = body.edited === true\n        ? parseRows(body.rows, structuredFallbackTitle(mode))\n        : undefined;\n",
+          "endLine": 180,
+          "explanation": "This entrypoint carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-1",
+          "label": "Entrypoint evidence",
+          "language": "typescript",
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "entrypoint",
+          "startLine": 163
+        },
+        {
+          "code": "      if (mode === \"workPlanStructured\") {\n        const buffer = await buildWorkPlanStructuredXlsx(scenario, body.structured, { editedRows });\n        return xlsxResponse(buffer, `${scenario.companyName}-\uc791\uc5c5\uacc4\ud68d\uc11c`, \"safeclaw-work-plan\");",
+          "endLine": 183,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-2",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "sink",
+          "startLine": 181
+        },
+        {
+          "code": "function parseWorkPlanStructured(value: StructuredRecord): WorkPlanStructured {\n  const overview = isRecord(value.workOverview) ? value.workOverview : {};\n  const emergency = isRecord(value.emergencyResponse) ? value.emergencyResponse : {};\n  const approvers = isRecord(value.approvers) ? value.approvers : {};\n  const steps = Array.isArray(value.workSteps) ? value.workSteps : [];\n  const contacts = Array.isArray(emergency.contacts) ? emergency.contacts : [];\n  return {\n    workOverview: {\n      workName: readString(overview.workName, \"\uc791\uc5c5\uba85 \ud655\uc778\"),\n      description: readString(overview.description, \"\uc791\uc5c5\ub0b4\uc6a9 \ud655\uc778\"),\n      workerCount: readNumber(overview.workerCount, 0),\n      location: readString(overview.location, \"\uc791\uc5c5\uc7a5\uc18c \ud655\uc778\"),\n      condition: readString(overview.condition, \"\uc791\uc5c5\uc870\uac74 \ud655\uc778\"),\n      equipment: readStringArray(overview.equipment)\n    },\n    workSteps: steps.flatMap((item, index): WorkPlanStructured[\"workSteps\"] => {\n      if (!isRecord(item)) return [];\n      return [{",
+          "endLine": 542,
+          "explanation": "This evidence carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-3",
+          "label": "Evidence evidence",
+          "language": "typescript",
+          "path": "lib/xlsx-builder.ts",
+          "role": "evidence",
+          "startLine": 525
+        }
+      ],
+      "confidence": {
+        "level": "medium",
+        "rationale": "The public route parses attacker-sized JSON without an application-level byte, item-count, or field-length budget and expands it in memory at the concrete workbook/HWP sink. Focused functional tests confirm these modes are live and independently reachable."
+      },
+      "extensions": {
+        "candidateId": "candidate-5dac880f635fa6af"
+      },
+      "findingId": "csf_7c616e59ae8f50e96114a026",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:2119ec65dacea9f147245304a6dbf8e0a2c26e97743adf8907de4b10f6ff9187"
+      },
+      "identity": {
+        "anchor": "unbounded-document-export-generation",
+        "instance": "workplanstructured"
+      },
+      "locations": [
+        {
+          "endLine": 182,
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "entrypoint",
+          "startLine": 163
+        },
+        {
+          "endLine": 183,
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "sink",
+          "startLine": 181
+        },
+        {
+          "endLine": 553,
+          "path": "lib/xlsx-builder.ts",
+          "role": "evidence",
+          "startLine": 525
+        }
+      ],
+      "occurrenceId": "occ_bbd186fd6ec9e653957341fd",
+      "preventiveControls": [
+        "Share one export-budget policy across PDF, XLSX, and HWP routes.",
+        "Apply durable abuse controls to unauthenticated export endpoints."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Reject oversized requests before JSON parsing where possible, then enforce mode-specific limits for document count, row count, nested array entries, field characters, rendered cells, and output bytes. Return a stable 413 or 422 response before allocating the workbook or HWP document.",
+      "remediationTests": [
+        "Add boundary and over-limit tests for the `workPlanStructured` export mode.",
+        "Verify oversized payloads fail before workbook or HWP generation begins."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "summary": "The route reads the whole body and passes the structured object directly to a parser that maps workSteps and string arrays without budgets before generating an in-memory workbook."
+      },
+      "ruleId": "resource-exhaustion.document-export",
+      "severity": {
+        "changeConditions": "Raise if repository-compatible payloads demonstrate disproportionate expansion or material service degradation; ignore if durable upstream limits cap collections and concurrency.",
+        "level": "low",
+        "rationale": "The path is remotely reachable, but impact is limited to ephemeral CPU/memory use under transport bounds."
+      },
+      "summary": "Structured work-plan XLSX export accepts unbounded nested arrays and strings.",
+      "taxonomy": {
+        "category": "Uncontrolled resource consumption",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Work-plan XLSX export accepts unbounded structured input",
+      "validation": {
+        "counterEvidence": [
+          "Hosting request-size limits provide an outer transport bound but do not cap row counts, nested item counts, cell lengths, or in-process expansion within accepted requests.",
+          "No destructive load test was run; deployment memory/concurrency limits determine the exact failure threshold."
+        ],
+        "evidence": [
+          "app/api/export/xlsx/route.ts accepts the complete JSON payload without a route-local resource budget.",
+          "Work steps and nested string arrays are expanded in memory.",
+          "Focused existing Vitest suites passed: 7 files, 102 tests (knowledge regeneration, workpack remediation, XLSX/HWP export, public share authority and tenant hardening, briefing)."
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "method": "static source/control/sink trace plus focused existing tests",
+        "summary": "The public route parses attacker-sized JSON without an application-level byte, item-count, or field-length budget and expands it in memory at the concrete workbook/HWP sink. Focused functional tests confirm these modes are live and independently reachable."
+      }
+    },
+    {
+      "attackPath": {
+        "counterEvidence": "Transport/serverless limits cap accepted bytes and no data is persisted, but multi-worksheet expansion can amplify memory and CPU more than single/structured modes.",
+        "dataflow": {
+          "outcome": "medium",
+          "sink": "ExcelJS multi-worksheet workpack construction and writeBuffer",
+          "source": "Unauthenticated POST JSON body.",
+          "summary": "Unauthenticated workpack-mode XLSX JSON -> unbounded documents and nested rows -> worksheet per document -> full in-memory ExcelJS writeBuffer."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated internet caller",
+          "entrypoint": "app/api/export/xlsx/route.ts",
+          "outcome": "medium",
+          "preconditions": [
+            "An attacker can repeatedly submit large but transport-accepted export requests."
+          ],
+          "summary": "The public workpack mode is independently selectable and multiplies attacker-controlled documents into worksheets without route-local size, count, or rate limits."
+        }
+      },
+      "codeEvidence": [
+        {
+          "code": "export async function POST(request: NextRequest) {\n  const parsed = await request.json().catch(() => ({}));\n  const body = isRecord(parsed) ? parsed : {};\n  const mode = readString(body.mode, \"single\");\n  const scenario = parseScenario(body.scenario);\n",
+          "endLine": 168,
+          "explanation": "This entrypoint carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-1",
+          "label": "Entrypoint evidence",
+          "language": "typescript",
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "entrypoint",
+          "startLine": 163
+        },
+        {
+          "code": "    if (mode === \"workpack\") {\n      const docs = Array.isArray(body.documents) ? body.documents : [];\n      const documents = docs\n        .map((d) => {\n          if (!isRecord(d)) return null;\n          const title = readString(d.title);\n          if (!title) return null;\n          return {\n            title,\n            rows: parseRows(d.rows, title),\n            profile: parseProfile(d.profile),\n            structuredRiskRows: d.edited === true ? [] : parseRiskRowsFromBody(d)\n          };\n        })\n        .filter((d): d is {\n          title: string;\n          rows: SheetRow[];\n          profile: ReturnType<typeof parseProfile>;",
+          "endLine": 222,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-2",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "sink",
+          "startLine": 205
+        },
+        {
+          "code": "export async function buildWorkpackXlsx(\n  scenario: AskResponse[\"scenario\"],\n  documents: Array<{ title: string; rows: SheetRow[]; profile: SafetyFormProfile; structuredRiskRows?: StructuredRiskAssessmentRow[] }>\n): Promise<Buffer> {\n  const wb = new ExcelJS.Workbook();\n  wb.creator = \"SafeClaw\";\n  wb.created = new Date();\n\n  // Cover sheet\n  const cover = wb.addWorksheet(\"\ud45c\uc9c0\", { pageSetup: { paperSize: 9, orientation: \"landscape\" } });\n  cover.columns = [{ width: 18 }, { width: 60 }];\n  cover.getCell(1, 1).value = \"SafeClaw \uc548\uc804 \ubb38\uc11c\ud329\";\n  cover.getCell(1, 1).font = { name: \"Malgun Gothic\", size: 18, bold: true, color: { argb: \"FF1F4D43\" } };\n  cover.mergeCells(1, 1, 1, 2);\n  const coverRows: Array<[string, string]> = [\n    [\"\uc0ac\uc5c5\uc7a5\", scenario.companyName || \"\"],\n    [\"\ud604\uc7a5/\uacf5\uc815\", scenario.siteName || \"\"],\n    [\"\uc791\uc5c5\ub0b4\uc6a9\", scenario.workSummary || \"\"],",
+          "endLine": 1551,
+          "explanation": "This evidence carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-3",
+          "label": "Evidence evidence",
+          "language": "typescript",
+          "path": "lib/xlsx-builder.ts",
+          "role": "evidence",
+          "startLine": 1534
+        }
+      ],
+      "confidence": {
+        "level": "medium",
+        "rationale": "The public route parses attacker-sized JSON without an application-level byte, item-count, or field-length budget and expands it in memory at the concrete workbook/HWP sink. Focused functional tests confirm these modes are live and independently reachable."
+      },
+      "extensions": {
+        "candidateId": "candidate-a130e7c7b735269a"
+      },
+      "findingId": "csf_90fab9d634e762871753178a",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:a68fc4c533475e86ea2298b0f8c603acd65e3876fb090412aef5853e6253125c"
+      },
+      "identity": {
+        "anchor": "unbounded-document-export-generation",
+        "instance": "workpack"
+      },
+      "locations": [
+        {
+          "endLine": 168,
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "entrypoint",
+          "startLine": 163
+        },
+        {
+          "endLine": 226,
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "sink",
+          "startLine": 205
+        },
+        {
+          "endLine": 1640,
+          "path": "lib/xlsx-builder.ts",
+          "role": "evidence",
+          "startLine": 1534
+        }
+      ],
+      "occurrenceId": "occ_2e5c79b1ffb3943a668423a6",
+      "preventiveControls": [
+        "Share one export-budget policy across PDF, XLSX, and HWP routes.",
+        "Apply durable abuse controls to unauthenticated export endpoints."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Reject oversized requests before JSON parsing where possible, then enforce mode-specific limits for document count, row count, nested array entries, field characters, rendered cells, and output bytes. Return a stable 413 or 422 response before allocating the workbook or HWP document.",
+      "remediationTests": [
+        "Add boundary and over-limit tests for the `workpack` export mode.",
+        "Verify oversized payloads fail before workbook or HWP generation begins."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "summary": "The workpack branch maps every supplied document and all nested rows without count or string-length limits, then creates a worksheet per document and serializes the workbook in memory."
+      },
+      "ruleId": "resource-exhaustion.document-export",
+      "severity": {
+        "changeConditions": "Lower if durable edge quotas and strict document/row caps exist in deployment; raise only if bounded load evidence demonstrates material service-wide outage.",
+        "level": "medium",
+        "rationale": "An unauthenticated caller can repeatedly drive comparatively expensive multi-worksheet serialization, supporting sustained service availability abuse while remaining short of broader compromise."
+      },
+      "summary": "Workpack XLSX export permits unbounded documents and rows.",
+      "taxonomy": {
+        "category": "Uncontrolled resource consumption",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Whole-workpack XLSX export accepts an unbounded work budget",
+      "validation": {
+        "counterEvidence": [
+          "Hosting request-size limits provide an outer transport bound but do not cap row counts, nested item counts, cell lengths, or in-process expansion within accepted requests.",
+          "No destructive load test was run; deployment memory/concurrency limits determine the exact failure threshold."
+        ],
+        "evidence": [
+          "app/api/export/xlsx/route.ts accepts the complete JSON payload without a route-local resource budget.",
+          "Every supplied document and nested row becomes workbook state before serialization; this is independently triggerable from single/structured modes.",
+          "Focused existing Vitest suites passed: 7 files, 102 tests (knowledge regeneration, workpack remediation, XLSX/HWP export, public share authority and tenant hardening, briefing)."
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "method": "static source/control/sink trace plus focused existing tests",
+        "summary": "The public route parses attacker-sized JSON without an application-level byte, item-count, or field-length budget and expands it in memory at the concrete workbook/HWP sink. Focused functional tests confirm these modes are live and independently reachable."
+      }
+    },
+    {
+      "attackPath": {
+        "counterEvidence": "CRON_SECRET prevents direct invocation, generation-evidence verification gates the insert, dispatch is fail-closed, and the attacker must know a registered email; none binds briefing_email to the caller before the legitimate cron uses service-role authority.",
+        "dataflow": {
+          "outcome": "medium",
+          "sink": "Service-role workpack insert into the email-resolved user tenant.",
+          "source": "Authenticated tenant-controlled briefing_email and briefing_question.",
+          "summary": "Authenticated user stores victim registered email plus chosen briefing question on own site -> legitimate CRON_SECRET run reads settings -> service-role user lookup -> generated workpack insert in victim workspace."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3",
+          "evidence-4"
+        ],
+        "reachability": {
+          "attacker": "Authenticated workspace user",
+          "entrypoint": "app/api/briefing/run/route.ts",
+          "outcome": "medium",
+          "preconditions": [
+            "Victim email is registered and the authorized scheduled briefing job runs."
+          ],
+          "summary": "The settings write is reachable to a workspace user; exploitation completes when the enabled scheduled briefing job runs and generation evidence verifies."
+        }
+      },
+      "codeEvidence": [
+        {
+          "code": "  const dbRows = await fetchBriefingSiteRows(supabaseClient);\n  const { sites, source, truncated, error } = resolveBriefingSites(dbRows, process.env.BRIEFING_SITES);\n\n  if (truncated) {\n    log.warn(\"briefing sites exceeded cap \u2014 extra sites skipped this run\", { source, cap: sites.length });\n  }\n\n  if (sites.length === 0) {\n    log.info(\"briefing run: no sites configured\", { source, error });\n    return NextResponse.json({ ok: true, message: \"no sites\", source, results: [] });\n  }\n\n  const results: SiteResult[] = [];\n\n  for (const site of sites) {\n    let weatherSummary = \"\";\n    let generated = false;\n    let saved = false;",
+          "endLine": 138,
+          "explanation": "This entrypoint carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-1",
+          "label": "Entrypoint evidence",
+          "language": "typescript",
+          "path": "app/api/briefing/run/route.ts",
+          "role": "entrypoint",
+          "startLine": 121
+        },
+        {
+          "code": "  const enabled = body.enabled === true;\n  const question = typeof body.question === \"string\" ? body.question.trim().slice(0, 500) : \"\";\n  const email = typeof body.email === \"string\" ? body.email.trim().slice(0, 200) : \"\";\n\n  if (enabled && (!question || !email.includes(\"@\"))) {\n    return NextResponse.json({\n      ok: false,\n      configured: true,\n      dispatch,\n      message: \"\ube0c\ub9ac\ud551\uc744 \ucf1c\ub824\uba74 \uc791\uc5c5 \uc124\uba85\uacfc \uc720\ud6a8\ud55c \uc218\uc2e0 \uc774\uba54\uc77c\uc774 \ud544\uc694\ud569\ub2c8\ub2e4.\"\n    }, { status: 400 });\n  }\n\n  try {\n    const context = await ensureWorkspaceContext(client, user, {});\n\n    const { error } = await client\n      .from(\"sites\")",
+          "endLine": 137,
+          "explanation": "This entrypoint carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-2",
+          "label": "Entrypoint evidence",
+          "language": "typescript",
+          "path": "app/api/briefing/settings/route.ts",
+          "role": "entrypoint",
+          "startLine": 120
+        },
+        {
+          "code": "  const email = typeof body.email === \"string\" ? body.email.trim().slice(0, 200) : \"\";\n\n  if (enabled && (!question || !email.includes(\"@\"))) {",
+          "endLine": 124,
+          "explanation": "This root_control carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-3",
+          "label": "Root Control evidence",
+          "language": "typescript",
+          "path": "app/api/briefing/settings/route.ts",
+          "role": "root_control",
+          "startLine": 122
+        },
+        {
+          "code": "  let userId: string | null;\n  try {\n    userId = await findUserIdByEmail(client, ownerEmail);\n  } catch (error) {\n    console.error(\"briefing workpack save: user lookup failed\", error);\n    return { ok: false, workpackId: null, message: \"\uc774\uba54\uc77c \uc18c\uc720\uc790 \uc870\ud68c\uc5d0 \uc2e4\ud328\ud588\uc2b5\ub2c8\ub2e4.\" };\n  }\n\n  if (!userId) {\n    return { ok: false, workpackId: null, message: `${ownerEmail} \uacc4\uc815\uc744 \ucc3e\uc9c0 \ubabb\ud574 \uc800\uc7a5\uc744 \uac74\ub108\ub6f0\uc5c8\uc2b5\ub2c8\ub2e4.` };\n  }\n\n  const context = await ensureWorkspaceContext(client, { id: userId, email: ownerEmail }, {\n    siteName,\n    companyName: siteName\n  });\n\n  const evidenceSummary = buildWorkpackEvidenceSummary(response, verification.snapshot);",
+          "endLine": 530,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-4",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "lib/workpack-store.ts",
+          "role": "sink",
+          "startLine": 513
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "An authenticated user can persist any syntactically email-like briefing_email on their own site. The authorized cron later treats that value as the workpack owner, resolves it through service-role auth administration, and inserts into the resolved user tenant."
+      },
+      "extensions": {
+        "candidateId": "candidate-cf63dd11825b2346"
+      },
+      "findingId": "csf_020491733c70a16c7e0e3584",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:53ea1c1a70cb5effbe984b8a0feafcb14d732bb2f9feb5bda47bb786171ad5dd"
+      },
+      "identity": {
+        "anchor": "briefing-recipient-reused-as-workpack-owner",
+        "instance": "scheduled-briefing"
+      },
+      "locations": [
+        {
+          "endLine": 159,
+          "path": "app/api/briefing/run/route.ts",
+          "role": "entrypoint",
+          "startLine": 121
+        },
+        {
+          "endLine": 141,
+          "path": "app/api/briefing/settings/route.ts",
+          "role": "entrypoint",
+          "startLine": 120
+        },
+        {
+          "endLine": 124,
+          "path": "app/api/briefing/settings/route.ts",
+          "role": "root_control",
+          "startLine": 122
+        },
+        {
+          "endLine": 543,
+          "path": "lib/workpack-store.ts",
+          "role": "sink",
+          "startLine": 513
+        }
+      ],
+      "occurrenceId": "occ_aa1760aa815294676365f0b9",
+      "preventiveControls": [
+        "Use tenant IDs rather than email addresses for service-role ownership decisions."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Persist the authenticated owner or organization identifier with the briefing configuration and pass that immutable identity to the cron save path. Treat `briefing_email` only as a delivery recipient, never as a workpack owner lookup key.",
+      "remediationTests": [
+        "Configure a briefing recipient matching another account and verify the workpack remains in the caller tenant.",
+        "Verify the cron path rejects stale or mismatched owner/site bindings."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3",
+          "evidence-4"
+        ],
+        "summary": "The authenticated settings route accepts any syntactically email-like body.email and stores it on the caller's site without binding it to user.email or a recipient-only identity. The cron route later reads all enabled sites with a service-role client and passes site.email to saveAskResponseAsWorkpack as the owner identity. That helper resolves the supplied email to a Supabase auth user and inserts the generated workpack into that user's workspace. Thus an attacker who knows another registered email can select the provider prompt through briefing_question, select the victim through briefing_email, and wait for the authorized cron execution to perform the cross-tenant insert."
+      },
+      "ruleId": "authorization-bypass.briefing-owner-binding",
+      "severity": {
+        "changeConditions": "Raise if the inserted workpack is automatically trusted/dispatched or scalable across many victims; lower if briefing_email is bound to the caller or treated solely as a recipient while ownership comes from the persisted tenant identity.",
+        "level": "medium",
+        "rationale": "The path crosses a tenant boundary and writes attacker-influenced safety workpack content into a victim workspace, but it is one scheduled object, requires a known email, and does not dispatch or expose data."
+      },
+      "summary": "A workspace user can make the cron job create a generated workpack in another user's tenant by setting briefing_email to the victim's registered email address.",
+      "taxonomy": {
+        "category": "Authorization bypass / cross-tenant write",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Scheduled briefing email can redirect workpack creation into another tenant",
+      "validation": {
+        "counterEvidence": [
+          "CRON_SECRET protects direct cron invocation and provider dispatch is fail-closed, but neither restores ownership binding for persisted settings consumed by the legitimate cron.",
+          "Exploitability requires knowledge of another registered email and an enabled scheduled run; no live data mutation was attempted."
+        ],
+        "evidence": [
+          "app/api/briefing/settings/route.ts:120-141 binds the row update to the caller site but does not bind email to the caller identity.",
+          "app/api/briefing/run/route.ts passes site.email to saveAskResponseAsWorkpack.",
+          "lib/workpack-store.ts:465-543 resolves that email to a user and inserts into that user workspace.",
+          "Focused existing Vitest suites passed: 7 files, 102 tests (knowledge regeneration, workpack remediation, XLSX/HWP export, public share authority and tenant hardening, briefing)."
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3",
+          "evidence-4"
+        ],
+        "method": "static source/control/sink trace plus focused existing tests",
+        "summary": "An authenticated user can persist any syntactically email-like briefing_email on their own site. The authorized cron later treats that value as the workpack owner, resolves it through service-role auth administration, and inserts into the resolved user tenant."
+      }
+    },
+    {
+      "attackPath": {
+        "counterEvidence": "Workpack organization ownership is checked and disclosed fields are limited metadata; UUID entropy reduces likelihood, but no composite relationship check or organization predicate authorizes the site lookup.",
+        "dataflow": {
+          "outcome": "low",
+          "sink": "Service-role site metadata query and archive response.",
+          "source": "Authenticated tenant workpack insert/update with a foreign site_id.",
+          "summary": "Authenticated organization owner creates/updates own workpack with foreign site UUID -> archive GET scopes workpack by owned organization -> service-role site lookup by site_id alone -> foreign name/industry/region returned."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3",
+          "evidence-4"
+        ],
+        "reachability": {
+          "attacker": "Authenticated tenant user with direct workpack write capability",
+          "entrypoint": "app/api/workpacks/route.ts",
+          "outcome": "low",
+          "preconditions": [
+            "Attacker knows or obtains a valid foreign site UUID."
+          ],
+          "summary": "The route is reachable to an authenticated workspace user and the schema/RLS permits the mismatched relationship; exploitation requires obtaining a valid foreign site UUID."
+        }
+      },
+      "codeEvidence": [
+        {
+          "code": "  const siteIds = Array.from(new Set((workpacks || []).map((workpack) => workpack.site_id).filter((id): id is string => Boolean(id))));\n  const { data: sites, error: siteError } = siteIds.length\n    ? await client.from(\"sites\").select(\"id,name,industry,region\").in(\"id\", siteIds)\n    : { data: [], error: null };",
+          "endLine": 115,
+          "explanation": "This root_control carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-1",
+          "label": "Root Control evidence",
+          "language": "typescript",
+          "path": "app/api/workpacks/route.ts",
+          "role": "root_control",
+          "startLine": 112
+        },
+        {
+          "code": "  const archiveWorkpacks = (workpacks || []).map((workpack) => {\n    const site = workpack.site_id ? siteMap.get(workpack.site_id) : null;\n    const encodedId = encodeURIComponent(workpack.id);\n    return {\n      id: workpack.id,\n      organizationName: organizationMap.get(workpack.organization_id) || \"SafeClaw Pilot\",\n      siteName: site?.name || \"\uae30\ubcf8 \ud604\uc7a5\",\n      industry: site?.industry || null,\n      region: site?.region || null,\n      question: workpack.question,\n      scenario: workpack.scenario,\n      documentKeys: documentKeysFromDeliverables(workpack.deliverables),\n      workerSummary: workpack.worker_summary,\n      status: workpack.status,\n      createdAt: workpack.created_at,\n      updatedAt: workpack.updated_at,\n      lastGeneratedAt: workpack.updated_at || workpack.created_at,\n      reopenHref: `/documents?workpackId=${encodedId}`,",
+          "endLine": 141,
+          "explanation": "This sink carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-2",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "app/api/workpacks/route.ts",
+          "role": "sink",
+          "startLine": 124
+        },
+        {
+          "code": "create table if not exists workpacks (\n  id uuid primary key default gen_random_uuid(),\n  organization_id uuid not null references organizations(id) on delete cascade,\n  site_id uuid references sites(id) on delete set null,",
+          "endLine": 47,
+          "explanation": "This evidence carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-3",
+          "label": "Evidence evidence",
+          "language": "text",
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "evidence",
+          "startLine": 44
+        },
+        {
+          "code": "create policy \"owners can manage workpacks\"\n  on workpacks for all\n  using (\n    exists (\n      select 1 from organizations\n      where organizations.id = workpacks.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  )\n  with check (\n    exists (\n      select 1 from organizations\n      where organizations.id = workpacks.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  );",
+          "endLine": 164,
+          "explanation": "This evidence carries the candidate's attacker-controlled value or missing control along the validated source-to-sink path.",
+          "id": "evidence-4",
+          "label": "Evidence evidence",
+          "language": "text",
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "evidence",
+          "startLine": 149
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Workpack RLS constrains organization_id ownership but not site_id ownership. An authenticated owner can create an own-organization workpack referencing an existing foreign site UUID; the service-role archive then fetches site metadata by that UUID without an organization predicate."
+      },
+      "extensions": {
+        "candidateId": "candidate-819e28ba9941fce3"
+      },
+      "findingId": "csf_1fa22cd0aee4ec11116c8bb1",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:d89791c0ab9f330bb0eff967ef49313366fffc95efdc07139ed7eb9870d3c468"
+      },
+      "identity": {
+        "anchor": "workpack-site-lookup-without-organization-constraint",
+        "instance": "workpack-archive-site-metadata"
+      },
+      "locations": [
+        {
+          "endLine": 115,
+          "path": "app/api/workpacks/route.ts",
+          "role": "root_control",
+          "startLine": 112
+        },
+        {
+          "endLine": 143,
+          "path": "app/api/workpacks/route.ts",
+          "role": "sink",
+          "startLine": 124
+        },
+        {
+          "endLine": 47,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "evidence",
+          "startLine": 44
+        },
+        {
+          "endLine": 164,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "evidence",
+          "startLine": 149
+        }
+      ],
+      "occurrenceId": "occ_ccc7719b02ac05da86a2fba2",
+      "preventiveControls": [
+        "Centralize organization-scoped site lookups for service-role routes."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Constrain the site enrichment query by both `site_id` and the already authorized organization IDs. Also enforce a database invariant or trigger ensuring every workpack `site_id` belongs to its `organization_id`.",
+      "remediationTests": [
+        "Create a mismatched workpack/site fixture and verify archive enrichment returns no foreign site metadata.",
+        "Add a schema-level relationship test for site and organization consistency."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3",
+          "evidence-4"
+        ],
+        "summary": "GET first limits workpacks to caller-owned organization_ids, but then collects their site_id values and queries sites only with .in(\"id\", siteIds). The schema has independent foreign keys for workpacks.organization_id and workpacks.site_id, and the workpacks RLS WITH CHECK validates only organization ownership. An authenticated tenant can therefore insert or update an own-organization workpack whose site_id names another tenant site; this service-role route then returns that site name, industry, and region."
+      },
+      "ruleId": "authorization-bypass.workpack-site-binding",
+      "severity": {
+        "changeConditions": "Raise if foreign site UUIDs are enumerable or the archive response expands to contacts/private safety data; ignore if a composite constraint or route predicate enforces site.organization_id membership.",
+        "level": "low",
+        "rationale": "This is a real cross-tenant read through service-role access, but only low-sensitivity site metadata is exposed and a target UUID is required."
+      },
+      "summary": "Workpack archive resolves site metadata by site_id without constraining the site to an organization owned by the caller, allowing cross-tenant site metadata disclosure through a mismatched workpack reference.",
+      "taxonomy": {
+        "category": "Authorization bypass / IDOR",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Workpack archive can disclose site metadata from another tenant",
+      "validation": {
+        "counterEvidence": [
+          "UUID entropy is a precondition, not an authorization control. No composite foreign key, trigger, RLS site-organization check, or route-level organization filter closes this path.",
+          "No live cross-tenant row was created; the proof is static because exercising it would require prohibited data mutation."
+        ],
+        "evidence": [
+          "supabase/migrations/002_workspace_productization.sql defines independent foreign keys and checks only workpacks.organization_id in RLS.",
+          "app/api/workpacks/route.ts first scopes workpacks by owned organizations, then queries sites solely with .in(\"id\", siteIds) and returns name, industry, and region.",
+          "Focused existing Vitest suites passed: 7 files, 102 tests (knowledge regeneration, workpack remediation, XLSX/HWP export, public share authority and tenant hardening, briefing)."
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3",
+          "evidence-4"
+        ],
+        "method": "static source/control/sink trace plus focused existing tests",
+        "summary": "Workpack RLS constrains organization_id ownership but not site_id ownership. An authenticated owner can create an own-organization workpack referencing an existing foreign site UUID; the service-role archive then fetches site metadata by that UUID without an organization predicate."
+      }
+    }
+  ],
+  "scanId": "safeclaw-repository-security-47b07b6a-20260728",
+  "schemaVersion": "1.0"
+}

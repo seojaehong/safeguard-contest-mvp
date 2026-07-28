@@ -1,0 +1,135 @@
+{
+  "completeness": "complete",
+  "deferred": [],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [
+    ".git/**",
+    "node_modules/**",
+    ".next/**"
+  ],
+  "explicitExclusions": [
+    {
+      "pattern": ".git/**",
+      "reason": "Git object-store internals are not repository product content."
+    },
+    {
+      "pattern": "node_modules/**",
+      "reason": "Generated dependency tree; lockfile and package manifests were reviewed instead."
+    },
+    {
+      "pattern": ".next/**",
+      "reason": "Generated Next.js build output; source and build configuration were reviewed instead."
+    }
+  ],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "repository",
+  "mode": "repository",
+  "openQuestions": [
+    {
+      "followUpPrompt": "At revision 47b07b6aff72ced25e8c1884ecd16f010e1fc170, verify Vercel and provider-side body, concurrency, and spend controls for /api/ask, /api/knowledge/regenerate, /api/workpack/remediate, /api/weather, /api/export/xlsx, and /api/export/hwp.",
+      "question": "What durable global quotas exist outside the repository for public AI, weather, and export routes?"
+    },
+    {
+      "followUpPrompt": "At revision 47b07b6aff72ced25e8c1884ecd16f010e1fc170, trace attacker-to-victim provenance for WorkpackEditor CSV and TSV exports and validate formula execution in the supported spreadsheet applications.",
+      "question": "Can untrusted or shared workpack text reach a different operator's spreadsheet export workflow?"
+    },
+    {
+      "followUpPrompt": "If confirmations become authorization-relevant, add a database unique constraint and authenticated or recipient-specific proof before relying on them.",
+      "question": "Will read confirmations become a legal, billing, or safety-release gate?"
+    }
+  ],
+  "scanId": "safeclaw-repository-security-47b07b6a-20260728",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "reported",
+      "id": "surface_tenant_authorization",
+      "label": "Tenant and object authorization",
+      "notes": "Briefing ownership reuse and workpack/site relationship binding produced reportable findings.",
+      "receiptRefs": [
+        "artifacts/02_discovery/candidate_ledger.jsonl",
+        "artifacts/02_discovery/raw_dispatch.coverage.md",
+        "artifacts/02_discovery/raw_supabase.coverage.md",
+        "artifacts/03_coverage/repository_coverage_ledger.md"
+      ],
+      "riskArea": "Cross-tenant reads and writes through service-role or RLS gaps"
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_public_generation",
+      "label": "Public AI, search, and weather workloads",
+      "notes": "Public provider and upstream fan-out paths lack durable or per-request work budgets.",
+      "receiptRefs": [
+        "artifacts/02_discovery/candidate_ledger.jsonl",
+        "artifacts/02_discovery/raw_public_ai.coverage.md",
+        "artifacts/02_discovery/raw_photo_network.coverage.md",
+        "artifacts/03_coverage/repository_coverage_ledger.md"
+      ],
+      "riskArea": "Provider cost and service availability"
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_document_exports",
+      "label": "CSV, TSV, XLSX, and HWP exports",
+      "notes": "Four delimited export modes and eight in-memory document-generation modes survived validation.",
+      "receiptRefs": [
+        "artifacts/02_discovery/candidate_ledger.jsonl",
+        "artifacts/02_discovery/raw_exports.coverage.md",
+        "artifacts/03_coverage/repository_coverage_ledger.md"
+      ],
+      "riskArea": "Spreadsheet formula injection and resource exhaustion"
+    },
+    {
+      "disposition": "rejected",
+      "id": "surface_public_share",
+      "label": "Public Share capability and read confirmations",
+      "notes": "The sessionId plus workerId pair is the intentional high-entropy recipient capability. The duplicate confirmation race remains a data-integrity issue but has no present security-gate impact.",
+      "receiptRefs": [
+        "artifacts/02_discovery/candidate_ledger.jsonl",
+        "artifacts/02_discovery/raw_share.coverage.md",
+        "artifacts/03_coverage/repository_coverage_ledger.md"
+      ],
+      "riskArea": "Bearer capability authorization and confirmation integrity"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_agent_mcp",
+      "label": "Agent, MCP, and privileged token boundaries",
+      "notes": "A focused auth and agent review found no surviving candidate; 161 relevant tests passed during discovery.",
+      "receiptRefs": [
+        "artifacts/02_discovery/file_review_receipts.jsonl",
+        "artifacts/02_discovery/raw_agent.coverage.md",
+        "artifacts/02_discovery/route_auth_inventory.json",
+        "artifacts/03_coverage/repository_coverage_ledger.md"
+      ],
+      "riskArea": "Authentication, scope, replay, and tool authorization"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_content_and_files",
+      "label": "HTML, file, archive, and secret-handling surfaces",
+      "notes": "Pattern review and manual triage found no credible surviving XSS, archive-path, command-execution, or secret candidate.",
+      "receiptRefs": [
+        "artifacts/02_discovery/file_review_receipts.jsonl",
+        "artifacts/02_discovery/automated_hits.txt",
+        "artifacts/03_coverage/repository_coverage_ledger.md"
+      ],
+      "riskArea": "XSS, unsafe file operations, and credential exposure"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_repository_inventory",
+      "label": "Repository-wide file inventory",
+      "notes": "All 4,772 in-scope files were accounted for: 766 source text, 191 structured/document text, 2,495 generated evidence text, 1,309 binary files metadata-accounted, and 11 other files.",
+      "receiptRefs": [
+        "artifacts/02_discovery/in_scope_files.txt",
+        "artifacts/02_discovery/file_classification_summary.json",
+        "artifacts/02_discovery/file_review_receipts.jsonl",
+        "artifacts/03_coverage/repository_coverage_ledger.md"
+      ],
+      "riskArea": "Coverage completeness"
+    }
+  ]
+}

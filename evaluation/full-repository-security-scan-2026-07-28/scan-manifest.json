@@ -1,0 +1,167 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "a15362e811cf4f1c5fe4f7ce3a6d484f00f02506db8c00fae125bbee259d42b9"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "92a77f87f161468388dbb03a1c5dbac2da3d8e1ec12d93542a69b50d26d15e97"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/02_discovery/automated_hits.txt",
+        "sha256": "459d277c8e991a7d7c4fe5f8323390e5de85856a7f15c333b19c61d947bce520"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/02_discovery/candidate_ledger.jsonl",
+        "sha256": "e7840019a81db642d0036b3a60ce5a3491afda17d761d617ba5811fcd676f67e"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/02_discovery/file_classification_summary.json",
+        "sha256": "b331bdf78e84a8226969380f8def5a81207f270743801e68a00af9002ded9cd7"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/02_discovery/file_review_receipts.jsonl",
+        "sha256": "4133c8bfc0f817263d3dfcd8f57fac977d3ab5e915f6f4399c47bfd949d2dd9b"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/02_discovery/in_scope_files.txt",
+        "sha256": "0596e50ee4a684ac91c2317d6121bc8955de7f6acd940988a326cabbe03f9dab"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/02_discovery/raw_agent.coverage.md",
+        "sha256": "23591b6ea9a111876d84760036e1c30d265ca9779b681d9436c9cb5bb697ec5e"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/02_discovery/raw_dispatch.coverage.md",
+        "sha256": "0a5cfd2152aa479b614b38bd522079357a7ac72362ad1ac4e4fa679557f46b96"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/02_discovery/raw_exports.coverage.md",
+        "sha256": "c03abf1ae517fffaac50f1e2b6ac4fd8e484867ac310d5753c3e931a98bc8d0e"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/02_discovery/raw_photo_network.coverage.md",
+        "sha256": "fc0a5c91f5d15490db96cbab33c78a7ca9e75f21397a3ec455e10865e7da1510"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/02_discovery/raw_public_ai.coverage.md",
+        "sha256": "29c85c907ffe6df55bec397b067aa250b6336d3b7f77287dae10db4b6036affb"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/02_discovery/raw_share.coverage.md",
+        "sha256": "4a7abef828e09c36943037239e6b722fc8aec28a8f660fec0200477734c4569b"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/02_discovery/raw_supabase.coverage.md",
+        "sha256": "5f381ebca22809aa8881978794ff014ecfae0efd423b95a76ecc0540707f7a8f"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/02_discovery/route_auth_inventory.json",
+        "sha256": "cc3d3330c410b47d64afa626c4092f3ded590028593757b5322fc85f8d857a9e"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/03_coverage/repository_coverage_ledger.md",
+        "sha256": "c8a5fc90cbabd17a499162dbebbd9bc16f33c6c2ab75842f5db646f959221bee"
+      }
+    ],
+    "completedAt": "2026-07-28T14:07:13.736150Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "safeclaw-repository-security-47b07b6a-20260728",
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.14"
+    },
+    "scope": {
+      "artifactsReviewed": [
+        "4,772-file deterministic repository inventory",
+        "Repository threat model",
+        "21-candidate compact discovery ledger",
+        "Route authorization inventory and focused security test evidence"
+      ],
+      "context": "The threat model was generated for this scan. Public generation and export access is intentional, so findings require a concrete cost, availability, cross-tenant, or client-parser consequence.",
+      "excludePaths": [
+        ".git/**",
+        "node_modules/**",
+        ".next/**"
+      ],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "No live denial-of-service or paid-provider load was generated.",
+        "No cross-tenant database row or public Share session was created because those actions cross approval boundaries.",
+        "1,309 binary files were metadata-accounted; their executable semantics were not reverse engineered.",
+        "Exact saved /share/[sessionId] product evidence remains MISSING_EVIDENCE and was not substituted with fixtures."
+      ],
+      "runtimeStatus": "Static source/control/sink validation plus 7 focused test files and 102 passing tests. No destructive load, provider-spend, DB mutation, or saved Share session creation was performed.",
+      "summary": "Single-pass repository security scan of the immutable SafeClaw revision, including application routes, server policies, Supabase migrations, scripts, tests, tracked evaluation evidence, and dependency manifests.",
+      "validationMode": "compact standard-scan static trace with focused existing tests"
+    },
+    "sealedAt": "2026-07-28T14:07:13.736150Z",
+    "startedAt": "2026-07-28T12:28:00Z",
+    "status": "completed",
+    "target": {
+      "displayName": "seojaehong/safeguard-contest-mvp",
+      "kind": "git_revision",
+      "remote": "https://github.com/seojaehong/safeguard-contest-mvp.git",
+      "revision": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
+      "targetId": "sha256:2869cdc1a90b9223b0b07877f453ee6e75bd3e3b7a02236e364a5a08866ffd37"
+    },
+    "threatModel": {
+      "assets": [
+        "Tenant organizations, sites, workers, contacts, workpacks, confirmations, and dispatch data",
+        "Generated safety-document integrity and legal/KOSHA/SIF provenance",
+        "Supabase, MCP, cron, provider, dispatch, and signing credentials",
+        "Provider budgets and availability of generation, search, weather, and export services"
+      ],
+      "assumptions": [
+        "Vercel TLS, Supabase Auth, cryptographic primitives, and provider authentication work as configured",
+        "Environment variables and deployment endpoints are operator controlled",
+        "Public generation and export access is intentional but still requires abuse controls",
+        "In-memory serverless rate limits are soft per-instance controls rather than durable quotas"
+      ],
+      "attackerCapabilities": [
+        "Send unauthenticated requests, query strings, JSON bodies, export rows, and AI prompts",
+        "Persist tenant-owned settings and workpack content after authentication",
+        "Influence upstream or generated text that is later exported",
+        "Possess transferable Share bearer identifiers when a recipient link is disclosed"
+      ],
+      "securityObjectives": [
+        "Bind every service-role read and write to the authenticated tenant and related objects",
+        "Bound public request sizes, downstream calls, concurrency, and provider spend",
+        "Keep exported user-controlled content inert in downstream parsers",
+        "Preserve explicit approval boundaries for DB, provider, Share, publication, and registry mutations"
+      ],
+      "summary": "SafeClaw crosses public browser, authenticated tenant, service-role Supabase, bearer Share, MCP, cron, AI/provider, and document-parser trust boundaries. Highest-impact risks are cross-tenant mutation or disclosure, unsafe automation, provider-cost abuse, and untrusted content reaching downloadable document interpreters.",
+      "trustBoundaries": [
+        "Internet/browser to public Next.js APIs",
+        "Authenticated browser to service-role Supabase routes",
+        "Bearer Share links to private workpack documents",
+        "Cron and automation to tenant-owned persisted settings",
+        "SafeClaw to AI, weather, legal, KOSHA, Supabase, and messaging providers",
+        "Untrusted document text to CSV, TSV, XLSX, HWP, PDF, and browser interpreters"
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}
