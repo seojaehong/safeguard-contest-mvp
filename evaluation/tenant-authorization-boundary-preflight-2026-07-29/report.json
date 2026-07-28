@@ -1,0 +1,123 @@
+{
+  "schemaVersion": "safeclaw-tenant-authorization-boundary-preflight/v1",
+  "checkedAt": "2026-07-29T04:37:10.1542106+09:00",
+  "verdict": "RED_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATION_REQUIRED_NO_MUTATION",
+  "sourceHead": "a65b8482f43a3091d54b4c98cd99387a67765e2c",
+  "productionBuild": {
+    "commitSha": "a65b8482f43a3091d54b4c98cd99387a67765e2c",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-iguu8lojo-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
+  "sourceScan": {
+    "artifact": "evaluation/full-repository-security-scan-2026-07-28/findings.json",
+    "targetFindingCount": 2,
+    "targetFindingIds": [
+      "csf_020491733c70a16c7e0e3584",
+      "csf_1fa22cd0aee4ec11116c8bb1"
+    ]
+  },
+  "checks": [
+    {
+      "id": "scheduled-briefing-owner-binding",
+      "status": "RED",
+      "findingId": "csf_020491733c70a16c7e0e3584",
+      "findingTitle": "Scheduled briefing email can redirect workpack creation into another tenant",
+      "currentDataflow": [
+        {
+          "path": "app/api/briefing/run/route.ts",
+          "line": 58,
+          "observation": "The service-role site query selects name, briefing_question, and briefing_email but carries no immutable site, organization, or owner identity into the run."
+        },
+        {
+          "path": "app/api/briefing/run/route.ts",
+          "line": 149,
+          "observation": "site.email is passed as the owner argument to saveAskResponseAsWorkpack."
+        },
+        {
+          "path": "lib/workpack-store.ts",
+          "line": 515,
+          "observation": "The owner argument is resolved through an admin email lookup."
+        },
+        {
+          "path": "lib/workpack-store.ts",
+          "line": 525,
+          "observation": "The email-selected user is passed into ensureWorkspaceContext and becomes the workpack tenant context."
+        }
+      ],
+      "requiredGreenContract": [
+        "The DB-backed briefing row carries immutable site_id and organization_id.",
+        "The scheduled save path derives owner identity from the authorized organization record rather than briefing_email.",
+        "briefing_email remains a delivery recipient only.",
+        "An organization and email mismatch fails closed without inserting a workpack."
+      ],
+      "redReproducedWithoutMutation": true
+    },
+    {
+      "id": "workpack-archive-site-binding",
+      "status": "RED",
+      "findingId": "csf_1fa22cd0aee4ec11116c8bb1",
+      "findingTitle": "Workpack archive can disclose site metadata from another tenant",
+      "currentDataflow": [
+        {
+          "path": "app/api/workpacks/route.ts",
+          "line": 114,
+          "observation": "Archive site enrichment uses only .in(\"id\", siteIds) and does not constrain sites by the already authorized organizationIds."
+        }
+      ],
+      "requiredGreenContract": [
+        "Site enrichment requires both site_id membership and organization_id membership.",
+        "A foreign site UUID cannot populate siteName, industry, or region.",
+        "The archive remains usable when a legacy or invalid site reference is omitted from enrichment."
+      ],
+      "redReproducedWithoutMutation": true
+    }
+  ],
+  "summary": {
+    "targetFindingCount": 2,
+    "redCount": 2,
+    "greenCount": 0,
+    "missingEvidenceCount": 0,
+    "productPatchAuthorized": false,
+    "productPatchPerformed": false
+  },
+  "proposedVerification": {
+    "scheduledBriefingFixture": "Use a mocked service-role client with organization owner A and briefing email for user B; assert no B-owned context or workpack insert is possible.",
+    "archiveFixture": "Use owned workpack rows containing a foreign site UUID and assert the site query includes organization membership and returns no foreign metadata.",
+    "liveExploitRequired": false,
+    "crossTenantMutationRequired": false
+  },
+  "koshaBoundaryRecheck": {
+    "reviewerSupportSourceHead": "75ce86dc4e1f05874134cf5a7a5fe30365912812",
+    "reviewGateSourceHead": "d8ce5a67d0528c2c7fcadd05e777142ba6563d15",
+    "reviewerCockpitSourceHead": "e7d8f6cafa13525a6a80f4f662f8136079cf2e7c",
+    "allEvidenceHeadsAreAncestorsOfCurrentSource": true,
+    "reviewerSupportPythonTestsPassed": 4,
+    "reviewerSupportPythonTestsFailed": 0,
+    "reviewerSupportVerdict": "PASS_MACHINE_REVIEWER_SUPPORT_HUMAN_CONFIRMATION_REQUIRED",
+    "reviewGateVerdict": "REVIEW_CHECKLIST_INCOMPLETE_BLOCKED",
+    "humanReviewCompleted": false,
+    "exactPromotionPerformed": false
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "crossTenantExploitPerformed": false,
+    "migrationCreatedOrApplied": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "reportableFindingCount": 18,
+    "tenantAuthorizationFindingCount": 2,
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "productPatchAuthorization": "AWAITING_USER_CONFIRMATION",
+    "koshaHumanReview": "REQUIRED",
+    "koshaExactPromotion": "APPROVAL_GATED"
+  }
+}
