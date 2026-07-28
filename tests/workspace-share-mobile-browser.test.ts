@@ -541,7 +541,7 @@ describe("workspace mobile share presentation", () => {
       selectedWorkerIds: ["worker-vietnamese-dispatch-standalone"]
     } satisfies CurrentWorkerSnapshot;
     const stored = buildStoredCurrentWorkpack(sample, { workerSnapshot });
-    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const page = await browser.newPage({ viewport: { width: 1440, height: 723 } });
     const mobilePage = await browser.newPage({ viewport: { width: 390, height: 723 } });
 
     try {
@@ -592,7 +592,7 @@ describe("workspace mobile share presentation", () => {
         `${JSON.stringify({
           checkedAt: new Date().toISOString(),
           route: "/dispatch?theme=day",
-          viewport: { width: 1440, height: 900 },
+          viewport: { width: 1440, height: 723 },
           verdict: "PASS",
           metrics
         }, null, 2)}\n`,

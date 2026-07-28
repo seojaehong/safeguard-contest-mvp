@@ -15275,12 +15275,19 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .share-panel.workflow-panel {
     grid-column: 1 / -1;
     max-width: 1180px;
+    max-height: calc(100vh - 339px);
     margin: 0;
     grid-template-columns: minmax(0, 1fr) minmax(520px, 0.72fr);
     align-items: start;
     gap: 8px;
     border-radius: var(--r-lg);
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 12px;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two:has(> .share-panel.workflow-panel) > .safeclaw-module-panel {
+    display: none;
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .share-workflow-header {
@@ -15369,14 +15376,14 @@ body:has(.safeclaw-landing) :is(
     position: sticky;
     top: 80px;
     align-self: start;
-    height: min(300px, calc(100vh - 212px));
-    min-height: min(300px, calc(100vh - 212px));
+    height: clamp(220px, calc(100vh - 500px), 300px);
+    min-height: clamp(220px, calc(100vh - 500px), 300px);
     max-height: calc(100vh - 160px);
     overflow: hidden;
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] [data-share-preview] .message-preview-lines {
-    max-height: min(210px, calc(100vh - 310px));
+    max-height: clamp(110px, calc(100vh - 580px), 210px);
     overflow: auto;
   }
 
