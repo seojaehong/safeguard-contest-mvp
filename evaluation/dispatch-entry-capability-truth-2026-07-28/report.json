@@ -1,14 +1,14 @@
 {
   "schemaVersion": "safeclaw-dispatch-entry-capability-truth/v1",
   "generatedAt": "2026-07-28T02:47:20.361Z",
-  "verdict": "PASS_CURRENT_SOURCE_DISPATCH_ENTRY_CAPABILITY_TRUTH_LIVE_PENDING",
+  "verdict": "PASS_LIVE_PRODUCTION_DISPATCH_ENTRY_CAPABILITY_TRUTH",
   "sourceHead": "9eb16294ea79e8ca140634022298c5b01c46875f",
   "productionBuild": {
-    "commitSha": "49f329f6e207be49f4053fc4920a271195767fe8",
+    "commitSha": "9eb16294ea79e8ca140634022298c5b01c46875f",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-p4wffapkk-seojaehongs-projects.vercel.app",
-    "sourceHeadMatchesProduction": false
+    "deploymentUrl": "safeguard-contest-3ofaopafr-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
   },
   "liveBefore": {
     "url": "https://www.safeclaw.kr/dispatch?theme=day",
@@ -32,6 +32,14 @@
     "prototypeBoundary": "준비되지 않은 채널은 미리보기로 유지합니다.",
     "forbiddenSendingClaimsRemainingInReviewedSurfaces": 0
   },
+  "liveAfter": {
+    "dispatchDescriptionVisible": true,
+    "dispatchDescription": "작업자 언어와 채널별 공지 문안을 미리 보고, 실제 발송 가능 여부와 승인된 접수 결과를 구분해 기록합니다.",
+    "landingDispatchState": "준비",
+    "landingDispatchBoundaryVisible": true,
+    "landingDispatchBoundary": "작업자 언어와 채널별 공지 문안을 준비하고, 승인된 전송 결과만 기록합니다.",
+    "sourceHeadMatchesProduction": true
+  },
   "verification": {
     "testFiles": 4,
     "testsPassed": 35,
@@ -50,7 +58,7 @@
     "exactTrustRegistryMutationPerformed": false
   },
   "remainingBoundaries": {
-    "liveAfterDeploymentRequired": true,
+    "liveAfterDeploymentRequired": false,
     "providerDispatchPersistence": "approval_gated",
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   }

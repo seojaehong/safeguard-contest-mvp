@@ -1,10 +1,10 @@
 # Dispatch Entry Capability Truth
 
-Verdict: `PASS_CURRENT_SOURCE_DISPATCH_ENTRY_CAPABILITY_TRUTH_LIVE_PENDING`
+Verdict: `PASS_LIVE_PRODUCTION_DISPATCH_ENTRY_CAPABILITY_TRUTH`
 
 Product commit: `9eb16294ea79e8ca140634022298c5b01c46875f`
 
-Production marker at check time: `49f329f6e207be49f4053fc4920a271195767fe8`
+Production marker: `9eb16294ea79e8ca140634022298c5b01c46875f`
 
 ## Finding
 
@@ -19,6 +19,8 @@ The live `/dispatch` first-screen description said that SafeClaw sends site noti
 
 ## Verification
 
+- Live `/dispatch` renders the capability-aware description.
+- Live landing renders Dispatch as `준비` and states that only approved transmission results are recorded.
 - Focused tests: 4 files, 35 passed, 0 failed.
 - Strict TypeScript typecheck: `PASS`.
 - Next.js 15.5.15 production build: `PASS`.
@@ -26,4 +28,4 @@ The live `/dispatch` first-screen description said that SafeClaw sends site noti
 
 ## Boundary
 
-This is current-source evidence. Production still reported `49f329f6` at the check time, so live-after verification remains required. No provider call, DB mutation, Share session creation, embedding/vector operation, or KOSHA exact-registry mutation was performed. Provider persistence remains approval-gated and exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.
+Production and product source are aligned at `9eb16294`. No provider call, DB mutation, Share session creation, embedding/vector operation, or KOSHA exact-registry mutation was performed. Provider persistence remains approval-gated and exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.
