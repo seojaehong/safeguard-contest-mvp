@@ -48,6 +48,41 @@ function gitHead() {
   }
 }
 
+function readSourceContract() {
+  const routeSource = fs.readFileSync(
+    path.join(REPO_ROOT, "app", "api", "agent", "chat", "route.ts"),
+    "utf8",
+  );
+  const transportSource = fs.readFileSync(
+    path.join(REPO_ROOT, "lib", "remote-hermes-https-transport.ts"),
+    "utf8",
+  );
+  const readinessSource = fs.readFileSync(
+    path.join(REPO_ROOT, "lib", "engine-runtime-readiness-policy.ts"),
+    "utf8",
+  );
+  const routeWiresConfiguredTransport = routeSource.includes(
+    "trustedTransport: createConfiguredRemoteHermesHttpsTransport(process.env)",
+  );
+  const configuredTransportFailsClosed = transportSource.includes(
+    "export function createConfiguredRemoteHermesHttpsTransport",
+  )
+    && transportSource.includes("attestation.serviceId !== serviceId")
+    && transportSource.includes('!/^[a-f0-9]{64}$/u.test(attestation.attestationDigest)');
+  const durableAttemptLedgerWired = routeSource.includes("attemptLedger:");
+  const readinessKeepsLedgerOpen = readinessSource.includes(
+    '? ["remote-attempt-ledger-required"]',
+  );
+  return {
+    routeWiresConfiguredTransport,
+    configuredTransportFailsClosed,
+    trustedTransportWired: routeWiresConfiguredTransport && configuredTransportFailsClosed,
+    durableAttemptLedgerWired,
+    readinessKeepsLedgerOpen,
+    executionReadyClaimed: false,
+  };
+}
+
 async function readJsonUrl(url, options = {}) {
   const response = await fetch(url, { cache: "no-store", ...options });
   const text = await response.text();
@@ -145,17 +180,29 @@ function parseArgs(argv) {
   return options;
 }
 
-function buildReport({ checkedAt, sourceSha, productionBuildInfo, focusedTests, liveUnauthenticatedBrokerSmoke }) {
+function buildReport({
+  checkedAt,
+  sourceSha,
+  productionBuildInfo,
+  focusedTests,
+  liveUnauthenticatedBrokerSmoke,
+  sourceContract,
+}) {
   return {
     schemaVersion: "safeclaw-hermes-openclaw-runtime-current-gate/v1",
     checkedAt,
     sourceShaForFocusedTests: sourceSha,
     productionBuildInfoAtLiveSmoke: productionBuildInfo,
-    verdict: focusedTests.status === "pass" && liveUnauthenticatedBrokerSmoke.status === "pass"
+    verdict: focusedTests.status === "pass"
+      && liveUnauthenticatedBrokerSmoke.status === "pass"
+      && sourceContract.trustedTransportWired
+      && !sourceContract.durableAttemptLedgerWired
+      && sourceContract.readinessKeepsLedgerOpen
       ? "adapter_boundary_pass_live_execution_not_claimed"
       : "adapter_boundary_red_live_execution_not_claimed",
     focusedTests,
     liveUnauthenticatedBrokerSmoke,
+    sourceContract,
     mutationBoundary: {
       dbMutationPerformed: false,
       providerDispatchLiveClaimed: false,
@@ -164,14 +211,19 @@ function buildReport({ checkedAt, sourceSha, productionBuildInfo, focusedTests, 
     },
     liveExecutionReadiness: {
       claimed: false,
+      proven: [
+        "authenticated route rejects unauthenticated requests before engine execution",
+        "tenant-bound request envelope and signed policy contract",
+        "deny-all remote tool policy",
+        "Evidence Harness claim allowlist and immutable evidence digest",
+        "DNS-pinned HTTPS trusted transport wired into the production route",
+        "terminal ledger interface and fail-closed terminal persistence contract",
+      ],
       requires: [
         "authenticated operator-owned site context",
         "local OpenClaw site/org binding attestation or configured remote Hermes gateway",
-        "service assertion and replay ledger",
-        "tenant-bound request envelope",
-        "tool-denial policy",
-        "Evidence Harness completeness",
-        "terminal ledger persistence",
+        "durable cross-instance attempt and terminal ledger implementation",
+        "authenticated live execution canary after durable ledger approval",
       ],
     },
   };
@@ -243,11 +295,20 @@ Result:
 - Engine execution claimed: \`${report.mutationBoundary.engineExecutionClaimed}\`
 - Live authenticated execution performed: \`${report.mutationBoundary.liveAuthenticatedExecutionPerformed}\`
 
+## Remote Hermes Source Contract
+
+- Production route wires configured trusted HTTPS transport: \`${report.sourceContract.routeWiresConfiguredTransport}\`
+- Configured transport fails closed on service/digest mismatch: \`${report.sourceContract.configuredTransportFailsClosed}\`
+- Trusted transport wired: \`${report.sourceContract.trustedTransportWired}\`
+- Durable attempt ledger wired: \`${report.sourceContract.durableAttemptLedgerWired}\`
+- Readiness keeps the durable ledger blocker visible: \`${report.sourceContract.readinessKeepsLedgerOpen}\`
+- Execution-ready claimed: \`${report.sourceContract.executionReadyClaimed}\`
+
 ## Interpretation
 
 This is the correct current state for launch safety: SafeClaw can demonstrate that Hermes/OpenClaw is integrated as a bounded adapter path, while avoiding the false claim that a production Hermes worker pool or local OAuth runtime is fully operational inside Vercel.
 
-The next proof requires an authenticated operator-owned test site plus a configured remote/local runtime that can pass availability, tenant binding, tool-denial, Evidence Harness, and terminal-ledger gates without exposing secrets.
+The production route now supplies the DNS-pinned trusted HTTPS transport. Runtime creation still fails closed because no durable cross-instance attempt/terminal ledger is wired. The next proof requires the approved durable ledger plus an authenticated operator-owned canary; this report does not substitute source wiring for live execution.
 `;
 }
 
@@ -256,11 +317,19 @@ async function main() {
   const checkedAt = new Date().toISOString();
   const sourceSha = gitHead();
   const productionBuildInfo = await readBuildInfo(options.baseUrl);
+  const sourceContract = readSourceContract();
   const focusedTests = options.skipTests
     ? { command: `npm.cmd ${TEST_ARGS.join(" ")}`, testFilesPassed: 0, testsPassed: 0, durationSeconds: 0, status: "skipped" }
     : runFocusedTests();
   const liveUnauthenticatedBrokerSmoke = await runUnauthenticatedBrokerSmoke(options.baseUrl);
-  const report = buildReport({ checkedAt, sourceSha, productionBuildInfo, focusedTests, liveUnauthenticatedBrokerSmoke });
+  const report = buildReport({
+    checkedAt,
+    sourceSha,
+    productionBuildInfo,
+    focusedTests,
+    liveUnauthenticatedBrokerSmoke,
+    sourceContract,
+  });
   fs.writeFileSync(path.join(REPO_ROOT, OUT_DIR, "report.json"), `${JSON.stringify(report, null, 2)}\n`, "utf8");
   fs.writeFileSync(path.join(REPO_ROOT, OUT_DIR, "report.md"), renderMarkdown(report), "utf8");
   console.log(JSON.stringify({
@@ -271,6 +340,8 @@ async function main() {
     tests: report.focusedTests.status,
     liveSmoke: report.liveUnauthenticatedBrokerSmoke.status,
     liveCode: report.liveUnauthenticatedBrokerSmoke.code,
+    trustedTransportWired: report.sourceContract.trustedTransportWired,
+    durableAttemptLedgerWired: report.sourceContract.durableAttemptLedgerWired,
     engineExecutionClaimed: report.mutationBoundary.engineExecutionClaimed,
   }, null, 2));
   if (report.verdict !== "adapter_boundary_pass_live_execution_not_claimed") {
