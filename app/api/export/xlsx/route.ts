@@ -8,6 +8,12 @@ import {
   buildWorkPlanStructuredXlsx,
   buildXlsxForDocument
 } from "@/lib/xlsx-builder";
+import {
+  assertDocumentExportInputBudget,
+  assertDocumentExportOutputBudget,
+  DocumentExportLimitError,
+  readDocumentExportRequestJson
+} from "@/lib/document-export-budget";
 import { parseStructuredRiskAssessmentRows } from "@/lib/risk-assessment-renderer";
 
 export const dynamic = "force-dynamic";
@@ -41,6 +47,7 @@ function sanitizeFileName(value: string) {
 }
 
 function xlsxResponse(buffer: Buffer, fileNameBase: string, fallbackName: string) {
+  assertDocumentExportOutputBudget(buffer);
   const fileName = `${sanitizeFileName(fileNameBase)}.xlsx`;
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
@@ -161,12 +168,13 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const parsed = await request.json().catch(() => ({}));
-  const body = isRecord(parsed) ? parsed : {};
-  const mode = readString(body.mode, "single");
-  const scenario = parseScenario(body.scenario);
-
   try {
+    const parsed = await readDocumentExportRequestJson(request);
+    const body = isRecord(parsed) ? parsed : {};
+    assertDocumentExportInputBudget(body);
+    const mode = readString(body.mode, "single");
+    const scenario = parseScenario(body.scenario);
+
     if (mode === "workPlanStructured" || mode === "permitInspectionStructured" || mode === "tbmBriefingStructured" || mode === "tbmLogStructured" || mode === "educationRecordStructured") {
       if (!isRecord(body.structured)) {
         return NextResponse.json(
@@ -233,9 +241,19 @@ export async function POST(request: NextRequest) {
     const buffer = await buildXlsxForDocument({ title, rows, profile, scenario, structuredRiskRows });
     return xlsxResponse(buffer, `${scenario.companyName}-${title}`, "safeclaw-document");
   } catch (error) {
+    if (error instanceof DocumentExportLimitError) {
+      return NextResponse.json(
+        {
+          ok: false,
+          code: "DOCUMENT_EXPORT_LIMIT_EXCEEDED",
+          message: "문서 내보내기 요청이 허용된 크기 한도를 초과했습니다."
+        },
+        { status: 413, headers: { "cache-control": "no-store" } }
+      );
+    }
     return NextResponse.json(
       { ok: false, error: error instanceof Error ? error.message : "xlsx build failed" },
-      { status: 500 }
+      { status: 500, headers: { "cache-control": "no-store" } }
     );
   }
 }

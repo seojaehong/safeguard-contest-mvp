@@ -8,6 +8,12 @@ import {
   resolveRiskAssessmentRows,
   type StructuredRiskAssessmentRow
 } from "@/lib/risk-assessment-renderer";
+import {
+  assertDocumentExportInputBudget,
+  assertDocumentExportOutputBudget,
+  DocumentExportLimitError,
+  readDocumentExportRequestJson
+} from "@/lib/document-export-budget";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -289,16 +295,17 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const parsed = await request.json().catch(() => ({}));
-  const body = isRecord(parsed) ? parsed : {};
-  const title = readString(body.title, "SafeClaw 안전 문서");
-  const rows = parseRows(body.rows, title);
-  const profile = parseProfile(body.profile);
-  const scenario = parseScenario(body.scenario);
-  const structuredRiskRows = body.edited === true ? [] : parseRiskRowsFromBody(body);
-
   try {
+    const parsed = await readDocumentExportRequestJson(request);
+    const body = isRecord(parsed) ? parsed : {};
+    assertDocumentExportInputBudget(body);
+    const title = readString(body.title, "SafeClaw 안전 문서");
+    const rows = parseRows(body.rows, title);
+    const profile = parseProfile(body.profile);
+    const scenario = parseScenario(body.scenario);
+    const structuredRiskRows = body.edited === true ? [] : parseRiskRowsFromBody(body);
     const buffer = buildHwpBuffer({ title, rows, profile, scenario, structuredRiskRows });
+    assertDocumentExportOutputBudget(buffer);
     const fileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.hwp`;
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
@@ -308,9 +315,19 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
+    if (error instanceof DocumentExportLimitError) {
+      return NextResponse.json(
+        {
+          ok: false,
+          code: "DOCUMENT_EXPORT_LIMIT_EXCEEDED",
+          message: "문서 내보내기 요청이 허용된 크기 한도를 초과했습니다."
+        },
+        { status: 413, headers: { "cache-control": "no-store" } }
+      );
+    }
     return NextResponse.json(
       { ok: false, error: error instanceof Error ? error.message : "HWP 문서를 만들지 못했습니다." },
-      { status: 500 }
+      { status: 500, headers: { "cache-control": "no-store" } }
     );
   }
 }
