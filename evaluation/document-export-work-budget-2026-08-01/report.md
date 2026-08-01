@@ -1,10 +1,14 @@
 # Document export work budget remediation
 
-Verdict: `PASS_CURRENT_SOURCE_DOCUMENT_EXPORT_WORK_BUDGETS`
+Verdict: `PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_WORK_BUDGETS`
 
 Source/product commit: `29e1e1ec5d0e4fc57e7b1ce5daa61170d2238c44`
 
 Base: `94bd0dcaa1e691b0a482b8ed2f552023a21ffcd4`
+
+Production marker: `ff9e44a8851f18042fc77c998f3bf31b49cef1ec` (`master`, `production`)
+
+Finding closure: document export `8/8`; cumulative bounded remediation evidence `18/18`; full repository rescan `not completed`; security-complete claim `false`.
 
 ## Scope
 

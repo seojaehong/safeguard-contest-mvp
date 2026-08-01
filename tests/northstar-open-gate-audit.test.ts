@@ -820,6 +820,34 @@ function createFixtureRoot(): string {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_WORK_BUDGETS",
+    sourceHead: "export-product-sha",
+    productCommit: "export-product-sha",
+    productionBuild: { commitSha: "fixture-sha", productCommitIsAncestorOfProduction: true },
+    wave: { findingCount: 8, findingIds: Array.from({ length: 8 }, (_, index) => `export-${index + 1}`) },
+    implementation: {
+      dbMutation: false,
+      shareMutation: false,
+      providerMutation: false,
+      vectorMutation: false,
+      wikiMutation: false,
+      koshaRegistryMutation: false,
+    },
+    findingClosure: {
+      documentExportFindingsRemediatedInLiveProduction: 8,
+      cumulativeBaselineFindingsWithBoundedRemediationEvidence: 18,
+      remainingReportableFindingsBeforeFullRescan: 0,
+      fullRepositoryRescanCompleted: false,
+      securityCompleteClaimAllowed: false,
+    },
+    openBoundaries: {
+      immutableFullRepositoryScanStillRecordsOriginal18Findings: true,
+      followUpFullRepositoryRescanRequired: true,
+      fullRepositorySecurityCompleteClaimAllowed: false,
+      exactSavedShare: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "live-document-rain-context-isolation-2026-07-25", "report.json"), {
     schemaVersion: "safeclaw-live-document-rain-context-isolation/v1",
     verdict: "PASS_LIVE_PRODUCTION_RAIN_CONTEXT_ISOLATION",
@@ -2537,6 +2565,8 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "spreadsheet_formula_neutralization")?.detail).toContain("12 remain");
     expect(audit.gates.find((gate) => gate.id === "public_provider_work_budget")).toMatchObject({ state: "proven" });
     expect(audit.gates.find((gate) => gate.id === "public_provider_work_budget")?.detail).toContain("8 remain");
+    expect(audit.gates.find((gate) => gate.id === "document_export_work_budget")).toMatchObject({ state: "proven" });
+    expect(audit.gates.find((gate) => gate.id === "document_export_work_budget")?.detail).toContain("All 18");
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_authority")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
@@ -3143,6 +3173,7 @@ describe("northstar open gate audit", () => {
     const tenantPath = path.join(rootDir, "evaluation", "tenant-authorization-boundary-preflight-2026-07-29", "report.json");
     const formulaPath = path.join(rootDir, "evaluation", "spreadsheet-formula-neutralization-2026-08-01", "report.json");
     const providerPath = path.join(rootDir, "evaluation", "public-provider-work-budget-2026-08-01", "report.json");
+    const exportPath = path.join(rootDir, "evaluation", "document-export-work-budget-2026-08-01", "report.json");
     const tenant = JSON.parse(fs.readFileSync(tenantPath, "utf8")) as {
       remainingBoundaries: { securityCompleteClaimAllowed: boolean };
     };
@@ -3152,18 +3183,24 @@ describe("northstar open gate audit", () => {
     const provider = JSON.parse(fs.readFileSync(providerPath, "utf8")) as {
       mutationBoundary: { productionProviderLoadTestPerformed: boolean };
     };
+    const exportReport = JSON.parse(fs.readFileSync(exportPath, "utf8")) as {
+      findingClosure: { fullRepositoryRescanCompleted: boolean };
+    };
     tenant.remainingBoundaries.securityCompleteClaimAllowed = true;
     formula.remainingBoundaries.exactSavedShareVerdict = "PASS";
     provider.mutationBoundary.productionProviderLoadTestPerformed = true;
+    exportReport.findingClosure.fullRepositoryRescanCompleted = true;
     fs.writeFileSync(tenantPath, `${JSON.stringify(tenant, null, 2)}\n`, "utf8");
     fs.writeFileSync(formulaPath, `${JSON.stringify(formula, null, 2)}\n`, "utf8");
     fs.writeFileSync(providerPath, `${JSON.stringify(provider, null, 2)}\n`, "utf8");
+    fs.writeFileSync(exportPath, `${JSON.stringify(exportReport, null, 2)}\n`, "utf8");
 
     const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-01T00:00:00.000Z" });
 
     expect(audit.gates.find((gate) => gate.id === "tenant_authorization_remediation")).toMatchObject({ state: "contradicted" });
     expect(audit.gates.find((gate) => gate.id === "spreadsheet_formula_neutralization")).toMatchObject({ state: "contradicted" });
     expect(audit.gates.find((gate) => gate.id === "public_provider_work_budget")).toMatchObject({ state: "contradicted" });
+    expect(audit.gates.find((gate) => gate.id === "document_export_work_budget")).toMatchObject({ state: "contradicted" });
   });
 
   it("fails secondary document grounding closed when one supporting document is not grounded", async () => {

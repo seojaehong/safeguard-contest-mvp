@@ -227,6 +227,15 @@ type NextRunwayReport = {
     productionProviderLoadTestPerformed: boolean;
     exactSavedShareVerdict: string;
   };
+  documentExportWorkBudget: {
+    verdict: string;
+    remediatedFindings: number;
+    cumulativeRemediatedFindings: number;
+    remainingBeforeFullRescan: number;
+    fullRepositoryRescanCompleted: boolean;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   fullRepositorySecurityScan: {
     verdict: string;
     sourceHead: string;
@@ -1100,6 +1109,20 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     mutationBoundary: { productionProviderLoadTestPerformed: false },
     remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
+  writeJson(root, "evaluation/document-export-work-budget-2026-08-01/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_WORK_BUDGETS",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", productCommitIsAncestorOfProduction: true },
+    findingClosure: {
+      documentExportFindingsRemediatedInLiveProduction: 8,
+      cumulativeBaselineFindingsWithBoundedRemediationEvidence: 18,
+      remainingReportableFindingsBeforeFullRescan: 0,
+      fullRepositoryRescanCompleted: false,
+      securityCompleteClaimAllowed: false,
+    },
+    openBoundaries: { exactSavedShare: "MISSING_EVIDENCE" },
+  });
   writeJson(root, "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
     sourceHead: "fixture-sha",
@@ -1848,11 +1871,12 @@ describe("northstar next runway generator", () => {
     });
     expect(report.provenCurrentState).toContain("full_repository_security_scan");
     expect(report.nextSafeWorkWithoutApproval).toContain(
-      "preserve the immutable 18-finding repository scan as the baseline: tenant authorization 2/2, spreadsheet formula neutralization 4/4, and public provider work budgets 4/4 are live-proven; 8 document-export findings remain before a full rescan, and no broad security-complete claim is allowed",
+      "preserve the immutable 18-finding repository scan as the baseline: all 18 findings have live bounded remediation evidence across tenant authorization, spreadsheet formula, public-provider budget, and document-export budget waves; run the follow-up full repository scan before any broad security-complete claim",
     );
     expect(report.provenCurrentState).toContain("tenant_authorization_remediation");
     expect(report.provenCurrentState).toContain("spreadsheet_formula_neutralization");
     expect(report.provenCurrentState).toContain("public_provider_work_budget");
+    expect(report.provenCurrentState).toContain("document_export_work_budget");
     expect(report.publicProviderWorkBudget).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_WORK_BUDGETS",
       remediatedFindings: 4,
@@ -1861,6 +1885,15 @@ describe("northstar next runway generator", () => {
       fullRepositoryRescanCompleted: false,
       securityCompleteClaimAllowed: false,
       productionProviderLoadTestPerformed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.documentExportWorkBudget).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_WORK_BUDGETS",
+      remediatedFindings: 8,
+      cumulativeRemediatedFindings: 18,
+      remainingBeforeFullRescan: 0,
+      fullRepositoryRescanCompleted: false,
+      securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.provenCurrentState).toContain("hermes_knowledge_review_authority");

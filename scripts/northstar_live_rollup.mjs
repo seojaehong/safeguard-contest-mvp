@@ -31,6 +31,7 @@ const ARTIFACTS = Object.freeze({
   tenantAuthorizationRemediation: path.join("evaluation", "tenant-authorization-boundary-preflight-2026-07-29", "report.json"),
   spreadsheetFormulaNeutralization: path.join("evaluation", "spreadsheet-formula-neutralization-2026-08-01", "report.json"),
   publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
+  documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "full-repository-security-scan-2026-07-28", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
@@ -327,6 +328,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const tenantAuthorizationRemediation = tryReadJson(rootDir, ARTIFACTS.tenantAuthorizationRemediation);
   const spreadsheetFormulaNeutralization = tryReadJson(rootDir, ARTIFACTS.spreadsheetFormulaNeutralization);
   const publicProviderWorkBudget = tryReadJson(rootDir, ARTIFACTS.publicProviderWorkBudget);
+  const documentExportWorkBudget = tryReadJson(rootDir, ARTIFACTS.documentExportWorkBudget);
   const fullRepositorySecurityScan = tryReadJson(rootDir, ARTIFACTS.fullRepositorySecurityScan);
   const hermesKnowledgeReviewAuthorityUi = tryReadJson(rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
   const liveDocumentSecondaryGrounding = tryReadJson(rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
@@ -413,6 +415,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "tenant_authorization_remediation", ARTIFACTS.tenantAuthorizationRemediation, tenantAuthorizationRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "spreadsheet_formula_neutralization", ARTIFACTS.spreadsheetFormulaNeutralization, spreadsheetFormulaNeutralization),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_work_budget", ARTIFACTS.publicProviderWorkBudget, publicProviderWorkBudget),
+    evidenceStatus(rootDir, currentHead, liveCommit, "document_export_work_budget", ARTIFACTS.documentExportWorkBudget, documentExportWorkBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "full_repository_security_scan", ARTIFACTS.fullRepositorySecurityScan, fullRepositorySecurityScan),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_knowledge_review_ui", ARTIFACTS.hermesKnowledgeReviewAuthorityUi, hermesKnowledgeReviewAuthorityUi),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_secondary_grounding", ARTIFACTS.liveDocumentSecondaryGrounding, liveDocumentSecondaryGrounding),
@@ -757,6 +760,18 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       securityCompleteClaimAllowed: recordAt(recordAt(publicProviderWorkBudget, "changes"), "findingClosure")?.securityCompleteClaimAllowed === true,
       productionProviderLoadTestPerformed: recordAt(publicProviderWorkBudget, "mutationBoundary")?.productionProviderLoadTestPerformed === true,
       exactSavedShareVerdict: asString(recordAt(publicProviderWorkBudget, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    documentExportWorkBudget: {
+      artifact: ARTIFACTS.documentExportWorkBudget,
+      verdict: isRecord(documentExportWorkBudget) ? asString(documentExportWorkBudget.verdict) : "missing",
+      productCommit: isRecord(documentExportWorkBudget) ? asString(documentExportWorkBudget.productCommit) : "",
+      productionCommit: asString(recordAt(documentExportWorkBudget, "productionBuild")?.commitSha),
+      remediatedFindings: asNumber(recordAt(documentExportWorkBudget, "findingClosure")?.documentExportFindingsRemediatedInLiveProduction),
+      cumulativeRemediatedFindings: asNumber(recordAt(documentExportWorkBudget, "findingClosure")?.cumulativeBaselineFindingsWithBoundedRemediationEvidence),
+      remainingBeforeFullRescan: asNumber(recordAt(documentExportWorkBudget, "findingClosure")?.remainingReportableFindingsBeforeFullRescan),
+      fullRepositoryRescanCompleted: recordAt(documentExportWorkBudget, "findingClosure")?.fullRepositoryRescanCompleted === true,
+      securityCompleteClaimAllowed: recordAt(documentExportWorkBudget, "findingClosure")?.securityCompleteClaimAllowed === true,
+      exactSavedShareVerdict: asString(recordAt(documentExportWorkBudget, "openBoundaries")?.exactSavedShare),
     },
     hermesKnowledgeReviewAuthorityUi: {
       artifact: ARTIFACTS.hermesKnowledgeReviewAuthorityUi,

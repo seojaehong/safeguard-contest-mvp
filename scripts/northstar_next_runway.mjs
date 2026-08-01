@@ -35,6 +35,7 @@ const ARTIFACTS = Object.freeze({
   tenantAuthorizationRemediation: path.join("evaluation", "tenant-authorization-boundary-preflight-2026-07-29", "report.json"),
   spreadsheetFormulaNeutralization: path.join("evaluation", "spreadsheet-formula-neutralization-2026-08-01", "report.json"),
   publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
+  documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "full-repository-security-scan-2026-07-28", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
@@ -750,6 +751,34 @@ function publicProviderWorkBudgetSummary(report) {
 /**
  * @param {unknown} report
  */
+function documentExportWorkBudgetSummary(report) {
+  if (!isRecord(report)) return {};
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const findingClosure = isRecord(report.findingClosure) ? report.findingClosure : {};
+  const openBoundaries = isRecord(report.openBoundaries) ? report.openBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    productCommit: asString(report.productCommit),
+    productionCommit: asString(productionBuild.commitSha),
+    productCommitIsAncestorOfProduction: asBoolean(productionBuild.productCommitIsAncestorOfProduction),
+    remediatedFindings: typeof findingClosure.documentExportFindingsRemediatedInLiveProduction === "number"
+      ? findingClosure.documentExportFindingsRemediatedInLiveProduction
+      : 0,
+    cumulativeRemediatedFindings: typeof findingClosure.cumulativeBaselineFindingsWithBoundedRemediationEvidence === "number"
+      ? findingClosure.cumulativeBaselineFindingsWithBoundedRemediationEvidence
+      : 0,
+    remainingBeforeFullRescan: typeof findingClosure.remainingReportableFindingsBeforeFullRescan === "number"
+      ? findingClosure.remainingReportableFindingsBeforeFullRescan
+      : 0,
+    fullRepositoryRescanCompleted: asBoolean(findingClosure.fullRepositoryRescanCompleted),
+    securityCompleteClaimAllowed: asBoolean(findingClosure.securityCompleteClaimAllowed),
+    exactSavedShareVerdict: asString(openBoundaries.exactSavedShare),
+  };
+}
+
+/**
+ * @param {unknown} report
+ */
 function fullRepositorySecurityScanSummary(report) {
   if (!isRecord(report)) return {};
   const scan = isRecord(report.scan) ? report.scan : {};
@@ -1416,6 +1445,7 @@ export function buildNorthstarNextRunway(options) {
   const tenantAuthorizationRemediation = readOptionalJson(options.rootDir, ARTIFACTS.tenantAuthorizationRemediation);
   const spreadsheetFormulaNeutralization = readOptionalJson(options.rootDir, ARTIFACTS.spreadsheetFormulaNeutralization);
   const publicProviderWorkBudget = readOptionalJson(options.rootDir, ARTIFACTS.publicProviderWorkBudget);
+  const documentExportWorkBudget = readOptionalJson(options.rootDir, ARTIFACTS.documentExportWorkBudget);
   const fullRepositorySecurityScan = readOptionalJson(options.rootDir, ARTIFACTS.fullRepositorySecurityScan);
   const hermesKnowledgeReviewAuthorityUi = readOptionalJson(options.rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
   const liveDocumentSecondaryGrounding = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
@@ -1453,6 +1483,7 @@ export function buildNorthstarNextRunway(options) {
   const tenantAuthorizationSummary = tenantAuthorizationRemediationSummary(tenantAuthorizationRemediation);
   const spreadsheetFormulaSummary = spreadsheetFormulaNeutralizationSummary(spreadsheetFormulaNeutralization);
   const publicProviderWorkBudgetResult = publicProviderWorkBudgetSummary(publicProviderWorkBudget);
+  const documentExportWorkBudgetResult = documentExportWorkBudgetSummary(documentExportWorkBudget);
   const fullRepositorySecuritySummary = fullRepositorySecurityScanSummary(fullRepositorySecurityScan);
   const boundedDetailDepthDebtRows = Array.isArray(boundedCurrentSummary.documentDetailDepthDebts)
     ? boundedCurrentSummary.documentDetailDepthDebts.length
@@ -1494,6 +1525,7 @@ export function buildNorthstarNextRunway(options) {
       "tenant_authorization_remediation",
       "spreadsheet_formula_neutralization",
       "public_provider_work_budget",
+      "document_export_work_budget",
       "full_repository_security_scan",
       "hermes_knowledge_review_authority",
       "hermes_knowledge_review_ui",
@@ -1558,6 +1590,7 @@ export function buildNorthstarNextRunway(options) {
     tenantAuthorizationRemediation: tenantAuthorizationSummary,
     spreadsheetFormulaNeutralization: spreadsheetFormulaSummary,
     publicProviderWorkBudget: publicProviderWorkBudgetResult,
+    documentExportWorkBudget: documentExportWorkBudgetResult,
     fullRepositorySecurityScan: fullRepositorySecuritySummary,
     hermesKnowledgeReviewAuthorityUi: hermesKnowledgeReviewAuthorityUiSummary(hermesKnowledgeReviewAuthorityUi),
     liveDocumentSecondaryGrounding: liveDocumentSecondaryGroundingSummary(liveDocumentSecondaryGrounding),
@@ -1594,7 +1627,7 @@ export function buildNorthstarNextRunway(options) {
       "keep Hermes/OpenClaw live execution held: tenant envelope, tool denial, Evidence Harness, DNS-pinned trusted transport, and terminal persistence behavior are source-proven, while the durable cross-instance attempt/terminal ledger and authenticated canary remain open",
       "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
       "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held",
-      "preserve the immutable 18-finding repository scan as the baseline: tenant authorization 2/2, spreadsheet formula neutralization 4/4, and public provider work budgets 4/4 are live-proven; 8 document-export findings remain before a full rescan, and no broad security-complete claim is allowed",
+      "preserve the immutable 18-finding repository scan as the baseline: all 18 findings have live bounded remediation evidence across tenant authorization, spreadsheet formula, public-provider budget, and document-export budget waves; run the follow-up full repository scan before any broad security-complete claim",
     ],
     providerLiveDispatchClaimed: false,
     dbMutationPerformed: false,

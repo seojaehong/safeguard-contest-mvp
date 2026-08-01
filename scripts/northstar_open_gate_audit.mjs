@@ -46,6 +46,7 @@ const EVIDENCE_PATHS = Object.freeze({
   tenantAuthorizationRemediation: path.join("evaluation", "tenant-authorization-boundary-preflight-2026-07-29", "report.json"),
   spreadsheetFormulaNeutralization: path.join("evaluation", "spreadsheet-formula-neutralization-2026-08-01", "report.json"),
   publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
+  documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "full-repository-security-scan-2026-07-28", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
@@ -3211,6 +3212,67 @@ function evaluatePublicProviderWorkBudgetGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluateDocumentExportWorkBudgetGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.documentExportWorkBudget;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "document_export_work_budget",
+      label: "Document export work budget",
+      state: "missing",
+      evidencePath,
+      detail: "Document export work-budget evidence is missing or invalid.",
+      nextActions: ["Restore the live XLSX/HWP budget evidence before claiming the eight export findings remediated."],
+    });
+  }
+
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const wave = isRecord(report.wave) ? report.wave : {};
+  const implementation = isRecord(report.implementation) ? report.implementation : {};
+  const findingClosure = isRecord(report.findingClosure) ? report.findingClosure : {};
+  const openBoundaries = isRecord(report.openBoundaries) ? report.openBoundaries : {};
+  const noMutation = implementation.dbMutation === false
+    && implementation.shareMutation === false
+    && implementation.providerMutation === false
+    && implementation.vectorMutation === false
+    && implementation.wikiMutation === false
+    && implementation.koshaRegistryMutation === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_WORK_BUDGETS"
+    && readString(report.sourceHead) === readString(report.productCommit)
+    && readString(productionBuild.commitSha).length > 0
+    && productionBuild.productCommitIsAncestorOfProduction === true
+    && readNumber(wave.findingCount) === 8
+    && Array.isArray(wave.findingIds)
+    && wave.findingIds.length === 8
+    && readNumber(findingClosure.documentExportFindingsRemediatedInLiveProduction) === 8
+    && readNumber(findingClosure.cumulativeBaselineFindingsWithBoundedRemediationEvidence) === 18
+    && readNumber(findingClosure.remainingReportableFindingsBeforeFullRescan) === 0
+    && findingClosure.fullRepositoryRescanCompleted === false
+    && findingClosure.securityCompleteClaimAllowed === false
+    && noMutation
+    && openBoundaries.immutableFullRepositoryScanStillRecordsOriginal18Findings === true
+    && openBoundaries.followUpFullRepositoryRescanRequired === true
+    && openBoundaries.fullRepositorySecurityCompleteClaimAllowed === false
+    && readString(openBoundaries.exactSavedShare) === "MISSING_EVIDENCE";
+
+  return gateResult({
+    id: "document_export_work_budget",
+    label: "Document export work budget",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live production bounds XLSX/HWP request bytes, document/row/nested-entry/field/rendered-cell work, and output bytes for all 8 export findings. All 18 immutable baseline findings now have bounded remediation evidence, but the follow-up full repository rescan is not complete, security-complete remains false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      : `Export-budget verdict=${readString(report.verdict) || "unknown"}, liveAncestor=${productionBuild.productCommitIsAncestorOfProduction === true}, remediated=${readNumber(findingClosure.documentExportFindingsRemediatedInLiveProduction)}, cumulative=${readNumber(findingClosure.cumulativeBaselineFindingsWithBoundedRemediationEvidence)}, remaining=${readNumber(findingClosure.remainingReportableFindingsBeforeFullRescan)}, fullRescan=${findingClosure.fullRepositoryRescanCompleted === true}, securityComplete=${findingClosure.securityCompleteClaimAllowed === true}, noMutation=${noMutation}, exactShare=${readString(openBoundaries.exactSavedShare) || "missing"}.`,
+    nextActions: pass
+      ? ["Run the follow-up full repository security scan; do not claim security completion from per-wave remediation evidence alone."]
+      : ["Restore every live provenance, 18/18 accounting, no-mutation, full-rescan-pending, and exact-Share boundary before claiming export-budget remediation."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateFullRepositorySecurityScanGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.fullRepositorySecurityScan;
   const report = readJsonFile(rootDir, evidencePath);
@@ -4182,6 +4244,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateTenantAuthorizationRemediationGate(rootDir),
     evaluateSpreadsheetFormulaNeutralizationGate(rootDir),
     evaluatePublicProviderWorkBudgetGate(rootDir),
+    evaluateDocumentExportWorkBudgetGate(rootDir),
     evaluateFullRepositorySecurityScanGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir),

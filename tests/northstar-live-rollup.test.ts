@@ -167,6 +167,15 @@ type RollupReport = {
     productionProviderLoadTestPerformed: boolean;
     exactSavedShareVerdict: string;
   };
+  documentExportWorkBudget: {
+    verdict: string;
+    remediatedFindings: number | null;
+    cumulativeRemediatedFindings: number | null;
+    remainingBeforeFullRescan: number | null;
+    fullRepositoryRescanCompleted: boolean;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   fullRepositorySecurityScan: {
     verdict: string;
     sourceHead: string;
@@ -258,6 +267,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "tenant_authorization_remediation", state: "proven", evidencePath: "evaluation/tenant-authorization-boundary-preflight-2026-07-29/report.json", detail: "two tenant findings remediated" },
       { id: "spreadsheet_formula_neutralization", state: "proven", evidencePath: "evaluation/spreadsheet-formula-neutralization-2026-08-01/report.json", detail: "four formula findings remediated" },
       { id: "public_provider_work_budget", state: "proven", evidencePath: "evaluation/public-provider-work-budget-2026-08-01/report.json", detail: "four provider-budget findings remediated" },
+      { id: "document_export_work_budget", state: "proven", evidencePath: "evaluation/document-export-work-budget-2026-08-01/report.json", detail: "eight export-budget findings remediated" },
       { id: "full_repository_security_scan", state: "proven", evidencePath: "evaluation/full-repository-security-scan-2026-07-28/report.json", detail: "complete scan with 18 reportable findings still open" },
       { id: "live_document_secondary_grounding", state: "proven", evidencePath: "evaluation/live-document-secondary-grounding-2026-07-25/report.json", detail: "all 30 supporting documents passed scenario grounding" },
       { id: "live_document_seed_profile_isolation", state: "proven", evidencePath: "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", detail: "all 60 documents passed seed-profile isolation" },
@@ -623,6 +633,20 @@ function createFixtureRoot(): { root: string; head: string } {
     mutationBoundary: { productionProviderLoadTestPerformed: false },
     remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
+  writeJson(root, "evaluation/document-export-work-budget-2026-08-01/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_WORK_BUDGETS",
+    sourceHead: "TO_FILL",
+    productCommit: "TO_FILL",
+    productionBuild: { commitSha: "TO_FILL", productCommitIsAncestorOfProduction: true },
+    findingClosure: {
+      documentExportFindingsRemediatedInLiveProduction: 8,
+      cumulativeBaselineFindingsWithBoundedRemediationEvidence: 18,
+      remainingReportableFindingsBeforeFullRescan: 0,
+      fullRepositoryRescanCompleted: false,
+      securityCompleteClaimAllowed: false,
+    },
+    openBoundaries: { exactSavedShare: "MISSING_EVIDENCE" },
+  });
   writeJson(root, "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
     sourceHead: "TO_FILL",
@@ -784,6 +808,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/tenant-authorization-boundary-preflight-2026-07-29/report.json",
     "evaluation/spreadsheet-formula-neutralization-2026-08-01/report.json",
     "evaluation/public-provider-work-budget-2026-08-01/report.json",
+    "evaluation/document-export-work-budget-2026-08-01/report.json",
     "evaluation/full-repository-security-scan-2026-07-28/report.json",
     "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
@@ -978,6 +1003,16 @@ describe("northstar live rollup", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.evidence.find((item) => item.id === "public_provider_work_budget")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.documentExportWorkBudget).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_WORK_BUDGETS",
+      remediatedFindings: 8,
+      cumulativeRemediatedFindings: 18,
+      remainingBeforeFullRescan: 0,
+      fullRepositoryRescanCompleted: false,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "document_export_work_budget")?.productionStatus).toBe("ancestor_of_head");
     expect(report.fullRepositorySecurityScan).toMatchObject({
       verdict: "COMPLETE_LIVE_PRODUCTION_REPOSITORY_SECURITY_SCAN_REPORTABLE_FINDINGS_OPEN",
       completeness: "complete",
