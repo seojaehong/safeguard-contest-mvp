@@ -1,6 +1,11 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { generateKnowledgeText } from "@/lib/ai";
+import {
+  PUBLIC_KNOWLEDGE_QUESTION_MAX_CHARS,
+  PUBLIC_KNOWLEDGE_RAW_EVENT_MAX_CHARS,
+  PUBLIC_KNOWLEDGE_RAW_EVENTS_MAX_COUNT
+} from "@/lib/public-work-budget";
 
 vi.mock("@/lib/ai", () => ({
   generateKnowledgeText: vi.fn(async () => ({
@@ -74,6 +79,106 @@ describe("knowledge candidate API", () => {
       message: "tenantContext.organizationId and tenantContext.siteId are required"
     });
     expect(payload.candidate).toBeUndefined();
+    expect(generateKnowledgeText).not.toHaveBeenCalled();
+  });
+
+  it("rejects oversized knowledge questions before AI generation", async () => {
+    const { POST } = await import("@/app/api/knowledge/regenerate/route");
+    const response = await POST(new NextRequest("http://localhost/api/knowledge/regenerate", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        question: "추락 위험 ".repeat(PUBLIC_KNOWLEDGE_QUESTION_MAX_CHARS),
+        generate: true,
+        tenantContext: {
+          organizationId: "org-1",
+          siteId: "site-1"
+        },
+        rawEvents: [{
+          source: "lawgo",
+          sourceId: "law-42",
+          capturedAt: "2026-07-14T10:00:00.000Z",
+          title: "산업안전보건법 현행 조문",
+          payload: { article: "42" },
+          relatedHazardIds: ["hazard-fall"],
+          reflectedDocuments: ["위험성평가표"]
+        }]
+      })
+    }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(413);
+    expect(payload).toMatchObject({
+      code: "PUBLIC_WORK_BUDGET_EXCEEDED",
+      limit: PUBLIC_KNOWLEDGE_QUESTION_MAX_CHARS
+    });
+    expect(generateKnowledgeText).not.toHaveBeenCalled();
+  });
+
+  it("rejects oversized raw event collections before candidate generation", async () => {
+    const { POST } = await import("@/app/api/knowledge/regenerate/route");
+    const rawEvents = Array.from({ length: PUBLIC_KNOWLEDGE_RAW_EVENTS_MAX_COUNT + 1 }, (_, index) => ({
+      source: "manual",
+      sourceId: `manual-${index}`,
+      capturedAt: "2026-07-14T10:00:00.000Z",
+      title: "작업 절차",
+      payload: { note: "bounded" },
+      relatedHazardIds: ["hazard-fall"],
+      reflectedDocuments: ["위험성평가표"]
+    }));
+    const response = await POST(new NextRequest("http://localhost/api/knowledge/regenerate", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        question: "추락 위험 통제대책을 검토해줘",
+        generate: true,
+        tenantContext: {
+          organizationId: "org-1",
+          siteId: "site-1"
+        },
+        rawEvents
+      })
+    }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(413);
+    expect(payload).toMatchObject({
+      code: "PUBLIC_WORK_BUDGET_EXCEEDED",
+      limit: PUBLIC_KNOWLEDGE_RAW_EVENTS_MAX_COUNT
+    });
+    expect(generateKnowledgeText).not.toHaveBeenCalled();
+  });
+
+  it("rejects oversized raw event payloads before AI generation", async () => {
+    const { POST } = await import("@/app/api/knowledge/regenerate/route");
+    const response = await POST(new NextRequest("http://localhost/api/knowledge/regenerate", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        question: "추락 위험 통제대책을 검토해줘",
+        generate: true,
+        tenantContext: {
+          organizationId: "org-1",
+          siteId: "site-1"
+        },
+        rawEvents: [{
+          source: "manual",
+          sourceId: "manual-oversized",
+          capturedAt: "2026-07-14T10:00:00.000Z",
+          title: "작업 절차",
+          payload: { note: "x".repeat(PUBLIC_KNOWLEDGE_RAW_EVENT_MAX_CHARS) },
+          relatedHazardIds: ["hazard-fall"],
+          reflectedDocuments: ["위험성평가표"]
+        }]
+      })
+    }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(413);
+    expect(payload).toMatchObject({
+      code: "PUBLIC_WORK_BUDGET_EXCEEDED",
+      limit: PUBLIC_KNOWLEDGE_RAW_EVENT_MAX_CHARS
+    });
     expect(generateKnowledgeText).not.toHaveBeenCalled();
   });
 

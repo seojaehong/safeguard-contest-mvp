@@ -43,6 +43,12 @@ import { fetchAccidentCases, selectFallbackAccidentCases } from "./accident-case
 import { fetchKoshaOpenApiEvidence } from "./kosha-openapi";
 import { buildForeignWorkerBriefing, buildForeignWorkerLanguages, buildForeignWorkerTransmission, ensureForeignWorkerTransmissionContext, reconcileLanguages } from "./foreign-worker";
 import { matchSafetyKnowledge } from "./safety-knowledge";
+import {
+  isOverCharBudget,
+  PUBLIC_ASK_HARNESS_MEMORY_MAX_CHARS,
+  PUBLIC_ASK_QUESTION_MAX_CHARS,
+  serializedCharLength
+} from "./public-work-budget";
 import { validateRiskAssessmentRows, type AccidentType, type FourM, type RiskAssessmentRow, type RiskAssessmentValidationIssue } from "./risk-assessment-schema";
 import { splitDocumentMeta } from "./doc-meta-split";
 import { buildEvidenceLabels } from "./smsa-mapping";
@@ -62,6 +68,22 @@ import {
 } from "./db-harness";
 
 const log = createLogger("search");
+
+export class PublicAskWorkBudgetError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "PublicAskWorkBudgetError";
+  }
+}
+
+function assertRunAskWorkBudget(question: string, options: RunAskOptions) {
+  if (isOverCharBudget(question, PUBLIC_ASK_QUESTION_MAX_CHARS)) {
+    throw new PublicAskWorkBudgetError("question exceeds the public ask work budget");
+  }
+  if (options.harnessMemory !== undefined && serializedCharLength(options.harnessMemory) > PUBLIC_ASK_HARNESS_MEMORY_MAX_CHARS) {
+    throw new PublicAskWorkBudgetError("harnessMemory exceeds the public ask work budget");
+  }
+}
 
 function accidentTypeToRiskTags(accidentType: string | undefined, text: string): string[] {
   const haystack = `${accidentType || ""} ${text}`;
@@ -2116,6 +2138,7 @@ export function attachDbHarnessFallback(response: AskResponse, input: {
 }
 
 export async function runAsk(question: string, options: RunAskOptions = {}): Promise<AskResponse> {
+  assertRunAskWorkBudget(question, options);
   const onProgress = options.onProgress;
   const traceId = randomUUID();
   const harnessMemory = {

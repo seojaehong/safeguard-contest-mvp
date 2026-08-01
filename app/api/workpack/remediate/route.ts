@@ -13,6 +13,12 @@ import {
   type SafetyReferenceItem
 } from "@/lib/safety-reference-catalog";
 import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
+import {
+  isOverCharBudget,
+  publicWorkBudgetExceeded,
+  PUBLIC_REMEDIATION_DOCUMENT_MAX_CHARS,
+  PUBLIC_REMEDIATION_QUESTION_MAX_CHARS
+} from "@/lib/public-work-budget";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // 2min — single Vertex call with 1 retry
@@ -60,6 +66,12 @@ function readRequest(value: unknown): { ok: true; request: RemediationRequest } 
   if (!question) return { ok: false, message: "question is required" };
   if (!documentKey || !(documentKey in documentLabels)) return { ok: false, message: "valid documentKey is required" };
   if (!rubricItemId) return { ok: false, message: "rubricItemId is required" };
+  if (isOverCharBudget(question, PUBLIC_REMEDIATION_QUESTION_MAX_CHARS)) {
+    return { ok: false, message: "question exceeds the public remediation work budget" };
+  }
+  if (isOverCharBudget(documentText, PUBLIC_REMEDIATION_DOCUMENT_MAX_CHARS)) {
+    return { ok: false, message: "documentText exceeds the public remediation work budget" };
+  }
 
   return {
     ok: true,
@@ -178,6 +190,14 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null) as unknown;
   const parsed = readRequest(body);
   if (!parsed.ok) {
+    const limit = parsed.message.startsWith("question exceeds")
+      ? PUBLIC_REMEDIATION_QUESTION_MAX_CHARS
+      : parsed.message.startsWith("documentText exceeds")
+        ? PUBLIC_REMEDIATION_DOCUMENT_MAX_CHARS
+        : null;
+    if (limit !== null) {
+      return publicWorkBudgetExceeded(parsed.message, limit);
+    }
     return NextResponse.json({ ok: false, message: parsed.message }, { status: 400 });
   }
 

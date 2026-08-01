@@ -3,6 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { buildDbHarnessPacket } from "@/lib/db-harness";
 import { buildMockAskResponse } from "@/lib/mock-data";
+import {
+  PUBLIC_ASK_HARNESS_MEMORY_MAX_CHARS,
+  PUBLIC_ASK_QUESTION_MAX_CHARS
+} from "@/lib/public-work-budget";
 import type { AskResponse } from "@/lib/types";
 
 const mocks = vi.hoisted(() => ({
@@ -65,13 +69,17 @@ function responseWithHarness(): AskResponse {
 }
 
 function request(path: string): NextRequest {
+  return requestWithBody(path, { question: "성수동 외벽 도장 작업" });
+}
+
+function requestWithBody(path: string, body: unknown): NextRequest {
   return new NextRequest(`http://localhost${path}`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
       "x-forwarded-for": `203.0.113.${path.includes("stream") ? "41" : "40"}`
     },
-    body: JSON.stringify({ question: "성수동 외벽 도장 작업" })
+    body: JSON.stringify(body)
   });
 }
 
@@ -123,5 +131,42 @@ describe("ask generation evidence routes", () => {
     expect(body).toContain("요청 처리 중 오류가 발생했습니다");
     expect(body).not.toContain("PII_MARKER");
     expect(body).not.toContain("secret=internal");
+  });
+
+  it("rejects oversized ask questions before runAsk", async () => {
+    const { POST } = await import("@/app/api/ask/route");
+    const response = await POST(requestWithBody("/api/ask", {
+      question: "작업 ".repeat(PUBLIC_ASK_QUESTION_MAX_CHARS)
+    }));
+    const body = await response.json() as { code: string; limit: number };
+
+    expect(response.status).toBe(413);
+    expect(body).toMatchObject({
+      code: "PUBLIC_WORK_BUDGET_EXCEEDED",
+      limit: PUBLIC_ASK_QUESTION_MAX_CHARS
+    });
+    expect(mocks.runAsk).not.toHaveBeenCalled();
+  });
+
+  it("rejects oversized harness memory before stream runAsk", async () => {
+    const { POST } = await import("@/app/api/ask/stream/route");
+    const response = await POST(requestWithBody("/api/ask/stream", {
+      question: "성수동 외벽 도장 작업",
+      harnessMemory: {
+        improvements: [{
+          id: "oversized",
+          sourceType: "photo_analysis",
+          improvementText: "x".repeat(PUBLIC_ASK_HARNESS_MEMORY_MAX_CHARS)
+        }]
+      }
+    }));
+    const body = await response.json() as { code: string; limit: number };
+
+    expect(response.status).toBe(413);
+    expect(body).toMatchObject({
+      code: "PUBLIC_WORK_BUDGET_EXCEEDED",
+      limit: PUBLIC_ASK_HARNESS_MEMORY_MAX_CHARS
+    });
+    expect(mocks.runAsk).not.toHaveBeenCalled();
   });
 });

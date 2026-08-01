@@ -3,6 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { POST } from "@/app/api/workpack/remediate/route";
 import { generateKnowledgeText } from "@/lib/ai";
+import {
+  PUBLIC_REMEDIATION_DOCUMENT_MAX_CHARS,
+  PUBLIC_REMEDIATION_QUESTION_MAX_CHARS
+} from "@/lib/public-work-budget";
 import { searchSafetyReferences, type SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 
 vi.mock("@/lib/ai", () => ({
@@ -53,6 +57,7 @@ function jsonRequest(body: unknown): NextRequest {
 
 describe("workpack remediation route", () => {
   beforeEach(() => {
+    vi.clearAllMocks();
     vi.mocked(generateKnowledgeText).mockResolvedValue({
       configured: true,
       providerLabel: "mock",
@@ -97,5 +102,41 @@ describe("workpack remediation route", () => {
     expect(generatedPrompt).toContain(readableTitle);
     expect(generatedPrompt).not.toContain(rawTitle);
     expect(archiveSifReference().title).toBe(rawTitle);
+  });
+
+  it("rejects oversized remediation questions before reference search or AI generation", async () => {
+    const response = await POST(jsonRequest({
+      question: "배수펌프 ".repeat(PUBLIC_REMEDIATION_QUESTION_MAX_CHARS),
+      documentKey: "riskAssessmentDraft",
+      documentText: "배수펌프 점검 전 안전조치",
+      rubricItemId: "required-risk-reduction"
+    }));
+    const body = await response.json() as { code: string; limit: number };
+
+    expect(response.status).toBe(413);
+    expect(body).toMatchObject({
+      code: "PUBLIC_WORK_BUDGET_EXCEEDED",
+      limit: PUBLIC_REMEDIATION_QUESTION_MAX_CHARS
+    });
+    expect(generateKnowledgeText).not.toHaveBeenCalled();
+    expect(searchSafetyReferences).not.toHaveBeenCalled();
+  });
+
+  it("rejects oversized remediation document text before reference search or AI generation", async () => {
+    const response = await POST(jsonRequest({
+      question: "지하 기계실 배수펌프 점검",
+      documentKey: "riskAssessmentDraft",
+      documentText: "x".repeat(PUBLIC_REMEDIATION_DOCUMENT_MAX_CHARS + 1),
+      rubricItemId: "required-risk-reduction"
+    }));
+    const body = await response.json() as { code: string; limit: number };
+
+    expect(response.status).toBe(413);
+    expect(body).toMatchObject({
+      code: "PUBLIC_WORK_BUDGET_EXCEEDED",
+      limit: PUBLIC_REMEDIATION_DOCUMENT_MAX_CHARS
+    });
+    expect(generateKnowledgeText).not.toHaveBeenCalled();
+    expect(searchSafetyReferences).not.toHaveBeenCalled();
   });
 });

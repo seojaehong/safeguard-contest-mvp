@@ -12,6 +12,14 @@ import {
   type KnowledgeCandidate,
   type KnowledgeTenantContext
 } from "@/lib/knowledge-governance";
+import {
+  isOverCharBudget,
+  publicWorkBudgetExceeded,
+  PUBLIC_KNOWLEDGE_QUESTION_MAX_CHARS,
+  PUBLIC_KNOWLEDGE_RAW_EVENT_MAX_CHARS,
+  PUBLIC_KNOWLEDGE_RAW_EVENTS_MAX_COUNT,
+  serializedCharLength
+} from "@/lib/public-work-budget";
 
 const MAX_TENANT_ID_LENGTH = 128;
 
@@ -198,6 +206,15 @@ export function createKnowledgeCandidatePostHandler(
         { ok: false, message: "question is required" },
         { status: 400 }
       );
+    }
+    if (isOverCharBudget(question, PUBLIC_KNOWLEDGE_QUESTION_MAX_CHARS)) {
+      return publicWorkBudgetExceeded("question exceeds the public knowledge regeneration work budget", PUBLIC_KNOWLEDGE_QUESTION_MAX_CHARS);
+    }
+    if (Array.isArray(record.rawEvents) && record.rawEvents.length > PUBLIC_KNOWLEDGE_RAW_EVENTS_MAX_COUNT) {
+      return publicWorkBudgetExceeded("rawEvents exceeds the public knowledge regeneration work budget", PUBLIC_KNOWLEDGE_RAW_EVENTS_MAX_COUNT);
+    }
+    if (Array.isArray(record.rawEvents) && record.rawEvents.some((event) => serializedCharLength(event) > PUBLIC_KNOWLEDGE_RAW_EVENT_MAX_CHARS)) {
+      return publicWorkBudgetExceeded("rawEvent exceeds the public knowledge regeneration work budget", PUBLIC_KNOWLEDGE_RAW_EVENT_MAX_CHARS);
     }
 
     const { events, errors, message } = readRawEvents(record.rawEvents);

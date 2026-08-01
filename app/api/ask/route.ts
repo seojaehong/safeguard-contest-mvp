@@ -7,6 +7,13 @@ import { parseHarnessMemoryInput } from "@/lib/db-harness";
 import { attachGenerationEvidence } from "@/lib/generation-evidence";
 import { createLogger } from "@/lib/logger";
 import { sanitizeAskResponsePublicSurface } from "@/lib/ask-public-surface";
+import {
+  isOverCharBudget,
+  publicWorkBudgetExceeded,
+  PUBLIC_ASK_HARNESS_MEMORY_MAX_CHARS,
+  PUBLIC_ASK_QUESTION_MAX_CHARS,
+  serializedCharLength
+} from "@/lib/public-work-budget";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5min — Pro plan max; 7-way parallel Vertex calls need headroom
@@ -25,6 +32,12 @@ export async function POST(request: NextRequest) {
   const body: unknown = await request.json().catch(() => ({}));
   const record = isRecord(body) ? body : {};
   const question = typeof record.question === "string" ? record.question : "산업안전 실무 질문";
+  if (isOverCharBudget(question, PUBLIC_ASK_QUESTION_MAX_CHARS)) {
+    return publicWorkBudgetExceeded("question exceeds the public ask work budget", PUBLIC_ASK_QUESTION_MAX_CHARS);
+  }
+  if (record.harnessMemory !== undefined && serializedCharLength(record.harnessMemory) > PUBLIC_ASK_HARNESS_MEMORY_MAX_CHARS) {
+    return publicWorkBudgetExceeded("harnessMemory exceeds the public ask work budget", PUBLIC_ASK_HARNESS_MEMORY_MAX_CHARS);
+  }
   const requestedMode = typeof record.aiMode === "string" ? (record.aiMode as AiMode) : undefined;
   const aiMode = requestedMode && ALLOWED_MODES.includes(requestedMode) ? requestedMode : undefined;
   const harnessMemory = parseHarnessMemoryInput(record.harnessMemory);
