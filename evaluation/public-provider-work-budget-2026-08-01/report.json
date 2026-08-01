@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-security-remediation-wave/v1",
   "checkedAt": "2026-08-01T15:03:00.0000000+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_PUBLIC_PROVIDER_WORK_BUDGETS_LIVE_PENDING",
+  "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_WORK_BUDGETS",
   "wave": {
     "id": "public-provider-and-upstream-work-budgets",
     "priority": 3,
@@ -18,8 +18,12 @@
   "source": {
     "baseHead": "3a64a8a8d3ebfe30aed4728b6a2a2877c9e4a755",
     "productCommit": "10749047126c70edf85e3e6c1e1256383ea0da33",
-    "productionMarkerAtValidation": "3a64a8a8d3ebfe30aed4728b6a2a2877c9e4a755",
-    "liveAfterProductDeploy": "PENDING"
+    "evidenceHead": "94bd0dcaa1e691b0a482b8ed2f552023a21ffcd4",
+    "productionMarkerAtValidation": "94bd0dcaa1e691b0a482b8ed2f552023a21ffcd4",
+    "productionBranch": "master",
+    "productionEnvironment": "production",
+    "deploymentUrl": "safeguard-contest-mp7mz67vx-seojaehongs-projects.vercel.app",
+    "liveAfterProductDeploy": "PASS"
   },
   "patchContract": {
     "vulnerablePaths": [

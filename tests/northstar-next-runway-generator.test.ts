@@ -201,6 +201,32 @@ type NextRunwayReport = {
     fullRepositorySecurityScanCompleted: boolean;
     exactSavedShareVerdict: string;
   };
+  tenantAuthorizationRemediation: {
+    verdict: string;
+    remediatedFindings: number;
+    remainingBeforeFullRescan: number;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
+  spreadsheetFormulaNeutralization: {
+    verdict: string;
+    remediatedFindings: number;
+    cumulativeRemediatedFindings: number;
+    remainingBeforeFullRescan: number;
+    fullRepositoryRescanCompleted: boolean;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
+  publicProviderWorkBudget: {
+    verdict: string;
+    remediatedFindings: number;
+    cumulativeRemediatedFindings: number;
+    remainingBeforeFullRescan: number;
+    fullRepositoryRescanCompleted: boolean;
+    securityCompleteClaimAllowed: boolean;
+    productionProviderLoadTestPerformed: boolean;
+    exactSavedShareVerdict: string;
+  };
   fullRepositorySecurityScan: {
     verdict: string;
     sourceHead: string;
@@ -1026,6 +1052,54 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/tenant-authorization-boundary-preflight-2026-07-29/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", sourceHeadIsAncestorOfProduction: true },
+    summary: { greenCount: 2 },
+    remainingBoundaries: {
+      reportableFindingCount: 16,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
+  writeJson(root, "evaluation/spreadsheet-formula-neutralization-2026-08-01/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_SPREADSHEET_FORMULA_NEUTRALIZATION",
+    source: {
+      productCommit: "fixture-sha",
+      evidenceHead: "fixture-sha",
+      productionMarkerAtValidation: "fixture-sha",
+      liveAfterProductDeploy: "PASS",
+    },
+    changes: {
+      findingClosure: {
+        spreadsheetFormulaInjectionFindingsRemediatedInCurrentSource: 4,
+        remainingReportableFindingsBeforeFullRescan: 12,
+        fullRepositoryRescanCompleted: false,
+        securityCompleteClaimAllowed: false,
+      },
+    },
+    remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  });
+  writeJson(root, "evaluation/public-provider-work-budget-2026-08-01/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_WORK_BUDGETS",
+    source: {
+      productCommit: "fixture-sha",
+      evidenceHead: "fixture-sha",
+      productionMarkerAtValidation: "fixture-sha",
+      liveAfterProductDeploy: "PASS",
+    },
+    changes: {
+      findingClosure: {
+        publicProviderAndUpstreamFindingsRemediatedInCurrentSource: 4,
+        remainingReportableFindingsBeforeFullRescan: 8,
+        fullRepositoryRescanCompleted: false,
+        securityCompleteClaimAllowed: false,
+      },
+    },
+    mutationBoundary: { productionProviderLoadTestPerformed: false },
+    remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  });
   writeJson(root, "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
     sourceHead: "fixture-sha",
@@ -1774,8 +1848,21 @@ describe("northstar next runway generator", () => {
     });
     expect(report.provenCurrentState).toContain("full_repository_security_scan");
     expect(report.nextSafeWorkWithoutApproval).toContain(
-      "remediate the 18 reportable findings from the completed full repository security scan before any broad security-complete claim; start with scheduled-briefing tenant binding, then public provider/export budgets and spreadsheet formula neutralization",
+      "preserve the immutable 18-finding repository scan as the baseline: tenant authorization 2/2, spreadsheet formula neutralization 4/4, and public provider work budgets 4/4 are live-proven; 8 document-export findings remain before a full rescan, and no broad security-complete claim is allowed",
     );
+    expect(report.provenCurrentState).toContain("tenant_authorization_remediation");
+    expect(report.provenCurrentState).toContain("spreadsheet_formula_neutralization");
+    expect(report.provenCurrentState).toContain("public_provider_work_budget");
+    expect(report.publicProviderWorkBudget).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_WORK_BUDGETS",
+      remediatedFindings: 4,
+      cumulativeRemediatedFindings: 10,
+      remainingBeforeFullRescan: 8,
+      fullRepositoryRescanCompleted: false,
+      securityCompleteClaimAllowed: false,
+      productionProviderLoadTestPerformed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
     expect(report.provenCurrentState).toContain("hermes_knowledge_review_authority");
     expect(report.provenCurrentState).toContain("hermes_knowledge_review_ui");
     expect(report.hermesKnowledgeReviewAuthorityUi).toMatchObject({
@@ -2380,5 +2467,5 @@ describe("northstar next runway generator", () => {
     expect(report.currentHeadIsEvidenceOnlyPending).toBe(false);
     expect(report.liveRollupMatchesProduction).toBe(false);
     expect(report.nextSafeWorkWithoutApproval).toContain("refresh live rollup before claiming live-exact if production advances beyond the current live rollup head");
-  });
+  }, 15_000);
 });

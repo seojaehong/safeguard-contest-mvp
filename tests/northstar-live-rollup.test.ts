@@ -141,6 +141,32 @@ type RollupReport = {
     exactSavedShareVerdict: string;
     documentsShareIaVerdict: string;
   };
+  tenantAuthorizationRemediation: {
+    verdict: string;
+    greenFindings: number | null;
+    remainingBeforeFullRescan: number | null;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
+  spreadsheetFormulaNeutralization: {
+    verdict: string;
+    remediatedFindings: number | null;
+    cumulativeRemediatedFindings: number;
+    remainingBeforeFullRescan: number | null;
+    fullRepositoryRescanCompleted: boolean;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
+  publicProviderWorkBudget: {
+    verdict: string;
+    remediatedFindings: number | null;
+    cumulativeRemediatedFindings: number;
+    remainingBeforeFullRescan: number | null;
+    fullRepositoryRescanCompleted: boolean;
+    securityCompleteClaimAllowed: boolean;
+    productionProviderLoadTestPerformed: boolean;
+    exactSavedShareVerdict: string;
+  };
   fullRepositorySecurityScan: {
     verdict: string;
     sourceHead: string;
@@ -229,6 +255,9 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "live_document_broad_review", state: "proven", evidencePath: "evaluation/live-document-broad-review-2026-07-25/report.json", detail: "all 12 deliverables passed" },
       { id: "live_document_editorial_review", state: "proven", evidencePath: "evaluation/live-document-editorial-review-2026-07-25/report.json", detail: "all 60 editorial surfaces passed automated contract" },
       { id: "product_capability_truth", state: "proven", evidencePath: "evaluation/product-capability-truth-2026-07-25/report.json", detail: "live capability truth passed without unlocking provider dispatch" },
+      { id: "tenant_authorization_remediation", state: "proven", evidencePath: "evaluation/tenant-authorization-boundary-preflight-2026-07-29/report.json", detail: "two tenant findings remediated" },
+      { id: "spreadsheet_formula_neutralization", state: "proven", evidencePath: "evaluation/spreadsheet-formula-neutralization-2026-08-01/report.json", detail: "four formula findings remediated" },
+      { id: "public_provider_work_budget", state: "proven", evidencePath: "evaluation/public-provider-work-budget-2026-08-01/report.json", detail: "four provider-budget findings remediated" },
       { id: "full_repository_security_scan", state: "proven", evidencePath: "evaluation/full-repository-security-scan-2026-07-28/report.json", detail: "complete scan with 18 reportable findings still open" },
       { id: "live_document_secondary_grounding", state: "proven", evidencePath: "evaluation/live-document-secondary-grounding-2026-07-25/report.json", detail: "all 30 supporting documents passed scenario grounding" },
       { id: "live_document_seed_profile_isolation", state: "proven", evidencePath: "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", detail: "all 60 documents passed seed-profile isolation" },
@@ -546,6 +575,54 @@ function createFixtureRoot(): { root: string; head: string } {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/tenant-authorization-boundary-preflight-2026-07-29/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
+    sourceHead: "TO_FILL",
+    productionBuild: { commitSha: "TO_FILL", sourceHeadIsAncestorOfProduction: true },
+    summary: { greenCount: 2 },
+    remainingBoundaries: {
+      reportableFindingCount: 16,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
+  writeJson(root, "evaluation/spreadsheet-formula-neutralization-2026-08-01/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_SPREADSHEET_FORMULA_NEUTRALIZATION",
+    source: {
+      productCommit: "TO_FILL",
+      evidenceHead: "TO_FILL",
+      productionMarkerAtValidation: "TO_FILL",
+      liveAfterProductDeploy: "PASS",
+    },
+    changes: {
+      findingClosure: {
+        spreadsheetFormulaInjectionFindingsRemediatedInCurrentSource: 4,
+        remainingReportableFindingsBeforeFullRescan: 12,
+        fullRepositoryRescanCompleted: false,
+        securityCompleteClaimAllowed: false,
+      },
+    },
+    remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  });
+  writeJson(root, "evaluation/public-provider-work-budget-2026-08-01/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_WORK_BUDGETS",
+    source: {
+      productCommit: "TO_FILL",
+      evidenceHead: "TO_FILL",
+      productionMarkerAtValidation: "TO_FILL",
+      liveAfterProductDeploy: "PASS",
+    },
+    changes: {
+      findingClosure: {
+        publicProviderAndUpstreamFindingsRemediatedInCurrentSource: 4,
+        remainingReportableFindingsBeforeFullRescan: 8,
+        fullRepositoryRescanCompleted: false,
+        securityCompleteClaimAllowed: false,
+      },
+    },
+    mutationBoundary: { productionProviderLoadTestPerformed: false },
+    remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  });
   writeJson(root, "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
     sourceHead: "TO_FILL",
@@ -704,6 +781,9 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-document-editorial-duplicate-classification-2026-07-25/report.json",
     "evaluation/live-document-editorial-near-classification-2026-07-25/report.json",
     "evaluation/product-capability-truth-2026-07-25/report.json",
+    "evaluation/tenant-authorization-boundary-preflight-2026-07-29/report.json",
+    "evaluation/spreadsheet-formula-neutralization-2026-08-01/report.json",
+    "evaluation/public-provider-work-budget-2026-08-01/report.json",
     "evaluation/full-repository-security-scan-2026-07-28/report.json",
     "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
@@ -869,6 +949,35 @@ describe("northstar live rollup", () => {
       documentsShareIaVerdict: "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
     });
     expect(report.evidence.find((item) => item.id === "product_capability_truth")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.tenantAuthorizationRemediation).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
+      greenFindings: 2,
+      remainingBeforeFullRescan: 16,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "tenant_authorization_remediation")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.spreadsheetFormulaNeutralization).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_SPREADSHEET_FORMULA_NEUTRALIZATION",
+      remediatedFindings: 4,
+      cumulativeRemediatedFindings: 6,
+      remainingBeforeFullRescan: 12,
+      fullRepositoryRescanCompleted: false,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "spreadsheet_formula_neutralization")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.publicProviderWorkBudget).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_WORK_BUDGETS",
+      remediatedFindings: 4,
+      cumulativeRemediatedFindings: 10,
+      remainingBeforeFullRescan: 8,
+      fullRepositoryRescanCompleted: false,
+      securityCompleteClaimAllowed: false,
+      productionProviderLoadTestPerformed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "public_provider_work_budget")?.productionStatus).toBe("ancestor_of_head");
     expect(report.fullRepositorySecurityScan).toMatchObject({
       verdict: "COMPLETE_LIVE_PRODUCTION_REPOSITORY_SECURITY_SCAN_REPORTABLE_FINDINGS_OPEN",
       completeness: "complete",

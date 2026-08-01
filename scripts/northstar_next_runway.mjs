@@ -32,6 +32,9 @@ const ARTIFACTS = Object.freeze({
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
   dependencySecurityRemediation: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
+  tenantAuthorizationRemediation: path.join("evaluation", "tenant-authorization-boundary-preflight-2026-07-29", "report.json"),
+  spreadsheetFormulaNeutralization: path.join("evaluation", "spreadsheet-formula-neutralization-2026-08-01", "report.json"),
+  publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "full-repository-security-scan-2026-07-28", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
@@ -660,6 +663,86 @@ function dependencySecurityRemediationSummary(report) {
     liveHigh: typeof auditAfter.high === "number" ? auditAfter.high : 0,
     liveModerate: typeof auditAfter.moderate === "number" ? auditAfter.moderate : 0,
     fullRepositorySecurityScanCompleted: asBoolean(remainingBoundaries.fullRepositorySecurityScanCompleted),
+    exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
+  };
+}
+
+/**
+ * @param {unknown} report
+ */
+function tenantAuthorizationRemediationSummary(report) {
+  if (!isRecord(report)) return {};
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const summary = isRecord(report.summary) ? report.summary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(productionBuild.commitSha),
+    sourceHeadIsAncestorOfProduction: asBoolean(productionBuild.sourceHeadIsAncestorOfProduction),
+    remediatedFindings: typeof summary.greenCount === "number" ? summary.greenCount : 0,
+    remainingBeforeFullRescan: typeof remainingBoundaries.reportableFindingCount === "number"
+      ? remainingBoundaries.reportableFindingCount
+      : 0,
+    securityCompleteClaimAllowed: asBoolean(remainingBoundaries.securityCompleteClaimAllowed),
+    exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
+  };
+}
+
+/**
+ * @param {unknown} report
+ */
+function spreadsheetFormulaNeutralizationSummary(report) {
+  if (!isRecord(report)) return {};
+  const source = isRecord(report.source) ? report.source : {};
+  const changes = isRecord(report.changes) ? report.changes : {};
+  const findingClosure = isRecord(changes.findingClosure) ? changes.findingClosure : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    productCommit: asString(source.productCommit),
+    evidenceHead: asString(source.evidenceHead),
+    productionCommit: asString(source.productionMarkerAtValidation),
+    liveAfterProductDeploy: asString(source.liveAfterProductDeploy),
+    remediatedFindings: typeof findingClosure.spreadsheetFormulaInjectionFindingsRemediatedInCurrentSource === "number"
+      ? findingClosure.spreadsheetFormulaInjectionFindingsRemediatedInCurrentSource
+      : 0,
+    cumulativeRemediatedFindings: 6,
+    remainingBeforeFullRescan: typeof findingClosure.remainingReportableFindingsBeforeFullRescan === "number"
+      ? findingClosure.remainingReportableFindingsBeforeFullRescan
+      : 0,
+    fullRepositoryRescanCompleted: asBoolean(findingClosure.fullRepositoryRescanCompleted),
+    securityCompleteClaimAllowed: asBoolean(findingClosure.securityCompleteClaimAllowed),
+    exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
+  };
+}
+
+/**
+ * @param {unknown} report
+ */
+function publicProviderWorkBudgetSummary(report) {
+  if (!isRecord(report)) return {};
+  const source = isRecord(report.source) ? report.source : {};
+  const changes = isRecord(report.changes) ? report.changes : {};
+  const findingClosure = isRecord(changes.findingClosure) ? changes.findingClosure : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    productCommit: asString(source.productCommit),
+    evidenceHead: asString(source.evidenceHead),
+    productionCommit: asString(source.productionMarkerAtValidation),
+    liveAfterProductDeploy: asString(source.liveAfterProductDeploy),
+    remediatedFindings: typeof findingClosure.publicProviderAndUpstreamFindingsRemediatedInCurrentSource === "number"
+      ? findingClosure.publicProviderAndUpstreamFindingsRemediatedInCurrentSource
+      : 0,
+    cumulativeRemediatedFindings: 10,
+    remainingBeforeFullRescan: typeof findingClosure.remainingReportableFindingsBeforeFullRescan === "number"
+      ? findingClosure.remainingReportableFindingsBeforeFullRescan
+      : 0,
+    fullRepositoryRescanCompleted: asBoolean(findingClosure.fullRepositoryRescanCompleted),
+    securityCompleteClaimAllowed: asBoolean(findingClosure.securityCompleteClaimAllowed),
+    productionProviderLoadTestPerformed: asBoolean(mutationBoundary.productionProviderLoadTestPerformed),
     exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
   };
 }
@@ -1330,6 +1413,9 @@ export function buildNorthstarNextRunway(options) {
   );
   const productCapabilityTruth = readOptionalJson(options.rootDir, ARTIFACTS.productCapabilityTruth);
   const dependencySecurityRemediation = readOptionalJson(options.rootDir, ARTIFACTS.dependencySecurityRemediation);
+  const tenantAuthorizationRemediation = readOptionalJson(options.rootDir, ARTIFACTS.tenantAuthorizationRemediation);
+  const spreadsheetFormulaNeutralization = readOptionalJson(options.rootDir, ARTIFACTS.spreadsheetFormulaNeutralization);
+  const publicProviderWorkBudget = readOptionalJson(options.rootDir, ARTIFACTS.publicProviderWorkBudget);
   const fullRepositorySecurityScan = readOptionalJson(options.rootDir, ARTIFACTS.fullRepositorySecurityScan);
   const hermesKnowledgeReviewAuthorityUi = readOptionalJson(options.rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
   const liveDocumentSecondaryGrounding = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
@@ -1364,6 +1450,9 @@ export function buildNorthstarNextRunway(options) {
   const boundedWorkbenchCurrentLivePending = boundedCurrentSourceHead !== "" && !boundedWorkbenchSourceIncludedInLive;
   const boundedCurrentSummary = boundedWorkbenchCurrentSummary(boundedCurrent);
   const dependencySecuritySummary = dependencySecurityRemediationSummary(dependencySecurityRemediation);
+  const tenantAuthorizationSummary = tenantAuthorizationRemediationSummary(tenantAuthorizationRemediation);
+  const spreadsheetFormulaSummary = spreadsheetFormulaNeutralizationSummary(spreadsheetFormulaNeutralization);
+  const publicProviderWorkBudgetResult = publicProviderWorkBudgetSummary(publicProviderWorkBudget);
   const fullRepositorySecuritySummary = fullRepositorySecurityScanSummary(fullRepositorySecurityScan);
   const boundedDetailDepthDebtRows = Array.isArray(boundedCurrentSummary.documentDetailDepthDebts)
     ? boundedCurrentSummary.documentDetailDepthDebts.length
@@ -1402,6 +1491,9 @@ export function buildNorthstarNextRunway(options) {
       "live_document_editorial_review",
       "product_capability_truth",
       "dependency_security_remediation",
+      "tenant_authorization_remediation",
+      "spreadsheet_formula_neutralization",
+      "public_provider_work_budget",
       "full_repository_security_scan",
       "hermes_knowledge_review_authority",
       "hermes_knowledge_review_ui",
@@ -1463,6 +1555,9 @@ export function buildNorthstarNextRunway(options) {
     ),
     productCapabilityTruth: productCapabilityTruthSummary(productCapabilityTruth),
     dependencySecurityRemediation: dependencySecuritySummary,
+    tenantAuthorizationRemediation: tenantAuthorizationSummary,
+    spreadsheetFormulaNeutralization: spreadsheetFormulaSummary,
+    publicProviderWorkBudget: publicProviderWorkBudgetResult,
     fullRepositorySecurityScan: fullRepositorySecuritySummary,
     hermesKnowledgeReviewAuthorityUi: hermesKnowledgeReviewAuthorityUiSummary(hermesKnowledgeReviewAuthorityUi),
     liveDocumentSecondaryGrounding: liveDocumentSecondaryGroundingSummary(liveDocumentSecondaryGrounding),
@@ -1499,7 +1594,7 @@ export function buildNorthstarNextRunway(options) {
       "keep Hermes/OpenClaw live execution held: tenant envelope, tool denial, Evidence Harness, DNS-pinned trusted transport, and terminal persistence behavior are source-proven, while the durable cross-instance attempt/terminal ledger and authenticated canary remain open",
       "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
       "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held",
-      "remediate the 18 reportable findings from the completed full repository security scan before any broad security-complete claim; start with scheduled-briefing tenant binding, then public provider/export budgets and spreadsheet formula neutralization",
+      "preserve the immutable 18-finding repository scan as the baseline: tenant authorization 2/2, spreadsheet formula neutralization 4/4, and public provider work budgets 4/4 are live-proven; 8 document-export findings remain before a full rescan, and no broad security-complete claim is allowed",
     ],
     providerLiveDispatchClaimed: false,
     dbMutationPerformed: false,

@@ -28,6 +28,9 @@ const ARTIFACTS = Object.freeze({
   liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
+  tenantAuthorizationRemediation: path.join("evaluation", "tenant-authorization-boundary-preflight-2026-07-29", "report.json"),
+  spreadsheetFormulaNeutralization: path.join("evaluation", "spreadsheet-formula-neutralization-2026-08-01", "report.json"),
+  publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "full-repository-security-scan-2026-07-28", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
@@ -181,6 +184,9 @@ function extractProductionCommit(report) {
   if (typeof report.productionCommit === "string") {
     return asString(report.productionCommit);
   }
+  if (isRecord(report.source)) {
+    return asString(report.source.productionMarkerAtValidation);
+  }
   return "";
 }
 
@@ -198,7 +204,8 @@ function extractSourceCommit(report) {
     || asString(report.sourceHead)
     || asString(report.head)
     || asString(report.commitSha)
-    || asString(report.commit);
+    || asString(report.commit)
+    || (isRecord(report.source) ? asString(report.source.evidenceHead) : "");
 }
 
 /**
@@ -317,6 +324,9 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const liveDocumentEditorialDuplicateClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialDuplicateClassification);
   const liveDocumentEditorialNearClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialNearClassification);
   const productCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.productCapabilityTruth);
+  const tenantAuthorizationRemediation = tryReadJson(rootDir, ARTIFACTS.tenantAuthorizationRemediation);
+  const spreadsheetFormulaNeutralization = tryReadJson(rootDir, ARTIFACTS.spreadsheetFormulaNeutralization);
+  const publicProviderWorkBudget = tryReadJson(rootDir, ARTIFACTS.publicProviderWorkBudget);
   const fullRepositorySecurityScan = tryReadJson(rootDir, ARTIFACTS.fullRepositorySecurityScan);
   const hermesKnowledgeReviewAuthorityUi = tryReadJson(rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
   const liveDocumentSecondaryGrounding = tryReadJson(rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
@@ -400,6 +410,9 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_duplicate_classification", ARTIFACTS.liveDocumentEditorialDuplicateClassification, liveDocumentEditorialDuplicateClassification),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_near_classification", ARTIFACTS.liveDocumentEditorialNearClassification, liveDocumentEditorialNearClassification),
     evidenceStatus(rootDir, currentHead, liveCommit, "product_capability_truth", ARTIFACTS.productCapabilityTruth, productCapabilityTruth),
+    evidenceStatus(rootDir, currentHead, liveCommit, "tenant_authorization_remediation", ARTIFACTS.tenantAuthorizationRemediation, tenantAuthorizationRemediation),
+    evidenceStatus(rootDir, currentHead, liveCommit, "spreadsheet_formula_neutralization", ARTIFACTS.spreadsheetFormulaNeutralization, spreadsheetFormulaNeutralization),
+    evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_work_budget", ARTIFACTS.publicProviderWorkBudget, publicProviderWorkBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "full_repository_security_scan", ARTIFACTS.fullRepositorySecurityScan, fullRepositorySecurityScan),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_knowledge_review_ui", ARTIFACTS.hermesKnowledgeReviewAuthorityUi, hermesKnowledgeReviewAuthorityUi),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_secondary_grounding", ARTIFACTS.liveDocumentSecondaryGrounding, liveDocumentSecondaryGrounding),
@@ -707,6 +720,43 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       photoAnalysisPostCalled: recordAt(productCapabilityTruth, "mutationBoundary")?.photoAnalysisPostCalled === true,
       exactSavedShareVerdict: asString(recordAt(productCapabilityTruth, "remainingBoundaries")?.exactSavedShareVerdict),
       documentsShareIaVerdict: asString(recordAt(productCapabilityTruth, "remainingBoundaries")?.documentsShareIaVerdict),
+    },
+    tenantAuthorizationRemediation: {
+      artifact: ARTIFACTS.tenantAuthorizationRemediation,
+      verdict: isRecord(tenantAuthorizationRemediation) ? asString(tenantAuthorizationRemediation.verdict) : "missing",
+      sourceHead: isRecord(tenantAuthorizationRemediation) ? asString(tenantAuthorizationRemediation.sourceHead) : "",
+      productionCommit: asString(recordAt(tenantAuthorizationRemediation, "productionBuild")?.commitSha),
+      greenFindings: asNumber(recordAt(tenantAuthorizationRemediation, "summary")?.greenCount),
+      remainingBeforeFullRescan: asNumber(recordAt(tenantAuthorizationRemediation, "remainingBoundaries")?.reportableFindingCount),
+      securityCompleteClaimAllowed: recordAt(tenantAuthorizationRemediation, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
+      exactSavedShareVerdict: asString(recordAt(tenantAuthorizationRemediation, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    spreadsheetFormulaNeutralization: {
+      artifact: ARTIFACTS.spreadsheetFormulaNeutralization,
+      verdict: isRecord(spreadsheetFormulaNeutralization) ? asString(spreadsheetFormulaNeutralization.verdict) : "missing",
+      productCommit: asString(recordAt(spreadsheetFormulaNeutralization, "source")?.productCommit),
+      evidenceHead: asString(recordAt(spreadsheetFormulaNeutralization, "source")?.evidenceHead),
+      productionCommit: asString(recordAt(spreadsheetFormulaNeutralization, "source")?.productionMarkerAtValidation),
+      remediatedFindings: asNumber(recordAt(recordAt(spreadsheetFormulaNeutralization, "changes"), "findingClosure")?.spreadsheetFormulaInjectionFindingsRemediatedInCurrentSource),
+      cumulativeRemediatedFindings: 6,
+      remainingBeforeFullRescan: asNumber(recordAt(recordAt(spreadsheetFormulaNeutralization, "changes"), "findingClosure")?.remainingReportableFindingsBeforeFullRescan),
+      fullRepositoryRescanCompleted: recordAt(recordAt(spreadsheetFormulaNeutralization, "changes"), "findingClosure")?.fullRepositoryRescanCompleted === true,
+      securityCompleteClaimAllowed: recordAt(recordAt(spreadsheetFormulaNeutralization, "changes"), "findingClosure")?.securityCompleteClaimAllowed === true,
+      exactSavedShareVerdict: asString(recordAt(spreadsheetFormulaNeutralization, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    publicProviderWorkBudget: {
+      artifact: ARTIFACTS.publicProviderWorkBudget,
+      verdict: isRecord(publicProviderWorkBudget) ? asString(publicProviderWorkBudget.verdict) : "missing",
+      productCommit: asString(recordAt(publicProviderWorkBudget, "source")?.productCommit),
+      evidenceHead: asString(recordAt(publicProviderWorkBudget, "source")?.evidenceHead),
+      productionCommit: asString(recordAt(publicProviderWorkBudget, "source")?.productionMarkerAtValidation),
+      remediatedFindings: asNumber(recordAt(recordAt(publicProviderWorkBudget, "changes"), "findingClosure")?.publicProviderAndUpstreamFindingsRemediatedInCurrentSource),
+      cumulativeRemediatedFindings: 10,
+      remainingBeforeFullRescan: asNumber(recordAt(recordAt(publicProviderWorkBudget, "changes"), "findingClosure")?.remainingReportableFindingsBeforeFullRescan),
+      fullRepositoryRescanCompleted: recordAt(recordAt(publicProviderWorkBudget, "changes"), "findingClosure")?.fullRepositoryRescanCompleted === true,
+      securityCompleteClaimAllowed: recordAt(recordAt(publicProviderWorkBudget, "changes"), "findingClosure")?.securityCompleteClaimAllowed === true,
+      productionProviderLoadTestPerformed: recordAt(publicProviderWorkBudget, "mutationBoundary")?.productionProviderLoadTestPerformed === true,
+      exactSavedShareVerdict: asString(recordAt(publicProviderWorkBudget, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     hermesKnowledgeReviewAuthorityUi: {
       artifact: ARTIFACTS.hermesKnowledgeReviewAuthorityUi,

@@ -1,14 +1,17 @@
 # Public provider and upstream work budget remediation
 
-Verdict: `PASS_CURRENT_SOURCE_PUBLIC_PROVIDER_WORK_BUDGETS_LIVE_PENDING`
+Verdict: `PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_WORK_BUDGETS`
 
 ## Scope
 
 - Wave: `public-provider-and-upstream-work-budgets`
 - Product commit: `10749047126c70edf85e3e6c1e1256383ea0da33`
 - Base/source before product patch: `3a64a8a8d3ebfe30aed4728b6a2a2877c9e4a755`
-- Production marker during validation: `3a64a8a8d3ebfe30aed4728b6a2a2877c9e4a755`
-- Live-after product deploy: `PENDING`
+- Evidence head: `94bd0dcaa1e691b0a482b8ed2f552023a21ffcd4`
+- Production marker during validation: `94bd0dcaa1e691b0a482b8ed2f552023a21ffcd4`
+- Production branch/environment: `master` / `production`
+- Deployment: `safeguard-contest-mp7mz67vx-seojaehongs-projects.vercel.app`
+- Live-after product deploy: `PASS`
 
 ## Findings addressed
 

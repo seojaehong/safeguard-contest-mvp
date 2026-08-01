@@ -43,6 +43,9 @@ const EVIDENCE_PATHS = Object.freeze({
   dispatchEntryCapabilityTruth: path.join("evaluation", "dispatch-entry-capability-truth-2026-07-28", "report.json"),
   landingHumanReviewBoundary: path.join("evaluation", "landing-human-review-boundary-2026-07-28", "report.json"),
   dependencySecurityRemediation: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
+  tenantAuthorizationRemediation: path.join("evaluation", "tenant-authorization-boundary-preflight-2026-07-29", "report.json"),
+  spreadsheetFormulaNeutralization: path.join("evaluation", "spreadsheet-formula-neutralization-2026-08-01", "report.json"),
+  publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "full-repository-security-scan-2026-07-28", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
@@ -3014,6 +3017,200 @@ function evaluateDependencySecurityRemediationGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluateTenantAuthorizationRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.tenantAuthorizationRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "tenant_authorization_remediation",
+      label: "Tenant authorization remediation",
+      state: "missing",
+      evidencePath,
+      detail: "Tenant authorization remediation evidence is missing or invalid.",
+      nextActions: ["Restore the live tenant-bound persistence and archive-enrichment evidence before claiming these two findings remediated."],
+    });
+  }
+
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const summary = isRecord(report.summary) ? report.summary : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const checks = Array.isArray(report.checks) ? report.checks : [];
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.crossTenantExploitPerformed === false
+    && mutationBoundary.migrationCreatedOrApplied === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.embeddingGenerated === false
+    && mutationBoundary.vectorUploadPerformed === false
+    && mutationBoundary.wikiPublished === false
+    && mutationBoundary.exactTrustRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION"
+    && readString(report.sourceHead) === readString(summary.productPatchCommit)
+    && readString(productionBuild.commitSha).length > 0
+    && productionBuild.sourceHeadIsAncestorOfProduction === true
+    && checks.length === 2
+    && checks.every((item) => isRecord(item) && readString(item.status) === "GREEN" && item.remediatedWithoutMutation === true)
+    && readNumber(summary.targetFindingCount) === 2
+    && readNumber(summary.redCount) === 0
+    && readNumber(summary.greenCount) === 2
+    && noMutation
+    && readNumber(remainingBoundaries.reportableFindingCount) === 16
+    && remainingBoundaries.securityCompleteClaimAllowed === false
+    && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+
+  return gateResult({
+    id: "tenant_authorization_remediation",
+    label: "Tenant authorization remediation",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live production contains the tenant-bound scheduled persistence and archive site-enrichment fixes for 2/2 cross-tenant findings. The immutable baseline scan remains unchanged, no exploit or mutation was performed, 16 baseline findings remain before a full rescan, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+      : `Tenant remediation verdict=${readString(report.verdict) || "unknown"}, sourceAncestor=${productionBuild.sourceHeadIsAncestorOfProduction === true}, green=${readNumber(summary.greenCount)}/2, remaining=${readNumber(remainingBoundaries.reportableFindingCount)}, securityComplete=${remainingBoundaries.securityCompleteClaimAllowed === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Keep the immutable 18-finding scan as the baseline and run a full repository rescan only after the remaining remediation waves land."]
+      : ["Restore every live provenance, finding-count, no-mutation, and non-closure predicate before claiming tenant remediation."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateSpreadsheetFormulaNeutralizationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.spreadsheetFormulaNeutralization;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "spreadsheet_formula_neutralization",
+      label: "Spreadsheet formula neutralization",
+      state: "missing",
+      evidencePath,
+      detail: "Spreadsheet formula-neutralization evidence is missing or invalid.",
+      nextActions: ["Restore the live CSV/TSV neutralization evidence before claiming the four formula-injection findings remediated."],
+    });
+  }
+
+  const source = isRecord(report.source) ? report.source : {};
+  const changes = isRecord(report.changes) ? report.changes : {};
+  const findingClosure = isRecord(changes.findingClosure) ? changes.findingClosure : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const wave = isRecord(report.wave) ? report.wave : {};
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.crossTenantExploitPerformed === false
+    && mutationBoundary.migrationCreatedOrApplied === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.embeddingGenerated === false
+    && mutationBoundary.vectorUploadPerformed === false
+    && mutationBoundary.wikiPublished === false
+    && mutationBoundary.exactTrustRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_SPREADSHEET_FORMULA_NEUTRALIZATION"
+    && readString(source.evidenceHead).length > 0
+    && readString(source.evidenceHead) === readString(source.productionMarkerAtValidation)
+    && readString(source.productionBranch) === "master"
+    && readString(source.productionEnvironment) === "production"
+    && readString(source.liveAfterProductDeploy) === "PASS"
+    && readNumber(wave.findingCount) === 4
+    && Array.isArray(wave.findingIds)
+    && wave.findingIds.length === 4
+    && readNumber(findingClosure.spreadsheetFormulaInjectionFindingsRemediatedInCurrentSource) === 4
+    && readNumber(findingClosure.tenantAuthorizationFindingsPreviouslyRemediatedInCurrentSource) === 2
+    && readNumber(findingClosure.remainingReportableFindingsBeforeFullRescan) === 12
+    && findingClosure.fullRepositoryRescanCompleted === false
+    && findingClosure.securityCompleteClaimAllowed === false
+    && noMutation
+    && remainingBoundaries.immutableFullRepositoryScanStillRecordsOriginal18Findings === true
+    && remainingBoundaries.followUpFullRepositoryRescanRequired === true
+    && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+
+  return gateResult({
+    id: "spreadsheet_formula_neutralization",
+    label: "Spreadsheet formula neutralization",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live production neutralizes all 4 baseline CSV/TSV spreadsheet-formula findings through one shared encoder. Together with the prior 2 tenant findings, 6 baseline findings have bounded remediation evidence and 12 remain before a full rescan; the immutable 18-finding scan is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      : `Formula remediation verdict=${readString(report.verdict) || "unknown"}, live=${readString(source.liveAfterProductDeploy) || "missing"}, remediated=${readNumber(findingClosure.spreadsheetFormulaInjectionFindingsRemediatedInCurrentSource)}, remaining=${readNumber(findingClosure.remainingReportableFindingsBeforeFullRescan)}, fullRescan=${findingClosure.fullRepositoryRescanCompleted === true}, securityComplete=${findingClosure.securityCompleteClaimAllowed === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Remediate the remaining public-provider/upstream and document-export budget findings, then run the full repository rescan before any security-complete claim."]
+      : ["Restore every live provenance, finding-count, immutable-baseline, no-mutation, and non-closure predicate before claiming formula neutralization."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluatePublicProviderWorkBudgetGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.publicProviderWorkBudget;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "public_provider_work_budget",
+      label: "Public provider work budget",
+      state: "missing",
+      evidencePath,
+      detail: "Public provider work-budget evidence is missing or invalid.",
+      nextActions: ["Restore the live public-route budget and weather coalescing evidence before claiming these four findings remediated."],
+    });
+  }
+
+  const source = isRecord(report.source) ? report.source : {};
+  const changes = isRecord(report.changes) ? report.changes : {};
+  const findingClosure = isRecord(changes.findingClosure) ? changes.findingClosure : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const wave = isRecord(report.wave) ? report.wave : {};
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.crossTenantExploitPerformed === false
+    && mutationBoundary.migrationCreatedOrApplied === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.productionProviderLoadTestPerformed === false
+    && mutationBoundary.embeddingGenerated === false
+    && mutationBoundary.vectorUploadPerformed === false
+    && mutationBoundary.wikiPublished === false
+    && mutationBoundary.exactTrustRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_WORK_BUDGETS"
+    && readString(source.evidenceHead).length > 0
+    && readString(source.evidenceHead) === readString(source.productionMarkerAtValidation)
+    && readString(source.productionBranch) === "master"
+    && readString(source.productionEnvironment) === "production"
+    && readString(source.liveAfterProductDeploy) === "PASS"
+    && readNumber(wave.findingCount) === 4
+    && Array.isArray(wave.findingIds)
+    && wave.findingIds.length === 4
+    && readNumber(findingClosure.publicProviderAndUpstreamFindingsRemediatedInCurrentSource) === 4
+    && readNumber(findingClosure.tenantAuthorizationFindingsPreviouslyRemediatedInCurrentSource) === 2
+    && readNumber(findingClosure.spreadsheetFormulaFindingsPreviouslyRemediatedInCurrentSource) === 4
+    && readNumber(findingClosure.remainingReportableFindingsBeforeFullRescan) === 8
+    && findingClosure.fullRepositoryRescanCompleted === false
+    && findingClosure.securityCompleteClaimAllowed === false
+    && noMutation
+    && remainingBoundaries.immutableFullRepositoryScanStillRecordsOriginal18Findings === true
+    && remainingBoundaries.followUpFullRepositoryRescanRequired === true
+    && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+
+  return gateResult({
+    id: "public_provider_work_budget",
+    label: "Public provider work budget",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live production fail-closes oversized Ask, knowledge, weather, and remediation work before downstream provider/API fan-out and coalesces equivalent weather misses. This remediates 4/4 provider-budget findings; 10 baseline findings now have bounded evidence and 8 remain before a full rescan. The immutable 18-finding scan is preserved, security-complete is false, no production load or mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      : `Provider-budget verdict=${readString(report.verdict) || "unknown"}, live=${readString(source.liveAfterProductDeploy) || "missing"}, remediated=${readNumber(findingClosure.publicProviderAndUpstreamFindingsRemediatedInCurrentSource)}, remaining=${readNumber(findingClosure.remainingReportableFindingsBeforeFullRescan)}, fullRescan=${findingClosure.fullRepositoryRescanCompleted === true}, securityComplete=${findingClosure.securityCompleteClaimAllowed === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Remediate the remaining 8 document-export work-budget findings, then run the full repository rescan before any security-complete claim."]
+      : ["Restore every live provenance, finding-count, immutable-baseline, no-load/no-mutation, and non-closure predicate before claiming provider-budget remediation."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateFullRepositorySecurityScanGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.fullRepositorySecurityScan;
   const report = readJsonFile(rootDir, evidencePath);
@@ -3982,6 +4179,9 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateLiveDocumentEditorialReviewGate(rootDir),
     evaluateProductCapabilityTruthGate(rootDir),
     evaluateDependencySecurityRemediationGate(rootDir),
+    evaluateTenantAuthorizationRemediationGate(rootDir),
+    evaluateSpreadsheetFormulaNeutralizationGate(rootDir),
+    evaluatePublicProviderWorkBudgetGate(rootDir),
     evaluateFullRepositorySecurityScanGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir),

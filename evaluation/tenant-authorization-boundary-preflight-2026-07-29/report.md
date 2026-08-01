@@ -1,10 +1,10 @@
 # Tenant Authorization Boundary Remediation
 
-Checked at: `2026-08-01T05:29:15.383Z`
+Checked at: `2026-08-01T14:54:01.8061338+09:00`
 
 Source HEAD: `f35aca93a11da019aa507b6a8d96f4131fd10da5`
 
-Verdict: `PASS_CURRENT_SOURCE_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION`
+Verdict: `PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION`
 
 ## Result
 
@@ -16,6 +16,8 @@ Verdict: `PASS_CURRENT_SOURCE_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION`
 - Provider/Share/vector/wiki/KOSHA mutation: `false`
 - Exact saved Share: `MISSING_EVIDENCE`
 - KOSHA human review: `REQUIRED`
+- Production marker: `3a64a8a8d3ebfe30aed4728b6a2a2877c9e4a755` (`master`, `production`)
+- Tenant product commit is an ancestor of the production marker: `true`
 
 ## Security Changes
 

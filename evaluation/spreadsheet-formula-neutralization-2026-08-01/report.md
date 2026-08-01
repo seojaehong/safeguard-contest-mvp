@@ -1,14 +1,17 @@
 # Spreadsheet formula neutralization remediation
 
-Verdict: `PASS_CURRENT_SOURCE_SPREADSHEET_FORMULA_NEUTRALIZATION_LIVE_PENDING`
+Verdict: `PASS_LIVE_PRODUCTION_SPREADSHEET_FORMULA_NEUTRALIZATION`
 
 ## Scope
 
 - Wave: `spreadsheet-formula-neutralization`
 - Product commit: `ff332f4d4fb6f9111dd50d3db2a33faf7a3fe574`
 - Base/source before product patch: `1c6a26b10e8863fed8da1c5026ba1ef218be2c95`
-- Production marker during validation: `1c6a26b10e8863fed8da1c5026ba1ef218be2c95`
-- Live-after product deploy: `PENDING`
+- Evidence head: `3a64a8a8d3ebfe30aed4728b6a2a2877c9e4a755`
+- Production marker during validation: `3a64a8a8d3ebfe30aed4728b6a2a2877c9e4a755`
+- Production branch/environment: `master` / `production`
+- Deployment: `safeguard-contest-8gb6fxe9c-seojaehongs-projects.vercel.app`
+- Live-after product deploy: `PASS`
 
 ## Findings addressed
 
@@ -37,6 +40,7 @@ Every spreadsheet-delimited CSV/TSV cell whose first significant character is `=
 
 - Baseline reproduction: pre-patch WorkpackEditor contained `function escapeCell` and delimiter-specific CSV quote / TSV cleanup without formula neutralization.
 - Focused and adjacent tests: `npm.cmd exec -- vitest run tests/spreadsheet-delimited-cell.test.ts tests/reporting-downloads.test.ts tests/editor-export-integrity.test.ts tests/document-export-localization.test.ts --maxWorkers=1 --fileParallelism=false` -> PASS, 4 files / 64 tests.
+- Documents browser contract: `npm.cmd exec -- vitest run tests/documents-editor-layout.test.ts --maxWorkers=1 --fileParallelism=false` -> PASS, 1 file / 35 tests.
 - Typecheck: `npm.cmd run typecheck` -> PASS.
 - Dependency audit: `npm.cmd audit --omit=dev` -> PASS, found 0 vulnerabilities.
 - Build: `npm.cmd run build` -> PASS, Next 15.5.22, 28/28 pages.

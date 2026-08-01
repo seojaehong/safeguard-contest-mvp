@@ -1,15 +1,16 @@
 {
   "schemaVersion": "safeclaw-tenant-authorization-boundary-preflight/v1",
-  "checkedAt": "2026-08-01T05:29:15.383Z",
-  "verdict": "PASS_CURRENT_SOURCE_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
+  "checkedAt": "2026-08-01T14:54:01.8061338+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
   "sourceHead": "f35aca93a11da019aa507b6a8d96f4131fd10da5",
   "productionBuild": {
-    "commitSha": "a65b8482f43a3091d54b4c98cd99387a67765e2c",
+    "commitSha": "3a64a8a8d3ebfe30aed4728b6a2a2877c9e4a755",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-iguu8lojo-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-8gb6fxe9c-seojaehongs-projects.vercel.app",
     "sourceHeadMatchesProduction": false,
-    "note": "Product remediation is current source and pushed after verification; live marker refresh is a separate deployment evidence step."
+    "sourceHeadIsAncestorOfProduction": true,
+    "note": "The production marker contains the tenant authorization product commit and the later spreadsheet formula remediation evidence head."
   },
   "sourceScan": {
     "artifact": "evaluation/full-repository-security-scan-2026-07-28/findings.json",

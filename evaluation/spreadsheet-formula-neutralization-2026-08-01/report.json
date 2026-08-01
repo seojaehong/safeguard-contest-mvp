@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-security-remediation-wave/v1",
-  "checkedAt": "2026-08-01T14:50:00.0000000+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_SPREADSHEET_FORMULA_NEUTRALIZATION_LIVE_PENDING",
+  "checkedAt": "2026-08-01T14:54:01.8061338+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_SPREADSHEET_FORMULA_NEUTRALIZATION",
   "wave": {
     "id": "spreadsheet-formula-neutralization",
     "priority": 2,
@@ -18,8 +18,12 @@
   "source": {
     "baseHead": "1c6a26b10e8863fed8da1c5026ba1ef218be2c95",
     "productCommit": "ff332f4d4fb6f9111dd50d3db2a33faf7a3fe574",
-    "productionMarkerAtValidation": "1c6a26b10e8863fed8da1c5026ba1ef218be2c95",
-    "liveAfterProductDeploy": "PENDING"
+    "evidenceHead": "3a64a8a8d3ebfe30aed4728b6a2a2877c9e4a755",
+    "productionMarkerAtValidation": "3a64a8a8d3ebfe30aed4728b6a2a2877c9e4a755",
+    "productionBranch": "master",
+    "productionEnvironment": "production",
+    "deploymentUrl": "safeguard-contest-8gb6fxe9c-seojaehongs-projects.vercel.app",
+    "liveAfterProductDeploy": "PASS"
   },
   "patchContract": {
     "vulnerablePath": [
@@ -61,6 +65,10 @@
     "focusedAndAdjacent": {
       "command": "npm.cmd exec -- vitest run tests/spreadsheet-delimited-cell.test.ts tests/reporting-downloads.test.ts tests/editor-export-integrity.test.ts tests/document-export-localization.test.ts --maxWorkers=1 --fileParallelism=false",
       "result": "PASS: 4 files / 64 tests"
+    },
+    "documentsBrowserContract": {
+      "command": "npm.cmd exec -- vitest run tests/documents-editor-layout.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS: 1 file / 35 tests"
     },
     "typecheck": {
       "command": "npm.cmd run typecheck",

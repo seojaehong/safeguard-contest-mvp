@@ -704,6 +704,122 @@ function createFixtureRoot(): string {
       providerDispatchPersistence: "approval_gated",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "tenant-authorization-boundary-preflight-2026-07-29", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
+    sourceHead: "tenant-product-sha",
+    productionBuild: {
+      commitSha: "fixture-sha",
+      sourceHeadMatchesProduction: false,
+      sourceHeadIsAncestorOfProduction: true,
+    },
+    checks: [
+      { id: "scheduled-briefing-owner-binding", status: "GREEN", remediatedWithoutMutation: true },
+      { id: "workpack-archive-site-binding", status: "GREEN", remediatedWithoutMutation: true },
+    ],
+    summary: {
+      targetFindingCount: 2,
+      redCount: 0,
+      greenCount: 2,
+      productPatchCommit: "tenant-product-sha",
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      crossTenantExploitPerformed: false,
+      migrationCreatedOrApplied: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      embeddingGenerated: false,
+      vectorUploadPerformed: false,
+      wikiPublished: false,
+      exactTrustRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      reportableFindingCount: 16,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
+  writeJson(rootDir, path.join("evaluation", "spreadsheet-formula-neutralization-2026-08-01", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_SPREADSHEET_FORMULA_NEUTRALIZATION",
+    wave: {
+      findingCount: 4,
+      findingIds: ["formula-1", "formula-2", "formula-3", "formula-4"],
+    },
+    source: {
+      productCommit: "formula-product-sha",
+      evidenceHead: "fixture-sha",
+      productionMarkerAtValidation: "fixture-sha",
+      productionBranch: "master",
+      productionEnvironment: "production",
+      liveAfterProductDeploy: "PASS",
+    },
+    changes: {
+      findingClosure: {
+        spreadsheetFormulaInjectionFindingsRemediatedInCurrentSource: 4,
+        tenantAuthorizationFindingsPreviouslyRemediatedInCurrentSource: 2,
+        remainingReportableFindingsBeforeFullRescan: 12,
+        fullRepositoryRescanCompleted: false,
+        securityCompleteClaimAllowed: false,
+      },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      crossTenantExploitPerformed: false,
+      migrationCreatedOrApplied: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      embeddingGenerated: false,
+      vectorUploadPerformed: false,
+      wikiPublished: false,
+      exactTrustRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      immutableFullRepositoryScanStillRecordsOriginal18Findings: true,
+      followUpFullRepositoryRescanRequired: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
+  writeJson(rootDir, path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_WORK_BUDGETS",
+    wave: {
+      findingCount: 4,
+      findingIds: ["provider-1", "provider-2", "provider-3", "provider-4"],
+    },
+    source: {
+      evidenceHead: "fixture-sha",
+      productionMarkerAtValidation: "fixture-sha",
+      productionBranch: "master",
+      productionEnvironment: "production",
+      liveAfterProductDeploy: "PASS",
+    },
+    changes: {
+      findingClosure: {
+        publicProviderAndUpstreamFindingsRemediatedInCurrentSource: 4,
+        tenantAuthorizationFindingsPreviouslyRemediatedInCurrentSource: 2,
+        spreadsheetFormulaFindingsPreviouslyRemediatedInCurrentSource: 4,
+        remainingReportableFindingsBeforeFullRescan: 8,
+        fullRepositoryRescanCompleted: false,
+        securityCompleteClaimAllowed: false,
+      },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      crossTenantExploitPerformed: false,
+      migrationCreatedOrApplied: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      productionProviderLoadTestPerformed: false,
+      embeddingGenerated: false,
+      vectorUploadPerformed: false,
+      wikiPublished: false,
+      exactTrustRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      immutableFullRepositoryScanStillRecordsOriginal18Findings: true,
+      followUpFullRepositoryRescanRequired: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "live-document-rain-context-isolation-2026-07-25", "report.json"), {
     schemaVersion: "safeclaw-live-document-rain-context-isolation/v1",
     verdict: "PASS_LIVE_PRODUCTION_RAIN_CONTEXT_ISOLATION",
@@ -2415,6 +2531,12 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("18 reportable findings");
     expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("not a security-complete claim");
     expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "tenant_authorization_remediation")).toMatchObject({ state: "proven" });
+    expect(audit.gates.find((gate) => gate.id === "tenant_authorization_remediation")?.detail).toContain("2/2");
+    expect(audit.gates.find((gate) => gate.id === "spreadsheet_formula_neutralization")).toMatchObject({ state: "proven" });
+    expect(audit.gates.find((gate) => gate.id === "spreadsheet_formula_neutralization")?.detail).toContain("12 remain");
+    expect(audit.gates.find((gate) => gate.id === "public_provider_work_budget")).toMatchObject({ state: "proven" });
+    expect(audit.gates.find((gate) => gate.id === "public_provider_work_budget")?.detail).toContain("8 remain");
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_authority")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
@@ -3013,6 +3135,35 @@ describe("northstar open gate audit", () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("humanReview=false");
+  });
+
+  it("fails security remediation waves closed when non-closure boundaries are weakened", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const tenantPath = path.join(rootDir, "evaluation", "tenant-authorization-boundary-preflight-2026-07-29", "report.json");
+    const formulaPath = path.join(rootDir, "evaluation", "spreadsheet-formula-neutralization-2026-08-01", "report.json");
+    const providerPath = path.join(rootDir, "evaluation", "public-provider-work-budget-2026-08-01", "report.json");
+    const tenant = JSON.parse(fs.readFileSync(tenantPath, "utf8")) as {
+      remainingBoundaries: { securityCompleteClaimAllowed: boolean };
+    };
+    const formula = JSON.parse(fs.readFileSync(formulaPath, "utf8")) as {
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    const provider = JSON.parse(fs.readFileSync(providerPath, "utf8")) as {
+      mutationBoundary: { productionProviderLoadTestPerformed: boolean };
+    };
+    tenant.remainingBoundaries.securityCompleteClaimAllowed = true;
+    formula.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    provider.mutationBoundary.productionProviderLoadTestPerformed = true;
+    fs.writeFileSync(tenantPath, `${JSON.stringify(tenant, null, 2)}\n`, "utf8");
+    fs.writeFileSync(formulaPath, `${JSON.stringify(formula, null, 2)}\n`, "utf8");
+    fs.writeFileSync(providerPath, `${JSON.stringify(provider, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-01T00:00:00.000Z" });
+
+    expect(audit.gates.find((gate) => gate.id === "tenant_authorization_remediation")).toMatchObject({ state: "contradicted" });
+    expect(audit.gates.find((gate) => gate.id === "spreadsheet_formula_neutralization")).toMatchObject({ state: "contradicted" });
+    expect(audit.gates.find((gate) => gate.id === "public_provider_work_budget")).toMatchObject({ state: "contradicted" });
   });
 
   it("fails secondary document grounding closed when one supporting document is not grounded", async () => {
