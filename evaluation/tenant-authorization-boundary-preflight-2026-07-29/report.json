@@ -168,8 +168,8 @@
   "evidenceReview": {
     "status": "P2_CONSISTENCY_FIXED_BEFORE_EVIDENCE_COMMIT",
     "fixes": [
-      "Renamed vulnerable pre-fix dataflow from currentDataflow to beforeDataflow.",
-      "Replaced organization/email mismatch wording with the implemented delivery-only briefing_email invariant."
+      "Recorded the vulnerable pre-fix source/sink path only under beforeDataflow.",
+      "Recorded the implemented invariant: briefing_email is delivery-only, and persistence requires immutable site/org/owner identity."
     ]
   }
 }
