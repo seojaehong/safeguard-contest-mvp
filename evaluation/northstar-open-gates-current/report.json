@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-28T14:29:32.495Z",
-  "sourceSha": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
+  "generatedAt": "2026-08-01T06:26:51.984Z",
+  "sourceSha": "8b0dccab8777b12904461ba0a533b89cfadea16f",
   "overall": "open",
   "gates": [
     {
@@ -125,6 +125,46 @@
       "detail": "Live runtime dependency remediation reduced the production lockfile audit from 19 findings to 0 while retaining ExcelJS 4.4.0 and verifying its patched archiver/unzipper write-read path. This is an npm dependency-audit claim, not a full repository security-scan or zero-risk product claim. No mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Use the separate full_repository_security_scan gate for repository-wide coverage; this dependency gate alone cannot support a broad security-complete claim."
+      ]
+    },
+    {
+      "id": "tenant_authorization_remediation",
+      "state": "proven",
+      "label": "Tenant authorization remediation",
+      "evidencePath": "evaluation\\tenant-authorization-boundary-preflight-2026-07-29\\report.json",
+      "detail": "Live production contains the tenant-bound scheduled persistence and archive site-enrichment fixes for 2/2 cross-tenant findings. The immutable baseline scan remains unchanged, no exploit or mutation was performed, 16 baseline findings remain before a full rescan, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Keep the immutable 18-finding scan as the baseline and run a full repository rescan only after the remaining remediation waves land."
+      ]
+    },
+    {
+      "id": "spreadsheet_formula_neutralization",
+      "state": "proven",
+      "label": "Spreadsheet formula neutralization",
+      "evidencePath": "evaluation\\spreadsheet-formula-neutralization-2026-08-01\\report.json",
+      "detail": "Live production neutralizes all 4 baseline CSV/TSV spreadsheet-formula findings through one shared encoder. Together with the prior 2 tenant findings, 6 baseline findings have bounded remediation evidence and 12 remain before a full rescan; the immutable 18-finding scan is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Remediate the remaining public-provider/upstream and document-export budget findings, then run the full repository rescan before any security-complete claim."
+      ]
+    },
+    {
+      "id": "public_provider_work_budget",
+      "state": "proven",
+      "label": "Public provider work budget",
+      "evidencePath": "evaluation\\public-provider-work-budget-2026-08-01\\report.json",
+      "detail": "Live production fail-closes oversized Ask, knowledge, weather, and remediation work before downstream provider/API fan-out and coalesces equivalent weather misses. This remediates 4/4 provider-budget findings; 10 baseline findings now have bounded evidence and 8 remain before a full rescan. The immutable 18-finding scan is preserved, security-complete is false, no production load or mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Remediate the remaining 8 document-export work-budget findings, then run the full repository rescan before any security-complete claim."
+      ]
+    },
+    {
+      "id": "document_export_work_budget",
+      "state": "proven",
+      "label": "Document export work budget",
+      "evidencePath": "evaluation\\document-export-work-budget-2026-08-01\\report.json",
+      "detail": "Live production bounds XLSX/HWP request bytes, document/row/nested-entry/field/rendered-cell work, and output bytes for all 8 export findings. All 18 immutable baseline findings now have bounded remediation evidence, but the follow-up full repository rescan is not complete, security-complete remains false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Run the follow-up full repository security scan; do not claim security completion from per-wave remediation evidence alone."
       ]
     },
     {

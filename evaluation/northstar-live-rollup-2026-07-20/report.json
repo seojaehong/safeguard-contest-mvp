@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-28T14:29:39.038Z",
-  "head": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
+  "generatedAt": "2026-08-01T06:26:53.449Z",
+  "head": "8b0dccab8777b12904461ba0a533b89cfadea16f",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
+    "commitSha": "8b0dccab8777b12904461ba0a533b89cfadea16f",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-99lz8phmq-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-jk67w3e0l-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 29
+    "gateCount": 33
   },
   "provenGates": [
     {
@@ -92,6 +92,30 @@
       "state": "proven",
       "artifact": "evaluation\\dependency-security-remediation-2026-07-28\\report.json",
       "detail": "Live runtime dependency remediation reduced the production lockfile audit from 19 findings to 0 while retaining ExcelJS 4.4.0 and verifying its patched archiver/unzipper write-read path. This is an npm dependency-audit claim, not a full repository security-scan or zero-risk product claim. No mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "tenant_authorization_remediation",
+      "state": "proven",
+      "artifact": "evaluation\\tenant-authorization-boundary-preflight-2026-07-29\\report.json",
+      "detail": "Live production contains the tenant-bound scheduled persistence and archive site-enrichment fixes for 2/2 cross-tenant findings. The immutable baseline scan remains unchanged, no exploit or mutation was performed, 16 baseline findings remain before a full rescan, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "spreadsheet_formula_neutralization",
+      "state": "proven",
+      "artifact": "evaluation\\spreadsheet-formula-neutralization-2026-08-01\\report.json",
+      "detail": "Live production neutralizes all 4 baseline CSV/TSV spreadsheet-formula findings through one shared encoder. Together with the prior 2 tenant findings, 6 baseline findings have bounded remediation evidence and 12 remain before a full rescan; the immutable 18-finding scan is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "public_provider_work_budget",
+      "state": "proven",
+      "artifact": "evaluation\\public-provider-work-budget-2026-08-01\\report.json",
+      "detail": "Live production fail-closes oversized Ask, knowledge, weather, and remediation work before downstream provider/API fan-out and coalesces equivalent weather misses. This remediates 4/4 provider-budget findings; 10 baseline findings now have bounded evidence and 8 remain before a full rescan. The immutable 18-finding scan is preserved, security-complete is false, no production load or mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "document_export_work_budget",
+      "state": "proven",
+      "artifact": "evaluation\\document-export-work-budget-2026-08-01\\report.json",
+      "detail": "Live production bounds XLSX/HWP request bytes, document/row/nested-entry/field/rendered-cell work, and output bytes for all 8 export findings. All 18 immutable baseline findings now have bounded remediation evidence, but the follow-up full repository rescan is not complete, security-complete remains false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "full_repository_security_scan",
@@ -464,6 +488,55 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "documentsShareIaVerdict": "OPEN_SEPARATE_VIEWPORT_IA_WAVE"
   },
+  "tenantAuthorizationRemediation": {
+    "artifact": "evaluation\\tenant-authorization-boundary-preflight-2026-07-29\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
+    "sourceHead": "f35aca93a11da019aa507b6a8d96f4131fd10da5",
+    "productionCommit": "3a64a8a8d3ebfe30aed4728b6a2a2877c9e4a755",
+    "greenFindings": 2,
+    "remainingBeforeFullRescan": 16,
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "spreadsheetFormulaNeutralization": {
+    "artifact": "evaluation\\spreadsheet-formula-neutralization-2026-08-01\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_SPREADSHEET_FORMULA_NEUTRALIZATION",
+    "productCommit": "ff332f4d4fb6f9111dd50d3db2a33faf7a3fe574",
+    "evidenceHead": "3a64a8a8d3ebfe30aed4728b6a2a2877c9e4a755",
+    "productionCommit": "3a64a8a8d3ebfe30aed4728b6a2a2877c9e4a755",
+    "remediatedFindings": 4,
+    "cumulativeRemediatedFindings": 6,
+    "remainingBeforeFullRescan": 12,
+    "fullRepositoryRescanCompleted": false,
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "publicProviderWorkBudget": {
+    "artifact": "evaluation\\public-provider-work-budget-2026-08-01\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_WORK_BUDGETS",
+    "productCommit": "10749047126c70edf85e3e6c1e1256383ea0da33",
+    "evidenceHead": "94bd0dcaa1e691b0a482b8ed2f552023a21ffcd4",
+    "productionCommit": "94bd0dcaa1e691b0a482b8ed2f552023a21ffcd4",
+    "remediatedFindings": 4,
+    "cumulativeRemediatedFindings": 10,
+    "remainingBeforeFullRescan": 8,
+    "fullRepositoryRescanCompleted": false,
+    "securityCompleteClaimAllowed": false,
+    "productionProviderLoadTestPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "documentExportWorkBudget": {
+    "artifact": "evaluation\\document-export-work-budget-2026-08-01\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_WORK_BUDGETS",
+    "productCommit": "29e1e1ec5d0e4fc57e7b1ce5daa61170d2238c44",
+    "productionCommit": "ff9e44a8851f18042fc77c998f3bf31b49cef1ec",
+    "remediatedFindings": 8,
+    "cumulativeRemediatedFindings": 18,
+    "remainingBeforeFullRescan": 0,
+    "fullRepositoryRescanCompleted": false,
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
   "hermesKnowledgeReviewAuthorityUi": {
     "artifact": "evaluation\\hermes-knowledge-review-authority-ui-2026-07-25\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
@@ -585,9 +658,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
+      "sourceCommit": "8b0dccab8777b12904461ba0a533b89cfadea16f",
       "sourceStatus": "exact",
-      "productionCommit": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
+      "productionCommit": "8b0dccab8777b12904461ba0a533b89cfadea16f",
       "productionStatus": "matches_live"
     },
     {
@@ -687,12 +760,44 @@
       "productionStatus": "ancestor_of_head"
     },
     {
+      "id": "tenant_authorization_remediation",
+      "artifact": "evaluation\\tenant-authorization-boundary-preflight-2026-07-29\\report.json",
+      "sourceCommit": "f35aca93a11da019aa507b6a8d96f4131fd10da5",
+      "sourceStatus": "ancestor",
+      "productionCommit": "3a64a8a8d3ebfe30aed4728b6a2a2877c9e4a755",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "spreadsheet_formula_neutralization",
+      "artifact": "evaluation\\spreadsheet-formula-neutralization-2026-08-01\\report.json",
+      "sourceCommit": "3a64a8a8d3ebfe30aed4728b6a2a2877c9e4a755",
+      "sourceStatus": "ancestor",
+      "productionCommit": "3a64a8a8d3ebfe30aed4728b6a2a2877c9e4a755",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "public_provider_work_budget",
+      "artifact": "evaluation\\public-provider-work-budget-2026-08-01\\report.json",
+      "sourceCommit": "94bd0dcaa1e691b0a482b8ed2f552023a21ffcd4",
+      "sourceStatus": "ancestor",
+      "productionCommit": "94bd0dcaa1e691b0a482b8ed2f552023a21ffcd4",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "document_export_work_budget",
+      "artifact": "evaluation\\document-export-work-budget-2026-08-01\\report.json",
+      "sourceCommit": "29e1e1ec5d0e4fc57e7b1ce5daa61170d2238c44",
+      "sourceStatus": "ancestor",
+      "productionCommit": "ff9e44a8851f18042fc77c998f3bf31b49cef1ec",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
       "id": "full_repository_security_scan",
       "artifact": "evaluation\\full-repository-security-scan-2026-07-28\\report.json",
       "sourceCommit": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "47b07b6aff72ced25e8c1884ecd16f010e1fc170",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "hermes_knowledge_review_ui",

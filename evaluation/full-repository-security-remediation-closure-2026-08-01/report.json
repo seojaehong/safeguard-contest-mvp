@@ -2,13 +2,13 @@
   "schemaVersion": "safeclaw-full-repository-security-remediation-closure/v1",
   "checkedAt": "2026-08-01T15:24:00.0000000+09:00",
   "verdict": "PASS_LIVE_PRODUCT_REMEDIATION_EVIDENCE_MAPPED_FULL_RESCAN_PENDING",
-  "currentSourceHeadAtGeneration": "52ade59cf489992dc42b685e298f59e436e04242",
-  "liveProductHeadAtGeneration": "ff9e44a8851f18042fc77c998f3bf31b49cef1ec",
+  "currentSourceHeadAtGeneration": "8b0dccab8777b12904461ba0a533b89cfadea16f",
+  "liveProductHeadAtGeneration": "a96b55ee08bf021dc8b7230238f30267e784eb4e",
   "productionBuild": {
-    "commitSha": "ff9e44a8851f18042fc77c998f3bf31b49cef1ec",
+    "commitSha": "a96b55ee08bf021dc8b7230238f30267e784eb4e",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ih67yikw0-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-cz6b9ewm7-seojaehongs-projects.vercel.app",
     "sourceHeadMatchesProduction": false,
     "note": "Production had reached the live product remediation head; subsequent Northstar gate/evidence commits were source-only at generation time."
   },
@@ -28,7 +28,7 @@
     {
       "id": "tenant-authorization-boundaries",
       "artifact": "evaluation/tenant-authorization-boundary-preflight-2026-07-29/report.json",
-      "verdict": "PASS_CURRENT_SOURCE_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
+      "verdict": "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
       "findingCount": 2,
       "findingIds": [
         "csf_020491733c70a16c7e0e3584",
@@ -38,7 +38,7 @@
     {
       "id": "spreadsheet-formula-neutralization",
       "artifact": "evaluation/spreadsheet-formula-neutralization-2026-08-01/report.json",
-      "verdict": "PASS_CURRENT_SOURCE_SPREADSHEET_FORMULA_NEUTRALIZATION_LIVE_PENDING",
+      "verdict": "PASS_LIVE_PRODUCTION_SPREADSHEET_FORMULA_NEUTRALIZATION",
       "findingCount": 4,
       "findingIds": [
         "csf_9227c8522ae1752d4659ca0e",
@@ -50,7 +50,7 @@
     {
       "id": "public-provider-and-upstream-work-budgets",
       "artifact": "evaluation/public-provider-work-budget-2026-08-01/report.json",
-      "verdict": "PASS_CURRENT_SOURCE_PUBLIC_PROVIDER_WORK_BUDGETS_LIVE_PENDING",
+      "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_WORK_BUDGETS",
       "findingCount": 4,
       "findingIds": [
         "csf_56e94d5af1a7088bda7deedb",
@@ -62,7 +62,7 @@
     {
       "id": "document-export-work-budgets",
       "artifact": "evaluation/document-export-work-budget-2026-08-01/report.json",
-      "verdict": "PASS_CURRENT_SOURCE_DOCUMENT_EXPORT_WORK_BUDGETS",
+      "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_WORK_BUDGETS",
       "findingCount": 8,
       "findingIds": [
         "csf_9f4d050101c5687bad6441dc",

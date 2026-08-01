@@ -2,9 +2,9 @@
 
 Verdict: `PASS_LIVE_PRODUCT_REMEDIATION_EVIDENCE_MAPPED_FULL_RESCAN_PENDING`
 
-Current source at generation: `52ade59cf489992dc42b685e298f59e436e04242`
+Current source at generation: `8b0dccab8777b12904461ba0a533b89cfadea16f`
 
-Live product remediation marker at generation: `ff9e44a8851f18042fc77c998f3bf31b49cef1ec`
+Live product remediation marker at generation: `a96b55ee08bf021dc8b7230238f30267e784eb4e`
 
 The live product marker had reached the document-export remediation product/evidence stack. The later Northstar gate/closure evidence commits were source-only at generation time.
 
