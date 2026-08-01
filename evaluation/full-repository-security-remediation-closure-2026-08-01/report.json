@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "safeclaw-full-repository-security-remediation-closure/v1",
+  "checkedAt": "2026-08-01T15:24:00.0000000+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_REMEDIATION_EVIDENCE_MAPPED_FULL_RESCAN_PENDING",
+  "sourceHead": "ff9e44a8851f18042fc77c998f3bf31b49cef1ec",
+  "productionBuild": {
+    "commitSha": "ff9e44a8851f18042fc77c998f3bf31b49cef1ec",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-ih67yikw0-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
+  "sourceScan": {
+    "artifact": "evaluation/full-repository-security-scan-2026-07-28/report.json",
+    "reportableFindingCount": 18,
+    "medium": 5,
+    "low": 13,
+    "note": "This remains the immutable historical full scan. It is not rewritten to zero findings."
+  },
+  "remediationPlan": {
+    "artifact": "evaluation/full-repository-security-remediation-plan-2026-07-29/report.json",
+    "waveCount": 4,
+    "plannedFindingCount": 18
+  },
+  "waveEvidence": [
+    {
+      "id": "tenant-authorization-boundaries",
+      "artifact": "evaluation/tenant-authorization-boundary-preflight-2026-07-29/report.json",
+      "verdict": "PASS_CURRENT_SOURCE_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
+      "findingCount": 2,
+      "findingIds": [
+        "csf_020491733c70a16c7e0e3584",
+        "csf_1fa22cd0aee4ec11116c8bb1"
+      ]
+    },
+    {
+      "id": "spreadsheet-formula-neutralization",
+      "artifact": "evaluation/spreadsheet-formula-neutralization-2026-08-01/report.json",
+      "verdict": "PASS_CURRENT_SOURCE_SPREADSHEET_FORMULA_NEUTRALIZATION_LIVE_PENDING",
+      "findingCount": 4,
+      "findingIds": [
+        "csf_9227c8522ae1752d4659ca0e",
+        "csf_f134a8b05f34e5e1ce8ec67a",
+        "csf_713f637da86733907c5d68cb",
+        "csf_856fe15617f534b60a467d21"
+      ]
+    },
+    {
+      "id": "public-provider-and-upstream-work-budgets",
+      "artifact": "evaluation/public-provider-work-budget-2026-08-01/report.json",
+      "verdict": "PASS_CURRENT_SOURCE_PUBLIC_PROVIDER_WORK_BUDGETS_LIVE_PENDING",
+      "findingCount": 4,
+      "findingIds": [
+        "csf_56e94d5af1a7088bda7deedb",
+        "csf_602a3194a53652647244cc7d",
+        "csf_1c556be46a6e411979fdc671",
+        "csf_82c8e671602027bb56acd591"
+      ]
+    },
+    {
+      "id": "document-export-work-budgets",
+      "artifact": "evaluation/document-export-work-budget-2026-08-01/report.json",
+      "verdict": "PASS_CURRENT_SOURCE_DOCUMENT_EXPORT_WORK_BUDGETS",
+      "findingCount": 8,
+      "findingIds": [
+        "csf_9f4d050101c5687bad6441dc",
+        "csf_bcec0c4f5c9d784eba666a36",
+        "csf_6a2c44d7d7c5ea908f1fc62d",
+        "csf_b0dbb71a9aeca1ffa150b9d9",
+        "csf_e5354308ff5ff4d402961a70",
+        "csf_21d7f195b719e0f73ad4c73a",
+        "csf_7c616e59ae8f50e96114a026",
+        "csf_90fab9d634e762871753178a"
+      ]
+    }
+  ],
+  "reconciliation": {
+    "plannedFindingCount": 18,
+    "mappedFindingCount": 18,
+    "uniqueMappedFindingCount": 18,
+    "duplicateFindingIds": [],
+    "missingFindingIds": [],
+    "extraFindingIds": [],
+    "allPlannedFindingsMappedToEvidence": true,
+    "allWaveArtifactsPresent": true
+  },
+  "verification": [
+    {
+      "command": "npm.cmd exec -- vitest run tests/document-export-budget.test.ts tests/xlsx-export-route.test.ts tests/editor-export-integrity.test.ts tests/document-export-localization.test.ts tests/pdf-korean-font-integration.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "result": "5 files / 49 tests PASS"
+    },
+    {
+      "command": "npm.cmd exec -- tsc --noEmit",
+      "status": "PASS",
+      "result": "strict typecheck PASS"
+    },
+    {
+      "command": "npm.cmd audit --omit=dev",
+      "status": "PASS",
+      "result": "0 vulnerabilities"
+    },
+    {
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "result": "Next 15.5.22 production build PASS, 28/28 static pages"
+    },
+    {
+      "command": "Invoke-RestMethod https://safeguard-contest-mvp.vercel.app/api/build-info",
+      "status": "PASS",
+      "result": "Production marker reached ff9e44a8851f18042fc77c998f3bf31b49cef1ec"
+    }
+  ],
+  "remainingBoundaries": {
+    "followUpFullRepositoryRescanCompleted": false,
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "providerDispatchPersistence": "approval_gated",
+    "koshaHumanReviewGate": "approval_gated",
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "exactTrustRegistryMutationPerformed": false
+  }
+}
