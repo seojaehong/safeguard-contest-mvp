@@ -1,0 +1,107 @@
+{
+  "schemaVersion": "safeclaw-security-remediation-wave/v1",
+  "checkedAt": "2026-08-01T14:50:00.0000000+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_SPREADSHEET_FORMULA_NEUTRALIZATION_LIVE_PENDING",
+  "wave": {
+    "id": "spreadsheet-formula-neutralization",
+    "priority": 2,
+    "findingCount": 4,
+    "findingIds": [
+      "csf_9227c8522ae1752d4659ca0e",
+      "csf_f134a8b05f34e5e1ce8ec67a",
+      "csf_713f637da86733907c5d68cb",
+      "csf_856fe15617f534b60a467d21"
+    ],
+    "sourceScanArtifact": "evaluation/full-repository-security-scan-2026-07-28/report.json",
+    "remediationPlanArtifact": "evaluation/full-repository-security-remediation-plan-2026-07-29/report.json"
+  },
+  "source": {
+    "baseHead": "1c6a26b10e8863fed8da1c5026ba1ef218be2c95",
+    "productCommit": "ff332f4d4fb6f9111dd50d3db2a33faf7a3fe574",
+    "productionMarkerAtValidation": "1c6a26b10e8863fed8da1c5026ba1ef218be2c95",
+    "liveAfterProductDeploy": "PENDING"
+  },
+  "patchContract": {
+    "vulnerablePath": [
+      "components/WorkpackEditor.tsx buildDelimited exported single-document CSV cells through CSV quoting only.",
+      "components/WorkpackEditor.tsx buildDelimited exported whole-workpack CSV, downloaded TSV, and clipboard TSV cells without formula-prefix neutralization.",
+      "lib/reporting-downloads.ts had a separate CSV neutralization implementation, so editor and reports behavior could drift."
+    ],
+    "attackerControlledInput": "Editable or generated workpack/report text that a victim operator later downloads, imports, or pastes into formula-evaluating spreadsheet software.",
+    "securityInvariant": "Every spreadsheet-delimited CSV/TSV cell whose first significant character is =, +, -, @, tab, or carriage return must be emitted as inert spreadsheet text by prefixing an apostrophe before delimiter-specific quoting or cleanup.",
+    "legitimateBehaviorPreserved": [
+      "Ordinary Korean text is unchanged.",
+      "CSV quoting for commas, quotes, CR, and LF is preserved.",
+      "TSV tab and newline cleanup semantics are preserved after neutralization.",
+      "Non-spreadsheet text, JSON, HTML, XLSX, HWP, HWPX, DOC, JPG, and TXT exports are outside this patch wave."
+    ]
+  },
+  "changes": {
+    "files": [
+      "lib/spreadsheet-delimited-cell.ts",
+      "components/WorkpackEditor.tsx",
+      "lib/reporting-downloads.ts",
+      "tests/spreadsheet-delimited-cell.test.ts",
+      "tests/reporting-downloads.test.ts"
+    ],
+    "strategy": "Extract one shared delimited-cell encoder and route WorkpackEditor CSV/TSV plus Reports CSV through it.",
+    "findingClosure": {
+      "spreadsheetFormulaInjectionFindingsRemediatedInCurrentSource": 4,
+      "tenantAuthorizationFindingsPreviouslyRemediatedInCurrentSource": 2,
+      "remainingReportableFindingsBeforeFullRescan": 12,
+      "fullRepositoryRescanCompleted": false,
+      "securityCompleteClaimAllowed": false
+    }
+  },
+  "verification": {
+    "baselineReproduction": {
+      "method": "Static source comparison against HEAD before product patch.",
+      "result": "Pre-patch WorkpackEditor contained function escapeCell and delimiter-specific CSV quote / TSV cleanup without formula neutralization; current source routes cells through encodeSpreadsheetDelimitedCell."
+    },
+    "focusedAndAdjacent": {
+      "command": "npm.cmd exec -- vitest run tests/spreadsheet-delimited-cell.test.ts tests/reporting-downloads.test.ts tests/editor-export-integrity.test.ts tests/document-export-localization.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS: 4 files / 64 tests"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    },
+    "dependencyAudit": {
+      "command": "npm.cmd audit --omit=dev",
+      "result": "PASS: found 0 vulnerabilities"
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "result": "PASS: Next 15.5.22 build, 28/28 pages"
+    },
+    "diffCheck": {
+      "command": "git diff --check",
+      "result": "PASS before product commit; LF-to-CRLF notices only"
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "crossTenantExploitPerformed": false,
+    "migrationCreatedOrApplied": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "paidProviderLoadPerformed": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "immutableFullRepositoryScanStillRecordsOriginal18Findings": true,
+    "followUpFullRepositoryRescanRequired": true,
+    "publicProviderAndUpstreamWorkBudgets": "OPEN",
+    "documentExportWorkBudgets": "OPEN",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "providerDispatchPersistence": "approval_gated",
+    "shareRecipientAck": "approval_gated",
+    "supabaseRlsLaunchIsolation": "approval_gated",
+    "llmWikiPublication": "approval_gated",
+    "sifEmbeddingRuntime": "approval_gated",
+    "koshaExactPromotionReview": "approval_gated"
+  }
+}
