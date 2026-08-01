@@ -1,14 +1,16 @@
 {
   "schemaVersion": "safeclaw-full-repository-security-remediation-closure/v1",
   "checkedAt": "2026-08-01T15:24:00.0000000+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_REMEDIATION_EVIDENCE_MAPPED_FULL_RESCAN_PENDING",
-  "sourceHead": "ff9e44a8851f18042fc77c998f3bf31b49cef1ec",
+  "verdict": "PASS_LIVE_PRODUCT_REMEDIATION_EVIDENCE_MAPPED_FULL_RESCAN_PENDING",
+  "currentSourceHeadAtGeneration": "52ade59cf489992dc42b685e298f59e436e04242",
+  "liveProductHeadAtGeneration": "ff9e44a8851f18042fc77c998f3bf31b49cef1ec",
   "productionBuild": {
     "commitSha": "ff9e44a8851f18042fc77c998f3bf31b49cef1ec",
     "branch": "master",
     "environment": "production",
     "deploymentUrl": "safeguard-contest-ih67yikw0-seojaehongs-projects.vercel.app",
-    "sourceHeadMatchesProduction": true
+    "sourceHeadMatchesProduction": false,
+    "note": "Production had reached the live product remediation head; subsequent Northstar gate/evidence commits were source-only at generation time."
   },
   "sourceScan": {
     "artifact": "evaluation/full-repository-security-scan-2026-07-28/report.json",

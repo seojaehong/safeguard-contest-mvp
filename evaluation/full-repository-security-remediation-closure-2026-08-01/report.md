@@ -1,8 +1,12 @@
 # Full repository security remediation closure
 
-Verdict: `PASS_CURRENT_SOURCE_REMEDIATION_EVIDENCE_MAPPED_FULL_RESCAN_PENDING`
+Verdict: `PASS_LIVE_PRODUCT_REMEDIATION_EVIDENCE_MAPPED_FULL_RESCAN_PENDING`
 
-Current source / production marker: `ff9e44a8851f18042fc77c998f3bf31b49cef1ec`
+Current source at generation: `52ade59cf489992dc42b685e298f59e436e04242`
+
+Live product remediation marker at generation: `ff9e44a8851f18042fc77c998f3bf31b49cef1ec`
+
+The live product marker had reached the document-export remediation product/evidence stack. The later Northstar gate/closure evidence commits were source-only at generation time.
 
 ## What this proves
 
