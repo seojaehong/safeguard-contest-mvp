@@ -1,48 +1,57 @@
-# Tenant Authorization Boundary Preflight
+# Tenant Authorization Boundary Remediation
 
-- Verdict: `RED_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATION_REQUIRED_NO_MUTATION`
-- Source / production: `a65b8482f43a3091d54b4c98cd99387a67765e2c`
-- Target findings: 2
-- RED: 2
-- Product patch authorized: `false`
-- Product patch performed: `false`
+Checked at: `2026-08-01T05:29:15.383Z`
 
-## Scheduled Briefing Owner Binding
+Source HEAD: `f35aca93a11da019aa507b6a8d96f4131fd10da5`
 
-The current DB-backed briefing path selects only `name`, `briefing_question`, and `briefing_email`. It does not carry immutable site, organization, or owner identity into the scheduled run.
+Verdict: `PASS_CURRENT_SOURCE_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION`
 
-The route passes `site.email` to `saveAskResponseAsWorkpack`. That helper resolves the email through the admin user list and passes the selected user into `ensureWorkspaceContext`, making a delivery address the tenant-selection input.
+## Result
 
-Required GREEN contract:
+- Scheduled briefing owner binding: GREEN
+- Workpack archive site binding: GREEN
+- RED findings closed in this wave: 2/2
+- DB mutation performed: `false`
+- Migration created/applied: `false`
+- Provider/Share/vector/wiki/KOSHA mutation: `false`
+- Exact saved Share: `MISSING_EVIDENCE`
+- KOSHA human review: `REQUIRED`
 
-- Carry immutable `site_id` and `organization_id` from the DB-backed briefing row.
-- Derive the workpack owner from the authorized organization record.
-- Keep `briefing_email` as a delivery recipient only.
-- Fail closed on organization/email mismatch without inserting a workpack.
+## Security Changes
 
-## Workpack Archive Site Binding
+### Scheduled briefing persistence
 
-The authenticated archive correctly restricts workpack rows by owned organization IDs. Its separate site enrichment query then fetches site metadata using only `site_id`, without applying the same organization boundary.
+- DB-backed briefing rows now carry immutable `site.id`, `organization_id`, and `organizations.owner_id`.
+- Rows missing any tenant identity are dropped from DB-backed persistence.
+- `briefing_email` remains a delivery recipient only and cannot select or alter tenant context.
+- The auth-admin email lookup path was removed from scheduled workpack persistence.
+- Missing or mismatched immutable site/org/owner identity fails closed without inserting a workpack.
+- Env `BRIEFING_SITES` fallback preserves generation/email behavior but skips persistence because it has no immutable tenant tuple.
 
-Required GREEN contract:
+### Archive site enrichment
 
-- Constrain site enrichment by both `site_id` and authorized `organization_id`.
-- Do not expose name, industry, or region for a foreign site UUID.
-- Preserve archive usability when a legacy or invalid site reference cannot be enriched.
+- Archive site enrichment requires both `site_id in siteIds` and `organization_id in authorized organizationIds`.
+- A stale or foreign site UUID can no longer populate `siteName`, `industry`, or `region`.
+- Legacy/invalid site references degrade to the existing default display values.
 
-## KOSHA Boundary Recheck
+## Verification
 
-The KOSHA reviewer-support, review-gate, and reviewer-cockpit evidence heads are all ancestors of current source. The reviewer-support Python suite passed 4/4.
+- RED -> GREEN: `npm.cmd exec -- vitest run tests/briefing.test.ts tests/tenant-authorization-boundary-source.test.ts --maxWorkers=1 --fileParallelism=false` -> PASS after initially reproducing 3 source-contract failures.
+- Focused + adjacent: `npm.cmd exec -- vitest run tests/briefing.test.ts tests/tenant-authorization-boundary-source.test.ts tests/workpack-store.test.ts tests/workpack-archive-tenant-boundary.test.ts tests/workpack-generation-evidence-route.test.ts tests/workpack-share-authority.test.ts tests/workpack-share-authority-routes.test.ts --maxWorkers=1 --fileParallelism=false` -> PASS, 7 files / 90 tests.
+- Independent read-only review: PASS, 4 files / 36 tests, no P1/P2 blocker.
+- Typecheck: PASS.
+- Build: PASS, Next 15.5.22, 28/28 pages.
+- Dependency audit: PASS, `npm.cmd audit --omit=dev` found 0 vulnerabilities.
+- Diff check: PASS; Windows LF-to-CRLF notices only.
 
-The boundary remains unchanged:
+## Remaining Boundaries
 
-- Reviewer support: `PASS_MACHINE_REVIEWER_SUPPORT_HUMAN_CONFIRMATION_REQUIRED`
-- Review gate: `REVIEW_CHECKLIST_INCOMPLETE_BLOCKED`
-- Human review completed: `false`
-- Exact promotion performed: `false`
+- Full repository security findings outside this tenant wave remain open.
+- `securityCompleteClaimAllowed=false`.
+- Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.
+- KOSHA reviewer support remains machine-only; human review and exact promotion remain approval-gated.
 
-## Safety Boundary
+## Evidence Review Corrections
 
-This preflight reproduces the current unsafe dataflows through source inspection only. It did not execute a cross-tenant exploit, insert a workpack, change a schema, send a provider message, create a Share session, publish a wiki, generate embeddings, upload vectors, or mutate the exact KOSHA registry.
-
-All 18 security findings remain open. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`. Product remediation awaits user confirmation.
+- The pre-fix vulnerable source/sink path is recorded as `beforeDataflow`, not current state.
+- The scheduled briefing invariant is delivery-only `briefing_email`; persistence is derived only from immutable site/org/owner identity.

@@ -1,14 +1,15 @@
 {
   "schemaVersion": "safeclaw-tenant-authorization-boundary-preflight/v1",
-  "checkedAt": "2026-07-29T04:37:10.1542106+09:00",
-  "verdict": "RED_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATION_REQUIRED_NO_MUTATION",
-  "sourceHead": "a65b8482f43a3091d54b4c98cd99387a67765e2c",
+  "checkedAt": "2026-08-01T05:29:15.383Z",
+  "verdict": "PASS_CURRENT_SOURCE_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
+  "sourceHead": "f35aca93a11da019aa507b6a8d96f4131fd10da5",
   "productionBuild": {
     "commitSha": "a65b8482f43a3091d54b4c98cd99387a67765e2c",
     "branch": "master",
     "environment": "production",
     "deploymentUrl": "safeguard-contest-iguu8lojo-seojaehongs-projects.vercel.app",
-    "sourceHeadMatchesProduction": true
+    "sourceHeadMatchesProduction": false,
+    "note": "Product remediation is current source and pushed after verification; live marker refresh is a separate deployment evidence step."
   },
   "sourceScan": {
     "artifact": "evaluation/full-repository-security-scan-2026-07-28/findings.json",
@@ -21,10 +22,24 @@
   "checks": [
     {
       "id": "scheduled-briefing-owner-binding",
-      "status": "RED",
+      "status": "GREEN",
       "findingId": "csf_020491733c70a16c7e0e3584",
       "findingTitle": "Scheduled briefing email can redirect workpack creation into another tenant",
-      "currentDataflow": [
+      "requiredGreenContract": [
+        "The DB-backed briefing row carries immutable site_id, organization_id, and organization owner identity.",
+        "The scheduled save path derives persistence context only from that immutable site/org/owner tuple.",
+        "briefing_email remains a delivery recipient only and cannot select or alter tenant context.",
+        "Missing or mismatched immutable site/org/owner identity fails closed without inserting a workpack."
+      ],
+      "redReproducedWithoutMutation": true,
+      "remediatedWithoutMutation": true,
+      "greenEvidence": [
+        "app/api/briefing/run/route.ts selects id, organization_id, and organizations(owner_id) for DB-backed sites.",
+        "lib/briefing.ts drops DB rows missing site_id, organization_id, or organization owner_id.",
+        "lib/workpack-store.ts removes auth-admin email lookup and inserts scheduled workpacks from the immutable site/org/owner tuple.",
+        "BRIEFING_SITES/env fallback has no tenantContext and therefore skips workpack persistence while preserving delivery-only email behavior."
+      ],
+      "beforeDataflow": [
         {
           "path": "app/api/briefing/run/route.ts",
           "line": 58,
@@ -45,42 +60,41 @@
           "line": 525,
           "observation": "The email-selected user is passed into ensureWorkspaceContext and becomes the workpack tenant context."
         }
-      ],
-      "requiredGreenContract": [
-        "The DB-backed briefing row carries immutable site_id and organization_id.",
-        "The scheduled save path derives owner identity from the authorized organization record rather than briefing_email.",
-        "briefing_email remains a delivery recipient only.",
-        "An organization and email mismatch fails closed without inserting a workpack."
-      ],
-      "redReproducedWithoutMutation": true
+      ]
     },
     {
       "id": "workpack-archive-site-binding",
-      "status": "RED",
+      "status": "GREEN",
       "findingId": "csf_1fa22cd0aee4ec11116c8bb1",
       "findingTitle": "Workpack archive can disclose site metadata from another tenant",
-      "currentDataflow": [
-        {
-          "path": "app/api/workpacks/route.ts",
-          "line": 114,
-          "observation": "Archive site enrichment uses only .in(\"id\", siteIds) and does not constrain sites by the already authorized organizationIds."
-        }
-      ],
       "requiredGreenContract": [
         "Site enrichment requires both site_id membership and organization_id membership.",
         "A foreign site UUID cannot populate siteName, industry, or region.",
         "The archive remains usable when a legacy or invalid site reference is omitted from enrichment."
       ],
-      "redReproducedWithoutMutation": true
+      "redReproducedWithoutMutation": true,
+      "remediatedWithoutMutation": true,
+      "greenEvidence": [
+        "app/api/workpacks/route.ts enriches archive site metadata only when site id and organization_id both match authorized organizationIds.",
+        "tests/workpack-archive-tenant-boundary.test.ts verifies a foreign site UUID does not populate siteName, industry, or region."
+      ],
+      "beforeDataflow": [
+        {
+          "path": "app/api/workpacks/route.ts",
+          "line": 114,
+          "observation": "Archive site enrichment uses only .in(\"id\", siteIds) and does not constrain sites by the already authorized organizationIds."
+        }
+      ]
     }
   ],
   "summary": {
     "targetFindingCount": 2,
-    "redCount": 2,
-    "greenCount": 0,
+    "redCount": 0,
+    "greenCount": 2,
     "missingEvidenceCount": 0,
-    "productPatchAuthorized": false,
-    "productPatchPerformed": false
+    "productPatchAuthorized": true,
+    "productPatchPerformed": true,
+    "productPatchCommit": "f35aca93a11da019aa507b6a8d96f4131fd10da5"
   },
   "proposedVerification": {
     "scheduledBriefingFixture": "Use a mocked service-role client with organization owner A and briefing email for user B; assert no B-owned context or workpack insert is possible.",
@@ -112,12 +126,50 @@
     "exactTrustRegistryMutationPerformed": false
   },
   "remainingBoundaries": {
-    "reportableFindingCount": 18,
-    "tenantAuthorizationFindingCount": 2,
+    "reportableFindingCount": 16,
+    "tenantAuthorizationFindingCount": 0,
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
-    "productPatchAuthorization": "AWAITING_USER_CONFIRMATION",
+    "productPatchAuthorization": "COMPLETED_FOR_TENANT_AUTHORIZATION_WAVE",
     "koshaHumanReview": "REQUIRED",
     "koshaExactPromotion": "APPROVAL_GATED"
+  },
+  "verification": {
+    "redToGreen": {
+      "command": "npm.cmd exec -- vitest run tests/briefing.test.ts tests/tenant-authorization-boundary-source.test.ts --maxWorkers=1 --fileParallelism=false",
+      "before": "RED: tests/tenant-authorization-boundary-source.test.ts 3 failed / briefing tests passed",
+      "after": "PASS: 2 files / 26 tests"
+    },
+    "focusedAndAdjacent": {
+      "command": "npm.cmd exec -- vitest run tests/briefing.test.ts tests/tenant-authorization-boundary-source.test.ts tests/workpack-store.test.ts tests/workpack-archive-tenant-boundary.test.ts tests/workpack-generation-evidence-route.test.ts tests/workpack-share-authority.test.ts tests/workpack-share-authority-routes.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS: 7 files / 90 tests"
+    },
+    "independentReviewFocused": {
+      "command": "npm.cmd exec -- vitest run tests/briefing.test.ts tests/workpack-store.test.ts tests/tenant-authorization-boundary-source.test.ts tests/workpack-archive-tenant-boundary.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS: 4 files / 36 tests, no P1/P2 blocker found in read-only review"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "result": "PASS: Next 15.5.22 build, 28/28 pages"
+    },
+    "dependencyAudit": {
+      "command": "npm.cmd audit --omit=dev",
+      "result": "PASS: found 0 vulnerabilities"
+    },
+    "diffCheck": {
+      "command": "git diff --check",
+      "result": "PASS: LF-to-CRLF notices only, no whitespace errors"
+    }
+  },
+  "evidenceReview": {
+    "status": "P2_CONSISTENCY_FIXED_BEFORE_EVIDENCE_COMMIT",
+    "fixes": [
+      "Renamed vulnerable pre-fix dataflow from currentDataflow to beforeDataflow.",
+      "Replaced organization/email mismatch wording with the implemented delivery-only briefing_email invariant."
+    ]
   }
 }
