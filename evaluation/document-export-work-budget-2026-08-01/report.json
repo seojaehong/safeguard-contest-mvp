@@ -1,0 +1,110 @@
+{
+  "verdict": "PASS_CURRENT_SOURCE_DOCUMENT_EXPORT_WORK_BUDGETS",
+  "date": "2026-08-01",
+  "sourceHead": "29e1e1ec5d0e4fc57e7b1ce5daa61170d2238c44",
+  "productCommit": "29e1e1ec5d0e4fc57e7b1ce5daa61170d2238c44",
+  "baseHead": "94bd0dcaa1e691b0a482b8ed2f552023a21ffcd4",
+  "wave": {
+    "id": "document-export-work-budgets",
+    "priority": 4,
+    "findingCount": 8,
+    "findingIds": [
+      "csf_9f4d050101c5687bad6441dc",
+      "csf_bcec0c4f5c9d784eba666a36",
+      "csf_6a2c44d7d7c5ea908f1fc62d",
+      "csf_b0dbb71a9aeca1ffa150b9d9",
+      "csf_e5354308ff5ff4d402961a70",
+      "csf_21d7f195b719e0f73ad4c73a",
+      "csf_7c616e59ae8f50e96114a026",
+      "csf_90fab9d634e762871753178a"
+    ]
+  },
+  "securityInvariant": {
+    "summary": "XLSX and HWP exports must fail closed before expensive document generation when request bytes, document count, row count, nested entries, field characters, rendered cell estimate, or output bytes exceed bounded budgets.",
+    "attackerControlledInput": "POST JSON bodies to /api/export/xlsx and /api/export/hwp, including mode, rows, documents, structured data, risk rows, scenario, profile, and long string fields.",
+    "legitimateBehaviorPreserved": "Valid single XLSX, workpack XLSX, structured XLSX, and HWP exports continue to return bounded binary documents with no DB, Share, provider, vector, wiki, or registry mutation."
+  },
+  "budgets": {
+    "requestBytes": 262144,
+    "documents": 12,
+    "rows": 128,
+    "totalRows": 512,
+    "fieldCharacters": 4000,
+    "nestedEntries": 2000,
+    "renderedCells": 5000,
+    "outputBytes": 2097152
+  },
+  "implementation": {
+    "changedFiles": [
+      "app/api/export/xlsx/route.ts",
+      "app/api/export/hwp/route.ts",
+      "lib/document-export-budget.ts",
+      "tests/document-export-budget.test.ts"
+    ],
+    "strategy": "Shared route-level budget helper reused by XLSX and HWP. The existing document builders were left unchanged; routes now read bounded request streams, validate input shape and workload before generation, assert output size before response, and return deterministic 413 JSON errors without content-disposition on over-limit input.",
+    "dbMutation": false,
+    "shareMutation": false,
+    "providerMutation": false,
+    "vectorMutation": false,
+    "wikiMutation": false,
+    "koshaRegistryMutation": false
+  },
+  "verification": [
+    {
+      "command": "npm.cmd install",
+      "status": "PASS",
+      "result": "363 packages installed, npm audit found 0 vulnerabilities"
+    },
+    {
+      "command": "npm.cmd exec -- vitest run tests/document-export-budget.test.ts tests/xlsx-export-route.test.ts tests/editor-export-integrity.test.ts tests/document-export-localization.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "result": "4 files / 31 tests PASS"
+    },
+    {
+      "command": "npm.cmd exec -- tsc --noEmit",
+      "status": "PASS",
+      "result": "strict typecheck PASS"
+    },
+    {
+      "command": "npm.cmd audit --omit=dev",
+      "status": "PASS",
+      "result": "0 vulnerabilities"
+    },
+    {
+      "command": "npm.cmd exec -- vitest run tests/document-export-budget.test.ts tests/xlsx-export-route.test.ts tests/editor-export-integrity.test.ts tests/document-export-localization.test.ts tests/pdf-korean-font-integration.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "result": "5 files / 49 tests PASS"
+    },
+    {
+      "command": "git diff --check",
+      "status": "PASS_WITH_WARNINGS",
+      "result": "No whitespace errors; LF-to-CRLF notices only for touched files"
+    },
+    {
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "result": "Next 15.5.22 production build PASS, 28/28 static pages"
+    }
+  ],
+  "regressionCoverage": {
+    "overLimitXlsxByteBudget": true,
+    "overLimitXlsxSingleRows": true,
+    "overLimitXlsxStructuredModes": [
+      "workPlanStructured",
+      "permitInspectionStructured",
+      "tbmBriefingStructured",
+      "tbmLogStructured",
+      "educationRecordStructured"
+    ],
+    "overLimitXlsxWorkpackDocuments": true,
+    "overLimitHwpRows": true,
+    "overLimitHwpFieldCharacters": true,
+    "validBoundedXlsxStillWorks": true,
+    "validBoundedHwpStillWorks": true
+  },
+  "openBoundaries": {
+    "exactSavedShare": "MISSING_EVIDENCE",
+    "koshaHumanReviewGate": "approval_gated",
+    "fullRepositorySecurityCompleteClaimAllowed": false
+  }
+}
