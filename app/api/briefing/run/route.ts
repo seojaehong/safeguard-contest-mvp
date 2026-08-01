@@ -17,7 +17,7 @@ import {
   type BriefingSiteRow
 } from "@/lib/briefing";
 import { createSupabaseAdminClient, type WorkspaceDatabase } from "@/lib/supabase-admin";
-import { saveAskResponseAsWorkpack } from "@/lib/workpack-store";
+import { saveAskResponseAsScheduledWorkpack } from "@/lib/workpack-store";
 import { isLiveDispatchEnabled, postWebhookWithTimeout, resolveWebhookConfig } from "@/lib/n8n-webhook";
 import { createLogger } from "@/lib/logger";
 import { resolveBriefingEmailDispatchStatus } from "@/lib/server/briefing-dispatch-status";
@@ -55,7 +55,7 @@ async function fetchBriefingSiteRows(
 
   const { data, error } = await client
     .from("sites")
-    .select("name,briefing_question,briefing_email")
+    .select("id,organization_id,name,briefing_question,briefing_email,organizations(owner_id)")
     .eq("briefing_enabled", true)
     .order("created_at", { ascending: true });
 
@@ -64,7 +64,7 @@ async function fetchBriefingSiteRows(
     return null;
   }
 
-  return data;
+  return (data || []) as BriefingSiteRow[];
 }
 
 async function sendBriefingEmail(
@@ -145,11 +145,13 @@ export async function GET(request: NextRequest) {
       weatherSummary = response.externalData?.weather?.summary || response.scenario?.weatherNote || "";
 
       let workpackId: string | null = null;
-      if (supabaseClient) {
-        const saveResult = await saveAskResponseAsWorkpack(supabaseClient, site.email, site.name, response);
+      if (supabaseClient && site.tenantContext) {
+        const saveResult = await saveAskResponseAsScheduledWorkpack(supabaseClient, site.tenantContext, response);
         saved = saveResult.ok;
         workpackId = saveResult.workpackId;
         if (!saveResult.ok) message += `save: ${saveResult.message} `;
+      } else if (supabaseClient) {
+        message += "save: skipped (immutable tenant context unavailable) ";
       } else {
         message += "save: skipped (Supabase not configured) ";
       }

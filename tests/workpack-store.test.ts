@@ -12,6 +12,7 @@ import {
   buildReopenData,
   buildSelectedWorkpackEvidenceSummary,
   buildWorkpackEvidenceSummary,
+  saveAskResponseAsScheduledWorkpack,
   saveMcpDocpackWorkpack
 } from "@/lib/workpack-store";
 import type { WorkspaceDatabase } from "@/lib/supabase-admin";
@@ -111,6 +112,34 @@ function makeMcpClient(siteOrganizationId: string) {
   return {
     client: client as unknown as SupabaseClient<WorkspaceDatabase>,
     insertCalled: () => insertCalled
+  };
+}
+
+function makeScheduledBriefingClient() {
+  let insertPayload: unknown = null;
+  const client = {
+    from(table: string) {
+      if (table === "workpacks") {
+        return {
+          insert(payload: unknown) {
+            insertPayload = payload;
+            return {
+              select() {
+                return {
+                  single: async () => ({ data: { id: "scheduled-wp-1" }, error: null })
+                };
+              }
+            };
+          }
+        };
+      }
+      throw new Error(`Unexpected table ${table}`);
+    }
+  };
+
+  return {
+    client: client as unknown as SupabaseClient<WorkspaceDatabase>,
+    insertPayload: () => insertPayload
   };
 }
 
@@ -297,5 +326,28 @@ describe("workpack store persistence contract", () => {
 
     expect(result.saved).toBe(true);
     expect(fake.insertCalled()).toBe(true);
+  });
+
+  it("inserts a scheduled briefing workpack from an immutable tenant tuple", async () => {
+    const secret = "scheduled-briefing-generation-evidence-secret";
+    process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET = secret;
+    const fake = makeScheduledBriefingClient();
+    const response = attachGenerationEvidence(makeStoredResponse(), {
+      secret,
+      generatedAt: "2026-07-29T01:00:00.000Z"
+    });
+
+    const result = await saveAskResponseAsScheduledWorkpack(
+      fake.client,
+      { organizationId: "org-from-site-row", ownerUserId: "owner-from-org-row", siteId: "site-from-site-row" },
+      response
+    );
+
+    expect(result).toMatchObject({ ok: true, workpackId: "scheduled-wp-1" });
+    expect(fake.insertPayload()).toMatchObject({
+      organization_id: "org-from-site-row",
+      site_id: "site-from-site-row",
+      created_by: "owner-from-org-row"
+    });
   });
 });

@@ -99,23 +99,54 @@ describe("buildBriefingEmail", () => {
 describe("sitesFromBriefingRows", () => {
   it("maps valid DB rows to briefing sites (trimmed)", () => {
     const rows: BriefingSiteRow[] = [
-      { name: " 안산 제조공장 ", briefing_question: " 용접 작업 ", briefing_email: " safety@example.com " }
+      {
+        id: " site-1 ",
+        organization_id: " org-1 ",
+        name: " 안산 제조공장 ",
+        briefing_question: " 용접 작업 ",
+        briefing_email: " safety@example.com ",
+        organizations: { owner_id: " owner-1 " }
+      }
     ];
     expect(sitesFromBriefingRows(rows)).toEqual([
-      { name: "안산 제조공장", question: "용접 작업", email: "safety@example.com" }
+      {
+        name: "안산 제조공장",
+        question: "용접 작업",
+        email: "safety@example.com",
+        tenantContext: {
+          organizationId: "org-1",
+          ownerUserId: "owner-1",
+          siteId: "site-1"
+        }
+      }
     ]);
   });
 
   it("drops rows with missing name/question or invalid email, keeping valid ones", () => {
     const rows: BriefingSiteRow[] = [
-      { name: "정상", briefing_question: "질문", briefing_email: "ok@example.com" },
-      { name: "질문 없음", briefing_question: null, briefing_email: "ok2@example.com" },
-      { name: null, briefing_question: "질문", briefing_email: "ok3@example.com" },
-      { name: "이메일 오류", briefing_question: "질문", briefing_email: "not-an-email" }
+      { id: "site-1", organization_id: "org-1", name: "정상", briefing_question: "질문", briefing_email: "ok@example.com", organizations: { owner_id: "owner-1" } },
+      { id: "site-2", organization_id: "org-1", name: "질문 없음", briefing_question: null, briefing_email: "ok2@example.com", organizations: { owner_id: "owner-1" } },
+      { id: "site-3", organization_id: "org-1", name: null, briefing_question: "질문", briefing_email: "ok3@example.com", organizations: { owner_id: "owner-1" } },
+      { id: "site-4", organization_id: "org-1", name: "이메일 오류", briefing_question: "질문", briefing_email: "not-an-email", organizations: { owner_id: "owner-1" } }
     ];
     expect(sitesFromBriefingRows(rows)).toEqual([
-      { name: "정상", question: "질문", email: "ok@example.com" }
+      {
+        name: "정상",
+        question: "질문",
+        email: "ok@example.com",
+        tenantContext: { organizationId: "org-1", ownerUserId: "owner-1", siteId: "site-1" }
+      }
     ]);
+  });
+
+  it("drops DB rows that do not carry immutable site, organization, and owner identity", () => {
+    const rows: BriefingSiteRow[] = [
+      { name: "사이트 없음", briefing_question: "질문", briefing_email: "ok1@example.com", organization_id: "org-1", organizations: { owner_id: "owner-1" } },
+      { id: "site-2", name: "조직 없음", briefing_question: "질문", briefing_email: "ok2@example.com", organizations: { owner_id: "owner-1" } },
+      { id: "site-3", organization_id: "org-1", name: "소유자 없음", briefing_question: "질문", briefing_email: "ok3@example.com", organizations: { owner_id: null } }
+    ];
+
+    expect(sitesFromBriefingRows(rows)).toEqual([]);
   });
 });
 
@@ -124,15 +155,23 @@ describe("resolveBriefingSites", () => {
     { name: "env 사업장", question: "env 질문", email: "env@example.com" }
   ]);
   const dbRow = (index: number): BriefingSiteRow => ({
+    id: `site-${index}`,
+    organization_id: "org-1",
     name: `DB 사업장 ${index}`,
     briefing_question: "DB 질문",
-    briefing_email: `db${index}@example.com`
+    briefing_email: `db${index}@example.com`,
+    organizations: { owner_id: "owner-1" }
   });
 
   it("prefers DB rows over env when valid rows exist", () => {
     const result = resolveBriefingSites([dbRow(1)], envRaw);
     expect(result.source).toBe("db");
-    expect(result.sites).toEqual([{ name: "DB 사업장 1", question: "DB 질문", email: "db1@example.com" }]);
+    expect(result.sites).toEqual([{
+      name: "DB 사업장 1",
+      question: "DB 질문",
+      email: "db1@example.com",
+      tenantContext: { organizationId: "org-1", ownerUserId: "owner-1", siteId: "site-1" }
+    }]);
     expect(result.truncated).toBe(false);
   });
 
@@ -144,7 +183,7 @@ describe("resolveBriefingSites", () => {
 
   it("falls back to env when DB rows are all invalid or empty", () => {
     expect(resolveBriefingSites([], envRaw).source).toBe("env");
-    const invalidRows: BriefingSiteRow[] = [{ name: "이메일 없음", briefing_question: "질문", briefing_email: null }];
+    const invalidRows: BriefingSiteRow[] = [{ id: "site-1", organization_id: "org-1", name: "이메일 없음", briefing_question: "질문", briefing_email: null, organizations: { owner_id: "owner-1" } }];
     expect(resolveBriefingSites(invalidRows, envRaw).source).toBe("env");
   });
 

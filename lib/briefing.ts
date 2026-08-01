@@ -11,6 +11,11 @@ export type BriefingSite = {
   name: string;
   question: string;
   email: string;
+  tenantContext?: {
+    organizationId: string;
+    ownerUserId: string;
+    siteId: string;
+  };
 };
 
 export type ParseBriefingSitesResult = {
@@ -72,9 +77,12 @@ export const MAX_BRIEFING_SITES = 10;
 
 /** sites 테이블에서 조회한 브리핑 설정 row (briefing_enabled=true 필터 후). */
 export type BriefingSiteRow = {
+  id?: string | null;
+  organization_id?: string | null;
   name: string | null;
   briefing_question: string | null;
   briefing_email: string | null;
+  organizations?: { owner_id: string | null } | Array<{ owner_id: string | null }> | null;
 };
 
 /**
@@ -86,7 +94,19 @@ export function sitesFromBriefingRows(rows: readonly BriefingSiteRow[]): Briefin
   return rows.flatMap((row): BriefingSite[] => {
     const { name, briefing_question: question, briefing_email: email } = row;
     if (!isNonEmptyString(name) || !isNonEmptyString(question) || !isValidEmail(email)) return [];
-    return [{ name: name.trim(), question: question.trim(), email: email.trim() }];
+    if (!isNonEmptyString(row.id) || !isNonEmptyString(row.organization_id)) return [];
+    const organization = Array.isArray(row.organizations) ? row.organizations[0] : row.organizations;
+    if (!isNonEmptyString(organization?.owner_id)) return [];
+    return [{
+      name: name.trim(),
+      question: question.trim(),
+      email: email.trim(),
+      tenantContext: {
+        organizationId: row.organization_id.trim(),
+        ownerUserId: organization.owner_id.trim(),
+        siteId: row.id.trim()
+      }
+    }];
   });
 }
 

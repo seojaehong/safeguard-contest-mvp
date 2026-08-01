@@ -111,7 +111,11 @@ export async function GET(request: NextRequest) {
 
   const siteIds = Array.from(new Set((workpacks || []).map((workpack) => workpack.site_id).filter((id): id is string => Boolean(id))));
   const { data: sites, error: siteError } = siteIds.length
-    ? await client.from("sites").select("id,name,industry,region").in("id", siteIds)
+    ? await client
+      .from("sites")
+      .select("id,name,industry,region,organization_id")
+      .in("id", siteIds)
+      .in("organization_id", organizationIds)
     : { data: [], error: null };
 
   if (siteError) {
