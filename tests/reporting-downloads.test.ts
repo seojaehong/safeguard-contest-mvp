@@ -1053,6 +1053,28 @@ describe("reporting downloads", () => {
     expect(csv).not.toContain(",=2+3,");
   });
 
+  it("neutralizes formula prefixes after whitespace and control prefixes", () => {
+    const maliciousRisk: RiskAssessmentRow = {
+      ...riskRow,
+      hazard: "  =2+3",
+      currentControls: "\t+SUM(A1)",
+      additionalControls: "  \r-1+1",
+      owner: "일반 담당자"
+    };
+    const snapshot = buildReportSnapshot({
+      workpack: makeWorkpack([maliciousRisk]),
+      improvements: [],
+      period: "weekly",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+    const csv = buildReportCsv(snapshot);
+
+    expect(csv).toContain("'  =2+3");
+    expect(csv).toContain("'\t+SUM(A1)");
+    expect(csv).toContain("'  \r-1+1");
+    expect(csv).toContain("일반 담당자");
+  });
+
   it("exports a period learning corpus as JSONL events", () => {
     const snapshot = buildReportSnapshot({
       workpack: makeWorkpack(),

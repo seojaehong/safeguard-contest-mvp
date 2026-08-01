@@ -17,6 +17,7 @@ import {
   type RubricEvaluationItem
 } from "@/lib/safety-document-rubric";
 import { buildWorkpackGenerationFingerprint } from "@/lib/current-workpack";
+import { encodeSpreadsheetDelimitedCell } from "@/lib/spreadsheet-delimited-cell";
 import {
   areRiskAssessmentRowsRepresentedInDraft,
   buildStructuredDocumentSections,
@@ -1811,14 +1812,10 @@ function buildLaunchSheetRows(values: Record<DocumentKey, string>) {
   return [...documentRows, ...rubricRows];
 }
 
-function escapeCell(value: string) {
-  return `"${value.replace(/"/g, "\"\"")}"`;
-}
-
 function buildDelimited(rows: SheetRow[], delimiter: "," | "\t") {
   const header = ["문서", "섹션", "항목", "내용"];
   const body = rows.map((row) => [row.document, row.section, row.item, row.content]
-    .map((value) => delimiter === "," ? escapeCell(value) : value.replace(/\t/g, " ").replace(/\r?\n/g, " "))
+    .map((value) => encodeSpreadsheetDelimitedCell(value, delimiter))
     .join(delimiter));
   return [header.join(delimiter), ...body].join("\n");
 }

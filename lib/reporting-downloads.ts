@@ -8,6 +8,7 @@ import type {
 } from "@/lib/operation-improvement-history";
 import { isRfc3339OffsetTimestamp } from "@/lib/rfc3339-timestamp";
 import type { RiskAssessmentRow, RiskLevel } from "@/lib/risk-assessment-schema";
+import { encodeSpreadsheetDelimitedCell } from "@/lib/spreadsheet-delimited-cell";
 
 export type ReportPeriod = "daily" | "weekly" | "monthly" | "custom";
 
@@ -924,11 +925,7 @@ export function buildReportSnapshot(input: {
 }
 
 function csvEscape(value: string | number) {
-  const raw = String(value);
-  const trimmedStart = raw.trimStart();
-  const text = /^[=+\-@]/.test(trimmedStart) || /^[\t\r]/.test(raw) ? `'${raw}` : raw;
-  if (!/[",\n\r]/.test(text)) return text;
-  return `"${text.replace(/"/g, "\"\"")}"`;
+  return encodeSpreadsheetDelimitedCell(value, ",");
 }
 
 function toCsv(rows: Array<Array<string | number>>) {
