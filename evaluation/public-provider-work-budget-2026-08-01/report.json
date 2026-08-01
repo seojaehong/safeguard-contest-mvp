@@ -1,0 +1,117 @@
+{
+  "schemaVersion": "safeclaw-security-remediation-wave/v1",
+  "checkedAt": "2026-08-01T15:03:00.0000000+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_PUBLIC_PROVIDER_WORK_BUDGETS_LIVE_PENDING",
+  "wave": {
+    "id": "public-provider-and-upstream-work-budgets",
+    "priority": 3,
+    "findingCount": 4,
+    "findingIds": [
+      "csf_56e94d5af1a7088bda7deedb",
+      "csf_602a3194a53652647244cc7d",
+      "csf_1c556be46a6e411979fdc671",
+      "csf_82c8e671602027bb56acd591"
+    ],
+    "sourceScanArtifact": "evaluation/full-repository-security-scan-2026-07-28/report.json",
+    "remediationPlanArtifact": "evaluation/full-repository-security-remediation-plan-2026-07-29/report.json"
+  },
+  "source": {
+    "baseHead": "3a64a8a8d3ebfe30aed4728b6a2a2877c9e4a755",
+    "productCommit": "10749047126c70edf85e3e6c1e1256383ea0da33",
+    "productionMarkerAtValidation": "3a64a8a8d3ebfe30aed4728b6a2a2877c9e4a755",
+    "liveAfterProductDeploy": "PENDING"
+  },
+  "patchContract": {
+    "vulnerablePaths": [
+      "POST /api/knowledge/regenerate accepted generate=true with unbounded question/rawEvents before model generation.",
+      "POST /api/ask and /api/ask/stream accepted unbounded question and harnessMemory before runAsk provider/search/weather fan-out.",
+      "runAsk could be called directly with oversized question or harnessMemory before downstream provider/search/weather work.",
+      "GET /api/weather accepted unbounded question text and concurrent equivalent cold misses could each trigger fixed multi-signal upstream fan-out.",
+      "POST /api/workpack/remediate accepted oversized question/documentText before safety-reference search and model generation."
+    ],
+    "attackerControlledInput": "Public request body or query string values that select question text, harness memory, raw knowledge events, or remediation document text.",
+    "securityInvariant": "Public routes must reject over-budget work before DB search, public API fan-out, or model invocation; equivalent in-flight weather lookups must share one upstream fetch promise.",
+    "legitimateBehaviorPreserved": [
+      "Bounded ask JSON and SSE requests still attach generation evidence.",
+      "Knowledge candidates remain stateless, unpublished, and human-review-only.",
+      "Workpack remediation still returns readable SIF labels and bounded source summaries.",
+      "Weather route keeps existing fetchWeatherSignal behavior, timeout/retry behavior, and response shape for accepted questions."
+    ]
+  },
+  "changes": {
+    "files": [
+      "lib/public-work-budget.ts",
+      "app/api/ask/route.ts",
+      "app/api/ask/stream/route.ts",
+      "lib/search.ts",
+      "lib/knowledge-candidate-route.ts",
+      "app/api/weather/route.ts",
+      "app/api/workpack/remediate/route.ts",
+      "tests/ask-generation-evidence-routes.test.ts",
+      "tests/run-ask-work-budget.test.ts",
+      "tests/knowledge-regenerate-route.test.ts",
+      "tests/weather-route-budget.test.ts",
+      "tests/workpack-remediate-route.test.ts"
+    ],
+    "strategy": "Use shared public-work budget constants and fail-closed 413 responses before downstream work; add weather route in-flight coalescing for normalized equivalent questions.",
+    "findingClosure": {
+      "publicProviderAndUpstreamFindingsRemediatedInCurrentSource": 4,
+      "tenantAuthorizationFindingsPreviouslyRemediatedInCurrentSource": 2,
+      "spreadsheetFormulaFindingsPreviouslyRemediatedInCurrentSource": 4,
+      "remainingReportableFindingsBeforeFullRescan": 8,
+      "fullRepositoryRescanCompleted": false,
+      "securityCompleteClaimAllowed": false
+    }
+  },
+  "verification": {
+    "focused": {
+      "command": "npm.cmd exec -- vitest run tests/ask-generation-evidence-routes.test.ts tests/run-ask-work-budget.test.ts tests/knowledge-regenerate-route.test.ts tests/workpack-remediate-route.test.ts tests/weather-route-budget.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS: 5 files / 25 tests"
+    },
+    "focusedAndAdjacent": {
+      "command": "npm.cmd exec -- vitest run tests/ask-generation-evidence-routes.test.ts tests/run-ask-work-budget.test.ts tests/knowledge-regenerate-route.test.ts tests/workpack-remediate-route.test.ts tests/weather-route-budget.test.ts tests/photo-vision-analysis-route.test.ts tests/workpack-share-authority-routes.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS: 7 files / 67 tests"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    },
+    "dependencyAudit": {
+      "command": "npm.cmd audit --omit=dev",
+      "result": "PASS: found 0 vulnerabilities"
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "result": "PASS: Next 15.5.22 build, 28/28 pages"
+    },
+    "diffCheck": {
+      "command": "git diff --check",
+      "result": "PASS before product commit; LF-to-CRLF notices only"
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "crossTenantExploitPerformed": false,
+    "migrationCreatedOrApplied": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "paidProviderLoadPerformed": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "exactTrustRegistryMutationPerformed": false,
+    "productionProviderLoadTestPerformed": false
+  },
+  "remainingBoundaries": {
+    "immutableFullRepositoryScanStillRecordsOriginal18Findings": true,
+    "followUpFullRepositoryRescanRequired": true,
+    "documentExportWorkBudgets": "OPEN",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "providerDispatchPersistence": "approval_gated",
+    "shareRecipientAck": "approval_gated",
+    "supabaseRlsLaunchIsolation": "approval_gated",
+    "llmWikiPublication": "approval_gated",
+    "sifEmbeddingRuntime": "approval_gated",
+    "koshaExactPromotionReview": "approval_gated"
+  }
+}
