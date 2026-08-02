@@ -538,6 +538,10 @@
   font-size: var(--text-caption);
 }
 
+.riskRowTabType {
+  display: none;
+}
+
 .riskRowTabs em {
   grid-column: 2;
   color: var(--workspace-danger, #a83224);
@@ -1676,10 +1680,27 @@
 
   .riskRowTabs button {
     grid-template-columns: auto minmax(0, 1fr);
+    gap: 0 4px;
     min-width: 0;
     max-width: none;
+    height: 36px;
     min-height: 36px;
+    overflow: hidden;
     padding: 3px 6px;
+  }
+
+  .riskRowTabHazard {
+    display: block;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    font-size: var(--text-hud);
+    line-height: 1.05;
+  }
+
+  .riskRowTabType {
+    display: block;
+    grid-column: 2;
+    grid-row: 1;
   }
 
   .riskRowsHeader,
@@ -1775,6 +1796,7 @@
   .riskRow select,
   .riskRow textarea {
     padding: 4px 8px;
+    scroll-margin-top: 72px;
   }
 
   .riskRowDetails summary {

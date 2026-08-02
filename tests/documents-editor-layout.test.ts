@@ -741,6 +741,7 @@ describe("documents editor layout", () => {
     await selectDocumentFromWorkbench(page, "riskAssessmentDraft");
     const navigation = await page.getByTestId("risk-row-selector").evaluateAll((buttons) => buttons.map((button) => ({
       label: button.querySelector("strong")?.textContent?.trim() || "",
+      compactLabel: button.querySelector<HTMLElement>("[class*='riskRowTabType']")?.textContent?.trim() || "",
       accessibleName: button.getAttribute("aria-label") || "",
       title: button.getAttribute("title") || ""
     })));
@@ -748,6 +749,7 @@ describe("documents editor layout", () => {
     expect(navigation.every((item) => item.accessibleName.includes("작업: 동일 외벽 도장 작업"))).toBe(true);
     expect(navigation.every((item) => item.title.includes("작업: 동일 외벽 도장 작업"))).toBe(true);
     expect(navigation.map((item) => item.label)).toEqual(riskRows.map((row) => row.hazard));
+    expect(navigation.every((item) => item.compactLabel.length > 0)).toBe(true);
   }, 90_000);
 
   it("persists an incomplete new risk row across reload while excluding invalid canonical export", async () => {
@@ -1795,6 +1797,20 @@ describe("documents editor layout", () => {
       }).toEqual(["true", "false"]);
       const riskRowNavigation = await page.getByTestId("risk-row-selector").evaluateAll((buttons) => buttons.map((button) => ({
         label: button.querySelector("strong")?.textContent?.trim() || "",
+        compactLabel: button.querySelector<HTMLElement>("[class*='riskRowTabType']")?.textContent?.trim() || "",
+        compactLabelVisible: (() => {
+          const label = button.querySelector<HTMLElement>("[class*='riskRowTabType']");
+          return Boolean(label && getComputedStyle(label).display !== "none" && label.getBoundingClientRect().width > 0);
+        })(),
+        compactLabelClipped: (() => {
+          const label = button.querySelector<HTMLElement>("[class*='riskRowTabType']");
+          return Boolean(label && label.scrollWidth > label.clientWidth + 1);
+        })(),
+        hazardLabelVisible: (() => {
+          const label = button.querySelector<HTMLElement>("[class*='riskRowTabHazard']");
+          return Boolean(label && getComputedStyle(label).display !== "none" && label.getBoundingClientRect().width > 0);
+        })(),
+        visibleText: (button as HTMLElement).innerText.replace(/\s+/gu, " ").trim(),
         accessibleName: button.getAttribute("aria-label") || "",
         title: button.getAttribute("title") || ""
       })));
@@ -1804,6 +1820,11 @@ describe("documents editor layout", () => {
       expect(riskRowNavigation.every((item) => item.accessibleName.includes(item.label))).toBe(true);
       expect(riskRowNavigation.every((item) => item.title.includes(item.label))).toBe(true);
       expect(riskRowNavigation.some((item) => item.accessibleName.includes("작업:"))).toBe(true);
+      expect(riskRowNavigation.every((item) => item.compactLabel.length > 0)).toBe(true);
+      expect(riskRowNavigation.every((item) => item.compactLabelVisible)).toBe(true);
+      expect(riskRowNavigation.every((item) => !item.compactLabelClipped)).toBe(true);
+      expect(riskRowNavigation.every((item) => item.hazardLabelVisible)).toBe(true);
+      expect(new Set(riskRowNavigation.map((item) => item.visibleText)).size).toBe(riskRowNavigation.length);
       const riskAssessmentLanding = await page.evaluate(() => {
         const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
         const documentSelect = document.querySelector<HTMLSelectElement>('select[aria-label="편집 문서 선택"]');

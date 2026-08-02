@@ -2552,7 +2552,10 @@ function RiskAssessmentRowsEditor({
               onClick={() => setActiveRiskRowIndex(rowIndex)}
             >
               <span>{String(rowIndex + 1).padStart(2, "0")}</span>
-              <strong>{riskLabel}</strong>
+              <strong className={styles.riskRowTabHazard}>{riskLabel}</strong>
+              <strong className={styles.riskRowTabType} aria-hidden="true">
+                {accidentTypeLabels[row.accidentType]}
+              </strong>
               {rowIssueCount ? <em>{rowIssueCount}건 확인</em> : null}
             </button>
           );
