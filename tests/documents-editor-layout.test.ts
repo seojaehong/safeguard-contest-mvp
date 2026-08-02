@@ -713,6 +713,43 @@ describe("documents editor layout", () => {
     expect(freeformExport.payload).not.toHaveProperty("riskAssessmentRows");
   }, 90_000);
 
+  it("distinguishes saved risk rows that share the same task name", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 723 } });
+    const sample = buildSampleWorkpack();
+    const riskRows = (sample.structured?.riskAssessmentRows ?? []).map((row, index) => ({
+      ...row,
+      task: "동일 외벽 도장 작업",
+      hazard: [
+        "비계 승강 중 추락",
+        "강풍 중 자재 낙하",
+        "지게차 동선 작업자 충돌"
+      ][index] ?? `고유 위험 ${index + 1}`
+    }));
+    expect(riskRows.length).toBeGreaterThanOrEqual(3);
+    sample.deliverables.riskAssessmentDraft = serializeRiskAssessmentRowsToDraft(riskRows);
+    sample.structured = {
+      riskAssessmentRows: riskRows,
+      riskAssessmentValidation: { ok: true, issueCount: 0, issues: [] }
+    };
+    const stored = buildStoredCurrentWorkpack(sample);
+    await page.addInitScript(({ storageKey, serialized }) => {
+      window.localStorage.setItem(storageKey, serialized);
+    }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
+
+    await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+    await selectDocumentFromWorkbench(page, "riskAssessmentDraft");
+    const navigation = await page.getByTestId("risk-row-selector").evaluateAll((buttons) => buttons.map((button) => ({
+      label: button.querySelector("strong")?.textContent?.trim() || "",
+      accessibleName: button.getAttribute("aria-label") || "",
+      title: button.getAttribute("title") || ""
+    })));
+    expect(new Set(navigation.map((item) => item.label)).size).toBe(navigation.length);
+    expect(navigation.every((item) => item.accessibleName.includes("작업: 동일 외벽 도장 작업"))).toBe(true);
+    expect(navigation.every((item) => item.title.includes("작업: 동일 외벽 도장 작업"))).toBe(true);
+    expect(navigation.map((item) => item.label)).toEqual(riskRows.map((row) => row.hazard));
+  }, 90_000);
+
   it("persists an incomplete new risk row across reload while excluding invalid canonical export", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 430, height: 932 } });
@@ -1756,6 +1793,17 @@ describe("documents editor layout", () => {
         const tbmLogPressed = await launcher.getByRole("button", { name: "TBM 기록" }).getAttribute("aria-pressed");
         return [riskAssessmentPressed, tbmLogPressed];
       }).toEqual(["true", "false"]);
+      const riskRowNavigation = await page.getByTestId("risk-row-selector").evaluateAll((buttons) => buttons.map((button) => ({
+        label: button.querySelector("strong")?.textContent?.trim() || "",
+        accessibleName: button.getAttribute("aria-label") || "",
+        title: button.getAttribute("title") || ""
+      })));
+      expect(riskRowNavigation.length).toBeGreaterThanOrEqual(3);
+      expect(new Set(riskRowNavigation.map((item) => item.label)).size).toBe(riskRowNavigation.length);
+      expect(riskRowNavigation.every((item) => item.label.length > 0)).toBe(true);
+      expect(riskRowNavigation.every((item) => item.accessibleName.includes(item.label))).toBe(true);
+      expect(riskRowNavigation.every((item) => item.title.includes(item.label))).toBe(true);
+      expect(riskRowNavigation.some((item) => item.accessibleName.includes("작업:"))).toBe(true);
       const riskAssessmentLanding = await page.evaluate(() => {
         const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
         const documentSelect = document.querySelector<HTMLSelectElement>('select[aria-label="편집 문서 선택"]');

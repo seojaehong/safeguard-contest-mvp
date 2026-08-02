@@ -2535,6 +2535,10 @@ function RiskAssessmentRowsEditor({
         {rows.map((row, rowIndex) => {
           const rowId = rowIds[rowIndex] ?? `risk-row-${rowIndex}`;
           const rowIssueCount = validation.issues.filter((issue) => issue.rowIndex === rowIndex).length;
+          const riskLabel = row.hazard.trim() || row.task.trim() || "새 위험 항목";
+          const taskContext = row.task.trim() && row.task.trim() !== riskLabel
+            ? ` · 작업: ${row.task.trim()}`
+            : "";
           return (
             <button
               key={rowId}
@@ -2543,11 +2547,12 @@ function RiskAssessmentRowsEditor({
               data-testid="risk-row-selector"
               aria-selected={activeRiskRowIndex === rowIndex}
               aria-controls={`risk-row-panel-${rowId}`}
-              aria-label={`위험 항목 ${rowIndex + 1} 선택: ${row.task || row.hazard || "새 위험 항목"}`}
+              aria-label={`위험 항목 ${rowIndex + 1} 선택: ${riskLabel}${taskContext}`}
+              title={`${riskLabel}${taskContext}`}
               onClick={() => setActiveRiskRowIndex(rowIndex)}
             >
               <span>{String(rowIndex + 1).padStart(2, "0")}</span>
-              <strong>{row.task || row.hazard || "새 위험 항목"}</strong>
+              <strong>{riskLabel}</strong>
               {rowIssueCount ? <em>{rowIssueCount}건 확인</em> : null}
             </button>
           );
