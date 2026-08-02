@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "safeclaw-document-risk-row-navigation-summary/v1",
+  "checkedAt": "2026-08-02T20:46:45.1535862+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_RISK_ROW_NAVIGATION",
+  "productCommit": "536cfcaab32cae84ede90f1ec724a2f9a12ee853",
+  "beforeLive": {
+    "path": "evaluation/document-risk-row-navigation-2026-08-02/before-live/report.json",
+    "productionCommit": "c72c70a3ee5e36cef3c768558d66f1f91641524a",
+    "verdict": "RED_LIVE_PRODUCTION_DOCUMENT_RISK_ROW_NAVIGATION",
+    "total": 4,
+    "pass": 0,
+    "fail": 4,
+    "firstVisibleLabel": "외벽 도장 작업",
+    "rowsWithTooltips": 0,
+    "taskContextOccurrences": 0
+  },
+  "afterLocal": {
+    "path": "evaluation/document-risk-row-navigation-2026-08-02/after-local/report.json",
+    "sourceHead": "536cfcaab32cae84ede90f1ec724a2f9a12ee853",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_DOCUMENT_RISK_ROW_NAVIGATION",
+    "total": 4,
+    "pass": 4,
+    "fail": 0,
+    "firstVisibleLabel": "이동식 비계 승·하강 및 작업발판 이동 중 추락",
+    "rowsWithTooltips": 12,
+    "taskContextOccurrences": 4,
+    "desktopBodyHeight": 723,
+    "mobileBodyHeight": 728,
+    "desktopShellRatio": 1.75,
+    "mobileShellRatio": 2.23,
+    "horizontalOverflowCases": 0
+  },
+  "afterLive": {
+    "path": "evaluation/document-risk-row-navigation-2026-08-02/after-live/report.json",
+    "sourceHead": "536cfcaab32cae84ede90f1ec724a2f9a12ee853",
+    "productionCommit": "536cfcaab32cae84ede90f1ec724a2f9a12ee853",
+    "deploymentUrl": "safeguard-contest-nkrok7sik-seojaehongs-projects.vercel.app",
+    "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_RISK_ROW_NAVIGATION",
+    "total": 4,
+    "pass": 4,
+    "fail": 0,
+    "sourceHeadMatchesProduction": true,
+    "desktopBodyHeight": 723,
+    "mobileBodyHeight": 728,
+    "desktopShellRatio": 1.75,
+    "mobileShellRatio": 2.23,
+    "uniqueVisibleLabelsPerCase": 3,
+    "horizontalOverflowCases": 0
+  },
+  "verification": {
+    "focusedSavedRiskRows": {
+      "filesPassed": 1,
+      "testsPassed": 1,
+      "status": "pass"
+    },
+    "documentsEditorLayout": {
+      "filesPassed": 1,
+      "testsPassed": 37,
+      "status": "pass"
+    },
+    "typecheck": {
+      "status": "pass"
+    },
+    "build": {
+      "status": "pass",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "liveAfterDeploymentRequired": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedLaunchBoundariesChanged": false
+  },
+  "boundary": "This bounded UI fix distinguishes risk-assessment rows by their hazards while retaining task context in accessible names and tooltips. It does not change generated document content, close exact saved Share, or alter any approval-gated DB, provider, vector, wiki, or KOSHA registry boundary."
+}

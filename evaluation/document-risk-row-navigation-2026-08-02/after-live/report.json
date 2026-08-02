@@ -1,0 +1,270 @@
+{
+  "schemaVersion": "safeclaw-document-risk-row-navigation/v1",
+  "checkedAt": "2026-08-02T11:47:51.588Z",
+  "mode": "live-production",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceHead": "536cfcaab32cae84ede90f1ec724a2f9a12ee853",
+  "productionBuild": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "536cfcaab32cae84ede90f1ec724a2f9a12ee853",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-nkrok7sik-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "sourceHeadMatchesProduction": true,
+  "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_RISK_ROW_NAVIGATION",
+  "total": 4,
+  "pass": 4,
+  "fail": 0,
+  "acceptanceContract": {
+    "uniqueVisibleRiskLabels": true,
+    "hazardFirstLabel": true,
+    "fullTaskContextInAccessibleNameAndTitle": true,
+    "minimumRiskRowCount": 3,
+    "shellRatioMaximum": 3,
+    "bodyLevelLongStackForbidden": true
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "results": [
+    {
+      "theme": "day",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "state": "selected-riskAssessmentDraft",
+      "metrics": {
+        "viewportWidth": 1440,
+        "viewportHeight": 723,
+        "bodyHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 786,
+        "shellRatio": 1.75,
+        "shellOverflowY": "auto",
+        "riskRowCount": 3,
+        "uniqueVisibleLabelCount": 3,
+        "taskContextLabelCount": 1,
+        "rows": [
+          {
+            "label": "이동식 비계 승·하강 및 작업발판 이동 중 추락",
+            "accessibleName": "위험 항목 1 선택: 이동식 비계 승·하강 및 작업발판 이동 중 추락 · 작업: 외벽 도장 작업",
+            "title": "이동식 비계 승·하강 및 작업발판 이동 중 추락 · 작업: 외벽 도장 작업",
+            "rect": {
+              "x": 545,
+              "y": 405,
+              "width": 220,
+              "height": 44
+            }
+          },
+          {
+            "label": "강풍 시 비계 전도와 공구·자재 낙하",
+            "accessibleName": "위험 항목 2 선택: 강풍 시 비계 전도와 공구·자재 낙하",
+            "title": "강풍 시 비계 전도와 공구·자재 낙하",
+            "rect": {
+              "x": 773,
+              "y": 405,
+              "width": 217,
+              "height": 44
+            }
+          },
+          {
+            "label": "지게차 동선 인접 구간에서 작업자 충돌",
+            "accessibleName": "위험 항목 3 선택: 지게차 동선 인접 구간에서 작업자 충돌",
+            "title": "지게차 동선 인접 구간에서 작업자 충돌",
+            "rect": {
+              "x": 998,
+              "y": 405,
+              "width": 220,
+              "height": 44
+            }
+          }
+        ]
+      },
+      "screenshot": "day-desktop-short-1440x723.png",
+      "verdict": "PASS"
+    },
+    {
+      "theme": "night",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "state": "selected-riskAssessmentDraft",
+      "metrics": {
+        "viewportWidth": 1440,
+        "viewportHeight": 723,
+        "bodyHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 786,
+        "shellRatio": 1.75,
+        "shellOverflowY": "auto",
+        "riskRowCount": 3,
+        "uniqueVisibleLabelCount": 3,
+        "taskContextLabelCount": 1,
+        "rows": [
+          {
+            "label": "이동식 비계 승·하강 및 작업발판 이동 중 추락",
+            "accessibleName": "위험 항목 1 선택: 이동식 비계 승·하강 및 작업발판 이동 중 추락 · 작업: 외벽 도장 작업",
+            "title": "이동식 비계 승·하강 및 작업발판 이동 중 추락 · 작업: 외벽 도장 작업",
+            "rect": {
+              "x": 545,
+              "y": 405,
+              "width": 220,
+              "height": 44
+            }
+          },
+          {
+            "label": "강풍 시 비계 전도와 공구·자재 낙하",
+            "accessibleName": "위험 항목 2 선택: 강풍 시 비계 전도와 공구·자재 낙하",
+            "title": "강풍 시 비계 전도와 공구·자재 낙하",
+            "rect": {
+              "x": 773,
+              "y": 405,
+              "width": 217,
+              "height": 44
+            }
+          },
+          {
+            "label": "지게차 동선 인접 구간에서 작업자 충돌",
+            "accessibleName": "위험 항목 3 선택: 지게차 동선 인접 구간에서 작업자 충돌",
+            "title": "지게차 동선 인접 구간에서 작업자 충돌",
+            "rect": {
+              "x": 998,
+              "y": 405,
+              "width": 220,
+              "height": 44
+            }
+          }
+        ]
+      },
+      "screenshot": "night-desktop-short-1440x723.png",
+      "verdict": "PASS"
+    },
+    {
+      "theme": "day",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "state": "selected-riskAssessmentDraft",
+      "metrics": {
+        "viewportWidth": 390,
+        "viewportHeight": 723,
+        "bodyHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 742,
+        "shellRatio": 2.23,
+        "shellOverflowY": "auto",
+        "riskRowCount": 3,
+        "uniqueVisibleLabelCount": 3,
+        "taskContextLabelCount": 1,
+        "rows": [
+          {
+            "label": "이동식 비계 승·하강 및 작업발판 이동 중 추락",
+            "accessibleName": "위험 항목 1 선택: 이동식 비계 승·하강 및 작업발판 이동 중 추락 · 작업: 외벽 도장 작업",
+            "title": "이동식 비계 승·하강 및 작업발판 이동 중 추락 · 작업: 외벽 도장 작업",
+            "rect": {
+              "x": 55,
+              "y": 713,
+              "width": 86,
+              "height": 36
+            }
+          },
+          {
+            "label": "강풍 시 비계 전도와 공구·자재 낙하",
+            "accessibleName": "위험 항목 2 선택: 강풍 시 비계 전도와 공구·자재 낙하",
+            "title": "강풍 시 비계 전도와 공구·자재 낙하",
+            "rect": {
+              "x": 145,
+              "y": 713,
+              "width": 86,
+              "height": 36
+            }
+          },
+          {
+            "label": "지게차 동선 인접 구간에서 작업자 충돌",
+            "accessibleName": "위험 항목 3 선택: 지게차 동선 인접 구간에서 작업자 충돌",
+            "title": "지게차 동선 인접 구간에서 작업자 충돌",
+            "rect": {
+              "x": 234,
+              "y": 713,
+              "width": 86,
+              "height": 36
+            }
+          }
+        ]
+      },
+      "screenshot": "day-mobile-short-390x723.png",
+      "verdict": "PASS"
+    },
+    {
+      "theme": "night",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "state": "selected-riskAssessmentDraft",
+      "metrics": {
+        "viewportWidth": 390,
+        "viewportHeight": 723,
+        "bodyHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 742,
+        "shellRatio": 2.23,
+        "shellOverflowY": "auto",
+        "riskRowCount": 3,
+        "uniqueVisibleLabelCount": 3,
+        "taskContextLabelCount": 1,
+        "rows": [
+          {
+            "label": "이동식 비계 승·하강 및 작업발판 이동 중 추락",
+            "accessibleName": "위험 항목 1 선택: 이동식 비계 승·하강 및 작업발판 이동 중 추락 · 작업: 외벽 도장 작업",
+            "title": "이동식 비계 승·하강 및 작업발판 이동 중 추락 · 작업: 외벽 도장 작업",
+            "rect": {
+              "x": 55,
+              "y": 713,
+              "width": 86,
+              "height": 36
+            }
+          },
+          {
+            "label": "강풍 시 비계 전도와 공구·자재 낙하",
+            "accessibleName": "위험 항목 2 선택: 강풍 시 비계 전도와 공구·자재 낙하",
+            "title": "강풍 시 비계 전도와 공구·자재 낙하",
+            "rect": {
+              "x": 145,
+              "y": 713,
+              "width": 86,
+              "height": 36
+            }
+          },
+          {
+            "label": "지게차 동선 인접 구간에서 작업자 충돌",
+            "accessibleName": "위험 항목 3 선택: 지게차 동선 인접 구간에서 작업자 충돌",
+            "title": "지게차 동선 인접 구간에서 작업자 충돌",
+            "rect": {
+              "x": 234,
+              "y": 713,
+              "width": 86,
+              "height": 36
+            }
+          }
+        ]
+      },
+      "screenshot": "night-mobile-short-390x723.png",
+      "verdict": "PASS"
+    }
+  ]
+}
