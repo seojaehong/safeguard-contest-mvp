@@ -428,6 +428,26 @@ type NextRunwayReport = {
     shareSessionCreated: boolean;
     exactSavedShareVerdict: string;
   };
+  documentRawDrilldownGeometry: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    sourceHeadMatchesProduction: boolean;
+    documentCount: number | null;
+    viewportCaseCount: number | null;
+    total: number | null;
+    pass: number | null;
+    fail: number | null;
+    maximumShellRatio: number | null;
+    maximumSourceBottom: number | null;
+    maximumSourceClientHeight: number | null;
+    maximumSourceRatio: number | null;
+    overflowAutoCount: number;
+    dbMutationPerformed: boolean;
+    providerDispatchCalled: boolean;
+    shareSessionCreated: boolean;
+    exactSavedShareVerdict: string;
+  };
   shareGeneratedSessionPerception: {
     verdict: string;
     sourceHead: string;
@@ -1652,6 +1672,36 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       }))
     )),
   });
+  writeJson(root, "evaluation/document-raw-drilldown-geometry-2026-08-02/after-live/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_12_DOCUMENT_RAW_DRILLDOWN_GEOMETRY",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", branch: "master", environment: "production" },
+    sourceHeadMatchesProduction: true,
+    documentCount: 12,
+    viewportCaseCount: 4,
+    total: 48,
+    pass: 48,
+    fail: 0,
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    results: ["day-desktop", "night-desktop", "day-mobile", "night-mobile"].flatMap((label) => (
+      canonicalDocumentKeys.map((documentKey) => ({
+        documentKey,
+        verdict: "PASS",
+        metrics: {
+          shellRatio: label.includes("mobile") ? 2.25 : 1.36,
+          sourceBottom: label.includes("mobile") ? 693 : 568,
+          sourceClientHeight: 258,
+          sourceRatio: documentKey === "foreignWorkerTransmission" ? 35.91 : 8.8,
+          sourceOverflowY: "auto",
+        },
+      }))
+    )),
+  });
   writeJson(root, "evaluation/workspace-bounded-workbench-dod-2026-07-22/report.json", {
     verdict: "DOD_RECORDED_NOT_A_PASS_CLAIM",
     routeSplitAloneAcceptedAsFix: false,
@@ -2156,7 +2206,7 @@ describe("northstar next runway generator", () => {
       routeSplitAloneAcceptedAsFix: false,
       acceptedStructure: "three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes",
       documentsDefaultCockpit: "first actionable cockpit is live-proven with 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers closed by default, 0 visible supporting launchers, and the legacy document index hidden; do not phrase this as the whole Documents page shortened",
-      documentsRemainingDebt: "full 12-document authoring polish remains; the all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content and the local workbench shell ratio target remains <= 3",
+      documentsRemainingDebt: "full 12-document authoring and broad human wording polish remain separate; the all-12 launcher exposure and explicit raw/source editor are now live-bounded secondary drilldowns rather than serial page content, while deeper row/detail editing keeps the local workbench shell ratio target <= 3",
       shareDesktop: "current measured Workspace Share passes a scoped three-zone desktop cockpit and 390x723 mobile-stack contract, while the invited recipient fixture separately passes a two-zone desktop workbench; exact saved/generated user sessions that still feel mobile-like require their own width-ratio/grid repro before product changes, and desktop must not regress into a mobile card stack",
       shareGeneratedResult: "current-source generated provider-result fixture keeps the result summary inside 1440x723, 1440x900, and 390x844 after the short desktop landing fix; exact saved user sessions still require their own repro if reported",
       shareRecipientLongContent: "live route-controlled long-content fixture keeps desktop recipient Share in two regions, mobile recipient root <= 1.5 viewports, confirmation in the first viewport, long task text in local scroll, and the document group collapsed by default; route split alone is insufficient and this is not exact saved-session proof",
@@ -2314,6 +2364,24 @@ describe("northstar next runway generator", () => {
       shareSessionCreated: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
+    expect(report.documentRawDrilldownGeometry).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_12_DOCUMENT_RAW_DRILLDOWN_GEOMETRY",
+      sourceHeadMatchesProduction: true,
+      documentCount: 12,
+      viewportCaseCount: 4,
+      total: 48,
+      pass: 48,
+      fail: 0,
+      maximumShellRatio: 2.25,
+      maximumSourceBottom: 693,
+      maximumSourceClientHeight: 258,
+      maximumSourceRatio: 35.91,
+      overflowAutoCount: 48,
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
     expect(report.uiInterpretation.documentsDefaultCockpit).toContain("exactly 3 visible core launchers");
     expect(report.uiInterpretation.documentsDefaultCockpit).toContain("0 visible supporting launchers");
     expect(report.uiInterpretation.documentsContainment).toContain("selected-only bounded workbench");
@@ -2351,6 +2419,7 @@ describe("northstar next runway generator", () => {
       ],
     });
     expect(report.uiInterpretation.selectedEditorDetail).toContain("desktop 1440x900");
+    expect(report.uiInterpretation.selectedEditorDetail).toContain("raw/source editing is separately live-bounded across 48/48 rows");
     expect(report.uiInterpretation.structuralAnswer).toContain("bounded IA/density wave");
     expect(report.uiInterpretation.structuralAnswer).toContain("default exposure budget");
     expect(report.uiInterpretation.stepShell.documents).toContain("full 12-document bodies remain selected-only drilldown");

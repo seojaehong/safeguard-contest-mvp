@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `649b13bf97ed6324f90f76b80a5ffb9908db5292`
+Source HEAD: `f53885a652f71c4315f27a7aa9476677e8c92ced`
 
-Production `/api/build-info`: `649b13bf97ed6324f90f76b80a5ffb9908db5292`
+Production `/api/build-info`: `f53885a652f71c4315f27a7aa9476677e8c92ced`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `649b13bf97ed6324f90f76b80a5ffb9908db5292`
+Live rollup source head: `f53885a652f71c4315f27a7aa9476677e8c92ced`
 
 Live rollup matches production: `true`
 
@@ -81,8 +81,9 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Documents cockpit workbench geometry: `PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH`; 1440x723 and 390x723 rows must show grid workbench, 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers closed by default, 0 visible supporting launchers, the legacy document index hidden, no horizontal overflow, and route split alone remains `false`.
 - Documents section navigation: `PASS_LIVE_PRODUCTION_DOCUMENT_SECTION_NAVIGATION`; 4/4 Day/Night desktop-short and mobile-short rows retain 6 tabs, exactly 1 selected tab, 44px minimum controls, readable two-line labels, shell ratio <= 3, first-action containment, no horizontal overflow, no mutation, and exact saved Share `MISSING_EVIDENCE`.
 - All-document selected-authoring geometry: `PASS_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY`; 48/48 rows cover 12 canonical documents across Day/Night desktop-short and mobile-short, with maximum shell ratio `2.69`, maximum first-action bottom `719/723`, at most one role-specific cockpit, local cockpit scroll, hidden raw/source editors, no mutation, and exact saved Share `MISSING_EVIDENCE`.
-- Documents selected editor/detail: risk-assessment default, same-document reselect, and all-12 launcher exposure land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown.
-- Documents remaining debt: live 12-document selected-authoring geometry is now bounded, while broad human wording polish and explicit raw/full-source drilldown quality remain separate from this layout proof.
+- Raw-source drilldown geometry: `PASS_LIVE_PRODUCTION_12_DOCUMENT_RAW_DRILLDOWN_GEOMETRY`; 48/48 rows cover 12 canonical documents across Day/Night desktop-short and mobile-short, with maximum shell ratio `2.25`, maximum source bottom `693/723`, maximum source editor height `258`, local source scrolling in 48/48, no mutation, and exact saved Share `MISSING_EVIDENCE`.
+- Documents selected editor/detail: risk-assessment default, same-document reselect, and all-12 launcher exposure land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; explicit raw/source editing remains secondary drilldown but is now live-bounded.
+- Documents remaining debt: live selected-authoring and explicit raw-source geometry are bounded, while deeper row/detail editing and broad human wording review remain separate from this layout proof.
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.
 - Bounded workbench DoD: route split alone is not accepted; desktop Documents hard-REDs above the recorded screen threshold, /share/result desktop requires multi-region workbench geometry, and generated fixture evidence must stay separate from exact saved/session proof.
 - Legacy workspace-layout regression: remains a broad no-overflow/editor-flow smoke only, not a long-form UX PASS gate; the DoD and route-specific evidence own first-task distance.

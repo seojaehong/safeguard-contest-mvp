@@ -1,8 +1,10 @@
 {
   "schemaVersion": "safeclaw-document-raw-drilldown-geometry-summary/v1",
   "generatedAt": "2026-08-02T20:05:11.5642447+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_12_DOCUMENT_RAW_DRILLDOWN_GEOMETRY_LIVE_PENDING",
+  "verdict": "PASS_LIVE_PRODUCTION_12_DOCUMENT_RAW_DRILLDOWN_GEOMETRY",
   "productCommit": "419f9e7bb2ceac8ec20af591f0526d78c661e866",
+  "evidenceCommit": "f53885a652f71c4315f27a7aa9476677e8c92ced",
+  "productionCommit": "f53885a652f71c4315f27a7aa9476677e8c92ced",
   "route": "/documents",
   "documentCount": 12,
   "themes": ["day", "night"],
@@ -38,6 +40,25 @@
     "sourceBottomFail": 0,
     "sourceHeightFail": 0
   },
+  "afterLive": {
+    "artifact": "evaluation/document-raw-drilldown-geometry-2026-08-02/after-live/report.json",
+    "sourceHead": "f53885a652f71c4315f27a7aa9476677e8c92ced",
+    "productionCommit": "f53885a652f71c4315f27a7aa9476677e8c92ced",
+    "deploymentUrl": "safeguard-contest-76196epgz-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true,
+    "verdict": "PASS_LIVE_PRODUCTION_12_DOCUMENT_RAW_DRILLDOWN_GEOMETRY",
+    "total": 48,
+    "pass": 48,
+    "fail": 0,
+    "maxShellRatio": 2.25,
+    "maxSourceBottom": 693,
+    "maxSourceClientHeight": 258,
+    "maxSourceRatio": 35.91,
+    "overflowAutoCount": 48,
+    "overflowHiddenCount": 0,
+    "sourceBottomFail": 0,
+    "sourceHeightFail": 0
+  },
   "verification": {
     "documentsBrowserContract": "PASS_1_FILE_36_TESTS",
     "typecheck": "PASS",
@@ -65,7 +86,7 @@
     "koshaRegistryMutationPerformed": false
   },
   "remainingBoundaries": {
-    "liveAfterDeploymentPending": true,
+    "liveAfterDeploymentPending": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "routeSplitAloneAcceptedAsFix": false,
     "broadHumanWordingReviewRequired": true
