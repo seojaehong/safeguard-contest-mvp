@@ -2308,6 +2308,53 @@ describe("runAsk DB harness mode", () => {
 });
 
 describe("workpack learning export", () => {
+  it("keeps stored text inert in Markdown and Obsidian exports without changing JSONL provenance", () => {
+    const hostileText = "점검 ![remote](https://attacker.invalid/pixel) <script>alert(1)</script> ![[../../secret]] javascript:alert(2) file:///etc/passwd";
+    const input = {
+      workpackId: "wp-hostile-markdown",
+      generatedAt: "2026-08-02T00:00:00.000Z",
+      question: `<img src="https://attacker.invalid/pixel"> ${hostileText}`,
+      taskLabel: hostileText,
+      references: [{
+        ...reference(),
+        title: hostileText,
+        short_summary: hostileText,
+        summary: hostileText,
+        source_url: "file:///etc/passwd"
+      }],
+      improvements: [{
+        id: "imp-hostile-markdown",
+        taskLabel: hostileText,
+        hazardLabel: "![[../../secret]]",
+        improvementText: "<iframe src=https://attacker.invalid></iframe>",
+        reflectedDocuments: ["[document](javascript:alert(3))"],
+        sourceType: "operator_note" as const,
+        visionSummary: "data:text/html,<script>alert(4)</script>"
+      }],
+      confirmations: [{
+        displayName: "<img src=file:///secret>",
+        languageCode: "javascript:alert(5)",
+        readAt: "2026-08-02T00:00:00.000Z"
+      }]
+    };
+
+    const markdown = buildWorkpackLearningMarkdown(input);
+    const obsidian = buildWorkpackLearningFile(input, "obsidian").content;
+    const jsonl = buildWorkpackLearningJsonl(input);
+
+    for (const output of [markdown, obsidian]) {
+      expect(output).not.toMatch(/<(?:script|img|iframe)\b/iu);
+      expect(output).not.toContain("![remote]");
+      expect(output).not.toContain("![[");
+      expect(output).not.toMatch(/\b(?:javascript|data|file|vbscript):/iu);
+      expect(output).not.toContain("[[Workpack/../../");
+    }
+    expect(markdown).toContain("\\!\\[remote\\]");
+    expect(markdown).toContain("javascript\\[colon\\]");
+    expect(jsonl).toContain("<script>alert(1)</script>");
+    expect(jsonl).toContain("file:///etc/passwd");
+  });
+
   it("exports daily work memory as markdown and jsonl", () => {
     const input = {
       workpackId: "wp-1",

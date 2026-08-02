@@ -76,6 +76,19 @@ function preservePayloadText(value: string, maxLength = 4000) {
   return `${normalized.slice(0, maxLength - 1).trimEnd()}…`;
 }
 
+export function neutralizeWorkpackLearningMarkdownText(value: string, maxLength = 4000) {
+  return preservePayloadText(value, maxLength)
+    .replace(/\b(javascript|data|file|vbscript):/giu, "$1[colon]")
+    .replace(/\\/g, "\\\\")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/([`\[\]!])/g, "\\$1");
+}
+
+function markdownList(values: string[]) {
+  return values.map((value) => neutralizeWorkpackLearningMarkdownText(value, 500)).join(", ");
+}
+
 function readOptionalPayloadString(value: unknown, key: string, maxLength = 4000): string | undefined {
   if (!isRecord(value)) return undefined;
   const text = value[key];
@@ -175,12 +188,12 @@ function slugSegment(value: string) {
 }
 
 function frontmatterString(value: string) {
-  return JSON.stringify(value);
+  return JSON.stringify(neutralizeWorkpackLearningMarkdownText(value));
 }
 
 function obsidianSegment(value: string, fallback: string) {
   const normalized = value
-    .replace(/[\[\]#^|]/g, "")
+    .replace(/[\[\]#^|/\\:*?"<>!]/g, "")
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 96);
@@ -194,7 +207,7 @@ function obsidianLink(kind: string, label: string) {
 function metadataLines(meta: Record<string, string | number | boolean | null>, indent = "  ") {
   return Object.entries(meta).flatMap(([key, value]) => {
     if (value === null || typeof value === "undefined" || value === "") return [];
-    return [`${indent}- ${key}: ${String(value)}`];
+    return [`${indent}- ${key}: ${neutralizeWorkpackLearningMarkdownText(String(value))}`];
   });
 }
 
@@ -292,11 +305,11 @@ export function buildWorkpackLearningMarkdown(input: WorkpackLearningInput) {
     confirmations: input.confirmations
   });
   const lines = [
-    `# ${input.taskLabel}`,
+    `# ${neutralizeWorkpackLearningMarkdownText(input.taskLabel)}`,
     "",
-    `- workpackId: \`${input.workpackId}\``,
-    `- generatedAt: ${input.generatedAt}`,
-    `- question: ${input.question}`,
+    `- workpackId: ${neutralizeWorkpackLearningMarkdownText(input.workpackId)}`,
+    `- generatedAt: ${neutralizeWorkpackLearningMarkdownText(input.generatedAt)}`,
+    `- question: ${neutralizeWorkpackLearningMarkdownText(input.question)}`,
     "",
     "## 운영 메모리 계약",
     "",
@@ -323,44 +336,44 @@ export function buildWorkpackLearningMarkdown(input: WorkpackLearningInput) {
   ];
 
   for (const reference of input.references) {
-    lines.push(`- ${getSafetyReferenceDisplayTitle(reference)}`);
-    lines.push(`  - sourceId: ${reference.source_id}`);
-    lines.push(`  - type: ${reference.item_type}`);
+    lines.push(`- ${neutralizeWorkpackLearningMarkdownText(getSafetyReferenceDisplayTitle(reference))}`);
+    lines.push(`  - sourceId: ${neutralizeWorkpackLearningMarkdownText(reference.source_id)}`);
+    lines.push(`  - type: ${neutralizeWorkpackLearningMarkdownText(reference.item_type)}`);
     lines.push(`  - retrieval: ${referenceRetrievalLabel(reference)}`);
     if (reference.evidence_role) lines.push(`  - role: ${reference.evidence_role}`);
     if (reference.kosha_guide) {
-      lines.push(`  - stableDocumentKey: ${reference.kosha_guide.stableDocumentKey}`);
-      lines.push(`  - quality: ${reference.kosha_guide.quality}`);
-      lines.push(`  - lifecycle: ${reference.kosha_guide.lifecycle}`);
+      lines.push(`  - stableDocumentKey: ${neutralizeWorkpackLearningMarkdownText(reference.kosha_guide.stableDocumentKey)}`);
+      lines.push(`  - quality: ${neutralizeWorkpackLearningMarkdownText(reference.kosha_guide.quality)}`);
+      lines.push(`  - lifecycle: ${neutralizeWorkpackLearningMarkdownText(reference.kosha_guide.lifecycle)}`);
       lines.push(`  - directEligible: ${reference.kosha_guide.directEligible}`);
       const anchor = reference.kosha_guide.anchors[0];
-      if (anchor) lines.push(`  - anchor: p.${anchor.page} ${anchor.excerpt}`);
+      if (anchor) lines.push(`  - anchor: p.${anchor.page} ${neutralizeWorkpackLearningMarkdownText(anchor.excerpt)}`);
     }
-    lines.push(`  - documents: ${reference.primary_documents.join(", ") || "없음"}`);
-    if (reference.reflected_documents?.length) lines.push(`  - reflected: ${reference.reflected_documents.join(", ")}`);
-    lines.push(`  - controls: ${reference.controls.join(" / ") || "없음"}`);
-    if (reference.source_url) lines.push(`  - sourceUrl: ${reference.source_url}`);
+    lines.push(`  - documents: ${markdownList(reference.primary_documents) || "없음"}`);
+    if (reference.reflected_documents?.length) lines.push(`  - reflected: ${markdownList(reference.reflected_documents)}`);
+    lines.push(`  - controls: ${reference.controls.map((control) => neutralizeWorkpackLearningMarkdownText(control, 500)).join(" / ") || "없음"}`);
+    if (reference.source_url) lines.push(`  - sourceUrl: ${neutralizeWorkpackLearningMarkdownText(reference.source_url, 2000)}`);
   }
 
   lines.push("", "## 개선사항", "");
   for (const improvement of input.improvements) {
-    lines.push(`- ${improvement.hazardLabel}: ${improvement.improvementText}`);
-    lines.push(`  - reflected: ${improvement.reflectedDocuments.join(", ") || "없음"}`);
+    lines.push(`- ${neutralizeWorkpackLearningMarkdownText(improvement.hazardLabel)}: ${neutralizeWorkpackLearningMarkdownText(improvement.improvementText)}`);
+    lines.push(`  - reflected: ${markdownList(improvement.reflectedDocuments) || "없음"}`);
     lines.push(`  - source: ${improvement.sourceType}`);
     if (improvement.visionStatus) lines.push(`  - visionStatus: ${improvement.visionStatus}`);
     if (improvement.analysisMode) lines.push(`  - analysisMode: ${improvement.analysisMode}`);
     if (typeof improvement.photoPairAttached === "boolean") lines.push(`  - photoPairAttached: ${improvement.photoPairAttached ? "yes" : "no"}`);
-    if (improvement.visionUserLabel) lines.push(`  - visionLabel: ${improvement.visionUserLabel}`);
-    if (improvement.visionModel) lines.push(`  - visionModel: ${improvement.visionModel}`);
-    if (improvement.visionSummary) lines.push(`  - vision: ${improvement.visionSummary}`);
-    if (improvement.detectedHazards?.length) lines.push(`  - detectedHazards: ${improvement.detectedHazards.join(", ")}`);
-    if (improvement.observedImprovement) lines.push(`  - observedImprovement: ${improvement.observedImprovement}`);
-    if (improvement.ocrText) lines.push(`  - ocr: ${improvement.ocrText}`);
-    if (improvement.sourcePhotoNames?.length) lines.push(`  - sourcePhotos: ${improvement.sourcePhotoNames.join(", ")}`);
+    if (improvement.visionUserLabel) lines.push(`  - visionLabel: ${neutralizeWorkpackLearningMarkdownText(improvement.visionUserLabel)}`);
+    if (improvement.visionModel) lines.push(`  - visionModel: ${neutralizeWorkpackLearningMarkdownText(improvement.visionModel)}`);
+    if (improvement.visionSummary) lines.push(`  - vision: ${neutralizeWorkpackLearningMarkdownText(improvement.visionSummary)}`);
+    if (improvement.detectedHazards?.length) lines.push(`  - detectedHazards: ${markdownList(improvement.detectedHazards)}`);
+    if (improvement.observedImprovement) lines.push(`  - observedImprovement: ${neutralizeWorkpackLearningMarkdownText(improvement.observedImprovement)}`);
+    if (improvement.ocrText) lines.push(`  - ocr: ${neutralizeWorkpackLearningMarkdownText(improvement.ocrText)}`);
+    if (improvement.sourcePhotoNames?.length) lines.push(`  - sourcePhotos: ${markdownList(improvement.sourcePhotoNames)}`);
     if (improvement.photoCount) lines.push(`  - photoCount: ${improvement.photoCount}`);
-    if (improvement.siteSignals?.length) lines.push(`  - siteSignals: ${improvement.siteSignals.join(", ")}`);
-    if (improvement.visionEvidence) lines.push(`  - photoEvidence: ${improvement.visionEvidence}`);
-    if (improvement.visionErrorMessage) lines.push(`  - visionError: ${improvement.visionErrorMessage}`);
+    if (improvement.siteSignals?.length) lines.push(`  - siteSignals: ${markdownList(improvement.siteSignals)}`);
+    if (improvement.visionEvidence) lines.push(`  - photoEvidence: ${neutralizeWorkpackLearningMarkdownText(improvement.visionEvidence)}`);
+    if (improvement.visionErrorMessage) lines.push(`  - visionError: ${neutralizeWorkpackLearningMarkdownText(improvement.visionErrorMessage)}`);
     for (const retrieval of photoRetrievalLabels(improvement)) {
       lines.push(`  - photoRetrieval: ${retrieval}`);
     }
@@ -368,7 +381,7 @@ export function buildWorkpackLearningMarkdown(input: WorkpackLearningInput) {
 
   lines.push("", "## 확인 이력", "");
   for (const confirmation of input.confirmations) {
-    lines.push(`- ${confirmation.displayName} (${confirmation.languageCode}) ${confirmation.readAt}`);
+    lines.push(`- ${neutralizeWorkpackLearningMarkdownText(confirmation.displayName)} (${neutralizeWorkpackLearningMarkdownText(confirmation.languageCode)}) ${neutralizeWorkpackLearningMarkdownText(confirmation.readAt)}`);
   }
 
   return `${lines.join("\n")}\n`;
@@ -400,7 +413,7 @@ export function buildWorkpackObsidianMarkdown(input: WorkpackLearningInput) {
     `task_label: ${frontmatterString(input.taskLabel)}`,
     "---",
     "",
-    `# ${input.taskLabel}`,
+    `# ${neutralizeWorkpackLearningMarkdownText(input.taskLabel)}`,
     "",
     `작업 노트: ${workpackLink}`,
     "",
@@ -409,8 +422,8 @@ export function buildWorkpackObsidianMarkdown(input: WorkpackLearningInput) {
     "## 작업 컨텍스트",
     "",
     `- workpack: ${workpackLink}`,
-    `- question: ${input.question}`,
-    `- generatedAt: ${input.generatedAt}`,
+    `- question: ${neutralizeWorkpackLearningMarkdownText(input.question)}`,
+    `- generatedAt: ${neutralizeWorkpackLearningMarkdownText(input.generatedAt)}`,
     `- authority: ${WORKPACK_LEARNING_GOVERNANCE.authority}`,
     `- promotionStatus: ${WORKPACK_LEARNING_GOVERNANCE.promotionStatus}`,
     `- runtimeAuthority: ${WORKPACK_LEARNING_GOVERNANCE.runtimeAuthority ? "yes" : "no"}`,
@@ -431,7 +444,7 @@ export function buildWorkpackObsidianMarkdown(input: WorkpackLearningInput) {
   for (const node of graph.nodes) {
     lines.push(`### ${obsidianLink(node.kind, node.label)}`);
     lines.push(`- kind: ${node.kind}`);
-    if (node.detail) lines.push(`- detail: ${node.detail}`);
+    if (node.detail) lines.push(`- detail: ${neutralizeWorkpackLearningMarkdownText(node.detail)}`);
     const meta = metadataLines(node.meta);
     if (meta.length) {
       lines.push("- meta:");
@@ -444,30 +457,30 @@ export function buildWorkpackObsidianMarkdown(input: WorkpackLearningInput) {
   for (const reference of input.references) {
     lines.push(`- ${obsidianLink("Evidence", getSafetyReferenceDisplayTitle(reference))}`);
     lines.push(`  - retrieval: ${referenceRetrievalLabel(reference)}`);
-    lines.push(`  - sourceId: ${reference.source_id}`);
-    lines.push(`  - type: ${reference.item_type}`);
+    lines.push(`  - sourceId: ${neutralizeWorkpackLearningMarkdownText(reference.source_id)}`);
+    lines.push(`  - type: ${neutralizeWorkpackLearningMarkdownText(reference.item_type)}`);
     lines.push(`  - hazards: ${reference.risk_tags.map((tag) => obsidianLink("Hazard", tag)).join(", ") || "없음"}`);
     lines.push(`  - controls: ${reference.controls.map((control) => obsidianLink("Control", control)).join(", ") || "없음"}`);
-    lines.push(`  - documents: ${reference.primary_documents.join(", ") || "없음"}`);
-    if (reference.reflected_documents?.length) lines.push(`  - reflected: ${reference.reflected_documents.join(", ")}`);
-    if (reference.source_url) lines.push(`  - sourceUrl: ${reference.source_url}`);
+    lines.push(`  - documents: ${markdownList(reference.primary_documents) || "없음"}`);
+    if (reference.reflected_documents?.length) lines.push(`  - reflected: ${markdownList(reference.reflected_documents)}`);
+    if (reference.source_url) lines.push(`  - sourceUrl: ${neutralizeWorkpackLearningMarkdownText(reference.source_url, 2000)}`);
   }
 
   lines.push("", "## 개선 후보", "");
   for (const improvement of input.improvements) {
     lines.push(`- ${obsidianLink("Improvement", improvement.improvementText)}`);
     lines.push(`  - hazard: ${obsidianLink("Hazard", improvement.hazardLabel)}`);
-    lines.push(`  - reflected: ${improvement.reflectedDocuments.join(", ") || "없음"}`);
+    lines.push(`  - reflected: ${markdownList(improvement.reflectedDocuments) || "없음"}`);
     lines.push(`  - source: ${improvement.sourceType}`);
     if (improvement.visionStatus) lines.push(`  - visionStatus: ${improvement.visionStatus}`);
     if (improvement.analysisMode) lines.push(`  - analysisMode: ${improvement.analysisMode}`);
     if (typeof improvement.photoPairAttached === "boolean") lines.push(`  - photoPairAttached: ${improvement.photoPairAttached ? "yes" : "no"}`);
-    if (improvement.visionSummary) lines.push(`  - vision: ${improvement.visionSummary}`);
+    if (improvement.visionSummary) lines.push(`  - vision: ${neutralizeWorkpackLearningMarkdownText(improvement.visionSummary)}`);
     if (improvement.detectedHazards?.length) lines.push(`  - detectedHazards: ${improvement.detectedHazards.map((tag) => obsidianLink("Hazard", tag)).join(", ")}`);
-    if (improvement.observedImprovement) lines.push(`  - observedImprovement: ${improvement.observedImprovement}`);
-    if (improvement.ocrText) lines.push(`  - ocr: ${improvement.ocrText}`);
-    if (improvement.sourcePhotoNames?.length) lines.push(`  - sourcePhotos: ${improvement.sourcePhotoNames.join(", ")}`);
-    if (improvement.visionEvidence) lines.push(`  - photoEvidence: ${improvement.visionEvidence}`);
+    if (improvement.observedImprovement) lines.push(`  - observedImprovement: ${neutralizeWorkpackLearningMarkdownText(improvement.observedImprovement)}`);
+    if (improvement.ocrText) lines.push(`  - ocr: ${neutralizeWorkpackLearningMarkdownText(improvement.ocrText)}`);
+    if (improvement.sourcePhotoNames?.length) lines.push(`  - sourcePhotos: ${markdownList(improvement.sourcePhotoNames)}`);
+    if (improvement.visionEvidence) lines.push(`  - photoEvidence: ${neutralizeWorkpackLearningMarkdownText(improvement.visionEvidence)}`);
     for (const retrieval of photoRetrievalLabels(improvement)) {
       lines.push(`  - photoRetrieval: ${retrieval}`);
     }
@@ -476,8 +489,8 @@ export function buildWorkpackObsidianMarkdown(input: WorkpackLearningInput) {
   lines.push("", "## 확인 후보", "");
   for (const confirmation of input.confirmations) {
     lines.push(`- ${obsidianLink("Ack", confirmation.displayName)}`);
-    lines.push(`  - language: ${confirmation.languageCode}`);
-    lines.push(`  - readAt: ${confirmation.readAt}`);
+    lines.push(`  - language: ${neutralizeWorkpackLearningMarkdownText(confirmation.languageCode)}`);
+    lines.push(`  - readAt: ${neutralizeWorkpackLearningMarkdownText(confirmation.readAt)}`);
   }
 
   lines.push("", "## 승격 전 체크", "");

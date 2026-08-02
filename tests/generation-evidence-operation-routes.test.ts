@@ -210,5 +210,12 @@ describe("saved generation evidence operation routes", () => {
     expect(body).toContain('"referenceItemId":"generation-ref"');
     expect(body).not.toContain('"referenceItemId":"current-ref"');
     expect(response.headers.get("x-safeclaw-generation-reference-count")).toBe("1");
+    expect(response.headers.get("content-disposition")).toContain("attachment;");
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+    expect(response.headers.get("content-security-policy")).toBe(
+      "sandbox; default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+    );
+    expect(response.headers.get("referrer-policy")).toBe("no-referrer");
+    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
   });
 });

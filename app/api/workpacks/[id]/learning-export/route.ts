@@ -170,6 +170,10 @@ export async function GET(request: NextRequest, context: RouteContext) {
     headers: {
       "content-type": file.contentType,
       "content-disposition": `attachment; filename*=UTF-8''${encodeURIComponent(file.fileName)}`,
+      "cache-control": "private, no-store",
+      "content-security-policy": "sandbox; default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+      "referrer-policy": "no-referrer",
+      "x-content-type-options": "nosniff",
       "x-safeclaw-reference-count": String(references.length),
       "x-safeclaw-generation-reference-count": String(references.length),
       "x-safeclaw-improvement-count": String(mergedImprovements.length),
