@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { readSafetyReferenceLimit } from "@/lib/safety-reference-catalog";
 import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 import { createRateLimiter } from "@/lib/rate-limit";
-import { enforceRateLimit } from "@/lib/api-guard";
+import {
+  applyPublicRateLimitHeader,
+  checkPublicRateLimit,
+  publicRateLimitResponse,
+} from "@/lib/public-distributed-rate-limit";
 import {
   isOverCharBudget,
   publicWorkBudgetExceeded,
@@ -38,7 +42,14 @@ function searchCoalesced(
 }
 
 export async function GET(request: NextRequest) {
-  const limited = enforceRateLimit(request, limiter);
+  const rateLimit = await checkPublicRateLimit({
+    request,
+    namespace: "safety-reference-search",
+    limit: 30,
+    windowMs: 60_000,
+    instanceLimiter: limiter,
+  });
+  const limited = publicRateLimitResponse(rateLimit);
   if (limited) return limited;
 
   const query = normalizeSearchValue(request.nextUrl.searchParams.get("q") || "");
@@ -52,16 +63,16 @@ export async function GET(request: NextRequest) {
     : undefined;
 
   if (isOverCharBudget(query, PUBLIC_SAFETY_REFERENCE_QUERY_MAX_CHARS)) {
-    return publicWorkBudgetExceeded(
+    return applyPublicRateLimitHeader(publicWorkBudgetExceeded(
       "q exceeds the public safety-reference work budget",
       PUBLIC_SAFETY_REFERENCE_QUERY_MAX_CHARS,
-    );
+    ), rateLimit);
   }
   if ([itemType, sourceId, riskTag].some(isOversizedFilter)) {
-    return publicWorkBudgetExceeded(
+    return applyPublicRateLimitHeader(publicWorkBudgetExceeded(
       "filter exceeds the public safety-reference work budget",
       PUBLIC_SAFETY_REFERENCE_FILTER_MAX_CHARS,
-    );
+    ), rateLimit);
   }
 
   const result = await searchCoalesced({
@@ -73,5 +84,8 @@ export async function GET(request: NextRequest) {
     evidenceRole
   });
 
-  return NextResponse.json(result, { status: result.ok ? 200 : 503 });
+  return applyPublicRateLimitHeader(
+    NextResponse.json(result, { status: result.ok ? 200 : 503 }),
+    rateLimit,
+  );
 }

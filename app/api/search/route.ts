@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { runSearch } from "@/lib/search";
 import { summarizeLegalSourceMix } from "@/lib/legal-sources";
 import { createRateLimiter } from "@/lib/rate-limit";
-import { enforceRateLimit } from "@/lib/api-guard";
+import {
+  applyPublicRateLimitHeader,
+  checkPublicRateLimit,
+  publicRateLimitResponse,
+} from "@/lib/public-distributed-rate-limit";
 import {
   isOverCharBudget,
   publicWorkBudgetExceeded,
@@ -30,22 +34,29 @@ function runCoalescedSearch(query: string): ReturnType<typeof runSearch> {
 }
 
 export async function GET(request: NextRequest) {
-  const limited = enforceRateLimit(request, limiter);
+  const rateLimit = await checkPublicRateLimit({
+    request,
+    namespace: "legal-search",
+    limit: 30,
+    windowMs: 60_000,
+    instanceLimiter: limiter,
+  });
+  const limited = publicRateLimitResponse(rateLimit);
   if (limited) return limited;
 
   const q = normalizeSearchQuery(request.nextUrl.searchParams.get("q") || "");
   if (isOverCharBudget(q, PUBLIC_LEGAL_SEARCH_QUERY_MAX_CHARS)) {
-    return publicWorkBudgetExceeded(
+    return applyPublicRateLimitHeader(publicWorkBudgetExceeded(
       "q exceeds the public legal search work budget",
       PUBLIC_LEGAL_SEARCH_QUERY_MAX_CHARS,
-    );
+    ), rateLimit);
   }
 
   const results = await runCoalescedSearch(q);
-  return NextResponse.json({
+  return applyPublicRateLimitHeader(NextResponse.json({
     q,
     count: results.length,
     results,
     sourceMix: summarizeLegalSourceMix(results)
-  });
+  }), rateLimit);
 }

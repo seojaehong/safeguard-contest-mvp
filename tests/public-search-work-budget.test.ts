@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   PUBLIC_LEGAL_SEARCH_QUERY_MAX_CHARS,
@@ -40,6 +40,49 @@ describe("public search work budgets", () => {
       vectorSearch: { enabled: false, attempted: false, ok: false },
       message: "조회 완료",
     });
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("fails closed before provider work when distributed limiter configuration is partial", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const legal = await import("@/app/api/search/route");
+    const safety = await import("@/app/api/safety-reference/search/route");
+
+    const legalResponse = await legal.GET(request("/api/search?q=산업안전", "198.51.100.8"));
+    const safetyResponse = await safety.GET(request("/api/safety-reference/search?q=비계", "198.51.100.9"));
+
+    expect(legalResponse.status).toBe(503);
+    expect(safetyResponse.status).toBe(503);
+    expect(mocks.runSearch).not.toHaveBeenCalled();
+    expect(mocks.searchSafetyReferences).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledTimes(2);
+    error.mockRestore();
+  });
+
+  it("reports distributed admission control on successful route responses", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "test-token");
+    const distributedFetch = vi.fn(async () => Response.json({ result: [1, 59_000] }));
+    vi.stubGlobal("fetch", distributedFetch);
+    const legal = await import("@/app/api/search/route");
+    const safety = await import("@/app/api/safety-reference/search/route");
+
+    const legalResponse = await legal.GET(request("/api/search?q=산업안전", "198.51.100.6"));
+    const safetyResponse = await safety.GET(request("/api/safety-reference/search?q=비계", "198.51.100.7"));
+
+    expect(legalResponse.status).toBe(200);
+    expect(safetyResponse.status).toBe(200);
+    expect(legalResponse.headers.get("X-SafeClaw-Rate-Limit")).toBe("distributed");
+    expect(safetyResponse.headers.get("X-SafeClaw-Rate-Limit")).toBe("distributed");
+    expect(distributedFetch).toHaveBeenCalledTimes(2);
+    expect(mocks.runSearch).toHaveBeenCalledTimes(1);
+    expect(mocks.searchSafetyReferences).toHaveBeenCalledTimes(1);
   });
 
   it("rejects oversized legal queries before provider fan-out", async () => {
@@ -99,6 +142,10 @@ describe("public search work budgets", () => {
     const legalSecond = legal.GET(request("/api/search?q=산업안전", "198.51.100.14"));
     const safetyFirst = safety.GET(request("/api/safety-reference/search?q=비계", "198.51.100.15"));
     const safetySecond = safety.GET(request("/api/safety-reference/search?q=비계", "198.51.100.16"));
+    await vi.waitFor(() => {
+      expect(mocks.runSearch).toHaveBeenCalledTimes(1);
+      expect(mocks.searchSafetyReferences).toHaveBeenCalledTimes(1);
+    });
     resolveLegal([]);
     resolveSafety({
       ok: true,
