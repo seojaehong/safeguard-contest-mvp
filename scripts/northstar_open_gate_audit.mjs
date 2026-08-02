@@ -47,7 +47,7 @@ const EVIDENCE_PATHS = Object.freeze({
   spreadsheetFormulaNeutralization: path.join("evaluation", "spreadsheet-formula-neutralization-2026-08-01", "report.json"),
   publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
   documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
-  fullRepositorySecurityScan: path.join("evaluation", "full-repository-security-scan-2026-07-28", "report.json"),
+  fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
@@ -3290,10 +3290,9 @@ function evaluateFullRepositorySecurityScanGate(rootDir) {
   const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
   const scan = isRecord(report.scan) ? report.scan : {};
   const severity = isRecord(scan.severity) ? scan.severity : {};
-  const verification = isRecord(report.verification) ? report.verification : {};
+  const companionRemediation = isRecord(report.companionRemediation) ? report.companionRemediation : {};
   const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
   const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
-  const findingFamilies = isRecord(report.findingFamilies) ? report.findingFamilies : {};
   const noMutation = mutationBoundary.dbMutationPerformed === false
     && mutationBoundary.shareSessionCreated === false
     && mutationBoundary.providerDispatchCalled === false
@@ -3301,61 +3300,65 @@ function evaluateFullRepositorySecurityScanGate(rootDir) {
     && mutationBoundary.vectorUploadPerformed === false
     && mutationBoundary.wikiPublished === false
     && mutationBoundary.exactTrustRegistryMutationPerformed === false;
-  const pass = readString(report.verdict) === "COMPLETE_LIVE_PRODUCTION_REPOSITORY_SECURITY_SCAN_REPORTABLE_FINDINGS_OPEN"
+  const pass = readString(report.verdict) === "COMPLETED_FOLLOWUP_REPOSITORY_SECURITY_SCAN_OPEN_FINDINGS_AND_DEFERRED_REVIEW"
     && readString(report.sourceHead).length > 0
-    && readString(report.sourceHead) === readString(productionBuild.commitSha)
-    && productionBuild.sourceHeadMatchesProduction === true
+    && productionBuild.sourceHeadIsAncestorOfProduction === true
+    && readString(scan.status) === "completed"
     && readString(scan.mode) === "repository"
     && readString(scan.inventoryStrategy) === "repository"
-    && readString(scan.completeness) === "complete"
+    && readString(scan.completeness) === "partial"
     && readString(scan.targetKind) === "git_revision"
-    && readNumber(scan.fileCount) === 4772
-    && readNumber(scan.candidateCount) === 21
-    && readNumber(scan.reportableFindingCount) === 18
-    && readNumber(scan.suppressedCandidateCount) === 3
-    && readNumber(scan.deferredCandidateCount) === 0
+    && readNumber(scan.fileCount) === 5241
+    && readNumber(scan.reviewedTextCount) === 2673
+    && readNumber(scan.binaryOrGeneratedAccountedCount) === 2568
+    && readNumber(scan.candidateCount) === 32
+    && readNumber(scan.reportableFindingCount) === 17
+    && readNumber(scan.ignoredCandidateCount) === 8
+    && readNumber(scan.deferredCandidateCount) === 1
+    && readNumber(scan.validationSuppressedCount) === 5
+    && readNumber(scan.validationNotApplicableCount) === 1
     && readNumber(severity.critical) === 0
     && readNumber(severity.high) === 0
     && readNumber(severity.medium) === 5
-    && readNumber(severity.low) === 13
-    && readNumber(findingFamilies.crossTenantAuthorization) === 2
-    && readNumber(findingFamilies.publicProviderAndUpstreamResourceAbuse) === 4
-    && readNumber(findingFamilies.spreadsheetFormulaInjection) === 4
-    && readNumber(findingFamilies.documentExportResourceExhaustion) === 8
-    && readNumber(verification.focusedTestFiles) === 7
-    && readNumber(verification.focusedTestsPassed) === 102
-    && verification.canonicalJsonValidated === true
-    && verification.finalizerCompleted === true
-    && readNumber(verification.sealedArtifactCount) === 16
+    && readNumber(severity.low) === 12
+    && scan.finalizerCompleted === true
+    && readNumber(scan.sealedArtifactCount) === 8
+    && readNumber(companionRemediation.targetedFindingCount) === 4
+    && readNumber(companionRemediation.sourceBoundedFindingCount) === 2
+    && readNumber(companionRemediation.mitigatedWithDistributedRateResidualCount) === 2
+    && readNumber(companionRemediation.livePublicQueryBudgetChecks) === 3
     && noMutation
     && remainingBoundaries.fullRepositorySecurityScanCompleted === true
     && remainingBoundaries.securityCompleteClaimAllowed === false
     && remainingBoundaries.remediationRequired === true
-    && readNumber(remainingBoundaries.reportableFindingCount) === 18
+    && readNumber(remainingBoundaries.reportableFindingCount) === 17
+    && readNumber(remainingBoundaries.deferredCandidateCount) === 1
+    && readString(remainingBoundaries.coverageCompleteness) === "partial"
+    && remainingBoundaries.distributedRateLimitResidual === true
     && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
     && readString(remainingBoundaries.providerDispatchPersistence) === "approval_gated";
 
   if (pass) {
     return gateResult({
       id: "full_repository_security_scan",
-      label: "Full repository security scan",
+      label: "Follow-up full repository security scan",
       state: "proven",
       evidencePath,
-      detail: "The immutable live production revision received complete repository coverage: 4,772 files accounted for, 21 candidates decided, 18 reportable findings retained (5 medium, 13 low), 3 Share/confirmation candidates suppressed with explicit counterevidence, and 0 deferred rows. Completion is not a security-complete claim: remediation remains required, no mutation or destructive load was performed, and exact saved Share remains MISSING_EVIDENCE.",
+      detail: "The sealed follow-up scan accounted for 5,241 tracked files and retained 17 reportable findings (5 medium, 12 low) plus one renderer-dependent deferred candidate. The companion no-DB wave bounded 2 findings and mitigated 2 public-search findings while retaining a distributed-rate residual. Scan completion is not a security-complete claim: coverage remains partial, remediation remains required, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
       nextActions: [
-        "Remediate the scheduled-briefing cross-tenant owner binding first, then public provider work budgets, export work budgets, and CSV/TSV formula neutralization.",
-        "Do not claim security completion until the 18 reportable findings are fixed and a follow-up scan confirms closure.",
+        "Resolve the remaining DB/RLS findings only through separately approved migration and live-isolation work, and review the renderer-dependent deferred candidate with its actual host behavior.",
+        "Add a distributed public-request budget before treating the two warm-instance search mitigations as fully closed, then rerun the repository scan before any security-complete claim.",
       ],
     });
   }
 
   return gateResult({
     id: "full_repository_security_scan",
-    label: "Full repository security scan",
+    label: "Follow-up full repository security scan",
     state: "contradicted",
     evidencePath,
     detail: `Security scan verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${readString(report.sourceHead) === readString(productionBuild.commitSha)}, completeness=${readString(scan.completeness) || "unknown"}, files=${readNumber(scan.fileCount)}, candidates=${readNumber(scan.candidateCount)}, reportable=${readNumber(scan.reportableFindingCount)}, deferred=${readNumber(scan.deferredCandidateCount)}, securityComplete=${remainingBoundaries.securityCompleteClaimAllowed === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
-    nextActions: ["Restore complete candidate closure and the explicit findings-open/no-mutation boundary before claiming repository scan completion."],
+    nextActions: ["Restore the sealed follow-up scan counts, partial-coverage/deferred boundary, companion remediation residuals, and explicit findings-open/no-mutation boundary before claiming scan completion."],
   });
 }
 

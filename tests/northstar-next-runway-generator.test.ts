@@ -244,13 +244,14 @@ type NextRunwayReport = {
     fileCount: number;
     candidateCount: number;
     reportableFindingCount: number;
-    suppressedCandidateCount: number;
+    ignoredCandidateCount: number;
     deferredCandidateCount: number;
     medium: number;
     low: number;
     fullRepositorySecurityScanCompleted: boolean;
     securityCompleteClaimAllowed: boolean;
     remediationRequired: boolean;
+    distributedRateLimitResidual: boolean;
     exactSavedShareVerdict: string;
   };
   hermesOpenclaw: {
@@ -1036,28 +1037,29 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
-  writeJson(root, "evaluation/full-repository-security-scan-2026-07-28/report.json", {
-    verdict: "COMPLETE_LIVE_PRODUCTION_REPOSITORY_SECURITY_SCAN_REPORTABLE_FINDINGS_OPEN",
+  writeJson(root, "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json", {
+    verdict: "COMPLETED_FOLLOWUP_REPOSITORY_SECURITY_SCAN_OPEN_FINDINGS_AND_DEFERRED_REVIEW",
     sourceHead: "fixture-sha",
     productionBuild: {
       commitSha: "fixture-sha",
     },
     scan: {
-      completeness: "complete",
-      fileCount: 4772,
-      candidateCount: 21,
-      reportableFindingCount: 18,
-      suppressedCandidateCount: 3,
-      deferredCandidateCount: 0,
+      completeness: "partial",
+      fileCount: 5241,
+      candidateCount: 32,
+      reportableFindingCount: 17,
+      ignoredCandidateCount: 8,
+      deferredCandidateCount: 1,
       severity: {
         medium: 5,
-        low: 13,
+        low: 12,
       },
     },
     remainingBoundaries: {
       fullRepositorySecurityScanCompleted: true,
       securityCompleteClaimAllowed: false,
       remediationRequired: true,
+      distributedRateLimitResidual: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
@@ -1853,25 +1855,26 @@ describe("northstar next runway generator", () => {
     });
     expect(report.provenCurrentState).toContain("dependency_security_remediation");
     expect(report.fullRepositorySecurityScan).toMatchObject({
-      verdict: "COMPLETE_LIVE_PRODUCTION_REPOSITORY_SECURITY_SCAN_REPORTABLE_FINDINGS_OPEN",
+      verdict: "COMPLETED_FOLLOWUP_REPOSITORY_SECURITY_SCAN_OPEN_FINDINGS_AND_DEFERRED_REVIEW",
       sourceHead: "fixture-sha",
       productionCommit: "fixture-sha",
-      completeness: "complete",
-      fileCount: 4772,
-      candidateCount: 21,
-      reportableFindingCount: 18,
-      suppressedCandidateCount: 3,
-      deferredCandidateCount: 0,
+      completeness: "partial",
+      fileCount: 5241,
+      candidateCount: 32,
+      reportableFindingCount: 17,
+      ignoredCandidateCount: 8,
+      deferredCandidateCount: 1,
       medium: 5,
-      low: 13,
+      low: 12,
       fullRepositorySecurityScanCompleted: true,
       securityCompleteClaimAllowed: false,
       remediationRequired: true,
+      distributedRateLimitResidual: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.provenCurrentState).toContain("full_repository_security_scan");
     expect(report.nextSafeWorkWithoutApproval).toContain(
-      "preserve the immutable 18-finding repository scan as the baseline: all 18 findings have live bounded remediation evidence across tenant authorization, spreadsheet formula, public-provider budget, and document-export budget waves; run the follow-up full repository scan before any broad security-complete claim",
+      "preserve the immutable original 18-finding repository scan as the historical baseline; the sealed follow-up scan accounts for 5,241 files and retains 17 reportable findings plus one renderer-dependent deferred candidate, while the companion no-DB wave bounds 2 findings and mitigates 2 with a distributed-rate residual; resolve the remaining DB/RLS, renderer, distributed-rate, and exact saved Share boundaries before any security-complete claim",
     );
     expect(report.provenCurrentState).toContain("tenant_authorization_remediation");
     expect(report.provenCurrentState).toContain("spreadsheet_formula_neutralization");

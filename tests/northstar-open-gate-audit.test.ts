@@ -654,37 +654,38 @@ function createFixtureRoot(): string {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
-  writeJson(rootDir, path.join("evaluation", "full-repository-security-scan-2026-07-28", "report.json"), {
-    verdict: "COMPLETE_LIVE_PRODUCTION_REPOSITORY_SECURITY_SCAN_REPORTABLE_FINDINGS_OPEN",
+  writeJson(rootDir, path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"), {
+    verdict: "COMPLETED_FOLLOWUP_REPOSITORY_SECURITY_SCAN_OPEN_FINDINGS_AND_DEFERRED_REVIEW",
     sourceHead: "fixture-sha",
     productionBuild: {
       commitSha: "fixture-sha",
       sourceHeadMatchesProduction: true,
+      sourceHeadIsAncestorOfProduction: true,
     },
     scan: {
       mode: "repository",
       inventoryStrategy: "repository",
-      completeness: "complete",
+      status: "completed",
+      completeness: "partial",
       targetKind: "git_revision",
-      fileCount: 4772,
-      candidateCount: 21,
-      reportableFindingCount: 18,
-      suppressedCandidateCount: 3,
-      deferredCandidateCount: 0,
-      severity: { critical: 0, high: 0, medium: 5, low: 13 },
-    },
-    findingFamilies: {
-      crossTenantAuthorization: 2,
-      publicProviderAndUpstreamResourceAbuse: 4,
-      spreadsheetFormulaInjection: 4,
-      documentExportResourceExhaustion: 8,
-    },
-    verification: {
-      focusedTestFiles: 7,
-      focusedTestsPassed: 102,
-      canonicalJsonValidated: true,
+      fileCount: 5241,
+      reviewedTextCount: 2673,
+      binaryOrGeneratedAccountedCount: 2568,
+      candidateCount: 32,
+      reportableFindingCount: 17,
+      ignoredCandidateCount: 8,
+      deferredCandidateCount: 1,
+      validationSuppressedCount: 5,
+      validationNotApplicableCount: 1,
+      severity: { critical: 0, high: 0, medium: 5, low: 12 },
       finalizerCompleted: true,
-      sealedArtifactCount: 16,
+      sealedArtifactCount: 8,
+    },
+    companionRemediation: {
+      targetedFindingCount: 4,
+      sourceBoundedFindingCount: 2,
+      mitigatedWithDistributedRateResidualCount: 2,
+      livePublicQueryBudgetChecks: 3,
     },
     mutationBoundary: {
       dbMutationPerformed: false,
@@ -699,7 +700,10 @@ function createFixtureRoot(): string {
       fullRepositorySecurityScanCompleted: true,
       securityCompleteClaimAllowed: false,
       remediationRequired: true,
-      reportableFindingCount: 18,
+      reportableFindingCount: 17,
+      deferredCandidateCount: 1,
+      coverageCompleteness: "partial",
+      distributedRateLimitResidual: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       providerDispatchPersistence: "approval_gated",
     },
@@ -2553,10 +2557,12 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")).toMatchObject({
       state: "proven",
-      evidencePath: path.join("evaluation", "full-repository-security-scan-2026-07-28", "report.json"),
+      evidencePath: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
     });
-    expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("4,772 files");
-    expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("18 reportable findings");
+    expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("5,241 tracked files");
+    expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("17 reportable findings");
+    expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("one renderer-dependent deferred candidate");
+    expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("distributed-rate residual");
     expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("not a security-complete claim");
     expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "tenant_authorization_remediation")).toMatchObject({ state: "proven" });
@@ -3092,7 +3098,7 @@ describe("northstar open gate audit", () => {
   it("fails the full repository security scan closed when findings are hidden behind a security-complete claim", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
-    const reportPath = path.join(rootDir, "evaluation", "full-repository-security-scan-2026-07-28", "report.json");
+    const reportPath = path.join(rootDir, "evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json");
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
       scan: { reportableFindingCount: number };
       remainingBoundaries: {

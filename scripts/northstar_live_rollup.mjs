@@ -32,7 +32,7 @@ const ARTIFACTS = Object.freeze({
   spreadsheetFormulaNeutralization: path.join("evaluation", "spreadsheet-formula-neutralization-2026-08-01", "report.json"),
   publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
   documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
-  fullRepositorySecurityScan: path.join("evaluation", "full-repository-security-scan-2026-07-28", "report.json"),
+  fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
@@ -530,6 +530,9 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       reportableFindingCount: isRecord(fullRepositorySecurityScan) && isRecord(fullRepositorySecurityScan.scan)
         ? asNumber(fullRepositorySecurityScan.scan.reportableFindingCount)
         : null,
+      deferredCandidateCount: isRecord(fullRepositorySecurityScan) && isRecord(fullRepositorySecurityScan.scan)
+        ? asNumber(fullRepositorySecurityScan.scan.deferredCandidateCount)
+        : null,
       medium: isRecord(fullRepositorySecurityScan)
         && isRecord(fullRepositorySecurityScan.scan)
         && isRecord(fullRepositorySecurityScan.scan.severity)
@@ -543,6 +546,10 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       securityCompleteClaimAllowed: isRecord(fullRepositorySecurityScan)
         && isRecord(fullRepositorySecurityScan.remainingBoundaries)
         ? fullRepositorySecurityScan.remainingBoundaries.securityCompleteClaimAllowed === true
+        : null,
+      distributedRateLimitResidual: isRecord(fullRepositorySecurityScan)
+        && isRecord(fullRepositorySecurityScan.remainingBoundaries)
+        ? fullRepositorySecurityScan.remainingBoundaries.distributedRateLimitResidual === true
         : null,
       exactSavedShareVerdict: isRecord(fullRepositorySecurityScan)
         && isRecord(fullRepositorySecurityScan.remainingBoundaries)

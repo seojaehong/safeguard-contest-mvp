@@ -183,9 +183,11 @@ type RollupReport = {
     completeness: string;
     fileCount: number | null;
     reportableFindingCount: number | null;
+    deferredCandidateCount: number | null;
     medium: number | null;
     low: number | null;
     securityCompleteClaimAllowed: boolean | null;
+    distributedRateLimitResidual: boolean | null;
     exactSavedShareVerdict: string;
   };
   hermesKnowledgeReviewAuthorityUi: {
@@ -268,7 +270,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "spreadsheet_formula_neutralization", state: "proven", evidencePath: "evaluation/spreadsheet-formula-neutralization-2026-08-01/report.json", detail: "four formula findings remediated" },
       { id: "public_provider_work_budget", state: "proven", evidencePath: "evaluation/public-provider-work-budget-2026-08-01/report.json", detail: "four provider-budget findings remediated" },
       { id: "document_export_work_budget", state: "proven", evidencePath: "evaluation/document-export-work-budget-2026-08-01/report.json", detail: "eight export-budget findings remediated" },
-      { id: "full_repository_security_scan", state: "proven", evidencePath: "evaluation/full-repository-security-scan-2026-07-28/report.json", detail: "complete scan with 18 reportable findings still open" },
+      { id: "full_repository_security_scan", state: "proven", evidencePath: "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json", detail: "sealed follow-up scan with 17 reportable findings and one deferred candidate" },
       { id: "live_document_secondary_grounding", state: "proven", evidencePath: "evaluation/live-document-secondary-grounding-2026-07-25/report.json", detail: "all 30 supporting documents passed scenario grounding" },
       { id: "live_document_seed_profile_isolation", state: "proven", evidencePath: "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", detail: "all 60 documents passed seed-profile isolation" },
       { id: "provider_dispatch_persistence", state: "approval_gated", evidencePath: "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json", detail: "preview only" },
@@ -565,23 +567,25 @@ function createFixtureRoot(): { root: string; head: string } {
       documentsShareIaVerdict: "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
     },
   });
-  writeJson(root, "evaluation/full-repository-security-scan-2026-07-28/report.json", {
-    verdict: "COMPLETE_LIVE_PRODUCTION_REPOSITORY_SECURITY_SCAN_REPORTABLE_FINDINGS_OPEN",
+  writeJson(root, "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json", {
+    verdict: "COMPLETED_FOLLOWUP_REPOSITORY_SECURITY_SCAN_OPEN_FINDINGS_AND_DEFERRED_REVIEW",
     sourceHead: "TO_FILL",
     productionBuild: {
       commitSha: "TO_FILL",
     },
     scan: {
-      completeness: "complete",
-      fileCount: 4772,
-      reportableFindingCount: 18,
+      completeness: "partial",
+      fileCount: 5241,
+      reportableFindingCount: 17,
+      deferredCandidateCount: 1,
       severity: {
         medium: 5,
-        low: 13,
+        low: 12,
       },
     },
     remainingBoundaries: {
       securityCompleteClaimAllowed: false,
+      distributedRateLimitResidual: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
@@ -809,7 +813,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/spreadsheet-formula-neutralization-2026-08-01/report.json",
     "evaluation/public-provider-work-budget-2026-08-01/report.json",
     "evaluation/document-export-work-budget-2026-08-01/report.json",
-    "evaluation/full-repository-security-scan-2026-07-28/report.json",
+    "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json",
     "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
     "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json",
@@ -1014,13 +1018,15 @@ describe("northstar live rollup", () => {
     });
     expect(report.evidence.find((item) => item.id === "document_export_work_budget")?.productionStatus).toBe("ancestor_of_head");
     expect(report.fullRepositorySecurityScan).toMatchObject({
-      verdict: "COMPLETE_LIVE_PRODUCTION_REPOSITORY_SECURITY_SCAN_REPORTABLE_FINDINGS_OPEN",
-      completeness: "complete",
-      fileCount: 4772,
-      reportableFindingCount: 18,
+      verdict: "COMPLETED_FOLLOWUP_REPOSITORY_SECURITY_SCAN_OPEN_FINDINGS_AND_DEFERRED_REVIEW",
+      completeness: "partial",
+      fileCount: 5241,
+      reportableFindingCount: 17,
+      deferredCandidateCount: 1,
       medium: 5,
-      low: 13,
+      low: 12,
       securityCompleteClaimAllowed: false,
+      distributedRateLimitResidual: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.evidence.find((item) => item.id === "full_repository_security_scan")?.productionStatus).toBe("ancestor_of_head");

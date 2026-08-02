@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "safeclaw-follow-up-full-repository-security-scan/v1",
+  "checkedAt": "2026-08-02T17:03:00+09:00",
+  "verdict": "COMPLETED_FOLLOWUP_REPOSITORY_SECURITY_SCAN_OPEN_FINDINGS_AND_DEFERRED_REVIEW",
+  "sourceHead": "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
+  "productionBuild": {
+    "commitSha": "d6d42024c8b07f0d9159666a0e8f2f9213709d21",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-k6bnhi2gu-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": false,
+    "sourceHeadIsAncestorOfProduction": true
+  },
+  "scan": {
+    "id": "8fe9c06a-018c-446f-aa98-1b37df95287a",
+    "mode": "repository",
+    "targetKind": "git_revision",
+    "status": "completed",
+    "sealedAt": "2026-08-02T07:47:47.496902Z",
+    "inventoryStrategy": "repository",
+    "completeness": "partial",
+    "fileCount": 5241,
+    "reviewedTextCount": 2673,
+    "binaryOrGeneratedAccountedCount": 2568,
+    "candidateCount": 32,
+    "reportableFindingCount": 17,
+    "ignoredCandidateCount": 8,
+    "deferredCandidateCount": 1,
+    "validationSuppressedCount": 5,
+    "validationNotApplicableCount": 1,
+    "severity": {
+      "critical": 0,
+      "high": 0,
+      "medium": 5,
+      "low": 12
+    },
+    "finalizerCompleted": true,
+    "sealedArtifactCount": 8
+  },
+  "companionRemediation": {
+    "path": "evaluation/security-followup-non-db-2026-08-02/report.json",
+    "productCommit": "d6d42024c8b07f0d9159666a0e8f2f9213709d21",
+    "targetedFindingCount": 4,
+    "sourceBoundedFindingCount": 2,
+    "mitigatedWithDistributedRateResidualCount": 2,
+    "livePublicQueryBudgetChecks": 3
+  },
+  "canonicalArtifacts": {
+    "readableReport": "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.md",
+    "scanManifest": "evaluation/follow-up-full-repository-security-scan-2026-08-02/scan-manifest.json",
+    "findings": "evaluation/follow-up-full-repository-security-scan-2026-08-02/findings.json",
+    "coverage": "evaluation/follow-up-full-repository-security-scan-2026-08-02/coverage.json",
+    "findingWriteupCount": 17,
+    "pocEvidenceFileCount": 17
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "fullRepositorySecurityScanCompleted": true,
+    "securityCompleteClaimAllowed": false,
+    "remediationRequired": true,
+    "reportableFindingCount": 17,
+    "deferredCandidateCount": 1,
+    "coverageCompleteness": "partial",
+    "distributedRateLimitResidual": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "providerDispatchPersistence": "approval_gated",
+    "shareRecipientAck": "approval_gated",
+    "supabaseRlsLaunchIsolation": "approval_gated",
+    "llmWikiPublication": "approval_gated",
+    "sifEmbeddingRuntime": "approval_gated",
+    "koshaExactPromotionReview": "approval_gated"
+  },
+  "boundary": "The canonical Codex Security scan is sealed and indexed, but it retains 17 reportable findings and one renderer-dependent deferred candidate. The companion no-DB wave bounds two findings in current source and mitigates two public-search findings with an explicit distributed-rate residual. This is not a security-complete claim and does not close any approval-gated mutation boundary."
+}
+

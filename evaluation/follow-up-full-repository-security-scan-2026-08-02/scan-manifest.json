@@ -1,0 +1,121 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "62af4f6f6e093c174edde7f5a66031a311bbd2e59fdd259814dd956f18f39d19"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "00269de2535b5208a1c55bbe508a535e44f7d98c27075f672b01db1c0a9cdd9a"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/02_discovery/candidate_ledger.jsonl",
+        "sha256": "5a4e20d557205e84ff63da66dc6c0b2711c72a470eecd101f4a1f22c80600961"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/03_coverage/review-shard-01.md",
+        "sha256": "603c75ed1295ed94ecde996a22a8dff938c534fdad144288e25141a1c3ba7268"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/03_coverage/review-shard-02.md",
+        "sha256": "b63c3050bc5bbaef6b76a7dcc4c921a329c851d1d3eec040a56426b9fc9e1cbe"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/03_coverage/review-shard-03.md",
+        "sha256": "74d0d5b9f2856ab753bcb165dc4c8d1a23532c7d3de417553c58d5d83bb136b4"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/03_coverage/review-shard-04.md",
+        "sha256": "336a8e9013c81276bd46c3fbfe7e82dd793fd77754850098eeeb56473026ecd3"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/03_coverage/review-shard-05.md",
+        "sha256": "73123b055c085d8204e2eadbb195cdb7014e26c23bd76728002a567604cd0657"
+      }
+    ],
+    "completedAt": "2026-08-02T07:47:47.496902Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "8fe9c06a-018c-446f-aa98-1b37df95287a",
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.15"
+    },
+    "scope": {
+      "artifactsReviewed": [
+        "5,241-file immutable inventory",
+        "32-candidate enriched ledger",
+        "five shard coverage receipts",
+        "current migrations 001 through 010",
+        "existing remediation and tenant-boundary tests"
+      ],
+      "context": "The immutable original 18-finding baseline remains historical evidence. This follow-up scan independently evaluates the remediated f0c8a7be tree.",
+      "excludePaths": [],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "Production Supabase grants and RLS behavior were not mutated or live-tested.",
+        "2,568 binary or generated artifacts were read and classified but opaque binary semantics were not treated as source review.",
+        "One Markdown renderer-dependent candidate remains deferred.",
+        "Exact saved Share remains MISSING_EVIDENCE and is not closed by this scan."
+      ],
+      "runtimeStatus": "Repository remained clean. No DB, provider, share-session, vector, wiki, or KOSHA registry mutation was executed.",
+      "summary": "Standard single-pass review of all 5,241 tracked files at immutable revision f0c8a7be, followed by one compact validation pass and one compact attack-path pass.",
+      "validationMode": "Static source and schema trace with one targeted non-mutating HWPX decompression PoC; attack-path decisions use repository evidence and the generated repository threat model."
+    },
+    "sealedAt": "2026-08-02T07:47:47.496902Z",
+    "startedAt": "2026-08-02T06:50:05.839922Z",
+    "status": "completed",
+    "target": {
+      "displayName": "spreadsheet-formula-neutralization-20260801",
+      "kind": "git_revision",
+      "revision": "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
+      "targetId": "target_sha256_cb3340b0ddac5dcb879a264d74c9f9486be620a80f1162a35ecb5f54b6c26a36"
+    },
+    "threatModel": {
+      "assets": [
+        "Organization, site, worker, workpack, share-recipient, and dispatch data",
+        "Provider and Supabase credentials",
+        "Safety evidence provenance and generated document integrity",
+        "Public API availability and provider quota"
+      ],
+      "assumptions": [
+        "Service-role database access bypasses RLS and therefore requires explicit server-side ownership checks",
+        "External provider responses are untrusted data",
+        "Operator-only local tools do not become remotely reachable without additional deployment evidence"
+      ],
+      "attackerCapabilities": [
+        "Send arbitrary public or authenticated request data",
+        "Replay requests and supply object identifiers",
+        "Provide document, model, OCR, or external-catalog text that reaches exports",
+        "Trigger expensive search, AI, and document work where endpoints permit"
+      ],
+      "securityObjectives": [
+        "Preserve immutable tenant ownership for every related object",
+        "Bound expensive public and authenticated work before providers or parsers",
+        "Prevent active-content and formula interpretation in exports",
+        "Keep approval-gated mutation paths fail closed and auditable"
+      ],
+      "summary": "SafeClaw is a multi-tenant industrial-safety document and sharing application whose primary risks are tenant authorization, public provider work amplification, generated document integrity, external evidence provenance, and privileged MCP/Hermes or operator workflows.",
+      "trustBoundaries": [
+        "Unauthenticated callers to public Next.js routes",
+        "Authenticated users to organization-scoped Supabase data",
+        "Public recipients to saved share sessions",
+        "Server to AI, KOSHA, Law.go, n8n, MCP, and Hermes providers",
+        "Operator scripts to downloaded archives and production credentials"
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}

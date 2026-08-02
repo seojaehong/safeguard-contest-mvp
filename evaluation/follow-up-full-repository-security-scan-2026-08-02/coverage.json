@@ -1,0 +1,187 @@
+{
+  "completeness": "partial",
+  "deferred": [
+    {
+      "id": "candidate-5ae4fb7bd6d7ea24",
+      "paths": [
+        "app/api/workpacks/[id]/learning-export/route.ts",
+        "lib/workpack-learning-export.ts",
+        "lib/workpack-learning-export.ts",
+        "lib/workpack-learning-export.ts",
+        "lib/workpack-learning-export.ts",
+        "lib/workpack-learning-export.ts"
+      ],
+      "reason": "Identify the exact supported Markdown/Obsidian renderer and settings, then prove or disprove automatic network loading, active embed/script execution, same-origin access, or local-file disclosure with the exported bytes.",
+      "surfaceIds": [
+        "learning-export-markdown"
+      ]
+    }
+  ],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "repository",
+  "mode": "repository",
+  "openQuestions": [
+    {
+      "followUpPrompt": "At f0c8a7be02becd53c21fb80842cf23c571f22b1f, validate the supported renderer behavior for lib/workpack-learning-export.ts with attacker-controlled Markdown and no network or file disclosure side effects.",
+      "question": "Which Markdown or Obsidian renderer is officially supported for learning exports, and does it automatically load remote or local active content?"
+    },
+    {
+      "followUpPrompt": "With explicit live-data approval, run tenant A/B RLS verification for the 11 reported table boundaries at f0c8a7be02becd53c21fb80842cf23c571f22b1f without changing schema or data.",
+      "question": "Do production Supabase grants and RLS policies exactly match migrations 001 through 010?"
+    },
+    {
+      "followUpPrompt": "Add focused non-provider tests at f0c8a7be02becd53c21fb80842cf23c571f22b1f that prove oversized and repeated /api/search and /api/safety-reference/search requests are rejected before external work.",
+      "question": "Can the reported public-search budgets be bypassed across serverless instances?"
+    }
+  ],
+  "scanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "reported",
+      "id": "public-search-and-generation",
+      "label": "Public search and generation APIs",
+      "notes": "Legal search and safety-reference search lack durable request work budgets; previously remediated Ask/provider siblings were separately reviewed.",
+      "receiptRefs": [
+        "artifacts/02_discovery/candidate_ledger.jsonl",
+        "artifacts/03_coverage/review-shard-01.md"
+      ],
+      "riskArea": "Resource exhaustion"
+    },
+    {
+      "disposition": "reported",
+      "id": "mcp-generation",
+      "label": "Authenticated MCP and reviewed-docpack tools",
+      "notes": "Authenticated MCP generation fields remain unbounded before AI and QA work.",
+      "receiptRefs": [
+        "artifacts/02_discovery/candidate_ledger.jsonl",
+        "artifacts/03_coverage/review-shard-01.md"
+      ],
+      "riskArea": "Resource exhaustion and delegated-tool boundaries"
+    },
+    {
+      "disposition": "reported",
+      "id": "commercial-tenant-schema",
+      "label": "Supabase commercial tenant schema",
+      "notes": "Current migrations leave independently reachable missing-RLS, NULL-tenant, and cross-tenant relationship controls.",
+      "receiptRefs": [
+        "artifacts/02_discovery/candidate_ledger.jsonl",
+        "artifacts/03_coverage/review-shard-03.md"
+      ],
+      "riskArea": "RLS and related-object tenant integrity"
+    },
+    {
+      "disposition": "reported",
+      "id": "dispatch-audit",
+      "label": "Dispatch audit logging",
+      "notes": "The API stores an idempotency key in JSON but does not reserve it atomically or enforce uniqueness.",
+      "receiptRefs": [
+        "artifacts/02_discovery/candidate_ledger.jsonl",
+        "artifacts/03_coverage/review-shard-01.md"
+      ],
+      "riskArea": "Replay and audit integrity"
+    },
+    {
+      "disposition": "rejected",
+      "id": "operator-archive-tools",
+      "label": "Operator archive and document ingestion scripts",
+      "notes": "Six parser candidates lacked a product or privilege-crossing entrypoint and were limited to explicit trusted local operator invocation.",
+      "receiptRefs": [
+        "artifacts/02_discovery/candidate_ledger.jsonl",
+        "artifacts/03_coverage/review-shard-03.md"
+      ],
+      "riskArea": "Archive resource exhaustion"
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "learning-export-markdown",
+      "label": "Markdown and Obsidian learning export",
+      "notes": "Stored text reaches exported Markdown, but the supported renderer and automatic execution or loading behavior are not specified.",
+      "receiptRefs": [
+        "artifacts/02_discovery/candidate_ledger.jsonl",
+        "artifacts/03_coverage/review-shard-02.md"
+      ],
+      "riskArea": "Active content in downstream renderers"
+    },
+    {
+      "disposition": "rejected",
+      "id": "browser-link-rendering",
+      "label": "Browser-rendered evidence and catalog links",
+      "notes": "React 19 URL sanitization defeats the claimed javascript-scheme execution path in the reviewed renderers.",
+      "receiptRefs": [
+        "artifacts/02_discovery/candidate_ledger.jsonl",
+        "artifacts/03_coverage/review-shard-01.md"
+      ],
+      "riskArea": "Client-side active URL handling"
+    },
+    {
+      "disposition": "rejected",
+      "id": "worker-route-scope",
+      "label": "Worker list and upsert routes",
+      "notes": "Route-level site-scope candidates did not cross the repository's organization-owner privilege model; lower-level worker-to-site RLS integrity remains reported separately.",
+      "receiptRefs": [
+        "artifacts/02_discovery/candidate_ledger.jsonl",
+        "artifacts/03_coverage/review-shard-01.md"
+      ],
+      "riskArea": "Object authorization"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "document-export-formats",
+      "label": "XLSX, HWP, HWPX, PDF, ZIP, and delimited exports",
+      "notes": "The full tree review found no surviving product-export candidate after current formula neutralization and document budget controls; historical binary outputs were classified with explicit limits.",
+      "receiptRefs": [
+        "artifacts/03_coverage/review-shard-01.md",
+        "artifacts/03_coverage/review-shard-02.md",
+        "artifacts/03_coverage/review-shard-03.md",
+        "artifacts/03_coverage/review-shard-04.md",
+        "artifacts/03_coverage/review-shard-05.md"
+      ],
+      "riskArea": "Formula injection and export work budgets"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "knowledge-kosha-and-ontology",
+      "label": "Knowledge, KOSHA, ontology, and evidence promotion",
+      "notes": "Machine evidence and no-mutation approval boundaries remained intact; knowledge runtime table relationships are reported under tenant schema.",
+      "receiptRefs": [
+        "artifacts/03_coverage/review-shard-01.md",
+        "artifacts/03_coverage/review-shard-02.md",
+        "artifacts/03_coverage/review-shard-03.md",
+        "artifacts/03_coverage/review-shard-04.md",
+        "artifacts/03_coverage/review-shard-05.md"
+      ],
+      "riskArea": "Provenance and approval boundaries"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "ui-components-and-pages",
+      "label": "UI components and application pages",
+      "notes": "All assigned source files were reviewed; no additional client-side finding survived validation and attack-path analysis.",
+      "receiptRefs": [
+        "artifacts/03_coverage/review-shard-01.md",
+        "artifacts/03_coverage/review-shard-02.md"
+      ],
+      "riskArea": "XSS, unsafe navigation, and client data exposure"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "tests-evaluation-and-binaries",
+      "label": "Tests, evaluation evidence, generated documents, and binary fixtures",
+      "notes": "5,241 tracked files were inventoried. 2,673 text files were semantically reviewed and 2,568 binary or generated files were read, classified, and recorded with format limitations.",
+      "receiptRefs": [
+        "artifacts/03_coverage/review-shard-01.md",
+        "artifacts/03_coverage/review-shard-02.md",
+        "artifacts/03_coverage/review-shard-03.md",
+        "artifacts/03_coverage/review-shard-04.md",
+        "artifacts/03_coverage/review-shard-05.md"
+      ],
+      "riskArea": "Coverage and historical artifact integrity"
+    }
+  ]
+}

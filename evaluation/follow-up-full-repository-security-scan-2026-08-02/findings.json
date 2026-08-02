@@ -1,0 +1,2435 @@
+{
+  "documentType": "codex-security.findings",
+  "findings": [
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "The matrix maps high impact and unknown likelihood to medium because broad document confidentiality/integrity loss is credible under normal grants, while live grants and migration state are unverified.",
+          "sink": "PostgREST SELECT/INSERT/UPDATE/DELETE on documents",
+          "source": "Public documents table created by migration 001",
+          "summary": "Direct Supabase PostgREST anon/authenticated request -> public.documents created without RLS/policy/grant revocation -> select/insert/update/delete -> document body, citation, and source content disclosure or mutation."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "high",
+          "why": "The matrix maps high impact and unknown likelihood to medium because broad document confidentiality/integrity loss is credible under normal grants, while live grants and migration state are unverified."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "Browser Supabase configuration proves intended direct REST capability and canonical migrations never add documents RLS; live table grants/existence remain unverified and were not changed."
+        },
+        "limitations": [
+          "No application route is required and service-role checks cannot protect direct REST. Missing live catalog proof lowers likelihood confidence but is not source-level suppression."
+        ],
+        "reachability": {
+          "attacker": "Anon or authenticated Supabase client performs direct table operations",
+          "entrypoint": "Public documents table created by migration 001",
+          "outcome": "The matrix maps high impact and unknown likelihood to medium because broad document confidentiality/integrity loss is credible under normal grants, while live grants and migration state are unverified.",
+          "summary": "Browser Supabase configuration proves intended direct REST capability and canonical migrations never add documents RLS; live table grants/existence remain unverified and were not changed."
+        },
+        "summary": "Browser Supabase configuration proves intended direct REST capability and canonical migrations never add documents RLS; live table grants/existence remain unverified and were not changed."
+      },
+      "codeEvidence": [
+        {
+          "code": "create table if not exists documents (\n  id text primary key,\n  doc_type text not null,\n  title text not null,\n  summary text,\n  body text,\n  citation text,\n  source_url text,\n  created_at timestamptz not null default now()",
+          "endLine": 16,
+          "explanation": "This root_control location carries or governs the validated path: The table contains title, summary, body, citation, and source_url, but this migration has no RLS enablement or policy for documents and no assigned later migration adds one.",
+          "id": "evidence-1",
+          "label": "Root Control evidence",
+          "language": "sql",
+          "path": "supabase/migrations/001_init.sql",
+          "role": "root_control",
+          "startLine": 8
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "documents contains sensitive bodies/citations; migration 001 never enables RLS and no later migration or grant revocation closes direct access."
+      },
+      "extensions": {
+        "candidateId": "candidate-8a52343203698158"
+      },
+      "findingId": "csf_ee41220d108de44c10d9b6fb",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:c12921a532abb75c4731cdcf991433a1f749cc1307735a2e1ba9f7757f101219"
+      },
+      "identity": {
+        "anchor": "public-table-rls",
+        "instance": "documents"
+      },
+      "locations": [
+        {
+          "endLine": 16,
+          "path": "supabase/migrations/001_init.sql",
+          "role": "root_control",
+          "startLine": 8
+        }
+      ],
+      "occurrenceId": "occ_7046e551edb8f1d399575a12",
+      "preventiveControls": [
+        "Keep the broken invariant in a shared policy or database constraint rather than route-local convention.",
+        "Add a negative cross-boundary or over-budget regression test for every independently reachable sibling path."
+      ],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Enable RLS, define explicit least-privilege select and mutation policies, bind rows to immutable tenant ownership, and revoke broad grants not required by the product.",
+      "remediationTests": [
+        "Anonymous and unrelated authenticated roles cannot read or mutate documents.",
+        "Tenant A cannot access tenant B document bodies or citations."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "The violated invariant is that documents table is exposed without row-level security. Current source instead shows: The table contains title, summary, body, citation, and source_url, but this migration has no RLS enablement or policy for documents and no assigned later migration adds one."
+      },
+      "ruleId": "authorization-bypass.missing-row-level-security",
+      "severity": {
+        "changeConditions": "Raise likelihood if live anon/authenticated grants and populated rows are confirmed; ignore if verified live grants revoke direct access or the table is absent/protected by a later policy.",
+        "level": "medium",
+        "rationale": "The matrix maps high impact and unknown likelihood to medium because broad document confidentiality/integrity loss is credible under normal grants, while live grants and migration state are unverified."
+      },
+      "summary": "documents is created without row-level security, allowing unauthorized read or mutation of stored document content under Supabase default grants. Browser Supabase configuration proves intended direct REST capability and canonical migrations never add documents RLS; live table grants/existence remain unverified and were not changed.",
+      "taxonomy": {
+        "category": "Missing authorization / RLS",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Documents table is exposed without row-level security",
+      "validation": {
+        "assertions": [
+          "supabase/migrations/001_init.sql:8-16 creates documents without RLS",
+          "No later canonical migration mentions documents RLS or revokes grants",
+          "NEXT_PUBLIC Supabase URL and anon key are used by browser clients"
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "No repository-side authorization control protects direct table access.",
+          "Live grants/table existence are not verified because live RLS evidence is approval-gated."
+        ],
+        "method": "Cumulative canonical migration and browser-client exposure trace",
+        "summary": "documents contains sensitive bodies/citations; migration 001 never enables RLS and no later migration or grant revocation closes direct access."
+      },
+      "writeup": {
+        "reportPath": "findings/f16/f16.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1",
+            "evidence-2"
+          ],
+          "outcome": "The matrix maps high impact and unknown likelihood to medium because NULL-tenant operational data can cross authorization boundaries while live grants/apply state remain unverified.",
+          "sink": "RLS USING/WITH CHECK admits the forged relationship",
+          "source": "Direct PostgREST/table operation against public.dispatch_logs",
+          "summary": "Direct Supabase PostgREST anon/authenticated table request -> dispatch_logs policy organization_id IS NULL branch -> unrestricted NULL-tenant select/insert/update/delete -> target_contact, failure_reason, and payload disclosure or audit mutation."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "impact": {
+          "level": "high",
+          "why": "The matrix maps high impact and unknown likelihood to medium because NULL-tenant operational data can cross authorization boundaries while live grants/apply state remain unverified."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "Canonical migration policy is directly applicable to browser Supabase roles when deployed; browser URL/anon-key configuration proves intended direct REST capability, but live grants and migration state were not mutated or verified."
+        },
+        "limitations": [
+          "Service-role application routes add authentication and ownership checks, but they do not protect direct REST; absent live catalog proof limits deployment confidence rather than suppressing the source flaw."
+        ],
+        "reachability": {
+          "attacker": "Authenticated Supabase role supplies owned organization_id plus known foreign related-object UUIDs",
+          "entrypoint": "Direct PostgREST/table operation against public.dispatch_logs",
+          "outcome": "The matrix maps high impact and unknown likelihood to medium because NULL-tenant operational data can cross authorization boundaries while live grants/apply state remain unverified.",
+          "summary": "Canonical migration policy is directly applicable to browser Supabase roles when deployed; browser URL/anon-key configuration proves intended direct REST capability, but live grants and migration state were not mutated or verified."
+        },
+        "summary": "Canonical migration policy is directly applicable to browser Supabase roles when deployed; browser URL/anon-key configuration proves intended direct REST capability, but live grants and migration state were not mutated or verified."
+      },
+      "codeEvidence": [
+        {
+          "code": "create table if not exists dispatch_logs (\n  id uuid primary key default gen_random_uuid(),\n  organization_id uuid references organizations(id) on delete set null,\n  site_id uuid references sites(id) on delete set null,\n  workpack_id uuid references workpacks(id) on delete set null,\n  channel text not null,\n  target_label text,\n  target_contact text,\n  language_code text,\n  provider text,\n  provider_status text,\n  workflow_run_id text,\n  failure_reason text,\n  payload jsonb not null default '{}'::jsonb,\n  created_at timestamptz not null default now()",
+          "endLine": 90,
+          "explanation": "This source location carries or governs the validated path: Both USING and WITH CHECK begin with organization_id is null, so the policy succeeds without auth.uid ownership and exposes nullable contact, provider status, failure, and payload fields through direct table access.",
+          "id": "evidence-1",
+          "label": "Source evidence",
+          "language": "sql",
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 76
+        },
+        {
+          "code": "create policy \"owners can manage dispatch logs\"\n  on dispatch_logs for all\n  using (\n    organization_id is null\n    or exists (\n      select 1 from organizations\n      where organizations.id = dispatch_logs.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  )\n  with check (\n    organization_id is null\n    or exists (\n      select 1 from organizations\n      where organizations.id = dispatch_logs.organization_id\n        and organizations.owner_id = auth.uid()\n    )",
+          "endLine": 199,
+          "explanation": "This root_control location carries or governs the validated path: Both USING and WITH CHECK begin with organization_id is null, so the policy succeeds without auth.uid ownership and exposes nullable contact, provider status, failure, and payload fields through direct table access.",
+          "id": "evidence-2",
+          "label": "Root Control evidence",
+          "language": "sql",
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 183
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "The current canonical schema ends at migration 010; organization_id IS NULL bypasses ownership for SELECT/INSERT/UPDATE, exposing contact/status/payload. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "extensions": {
+        "candidateId": "candidate-f620b29bfd1017ff"
+      },
+      "findingId": "csf_880b3629ed4b64a56e910b0f",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:54f5a3780569f8ae031fe0d34091b642d312cb5aa000466ce23e4f29a155f1e9"
+      },
+      "identity": {
+        "anchor": "dispatch-log-null-organization-policy",
+        "instance": "dispatch-logs"
+      },
+      "locations": [
+        {
+          "endLine": 90,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 76
+        },
+        {
+          "endLine": 199,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 183
+        }
+      ],
+      "occurrenceId": "occ_99b9f22418beb2c9e20e2c05",
+      "preventiveControls": [
+        "Keep the broken invariant in a shared policy or database constraint rather than route-local convention.",
+        "Add a negative cross-boundary or over-budget regression test for every independently reachable sibling path."
+      ],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Make organization_id non-null for tenant rows, remove the NULL-allowing policy branch, and backfill or isolate legacy system rows behind a separate privileged table or explicit service-role path.",
+      "remediationTests": [
+        "Authenticated tenant A cannot read or insert NULL-organization rows.",
+        "Only an explicit privileged system path can access isolated system audit rows."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "summary": "The violated invariant is that null dispatch-log tenants bypass row-level authorization. Current source instead shows: Both USING and WITH CHECK begin with organization_id is null, so the policy succeeds without auth.uid ownership and exposes nullable contact, provider status, failure, and payload fields through direct table access."
+      },
+      "ruleId": "authorization-bypass.null-tenant-rls",
+      "severity": {
+        "changeConditions": "Raise likelihood if live grants/policy and populated NULL rows are proven reachable; lower or ignore if live roles cannot access the table or a later verified policy removes the NULL bypass.",
+        "level": "medium",
+        "rationale": "The matrix maps high impact and unknown likelihood to medium because NULL-tenant operational data can cross authorization boundaries while live grants/apply state remain unverified."
+      },
+      "summary": "dispatch_logs policy explicitly allows rows with null organization_id, bypassing tenant authorization for reads and writes. Canonical migration policy is directly applicable to browser Supabase roles when deployed; browser URL/anon-key configuration proves intended direct REST capability, but live grants and migration state were not mutated or verified.",
+      "taxonomy": {
+        "category": "Authorization bypass / RLS",
+        "cwe": [
+          "CWE-639",
+          "CWE-862"
+        ]
+      },
+      "title": "NULL dispatch-log tenants bypass row-level authorization",
+      "validation": {
+        "assertions": [
+          "002_workspace_productization.sql:183-200 checks organization ownership only",
+          "No canonical migrations later than 010 exist",
+          "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are intentionally exposed to browser clients"
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "limitations": [
+          "Application service-role routes often add ownership checks, but those do not protect direct Supabase table access.",
+          "Live pg_policy/catalog and tenant A/B proof are approval-gated and absent; deployment/apply state remains unverified."
+        ],
+        "method": "Cumulative canonical migration review and static direct-Supabase RLS proof",
+        "summary": "The current canonical schema ends at migration 010; organization_id IS NULL bypasses ownership for SELECT/INSERT/UPDATE, exposing contact/status/payload. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "writeup": {
+        "reportPath": "findings/f05/f05.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1",
+            "evidence-2"
+          ],
+          "outcome": "The matrix maps medium impact and high likelihood to medium: unauthenticated amplification is straightforward, while sustained outage or material cost is not proven strongly enough for high impact.",
+          "sink": "runSearch -> searchLegalSources -> Law.go primary/fallback, Korean-law MCP, precedent mapping with retries",
+          "source": "GET /api/search",
+          "summary": "Unauthenticated GET q/frequency -> /api/search without query or rate budget -> runSearch -> multiple legal-provider branches with retries/timeouts -> serverless/provider work."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "The matrix maps medium impact and high likelihood to medium: unauthenticated amplification is straightforward, while sustained outage or material cost is not proven strongly enough for high impact."
+        },
+        "likelihood": {
+          "level": "high",
+          "why": "Public Next.js route is directly remote-reachable in the product source; each request can fan out before result slicing, and no repository rate, concurrency, or query-size control precedes work."
+        },
+        "limitations": [
+          "Per-provider timeouts and result caps bound individual outputs, but they do not bound request frequency or aggregate provider attempts; external edge throttling is unverified."
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated q query parameter and request frequency",
+          "entrypoint": "GET /api/search",
+          "outcome": "The matrix maps medium impact and high likelihood to medium: unauthenticated amplification is straightforward, while sustained outage or material cost is not proven strongly enough for high impact.",
+          "summary": "Public Next.js route is directly remote-reachable in the product source; each request can fan out before result slicing, and no repository rate, concurrency, or query-size control precedes work."
+        },
+        "summary": "Public Next.js route is directly remote-reachable in the product source; each request can fan out before result slicing, and no repository rate, concurrency, or query-size control precedes work."
+      },
+      "codeEvidence": [
+        {
+          "code": "export async function GET(request: NextRequest) {\n  const q = request.nextUrl.searchParams.get(\"q\") || \"\";\n  const results = await runSearch(q);",
+          "endLine": 9,
+          "explanation": "This entrypoint location carries or governs the validated path: Unauthenticated GET accepts q without a length check or limiter and immediately calls runSearch; supporting implementation performs primary, fallback, secondary, and precedent provider searches with retries, so repeated requests can consume provider and server resources.",
+          "id": "evidence-1",
+          "label": "Entrypoint evidence",
+          "language": "typescript",
+          "path": "app/api/search/route.ts",
+          "role": "entrypoint",
+          "startLine": 7
+        },
+        {
+          "code": "export async function searchLegalSources(query: string): Promise<SearchResult[]> {\n  const primary = await withRetry(\n    () => withTimeout(searchLawGo(query), SEARCH_TIMEOUT_MS, \"Law.go search\"),\n    2,\n    \"Law.go search\"\n  ).catch(() => filterMockResults(query));\n  const fallbackPrimary =\n    (primary.some((item) => item.type === \"law\") && primary.length) || query.trim() === \"\uc0b0\uc5c5\uc548\uc804\ubcf4\uac74\ubc95\"\n      ? []\n      : await withRetry(\n          () => withTimeout(searchLawGo(\"\uc0b0\uc5c5\uc548\uc804\ubcf4\uac74\ubc95\"), SEARCH_TIMEOUT_MS, \"Law.go fallback search\"),\n          2,\n          \"Law.go fallback search\"\n        ).catch(() => []);\n\n  const secondary = await withRetry(\n    () => withTimeout(searchKoreanLawMcp(query), SEARCH_TIMEOUT_MS, \"korean-law-mcp search\"),\n    2,",
+          "endLine": 138,
+          "explanation": "This sink location carries or governs the validated path: Unauthenticated GET accepts q without a length check or limiter and immediately calls runSearch; supporting implementation performs primary, fallback, secondary, and precedent provider searches with retries, so repeated requests can consume provider and server resources.",
+          "id": "evidence-2",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "lib/legal-sources.ts",
+          "role": "sink",
+          "startLine": 121
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "The unauthenticated route has no query budget or rate control and can trigger several timed, retried providers per request."
+      },
+      "extensions": {
+        "candidateId": "candidate-3a1b115c790af29d"
+      },
+      "findingId": "csf_e45a58b22598698e0bf4de16",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:ed6958ccd729ac22769551f7b660ac2d556e9e04ec1e94e205feda8001c152b7"
+      },
+      "identity": {
+        "anchor": "public-search-request-budget",
+        "instance": "legal-search"
+      },
+      "locations": [
+        {
+          "endLine": 9,
+          "path": "app/api/search/route.ts",
+          "role": "entrypoint",
+          "startLine": 7
+        },
+        {
+          "endLine": 150,
+          "path": "lib/legal-sources.ts",
+          "role": "sink",
+          "startLine": 121
+        }
+      ],
+      "occurrenceId": "occ_4039c3d2dbeecff3afac585b",
+      "preventiveControls": [
+        "Keep the broken invariant in a shared policy or database constraint rather than route-local convention.",
+        "Add a negative cross-boundary or over-budget regression test for every independently reachable sibling path."
+      ],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Reject oversized queries, apply a shared public-request budget before provider fan-out, and enforce a durable IP or abuse-token rate limit with bounded retries.",
+      "remediationTests": [
+        "Reject oversized legal queries before any provider call.",
+        "Assert repeated public requests are throttled before retry fan-out."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "summary": "The violated invariant is that public legal search can amplify unbounded provider work. Current source instead shows: Unauthenticated GET accepts q without a length check or limiter and immediately calls runSearch; supporting implementation performs primary, fallback, secondary, and precedent provider searches with retries, so repeated requests can consume provider and server resources."
+      },
+      "ruleId": "resource-exhaustion.public-search",
+      "severity": {
+        "changeConditions": "Raise if production telemetry proves sustained outage/material provider cost at modest effort; lower if a verified edge or distributed work budget covers this route before provider fan-out.",
+        "level": "medium",
+        "rationale": "The matrix maps medium impact and high likelihood to medium: unauthenticated amplification is straightforward, while sustained outage or material cost is not proven strongly enough for high impact."
+      },
+      "summary": "Public legal search lacks request rate and query-size budgets before multi-provider retry fan-out. Public Next.js route is directly remote-reachable in the product source; each request can fan out before result slicing, and no repository rate, concurrency, or query-size control precedes work.",
+      "taxonomy": {
+        "category": "Resource exhaustion",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Public legal search can amplify unbounded provider work",
+      "validation": {
+        "assertions": [
+          "app/api/search/route.ts:7-15 passes arbitrary q directly to runSearch",
+          "lib/legal-sources.ts:121-152 can invoke four provider branches with two attempts each",
+          "Timeouts cap individual calls but not request rate or query size"
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "limitations": [
+          "No closest route-level work budget was found.",
+          "External platform/CDN throttling is not represented in source."
+        ],
+        "method": "Static public route through provider fan-out/retry trace",
+        "summary": "The unauthenticated route has no query budget or rate control and can trigger several timed, retried providers per request."
+      },
+      "writeup": {
+        "reportPath": "findings/f03/f03.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1",
+            "evidence-2"
+          ],
+          "outcome": "The matrix maps medium impact and high likelihood to medium because remote repetition is easy but the evidence does not establish sustained high-impact outage.",
+          "sink": "loadKoshaGuideCorpus/load exact bundle/search local corpus/searchRemoteSafetyReferences",
+          "source": "GET /api/safety-reference/search",
+          "summary": "Unauthenticated safety-reference q/filters/frequency -> public search route -> local corpus/exact bundle loading and remote catalog search -> serverless I/O/CPU and Supabase/provider work."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "The matrix maps medium impact and high likelihood to medium because remote repetition is easy but the evidence does not establish sustained high-impact outage."
+        },
+        "likelihood": {
+          "level": "high",
+          "why": "The public route accepts arbitrary query/filter lengths and repeated calls; the 1..50 result limit applies after pre-result work and no repository rate/concurrency budget protects the entrypoint."
+        },
+        "limitations": [
+          "Result limits, trust gates, and possible caching constrain output and repeated local loading, but caching is not a distributed admission control and production edge throttling is unverified."
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated q and filter parameters plus request frequency",
+          "entrypoint": "GET /api/safety-reference/search",
+          "outcome": "The matrix maps medium impact and high likelihood to medium because remote repetition is easy but the evidence does not establish sustained high-impact outage.",
+          "summary": "The public route accepts arbitrary query/filter lengths and repeated calls; the 1..50 result limit applies after pre-result work and no repository rate/concurrency budget protects the entrypoint."
+        },
+        "summary": "The public route accepts arbitrary query/filter lengths and repeated calls; the 1..50 result limit applies after pre-result work and no repository rate/concurrency budget protects the entrypoint."
+      },
+      "codeEvidence": [
+        {
+          "code": "export async function GET(request: NextRequest) {\n  const query = request.nextUrl.searchParams.get(\"q\") || \"\";\n  const limit = readSafetyReferenceLimit(request.nextUrl.searchParams.get(\"limit\"));\n  const itemType = request.nextUrl.searchParams.get(\"itemType\") || undefined;\n  const sourceId = request.nextUrl.searchParams.get(\"sourceId\") || undefined;\n  const riskTag = request.nextUrl.searchParams.get(\"riskTag\") || undefined;\n  const evidenceRoleParam = request.nextUrl.searchParams.get(\"evidenceRole\");\n  const evidenceRole = evidenceRoleParam === \"direct\" || evidenceRoleParam === \"supporting\"\n    ? evidenceRoleParam\n    : undefined;\n\n  const result = await searchSafetyReferences({\n    query,\n    limit,\n    itemType,\n    sourceId,\n    riskTag,\n    evidenceRole",
+          "endLine": 24,
+          "explanation": "This entrypoint location carries or governs the validated path: The route accepts arbitrary q and filter strings with no rate limiter or character budget, then invokes searchSafetyReferences; the supporting implementation loads local KOSHA corpus and exact-reference assets and executes remote search for each call.",
+          "id": "evidence-1",
+          "label": "Entrypoint evidence",
+          "language": "typescript",
+          "path": "app/api/safety-reference/search/route.ts",
+          "role": "entrypoint",
+          "startLine": 7
+        },
+        {
+          "code": "export async function searchSafetyReferences(\n  options: SafetyReferenceServerSearchOptions\n): Promise<SafetyReferenceSearchResult> {\n  const query = options.query.trim();\n  const limit = Math.min(Math.max(options.limit || 12, 1), 50);\n  const localSearchAllowed = localSnapshotAllowed(options);\n  const trustGateActive = koshaTrustGateApplies(options);\n  const localCorpus = trustGateActive\n    ? await loadKoshaGuideCorpus(options.offlineCorpus)\n    : { status: \"unconfigured\" as const, rootDir: null, failures: [] as [] };\n  const responseLocalCorpusStatus = localSearchAllowed ? localCorpus.status : \"unconfigured\";\n  const localSearch = localSearchAllowed && localCorpus.status === \"ready\"\n    ? searchKoshaGuideCorpus(localCorpus, query, limit, options.itemType)\n    : { retrievalMode: null, items: [] };\n  const localItems = localSearch.items\n    .filter(() => !options.evidenceRole || options.evidenceRole === \"supporting\")\n    .map(buildLocalItem);\n  const bundledExact = trustGateActive",
+          "endLine": 520,
+          "explanation": "This sink location carries or governs the validated path: The route accepts arbitrary q and filter strings with no rate limiter or character budget, then invokes searchSafetyReferences; the supporting implementation loads local KOSHA corpus and exact-reference assets and executes remote search for each call.",
+          "id": "evidence-2",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "lib/safety-reference-catalog-server.ts",
+          "role": "sink",
+          "startLine": 503
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Result count is capped, but query/filter lengths and request rate are not, and each request can load/search local assets and invoke remote catalog retrieval."
+      },
+      "extensions": {
+        "candidateId": "candidate-737d561572703a47"
+      },
+      "findingId": "csf_249dcc0898d9d68ffe436ac9",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:2dd81baffe1bef976955080c74c8dbf34b49721879881c364992dac39ce1c078"
+      },
+      "identity": {
+        "anchor": "public-search-request-budget",
+        "instance": "safety-reference-search"
+      },
+      "locations": [
+        {
+          "endLine": 25,
+          "path": "app/api/safety-reference/search/route.ts",
+          "role": "entrypoint",
+          "startLine": 7
+        },
+        {
+          "endLine": 523,
+          "path": "lib/safety-reference-catalog-server.ts",
+          "role": "sink",
+          "startLine": 503
+        }
+      ],
+      "occurrenceId": "occ_3307f156e27e1db0ae01659b",
+      "preventiveControls": [
+        "Keep the broken invariant in a shared policy or database constraint rather than route-local convention.",
+        "Add a negative cross-boundary or over-budget regression test for every independently reachable sibling path."
+      ],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Apply query-size, result-count, timeout, and durable public rate budgets before loading the corpus or calling the remote catalog.",
+      "remediationTests": [
+        "Reject oversized queries before corpus or network work.",
+        "Throttle repeated public searches and cap returned result work."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "summary": "The violated invariant is that public safety-reference search lacks request work budgets. Current source instead shows: The route accepts arbitrary q and filter strings with no rate limiter or character budget, then invokes searchSafetyReferences; the supporting implementation loads local KOSHA corpus and exact-reference assets and executes remote search for each call."
+      },
+      "ruleId": "resource-exhaustion.public-search",
+      "severity": {
+        "changeConditions": "Raise with evidence of sustained shared outage/material provider cost; lower if a verified distributed budget, cache, and query-length guard execute before all expensive work.",
+        "level": "medium",
+        "rationale": "The matrix maps medium impact and high likelihood to medium because remote repetition is easy but the evidence does not establish sustained high-impact outage."
+      },
+      "summary": "Public safety-reference search is unthrottled before corpus loading and remote catalog search. The public route accepts arbitrary query/filter lengths and repeated calls; the 1..50 result limit applies after pre-result work and no repository rate/concurrency budget protects the entrypoint.",
+      "taxonomy": {
+        "category": "Resource exhaustion",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Public safety-reference search lacks request work budgets",
+      "validation": {
+        "assertions": [
+          "search route.ts:7-25 accepts q/itemType/sourceId/riskTag without budgets",
+          "safety-reference-catalog-server.ts:503-523 performs local corpus/exact asset work then remote search",
+          "The limit at :507 bounds returned items, not input or pre-result work"
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "limitations": [
+          "Caching may reduce repeated local loads but is not a distributed request control.",
+          "Production cache lifetime and external edge throttling are unknown."
+        ],
+        "method": "Static public route through local-corpus and remote-catalog trace",
+        "summary": "Result count is capped, but query/filter lengths and request rate are not, and each request can load/search local assets and invoke remote catalog retrieval."
+      },
+      "writeup": {
+        "reportPath": "findings/f04/f04.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1",
+            "evidence-2",
+            "evidence-3"
+          ],
+          "outcome": "The matrix maps medium impact and high likelihood to medium because replay is simple and corrupts dispatch audit truth without proving duplicate external delivery.",
+          "sink": "client.from(\"dispatch_logs\").insert(rows) at :267",
+          "source": "app/api/dispatch-logs/route.ts:187-203",
+          "summary": "Authenticated POST idempotencyKey and dispatch rows -> shape validation and owned workpack check -> key stored only inside JSON payload -> plain dispatch_logs insert without uniqueness or replay reservation."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "The matrix maps medium impact and high likelihood to medium because replay is simple and corrupts dispatch audit truth without proving duplicate external delivery."
+        },
+        "likelihood": {
+          "level": "high",
+          "why": "Directly reachable through the authenticated product API by replaying the same valid request; the sink records duplicate provider-status/audit rows but does not itself send through a provider."
+        },
+        "limitations": [
+          "Authentication, tenant ownership, and preview-only provider capability constrain the effect to operational history; no schema or route control deduplicates the insert."
+        ],
+        "reachability": {
+          "attacker": "Repeated authenticated POST with the same valid idempotencyKey",
+          "entrypoint": "app/api/dispatch-logs/route.ts:187-203",
+          "outcome": "The matrix maps medium impact and high likelihood to medium because replay is simple and corrupts dispatch audit truth without proving duplicate external delivery.",
+          "summary": "Directly reachable through the authenticated product API by replaying the same valid request; the sink records duplicate provider-status/audit rows but does not itself send through a provider."
+        },
+        "summary": "Directly reachable through the authenticated product API by replaying the same valid request; the sink records duplicate provider-status/audit rows but does not itself send through a provider."
+      },
+      "codeEvidence": [
+        {
+          "code": "  const parsed = await request.json().catch((): unknown => ({}));\n  const body = isRecord(parsed) ? parsed : {};\n  const logs = parseDispatchLogs(body.logs);\n  const workpackId = readString(body.workpackId) || null;\n  const idempotencyKey = readString(body.idempotencyKey);\n  if (!logs.length) {\n    return NextResponse.json({ ok: false, configured: true, savedCount: 0, message: \"\uc800\uc7a5\ud560 \uc804\ud30c \uc774\ub825\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.\" }, { status: 400 });\n  }\n  if (!DISPATCH_LOG_IDEMPOTENCY_PATTERN.test(idempotencyKey)) {\n    return NextResponse.json({\n      ok: false,\n      configured: true,\n      savedCount: 0,\n      code: \"dispatch_log_idempotency_key_invalid\",\n      message: \"\uc804\ud30c \uc774\ub825 \uc800\uc7a5 \uc694\uccad \ud0a4\uac00 \uc62c\ubc14\ub974\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.\",\n    }, { status: 400 });\n  }",
+          "endLine": 203,
+          "explanation": "This source location carries or governs the validated path: POST validates only the key shape, embeds it inside each row's JSON payload, and performs a plain insert; the dispatch_logs schema has no idempotency column or unique constraint, so replaying the same authenticated request creates duplicate provider-status audit records.",
+          "id": "evidence-1",
+          "label": "Source evidence",
+          "language": "typescript",
+          "path": "app/api/dispatch-logs/route.ts",
+          "role": "source",
+          "startLine": 187
+        },
+        {
+          "code": "  const rows = logs.map((log) => ({\n    organization_id: context.organizationId,\n    site_id: context.siteId,\n    workpack_id: workpackId,\n    channel: log.channel,\n    target_label: log.targetLabel || null,\n    target_contact: log.targetContact || null,\n    language_code: log.languageCode || null,\n    provider: log.provider || null,\n    provider_status: log.providerStatus || null,\n    workflow_run_id: log.workflowRunId || null,\n    failure_reason: log.failureReason || null,\n    payload: toJson({\n      ...(isRecord(log.payload) ? log.payload : {}),\n      idempotencyKey\n    })\n  }));\n",
+          "endLine": 266,
+          "explanation": "This sink location carries or governs the validated path: POST validates only the key shape, embeds it inside each row's JSON payload, and performs a plain insert; the dispatch_logs schema has no idempotency column or unique constraint, so replaying the same authenticated request creates duplicate provider-status audit records.",
+          "id": "evidence-2",
+          "label": "Sink evidence",
+          "language": "typescript",
+          "path": "app/api/dispatch-logs/route.ts",
+          "role": "sink",
+          "startLine": 249
+        },
+        {
+          "code": "create table if not exists dispatch_logs (\n  id uuid primary key default gen_random_uuid(),\n  organization_id uuid references organizations(id) on delete set null,\n  site_id uuid references sites(id) on delete set null,\n  workpack_id uuid references workpacks(id) on delete set null,\n  channel text not null,\n  target_label text,\n  target_contact text,\n  language_code text,\n  provider text,\n  provider_status text,\n  workflow_run_id text,\n  failure_reason text,\n  payload jsonb not null default '{}'::jsonb,\n  created_at timestamptz not null default now()\n);\n\ncreate index if not exists idx_sites_organization_id on sites(organization_id);",
+          "endLine": 93,
+          "explanation": "This evidence location carries or governs the validated path: POST validates only the key shape, embeds it inside each row's JSON payload, and performs a plain insert; the dispatch_logs schema has no idempotency column or unique constraint, so replaying the same authenticated request creates duplicate provider-status audit records.",
+          "id": "evidence-3",
+          "label": "Evidence evidence",
+          "language": "sql",
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "evidence",
+          "startLine": 76
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "The authenticated replay path, plain insert, and absence of a unique idempotency column/constraint are explicit in current source."
+      },
+      "extensions": {
+        "candidateId": "candidate-041be133e97f783e"
+      },
+      "findingId": "csf_a034e84fe6f589ab32bc4177",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:6d044a60df8873261cad203349f5b6596b9174328a4a1ea97e86e00c4b94f8b4"
+      },
+      "identity": {
+        "anchor": "dispatch-log-idempotency-reservation",
+        "instance": "dispatch-log-insert"
+      },
+      "locations": [
+        {
+          "endLine": 203,
+          "path": "app/api/dispatch-logs/route.ts",
+          "role": "source",
+          "startLine": 187
+        },
+        {
+          "endLine": 267,
+          "path": "app/api/dispatch-logs/route.ts",
+          "role": "sink",
+          "startLine": 249
+        },
+        {
+          "endLine": 97,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "evidence",
+          "startLine": 76
+        }
+      ],
+      "occurrenceId": "occ_dab989553bbec2eb1eececb1",
+      "preventiveControls": [
+        "Keep the broken invariant in a shared policy or database constraint rather than route-local convention.",
+        "Add a negative cross-boundary or over-budget regression test for every independently reachable sibling path."
+      ],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Add a first-class idempotency key column with a tenant-scoped unique constraint, reserve it atomically before inserting rows, and return the prior result on replay.",
+      "remediationTests": [
+        "Replay the same authenticated request twice and assert one logical dispatch-log set.",
+        "Race two requests with the same key and assert one insert wins."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "summary": "The violated invariant is that replayed dispatch-log requests create duplicate audit records. Current source instead shows: POST validates only the key shape, embeds it inside each row's JSON payload, and performs a plain insert; the dispatch_logs schema has no idempotency column or unique constraint, so replaying the same authenticated request creates duplicate provider-status audit records."
+      },
+      "ruleId": "replay.audit-log-idempotency",
+      "severity": {
+        "changeConditions": "Lower or ignore if duplicate rows are proven harmless and excluded from all operational decisions; raise only if the same replay is proven to cause duplicate provider sends or cross-tenant effects.",
+        "level": "medium",
+        "rationale": "The matrix maps medium impact and high likelihood to medium because replay is simple and corrupts dispatch audit truth without proving duplicate external delivery."
+      },
+      "summary": "Dispatch log idempotency key is format-checked but does not prevent replayed audit inserts. Directly reachable through the authenticated product API by replaying the same valid request; the sink records duplicate provider-status/audit rows but does not itself send through a provider.",
+      "taxonomy": {
+        "category": "Replay / idempotency failure",
+        "cwe": [
+          "CWE-294"
+        ]
+      },
+      "title": "Replayed dispatch-log requests create duplicate audit records",
+      "validation": {
+        "assertions": [
+          "route.ts:261-267 stores idempotencyKey only inside JSON payload then performs insert",
+          "002_workspace_productization.sql:76-97 defines no idempotency column or unique constraint",
+          "tests/briefing-dispatch-truth.test.ts records persistent_idempotency_unavailable"
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2",
+          "evidence-3"
+        ],
+        "limitations": [
+          "No current control queries or reserves the key before insert.",
+          "Live table could have out-of-repo constraints, but live DB evidence is approval-gated and absent."
+        ],
+        "method": "Static route/schema trace plus existing tenant-boundary test inspection",
+        "summary": "The authenticated replay path, plain insert, and absence of a unique idempotency column/constraint are explicit in current source."
+      },
+      "writeup": {
+        "reportPath": "findings/f01/f01.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1",
+            "evidence-2"
+          ],
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "sink": "RLS USING/WITH CHECK admits the forged relationship",
+          "source": "Direct PostgREST/table operation against public.daily_entries",
+          "summary": "Authenticated direct Supabase PostgREST write supplies an owned organization_id plus a known foreign site_id/workpack_id UUID -> daily_entries owner policy checks organization_id only -> ordinary FK existence check accepts a cross-tenant relationship -> daily-entry metadata."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "limitations": [
+          "Service-role application routes often perform stronger ownership checks, but those checks do not govern direct table REST. Foreign-table RLS also prevents claiming direct disclosure of the referenced row, so the proven effect is constrained relationship/provenance integrity."
+        ],
+        "reachability": {
+          "attacker": "Authenticated Supabase role supplies owned organization_id plus known foreign related-object UUIDs",
+          "entrypoint": "Direct PostgREST/table operation against public.daily_entries",
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+      },
+      "codeEvidence": [
+        {
+          "code": "create table if not exists daily_entries (\n  id uuid primary key default gen_random_uuid(),\n  organization_id uuid not null references organizations(id) on delete cascade,\n  site_id uuid references sites(id) on delete set null,\n  workpack_id uuid references workpacks(id) on delete set null,\n  entry_date date not null default current_date,\n  input_delta text,\n  weather_snap jsonb not null default '{}'::jsonb,\n  legal_evidence_snap jsonb not null default '{}'::jsonb,\n  training_snap jsonb not null default '{}'::jsonb,\n  kosha_snap jsonb not null default '{}'::jsonb,\n  accident_snap jsonb not null default '{}'::jsonb,\n  knowledge_snap jsonb not null default '{}'::jsonb,\n  doc_pack jsonb not null default '{}'::jsonb,\n  created_by uuid,\n  created_at timestamptz not null default now(),\n  updated_at timestamptz not null default now(),\n  unique (organization_id, site_id, entry_date)",
+          "endLine": 18,
+          "explanation": "This source location carries or governs the validated path: The policy validates only daily_entries.organization_id, while attacker-selected site_id and workpack_id remain independent foreign keys and can point at another tenant.",
+          "id": "evidence-1",
+          "label": "Source evidence",
+          "language": "sql",
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "source",
+          "startLine": 1
+        },
+        {
+          "code": "create policy \"owners can manage daily entries\"\n  on daily_entries for all\n  using (\n    exists (\n      select 1 from organizations\n      where organizations.id = daily_entries.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  )\n  with check (\n    exists (\n      select 1 from organizations\n      where organizations.id = daily_entries.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  );",
+          "endLine": 92,
+          "explanation": "This root_control location carries or governs the validated path: The policy validates only daily_entries.organization_id, while attacker-selected site_id and workpack_id remain independent foreign keys and can point at another tenant.",
+          "id": "evidence-2",
+          "label": "Root Control evidence",
+          "language": "sql",
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "root_control",
+          "startLine": 77
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "The current canonical schema ends at migration 010; site_id and workpack_id are independent FKs not checked against row organization_id. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "extensions": {
+        "candidateId": "candidate-c9cb8f77b8f8bafe"
+      },
+      "findingId": "csf_9718d797602acba430a08a2c",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:397169da80da2648788b9f812c3191fb67386d4143c1293b4353baaffe14a0da"
+      },
+      "identity": {
+        "anchor": "rls-related-object-tenant-binding",
+        "instance": "daily-entries"
+      },
+      "locations": [
+        {
+          "endLine": 18,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "source",
+          "startLine": 1
+        },
+        {
+          "endLine": 92,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "root_control",
+          "startLine": 77
+        }
+      ],
+      "occurrenceId": "occ_b6a97fc7cecb29545abcdcca",
+      "preventiveControls": [
+        "Keep the broken invariant in a shared policy or database constraint rather than route-local convention.",
+        "Add a negative cross-boundary or over-budget regression test for every independently reachable sibling path."
+      ],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Require every referenced site and workpack to belong to organization_id in both RLS checks and database constraints or triggers.",
+      "remediationTests": [
+        "Tenant A cannot insert or update a daily entry with tenant B site or workpack IDs.",
+        "Valid same-tenant relationships continue to pass."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "summary": "The violated invariant is that daily entries can reference another tenant's site or workpack. Current source instead shows: The policy validates only daily_entries.organization_id, while attacker-selected site_id and workpack_id remain independent foreign keys and can point at another tenant."
+      },
+      "ruleId": "tenant-integrity.related-object-binding",
+      "severity": {
+        "changeConditions": "Raise if direct REST is live and forged relationships are shown to disclose foreign records or drive privileged export/share/mutation; ignore if verified live constraints or policies enforce same-tenant references.",
+        "level": "low",
+        "rationale": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+      },
+      "summary": "daily_entries RLS fails to bind site_id and workpack_id to the owned organization. Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval.",
+      "taxonomy": {
+        "category": "Authorization bypass / tenant integrity",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Daily entries can reference another tenant's site or workpack",
+      "validation": {
+        "assertions": [
+          "003_knowledge_runtime.sql:77-92 checks organization ownership only",
+          "No canonical migrations later than 010 exist",
+          "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are intentionally exposed to browser clients"
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "limitations": [
+          "Application service-role routes often add ownership checks, but those do not protect direct Supabase table access.",
+          "Live pg_policy/catalog and tenant A/B proof are approval-gated and absent; deployment/apply state remains unverified."
+        ],
+        "method": "Cumulative canonical migration review and static direct-Supabase RLS proof",
+        "summary": "The current canonical schema ends at migration 010; site_id and workpack_id are independent FKs not checked against row organization_id. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "writeup": {
+        "reportPath": "findings/f06/f06.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1",
+            "evidence-2"
+          ],
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "sink": "RLS USING/WITH CHECK admits the forged relationship",
+          "source": "Direct PostgREST/table operation against public.education_records",
+          "summary": "Authenticated direct Supabase PostgREST write supplies an owned organization_id plus a known foreign site_id/workpack_id/worker_id UUID -> education_records owner policy checks organization_id only -> ordinary FK existence check accepts a cross-tenant relationship -> education-record integrity."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "limitations": [
+          "Service-role application routes often perform stronger ownership checks, but those checks do not govern direct table REST. Foreign-table RLS also prevents claiming direct disclosure of the referenced row, so the proven effect is constrained relationship/provenance integrity."
+        ],
+        "reachability": {
+          "attacker": "Authenticated Supabase role supplies owned organization_id plus known foreign related-object UUIDs",
+          "entrypoint": "Direct PostgREST/table operation against public.education_records",
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+      },
+      "codeEvidence": [
+        {
+          "code": "create table if not exists education_records (\n  id uuid primary key default gen_random_uuid(),\n  organization_id uuid not null references organizations(id) on delete cascade,\n  site_id uuid references sites(id) on delete set null,\n  workpack_id uuid references workpacks(id) on delete cascade,\n  worker_id uuid references workers(id) on delete set null,\n  worker_external_key text,\n  worker_snapshot jsonb not null default '{}'::jsonb,\n  topic text not null,\n  language_code text,\n  language_label text,\n  confirmation_status text not null default '\ud655\uc778 \ud544\uc694',\n  confirmation_method text,\n  memo text,\n  created_at timestamptz not null default now()\n);",
+          "endLine": 74,
+          "explanation": "This source location carries or governs the validated path: The child row has three independently supplied foreign keys, but USING/WITH CHECK validate only education_records.organization_id, enabling forged cross-tenant training relationships when an identifier is known.",
+          "id": "evidence-1",
+          "label": "Source evidence",
+          "language": "sql",
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 59
+        },
+        {
+          "code": "create policy \"owners can manage education records\"\n  on education_records for all\n  using (\n    exists (\n      select 1 from organizations\n      where organizations.id = education_records.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  )\n  with check (\n    exists (\n      select 1 from organizations\n      where organizations.id = education_records.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  );",
+          "endLine": 181,
+          "explanation": "This root_control location carries or governs the validated path: The child row has three independently supplied foreign keys, but USING/WITH CHECK validate only education_records.organization_id, enabling forged cross-tenant training relationships when an identifier is known.",
+          "id": "evidence-2",
+          "label": "Root Control evidence",
+          "language": "sql",
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 166
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "The current canonical schema ends at migration 010; site_id, workpack_id, and worker_id are not tenant-bound by policy. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "extensions": {
+        "candidateId": "candidate-5ead52eea8de6fc0"
+      },
+      "findingId": "csf_37c05b7826908c646c7358fc",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:c63b1b4537edc0d6e89f56ccce21041ab6b77a6d9625bf777367a2521f6800c2"
+      },
+      "identity": {
+        "anchor": "rls-related-object-tenant-binding",
+        "instance": "education-records"
+      },
+      "locations": [
+        {
+          "endLine": 74,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 59
+        },
+        {
+          "endLine": 181,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 166
+        }
+      ],
+      "occurrenceId": "occ_c667575319c6bae5d45e6291",
+      "preventiveControls": [
+        "Keep the broken invariant in a shared policy or database constraint rather than route-local convention.",
+        "Add a negative cross-boundary or over-budget regression test for every independently reachable sibling path."
+      ],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Enforce that site_id, workpack_id, and worker_id all resolve to the row organization in RLS and database relationship constraints.",
+      "remediationTests": [
+        "Reject every tenant A record containing one tenant B foreign key.",
+        "Cover insert and update paths for all three relationships."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "summary": "The violated invariant is that education records can bind cross-tenant work objects. Current source instead shows: The child row has three independently supplied foreign keys, but USING/WITH CHECK validate only education_records.organization_id, enabling forged cross-tenant training relationships when an identifier is known."
+      },
+      "ruleId": "tenant-integrity.related-object-binding",
+      "severity": {
+        "changeConditions": "Raise if direct REST is live and forged relationships are shown to disclose foreign records or drive privileged export/share/mutation; ignore if verified live constraints or policies enforce same-tenant references.",
+        "level": "low",
+        "rationale": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+      },
+      "summary": "education_records RLS does not require site_id, workpack_id, or worker_id to belong to the authorized organization. Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval.",
+      "taxonomy": {
+        "category": "Authorization bypass / tenant integrity",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Education records can bind cross-tenant work objects",
+      "validation": {
+        "assertions": [
+          "002_workspace_productization.sql:166-181 checks organization ownership only",
+          "No canonical migrations later than 010 exist",
+          "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are intentionally exposed to browser clients"
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "limitations": [
+          "Application service-role routes often add ownership checks, but those do not protect direct Supabase table access.",
+          "Live pg_policy/catalog and tenant A/B proof are approval-gated and absent; deployment/apply state remains unverified."
+        ],
+        "method": "Cumulative canonical migration review and static direct-Supabase RLS proof",
+        "summary": "The current canonical schema ends at migration 010; site_id, workpack_id, and worker_id are not tenant-bound by policy. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "writeup": {
+        "reportPath": "findings/f07/f07.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1",
+            "evidence-2"
+          ],
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "sink": "RLS USING/WITH CHECK admits the forged relationship",
+          "source": "Direct PostgREST/table operation against public.workpack_improvement_photos",
+          "summary": "Authenticated direct Supabase PostgREST write supplies an owned organization_id plus a known foreign workpack_id/improvement_id/site_id UUID -> workpack_improvement_photos owner policy checks organization_id only -> ordinary FK existence check accepts a cross-tenant relationship -> improvement-photo relationship integrity."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "limitations": [
+          "Service-role application routes often perform stronger ownership checks, but those checks do not govern direct table REST. Foreign-table RLS also prevents claiming direct disclosure of the referenced row, so the proven effect is constrained relationship/provenance integrity."
+        ],
+        "reachability": {
+          "attacker": "Authenticated Supabase role supplies owned organization_id plus known foreign related-object UUIDs",
+          "entrypoint": "Direct PostgREST/table operation against public.workpack_improvement_photos",
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+      },
+      "codeEvidence": [
+        {
+          "code": "create table if not exists workpack_improvement_photos (\n  id uuid primary key default gen_random_uuid(),\n  organization_id uuid not null references organizations(id) on delete cascade,\n  site_id uuid references sites(id) on delete set null,\n  workpack_id uuid not null references workpacks(id) on delete cascade,\n  improvement_id uuid not null references workpack_improvements(id) on delete cascade,\n  photo_role text not null check (photo_role in ('before','after')),\n  storage_bucket text not null default 'safeclaw-improvement-photos',\n  storage_path text not null,\n  original_filename text not null,\n  content_type text,\n  analysis_payload jsonb not null default '{}'::jsonb,\n  created_by uuid,\n  created_at timestamptz not null default now(),\n  unique (improvement_id, photo_role)\n);",
+          "endLine": 86,
+          "explanation": "This source location carries or governs the validated path: RLS proves only organization ownership; all three related-object FKs can point outside that organization, allowing cross-tenant metadata association when IDs are known.",
+          "id": "evidence-1",
+          "label": "Source evidence",
+          "language": "sql",
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "source",
+          "startLine": 71
+        },
+        {
+          "code": "create policy \"owners can manage workpack improvement photos\"\n  on workpack_improvement_photos for all\n  using (\n    exists (\n      select 1 from organizations\n      where organizations.id = workpack_improvement_photos.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  )\n  with check (\n    exists (\n      select 1 from organizations\n      where organizations.id = workpack_improvement_photos.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  );",
+          "endLine": 227,
+          "explanation": "This root_control location carries or governs the validated path: RLS proves only organization ownership; all three related-object FKs can point outside that organization, allowing cross-tenant metadata association when IDs are known.",
+          "id": "evidence-2",
+          "label": "Root Control evidence",
+          "language": "sql",
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 212
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "The current canonical schema ends at migration 010; workpack_id, improvement_id, and site_id are not tenant-bound by policy. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "extensions": {
+        "candidateId": "candidate-ec168b19ed09499e"
+      },
+      "findingId": "csf_859821028dcfe217e2f9c8bb",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:746bd98a85b020fabda343e9b7b537cf4f109b7c16ab031034ea5ddd6081052b"
+      },
+      "identity": {
+        "anchor": "rls-related-object-tenant-binding",
+        "instance": "workpack-improvement-photos"
+      },
+      "locations": [
+        {
+          "endLine": 86,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "source",
+          "startLine": 71
+        },
+        {
+          "endLine": 227,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 212
+        }
+      ],
+      "occurrenceId": "occ_64e2b143cc02477d8d3169bf",
+      "preventiveControls": [
+        "Keep the broken invariant in a shared policy or database constraint rather than route-local convention.",
+        "Add a negative cross-boundary or over-budget regression test for every independently reachable sibling path."
+      ],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Validate organization ownership for workpack_id, improvement_id, and site_id in RLS and enforce their mutual relationship in the database.",
+      "remediationTests": [
+        "Reject photo rows that mix tenant A ownership with tenant B related IDs.",
+        "Reject an improvement that does not belong to the selected workpack."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "summary": "The violated invariant is that improvement photos can bind cross-tenant related objects. Current source instead shows: RLS proves only organization ownership; all three related-object FKs can point outside that organization, allowing cross-tenant metadata association when IDs are known."
+      },
+      "ruleId": "tenant-integrity.related-object-binding",
+      "severity": {
+        "changeConditions": "Raise if direct REST is live and forged relationships are shown to disclose foreign records or drive privileged export/share/mutation; ignore if verified live constraints or policies enforce same-tenant references.",
+        "level": "low",
+        "rationale": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+      },
+      "summary": "workpack_improvement_photos policy omits tenant checks for workpack_id, improvement_id, and site_id. Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval.",
+      "taxonomy": {
+        "category": "Authorization bypass / tenant integrity",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Improvement photos can bind cross-tenant related objects",
+      "validation": {
+        "assertions": [
+          "010_commercial_operations.sql:212-227 checks organization ownership only",
+          "No canonical migrations later than 010 exist",
+          "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are intentionally exposed to browser clients"
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "limitations": [
+          "Application service-role routes often add ownership checks, but those do not protect direct Supabase table access.",
+          "Live pg_policy/catalog and tenant A/B proof are approval-gated and absent; deployment/apply state remains unverified."
+        ],
+        "method": "Cumulative canonical migration review and static direct-Supabase RLS proof",
+        "summary": "The current canonical schema ends at migration 010; workpack_id, improvement_id, and site_id are not tenant-bound by policy. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "writeup": {
+        "reportPath": "findings/f08/f08.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1",
+            "evidence-2"
+          ],
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "sink": "RLS USING/WITH CHECK admits the forged relationship",
+          "source": "Direct PostgREST/table operation against public.knowledge_events",
+          "summary": "Authenticated direct Supabase PostgREST write supplies an owned organization_id plus a known foreign site_id/workpack_id/daily_entry_id UUID -> knowledge_events owner policy checks organization_id only -> ordinary FK existence check accepts a cross-tenant relationship -> knowledge-event provenance integrity."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "limitations": [
+          "Service-role application routes often perform stronger ownership checks, but those checks do not govern direct table REST. Foreign-table RLS also prevents claiming direct disclosure of the referenced row, so the proven effect is constrained relationship/provenance integrity."
+        ],
+        "reachability": {
+          "attacker": "Authenticated Supabase role supplies owned organization_id plus known foreign related-object UUIDs",
+          "entrypoint": "Direct PostgREST/table operation against public.knowledge_events",
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+      },
+      "codeEvidence": [
+        {
+          "code": "create table if not exists knowledge_events (\n  id uuid primary key default gen_random_uuid(),\n  organization_id uuid not null references organizations(id) on delete cascade,\n  site_id uuid references sites(id) on delete set null,\n  workpack_id uuid references workpacks(id) on delete set null,\n  daily_entry_id uuid references daily_entries(id) on delete set null,\n  source text not null check (\n    source in ('kma', 'lawgo', 'work24', 'kosha', 'kosha-openapi', 'kosha-accident', 'manual')\n  ),\n  source_id text not null,\n  captured_at timestamptz not null default now(),\n  title text not null,\n  url text,\n  payload jsonb not null default '{}'::jsonb,\n  related_hazard_ids text[] not null default '{}'::text[],\n  reflected_documents text[] not null default '{}'::text[],\n  review_status text not null default 'pending_review' check (\n    review_status in ('pending_review', 'approved', 'rejected', 'superseded')",
+          "endLine": 38,
+          "explanation": "This source location carries or governs the validated path: USING/WITH CHECK establish ownership only from knowledge_events.organization_id and do not verify that site_id, workpack_id, or daily_entry_id belongs to the same organization.",
+          "id": "evidence-1",
+          "label": "Source evidence",
+          "language": "sql",
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "source",
+          "startLine": 21
+        },
+        {
+          "code": "create policy \"owners can manage knowledge events\"\n  on knowledge_events for all\n  using (\n    exists (\n      select 1 from organizations\n      where organizations.id = knowledge_events.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  )\n  with check (\n    exists (\n      select 1 from organizations\n      where organizations.id = knowledge_events.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  );",
+          "endLine": 109,
+          "explanation": "This root_control location carries or governs the validated path: USING/WITH CHECK establish ownership only from knowledge_events.organization_id and do not verify that site_id, workpack_id, or daily_entry_id belongs to the same organization.",
+          "id": "evidence-2",
+          "label": "Root Control evidence",
+          "language": "sql",
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "root_control",
+          "startLine": 94
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "The current canonical schema ends at migration 010; site_id, workpack_id, and daily_entry_id are not tenant-bound by policy. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "extensions": {
+        "candidateId": "candidate-599e2c8fab24dc32"
+      },
+      "findingId": "csf_a473fbdc192153aa1bfe7e9a",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:04e0c3633cb6744021f4d6f16edbf8b20e145519d5a1e873aeb398cf8fc8246c"
+      },
+      "identity": {
+        "anchor": "rls-related-object-tenant-binding",
+        "instance": "knowledge-events"
+      },
+      "locations": [
+        {
+          "endLine": 44,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "source",
+          "startLine": 21
+        },
+        {
+          "endLine": 109,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "root_control",
+          "startLine": 94
+        }
+      ],
+      "occurrenceId": "occ_0565e36949a59f7e16a8e60b",
+      "preventiveControls": [
+        "Keep the broken invariant in a shared policy or database constraint rather than route-local convention.",
+        "Add a negative cross-boundary or over-budget regression test for every independently reachable sibling path."
+      ],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Tenant-bind every optional site, workpack, and daily-entry reference and reject relationship tuples that do not share organization_id.",
+      "remediationTests": [
+        "Reject each cross-tenant related-object permutation.",
+        "Verify provenance exports never resolve foreign-tenant objects."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "summary": "The violated invariant is that knowledge events can forge cross-tenant provenance links. Current source instead shows: USING/WITH CHECK establish ownership only from knowledge_events.organization_id and do not verify that site_id, workpack_id, or daily_entry_id belongs to the same organization."
+      },
+      "ruleId": "tenant-integrity.related-object-binding",
+      "severity": {
+        "changeConditions": "Raise if direct REST is live and forged relationships are shown to disclose foreign records or drive privileged export/share/mutation; ignore if verified live constraints or policies enforce same-tenant references.",
+        "level": "low",
+        "rationale": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+      },
+      "summary": "knowledge_events RLS permits cross-tenant site, workpack, and daily-entry references. Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval.",
+      "taxonomy": {
+        "category": "Authorization bypass / provenance integrity",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Knowledge events can forge cross-tenant provenance links",
+      "validation": {
+        "assertions": [
+          "003_knowledge_runtime.sql:94-109 checks organization ownership only",
+          "No canonical migrations later than 010 exist",
+          "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are intentionally exposed to browser clients"
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "limitations": [
+          "Application service-role routes often add ownership checks, but those do not protect direct Supabase table access.",
+          "Live pg_policy/catalog and tenant A/B proof are approval-gated and absent; deployment/apply state remains unverified."
+        ],
+        "method": "Cumulative canonical migration review and static direct-Supabase RLS proof",
+        "summary": "The current canonical schema ends at migration 010; site_id, workpack_id, and daily_entry_id are not tenant-bound by policy. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "writeup": {
+        "reportPath": "findings/f10/f10.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1",
+            "evidence-2"
+          ],
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "sink": "RLS USING/WITH CHECK admits the forged relationship",
+          "source": "Direct PostgREST/table operation against public.knowledge_regeneration_runs",
+          "summary": "Authenticated direct Supabase PostgREST write supplies an owned organization_id plus a known foreign site_id/workpack_id/daily_entry_id/raw_event_ids UUID -> knowledge_regeneration_runs owner policy checks organization_id only -> ordinary FK existence check accepts a cross-tenant relationship -> regeneration provenance integrity."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "limitations": [
+          "Service-role application routes often perform stronger ownership checks, but those checks do not govern direct table REST. Foreign-table RLS also prevents claiming direct disclosure of the referenced row, so the proven effect is constrained relationship/provenance integrity."
+        ],
+        "reachability": {
+          "attacker": "Authenticated Supabase role supplies owned organization_id plus known foreign related-object UUIDs",
+          "entrypoint": "Direct PostgREST/table operation against public.knowledge_regeneration_runs",
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+      },
+      "codeEvidence": [
+        {
+          "code": "create table if not exists knowledge_regeneration_runs (\n  id uuid primary key default gen_random_uuid(),\n  organization_id uuid not null references organizations(id) on delete cascade,\n  site_id uuid references sites(id) on delete set null,\n  workpack_id uuid references workpacks(id) on delete set null,\n  daily_entry_id uuid references daily_entries(id) on delete set null,\n  question text not null,\n  raw_event_ids uuid[] not null default '{}'::uuid[],\n  matched_hazards jsonb not null default '[]'::jsonb,\n  templates jsonb not null default '[]'::jsonb,\n  ai_instruction text not null default '',\n  generated_output jsonb not null default '{}'::jsonb,\n  provider text,\n  status text not null default 'draft' check (\n    status in ('draft', 'generated', 'review_required', 'approved', 'failed')\n  ),\n  created_by uuid,\n  created_at timestamptz not null default now()",
+          "endLine": 63,
+          "explanation": "This source location carries or governs the validated path: The owner-for-all policy checks only organization_id although site_id, workpack_id, daily_entry_id, and raw_event_ids can identify records outside that organization.",
+          "id": "evidence-1",
+          "label": "Source evidence",
+          "language": "sql",
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "source",
+          "startLine": 46
+        },
+        {
+          "code": "create policy \"owners can manage knowledge regeneration runs\"\n  on knowledge_regeneration_runs for all\n  using (\n    exists (\n      select 1 from organizations\n      where organizations.id = knowledge_regeneration_runs.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  )\n  with check (\n    exists (\n      select 1 from organizations\n      where organizations.id = knowledge_regeneration_runs.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  );",
+          "endLine": 126,
+          "explanation": "This root_control location carries or governs the validated path: The owner-for-all policy checks only organization_id although site_id, workpack_id, daily_entry_id, and raw_event_ids can identify records outside that organization.",
+          "id": "evidence-2",
+          "label": "Root Control evidence",
+          "language": "sql",
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "root_control",
+          "startLine": 111
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "The current canonical schema ends at migration 010; site_id, workpack_id, daily_entry_id, and raw_event_ids are not tenant-bound by policy. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "extensions": {
+        "candidateId": "candidate-7acda501fee82e8f"
+      },
+      "findingId": "csf_8afd1df3d2ec190e0d19a49a",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:eb090eab10e9b4a7e950931083f27b0d90bef7feaa81911618ef3e462566b0e1"
+      },
+      "identity": {
+        "anchor": "rls-related-object-tenant-binding",
+        "instance": "knowledge-regeneration-runs"
+      },
+      "locations": [
+        {
+          "endLine": 64,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "source",
+          "startLine": 46
+        },
+        {
+          "endLine": 126,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "root_control",
+          "startLine": 111
+        }
+      ],
+      "occurrenceId": "occ_f360688b708a4dae725e15a2",
+      "preventiveControls": [
+        "Keep the broken invariant in a shared policy or database constraint rather than route-local convention.",
+        "Add a negative cross-boundary or over-budget regression test for every independently reachable sibling path."
+      ],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Check that every related site, workpack, and daily entry belongs to organization_id before insert or update and enforce the tuple at the database layer.",
+      "remediationTests": [
+        "Reject regeneration runs with any foreign-tenant relationship.",
+        "Verify same-tenant regeneration history remains queryable."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "summary": "The violated invariant is that knowledge regeneration runs can forge cross-tenant relationships. Current source instead shows: The owner-for-all policy checks only organization_id although site_id, workpack_id, daily_entry_id, and raw_event_ids can identify records outside that organization."
+      },
+      "ruleId": "tenant-integrity.related-object-binding",
+      "severity": {
+        "changeConditions": "Raise if direct REST is live and forged relationships are shown to disclose foreign records or drive privileged export/share/mutation; ignore if verified live constraints or policies enforce same-tenant references.",
+        "level": "low",
+        "rationale": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+      },
+      "summary": "knowledge_regeneration_runs RLS allows cross-tenant related-object binding. Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval.",
+      "taxonomy": {
+        "category": "Authorization bypass / provenance integrity",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Knowledge regeneration runs can forge cross-tenant relationships",
+      "validation": {
+        "assertions": [
+          "003_knowledge_runtime.sql:111-126 checks organization ownership only",
+          "No canonical migrations later than 010 exist",
+          "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are intentionally exposed to browser clients"
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "limitations": [
+          "Application service-role routes often add ownership checks, but those do not protect direct Supabase table access.",
+          "Live pg_policy/catalog and tenant A/B proof are approval-gated and absent; deployment/apply state remains unverified."
+        ],
+        "method": "Cumulative canonical migration review and static direct-Supabase RLS proof",
+        "summary": "The current canonical schema ends at migration 010; site_id, workpack_id, daily_entry_id, and raw_event_ids are not tenant-bound by policy. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "writeup": {
+        "reportPath": "findings/f11/f11.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1",
+            "evidence-2"
+          ],
+          "outcome": "The matrix maps medium impact and medium likelihood to low because valid token possession and existing throttling constrain otherwise expensive work.",
+          "sink": "queryKnowledge -> runAsk/provider generation -> QA -> optional tenant persistence; maxDuration 300s",
+          "source": "JSON-RPC tool schemas use z.string() without max",
+          "summary": "Authenticated scoped MCP tool strings/includeFull -> unbounded z.string schemas -> knowledge search and runAsk/provider generation -> QA -> optional tenant persistence and response assembly."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "The matrix maps medium impact and medium likelihood to low because valid token possession and existing throttling constrain otherwise expensive work."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Remote MCP transport is repository-defined and bearer-authenticated; a valid low-trust scoped token can invoke up to 300-second work, while the 20/min limiter is warm-instance-local and no per-request byte budget exists."
+        },
+        "limitations": [
+          "Bearer authentication, scopes, disabled-when-unconfigured behavior, and a soft rate limiter reduce exposure; they do not bound one accepted request or distributed token use."
+        ],
+        "reachability": {
+          "attacker": "Authenticated MCP question/task strings and includeFull flag",
+          "entrypoint": "JSON-RPC tool schemas use z.string() without max",
+          "outcome": "The matrix maps medium impact and medium likelihood to low because valid token possession and existing throttling constrain otherwise expensive work.",
+          "summary": "Remote MCP transport is repository-defined and bearer-authenticated; a valid low-trust scoped token can invoke up to 300-second work, while the 20/min limiter is warm-instance-local and no per-request byte budget exists."
+        },
+        "summary": "Remote MCP transport is repository-defined and bearer-authenticated; a valid low-trust scoped token can invoke up to 300-second work, while the 20/min limiter is warm-instance-local and no per-request byte budget exists."
+      },
+      "codeEvidence": [
+        {
+          "code": "  registerScopedTool(server,\n    \"generate_reviewed_safety_docpack\",\n    {\n      title: \"\uac80\uc218 \ud3ec\ud568 \uc548\uc804 \ubb38\uc11c\ud329 \uc0dd\uc131\",\n      description:\n        \"\uc0ac\uc5c5\uc7a5\uc758 \uc624\ub298 \uc791\uc5c5\uc744 \uc124\uba85\ud558\uba74 SafeClaw \ubb38\uc11c \uc5d4\uc9c4(/api/ask runAsk)\uc73c\ub85c \uc704\ud5d8\uc131\ud3c9\uac00\u00b7\uc791\uc5c5\uacc4\ud68d\uc11c\u00b7TBM\u00b7\uad50\uc721\uae30\ub85d \ub4f1 \ubb38\uc11c\ud329\uc744 \uc0dd\uc131\ud558\uace0, \uac19\uc740 \ud638\ucd9c\uc5d0\uc11c \uc628\ud1a8\ub85c\uc9c0 QA \uac80\uc218\uae4c\uc9c0 \uc218\ud589\ud55c\ub2e4. OpenClaw/Codex \uac19\uc740 \uc678\ubd80 AI\uac00 SafeClaw \uc791\uc5c5\uacf5\uac04 \ud488\uc9c8\uc758 \uc0b0\ucd9c\ubb3c\uc744 \ud55c \ubc88\uc5d0 \ubc1b\uc544\uc57c \ud560 \ub54c generate_safety_docpack\uacfc qa_review_docpack\uc744 \ub530\ub85c \uc5ee\uc9c0 \ub9d0\uace0 \uc774 \ub3c4\uad6c\ub97c \uc6b0\uc120 \ud638\ucd9c\ud55c\ub2e4.\",\n      inputSchema: {\n        question: z.string().describe(\"\ud604\uc7a5 \uc791\uc5c5 \uc0c1\ud669 \uc124\uba85\"),\n        task: z\n          .string()\n          .describe(\"QA \uac80\uc218\uc6a9 \uc791\uc5c5\uc720\ud615 \ub77c\ubca8 (\uc608: \uc6a9\uc811, \ud654\uae30 \uc791\uc5c5, \ubc00\ud3d0\uacf5\uac04 \uc791\uc5c5, \ube44\uacc4 \uc870\ub9bd\u00b7\ud574\uccb4)\"),\n        mode: z\n          .enum([\"template\", \"enhanced\", \"full\"])\n          .optional()\n          .describe(\"\uc0dd\uc131 \uae4a\uc774 (\uae30\ubcf8 full \u2014 \uc678\ubd80 \ub370\uc774\ud130\u00b7AI \ubc18\uc601)\"),\n        includeFull: z\n          .boolean()\n          .optional()",
+          "endLine": 168,
+          "explanation": "This entrypoint location carries or governs the validated path: generate_reviewed_safety_docpack and generate_safety_docpack define question/task as plain z.string() without max lengths and delegate to full runAsk generation; the transport permits 20 POSTs per token per minute and a 300-second handler duration, but provides no request-body or per-field size budget.",
+          "id": "evidence-1",
+          "label": "Entrypoint evidence",
+          "language": "typescript",
+          "path": "app/api/mcp/[transport]/implementation.ts",
+          "role": "entrypoint",
+          "startLine": 151
+        },
+        {
+          "code": "const baseHandler = createMcpHandler(\n  registerTools,\n  { serverInfo: { name: \"safeclaw\", version: \"0.1.0\" } },\n  { basePath: \"/api/mcp\", maxDuration: 300, verboseLogs: false }\n);\n\n// Bearer \u2192 {siteId, orgId, scopes} \ucee8\ud14d\uc2a4\ud2b8. DB(mcp_tokens) \uc6b0\uc120, env \ub808\uac70\uc2dc \ud3f4\ubc31.\n// \ucee8\ud14d\uc2a4\ud2b8\ub97c AuthInfo.extra\uc5d0 \uc2e4\uc5b4 \ubcf4\ub0b4\uba74 transport\uac00 \ub3c4\uad6c \ud578\ub4e4\ub7ec\uc758 extra.authInfo\ub85c \uc804\ub2ec\ud55c\ub2e4.\nconst verifyToken = async (_req: Request, bearerToken?: string): Promise<AuthInfo | undefined> => {\n  if (!bearerToken) return undefined;\n  const context = await resolveMcpAuth(bearerToken);\n  if (!context) return undefined;\n  return {\n    token: bearerToken,\n    clientId: context.source === \"db\" ? `safeclaw-mcp:${context.tokenId}` : \"safeclaw-mcp\",\n    scopes: context.scopes,\n    // McpAuthContext \u2014 \ud3c9\ubb38 \ud1a0\ud070\uc740 \ud3ec\ud568\ud558\uc9c0 \uc54a\ub294\ub2e4. AuthInfo.extra\ub294 Record<string, unknown>.\n    extra: context as unknown as Record<string, unknown>,",
+          "endLine": 332,
+          "explanation": "This root_control location carries or governs the validated path: generate_reviewed_safety_docpack and generate_safety_docpack define question/task as plain z.string() without max lengths and delegate to full runAsk generation; the transport permits 20 POSTs per token per minute and a 300-second handler duration, but provides no request-body or per-field size budget.",
+          "id": "evidence-2",
+          "label": "Root Control evidence",
+          "language": "typescript",
+          "path": "app/api/mcp/[transport]/implementation.ts",
+          "role": "root_control",
+          "startLine": 315
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Authentication and a soft per-token rate limit exist, but unbounded strings reach expensive generation before any character/body budget."
+      },
+      "extensions": {
+        "candidateId": "candidate-d15f964a8816890f"
+      },
+      "findingId": "csf_f30faad248ef517b894c8946",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:18656c15a47860be77d849a54f3ff20972f8495de909fa4b2522407405d7bf3e"
+      },
+      "identity": {
+        "anchor": "mcp-generation-input-budget",
+        "instance": "reviewed-docpack-tools"
+      },
+      "locations": [
+        {
+          "endLine": 198,
+          "path": "app/api/mcp/[transport]/implementation.ts",
+          "role": "entrypoint",
+          "startLine": 151
+        },
+        {
+          "endLine": 372,
+          "path": "app/api/mcp/[transport]/implementation.ts",
+          "role": "root_control",
+          "startLine": 315
+        }
+      ],
+      "occurrenceId": "occ_71900f6f1b9cbbe6c6c308d9",
+      "preventiveControls": [
+        "Keep the broken invariant in a shared policy or database constraint rather than route-local convention.",
+        "Add a negative cross-boundary or over-budget regression test for every independently reachable sibling path."
+      ],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Apply shared byte and character budgets to every MCP generation field before AI or QA work, cap aggregate tool payloads, and use a durable tenant-aware rate limit for costly operations.",
+      "remediationTests": [
+        "Reject over-budget strings before invoking any provider or persistence helper.",
+        "Assert aggregate nested payload limits and durable tenant throttling."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "summary": "The violated invariant is that mcp document generation accepts unbounded authenticated inputs. Current source instead shows: generate_reviewed_safety_docpack and generate_safety_docpack define question/task as plain z.string() without max lengths and delegate to full runAsk generation; the transport permits 20 POSTs per token per minute and a 300-second handler duration, but provides no request-body or per-field size budget."
+      },
+      "ruleId": "resource-exhaustion.mcp-generation",
+      "severity": {
+        "changeConditions": "Raise if modest authenticated traffic is proven to create sustained shared outage or material provider cost; ignore if platform and distributed quotas enforce effective body, work, and response budgets.",
+        "level": "low",
+        "rationale": "The matrix maps medium impact and medium likelihood to low because valid token possession and existing throttling constrain otherwise expensive work."
+      },
+      "summary": "MCP generation tools accept unbounded strings before long-running AI and QA work. Remote MCP transport is repository-defined and bearer-authenticated; a valid low-trust scoped token can invoke up to 300-second work, while the 20/min limiter is warm-instance-local and no per-request byte budget exists.",
+      "taxonomy": {
+        "category": "Resource exhaustion",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "MCP document generation accepts unbounded authenticated inputs",
+      "validation": {
+        "assertions": [
+          "implementation.ts:157-198 uses unbounded z.string for generation tools",
+          "mcp-docpack-handler.ts:64-113 and :153-201 pass strings directly into knowledge, runAsk, QA, and persistence",
+          "implementation.ts:336-372 requires auth but limiter is explicitly per warm instance and maxDuration is 300s"
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "limitations": [
+          "Auth and rate limiting reduce anonymous abuse but do not bound per-request work.",
+          "Deployment-level request-body limits and distributed quotas are not evidenced in repo."
+        ],
+        "method": "Static authenticated MCP source/control/sink trace across schemas, auth, handlers, AI generation, QA, and persistence",
+        "summary": "Authentication and a soft per-token rate limit exist, but unbounded strings reach expensive generation before any character/body budget."
+      },
+      "writeup": {
+        "reportPath": "findings/f02/f02.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "The matrix maps medium impact and unknown likelihood to low because query text may be sensitive but live grants and table deployment are not verified.",
+          "sink": "PostgREST SELECT/INSERT/UPDATE/DELETE on query_logs",
+          "source": "Public query_logs table created by migration 001",
+          "summary": "Direct Supabase PostgREST anon/authenticated request -> public.query_logs created without RLS/policy/grant revocation -> select/insert/update/delete -> stored query-text disclosure or mutation."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "The matrix maps medium impact and unknown likelihood to low because query text may be sensitive but live grants and table deployment are not verified."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "Browser Supabase configuration proves intended direct REST capability and no canonical migration adds query_logs RLS; live table grants/existence remain unverified and were not changed."
+        },
+        "limitations": [
+          "No application route is needed and service-role controls do not protect direct REST; missing live proof limits deployment confidence rather than defeating the canonical policy gap."
+        ],
+        "reachability": {
+          "attacker": "Anon or authenticated Supabase client performs direct table operations",
+          "entrypoint": "Public query_logs table created by migration 001",
+          "outcome": "The matrix maps medium impact and unknown likelihood to low because query text may be sensitive but live grants and table deployment are not verified.",
+          "summary": "Browser Supabase configuration proves intended direct REST capability and no canonical migration adds query_logs RLS; live table grants/existence remain unverified and were not changed."
+        },
+        "summary": "Browser Supabase configuration proves intended direct REST capability and no canonical migration adds query_logs RLS; live table grants/existence remain unverified and were not changed."
+      },
+      "codeEvidence": [
+        {
+          "code": "create table if not exists query_logs (\n  id bigint generated always as identity primary key,\n  query_text text not null,\n  mode text not null default 'mock',\n  created_at timestamptz not null default now()\n);",
+          "endLine": 6,
+          "explanation": "This root_control location carries or governs the validated path: The migration creates query_logs with query_text but never enables RLS or defines an authorization policy; later migrations do not retrofit this table.",
+          "id": "evidence-1",
+          "label": "Root Control evidence",
+          "language": "sql",
+          "path": "supabase/migrations/001_init.sql",
+          "role": "root_control",
+          "startLine": 1
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "query_logs stores user query text; migration 001 never enables RLS and no later migration or grant revocation closes direct access."
+      },
+      "extensions": {
+        "candidateId": "candidate-b3d53e946a9a7ecf"
+      },
+      "findingId": "csf_86e7a213323df30741456ca9",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:404303415472443beb21b706e83ac5421a11ad0a9a067440a8bf910dc71e2db3"
+      },
+      "identity": {
+        "anchor": "public-table-rls",
+        "instance": "query-logs"
+      },
+      "locations": [
+        {
+          "endLine": 6,
+          "path": "supabase/migrations/001_init.sql",
+          "role": "root_control",
+          "startLine": 1
+        }
+      ],
+      "occurrenceId": "occ_67577b7531789683b29e61f1",
+      "preventiveControls": [
+        "Keep the broken invariant in a shared policy or database constraint rather than route-local convention.",
+        "Add a negative cross-boundary or over-budget regression test for every independently reachable sibling path."
+      ],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Enable RLS, restrict writes to a controlled server path, restrict reads to authorized operators, and remove broad public-schema grants.",
+      "remediationTests": [
+        "Anonymous and ordinary authenticated roles cannot read query text.",
+        "Only the intended server or operator role can insert and inspect logs."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "The violated invariant is that query logs table is exposed without row-level security. Current source instead shows: The migration creates query_logs with query_text but never enables RLS or defines an authorization policy; later migrations do not retrofit this table."
+      },
+      "ruleId": "authorization-bypass.missing-row-level-security",
+      "severity": {
+        "changeConditions": "Raise if live direct access and sensitive query contents are confirmed; ignore if verified live grants revoke access or a later applied policy protects the table.",
+        "level": "low",
+        "rationale": "The matrix maps medium impact and unknown likelihood to low because query text may be sensitive but live grants and table deployment are not verified."
+      },
+      "summary": "query_logs is created without row-level security, exposing stored query text to direct public-schema access under Supabase default grants. Browser Supabase configuration proves intended direct REST capability and no canonical migration adds query_logs RLS; live table grants/existence remain unverified and were not changed.",
+      "taxonomy": {
+        "category": "Missing authorization / RLS",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Query logs table is exposed without row-level security",
+      "validation": {
+        "assertions": [
+          "supabase/migrations/001_init.sql:1-6 creates query_logs without RLS",
+          "No later canonical migration mentions query_logs RLS or revokes grants",
+          "NEXT_PUBLIC Supabase URL and anon key are used by browser clients"
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "No application route is needed for direct public-schema access.",
+          "Live grants/table existence are not verified because live RLS evidence is approval-gated."
+        ],
+        "method": "Cumulative canonical migration and browser-client exposure trace",
+        "summary": "query_logs stores user query text; migration 001 never enables RLS and no later migration or grant revocation closes direct access."
+      },
+      "writeup": {
+        "reportPath": "findings/f17/f17.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1",
+            "evidence-2"
+          ],
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "sink": "RLS USING/WITH CHECK admits the forged relationship",
+          "source": "Direct PostgREST/table operation against public.workpack_read_confirmations",
+          "summary": "Authenticated direct Supabase PostgREST write supplies an owned organization_id plus a known foreign workpack_id/share_session_id/worker_id/site_id UUID -> workpack_read_confirmations owner policy checks organization_id only -> ordinary FK existence check accepts a cross-tenant relationship -> recipient confirmation integrity."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "limitations": [
+          "Service-role application routes often perform stronger ownership checks, but those checks do not govern direct table REST. Foreign-table RLS also prevents claiming direct disclosure of the referenced row, so the proven effect is constrained relationship/provenance integrity."
+        ],
+        "reachability": {
+          "attacker": "Authenticated Supabase role supplies owned organization_id plus known foreign related-object UUIDs",
+          "entrypoint": "Direct PostgREST/table operation against public.workpack_read_confirmations",
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+      },
+      "codeEvidence": [
+        {
+          "code": "create table if not exists workpack_read_confirmations (\n  id uuid primary key default gen_random_uuid(),\n  organization_id uuid not null references organizations(id) on delete cascade,\n  site_id uuid references sites(id) on delete set null,\n  workpack_id uuid not null references workpacks(id) on delete cascade,\n  share_session_id uuid references workpack_share_sessions(id) on delete set null,\n  worker_id uuid references workers(id) on delete set null,\n  worker_display_name text not null,\n  worker_snapshot jsonb not null default '{}'::jsonb,\n  language_code text not null default 'ko',\n  confirmation_method text not null default 'button' check (confirmation_method in ('button','admin_marked')),\n  read_at timestamptz not null default now(),\n  created_at timestamptz not null default now()\n);",
+          "endLine": 49,
+          "explanation": "This source location carries or governs the validated path: workpack_id, share_session_id, worker_id, and site_id are independent FKs, while RLS validates only organization_id; forged confirmation rows can therefore attach to another tenant's identifiers.",
+          "id": "evidence-1",
+          "label": "Source evidence",
+          "language": "sql",
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "source",
+          "startLine": 36
+        },
+        {
+          "code": "create policy \"owners can manage workpack read confirmations\"\n  on workpack_read_confirmations for all\n  using (\n    exists (\n      select 1 from organizations\n      where organizations.id = workpack_read_confirmations.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  )\n  with check (\n    exists (\n      select 1 from organizations\n      where organizations.id = workpack_read_confirmations.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  );",
+          "endLine": 193,
+          "explanation": "This root_control location carries or governs the validated path: workpack_id, share_session_id, worker_id, and site_id are independent FKs, while RLS validates only organization_id; forged confirmation rows can therefore attach to another tenant's identifiers.",
+          "id": "evidence-2",
+          "label": "Root Control evidence",
+          "language": "sql",
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 178
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "The current canonical schema ends at migration 010; workpack/share-session/worker/site references are not tenant-bound by policy. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "extensions": {
+        "candidateId": "candidate-3f9e10f8d6d58aac"
+      },
+      "findingId": "csf_4acfec1a2b24d40f7eecfbc4",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:a4f70643c0ce59b35cd957ef7d073c42b4ad5b903246b237d38861333e1d3481"
+      },
+      "identity": {
+        "anchor": "rls-related-object-tenant-binding",
+        "instance": "workpack-read-confirmations"
+      },
+      "locations": [
+        {
+          "endLine": 49,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "source",
+          "startLine": 36
+        },
+        {
+          "endLine": 193,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 178
+        }
+      ],
+      "occurrenceId": "occ_8264329851d83947e54351f4",
+      "preventiveControls": [
+        "Keep the broken invariant in a shared policy or database constraint rather than route-local convention.",
+        "Add a negative cross-boundary or over-budget regression test for every independently reachable sibling path."
+      ],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Require session, workpack, site, and worker references to share organization ownership and enforce the expected session-recipient tuple atomically.",
+      "remediationTests": [
+        "Reject acknowledgements mixing tenant A and B identifiers.",
+        "Reject workers that are not recipients of the referenced session."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "summary": "The violated invariant is that read confirmations can bind cross-tenant recipient objects. Current source instead shows: workpack_id, share_session_id, worker_id, and site_id are independent FKs, while RLS validates only organization_id; forged confirmation rows can therefore attach to another tenant's identifiers."
+      },
+      "ruleId": "tenant-integrity.related-object-binding",
+      "severity": {
+        "changeConditions": "Raise if direct REST is live and forged relationships are shown to disclose foreign records or drive privileged export/share/mutation; ignore if verified live constraints or policies enforce same-tenant references.",
+        "level": "low",
+        "rationale": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+      },
+      "summary": "workpack_read_confirmations policy omits same-tenant checks for all related recipient objects. Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval.",
+      "taxonomy": {
+        "category": "Authorization bypass / recipient integrity",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Read confirmations can bind cross-tenant recipient objects",
+      "validation": {
+        "assertions": [
+          "010_commercial_operations.sql:178-193 checks organization ownership only",
+          "No canonical migrations later than 010 exist",
+          "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are intentionally exposed to browser clients"
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "limitations": [
+          "Application service-role routes often add ownership checks, but those do not protect direct Supabase table access.",
+          "Live pg_policy/catalog and tenant A/B proof are approval-gated and absent; deployment/apply state remains unverified."
+        ],
+        "method": "Cumulative canonical migration review and static direct-Supabase RLS proof",
+        "summary": "The current canonical schema ends at migration 010; workpack/share-session/worker/site references are not tenant-bound by policy. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "writeup": {
+        "reportPath": "findings/f12/f12.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1",
+            "evidence-2"
+          ],
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "sink": "RLS USING/WITH CHECK admits the forged relationship",
+          "source": "Direct PostgREST/table operation against public.workpack_share_sessions",
+          "summary": "Authenticated direct Supabase PostgREST write supplies an owned organization_id plus a known foreign site_id/workpack_id UUID -> workpack_share_sessions owner policy checks organization_id only -> ordinary FK existence check accepts a cross-tenant relationship -> saved-share relationship integrity. This does not establish exact saved /share reachability: saved Share remains MISSING_EVIDENCE and storage activation is approval-gated."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "limitations": [
+          "Service-role application routes often perform stronger ownership checks, but those checks do not govern direct table REST. Foreign-table RLS also prevents claiming direct disclosure of the referenced row, so the proven effect is constrained relationship/provenance integrity."
+        ],
+        "reachability": {
+          "attacker": "Authenticated Supabase role supplies owned organization_id plus known foreign related-object UUIDs",
+          "entrypoint": "Direct PostgREST/table operation against public.workpack_share_sessions",
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+      },
+      "codeEvidence": [
+        {
+          "code": "create table if not exists workpack_share_sessions (\n  id uuid primary key default gen_random_uuid(),\n  organization_id uuid not null references organizations(id) on delete cascade,\n  site_id uuid references sites(id) on delete set null,\n  workpack_id uuid not null references workpacks(id) on delete cascade,\n  share_scope text not null default 'invited' check (share_scope in ('invited','organization')),\n  recipients_snapshot jsonb not null default '[]'::jsonb,\n  access_policy jsonb not null default '{\"anonymousAllowed\":false,\"manualLanguageSwitchAllowed\":true,\"requireKnownWorkerSnapshot\":true}'::jsonb,\n  status text not null default 'active' check (status in ('active','revoked','expired')),\n  expires_at timestamptz,\n  created_by uuid,\n  created_at timestamptz not null default now(),\n  updated_at timestamptz not null default now()\n);",
+          "endLine": 34,
+          "explanation": "This source location carries or governs the validated path: The RLS predicate authorizes solely through organization_id, permitting an owned row to reference another tenant's workpack or site if its UUID is known.",
+          "id": "evidence-1",
+          "label": "Source evidence",
+          "language": "sql",
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "source",
+          "startLine": 21
+        },
+        {
+          "code": "create policy \"owners can manage workpack share sessions\"\n  on workpack_share_sessions for all\n  using (\n    exists (\n      select 1 from organizations\n      where organizations.id = workpack_share_sessions.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  )\n  with check (\n    exists (\n      select 1 from organizations\n      where organizations.id = workpack_share_sessions.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  );",
+          "endLine": 176,
+          "explanation": "This root_control location carries or governs the validated path: The RLS predicate authorizes solely through organization_id, permitting an owned row to reference another tenant's workpack or site if its UUID is known.",
+          "id": "evidence-2",
+          "label": "Root Control evidence",
+          "language": "sql",
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 161
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "The current canonical schema ends at migration 010; site_id and workpack_id are not tenant-bound by policy. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "extensions": {
+        "candidateId": "candidate-d7cd5f16f8ade525"
+      },
+      "findingId": "csf_3ee601f8b3e9c94e52a05522",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:b5e8a4d5e0928a4d79f7e09bce42996fd1105d136bcc504c121c02c4201ed2d2"
+      },
+      "identity": {
+        "anchor": "rls-related-object-tenant-binding",
+        "instance": "workpack-share-sessions"
+      },
+      "locations": [
+        {
+          "endLine": 34,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "source",
+          "startLine": 21
+        },
+        {
+          "endLine": 176,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 161
+        }
+      ],
+      "occurrenceId": "occ_ca465f4024d4f5ce079d590f",
+      "preventiveControls": [
+        "Keep the broken invariant in a shared policy or database constraint rather than route-local convention.",
+        "Add a negative cross-boundary or over-budget regression test for every independently reachable sibling path."
+      ],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Enforce that site_id and workpack_id belong to organization_id in RLS and database constraints before enabling DB-backed public share creation.",
+      "remediationTests": [
+        "Tenant A cannot create or update a session with tenant B workpack or site IDs.",
+        "Exact saved-session geometry remains a separate post-storage verification."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "summary": "The violated invariant is that share sessions can bind another tenant's site or workpack. Current source instead shows: The RLS predicate authorizes solely through organization_id, permitting an owned row to reference another tenant's workpack or site if its UUID is known."
+      },
+      "ruleId": "tenant-integrity.related-object-binding",
+      "severity": {
+        "changeConditions": "Raise if direct REST is live and forged relationships are shown to disclose foreign records or drive privileged export/share/mutation; ignore if verified live constraints or policies enforce same-tenant references.",
+        "level": "low",
+        "rationale": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+      },
+      "summary": "workpack_share_sessions policy does not prove that site_id and workpack_id belong to organization_id. Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval.",
+      "taxonomy": {
+        "category": "Authorization bypass / share integrity",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Share sessions can bind another tenant's site or workpack",
+      "validation": {
+        "assertions": [
+          "010_commercial_operations.sql:161-176 checks organization ownership only",
+          "No canonical migrations later than 010 exist",
+          "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are intentionally exposed to browser clients"
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "limitations": [
+          "Application service-role routes often add ownership checks, but those do not protect direct Supabase table access.",
+          "Live pg_policy/catalog and tenant A/B proof are approval-gated and absent; deployment/apply state remains unverified."
+        ],
+        "method": "Cumulative canonical migration review and static direct-Supabase RLS proof",
+        "summary": "The current canonical schema ends at migration 010; site_id and workpack_id are not tenant-bound by policy. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "writeup": {
+        "reportPath": "findings/f13/f13.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1",
+            "evidence-2"
+          ],
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "sink": "RLS USING/WITH CHECK admits the forged relationship",
+          "source": "Direct PostgREST/table operation against public.workers",
+          "summary": "Authenticated direct Supabase PostgREST write supplies an owned organization_id plus a known foreign site_id UUID -> workers owner policy checks organization_id only -> ordinary FK existence check accepts a cross-tenant relationship -> worker-site relationship integrity."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "limitations": [
+          "Service-role application routes often perform stronger ownership checks, but those checks do not govern direct table REST. Foreign-table RLS also prevents claiming direct disclosure of the referenced row, so the proven effect is constrained relationship/provenance integrity."
+        ],
+        "reachability": {
+          "attacker": "Authenticated Supabase role supplies owned organization_id plus known foreign related-object UUIDs",
+          "entrypoint": "Direct PostgREST/table operation against public.workers",
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+      },
+      "codeEvidence": [
+        {
+          "code": "create table if not exists workers (\n  id uuid primary key default gen_random_uuid(),\n  organization_id uuid not null references organizations(id) on delete cascade,\n  site_id uuid references sites(id) on delete set null,\n  external_key text not null,\n  display_name text not null,\n  role text not null,\n  joined_at date,\n  experience_summary text,\n  nationality text,\n  language_code text,\n  language_label text,\n  is_new_worker boolean not null default false,\n  is_foreign_worker boolean not null default false,\n  training_status text not null default '\ud655\uc778 \ud544\uc694',\n  training_summary text,\n  phone text,\n  email text,",
+          "endLine": 38,
+          "explanation": "This source location carries or governs the validated path: site_id is an independent foreign key, while WITH CHECK proves only that workers.organization_id belongs to auth.uid(); it never proves sites.organization_id equals the row organization_id.",
+          "id": "evidence-1",
+          "label": "Source evidence",
+          "language": "sql",
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 21
+        },
+        {
+          "code": "create policy \"owners can manage workers\"\n  on workers for all\n  using (\n    exists (\n      select 1 from organizations\n      where organizations.id = workers.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  )\n  with check (\n    exists (\n      select 1 from organizations\n      where organizations.id = workers.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  );",
+          "endLine": 147,
+          "explanation": "This root_control location carries or governs the validated path: site_id is an independent foreign key, while WITH CHECK proves only that workers.organization_id belongs to auth.uid(); it never proves sites.organization_id equals the row organization_id.",
+          "id": "evidence-2",
+          "label": "Root Control evidence",
+          "language": "sql",
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 132
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "The current canonical schema ends at migration 010; site_id is not required to belong to workers.organization_id. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "extensions": {
+        "candidateId": "candidate-18468428547ee512"
+      },
+      "findingId": "csf_71b78106bcb87a7b3057544a",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:920608688f55b21c5eb0e446de77a776649cede305668107c54be90f0e212637"
+      },
+      "identity": {
+        "anchor": "rls-related-object-tenant-binding",
+        "instance": "workers"
+      },
+      "locations": [
+        {
+          "endLine": 41,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 21
+        },
+        {
+          "endLine": 147,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 132
+        }
+      ],
+      "occurrenceId": "occ_b769d91241e55b14dd202a68",
+      "preventiveControls": [
+        "Keep the broken invariant in a shared policy or database constraint rather than route-local convention.",
+        "Add a negative cross-boundary or over-budget regression test for every independently reachable sibling path."
+      ],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Require site_id to resolve to the same organization_id in RLS and a database constraint or trigger on insert and update.",
+      "remediationTests": [
+        "Reject an owned worker row containing a foreign-tenant site UUID.",
+        "Verify authorized same-tenant site reassignment remains possible."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "summary": "The violated invariant is that worker rows can reference another tenant's site. Current source instead shows: site_id is an independent foreign key, while WITH CHECK proves only that workers.organization_id belongs to auth.uid(); it never proves sites.organization_id equals the row organization_id."
+      },
+      "ruleId": "tenant-integrity.related-object-binding",
+      "severity": {
+        "changeConditions": "Raise if direct REST is live and forged relationships are shown to disclose foreign records or drive privileged export/share/mutation; ignore if verified live constraints or policies enforce same-tenant references.",
+        "level": "low",
+        "rationale": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+      },
+      "summary": "workers RLS authorizes only organization_id and permits a caller to bind an owned worker row to another tenant's site_id. Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval.",
+      "taxonomy": {
+        "category": "Authorization bypass / tenant integrity",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Worker rows can reference another tenant's site",
+      "validation": {
+        "assertions": [
+          "002_workspace_productization.sql:132-147 checks organization ownership only",
+          "No canonical migrations later than 010 exist",
+          "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are intentionally exposed to browser clients"
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "limitations": [
+          "Application service-role routes often add ownership checks, but those do not protect direct Supabase table access.",
+          "Live pg_policy/catalog and tenant A/B proof are approval-gated and absent; deployment/apply state remains unverified."
+        ],
+        "method": "Cumulative canonical migration review and static direct-Supabase RLS proof",
+        "summary": "The current canonical schema ends at migration 010; site_id is not required to belong to workers.organization_id. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "writeup": {
+        "reportPath": "findings/f14/f14.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1",
+            "evidence-2"
+          ],
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "sink": "RLS USING/WITH CHECK admits the forged relationship",
+          "source": "Direct PostgREST/table operation against public.workpack_improvements",
+          "summary": "Authenticated direct Supabase PostgREST write supplies an owned organization_id plus a known foreign workpack_id/site_id UUID -> workpack_improvements owner policy checks organization_id only -> ordinary FK existence check accepts a cross-tenant relationship -> improvement relationship integrity."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "limitations": [
+          "Service-role application routes often perform stronger ownership checks, but those checks do not govern direct table REST. Foreign-table RLS also prevents claiming direct disclosure of the referenced row, so the proven effect is constrained relationship/provenance integrity."
+        ],
+        "reachability": {
+          "attacker": "Authenticated Supabase role supplies owned organization_id plus known foreign related-object UUIDs",
+          "entrypoint": "Direct PostgREST/table operation against public.workpack_improvements",
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+      },
+      "codeEvidence": [
+        {
+          "code": "create table if not exists workpack_improvements (\n  id uuid primary key default gen_random_uuid(),\n  organization_id uuid not null references organizations(id) on delete cascade,\n  site_id uuid references sites(id) on delete set null,\n  workpack_id uuid not null references workpacks(id) on delete cascade,\n  task_label text not null,\n  hazard_label text not null,\n  improvement_text text not null,\n  reflected_documents text[] not null default '{}'::text[],\n  review_status text not null default 'candidate' check (review_status in ('candidate','approved','rejected','reflected')),\n  source_type text not null default 'manual' check (source_type in ('manual','photo_analysis','operator_note')),\n  photo_summary jsonb not null default '{}'::jsonb,\n  analysis_payload jsonb not null default '{}'::jsonb,\n  created_by uuid,\n  approved_by uuid,\n  approved_at timestamptz,\n  created_at timestamptz not null default now(),\n  updated_at timestamptz not null default now()",
+          "endLine": 68,
+          "explanation": "This source location carries or governs the validated path: The owner policy checks organization_id only and leaves workpack_id and site_id consistency unenforced, allowing integrity-impacting improvement rows on known foreign identifiers.",
+          "id": "evidence-1",
+          "label": "Source evidence",
+          "language": "sql",
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "source",
+          "startLine": 51
+        },
+        {
+          "code": "create policy \"owners can manage workpack improvements\"\n  on workpack_improvements for all\n  using (\n    exists (\n      select 1 from organizations\n      where organizations.id = workpack_improvements.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  )\n  with check (\n    exists (\n      select 1 from organizations\n      where organizations.id = workpack_improvements.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  );",
+          "endLine": 210,
+          "explanation": "This root_control location carries or governs the validated path: The owner policy checks organization_id only and leaves workpack_id and site_id consistency unenforced, allowing integrity-impacting improvement rows on known foreign identifiers.",
+          "id": "evidence-2",
+          "label": "Root Control evidence",
+          "language": "sql",
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 195
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "The current canonical schema ends at migration 010; workpack_id and site_id are not tenant-bound by policy. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "extensions": {
+        "candidateId": "candidate-c0d9c7a5c82ae199"
+      },
+      "findingId": "csf_eac496c48e6c6cd8f0871f4a",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:165e6f4d54cae0a5f4e335b5e39d5de85a3283e74b583d21c4a09576f6e2ba4c"
+      },
+      "identity": {
+        "anchor": "rls-related-object-tenant-binding",
+        "instance": "workpack-improvements"
+      },
+      "locations": [
+        {
+          "endLine": 69,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "source",
+          "startLine": 51
+        },
+        {
+          "endLine": 210,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 195
+        }
+      ],
+      "occurrenceId": "occ_452dc4801ecf26b79e4e0c71",
+      "preventiveControls": [
+        "Keep the broken invariant in a shared policy or database constraint rather than route-local convention.",
+        "Add a negative cross-boundary or over-budget regression test for every independently reachable sibling path."
+      ],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Require workpack_id and site_id to belong to organization_id and to each other through RLS plus database constraints or triggers.",
+      "remediationTests": [
+        "Reject cross-tenant workpack and site IDs on insert and update.",
+        "Accept only same-tenant, internally consistent improvement rows."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "summary": "The violated invariant is that workpack improvements can bind cross-tenant workpacks or sites. Current source instead shows: The owner policy checks organization_id only and leaves workpack_id and site_id consistency unenforced, allowing integrity-impacting improvement rows on known foreign identifiers."
+      },
+      "ruleId": "tenant-integrity.related-object-binding",
+      "severity": {
+        "changeConditions": "Raise if direct REST is live and forged relationships are shown to disclose foreign records or drive privileged export/share/mutation; ignore if verified live constraints or policies enforce same-tenant references.",
+        "level": "low",
+        "rationale": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+      },
+      "summary": "workpack_improvements policy permits cross-tenant workpack and site associations. Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval.",
+      "taxonomy": {
+        "category": "Authorization bypass / tenant integrity",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Workpack improvements can bind cross-tenant workpacks or sites",
+      "validation": {
+        "assertions": [
+          "010_commercial_operations.sql:195-210 checks organization ownership only",
+          "No canonical migrations later than 010 exist",
+          "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are intentionally exposed to browser clients"
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "limitations": [
+          "Application service-role routes often add ownership checks, but those do not protect direct Supabase table access.",
+          "Live pg_policy/catalog and tenant A/B proof are approval-gated and absent; deployment/apply state remains unverified."
+        ],
+        "method": "Cumulative canonical migration review and static direct-Supabase RLS proof",
+        "summary": "The current canonical schema ends at migration 010; workpack_id and site_id are not tenant-bound by policy. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "writeup": {
+        "reportPath": "findings/f09/f09.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1",
+            "evidence-2"
+          ],
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "sink": "RLS USING/WITH CHECK admits the forged relationship",
+          "source": "Direct PostgREST/table operation against public.workpacks",
+          "summary": "Authenticated direct Supabase PostgREST write supplies an owned organization_id plus a known foreign site_id UUID -> workpacks owner policy checks organization_id only -> ordinary FK existence check accepts a cross-tenant relationship -> workpack-site relationship integrity."
+        },
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "limitations": [
+          "Service-role application routes often perform stronger ownership checks, but those checks do not govern direct table REST. Foreign-table RLS also prevents claiming direct disclosure of the referenced row, so the proven effect is constrained relationship/provenance integrity."
+        ],
+        "reachability": {
+          "attacker": "Authenticated Supabase role supplies owned organization_id plus known foreign related-object UUIDs",
+          "entrypoint": "Direct PostgREST/table operation against public.workpacks",
+          "outcome": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations.",
+          "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+        },
+        "summary": "Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval."
+      },
+      "codeEvidence": [
+        {
+          "code": "create table if not exists workpacks (\n  id uuid primary key default gen_random_uuid(),\n  organization_id uuid not null references organizations(id) on delete cascade,\n  site_id uuid references sites(id) on delete set null,\n  question text not null,\n  scenario jsonb not null default '{}'::jsonb,\n  deliverables jsonb not null default '{}'::jsonb,\n  evidence_summary jsonb not null default '{}'::jsonb,\n  worker_summary jsonb not null default '{}'::jsonb,\n  status jsonb not null default '{}'::jsonb,\n  created_by uuid,\n  created_at timestamptz not null default now(),\n  updated_at timestamptz not null default now()",
+          "endLine": 56,
+          "explanation": "This source location carries or governs the validated path: A workpack can carry any existing site_id FK while WITH CHECK validates only workpacks.organization_id against an organization owned by auth.uid().",
+          "id": "evidence-1",
+          "label": "Source evidence",
+          "language": "sql",
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 44
+        },
+        {
+          "code": "create policy \"owners can manage workpacks\"\n  on workpacks for all\n  using (\n    exists (\n      select 1 from organizations\n      where organizations.id = workpacks.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  )\n  with check (\n    exists (\n      select 1 from organizations\n      where organizations.id = workpacks.organization_id\n        and organizations.owner_id = auth.uid()\n    )\n  );",
+          "endLine": 164,
+          "explanation": "This root_control location carries or governs the validated path: A workpack can carry any existing site_id FK while WITH CHECK validates only workpacks.organization_id against an organization owned by auth.uid().",
+          "id": "evidence-2",
+          "label": "Root Control evidence",
+          "language": "sql",
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 149
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "The current canonical schema ends at migration 010; site_id is not required to belong to workpacks.organization_id. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "extensions": {
+        "candidateId": "candidate-3f1043170039df38"
+      },
+      "findingId": "csf_f2c907fd607896c985c91ef3",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:9e93c2f9438ea8bb51442a880b27d1d18f6af15761c203ce6f8599221db4b117"
+      },
+      "identity": {
+        "anchor": "rls-related-object-tenant-binding",
+        "instance": "workpacks"
+      },
+      "locations": [
+        {
+          "endLine": 56,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 44
+        },
+        {
+          "endLine": 164,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 149
+        }
+      ],
+      "occurrenceId": "occ_aa93c0154b7e8963754702f1",
+      "preventiveControls": [
+        "Keep the broken invariant in a shared policy or database constraint rather than route-local convention.",
+        "Add a negative cross-boundary or over-budget regression test for every independently reachable sibling path."
+      ],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Require site_id to belong to organization_id in RLS and database constraints before accepting workpack inserts or updates.",
+      "remediationTests": [
+        "Reject tenant A workpacks containing tenant B site IDs.",
+        "Verify archives and enrichment cannot resolve foreign-site metadata."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "summary": "The violated invariant is that workpacks can reference another tenant's site. Current source instead shows: A workpack can carry any existing site_id FK while WITH CHECK validates only workpacks.organization_id against an organization owned by auth.uid()."
+      },
+      "ruleId": "tenant-integrity.related-object-binding",
+      "severity": {
+        "changeConditions": "Raise if direct REST is live and forged relationships are shown to disclose foreign records or drive privileged export/share/mutation; ignore if verified live constraints or policies enforce same-tenant references.",
+        "level": "low",
+        "rationale": "The matrix maps medium impact and medium likelihood to low because cross-tenant integrity is real in canonical policy but requires authentication, identifier knowledge, and deployed grants/migrations."
+      },
+      "summary": "workpacks RLS permits cross-tenant site_id associations because the policy checks only organization ownership. Browser Supabase clients and canonical owner policies support direct authenticated REST as a distinct path from service-role application access; exploitation requires a valid account and foreign UUID. Live policy/application state is unverified without approval.",
+      "taxonomy": {
+        "category": "Authorization bypass / tenant integrity",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Workpacks can reference another tenant's site",
+      "validation": {
+        "assertions": [
+          "002_workspace_productization.sql:149-164 checks organization ownership only",
+          "No canonical migrations later than 010 exist",
+          "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are intentionally exposed to browser clients"
+        ],
+        "evidenceRefs": [
+          "evidence-1",
+          "evidence-2"
+        ],
+        "limitations": [
+          "Application service-role routes often add ownership checks, but those do not protect direct Supabase table access.",
+          "Live pg_policy/catalog and tenant A/B proof are approval-gated and absent; deployment/apply state remains unverified."
+        ],
+        "method": "Cumulative canonical migration review and static direct-Supabase RLS proof",
+        "summary": "The current canonical schema ends at migration 010; site_id is not required to belong to workpacks.organization_id. No later migration, composite FK, trigger, or policy closes it."
+      },
+      "writeup": {
+        "reportPath": "findings/f15/f15.md"
+      }
+    }
+  ],
+  "scanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
+  "schemaVersion": "1.0"
+}
