@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "safeclaw-document-raw-drilldown-geometry-summary/v1",
+  "generatedAt": "2026-08-02T20:05:11.5642447+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_12_DOCUMENT_RAW_DRILLDOWN_GEOMETRY_LIVE_PENDING",
+  "productCommit": "419f9e7bb2ceac8ec20af591f0526d78c661e866",
+  "route": "/documents",
+  "documentCount": 12,
+  "themes": ["day", "night"],
+  "viewports": ["1440x723", "390x723"],
+  "beforeLive": {
+    "artifact": "evaluation/document-raw-drilldown-geometry-2026-08-02/before-live/report.json",
+    "sourceHead": "1d01810b9ad47b0509d5ab42d0efcd6d22a2733a",
+    "verdict": "RED_LIVE_PRODUCTION_12_DOCUMENT_RAW_DRILLDOWN_GEOMETRY",
+    "total": 48,
+    "pass": 0,
+    "fail": 48,
+    "maxShellRatio": 2.83,
+    "maxSourceBottom": 1096,
+    "maxSourceClientHeight": 460,
+    "overflowAutoCount": 0,
+    "overflowHiddenCount": 48,
+    "sourceBottomFail": 48,
+    "sourceHeightFail": 48
+  },
+  "afterLocal": {
+    "artifact": "evaluation/document-raw-drilldown-geometry-2026-08-02/after-local/report.json",
+    "sourceHead": "419f9e7bb2ceac8ec20af591f0526d78c661e866",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_12_DOCUMENT_RAW_DRILLDOWN_GEOMETRY",
+    "total": 48,
+    "pass": 48,
+    "fail": 0,
+    "maxShellRatio": 2.25,
+    "maxSourceBottom": 721,
+    "maxSourceClientHeight": 258,
+    "maxSourceRatio": 35.91,
+    "overflowAutoCount": 48,
+    "overflowHiddenCount": 0,
+    "sourceBottomFail": 0,
+    "sourceHeightFail": 0
+  },
+  "verification": {
+    "documentsBrowserContract": "PASS_1_FILE_36_TESTS",
+    "typecheck": "PASS",
+    "build": "PASS_NEXT_15_5_22_STATIC_PAGES_28_OF_28",
+    "diffCheck": "PASS"
+  },
+  "acceptanceContract": {
+    "bodyHeightBounded": true,
+    "horizontalOverflowAbsent": true,
+    "workpackShellRatioAtMost3": true,
+    "sourceEditorVisibleCount": 1,
+    "structuredEditorVisibleCount": 0,
+    "sourceEditorBottomInsideViewport": true,
+    "sourceEditorClientHeightAtMost320": true,
+    "longSourceUsesLocalScroll": true,
+    "selectedEditorCount": 1
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "liveAfterDeploymentPending": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "routeSplitAloneAcceptedAsFix": false,
+    "broadHumanWordingReviewRequired": true
+  }
+}
