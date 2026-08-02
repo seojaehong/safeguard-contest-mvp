@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-01T06:26:51.984Z",
-  "sourceSha": "8b0dccab8777b12904461ba0a533b89cfadea16f",
+  "generatedAt": "2026-08-02T08:12:39.287Z",
+  "sourceSha": "77af5cd600ab0cc843dc885e1b2d074a033b491f",
   "overall": "open",
   "gates": [
     {
@@ -170,12 +170,12 @@
     {
       "id": "full_repository_security_scan",
       "state": "proven",
-      "label": "Full repository security scan",
-      "evidencePath": "evaluation\\full-repository-security-scan-2026-07-28\\report.json",
-      "detail": "The immutable live production revision received complete repository coverage: 4,772 files accounted for, 21 candidates decided, 18 reportable findings retained (5 medium, 13 low), 3 Share/confirmation candidates suppressed with explicit counterevidence, and 0 deferred rows. Completion is not a security-complete claim: remediation remains required, no mutation or destructive load was performed, and exact saved Share remains MISSING_EVIDENCE.",
+      "label": "Follow-up full repository security scan",
+      "evidencePath": "evaluation\\follow-up-full-repository-security-scan-2026-08-02\\report.json",
+      "detail": "The sealed follow-up scan accounted for 5,241 tracked files and retained 17 reportable findings (5 medium, 12 low) plus one renderer-dependent deferred candidate. The companion no-DB wave bounded 2 findings and mitigated 2 public-search findings while retaining a distributed-rate residual. Scan completion is not a security-complete claim: coverage remains partial, remediation remains required, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Remediate the scheduled-briefing cross-tenant owner binding first, then public provider work budgets, export work budgets, and CSV/TSV formula neutralization.",
-        "Do not claim security completion until the 18 reportable findings are fixed and a follow-up scan confirms closure."
+        "Resolve the remaining DB/RLS findings only through separately approved migration and live-isolation work, and review the renderer-dependent deferred candidate with its actual host behavior.",
+        "Add a distributed public-request budget before treating the two warm-instance search mitigations as fully closed, then rerun the repository scan before any security-complete claim."
       ]
     },
     {

@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `8b0dccab8777b12904461ba0a533b89cfadea16f`
+Source HEAD: `77af5cd600ab0cc843dc885e1b2d074a033b491f`
 
-Production `/api/build-info`: `8b0dccab8777b12904461ba0a533b89cfadea16f`
+Production `/api/build-info`: `838ad1583d0764268340a0aa55bbbfefa9494d75`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `none`
+Source pending changed paths: `evaluation/follow-up-full-repository-security-scan-2026-08-02/coverage.json`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings.json`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f01/f01.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f01/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f02/f02.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f02/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f03/f03.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f03/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f04/f04.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f04/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f05/f05.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f05/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f06/f06.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f06/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f07/f07.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f07/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f08/f08.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f08/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f09/f09.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f09/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f10/f10.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f10/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f11/f11.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f11/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f12/f12.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f12/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f13/f13.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f13/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f14/f14.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f14/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f15/f15.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f15/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f16/f16.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f16/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f17/f17.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f17/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/report.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/scan-manifest.json`, `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
 
-Current head is evidence-only pending: `false`
+Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `8b0dccab8777b12904461ba0a533b89cfadea16f`
+Live rollup source head: `77af5cd600ab0cc843dc885e1b2d074a033b491f`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `77af5cd600ab0cc843dc885e1b2d074a033b491f` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `838ad1583d0764268340a0aa55bbbfefa9494d75`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -123,7 +123,7 @@ Required first-task containment:
 16. keep Hermes/OpenClaw live execution held: tenant envelope, tool denial, Evidence Harness, DNS-pinned trusted transport, and terminal persistence behavior are source-proven, while the durable cross-instance attempt/terminal ledger and authenticated canary remain open.
 17. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
 18. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
-19. preserve the immutable 18-finding repository scan as the baseline: all 18 findings have live bounded remediation evidence across tenant authorization, spreadsheet formula, public-provider budget, and document-export budget waves; run the follow-up full repository scan before any broad security-complete claim.
+19. preserve the immutable original 18-finding repository scan as the historical baseline; the sealed follow-up scan accounts for 5,241 files and retains 17 reportable findings plus one renderer-dependent deferred candidate, while the companion no-DB wave bounds 2 findings and mitigates 2 with a distributed-rate residual; resolve the remaining DB/RLS, renderer, distributed-rate, and exact saved Share boundaries before any security-complete claim.
 
 ## KOSHA Candidate Boundary
 
