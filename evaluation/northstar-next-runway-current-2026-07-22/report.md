@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `77af5cd600ab0cc843dc885e1b2d074a033b491f`
+Source HEAD: `0697a6127bef20014910ac1991ae53da3d5fec03`
 
-Production `/api/build-info`: `838ad1583d0764268340a0aa55bbbfefa9494d75`
+Production `/api/build-info`: `0697a6127bef20014910ac1991ae53da3d5fec03`
 
-Latest evidence commit live: `false`
+Latest evidence commit live: `true`
 
-Source head live pending: `true`
+Source head live pending: `false`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/follow-up-full-repository-security-scan-2026-08-02/coverage.json`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings.json`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f01/f01.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f01/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f02/f02.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f02/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f03/f03.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f03/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f04/f04.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f04/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f05/f05.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f05/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f06/f06.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f06/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f07/f07.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f07/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f08/f08.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f08/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f09/f09.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f09/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f10/f10.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f10/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f11/f11.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f11/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f12/f12.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f12/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f13/f13.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f13/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f14/f14.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f14/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f15/f15.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f15/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f16/f16.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f16/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f17/f17.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/findings/f17/poc/evidence.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/report.md`, `evaluation/follow-up-full-repository-security-scan-2026-08-02/scan-manifest.json`, `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
+Source pending changed paths: `none`
 
-Current head is evidence-only pending: `true`
+Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `77af5cd600ab0cc843dc885e1b2d074a033b491f`
+Live rollup source head: `0697a6127bef20014910ac1991ae53da3d5fec03`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `77af5cd600ab0cc843dc885e1b2d074a033b491f` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `838ad1583d0764268340a0aa55bbbfefa9494d75`, and the live rollup remains exact for that deployed marker.
+Note: source HEAD and production marker match for this artifact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 

@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "safeclaw-learning-export-renderer-security/v1",
+  "checkedAt": "2026-08-02T17:23:42.1976424+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_RENDERER_INERT_LEARNING_EXPORT_SOURCE_CONTRACT",
+  "sourceHead": "0697a6127bef20014910ac1991ae53da3d5fec03",
+  "productionBuild": {
+    "commitSha": "0697a6127bef20014910ac1991ae53da3d5fec03",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-n9bajew7o-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true,
+    "liveAfterDeploymentPending": false
+  },
+  "candidate": {
+    "id": "candidate-5ae4fb7bd6d7ea24",
+    "surfaceId": "learning-export-markdown",
+    "originalDisposition": "needs_follow_up",
+    "originalCoveragePath": "evaluation/follow-up-full-repository-security-scan-2026-08-02/coverage.json",
+    "currentSourceDisposition": "bounded_renderer_independent_inert_text_contract",
+    "fullRepositoryRescanRequiredForCanonicalClosure": true
+  },
+  "rendererContract": {
+    "applicationEmbeddedRenderer": false,
+    "deliveryDisposition": "attachment",
+    "markdownContentType": "text/markdown; charset=utf-8",
+    "obsidianRole": "optional_operator_review_tool",
+    "externalRendererTrustRequired": false,
+    "jsonlRawProvenancePreserved": true
+  },
+  "controls": {
+    "dynamicTextWhitespaceBounded": true,
+    "rawHtmlDelimitersEntityEncoded": true,
+    "markdownImageAndLinkOpenersEscaped": true,
+    "obsidianEmbedOpenersEscaped": true,
+    "obsidianSegmentsBlockPathAndEmbedMetacharacters": true,
+    "activeAndLocalUriSchemesNeutralized": [
+      "javascript",
+      "data",
+      "file",
+      "vbscript"
+    ],
+    "frontmatterDynamicValuesNeutralized": true,
+    "contentDispositionAttachment": true,
+    "contentSecurityPolicySandbox": true,
+    "contentTypeNosniff": true,
+    "cacheControlPrivateNoStore": true,
+    "referrerPolicyNoReferrer": true
+  },
+  "verification": {
+    "focusedTestFiles": 5,
+    "focusedTestsPassed": 87,
+    "strictTypecheck": "PASS",
+    "productionBuild": "PASS",
+    "staticPagesGenerated": 28,
+    "hostileFixtureRawHtmlAbsent": true,
+    "hostileFixtureActiveUriAbsent": true,
+    "hostileFixtureObsidianEmbedAbsent": true,
+    "jsonlRawProvenanceRetained": true
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "canonicalFollowUpScanCompleteness": "partial",
+    "canonicalDeferredCandidateCount": 1,
+    "securityCompleteClaimAllowed": false,
+    "liveSuccessResponseProbeAvailableWithoutStoredWorkpack": false,
+    "liveAfterDeploymentRequired": false,
+    "distributedRateLimitResidual": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedDbAndProviderWorkUnchanged": true
+  },
+  "boundary": "Current source makes dynamic learning-export text inert before Markdown or Obsidian bytes are emitted and adds attachment, sandbox, no-sniff, no-store, and no-referrer response controls. JSONL preserves raw provenance. This bounds the renderer-dependent candidate without assuming external renderer settings, but the sealed scan remains immutable and partial until a later repository rescan reclassifies the candidate."
+}

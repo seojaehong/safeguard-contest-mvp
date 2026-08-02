@@ -48,6 +48,7 @@ const EVIDENCE_PATHS = Object.freeze({
   publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
   documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
+  learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
@@ -3344,9 +3345,9 @@ function evaluateFullRepositorySecurityScanGate(rootDir) {
       label: "Follow-up full repository security scan",
       state: "proven",
       evidencePath,
-      detail: "The sealed follow-up scan accounted for 5,241 tracked files and retained 17 reportable findings (5 medium, 12 low) plus one renderer-dependent deferred candidate. The companion no-DB wave bounded 2 findings and mitigated 2 public-search findings while retaining a distributed-rate residual. Scan completion is not a security-complete claim: coverage remains partial, remediation remains required, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      detail: "The sealed follow-up scan accounted for 5,241 tracked files and retained 17 reportable findings (5 medium, 12 low) plus one renderer-dependent candidate deferred in the immutable baseline. The companion no-DB wave bounded 2 findings and mitigated 2 public-search findings while retaining a distributed-rate residual; the later learning_export_renderer_security gate tracks the deferred candidate's current-source remediation separately. Scan completion is not a security-complete claim: coverage remains partial, remediation remains required, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
       nextActions: [
-        "Resolve the remaining DB/RLS findings only through separately approved migration and live-isolation work, and review the renderer-dependent deferred candidate with its actual host behavior.",
+        "Resolve the remaining DB/RLS findings only through separately approved migration and live-isolation work; preserve the canonical renderer candidate as deferred until a future full scan reclassifies the separately proven current-source remediation.",
         "Add a distributed public-request budget before treating the two warm-instance search mitigations as fully closed, then rerun the repository scan before any security-complete claim.",
       ],
     });
@@ -3359,6 +3360,105 @@ function evaluateFullRepositorySecurityScanGate(rootDir) {
     evidencePath,
     detail: `Security scan verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${readString(report.sourceHead) === readString(productionBuild.commitSha)}, completeness=${readString(scan.completeness) || "unknown"}, files=${readNumber(scan.fileCount)}, candidates=${readNumber(scan.candidateCount)}, reportable=${readNumber(scan.reportableFindingCount)}, deferred=${readNumber(scan.deferredCandidateCount)}, securityComplete=${remainingBoundaries.securityCompleteClaimAllowed === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: ["Restore the sealed follow-up scan counts, partial-coverage/deferred boundary, companion remediation residuals, and explicit findings-open/no-mutation boundary before claiming scan completion."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateLearningExportRendererSecurityGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.learningExportRendererSecurity;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "learning_export_renderer_security",
+      label: "Learning export renderer security",
+      state: "missing",
+      evidencePath,
+      detail: "Learning export renderer-security evidence is missing or invalid.",
+      nextActions: ["Verify inert Markdown/Obsidian bytes and attachment response controls without creating a production workpack."],
+    });
+  }
+
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const candidate = isRecord(report.candidate) ? report.candidate : {};
+  const rendererContract = isRecord(report.rendererContract) ? report.rendererContract : {};
+  const controls = isRecord(report.controls) ? report.controls : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.embeddingGenerated === false
+    && mutationBoundary.vectorUploadPerformed === false
+    && mutationBoundary.wikiPublished === false
+    && mutationBoundary.exactTrustRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_RENDERER_INERT_LEARNING_EXPORT_SOURCE_CONTRACT"
+    && readString(report.sourceHead).length > 0
+    && readString(report.sourceHead) === readString(productionBuild.commitSha)
+    && productionBuild.sourceHeadMatchesProduction === true
+    && productionBuild.liveAfterDeploymentPending === false
+    && readString(candidate.id) === "candidate-5ae4fb7bd6d7ea24"
+    && readString(candidate.originalDisposition) === "needs_follow_up"
+    && readString(candidate.currentSourceDisposition) === "bounded_renderer_independent_inert_text_contract"
+    && candidate.fullRepositoryRescanRequiredForCanonicalClosure === true
+    && rendererContract.applicationEmbeddedRenderer === false
+    && readString(rendererContract.deliveryDisposition) === "attachment"
+    && readString(rendererContract.obsidianRole) === "optional_operator_review_tool"
+    && rendererContract.externalRendererTrustRequired === false
+    && rendererContract.jsonlRawProvenancePreserved === true
+    && controls.rawHtmlDelimitersEntityEncoded === true
+    && controls.markdownImageAndLinkOpenersEscaped === true
+    && controls.obsidianEmbedOpenersEscaped === true
+    && controls.obsidianSegmentsBlockPathAndEmbedMetacharacters === true
+    && Array.isArray(controls.activeAndLocalUriSchemesNeutralized)
+    && controls.activeAndLocalUriSchemesNeutralized.length === 4
+    && controls.frontmatterDynamicValuesNeutralized === true
+    && controls.contentDispositionAttachment === true
+    && controls.contentSecurityPolicySandbox === true
+    && controls.contentTypeNosniff === true
+    && controls.cacheControlPrivateNoStore === true
+    && controls.referrerPolicyNoReferrer === true
+    && readNumber(verification.focusedTestFiles) === 5
+    && readNumber(verification.focusedTestsPassed) === 87
+    && readString(verification.strictTypecheck) === "PASS"
+    && readString(verification.productionBuild) === "PASS"
+    && readNumber(verification.staticPagesGenerated) === 28
+    && verification.hostileFixtureRawHtmlAbsent === true
+    && verification.hostileFixtureActiveUriAbsent === true
+    && verification.hostileFixtureObsidianEmbedAbsent === true
+    && verification.jsonlRawProvenanceRetained === true
+    && noMutation
+    && readString(remainingBoundaries.canonicalFollowUpScanCompleteness) === "partial"
+    && readNumber(remainingBoundaries.canonicalDeferredCandidateCount) === 1
+    && remainingBoundaries.securityCompleteClaimAllowed === false
+    && remainingBoundaries.liveSuccessResponseProbeAvailableWithoutStoredWorkpack === false
+    && remainingBoundaries.liveAfterDeploymentRequired === false
+    && remainingBoundaries.distributedRateLimitResidual === true
+    && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+
+  if (pass) {
+    return gateResult({
+      id: "learning_export_renderer_security",
+      label: "Learning export renderer security",
+      state: "proven",
+      evidencePath,
+      detail: "Live source alignment proves a renderer-independent inert-text contract for downloaded Markdown/Obsidian learning exports: raw HTML, active/local URI schemes, image/link openers, Obsidian embeds, path metacharacters, and frontmatter are bounded; attachment CSP/no-sniff/no-store/no-referrer controls are present; JSONL provenance remains raw. This bounds the deferred candidate in current source but does not rewrite the sealed partial scan, replace a future full rescan, create a stored workpack, or close exact saved Share MISSING_EVIDENCE.",
+      nextActions: [
+        "Re-run the full repository security scan after the remaining findings are remediated so the immutable canonical coverage can reclassify the deferred candidate.",
+      ],
+    });
+  }
+
+  return gateResult({
+    id: "learning_export_renderer_security",
+    label: "Learning export renderer security",
+    state: "contradicted",
+    evidencePath,
+    detail: `Learning export verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${readString(report.sourceHead) === readString(productionBuild.commitSha)}, disposition=${readString(candidate.currentSourceDisposition) || "missing"}, tests=${readNumber(verification.focusedTestsPassed)}, canonicalDeferred=${readNumber(remainingBoundaries.canonicalDeferredCandidateCount)}, securityComplete=${remainingBoundaries.securityCompleteClaimAllowed === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: ["Restore the inert-byte, response-header, provenance, no-mutation, and canonical-rescan boundaries before claiming this current-source remediation."],
   });
 }
 
@@ -4249,6 +4349,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluatePublicProviderWorkBudgetGate(rootDir),
     evaluateDocumentExportWorkBudgetGate(rootDir),
     evaluateFullRepositorySecurityScanGate(rootDir),
+    evaluateLearningExportRendererSecurityGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir),
     evaluateLiveDocumentSecondaryGroundingGate(rootDir),

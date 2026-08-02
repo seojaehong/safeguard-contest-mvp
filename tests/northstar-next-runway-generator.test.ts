@@ -254,6 +254,16 @@ type NextRunwayReport = {
     distributedRateLimitResidual: boolean;
     exactSavedShareVerdict: string;
   };
+  learningExportRendererSecurity: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    currentSourceDisposition: string;
+    canonicalDeferredCandidateCount: number;
+    fullRepositoryRescanRequired: boolean;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   hermesOpenclaw: {
     verdict: string;
     trustedTransportWired: boolean;
@@ -1060,6 +1070,20 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       securityCompleteClaimAllowed: false,
       remediationRequired: true,
       distributedRateLimitResidual: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
+  writeJson(root, "evaluation/learning-export-renderer-security-2026-08-02/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_RENDERER_INERT_LEARNING_EXPORT_SOURCE_CONTRACT",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha" },
+    candidate: {
+      currentSourceDisposition: "bounded_renderer_independent_inert_text_contract",
+      fullRepositoryRescanRequiredForCanonicalClosure: true,
+    },
+    remainingBoundaries: {
+      canonicalDeferredCandidateCount: 1,
+      securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
@@ -1873,6 +1897,17 @@ describe("northstar next runway generator", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.provenCurrentState).toContain("full_repository_security_scan");
+    expect(report.provenCurrentState).toContain("learning_export_renderer_security");
+    expect(report.learningExportRendererSecurity).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_RENDERER_INERT_LEARNING_EXPORT_SOURCE_CONTRACT",
+      sourceHead: "fixture-sha",
+      productionCommit: "fixture-sha",
+      currentSourceDisposition: "bounded_renderer_independent_inert_text_contract",
+      canonicalDeferredCandidateCount: 1,
+      fullRepositoryRescanRequired: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
     expect(report.nextSafeWorkWithoutApproval).toContain(
       "preserve the immutable original 18-finding repository scan as the historical baseline; the sealed follow-up scan accounts for 5,241 files and retains 17 reportable findings plus one renderer-dependent deferred candidate, while the companion no-DB wave bounds 2 findings and mitigates 2 with a distributed-rate residual; resolve the remaining DB/RLS, renderer, distributed-rate, and exact saved Share boundaries before any security-complete claim",
     );

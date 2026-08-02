@@ -37,6 +37,7 @@ const ARTIFACTS = Object.freeze({
   publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
   documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
+  learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
@@ -804,6 +805,26 @@ function fullRepositorySecurityScanSummary(report) {
   };
 }
 
+/** @param {unknown} report */
+function learningExportRendererSecuritySummary(report) {
+  if (!isRecord(report)) return {};
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const candidate = isRecord(report.candidate) ? report.candidate : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(productionBuild.commitSha),
+    currentSourceDisposition: asString(candidate.currentSourceDisposition),
+    canonicalDeferredCandidateCount: typeof remainingBoundaries.canonicalDeferredCandidateCount === "number"
+      ? remainingBoundaries.canonicalDeferredCandidateCount
+      : 0,
+    fullRepositoryRescanRequired: asBoolean(candidate.fullRepositoryRescanRequiredForCanonicalClosure),
+    securityCompleteClaimAllowed: asBoolean(remainingBoundaries.securityCompleteClaimAllowed),
+    exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
+  };
+}
+
 /**
  * @param {unknown} report
  */
@@ -1448,6 +1469,7 @@ export function buildNorthstarNextRunway(options) {
   const publicProviderWorkBudget = readOptionalJson(options.rootDir, ARTIFACTS.publicProviderWorkBudget);
   const documentExportWorkBudget = readOptionalJson(options.rootDir, ARTIFACTS.documentExportWorkBudget);
   const fullRepositorySecurityScan = readOptionalJson(options.rootDir, ARTIFACTS.fullRepositorySecurityScan);
+  const learningExportRendererSecurity = readOptionalJson(options.rootDir, ARTIFACTS.learningExportRendererSecurity);
   const hermesKnowledgeReviewAuthorityUi = readOptionalJson(options.rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
   const liveDocumentSecondaryGrounding = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
   const liveDocumentSeedProfileIsolation = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSeedProfileIsolation);
@@ -1486,6 +1508,7 @@ export function buildNorthstarNextRunway(options) {
   const publicProviderWorkBudgetResult = publicProviderWorkBudgetSummary(publicProviderWorkBudget);
   const documentExportWorkBudgetResult = documentExportWorkBudgetSummary(documentExportWorkBudget);
   const fullRepositorySecuritySummary = fullRepositorySecurityScanSummary(fullRepositorySecurityScan);
+  const learningExportRendererSecurityResult = learningExportRendererSecuritySummary(learningExportRendererSecurity);
   const boundedDetailDepthDebtRows = Array.isArray(boundedCurrentSummary.documentDetailDepthDebts)
     ? boundedCurrentSummary.documentDetailDepthDebts.length
     : 0;
@@ -1528,6 +1551,7 @@ export function buildNorthstarNextRunway(options) {
       "public_provider_work_budget",
       "document_export_work_budget",
       "full_repository_security_scan",
+      "learning_export_renderer_security",
       "hermes_knowledge_review_authority",
       "hermes_knowledge_review_ui",
       "kosha_exact_promotion_packet_ready_for_review",
@@ -1593,6 +1617,7 @@ export function buildNorthstarNextRunway(options) {
     publicProviderWorkBudget: publicProviderWorkBudgetResult,
     documentExportWorkBudget: documentExportWorkBudgetResult,
     fullRepositorySecurityScan: fullRepositorySecuritySummary,
+    learningExportRendererSecurity: learningExportRendererSecurityResult,
     hermesKnowledgeReviewAuthorityUi: hermesKnowledgeReviewAuthorityUiSummary(hermesKnowledgeReviewAuthorityUi),
     liveDocumentSecondaryGrounding: liveDocumentSecondaryGroundingSummary(liveDocumentSecondaryGrounding),
     liveDocumentSeedProfileIsolation: liveDocumentSeedProfileIsolationSummary(liveDocumentSeedProfileIsolation),

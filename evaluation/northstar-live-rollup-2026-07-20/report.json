@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-02T08:12:40.866Z",
-  "head": "77af5cd600ab0cc843dc885e1b2d074a033b491f",
+  "generatedAt": "2026-08-02T08:36:56.741Z",
+  "head": "0697a6127bef20014910ac1991ae53da3d5fec03",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "838ad1583d0764268340a0aa55bbbfefa9494d75",
+    "commitSha": "0697a6127bef20014910ac1991ae53da3d5fec03",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-mpd6rn0a5-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-n9bajew7o-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 33
+    "gateCount": 34
   },
   "provenGates": [
     {
@@ -121,7 +121,13 @@
       "id": "full_repository_security_scan",
       "state": "proven",
       "artifact": "evaluation\\follow-up-full-repository-security-scan-2026-08-02\\report.json",
-      "detail": "The sealed follow-up scan accounted for 5,241 tracked files and retained 17 reportable findings (5 medium, 12 low) plus one renderer-dependent deferred candidate. The companion no-DB wave bounded 2 findings and mitigated 2 public-search findings while retaining a distributed-rate residual. Scan completion is not a security-complete claim: coverage remains partial, remediation remains required, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "The sealed follow-up scan accounted for 5,241 tracked files and retained 17 reportable findings (5 medium, 12 low) plus one renderer-dependent candidate deferred in the immutable baseline. The companion no-DB wave bounded 2 findings and mitigated 2 public-search findings while retaining a distributed-rate residual; the later learning_export_renderer_security gate tracks the deferred candidate's current-source remediation separately. Scan completion is not a security-complete claim: coverage remains partial, remediation remains required, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "learning_export_renderer_security",
+      "state": "proven",
+      "artifact": "evaluation\\learning-export-renderer-security-2026-08-02\\report.json",
+      "detail": "Live source alignment proves a renderer-independent inert-text contract for downloaded Markdown/Obsidian learning exports: raw HTML, active/local URI schemes, image/link openers, Obsidian embeds, path metacharacters, and frontmatter are bounded; attachment CSP/no-sniff/no-store/no-referrer controls are present; JSONL provenance remains raw. This bounds the deferred candidate in current source but does not rewrite the sealed partial scan, replace a future full rescan, create a stored workpack, or close exact saved Share MISSING_EVIDENCE."
     },
     {
       "id": "hermes_knowledge_review_authority",
@@ -342,6 +348,17 @@
     "low": 12,
     "securityCompleteClaimAllowed": false,
     "distributedRateLimitResidual": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "learningExportRendererSecurity": {
+    "artifact": "evaluation\\learning-export-renderer-security-2026-08-02\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_RENDERER_INERT_LEARNING_EXPORT_SOURCE_CONTRACT",
+    "sourceHead": "0697a6127bef20014910ac1991ae53da3d5fec03",
+    "productionCommit": "0697a6127bef20014910ac1991ae53da3d5fec03",
+    "currentSourceDisposition": "bounded_renderer_independent_inert_text_contract",
+    "canonicalDeferredCandidateCount": 1,
+    "fullRepositoryRescanRequired": true,
+    "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "liveDocumentQualityMatrix": {
@@ -660,10 +677,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "77af5cd600ab0cc843dc885e1b2d074a033b491f",
+      "sourceCommit": "0697a6127bef20014910ac1991ae53da3d5fec03",
       "sourceStatus": "exact",
-      "productionCommit": "77af5cd600ab0cc843dc885e1b2d074a033b491f",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "0697a6127bef20014910ac1991ae53da3d5fec03",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -800,6 +817,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": "d6d42024c8b07f0d9159666a0e8f2f9213709d21",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "learning_export_renderer_security",
+      "artifact": "evaluation\\learning-export-renderer-security-2026-08-02\\report.json",
+      "sourceCommit": "0697a6127bef20014910ac1991ae53da3d5fec03",
+      "sourceStatus": "exact",
+      "productionCommit": "0697a6127bef20014910ac1991ae53da3d5fec03",
+      "productionStatus": "matches_live"
     },
     {
       "id": "hermes_knowledge_review_ui",

@@ -708,6 +708,66 @@ function createFixtureRoot(): string {
       providerDispatchPersistence: "approval_gated",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_RENDERER_INERT_LEARNING_EXPORT_SOURCE_CONTRACT",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", sourceHeadMatchesProduction: true, liveAfterDeploymentPending: false },
+    candidate: {
+      id: "candidate-5ae4fb7bd6d7ea24",
+      originalDisposition: "needs_follow_up",
+      currentSourceDisposition: "bounded_renderer_independent_inert_text_contract",
+      fullRepositoryRescanRequiredForCanonicalClosure: true,
+    },
+    rendererContract: {
+      applicationEmbeddedRenderer: false,
+      deliveryDisposition: "attachment",
+      obsidianRole: "optional_operator_review_tool",
+      externalRendererTrustRequired: false,
+      jsonlRawProvenancePreserved: true,
+    },
+    controls: {
+      rawHtmlDelimitersEntityEncoded: true,
+      markdownImageAndLinkOpenersEscaped: true,
+      obsidianEmbedOpenersEscaped: true,
+      obsidianSegmentsBlockPathAndEmbedMetacharacters: true,
+      activeAndLocalUriSchemesNeutralized: ["javascript", "data", "file", "vbscript"],
+      frontmatterDynamicValuesNeutralized: true,
+      contentDispositionAttachment: true,
+      contentSecurityPolicySandbox: true,
+      contentTypeNosniff: true,
+      cacheControlPrivateNoStore: true,
+      referrerPolicyNoReferrer: true,
+    },
+    verification: {
+      focusedTestFiles: 5,
+      focusedTestsPassed: 87,
+      strictTypecheck: "PASS",
+      productionBuild: "PASS",
+      staticPagesGenerated: 28,
+      hostileFixtureRawHtmlAbsent: true,
+      hostileFixtureActiveUriAbsent: true,
+      hostileFixtureObsidianEmbedAbsent: true,
+      jsonlRawProvenanceRetained: true,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      embeddingGenerated: false,
+      vectorUploadPerformed: false,
+      wikiPublished: false,
+      exactTrustRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      canonicalFollowUpScanCompleteness: "partial",
+      canonicalDeferredCandidateCount: 1,
+      securityCompleteClaimAllowed: false,
+      liveSuccessResponseProbeAvailableWithoutStoredWorkpack: false,
+      liveAfterDeploymentRequired: false,
+      distributedRateLimitResidual: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "tenant-authorization-boundary-preflight-2026-07-29", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
     sourceHead: "tenant-product-sha",
@@ -2561,10 +2621,17 @@ describe("northstar open gate audit", () => {
     });
     expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("5,241 tracked files");
     expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("17 reportable findings");
-    expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("one renderer-dependent deferred candidate");
+    expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("one renderer-dependent candidate deferred in the immutable baseline");
     expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("distributed-rate residual");
     expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("not a security-complete claim");
     expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "learning_export_renderer_security")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "learning_export_renderer_security")?.detail).toContain("renderer-independent inert-text contract");
+    expect(audit.gates.find((gate) => gate.id === "learning_export_renderer_security")?.detail).toContain("does not rewrite the sealed partial scan");
+    expect(audit.gates.find((gate) => gate.id === "learning_export_renderer_security")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "tenant_authorization_remediation")).toMatchObject({ state: "proven" });
     expect(audit.gates.find((gate) => gate.id === "tenant_authorization_remediation")?.detail).toContain("2/2");
     expect(audit.gates.find((gate) => gate.id === "spreadsheet_formula_neutralization")).toMatchObject({ state: "proven" });
@@ -3121,6 +3188,28 @@ describe("northstar open gate audit", () => {
     });
     expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("reportable=0");
     expect(audit.gates.find((gate) => gate.id === "full_repository_security_scan")?.detail).toContain("securityComplete=true");
+  });
+
+  it("fails the learning export renderer gate closed when the canonical deferred boundary is erased", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "learning-export-renderer-security-2026-08-02", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remainingBoundaries: {
+        canonicalDeferredCandidateCount: number;
+        securityCompleteClaimAllowed: boolean;
+      };
+    };
+    report.remainingBoundaries.canonicalDeferredCandidateCount = 0;
+    report.remainingBoundaries.securityCompleteClaimAllowed = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-02T00:00:00.000Z" });
+    expect(audit.gates.find((gate) => gate.id === "learning_export_renderer_security")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "learning_export_renderer_security")?.detail).toContain("canonicalDeferred=0");
+    expect(audit.gates.find((gate) => gate.id === "learning_export_renderer_security")?.detail).toContain("securityComplete=true");
   });
 
   it("fails Hermes knowledge review authority closed when machine evidence replaces human review", async () => {

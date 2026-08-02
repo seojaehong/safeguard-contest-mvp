@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-02T08:12:39.287Z",
-  "sourceSha": "77af5cd600ab0cc843dc885e1b2d074a033b491f",
+  "generatedAt": "2026-08-02T08:36:53.285Z",
+  "sourceSha": "0697a6127bef20014910ac1991ae53da3d5fec03",
   "overall": "open",
   "gates": [
     {
@@ -172,10 +172,20 @@
       "state": "proven",
       "label": "Follow-up full repository security scan",
       "evidencePath": "evaluation\\follow-up-full-repository-security-scan-2026-08-02\\report.json",
-      "detail": "The sealed follow-up scan accounted for 5,241 tracked files and retained 17 reportable findings (5 medium, 12 low) plus one renderer-dependent deferred candidate. The companion no-DB wave bounded 2 findings and mitigated 2 public-search findings while retaining a distributed-rate residual. Scan completion is not a security-complete claim: coverage remains partial, remediation remains required, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "The sealed follow-up scan accounted for 5,241 tracked files and retained 17 reportable findings (5 medium, 12 low) plus one renderer-dependent candidate deferred in the immutable baseline. The companion no-DB wave bounded 2 findings and mitigated 2 public-search findings while retaining a distributed-rate residual; the later learning_export_renderer_security gate tracks the deferred candidate's current-source remediation separately. Scan completion is not a security-complete claim: coverage remains partial, remediation remains required, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Resolve the remaining DB/RLS findings only through separately approved migration and live-isolation work, and review the renderer-dependent deferred candidate with its actual host behavior.",
+        "Resolve the remaining DB/RLS findings only through separately approved migration and live-isolation work; preserve the canonical renderer candidate as deferred until a future full scan reclassifies the separately proven current-source remediation.",
         "Add a distributed public-request budget before treating the two warm-instance search mitigations as fully closed, then rerun the repository scan before any security-complete claim."
+      ]
+    },
+    {
+      "id": "learning_export_renderer_security",
+      "state": "proven",
+      "label": "Learning export renderer security",
+      "evidencePath": "evaluation\\learning-export-renderer-security-2026-08-02\\report.json",
+      "detail": "Live source alignment proves a renderer-independent inert-text contract for downloaded Markdown/Obsidian learning exports: raw HTML, active/local URI schemes, image/link openers, Obsidian embeds, path metacharacters, and frontmatter are bounded; attachment CSP/no-sniff/no-store/no-referrer controls are present; JSONL provenance remains raw. This bounds the deferred candidate in current source but does not rewrite the sealed partial scan, replace a future full rescan, create a stored workpack, or close exact saved Share MISSING_EVIDENCE.",
+      "nextActions": [
+        "Re-run the full repository security scan after the remaining findings are remediated so the immutable canonical coverage can reclassify the deferred candidate."
       ]
     },
     {

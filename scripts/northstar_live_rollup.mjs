@@ -33,6 +33,7 @@ const ARTIFACTS = Object.freeze({
   publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
   documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
+  learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
@@ -330,6 +331,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const publicProviderWorkBudget = tryReadJson(rootDir, ARTIFACTS.publicProviderWorkBudget);
   const documentExportWorkBudget = tryReadJson(rootDir, ARTIFACTS.documentExportWorkBudget);
   const fullRepositorySecurityScan = tryReadJson(rootDir, ARTIFACTS.fullRepositorySecurityScan);
+  const learningExportRendererSecurity = tryReadJson(rootDir, ARTIFACTS.learningExportRendererSecurity);
   const hermesKnowledgeReviewAuthorityUi = tryReadJson(rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
   const liveDocumentSecondaryGrounding = tryReadJson(rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
   const liveDocumentSeedProfileIsolation = tryReadJson(rootDir, ARTIFACTS.liveDocumentSeedProfileIsolation);
@@ -417,6 +419,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_work_budget", ARTIFACTS.publicProviderWorkBudget, publicProviderWorkBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "document_export_work_budget", ARTIFACTS.documentExportWorkBudget, documentExportWorkBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "full_repository_security_scan", ARTIFACTS.fullRepositorySecurityScan, fullRepositorySecurityScan),
+    evidenceStatus(rootDir, currentHead, liveCommit, "learning_export_renderer_security", ARTIFACTS.learningExportRendererSecurity, learningExportRendererSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_knowledge_review_ui", ARTIFACTS.hermesKnowledgeReviewAuthorityUi, hermesKnowledgeReviewAuthorityUi),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_secondary_grounding", ARTIFACTS.liveDocumentSecondaryGrounding, liveDocumentSecondaryGrounding),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_seed_profile_isolation", ARTIFACTS.liveDocumentSeedProfileIsolation, liveDocumentSeedProfileIsolation),
@@ -555,6 +558,19 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
         && isRecord(fullRepositorySecurityScan.remainingBoundaries)
         ? asString(fullRepositorySecurityScan.remainingBoundaries.exactSavedShareVerdict)
         : "",
+    },
+    learningExportRendererSecurity: {
+      artifact: ARTIFACTS.learningExportRendererSecurity,
+      verdict: isRecord(learningExportRendererSecurity) ? asString(learningExportRendererSecurity.verdict) : "missing",
+      sourceHead: isRecord(learningExportRendererSecurity) ? asString(learningExportRendererSecurity.sourceHead) : "",
+      productionCommit: isRecord(learningExportRendererSecurity) && isRecord(learningExportRendererSecurity.productionBuild)
+        ? asString(learningExportRendererSecurity.productionBuild.commitSha)
+        : "",
+      currentSourceDisposition: asString(recordAt(learningExportRendererSecurity, "candidate")?.currentSourceDisposition),
+      canonicalDeferredCandidateCount: asNumber(recordAt(learningExportRendererSecurity, "remainingBoundaries")?.canonicalDeferredCandidateCount),
+      fullRepositoryRescanRequired: recordAt(learningExportRendererSecurity, "candidate")?.fullRepositoryRescanRequiredForCanonicalClosure === true,
+      securityCompleteClaimAllowed: recordAt(learningExportRendererSecurity, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
+      exactSavedShareVerdict: asString(recordAt(learningExportRendererSecurity, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     liveDocumentQualityMatrix: {
       artifact: ARTIFACTS.liveDocumentQualityMatrix,
