@@ -2,7 +2,7 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_LOCAL_12_DOCUMENT_AUTHORING_GEOMETRY_LIVE_PENDING`
+`PASS_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY`
 
 The bounded authoring wave removes the duplicated foreign-worker briefing cockpit and contains every non-risk document cockpit inside a local scroll region. The product commit is `4e75b69d509cda6206aff69737d4dc0d6b0d167d`.
 
@@ -12,6 +12,7 @@ The bounded authoring wave removes the duplicated foreign-worker briefing cockpi
 | --- | --- | ---: | ---: | --- |
 | Before live | `e4de2f86` | 4 | 44 | `RED_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY` |
 | After local | `4e75b69d` | 48 | 0 | `PASS_CURRENT_SOURCE_LOCAL_12_DOCUMENT_AUTHORING_GEOMETRY` |
+| After live | `006090ff` | 48 | 0 | `PASS_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY` |
 
 The 48 rows cover 12 canonical documents across Day/Night and 1440x723/390x723 viewports. The after-local maximum shell ratio is 2.69, the lowest remaining first-action margin is 4px (`719/723`), and the body is at most 5px taller than the viewport. Desktop cockpits are capped at 260px; mobile cockpits are 88px, with the foreign-worker briefing compact cockpit at 76px.
 
@@ -32,4 +33,4 @@ The 48 rows cover 12 canonical documents across Day/Night and 1440x723/390x723 v
 
 ## Boundary
 
-This is current-source local-production evidence. Live after-deployment verification is still required. No DB mutation, provider dispatch, or Share session creation occurred. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`; this wave does not close human wording review or approval-gated DB, provider, vector, wiki, and KOSHA registry work.
+The live source and production marker both resolve to `006090ff588e6423917ad8b0b8bf00db35e7414f`. No DB mutation, provider dispatch, or Share session creation occurred. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`; this wave does not close human wording review or approval-gated DB, provider, vector, wiki, and KOSHA registry work.

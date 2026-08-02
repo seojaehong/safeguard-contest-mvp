@@ -55,6 +55,7 @@ const ARTIFACTS = Object.freeze({
   sharePublicSessionStorageApproval: path.join("evaluation", "share-public-session-storage-approval-2026-07-23", "report.json"),
   documentsCockpitWorkbenchGeometry: path.join("evaluation", "documents-cockpit-workbench-geometry-2026-07-22", "report.json"),
   documentSectionNavigation: path.join("evaluation", "document-section-navigation-2026-08-02", "report.json"),
+  documentAllAuthoringGeometry: path.join("evaluation", "document-all-authoring-geometry-2026-08-02", "after-live", "report.json"),
   documentsLongFormIA: path.join("evaluation", "documents-long-form-ia-2026-07-22", "report.json"),
   boundedWorkbenchDod: path.join("evaluation", "workspace-bounded-workbench-dod-2026-07-22", "report.json"),
   boundedWorkbenchCurrent: path.join("evaluation", "workspace-bounded-workbench-current-2026-07-22", "report.json"),
@@ -1240,6 +1241,41 @@ function documentSectionNavigationSummary(report) {
 }
 
 /**
+ * @param {unknown} report
+ */
+function documentAllAuthoringGeometrySummary(report) {
+  if (!isRecord(report)) return {};
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const results = Array.isArray(report.results) ? report.results.filter(isRecord) : [];
+  const shellRatios = results.flatMap((row) => {
+    const metrics = isRecord(row.metrics) ? row.metrics : {};
+    return typeof metrics.shellRatio === "number" ? [metrics.shellRatio] : [];
+  });
+  const firstActionBottoms = results.flatMap((row) => {
+    const metrics = isRecord(row.metrics) ? row.metrics : {};
+    return typeof metrics.firstActionBottom === "number" ? [metrics.firstActionBottom] : [];
+  });
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(productionBuild.commitSha),
+    sourceHeadMatchesProduction: asBoolean(report.sourceHeadMatchesProduction),
+    documentCount: typeof report.documentCount === "number" ? report.documentCount : null,
+    viewportCaseCount: typeof report.viewportCaseCount === "number" ? report.viewportCaseCount : null,
+    total: typeof report.total === "number" ? report.total : null,
+    pass: typeof report.pass === "number" ? report.pass : null,
+    fail: typeof report.fail === "number" ? report.fail : null,
+    maximumShellRatio: shellRatios.length ? Math.max(...shellRatios) : null,
+    maximumFirstActionBottom: firstActionBottoms.length ? Math.max(...firstActionBottoms) : null,
+    dbMutationPerformed: asBoolean(mutationBoundary.dbMutationPerformed),
+    providerDispatchCalled: asBoolean(mutationBoundary.providerDispatchCalled),
+    shareSessionCreated: asBoolean(mutationBoundary.shareSessionCreated),
+    exactSavedShareVerdict: asString(mutationBoundary.exactSavedShareVerdict),
+  };
+}
+
+/**
  * @param {unknown} documentsIa
  */
 function documentsLongFormIASummary(documentsIa) {
@@ -1553,6 +1589,7 @@ export function buildNorthstarNextRunway(options) {
   const sharePublicSessionStorageApproval = readOptionalJson(options.rootDir, ARTIFACTS.sharePublicSessionStorageApproval);
   const documentsCockpitGeometry = readOptionalJson(options.rootDir, ARTIFACTS.documentsCockpitWorkbenchGeometry);
   const documentSectionNavigation = readOptionalJson(options.rootDir, ARTIFACTS.documentSectionNavigation);
+  const documentAllAuthoringGeometry = readOptionalJson(options.rootDir, ARTIFACTS.documentAllAuthoringGeometry);
   const documentsIa = readJson(options.rootDir, ARTIFACTS.documentsLongFormIA);
   const boundedDod = readJson(options.rootDir, ARTIFACTS.boundedWorkbenchDod);
   const boundedCurrent = readJson(options.rootDir, ARTIFACTS.boundedWorkbenchCurrent);
@@ -1711,6 +1748,7 @@ export function buildNorthstarNextRunway(options) {
     sharePublicSessionStorageApproval: sharePublicSessionStorageApprovalSummary(sharePublicSessionStorageApproval),
     documentsCockpitWorkbenchGeometry: documentsCockpitWorkbenchGeometrySummary(documentsCockpitGeometry),
     documentSectionNavigation: documentSectionNavigationSummary(documentSectionNavigation),
+    documentAllAuthoringGeometry: documentAllAuthoringGeometrySummary(documentAllAuthoringGeometry),
     documentsLongFormIA: documentsLongFormIASummary(documentsIa),
     boundedWorkbenchDod: boundedWorkbenchDodSummary(boundedDod),
     boundedWorkbenchCurrent: boundedCurrentSummary,
@@ -1843,8 +1881,9 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Default Documents cockpit: first actionable cockpit is live-proven; do not phrase this as "Documents page height fixed" or "the whole Documents page is short".
 - Documents cockpit workbench geometry: \`${report.documentsCockpitWorkbenchGeometry.verdict || "missing"}\`; 1440x723 and 390x723 rows must show grid workbench, 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers closed by default, 0 visible supporting launchers, the legacy document index hidden, no horizontal overflow, and route split alone remains \`false\`.
 - Documents section navigation: \`${report.documentSectionNavigation.verdict || "missing"}\`; ${report.documentSectionNavigation.pass ?? 0}/${report.documentSectionNavigation.total ?? 0} Day/Night desktop-short and mobile-short rows retain 6 tabs, exactly 1 selected tab, 44px minimum controls, readable two-line labels, shell ratio <= 3, first-action containment, no horizontal overflow, no mutation, and exact saved Share \`${report.documentSectionNavigation.exactSavedShareVerdict || "missing"}\`.
+- All-document selected-authoring geometry: \`${report.documentAllAuthoringGeometry.verdict || "missing"}\`; ${report.documentAllAuthoringGeometry.pass ?? 0}/${report.documentAllAuthoringGeometry.total ?? 0} rows cover 12 canonical documents across Day/Night desktop-short and mobile-short, with maximum shell ratio \`${report.documentAllAuthoringGeometry.maximumShellRatio ?? "missing"}\`, maximum first-action bottom \`${report.documentAllAuthoringGeometry.maximumFirstActionBottom ?? "missing"}/723\`, at most one role-specific cockpit, local cockpit scroll, hidden raw/source editors, no mutation, and exact saved Share \`${report.documentAllAuthoringGeometry.exactSavedShareVerdict || "missing"}\`.
 - Documents selected editor/detail: risk-assessment default, same-document reselect, and all-12 launcher exposure land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown.
-- Documents remaining debt: full 12-document authoring polish remains. The all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content.
+- Documents remaining debt: live 12-document selected-authoring geometry is now bounded, while broad human wording polish and explicit raw/full-source drilldown quality remain separate from this layout proof.
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.
 - Bounded workbench DoD: route split alone is not accepted; desktop Documents hard-REDs above the recorded screen threshold, /share/result desktop requires multi-region workbench geometry, and generated fixture evidence must stay separate from exact saved/session proof.
 - Legacy workspace-layout regression: remains a broad no-overflow/editor-flow smoke only, not a long-form UX PASS gate; the DoD and route-specific evidence own first-task distance.

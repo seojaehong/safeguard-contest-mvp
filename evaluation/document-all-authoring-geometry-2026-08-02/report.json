@@ -1,8 +1,9 @@
 {
   "schemaVersion": "safeclaw-document-all-authoring-geometry-summary/v1",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_12_DOCUMENT_AUTHORING_GEOMETRY_LIVE_PENDING",
+  "verdict": "PASS_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY",
   "productCommit": "4e75b69d509cda6206aff69737d4dc0d6b0d167d",
-  "liveAfterDeploymentPending": true,
+  "evidenceCommit": "006090ff588e6423917ad8b0b8bf00db35e7414f",
+  "liveAfterDeploymentPending": false,
   "beforeLive": {
     "path": "evaluation/document-all-authoring-geometry-2026-08-02/before-live/report.json",
     "sourceHead": "e4de2f86a67abcc75d9e235a5f467750d5d2805a",
@@ -24,6 +25,17 @@
     "viewportHeight": 723,
     "maximumBodyHeightDelta": 5,
     "maximumCockpitHeight": 260
+  },
+  "afterLive": {
+    "path": "evaluation/document-all-authoring-geometry-2026-08-02/after-live/report.json",
+    "sourceHead": "006090ff588e6423917ad8b0b8bf00db35e7414f",
+    "productionCommit": "006090ff588e6423917ad8b0b8bf00db35e7414f",
+    "sourceHeadMatchesProduction": true,
+    "verdict": "PASS_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY",
+    "total": 48,
+    "pass": 48,
+    "fail": 0,
+    "deploymentUrl": "safeguard-contest-6aguai4j6-seojaehongs-projects.vercel.app"
   },
   "acceptanceContract": {
     "canonicalDocumentCount": 12,
@@ -59,5 +71,5 @@
     "shareSessionCreated": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
-  "boundary": "This is a current-source local-production geometry proof for all 12 canonical document authoring surfaces. It does not replace live after-deployment evidence, human wording review, exact saved Share evidence, or any approval-gated DB, provider, vector, wiki, or KOSHA registry work."
+  "boundary": "This is a live-production geometry proof for all 12 canonical document authoring surfaces. It does not replace human wording review, exact saved Share evidence, or any approval-gated DB, provider, vector, wiki, or KOSHA registry work."
 }

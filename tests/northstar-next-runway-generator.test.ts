@@ -411,6 +411,23 @@ type NextRunwayReport = {
     shareSessionCreated: boolean;
     exactSavedShareVerdict: string;
   };
+  documentAllAuthoringGeometry: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    sourceHeadMatchesProduction: boolean;
+    documentCount: number | null;
+    viewportCaseCount: number | null;
+    total: number | null;
+    pass: number | null;
+    fail: number | null;
+    maximumShellRatio: number | null;
+    maximumFirstActionBottom: number | null;
+    dbMutationPerformed: boolean;
+    providerDispatchCalled: boolean;
+    shareSessionCreated: boolean;
+    exactSavedShareVerdict: string;
+  };
   shareGeneratedSessionPerception: {
     verdict: string;
     sourceHead: string;
@@ -1594,6 +1611,47 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       },
     })),
   });
+  const canonicalDocumentKeys = [
+    "riskAssessmentDraft",
+    "tbmBriefing",
+    "tbmLogDraft",
+    "workpackSummaryDraft",
+    "workPlanDraft",
+    "workPermitDraft",
+    "safetyEducationRecordDraft",
+    "emergencyResponseDraft",
+    "photoEvidenceDraft",
+    "foreignWorkerBriefing",
+    "foreignWorkerTransmission",
+    "kakaoMessage",
+  ];
+  writeJson(root, "evaluation/document-all-authoring-geometry-2026-08-02/after-live/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", branch: "master", environment: "production" },
+    sourceHeadMatchesProduction: true,
+    documentCount: 12,
+    viewportCaseCount: 4,
+    total: 48,
+    pass: 48,
+    fail: 0,
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    results: ["day-desktop", "night-desktop", "day-mobile", "night-mobile"].flatMap((label) => (
+      canonicalDocumentKeys.map((documentKey) => ({
+        documentKey,
+        verdict: "PASS",
+        metrics: {
+          shellRatio: label.includes("mobile") ? 2.69 : 2.21,
+          firstActionBottom: label.includes("mobile") ? 719 : 694,
+        },
+      }))
+    )),
+  });
   writeJson(root, "evaluation/workspace-bounded-workbench-dod-2026-07-22/report.json", {
     verdict: "DOD_RECORDED_NOT_A_PASS_CLAIM",
     routeSplitAloneAcceptedAsFix: false,
@@ -2240,6 +2298,21 @@ describe("northstar next runway generator", () => {
           horizontalOverflow: false,
         }),
       ]),
+    });
+    expect(report.documentAllAuthoringGeometry).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY",
+      sourceHeadMatchesProduction: true,
+      documentCount: 12,
+      viewportCaseCount: 4,
+      total: 48,
+      pass: 48,
+      fail: 0,
+      maximumShellRatio: 2.69,
+      maximumFirstActionBottom: 719,
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.uiInterpretation.documentsDefaultCockpit).toContain("exactly 3 visible core launchers");
     expect(report.uiInterpretation.documentsDefaultCockpit).toContain("0 visible supporting launchers");
