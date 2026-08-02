@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `7efd21138066842017c206dbb5c0f3ef1d1ba54a`
+Source HEAD: `86f45e381640d4d7da82638b0b2faabfab972c97`
 
-Production `/api/build-info`: `7efd21138066842017c206dbb5c0f3ef1d1ba54a`
+Production `/api/build-info`: `86f45e381640d4d7da82638b0b2faabfab972c97`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `7efd21138066842017c206dbb5c0f3ef1d1ba54a`
+Live rollup source head: `86f45e381640d4d7da82638b0b2faabfab972c97`
 
 Live rollup matches production: `true`
 
@@ -79,6 +79,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 
 - Default Documents cockpit: first actionable cockpit is live-proven; do not phrase this as "Documents page height fixed" or "the whole Documents page is short".
 - Documents cockpit workbench geometry: `PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH`; 1440x723 and 390x723 rows must show grid workbench, 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers closed by default, 0 visible supporting launchers, the legacy document index hidden, no horizontal overflow, and route split alone remains `false`.
+- Documents section navigation: `PASS_LIVE_PRODUCTION_DOCUMENT_SECTION_NAVIGATION`; 4/4 Day/Night desktop-short and mobile-short rows retain 6 tabs, exactly 1 selected tab, 44px minimum controls, readable two-line labels, shell ratio <= 3, first-action containment, no horizontal overflow, no mutation, and exact saved Share `MISSING_EVIDENCE`.
 - Documents selected editor/detail: risk-assessment default, same-document reselect, and all-12 launcher exposure land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown.
 - Documents remaining debt: full 12-document authoring polish remains. The all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content.
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.

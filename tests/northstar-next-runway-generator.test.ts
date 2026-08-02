@@ -388,6 +388,29 @@ type NextRunwayReport = {
       detailsOpen: boolean | null;
     }>;
   };
+  documentSectionNavigation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    sourceHeadMatchesProduction: boolean;
+    total: number | null;
+    pass: number | null;
+    fail: number | null;
+    rows: Array<{
+      theme: string;
+      label: string;
+      verdict: string;
+      shellRatio: number | null;
+      sectionTabCount: number | null;
+      selectedSectionTabCount: number | null;
+      minimumSectionTabHeight: number | null;
+      horizontalOverflow: boolean;
+    }>;
+    dbMutationPerformed: boolean;
+    providerDispatchCalled: boolean;
+    shareSessionCreated: boolean;
+    exactSavedShareVerdict: string;
+  };
   shareGeneratedSessionPerception: {
     verdict: string;
     sourceHead: string;
@@ -1539,6 +1562,38 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       },
     ],
   });
+  writeJson(root, "evaluation/document-section-navigation-2026-08-02/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_SECTION_NAVIGATION",
+    sourceHead: "TO_FILL",
+    productionBuild: { commitSha: "TO_FILL", branch: "master", environment: "production" },
+    sourceHeadMatchesProduction: true,
+    total: 4,
+    pass: 4,
+    fail: 0,
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    results: ["day-desktop", "night-desktop", "day-mobile", "night-mobile"].map((label) => ({
+      theme: label.startsWith("day") ? "day" : "night",
+      label,
+      verdict: "PASS",
+      metrics: {
+        viewportHeight: 723,
+        bodyHeight: label.includes("mobile") ? 728 : 723,
+        shellRatio: label.includes("mobile") ? 2.76 : 2.21,
+        actionBottom: label.includes("mobile") ? 536 : 340,
+        sectionTabCount: 6,
+        selectedSectionTabCount: 1,
+        filledSectionTabCount: 6,
+        emptySectionTabCount: 0,
+        minimumSectionTabHeight: 46,
+        horizontalOverflow: false,
+      },
+    })),
+  });
   writeJson(root, "evaluation/workspace-bounded-workbench-dod-2026-07-22/report.json", {
     verdict: "DOD_RECORDED_NOT_A_PASS_CLAIM",
     routeSplitAloneAcceptedAsFix: false,
@@ -2162,6 +2217,29 @@ describe("northstar next runway generator", () => {
           detailsOpen: false,
         },
       ],
+    });
+    expect(report.documentSectionNavigation).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_SECTION_NAVIGATION",
+      sourceHeadMatchesProduction: true,
+      total: 4,
+      pass: 4,
+      fail: 0,
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      rows: expect.arrayContaining([
+        expect.objectContaining({
+          theme: "day",
+          label: "day-desktop",
+          verdict: "PASS",
+          shellRatio: 2.21,
+          sectionTabCount: 6,
+          selectedSectionTabCount: 1,
+          minimumSectionTabHeight: 46,
+          horizontalOverflow: false,
+        }),
+      ]),
     });
     expect(report.uiInterpretation.documentsDefaultCockpit).toContain("exactly 3 visible core launchers");
     expect(report.uiInterpretation.documentsDefaultCockpit).toContain("0 visible supporting launchers");

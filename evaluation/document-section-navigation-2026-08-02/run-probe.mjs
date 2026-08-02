@@ -5,6 +5,7 @@ import { chromium } from "playwright";
 
 const baseUrl = process.env.SAFECLAW_BASE_URL || "http://127.0.0.1:3084";
 const outputDir = path.resolve("evaluation/document-section-navigation-2026-08-02");
+const liveProductionRun = new URL(baseUrl).hostname === "www.safeclaw.kr";
 const cases = [
   { theme: "day", label: "desktop-short-1440x723", width: 1440, height: 723 },
   { theme: "night", label: "desktop-short-1440x723", width: 1440, height: 723 },
@@ -105,15 +106,26 @@ try {
 }
 
 const sourceHead = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+const productionBuild = liveProductionRun
+  ? await fetch(`${baseUrl}/api/build-info?codexCacheBust=document-section-${Date.now()}`).then(async (response) => {
+      if (!response.ok) throw new Error(`Production build-info failed (${response.status})`);
+      return response.json();
+    })
+  : null;
 const pass = results.filter((result) => result.verdict === "PASS").length;
+const sourceHeadMatchesProduction = productionBuild?.commitSha === sourceHead;
 const report = {
   schemaVersion: "safeclaw-document-section-navigation/v1",
   checkedAt: new Date().toISOString(),
-  mode: "current-source-local-production",
+  mode: liveProductionRun ? "live-production" : "current-source-local-production",
   baseUrl,
   sourceHead,
+  productionBuild,
+  sourceHeadMatchesProduction,
   verdict: pass === results.length
-    ? "PASS_CURRENT_SOURCE_LOCAL_DOCUMENT_SECTION_NAVIGATION"
+    ? liveProductionRun && sourceHeadMatchesProduction
+      ? "PASS_LIVE_PRODUCTION_DOCUMENT_SECTION_NAVIGATION"
+      : "PASS_CURRENT_SOURCE_LOCAL_DOCUMENT_SECTION_NAVIGATION"
     : "RED_CURRENT_SOURCE_LOCAL_DOCUMENT_SECTION_NAVIGATION",
   total: results.length,
   pass,
@@ -147,7 +159,7 @@ await writeFile(path.join(outputDir, "report.json"), `${JSON.stringify(report, n
 const rows = results.map((result) => (
   `| ${result.theme} | ${result.label} | ${result.metrics.bodyHeight}/${result.height} | ${result.metrics.shellRatio} | ${result.metrics.actionBottom} | ${result.metrics.minimumSectionTabHeight} | ${result.metrics.selectedSectionTabCount}/${result.metrics.sectionTabCount} | ${result.verdict} |`
 )).join("\n");
-await writeFile(path.join(outputDir, "report.md"), `# Document Section Navigation Evidence\n\n- Verdict: \`${report.verdict}\`\n- Source: \`${sourceHead}\`\n- Scope: selected Work Plan section navigation only\n- Verification: Documents browser 35/35, focused navigation 1/1, strict typecheck PASS, Next 15.5.22 build PASS (28 static pages)\n- Boundary: no DB/provider/Share mutation; exact saved Share remains \`MISSING_EVIDENCE\`\n\n| Theme | Viewport | Body/Viewport | Shell ratio | Action bottom | Min tab height | Selected/Tabs | Verdict |\n|---|---|---:|---:|---:|---:|---:|---|\n${rows}\n\nThis evidence does not claim that route splitting alone solves long-form authoring. It verifies one selected document, readable section navigation, and bounded local editing.\n`, "utf8");
+await writeFile(path.join(outputDir, "report.md"), `# Document Section Navigation Evidence\n\n- Verdict: \`${report.verdict}\`\n- Source: \`${sourceHead}\`\n- Production: \`${productionBuild?.commitSha || "local"}\`\n- Scope: selected Work Plan section navigation only\n- Verification: Documents browser 35/35, focused navigation 1/1, strict typecheck PASS, Next 15.5.22 build PASS (28 static pages)\n- Boundary: no DB/provider/Share mutation; exact saved Share remains \`MISSING_EVIDENCE\`\n\n| Theme | Viewport | Body/Viewport | Shell ratio | Action bottom | Min tab height | Selected/Tabs | Verdict |\n|---|---|---:|---:|---:|---:|---:|---|\n${rows}\n\nThis evidence does not claim that route splitting alone solves long-form authoring. It verifies one selected document, readable section navigation, and bounded local editing.\n`, "utf8");
 
 console.log(JSON.stringify({ verdict: report.verdict, total: report.total, pass: report.pass, fail: report.fail }, null, 2));
 if (report.fail > 0) process.exitCode = 1;

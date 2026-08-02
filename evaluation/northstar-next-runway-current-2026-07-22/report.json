@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-02T09:03:07.927Z",
+  "generatedAt": "2026-08-02T09:42:26.136Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
-  "productionCommit": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
+  "sourceHead": "86f45e381640d4d7da82638b0b2faabfab972c97",
+  "productionCommit": "86f45e381640d4d7da82638b0b2faabfab972c97",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
+    "commitSha": "86f45e381640d4d7da82638b0b2faabfab972c97",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-gh5l9zcnw-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-wayed0y36-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
-  "liveRollupLiveCommit": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
+  "liveExactEvidenceCommit": "86f45e381640d4d7da82638b0b2faabfab972c97",
+  "liveRollupLiveCommit": "86f45e381640d4d7da82638b0b2faabfab972c97",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -66,6 +66,7 @@
     "sharePublicSessionStorageReadiness": "evaluation\\share-public-session-storage-readiness-2026-07-23\\report.json",
     "sharePublicSessionStorageApproval": "evaluation\\share-public-session-storage-approval-2026-07-23\\report.json",
     "documentsCockpitWorkbenchGeometry": "evaluation\\documents-cockpit-workbench-geometry-2026-07-22\\report.json",
+    "documentSectionNavigation": "evaluation\\document-section-navigation-2026-08-02\\report.json",
     "documentsLongFormIA": "evaluation\\documents-long-form-ia-2026-07-22\\report.json",
     "boundedWorkbenchDod": "evaluation\\workspace-bounded-workbench-dod-2026-07-22\\report.json",
     "boundedWorkbenchCurrent": "evaluation\\workspace-bounded-workbench-current-2026-07-22\\report.json"
@@ -971,6 +972,81 @@
         "detailsOpen": false
       }
     ]
+  },
+  "documentSectionNavigation": {
+    "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_SECTION_NAVIGATION",
+    "sourceHead": "86f45e381640d4d7da82638b0b2faabfab972c97",
+    "productionCommit": "86f45e381640d4d7da82638b0b2faabfab972c97",
+    "sourceHeadMatchesProduction": true,
+    "total": 4,
+    "pass": 4,
+    "fail": 0,
+    "rows": [
+      {
+        "theme": "day",
+        "label": "desktop-short-1440x723",
+        "verdict": "PASS",
+        "bodyHeight": 723,
+        "viewportHeight": 723,
+        "shellRatio": 2.21,
+        "actionBottom": 340,
+        "sectionTabCount": 6,
+        "selectedSectionTabCount": 1,
+        "filledSectionTabCount": 6,
+        "emptySectionTabCount": 0,
+        "minimumSectionTabHeight": 46,
+        "horizontalOverflow": false
+      },
+      {
+        "theme": "night",
+        "label": "desktop-short-1440x723",
+        "verdict": "PASS",
+        "bodyHeight": 723,
+        "viewportHeight": 723,
+        "shellRatio": 2.21,
+        "actionBottom": 340,
+        "sectionTabCount": 6,
+        "selectedSectionTabCount": 1,
+        "filledSectionTabCount": 6,
+        "emptySectionTabCount": 0,
+        "minimumSectionTabHeight": 46,
+        "horizontalOverflow": false
+      },
+      {
+        "theme": "day",
+        "label": "mobile-short-390x723",
+        "verdict": "PASS",
+        "bodyHeight": 728,
+        "viewportHeight": 723,
+        "shellRatio": 2.76,
+        "actionBottom": 536,
+        "sectionTabCount": 6,
+        "selectedSectionTabCount": 1,
+        "filledSectionTabCount": 6,
+        "emptySectionTabCount": 0,
+        "minimumSectionTabHeight": 46,
+        "horizontalOverflow": false
+      },
+      {
+        "theme": "night",
+        "label": "mobile-short-390x723",
+        "verdict": "PASS",
+        "bodyHeight": 728,
+        "viewportHeight": 723,
+        "shellRatio": 2.76,
+        "actionBottom": 536,
+        "sectionTabCount": 6,
+        "selectedSectionTabCount": 1,
+        "filledSectionTabCount": 6,
+        "emptySectionTabCount": 0,
+        "minimumSectionTabHeight": 46,
+        "horizontalOverflow": false
+      }
+    ],
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "documentsLongFormIA": {
     "verdict": "PASS_LIVE_PRODUCTION_MEASURED",

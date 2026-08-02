@@ -1,7 +1,8 @@
 # Document Section Navigation Evidence
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_DOCUMENT_SECTION_NAVIGATION`
-- Source: `038dbbcbf0b4ca864847215f66771d3840222c8d`
+- Verdict: `PASS_LIVE_PRODUCTION_DOCUMENT_SECTION_NAVIGATION`
+- Source: `86f45e381640d4d7da82638b0b2faabfab972c97`
+- Production: `86f45e381640d4d7da82638b0b2faabfab972c97`
 - Scope: selected Work Plan section navigation only
 - Verification: Documents browser 35/35, focused navigation 1/1, strict typecheck PASS, Next 15.5.22 build PASS (28 static pages)
 - Boundary: no DB/provider/Share mutation; exact saved Share remains `MISSING_EVIDENCE`

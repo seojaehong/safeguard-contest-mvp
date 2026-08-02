@@ -54,6 +54,7 @@ const ARTIFACTS = Object.freeze({
   sharePublicSessionStorageReadiness: path.join("evaluation", "share-public-session-storage-readiness-2026-07-23", "report.json"),
   sharePublicSessionStorageApproval: path.join("evaluation", "share-public-session-storage-approval-2026-07-23", "report.json"),
   documentsCockpitWorkbenchGeometry: path.join("evaluation", "documents-cockpit-workbench-geometry-2026-07-22", "report.json"),
+  documentSectionNavigation: path.join("evaluation", "document-section-navigation-2026-08-02", "report.json"),
   documentsLongFormIA: path.join("evaluation", "documents-long-form-ia-2026-07-22", "report.json"),
   boundedWorkbenchDod: path.join("evaluation", "workspace-bounded-workbench-dod-2026-07-22", "report.json"),
   boundedWorkbenchCurrent: path.join("evaluation", "workspace-bounded-workbench-current-2026-07-22", "report.json"),
@@ -1198,6 +1199,47 @@ function documentsCockpitWorkbenchGeometrySummary(documentsGeometry) {
 }
 
 /**
+ * @param {unknown} report
+ */
+function documentSectionNavigationSummary(report) {
+  if (!isRecord(report)) return {};
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const results = Array.isArray(report.results) ? report.results.filter(isRecord) : [];
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(productionBuild.commitSha),
+    sourceHeadMatchesProduction: asBoolean(report.sourceHeadMatchesProduction),
+    total: typeof report.total === "number" ? report.total : null,
+    pass: typeof report.pass === "number" ? report.pass : null,
+    fail: typeof report.fail === "number" ? report.fail : null,
+    rows: results.map((row) => {
+      const metrics = isRecord(row.metrics) ? row.metrics : {};
+      return {
+        theme: asString(row.theme),
+        label: asString(row.label),
+        verdict: asString(row.verdict),
+        bodyHeight: typeof metrics.bodyHeight === "number" ? metrics.bodyHeight : null,
+        viewportHeight: typeof metrics.viewportHeight === "number" ? metrics.viewportHeight : null,
+        shellRatio: typeof metrics.shellRatio === "number" ? metrics.shellRatio : null,
+        actionBottom: typeof metrics.actionBottom === "number" ? metrics.actionBottom : null,
+        sectionTabCount: typeof metrics.sectionTabCount === "number" ? metrics.sectionTabCount : null,
+        selectedSectionTabCount: typeof metrics.selectedSectionTabCount === "number" ? metrics.selectedSectionTabCount : null,
+        filledSectionTabCount: typeof metrics.filledSectionTabCount === "number" ? metrics.filledSectionTabCount : null,
+        emptySectionTabCount: typeof metrics.emptySectionTabCount === "number" ? metrics.emptySectionTabCount : null,
+        minimumSectionTabHeight: typeof metrics.minimumSectionTabHeight === "number" ? metrics.minimumSectionTabHeight : null,
+        horizontalOverflow: asBoolean(metrics.horizontalOverflow),
+      };
+    }),
+    dbMutationPerformed: asBoolean(mutationBoundary.dbMutationPerformed),
+    providerDispatchCalled: asBoolean(mutationBoundary.providerDispatchCalled),
+    shareSessionCreated: asBoolean(mutationBoundary.shareSessionCreated),
+    exactSavedShareVerdict: asString(mutationBoundary.exactSavedShareVerdict),
+  };
+}
+
+/**
  * @param {unknown} documentsIa
  */
 function documentsLongFormIASummary(documentsIa) {
@@ -1510,6 +1552,7 @@ export function buildNorthstarNextRunway(options) {
   const sharePublicSessionStorageReadiness = readOptionalJson(options.rootDir, ARTIFACTS.sharePublicSessionStorageReadiness);
   const sharePublicSessionStorageApproval = readOptionalJson(options.rootDir, ARTIFACTS.sharePublicSessionStorageApproval);
   const documentsCockpitGeometry = readOptionalJson(options.rootDir, ARTIFACTS.documentsCockpitWorkbenchGeometry);
+  const documentSectionNavigation = readOptionalJson(options.rootDir, ARTIFACTS.documentSectionNavigation);
   const documentsIa = readJson(options.rootDir, ARTIFACTS.documentsLongFormIA);
   const boundedDod = readJson(options.rootDir, ARTIFACTS.boundedWorkbenchDod);
   const boundedCurrent = readJson(options.rootDir, ARTIFACTS.boundedWorkbenchCurrent);
@@ -1667,6 +1710,7 @@ export function buildNorthstarNextRunway(options) {
     sharePublicSessionStorageReadiness: sharePublicSessionStorageReadinessSummary(sharePublicSessionStorageReadiness),
     sharePublicSessionStorageApproval: sharePublicSessionStorageApprovalSummary(sharePublicSessionStorageApproval),
     documentsCockpitWorkbenchGeometry: documentsCockpitWorkbenchGeometrySummary(documentsCockpitGeometry),
+    documentSectionNavigation: documentSectionNavigationSummary(documentSectionNavigation),
     documentsLongFormIA: documentsLongFormIASummary(documentsIa),
     boundedWorkbenchDod: boundedWorkbenchDodSummary(boundedDod),
     boundedWorkbenchCurrent: boundedCurrentSummary,
@@ -1798,6 +1842,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 
 - Default Documents cockpit: first actionable cockpit is live-proven; do not phrase this as "Documents page height fixed" or "the whole Documents page is short".
 - Documents cockpit workbench geometry: \`${report.documentsCockpitWorkbenchGeometry.verdict || "missing"}\`; 1440x723 and 390x723 rows must show grid workbench, 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers closed by default, 0 visible supporting launchers, the legacy document index hidden, no horizontal overflow, and route split alone remains \`false\`.
+- Documents section navigation: \`${report.documentSectionNavigation.verdict || "missing"}\`; ${report.documentSectionNavigation.pass ?? 0}/${report.documentSectionNavigation.total ?? 0} Day/Night desktop-short and mobile-short rows retain 6 tabs, exactly 1 selected tab, 44px minimum controls, readable two-line labels, shell ratio <= 3, first-action containment, no horizontal overflow, no mutation, and exact saved Share \`${report.documentSectionNavigation.exactSavedShareVerdict || "missing"}\`.
 - Documents selected editor/detail: risk-assessment default, same-document reselect, and all-12 launcher exposure land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown.
 - Documents remaining debt: full 12-document authoring polish remains. The all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content.
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.

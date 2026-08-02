@@ -1951,6 +1951,42 @@ function createFixtureRoot(): string {
       },
     ],
   });
+  writeJson(rootDir, path.join("evaluation", "document-section-navigation-2026-08-02", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_SECTION_NAVIGATION",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", branch: "master", environment: "production" },
+    total: 4,
+    pass: 4,
+    fail: 0,
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    results: ["day-desktop", "night-desktop", "day-mobile", "night-mobile"].map((label) => ({
+      label,
+      verdict: "PASS",
+      metrics: {
+        viewportHeight: 723,
+        bodyHeight: label.includes("mobile") ? 728 : 723,
+        horizontalOverflow: false,
+        shellRatio: label.includes("mobile") ? 2.76 : 2.21,
+        actionBottom: label.includes("mobile") ? 536 : 340,
+        sectionTabCount: 6,
+        selectedSectionTabCount: 1,
+        filledSectionTabCount: 6,
+        emptySectionTabCount: 0,
+        minimumSectionTabHeight: 46,
+        sectionTabLabels: Array.from({ length: 6 }, (_, index) => `section ${index + 1}, 1줄 작성됨`),
+        sectionLabelWhiteSpace: Array.from({ length: 6 }, () => "normal"),
+        sectionLabelLineClamp: Array.from({ length: 6 }, () => "2"),
+        selectedBackground: "selected",
+        unselectedBackground: "unselected",
+        selectedBoxShadow: "inset 0 -3px accent",
+      },
+    })),
+  });
   writeJson(rootDir, path.join("evaluation", "workspace-ia-live-7b36-2026-07-22", "report.json"), {
     verdict: "IA_BLOCKER_REFINED_CURRENT_LIVE",
     liveCommitChecked: "fixture-sha",
@@ -2728,6 +2764,9 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exactly 3 visible core launchers");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("0 visible supporting launchers");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("legacy document index hidden");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("6 readable section tabs");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("44px minimum controls");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("two-line labels");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("12 document first-task cockpits");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("staged Share rail");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("desktop-short 1440x723");
@@ -2744,7 +2783,7 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("/share/[sessionId] desktop recipient confirmation");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("mobile confirmation CTA before document details");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.evidencePath).toBe(
-      path.join("evaluation", "documents-cockpit-workbench-geometry-2026-07-22", "report.json"),
+      path.join("evaluation", "document-section-navigation-2026-08-02", "report.json"),
     );
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("raw textarea and deeper row/all-document authoring");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("selected-editor evidence/recheck CTA is live-proven before raw textarea");
