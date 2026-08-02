@@ -381,6 +381,125 @@ describe("documents editor layout", () => {
     }
   }, 90_000);
 
+  it("keeps every raw document drilldown inside the bounded workbench", async () => {
+    if (!browser) throw new Error("Browser was not started");
+
+    const documentKeys = [
+      "riskAssessmentDraft",
+      "tbmBriefing",
+      "tbmLogDraft",
+      "workpackSummaryDraft",
+      "workPlanDraft",
+      "workPermitDraft",
+      "safetyEducationRecordDraft",
+      "emergencyResponseDraft",
+      "photoEvidenceDraft",
+      "foreignWorkerBriefing",
+      "foreignWorkerTransmission",
+      "kakaoMessage"
+    ] as const;
+    const viewports = [
+      { name: "desktop short", width: 1440, height: 723 },
+      { name: "mobile short", width: 390, height: 723 }
+    ] as const;
+
+    for (const viewport of viewports) {
+      const page = await browser.newPage({ viewport });
+      await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+
+      for (const documentKey of documentKeys) {
+        await selectDocumentFromWorkbench(page, documentKey);
+        await expect.poll(
+          async () => page.getByRole("button", { name: "구조화", exact: true }).getAttribute("aria-pressed")
+        ).toBe("true");
+        await page.getByRole("button", { name: "원문", exact: true }).click();
+        const sourceEditor = page.getByTestId("document-source-editor");
+        await sourceEditor.waitFor({ state: "visible" });
+        await expect.poll(async () => page.getByRole("button", { name: "원문", exact: true }).getAttribute("aria-pressed"))
+          .toBe("true");
+        await expect.poll(
+          async () => sourceEditor.evaluate((element) => Math.round(element.getBoundingClientRect().bottom)),
+          { timeout: 2_000 }
+        ).toBeLessThanOrEqual(viewport.height);
+        await expect.poll(async () => sourceEditor.evaluate((element) => {
+          const source = element as HTMLTextAreaElement;
+          const bounds = source.getBoundingClientRect();
+          const style = getComputedStyle(source);
+          const shell = document.querySelector<HTMLElement>('[data-testid="workpack-editor-workspace"]');
+          return {
+            pageHeight: document.documentElement.scrollHeight,
+            viewportHeight: window.innerHeight,
+            horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+            shellRatio: shell ? shell.scrollHeight / Math.max(shell.clientHeight, 1) : Number.POSITIVE_INFINITY,
+            sourceTop: Math.round(bounds.top),
+            sourceBottom: Math.round(bounds.bottom),
+            sourceClientHeight: source.clientHeight,
+            sourceNeedsScroll: source.scrollHeight > source.clientHeight + 1,
+            sourceOverflowY: style.overflowY,
+            sourceMinHeight: style.minHeight,
+            sourceMaxHeight: style.maxHeight,
+            sourceClassName: source.className,
+            structuredEditorVisibleCount: Array.from(document.querySelectorAll('[data-testid="document-structured-editor"]'))
+              .filter((candidate) => {
+                const rect = candidate.getBoundingClientRect();
+                return rect.width > 0 && rect.height > 0;
+              }).length,
+            sourceEditorVisibleCount: Array.from(document.querySelectorAll('[data-testid="document-source-editor"]'))
+              .filter((candidate) => {
+                const rect = candidate.getBoundingClientRect();
+                return rect.width > 0 && rect.height > 0;
+              }).length
+          };
+        })).toMatchObject({
+          pageHeight: expect.any(Number),
+          viewportHeight: viewport.height,
+          horizontalOverflow: false,
+          structuredEditorVisibleCount: 0,
+          sourceEditorVisibleCount: 1
+        });
+
+        const metrics = await sourceEditor.evaluate((element) => {
+          const source = element as HTMLTextAreaElement;
+          const bounds = source.getBoundingClientRect();
+          const style = getComputedStyle(source);
+          const shell = document.querySelector<HTMLElement>('[data-testid="workpack-editor-workspace"]');
+          const toolbar = document.querySelector<HTMLElement>(".document-toolbar");
+          const shellRect = shell?.getBoundingClientRect();
+          const toolbarRect = toolbar?.getBoundingClientRect();
+          return {
+            pageHeight: document.documentElement.scrollHeight,
+            shellRatio: shell ? shell.scrollHeight / Math.max(shell.clientHeight, 1) : Number.POSITIVE_INFINITY,
+            shellScrollTop: shell?.scrollTop ?? -1,
+            shellMaxScrollTop: shell ? shell.scrollHeight - shell.clientHeight : -1,
+            shellTop: shellRect ? Math.round(shellRect.top) : -1,
+            shellBottom: shellRect ? Math.round(shellRect.bottom) : -1,
+            toolbarTop: toolbarRect ? Math.round(toolbarRect.top) : -1,
+            toolbarBottom: toolbarRect ? Math.round(toolbarRect.bottom) : -1,
+            sourceTop: Math.round(bounds.top),
+            sourceBottom: Math.round(bounds.bottom),
+            sourceClientHeight: source.clientHeight,
+            sourceNeedsScroll: source.scrollHeight > source.clientHeight + 1,
+            sourceOverflowY: style.overflowY,
+            sourceMinHeight: style.minHeight,
+            sourceMaxHeight: style.maxHeight,
+            sourceClassName: source.className
+          };
+        });
+        expect(metrics.pageHeight).toBeLessThanOrEqual(viewport.height + 8);
+        expect(metrics.shellRatio).toBeLessThanOrEqual(3);
+        expect(metrics.sourceTop).toBeGreaterThanOrEqual(0);
+        expect(
+          metrics.sourceBottom,
+          `${viewport.name}/${documentKey}: ${JSON.stringify(metrics)}`
+        ).toBeLessThanOrEqual(viewport.height);
+        expect(metrics.sourceClientHeight).toBeLessThanOrEqual(320);
+        if (metrics.sourceNeedsScroll) expect(metrics.sourceOverflowY).toBe("auto");
+      }
+
+      await page.close();
+    }
+  }, 180_000);
+
   it("renders actual message samples and an empty permit with document-specific structured sections", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 391, height: 844 } });

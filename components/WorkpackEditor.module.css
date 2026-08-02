@@ -4,6 +4,7 @@
   gap: var(--space-4);
   container-name: workpack-editor;
   container-type: inline-size;
+  overflow-anchor: none;
 }
 
 .navigator {
@@ -894,10 +895,23 @@
   outline-offset: 2px;
 }
 
-.editor :global(.document-textarea).sourceTextarea {
-  max-height: none;
-  overflow-y: hidden;
+:global(.safeclaw-module-shell.module-variant-document) .editor :global(.document-textarea).sourceTextarea {
+  width: 100%;
+  min-height: 220px;
+  height: clamp(220px, 36vh, 300px);
+  max-height: 300px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
   resize: none;
+}
+
+.documentBody[data-editor-mode="source"] .editorModeBar {
+  order: -2;
+}
+
+.documentBody[data-editor-mode="source"] .sourceTextarea {
+  order: -1;
 }
 
 .documentFootnote {
@@ -1514,8 +1528,10 @@
     display: none;
   }
 
-  .editor :global(.document-source-textarea) {
-    min-height: 420px;
+  :global(.safeclaw-module-shell.module-variant-document) .editor :global(.document-source-textarea) {
+    min-height: 220px;
+    height: min(260px, 34vh);
+    max-height: 260px;
     padding: var(--space-3);
     font-size: var(--text-body);
     font-weight: 500;

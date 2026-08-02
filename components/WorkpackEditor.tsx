@@ -3162,6 +3162,48 @@ export function WorkpackEditor({
     });
   }
 
+  function alignSourceEditorWithinPane() {
+    const sourceEditor = documentBodyRef.current?.querySelector<HTMLTextAreaElement>(
+      '[data-testid="document-source-editor"]'
+    ) || null;
+    if (!sourceEditor) return false;
+
+    alignPaneTargetBelowToolbar(sourceEditor);
+    const shell = workpackShellRef.current;
+    if (shell) {
+      const shellRect = shell.getBoundingClientRect();
+      const sourceRect = sourceEditor.getBoundingClientRect();
+      const visibleBottom = Math.min(shellRect.bottom, window.innerHeight) - 8;
+      const bottomOverflow = Math.max(0, sourceRect.bottom - visibleBottom);
+      if (bottomOverflow > 0) {
+        shell.scrollTo({
+          top: shell.scrollTop + bottomOverflow,
+          behavior: "auto"
+        });
+      }
+    }
+    sourceEditor.focus({ preventScroll: true });
+    return true;
+  }
+
+  useLayoutEffect(() => {
+    if (editorMode !== "source") return;
+
+    alignSourceEditorWithinPane();
+    const alignFrame = window.requestAnimationFrame(alignSourceEditorWithinPane);
+    const alignTimer = window.setTimeout(alignSourceEditorWithinPane, 80);
+    const backupAlignTimer = window.setTimeout(alignSourceEditorWithinPane, 240);
+    const finalAlignTimer = window.setTimeout(alignSourceEditorWithinPane, 480);
+    const settledAlignTimer = window.setTimeout(alignSourceEditorWithinPane, 720);
+    return () => {
+      window.cancelAnimationFrame(alignFrame);
+      window.clearTimeout(alignTimer);
+      window.clearTimeout(backupAlignTimer);
+      window.clearTimeout(finalAlignTimer);
+      window.clearTimeout(settledAlignTimer);
+    };
+  }, [editorMode, selected.key]);
+
   function alignStructuredSectionCockpitBelowToolbar(section: HTMLElement | null) {
     const shell = workpackShellRef.current;
     const fieldStrip = section?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]') || null;
@@ -3473,6 +3515,7 @@ export function WorkpackEditor({
       root.style.scrollBehavior = previousScrollBehavior;
       workpackShellRef.current?.scrollTo({ top: 0, behavior: "auto" });
       const alignReselectedDocument = () => {
+        if (alignSourceEditorWithinPane()) return;
         if (key === "riskAssessmentDraft") {
           alignRiskCockpitBelowToolbar();
         } else if (key === "workPlanDraft") {
@@ -3494,6 +3537,7 @@ export function WorkpackEditor({
     setSelectedKey(key);
     workpackShellRef.current?.scrollTo({ top: 0, behavior: "auto" });
     const alignSelectedDocument = () => {
+      if (alignSourceEditorWithinPane()) return;
       if (key === "riskAssessmentDraft") {
         alignRiskCockpitBelowToolbar();
       } else if (key === "workPlanDraft") {
@@ -3982,6 +4026,7 @@ export function WorkpackEditor({
           className={styles.documentBody}
           id="workpack-document-body"
           data-testid="editor-document-body"
+          data-editor-mode={editorMode}
           role="tabpanel"
           aria-labelledby={documentTabId(selected.key)}
           ref={documentBodyRef}
@@ -4018,8 +4063,8 @@ export function WorkpackEditor({
 
           <div className={styles.editorModeBar} data-testid="editor-mode-bar">
             <div>
-              <span className="eyebrow">문서 유형</span>
-              <strong>{structuredDocument.profile.label}</strong>
+              <span className="eyebrow">{editorMode === "source" ? "원문 편집" : "문서 유형"}</span>
+              <strong>{editorMode === "source" ? selected.title : structuredDocument.profile.label}</strong>
             </div>
             <div className={styles.editorModeControl} role="group" aria-label="본문 편집 방식">
               <button
@@ -4216,6 +4261,7 @@ export function WorkpackEditor({
             <textarea
               ref={textareaRef}
               className={`document-textarea document-source-textarea ${styles.sourceTextarea}`}
+              data-testid="document-source-editor"
               value={selectedText}
               rows={Math.min(16, Math.max(12, selectedText.split(/\r?\n/u).length + 1))}
               onChange={(event) => updateValue(event.target.value)}
