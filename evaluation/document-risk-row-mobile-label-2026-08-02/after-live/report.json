@@ -1,0 +1,279 @@
+{
+  "schemaVersion": "safeclaw-document-risk-row-mobile-label/v1",
+  "checkedAt": "2026-08-02T13:26:59.860Z",
+  "mode": "live-production",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceHead": "ca908cf8bbc1db1ee1a1054575921025c6c2e621",
+  "productionBuild": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "ca908cf8bbc1db1ee1a1054575921025c6c2e621",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-9fcnetygf-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "sourceHeadMatchesProduction": true,
+  "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_RISK_ROW_MOBILE_LABEL",
+  "total": 4,
+  "pass": 4,
+  "fail": 0,
+  "acceptanceContract": {
+    "desktopFullHazardLabelVisible": true,
+    "mobileCompactAccidentTypeVisible": true,
+    "mobileCompactLabelClippingForbidden": true,
+    "fullHazardPreservedInAccessibleNameAndTitle": true,
+    "minimumDistinctMobileVisibleSelectors": 3,
+    "firstHazardFieldVisibleInViewport": true,
+    "bodyLevelLongStackForbidden": true
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "results": [
+    {
+      "theme": "day",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "metrics": {
+        "viewportWidth": 1440,
+        "viewportHeight": 723,
+        "bodyHeight": 723,
+        "horizontalOverflow": false,
+        "shellRatio": 1.75,
+        "shellOverflowY": "auto",
+        "shellTop": 205,
+        "shellBottom": 653,
+        "tabsTop": 405,
+        "tabsBottom": 451,
+        "panelTop": 463,
+        "hazardFieldBottom": 632,
+        "tabsBeforePanel": true,
+        "hazardFieldVisibleInShell": true,
+        "selectorCount": 3,
+        "uniqueCompactLabelCount": 2,
+        "uniqueVisibleSelectorCount": 3,
+        "selectorMetrics": [
+          {
+            "hazardText": "이동식 비계 승·하강 및 작업발판 이동 중 추락",
+            "compactText": "추락",
+            "visibleText": "01 이동식 비계 승·하강 및 작업발판 이동 중 추락",
+            "accessibleName": "위험 항목 1 선택: 이동식 비계 승·하강 및 작업발판 이동 중 추락 · 작업: 외벽 도장 작업",
+            "title": "이동식 비계 승·하강 및 작업발판 이동 중 추락 · 작업: 외벽 도장 작업",
+            "hazardVisible": true,
+            "compactVisible": false,
+            "compactClipped": false
+          },
+          {
+            "hazardText": "강풍 시 비계 전도와 공구·자재 낙하",
+            "compactText": "추락",
+            "visibleText": "02 강풍 시 비계 전도와 공구·자재 낙하",
+            "accessibleName": "위험 항목 2 선택: 강풍 시 비계 전도와 공구·자재 낙하",
+            "title": "강풍 시 비계 전도와 공구·자재 낙하",
+            "hazardVisible": true,
+            "compactVisible": false,
+            "compactClipped": false
+          },
+          {
+            "hazardText": "지게차 동선 인접 구간에서 작업자 충돌",
+            "compactText": "충돌·맞음",
+            "visibleText": "03 지게차 동선 인접 구간에서 작업자 충돌",
+            "accessibleName": "위험 항목 3 선택: 지게차 동선 인접 구간에서 작업자 충돌",
+            "title": "지게차 동선 인접 구간에서 작업자 충돌",
+            "hazardVisible": true,
+            "compactVisible": false,
+            "compactClipped": false
+          }
+        ]
+      },
+      "screenshot": "day-desktop-short-1440x723.png",
+      "verdict": "PASS"
+    },
+    {
+      "theme": "night",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "metrics": {
+        "viewportWidth": 1440,
+        "viewportHeight": 723,
+        "bodyHeight": 723,
+        "horizontalOverflow": false,
+        "shellRatio": 1.75,
+        "shellOverflowY": "auto",
+        "shellTop": 205,
+        "shellBottom": 653,
+        "tabsTop": 405,
+        "tabsBottom": 451,
+        "panelTop": 463,
+        "hazardFieldBottom": 632,
+        "tabsBeforePanel": true,
+        "hazardFieldVisibleInShell": true,
+        "selectorCount": 3,
+        "uniqueCompactLabelCount": 2,
+        "uniqueVisibleSelectorCount": 3,
+        "selectorMetrics": [
+          {
+            "hazardText": "이동식 비계 승·하강 및 작업발판 이동 중 추락",
+            "compactText": "추락",
+            "visibleText": "01 이동식 비계 승·하강 및 작업발판 이동 중 추락",
+            "accessibleName": "위험 항목 1 선택: 이동식 비계 승·하강 및 작업발판 이동 중 추락 · 작업: 외벽 도장 작업",
+            "title": "이동식 비계 승·하강 및 작업발판 이동 중 추락 · 작업: 외벽 도장 작업",
+            "hazardVisible": true,
+            "compactVisible": false,
+            "compactClipped": false
+          },
+          {
+            "hazardText": "강풍 시 비계 전도와 공구·자재 낙하",
+            "compactText": "추락",
+            "visibleText": "02 강풍 시 비계 전도와 공구·자재 낙하",
+            "accessibleName": "위험 항목 2 선택: 강풍 시 비계 전도와 공구·자재 낙하",
+            "title": "강풍 시 비계 전도와 공구·자재 낙하",
+            "hazardVisible": true,
+            "compactVisible": false,
+            "compactClipped": false
+          },
+          {
+            "hazardText": "지게차 동선 인접 구간에서 작업자 충돌",
+            "compactText": "충돌·맞음",
+            "visibleText": "03 지게차 동선 인접 구간에서 작업자 충돌",
+            "accessibleName": "위험 항목 3 선택: 지게차 동선 인접 구간에서 작업자 충돌",
+            "title": "지게차 동선 인접 구간에서 작업자 충돌",
+            "hazardVisible": true,
+            "compactVisible": false,
+            "compactClipped": false
+          }
+        ]
+      },
+      "screenshot": "night-desktop-short-1440x723.png",
+      "verdict": "PASS"
+    },
+    {
+      "theme": "day",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "metrics": {
+        "viewportWidth": 390,
+        "viewportHeight": 723,
+        "bodyHeight": 728,
+        "horizontalOverflow": false,
+        "shellRatio": 2.11,
+        "shellOverflowY": "auto",
+        "shellTop": 348,
+        "shellBottom": 700,
+        "tabsTop": 542,
+        "tabsBottom": 580,
+        "panelTop": 583,
+        "hazardFieldBottom": 703,
+        "tabsBeforePanel": true,
+        "hazardFieldVisibleInShell": true,
+        "selectorCount": 3,
+        "uniqueCompactLabelCount": 2,
+        "uniqueVisibleSelectorCount": 3,
+        "selectorMetrics": [
+          {
+            "hazardText": "이동식 비계 승·하강 및 작업발판 이동 중 추락",
+            "compactText": "추락",
+            "visibleText": "01 이동식 비계 승·하강 및 작업발판 이동 중 추락 추락",
+            "accessibleName": "위험 항목 1 선택: 이동식 비계 승·하강 및 작업발판 이동 중 추락 · 작업: 외벽 도장 작업",
+            "title": "이동식 비계 승·하강 및 작업발판 이동 중 추락 · 작업: 외벽 도장 작업",
+            "hazardVisible": true,
+            "compactVisible": true,
+            "compactClipped": false
+          },
+          {
+            "hazardText": "강풍 시 비계 전도와 공구·자재 낙하",
+            "compactText": "추락",
+            "visibleText": "02 강풍 시 비계 전도와 공구·자재 낙하 추락",
+            "accessibleName": "위험 항목 2 선택: 강풍 시 비계 전도와 공구·자재 낙하",
+            "title": "강풍 시 비계 전도와 공구·자재 낙하",
+            "hazardVisible": true,
+            "compactVisible": true,
+            "compactClipped": false
+          },
+          {
+            "hazardText": "지게차 동선 인접 구간에서 작업자 충돌",
+            "compactText": "충돌·맞음",
+            "visibleText": "03 지게차 동선 인접 구간에서 작업자 충돌 충돌·맞음",
+            "accessibleName": "위험 항목 3 선택: 지게차 동선 인접 구간에서 작업자 충돌",
+            "title": "지게차 동선 인접 구간에서 작업자 충돌",
+            "hazardVisible": true,
+            "compactVisible": true,
+            "compactClipped": false
+          }
+        ]
+      },
+      "screenshot": "day-mobile-short-390x723.png",
+      "verdict": "PASS"
+    },
+    {
+      "theme": "night",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "metrics": {
+        "viewportWidth": 390,
+        "viewportHeight": 723,
+        "bodyHeight": 728,
+        "horizontalOverflow": false,
+        "shellRatio": 2.11,
+        "shellOverflowY": "auto",
+        "shellTop": 348,
+        "shellBottom": 700,
+        "tabsTop": 542,
+        "tabsBottom": 580,
+        "panelTop": 583,
+        "hazardFieldBottom": 703,
+        "tabsBeforePanel": true,
+        "hazardFieldVisibleInShell": true,
+        "selectorCount": 3,
+        "uniqueCompactLabelCount": 2,
+        "uniqueVisibleSelectorCount": 3,
+        "selectorMetrics": [
+          {
+            "hazardText": "이동식 비계 승·하강 및 작업발판 이동 중 추락",
+            "compactText": "추락",
+            "visibleText": "01 이동식 비계 승·하강 및 작업발판 이동 중 추락 추락",
+            "accessibleName": "위험 항목 1 선택: 이동식 비계 승·하강 및 작업발판 이동 중 추락 · 작업: 외벽 도장 작업",
+            "title": "이동식 비계 승·하강 및 작업발판 이동 중 추락 · 작업: 외벽 도장 작업",
+            "hazardVisible": true,
+            "compactVisible": true,
+            "compactClipped": false
+          },
+          {
+            "hazardText": "강풍 시 비계 전도와 공구·자재 낙하",
+            "compactText": "추락",
+            "visibleText": "02 강풍 시 비계 전도와 공구·자재 낙하 추락",
+            "accessibleName": "위험 항목 2 선택: 강풍 시 비계 전도와 공구·자재 낙하",
+            "title": "강풍 시 비계 전도와 공구·자재 낙하",
+            "hazardVisible": true,
+            "compactVisible": true,
+            "compactClipped": false
+          },
+          {
+            "hazardText": "지게차 동선 인접 구간에서 작업자 충돌",
+            "compactText": "충돌·맞음",
+            "visibleText": "03 지게차 동선 인접 구간에서 작업자 충돌 충돌·맞음",
+            "accessibleName": "위험 항목 3 선택: 지게차 동선 인접 구간에서 작업자 충돌",
+            "title": "지게차 동선 인접 구간에서 작업자 충돌",
+            "hazardVisible": true,
+            "compactVisible": true,
+            "compactClipped": false
+          }
+        ]
+      },
+      "screenshot": "night-mobile-short-390x723.png",
+      "verdict": "PASS"
+    }
+  ]
+}

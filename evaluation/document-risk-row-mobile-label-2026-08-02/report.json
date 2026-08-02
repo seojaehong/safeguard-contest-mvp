@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "safeclaw-document-risk-row-mobile-label-summary/v1",
+  "checkedAt": "2026-08-02T13:27:29.4623647Z",
+  "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_RISK_ROW_MOBILE_LABEL",
+  "productCommit": "ca908cf8bbc1db1ee1a1054575921025c6c2e621",
+  "productionCommit": "ca908cf8bbc1db1ee1a1054575921025c6c2e621",
+  "deploymentUrl": "safeguard-contest-9fcnetygf-seojaehongs-projects.vercel.app",
+  "beforeLive": {
+    "sourceHead": "e150bfcc280c215e6392b16491dfe49ac1fd1881",
+    "productionCommit": "e150bfcc280c215e6392b16491dfe49ac1fd1881",
+    "verdict": "RED_LIVE_PRODUCTION_DOCUMENT_RISK_ROW_MOBILE_LABEL",
+    "total": 4,
+    "pass": 2,
+    "fail": 2,
+    "failedScope": "day/night mobile-short 390x723 lacked a compact, unclipped risk-type cue"
+  },
+  "afterLocal": {
+    "sourceHead": "ca908cf8bbc1db1ee1a1054575921025c6c2e621",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_DOCUMENT_RISK_ROW_MOBILE_LABEL",
+    "total": 4,
+    "pass": 4,
+    "fail": 0
+  },
+  "afterLive": {
+    "sourceHead": "ca908cf8bbc1db1ee1a1054575921025c6c2e621",
+    "productionCommit": "ca908cf8bbc1db1ee1a1054575921025c6c2e621",
+    "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_RISK_ROW_MOBILE_LABEL",
+    "total": 4,
+    "pass": 4,
+    "fail": 0,
+    "desktop": {
+      "bodyHeight": 723,
+      "viewportHeight": 723,
+      "shellRatio": 1.75,
+      "firstHazardBottom": 632,
+      "fullHazardLabelsVisible": true
+    },
+    "mobile": {
+      "bodyHeight": 728,
+      "viewportHeight": 723,
+      "shellRatio": 2.11,
+      "firstHazardBottom": 703,
+      "distinctVisibleSelectors": 3,
+      "compactLabelsClipped": 0,
+      "selectorExamples": [
+        "01 추락 / 이동식 비계",
+        "02 추락 / 강풍 시 비계",
+        "03 충돌·맞음 / 지게차 동선"
+      ]
+    }
+  },
+  "verification": {
+    "documentsEditorLayout": "PASS 1 file / 37 tests",
+    "mobileCoreLauncherFocused": "PASS 2 tests",
+    "incompleteRiskRowReloadFocused": "PASS 1 test",
+    "northstarOpenGateAudit": "PASS 1 file / 48 tests",
+    "typecheck": "PASS",
+    "build": "PASS Next.js 15.5.22 / 28 static pages"
+  },
+  "acceptanceContract": {
+    "desktopFullHazardLabelVisible": true,
+    "mobileAccidentTypeAndHazardCueVisible": true,
+    "mobileCompactLabelClippingForbidden": true,
+    "fullHazardPreservedInAccessibleNameAndTitle": true,
+    "stickyFocusMustNotCoverRiskField": true,
+    "bodyLevelLongStackForbidden": true
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrWikiMutationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  }
+}

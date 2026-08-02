@@ -2151,6 +2151,56 @@ function createFixtureRoot(): string {
       },
     })),
   });
+  writeJson(rootDir, path.join("evaluation", "document-risk-row-mobile-label-2026-08-02", "after-live", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_RISK_ROW_MOBILE_LABEL",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", branch: "master", environment: "production" },
+    sourceHeadMatchesProduction: true,
+    total: 4,
+    pass: 4,
+    fail: 0,
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    results: [
+      { theme: "day", label: "desktop-short-1440x723", mobile: false },
+      { theme: "night", label: "desktop-short-1440x723", mobile: false },
+      { theme: "day", label: "mobile-short-390x723", mobile: true },
+      { theme: "night", label: "mobile-short-390x723", mobile: true },
+    ].map(({ theme, label, mobile }) => ({
+      theme,
+      label,
+      verdict: "PASS",
+      metrics: {
+        viewportWidth: mobile ? 390 : 1440,
+        viewportHeight: 723,
+        bodyHeight: mobile ? 728 : 723,
+        horizontalOverflow: false,
+        shellRatio: mobile ? 2.11 : 1.75,
+        hazardFieldBottom: mobile ? 703 : 632,
+        tabsBeforePanel: true,
+        hazardFieldVisibleInShell: true,
+        uniqueVisibleSelectorCount: 3,
+        selectorMetrics: [
+          { hazardText: "이동식 비계 추락", compactText: "추락" },
+          { hazardText: "강풍 자재 낙하", compactText: "추락" },
+          { hazardText: "지게차 동선 충돌", compactText: "충돌·맞음" },
+        ].map(({ hazardText, compactText }, index) => ({
+          hazardText,
+          compactText,
+          visibleText: `${String(index + 1).padStart(2, "0")} ${compactText} ${hazardText}`,
+          accessibleName: `위험 항목 ${index + 1} 선택: ${hazardText}`,
+          title: hazardText,
+          hazardVisible: true,
+          compactVisible: mobile,
+          compactClipped: false,
+        })),
+      },
+    })),
+  });
   writeJson(rootDir, path.join("evaluation", "workspace-ia-live-7b36-2026-07-22", "report.json"), {
     verdict: "IA_BLOCKER_REFINED_CURRENT_LIVE",
     liveCommitChecked: "fixture-sha",
@@ -2939,7 +2989,8 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("4/4 Day/Night desktop-short/mobile-short cases");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("hazard-first visible labels");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("selector rail precedes the active editor");
-    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("first hazard field ends at 703px");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("first hazard bottom 703px");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("unclipped accident type plus hazard cue");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("12 document first-task cockpits");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("staged Share rail");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("desktop-short 1440x723");
@@ -2956,7 +3007,7 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("/share/[sessionId] desktop recipient confirmation");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("mobile confirmation CTA before document details");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.evidencePath).toBe(
-      path.join("evaluation", "document-risk-row-mobile-order-2026-08-02", "after-live", "report.json"),
+      path.join("evaluation", "document-risk-row-mobile-label-2026-08-02", "after-live", "report.json"),
     );
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("raw/source editing as an explicit live-bounded secondary drilldown");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("selected-editor evidence/recheck CTA remains live-proven before raw editing");
@@ -3704,6 +3755,29 @@ describe("northstar open gate audit", () => {
     expect(gate?.state).toBe("contradicted");
     expect(gate?.evidencePath).toBe(path.join("evaluation", "document-risk-row-mobile-order-2026-08-02", "after-live", "report.json"));
     expect(gate?.detail).toContain("selector-before-editor mobile risk-row order");
+  });
+
+  it("contradicts the UI gate when a mobile risk-row label is clipped", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const geometryPath = path.join(rootDir, "evaluation", "document-risk-row-mobile-label-2026-08-02", "after-live", "report.json");
+    const geometry = JSON.parse(fs.readFileSync(geometryPath, "utf8")) as {
+      results: Array<{ label: string; metrics: { selectorMetrics: Array<{ compactClipped: boolean }> } }>;
+    };
+    const mobile = geometry.results.find((row) => row.label === "mobile-short-390x723");
+    if (!mobile) throw new Error("Missing mobile risk-row label fixture");
+    mobile.metrics.selectorMetrics[0].compactClipped = true;
+    fs.writeFileSync(geometryPath, `${JSON.stringify(geometry, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+    const gate = audit.gates.find((item) => item.id === "ui_documents_share_cockpit");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.evidencePath).toBe(path.join("evaluation", "document-risk-row-mobile-label-2026-08-02", "after-live", "report.json"));
+    expect(gate?.detail).toContain("distinct unclipped mobile risk-row labels");
   });
 
   it("fails seed-profile isolation closed when one forbidden fragment remains live", async () => {
