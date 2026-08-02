@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-02T11:53:19.280Z
-Source HEAD at generation: 536cfcaab32cae84ede90f1ec724a2f9a12ee853
-Live commit at generation: 536cfcaab32cae84ede90f1ec724a2f9a12ee853
+Generated at: 2026-08-02T12:23:51.453Z
+Source HEAD at generation: d1b487d514268c5243b52575845d7b0f8f71cf5b
+Live commit at generation: d1b487d514268c5243b52575845d7b0f8f71cf5b
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -164,7 +164,7 @@ Overall: `northstar_open_approval_gated`
 | hermes_knowledge_review_ui | proven | evaluation\hermes-knowledge-review-authority-ui-2026-07-25\report.json |
 | live_document_secondary_grounding | proven | evaluation\live-document-secondary-grounding-2026-07-25\report.json |
 | live_document_seed_profile_isolation | proven | evaluation\live-document-seed-profile-isolation-2026-07-25\report.json |
-| ui_documents_share_cockpit | proven | evaluation\document-risk-row-navigation-2026-08-02\after-live\report.json |
+| ui_documents_share_cockpit | proven | evaluation\document-risk-row-mobile-order-2026-08-02\after-live\report.json |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-viewport-2026-07-28\report.json |
 | share_result_fixture_cockpit | proven | evaluation\share-result-drilldown-2026-07-21\report.json |
 | share_recipient_long_content_fixture | proven | evaluation\share-recipient-long-content-fixture-2026-07-25\report.json |

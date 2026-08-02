@@ -2113,6 +2113,44 @@ function createFixtureRoot(): string {
       },
     })),
   });
+  writeJson(rootDir, path.join("evaluation", "document-risk-row-mobile-order-2026-08-02", "after-live", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_RISK_ROW_MOBILE_ORDER",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", branch: "master", environment: "production" },
+    sourceHeadMatchesProduction: true,
+    total: 4,
+    pass: 4,
+    fail: 0,
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    results: [
+      { theme: "day", label: "desktop-short-1440x723", mobile: false },
+      { theme: "night", label: "desktop-short-1440x723", mobile: false },
+      { theme: "day", label: "mobile-short-390x723", mobile: true },
+      { theme: "night", label: "mobile-short-390x723", mobile: true },
+    ].map(({ theme, label, mobile }) => ({
+      theme,
+      label,
+      verdict: "PASS",
+      metrics: {
+        viewportHeight: 723,
+        bodyHeight: mobile ? 728 : 723,
+        horizontalOverflow: false,
+        shellRatio: mobile ? 2.11 : 1.75,
+        tabsBottom: mobile ? 580 : 451,
+        panelTop: mobile ? 583 : 463,
+        hazardFieldBottom: mobile ? 703 : 632,
+        selectorCount: 3,
+        tabsBeforePanel: true,
+        tabsVisibleInShell: true,
+        hazardFieldVisibleInShell: true,
+      },
+    })),
+  });
   writeJson(rootDir, path.join("evaluation", "workspace-ia-live-7b36-2026-07-22", "report.json"), {
     verdict: "IA_BLOCKER_REFINED_CURRENT_LIVE",
     liveCommitChecked: "fixture-sha",
@@ -2900,6 +2938,8 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("local source scrolling");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("4/4 Day/Night desktop-short/mobile-short cases");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("hazard-first visible labels");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("selector rail precedes the active editor");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("first hazard field ends at 703px");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("12 document first-task cockpits");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("staged Share rail");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("desktop-short 1440x723");
@@ -2916,7 +2956,7 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("/share/[sessionId] desktop recipient confirmation");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("mobile confirmation CTA before document details");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.evidencePath).toBe(
-      path.join("evaluation", "document-risk-row-navigation-2026-08-02", "after-live", "report.json"),
+      path.join("evaluation", "document-risk-row-mobile-order-2026-08-02", "after-live", "report.json"),
     );
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("raw/source editing as an explicit live-bounded secondary drilldown");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("selected-editor evidence/recheck CTA remains live-proven before raw editing");
@@ -3639,6 +3679,31 @@ describe("northstar open gate audit", () => {
     expect(gate?.state).toBe("contradicted");
     expect(gate?.evidencePath).toBe(path.join("evaluation", "document-risk-row-navigation-2026-08-02", "after-live", "report.json"));
     expect(gate?.detail).toContain("distinct hazard-first risk-row navigation");
+  });
+
+  it("contradicts the UI gate when mobile risk-row navigation follows the active editor", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const geometryPath = path.join(rootDir, "evaluation", "document-risk-row-mobile-order-2026-08-02", "after-live", "report.json");
+    const geometry = JSON.parse(fs.readFileSync(geometryPath, "utf8")) as {
+      results: Array<{ label: string; metrics: { tabsBeforePanel: boolean; tabsBottom: number; panelTop: number } }>;
+    };
+    const mobile = geometry.results.find((row) => row.label === "mobile-short-390x723");
+    if (!mobile) throw new Error("Missing mobile risk-row order fixture");
+    mobile.metrics.tabsBeforePanel = false;
+    mobile.metrics.tabsBottom = 751;
+    mobile.metrics.panelTop = 542;
+    fs.writeFileSync(geometryPath, `${JSON.stringify(geometry, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+    const gate = audit.gates.find((item) => item.id === "ui_documents_share_cockpit");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.evidencePath).toBe(path.join("evaluation", "document-risk-row-mobile-order-2026-08-02", "after-live", "report.json"));
+    expect(gate?.detail).toContain("selector-before-editor mobile risk-row order");
   });
 
   it("fails seed-profile isolation closed when one forbidden fragment remains live", async () => {

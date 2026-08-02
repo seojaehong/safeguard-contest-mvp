@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "safeclaw-document-risk-row-mobile-order-summary/v1",
+  "checkedAt": "2026-08-02T12:19:00.724Z",
+  "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_RISK_ROW_MOBILE_ORDER",
+  "productCommit": "d1b487d514268c5243b52575845d7b0f8f71cf5b",
+  "productionCommit": "d1b487d514268c5243b52575845d7b0f8f71cf5b",
+  "beforeLive": {
+    "sourceHead": "7758217db043cecfa25f3e3dfc233be2178f9445",
+    "verdict": "RED_LIVE_PRODUCTION_DOCUMENT_RISK_ROW_MOBILE_ORDER",
+    "pass": 2,
+    "fail": 2,
+    "mobileTabsBottom": 751,
+    "mobilePanelTop": 542,
+    "mobileHazardBottom": 662,
+    "mobileShellRatio": 2.23
+  },
+  "afterLocal": {
+    "sourceHead": "d1b487d514268c5243b52575845d7b0f8f71cf5b",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_DOCUMENT_RISK_ROW_MOBILE_ORDER",
+    "pass": 4,
+    "fail": 0,
+    "mobileTabsBottom": 580,
+    "mobilePanelTop": 583,
+    "mobileHazardBottom": 703,
+    "mobileShellRatio": 2.11
+  },
+  "afterLive": {
+    "sourceHead": "d1b487d514268c5243b52575845d7b0f8f71cf5b",
+    "productionCommit": "d1b487d514268c5243b52575845d7b0f8f71cf5b",
+    "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_RISK_ROW_MOBILE_ORDER",
+    "pass": 4,
+    "fail": 0,
+    "mobileTabsBottom": 580,
+    "mobilePanelTop": 583,
+    "mobileHazardBottom": 703,
+    "mobileShellRatio": 2.11,
+    "mobileBodyHeight": 728,
+    "desktopBodyHeight": 723
+  },
+  "verification": {
+    "focusedBrowserTests": "3/3 PASS",
+    "documentsBrowserTests": "37/37 PASS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": "28/28"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  }
+}
