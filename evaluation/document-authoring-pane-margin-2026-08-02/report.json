@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "safeclaw-document-authoring-pane-margin/v1",
+  "checkedAt": "2026-08-02T14:53:39.166Z",
+  "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
+  "productCommit": "b2abf19e1a8b8a470292e8503a23173cf251f842",
+  "productionCommit": "b2abf19e1a8b8a470292e8503a23173cf251f842",
+  "sourceHeadMatchesProduction": true,
+  "acceptanceContract": {
+    "canonicalDocumentCount": 12,
+    "viewportCaseCount": 4,
+    "expectedGeometryRows": 48,
+    "firstActionInsidePaneWithMinimumMargin": 16,
+    "shellRatioMaximum": 3,
+    "selectedDocumentOnly": true,
+    "sourceEditorHiddenByDefault": true,
+    "bodyLevelLongStackForbidden": true
+  },
+  "beforeLive": {
+    "artifact": "evaluation/document-authoring-pane-margin-2026-08-02/before-live/report.json",
+    "sourceHead": "25a2ae02b19b32521bc2e53b0be717320eb39919",
+    "productionCommit": "25a2ae02b19b32521bc2e53b0be717320eb39919",
+    "legacyContractPass": 48,
+    "legacyContractFail": 0,
+    "paneMarginBelow16Count": 44,
+    "minimumPaneMargin": -41,
+    "maximumShellRatio": 2.53,
+    "newPaneMarginContractVerdict": "RED_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN"
+  },
+  "afterLocal": {
+    "artifact": "evaluation/document-authoring-pane-margin-2026-08-02/after-local/report.json",
+    "sourceHead": "b2abf19e1a8b8a470292e8503a23173cf251f842",
+    "total": 48,
+    "pass": 48,
+    "fail": 0,
+    "paneMarginBelow16Count": 0,
+    "minimumPaneMargin": 16,
+    "maximumShellRatio": 2.36,
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_12_DOCUMENT_AUTHORING_GEOMETRY"
+  },
+  "afterLive": {
+    "artifact": "evaluation/document-authoring-pane-margin-2026-08-02/after-live/report.json",
+    "sourceHead": "b2abf19e1a8b8a470292e8503a23173cf251f842",
+    "productionCommit": "b2abf19e1a8b8a470292e8503a23173cf251f842",
+    "sourceHeadMatchesProduction": true,
+    "total": 48,
+    "pass": 48,
+    "fail": 0,
+    "paneMarginBelow16Count": 0,
+    "minimumPaneMargin": 16,
+    "maximumShellRatio": 2.36,
+    "verdict": "PASS_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY"
+  },
+  "verification": {
+    "documentsEditorLayout": "1 file / 37 tests PASS",
+    "typecheck": "PASS",
+    "build": "PASS, Next 15.5.22, 28 static pages"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorRuntimeActivated": false,
+    "wikiPublished": false,
+    "koshaRegistryMutated": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "routeSplitAloneAcceptedAsFix": false,
+    "wholeDocumentsPageDeclaredShortForEveryExpandedState": false
+  }
+}
