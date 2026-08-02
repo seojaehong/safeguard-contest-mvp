@@ -19631,6 +19631,10 @@ body:has(.safeclaw-landing) :is(
 }
 
 @media (max-width: 900px) {
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-module-main {
+    padding-bottom: 28px;
+  }
+
   .safeclaw-module-shell.module-variant-document .safeclaw-document-cockpit {
     grid-template-columns: 1fr;
     width: min(100% - 24px, 1180px);
@@ -22382,7 +22386,7 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .workpack-shell {
     position: relative;
     grid-template-columns: minmax(0, 1fr);
-    max-height: min(332px, calc(100vh - 390px));
+    max-height: min(352px, calc(100vh - 370px));
     margin-top: 4px;
     overflow-y: auto;
     overscroll-behavior: contain;

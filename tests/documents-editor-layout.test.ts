@@ -1809,14 +1809,17 @@ describe("documents editor layout", () => {
         const documentSelect = document.querySelector<HTMLSelectElement>('select[aria-label="편집 문서 선택"]');
         const toolbar = document.querySelector<HTMLElement>(".document-toolbar");
         const drilldownSummary = document.querySelector<HTMLElement>('[data-testid="selected-document-drilldown-summary"]');
+        const riskRowTabs = document.querySelector<HTMLElement>('[role="tablist"][aria-label="위험 항목 선택"]');
         const riskRow = document.querySelector<HTMLElement>('[data-testid="risk-row-editor-row"]');
         const riskRowHeader = riskRow?.querySelector<HTMLElement>("summary");
         const riskHazardField = document.querySelector<HTMLElement>('[aria-label="행 1 유해·위험요인"]');
-        if (!workpackShell || !documentSelect || !toolbar || !drilldownSummary || !riskRow || !riskRowHeader || !riskHazardField) {
+        if (!workpackShell || !documentSelect || !toolbar || !drilldownSummary || !riskRowTabs || !riskRow || !riskRowHeader || !riskHazardField) {
           throw new Error("Missing selected risk assessment mobile editor target");
         }
         const shellRect = workpackShell.getBoundingClientRect();
         const toolbarRect = toolbar.getBoundingClientRect();
+        const riskRowTabsRect = riskRowTabs.getBoundingClientRect();
+        const riskRowRect = riskRow.getBoundingClientRect();
         const riskRowHeaderRect = riskRowHeader.getBoundingClientRect();
         const riskHazardFieldRect = riskHazardField.getBoundingClientRect();
         const toolbarStyle = getComputedStyle(toolbar);
@@ -1825,6 +1828,11 @@ describe("documents editor layout", () => {
           toolbarText: toolbar.textContent?.replace(/\s+/gu, " ").trim(),
           drilldownSummaryText: drilldownSummary.textContent?.replace(/\s+/gu, " ").trim(),
           riskRowText: riskRow.textContent?.replace(/\s+/gu, " ").trim(),
+          riskRowTabsTop: Math.round(riskRowTabsRect.top),
+          riskRowTabsBottom: Math.round(riskRowTabsRect.bottom),
+          riskRowPanelTop: Math.round(riskRowRect.top),
+          riskRowTabsBeforePanel: riskRowTabsRect.bottom <= riskRowRect.top + 1,
+          riskRowTabsVisibleInPane: riskRowTabsRect.bottom > shellRect.top && riskRowTabsRect.top < shellRect.bottom,
           riskRowHeaderTop: Math.round(riskRowHeaderRect.top),
           riskRowHeaderBottom: Math.round(riskRowHeaderRect.bottom),
           riskHazardFieldTop: Math.round(riskHazardFieldRect.top),
@@ -1859,6 +1867,10 @@ describe("documents editor layout", () => {
       expect(riskAssessmentLanding.toolbarCoversHazardField).toBe(false);
       expect(riskAssessmentLanding.toolbarTop).toBeGreaterThanOrEqual(riskAssessmentLanding.shellTop - 1);
       expect(riskAssessmentLanding.toolbarBottom).toBeLessThan(riskAssessmentLanding.shellBottom);
+      expect(riskAssessmentLanding.riskRowTabsBeforePanel).toBe(true);
+      expect(riskAssessmentLanding.riskRowTabsVisibleInPane).toBe(true);
+      expect(riskAssessmentLanding.riskRowTabsTop).toBeGreaterThanOrEqual(riskAssessmentLanding.toolbarBottom - 1);
+      expect(riskAssessmentLanding.riskRowTabsBottom).toBeLessThanOrEqual(riskAssessmentLanding.riskRowPanelTop + 1);
       expect(riskAssessmentLanding.riskRowHeaderVisibleInPane).toBe(true);
       expect(riskAssessmentLanding.riskHazardFieldVisibleInPane).toBe(true);
       expect(riskAssessmentLanding.riskRowHeaderBelowToolbar).toBe(true);
