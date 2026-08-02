@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `86f45e381640d4d7da82638b0b2faabfab972c97`
+Source HEAD: `b8c88b6d8543ea38e8c5570c20425485dd52f057`
 
-Production `/api/build-info`: `86f45e381640d4d7da82638b0b2faabfab972c97`
+Production `/api/build-info`: `006090ff588e6423917ad8b0b8bf00db35e7414f`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `none`
+Source pending changed paths: `evaluation/document-all-authoring-geometry-2026-08-02/after-live/day-desktop-short-1440x723-foreignWorkerBriefing.png`, `evaluation/document-all-authoring-geometry-2026-08-02/after-live/day-desktop-short-1440x723-workpackSummaryDraft.png`, `evaluation/document-all-authoring-geometry-2026-08-02/after-live/day-mobile-short-390x723-foreignWorkerBriefing.png`, `evaluation/document-all-authoring-geometry-2026-08-02/after-live/day-mobile-short-390x723-workpackSummaryDraft.png`, `evaluation/document-all-authoring-geometry-2026-08-02/after-live/night-desktop-short-1440x723-foreignWorkerBriefing.png`, `evaluation/document-all-authoring-geometry-2026-08-02/after-live/night-desktop-short-1440x723-workpackSummaryDraft.png`, `evaluation/document-all-authoring-geometry-2026-08-02/after-live/night-mobile-short-390x723-foreignWorkerBriefing.png`, `evaluation/document-all-authoring-geometry-2026-08-02/after-live/night-mobile-short-390x723-workpackSummaryDraft.png`, `evaluation/document-all-authoring-geometry-2026-08-02/after-live/report.json`, `evaluation/document-all-authoring-geometry-2026-08-02/after-live/report.md`, `evaluation/document-all-authoring-geometry-2026-08-02/report.json`, `evaluation/document-all-authoring-geometry-2026-08-02/report.md`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
 
-Current head is evidence-only pending: `false`
+Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `86f45e381640d4d7da82638b0b2faabfab972c97`
+Live rollup source head: `b8c88b6d8543ea38e8c5570c20425485dd52f057`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `b8c88b6d8543ea38e8c5570c20425485dd52f057` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `006090ff588e6423917ad8b0b8bf00db35e7414f`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -80,8 +80,9 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Default Documents cockpit: first actionable cockpit is live-proven; do not phrase this as "Documents page height fixed" or "the whole Documents page is short".
 - Documents cockpit workbench geometry: `PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH`; 1440x723 and 390x723 rows must show grid workbench, 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers closed by default, 0 visible supporting launchers, the legacy document index hidden, no horizontal overflow, and route split alone remains `false`.
 - Documents section navigation: `PASS_LIVE_PRODUCTION_DOCUMENT_SECTION_NAVIGATION`; 4/4 Day/Night desktop-short and mobile-short rows retain 6 tabs, exactly 1 selected tab, 44px minimum controls, readable two-line labels, shell ratio <= 3, first-action containment, no horizontal overflow, no mutation, and exact saved Share `MISSING_EVIDENCE`.
+- All-document selected-authoring geometry: `PASS_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY`; 48/48 rows cover 12 canonical documents across Day/Night desktop-short and mobile-short, with maximum shell ratio `2.69`, maximum first-action bottom `719/723`, at most one role-specific cockpit, local cockpit scroll, hidden raw/source editors, no mutation, and exact saved Share `MISSING_EVIDENCE`.
 - Documents selected editor/detail: risk-assessment default, same-document reselect, and all-12 launcher exposure land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; raw textarea remains secondary drilldown.
-- Documents remaining debt: full 12-document authoring polish remains. The all-12 launcher exposure is now bounded navigation in current evidence, while raw/full document text must stay secondary drilldown rather than serial page content.
+- Documents remaining debt: live 12-document selected-authoring geometry is now bounded, while broad human wording polish and explicit raw/full-source drilldown quality remain separate from this layout proof.
 - Documents structure contract: route/page split is only orientation; /documents must remain a selected-only bounded workbench with core 3/supporting 9 as index or collapsed navigation.
 - Bounded workbench DoD: route split alone is not accepted; desktop Documents hard-REDs above the recorded screen threshold, /share/result desktop requires multi-region workbench geometry, and generated fixture evidence must stay separate from exact saved/session proof.
 - Legacy workspace-layout regression: remains a broad no-overflow/editor-flow smoke only, not a long-form UX PASS gate; the DoD and route-specific evidence own first-task distance.
