@@ -575,6 +575,8 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
         ? asString(publicSearchDistributedRateLimitReadiness.productionBuild.commitSha)
         : "",
       productionModeVerified: recordAt(publicSearchDistributedRateLimitReadiness, "configuration")?.productionModeVerified === true,
+      observedMode: asString(recordAt(publicSearchDistributedRateLimitReadiness, "configuration")?.observedMode),
+      distributedActivationPending: recordAt(publicSearchDistributedRateLimitReadiness, "configuration")?.distributedActivationPending === true,
       sealedFindingsClosedWithoutRescan: recordAt(publicSearchDistributedRateLimitReadiness, "boundary")?.sealedFindingsClosedWithoutRescan === true,
       remainingDbRlsFindings: asNumber(recordAt(publicSearchDistributedRateLimitReadiness, "boundary")?.remainingDbRlsFindings),
       exactSavedShareVerdict: asString(recordAt(publicSearchDistributedRateLimitReadiness, "boundary")?.exactSavedShareVerdict),

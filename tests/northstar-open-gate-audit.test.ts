@@ -769,11 +769,12 @@ function createFixtureRoot(): string {
     },
   });
   writeJson(rootDir, path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"), {
-    verdict: "PASS_CURRENT_SOURCE_DISTRIBUTED_LIMITER_CAPABILITY_LIVE_CONFIGURATION_PENDING",
+    verdict: "PASS_LIVE_PRODUCTION_DISTRIBUTED_LIMITER_CAPABILITY_INSTANCE_FALLBACK_CONFIG_PENDING",
     sourceHead: "fixture-sha",
     productionBuild: {
       commitSha: "previous-live-sha",
       sourceHeadMatchesProduction: false,
+      productCommitIsAncestorOfProduction: true,
     },
     currentSourceContract: {
       atomicDistributedCounter: true,
@@ -788,8 +789,10 @@ function createFixtureRoot(): string {
       providerCallsOnPartialConfiguration: 0,
     },
     configuration: {
-      productionConfigured: null,
-      productionModeVerified: false,
+      productionConfigured: false,
+      productionModeVerified: true,
+      observedMode: "instance",
+      distributedActivationPending: true,
     },
     verification: {
       focusedAndAdjacentTests: { files: 6, tests: 88, failed: 0 },
@@ -799,6 +802,7 @@ function createFixtureRoot(): string {
     boundary: {
       sealedScanMutated: false,
       sealedFindingsClosedWithoutRescan: false,
+      capabilityIncludedInProduction: true,
       distributedProtectionClaimedLive: false,
       remainingDbRlsFindings: 13,
       remainingDbRlsFindingsRequireApproval: true,
@@ -2679,7 +2683,7 @@ describe("northstar open gate audit", () => {
       state: "notice",
       evidencePath: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
     });
-    expect(audit.gates.find((gate) => gate.id === "public_search_distributed_rate_limit_readiness")?.detail).toContain("production configuration");
+    expect(audit.gates.find((gate) => gate.id === "public_search_distributed_rate_limit_readiness")?.detail).toContain("X-SafeClaw-Rate-Limit=instance");
     expect(audit.gates.find((gate) => gate.id === "public_search_distributed_rate_limit_readiness")?.detail).toContain("13 DB/RLS findings");
     expect(audit.gates.find((gate) => gate.id === "public_search_distributed_rate_limit_readiness")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "tenant_authorization_remediation")).toMatchObject({ state: "proven" });

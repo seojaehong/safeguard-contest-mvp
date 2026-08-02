@@ -260,6 +260,8 @@ type NextRunwayReport = {
     productionCommit: string;
     sourceHeadMatchesProduction: boolean;
     productionModeVerified: boolean;
+    observedMode: string;
+    distributedActivationPending: boolean;
     sealedFindingsClosedWithoutRescan: boolean;
     remainingDbRlsFindings: number;
     exactSavedShareVerdict: string;
@@ -1084,10 +1086,14 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     },
   });
   writeJson(root, "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json", {
-    verdict: "PASS_CURRENT_SOURCE_DISTRIBUTED_LIMITER_CAPABILITY_LIVE_CONFIGURATION_PENDING",
+    verdict: "PASS_LIVE_PRODUCTION_DISTRIBUTED_LIMITER_CAPABILITY_INSTANCE_FALLBACK_CONFIG_PENDING",
     sourceHead: "fixture-sha",
     productionBuild: { commitSha: "previous-live-sha", sourceHeadMatchesProduction: false },
-    configuration: { productionModeVerified: false },
+    configuration: {
+      productionModeVerified: true,
+      observedMode: "instance",
+      distributedActivationPending: true,
+    },
     boundary: {
       sealedFindingsClosedWithoutRescan: false,
       remainingDbRlsFindings: 13,
@@ -1923,11 +1929,13 @@ describe("northstar next runway generator", () => {
       state: "notice",
     }));
     expect(report.publicSearchDistributedRateLimitReadiness).toMatchObject({
-      verdict: "PASS_CURRENT_SOURCE_DISTRIBUTED_LIMITER_CAPABILITY_LIVE_CONFIGURATION_PENDING",
+      verdict: "PASS_LIVE_PRODUCTION_DISTRIBUTED_LIMITER_CAPABILITY_INSTANCE_FALLBACK_CONFIG_PENDING",
       sourceHead: "fixture-sha",
       productionCommit: "previous-live-sha",
       sourceHeadMatchesProduction: false,
-      productionModeVerified: false,
+      productionModeVerified: true,
+      observedMode: "instance",
+      distributedActivationPending: true,
       sealedFindingsClosedWithoutRescan: false,
       remainingDbRlsFindings: 13,
       exactSavedShareVerdict: "MISSING_EVIDENCE",

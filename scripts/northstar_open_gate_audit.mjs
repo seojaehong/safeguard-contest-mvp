@@ -3488,9 +3488,10 @@ function evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir) {
   const tests = isRecord(verification.focusedAndAdjacentTests) ? verification.focusedAndAdjacentTests : {};
   const build = isRecord(verification.build) ? verification.build : {};
   const boundary = isRecord(report.boundary) ? report.boundary : {};
-  const pass = readString(report.verdict) === "PASS_CURRENT_SOURCE_DISTRIBUTED_LIMITER_CAPABILITY_LIVE_CONFIGURATION_PENDING"
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_DISTRIBUTED_LIMITER_CAPABILITY_INSTANCE_FALLBACK_CONFIG_PENDING"
     && readString(report.sourceHead).length > 0
     && productionBuild.sourceHeadMatchesProduction === false
+    && productionBuild.productCommitIsAncestorOfProduction === true
     && contract.atomicDistributedCounter === true
     && contract.serverOnlyRestCredentials === true
     && contract.httpsOnlyEndpoint === true
@@ -3501,8 +3502,10 @@ function evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir) {
     && contract.instanceFallbackWhenCompletelyUnconfigured === true
     && readString(contract.responseModeHeader) === "X-SafeClaw-Rate-Limit"
     && readNumber(contract.providerCallsOnPartialConfiguration) === 0
-    && configuration.productionConfigured === null
-    && configuration.productionModeVerified === false
+    && configuration.productionConfigured === false
+    && configuration.productionModeVerified === true
+    && readString(configuration.observedMode) === "instance"
+    && configuration.distributedActivationPending === true
     && readNumber(tests.files) === 6
     && readNumber(tests.tests) === 88
     && readNumber(tests.failed) === 0
@@ -3511,6 +3514,7 @@ function evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir) {
     && readNumber(build.staticPages) === 28
     && boundary.sealedScanMutated === false
     && boundary.sealedFindingsClosedWithoutRescan === false
+    && boundary.capabilityIncludedInProduction === true
     && boundary.distributedProtectionClaimedLive === false
     && readNumber(boundary.remainingDbRlsFindings) === 13
     && boundary.remainingDbRlsFindingsRequireApproval === true
@@ -3528,7 +3532,7 @@ function evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Current source has an atomic, IP-hashed, fail-closed distributed limiter capability for both public search routes, but production configuration and X-SafeClaw-Rate-Limit=distributed are not verified. The sealed two search findings remain open until deployment evidence and a future full scan; 13 DB/RLS findings remain approval-gated and exact saved Share remains MISSING_EVIDENCE."
+      ? "Live production contains an atomic, IP-hashed, fail-closed distributed limiter capability for both public search routes, while read-only probes honestly report X-SafeClaw-Rate-Limit=instance because production Upstash configuration is absent. Distributed activation and a future full scan remain required before closing the two sealed search findings; 13 DB/RLS findings remain approval-gated and exact saved Share remains MISSING_EVIDENCE."
       : `Distributed limiter verdict=${readString(report.verdict) || "unknown"}, liveVerified=${configuration.productionModeVerified === true}, tests=${readNumber(tests.tests)}, sealedClosed=${boundary.sealedFindingsClosedWithoutRescan === true}, DB/RLS=${readNumber(boundary.remainingDbRlsFindings)}, exactShare=${readString(boundary.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [

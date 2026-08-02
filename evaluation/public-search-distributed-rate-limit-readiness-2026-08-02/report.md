@@ -1,6 +1,6 @@
 # Public Search Distributed Rate-Limit Readiness
 
-Verdict: `PASS_CURRENT_SOURCE_DISTRIBUTED_LIMITER_CAPABILITY_LIVE_CONFIGURATION_PENDING`
+Verdict: `PASS_LIVE_PRODUCTION_DISTRIBUTED_LIMITER_CAPABILITY_INSTANCE_FALLBACK_CONFIG_PENDING`
 
 ## Result
 
@@ -25,7 +25,7 @@ The protocol shape follows the official [Upstash Redis REST API documentation](h
 
 ## Live Boundary
 
-Production still reported `6546a04912bc3fd08f28bd09037701cc113d6e0b` when this report was authored, so current source had not deployed. Production Upstash configuration was not inspected or changed. This report does not claim `X-SafeClaw-Rate-Limit: distributed` is live.
+Production reached `7efd21138066842017c206dbb5c0f3ef1d1ba54a`, which contains product commit `c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56`. One read-only request per route returned HTTP 200 and `X-SafeClaw-Rate-Limit: instance`: `/api/search` returned 9 results and `/api/safety-reference/search` returned 1 result. The capability is live, but Upstash is not configured and this report does not claim `X-SafeClaw-Rate-Limit: distributed` is active.
 
 The sealed scan `8fe9c06a-018c-446f-aa98-1b37df95287a` remains immutable. Its two public-search findings are not marked closed by this companion evidence; a future full repository scan must reclassify them after the production mode is verified. Thirteen DB/RLS findings remain separately approval-gated.
 

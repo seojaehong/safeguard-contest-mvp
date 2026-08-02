@@ -1,36 +1,29 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-02T08:57:28.262Z",
+  "generatedAt": "2026-08-02T09:03:07.927Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
-  "productionCommit": "6546a04912bc3fd08f28bd09037701cc113d6e0b",
+  "sourceHead": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
+  "productionCommit": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "6546a04912bc3fd08f28bd09037701cc113d6e0b",
+    "commitSha": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-jv3y9z2q5-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-gh5l9zcnw-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": false,
+  "latestEvidenceCommitLive": true,
   "currentHeadIsEvidenceOnlyPending": false,
-  "sourceHeadLivePending": true,
-  "sourceHeadHasProductChanges": true,
-  "sourcePendingChangedPaths": [
-    ".env.example",
-    "app/api/safety-reference/search/route.ts",
-    "app/api/search/route.ts",
-    "lib/public-distributed-rate-limit.ts",
-    "tests/public-distributed-rate-limit.test.ts",
-    "tests/public-search-work-budget.test.ts"
-  ],
+  "sourceHeadLivePending": false,
+  "sourceHeadHasProductChanges": false,
+  "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
-  "liveRollupLiveCommit": "6546a04912bc3fd08f28bd09037701cc113d6e0b",
+  "liveExactEvidenceCommit": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
+  "liveRollupLiveCommit": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -113,7 +106,7 @@
     {
       "gate": "public_search_distributed_rate_limit_readiness",
       "state": "notice",
-      "reason": "current-source distributed limiter capability is verified, but production configuration and distributed response mode remain unverified"
+      "reason": "live capability is verified with X-SafeClaw-Rate-Limit=instance; production distributed configuration remains pending"
     }
   ],
   "approvalGated": [
@@ -575,11 +568,13 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "publicSearchDistributedRateLimitReadiness": {
-    "verdict": "PASS_CURRENT_SOURCE_DISTRIBUTED_LIMITER_CAPABILITY_LIVE_CONFIGURATION_PENDING",
+    "verdict": "PASS_LIVE_PRODUCTION_DISTRIBUTED_LIMITER_CAPABILITY_INSTANCE_FALLBACK_CONFIG_PENDING",
     "sourceHead": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
-    "productionCommit": "6546a04912bc3fd08f28bd09037701cc113d6e0b",
+    "productionCommit": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
     "sourceHeadMatchesProduction": false,
-    "productionModeVerified": false,
+    "productionModeVerified": true,
+    "observedMode": "instance",
+    "distributedActivationPending": true,
     "sealedFindingsClosedWithoutRescan": false,
     "remainingDbRlsFindings": 13,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"

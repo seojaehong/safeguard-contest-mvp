@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-02T08:57:19.902Z",
-  "sourceSha": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
+  "generatedAt": "2026-08-02T09:03:00.515Z",
+  "sourceSha": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
   "overall": "open",
   "gates": [
     {
@@ -183,7 +183,7 @@
       "state": "notice",
       "label": "Public search distributed rate-limit readiness",
       "evidencePath": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
-      "detail": "Current source has an atomic, IP-hashed, fail-closed distributed limiter capability for both public search routes, but production configuration and X-SafeClaw-Rate-Limit=distributed are not verified. The sealed two search findings remain open until deployment evidence and a future full scan; 13 DB/RLS findings remain approval-gated and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Live production contains an atomic, IP-hashed, fail-closed distributed limiter capability for both public search routes, while read-only probes honestly report X-SafeClaw-Rate-Limit=instance because production Upstash configuration is absent. Distributed activation and a future full scan remain required before closing the two sealed search findings; 13 DB/RLS findings remain approval-gated and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Configure both server-only Upstash REST variables through an approved production environment change.",
         "Verify both public search routes return X-SafeClaw-Rate-Limit=distributed, then rerun the full repository scan before closing either sealed finding."

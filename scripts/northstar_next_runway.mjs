@@ -838,6 +838,8 @@ function publicSearchDistributedRateLimitReadinessSummary(report) {
     productionCommit: asString(productionBuild.commitSha),
     sourceHeadMatchesProduction: asBoolean(productionBuild.sourceHeadMatchesProduction),
     productionModeVerified: asBoolean(configuration.productionModeVerified),
+    observedMode: asString(configuration.observedMode),
+    distributedActivationPending: asBoolean(configuration.distributedActivationPending),
     sealedFindingsClosedWithoutRescan: asBoolean(boundary.sealedFindingsClosedWithoutRescan),
     remainingDbRlsFindings: typeof boundary.remainingDbRlsFindings === "number"
       ? boundary.remainingDbRlsFindings
@@ -1601,7 +1603,7 @@ export function buildNorthstarNextRunway(options) {
       {
         gate: "public_search_distributed_rate_limit_readiness",
         state: "notice",
-        reason: "current-source distributed limiter capability is verified, but production configuration and distributed response mode remain unverified",
+        reason: "live capability is verified with X-SafeClaw-Rate-Limit=instance; production distributed configuration remains pending",
       },
     ],
     approvalGated: approvalGates(approvalRunway, shareRecipientAckApproval),

@@ -195,6 +195,8 @@ type RollupReport = {
     sourceHead: string;
     productionCommit: string;
     productionModeVerified: boolean;
+    observedMode: string;
+    distributedActivationPending: boolean;
     sealedFindingsClosedWithoutRescan: boolean;
     remainingDbRlsFindings: number | null;
     exactSavedShareVerdict: string;
@@ -611,10 +613,14 @@ function createFixtureRoot(): { root: string; head: string } {
     },
   });
   writeJson(root, "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json", {
-    verdict: "PASS_CURRENT_SOURCE_DISTRIBUTED_LIMITER_CAPABILITY_LIVE_CONFIGURATION_PENDING",
+    verdict: "PASS_LIVE_PRODUCTION_DISTRIBUTED_LIMITER_CAPABILITY_INSTANCE_FALLBACK_CONFIG_PENDING",
     sourceHead: "TO_FILL",
     productionBuild: { commitSha: "TO_FILL", sourceHeadMatchesProduction: false },
-    configuration: { productionModeVerified: false },
+    configuration: {
+      productionModeVerified: true,
+      observedMode: "instance",
+      distributedActivationPending: true,
+    },
     boundary: {
       sealedFindingsClosedWithoutRescan: false,
       remainingDbRlsFindings: 13,
@@ -1079,8 +1085,10 @@ describe("northstar live rollup", () => {
     });
     expect(report.evidence.find((item) => item.id === "full_repository_security_scan")?.productionStatus).toBe("ancestor_of_head");
     expect(report.publicSearchDistributedRateLimitReadiness).toMatchObject({
-      verdict: "PASS_CURRENT_SOURCE_DISTRIBUTED_LIMITER_CAPABILITY_LIVE_CONFIGURATION_PENDING",
-      productionModeVerified: false,
+      verdict: "PASS_LIVE_PRODUCTION_DISTRIBUTED_LIMITER_CAPABILITY_INSTANCE_FALLBACK_CONFIG_PENDING",
+      productionModeVerified: true,
+      observedMode: "instance",
+      distributedActivationPending: true,
       sealedFindingsClosedWithoutRescan: false,
       remainingDbRlsFindings: 13,
       exactSavedShareVerdict: "MISSING_EVIDENCE",

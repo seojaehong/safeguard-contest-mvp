@@ -1,14 +1,15 @@
 {
   "schema": "safeclaw-public-search-distributed-rate-limit-readiness/v1",
-  "generatedAt": "2026-08-02T08:50:07.2385073Z",
-  "verdict": "PASS_CURRENT_SOURCE_DISTRIBUTED_LIMITER_CAPABILITY_LIVE_CONFIGURATION_PENDING",
+  "generatedAt": "2026-08-02T09:00:35.2024979Z",
+  "verdict": "PASS_LIVE_PRODUCTION_DISTRIBUTED_LIMITER_CAPABILITY_INSTANCE_FALLBACK_CONFIG_PENDING",
   "sourceHead": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
   "productionBuild": {
-    "commitSha": "6546a04912bc3fd08f28bd09037701cc113d6e0b",
+    "commitSha": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-jv3y9z2q5-seojaehongs-projects.vercel.app",
-    "sourceHeadMatchesProduction": false
+    "deploymentUrl": "safeguard-contest-gh5l9zcnw-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": false,
+    "productCommitIsAncestorOfProduction": true
   },
   "scope": {
     "routes": [
@@ -48,10 +49,26 @@
       "UPSTASH_REDIS_REST_URL",
       "UPSTASH_REDIS_REST_TOKEN"
     ],
-    "productionConfigured": null,
-    "productionModeVerified": false,
+    "productionConfigured": false,
+    "productionModeVerified": true,
+    "observedMode": "instance",
+    "distributedActivationPending": true,
     "officialProtocolReference": "https://upstash.com/docs/redis/features/restapi"
   },
+  "liveProbes": [
+    {
+      "route": "/api/search",
+      "status": 200,
+      "rateLimitHeader": "instance",
+      "resultCount": 9
+    },
+    {
+      "route": "/api/safety-reference/search",
+      "status": 200,
+      "rateLimitHeader": "instance",
+      "resultCount": 1
+    }
+  ],
   "verification": {
     "focusedAndAdjacentTests": {
       "files": 6,
@@ -71,6 +88,7 @@
   "boundary": {
     "sealedScanMutated": false,
     "sealedFindingsClosedWithoutRescan": false,
+    "capabilityIncludedInProduction": true,
     "distributedProtectionClaimedLive": false,
     "remainingDbRlsFindings": 13,
     "remainingDbRlsFindingsRequireApproval": true,

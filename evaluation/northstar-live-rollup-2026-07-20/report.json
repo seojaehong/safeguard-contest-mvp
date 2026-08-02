@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-02T08:57:21.009Z",
-  "head": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
+  "generatedAt": "2026-08-02T09:03:01.472Z",
+  "head": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "6546a04912bc3fd08f28bd09037701cc113d6e0b",
+    "commitSha": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-jv3y9z2q5-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-gh5l9zcnw-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -127,7 +127,7 @@
       "id": "public_search_distributed_rate_limit_readiness",
       "state": "notice",
       "artifact": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
-      "detail": "Current source has an atomic, IP-hashed, fail-closed distributed limiter capability for both public search routes, but production configuration and X-SafeClaw-Rate-Limit=distributed are not verified. The sealed two search findings remain open until deployment evidence and a future full scan; 13 DB/RLS findings remain approval-gated and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Live production contains an atomic, IP-hashed, fail-closed distributed limiter capability for both public search routes, while read-only probes honestly report X-SafeClaw-Rate-Limit=instance because production Upstash configuration is absent. Distributed activation and a future full scan remain required before closing the two sealed search findings; 13 DB/RLS findings remain approval-gated and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "learning_export_renderer_security",
@@ -358,10 +358,12 @@
   },
   "publicSearchDistributedRateLimitReadiness": {
     "artifact": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
-    "verdict": "PASS_CURRENT_SOURCE_DISTRIBUTED_LIMITER_CAPABILITY_LIVE_CONFIGURATION_PENDING",
+    "verdict": "PASS_LIVE_PRODUCTION_DISTRIBUTED_LIMITER_CAPABILITY_INSTANCE_FALLBACK_CONFIG_PENDING",
     "sourceHead": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
-    "productionCommit": "6546a04912bc3fd08f28bd09037701cc113d6e0b",
-    "productionModeVerified": false,
+    "productionCommit": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
+    "productionModeVerified": true,
+    "observedMode": "instance",
+    "distributedActivationPending": true,
     "sealedFindingsClosedWithoutRescan": false,
     "remainingDbRlsFindings": 13,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
@@ -693,10 +695,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
+      "sourceCommit": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
       "sourceStatus": "exact",
-      "productionCommit": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -838,8 +840,8 @@
       "id": "public_search_distributed_rate_limit_readiness",
       "artifact": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
       "sourceCommit": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
-      "sourceStatus": "exact",
-      "productionCommit": "6546a04912bc3fd08f28bd09037701cc113d6e0b",
+      "sourceStatus": "ancestor",
+      "productionCommit": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
       "productionStatus": "matches_live_source_mismatch"
     },
     {
