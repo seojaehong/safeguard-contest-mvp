@@ -44,6 +44,7 @@ const ARTIFACTS = Object.freeze({
   liveCritical: path.join("evaluation", "live-critical-surface-current-2026-07-20-rerun", "report.json"),
   mobileP0: path.join("evaluation", "mobile-p0-workspace-gate-2026-07-20", "report.json"),
   workspaceGeometry: path.join("evaluation", "workspace-docs-share-production-gate-2026-07-20", "current-geometry.json"),
+  documentAuthoringPaneMargin: path.join("evaluation", "document-authoring-pane-margin-2026-08-02", "report.json"),
   dispatchStandalone: path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"),
   dispatchStandaloneViewport: path.join("evaluation", "dispatch-standalone-viewport-2026-07-28", "report.json"),
   providerDispatchIdempotency: path.join("evaluation", "provider-dispatch-idempotency-gate-2026-07-19", "report.json"),
@@ -343,6 +344,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const liveCritical = tryReadJson(rootDir, ARTIFACTS.liveCritical);
   const mobileP0 = tryReadJson(rootDir, ARTIFACTS.mobileP0);
   const workspaceGeometry = tryReadJson(rootDir, ARTIFACTS.workspaceGeometry);
+  const documentAuthoringPaneMargin = tryReadJson(rootDir, ARTIFACTS.documentAuthoringPaneMargin);
   const dispatchStandalone = tryReadJson(rootDir, ARTIFACTS.dispatchStandalone);
   const dispatchStandaloneViewport = tryReadJson(rootDir, ARTIFACTS.dispatchStandaloneViewport);
   const providerDispatchIdempotency = tryReadJson(rootDir, ARTIFACTS.providerDispatchIdempotency);
@@ -432,6 +434,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "live_critical_surface", ARTIFACTS.liveCritical, liveCritical),
     evidenceStatus(rootDir, currentHead, liveCommit, "mobile_p0_workspace", ARTIFACTS.mobileP0, mobileP0),
     evidenceStatus(rootDir, currentHead, liveCommit, "workspace_docs_share_geometry", ARTIFACTS.workspaceGeometry, workspaceGeometry),
+    evidenceStatus(rootDir, currentHead, liveCommit, "document_authoring_pane_margin", ARTIFACTS.documentAuthoringPaneMargin, documentAuthoringPaneMargin),
     evidenceStatus(rootDir, currentHead, liveCommit, "dispatch_standalone_cockpit", ARTIFACTS.dispatchStandalone, dispatchStandalone),
     evidenceStatus(rootDir, currentHead, liveCommit, "dispatch_standalone_viewport_companion", ARTIFACTS.dispatchStandaloneViewport, dispatchStandaloneViewport),
     evidenceStatus(rootDir, currentHead, liveCommit, "provider_dispatch_persistence", ARTIFACTS.providerDispatchIdempotency, providerDispatchIdempotency),
@@ -502,6 +505,18 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       productionCommit: extractProductionCommit(workspaceGeometry),
       mobileDocumentDeepReviewOpen: mobileDocuments ? mobileDocuments.documentDeepReviewOpen === true : null,
       mobileVisibleDocumentPreviews: mobileDocuments ? asNumber(mobileDocuments.visibleDocumentPreviews) : null,
+    },
+    documentAuthoringPaneMargin: {
+      artifact: ARTIFACTS.documentAuthoringPaneMargin,
+      verdict: isRecord(documentAuthoringPaneMargin) ? asString(documentAuthoringPaneMargin.verdict) : "missing",
+      productCommit: isRecord(documentAuthoringPaneMargin) ? asString(documentAuthoringPaneMargin.productCommit) : "",
+      productionCommit: isRecord(documentAuthoringPaneMargin) ? asString(documentAuthoringPaneMargin.productionCommit) : "",
+      sourceHeadMatchesProduction: isRecord(documentAuthoringPaneMargin) && documentAuthoringPaneMargin.sourceHeadMatchesProduction === true,
+      beforeBelowMargin: asNumber(recordAt(documentAuthoringPaneMargin, "beforeLive")?.paneMarginBelow16Count),
+      liveBelowMargin: asNumber(recordAt(documentAuthoringPaneMargin, "afterLive")?.paneMarginBelow16Count),
+      liveMinimumMargin: asNumber(recordAt(documentAuthoringPaneMargin, "afterLive")?.minimumPaneMargin),
+      liveMaximumShellRatio: asNumber(recordAt(documentAuthoringPaneMargin, "afterLive")?.maximumShellRatio),
+      exactSavedShareVerdict: asString(recordAt(documentAuthoringPaneMargin, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     dispatchStandaloneCockpit: {
       artifact: ARTIFACTS.dispatchStandalone,
@@ -948,6 +963,14 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Deep review closed: ${rollup.mobileP0.documentDeepReviewOpen === false ? "yes" : "no"}`,
     `- Visible full previews while closed: ${rollup.mobileP0.visibleDocumentPreviews}`,
     `- Share: ${rollup.mobileP0.shareBodyHeight ?? "unknown"}/${rollup.mobileP0.shareViewportHeight ?? "unknown"} (${rollup.mobileP0.shareHeightRatio}x viewport), root bottom=${rollup.mobileP0.shareRootBottom}, preview bottom=${rollup.mobileP0.sharePreviewBottom}, preview y=${rollup.mobileP0.sharePreviewY}`,
+    "",
+    "## Document Authoring Pane Margin",
+    "",
+    `- Verdict: \`${rollup.documentAuthoringPaneMargin.verdict}\``,
+    `- Product/production commit: ${rollup.documentAuthoringPaneMargin.productCommit || "missing"}/${rollup.documentAuthoringPaneMargin.productionCommit || "missing"}`,
+    `- Rows below 16px pane margin: ${rollup.documentAuthoringPaneMargin.beforeBelowMargin ?? "unknown"} -> ${rollup.documentAuthoringPaneMargin.liveBelowMargin ?? "unknown"}`,
+    `- Live minimum pane margin / maximum shell ratio: ${rollup.documentAuthoringPaneMargin.liveMinimumMargin ?? "unknown"}px / ${rollup.documentAuthoringPaneMargin.liveMaximumShellRatio ?? "unknown"}`,
+    `- Exact saved Share: ${rollup.documentAuthoringPaneMargin.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "",
     "## Dispatch Standalone Cockpit",
     "",

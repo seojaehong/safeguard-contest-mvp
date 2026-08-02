@@ -2039,6 +2039,33 @@ function createFixtureRoot(): string {
       }))
     )),
   });
+  writeJson(rootDir, path.join("evaluation", "document-authoring-pane-margin-2026-08-02", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    sourceHeadMatchesProduction: true,
+    beforeLive: {
+      paneMarginBelow16Count: 44,
+      minimumPaneMargin: -41,
+    },
+    afterLive: {
+      total: 48,
+      pass: 48,
+      fail: 0,
+      paneMarginBelow16Count: 0,
+      minimumPaneMargin: 16,
+      maximumShellRatio: 2.36,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      routeSplitAloneAcceptedAsFix: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "document-raw-drilldown-geometry-2026-08-02", "after-live", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_12_DOCUMENT_RAW_DRILLDOWN_GEOMETRY",
     sourceHead: "fixture-sha",
@@ -2984,6 +3011,9 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("48/48 rows");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("at most one role-specific cockpit");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("foreign-worker briefing no longer stacks");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("44/48 to 0/48");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("minimum margin from -41px to 16px");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("maximum shell ratio at 2.36");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("48/48 raw-source drilldown");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("local source scrolling");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("4/4 Day/Night desktop-short/mobile-short cases");
@@ -3687,6 +3717,28 @@ describe("northstar open gate audit", () => {
     const gate = audit.gates.find((item) => item.id === "ui_documents_share_cockpit");
     expect(gate?.state).toBe("contradicted");
     expect(gate?.evidencePath).toBe(path.join("evaluation", "document-all-authoring-geometry-2026-08-02", "after-live", "report.json"));
+    expect(gate?.detail).toContain("48/48 all-document selected-authoring and raw-source containment");
+  });
+
+  it("contradicts the UI gate when a document action loses its inner-pane margin", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const geometryPath = path.join(rootDir, "evaluation", "document-authoring-pane-margin-2026-08-02", "report.json");
+    const geometry = JSON.parse(fs.readFileSync(geometryPath, "utf8")) as {
+      afterLive: { paneMarginBelow16Count: number; minimumPaneMargin: number };
+    };
+    geometry.afterLive.paneMarginBelow16Count = 1;
+    geometry.afterLive.minimumPaneMargin = 15;
+    fs.writeFileSync(geometryPath, `${JSON.stringify(geometry, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+    const gate = audit.gates.find((item) => item.id === "ui_documents_share_cockpit");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.evidencePath).toBe(path.join("evaluation", "document-authoring-pane-margin-2026-08-02", "report.json"));
     expect(gate?.detail).toContain("48/48 all-document selected-authoring and raw-source containment");
   });
 

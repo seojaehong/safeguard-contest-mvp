@@ -428,6 +428,18 @@ type NextRunwayReport = {
     shareSessionCreated: boolean;
     exactSavedShareVerdict: string;
   };
+  documentAuthoringPaneMargin: {
+    verdict: string;
+    productCommit: string;
+    productionCommit: string;
+    sourceHeadMatchesProduction: boolean;
+    beforeBelowMargin: number | null;
+    liveBelowMargin: number | null;
+    liveMinimumMargin: number | null;
+    liveMaximumShellRatio: number | null;
+    exactSavedShareVerdict: string;
+    routeSplitAloneAcceptedAsFix: boolean;
+  };
   documentRawDrilldownGeometry: {
     verdict: string;
     sourceHead: string;
@@ -1672,6 +1684,18 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       }))
     )),
   });
+  writeJson(root, "evaluation/document-authoring-pane-margin-2026-08-02/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    sourceHeadMatchesProduction: true,
+    beforeLive: { paneMarginBelow16Count: 44 },
+    afterLive: { paneMarginBelow16Count: 0, minimumPaneMargin: 16, maximumShellRatio: 2.36 },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      routeSplitAloneAcceptedAsFix: false,
+    },
+  });
   writeJson(root, "evaluation/document-raw-drilldown-geometry-2026-08-02/after-live/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_12_DOCUMENT_RAW_DRILLDOWN_GEOMETRY",
     sourceHead: "fixture-sha",
@@ -2363,6 +2387,18 @@ describe("northstar next runway generator", () => {
       providerDispatchCalled: false,
       shareSessionCreated: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.documentAuthoringPaneMargin).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
+      productCommit: "fixture-sha",
+      productionCommit: "fixture-sha",
+      sourceHeadMatchesProduction: true,
+      beforeBelowMargin: 44,
+      liveBelowMargin: 0,
+      liveMinimumMargin: 16,
+      liveMaximumShellRatio: 2.36,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      routeSplitAloneAcceptedAsFix: false,
     });
     expect(report.documentRawDrilldownGeometry).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_12_DOCUMENT_RAW_DRILLDOWN_GEOMETRY",

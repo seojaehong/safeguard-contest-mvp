@@ -17,6 +17,17 @@ type RollupReport = {
     documentsHeightRatio: number;
     shareHeightRatio: number;
   };
+  documentAuthoringPaneMargin: {
+    verdict: string;
+    productCommit: string;
+    productionCommit: string;
+    sourceHeadMatchesProduction: boolean;
+    beforeBelowMargin: number | null;
+    liveBelowMargin: number | null;
+    liveMinimumMargin: number | null;
+    liveMaximumShellRatio: number | null;
+    exactSavedShareVerdict: string;
+  };
   liveCritical: {
     findings: number;
   };
@@ -841,6 +852,15 @@ function createFixtureRoot(): { root: string; head: string } {
       },
     ],
   });
+  writeJson(root, "evaluation/document-authoring-pane-margin-2026-08-02/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
+    productCommit: "TO_FILL",
+    productionCommit: "TO_FILL",
+    sourceHeadMatchesProduction: true,
+    beforeLive: { paneMarginBelow16Count: 44 },
+    afterLive: { paneMarginBelow16Count: 0, minimumPaneMargin: 16, maximumShellRatio: 2.36 },
+    remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  });
 
   const firstCommit = commitAll(root, "seed fixtures");
   const replaceToken = (relativePath: string, commit = firstCommit): void => {
@@ -879,6 +899,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-critical-surface-current-2026-07-20-rerun/report.json",
     "evaluation/mobile-p0-workspace-gate-2026-07-20/report.json",
     "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
+    "evaluation/document-authoring-pane-margin-2026-08-02/report.json",
   ].forEach((relativePath) => replaceToken(relativePath));
   const head = commitAll(root, "bind evidence");
   {
@@ -915,6 +936,16 @@ describe("northstar live rollup", () => {
     expect(report.mobileP0.visibleDocumentPreviews).toBe(0);
     expect(report.mobileP0.documentsHeightRatio).toBe(1);
     expect(report.mobileP0.shareHeightRatio).toBe(1);
+    expect(report.documentAuthoringPaneMargin).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
+      sourceHeadMatchesProduction: true,
+      beforeBelowMargin: 44,
+      liveBelowMargin: 0,
+      liveMinimumMargin: 16,
+      liveMaximumShellRatio: 2.36,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "document_authoring_pane_margin")?.productionStatus).toBe("ancestor_of_head");
     expect(report.liveCritical.findings).toBe(0);
     expect(report.liveDocumentQualityMatrix).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_MULTI_SCENARIO_DOCUMENT_QUALITY",

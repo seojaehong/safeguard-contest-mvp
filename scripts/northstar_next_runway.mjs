@@ -56,6 +56,7 @@ const ARTIFACTS = Object.freeze({
   documentsCockpitWorkbenchGeometry: path.join("evaluation", "documents-cockpit-workbench-geometry-2026-07-22", "report.json"),
   documentSectionNavigation: path.join("evaluation", "document-section-navigation-2026-08-02", "report.json"),
   documentAllAuthoringGeometry: path.join("evaluation", "document-all-authoring-geometry-2026-08-02", "after-live", "report.json"),
+  documentAuthoringPaneMargin: path.join("evaluation", "document-authoring-pane-margin-2026-08-02", "report.json"),
   documentRawDrilldownGeometry: path.join("evaluation", "document-raw-drilldown-geometry-2026-08-02", "after-live", "report.json"),
   documentsLongFormIA: path.join("evaluation", "documents-long-form-ia-2026-07-22", "report.json"),
   boundedWorkbenchDod: path.join("evaluation", "workspace-bounded-workbench-dod-2026-07-22", "report.json"),
@@ -1279,6 +1280,28 @@ function documentAllAuthoringGeometrySummary(report) {
 /**
  * @param {unknown} report
  */
+function documentAuthoringPaneMarginSummary(report) {
+  if (!isRecord(report)) return {};
+  const beforeLive = isRecord(report.beforeLive) ? report.beforeLive : {};
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    productCommit: asString(report.productCommit),
+    productionCommit: asString(report.productionCommit),
+    sourceHeadMatchesProduction: asBoolean(report.sourceHeadMatchesProduction),
+    beforeBelowMargin: typeof beforeLive.paneMarginBelow16Count === "number" ? beforeLive.paneMarginBelow16Count : null,
+    liveBelowMargin: typeof afterLive.paneMarginBelow16Count === "number" ? afterLive.paneMarginBelow16Count : null,
+    liveMinimumMargin: typeof afterLive.minimumPaneMargin === "number" ? afterLive.minimumPaneMargin : null,
+    liveMaximumShellRatio: typeof afterLive.maximumShellRatio === "number" ? afterLive.maximumShellRatio : null,
+    exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
+    routeSplitAloneAcceptedAsFix: asBoolean(remainingBoundaries.routeSplitAloneAcceptedAsFix),
+  };
+}
+
+/**
+ * @param {unknown} report
+ */
 function documentRawDrilldownGeometrySummary(report) {
   if (!isRecord(report)) return {};
   const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
@@ -1633,6 +1656,7 @@ export function buildNorthstarNextRunway(options) {
   const documentsCockpitGeometry = readOptionalJson(options.rootDir, ARTIFACTS.documentsCockpitWorkbenchGeometry);
   const documentSectionNavigation = readOptionalJson(options.rootDir, ARTIFACTS.documentSectionNavigation);
   const documentAllAuthoringGeometry = readOptionalJson(options.rootDir, ARTIFACTS.documentAllAuthoringGeometry);
+  const documentAuthoringPaneMargin = readOptionalJson(options.rootDir, ARTIFACTS.documentAuthoringPaneMargin);
   const documentRawDrilldownGeometry = readOptionalJson(options.rootDir, ARTIFACTS.documentRawDrilldownGeometry);
   const documentsIa = readJson(options.rootDir, ARTIFACTS.documentsLongFormIA);
   const boundedDod = readJson(options.rootDir, ARTIFACTS.boundedWorkbenchDod);
@@ -1793,6 +1817,7 @@ export function buildNorthstarNextRunway(options) {
     documentsCockpitWorkbenchGeometry: documentsCockpitWorkbenchGeometrySummary(documentsCockpitGeometry),
     documentSectionNavigation: documentSectionNavigationSummary(documentSectionNavigation),
     documentAllAuthoringGeometry: documentAllAuthoringGeometrySummary(documentAllAuthoringGeometry),
+    documentAuthoringPaneMargin: documentAuthoringPaneMarginSummary(documentAuthoringPaneMargin),
     documentRawDrilldownGeometry: documentRawDrilldownGeometrySummary(documentRawDrilldownGeometry),
     documentsLongFormIA: documentsLongFormIASummary(documentsIa),
     boundedWorkbenchDod: boundedWorkbenchDodSummary(boundedDod),
@@ -1927,6 +1952,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Documents cockpit workbench geometry: \`${report.documentsCockpitWorkbenchGeometry.verdict || "missing"}\`; 1440x723 and 390x723 rows must show grid workbench, 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers closed by default, 0 visible supporting launchers, the legacy document index hidden, no horizontal overflow, and route split alone remains \`false\`.
 - Documents section navigation: \`${report.documentSectionNavigation.verdict || "missing"}\`; ${report.documentSectionNavigation.pass ?? 0}/${report.documentSectionNavigation.total ?? 0} Day/Night desktop-short and mobile-short rows retain 6 tabs, exactly 1 selected tab, 44px minimum controls, readable two-line labels, shell ratio <= 3, first-action containment, no horizontal overflow, no mutation, and exact saved Share \`${report.documentSectionNavigation.exactSavedShareVerdict || "missing"}\`.
 - All-document selected-authoring geometry: \`${report.documentAllAuthoringGeometry.verdict || "missing"}\`; ${report.documentAllAuthoringGeometry.pass ?? 0}/${report.documentAllAuthoringGeometry.total ?? 0} rows cover 12 canonical documents across Day/Night desktop-short and mobile-short, with maximum shell ratio \`${report.documentAllAuthoringGeometry.maximumShellRatio ?? "missing"}\`, maximum first-action bottom \`${report.documentAllAuthoringGeometry.maximumFirstActionBottom ?? "missing"}/723\`, at most one role-specific cockpit, local cockpit scroll, hidden raw/source editors, no mutation, and exact saved Share \`${report.documentAllAuthoringGeometry.exactSavedShareVerdict || "missing"}\`.
+- Document action pane margin: \`${report.documentAuthoringPaneMargin.verdict || "missing"}\`; rows below the required 16px inner-pane margin move from ${report.documentAuthoringPaneMargin.beforeBelowMargin ?? "unknown"}/48 to ${report.documentAuthoringPaneMargin.liveBelowMargin ?? "unknown"}/48, live minimum margin is ${report.documentAuthoringPaneMargin.liveMinimumMargin ?? "unknown"}px, maximum shell ratio is ${report.documentAuthoringPaneMargin.liveMaximumShellRatio ?? "unknown"}, route split alone remains \`${report.documentAuthoringPaneMargin.routeSplitAloneAcceptedAsFix === true}\`, and exact saved Share remains \`${report.documentAuthoringPaneMargin.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Raw-source drilldown geometry: \`${report.documentRawDrilldownGeometry.verdict || "missing"}\`; ${report.documentRawDrilldownGeometry.pass ?? 0}/${report.documentRawDrilldownGeometry.total ?? 0} rows cover 12 canonical documents across Day/Night desktop-short and mobile-short, with maximum shell ratio \`${report.documentRawDrilldownGeometry.maximumShellRatio ?? "missing"}\`, maximum source bottom \`${report.documentRawDrilldownGeometry.maximumSourceBottom ?? "missing"}/723\`, maximum source editor height \`${report.documentRawDrilldownGeometry.maximumSourceClientHeight ?? "missing"}\`, local source scrolling in ${report.documentRawDrilldownGeometry.overflowAutoCount ?? 0}/${report.documentRawDrilldownGeometry.total ?? 0}, no mutation, and exact saved Share \`${report.documentRawDrilldownGeometry.exactSavedShareVerdict || "missing"}\`.
 - Documents selected editor/detail: risk-assessment default, same-document reselect, and all-12 launcher exposure land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; explicit raw/source editing remains secondary drilldown but is now live-bounded.
 - Documents remaining debt: live selected-authoring and explicit raw-source geometry are bounded, while deeper row/detail editing and broad human wording review remain separate from this layout proof.
