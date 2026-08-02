@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "safeclaw-frontend-parallel-worktree-reconciliation/v1",
+  "checkedAt": "2026-08-02T20:25:00+09:00",
+  "verdict": "PASS_NO_UNMERGED_UI_BRANCH_REQUIRES_WHOLE_BRANCH_INTEGRATION",
+  "authoritativeHead": "a26b031c0557777c540e9003f3dd8a39f236e65c",
+  "authoritativeBranch": "master",
+  "productionProductEvidenceCommit": "f53885a652f71c4315f27a7aa9476677e8c92ced",
+  "inspectedWorktrees": [
+    {
+      "branch": "feat/safeclaw-document-rail",
+      "head": "a497c5419fd28f1466725d7cdcea04bf03b2ed5a",
+      "commitDate": "2026-07-08T18:10:10+09:00",
+      "dirtyCount": 0,
+      "mergedIntoMaster": false,
+      "decision": "do_not_merge_whole_branch",
+      "reason": "The branch adds a 463-line legacy CSS override and an older command-center component rewrite. Current master already contains the document review status strip, selected-only workbench, core-3/supporting-9 exposure, and bounded raw-source editor contracts with newer live geometry evidence."
+    },
+    {
+      "branch": "feat/safeclaw-linear-shell",
+      "head": "1cd42e3aef6376a124d5bf8c99a93e471f7ec56f",
+      "commitDate": "2026-07-08T18:20:28+09:00",
+      "dirtyCount": 0,
+      "mergedIntoMaster": false,
+      "decision": "do_not_merge_whole_branch",
+      "reason": "The branch adds an 877-line near-black shell override on an obsolete component baseline. Current master preserves the step shell and viewport containment without reintroducing the branch's sticky full-height sidebar and wholesale palette rewrite."
+    },
+    {
+      "branch": "feat/safeclaw-share-workflow",
+      "head": "93fad09338662fb9a65bb3e74e6f14eaea14f44a",
+      "commitDate": "2026-07-08T18:17:03+09:00",
+      "dirtyCount": 0,
+      "mergedIntoMaster": false,
+      "decision": "do_not_merge_whole_branch",
+      "reason": "Current master already contains share-workflow-header, data-share-preview, desktop workspace three-zone geometry, standalone dispatch two-pane geometry, and mobile-only stack rules. Whole-branch integration would reapply 692 lines of stale share CSS and an older WorkflowSharePanel rewrite."
+    },
+    {
+      "branch": "fix/docs-share-viewport-ia",
+      "head": "3fc8ff1276575482caa1fecf99262bbd427597e2",
+      "commitDate": "2026-07-25T15:10:30+09:00",
+      "dirtyCount": 0,
+      "mergedIntoMaster": true,
+      "decision": "already_integrated",
+      "reason": "The branch head is an ancestor of current master."
+    },
+    {
+      "branch": "fix/frontend-final-gate-current",
+      "head": "7cb0dd5a9e4d919f933da9f78e5fc5f47d1b6926",
+      "commitDate": "2026-07-12T18:05:14+09:00",
+      "dirtyCount": 16,
+      "mergedIntoMaster": false,
+      "decision": "preserve_dirty_worktree_no_integration",
+      "reason": "The useful document preview tracking selector from commit 92eea81f is already present in current WorkpackEditor. The remaining worktree contains stale generated screenshots and unrelated dirty evidence that must not be overwritten or merged wholesale."
+    },
+    {
+      "branch": "feat/frontend-workspace-viewport-wave7",
+      "head": "7f8aac4684b34e76b32c3f3590b73383225876eb",
+      "commitDate": "2026-07-12T13:01:26+09:00",
+      "dirtyCount": 1,
+      "mergedIntoMaster": false,
+      "decision": "preserve_dirty_worktree_no_integration",
+      "reason": "Its viewport intent is superseded by current route-specific live geometry. The worktree remains dirty and its old global spacing patch should not replace the newer Documents and Share containment rules."
+    }
+  ],
+  "currentMasterContractSignals": {
+    "documentReviewStatusStripPresent": true,
+    "workspaceDocumentPagePresent": true,
+    "shareWorkflowHeaderPresent": true,
+    "sharePreviewSelectorPresent": true,
+    "documentPreviewTrackingSelectorPresent": true,
+    "rawSourceEditorSelectorPresent": true,
+    "documentsRawDrilldownLivePass": "48/48",
+    "shareDesktopScopedPassPreserved": true
+  },
+  "integrationDecision": {
+    "wholeBranchCherryPickAllowed": false,
+    "freshBehaviorLevelDiffRequired": true,
+    "reason": "The unmerged branches are old implementation snapshots, not missing current product requirements. Only a newly reproduced behavior gap may justify extracting a small patch."
+  },
+  "boundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "routeSplitAloneAcceptedAsFix": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "sourceFilesModifiedByThisAudit": false
+  }
+}
