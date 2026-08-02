@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-02T08:36:56.741Z
-Source HEAD at generation: 0697a6127bef20014910ac1991ae53da3d5fec03
-Live commit at generation: 0697a6127bef20014910ac1991ae53da3d5fec03
+Generated at: 2026-08-02T08:57:21.009Z
+Source HEAD at generation: c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56
+Live commit at generation: 6546a04912bc3fd08f28bd09037701cc113d6e0b
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -158,6 +158,7 @@ Overall: `northstar_open_approval_gated`
 | public_provider_work_budget | proven | evaluation\public-provider-work-budget-2026-08-01\report.json |
 | document_export_work_budget | proven | evaluation\document-export-work-budget-2026-08-01\report.json |
 | full_repository_security_scan | proven | evaluation\follow-up-full-repository-security-scan-2026-08-02\report.json |
+| public_search_distributed_rate_limit_readiness | notice | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
 | learning_export_renderer_security | proven | evaluation\learning-export-renderer-security-2026-08-02\report.json |
 | hermes_knowledge_review_authority | proven | evaluation\hermes-knowledge-review-contract-live-2026-07-25\report.json |
 | hermes_knowledge_review_ui | proven | evaluation\hermes-knowledge-review-authority-ui-2026-07-25\report.json |
@@ -180,7 +181,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
 | live_document_quality_matrix | ancestor | ancestor_of_head | evaluation\live-document-quality-matrix-2026-07-24\report.json |
@@ -198,7 +199,8 @@ Overall: `northstar_open_approval_gated`
 | public_provider_work_budget | ancestor | ancestor_of_head | evaluation\public-provider-work-budget-2026-08-01\report.json |
 | document_export_work_budget | ancestor | ancestor_of_head | evaluation\document-export-work-budget-2026-08-01\report.json |
 | full_repository_security_scan | ancestor | ancestor_of_head | evaluation\follow-up-full-repository-security-scan-2026-08-02\report.json |
-| learning_export_renderer_security | exact | matches_live | evaluation\learning-export-renderer-security-2026-08-02\report.json |
+| public_search_distributed_rate_limit_readiness | exact | matches_live_source_mismatch | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
+| learning_export_renderer_security | ancestor | ancestor_of_head | evaluation\learning-export-renderer-security-2026-08-02\report.json |
 | hermes_knowledge_review_ui | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-authority-ui-2026-07-25\report.json |
 | live_document_secondary_grounding | ancestor | ancestor_of_head | evaluation\live-document-secondary-grounding-2026-07-25\report.json |
 | live_document_seed_profile_isolation | ancestor | ancestor_of_head | evaluation\live-document-seed-profile-isolation-2026-07-25\report.json |

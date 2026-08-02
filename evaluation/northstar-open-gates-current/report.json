@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-02T08:36:53.285Z",
-  "sourceSha": "0697a6127bef20014910ac1991ae53da3d5fec03",
+  "generatedAt": "2026-08-02T08:57:19.902Z",
+  "sourceSha": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
   "overall": "open",
   "gates": [
     {
@@ -176,6 +176,17 @@
       "nextActions": [
         "Resolve the remaining DB/RLS findings only through separately approved migration and live-isolation work; preserve the canonical renderer candidate as deferred until a future full scan reclassifies the separately proven current-source remediation.",
         "Add a distributed public-request budget before treating the two warm-instance search mitigations as fully closed, then rerun the repository scan before any security-complete claim."
+      ]
+    },
+    {
+      "id": "public_search_distributed_rate_limit_readiness",
+      "state": "notice",
+      "label": "Public search distributed rate-limit readiness",
+      "evidencePath": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
+      "detail": "Current source has an atomic, IP-hashed, fail-closed distributed limiter capability for both public search routes, but production configuration and X-SafeClaw-Rate-Limit=distributed are not verified. The sealed two search findings remain open until deployment evidence and a future full scan; 13 DB/RLS findings remain approval-gated and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Configure both server-only Upstash REST variables through an approved production environment change.",
+        "Verify both public search routes return X-SafeClaw-Rate-Limit=distributed, then rerun the full repository scan before closing either sealed finding."
       ]
     },
     {

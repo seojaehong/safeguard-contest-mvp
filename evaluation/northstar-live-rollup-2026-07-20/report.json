@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-02T08:36:56.741Z",
-  "head": "0697a6127bef20014910ac1991ae53da3d5fec03",
+  "generatedAt": "2026-08-02T08:57:21.009Z",
+  "head": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "0697a6127bef20014910ac1991ae53da3d5fec03",
+    "commitSha": "6546a04912bc3fd08f28bd09037701cc113d6e0b",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-n9bajew7o-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-jv3y9z2q5-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 34
+    "gateCount": 35
   },
   "provenGates": [
     {
@@ -122,6 +122,12 @@
       "state": "proven",
       "artifact": "evaluation\\follow-up-full-repository-security-scan-2026-08-02\\report.json",
       "detail": "The sealed follow-up scan accounted for 5,241 tracked files and retained 17 reportable findings (5 medium, 12 low) plus one renderer-dependent candidate deferred in the immutable baseline. The companion no-DB wave bounded 2 findings and mitigated 2 public-search findings while retaining a distributed-rate residual; the later learning_export_renderer_security gate tracks the deferred candidate's current-source remediation separately. Scan completion is not a security-complete claim: coverage remains partial, remediation remains required, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "public_search_distributed_rate_limit_readiness",
+      "state": "notice",
+      "artifact": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
+      "detail": "Current source has an atomic, IP-hashed, fail-closed distributed limiter capability for both public search routes, but production configuration and X-SafeClaw-Rate-Limit=distributed are not verified. The sealed two search findings remain open until deployment evidence and a future full scan; 13 DB/RLS findings remain approval-gated and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "learning_export_renderer_security",
@@ -348,6 +354,16 @@
     "low": 12,
     "securityCompleteClaimAllowed": false,
     "distributedRateLimitResidual": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "publicSearchDistributedRateLimitReadiness": {
+    "artifact": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
+    "verdict": "PASS_CURRENT_SOURCE_DISTRIBUTED_LIMITER_CAPABILITY_LIVE_CONFIGURATION_PENDING",
+    "sourceHead": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
+    "productionCommit": "6546a04912bc3fd08f28bd09037701cc113d6e0b",
+    "productionModeVerified": false,
+    "sealedFindingsClosedWithoutRescan": false,
+    "remainingDbRlsFindings": 13,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "learningExportRendererSecurity": {
@@ -677,10 +693,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "0697a6127bef20014910ac1991ae53da3d5fec03",
+      "sourceCommit": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
       "sourceStatus": "exact",
-      "productionCommit": "0697a6127bef20014910ac1991ae53da3d5fec03",
-      "productionStatus": "matches_live"
+      "productionCommit": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -819,12 +835,20 @@
       "productionStatus": "ancestor_of_head"
     },
     {
+      "id": "public_search_distributed_rate_limit_readiness",
+      "artifact": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
+      "sourceCommit": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
+      "sourceStatus": "exact",
+      "productionCommit": "6546a04912bc3fd08f28bd09037701cc113d6e0b",
+      "productionStatus": "matches_live_source_mismatch"
+    },
+    {
       "id": "learning_export_renderer_security",
       "artifact": "evaluation\\learning-export-renderer-security-2026-08-02\\report.json",
       "sourceCommit": "0697a6127bef20014910ac1991ae53da3d5fec03",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "0697a6127bef20014910ac1991ae53da3d5fec03",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "hermes_knowledge_review_ui",

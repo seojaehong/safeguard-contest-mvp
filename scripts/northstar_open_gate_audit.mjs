@@ -48,6 +48,7 @@ const EVIDENCE_PATHS = Object.freeze({
   publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
   documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
+  publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
@@ -3466,6 +3467,82 @@ function evaluateLearningExportRendererSecurityGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.publicSearchDistributedRateLimitReadiness;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "public_search_distributed_rate_limit_readiness",
+      label: "Public search distributed rate-limit readiness",
+      state: "missing",
+      evidencePath,
+      detail: "Distributed public-search rate-limit readiness evidence is missing or invalid.",
+      nextActions: ["Restore the bounded current-source readiness report without claiming live distributed protection."],
+    });
+  }
+
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const contract = isRecord(report.currentSourceContract) ? report.currentSourceContract : {};
+  const configuration = isRecord(report.configuration) ? report.configuration : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const tests = isRecord(verification.focusedAndAdjacentTests) ? verification.focusedAndAdjacentTests : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const boundary = isRecord(report.boundary) ? report.boundary : {};
+  const pass = readString(report.verdict) === "PASS_CURRENT_SOURCE_DISTRIBUTED_LIMITER_CAPABILITY_LIVE_CONFIGURATION_PENDING"
+    && readString(report.sourceHead).length > 0
+    && productionBuild.sourceHeadMatchesProduction === false
+    && contract.atomicDistributedCounter === true
+    && contract.serverOnlyRestCredentials === true
+    && contract.httpsOnlyEndpoint === true
+    && contract.clientIdentifierSha256Hashed === true
+    && contract.rawClientIpSentToStore === false
+    && contract.partialConfigurationFailsClosed === true
+    && contract.distributedFailureFailsClosedBeforeProviderWork === true
+    && contract.instanceFallbackWhenCompletelyUnconfigured === true
+    && readString(contract.responseModeHeader) === "X-SafeClaw-Rate-Limit"
+    && readNumber(contract.providerCallsOnPartialConfiguration) === 0
+    && configuration.productionConfigured === null
+    && configuration.productionModeVerified === false
+    && readNumber(tests.files) === 6
+    && readNumber(tests.tests) === 88
+    && readNumber(tests.failed) === 0
+    && readString(verification.typecheck) === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && boundary.sealedScanMutated === false
+    && boundary.sealedFindingsClosedWithoutRescan === false
+    && boundary.distributedProtectionClaimedLive === false
+    && readNumber(boundary.remainingDbRlsFindings) === 13
+    && boundary.remainingDbRlsFindingsRequireApproval === true
+    && boundary.dbMutationPerformed === false
+    && boundary.providerDispatchCalled === false
+    && boundary.shareSessionCreated === false
+    && boundary.vectorMutationPerformed === false
+    && boundary.wikiPublicationPerformed === false
+    && boundary.koshaRegistryMutationPerformed === false
+    && readString(boundary.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+
+  return gateResult({
+    id: "public_search_distributed_rate_limit_readiness",
+    label: "Public search distributed rate-limit readiness",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Current source has an atomic, IP-hashed, fail-closed distributed limiter capability for both public search routes, but production configuration and X-SafeClaw-Rate-Limit=distributed are not verified. The sealed two search findings remain open until deployment evidence and a future full scan; 13 DB/RLS findings remain approval-gated and exact saved Share remains MISSING_EVIDENCE."
+      : `Distributed limiter verdict=${readString(report.verdict) || "unknown"}, liveVerified=${configuration.productionModeVerified === true}, tests=${readNumber(tests.tests)}, sealedClosed=${boundary.sealedFindingsClosedWithoutRescan === true}, DB/RLS=${readNumber(boundary.remainingDbRlsFindings)}, exactShare=${readString(boundary.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Configure both server-only Upstash REST variables through an approved production environment change.",
+          "Verify both public search routes return X-SafeClaw-Rate-Limit=distributed, then rerun the full repository scan before closing either sealed finding.",
+        ]
+      : ["Restore every current-source, fail-closed, verification, no-mutation, sealed-scan, and exact-Share predicate."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateShareResultFixtureCockpitGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.shareResultDrilldown;
   const report = readJsonFile(rootDir, evidencePath);
@@ -4349,6 +4426,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluatePublicProviderWorkBudgetGate(rootDir),
     evaluateDocumentExportWorkBudgetGate(rootDir),
     evaluateFullRepositorySecurityScanGate(rootDir),
+    evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir),
     evaluateLearningExportRendererSecurityGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir),

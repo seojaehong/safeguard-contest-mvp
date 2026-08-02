@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `0697a6127bef20014910ac1991ae53da3d5fec03`
+Source HEAD: `c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56`
 
-Production `/api/build-info`: `0697a6127bef20014910ac1991ae53da3d5fec03`
+Production `/api/build-info`: `6546a04912bc3fd08f28bd09037701cc113d6e0b`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
-Source head has product changes: `false`
+Source head has product changes: `true`
 
-Source pending changed paths: `none`
+Source pending changed paths: `.env.example`, `app/api/safety-reference/search/route.ts`, `app/api/search/route.ts`, `lib/public-distributed-rate-limit.ts`, `tests/public-distributed-rate-limit.test.ts`, `tests/public-search-work-budget.test.ts`
 
 Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `0697a6127bef20014910ac1991ae53da3d5fec03`
+Live rollup source head: `c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56` includes product/runtime file changes that are not live yet. Production is still `6546a04912bc3fd08f28bd09037701cc113d6e0b`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 

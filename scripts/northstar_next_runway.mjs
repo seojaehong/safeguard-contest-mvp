@@ -37,6 +37,7 @@ const ARTIFACTS = Object.freeze({
   publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
   documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
+  publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
@@ -825,6 +826,26 @@ function learningExportRendererSecuritySummary(report) {
   };
 }
 
+/** @param {unknown} report */
+function publicSearchDistributedRateLimitReadinessSummary(report) {
+  if (!isRecord(report)) return {};
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const configuration = isRecord(report.configuration) ? report.configuration : {};
+  const boundary = isRecord(report.boundary) ? report.boundary : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(productionBuild.commitSha),
+    sourceHeadMatchesProduction: asBoolean(productionBuild.sourceHeadMatchesProduction),
+    productionModeVerified: asBoolean(configuration.productionModeVerified),
+    sealedFindingsClosedWithoutRescan: asBoolean(boundary.sealedFindingsClosedWithoutRescan),
+    remainingDbRlsFindings: typeof boundary.remainingDbRlsFindings === "number"
+      ? boundary.remainingDbRlsFindings
+      : 0,
+    exactSavedShareVerdict: asString(boundary.exactSavedShareVerdict),
+  };
+}
+
 /**
  * @param {unknown} report
  */
@@ -1469,6 +1490,10 @@ export function buildNorthstarNextRunway(options) {
   const publicProviderWorkBudget = readOptionalJson(options.rootDir, ARTIFACTS.publicProviderWorkBudget);
   const documentExportWorkBudget = readOptionalJson(options.rootDir, ARTIFACTS.documentExportWorkBudget);
   const fullRepositorySecurityScan = readOptionalJson(options.rootDir, ARTIFACTS.fullRepositorySecurityScan);
+  const publicSearchDistributedRateLimitReadiness = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.publicSearchDistributedRateLimitReadiness,
+  );
   const learningExportRendererSecurity = readOptionalJson(options.rootDir, ARTIFACTS.learningExportRendererSecurity);
   const hermesKnowledgeReviewAuthorityUi = readOptionalJson(options.rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
   const liveDocumentSecondaryGrounding = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
@@ -1508,6 +1533,9 @@ export function buildNorthstarNextRunway(options) {
   const publicProviderWorkBudgetResult = publicProviderWorkBudgetSummary(publicProviderWorkBudget);
   const documentExportWorkBudgetResult = documentExportWorkBudgetSummary(documentExportWorkBudget);
   const fullRepositorySecuritySummary = fullRepositorySecurityScanSummary(fullRepositorySecurityScan);
+  const publicSearchDistributedRateLimitReadinessResult = publicSearchDistributedRateLimitReadinessSummary(
+    publicSearchDistributedRateLimitReadiness,
+  );
   const learningExportRendererSecurityResult = learningExportRendererSecuritySummary(learningExportRendererSecurity);
   const boundedDetailDepthDebtRows = Array.isArray(boundedCurrentSummary.documentDetailDepthDebts)
     ? boundedCurrentSummary.documentDetailDepthDebts.length
@@ -1570,6 +1598,11 @@ export function buildNorthstarNextRunway(options) {
         state: "notice",
         reason: "pass_with_notice with carried auth-history and dispatch-policy notices",
       },
+      {
+        gate: "public_search_distributed_rate_limit_readiness",
+        state: "notice",
+        reason: "current-source distributed limiter capability is verified, but production configuration and distributed response mode remain unverified",
+      },
     ],
     approvalGated: approvalGates(approvalRunway, shareRecipientAckApproval),
     launchReadiness: launchReadinessSummary(launch),
@@ -1617,6 +1650,7 @@ export function buildNorthstarNextRunway(options) {
     publicProviderWorkBudget: publicProviderWorkBudgetResult,
     documentExportWorkBudget: documentExportWorkBudgetResult,
     fullRepositorySecurityScan: fullRepositorySecuritySummary,
+    publicSearchDistributedRateLimitReadiness: publicSearchDistributedRateLimitReadinessResult,
     learningExportRendererSecurity: learningExportRendererSecurityResult,
     hermesKnowledgeReviewAuthorityUi: hermesKnowledgeReviewAuthorityUiSummary(hermesKnowledgeReviewAuthorityUi),
     liveDocumentSecondaryGrounding: liveDocumentSecondaryGroundingSummary(liveDocumentSecondaryGrounding),

@@ -768,6 +768,49 @@ function createFixtureRoot(): string {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"), {
+    verdict: "PASS_CURRENT_SOURCE_DISTRIBUTED_LIMITER_CAPABILITY_LIVE_CONFIGURATION_PENDING",
+    sourceHead: "fixture-sha",
+    productionBuild: {
+      commitSha: "previous-live-sha",
+      sourceHeadMatchesProduction: false,
+    },
+    currentSourceContract: {
+      atomicDistributedCounter: true,
+      serverOnlyRestCredentials: true,
+      httpsOnlyEndpoint: true,
+      clientIdentifierSha256Hashed: true,
+      rawClientIpSentToStore: false,
+      partialConfigurationFailsClosed: true,
+      distributedFailureFailsClosedBeforeProviderWork: true,
+      instanceFallbackWhenCompletelyUnconfigured: true,
+      responseModeHeader: "X-SafeClaw-Rate-Limit",
+      providerCallsOnPartialConfiguration: 0,
+    },
+    configuration: {
+      productionConfigured: null,
+      productionModeVerified: false,
+    },
+    verification: {
+      focusedAndAdjacentTests: { files: 6, tests: 88, failed: 0 },
+      typecheck: "PASS",
+      build: { status: "PASS", staticPages: 28 },
+    },
+    boundary: {
+      sealedScanMutated: false,
+      sealedFindingsClosedWithoutRescan: false,
+      distributedProtectionClaimedLive: false,
+      remainingDbRlsFindings: 13,
+      remainingDbRlsFindingsRequireApproval: true,
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "tenant-authorization-boundary-preflight-2026-07-29", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
     sourceHead: "tenant-product-sha",
@@ -2632,6 +2675,13 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "learning_export_renderer_security")?.detail).toContain("renderer-independent inert-text contract");
     expect(audit.gates.find((gate) => gate.id === "learning_export_renderer_security")?.detail).toContain("does not rewrite the sealed partial scan");
     expect(audit.gates.find((gate) => gate.id === "learning_export_renderer_security")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "public_search_distributed_rate_limit_readiness")).toMatchObject({
+      state: "notice",
+      evidencePath: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "public_search_distributed_rate_limit_readiness")?.detail).toContain("production configuration");
+    expect(audit.gates.find((gate) => gate.id === "public_search_distributed_rate_limit_readiness")?.detail).toContain("13 DB/RLS findings");
+    expect(audit.gates.find((gate) => gate.id === "public_search_distributed_rate_limit_readiness")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "tenant_authorization_remediation")).toMatchObject({ state: "proven" });
     expect(audit.gates.find((gate) => gate.id === "tenant_authorization_remediation")?.detail).toContain("2/2");
     expect(audit.gates.find((gate) => gate.id === "spreadsheet_formula_neutralization")).toMatchObject({ state: "proven" });

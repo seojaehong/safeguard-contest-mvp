@@ -190,6 +190,15 @@ type RollupReport = {
     distributedRateLimitResidual: boolean | null;
     exactSavedShareVerdict: string;
   };
+  publicSearchDistributedRateLimitReadiness: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    productionModeVerified: boolean;
+    sealedFindingsClosedWithoutRescan: boolean;
+    remainingDbRlsFindings: number | null;
+    exactSavedShareVerdict: string;
+  };
   learningExportRendererSecurity: {
     verdict: string;
     sourceHead: string;
@@ -281,6 +290,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "public_provider_work_budget", state: "proven", evidencePath: "evaluation/public-provider-work-budget-2026-08-01/report.json", detail: "four provider-budget findings remediated" },
       { id: "document_export_work_budget", state: "proven", evidencePath: "evaluation/document-export-work-budget-2026-08-01/report.json", detail: "eight export-budget findings remediated" },
       { id: "full_repository_security_scan", state: "proven", evidencePath: "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json", detail: "sealed follow-up scan with 17 reportable findings and one deferred candidate" },
+      { id: "public_search_distributed_rate_limit_readiness", state: "notice", evidencePath: "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json", detail: "current-source capability with production configuration pending" },
       { id: "learning_export_renderer_security", state: "proven", evidencePath: "evaluation/learning-export-renderer-security-2026-08-02/report.json", detail: "renderer-independent inert learning export source contract" },
       { id: "live_document_secondary_grounding", state: "proven", evidencePath: "evaluation/live-document-secondary-grounding-2026-07-25/report.json", detail: "all 30 supporting documents passed scenario grounding" },
       { id: "live_document_seed_profile_isolation", state: "proven", evidencePath: "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", detail: "all 60 documents passed seed-profile isolation" },
@@ -600,6 +610,17 @@ function createFixtureRoot(): { root: string; head: string } {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json", {
+    verdict: "PASS_CURRENT_SOURCE_DISTRIBUTED_LIMITER_CAPABILITY_LIVE_CONFIGURATION_PENDING",
+    sourceHead: "TO_FILL",
+    productionBuild: { commitSha: "TO_FILL", sourceHeadMatchesProduction: false },
+    configuration: { productionModeVerified: false },
+    boundary: {
+      sealedFindingsClosedWithoutRescan: false,
+      remainingDbRlsFindings: 13,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/learning-export-renderer-security-2026-08-02/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_RENDERER_INERT_LEARNING_EXPORT_SOURCE_CONTRACT",
     sourceHead: "TO_FILL",
@@ -839,6 +860,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/public-provider-work-budget-2026-08-01/report.json",
     "evaluation/document-export-work-budget-2026-08-01/report.json",
     "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json",
+    "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json",
     "evaluation/learning-export-renderer-security-2026-08-02/report.json",
     "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
@@ -1056,6 +1078,14 @@ describe("northstar live rollup", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.evidence.find((item) => item.id === "full_repository_security_scan")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.publicSearchDistributedRateLimitReadiness).toMatchObject({
+      verdict: "PASS_CURRENT_SOURCE_DISTRIBUTED_LIMITER_CAPABILITY_LIVE_CONFIGURATION_PENDING",
+      productionModeVerified: false,
+      sealedFindingsClosedWithoutRescan: false,
+      remainingDbRlsFindings: 13,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "public_search_distributed_rate_limit_readiness")?.sourceStatus).toBe("ancestor");
     expect(report.learningExportRendererSecurity).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_RENDERER_INERT_LEARNING_EXPORT_SOURCE_CONTRACT",
       currentSourceDisposition: "bounded_renderer_independent_inert_text_contract",

@@ -254,6 +254,16 @@ type NextRunwayReport = {
     distributedRateLimitResidual: boolean;
     exactSavedShareVerdict: string;
   };
+  publicSearchDistributedRateLimitReadiness: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    sourceHeadMatchesProduction: boolean;
+    productionModeVerified: boolean;
+    sealedFindingsClosedWithoutRescan: boolean;
+    remainingDbRlsFindings: number;
+    exactSavedShareVerdict: string;
+  };
   learningExportRendererSecurity: {
     verdict: string;
     sourceHead: string;
@@ -1070,6 +1080,17 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       securityCompleteClaimAllowed: false,
       remediationRequired: true,
       distributedRateLimitResidual: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
+  writeJson(root, "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json", {
+    verdict: "PASS_CURRENT_SOURCE_DISTRIBUTED_LIMITER_CAPABILITY_LIVE_CONFIGURATION_PENDING",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "previous-live-sha", sourceHeadMatchesProduction: false },
+    configuration: { productionModeVerified: false },
+    boundary: {
+      sealedFindingsClosedWithoutRescan: false,
+      remainingDbRlsFindings: 13,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
@@ -1897,6 +1918,20 @@ describe("northstar next runway generator", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.provenCurrentState).toContain("full_repository_security_scan");
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "public_search_distributed_rate_limit_readiness",
+      state: "notice",
+    }));
+    expect(report.publicSearchDistributedRateLimitReadiness).toMatchObject({
+      verdict: "PASS_CURRENT_SOURCE_DISTRIBUTED_LIMITER_CAPABILITY_LIVE_CONFIGURATION_PENDING",
+      sourceHead: "fixture-sha",
+      productionCommit: "previous-live-sha",
+      sourceHeadMatchesProduction: false,
+      productionModeVerified: false,
+      sealedFindingsClosedWithoutRescan: false,
+      remainingDbRlsFindings: 13,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
     expect(report.provenCurrentState).toContain("learning_export_renderer_security");
     expect(report.learningExportRendererSecurity).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_RENDERER_INERT_LEARNING_EXPORT_SOURCE_CONTRACT",

@@ -33,6 +33,7 @@ const ARTIFACTS = Object.freeze({
   publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
   documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
+  publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
@@ -331,6 +332,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const publicProviderWorkBudget = tryReadJson(rootDir, ARTIFACTS.publicProviderWorkBudget);
   const documentExportWorkBudget = tryReadJson(rootDir, ARTIFACTS.documentExportWorkBudget);
   const fullRepositorySecurityScan = tryReadJson(rootDir, ARTIFACTS.fullRepositorySecurityScan);
+  const publicSearchDistributedRateLimitReadiness = tryReadJson(rootDir, ARTIFACTS.publicSearchDistributedRateLimitReadiness);
   const learningExportRendererSecurity = tryReadJson(rootDir, ARTIFACTS.learningExportRendererSecurity);
   const hermesKnowledgeReviewAuthorityUi = tryReadJson(rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
   const liveDocumentSecondaryGrounding = tryReadJson(rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
@@ -419,6 +421,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_work_budget", ARTIFACTS.publicProviderWorkBudget, publicProviderWorkBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "document_export_work_budget", ARTIFACTS.documentExportWorkBudget, documentExportWorkBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "full_repository_security_scan", ARTIFACTS.fullRepositorySecurityScan, fullRepositorySecurityScan),
+    evidenceStatus(rootDir, currentHead, liveCommit, "public_search_distributed_rate_limit_readiness", ARTIFACTS.publicSearchDistributedRateLimitReadiness, publicSearchDistributedRateLimitReadiness),
     evidenceStatus(rootDir, currentHead, liveCommit, "learning_export_renderer_security", ARTIFACTS.learningExportRendererSecurity, learningExportRendererSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_knowledge_review_ui", ARTIFACTS.hermesKnowledgeReviewAuthorityUi, hermesKnowledgeReviewAuthorityUi),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_secondary_grounding", ARTIFACTS.liveDocumentSecondaryGrounding, liveDocumentSecondaryGrounding),
@@ -558,6 +561,23 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
         && isRecord(fullRepositorySecurityScan.remainingBoundaries)
         ? asString(fullRepositorySecurityScan.remainingBoundaries.exactSavedShareVerdict)
         : "",
+    },
+    publicSearchDistributedRateLimitReadiness: {
+      artifact: ARTIFACTS.publicSearchDistributedRateLimitReadiness,
+      verdict: isRecord(publicSearchDistributedRateLimitReadiness)
+        ? asString(publicSearchDistributedRateLimitReadiness.verdict)
+        : "missing",
+      sourceHead: isRecord(publicSearchDistributedRateLimitReadiness)
+        ? asString(publicSearchDistributedRateLimitReadiness.sourceHead)
+        : "",
+      productionCommit: isRecord(publicSearchDistributedRateLimitReadiness)
+        && isRecord(publicSearchDistributedRateLimitReadiness.productionBuild)
+        ? asString(publicSearchDistributedRateLimitReadiness.productionBuild.commitSha)
+        : "",
+      productionModeVerified: recordAt(publicSearchDistributedRateLimitReadiness, "configuration")?.productionModeVerified === true,
+      sealedFindingsClosedWithoutRescan: recordAt(publicSearchDistributedRateLimitReadiness, "boundary")?.sealedFindingsClosedWithoutRescan === true,
+      remainingDbRlsFindings: asNumber(recordAt(publicSearchDistributedRateLimitReadiness, "boundary")?.remainingDbRlsFindings),
+      exactSavedShareVerdict: asString(recordAt(publicSearchDistributedRateLimitReadiness, "boundary")?.exactSavedShareVerdict),
     },
     learningExportRendererSecurity: {
       artifact: ARTIFACTS.learningExportRendererSecurity,

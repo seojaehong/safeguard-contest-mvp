@@ -1,0 +1,91 @@
+{
+  "schema": "safeclaw-public-search-distributed-rate-limit-readiness/v1",
+  "generatedAt": "2026-08-02T08:50:07.2385073Z",
+  "verdict": "PASS_CURRENT_SOURCE_DISTRIBUTED_LIMITER_CAPABILITY_LIVE_CONFIGURATION_PENDING",
+  "sourceHead": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
+  "productionBuild": {
+    "commitSha": "6546a04912bc3fd08f28bd09037701cc113d6e0b",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-jv3y9z2q5-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": false
+  },
+  "scope": {
+    "routes": [
+      "/api/search",
+      "/api/safety-reference/search"
+    ],
+    "sealedScanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
+    "sealedFindings": [
+      {
+        "findingId": "csf_e45a58b22598698e0bf4de16",
+        "title": "Public legal search can amplify unbounded provider work"
+      },
+      {
+        "findingId": "csf_249dcc0898d9d68ffe436ac9",
+        "title": "Public safety-reference search lacks request work budgets"
+      }
+    ]
+  },
+  "currentSourceContract": {
+    "atomicDistributedCounter": true,
+    "serverOnlyRestCredentials": true,
+    "httpsOnlyEndpoint": true,
+    "clientIdentifierSha256Hashed": true,
+    "rawClientIpSentToStore": false,
+    "partialConfigurationFailsClosed": true,
+    "distributedFailureFailsClosedBeforeProviderWork": true,
+    "distributedLimitResponseStatus": 429,
+    "distributedUnavailableResponseStatus": 503,
+    "instanceFallbackWhenCompletelyUnconfigured": true,
+    "responseModeHeader": "X-SafeClaw-Rate-Limit",
+    "configuredModeHeaderValue": "distributed",
+    "unconfiguredModeHeaderValue": "instance",
+    "providerCallsOnPartialConfiguration": 0
+  },
+  "configuration": {
+    "requiredVariables": [
+      "UPSTASH_REDIS_REST_URL",
+      "UPSTASH_REDIS_REST_TOKEN"
+    ],
+    "productionConfigured": null,
+    "productionModeVerified": false,
+    "officialProtocolReference": "https://upstash.com/docs/redis/features/restapi"
+  },
+  "verification": {
+    "focusedAndAdjacentTests": {
+      "files": 6,
+      "tests": 88,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "diffCheck": "PASS",
+    "secretScan": "PASS"
+  },
+  "boundary": {
+    "sealedScanMutated": false,
+    "sealedFindingsClosedWithoutRescan": false,
+    "distributedProtectionClaimedLive": false,
+    "remainingDbRlsFindings": 13,
+    "remainingDbRlsFindingsRequireApproval": true,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "nextActions": [
+    "Configure both Upstash REST variables in the production environment through an approved operator change.",
+    "After deployment, probe both routes and require X-SafeClaw-Rate-Limit=distributed without invoking sustained load.",
+    "Rerun the full repository security scan before changing either sealed finding to remediated or claiming security completion.",
+    "Keep the remaining 13 DB/RLS findings approval-gated until an approved migration and live tenant-isolation verification exist."
+  ]
+}
