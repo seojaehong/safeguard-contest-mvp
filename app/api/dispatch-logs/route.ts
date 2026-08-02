@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient, ensureWorkspaceContext, getWorkspaceUser, toJson } from "@/lib/supabase-admin";
 import { isRecord, parseScenarioContext, readString } from "@/lib/workspace-api";
+import { dispatchLogRowId, isDispatchLogReplayError } from "@/lib/dispatch-log-idempotency";
 
 export const dynamic = "force-dynamic";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const DISPATCH_LOG_IDEMPOTENCY_PATTERN = /^dispatch-v1-[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}-[0-9a-f]{8}$/i;
+const MAX_DISPATCH_LOGS_PER_REQUEST = 100;
 
 type DispatchLogDraft = {
   channel: string;
@@ -192,6 +194,15 @@ export async function POST(request: NextRequest) {
   if (!logs.length) {
     return NextResponse.json({ ok: false, configured: true, savedCount: 0, message: "저장할 전파 이력이 없습니다." }, { status: 400 });
   }
+  if (logs.length > MAX_DISPATCH_LOGS_PER_REQUEST) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      savedCount: 0,
+      code: "dispatch_log_batch_too_large",
+      message: "한 번에 저장할 수 있는 전파 이력 수를 초과했습니다.",
+    }, { status: 413 });
+  }
   if (!DISPATCH_LOG_IDEMPOTENCY_PATTERN.test(idempotencyKey)) {
     return NextResponse.json({
       ok: false,
@@ -246,7 +257,13 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const rows = logs.map((log) => ({
+  const rows = logs.map((log, rowIndex) => ({
+    id: dispatchLogRowId({
+      organizationId: context.organizationId,
+      siteId: context.siteId,
+      idempotencyKey,
+      rowIndex,
+    }),
     organization_id: context.organizationId,
     site_id: context.siteId,
     workpack_id: workpackId,
@@ -267,6 +284,15 @@ export async function POST(request: NextRequest) {
   const { error } = await client.from("dispatch_logs").insert(rows);
 
   if (error) {
+    if (isDispatchLogReplayError(error)) {
+      return NextResponse.json({
+        ok: false,
+        configured: true,
+        savedCount: 0,
+        code: "dispatch_log_idempotency_key_reused",
+        message: "이미 처리된 전파 이력 저장 요청입니다.",
+      }, { status: 409 });
+    }
     console.error("dispatch logs save failed", error);
     return NextResponse.json({ ok: false, configured: true, savedCount: 0, message: "전파 이력 저장에 실패했습니다." }, { status: 500 });
   }

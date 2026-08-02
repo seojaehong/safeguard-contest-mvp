@@ -1,0 +1,6 @@
+export const MCP_GENERATION_QUESTION_MAX_CHARS = 4_000;
+export const MCP_TASK_MAX_CHARS = 256;
+export const MCP_REGION_MAX_CHARS = 120;
+export const MCP_DOCUMENT_TEXT_MAX_CHARS = 20_000;
+export const MCP_SEARCH_QUERY_MAX_CHARS = 1_000;
+export const MCP_DOC_TYPE_MAX_CHARS = 128;

@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { dispatchLogRowId } from "@/lib/dispatch-log-idempotency";
 
 const mocks = vi.hoisted(() => ({
   createSupabaseAdminClient: vi.fn(),
@@ -43,7 +44,10 @@ function jsonRequest(workpackId?: string): NextRequest {
   });
 }
 
-function fakeClient(workpackLookup: WorkpackLookup) {
+function fakeClient(
+  workpackLookup: WorkpackLookup,
+  dispatchInsertError: { code: string; message: string } | null = null,
+) {
   let insertPayload: unknown = null;
   let workpackLookupCount = 0;
   const workpackFilters: Array<[string, unknown]> = [];
@@ -67,7 +71,7 @@ function fakeClient(workpackLookup: WorkpackLookup) {
           return {
             insert: async (payload: unknown) => {
               insertPayload = payload;
-              return { error: null };
+              return { error: dispatchInsertError };
             },
           };
         }
@@ -186,11 +190,45 @@ describe("dispatch log tenant boundary", () => {
     ]);
     expect(fake.insertPayload()).toEqual([
       expect.objectContaining({
+        id: dispatchLogRowId({
+          organizationId: "org-1",
+          siteId: "site-1",
+          idempotencyKey: DISPATCH_LOG_IDEMPOTENCY_KEY,
+          rowIndex: 0,
+        }),
         organization_id: "org-1",
         site_id: "site-1",
         workpack_id: OWNED_WORKPACK_ID,
         payload: expect.objectContaining({
           idempotencyKey: DISPATCH_LOG_IDEMPOTENCY_KEY,
+        }),
+      }),
+    ]);
+  });
+
+  it("fails closed on a deterministic primary-key replay", async () => {
+    const fake = fakeClient(
+      { data: { id: OWNED_WORKPACK_ID, organization_id: "org-1", site_id: "site-1" }, error: null },
+      { code: "23505", message: "duplicate key value violates unique constraint" },
+    );
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    const { POST } = await import("@/app/api/dispatch-logs/route");
+
+    const response = await POST(jsonRequest(OWNED_WORKPACK_ID));
+    const body = await response.json() as { code?: string; savedCount?: number };
+
+    expect(response.status).toBe(409);
+    expect(body).toMatchObject({
+      code: "dispatch_log_idempotency_key_reused",
+      savedCount: 0,
+    });
+    expect(fake.insertPayload()).toEqual([
+      expect.objectContaining({
+        id: dispatchLogRowId({
+          organizationId: "org-1",
+          siteId: "site-1",
+          idempotencyKey: DISPATCH_LOG_IDEMPOTENCY_KEY,
+          rowIndex: 0,
         }),
       }),
     ]);
