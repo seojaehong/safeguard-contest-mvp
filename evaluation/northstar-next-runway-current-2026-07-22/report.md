@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `b8c88b6d8543ea38e8c5570c20425485dd52f057`
+Source HEAD: `649b13bf97ed6324f90f76b80a5ffb9908db5292`
 
-Production `/api/build-info`: `006090ff588e6423917ad8b0b8bf00db35e7414f`
+Production `/api/build-info`: `649b13bf97ed6324f90f76b80a5ffb9908db5292`
 
-Latest evidence commit live: `false`
+Latest evidence commit live: `true`
 
-Source head live pending: `true`
+Source head live pending: `false`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/document-all-authoring-geometry-2026-08-02/after-live/day-desktop-short-1440x723-foreignWorkerBriefing.png`, `evaluation/document-all-authoring-geometry-2026-08-02/after-live/day-desktop-short-1440x723-workpackSummaryDraft.png`, `evaluation/document-all-authoring-geometry-2026-08-02/after-live/day-mobile-short-390x723-foreignWorkerBriefing.png`, `evaluation/document-all-authoring-geometry-2026-08-02/after-live/day-mobile-short-390x723-workpackSummaryDraft.png`, `evaluation/document-all-authoring-geometry-2026-08-02/after-live/night-desktop-short-1440x723-foreignWorkerBriefing.png`, `evaluation/document-all-authoring-geometry-2026-08-02/after-live/night-desktop-short-1440x723-workpackSummaryDraft.png`, `evaluation/document-all-authoring-geometry-2026-08-02/after-live/night-mobile-short-390x723-foreignWorkerBriefing.png`, `evaluation/document-all-authoring-geometry-2026-08-02/after-live/night-mobile-short-390x723-workpackSummaryDraft.png`, `evaluation/document-all-authoring-geometry-2026-08-02/after-live/report.json`, `evaluation/document-all-authoring-geometry-2026-08-02/after-live/report.md`, `evaluation/document-all-authoring-geometry-2026-08-02/report.json`, `evaluation/document-all-authoring-geometry-2026-08-02/report.md`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
+Source pending changed paths: `none`
 
-Current head is evidence-only pending: `true`
+Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `b8c88b6d8543ea38e8c5570c20425485dd52f057`
+Live rollup source head: `649b13bf97ed6324f90f76b80a5ffb9908db5292`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `b8c88b6d8543ea38e8c5570c20425485dd52f057` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `006090ff588e6423917ad8b0b8bf00db35e7414f`, and the live rollup remains exact for that deployed marker.
+Note: source HEAD and production marker match for this artifact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
