@@ -4106,6 +4106,8 @@ export function WorkpackEditor({
                   >
                     {structuredDocument.body.map((section, index) => {
                       const selectedSection = section.id === activeStructuredSection.id;
+                      const sectionLineCount = section.value.split(/\r?\n/u).filter((line) => line.trim().length > 0).length;
+                      const sectionState = sectionLineCount > 0 ? "filled" : "empty";
                       return (
                         <button
                           key={section.id}
@@ -4114,6 +4116,8 @@ export function WorkpackEditor({
                           role="tab"
                           aria-selected={selectedSection}
                           aria-controls={`document-section-panel-${selected.key}`}
+                          aria-label={`${section.label}, ${sectionLineCount > 0 ? `${sectionLineCount.toLocaleString("ko-KR")}줄 작성됨` : "내용 없음"}`}
+                          data-section-state={sectionState}
                           data-testid="document-section-tab"
                           onClick={() => setExpandedStructuredSectionId(section.id)}
                           onKeyDown={(event) => {

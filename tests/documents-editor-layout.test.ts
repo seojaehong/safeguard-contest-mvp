@@ -452,6 +452,7 @@ describe("documents editor layout", () => {
         const sectionDetails = document.querySelectorAll('[data-testid="document-section-detail"]');
         const sectionTextareas = document.querySelectorAll(".document-section-textarea");
         if (!shell || !actions || !sectionIndex) throw new Error("Selected section cockpit is unavailable");
+        const sectionTabs = Array.from(sectionIndex.querySelectorAll<HTMLButtonElement>('[data-testid="document-section-tab"]'));
         return {
           viewportHeight: window.innerHeight,
           shellBottom: Math.round(shell.getBoundingClientRect().bottom),
@@ -461,6 +462,14 @@ describe("documents editor layout", () => {
           sectionIndexScrollWidth: sectionIndex.scrollWidth,
           sectionDetailCount: sectionDetails.length,
           sectionTextareaCount: sectionTextareas.length,
+          sectionTabCount: sectionTabs.length,
+          selectedSectionTabCount: sectionTabs.filter((tab) => tab.getAttribute("aria-selected") === "true").length,
+          filledSectionTabCount: sectionTabs.filter((tab) => tab.dataset.sectionState === "filled").length,
+          emptySectionTabCount: sectionTabs.filter((tab) => tab.dataset.sectionState === "empty").length,
+          sectionTabLabels: sectionTabs.map((tab) => tab.getAttribute("aria-label")),
+          sectionTabHeights: sectionTabs.map((tab) => Math.round(tab.getBoundingClientRect().height)),
+          selectedSectionTabBoxShadow: getComputedStyle(sectionTabs.find((tab) => tab.getAttribute("aria-selected") === "true")!).boxShadow,
+          sectionLabelWhiteSpace: getComputedStyle(sectionTabs[0].querySelector("strong")!).whiteSpace,
           horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth
         };
       });
@@ -473,6 +482,14 @@ describe("documents editor layout", () => {
       }
       expect(metrics.sectionDetailCount).toBe(1);
       expect(metrics.sectionTextareaCount).toBe(1);
+      expect(metrics.sectionTabCount).toBe(6);
+      expect(metrics.selectedSectionTabCount).toBe(1);
+      expect(metrics.filledSectionTabCount).toBe(6);
+      expect(metrics.emptySectionTabCount).toBe(0);
+      expect(metrics.sectionTabLabels.every((label) => label?.includes("줄 작성됨"))).toBe(true);
+      expect(metrics.sectionTabHeights.every((height) => height >= 44)).toBe(true);
+      expect(metrics.selectedSectionTabBoxShadow).not.toBe("none");
+      expect(metrics.sectionLabelWhiteSpace).toBe("normal");
       expect(metrics.horizontalOverflow).toBe(false);
       await page.close();
     }

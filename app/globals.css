@@ -5554,6 +5554,21 @@ ul {
   }
 }
 
+/* Documents section navigation is a status rail, not a command button row.
+   Keep inactive sections neutral and reserve the accent for the selected tab. */
+.safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="document-section-index"] button {
+  border-color: var(--workspace-rule);
+  background: var(--workspace-surface-1);
+  color: var(--workspace-muted);
+}
+
+.safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="document-section-index"] button[aria-selected="true"] {
+  border-color: color-mix(in srgb, var(--workspace-accent) 52%, var(--workspace-rule));
+  background: color-mix(in srgb, var(--workspace-accent) 8%, var(--workspace-surface-1));
+  box-shadow: inset 0 -3px 0 var(--workspace-accent);
+  color: var(--workspace-ink);
+}
+
 .document-editor {
   display: grid;
   gap: 16px;
@@ -20850,14 +20865,17 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="document-section-index"] button {
     flex: 1 0 112px;
-    min-height: 36px;
+    min-height: 44px;
     padding: 4px 7px;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="document-section-index"] button strong {
+    display: -webkit-box;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    white-space: normal;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-secondary-tools"] {
@@ -22294,14 +22312,17 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="document-section-index"] button {
     flex: 0 0 118px;
-    min-height: 36px;
+    min-height: 44px;
     padding: 4px 7px;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="document-section-index"] button strong {
+    display: -webkit-box;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    white-space: normal;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="document-section-accordion"] > summary {

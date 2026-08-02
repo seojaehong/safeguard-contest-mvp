@@ -722,14 +722,14 @@
 
 .documentSectionIndex button {
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr);
+  grid-template-columns: 24px minmax(0, 1fr) 8px;
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
-  min-height: 40px;
-  border: 1px solid transparent;
+  min-height: 44px;
+  border: 1px solid var(--workspace-rule);
   border-radius: var(--radius-control);
-  background: transparent;
+  background: var(--workspace-surface-1);
   color: var(--workspace-muted);
   padding: 5px 8px;
   text-align: left;
@@ -744,9 +744,24 @@
 }
 
 .documentSectionIndex button[aria-selected="true"] {
-  border-color: var(--workspace-rule-strong);
-  background: var(--workspace-surface-2);
+  border-color: color-mix(in srgb, var(--workspace-accent) 52%, var(--workspace-rule));
+  background: color-mix(in srgb, var(--workspace-accent) 8%, var(--workspace-surface-1));
+  box-shadow: inset 0 -3px 0 var(--workspace-accent);
   color: var(--workspace-ink);
+}
+
+.documentSectionIndex button::after {
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--workspace-rule-strong);
+  border-radius: 50%;
+  background: transparent;
+  content: "";
+}
+
+.documentSectionIndex button[data-section-state="filled"]::after {
+  border-color: var(--workspace-success);
+  background: var(--workspace-success);
 }
 
 .documentSectionIndex button span,
@@ -759,12 +774,14 @@
 }
 
 .documentSectionIndex button strong {
+  display: -webkit-box;
   overflow: hidden;
   font-size: var(--text-caption);
   font-weight: 700;
   line-height: var(--leading-caption);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .documentSection {
@@ -1520,7 +1537,7 @@
   }
 
   .documentSectionIndex button {
-    min-height: 36px;
+    min-height: 44px;
   }
 
   .documentSectionHeading {
