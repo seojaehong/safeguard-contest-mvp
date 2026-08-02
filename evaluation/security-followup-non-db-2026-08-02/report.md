@@ -1,6 +1,6 @@
 # Non-DB Security Follow-up
 
-Verdict: `PASS_CURRENT_SOURCE_NON_DB_SECURITY_FOLLOWUP_LIVE_PENDING_WITH_DISTRIBUTED_RATE_BOUNDARY`
+Verdict: `PASS_LIVE_PRODUCTION_PUBLIC_QUERY_BUDGETS_CURRENT_SOURCE_MCP_DISPATCH_WITH_DISTRIBUTED_RATE_BOUNDARY`
 
 ## Scope
 
@@ -23,7 +23,8 @@ Current source `d6d42024` adds:
 
 ## Live Boundary
 
-Production still reports `f0c8a7be`, so live-after-deployment verification is pending. The two public-search rate limiters are explicit warm-instance guards, not distributed quotas; those findings are mitigated but must retain that residual until a durable edge or shared limiter is proven.
+Production reports product commit `d6d42024`. Read-only probes confirmed HTTP 413 with `PUBLIC_WORK_BUDGET_EXCEEDED` for an oversized legal query, oversized safety-reference query, and oversized safety-reference filter. Authenticated MCP invocation and dispatch-log POST were not executed, so those two controls remain source-deployed evidence without an auth or DB mutation claim.
+
+The two public-search rate limiters are explicit warm-instance guards, not distributed quotas; those findings are mitigated but must retain that residual until a durable edge or shared limiter is proven.
 
 No DB, provider, share-session, vector, wiki, or KOSHA registry mutation was performed. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`. The 13 database/RLS or renderer-bound findings remain outside this no-approval wave.
-

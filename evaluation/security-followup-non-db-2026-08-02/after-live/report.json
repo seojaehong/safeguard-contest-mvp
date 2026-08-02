@@ -1,0 +1,52 @@
+{
+  "schema": "safeclaw-security-followup-non-db-live/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_QUERY_BUDGETS_CURRENT_SOURCE_MCP_DISPATCH_WITH_DISTRIBUTED_RATE_BOUNDARY",
+  "checkedAt": "2026-08-02T17:01:30+09:00",
+  "sourceHead": "d6d42024c8b07f0d9159666a0e8f2f9213709d21",
+  "productionBuild": {
+    "commitSha": "d6d42024c8b07f0d9159666a0e8f2f9213709d21",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-k6bnhi2gu-seojaehongs-projects.vercel.app"
+  },
+  "readOnlyLiveChecks": [
+    {
+      "name": "legalOversized",
+      "path": "/api/search",
+      "status": 413,
+      "code": "PUBLIC_WORK_BUDGET_EXCEEDED",
+      "limit": 240
+    },
+    {
+      "name": "safetyOversized",
+      "path": "/api/safety-reference/search",
+      "status": 413,
+      "code": "PUBLIC_WORK_BUDGET_EXCEEDED",
+      "limit": 500
+    },
+    {
+      "name": "safetyFilterOversized",
+      "path": "/api/safety-reference/search",
+      "status": 413,
+      "code": "PUBLIC_WORK_BUDGET_EXCEEDED",
+      "limit": 128
+    }
+  ],
+  "notExecuted": {
+    "mcpAuthenticatedInvocation": true,
+    "dispatchLogPost": true,
+    "distributedRateFlood": true
+  },
+  "boundaries": {
+    "distributedRateLimitResidual": true,
+    "databaseOrRlsFindingsUntouched": 13,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "providerDispatchPerformed": false,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "vectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  }
+}
+
