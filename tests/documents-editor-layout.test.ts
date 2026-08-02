@@ -1913,14 +1913,8 @@ describe("documents editor layout", () => {
       {
         key: "foreignWorkerBriefing",
         title: "외국인 근로자 출력본",
-        cockpitTestId: "transmission-document-cockpit",
-        requiredText: ["전송 cockpit", "언어 대상", "전송 전 확인", "미리보기 핵심"]
-      },
-      {
-        key: "foreignWorkerBriefing",
-        title: "외국인 근로자 출력본",
         cockpitTestId: "education-document-cockpit",
-        requiredText: ["교육 진행 cockpit", "교육 내용", "이해 확인", "TBM 연계"]
+        requiredText: ["교육 진행 cockpit", "언어 대상", "쉬운 한국어", "통역/관리자 확인", "이해 확인", "TBM 연계"]
       },
       {
         key: "foreignWorkerTransmission",
@@ -1953,6 +1947,16 @@ describe("documents editor layout", () => {
         const cockpitRect = cockpit.getBoundingClientRect();
         return cockpitRect.top >= toolbarRect.bottom - 1 && cockpitRect.bottom < shellRect.bottom;
       }, item.cockpitTestId);
+      await expect.poll(async () => page.locator('[data-testid$="-document-cockpit"]:visible').count()).toBe(1);
+      const cockpitContainment = await page.getByTestId(item.cockpitTestId).evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          maxHeight: Number.parseFloat(style.maxHeight),
+          overflowY: style.overflowY
+        };
+      });
+      expect(cockpitContainment.maxHeight).toBeLessThanOrEqual(260);
+      expect(cockpitContainment.overflowY).toBe("auto");
       await page.waitForFunction((cockpitTestId) => {
         const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
         const toolbar = document.querySelector<HTMLElement>(".document-toolbar");

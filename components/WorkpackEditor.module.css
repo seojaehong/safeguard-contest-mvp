@@ -333,6 +333,10 @@
   display: grid;
   gap: var(--space-3);
   min-width: 0;
+  max-height: 260px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
   border: 1px solid var(--workspace-rule-strong);
   border-radius: var(--radius-soft);
   background: var(--workspace-surface-1);

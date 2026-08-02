@@ -397,7 +397,7 @@ function isPhotoEvidenceDocumentKey(key: DocumentKey) {
 }
 
 function isTransmissionDocumentKey(key: DocumentKey) {
-  return key === "foreignWorkerBriefing" || key === "foreignWorkerTransmission" || key === "kakaoMessage";
+  return key === "foreignWorkerTransmission" || key === "kakaoMessage";
 }
 
 function compactList(items: readonly string[], fallback: string, limit: number) {
@@ -589,6 +589,11 @@ function EducationDocumentCockpit({ data, documentKey }: { data: AskResponse; do
   const understandingCheck = education?.understandingCheck || "질문 · 복창 · 서명으로 이해 여부 확인";
   const tbmLink = education?.tbmLink || compactList(data.deliverables.tbmQuestions, "TBM에서 작업중지 기준을 다시 확인", 1)[0];
   const isForeignBriefing = documentKey === "foreignWorkerBriefing";
+  const briefingLanguages = compactList(
+    data.deliverables.foreignWorkerLanguages.map((language) => `${language.label} / ${language.nativeLabel}`),
+    "쉬운 한국어",
+    2
+  );
 
   return (
     <section className={styles.tbmCockpit} data-density={isForeignBriefing ? "compact" : undefined} data-testid="education-document-cockpit" aria-label="교육 진행 요약">
@@ -597,13 +602,25 @@ function EducationDocumentCockpit({ data, documentKey }: { data: AskResponse; do
           <span className="eyebrow">교육 진행 cockpit</span>
           <strong>{education?.educationName || "교육 대상과 이해확인"}</strong>
         </div>
-        <span>{data.scenario.workerCount.toLocaleString("ko-KR")}명 · {education?.type || "작업 전 교육"}</span>
+        <span>
+          {isForeignBriefing
+            ? `${briefingLanguages.length.toLocaleString("ko-KR")}개 언어 · 채택본 확인`
+            : `${data.scenario.workerCount.toLocaleString("ko-KR")}명 · ${education?.type || "작업 전 교육"}`}
+        </span>
       </div>
       <div className={styles.tbmCockpitGrid}>
         <article>
-          <b>교육 대상</b>
-          <strong>{education?.target || `${data.scenario.workerCount.toLocaleString("ko-KR")}명 현장 작업자`}</strong>
-          <small>{education?.location || data.scenario.siteName}</small>
+          <b>{isForeignBriefing ? "언어 대상" : "교육 대상"}</b>
+          <strong>
+            {isForeignBriefing
+              ? briefingLanguages.join(" · ")
+              : education?.target || `${data.scenario.workerCount.toLocaleString("ko-KR")}명 현장 작업자`}
+          </strong>
+          <small>
+            {isForeignBriefing
+              ? "쉬운 한국어와 번역본 대조 · 통역/관리자 확인"
+              : education?.location || data.scenario.siteName}
+          </small>
         </article>
         <article>
           <b>이해 확인</b>
@@ -769,23 +786,22 @@ function PhotoEvidenceDocumentCockpit({ data, documentKey }: { data: AskResponse
 
 function TransmissionDocumentCockpit({ data, documentKey }: { data: AskResponse; documentKey: DocumentKey }) {
   if (!isTransmissionDocumentKey(documentKey)) return null;
-  const isForeignWorkerDocument = documentKey === "foreignWorkerBriefing" || documentKey === "foreignWorkerTransmission";
-  const isForeignBriefing = documentKey === "foreignWorkerBriefing";
+  const isForeignWorkerDocument = documentKey === "foreignWorkerTransmission";
   const languages = compactList(
     data.deliverables.foreignWorkerLanguages.map((language) => `${language.label} / ${language.nativeLabel}`),
     "쉬운 한국어",
     2
   );
-  const sourceMessage = isForeignBriefing
-    ? data.deliverables.foreignWorkerBriefing
-    : documentKey === "foreignWorkerTransmission" ? data.deliverables.foreignWorkerTransmission : data.deliverables.kakaoMessage;
+  const sourceMessage = documentKey === "foreignWorkerTransmission"
+    ? data.deliverables.foreignWorkerTransmission
+    : data.deliverables.kakaoMessage;
   const messageLines = compactList(
     sourceMessage.split(/\r?\n/u),
     data.riskSummary.topRisk,
     2
   );
   const channelFlow = isForeignWorkerDocument
-    ? [isForeignBriefing ? "쉬운 한국어와 번역본 대조" : "대상 언어 확인", isForeignBriefing ? "출력 전 그림·문장 길이 확인" : "짧은 전송본 복사"]
+    ? ["대상 언어 확인", "짧은 전송본 복사"]
     : ["단체방 붙여넣기", "TBM에서 다시 읽기"];
 
   return (

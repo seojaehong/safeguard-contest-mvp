@@ -1,0 +1,1446 @@
+{
+  "schemaVersion": "safeclaw-document-all-authoring-geometry/v1",
+  "checkedAt": "2026-08-02T09:55:57.490Z",
+  "mode": "live-production",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceHead": "e4de2f86a67abcc75d9e235a5f467750d5d2805a",
+  "productionBuild": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "e4de2f86a67abcc75d9e235a5f467750d5d2805a",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-2c970bak7-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "sourceHeadMatchesProduction": true,
+  "verdict": "RED_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY",
+  "documentCount": 12,
+  "viewportCaseCount": 4,
+  "total": 48,
+  "pass": 4,
+  "fail": 44,
+  "acceptanceContract": {
+    "selectedDocumentOnly": true,
+    "maximumVisibleCockpitsPerDocument": 1,
+    "nonRiskDocumentCockpitRequired": true,
+    "cockpitMaxHeight": 260,
+    "cockpitInternalScrollRequired": true,
+    "shellRatioMaximum": 3,
+    "firstActionInsideViewport": true,
+    "sourceEditorHiddenByDefault": true,
+    "bodyLevelLongStackForbidden": true
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "verification": {
+    "documentsEditorLayout": {
+      "filesPassed": 1,
+      "testsPassed": 35,
+      "status": "pass"
+    },
+    "typecheck": {
+      "status": "pass"
+    },
+    "build": {
+      "status": "pass",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    }
+  },
+  "results": [
+    {
+      "theme": "day",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "riskAssessmentDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 786,
+        "shellRatio": 1.75,
+        "shellBottom": 653,
+        "firstActionBottom": 317,
+        "visibleCockpitCount": 0,
+        "cockpitTestIds": [],
+        "cockpitMaxHeight": 0,
+        "cockpitOverflowY": "none",
+        "sectionTabCount": 0,
+        "selectedSectionTabCount": 0,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "PASS"
+    },
+    {
+      "theme": "day",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "tbmBriefing",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 1009,
+        "shellRatio": 2.25,
+        "shellBottom": 653,
+        "firstActionBottom": 712,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "tbm-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 9,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "tbmLogDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 1009,
+        "shellRatio": 2.25,
+        "shellBottom": 653,
+        "firstActionBottom": 712,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "tbm-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 9,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "workpackSummaryDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 1007,
+        "shellRatio": 2.25,
+        "shellBottom": 653,
+        "firstActionBottom": 714,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "summary-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 5,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": "day-desktop-short-1440x723-workpackSummaryDraft.png",
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "workPlanDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 989,
+        "shellRatio": 2.21,
+        "shellBottom": 653,
+        "firstActionBottom": 696,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "execution-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 6,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "workPermitDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 936,
+        "shellRatio": 2.09,
+        "shellBottom": 653,
+        "firstActionBottom": 696,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "execution-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 7,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "safetyEducationRecordDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 1009,
+        "shellRatio": 2.25,
+        "shellBottom": 653,
+        "firstActionBottom": 715,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "education-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 7,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "emergencyResponseDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 1009,
+        "shellRatio": 2.25,
+        "shellBottom": 653,
+        "firstActionBottom": 716,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "emergency-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 5,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "photoEvidenceDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 1009,
+        "shellRatio": 2.25,
+        "shellBottom": 653,
+        "firstActionBottom": 716,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "photo-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 5,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "foreignWorkerBriefing",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 1282,
+        "shellRatio": 2.86,
+        "shellBottom": 653,
+        "firstActionBottom": 989,
+        "visibleCockpitCount": 2,
+        "cockpitTestIds": [
+          "education-document-cockpit",
+          "transmission-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 15,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": "day-desktop-short-1440x723-foreignWorkerBriefing.png",
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "foreignWorkerTransmission",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 983,
+        "shellRatio": 2.19,
+        "shellBottom": 653,
+        "firstActionBottom": 690,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "transmission-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 4,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "kakaoMessage",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 983,
+        "shellRatio": 2.19,
+        "shellBottom": 653,
+        "firstActionBottom": 690,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "transmission-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 4,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "riskAssessmentDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 786,
+        "shellRatio": 1.75,
+        "shellBottom": 653,
+        "firstActionBottom": 317,
+        "visibleCockpitCount": 0,
+        "cockpitTestIds": [],
+        "cockpitMaxHeight": 0,
+        "cockpitOverflowY": "none",
+        "sectionTabCount": 0,
+        "selectedSectionTabCount": 0,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "PASS"
+    },
+    {
+      "theme": "night",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "tbmBriefing",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 1009,
+        "shellRatio": 2.25,
+        "shellBottom": 653,
+        "firstActionBottom": 712,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "tbm-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 9,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "tbmLogDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 1009,
+        "shellRatio": 2.25,
+        "shellBottom": 653,
+        "firstActionBottom": 712,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "tbm-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 9,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "workpackSummaryDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 1007,
+        "shellRatio": 2.25,
+        "shellBottom": 653,
+        "firstActionBottom": 714,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "summary-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 5,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": "night-desktop-short-1440x723-workpackSummaryDraft.png",
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "workPlanDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 989,
+        "shellRatio": 2.21,
+        "shellBottom": 653,
+        "firstActionBottom": 696,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "execution-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 6,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "workPermitDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 936,
+        "shellRatio": 2.09,
+        "shellBottom": 653,
+        "firstActionBottom": 696,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "execution-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 7,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "safetyEducationRecordDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 1009,
+        "shellRatio": 2.25,
+        "shellBottom": 653,
+        "firstActionBottom": 715,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "education-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 7,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "emergencyResponseDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 1009,
+        "shellRatio": 2.25,
+        "shellBottom": 653,
+        "firstActionBottom": 716,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "emergency-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 5,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "photoEvidenceDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 1009,
+        "shellRatio": 2.25,
+        "shellBottom": 653,
+        "firstActionBottom": 716,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "photo-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 5,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "foreignWorkerBriefing",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 1282,
+        "shellRatio": 2.86,
+        "shellBottom": 653,
+        "firstActionBottom": 989,
+        "visibleCockpitCount": 2,
+        "cockpitTestIds": [
+          "education-document-cockpit",
+          "transmission-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 15,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": "night-desktop-short-1440x723-foreignWorkerBriefing.png",
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "foreignWorkerTransmission",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 983,
+        "shellRatio": 2.19,
+        "shellBottom": 653,
+        "firstActionBottom": 690,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "transmission-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 4,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "kakaoMessage",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 983,
+        "shellRatio": 2.19,
+        "shellBottom": 653,
+        "firstActionBottom": 690,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "transmission-document-cockpit"
+        ],
+        "cockpitMaxHeight": null,
+        "cockpitOverflowY": "visible",
+        "sectionTabCount": 4,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "riskAssessmentDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 742,
+        "shellRatio": 2.23,
+        "shellBottom": 680,
+        "firstActionBottom": 536,
+        "visibleCockpitCount": 0,
+        "cockpitTestIds": [],
+        "cockpitMaxHeight": 0,
+        "cockpitOverflowY": "none",
+        "sectionTabCount": 0,
+        "selectedSectionTabCount": 0,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "PASS"
+    },
+    {
+      "theme": "day",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "tbmBriefing",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 936,
+        "shellRatio": 2.82,
+        "shellBottom": 680,
+        "firstActionBottom": 759,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "tbm-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 9,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "tbmLogDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 915,
+        "shellRatio": 2.76,
+        "shellBottom": 680,
+        "firstActionBottom": 763,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "tbm-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 9,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "workpackSummaryDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 915,
+        "shellRatio": 2.76,
+        "shellBottom": 680,
+        "firstActionBottom": 763,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "summary-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 5,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": "day-mobile-short-390x723-workpackSummaryDraft.png",
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "workPlanDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 915,
+        "shellRatio": 2.76,
+        "shellBottom": 680,
+        "firstActionBottom": 763,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "execution-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 6,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "workPermitDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 884,
+        "shellRatio": 2.66,
+        "shellBottom": 680,
+        "firstActionBottom": 763,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "execution-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 7,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "safetyEducationRecordDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 915,
+        "shellRatio": 2.76,
+        "shellBottom": 680,
+        "firstActionBottom": 763,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "education-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 7,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "emergencyResponseDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 915,
+        "shellRatio": 2.76,
+        "shellBottom": 680,
+        "firstActionBottom": 763,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "emergency-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 5,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "photoEvidenceDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 915,
+        "shellRatio": 2.76,
+        "shellBottom": 680,
+        "firstActionBottom": 763,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "photo-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 5,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "foreignWorkerBriefing",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 1018,
+        "shellRatio": 3.07,
+        "shellBottom": 680,
+        "firstActionBottom": 845,
+        "visibleCockpitCount": 2,
+        "cockpitTestIds": [
+          "education-document-cockpit",
+          "transmission-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 15,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": "day-mobile-short-390x723-foreignWorkerBriefing.png",
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "foreignWorkerTransmission",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 936,
+        "shellRatio": 2.82,
+        "shellBottom": 680,
+        "firstActionBottom": 763,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "transmission-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 4,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "day",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "documentKey": "kakaoMessage",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 915,
+        "shellRatio": 2.76,
+        "shellBottom": 680,
+        "firstActionBottom": 763,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "transmission-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 4,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "riskAssessmentDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 742,
+        "shellRatio": 2.23,
+        "shellBottom": 680,
+        "firstActionBottom": 536,
+        "visibleCockpitCount": 0,
+        "cockpitTestIds": [],
+        "cockpitMaxHeight": 0,
+        "cockpitOverflowY": "none",
+        "sectionTabCount": 0,
+        "selectedSectionTabCount": 0,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "PASS"
+    },
+    {
+      "theme": "night",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "tbmBriefing",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 936,
+        "shellRatio": 2.82,
+        "shellBottom": 680,
+        "firstActionBottom": 759,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "tbm-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 9,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "tbmLogDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 915,
+        "shellRatio": 2.76,
+        "shellBottom": 680,
+        "firstActionBottom": 763,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "tbm-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 9,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "workpackSummaryDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 915,
+        "shellRatio": 2.76,
+        "shellBottom": 680,
+        "firstActionBottom": 763,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "summary-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 5,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": "night-mobile-short-390x723-workpackSummaryDraft.png",
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "workPlanDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 915,
+        "shellRatio": 2.76,
+        "shellBottom": 680,
+        "firstActionBottom": 763,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "execution-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 6,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "workPermitDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 884,
+        "shellRatio": 2.66,
+        "shellBottom": 680,
+        "firstActionBottom": 763,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "execution-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 7,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "safetyEducationRecordDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 915,
+        "shellRatio": 2.76,
+        "shellBottom": 680,
+        "firstActionBottom": 763,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "education-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 7,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "emergencyResponseDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 915,
+        "shellRatio": 2.76,
+        "shellBottom": 680,
+        "firstActionBottom": 763,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "emergency-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 5,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "photoEvidenceDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 915,
+        "shellRatio": 2.76,
+        "shellBottom": 680,
+        "firstActionBottom": 763,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "photo-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 5,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "foreignWorkerBriefing",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 1018,
+        "shellRatio": 3.07,
+        "shellBottom": 680,
+        "firstActionBottom": 845,
+        "visibleCockpitCount": 2,
+        "cockpitTestIds": [
+          "education-document-cockpit",
+          "transmission-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 15,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": "night-mobile-short-390x723-foreignWorkerBriefing.png",
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "foreignWorkerTransmission",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 936,
+        "shellRatio": 2.82,
+        "shellBottom": 680,
+        "firstActionBottom": 763,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "transmission-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 4,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    },
+    {
+      "theme": "night",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "documentKey": "kakaoMessage",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 915,
+        "shellRatio": 2.76,
+        "shellBottom": 680,
+        "firstActionBottom": 763,
+        "visibleCockpitCount": 1,
+        "cockpitTestIds": [
+          "transmission-document-cockpit"
+        ],
+        "cockpitMaxHeight": 132,
+        "cockpitOverflowY": "auto",
+        "sectionTabCount": 4,
+        "selectedSectionTabCount": 1,
+        "sourceEditorVisibleCount": 0
+      },
+      "screenshot": null,
+      "verdict": "RED"
+    }
+  ]
+}
