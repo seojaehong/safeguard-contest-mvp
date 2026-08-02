@@ -1,0 +1,265 @@
+{
+  "schemaVersion": "safeclaw-document-section-navigation/v1",
+  "checkedAt": "2026-08-02T09:25:50.706Z",
+  "mode": "current-source-local-production",
+  "baseUrl": "http://127.0.0.1:3084",
+  "sourceHead": "038dbbcbf0b4ca864847215f66771d3840222c8d",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_DOCUMENT_SECTION_NAVIGATION",
+  "total": 4,
+  "pass": 4,
+  "fail": 0,
+  "acceptanceContract": {
+    "selectedDocumentOnly": true,
+    "sectionTabCount": 6,
+    "selectedSectionTabCount": 1,
+    "minimumTouchHeight": 44,
+    "readableTwoLineLabels": true,
+    "shellRatioMaximum": 3,
+    "firstActionInsideViewport": true,
+    "bodyLevelLongStackForbidden": true
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "verification": {
+    "documentsEditorLayout": {
+      "filesPassed": 1,
+      "testsPassed": 35,
+      "status": "pass"
+    },
+    "focusedSectionNavigation": {
+      "filesPassed": 1,
+      "testsPassed": 1,
+      "status": "pass"
+    },
+    "typecheck": {
+      "status": "pass"
+    },
+    "build": {
+      "status": "pass",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    }
+  },
+  "results": [
+    {
+      "theme": "day",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "state": "selected-workPlanDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "bodyHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 989,
+        "shellRatio": 2.21,
+        "actionBottom": 340,
+        "shellBottom": 653,
+        "sectionIndexClientWidth": 831,
+        "sectionIndexScrollWidth": 831,
+        "sectionTabCount": 6,
+        "selectedSectionTabCount": 1,
+        "filledSectionTabCount": 6,
+        "emptySectionTabCount": 0,
+        "minimumSectionTabHeight": 46,
+        "sectionTabLabels": [
+          "작업 개요, 7줄 작성됨",
+          "1. 작업개요, 4줄 작성됨",
+          "2. 작업순서 및 안전조치, 7줄 작성됨",
+          "3. 장비·인원·허가 확인, 3줄 작성됨",
+          "4. 작업중지 기준, 3줄 작성됨",
+          "5. 확인 근거, 1줄 작성됨"
+        ],
+        "sectionLabelWhiteSpace": [
+          "normal",
+          "normal",
+          "normal",
+          "normal",
+          "normal",
+          "normal"
+        ],
+        "sectionLabelLineClamp": [
+          "2",
+          "2",
+          "2",
+          "2",
+          "2",
+          "2"
+        ],
+        "selectedBackground": "color(srgb 0.996863 0.981804 0.927529)",
+        "unselectedBackground": "rgb(255, 255, 255)",
+        "selectedBoxShadow": "rgb(245, 197, 24) 0px -3px 0px 0px inset"
+      },
+      "screenshot": "day-desktop-short-1440x723.png",
+      "verdict": "PASS"
+    },
+    {
+      "theme": "night",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "state": "selected-workPlanDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "bodyHeight": 723,
+        "horizontalOverflow": false,
+        "shellClientHeight": 448,
+        "shellScrollHeight": 989,
+        "shellRatio": 2.21,
+        "actionBottom": 340,
+        "shellBottom": 653,
+        "sectionIndexClientWidth": 831,
+        "sectionIndexScrollWidth": 831,
+        "sectionTabCount": 6,
+        "selectedSectionTabCount": 1,
+        "filledSectionTabCount": 6,
+        "emptySectionTabCount": 0,
+        "minimumSectionTabHeight": 46,
+        "sectionTabLabels": [
+          "작업 개요, 7줄 작성됨",
+          "1. 작업개요, 4줄 작성됨",
+          "2. 작업순서 및 안전조치, 7줄 작성됨",
+          "3. 장비·인원·허가 확인, 3줄 작성됨",
+          "4. 작업중지 기준, 3줄 작성됨",
+          "5. 확인 근거, 1줄 작성됨"
+        ],
+        "sectionLabelWhiteSpace": [
+          "normal",
+          "normal",
+          "normal",
+          "normal",
+          "normal",
+          "normal"
+        ],
+        "sectionLabelLineClamp": [
+          "2",
+          "2",
+          "2",
+          "2",
+          "2",
+          "2"
+        ],
+        "selectedBackground": "color(srgb 0.088 0.092549 0.138824)",
+        "unselectedBackground": "rgb(15, 16, 17)",
+        "selectedBoxShadow": "rgb(108, 111, 247) 0px -3px 0px 0px inset"
+      },
+      "screenshot": "night-desktop-short-1440x723.png",
+      "verdict": "PASS"
+    },
+    {
+      "theme": "day",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "state": "selected-workPlanDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "bodyHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 915,
+        "shellRatio": 2.76,
+        "actionBottom": 536,
+        "shellBottom": 680,
+        "sectionIndexClientWidth": 265,
+        "sectionIndexScrollWidth": 728,
+        "sectionTabCount": 6,
+        "selectedSectionTabCount": 1,
+        "filledSectionTabCount": 6,
+        "emptySectionTabCount": 0,
+        "minimumSectionTabHeight": 46,
+        "sectionTabLabels": [
+          "작업 개요, 7줄 작성됨",
+          "1. 작업개요, 4줄 작성됨",
+          "2. 작업순서 및 안전조치, 7줄 작성됨",
+          "3. 장비·인원·허가 확인, 3줄 작성됨",
+          "4. 작업중지 기준, 3줄 작성됨",
+          "5. 확인 근거, 1줄 작성됨"
+        ],
+        "sectionLabelWhiteSpace": [
+          "normal",
+          "normal",
+          "normal",
+          "normal",
+          "normal",
+          "normal"
+        ],
+        "sectionLabelLineClamp": [
+          "2",
+          "2",
+          "2",
+          "2",
+          "2",
+          "2"
+        ],
+        "selectedBackground": "color(srgb 0.996863 0.981804 0.927529)",
+        "unselectedBackground": "rgb(255, 255, 255)",
+        "selectedBoxShadow": "rgb(245, 197, 24) 0px -3px 0px 0px inset"
+      },
+      "screenshot": "day-mobile-short-390x723.png",
+      "verdict": "PASS"
+    },
+    {
+      "theme": "night",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "state": "selected-workPlanDraft",
+      "metrics": {
+        "viewportHeight": 723,
+        "bodyHeight": 728,
+        "horizontalOverflow": false,
+        "shellClientHeight": 332,
+        "shellScrollHeight": 915,
+        "shellRatio": 2.76,
+        "actionBottom": 536,
+        "shellBottom": 680,
+        "sectionIndexClientWidth": 265,
+        "sectionIndexScrollWidth": 728,
+        "sectionTabCount": 6,
+        "selectedSectionTabCount": 1,
+        "filledSectionTabCount": 6,
+        "emptySectionTabCount": 0,
+        "minimumSectionTabHeight": 46,
+        "sectionTabLabels": [
+          "작업 개요, 7줄 작성됨",
+          "1. 작업개요, 4줄 작성됨",
+          "2. 작업순서 및 안전조치, 7줄 작성됨",
+          "3. 장비·인원·허가 확인, 3줄 작성됨",
+          "4. 작업중지 기준, 3줄 작성됨",
+          "5. 확인 근거, 1줄 작성됨"
+        ],
+        "sectionLabelWhiteSpace": [
+          "normal",
+          "normal",
+          "normal",
+          "normal",
+          "normal",
+          "normal"
+        ],
+        "sectionLabelLineClamp": [
+          "2",
+          "2",
+          "2",
+          "2",
+          "2",
+          "2"
+        ],
+        "selectedBackground": "color(srgb 0.088 0.092549 0.138824)",
+        "unselectedBackground": "rgb(15, 16, 17)",
+        "selectedBoxShadow": "rgb(108, 111, 247) 0px -3px 0px 0px inset"
+      },
+      "screenshot": "night-mobile-short-390x723.png",
+      "verdict": "PASS"
+    }
+  ]
+}
