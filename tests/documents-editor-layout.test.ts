@@ -79,6 +79,9 @@ async function exportSelectedXlsx(page: Page) {
 }
 
 async function selectDocumentFromWorkbench(page: Page, key: string) {
+  await page.waitForFunction(() => (
+    document.querySelector(".safeclaw-module-shell")?.getAttribute("data-ready") === "true"
+  ));
   await page.getByTestId("workpack-editor-workspace").waitFor({ state: "visible" });
   const documentSelect = page.locator('select[aria-label="편집 문서 선택"]');
   if (await documentSelect.inputValue() === key) return;
@@ -121,7 +124,10 @@ async function selectDocumentFromWorkbench(page: Page, key: string) {
 }
 
 async function openSourceEditor(page: Page, documentTitle: string) {
-  await page.getByRole("button", { name: "원문" }).click();
+  await page.waitForFunction(() => (
+    document.querySelector(".safeclaw-module-shell")?.getAttribute("data-ready") === "true"
+  ));
+  await page.getByRole("button", { name: "원문", exact: true }).click();
   const editor = page.getByRole("textbox", { name: `${documentTitle} 전체 원문 편집` });
   await editor.waitFor({ state: "visible" });
   return editor;
@@ -2157,7 +2163,7 @@ describe("documents editor layout", () => {
       });
       expect(cockpitContainment.maxHeight).toBeLessThanOrEqual(88);
       expect(cockpitContainment.overflowY).toBe("auto");
-      await page.waitForFunction((cockpitTestId) => {
+      await expect.poll(() => page.evaluate((cockpitTestId) => {
         const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
         const toolbar = document.querySelector<HTMLElement>(".document-toolbar");
         const cockpit = document.querySelector<HTMLElement>(`[data-testid="${cockpitTestId}"]`);
@@ -2166,7 +2172,13 @@ describe("documents editor layout", () => {
         const toolbarRect = toolbar.getBoundingClientRect();
         const cockpitRect = cockpit.getBoundingClientRect();
         return cockpitRect.top >= toolbarRect.bottom - 1 && cockpitRect.bottom < shellRect.bottom;
-      }, item.cockpitTestId, { timeout: 2_000 });
+      }, item.cockpitTestId), { message: `${item.key} cockpit`, timeout: 3_000 }).toBe(true);
+      await expect.poll(() => page.evaluate(() => {
+        const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
+        const sectionActions = document.querySelector<HTMLElement>('[data-testid="document-section-actions"]');
+        if (!workpackShell || !sectionActions) return false;
+        return sectionActions.getBoundingClientRect().bottom <= workpackShell.getBoundingClientRect().bottom - 16;
+      }), { message: `${item.key} first action`, timeout: 3_000 }).toBe(true);
 
       const metrics = await page.evaluate((cockpitTestId) => {
         const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
@@ -2174,8 +2186,9 @@ describe("documents editor layout", () => {
         const cockpit = document.querySelector<HTMLElement>(`[data-testid="${cockpitTestId}"]`);
         const firstTextarea = document.querySelector<HTMLElement>(".document-section-textarea");
         const fieldStrip = document.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]');
+        const sectionActions = document.querySelector<HTMLElement>('[data-testid="document-section-actions"]');
         const documentSelectElement = document.querySelector<HTMLSelectElement>('select[aria-label="편집 문서 선택"]');
-        if (!workpackShell || !toolbar || !cockpit || !firstTextarea || !fieldStrip || !documentSelectElement) {
+        if (!workpackShell || !toolbar || !cockpit || !firstTextarea || !fieldStrip || !sectionActions || !documentSelectElement) {
           throw new Error("Missing execution document cockpit target");
         }
         const shellRect = workpackShell.getBoundingClientRect();
@@ -2183,6 +2196,7 @@ describe("documents editor layout", () => {
         const cockpitRect = cockpit.getBoundingClientRect();
         const textareaRect = firstTextarea.getBoundingClientRect();
         const fieldStripRect = fieldStrip.getBoundingClientRect();
+        const sectionActionsRect = sectionActions.getBoundingClientRect();
         return {
           selectedDocument: documentSelectElement.value,
           scrollWidth: document.documentElement.scrollWidth,
@@ -2202,13 +2216,13 @@ describe("documents editor layout", () => {
           cockpitText: cockpit.textContent?.replace(/\s+/gu, " ").trim(),
           cockpitVisibleInPane: cockpitRect.bottom > shellRect.top && cockpitRect.top < shellRect.bottom,
           cockpitBelowToolbar: cockpitRect.top >= toolbarRect.bottom - 1,
+          firstActionBottom: Math.round(sectionActionsRect.bottom),
           textareaTop: Math.round(textareaRect.top),
           textareaBottom: Math.round(textareaRect.bottom),
           fieldStripTop: Math.round(fieldStripRect.top),
           textareaVisibleInPane: textareaRect.bottom > shellRect.top && textareaRect.top < shellRect.bottom
         };
       }, item.cockpitTestId);
-
       expect(metrics.selectedDocument).toBe(item.key);
       expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewportWidth + 1);
       expect(metrics.pageHeight).toBeLessThanOrEqual(metrics.viewportHeight + 1);
@@ -2219,6 +2233,7 @@ describe("documents editor layout", () => {
       expect(metrics.cockpitBelowToolbar).toBe(true);
       expect(metrics.cockpitTop).toBeGreaterThanOrEqual(metrics.toolbarBottom - 1);
       expect(metrics.cockpitBottom, item.title).toBeLessThan(metrics.shellBottom);
+      expect(metrics.firstActionBottom, item.title).toBeLessThanOrEqual(metrics.shellBottom - 16);
       item.requiredText.forEach((text) => expect(metrics.cockpitText).toContain(text));
       expect(metrics.textareaTop).toBeGreaterThanOrEqual(metrics.cockpitBottom);
       expect(metrics.fieldStripTop).toBeGreaterThanOrEqual(metrics.cockpitBottom);

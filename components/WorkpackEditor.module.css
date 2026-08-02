@@ -1375,6 +1375,10 @@
     justify-content: flex-start;
     max-width: none;
   }
+
+  .documentMeta span:not(:first-child) {
+    display: none;
+  }
 }
 
 :global(.command-center-shell .field-workspace-editor-focus) .workspace {
@@ -1553,19 +1557,24 @@
   }
 
   .documentSectionIndex {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
     gap: 3px;
-    overflow: visible;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
     padding-bottom: 5px;
+    scroll-snap-type: inline proximity;
+    scrollbar-width: thin;
   }
 
   .documentSectionIndex button {
+    flex: 0 0 min(42vw, 148px);
     min-height: 44px;
+    scroll-snap-align: start;
   }
 
   .documentSectionHeading {
-    min-height: 32px;
+    display: none;
   }
 
   .editorModeBar {

@@ -3126,18 +3126,38 @@ export function WorkpackEditor({
           || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
           || documentBodyRef.current
         : textareaRef.current;
-      alignPaneTargetBelowToolbar(target || null);
-      requestedDocumentKey ? focusSelectedDocumentTarget(requestedDocumentKey) : textareaRef.current?.focus({ preventScroll: true });
+      if (requestedDocumentKey) {
+        const activeSection = documentBodyRef.current?.querySelector<HTMLElement>(
+          '[data-testid="document-section-detail"]'
+        ) || null;
+        if (!alignDocumentCockpitWithAction(target || null, requestedDocumentKey)) {
+          alignStructuredSectionCockpitBelowToolbar(activeSection);
+        }
+        focusSelectedDocumentTarget(requestedDocumentKey);
+      } else {
+        alignPaneTargetBelowToolbar(target || null);
+        textareaRef.current?.focus({ preventScroll: true });
+      }
     };
     const focusFrame = window.requestAnimationFrame(alignRequestedDocument);
     const focusTimer = window.setTimeout(alignRequestedDocument, 120);
     const backupFocusTimer = window.setTimeout(alignRequestedDocument, 320);
-    const timer = window.setTimeout(() => setShowFocusCue(false), 2200);
+    const settledFocusTimer = window.setTimeout(alignRequestedDocument, 640);
+    let postCueAlignFrame: number | null = null;
+    let postCueAlignTimer: number | null = null;
+    const timer = window.setTimeout(() => {
+      setShowFocusCue(false);
+      postCueAlignFrame = window.requestAnimationFrame(alignRequestedDocument);
+      postCueAlignTimer = window.setTimeout(alignRequestedDocument, 120);
+    }, 2200);
     return () => {
       window.cancelAnimationFrame(focusFrame);
       window.clearTimeout(focusTimer);
       window.clearTimeout(backupFocusTimer);
+      window.clearTimeout(settledFocusTimer);
       window.clearTimeout(timer);
+      if (postCueAlignFrame !== null) window.cancelAnimationFrame(postCueAlignFrame);
+      if (postCueAlignTimer !== null) window.clearTimeout(postCueAlignTimer);
     };
   }, [focusToken, requestedDocumentKey]);
 
@@ -3168,6 +3188,45 @@ export function WorkpackEditor({
       top: Math.max(0, nextScrollTop),
       behavior: "auto"
     });
+  }
+
+  function alignDocumentCockpitWithAction(target: HTMLElement | null, expectedDocumentKey: DocumentKey) {
+    const shell = workpackShellRef.current;
+    const documentBody = documentBodyRef.current;
+    const sectionActions = documentBodyRef.current?.querySelector<HTMLElement>(
+      '[data-testid="document-section-actions"]'
+    ) || null;
+    const selectedDocument = document.querySelector<HTMLSelectElement>('select[aria-label="편집 문서 선택"]');
+    if (
+      !shell
+      || !documentBody
+      || !target
+      || !sectionActions
+      || documentBody.dataset.editorMode !== "structured"
+      || selectedDocument?.value !== expectedDocumentKey
+    ) return false;
+
+    const shellRect = shell.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const actionsRect = sectionActions.getBoundingClientRect();
+    const toolbar = documentBody.querySelector<HTMLElement>(".document-toolbar") || null;
+    const toolbarRect = toolbar?.getBoundingClientRect();
+    const visibleTop = toolbarRect && toolbarRect.bottom > shellRect.top && toolbarRect.top < shellRect.bottom
+      ? toolbarRect.bottom + 8
+      : shellRect.top + 8;
+    const visibleBottom = Math.min(shellRect.bottom, window.innerHeight) - 16;
+    const minimumScrollDelta = actionsRect.bottom - visibleBottom;
+    const maximumScrollDelta = targetRect.top - visibleTop;
+    if (minimumScrollDelta > maximumScrollDelta) return false;
+
+    const scrollDelta = Math.min(Math.max(0, minimumScrollDelta), maximumScrollDelta);
+    if (Math.abs(scrollDelta) < 1) return true;
+
+    shell.scrollTo({
+      top: Math.max(0, shell.scrollTop + scrollDelta),
+      behavior: "auto"
+    });
+    return true;
   }
 
   function alignSourceEditorWithinPane() {
@@ -3229,12 +3288,14 @@ export function WorkpackEditor({
     const visibleTop = toolbarRect && toolbarRect.bottom > shellRect.top && toolbarRect.top < shellRect.bottom
       ? toolbarRect.bottom
       : shellRect.top;
-    const visibleBottom = Math.min(shellRect.bottom, window.innerHeight);
+    const visibleBottom = Math.min(shellRect.bottom, window.innerHeight) - 16;
     const fieldRect = fieldStrip?.getBoundingClientRect();
     const actionsRect = sectionActions.getBoundingClientRect();
-    const overflow = Math.max(0, actionsRect.bottom - (visibleBottom - 8));
+    const overflow = Math.max(0, actionsRect.bottom - visibleBottom);
     const topAllowance = fieldRect ? Math.max(0, fieldRect.top - visibleTop - 4) : overflow;
-    const additionalScroll = Math.min(overflow, topAllowance);
+    const additionalScroll = window.innerHeight <= 723
+      ? overflow
+      : Math.min(overflow, topAllowance);
     if (additionalScroll > 0) {
       shell.scrollTo({
         top: shell.scrollTop + additionalScroll,
@@ -3301,8 +3362,16 @@ export function WorkpackEditor({
     const activeSection = Array.from(
       documentBodyRef.current?.querySelectorAll<HTMLElement>("[data-section-id]") || []
     ).find((section) => section.dataset.sectionId === expandedStructuredSectionId) || null;
+    const alignCockpitOrActiveSection = (cockpit: HTMLElement | null) => {
+      if (!alignDocumentCockpitWithAction(cockpit, selected.key)) {
+        alignStructuredSectionCockpitBelowToolbar(activeSection);
+      }
+    };
     if (selected.key === "workPlanDraft" && activeSection) {
-      const alignWorkPlanSection = () => alignStructuredSectionCockpitBelowToolbar(activeSection);
+      const workPlanCockpit = documentBodyRef.current?.querySelector<HTMLElement>(
+        '[data-testid="execution-document-cockpit"]'
+      ) || null;
+      const alignWorkPlanSection = () => alignCockpitOrActiveSection(workPlanCockpit);
       alignWorkPlanSection();
       const alignFrame = window.requestAnimationFrame(alignWorkPlanSection);
       const alignTimer = window.setTimeout(alignWorkPlanSection, 80);
@@ -3315,49 +3384,49 @@ export function WorkpackEditor({
       ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="summary-document-cockpit"]') || null
       : null;
     if (summaryCockpitTarget) {
-      alignPaneTargetBelowToolbar(summaryCockpitTarget);
+      alignCockpitOrActiveSection(summaryCockpitTarget);
       return;
     }
     const tbmCockpitTarget = isTbmDocumentKey(selected.key)
       ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="tbm-document-cockpit"]') || null
       : null;
     if (tbmCockpitTarget) {
-      alignPaneTargetBelowToolbar(tbmCockpitTarget);
+      alignCockpitOrActiveSection(tbmCockpitTarget);
       return;
     }
     const executionCockpitTarget = isExecutionDocumentKey(selected.key)
       ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="execution-document-cockpit"]') || null
       : null;
     if (executionCockpitTarget) {
-      alignPaneTargetBelowToolbar(executionCockpitTarget);
+      alignCockpitOrActiveSection(executionCockpitTarget);
       return;
     }
     const educationCockpitTarget = isEducationDocumentKey(selected.key)
       ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="education-document-cockpit"]') || null
       : null;
     if (educationCockpitTarget) {
-      alignPaneTargetBelowToolbar(educationCockpitTarget);
+      alignCockpitOrActiveSection(educationCockpitTarget);
       return;
     }
     const emergencyCockpitTarget = isEmergencyDocumentKey(selected.key)
       ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="emergency-document-cockpit"]') || null
       : null;
     if (emergencyCockpitTarget) {
-      alignPaneTargetBelowToolbar(emergencyCockpitTarget);
+      alignCockpitOrActiveSection(emergencyCockpitTarget);
       return;
     }
     const photoCockpitTarget = isPhotoEvidenceDocumentKey(selected.key)
       ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="photo-document-cockpit"]') || null
       : null;
     if (photoCockpitTarget) {
-      alignPaneTargetBelowToolbar(photoCockpitTarget);
+      alignCockpitOrActiveSection(photoCockpitTarget);
       return;
     }
     const transmissionCockpitTarget = isTransmissionDocumentKey(selected.key)
       ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="transmission-document-cockpit"]') || null
       : null;
     if (transmissionCockpitTarget) {
-      alignPaneTargetBelowToolbar(transmissionCockpitTarget);
+      alignCockpitOrActiveSection(transmissionCockpitTarget);
       return;
     }
     const alignActiveSection = () => alignStructuredSectionCockpitBelowToolbar(activeSection);
@@ -3374,12 +3443,6 @@ export function WorkpackEditor({
     const alignSelectedDocument = () => {
       if (selected.key === "riskAssessmentDraft") {
         alignRiskCockpitBelowToolbar();
-        return;
-      }
-      if (selected.key === "workPlanDraft") {
-        alignStructuredSectionCockpitBelowToolbar(
-          documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-detail"]') || null
-        );
         return;
       }
       const target = isSummaryDocumentKey(selected.key)
@@ -3413,7 +3476,7 @@ export function WorkpackEditor({
         : documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
         || textareaRef.current
         || documentBodyRef.current;
-      alignPaneTargetBelowToolbar(target);
+      alignDocumentCockpitWithAction(target, selected.key);
     };
     const alignFrame = window.requestAnimationFrame(alignSelectedDocument);
     const alignTimer = window.setTimeout(alignSelectedDocument, 80);
@@ -3523,10 +3586,12 @@ export function WorkpackEditor({
       root.style.scrollBehavior = previousScrollBehavior;
       workpackShellRef.current?.scrollTo({ top: 0, behavior: "auto" });
       const alignReselectedDocument = () => {
+        const selectedDocument = document.querySelector<HTMLSelectElement>('select[aria-label="편집 문서 선택"]');
+        if (selectedDocument?.value !== key) return;
         if (alignSourceEditorWithinPane()) return;
         if (key === "riskAssessmentDraft") {
           alignRiskCockpitBelowToolbar();
-        } else if (key === "workPlanDraft") {
+        } else if (key === "workPlanDraft" || (key === "workpackSummaryDraft" && window.innerHeight <= 723)) {
           alignStructuredSectionCockpitBelowToolbar(
             documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-detail"]') || null
           );
@@ -3545,10 +3610,12 @@ export function WorkpackEditor({
     setSelectedKey(key);
     workpackShellRef.current?.scrollTo({ top: 0, behavior: "auto" });
     const alignSelectedDocument = () => {
+      const selectedDocument = document.querySelector<HTMLSelectElement>('select[aria-label="편집 문서 선택"]');
+      if (selectedDocument?.value !== key) return;
       if (alignSourceEditorWithinPane()) return;
       if (key === "riskAssessmentDraft") {
         alignRiskCockpitBelowToolbar();
-      } else if (key === "workPlanDraft") {
+      } else if (key === "workPlanDraft" || (key === "workpackSummaryDraft" && window.innerHeight <= 723)) {
         alignStructuredSectionCockpitBelowToolbar(
           documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-detail"]') || null
         );

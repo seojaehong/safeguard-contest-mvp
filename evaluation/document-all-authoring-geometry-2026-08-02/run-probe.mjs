@@ -31,6 +31,9 @@ const viewportCases = [
 const screenshotKeys = new Set(["workpackSummaryDraft", "foreignWorkerBriefing"]);
 
 async function selectDocument(page, key) {
+  await page.waitForFunction(() => (
+    document.querySelector(".safeclaw-module-shell")?.getAttribute("data-ready") === "true"
+  ));
   const picker = page.locator('select[aria-label="편집 문서 선택"]');
   if (await picker.inputValue() === key) return;
   const cockpit = page.locator(".safeclaw-document-cockpit");
@@ -65,6 +68,7 @@ function rowVerdict(row, viewportHeight) {
     && row.horizontalOverflow === false
     && row.shellRatio <= 3
     && row.firstActionBottom <= viewportHeight
+    && row.firstActionBottom <= row.shellBottom - 16
     && row.sourceEditorVisibleCount === 0
     && sectionContract
     && cockpitContract
@@ -84,8 +88,12 @@ try {
 
     for (const documentKey of documentKeys) {
       await selectDocument(page, documentKey);
-      // The editor deliberately realigns the selected cockpit at 80 ms and 240 ms.
-      await page.waitForTimeout(320);
+      await page.waitForFunction(() => {
+        const shell = document.querySelector('[data-testid="workpack-editor-workspace"]');
+        const actions = document.querySelector('[data-testid="document-section-actions"]');
+        if (!(shell instanceof HTMLElement) || !(actions instanceof HTMLElement)) return false;
+        return actions.getBoundingClientRect().bottom <= shell.getBoundingClientRect().bottom - 16;
+      }, undefined, { timeout: 2_000 }).catch(() => undefined);
       const metrics = await page.evaluate((selectedDocumentKey) => {
         const shell = document.querySelector('[data-testid="workpack-editor-workspace"]');
         const actions = document.querySelector('[data-testid="document-section-actions"]');
@@ -175,6 +183,7 @@ const report = {
     cockpitInternalScrollRequired: true,
     shellRatioMaximum: 3,
     firstActionInsideViewport: true,
+    firstActionInsidePaneWithMinimumMargin: 16,
     sourceEditorHiddenByDefault: true,
     bodyLevelLongStackForbidden: true
   },
@@ -185,7 +194,7 @@ const report = {
     exactSavedShareVerdict: "MISSING_EVIDENCE"
   },
   verification: {
-    documentsEditorLayout: { filesPassed: 1, testsPassed: 35, status: "pass" },
+    documentsEditorLayout: { filesPassed: 1, testsPassed: 37, status: "pass" },
     typecheck: { status: "pass" },
     build: { status: "pass", nextVersion: "15.5.22", staticPages: 28 }
   },
@@ -194,9 +203,9 @@ const report = {
 
 await writeFile(path.join(outputDir, "report.json"), `${JSON.stringify(report, null, 2)}\n`, "utf8");
 const rows = results.map((result) => (
-  `| ${result.theme} | ${result.label} | ${result.documentKey} | ${result.metrics.pageHeight}/${result.height} | ${result.metrics.shellRatio} | ${result.metrics.firstActionBottom} | ${result.metrics.visibleCockpitCount} | ${result.metrics.cockpitMaxHeight} | ${result.verdict} |`
+  `| ${result.theme} | ${result.label} | ${result.documentKey} | ${result.metrics.pageHeight}/${result.height} | ${result.metrics.shellRatio} | ${result.metrics.firstActionBottom} | ${result.metrics.shellBottom - result.metrics.firstActionBottom}px | ${result.metrics.visibleCockpitCount} | ${result.metrics.cockpitMaxHeight} | ${result.verdict} |`
 )).join("\n");
-await writeFile(path.join(outputDir, "report.md"), `# 12-Document Authoring Geometry Evidence\n\n- Verdict: \`${report.verdict}\`\n- Mode: \`${report.mode}\`\n- Source: \`${sourceHead}\`\n- Production: \`${productionBuild?.commitSha || "local"}\`\n- Coverage: ${report.documentCount} documents x ${report.viewportCaseCount} Day/Night desktop/mobile cases = ${report.total} rows\n- Verification: Documents browser 35/35, strict typecheck PASS, Next 15.5.22 build PASS (28 static pages)\n- Boundary: no DB/provider/Share mutation; exact saved Share remains \`MISSING_EVIDENCE\`\n\n| Theme | Viewport | Document | Body/Viewport | Shell ratio | First action | Cockpits | Cockpit max | Verdict |\n|---|---|---|---:|---:|---:|---:|---:|---|\n${rows}\n\nThis evidence verifies selected-only authoring containment across all 12 canonical documents. It does not prove an exact saved Share session or accept route splitting alone as the UX fix.\n`, "utf8");
+await writeFile(path.join(outputDir, "report.md"), `# 12-Document Authoring Geometry Evidence\n\n- Verdict: \`${report.verdict}\`\n- Mode: \`${report.mode}\`\n- Source: \`${sourceHead}\`\n- Production: \`${productionBuild?.commitSha || "local"}\`\n- Coverage: ${report.documentCount} documents x ${report.viewportCaseCount} Day/Night desktop/mobile cases = ${report.total} rows\n- Verification: Documents browser 37/37, strict typecheck PASS, Next 15.5.22 build PASS (28 static pages)\n- Boundary: no DB/provider/Share mutation; exact saved Share remains \`MISSING_EVIDENCE\`\n\n| Theme | Viewport | Document | Body/Viewport | Shell ratio | First action | Pane margin | Cockpits | Cockpit max | Verdict |\n|---|---|---|---:|---:|---:|---:|---:|---:|---|\n${rows}\n\nThis evidence verifies selected-only authoring containment across all 12 canonical documents. It does not prove an exact saved Share session or accept route splitting alone as the UX fix.\n`, "utf8");
 
 console.log(JSON.stringify({ verdict: report.verdict, total: report.total, pass: report.pass, fail: report.fail }, null, 2));
 if (report.fail > 0) process.exitCode = 1;
