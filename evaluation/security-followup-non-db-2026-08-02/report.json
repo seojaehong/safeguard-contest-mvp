@@ -1,0 +1,84 @@
+{
+  "schema": "safeclaw-security-followup-non-db/v1",
+  "verdict": "PASS_CURRENT_SOURCE_NON_DB_SECURITY_FOLLOWUP_LIVE_PENDING_WITH_DISTRIBUTED_RATE_BOUNDARY",
+  "generatedAt": "2026-08-02T16:58:30+09:00",
+  "sourceHead": "d6d42024c8b07f0d9159666a0e8f2f9213709d21",
+  "productionBuild": {
+    "commitSha": "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-i26s43ipc-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": false
+  },
+  "scan": {
+    "scanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
+    "targetRevision": "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
+    "originalBaselinePreserved": true,
+    "reportableFindings": 17,
+    "medium": 5,
+    "low": 12
+  },
+  "targetedFindings": [
+    {
+      "candidateId": "candidate-041be133e97f783e",
+      "title": "Replayed dispatch-log requests create duplicate audit records",
+      "sourceStatus": "PASS_DETERMINISTIC_PRIMARY_KEY_REPLAY_CONFLICT",
+      "liveStatus": "PENDING_DEPLOYMENT",
+      "detail": "Each tenant-scoped idempotency key and row index now derives a deterministic UUID primary key. PostgreSQL unique violation 23505 fails closed with HTTP 409."
+    },
+    {
+      "candidateId": "candidate-d15f964a8816890f",
+      "title": "MCP document generation accepts unbounded authenticated inputs",
+      "sourceStatus": "PASS_MCP_ZOD_INPUT_BUDGETS",
+      "liveStatus": "PENDING_DEPLOYMENT",
+      "detail": "All MCP generation, review, search, region, document, and document-type strings now have explicit Zod maximum lengths."
+    },
+    {
+      "candidateId": "candidate-3a1b115c790af29d",
+      "title": "Public legal search can amplify unbounded provider work",
+      "sourceStatus": "MITIGATED_QUERY_BUDGET_RATE_GUARD_AND_IN_FLIGHT_COALESCING",
+      "liveStatus": "PENDING_DEPLOYMENT",
+      "residual": "The fixed-window limiter remains warm-instance-local and is not a distributed quota."
+    },
+    {
+      "candidateId": "candidate-737d561572703a47",
+      "title": "Public safety-reference search lacks request work budgets",
+      "sourceStatus": "MITIGATED_QUERY_FILTER_BUDGET_RATE_GUARD_AND_IN_FLIGHT_COALESCING",
+      "liveStatus": "PENDING_DEPLOYMENT",
+      "residual": "The fixed-window limiter remains warm-instance-local and is not a distributed quota."
+    }
+  ],
+  "verification": {
+    "focusedTests": {
+      "files": 3,
+      "tests": 17,
+      "status": "PASS"
+    },
+    "adjacentTests": {
+      "files": 6,
+      "tests": 34,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "diffCheck": "PASS"
+  },
+  "remainingBoundaries": {
+    "databaseOrRlsFindingsUntouched": 13,
+    "databaseSchemaMutationApprovalRequired": true,
+    "distributedRateLimitResidual": true,
+    "markdownRendererCandidateDeferred": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "providerDispatchPerformed": false,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "vectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  }
+}
+
