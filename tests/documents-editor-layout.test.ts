@@ -1955,7 +1955,7 @@ describe("documents editor layout", () => {
           overflowY: style.overflowY
         };
       });
-      expect(cockpitContainment.maxHeight).toBeLessThanOrEqual(260);
+      expect(cockpitContainment.maxHeight).toBeLessThanOrEqual(88);
       expect(cockpitContainment.overflowY).toBe("auto");
       await page.waitForFunction((cockpitTestId) => {
         const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");

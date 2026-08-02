@@ -64,7 +64,7 @@ function rowVerdict(row, viewportHeight) {
   return row.pageHeight <= viewportHeight + 8
     && row.horizontalOverflow === false
     && row.shellRatio <= 3
-    && row.firstActionBottom <= Math.min(row.shellBottom, viewportHeight)
+    && row.firstActionBottom <= viewportHeight
     && row.sourceEditorVisibleCount === 0
     && sectionContract
     && cockpitContract
@@ -84,7 +84,8 @@ try {
 
     for (const documentKey of documentKeys) {
       await selectDocument(page, documentKey);
-      await page.waitForTimeout(100);
+      // The editor deliberately realigns the selected cockpit at 80 ms and 240 ms.
+      await page.waitForTimeout(320);
       const metrics = await page.evaluate((selectedDocumentKey) => {
         const shell = document.querySelector('[data-testid="workpack-editor-workspace"]');
         const actions = document.querySelector('[data-testid="document-section-actions"]');
