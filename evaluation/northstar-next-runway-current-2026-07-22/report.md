@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `ca908cf8bbc1db1ee1a1054575921025c6c2e621`
+Source HEAD: `415f23de65f26528f6ef8c50f50e96221000d3c2`
 
-Production `/api/build-info`: `ca908cf8bbc1db1ee1a1054575921025c6c2e621`
+Production `/api/build-info`: `6623dcb36ecfb5da9509a2655bf6abe53127d216`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `none`
+Source pending changed paths: `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
 
-Current head is evidence-only pending: `false`
+Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `ca908cf8bbc1db1ee1a1054575921025c6c2e621`
+Live rollup source head: `415f23de65f26528f6ef8c50f50e96221000d3c2`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `415f23de65f26528f6ef8c50f50e96221000d3c2` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `6623dcb36ecfb5da9509a2655bf6abe53127d216`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -81,6 +81,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Documents cockpit workbench geometry: `PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH`; 1440x723 and 390x723 rows must show grid workbench, 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers closed by default, 0 visible supporting launchers, the legacy document index hidden, no horizontal overflow, and route split alone remains `false`.
 - Documents section navigation: `PASS_LIVE_PRODUCTION_DOCUMENT_SECTION_NAVIGATION`; 4/4 Day/Night desktop-short and mobile-short rows retain 6 tabs, exactly 1 selected tab, 44px minimum controls, readable two-line labels, shell ratio <= 3, first-action containment, no horizontal overflow, no mutation, and exact saved Share `MISSING_EVIDENCE`.
 - All-document selected-authoring geometry: `PASS_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY`; 48/48 rows cover 12 canonical documents across Day/Night desktop-short and mobile-short, with maximum shell ratio `2.69`, maximum first-action bottom `719/723`, at most one role-specific cockpit, local cockpit scroll, hidden raw/source editors, no mutation, and exact saved Share `MISSING_EVIDENCE`.
+- Document action pane margin: `PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN`; rows below the required 16px inner-pane margin move from 44/48 to 0/48, live minimum margin is 16px, maximum shell ratio is 2.36, route split alone remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Raw-source drilldown geometry: `PASS_LIVE_PRODUCTION_12_DOCUMENT_RAW_DRILLDOWN_GEOMETRY`; 48/48 rows cover 12 canonical documents across Day/Night desktop-short and mobile-short, with maximum shell ratio `2.25`, maximum source bottom `693/723`, maximum source editor height `258`, local source scrolling in 48/48, no mutation, and exact saved Share `MISSING_EVIDENCE`.
 - Documents selected editor/detail: risk-assessment default, same-document reselect, and all-12 launcher exposure land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; explicit raw/source editing remains secondary drilldown but is now live-bounded.
 - Documents remaining debt: live selected-authoring and explicit raw-source geometry are bounded, while deeper row/detail editing and broad human wording review remain separate from this layout proof.

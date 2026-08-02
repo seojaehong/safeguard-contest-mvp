@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-02T13:30:26.703Z
-Source HEAD at generation: ca908cf8bbc1db1ee1a1054575921025c6c2e621
-Live commit at generation: ca908cf8bbc1db1ee1a1054575921025c6c2e621
+Generated at: 2026-08-02T15:05:15.638Z
+Source HEAD at generation: 415f23de65f26528f6ef8c50f50e96221000d3c2
+Live commit at generation: 6623dcb36ecfb5da9509a2655bf6abe53127d216
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -15,6 +15,14 @@ Overall: `northstar_open_approval_gated`
 - Deep review closed: yes
 - Visible full previews while closed: 0
 - Share: 844/844 (1x viewport), root bottom=810, preview bottom=683, preview y=491
+
+## Document Authoring Pane Margin
+
+- Verdict: `PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN`
+- Product/production commit: b2abf19e1a8b8a470292e8503a23173cf251f842/b2abf19e1a8b8a470292e8503a23173cf251f842
+- Rows below 16px pane margin: 44 -> 0
+- Live minimum pane margin / maximum shell ratio: 16px / 2.36
+- Exact saved Share: MISSING_EVIDENCE
 
 ## Dispatch Standalone Cockpit
 
@@ -181,7 +189,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
 | live_document_quality_matrix | ancestor | ancestor_of_head | evaluation\live-document-quality-matrix-2026-07-24\report.json |
@@ -210,6 +218,7 @@ Overall: `northstar_open_approval_gated`
 | live_critical_surface | ancestor | ancestor_of_head | evaluation\live-critical-surface-current-2026-07-20-rerun\report.json |
 | mobile_p0_workspace | ancestor | ancestor_of_head | evaluation\mobile-p0-workspace-gate-2026-07-20\report.json |
 | workspace_docs_share_geometry | ancestor | ancestor_of_head | evaluation\workspace-docs-share-production-gate-2026-07-20\current-geometry.json |
+| document_authoring_pane_margin | missing | ancestor_of_head | evaluation\document-authoring-pane-margin-2026-08-02\report.json |
 | dispatch_standalone_cockpit | ancestor | ancestor_of_head | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
 | dispatch_standalone_viewport_companion | ancestor | ancestor_of_head | evaluation\dispatch-standalone-viewport-2026-07-28\report.json |
 | provider_dispatch_persistence | ancestor | ancestor_of_head | evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json |

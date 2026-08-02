@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-02T13:30:26.703Z",
-  "head": "ca908cf8bbc1db1ee1a1054575921025c6c2e621",
+  "generatedAt": "2026-08-02T15:05:15.638Z",
+  "head": "415f23de65f26528f6ef8c50f50e96221000d3c2",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "ca908cf8bbc1db1ee1a1054575921025c6c2e621",
+    "commitSha": "6623dcb36ecfb5da9509a2655bf6abe53127d216",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-9fcnetygf-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-r1h22erqj-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -163,7 +163,7 @@
       "id": "ui_documents_share_cockpit",
       "state": "proven",
       "artifact": "evaluation\\document-risk-row-mobile-label-2026-08-02\\after-live\\report.json",
-      "detail": "Scoped first-task cockpit proof only, not full Documents/Share IA completion: live /documents?theme=day geometry now directly proves the selected-document cockpit/workbench is not the stale stacked layout at 1440x723 and 390x723, with 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers kept inside the closed disclosure, 0 visible supporting launchers by default, and the legacy document index hidden. Live Day/Night section-navigation evidence additionally proves the selected Work Plan exposes 6 readable section tabs with exactly 1 selected tab, 6 filled states, 44px minimum controls, two-line labels, shell ratio <= 3, and first action containment across 1440x723 and 390x723. Live all-document selected-authoring geometry further covers all 12 canonical documents in 48/48 rows across Day/Night desktop-short/mobile-short, with at most one role-specific cockpit, internal cockpit scrolling, first action inside the viewport, and raw/source editors hidden by default; the foreign-worker briefing no longer stacks education and transmission cockpits. A separate live 48/48 raw-source drilldown contract now proves every canonical document opens exactly one source editor inside the viewport with a bounded 258px editor, local source scrolling, shell ratio <= 2.25, and no horizontal overflow across the same Day/Night desktop-short/mobile-short matrix. Live risk-row navigation adds 4/4 Day/Night desktop-short/mobile-short cases with 3/3 hazard-first visible labels, task context preserved in accessible names and tooltips, shell ratio <= 2.23, and no horizontal overflow. A companion live mobile-order contract proves the selector rail precedes the active editor in all 4/4 cases; a second live mobile-label contract keeps all three 390px selectors visually distinct with an unclipped accident type plus hazard cue while preserving each full hazard in its accessible name and title, body height 728px, first hazard bottom 703px, and shell ratio 2.11. Default /workspace Documents and Share cockpits, /documents mobile first-action containment, exact one-viewport Documents review cockpit, selected-document context/summary layers, selected editor/detail field-summary risk-row landing, selected-editor field summary plus evidence/recheck CTA before raw textarea, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors remain scoped. Live Workspace Share now separately proves a 1440px three-zone cockpit, including desktop-short 1440x723, with the status/provenance rail inside the first viewport and a 390x723 mobile stack with that rail hidden; the invited recipient fixture retains a separate desktop two-zone contract. It also keeps desktop-short Share containment, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, mobile Share exact 844px viewport containment, and /share/[sessionId] desktop recipient confirmation cockpit with mobile confirmation CTA before document details. This is not a claim that the whole Documents page is short; raw/source editing remains an explicit secondary drilldown and is now live-bounded, while deeper row/detail editing and broad human wording review remain separate. It also does not prove exact saved/generated Share, provider live dispatch, or route/page split alone as the UX fix."
+      "detail": "Scoped first-task cockpit proof only, not full Documents/Share IA completion: live /documents?theme=day geometry now directly proves the selected-document cockpit/workbench is not the stale stacked layout at 1440x723 and 390x723, with 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers kept inside the closed disclosure, 0 visible supporting launchers by default, and the legacy document index hidden. Live Day/Night section-navigation evidence additionally proves the selected Work Plan exposes 6 readable section tabs with exactly 1 selected tab, 6 filled states, 44px minimum controls, two-line labels, shell ratio <= 3, and first action containment across 1440x723 and 390x723. Live all-document selected-authoring geometry further covers all 12 canonical documents in 48/48 rows across Day/Night desktop-short/mobile-short, with at most one role-specific cockpit, internal cockpit scrolling, first action inside the viewport, and raw/source editors hidden by default; the foreign-worker briefing no longer stacks education and transmission cockpits. Its strengthened pane-margin companion reduces first-action rows below the required 16px inner-pane margin from 44/48 to 0/48, raises the minimum margin from -41px to 16px, and keeps the maximum shell ratio at 2.36 in aligned live production. A separate live 48/48 raw-source drilldown contract now proves every canonical document opens exactly one source editor inside the viewport with a bounded 258px editor, local source scrolling, shell ratio <= 2.25, and no horizontal overflow across the same Day/Night desktop-short/mobile-short matrix. Live risk-row navigation adds 4/4 Day/Night desktop-short/mobile-short cases with 3/3 hazard-first visible labels, task context preserved in accessible names and tooltips, shell ratio <= 2.23, and no horizontal overflow. A companion live mobile-order contract proves the selector rail precedes the active editor in all 4/4 cases; a second live mobile-label contract keeps all three 390px selectors visually distinct with an unclipped accident type plus hazard cue while preserving each full hazard in its accessible name and title, body height 728px, first hazard bottom 703px, and shell ratio 2.11. Default /workspace Documents and Share cockpits, /documents mobile first-action containment, exact one-viewport Documents review cockpit, selected-document context/summary layers, selected editor/detail field-summary risk-row landing, selected-editor field summary plus evidence/recheck CTA before raw textarea, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors remain scoped. Live Workspace Share now separately proves a 1440px three-zone cockpit, including desktop-short 1440x723, with the status/provenance rail inside the first viewport and a 390x723 mobile stack with that rail hidden; the invited recipient fixture retains a separate desktop two-zone contract. It also keeps desktop-short Share containment, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, mobile Share exact 844px viewport containment, and /share/[sessionId] desktop recipient confirmation cockpit with mobile confirmation CTA before document details. This is not a claim that the whole Documents page is short; raw/source editing remains an explicit secondary drilldown and is now live-bounded, while deeper row/detail editing and broad human wording review remain separate. It also does not prove exact saved/generated Share, provider live dispatch, or route/page split alone as the UX fix."
     },
     {
       "id": "dispatch_standalone_cockpit",
@@ -266,6 +266,18 @@
     "productionCommit": "21076b0ab67f1cb5bdde7dc9f490874e1f59acb5",
     "mobileDocumentDeepReviewOpen": false,
     "mobileVisibleDocumentPreviews": 0
+  },
+  "documentAuthoringPaneMargin": {
+    "artifact": "evaluation\\document-authoring-pane-margin-2026-08-02\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
+    "productCommit": "b2abf19e1a8b8a470292e8503a23173cf251f842",
+    "productionCommit": "b2abf19e1a8b8a470292e8503a23173cf251f842",
+    "sourceHeadMatchesProduction": true,
+    "beforeBelowMargin": 44,
+    "liveBelowMargin": 0,
+    "liveMinimumMargin": 16,
+    "liveMaximumShellRatio": 2.36,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "dispatchStandaloneCockpit": {
     "artifact": "evaluation\\dispatch-standalone-cockpit-2026-07-21\\report.json",
@@ -695,10 +707,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "ca908cf8bbc1db1ee1a1054575921025c6c2e621",
+      "sourceCommit": "415f23de65f26528f6ef8c50f50e96221000d3c2",
       "sourceStatus": "exact",
-      "productionCommit": "ca908cf8bbc1db1ee1a1054575921025c6c2e621",
-      "productionStatus": "matches_live"
+      "productionCommit": "415f23de65f26528f6ef8c50f50e96221000d3c2",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -922,6 +934,14 @@
       "sourceCommit": "21076b0ab67f1cb5bdde7dc9f490874e1f59acb5",
       "sourceStatus": "ancestor",
       "productionCommit": "21076b0ab67f1cb5bdde7dc9f490874e1f59acb5",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "document_authoring_pane_margin",
+      "artifact": "evaluation\\document-authoring-pane-margin-2026-08-02\\report.json",
+      "sourceCommit": null,
+      "sourceStatus": "missing",
+      "productionCommit": "b2abf19e1a8b8a470292e8503a23173cf251f842",
       "productionStatus": "ancestor_of_head"
     },
     {
