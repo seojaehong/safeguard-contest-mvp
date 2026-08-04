@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-04T07:34:17.150Z",
-  "sourceSha": "1d82ed5648685a35007c13a18baaa44eba1bddd6",
+  "generatedAt": "2026-08-04T07:58:20.617Z",
+  "sourceSha": "4c394ac5646172d3aa9fcca8fd4da0fad363ddcf",
   "overall": "open",
   "gates": [
     {
@@ -198,6 +198,17 @@
       "nextActions": [
         "Complete the running e087d474..cb2f2dd7 Codex Security diff scan before closing the sealed finding.",
         "Configure approved server-only Upstash credentials and verify distributed mode before claiming multi-instance protection."
+      ]
+    },
+    {
+      "id": "mcp_generation_work_budget_security",
+      "state": "notice",
+      "label": "MCP generation work-budget security",
+      "evidencePath": "evaluation\\security-mcp-generation-work-budget-2026-08-04\\report.json",
+      "detail": "Live production includes the 96 KiB measured MCP POST body budget and token-bound admission contract with 77 adjacent tests, zero dependency vulnerabilities, and invalid-token 401 fail-closed. The valid authenticated runtime probe, distributed activation, and fresh security rescan remain open; the sealed finding is unchanged, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Run a valid credential-safe production MCP boundary probe without exposing the token.",
+        "Activate the approved distributed limiter configuration and complete a fresh security rescan before reclassifying the sealed finding."
       ]
     },
     {

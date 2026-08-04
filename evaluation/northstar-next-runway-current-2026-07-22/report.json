@@ -1,29 +1,36 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-04T07:34:38.680Z",
+  "generatedAt": "2026-08-04T07:58:33.343Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "1d82ed5648685a35007c13a18baaa44eba1bddd6",
-  "productionCommit": "1d82ed5648685a35007c13a18baaa44eba1bddd6",
+  "sourceHead": "4c394ac5646172d3aa9fcca8fd4da0fad363ddcf",
+  "productionCommit": "a21186df9c03b16935974aeb375c055eb7439752",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "1d82ed5648685a35007c13a18baaa44eba1bddd6",
+    "commitSha": "a21186df9c03b16935974aeb375c055eb7439752",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-aq07poj7f-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-qj5vo3ww2-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": true,
-  "currentHeadIsEvidenceOnlyPending": false,
-  "sourceHeadLivePending": false,
+  "latestEvidenceCommitLive": false,
+  "currentHeadIsEvidenceOnlyPending": true,
+  "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
-  "sourcePendingChangedPaths": [],
+  "sourcePendingChangedPaths": [
+    "scripts/northstar_live_rollup.mjs",
+    "scripts/northstar_next_runway.mjs",
+    "scripts/northstar_open_gate_audit.mjs",
+    "tests/northstar-live-rollup.test.ts",
+    "tests/northstar-next-runway-generator.test.ts",
+    "tests/northstar-open-gate-audit.test.ts"
+  ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "1d82ed5648685a35007c13a18baaa44eba1bddd6",
-  "liveRollupLiveCommit": "1d82ed5648685a35007c13a18baaa44eba1bddd6",
+  "liveExactEvidenceCommit": "4c394ac5646172d3aa9fcca8fd4da0fad363ddcf",
+  "liveRollupLiveCommit": "a21186df9c03b16935974aeb375c055eb7439752",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -51,6 +58,7 @@
     "fullRepositorySecurityScan": "evaluation\\follow-up-full-repository-security-scan-2026-08-02\\report.json",
     "publicSearchDistributedRateLimitReadiness": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
     "publicGenerationAdmissionSecurity": "evaluation\\security-public-generation-admission-2026-08-04\\report.json",
+    "mcpGenerationWorkBudgetSecurity": "evaluation\\security-mcp-generation-work-budget-2026-08-04\\report.json",
     "learningExportRendererSecurity": "evaluation\\learning-export-renderer-security-2026-08-02\\report.json",
     "hermesKnowledgeReviewAuthorityUi": "evaluation\\hermes-knowledge-review-authority-ui-2026-07-25\\report.json",
     "liveDocumentSecondaryGrounding": "evaluation\\live-document-secondary-grounding-2026-07-25\\report.json",
@@ -117,6 +125,11 @@
       "gate": "public_generation_admission_security",
       "state": "notice",
       "reason": "live instance admission is verified; distributed production activation and the fresh remediation diff scan remain open"
+    },
+    {
+      "gate": "mcp_generation_work_budget_security",
+      "state": "notice",
+      "reason": "deployed source includes the measured MCP body and token-bound admission budgets; a valid authenticated runtime probe, distributed activation, and fresh rescan remain open"
     }
   ],
   "approvalGated": [
@@ -597,6 +610,18 @@
     "liveDeploymentVerified": true,
     "distributedHardeningOpen": true,
     "vulnerabilityCount": 0,
+    "freshRescanRequired": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "mcpGenerationWorkBudgetSecurity": {
+    "verdict": "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
+    "sourceHead": "5c0e7c27599a49ff2c6c4c023cf937c240c0a101",
+    "productionCommit": "5c0e7c27599a49ff2c6c4c023cf937c240c0a101",
+    "sourceHeadMatchesProduction": true,
+    "postBodyMaxBytes": 98304,
+    "adjacentTests": 77,
+    "validAuthenticatedRuntimeProbeRequired": true,
+    "distributedActivationRequired": true,
     "freshRescanRequired": true,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },

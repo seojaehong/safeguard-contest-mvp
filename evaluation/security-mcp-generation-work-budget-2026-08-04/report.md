@@ -2,9 +2,9 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_LOCAL_MCP_GENERATION_WORK_BUDGET_LIVE_AND_RESCAN_PENDING`
+`PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING`
 
-The current source at `5c0e7c27599a49ff2c6c4c023cf937c240c0a101` adds a measured 96 KiB JSON-RPC body budget and a token-bound 20/min admission guard before authenticated MCP tool dispatch. Production was still at `e1eeffac2e62d615a5f65e1ecc250983ec77ea88` when this report was written, so this is not a live closure claim.
+The source and production marker are aligned at `5c0e7c27599a49ff2c6c4c023cf937c240c0a101`. The deployed source adds a measured 96 KiB JSON-RPC body budget and a token-bound 20/min admission guard before authenticated MCP tool dispatch. A read-only invalid-token probe returned 401 fail-closed. No production MCP credential was used, so the valid authenticated runtime boundary and fresh rescan remain open.
 
 ## Immutable Baseline
 
@@ -32,10 +32,12 @@ The sealed finding remains unchanged. This report records a remediation candidat
 - Strict TypeScript: PASS.
 - Dependency audit: 0 vulnerabilities.
 - Production build: PASS, Next.js 15.5.22, 28 static pages.
+- Production marker: `5c0e7c27599a49ff2c6c4c023cf937c240c0a101` on `safeguard-contest-n0go4io0m-seojaehongs-projects.vercel.app`.
+- Read-only invalid-token MCP probe: 401 fail-closed; no valid credential was used.
 
 ## Boundaries
 
-- Live deployment evidence is pending.
+- The product source is deployed, but a valid authenticated runtime body/rate-limit probe is pending.
 - A fresh security rescan is still required before the canonical finding can be reclassified.
 - Production distributed limiter activation remains open.
 - No DB, provider, Share-session, embedding/vector, wiki, or KOSHA exact-registry mutation occurred.

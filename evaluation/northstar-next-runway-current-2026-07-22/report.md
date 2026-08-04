@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `1d82ed5648685a35007c13a18baaa44eba1bddd6`
+Source HEAD: `4c394ac5646172d3aa9fcca8fd4da0fad363ddcf`
 
-Production `/api/build-info`: `1d82ed5648685a35007c13a18baaa44eba1bddd6`
+Production `/api/build-info`: `a21186df9c03b16935974aeb375c055eb7439752`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `none`
+Source pending changed paths: `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
 
-Current head is evidence-only pending: `false`
+Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `1d82ed5648685a35007c13a18baaa44eba1bddd6`
+Live rollup source head: `4c394ac5646172d3aa9fcca8fd4da0fad363ddcf`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `4c394ac5646172d3aa9fcca8fd4da0fad363ddcf` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `a21186df9c03b16935974aeb375c055eb7439752`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -52,6 +52,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live editorial near-duplicate classification preserves `100->100` findings while reducing unclassified human-review-required `54->0`. The retained role-prefix/context/hazard/control categories are `81/9/8/2`; humanReviewCompleted=`false` and exact saved Share remains `MISSING_EVIDENCE`.
 - Live product capability truth is measured separately: `PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH`; manual/provider dispatch is `preview_only` with reason `persistent_idempotency_unavailable`, scheduled briefing email ready=`false`, photo Vision/OCR ready/accepted-only=`true/true`, and AI modes are `template, enhanced, full`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains `MISSING_EVIDENCE` and Documents/Share IA remains `OPEN_SEPARATE_VIEWPORT_IA_WAVE`.
 - Public generation admission security is measured separately: `PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN`, live mode `instance`, dependency vulnerabilities `0`, distributed hardening open=`true`, and fresh diff scan required=`true`. This notice does not close multi-instance protection, the immutable scan finding, approval-gated operations, or exact saved Share; exact saved Share remains `MISSING_EVIDENCE`.
+- MCP generation work-budget security is separately measured: `PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING`, POST body budget `98304` bytes, adjacent tests `77`, valid authenticated runtime probe pending=`true`, distributed activation pending=`true`, and fresh rescan required=`true`. This notice preserves the sealed finding and exact saved Share `MISSING_EVIDENCE`.
 - Live Hermes reviewer authority UI is measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI`, local/live viewport contracts `8/8` and `8/8`, with authority order `SIF -> KOSHA -> law -> organization_history -> site_history -> external_context`. Human review remains required and machine evidence does not replace it; no DB/provider/share/publication mutation is claimed. Exact saved Share remains `MISSING_EVIDENCE`, while LLM Wiki publication and Supabase RLS remain approval-gated.
 - Live supporting-document scenario grounding is measured separately: `PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT`, live cases `5/5`, supporting documents `30/30`, cross-scenario leakage `0`, and missingUnexpected `0`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains `MISSING_EVIDENCE`.
 - Live document seed-profile isolation is measured separately: `PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION`, before forbidden fragments `90`, live forbidden fragments `0`, reviewed document surface `60`, and secondary grounding `30/30`. This deterministic gate does not replace broad human wording review or exact saved Share evidence; exact saved Share remains `MISSING_EVIDENCE`.

@@ -1,10 +1,11 @@
 {
   "schemaVersion": "safeclaw-security-mcp-generation-work-budget/v1",
-  "generatedAt": "2026-08-04T07:50:22.1408214Z",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_MCP_GENERATION_WORK_BUDGET_LIVE_AND_RESCAN_PENDING",
+  "generatedAt": "2026-08-04T07:52:02.7810349Z",
+  "verdict": "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
   "sourceHead": "5c0e7c27599a49ff2c6c4c023cf937c240c0a101",
-  "productionCommit": "e1eeffac2e62d615a5f65e1ecc250983ec77ea88",
-  "sourceHeadMatchesProduction": false,
+  "productionCommit": "5c0e7c27599a49ff2c6c4c023cf937c240c0a101",
+  "sourceHeadMatchesProduction": true,
+  "productionDeployment": "safeguard-contest-n0go4io0m-seojaehongs-projects.vercel.app",
   "canonicalBaseline": {
     "scanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
     "targetRevision": "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
@@ -63,10 +64,20 @@
       "status": "PASS",
       "framework": "Next.js 15.5.22",
       "staticPages": 28
+    },
+    "liveReadOnlyProbe": {
+      "path": "/api/mcp/mcp",
+      "method": "POST",
+      "credential": "intentionally_invalid_non_secret",
+      "status": 401,
+      "authenticationFailedClosed": true,
+      "validAuthenticatedBudgetProbeExecuted": false,
+      "reason": "No production MCP credential was used or exposed."
     }
   },
   "remainingBoundaries": {
-    "liveAfterDeploymentRequired": true,
+    "liveAfterDeploymentRequired": false,
+    "validAuthenticatedRuntimeProbeRequired": true,
     "freshSecurityRescanRequired": true,
     "distributedProductionActivationRequired": true,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
