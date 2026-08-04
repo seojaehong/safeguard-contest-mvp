@@ -439,6 +439,18 @@ type NextRunwayReport = {
     freshRescanRequired: boolean;
     exactSavedShareVerdict: string;
   };
+  mcpGenerationWorkBudgetSecurity: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    sourceHeadMatchesProduction: boolean;
+    postBodyMaxBytes: number | null;
+    adjacentTests: number | null;
+    validAuthenticatedRuntimeProbeRequired: boolean;
+    distributedActivationRequired: boolean;
+    freshRescanRequired: boolean;
+    exactSavedShareVerdict: string;
+  };
   documentAuthoringPaneMargin: {
     verdict: string;
     productCommit: string;
@@ -1710,6 +1722,20 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    sourceHeadMatchesProduction: true,
+    currentSourceContract: { postBodyMaxBytes: 98304 },
+    verification: { adjacentMcp: { tests: 77 } },
+    remainingBoundaries: {
+      validAuthenticatedRuntimeProbeRequired: true,
+      distributedProductionActivationRequired: true,
+      freshSecurityRescanRequired: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/document-authoring-pane-margin-2026-08-02/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
     productCommit: "fixture-sha",
@@ -2425,6 +2451,19 @@ describe("northstar next runway generator", () => {
       freshRescanRequired: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
+    expect(report.mcpGenerationWorkBudgetSecurity).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
+      postBodyMaxBytes: 98304,
+      adjacentTests: 77,
+      validAuthenticatedRuntimeProbeRequired: true,
+      distributedActivationRequired: true,
+      freshRescanRequired: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "mcp_generation_work_budget_security",
+      state: "notice",
+    }));
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "public_generation_admission_security",
       state: "notice",

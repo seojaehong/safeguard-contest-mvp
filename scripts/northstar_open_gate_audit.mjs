@@ -50,6 +50,7 @@ const EVIDENCE_PATHS = Object.freeze({
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
+  mcpGenerationWorkBudgetSecurity: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
@@ -4037,6 +4038,113 @@ function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.mcpGenerationWorkBudgetSecurity;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "mcp_generation_work_budget_security",
+      label: "MCP generation work-budget security",
+      state: "missing",
+      evidencePath,
+      detail: "MCP generation work-budget evidence is missing or invalid.",
+      nextActions: ["Restore the deployed source, bounded-body, limiter, no-mutation, runtime-probe, rescan, and exact-Share evidence."],
+    });
+  }
+
+  const baseline = isRecord(report.canonicalBaseline) ? report.canonicalBaseline : {};
+  const contract = isRecord(report.currentSourceContract) ? report.currentSourceContract : {};
+  const rateLimit = isRecord(contract.rateLimit) ? contract.rateLimit : {};
+  const ordering = isRecord(contract.ordering) ? contract.ordering : {};
+  const preserved = isRecord(contract.preservedBehavior) ? contract.preservedBehavior : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focused) ? verification.focused : {};
+  const adjacent = isRecord(verification.adjacentMcp) ? verification.adjacentMcp : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const liveProbe = isRecord(verification.liveReadOnlyProbe) ? verification.liveReadOnlyProbe : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.embeddingOrVectorMutationPerformed === false
+    && mutation.wikiPublished === false
+    && mutation.koshaExactRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING"
+    && sourceHead.length > 0
+    && sourceHead === productionCommit
+    && report.sourceHeadMatchesProduction === true
+    && isGitAncestor(rootDir, sourceHead)
+    && readString(baseline.scanId) === "8fe9c06a-018c-446f-aa98-1b37df95287a"
+    && readString(baseline.targetRevision) === "f0c8a7be02becd53c21fb80842cf23c571f22b1f"
+    && readString(baseline.findingId) === "csf_f30faad248ef517b894c8946"
+    && readString(baseline.ruleId) === "resource-exhaustion.mcp-generation"
+    && readString(baseline.findingStatus) === "immutable_baseline_preserved_remediation_not_rescanned"
+    && readNumber(contract.postBodyMaxBytes) === 98_304
+    && readNumber(contract.questionMaxChars) === 4_000
+    && readNumber(contract.taskMaxChars) === 256
+    && readNumber(contract.documentTextMaxChars) === 20_000
+    && readString(rateLimit.namespace) === "mcp-authenticated"
+    && readNumber(rateLimit.limit) === 20
+    && readNumber(rateLimit.windowMs) === 60_000
+    && rateLimit.rawBearerSentToLimiter === false
+    && rateLimit.distributedWhenConfigured === true
+    && rateLimit.instanceFallbackWhenAbsent === true
+    && rateLimit.partialOrUnavailableDistributedConfigFailsClosed === true
+    && readString(rateLimit.responseModeHeader) === "X-SafeClaw-Rate-Limit"
+    && ordering.authenticationWrapsBudgetedHandler === true
+    && ordering.admissionBeforeBodyBuffering === true
+    && ordering.bodyBudgetBeforeMcpToolDispatch === true
+    && ordering.oversizedChunkedBodyRejected === true
+    && ordering.declaredContentLengthBypassRejectedByMeasuredBytes === true
+    && preserved.boundedAuthenticatedPost === true
+    && preserved.maxQaDocumentPayload === true
+    && preserved.getSseExcludedFromPostBudget === true
+    && preserved.deleteSessionExcludedFromPostBudget === true
+    && readNumber(focused.files) === 2
+    && readNumber(focused.tests) === 14
+    && readString(focused.status) === "PASS"
+    && readNumber(adjacent.files) === 7
+    && readNumber(adjacent.tests) === 77
+    && readString(adjacent.status) === "PASS"
+    && verification.typecheck === "PASS"
+    && readNumber(verification.dependencyAuditVulnerabilities) === 0
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && readNumber(liveProbe.status) === 401
+    && liveProbe.authenticationFailedClosed === true
+    && liveProbe.validAuthenticatedBudgetProbeExecuted === false
+    && noMutation
+    && remaining.liveAfterDeploymentRequired === false
+    && remaining.validAuthenticatedRuntimeProbeRequired === true
+    && remaining.freshSecurityRescanRequired === true
+    && remaining.distributedProductionActivationRequired === true
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && remaining.approvalGatedBoundariesUnchanged === true;
+
+  return gateResult({
+    id: "mcp_generation_work_budget_security",
+    label: "MCP generation work-budget security",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live production includes the 96 KiB measured MCP POST body budget and token-bound admission contract with 77 adjacent tests, zero dependency vulnerabilities, and invalid-token 401 fail-closed. The valid authenticated runtime probe, distributed activation, and fresh security rescan remain open; the sealed finding is unchanged, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      : `MCP budget verdict=${readString(report.verdict) || "unknown"}, source/live=${sourceHead}/${productionCommit}, bodyBytes=${readNumber(contract.postBodyMaxBytes)}, adjacent=${readNumber(adjacent.tests)}, liveAuth=${readNumber(liveProbe.status)}, validProbe=${liveProbe.validAuthenticatedBudgetProbeExecuted === true}, rescan=${remaining.freshSecurityRescanRequired === true}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Run a valid credential-safe production MCP boundary probe without exposing the token.",
+          "Activate the approved distributed limiter configuration and complete a fresh security rescan before reclassifying the sealed finding.",
+        ]
+      : ["Restore every deployed-source, body-budget, limiter, verification, no-mutation, rescan, and exact-Share predicate."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateShareResultFixtureCockpitGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.shareResultDrilldown;
   const report = readJsonFile(rootDir, evidencePath);
@@ -4922,6 +5030,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateFullRepositorySecurityScanGate(rootDir),
     evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir),
     evaluatePublicGenerationAdmissionSecurityGate(rootDir),
+    evaluateMcpGenerationWorkBudgetSecurityGate(rootDir),
     evaluateLearningExportRendererSecurityGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir),

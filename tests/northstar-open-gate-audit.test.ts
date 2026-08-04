@@ -2091,6 +2091,72 @@ function createFixtureRoot(): string {
       distributedProductionLimiterStillRecommended: true,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    sourceHeadMatchesProduction: true,
+    canonicalBaseline: {
+      scanId: "8fe9c06a-018c-446f-aa98-1b37df95287a",
+      targetRevision: "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
+      findingId: "csf_f30faad248ef517b894c8946",
+      ruleId: "resource-exhaustion.mcp-generation",
+      findingStatus: "immutable_baseline_preserved_remediation_not_rescanned",
+    },
+    currentSourceContract: {
+      postBodyMaxBytes: 98304,
+      questionMaxChars: 4000,
+      taskMaxChars: 256,
+      documentTextMaxChars: 20000,
+      rateLimit: {
+        namespace: "mcp-authenticated",
+        limit: 20,
+        windowMs: 60000,
+        rawBearerSentToLimiter: false,
+        distributedWhenConfigured: true,
+        instanceFallbackWhenAbsent: true,
+        partialOrUnavailableDistributedConfigFailsClosed: true,
+        responseModeHeader: "X-SafeClaw-Rate-Limit",
+      },
+      ordering: {
+        authenticationWrapsBudgetedHandler: true,
+        admissionBeforeBodyBuffering: true,
+        bodyBudgetBeforeMcpToolDispatch: true,
+        oversizedChunkedBodyRejected: true,
+        declaredContentLengthBypassRejectedByMeasuredBytes: true,
+      },
+      preservedBehavior: {
+        boundedAuthenticatedPost: true,
+        maxQaDocumentPayload: true,
+        getSseExcludedFromPostBudget: true,
+        deleteSessionExcludedFromPostBudget: true,
+      },
+    },
+    verification: {
+      focused: { files: 2, tests: 14, status: "PASS" },
+      adjacentMcp: { files: 7, tests: 77, status: "PASS" },
+      typecheck: "PASS",
+      dependencyAuditVulnerabilities: 0,
+      build: { status: "PASS", staticPages: 28 },
+      liveReadOnlyProbe: { status: 401, authenticationFailedClosed: true, validAuthenticatedBudgetProbeExecuted: false },
+    },
+    remainingBoundaries: {
+      liveAfterDeploymentRequired: false,
+      validAuthenticatedRuntimeProbeRequired: true,
+      freshSecurityRescanRequired: true,
+      distributedProductionActivationRequired: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      approvalGatedBoundariesUnchanged: true,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      embeddingOrVectorMutationPerformed: false,
+      wikiPublished: false,
+      koshaExactRegistryMutationPerformed: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "document-authoring-pane-margin-2026-08-02", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
     productCommit: "fixture-sha",
@@ -3022,6 +3088,13 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("instance admission");
     expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("fresh diff scan remain open");
     expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")).toMatchObject({
+      state: "notice",
+      evidencePath: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("96 KiB");
+    expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("valid authenticated runtime probe");
+    expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "tenant_authorization_remediation")).toMatchObject({ state: "proven" });
     expect(audit.gates.find((gate) => gate.id === "tenant_authorization_remediation")?.detail).toContain("2/2");
     expect(audit.gates.find((gate) => gate.id === "spreadsheet_formula_neutralization")).toMatchObject({ state: "proven" });

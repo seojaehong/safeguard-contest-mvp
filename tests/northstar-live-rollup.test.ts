@@ -222,6 +222,17 @@ type RollupReport = {
     vulnerabilityCount: number | null;
     exactSavedShareVerdict: string;
   };
+  mcpGenerationWorkBudgetSecurity: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    postBodyMaxBytes: number | null;
+    adjacentTests: number | null;
+    validAuthenticatedRuntimeProbeRequired: boolean;
+    distributedActivationRequired: boolean;
+    freshRescanRequired: boolean;
+    exactSavedShareVerdict: string;
+  };
   learningExportRendererSecurity: {
     verdict: string;
     sourceHead: string;
@@ -878,6 +889,20 @@ function createFixtureRoot(): { root: string; head: string } {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    sourceHeadMatchesProduction: true,
+    currentSourceContract: { postBodyMaxBytes: 98304 },
+    verification: { adjacentMcp: { tests: 77 } },
+    remainingBoundaries: {
+      validAuthenticatedRuntimeProbeRequired: true,
+      distributedProductionActivationRequired: true,
+      freshSecurityRescanRequired: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/document-authoring-pane-margin-2026-08-02/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
     productCommit: "TO_FILL",
@@ -914,6 +939,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json",
     "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json",
     "evaluation/security-public-generation-admission-2026-08-04/report.json",
+    "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json",
     "evaluation/learning-export-renderer-security-2026-08-02/report.json",
     "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
@@ -1159,6 +1185,16 @@ describe("northstar live rollup", () => {
       vulnerabilityCount: 0,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
+    expect(report.mcpGenerationWorkBudgetSecurity).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
+      postBodyMaxBytes: 98304,
+      adjacentTests: 77,
+      validAuthenticatedRuntimeProbeRequired: true,
+      distributedActivationRequired: true,
+      freshRescanRequired: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "mcp_generation_work_budget_security")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "public_generation_admission_security")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "public_search_distributed_rate_limit_readiness")?.sourceStatus).toBe("ancestor");
     expect(report.learningExportRendererSecurity).toMatchObject({
