@@ -28,6 +28,7 @@ type FetchLike = (
 
 export type PublicRateLimitOptions = {
   request: Request;
+  identifier?: string;
   namespace: string;
   limit: number;
   windowMs: number;
@@ -142,7 +143,7 @@ export async function checkPublicRateLimit(
 ): Promise<PublicRateLimitDecision> {
   const environment = options.environment ?? process.env;
   const config = readUpstashConfiguration(environment);
-  const identifier = getClientIp(options.request);
+  const identifier = options.identifier ?? getClientIp(options.request);
 
   if (config.state === "invalid") {
     console.error("[public-rate-limit] distributed limiter configuration is incomplete or unsafe", {
@@ -181,7 +182,7 @@ export function publicRateLimitResponse(decision: PublicRateLimitDecision): Resp
   return new Response(
     JSON.stringify({
       error: unavailable
-        ? "요청 보호 서비스를 확인하는 동안 검색을 잠시 사용할 수 없습니다."
+        ? "요청 보호 서비스를 확인하는 동안 요청을 잠시 처리할 수 없습니다."
         : "요청이 너무 잦습니다. 잠시 후 다시 시도해 주세요.",
       code: unavailable ? "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
       retryAfterSeconds: Number(retryAfter),

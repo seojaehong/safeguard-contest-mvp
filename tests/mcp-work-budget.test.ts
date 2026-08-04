@@ -1,22 +1,32 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   MCP_DOCUMENT_TEXT_MAX_CHARS,
   MCP_GENERATION_QUESTION_MAX_CHARS,
+  MCP_REQUEST_BODY_MAX_BYTES,
   MCP_TASK_MAX_CHARS,
 } from "@/lib/mcp-work-budget";
 
+const mocks = vi.hoisted(() => ({
+  baseHandler: vi.fn(async (_request: Request) => Response.json({ ok: true })),
+}));
+
 vi.mock("mcp-handler", () => ({
-  createMcpHandler: vi.fn(() => vi.fn()),
+  createMcpHandler: vi.fn(() => mocks.baseHandler),
   withMcpAuth: vi.fn((handler: unknown) => handler),
+}));
+
+vi.mock("@/lib/mcp-auth", () => ({
+  isMcpEnabled: vi.fn(() => true),
+  resolveMcpAuth: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase-admin", () => ({
   createSupabaseAdminClient: vi.fn(() => null),
 }));
 
-import { registerTools } from "@/app/api/mcp/[transport]/implementation";
+import { handler, registerTools } from "@/app/api/mcp/[transport]/implementation";
 
 type SafeParseSchema = {
   safeParse(value: unknown): { success: boolean };
@@ -45,6 +55,12 @@ function schemaFor(tools: Map<string, ToolConfig>, toolName: string): SafeParseS
 }
 
 describe("MCP tool work budgets", () => {
+  beforeEach(() => {
+    mocks.baseHandler.mockClear();
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
   it.each([
     ["run_safeclaw_harness_agent", {}],
     ["generate_reviewed_safety_docpack", { task: "용접" }],
@@ -83,5 +99,111 @@ describe("MCP tool work budgets", () => {
       task: "용접",
       document_text: "가".repeat(MCP_DOCUMENT_TEXT_MAX_CHARS + 1),
     }).success).toBe(false);
+  });
+
+  it("rejects an oversized chunked JSON-RPC body before the MCP handler", async () => {
+    const response = await handler(new Request("https://www.safeclaw.kr/api/mcp/mcp", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer oversized-body-token",
+        "Content-Length": "1",
+        "Content-Type": "application/json",
+      },
+      body: "가".repeat(Math.floor(MCP_REQUEST_BODY_MAX_BYTES / 3) + 1),
+    }));
+
+    expect(response.status).toBe(413);
+    expect(await response.json()).toMatchObject({ code: "MCP_PAYLOAD_TOO_LARGE" });
+    expect(mocks.baseHandler).not.toHaveBeenCalled();
+  });
+
+  it("preserves the largest legitimate QA document payload", async () => {
+    const response = await handler(new Request("https://www.safeclaw.kr/api/mcp/mcp", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer max-qa-payload-token",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "tools/call",
+        params: {
+          name: "qa_review_docpack",
+          arguments: {
+            task: "용접",
+            document_text: "가".repeat(MCP_DOCUMENT_TEXT_MAX_CHARS),
+          },
+        },
+      }),
+    }));
+
+    expect(response.status).toBe(200);
+    expect(mocks.baseHandler).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves a bounded authenticated POST and reports the limiter mode", async () => {
+    const response = await handler(new Request("https://www.safeclaw.kr/api/mcp/mcp", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer bounded-body-token",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+    }));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("instance");
+    expect(mocks.baseHandler).toHaveBeenCalledTimes(1);
+    const forwarded = mocks.baseHandler.mock.calls[0]?.[0] as Request | undefined;
+    expect(await forwarded?.json()).toMatchObject({ method: "tools/list" });
+  });
+
+  it("fails closed before MCP work when distributed configuration is partial", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+
+    const response = await handler(new Request("https://www.safeclaw.kr/api/mcp/mcp", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer partial-config-token",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+    }));
+
+    expect(response.status).toBe(503);
+    expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("distributed");
+    expect(mocks.baseHandler).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalled();
+    error.mockRestore();
+  });
+
+  it("uses a hashed token-bound distributed key without exposing the bearer", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "distributed-test-token");
+    const bearer = "mcp-sensitive-bearer";
+    const fetchImpl = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
+      const command = JSON.parse(String(init?.body)) as unknown[];
+      expect(String(command[3])).toMatch(/^safeclaw:public-rate:mcp-authenticated:[a-f0-9]{32}$/u);
+      expect(String(command[3])).not.toContain(bearer);
+      return Response.json({ result: [1, 59_000] });
+    });
+    vi.stubGlobal("fetch", fetchImpl);
+
+    const response = await handler(new Request("https://www.safeclaw.kr/api/mcp/mcp", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${bearer}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+    }));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("distributed");
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(mocks.baseHandler).toHaveBeenCalledTimes(1);
   });
 });

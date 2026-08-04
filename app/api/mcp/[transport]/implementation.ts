@@ -15,6 +15,7 @@
 import { createMcpHandler, withMcpAuth } from "mcp-handler";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
+import { createHash } from "node:crypto";
 import { z } from "zod";
 
 import { runAsk } from "@/lib/search";
@@ -25,10 +26,17 @@ import {
   MCP_DOC_TYPE_MAX_CHARS,
   MCP_DOCUMENT_TEXT_MAX_CHARS,
   MCP_GENERATION_QUESTION_MAX_CHARS,
+  MCP_REQUEST_BODY_MAX_BYTES,
   MCP_REGION_MAX_CHARS,
   MCP_SEARCH_QUERY_MAX_CHARS,
   MCP_TASK_MAX_CHARS,
+  enforceMcpRequestBodyBudget,
 } from "@/lib/mcp-work-budget";
+import {
+  applyPublicRateLimitHeader,
+  checkPublicRateLimit,
+  publicRateLimitResponse,
+} from "@/lib/public-distributed-rate-limit";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import {
   createSupabaseMcpWorkpackRepository,
@@ -344,10 +352,35 @@ const verifyToken = async (_req: Request, bearerToken?: string): Promise<AuthInf
   };
 };
 
-const authHandler = withMcpAuth(baseHandler, verifyToken, { required: true });
+const instanceLimiter = createRateLimiter({ limit: 20, windowMs: 60_000 });
 
-// 토큰당 20/min. 서버리스 웜 인스턴스 단위의 소프트 가드(분산 쿼터 아님).
-const limiter = createRateLimiter({ limit: 20, windowMs: 60_000 });
+async function protectedBaseHandler(request: Request): Promise<Response> {
+  if (request.method !== "POST") return baseHandler(request);
+
+  const bearer = request.headers
+    .get("authorization")
+    ?.replace(/^Bearer\s+/i, "")
+    .trim();
+  const identifier = createHash("sha256").update(bearer || "missing-bearer").digest("hex");
+  const rateDecision = await checkPublicRateLimit({
+    request,
+    identifier,
+    namespace: "mcp-authenticated",
+    limit: 20,
+    windowMs: 60_000,
+    instanceLimiter,
+  });
+  const rateLimitRejection = publicRateLimitResponse(rateDecision);
+  if (rateLimitRejection) return rateLimitRejection;
+
+  const bodyBudget = await enforceMcpRequestBodyBudget(request, MCP_REQUEST_BODY_MAX_BYTES);
+  if (!bodyBudget.ok) return bodyBudget.response;
+
+  const response = await baseHandler(bodyBudget.request);
+  return applyPublicRateLimitHeader(response, rateDecision);
+}
+
+const authHandler = withMcpAuth(protectedBaseHandler, verifyToken, { required: true });
 
 export async function handler(request: Request): Promise<Response> {
   // 활성화 조건: env 레거시 토큰이 있거나 Supabase 서비스 롤(DB 토큰)이 설정된 경우.
@@ -356,28 +389,6 @@ export async function handler(request: Request): Promise<Response> {
       status: 501,
       headers: { "Content-Type": "application/json" },
     });
-  }
-
-  // POST(JSON-RPC 메시지)만 rate limit. GET(SSE)/DELETE(세션 종료)는 제외.
-  // 키는 raw bearer(휘발성 인메모리, DB/로그 미저장). DB·env 토큰 모두 커버한다.
-  if (request.method === "POST") {
-    const bearer = request.headers
-      .get("authorization")
-      ?.replace(/^Bearer\s+/i, "")
-      .trim();
-    if (bearer) {
-      const result = limiter.check(bearer);
-      if (!result.allowed) {
-        const retryAfter = String(result.retryAfterSeconds ?? 60);
-        return new Response(
-          JSON.stringify({
-            error: "요청이 너무 잦습니다. 잠시 후 다시 시도해 주세요.",
-            retryAfterSeconds: Number(retryAfter),
-          }),
-          { status: 429, headers: { "Content-Type": "application/json", "Retry-After": retryAfter } }
-        );
-      }
-    }
   }
 
   return authHandler(request);
