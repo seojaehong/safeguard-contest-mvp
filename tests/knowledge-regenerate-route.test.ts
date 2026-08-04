@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { generateKnowledgeText } from "@/lib/ai";
 import {
   PUBLIC_KNOWLEDGE_QUESTION_MAX_CHARS,
@@ -19,6 +19,39 @@ vi.mock("@/lib/ai", () => ({
 describe("knowledge candidate API", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("fails closed before candidate parsing or AI generation when distributed admission is misconfigured", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { POST } = await import("@/app/api/knowledge/regenerate/route");
+
+    const response = await POST(new NextRequest("http://localhost/api/knowledge/regenerate", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-forwarded-for": "198.51.100.41"
+      },
+      body: JSON.stringify({
+        question: "추락 위험 통제대책을 검토해줘",
+        generate: true,
+        tenantContext: { organizationId: "org-1", siteId: "site-1" },
+        rawEvents: []
+      })
+    }));
+    const payload = await response.json() as { code: string };
+
+    expect(response.status).toBe(503);
+    expect(payload.code).toBe("DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+    expect(generateKnowledgeText).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledTimes(1);
+    error.mockRestore();
   });
 
   it.each([
@@ -248,6 +281,7 @@ describe("knowledge candidate API", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
+    expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("instance");
     expect(payload).toMatchObject({
       ok: true,
       storageMode: "stateless_candidate",

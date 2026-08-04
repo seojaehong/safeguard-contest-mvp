@@ -7,6 +7,12 @@ import {
 } from "@/lib/safety-document-rubric";
 import { matchSafetyKnowledge } from "@/lib/safety-knowledge";
 import { generateKnowledgeText } from "@/lib/ai";
+import { createRateLimiter } from "@/lib/rate-limit";
+import {
+  applyPublicRateLimitHeader,
+  checkPublicRateLimit,
+  publicRateLimitResponse
+} from "@/lib/public-distributed-rate-limit";
 import {
   getSafetyReferenceDisplaySummary,
   getSafetyReferenceDisplayTitle,
@@ -22,6 +28,13 @@ import {
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // 2min — single Vertex call with 1 retry
+
+const REMEDIATION_RATE_LIMIT = 12;
+const REMEDIATION_RATE_WINDOW_MS = 60_000;
+const limiter = createRateLimiter({
+  limit: REMEDIATION_RATE_LIMIT,
+  windowMs: REMEDIATION_RATE_WINDOW_MS
+});
 
 const documentLabels: Record<RubricDocumentKey, string> = {
   workpackSummaryDraft: "점검결과 요약",
@@ -187,6 +200,16 @@ async function buildPrompt(request: RemediationRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const rateLimit = await checkPublicRateLimit({
+    request,
+    namespace: "workpack-remediation",
+    limit: REMEDIATION_RATE_LIMIT,
+    windowMs: REMEDIATION_RATE_WINDOW_MS,
+    instanceLimiter: limiter
+  });
+  const limited = publicRateLimitResponse(rateLimit);
+  if (limited) return limited;
+
   const body = await request.json().catch(() => null) as unknown;
   const parsed = readRequest(body);
   if (!parsed.ok) {
@@ -196,14 +219,20 @@ export async function POST(request: NextRequest) {
         ? PUBLIC_REMEDIATION_DOCUMENT_MAX_CHARS
         : null;
     if (limit !== null) {
-      return publicWorkBudgetExceeded(parsed.message, limit);
+      return applyPublicRateLimitHeader(publicWorkBudgetExceeded(parsed.message, limit), rateLimit);
     }
-    return NextResponse.json({ ok: false, message: parsed.message }, { status: 400 });
+    return applyPublicRateLimitHeader(
+      NextResponse.json({ ok: false, message: parsed.message }, { status: 400 }),
+      rateLimit
+    );
   }
 
   const promptBundle = await buildPrompt(parsed.request);
   if (!promptBundle) {
-    return NextResponse.json({ ok: false, message: "rubric item not found" }, { status: 404 });
+    return applyPublicRateLimitHeader(
+      NextResponse.json({ ok: false, message: "rubric item not found" }, { status: 404 }),
+      rateLimit
+    );
   }
 
   const generated = await generateKnowledgeText(promptBundle.prompt);
@@ -237,7 +266,7 @@ export async function POST(request: NextRequest) {
     ? `Supabase 지식 DB ${promptBundle.catalog.count.toLocaleString("ko-KR")}건을 보완 근거 후보로 확인했습니다.`
     : `Supabase 지식 DB 검색 실패 또는 미설정: ${promptBundle.catalog.message} 내장 법령·KOSHA seed 기준으로 보완했습니다.`;
 
-  return NextResponse.json({
+  return applyPublicRateLimitHeader(NextResponse.json({
     ok: true,
     configured: generated.configured,
     providerLabel: generated.providerLabel,
@@ -254,5 +283,5 @@ export async function POST(request: NextRequest) {
     documentKey: parsed.request.documentKey,
     text,
     sources: [...sources.slice(0, 3), ...catalogSources.slice(0, 2)]
-  });
+  }), rateLimit);
 }

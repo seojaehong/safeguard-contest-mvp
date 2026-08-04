@@ -1,5 +1,5 @@
-import type { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { NextRequest } from "next/server";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { POST } from "@/app/api/workpack/remediate/route";
 import { generateKnowledgeText } from "@/lib/ai";
@@ -50,9 +50,14 @@ function archiveSifReference(): SafetyReferenceItem {
 }
 
 function jsonRequest(body: unknown): NextRequest {
-  return {
-    json: async () => body
-  } as unknown as NextRequest;
+  return new NextRequest("http://localhost/api/workpack/remediate", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-forwarded-for": "198.51.100.40"
+    },
+    body: JSON.stringify(body)
+  });
 }
 
 describe("workpack remediation route", () => {
@@ -96,12 +101,39 @@ describe("workpack remediation route", () => {
     const body = await response.json() as { sources: Array<{ title: string; url: string }> };
     const generatedPrompt = vi.mocked(generateKnowledgeText).mock.calls[0]?.[0] || "";
 
+    expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("instance");
     expect(body.sources.some((source) => source.title === readableTitle)).toBe(true);
     expect(body.sources.every((source) => source.title !== rawTitle)).toBe(true);
     expect(body.sources.find((source) => source.title === readableTitle)?.url).toContain(encodeURIComponent(readableTitle));
     expect(generatedPrompt).toContain(readableTitle);
     expect(generatedPrompt).not.toContain(rawTitle);
     expect(archiveSifReference().title).toBe(rawTitle);
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("fails closed before reference search or AI generation when distributed admission is misconfigured", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    const response = await POST(jsonRequest({
+      question: "지하 기계실 배수펌프 점검",
+      documentKey: "riskAssessmentDraft",
+      documentText: "배수펌프 점검 전 안전조치",
+      rubricItemId: "required-risk-reduction"
+    }));
+    const body = await response.json() as { code: string };
+
+    expect(response.status).toBe(503);
+    expect(body.code).toBe("DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+    expect(generateKnowledgeText).not.toHaveBeenCalled();
+    expect(searchSafetyReferences).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledTimes(1);
+    error.mockRestore();
   });
 
   it("rejects oversized remediation questions before reference search or AI generation", async () => {
