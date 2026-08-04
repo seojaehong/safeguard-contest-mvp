@@ -1,0 +1,93 @@
+{
+  "schema": "safeclaw-security-public-generation-admission/v1",
+  "verdict": "PASS_CURRENT_SOURCE_PUBLIC_GENERATION_ADMISSION_AND_DEPENDENCY_AUDIT_LIVE_PENDING",
+  "productCommit": "cb2f2dd7b8b6be257dc21c84219d0bbd361f1660",
+  "baseSecurityScan": {
+    "scanId": "d12d04ce-deaf-497d-8754-33d5baab2ca0",
+    "targetCommit": "e087d474a1de72bd3687c703a61a4263fe792fa4",
+    "immutableBaselinePreserved": true,
+    "reportableFindingCount": 28,
+    "suppressedCandidateCount": 1
+  },
+  "admissionControls": [
+    {
+      "route": "/api/knowledge/regenerate",
+      "namespace": "knowledge-regeneration",
+      "limit": 20,
+      "windowMs": 60000,
+      "beforeRequestBodyParsing": true,
+      "beforeAiGeneration": true
+    },
+    {
+      "route": "/api/workpack/remediate",
+      "namespace": "workpack-remediation",
+      "limit": 12,
+      "windowMs": 60000,
+      "beforeRequestBodyParsing": true,
+      "beforeReferenceSearch": true,
+      "beforeAiGeneration": true
+    }
+  ],
+  "runtimeBoundary": {
+    "distributedWhenConfigured": true,
+    "instanceFallbackWhenDistributedConfigAbsent": true,
+    "partialDistributedConfigFailsClosed": true,
+    "successHeader": "X-SafeClaw-Rate-Limit",
+    "liveDeploymentVerified": false
+  },
+  "dependencyAudit": {
+    "before": {
+      "total": 5,
+      "high": 4,
+      "moderate": 1
+    },
+    "after": {
+      "total": 0,
+      "high": 0,
+      "moderate": 0
+    },
+    "overrides": {
+      "brace-expansion": "5.0.9",
+      "fast-uri": "3.1.5",
+      "hono": "4.13.0",
+      "ip-address": "10.4.0"
+    }
+  },
+  "verification": {
+    "focused": {
+      "testFiles": 3,
+      "tests": 23,
+      "passed": true
+    },
+    "adjacentSecurity": {
+      "testFiles": 15,
+      "tests": 173,
+      "passed": true
+    },
+    "typecheck": "PASS",
+    "build": {
+      "verdict": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "npmAudit": {
+      "verdict": "PASS",
+      "vulnerabilityCount": 0
+    },
+    "diffCheck": "PASS"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedOperationsUnchanged": true,
+    "freshPostChangeSecurityRescanRequired": true,
+    "liveDeploymentVerificationRequired": true
+  }
+}
