@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-02T15:07:34.343Z",
-  "sourceSha": "08d5104cf8273016384eee04fbf0e730c4af7724",
+  "generatedAt": "2026-08-04T07:31:30.987Z",
+  "sourceSha": "6ba1546b85bf3e96b54ec1d1810a17a366c83460",
   "overall": "open",
   "gates": [
     {
@@ -187,6 +187,17 @@
       "nextActions": [
         "Configure both server-only Upstash REST variables through an approved production environment change.",
         "Verify both public search routes return X-SafeClaw-Rate-Limit=distributed, then rerun the full repository scan before closing either sealed finding."
+      ]
+    },
+    {
+      "id": "public_generation_admission_security",
+      "state": "notice",
+      "label": "Public generation admission security",
+      "evidencePath": "evaluation\\security-public-generation-admission-2026-08-04\\report.json",
+      "detail": "Live production enforces fail-fast instance admission before request parsing, reference search, and AI work on both public generation routes, and the dependency audit remains zero. Distributed production activation plus the fresh diff scan remain open; the immutable baseline is preserved, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Complete the running e087d474..cb2f2dd7 Codex Security diff scan before closing the sealed finding.",
+        "Configure approved server-only Upstash credentials and verify distributed mode before claiming multi-instance protection."
       ]
     },
     {

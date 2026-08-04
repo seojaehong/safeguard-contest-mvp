@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-02T15:07:36.113Z",
-  "head": "08d5104cf8273016384eee04fbf0e730c4af7724",
+  "generatedAt": "2026-08-04T07:31:32.820Z",
+  "head": "6ba1546b85bf3e96b54ec1d1810a17a366c83460",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "08d5104cf8273016384eee04fbf0e730c4af7724",
+    "commitSha": "cfd05c7b4443704a153ff5478d02469cd0a6933d",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-6hks8kldh-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-2usnhtbzp-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 35
+    "gateCount": 36
   },
   "provenGates": [
     {
@@ -128,6 +128,12 @@
       "state": "notice",
       "artifact": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
       "detail": "Live production contains an atomic, IP-hashed, fail-closed distributed limiter capability for both public search routes, while read-only probes honestly report X-SafeClaw-Rate-Limit=instance because production Upstash configuration is absent. Distributed activation and a future full scan remain required before closing the two sealed search findings; 13 DB/RLS findings remain approval-gated and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "public_generation_admission_security",
+      "state": "notice",
+      "artifact": "evaluation\\security-public-generation-admission-2026-08-04\\report.json",
+      "detail": "Live production enforces fail-fast instance admission before request parsing, reference search, and AI work on both public generation routes, and the dependency audit remains zero. Distributed production activation plus the fresh diff scan remain open; the immutable baseline is preserved, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "learning_export_renderer_security",
@@ -378,6 +384,17 @@
     "distributedActivationPending": true,
     "sealedFindingsClosedWithoutRescan": false,
     "remainingDbRlsFindings": 13,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "publicGenerationAdmissionSecurity": {
+    "artifact": "evaluation\\security-public-generation-admission-2026-08-04\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN",
+    "productCommit": "cb2f2dd7b8b6be257dc21c84219d0bbd361f1660",
+    "productionCommit": "42ce15f05b543ea379efb22749bde1559acdbc11",
+    "liveMode": "instance",
+    "distributedHardeningOpen": true,
+    "freshRescanRequired": true,
+    "vulnerabilityCount": 0,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "learningExportRendererSecurity": {
@@ -707,10 +724,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "08d5104cf8273016384eee04fbf0e730c4af7724",
+      "sourceCommit": "6ba1546b85bf3e96b54ec1d1810a17a366c83460",
       "sourceStatus": "exact",
-      "productionCommit": "08d5104cf8273016384eee04fbf0e730c4af7724",
-      "productionStatus": "matches_live"
+      "productionCommit": "6ba1546b85bf3e96b54ec1d1810a17a366c83460",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -854,6 +871,14 @@
       "sourceCommit": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
       "sourceStatus": "ancestor",
       "productionCommit": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "public_generation_admission_security",
+      "artifact": "evaluation\\security-public-generation-admission-2026-08-04\\report.json",
+      "sourceCommit": null,
+      "sourceStatus": "missing",
+      "productionCommit": "42ce15f05b543ea379efb22749bde1559acdbc11",
       "productionStatus": "ancestor_of_head"
     },
     {

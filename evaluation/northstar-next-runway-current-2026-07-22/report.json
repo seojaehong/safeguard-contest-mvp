@@ -1,29 +1,36 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-02T15:07:43.687Z",
+  "generatedAt": "2026-08-04T07:31:48.878Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "08d5104cf8273016384eee04fbf0e730c4af7724",
-  "productionCommit": "08d5104cf8273016384eee04fbf0e730c4af7724",
+  "sourceHead": "6ba1546b85bf3e96b54ec1d1810a17a366c83460",
+  "productionCommit": "cfd05c7b4443704a153ff5478d02469cd0a6933d",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "08d5104cf8273016384eee04fbf0e730c4af7724",
+    "commitSha": "cfd05c7b4443704a153ff5478d02469cd0a6933d",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-6hks8kldh-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-2usnhtbzp-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": true,
-  "currentHeadIsEvidenceOnlyPending": false,
-  "sourceHeadLivePending": false,
+  "latestEvidenceCommitLive": false,
+  "currentHeadIsEvidenceOnlyPending": true,
+  "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
-  "sourcePendingChangedPaths": [],
+  "sourcePendingChangedPaths": [
+    "scripts/northstar_live_rollup.mjs",
+    "scripts/northstar_next_runway.mjs",
+    "scripts/northstar_open_gate_audit.mjs",
+    "tests/northstar-live-rollup.test.ts",
+    "tests/northstar-next-runway-generator.test.ts",
+    "tests/northstar-open-gate-audit.test.ts"
+  ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "08d5104cf8273016384eee04fbf0e730c4af7724",
-  "liveRollupLiveCommit": "08d5104cf8273016384eee04fbf0e730c4af7724",
+  "liveExactEvidenceCommit": "6ba1546b85bf3e96b54ec1d1810a17a366c83460",
+  "liveRollupLiveCommit": "cfd05c7b4443704a153ff5478d02469cd0a6933d",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -50,6 +57,7 @@
     "documentExportWorkBudget": "evaluation\\document-export-work-budget-2026-08-01\\report.json",
     "fullRepositorySecurityScan": "evaluation\\follow-up-full-repository-security-scan-2026-08-02\\report.json",
     "publicSearchDistributedRateLimitReadiness": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
+    "publicGenerationAdmissionSecurity": "evaluation\\security-public-generation-admission-2026-08-04\\report.json",
     "learningExportRendererSecurity": "evaluation\\learning-export-renderer-security-2026-08-02\\report.json",
     "hermesKnowledgeReviewAuthorityUi": "evaluation\\hermes-knowledge-review-authority-ui-2026-07-25\\report.json",
     "liveDocumentSecondaryGrounding": "evaluation\\live-document-secondary-grounding-2026-07-25\\report.json",
@@ -111,6 +119,11 @@
       "gate": "public_search_distributed_rate_limit_readiness",
       "state": "notice",
       "reason": "live capability is verified with X-SafeClaw-Rate-Limit=instance; production distributed configuration remains pending"
+    },
+    {
+      "gate": "public_generation_admission_security",
+      "state": "notice",
+      "reason": "live instance admission is verified; distributed production activation and the fresh remediation diff scan remain open"
     }
   ],
   "approvalGated": [
@@ -581,6 +594,17 @@
     "distributedActivationPending": true,
     "sealedFindingsClosedWithoutRescan": false,
     "remainingDbRlsFindings": 13,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "publicGenerationAdmissionSecurity": {
+    "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN",
+    "productCommit": "cb2f2dd7b8b6be257dc21c84219d0bbd361f1660",
+    "productionCommit": "42ce15f05b543ea379efb22749bde1559acdbc11",
+    "liveMode": "instance",
+    "liveDeploymentVerified": true,
+    "distributedHardeningOpen": true,
+    "vulnerabilityCount": 0,
+    "freshRescanRequired": true,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "learningExportRendererSecurity": {
