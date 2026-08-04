@@ -2,7 +2,7 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_PUBLIC_GENERATION_ADMISSION_AND_DEPENDENCY_AUDIT_LIVE_PENDING`
+`PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN`
 
 Product commit: `cb2f2dd7b8b6be257dc21c84219d0bbd361f1660`
 
@@ -29,6 +29,12 @@ The install-time audit moved from five advisories (four high, one moderate) to z
 - `npm audit`: 0 vulnerabilities.
 - `git diff --check`: PASS.
 
+## Live production
+
+Production reports evidence commit `42ce15f05b543ea379efb22749bde1559acdbc11` on `master`. Read-only invalid-body probes returned `400 question is required` from both routes before AI work and included `X-SafeClaw-Rate-Limit: instance`.
+
+This proves the route admission boundary is deployed. It also proves production currently uses the instance fallback, not the distributed limiter. Multi-instance distributed hardening remains open and is not represented as complete.
+
 ## Boundaries
 
-This evidence is current-source only until production reports the product commit and read-only route probes confirm the deployed behavior. No database mutation, provider dispatch, Share-session creation, vector or embedding mutation, wiki publication, or KOSHA registry mutation was performed. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`. Approval-gated operations remain approval-gated, and a fresh post-change security rescan is still required before claiming canonical scan closure.
+No database mutation, provider dispatch, Share-session creation, vector or embedding mutation, wiki publication, or KOSHA registry mutation was performed. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`. Approval-gated operations remain approval-gated. A fresh post-change security rescan is still required before claiming canonical scan closure, and production distributed limiter configuration remains a recommended hardening step.

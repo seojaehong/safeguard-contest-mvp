@@ -1,7 +1,9 @@
 {
   "schema": "safeclaw-security-public-generation-admission/v1",
-  "verdict": "PASS_CURRENT_SOURCE_PUBLIC_GENERATION_ADMISSION_AND_DEPENDENCY_AUDIT_LIVE_PENDING",
+  "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN",
   "productCommit": "cb2f2dd7b8b6be257dc21c84219d0bbd361f1660",
+  "evidenceCommit": "42ce15f05b543ea379efb22749bde1559acdbc11",
+  "productionCommit": "42ce15f05b543ea379efb22749bde1559acdbc11",
   "baseSecurityScan": {
     "scanId": "d12d04ce-deaf-497d-8754-33d5baab2ca0",
     "targetCommit": "e087d474a1de72bd3687c703a61a4263fe792fa4",
@@ -33,7 +35,27 @@
     "instanceFallbackWhenDistributedConfigAbsent": true,
     "partialDistributedConfigFailsClosed": true,
     "successHeader": "X-SafeClaw-Rate-Limit",
-    "liveDeploymentVerified": false
+    "liveDeploymentVerified": true,
+    "liveMode": "instance",
+    "distributedProductionHardeningOpen": true
+  },
+  "liveChecks": {
+    "baseUrl": "https://www.safeclaw.kr",
+    "productionEnvironment": "production",
+    "productionBranch": "master",
+    "deploymentUrl": "safeguard-contest-2w0t8zx5g-seojaehongs-projects.vercel.app",
+    "knowledgeRegeneration": {
+      "probe": "invalid-body-no-ai-call",
+      "status": 400,
+      "message": "question is required",
+      "rateLimitHeader": "instance"
+    },
+    "workpackRemediation": {
+      "probe": "invalid-body-no-reference-or-ai-call",
+      "status": 400,
+      "message": "question is required",
+      "rateLimitHeader": "instance"
+    }
   },
   "dependencyAudit": {
     "before": {
@@ -88,6 +110,7 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "approvalGatedOperationsUnchanged": true,
     "freshPostChangeSecurityRescanRequired": true,
-    "liveDeploymentVerificationRequired": true
+    "liveDeploymentVerificationRequired": false,
+    "distributedProductionLimiterStillRecommended": true
   }
 }
