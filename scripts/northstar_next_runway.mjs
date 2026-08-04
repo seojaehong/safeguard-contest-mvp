@@ -38,6 +38,7 @@ const ARTIFACTS = Object.freeze({
   documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
+  publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
@@ -1277,6 +1278,26 @@ function documentAllAuthoringGeometrySummary(report) {
   };
 }
 
+/** @param {unknown} report */
+function publicGenerationAdmissionSecuritySummary(report) {
+  if (!isRecord(report)) return {};
+  const runtimeBoundary = isRecord(report.runtimeBoundary) ? report.runtimeBoundary : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const npmAudit = isRecord(verification.npmAudit) ? verification.npmAudit : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    productCommit: asString(report.productCommit),
+    productionCommit: asString(report.productionCommit),
+    liveMode: asString(runtimeBoundary.liveMode),
+    liveDeploymentVerified: asBoolean(runtimeBoundary.liveDeploymentVerified),
+    distributedHardeningOpen: asBoolean(runtimeBoundary.distributedProductionHardeningOpen),
+    vulnerabilityCount: typeof npmAudit.vulnerabilityCount === "number" ? npmAudit.vulnerabilityCount : 0,
+    freshRescanRequired: asBoolean(remainingBoundaries.freshPostChangeSecurityRescanRequired),
+    exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
+  };
+}
+
 /**
  * @param {unknown} report
  */
@@ -1640,6 +1661,10 @@ export function buildNorthstarNextRunway(options) {
     options.rootDir,
     ARTIFACTS.publicSearchDistributedRateLimitReadiness,
   );
+  const publicGenerationAdmissionSecurity = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.publicGenerationAdmissionSecurity,
+  );
   const learningExportRendererSecurity = readOptionalJson(options.rootDir, ARTIFACTS.learningExportRendererSecurity);
   const hermesKnowledgeReviewAuthorityUi = readOptionalJson(options.rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
   const liveDocumentSecondaryGrounding = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
@@ -1685,6 +1710,9 @@ export function buildNorthstarNextRunway(options) {
   const fullRepositorySecuritySummary = fullRepositorySecurityScanSummary(fullRepositorySecurityScan);
   const publicSearchDistributedRateLimitReadinessResult = publicSearchDistributedRateLimitReadinessSummary(
     publicSearchDistributedRateLimitReadiness,
+  );
+  const publicGenerationAdmissionSecurityResult = publicGenerationAdmissionSecuritySummary(
+    publicGenerationAdmissionSecurity,
   );
   const learningExportRendererSecurityResult = learningExportRendererSecuritySummary(learningExportRendererSecurity);
   const boundedDetailDepthDebtRows = Array.isArray(boundedCurrentSummary.documentDetailDepthDebts)
@@ -1753,6 +1781,11 @@ export function buildNorthstarNextRunway(options) {
         state: "notice",
         reason: "live capability is verified with X-SafeClaw-Rate-Limit=instance; production distributed configuration remains pending",
       },
+      {
+        gate: "public_generation_admission_security",
+        state: "notice",
+        reason: "live instance admission is verified; distributed production activation and the fresh remediation diff scan remain open",
+      },
     ],
     approvalGated: approvalGates(approvalRunway, shareRecipientAckApproval),
     launchReadiness: launchReadinessSummary(launch),
@@ -1801,6 +1834,7 @@ export function buildNorthstarNextRunway(options) {
     documentExportWorkBudget: documentExportWorkBudgetResult,
     fullRepositorySecurityScan: fullRepositorySecuritySummary,
     publicSearchDistributedRateLimitReadiness: publicSearchDistributedRateLimitReadinessResult,
+    publicGenerationAdmissionSecurity: publicGenerationAdmissionSecurityResult,
     learningExportRendererSecurity: learningExportRendererSecurityResult,
     hermesKnowledgeReviewAuthorityUi: hermesKnowledgeReviewAuthorityUiSummary(hermesKnowledgeReviewAuthorityUi),
     liveDocumentSecondaryGrounding: liveDocumentSecondaryGroundingSummary(liveDocumentSecondaryGrounding),
@@ -1927,6 +1961,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Live editorial duplicate classification is measured separately: \`${report.liveDocumentEditorialDuplicateClassification.verdict || "missing"}\`, generic template overuse \`${report.liveDocumentEditorialDuplicateClassification.beforeGenericTemplateOveruseCount ?? 0}->${report.liveDocumentEditorialDuplicateClassification.liveGenericTemplateOveruseCount ?? 0}\`, retained reviewer findings exact/near \`${report.liveDocumentEditorialDuplicateClassification.exactLineOveruseCount ?? 0}/${report.liveDocumentEditorialDuplicateClassification.nearDuplicateLineOveruseCount ?? 0}\`, and humanReviewCompleted=\`${report.liveDocumentEditorialDuplicateClassification.humanReviewCompleted === true}\`. Only generic template overuse fails automatically; safety-control and legal-reference repetition remains visible, and exact saved Share remains \`${report.liveDocumentEditorialDuplicateClassification.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live editorial near-duplicate classification preserves \`${report.liveDocumentEditorialNearClassification.beforeNearDuplicateLineOveruseCount ?? 0}->${report.liveDocumentEditorialNearClassification.liveNearDuplicateLineOveruseCount ?? 0}\` findings while reducing unclassified human-review-required \`${report.liveDocumentEditorialNearClassification.beforeHumanReviewRequiredCount ?? 0}->${report.liveDocumentEditorialNearClassification.liveHumanReviewRequiredCount ?? 0}\`. The retained role-prefix/context/hazard/control categories are \`${report.liveDocumentEditorialNearClassification.rolePrefixVariantCount ?? 0}/${report.liveDocumentEditorialNearClassification.independentContextCount ?? 0}/${report.liveDocumentEditorialNearClassification.hazardConsistencyCount ?? 0}/${report.liveDocumentEditorialNearClassification.controlConsistencyCount ?? 0}\`; humanReviewCompleted=\`${report.liveDocumentEditorialNearClassification.humanReviewCompleted === true}\` and exact saved Share remains \`${report.liveDocumentEditorialNearClassification.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live product capability truth is measured separately: \`${report.productCapabilityTruth.verdict || "missing"}\`; manual/provider dispatch is \`${report.productCapabilityTruth.dispatchMode || "unknown"}\` with reason \`${report.productCapabilityTruth.dispatchReason || "unknown"}\`, scheduled briefing email ready=\`${report.productCapabilityTruth.briefingEmailReady === true}\`, photo Vision/OCR ready/accepted-only=\`${report.productCapabilityTruth.photoVisionReady === true}/${report.productCapabilityTruth.photoAcceptedOnly === true}\`, and AI modes are \`${report.productCapabilityTruth.aiModes?.join(", ") || "missing"}\`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains \`${report.productCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}\` and Documents/Share IA remains \`${report.productCapabilityTruth.documentsShareIaVerdict || "OPEN_SEPARATE_VIEWPORT_IA_WAVE"}\`.
+- Public generation admission security is measured separately: \`${report.publicGenerationAdmissionSecurity.verdict || "missing"}\`, live mode \`${report.publicGenerationAdmissionSecurity.liveMode || "unknown"}\`, dependency vulnerabilities \`${report.publicGenerationAdmissionSecurity.vulnerabilityCount ?? "unknown"}\`, distributed hardening open=\`${report.publicGenerationAdmissionSecurity.distributedHardeningOpen === true}\`, and fresh diff scan required=\`${report.publicGenerationAdmissionSecurity.freshRescanRequired === true}\`. This notice does not close multi-instance protection, the immutable scan finding, approval-gated operations, or exact saved Share; exact saved Share remains \`${report.publicGenerationAdmissionSecurity.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live Hermes reviewer authority UI is measured separately: \`${report.hermesKnowledgeReviewAuthorityUi.verdict || "missing"}\`, local/live viewport contracts \`${report.hermesKnowledgeReviewAuthorityUi.localPassed ?? 0}/${report.hermesKnowledgeReviewAuthorityUi.localViewportCount ?? 0}\` and \`${report.hermesKnowledgeReviewAuthorityUi.livePassed ?? 0}/${report.hermesKnowledgeReviewAuthorityUi.liveViewportCount ?? 0}\`, with authority order \`${report.hermesKnowledgeReviewAuthorityUi.sourceOrder?.join(" -> ") || "missing"}\`. Human review remains required and machine evidence does not replace it; no DB/provider/share/publication mutation is claimed. Exact saved Share remains \`${report.hermesKnowledgeReviewAuthorityUi.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`, while LLM Wiki publication and Supabase RLS remain approval-gated.
 - Live supporting-document scenario grounding is measured separately: \`${report.liveDocumentSecondaryGrounding.verdict || "missing"}\`, live cases \`${report.liveDocumentSecondaryGrounding.livePassed ?? 0}/5\`, supporting documents \`${report.liveDocumentSecondaryGrounding.secondaryPassed ?? 0}/${report.liveDocumentSecondaryGrounding.secondaryReviewed ?? 0}\`, cross-scenario leakage \`${report.liveDocumentSecondaryGrounding.crossScenarioLeakageCount ?? 0}\`, and missingUnexpected \`${report.liveDocumentSecondaryGrounding.missingUnexpectedCount ?? 0}\`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains \`${report.liveDocumentSecondaryGrounding.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live document seed-profile isolation is measured separately: \`${report.liveDocumentSeedProfileIsolation.verdict || "missing"}\`, before forbidden fragments \`${report.liveDocumentSeedProfileIsolation.beforeSeedProfileLeakageCount ?? 0}\`, live forbidden fragments \`${report.liveDocumentSeedProfileIsolation.liveSeedProfileLeakageCount ?? 0}\`, reviewed document surface \`${report.liveDocumentSeedProfileIsolation.reviewedDocumentSurfaceCount ?? 0}\`, and secondary grounding \`${report.liveDocumentSeedProfileIsolation.secondaryGroundingPassed ?? 0}/${report.liveDocumentSeedProfileIsolation.secondaryGroundingReviewed ?? 0}\`. This deterministic gate does not replace broad human wording review or exact saved Share evidence; exact saved Share remains \`${report.liveDocumentSeedProfileIsolation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.

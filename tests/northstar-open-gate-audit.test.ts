@@ -2039,6 +2039,58 @@ function createFixtureRoot(): string {
       }))
     )),
   });
+  writeJson(rootDir, path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN",
+    productCommit: "fixture-sha",
+    evidenceCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    baseSecurityScan: {
+      scanId: "d12d04ce-deaf-497d-8754-33d5baab2ca0",
+      targetCommit: "e087d474a1de72bd3687c703a61a4263fe792fa4",
+      immutableBaselinePreserved: true,
+      reportableFindingCount: 28,
+    },
+    admissionControls: [
+      { route: "/api/knowledge/regenerate", namespace: "knowledge-regeneration", limit: 20, windowMs: 60000, beforeRequestBodyParsing: true, beforeAiGeneration: true },
+      { route: "/api/workpack/remediate", namespace: "workpack-remediation", limit: 12, windowMs: 60000, beforeRequestBodyParsing: true, beforeReferenceSearch: true, beforeAiGeneration: true },
+    ],
+    runtimeBoundary: {
+      distributedWhenConfigured: true,
+      instanceFallbackWhenDistributedConfigAbsent: true,
+      partialDistributedConfigFailsClosed: true,
+      successHeader: "X-SafeClaw-Rate-Limit",
+      liveDeploymentVerified: true,
+      liveMode: "instance",
+      distributedProductionHardeningOpen: true,
+    },
+    liveChecks: {
+      knowledgeRegeneration: { status: 400, message: "question is required", rateLimitHeader: "instance" },
+      workpackRemediation: { status: 400, message: "question is required", rateLimitHeader: "instance" },
+    },
+    dependencyAudit: { after: { total: 0 } },
+    verification: {
+      focused: { testFiles: 3, tests: 23, passed: true },
+      adjacentSecurity: { testFiles: 15, tests: 173, passed: true },
+      typecheck: "PASS",
+      build: { verdict: "PASS", staticPages: 28 },
+      npmAudit: { verdict: "PASS", vulnerabilityCount: 0 },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      approvalGatedOperationsUnchanged: true,
+      freshPostChangeSecurityRescanRequired: true,
+      liveDeploymentVerificationRequired: false,
+      distributedProductionLimiterStillRecommended: true,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "document-authoring-pane-margin-2026-08-02", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
     productCommit: "fixture-sha",
@@ -2963,6 +3015,13 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "public_search_distributed_rate_limit_readiness")?.detail).toContain("X-SafeClaw-Rate-Limit=instance");
     expect(audit.gates.find((gate) => gate.id === "public_search_distributed_rate_limit_readiness")?.detail).toContain("13 DB/RLS findings");
     expect(audit.gates.find((gate) => gate.id === "public_search_distributed_rate_limit_readiness")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")).toMatchObject({
+      state: "notice",
+      evidencePath: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("instance admission");
+    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("fresh diff scan remain open");
+    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "tenant_authorization_remediation")).toMatchObject({ state: "proven" });
     expect(audit.gates.find((gate) => gate.id === "tenant_authorization_remediation")?.detail).toContain("2/2");
     expect(audit.gates.find((gate) => gate.id === "spreadsheet_formula_neutralization")).toMatchObject({ state: "proven" });
@@ -3718,6 +3777,27 @@ describe("northstar open gate audit", () => {
     expect(gate?.state).toBe("contradicted");
     expect(gate?.evidencePath).toBe(path.join("evaluation", "document-all-authoring-geometry-2026-08-02", "after-live", "report.json"));
     expect(gate?.detail).toContain("48/48 all-document selected-authoring and raw-source containment");
+  });
+
+  it("fails public generation admission security closed when exact Share is overclaimed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "security-public-generation-admission-2026-08-04", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-08-04T00:00:00.000Z",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("exactShare=PASS");
   });
 
   it("contradicts the UI gate when a document action loses its inner-pane margin", async () => {

@@ -49,6 +49,7 @@ const EVIDENCE_PATHS = Object.freeze({
   documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
+  publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
@@ -3924,6 +3925,118 @@ function evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.publicGenerationAdmissionSecurity;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "public_generation_admission_security",
+      label: "Public generation admission security",
+      state: "missing",
+      evidencePath,
+      detail: "Public generation admission security evidence is missing or invalid.",
+      nextActions: ["Restore the live no-AI admission probes and preserve the distributed-hardening and rescan boundaries."],
+    });
+  }
+
+  const baseScan = isRecord(report.baseSecurityScan) ? report.baseSecurityScan : {};
+  const runtimeBoundary = isRecord(report.runtimeBoundary) ? report.runtimeBoundary : {};
+  const liveChecks = isRecord(report.liveChecks) ? report.liveChecks : {};
+  const knowledge = isRecord(liveChecks.knowledgeRegeneration) ? liveChecks.knowledgeRegeneration : {};
+  const remediation = isRecord(liveChecks.workpackRemediation) ? liveChecks.workpackRemediation : {};
+  const dependencyAudit = isRecord(report.dependencyAudit) ? report.dependencyAudit : {};
+  const auditAfter = isRecord(dependencyAudit.after) ? dependencyAudit.after : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focused) ? verification.focused : {};
+  const adjacent = isRecord(verification.adjacentSecurity) ? verification.adjacentSecurity : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const npmAudit = isRecord(verification.npmAudit) ? verification.npmAudit : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const controls = Array.isArray(report.admissionControls) ? report.admissionControls.filter(isRecord) : [];
+  const productCommit = readString(report.productCommit);
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.vectorOrEmbeddingMutationPerformed === false
+    && mutationBoundary.wikiPublicationPerformed === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN"
+    && productCommit.length > 0
+    && isGitAncestor(rootDir, productCommit)
+    && readString(report.evidenceCommit).length > 0
+    && readString(report.evidenceCommit) === readString(report.productionCommit)
+    && readString(baseScan.scanId) === "d12d04ce-deaf-497d-8754-33d5baab2ca0"
+    && readString(baseScan.targetCommit) === "e087d474a1de72bd3687c703a61a4263fe792fa4"
+    && baseScan.immutableBaselinePreserved === true
+    && readNumber(baseScan.reportableFindingCount) === 28
+    && controls.length === 2
+    && controls.some((control) => readString(control.route) === "/api/knowledge/regenerate"
+      && readString(control.namespace) === "knowledge-regeneration"
+      && readNumber(control.limit) === 20
+      && readNumber(control.windowMs) === 60_000
+      && control.beforeRequestBodyParsing === true
+      && control.beforeAiGeneration === true)
+    && controls.some((control) => readString(control.route) === "/api/workpack/remediate"
+      && readString(control.namespace) === "workpack-remediation"
+      && readNumber(control.limit) === 12
+      && readNumber(control.windowMs) === 60_000
+      && control.beforeRequestBodyParsing === true
+      && control.beforeReferenceSearch === true
+      && control.beforeAiGeneration === true)
+    && runtimeBoundary.distributedWhenConfigured === true
+    && runtimeBoundary.instanceFallbackWhenDistributedConfigAbsent === true
+    && runtimeBoundary.partialDistributedConfigFailsClosed === true
+    && runtimeBoundary.liveDeploymentVerified === true
+    && readString(runtimeBoundary.liveMode) === "instance"
+    && runtimeBoundary.distributedProductionHardeningOpen === true
+    && readString(runtimeBoundary.successHeader) === "X-SafeClaw-Rate-Limit"
+    && readNumber(knowledge.status) === 400
+    && readString(knowledge.message) === "question is required"
+    && readString(knowledge.rateLimitHeader) === "instance"
+    && readNumber(remediation.status) === 400
+    && readString(remediation.message) === "question is required"
+    && readString(remediation.rateLimitHeader) === "instance"
+    && readNumber(auditAfter.total) === 0
+    && focused.passed === true
+    && readNumber(focused.testFiles) === 3
+    && readNumber(focused.tests) === 23
+    && adjacent.passed === true
+    && readNumber(adjacent.testFiles) === 15
+    && readNumber(adjacent.tests) === 173
+    && verification.typecheck === "PASS"
+    && readString(build.verdict) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && readString(npmAudit.verdict) === "PASS"
+    && readNumber(npmAudit.vulnerabilityCount) === 0
+    && noMutation
+    && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && remainingBoundaries.approvalGatedOperationsUnchanged === true
+    && remainingBoundaries.freshPostChangeSecurityRescanRequired === true
+    && remainingBoundaries.liveDeploymentVerificationRequired === false
+    && remainingBoundaries.distributedProductionLimiterStillRecommended === true;
+
+  return gateResult({
+    id: "public_generation_admission_security",
+    label: "Public generation admission security",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live production enforces fail-fast instance admission before request parsing, reference search, and AI work on both public generation routes, and the dependency audit remains zero. Distributed production activation plus the fresh diff scan remain open; the immutable baseline is preserved, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      : `Generation admission verdict=${readString(report.verdict) || "unknown"}, productAncestor=${productCommit.length > 0 && isGitAncestor(rootDir, productCommit)}, liveMode=${readString(runtimeBoundary.liveMode) || "unknown"}, knowledge=${readNumber(knowledge.status)}/${readString(knowledge.rateLimitHeader) || "missing"}, remediation=${readNumber(remediation.status)}/${readString(remediation.rateLimitHeader) || "missing"}, audit=${readNumber(auditAfter.total)}, rescanPending=${remainingBoundaries.freshPostChangeSecurityRescanRequired === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Complete the running e087d474..cb2f2dd7 Codex Security diff scan before closing the sealed finding.",
+          "Configure approved server-only Upstash credentials and verify distributed mode before claiming multi-instance protection.",
+        ]
+      : ["Restore the live admission, zero-audit, no-mutation, immutable-baseline, rescan-pending, and exact-Share boundaries."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateShareResultFixtureCockpitGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.shareResultDrilldown;
   const report = readJsonFile(rootDir, evidencePath);
@@ -4808,6 +4921,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateDocumentExportWorkBudgetGate(rootDir),
     evaluateFullRepositorySecurityScanGate(rootDir),
     evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir),
+    evaluatePublicGenerationAdmissionSecurityGate(rootDir),
     evaluateLearningExportRendererSecurityGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir),

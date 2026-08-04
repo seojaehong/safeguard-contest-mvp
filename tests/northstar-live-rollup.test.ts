@@ -212,6 +212,16 @@ type RollupReport = {
     remainingDbRlsFindings: number | null;
     exactSavedShareVerdict: string;
   };
+  publicGenerationAdmissionSecurity: {
+    verdict: string;
+    productCommit: string;
+    productionCommit: string;
+    liveMode: string;
+    distributedHardeningOpen: boolean;
+    freshRescanRequired: boolean;
+    vulnerabilityCount: number | null;
+    exactSavedShareVerdict: string;
+  };
   learningExportRendererSecurity: {
     verdict: string;
     sourceHead: string;
@@ -304,6 +314,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "document_export_work_budget", state: "proven", evidencePath: "evaluation/document-export-work-budget-2026-08-01/report.json", detail: "eight export-budget findings remediated" },
       { id: "full_repository_security_scan", state: "proven", evidencePath: "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json", detail: "sealed follow-up scan with 17 reportable findings and one deferred candidate" },
       { id: "public_search_distributed_rate_limit_readiness", state: "notice", evidencePath: "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json", detail: "current-source capability with production configuration pending" },
+      { id: "public_generation_admission_security", state: "notice", evidencePath: "evaluation/security-public-generation-admission-2026-08-04/report.json", detail: "live instance admission with distributed hardening and fresh rescan pending" },
       { id: "learning_export_renderer_security", state: "proven", evidencePath: "evaluation/learning-export-renderer-security-2026-08-02/report.json", detail: "renderer-independent inert learning export source contract" },
       { id: "live_document_secondary_grounding", state: "proven", evidencePath: "evaluation/live-document-secondary-grounding-2026-07-25/report.json", detail: "all 30 supporting documents passed scenario grounding" },
       { id: "live_document_seed_profile_isolation", state: "proven", evidencePath: "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", detail: "all 60 documents passed seed-profile isolation" },
@@ -852,6 +863,21 @@ function createFixtureRoot(): { root: string; head: string } {
       },
     ],
   });
+  writeJson(root, "evaluation/security-public-generation-admission-2026-08-04/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN",
+    productCommit: "TO_FILL",
+    productionCommit: "TO_FILL",
+    runtimeBoundary: {
+      liveDeploymentVerified: true,
+      liveMode: "instance",
+      distributedProductionHardeningOpen: true,
+    },
+    verification: { npmAudit: { verdict: "PASS", vulnerabilityCount: 0 } },
+    remainingBoundaries: {
+      freshPostChangeSecurityRescanRequired: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/document-authoring-pane-margin-2026-08-02/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
     productCommit: "TO_FILL",
@@ -887,6 +913,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/document-export-work-budget-2026-08-01/report.json",
     "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json",
     "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json",
+    "evaluation/security-public-generation-admission-2026-08-04/report.json",
     "evaluation/learning-export-renderer-security-2026-08-02/report.json",
     "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
@@ -1124,6 +1151,15 @@ describe("northstar live rollup", () => {
       remainingDbRlsFindings: 13,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
+    expect(report.publicGenerationAdmissionSecurity).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN",
+      liveMode: "instance",
+      distributedHardeningOpen: true,
+      freshRescanRequired: true,
+      vulnerabilityCount: 0,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "public_generation_admission_security")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "public_search_distributed_rate_limit_readiness")?.sourceStatus).toBe("ancestor");
     expect(report.learningExportRendererSecurity).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_RENDERER_INERT_LEARNING_EXPORT_SOURCE_CONTRACT",

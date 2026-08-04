@@ -428,6 +428,17 @@ type NextRunwayReport = {
     shareSessionCreated: boolean;
     exactSavedShareVerdict: string;
   };
+  publicGenerationAdmissionSecurity: {
+    verdict: string;
+    productCommit: string;
+    productionCommit: string;
+    liveMode: string;
+    liveDeploymentVerified: boolean;
+    distributedHardeningOpen: boolean;
+    vulnerabilityCount: number;
+    freshRescanRequired: boolean;
+    exactSavedShareVerdict: string;
+  };
   documentAuthoringPaneMargin: {
     verdict: string;
     productCommit: string;
@@ -1684,6 +1695,21 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       }))
     )),
   });
+  writeJson(root, "evaluation/security-public-generation-admission-2026-08-04/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    runtimeBoundary: {
+      liveDeploymentVerified: true,
+      liveMode: "instance",
+      distributedProductionHardeningOpen: true,
+    },
+    verification: { npmAudit: { verdict: "PASS", vulnerabilityCount: 0 } },
+    remainingBoundaries: {
+      freshPostChangeSecurityRescanRequired: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/document-authoring-pane-margin-2026-08-02/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
     productCommit: "fixture-sha",
@@ -2388,6 +2414,21 @@ describe("northstar next runway generator", () => {
       shareSessionCreated: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
+    expect(report.publicGenerationAdmissionSecurity).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN",
+      productCommit: "fixture-sha",
+      productionCommit: "fixture-sha",
+      liveMode: "instance",
+      liveDeploymentVerified: true,
+      distributedHardeningOpen: true,
+      vulnerabilityCount: 0,
+      freshRescanRequired: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "public_generation_admission_security",
+      state: "notice",
+    }));
     expect(report.documentAuthoringPaneMargin).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
       productCommit: "fixture-sha",

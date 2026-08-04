@@ -34,6 +34,7 @@ const ARTIFACTS = Object.freeze({
   documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
+  publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
@@ -334,6 +335,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const documentExportWorkBudget = tryReadJson(rootDir, ARTIFACTS.documentExportWorkBudget);
   const fullRepositorySecurityScan = tryReadJson(rootDir, ARTIFACTS.fullRepositorySecurityScan);
   const publicSearchDistributedRateLimitReadiness = tryReadJson(rootDir, ARTIFACTS.publicSearchDistributedRateLimitReadiness);
+  const publicGenerationAdmissionSecurity = tryReadJson(rootDir, ARTIFACTS.publicGenerationAdmissionSecurity);
   const learningExportRendererSecurity = tryReadJson(rootDir, ARTIFACTS.learningExportRendererSecurity);
   const hermesKnowledgeReviewAuthorityUi = tryReadJson(rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
   const liveDocumentSecondaryGrounding = tryReadJson(rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
@@ -424,6 +426,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "document_export_work_budget", ARTIFACTS.documentExportWorkBudget, documentExportWorkBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "full_repository_security_scan", ARTIFACTS.fullRepositorySecurityScan, fullRepositorySecurityScan),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_search_distributed_rate_limit_readiness", ARTIFACTS.publicSearchDistributedRateLimitReadiness, publicSearchDistributedRateLimitReadiness),
+    evidenceStatus(rootDir, currentHead, liveCommit, "public_generation_admission_security", ARTIFACTS.publicGenerationAdmissionSecurity, publicGenerationAdmissionSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "learning_export_renderer_security", ARTIFACTS.learningExportRendererSecurity, learningExportRendererSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_knowledge_review_ui", ARTIFACTS.hermesKnowledgeReviewAuthorityUi, hermesKnowledgeReviewAuthorityUi),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_secondary_grounding", ARTIFACTS.liveDocumentSecondaryGrounding, liveDocumentSecondaryGrounding),
@@ -595,6 +598,23 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       sealedFindingsClosedWithoutRescan: recordAt(publicSearchDistributedRateLimitReadiness, "boundary")?.sealedFindingsClosedWithoutRescan === true,
       remainingDbRlsFindings: asNumber(recordAt(publicSearchDistributedRateLimitReadiness, "boundary")?.remainingDbRlsFindings),
       exactSavedShareVerdict: asString(recordAt(publicSearchDistributedRateLimitReadiness, "boundary")?.exactSavedShareVerdict),
+    },
+    publicGenerationAdmissionSecurity: {
+      artifact: ARTIFACTS.publicGenerationAdmissionSecurity,
+      verdict: isRecord(publicGenerationAdmissionSecurity)
+        ? asString(publicGenerationAdmissionSecurity.verdict)
+        : "missing",
+      productCommit: isRecord(publicGenerationAdmissionSecurity)
+        ? asString(publicGenerationAdmissionSecurity.productCommit)
+        : "",
+      productionCommit: isRecord(publicGenerationAdmissionSecurity)
+        ? asString(publicGenerationAdmissionSecurity.productionCommit)
+        : "",
+      liveMode: asString(recordAt(publicGenerationAdmissionSecurity, "runtimeBoundary")?.liveMode),
+      distributedHardeningOpen: recordAt(publicGenerationAdmissionSecurity, "runtimeBoundary")?.distributedProductionHardeningOpen === true,
+      freshRescanRequired: recordAt(publicGenerationAdmissionSecurity, "remainingBoundaries")?.freshPostChangeSecurityRescanRequired === true,
+      vulnerabilityCount: asNumber(recordAt(recordAt(publicGenerationAdmissionSecurity, "verification"), "npmAudit")?.vulnerabilityCount),
+      exactSavedShareVerdict: asString(recordAt(publicGenerationAdmissionSecurity, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     learningExportRendererSecurity: {
       artifact: ARTIFACTS.learningExportRendererSecurity,
@@ -1051,6 +1071,15 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Classified as role-prefix/context/hazard/control: ${rollup.liveDocumentEditorialNearClassification.rolePrefixVariantCount}/${rollup.liveDocumentEditorialNearClassification.independentContextCount}/${rollup.liveDocumentEditorialNearClassification.hazardConsistencyCount}/${rollup.liveDocumentEditorialNearClassification.controlConsistencyCount}`,
     `- Human review completed: ${rollup.liveDocumentEditorialNearClassification.humanReviewCompleted}; exact saved Share: ${rollup.liveDocumentEditorialNearClassification.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "- Boundary: classification improves reviewer precision without hiding findings or claiming completed human review.",
+    "",
+    "## Public Generation Admission Security",
+    "",
+    `- Verdict: \`${rollup.publicGenerationAdmissionSecurity.verdict}\``,
+    `- Live admission mode: ${rollup.publicGenerationAdmissionSecurity.liveMode || "unknown"}; distributed hardening open=${rollup.publicGenerationAdmissionSecurity.distributedHardeningOpen}`,
+    `- Dependency audit vulnerabilities: ${rollup.publicGenerationAdmissionSecurity.vulnerabilityCount ?? "unknown"}`,
+    `- Fresh diff scan required: ${rollup.publicGenerationAdmissionSecurity.freshRescanRequired}`,
+    `- Exact saved Share: ${rollup.publicGenerationAdmissionSecurity.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "- Boundary: live instance admission is not a distributed multi-instance or canonical rescan closure claim.",
     "",
     "## Live Product Capability Truth",
     "",
