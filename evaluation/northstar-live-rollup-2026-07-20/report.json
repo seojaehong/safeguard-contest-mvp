@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-04T07:58:21.980Z",
-  "head": "4c394ac5646172d3aa9fcca8fd4da0fad363ddcf",
+  "generatedAt": "2026-08-10T22:33:47.497Z",
+  "head": "159aa38ccc74073c8c60b9a78adb48afa059fd01",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "a21186df9c03b16935974aeb375c055eb7439752",
+    "commitSha": "159aa38ccc74073c8c60b9a78adb48afa059fd01",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-qj5vo3ww2-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-fny5wz6fk-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -395,8 +395,8 @@
   "publicGenerationAdmissionSecurity": {
     "artifact": "evaluation\\security-public-generation-admission-2026-08-04\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN",
-    "productCommit": "cb2f2dd7b8b6be257dc21c84219d0bbd361f1660",
-    "productionCommit": "42ce15f05b543ea379efb22749bde1559acdbc11",
+    "productCommit": "159aa38ccc74073c8c60b9a78adb48afa059fd01",
+    "productionCommit": "159aa38ccc74073c8c60b9a78adb48afa059fd01",
     "liveMode": "instance",
     "distributedHardeningOpen": true,
     "freshRescanRequired": true,
@@ -742,10 +742,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "4c394ac5646172d3aa9fcca8fd4da0fad363ddcf",
+      "sourceCommit": "159aa38ccc74073c8c60b9a78adb48afa059fd01",
       "sourceStatus": "exact",
-      "productionCommit": "4c394ac5646172d3aa9fcca8fd4da0fad363ddcf",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "159aa38ccc74073c8c60b9a78adb48afa059fd01",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -896,8 +896,8 @@
       "artifact": "evaluation\\security-public-generation-admission-2026-08-04\\report.json",
       "sourceCommit": null,
       "sourceStatus": "missing",
-      "productionCommit": "42ce15f05b543ea379efb22749bde1559acdbc11",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "159aa38ccc74073c8c60b9a78adb48afa059fd01",
+      "productionStatus": "matches_live"
     },
     {
       "id": "mcp_generation_work_budget_security",

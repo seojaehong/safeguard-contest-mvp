@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-08-04T07:58:20.617Z
-Source SHA: `4c394ac5646172d3aa9fcca8fd4da0fad363ddcf`
+Generated at: 2026-08-10T22:33:46.047Z
+Source SHA: `159aa38ccc74073c8c60b9a78adb48afa059fd01`
 Overall: `open`
 
 ## Gate Matrix
@@ -91,7 +91,7 @@ Overall: `open`
 - full_repository_security_scan: Add a distributed public-request budget before treating the two warm-instance search mitigations as fully closed, then rerun the repository scan before any security-complete claim.
 - public_search_distributed_rate_limit_readiness: Configure both server-only Upstash REST variables through an approved production environment change.
 - public_search_distributed_rate_limit_readiness: Verify both public search routes return X-SafeClaw-Rate-Limit=distributed, then rerun the full repository scan before closing either sealed finding.
-- public_generation_admission_security: Complete the running e087d474..cb2f2dd7 Codex Security diff scan before closing the sealed finding.
+- public_generation_admission_security: Preserve completed scan 8fe9c06a at immutable f0c8a7be, and run a fresh post-159aa38c security scan before closing the remediated finding.
 - public_generation_admission_security: Configure approved server-only Upstash credentials and verify distributed mode before claiming multi-instance protection.
 - mcp_generation_work_budget_security: Run a valid credential-safe production MCP boundary probe without exposing the token.
 - mcp_generation_work_budget_security: Activate the approved distributed limiter configuration and complete a fresh security rescan before reclassifying the sealed finding.

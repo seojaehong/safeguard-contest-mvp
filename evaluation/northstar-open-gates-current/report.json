@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-04T07:58:20.617Z",
-  "sourceSha": "4c394ac5646172d3aa9fcca8fd4da0fad363ddcf",
+  "generatedAt": "2026-08-10T22:33:46.047Z",
+  "sourceSha": "159aa38ccc74073c8c60b9a78adb48afa059fd01",
   "overall": "open",
   "gates": [
     {
@@ -196,7 +196,7 @@
       "evidencePath": "evaluation\\security-public-generation-admission-2026-08-04\\report.json",
       "detail": "Live production enforces fail-fast instance admission before request parsing, reference search, and AI work on both public generation routes, and the dependency audit remains zero. Distributed production activation plus the fresh diff scan remain open; the immutable baseline is preserved, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Complete the running e087d474..cb2f2dd7 Codex Security diff scan before closing the sealed finding.",
+        "Preserve completed scan 8fe9c06a at immutable f0c8a7be, and run a fresh post-159aa38c security scan before closing the remediated finding.",
         "Configure approved server-only Upstash credentials and verify distributed mode before claiming multi-instance protection."
       ]
     },

@@ -2090,6 +2090,15 @@ function createFixtureRoot(): string {
       build: { verdict: "PASS", staticPages: 28 },
       npmAudit: { verdict: "PASS", vulnerabilityCount: 0 },
     },
+    refreshVerification: {
+      focusedSecurity: { files: 5, tests: 37, status: "PASS" },
+      northstar: { files: 3, tests: 64, status: "PASS" },
+      pdf: { files: 1, tests: 18, status: "PASS" },
+      typecheck: "PASS",
+      build: { status: "PASS", nextVersion: "15.5.22", staticPages: 28 },
+      npmAudit: { status: "PASS", vulnerabilityCount: 0 },
+      diffCheck: "PASS",
+    },
     mutationBoundary: {
       dbMutationPerformed: false,
       providerDispatchCalled: false,

@@ -4,7 +4,7 @@
 
 `PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN`
 
-Product commit: `cb2f2dd7b8b6be257dc21c84219d0bbd361f1660`
+Product commit: `159aa38ccc74073c8c60b9a78adb48afa059fd01`
 
 The immutable security baseline remains scan `d12d04ce-deaf-497d-8754-33d5baab2ca0` at target `e087d474a1de72bd3687c703a61a4263fe792fa4`. This remediation does not rewrite the baseline or claim that all 28 reportable findings are closed.
 
@@ -18,7 +18,7 @@ The immutable security baseline remains scan `d12d04ce-deaf-497d-8754-33d5baab2c
 
 ## Dependency audit
 
-The install-time audit moved from five advisories (four high, one moderate) to zero by patching the existing transitive overrides: `brace-expansion@5.0.9`, `fast-uri@3.1.5`, `hono@4.13.0`, and `ip-address@10.4.0`.
+The original install-time audit moved from five advisories (four high, one moderate) to zero. A fresh dependency drift check then found two high advisories in `nanoid` and `pdfjs-dist`; `nanoid@3.3.18` plus `pdfjs-dist@6.2.108` (including the `korean-law-mcp` transitive copy) returned the current audit to zero.
 
 ## Verification
 
@@ -28,10 +28,13 @@ The install-time audit moved from five advisories (four high, one moderate) to z
 - Production build: PASS, Next.js 15.5.22, 28 static pages.
 - `npm audit`: 0 vulnerabilities.
 - `git diff --check`: PASS.
+- Current refresh security suite: 5 files, 37 tests, PASS.
+- Current Northstar suite: 3 files, 64 tests, PASS.
+- PDF.js 6 integration: 1 file, 18 tests, PASS.
 
 ## Live production
 
-Production reports evidence commit `42ce15f05b543ea379efb22749bde1559acdbc11` on `master`. Read-only invalid-body probes returned `400 question is required` from both routes before AI work and included `X-SafeClaw-Rate-Limit: instance`.
+Production reports product commit `159aa38ccc74073c8c60b9a78adb48afa059fd01` on `master` at deployment `safeguard-contest-fny5wz6fk-seojaehongs-projects.vercel.app`. Read-only invalid-body probes returned `400 question is required` from both routes before AI work and included `X-SafeClaw-Rate-Limit: instance`.
 
 This proves the route admission boundary is deployed. It also proves production currently uses the instance fallback, not the distributed limiter. Multi-instance distributed hardening remains open and is not represented as complete.
 

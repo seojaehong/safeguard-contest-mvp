@@ -4004,6 +4004,12 @@ function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
   const dependencyAudit = isRecord(report.dependencyAudit) ? report.dependencyAudit : {};
   const auditAfter = isRecord(dependencyAudit.after) ? dependencyAudit.after : {};
   const verification = isRecord(report.verification) ? report.verification : {};
+  const refreshVerification = isRecord(report.refreshVerification) ? report.refreshVerification : {};
+  const refreshFocused = isRecord(refreshVerification.focusedSecurity) ? refreshVerification.focusedSecurity : {};
+  const refreshNorthstar = isRecord(refreshVerification.northstar) ? refreshVerification.northstar : {};
+  const refreshPdf = isRecord(refreshVerification.pdf) ? refreshVerification.pdf : {};
+  const refreshBuild = isRecord(refreshVerification.build) ? refreshVerification.build : {};
+  const refreshAudit = isRecord(refreshVerification.npmAudit) ? refreshVerification.npmAudit : {};
   const focused = isRecord(verification.focused) ? verification.focused : {};
   const adjacent = isRecord(verification.adjacentSecurity) ? verification.adjacentSecurity : {};
   const build = isRecord(verification.build) ? verification.build : {};
@@ -4066,6 +4072,21 @@ function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
     && readNumber(build.staticPages) === 28
     && readString(npmAudit.verdict) === "PASS"
     && readNumber(npmAudit.vulnerabilityCount) === 0
+    && readString(refreshFocused.status) === "PASS"
+    && readNumber(refreshFocused.files) === 5
+    && readNumber(refreshFocused.tests) === 37
+    && readString(refreshNorthstar.status) === "PASS"
+    && readNumber(refreshNorthstar.files) === 3
+    && readNumber(refreshNorthstar.tests) === 64
+    && readString(refreshPdf.status) === "PASS"
+    && readNumber(refreshPdf.files) === 1
+    && readNumber(refreshPdf.tests) === 18
+    && refreshVerification.typecheck === "PASS"
+    && readString(refreshBuild.status) === "PASS"
+    && readNumber(refreshBuild.staticPages) === 28
+    && readString(refreshAudit.status) === "PASS"
+    && readNumber(refreshAudit.vulnerabilityCount) === 0
+    && refreshVerification.diffCheck === "PASS"
     && noMutation
     && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
     && remainingBoundaries.approvalGatedOperationsUnchanged === true
@@ -4080,10 +4101,10 @@ function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
     evidencePath,
     detail: pass
       ? "Live production enforces fail-fast instance admission before request parsing, reference search, and AI work on both public generation routes, and the dependency audit remains zero. Distributed production activation plus the fresh diff scan remain open; the immutable baseline is preserved, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
-      : `Generation admission verdict=${readString(report.verdict) || "unknown"}, productPathsCurrent=${productCommit.length > 0 && isEvidenceCurrentForPaths(rootDir, productCommit, PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS)}, liveMode=${readString(runtimeBoundary.liveMode) || "unknown"}, knowledge=${readNumber(knowledge.status)}/${readString(knowledge.rateLimitHeader) || "missing"}, remediation=${readNumber(remediation.status)}/${readString(remediation.rateLimitHeader) || "missing"}, audit=${readNumber(auditAfter.total)}, rescanPending=${remainingBoundaries.freshPostChangeSecurityRescanRequired === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+      : `Generation admission verdict=${readString(report.verdict) || "unknown"}, productPathsCurrent=${productCommit.length > 0 && isEvidenceCurrentForPaths(rootDir, productCommit, PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS)}, liveMode=${readString(runtimeBoundary.liveMode) || "unknown"}, knowledge=${readNumber(knowledge.status)}/${readString(knowledge.rateLimitHeader) || "missing"}, remediation=${readNumber(remediation.status)}/${readString(remediation.rateLimitHeader) || "missing"}, audit=${readNumber(auditAfter.total)}, refresh=${readNumber(refreshFocused.tests)}/${readNumber(refreshNorthstar.tests)}/${readNumber(refreshPdf.tests)}, rescanPending=${remainingBoundaries.freshPostChangeSecurityRescanRequired === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
-          "Complete the running e087d474..cb2f2dd7 Codex Security diff scan before closing the sealed finding.",
+          "Preserve completed scan 8fe9c06a at immutable f0c8a7be, and run a fresh post-159aa38c security scan before closing the remediated finding.",
           "Configure approved server-only Upstash credentials and verify distributed mode before claiming multi-instance protection.",
         ]
       : ["Restore the live admission, zero-audit, no-mutation, immutable-baseline, rescan-pending, and exact-Share boundaries."],

@@ -1,9 +1,9 @@
 {
   "schema": "safeclaw-security-public-generation-admission/v1",
   "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN",
-  "productCommit": "cb2f2dd7b8b6be257dc21c84219d0bbd361f1660",
-  "evidenceCommit": "42ce15f05b543ea379efb22749bde1559acdbc11",
-  "productionCommit": "42ce15f05b543ea379efb22749bde1559acdbc11",
+  "productCommit": "159aa38ccc74073c8c60b9a78adb48afa059fd01",
+  "evidenceCommit": "159aa38ccc74073c8c60b9a78adb48afa059fd01",
+  "productionCommit": "159aa38ccc74073c8c60b9a78adb48afa059fd01",
   "baseSecurityScan": {
     "scanId": "d12d04ce-deaf-497d-8754-33d5baab2ca0",
     "targetCommit": "e087d474a1de72bd3687c703a61a4263fe792fa4",
@@ -43,7 +43,7 @@
     "baseUrl": "https://www.safeclaw.kr",
     "productionEnvironment": "production",
     "productionBranch": "master",
-    "deploymentUrl": "safeguard-contest-2w0t8zx5g-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-fny5wz6fk-seojaehongs-projects.vercel.app",
     "knowledgeRegeneration": {
       "probe": "invalid-body-no-ai-call",
       "status": 400,
@@ -72,7 +72,15 @@
       "brace-expansion": "5.0.9",
       "fast-uri": "3.1.5",
       "hono": "4.13.0",
-      "ip-address": "10.4.0"
+      "ip-address": "10.4.0",
+      "nanoid": "3.3.18",
+      "pdfjs-dist": "6.2.108",
+      "korean-law-mcp>pdfjs-dist": "6.2.108"
+    },
+    "currentDriftBefore": {
+      "total": 2,
+      "high": 2,
+      "moderate": 0
     }
   },
   "verification": {
@@ -94,6 +102,34 @@
     },
     "npmAudit": {
       "verdict": "PASS",
+      "vulnerabilityCount": 0
+    },
+    "diffCheck": "PASS"
+  },
+  "refreshVerification": {
+    "focusedSecurity": {
+      "files": 5,
+      "tests": 37,
+      "status": "PASS"
+    },
+    "northstar": {
+      "files": 3,
+      "tests": 64,
+      "status": "PASS"
+    },
+    "pdf": {
+      "files": 1,
+      "tests": 18,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "npmAudit": {
+      "status": "PASS",
       "vulnerabilityCount": 0
     },
     "diffCheck": "PASS"
