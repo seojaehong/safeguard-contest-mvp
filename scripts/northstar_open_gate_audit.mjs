@@ -209,17 +209,26 @@ function resolveSourceSha(rootDir) {
  * @param {string} rootDir
  * @param {string} possibleAncestorSha
  */
+const gitAncestorCache = new Map();
+const evidencePathCurrentCache = new Map();
+
 function isGitAncestor(rootDir, possibleAncestorSha) {
   if (!/^[0-9a-f]{40}$/u.test(possibleAncestorSha)) {
-    return true;
+    return false;
+  }
+  const cacheKey = `${rootDir}\0${possibleAncestorSha}`;
+  if (gitAncestorCache.has(cacheKey)) {
+    return gitAncestorCache.get(cacheKey);
   }
   try {
     execFileSync("git", ["merge-base", "--is-ancestor", possibleAncestorSha, "HEAD"], {
       cwd: rootDir,
       stdio: ["ignore", "ignore", "ignore"],
     });
+    gitAncestorCache.set(cacheKey, true);
     return true;
   } catch {
+    gitAncestorCache.set(cacheKey, false);
     return false;
   }
 }
@@ -3768,6 +3777,7 @@ function evaluateLearningExportRendererSecurityGate(rootDir) {
   const verification = isRecord(report.verification) ? report.verification : {};
   const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
   const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
   const noMutation = mutationBoundary.dbMutationPerformed === false
     && mutationBoundary.shareSessionCreated === false
     && mutationBoundary.providerDispatchCalled === false
@@ -3776,8 +3786,9 @@ function evaluateLearningExportRendererSecurityGate(rootDir) {
     && mutationBoundary.wikiPublished === false
     && mutationBoundary.exactTrustRegistryMutationPerformed === false;
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_RENDERER_INERT_LEARNING_EXPORT_SOURCE_CONTRACT"
-    && readString(report.sourceHead).length > 0
-    && readString(report.sourceHead) === readString(productionBuild.commitSha)
+    && sourceHead.length > 0
+    && sourceHead === readString(productionBuild.commitSha)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, LEARNING_EXPORT_RENDERER_SECURITY_PATHS)
     && productionBuild.sourceHeadMatchesProduction === true
     && productionBuild.liveAfterDeploymentPending === false
     && readString(candidate.id) === "candidate-5ae4fb7bd6d7ea24"
@@ -3924,6 +3935,51 @@ function evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir) {
 
 /**
  * @param {string} rootDir
+ * @param {string} sourceSha
+ * @param {string[]} governedPaths
+ */
+function isEvidenceCurrentForPaths(rootDir, sourceSha, governedPaths) {
+  if (!isGitAncestor(rootDir, sourceSha) || governedPaths.length === 0) {
+    return false;
+  }
+  const cacheKey = `${rootDir}\0${sourceSha}\0${governedPaths.join("\0")}`;
+  if (evidencePathCurrentCache.has(cacheKey)) {
+    return evidencePathCurrentCache.get(cacheKey);
+  }
+  try {
+    execFileSync("git", ["diff", "--quiet", `${sourceSha}..HEAD`, "--", ...governedPaths], {
+      cwd: rootDir,
+      stdio: ["ignore", "ignore", "ignore"],
+    });
+    evidencePathCurrentCache.set(cacheKey, true);
+    return true;
+  } catch {
+    evidencePathCurrentCache.set(cacheKey, false);
+    return false;
+  }
+}
+
+const LEARNING_EXPORT_RENDERER_SECURITY_PATHS = [
+  "lib/workpack-learning-export.ts",
+  "app/api/workpacks/[id]/learning-export/route.ts",
+];
+
+const PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS = [
+  "app/api/knowledge/regenerate/route.ts",
+  "app/api/workpack/remediate/route.ts",
+  "lib/public-distributed-rate-limit.ts",
+  "lib/rate-limit.ts",
+];
+
+const MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS = [
+  "app/api/mcp/[transport]/implementation.ts",
+  "app/api/mcp/[transport]/route.ts",
+  "lib/public-distributed-rate-limit.ts",
+  "lib/rate-limit.ts",
+];
+
+/**
+ * @param {string} rootDir
  * @returns {GateResult}
  */
 function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
@@ -3964,7 +4020,7 @@ function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
     && mutationBoundary.koshaRegistryMutationPerformed === false;
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN"
     && productCommit.length > 0
-    && isGitAncestor(rootDir, productCommit)
+    && isEvidenceCurrentForPaths(rootDir, productCommit, PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS)
     && readString(report.evidenceCommit).length > 0
     && readString(report.evidenceCommit) === readString(report.productionCommit)
     && readString(baseScan.scanId) === "d12d04ce-deaf-497d-8754-33d5baab2ca0"
@@ -4024,7 +4080,7 @@ function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
     evidencePath,
     detail: pass
       ? "Live production enforces fail-fast instance admission before request parsing, reference search, and AI work on both public generation routes, and the dependency audit remains zero. Distributed production activation plus the fresh diff scan remain open; the immutable baseline is preserved, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
-      : `Generation admission verdict=${readString(report.verdict) || "unknown"}, productAncestor=${productCommit.length > 0 && isGitAncestor(rootDir, productCommit)}, liveMode=${readString(runtimeBoundary.liveMode) || "unknown"}, knowledge=${readNumber(knowledge.status)}/${readString(knowledge.rateLimitHeader) || "missing"}, remediation=${readNumber(remediation.status)}/${readString(remediation.rateLimitHeader) || "missing"}, audit=${readNumber(auditAfter.total)}, rescanPending=${remainingBoundaries.freshPostChangeSecurityRescanRequired === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+      : `Generation admission verdict=${readString(report.verdict) || "unknown"}, productPathsCurrent=${productCommit.length > 0 && isEvidenceCurrentForPaths(rootDir, productCommit, PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS)}, liveMode=${readString(runtimeBoundary.liveMode) || "unknown"}, knowledge=${readNumber(knowledge.status)}/${readString(knowledge.rateLimitHeader) || "missing"}, remediation=${readNumber(remediation.status)}/${readString(remediation.rateLimitHeader) || "missing"}, audit=${readNumber(auditAfter.total)}, rescanPending=${remainingBoundaries.freshPostChangeSecurityRescanRequired === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
           "Complete the running e087d474..cb2f2dd7 Codex Security diff scan before closing the sealed finding.",
@@ -4076,7 +4132,7 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
     && sourceHead.length > 0
     && sourceHead === productionCommit
     && report.sourceHeadMatchesProduction === true
-    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS)
     && readString(baseline.scanId) === "8fe9c06a-018c-446f-aa98-1b37df95287a"
     && readString(baseline.targetRevision) === "f0c8a7be02becd53c21fb80842cf23c571f22b1f"
     && readString(baseline.findingId) === "csf_f30faad248ef517b894c8946"
@@ -5009,6 +5065,8 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
  * @returns {NorthstarAudit}
  */
 export function buildNorthstarOpenGateAudit(options = {}) {
+  gitAncestorCache.clear();
+  evidencePathCurrentCache.clear();
   const rootDir = options.rootDir || REPO_ROOT;
   const gates = [
     evaluateFinal99Gate(rootDir),

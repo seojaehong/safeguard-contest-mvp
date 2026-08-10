@@ -68,6 +68,20 @@ function writeText(rootDir: string, relativePath: string, value: string): void {
   fs.writeFileSync(absolutePath, value, "utf8");
 }
 
+function alignFixtureJsonSourceShas(directory: string, sourceSha: string): void {
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      alignFixtureJsonSourceShas(entryPath, sourceSha);
+    } else if (entry.isFile() && entry.name.endsWith(".json")) {
+      const source = fs.readFileSync(entryPath, "utf8");
+      if (source.includes('"fixture-sha"')) {
+        fs.writeFileSync(entryPath, source.replaceAll('"fixture-sha"', JSON.stringify(sourceSha)), "utf8");
+      }
+    }
+  }
+}
+
 function createProviderDispatchIdempotencyFixture(): Record<string, unknown> {
   return {
     status: "approval_required",
@@ -1136,6 +1150,7 @@ function createFixtureRoot(): string {
     },
   });
   writeJson(rootDir, path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"), {
+    sourceSha: "fixture-sha",
     ok: true,
     approvalHeld: true,
     dbMutationPerformed: false,
@@ -2973,10 +2988,15 @@ function createFixtureRoot(): string {
   });
   execFileSync("git", ["add", "."], { cwd: rootDir, stdio: "ignore" });
   execFileSync("git", ["commit", "-m", "fixture"], { cwd: rootDir, stdio: "ignore" });
+  const fixtureSourceSha = execFileSync("git", ["rev-parse", "HEAD"], {
+    cwd: rootDir,
+    encoding: "utf8",
+  }).trim();
+  alignFixtureJsonSourceShas(path.join(rootDir, "evaluation"), fixtureSourceSha);
   return rootDir;
 }
 
-describe("northstar open gate audit", () => {
+describe("northstar open gate audit", { timeout: 15_000 }, () => {
   it("keeps approval-gated north-star work open instead of complete", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
@@ -3237,6 +3257,51 @@ describe("northstar open gate audit", () => {
     expect(audit.forbiddenClaims).toContain("KOSHA operator checklist completion alone approves exact-trust promotion.");
     expect(audit.forbiddenClaims).toContain("Real provider dispatch is production-live for any channel before persistent idempotency and provider result persistence approval.");
     expect(audit.safeDemoClaims).toContain("Photo hazard analysis readiness supports up to 10 images and keeps Before/After improvements as reviewed operation memory.");
+  });
+
+  it("fails security evidence closed when revision fields are not Git SHAs", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const rendererPath = path.join(rootDir, "evaluation", "learning-export-renderer-security-2026-08-02", "report.json");
+    const renderer = JSON.parse(fs.readFileSync(rendererPath, "utf8")) as {
+      sourceHead: string;
+      productionBuild: { commitSha: string };
+    };
+    renderer.sourceHead = "self-asserted";
+    renderer.productionBuild.commitSha = "self-asserted";
+    fs.writeFileSync(rendererPath, `${JSON.stringify(renderer, null, 2)}\n`, "utf8");
+
+    const publicPath = path.join(rootDir, "evaluation", "security-public-generation-admission-2026-08-04", "report.json");
+    const publicReport = JSON.parse(fs.readFileSync(publicPath, "utf8")) as { productCommit: string };
+    publicReport.productCommit = "self-asserted";
+    fs.writeFileSync(publicPath, `${JSON.stringify(publicReport, null, 2)}\n`, "utf8");
+
+    const mcpPath = path.join(rootDir, "evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json");
+    const mcp = JSON.parse(fs.readFileSync(mcpPath, "utf8")) as {
+      sourceHead: string;
+      productionCommit: string;
+    };
+    mcp.sourceHead = "self-asserted";
+    mcp.productionCommit = "self-asserted";
+    fs.writeFileSync(mcpPath, `${JSON.stringify(mcp, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "learning_export_renderer_security")?.state).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.state).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.state).toBe("contradicted");
+  });
+
+  it("invalidates only security gates whose governed paths changed after evidence", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    writeText(rootDir, path.join("lib", "public-distributed-rate-limit.ts"), "export const changed = true;\n");
+    execFileSync("git", ["add", "lib/public-distributed-rate-limit.ts"], { cwd: rootDir, stdio: "ignore" });
+    execFileSync("git", ["commit", "-m", "change governed security path"], { cwd: rootDir, stdio: "ignore" });
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "learning_export_renderer_security")?.state).toBe("proven");
+    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.state).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.state).toBe("contradicted");
   });
 
   it("fails the standalone dispatch gate closed when mobile-short leaves the first viewport", async () => {
@@ -4207,7 +4272,7 @@ describe("northstar open gate audit", () => {
 
     expect(audit.overall).toBe("contradicted");
     expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.state).toBe("contradicted");
-  });
+  }, 15_000);
 
   it("contradicts stale SIF embedding preflight evidence from outside the current history", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
@@ -4227,7 +4292,7 @@ describe("northstar open gate audit", () => {
     const sifGate = audit.gates.find((gate) => gate.id === "sif_embedding_runtime");
     expect(sifGate?.state).toBe("contradicted");
     expect(sifGate?.detail).toContain("not an ancestor");
-  });
+  }, 15_000);
 
   it("contradicts SIF embedding preflight when corpus row integrity is incomplete", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();

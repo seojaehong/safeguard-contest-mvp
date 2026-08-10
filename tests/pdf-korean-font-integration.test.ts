@@ -30,6 +30,16 @@ const fontPaths = [
 ] as const;
 const licensePath = path.join(root, "public/fonts/NotoSansKR-OFL.txt");
 
+async function loadPdfDocument(data: Uint8Array) {
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const loadingTask = pdfjs.getDocument({ data });
+  return {
+    pdfjs,
+    document: await loadingTask.promise,
+    destroy: () => loadingTask.destroy(),
+  };
+}
+
 const expectedFourMLabels = {
   Man: "인적 요인",
   Machine: "기계·설비 요인",
@@ -126,7 +136,7 @@ describe("Korean PDF font integration", () => {
     expect(packageJson.dependencies?.["@pdf-lib/fontkit"]).toBe("^1.1.1");
     expect(packageJson.dependencies?.["pdf-lib"]).toBe("^1.17.1");
     expect(packageJson.devDependencies?.["@napi-rs/canvas"]).toBe("^1.0.2");
-    expect(packageJson.devDependencies?.["pdfjs-dist"]).toBe("^5.4.624");
+    expect(packageJson.devDependencies?.["pdfjs-dist"]).toBe("^6.2.108");
 
     const gitignore = fs.readFileSync(gitignorePath, "utf8");
     expect(gitignore.split(/\r?\n/u)).not.toContain("package-lock.json");
@@ -211,8 +221,7 @@ describe("Korean PDF font integration", () => {
     expect(binary.length).toBeLessThan(smallestSourceFont / 4);
 
     Object.assign(globalThis, { DOMMatrix, ImageData, Path2D });
-    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-    const document = await pdfjs.getDocument({ data: new Uint8Array(binary) }).promise;
+    const { document, destroy } = await loadPdfDocument(new Uint8Array(binary));
     expect(document.numPages).toBe(1);
     const page = await document.getPage(1);
     const textContent = await page.getTextContent();
@@ -250,7 +259,7 @@ describe("Korean PDF font integration", () => {
       }
     }
     expect(opaqueDarkPixels).toBeGreaterThan(100);
-    await document.destroy();
+    await destroy();
   });
 
   it("paginates long content and preserves the final row and document footer", async () => {
@@ -274,10 +283,7 @@ describe("Korean PDF font integration", () => {
 
     expect(response.status).toBe(200);
     Object.assign(globalThis, { DOMMatrix, ImageData, Path2D });
-    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-    const document = await pdfjs.getDocument({
-      data: new Uint8Array(await response.arrayBuffer())
-    }).promise;
+    const { document, destroy } = await loadPdfDocument(new Uint8Array(await response.arrayBuffer()));
     expect(document.numPages).toBeGreaterThan(1);
 
     const extractedPages: string[] = [];
@@ -296,7 +302,7 @@ describe("Korean PDF font integration", () => {
     expect(extractedPages.at(-1)).toContain("작성자");
     expect(extractedPages.at(-1)).toContain("승인");
     expect(extractedPages.at(-1)).toContain("본 출력물은 공식자료 기반 현장 검토용 초안입니다.");
-    await document.destroy();
+    await destroy();
   });
 
   it("preserves TBM delivery rows alongside linked risk-assessment rows", async () => {
@@ -319,10 +325,7 @@ describe("Korean PDF font integration", () => {
 
     expect(response.status).toBe(200);
     Object.assign(globalThis, { DOMMatrix, ImageData, Path2D });
-    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-    const document = await pdfjs.getDocument({
-      data: new Uint8Array(await response.arrayBuffer())
-    }).promise;
+    const { document, destroy } = await loadPdfDocument(new Uint8Array(await response.arrayBuffer()));
     const extractedPages: string[] = [];
     for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
       const page = await document.getPage(pageNumber);
@@ -335,7 +338,7 @@ describe("Korean PDF font integration", () => {
     expect(extracted).toContain("작업중지복창행");
     expect(extracted).toContain("위험성평가표 → TBM");
     expect(extracted).toContain("TBM 전달사항");
-    await document.destroy();
+    await destroy();
   });
 
   it("rejects request bodies above the byte budget instead of truncating them", async () => {
@@ -396,8 +399,7 @@ describe("Korean PDF font integration", () => {
     const binary = Buffer.from(await response.arrayBuffer());
 
     Object.assign(globalThis, { DOMMatrix, ImageData, Path2D });
-    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-    const document = await pdfjs.getDocument({ data: new Uint8Array(binary) }).promise;
+    const { pdfjs, document, destroy } = await loadPdfDocument(new Uint8Array(binary));
     const page = await document.getPage(1);
     const scale = 2;
     const viewport = page.getViewport({ scale });
@@ -459,7 +461,7 @@ describe("Korean PDF font integration", () => {
       expect(metric.darkPixelsPerCharacter, metric.text).toBeGreaterThan(45);
       expect(metric.occupiedBucketRatio, metric.text).toBeGreaterThanOrEqual(0.75);
     }
-    await document.destroy();
+    await destroy();
   });
 
   it("covers short regular and bold Korean labels and detects an erased-label mutation", async () => {
@@ -467,8 +469,7 @@ describe("Korean PDF font integration", () => {
     const binary = Buffer.from(await response.arrayBuffer());
 
     Object.assign(globalThis, { DOMMatrix, ImageData, Path2D });
-    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-    const document = await pdfjs.getDocument({ data: new Uint8Array(binary) }).promise;
+    const { pdfjs, document, destroy } = await loadPdfDocument(new Uint8Array(binary));
     const page = await document.getPage(1);
     const scale = 2;
     const viewport = page.getViewport({ scale });
@@ -525,7 +526,7 @@ describe("Korean PDF font integration", () => {
         expect(mutatedGeometry.occupiedBucketRatio).toBeLessThan(0.75);
       }
     }
-    await document.destroy();
+    await destroy();
   });
 
   it("preserves canonical structured risk rows in extracted binary PDF text", async () => {
@@ -570,10 +571,7 @@ describe("Korean PDF font integration", () => {
 
     expect(response.status).toBe(200);
     Object.assign(globalThis, { DOMMatrix, ImageData, Path2D });
-    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-    const document = await pdfjs.getDocument({
-      data: new Uint8Array(await response.arrayBuffer())
-    }).promise;
+    const { document, destroy } = await loadPdfDocument(new Uint8Array(await response.arrayBuffer()));
     const page = await document.getPage(1);
     const textContent = await page.getTextContent();
     const extracted = textContent.items.flatMap((item) => "str" in item ? [item.str] : []).join(" ");
@@ -596,7 +594,7 @@ describe("Korean PDF font integration", () => {
     }
     expect(extracted.replace(/\s+/gu, "")).toContain("검토필요");
     expect(extracted).not.toMatch(/\b(?:high|medium|low|planned|done|needsReview)\b/u);
-    await document.destroy();
+    await destroy();
   });
 
   it("localizes every canonical 4M and accident type enum in extracted binary PDF text", async () => {
@@ -622,10 +620,7 @@ describe("Korean PDF font integration", () => {
 
     expect(response.status).toBe(200);
     Object.assign(globalThis, { DOMMatrix, ImageData, Path2D });
-    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-    const document = await pdfjs.getDocument({
-      data: new Uint8Array(await response.arrayBuffer())
-    }).promise;
+    const { document, destroy } = await loadPdfDocument(new Uint8Array(await response.arrayBuffer()));
     const extractedPages: string[] = [];
     for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
       const page = await document.getPage(pageNumber);
@@ -646,7 +641,7 @@ describe("Korean PDF font integration", () => {
     for (const rawValue of [...FOUR_M_VALUES, ...ACCIDENT_TYPE_VALUES]) {
       expect(extracted).not.toMatch(new RegExp(`\\b${rawValue}\\b`, "u"));
     }
-    await document.destroy();
+    await destroy();
   });
 
   it("keeps the HTML export contract available independently", async () => {

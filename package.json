@@ -79,7 +79,7 @@
     "@types/node": "^22.15.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "pdfjs-dist": "^5.4.624",
+    "pdfjs-dist": "^6.2.108",
     "playwright": "^1.59.1",
     "typescript": "^5.8.3",
     "vitest": "^4.1.9"
@@ -91,6 +91,10 @@
     "fast-uri": "3.1.5",
     "hono": "4.13.0",
     "ip-address": "10.4.0",
+    "korean-law-mcp": {
+      "pdfjs-dist": "6.2.108"
+    },
+    "nanoid": "3.3.18",
     "postcss": "8.5.23",
     "sharp": "0.35.3",
     "unzipper": "0.12.1",
