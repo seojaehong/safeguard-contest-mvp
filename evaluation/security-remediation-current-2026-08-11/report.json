@@ -1,0 +1,103 @@
+{
+  "schema": "safeclaw-security-remediation/v1",
+  "verdict": "PASS_CURRENT_SOURCE_APPROVAL_FREE_SECURITY_REMEDIATION_LIVE_PENDING",
+  "sourceHead": "f0bacff5a0b32adb5b534afdce1135a4385d528c",
+  "productionCommit": null,
+  "liveAfterDeploymentPending": true,
+  "baseline": {
+    "immutableScanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
+    "immutableFindingCount": 17,
+    "currentSourceScanId": "739fa314-fe17-4f46-80c5-0802b932bf83",
+    "currentSourceFindingCount": 27,
+    "currentSourceSeverity": {
+      "medium": 11,
+      "low": 16
+    },
+    "currentSourceCoverage": "partial"
+  },
+  "userContext": "Preserve immutable original 18-finding baseline and completed 17-finding scan 8fe9c06a-018c-446f-aa98-1b37df95287a. Verify current b3e3df6c source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
+  "sourceRemediations": [
+    {
+      "finding": "MCP authentication performs a database lookup before rate limiting",
+      "status": "source_remediated",
+      "evidence": "A coarse shared public admission check now runs before withMcpAuth while the existing token-scoped admission remains after authentication."
+    },
+    {
+      "finding": "Agent chat parses an unbounded authenticated JSON body",
+      "status": "source_remediated",
+      "evidence": "Authenticated agent chat enforces a measured 64 KiB pre-parse request budget."
+    },
+    {
+      "finding": "MCP token issuance parses an unbounded authenticated JSON body",
+      "status": "source_remediated",
+      "evidence": "MCP token issuance enforces an 8 KiB pre-parse request budget after authentication and before workspace or storage work."
+    },
+    {
+      "finding": "Public document exports lack aggregate work admission",
+      "status": "source_remediated_live_configuration_pending",
+      "evidence": "HWP, XLSX, PDF, and HWPX share document-export distributed admission and a two-work in-process concurrency guard before parsing or serialization."
+    },
+    {
+      "finding": "Legal-search timeouts do not cancel underlying provider requests",
+      "status": "source_remediated",
+      "evidence": "Timeout and caller cancellation now abort Law.go and korean-law-mcp fetch work before retry."
+    },
+    {
+      "finding": "Safety-reference catalog requests lack explicit deadlines",
+      "status": "source_remediated",
+      "evidence": "Catalog REST, ranked RPC, vector RPC, and count requests use bounded abortable deadlines; ask caller cancellation reaches catalog fetch work."
+    }
+  ],
+  "partialRemediations": [
+    {
+      "finding": "Public ask transports use separate instance quotas and do not cancel abandoned streaming work",
+      "status": "partial_source_remediation",
+      "evidence": "JSON and SSE now share public-ask-family admission; request abort, stream cancellation, legal providers, and safety-reference providers receive cancellation. Some SDK-backed generation providers still do not expose AbortSignal cancellation."
+    },
+    {
+      "finding": "Weather request coalescing can be bypassed with equivalent questions",
+      "status": "partial_source_remediation",
+      "evidence": "Equivalent questions coalesce by resolved area and outdoor/standard work key. Distributed miss-concurrency proof remains pending."
+    }
+  ],
+  "verification": {
+    "focusedSecurityTests": {
+      "files": 9,
+      "tests": 52,
+      "status": "PASS"
+    },
+    "adjacentRegressionTests": {
+      "files": 18,
+      "tests": 222,
+      "status": "PASS"
+    },
+    "postBuildRouteRegressionTests": {
+      "files": 2,
+      "tests": 12,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "diffCheck": "PASS"
+  },
+  "mutationBoundary": {
+    "dbSchemaMutation": false,
+    "dbDataMutation": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutation": false,
+    "wikiPublication": false,
+    "koshaExactRegistryMutation": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "dbRlsTenantFindings": "OPEN_APPROVAL_GATED",
+    "providerDispatchPersistence": "OPEN_APPROVAL_GATED",
+    "distributedRuntimeConfiguration": "LIVE_VERIFICATION_PENDING",
+    "followUpSecurityScan": "REQUIRED_AFTER_DEPLOYMENT"
+  }
+}
