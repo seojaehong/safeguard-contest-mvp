@@ -1,7 +1,10 @@
 import type { NextRequest } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createAgentChatPost } from "@/lib/openclaw-broker-route";
+import {
+  AGENT_CHAT_REQUEST_BODY_MAX_BYTES,
+  createAgentChatPost,
+} from "@/lib/openclaw-broker-route";
 import type { ClawChatEvent } from "@/lib/agent-loop";
 import {
   BrokerError,
@@ -186,6 +189,28 @@ describe("/api/agent/chat broker boundary", () => {
     expect(events).toEqual(["authenticate", "fine-limit"]);
     expect(parseBody).not.toHaveBeenCalled();
     expect(engine.checkAvailability).not.toHaveBeenCalled();
+  });
+
+  it("rejects an oversized authenticated body before site or engine work", async () => {
+    const engine = adapter();
+    const findOwnedSite = vi.fn(async () => validContext);
+    const resolveContext = createBrokerContextResolver({
+      createClient: () => ({ marker: "client" }),
+      authenticate: async () => ({ id: validContext.userId, email: "owner@example.com" }),
+      findOwnedSite,
+    });
+    const post = createAgentChatPost({ resolveContext, engine });
+
+    const response = await post(request({
+      token: "valid-token",
+      rawBody: JSON.stringify({ message: "가".repeat(AGENT_CHAT_REQUEST_BODY_MAX_BYTES) }),
+    }));
+
+    expect(response.status).toBe(413);
+    await expect(response.json()).resolves.toMatchObject({ code: "AGENT_CHAT_PAYLOAD_TOO_LARGE" });
+    expect(findOwnedSite).not.toHaveBeenCalled();
+    expect(engine.checkAvailability).not.toHaveBeenCalled();
+    expect(engine.run).not.toHaveBeenCalled();
   });
 
   it("charges malformed and unowned authenticated requests against the user quota", async () => {

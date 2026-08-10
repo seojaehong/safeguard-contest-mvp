@@ -10,16 +10,25 @@ import {
 
 const mocks = vi.hoisted(() => ({
   baseHandler: vi.fn(async (_request: Request) => Response.json({ ok: true })),
+  resolveMcpAuth: vi.fn(),
 }));
 
 vi.mock("mcp-handler", () => ({
   createMcpHandler: vi.fn(() => mocks.baseHandler),
-  withMcpAuth: vi.fn((handler: unknown) => handler),
+  withMcpAuth: vi.fn((handler: (request: Request) => Promise<Response>, verify: (
+    request: Request,
+    bearerToken?: string,
+  ) => Promise<unknown>) => async (request: Request) => {
+    const bearer = request.headers.get("authorization")?.replace(/^Bearer\s+/iu, "").trim();
+    const auth = await verify(request, bearer);
+    if (!auth) return Response.json({ error: "Unauthorized" }, { status: 401 });
+    return handler(request);
+  }),
 }));
 
 vi.mock("@/lib/mcp-auth", () => ({
   isMcpEnabled: vi.fn(() => true),
-  resolveMcpAuth: vi.fn(),
+  resolveMcpAuth: mocks.resolveMcpAuth,
 }));
 
 vi.mock("@/lib/supabase-admin", () => ({
@@ -57,8 +66,40 @@ function schemaFor(tools: Map<string, ToolConfig>, toolName: string): SafeParseS
 describe("MCP tool work budgets", () => {
   beforeEach(() => {
     mocks.baseHandler.mockClear();
+    mocks.resolveMcpAuth.mockReset();
+    mocks.resolveMcpAuth.mockResolvedValue({
+      orgId: "org-1",
+      scopes: ["safeclaw:read"],
+      siteId: "site-1",
+      source: "db",
+      tokenId: "token-1",
+    });
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
+  });
+
+  it("applies coarse admission before resolving invalid bearer tokens", async () => {
+    mocks.resolveMcpAuth.mockResolvedValue(null);
+    const requestForAttempt = () => new Request("https://www.safeclaw.kr/api/mcp/mcp", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer invalid-token",
+        "Content-Type": "application/json",
+        "X-Forwarded-For": "198.51.100.240",
+      },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+    });
+
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      const response = await handler(requestForAttempt());
+      expect(response.status).toBe(401);
+    }
+
+    const limited = await handler(requestForAttempt());
+
+    expect(limited.status).toBe(429);
+    expect(mocks.resolveMcpAuth).toHaveBeenCalledTimes(20);
+    expect(mocks.baseHandler).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -184,10 +225,10 @@ describe("MCP tool work budgets", () => {
     vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
     vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "distributed-test-token");
     const bearer = "mcp-sensitive-bearer";
+    const limiterKeys: string[] = [];
     const fetchImpl = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
       const command = JSON.parse(String(init?.body)) as unknown[];
-      expect(String(command[3])).toMatch(/^safeclaw:public-rate:mcp-authenticated:[a-f0-9]{32}$/u);
-      expect(String(command[3])).not.toContain(bearer);
+      limiterKeys.push(String(command[3]));
       return Response.json({ result: [1, 59_000] });
     });
     vi.stubGlobal("fetch", fetchImpl);
@@ -203,7 +244,11 @@ describe("MCP tool work budgets", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("distributed");
-    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(limiterKeys).toHaveLength(2);
+    expect(limiterKeys[0]).toMatch(/^safeclaw:public-rate:mcp-pre-auth:/u);
+    expect(limiterKeys[1]).toMatch(/^safeclaw:public-rate:mcp-authenticated:[a-f0-9]{32}$/u);
+    expect(limiterKeys.join("\n")).not.toContain(bearer);
     expect(mocks.baseHandler).toHaveBeenCalledTimes(1);
   });
 });

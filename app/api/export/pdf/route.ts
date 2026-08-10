@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withPublicDocumentExportAdmission } from "@/lib/public-distributed-rate-limit";
 import { EventEmitter } from "node:events";
 import fs from "node:fs";
 import path from "node:path";
@@ -1206,7 +1207,7 @@ async function buildBinaryPdf(
   }
 }
 
-export async function POST(request: NextRequest) {
+async function exportPdf(request: NextRequest) {
   try {
     const parsed = await readPdfRequestJson(request);
     assertPdfFieldBudget(parsed);
@@ -1266,4 +1267,8 @@ export async function POST(request: NextRequest) {
     if (error instanceof PdfExportLimitError) return pdfExportLimitResponse();
     throw error;
   }
+}
+
+export async function POST(request: NextRequest) {
+  return withPublicDocumentExportAdmission(request, () => exportPdf(request));
 }

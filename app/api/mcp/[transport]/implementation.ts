@@ -353,6 +353,7 @@ const verifyToken = async (_req: Request, bearerToken?: string): Promise<AuthInf
 };
 
 const instanceLimiter = createRateLimiter({ limit: 20, windowMs: 60_000 });
+const coarseInstanceLimiter = createRateLimiter({ limit: 20, windowMs: 60_000 });
 
 async function protectedBaseHandler(request: Request): Promise<Response> {
   if (request.method !== "POST") return baseHandler(request);
@@ -391,6 +392,22 @@ export async function handler(request: Request): Promise<Response> {
     });
   }
 
-  return authHandler(request);
+  if (request.method !== "POST") return authHandler(request);
+
+  const coarseDecision = await checkPublicRateLimit({
+    request,
+    namespace: "mcp-pre-auth",
+    limit: 20,
+    windowMs: 60_000,
+    instanceLimiter: coarseInstanceLimiter,
+  });
+  const coarseRejection = publicRateLimitResponse(coarseDecision);
+  if (coarseRejection) return coarseRejection;
+
+  const response = await authHandler(request);
+  if (!response.headers.has("X-SafeClaw-Rate-Limit")) {
+    applyPublicRateLimitHeader(response, coarseDecision);
+  }
+  return response;
 }
 

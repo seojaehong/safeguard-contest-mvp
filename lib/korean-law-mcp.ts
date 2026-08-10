@@ -2,6 +2,7 @@ import "server-only";
 
 import { cleanHtml, extractHangContent, flattenContent } from "korean-law-mcp/lib/article-parser";
 import { LawApiClient } from "korean-law-mcp/lib/api-client";
+import { normalizeLawSearchText, resolveLawAlias } from "korean-law-mcp/lib/search-normalizer";
 import { extractTag, parseInterpretationXML, parsePrecedentXML, stripHtml } from "korean-law-mcp/lib/xml-parser";
 import { DetailRecord, SearchResult } from "./types";
 
@@ -204,7 +205,43 @@ function mapInterpretationSearchResults(xml: string, limit: number): SearchResul
   }));
 }
 
-export async function searchKoreanLawMcp(query: string, limit = DEFAULT_SEARCH_LIMIT): Promise<SearchResult[]> {
+async function fetchSearchXml(input: {
+  apiKey: string;
+  query: string;
+  limit: number;
+  signal?: AbortSignal;
+  target: "law" | "prec" | "expc";
+}): Promise<string> {
+  const query = input.target === "law"
+    ? resolveLawAlias(normalizeLawSearchText(input.query)).canonical
+    : input.query;
+  const params = new URLSearchParams({
+    OC: input.apiKey,
+    type: "XML",
+    target: input.target,
+    query,
+    display: String(input.limit),
+    page: "1",
+  });
+  const response = await fetch(`https://www.law.go.kr/DRF/lawSearch.do?${params.toString()}`, {
+    cache: "no-store",
+    signal: input.signal,
+  });
+  const text = await response.text();
+  if (!response.ok) {
+    throw new Error(`korean-law-mcp ${input.target} search failed with status ${response.status}`);
+  }
+  if (text.includes("<!DOCTYPE html") || text.includes("<html")) {
+    throw new Error(`korean-law-mcp ${input.target} search returned an HTML error page`);
+  }
+  return text;
+}
+
+export async function searchKoreanLawMcp(
+  query: string,
+  limit = DEFAULT_SEARCH_LIMIT,
+  signal?: AbortSignal
+): Promise<SearchResult[]> {
   const normalizedQuery = query.trim();
   const config = getConfig();
 
@@ -212,20 +249,19 @@ export async function searchKoreanLawMcp(query: string, limit = DEFAULT_SEARCH_L
     return [];
   }
 
-  const client = createClient();
-
   const [lawXml, precedentXml, interpretationXml] = await Promise.all([
-    client.searchLaw(normalizedQuery).catch(() => ""),
-    client.fetchApi({
-      endpoint: "lawSearch.do",
-      target: "prec",
-      extraParams: { query: normalizedQuery, display: String(limit), page: "1" }
-    }).catch(() => ""),
-    client.fetchApi({
-      endpoint: "lawSearch.do",
-      target: "expc",
-      extraParams: { query: normalizedQuery, display: String(limit), page: "1" }
-    }).catch(() => "")
+    fetchSearchXml({ apiKey: config.apiKey, query: normalizedQuery, limit, signal, target: "law" }).catch((error) => {
+      if (signal?.aborted) throw error;
+      return "";
+    }),
+    fetchSearchXml({ apiKey: config.apiKey, query: normalizedQuery, limit, signal, target: "prec" }).catch((error) => {
+      if (signal?.aborted) throw error;
+      return "";
+    }),
+    fetchSearchXml({ apiKey: config.apiKey, query: normalizedQuery, limit, signal, target: "expc" }).catch((error) => {
+      if (signal?.aborted) throw error;
+      return "";
+    })
   ]);
 
   return dedupeResults([

@@ -85,6 +85,25 @@ function assertRunAskWorkBudget(question: string, options: RunAskOptions) {
   }
 }
 
+function waitForRequest<T>(promise: Promise<T>, signal: AbortSignal | undefined): Promise<T> {
+  if (!signal) return promise;
+  signal.throwIfAborted();
+  return new Promise<T>((resolve, reject) => {
+    const abort = () => reject(signal.reason);
+    signal.addEventListener("abort", abort, { once: true });
+    promise.then(
+      (value) => {
+        signal.removeEventListener("abort", abort);
+        resolve(value);
+      },
+      (error: unknown) => {
+        signal.removeEventListener("abort", abort);
+        reject(error);
+      },
+    );
+  });
+}
+
 function accidentTypeToRiskTags(accidentType: string | undefined, text: string): string[] {
   const haystack = `${accidentType || ""} ${text}`;
   const tags = [
@@ -1958,6 +1977,8 @@ export type RunAskOptions = {
   phaseAGrounding?: PhaseAGenerationGrounding;
   /** Task D-2a: SSE progress callback for the AI console. Defaults to no-op. */
   onProgress?: OnAskProgress;
+  /** Cancels request-scoped orchestration when the caller disconnects. */
+  signal?: AbortSignal;
 };
 
 function summarizeDbHarnessPacket(packet: ReturnType<typeof buildDbHarnessPacket>): NonNullable<AskResponse["dbHarness"]>["summary"] {
@@ -2139,6 +2160,7 @@ export function attachDbHarnessFallback(response: AskResponse, input: {
 
 export async function runAsk(question: string, options: RunAskOptions = {}): Promise<AskResponse> {
   assertRunAskWorkBudget(question, options);
+  options.signal?.throwIfAborted();
   const onProgress = options.onProgress;
   const traceId = randomUUID();
   const harnessMemory = {
@@ -2154,6 +2176,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
 
   // Fix 4: template fast path — no external calls, no AI, pure static output < 100ms
   if (aiMode === "template") {
+    options.signal?.throwIfAborted();
     const response = applyPhaseAResponseBoundary(attachDbHarnessFallback(
       buildMockAskResponse(
         question,
@@ -2189,6 +2212,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
   }
 
   try {
+    options.signal?.throwIfAborted();
     const accidentCasesPromise = fetchAccidentCases(question, {
       requestTimeoutMs: 5_000,
       retryCount: 0,
@@ -2199,9 +2223,9 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     // enhanceLegalEvidenceMappings is a quality add-on (AI reorders citations); it no longer
     // gates generateAnswer. generateAnswer starts as soon as raw citations arrive.
     // citationsPromise resolves to enhanced citations when available (best-effort).
-    const rawCitationsPromise = searchLegalSources(question);
+    const rawCitationsPromise = searchLegalSources(question, options.signal);
     const rawCitationsBasePromise = rawCitationsPromise.then(async (raw) =>
-      raw.length ? raw : searchLegalSources("산업안전보건법")
+      raw.length ? raw : searchLegalSources("산업안전보건법", options.signal)
     );
     // enhanceLegalEvidenceMappings: optional quality pass, runs in parallel, best-effort.
     const citationsPromise = rawCitationsBasePromise.then((base) =>
@@ -2263,7 +2287,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       message: ""
     };
     const safeSearch = (opts: Parameters<typeof searchSafetyReferences>[0]) =>
-      searchSafetyReferences(opts).catch((error) => {
+      searchSafetyReferences({ ...opts, signal: options.signal }).catch((error) => {
+        options.signal?.throwIfAborted();
         log.error("safety reference search failed", safeFailureContext(error));
         return {
           ...emptyResult,
@@ -2516,7 +2541,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       onProgress
     );
 
-    const allResults = await Promise.allSettled([
+    const allResults = await waitForRequest(Promise.allSettled([
       weatherPromise,         // 0
       trainingPromise,        // 1
       koshaEducationPromise,  // 2
@@ -2527,7 +2552,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       safetyReferencePromise, // 7
       citationsPromise,       // 8
       deliverablesPromise     // 9 — runs in parallel with the above
-    ]);
+    ]), options.signal);
+    options.signal?.throwIfAborted();
 
     const weather = allResults[0].status === "fulfilled" ? allResults[0].value : (
       log.warn("weatherPromise failed", safeFailureContext((allResults[0] as PromiseRejectedResult).reason)),

@@ -409,7 +409,7 @@ function parseExpcResults(xml: string): SearchResult[] {
   }).filter((item) => item.title);
 }
 
-async function fetchLawGo(endpoint: string, params: Record<string, string>) {
+async function fetchLawGo(endpoint: string, params: Record<string, string>, signal?: AbortSignal) {
   ensureConfigured();
   const url = new URL(`${baseUrl}/${endpoint}`);
   url.searchParams.set("OC", oc);
@@ -417,7 +417,7 @@ async function fetchLawGo(endpoint: string, params: Record<string, string>) {
   Object.entries(params).forEach(([key, value]) => {
     if (value) url.searchParams.set(key, value);
   });
-  const response = await fetch(url.toString(), { cache: "no-store", headers: lawGoHeaders });
+  const response = await fetch(url.toString(), { cache: "no-store", headers: lawGoHeaders, signal });
   const text = await response.text();
   if (!response.ok) {
     throw new Error(text.slice(0, 160));
@@ -442,7 +442,7 @@ function parseLawId(id: string) {
   return null;
 }
 
-export async function searchAll(query: string): Promise<SearchResult[]> {
+export async function searchAll(query: string, signal?: AbortSignal): Promise<SearchResult[]> {
   if (mockMode) {
     const q = query.trim();
     if (!q) return mockSearchResults;
@@ -459,9 +459,18 @@ export async function searchAll(query: string): Promise<SearchResult[]> {
 
   for (const candidate of candidates) {
     const [laws, precedents, interpretations] = await Promise.all([
-      fetchLawGo("lawSearch.do", { target: "law", query: candidate }).then(parseLawResults).catch(() => []),
-      fetchLawGo("lawSearch.do", { target: "prec", query: candidate }).then(parsePrecResults).catch(() => []),
-      fetchLawGo("lawSearch.do", { target: "expc", query: candidate }).then(parseExpcResults).catch(() => [])
+      fetchLawGo("lawSearch.do", { target: "law", query: candidate }, signal).then(parseLawResults).catch((error) => {
+        if (signal?.aborted) throw error;
+        return [];
+      }),
+      fetchLawGo("lawSearch.do", { target: "prec", query: candidate }, signal).then(parsePrecResults).catch((error) => {
+        if (signal?.aborted) throw error;
+        return [];
+      }),
+      fetchLawGo("lawSearch.do", { target: "expc", query: candidate }, signal).then(parseExpcResults).catch((error) => {
+        if (signal?.aborted) throw error;
+        return [];
+      })
     ]);
 
     const merged = dedupe([...laws, ...interpretations, ...precedents]).slice(0, 10);
@@ -473,7 +482,10 @@ export async function searchAll(query: string): Promise<SearchResult[]> {
     }
   }
 
-  const precedentResults = await searchLawGoPrecedents(query, 4).catch(() => []);
+  const precedentResults = await searchLawGoPrecedents(query, 4, signal).catch((error) => {
+    if (signal?.aborted) throw error;
+    return [];
+  });
   if (precedentResults.length) {
     return dedupe([...precedentResults, ...bestResults]).slice(0, 10);
   }
@@ -481,16 +493,23 @@ export async function searchAll(query: string): Promise<SearchResult[]> {
   return bestResults;
 }
 
-export async function searchLawGoPrecedents(query: string, limit = 4): Promise<SearchResult[]> {
+export async function searchLawGoPrecedents(
+  query: string,
+  limit = 4,
+  signal?: AbortSignal
+): Promise<SearchResult[]> {
   if (mockMode) {
     return mockSearchResults.filter((item) => item.type === "precedent").slice(0, limit);
   }
 
   const collected: SearchResult[] = [];
   for (const candidate of buildPrecedentQueries(query)) {
-    const precedents = await fetchLawGo("lawSearch.do", { target: "prec", query: candidate })
+    const precedents = await fetchLawGo("lawSearch.do", { target: "prec", query: candidate }, signal)
       .then(parsePrecResults)
-      .catch(() => []);
+      .catch((error) => {
+        if (signal?.aborted) throw error;
+        return [];
+      });
 
     collected.push(...precedents.map((item) => ({
       ...item,

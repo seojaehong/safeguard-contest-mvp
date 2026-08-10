@@ -72,14 +72,15 @@ function request(path: string): NextRequest {
   return requestWithBody(path, { question: "성수동 외벽 도장 작업" });
 }
 
-function requestWithBody(path: string, body: unknown): NextRequest {
+function requestWithBody(path: string, body: unknown, options: { ip?: string; signal?: AbortSignal } = {}): NextRequest {
   return new NextRequest(`http://localhost${path}`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      "x-forwarded-for": `203.0.113.${path.includes("stream") ? "41" : "40"}`
+      "x-forwarded-for": options.ip ?? `203.0.113.${path.includes("stream") ? "41" : "40"}`
     },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
+    signal: options.signal,
   });
 }
 
@@ -168,5 +169,44 @@ describe("ask generation evidence routes", () => {
       limit: PUBLIC_ASK_HARNESS_MEMORY_MAX_CHARS
     });
     expect(mocks.runAsk).not.toHaveBeenCalled();
+  });
+
+  it("shares one admission budget across JSON and SSE transports", async () => {
+    const ip = "203.0.113.88";
+    const { POST: postJson } = await import("@/app/api/ask/route");
+    const { POST: postStream } = await import("@/app/api/ask/stream/route");
+
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const post = attempt % 2 === 0 ? postJson : postStream;
+      const path = attempt % 2 === 0 ? "/api/ask" : "/api/ask/stream";
+      const response = await post(requestWithBody(path, { question: "성수동 외벽 도장 작업" }, { ip }));
+      expect(response.status).toBe(200);
+      expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("instance");
+      if (response.body) await response.body.cancel();
+    }
+
+    const limited = await postJson(requestWithBody("/api/ask", { question: "성수동 외벽 도장 작업" }, { ip }));
+    expect(limited.status).toBe(429);
+    expect(mocks.runAsk).toHaveBeenCalledTimes(10);
+  });
+
+  it("aborts streaming work when the response consumer cancels", async () => {
+    let receivedSignal: AbortSignal | undefined;
+    mocks.runAsk.mockImplementationOnce(async (_question, options: { signal?: AbortSignal }) => {
+      receivedSignal = options.signal;
+      await new Promise<never>((_resolve, reject) => {
+        options.signal?.addEventListener("abort", () => reject(options.signal?.reason), { once: true });
+      });
+    });
+    const { POST } = await import("@/app/api/ask/stream/route");
+    const response = await POST(requestWithBody(
+      "/api/ask/stream",
+      { question: "성수동 외벽 도장 작업" },
+      { ip: "203.0.113.89" },
+    ));
+
+    await response.body?.cancel("test consumer cancelled");
+
+    expect(receivedSignal?.aborted).toBe(true);
   });
 });

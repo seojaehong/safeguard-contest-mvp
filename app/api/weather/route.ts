@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchWeatherSignal } from "@/lib/weather";
+import { fetchWeatherSignal, getWeatherWorkKey } from "@/lib/weather";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { enforceRateLimit } from "@/lib/api-guard";
 import {
@@ -13,12 +13,8 @@ export const dynamic = "force-dynamic";
 const limiter = createRateLimiter({ limit: 30, windowMs: 60_000 });
 const inFlightWeather = new Map<string, Promise<Awaited<ReturnType<typeof fetchWeatherSignal>>>>();
 
-function normalizeWeatherQuestion(value: string): string {
-  return value.replace(/\s+/gu, " ").trim();
-}
-
 function fetchCoalescedWeather(question: string) {
-  const key = normalizeWeatherQuestion(question).toLowerCase();
+  const key = getWeatherWorkKey(question);
   const existing = inFlightWeather.get(key);
   if (existing) return existing;
   const pending = fetchWeatherSignal(question).finally(() => {

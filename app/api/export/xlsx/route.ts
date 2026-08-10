@@ -14,6 +14,7 @@ import {
   DocumentExportLimitError,
   readDocumentExportRequestJson
 } from "@/lib/document-export-budget";
+import { withPublicDocumentExportAdmission } from "@/lib/public-distributed-rate-limit";
 import { parseStructuredRiskAssessmentRows } from "@/lib/risk-assessment-renderer";
 
 export const dynamic = "force-dynamic";
@@ -167,7 +168,7 @@ export async function GET() {
   );
 }
 
-export async function POST(request: NextRequest) {
+async function exportXlsx(request: NextRequest) {
   try {
     const parsed = await readDocumentExportRequestJson(request);
     const body = isRecord(parsed) ? parsed : {};
@@ -256,4 +257,8 @@ export async function POST(request: NextRequest) {
       { status: 500, headers: { "cache-control": "no-store" } }
     );
   }
+}
+
+export async function POST(request: NextRequest) {
+  return withPublicDocumentExportAdmission(request, () => exportXlsx(request));
 }

@@ -5,30 +5,38 @@ export const MCP_DOCUMENT_TEXT_MAX_CHARS = 20_000;
 export const MCP_SEARCH_QUERY_MAX_CHARS = 1_000;
 export const MCP_DOC_TYPE_MAX_CHARS = 128;
 export const MCP_REQUEST_BODY_MAX_BYTES = 96 * 1_024;
+export const MCP_TOKEN_REQUEST_BODY_MAX_BYTES = 8 * 1_024;
 
 export type McpRequestBodyBudgetResult =
   | { ok: true; request: Request }
   | { ok: false; response: Response };
 
-function payloadTooLargeResponse(maxBytes: number): Response {
+type RequestBodyBudgetError = {
+  code: string;
+  error: string;
+};
+
+function payloadTooLargeResponse(maxBytes: number, error: RequestBodyBudgetError): Response {
   return Response.json(
     {
-      code: "MCP_PAYLOAD_TOO_LARGE",
-      error: `MCP request body exceeds the ${maxBytes}-byte limit.`,
+      code: error.code,
+      error: error.error,
+      limit: maxBytes,
     },
     { status: 413 },
   );
 }
 
-export async function enforceMcpRequestBodyBudget(
+export async function enforceRequestBodyBudget(
   request: Request,
-  maxBytes = MCP_REQUEST_BODY_MAX_BYTES,
+  maxBytes: number,
+  error: RequestBodyBudgetError,
 ): Promise<McpRequestBodyBudgetResult> {
   const contentLength = request.headers.get("content-length");
   if (contentLength && /^\d+$/u.test(contentLength)) {
     const declaredBytes = Number(contentLength);
     if (Number.isSafeInteger(declaredBytes) && declaredBytes > maxBytes) {
-      return { ok: false, response: payloadTooLargeResponse(maxBytes) };
+      return { ok: false, response: payloadTooLargeResponse(maxBytes, error) };
     }
   }
 
@@ -43,8 +51,8 @@ export async function enforceMcpRequestBodyBudget(
     if (done) break;
     totalBytes += value.byteLength;
     if (totalBytes > maxBytes) {
-      await reader.cancel("MCP request body budget exceeded");
-      return { ok: false, response: payloadTooLargeResponse(maxBytes) };
+      await reader.cancel("Request body budget exceeded");
+      return { ok: false, response: payloadTooLargeResponse(maxBytes, error) };
     }
     chunks.push(value);
   }
@@ -60,4 +68,14 @@ export async function enforceMcpRequestBodyBudget(
     ok: true,
     request: new Request(request, { body }),
   };
+}
+
+export async function enforceMcpRequestBodyBudget(
+  request: Request,
+  maxBytes = MCP_REQUEST_BODY_MAX_BYTES,
+): Promise<McpRequestBodyBudgetResult> {
+  return enforceRequestBodyBudget(request, maxBytes, {
+    code: "MCP_PAYLOAD_TOO_LARGE",
+    error: `MCP request body exceeds the ${maxBytes}-byte limit.`,
+  });
 }

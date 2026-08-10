@@ -6,6 +6,7 @@ import {
   TEMPLATE_LABELS,
   type HwpxTemplateKind
 } from "@/lib/hwpx-template";
+import { withPublicDocumentExportAdmission } from "@/lib/public-distributed-rate-limit";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -18,7 +19,7 @@ function sanitizeFileName(value: string) {
     .slice(0, 80) || "safeclaw-template";
 }
 
-export async function GET(request: NextRequest) {
+async function exportHwpxTemplate(request: NextRequest) {
   const url = request.nextUrl;
   const kind = url.searchParams.get("kind");
   const companyName = url.searchParams.get("companyName") || "";
@@ -61,4 +62,8 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+export async function GET(request: NextRequest) {
+  return withPublicDocumentExportAdmission(request, () => exportHwpxTemplate(request));
 }

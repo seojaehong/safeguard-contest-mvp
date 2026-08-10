@@ -16,9 +16,13 @@ const mocks = vi.hoisted(() => ({
   fetchWeatherSignal: vi.fn()
 }));
 
-vi.mock("@/lib/weather", () => ({
-  fetchWeatherSignal: mocks.fetchWeatherSignal
-}));
+vi.mock("@/lib/weather", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/weather")>();
+  return {
+    ...actual,
+    fetchWeatherSignal: mocks.fetchWeatherSignal
+  };
+});
 
 function weatherRequest(question: string, ipSuffix: number): NextRequest {
   const url = new URL("http://localhost/api/weather");
@@ -64,8 +68,8 @@ describe("weather route public work budget", () => {
       resolveWeather = resolve;
     }));
 
-    const first = GET(weatherRequest("서울  폭염  외부작업", 11));
-    const second = GET(weatherRequest("서울 폭염 외부작업", 12));
+    const first = GET(weatherRequest("서울 옥외 폭염 작업", 11));
+    const second = GET(weatherRequest("서울 야외 고온 작업 기상 확인", 12));
     resolveWeather?.({
       source: "kma",
       mode: "live",

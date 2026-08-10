@@ -1,9 +1,30 @@
 import { createHash } from "node:crypto";
 
 import { getClientIp } from "@/lib/api-guard";
-import type { RateLimiter, RateLimitResult } from "@/lib/rate-limit";
+import {
+  createConcurrencyGuard,
+  createRateLimiter,
+  type RateLimiter,
+  type RateLimitResult,
+} from "@/lib/rate-limit";
 
 const DEFAULT_TIMEOUT_MS = 1_500;
+
+export const PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY = {
+  concurrency: 2,
+  limit: 24,
+  namespace: "document-export",
+  windowMs: 60_000,
+  workUnit: "document-export",
+} as const;
+
+const documentExportLimiter = createRateLimiter({
+  limit: PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.limit,
+  windowMs: PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.windowMs,
+});
+const documentExportConcurrency = createConcurrencyGuard(
+  PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.concurrency,
+);
 
 const FIXED_WINDOW_SCRIPT = [
   "local count = redis.call('INCR', KEYS[1])",
@@ -204,4 +225,54 @@ export function applyPublicRateLimitHeader<T extends Response>(
 ): T {
   response.headers.set("X-SafeClaw-Rate-Limit", decision.mode);
   return response;
+}
+
+function applyDocumentExportAdmissionHeaders<T extends Response>(
+  response: T,
+  decision: PublicRateLimitDecision,
+): T {
+  applyPublicRateLimitHeader(response, decision);
+  response.headers.set("X-SafeClaw-Work-Unit", PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.workUnit);
+  return response;
+}
+
+function documentExportConcurrencyResponse(decision: PublicRateLimitDecision): Response {
+  return applyDocumentExportAdmissionHeaders(new Response(JSON.stringify({
+    error: "문서 내보내기 작업이 많습니다. 잠시 후 다시 시도해 주세요.",
+    code: "PUBLIC_EXPORT_CONCURRENCY_LIMIT",
+    retryAfterSeconds: 1,
+  }), {
+    status: 503,
+    headers: {
+      "Content-Type": "application/json",
+      "Retry-After": "1",
+    },
+  }), decision);
+}
+
+export async function withPublicDocumentExportAdmission(
+  request: Request,
+  work: () => Promise<Response>,
+): Promise<Response> {
+  const decision = await checkPublicRateLimit({
+    request,
+    namespace: PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.namespace,
+    limit: PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.limit,
+    windowMs: PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.windowMs,
+    instanceLimiter: documentExportLimiter,
+  });
+  const limited = publicRateLimitResponse(decision);
+  if (limited) {
+    limited.headers.set("X-SafeClaw-Work-Unit", PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.workUnit);
+    return limited;
+  }
+
+  const release = documentExportConcurrency.tryAcquire();
+  if (!release) return documentExportConcurrencyResponse(decision);
+
+  try {
+    return applyDocumentExportAdmissionHeaders(await work(), decision);
+  } finally {
+    release();
+  }
 }

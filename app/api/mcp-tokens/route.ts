@@ -20,6 +20,10 @@ import {
   type McpTokenOwnerScope,
 } from "@/lib/mcp-token-service";
 import { isRecord } from "@/lib/workspace-api";
+import {
+  enforceRequestBodyBudget,
+  MCP_TOKEN_REQUEST_BODY_MAX_BYTES,
+} from "@/lib/mcp-work-budget";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
@@ -207,7 +211,13 @@ export async function POST(request: NextRequest) {
     }, { status: 401 });
   }
 
-  const parsed = await request.json().catch((): unknown => ({}));
+  const bodyBudget = await enforceRequestBodyBudget(request, MCP_TOKEN_REQUEST_BODY_MAX_BYTES, {
+    code: "MCP_TOKEN_PAYLOAD_TOO_LARGE",
+    error: `MCP token request body exceeds the ${MCP_TOKEN_REQUEST_BODY_MAX_BYTES}-byte limit.`,
+  });
+  if (!bodyBudget.ok) return bodyBudget.response;
+
+  const parsed = await bodyBudget.request.json().catch((): unknown => ({}));
   const body = isRecord(parsed) ? parsed : {};
   const requestedLabel = typeof body.label === "string" ? body.label : undefined;
 

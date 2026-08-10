@@ -37,8 +37,10 @@ import {
   createRemoteHermesComposition,
   type RemoteHermesRuntimeDependencies,
 } from "@/lib/remote-hermes-runtime";
+import { enforceRequestBodyBudget } from "@/lib/mcp-work-budget";
 
 const log = createLogger("api/agent/chat");
+export const AGENT_CHAT_REQUEST_BODY_MAX_BYTES = 64 * 1_024;
 export type AgentChatRouteDependencies = {
   resolveContext: ResolveBrokerContext;
   engine: EngineAdapter;
@@ -128,7 +130,13 @@ export function createAgentChatPost(dependencies: AgentChatRouteDependencies) {
     const limited = enforceAuthenticatedRateLimit(authentication.user.id, routeAuthenticatedLimiter);
     if (limited) return limited;
 
-    const body = await request.json().catch(() => null);
+    const bodyBudget = await enforceRequestBodyBudget(request, AGENT_CHAT_REQUEST_BODY_MAX_BYTES, {
+      code: "AGENT_CHAT_PAYLOAD_TOO_LARGE",
+      error: `Agent chat request body exceeds the ${AGENT_CHAT_REQUEST_BODY_MAX_BYTES}-byte limit.`,
+    });
+    if (!bodyBudget.ok) return bodyBudget.response;
+
+    const body = await bodyBudget.request.json().catch(() => null);
     if (!body || typeof body !== "object") {
       return jsonError(new BrokerError("SITE_CONTEXT_REQUIRED", 400));
     }

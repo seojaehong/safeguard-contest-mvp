@@ -235,6 +235,12 @@ function pickLocation(question: string) {
   return locationMap.find((item) => item.keywords.some((keyword) => normalized.includes(keyword.toLowerCase())))?.config || locationMap[0].config;
 }
 
+export function getWeatherWorkKey(question: string): string {
+  const location = pickLocation(question);
+  const context = isOutdoorHeatContext(question) ? "outdoor" : "standard";
+  return `${location.areaNo}:${context}`;
+}
+
 function toKst(now = new Date()) {
   const utc = now.getTime() + now.getTimezoneOffset() * 60_000;
   return new Date(utc + 9 * 60 * 60_000);

@@ -2513,23 +2513,66 @@ function buildRestUrl(config: SupabaseConfig, table: string, params: URLSearchPa
   return `${config.url}/rest/v1/${table}?${params.toString()}`;
 }
 
-async function fetchRest(config: SupabaseConfig, table: string, params: URLSearchParams): Promise<Response> {
-  return await fetch(buildRestUrl(config, table, params), {
+const SAFETY_REFERENCE_REQUEST_TIMEOUT_MS = 5_000;
+
+async function fetchWithDeadline(
+  input: string,
+  init: RequestInit,
+  callerSignal?: AbortSignal
+): Promise<Response> {
+  const controller = new AbortController();
+  const abortFromCaller = () => controller.abort(callerSignal?.reason);
+  if (callerSignal?.aborted) abortFromCaller();
+  else callerSignal?.addEventListener("abort", abortFromCaller, { once: true });
+  const timeout = setTimeout(() => {
+    controller.abort(new Error(`safety reference request timeout after ${SAFETY_REFERENCE_REQUEST_TIMEOUT_MS}ms`));
+  }, SAFETY_REFERENCE_REQUEST_TIMEOUT_MS);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+    callerSignal?.removeEventListener("abort", abortFromCaller);
+  }
+}
+
+async function fetchRest(
+  config: SupabaseConfig,
+  table: string,
+  params: URLSearchParams,
+  signal?: AbortSignal
+): Promise<Response> {
+  return await fetchWithDeadline(buildRestUrl(config, table, params), {
     headers: {
       apikey: config.serviceRoleKey,
       Authorization: `Bearer ${config.serviceRoleKey}`
     },
     cache: "no-store"
-  });
+  }, signal);
 }
 
-async function fetchReferenceItems(config: SupabaseConfig, params: URLSearchParams): Promise<{
+async function fetchReferenceItems(config: SupabaseConfig, params: URLSearchParams, signal?: AbortSignal): Promise<{
   ok: boolean;
   status: number;
   message: string;
   items: SafetyReferenceItem[];
 }> {
-  const response = await fetchRest(config, "safety_reference_items", params);
+  let response: Response;
+  try {
+    response = await fetchRest(config, "safety_reference_items", params, signal);
+  } catch (error) {
+    signal?.throwIfAborted();
+    log.error("safety reference REST search failed", {
+      event: SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
+      errorCode: SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
+      errorType: error instanceof Error ? error.name : typeof error
+    });
+    return {
+      ok: false,
+      status: 0,
+      message: "안전 지식 DB 자료 조회를 완료하지 못했습니다.",
+      items: []
+    };
+  }
   if (!response.ok) {
     return {
       ok: false,
@@ -2560,12 +2603,13 @@ async function fetchRankedReferences(
   config: SupabaseConfig,
   query: string,
   limit: number,
-  itemType?: string
+  itemType?: string,
+  signal?: AbortSignal
 ): Promise<{ ok: boolean; status: number; message: string; items: SafetyReferenceItem[] } | null> {
   const url = `${config.url}/rest/v1/rpc/search_safety_references_ranked`;
   let response: Response;
   try {
-    response = await fetch(url, {
+    response = await fetchWithDeadline(url, {
       method: "POST",
       headers: {
         apikey: config.serviceRoleKey,
@@ -2578,8 +2622,9 @@ async function fetchRankedReferences(
         item_type_filter: itemType ?? null
       }),
       cache: "no-store"
-    });
+    }, signal);
   } catch (error) {
+    signal?.throwIfAborted();
     log.error("safety reference ranked RPC failed", {
       event: SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
       errorCode: SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
@@ -2631,7 +2676,8 @@ async function normalizeVectorReferenceRow(value: unknown): Promise<SafetyRefere
 
 async function fetchQueryEmbedding(
   query: string,
-  runtime: SafetyReferenceVectorRuntime
+  runtime: SafetyReferenceVectorRuntime,
+  signal?: AbortSignal
 ): Promise<{ ok: true; embedding: number[] } | { ok: false; message: string }> {
   if (!runtime.apiKey) {
     return { ok: false, message: "OPENAI_API_KEY가 없어 query embedding을 생성하지 않았습니다." };
@@ -2646,6 +2692,9 @@ async function fetchQueryEmbedding(
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
     const controller = new AbortController();
+    const abortFromCaller = () => controller.abort(signal?.reason);
+    if (signal?.aborted) abortFromCaller();
+    else signal?.addEventListener("abort", abortFromCaller, { once: true });
     const timeout = setTimeout(() => controller.abort(), VECTOR_SEARCH_TIMEOUT_MS);
     try {
       const response = await fetch("https://api.openai.com/v1/embeddings", {
@@ -2682,6 +2731,7 @@ async function fetchQueryEmbedding(
       }
       return { ok: true, embedding };
     } catch {
+      signal?.throwIfAborted();
       if (attempt === 0) continue;
       return {
         ok: false,
@@ -2689,6 +2739,7 @@ async function fetchQueryEmbedding(
       };
     } finally {
       clearTimeout(timeout);
+      signal?.removeEventListener("abort", abortFromCaller);
     }
   }
 
@@ -2700,13 +2751,14 @@ async function fetchVectorReferences(
   query: string,
   limit: number,
   itemType: string | undefined,
-  runtime: SafetyReferenceVectorRuntime
+  runtime: SafetyReferenceVectorRuntime,
+  signal?: AbortSignal
 ): Promise<VectorFetchResult> {
   if (!runtime.enabled) {
     return { status: runtime.status, items: [] };
   }
 
-  const embedding = await fetchQueryEmbedding(query, runtime);
+  const embedding = await fetchQueryEmbedding(query, runtime, signal);
   if (!embedding.ok) {
     log.error("safety reference vector embedding failed", {
       event: SAFETY_REFERENCE_VECTOR_FAILURE_CODE,
@@ -2730,7 +2782,7 @@ async function fetchVectorReferences(
   const url = `${config.url}/rest/v1/rpc/match_safety_reference_embeddings`;
   let response: Response;
   try {
-    response = await fetch(url, {
+    response = await fetchWithDeadline(url, {
       method: "POST",
       headers: {
         apikey: config.serviceRoleKey,
@@ -2743,8 +2795,9 @@ async function fetchVectorReferences(
         item_type_filter: itemType ?? null
       }),
       cache: "no-store"
-    });
+    }, signal);
   } catch (error) {
+    signal?.throwIfAborted();
     log.error("safety reference vector RPC failed", {
       event: SAFETY_REFERENCE_VECTOR_FAILURE_CODE,
       errorCode: SAFETY_REFERENCE_VECTOR_FAILURE_CODE,
@@ -2817,7 +2870,7 @@ async function countRows(config: SupabaseConfig, spec: CountSpec): Promise<numbe
   params.set("select", "id");
   params.set("limit", "1");
   Object.entries(spec.filters || {}).forEach(([key, value]) => params.set(key, value));
-  const response = await fetch(buildRestUrl(config, spec.table, params), {
+  const response = await fetchWithDeadline(buildRestUrl(config, spec.table, params), {
     headers: {
       apikey: config.serviceRoleKey,
       Authorization: `Bearer ${config.serviceRoleKey}`,
@@ -2838,6 +2891,7 @@ export type SafetyReferenceSearchOptions = {
   sourceId?: string;
   riskTag?: string;
   evidenceRole?: "direct" | "supporting";
+  signal?: AbortSignal;
 };
 
 export function deriveSafetyReferenceRetrievalModeFromItems(
@@ -2869,6 +2923,7 @@ export function deriveSafetyReferenceRetrievalModeFromItems(
 }
 
 export async function searchSafetyReferences(options: SafetyReferenceSearchOptions): Promise<SafetyReferenceSearchResult> {
+  options.signal?.throwIfAborted();
   const config = getSupabaseConfig();
   const query = options.query.trim();
   const limit = Math.min(Math.max(options.limit || 12, 1), 50);
@@ -2892,9 +2947,9 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
   // RPC handles only `query` + `itemType`. For sourceId/riskTag we still use the
   // legacy ilike path. evidenceRole is post-filtered on returned items.
   if (query && !options.sourceId && !options.riskTag) {
-    const vector = await fetchVectorReferences(config, query, fetchLimit, options.itemType, vectorRuntime);
+    const vector = await fetchVectorReferences(config, query, fetchLimit, options.itemType, vectorRuntime, options.signal);
     vectorSearch = vector.status;
-    const ranked = await fetchRankedReferences(config, query, fetchLimit, options.itemType);
+    const ranked = await fetchRankedReferences(config, query, fetchLimit, options.itemType, options.signal);
     if ((ranked && ranked.ok && ranked.items.length) || vector.items.length) {
       const merged = mergeSafetyReferenceHybridResults({
         vectorItems: vector.items,
@@ -2933,7 +2988,7 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
     params.set("or", `(title.ilike.*${searchTerm}*,summary.ilike.*${searchTerm}*,body.ilike.*${searchTerm}*)`);
   }
 
-  const firstPass = await fetchReferenceItems(config, params);
+  const firstPass = await fetchReferenceItems(config, params, options.signal);
   if (!firstPass.ok) {
     return {
       ok: false,
@@ -2957,10 +3012,11 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
     const fallbackTerms = extractFallbackTerms(searchTerm);
     const minimumSignalPasses = Math.min(4, fallbackTerms.length);
     for (const [index, term] of fallbackTerms.entries()) {
+      options.signal?.throwIfAborted();
       const fallbackParams = new URLSearchParams(params);
       fallbackParams.set("limit", String(fetchLimit));
       fallbackParams.set("or", `(title.ilike.*${term}*,summary.ilike.*${term}*,body.ilike.*${term}*)`);
-      const fallback = await fetchReferenceItems(config, fallbackParams);
+      const fallback = await fetchReferenceItems(config, fallbackParams, options.signal);
       if (fallback.ok) {
         filterByEvidenceRole(
           fallback.items.map((item) => withRetrievalSource(item, "rest")),

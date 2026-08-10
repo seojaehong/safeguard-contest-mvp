@@ -10,28 +10,49 @@ async function wait(ms: number) {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function withTimeout<T>(task: Promise<T>, timeoutMs: number, label: string): Promise<T> {
+async function withTimeout<T>(
+  runner: (signal: AbortSignal) => Promise<T>,
+  timeoutMs: number,
+  label: string,
+  callerSignal?: AbortSignal
+): Promise<T> {
+  const controller = new AbortController();
+  const abortFromCaller = () => controller.abort(callerSignal?.reason);
+  if (callerSignal?.aborted) abortFromCaller();
+  else callerSignal?.addEventListener("abort", abortFromCaller, { once: true });
   let timeoutHandle: NodeJS.Timeout | undefined;
 
   const timeoutPromise = new Promise<T>((_, reject) => {
-    timeoutHandle = setTimeout(() => reject(new Error(`${label} timeout after ${timeoutMs}ms`)), timeoutMs);
+    timeoutHandle = setTimeout(() => {
+      const error = new Error(`${label} timeout after ${timeoutMs}ms`);
+      controller.abort(error);
+      reject(error);
+    }, timeoutMs);
   });
 
   try {
-    return await Promise.race([task, timeoutPromise]);
+    return await Promise.race([runner(controller.signal), timeoutPromise]);
   } finally {
     if (timeoutHandle) clearTimeout(timeoutHandle);
+    callerSignal?.removeEventListener("abort", abortFromCaller);
   }
 }
 
-async function withRetry<T>(runner: () => Promise<T>, attempts: number, label: string): Promise<T> {
+async function withRetry<T>(
+  runner: () => Promise<T>,
+  attempts: number,
+  label: string,
+  signal?: AbortSignal
+): Promise<T> {
   let lastError: unknown;
 
   for (let attempt = 0; attempt < attempts; attempt += 1) {
+    signal?.throwIfAborted();
     try {
       return await runner();
     } catch (error) {
       lastError = error;
+      signal?.throwIfAborted();
       if (attempt < attempts - 1) {
         await wait(RETRY_DELAY_MS);
       }
@@ -118,36 +139,62 @@ function rankLegalResults(results: SearchResult[]) {
   });
 }
 
-export async function searchLegalSources(query: string): Promise<SearchResult[]> {
+export async function searchLegalSources(query: string, signal?: AbortSignal): Promise<SearchResult[]> {
   const primary = await withRetry(
-    () => withTimeout(searchLawGo(query), SEARCH_TIMEOUT_MS, "Law.go search"),
+    () => withTimeout((requestSignal) => searchLawGo(query, requestSignal), SEARCH_TIMEOUT_MS, "Law.go search", signal),
     2,
-    "Law.go search"
-  ).catch(() => filterMockResults(query));
+    "Law.go search",
+    signal
+  ).catch((error) => {
+    signal?.throwIfAborted();
+    return filterMockResults(query);
+  });
   const fallbackPrimary =
     (primary.some((item) => item.type === "law") && primary.length) || query.trim() === "산업안전보건법"
       ? []
       : await withRetry(
-          () => withTimeout(searchLawGo("산업안전보건법"), SEARCH_TIMEOUT_MS, "Law.go fallback search"),
+          () => withTimeout(
+            (requestSignal) => searchLawGo("산업안전보건법", requestSignal),
+            SEARCH_TIMEOUT_MS,
+            "Law.go fallback search",
+            signal
+          ),
           2,
-          "Law.go fallback search"
-        ).catch(() => []);
+          "Law.go fallback search",
+          signal
+        ).catch((error) => {
+          signal?.throwIfAborted();
+          return [];
+        });
 
   const secondary = await withRetry(
-    () => withTimeout(searchKoreanLawMcp(query), SEARCH_TIMEOUT_MS, "korean-law-mcp search"),
+    () => withTimeout((requestSignal) => searchKoreanLawMcp(query, 3, requestSignal), SEARCH_TIMEOUT_MS, "korean-law-mcp search", signal),
     2,
-    "korean-law-mcp search"
-  ).catch(() => []);
+    "korean-law-mcp search",
+    signal
+  ).catch((error) => {
+    signal?.throwIfAborted();
+    return [];
+  });
 
   const merged = mergeResults(mergeResults(primary, fallbackPrimary), secondary);
   const livePrecedentCount = merged.filter((item) => item.type === "precedent" && item.sourceSystem !== "mock").length;
   const mappedPrecedents = livePrecedentCount
     ? []
     : await withRetry(
-        () => withTimeout(searchLawGoPrecedents(query, 3), SEARCH_TIMEOUT_MS, "Law.go precedent mapping"),
+        () => withTimeout(
+          (requestSignal) => searchLawGoPrecedents(query, 3, requestSignal),
+          SEARCH_TIMEOUT_MS,
+          "Law.go precedent mapping",
+          signal
+        ),
         2,
-        "Law.go precedent mapping"
-      ).then(buildMappedPrecedents).catch(() => []);
+        "Law.go precedent mapping",
+        signal
+      ).then(buildMappedPrecedents).catch((error) => {
+        signal?.throwIfAborted();
+        return [];
+      });
 
   return rankLegalResults(mergeResults(merged, mappedPrecedents)).slice(0, 10);
 }

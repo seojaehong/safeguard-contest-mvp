@@ -8,6 +8,11 @@ export interface RateLimiter {
   size(): number;
 }
 
+export interface ConcurrencyGuard {
+  active(): number;
+  tryAcquire(): (() => void) | null;
+}
+
 interface WindowEntry {
   windowStart: number;
   count: number;
@@ -45,6 +50,29 @@ export function createRateLimiter(options: { limit: number; windowMs: number }):
     },
     size(): number {
       return entries.size;
+    },
+  };
+}
+
+export function createConcurrencyGuard(limit: number): ConcurrencyGuard {
+  if (!Number.isSafeInteger(limit) || limit < 1) {
+    throw new Error("Concurrency limit must be a positive safe integer");
+  }
+
+  let activeCount = 0;
+  return {
+    active(): number {
+      return activeCount;
+    },
+    tryAcquire(): (() => void) | null {
+      if (activeCount >= limit) return null;
+      activeCount += 1;
+      let released = false;
+      return () => {
+        if (released) return;
+        released = true;
+        activeCount -= 1;
+      };
     },
   };
 }
