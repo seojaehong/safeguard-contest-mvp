@@ -340,6 +340,10 @@ describe("workspace mobile share presentation", () => {
             const configCards = [...document.querySelectorAll<HTMLElement>(".share-config-card")];
             const stageRail = document.querySelector<HTMLElement>("[data-share-stage-rail]");
             const stageItems = [...document.querySelectorAll<HTMLElement>("[data-share-stage]")];
+            const workspaceSideNav = document.querySelector<HTMLElement>(".workspace-side-nav");
+            const workspaceStepButtons = [...document.querySelectorAll<HTMLElement>(
+              ".workspace-side-group:first-child button"
+            )];
             if (!preview || !lines || !primary || !stageRail) throw new Error("Missing share presentation target");
             const previewRect = preview.getBoundingClientRect();
             const linesRect = lines.getBoundingClientRect();
@@ -349,6 +353,14 @@ describe("workspace mobile share presentation", () => {
             const mobileSummaryRect = mobileSummary?.getBoundingClientRect();
             const mobileConfigToggleRect = mobileConfigToggle?.getBoundingClientRect();
             const desktopStatusRailRect = desktopStatusRail?.getBoundingClientRect();
+            const workspaceSideNavRect = workspaceSideNav?.getBoundingClientRect();
+            const workspaceStepStatusOverflows = workspaceStepButtons.map((button) => {
+              const status = button.querySelector<HTMLElement>("small");
+              if (!status || getComputedStyle(status).display === "none") return 0;
+              const buttonRect = button.getBoundingClientRect();
+              const statusRect = status.getBoundingClientRect();
+              return Math.max(0, Math.round(statusRect.right - buttonRect.right));
+            });
             return {
               viewportHeight: window.innerHeight,
               pageHeight: document.documentElement.scrollHeight,
@@ -381,6 +393,9 @@ describe("workspace mobile share presentation", () => {
               stageRailWidth: Math.round(stageRailRect.width),
               stageItemCount: stageItems.length,
               stageColumns: getComputedStyle(stageRail).gridTemplateColumns.split(" ").filter(Boolean).length,
+              workspaceSideNavWidth: Math.round(workspaceSideNavRect?.width ?? 0),
+              workspaceStepStatusOverflowCount: workspaceStepStatusOverflows.filter((overflow) => overflow > 1).length,
+              workspaceStepStatusMaxOverflow: Math.max(0, ...workspaceStepStatusOverflows),
               paragraphCount: paragraphs.length,
               primaryCount: primaryActions.length,
               channelCards: channelCards.map((card) => {
@@ -466,6 +481,9 @@ describe("workspace mobile share presentation", () => {
               "utf8"
             );
           } else {
+            expect.soft(metrics.workspaceSideNavWidth, `${scenario.label} ${theme} workspace step rail width`).toBeGreaterThanOrEqual(1100);
+            expect.soft(metrics.workspaceStepStatusOverflowCount, `${scenario.label} ${theme} workspace step status overflow count`).toBe(0);
+            expect.soft(metrics.workspaceStepStatusMaxOverflow, `${scenario.label} ${theme} workspace step status max overflow`).toBeLessThanOrEqual(1);
             expect.soft(metrics.stageColumns, `${scenario.label} ${theme} desktop stage rail columns`).toBe(4);
             expect.soft(metrics.primaryBottom, `${scenario.label} ${theme} desktop CTA in first viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
             expect.soft(metrics.previewBottom, `${scenario.label} ${theme} desktop preview in first viewport`).toBeLessThanOrEqual(metrics.viewportHeight);

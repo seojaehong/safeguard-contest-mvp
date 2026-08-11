@@ -23860,6 +23860,30 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
+/* Keep the desktop Documents/Share step rail aligned with the route cockpit.
+   Later theme rules restore the input-page sidebar width, so this final
+   route-scoped guard prevents step status text from colliding at 1440px. */
+@media (min-width: 901px) {
+  .command-center-shell.workspace-theme-day.workspace-page-document .linear-workspace-layout,
+  .command-center-shell.workspace-theme-day.workspace-page-share .linear-workspace-layout,
+  .command-center-shell.workspace-theme-night.workspace-page-document .linear-workspace-layout,
+  .command-center-shell.workspace-theme-night.workspace-page-share .linear-workspace-layout {
+    grid-template-columns: minmax(0, 1180px);
+    justify-content: center;
+  }
+
+  .command-center-shell.workspace-theme-day.workspace-page-document .workspace-side-nav,
+  .command-center-shell.workspace-theme-day.workspace-page-share .workspace-side-nav,
+  .command-center-shell.workspace-theme-night.workspace-page-document .workspace-side-nav,
+  .command-center-shell.workspace-theme-night.workspace-page-share .workspace-side-nav {
+    grid-column: 1;
+    width: 100%;
+    max-width: none;
+    border-right: 0;
+    border-bottom: 1px solid var(--workspace-rule);
+  }
+}
+
 /* Short desktop cockpit guard: route splitting alone does not shorten long
    Documents/Share content, so keep the stage chrome in the viewport and move
    long review/share detail into the explicit panel drilldown area. */

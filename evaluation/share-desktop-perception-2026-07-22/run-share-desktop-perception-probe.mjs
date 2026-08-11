@@ -3,10 +3,12 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { chromium } from "playwright";
 
-const outDir = path.resolve("evaluation/share-desktop-perception-2026-07-22");
+const outDir = path.resolve(process.env.SAFECLAW_OUTPUT_DIR || "evaluation/share-desktop-perception-2026-07-22");
 fs.mkdirSync(outDir, { recursive: true });
 
 const baseUrl = process.env.SAFECLAW_BASE_URL || "https://www.safeclaw.kr";
+const baseHostname = new URL(baseUrl).hostname;
+const liveProductionRun = baseHostname !== "localhost" && baseHostname !== "127.0.0.1";
 const sourceHead = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
 const checkedAt = new Date().toISOString();
 const build = await (await fetch(`${baseUrl}/api/build-info?codexCacheBust=share-perception-${Date.now()}`)).json();
@@ -78,6 +80,9 @@ function passCriteria(metrics, kind) {
         && metrics.previewBottom <= metrics.viewportHeight
         && metrics.desktopStatusRailBottom <= metrics.viewportHeight
         && metrics.previewRightOfPrimary === true
+        && metrics.workspaceSideNavWidth >= 1100
+        && metrics.workspaceStepStatusOverflowCount === 0
+        && metrics.workspaceStepStatusMaxOverflow <= 1
         && metrics.horizontalOverflow === false
         && metrics.outsideElements === 0
         && metrics.mobileSummaryDisplay === "none"
@@ -195,6 +200,8 @@ async function measureWorkspaceShare(page) {
     const mobileSummary = document.querySelector("[data-share-mobile-summary]");
     const desktopStatusRail = rect("[data-share-desktop-status-rail]");
     const desktopStatusRailElement = document.querySelector("[data-share-desktop-status-rail]");
+    const workspaceSideNav = document.querySelector(".workspace-side-nav");
+    const workspaceStepButtons = [...document.querySelectorAll(".workspace-side-group:first-child button")];
     const channelCards = [...document.querySelectorAll(".channel-grid .channel-card")].map((card) => {
       const box = card.getBoundingClientRect();
       return {
@@ -212,6 +219,14 @@ async function measureWorkspaceShare(page) {
       const box = element.getBoundingClientRect();
       return box.width > 0 && box.height > 0 && (box.left < -1 || box.right > window.innerWidth + 1);
     }).length;
+    const workspaceSideNavBox = workspaceSideNav?.getBoundingClientRect();
+    const workspaceStepStatusOverflows = workspaceStepButtons.map((button) => {
+      const status = button.querySelector("small");
+      if (!status || getComputedStyle(status).display === "none") return 0;
+      const buttonBox = button.getBoundingClientRect();
+      const statusBox = status.getBoundingClientRect();
+      return Math.max(0, Math.round(statusBox.right - buttonBox.right));
+    });
     return {
       viewportWidth: window.innerWidth,
       viewportHeight: window.innerHeight,
@@ -235,6 +250,9 @@ async function measureWorkspaceShare(page) {
         ? getComputedStyle(desktopStatusRailElement).display
         : "missing",
       previewRightOfPrimary: Boolean(preview && primary && preview.left > primary.right),
+      workspaceSideNavWidth: Math.round(workspaceSideNavBox?.width ?? 0),
+      workspaceStepStatusOverflowCount: workspaceStepStatusOverflows.filter((overflow) => overflow > 1).length,
+      workspaceStepStatusMaxOverflow: Math.max(0, ...workspaceStepStatusOverflows),
       mobileSummaryDisplay: mobileSummary ? getComputedStyle(mobileSummary).display : "missing",
       horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
       outsideElements,
@@ -426,6 +444,7 @@ const report = {
   schemaVersion: "safeclaw-share-desktop-perception/v1",
   checkedAt,
   baseUrl,
+  mode: liveProductionRun ? "live-production" : "current-source-local-production",
   sourceHead,
   productionBuild: build,
   providerDispatchLiveClaimed: false,
@@ -434,10 +453,14 @@ const report = {
   exactSavedSessionVerdict: "MISSING_EVIDENCE",
   routeSplitAloneAcceptedAsFix: false,
   verdict: failed.length === 0
-    ? "PASS_LIVE_PRODUCTION_SCOPED_WORKSPACE_AND_INVITED_FIXTURE"
-    : "RED_REPRODUCED_OR_ERROR",
+    ? liveProductionRun
+      ? "PASS_LIVE_PRODUCTION_SCOPED_WORKSPACE_AND_INVITED_FIXTURE"
+      : "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SCOPED_WORKSPACE_AND_INVITED_FIXTURE"
+    : liveProductionRun
+      ? "RED_LIVE_PRODUCTION_SCOPED_WORKSPACE_OR_INVITED_FIXTURE"
+      : "RED_CURRENT_SOURCE_LOCAL_PRODUCTION_SCOPED_WORKSPACE_OR_INVITED_FIXTURE",
   interpretation: failed.length === 0
-    ? "Current measured live Workspace Share uses a three-zone desktop cockpit, while the invited recipient fixture uses a separate two-zone desktop workbench. This does not prove a different user-visible saved/generated session; if that exact session still looks like a narrow mobile card, reproduce it with this width-ratio/grid gate before changing product code."
+    ? `${liveProductionRun ? "Current measured live" : "Current-source local production"} Workspace Share uses a three-zone desktop cockpit, while the invited recipient fixture uses a separate two-zone desktop workbench. This does not prove a different user-visible saved/generated session; if that exact session still looks like a narrow mobile card, reproduce it with this width-ratio/grid gate before changing product code.`
     : "At least one measured route failed the full-workbench perception gate. Literal two-column geometry and perceived full-workbench breadth are separated: a route can have two columns and still fail if the root/content width is too narrow for a 1440px desktop.",
   acceptance: {
     desktop: [
@@ -469,7 +492,7 @@ fs.writeFileSync(path.join(outDir, "report.json"), `${JSON.stringify(report, nul
 const rows = results.map((item) => {
   const metrics = item.metrics || {};
   const perception = item.perception || {};
-  return `| ${item.route} | ${item.viewport.label} | ${item.verdict} | ${perception.literalStackVerdict ?? "n/a"} | ${perception.fullWorkbenchBreadthVerdict ?? "n/a"} | ${perception.perceivedFullWorkbenchVerdict ?? "n/a"} | ${metrics.rootWidthRatio ?? "n/a"} | ${metrics.distinctFirstViewportRegions ?? "n/a"} | ${metrics.primaryBottom ?? metrics.confirmButtonBottom ?? "n/a"} | ${metrics.previewBottom ?? metrics.documentsTop ?? "n/a"} | ${metrics.horizontalOverflow ?? "n/a"} | ${metrics.outsideElements ?? "n/a"} |`;
+  return `| ${item.route} | ${item.viewport.label} | ${item.verdict} | ${perception.literalStackVerdict ?? "n/a"} | ${perception.fullWorkbenchBreadthVerdict ?? "n/a"} | ${perception.perceivedFullWorkbenchVerdict ?? "n/a"} | ${metrics.rootWidthRatio ?? "n/a"} | ${metrics.distinctFirstViewportRegions ?? "n/a"} | ${metrics.workspaceSideNavWidth ?? "n/a"} | ${metrics.workspaceStepStatusOverflowCount ?? "n/a"} | ${metrics.primaryBottom ?? metrics.confirmButtonBottom ?? "n/a"} | ${metrics.previewBottom ?? metrics.documentsTop ?? "n/a"} | ${metrics.horizontalOverflow ?? "n/a"} | ${metrics.outsideElements ?? "n/a"} |`;
 });
 
 fs.writeFileSync(path.join(outDir, "report.md"), `# Share Desktop Perception Probe
@@ -500,8 +523,8 @@ Literal two-column and perceived full-workbench breadth are separate checks. A r
 
 ## Metrics
 
-| Route | Viewport | Verdict | Literal stack | Breadth | Perceived workbench | Root width ratio | Distinct first-viewport regions | Primary/confirm bottom | Preview/docs top-bottom | Horizontal overflow | Outside elements |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Route | Viewport | Verdict | Literal stack | Breadth | Perceived workbench | Root width ratio | Distinct first-viewport regions | Step rail width | Status overflows | Primary/confirm bottom | Preview/docs top-bottom | Horizontal overflow | Outside elements |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 ${rows.join("\n")}
 
 ## Remaining UX Boundary
