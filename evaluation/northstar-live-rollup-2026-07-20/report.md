@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-11T11:21:45.209Z
-Source HEAD at generation: e3c9f4744950974947b700fb7a6cfd3cc7244976
-Live commit at generation: e3c9f4744950974947b700fb7a6cfd3cc7244976
+Generated at: 2026-08-11T11:38:48.608Z
+Source HEAD at generation: c4abb9077746e9db49dcdcc8d15b08aef1f31a91
+Live commit at generation: c4abb9077746e9db49dcdcc8d15b08aef1f31a91
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -190,7 +190,7 @@ Overall: `northstar_open_approval_gated`
 - Photo Vision/OCR ready: true; accepted-only=true; photo POST executed=false
 - AI generation modes: template, enhanced, full
 - Exact saved Share: MISSING_EVIDENCE
-- Documents/Share IA: OPEN_SEPARATE_VIEWPORT_IA_WAVE
+- Documents/Share IA: PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP
 - Boundary: capability truth does not unlock provider persistence, exact saved Share, or Documents/Share viewport IA.
 
 ## Live Hermes Reviewer Authority UI

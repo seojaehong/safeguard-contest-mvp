@@ -738,7 +738,7 @@ function createFixtureRoot(): { root: string; head: string } {
     },
     remainingBoundaries: {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
-      documentsShareIaVerdict: "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
+      documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
     },
   });
   writeJson(root, "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json", {
@@ -1368,7 +1368,7 @@ describe("northstar live rollup", () => {
       providerDispatchCalled: false,
       photoAnalysisPostCalled: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
-      documentsShareIaVerdict: "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
+      documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
     });
     expect(report.evidence.find((item) => item.id === "product_capability_truth")?.productionStatus).toBe("ancestor_of_head");
     expect(report.tenantAuthorizationRemediation).toMatchObject({

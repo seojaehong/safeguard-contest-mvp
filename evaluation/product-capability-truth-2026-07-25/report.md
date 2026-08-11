@@ -38,6 +38,6 @@ The card is not claimed as a first-viewport geometry pass. These screenshots pro
 - No provider dispatch.
 - No photo-analysis POST.
 - Exact saved `/share/[sessionId]`: `MISSING_EVIDENCE`.
-- Documents density and desktop Share multi-zone presentation: `OPEN_SEPARATE_VIEWPORT_IA_WAVE`.
-- Route split alone is not accepted as the Documents/Share IA fix.
+- Documents and Workspace/fixture Share viewport IA: `PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP`, backed by `evaluation/workspace-bounded-workbench-current-2026-07-22/report.json` at `33a81670` with no later governed UI-path changes.
+- Route split alone is not accepted as the Documents/Share IA fix; exact saved Share remains a separate geometry boundary.
 - Human editorial review remains incomplete.

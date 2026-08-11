@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-11T11:21:43.171Z",
-  "sourceSha": "e3c9f4744950974947b700fb7a6cfd3cc7244976",
+  "generatedAt": "2026-08-11T11:38:47.401Z",
+  "sourceSha": "c4abb9077746e9db49dcdcc8d15b08aef1f31a91",
   "overall": "open",
   "gates": [
     {
@@ -111,10 +111,10 @@
       "state": "proven",
       "label": "Live product capability truth",
       "evidencePath": "evaluation\\product-capability-truth-2026-07-25\\report.json",
-      "detail": "Manual email/SMS/Kakao and scheduled briefing email are fail-closed preview-only because persistent idempotency is unavailable. Live dispatch entry copy distinguishes preview/readiness from approved results (evaluation\\dispatch-entry-capability-truth-2026-07-28\\report.json), and the public landing keeps safety judgment and final confirmation with a human instead of claiming role replacement (evaluation\\landing-human-review-boundary-2026-07-28\\report.json). Live photo Vision/OCR readiness is accepted-only, AI generation modes are template/enhanced/full, and no DB/share/provider/photo POST mutation occurred. This does not grant provider dispatch approval or replace broad human/legal review: exact saved Share remains MISSING_EVIDENCE and Documents/Share IA remains OPEN_SEPARATE_VIEWPORT_IA_WAVE.",
+      "detail": "Manual email/SMS/Kakao and scheduled briefing email are fail-closed preview-only because persistent idempotency is unavailable. Live dispatch entry copy distinguishes preview/readiness from approved results (evaluation\\dispatch-entry-capability-truth-2026-07-28\\report.json), and the public landing keeps safety judgment and final confirmation with a human instead of claiming role replacement (evaluation\\landing-human-review-boundary-2026-07-28\\report.json). Live photo Vision/OCR readiness is accepted-only, AI generation modes are template/enhanced/full, and no DB/share/provider/photo POST mutation occurred. Scoped Documents and Workspace/fixture Share viewport IA is separately proven without accepting route split alone; provider approval and broad human/legal review remain open, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Keep provider dispatch persistence approval-gated.",
-        "Measure exact saved Share and Documents/Share viewport IA in their separate gates."
+        "Measure exact saved Share geometry with a concrete existing session URL or separately approved creation flow."
       ]
     },
     {

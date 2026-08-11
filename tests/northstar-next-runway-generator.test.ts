@@ -1240,7 +1240,7 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     },
     remainingBoundaries: {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
-      documentsShareIaVerdict: "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
+      documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
     },
   });
   writeJson(root, "evaluation/dependency-security-remediation-2026-07-28/report.json", {
@@ -2355,7 +2355,7 @@ describe("northstar next runway generator", () => {
       providerDispatchCalled: false,
       photoAnalysisPostCalled: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
-      documentsShareIaVerdict: "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
+      documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
     });
     expect(report.provenCurrentState).toContain("product_capability_truth");
     expect(report.hermesOpenclaw).toMatchObject({

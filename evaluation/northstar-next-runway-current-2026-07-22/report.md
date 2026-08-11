@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `e3c9f4744950974947b700fb7a6cfd3cc7244976`
+Source HEAD: `c4abb9077746e9db49dcdcc8d15b08aef1f31a91`
 
-Production `/api/build-info`: `e3c9f4744950974947b700fb7a6cfd3cc7244976`
+Production `/api/build-info`: `c4abb9077746e9db49dcdcc8d15b08aef1f31a91`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `e3c9f4744950974947b700fb7a6cfd3cc7244976`
+Live rollup source head: `c4abb9077746e9db49dcdcc8d15b08aef1f31a91`
 
 Live rollup matches production: `true`
 
@@ -50,7 +50,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live 12-deliverable automated editorial quality is measured separately: `PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY`, live scenarios `5/5`, reviewed document surface `60`, placeholder/legal/awkward/evidence mismatch `0/0/0/0`, and duplicate findings exact/near `38/100`. This is reviewer-ready automated evidence with humanReviewCompleted=`false`, not a combined human PASS; exact saved Share remains `MISSING_EVIDENCE`.
 - Live editorial duplicate classification is measured separately: `PASS_LIVE_PRODUCTION_EDITORIAL_DUPLICATE_CLASSIFICATION_REVIEWER_READY`, generic template overuse `4->0`, retained reviewer findings exact/near `31/100`, and humanReviewCompleted=`false`. Only generic template overuse fails automatically; safety-control and legal-reference repetition remains visible, and exact saved Share remains `MISSING_EVIDENCE`.
 - Live editorial near-duplicate classification preserves `100->100` findings while reducing unclassified human-review-required `54->0`. The retained role-prefix/context/hazard/control categories are `81/9/8/2`; humanReviewCompleted=`false` and exact saved Share remains `MISSING_EVIDENCE`.
-- Live product capability truth is measured separately: `PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH`; manual/provider dispatch is `preview_only` with reason `persistent_idempotency_unavailable`, scheduled briefing email ready=`false`, photo Vision/OCR ready/accepted-only=`true/true`, and AI modes are `template, enhanced, full`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains `MISSING_EVIDENCE` and Documents/Share IA remains `OPEN_SEPARATE_VIEWPORT_IA_WAVE`.
+- Live product capability truth is measured separately: `PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH`; manual/provider dispatch is `preview_only` with reason `persistent_idempotency_unavailable`, scheduled briefing email ready=`false`, photo Vision/OCR ready/accepted-only=`true/true`, and AI modes are `template, enhanced, full`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains `MISSING_EVIDENCE` and Documents/Share IA remains `PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP`.
 - Public generation admission security is measured separately: `PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN`, live mode `instance`, dependency vulnerabilities `0`, distributed hardening open=`true`, and fresh diff scan required=`true`. This notice does not close multi-instance protection, the immutable scan finding, approval-gated operations, or exact saved Share; exact saved Share remains `MISSING_EVIDENCE`.
 - Security follow-up remediation is separately proven: `PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP`, sealed findings `3`, focused tests `129`, and remaining security work `0`. The immutable original baseline remains `18` findings with rewritten=`false`; two deferred candidates and the separate public-admission notice remain visible, no live provider cancellation probe is claimed, and exact saved Share remains `MISSING_EVIDENCE`.
 - Fresh security resource remediation is scoped rather than security-complete: `PASS_LIVE_PRODUCTION_SECURITY_RESOURCE_REMEDIATION`, remediated `6/20`, remaining `14`, provider persistence `APPROVAL_GATED`, exact saved Share `MISSING_EVIDENCE`.

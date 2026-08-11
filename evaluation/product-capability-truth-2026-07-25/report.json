@@ -115,10 +115,21 @@
     "photoAnalysisPostCalled": false,
     "exactSavedShareReproduced": false
   },
+  "currentViewportIaEvidence": {
+    "verdict": "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
+    "gateId": "ui_documents_share_cockpit",
+    "boundedWorkbenchEvidencePath": "evaluation/workspace-bounded-workbench-current-2026-07-22/report.json",
+    "boundedWorkbenchVerdict": "PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP",
+    "boundedWorkbenchSourceHead": "33a8167060d1f3433131ff687bd14eb4920e7520",
+    "scopedLiveDocumentsAndWorkspaceShareProven": true,
+    "routeSplitAloneAcceptedAsFix": false,
+    "exactSavedUserSessionReproduced": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
   "remainingBoundaries": {
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
-    "documentsShareIaVerdict": "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
-    "documentsShareIaDetail": "Route split alone is not accepted. Documents density and desktop Share multi-zone presentation remain separate from capability-truth PASS.",
+    "documentsShareIaVerdict": "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
+    "documentsShareIaDetail": "Current bounded-workbench evidence proves scoped Documents and Workspace/fixture Share viewport IA without accepting route split alone. Exact saved /share/[sessionId] remains separate MISSING_EVIDENCE.",
     "providerDispatchApprovalRequired": true,
     "humanEditorialReviewCompleted": false
   }

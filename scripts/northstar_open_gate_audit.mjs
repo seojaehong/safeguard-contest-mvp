@@ -1339,6 +1339,9 @@ function evaluateProductCapabilityTruthGate(rootDir) {
     ? aiModes.modes.filter((mode) => typeof mode === "string").sort().join(",")
     : "";
   const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const currentViewportIaEvidence = isRecord(report.currentViewportIaEvidence)
+    ? report.currentViewportIaEvidence
+    : {};
   const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
   const entryProductionBuild = isRecord(entryTruth?.productionBuild) ? entryTruth.productionBuild : {};
   const entryCurrentSource = isRecord(entryTruth?.currentSource) ? entryTruth.currentSource : {};
@@ -1405,6 +1408,17 @@ function evaluateProductCapabilityTruthGate(rootDir) {
     && mutationBoundary.providerDispatchCalled === false
     && mutationBoundary.photoAnalysisPostCalled === false
     && mutationBoundary.exactSavedShareReproduced === false;
+  const currentViewportIaGate = evaluateUiDocumentsShareCockpitGate(rootDir);
+  const currentViewportIaPass = readString(currentViewportIaEvidence.verdict) === "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP"
+    && readString(currentViewportIaEvidence.gateId) === "ui_documents_share_cockpit"
+    && readString(currentViewportIaEvidence.boundedWorkbenchEvidencePath) === "evaluation/workspace-bounded-workbench-current-2026-07-22/report.json"
+    && readString(currentViewportIaEvidence.boundedWorkbenchVerdict) === "PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP"
+    && readString(currentViewportIaEvidence.boundedWorkbenchSourceHead) === "33a8167060d1f3433131ff687bd14eb4920e7520"
+    && currentViewportIaEvidence.scopedLiveDocumentsAndWorkspaceShareProven === true
+    && currentViewportIaEvidence.routeSplitAloneAcceptedAsFix === false
+    && currentViewportIaEvidence.exactSavedUserSessionReproduced === false
+    && readString(currentViewportIaEvidence.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && currentViewportIaGate.state === "proven";
   const liveReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH"
     && sourceMatchesProduction
     && readNumber(providerDispatch.status) === 200
@@ -1432,7 +1446,8 @@ function evaluateProductCapabilityTruthGate(rootDir) {
     && aiModes.liveInteractiveModeSwitchExecuted === false
     && noMutation
     && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
-    && readString(remainingBoundaries.documentsShareIaVerdict) === "OPEN_SEPARATE_VIEWPORT_IA_WAVE"
+    && readString(remainingBoundaries.documentsShareIaVerdict) === "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP"
+    && currentViewportIaPass
     && remainingBoundaries.providerDispatchApprovalRequired === true
     && remainingBoundaries.humanEditorialReviewCompleted === false
     && entryTruthPass
@@ -1444,10 +1459,10 @@ function evaluateProductCapabilityTruthGate(rootDir) {
       label: "Live product capability truth",
       state: "proven",
       evidencePath,
-      detail: `Manual email/SMS/Kakao and scheduled briefing email are fail-closed preview-only because persistent idempotency is unavailable. Live dispatch entry copy distinguishes preview/readiness from approved results (${entryTruthPath}), and the public landing keeps safety judgment and final confirmation with a human instead of claiming role replacement (${landingTruthPath}). Live photo Vision/OCR readiness is accepted-only, AI generation modes are template/enhanced/full, and no DB/share/provider/photo POST mutation occurred. This does not grant provider dispatch approval or replace broad human/legal review: exact saved Share remains MISSING_EVIDENCE and Documents/Share IA remains OPEN_SEPARATE_VIEWPORT_IA_WAVE.`,
+      detail: `Manual email/SMS/Kakao and scheduled briefing email are fail-closed preview-only because persistent idempotency is unavailable. Live dispatch entry copy distinguishes preview/readiness from approved results (${entryTruthPath}), and the public landing keeps safety judgment and final confirmation with a human instead of claiming role replacement (${landingTruthPath}). Live photo Vision/OCR readiness is accepted-only, AI generation modes are template/enhanced/full, and no DB/share/provider/photo POST mutation occurred. Scoped Documents and Workspace/fixture Share viewport IA is separately proven without accepting route split alone; provider approval and broad human/legal review remain open, and exact saved Share remains MISSING_EVIDENCE.`,
       nextActions: [
         "Keep provider dispatch persistence approval-gated.",
-        "Measure exact saved Share and Documents/Share viewport IA in their separate gates.",
+        "Measure exact saved Share geometry with a concrete existing session URL or separately approved creation flow.",
       ],
     });
   }
@@ -1457,7 +1472,7 @@ function evaluateProductCapabilityTruthGate(rootDir) {
     label: "Live product capability truth",
     state: "contradicted",
     evidencePath,
-    detail: `Capability verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, dispatch=${readString(providerDispatch.mode) || "unknown"}/${readString(providerDispatch.reason) || "unknown"}, providerCalled=${providerDispatch.providerCalled === true}, briefingEmailReady=${briefing.emailReady === true}, photoReady=${photo.ready === true}, photoAcceptedOnly=${photo.acceptedOnly === true}, photoPost=${photo.photoPostAnalysisExecuted === true}, uiTruthPass=${uiTruthPass}, entryTruthPass=${entryTruthPass}, landingTruthPass=${landingTruthPass}, aiModes=${sortedModes || "missing"}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, ia=${readString(remainingBoundaries.documentsShareIaVerdict) || "missing"}.`,
+    detail: `Capability verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, dispatch=${readString(providerDispatch.mode) || "unknown"}/${readString(providerDispatch.reason) || "unknown"}, providerCalled=${providerDispatch.providerCalled === true}, briefingEmailReady=${briefing.emailReady === true}, photoReady=${photo.ready === true}, photoAcceptedOnly=${photo.acceptedOnly === true}, photoPost=${photo.photoPostAnalysisExecuted === true}, uiTruthPass=${uiTruthPass}, entryTruthPass=${entryTruthPass}, landingTruthPass=${landingTruthPass}, viewportIaPass=${currentViewportIaPass}, aiModes=${sortedModes || "missing"}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, ia=${readString(remainingBoundaries.documentsShareIaVerdict) || "missing"}.`,
     nextActions: ["Restore the fail-closed capability boundaries and rerun current-production truth evidence without mutation."],
   });
 }

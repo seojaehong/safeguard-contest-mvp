@@ -458,9 +458,20 @@ function createFixtureRoot(): string {
       photoAnalysisPostCalled: false,
       exactSavedShareReproduced: false,
     },
+    currentViewportIaEvidence: {
+      verdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
+      gateId: "ui_documents_share_cockpit",
+      boundedWorkbenchEvidencePath: "evaluation/workspace-bounded-workbench-current-2026-07-22/report.json",
+      boundedWorkbenchVerdict: "PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP",
+      boundedWorkbenchSourceHead: "33a8167060d1f3433131ff687bd14eb4920e7520",
+      scopedLiveDocumentsAndWorkspaceShareProven: true,
+      routeSplitAloneAcceptedAsFix: false,
+      exactSavedUserSessionReproduced: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
     remainingBoundaries: {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
-      documentsShareIaVerdict: "OPEN_SEPARATE_VIEWPORT_IA_WAVE",
+      documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
       providerDispatchApprovalRequired: true,
       humanEditorialReviewCompleted: false,
     },
@@ -3728,7 +3739,7 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("dispatch-entry-capability-truth");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("landing-human-review-boundary");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
-    expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("OPEN_SEPARATE_VIEWPORT_IA_WAVE");
+    expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("Scoped Documents and Workspace/fixture Share viewport IA");
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
@@ -4670,6 +4681,27 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     });
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("exactShare=PASS");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("ia=PASS");
+  });
+
+  it("fails product capability truth closed when scoped IA claims an exact saved session", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "product-capability-truth-2026-07-25", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      currentViewportIaEvidence: { exactSavedUserSessionReproduced: boolean };
+    };
+    report.currentViewportIaEvidence.exactSavedUserSessionReproduced = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-08-11T00:00:00.000Z",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "product_capability_truth")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("viewportIaPass=false");
   });
 
   it("fails product capability truth closed when live dispatch entry copy is not proven", async () => {
