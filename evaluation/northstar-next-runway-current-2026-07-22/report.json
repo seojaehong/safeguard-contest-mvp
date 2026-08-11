@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-11T07:12:27.663Z",
+  "generatedAt": "2026-08-11T08:16:49.778Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "729bec6c297b742f6c652be5a7a325ac35a90f49",
-  "productionCommit": "729bec6c297b742f6c652be5a7a325ac35a90f49",
+  "sourceHead": "f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a",
+  "productionCommit": "f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "729bec6c297b742f6c652be5a7a325ac35a90f49",
+    "commitSha": "f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ex98v48uz-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-qqii5nqui-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "729bec6c297b742f6c652be5a7a325ac35a90f49",
-  "liveRollupLiveCommit": "729bec6c297b742f6c652be5a7a325ac35a90f49",
+  "liveExactEvidenceCommit": "f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a",
+  "liveRollupLiveCommit": "f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -53,6 +53,7 @@
     "publicJsonRequestBodyBudget": "evaluation\\public-json-request-body-budget-2026-08-11\\report.json",
     "improvementPhotoAnalysisBudget": "evaluation\\improvement-photo-analysis-budget-2026-08-11\\report.json",
     "publicProviderCancellation": "evaluation\\public-provider-cancellation-2026-08-11\\report.json",
+    "publicProviderAdmission": "evaluation\\public-provider-admission-2026-08-11\\report.json",
     "publicSearchDistributedRateLimitReadiness": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
     "publicGenerationAdmissionSecurity": "evaluation\\security-public-generation-admission-2026-08-04\\report.json",
     "securityFollowupRemediation": "evaluation\\codex-security-followup-remediation-2026-08-11\\report.json",
@@ -136,6 +137,16 @@
       "gate": "improvement_photo_analysis_budget",
       "state": "notice",
       "reason": "deployed source includes shared photo byte, file, signature, rate, and concurrency controls; production still reports process-instance admission and a fresh rescan remains open"
+    },
+    {
+      "gate": "public_provider_cancellation",
+      "state": "notice",
+      "reason": "deployed source forwards disconnect cancellation through weather, knowledge regeneration, and remediation; live provider cancellation was not invoked and a fresh rescan remains open"
+    },
+    {
+      "gate": "public_provider_admission",
+      "state": "notice",
+      "reason": "deployed source enforces weighted instance admission and no-provider work budgets; distributed production activation and a fresh rescan remain open"
     }
   ],
   "approvalGated": [
@@ -680,6 +691,19 @@
     "findingId": "csf_278e8efc9722eb80016c42a3",
     "tests": 104,
     "liveProviderCallExecuted": false,
+    "followUpSecurityScan": "REQUIRED",
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "publicProviderAdmission": {
+    "verdict": "PARTIAL_LIVE_PRODUCTION_WEIGHTED_INSTANCE_ADMISSION_DISTRIBUTED_ACTIVATION_PENDING",
+    "sourceHead": "e364220eae35e6700127e8e72f8bc32659c19e5b",
+    "productionCommit": "e364220eae35e6700127e8e72f8bc32659c19e5b",
+    "findingCount": 2,
+    "capacity": 12,
+    "fullModeWeight": 12,
+    "liveCaseCount": 3,
+    "distributedProductionActivation": "PENDING_CONFIGURATION",
     "followUpSecurityScan": "REQUIRED",
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"

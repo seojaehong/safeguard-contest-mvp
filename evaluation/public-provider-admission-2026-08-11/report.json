@@ -79,6 +79,34 @@
     },
     "diffCheck": "PASS"
   },
+  "governedPathCompatibility": {
+    "verdict": "PASS_LIVE_PRODUCTION_GOVERNED_PATH_COMPATIBILITY",
+    "sourceHead": "e364220eae35e6700127e8e72f8bc32659c19e5b",
+    "productionCommit": "e364220eae35e6700127e8e72f8bc32659c19e5b",
+    "coveredGateIds": [
+      "security_followup_remediation",
+      "public_json_request_body_budget",
+      "improvement_photo_analysis_budget",
+      "public_provider_cancellation"
+    ],
+    "changedGovernedPaths": [
+      "app/api/ask/route.ts",
+      "app/api/ask/stream/route.ts",
+      "app/api/knowledge/match/route.ts",
+      "app/api/weather/route.ts",
+      "lib/public-ask-admission.ts",
+      "lib/public-distributed-rate-limit.ts"
+    ],
+    "focusedVitest": {
+      "files": 23,
+      "tests": 215,
+      "failed": 0
+    },
+    "originalSecurityBaselinesRewritten": false,
+    "followUpSecurityScan": "REQUIRED",
+    "noMutation": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
   "productionBuild": {
     "commitSha": "e364220eae35e6700127e8e72f8bc32659c19e5b",
     "branch": "master",

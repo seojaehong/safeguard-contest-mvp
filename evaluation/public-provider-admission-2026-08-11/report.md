@@ -21,6 +21,7 @@ This bounded wave addresses corrected scan findings `csf_f5dd7b0bac8e0b7c7e531b2
 - Focused and adjacent Vitest: 10 files / 52 tests, 0 failures.
 - Strict TypeScript typecheck: PASS.
 - Next.js 15.5.22 production build: PASS, 28 static pages.
+- Governed-path compatibility: 23 files / 215 tests, 0 failures. This companion re-proves the existing JSON body-budget, improvement-photo admission, provider-cancellation, and earlier three-finding security-remediation contracts after the bounded ask/weather/knowledge admission changes; it does not rewrite their original evidence.
 - Production marker: `e364220eae35e6700127e8e72f8bc32659c19e5b` on `master`, deployment `safeguard-contest-6x4xnqzot-seojaehongs-projects.vercel.app`.
 - Live no-provider probes: template ask 200 with `workUnit=0`; weather and knowledge oversized requests 413 with `PUBLIC_WORK_BUDGET_EXCEEDED`. All three report `X-SafeClaw-Rate-Limit: instance`.
 - The preceding `b4828513` deployment briefly failed weather and knowledge closed with 503 because Upstash is not configured. The hotfix restored availability while retaining distributed-ready code and an explicit open activation boundary.

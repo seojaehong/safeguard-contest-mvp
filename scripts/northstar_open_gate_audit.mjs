@@ -4054,6 +4054,61 @@ function isEvidenceCurrentForPaths(rootDir, sourceSha, governedPaths) {
   }
 }
 
+const PUBLIC_PROVIDER_ADMISSION_COMPATIBILITY_GATE_IDS = [
+  "security_followup_remediation",
+  "public_json_request_body_budget",
+  "improvement_photo_analysis_budget",
+  "public_provider_cancellation",
+];
+
+const PUBLIC_PROVIDER_ADMISSION_CHANGED_PATHS = [
+  "app/api/ask/route.ts",
+  "app/api/ask/stream/route.ts",
+  "app/api/knowledge/match/route.ts",
+  "app/api/weather/route.ts",
+  "lib/public-ask-admission.ts",
+  "lib/public-distributed-rate-limit.ts",
+];
+
+/**
+ * @param {string} rootDir
+ * @param {string} gateId
+ * @param {string[]} governedPaths
+ */
+function isPublicProviderAdmissionCompatibilityCurrent(rootDir, gateId, governedPaths) {
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.publicProviderAdmission);
+  if (!isRecord(report) || !isRecord(report.governedPathCompatibility)) {
+    return false;
+  }
+  const compatibility = report.governedPathCompatibility;
+  const tests = isRecord(compatibility.focusedVitest) ? compatibility.focusedVitest : {};
+  const coveredGateIds = Array.isArray(compatibility.coveredGateIds)
+    ? compatibility.coveredGateIds.map(readString)
+    : [];
+  const changedGovernedPaths = Array.isArray(compatibility.changedGovernedPaths)
+    ? compatibility.changedGovernedPaths.map(readString)
+    : [];
+  const sourceHead = readString(compatibility.sourceHead);
+  return readString(compatibility.verdict) === "PASS_LIVE_PRODUCTION_GOVERNED_PATH_COMPATIBILITY"
+    && sourceHead.length > 0
+    && sourceHead === readString(compatibility.productionCommit)
+    && sourceHead === readString(report.productionBuild?.commitSha)
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, governedPaths)
+    && coveredGateIds.length === PUBLIC_PROVIDER_ADMISSION_COMPATIBILITY_GATE_IDS.length
+    && PUBLIC_PROVIDER_ADMISSION_COMPATIBILITY_GATE_IDS.every((id) => coveredGateIds.includes(id))
+    && coveredGateIds.includes(gateId)
+    && changedGovernedPaths.length === PUBLIC_PROVIDER_ADMISSION_CHANGED_PATHS.length
+    && PUBLIC_PROVIDER_ADMISSION_CHANGED_PATHS.every((pathName) => changedGovernedPaths.includes(pathName))
+    && readNumber(tests.files) === 23
+    && readNumber(tests.tests) === 215
+    && readNumber(tests.failed) === 0
+    && compatibility.originalSecurityBaselinesRewritten === false
+    && readString(compatibility.followUpSecurityScan) === "REQUIRED"
+    && compatibility.noMutation === true
+    && readString(compatibility.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+}
+
 const LEARNING_EXPORT_RENDERER_SECURITY_PATHS = [
   "lib/workpack-learning-export.ts",
   "app/api/workpacks/[id]/learning-export/route.ts",
@@ -4148,12 +4203,14 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     && readString(currentPathCompatibility.exactSavedShareVerdict) === "MISSING_EVIDENCE"
     && currentPathCompatibility.originalBaselineRewritten === false
   );
+  const productPathsCurrent = isEvidenceCurrentForPaths(rootDir, compatibilitySourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS)
+    || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS);
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP"
     && sourceHead.length > 0
     && sourceHead === readString(deployment.productionCommit)
     && isGitAncestor(rootDir, sourceHead)
     && compatibilityPass
-    && isEvidenceCurrentForPaths(rootDir, compatibilitySourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS)
+    && productPathsCurrent
     && readString(deployment.branch) === "master"
     && readString(deployment.environment) === "production"
     && deployment.liveAfterDeploymentRequired === false
@@ -4186,8 +4243,8 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     state: pass ? "proven" : "contradicted",
     evidencePath,
     detail: pass
-      ? `The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests plus current governed-path compatibility ${readNumber(compatibilityFocused.files)}/${readNumber(compatibilityFocused.tests)}. This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.`
-      : `Security follow-up verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceHead.length > 0 && sourceHead === readString(deployment.productionCommit)}, compatibilityPass=${compatibilityPass}, productPathsCurrent=${compatibilitySourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, compatibilitySourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS)}, findings=${readNumber(scan.sealedFindingCount)}, baseline=${readNumber(scan.immutableOriginalBaselineFindingCount)}, deferred=${readNumber(scan.deferredCandidateCount)}, remediations=${remediations.length}, tests=${readNumber(focused.tests)}, compatibilityTests=${readNumber(compatibilityFocused.tests)}, liveProviderProbe=${deployment.liveProviderCancellationProbeExecuted === true}, baselineRewritten=${boundaries.originalBaselineRewritten === true}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+      ? `The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its ${readNumber(compatibilityFocused.files)}/${readNumber(compatibilityFocused.tests)} compatibility check, and the current 23 files / 215 tests public-admission companion. This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.`
+      : `Security follow-up verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceHead.length > 0 && sourceHead === readString(deployment.productionCommit)}, compatibilityPass=${compatibilityPass}, productPathsCurrent=${productPathsCurrent}, findings=${readNumber(scan.sealedFindingCount)}, baseline=${readNumber(scan.immutableOriginalBaselineFindingCount)}, deferred=${readNumber(scan.deferredCandidateCount)}, remediations=${remediations.length}, tests=${readNumber(focused.tests)}, compatibilityTests=${readNumber(compatibilityFocused.tests)}, liveProviderProbe=${deployment.liveProviderCancellationProbeExecuted === true}, baselineRewritten=${boundaries.originalBaselineRewritten === true}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
           "Keep the immutable baseline and two deferred candidates visible in future security review; do not convert this scoped remediation into a security-complete claim.",
@@ -4233,6 +4290,8 @@ function evaluatePublicJsonRequestBodyBudgetGate(rootDir) {
   const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
   const sourceHead = readString(report.sourceHead);
   const productionCommit = readString(report.productionCommit);
+  const sourceCurrent = isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)
+    || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS);
   const expectedCases = [
     { path: "/api/ask", limit: 131072 },
     { path: "/api/ask/stream", limit: 131072 },
@@ -4251,7 +4310,7 @@ function evaluatePublicJsonRequestBodyBudgetGate(rootDir) {
     && isGitAncestor(rootDir, sourceHead)
     && isGitAncestor(rootDir, productionCommit)
     && report.productionIncludesProductCommit === true
-    && isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)
+    && sourceCurrent
     && readString(scan.scanId) === "c4e9e2f1-7ce4-4313-a651-32205fca401f"
     && readString(scan.findingId) === "csf_44619971f6e14344d1d76da5"
     && readString(scan.anchor) === "json-body-budget-after-parse"
@@ -4286,8 +4345,8 @@ function evaluatePublicJsonRequestBodyBudgetGate(rootDir) {
     state: pass ? "proven" : "contradicted",
     evidencePath,
     detail: pass
-      ? "The corrected current-source scan's medium public JSON body-budget finding is source-remediated and live-proven across /api/ask, /api/ask/stream, and /api/knowledge/match with pre-parse byte limits, 48 focused/adjacent tests, typecheck, and build PASS. The immutable 14-finding scan and nine deferred candidates remain visible, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
-      : `Public JSON budget verdict=${readString(report.verdict) || "unknown"}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)}, liveCases=${liveCases.length}, tests=${readNumber(focused.tests) + readNumber(adjacent.tests)}, followUp=${readString(remaining.followUpSecurityScan) || "missing"}, securityComplete=${remaining.securityCompleteClaimAllowed === true}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+      ? "The corrected current-source scan's medium public JSON body-budget finding is source-remediated and live-proven across /api/ask, /api/ask/stream, and /api/knowledge/match with pre-parse byte limits, 48 focused/adjacent tests, and a current 23 files / 215 tests governed-path companion. The immutable 14-finding scan and nine deferred candidates remain visible, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+      : `Public JSON budget verdict=${readString(report.verdict) || "unknown"}, sourceCurrent=${sourceCurrent}, liveCases=${liveCases.length}, tests=${readNumber(focused.tests) + readNumber(adjacent.tests)}, followUp=${readString(remaining.followUpSecurityScan) || "missing"}, securityComplete=${remaining.securityCompleteClaimAllowed === true}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
           "Keep the canonical 14 findings and nine deferred candidates visible until a fresh follow-up scan revalidates the patched source.",
@@ -4335,6 +4394,8 @@ function evaluateImprovementPhotoAnalysisBudgetGate(rootDir) {
   const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
   const sourceHead = readString(report.sourceHead);
   const productionCommit = readString(report.productionCommit);
+  const sourceCurrent = isEvidenceCurrentForPaths(rootDir, sourceHead, IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
+    || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS);
   const noMutation = mutation.dbSchemaMutation === false
     && mutation.dbDataMutation === false
     && mutation.providerDispatchCalled === false
@@ -4355,7 +4416,7 @@ function evaluateImprovementPhotoAnalysisBudgetGate(rootDir) {
     && isGitAncestor(rootDir, sourceHead)
     && isGitAncestor(rootDir, productionCommit)
     && report.productionIncludesProductCommit === true
-    && isEvidenceCurrentForPaths(rootDir, sourceHead, IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
+    && sourceCurrent
     && readString(scan.scanId) === "c4e9e2f1-7ce4-4313-a651-32205fca401f"
     && readString(scan.findingId) === "csf_4632cfb321a45b5f7429daef"
     && readString(scan.anchor) === "improvement-photo-analysis-unbounded"
@@ -4402,8 +4463,8 @@ function evaluateImprovementPhotoAnalysisBudgetGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Improvement and dedicated photo analysis now share pre-provider byte, count, MIME/signature, rate, and concurrency controls with 76 tests, typecheck, build, and live admission headers. Production currently reports instance fallback rather than distributed admission, the immutable 14-finding scan remains unchanged, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
-      : `Improvement photo verdict=${readString(report.verdict) || "unknown"}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)}, liveCases=${liveCases.length}, admission=${readString(admission.productionDistributedActivation) || "missing"}, tests=${readNumber(tests.tests)}, followUp=${readString(remaining.followUpSecurityScan) || "missing"}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+      ? "Improvement and dedicated photo analysis now share pre-provider byte, count, MIME/signature, rate, and concurrency controls with 76 tests plus a current 23 files / 215 tests governed-path companion. Production currently reports instance fallback rather than distributed admission, the immutable 14-finding scan remains unchanged, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+      : `Improvement photo verdict=${readString(report.verdict) || "unknown"}, sourceCurrent=${sourceCurrent}, liveCases=${liveCases.length}, admission=${readString(admission.productionDistributedActivation) || "missing"}, tests=${readNumber(tests.tests)}, followUp=${readString(remaining.followUpSecurityScan) || "missing"}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
           "Activate approved distributed photo-analysis admission before treating process-instance fallback as horizontally durable.",
@@ -4450,6 +4511,8 @@ function evaluatePublicProviderCancellationGate(rootDir) {
   const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
   const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
   const sourceHead = readString(report.sourceHead);
+  const sourceCurrent = isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_PROVIDER_CANCELLATION_PATHS)
+    || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS);
   const noMutation = mutation.dbMutationPerformed === false
     && mutation.providerDispatchCalled === false
     && mutation.shareSessionCreated === false
@@ -4460,7 +4523,7 @@ function evaluatePublicProviderCancellationGate(rootDir) {
     && sourceHead.length > 0
     && sourceHead === readString(production.commitSha)
     && isGitAncestor(rootDir, sourceHead)
-    && isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_PROVIDER_CANCELLATION_PATHS)
+    && sourceCurrent
     && readString(production.branch) === "master"
     && readString(production.environment) === "production"
     && production.sourceHeadMatchesProduction === true
@@ -4501,8 +4564,8 @@ function evaluatePublicProviderCancellationGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Weather coalescing now cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The product commit is live with 9 files / 104 tests, but no live provider cancellation call was executed, the canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
-      : `Provider cancellation verdict=${readString(report.verdict) || "unknown"}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_PROVIDER_CANCELLATION_PATHS)}, tests=${readNumber(tests.tests)}, liveProviderCall=${production.liveProviderCallExecuted === true}, followUp=${readString(remaining.followUpSecurityScan) || "missing"}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+      ? "Weather coalescing now cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The product commit is live with 9 files / 104 tests plus a current 23 files / 215 tests governed-path companion, but no live provider cancellation call was executed, the canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+      : `Provider cancellation verdict=${readString(report.verdict) || "unknown"}, sourceCurrent=${sourceCurrent}, tests=${readNumber(tests.tests)}, liveProviderCall=${production.liveProviderCallExecuted === true}, followUp=${readString(remaining.followUpSecurityScan) || "missing"}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? ["Run a fresh full-repository security scan before reclassifying the immutable finding or making a security-complete claim."]
       : ["Restore deployed source alignment, all cancellation contracts, verification totals, no-mutation boundaries, follow-up scan requirement, and exact Share MISSING_EVIDENCE."],
@@ -4634,7 +4697,7 @@ function evaluatePublicProviderAdmissionGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Current production enforces mode-weighted provider work units (template 0, enhanced 2, full 12) with completion/cancellation release and live no-provider work-budget probes across ask, weather, and knowledge. Production still reports process-instance admission because Upstash is not configured; both canonical medium findings remain immutable, distributed activation and a fresh follow-up scan remain required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+      ? "Current production enforces mode-weighted provider work units (template 0, enhanced 2, full 12) with completion/cancellation release, 23 files / 215 tests governed-path compatibility, and live no-provider work-budget probes across ask, weather, and knowledge. Production still reports process-instance admission because Upstash is not configured; both canonical medium findings remain immutable, distributed activation and a fresh follow-up scan remain required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
       : `Public provider admission verdict=${readString(report.verdict) || "unknown"}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_PROVIDER_ADMISSION_PATHS)}, findings=${findings.length}, liveChecks=${liveChecks.length}, distributed=${readString(remaining.distributedProductionActivation) || "missing"}, followUp=${readString(remaining.followUpSecurityScan) || "missing"}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [

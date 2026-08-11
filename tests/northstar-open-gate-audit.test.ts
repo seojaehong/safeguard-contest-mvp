@@ -2412,6 +2412,30 @@ function createFixtureRoot(): string {
       build: { status: "PASS", staticPages: 28 },
       diffCheck: "PASS",
     },
+    governedPathCompatibility: {
+      verdict: "PASS_LIVE_PRODUCTION_GOVERNED_PATH_COMPATIBILITY",
+      sourceHead: "fixture-sha",
+      productionCommit: "fixture-sha",
+      coveredGateIds: [
+        "security_followup_remediation",
+        "public_json_request_body_budget",
+        "improvement_photo_analysis_budget",
+        "public_provider_cancellation",
+      ],
+      changedGovernedPaths: [
+        "app/api/ask/route.ts",
+        "app/api/ask/stream/route.ts",
+        "app/api/knowledge/match/route.ts",
+        "app/api/weather/route.ts",
+        "lib/public-ask-admission.ts",
+        "lib/public-distributed-rate-limit.ts",
+      ],
+      focusedVitest: { files: 23, tests: 215, failed: 0 },
+      originalSecurityBaselinesRewritten: false,
+      followUpSecurityScan: "REQUIRED",
+      noMutation: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
     productionBuild: {
       commitSha: "fixture-sha",
       branch: "master",
@@ -3696,6 +3720,70 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.state).toBe("notice");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.state).toBe("notice");
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.state).toBe("contradicted");
+  });
+
+  it("accepts the current public admission companion for older governed-path evidence", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    writeText(rootDir, path.join("app", "api", "ask", "route.ts"), "export const changed = true;\n");
+    writeText(rootDir, path.join("app", "api", "weather", "route.ts"), "export const changed = true;\n");
+    writeText(rootDir, path.join("lib", "public-distributed-rate-limit.ts"), "export const changed = true;\n");
+    execFileSync("git", ["add", "app/api/ask/route.ts", "app/api/weather/route.ts", "lib/public-distributed-rate-limit.ts"], { cwd: rootDir, stdio: "ignore" });
+    execFileSync("git", ["commit", "-m", "change governed admission paths"], { cwd: rootDir, stdio: "ignore" });
+    const currentSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: rootDir, encoding: "utf8" }).trim();
+    const reportPath = path.join(rootDir, "evaluation", "public-provider-admission-2026-08-11", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      sourceHead: string;
+      productionBuild: { commitSha: string };
+      governedPathCompatibility: { sourceHead: string; productionCommit: string };
+    };
+    report.sourceHead = currentSha;
+    report.productionBuild.commitSha = currentSha;
+    report.governedPathCompatibility.sourceHead = currentSha;
+    report.governedPathCompatibility.productionCommit = currentSha;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.state).toBe("proven");
+    expect(audit.gates.find((gate) => gate.id === "public_json_request_body_budget")?.state).toBe("proven");
+    expect(audit.gates.find((gate) => gate.id === "improvement_photo_analysis_budget")?.state).toBe("notice");
+    expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.state).toBe("notice");
+    expect(audit.gates.find((gate) => gate.id === "public_provider_admission")?.state).toBe("notice");
+  });
+
+  it("fails older governed-path gates closed when the companion weakens boundaries", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    writeText(rootDir, path.join("app", "api", "ask", "route.ts"), "export const changed = true;\n");
+    writeText(rootDir, path.join("app", "api", "weather", "route.ts"), "export const changed = true;\n");
+    writeText(rootDir, path.join("lib", "public-distributed-rate-limit.ts"), "export const changed = true;\n");
+    execFileSync("git", ["add", "app/api/ask/route.ts", "app/api/weather/route.ts", "lib/public-distributed-rate-limit.ts"], { cwd: rootDir, stdio: "ignore" });
+    execFileSync("git", ["commit", "-m", "change governed admission paths"], { cwd: rootDir, stdio: "ignore" });
+    const currentSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: rootDir, encoding: "utf8" }).trim();
+    const reportPath = path.join(rootDir, "evaluation", "public-provider-admission-2026-08-11", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      sourceHead: string;
+      productionBuild: { commitSha: string };
+      governedPathCompatibility: {
+        sourceHead: string;
+        productionCommit: string;
+        exactSavedShareVerdict: string;
+        originalSecurityBaselinesRewritten: boolean;
+      };
+    };
+    report.sourceHead = currentSha;
+    report.productionBuild.commitSha = currentSha;
+    report.governedPathCompatibility.sourceHead = currentSha;
+    report.governedPathCompatibility.productionCommit = currentSha;
+    report.governedPathCompatibility.exactSavedShareVerdict = "PASS";
+    report.governedPathCompatibility.originalSecurityBaselinesRewritten = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.state).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "public_json_request_body_budget")?.state).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "improvement_photo_analysis_budget")?.state).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.state).toBe("contradicted");
   });
 
   it("keeps security follow-up non-closure boundaries fail-closed", async () => {

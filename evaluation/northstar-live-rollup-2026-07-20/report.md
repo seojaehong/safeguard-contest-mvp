@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-11T07:12:17.684Z
-Source HEAD at generation: 729bec6c297b742f6c652be5a7a325ac35a90f49
-Live commit at generation: 729bec6c297b742f6c652be5a7a325ac35a90f49
+Generated at: 2026-08-11T08:16:40.030Z
+Source HEAD at generation: f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a
+Live commit at generation: f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -141,7 +141,14 @@ Overall: `northstar_open_approval_gated`
 - Live provider cancellation call executed: false
 - Follow-up scan: REQUIRED; security-complete=false
 - Exact saved Share: MISSING_EVIDENCE
-- Boundary: current production uses process-instance fallback; distributed multi-instance admission remains open.
+
+## Public provider admission
+- Verdict: `PARTIAL_LIVE_PRODUCTION_WEIGHTED_INSTANCE_ADMISSION_DISTRIBUTED_ACTIVATION_PENDING`
+- Findings: 2; capacity=12; full weight=12
+- Live no-provider cases: 3; distributed activation=PENDING_CONFIGURATION
+- Follow-up scan: REQUIRED; security-complete=false
+- Exact saved Share: MISSING_EVIDENCE
+- Boundary: weighted process-instance admission is live; distributed multi-instance admission remains open.
 
 ## Repository Security Scan Reconciliation
 
@@ -225,6 +232,7 @@ Overall: `northstar_open_approval_gated`
 | public_json_request_body_budget | proven | evaluation\public-json-request-body-budget-2026-08-11\report.json |
 | improvement_photo_analysis_budget | notice | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
 | public_provider_cancellation | notice | evaluation\public-provider-cancellation-2026-08-11\report.json |
+| public_provider_admission | notice | evaluation\public-provider-admission-2026-08-11\report.json |
 | public_search_distributed_rate_limit_readiness | notice | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
 | public_generation_admission_security | notice | evaluation\security-public-generation-admission-2026-08-04\report.json |
 | security_followup_remediation | proven | evaluation\codex-security-followup-remediation-2026-08-11\report.json |
@@ -273,6 +281,7 @@ Overall: `northstar_open_approval_gated`
 | public_json_request_body_budget | ancestor | ancestor_of_head | evaluation\public-json-request-body-budget-2026-08-11\report.json |
 | improvement_photo_analysis_budget | ancestor | ancestor_of_head | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
 | public_provider_cancellation | ancestor | ancestor_of_head | evaluation\public-provider-cancellation-2026-08-11\report.json |
+| public_provider_admission | ancestor | ancestor_of_head | evaluation\public-provider-admission-2026-08-11\report.json |
 | public_search_distributed_rate_limit_readiness | ancestor | ancestor_of_head | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
 | public_generation_admission_security | missing | ancestor_of_head | evaluation\security-public-generation-admission-2026-08-04\report.json |
 | security_followup_remediation | ancestor | missing | evaluation\codex-security-followup-remediation-2026-08-11\report.json |

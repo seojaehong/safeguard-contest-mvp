@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-11T07:12:16.328Z",
-  "sourceSha": "729bec6c297b742f6c652be5a7a325ac35a90f49",
+  "generatedAt": "2026-08-11T08:16:38.728Z",
+  "sourceSha": "f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a",
   "overall": "open",
   "gates": [
     {
@@ -193,7 +193,7 @@
       "state": "proven",
       "label": "Public JSON request body budget",
       "evidencePath": "evaluation\\public-json-request-body-budget-2026-08-11\\report.json",
-      "detail": "The corrected current-source scan's medium public JSON body-budget finding is source-remediated and live-proven across /api/ask, /api/ask/stream, and /api/knowledge/match with pre-parse byte limits, 48 focused/adjacent tests, typecheck, and build PASS. The immutable 14-finding scan and nine deferred candidates remain visible, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "The corrected current-source scan's medium public JSON body-budget finding is source-remediated and live-proven across /api/ask, /api/ask/stream, and /api/knowledge/match with pre-parse byte limits, 48 focused/adjacent tests, and a current 23 files / 215 tests governed-path companion. The immutable 14-finding scan and nine deferred candidates remain visible, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Keep the canonical 14 findings and nine deferred candidates visible until a fresh follow-up scan revalidates the patched source.",
         "Continue approval-free remediation without weakening exact saved Share or other approval-gated boundaries."
@@ -204,7 +204,7 @@
       "state": "notice",
       "label": "Improvement photo analysis budget",
       "evidencePath": "evaluation\\improvement-photo-analysis-budget-2026-08-11\\report.json",
-      "detail": "Improvement and dedicated photo analysis now share pre-provider byte, count, MIME/signature, rate, and concurrency controls with 76 tests, typecheck, build, and live admission headers. Production currently reports instance fallback rather than distributed admission, the immutable 14-finding scan remains unchanged, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Improvement and dedicated photo analysis now share pre-provider byte, count, MIME/signature, rate, and concurrency controls with 76 tests plus a current 23 files / 215 tests governed-path companion. Production currently reports instance fallback rather than distributed admission, the immutable 14-finding scan remains unchanged, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Activate approved distributed photo-analysis admission before treating process-instance fallback as horizontally durable.",
         "Keep the canonical findings visible until a fresh follow-up security scan revalidates the patched source."
@@ -215,9 +215,20 @@
       "state": "notice",
       "label": "Public provider cancellation",
       "evidencePath": "evaluation\\public-provider-cancellation-2026-08-11\\report.json",
-      "detail": "Weather coalescing now cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The product commit is live with 9 files / 104 tests, but no live provider cancellation call was executed, the canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Weather coalescing now cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The product commit is live with 9 files / 104 tests plus a current 23 files / 215 tests governed-path companion, but no live provider cancellation call was executed, the canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Run a fresh full-repository security scan before reclassifying the immutable finding or making a security-complete claim."
+      ]
+    },
+    {
+      "id": "public_provider_admission",
+      "state": "notice",
+      "label": "Public provider admission",
+      "evidencePath": "evaluation\\public-provider-admission-2026-08-11\\report.json",
+      "detail": "Current production enforces mode-weighted provider work units (template 0, enhanced 2, full 12) with completion/cancellation release, 23 files / 215 tests governed-path compatibility, and live no-provider work-budget probes across ask, weather, and knowledge. Production still reports process-instance admission because Upstash is not configured; both canonical medium findings remain immutable, distributed activation and a fresh follow-up scan remain required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Configure and verify an approved distributed admission backend before claiming horizontal durability.",
+        "Run a fresh full-repository security scan before reclassifying either immutable finding or making a security-complete claim."
       ]
     },
     {
@@ -247,7 +258,7 @@
       "state": "proven",
       "label": "Security follow-up remediation",
       "evidencePath": "evaluation\\codex-security-followup-remediation-2026-08-11\\report.json",
-      "detail": "The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests plus current governed-path compatibility 12/147. This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its 12/147 compatibility check, and the current 23 files / 215 tests public-admission companion. This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Keep the immutable baseline and two deferred candidates visible in future security review; do not convert this scoped remediation into a security-complete claim.",
         "Retain the separate public generation admission notice and exact saved Share boundary until their own evidence contracts close."
