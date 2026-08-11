@@ -1,4 +1,9 @@
 import { AccidentCase, IntegrationMode } from "./types";
+import {
+  assertApprovedUpstreamUrl,
+  configuredUpstreamAllowedOrigins,
+  readBoundedResponseText,
+} from "./server/upstream-http";
 
 type AccidentCaseResult = {
   source: "kosha-accident";
@@ -28,6 +33,7 @@ const proxyUrl = process.env.KOSHA_ACCIDENT_PROXY_URL?.trim() || "";
 const proxyToken = process.env.KOSHA_ACCIDENT_PROXY_TOKEN?.trim() || "";
 const REQUEST_TIMEOUT_MS = 5_000;
 const RETRY_COUNT = 1;
+const ACCIDENT_RESPONSE_MAX_BYTES = 2_097_152;
 const FALLBACK_SOURCE_URL = "https://www.kosha.or.kr/kosha/data/industrialAccidentStatus.do";
 
 function isRecord(value: unknown): value is JsonRecord {
@@ -92,10 +98,14 @@ async function fetchWithTimeout(url: string, timeoutMs: number, callerSignal?: A
   try {
     const response = await fetch(url, {
       cache: "no-store",
+      redirect: "manual",
       signal: controller.signal,
       headers: { accept: "application/json, text/plain;q=0.9, */*;q=0.8" }
     });
-    const text = await response.text();
+    const text = await readBoundedResponseText(response, {
+      label: "KOSHA accident upstream",
+      maxBytes: ACCIDENT_RESPONSE_MAX_BYTES,
+    });
     if (!response.ok) {
       throw new Error(text.slice(0, 180) || `HTTP ${response.status}`);
     }
@@ -125,6 +135,20 @@ async function fetchWithRetry(url: string, options: ResolvedFetchOptions) {
 async function fetchProxy(question: string, options: ResolvedFetchOptions): Promise<ParseResult | null> {
   if (!proxyUrl) return null;
 
+  let approvedProxyUrl: URL;
+  try {
+    approvedProxyUrl = await assertApprovedUpstreamUrl(proxyUrl, {
+      allowedOrigins: configuredUpstreamAllowedOrigins(),
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return {
+      kind: "api_error",
+      cases: [],
+      detail: `KOSHA 재해사례 relay 보안 검증 실패: ${message}`,
+    };
+  }
+
   const controller = new AbortController();
   const abortFromCaller = () => controller.abort(options.signal?.reason);
   options.signal?.throwIfAborted();
@@ -134,9 +158,10 @@ async function fetchProxy(question: string, options: ResolvedFetchOptions): Prom
     options.requestTimeoutMs,
   );
   try {
-    const response = await fetch(proxyUrl, {
+    const response = await fetch(approvedProxyUrl, {
       method: "POST",
       cache: "no-store",
+      redirect: "manual",
       signal: controller.signal,
       headers: {
         "content-type": "application/json",
@@ -151,7 +176,10 @@ async function fetchProxy(question: string, options: ResolvedFetchOptions): Prom
         callApiId: "1060"
       })
     });
-    const text = await response.text();
+    const text = await readBoundedResponseText(response, {
+      label: "KOSHA accident relay",
+      maxBytes: ACCIDENT_RESPONSE_MAX_BYTES,
+    });
     if (!response.ok) {
       return {
         kind: "api_error",

@@ -1,4 +1,9 @@
 import { IntegrationMode } from "./types";
+import {
+  assertApprovedUpstreamUrl,
+  configuredUpstreamAllowedOrigins,
+  readBoundedResponseText,
+} from "./server/upstream-http";
 
 type LocationConfig = {
   label: string;
@@ -218,6 +223,7 @@ const weatherCache = new Map<string, {
 
 const KMA_TIMEOUT_MS = 5_000;
 const KMA_RETRY_COUNT = 1;
+const WEATHER_RESPONSE_MAX_BYTES = 1_048_576;
 
 const locationMap: Array<{ keywords: string[]; config: LocationConfig }> = [
   { keywords: ["성수", "강남", "서울"], config: { label: "서울", area1: "11", areaNo: "1100000000", latitude: 37.5665, longitude: 126.978, nx: 61, ny: 125 } },
@@ -391,8 +397,15 @@ async function fetchWithTimeout(url: string, label: string, signal?: AbortSignal
     signal?.addEventListener("abort", abortFromCaller, { once: true });
     const timeout = setTimeout(() => controller.abort(new Error(`${label} timeout`)), KMA_TIMEOUT_MS);
     try {
-      const response = await fetch(url, { cache: "no-store", signal: controller.signal });
-      const text = await response.text();
+      const response = await fetch(url, {
+        cache: "no-store",
+        redirect: "manual",
+        signal: controller.signal,
+      });
+      const text = await readBoundedResponseText(response, {
+        label,
+        maxBytes: WEATHER_RESPONSE_MAX_BYTES,
+      });
       if (!response.ok) {
         throw new Error(text.slice(0, 180) || `${label} HTTP ${response.status}`);
       }
@@ -654,7 +667,10 @@ async function fetchErythemalUvSignal(location: LocationConfig, signal?: AbortSi
       url.searchParams.set("lot", String(location.longitude));
     }
 
-    const text = await fetchWithTimeout(url.toString(), "실시간 홍반자외선", signal);
+    const approvedUrl = await assertApprovedUpstreamUrl(url.toString(), {
+      allowedOrigins: ["https://apis.data.go.kr", ...configuredUpstreamAllowedOrigins()],
+    });
+    const text = await fetchWithTimeout(approvedUrl.toString(), "실시간 홍반자외선", signal);
     const parsed = JSON.parse(text) as ErythemalUvEnvelope;
     const header = parsed.header || parsed.response?.header;
     const body = parsed.body || parsed.response?.body;
