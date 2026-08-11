@@ -16,6 +16,10 @@ import {
   OntologyPromotionPolicyError,
   parseOntologyPromotionCommand
 } from "@/lib/ontology-promotion-policy";
+import {
+  enforcePublicJsonRequestBodyBudget,
+  KNOWLEDGE_WRITE_REQUEST_MAX_BYTES
+} from "@/lib/public-work-budget";
 
 export const dynamic = "force-dynamic";
 
@@ -66,7 +70,14 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const parsedBody = await request.json().catch((): unknown => null);
+  const bodyBudget = await enforcePublicJsonRequestBodyBudget(
+    request,
+    KNOWLEDGE_WRITE_REQUEST_MAX_BYTES,
+    "request body exceeds the knowledge write byte budget",
+  );
+  if (!bodyBudget.ok) return bodyBudget.response;
+
+  const parsedBody = await bodyBudget.request.json().catch((): unknown => null);
   const promotionCommand = parseOntologyPromotionCommand(parsedBody);
   const promotionEnvelope = isOntologyPromotionLikeEnvelope(parsedBody);
   if (promotionEnvelope && !promotionCommand) {

@@ -11,8 +11,29 @@ import {
   type WorkspaceDatabase
 } from "@/lib/supabase-admin";
 import { loadActivePublicShareSession } from "@/lib/workpack-commercial-store";
+import { createRateLimiter } from "@/lib/rate-limit";
+import {
+  checkPublicRateLimit,
+  publicRateLimitResponse
+} from "@/lib/public-distributed-rate-limit";
+import {
+  enforcePublicJsonRequestBodyBudget,
+  PUBLIC_SHARE_ACK_REQUEST_MAX_BYTES
+} from "@/lib/public-work-budget";
 
 export const dynamic = "force-dynamic";
+
+const SHARE_READ_LIMIT = 60;
+const SHARE_ACK_LIMIT = 20;
+const SHARE_RATE_WINDOW_MS = 60_000;
+const shareReadLimiter = createRateLimiter({
+  limit: SHARE_READ_LIMIT,
+  windowMs: SHARE_RATE_WINDOW_MS
+});
+const shareAckLimiter = createRateLimiter({
+  limit: SHARE_ACK_LIMIT,
+  windowMs: SHARE_RATE_WINDOW_MS
+});
 
 type RouteContext = {
   params: Promise<{
@@ -34,6 +55,16 @@ function buildPublicRecipientHint(recipients: ShareRecipientInput[]) {
 }
 
 export async function GET(request: NextRequest, context: RouteContext) {
+  const admission = await checkPublicRateLimit({
+    request,
+    namespace: "share-session-read",
+    limit: SHARE_READ_LIMIT,
+    windowMs: SHARE_RATE_WINDOW_MS,
+    instanceLimiter: shareReadLimiter
+  });
+  const limited = publicRateLimitResponse(admission);
+  if (limited) return limited;
+
   const client = createSupabaseAdminClient();
   if (!client) {
     return NextResponse.json({ ok: false, configured: false, session: null, message: "Supabase 저장소가 아직 설정되지 않았습니다." });
@@ -97,6 +128,23 @@ export async function GET(request: NextRequest, context: RouteContext) {
 }
 
 export async function POST(request: NextRequest, context: RouteContext) {
+  const admission = await checkPublicRateLimit({
+    request,
+    namespace: "share-session-ack",
+    limit: SHARE_ACK_LIMIT,
+    windowMs: SHARE_RATE_WINDOW_MS,
+    instanceLimiter: shareAckLimiter
+  });
+  const limited = publicRateLimitResponse(admission);
+  if (limited) return limited;
+
+  const bodyBudget = await enforcePublicJsonRequestBodyBudget(
+    request,
+    PUBLIC_SHARE_ACK_REQUEST_MAX_BYTES,
+    "request body exceeds the public Share acknowledgement byte budget",
+  );
+  if (!bodyBudget.ok) return bodyBudget.response;
+
   const client = createSupabaseAdminClient();
   if (!client) {
     return NextResponse.json({ ok: false, configured: false, confirmationId: null, message: "Supabase 저장소가 아직 설정되지 않았습니다." });
@@ -106,7 +154,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   const searchParams = request.nextUrl.searchParams;
   const queryWorkerId = searchParams.get("workerId") || undefined;
 
-  const parsed = await request.json().catch((): unknown => ({}));
+  const parsed = await bodyBudget.request.json().catch((): unknown => ({}));
   const body = isRecord(parsed) ? parsed : {};
   const bodyWorkerId = readString(body.workerId);
   const workerId = queryWorkerId || bodyWorkerId || undefined;

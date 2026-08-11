@@ -6,6 +6,7 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { evaluateShareSessionReuse } from "@/components/WorkflowSharePolicy";
 import type { AskResponse } from "@/lib/types";
+import { PUBLIC_SHARE_ACK_REQUEST_MAX_BYTES } from "@/lib/public-work-budget";
 import {
   buildCanonicalRecipientMessageVariants,
   buildLocalizedDispatchRecipients,
@@ -43,9 +44,13 @@ vi.mock("@/lib/n8n-webhook", () => ({
   isLiveDispatchEnabled: mocks.isLiveDispatchEnabled
 }));
 
-vi.mock("@/lib/api-guard", () => ({
-  enforceRateLimit: () => null
-}));
+vi.mock("@/lib/api-guard", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/api-guard")>();
+  return {
+    ...actual,
+    enforceRateLimit: () => null
+  };
+});
 
 const WORKPACK_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const SESSION_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
@@ -364,6 +369,52 @@ beforeEach(() => {
 });
 
 describe("share session route authority", () => {
+  it("rejects an oversized public acknowledgement before session lookup", async () => {
+    const { POST } = await import("@/app/api/share-sessions/[sessionId]/route");
+    const response = await POST(new NextRequest(`http://localhost/api/share-sessions/${SESSION_ID}`, {
+      method: "POST",
+      headers: {
+        "content-length": "1",
+        "content-type": "application/json",
+        "x-forwarded-for": "198.51.100.88"
+      },
+      body: "x".repeat(PUBLIC_SHARE_ACK_REQUEST_MAX_BYTES + 1)
+    }), { params: Promise.resolve({ sessionId: SESSION_ID }) });
+    const payload = await response.json() as { code: string; limit: number };
+
+    expect(response.status).toBe(413);
+    expect(payload).toMatchObject({
+      code: "PUBLIC_WORK_BUDGET_EXCEEDED",
+      limit: PUBLIC_SHARE_ACK_REQUEST_MAX_BYTES
+    });
+    expect(mocks.loadActivePublicShareSession).not.toHaveBeenCalled();
+  });
+
+  it("rate limits repeated public share reads before session lookup", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    const { GET } = await import("@/app/api/share-sessions/[sessionId]/route");
+    const requestForAttempt = () => new NextRequest(
+      `http://localhost/api/share-sessions/${SESSION_ID}?workerId=${WORKER_ID}`,
+      { method: "GET", headers: { "x-forwarded-for": "198.51.100.89" } }
+    );
+
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      const response = await GET(requestForAttempt(), {
+        params: Promise.resolve({ sessionId: SESSION_ID })
+      });
+      expect(response.status).toBe(200);
+    }
+
+    mocks.loadActivePublicShareSession.mockClear();
+    const limited = await GET(requestForAttempt(), {
+      params: Promise.resolve({ sessionId: SESSION_ID })
+    });
+
+    expect(limited.status).toBe(429);
+    expect(limited.headers.get("X-SafeClaw-Rate-Limit")).toBe("instance");
+    expect(mocks.loadActivePublicShareSession).not.toHaveBeenCalled();
+  });
+
   it("returns only the invited worker hint for a public recipient share link", async () => {
     mocks.createSupabaseAdminClient.mockReturnValue({});
     const { GET } = await import("@/app/api/share-sessions/[sessionId]/route");

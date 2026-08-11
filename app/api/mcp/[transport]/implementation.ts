@@ -356,8 +356,6 @@ const instanceLimiter = createRateLimiter({ limit: 20, windowMs: 60_000 });
 const coarseInstanceLimiter = createRateLimiter({ limit: 20, windowMs: 60_000 });
 
 async function protectedBaseHandler(request: Request): Promise<Response> {
-  if (request.method !== "POST") return baseHandler(request);
-
   const bearer = request.headers
     .get("authorization")
     ?.replace(/^Bearer\s+/i, "")
@@ -391,8 +389,6 @@ export async function handler(request: Request): Promise<Response> {
       headers: { "Content-Type": "application/json" },
     });
   }
-
-  if (request.method !== "POST") return authHandler(request);
 
   const coarseDecision = await checkPublicRateLimit({
     request,

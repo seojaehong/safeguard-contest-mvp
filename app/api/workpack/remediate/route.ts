@@ -20,10 +20,12 @@ import {
 } from "@/lib/safety-reference-catalog";
 import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 import {
+  enforcePublicJsonRequestBodyBudget,
   isOverCharBudget,
   publicWorkBudgetExceeded,
   PUBLIC_REMEDIATION_DOCUMENT_MAX_CHARS,
-  PUBLIC_REMEDIATION_QUESTION_MAX_CHARS
+  PUBLIC_REMEDIATION_QUESTION_MAX_CHARS,
+  PUBLIC_REMEDIATION_REQUEST_MAX_BYTES
 } from "@/lib/public-work-budget";
 
 export const dynamic = "force-dynamic";
@@ -211,7 +213,14 @@ export async function POST(request: NextRequest) {
   const limited = publicRateLimitResponse(rateLimit);
   if (limited) return limited;
 
-  const body = await request.json().catch(() => null) as unknown;
+  const bodyBudget = await enforcePublicJsonRequestBodyBudget(
+    request,
+    PUBLIC_REMEDIATION_REQUEST_MAX_BYTES,
+    "request body exceeds the public remediation byte budget",
+  );
+  if (!bodyBudget.ok) return applyPublicRateLimitHeader(bodyBudget.response, rateLimit);
+
+  const body = await bodyBudget.request.json().catch(() => null) as unknown;
   const parsed = readRequest(body);
   if (!parsed.ok) {
     const limit = parsed.message.startsWith("question exceeds")

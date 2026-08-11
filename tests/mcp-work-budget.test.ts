@@ -102,6 +102,28 @@ describe("MCP tool work budgets", () => {
     expect(mocks.baseHandler).not.toHaveBeenCalled();
   });
 
+  it("applies coarse admission to authenticated transport methods other than POST", async () => {
+    mocks.resolveMcpAuth.mockResolvedValue(null);
+    const requestForAttempt = () => new Request("https://www.safeclaw.kr/api/mcp/mcp", {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer invalid-get-token",
+        "X-Forwarded-For": "198.51.100.241",
+      },
+    });
+
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      const response = await handler(requestForAttempt());
+      expect(response.status).toBe(401);
+    }
+
+    const limited = await handler(requestForAttempt());
+
+    expect(limited.status).toBe(429);
+    expect(mocks.resolveMcpAuth).toHaveBeenCalledTimes(20);
+    expect(mocks.baseHandler).not.toHaveBeenCalled();
+  });
+
   it.each([
     ["run_safeclaw_harness_agent", {}],
     ["generate_reviewed_safety_docpack", { task: "용접" }],

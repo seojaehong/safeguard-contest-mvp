@@ -5,7 +5,8 @@ import { POST } from "@/app/api/workpack/remediate/route";
 import { generateKnowledgeText } from "@/lib/ai";
 import {
   PUBLIC_REMEDIATION_DOCUMENT_MAX_CHARS,
-  PUBLIC_REMEDIATION_QUESTION_MAX_CHARS
+  PUBLIC_REMEDIATION_QUESTION_MAX_CHARS,
+  PUBLIC_REMEDIATION_REQUEST_MAX_BYTES
 } from "@/lib/public-work-budget";
 import { searchSafetyReferences, type SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 
@@ -167,6 +168,27 @@ describe("workpack remediation route", () => {
     expect(body).toMatchObject({
       code: "PUBLIC_WORK_BUDGET_EXCEEDED",
       limit: PUBLIC_REMEDIATION_DOCUMENT_MAX_CHARS
+    });
+    expect(generateKnowledgeText).not.toHaveBeenCalled();
+    expect(searchSafetyReferences).not.toHaveBeenCalled();
+  });
+
+  it("rejects an oversized chunked body before JSON parsing or downstream work", async () => {
+    const response = await POST(new NextRequest("http://localhost/api/workpack/remediate", {
+      method: "POST",
+      headers: {
+        "content-length": "1",
+        "content-type": "application/json",
+        "x-forwarded-for": "198.51.100.57"
+      },
+      body: "x".repeat(PUBLIC_REMEDIATION_REQUEST_MAX_BYTES + 1)
+    }));
+    const body = await response.json() as { code: string; limit: number };
+
+    expect(response.status).toBe(413);
+    expect(body).toMatchObject({
+      code: "PUBLIC_WORK_BUDGET_EXCEEDED",
+      limit: PUBLIC_REMEDIATION_REQUEST_MAX_BYTES
     });
     expect(generateKnowledgeText).not.toHaveBeenCalled();
     expect(searchSafetyReferences).not.toHaveBeenCalled();

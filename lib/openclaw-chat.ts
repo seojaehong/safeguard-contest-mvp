@@ -35,6 +35,8 @@ export type OpenClawOAuthStatus = {
 
 export const DEFAULT_OPENCLAW_CHAT_MODEL = "openai/gpt-5.5";
 export const DEFAULT_OPENCLAW_CHAT_TIMEOUT_MS = 240_000;
+export const OPENCLAW_MAX_OUTPUT_BYTES = 256 * 1_024;
+export const OPENCLAW_TERMINATION_GRACE_MS = 1_000;
 const OAUTH_STATUS_TIMEOUT_MS = 30_000;
 const OAUTH_STATUS_CACHE_MS = 60_000;
 
@@ -291,8 +293,12 @@ export type AssertOpenClawOpenAiOAuth = (
 
 export function createOpenClawOAuthStatusChecker(dependencies: {
   spawnProcess?: OpenClawSpawnProcess;
+  maxOutputBytes?: number;
+  terminationGraceMs?: number;
 } = {}): AssertOpenClawOpenAiOAuth {
   const spawnProcess = dependencies.spawnProcess ?? spawn;
+  const maxOutputBytes = dependencies.maxOutputBytes ?? OPENCLAW_MAX_OUTPUT_BYTES;
+  const terminationGraceMs = dependencies.terminationGraceMs ?? OPENCLAW_TERMINATION_GRACE_MS;
 
   return async function checkOpenClawOAuthStatus(
     config: OpenClawChatConfig,
@@ -307,12 +313,22 @@ export function createOpenClawOAuthStatusChecker(dependencies: {
       const command = resolveOpenClawCommand(config, buildOpenClawStatusArgs(config));
       const child = spawnProcess(command.command, command.args, resolveSpawnOptions());
       let stdout = "";
+      let stdoutBytes = 0;
       let closeObserved = false;
       let terminationError: unknown = null;
+      let terminationTimer: ReturnType<typeof setTimeout> | null = null;
       const terminate = (error: unknown): void => {
         if (terminationError || closeObserved) return;
         terminationError = error;
         child.kill();
+        terminationTimer = setTimeout(() => {
+          if (closeObserved) return;
+          closeObserved = true;
+          child.kill("SIGKILL");
+          clearTimeout(timeout);
+          signal?.removeEventListener("abort", abort);
+          reject(error);
+        }, terminationGraceMs);
       };
       const abort = (): void => terminate(
         signal?.reason ?? new BrokerError("ENGINE_EXECUTION_FAILED", 500),
@@ -323,6 +339,11 @@ export function createOpenClawOAuthStatusChecker(dependencies: {
       }, OAUTH_STATUS_TIMEOUT_MS);
 
       child.stdout.on("data", (chunk: Buffer) => {
+        stdoutBytes += chunk.byteLength;
+        if (stdoutBytes > maxOutputBytes) {
+          terminate(new Error(`OpenClaw OAuth status output exceeded ${maxOutputBytes} bytes`));
+          return;
+        }
         stdout += chunk.toString();
       });
       child.stderr.on("data", () => undefined);
@@ -331,6 +352,7 @@ export function createOpenClawOAuthStatusChecker(dependencies: {
         if (closeObserved) return;
         closeObserved = true;
         clearTimeout(timeout);
+        if (terminationTimer) clearTimeout(terminationTimer);
         signal?.removeEventListener("abort", abort);
         if (terminationError) {
           reject(terminationError);
@@ -379,8 +401,12 @@ export function createOpenClawBrokerSessionKey(): string {
 
 export function createOpenClawChatRunner(dependencies: {
   spawnProcess?: OpenClawSpawnProcess;
+  maxOutputBytes?: number;
+  terminationGraceMs?: number;
 } = {}) {
   const spawnProcess = dependencies.spawnProcess ?? spawn;
+  const maxOutputBytes = dependencies.maxOutputBytes ?? OPENCLAW_MAX_OUTPUT_BYTES;
+  const terminationGraceMs = dependencies.terminationGraceMs ?? OPENCLAW_TERMINATION_GRACE_MS;
 
   return async function runOpenClawChat(input: {
   config: OpenClawChatConfig;
@@ -401,6 +427,8 @@ export function createOpenClawChatRunner(dependencies: {
     const child = spawnProcess(command.command, command.args, resolveSpawnOptions());
     let closeObserved = false;
     let terminationError: unknown = null;
+    let outputBytes = 0;
+    let terminationTimer: ReturnType<typeof setTimeout> | null = null;
     const timeout = setTimeout(() => {
       terminate(new BrokerError("ENGINE_TIMEOUT", 503));
     }, input.config.timeoutMs);
@@ -408,11 +436,28 @@ export function createOpenClawChatRunner(dependencies: {
       if (terminationError || closeObserved) return;
       terminationError = error;
       child.kill();
+      terminationTimer = setTimeout(() => {
+        if (closeObserved) return;
+        closeObserved = true;
+        child.kill("SIGKILL");
+        clearTimeout(timeout);
+        input.signal?.removeEventListener("abort", abort);
+        reject(error);
+      }, terminationGraceMs);
     };
     const abort = (): void => terminate(input.signal?.reason ?? new BrokerError("ENGINE_EXECUTION_FAILED", 500));
     input.signal?.addEventListener("abort", abort, { once: true });
 
     child.stdout.on("data", (chunk: Buffer) => {
+      outputBytes += chunk.byteLength;
+      if (outputBytes > maxOutputBytes) {
+        terminate(new BrokerError(
+          "ENGINE_EXECUTION_FAILED",
+          503,
+          new Error(`OpenClaw output exceeded ${maxOutputBytes} bytes`),
+        ));
+        return;
+      }
       const text = chunk.toString();
       if (text) input.emit({ kind: "text-delta", text });
     });
@@ -424,6 +469,7 @@ export function createOpenClawChatRunner(dependencies: {
       if (closeObserved) return;
       closeObserved = true;
       clearTimeout(timeout);
+      if (terminationTimer) clearTimeout(terminationTimer);
       input.signal?.removeEventListener("abort", abort);
       if (terminationError) {
         reject(terminationError);

@@ -8,11 +8,22 @@ import {
   getWorkspaceUser,
   toJson
 } from "@/lib/supabase-admin";
+import {
+  enforcePublicJsonRequestBodyBudget,
+  KNOWLEDGE_WRITE_REQUEST_MAX_BYTES
+} from "@/lib/public-work-budget";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
-  const body = await request.json().catch(() => null) as unknown;
+  const bodyBudget = await enforcePublicJsonRequestBodyBudget(
+    request,
+    KNOWLEDGE_WRITE_REQUEST_MAX_BYTES,
+    "request body exceeds the knowledge write byte budget",
+  );
+  if (!bodyBudget.ok) return bodyBudget.response;
+
+  const body = await bodyBudget.request.json().catch(() => null) as unknown;
   const normalized = normalizeKnowledgeRawEvent(body);
 
   if (!normalized.ok) {

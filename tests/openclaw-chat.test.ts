@@ -1,5 +1,6 @@
 import { EventEmitter } from "node:events";
 import { PassThrough } from "node:stream";
+import type { ChildProcessWithoutNullStreams } from "node:child_process";
 
 import { describe, expect, it, vi } from "vitest";
 
@@ -57,6 +58,59 @@ describe("OpenClaw chat routing", () => {
 
     child.emit("close", null, "SIGTERM");
     await expect(run).rejects.toBeInstanceOf(Error);
+  });
+
+  it("rejects after the termination grace when a killed child never closes", async () => {
+    const module = await import("@/lib/openclaw-chat");
+    const child = Object.assign(new EventEmitter(), {
+      stdout: new PassThrough(),
+      stderr: new PassThrough(),
+      kill: vi.fn(() => true),
+    });
+    const runChat = module.createOpenClawChatRunner({
+      spawnProcess: () => child as unknown as ChildProcessWithoutNullStreams,
+      terminationGraceMs: 10,
+    });
+    const controller = new AbortController();
+    const reason = new Error("request cancelled");
+    const run = runChat({
+      config: resolveOpenClawChatConfig({ OPENCLAW_LOCAL: "1", OPENCLAW_CHAT_TIMEOUT_MS: "60000" }),
+      prompt: "test",
+      emit: () => undefined,
+      signal: controller.signal,
+    });
+
+    controller.abort(reason);
+
+    await expect(run).rejects.toBe(reason);
+    expect(child.kill).toHaveBeenCalledWith();
+    expect(child.kill).toHaveBeenCalledWith("SIGKILL");
+  });
+
+  it("terminates OpenClaw before emitting output beyond the cumulative byte budget", async () => {
+    const module = await import("@/lib/openclaw-chat");
+    const child = Object.assign(new EventEmitter(), {
+      stdout: new PassThrough(),
+      stderr: new PassThrough(),
+      kill: vi.fn(() => true),
+    });
+    const emit = vi.fn();
+    const runChat = module.createOpenClawChatRunner({
+      spawnProcess: () => child as unknown as ChildProcessWithoutNullStreams,
+      maxOutputBytes: 16,
+      terminationGraceMs: 10,
+    });
+    const run = runChat({
+      config: resolveOpenClawChatConfig({ OPENCLAW_LOCAL: "1", OPENCLAW_CHAT_TIMEOUT_MS: "60000" }),
+      prompt: "test",
+      emit,
+    });
+
+    child.stdout.write("a".repeat(17));
+
+    await expect(run).rejects.toMatchObject({ code: "ENGINE_EXECUTION_FAILED", status: 503 });
+    expect(emit).not.toHaveBeenCalled();
+    expect(child.kill).toHaveBeenCalled();
   });
 
   it("does not spawn an already-aborted request", async () => {
