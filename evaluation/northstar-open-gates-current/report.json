@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-11T04:39:15.630Z",
-  "sourceSha": "da82b7836a55a817f8792ffaf48ddb94857a0145",
+  "generatedAt": "2026-08-11T04:53:59.689Z",
+  "sourceSha": "5ecc9f25a300106f87c39cf723ea0e528ec2739c",
   "overall": "open",
   "gates": [
     {
@@ -176,6 +176,16 @@
       "nextActions": [
         "Resolve the remaining DB/RLS findings only through separately approved migration and live-isolation work; preserve the canonical renderer candidate as deferred until a future full scan reclassifies the separately proven current-source remediation.",
         "Add a distributed public-request budget before treating the two warm-instance search mitigations as fully closed, then rerun the repository scan before any security-complete claim."
+      ]
+    },
+    {
+      "id": "repository_security_scan_reconciliation",
+      "state": "notice",
+      "label": "Repository security scan reconciliation",
+      "evidencePath": "evaluation\\repository-security-scan-reconciliation-2026-08-11\\report.json",
+      "detail": "Two immutable sealed scans claim the same f0c8a7be target but disagree 17 findings / 1 deferred versus 0 / 0. The zero-finding scan also contains two fail-open receipt contradictions, so Northstar does not accept it as security-complete. A later diff scan's three findings are remediated, but two deferred candidates remain; a corrected fresh full scan is required, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Run a corrected full repository scan at or after c4f58947 and require every no-issue disposition to agree with its machine predicates."
       ]
     },
     {
