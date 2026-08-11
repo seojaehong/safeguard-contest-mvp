@@ -19,7 +19,9 @@ type FetchOptions = {
   requestTimeoutMs?: number;
   retryCount?: number;
   budgetLabel?: string;
+  signal?: AbortSignal;
 };
+type ResolvedFetchOptions = Required<Omit<FetchOptions, "signal">> & Pick<FetchOptions, "signal">;
 
 const serviceKey = process.env.DATA_GO_KR_SERVICE_KEY?.trim() || process.env.PUBLIC_DATA_API_KEY?.trim() || "";
 const proxyUrl = process.env.KOSHA_ACCIDENT_PROXY_URL?.trim() || "";
@@ -62,13 +64,30 @@ function readArrayEnvelope(value: unknown): JsonRecord[] {
   return [];
 }
 
-function wait(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function wait(ms: number, signal?: AbortSignal) {
+  signal?.throwIfAborted();
+  return new Promise<void>((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      signal?.removeEventListener("abort", abort);
+      resolve();
+    }, ms);
+    const abort = () => {
+      clearTimeout(timeout);
+      reject(signal?.reason);
+    };
+    signal?.addEventListener("abort", abort, { once: true });
+  });
 }
 
-async function fetchWithTimeout(url: string, timeoutMs: number) {
+async function fetchWithTimeout(url: string, timeoutMs: number, callerSignal?: AbortSignal) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  const abortFromCaller = () => controller.abort(callerSignal?.reason);
+  callerSignal?.throwIfAborted();
+  callerSignal?.addEventListener("abort", abortFromCaller, { once: true });
+  const timeout = setTimeout(
+    () => controller.abort(new Error(`KOSHA accident request timeout after ${timeoutMs}ms`)),
+    timeoutMs,
+  );
 
   try {
     const response = await fetch(url, {
@@ -83,28 +102,37 @@ async function fetchWithTimeout(url: string, timeoutMs: number) {
     return text;
   } finally {
     clearTimeout(timeout);
+    callerSignal?.removeEventListener("abort", abortFromCaller);
   }
 }
 
-async function fetchWithRetry(url: string, options: Required<FetchOptions>) {
+async function fetchWithRetry(url: string, options: ResolvedFetchOptions) {
   let lastError: unknown;
   for (let attempt = 0; attempt <= options.retryCount; attempt += 1) {
+    options.signal?.throwIfAborted();
     try {
-      return await fetchWithTimeout(url, options.requestTimeoutMs);
+      return await fetchWithTimeout(url, options.requestTimeoutMs, options.signal);
     } catch (error) {
+      options.signal?.throwIfAborted();
       lastError = error;
-      if (attempt < options.retryCount) await wait(400);
+      if (attempt < options.retryCount) await wait(400, options.signal);
     }
   }
   const message = lastError instanceof Error ? lastError.message : String(lastError);
   throw new Error(`${options.budgetLabel}: ${message}`);
 }
 
-async function fetchProxy(question: string, options: Required<FetchOptions>): Promise<ParseResult | null> {
+async function fetchProxy(question: string, options: ResolvedFetchOptions): Promise<ParseResult | null> {
   if (!proxyUrl) return null;
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), options.requestTimeoutMs);
+  const abortFromCaller = () => controller.abort(options.signal?.reason);
+  options.signal?.throwIfAborted();
+  options.signal?.addEventListener("abort", abortFromCaller, { once: true });
+  const timeout = setTimeout(
+    () => controller.abort(new Error(`KOSHA accident relay timeout after ${options.requestTimeoutMs}ms`)),
+    options.requestTimeoutMs,
+  );
   try {
     const response = await fetch(proxyUrl, {
       method: "POST",
@@ -133,6 +161,7 @@ async function fetchProxy(question: string, options: Required<FetchOptions>): Pr
     }
     return parseAccidentCases(question, text);
   } catch (error) {
+    options.signal?.throwIfAborted();
     const message = error instanceof Error ? error.message : String(error);
     return {
       kind: "api_error",
@@ -141,6 +170,7 @@ async function fetchProxy(question: string, options: Required<FetchOptions>): Pr
     };
   } finally {
     clearTimeout(timeout);
+    options.signal?.removeEventListener("abort", abortFromCaller);
   }
 }
 
@@ -470,7 +500,7 @@ function parseAttachment(text: string) {
   return null;
 }
 
-async function fetchAttachment(boardNo: string, options: Required<FetchOptions>) {
+async function fetchAttachment(boardNo: string, options: ResolvedFetchOptions) {
   for (const candidate of buildAttachmentUrlCandidates(boardNo)) {
     try {
       const text = await fetchWithRetry(candidate.url, {
@@ -482,6 +512,7 @@ async function fetchAttachment(boardNo: string, options: Required<FetchOptions>)
       const attachment = parseAttachment(text);
       if (attachment) return attachment;
     } catch (error) {
+      options.signal?.throwIfAborted();
       const message = error instanceof Error ? error.message : String(error);
       console.warn(`KOSHA accident attachment failed: ${candidate.label}: ${message}`);
     }
@@ -489,7 +520,7 @@ async function fetchAttachment(boardNo: string, options: Required<FetchOptions>)
   return null;
 }
 
-async function enrichAttachments(cases: AccidentCaseWithMeta[], options: Required<FetchOptions>) {
+async function enrichAttachments(cases: AccidentCaseWithMeta[], options: ResolvedFetchOptions) {
   const enriched = await Promise.all(cases.map(async (item) => {
     if (!item.boardNo || item.sourceType === "fatal-accident") return item;
     const attachment = await fetchAttachment(item.boardNo, options);
@@ -547,7 +578,7 @@ function parseFatalAccidentCases(question: string, text: string): ParseResult {
   }
 }
 
-async function fetchFatalAccidents(question: string, options: Required<FetchOptions>) {
+async function fetchFatalAccidents(question: string, options: ResolvedFetchOptions) {
   const failureDetails: string[] = [];
   for (const candidate of buildFatalAccidentUrlCandidates(question)) {
     try {
@@ -561,6 +592,7 @@ async function fetchFatalAccidents(question: string, options: Required<FetchOpti
       if (parsed.kind === "ok") return parsed;
       failureDetails.push(`${candidate.label}: ${parsed.detail}`);
     } catch (error) {
+      options.signal?.throwIfAborted();
       const message = error instanceof Error ? error.message : String(error);
       failureDetails.push(`${candidate.label}: ${message}`);
     }
@@ -640,10 +672,11 @@ function parseAccidentCases(question: string, text: string): ParseResult {
 }
 
 export async function fetchAccidentCases(question: string, options: FetchOptions = {}): Promise<AccidentCaseResult> {
-  const resolvedOptions: Required<FetchOptions> = {
+  const resolvedOptions: ResolvedFetchOptions = {
     requestTimeoutMs: options.requestTimeoutMs ?? REQUEST_TIMEOUT_MS,
     retryCount: options.retryCount ?? RETRY_COUNT,
-    budgetLabel: options.budgetLabel ?? "KOSHA accident case request"
+    budgetLabel: options.budgetLabel ?? "KOSHA accident case request",
+    signal: options.signal,
   };
 
   if (!serviceKey) {
@@ -697,6 +730,7 @@ export async function fetchAccidentCases(question: string, options: FetchOptions
         }
         failureDetails.push(`${candidate.label}: ${parsed.detail}`);
       } catch (error) {
+        resolvedOptions.signal?.throwIfAborted();
         const message = error instanceof Error ? error.message : String(error);
         failureDetails.push(`${candidate.label}: ${message}`);
       }
@@ -720,6 +754,7 @@ export async function fetchAccidentCases(question: string, options: FetchOptions
       cases: selectFallbackAccidentCases(question)
     };
   } catch (error) {
+    resolvedOptions.signal?.throwIfAborted();
     const message = error instanceof Error ? error.message : String(error);
     return {
       source: "kosha-accident",

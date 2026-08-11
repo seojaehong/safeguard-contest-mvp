@@ -70,6 +70,7 @@ type DeliverablesProviderCallResult = {
 type CallAndParseOptions = {
   traceId?: string;
   onTrace?: (document: string, trace: DeliverablesProviderCallTrace, outputKeys: string[]) => void;
+  signal?: AbortSignal;
 };
 
 const providerDecision = resolveDeliverablesProvider({
@@ -141,8 +142,10 @@ type GenContext = {
 async function callGemini(
   prompt: string,
   budget: DocBudget,
-  label: string
+  label: string,
+  signal?: AbortSignal,
 ): Promise<DeliverablesProviderCallResult> {
+  signal?.throwIfAborted();
   // Optional demo/pilot route: Claude first, Vertex chain as the runtime fallback.
   let anthropicFailed = false;
   if (providerDecision.provider === "anthropic" && providerDecision.model) {
@@ -151,6 +154,7 @@ async function callGemini(
       const text = await generateWithAnthropic(anthropicModel, prompt, {
         maxOutputTokens: budget.maxOutputTokens,
         timeoutMs: budget.timeoutMs,
+        signal,
       });
       return {
         text,
@@ -161,6 +165,7 @@ async function callGemini(
         }
       };
     } catch (error) {
+      signal?.throwIfAborted();
       anthropicFailed = true;
       log.error(
         `Anthropic deliverables (${anthropicModel}) failed; falling back to Vertex`,
@@ -177,6 +182,7 @@ async function callGemini(
   let lastError: unknown;
 
   for (const [index, { model, timeoutMs }] of attempts.entries()) {
+    signal?.throwIfAborted();
     try {
       // generateWithVertex handles timeout internally via Promise.race.
       // Standard docs (1,500-3,500자): 8,192 output tokens.
@@ -189,6 +195,7 @@ async function callGemini(
           responseMimeType: "application/json",
         },
         timeoutMs,
+        signal,
       });
       return {
         text,
@@ -199,6 +206,7 @@ async function callGemini(
         }
       };
     } catch (error) {
+      signal?.throwIfAborted();
       lastError = error;
       log.error(`Vertex AI deliverables (${model}) failed`, safeProviderFailureContext(error));
       // A timeout on the primary no longer aborts the chain: the fallback
@@ -231,8 +239,9 @@ async function callAndParse<T>(
   const maxAttempts = isHeavyOutputDoc(label) ? 1 : 2;
   let lastError: unknown;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    options.signal?.throwIfAborted();
     try {
-      const generated = await callGemini(prompt, budget, label);
+      const generated = await callGemini(prompt, budget, label, options.signal);
       const parsed = parser(generated.text);
       if (parsed) {
         const outputKeys = typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)
@@ -254,6 +263,7 @@ async function callAndParse<T>(
         rawLength: generated.text.length
       });
     } catch (error) {
+      options.signal?.throwIfAborted();
       lastError = error;
       log.error(`[AI ${label}] attempt ${attempt} call failed`, safeProviderFailureContext(error));
       // Don't waste time retrying if we already hit the timeout budget.
@@ -848,6 +858,8 @@ export type GenerateAllOptions = {
   onProgress?: OnAskProgress;
   /** Correlates provider/model evidence across per-document calls and the ask response. */
   traceId?: string;
+  /** Stops provider work when the originating Ask request disconnects. */
+  signal?: AbortSignal;
 };
 
 function buildContext(opts: GenerateAllOptions): GenContext {
@@ -1035,6 +1047,7 @@ async function generateTbmRiskLinks(
       traceOptions
     );
   } catch (error) {
+    traceOptions?.signal?.throwIfAborted();
     log.error("[AI tbmRiskLinks] falling back to []", safeProviderFailureContext(error));
     return { tbmRiskLinks: [] };
   }
@@ -1271,6 +1284,7 @@ export function buildFailedDeliverablesDiagnostics(input: {
 export async function generateAllDeliverablesWithDiagnostics(
   opts: GenerateAllOptions
 ): Promise<{ deliverables: AiDeliverables; diagnostics: AiDeliverablesDiagnostics }> {
+  opts.signal?.throwIfAborted();
   const configuredProvider = configuredDeliverablesProvider();
   if (!configuredProvider) {
     return {
@@ -1305,6 +1319,7 @@ export async function generateAllDeliverablesWithDiagnostics(
   });
   const traceOptions: CallAndParseOptions = {
     traceId: opts.traceId,
+    signal: opts.signal,
     onTrace: (document, trace, outputKeys) => {
       const expectedKeys = new Set(DELIVERABLE_GROUP_DOCUMENT_KEYS[document] || []);
       outputKeys.filter((key) => expectedKeys.has(key)).forEach((key) => {
@@ -1347,6 +1362,7 @@ export async function generateAllDeliverablesWithDiagnostics(
   }
 
   const settled = await Promise.allSettled(allSpecs.map((s) => s.promise));
+  opts.signal?.throwIfAborted();
   const out: AiDeliverables = {};
   const groupResults: AiDeliverablesDiagnostics["groupResults"] = [];
   const rejectedGroundingGroups: string[] = [];

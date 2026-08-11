@@ -2216,7 +2216,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const accidentCasesPromise = fetchAccidentCases(question, {
       requestTimeoutMs: 5_000,
       retryCount: 0,
-      budgetLabel: "KOSHA accident case enrichment budget"
+      budgetLabel: "KOSHA accident case enrichment budget",
+      signal: options.signal,
     });
 
     // Fix 5: decouple enhance and generateAnswer — both branch off rawCitations in parallel.
@@ -2229,7 +2230,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     );
     // enhanceLegalEvidenceMappings: optional quality pass, runs in parallel, best-effort.
     const citationsPromise = rawCitationsBasePromise.then((base) =>
-      enhanceLegalEvidenceMappings(question, base, options.phaseAGrounding).catch((error) => {
+      enhanceLegalEvidenceMappings(question, base, options.phaseAGrounding, options.signal).catch((error) => {
+        options.signal?.throwIfAborted();
         log.error(
           "AI legal evidence mapping failed; using original legal evidence order",
           safeFailureContext(error)
@@ -2242,7 +2244,9 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       generateAnswer(question, rawBase.slice(0, 6), {
         traceId,
         phaseAGrounding: options.phaseAGrounding,
+        signal: options.signal,
       }).catch((error): AnswerGenerationResult => {
+        options.signal?.throwIfAborted();
         log.error("AI response generation failed; using DB harness fallback", safeFailureContext(error));
         return {
           response: applyPhaseAResponseBoundary(buildMockAskResponse(
@@ -2445,11 +2449,13 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
               phaseAGrounding: options.phaseAGrounding,
               scope: "full",
               onProgress,
-              traceId
+              traceId,
+              signal: options.signal,
             }).then((result) => {
               deliverablesAttempted = result.diagnostics.trace.attempted;
               return result;
             }).catch((error) => {
+              options.signal?.throwIfAborted();
               log.error(
                 "AI deliverable generation failed (parallel path); falling back to template bodies",
                 safeFailureContext(error)
@@ -2464,6 +2470,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
               };
             });
           }).catch((error) => {
+            options.signal?.throwIfAborted();
             log.error("deliverablesPromise setup failed", safeFailureContext(error));
             return {
               deliverables: {},
@@ -3082,6 +3089,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       }
     };
   } catch (error) {
+    options.signal?.throwIfAborted();
     log.error("runAsk pipeline failed; using DB harness fallback", {
       errorType: error instanceof Error ? error.name : typeof error
     });

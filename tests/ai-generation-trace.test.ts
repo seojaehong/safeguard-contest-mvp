@@ -54,6 +54,26 @@ describe("answer generation trace", () => {
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"model":"gpt-4.1-mini"'));
   });
 
+  test("aborts the active OpenAI request when the caller disconnects", async () => {
+    const controller = new AbortController();
+    mocks.openAiCreate.mockImplementationOnce((_input: unknown, options?: { signal?: AbortSignal }) =>
+      new Promise((_, reject) => {
+        options?.signal?.addEventListener("abort", () => reject(options.signal?.reason), { once: true });
+      })
+    );
+    const { generateAnswer } = await import("@/lib/ai");
+    const pending = generateAnswer("성수동 외벽 도장 작업", [], {
+      traceId: "trace-openai-abort",
+      signal: controller.signal,
+    });
+    const reason = new Error("caller disconnected");
+    controller.abort(reason);
+
+    await expect(pending).rejects.toBe(reason);
+    expect(mocks.openAiCreate).toHaveBeenCalledOnce();
+    expect((mocks.openAiCreate.mock.calls[0]?.[1] as { signal?: AbortSignal })?.signal?.aborted).toBe(true);
+  });
+
   test("marks the answer trace when Vertex falls back to OpenAI", async () => {
     process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON = "{}";
     process.env.GCP_PROJECT_ID = "test-project";

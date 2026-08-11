@@ -118,6 +118,94 @@ describe("provider request lifetimes", () => {
     });
   });
 
+  it("keeps the safety-reference deadline active while reading the response body", async () => {
+    vi.useFakeTimers();
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test-key");
+    vi.stubEnv("SAFETY_REFERENCE_VECTOR_SEARCH", "0");
+    let bodyCancelled = false;
+    const stalledBody = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode("["));
+      },
+      cancel() {
+        bodyCancelled = true;
+      },
+    });
+    const fetchMock = vi.fn(() => fetchMock.mock.calls.length === 1
+      ? Promise.resolve(new Response(stalledBody, { status: 200 }))
+      : Promise.resolve(Response.json([]))
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { searchSafetyReferences } = await import("@/lib/safety-reference-catalog");
+    const pending = searchSafetyReferences({ query: "비계 추락", limit: 3 });
+    await vi.advanceTimersByTimeAsync(5_000);
+    const result = await pending;
+
+    expect(bodyCancelled).toBe(true);
+    expect(fetchMock.mock.calls.length).toBeGreaterThanOrEqual(2);
+    expect(result).toMatchObject({ retrievalMode: "rest-ilike", count: 0 });
+  });
+
+  it("propagates caller cancellation while reading a safety-reference body", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test-key");
+    vi.stubEnv("SAFETY_REFERENCE_VECTOR_SEARCH", "0");
+    let bodyCancelled = false;
+    const stalledBody = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode("["));
+      },
+      cancel() {
+        bodyCancelled = true;
+      },
+    });
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(stalledBody, { status: 200 })));
+    const controller = new AbortController();
+
+    const { searchSafetyReferences } = await import("@/lib/safety-reference-catalog");
+    const pending = searchSafetyReferences({ query: "비계 추락", limit: 3, signal: controller.signal });
+    const reason = new Error("caller disconnected during body read");
+    controller.abort(reason);
+
+    await expect(pending).rejects.toBe(reason);
+    expect(bodyCancelled).toBe(true);
+  });
+
+  it("preserves malformed safety-reference JSON as an explicit failure", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test-key");
+    vi.stubEnv("SAFETY_REFERENCE_VECTOR_SEARCH", "0");
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("not-json", {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    })));
+
+    const { searchSafetyReferences } = await import("@/lib/safety-reference-catalog");
+    await expect(searchSafetyReferences({ query: "비계 추락", limit: 3 })).rejects.toBeInstanceOf(SyntaxError);
+  });
+
+  it("rejects an oversized safety-reference body before parsing and keeps the REST fallback", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test-key");
+    vi.stubEnv("SAFETY_REFERENCE_VECTOR_SEARCH", "0");
+    const fetchMock = vi.fn(() => fetchMock.mock.calls.length === 1
+      ? Promise.resolve(new Response("[]", {
+          status: 200,
+          headers: { "content-length": String(1024 * 1024 + 1) },
+        }))
+      : Promise.resolve(Response.json([]))
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { searchSafetyReferences } = await import("@/lib/safety-reference-catalog");
+    const result = await searchSafetyReferences({ query: "비계 추락", limit: 3 });
+
+    expect(fetchMock.mock.calls.length).toBeGreaterThanOrEqual(2);
+    expect(result).toMatchObject({ retrievalMode: "rest-ilike", count: 0 });
+  });
+
   it("stops safety-reference fallback work when the caller disconnects", async () => {
     vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test-key");

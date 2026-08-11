@@ -2514,12 +2514,75 @@ function buildRestUrl(config: SupabaseConfig, table: string, params: URLSearchPa
 }
 
 const SAFETY_REFERENCE_REQUEST_TIMEOUT_MS = 5_000;
+const SAFETY_REFERENCE_RESPONSE_BODY_MAX_BYTES = 1024 * 1024;
+
+async function readBoundedJson(
+  response: Response,
+  signal: AbortSignal,
+  maxBytes = SAFETY_REFERENCE_RESPONSE_BODY_MAX_BYTES,
+): Promise<unknown> {
+  const contentLength = Number.parseInt(response.headers.get("content-length") || "", 10);
+  if (Number.isFinite(contentLength) && contentLength > maxBytes) {
+    await response.body?.cancel("safety reference response body exceeds byte limit");
+    throw new Error(`safety reference response body exceeds ${maxBytes} bytes`);
+  }
+  if (!response.body) return JSON.parse(await response.text()) as unknown;
+
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+  const abortRead = () => {
+    void reader.cancel(signal.reason);
+  };
+  signal.addEventListener("abort", abortRead, { once: true });
+  try {
+    while (true) {
+      signal.throwIfAborted();
+      const { done, value } = await reader.read();
+      signal.throwIfAborted();
+      if (done) break;
+      totalBytes += value.byteLength;
+      if (totalBytes > maxBytes) {
+        await reader.cancel("safety reference response body exceeds byte limit");
+        throw new Error(`safety reference response body exceeds ${maxBytes} bytes`);
+      }
+      chunks.push(value);
+    }
+  } catch (error) {
+    await reader.cancel(error).catch(() => undefined);
+    throw error;
+  } finally {
+    signal.removeEventListener("abort", abortRead);
+    reader.releaseLock();
+  }
+
+  const bytes = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return JSON.parse(new TextDecoder().decode(bytes)) as unknown;
+}
 
 async function fetchWithDeadline(
   input: string,
   init: RequestInit,
   callerSignal?: AbortSignal
-): Promise<Response> {
+): Promise<Response>;
+async function fetchWithDeadline<T>(
+  input: string,
+  init: RequestInit,
+  callerSignal: AbortSignal | undefined,
+  consume: (response: Response, signal: AbortSignal) => Promise<T>,
+): Promise<T>;
+
+async function fetchWithDeadline(
+  input: string,
+  init: RequestInit,
+  callerSignal?: AbortSignal,
+  consume?: (response: Response, signal: AbortSignal) => Promise<unknown>,
+): Promise<Response | unknown> {
   const controller = new AbortController();
   const abortFromCaller = () => controller.abort(callerSignal?.reason);
   if (callerSignal?.aborted) abortFromCaller();
@@ -2528,26 +2591,28 @@ async function fetchWithDeadline(
     controller.abort(new Error(`safety reference request timeout after ${SAFETY_REFERENCE_REQUEST_TIMEOUT_MS}ms`));
   }, SAFETY_REFERENCE_REQUEST_TIMEOUT_MS);
   try {
-    return await fetch(input, { ...init, signal: controller.signal });
+    const response = await fetch(input, { ...init, signal: controller.signal });
+    return consume ? await consume(response, controller.signal) : response;
   } finally {
     clearTimeout(timeout);
     callerSignal?.removeEventListener("abort", abortFromCaller);
   }
 }
 
-async function fetchRest(
+async function fetchRest<T>(
   config: SupabaseConfig,
   table: string,
   params: URLSearchParams,
-  signal?: AbortSignal
-): Promise<Response> {
+  signal: AbortSignal | undefined,
+  consume: (response: Response, signal: AbortSignal) => Promise<T>,
+): Promise<T> {
   return await fetchWithDeadline(buildRestUrl(config, table, params), {
     headers: {
       apikey: config.serviceRoleKey,
       Authorization: `Bearer ${config.serviceRoleKey}`
     },
     cache: "no-store"
-  }, signal);
+  }, signal, consume);
 }
 
 async function fetchReferenceItems(config: SupabaseConfig, params: URLSearchParams, signal?: AbortSignal): Promise<{
@@ -2557,10 +2622,15 @@ async function fetchReferenceItems(config: SupabaseConfig, params: URLSearchPara
   items: SafetyReferenceItem[];
 }> {
   let response: Response;
+  let data: unknown;
   try {
-    response = await fetchRest(config, "safety_reference_items", params, signal);
+    ({ response, data } = await fetchRest(config, "safety_reference_items", params, signal, async (nextResponse, deadlineSignal) => ({
+      response: nextResponse,
+      data: nextResponse.ok ? await readBoundedJson(nextResponse, deadlineSignal) : undefined,
+    })));
   } catch (error) {
     signal?.throwIfAborted();
+    if (error instanceof SyntaxError) throw error;
     log.error("safety reference REST search failed", {
       event: SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
       errorCode: SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
@@ -2581,7 +2651,6 @@ async function fetchReferenceItems(config: SupabaseConfig, params: URLSearchPara
       items: []
     };
   }
-  const data = (await response.json()) as unknown;
   const parsed = Array.isArray(data) ? await Promise.all(data.map(normalizeRemoteReferenceItem)) : [];
   const items = parsed.filter((item): item is SafetyReferenceItem => item !== null);
   return {
@@ -2608,8 +2677,9 @@ async function fetchRankedReferences(
 ): Promise<{ ok: boolean; status: number; message: string; items: SafetyReferenceItem[] } | null> {
   const url = `${config.url}/rest/v1/rpc/search_safety_references_ranked`;
   let response: Response;
+  let data: unknown;
   try {
-    response = await fetchWithDeadline(url, {
+    ({ response, data } = await fetchWithDeadline(url, {
       method: "POST",
       headers: {
         apikey: config.serviceRoleKey,
@@ -2622,9 +2692,13 @@ async function fetchRankedReferences(
         item_type_filter: itemType ?? null
       }),
       cache: "no-store"
-    }, signal);
+    }, signal, async (nextResponse, deadlineSignal) => ({
+      response: nextResponse,
+      data: nextResponse.ok ? await readBoundedJson(nextResponse, deadlineSignal) : undefined,
+    })));
   } catch (error) {
     signal?.throwIfAborted();
+    if (error instanceof SyntaxError) throw error;
     log.error("safety reference ranked RPC failed", {
       event: SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
       errorCode: SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
@@ -2648,7 +2722,6 @@ async function fetchRankedReferences(
       items: []
     };
   }
-  const data = (await response.json()) as unknown;
   const parsed = Array.isArray(data) ? await Promise.all(data.map(normalizeRemoteReferenceItem)) : [];
   const items = parsed.filter((item): item is SafetyReferenceItem => item !== null);
   return {
@@ -2781,8 +2854,9 @@ async function fetchVectorReferences(
 
   const url = `${config.url}/rest/v1/rpc/match_safety_reference_embeddings`;
   let response: Response;
+  let data: unknown;
   try {
-    response = await fetchWithDeadline(url, {
+    ({ response, data } = await fetchWithDeadline(url, {
       method: "POST",
       headers: {
         apikey: config.serviceRoleKey,
@@ -2795,9 +2869,13 @@ async function fetchVectorReferences(
         item_type_filter: itemType ?? null
       }),
       cache: "no-store"
-    }, signal);
+    }, signal, async (nextResponse, deadlineSignal) => ({
+      response: nextResponse,
+      data: nextResponse.ok ? await readBoundedJson(nextResponse, deadlineSignal) : undefined,
+    })));
   } catch (error) {
     signal?.throwIfAborted();
+    if (error instanceof SyntaxError) throw error;
     log.error("safety reference vector RPC failed", {
       event: SAFETY_REFERENCE_VECTOR_FAILURE_CODE,
       errorCode: SAFETY_REFERENCE_VECTOR_FAILURE_CODE,
@@ -2847,7 +2925,6 @@ async function fetchVectorReferences(
     };
   }
 
-  const data = (await response.json()) as unknown;
   const parsed = Array.isArray(data) ? await Promise.all(data.map(normalizeVectorReferenceRow)) : [];
   const items = parsed.filter((item): item is SafetyReferenceItem => item !== null);
   return {

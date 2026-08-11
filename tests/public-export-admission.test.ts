@@ -61,11 +61,17 @@ describe("public export aggregate admission", () => {
   it("uses one distributed namespace for all export formats", async () => {
     vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
     vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "test-token");
-    const keys: string[] = [];
+    const rateKeys: string[] = [];
+    const concurrencyKeys: string[] = [];
     vi.stubGlobal("fetch", vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
       const command = JSON.parse(String(init?.body)) as unknown[];
-      keys.push(String(command[3]));
-      return Response.json({ result: [1, 59_000] });
+      const script = String(command[1]);
+      if (script.includes("INCR")) {
+        rateKeys.push(String(command[3]));
+        return Response.json({ result: [1, 59_000] });
+      }
+      concurrencyKeys.push(String(command[3]));
+      return Response.json({ result: script.includes("ZADD") ? [1, 1] : 1 });
     }));
     const [{ POST: hwp }, { POST: xlsx }, { POST: pdf }, { GET: hwpxTemplate }] = await Promise.all([
       import("@/app/api/export/hwp/route"),
@@ -83,12 +89,62 @@ describe("public export aggregate admission", () => {
       })),
     ];
 
-    expect(keys).toHaveLength(4);
-    expect(keys.every((key) => /^safeclaw:public-rate:document-export:[a-f0-9]{32}$/u.test(key))).toBe(true);
+    expect(rateKeys).toHaveLength(4);
+    expect(rateKeys.every((key) => /^safeclaw:public-rate:document-export:[a-f0-9]{32}$/u.test(key))).toBe(true);
+    expect(concurrencyKeys).toHaveLength(8);
+    expect(concurrencyKeys.every((key) => key === "safeclaw:public-concurrency:document-export")).toBe(true);
     for (const response of responses) {
       expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("distributed");
       expect(response.headers.get("X-SafeClaw-Work-Unit")).toBe("document-export");
     }
+  });
+
+  it("enforces one distributed concurrency lease across export requests", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "test-token");
+    const owners = new Set<string>();
+    vi.stubGlobal("fetch", vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
+      const command = JSON.parse(String(init?.body)) as unknown[];
+      const script = String(command[1]);
+      if (script.includes("INCR")) return Response.json({ result: [1, 59_000] });
+      if (script.includes("ZADD")) {
+        if (owners.size >= 2) return Response.json({ result: [0, owners.size] });
+        owners.add(String(command[7]));
+        return Response.json({ result: [1, owners.size] });
+      }
+      owners.delete(String(command[4]));
+      return Response.json({ result: 1 });
+    }));
+
+    let releaseFirst: () => void = () => undefined;
+    let releaseSecond: () => void = () => undefined;
+    const firstGate = new Promise<void>((resolve) => { releaseFirst = resolve; });
+    const secondGate = new Promise<void>((resolve) => { releaseSecond = resolve; });
+    const request = (ip: string) => new NextRequest("http://localhost/api/export/pdf", {
+      method: "POST",
+      headers: { "x-forwarded-for": ip },
+    });
+    const first = withPublicDocumentExportAdmission(request("198.51.100.61"), async () => {
+      await firstGate;
+      return new Response("first");
+    });
+    const second = withPublicDocumentExportAdmission(request("198.51.100.62"), async () => {
+      await secondGate;
+      return new Response("second");
+    });
+    await vi.waitFor(() => expect(owners.size).toBe(2));
+
+    const busy = await withPublicDocumentExportAdmission(
+      request("198.51.100.63"),
+      async () => new Response("third"),
+    );
+    expect(busy.status).toBe(503);
+    await expect(busy.json()).resolves.toMatchObject({ code: "PUBLIC_EXPORT_CONCURRENCY_LIMIT" });
+
+    releaseFirst();
+    releaseSecond();
+    await Promise.all([first, second]);
+    expect(owners.size).toBe(0);
   });
 
   it("fails closed without starting export work when the distributed limiter is unavailable", async () => {
@@ -114,6 +170,25 @@ describe("public export aggregate admission", () => {
     expect(work).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledOnce();
     error.mockRestore();
+  });
+
+  it("does not fall back to process-local concurrency in production", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const work = vi.fn(async () => new Response("should not run"));
+
+    const response = await withPublicDocumentExportAdmission(
+      new NextRequest("http://localhost/api/export/pdf", {
+        method: "POST",
+        headers: { "x-forwarded-for": "198.51.100.46" },
+      }),
+      work,
+    );
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({ code: "PUBLIC_EXPORT_CONCURRENCY_LIMIT" });
+    expect(work).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledOnce();
   });
 
   it("applies the shared in-process concurrency lease around export work", async () => {

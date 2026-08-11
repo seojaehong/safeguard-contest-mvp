@@ -70,6 +70,32 @@ describe("deliverables generation trace", () => {
     process.env = { ...savedEnv };
   });
 
+  test("stops all deliverable provider work when the caller disconnects", async () => {
+    const controller = new AbortController();
+    mocks.anthropicGenerate.mockImplementation((_model: string, _prompt: string, options?: { signal?: AbortSignal }) =>
+      new Promise((_, reject) => {
+        options?.signal?.addEventListener("abort", () => reject(options.signal?.reason), { once: true });
+      })
+    );
+    const { generateAllDeliverablesWithDiagnostics } = await import("@/lib/ai-deliverables");
+    const pending = generateAllDeliverablesWithDiagnostics({
+      scenario: {
+        companyName: "테스트사",
+        siteName: "테스트 현장",
+        workSummary: "외벽 도장",
+        workerCount: 4,
+        weatherNote: "강풍 주의",
+      },
+      question: "성수동 외벽 도장 작업",
+      signal: controller.signal,
+    });
+    const reason = new Error("caller disconnected");
+    controller.abort(reason);
+
+    await expect(pending).rejects.toBe(reason);
+    expect(mocks.vertexGenerate).not.toHaveBeenCalled();
+  });
+
   test("records the successful provider and routed model for each document", async () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
     const { generateAllDeliverablesWithDiagnostics } = await import("@/lib/ai-deliverables");

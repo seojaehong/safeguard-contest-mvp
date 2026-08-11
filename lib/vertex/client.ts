@@ -34,6 +34,8 @@ export type GenerateWithVertexOptions = {
    * caller unblocks and throws after timeoutMs. Default: 10_000.
    */
   timeoutMs?: number;
+  /** Stops caller wait and fallback work when the originating request is gone. */
+  signal?: AbortSignal;
 };
 
 /**
@@ -49,7 +51,8 @@ export async function generateWithVertex(
   prompt: string,
   options: GenerateWithVertexOptions = {}
 ): Promise<string> {
-  const { generationConfig, timeoutMs = 10_000 } = options;
+  const { generationConfig, timeoutMs = 10_000, signal } = options;
+  signal?.throwIfAborted();
 
   const vertex = getVertexClient();
   const genModel = vertex.getGenerativeModel({ model });
@@ -59,11 +62,27 @@ export async function generateWithVertex(
     ...(generationConfig ? { generationConfig } : {}),
   });
 
-  const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error(`Vertex AI timeout after ${timeoutMs}ms (model=${model})`)), timeoutMs)
-  );
+  let timeoutHandle: NodeJS.Timeout | undefined;
+  let abortListener: (() => void) | undefined;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutHandle = setTimeout(
+      () => reject(new Error(`Vertex AI timeout after ${timeoutMs}ms (model=${model})`)),
+      timeoutMs,
+    );
+  });
+  const abortPromise = new Promise<never>((_, reject) => {
+    if (!signal) return;
+    abortListener = () => reject(signal.reason);
+    signal.addEventListener("abort", abortListener, { once: true });
+  });
 
-  const result = await Promise.race([callPromise, timeoutPromise]);
+  let result: Awaited<typeof callPromise>;
+  try {
+    result = await Promise.race([callPromise, timeoutPromise, abortPromise]);
+  } finally {
+    if (timeoutHandle) clearTimeout(timeoutHandle);
+    if (signal && abortListener) signal.removeEventListener("abort", abortListener);
+  }
 
   const candidate = result.response.candidates?.[0];
   const text = candidate?.content?.parts?.map((p) => p.text ?? "").join("").trim() ?? "";

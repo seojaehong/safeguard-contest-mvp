@@ -24,8 +24,9 @@ export function isAnthropicConfigured(): boolean {
 export async function generateWithAnthropic(
   model: string,
   prompt: string,
-  options: { maxOutputTokens: number; timeoutMs: number }
+  options: { maxOutputTokens: number; timeoutMs: number; signal?: AbortSignal }
 ): Promise<string> {
+  options.signal?.throwIfAborted();
   const client = getClient();
   const response = await client.messages.create(
     {
@@ -33,7 +34,7 @@ export async function generateWithAnthropic(
       max_tokens: options.maxOutputTokens,
       messages: [{ role: "user", content: prompt }],
     },
-    { timeout: options.timeoutMs, maxRetries: 0 }
+    { timeout: options.timeoutMs, maxRetries: 0, signal: options.signal }
   );
 
   if (response.stop_reason === "refusal") {

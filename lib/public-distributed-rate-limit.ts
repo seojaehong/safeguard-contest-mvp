@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 import { getClientIp } from "@/lib/api-guard";
 import {
@@ -9,6 +9,7 @@ import {
 } from "@/lib/rate-limit";
 
 const DEFAULT_TIMEOUT_MS = 1_500;
+const DOCUMENT_EXPORT_LEASE_MS = 310_000;
 
 export const PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY = {
   concurrency: 2,
@@ -31,6 +32,17 @@ const FIXED_WINDOW_SCRIPT = [
   "if count == 1 then redis.call('PEXPIRE', KEYS[1], ARGV[1]) end",
   "local ttl = redis.call('PTTL', KEYS[1])",
   "return {count, ttl}",
+].join("\n");
+const CONCURRENCY_ACQUIRE_SCRIPT = [
+  "redis.call('ZREMRANGEBYSCORE', KEYS[1], '-inf', ARGV[1])",
+  "local active = redis.call('ZCARD', KEYS[1])",
+  "if active >= tonumber(ARGV[2]) then return {0, active} end",
+  "redis.call('ZADD', KEYS[1], ARGV[3], ARGV[4])",
+  "redis.call('PEXPIRE', KEYS[1], ARGV[5])",
+  "return {1, active + 1}",
+].join("\n");
+const CONCURRENCY_RELEASE_SCRIPT = [
+  "return redis.call('ZREM', KEYS[1], ARGV[1])",
 ].join("\n");
 
 type RateLimitMode = "distributed" | "instance";
@@ -227,6 +239,87 @@ export function applyPublicRateLimitHeader<T extends Response>(
   return response;
 }
 
+function buildConcurrencyKey(namespace: string): string {
+  return `safeclaw:public-concurrency:${namespace}`;
+}
+
+async function runUpstashCommand(
+  config: Extract<UpstashConfiguration, { state: "ready" }>,
+  command: unknown[],
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+): Promise<unknown> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(config.url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${config.token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(command),
+      cache: "no-store",
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error(`distributed concurrency returned HTTP ${response.status}`);
+    const payload = await response.json() as { error?: unknown; result?: unknown };
+    if (typeof payload.error === "string" && payload.error) {
+      throw new Error("distributed concurrency rejected the atomic lease command");
+    }
+    return payload.result;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function acquireDocumentExportLease(): Promise<(() => Promise<void>) | null | undefined> {
+  const config = readUpstashConfiguration(process.env);
+  if (config.state === "absent") {
+    if (process.env.VERCEL_ENV === "production") {
+      throw new Error("distributed concurrency is required in production");
+    }
+    return undefined;
+  }
+  if (config.state === "invalid") throw new Error("distributed concurrency configuration is incomplete or unsafe");
+
+  const owner = randomUUID();
+  const now = Date.now();
+  const result = await runUpstashCommand(config, [
+    "EVAL",
+    CONCURRENCY_ACQUIRE_SCRIPT,
+    "1",
+    buildConcurrencyKey(PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.namespace),
+    String(now),
+    String(PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.concurrency),
+    String(now + DOCUMENT_EXPORT_LEASE_MS),
+    owner,
+    String(DOCUMENT_EXPORT_LEASE_MS),
+  ]);
+  if (!Array.isArray(result) || result.length < 1 || ![0, 1].includes(Number(result[0]))) {
+    throw new Error("distributed concurrency returned an invalid lease response");
+  }
+  if (Number(result[0]) === 0) return null;
+
+  let released = false;
+  return async () => {
+    if (released) return;
+    released = true;
+    try {
+      await runUpstashCommand(config, [
+        "EVAL",
+        CONCURRENCY_RELEASE_SCRIPT,
+        "1",
+        buildConcurrencyKey(PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.namespace),
+        owner,
+      ]);
+    } catch (error) {
+      console.error("[public-rate-limit] distributed concurrency release failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  };
+}
+
 function applyDocumentExportAdmissionHeaders<T extends Response>(
   response: T,
   decision: PublicRateLimitDecision,
@@ -267,12 +360,23 @@ export async function withPublicDocumentExportAdmission(
     return limited;
   }
 
-  const release = documentExportConcurrency.tryAcquire();
+  let release: (() => void | Promise<void>) | null;
+  try {
+    const distributedRelease = await acquireDocumentExportLease();
+    release = distributedRelease === undefined
+      ? documentExportConcurrency.tryAcquire()
+      : distributedRelease;
+  } catch (error) {
+    console.error("[public-rate-limit] distributed concurrency unavailable", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return documentExportConcurrencyResponse(decision);
+  }
   if (!release) return documentExportConcurrencyResponse(decision);
 
   try {
     return applyDocumentExportAdmissionHeaders(await work(), decision);
   } finally {
-    release();
+    await release();
   }
 }

@@ -63,34 +63,61 @@ function isVertexConfigured(): boolean {
   return Boolean(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON && process.env.GCP_PROJECT_ID);
 }
 
-async function wait(ms: number) {
-  await new Promise((resolve) => setTimeout(resolve, ms));
+async function wait(ms: number, signal?: AbortSignal) {
+  signal?.throwIfAborted();
+  await new Promise<void>((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      signal?.removeEventListener("abort", abort);
+      resolve();
+    }, ms);
+    const abort = () => {
+      clearTimeout(timeout);
+      reject(signal?.reason);
+    };
+    signal?.addEventListener("abort", abort, { once: true });
+  });
 }
 
-async function withTimeout<T>(task: Promise<T>, timeoutMs: number, label: string): Promise<T> {
+async function withTimeout<T>(
+  runner: (signal: AbortSignal) => Promise<T>,
+  timeoutMs: number,
+  label: string,
+  callerSignal?: AbortSignal,
+): Promise<T> {
+  const controller = new AbortController();
+  const abortFromCaller = () => controller.abort(callerSignal?.reason);
+  callerSignal?.throwIfAborted();
+  callerSignal?.addEventListener("abort", abortFromCaller, { once: true });
   let timeoutHandle: NodeJS.Timeout | undefined;
-
-  const timeoutPromise = new Promise<T>((_, reject) => {
-    timeoutHandle = setTimeout(() => reject(new Error(`${label} timeout after ${timeoutMs}ms`)), timeoutMs);
-  });
-
+  timeoutHandle = setTimeout(
+    () => controller.abort(new Error(`${label} timeout after ${timeoutMs}ms`)),
+    timeoutMs,
+  );
   try {
-    return await Promise.race([task, timeoutPromise]);
+    return await runner(controller.signal);
   } finally {
     if (timeoutHandle) clearTimeout(timeoutHandle);
+    callerSignal?.removeEventListener("abort", abortFromCaller);
   }
 }
 
-async function withRetry<T>(runner: () => Promise<T>, attempts: number, label: string): Promise<T> {
+async function withRetry<T>(
+  runner: () => Promise<T>,
+  attempts: number,
+  label: string,
+  signal?: AbortSignal,
+): Promise<T> {
   let lastError: unknown;
 
   for (let attempt = 0; attempt < attempts; attempt += 1) {
+    signal?.throwIfAborted();
     try {
       return await runner();
     } catch (error) {
+      signal?.throwIfAborted();
       lastError = error;
       if (attempt < attempts - 1) {
-        await wait(RETRY_DELAY_MS);
+        await wait(RETRY_DELAY_MS, signal);
       }
     }
   }
@@ -98,7 +125,7 @@ async function withRetry<T>(runner: () => Promise<T>, attempts: number, label: s
   throw lastError instanceof Error ? lastError : new Error(`${label} failed`);
 }
 
-async function generateWithOpenAI(prompt: string): Promise<ProviderGenerationResult> {
+async function generateWithOpenAI(prompt: string, signal?: AbortSignal): Promise<ProviderGenerationResult> {
   if (!openAiApiKey) {
     throw new Error("OPENAI_API_KEY is not set");
   }
@@ -107,15 +134,17 @@ async function generateWithOpenAI(prompt: string): Promise<ProviderGenerationRes
   const response = await withRetry(
     () =>
       withTimeout(
-        client.responses.create({
+        (requestSignal) => client.responses.create({
           model: openAiModel,
           input: prompt
-        }),
+        }, { signal: requestSignal }),
         RESPONSE_TIMEOUT_MS,
-        "OpenAI response"
+        "OpenAI response",
+        signal,
       ),
     1,
-    "OpenAI response"
+    "OpenAI response",
+    signal,
   );
 
   return {
@@ -128,13 +157,18 @@ async function generateWithOpenAI(prompt: string): Promise<ProviderGenerationRes
   };
 }
 
-async function generateWithGeminiModel(prompt: string, model: string): Promise<ProviderGenerationResult> {
+async function generateWithGeminiModel(
+  prompt: string,
+  model: string,
+  signal?: AbortSignal,
+): Promise<ProviderGenerationResult> {
   // generateWithVertex handles its own timeout internally (Promise.race).
   // 1 attempt only — retry doubles wall time, which defeats the timeout budget.
   const answer = await withRetry(
-    () => generateWithVertex(model, prompt, { timeoutMs: GEMINI_TIMEOUT_MS }),
+    () => generateWithVertex(model, prompt, { timeoutMs: GEMINI_TIMEOUT_MS, signal }),
     1,
-    `Vertex AI response (${model})`
+    `Vertex AI response (${model})`,
+    signal,
   );
 
   return {
@@ -147,15 +181,17 @@ async function generateWithGeminiModel(prompt: string, model: string): Promise<P
   };
 }
 
-async function generateWithGemini(prompt: string): Promise<ProviderGenerationResult> {
+async function generateWithGemini(prompt: string, signal?: AbortSignal): Promise<ProviderGenerationResult> {
   const models = [...new Set([geminiModel, ...geminiFallbackModels])];
   let lastError: unknown;
 
   for (const [index, model] of models.entries()) {
+    signal?.throwIfAborted();
     try {
-      const result = await generateWithGeminiModel(prompt, model);
+      const result = await generateWithGeminiModel(prompt, model, signal);
       return { ...result, fallbackUsed: index > 0 };
     } catch (error) {
+      signal?.throwIfAborted();
       lastError = error;
       log.error(`Gemini model failed: ${model}`, safeGenerationFailureContext(error));
       // Skip fallback models on timeout — they are unlikely to respond faster.
@@ -287,20 +323,22 @@ export async function enhanceLegalEvidenceMappings(
   question: string,
   citations: SearchResult[],
   phaseAGrounding?: PhaseAGenerationGrounding,
+  signal?: AbortSignal,
 ): Promise<SearchResult[]> {
   if (!citations.length || (!isVertexConfigured() && !openAiApiKey)) return citations;
 
   const prompt = buildCitationMappingPrompt(question, citations, phaseAGrounding);
   const response = isVertexConfigured()
-      ? await generateWithGemini(prompt).catch((error) => {
+      ? await generateWithGemini(prompt, signal).catch((error) => {
+        signal?.throwIfAborted();
         if (!openAiApiKey) throw error;
         log.error(
           "Vertex AI legal evidence mapping failed; falling back to OpenAI",
           safeGenerationFailureContext(error)
         );
-        return generateWithOpenAI(prompt);
+        return generateWithOpenAI(prompt, signal);
       })
-    : await generateWithOpenAI(prompt);
+    : await generateWithOpenAI(prompt, signal);
 
   const mappings = parseCitationMappings(response.answer);
   if (!mappings.length) return citations;
@@ -326,8 +364,9 @@ export async function enhanceLegalEvidenceMappings(
 export async function generateAnswer(
   question: string,
   citations: SearchResult[],
-  options: { traceId: string; phaseAGrounding?: PhaseAGenerationGrounding }
+  options: { traceId: string; phaseAGrounding?: PhaseAGenerationGrounding; signal?: AbortSignal }
 ): Promise<AnswerGenerationResult> {
+  options.signal?.throwIfAborted();
   if (!isVertexConfigured() && !openAiApiKey) {
     const trace = { provider: "mock", model: null, fallbackUsed: false } as const;
     log.info("safeclaw_answer_trace", {
@@ -349,12 +388,13 @@ export async function generateAnswer(
   const prompt = buildPrompt(question, citations, options.phaseAGrounding);
 
   const response = isVertexConfigured()
-    ? await generateWithGemini(prompt).catch((error) => {
+    ? await generateWithGemini(prompt, options.signal).catch((error) => {
+        options.signal?.throwIfAborted();
         if (!openAiApiKey) throw error;
         log.error("Vertex AI model chain failed; falling back to OpenAI", safeGenerationFailureContext(error));
-        return generateWithOpenAI(prompt).then((fallback) => ({ ...fallback, fallbackUsed: true }));
+        return generateWithOpenAI(prompt, options.signal).then((fallback) => ({ ...fallback, fallbackUsed: true }));
       })
-    : await generateWithOpenAI(prompt);
+    : await generateWithOpenAI(prompt, options.signal);
 
   const live = buildMockAskResponse(
     question,
