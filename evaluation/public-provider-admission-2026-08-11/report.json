@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-public-provider-admission/v1",
-  "generatedAt": "2026-08-11T16:36:31+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_PUBLIC_PROVIDER_ADMISSION_LIVE_PENDING",
-  "sourceHead": "b4828513c5fc0fb46198684b85a7c9dd11a4e19a",
+  "generatedAt": "2026-08-11T16:43:05+09:00",
+  "verdict": "PARTIAL_LIVE_PRODUCTION_WEIGHTED_INSTANCE_ADMISSION_DISTRIBUTED_ACTIVATION_PENDING",
+  "sourceHead": "e364220eae35e6700127e8e72f8bc32659c19e5b",
   "securityFindings": [
     {
       "scanId": "c4e9e2f1-7ce4-4313-a651-32205fca401f",
@@ -28,7 +28,8 @@
   "userContext": "Preserve immutable original 18-finding baseline. Verify current f0c8a7be source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
   "contracts": {
     "publicAskProviderAdmission": {
-      "distributedLeaseRequiredInProduction": true,
+      "distributedLeaseSupported": true,
+      "productionFallbackMode": "instance",
       "capacity": 12,
       "modeWeights": {
         "template": 0,
@@ -41,7 +42,8 @@
     },
     "weatherAdmission": {
       "namespace": "public-weather",
-      "distributedRateLimitRequiredInProduction": true,
+      "distributedRateLimitSupported": true,
+      "productionFallbackMode": "instance",
       "limit": 30,
       "windowMs": 60000,
       "questionMaxChars": 240,
@@ -49,7 +51,8 @@
     },
     "knowledgeMatchAdmission": {
       "namespace": "public-knowledge-match",
-      "distributedRateLimitRequiredInProduction": true,
+      "distributedRateLimitSupported": true,
+      "productionFallbackMode": "instance",
       "limit": 60,
       "windowMs": 60000,
       "questionMaxChars": 900,
@@ -59,8 +62,8 @@
   },
   "verification": {
     "focusedVitest": {
-      "files": 4,
-      "tests": 25,
+      "files": 7,
+      "tests": 38,
       "failed": 0
     },
     "focusedAndAdjacentVitest": {
@@ -77,15 +80,48 @@
     "diffCheck": "PASS"
   },
   "productionBuild": {
-    "commitSha": "e5ce29142344699bf814cfa0e56f03055d80d69d",
+    "commitSha": "e364220eae35e6700127e8e72f8bc32659c19e5b",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-auap0uz2k-seojaehongs-projects.vercel.app",
-    "sourceHeadMatchesProduction": false,
-    "liveAfterDeploymentPending": true,
+    "deploymentUrl": "safeguard-contest-6x4xnqzot-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true,
+    "liveAfterDeploymentPending": false,
+    "liveTemplateAskExecuted": true,
     "liveProviderBackedAskExecuted": false,
     "liveWeatherProviderCallExecuted": false,
     "liveKnowledgeMatchExecuted": false
+  },
+  "liveChecks": [
+    {
+      "path": "/api/ask",
+      "case": "template-no-provider",
+      "status": 200,
+      "rateLimitMode": "instance",
+      "aiMode": "template",
+      "workUnit": 0
+    },
+    {
+      "path": "/api/weather",
+      "case": "oversized-no-provider",
+      "status": 413,
+      "rateLimitMode": "instance",
+      "code": "PUBLIC_WORK_BUDGET_EXCEEDED"
+    },
+    {
+      "path": "/api/knowledge/match",
+      "case": "oversized-no-match",
+      "status": 413,
+      "rateLimitMode": "instance",
+      "code": "PUBLIC_WORK_BUDGET_EXCEEDED"
+    }
+  ],
+  "preHotfixDiagnostic": {
+    "commitSha": "b4828513c5fc0fb46198684b85a7c9dd11a4e19a",
+    "askRateLimitMode": "instance",
+    "weatherStatus": 503,
+    "knowledgeMatchStatus": 503,
+    "reason": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "result": "production availability hotfix required"
   },
   "mutationBoundary": {
     "dbMutationPerformed": false,
@@ -100,6 +136,7 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "securityCompleteClaimAllowed": false,
     "followUpSecurityScan": "REQUIRED",
+    "distributedProductionActivation": "PENDING_CONFIGURATION",
     "approvalGatedOperationsUnchanged": true
   }
 }
