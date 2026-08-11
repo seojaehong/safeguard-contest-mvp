@@ -620,6 +620,39 @@ describe("documents editor layout", () => {
     }
   }, 90_000);
 
+  it("preserves mobile authoring margin below the first TBM action", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 390, height: 723 } });
+    await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+    await selectDocumentFromWorkbench(page, "tbmBriefing");
+
+    const metrics = await page.evaluate(() => {
+      const header = document.querySelector<HTMLElement>(".safeclaw-page-decision-header");
+      const eyebrow = document.querySelector<HTMLElement>(".safeclaw-page-decision-copy .safeclaw-module-eyebrow");
+      const shell = document.querySelector<HTMLElement>(".workpack-shell");
+      const actions = document.querySelector<HTMLElement>('[data-testid="document-section-actions"]');
+      if (!header || !eyebrow || !shell || !actions) throw new Error("Missing mobile authoring margin target");
+      const shellRect = shell.getBoundingClientRect();
+      const actionRect = actions.getBoundingClientRect();
+      return {
+        pageHeight: document.documentElement.scrollHeight,
+        viewportHeight: window.innerHeight,
+        headerHeight: Math.round(header.getBoundingClientRect().height),
+        eyebrowDisplay: getComputedStyle(eyebrow).display,
+        shellBottom: Math.round(shellRect.bottom),
+        firstActionBottom: Math.round(actionRect.bottom),
+        horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth
+      };
+    });
+
+    expect(metrics.pageHeight).toBeLessThanOrEqual(metrics.viewportHeight + 8);
+    expect(metrics.headerHeight).toBeLessThanOrEqual(44);
+    expect(metrics.eyebrowDisplay).toBe("none");
+    expect(metrics.firstActionBottom).toBeLessThanOrEqual(metrics.shellBottom - 32);
+    expect(metrics.horizontalOverflow).toBe(false);
+    await page.close();
+  }, 90_000);
+
   it("round-trips a structured editor change into canonical XLSX rows without stale payload or truncation", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -2177,7 +2210,7 @@ describe("documents editor layout", () => {
         const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
         const sectionActions = document.querySelector<HTMLElement>('[data-testid="document-section-actions"]');
         if (!workpackShell || !sectionActions) return false;
-        return sectionActions.getBoundingClientRect().bottom <= workpackShell.getBoundingClientRect().bottom - 16;
+        return sectionActions.getBoundingClientRect().bottom <= workpackShell.getBoundingClientRect().bottom - 32;
       }), { message: `${item.key} first action`, timeout: 3_000 }).toBe(true);
 
       const metrics = await page.evaluate((cockpitTestId) => {
@@ -2233,7 +2266,7 @@ describe("documents editor layout", () => {
       expect(metrics.cockpitBelowToolbar).toBe(true);
       expect(metrics.cockpitTop).toBeGreaterThanOrEqual(metrics.toolbarBottom - 1);
       expect(metrics.cockpitBottom, item.title).toBeLessThan(metrics.shellBottom);
-      expect(metrics.firstActionBottom, item.title).toBeLessThanOrEqual(metrics.shellBottom - 16);
+      expect(metrics.firstActionBottom, item.title).toBeLessThanOrEqual(metrics.shellBottom - 32);
       item.requiredText.forEach((text) => expect(metrics.cockpitText).toContain(text));
       expect(metrics.textareaTop).toBeGreaterThanOrEqual(metrics.cockpitBottom);
       expect(metrics.fieldStripTop).toBeGreaterThanOrEqual(metrics.cockpitBottom);

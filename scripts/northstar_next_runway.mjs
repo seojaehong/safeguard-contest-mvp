@@ -1299,6 +1299,13 @@ function documentAllAuthoringGeometrySummary(report) {
     const metrics = isRecord(row.metrics) ? row.metrics : {};
     return typeof metrics.firstActionBottom === "number" ? [metrics.firstActionBottom] : [];
   });
+  const paneMargins = results.flatMap((row) => {
+    const metrics = isRecord(row.metrics) ? row.metrics : {};
+    return typeof metrics.shellBottom === "number" && typeof metrics.firstActionBottom === "number"
+      ? [metrics.shellBottom - metrics.firstActionBottom]
+      : [];
+  });
+  const acceptanceContract = isRecord(report.acceptanceContract) ? report.acceptanceContract : {};
   return {
     verdict: asString(report.verdict),
     sourceHead: asString(report.sourceHead),
@@ -1311,6 +1318,10 @@ function documentAllAuthoringGeometrySummary(report) {
     fail: typeof report.fail === "number" ? report.fail : null,
     maximumShellRatio: shellRatios.length ? Math.max(...shellRatios) : null,
     maximumFirstActionBottom: firstActionBottoms.length ? Math.max(...firstActionBottoms) : null,
+    minimumPaneMargin: paneMargins.length ? Math.min(...paneMargins) : null,
+    requiredPaneMargin: typeof acceptanceContract.firstActionInsidePaneWithMinimumMargin === "number"
+      ? acceptanceContract.firstActionInsidePaneWithMinimumMargin
+      : null,
     dbMutationPerformed: asBoolean(mutationBoundary.dbMutationPerformed),
     providerDispatchCalled: asBoolean(mutationBoundary.providerDispatchCalled),
     shareSessionCreated: asBoolean(mutationBoundary.shareSessionCreated),
@@ -2327,7 +2338,7 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Default Documents cockpit: first actionable cockpit is live-proven; do not phrase this as "Documents page height fixed" or "the whole Documents page is short".
 - Documents cockpit workbench geometry: \`${report.documentsCockpitWorkbenchGeometry.verdict || "missing"}\`; 1440x723 and 390x723 rows must show grid workbench, 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers closed by default, 0 visible supporting launchers, the legacy document index hidden, no horizontal overflow, and route split alone remains \`false\`.
 - Documents section navigation: \`${report.documentSectionNavigation.verdict || "missing"}\`; ${report.documentSectionNavigation.pass ?? 0}/${report.documentSectionNavigation.total ?? 0} Day/Night desktop-short and mobile-short rows retain 6 tabs, exactly 1 selected tab, 44px minimum controls, readable two-line labels, shell ratio <= 3, first-action containment, no horizontal overflow, no mutation, and exact saved Share \`${report.documentSectionNavigation.exactSavedShareVerdict || "missing"}\`.
-- All-document selected-authoring geometry: \`${report.documentAllAuthoringGeometry.verdict || "missing"}\`; ${report.documentAllAuthoringGeometry.pass ?? 0}/${report.documentAllAuthoringGeometry.total ?? 0} rows cover 12 canonical documents across Day/Night desktop-short and mobile-short, with maximum shell ratio \`${report.documentAllAuthoringGeometry.maximumShellRatio ?? "missing"}\`, maximum first-action bottom \`${report.documentAllAuthoringGeometry.maximumFirstActionBottom ?? "missing"}/723\`, at most one role-specific cockpit, local cockpit scroll, hidden raw/source editors, no mutation, and exact saved Share \`${report.documentAllAuthoringGeometry.exactSavedShareVerdict || "missing"}\`.
+- All-document selected-authoring geometry: \`${report.documentAllAuthoringGeometry.verdict || "missing"}\`; ${report.documentAllAuthoringGeometry.pass ?? 0}/${report.documentAllAuthoringGeometry.total ?? 0} rows cover 12 canonical documents across Day/Night desktop-short and mobile-short, with maximum shell ratio \`${report.documentAllAuthoringGeometry.maximumShellRatio ?? "missing"}\`, maximum first-action bottom \`${report.documentAllAuthoringGeometry.maximumFirstActionBottom ?? "missing"}/723\`, minimum inner-pane margin \`${report.documentAllAuthoringGeometry.minimumPaneMargin ?? "missing"}px\` against required \`${report.documentAllAuthoringGeometry.requiredPaneMargin ?? "missing"}px\`, at most one role-specific cockpit, local cockpit scroll, hidden raw/source editors, no mutation, and exact saved Share \`${report.documentAllAuthoringGeometry.exactSavedShareVerdict || "missing"}\`.
 - Document action pane margin: \`${report.documentAuthoringPaneMargin.verdict || "missing"}\`; rows below the required 16px inner-pane margin move from ${report.documentAuthoringPaneMargin.beforeBelowMargin ?? "unknown"}/48 to ${report.documentAuthoringPaneMargin.liveBelowMargin ?? "unknown"}/48, live minimum margin is ${report.documentAuthoringPaneMargin.liveMinimumMargin ?? "unknown"}px, maximum shell ratio is ${report.documentAuthoringPaneMargin.liveMaximumShellRatio ?? "unknown"}, route split alone remains \`${report.documentAuthoringPaneMargin.routeSplitAloneAcceptedAsFix === true}\`, and exact saved Share remains \`${report.documentAuthoringPaneMargin.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Raw-source drilldown geometry: \`${report.documentRawDrilldownGeometry.verdict || "missing"}\`; ${report.documentRawDrilldownGeometry.pass ?? 0}/${report.documentRawDrilldownGeometry.total ?? 0} rows cover 12 canonical documents across Day/Night desktop-short and mobile-short, with maximum shell ratio \`${report.documentRawDrilldownGeometry.maximumShellRatio ?? "missing"}\`, maximum source bottom \`${report.documentRawDrilldownGeometry.maximumSourceBottom ?? "missing"}/723\`, maximum source editor height \`${report.documentRawDrilldownGeometry.maximumSourceClientHeight ?? "missing"}\`, local source scrolling in ${report.documentRawDrilldownGeometry.overflowAutoCount ?? 0}/${report.documentRawDrilldownGeometry.total ?? 0}, no mutation, and exact saved Share \`${report.documentRawDrilldownGeometry.exactSavedShareVerdict || "missing"}\`.
 - Documents selected editor/detail: risk-assessment default, same-document reselect, and all-12 launcher exposure land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; explicit raw/source editing remains secondary drilldown but is now live-bounded.

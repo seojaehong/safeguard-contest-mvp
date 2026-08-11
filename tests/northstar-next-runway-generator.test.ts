@@ -1799,6 +1799,7 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     total: 48,
     pass: 48,
     fail: 0,
+    acceptanceContract: { firstActionInsidePaneWithMinimumMargin: 32 },
     mutationBoundary: {
       dbMutationPerformed: false,
       providerDispatchCalled: false,
@@ -1811,7 +1812,8 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
         verdict: "PASS",
         metrics: {
           shellRatio: label.includes("mobile") ? 2.69 : 2.21,
-          firstActionBottom: label.includes("mobile") ? 719 : 694,
+          shellBottom: label.includes("mobile") ? 672 : 653,
+          firstActionBottom: label.includes("mobile") ? 640 : 620,
         },
       }))
     )),
@@ -2672,7 +2674,9 @@ describe("northstar next runway generator", () => {
       pass: 48,
       fail: 0,
       maximumShellRatio: 2.69,
-      maximumFirstActionBottom: 719,
+      maximumFirstActionBottom: 640,
+      minimumPaneMargin: 32,
+      requiredPaneMargin: 32,
       dbMutationPerformed: false,
       providerDispatchCalled: false,
       shareSessionCreated: false,

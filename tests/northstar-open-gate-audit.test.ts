@@ -2037,6 +2037,7 @@ function createFixtureRoot(): string {
     total: 48,
     pass: 48,
     fail: 0,
+    acceptanceContract: { firstActionInsidePaneWithMinimumMargin: 32 },
     mutationBoundary: {
       dbMutationPerformed: false,
       providerDispatchCalled: false,
@@ -2054,7 +2055,8 @@ function createFixtureRoot(): string {
           pageHeight: label.includes("mobile") ? 728 : 723,
           horizontalOverflow: false,
           shellRatio: label.includes("mobile") ? 2.69 : 2.21,
-          firstActionBottom: label.includes("mobile") ? 719 : 694,
+          shellBottom: label.includes("mobile") ? 672 : 653,
+          firstActionBottom: label.includes("mobile") ? 640 : 620,
           visibleCockpitCount: documentKey === "riskAssessmentDraft" ? 0 : 1,
           cockpitMaxHeight: documentKey === "riskAssessmentDraft" ? 0 : label.includes("mobile") ? 88 : 260,
           cockpitOverflowY: documentKey === "riskAssessmentDraft" ? "none" : "auto",
@@ -4981,6 +4983,28 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(gate?.state).toBe("contradicted");
     expect(gate?.evidencePath).toBe(path.join("evaluation", "document-all-authoring-geometry-2026-08-02", "after-live", "report.json"));
     expect(gate?.detail).toContain("48/48 all-document selected-authoring and raw-source containment");
+  });
+
+  it("contradicts the UI gate when a document action loses the 32px pane margin", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const geometryPath = path.join(rootDir, "evaluation", "document-all-authoring-geometry-2026-08-02", "after-live", "report.json");
+    const geometry = JSON.parse(fs.readFileSync(geometryPath, "utf8")) as {
+      results: Array<{ documentKey: string; metrics: { shellBottom: number; firstActionBottom: number } }>;
+    };
+    const briefing = geometry.results.find((row) => row.documentKey === "tbmBriefing");
+    if (!briefing) throw new Error("tbmBriefing fixture missing");
+    briefing.metrics.firstActionBottom = briefing.metrics.shellBottom - 31;
+    fs.writeFileSync(geometryPath, `${JSON.stringify(geometry, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-08-12T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+    const gate = audit.gates.find((item) => item.id === "ui_documents_share_cockpit");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.evidencePath).toBe(path.join("evaluation", "document-all-authoring-geometry-2026-08-02", "after-live", "report.json"));
   });
 
   it("fails public generation admission security closed when exact Share is overclaimed", async () => {

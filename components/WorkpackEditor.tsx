@@ -58,6 +58,8 @@ const rubricDocumentKeys: RubricDocumentKey[] = [
   "kakaoMessage"
 ];
 
+const DOCUMENT_ACTION_PANE_MARGIN = 32;
+
 function isRubricDocumentKey(key: DocumentKey): key is RubricDocumentKey {
   return rubricDocumentKeys.includes(key as RubricDocumentKey);
 }
@@ -3214,7 +3216,7 @@ export function WorkpackEditor({
     const visibleTop = toolbarRect && toolbarRect.bottom > shellRect.top && toolbarRect.top < shellRect.bottom
       ? toolbarRect.bottom + 8
       : shellRect.top + 8;
-    const visibleBottom = Math.min(shellRect.bottom, window.innerHeight) - 16;
+    const visibleBottom = Math.min(shellRect.bottom, window.innerHeight) - DOCUMENT_ACTION_PANE_MARGIN;
     const minimumScrollDelta = actionsRect.bottom - visibleBottom;
     const maximumScrollDelta = targetRect.top - visibleTop;
     if (minimumScrollDelta > maximumScrollDelta) return false;
@@ -3288,7 +3290,7 @@ export function WorkpackEditor({
     const visibleTop = toolbarRect && toolbarRect.bottom > shellRect.top && toolbarRect.top < shellRect.bottom
       ? toolbarRect.bottom
       : shellRect.top;
-    const visibleBottom = Math.min(shellRect.bottom, window.innerHeight) - 16;
+    const visibleBottom = Math.min(shellRect.bottom, window.innerHeight) - DOCUMENT_ACTION_PANE_MARGIN;
     const fieldRect = fieldStrip?.getBoundingClientRect();
     const actionsRect = sectionActions.getBoundingClientRect();
     const overflow = Math.max(0, actionsRect.bottom - visibleBottom);

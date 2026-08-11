@@ -22184,8 +22184,12 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-page-decision-header {
     grid-template-columns: 1fr;
-    gap: 6px;
-    padding: 6px 16px;
+    gap: 0;
+    padding: 4px 16px;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-page-decision-copy .safeclaw-module-eyebrow {
+    display: none;
   }
 
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-page-decision-copy h1 {

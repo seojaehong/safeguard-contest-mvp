@@ -2098,6 +2098,9 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const allAuthoringBoundary = isRecord(documentAllAuthoringGeometry.mutationBoundary)
     ? documentAllAuthoringGeometry.mutationBoundary
     : {};
+  const allAuthoringAcceptance = isRecord(documentAllAuthoringGeometry.acceptanceContract)
+    ? documentAllAuthoringGeometry.acceptanceContract
+    : {};
   const allAuthoringRows = Array.isArray(documentAllAuthoringGeometry.results)
     ? documentAllAuthoringGeometry.results.filter(isRecord)
     : [];
@@ -2110,12 +2113,14 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     && readNumber(documentAllAuthoringGeometry.total) === 48
     && readNumber(documentAllAuthoringGeometry.pass) === 48
     && readNumber(documentAllAuthoringGeometry.fail) === 0
+    && readNumber(allAuthoringAcceptance.firstActionInsidePaneWithMinimumMargin) === 32
     && allAuthoringRows.length === 48
     && allAuthoringRows.every((row) => {
       const metrics = isRecord(row.metrics) ? row.metrics : {};
       const viewportHeight = readNumber(metrics.viewportHeight);
       const pageHeight = readNumber(metrics.pageHeight);
       const shellRatio = readNumber(metrics.shellRatio);
+      const shellBottom = readNumber(metrics.shellBottom);
       const firstActionBottom = readNumber(metrics.firstActionBottom);
       const visibleCockpitCount = readNumber(metrics.visibleCockpitCount);
       const cockpitMaxHeight = readNumber(metrics.cockpitMaxHeight);
@@ -2127,10 +2132,12 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
         && viewportHeight !== null
         && pageHeight !== null
         && shellRatio !== null
+        && shellBottom !== null
         && firstActionBottom !== null
         && pageHeight <= viewportHeight + 8
         && shellRatio <= 3
         && firstActionBottom <= viewportHeight
+        && firstActionBottom <= shellBottom - 32
         && readBoolean(metrics.horizontalOverflow) === false
         && readNumber(metrics.sourceEditorVisibleCount) === 0
         && (riskAssessment
