@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "safeclaw-security-resource-remediation/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_SECURITY_RESOURCE_REMEDIATION",
+  "generatedAt": "2026-08-11T09:02:00.000Z",
+  "sourceHead": "6ebf22f3",
+  "productCommit": "6ebf22f3",
+  "productionCommit": "6ebf22f30b52424a01a23729a2b91899a1c94c84",
+  "deploymentUrl": "safeguard-contest-68v3ohv9e-seojaehongs-projects.vercel.app",
+  "liveAfterDeploymentPending": false,
+  "sourceScan": {
+    "scanId": "a8aa9242-ed42-4057-88e9-31a72e298292",
+    "targetRevision": "8cd86f7ab2abe4ad7d4948d8feda083b0b032386",
+    "findingCount": 20,
+    "mediumCount": 15,
+    "lowCount": 5,
+    "coverageCompleteness": "partial"
+  },
+  "remediatedFindings": [
+    "mcp-non-post-admission",
+    "openclaw-output-budget",
+    "openclaw-termination-grace",
+    "knowledge-preauth-body-budget",
+    "workpack-remediation-body-budget",
+    "public-share-admission"
+  ],
+  "contracts": {
+    "mcpAllMethodsAdmission": true,
+    "openClawMaxOutputBytes": 262144,
+    "openClawTerminationGraceMs": 1000,
+    "knowledgeWriteRequestMaxBytes": 65536,
+    "remediationRequestMaxBytes": 16384,
+    "shareAckRequestMaxBytes": 16384,
+    "shareReadLimitPerMinute": 60,
+    "shareAckLimitPerMinute": 20
+  },
+  "verification": {
+    "focused": { "testFiles": 5, "tests": 79, "status": "PASS" },
+    "adjacent": { "testFiles": 12, "tests": 156, "status": "PASS" },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28,
+    "dependencyAuditVulnerabilities": 0
+  },
+  "liveChecks": {
+    "buildInfo": {
+      "status": "PASS",
+      "commitSha": "6ebf22f30b52424a01a23729a2b91899a1c94c84"
+    },
+    "mcpNonPostAdmission": {
+      "status": 401,
+      "rateLimitMode": "instance",
+      "verdict": "PASS"
+    },
+    "knowledgeOversizedBody": {
+      "routes": 3,
+      "status": 413,
+      "code": "PUBLIC_WORK_BUDGET_EXCEEDED",
+      "limit": 65536,
+      "verdict": "PASS"
+    },
+    "remediationOversizedBody": {
+      "status": 413,
+      "code": "PUBLIC_WORK_BUDGET_EXCEEDED",
+      "limit": 16384,
+      "rateLimitMode": "instance",
+      "verdict": "PASS"
+    },
+    "shareOversizedAck": {
+      "status": 413,
+      "code": "PUBLIC_WORK_BUDGET_EXCEEDED",
+      "limit": 16384,
+      "verdict": "PASS"
+    }
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "databaseMutations": "NOT_PERFORMED",
+    "vectorWikiKoshaRegistryMutations": "NOT_PERFORMED",
+    "remainingScanFindings": 14
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  }
+}
