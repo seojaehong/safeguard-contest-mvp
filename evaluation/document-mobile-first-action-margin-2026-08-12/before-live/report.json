@@ -1,26 +1,26 @@
 {
   "schemaVersion": "safeclaw-document-all-authoring-geometry/v1",
-  "checkedAt": "2026-08-11T12:08:54.579Z",
+  "checkedAt": "2026-08-11T11:50:21.647Z",
   "mode": "live-production",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHead": "f426ab4fc269e6fa23e3ca35a5e759a45f693527",
+  "sourceHead": "c1a176e0658b7d1ef160d0f292eb88c5f00b23cd",
   "productionBuild": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f426ab4fc269e6fa23e3ca35a5e759a45f693527",
+    "commitSha": "c1a176e0658b7d1ef160d0f292eb88c5f00b23cd",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-8tpns0ehw-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-nzdaevzhc-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "sourceHeadMatchesProduction": true,
-  "verdict": "PASS_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY",
+  "verdict": "RED_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY",
   "documentCount": 12,
   "viewportCaseCount": 4,
   "total": 48,
-  "pass": 48,
-  "fail": 0,
+  "pass": 46,
+  "fail": 2,
   "acceptanceContract": {
     "selectedDocumentOnly": true,
     "maximumVisibleCockpitsPerDocument": 1,
@@ -42,7 +42,7 @@
   "verification": {
     "documentsEditorLayout": {
       "filesPassed": 1,
-      "testsPassed": 38,
+      "testsPassed": 37,
       "status": "pass"
     },
     "typecheck": {
@@ -756,13 +756,13 @@
       "documentKey": "riskAssessmentDraft",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 714,
         "shellRatio": 2.03,
-        "shellBottom": 672,
-        "firstActionBottom": 480,
+        "shellBottom": 700,
+        "firstActionBottom": 508,
         "visibleCockpitCount": 0,
         "cockpitTestIds": [],
         "cockpitMaxHeight": 0,
@@ -783,13 +783,13 @@
       "documentKey": "tbmBriefing",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 830,
         "shellRatio": 2.36,
-        "shellBottom": 672,
-        "firstActionBottom": 640,
+        "shellBottom": 700,
+        "firstActionBottom": 684,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "tbm-document-cockpit"
@@ -801,7 +801,7 @@
         "sourceEditorVisibleCount": 0
       },
       "screenshot": null,
-      "verdict": "PASS"
+      "verdict": "RED"
     },
     {
       "theme": "day",
@@ -812,13 +812,13 @@
       "documentKey": "tbmLogDraft",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 809,
         "shellRatio": 2.3,
-        "shellBottom": 672,
-        "firstActionBottom": 629,
+        "shellBottom": 700,
+        "firstActionBottom": 657,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "tbm-document-cockpit"
@@ -841,13 +841,13 @@
       "documentKey": "workpackSummaryDraft",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 809,
         "shellRatio": 2.3,
-        "shellBottom": 672,
-        "firstActionBottom": 629,
+        "shellBottom": 700,
+        "firstActionBottom": 657,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "summary-document-cockpit"
@@ -870,13 +870,13 @@
       "documentKey": "workPlanDraft",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 809,
         "shellRatio": 2.3,
-        "shellBottom": 672,
-        "firstActionBottom": 629,
+        "shellBottom": 700,
+        "firstActionBottom": 657,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "execution-document-cockpit"
@@ -899,13 +899,13 @@
       "documentKey": "workPermitDraft",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 778,
         "shellRatio": 2.21,
-        "shellBottom": 672,
-        "firstActionBottom": 629,
+        "shellBottom": 700,
+        "firstActionBottom": 657,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "execution-document-cockpit"
@@ -928,13 +928,13 @@
       "documentKey": "safetyEducationRecordDraft",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 809,
         "shellRatio": 2.3,
-        "shellBottom": 672,
-        "firstActionBottom": 629,
+        "shellBottom": 700,
+        "firstActionBottom": 657,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "education-document-cockpit"
@@ -957,13 +957,13 @@
       "documentKey": "emergencyResponseDraft",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 809,
         "shellRatio": 2.3,
-        "shellBottom": 672,
-        "firstActionBottom": 629,
+        "shellBottom": 700,
+        "firstActionBottom": 657,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "emergency-document-cockpit"
@@ -986,13 +986,13 @@
       "documentKey": "photoEvidenceDraft",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 809,
         "shellRatio": 2.3,
-        "shellBottom": 672,
-        "firstActionBottom": 629,
+        "shellBottom": 700,
+        "firstActionBottom": 657,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "photo-document-cockpit"
@@ -1015,13 +1015,13 @@
       "documentKey": "foreignWorkerBriefing",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 818,
         "shellRatio": 2.32,
-        "shellBottom": 672,
-        "firstActionBottom": 617,
+        "shellBottom": 700,
+        "firstActionBottom": 645,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "education-document-cockpit"
@@ -1044,13 +1044,13 @@
       "documentKey": "foreignWorkerTransmission",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 830,
         "shellRatio": 2.36,
-        "shellBottom": 672,
-        "firstActionBottom": 629,
+        "shellBottom": 700,
+        "firstActionBottom": 657,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "transmission-document-cockpit"
@@ -1073,13 +1073,13 @@
       "documentKey": "kakaoMessage",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 809,
         "shellRatio": 2.3,
-        "shellBottom": 672,
-        "firstActionBottom": 629,
+        "shellBottom": 700,
+        "firstActionBottom": 657,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "transmission-document-cockpit"
@@ -1102,13 +1102,13 @@
       "documentKey": "riskAssessmentDraft",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 714,
         "shellRatio": 2.03,
-        "shellBottom": 672,
-        "firstActionBottom": 480,
+        "shellBottom": 700,
+        "firstActionBottom": 508,
         "visibleCockpitCount": 0,
         "cockpitTestIds": [],
         "cockpitMaxHeight": 0,
@@ -1129,13 +1129,13 @@
       "documentKey": "tbmBriefing",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 830,
         "shellRatio": 2.36,
-        "shellBottom": 672,
-        "firstActionBottom": 640,
+        "shellBottom": 700,
+        "firstActionBottom": 684,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "tbm-document-cockpit"
@@ -1147,7 +1147,7 @@
         "sourceEditorVisibleCount": 0
       },
       "screenshot": null,
-      "verdict": "PASS"
+      "verdict": "RED"
     },
     {
       "theme": "night",
@@ -1158,13 +1158,13 @@
       "documentKey": "tbmLogDraft",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 809,
         "shellRatio": 2.3,
-        "shellBottom": 672,
-        "firstActionBottom": 629,
+        "shellBottom": 700,
+        "firstActionBottom": 657,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "tbm-document-cockpit"
@@ -1187,13 +1187,13 @@
       "documentKey": "workpackSummaryDraft",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 809,
         "shellRatio": 2.3,
-        "shellBottom": 672,
-        "firstActionBottom": 629,
+        "shellBottom": 700,
+        "firstActionBottom": 657,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "summary-document-cockpit"
@@ -1216,13 +1216,13 @@
       "documentKey": "workPlanDraft",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 809,
         "shellRatio": 2.3,
-        "shellBottom": 672,
-        "firstActionBottom": 629,
+        "shellBottom": 700,
+        "firstActionBottom": 657,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "execution-document-cockpit"
@@ -1245,13 +1245,13 @@
       "documentKey": "workPermitDraft",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 778,
         "shellRatio": 2.21,
-        "shellBottom": 672,
-        "firstActionBottom": 629,
+        "shellBottom": 700,
+        "firstActionBottom": 657,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "execution-document-cockpit"
@@ -1274,13 +1274,13 @@
       "documentKey": "safetyEducationRecordDraft",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 809,
         "shellRatio": 2.3,
-        "shellBottom": 672,
-        "firstActionBottom": 629,
+        "shellBottom": 700,
+        "firstActionBottom": 657,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "education-document-cockpit"
@@ -1303,13 +1303,13 @@
       "documentKey": "emergencyResponseDraft",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 809,
         "shellRatio": 2.3,
-        "shellBottom": 672,
-        "firstActionBottom": 629,
+        "shellBottom": 700,
+        "firstActionBottom": 657,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "emergency-document-cockpit"
@@ -1332,13 +1332,13 @@
       "documentKey": "photoEvidenceDraft",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 809,
         "shellRatio": 2.3,
-        "shellBottom": 672,
-        "firstActionBottom": 629,
+        "shellBottom": 700,
+        "firstActionBottom": 657,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "photo-document-cockpit"
@@ -1361,13 +1361,13 @@
       "documentKey": "foreignWorkerBriefing",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 818,
         "shellRatio": 2.32,
-        "shellBottom": 672,
-        "firstActionBottom": 617,
+        "shellBottom": 700,
+        "firstActionBottom": 645,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "education-document-cockpit"
@@ -1390,13 +1390,13 @@
       "documentKey": "foreignWorkerTransmission",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 830,
         "shellRatio": 2.36,
-        "shellBottom": 672,
-        "firstActionBottom": 629,
+        "shellBottom": 700,
+        "firstActionBottom": 657,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "transmission-document-cockpit"
@@ -1419,13 +1419,13 @@
       "documentKey": "kakaoMessage",
       "metrics": {
         "viewportHeight": 723,
-        "pageHeight": 723,
+        "pageHeight": 728,
         "horizontalOverflow": false,
         "shellClientHeight": 352,
         "shellScrollHeight": 809,
         "shellRatio": 2.3,
-        "shellBottom": 672,
-        "firstActionBottom": 629,
+        "shellBottom": 700,
+        "firstActionBottom": 657,
         "visibleCockpitCount": 1,
         "cockpitTestIds": [
           "transmission-document-cockpit"

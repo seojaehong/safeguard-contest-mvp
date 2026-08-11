@@ -1,9 +1,9 @@
 # 12-Document Authoring Geometry Evidence
 
-- Verdict: `PASS_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY`
-- Mode: `live-production`
+- Verdict: `PASS_CURRENT_SOURCE_LOCAL_12_DOCUMENT_AUTHORING_GEOMETRY`
+- Mode: `current-source-local-production`
 - Source: `f426ab4fc269e6fa23e3ca35a5e759a45f693527`
-- Production: `f426ab4fc269e6fa23e3ca35a5e759a45f693527`
+- Production: `local`
 - Coverage: 12 documents x 4 Day/Night desktop/mobile cases = 48 rows
 - Verification: Documents browser 38/38, strict typecheck PASS, Next 15.5.22 build PASS (28 static pages)
 - Boundary: no DB/provider/Share mutation; exact saved Share remains `MISSING_EVIDENCE`

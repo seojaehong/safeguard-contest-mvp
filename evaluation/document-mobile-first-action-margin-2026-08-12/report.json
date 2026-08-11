@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "safeclaw-document-mobile-first-action-margin/v1",
+  "checkedAt": "2026-08-11T12:09:13.9Z",
+  "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_MARGIN_32PX",
+  "productCommit": "f426ab4fc269e6fa23e3ca35a5e759a45f693527",
+  "acceptanceContract": {
+    "canonicalDocumentCount": 12,
+    "viewportCaseCount": 4,
+    "expectedGeometryRows": 48,
+    "mobileViewport": "390x723",
+    "firstActionInsidePaneWithMinimumMargin": 32,
+    "bodyLevelLongStackForbidden": true,
+    "routeSplitAloneAcceptedAsFix": false
+  },
+  "beforeLive": {
+    "artifact": "evaluation/document-mobile-first-action-margin-2026-08-12/before-live/report.json",
+    "sourceHead": "c1a176e0658b7d1ef160d0f292eb88c5f00b23cd",
+    "productionCommit": "c1a176e0658b7d1ef160d0f292eb88c5f00b23cd",
+    "verdict": "RED_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY",
+    "total": 48,
+    "pass": 46,
+    "fail": 2,
+    "belowRequiredMarginCount": 2,
+    "minimumPaneMargin": 16,
+    "failedDocuments": [
+      "day:tbmBriefing",
+      "night:tbmBriefing"
+    ]
+  },
+  "afterLocal": {
+    "artifact": "evaluation/document-mobile-first-action-margin-2026-08-12/after-local/report.json",
+    "sourceHead": "f426ab4fc269e6fa23e3ca35a5e759a45f693527",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_12_DOCUMENT_AUTHORING_GEOMETRY",
+    "total": 48,
+    "pass": 48,
+    "fail": 0,
+    "belowRequiredMarginCount": 0,
+    "minimumPaneMargin": 32,
+    "maximumShellRatio": 2.36
+  },
+  "afterLive": {
+    "artifact": "evaluation/document-mobile-first-action-margin-2026-08-12/after-live/report.json",
+    "sourceHead": "f426ab4fc269e6fa23e3ca35a5e759a45f693527",
+    "productionCommit": "f426ab4fc269e6fa23e3ca35a5e759a45f693527",
+    "sourceHeadMatchesProduction": true,
+    "verdict": "PASS_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY",
+    "total": 48,
+    "pass": 48,
+    "fail": 0,
+    "belowRequiredMarginCount": 0,
+    "minimumPaneMargin": 32,
+    "maximumShellRatio": 2.36,
+    "deploymentUrl": "safeguard-contest-8tpns0ehw-seojaehongs-projects.vercel.app"
+  },
+  "verification": {
+    "focusedBrowser": "1 file / 1 selected test PASS",
+    "documentsBrowser": "1 file / 38 tests PASS",
+    "northstar": "3 files / 80 tests PASS",
+    "typecheck": "PASS",
+    "build": "PASS, Next 15.5.22, 28 static pages"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorRuntimeActivated": false,
+    "wikiPublished": false,
+    "koshaRegistryMutated": false
+  },
+  "remainingBoundaries": {
+    "liveAfterDeploymentRequired": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "wholeDocumentsPageDeclaredShortForEveryExpandedState": false
+  }
+}
