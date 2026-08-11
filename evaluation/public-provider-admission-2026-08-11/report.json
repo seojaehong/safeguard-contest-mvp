@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "safeclaw-public-provider-admission/v1",
+  "generatedAt": "2026-08-11T16:36:31+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_PUBLIC_PROVIDER_ADMISSION_LIVE_PENDING",
+  "sourceHead": "b4828513c5fc0fb46198684b85a7c9dd11a4e19a",
+  "securityFindings": [
+    {
+      "scanId": "c4e9e2f1-7ce4-4313-a651-32205fca401f",
+      "findingId": "csf_f5dd7b0bac8e0b7c7e531b29",
+      "occurrenceId": "occ_7b4c4070f59556768a6bd97b",
+      "anchor": "public-full-ai-concurrency",
+      "title": "Public full AI generation lacks weighted concurrency admission",
+      "severity": "medium",
+      "canonicalFindingRemainsImmutable": true,
+      "followUpSecurityScanRequired": true
+    },
+    {
+      "scanId": "c4e9e2f1-7ce4-4313-a651-32205fca401f",
+      "findingId": "csf_a0ac317d9f81776462e0441a",
+      "occurrenceId": "occ_eb3c112a02185f9797477036",
+      "anchor": "weather-knowledge-admission-gaps",
+      "title": "Weather and knowledge match endpoints lack durable public admission",
+      "severity": "medium",
+      "canonicalFindingRemainsImmutable": true,
+      "followUpSecurityScanRequired": true
+    }
+  ],
+  "userContext": "Preserve immutable original 18-finding baseline. Verify current f0c8a7be source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
+  "contracts": {
+    "publicAskProviderAdmission": {
+      "distributedLeaseRequiredInProduction": true,
+      "capacity": 12,
+      "modeWeights": {
+        "template": 0,
+        "enhanced": 2,
+        "full": 12
+      },
+      "queueRejectedBeforeProviderWork": true,
+      "jsonLeaseReleasedAfterWork": true,
+      "streamLeaseHeldUntilCompletionOrCancellation": true
+    },
+    "weatherAdmission": {
+      "namespace": "public-weather",
+      "distributedRateLimitRequiredInProduction": true,
+      "limit": 30,
+      "windowMs": 60000,
+      "questionMaxChars": 240,
+      "equivalentProviderWorkCoalesced": true
+    },
+    "knowledgeMatchAdmission": {
+      "namespace": "public-knowledge-match",
+      "distributedRateLimitRequiredInProduction": true,
+      "limit": 60,
+      "windowMs": 60000,
+      "questionMaxChars": 900,
+      "requestMaxBytes": 16384,
+      "getAndPostSharePolicy": true
+    }
+  },
+  "verification": {
+    "focusedVitest": {
+      "files": 4,
+      "tests": 25,
+      "failed": 0
+    },
+    "focusedAndAdjacentVitest": {
+      "files": 10,
+      "tests": 52,
+      "failed": 0
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "diffCheck": "PASS"
+  },
+  "productionBuild": {
+    "commitSha": "e5ce29142344699bf814cfa0e56f03055d80d69d",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-auap0uz2k-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": false,
+    "liveAfterDeploymentPending": true,
+    "liveProviderBackedAskExecuted": false,
+    "liveWeatherProviderCallExecuted": false,
+    "liveKnowledgeMatchExecuted": false
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerCallPerformedForEvidence": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorRuntimeMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "securityCompleteClaimAllowed": false,
+    "followUpSecurityScan": "REQUIRED",
+    "approvalGatedOperationsUnchanged": true
+  }
+}
