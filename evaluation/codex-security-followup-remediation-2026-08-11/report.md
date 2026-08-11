@@ -2,7 +2,7 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_SECURITY_FOLLOWUP_LIVE_PENDING`
+`PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP`
 
 Product commit: `c4f58947dbbee20fb77edeb0edfddcc08c87f6a4`
 
@@ -23,6 +23,8 @@ The sealed follow-up scan `3f0107a8-e4a4-4a5b-be37-a28bcea8b05a` reported three 
 
 ## Boundaries
 
-This is current-source evidence. Live production verification remains pending until the production marker reaches `c4f58947`.
+Production `/api/build-info` reports product commit `c4f58947dbbee20fb77edeb0edfddcc08c87f6a4` on `master`, deployment `safeguard-contest-mjnjdjxwk-seojaehongs-projects.vercel.app`.
+
+The marker proves deployment of the tested product commit. No live provider cancellation probe was executed; cancellation behavior is proven by source-level JSON, SSE, provider, and enrichment regression tests without consuming live provider capacity.
 
 No DB mutation, provider dispatch, Share-session creation, vector runtime mutation, wiki publication, or KOSHA registry mutation was performed. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`, and existing approval-gated boundaries remain open. The two deferred forwarding-header candidates from the scan remain deferred rather than being silently closed.

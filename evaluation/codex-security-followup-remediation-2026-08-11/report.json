@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-codex-security-followup-remediation/v1",
-  "generatedAt": "2026-08-11T09:36:18.4294133+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_SECURITY_FOLLOWUP_LIVE_PENDING",
+  "generatedAt": "2026-08-11T09:38:42.8473081+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP",
   "sourceHead": "c4f58947dbbee20fb77edeb0edfddcc08c87f6a4",
   "securityScan": {
     "scanId": "3f0107a8-e4a4-4a5b-be37-a28bcea8b05a",
@@ -46,8 +46,13 @@
     "diffCheck": "PASS"
   },
   "deployment": {
-    "liveAfterDeploymentRequired": true,
-    "productionCommit": null
+    "liveAfterDeploymentRequired": false,
+    "productionCommit": "c4f58947dbbee20fb77edeb0edfddcc08c87f6a4",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-mjnjdjxwk-seojaehongs-projects.vercel.app",
+    "liveProviderCancellationProbeExecuted": false,
+    "evidenceBoundary": "Production marker proves deployment of the tested product commit; cancellation behavior is proven by source-level JSON, SSE, provider, and enrichment regression tests without invoking live providers."
   },
   "remainingSecurityWork": [],
   "boundaries": {
