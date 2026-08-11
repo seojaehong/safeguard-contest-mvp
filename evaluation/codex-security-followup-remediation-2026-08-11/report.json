@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-codex-security-followup-remediation/v1",
   "generatedAt": "2026-08-11T09:21:32.7305048+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_SECURITY_FOLLOWUP_LIVE_PENDING",
+  "verdict": "PARTIAL_CURRENT_SOURCE_SECURITY_FOLLOWUP_LIVE_PENDING",
   "sourceHead": "2a7d46905da8f9a5fb77e2eda919d48f59e850f0",
   "securityScan": {
     "scanId": "3f0107a8-e4a4-4a5b-be37-a28bcea8b05a",
@@ -17,8 +17,8 @@
   "remediations": [
     {
       "id": "ask-descendant-cancellation",
-      "status": "PASS_CURRENT_SOURCE",
-      "detail": "Caller AbortSignal now reaches answer and deliverable providers plus accident and safety-reference retrieval; aborts bypass fallback and retry work. OpenAI and Anthropic receive request signals. Vertex stops caller wait and fallback chains while its SDK remains unable to cancel the underlying transport."
+      "status": "PARTIAL_CURRENT_SOURCE",
+      "detail": "Caller AbortSignal now reaches answer and deliverable providers plus accident and safety-reference retrieval; aborts bypass fallback and retry work. OpenAI and Anthropic receive request signals. The finding remains open because Vertex only stops caller wait and fallback chains while its SDK transport continues, and KMA, Work24, and KOSHA enrichment descendants do not yet all observe the caller signal."
     },
     {
       "id": "distributed-export-concurrency",
@@ -49,6 +49,11 @@
     "liveAfterDeploymentRequired": true,
     "productionCommit": null
   },
+  "remainingSecurityWork": [
+    "Provide cancellable Vertex transport or a provider adapter that can abort the underlying request.",
+    "Propagate the originating Ask signal through KMA, Work24, KOSHA education, KOSHA reference, and KOSHA OpenAPI enrichment calls.",
+    "Run JSON and SSE disconnect regression tests proving every active descendant stops."
+  ],
   "boundaries": {
     "dbMutationPerformed": false,
     "providerDispatchCalled": false,
