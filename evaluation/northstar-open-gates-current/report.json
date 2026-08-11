@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-11T09:20:28.516Z",
-  "sourceSha": "386e33d285ced15d0e7ad8fff82b31c24863f8c0",
+  "generatedAt": "2026-08-11T10:01:40.785Z",
+  "sourceSha": "15d2e6810049b5589de8f77b146305281f809e28",
   "overall": "open",
   "gates": [
     {
@@ -207,6 +207,16 @@
       "detail": "Fresh sealed scan a8aa9242 retained 20 findings under partial coverage; live production now proves bounded remediation for 6/20 resource-control findings with 235 focused/adjacent tests. The remaining 14 findings stay open, security-complete remains false, no mutation occurred, provider persistence remains approval-gated, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Remediate or explicitly defer the remaining 14 sealed findings; do not convert this scoped 6/20 closure into a security-complete claim."
+      ]
+    },
+    {
+      "id": "security_upstream_transport_remediation",
+      "state": "proven",
+      "label": "Security upstream transport remediation",
+      "evidencePath": "evaluation\\security-upstream-transport-remediation-2026-08-11\\report.json",
+      "detail": "Fresh sealed scan a8aa9242 keeps its immutable 20-finding baseline while live production source-proves configurable upstream SSRF containment and bounded provider responses. This wave closes 2 findings for a cumulative 8/20, leaves 12 visible, performs no external provider probe or mutation, keeps provider persistence approval-gated, and preserves exact saved Share as MISSING_EVIDENCE.",
+      "nextActions": [
+        "Remediate or explicitly defer the remaining 12 sealed findings and require a fresh scan before any security-complete claim."
       ]
     },
     {

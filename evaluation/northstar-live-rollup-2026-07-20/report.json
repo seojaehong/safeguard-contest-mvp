@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-11T09:20:29.685Z",
-  "head": "386e33d285ced15d0e7ad8fff82b31c24863f8c0",
+  "generatedAt": "2026-08-11T10:01:41.867Z",
+  "head": "15d2e6810049b5589de8f77b146305281f809e28",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "386e33d285ced15d0e7ad8fff82b31c24863f8c0",
+    "commitSha": "b673fc5d3a7f3be366c61d242e54d6a8a452e85e",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-n0cuqebuj-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-pj8hjxjiq-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 44
+    "gateCount": 45
   },
   "provenGates": [
     {
@@ -140,6 +140,12 @@
       "state": "proven",
       "artifact": "evaluation\\security-resource-remediation-2026-08-11\\report.json",
       "detail": "Fresh sealed scan a8aa9242 retained 20 findings under partial coverage; live production now proves bounded remediation for 6/20 resource-control findings with 235 focused/adjacent tests. The remaining 14 findings stay open, security-complete remains false, no mutation occurred, provider persistence remains approval-gated, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "security_upstream_transport_remediation",
+      "state": "proven",
+      "artifact": "evaluation\\security-upstream-transport-remediation-2026-08-11\\report.json",
+      "detail": "Fresh sealed scan a8aa9242 keeps its immutable 20-finding baseline while live production source-proves configurable upstream SSRF containment and bounded provider responses. This wave closes 2 findings for a cumulative 8/20, leaves 12 visible, performs no external provider probe or mutation, keeps provider persistence approval-gated, and preserves exact saved Share as MISSING_EVIDENCE."
     },
     {
       "id": "improvement_photo_analysis_budget",
@@ -486,6 +492,19 @@
     "scanFindingCount": 20,
     "remediatedFindingCount": 6,
     "remainingScanFindings": 14,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "providerDispatchPersistence": "APPROVAL_GATED"
+  },
+  "securityUpstreamTransportRemediation": {
+    "artifact": "evaluation\\security-upstream-transport-remediation-2026-08-11\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_SOURCE_PROVEN_UPSTREAM_TRANSPORT_SECURITY_NO_PROVIDER_PROBE",
+    "sourceHead": "b673fc5d3a7f3be366c61d242e54d6a8a452e85e",
+    "productionCommit": "b673fc5d3a7f3be366c61d242e54d6a8a452e85e",
+    "scanFindingCount": 20,
+    "remediatedThisWave": 2,
+    "remediatedTotal": 8,
+    "remainingScanFindings": 12,
+    "externalProviderProbeExecuted": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "providerDispatchPersistence": "APPROVAL_GATED"
   },
@@ -879,10 +898,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "386e33d285ced15d0e7ad8fff82b31c24863f8c0",
+      "sourceCommit": "15d2e6810049b5589de8f77b146305281f809e28",
       "sourceStatus": "exact",
-      "productionCommit": "386e33d285ced15d0e7ad8fff82b31c24863f8c0",
-      "productionStatus": "matches_live"
+      "productionCommit": "15d2e6810049b5589de8f77b146305281f809e28",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -1091,6 +1110,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": "6ebf22f30b52424a01a23729a2b91899a1c94c84",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "security_upstream_transport_remediation",
+      "artifact": "evaluation\\security-upstream-transport-remediation-2026-08-11\\report.json",
+      "sourceCommit": "b673fc5d3a7f3be366c61d242e54d6a8a452e85e",
+      "sourceStatus": "ancestor",
+      "productionCommit": "b673fc5d3a7f3be366c61d242e54d6a8a452e85e",
+      "productionStatus": "matches_live"
     },
     {
       "id": "mcp_generation_work_budget_security",

@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-11T09:20:29.685Z
-Source HEAD at generation: 386e33d285ced15d0e7ad8fff82b31c24863f8c0
-Live commit at generation: 386e33d285ced15d0e7ad8fff82b31c24863f8c0
+Generated at: 2026-08-11T10:01:41.867Z
+Source HEAD at generation: 15d2e6810049b5589de8f77b146305281f809e28
+Live commit at generation: b673fc5d3a7f3be366c61d242e54d6a8a452e85e
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -125,6 +125,11 @@ Overall: `northstar_open_approval_gated`
 - Fresh sealed findings: 20; remediated: 6; remaining: 14
 - Provider persistence: APPROVAL_GATED; exact saved Share: MISSING_EVIDENCE
 
+## Security Upstream Transport Remediation
+- Verdict: `PASS_LIVE_PRODUCTION_SOURCE_PROVEN_UPSTREAM_TRANSPORT_SECURITY_NO_PROVIDER_PROBE`
+- Fresh sealed findings: 20; remediated this wave: 2; cumulative: 8; remaining: 12
+- External provider probe executed: false; provider persistence: APPROVAL_GATED; exact saved Share: MISSING_EVIDENCE
+
 ## Public JSON Request Body Budget
 
 - Verdict: `PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET`
@@ -236,6 +241,7 @@ Overall: `northstar_open_approval_gated`
 | repository_security_scan_reconciliation | proven | evaluation\repository-security-scan-reconciliation-2026-08-11\report.json |
 | public_json_request_body_budget | proven | evaluation\public-json-request-body-budget-2026-08-11\report.json |
 | security_resource_remediation | proven | evaluation\security-resource-remediation-2026-08-11\report.json |
+| security_upstream_transport_remediation | proven | evaluation\security-upstream-transport-remediation-2026-08-11\report.json |
 | improvement_photo_analysis_budget | notice | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
 | public_provider_cancellation | notice | evaluation\public-provider-cancellation-2026-08-11\report.json |
 | public_provider_admission | notice | evaluation\public-provider-admission-2026-08-11\report.json |
@@ -265,7 +271,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
 | live_document_quality_matrix | ancestor | ancestor_of_head | evaluation\live-document-quality-matrix-2026-07-24\report.json |
@@ -292,6 +298,7 @@ Overall: `northstar_open_approval_gated`
 | public_generation_admission_security | missing | ancestor_of_head | evaluation\security-public-generation-admission-2026-08-04\report.json |
 | security_followup_remediation | ancestor | missing | evaluation\codex-security-followup-remediation-2026-08-11\report.json |
 | security_resource_remediation | ancestor | ancestor_of_head | evaluation\security-resource-remediation-2026-08-11\report.json |
+| security_upstream_transport_remediation | ancestor | matches_live | evaluation\security-upstream-transport-remediation-2026-08-11\report.json |
 | mcp_generation_work_budget_security | ancestor | ancestor_of_head | evaluation\security-mcp-generation-work-budget-2026-08-04\report.json |
 | learning_export_renderer_security | ancestor | ancestor_of_head | evaluation\learning-export-renderer-security-2026-08-02\report.json |
 | hermes_knowledge_review_ui | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-authority-ui-2026-07-25\report.json |
