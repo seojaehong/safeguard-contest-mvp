@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "safeclaw-share-workspace-step-status-fit/v1",
+  "checkedAt": "2026-08-11T12:48:06.142Z",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_WORKSPACE_STEP_STATUS_FIT_LIVE_PENDING",
+  "productCommit": "4544e3dc64db7ca52ed9521dcea572c149f0dbb7",
+  "productionCommit": "137ea586f84b5abed5f307fb283d9d8eb1ea57d2",
+  "sourceHeadMatchesProduction": false,
+  "beforeLive": {
+    "artifact": "evaluation/share-workspace-step-status-fit-2026-08-12/before-live/report.json",
+    "verdict": "RED_LIVE_PRODUCTION_SCOPED_WORKSPACE_OR_INVITED_FIXTURE",
+    "sourceHead": "137ea586f84b5abed5f307fb283d9d8eb1ea57d2",
+    "productionCommit": "137ea586f84b5abed5f307fb283d9d8eb1ea57d2",
+    "pass": 6,
+    "fail": 2,
+    "desktopShort": {
+      "workspaceSideNavWidth": 264,
+      "workspaceStepStatusOverflowCount": 2,
+      "workspaceStepStatusMaxOverflow": 29
+    },
+    "desktop": {
+      "workspaceSideNavWidth": 264,
+      "workspaceStepStatusOverflowCount": 2,
+      "workspaceStepStatusMaxOverflow": 37
+    }
+  },
+  "afterLocal": {
+    "artifact": "evaluation/share-workspace-step-status-fit-2026-08-12/after-local/report.json",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SCOPED_WORKSPACE_AND_INVITED_FIXTURE",
+    "sourceHead": "4544e3dc64db7ca52ed9521dcea572c149f0dbb7",
+    "pass": 8,
+    "fail": 0,
+    "desktopShort": {
+      "workspaceSideNavWidth": 1180,
+      "workspaceStepStatusOverflowCount": 0,
+      "workspaceStepStatusMaxOverflow": 0,
+      "pageHeight": 723,
+      "rootWidthRatio": 0.82
+    },
+    "desktop": {
+      "workspaceSideNavWidth": 1180,
+      "workspaceStepStatusOverflowCount": 0,
+      "workspaceStepStatusMaxOverflow": 0,
+      "pageHeight": 963,
+      "rootWidthRatio": 0.82
+    }
+  },
+  "verification": {
+    "focusedRedThenGreen": true,
+    "shareBrowserAndStaticTests": {
+      "files": 2,
+      "tests": 16,
+      "passed": 16
+    },
+    "documentsBrowserTests": {
+      "files": 1,
+      "tests": 38,
+      "passed": 38
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28
+  },
+  "liveAfterDeploymentPending": true,
+  "routeSplitAloneAcceptedAsFix": false,
+  "exactSavedUserSessionReproduced": false,
+  "exactSavedSessionVerdict": "MISSING_EVIDENCE",
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorRuntimeActivated": false,
+    "wikiPublished": false,
+    "koshaRegistryMutated": false
+  }
+}
