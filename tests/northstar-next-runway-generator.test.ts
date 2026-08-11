@@ -468,6 +468,16 @@ type NextRunwayReport = {
     originalBaselineRewritten: boolean;
     exactSavedShareVerdict: string;
   };
+  publicJsonRequestBodyBudget: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    findingId: string;
+    liveCaseCount: number;
+    followUpSecurityScan: string;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   mcpGenerationWorkBudgetSecurity: {
     verdict: string;
     sourceHead: string;
@@ -1760,6 +1770,18 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     remainingSecurityWork: [],
     boundaries: { originalBaselineRewritten: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
+  writeJson(root, "evaluation/public-json-request-body-budget-2026-08-11/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    scan: { findingId: "csf_44619971f6e14344d1d76da5" },
+    liveVerification: { cases: [{}, {}, {}] },
+    remainingBoundaries: {
+      followUpSecurityScan: "REQUIRED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/repository-security-scan-reconciliation-2026-08-11/report.json", {
     verdict: "PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS",
     targetRevision: "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
@@ -2534,6 +2556,15 @@ describe("northstar next runway generator", () => {
       correctedScanId: "c4e9e2f1-7ce4-4313-a651-32205fca401f",
       correctedReportableFindingCount: 14,
       correctedDeferredCandidateCount: 9,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.provenCurrentState).toContain("public_json_request_body_budget");
+    expect(report.publicJsonRequestBodyBudget).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",
+      findingId: "csf_44619971f6e14344d1d76da5",
+      liveCaseCount: 3,
+      followUpSecurityScan: "REQUIRED",
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });

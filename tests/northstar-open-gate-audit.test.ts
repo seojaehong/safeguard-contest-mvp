@@ -2206,6 +2206,50 @@ function createFixtureRoot(): string {
       approvalGatedBoundariesPreserved: true,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    productionIncludesProductCommit: true,
+    scan: {
+      scanId: "c4e9e2f1-7ce4-4313-a651-32205fca401f",
+      findingId: "csf_44619971f6e14344d1d76da5",
+      anchor: "json-body-budget-after-parse",
+      immutableFindingPreserved: true,
+      followUpScanRequired: true,
+    },
+    verification: {
+      focusedSecurityTests: { files: 3, tests: 22, status: "PASS" },
+      adjacentAdmissionTests: { files: 4, tests: 26, status: "PASS" },
+      typecheck: "PASS",
+      build: { status: "PASS", staticPages: 28 },
+      diffCheck: "PASS",
+    },
+    liveVerification: {
+      buildInfoCommit: "fixture-sha",
+      providerWorkExpected: false,
+      cases: [
+        { path: "/api/ask", status: 413, code: "PUBLIC_WORK_BUDGET_EXCEEDED", limit: 131072 },
+        { path: "/api/ask/stream", status: 413, code: "PUBLIC_WORK_BUDGET_EXCEEDED", limit: 131072 },
+        { path: "/api/knowledge/match", status: 413, code: "PUBLIC_WORK_BUDGET_EXCEEDED", limit: 16384 },
+      ],
+    },
+    mutationBoundary: {
+      dbSchemaMutation: false,
+      dbDataMutation: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorOrEmbeddingMutation: false,
+      wikiPublication: false,
+      koshaExactRegistryMutation: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      securityCompleteClaimAllowed: false,
+      remainingScanFindingsStayVisible: true,
+      followUpSecurityScan: "REQUIRED",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
     sourceHead: "fixture-sha",
@@ -3224,6 +3268,13 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "repository_security_scan_reconciliation")?.detail).toContain("two fail-open receipt contradictions");
     expect(audit.gates.find((gate) => gate.id === "repository_security_scan_reconciliation")?.detail).toContain("14 open findings");
     expect(audit.gates.find((gate) => gate.id === "repository_security_scan_reconciliation")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "public_json_request_body_budget")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "public_json_request_body_budget")?.detail).toContain("pre-parse byte limits");
+    expect(audit.gates.find((gate) => gate.id === "public_json_request_body_budget")?.detail).toContain("14-finding scan");
+    expect(audit.gates.find((gate) => gate.id === "public_json_request_body_budget")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")).toMatchObject({
       state: "notice",
       evidencePath: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
@@ -3451,6 +3502,31 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("liveProviderProbe=true");
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("baselineRewritten=true");
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("exactShare=PASS");
+  });
+
+  it("keeps public JSON body-budget scan and exact Share boundaries fail-closed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "public-json-request-body-budget-2026-08-11", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remainingBoundaries: {
+        exactSavedShareVerdict: string;
+        securityCompleteClaimAllowed: boolean;
+        followUpSecurityScan: string;
+      };
+    };
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    report.remainingBoundaries.securityCompleteClaimAllowed = true;
+    report.remainingBoundaries.followUpSecurityScan = "NOT_REQUIRED";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "public_json_request_body_budget")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "public_json_request_body_budget")?.detail).toContain("followUp=NOT_REQUIRED");
+    expect(audit.gates.find((gate) => gate.id === "public_json_request_body_budget")?.detail).toContain("securityComplete=true");
+    expect(audit.gates.find((gate) => gate.id === "public_json_request_body_budget")?.detail).toContain("exactShare=PASS");
   });
 
   it("rejects a conflicting zero-finding scan when Northstar acceptance is claimed", async () => {

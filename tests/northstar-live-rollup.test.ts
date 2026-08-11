@@ -251,6 +251,16 @@ type RollupReport = {
     originalBaselineRewritten: boolean;
     exactSavedShareVerdict: string;
   };
+  publicJsonRequestBodyBudget: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    findingId: string;
+    liveCaseCount: number;
+    followUpSecurityScan: string;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   mcpGenerationWorkBudgetSecurity: {
     verdict: string;
     sourceHead: string;
@@ -357,6 +367,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "public_search_distributed_rate_limit_readiness", state: "notice", evidencePath: "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json", detail: "current-source capability with production configuration pending" },
       { id: "public_generation_admission_security", state: "notice", evidencePath: "evaluation/security-public-generation-admission-2026-08-04/report.json", detail: "live instance admission with distributed hardening and fresh rescan pending" },
       { id: "security_followup_remediation", state: "proven", evidencePath: "evaluation/codex-security-followup-remediation-2026-08-11/report.json", detail: "deployed three-finding remediation with immutable baseline preserved" },
+      { id: "public_json_request_body_budget", state: "proven", evidencePath: "evaluation/public-json-request-body-budget-2026-08-11/report.json", detail: "three public JSON routes reject oversized bodies before parsing" },
       { id: "learning_export_renderer_security", state: "proven", evidencePath: "evaluation/learning-export-renderer-security-2026-08-02/report.json", detail: "renderer-independent inert learning export source contract" },
       { id: "live_document_secondary_grounding", state: "proven", evidencePath: "evaluation/live-document-secondary-grounding-2026-07-25/report.json", detail: "all 30 supporting documents passed scenario grounding" },
       { id: "live_document_seed_profile_isolation", state: "proven", evidencePath: "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", detail: "all 60 documents passed seed-profile isolation" },
@@ -929,6 +940,18 @@ function createFixtureRoot(): { root: string; head: string } {
     remainingSecurityWork: [],
     boundaries: { originalBaselineRewritten: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
+  writeJson(root, "evaluation/public-json-request-body-budget-2026-08-11/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    scan: { findingId: "csf_44619971f6e14344d1d76da5" },
+    liveVerification: { cases: [{}, {}, {}] },
+    remainingBoundaries: {
+      followUpSecurityScan: "REQUIRED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/repository-security-scan-reconciliation-2026-08-11/report.json", {
     verdict: "PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS",
     targetRevision: "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
@@ -1001,6 +1024,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json",
     "evaluation/security-public-generation-admission-2026-08-04/report.json",
     "evaluation/codex-security-followup-remediation-2026-08-11/report.json",
+    "evaluation/public-json-request-body-budget-2026-08-11/report.json",
     "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json",
     "evaluation/learning-export-renderer-security-2026-08-02/report.json",
     "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
@@ -1270,6 +1294,14 @@ describe("northstar live rollup", () => {
       correctedScanId: "c4e9e2f1-7ce4-4313-a651-32205fca401f",
       correctedReportableFindingCount: 14,
       correctedDeferredCandidateCount: 9,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.publicJsonRequestBodyBudget).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",
+      findingId: "csf_44619971f6e14344d1d76da5",
+      liveCaseCount: 3,
+      followUpSecurityScan: "REQUIRED",
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });

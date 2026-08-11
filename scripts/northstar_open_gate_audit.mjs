@@ -49,6 +49,7 @@ const EVIDENCE_PATHS = Object.freeze({
   documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
+  publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
@@ -4164,6 +4165,106 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
   });
 }
 
+const PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS = [
+  "app/api/ask/route.ts",
+  "app/api/ask/stream/route.ts",
+  "app/api/knowledge/match/route.ts",
+  "lib/public-work-budget.ts",
+];
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluatePublicJsonRequestBodyBudgetGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.publicJsonRequestBodyBudget;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "public_json_request_body_budget",
+      label: "Public JSON request body budget",
+      state: "missing",
+      evidencePath,
+      detail: "Public JSON pre-parse request budget evidence is missing or invalid.",
+      nextActions: ["Restore the scoped live request-budget evidence without rewriting the corrected canonical scan."],
+    });
+  }
+
+  const scan = isRecord(report.scan) ? report.scan : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedSecurityTests) ? verification.focusedSecurityTests : {};
+  const adjacent = isRecord(verification.adjacentAdmissionTests) ? verification.adjacentAdmissionTests : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const liveVerification = isRecord(report.liveVerification) ? report.liveVerification : {};
+  const liveCases = Array.isArray(liveVerification.cases) ? liveVerification.cases.filter(isRecord) : [];
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(report.productionCommit);
+  const expectedCases = [
+    { path: "/api/ask", limit: 131072 },
+    { path: "/api/ask/stream", limit: 131072 },
+    { path: "/api/knowledge/match", limit: 16384 },
+  ];
+  const noMutation = mutationBoundary.dbSchemaMutation === false
+    && mutationBoundary.dbDataMutation === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.vectorOrEmbeddingMutation === false
+    && mutationBoundary.wikiPublication === false
+    && mutationBoundary.koshaExactRegistryMutation === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET"
+    && sourceHead.length > 0
+    && productionCommit.length > 0
+    && isGitAncestor(rootDir, sourceHead)
+    && isGitAncestor(rootDir, productionCommit)
+    && report.productionIncludesProductCommit === true
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)
+    && readString(scan.scanId) === "c4e9e2f1-7ce4-4313-a651-32205fca401f"
+    && readString(scan.findingId) === "csf_44619971f6e14344d1d76da5"
+    && readString(scan.anchor) === "json-body-budget-after-parse"
+    && scan.immutableFindingPreserved === true
+    && scan.followUpScanRequired === true
+    && liveVerification.buildInfoCommit === productionCommit
+    && liveVerification.providerWorkExpected === false
+    && liveCases.length === expectedCases.length
+    && expectedCases.every((expected) => liveCases.some((item) => readString(item.path) === expected.path
+      && readNumber(item.status) === 413
+      && readString(item.code) === "PUBLIC_WORK_BUDGET_EXCEEDED"
+      && readNumber(item.limit) === expected.limit))
+    && readNumber(focused.files) === 3
+    && readNumber(focused.tests) === 22
+    && readString(focused.status) === "PASS"
+    && readNumber(adjacent.files) === 4
+    && readNumber(adjacent.tests) === 26
+    && readString(adjacent.status) === "PASS"
+    && verification.typecheck === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && verification.diffCheck === "PASS"
+    && noMutation
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && remaining.securityCompleteClaimAllowed === false
+    && remaining.remainingScanFindingsStayVisible === true
+    && readString(remaining.followUpSecurityScan) === "REQUIRED";
+
+  return gateResult({
+    id: "public_json_request_body_budget",
+    label: "Public JSON request body budget",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "The corrected current-source scan's medium public JSON body-budget finding is source-remediated and live-proven across /api/ask, /api/ask/stream, and /api/knowledge/match with pre-parse byte limits, 48 focused/adjacent tests, typecheck, and build PASS. The immutable 14-finding scan and nine deferred candidates remain visible, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+      : `Public JSON budget verdict=${readString(report.verdict) || "unknown"}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)}, liveCases=${liveCases.length}, tests=${readNumber(focused.tests) + readNumber(adjacent.tests)}, followUp=${readString(remaining.followUpSecurityScan) || "missing"}, securityComplete=${remaining.securityCompleteClaimAllowed === true}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Keep the canonical 14 findings and nine deferred candidates visible until a fresh follow-up scan revalidates the patched source.",
+          "Continue approval-free remediation without weakening exact saved Share or other approval-gated boundaries.",
+        ]
+      : ["Restore deployed SHA ancestry, all three live 413 cases, verification totals, immutable-scan preservation, follow-up scan requirement, no-mutation boundaries, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
 const MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS = [
   "app/api/mcp/[transport]/implementation.ts",
   "app/api/mcp/[transport]/route.ts",
@@ -5300,6 +5401,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateDocumentExportWorkBudgetGate(rootDir),
     evaluateFullRepositorySecurityScanGate(rootDir),
     evaluateRepositorySecurityScanReconciliationGate(rootDir),
+    evaluatePublicJsonRequestBodyBudgetGate(rootDir),
     evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir),
     evaluatePublicGenerationAdmissionSecurityGate(rootDir),
     evaluateSecurityFollowupRemediationGate(rootDir),

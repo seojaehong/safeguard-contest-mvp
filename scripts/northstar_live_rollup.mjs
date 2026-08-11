@@ -34,6 +34,7 @@ const ARTIFACTS = Object.freeze({
   documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
+  publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
@@ -338,6 +339,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const documentExportWorkBudget = tryReadJson(rootDir, ARTIFACTS.documentExportWorkBudget);
   const fullRepositorySecurityScan = tryReadJson(rootDir, ARTIFACTS.fullRepositorySecurityScan);
   const repositorySecurityScanReconciliation = tryReadJson(rootDir, ARTIFACTS.repositorySecurityScanReconciliation);
+  const publicJsonRequestBodyBudget = tryReadJson(rootDir, ARTIFACTS.publicJsonRequestBodyBudget);
   const publicSearchDistributedRateLimitReadiness = tryReadJson(rootDir, ARTIFACTS.publicSearchDistributedRateLimitReadiness);
   const publicGenerationAdmissionSecurity = tryReadJson(rootDir, ARTIFACTS.publicGenerationAdmissionSecurity);
   const securityFollowupRemediation = tryReadJson(rootDir, ARTIFACTS.securityFollowupRemediation);
@@ -432,6 +434,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "document_export_work_budget", ARTIFACTS.documentExportWorkBudget, documentExportWorkBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "full_repository_security_scan", ARTIFACTS.fullRepositorySecurityScan, fullRepositorySecurityScan),
     evidenceStatus(rootDir, currentHead, liveCommit, "repository_security_scan_reconciliation", ARTIFACTS.repositorySecurityScanReconciliation, repositorySecurityScanReconciliation),
+    evidenceStatus(rootDir, currentHead, liveCommit, "public_json_request_body_budget", ARTIFACTS.publicJsonRequestBodyBudget, publicJsonRequestBodyBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_search_distributed_rate_limit_readiness", ARTIFACTS.publicSearchDistributedRateLimitReadiness, publicSearchDistributedRateLimitReadiness),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_generation_admission_security", ARTIFACTS.publicGenerationAdmissionSecurity, publicGenerationAdmissionSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "security_followup_remediation", ARTIFACTS.securityFollowupRemediation, securityFollowupRemediation),
@@ -663,6 +666,19 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
         : null,
       originalBaselineRewritten: recordAt(securityFollowupRemediation, "boundaries")?.originalBaselineRewritten === true,
       exactSavedShareVerdict: asString(recordAt(securityFollowupRemediation, "boundaries")?.exactSavedShareVerdict),
+    },
+    publicJsonRequestBodyBudget: {
+      artifact: ARTIFACTS.publicJsonRequestBodyBudget,
+      verdict: isRecord(publicJsonRequestBodyBudget) ? asString(publicJsonRequestBodyBudget.verdict) : "missing",
+      sourceHead: isRecord(publicJsonRequestBodyBudget) ? asString(publicJsonRequestBodyBudget.sourceHead) : "",
+      productionCommit: isRecord(publicJsonRequestBodyBudget) ? asString(publicJsonRequestBodyBudget.productionCommit) : "",
+      findingId: asString(recordAt(publicJsonRequestBodyBudget, "scan")?.findingId),
+      liveCaseCount: Array.isArray(recordAt(publicJsonRequestBodyBudget, "liveVerification")?.cases)
+        ? recordAt(publicJsonRequestBodyBudget, "liveVerification")?.cases.length
+        : 0,
+      followUpSecurityScan: asString(recordAt(publicJsonRequestBodyBudget, "remainingBoundaries")?.followUpSecurityScan),
+      securityCompleteClaimAllowed: recordAt(publicJsonRequestBodyBudget, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
+      exactSavedShareVerdict: asString(recordAt(publicJsonRequestBodyBudget, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     mcpGenerationWorkBudgetSecurity: {
       artifact: ARTIFACTS.mcpGenerationWorkBudgetSecurity,
@@ -1153,6 +1169,13 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Immutable original baseline: ${rollup.securityFollowupRemediation.immutableOriginalBaselineFindingCount ?? "unknown"}; rewritten=${rollup.securityFollowupRemediation.originalBaselineRewritten}`,
     `- Deferred candidates retained: ${rollup.securityFollowupRemediation.deferredCandidateCount ?? "unknown"}; live provider cancellation probe executed=${rollup.securityFollowupRemediation.liveProviderCancellationProbeExecuted}`,
     `- Exact saved Share: ${rollup.securityFollowupRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "",
+    "## Public JSON Request Body Budget",
+    "",
+    `- Verdict: \`${rollup.publicJsonRequestBodyBudget.verdict}\``,
+    `- Live oversized-request cases: ${rollup.publicJsonRequestBodyBudget.liveCaseCount}; finding: ${rollup.publicJsonRequestBodyBudget.findingId || "missing"}`,
+    `- Follow-up scan: ${rollup.publicJsonRequestBodyBudget.followUpSecurityScan || "REQUIRED"}; security-complete=${rollup.publicJsonRequestBodyBudget.securityCompleteClaimAllowed}`,
+    `- Exact saved Share: ${rollup.publicJsonRequestBodyBudget.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "",
     "## Repository Security Scan Reconciliation",
     "",
