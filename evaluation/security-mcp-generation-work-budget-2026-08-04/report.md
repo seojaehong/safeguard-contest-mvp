@@ -35,6 +35,10 @@ The sealed finding remains unchanged. This report records a remediation candidat
 - Production marker: `5c0e7c27599a49ff2c6c4c023cf937c240c0a101` on `safeguard-contest-n0go4io0m-seojaehongs-projects.vercel.app`.
 - Read-only invalid-token MCP probe: 401 fail-closed; no valid credential was used.
 
+## Current live refresh
+
+Production commit `87025eb89280d75c7232ec2812a9ddb19a961ef3` was re-probed with an intentionally invalid, non-secret bearer and a two-byte JSON body. `/api/mcp/mcp` returned `401` with `X-SafeClaw-Rate-Limit: instance`; no MCP tool dispatch, provider call, or mutation was performed. This is current invalid-token admission evidence only. It does not substitute for a valid authenticated 96 KiB boundary probe, distributed activation, or a fresh security scan.
+
 ## Boundaries
 
 - The product source is deployed, but a valid authenticated runtime body/rate-limit probe is pending.

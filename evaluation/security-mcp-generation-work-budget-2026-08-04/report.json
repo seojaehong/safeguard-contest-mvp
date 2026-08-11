@@ -75,6 +75,34 @@
       "reason": "No production MCP credential was used or exposed."
     }
   },
+  "currentLiveRefresh": {
+    "verdict": "PASS_LIVE_PRODUCTION_MCP_INVALID_TOKEN_ADMISSION_REFRESH",
+    "sourceHead": "87025eb89280d75c7232ec2812a9ddb19a961ef3",
+    "productionCommit": "87025eb89280d75c7232ec2812a9ddb19a961ef3",
+    "productionBranch": "master",
+    "productionEnvironment": "production",
+    "deploymentUrl": "safeguard-contest-6096ipvjp-seojaehongs-projects.vercel.app",
+    "probe": {
+      "path": "/api/mcp/mcp",
+      "method": "POST",
+      "credential": "intentionally_invalid_non_secret",
+      "requestBodyBytes": 2,
+      "status": 401,
+      "authenticationFailedClosed": true,
+      "rateLimitHeader": "instance",
+      "mcpToolDispatchPerformed": false,
+      "providerCallPerformed": false,
+      "validAuthenticatedBudgetProbeExecuted": false
+    },
+    "mutationBoundary": {
+      "dbMutationPerformed": false,
+      "providerDispatchCalled": false,
+      "shareSessionCreated": false,
+      "embeddingOrVectorMutationPerformed": false,
+      "wikiPublished": false,
+      "koshaExactRegistryMutationPerformed": false
+    }
+  },
   "remainingBoundaries": {
     "liveAfterDeploymentRequired": false,
     "validAuthenticatedRuntimeProbeRequired": true,

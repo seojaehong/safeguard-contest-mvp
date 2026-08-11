@@ -2786,6 +2786,34 @@ function createFixtureRoot(): string {
       build: { status: "PASS", staticPages: 28 },
       liveReadOnlyProbe: { status: 401, authenticationFailedClosed: true, validAuthenticatedBudgetProbeExecuted: false },
     },
+    currentLiveRefresh: {
+      verdict: "PASS_LIVE_PRODUCTION_MCP_INVALID_TOKEN_ADMISSION_REFRESH",
+      sourceHead: "fixture-sha",
+      productionCommit: "fixture-sha",
+      productionBranch: "master",
+      productionEnvironment: "production",
+      deploymentUrl: "fixture.vercel.app",
+      probe: {
+        path: "/api/mcp/mcp",
+        method: "POST",
+        credential: "intentionally_invalid_non_secret",
+        requestBodyBytes: 2,
+        status: 401,
+        authenticationFailedClosed: true,
+        rateLimitHeader: "instance",
+        mcpToolDispatchPerformed: false,
+        providerCallPerformed: false,
+        validAuthenticatedBudgetProbeExecuted: false,
+      },
+      mutationBoundary: {
+        dbMutationPerformed: false,
+        providerDispatchCalled: false,
+        shareSessionCreated: false,
+        embeddingOrVectorMutationPerformed: false,
+        wikiPublished: false,
+        koshaExactRegistryMutationPerformed: false,
+      },
+    },
     remainingBoundaries: {
       liveAfterDeploymentRequired: false,
       validAuthenticatedRuntimeProbeRequired: true,
@@ -3810,6 +3838,7 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
       evidencePath: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
     });
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("96 KiB");
+    expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("before any MCP tool dispatch");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("valid authenticated runtime probe");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "tenant_authorization_remediation")).toMatchObject({ state: "proven" });
@@ -4962,6 +4991,27 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("currentRefresh=false");
+  });
+
+  it("fails MCP generation security closed when the current refresh claims tool dispatch", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      currentLiveRefresh: { probe: { mcpToolDispatchPerformed: boolean } };
+    };
+    report.currentLiveRefresh.probe.mcpToolDispatchPerformed = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-08-11T00:00:00.000Z",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("currentRefresh=false");
   });
 
   it("contradicts the UI gate when a document action loses its inner-pane margin", async () => {
