@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-11T06:03:34.245Z",
+  "generatedAt": "2026-08-11T06:56:35.026Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "2c7d7419237cdbfa19525058429597a585a45571",
-  "productionCommit": "2c7d7419237cdbfa19525058429597a585a45571",
+  "sourceHead": "03a8bae3d4634c9273834174297ec149ecf2d3f9",
+  "productionCommit": "03a8bae3d4634c9273834174297ec149ecf2d3f9",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "2c7d7419237cdbfa19525058429597a585a45571",
+    "commitSha": "03a8bae3d4634c9273834174297ec149ecf2d3f9",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-5ej6o978z-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-r65fpq6y4-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "2c7d7419237cdbfa19525058429597a585a45571",
-  "liveRollupLiveCommit": "2c7d7419237cdbfa19525058429597a585a45571",
+  "liveExactEvidenceCommit": "03a8bae3d4634c9273834174297ec149ecf2d3f9",
+  "liveRollupLiveCommit": "03a8bae3d4634c9273834174297ec149ecf2d3f9",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -51,6 +51,7 @@
     "fullRepositorySecurityScan": "evaluation\\follow-up-full-repository-security-scan-2026-08-02\\report.json",
     "repositorySecurityScanReconciliation": "evaluation\\repository-security-scan-reconciliation-2026-08-11\\report.json",
     "publicJsonRequestBodyBudget": "evaluation\\public-json-request-body-budget-2026-08-11\\report.json",
+    "improvementPhotoAnalysisBudget": "evaluation\\improvement-photo-analysis-budget-2026-08-11\\report.json",
     "publicSearchDistributedRateLimitReadiness": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
     "publicGenerationAdmissionSecurity": "evaluation\\security-public-generation-admission-2026-08-04\\report.json",
     "securityFollowupRemediation": "evaluation\\codex-security-followup-remediation-2026-08-11\\report.json",
@@ -129,6 +130,11 @@
       "gate": "mcp_generation_work_budget_security",
       "state": "notice",
       "reason": "deployed source includes the measured MCP body and token-bound admission budgets; a valid authenticated runtime probe, distributed activation, and fresh rescan remain open"
+    },
+    {
+      "gate": "improvement_photo_analysis_budget",
+      "state": "notice",
+      "reason": "deployed source includes shared photo byte, file, signature, rate, and concurrency controls; production still reports process-instance admission and a fresh rescan remains open"
     }
   ],
   "approvalGated": [
@@ -649,6 +655,19 @@
     "productionCommit": "2c2e5c8065dd2bd6d5549b95cfb420a83a76b037",
     "findingId": "csf_44619971f6e14344d1d76da5",
     "liveCaseCount": 3,
+    "followUpSecurityScan": "REQUIRED",
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "improvementPhotoAnalysisBudget": {
+    "verdict": "PASS_LIVE_PRODUCTION_IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_WITH_INSTANCE_ADMISSION",
+    "sourceHead": "8b3428023e424b03586626912ad522f271e3a371",
+    "productionCommit": "8b3428023e424b03586626912ad522f271e3a371",
+    "findingId": "csf_4632cfb321a45b5f7429daef",
+    "maxRequestBytes": 42991616,
+    "aggregateConcurrency": 2,
+    "liveCaseCount": 2,
+    "distributedProductionActivation": "INSTANCE_FALLBACK_ACTIVE_NOT_DISTRIBUTED",
     "followUpSecurityScan": "REQUIRED",
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"

@@ -4105,6 +4105,9 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
   const focused = isRecord(verification.focusedVitest) ? verification.focusedVitest : {};
   const build = isRecord(verification.build) ? verification.build : {};
   const deployment = isRecord(report.deployment) ? report.deployment : {};
+  const currentPathCompatibility = isRecord(report.currentPathCompatibility)
+    ? report.currentPathCompatibility
+    : null;
   const boundaries = isRecord(report.boundaries) ? report.boundaries : {};
   const sourceHead = readString(report.sourceHead);
   const remediations = Array.isArray(report.remediations) ? report.remediations.filter(isRecord) : [];
@@ -4119,10 +4122,35 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     && boundaries.vectorRuntimeMutationPerformed === false
     && boundaries.wikiPublicationPerformed === false
     && boundaries.koshaRegistryMutationPerformed === false;
+  const compatibilitySourceHead = currentPathCompatibility
+    ? readString(currentPathCompatibility.sourceHead)
+    : sourceHead;
+  const compatibilityProductionCommit = currentPathCompatibility
+    ? readString(currentPathCompatibility.productionCommit)
+    : readString(deployment.productionCommit);
+  const compatibilityFocused = currentPathCompatibility && isRecord(currentPathCompatibility.focusedVitest)
+    ? currentPathCompatibility.focusedVitest
+    : focused;
+  const compatibilityPass = currentPathCompatibility === null || (
+    readString(currentPathCompatibility.verdict) === "PASS_LIVE_PRODUCTION_CURRENT_PATH_COMPATIBILITY"
+    && compatibilitySourceHead.length > 0
+    && compatibilitySourceHead === compatibilityProductionCommit
+    && Array.isArray(currentPathCompatibility.changedGovernedPaths)
+    && currentPathCompatibility.changedGovernedPaths.length === 1
+    && currentPathCompatibility.changedGovernedPaths[0] === "lib/public-distributed-rate-limit.ts"
+    && readNumber(compatibilityFocused.files) === 12
+    && readNumber(compatibilityFocused.tests) === 147
+    && readNumber(compatibilityFocused.failed) === 0
+    && currentPathCompatibility.noMutation === true
+    && readString(currentPathCompatibility.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && currentPathCompatibility.originalBaselineRewritten === false
+  );
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP"
     && sourceHead.length > 0
     && sourceHead === readString(deployment.productionCommit)
-    && isEvidenceCurrentForPaths(rootDir, sourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS)
+    && isGitAncestor(rootDir, sourceHead)
+    && compatibilityPass
+    && isEvidenceCurrentForPaths(rootDir, compatibilitySourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     && readString(deployment.branch) === "master"
     && readString(deployment.environment) === "production"
     && deployment.liveAfterDeploymentRequired === false
@@ -4155,8 +4183,8 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     state: pass ? "proven" : "contradicted",
     evidencePath,
     detail: pass
-      ? "The sealed follow-up scan's three diff findings (1 medium, 2 low) are remediated in deployed production with 12 files / 129 tests, strict typecheck, and build PASS. This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
-      : `Security follow-up verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceHead.length > 0 && sourceHead === readString(deployment.productionCommit)}, productPathsCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS)}, findings=${readNumber(scan.sealedFindingCount)}, baseline=${readNumber(scan.immutableOriginalBaselineFindingCount)}, deferred=${readNumber(scan.deferredCandidateCount)}, remediations=${remediations.length}, tests=${readNumber(focused.tests)}, liveProviderProbe=${deployment.liveProviderCancellationProbeExecuted === true}, baselineRewritten=${boundaries.originalBaselineRewritten === true}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+      ? `The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests plus current governed-path compatibility ${readNumber(compatibilityFocused.files)}/${readNumber(compatibilityFocused.tests)}. This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.`
+      : `Security follow-up verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceHead.length > 0 && sourceHead === readString(deployment.productionCommit)}, compatibilityPass=${compatibilityPass}, productPathsCurrent=${compatibilitySourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, compatibilitySourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS)}, findings=${readNumber(scan.sealedFindingCount)}, baseline=${readNumber(scan.immutableOriginalBaselineFindingCount)}, deferred=${readNumber(scan.deferredCandidateCount)}, remediations=${remediations.length}, tests=${readNumber(focused.tests)}, compatibilityTests=${readNumber(compatibilityFocused.tests)}, liveProviderProbe=${deployment.liveProviderCancellationProbeExecuted === true}, baselineRewritten=${boundaries.originalBaselineRewritten === true}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
           "Keep the immutable baseline and two deferred candidates visible in future security review; do not convert this scoped remediation into a security-complete claim.",

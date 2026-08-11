@@ -54,6 +54,23 @@
     "liveProviderCancellationProbeExecuted": false,
     "evidenceBoundary": "Production marker proves deployment of the tested product commit; cancellation behavior is proven by source-level JSON, SSE, provider, and enrichment regression tests without invoking live providers."
   },
+  "currentPathCompatibility": {
+    "verdict": "PASS_LIVE_PRODUCTION_CURRENT_PATH_COMPATIBILITY",
+    "sourceHead": "03a8bae3d4634c9273834174297ec149ecf2d3f9",
+    "productionCommit": "03a8bae3d4634c9273834174297ec149ecf2d3f9",
+    "changedGovernedPaths": [
+      "lib/public-distributed-rate-limit.ts"
+    ],
+    "focusedVitest": {
+      "files": 12,
+      "tests": 147,
+      "failed": 0
+    },
+    "noMutation": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "originalBaselineRewritten": false,
+    "detail": "The shared admission helper changed for the separate improvement-photo budget wave. Current regression coverage re-proves the original cancellation, distributed export concurrency, and safety-reference deadline contracts without rewriting the sealed scan or claiming the corrected full-repository scan is complete."
+  },
   "remainingSecurityWork": [],
   "boundaries": {
     "dbMutationPerformed": false,

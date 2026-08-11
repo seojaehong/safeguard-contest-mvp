@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-11T06:03:21.060Z",
-  "head": "2c7d7419237cdbfa19525058429597a585a45571",
+  "generatedAt": "2026-08-11T06:56:25.056Z",
+  "head": "03a8bae3d4634c9273834174297ec149ecf2d3f9",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "2c7d7419237cdbfa19525058429597a585a45571",
+    "commitSha": "03a8bae3d4634c9273834174297ec149ecf2d3f9",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-5ej6o978z-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-r65fpq6y4-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 40
+    "gateCount": 41
   },
   "provenGates": [
     {
@@ -136,6 +136,12 @@
       "detail": "The corrected current-source scan's medium public JSON body-budget finding is source-remediated and live-proven across /api/ask, /api/ask/stream, and /api/knowledge/match with pre-parse byte limits, 48 focused/adjacent tests, typecheck, and build PASS. The immutable 14-finding scan and nine deferred candidates remain visible, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
+      "id": "improvement_photo_analysis_budget",
+      "state": "notice",
+      "artifact": "evaluation\\improvement-photo-analysis-budget-2026-08-11\\report.json",
+      "detail": "Improvement and dedicated photo analysis now share pre-provider byte, count, MIME/signature, rate, and concurrency controls with 76 tests, typecheck, build, and live admission headers. Production currently reports instance fallback rather than distributed admission, the immutable 14-finding scan remains unchanged, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
       "id": "public_search_distributed_rate_limit_readiness",
       "state": "notice",
       "artifact": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
@@ -151,7 +157,7 @@
       "id": "security_followup_remediation",
       "state": "proven",
       "artifact": "evaluation\\codex-security-followup-remediation-2026-08-11\\report.json",
-      "detail": "The sealed follow-up scan's three diff findings (1 medium, 2 low) are remediated in deployed production with 12 files / 129 tests, strict typecheck, and build PASS. This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests plus current governed-path compatibility 12/147. This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "mcp_generation_work_budget_security",
@@ -461,6 +467,20 @@
     "productionCommit": "2c2e5c8065dd2bd6d5549b95cfb420a83a76b037",
     "findingId": "csf_44619971f6e14344d1d76da5",
     "liveCaseCount": 3,
+    "followUpSecurityScan": "REQUIRED",
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "improvementPhotoAnalysisBudget": {
+    "artifact": "evaluation\\improvement-photo-analysis-budget-2026-08-11\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_WITH_INSTANCE_ADMISSION",
+    "sourceHead": "8b3428023e424b03586626912ad522f271e3a371",
+    "productionCommit": "8b3428023e424b03586626912ad522f271e3a371",
+    "findingId": "csf_4632cfb321a45b5f7429daef",
+    "maxRequestBytes": 42991616,
+    "aggregateConcurrency": 2,
+    "liveCaseCount": 2,
+    "distributedProductionActivation": "INSTANCE_FALLBACK_ACTIVE_NOT_DISTRIBUTED",
     "followUpSecurityScan": "REQUIRED",
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
@@ -804,9 +824,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "2c7d7419237cdbfa19525058429597a585a45571",
+      "sourceCommit": "03a8bae3d4634c9273834174297ec149ecf2d3f9",
       "sourceStatus": "exact",
-      "productionCommit": "2c7d7419237cdbfa19525058429597a585a45571",
+      "productionCommit": "03a8bae3d4634c9273834174297ec149ecf2d3f9",
       "productionStatus": "matches_live"
     },
     {
@@ -959,6 +979,14 @@
       "sourceCommit": "4c7172c2e04353621300972d6215b1afa532017d",
       "sourceStatus": "ancestor",
       "productionCommit": "2c2e5c8065dd2bd6d5549b95cfb420a83a76b037",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "improvement_photo_analysis_budget",
+      "artifact": "evaluation\\improvement-photo-analysis-budget-2026-08-11\\report.json",
+      "sourceCommit": "8b3428023e424b03586626912ad522f271e3a371",
+      "sourceStatus": "ancestor",
+      "productionCommit": "8b3428023e424b03586626912ad522f271e3a371",
       "productionStatus": "ancestor_of_head"
     },
     {

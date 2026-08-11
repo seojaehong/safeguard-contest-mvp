@@ -2143,6 +2143,16 @@ function createFixtureRoot(): string {
       environment: "production",
       liveProviderCancellationProbeExecuted: false,
     },
+    currentPathCompatibility: {
+      verdict: "PASS_LIVE_PRODUCTION_CURRENT_PATH_COMPATIBILITY",
+      sourceHead: "fixture-sha",
+      productionCommit: "fixture-sha",
+      changedGovernedPaths: ["lib/public-distributed-rate-limit.ts"],
+      focusedVitest: { files: 12, tests: 147, failed: 0 },
+      noMutation: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      originalBaselineRewritten: false,
+    },
     remainingSecurityWork: [],
     boundaries: {
       dbMutationPerformed: false,
@@ -3576,6 +3586,27 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("liveProviderProbe=true");
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("baselineRewritten=true");
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("exactShare=PASS");
+  });
+
+  it("fails security follow-up closed when current governed-path compatibility is overstated", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "codex-security-followup-remediation-2026-08-11", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      currentPathCompatibility: {
+        focusedVitest: { tests: number };
+        exactSavedShareVerdict: string;
+        originalBaselineRewritten: boolean;
+      };
+    };
+    report.currentPathCompatibility.focusedVitest.tests = 146;
+    report.currentPathCompatibility.exactSavedShareVerdict = "PASS";
+    report.currentPathCompatibility.originalBaselineRewritten = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.state).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("compatibilityPass=false");
   });
 
   it("keeps public JSON body-budget scan and exact Share boundaries fail-closed", async () => {

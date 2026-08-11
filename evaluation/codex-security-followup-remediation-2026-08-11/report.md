@@ -21,6 +21,10 @@ The sealed follow-up scan `3f0107a8-e4a4-4a5b-be37-a28bcea8b05a` reported three 
 - Next.js 15.5.22 production build: PASS, 28 static pages.
 - `git diff --check`: PASS.
 
+## Current-path compatibility
+
+The later improvement-photo admission wave changed only `lib/public-distributed-rate-limit.ts` inside this gate's governed paths. Current production `03a8bae3d4634c9273834174297ec149ecf2d3f9` re-ran 12 focused and adjacent files / 147 tests with 0 failures. This companion check preserves the original sealed three-finding remediation evidence rather than replacing or rewriting it.
+
 ## Boundaries
 
 Production `/api/build-info` reports product commit `c4f58947dbbee20fb77edeb0edfddcc08c87f6a4` on `master`, deployment `safeguard-contest-mjnjdjxwk-seojaehongs-projects.vercel.app`.
