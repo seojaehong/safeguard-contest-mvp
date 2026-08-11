@@ -26,4 +26,3 @@ The sealed follow-up scan `3f0107a8-e4a4-4a5b-be37-a28bcea8b05a` reported three 
 This is current-source evidence. Live production verification remains pending until the production marker reaches `c4f58947`.
 
 No DB mutation, provider dispatch, Share-session creation, vector runtime mutation, wiki publication, or KOSHA registry mutation was performed. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`, and existing approval-gated boundaries remain open. The two deferred forwarding-header candidates from the scan remain deferred rather than being silently closed.
-
