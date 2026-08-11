@@ -47,6 +47,7 @@ export type KnowledgeCandidateBuildInput = {
   tenantContext: KnowledgeTenantContext;
   limit?: number;
   generate?: boolean;
+  signal?: AbortSignal;
 };
 
 export const BLOCKED_KNOWLEDGE_MUTATION_GATEWAY: KnowledgeMutationGateway = {
@@ -164,7 +165,7 @@ export async function buildKnowledgeCandidateDraft(
         providerLabel: null,
         policyNote: "generate=true가 아니어서 AI 초안 생성을 건너뛰었습니다."
       }
-    : await dependencies.generateText(buildKnowledgePrompt(bundle, input.tenantContext));
+    : await dependencies.generateText(buildKnowledgePrompt(bundle, input.tenantContext), input.signal);
   const candidate = buildKnowledgeCandidate({
     question: input.question,
     rawEvents: bundle.rawEvents,
@@ -247,7 +248,8 @@ export function createKnowledgeCandidatePostHandler(
       rawEvents: events,
       tenantContext,
       limit,
-      generate: shouldGenerate
+      generate: shouldGenerate,
+      signal: request.signal
     }, dependencies);
     const responseBundle = {
       question: bundle.question,

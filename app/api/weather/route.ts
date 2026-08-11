@@ -11,17 +11,51 @@ import {
 export const dynamic = "force-dynamic";
 
 const limiter = createRateLimiter({ limit: 30, windowMs: 60_000 });
-const inFlightWeather = new Map<string, Promise<Awaited<ReturnType<typeof fetchWeatherSignal>>>>();
+type InFlightWeather = {
+  controller: AbortController;
+  consumers: number;
+  settled: boolean;
+  promise: Promise<Awaited<ReturnType<typeof fetchWeatherSignal>>>;
+};
 
-function fetchCoalescedWeather(question: string) {
-  const key = getWeatherWorkKey(question);
-  const existing = inFlightWeather.get(key);
-  if (existing) return existing;
-  const pending = fetchWeatherSignal(question).finally(() => {
-    inFlightWeather.delete(key);
+const inFlightWeather = new Map<string, InFlightWeather>();
+
+function waitForWeather<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+  signal.throwIfAborted();
+  return new Promise<T>((resolve, reject) => {
+    const abort = () => reject(signal.reason);
+    signal.addEventListener("abort", abort, { once: true });
+    promise.then(resolve, reject).finally(() => {
+      signal.removeEventListener("abort", abort);
+    });
   });
-  inFlightWeather.set(key, pending);
-  return pending;
+}
+
+async function fetchCoalescedWeather(question: string, signal: AbortSignal) {
+  const key = getWeatherWorkKey(question);
+  let entry = inFlightWeather.get(key);
+  if (!entry) {
+    const controller = new AbortController();
+    let createdEntry: InFlightWeather;
+    const promise = fetchWeatherSignal(question, controller.signal).finally(() => {
+      createdEntry.settled = true;
+      if (inFlightWeather.get(key) === createdEntry) inFlightWeather.delete(key);
+    });
+    createdEntry = { controller, consumers: 0, settled: false, promise };
+    void createdEntry.promise.catch(() => undefined);
+    inFlightWeather.set(key, createdEntry);
+    entry = createdEntry;
+  }
+
+  entry.consumers += 1;
+  try {
+    return await waitForWeather(entry.promise, signal);
+  } finally {
+    entry.consumers -= 1;
+    if (entry.consumers === 0 && !entry.settled) {
+      entry.controller.abort(new Error("all weather request consumers disconnected"));
+    }
+  }
 }
 
 export async function GET(request: NextRequest) {
@@ -40,9 +74,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const weather = await fetchCoalescedWeather(question);
+    const weather = await fetchCoalescedWeather(question, request.signal);
     return NextResponse.json({ ok: true, weather });
   } catch (error) {
+    request.signal.throwIfAborted();
     const message = error instanceof Error ? error.message : String(error);
     console.error("weather route failed", error);
     return NextResponse.json(

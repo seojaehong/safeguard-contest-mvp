@@ -135,7 +135,8 @@ function labelCatalogAgency(itemType: string) {
   return "Supabase 지식 DB";
 }
 
-async function buildPrompt(request: RemediationRequest) {
+async function buildPrompt(request: RemediationRequest, signal?: AbortSignal) {
+  signal?.throwIfAborted();
   const rubricItem = publicSafetyDocumentRubric.find((item) => item.id === request.rubricItemId);
   if (!rubricItem) return null;
 
@@ -146,7 +147,7 @@ async function buildPrompt(request: RemediationRequest) {
     rubricItem.improvementAction,
     rubricItem.researchAction
   ].join(" ");
-  const catalog = await searchSafetyReferences({ query: catalogQuery, limit: 6 });
+  const catalog = await searchSafetyReferences({ query: catalogQuery, limit: 6, signal });
   const evidence = matches.map((match, index) => ({
     order: index + 1,
     title: match.title,
@@ -227,7 +228,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const promptBundle = await buildPrompt(parsed.request);
+  const promptBundle = await buildPrompt(parsed.request, request.signal);
   if (!promptBundle) {
     return applyPublicRateLimitHeader(
       NextResponse.json({ ok: false, message: "rubric item not found" }, { status: 404 }),
@@ -235,7 +236,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const generated = await generateKnowledgeText(promptBundle.prompt);
+  const generated = await generateKnowledgeText(promptBundle.prompt, request.signal);
   const fallbackText = buildFallbackText(promptBundle.rubricItem.title, promptBundle.rubricItem.improvementAction);
   const text = generated.text.trim() || fallbackText;
   const sources = promptBundle.matches.flatMap((match) => (

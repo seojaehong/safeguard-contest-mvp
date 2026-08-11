@@ -427,7 +427,8 @@ export async function generateAnswer(
   };
 }
 
-export async function generateKnowledgeText(prompt: string) {
+export async function generateKnowledgeText(prompt: string, signal?: AbortSignal) {
+  signal?.throwIfAborted();
   if (!isVertexConfigured() && !openAiApiKey) {
     return {
       configured: false,
@@ -438,15 +439,16 @@ export async function generateKnowledgeText(prompt: string) {
   }
 
   const response = isVertexConfigured()
-    ? await generateWithGemini(prompt).catch((error) => {
+    ? await generateWithGemini(prompt, signal).catch((error) => {
+        signal?.throwIfAborted();
         if (!openAiApiKey) throw error;
         log.error(
           "Vertex AI knowledge generation failed; falling back to OpenAI",
           safeGenerationFailureContext(error)
         );
-        return generateWithOpenAI(prompt);
+        return generateWithOpenAI(prompt, signal);
       })
-    : await generateWithOpenAI(prompt);
+    : await generateWithOpenAI(prompt, signal);
 
   return {
     configured: true,

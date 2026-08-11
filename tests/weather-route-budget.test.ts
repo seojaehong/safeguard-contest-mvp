@@ -24,13 +24,14 @@ vi.mock("@/lib/weather", async (importOriginal) => {
   };
 });
 
-function weatherRequest(question: string, ipSuffix: number): NextRequest {
+function weatherRequest(question: string, ipSuffix: number, signal?: AbortSignal): NextRequest {
   const url = new URL("http://localhost/api/weather");
   url.searchParams.set("question", question);
   return new NextRequest(url, {
     headers: {
       "x-forwarded-for": `198.51.100.${ipSuffix}`
-    }
+    },
+    signal
   });
 }
 
@@ -84,5 +85,31 @@ describe("weather route public work budget", () => {
     expect(firstResponse.status).toBe(200);
     expect(secondResponse.status).toBe(200);
     expect(mocks.fetchWeatherSignal).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps shared weather work alive until the final consumer disconnects", async () => {
+    const { GET } = await import("@/app/api/weather/route");
+    let providerSignal: AbortSignal | undefined;
+    mocks.fetchWeatherSignal.mockImplementationOnce((_question: string, signal?: AbortSignal) => {
+      providerSignal = signal;
+      return new Promise<WeatherRouteSignal>((_resolve, reject) => {
+        signal?.addEventListener("abort", () => reject(signal.reason), { once: true });
+      });
+    });
+    const firstController = new AbortController();
+    const secondController = new AbortController();
+    const first = GET(weatherRequest("서울 옥외 폭염 작업", 13, firstController.signal));
+    const second = GET(weatherRequest("서울 야외 고온 작업 기상 확인", 14, secondController.signal));
+    await vi.waitFor(() => expect(mocks.fetchWeatherSignal).toHaveBeenCalledTimes(1));
+
+    const firstReason = new Error("first caller disconnected");
+    firstController.abort(firstReason);
+    await expect(first).rejects.toBe(firstReason);
+    expect(providerSignal?.aborted).toBe(false);
+
+    const secondReason = new Error("final caller disconnected");
+    secondController.abort(secondReason);
+    await expect(second).rejects.toBe(secondReason);
+    expect(providerSignal?.aborted).toBe(true);
   });
 });

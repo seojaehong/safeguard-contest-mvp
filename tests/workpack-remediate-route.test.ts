@@ -171,4 +171,39 @@ describe("workpack remediation route", () => {
     expect(generateKnowledgeText).not.toHaveBeenCalled();
     expect(searchSafetyReferences).not.toHaveBeenCalled();
   });
+
+  it("forwards caller cancellation through reference search and AI generation", async () => {
+    const controller = new AbortController();
+    const reason = new Error("remediation caller disconnected");
+    vi.mocked(generateKnowledgeText).mockImplementationOnce((_prompt: string, signal?: AbortSignal) => (
+      new Promise((_, reject) => {
+        signal?.addEventListener("abort", () => reject(signal.reason), { once: true });
+      })
+    ));
+    const request = new NextRequest("http://localhost/api/workpack/remediate", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-forwarded-for": "198.51.100.56"
+      },
+      signal: controller.signal,
+      body: JSON.stringify({
+        question: "지하 기계실 배수펌프 점검",
+        documentKey: "riskAssessmentDraft",
+        documentText: "배수펌프 점검 전 안전조치",
+        rubricItemId: "required-risk-reduction"
+      })
+    });
+    const pending = POST(request);
+    await vi.waitFor(() => expect(generateKnowledgeText).toHaveBeenCalledTimes(1));
+    const searchSignal = vi.mocked(searchSafetyReferences).mock.calls[0]?.[0].signal;
+    const providerSignal = vi.mocked(generateKnowledgeText).mock.calls[0]?.[1];
+    expect(searchSignal?.aborted).toBe(false);
+    expect(providerSignal?.aborted).toBe(false);
+
+    controller.abort(reason);
+    await expect(pending).rejects.toBe(reason);
+    expect(searchSignal?.aborted).toBe(true);
+    expect(providerSignal?.aborted).toBe(true);
+  });
 });

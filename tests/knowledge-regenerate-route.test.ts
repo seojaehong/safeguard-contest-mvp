@@ -331,6 +331,43 @@ describe("knowledge candidate API", () => {
     });
   });
 
+  it("forwards caller cancellation into knowledge generation", async () => {
+    const controller = new AbortController();
+    const reason = new Error("knowledge caller disconnected");
+    vi.mocked(generateKnowledgeText).mockImplementationOnce((_prompt: string, signal?: AbortSignal) => (
+      new Promise((_, reject) => {
+        signal?.addEventListener("abort", () => reject(signal.reason), { once: true });
+      })
+    ));
+    const { POST } = await import("@/app/api/knowledge/regenerate/route");
+    const pending = POST(new NextRequest("http://localhost/api/knowledge/regenerate", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-forwarded-for": "198.51.100.55" },
+      signal: controller.signal,
+      body: JSON.stringify({
+        question: "추락 위험 통제대책을 검토해줘",
+        generate: true,
+        tenantContext: { organizationId: "org-1", siteId: "site-1" },
+        rawEvents: [{
+          source: "lawgo",
+          sourceId: "law-42",
+          capturedAt: "2026-07-14T10:00:00.000Z",
+          title: "산업안전보건법 현행 조문",
+          payload: { article: "42" },
+          relatedHazardIds: ["hazard-fall"],
+          reflectedDocuments: ["위험성평가표"]
+        }]
+      })
+    }));
+    await vi.waitFor(() => expect(generateKnowledgeText).toHaveBeenCalledTimes(1));
+    const providerSignal = vi.mocked(generateKnowledgeText).mock.calls[0]?.[1];
+    expect(providerSignal?.aborted).toBe(false);
+
+    controller.abort(reason);
+    await expect(pending).rejects.toBe(reason);
+    expect(providerSignal?.aborted).toBe(true);
+  });
+
   it("returns tenant-bound immutable provenance without exposing sensitive raw event text", async () => {
     const sensitiveTitle = "김테스트 작업자 사고 원문";
     const sensitivePayload = "resident-id: 900101-1234567";
