@@ -5,7 +5,8 @@ import { buildDbHarnessPacket } from "@/lib/db-harness";
 import { buildMockAskResponse } from "@/lib/mock-data";
 import {
   PUBLIC_ASK_HARNESS_MEMORY_MAX_CHARS,
-  PUBLIC_ASK_QUESTION_MAX_CHARS
+  PUBLIC_ASK_QUESTION_MAX_CHARS,
+  PUBLIC_ASK_REQUEST_MAX_BYTES,
 } from "@/lib/public-work-budget";
 import type { AskResponse } from "@/lib/types";
 
@@ -167,6 +168,25 @@ describe("ask generation evidence routes", () => {
     expect(body).toMatchObject({
       code: "PUBLIC_WORK_BUDGET_EXCEEDED",
       limit: PUBLIC_ASK_HARNESS_MEMORY_MAX_CHARS
+    });
+    expect(mocks.runAsk).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["JSON", "/api/ask", () => import("@/app/api/ask/route")],
+    ["SSE", "/api/ask/stream", () => import("@/app/api/ask/stream/route")],
+  ])("rejects an oversized %s body before JSON parsing and runAsk", async (_label, path, loadRoute) => {
+    const { POST } = await loadRoute();
+    const response = await POST(requestWithBody(path, {
+      question: "성수동 외벽 도장 작업",
+      ignored: "x".repeat(PUBLIC_ASK_REQUEST_MAX_BYTES),
+    }));
+    const body = await response.json() as { code: string; limit: number };
+
+    expect(response.status).toBe(413);
+    expect(body).toMatchObject({
+      code: "PUBLIC_WORK_BUDGET_EXCEEDED",
+      limit: PUBLIC_ASK_REQUEST_MAX_BYTES,
     });
     expect(mocks.runAsk).not.toHaveBeenCalled();
   });

@@ -5,6 +5,10 @@ import {
   getSafetyKnowledgeTemplates,
   matchSafetyKnowledge
 } from "@/lib/safety-knowledge";
+import {
+  enforcePublicJsonRequestBodyBudget,
+  PUBLIC_KNOWLEDGE_MATCH_REQUEST_MAX_BYTES,
+} from "@/lib/public-work-budget";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +52,13 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json().catch(() => null) as unknown;
+  const bodyBudget = await enforcePublicJsonRequestBodyBudget(
+    request,
+    PUBLIC_KNOWLEDGE_MATCH_REQUEST_MAX_BYTES,
+    "request body exceeds the public knowledge byte budget",
+  );
+  if (!bodyBudget.ok) return bodyBudget.response;
+  const body = await bodyBudget.request.json().catch(() => null) as unknown;
   if (typeof body !== "object" || body === null || Array.isArray(body)) {
     return NextResponse.json(
       { ok: false, message: "JSON object body is required" },

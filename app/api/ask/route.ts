@@ -7,9 +7,11 @@ import { createLogger } from "@/lib/logger";
 import { sanitizeAskResponsePublicSurface } from "@/lib/ask-public-surface";
 import {
   isOverCharBudget,
+  enforcePublicJsonRequestBodyBudget,
   publicWorkBudgetExceeded,
   PUBLIC_ASK_HARNESS_MEMORY_MAX_CHARS,
   PUBLIC_ASK_QUESTION_MAX_CHARS,
+  PUBLIC_ASK_REQUEST_MAX_BYTES,
   serializedCharLength
 } from "@/lib/public-work-budget";
 import { checkPublicAskAdmission } from "@/lib/public-ask-admission";
@@ -32,7 +34,13 @@ export async function POST(request: NextRequest) {
   const rateLimit = await checkPublicAskAdmission(request);
   const limited = publicRateLimitResponse(rateLimit);
   if (limited) return limited;
-  const body: unknown = await request.json().catch(() => ({}));
+  const bodyBudget = await enforcePublicJsonRequestBodyBudget(
+    request,
+    PUBLIC_ASK_REQUEST_MAX_BYTES,
+    "request body exceeds the public ask byte budget",
+  );
+  if (!bodyBudget.ok) return applyPublicRateLimitHeader(bodyBudget.response, rateLimit);
+  const body: unknown = await bodyBudget.request.json().catch(() => ({}));
   const record = isRecord(body) ? body : {};
   const question = typeof record.question === "string" ? record.question : "산업안전 실무 질문";
   if (isOverCharBudget(question, PUBLIC_ASK_QUESTION_MAX_CHARS)) {

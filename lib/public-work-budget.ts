@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
+import { enforceRequestBodyBudget } from "@/lib/mcp-work-budget";
 
 export const PUBLIC_ASK_QUESTION_MAX_CHARS = 1_200;
 export const PUBLIC_ASK_HARNESS_MEMORY_MAX_CHARS = 32_000;
+export const PUBLIC_ASK_REQUEST_MAX_BYTES = 128 * 1_024;
 export const PUBLIC_KNOWLEDGE_QUESTION_MAX_CHARS = 900;
+export const PUBLIC_KNOWLEDGE_MATCH_REQUEST_MAX_BYTES = 16 * 1_024;
 export const PUBLIC_KNOWLEDGE_RAW_EVENTS_MAX_COUNT = 12;
 export const PUBLIC_KNOWLEDGE_RAW_EVENT_MAX_CHARS = 8_000;
 export const PUBLIC_REMEDIATION_QUESTION_MAX_CHARS = 900;
@@ -41,4 +44,15 @@ export function serializedCharLength(value: unknown): number {
 
 export function isOverCharBudget(value: string, maxChars: number): boolean {
   return Array.from(value).length > maxChars;
+}
+
+export async function enforcePublicJsonRequestBodyBudget(
+  request: Request,
+  maxBytes: number,
+  message: string,
+) {
+  return enforceRequestBodyBudget(request, maxBytes, {
+    code: "PUBLIC_WORK_BUDGET_EXCEEDED",
+    error: message,
+  });
 }
