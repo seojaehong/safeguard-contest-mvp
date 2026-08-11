@@ -58,6 +58,7 @@ const EVIDENCE_PATHS = Object.freeze({
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
   securityResourceRemediation: path.join("evaluation", "security-resource-remediation-2026-08-11", "report.json"),
   securityUpstreamTransportRemediation: path.join("evaluation", "security-upstream-transport-remediation-2026-08-11", "report.json"),
+  securitySafetyReferenceSurfaceRemediation: path.join("evaluation", "security-safety-reference-surface-remediation-2026-08-11", "report.json"),
   mcpGenerationWorkBudgetSecurity: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
@@ -4145,6 +4146,57 @@ function isSecurityUpstreamTransportCompatibilityCurrent(rootDir, gateId, govern
     && readString(compatibility.exactSavedShareVerdict) === "MISSING_EVIDENCE";
 }
 
+const SECURITY_SAFETY_REFERENCE_SURFACE_CHANGED_PATHS = [
+  "lib/safety-reference-catalog.ts",
+];
+
+const SECURITY_SAFETY_REFERENCE_SURFACE_COMPATIBILITY_GATE_IDS = [
+  "security_followup_remediation",
+];
+
+/**
+ * @param {string} rootDir
+ * @param {string} gateId
+ * @param {string[]} governedPaths
+ */
+function isSecuritySafetyReferenceSurfaceCompatibilityCurrent(rootDir, gateId, governedPaths) {
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.securitySafetyReferenceSurfaceRemediation);
+  if (!isRecord(report) || !isRecord(report.governedPathCompatibility)) {
+    return false;
+  }
+  const compatibility = report.governedPathCompatibility;
+  const coveredGateIds = Array.isArray(compatibility.coveredGateIds)
+    ? compatibility.coveredGateIds.map(readString)
+    : [];
+  const changedGovernedPaths = Array.isArray(compatibility.changedGovernedPaths)
+    ? compatibility.changedGovernedPaths.map(readString)
+    : [];
+  const focused = isRecord(compatibility.focused) ? compatibility.focused : {};
+  const adjacent = isRecord(compatibility.adjacent) ? compatibility.adjacent : {};
+  const sourceHead = readString(compatibility.sourceHead);
+  const productionCommit = readString(compatibility.productionCommit);
+  return readString(report.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_SAFETY_REFERENCE_SURFACE_BOUNDED"
+    && readString(compatibility.verdict) === "PASS_LIVE_PRODUCTION_SAFETY_REFERENCE_SURFACE_COMPATIBILITY"
+    && sourceHead.length > 0
+    && sourceHead === productionCommit
+    && productionCommit === readString(report.productionCommit)
+    && isGitAncestor(rootDir, productionCommit)
+    && isEvidenceCurrentForPaths(rootDir, productionCommit, governedPaths)
+    && coveredGateIds.length === SECURITY_SAFETY_REFERENCE_SURFACE_COMPATIBILITY_GATE_IDS.length
+    && SECURITY_SAFETY_REFERENCE_SURFACE_COMPATIBILITY_GATE_IDS.every((id) => coveredGateIds.includes(id))
+    && coveredGateIds.includes(gateId)
+    && changedGovernedPaths.length === SECURITY_SAFETY_REFERENCE_SURFACE_CHANGED_PATHS.length
+    && SECURITY_SAFETY_REFERENCE_SURFACE_CHANGED_PATHS.every((item) => changedGovernedPaths.includes(item))
+    && readNumber(focused.testFiles) === 4
+    && readNumber(focused.tests) === 103
+    && readString(focused.status) === "PASS"
+    && readNumber(adjacent.testFiles) === 8
+    && readNumber(adjacent.tests) === 176
+    && readString(adjacent.status) === "PASS"
+    && compatibility.noMutation === true
+    && readString(compatibility.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+}
+
 /**
  * @param {string} rootDir
  * @param {string} gateId
@@ -4324,7 +4376,8 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
   );
   const productPathsCurrent = isEvidenceCurrentForPaths(rootDir, compatibilitySourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
-    || isSecurityUpstreamTransportCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS);
+    || isSecurityUpstreamTransportCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
+    || isSecuritySafetyReferenceSurfaceCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS);
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP"
     && sourceHead.length > 0
     && sourceHead === readString(deployment.productionCommit)
@@ -4681,6 +4734,121 @@ function evaluateSecurityUpstreamTransportRemediationGate(rootDir) {
     nextActions: pass
       ? ["Remediate or explicitly defer the remaining 12 sealed findings and require a fresh scan before any security-complete claim."]
       : ["Restore finding identities, cumulative 8/20 accounting, live marker equality, verification totals, no-provider/no-mutation boundaries, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateSecuritySafetyReferenceSurfaceRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.securitySafetyReferenceSurfaceRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "security_safety_reference_surface_remediation",
+      label: "Security safety-reference surface remediation",
+      state: "missing",
+      evidencePath,
+      detail: "Live safety-reference public-surface evidence is missing or invalid.",
+      nextActions: ["Restore the sealed-scan-linked public projection evidence without exposing local corpus bodies."],
+    });
+  }
+
+  const sourceScan = isRecord(report.sourceScan) ? report.sourceScan : {};
+  const finding = isRecord(report.remediatedFinding) ? report.remediatedFinding : {};
+  const cumulative = isRecord(report.cumulativeRemediation) ? report.cumulativeRemediation : {};
+  const contracts = isRecord(report.contracts) ? report.contracts : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focused) ? verification.focused : {};
+  const adjacent = isRecord(verification.adjacent) ? verification.adjacent : {};
+  const liveChecks = isRecord(report.liveChecks) ? report.liveChecks : {};
+  const buildInfo = isRecord(liveChecks.buildInfo) ? liveChecks.buildInfo : {};
+  const publicSearch = isRecord(liveChecks.publicSafetyReferenceSearch)
+    ? liveChecks.publicSafetyReferenceSearch
+    : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const sourceHead = readString(report.sourceHead);
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.vectorUploadPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_SAFETY_REFERENCE_SURFACE_BOUNDED"
+    && sourceHead.length > 0
+    && productCommit === sourceHead
+    && productionCommit === productCommit
+    && isGitAncestor(rootDir, productionCommit)
+    && report.liveAfterDeploymentPending === false
+    && readString(sourceScan.scanId) === "a8aa9242-ed42-4057-88e9-31a72e298292"
+    && readString(sourceScan.targetRevision) === "8cd86f7ab2abe4ad7d4948d8feda083b0b032386"
+    && readNumber(sourceScan.findingCount) === 20
+    && sourceScan.immutableBaselinePreserved === true
+    && readString(finding.findingId) === "csf_343e69e970d1524202d48324"
+    && readString(finding.anchor) === "safety-reference-local-body-amplification"
+    && readString(finding.severity) === "medium"
+    && readNumber(cumulative.previouslyRemediated) === 8
+    && readNumber(cumulative.remediatedThisWave) === 1
+    && readNumber(cumulative.remediatedTotal) === 9
+    && readNumber(cumulative.remainingScanFindings) === 11
+    && cumulative.securityCompleteClaimAllowed === false
+    && cumulative.freshFollowUpScanRequired === true
+    && contracts.internalCorpusBodyRetainedForGrounding === true
+    && contracts.publicSearchBodyOmitted === true
+    && contracts.publicSearchPayloadOmitted === true
+    && contracts.publicSearchMetadataOmitted === true
+    && contracts.publicHarnessPacketBodyOmitted === true
+    && contracts.comparisonOnlySearchBodyOmitted === true
+    && contracts.promptEvidenceUsesBoundedExcerpt === true
+    && readNumber(contracts.summaryMaxChars) === 480
+    && readNumber(contracts.controlsMaxItems) === 12
+    && readNumber(contracts.controlMaxChars) === 280
+    && readNumber(contracts.anchorsMaxItems) === 8
+    && readNumber(contracts.anchorExcerptMaxChars) === 360
+    && readNumber(focused.testFiles) === 4
+    && readNumber(focused.tests) === 103
+    && readString(focused.status) === "PASS"
+    && readNumber(adjacent.testFiles) === 8
+    && readNumber(adjacent.tests) === 176
+    && readString(adjacent.status) === "PASS"
+    && verification.typecheck === "PASS"
+    && verification.build === "PASS"
+    && readNumber(verification.staticPages) === 28
+    && verification.diffCheck === "PASS"
+    && readString(buildInfo.status) === "PASS"
+    && readString(buildInfo.commitSha) === productionCommit
+    && publicSearch.executed === true
+    && publicSearch.readOnly === true
+    && readNumber(publicSearch.status) === 200
+    && readNumber(publicSearch.returnedItems) === 5
+    && readNumber(publicSearch.bodyFieldCount) === 0
+    && readNumber(publicSearch.payloadFieldCount) === 0
+    && readNumber(publicSearch.metadataFieldCount) === 0
+    && readNumber(publicSearch.maxSummaryChars) <= 480
+    && readNumber(publicSearch.maxControlsPerItem) <= 12
+    && readString(publicSearch.rateLimitMode) === "instance"
+    && readString(remaining.publicSearchDistributedRateLimitReadiness) === "NOTICE_INSTANCE_MODE"
+    && readNumber(remaining.remainingScanFindings) === 11
+    && remaining.securityCompleteClaimAllowed === false
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(remaining.providerDispatchPersistence) === "APPROVAL_GATED"
+    && noMutation;
+
+  return gateResult({
+    id: "security_safety_reference_surface_remediation",
+    label: "Security safety-reference surface remediation",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live public safety-reference search, MCP harness packets, and saved-workpack comparison results omit full bodies and arbitrary payload metadata while internal KOSHA grounding retains a bounded prompt excerpt. This wave closes 1 finding for a cumulative 9/20, leaves 11 visible, preserves instance rate limiting as a separate notice, performs no mutation, and keeps exact saved Share as MISSING_EVIDENCE."
+      : `Safety-reference surface verdict=${readString(report.verdict) || "unknown"}, finding=${readString(finding.findingId) || "missing"}, cumulative=${readNumber(cumulative.remediatedTotal)}/20, remaining=${readNumber(remaining.remainingScanFindings)}, publicFields=${readNumber(publicSearch.bodyFieldCount)}/${readNumber(publicSearch.payloadFieldCount)}/${readNumber(publicSearch.metadataFieldCount)}, rateLimit=${readString(publicSearch.rateLimitMode) || "unknown"}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Remediate or explicitly defer the remaining 11 sealed findings and require a fresh scan before any security-complete claim."]
+      : ["Restore cumulative 9/20 accounting, live marker equality, zero public body/payload/metadata fields, bounded text contracts, instance-rate notice, no-mutation boundaries, and exact Share MISSING_EVIDENCE."],
   });
 }
 
@@ -6177,6 +6345,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluatePublicJsonRequestBodyBudgetGate(rootDir),
     evaluateSecurityResourceRemediationGate(rootDir),
     evaluateSecurityUpstreamTransportRemediationGate(rootDir),
+    evaluateSecuritySafetyReferenceSurfaceRemediationGate(rootDir),
     evaluateImprovementPhotoAnalysisBudgetGate(rootDir),
     evaluatePublicProviderCancellationGate(rootDir),
     evaluatePublicProviderAdmissionGate(rootDir),

@@ -13,6 +13,7 @@ Product commit `fde9343e` is live in production. It closes the approval-free med
 - Public MCP harness packets and saved-workpack comparison searches use the same bounded projection.
 - KOSHA prompt evidence is computed from the internal packet and limited to the existing verified excerpt budget; the complete source body is not returned in the public packet.
 - Public summaries, controls, labels, URLs, and KOSHA anchors have explicit item and character budgets.
+- The companion compatibility receipt covers the existing `security_followup_remediation` gate's governed `lib/safety-reference-catalog.ts` path with the same 4/103 focused and 8/176 adjacent test evidence.
 
 The cumulative accounting is now 9 of 20 findings remediated, with 11 still open. This is not a security-complete claim and does not replace a fresh follow-up scan.
 

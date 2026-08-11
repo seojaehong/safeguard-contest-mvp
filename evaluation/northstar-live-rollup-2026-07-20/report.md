@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-11T10:04:05.464Z
-Source HEAD at generation: 10c05c2cd17f5c1e29c4ccd18eb30b3f66196018
-Live commit at generation: 10c05c2cd17f5c1e29c4ccd18eb30b3f66196018
+Generated at: 2026-08-11T10:36:44.881Z
+Source HEAD at generation: 9611cd480c65ad8f7af5a7692d986ec5de3abe51
+Live commit at generation: 9611cd480c65ad8f7af5a7692d986ec5de3abe51
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -130,6 +130,12 @@ Overall: `northstar_open_approval_gated`
 - Fresh sealed findings: 20; remediated this wave: 2; cumulative: 8; remaining: 12
 - External provider probe executed: false; provider persistence: APPROVAL_GATED; exact saved Share: MISSING_EVIDENCE
 
+## Security Safety-reference Surface Remediation
+- Verdict: `PASS_LIVE_PRODUCTION_PUBLIC_SAFETY_REFERENCE_SURFACE_BOUNDED`
+- Fresh sealed findings: 20; remediated this wave: 1; cumulative: 9; remaining: 11
+- Live public items: 5; body/payload/metadata fields: 0/0/0; rate limit: instance
+- Provider persistence: APPROVAL_GATED; exact saved Share: MISSING_EVIDENCE
+
 ## Public JSON Request Body Budget
 
 - Verdict: `PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET`
@@ -242,6 +248,7 @@ Overall: `northstar_open_approval_gated`
 | public_json_request_body_budget | proven | evaluation\public-json-request-body-budget-2026-08-11\report.json |
 | security_resource_remediation | proven | evaluation\security-resource-remediation-2026-08-11\report.json |
 | security_upstream_transport_remediation | proven | evaluation\security-upstream-transport-remediation-2026-08-11\report.json |
+| security_safety_reference_surface_remediation | proven | evaluation\security-safety-reference-surface-remediation-2026-08-11\report.json |
 | improvement_photo_analysis_budget | notice | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
 | public_provider_cancellation | notice | evaluation\public-provider-cancellation-2026-08-11\report.json |
 | public_provider_admission | notice | evaluation\public-provider-admission-2026-08-11\report.json |
@@ -299,6 +306,7 @@ Overall: `northstar_open_approval_gated`
 | security_followup_remediation | ancestor | missing | evaluation\codex-security-followup-remediation-2026-08-11\report.json |
 | security_resource_remediation | ancestor | ancestor_of_head | evaluation\security-resource-remediation-2026-08-11\report.json |
 | security_upstream_transport_remediation | ancestor | ancestor_of_head | evaluation\security-upstream-transport-remediation-2026-08-11\report.json |
+| security_safety_reference_surface_remediation | ancestor | ancestor_of_head | evaluation\security-safety-reference-surface-remediation-2026-08-11\report.json |
 | mcp_generation_work_budget_security | ancestor | ancestor_of_head | evaluation\security-mcp-generation-work-budget-2026-08-04\report.json |
 | learning_export_renderer_security | ancestor | ancestor_of_head | evaluation\learning-export-renderer-security-2026-08-02\report.json |
 | hermes_knowledge_review_ui | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-authority-ui-2026-07-25\report.json |

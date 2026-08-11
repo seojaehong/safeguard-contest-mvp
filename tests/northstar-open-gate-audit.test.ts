@@ -2325,6 +2325,95 @@ function createFixtureRoot(): string {
       koshaRegistryMutationPerformed: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "security-safety-reference-surface-remediation-2026-08-11", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_SAFETY_REFERENCE_SURFACE_BOUNDED",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    liveAfterDeploymentPending: false,
+    sourceScan: {
+      scanId: "a8aa9242-ed42-4057-88e9-31a72e298292",
+      targetRevision: "8cd86f7ab2abe4ad7d4948d8feda083b0b032386",
+      findingCount: 20,
+      immutableBaselinePreserved: true,
+    },
+    remediatedFinding: {
+      findingId: "csf_343e69e970d1524202d48324",
+      anchor: "safety-reference-local-body-amplification",
+      severity: "medium",
+    },
+    cumulativeRemediation: {
+      previouslyRemediated: 8,
+      remediatedThisWave: 1,
+      remediatedTotal: 9,
+      remainingScanFindings: 11,
+      securityCompleteClaimAllowed: false,
+      freshFollowUpScanRequired: true,
+    },
+    contracts: {
+      internalCorpusBodyRetainedForGrounding: true,
+      publicSearchBodyOmitted: true,
+      publicSearchPayloadOmitted: true,
+      publicSearchMetadataOmitted: true,
+      publicHarnessPacketBodyOmitted: true,
+      comparisonOnlySearchBodyOmitted: true,
+      promptEvidenceUsesBoundedExcerpt: true,
+      summaryMaxChars: 480,
+      controlsMaxItems: 12,
+      controlMaxChars: 280,
+      anchorsMaxItems: 8,
+      anchorExcerptMaxChars: 360,
+    },
+    governedPathCompatibility: {
+      verdict: "PASS_LIVE_PRODUCTION_SAFETY_REFERENCE_SURFACE_COMPATIBILITY",
+      sourceHead: "fixture-sha",
+      productionCommit: "fixture-sha",
+      coveredGateIds: ["security_followup_remediation"],
+      changedGovernedPaths: ["lib/safety-reference-catalog.ts"],
+      focused: { testFiles: 4, tests: 103, status: "PASS" },
+      adjacent: { testFiles: 8, tests: 176, status: "PASS" },
+      noMutation: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    verification: {
+      focused: { testFiles: 4, tests: 103, status: "PASS" },
+      adjacent: { testFiles: 8, tests: 176, status: "PASS" },
+      typecheck: "PASS",
+      build: "PASS",
+      staticPages: 28,
+      diffCheck: "PASS",
+    },
+    liveChecks: {
+      buildInfo: { status: "PASS", commitSha: "fixture-sha" },
+      publicSafetyReferenceSearch: {
+        executed: true,
+        readOnly: true,
+        status: 200,
+        returnedItems: 5,
+        bodyFieldCount: 0,
+        payloadFieldCount: 0,
+        metadataFieldCount: 0,
+        maxSummaryChars: 259,
+        maxControlsPerItem: 2,
+        rateLimitMode: "instance",
+      },
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      providerDispatchPersistence: "APPROVAL_GATED",
+      publicSearchDistributedRateLimitReadiness: "NOTICE_INSTANCE_MODE",
+      remainingScanFindings: 11,
+      securityCompleteClaimAllowed: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorUploadPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"), {
     verdict: "PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS",
     targetRevision: "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
@@ -3652,6 +3741,13 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "security_upstream_transport_remediation")?.detail).toContain("cumulative 8/20");
     expect(audit.gates.find((gate) => gate.id === "security_upstream_transport_remediation")?.detail).toContain("leaves 12 visible");
     expect(audit.gates.find((gate) => gate.id === "security_upstream_transport_remediation")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "security_safety_reference_surface_remediation")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "security-safety-reference-surface-remediation-2026-08-11", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "security_safety_reference_surface_remediation")?.detail).toContain("cumulative 9/20");
+    expect(audit.gates.find((gate) => gate.id === "security_safety_reference_surface_remediation")?.detail).toContain("leaves 11 visible");
+    expect(audit.gates.find((gate) => gate.id === "security_safety_reference_surface_remediation")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "repository_security_scan_reconciliation")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
@@ -3938,6 +4034,30 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     });
     expect(audit.gates.find((gate) => gate.id === "security_upstream_transport_remediation")?.detail).toContain("providerProbe=true");
     expect(audit.gates.find((gate) => gate.id === "security_upstream_transport_remediation")?.detail).toContain("exactShare=PASS");
+  });
+
+  it("contradicts safety-reference surface remediation when a public body or exact Share closure is claimed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "security-safety-reference-surface-remediation-2026-08-11", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as Record<string, unknown>;
+    const liveChecks = report.liveChecks as Record<string, unknown>;
+    liveChecks.publicSafetyReferenceSearch = {
+      ...(liveChecks.publicSafetyReferenceSearch as Record<string, unknown>),
+      bodyFieldCount: 1,
+    };
+    report.remainingBoundaries = {
+      ...(report.remainingBoundaries as Record<string, unknown>),
+      exactSavedShareVerdict: "PASS",
+    };
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "security_safety_reference_surface_remediation")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "security_safety_reference_surface_remediation")?.detail).toContain("publicFields=1/0/0");
+    expect(audit.gates.find((gate) => gate.id === "security_safety_reference_surface_remediation")?.detail).toContain("exactShare=PASS");
   });
 
   it("accepts the current public admission companion for older governed-path evidence", async () => {

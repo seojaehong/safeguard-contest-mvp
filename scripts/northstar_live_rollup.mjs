@@ -43,6 +43,7 @@ const ARTIFACTS = Object.freeze({
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
   securityResourceRemediation: path.join("evaluation", "security-resource-remediation-2026-08-11", "report.json"),
   securityUpstreamTransportRemediation: path.join("evaluation", "security-upstream-transport-remediation-2026-08-11", "report.json"),
+  securitySafetyReferenceSurfaceRemediation: path.join("evaluation", "security-safety-reference-surface-remediation-2026-08-11", "report.json"),
   mcpGenerationWorkBudgetSecurity: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
@@ -353,6 +354,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const securityFollowupRemediation = tryReadJson(rootDir, ARTIFACTS.securityFollowupRemediation);
   const securityResourceRemediation = tryReadJson(rootDir, ARTIFACTS.securityResourceRemediation);
   const securityUpstreamTransportRemediation = tryReadJson(rootDir, ARTIFACTS.securityUpstreamTransportRemediation);
+  const securitySafetyReferenceSurfaceRemediation = tryReadJson(rootDir, ARTIFACTS.securitySafetyReferenceSurfaceRemediation);
   const mcpGenerationWorkBudgetSecurity = tryReadJson(rootDir, ARTIFACTS.mcpGenerationWorkBudgetSecurity);
   const learningExportRendererSecurity = tryReadJson(rootDir, ARTIFACTS.learningExportRendererSecurity);
   const hermesKnowledgeReviewAuthorityUi = tryReadJson(rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
@@ -453,6 +455,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "security_followup_remediation", ARTIFACTS.securityFollowupRemediation, securityFollowupRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "security_resource_remediation", ARTIFACTS.securityResourceRemediation, securityResourceRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "security_upstream_transport_remediation", ARTIFACTS.securityUpstreamTransportRemediation, securityUpstreamTransportRemediation),
+    evidenceStatus(rootDir, currentHead, liveCommit, "security_safety_reference_surface_remediation", ARTIFACTS.securitySafetyReferenceSurfaceRemediation, securitySafetyReferenceSurfaceRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "mcp_generation_work_budget_security", ARTIFACTS.mcpGenerationWorkBudgetSecurity, mcpGenerationWorkBudgetSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "learning_export_renderer_security", ARTIFACTS.learningExportRendererSecurity, learningExportRendererSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_knowledge_review_ui", ARTIFACTS.hermesKnowledgeReviewAuthorityUi, hermesKnowledgeReviewAuthorityUi),
@@ -707,6 +710,24 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       externalProviderProbeExecuted: recordAt(recordAt(securityUpstreamTransportRemediation, "liveChecks"), "externalProviderProbe")?.executed === true,
       exactSavedShareVerdict: asString(recordAt(securityUpstreamTransportRemediation, "remainingBoundaries")?.exactSavedShareVerdict),
       providerDispatchPersistence: asString(recordAt(securityUpstreamTransportRemediation, "remainingBoundaries")?.providerDispatchPersistence),
+    },
+    securitySafetyReferenceSurfaceRemediation: {
+      artifact: ARTIFACTS.securitySafetyReferenceSurfaceRemediation,
+      verdict: isRecord(securitySafetyReferenceSurfaceRemediation) ? asString(securitySafetyReferenceSurfaceRemediation.verdict) : "missing",
+      sourceHead: isRecord(securitySafetyReferenceSurfaceRemediation) ? asString(securitySafetyReferenceSurfaceRemediation.sourceHead) : "",
+      productionCommit: isRecord(securitySafetyReferenceSurfaceRemediation) ? asString(securitySafetyReferenceSurfaceRemediation.productionCommit) : "",
+      findingId: asString(recordAt(securitySafetyReferenceSurfaceRemediation, "remediatedFinding")?.findingId),
+      scanFindingCount: asNumber(recordAt(securitySafetyReferenceSurfaceRemediation, "sourceScan")?.findingCount),
+      remediatedThisWave: asNumber(recordAt(securitySafetyReferenceSurfaceRemediation, "cumulativeRemediation")?.remediatedThisWave),
+      remediatedTotal: asNumber(recordAt(securitySafetyReferenceSurfaceRemediation, "cumulativeRemediation")?.remediatedTotal),
+      remainingScanFindings: asNumber(recordAt(securitySafetyReferenceSurfaceRemediation, "remainingBoundaries")?.remainingScanFindings),
+      liveReturnedItems: asNumber(recordAt(recordAt(securitySafetyReferenceSurfaceRemediation, "liveChecks"), "publicSafetyReferenceSearch")?.returnedItems),
+      publicBodyFieldCount: asNumber(recordAt(recordAt(securitySafetyReferenceSurfaceRemediation, "liveChecks"), "publicSafetyReferenceSearch")?.bodyFieldCount),
+      publicPayloadFieldCount: asNumber(recordAt(recordAt(securitySafetyReferenceSurfaceRemediation, "liveChecks"), "publicSafetyReferenceSearch")?.payloadFieldCount),
+      publicMetadataFieldCount: asNumber(recordAt(recordAt(securitySafetyReferenceSurfaceRemediation, "liveChecks"), "publicSafetyReferenceSearch")?.metadataFieldCount),
+      rateLimitMode: asString(recordAt(recordAt(securitySafetyReferenceSurfaceRemediation, "liveChecks"), "publicSafetyReferenceSearch")?.rateLimitMode),
+      exactSavedShareVerdict: asString(recordAt(securitySafetyReferenceSurfaceRemediation, "remainingBoundaries")?.exactSavedShareVerdict),
+      providerDispatchPersistence: asString(recordAt(securitySafetyReferenceSurfaceRemediation, "remainingBoundaries")?.providerDispatchPersistence),
     },
     publicJsonRequestBodyBudget: {
       artifact: ARTIFACTS.publicJsonRequestBodyBudget,
@@ -1262,6 +1283,12 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Verdict: \`${rollup.securityUpstreamTransportRemediation.verdict}\``,
     `- Fresh sealed findings: ${rollup.securityUpstreamTransportRemediation.scanFindingCount ?? "unknown"}; remediated this wave: ${rollup.securityUpstreamTransportRemediation.remediatedThisWave ?? "unknown"}; cumulative: ${rollup.securityUpstreamTransportRemediation.remediatedTotal ?? "unknown"}; remaining: ${rollup.securityUpstreamTransportRemediation.remainingScanFindings ?? "unknown"}`,
     `- External provider probe executed: ${rollup.securityUpstreamTransportRemediation.externalProviderProbeExecuted}; provider persistence: ${rollup.securityUpstreamTransportRemediation.providerDispatchPersistence || "unknown"}; exact saved Share: ${rollup.securityUpstreamTransportRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "",
+    "## Security Safety-reference Surface Remediation",
+    `- Verdict: \`${rollup.securitySafetyReferenceSurfaceRemediation.verdict}\``,
+    `- Fresh sealed findings: ${rollup.securitySafetyReferenceSurfaceRemediation.scanFindingCount ?? "unknown"}; remediated this wave: ${rollup.securitySafetyReferenceSurfaceRemediation.remediatedThisWave ?? "unknown"}; cumulative: ${rollup.securitySafetyReferenceSurfaceRemediation.remediatedTotal ?? "unknown"}; remaining: ${rollup.securitySafetyReferenceSurfaceRemediation.remainingScanFindings ?? "unknown"}`,
+    `- Live public items: ${rollup.securitySafetyReferenceSurfaceRemediation.liveReturnedItems ?? "unknown"}; body/payload/metadata fields: ${rollup.securitySafetyReferenceSurfaceRemediation.publicBodyFieldCount ?? "unknown"}/${rollup.securitySafetyReferenceSurfaceRemediation.publicPayloadFieldCount ?? "unknown"}/${rollup.securitySafetyReferenceSurfaceRemediation.publicMetadataFieldCount ?? "unknown"}; rate limit: ${rollup.securitySafetyReferenceSurfaceRemediation.rateLimitMode || "unknown"}`,
+    `- Provider persistence: ${rollup.securitySafetyReferenceSurfaceRemediation.providerDispatchPersistence || "unknown"}; exact saved Share: ${rollup.securitySafetyReferenceSurfaceRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "",
     "## Public JSON Request Body Budget",
     "",

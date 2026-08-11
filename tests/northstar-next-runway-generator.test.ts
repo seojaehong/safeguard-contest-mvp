@@ -486,6 +486,21 @@ type NextRunwayReport = {
     providerDispatchPersistence: string;
     exactSavedShareVerdict: string;
   };
+  securitySafetyReferenceSurfaceRemediation: {
+    verdict: string;
+    findingId: string;
+    scanFindingCount: number | null;
+    remediatedThisWave: number | null;
+    remediatedTotal: number | null;
+    remainingScanFindings: number | null;
+    liveReturnedItems: number | null;
+    publicBodyFieldCount: number | null;
+    publicPayloadFieldCount: number | null;
+    publicMetadataFieldCount: number | null;
+    rateLimitMode: string;
+    providerDispatchPersistence: string;
+    exactSavedShareVerdict: string;
+  };
   publicJsonRequestBodyBudget: {
     verdict: string;
     sourceHead: string;
@@ -1850,6 +1865,28 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/security-safety-reference-surface-remediation-2026-08-11/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_SAFETY_REFERENCE_SURFACE_BOUNDED",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    sourceScan: { findingCount: 20 },
+    remediatedFinding: { findingId: "csf_343e69e970d1524202d48324" },
+    cumulativeRemediation: { remediatedThisWave: 1, remediatedTotal: 9 },
+    liveChecks: {
+      publicSafetyReferenceSearch: {
+        returnedItems: 5,
+        bodyFieldCount: 0,
+        payloadFieldCount: 0,
+        metadataFieldCount: 0,
+        rateLimitMode: "instance",
+      },
+    },
+    remainingBoundaries: {
+      remainingScanFindings: 11,
+      providerDispatchPersistence: "APPROVAL_GATED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/public-json-request-body-budget-2026-08-11/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",
     sourceHead: "fixture-sha",
@@ -2674,6 +2711,7 @@ describe("northstar next runway generator", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.provenCurrentState).toContain("security_upstream_transport_remediation");
+    expect(report.provenCurrentState).toContain("security_safety_reference_surface_remediation");
     expect(report.securityUpstreamTransportRemediation).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_SOURCE_PROVEN_UPSTREAM_TRANSPORT_SECURITY_NO_PROVIDER_PROBE",
       scanFindingCount: 20,
@@ -2681,6 +2719,21 @@ describe("northstar next runway generator", () => {
       remediatedTotal: 8,
       remainingScanFindings: 12,
       externalProviderProbeExecuted: false,
+      providerDispatchPersistence: "APPROVAL_GATED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.securitySafetyReferenceSurfaceRemediation).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_SAFETY_REFERENCE_SURFACE_BOUNDED",
+      findingId: "csf_343e69e970d1524202d48324",
+      scanFindingCount: 20,
+      remediatedThisWave: 1,
+      remediatedTotal: 9,
+      remainingScanFindings: 11,
+      liveReturnedItems: 5,
+      publicBodyFieldCount: 0,
+      publicPayloadFieldCount: 0,
+      publicMetadataFieldCount: 0,
+      rateLimitMode: "instance",
       providerDispatchPersistence: "APPROVAL_GATED",
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });

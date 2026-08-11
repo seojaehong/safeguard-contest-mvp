@@ -44,6 +44,21 @@
     "anchorsMaxItems": 8,
     "anchorExcerptMaxChars": 360
   },
+  "governedPathCompatibility": {
+    "verdict": "PASS_LIVE_PRODUCTION_SAFETY_REFERENCE_SURFACE_COMPATIBILITY",
+    "sourceHead": "fde9343e555b02ba9d003e8a41688f4e1cf204bb",
+    "productionCommit": "fde9343e555b02ba9d003e8a41688f4e1cf204bb",
+    "coveredGateIds": [
+      "security_followup_remediation"
+    ],
+    "changedGovernedPaths": [
+      "lib/safety-reference-catalog.ts"
+    ],
+    "focused": { "testFiles": 4, "tests": 103, "status": "PASS" },
+    "adjacent": { "testFiles": 8, "tests": 176, "status": "PASS" },
+    "noMutation": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
   "verification": {
     "focused": { "testFiles": 4, "tests": 103, "status": "PASS" },
     "adjacent": { "testFiles": 8, "tests": 176, "status": "PASS" },

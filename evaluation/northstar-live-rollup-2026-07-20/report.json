@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-11T10:04:05.464Z",
-  "head": "10c05c2cd17f5c1e29c4ccd18eb30b3f66196018",
+  "generatedAt": "2026-08-11T10:36:44.881Z",
+  "head": "9611cd480c65ad8f7af5a7692d986ec5de3abe51",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "10c05c2cd17f5c1e29c4ccd18eb30b3f66196018",
+    "commitSha": "9611cd480c65ad8f7af5a7692d986ec5de3abe51",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-n0wnks1ne-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-5hxwbxnxn-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 45
+    "gateCount": 46
   },
   "provenGates": [
     {
@@ -146,6 +146,12 @@
       "state": "proven",
       "artifact": "evaluation\\security-upstream-transport-remediation-2026-08-11\\report.json",
       "detail": "Fresh sealed scan a8aa9242 keeps its immutable 20-finding baseline while live production source-proves configurable upstream SSRF containment and bounded provider responses. This wave closes 2 findings for a cumulative 8/20, leaves 12 visible, performs no external provider probe or mutation, keeps provider persistence approval-gated, and preserves exact saved Share as MISSING_EVIDENCE."
+    },
+    {
+      "id": "security_safety_reference_surface_remediation",
+      "state": "proven",
+      "artifact": "evaluation\\security-safety-reference-surface-remediation-2026-08-11\\report.json",
+      "detail": "Live public safety-reference search, MCP harness packets, and saved-workpack comparison results omit full bodies and arbitrary payload metadata while internal KOSHA grounding retains a bounded prompt excerpt. This wave closes 1 finding for a cumulative 9/20, leaves 11 visible, preserves instance rate limiting as a separate notice, performs no mutation, and keeps exact saved Share as MISSING_EVIDENCE."
     },
     {
       "id": "improvement_photo_analysis_budget",
@@ -505,6 +511,24 @@
     "remediatedTotal": 8,
     "remainingScanFindings": 12,
     "externalProviderProbeExecuted": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "providerDispatchPersistence": "APPROVAL_GATED"
+  },
+  "securitySafetyReferenceSurfaceRemediation": {
+    "artifact": "evaluation\\security-safety-reference-surface-remediation-2026-08-11\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_SAFETY_REFERENCE_SURFACE_BOUNDED",
+    "sourceHead": "fde9343e555b02ba9d003e8a41688f4e1cf204bb",
+    "productionCommit": "fde9343e555b02ba9d003e8a41688f4e1cf204bb",
+    "findingId": "csf_343e69e970d1524202d48324",
+    "scanFindingCount": 20,
+    "remediatedThisWave": 1,
+    "remediatedTotal": 9,
+    "remainingScanFindings": 11,
+    "liveReturnedItems": 5,
+    "publicBodyFieldCount": 0,
+    "publicPayloadFieldCount": 0,
+    "publicMetadataFieldCount": 0,
+    "rateLimitMode": "instance",
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "providerDispatchPersistence": "APPROVAL_GATED"
   },
@@ -898,9 +922,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "10c05c2cd17f5c1e29c4ccd18eb30b3f66196018",
+      "sourceCommit": "9611cd480c65ad8f7af5a7692d986ec5de3abe51",
       "sourceStatus": "exact",
-      "productionCommit": "10c05c2cd17f5c1e29c4ccd18eb30b3f66196018",
+      "productionCommit": "9611cd480c65ad8f7af5a7692d986ec5de3abe51",
       "productionStatus": "matches_live"
     },
     {
@@ -1117,6 +1141,14 @@
       "sourceCommit": "b673fc5d3a7f3be366c61d242e54d6a8a452e85e",
       "sourceStatus": "ancestor",
       "productionCommit": "b673fc5d3a7f3be366c61d242e54d6a8a452e85e",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "security_safety_reference_surface_remediation",
+      "artifact": "evaluation\\security-safety-reference-surface-remediation-2026-08-11\\report.json",
+      "sourceCommit": "fde9343e555b02ba9d003e8a41688f4e1cf204bb",
+      "sourceStatus": "ancestor",
+      "productionCommit": "fde9343e555b02ba9d003e8a41688f4e1cf204bb",
       "productionStatus": "ancestor_of_head"
     },
     {

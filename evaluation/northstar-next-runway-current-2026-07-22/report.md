@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `10c05c2cd17f5c1e29c4ccd18eb30b3f66196018`
+Source HEAD: `9611cd480c65ad8f7af5a7692d986ec5de3abe51`
 
-Production `/api/build-info`: `10c05c2cd17f5c1e29c4ccd18eb30b3f66196018`
+Production `/api/build-info`: `9611cd480c65ad8f7af5a7692d986ec5de3abe51`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `10c05c2cd17f5c1e29c4ccd18eb30b3f66196018`
+Live rollup source head: `9611cd480c65ad8f7af5a7692d986ec5de3abe51`
 
 Live rollup matches production: `true`
 
@@ -55,6 +55,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Security follow-up remediation is separately proven: `PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP`, sealed findings `3`, focused tests `129`, and remaining security work `0`. The immutable original baseline remains `18` findings with rewritten=`false`; two deferred candidates and the separate public-admission notice remain visible, no live provider cancellation probe is claimed, and exact saved Share remains `MISSING_EVIDENCE`.
 - Fresh security resource remediation is scoped rather than security-complete: `PASS_LIVE_PRODUCTION_SECURITY_RESOURCE_REMEDIATION`, remediated `6/20`, remaining `14`, provider persistence `APPROVAL_GATED`, exact saved Share `MISSING_EVIDENCE`.
 - Upstream transport remediation is separately live/source-proven without an external provider probe: `PASS_LIVE_PRODUCTION_SOURCE_PROVEN_UPSTREAM_TRANSPORT_SECURITY_NO_PROVIDER_PROBE`, remediated this wave `2`, cumulative `8/20`, remaining `12`, provider probe executed `false`, provider persistence `APPROVAL_GATED`, exact saved Share `MISSING_EVIDENCE`.
+- Safety-reference public-surface remediation is separately live-proven: `PASS_LIVE_PRODUCTION_PUBLIC_SAFETY_REFERENCE_SURFACE_BOUNDED`, finding `csf_343e69e970d1524202d48324`, cumulative `9/20`, remaining `11`, live items `5`, public body/payload/metadata fields `0/0/0`, and rate-limit mode `instance`. Instance-mode distributed readiness remains a notice, provider persistence remains `APPROVAL_GATED`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Public JSON pre-parse body budgeting is separately live-proven: `PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET`, finding `csf_44619971f6e14344d1d76da5`, and live oversized-request cases `3`. The corrected canonical scan remains immutable, follow-up scan status is `REQUIRED`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Improvement photo analysis budgeting is separately live-measured: `PASS_LIVE_PRODUCTION_IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_WITH_INSTANCE_ADMISSION`, finding `csf_4632cfb321a45b5f7429daef`, request bytes `42991616`, concurrency `2`, and live admission cases `2`. Production admission remains `INSTANCE_FALLBACK_ACTIVE_NOT_DISTRIBUTED`; the distributed multi-instance boundary and follow-up scan remain open, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Public provider cancellation is separately source-proven in deployed production: `PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_CANCELLATION_SOURCE_PROVEN`, finding `csf_278e8efc9722eb80016c42a3`, tests `104`, and live provider cancellation call executed=`false`. The canonical finding remains immutable until follow-up scan `REQUIRED`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
