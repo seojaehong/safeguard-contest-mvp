@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-public-provider-cancellation/v1",
   "generatedAt": "2026-08-11T16:06:00+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_PUBLIC_PROVIDER_CANCELLATION_LIVE_PENDING",
+  "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_CANCELLATION_SOURCE_PROVEN",
   "sourceHead": "84a4bf301e4869e4263bff78931228caff27319b",
   "securityFinding": {
     "scanId": "c4e9e2f1-7ce4-4313-a651-32205fca401f",
@@ -48,12 +48,12 @@
     "diffCheck": "PASS"
   },
   "productionBuild": {
-    "commitSha": null,
-    "branch": null,
-    "environment": null,
-    "deploymentUrl": null,
-    "sourceHeadMatchesProduction": false,
-    "liveAfterDeploymentPending": true,
+    "commitSha": "84a4bf301e4869e4263bff78931228caff27319b",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-9ndq3celh-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true,
+    "liveAfterDeploymentPending": false,
     "liveProviderCallExecuted": false
   },
   "mutationBoundary": {

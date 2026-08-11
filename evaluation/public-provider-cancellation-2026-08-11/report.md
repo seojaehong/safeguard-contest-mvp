@@ -2,7 +2,7 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_PUBLIC_PROVIDER_CANCELLATION_LIVE_PENDING`
+`PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_CANCELLATION_SOURCE_PROVEN`
 
 Product commit: `84a4bf301e4869e4263bff78931228caff27319b`
 
@@ -19,7 +19,8 @@ This bounded wave remediates corrected scan finding `csf_278e8efc9722eb80016c42a
 - Focused and adjacent Vitest: 9 files / 104 tests, 0 failures.
 - Strict TypeScript typecheck: PASS.
 - Next.js 15.5.22 production build: PASS, 28 static pages.
-- Live deployment verification: pending.
+- Production marker: `84a4bf301e4869e4263bff78931228caff27319b` on `master`, deployment `safeguard-contest-9ndq3celh-seojaehongs-projects.vercel.app`.
+- No live provider cancellation call was executed; cancellation behavior remains source-test proven.
 
 ## Boundaries
 
