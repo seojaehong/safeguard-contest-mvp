@@ -2385,6 +2385,66 @@ function createFixtureRoot(): string {
       approvalGatedOperationsUnchanged: true,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "public-provider-admission-2026-08-11", "report.json"), {
+    verdict: "PARTIAL_LIVE_PRODUCTION_WEIGHTED_INSTANCE_ADMISSION_DISTRIBUTED_ACTIVATION_PENDING",
+    sourceHead: "fixture-sha",
+    securityFindings: [
+      { scanId: "c4e9e2f1-7ce4-4313-a651-32205fca401f", findingId: "csf_f5dd7b0bac8e0b7c7e531b29", canonicalFindingRemainsImmutable: true, followUpSecurityScanRequired: true },
+      { scanId: "c4e9e2f1-7ce4-4313-a651-32205fca401f", findingId: "csf_a0ac317d9f81776462e0441a", canonicalFindingRemainsImmutable: true, followUpSecurityScanRequired: true },
+    ],
+    contracts: {
+      publicAskProviderAdmission: {
+        distributedLeaseSupported: true,
+        productionFallbackMode: "instance",
+        capacity: 12,
+        modeWeights: { template: 0, enhanced: 2, full: 12 },
+        queueRejectedBeforeProviderWork: true,
+        jsonLeaseReleasedAfterWork: true,
+        streamLeaseHeldUntilCompletionOrCancellation: true,
+      },
+      weatherAdmission: { distributedRateLimitSupported: true, productionFallbackMode: "instance", questionMaxChars: 240 },
+      knowledgeMatchAdmission: { distributedRateLimitSupported: true, productionFallbackMode: "instance", questionMaxChars: 900, requestMaxBytes: 16384 },
+    },
+    verification: {
+      focusedVitest: { files: 7, tests: 38, failed: 0 },
+      focusedAndAdjacentVitest: { files: 10, tests: 52, failed: 0 },
+      typecheck: "PASS",
+      build: { status: "PASS", staticPages: 28 },
+      diffCheck: "PASS",
+    },
+    productionBuild: {
+      commitSha: "fixture-sha",
+      branch: "master",
+      environment: "production",
+      sourceHeadMatchesProduction: true,
+      liveAfterDeploymentPending: false,
+      liveTemplateAskExecuted: true,
+      liveProviderBackedAskExecuted: false,
+      liveWeatherProviderCallExecuted: false,
+      liveKnowledgeMatchExecuted: false,
+    },
+    liveChecks: [
+      { path: "/api/ask", status: 200, rateLimitMode: "instance", aiMode: "template", workUnit: 0 },
+      { path: "/api/weather", status: 413, rateLimitMode: "instance", code: "PUBLIC_WORK_BUDGET_EXCEEDED" },
+      { path: "/api/knowledge/match", status: 413, rateLimitMode: "instance", code: "PUBLIC_WORK_BUDGET_EXCEEDED" },
+    ],
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerCallPerformedForEvidence: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorRuntimeMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      distributedProductionActivation: "PENDING_CONFIGURATION",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      securityCompleteClaimAllowed: false,
+      followUpSecurityScan: "REQUIRED",
+      approvalGatedOperationsUnchanged: true,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
     sourceHead: "fixture-sha",
@@ -3424,6 +3484,13 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("104 tests");
     expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("no live provider cancellation call");
     expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "public_provider_admission")).toMatchObject({
+      state: "notice",
+      evidencePath: path.join("evaluation", "public-provider-admission-2026-08-11", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "public_provider_admission")?.detail).toContain("template 0, enhanced 2, full 12");
+    expect(audit.gates.find((gate) => gate.id === "public_provider_admission")?.detail).toContain("process-instance admission");
+    expect(audit.gates.find((gate) => gate.id === "public_provider_admission")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")).toMatchObject({
       state: "notice",
       evidencePath: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
@@ -3751,6 +3818,31 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("liveProviderCall=true");
     expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("followUp=NOT_REQUIRED");
     expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("exactShare=PASS");
+  });
+
+  it("keeps distributed provider admission and exact Share boundaries fail-closed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "public-provider-admission-2026-08-11", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remainingBoundaries: {
+        distributedProductionActivation: string;
+        exactSavedShareVerdict: string;
+        securityCompleteClaimAllowed: boolean;
+        followUpSecurityScan: string;
+      };
+    };
+    report.remainingBoundaries.distributedProductionActivation = "DISTRIBUTED_ACTIVE";
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    report.remainingBoundaries.securityCompleteClaimAllowed = true;
+    report.remainingBoundaries.followUpSecurityScan = "NOT_REQUIRED";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "public_provider_admission")?.state).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "public_provider_admission")?.detail).toContain("distributed=DISTRIBUTED_ACTIVE");
+    expect(audit.gates.find((gate) => gate.id === "public_provider_admission")?.detail).toContain("followUp=NOT_REQUIRED");
+    expect(audit.gates.find((gate) => gate.id === "public_provider_admission")?.detail).toContain("exactShare=PASS");
   });
 
   it("rejects a conflicting zero-finding scan when Northstar acceptance is claimed", async () => {

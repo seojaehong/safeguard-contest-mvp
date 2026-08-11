@@ -502,6 +502,19 @@ type NextRunwayReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  publicProviderAdmission: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    findingCount: number;
+    capacity: number | null;
+    fullModeWeight: number | null;
+    liveCaseCount: number;
+    distributedProductionActivation: string;
+    followUpSecurityScan: string;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   mcpGenerationWorkBudgetSecurity: {
     verdict: string;
     sourceHead: string;
@@ -1832,6 +1845,20 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/public-provider-admission-2026-08-11/report.json", {
+    verdict: "PARTIAL_LIVE_PRODUCTION_WEIGHTED_INSTANCE_ADMISSION_DISTRIBUTED_ACTIVATION_PENDING",
+    sourceHead: "fixture-sha",
+    securityFindings: [{}, {}],
+    contracts: { publicAskProviderAdmission: { capacity: 12, modeWeights: { full: 12 } } },
+    productionBuild: { commitSha: "fixture-sha" },
+    liveChecks: [{}, {}, {}],
+    remainingBoundaries: {
+      distributedProductionActivation: "PENDING_CONFIGURATION",
+      followUpSecurityScan: "REQUIRED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/repository-security-scan-reconciliation-2026-08-11/report.json", {
     verdict: "PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS",
     targetRevision: "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
@@ -2644,6 +2671,21 @@ describe("northstar next runway generator", () => {
     });
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "public_provider_cancellation",
+      state: "notice",
+    }));
+    expect(report.publicProviderAdmission).toMatchObject({
+      verdict: "PARTIAL_LIVE_PRODUCTION_WEIGHTED_INSTANCE_ADMISSION_DISTRIBUTED_ACTIVATION_PENDING",
+      findingCount: 2,
+      capacity: 12,
+      fullModeWeight: 12,
+      liveCaseCount: 3,
+      distributedProductionActivation: "PENDING_CONFIGURATION",
+      followUpSecurityScan: "REQUIRED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "public_provider_admission",
       state: "notice",
     }));
     expect(report.provenCurrentState).toContain("repository_security_scan_reconciliation");

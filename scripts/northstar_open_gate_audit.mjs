@@ -52,6 +52,7 @@ const EVIDENCE_PATHS = Object.freeze({
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
+  publicProviderAdmission: path.join("evaluation", "public-provider-admission-2026-08-11", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
@@ -4508,6 +4509,142 @@ function evaluatePublicProviderCancellationGate(rootDir) {
   });
 }
 
+const PUBLIC_PROVIDER_ADMISSION_PATHS = [
+  "app/api/ask/route.ts",
+  "app/api/ask/stream/route.ts",
+  "app/api/knowledge/match/route.ts",
+  "app/api/weather/route.ts",
+  "lib/public-ask-admission.ts",
+  "lib/public-distributed-rate-limit.ts",
+  "lib/public-work-budget.ts",
+];
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluatePublicProviderAdmissionGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.publicProviderAdmission;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "public_provider_admission",
+      label: "Public provider admission",
+      state: "missing",
+      evidencePath,
+      detail: "Public weighted provider admission evidence is missing or invalid.",
+      nextActions: ["Restore the live no-provider admission evidence without claiming distributed activation."],
+    });
+  }
+
+  const findings = Array.isArray(report.securityFindings) ? report.securityFindings.filter(isRecord) : [];
+  const contracts = isRecord(report.contracts) ? report.contracts : {};
+  const ask = isRecord(contracts.publicAskProviderAdmission) ? contracts.publicAskProviderAdmission : {};
+  const weights = isRecord(ask.modeWeights) ? ask.modeWeights : {};
+  const weather = isRecord(contracts.weatherAdmission) ? contracts.weatherAdmission : {};
+  const knowledge = isRecord(contracts.knowledgeMatchAdmission) ? contracts.knowledgeMatchAdmission : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedVitest) ? verification.focusedVitest : {};
+  const adjacent = isRecord(verification.focusedAndAdjacentVitest) ? verification.focusedAndAdjacentVitest : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const production = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const liveChecks = Array.isArray(report.liveChecks) ? report.liveChecks.filter(isRecord) : [];
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const expectedFindingIds = new Set([
+    "csf_f5dd7b0bac8e0b7c7e531b29",
+    "csf_a0ac317d9f81776462e0441a",
+  ]);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerCallPerformedForEvidence === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.vectorRuntimeMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PARTIAL_LIVE_PRODUCTION_WEIGHTED_INSTANCE_ADMISSION_DISTRIBUTED_ACTIVATION_PENDING"
+    && sourceHead.length > 0
+    && sourceHead === readString(production.commitSha)
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_PROVIDER_ADMISSION_PATHS)
+    && findings.length === 2
+    && findings.every((item) => readString(item.scanId) === "c4e9e2f1-7ce4-4313-a651-32205fca401f"
+      && expectedFindingIds.has(readString(item.findingId))
+      && item.canonicalFindingRemainsImmutable === true
+      && item.followUpSecurityScanRequired === true)
+    && ask.distributedLeaseSupported === true
+    && readString(ask.productionFallbackMode) === "instance"
+    && readNumber(ask.capacity) === 12
+    && readNumber(weights.template) === 0
+    && readNumber(weights.enhanced) === 2
+    && readNumber(weights.full) === 12
+    && ask.queueRejectedBeforeProviderWork === true
+    && ask.jsonLeaseReleasedAfterWork === true
+    && ask.streamLeaseHeldUntilCompletionOrCancellation === true
+    && weather.distributedRateLimitSupported === true
+    && readString(weather.productionFallbackMode) === "instance"
+    && readNumber(weather.questionMaxChars) === 240
+    && knowledge.distributedRateLimitSupported === true
+    && readString(knowledge.productionFallbackMode) === "instance"
+    && readNumber(knowledge.questionMaxChars) === 900
+    && readNumber(knowledge.requestMaxBytes) === 16_384
+    && readNumber(focused.files) === 7
+    && readNumber(focused.tests) === 38
+    && readNumber(focused.failed) === 0
+    && readNumber(adjacent.files) === 10
+    && readNumber(adjacent.tests) === 52
+    && readNumber(adjacent.failed) === 0
+    && verification.typecheck === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && verification.diffCheck === "PASS"
+    && readString(production.branch) === "master"
+    && readString(production.environment) === "production"
+    && production.sourceHeadMatchesProduction === true
+    && production.liveAfterDeploymentPending === false
+    && production.liveTemplateAskExecuted === true
+    && production.liveProviderBackedAskExecuted === false
+    && production.liveWeatherProviderCallExecuted === false
+    && production.liveKnowledgeMatchExecuted === false
+    && liveChecks.length === 3
+    && liveChecks.some((item) => readString(item.path) === "/api/ask"
+      && readNumber(item.status) === 200
+      && readString(item.rateLimitMode) === "instance"
+      && readString(item.aiMode) === "template"
+      && readNumber(item.workUnit) === 0)
+    && liveChecks.some((item) => readString(item.path) === "/api/weather"
+      && readNumber(item.status) === 413
+      && readString(item.rateLimitMode) === "instance"
+      && readString(item.code) === "PUBLIC_WORK_BUDGET_EXCEEDED")
+    && liveChecks.some((item) => readString(item.path) === "/api/knowledge/match"
+      && readNumber(item.status) === 413
+      && readString(item.rateLimitMode) === "instance"
+      && readString(item.code) === "PUBLIC_WORK_BUDGET_EXCEEDED")
+    && noMutation
+    && readString(remaining.distributedProductionActivation) === "PENDING_CONFIGURATION"
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && remaining.securityCompleteClaimAllowed === false
+    && readString(remaining.followUpSecurityScan) === "REQUIRED"
+    && remaining.approvalGatedOperationsUnchanged === true;
+
+  return gateResult({
+    id: "public_provider_admission",
+    label: "Public provider admission",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Current production enforces mode-weighted provider work units (template 0, enhanced 2, full 12) with completion/cancellation release and live no-provider work-budget probes across ask, weather, and knowledge. Production still reports process-instance admission because Upstash is not configured; both canonical medium findings remain immutable, distributed activation and a fresh follow-up scan remain required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+      : `Public provider admission verdict=${readString(report.verdict) || "unknown"}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_PROVIDER_ADMISSION_PATHS)}, findings=${findings.length}, liveChecks=${liveChecks.length}, distributed=${readString(remaining.distributedProductionActivation) || "missing"}, followUp=${readString(remaining.followUpSecurityScan) || "missing"}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Configure and verify an approved distributed admission backend before claiming horizontal durability.",
+          "Run a fresh full-repository security scan before reclassifying either immutable finding or making a security-complete claim.",
+        ]
+      : ["Restore source/live alignment, weighted contracts, all three no-provider live probes, verification totals, instance/distributed boundary, no-mutation boundary, follow-up scan requirement, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
 const MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS = [
   "app/api/mcp/[transport]/implementation.ts",
   "app/api/mcp/[transport]/route.ts",
@@ -5647,6 +5784,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluatePublicJsonRequestBodyBudgetGate(rootDir),
     evaluateImprovementPhotoAnalysisBudgetGate(rootDir),
     evaluatePublicProviderCancellationGate(rootDir),
+    evaluatePublicProviderAdmissionGate(rootDir),
     evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir),
     evaluatePublicGenerationAdmissionSecurityGate(rootDir),
     evaluateSecurityFollowupRemediationGate(rootDir),
