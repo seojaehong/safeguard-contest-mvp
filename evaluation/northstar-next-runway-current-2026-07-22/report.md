@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `92e2547745a43d60eeda4a16f5ce5eeba03933a9`
+Source HEAD: `07429f15021305b57bee31c699b1028e5ce2a9de`
 
-Production `/api/build-info`: `92e2547745a43d60eeda4a16f5ce5eeba03933a9`
+Production `/api/build-info`: `07429f15021305b57bee31c699b1028e5ce2a9de`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `92e2547745a43d60eeda4a16f5ce5eeba03933a9`
+Live rollup source head: `07429f15021305b57bee31c699b1028e5ce2a9de`
 
 Live rollup matches production: `true`
 
@@ -91,8 +91,8 @@ The user's Documents/Share concern remains framed as information architecture, n
 - Default Documents cockpit: first actionable cockpit is live-proven; do not phrase this as "Documents page height fixed" or "the whole Documents page is short".
 - Documents cockpit workbench geometry: `PASS_LIVE_PRODUCTION_DOCUMENTS_WORKBENCH`; 1440x723 and 390x723 rows must show grid workbench, 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers closed by default, 0 visible supporting launchers, the legacy document index hidden, no horizontal overflow, and route split alone remains `false`.
 - Documents section navigation: `PASS_LIVE_PRODUCTION_DOCUMENT_SECTION_NAVIGATION`; 4/4 Day/Night desktop-short and mobile-short rows retain 6 tabs, exactly 1 selected tab, 44px minimum controls, readable two-line labels, shell ratio <= 3, first-action containment, no horizontal overflow, no mutation, and exact saved Share `MISSING_EVIDENCE`.
-- All-document selected-authoring geometry: `PASS_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY`; 48/48 rows cover 12 canonical documents across Day/Night desktop-short and mobile-short, with maximum shell ratio `2.69`, maximum first-action bottom `719/723`, at most one role-specific cockpit, local cockpit scroll, hidden raw/source editors, no mutation, and exact saved Share `MISSING_EVIDENCE`.
-- Document action pane margin: `PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN`; rows below the required 16px inner-pane margin move from 44/48 to 0/48, live minimum margin is 16px, maximum shell ratio is 2.36, route split alone remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
+- All-document selected-authoring geometry: `PASS_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY`; 48/48 rows cover 12 canonical documents across Day/Night desktop-short and mobile-short, with maximum shell ratio `2.36`, maximum first-action bottom `640/723`, minimum inner-pane margin `32px` against required `32px`, at most one role-specific cockpit, local cockpit scroll, hidden raw/source editors, no mutation, and exact saved Share `MISSING_EVIDENCE`.
+- Historical document action pane companion: `PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN`; its earlier 16px contract moved below-margin rows from 44/48 to 0/48. The current 32px requirement is reported by the all-document selected-authoring geometry above; route split alone remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Raw-source drilldown geometry: `PASS_LIVE_PRODUCTION_12_DOCUMENT_RAW_DRILLDOWN_GEOMETRY`; 48/48 rows cover 12 canonical documents across Day/Night desktop-short and mobile-short, with maximum shell ratio `2.25`, maximum source bottom `693/723`, maximum source editor height `258`, local source scrolling in 48/48, no mutation, and exact saved Share `MISSING_EVIDENCE`.
 - Documents selected editor/detail: risk-assessment default, same-document reselect, and all-12 launcher exposure land the field strip, evidence/recheck CTA, first risk row, and hazard field before raw long-form textarea across desktop-short, desktop 1440x900, and mobile; explicit raw/source editing remains secondary drilldown but is now live-bounded.
 - Documents remaining debt: live selected-authoring and explicit raw-source geometry are bounded, while deeper row/detail editing and broad human wording review remain separate from this layout proof.

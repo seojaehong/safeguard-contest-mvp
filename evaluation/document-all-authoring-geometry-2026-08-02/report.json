@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-document-all-authoring-geometry-summary/v1",
   "verdict": "PASS_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY",
-  "productCommit": "4e75b69d509cda6206aff69737d4dc0d6b0d167d",
-  "evidenceCommit": "006090ff588e6423917ad8b0b8bf00db35e7414f",
+  "productCommit": "f426ab4fc269e6fa23e3ca35a5e759a45f693527",
+  "evidenceCommit": "07429f15",
   "liveAfterDeploymentPending": false,
   "beforeLive": {
     "path": "evaluation/document-all-authoring-geometry-2026-08-02/before-live/report.json",
@@ -28,14 +28,16 @@
   },
   "afterLive": {
     "path": "evaluation/document-all-authoring-geometry-2026-08-02/after-live/report.json",
-    "sourceHead": "006090ff588e6423917ad8b0b8bf00db35e7414f",
-    "productionCommit": "006090ff588e6423917ad8b0b8bf00db35e7414f",
+    "sourceHead": "f426ab4fc269e6fa23e3ca35a5e759a45f693527",
+    "productionCommit": "f426ab4fc269e6fa23e3ca35a5e759a45f693527",
     "sourceHeadMatchesProduction": true,
     "verdict": "PASS_LIVE_PRODUCTION_12_DOCUMENT_AUTHORING_GEOMETRY",
     "total": 48,
     "pass": 48,
     "fail": 0,
-    "deploymentUrl": "safeguard-contest-6aguai4j6-seojaehongs-projects.vercel.app"
+    "minimumPaneMargin": 32,
+    "maximumShellRatio": 2.36,
+    "deploymentUrl": "safeguard-contest-8tpns0ehw-seojaehongs-projects.vercel.app"
   },
   "acceptanceContract": {
     "canonicalDocumentCount": 12,
@@ -47,13 +49,14 @@
     "cockpitInternalScrollRequired": true,
     "shellRatioMaximum": 3,
     "firstActionInsideViewport": true,
+    "firstActionInsidePaneWithMinimumMargin": 32,
     "sourceEditorHiddenByDefault": true,
     "bodyLevelLongStackForbidden": true
   },
   "verification": {
     "documentsEditorLayout": {
       "filesPassed": 1,
-      "testsPassed": 35,
+      "testsPassed": 38,
       "status": "pass"
     },
     "typecheck": {
