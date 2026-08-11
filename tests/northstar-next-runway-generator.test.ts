@@ -468,6 +468,14 @@ type NextRunwayReport = {
     originalBaselineRewritten: boolean;
     exactSavedShareVerdict: string;
   };
+  securityResourceRemediation: {
+    verdict: string;
+    scanFindingCount: number | null;
+    remediatedFindingCount: number | null;
+    remainingScanFindings: number | null;
+    providerDispatchPersistence: string;
+    exactSavedShareVerdict: string;
+  };
   publicJsonRequestBodyBudget: {
     verdict: string;
     sourceHead: string;
@@ -1807,6 +1815,18 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     remainingSecurityWork: [],
     boundaries: { originalBaselineRewritten: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
+  writeJson(root, "evaluation/security-resource-remediation-2026-08-11/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_SECURITY_RESOURCE_REMEDIATION",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    sourceScan: { findingCount: 20 },
+    remediatedFindings: [{}, {}, {}, {}, {}, {}],
+    remainingBoundaries: {
+      remainingScanFindings: 14,
+      providerDispatchPersistence: "APPROVAL_GATED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/public-json-request-body-budget-2026-08-11/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",
     sourceHead: "fixture-sha",
@@ -2619,6 +2639,15 @@ describe("northstar next runway generator", () => {
       liveProviderCancellationProbeExecuted: false,
       remainingSecurityWorkCount: 0,
       originalBaselineRewritten: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.provenCurrentState).toContain("security_resource_remediation");
+    expect(report.securityResourceRemediation).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_SECURITY_RESOURCE_REMEDIATION",
+      scanFindingCount: 20,
+      remediatedFindingCount: 6,
+      remainingScanFindings: 14,
+      providerDispatchPersistence: "APPROVAL_GATED",
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.repositorySecurityScanReconciliation).toMatchObject({

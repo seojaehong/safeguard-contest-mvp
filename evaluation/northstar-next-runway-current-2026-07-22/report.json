@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-11T08:16:49.778Z",
+  "generatedAt": "2026-08-11T09:20:40.652Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a",
-  "productionCommit": "f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a",
+  "sourceHead": "386e33d285ced15d0e7ad8fff82b31c24863f8c0",
+  "productionCommit": "386e33d285ced15d0e7ad8fff82b31c24863f8c0",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a",
+    "commitSha": "386e33d285ced15d0e7ad8fff82b31c24863f8c0",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-qqii5nqui-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-n0cuqebuj-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a",
-  "liveRollupLiveCommit": "f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a",
+  "liveExactEvidenceCommit": "386e33d285ced15d0e7ad8fff82b31c24863f8c0",
+  "liveRollupLiveCommit": "386e33d285ced15d0e7ad8fff82b31c24863f8c0",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -57,6 +57,7 @@
     "publicSearchDistributedRateLimitReadiness": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
     "publicGenerationAdmissionSecurity": "evaluation\\security-public-generation-admission-2026-08-04\\report.json",
     "securityFollowupRemediation": "evaluation\\codex-security-followup-remediation-2026-08-11\\report.json",
+    "securityResourceRemediation": "evaluation\\security-resource-remediation-2026-08-11\\report.json",
     "mcpGenerationWorkBudgetSecurity": "evaluation\\security-mcp-generation-work-budget-2026-08-04\\report.json",
     "learningExportRendererSecurity": "evaluation\\learning-export-renderer-security-2026-08-02\\report.json",
     "hermesKnowledgeReviewAuthorityUi": "evaluation\\hermes-knowledge-review-authority-ui-2026-07-25\\report.json",
@@ -99,6 +100,7 @@
     "repository_security_scan_reconciliation",
     "public_json_request_body_budget",
     "security_followup_remediation",
+    "security_resource_remediation",
     "learning_export_renderer_security",
     "hermes_knowledge_review_authority",
     "hermes_knowledge_review_ui",
@@ -659,6 +661,16 @@
     "liveProviderCancellationProbeExecuted": false,
     "remainingSecurityWorkCount": 0,
     "originalBaselineRewritten": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "securityResourceRemediation": {
+    "verdict": "PASS_LIVE_PRODUCTION_SECURITY_RESOURCE_REMEDIATION",
+    "sourceHead": "6ebf22f30b52424a01a23729a2b91899a1c94c84",
+    "productionCommit": "6ebf22f30b52424a01a23729a2b91899a1c94c84",
+    "scanFindingCount": 20,
+    "remediatedFindingCount": 6,
+    "remainingScanFindings": 14,
+    "providerDispatchPersistence": "APPROVAL_GATED",
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "publicJsonRequestBodyBudget": {

@@ -19,6 +19,7 @@ The completed Codex Security scan `a8aa9242-ed42-4057-88e9-31a72e298292` reporte
 
 - Focused: 5 files / 79 tests PASS.
 - Adjacent: 12 files / 156 tests PASS.
+- Governed-path compatibility: public JSON budget, provider cancellation, and provider admission remain current through the deployed resource-control patch; 8 changed paths are enumerated in `report.json`.
 - Strict TypeScript typecheck PASS.
 - Next.js 15.5.22 production build PASS, 28/28 static pages.
 - Dependency audit: zero vulnerabilities.

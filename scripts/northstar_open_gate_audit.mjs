@@ -56,6 +56,7 @@ const EVIDENCE_PATHS = Object.freeze({
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
+  securityResourceRemediation: path.join("evaluation", "security-resource-remediation-2026-08-11", "report.json"),
   mcpGenerationWorkBudgetSecurity: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
@@ -4070,6 +4071,66 @@ const PUBLIC_PROVIDER_ADMISSION_CHANGED_PATHS = [
   "lib/public-distributed-rate-limit.ts",
 ];
 
+const SECURITY_RESOURCE_REMEDIATION_CHANGED_PATHS = [
+  "app/api/knowledge/ingest/route.ts",
+  "app/api/knowledge/review/prepare/route.ts",
+  "app/api/knowledge/review/route.ts",
+  "app/api/mcp/[transport]/implementation.ts",
+  "app/api/share-sessions/[sessionId]/route.ts",
+  "app/api/workpack/remediate/route.ts",
+  "lib/openclaw-chat.ts",
+  "lib/public-work-budget.ts",
+];
+
+const SECURITY_RESOURCE_REMEDIATION_COMPATIBILITY_GATE_IDS = [
+  "public_json_request_body_budget",
+  "public_provider_cancellation",
+  "public_provider_admission",
+];
+
+/**
+ * @param {string} rootDir
+ * @param {string} gateId
+ * @param {string[]} governedPaths
+ */
+function isSecurityResourceRemediationCompatibilityCurrent(rootDir, gateId, governedPaths) {
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.securityResourceRemediation);
+  if (!isRecord(report) || !isRecord(report.governedPathCompatibility)) {
+    return false;
+  }
+  const compatibility = report.governedPathCompatibility;
+  const coveredGateIds = Array.isArray(compatibility.coveredGateIds)
+    ? compatibility.coveredGateIds.map(readString)
+    : [];
+  const changedGovernedPaths = Array.isArray(compatibility.changedGovernedPaths)
+    ? compatibility.changedGovernedPaths.map(readString)
+    : [];
+  const focused = isRecord(compatibility.focused) ? compatibility.focused : {};
+  const adjacent = isRecord(compatibility.adjacent) ? compatibility.adjacent : {};
+  const sourceHead = readString(compatibility.sourceHead);
+  const productionCommit = readString(compatibility.productionCommit);
+  return readString(report.verdict) === "PASS_LIVE_PRODUCTION_SECURITY_RESOURCE_REMEDIATION"
+    && readString(compatibility.verdict) === "PASS_LIVE_PRODUCTION_RESOURCE_REMEDIATION_COMPATIBILITY"
+    && sourceHead.length > 0
+    && productionCommit.startsWith(sourceHead)
+    && productionCommit === readString(report.productionCommit)
+    && isGitAncestor(rootDir, productionCommit)
+    && isEvidenceCurrentForPaths(rootDir, productionCommit, governedPaths)
+    && coveredGateIds.length === SECURITY_RESOURCE_REMEDIATION_COMPATIBILITY_GATE_IDS.length
+    && SECURITY_RESOURCE_REMEDIATION_COMPATIBILITY_GATE_IDS.every((id) => coveredGateIds.includes(id))
+    && coveredGateIds.includes(gateId)
+    && changedGovernedPaths.length === SECURITY_RESOURCE_REMEDIATION_CHANGED_PATHS.length
+    && SECURITY_RESOURCE_REMEDIATION_CHANGED_PATHS.every((item) => changedGovernedPaths.includes(item))
+    && readNumber(focused.testFiles) === 5
+    && readNumber(focused.tests) === 79
+    && readString(focused.status) === "PASS"
+    && readNumber(adjacent.testFiles) === 12
+    && readNumber(adjacent.tests) === 156
+    && readString(adjacent.status) === "PASS"
+    && compatibility.noMutation === true
+    && readString(compatibility.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+}
+
 /**
  * @param {string} rootDir
  * @param {string} gateId
@@ -4094,7 +4155,8 @@ function isPublicProviderAdmissionCompatibilityCurrent(rootDir, gateId, governed
     && sourceHead === readString(compatibility.productionCommit)
     && sourceHead === readString(report.productionBuild?.commitSha)
     && isGitAncestor(rootDir, sourceHead)
-    && isEvidenceCurrentForPaths(rootDir, sourceHead, governedPaths)
+    && (isEvidenceCurrentForPaths(rootDir, sourceHead, governedPaths)
+      || isSecurityResourceRemediationCompatibilityCurrent(rootDir, gateId, governedPaths))
     && coveredGateIds.length === PUBLIC_PROVIDER_ADMISSION_COMPATIBILITY_GATE_IDS.length
     && PUBLIC_PROVIDER_ADMISSION_COMPATIBILITY_GATE_IDS.every((id) => coveredGateIds.includes(id))
     && coveredGateIds.includes(gateId)
@@ -4353,6 +4415,108 @@ function evaluatePublicJsonRequestBodyBudgetGate(rootDir) {
           "Continue approval-free remediation without weakening exact saved Share or other approval-gated boundaries.",
         ]
       : ["Restore deployed SHA ancestry, all three live 413 cases, verification totals, immutable-scan preservation, follow-up scan requirement, no-mutation boundaries, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateSecurityResourceRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.securityResourceRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "security_resource_remediation",
+      label: "Security resource remediation",
+      state: "missing",
+      evidencePath,
+      detail: "Live security resource-remediation evidence is missing or invalid.",
+      nextActions: ["Restore the sealed-scan-linked live evidence without rewriting the immutable scan baseline."],
+    });
+  }
+
+  const sourceScan = isRecord(report.sourceScan) ? report.sourceScan : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focused) ? verification.focused : {};
+  const adjacent = isRecord(verification.adjacent) ? verification.adjacent : {};
+  const liveChecks = isRecord(report.liveChecks) ? report.liveChecks : {};
+  const buildInfo = isRecord(liveChecks.buildInfo) ? liveChecks.buildInfo : {};
+  const mcp = isRecord(liveChecks.mcpNonPostAdmission) ? liveChecks.mcpNonPostAdmission : {};
+  const knowledge = isRecord(liveChecks.knowledgeOversizedBody) ? liveChecks.knowledgeOversizedBody : {};
+  const remediation = isRecord(liveChecks.remediationOversizedBody) ? liveChecks.remediationOversizedBody : {};
+  const share = isRecord(liveChecks.shareOversizedAck) ? liveChecks.shareOversizedAck : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remediated = Array.isArray(report.remediatedFindings) ? report.remediatedFindings.map(readString) : [];
+  const expectedRemediated = [
+    "mcp-non-post-admission",
+    "openclaw-output-budget",
+    "openclaw-termination-grace",
+    "knowledge-preauth-body-budget",
+    "workpack-remediation-body-budget",
+    "public-share-admission",
+  ];
+  const sourceHead = readString(report.sourceHead);
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.vectorUploadPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_SECURITY_RESOURCE_REMEDIATION"
+    && sourceHead.length > 0
+    && productCommit === sourceHead
+    && productionCommit.startsWith(productCommit)
+    && isGitAncestor(rootDir, productionCommit)
+    && report.liveAfterDeploymentPending === false
+    && readString(sourceScan.scanId) === "a8aa9242-ed42-4057-88e9-31a72e298292"
+    && readString(sourceScan.targetRevision) === "8cd86f7ab2abe4ad7d4948d8feda083b0b032386"
+    && readNumber(sourceScan.findingCount) === 20
+    && readNumber(sourceScan.mediumCount) === 15
+    && readNumber(sourceScan.lowCount) === 5
+    && readString(sourceScan.coverageCompleteness) === "partial"
+    && remediated.length === expectedRemediated.length
+    && expectedRemediated.every((id) => remediated.includes(id))
+    && readNumber(focused.testFiles) === 5
+    && readNumber(focused.tests) === 79
+    && readString(focused.status) === "PASS"
+    && readNumber(adjacent.testFiles) === 12
+    && readNumber(adjacent.tests) === 156
+    && readString(adjacent.status) === "PASS"
+    && verification.typecheck === "PASS"
+    && verification.build === "PASS"
+    && readNumber(verification.staticPages) === 28
+    && readNumber(verification.dependencyAuditVulnerabilities) === 0
+    && readString(buildInfo.status) === "PASS"
+    && readString(buildInfo.commitSha) === productionCommit
+    && readNumber(mcp.status) === 401
+    && readString(mcp.verdict) === "PASS"
+    && readNumber(knowledge.routes) === 3
+    && readNumber(knowledge.status) === 413
+    && readString(knowledge.verdict) === "PASS"
+    && readNumber(remediation.status) === 413
+    && readString(remediation.verdict) === "PASS"
+    && readNumber(share.status) === 413
+    && readString(share.verdict) === "PASS"
+    && readNumber(remaining.remainingScanFindings) === 14
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(remaining.providerDispatchPersistence) === "APPROVAL_GATED"
+    && noMutation;
+
+  return gateResult({
+    id: "security_resource_remediation",
+    label: "Security resource remediation",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Fresh sealed scan a8aa9242 retained 20 findings under partial coverage; live production now proves bounded remediation for 6/20 resource-control findings with 235 focused/adjacent tests. The remaining 14 findings stay open, security-complete remains false, no mutation occurred, provider persistence remains approval-gated, and exact saved Share remains MISSING_EVIDENCE."
+      : `Security resource verdict=${readString(report.verdict) || "unknown"}, scan=${readString(sourceScan.scanId) || "missing"}, findings=${readNumber(sourceScan.findingCount)}, remediated=${remediated.length}, remaining=${readNumber(remaining.remainingScanFindings)}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Remediate or explicitly defer the remaining 14 sealed findings; do not convert this scoped 6/20 closure into a security-complete claim."]
+      : ["Restore sealed scan identity, 6/20 remediation accounting, live verification, no-mutation boundaries, and exact Share MISSING_EVIDENCE."],
   });
 }
 
@@ -4630,7 +4794,8 @@ function evaluatePublicProviderAdmissionGate(rootDir) {
     && sourceHead.length > 0
     && sourceHead === readString(production.commitSha)
     && isGitAncestor(rootDir, sourceHead)
-    && isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_PROVIDER_ADMISSION_PATHS)
+    && (isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_PROVIDER_ADMISSION_PATHS)
+      || isSecurityResourceRemediationCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS))
     && findings.length === 2
     && findings.every((item) => readString(item.scanId) === "c4e9e2f1-7ce4-4313-a651-32205fca401f"
       && expectedFindingIds.has(readString(item.findingId))
@@ -5845,6 +6010,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateFullRepositorySecurityScanGate(rootDir),
     evaluateRepositorySecurityScanReconciliationGate(rootDir),
     evaluatePublicJsonRequestBodyBudgetGate(rootDir),
+    evaluateSecurityResourceRemediationGate(rootDir),
     evaluateImprovementPhotoAnalysisBudgetGate(rootDir),
     evaluatePublicProviderCancellationGate(rootDir),
     evaluatePublicProviderAdmissionGate(rootDir),

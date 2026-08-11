@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-11T08:16:38.728Z",
-  "sourceSha": "f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a",
+  "generatedAt": "2026-08-11T09:20:28.516Z",
+  "sourceSha": "386e33d285ced15d0e7ad8fff82b31c24863f8c0",
   "overall": "open",
   "gates": [
     {
@@ -197,6 +197,16 @@
       "nextActions": [
         "Keep the canonical 14 findings and nine deferred candidates visible until a fresh follow-up scan revalidates the patched source.",
         "Continue approval-free remediation without weakening exact saved Share or other approval-gated boundaries."
+      ]
+    },
+    {
+      "id": "security_resource_remediation",
+      "state": "proven",
+      "label": "Security resource remediation",
+      "evidencePath": "evaluation\\security-resource-remediation-2026-08-11\\report.json",
+      "detail": "Fresh sealed scan a8aa9242 retained 20 findings under partial coverage; live production now proves bounded remediation for 6/20 resource-control findings with 235 focused/adjacent tests. The remaining 14 findings stay open, security-complete remains false, no mutation occurred, provider persistence remains approval-gated, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Remediate or explicitly defer the remaining 14 sealed findings; do not convert this scoped 6/20 closure into a security-complete claim."
       ]
     },
     {

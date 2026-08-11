@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-11T08:16:40.030Z
-Source HEAD at generation: f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a
-Live commit at generation: f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a
+Generated at: 2026-08-11T09:20:29.685Z
+Source HEAD at generation: 386e33d285ced15d0e7ad8fff82b31c24863f8c0
+Live commit at generation: 386e33d285ced15d0e7ad8fff82b31c24863f8c0
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -120,6 +120,11 @@ Overall: `northstar_open_approval_gated`
 - Deferred candidates retained: 2; live provider cancellation probe executed=false
 - Exact saved Share: MISSING_EVIDENCE
 
+## Security Resource Remediation
+- Verdict: `PASS_LIVE_PRODUCTION_SECURITY_RESOURCE_REMEDIATION`
+- Fresh sealed findings: 20; remediated: 6; remaining: 14
+- Provider persistence: APPROVAL_GATED; exact saved Share: MISSING_EVIDENCE
+
 ## Public JSON Request Body Budget
 
 - Verdict: `PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET`
@@ -230,6 +235,7 @@ Overall: `northstar_open_approval_gated`
 | full_repository_security_scan | proven | evaluation\follow-up-full-repository-security-scan-2026-08-02\report.json |
 | repository_security_scan_reconciliation | proven | evaluation\repository-security-scan-reconciliation-2026-08-11\report.json |
 | public_json_request_body_budget | proven | evaluation\public-json-request-body-budget-2026-08-11\report.json |
+| security_resource_remediation | proven | evaluation\security-resource-remediation-2026-08-11\report.json |
 | improvement_photo_analysis_budget | notice | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
 | public_provider_cancellation | notice | evaluation\public-provider-cancellation-2026-08-11\report.json |
 | public_provider_admission | notice | evaluation\public-provider-admission-2026-08-11\report.json |
@@ -285,6 +291,7 @@ Overall: `northstar_open_approval_gated`
 | public_search_distributed_rate_limit_readiness | ancestor | ancestor_of_head | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
 | public_generation_admission_security | missing | ancestor_of_head | evaluation\security-public-generation-admission-2026-08-04\report.json |
 | security_followup_remediation | ancestor | missing | evaluation\codex-security-followup-remediation-2026-08-11\report.json |
+| security_resource_remediation | ancestor | ancestor_of_head | evaluation\security-resource-remediation-2026-08-11\report.json |
 | mcp_generation_work_budget_security | ancestor | ancestor_of_head | evaluation\security-mcp-generation-work-budget-2026-08-04\report.json |
 | learning_export_renderer_security | ancestor | ancestor_of_head | evaluation\learning-export-renderer-security-2026-08-02\report.json |
 | hermes_knowledge_review_ui | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-authority-ui-2026-07-25\report.json |

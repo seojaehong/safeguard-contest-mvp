@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-11T08:16:40.030Z",
-  "head": "f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a",
+  "generatedAt": "2026-08-11T09:20:29.685Z",
+  "head": "386e33d285ced15d0e7ad8fff82b31c24863f8c0",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a",
+    "commitSha": "386e33d285ced15d0e7ad8fff82b31c24863f8c0",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-qqii5nqui-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-n0cuqebuj-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 43
+    "gateCount": 44
   },
   "provenGates": [
     {
@@ -134,6 +134,12 @@
       "state": "proven",
       "artifact": "evaluation\\public-json-request-body-budget-2026-08-11\\report.json",
       "detail": "The corrected current-source scan's medium public JSON body-budget finding is source-remediated and live-proven across /api/ask, /api/ask/stream, and /api/knowledge/match with pre-parse byte limits, 48 focused/adjacent tests, and a current 23 files / 215 tests governed-path companion. The immutable 14-finding scan and nine deferred candidates remain visible, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "security_resource_remediation",
+      "state": "proven",
+      "artifact": "evaluation\\security-resource-remediation-2026-08-11\\report.json",
+      "detail": "Fresh sealed scan a8aa9242 retained 20 findings under partial coverage; live production now proves bounded remediation for 6/20 resource-control findings with 235 focused/adjacent tests. The remaining 14 findings stay open, security-complete remains false, no mutation occurred, provider persistence remains approval-gated, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "improvement_photo_analysis_budget",
@@ -471,6 +477,17 @@
     "remainingSecurityWorkCount": 0,
     "originalBaselineRewritten": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "securityResourceRemediation": {
+    "artifact": "evaluation\\security-resource-remediation-2026-08-11\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_SECURITY_RESOURCE_REMEDIATION",
+    "sourceHead": "6ebf22f30b52424a01a23729a2b91899a1c94c84",
+    "productionCommit": "6ebf22f30b52424a01a23729a2b91899a1c94c84",
+    "scanFindingCount": 20,
+    "remediatedFindingCount": 6,
+    "remainingScanFindings": 14,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "providerDispatchPersistence": "APPROVAL_GATED"
   },
   "publicJsonRequestBodyBudget": {
     "artifact": "evaluation\\public-json-request-body-budget-2026-08-11\\report.json",
@@ -862,9 +879,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a",
+      "sourceCommit": "386e33d285ced15d0e7ad8fff82b31c24863f8c0",
       "sourceStatus": "exact",
-      "productionCommit": "f9f1b4a5b91ad05521768bbe5ce2feeaa4d1614a",
+      "productionCommit": "386e33d285ced15d0e7ad8fff82b31c24863f8c0",
       "productionStatus": "matches_live"
     },
     {
@@ -1066,6 +1083,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
+    },
+    {
+      "id": "security_resource_remediation",
+      "artifact": "evaluation\\security-resource-remediation-2026-08-11\\report.json",
+      "sourceCommit": "6ebf22f30b52424a01a23729a2b91899a1c94c84",
+      "sourceStatus": "ancestor",
+      "productionCommit": "6ebf22f30b52424a01a23729a2b91899a1c94c84",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "mcp_generation_work_budget_security",

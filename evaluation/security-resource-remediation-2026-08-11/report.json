@@ -2,8 +2,8 @@
   "schemaVersion": "safeclaw-security-resource-remediation/v1",
   "verdict": "PASS_LIVE_PRODUCTION_SECURITY_RESOURCE_REMEDIATION",
   "generatedAt": "2026-08-11T09:02:00.000Z",
-  "sourceHead": "6ebf22f3",
-  "productCommit": "6ebf22f3",
+  "sourceHead": "6ebf22f30b52424a01a23729a2b91899a1c94c84",
+  "productCommit": "6ebf22f30b52424a01a23729a2b91899a1c94c84",
   "productionCommit": "6ebf22f30b52424a01a23729a2b91899a1c94c84",
   "deploymentUrl": "safeguard-contest-68v3ohv9e-seojaehongs-projects.vercel.app",
   "liveAfterDeploymentPending": false,
@@ -23,6 +23,30 @@
     "workpack-remediation-body-budget",
     "public-share-admission"
   ],
+  "governedPathCompatibility": {
+    "verdict": "PASS_LIVE_PRODUCTION_RESOURCE_REMEDIATION_COMPATIBILITY",
+    "sourceHead": "6ebf22f30b52424a01a23729a2b91899a1c94c84",
+    "productionCommit": "6ebf22f30b52424a01a23729a2b91899a1c94c84",
+    "coveredGateIds": [
+      "public_json_request_body_budget",
+      "public_provider_cancellation",
+      "public_provider_admission"
+    ],
+    "changedGovernedPaths": [
+      "app/api/knowledge/ingest/route.ts",
+      "app/api/knowledge/review/prepare/route.ts",
+      "app/api/knowledge/review/route.ts",
+      "app/api/mcp/[transport]/implementation.ts",
+      "app/api/share-sessions/[sessionId]/route.ts",
+      "app/api/workpack/remediate/route.ts",
+      "lib/openclaw-chat.ts",
+      "lib/public-work-budget.ts"
+    ],
+    "focused": { "testFiles": 5, "tests": 79, "status": "PASS" },
+    "adjacent": { "testFiles": 12, "tests": 156, "status": "PASS" },
+    "noMutation": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
   "contracts": {
     "mcpAllMethodsAdmission": true,
     "openClawMaxOutputBytes": 262144,

@@ -2166,6 +2166,81 @@ function createFixtureRoot(): string {
       originalBaselineRewritten: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "security-resource-remediation-2026-08-11", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_SECURITY_RESOURCE_REMEDIATION",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    liveAfterDeploymentPending: false,
+    sourceScan: {
+      scanId: "a8aa9242-ed42-4057-88e9-31a72e298292",
+      targetRevision: "8cd86f7ab2abe4ad7d4948d8feda083b0b032386",
+      findingCount: 20,
+      mediumCount: 15,
+      lowCount: 5,
+      coverageCompleteness: "partial",
+    },
+    remediatedFindings: [
+      "mcp-non-post-admission",
+      "openclaw-output-budget",
+      "openclaw-termination-grace",
+      "knowledge-preauth-body-budget",
+      "workpack-remediation-body-budget",
+      "public-share-admission",
+    ],
+    governedPathCompatibility: {
+      verdict: "PASS_LIVE_PRODUCTION_RESOURCE_REMEDIATION_COMPATIBILITY",
+      sourceHead: "fixture-sha",
+      productionCommit: "fixture-sha",
+      coveredGateIds: [
+        "public_json_request_body_budget",
+        "public_provider_cancellation",
+        "public_provider_admission",
+      ],
+      changedGovernedPaths: [
+        "app/api/knowledge/ingest/route.ts",
+        "app/api/knowledge/review/prepare/route.ts",
+        "app/api/knowledge/review/route.ts",
+        "app/api/mcp/[transport]/implementation.ts",
+        "app/api/share-sessions/[sessionId]/route.ts",
+        "app/api/workpack/remediate/route.ts",
+        "lib/openclaw-chat.ts",
+        "lib/public-work-budget.ts",
+      ],
+      focused: { testFiles: 5, tests: 79, status: "PASS" },
+      adjacent: { testFiles: 12, tests: 156, status: "PASS" },
+      noMutation: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    verification: {
+      focused: { testFiles: 5, tests: 79, status: "PASS" },
+      adjacent: { testFiles: 12, tests: 156, status: "PASS" },
+      typecheck: "PASS",
+      build: "PASS",
+      staticPages: 28,
+      dependencyAuditVulnerabilities: 0,
+    },
+    liveChecks: {
+      buildInfo: { status: "PASS", commitSha: "fixture-sha" },
+      mcpNonPostAdmission: { status: 401, verdict: "PASS" },
+      knowledgeOversizedBody: { routes: 3, status: 413, verdict: "PASS" },
+      remediationOversizedBody: { status: 413, verdict: "PASS" },
+      shareOversizedAck: { status: 413, verdict: "PASS" },
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      providerDispatchPersistence: "APPROVAL_GATED",
+      remainingScanFindings: 14,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorUploadPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"), {
     verdict: "PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS",
     targetRevision: "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
@@ -3479,6 +3554,13 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("original 18-finding baseline");
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("two deferred candidates");
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "security_resource_remediation")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "security-resource-remediation-2026-08-11", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "security_resource_remediation")?.detail).toContain("6/20");
+    expect(audit.gates.find((gate) => gate.id === "security_resource_remediation")?.detail).toContain("remaining 14 findings");
+    expect(audit.gates.find((gate) => gate.id === "security_resource_remediation")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "repository_security_scan_reconciliation")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
@@ -3720,6 +3802,26 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.state).toBe("notice");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.state).toBe("notice");
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.state).toBe("contradicted");
+  });
+
+  it("contradicts security resource remediation when remaining findings or exact Share boundaries are weakened", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "security-resource-remediation-2026-08-11", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as Record<string, unknown>;
+    report.remainingBoundaries = {
+      exactSavedShareVerdict: "PASS",
+      providerDispatchPersistence: "APPROVAL_GATED",
+      remainingScanFindings: 13,
+    };
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "security_resource_remediation")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "security_resource_remediation")?.detail).toContain("remaining=13");
+    expect(audit.gates.find((gate) => gate.id === "security_resource_remediation")?.detail).toContain("exactShare=PASS");
   });
 
   it("accepts the current public admission companion for older governed-path evidence", async () => {
