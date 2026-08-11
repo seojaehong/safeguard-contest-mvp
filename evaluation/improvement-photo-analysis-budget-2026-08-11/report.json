@@ -1,10 +1,11 @@
 {
   "schema": "safeclaw-improvement-photo-analysis-budget/v1",
-  "verdict": "PASS_CURRENT_SOURCE_IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_LIVE_PENDING",
+  "verdict": "PASS_LIVE_PRODUCTION_IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_WITH_INSTANCE_ADMISSION",
   "sourceHead": "8b3428023e424b03586626912ad522f271e3a371",
-  "productionCommit": "1f1672e003c9a1392c123f58b1e55ee40ab54027",
-  "productionIncludesProductCommit": false,
-  "liveAfterDeploymentPending": true,
+  "productionCommit": "8b3428023e424b03586626912ad522f271e3a371",
+  "productionIncludesProductCommit": true,
+  "deploymentUrl": "safeguard-contest-r81tlz1fv-seojaehongs-projects.vercel.app",
+  "liveAfterDeploymentPending": false,
   "scan": {
     "scanId": "c4e9e2f1-7ce4-4313-a651-32205fca401f",
     "targetRevision": "910eccb713848aa4aee26f0c411ed0f07ada04a6",
@@ -48,7 +49,7 @@
   "admission": {
     "rateLimit": "distributed_when_configured_instance_fallback_otherwise",
     "concurrency": "distributed_when_configured_instance_fallback_otherwise",
-    "productionDistributedActivation": "PENDING_LIVE_HEADER_PROBE",
+    "productionDistributedActivation": "INSTANCE_FALLBACK_ACTIVE",
     "workUnitHeader": "photo-analysis"
   },
   "verification": {
@@ -69,11 +70,34 @@
   },
   "liveVerification": {
     "baseUrl": "https://www.safeclaw.kr",
-    "buildInfoCommit": "1f1672e003c9a1392c123f58b1e55ee40ab54027",
-    "status": "PENDING_PRODUCT_DEPLOYMENT",
+    "buildInfoCommit": "8b3428023e424b03586626912ad522f271e3a371",
+    "deploymentUrl": "safeguard-contest-r81tlz1fv-seojaehongs-projects.vercel.app",
+    "status": "PASS_READ_ONLY_ADMISSION_PROBE",
     "providerWorkExpected": false,
     "dbMutationExpected": false,
-    "cases": []
+    "cases": [
+      {
+        "path": "/api/input-photos/hazard-analysis",
+        "status": 401,
+        "rateLimitMode": "instance",
+        "workUnit": "photo-analysis",
+        "multipartParsed": false,
+        "providerCalled": false
+      },
+      {
+        "path": "/api/workpacks/00000000-0000-0000-0000-000000000000/improvements",
+        "status": 401,
+        "rateLimitMode": "instance",
+        "workUnit": "photo-analysis",
+        "multipartParsed": false,
+        "providerCalled": false,
+        "dbMutationPerformed": false
+      }
+    ],
+    "oversizedMultipartProbe": {
+      "status": "NOT_RECORDED",
+      "reason": "A mismatched declared Content-Length was held by the platform until body completion; local route tests prove 413 before formData and provider/DB work without sending a live oversized body."
+    }
   },
   "mutationBoundary": {
     "dbSchemaMutation": false,
@@ -89,7 +113,7 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "securityCompleteClaimAllowed": false,
     "remainingScanFindingsStayVisible": true,
-    "distributedProductionActivation": "PENDING_LIVE_HEADER_PROBE",
+    "distributedProductionActivation": "INSTANCE_FALLBACK_ACTIVE_NOT_DISTRIBUTED",
     "followUpSecurityScan": "REQUIRED"
   }
 }
