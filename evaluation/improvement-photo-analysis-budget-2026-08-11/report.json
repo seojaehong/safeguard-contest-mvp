@@ -1,0 +1,95 @@
+{
+  "schema": "safeclaw-improvement-photo-analysis-budget/v1",
+  "verdict": "PASS_CURRENT_SOURCE_IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_LIVE_PENDING",
+  "sourceHead": "8b3428023e424b03586626912ad522f271e3a371",
+  "productionCommit": "1f1672e003c9a1392c123f58b1e55ee40ab54027",
+  "productionIncludesProductCommit": false,
+  "liveAfterDeploymentPending": true,
+  "scan": {
+    "scanId": "c4e9e2f1-7ce4-4313-a651-32205fca401f",
+    "targetRevision": "910eccb713848aa4aee26f0c411ed0f07ada04a6",
+    "findingId": "csf_4632cfb321a45b5f7429daef",
+    "occurrenceId": "occ_519c5114762e7ab726b7134c",
+    "anchor": "improvement-photo-analysis-unbounded",
+    "title": "Improvement photo analysis buffers uploads before enforcing file budgets",
+    "severity": "medium",
+    "immutableFindingPreserved": true,
+    "followUpScanRequired": true
+  },
+  "userContext": "Preserve the immutable original 18-finding baseline and both conflicting f0c8a7be sealed scans. Run a corrected fresh full-repository Standard scan against the current clean source at or after 910eccb713848aa4aee26f0c411ed0f07ada04a6, including the deployed c4f58947 security remediation chain. Require every no-issue disposition to agree with its machine predicates; keep all reportable findings and deferred candidates visible. Do not perform DB, provider, share-session, vector, wiki, embedding, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
+  "securityContract": {
+    "attackerControlledInput": "Authenticated multipart photo uploads sent to the workpack improvement route and dedicated photo-analysis route.",
+    "vulnerableBehavior": "The improvement route parsed multipart files and reached vision analysis without request, file-count, aggregate-byte, MIME-signature, or shared admission controls.",
+    "enforcementBoundary": "Declared request bytes are checked before multipart parsing; parsed files are counted, summed, and signature-validated before provider or persistence work.",
+    "sharedAdmissionNamespace": "photo-analysis",
+    "preservedBehavior": "Bounded Before/After improvement photos and bounded dedicated hazard photos remain available."
+  },
+  "budgets": {
+    "maxRequestBytes": 42991616,
+    "maxAggregatePhotoBytes": 41943040,
+    "maxBytesPerPhoto": 20971520,
+    "maxImprovementPhotoFiles": 2,
+    "maxDedicatedHazardPhotoFiles": 10,
+    "rateLimitPerMinute": 8,
+    "aggregateConcurrency": 2
+  },
+  "controls": {
+    "contentLengthRequiredBeforeMultipartParse": true,
+    "oversizedDeclaredBodyRejectedBeforeMultipartParse": true,
+    "aggregateBytesCheckedAfterParseBeforeProvider": true,
+    "unexpectedFileFieldsRejected": true,
+    "mimeAllowlistChecked": true,
+    "fileSignatureChecked": true,
+    "improvementAnalyzerRevalidatesFiles": true,
+    "dedicatedAndImprovementRoutesShareAdmission": true,
+    "providerCalledOnRejectedInput": false,
+    "dbWriteCalledOnRejectedInput": false
+  },
+  "admission": {
+    "rateLimit": "distributed_when_configured_instance_fallback_otherwise",
+    "concurrency": "distributed_when_configured_instance_fallback_otherwise",
+    "productionDistributedActivation": "PENDING_LIVE_HEADER_PROBE",
+    "workUnitHeader": "photo-analysis"
+  },
+  "verification": {
+    "focusedAndAdjacentTests": {
+      "command": "npm.cmd exec -- vitest run tests/photo-analysis-admission.test.ts tests/photo-vision-analysis-route.test.ts tests/workpack-improvement-route.test.ts tests/photo-vision-analysis.test.ts tests/public-export-admission.test.ts tests/public-distributed-rate-limit.test.ts tests/operation-improvements.test.ts --maxWorkers=1 --fileParallelism=false",
+      "files": 7,
+      "tests": 76,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "diffCheck": "PASS",
+    "secretScan": "PASS"
+  },
+  "liveVerification": {
+    "baseUrl": "https://www.safeclaw.kr",
+    "buildInfoCommit": "1f1672e003c9a1392c123f58b1e55ee40ab54027",
+    "status": "PENDING_PRODUCT_DEPLOYMENT",
+    "providerWorkExpected": false,
+    "dbMutationExpected": false,
+    "cases": []
+  },
+  "mutationBoundary": {
+    "dbSchemaMutation": false,
+    "dbDataMutation": false,
+    "providerDispatchCalled": false,
+    "photoVisionProviderCalledDuringEvidence": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutation": false,
+    "wikiPublication": false,
+    "koshaExactRegistryMutation": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "securityCompleteClaimAllowed": false,
+    "remainingScanFindingsStayVisible": true,
+    "distributedProductionActivation": "PENDING_LIVE_HEADER_PROBE",
+    "followUpSecurityScan": "REQUIRED"
+  }
+}
