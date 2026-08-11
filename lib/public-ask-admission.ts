@@ -58,7 +58,7 @@ export async function acquirePublicAskWorkLease(aiMode: AiMode): Promise<PublicA
     concurrency: PUBLIC_ASK_PROVIDER_ADMISSION_POLICY.capacity,
     leaseMs: PUBLIC_ASK_PROVIDER_ADMISSION_POLICY.leaseMs,
     namespace: PUBLIC_ASK_PROVIDER_ADMISSION_POLICY.namespace,
-    requireDistributedInProduction: true,
+    requireDistributedInProduction: false,
     weight,
   });
   const release = distributedRelease === undefined

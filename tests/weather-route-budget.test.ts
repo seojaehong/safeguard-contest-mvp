@@ -70,18 +70,6 @@ describe("weather route public work budget", () => {
     error.mockRestore();
   });
 
-  it("requires durable admission in production", async () => {
-    vi.stubEnv("VERCEL_ENV", "production");
-    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const { GET } = await import("@/app/api/weather/route");
-
-    const response = await GET(weatherRequest("서울 옥외 폭염 작업", 8));
-
-    expect(response.status).toBe(503);
-    expect(mocks.fetchWeatherSignal).not.toHaveBeenCalled();
-    error.mockRestore();
-  });
-
   it("rejects oversized questions before upstream weather fan-out", async () => {
     const { GET } = await import("@/app/api/weather/route");
     const response = await GET(weatherRequest("서울 폭염 ".repeat(PUBLIC_WEATHER_QUESTION_MAX_CHARS), 10));

@@ -69,7 +69,6 @@ export async function GET(request: NextRequest) {
     limit: 30,
     windowMs: 60_000,
     instanceLimiter: limiter,
-    requireDistributedInProduction: true,
   });
   const limited = publicRateLimitResponse(rateLimit);
   if (limited) return limited;

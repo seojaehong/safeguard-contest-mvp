@@ -30,7 +30,6 @@ async function checkAdmission(request: NextRequest): Promise<PublicRateLimitDeci
     limit: 60,
     windowMs: 60_000,
     instanceLimiter: limiter,
-    requireDistributedInProduction: true,
   });
 }
 

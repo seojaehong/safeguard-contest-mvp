@@ -58,11 +58,11 @@ describe("public ask weighted concurrency admission", () => {
     await expect(lease?.release()).resolves.toBeUndefined();
   });
 
-  it("fails provider-backed modes closed in production without distributed leases", async () => {
+  it("preserves weighted instance admission until distributed production configuration is activated", async () => {
     vi.stubEnv("VERCEL_ENV", "production");
 
-    await expect(acquirePublicAskWorkLease("enhanced")).rejects.toThrow(
-      "distributed concurrency is required in production",
-    );
+    const lease = await acquirePublicAskWorkLease("enhanced");
+    expect(lease?.weight).toBe(2);
+    await lease?.release();
   });
 });

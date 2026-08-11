@@ -38,19 +38,6 @@ describe("knowledge match request body budget", () => {
     error.mockRestore();
   });
 
-  it("requires durable admission in production", async () => {
-    vi.stubEnv("VERCEL_ENV", "production");
-    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
-
-    const response = await POST(request({ question: "고소작업 안전조치" }));
-
-    expect(response.status).toBe(503);
-    await expect(response.json()).resolves.toMatchObject({
-      code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
-    });
-    error.mockRestore();
-  });
-
   it.each(["GET", "POST"])("rejects oversized %s questions", async (method) => {
     const question = "추락 위험 ".repeat(PUBLIC_KNOWLEDGE_QUESTION_MAX_CHARS);
     const response = method === "GET"
