@@ -135,9 +135,12 @@ function pickChemicalKeyword(question: string) {
   return candidates.find((keyword) => question.includes(keyword)) || "";
 }
 
-async function fetchText(url: string) {
+async function fetchText(url: string, signal?: AbortSignal) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const abortFromCaller = () => controller.abort(signal?.reason);
+  signal?.throwIfAborted();
+  signal?.addEventListener("abort", abortFromCaller, { once: true });
+  const timeout = setTimeout(() => controller.abort(new Error("KOSHA OpenAPI timeout")), REQUEST_TIMEOUT_MS);
   try {
     const response = await fetch(url, {
       cache: "no-store",
@@ -151,6 +154,7 @@ async function fetchText(url: string) {
     return text;
   } finally {
     clearTimeout(timeout);
+    signal?.removeEventListener("abort", abortFromCaller);
   }
 }
 
@@ -208,7 +212,7 @@ function parseXmlItems(text: string) {
 
 type KoshaOpenApiFetchResult = KoshaOpenApiReference[] | { detail: string };
 
-async function fetchSmartSearch(question: string): Promise<KoshaOpenApiFetchResult> {
+async function fetchSmartSearch(question: string, signal?: AbortSignal): Promise<KoshaOpenApiFetchResult> {
   const keyword = pickKeyword(question);
   const url = new URL(KOSHA_SMART_SEARCH_URL);
   url.searchParams.set("serviceKey", serviceKey);
@@ -218,7 +222,7 @@ async function fetchSmartSearch(question: string): Promise<KoshaOpenApiFetchResu
   url.searchParams.set("category", pickSmartSearchCategory(question));
 
   try {
-    const parsed = parseJsonRecords(await fetchText(url.toString()));
+    const parsed = parseJsonRecords(await fetchText(url.toString(), signal));
     if (!parsed.records.length) return { detail: `smartSearch searchValue=${keyword}: ${parsed.detail}` };
     return parsed.records.slice(0, 2).map((record) => ({
       title: readString(record, ["title", "ttl", "sj", "lawNm", "guideNm"]) || `KOSHA 스마트검색: ${keyword}`,
@@ -228,12 +232,13 @@ async function fetchSmartSearch(question: string): Promise<KoshaOpenApiFetchResu
       reflectedIn: ["문서 반영 근거", "위험성평가표", "TBM"]
     }));
   } catch (error) {
+    signal?.throwIfAborted();
     const message = error instanceof Error ? error.message : String(error);
     return { detail: `smartSearch searchValue=${keyword}: ${message}` };
   }
 }
 
-async function fetchSafetyMedia(question: string): Promise<KoshaOpenApiFetchResult> {
+async function fetchSafetyMedia(question: string, signal?: AbortSignal): Promise<KoshaOpenApiFetchResult> {
   const accidentTypeCode = pickMediaAccidentTypeCode(question);
   const languageCode = pickForeignLanguageCode(question);
   const url = new URL(KOSHA_MEDIA_URL);
@@ -248,7 +253,7 @@ async function fetchSafetyMedia(question: string): Promise<KoshaOpenApiFetchResu
   url.searchParams.set("ctgr04_kr", "Y");
 
   try {
-    const parsed = parseJsonRecords(await fetchText(url.toString()));
+    const parsed = parseJsonRecords(await fetchText(url.toString(), signal));
     if (!parsed.records.length) return { detail: parsed.detail };
     return parsed.records.slice(0, 2).map((record) => ({
       title: readString(record, ["title", "ttl", "mediaTitle", "sj", "dataNm", "name"]) || "KOSHA 안전보건자료",
@@ -258,12 +263,13 @@ async function fetchSafetyMedia(question: string): Promise<KoshaOpenApiFetchResu
       reflectedIn: ["안전보건교육 기록", "외국인 근로자 출력본", "문서 반영 근거"]
     }));
   } catch (error) {
+    signal?.throwIfAborted();
     const message = error instanceof Error ? error.message : String(error);
     return { detail: message };
   }
 }
 
-async function fetchMsds(question: string): Promise<KoshaOpenApiFetchResult> {
+async function fetchMsds(question: string, signal?: AbortSignal): Promise<KoshaOpenApiFetchResult> {
   const chemical = pickChemicalKeyword(question);
   if (!chemical) return { detail: "화학물질 키워드가 없어 MSDS 호출을 건너뜁니다." };
 
@@ -276,7 +282,7 @@ async function fetchMsds(question: string): Promise<KoshaOpenApiFetchResult> {
     url.searchParams.set("numOfRows", "5");
     url.searchParams.set(param, chemical);
     try {
-      const text = await fetchText(url.toString());
+      const text = await fetchText(url.toString(), signal);
       const records = parseXmlItems(text);
       if (records.length) {
         return records.slice(0, 2).map((record) => ({
@@ -289,6 +295,7 @@ async function fetchMsds(question: string): Promise<KoshaOpenApiFetchResult> {
       }
       details.push(`${param}: 응답 항목 없음`);
     } catch (error) {
+      signal?.throwIfAborted();
       const message = error instanceof Error ? error.message : String(error);
       details.push(`${param}: ${message}`);
     }
@@ -297,7 +304,7 @@ async function fetchMsds(question: string): Promise<KoshaOpenApiFetchResult> {
   return { detail: details.join(" | ") };
 }
 
-async function fetchConstructionDailyDisaster(question: string): Promise<KoshaOpenApiFetchResult> {
+async function fetchConstructionDailyDisaster(question: string, signal?: AbortSignal): Promise<KoshaOpenApiFetchResult> {
   if (!isConstructionScenario(question)) {
     return { detail: "건설업 작업 키워드가 없어 건설업 일별 중대재해 현황 호출을 건너뜁니다." };
   }
@@ -317,7 +324,7 @@ async function fetchConstructionDailyDisaster(question: string): Promise<KoshaOp
     url.searchParams.set("dsstrDy", dsstrDy);
 
     try {
-      const parsed = parseJsonRecordsWithBody(await fetchText(url.toString()));
+      const parsed = parseJsonRecordsWithBody(await fetchText(url.toString(), signal));
       if (!parsed.records.length) {
         details.push(`${dsstrDy}: ${parsed.detail}, 항목 없음`);
         continue;
@@ -343,6 +350,7 @@ async function fetchConstructionDailyDisaster(question: string): Promise<KoshaOp
         };
       });
     } catch (error) {
+      signal?.throwIfAborted();
       const message = error instanceof Error ? error.message : String(error);
       details.push(`${dsstrDy}: ${message}`);
     }
@@ -351,7 +359,8 @@ async function fetchConstructionDailyDisaster(question: string): Promise<KoshaOp
   return { detail: `건설업 일별 중대재해 현황 표시 항목 없음. ${details.slice(0, 5).join(" / ")}` };
 }
 
-export async function fetchKoshaOpenApiEvidence(question: string): Promise<KoshaOpenApiEvidence> {
+export async function fetchKoshaOpenApiEvidence(question: string, signal?: AbortSignal): Promise<KoshaOpenApiEvidence> {
+  signal?.throwIfAborted();
   if (!serviceKey) {
     return {
       source: "kosha-openapi",
@@ -362,10 +371,10 @@ export async function fetchKoshaOpenApiEvidence(question: string): Promise<Kosha
   }
 
   const [smartSearch, media, msds, constructionDaily] = await Promise.all([
-    fetchSmartSearch(question),
-    fetchSafetyMedia(question),
-    fetchMsds(question),
-    fetchConstructionDailyDisaster(question)
+    fetchSmartSearch(question, signal),
+    fetchSafetyMedia(question, signal),
+    fetchMsds(question, signal),
+    fetchConstructionDailyDisaster(question, signal)
   ]);
   const references = [smartSearch, media, msds, constructionDaily]
     .flatMap((item): KoshaOpenApiReference[] => Array.isArray(item) ? item : [])

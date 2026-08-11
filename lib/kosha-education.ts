@@ -54,12 +54,15 @@ function compactDate(value: string) {
   return `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}`;
 }
 
-async function postKoshaEdu(endpoint: string, body: Record<string, unknown>) {
+async function postKoshaEdu(endpoint: string, body: Record<string, unknown>, signal?: AbortSignal) {
   let lastError: unknown = null;
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    const abortFromCaller = () => controller.abort(signal?.reason);
+    signal?.throwIfAborted();
+    signal?.addEventListener("abort", abortFromCaller, { once: true });
+    const timeout = setTimeout(() => controller.abort(new Error(`KOSHA EDU ${endpoint} timeout`)), TIMEOUT_MS);
 
     try {
       const response = await fetch(`${API_BASE}/${endpoint}`, {
@@ -84,12 +87,14 @@ async function postKoshaEdu(endpoint: string, body: Record<string, unknown>) {
       }
       return parsed as KoshaEduApiResponse;
     } catch (error) {
+      signal?.throwIfAborted();
       lastError = error;
       if (attempt >= MAX_ATTEMPTS) {
         throw error;
       }
     } finally {
       clearTimeout(timeout);
+      signal?.removeEventListener("abort", abortFromCaller);
     }
   }
 
@@ -217,7 +222,7 @@ function scoreCourse(question: string, course: KoshaEducationRecommendation) {
   return score;
 }
 
-async function tryFetchCourses(question: string) {
+async function tryFetchCourses(question: string, signal?: AbortSignal) {
   const flags = classifyQuestion(question);
   const eduWayCd = ["01", "02", "03", "04", "05"];
   const targetCandidates = flags.asksForeignWorker
@@ -228,7 +233,10 @@ async function tryFetchCourses(question: string) {
   const collected: KoshaEducationRecommendation[] = [];
 
   for (const eduTrgtCd of targetCandidates) {
-    const instResponse = await postKoshaEdu("selectEduInst", { eduWayCd, eduTrgtCd: [eduTrgtCd] }).catch(() => null);
+    const instResponse = await postKoshaEdu("selectEduInst", { eduWayCd, eduTrgtCd: [eduTrgtCd] }, signal).catch((error) => {
+      signal?.throwIfAborted();
+      return null;
+    });
     const instList = instResponse?.payload?.eduInstList || [
       { crclmSrcSeCd: "10", comCdNm: "공단 일선기관" },
       { crclmSrcSeCd: "20", comCdNm: "공단 교육원" },
@@ -241,7 +249,10 @@ async function tryFetchCourses(question: string) {
         eduWayCd,
         eduTrgtCd: [eduTrgtCd],
         eduInstCd: sourceCode
-      }).catch(() => null);
+      }, signal).catch((error) => {
+        signal?.throwIfAborted();
+        return null;
+      });
       const comboSrch1 = searchResponse?.payload?.eduSrchList?.[0]?.id || "ALL";
       const response = await postKoshaEdu("selectEduCrsList", {
         eduWayCd,
@@ -259,7 +270,10 @@ async function tryFetchCourses(question: string) {
         page: 1,
         rowsPerPage: 12,
         totalCount: 0
-      }).catch(() => null);
+      }, signal).catch((error) => {
+        signal?.throwIfAborted();
+        return null;
+      });
 
       const courses = response?.payload?.eduCrsList || [];
       collected.push(...courses.map((course) => mapCourse(course, question)).filter((course): course is KoshaEducationRecommendation => Boolean(course)));
@@ -276,7 +290,7 @@ async function tryFetchCourses(question: string) {
     .slice(0, 3);
 }
 
-export async function fetchKoshaEducationRecommendations(question: string): Promise<{
+export async function fetchKoshaEducationRecommendations(question: string, signal?: AbortSignal): Promise<{
   source: "kosha-edu";
   mode: IntegrationMode;
   detail: string;
@@ -284,8 +298,11 @@ export async function fetchKoshaEducationRecommendations(question: string): Prom
 }> {
   try {
     const [targetResponse, courseRecommendations] = await Promise.all([
-      postKoshaEdu("selectEduTrgt", { eduWayCd: ["01", "02", "03", "04", "05"] }),
-      tryFetchCourses(question).catch(() => [])
+      postKoshaEdu("selectEduTrgt", { eduWayCd: ["01", "02", "03", "04", "05"] }, signal),
+      tryFetchCourses(question, signal).catch((error) => {
+        signal?.throwIfAborted();
+        return [];
+      })
     ]);
     const targetNames = (targetResponse.payload?.eduTrgtList || [])
       .map((target) => target.comCdNm || "")
@@ -302,6 +319,7 @@ export async function fetchKoshaEducationRecommendations(question: string): Prom
       recommendations
     };
   } catch (error) {
+    signal?.throwIfAborted();
     const message = error instanceof Error ? error.message : String(error);
     return {
       source: "kosha-edu",

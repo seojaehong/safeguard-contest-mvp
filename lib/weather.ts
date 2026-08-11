@@ -382,11 +382,14 @@ function valueByCategory(items: ForecastItem[], category: string, key: "obsrValu
   return items.find((item) => item.category === category)?.[key] || "";
 }
 
-async function fetchWithTimeout(url: string, label: string) {
+async function fetchWithTimeout(url: string, label: string, signal?: AbortSignal) {
   let lastError: Error | null = null;
   for (let attempt = 0; attempt <= KMA_RETRY_COUNT; attempt += 1) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), KMA_TIMEOUT_MS);
+    const abortFromCaller = () => controller.abort(signal?.reason);
+    signal?.throwIfAborted();
+    signal?.addEventListener("abort", abortFromCaller, { once: true });
+    const timeout = setTimeout(() => controller.abort(new Error(`${label} timeout`)), KMA_TIMEOUT_MS);
     try {
       const response = await fetch(url, { cache: "no-store", signal: controller.signal });
       const text = await response.text();
@@ -395,9 +398,11 @@ async function fetchWithTimeout(url: string, label: string) {
       }
       return text;
     } catch (error) {
+      signal?.throwIfAborted();
       lastError = error instanceof Error ? error : new Error(String(error));
     } finally {
       clearTimeout(timeout);
+      signal?.removeEventListener("abort", abortFromCaller);
     }
   }
   throw lastError || new Error(`${label} 호출 실패`);
@@ -405,7 +410,8 @@ async function fetchWithTimeout(url: string, label: string) {
 
 async function fetchKmaItems(
   endpoint: "getUltraSrtNcst" | "getUltraSrtFcst" | "getVilageFcst",
-  params: { baseDate: string; baseTime: string; nx: number; ny: number; numOfRows: string }
+  params: { baseDate: string; baseTime: string; nx: number; ny: number; numOfRows: string },
+  signal?: AbortSignal,
 ) {
   const url = new URL(`https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/${endpoint}`);
   url.searchParams.set("serviceKey", serviceKey);
@@ -417,7 +423,7 @@ async function fetchKmaItems(
   url.searchParams.set("nx", String(params.nx));
   url.searchParams.set("ny", String(params.ny));
 
-  const text = await fetchWithTimeout(url.toString(), endpoint);
+  const text = await fetchWithTimeout(url.toString(), endpoint, signal);
   const parsed = JSON.parse(text) as WeatherEnvelope;
   const resultCode = parsed.response?.header?.resultCode;
   if (resultCode && resultCode !== "00") {
@@ -436,7 +442,7 @@ function normalizeArray<T>(item?: T[] | T) {
   return item ? [item] : [];
 }
 
-async function fetchWarningSignal(location: LocationConfig): Promise<KmaSignal> {
+async function fetchWarningSignal(location: LocationConfig, signal?: AbortSignal): Promise<KmaSignal> {
   try {
     const url = new URL("https://apis.data.go.kr/1360000/WthrWrnInfoService/getWthrWrnList");
     url.searchParams.set("serviceKey", serviceKey);
@@ -447,7 +453,7 @@ async function fetchWarningSignal(location: LocationConfig): Promise<KmaSignal> 
     url.searchParams.set("fromTmFc", yyyymmddOffset(-1));
     url.searchParams.set("toTmFc", yyyymmddOffset(1));
 
-    const text = await fetchWithTimeout(url.toString(), "기상특보");
+    const text = await fetchWithTimeout(url.toString(), "기상특보", signal);
     const parsed = JSON.parse(text) as WeatherWarningEnvelope;
     const resultCode = parsed.response?.header?.resultCode;
     if (resultCode && resultCode !== "00") {
@@ -472,6 +478,7 @@ async function fetchWarningSignal(location: LocationConfig): Promise<KmaSignal> 
         : `기상청 기상특보 조회 성공 (${location.label}, 최근 특보 없음)`
     };
   } catch (error) {
+    signal?.throwIfAborted();
     const message = error instanceof Error ? error.message : String(error);
     return {
       endpoint: "기상특보",
@@ -482,7 +489,7 @@ async function fetchWarningSignal(location: LocationConfig): Promise<KmaSignal> 
   }
 }
 
-async function fetchImpactForecastSignal(location: LocationConfig): Promise<KmaSignal> {
+async function fetchImpactForecastSignal(location: LocationConfig, signal?: AbortSignal): Promise<KmaSignal> {
   try {
     const url = new URL("https://apis.data.go.kr/1360000/ImpactInfoService/getHWImpactValue");
     url.searchParams.set("serviceKey", serviceKey);
@@ -491,7 +498,7 @@ async function fetchImpactForecastSignal(location: LocationConfig): Promise<KmaS
     url.searchParams.set("dataType", "JSON");
     url.searchParams.set("tm", yyyymmddOffset(0));
 
-    const text = await fetchWithTimeout(url.toString(), "영향예보");
+    const text = await fetchWithTimeout(url.toString(), "영향예보", signal);
     const parsed = JSON.parse(text) as ImpactForecastEnvelope;
     const resultCode = parsed.response?.header?.resultCode;
     if (resultCode && resultCode !== "00") {
@@ -516,6 +523,7 @@ async function fetchImpactForecastSignal(location: LocationConfig): Promise<KmaS
         : `기상청 영향예보 조회 성공 (${location.label}, 발표 자료 없음)`
     };
   } catch (error) {
+    signal?.throwIfAborted();
     const message = error instanceof Error ? error.message : String(error);
     return {
       endpoint: "영향예보",
@@ -526,7 +534,7 @@ async function fetchImpactForecastSignal(location: LocationConfig): Promise<KmaS
   }
 }
 
-async function fetchLivingUvSignal(location: LocationConfig): Promise<KmaSignal> {
+async function fetchLivingUvSignal(location: LocationConfig, signal?: AbortSignal): Promise<KmaSignal> {
   try {
     const url = new URL("https://apis.data.go.kr/1360000/LivingWthrIdxServiceV4/getUVIdxV4");
     url.searchParams.set("serviceKey", serviceKey);
@@ -536,7 +544,7 @@ async function fetchLivingUvSignal(location: LocationConfig): Promise<KmaSignal>
     url.searchParams.set("areaNo", location.areaNo);
     url.searchParams.set("time", formatLivingIndexTime());
 
-    const text = await fetchWithTimeout(url.toString(), "생활기상 자외선");
+    const text = await fetchWithTimeout(url.toString(), "생활기상 자외선", signal);
     const parsed = JSON.parse(text) as LivingWeatherIndexEnvelope;
     const resultCode = parsed.response?.header?.resultCode;
     if (resultCode && resultCode !== "00") {
@@ -558,6 +566,7 @@ async function fetchLivingUvSignal(location: LocationConfig): Promise<KmaSignal>
       detail: `기상청 생활기상지수 자외선 조회 성공 (${location.label}, areaNo ${location.areaNo})`
     };
   } catch (error) {
+    signal?.throwIfAborted();
     const message = error instanceof Error ? error.message : String(error);
     return {
       endpoint: "생활기상 자외선",
@@ -568,7 +577,7 @@ async function fetchLivingUvSignal(location: LocationConfig): Promise<KmaSignal>
   }
 }
 
-async function fetchLivingHeatIndexSignal(location: LocationConfig): Promise<KmaSignal> {
+async function fetchLivingHeatIndexSignal(location: LocationConfig, signal?: AbortSignal): Promise<KmaSignal> {
   try {
     const url = new URL("https://apis.data.go.kr/1360000/LivingWthrIdxServiceV4/getSenTaIdxV4");
     url.searchParams.set("serviceKey", serviceKey);
@@ -579,7 +588,7 @@ async function fetchLivingHeatIndexSignal(location: LocationConfig): Promise<Kma
     url.searchParams.set("time", formatLivingIndexTime());
     url.searchParams.set("requestCode", "A48");
 
-    const text = await fetchWithTimeout(url.toString(), "생활기상 체감온도");
+    const text = await fetchWithTimeout(url.toString(), "생활기상 체감온도", signal);
     const parsed = JSON.parse(text) as LivingWeatherIndexEnvelope;
     const resultCode = parsed.response?.header?.resultCode;
     if (resultCode && resultCode !== "00") {
@@ -602,6 +611,7 @@ async function fetchLivingHeatIndexSignal(location: LocationConfig): Promise<Kma
       detail: `기상청 생활기상지수 체감온도 조회 성공 (${location.label}, requestCode A48, areaNo ${location.areaNo})`
     };
   } catch (error) {
+    signal?.throwIfAborted();
     const message = error instanceof Error ? error.message : String(error);
     return {
       endpoint: "생활기상 체감온도",
@@ -612,7 +622,7 @@ async function fetchLivingHeatIndexSignal(location: LocationConfig): Promise<Kma
   }
 }
 
-async function fetchErythemalUvSignal(location: LocationConfig): Promise<KmaSignal> {
+async function fetchErythemalUvSignal(location: LocationConfig, signal?: AbortSignal): Promise<KmaSignal> {
   try {
     const { date, time } = formatKstHour();
     const url = new URL(kierErythemalUvEndpoint);
@@ -644,7 +654,7 @@ async function fetchErythemalUvSignal(location: LocationConfig): Promise<KmaSign
       url.searchParams.set("lot", String(location.longitude));
     }
 
-    const text = await fetchWithTimeout(url.toString(), "실시간 홍반자외선");
+    const text = await fetchWithTimeout(url.toString(), "실시간 홍반자외선", signal);
     const parsed = JSON.parse(text) as ErythemalUvEnvelope;
     const header = parsed.header || parsed.response?.header;
     const body = parsed.body || parsed.response?.body;
@@ -668,6 +678,7 @@ async function fetchErythemalUvSignal(location: LocationConfig): Promise<KmaSign
       detail: `한국에너지기술연구원 실시간 홍반자외선 조회 성공 (${location.label}, lat ${location.latitude}, lot ${location.longitude})`
     };
   } catch (error) {
+    signal?.throwIfAborted();
     const message = error instanceof Error ? error.message : String(error);
     return {
       endpoint: "실시간 홍반자외선",
@@ -678,7 +689,7 @@ async function fetchErythemalUvSignal(location: LocationConfig): Promise<KmaSign
   }
 }
 
-async function fetchUltraNowSignal(location: LocationConfig): Promise<KmaSignal> {
+async function fetchUltraNowSignal(location: LocationConfig, signal?: AbortSignal): Promise<KmaSignal> {
   const { baseDate, baseTime } = formatUltraNowBase();
   try {
     const items = await fetchKmaItems("getUltraSrtNcst", {
@@ -687,7 +698,7 @@ async function fetchUltraNowSignal(location: LocationConfig): Promise<KmaSignal>
       nx: location.nx,
       ny: location.ny,
       numOfRows: "20"
-    });
+    }, signal);
     const temperature = valueByCategory(items, "T1H", "obsrValue");
     const windSpeed = valueByCategory(items, "WSD", "obsrValue");
     const precipitationType = valueByCategory(items, "PTY", "obsrValue");
@@ -704,6 +715,7 @@ async function fetchUltraNowSignal(location: LocationConfig): Promise<KmaSignal>
       detail: `기상청 초단기실황 호출 성공 (${location.label}, base ${baseDate} ${baseTime})`
     };
   } catch (error) {
+    signal?.throwIfAborted();
     const message = error instanceof Error ? error.message : String(error);
     return {
       endpoint: "초단기실황",
@@ -714,7 +726,7 @@ async function fetchUltraNowSignal(location: LocationConfig): Promise<KmaSignal>
   }
 }
 
-async function fetchUltraForecastSignal(location: LocationConfig): Promise<KmaSignal> {
+async function fetchUltraForecastSignal(location: LocationConfig, signal?: AbortSignal): Promise<KmaSignal> {
   const { baseDate, baseTime } = formatUltraForecastBase();
   try {
     const items = await fetchKmaItems("getUltraSrtFcst", {
@@ -723,7 +735,7 @@ async function fetchUltraForecastSignal(location: LocationConfig): Promise<KmaSi
       nx: location.nx,
       ny: location.ny,
       numOfRows: "60"
-    });
+    }, signal);
     const firstTime = items[0]?.fcstTime;
     const firstDate = items[0]?.fcstDate;
     const current = items.filter((item) => item.fcstDate === firstDate && item.fcstTime === firstTime);
@@ -743,6 +755,7 @@ async function fetchUltraForecastSignal(location: LocationConfig): Promise<KmaSi
       detail: `기상청 초단기예보 호출 성공 (${location.label}, base ${baseDate} ${baseTime})`
     };
   } catch (error) {
+    signal?.throwIfAborted();
     const message = error instanceof Error ? error.message : String(error);
     return {
       endpoint: "초단기예보",
@@ -753,7 +766,7 @@ async function fetchUltraForecastSignal(location: LocationConfig): Promise<KmaSi
   }
 }
 
-async function fetchVillageForecastSignal(location: LocationConfig): Promise<KmaSignal> {
+async function fetchVillageForecastSignal(location: LocationConfig, signal?: AbortSignal): Promise<KmaSignal> {
   const { baseDate, baseTime } = formatKmaBaseDate();
   try {
     const items = await fetchKmaItems("getVilageFcst", {
@@ -762,7 +775,7 @@ async function fetchVillageForecastSignal(location: LocationConfig): Promise<Kma
       nx: location.nx,
       ny: location.ny,
       numOfRows: "80"
-    });
+    }, signal);
     const firstTime = items[0]?.fcstTime;
     const firstDate = items[0]?.fcstDate;
     const current = items.filter((item) => item.fcstDate === firstDate && item.fcstTime === firstTime);
@@ -784,6 +797,7 @@ async function fetchVillageForecastSignal(location: LocationConfig): Promise<Kma
       detail: `기상청 단기예보 호출 성공 (${location.label}, base ${baseDate} ${baseTime})`
     };
   } catch (error) {
+    signal?.throwIfAborted();
     const message = error instanceof Error ? error.message : String(error);
     return {
       endpoint: "단기예보",
@@ -847,7 +861,8 @@ function composeSummary(signals: KmaSignal[]) {
   return `${preferred.summary} (${liveLabels} 반영)`;
 }
 
-export async function fetchWeatherSignal(question: string): Promise<WeatherSignal> {
+export async function fetchWeatherSignal(question: string, signal?: AbortSignal): Promise<WeatherSignal> {
+  signal?.throwIfAborted();
   const location = pickLocation(question);
   const outdoorHeatContext = isOutdoorHeatContext(question);
 
@@ -887,17 +902,17 @@ export async function fetchWeatherSignal(question: string): Promise<WeatherSigna
   }
 
   const baseSignals = await Promise.all([
-    fetchUltraNowSignal(location),
-    fetchUltraForecastSignal(location),
-    fetchVillageForecastSignal(location),
-    fetchWarningSignal(location),
-    fetchImpactForecastSignal(location)
+    fetchUltraNowSignal(location, signal),
+    fetchUltraForecastSignal(location, signal),
+    fetchVillageForecastSignal(location, signal),
+    fetchWarningSignal(location, signal),
+    fetchImpactForecastSignal(location, signal)
   ]);
   const outdoorSignals = outdoorHeatContext
     ? await Promise.all([
-        fetchLivingUvSignal(location),
-        fetchLivingHeatIndexSignal(location),
-        fetchErythemalUvSignal(location)
+        fetchLivingUvSignal(location, signal),
+        fetchLivingHeatIndexSignal(location, signal),
+        fetchErythemalUvSignal(location, signal)
       ])
     : [];
   const signals = [...baseSignals, ...outdoorSignals];

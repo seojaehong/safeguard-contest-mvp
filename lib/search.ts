@@ -2264,11 +2264,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       })
     );
 
-    const weatherPromise = fetchWeatherSignal(question);
-    const trainingPromise = fetchTrainingRecommendations(question);
-    const koshaEducationPromise = fetchKoshaEducationRecommendations(question);
-    const koshaPromise = fetchKoshaReferences(question);
-    const koshaOpenApiPromise = fetchKoshaOpenApiEvidence(question);
+    const weatherPromise = fetchWeatherSignal(question, options.signal);
+    const trainingPromise = fetchTrainingRecommendations(question, options.signal);
+    const koshaEducationPromise = fetchKoshaEducationRecommendations(question, options.signal);
+    const koshaPromise = fetchKoshaReferences(question, options.signal);
+    const koshaOpenApiPromise = fetchKoshaOpenApiEvidence(question, options.signal);
     // Track D / E: Supabase safety_reference_items (9,920 rows) RAG.
     // Boost KOSHA technical-* types ahead of generic sif-case rows so the
     // most authoritative refs (KOSHA 기술지침 / 기술지원규정) actually show up.

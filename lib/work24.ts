@@ -131,7 +131,7 @@ function scoreCourseFit(question: string, course: Work24Course): Work24Course {
   };
 }
 
-async function fetchCourseXml(params: Record<string, string>) {
+async function fetchCourseXml(params: Record<string, string>, signal?: AbortSignal) {
   const { start, end } = currentDateRange();
   const url = new URL("https://www.work24.go.kr/cm/openApi/call/hr/callOpenApiSvcInfo311L01.do");
   url.searchParams.set("authKey", authKey);
@@ -148,7 +148,7 @@ async function fetchCourseXml(params: Record<string, string>) {
     if (value) url.searchParams.set(key, value);
   });
 
-  const response = await fetch(url.toString(), { cache: "no-store" });
+  const response = await fetch(url.toString(), { cache: "no-store", signal });
   const text = await response.text();
   if (!response.ok || text.includes("<error>")) {
     throw new Error(text.slice(0, 200));
@@ -156,7 +156,7 @@ async function fetchCourseXml(params: Record<string, string>) {
   return text;
 }
 
-export async function fetchTrainingRecommendations(question: string): Promise<{
+export async function fetchTrainingRecommendations(question: string, signal?: AbortSignal): Promise<{
   source: "work24";
   mode: IntegrationMode;
   detail: string;
@@ -175,8 +175,8 @@ export async function fetchTrainingRecommendations(question: string): Promise<{
 
   try {
     const [foreignXml, safetyXml] = await Promise.all([
-      fetchCourseXml({ srchNcs1: "23", srchTraProcessNm: "외국인", ...(area1 ? { srchTraArea1: area1 } : {}) }),
-      fetchCourseXml({ srchNcs1: "23", srchTraProcessNm: "안전", ...(area1 ? { srchTraArea1: area1 } : {}) })
+      fetchCourseXml({ srchNcs1: "23", srchTraProcessNm: "외국인", ...(area1 ? { srchTraArea1: area1 } : {}) }, signal),
+      fetchCourseXml({ srchNcs1: "23", srchTraProcessNm: "안전", ...(area1 ? { srchTraArea1: area1 } : {}) }, signal)
     ]);
 
     const merged = [...parseCourses(foreignXml), ...parseCourses(safetyXml)]
@@ -196,6 +196,7 @@ export async function fetchTrainingRecommendations(question: string): Promise<{
       recommendations
     };
   } catch (error) {
+    signal?.throwIfAborted();
     const message = error instanceof Error ? error.message : String(error);
     return {
       source: "work24",

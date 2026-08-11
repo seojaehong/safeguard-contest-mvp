@@ -401,6 +401,7 @@ describe("current-base runAsk retrieval provenance", () => {
       "고소작업",
       expect.any(Array),
       phaseAGrounding,
+      undefined,
     );
   }, 30_000);
 

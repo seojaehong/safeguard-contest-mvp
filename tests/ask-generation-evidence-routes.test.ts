@@ -209,4 +209,27 @@ describe("ask generation evidence routes", () => {
 
     expect(receivedSignal?.aborted).toBe(true);
   });
+
+  it("aborts JSON work when the request disconnects", async () => {
+    let receivedSignal: AbortSignal | undefined;
+    mocks.runAsk.mockImplementationOnce(async (_question, options: { signal?: AbortSignal }) => {
+      receivedSignal = options.signal;
+      await new Promise<never>((_resolve, reject) => {
+        options.signal?.addEventListener("abort", () => reject(options.signal?.reason), { once: true });
+      });
+    });
+    const controller = new AbortController();
+    const { POST } = await import("@/app/api/ask/route");
+    const pending = POST(requestWithBody(
+      "/api/ask",
+      { question: "성수동 외벽 도장 작업" },
+      { ip: "203.0.113.90", signal: controller.signal },
+    ));
+    await vi.waitFor(() => expect(receivedSignal).toBeInstanceOf(AbortSignal));
+    const reason = new Error("request disconnected");
+    controller.abort(reason);
+
+    await expect(pending).rejects.toBe(reason);
+    expect(receivedSignal?.aborted).toBe(true);
+  });
 });

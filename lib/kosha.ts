@@ -10,13 +10,27 @@ type VerifiedOfficialResource = OfficialSafetyResource & {
 const REQUEST_TIMEOUT_MS = 5_000;
 const RETRY_COUNT = 1;
 
-async function wait(ms: number) {
-  await new Promise((resolve) => setTimeout(resolve, ms));
+async function wait(ms: number, signal?: AbortSignal) {
+  signal?.throwIfAborted();
+  await new Promise<void>((resolve, reject) => {
+    const abort = () => {
+      clearTimeout(timeout);
+      reject(signal?.reason);
+    };
+    const timeout = setTimeout(() => {
+      signal?.removeEventListener("abort", abort);
+      resolve();
+    }, ms);
+    signal?.addEventListener("abort", abort, { once: true });
+  });
 }
 
-async function fetchWithTimeout(url: string): Promise<boolean> {
+async function fetchWithTimeout(url: string, signal?: AbortSignal): Promise<boolean> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const abortFromCaller = () => controller.abort(signal?.reason);
+  signal?.throwIfAborted();
+  signal?.addEventListener("abort", abortFromCaller, { once: true });
+  const timeout = setTimeout(() => controller.abort(new Error("official safety resource timeout")), REQUEST_TIMEOUT_MS);
 
   try {
     const response = await fetch(url, {
@@ -31,6 +45,7 @@ async function fetchWithTimeout(url: string): Promise<boolean> {
     return response.ok && (text.length > 0 || response.headers.has("content-type"));
   } finally {
     clearTimeout(timeout);
+    signal?.removeEventListener("abort", abortFromCaller);
   }
 }
 
@@ -38,17 +53,18 @@ function toSourceKind(kind: OfficialSafetyResource["kind"]): VerifiedOfficialRes
   return kind === "press" ? "board" : kind;
 }
 
-async function verifyReference(reference: OfficialSafetyResource): Promise<VerifiedOfficialResource> {
+async function verifyReference(reference: OfficialSafetyResource, signal?: AbortSignal): Promise<VerifiedOfficialResource> {
   let verified = false;
   let lastError: unknown;
 
   for (let attempt = 0; attempt <= RETRY_COUNT; attempt += 1) {
     try {
-      verified = await fetchWithTimeout(reference.url);
+      verified = await fetchWithTimeout(reference.url, signal);
       if (verified) break;
     } catch (error) {
+      signal?.throwIfAborted();
       lastError = error;
-      if (attempt < RETRY_COUNT) await wait(400);
+      if (attempt < RETRY_COUNT) await wait(400, signal);
     }
   }
 
@@ -64,14 +80,14 @@ async function verifyReference(reference: OfficialSafetyResource): Promise<Verif
   };
 }
 
-export async function fetchKoshaReferences(question: string): Promise<{
+export async function fetchKoshaReferences(question: string, signal?: AbortSignal): Promise<{
   source: "kosha";
   mode: IntegrationMode;
   detail: string;
   references: VerifiedOfficialResource[];
 }> {
   const selected = pickOfficialSafetyResources(question);
-  const verifiedReferences = await Promise.all(selected.map((reference) => verifyReference(reference)));
+  const verifiedReferences = await Promise.all(selected.map((reference) => verifyReference(reference, signal)));
   const verifiedCount = verifiedReferences.filter((reference) => reference.verified).length;
 
   return {
