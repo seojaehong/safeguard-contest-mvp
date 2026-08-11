@@ -2157,7 +2157,7 @@ function createFixtureRoot(): string {
     },
   });
   writeJson(rootDir, path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"), {
-    verdict: "REVIEW_REQUIRED_CONFLICTING_SAME_TARGET_SCANS_FAIL_OPEN_RECEIPTS",
+    verdict: "PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS",
     targetRevision: "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
     scans: [
       { scanId: "8fe9c06a-018c-446f-aa98-1b37df95287a", reportableFindingCount: 17, deferredCandidateCount: 1 },
@@ -2175,8 +2175,23 @@ function createFixtureRoot(): string {
       deferredCandidateCount: 2,
       securityCompleteClaimAllowed: false,
     },
+    correctedFreshScan: {
+      scanId: "c4e9e2f1-7ce4-4313-a651-32205fca401f",
+      targetRevision: "910eccb713848aa4aee26f0c411ed0f07ada04a6",
+      status: "complete",
+      mode: "standard",
+      coverageCompleteness: "partial",
+      reviewedSurfaceCount: 4,
+      reportableFindingCount: 14,
+      severityCounts: { medium: 8, low: 6 },
+      deferredCandidateCount: 9,
+      sourceIncludesLaterProductCommit: true,
+      machinePredicatesAlignedWithDispositions: true,
+      securityCompleteClaimAllowed: false,
+    },
     requiredResolution: {
-      correctedFreshFullRepositoryScanRequired: true,
+      correctedFreshFullRepositoryScanRequired: false,
+      correctedFreshFullRepositoryScanCompleted: true,
       receiptPredicatesMustMatchDisposition: true,
       originalScansMustRemainImmutable: true,
     },
@@ -3202,11 +3217,12 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("two deferred candidates");
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "repository_security_scan_reconciliation")).toMatchObject({
-      state: "notice",
+      state: "proven",
       evidencePath: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
     });
     expect(audit.gates.find((gate) => gate.id === "repository_security_scan_reconciliation")?.detail).toContain("17 findings / 1 deferred versus 0 / 0");
     expect(audit.gates.find((gate) => gate.id === "repository_security_scan_reconciliation")?.detail).toContain("two fail-open receipt contradictions");
+    expect(audit.gates.find((gate) => gate.id === "repository_security_scan_reconciliation")?.detail).toContain("14 open findings");
     expect(audit.gates.find((gate) => gate.id === "repository_security_scan_reconciliation")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")).toMatchObject({
       state: "notice",

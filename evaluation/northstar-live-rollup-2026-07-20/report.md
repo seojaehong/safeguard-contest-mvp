@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-11T04:57:33.758Z
-Source HEAD at generation: 33a8167060d1f3433131ff687bd14eb4920e7520
-Live commit at generation: 33a8167060d1f3433131ff687bd14eb4920e7520
+Generated at: 2026-08-11T05:36:33.713Z
+Source HEAD at generation: 910eccb713848aa4aee26f0c411ed0f07ada04a6
+Live commit at generation: 910eccb713848aa4aee26f0c411ed0f07ada04a6
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -122,10 +122,10 @@ Overall: `northstar_open_approval_gated`
 
 ## Repository Security Scan Reconciliation
 
-- Verdict: `REVIEW_REQUIRED_CONFLICTING_SAME_TARGET_SCANS_FAIL_OPEN_RECEIPTS`
+- Verdict: `PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS`
 - Same-target sealed scans: 2; finding delta=17
 - Fail-open receipt contradictions: 2; zero-finding accepted=false
-- Corrected fresh scan required: true; later deferred candidates=2
+- Corrected fresh scan: completed=true, id=c4e9e2f1-7ce4-4313-a651-32205fca401f, target=910eccb713848aa4aee26f0c411ed0f07ada04a6, reportable=14, deferred=9, coverage=partial, security-complete=false
 - Exact saved Share: MISSING_EVIDENCE
 
 ## MCP Generation Work-Budget Security
@@ -198,7 +198,7 @@ Overall: `northstar_open_approval_gated`
 | public_provider_work_budget | proven | evaluation\public-provider-work-budget-2026-08-01\report.json |
 | document_export_work_budget | proven | evaluation\document-export-work-budget-2026-08-01\report.json |
 | full_repository_security_scan | proven | evaluation\follow-up-full-repository-security-scan-2026-08-02\report.json |
-| repository_security_scan_reconciliation | notice | evaluation\repository-security-scan-reconciliation-2026-08-11\report.json |
+| repository_security_scan_reconciliation | proven | evaluation\repository-security-scan-reconciliation-2026-08-11\report.json |
 | public_search_distributed_rate_limit_readiness | notice | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
 | public_generation_admission_security | notice | evaluation\security-public-generation-admission-2026-08-04\report.json |
 | security_followup_remediation | proven | evaluation\codex-security-followup-remediation-2026-08-11\report.json |

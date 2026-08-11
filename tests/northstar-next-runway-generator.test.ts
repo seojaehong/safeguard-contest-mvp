@@ -263,6 +263,11 @@ type NextRunwayReport = {
     receiptContradictionCount: number | null;
     laterDeferredCandidateCount: number | null;
     correctedFreshScanRequired: boolean;
+    correctedFreshScanCompleted: boolean;
+    correctedScanId: string;
+    correctedReportableFindingCount: number | null;
+    correctedDeferredCandidateCount: number | null;
+    securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
   publicSearchDistributedRateLimitReadiness: {
@@ -1756,13 +1761,24 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     boundaries: { originalBaselineRewritten: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
   writeJson(root, "evaluation/repository-security-scan-reconciliation-2026-08-11/report.json", {
-    verdict: "REVIEW_REQUIRED_CONFLICTING_SAME_TARGET_SCANS_FAIL_OPEN_RECEIPTS",
+    verdict: "PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS",
     targetRevision: "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
     scans: [{}, {}],
     sameTargetConflict: { findingCountDelta: 17, zeroFindingClaimAcceptedForNorthstar: false },
     canonicalReceiptContradictions: [{}, {}],
     laterSecurityChain: { deferredCandidateCount: 2 },
-    requiredResolution: { correctedFreshFullRepositoryScanRequired: true },
+    correctedFreshScan: {
+      scanId: "c4e9e2f1-7ce4-4313-a651-32205fca401f",
+      targetRevision: "910eccb713848aa4aee26f0c411ed0f07ada04a6",
+      reportableFindingCount: 14,
+      deferredCandidateCount: 9,
+      coverageCompleteness: "partial",
+      securityCompleteClaimAllowed: false,
+    },
+    requiredResolution: {
+      correctedFreshFullRepositoryScanRequired: false,
+      correctedFreshFullRepositoryScanCompleted: true,
+    },
     boundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
   writeJson(root, "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json", {
@@ -2507,18 +2523,23 @@ describe("northstar next runway generator", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.repositorySecurityScanReconciliation).toMatchObject({
-      verdict: "REVIEW_REQUIRED_CONFLICTING_SAME_TARGET_SCANS_FAIL_OPEN_RECEIPTS",
+      verdict: "PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS",
       conflictingScanCount: 2,
       findingCountDelta: 17,
       zeroFindingClaimAccepted: false,
       receiptContradictionCount: 2,
       laterDeferredCandidateCount: 2,
-      correctedFreshScanRequired: true,
+      correctedFreshScanRequired: false,
+      correctedFreshScanCompleted: true,
+      correctedScanId: "c4e9e2f1-7ce4-4313-a651-32205fca401f",
+      correctedReportableFindingCount: 14,
+      correctedDeferredCandidateCount: 9,
+      securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
-    expect(report.noticeState).toContainEqual(expect.objectContaining({
+    expect(report.provenCurrentState).toContain("repository_security_scan_reconciliation");
+    expect(report.noticeState).not.toContainEqual(expect.objectContaining({
       gate: "repository_security_scan_reconciliation",
-      state: "notice",
     }));
     expect(report.mcpGenerationWorkBudgetSecurity).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",

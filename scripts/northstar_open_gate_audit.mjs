@@ -3778,6 +3778,8 @@ function evaluateRepositorySecurityScanReconciliationGate(rootDir) {
     ? report.canonicalReceiptContradictions.filter(isRecord)
     : [];
   const later = isRecord(report.laterSecurityChain) ? report.laterSecurityChain : {};
+  const corrected = isRecord(report.correctedFreshScan) ? report.correctedFreshScan : {};
+  const correctedSeverity = isRecord(corrected.severityCounts) ? corrected.severityCounts : {};
   const resolution = isRecord(report.requiredResolution) ? report.requiredResolution : {};
   const boundaries = isRecord(report.boundaries) ? report.boundaries : {};
   const noMutation = boundaries.dbMutationPerformed === false
@@ -3788,7 +3790,7 @@ function evaluateRepositorySecurityScanReconciliationGate(rootDir) {
     && boundaries.koshaRegistryMutationPerformed === false;
   const partialScan = scans.find((scan) => readString(scan.scanId) === "8fe9c06a-018c-446f-aa98-1b37df95287a");
   const zeroScan = scans.find((scan) => readString(scan.scanId) === "03305068-49ff-4b73-8a24-84a91e64ff56");
-  const pass = readString(report.verdict) === "REVIEW_REQUIRED_CONFLICTING_SAME_TARGET_SCANS_FAIL_OPEN_RECEIPTS"
+  const pass = readString(report.verdict) === "PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS"
     && readString(report.targetRevision) === "f0c8a7be02becd53c21fb80842cf23c571f22b1f"
     && scans.length === 2
     && readNumber(partialScan?.reportableFindingCount) === 17
@@ -3806,7 +3808,21 @@ function evaluateRepositorySecurityScanReconciliationGate(rootDir) {
     && readNumber(later.remediatedFindingCount) === 3
     && readNumber(later.deferredCandidateCount) === 2
     && later.securityCompleteClaimAllowed === false
-    && resolution.correctedFreshFullRepositoryScanRequired === true
+    && readString(corrected.scanId) === "c4e9e2f1-7ce4-4313-a651-32205fca401f"
+    && readString(corrected.targetRevision) === "910eccb713848aa4aee26f0c411ed0f07ada04a6"
+    && readString(corrected.status) === "complete"
+    && readString(corrected.mode) === "standard"
+    && readString(corrected.coverageCompleteness) === "partial"
+    && readNumber(corrected.reviewedSurfaceCount) === 4
+    && readNumber(corrected.reportableFindingCount) === 14
+    && readNumber(correctedSeverity.medium) === 8
+    && readNumber(correctedSeverity.low) === 6
+    && readNumber(corrected.deferredCandidateCount) === 9
+    && corrected.sourceIncludesLaterProductCommit === true
+    && corrected.machinePredicatesAlignedWithDispositions === true
+    && corrected.securityCompleteClaimAllowed === false
+    && resolution.correctedFreshFullRepositoryScanRequired === false
+    && resolution.correctedFreshFullRepositoryScanCompleted === true
     && resolution.receiptPredicatesMustMatchDisposition === true
     && resolution.originalScansMustRemainImmutable === true
     && noMutation
@@ -3816,13 +3832,13 @@ function evaluateRepositorySecurityScanReconciliationGate(rootDir) {
   return gateResult({
     id: "repository_security_scan_reconciliation",
     label: "Repository security scan reconciliation",
-    state: pass ? "notice" : "contradicted",
+    state: pass ? "proven" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Two immutable sealed scans claim the same f0c8a7be target but disagree 17 findings / 1 deferred versus 0 / 0. The zero-finding scan also contains two fail-open receipt contradictions, so Northstar does not accept it as security-complete. A later diff scan's three findings are remediated, but two deferred candidates remain; a corrected fresh full scan is required, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      ? "The immutable f0c8a7be scans remain preserved at 17 findings / 1 deferred versus 0 / 0, and the zero-finding scan's two fail-open receipt contradictions remain rejected. Corrected Standard scan c4e9e2f1 is sealed at 910eccb7 with 14 open findings (8 medium, 6 low), partial coverage, and 9 deferred candidates. Reconciliation is proven, not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
       : `Reconciliation verdict=${readString(report.verdict) || "unknown"}, scans=${scans.length}, conflict=${conflict.present === true}, zeroAccepted=${conflict.zeroFindingClaimAcceptedForNorthstar === true}, receiptContradictions=${contradictions.length}, laterFindings=${readNumber(later.sealedFindingCount)}, laterDeferred=${readNumber(later.deferredCandidateCount)}, freshScanRequired=${resolution.correctedFreshFullRepositoryScanRequired === true}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
-      ? ["Run a corrected full repository scan at or after c4f58947 and require every no-issue disposition to agree with its machine predicates."]
+      ? ["Remediate the 14 current-source findings and preserve all 9 deferred candidates; rerun after each bounded wave without rewriting the immutable baselines."]
       : ["Restore both immutable scan results, both receipt contradictions, the later diff-scan boundary, and the corrected-rescan requirement."],
   });
 }

@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `33a8167060d1f3433131ff687bd14eb4920e7520`
+Source HEAD: `910eccb713848aa4aee26f0c411ed0f07ada04a6`
 
-Production `/api/build-info`: `33a8167060d1f3433131ff687bd14eb4920e7520`
+Production `/api/build-info`: `910eccb713848aa4aee26f0c411ed0f07ada04a6`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `33a8167060d1f3433131ff687bd14eb4920e7520`
+Live rollup source head: `910eccb713848aa4aee26f0c411ed0f07ada04a6`
 
 Live rollup matches production: `true`
 
@@ -53,7 +53,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live product capability truth is measured separately: `PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH`; manual/provider dispatch is `preview_only` with reason `persistent_idempotency_unavailable`, scheduled briefing email ready=`false`, photo Vision/OCR ready/accepted-only=`true/true`, and AI modes are `template, enhanced, full`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains `MISSING_EVIDENCE` and Documents/Share IA remains `OPEN_SEPARATE_VIEWPORT_IA_WAVE`.
 - Public generation admission security is measured separately: `PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN`, live mode `instance`, dependency vulnerabilities `0`, distributed hardening open=`true`, and fresh diff scan required=`true`. This notice does not close multi-instance protection, the immutable scan finding, approval-gated operations, or exact saved Share; exact saved Share remains `MISSING_EVIDENCE`.
 - Security follow-up remediation is separately proven: `PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP`, sealed findings `3`, focused tests `129`, and remaining security work `0`. The immutable original baseline remains `18` findings with rewritten=`false`; two deferred candidates and the separate public-admission notice remain visible, no live provider cancellation probe is claimed, and exact saved Share remains `MISSING_EVIDENCE`.
-- Repository security scan reconciliation remains a notice: `REVIEW_REQUIRED_CONFLICTING_SAME_TARGET_SCANS_FAIL_OPEN_RECEIPTS`. The same target has `2` incompatible sealed scans with a `17`-finding delta and `2` fail-open receipt contradictions. Zero-finding accepted=`false`; corrected fresh scan required=`true`, later deferred candidates=`2`, and exact saved Share remains `MISSING_EVIDENCE`.
+- Repository security scan reconciliation is `PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS`. The immutable same-target scans and `2` fail-open contradictions remain preserved; zero-finding accepted=`false`. Corrected scan completed=`true`, id=`c4e9e2f1-7ce4-4313-a651-32205fca401f`, reportable=`14`, deferred=`9`, coverage=`partial`, security-complete=`false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - MCP generation work-budget security is separately measured: `PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING`, POST body budget `98304` bytes, adjacent tests `77`, valid authenticated runtime probe pending=`true`, distributed activation pending=`true`, and fresh rescan required=`true`. This notice preserves the sealed finding and exact saved Share `MISSING_EVIDENCE`.
 - Live Hermes reviewer authority UI is measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI`, local/live viewport contracts `8/8` and `8/8`, with authority order `SIF -> KOSHA -> law -> organization_history -> site_history -> external_context`. Human review remains required and machine evidence does not replace it; no DB/provider/share/publication mutation is claimed. Exact saved Share remains `MISSING_EVIDENCE`, while LLM Wiki publication and Supabase RLS remain approval-gated.
 - Live supporting-document scenario grounding is measured separately: `PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT`, live cases `5/5`, supporting documents `30/30`, cross-scenario leakage `0`, and missingUnexpected `0`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains `MISSING_EVIDENCE`.
