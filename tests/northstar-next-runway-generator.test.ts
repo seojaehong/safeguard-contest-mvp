@@ -478,6 +478,19 @@ type NextRunwayReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  improvementPhotoAnalysisBudget: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    findingId: string;
+    maxRequestBytes: number | null;
+    aggregateConcurrency: number | null;
+    liveCaseCount: number;
+    distributedProductionActivation: string;
+    followUpSecurityScan: string;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   mcpGenerationWorkBudgetSecurity: {
     verdict: string;
     sourceHead: string;
@@ -1782,6 +1795,20 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/improvement-photo-analysis-budget-2026-08-11/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_WITH_INSTANCE_ADMISSION",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    scan: { findingId: "csf_4632cfb321a45b5f7429daef" },
+    budgets: { maxRequestBytes: 42991616, aggregateConcurrency: 2 },
+    liveVerification: { cases: [{}, {}] },
+    remainingBoundaries: {
+      distributedProductionActivation: "INSTANCE_FALLBACK_ACTIVE_NOT_DISTRIBUTED",
+      followUpSecurityScan: "REQUIRED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/repository-security-scan-reconciliation-2026-08-11/report.json", {
     verdict: "PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS",
     targetRevision: "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
@@ -2568,6 +2595,21 @@ describe("northstar next runway generator", () => {
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
+    expect(report.improvementPhotoAnalysisBudget).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_WITH_INSTANCE_ADMISSION",
+      findingId: "csf_4632cfb321a45b5f7429daef",
+      maxRequestBytes: 42991616,
+      aggregateConcurrency: 2,
+      liveCaseCount: 2,
+      distributedProductionActivation: "INSTANCE_FALLBACK_ACTIVE_NOT_DISTRIBUTED",
+      followUpSecurityScan: "REQUIRED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "improvement_photo_analysis_budget",
+      state: "notice",
+    }));
     expect(report.provenCurrentState).toContain("repository_security_scan_reconciliation");
     expect(report.noticeState).not.toContainEqual(expect.objectContaining({
       gate: "repository_security_scan_reconciliation",

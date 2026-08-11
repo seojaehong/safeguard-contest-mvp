@@ -50,6 +50,7 @@ const EVIDENCE_PATHS = Object.freeze({
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
+  improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
@@ -4265,6 +4266,122 @@ function evaluatePublicJsonRequestBodyBudgetGate(rootDir) {
   });
 }
 
+const IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS = [
+  "app/api/input-photos/hazard-analysis/route.ts",
+  "app/api/workpacks/[id]/improvements/route.ts",
+  "lib/photo-vision-analysis.ts",
+  "lib/public-distributed-rate-limit.ts",
+];
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateImprovementPhotoAnalysisBudgetGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.improvementPhotoAnalysisBudget;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "improvement_photo_analysis_budget",
+      label: "Improvement photo analysis budget",
+      state: "missing",
+      evidencePath,
+      detail: "Improvement photo request-budget evidence is missing or invalid.",
+      nextActions: ["Restore the scoped evidence without rewriting the immutable corrected scan."],
+    });
+  }
+
+  const scan = isRecord(report.scan) ? report.scan : {};
+  const budgets = isRecord(report.budgets) ? report.budgets : {};
+  const controls = isRecord(report.controls) ? report.controls : {};
+  const admission = isRecord(report.admission) ? report.admission : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const tests = isRecord(verification.focusedAndAdjacentTests) ? verification.focusedAndAdjacentTests : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const live = isRecord(report.liveVerification) ? report.liveVerification : {};
+  const liveCases = Array.isArray(live.cases) ? live.cases.filter(isRecord) : [];
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutation.dbSchemaMutation === false
+    && mutation.dbDataMutation === false
+    && mutation.providerDispatchCalled === false
+    && mutation.photoVisionProviderCalledDuringEvidence === false
+    && mutation.shareSessionCreated === false
+    && mutation.vectorOrEmbeddingMutation === false
+    && mutation.wikiPublication === false
+    && mutation.koshaExactRegistryMutation === false;
+  const sharedLiveAdmission = liveCases.length === 2
+    && liveCases.every((item) => readNumber(item.status) === 401
+      && readString(item.rateLimitMode) === "instance"
+      && readString(item.workUnit) === "photo-analysis"
+      && item.multipartParsed === false
+      && item.providerCalled === false);
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_WITH_INSTANCE_ADMISSION"
+    && sourceHead.length > 0
+    && productionCommit.length > 0
+    && isGitAncestor(rootDir, sourceHead)
+    && isGitAncestor(rootDir, productionCommit)
+    && report.productionIncludesProductCommit === true
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
+    && readString(scan.scanId) === "c4e9e2f1-7ce4-4313-a651-32205fca401f"
+    && readString(scan.findingId) === "csf_4632cfb321a45b5f7429daef"
+    && readString(scan.anchor) === "improvement-photo-analysis-unbounded"
+    && scan.immutableFindingPreserved === true
+    && scan.followUpScanRequired === true
+    && readNumber(budgets.maxRequestBytes) === 42_991_616
+    && readNumber(budgets.maxAggregatePhotoBytes) === 41_943_040
+    && readNumber(budgets.maxBytesPerPhoto) === 20_971_520
+    && readNumber(budgets.maxImprovementPhotoFiles) === 2
+    && readNumber(budgets.rateLimitPerMinute) === 8
+    && readNumber(budgets.aggregateConcurrency) === 2
+    && controls.contentLengthRequiredBeforeMultipartParse === true
+    && controls.oversizedDeclaredBodyRejectedBeforeMultipartParse === true
+    && controls.aggregateBytesCheckedAfterParseBeforeProvider === true
+    && controls.unexpectedFileFieldsRejected === true
+    && controls.mimeAllowlistChecked === true
+    && controls.fileSignatureChecked === true
+    && controls.improvementAnalyzerRevalidatesFiles === true
+    && controls.dedicatedAndImprovementRoutesShareAdmission === true
+    && controls.providerCalledOnRejectedInput === false
+    && controls.dbWriteCalledOnRejectedInput === false
+    && readString(admission.productionDistributedActivation) === "INSTANCE_FALLBACK_ACTIVE"
+    && readNumber(tests.files) === 7
+    && readNumber(tests.tests) === 76
+    && readString(tests.status) === "PASS"
+    && verification.typecheck === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && verification.diffCheck === "PASS"
+    && verification.secretScan === "PASS"
+    && live.buildInfoCommit === productionCommit
+    && readString(live.status) === "PASS_READ_ONLY_ADMISSION_PROBE"
+    && sharedLiveAdmission
+    && noMutation
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && remaining.securityCompleteClaimAllowed === false
+    && remaining.remainingScanFindingsStayVisible === true
+    && readString(remaining.distributedProductionActivation) === "INSTANCE_FALLBACK_ACTIVE_NOT_DISTRIBUTED"
+    && readString(remaining.followUpSecurityScan) === "REQUIRED";
+
+  return gateResult({
+    id: "improvement_photo_analysis_budget",
+    label: "Improvement photo analysis budget",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Improvement and dedicated photo analysis now share pre-provider byte, count, MIME/signature, rate, and concurrency controls with 76 tests, typecheck, build, and live admission headers. Production currently reports instance fallback rather than distributed admission, the immutable 14-finding scan remains unchanged, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+      : `Improvement photo verdict=${readString(report.verdict) || "unknown"}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)}, liveCases=${liveCases.length}, admission=${readString(admission.productionDistributedActivation) || "missing"}, tests=${readNumber(tests.tests)}, followUp=${readString(remaining.followUpSecurityScan) || "missing"}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Activate approved distributed photo-analysis admission before treating process-instance fallback as horizontally durable.",
+          "Keep the canonical findings visible until a fresh follow-up security scan revalidates the patched source.",
+        ]
+      : ["Restore deployed source ancestry, file budgets, shared live admission, verification totals, no-mutation boundaries, follow-up scan requirement, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
 const MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS = [
   "app/api/mcp/[transport]/implementation.ts",
   "app/api/mcp/[transport]/route.ts",
@@ -5402,6 +5519,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateFullRepositorySecurityScanGate(rootDir),
     evaluateRepositorySecurityScanReconciliationGate(rootDir),
     evaluatePublicJsonRequestBodyBudgetGate(rootDir),
+    evaluateImprovementPhotoAnalysisBudgetGate(rootDir),
     evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir),
     evaluatePublicGenerationAdmissionSecurityGate(rootDir),
     evaluateSecurityFollowupRemediationGate(rootDir),
