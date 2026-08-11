@@ -22,7 +22,7 @@ Authoritative source and production are aligned at `137ea586f84b5abed5f307fb283d
 ## Current Proof
 
 - Documents: 48/48 live rows across 12 documents, Day/Night, 1440x723 and 390x723; minimum and required pane margin are both 32px.
-- Workspace Share: the original current-head geometry evidence at `137ea586` passed all 8 scoped rows, but a stronger outer step-status fit contract found both desktop rows RED: the rail was 264px and two status labels overflowed by up to 37px. Product commit `4544e3dc` expands the route-scoped rail to 1180px and passes all 8 current-source local rows with zero status overflow. Live after-deployment proof remains pending.
+- Workspace Share: the original current-head geometry evidence at `137ea586` passed all 8 scoped rows, but a stronger outer step-status fit contract found both desktop rows RED: the rail was 264px and two status labels overflowed by up to 37px. Product commit `4544e3dc` expands the route-scoped rail to 1180px; all 8 local and live rows now pass with zero status overflow, with live evidence aligned at `b9275601`.
 - Current source retains mobile core-document priority, section navigation, document preview tracking, Share evidence scoping, and persistent-idempotency fail-closed policy.
 - New UI work must start from the authoritative branch and produce fresh 1440x723 and 390x723 evidence before making another current-head Share claim.
 

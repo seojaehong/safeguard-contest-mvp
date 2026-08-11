@@ -1,10 +1,10 @@
 # Workspace Share Step Status Fit
 
-Verdict: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_WORKSPACE_STEP_STATUS_FIT_LIVE_PENDING`
+Verdict: `PASS_LIVE_PRODUCTION_WORKSPACE_STEP_STATUS_FIT`
 
 Product commit: `4544e3dc64db7ca52ed9521dcea572c149f0dbb7`
 
-Production baseline: `137ea586f84b5abed5f307fb283d9d8eb1ea57d2`
+Live evidence commit: `b92756011c887b3257b3317896327a3be93369c8`
 
 ## Before Live
 
@@ -28,6 +28,10 @@ Current-source local production passes all eight Workspace Share and invited-rec
 
 Mobile remains intentionally stacked and all mobile rows pass. The fix is scoped to desktop Documents/Share route state and does not alter the input route or Share's internal three-zone contract.
 
+## After Live
+
+Production reached the evidence-containing commit `b9275601`. The same eight-row probe passes live with source and production aligned: both desktop rails are 1180px, all step-status overflow counts are zero, desktop-short page height remains 723px, and mobile remains intentionally stacked.
+
 ## Verification
 
 - Focused browser contract: RED then GREEN.
@@ -38,4 +42,4 @@ Mobile remains intentionally stacked and all mobile rows pass. The fix is scoped
 
 ## Boundary
 
-Live after-deployment verification is pending. This scoped Workspace/invited-fixture evidence does not reproduce an exact saved user `/share/[sessionId]`; that boundary remains `MISSING_EVIDENCE`. No DB, provider, Share-session, vector, wiki, or KOSHA-registry mutation was performed. Route splitting alone is not accepted as the UX fix.
+This scoped Workspace/invited-fixture evidence does not reproduce an exact saved user `/share/[sessionId]`; that boundary remains `MISSING_EVIDENCE`. No DB, provider, Share-session, vector, wiki, or KOSHA-registry mutation was performed. Route splitting alone is not accepted as the UX fix.

@@ -97,8 +97,10 @@
     "strongerStepStatusFitFollowUp": "evaluation/share-workspace-step-status-fit-2026-08-12/report.json",
     "strongerStepStatusFitBeforeLiveVerdict": "RED_LIVE_PRODUCTION_SCOPED_WORKSPACE_OR_INVITED_FIXTURE",
     "strongerStepStatusFitAfterLocalVerdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SCOPED_WORKSPACE_AND_INVITED_FIXTURE",
+    "strongerStepStatusFitAfterLiveVerdict": "PASS_LIVE_PRODUCTION_SCOPED_WORKSPACE_AND_INVITED_FIXTURE",
     "strongerStepStatusFitProductCommit": "4544e3dc64db7ca52ed9521dcea572c149f0dbb7",
-    "strongerStepStatusFitLivePending": true
+    "strongerStepStatusFitLiveEvidenceCommit": "b92756011c887b3257b3317896327a3be93369c8",
+    "strongerStepStatusFitLivePending": false
   },
   "currentSourceContracts": {
     "mobileCoreLauncher": "components/CurrentWorkpackModules.tsx",
@@ -125,7 +127,7 @@
     "koshaRegistryMutated": false
   },
   "remainingBoundaries": {
-    "freshCurrentHeadShareProbeRequiredForNewShareClaim": true,
+    "freshCurrentHeadShareProbeRequiredForNewShareClaim": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "providerDispatchPersistence": "approval_gated",
     "supabaseRlsLaunchIsolation": "approval_gated",

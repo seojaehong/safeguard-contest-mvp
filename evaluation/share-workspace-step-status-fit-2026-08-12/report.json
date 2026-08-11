@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-share-workspace-step-status-fit/v1",
   "checkedAt": "2026-08-11T12:48:06.142Z",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_WORKSPACE_STEP_STATUS_FIT_LIVE_PENDING",
+  "verdict": "PASS_LIVE_PRODUCTION_WORKSPACE_STEP_STATUS_FIT",
   "productCommit": "4544e3dc64db7ca52ed9521dcea572c149f0dbb7",
-  "productionCommit": "137ea586f84b5abed5f307fb283d9d8eb1ea57d2",
+  "productionCommit": "b92756011c887b3257b3317896327a3be93369c8",
   "sourceHeadMatchesProduction": false,
   "beforeLive": {
     "artifact": "evaluation/share-workspace-step-status-fit-2026-08-12/before-live/report.json",
@@ -44,6 +44,28 @@
       "rootWidthRatio": 0.82
     }
   },
+  "afterLive": {
+    "artifact": "evaluation/share-workspace-step-status-fit-2026-08-12/after-live/report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_SCOPED_WORKSPACE_AND_INVITED_FIXTURE",
+    "sourceHead": "b92756011c887b3257b3317896327a3be93369c8",
+    "productionCommit": "b92756011c887b3257b3317896327a3be93369c8",
+    "pass": 8,
+    "fail": 0,
+    "desktopShort": {
+      "workspaceSideNavWidth": 1180,
+      "workspaceStepStatusOverflowCount": 0,
+      "workspaceStepStatusMaxOverflow": 0,
+      "pageHeight": 723,
+      "rootWidthRatio": 0.82
+    },
+    "desktop": {
+      "workspaceSideNavWidth": 1180,
+      "workspaceStepStatusOverflowCount": 0,
+      "workspaceStepStatusMaxOverflow": 0,
+      "pageHeight": 963,
+      "rootWidthRatio": 0.82
+    }
+  },
   "verification": {
     "focusedRedThenGreen": true,
     "shareBrowserAndStaticTests": {
@@ -60,7 +82,7 @@
     "build": "PASS",
     "staticPages": 28
   },
-  "liveAfterDeploymentPending": true,
+  "liveAfterDeploymentPending": false,
   "routeSplitAloneAcceptedAsFix": false,
   "exactSavedUserSessionReproduced": false,
   "exactSavedSessionVerdict": "MISSING_EVIDENCE",

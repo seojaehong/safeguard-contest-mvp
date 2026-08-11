@@ -1,6 +1,6 @@
 # Share Desktop Perception Probe
 
-Checked at: 2026-08-11T12:51:48.197Z
+Checked at: 2026-08-11T12:51:27.723Z
 
 Base URL: `https://www.safeclaw.kr`
 
