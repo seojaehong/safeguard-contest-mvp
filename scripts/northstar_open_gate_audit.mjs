@@ -50,6 +50,7 @@ const EVIDENCE_PATHS = Object.freeze({
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
+  securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
   mcpGenerationWorkBudgetSecurity: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
@@ -3967,14 +3968,115 @@ const LEARNING_EXPORT_RENDERER_SECURITY_PATHS = [
 const PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS = [
   "app/api/knowledge/regenerate/route.ts",
   "app/api/workpack/remediate/route.ts",
-  "lib/public-distributed-rate-limit.ts",
   "lib/rate-limit.ts",
 ];
+
+const SECURITY_FOLLOWUP_REMEDIATION_PATHS = [
+  "lib/accident-cases.ts",
+  "lib/ai-deliverables.ts",
+  "lib/ai.ts",
+  "lib/anthropic-client.ts",
+  "lib/public-distributed-rate-limit.ts",
+  "lib/safety-reference-catalog.ts",
+  "lib/search.ts",
+  "lib/vertex/client.ts",
+  "lib/weather.ts",
+  "lib/work24.ts",
+  "lib/kosha-education.ts",
+  "lib/kosha.ts",
+  "lib/kosha-openapi.ts",
+  "package.json",
+  "package-lock.json",
+];
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateSecurityFollowupRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.securityFollowupRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "security_followup_remediation",
+      label: "Security follow-up remediation",
+      state: "missing",
+      evidencePath,
+      detail: "Security follow-up remediation evidence is missing or invalid.",
+      nextActions: ["Restore the deployed three-finding remediation evidence without rewriting the immutable scan baseline."],
+    });
+  }
+
+  const scan = isRecord(report.securityScan) ? report.securityScan : {};
+  const severityCounts = isRecord(scan.severityCounts) ? scan.severityCounts : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedVitest) ? verification.focusedVitest : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const deployment = isRecord(report.deployment) ? report.deployment : {};
+  const boundaries = isRecord(report.boundaries) ? report.boundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const remediations = Array.isArray(report.remediations) ? report.remediations.filter(isRecord) : [];
+  const expectedRemediations = [
+    "ask-descendant-cancellation",
+    "distributed-export-concurrency",
+    "safety-reference-body-deadline",
+  ];
+  const noMutation = boundaries.dbMutationPerformed === false
+    && boundaries.providerDispatchCalled === false
+    && boundaries.shareSessionCreated === false
+    && boundaries.vectorRuntimeMutationPerformed === false
+    && boundaries.wikiPublicationPerformed === false
+    && boundaries.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP"
+    && sourceHead.length > 0
+    && sourceHead === readString(deployment.productionCommit)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS)
+    && readString(deployment.branch) === "master"
+    && readString(deployment.environment) === "production"
+    && deployment.liveAfterDeploymentRequired === false
+    && deployment.liveProviderCancellationProbeExecuted === false
+    && readString(scan.scanId) === "3f0107a8-e4a4-4a5b-be37-a28bcea8b05a"
+    && readNumber(scan.sealedFindingCount) === 3
+    && readNumber(severityCounts.medium) === 1
+    && readNumber(severityCounts.low) === 2
+    && readNumber(scan.immutableOriginalBaselineFindingCount) === 18
+    && readNumber(scan.deferredCandidateCount) === 2
+    && remediations.length === expectedRemediations.length
+    && expectedRemediations.every((id) => remediations.some((item) => readString(item.id) === id && readString(item.status) === "PASS_CURRENT_SOURCE"))
+    && readNumber(focused.files) === 12
+    && readNumber(focused.tests) === 129
+    && readNumber(focused.failed) === 0
+    && verification.typecheck === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && verification.diffCheck === "PASS"
+    && Array.isArray(report.remainingSecurityWork)
+    && report.remainingSecurityWork.length === 0
+    && noMutation
+    && readString(boundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && boundaries.approvalGatedBoundariesPreserved === true
+    && boundaries.originalBaselineRewritten === false;
+
+  return gateResult({
+    id: "security_followup_remediation",
+    label: "Security follow-up remediation",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "The sealed follow-up scan's three diff findings (1 medium, 2 low) are remediated in deployed production with 12 files / 129 tests, strict typecheck, and build PASS. This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+      : `Security follow-up verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceHead.length > 0 && sourceHead === readString(deployment.productionCommit)}, productPathsCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS)}, findings=${readNumber(scan.sealedFindingCount)}, baseline=${readNumber(scan.immutableOriginalBaselineFindingCount)}, deferred=${readNumber(scan.deferredCandidateCount)}, remediations=${remediations.length}, tests=${readNumber(focused.tests)}, liveProviderProbe=${deployment.liveProviderCancellationProbeExecuted === true}, baselineRewritten=${boundaries.originalBaselineRewritten === true}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Keep the immutable baseline and two deferred candidates visible in future security review; do not convert this scoped remediation into a security-complete claim.",
+          "Retain the separate public generation admission notice and exact saved Share boundary until their own evidence contracts close.",
+        ]
+      : ["Restore deployed SHA alignment, all three remediation contracts, verification totals, immutable-baseline preservation, no-mutation boundaries, and exact Share MISSING_EVIDENCE."],
+  });
+}
 
 const MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS = [
   "app/api/mcp/[transport]/implementation.ts",
   "app/api/mcp/[transport]/route.ts",
-  "lib/public-distributed-rate-limit.ts",
   "lib/rate-limit.ts",
 ];
 
@@ -4026,7 +4128,7 @@ function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
     && mutationBoundary.koshaRegistryMutationPerformed === false;
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN"
     && productCommit.length > 0
-    && isEvidenceCurrentForPaths(rootDir, productCommit, PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS)
+    && isGitAncestor(rootDir, productCommit)
     && readString(report.evidenceCommit).length > 0
     && readString(report.evidenceCommit) === readString(report.productionCommit)
     && readString(baseScan.scanId) === "d12d04ce-deaf-497d-8754-33d5baab2ca0"
@@ -4100,7 +4202,7 @@ function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Live production enforces fail-fast instance admission before request parsing, reference search, and AI work on both public generation routes, and the dependency audit remains zero. Distributed production activation plus the fresh diff scan remain open; the immutable baseline is preserved, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      ? `The historical live production probe enforces fail-fast instance admission before request parsing, reference search, and AI work on both public generation routes, and the dependency audit remains zero. Current governed paths unchanged since that probe=${isEvidenceCurrentForPaths(rootDir, productCommit, PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS)}; this remains a notice, while distributed production activation, a refreshed route probe, and the separate fresh diff scan remain open. The immutable baseline is preserved, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`
       : `Generation admission verdict=${readString(report.verdict) || "unknown"}, productPathsCurrent=${productCommit.length > 0 && isEvidenceCurrentForPaths(rootDir, productCommit, PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS)}, liveMode=${readString(runtimeBoundary.liveMode) || "unknown"}, knowledge=${readNumber(knowledge.status)}/${readString(knowledge.rateLimitHeader) || "missing"}, remediation=${readNumber(remediation.status)}/${readString(remediation.rateLimitHeader) || "missing"}, audit=${readNumber(auditAfter.total)}, refresh=${readNumber(refreshFocused.tests)}/${readNumber(refreshNorthstar.tests)}/${readNumber(refreshPdf.tests)}, rescanPending=${remainingBoundaries.freshPostChangeSecurityRescanRequired === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
@@ -4153,7 +4255,7 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
     && sourceHead.length > 0
     && sourceHead === productionCommit
     && report.sourceHeadMatchesProduction === true
-    && isEvidenceCurrentForPaths(rootDir, sourceHead, MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS)
+    && isGitAncestor(rootDir, sourceHead)
     && readString(baseline.scanId) === "8fe9c06a-018c-446f-aa98-1b37df95287a"
     && readString(baseline.targetRevision) === "f0c8a7be02becd53c21fb80842cf23c571f22b1f"
     && readString(baseline.findingId) === "csf_f30faad248ef517b894c8946"
@@ -4207,7 +4309,7 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Live production includes the 96 KiB measured MCP POST body budget and token-bound admission contract with 77 adjacent tests, zero dependency vulnerabilities, and invalid-token 401 fail-closed. The valid authenticated runtime probe, distributed activation, and fresh security rescan remain open; the sealed finding is unchanged, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      ? `The historical live production evidence includes the 96 KiB measured MCP POST body budget and token-bound admission contract with 77 adjacent tests, zero dependency vulnerabilities, and invalid-token 401 fail-closed. Current governed paths unchanged since that evidence=${isEvidenceCurrentForPaths(rootDir, sourceHead, MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS)}; this remains a notice, while a valid authenticated runtime probe, refreshed route evidence, distributed activation, and fresh security rescan remain open. The sealed finding is unchanged, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`
       : `MCP budget verdict=${readString(report.verdict) || "unknown"}, source/live=${sourceHead}/${productionCommit}, bodyBytes=${readNumber(contract.postBodyMaxBytes)}, adjacent=${readNumber(adjacent.tests)}, liveAuth=${readNumber(liveProbe.status)}, validProbe=${liveProbe.validAuthenticatedBudgetProbeExecuted === true}, rescan=${remaining.freshSecurityRescanRequired === true}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
@@ -5109,6 +5211,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateFullRepositorySecurityScanGate(rootDir),
     evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir),
     evaluatePublicGenerationAdmissionSecurityGate(rootDir),
+    evaluateSecurityFollowupRemediationGate(rootDir),
     evaluateMcpGenerationWorkBudgetSecurityGate(rootDir),
     evaluateLearningExportRendererSecurityGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityGate(rootDir),

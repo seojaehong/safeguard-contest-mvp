@@ -439,6 +439,19 @@ type NextRunwayReport = {
     freshRescanRequired: boolean;
     exactSavedShareVerdict: string;
   };
+  securityFollowupRemediation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    sealedFindingCount: number | null;
+    immutableOriginalBaselineFindingCount: number | null;
+    deferredCandidateCount: number | null;
+    focusedTests: number | null;
+    liveProviderCancellationProbeExecuted: boolean;
+    remainingSecurityWorkCount: number | null;
+    originalBaselineRewritten: boolean;
+    exactSavedShareVerdict: string;
+  };
   mcpGenerationWorkBudgetSecurity: {
     verdict: string;
     sourceHead: string;
@@ -1722,6 +1735,15 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/codex-security-followup-remediation-2026-08-11/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP",
+    sourceHead: "fixture-sha",
+    securityScan: { sealedFindingCount: 3, immutableOriginalBaselineFindingCount: 18, deferredCandidateCount: 2 },
+    verification: { focusedVitest: { tests: 129 } },
+    deployment: { productionCommit: "fixture-sha", liveProviderCancellationProbeExecuted: false },
+    remainingSecurityWork: [],
+    boundaries: { originalBaselineRewritten: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  });
   writeJson(root, "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
     sourceHead: "fixture-sha",
@@ -2449,6 +2471,18 @@ describe("northstar next runway generator", () => {
       distributedHardeningOpen: true,
       vulnerabilityCount: 0,
       freshRescanRequired: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.provenCurrentState).toContain("security_followup_remediation");
+    expect(report.securityFollowupRemediation).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP",
+      sealedFindingCount: 3,
+      immutableOriginalBaselineFindingCount: 18,
+      deferredCandidateCount: 2,
+      focusedTests: 129,
+      liveProviderCancellationProbeExecuted: false,
+      remainingSecurityWorkCount: 0,
+      originalBaselineRewritten: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.mcpGenerationWorkBudgetSecurity).toMatchObject({

@@ -35,6 +35,7 @@ const ARTIFACTS = Object.freeze({
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
+  securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
   mcpGenerationWorkBudgetSecurity: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
@@ -337,6 +338,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const fullRepositorySecurityScan = tryReadJson(rootDir, ARTIFACTS.fullRepositorySecurityScan);
   const publicSearchDistributedRateLimitReadiness = tryReadJson(rootDir, ARTIFACTS.publicSearchDistributedRateLimitReadiness);
   const publicGenerationAdmissionSecurity = tryReadJson(rootDir, ARTIFACTS.publicGenerationAdmissionSecurity);
+  const securityFollowupRemediation = tryReadJson(rootDir, ARTIFACTS.securityFollowupRemediation);
   const mcpGenerationWorkBudgetSecurity = tryReadJson(rootDir, ARTIFACTS.mcpGenerationWorkBudgetSecurity);
   const learningExportRendererSecurity = tryReadJson(rootDir, ARTIFACTS.learningExportRendererSecurity);
   const hermesKnowledgeReviewAuthorityUi = tryReadJson(rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
@@ -429,6 +431,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "full_repository_security_scan", ARTIFACTS.fullRepositorySecurityScan, fullRepositorySecurityScan),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_search_distributed_rate_limit_readiness", ARTIFACTS.publicSearchDistributedRateLimitReadiness, publicSearchDistributedRateLimitReadiness),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_generation_admission_security", ARTIFACTS.publicGenerationAdmissionSecurity, publicGenerationAdmissionSecurity),
+    evidenceStatus(rootDir, currentHead, liveCommit, "security_followup_remediation", ARTIFACTS.securityFollowupRemediation, securityFollowupRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "mcp_generation_work_budget_security", ARTIFACTS.mcpGenerationWorkBudgetSecurity, mcpGenerationWorkBudgetSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "learning_export_renderer_security", ARTIFACTS.learningExportRendererSecurity, learningExportRendererSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_knowledge_review_ui", ARTIFACTS.hermesKnowledgeReviewAuthorityUi, hermesKnowledgeReviewAuthorityUi),
@@ -618,6 +621,22 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       freshRescanRequired: recordAt(publicGenerationAdmissionSecurity, "remainingBoundaries")?.freshPostChangeSecurityRescanRequired === true,
       vulnerabilityCount: asNumber(recordAt(recordAt(publicGenerationAdmissionSecurity, "verification"), "npmAudit")?.vulnerabilityCount),
       exactSavedShareVerdict: asString(recordAt(publicGenerationAdmissionSecurity, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    securityFollowupRemediation: {
+      artifact: ARTIFACTS.securityFollowupRemediation,
+      verdict: isRecord(securityFollowupRemediation) ? asString(securityFollowupRemediation.verdict) : "missing",
+      sourceHead: isRecord(securityFollowupRemediation) ? asString(securityFollowupRemediation.sourceHead) : "",
+      productionCommit: asString(recordAt(securityFollowupRemediation, "deployment")?.productionCommit),
+      sealedFindingCount: asNumber(recordAt(securityFollowupRemediation, "securityScan")?.sealedFindingCount),
+      immutableOriginalBaselineFindingCount: asNumber(recordAt(securityFollowupRemediation, "securityScan")?.immutableOriginalBaselineFindingCount),
+      deferredCandidateCount: asNumber(recordAt(securityFollowupRemediation, "securityScan")?.deferredCandidateCount),
+      focusedTests: asNumber(recordAt(recordAt(securityFollowupRemediation, "verification"), "focusedVitest")?.tests),
+      liveProviderCancellationProbeExecuted: recordAt(securityFollowupRemediation, "deployment")?.liveProviderCancellationProbeExecuted === true,
+      remainingSecurityWorkCount: isRecord(securityFollowupRemediation) && Array.isArray(securityFollowupRemediation.remainingSecurityWork)
+        ? securityFollowupRemediation.remainingSecurityWork.length
+        : null,
+      originalBaselineRewritten: recordAt(securityFollowupRemediation, "boundaries")?.originalBaselineRewritten === true,
+      exactSavedShareVerdict: asString(recordAt(securityFollowupRemediation, "boundaries")?.exactSavedShareVerdict),
     },
     mcpGenerationWorkBudgetSecurity: {
       artifact: ARTIFACTS.mcpGenerationWorkBudgetSecurity,
@@ -1100,6 +1119,14 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Dependency audit vulnerabilities: ${rollup.publicGenerationAdmissionSecurity.vulnerabilityCount ?? "unknown"}`,
     `- Fresh diff scan required: ${rollup.publicGenerationAdmissionSecurity.freshRescanRequired}`,
     `- Exact saved Share: ${rollup.publicGenerationAdmissionSecurity.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "",
+    "## Security Follow-up Remediation",
+    "",
+    `- Verdict: \`${rollup.securityFollowupRemediation.verdict}\``,
+    `- Sealed findings remediated: ${rollup.securityFollowupRemediation.sealedFindingCount ?? "unknown"}; focused tests: ${rollup.securityFollowupRemediation.focusedTests ?? "unknown"}`,
+    `- Immutable original baseline: ${rollup.securityFollowupRemediation.immutableOriginalBaselineFindingCount ?? "unknown"}; rewritten=${rollup.securityFollowupRemediation.originalBaselineRewritten}`,
+    `- Deferred candidates retained: ${rollup.securityFollowupRemediation.deferredCandidateCount ?? "unknown"}; live provider cancellation probe executed=${rollup.securityFollowupRemediation.liveProviderCancellationProbeExecuted}`,
+    `- Exact saved Share: ${rollup.securityFollowupRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "",
     "## MCP Generation Work-Budget Security",
     `- Verdict: \`${rollup.mcpGenerationWorkBudgetSecurity.verdict}\``,

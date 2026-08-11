@@ -222,6 +222,19 @@ type RollupReport = {
     vulnerabilityCount: number | null;
     exactSavedShareVerdict: string;
   };
+  securityFollowupRemediation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    sealedFindingCount: number | null;
+    immutableOriginalBaselineFindingCount: number | null;
+    deferredCandidateCount: number | null;
+    focusedTests: number | null;
+    liveProviderCancellationProbeExecuted: boolean;
+    remainingSecurityWorkCount: number | null;
+    originalBaselineRewritten: boolean;
+    exactSavedShareVerdict: string;
+  };
   mcpGenerationWorkBudgetSecurity: {
     verdict: string;
     sourceHead: string;
@@ -326,6 +339,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "full_repository_security_scan", state: "proven", evidencePath: "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json", detail: "sealed follow-up scan with 17 reportable findings and one deferred candidate" },
       { id: "public_search_distributed_rate_limit_readiness", state: "notice", evidencePath: "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json", detail: "current-source capability with production configuration pending" },
       { id: "public_generation_admission_security", state: "notice", evidencePath: "evaluation/security-public-generation-admission-2026-08-04/report.json", detail: "live instance admission with distributed hardening and fresh rescan pending" },
+      { id: "security_followup_remediation", state: "proven", evidencePath: "evaluation/codex-security-followup-remediation-2026-08-11/report.json", detail: "deployed three-finding remediation with immutable baseline preserved" },
       { id: "learning_export_renderer_security", state: "proven", evidencePath: "evaluation/learning-export-renderer-security-2026-08-02/report.json", detail: "renderer-independent inert learning export source contract" },
       { id: "live_document_secondary_grounding", state: "proven", evidencePath: "evaluation/live-document-secondary-grounding-2026-07-25/report.json", detail: "all 30 supporting documents passed scenario grounding" },
       { id: "live_document_seed_profile_isolation", state: "proven", evidencePath: "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", detail: "all 60 documents passed seed-profile isolation" },
@@ -889,6 +903,15 @@ function createFixtureRoot(): { root: string; head: string } {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/codex-security-followup-remediation-2026-08-11/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP",
+    sourceHead: "TO_FILL",
+    securityScan: { sealedFindingCount: 3, immutableOriginalBaselineFindingCount: 18, deferredCandidateCount: 2 },
+    verification: { focusedVitest: { tests: 129 } },
+    deployment: { productionCommit: "TO_FILL", liveProviderCancellationProbeExecuted: false },
+    remainingSecurityWork: [],
+    boundaries: { originalBaselineRewritten: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  });
   writeJson(root, "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
     sourceHead: "TO_FILL",
@@ -939,6 +962,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json",
     "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json",
     "evaluation/security-public-generation-admission-2026-08-04/report.json",
+    "evaluation/codex-security-followup-remediation-2026-08-11/report.json",
     "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json",
     "evaluation/learning-export-renderer-security-2026-08-02/report.json",
     "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
@@ -1183,6 +1207,17 @@ describe("northstar live rollup", () => {
       distributedHardeningOpen: true,
       freshRescanRequired: true,
       vulnerabilityCount: 0,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.securityFollowupRemediation).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP",
+      sealedFindingCount: 3,
+      immutableOriginalBaselineFindingCount: 18,
+      deferredCandidateCount: 2,
+      focusedTests: 129,
+      liveProviderCancellationProbeExecuted: false,
+      remainingSecurityWorkCount: 0,
+      originalBaselineRewritten: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.mcpGenerationWorkBudgetSecurity).toMatchObject({

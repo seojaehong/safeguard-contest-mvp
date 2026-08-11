@@ -2115,6 +2115,47 @@ function createFixtureRoot(): string {
       distributedProductionLimiterStillRecommended: true,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP",
+    sourceHead: "fixture-sha",
+    securityScan: {
+      scanId: "3f0107a8-e4a4-4a5b-be37-a28bcea8b05a",
+      sealedFindingCount: 3,
+      severityCounts: { medium: 1, low: 2 },
+      immutableOriginalBaselineFindingCount: 18,
+      deferredCandidateCount: 2,
+    },
+    remediations: [
+      { id: "ask-descendant-cancellation", status: "PASS_CURRENT_SOURCE" },
+      { id: "distributed-export-concurrency", status: "PASS_CURRENT_SOURCE" },
+      { id: "safety-reference-body-deadline", status: "PASS_CURRENT_SOURCE" },
+    ],
+    verification: {
+      focusedVitest: { files: 12, tests: 129, failed: 0 },
+      typecheck: "PASS",
+      build: { status: "PASS", staticPages: 28 },
+      diffCheck: "PASS",
+    },
+    deployment: {
+      liveAfterDeploymentRequired: false,
+      productionCommit: "fixture-sha",
+      branch: "master",
+      environment: "production",
+      liveProviderCancellationProbeExecuted: false,
+    },
+    remainingSecurityWork: [],
+    boundaries: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorRuntimeMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      approvalGatedBoundariesPreserved: true,
+      originalBaselineRewritten: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
     sourceHead: "fixture-sha",
@@ -3117,6 +3158,14 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("instance admission");
     expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("fresh diff scan remain open");
     expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("three diff findings");
+    expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("original 18-finding baseline");
+    expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("two deferred candidates");
+    expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")).toMatchObject({
       state: "notice",
       evidencePath: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
@@ -3294,10 +3343,20 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     mcp.productionCommit = "self-asserted";
     fs.writeFileSync(mcpPath, `${JSON.stringify(mcp, null, 2)}\n`, "utf8");
 
+    const followupPath = path.join(rootDir, "evaluation", "codex-security-followup-remediation-2026-08-11", "report.json");
+    const followup = JSON.parse(fs.readFileSync(followupPath, "utf8")) as {
+      sourceHead: string;
+      deployment: { productionCommit: string };
+    };
+    followup.sourceHead = "self-asserted";
+    followup.deployment.productionCommit = "self-asserted";
+    fs.writeFileSync(followupPath, `${JSON.stringify(followup, null, 2)}\n`, "utf8");
+
     const audit = buildNorthstarOpenGateAudit({ rootDir });
     expect(audit.gates.find((gate) => gate.id === "learning_export_renderer_security")?.state).toBe("contradicted");
     expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.state).toBe("contradicted");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.state).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.state).toBe("contradicted");
   });
 
   it("invalidates only security gates whose governed paths changed after evidence", async () => {
@@ -3309,8 +3368,31 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
 
     const audit = buildNorthstarOpenGateAudit({ rootDir });
     expect(audit.gates.find((gate) => gate.id === "learning_export_renderer_security")?.state).toBe("proven");
-    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.state).toBe("contradicted");
-    expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.state).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.state).toBe("notice");
+    expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.state).toBe("notice");
+    expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.state).toBe("contradicted");
+  });
+
+  it("keeps security follow-up non-closure boundaries fail-closed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "codex-security-followup-remediation-2026-08-11", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      deployment: { liveProviderCancellationProbeExecuted: boolean };
+      boundaries: { exactSavedShareVerdict: string; originalBaselineRewritten: boolean };
+    };
+    report.deployment.liveProviderCancellationProbeExecuted = true;
+    report.boundaries.exactSavedShareVerdict = "PASS";
+    report.boundaries.originalBaselineRewritten = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("liveProviderProbe=true");
+    expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("baselineRewritten=true");
+    expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("exactShare=PASS");
   });
 
   it("fails the standalone dispatch gate closed when mobile-short leaves the first viewport", async () => {

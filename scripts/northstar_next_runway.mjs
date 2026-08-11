@@ -39,6 +39,7 @@ const ARTIFACTS = Object.freeze({
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
+  securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
   mcpGenerationWorkBudgetSecurity: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
@@ -1300,6 +1301,31 @@ function publicGenerationAdmissionSecuritySummary(report) {
 }
 
 /** @param {unknown} report */
+function securityFollowupRemediationSummary(report) {
+  if (!isRecord(report)) return {};
+  const scan = isRecord(report.securityScan) ? report.securityScan : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedVitest) ? verification.focusedVitest : {};
+  const deployment = isRecord(report.deployment) ? report.deployment : {};
+  const boundaries = isRecord(report.boundaries) ? report.boundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(deployment.productionCommit),
+    sealedFindingCount: typeof scan.sealedFindingCount === "number" ? scan.sealedFindingCount : null,
+    immutableOriginalBaselineFindingCount: typeof scan.immutableOriginalBaselineFindingCount === "number"
+      ? scan.immutableOriginalBaselineFindingCount
+      : null,
+    deferredCandidateCount: typeof scan.deferredCandidateCount === "number" ? scan.deferredCandidateCount : null,
+    focusedTests: typeof focused.tests === "number" ? focused.tests : null,
+    liveProviderCancellationProbeExecuted: asBoolean(deployment.liveProviderCancellationProbeExecuted),
+    remainingSecurityWorkCount: Array.isArray(report.remainingSecurityWork) ? report.remainingSecurityWork.length : null,
+    originalBaselineRewritten: asBoolean(boundaries.originalBaselineRewritten),
+    exactSavedShareVerdict: asString(boundaries.exactSavedShareVerdict),
+  };
+}
+
+/** @param {unknown} report */
 function mcpGenerationWorkBudgetSecuritySummary(report) {
   if (!isRecord(report)) return {};
   const contract = isRecord(report.currentSourceContract) ? report.currentSourceContract : {};
@@ -1687,6 +1713,10 @@ export function buildNorthstarNextRunway(options) {
     options.rootDir,
     ARTIFACTS.publicGenerationAdmissionSecurity,
   );
+  const securityFollowupRemediation = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.securityFollowupRemediation,
+  );
   const mcpGenerationWorkBudgetSecurity = readOptionalJson(
     options.rootDir,
     ARTIFACTS.mcpGenerationWorkBudgetSecurity,
@@ -1740,6 +1770,7 @@ export function buildNorthstarNextRunway(options) {
   const publicGenerationAdmissionSecurityResult = publicGenerationAdmissionSecuritySummary(
     publicGenerationAdmissionSecurity,
   );
+  const securityFollowupRemediationResult = securityFollowupRemediationSummary(securityFollowupRemediation);
   const mcpGenerationWorkBudgetSecurityResult = mcpGenerationWorkBudgetSecuritySummary(
     mcpGenerationWorkBudgetSecurity,
   );
@@ -1786,6 +1817,7 @@ export function buildNorthstarNextRunway(options) {
       "public_provider_work_budget",
       "document_export_work_budget",
       "full_repository_security_scan",
+      "security_followup_remediation",
       "learning_export_renderer_security",
       "hermes_knowledge_review_authority",
       "hermes_knowledge_review_ui",
@@ -1869,6 +1901,7 @@ export function buildNorthstarNextRunway(options) {
     fullRepositorySecurityScan: fullRepositorySecuritySummary,
     publicSearchDistributedRateLimitReadiness: publicSearchDistributedRateLimitReadinessResult,
     publicGenerationAdmissionSecurity: publicGenerationAdmissionSecurityResult,
+    securityFollowupRemediation: securityFollowupRemediationResult,
     mcpGenerationWorkBudgetSecurity: mcpGenerationWorkBudgetSecurityResult,
     learningExportRendererSecurity: learningExportRendererSecurityResult,
     hermesKnowledgeReviewAuthorityUi: hermesKnowledgeReviewAuthorityUiSummary(hermesKnowledgeReviewAuthorityUi),
@@ -1997,6 +2030,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Live editorial near-duplicate classification preserves \`${report.liveDocumentEditorialNearClassification.beforeNearDuplicateLineOveruseCount ?? 0}->${report.liveDocumentEditorialNearClassification.liveNearDuplicateLineOveruseCount ?? 0}\` findings while reducing unclassified human-review-required \`${report.liveDocumentEditorialNearClassification.beforeHumanReviewRequiredCount ?? 0}->${report.liveDocumentEditorialNearClassification.liveHumanReviewRequiredCount ?? 0}\`. The retained role-prefix/context/hazard/control categories are \`${report.liveDocumentEditorialNearClassification.rolePrefixVariantCount ?? 0}/${report.liveDocumentEditorialNearClassification.independentContextCount ?? 0}/${report.liveDocumentEditorialNearClassification.hazardConsistencyCount ?? 0}/${report.liveDocumentEditorialNearClassification.controlConsistencyCount ?? 0}\`; humanReviewCompleted=\`${report.liveDocumentEditorialNearClassification.humanReviewCompleted === true}\` and exact saved Share remains \`${report.liveDocumentEditorialNearClassification.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live product capability truth is measured separately: \`${report.productCapabilityTruth.verdict || "missing"}\`; manual/provider dispatch is \`${report.productCapabilityTruth.dispatchMode || "unknown"}\` with reason \`${report.productCapabilityTruth.dispatchReason || "unknown"}\`, scheduled briefing email ready=\`${report.productCapabilityTruth.briefingEmailReady === true}\`, photo Vision/OCR ready/accepted-only=\`${report.productCapabilityTruth.photoVisionReady === true}/${report.productCapabilityTruth.photoAcceptedOnly === true}\`, and AI modes are \`${report.productCapabilityTruth.aiModes?.join(", ") || "missing"}\`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains \`${report.productCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}\` and Documents/Share IA remains \`${report.productCapabilityTruth.documentsShareIaVerdict || "OPEN_SEPARATE_VIEWPORT_IA_WAVE"}\`.
 - Public generation admission security is measured separately: \`${report.publicGenerationAdmissionSecurity.verdict || "missing"}\`, live mode \`${report.publicGenerationAdmissionSecurity.liveMode || "unknown"}\`, dependency vulnerabilities \`${report.publicGenerationAdmissionSecurity.vulnerabilityCount ?? "unknown"}\`, distributed hardening open=\`${report.publicGenerationAdmissionSecurity.distributedHardeningOpen === true}\`, and fresh diff scan required=\`${report.publicGenerationAdmissionSecurity.freshRescanRequired === true}\`. This notice does not close multi-instance protection, the immutable scan finding, approval-gated operations, or exact saved Share; exact saved Share remains \`${report.publicGenerationAdmissionSecurity.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
+- Security follow-up remediation is separately proven: \`${report.securityFollowupRemediation.verdict || "missing"}\`, sealed findings \`${report.securityFollowupRemediation.sealedFindingCount ?? "unknown"}\`, focused tests \`${report.securityFollowupRemediation.focusedTests ?? "unknown"}\`, and remaining security work \`${report.securityFollowupRemediation.remainingSecurityWorkCount ?? "unknown"}\`. The immutable original baseline remains \`${report.securityFollowupRemediation.immutableOriginalBaselineFindingCount ?? "unknown"}\` findings with rewritten=\`${report.securityFollowupRemediation.originalBaselineRewritten === true}\`; two deferred candidates and the separate public-admission notice remain visible, no live provider cancellation probe is claimed, and exact saved Share remains \`${report.securityFollowupRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - MCP generation work-budget security is separately measured: \`${report.mcpGenerationWorkBudgetSecurity.verdict || "missing"}\`, POST body budget \`${report.mcpGenerationWorkBudgetSecurity.postBodyMaxBytes ?? "unknown"}\` bytes, adjacent tests \`${report.mcpGenerationWorkBudgetSecurity.adjacentTests ?? "unknown"}\`, valid authenticated runtime probe pending=\`${report.mcpGenerationWorkBudgetSecurity.validAuthenticatedRuntimeProbeRequired === true}\`, distributed activation pending=\`${report.mcpGenerationWorkBudgetSecurity.distributedActivationRequired === true}\`, and fresh rescan required=\`${report.mcpGenerationWorkBudgetSecurity.freshRescanRequired === true}\`. This notice preserves the sealed finding and exact saved Share \`${report.mcpGenerationWorkBudgetSecurity.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live Hermes reviewer authority UI is measured separately: \`${report.hermesKnowledgeReviewAuthorityUi.verdict || "missing"}\`, local/live viewport contracts \`${report.hermesKnowledgeReviewAuthorityUi.localPassed ?? 0}/${report.hermesKnowledgeReviewAuthorityUi.localViewportCount ?? 0}\` and \`${report.hermesKnowledgeReviewAuthorityUi.livePassed ?? 0}/${report.hermesKnowledgeReviewAuthorityUi.liveViewportCount ?? 0}\`, with authority order \`${report.hermesKnowledgeReviewAuthorityUi.sourceOrder?.join(" -> ") || "missing"}\`. Human review remains required and machine evidence does not replace it; no DB/provider/share/publication mutation is claimed. Exact saved Share remains \`${report.hermesKnowledgeReviewAuthorityUi.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`, while LLM Wiki publication and Supabase RLS remain approval-gated.
 - Live supporting-document scenario grounding is measured separately: \`${report.liveDocumentSecondaryGrounding.verdict || "missing"}\`, live cases \`${report.liveDocumentSecondaryGrounding.livePassed ?? 0}/5\`, supporting documents \`${report.liveDocumentSecondaryGrounding.secondaryPassed ?? 0}/${report.liveDocumentSecondaryGrounding.secondaryReviewed ?? 0}\`, cross-scenario leakage \`${report.liveDocumentSecondaryGrounding.crossScenarioLeakageCount ?? 0}\`, and missingUnexpected \`${report.liveDocumentSecondaryGrounding.missingUnexpectedCount ?? 0}\`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains \`${report.liveDocumentSecondaryGrounding.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
