@@ -6,13 +6,23 @@ import {
   type WorkspaceDatabase
 } from "@/lib/supabase-admin";
 import { isRecord, readString } from "@/lib/workspace-api";
-import { analyzeImprovementPhotos, buildImprovementAnalysisPayload } from "@/lib/photo-vision-analysis";
+import {
+  analyzeImprovementPhotos,
+  buildImprovementAnalysisPayload,
+  MAX_HAZARD_PHOTO_REQUEST_BYTES,
+  MAX_HAZARD_PHOTO_TOTAL_BYTES,
+  validateHazardPhotoFile
+} from "@/lib/photo-vision-analysis";
+import { withPublicPhotoAnalysisAdmission } from "@/lib/public-distributed-rate-limit";
 import { buildImprovementDraft, buildImprovementPhotoPath } from "@/lib/workpack-commercial";
 import { loadOwnedWorkpackOperationContext } from "@/lib/workpack-commercial-store";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+export const maxDuration = 60;
 
 const IMPROVEMENT_PHOTO_BUCKET = "safeclaw-improvement-photos";
+const MAX_IMPROVEMENT_PHOTO_FILES = 2;
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -37,6 +47,17 @@ type PhotoUploadResult = {
   message: string;
 };
 
+class ImprovementRequestError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly code: string
+  ) {
+    super(message);
+    this.name = "ImprovementRequestError";
+  }
+}
+
 function readStringArray(value: unknown) {
   if (!Array.isArray(value)) return [];
   return value.filter((item): item is string => typeof item === "string").map((item) => item.trim()).filter(Boolean);
@@ -54,7 +75,36 @@ function readFormString(form: FormData, key: string) {
 async function readImprovementRequest(request: NextRequest): Promise<ImprovementRequest> {
   const contentType = request.headers.get("content-type") || "";
   if (contentType.includes("multipart/form-data")) {
-    const form = await request.formData();
+    let form: FormData;
+    try {
+      form = await request.formData();
+    } catch (error) {
+      console.error("improvement multipart parse failed", error);
+      throw new ImprovementRequestError("개선사진 요청 형식을 읽지 못했습니다.", 400, "invalid_multipart");
+    }
+    const photoEntries = Array.from(form.entries()).filter(
+      (entry): entry is [string, File] => typeof File !== "undefined" && entry[1] instanceof File
+    );
+    if (photoEntries.some(([key]) => key !== "beforePhoto" && key !== "afterPhoto")) {
+      throw new ImprovementRequestError("개선사진은 beforePhoto와 afterPhoto 필드만 지원합니다.", 400, "unexpected_photo_field");
+    }
+    if (photoEntries.length > MAX_IMPROVEMENT_PHOTO_FILES) {
+      throw new ImprovementRequestError("개선사진은 Before/After 각 1장만 첨부할 수 있습니다.", 400, "too_many_photos");
+    }
+    const totalPhotoBytes = photoEntries.reduce((total, [, photo]) => total + photo.size, 0);
+    if (totalPhotoBytes > MAX_HAZARD_PHOTO_TOTAL_BYTES) {
+      throw new ImprovementRequestError("첨부한 개선사진의 합계 용량이 허용 한도를 초과합니다.", 413, "photo_payload_too_large");
+    }
+    for (const [, photo] of photoEntries) {
+      const validationError = await validateHazardPhotoFile(photo);
+      if (validationError) {
+        throw new ImprovementRequestError(
+          validationError.message,
+          validationError.code === "file_too_large" ? 413 : 400,
+          validationError.code
+        );
+      }
+    }
     const reflectedDocumentsRaw = readFormString(form, "reflectedDocuments");
     const reflectedDocuments = reflectedDocumentsRaw
       ? reflectedDocumentsRaw.split(",").map((item) => item.trim()).filter(Boolean)
@@ -222,7 +272,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
   });
 }
 
-export async function POST(request: NextRequest, context: RouteContext) {
+async function handlePost(request: NextRequest, context: RouteContext) {
   const client = createSupabaseAdminClient();
   if (!client) {
     return NextResponse.json({ ok: false, configured: false, improvementId: null, message: "Supabase 저장소가 아직 설정되지 않았습니다." });
@@ -239,7 +289,21 @@ export async function POST(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ ok: false, configured: true, improvementId: null, message: owned.message }, { status: owned.status });
   }
 
-  const body = await readImprovementRequest(request);
+  let body: ImprovementRequest;
+  try {
+    body = await readImprovementRequest(request);
+  } catch (error) {
+    if (error instanceof ImprovementRequestError) {
+      return NextResponse.json({
+        ok: false,
+        configured: true,
+        improvementId: null,
+        code: error.code,
+        message: error.message
+      }, { status: error.status });
+    }
+    throw error;
+  }
   const reflectedDocuments = body.reflectedDocuments.length
     ? body.reflectedDocuments
     : ["위험성평가표", "TBM 브리핑", "TBM 기록"];
@@ -379,4 +443,34 @@ export async function POST(request: NextRequest, context: RouteContext) {
         ? `${analysisPayload.userLabel}. 사진 후보는 저장했고 분석 결과는 보류 상태로 export에 남깁니다.`
         : "개선사항 후보를 저장했습니다."
   });
+}
+
+export async function POST(request: NextRequest, context: RouteContext) {
+  const contentType = request.headers.get("content-type") || "";
+  if (!contentType.includes("multipart/form-data")) {
+    return handlePost(request, context);
+  }
+
+  const contentLengthValue = request.headers.get("content-length");
+  const contentLength = Number(contentLengthValue);
+  if (!contentLengthValue || !Number.isFinite(contentLength) || contentLength <= 0) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      improvementId: null,
+      code: "content_length_required",
+      message: "개선사진 요청의 Content-Length가 필요합니다."
+    }, { status: 411 });
+  }
+  if (contentLength > MAX_HAZARD_PHOTO_REQUEST_BYTES) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      improvementId: null,
+      code: "photo_payload_too_large",
+      message: "개선사진 요청 전체 용량이 허용 한도를 초과합니다."
+    }, { status: 413 });
+  }
+
+  return withPublicPhotoAnalysisAdmission(request, () => handlePost(request, context));
 }

@@ -10,6 +10,7 @@ import {
 
 const DEFAULT_TIMEOUT_MS = 1_500;
 const DOCUMENT_EXPORT_LEASE_MS = 310_000;
+const PHOTO_ANALYSIS_LEASE_MS = 70_000;
 
 export const PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY = {
   concurrency: 2,
@@ -19,12 +20,27 @@ export const PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY = {
   workUnit: "document-export",
 } as const;
 
+export const PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY = {
+  concurrency: 2,
+  limit: 8,
+  namespace: "photo-analysis",
+  windowMs: 60_000,
+  workUnit: "photo-analysis",
+} as const;
+
 const documentExportLimiter = createRateLimiter({
   limit: PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.limit,
   windowMs: PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.windowMs,
 });
 const documentExportConcurrency = createConcurrencyGuard(
   PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.concurrency,
+);
+const photoAnalysisLimiter = createRateLimiter({
+  limit: PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.limit,
+  windowMs: PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.windowMs,
+});
+const photoAnalysisConcurrency = createConcurrencyGuard(
+  PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.concurrency,
 );
 
 const FIXED_WINDOW_SCRIPT = [
@@ -272,10 +288,15 @@ async function runUpstashCommand(
   }
 }
 
-async function acquireDocumentExportLease(): Promise<(() => Promise<void>) | null | undefined> {
+async function acquireDistributedConcurrencyLease(input: {
+  concurrency: number;
+  leaseMs: number;
+  namespace: string;
+  requireDistributedInProduction: boolean;
+}): Promise<(() => Promise<void>) | null | undefined> {
   const config = readUpstashConfiguration(process.env);
   if (config.state === "absent") {
-    if (process.env.VERCEL_ENV === "production") {
+    if (input.requireDistributedInProduction && process.env.VERCEL_ENV === "production") {
       throw new Error("distributed concurrency is required in production");
     }
     return undefined;
@@ -288,12 +309,12 @@ async function acquireDocumentExportLease(): Promise<(() => Promise<void>) | nul
     "EVAL",
     CONCURRENCY_ACQUIRE_SCRIPT,
     "1",
-    buildConcurrencyKey(PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.namespace),
+    buildConcurrencyKey(input.namespace),
     String(now),
-    String(PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.concurrency),
-    String(now + DOCUMENT_EXPORT_LEASE_MS),
+    String(input.concurrency),
+    String(now + input.leaseMs),
     owner,
-    String(DOCUMENT_EXPORT_LEASE_MS),
+    String(input.leaseMs),
   ]);
   if (!Array.isArray(result) || result.length < 1 || ![0, 1].includes(Number(result[0]))) {
     throw new Error("distributed concurrency returned an invalid lease response");
@@ -309,7 +330,7 @@ async function acquireDocumentExportLease(): Promise<(() => Promise<void>) | nul
         "EVAL",
         CONCURRENCY_RELEASE_SCRIPT,
         "1",
-        buildConcurrencyKey(PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.namespace),
+        buildConcurrencyKey(input.namespace),
         owner,
       ]);
     } catch (error) {
@@ -318,6 +339,24 @@ async function acquireDocumentExportLease(): Promise<(() => Promise<void>) | nul
       });
     }
   };
+}
+
+async function acquireDocumentExportLease(): Promise<(() => Promise<void>) | null | undefined> {
+  return acquireDistributedConcurrencyLease({
+    concurrency: PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.concurrency,
+    leaseMs: DOCUMENT_EXPORT_LEASE_MS,
+    namespace: PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.namespace,
+    requireDistributedInProduction: true,
+  });
+}
+
+async function acquirePhotoAnalysisLease(): Promise<(() => Promise<void>) | null | undefined> {
+  return acquireDistributedConcurrencyLease({
+    concurrency: PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.concurrency,
+    leaseMs: PHOTO_ANALYSIS_LEASE_MS,
+    namespace: PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.namespace,
+    requireDistributedInProduction: false,
+  });
 }
 
 function applyDocumentExportAdmissionHeaders<T extends Response>(
@@ -376,6 +415,64 @@ export async function withPublicDocumentExportAdmission(
 
   try {
     return applyDocumentExportAdmissionHeaders(await work(), decision);
+  } finally {
+    await release();
+  }
+}
+
+function photoAnalysisConcurrencyResponse(decision: PublicRateLimitDecision): Response {
+  const response = new Response(JSON.stringify({
+    error: "사진 분석 작업이 많습니다. 잠시 후 다시 시도해 주세요.",
+    code: "PHOTO_ANALYSIS_CONCURRENCY_LIMIT",
+    retryAfterSeconds: 1,
+  }), {
+    status: 503,
+    headers: {
+      "Content-Type": "application/json",
+      "Retry-After": "1",
+    },
+  });
+  applyPublicRateLimitHeader(response, decision);
+  response.headers.set("X-SafeClaw-Work-Unit", PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.workUnit);
+  return response;
+}
+
+export async function withPublicPhotoAnalysisAdmission(
+  request: Request,
+  work: () => Promise<Response>,
+): Promise<Response> {
+  const decision = await checkPublicRateLimit({
+    request,
+    namespace: PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.namespace,
+    limit: PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.limit,
+    windowMs: PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.windowMs,
+    instanceLimiter: photoAnalysisLimiter,
+  });
+  const limited = publicRateLimitResponse(decision);
+  if (limited) {
+    limited.headers.set("X-SafeClaw-Work-Unit", PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.workUnit);
+    return limited;
+  }
+
+  let release: (() => void | Promise<void>) | null;
+  try {
+    const distributedRelease = await acquirePhotoAnalysisLease();
+    release = distributedRelease === undefined
+      ? photoAnalysisConcurrency.tryAcquire()
+      : distributedRelease;
+  } catch (error) {
+    console.error("[public-rate-limit] photo analysis concurrency unavailable", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return photoAnalysisConcurrencyResponse(decision);
+  }
+  if (!release) return photoAnalysisConcurrencyResponse(decision);
+
+  try {
+    const response = await work();
+    applyPublicRateLimitHeader(response, decision);
+    response.headers.set("X-SafeClaw-Work-Unit", PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.workUnit);
+    return response;
   } finally {
     await release();
   }

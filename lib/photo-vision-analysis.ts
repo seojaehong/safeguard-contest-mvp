@@ -873,7 +873,7 @@ export function createSafeClawDbMcpHazardResolver(): HazardPhotoHarnessResolver 
   };
 }
 
-async function validateHazardPhoto(photo: File): Promise<HazardPhotoAnalysisError | null> {
+export async function validateHazardPhotoFile(photo: File): Promise<HazardPhotoAnalysisError | null> {
   if (photo.size <= 0) {
     return {
       code: "empty_file",
@@ -1061,7 +1061,7 @@ export async function analyzeHazardPhotos(input: {
       ocrText: "",
       siteSignals: []
     } satisfies Omit<HazardPhotoImageAnalysis, "status" | "error">;
-    const validationError = await validateHazardPhoto(photo);
+    const validationError = await validateHazardPhotoFile(photo);
     if (validationError) {
       return {
         ...base,
@@ -1308,6 +1308,23 @@ export async function analyzeImprovementPhotos(input: {
       reflectedDocuments: input.reflectedDocuments,
       errorMessage: "Before/After 사진이 모두 있어야 vision 분석을 실행합니다."
     };
+  }
+
+  for (const photo of [input.beforePhoto, input.afterPhoto]) {
+    const validationError = await validateHazardPhotoFile(photo);
+    if (validationError) {
+      return {
+        status: "failed",
+        provider: "openai",
+        model,
+        summary: "",
+        detectedHazards: [],
+        observedImprovement: "",
+        ocrText: "",
+        reflectedDocuments: input.reflectedDocuments,
+        errorMessage: validationError.message
+      };
+    }
   }
 
   if (!apiKey) {

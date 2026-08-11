@@ -12,7 +12,8 @@ import {
   createOpenAiHazardPhotoVisionProvider,
   getPhotoVisionReadiness,
   parseHazardPhotoVisionOutput,
-  parseImprovementVisionOutput
+  parseImprovementVisionOutput,
+  validateHazardPhotoFile
 } from "@/lib/photo-vision-analysis";
 
 vi.mock("@/lib/safety-reference-catalog", async (importOriginal) => {
@@ -1208,6 +1209,17 @@ describe("photo vision analysis contract", () => {
 
     expect(parsed.status).toBe("failed");
     expect(parsed.errorMessage).toBeTruthy();
+  });
+
+  it("rejects spoofed improvement photos with the shared MIME signature validator", async () => {
+    const error = await validateHazardPhotoFile(
+      new File(["plain text"], "before.jpg", { type: "image/jpeg" })
+    );
+
+    expect(error).toMatchObject({
+      code: "invalid_signature",
+      retryable: false
+    });
   });
 
   it("labels analyzed before/after payloads as vision OCR export memory", () => {

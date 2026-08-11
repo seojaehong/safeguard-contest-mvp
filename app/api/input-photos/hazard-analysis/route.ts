@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { enforceRateLimit } from "@/lib/api-guard";
 import {
   analyzeHazardPhotos,
   getPhotoVisionReadiness,
@@ -7,14 +6,12 @@ import {
   MAX_HAZARD_PHOTO_REQUEST_BYTES,
   MAX_HAZARD_PHOTO_TOTAL_BYTES
 } from "@/lib/photo-vision-analysis";
-import { createRateLimiter } from "@/lib/rate-limit";
+import { withPublicPhotoAnalysisAdmission } from "@/lib/public-distributed-rate-limit";
 import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 export const maxDuration = 60;
-
-const limiter = createRateLimiter({ limit: 8, windowMs: 60_000 });
 
 function isFileValue(value: FormDataEntryValue): value is File {
   return typeof File !== "undefined" && value instanceof File;
@@ -47,10 +44,7 @@ export async function GET() {
   return NextResponse.json(getPhotoVisionReadiness());
 }
 
-export async function POST(request: NextRequest) {
-  const limited = enforceRateLimit(request, limiter);
-  if (limited) return limited;
-
+async function handlePost(request: NextRequest) {
   const client = createSupabaseAdminClient();
   if (!client) {
     return NextResponse.json({
@@ -129,4 +123,8 @@ export async function POST(request: NextRequest) {
         ? `현장 사진 일부 처리: ${partialAnalysisMessage(analysis.counts)}.`
         : analysis.errorMessage || "현장 사진 분석을 완료하지 못했습니다."
   });
+}
+
+export async function POST(request: NextRequest) {
+  return withPublicPhotoAnalysisAdmission(request, () => handlePost(request));
 }

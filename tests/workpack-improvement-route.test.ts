@@ -1,10 +1,12 @@
 import { NextRequest } from "next/server";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { parseOperationImprovements } from "@/lib/operation-improvement-history";
 
 const mocks = vi.hoisted(() => ({
-  insert: vi.fn()
+  analyzeImprovementPhotos: vi.fn(),
+  insert: vi.fn(),
+  validateHazardPhotoFile: vi.fn()
 }));
 
 vi.mock("@/lib/supabase-admin", () => ({
@@ -48,7 +50,24 @@ vi.mock("@/lib/workpack-commercial-store", () => ({
 }));
 
 vi.mock("@/lib/photo-vision-analysis", () => ({
-  analyzeImprovementPhotos: async () => ({
+  MAX_HAZARD_PHOTO_REQUEST_BYTES: 41 * 1024 * 1024,
+  MAX_HAZARD_PHOTO_TOTAL_BYTES: 40 * 1024 * 1024,
+  analyzeImprovementPhotos: mocks.analyzeImprovementPhotos,
+  validateHazardPhotoFile: mocks.validateHazardPhotoFile,
+  buildImprovementAnalysisPayload: () => ({
+    sourcePhotoNames: [],
+    photoCount: 0,
+    siteSignals: [],
+    visionEvidence: "",
+    photoPairAttached: false,
+    analysisMode: "manual_text",
+    userLabel: "관리자 메모",
+    exportable: true
+  })
+}));
+
+function improvementVisionResult() {
+  return {
     status: "unconfigured",
     provider: "none",
     model: "none",
@@ -62,20 +81,30 @@ vi.mock("@/lib/photo-vision-analysis", () => ({
     visionEvidence: "",
     reflectedDocuments: ["위험성평가표"],
     errorMessage: ""
-  }),
-  buildImprovementAnalysisPayload: () => ({
-    sourcePhotoNames: [],
-    photoCount: 0,
-    siteSignals: [],
-    visionEvidence: "",
-    photoPairAttached: false,
-    analysisMode: "manual_text",
-    userLabel: "관리자 메모",
-    exportable: true
-  })
-}));
+  };
+}
+
+function multipartRequest(form: FormData, contentLength: number) {
+  return {
+    headers: new Headers({
+      authorization: "Bearer route-test-token",
+      "content-length": String(contentLength),
+      "content-type": "multipart/form-data; boundary=contract-test",
+      "x-forwarded-for": `198.51.100.${contentLength % 200 + 1}`
+    }),
+    formData: vi.fn(async () => form)
+  } as unknown as NextRequest;
+}
 
 describe("workpack improvement POST status contract", () => {
+  beforeEach(() => {
+    mocks.analyzeImprovementPhotos.mockReset();
+    mocks.analyzeImprovementPhotos.mockResolvedValue(improvementVisionResult());
+    mocks.insert.mockClear();
+    mocks.validateHazardPhotoFile.mockReset();
+    mocks.validateHazardPhotoFile.mockResolvedValue(null);
+  });
+
   it("returns the canonical DB review status for lossless local snapshot persistence", async () => {
     const { POST } = await import("@/app/api/workpacks/[id]/improvements/route");
     const response = await POST(new NextRequest(
@@ -116,5 +145,60 @@ describe("workpack improvement POST status contract", () => {
       status: body.reviewStatus
     }]));
     expect(localSnapshot[0]?.status).toBe("candidate");
+  });
+
+  it("rejects oversized improvement photo requests before multipart parsing or persistence", async () => {
+    const { POST } = await import("@/app/api/workpacks/[id]/improvements/route");
+    const request = multipartRequest(new FormData(), 41 * 1024 * 1024 + 1);
+
+    const response = await POST(request, { params: Promise.resolve({ id: "workpack-1" }) });
+
+    expect(response.status).toBe(413);
+    await expect(response.json()).resolves.toMatchObject({ code: "photo_payload_too_large" });
+    expect(request.formData).not.toHaveBeenCalled();
+    expect(mocks.analyzeImprovementPhotos).not.toHaveBeenCalled();
+    expect(mocks.insert).not.toHaveBeenCalled();
+  });
+
+  it("fails closed on invalid photo signatures before provider or DB work", async () => {
+    mocks.validateHazardPhotoFile.mockResolvedValueOnce({
+      code: "invalid_signature",
+      message: "before.jpg의 파일 내용이 선언된 MIME 형식과 일치하지 않습니다.",
+      retryable: false
+    });
+    const form = new FormData();
+    form.set("beforePhoto", new File(["not-a-jpeg"], "before.jpg", { type: "image/jpeg" }));
+    form.set("afterPhoto", new File(["not-a-jpeg"], "after.jpg", { type: "image/jpeg" }));
+    const { POST } = await import("@/app/api/workpacks/[id]/improvements/route");
+
+    const response = await POST(
+      multipartRequest(form, 2048),
+      { params: Promise.resolve({ id: "workpack-1" }) }
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.headers.get("X-SafeClaw-Work-Unit")).toBe("photo-analysis");
+    await expect(response.json()).resolves.toMatchObject({ code: "invalid_signature" });
+    expect(mocks.analyzeImprovementPhotos).not.toHaveBeenCalled();
+    expect(mocks.insert).not.toHaveBeenCalled();
+  });
+
+  it("rejects unexpected or excess file fields before provider or DB work", async () => {
+    const form = new FormData();
+    form.set("beforePhoto", new File(["one"], "before.jpg", { type: "image/jpeg" }));
+    form.set("afterPhoto", new File(["two"], "after.jpg", { type: "image/jpeg" }));
+    form.set("extraPhoto", new File(["three"], "extra.jpg", { type: "image/jpeg" }));
+    const { POST } = await import("@/app/api/workpacks/[id]/improvements/route");
+
+    const response = await POST(
+      multipartRequest(form, 4096),
+      { params: Promise.resolve({ id: "workpack-1" }) }
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({ code: "unexpected_photo_field" });
+    expect(mocks.validateHazardPhotoFile).not.toHaveBeenCalled();
+    expect(mocks.analyzeImprovementPhotos).not.toHaveBeenCalled();
+    expect(mocks.insert).not.toHaveBeenCalled();
   });
 });
