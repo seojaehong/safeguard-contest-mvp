@@ -2082,6 +2082,26 @@ function createFixtureRoot(): string {
       knowledgeRegeneration: { status: 400, message: "question is required", rateLimitHeader: "instance" },
       workpackRemediation: { status: 400, message: "question is required", rateLimitHeader: "instance" },
     },
+    currentLiveRefresh: {
+      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_REFRESH",
+      sourceHead: "fixture-sha",
+      productionCommit: "fixture-sha",
+      productionBranch: "master",
+      productionEnvironment: "production",
+      deploymentUrl: "fixture.vercel.app",
+      liveChecks: [
+        { route: "/api/knowledge/regenerate", probe: "invalid-body-no-ai-call", status: 400, message: "question is required", rateLimitHeader: "instance", providerCallPerformed: false, referenceSearchPerformed: false },
+        { route: "/api/workpack/remediate", probe: "invalid-body-no-reference-or-ai-call", status: 400, message: "question is required", rateLimitHeader: "instance", providerCallPerformed: false, referenceSearchPerformed: false },
+      ],
+      mutationBoundary: {
+        dbMutationPerformed: false,
+        providerDispatchCalled: false,
+        shareSessionCreated: false,
+        vectorOrEmbeddingMutationPerformed: false,
+        wikiPublicationPerformed: false,
+        koshaRegistryMutationPerformed: false,
+      },
+    },
     dependencyAudit: { after: { total: 0 } },
     verification: {
       focused: { testFiles: 3, tests: 23, passed: true },
@@ -3717,6 +3737,7 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
       evidencePath: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
     });
     expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("instance admission");
+    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("zero provider or mutation work");
     expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("fresh diff scan remain open");
     expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")).toMatchObject({
@@ -4920,6 +4941,27 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("exactShare=PASS");
+  });
+
+  it("fails public generation admission security closed when the current refresh claims provider work", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "security-public-generation-admission-2026-08-04", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      currentLiveRefresh: { liveChecks: Array<{ providerCallPerformed: boolean }> };
+    };
+    report.currentLiveRefresh.liveChecks[0].providerCallPerformed = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-08-11T00:00:00.000Z",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("currentRefresh=false");
   });
 
   it("contradicts the UI gate when a document action loses its inner-pane margin", async () => {

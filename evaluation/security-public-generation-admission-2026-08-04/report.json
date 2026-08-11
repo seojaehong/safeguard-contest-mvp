@@ -57,6 +57,42 @@
       "rateLimitHeader": "instance"
     }
   },
+  "currentLiveRefresh": {
+    "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_REFRESH",
+    "sourceHead": "73f4ac1dfaccb7ceaa12171450783d2c6c9e70be",
+    "productionCommit": "73f4ac1dfaccb7ceaa12171450783d2c6c9e70be",
+    "productionBranch": "master",
+    "productionEnvironment": "production",
+    "deploymentUrl": "safeguard-contest-pkhxiv5hm-seojaehongs-projects.vercel.app",
+    "liveChecks": [
+      {
+        "route": "/api/knowledge/regenerate",
+        "probe": "invalid-body-no-ai-call",
+        "status": 400,
+        "message": "question is required",
+        "rateLimitHeader": "instance",
+        "providerCallPerformed": false,
+        "referenceSearchPerformed": false
+      },
+      {
+        "route": "/api/workpack/remediate",
+        "probe": "invalid-body-no-reference-or-ai-call",
+        "status": 400,
+        "message": "question is required",
+        "rateLimitHeader": "instance",
+        "providerCallPerformed": false,
+        "referenceSearchPerformed": false
+      }
+    ],
+    "mutationBoundary": {
+      "dbMutationPerformed": false,
+      "providerDispatchCalled": false,
+      "shareSessionCreated": false,
+      "vectorOrEmbeddingMutationPerformed": false,
+      "wikiPublicationPerformed": false,
+      "koshaRegistryMutationPerformed": false
+    }
+  },
   "dependencyAudit": {
     "before": {
       "total": 5,

@@ -5233,6 +5233,13 @@ function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
   const baseScan = isRecord(report.baseSecurityScan) ? report.baseSecurityScan : {};
   const runtimeBoundary = isRecord(report.runtimeBoundary) ? report.runtimeBoundary : {};
   const liveChecks = isRecord(report.liveChecks) ? report.liveChecks : {};
+  const currentLiveRefresh = isRecord(report.currentLiveRefresh) ? report.currentLiveRefresh : {};
+  const currentRefreshChecks = Array.isArray(currentLiveRefresh.liveChecks)
+    ? currentLiveRefresh.liveChecks.filter(isRecord)
+    : [];
+  const currentRefreshMutation = isRecord(currentLiveRefresh.mutationBoundary)
+    ? currentLiveRefresh.mutationBoundary
+    : {};
   const knowledge = isRecord(liveChecks.knowledgeRegeneration) ? liveChecks.knowledgeRegeneration : {};
   const remediation = isRecord(liveChecks.workpackRemediation) ? liveChecks.workpackRemediation : {};
   const dependencyAudit = isRecord(report.dependencyAudit) ? report.dependencyAudit : {};
@@ -5252,12 +5259,38 @@ function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
   const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
   const controls = Array.isArray(report.admissionControls) ? report.admissionControls.filter(isRecord) : [];
   const productCommit = readString(report.productCommit);
+  const currentRefreshSourceHead = readString(currentLiveRefresh.sourceHead);
   const noMutation = mutationBoundary.dbMutationPerformed === false
     && mutationBoundary.providerDispatchCalled === false
     && mutationBoundary.shareSessionCreated === false
     && mutationBoundary.vectorOrEmbeddingMutationPerformed === false
     && mutationBoundary.wikiPublicationPerformed === false
     && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const currentRefreshNoMutation = currentRefreshMutation.dbMutationPerformed === false
+    && currentRefreshMutation.providerDispatchCalled === false
+    && currentRefreshMutation.shareSessionCreated === false
+    && currentRefreshMutation.vectorOrEmbeddingMutationPerformed === false
+    && currentRefreshMutation.wikiPublicationPerformed === false
+    && currentRefreshMutation.koshaRegistryMutationPerformed === false;
+  const currentRefreshPass = readString(currentLiveRefresh.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_REFRESH"
+    && currentRefreshSourceHead.length > 0
+    && readString(currentLiveRefresh.productionCommit) === currentRefreshSourceHead
+    && readString(currentLiveRefresh.productionBranch) === "master"
+    && readString(currentLiveRefresh.productionEnvironment) === "production"
+    && readString(currentLiveRefresh.deploymentUrl).length > 0
+    && isGitAncestor(rootDir, currentRefreshSourceHead)
+    && isEvidenceCurrentForPaths(rootDir, currentRefreshSourceHead, PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS)
+    && currentRefreshChecks.length === 2
+    && currentRefreshChecks.every((check) => readNumber(check.status) === 400
+      && readString(check.message) === "question is required"
+      && readString(check.rateLimitHeader) === "instance"
+      && check.providerCallPerformed === false
+      && check.referenceSearchPerformed === false)
+    && currentRefreshChecks.some((check) => readString(check.route) === "/api/knowledge/regenerate"
+      && readString(check.probe) === "invalid-body-no-ai-call")
+    && currentRefreshChecks.some((check) => readString(check.route) === "/api/workpack/remediate"
+      && readString(check.probe) === "invalid-body-no-reference-or-ai-call")
+    && currentRefreshNoMutation;
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN"
     && productCommit.length > 0
     && isGitAncestor(rootDir, productCommit)
@@ -5326,7 +5359,8 @@ function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
     && remainingBoundaries.approvalGatedOperationsUnchanged === true
     && remainingBoundaries.freshPostChangeSecurityRescanRequired === true
     && remainingBoundaries.liveDeploymentVerificationRequired === false
-    && remainingBoundaries.distributedProductionLimiterStillRecommended === true;
+    && remainingBoundaries.distributedProductionLimiterStillRecommended === true
+    && currentRefreshPass;
 
   return gateResult({
     id: "public_generation_admission_security",
@@ -5334,8 +5368,8 @@ function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? `The historical live production probe enforces fail-fast instance admission before request parsing, reference search, and AI work on both public generation routes, and the dependency audit remains zero. Current governed paths unchanged since that probe=${isEvidenceCurrentForPaths(rootDir, productCommit, PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS)}; this remains a notice, while distributed production activation, a refreshed route probe, and the separate fresh diff scan remain open. The immutable baseline is preserved, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`
-      : `Generation admission verdict=${readString(report.verdict) || "unknown"}, productPathsCurrent=${productCommit.length > 0 && isEvidenceCurrentForPaths(rootDir, productCommit, PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS)}, liveMode=${readString(runtimeBoundary.liveMode) || "unknown"}, knowledge=${readNumber(knowledge.status)}/${readString(knowledge.rateLimitHeader) || "missing"}, remediation=${readNumber(remediation.status)}/${readString(remediation.rateLimitHeader) || "missing"}, audit=${readNumber(auditAfter.total)}, refresh=${readNumber(refreshFocused.tests)}/${readNumber(refreshNorthstar.tests)}/${readNumber(refreshPdf.tests)}, rescanPending=${remainingBoundaries.freshPostChangeSecurityRescanRequired === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+      ? `Current production ${currentRefreshSourceHead.slice(0, 8)} re-proves fail-fast instance admission before request parsing, reference search, and AI work on both public generation routes with zero provider or mutation work. The dependency audit remains zero; distributed production activation and the separate fresh diff scan remain open. The immutable baseline is preserved, and exact saved Share remains MISSING_EVIDENCE.`
+      : `Generation admission verdict=${readString(report.verdict) || "unknown"}, productPathsCurrent=${productCommit.length > 0 && isEvidenceCurrentForPaths(rootDir, productCommit, PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS)}, currentRefresh=${currentRefreshPass}, refreshHead=${currentRefreshSourceHead || "missing"}, liveMode=${readString(runtimeBoundary.liveMode) || "unknown"}, knowledge=${readNumber(knowledge.status)}/${readString(knowledge.rateLimitHeader) || "missing"}, remediation=${readNumber(remediation.status)}/${readString(remediation.rateLimitHeader) || "missing"}, audit=${readNumber(auditAfter.total)}, refresh=${readNumber(refreshFocused.tests)}/${readNumber(refreshNorthstar.tests)}/${readNumber(refreshPdf.tests)}, rescanPending=${remainingBoundaries.freshPostChangeSecurityRescanRequired === true}, noMutation=${noMutation && currentRefreshNoMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
           "Preserve completed scan 8fe9c06a at immutable f0c8a7be, and run a fresh post-159aa38c security scan before closing the remediated finding.",

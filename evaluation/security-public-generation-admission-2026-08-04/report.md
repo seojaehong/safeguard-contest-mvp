@@ -38,6 +38,10 @@ Production reports product commit `159aa38ccc74073c8c60b9a78adb48afa059fd01` on 
 
 This proves the route admission boundary is deployed. It also proves production currently uses the instance fallback, not the distributed limiter. Multi-instance distributed hardening remains open and is not represented as complete.
 
+## Current live refresh
+
+Production commit `73f4ac1dfaccb7ceaa12171450783d2c6c9e70be` was re-probed after the later bounded security waves. Both public generation routes still returned `400 question is required` with `X-SafeClaw-Rate-Limit: instance` for an empty JSON body. The probes stopped before provider, reference-search, dispatch, or storage work. This refresh restores current governed-path evidence without rewriting the immutable scan or claiming distributed activation.
+
 ## Boundaries
 
 No database mutation, provider dispatch, Share-session creation, vector or embedding mutation, wiki publication, or KOSHA registry mutation was performed. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`. Approval-gated operations remain approval-gated. A fresh post-change security rescan is still required before claiming canonical scan closure, and production distributed limiter configuration remains a recommended hardening step.
