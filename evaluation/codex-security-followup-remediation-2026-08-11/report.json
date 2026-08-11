@@ -56,9 +56,10 @@
   },
   "currentPathCompatibility": {
     "verdict": "PASS_LIVE_PRODUCTION_CURRENT_PATH_COMPATIBILITY",
-    "sourceHead": "03a8bae3d4634c9273834174297ec149ecf2d3f9",
-    "productionCommit": "03a8bae3d4634c9273834174297ec149ecf2d3f9",
+    "sourceHead": "729bec6c297b742f6c652be5a7a325ac35a90f49",
+    "productionCommit": "729bec6c297b742f6c652be5a7a325ac35a90f49",
     "changedGovernedPaths": [
+      "lib/ai.ts",
       "lib/public-distributed-rate-limit.ts"
     ],
     "focusedVitest": {
@@ -69,7 +70,7 @@
     "noMutation": true,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "originalBaselineRewritten": false,
-    "detail": "The shared admission helper changed for the separate improvement-photo budget wave. Current regression coverage re-proves the original cancellation, distributed export concurrency, and safety-reference deadline contracts without rewriting the sealed scan or claiming the corrected full-repository scan is complete."
+    "detail": "The shared admission helper and knowledge-generation cancellation path changed in later bounded security waves. Current regression coverage re-proves the original cancellation, distributed export concurrency, and safety-reference deadline contracts without rewriting the sealed scan or claiming the corrected full-repository scan is complete."
   },
   "remainingSecurityWork": [],
   "boundaries": {

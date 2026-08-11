@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-11T06:56:16.468Z",
-  "sourceSha": "03a8bae3d4634c9273834174297ec149ecf2d3f9",
+  "generatedAt": "2026-08-11T07:12:16.328Z",
+  "sourceSha": "729bec6c297b742f6c652be5a7a325ac35a90f49",
   "overall": "open",
   "gates": [
     {
@@ -208,6 +208,16 @@
       "nextActions": [
         "Activate approved distributed photo-analysis admission before treating process-instance fallback as horizontally durable.",
         "Keep the canonical findings visible until a fresh follow-up security scan revalidates the patched source."
+      ]
+    },
+    {
+      "id": "public_provider_cancellation",
+      "state": "notice",
+      "label": "Public provider cancellation",
+      "evidencePath": "evaluation\\public-provider-cancellation-2026-08-11\\report.json",
+      "detail": "Weather coalescing now cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The product commit is live with 9 files / 104 tests, but no live provider cancellation call was executed, the canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Run a fresh full-repository security scan before reclassifying the immutable finding or making a security-complete claim."
       ]
     },
     {

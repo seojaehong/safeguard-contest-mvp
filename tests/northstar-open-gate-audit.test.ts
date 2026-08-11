@@ -2147,7 +2147,7 @@ function createFixtureRoot(): string {
       verdict: "PASS_LIVE_PRODUCTION_CURRENT_PATH_COMPATIBILITY",
       sourceHead: "fixture-sha",
       productionCommit: "fixture-sha",
-      changedGovernedPaths: ["lib/public-distributed-rate-limit.ts"],
+      changedGovernedPaths: ["lib/ai.ts", "lib/public-distributed-rate-limit.ts"],
       focusedVitest: { files: 12, tests: 147, failed: 0 },
       noMutation: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
@@ -2325,6 +2325,64 @@ function createFixtureRoot(): string {
       remainingScanFindingsStayVisible: true,
       distributedProductionActivation: "INSTANCE_FALLBACK_ACTIVE_NOT_DISTRIBUTED",
       followUpSecurityScan: "REQUIRED",
+    },
+  });
+  writeJson(rootDir, path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_CANCELLATION_SOURCE_PROVEN",
+    sourceHead: "fixture-sha",
+    securityFinding: {
+      scanId: "c4e9e2f1-7ce4-4313-a651-32205fca401f",
+      findingId: "csf_278e8efc9722eb80016c42a3",
+      anchor: "provider-work-survives-disconnect",
+      canonicalFindingRemainsImmutable: true,
+      followUpSecurityScanRequired: true,
+    },
+    contracts: {
+      weatherSharedWork: {
+        requestSignalForwarded: true,
+        equivalentRequestsCoalesced: true,
+        singleConsumerDisconnectDoesNotCancelSharedProvider: true,
+        finalConsumerDisconnectCancelsSharedProvider: true,
+      },
+      knowledgeRegeneration: {
+        requestSignalForwardedToGeneration: true,
+        abortSkipsProviderFallback: true,
+        dbMutationAllowed: false,
+      },
+      workpackRemediation: {
+        requestSignalForwardedToReferenceSearch: true,
+        requestSignalForwardedToGeneration: true,
+        abortSkipsProviderFallback: true,
+        dbMutationPerformed: false,
+      },
+    },
+    verification: {
+      focusedAndAdjacentVitest: { files: 9, tests: 104, failed: 0 },
+      typecheck: "PASS",
+      build: { status: "PASS", staticPages: 28 },
+      diffCheck: "PASS",
+    },
+    productionBuild: {
+      commitSha: "fixture-sha",
+      branch: "master",
+      environment: "production",
+      sourceHeadMatchesProduction: true,
+      liveAfterDeploymentPending: false,
+      liveProviderCallExecuted: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorRuntimeMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      securityCompleteClaimAllowed: false,
+      followUpSecurityScan: "REQUIRED",
+      approvalGatedOperationsUnchanged: true,
     },
   });
   writeJson(rootDir, path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"), {
@@ -3359,6 +3417,13 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "improvement_photo_analysis_budget")?.detail).toContain("76 tests");
     expect(audit.gates.find((gate) => gate.id === "improvement_photo_analysis_budget")?.detail).toContain("instance fallback");
     expect(audit.gates.find((gate) => gate.id === "improvement_photo_analysis_budget")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")).toMatchObject({
+      state: "notice",
+      evidencePath: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("104 tests");
+    expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("no live provider cancellation call");
+    expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")).toMatchObject({
       state: "notice",
       evidencePath: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
@@ -3661,6 +3726,31 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "improvement_photo_analysis_budget")?.detail).toContain("admission=DISTRIBUTED_ACTIVE");
     expect(audit.gates.find((gate) => gate.id === "improvement_photo_analysis_budget")?.detail).toContain("followUp=NOT_REQUIRED");
     expect(audit.gates.find((gate) => gate.id === "improvement_photo_analysis_budget")?.detail).toContain("exactShare=PASS");
+  });
+
+  it("keeps provider cancellation rescan and exact Share boundaries fail-closed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "public-provider-cancellation-2026-08-11", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      productionBuild: { liveProviderCallExecuted: boolean };
+      remainingBoundaries: {
+        exactSavedShareVerdict: string;
+        securityCompleteClaimAllowed: boolean;
+        followUpSecurityScan: string;
+      };
+    };
+    report.productionBuild.liveProviderCallExecuted = true;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    report.remainingBoundaries.securityCompleteClaimAllowed = true;
+    report.remainingBoundaries.followUpSecurityScan = "NOT_REQUIRED";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.state).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("liveProviderCall=true");
+    expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("followUp=NOT_REQUIRED");
+    expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("exactShare=PASS");
   });
 
   it("rejects a conflicting zero-finding scan when Northstar acceptance is claimed", async () => {

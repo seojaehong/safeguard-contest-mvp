@@ -23,7 +23,7 @@ The sealed follow-up scan `3f0107a8-e4a4-4a5b-be37-a28bcea8b05a` reported three 
 
 ## Current-path compatibility
 
-The later improvement-photo admission wave changed only `lib/public-distributed-rate-limit.ts` inside this gate's governed paths. Current production `03a8bae3d4634c9273834174297ec149ecf2d3f9` re-ran 12 focused and adjacent files / 147 tests with 0 failures. This companion check preserves the original sealed three-finding remediation evidence rather than replacing or rewriting it.
+Later improvement-photo admission and provider-cancellation waves changed `lib/public-distributed-rate-limit.ts` and `lib/ai.ts` inside this gate's governed paths. Current production `729bec6c297b742f6c652be5a7a325ac35a90f49` re-ran 12 focused and adjacent files / 147 tests with 0 failures. This companion check preserves the original sealed three-finding remediation evidence rather than replacing or rewriting it.
 
 ## Boundaries
 

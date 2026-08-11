@@ -51,6 +51,7 @@ const EVIDENCE_PATHS = Object.freeze({
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
+  publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
@@ -4136,8 +4137,9 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     && compatibilitySourceHead.length > 0
     && compatibilitySourceHead === compatibilityProductionCommit
     && Array.isArray(currentPathCompatibility.changedGovernedPaths)
-    && currentPathCompatibility.changedGovernedPaths.length === 1
-    && currentPathCompatibility.changedGovernedPaths[0] === "lib/public-distributed-rate-limit.ts"
+    && currentPathCompatibility.changedGovernedPaths.length === 2
+    && currentPathCompatibility.changedGovernedPaths.includes("lib/ai.ts")
+    && currentPathCompatibility.changedGovernedPaths.includes("lib/public-distributed-rate-limit.ts")
     && readNumber(compatibilityFocused.files) === 12
     && readNumber(compatibilityFocused.tests) === 147
     && readNumber(compatibilityFocused.failed) === 0
@@ -4407,6 +4409,102 @@ function evaluateImprovementPhotoAnalysisBudgetGate(rootDir) {
           "Keep the canonical findings visible until a fresh follow-up security scan revalidates the patched source.",
         ]
       : ["Restore deployed source ancestry, file budgets, shared live admission, verification totals, no-mutation boundaries, follow-up scan requirement, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+const PUBLIC_PROVIDER_CANCELLATION_PATHS = [
+  "app/api/weather/route.ts",
+  "app/api/workpack/remediate/route.ts",
+  "lib/ai.ts",
+  "lib/knowledge-candidate-route.ts",
+];
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluatePublicProviderCancellationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.publicProviderCancellation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "public_provider_cancellation",
+      label: "Public provider cancellation",
+      state: "missing",
+      evidencePath,
+      detail: "Public provider cancellation evidence is missing or invalid.",
+      nextActions: ["Restore the deployed source-level cancellation evidence without invoking live providers."],
+    });
+  }
+
+  const finding = isRecord(report.securityFinding) ? report.securityFinding : {};
+  const contracts = isRecord(report.contracts) ? report.contracts : {};
+  const weather = isRecord(contracts.weatherSharedWork) ? contracts.weatherSharedWork : {};
+  const knowledge = isRecord(contracts.knowledgeRegeneration) ? contracts.knowledgeRegeneration : {};
+  const remediation = isRecord(contracts.workpackRemediation) ? contracts.workpackRemediation : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const tests = isRecord(verification.focusedAndAdjacentVitest) ? verification.focusedAndAdjacentVitest : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const production = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.vectorRuntimeMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_CANCELLATION_SOURCE_PROVEN"
+    && sourceHead.length > 0
+    && sourceHead === readString(production.commitSha)
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_PROVIDER_CANCELLATION_PATHS)
+    && readString(production.branch) === "master"
+    && readString(production.environment) === "production"
+    && production.sourceHeadMatchesProduction === true
+    && production.liveAfterDeploymentPending === false
+    && production.liveProviderCallExecuted === false
+    && readString(finding.scanId) === "c4e9e2f1-7ce4-4313-a651-32205fca401f"
+    && readString(finding.findingId) === "csf_278e8efc9722eb80016c42a3"
+    && readString(finding.anchor) === "provider-work-survives-disconnect"
+    && finding.canonicalFindingRemainsImmutable === true
+    && finding.followUpSecurityScanRequired === true
+    && weather.requestSignalForwarded === true
+    && weather.equivalentRequestsCoalesced === true
+    && weather.singleConsumerDisconnectDoesNotCancelSharedProvider === true
+    && weather.finalConsumerDisconnectCancelsSharedProvider === true
+    && knowledge.requestSignalForwardedToGeneration === true
+    && knowledge.abortSkipsProviderFallback === true
+    && knowledge.dbMutationAllowed === false
+    && remediation.requestSignalForwardedToReferenceSearch === true
+    && remediation.requestSignalForwardedToGeneration === true
+    && remediation.abortSkipsProviderFallback === true
+    && remediation.dbMutationPerformed === false
+    && readNumber(tests.files) === 9
+    && readNumber(tests.tests) === 104
+    && readNumber(tests.failed) === 0
+    && verification.typecheck === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && verification.diffCheck === "PASS"
+    && noMutation
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && remaining.securityCompleteClaimAllowed === false
+    && readString(remaining.followUpSecurityScan) === "REQUIRED"
+    && remaining.approvalGatedOperationsUnchanged === true;
+
+  return gateResult({
+    id: "public_provider_cancellation",
+    label: "Public provider cancellation",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Weather coalescing now cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The product commit is live with 9 files / 104 tests, but no live provider cancellation call was executed, the canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+      : `Provider cancellation verdict=${readString(report.verdict) || "unknown"}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_PROVIDER_CANCELLATION_PATHS)}, tests=${readNumber(tests.tests)}, liveProviderCall=${production.liveProviderCallExecuted === true}, followUp=${readString(remaining.followUpSecurityScan) || "missing"}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Run a fresh full-repository security scan before reclassifying the immutable finding or making a security-complete claim."]
+      : ["Restore deployed source alignment, all cancellation contracts, verification totals, no-mutation boundaries, follow-up scan requirement, and exact Share MISSING_EVIDENCE."],
   });
 }
 
@@ -5548,6 +5646,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateRepositorySecurityScanReconciliationGate(rootDir),
     evaluatePublicJsonRequestBodyBudgetGate(rootDir),
     evaluateImprovementPhotoAnalysisBudgetGate(rootDir),
+    evaluatePublicProviderCancellationGate(rootDir),
     evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir),
     evaluatePublicGenerationAdmissionSecurityGate(rootDir),
     evaluateSecurityFollowupRemediationGate(rootDir),

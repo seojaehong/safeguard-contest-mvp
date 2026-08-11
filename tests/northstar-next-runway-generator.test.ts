@@ -491,6 +491,17 @@ type NextRunwayReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  publicProviderCancellation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    findingId: string;
+    tests: number | null;
+    liveProviderCallExecuted: boolean;
+    followUpSecurityScan: string;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   mcpGenerationWorkBudgetSecurity: {
     verdict: string;
     sourceHead: string;
@@ -1809,6 +1820,18 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/public-provider-cancellation-2026-08-11/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_CANCELLATION_SOURCE_PROVEN",
+    sourceHead: "fixture-sha",
+    securityFinding: { findingId: "csf_278e8efc9722eb80016c42a3" },
+    verification: { focusedAndAdjacentVitest: { tests: 104 } },
+    productionBuild: { commitSha: "fixture-sha", liveProviderCallExecuted: false },
+    remainingBoundaries: {
+      followUpSecurityScan: "REQUIRED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/repository-security-scan-reconciliation-2026-08-11/report.json", {
     verdict: "PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS",
     targetRevision: "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
@@ -2608,6 +2631,19 @@ describe("northstar next runway generator", () => {
     });
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "improvement_photo_analysis_budget",
+      state: "notice",
+    }));
+    expect(report.publicProviderCancellation).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_CANCELLATION_SOURCE_PROVEN",
+      findingId: "csf_278e8efc9722eb80016c42a3",
+      tests: 104,
+      liveProviderCallExecuted: false,
+      followUpSecurityScan: "REQUIRED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "public_provider_cancellation",
       state: "notice",
     }));
     expect(report.provenCurrentState).toContain("repository_security_scan_reconciliation");

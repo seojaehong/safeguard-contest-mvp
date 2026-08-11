@@ -36,6 +36,7 @@ const ARTIFACTS = Object.freeze({
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
+  publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
@@ -342,6 +343,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const repositorySecurityScanReconciliation = tryReadJson(rootDir, ARTIFACTS.repositorySecurityScanReconciliation);
   const publicJsonRequestBodyBudget = tryReadJson(rootDir, ARTIFACTS.publicJsonRequestBodyBudget);
   const improvementPhotoAnalysisBudget = tryReadJson(rootDir, ARTIFACTS.improvementPhotoAnalysisBudget);
+  const publicProviderCancellation = tryReadJson(rootDir, ARTIFACTS.publicProviderCancellation);
   const publicSearchDistributedRateLimitReadiness = tryReadJson(rootDir, ARTIFACTS.publicSearchDistributedRateLimitReadiness);
   const publicGenerationAdmissionSecurity = tryReadJson(rootDir, ARTIFACTS.publicGenerationAdmissionSecurity);
   const securityFollowupRemediation = tryReadJson(rootDir, ARTIFACTS.securityFollowupRemediation);
@@ -438,6 +440,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "repository_security_scan_reconciliation", ARTIFACTS.repositorySecurityScanReconciliation, repositorySecurityScanReconciliation),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_json_request_body_budget", ARTIFACTS.publicJsonRequestBodyBudget, publicJsonRequestBodyBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "improvement_photo_analysis_budget", ARTIFACTS.improvementPhotoAnalysisBudget, improvementPhotoAnalysisBudget),
+    evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_cancellation", ARTIFACTS.publicProviderCancellation, publicProviderCancellation),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_search_distributed_rate_limit_readiness", ARTIFACTS.publicSearchDistributedRateLimitReadiness, publicSearchDistributedRateLimitReadiness),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_generation_admission_security", ARTIFACTS.publicGenerationAdmissionSecurity, publicGenerationAdmissionSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "security_followup_remediation", ARTIFACTS.securityFollowupRemediation, securityFollowupRemediation),
@@ -698,6 +701,18 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       followUpSecurityScan: asString(recordAt(improvementPhotoAnalysisBudget, "remainingBoundaries")?.followUpSecurityScan),
       securityCompleteClaimAllowed: recordAt(improvementPhotoAnalysisBudget, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
       exactSavedShareVerdict: asString(recordAt(improvementPhotoAnalysisBudget, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    publicProviderCancellation: {
+      artifact: ARTIFACTS.publicProviderCancellation,
+      verdict: isRecord(publicProviderCancellation) ? asString(publicProviderCancellation.verdict) : "missing",
+      sourceHead: isRecord(publicProviderCancellation) ? asString(publicProviderCancellation.sourceHead) : "",
+      productionCommit: asString(recordAt(publicProviderCancellation, "productionBuild")?.commitSha),
+      findingId: asString(recordAt(publicProviderCancellation, "securityFinding")?.findingId),
+      tests: asNumber(recordAt(recordAt(publicProviderCancellation, "verification"), "focusedAndAdjacentVitest")?.tests),
+      liveProviderCallExecuted: recordAt(publicProviderCancellation, "productionBuild")?.liveProviderCallExecuted === true,
+      followUpSecurityScan: asString(recordAt(publicProviderCancellation, "remainingBoundaries")?.followUpSecurityScan),
+      securityCompleteClaimAllowed: recordAt(publicProviderCancellation, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
+      exactSavedShareVerdict: asString(recordAt(publicProviderCancellation, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     mcpGenerationWorkBudgetSecurity: {
       artifact: ARTIFACTS.mcpGenerationWorkBudgetSecurity,
@@ -1203,6 +1218,13 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Live admission cases: ${rollup.improvementPhotoAnalysisBudget.liveCaseCount}; mode=${rollup.improvementPhotoAnalysisBudget.distributedProductionActivation || "unknown"}`,
     `- Follow-up scan: ${rollup.improvementPhotoAnalysisBudget.followUpSecurityScan || "REQUIRED"}; security-complete=${rollup.improvementPhotoAnalysisBudget.securityCompleteClaimAllowed}`,
     `- Exact saved Share: ${rollup.improvementPhotoAnalysisBudget.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "",
+    "## Public provider cancellation",
+    `- Verdict: \`${rollup.publicProviderCancellation.verdict}\``,
+    `- Finding: \`${rollup.publicProviderCancellation.findingId || "missing"}\`; tests=${rollup.publicProviderCancellation.tests ?? "unknown"}`,
+    `- Live provider cancellation call executed: ${rollup.publicProviderCancellation.liveProviderCallExecuted}`,
+    `- Follow-up scan: ${rollup.publicProviderCancellation.followUpSecurityScan || "REQUIRED"}; security-complete=${rollup.publicProviderCancellation.securityCompleteClaimAllowed}`,
+    `- Exact saved Share: ${rollup.publicProviderCancellation.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "- Boundary: current production uses process-instance fallback; distributed multi-instance admission remains open.",
     "",
     "## Repository Security Scan Reconciliation",

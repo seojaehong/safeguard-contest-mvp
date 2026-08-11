@@ -40,6 +40,7 @@ const ARTIFACTS = Object.freeze({
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
+  publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
@@ -1399,6 +1400,27 @@ function improvementPhotoAnalysisBudgetSummary(report) {
 }
 
 /** @param {unknown} report */
+function publicProviderCancellationSummary(report) {
+  if (!isRecord(report)) return {};
+  const finding = isRecord(report.securityFinding) ? report.securityFinding : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const tests = isRecord(verification.focusedAndAdjacentVitest) ? verification.focusedAndAdjacentVitest : {};
+  const production = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(production.commitSha),
+    findingId: asString(finding.findingId),
+    tests: typeof tests.tests === "number" ? tests.tests : null,
+    liveProviderCallExecuted: asBoolean(production.liveProviderCallExecuted),
+    followUpSecurityScan: asString(remaining.followUpSecurityScan),
+    securityCompleteClaimAllowed: asBoolean(remaining.securityCompleteClaimAllowed),
+    exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
+  };
+}
+
+/** @param {unknown} report */
 function mcpGenerationWorkBudgetSecuritySummary(report) {
   if (!isRecord(report)) return {};
   const contract = isRecord(report.currentSourceContract) ? report.currentSourceContract : {};
@@ -1802,6 +1824,10 @@ export function buildNorthstarNextRunway(options) {
     options.rootDir,
     ARTIFACTS.improvementPhotoAnalysisBudget,
   );
+  const publicProviderCancellation = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.publicProviderCancellation,
+  );
   const mcpGenerationWorkBudgetSecurity = readOptionalJson(
     options.rootDir,
     ARTIFACTS.mcpGenerationWorkBudgetSecurity,
@@ -1861,6 +1887,7 @@ export function buildNorthstarNextRunway(options) {
   const securityFollowupRemediationResult = securityFollowupRemediationSummary(securityFollowupRemediation);
   const publicJsonRequestBodyBudgetResult = publicJsonRequestBodyBudgetSummary(publicJsonRequestBodyBudget);
   const improvementPhotoAnalysisBudgetResult = improvementPhotoAnalysisBudgetSummary(improvementPhotoAnalysisBudget);
+  const publicProviderCancellationResult = publicProviderCancellationSummary(publicProviderCancellation);
   const mcpGenerationWorkBudgetSecurityResult = mcpGenerationWorkBudgetSecuritySummary(
     mcpGenerationWorkBudgetSecurity,
   );
@@ -1949,6 +1976,11 @@ export function buildNorthstarNextRunway(options) {
         state: "notice",
         reason: "deployed source includes shared photo byte, file, signature, rate, and concurrency controls; production still reports process-instance admission and a fresh rescan remains open",
       },
+      {
+        gate: "public_provider_cancellation",
+        state: "notice",
+        reason: "deployed source forwards disconnect cancellation through weather, knowledge regeneration, and remediation; live provider cancellation was not invoked and a fresh rescan remains open",
+      },
     ],
     approvalGated: approvalGates(approvalRunway, shareRecipientAckApproval),
     launchReadiness: launchReadinessSummary(launch),
@@ -2002,6 +2034,7 @@ export function buildNorthstarNextRunway(options) {
     securityFollowupRemediation: securityFollowupRemediationResult,
     publicJsonRequestBodyBudget: publicJsonRequestBodyBudgetResult,
     improvementPhotoAnalysisBudget: improvementPhotoAnalysisBudgetResult,
+    publicProviderCancellation: publicProviderCancellationResult,
     mcpGenerationWorkBudgetSecurity: mcpGenerationWorkBudgetSecurityResult,
     learningExportRendererSecurity: learningExportRendererSecurityResult,
     hermesKnowledgeReviewAuthorityUi: hermesKnowledgeReviewAuthorityUiSummary(hermesKnowledgeReviewAuthorityUi),
@@ -2133,6 +2166,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Security follow-up remediation is separately proven: \`${report.securityFollowupRemediation.verdict || "missing"}\`, sealed findings \`${report.securityFollowupRemediation.sealedFindingCount ?? "unknown"}\`, focused tests \`${report.securityFollowupRemediation.focusedTests ?? "unknown"}\`, and remaining security work \`${report.securityFollowupRemediation.remainingSecurityWorkCount ?? "unknown"}\`. The immutable original baseline remains \`${report.securityFollowupRemediation.immutableOriginalBaselineFindingCount ?? "unknown"}\` findings with rewritten=\`${report.securityFollowupRemediation.originalBaselineRewritten === true}\`; two deferred candidates and the separate public-admission notice remain visible, no live provider cancellation probe is claimed, and exact saved Share remains \`${report.securityFollowupRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Public JSON pre-parse body budgeting is separately live-proven: \`${report.publicJsonRequestBodyBudget.verdict || "missing"}\`, finding \`${report.publicJsonRequestBodyBudget.findingId || "missing"}\`, and live oversized-request cases \`${report.publicJsonRequestBodyBudget.liveCaseCount ?? "unknown"}\`. The corrected canonical scan remains immutable, follow-up scan status is \`${report.publicJsonRequestBodyBudget.followUpSecurityScan || "REQUIRED"}\`, security-complete remains \`${report.publicJsonRequestBodyBudget.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.publicJsonRequestBodyBudget.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Improvement photo analysis budgeting is separately live-measured: \`${report.improvementPhotoAnalysisBudget.verdict || "missing"}\`, finding \`${report.improvementPhotoAnalysisBudget.findingId || "missing"}\`, request bytes \`${report.improvementPhotoAnalysisBudget.maxRequestBytes ?? "unknown"}\`, concurrency \`${report.improvementPhotoAnalysisBudget.aggregateConcurrency ?? "unknown"}\`, and live admission cases \`${report.improvementPhotoAnalysisBudget.liveCaseCount ?? "unknown"}\`. Production admission remains \`${report.improvementPhotoAnalysisBudget.distributedProductionActivation || "unknown"}\`; the distributed multi-instance boundary and follow-up scan remain open, security-complete remains \`${report.improvementPhotoAnalysisBudget.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.improvementPhotoAnalysisBudget.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
+- Public provider cancellation is separately source-proven in deployed production: \`${report.publicProviderCancellation.verdict || "missing"}\`, finding \`${report.publicProviderCancellation.findingId || "missing"}\`, tests \`${report.publicProviderCancellation.tests ?? "unknown"}\`, and live provider cancellation call executed=\`${report.publicProviderCancellation.liveProviderCallExecuted === true}\`. The canonical finding remains immutable until follow-up scan \`${report.publicProviderCancellation.followUpSecurityScan || "REQUIRED"}\`, security-complete remains \`${report.publicProviderCancellation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.publicProviderCancellation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Repository security scan reconciliation is \`${report.repositorySecurityScanReconciliation.verdict || "missing"}\`. The immutable same-target scans and \`${report.repositorySecurityScanReconciliation.receiptContradictionCount ?? "unknown"}\` fail-open contradictions remain preserved; zero-finding accepted=\`${report.repositorySecurityScanReconciliation.zeroFindingClaimAccepted === true}\`. Corrected scan completed=\`${report.repositorySecurityScanReconciliation.correctedFreshScanCompleted === true}\`, id=\`${report.repositorySecurityScanReconciliation.correctedScanId || "missing"}\`, reportable=\`${report.repositorySecurityScanReconciliation.correctedReportableFindingCount ?? "unknown"}\`, deferred=\`${report.repositorySecurityScanReconciliation.correctedDeferredCandidateCount ?? "unknown"}\`, coverage=\`${report.repositorySecurityScanReconciliation.correctedCoverageCompleteness || "unknown"}\`, security-complete=\`${report.repositorySecurityScanReconciliation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.repositorySecurityScanReconciliation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - MCP generation work-budget security is separately measured: \`${report.mcpGenerationWorkBudgetSecurity.verdict || "missing"}\`, POST body budget \`${report.mcpGenerationWorkBudgetSecurity.postBodyMaxBytes ?? "unknown"}\` bytes, adjacent tests \`${report.mcpGenerationWorkBudgetSecurity.adjacentTests ?? "unknown"}\`, valid authenticated runtime probe pending=\`${report.mcpGenerationWorkBudgetSecurity.validAuthenticatedRuntimeProbeRequired === true}\`, distributed activation pending=\`${report.mcpGenerationWorkBudgetSecurity.distributedActivationRequired === true}\`, and fresh rescan required=\`${report.mcpGenerationWorkBudgetSecurity.freshRescanRequired === true}\`. This notice preserves the sealed finding and exact saved Share \`${report.mcpGenerationWorkBudgetSecurity.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live Hermes reviewer authority UI is measured separately: \`${report.hermesKnowledgeReviewAuthorityUi.verdict || "missing"}\`, local/live viewport contracts \`${report.hermesKnowledgeReviewAuthorityUi.localPassed ?? 0}/${report.hermesKnowledgeReviewAuthorityUi.localViewportCount ?? 0}\` and \`${report.hermesKnowledgeReviewAuthorityUi.livePassed ?? 0}/${report.hermesKnowledgeReviewAuthorityUi.liveViewportCount ?? 0}\`, with authority order \`${report.hermesKnowledgeReviewAuthorityUi.sourceOrder?.join(" -> ") || "missing"}\`. Human review remains required and machine evidence does not replace it; no DB/provider/share/publication mutation is claimed. Exact saved Share remains \`${report.hermesKnowledgeReviewAuthorityUi.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`, while LLM Wiki publication and Supabase RLS remain approval-gated.
