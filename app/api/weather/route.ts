@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchWeatherSignal, getWeatherWorkKey } from "@/lib/weather";
 import { createRateLimiter } from "@/lib/rate-limit";
-import { enforceRateLimit } from "@/lib/api-guard";
+import {
+  applyPublicRateLimitHeader,
+  checkPublicRateLimit,
+  publicRateLimitResponse,
+} from "@/lib/public-distributed-rate-limit";
 import {
   isOverCharBudget,
   publicWorkBudgetExceeded,
@@ -59,7 +63,15 @@ async function fetchCoalescedWeather(question: string, signal: AbortSignal) {
 }
 
 export async function GET(request: NextRequest) {
-  const limited = enforceRateLimit(request, limiter);
+  const rateLimit = await checkPublicRateLimit({
+    request,
+    namespace: "public-weather",
+    limit: 30,
+    windowMs: 60_000,
+    instanceLimiter: limiter,
+    requireDistributedInProduction: true,
+  });
+  const limited = publicRateLimitResponse(rateLimit);
   if (limited) return limited;
 
   const question = request.nextUrl.searchParams.get("question")?.trim() || "";
@@ -70,12 +82,15 @@ export async function GET(request: NextRequest) {
     );
   }
   if (isOverCharBudget(question, PUBLIC_WEATHER_QUESTION_MAX_CHARS)) {
-    return publicWorkBudgetExceeded("question exceeds the public weather work budget", PUBLIC_WEATHER_QUESTION_MAX_CHARS);
+    return applyPublicRateLimitHeader(
+      publicWorkBudgetExceeded("question exceeds the public weather work budget", PUBLIC_WEATHER_QUESTION_MAX_CHARS),
+      rateLimit,
+    );
   }
 
   try {
     const weather = await fetchCoalescedWeather(question, request.signal);
-    return NextResponse.json({ ok: true, weather });
+    return applyPublicRateLimitHeader(NextResponse.json({ ok: true, weather }), rateLimit);
   } catch (error) {
     request.signal.throwIfAborted();
     const message = error instanceof Error ? error.message : String(error);

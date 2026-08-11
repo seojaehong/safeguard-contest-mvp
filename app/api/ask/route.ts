@@ -14,7 +14,14 @@ import {
   PUBLIC_ASK_REQUEST_MAX_BYTES,
   serializedCharLength
 } from "@/lib/public-work-budget";
-import { checkPublicAskAdmission } from "@/lib/public-ask-admission";
+import {
+  acquirePublicAskWorkLease,
+  applyPublicAskWorkHeaders,
+  checkPublicAskAdmission,
+  publicAskConcurrencyResponse,
+  type PublicAskWorkLease,
+} from "@/lib/public-ask-admission";
+import { resolveRunAskMode } from "@/lib/run-ask-mode";
 import {
   applyPublicRateLimitHeader,
   publicRateLimitResponse,
@@ -56,32 +63,49 @@ export async function POST(request: NextRequest) {
     );
   }
   const requestedMode = typeof record.aiMode === "string" ? (record.aiMode as AiMode) : undefined;
-  const aiMode = requestedMode && ALLOWED_MODES.includes(requestedMode) ? requestedMode : undefined;
-  const harnessMemory = parseHarnessMemoryInput(record.harnessMemory);
-  const result = await runAsk(question, { aiMode, harnessMemory, signal: request.signal });
-  const sealed = attachGenerationEvidence(result, {
-    secret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
-    generatedAt: new Date().toISOString()
+  const aiMode = resolveRunAskMode({
+    requestedMode: requestedMode && ALLOWED_MODES.includes(requestedMode) ? requestedMode : undefined,
+    envDefault: process.env.AI_MODE_DEFAULT,
   });
-  if (sealed.generationTrace) {
-    log.info("safeclaw_generation_trace", {
-      event: "safeclaw_generation_trace",
-      traceId: sealed.generationTrace.traceId,
-      askMode: sealed.generationTrace.askMode,
-      answerProvider: sealed.generationTrace.answer.provider,
-      answerModel: sealed.generationTrace.answer.model,
-      answerComposition: sealed.generationTrace.answer.composition,
-      answerUpstreamProvider: sealed.generationTrace.answer.upstream?.provider,
-      answerUpstreamModel: sealed.generationTrace.answer.upstream?.model,
-      deliverablesAttempted: sealed.generationTrace.deliverables.attempted,
-      deliverablesProvider: sealed.generationTrace.deliverables.provider,
-      modelPerDocument: sealed.generationTrace.deliverables.modelPerDocument,
-      fallbackUsed: sealed.generationTrace.fallbackUsed,
-      evidenceSealed: Boolean(sealed.generationEvidence)
+  const harnessMemory = parseHarnessMemoryInput(record.harnessMemory);
+  let workLease: PublicAskWorkLease | null;
+  try {
+    workLease = await acquirePublicAskWorkLease(aiMode);
+  } catch (error) {
+    log.error("public ask concurrency admission unavailable", {
+      errorType: error instanceof Error ? error.name : typeof error,
     });
+    return applyPublicRateLimitHeader(publicAskConcurrencyResponse(aiMode), rateLimit);
   }
-  return applyPublicRateLimitHeader(
-    NextResponse.json(sanitizeAskResponsePublicSurface(sealed)),
-    rateLimit,
-  );
+  if (!workLease) return applyPublicRateLimitHeader(publicAskConcurrencyResponse(aiMode), rateLimit);
+  try {
+    const result = await runAsk(question, { aiMode, harnessMemory, signal: request.signal });
+    const sealed = attachGenerationEvidence(result, {
+      secret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
+      generatedAt: new Date().toISOString()
+    });
+    if (sealed.generationTrace) {
+      log.info("safeclaw_generation_trace", {
+        event: "safeclaw_generation_trace",
+        traceId: sealed.generationTrace.traceId,
+        askMode: sealed.generationTrace.askMode,
+        answerProvider: sealed.generationTrace.answer.provider,
+        answerModel: sealed.generationTrace.answer.model,
+        answerComposition: sealed.generationTrace.answer.composition,
+        answerUpstreamProvider: sealed.generationTrace.answer.upstream?.provider,
+        answerUpstreamModel: sealed.generationTrace.answer.upstream?.model,
+        deliverablesAttempted: sealed.generationTrace.deliverables.attempted,
+        deliverablesProvider: sealed.generationTrace.deliverables.provider,
+        modelPerDocument: sealed.generationTrace.deliverables.modelPerDocument,
+        fallbackUsed: sealed.generationTrace.fallbackUsed,
+        evidenceSealed: Boolean(sealed.generationEvidence)
+      });
+    }
+    return applyPublicAskWorkHeaders(applyPublicRateLimitHeader(
+      NextResponse.json(sanitizeAskResponsePublicSurface(sealed)),
+      rateLimit,
+    ), aiMode, workLease.weight);
+  } finally {
+    await workLease.release();
+  }
 }

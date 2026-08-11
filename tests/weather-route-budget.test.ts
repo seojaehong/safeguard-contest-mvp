@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PUBLIC_WEATHER_QUESTION_MAX_CHARS } from "@/lib/public-work-budget";
 
 type WeatherRouteSignal = {
@@ -37,6 +37,8 @@ function weatherRequest(question: string, ipSuffix: number, signal?: AbortSignal
 
 describe("weather route public work budget", () => {
   beforeEach(() => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
     vi.clearAllMocks();
     mocks.fetchWeatherSignal.mockResolvedValue({
       source: "kma",
@@ -47,6 +49,37 @@ describe("weather route public work budget", () => {
       detail: "mock weather",
       signals: []
     });
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("fails closed before weather work when distributed admission is misconfigured", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { GET } = await import("@/app/api/weather/route");
+
+    const response = await GET(weatherRequest("서울 옥외 폭염 작업", 9));
+
+    expect(response.status).toBe(503);
+    expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("distributed");
+    expect(mocks.fetchWeatherSignal).not.toHaveBeenCalled();
+    error.mockRestore();
+  });
+
+  it("requires durable admission in production", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { GET } = await import("@/app/api/weather/route");
+
+    const response = await GET(weatherRequest("서울 옥외 폭염 작업", 8));
+
+    expect(response.status).toBe(503);
+    expect(mocks.fetchWeatherSignal).not.toHaveBeenCalled();
+    error.mockRestore();
   });
 
   it("rejects oversized questions before upstream weather fan-out", async () => {
@@ -71,6 +104,7 @@ describe("weather route public work budget", () => {
 
     const first = GET(weatherRequest("서울 옥외 폭염 작업", 11));
     const second = GET(weatherRequest("서울 야외 고온 작업 기상 확인", 12));
+    await vi.waitFor(() => expect(mocks.fetchWeatherSignal).toHaveBeenCalledTimes(1));
     resolveWeather?.({
       source: "kma",
       mode: "live",

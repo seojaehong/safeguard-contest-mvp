@@ -52,13 +52,16 @@ const FIXED_WINDOW_SCRIPT = [
 const CONCURRENCY_ACQUIRE_SCRIPT = [
   "redis.call('ZREMRANGEBYSCORE', KEYS[1], '-inf', ARGV[1])",
   "local active = redis.call('ZCARD', KEYS[1])",
-  "if active >= tonumber(ARGV[2]) then return {0, active} end",
-  "redis.call('ZADD', KEYS[1], ARGV[3], ARGV[4])",
+  "local requested = tonumber(ARGV[6])",
+  "if active + requested > tonumber(ARGV[2]) then return {0, active} end",
+  "for i = 1, requested do redis.call('ZADD', KEYS[1], ARGV[3], ARGV[4] .. ':' .. i) end",
   "redis.call('PEXPIRE', KEYS[1], ARGV[5])",
-  "return {1, active + 1}",
+  "return {1, active + requested}",
 ].join("\n");
 const CONCURRENCY_RELEASE_SCRIPT = [
-  "return redis.call('ZREM', KEYS[1], ARGV[1])",
+  "local released = 0",
+  "for i = 1, tonumber(ARGV[2]) do released = released + redis.call('ZREM', KEYS[1], ARGV[1] .. ':' .. i) end",
+  "return released",
 ].join("\n");
 
 type RateLimitMode = "distributed" | "instance";
@@ -85,6 +88,7 @@ export type PublicRateLimitOptions = {
   environment?: Environment;
   fetchImpl?: FetchLike;
   timeoutMs?: number;
+  requireDistributedInProduction?: boolean;
 };
 
 type UpstashConfiguration =
@@ -217,6 +221,18 @@ export async function checkPublicRateLimit(
     });
   }
 
+  if (options.requireDistributedInProduction && environment.VERCEL_ENV === "production") {
+    console.error("[public-rate-limit] distributed limiter is required in production", {
+      namespace: options.namespace,
+    });
+    return {
+      allowed: false,
+      mode: "distributed",
+      reason: "distributed_limiter_unavailable",
+      retryAfterSeconds: 5,
+    };
+  }
+
   return {
     ...options.instanceLimiter.check(identifier),
     mode: "instance",
@@ -288,12 +304,20 @@ async function runUpstashCommand(
   }
 }
 
-async function acquireDistributedConcurrencyLease(input: {
+export async function acquirePublicConcurrencyLease(input: {
   concurrency: number;
   leaseMs: number;
   namespace: string;
   requireDistributedInProduction: boolean;
+  weight?: number;
 }): Promise<(() => Promise<void>) | null | undefined> {
+  const weight = input.weight ?? 1;
+  if (!Number.isSafeInteger(input.concurrency) || input.concurrency < 1) {
+    throw new Error("distributed concurrency capacity must be a positive safe integer");
+  }
+  if (!Number.isSafeInteger(weight) || weight < 1 || weight > input.concurrency) {
+    throw new Error("distributed concurrency weight must fit within capacity");
+  }
   const config = readUpstashConfiguration(process.env);
   if (config.state === "absent") {
     if (input.requireDistributedInProduction && process.env.VERCEL_ENV === "production") {
@@ -315,6 +339,7 @@ async function acquireDistributedConcurrencyLease(input: {
     String(now + input.leaseMs),
     owner,
     String(input.leaseMs),
+    String(weight),
   ]);
   if (!Array.isArray(result) || result.length < 1 || ![0, 1].includes(Number(result[0]))) {
     throw new Error("distributed concurrency returned an invalid lease response");
@@ -332,6 +357,7 @@ async function acquireDistributedConcurrencyLease(input: {
         "1",
         buildConcurrencyKey(input.namespace),
         owner,
+        String(weight),
       ]);
     } catch (error) {
       console.error("[public-rate-limit] distributed concurrency release failed", {
@@ -342,7 +368,7 @@ async function acquireDistributedConcurrencyLease(input: {
 }
 
 async function acquireDocumentExportLease(): Promise<(() => Promise<void>) | null | undefined> {
-  return acquireDistributedConcurrencyLease({
+  return acquirePublicConcurrencyLease({
     concurrency: PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.concurrency,
     leaseMs: DOCUMENT_EXPORT_LEASE_MS,
     namespace: PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.namespace,
@@ -351,7 +377,7 @@ async function acquireDocumentExportLease(): Promise<(() => Promise<void>) | nul
 }
 
 async function acquirePhotoAnalysisLease(): Promise<(() => Promise<void>) | null | undefined> {
-  return acquireDistributedConcurrencyLease({
+  return acquirePublicConcurrencyLease({
     concurrency: PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.concurrency,
     leaseMs: PHOTO_ANALYSIS_LEASE_MS,
     namespace: PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.namespace,

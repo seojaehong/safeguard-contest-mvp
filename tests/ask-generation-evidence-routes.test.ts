@@ -87,12 +87,17 @@ function requestWithBody(path: string, body: unknown, options: { ip?: string; si
 
 describe("ask generation evidence routes", () => {
   beforeEach(() => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+    vi.stubEnv("VERCEL_ENV", "");
     process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET = "ask-route-generation-evidence-secret";
     mocks.runAsk.mockResolvedValue(responseWithHarness());
   });
 
   afterEach(() => {
     delete process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET;
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
     vi.clearAllMocks();
   });
 
@@ -208,6 +213,36 @@ describe("ask generation evidence routes", () => {
     const limited = await postJson(requestWithBody("/api/ask", { question: "성수동 외벽 도장 작업" }, { ip }));
     expect(limited.status).toBe(429);
     expect(mocks.runAsk).toHaveBeenCalledTimes(10);
+  });
+
+  it("holds a full-mode work lease until the SSE consumer cancels", async () => {
+    let receivedSignal: AbortSignal | undefined;
+    mocks.runAsk.mockImplementationOnce(async (_question, options: { signal?: AbortSignal }) => {
+      receivedSignal = options.signal;
+      await new Promise<never>((_resolve, reject) => {
+        options.signal?.addEventListener("abort", () => reject(options.signal?.reason), { once: true });
+      });
+    });
+    const { POST: postStream } = await import("@/app/api/ask/stream/route");
+    const { POST: postJson } = await import("@/app/api/ask/route");
+    const stream = await postStream(requestWithBody(
+      "/api/ask/stream",
+      { question: "성수동 외벽 도장 작업", aiMode: "full" },
+      { ip: "203.0.113.91" },
+    ));
+    await vi.waitFor(() => expect(receivedSignal).toBeInstanceOf(AbortSignal));
+
+    const busy = await postJson(requestWithBody(
+      "/api/ask",
+      { question: "다른 현장 작업", aiMode: "full" },
+      { ip: "203.0.113.92" },
+    ));
+    expect(busy.status).toBe(503);
+    await expect(busy.json()).resolves.toMatchObject({ code: "PUBLIC_ASK_CONCURRENCY_LIMIT" });
+    expect(mocks.runAsk).toHaveBeenCalledTimes(1);
+
+    await stream.body?.cancel("release full-mode test lease");
+    expect(receivedSignal?.aborted).toBe(true);
   });
 
   it("aborts streaming work when the response consumer cancels", async () => {

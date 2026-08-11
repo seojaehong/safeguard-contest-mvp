@@ -15,7 +15,14 @@ import {
   PUBLIC_ASK_REQUEST_MAX_BYTES,
   serializedCharLength
 } from "@/lib/public-work-budget";
-import { checkPublicAskAdmission } from "@/lib/public-ask-admission";
+import {
+  acquirePublicAskWorkLease,
+  applyPublicAskWorkHeaders,
+  checkPublicAskAdmission,
+  publicAskConcurrencyResponse,
+  type PublicAskWorkLease,
+} from "@/lib/public-ask-admission";
+import { resolveRunAskMode } from "@/lib/run-ask-mode";
 import {
   applyPublicRateLimitHeader,
   publicRateLimitResponse,
@@ -60,8 +67,21 @@ export async function POST(request: NextRequest) {
     );
   }
   const requestedMode = typeof record.aiMode === "string" ? (record.aiMode as AiMode) : undefined;
-  const aiMode = requestedMode && ALLOWED_MODES.includes(requestedMode) ? requestedMode : undefined;
+  const aiMode = resolveRunAskMode({
+    requestedMode: requestedMode && ALLOWED_MODES.includes(requestedMode) ? requestedMode : undefined,
+    envDefault: process.env.AI_MODE_DEFAULT,
+  });
   const harnessMemory = parseHarnessMemoryInput(record.harnessMemory);
+  let workLease: PublicAskWorkLease | null;
+  try {
+    workLease = await acquirePublicAskWorkLease(aiMode);
+  } catch (error) {
+    log.error("public ask concurrency admission unavailable", {
+      errorType: error instanceof Error ? error.name : typeof error,
+    });
+    return applyPublicRateLimitHeader(publicAskConcurrencyResponse(aiMode), rateLimit);
+  }
+  if (!workLease) return applyPublicRateLimitHeader(publicAskConcurrencyResponse(aiMode), rateLimit);
 
   const workController = new AbortController();
   const abortWork = () => workController.abort(request.signal.reason);
@@ -107,19 +127,21 @@ export async function POST(request: NextRequest) {
         } catch {
           // The consumer may already have cancelled the stream.
         }
+        await workLease.release();
       }
     },
     cancel(reason) {
       if (!workController.signal.aborted) workController.abort(reason);
       request.signal.removeEventListener("abort", abortWork);
+      void workLease.release();
     },
   });
 
-  return applyPublicRateLimitHeader(new Response(stream, {
+  return applyPublicAskWorkHeaders(applyPublicRateLimitHeader(new Response(stream, {
     headers: {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive"
     }
-  }), rateLimit);
+  }), rateLimit), aiMode, workLease.weight);
 }
