@@ -1577,6 +1577,7 @@ function createFixtureRoot(): string {
   });
   writeJson(rootDir, path.join("evaluation", "share-desktop-perception-2026-07-22", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_SCOPED_WORKSPACE_AND_INVITED_FIXTURE",
+    mode: "live-production",
     sourceHead: "fixture-sha",
     productionBuild: {
       commitSha: "fixture-sha",
@@ -1599,6 +1600,9 @@ function createFixtureRoot(): string {
           distinctFirstViewportRegions: 4,
           desktopStatusRailDisplay: "grid",
           desktopStatusRailBottom: 688,
+          workspaceSideNavWidth: 1180,
+          workspaceStepStatusOverflowCount: 0,
+          workspaceStepStatusMaxOverflow: 0,
           horizontalOverflow: false,
           outsideElements: 0,
         },
@@ -1613,6 +1617,9 @@ function createFixtureRoot(): string {
           distinctFirstViewportRegions: 4,
           desktopStatusRailDisplay: "grid",
           desktopStatusRailBottom: 700,
+          workspaceSideNavWidth: 1180,
+          workspaceStepStatusOverflowCount: 0,
+          workspaceStepStatusMaxOverflow: 0,
           horizontalOverflow: false,
           outsideElements: 0,
         },
@@ -3916,6 +3923,8 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("staged Share rail");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("desktop-short 1440x723");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("three-zone cockpit");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("1180px workspace step rail");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("zero overflowing step-status labels");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("390x723 mobile stack");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("invited recipient fixture retains a separate desktop two-zone contract");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("live mobile selected-summary");
@@ -4983,6 +4992,28 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(gate?.state).toBe("contradicted");
     expect(gate?.evidencePath).toBe(path.join("evaluation", "document-all-authoring-geometry-2026-08-02", "after-live", "report.json"));
     expect(gate?.detail).toContain("48/48 all-document selected-authoring and raw-source containment");
+  });
+
+  it("contradicts the UI gate when a desktop workspace step status overflows its button", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "share-desktop-perception-2026-07-22", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      results: Array<{ route: string; viewport: { width: number }; metrics: { workspaceStepStatusOverflowCount: number } }>;
+    };
+    const desktop = report.results.find((row) => row.route === "/workspace share step" && row.viewport.width === 1440);
+    if (!desktop) throw new Error("Workspace desktop fixture missing");
+    desktop.metrics.workspaceStepStatusOverflowCount = 1;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-08-12T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+    const gate = audit.gates.find((item) => item.id === "ui_documents_share_cockpit");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.evidencePath).toBe(path.join("evaluation", "share-desktop-perception-2026-07-22", "report.json"));
   });
 
   it("contradicts the UI gate when a document action loses the 32px pane margin", async () => {
