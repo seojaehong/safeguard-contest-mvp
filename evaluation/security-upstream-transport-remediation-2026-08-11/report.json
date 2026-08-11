@@ -1,0 +1,108 @@
+{
+  "schemaVersion": "safeclaw-security-upstream-transport-remediation/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_SOURCE_PROVEN_UPSTREAM_TRANSPORT_SECURITY_NO_PROVIDER_PROBE",
+  "generatedAt": "2026-08-11T09:42:24.235Z",
+  "sourceHead": "b673fc5d3a7f3be366c61d242e54d6a8a452e85e",
+  "productCommit": "b673fc5d3a7f3be366c61d242e54d6a8a452e85e",
+  "productionCommit": "b673fc5d3a7f3be366c61d242e54d6a8a452e85e",
+  "deploymentUrl": "safeguard-contest-pj8hjxjiq-seojaehongs-projects.vercel.app",
+  "liveAfterDeploymentPending": false,
+  "sourceScan": {
+    "scanId": "a8aa9242-ed42-4057-88e9-31a72e298292",
+    "targetRevision": "8cd86f7ab2abe4ad7d4948d8feda083b0b032386",
+    "findingCount": 20,
+    "mediumCount": 15,
+    "lowCount": 5,
+    "coverageCompleteness": "partial",
+    "immutableBaselinePreserved": true
+  },
+  "remediatedFindings": [
+    {
+      "findingId": "csf_afc7b9c8c2fe4982bcd22475",
+      "anchor": "configurable-mcp-upstream-ssrf",
+      "title": "Configurable MCP upstreams allow arbitrary destinations and credential disclosure"
+    },
+    {
+      "findingId": "csf_b39a066e2b5d07924770057a",
+      "anchor": "unbounded-mcp-upstream-response",
+      "title": "MCP upstream responses are buffered without a byte budget"
+    }
+  ],
+  "cumulativeRemediation": {
+    "previouslyRemediated": 6,
+    "remediatedThisWave": 2,
+    "remediatedTotal": 8,
+    "remainingScanFindings": 12,
+    "securityCompleteClaimAllowed": false,
+    "freshFollowUpScanRequired": true
+  },
+  "contracts": {
+    "configurableOriginsRequireExplicitAllowlist": true,
+    "credentialFreeHttpsDefaultPortOnly": true,
+    "allResolvedAddressesMustBePublic": true,
+    "literalPrivateAndLinkLocalAddressesRejected": true,
+    "redirectsDisabled": true,
+    "credentialsAttachedOnlyAfterUrlApproval": true,
+    "weatherResponseMaxBytes": 1048576,
+    "accidentResponseMaxBytes": 2097152,
+    "contentLengthPreflightEnforced": true,
+    "streamedByteLimitEnforced": true
+  },
+  "governedPathCompatibility": {
+    "verdict": "PASS_LIVE_PRODUCTION_UPSTREAM_TRANSPORT_COMPATIBILITY",
+    "sourceHead": "b673fc5d3a7f3be366c61d242e54d6a8a452e85e",
+    "productionCommit": "b673fc5d3a7f3be366c61d242e54d6a8a452e85e",
+    "coveredGateIds": [
+      "security_followup_remediation",
+      "public_provider_cancellation",
+      "public_provider_work_budget"
+    ],
+    "changedGovernedPaths": [
+      ".env.example",
+      "lib/accident-cases.ts",
+      "lib/server/upstream-http.ts",
+      "lib/weather.ts"
+    ],
+    "focused": { "testFiles": 5, "tests": 32, "status": "PASS" },
+    "adjacent": { "testFiles": 11, "tests": 119, "status": "PASS" },
+    "noMutation": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "verification": {
+    "focused": { "testFiles": 5, "tests": 32, "status": "PASS" },
+    "adjacent": { "testFiles": 11, "tests": 119, "status": "PASS" },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28,
+    "diffCheck": "PASS"
+  },
+  "liveChecks": {
+    "buildInfo": {
+      "status": "PASS",
+      "commitSha": "b673fc5d3a7f3be366c61d242e54d6a8a452e85e",
+      "branch": "master",
+      "environment": "production"
+    },
+    "externalProviderProbe": {
+      "executed": false,
+      "reason": "No live KMA, KIER, KOSHA relay, or provider dispatch request was made; transport controls are source/test proven and the product commit is live."
+    }
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "databaseMutations": "NOT_PERFORMED",
+    "vectorWikiKoshaRegistryMutations": "NOT_PERFORMED",
+    "remainingScanFindings": 12,
+    "securityCompleteClaimAllowed": false
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "externalProviderProbeExecuted": false,
+    "shareSessionCreated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  }
+}

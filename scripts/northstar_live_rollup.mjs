@@ -42,6 +42,7 @@ const ARTIFACTS = Object.freeze({
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
   securityResourceRemediation: path.join("evaluation", "security-resource-remediation-2026-08-11", "report.json"),
+  securityUpstreamTransportRemediation: path.join("evaluation", "security-upstream-transport-remediation-2026-08-11", "report.json"),
   mcpGenerationWorkBudgetSecurity: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
@@ -351,6 +352,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const publicGenerationAdmissionSecurity = tryReadJson(rootDir, ARTIFACTS.publicGenerationAdmissionSecurity);
   const securityFollowupRemediation = tryReadJson(rootDir, ARTIFACTS.securityFollowupRemediation);
   const securityResourceRemediation = tryReadJson(rootDir, ARTIFACTS.securityResourceRemediation);
+  const securityUpstreamTransportRemediation = tryReadJson(rootDir, ARTIFACTS.securityUpstreamTransportRemediation);
   const mcpGenerationWorkBudgetSecurity = tryReadJson(rootDir, ARTIFACTS.mcpGenerationWorkBudgetSecurity);
   const learningExportRendererSecurity = tryReadJson(rootDir, ARTIFACTS.learningExportRendererSecurity);
   const hermesKnowledgeReviewAuthorityUi = tryReadJson(rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
@@ -450,6 +452,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "public_generation_admission_security", ARTIFACTS.publicGenerationAdmissionSecurity, publicGenerationAdmissionSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "security_followup_remediation", ARTIFACTS.securityFollowupRemediation, securityFollowupRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "security_resource_remediation", ARTIFACTS.securityResourceRemediation, securityResourceRemediation),
+    evidenceStatus(rootDir, currentHead, liveCommit, "security_upstream_transport_remediation", ARTIFACTS.securityUpstreamTransportRemediation, securityUpstreamTransportRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "mcp_generation_work_budget_security", ARTIFACTS.mcpGenerationWorkBudgetSecurity, mcpGenerationWorkBudgetSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "learning_export_renderer_security", ARTIFACTS.learningExportRendererSecurity, learningExportRendererSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_knowledge_review_ui", ARTIFACTS.hermesKnowledgeReviewAuthorityUi, hermesKnowledgeReviewAuthorityUi),
@@ -691,6 +694,19 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       remainingScanFindings: asNumber(recordAt(securityResourceRemediation, "remainingBoundaries")?.remainingScanFindings),
       exactSavedShareVerdict: asString(recordAt(securityResourceRemediation, "remainingBoundaries")?.exactSavedShareVerdict),
       providerDispatchPersistence: asString(recordAt(securityResourceRemediation, "remainingBoundaries")?.providerDispatchPersistence),
+    },
+    securityUpstreamTransportRemediation: {
+      artifact: ARTIFACTS.securityUpstreamTransportRemediation,
+      verdict: isRecord(securityUpstreamTransportRemediation) ? asString(securityUpstreamTransportRemediation.verdict) : "missing",
+      sourceHead: isRecord(securityUpstreamTransportRemediation) ? asString(securityUpstreamTransportRemediation.sourceHead) : "",
+      productionCommit: isRecord(securityUpstreamTransportRemediation) ? asString(securityUpstreamTransportRemediation.productionCommit) : "",
+      scanFindingCount: asNumber(recordAt(securityUpstreamTransportRemediation, "sourceScan")?.findingCount),
+      remediatedThisWave: asNumber(recordAt(securityUpstreamTransportRemediation, "cumulativeRemediation")?.remediatedThisWave),
+      remediatedTotal: asNumber(recordAt(securityUpstreamTransportRemediation, "cumulativeRemediation")?.remediatedTotal),
+      remainingScanFindings: asNumber(recordAt(securityUpstreamTransportRemediation, "remainingBoundaries")?.remainingScanFindings),
+      externalProviderProbeExecuted: recordAt(recordAt(securityUpstreamTransportRemediation, "liveChecks"), "externalProviderProbe")?.executed === true,
+      exactSavedShareVerdict: asString(recordAt(securityUpstreamTransportRemediation, "remainingBoundaries")?.exactSavedShareVerdict),
+      providerDispatchPersistence: asString(recordAt(securityUpstreamTransportRemediation, "remainingBoundaries")?.providerDispatchPersistence),
     },
     publicJsonRequestBodyBudget: {
       artifact: ARTIFACTS.publicJsonRequestBodyBudget,
@@ -1241,6 +1257,11 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Verdict: \`${rollup.securityResourceRemediation.verdict}\``,
     `- Fresh sealed findings: ${rollup.securityResourceRemediation.scanFindingCount ?? "unknown"}; remediated: ${rollup.securityResourceRemediation.remediatedFindingCount ?? "unknown"}; remaining: ${rollup.securityResourceRemediation.remainingScanFindings ?? "unknown"}`,
     `- Provider persistence: ${rollup.securityResourceRemediation.providerDispatchPersistence || "unknown"}; exact saved Share: ${rollup.securityResourceRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "",
+    "## Security Upstream Transport Remediation",
+    `- Verdict: \`${rollup.securityUpstreamTransportRemediation.verdict}\``,
+    `- Fresh sealed findings: ${rollup.securityUpstreamTransportRemediation.scanFindingCount ?? "unknown"}; remediated this wave: ${rollup.securityUpstreamTransportRemediation.remediatedThisWave ?? "unknown"}; cumulative: ${rollup.securityUpstreamTransportRemediation.remediatedTotal ?? "unknown"}; remaining: ${rollup.securityUpstreamTransportRemediation.remainingScanFindings ?? "unknown"}`,
+    `- External provider probe executed: ${rollup.securityUpstreamTransportRemediation.externalProviderProbeExecuted}; provider persistence: ${rollup.securityUpstreamTransportRemediation.providerDispatchPersistence || "unknown"}; exact saved Share: ${rollup.securityUpstreamTransportRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "",
     "## Public JSON Request Body Budget",
     "",

@@ -46,6 +46,7 @@ const ARTIFACTS = Object.freeze({
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
   securityResourceRemediation: path.join("evaluation", "security-resource-remediation-2026-08-11", "report.json"),
+  securityUpstreamTransportRemediation: path.join("evaluation", "security-upstream-transport-remediation-2026-08-11", "report.json"),
   mcpGenerationWorkBudgetSecurity: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
@@ -1379,6 +1380,28 @@ function securityResourceRemediationSummary(report) {
 }
 
 /** @param {unknown} report */
+function securityUpstreamTransportRemediationSummary(report) {
+  if (!isRecord(report)) return {};
+  const scan = isRecord(report.sourceScan) ? report.sourceScan : {};
+  const cumulative = isRecord(report.cumulativeRemediation) ? report.cumulativeRemediation : {};
+  const live = isRecord(report.liveChecks) ? report.liveChecks : {};
+  const providerProbe = isRecord(live.externalProviderProbe) ? live.externalProviderProbe : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(report.productionCommit),
+    scanFindingCount: typeof scan.findingCount === "number" ? scan.findingCount : null,
+    remediatedThisWave: typeof cumulative.remediatedThisWave === "number" ? cumulative.remediatedThisWave : null,
+    remediatedTotal: typeof cumulative.remediatedTotal === "number" ? cumulative.remediatedTotal : null,
+    remainingScanFindings: typeof remaining.remainingScanFindings === "number" ? remaining.remainingScanFindings : null,
+    externalProviderProbeExecuted: asBoolean(providerProbe.executed),
+    providerDispatchPersistence: asString(remaining.providerDispatchPersistence),
+    exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
+  };
+}
+
+/** @param {unknown} report */
 function publicJsonRequestBodyBudgetSummary(report) {
   if (!isRecord(report)) return {};
   const scan = isRecord(report.scan) ? report.scan : {};
@@ -1862,6 +1885,10 @@ export function buildNorthstarNextRunway(options) {
     options.rootDir,
     ARTIFACTS.securityResourceRemediation,
   );
+  const securityUpstreamTransportRemediation = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.securityUpstreamTransportRemediation,
+  );
   const publicJsonRequestBodyBudget = readOptionalJson(
     options.rootDir,
     ARTIFACTS.publicJsonRequestBodyBudget,
@@ -1936,6 +1963,9 @@ export function buildNorthstarNextRunway(options) {
   );
   const securityFollowupRemediationResult = securityFollowupRemediationSummary(securityFollowupRemediation);
   const securityResourceRemediationResult = securityResourceRemediationSummary(securityResourceRemediation);
+  const securityUpstreamTransportRemediationResult = securityUpstreamTransportRemediationSummary(
+    securityUpstreamTransportRemediation,
+  );
   const publicJsonRequestBodyBudgetResult = publicJsonRequestBodyBudgetSummary(publicJsonRequestBodyBudget);
   const improvementPhotoAnalysisBudgetResult = improvementPhotoAnalysisBudgetSummary(improvementPhotoAnalysisBudget);
   const publicProviderCancellationResult = publicProviderCancellationSummary(publicProviderCancellation);
@@ -1990,6 +2020,7 @@ export function buildNorthstarNextRunway(options) {
       "public_json_request_body_budget",
       "security_followup_remediation",
       "security_resource_remediation",
+      "security_upstream_transport_remediation",
       "learning_export_renderer_security",
       "hermes_knowledge_review_authority",
       "hermes_knowledge_review_ui",
@@ -2091,6 +2122,7 @@ export function buildNorthstarNextRunway(options) {
     publicGenerationAdmissionSecurity: publicGenerationAdmissionSecurityResult,
     securityFollowupRemediation: securityFollowupRemediationResult,
     securityResourceRemediation: securityResourceRemediationResult,
+    securityUpstreamTransportRemediation: securityUpstreamTransportRemediationResult,
     publicJsonRequestBodyBudget: publicJsonRequestBodyBudgetResult,
     improvementPhotoAnalysisBudget: improvementPhotoAnalysisBudgetResult,
     publicProviderCancellation: publicProviderCancellationResult,
@@ -2225,6 +2257,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Public generation admission security is measured separately: \`${report.publicGenerationAdmissionSecurity.verdict || "missing"}\`, live mode \`${report.publicGenerationAdmissionSecurity.liveMode || "unknown"}\`, dependency vulnerabilities \`${report.publicGenerationAdmissionSecurity.vulnerabilityCount ?? "unknown"}\`, distributed hardening open=\`${report.publicGenerationAdmissionSecurity.distributedHardeningOpen === true}\`, and fresh diff scan required=\`${report.publicGenerationAdmissionSecurity.freshRescanRequired === true}\`. This notice does not close multi-instance protection, the immutable scan finding, approval-gated operations, or exact saved Share; exact saved Share remains \`${report.publicGenerationAdmissionSecurity.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Security follow-up remediation is separately proven: \`${report.securityFollowupRemediation.verdict || "missing"}\`, sealed findings \`${report.securityFollowupRemediation.sealedFindingCount ?? "unknown"}\`, focused tests \`${report.securityFollowupRemediation.focusedTests ?? "unknown"}\`, and remaining security work \`${report.securityFollowupRemediation.remainingSecurityWorkCount ?? "unknown"}\`. The immutable original baseline remains \`${report.securityFollowupRemediation.immutableOriginalBaselineFindingCount ?? "unknown"}\` findings with rewritten=\`${report.securityFollowupRemediation.originalBaselineRewritten === true}\`; two deferred candidates and the separate public-admission notice remain visible, no live provider cancellation probe is claimed, and exact saved Share remains \`${report.securityFollowupRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Fresh security resource remediation is scoped rather than security-complete: \`${report.securityResourceRemediation.verdict || "missing"}\`, remediated \`${report.securityResourceRemediation.remediatedFindingCount ?? "unknown"}/${report.securityResourceRemediation.scanFindingCount ?? "unknown"}\`, remaining \`${report.securityResourceRemediation.remainingScanFindings ?? "unknown"}\`, provider persistence \`${report.securityResourceRemediation.providerDispatchPersistence || "unknown"}\`, exact saved Share \`${report.securityResourceRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
+- Upstream transport remediation is separately live/source-proven without an external provider probe: \`${report.securityUpstreamTransportRemediation.verdict || "missing"}\`, remediated this wave \`${report.securityUpstreamTransportRemediation.remediatedThisWave ?? "unknown"}\`, cumulative \`${report.securityUpstreamTransportRemediation.remediatedTotal ?? "unknown"}/${report.securityUpstreamTransportRemediation.scanFindingCount ?? "unknown"}\`, remaining \`${report.securityUpstreamTransportRemediation.remainingScanFindings ?? "unknown"}\`, provider probe executed \`${report.securityUpstreamTransportRemediation.externalProviderProbeExecuted === true}\`, provider persistence \`${report.securityUpstreamTransportRemediation.providerDispatchPersistence || "unknown"}\`, exact saved Share \`${report.securityUpstreamTransportRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Public JSON pre-parse body budgeting is separately live-proven: \`${report.publicJsonRequestBodyBudget.verdict || "missing"}\`, finding \`${report.publicJsonRequestBodyBudget.findingId || "missing"}\`, and live oversized-request cases \`${report.publicJsonRequestBodyBudget.liveCaseCount ?? "unknown"}\`. The corrected canonical scan remains immutable, follow-up scan status is \`${report.publicJsonRequestBodyBudget.followUpSecurityScan || "REQUIRED"}\`, security-complete remains \`${report.publicJsonRequestBodyBudget.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.publicJsonRequestBodyBudget.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Improvement photo analysis budgeting is separately live-measured: \`${report.improvementPhotoAnalysisBudget.verdict || "missing"}\`, finding \`${report.improvementPhotoAnalysisBudget.findingId || "missing"}\`, request bytes \`${report.improvementPhotoAnalysisBudget.maxRequestBytes ?? "unknown"}\`, concurrency \`${report.improvementPhotoAnalysisBudget.aggregateConcurrency ?? "unknown"}\`, and live admission cases \`${report.improvementPhotoAnalysisBudget.liveCaseCount ?? "unknown"}\`. Production admission remains \`${report.improvementPhotoAnalysisBudget.distributedProductionActivation || "unknown"}\`; the distributed multi-instance boundary and follow-up scan remain open, security-complete remains \`${report.improvementPhotoAnalysisBudget.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.improvementPhotoAnalysisBudget.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Public provider cancellation is separately source-proven in deployed production: \`${report.publicProviderCancellation.verdict || "missing"}\`, finding \`${report.publicProviderCancellation.findingId || "missing"}\`, tests \`${report.publicProviderCancellation.tests ?? "unknown"}\`, and live provider cancellation call executed=\`${report.publicProviderCancellation.liveProviderCallExecuted === true}\`. The canonical finding remains immutable until follow-up scan \`${report.publicProviderCancellation.followUpSecurityScan || "REQUIRED"}\`, security-complete remains \`${report.publicProviderCancellation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.publicProviderCancellation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.

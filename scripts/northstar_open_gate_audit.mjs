@@ -57,6 +57,7 @@ const EVIDENCE_PATHS = Object.freeze({
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
   securityResourceRemediation: path.join("evaluation", "security-resource-remediation-2026-08-11", "report.json"),
+  securityUpstreamTransportRemediation: path.join("evaluation", "security-upstream-transport-remediation-2026-08-11", "report.json"),
   mcpGenerationWorkBudgetSecurity: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
@@ -4088,6 +4089,62 @@ const SECURITY_RESOURCE_REMEDIATION_COMPATIBILITY_GATE_IDS = [
   "public_provider_admission",
 ];
 
+const SECURITY_UPSTREAM_TRANSPORT_CHANGED_PATHS = [
+  ".env.example",
+  "lib/accident-cases.ts",
+  "lib/server/upstream-http.ts",
+  "lib/weather.ts",
+];
+
+const SECURITY_UPSTREAM_TRANSPORT_COMPATIBILITY_GATE_IDS = [
+  "security_followup_remediation",
+  "public_provider_cancellation",
+  "public_provider_work_budget",
+];
+
+/**
+ * @param {string} rootDir
+ * @param {string} gateId
+ * @param {string[]} governedPaths
+ */
+function isSecurityUpstreamTransportCompatibilityCurrent(rootDir, gateId, governedPaths) {
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.securityUpstreamTransportRemediation);
+  if (!isRecord(report) || !isRecord(report.governedPathCompatibility)) {
+    return false;
+  }
+  const compatibility = report.governedPathCompatibility;
+  const coveredGateIds = Array.isArray(compatibility.coveredGateIds)
+    ? compatibility.coveredGateIds.map(readString)
+    : [];
+  const changedGovernedPaths = Array.isArray(compatibility.changedGovernedPaths)
+    ? compatibility.changedGovernedPaths.map(readString)
+    : [];
+  const focused = isRecord(compatibility.focused) ? compatibility.focused : {};
+  const adjacent = isRecord(compatibility.adjacent) ? compatibility.adjacent : {};
+  const sourceHead = readString(compatibility.sourceHead);
+  const productionCommit = readString(compatibility.productionCommit);
+  return readString(report.verdict) === "PASS_LIVE_PRODUCTION_SOURCE_PROVEN_UPSTREAM_TRANSPORT_SECURITY_NO_PROVIDER_PROBE"
+    && readString(compatibility.verdict) === "PASS_LIVE_PRODUCTION_UPSTREAM_TRANSPORT_COMPATIBILITY"
+    && sourceHead.length > 0
+    && sourceHead === productionCommit
+    && productionCommit === readString(report.productionCommit)
+    && isGitAncestor(rootDir, productionCommit)
+    && isEvidenceCurrentForPaths(rootDir, productionCommit, governedPaths)
+    && coveredGateIds.length === SECURITY_UPSTREAM_TRANSPORT_COMPATIBILITY_GATE_IDS.length
+    && SECURITY_UPSTREAM_TRANSPORT_COMPATIBILITY_GATE_IDS.every((id) => coveredGateIds.includes(id))
+    && coveredGateIds.includes(gateId)
+    && changedGovernedPaths.length === SECURITY_UPSTREAM_TRANSPORT_CHANGED_PATHS.length
+    && SECURITY_UPSTREAM_TRANSPORT_CHANGED_PATHS.every((item) => changedGovernedPaths.includes(item))
+    && readNumber(focused.testFiles) === 5
+    && readNumber(focused.tests) === 32
+    && readString(focused.status) === "PASS"
+    && readNumber(adjacent.testFiles) === 11
+    && readNumber(adjacent.tests) === 119
+    && readString(adjacent.status) === "PASS"
+    && compatibility.noMutation === true
+    && readString(compatibility.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+}
+
 /**
  * @param {string} rootDir
  * @param {string} gateId
@@ -4266,7 +4323,8 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     && currentPathCompatibility.originalBaselineRewritten === false
   );
   const productPathsCurrent = isEvidenceCurrentForPaths(rootDir, compatibilitySourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS)
-    || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS);
+    || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
+    || isSecurityUpstreamTransportCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS);
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP"
     && sourceHead.length > 0
     && sourceHead === readString(deployment.productionCommit)
@@ -4520,6 +4578,112 @@ function evaluateSecurityResourceRemediationGate(rootDir) {
   });
 }
 
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateSecurityUpstreamTransportRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.securityUpstreamTransportRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "security_upstream_transport_remediation",
+      label: "Security upstream transport remediation",
+      state: "missing",
+      evidencePath,
+      detail: "Live upstream transport-remediation evidence is missing or invalid.",
+      nextActions: ["Restore the sealed-scan-linked upstream transport evidence without rewriting the immutable scan baseline."],
+    });
+  }
+
+  const sourceScan = isRecord(report.sourceScan) ? report.sourceScan : {};
+  const cumulative = isRecord(report.cumulativeRemediation) ? report.cumulativeRemediation : {};
+  const contracts = isRecord(report.contracts) ? report.contracts : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focused) ? verification.focused : {};
+  const adjacent = isRecord(verification.adjacent) ? verification.adjacent : {};
+  const liveChecks = isRecord(report.liveChecks) ? report.liveChecks : {};
+  const buildInfo = isRecord(liveChecks.buildInfo) ? liveChecks.buildInfo : {};
+  const providerProbe = isRecord(liveChecks.externalProviderProbe) ? liveChecks.externalProviderProbe : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remediated = Array.isArray(report.remediatedFindings) ? report.remediatedFindings.filter(isRecord) : [];
+  const expectedFindings = new Map([
+    ["csf_afc7b9c8c2fe4982bcd22475", "configurable-mcp-upstream-ssrf"],
+    ["csf_b39a066e2b5d07924770057a", "unbounded-mcp-upstream-response"],
+  ]);
+  const sourceHead = readString(report.sourceHead);
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(report.productionCommit);
+  const findingIdentityPass = remediated.length === expectedFindings.size
+    && remediated.every((item) => expectedFindings.get(readString(item.findingId)) === readString(item.anchor));
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.externalProviderProbeExecuted === false
+    && mutation.shareSessionCreated === false
+    && mutation.vectorUploadPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_SOURCE_PROVEN_UPSTREAM_TRANSPORT_SECURITY_NO_PROVIDER_PROBE"
+    && sourceHead.length > 0
+    && productCommit === sourceHead
+    && productionCommit === productCommit
+    && isGitAncestor(rootDir, productionCommit)
+    && report.liveAfterDeploymentPending === false
+    && readString(sourceScan.scanId) === "a8aa9242-ed42-4057-88e9-31a72e298292"
+    && readString(sourceScan.targetRevision) === "8cd86f7ab2abe4ad7d4948d8feda083b0b032386"
+    && readNumber(sourceScan.findingCount) === 20
+    && sourceScan.immutableBaselinePreserved === true
+    && findingIdentityPass
+    && readNumber(cumulative.previouslyRemediated) === 6
+    && readNumber(cumulative.remediatedThisWave) === 2
+    && readNumber(cumulative.remediatedTotal) === 8
+    && readNumber(cumulative.remainingScanFindings) === 12
+    && cumulative.securityCompleteClaimAllowed === false
+    && cumulative.freshFollowUpScanRequired === true
+    && contracts.configurableOriginsRequireExplicitAllowlist === true
+    && contracts.credentialFreeHttpsDefaultPortOnly === true
+    && contracts.allResolvedAddressesMustBePublic === true
+    && contracts.literalPrivateAndLinkLocalAddressesRejected === true
+    && contracts.redirectsDisabled === true
+    && contracts.credentialsAttachedOnlyAfterUrlApproval === true
+    && readNumber(contracts.weatherResponseMaxBytes) === 1048576
+    && readNumber(contracts.accidentResponseMaxBytes) === 2097152
+    && contracts.contentLengthPreflightEnforced === true
+    && contracts.streamedByteLimitEnforced === true
+    && readNumber(focused.testFiles) === 5
+    && readNumber(focused.tests) === 32
+    && readString(focused.status) === "PASS"
+    && readNumber(adjacent.testFiles) === 11
+    && readNumber(adjacent.tests) === 119
+    && readString(adjacent.status) === "PASS"
+    && verification.typecheck === "PASS"
+    && verification.build === "PASS"
+    && readNumber(verification.staticPages) === 28
+    && verification.diffCheck === "PASS"
+    && readString(buildInfo.status) === "PASS"
+    && readString(buildInfo.commitSha) === productionCommit
+    && providerProbe.executed === false
+    && readNumber(remaining.remainingScanFindings) === 12
+    && remaining.securityCompleteClaimAllowed === false
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(remaining.providerDispatchPersistence) === "APPROVAL_GATED"
+    && noMutation;
+
+  return gateResult({
+    id: "security_upstream_transport_remediation",
+    label: "Security upstream transport remediation",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Fresh sealed scan a8aa9242 keeps its immutable 20-finding baseline while live production source-proves configurable upstream SSRF containment and bounded provider responses. This wave closes 2 findings for a cumulative 8/20, leaves 12 visible, performs no external provider probe or mutation, keeps provider persistence approval-gated, and preserves exact saved Share as MISSING_EVIDENCE."
+      : `Upstream transport verdict=${readString(report.verdict) || "unknown"}, findings=${remediated.length}, cumulative=${readNumber(cumulative.remediatedTotal)}/20, remaining=${readNumber(remaining.remainingScanFindings)}, providerProbe=${providerProbe.executed === true}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Remediate or explicitly defer the remaining 12 sealed findings and require a fresh scan before any security-complete claim."]
+      : ["Restore finding identities, cumulative 8/20 accounting, live marker equality, verification totals, no-provider/no-mutation boundaries, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
 const IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS = [
   "app/api/input-photos/hazard-analysis/route.ts",
   "app/api/workpacks/[id]/improvements/route.ts",
@@ -4676,7 +4840,8 @@ function evaluatePublicProviderCancellationGate(rootDir) {
   const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
   const sourceHead = readString(report.sourceHead);
   const sourceCurrent = isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_PROVIDER_CANCELLATION_PATHS)
-    || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS);
+    || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
+    || isSecurityUpstreamTransportCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS);
   const noMutation = mutation.dbMutationPerformed === false
     && mutation.providerDispatchCalled === false
     && mutation.shareSessionCreated === false
@@ -6011,6 +6176,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateRepositorySecurityScanReconciliationGate(rootDir),
     evaluatePublicJsonRequestBodyBudgetGate(rootDir),
     evaluateSecurityResourceRemediationGate(rootDir),
+    evaluateSecurityUpstreamTransportRemediationGate(rootDir),
     evaluateImprovementPhotoAnalysisBudgetGate(rootDir),
     evaluatePublicProviderCancellationGate(rootDir),
     evaluatePublicProviderAdmissionGate(rootDir),

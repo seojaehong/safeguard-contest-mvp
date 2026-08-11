@@ -476,6 +476,16 @@ type NextRunwayReport = {
     providerDispatchPersistence: string;
     exactSavedShareVerdict: string;
   };
+  securityUpstreamTransportRemediation: {
+    verdict: string;
+    scanFindingCount: number | null;
+    remediatedThisWave: number | null;
+    remediatedTotal: number | null;
+    remainingScanFindings: number | null;
+    externalProviderProbeExecuted: boolean;
+    providerDispatchPersistence: string;
+    exactSavedShareVerdict: string;
+  };
   publicJsonRequestBodyBudget: {
     verdict: string;
     sourceHead: string;
@@ -1827,6 +1837,19 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/security-upstream-transport-remediation-2026-08-11/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_SOURCE_PROVEN_UPSTREAM_TRANSPORT_SECURITY_NO_PROVIDER_PROBE",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    sourceScan: { findingCount: 20 },
+    cumulativeRemediation: { remediatedThisWave: 2, remediatedTotal: 8 },
+    liveChecks: { externalProviderProbe: { executed: false } },
+    remainingBoundaries: {
+      remainingScanFindings: 12,
+      providerDispatchPersistence: "APPROVAL_GATED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/public-json-request-body-budget-2026-08-11/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",
     sourceHead: "fixture-sha",
@@ -2647,6 +2670,17 @@ describe("northstar next runway generator", () => {
       scanFindingCount: 20,
       remediatedFindingCount: 6,
       remainingScanFindings: 14,
+      providerDispatchPersistence: "APPROVAL_GATED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.provenCurrentState).toContain("security_upstream_transport_remediation");
+    expect(report.securityUpstreamTransportRemediation).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_SOURCE_PROVEN_UPSTREAM_TRANSPORT_SECURITY_NO_PROVIDER_PROBE",
+      scanFindingCount: 20,
+      remediatedThisWave: 2,
+      remediatedTotal: 8,
+      remainingScanFindings: 12,
+      externalProviderProbeExecuted: false,
       providerDispatchPersistence: "APPROVAL_GATED",
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });

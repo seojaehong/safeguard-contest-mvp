@@ -2241,6 +2241,90 @@ function createFixtureRoot(): string {
       koshaRegistryMutationPerformed: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "security-upstream-transport-remediation-2026-08-11", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_SOURCE_PROVEN_UPSTREAM_TRANSPORT_SECURITY_NO_PROVIDER_PROBE",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    liveAfterDeploymentPending: false,
+    sourceScan: {
+      scanId: "a8aa9242-ed42-4057-88e9-31a72e298292",
+      targetRevision: "8cd86f7ab2abe4ad7d4948d8feda083b0b032386",
+      findingCount: 20,
+      immutableBaselinePreserved: true,
+    },
+    remediatedFindings: [
+      { findingId: "csf_afc7b9c8c2fe4982bcd22475", anchor: "configurable-mcp-upstream-ssrf" },
+      { findingId: "csf_b39a066e2b5d07924770057a", anchor: "unbounded-mcp-upstream-response" },
+    ],
+    cumulativeRemediation: {
+      previouslyRemediated: 6,
+      remediatedThisWave: 2,
+      remediatedTotal: 8,
+      remainingScanFindings: 12,
+      securityCompleteClaimAllowed: false,
+      freshFollowUpScanRequired: true,
+    },
+    contracts: {
+      configurableOriginsRequireExplicitAllowlist: true,
+      credentialFreeHttpsDefaultPortOnly: true,
+      allResolvedAddressesMustBePublic: true,
+      literalPrivateAndLinkLocalAddressesRejected: true,
+      redirectsDisabled: true,
+      credentialsAttachedOnlyAfterUrlApproval: true,
+      weatherResponseMaxBytes: 1048576,
+      accidentResponseMaxBytes: 2097152,
+      contentLengthPreflightEnforced: true,
+      streamedByteLimitEnforced: true,
+    },
+    governedPathCompatibility: {
+      verdict: "PASS_LIVE_PRODUCTION_UPSTREAM_TRANSPORT_COMPATIBILITY",
+      sourceHead: "fixture-sha",
+      productionCommit: "fixture-sha",
+      coveredGateIds: [
+        "security_followup_remediation",
+        "public_provider_cancellation",
+        "public_provider_work_budget",
+      ],
+      changedGovernedPaths: [
+        ".env.example",
+        "lib/accident-cases.ts",
+        "lib/server/upstream-http.ts",
+        "lib/weather.ts",
+      ],
+      focused: { testFiles: 5, tests: 32, status: "PASS" },
+      adjacent: { testFiles: 11, tests: 119, status: "PASS" },
+      noMutation: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    verification: {
+      focused: { testFiles: 5, tests: 32, status: "PASS" },
+      adjacent: { testFiles: 11, tests: 119, status: "PASS" },
+      typecheck: "PASS",
+      build: "PASS",
+      staticPages: 28,
+      diffCheck: "PASS",
+    },
+    liveChecks: {
+      buildInfo: { status: "PASS", commitSha: "fixture-sha" },
+      externalProviderProbe: { executed: false },
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      providerDispatchPersistence: "APPROVAL_GATED",
+      remainingScanFindings: 12,
+      securityCompleteClaimAllowed: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      externalProviderProbeExecuted: false,
+      shareSessionCreated: false,
+      vectorUploadPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"), {
     verdict: "PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS",
     targetRevision: "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
@@ -3561,6 +3645,13 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "security_resource_remediation")?.detail).toContain("6/20");
     expect(audit.gates.find((gate) => gate.id === "security_resource_remediation")?.detail).toContain("remaining 14 findings");
     expect(audit.gates.find((gate) => gate.id === "security_resource_remediation")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "security_upstream_transport_remediation")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "security-upstream-transport-remediation-2026-08-11", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "security_upstream_transport_remediation")?.detail).toContain("cumulative 8/20");
+    expect(audit.gates.find((gate) => gate.id === "security_upstream_transport_remediation")?.detail).toContain("leaves 12 visible");
+    expect(audit.gates.find((gate) => gate.id === "security_upstream_transport_remediation")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "repository_security_scan_reconciliation")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
@@ -3822,6 +3913,31 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     });
     expect(audit.gates.find((gate) => gate.id === "security_resource_remediation")?.detail).toContain("remaining=13");
     expect(audit.gates.find((gate) => gate.id === "security_resource_remediation")?.detail).toContain("exactShare=PASS");
+  });
+
+  it("contradicts upstream transport remediation when provider probing or exact Share closure is claimed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "security-upstream-transport-remediation-2026-08-11", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as Record<string, unknown>;
+    report.liveChecks = {
+      buildInfo: { status: "PASS", commitSha: "fixture-sha" },
+      externalProviderProbe: { executed: true },
+    };
+    report.remainingBoundaries = {
+      exactSavedShareVerdict: "PASS",
+      providerDispatchPersistence: "APPROVAL_GATED",
+      remainingScanFindings: 12,
+      securityCompleteClaimAllowed: false,
+    };
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "security_upstream_transport_remediation")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "security_upstream_transport_remediation")?.detail).toContain("providerProbe=true");
+    expect(audit.gates.find((gate) => gate.id === "security_upstream_transport_remediation")?.detail).toContain("exactShare=PASS");
   });
 
   it("accepts the current public admission companion for older governed-path evidence", async () => {
