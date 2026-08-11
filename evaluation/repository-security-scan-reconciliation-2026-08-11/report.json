@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "safeclaw-repository-security-scan-reconciliation/v1",
+  "generatedAt": "2026-08-11T13:45:00+09:00",
+  "verdict": "REVIEW_REQUIRED_CONFLICTING_SAME_TARGET_SCANS_FAIL_OPEN_RECEIPTS",
+  "sourceHeadAtReview": "5babc025c34c361af08e27f2fa2c3adf7dd20b31",
+  "targetRevision": "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
+  "scans": [
+    {
+      "scanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
+      "artifact": "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json",
+      "status": "completed",
+      "coverage": "partial",
+      "reportableFindingCount": 17,
+      "deferredCandidateCount": 1,
+      "immutable": true
+    },
+    {
+      "scanId": "03305068-49ff-4b73-8a24-84a91e64ff56",
+      "canonicalArtifactDirectory": "C:/Users/iceam/AppData/Local/Temp/codex-security-scans-oj5dTy/safeclaw-northstar-current/f0c8a7be02becd53c21fb80842cf23c571f22b1f_20260802T064716Z_5xc6mxdd",
+      "status": "completed",
+      "coverage": "complete",
+      "reportableFindingCount": 0,
+      "deferredCandidateCount": 0,
+      "immutable": true
+    }
+  ],
+  "sameTargetConflict": {
+    "present": true,
+    "findingCountDelta": 17,
+    "deferredCountDelta": 1,
+    "zeroFindingClaimAcceptedForNorthstar": false
+  },
+  "canonicalReceiptContradictions": [
+    {
+      "surface": "document_export_work_budgets",
+      "receiptDisposition": "no_issue_found",
+      "contradictingFields": {
+        "sharedBudgetHelperPresent": false,
+        "xlsxUsesBudgetHelper": false,
+        "hwpUsesBudgetHelper": false
+      },
+      "reason": "A no-issue disposition cannot be supported by three false control-presence predicates."
+    },
+    {
+      "surface": "archive_enrichment_membership",
+      "receiptDisposition": "no_issue_found",
+      "contradictingFields": {
+        "workpackSiteFilterRequiresAuthorizedOrg": false
+      },
+      "reason": "The receipt claims organization membership enforcement while its own enforcement predicate is false."
+    }
+  ],
+  "laterSecurityChain": {
+    "diffScanId": "3f0107a8-e4a4-4a5b-be37-a28bcea8b05a",
+    "artifact": "evaluation/codex-security-followup-remediation-2026-08-11/report.json",
+    "sealedFindingCount": 3,
+    "remediatedFindingCount": 3,
+    "deferredCandidateCount": 2,
+    "productCommit": "c4f58947dbbee20fb77edeb0edfddcc08c87f6a4",
+    "liveDeployed": true,
+    "securityCompleteClaimAllowed": false
+  },
+  "requiredResolution": {
+    "correctedFreshFullRepositoryScanRequired": true,
+    "receiptPredicatesMustMatchDisposition": true,
+    "targetMustIncludeLaterSecurityProductCommit": "c4f58947dbbee20fb77edeb0edfddcc08c87f6a4",
+    "originalScansMustRemainImmutable": true
+  },
+  "boundaries": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorRuntimeMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedBoundariesPreserved": true
+  }
+}

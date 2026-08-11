@@ -48,6 +48,7 @@ const EVIDENCE_PATHS = Object.freeze({
   publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
   documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
+  repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
@@ -3757,6 +3758,79 @@ function evaluateFullRepositorySecurityScanGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluateRepositorySecurityScanReconciliationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.repositorySecurityScanReconciliation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "repository_security_scan_reconciliation",
+      label: "Repository security scan reconciliation",
+      state: "missing",
+      evidencePath,
+      detail: "Repository security scan reconciliation evidence is missing or invalid.",
+      nextActions: ["Reconcile the conflicting same-target scans without rewriting either canonical result."],
+    });
+  }
+
+  const scans = Array.isArray(report.scans) ? report.scans.filter(isRecord) : [];
+  const conflict = isRecord(report.sameTargetConflict) ? report.sameTargetConflict : {};
+  const contradictions = Array.isArray(report.canonicalReceiptContradictions)
+    ? report.canonicalReceiptContradictions.filter(isRecord)
+    : [];
+  const later = isRecord(report.laterSecurityChain) ? report.laterSecurityChain : {};
+  const resolution = isRecord(report.requiredResolution) ? report.requiredResolution : {};
+  const boundaries = isRecord(report.boundaries) ? report.boundaries : {};
+  const noMutation = boundaries.dbMutationPerformed === false
+    && boundaries.providerDispatchCalled === false
+    && boundaries.shareSessionCreated === false
+    && boundaries.vectorRuntimeMutationPerformed === false
+    && boundaries.wikiPublicationPerformed === false
+    && boundaries.koshaRegistryMutationPerformed === false;
+  const partialScan = scans.find((scan) => readString(scan.scanId) === "8fe9c06a-018c-446f-aa98-1b37df95287a");
+  const zeroScan = scans.find((scan) => readString(scan.scanId) === "03305068-49ff-4b73-8a24-84a91e64ff56");
+  const pass = readString(report.verdict) === "REVIEW_REQUIRED_CONFLICTING_SAME_TARGET_SCANS_FAIL_OPEN_RECEIPTS"
+    && readString(report.targetRevision) === "f0c8a7be02becd53c21fb80842cf23c571f22b1f"
+    && scans.length === 2
+    && readNumber(partialScan?.reportableFindingCount) === 17
+    && readNumber(partialScan?.deferredCandidateCount) === 1
+    && readNumber(zeroScan?.reportableFindingCount) === 0
+    && readNumber(zeroScan?.deferredCandidateCount) === 0
+    && conflict.present === true
+    && readNumber(conflict.findingCountDelta) === 17
+    && conflict.zeroFindingClaimAcceptedForNorthstar === false
+    && contradictions.length === 2
+    && contradictions.some((item) => readString(item.surface) === "document_export_work_budgets")
+    && contradictions.some((item) => readString(item.surface) === "archive_enrichment_membership")
+    && readString(later.diffScanId) === "3f0107a8-e4a4-4a5b-be37-a28bcea8b05a"
+    && readNumber(later.sealedFindingCount) === 3
+    && readNumber(later.remediatedFindingCount) === 3
+    && readNumber(later.deferredCandidateCount) === 2
+    && later.securityCompleteClaimAllowed === false
+    && resolution.correctedFreshFullRepositoryScanRequired === true
+    && resolution.receiptPredicatesMustMatchDisposition === true
+    && resolution.originalScansMustRemainImmutable === true
+    && noMutation
+    && readString(boundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && boundaries.approvalGatedBoundariesPreserved === true;
+
+  return gateResult({
+    id: "repository_security_scan_reconciliation",
+    label: "Repository security scan reconciliation",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Two immutable sealed scans claim the same f0c8a7be target but disagree 17 findings / 1 deferred versus 0 / 0. The zero-finding scan also contains two fail-open receipt contradictions, so Northstar does not accept it as security-complete. A later diff scan's three findings are remediated, but two deferred candidates remain; a corrected fresh full scan is required, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      : `Reconciliation verdict=${readString(report.verdict) || "unknown"}, scans=${scans.length}, conflict=${conflict.present === true}, zeroAccepted=${conflict.zeroFindingClaimAcceptedForNorthstar === true}, receiptContradictions=${contradictions.length}, laterFindings=${readNumber(later.sealedFindingCount)}, laterDeferred=${readNumber(later.deferredCandidateCount)}, freshScanRequired=${resolution.correctedFreshFullRepositoryScanRequired === true}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Run a corrected full repository scan at or after c4f58947 and require every no-issue disposition to agree with its machine predicates."]
+      : ["Restore both immutable scan results, both receipt contradictions, the later diff-scan boundary, and the corrected-rescan requirement."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateLearningExportRendererSecurityGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.learningExportRendererSecurity;
   const report = readJsonFile(rootDir, evidencePath);
@@ -5209,6 +5283,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluatePublicProviderWorkBudgetGate(rootDir),
     evaluateDocumentExportWorkBudgetGate(rootDir),
     evaluateFullRepositorySecurityScanGate(rootDir),
+    evaluateRepositorySecurityScanReconciliationGate(rootDir),
     evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir),
     evaluatePublicGenerationAdmissionSecurityGate(rootDir),
     evaluateSecurityFollowupRemediationGate(rootDir),

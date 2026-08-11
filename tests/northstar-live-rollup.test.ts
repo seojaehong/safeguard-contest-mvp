@@ -201,6 +201,17 @@ type RollupReport = {
     distributedRateLimitResidual: boolean | null;
     exactSavedShareVerdict: string;
   };
+  repositorySecurityScanReconciliation: {
+    verdict: string;
+    targetRevision: string;
+    conflictingScanCount: number | null;
+    findingCountDelta: number | null;
+    zeroFindingClaimAccepted: boolean;
+    receiptContradictionCount: number | null;
+    laterDeferredCandidateCount: number | null;
+    correctedFreshScanRequired: boolean;
+    exactSavedShareVerdict: string;
+  };
   publicSearchDistributedRateLimitReadiness: {
     verdict: string;
     sourceHead: string;
@@ -337,6 +348,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "public_provider_work_budget", state: "proven", evidencePath: "evaluation/public-provider-work-budget-2026-08-01/report.json", detail: "four provider-budget findings remediated" },
       { id: "document_export_work_budget", state: "proven", evidencePath: "evaluation/document-export-work-budget-2026-08-01/report.json", detail: "eight export-budget findings remediated" },
       { id: "full_repository_security_scan", state: "proven", evidencePath: "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json", detail: "sealed follow-up scan with 17 reportable findings and one deferred candidate" },
+      { id: "repository_security_scan_reconciliation", state: "notice", evidencePath: "evaluation/repository-security-scan-reconciliation-2026-08-11/report.json", detail: "same-target scan conflict with fail-open receipts" },
       { id: "public_search_distributed_rate_limit_readiness", state: "notice", evidencePath: "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json", detail: "current-source capability with production configuration pending" },
       { id: "public_generation_admission_security", state: "notice", evidencePath: "evaluation/security-public-generation-admission-2026-08-04/report.json", detail: "live instance admission with distributed hardening and fresh rescan pending" },
       { id: "security_followup_remediation", state: "proven", evidencePath: "evaluation/codex-security-followup-remediation-2026-08-11/report.json", detail: "deployed three-finding remediation with immutable baseline preserved" },
@@ -912,6 +924,16 @@ function createFixtureRoot(): { root: string; head: string } {
     remainingSecurityWork: [],
     boundaries: { originalBaselineRewritten: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
+  writeJson(root, "evaluation/repository-security-scan-reconciliation-2026-08-11/report.json", {
+    verdict: "REVIEW_REQUIRED_CONFLICTING_SAME_TARGET_SCANS_FAIL_OPEN_RECEIPTS",
+    targetRevision: "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
+    scans: [{}, {}],
+    sameTargetConflict: { findingCountDelta: 17, zeroFindingClaimAcceptedForNorthstar: false },
+    canonicalReceiptContradictions: [{}, {}],
+    laterSecurityChain: { deferredCandidateCount: 2 },
+    requiredResolution: { correctedFreshFullRepositoryScanRequired: true },
+    boundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  });
   writeJson(root, "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
     sourceHead: "TO_FILL",
@@ -1218,6 +1240,16 @@ describe("northstar live rollup", () => {
       liveProviderCancellationProbeExecuted: false,
       remainingSecurityWorkCount: 0,
       originalBaselineRewritten: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.repositorySecurityScanReconciliation).toMatchObject({
+      verdict: "REVIEW_REQUIRED_CONFLICTING_SAME_TARGET_SCANS_FAIL_OPEN_RECEIPTS",
+      conflictingScanCount: 2,
+      findingCountDelta: 17,
+      zeroFindingClaimAccepted: false,
+      receiptContradictionCount: 2,
+      laterDeferredCandidateCount: 2,
+      correctedFreshScanRequired: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.mcpGenerationWorkBudgetSecurity).toMatchObject({

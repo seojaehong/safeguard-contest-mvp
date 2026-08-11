@@ -254,6 +254,17 @@ type NextRunwayReport = {
     distributedRateLimitResidual: boolean;
     exactSavedShareVerdict: string;
   };
+  repositorySecurityScanReconciliation: {
+    verdict: string;
+    targetRevision: string;
+    conflictingScanCount: number | null;
+    findingCountDelta: number | null;
+    zeroFindingClaimAccepted: boolean;
+    receiptContradictionCount: number | null;
+    laterDeferredCandidateCount: number | null;
+    correctedFreshScanRequired: boolean;
+    exactSavedShareVerdict: string;
+  };
   publicSearchDistributedRateLimitReadiness: {
     verdict: string;
     sourceHead: string;
@@ -1744,6 +1755,16 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     remainingSecurityWork: [],
     boundaries: { originalBaselineRewritten: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
+  writeJson(root, "evaluation/repository-security-scan-reconciliation-2026-08-11/report.json", {
+    verdict: "REVIEW_REQUIRED_CONFLICTING_SAME_TARGET_SCANS_FAIL_OPEN_RECEIPTS",
+    targetRevision: "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
+    scans: [{}, {}],
+    sameTargetConflict: { findingCountDelta: 17, zeroFindingClaimAcceptedForNorthstar: false },
+    canonicalReceiptContradictions: [{}, {}],
+    laterSecurityChain: { deferredCandidateCount: 2 },
+    requiredResolution: { correctedFreshFullRepositoryScanRequired: true },
+    boundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  });
   writeJson(root, "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
     sourceHead: "fixture-sha",
@@ -2485,6 +2506,20 @@ describe("northstar next runway generator", () => {
       originalBaselineRewritten: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
+    expect(report.repositorySecurityScanReconciliation).toMatchObject({
+      verdict: "REVIEW_REQUIRED_CONFLICTING_SAME_TARGET_SCANS_FAIL_OPEN_RECEIPTS",
+      conflictingScanCount: 2,
+      findingCountDelta: 17,
+      zeroFindingClaimAccepted: false,
+      receiptContradictionCount: 2,
+      laterDeferredCandidateCount: 2,
+      correctedFreshScanRequired: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "repository_security_scan_reconciliation",
+      state: "notice",
+    }));
     expect(report.mcpGenerationWorkBudgetSecurity).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
       postBodyMaxBytes: 98304,

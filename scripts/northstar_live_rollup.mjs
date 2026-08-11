@@ -33,6 +33,7 @@ const ARTIFACTS = Object.freeze({
   publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
   documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
+  repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
@@ -336,6 +337,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const publicProviderWorkBudget = tryReadJson(rootDir, ARTIFACTS.publicProviderWorkBudget);
   const documentExportWorkBudget = tryReadJson(rootDir, ARTIFACTS.documentExportWorkBudget);
   const fullRepositorySecurityScan = tryReadJson(rootDir, ARTIFACTS.fullRepositorySecurityScan);
+  const repositorySecurityScanReconciliation = tryReadJson(rootDir, ARTIFACTS.repositorySecurityScanReconciliation);
   const publicSearchDistributedRateLimitReadiness = tryReadJson(rootDir, ARTIFACTS.publicSearchDistributedRateLimitReadiness);
   const publicGenerationAdmissionSecurity = tryReadJson(rootDir, ARTIFACTS.publicGenerationAdmissionSecurity);
   const securityFollowupRemediation = tryReadJson(rootDir, ARTIFACTS.securityFollowupRemediation);
@@ -429,6 +431,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_work_budget", ARTIFACTS.publicProviderWorkBudget, publicProviderWorkBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "document_export_work_budget", ARTIFACTS.documentExportWorkBudget, documentExportWorkBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "full_repository_security_scan", ARTIFACTS.fullRepositorySecurityScan, fullRepositorySecurityScan),
+    evidenceStatus(rootDir, currentHead, liveCommit, "repository_security_scan_reconciliation", ARTIFACTS.repositorySecurityScanReconciliation, repositorySecurityScanReconciliation),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_search_distributed_rate_limit_readiness", ARTIFACTS.publicSearchDistributedRateLimitReadiness, publicSearchDistributedRateLimitReadiness),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_generation_admission_security", ARTIFACTS.publicGenerationAdmissionSecurity, publicGenerationAdmissionSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "security_followup_remediation", ARTIFACTS.securityFollowupRemediation, securityFollowupRemediation),
@@ -585,6 +588,22 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
         && isRecord(fullRepositorySecurityScan.remainingBoundaries)
         ? asString(fullRepositorySecurityScan.remainingBoundaries.exactSavedShareVerdict)
         : "",
+    },
+    repositorySecurityScanReconciliation: {
+      artifact: ARTIFACTS.repositorySecurityScanReconciliation,
+      verdict: isRecord(repositorySecurityScanReconciliation) ? asString(repositorySecurityScanReconciliation.verdict) : "missing",
+      targetRevision: isRecord(repositorySecurityScanReconciliation) ? asString(repositorySecurityScanReconciliation.targetRevision) : "",
+      conflictingScanCount: isRecord(repositorySecurityScanReconciliation) && Array.isArray(repositorySecurityScanReconciliation.scans)
+        ? repositorySecurityScanReconciliation.scans.length
+        : null,
+      findingCountDelta: asNumber(recordAt(repositorySecurityScanReconciliation, "sameTargetConflict")?.findingCountDelta),
+      zeroFindingClaimAccepted: recordAt(repositorySecurityScanReconciliation, "sameTargetConflict")?.zeroFindingClaimAcceptedForNorthstar === true,
+      receiptContradictionCount: isRecord(repositorySecurityScanReconciliation) && Array.isArray(repositorySecurityScanReconciliation.canonicalReceiptContradictions)
+        ? repositorySecurityScanReconciliation.canonicalReceiptContradictions.length
+        : null,
+      laterDeferredCandidateCount: asNumber(recordAt(repositorySecurityScanReconciliation, "laterSecurityChain")?.deferredCandidateCount),
+      correctedFreshScanRequired: recordAt(repositorySecurityScanReconciliation, "requiredResolution")?.correctedFreshFullRepositoryScanRequired === true,
+      exactSavedShareVerdict: asString(recordAt(repositorySecurityScanReconciliation, "boundaries")?.exactSavedShareVerdict),
     },
     publicSearchDistributedRateLimitReadiness: {
       artifact: ARTIFACTS.publicSearchDistributedRateLimitReadiness,
@@ -1127,6 +1146,14 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Immutable original baseline: ${rollup.securityFollowupRemediation.immutableOriginalBaselineFindingCount ?? "unknown"}; rewritten=${rollup.securityFollowupRemediation.originalBaselineRewritten}`,
     `- Deferred candidates retained: ${rollup.securityFollowupRemediation.deferredCandidateCount ?? "unknown"}; live provider cancellation probe executed=${rollup.securityFollowupRemediation.liveProviderCancellationProbeExecuted}`,
     `- Exact saved Share: ${rollup.securityFollowupRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "",
+    "## Repository Security Scan Reconciliation",
+    "",
+    `- Verdict: \`${rollup.repositorySecurityScanReconciliation.verdict}\``,
+    `- Same-target sealed scans: ${rollup.repositorySecurityScanReconciliation.conflictingScanCount ?? "unknown"}; finding delta=${rollup.repositorySecurityScanReconciliation.findingCountDelta ?? "unknown"}`,
+    `- Fail-open receipt contradictions: ${rollup.repositorySecurityScanReconciliation.receiptContradictionCount ?? "unknown"}; zero-finding accepted=${rollup.repositorySecurityScanReconciliation.zeroFindingClaimAccepted}`,
+    `- Corrected fresh scan required: ${rollup.repositorySecurityScanReconciliation.correctedFreshScanRequired}; later deferred candidates=${rollup.repositorySecurityScanReconciliation.laterDeferredCandidateCount ?? "unknown"}`,
+    `- Exact saved Share: ${rollup.repositorySecurityScanReconciliation.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "",
     "## MCP Generation Work-Budget Security",
     `- Verdict: \`${rollup.mcpGenerationWorkBudgetSecurity.verdict}\``,
