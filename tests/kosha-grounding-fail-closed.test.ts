@@ -712,7 +712,14 @@ describe("bounded KOSHA grounding fail-closed", () => {
 
     expect(response.status).toBe(200);
     expect(result.items.map((item) => item.id)).toEqual([bundled.id]);
-    expect(result.items[0]?.body).toHaveLength(19_058);
+    expect(result.items[0]?.body).toBeUndefined();
+    expect(result.items[0]?.payload).toBeUndefined();
+    expect(result.items[0]?.metadata).toBeUndefined();
+    expect(result.items[0]?.kosha_guide?.stableDocumentKey).toBe("D-C-13");
+    expect(grounding(result.items[0])).toMatchObject({
+      status: "verified_current",
+      source: "production-registry",
+    });
     expect(result.items.some((item) => item.id === "general-verified-kosha")).toBe(false);
     expect(result.koshaGrounding).toMatchObject({
       localCorpusStatus: "unconfigured",

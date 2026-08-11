@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readSafetyReferenceLimit } from "@/lib/safety-reference-catalog";
+import {
+  buildPublicSafetyReferenceItem,
+  readSafetyReferenceLimit,
+} from "@/lib/safety-reference-catalog";
 import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 import { createRateLimiter } from "@/lib/rate-limit";
 import {
@@ -83,9 +86,13 @@ export async function GET(request: NextRequest) {
     riskTag,
     evidenceRole
   });
+  const publicResult = {
+    ...result,
+    items: result.items.map(buildPublicSafetyReferenceItem),
+  };
 
   return applyPublicRateLimitHeader(
-    NextResponse.json(result, { status: result.ok ? 200 : 503 }),
+    NextResponse.json(publicResult, { status: result.ok ? 200 : 503 }),
     rateLimit,
   );
 }

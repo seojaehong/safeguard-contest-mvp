@@ -117,6 +117,76 @@ describe("public search work budgets", () => {
     expect(mocks.searchSafetyReferences).not.toHaveBeenCalled();
   });
 
+  it("returns bounded public safety-reference projections without local corpus bodies", async () => {
+    const privateBodyMarker = "PRIVATE_LOCAL_CORPUS_BODY_MARKER";
+    const privatePayloadMarker = "PRIVATE_REFERENCE_PAYLOAD_MARKER";
+    mocks.searchSafetyReferences.mockResolvedValueOnce({
+      ok: true,
+      configured: true,
+      query: "비계",
+      items: [{
+        id: "local-guide-1",
+        source_id: "kosha-guide-offline:d-c-1",
+        item_type: "technical-guideline",
+        category: "건설",
+        subcategory: null,
+        title: "비계 작업 기술지침",
+        summary: "요약".repeat(400),
+        body: `${privateBodyMarker}:${"본문".repeat(40_000)}`,
+        keywords: Array.from({ length: 40 }, (_, index) => `키워드-${index}`),
+        risk_tags: ["추락"],
+        primary_documents: ["위험성평가표"],
+        controls: Array.from({ length: 20 }, (_, index) => `통제-${index}-${"조치".repeat(200)}`),
+        payload: { raw: privatePayloadMarker },
+        metadata: { raw: privatePayloadMarker },
+        kosha_guide: {
+          referenceId: "local-guide-1",
+          stableDocumentKey: "D-C-1",
+          version: "D-C-1-2026",
+          quality: "accepted",
+          lifecycle: "current",
+          bodyKind: "native",
+          anchors: Array.from({ length: 12 }, (_, index) => ({
+            page: index + 1,
+            excerpt: `앵커-${index}-${"문맥".repeat(300)}`,
+          })),
+          evidenceRef: "KOSHA 근거",
+          directEligible: true,
+        },
+      }],
+      count: 1,
+      retrievalMode: "local-ranked",
+      vectorSearch: { enabled: false, attempted: false, ok: false },
+      message: "조회 완료",
+    });
+    const { GET } = await import("@/app/api/safety-reference/search/route");
+    const response = await GET(request("/api/safety-reference/search?q=비계", "198.51.100.17"));
+    const body = await response.json() as {
+      items: Array<{
+        body?: string;
+        payload?: Record<string, unknown>;
+        metadata?: Record<string, unknown>;
+        summary: string;
+        controls: string[];
+        kosha_guide?: { anchors: Array<{ excerpt: string }> };
+      }>;
+    };
+    const serialized = JSON.stringify(body);
+
+    expect(response.status).toBe(200);
+    expect(body.items[0]?.body).toBeUndefined();
+    expect(body.items[0]?.payload).toBeUndefined();
+    expect(body.items[0]?.metadata).toBeUndefined();
+    expect(body.items[0]?.summary.length).toBeLessThanOrEqual(480);
+    expect(body.items[0]?.controls).toHaveLength(12);
+    expect(body.items[0]?.controls.every((control) => control.length <= 280)).toBe(true);
+    expect(body.items[0]?.kosha_guide?.anchors).toHaveLength(8);
+    expect(body.items[0]?.kosha_guide?.anchors.every((anchor) => anchor.excerpt.length <= 360)).toBe(true);
+    expect(serialized).not.toContain(privateBodyMarker);
+    expect(serialized).not.toContain(privatePayloadMarker);
+    expect(serialized.length).toBeLessThan(15_000);
+  });
+
   it("coalesces equivalent concurrent legal and safety lookups", async () => {
     const legal = await import("@/app/api/search/route");
     const safety = await import("@/app/api/safety-reference/search/route");

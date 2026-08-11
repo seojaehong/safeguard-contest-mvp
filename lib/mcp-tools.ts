@@ -424,6 +424,7 @@ export function buildHarnessAgentResult(input: {
       message: input.referenceSearch.map((item) => `${item.source}: ${item.message}`).join(" / ")
     }
   });
+  const promptContext = buildHarnessPromptContext(internalPacket);
   const packet = buildPublicDbHarnessPacket(internalPacket);
   const tenantMemoryDigest = buildRuntimeTenantMemoryDigest(input.tenantMemory);
   const inferredSiteScope: TenantHarnessMemoryStage["siteScope"] = input.auth?.siteId
@@ -486,7 +487,7 @@ export function buildHarnessAgentResult(input: {
     },
     tenantMemoryDigest,
     packet,
-    promptContext: buildHarnessPromptContext(packet),
+    promptContext,
     referenceSearch: input.referenceSearch,
     auth: input.auth || {
       source: "none",

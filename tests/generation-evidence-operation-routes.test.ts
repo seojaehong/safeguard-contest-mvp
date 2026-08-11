@@ -39,10 +39,13 @@ function reference(id: string, title: string): SafetyReferenceItem {
     subcategory: "외벽",
     title,
     summary: `${title} 요약`,
+    body: `PRIVATE_COMPARISON_BODY:${title}`,
     keywords: ["외벽", "도장"],
     risk_tags: ["추락"],
     primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
     controls: ["강풍 시 작업중지"],
+    payload: { raw: "PRIVATE_COMPARISON_PAYLOAD" },
+    metadata: { raw: "PRIVATE_COMPARISON_METADATA" },
     evidence_role: "direct",
     reflected_documents: ["TBM 기록"],
     retrieval_source: "ranked"
@@ -197,6 +200,9 @@ describe("saved generation evidence operation routes", () => {
       expect.objectContaining({ id: "current-ref" }),
       expect.objectContaining({ id: expect.stringContaining("d-c-13-2026") })
     ]));
+    expect(JSON.stringify(body.comparison)).not.toMatch(
+      /PRIVATE_COMPARISON_BODY|PRIVATE_COMPARISON_PAYLOAD|PRIVATE_COMPARISON_METADATA/,
+    );
     expect(body.comparison.retrievedAt).toEqual(expect.any(String));
   });
 

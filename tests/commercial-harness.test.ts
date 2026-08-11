@@ -581,6 +581,35 @@ describe("DB harness packet", () => {
     expect(promptContext).toContain("KOSHA 외벽 도장 지침");
   });
 
+  it("keeps bounded KOSHA prompt evidence while removing full bodies from public harness packets", () => {
+    const promptMarker = "BOUNDED_KOSHA_PROMPT_MARKER";
+    const tailMarker = "PRIVATE_KOSHA_BODY_TAIL_MARKER";
+    const payloadMarker = "PRIVATE_KOSHA_PAYLOAD_MARKER";
+    const guide = verifiedKoshaReference({
+      id: "guide-public-projection",
+      title: "D-C-13-2026 외벽 도장 작업 기술지침",
+      summary: "외벽 도장 작업의 추락 위험과 작업발판 확인",
+      body: `외벽 도장 추락 위험 ${promptMarker} 작업발판과 안전난간을 확인한다. ${"기술 본문 ".repeat(600)}${tailMarker}`,
+      payload: { raw: payloadMarker },
+      metadata: { raw: payloadMarker },
+    });
+    const internalPacket = buildDbHarnessPacket({
+      question: "외벽 도장 작업의 추락 위험과 작업발판 확인",
+      references: [reference(), guide],
+    });
+    const publicPacket = buildPublicDbHarnessPacket(internalPacket);
+    const promptContext = buildHarnessPromptContext(internalPacket);
+    const serializedPublicPacket = JSON.stringify(publicPacket);
+
+    expect(internalPacket.supportingEvidence.find((item) => item.id === guide.id)?.body).toContain(tailMarker);
+    expect(publicPacket.sifCases.every((item) => item.body === undefined)).toBe(true);
+    expect(publicPacket.supportingEvidence.every((item) => item.body === undefined)).toBe(true);
+    expect(serializedPublicPacket).not.toContain(payloadMarker);
+    expect(serializedPublicPacket).not.toContain(tailMarker);
+    expect(promptContext).toContain(promptMarker);
+    expect(promptContext).not.toContain(tailMarker);
+  });
+
   it("ignores stale KOSHA anchors that are absent from the verified body", () => {
     const verifiedBody = "외벽 도장 작업에서는 작업발판과 안전난간 상태를 확인한다.";
     const staleAnchor = "STALE_KOSHA_ANCHOR_NOT_PRESENT_IN_BODY";

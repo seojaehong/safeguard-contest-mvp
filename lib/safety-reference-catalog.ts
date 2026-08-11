@@ -176,6 +176,175 @@ export type SafetyReferenceStats = {
   message: string;
 };
 
+const PUBLIC_REFERENCE_LIMITS = {
+  id: 180,
+  sourceId: 240,
+  type: 96,
+  category: 160,
+  title: 220,
+  summary: 480,
+  label: 240,
+  listValue: 160,
+  control: 280,
+  url: 2048,
+  provenance: 480,
+  anchorExcerpt: 360,
+} as const;
+
+function boundPublicReferenceText(value: string, maxChars: number): string {
+  return Array.from(value
+    .replace(/[\u0000-\u001f\u007f\u2028\u2029]+/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim())
+    .slice(0, maxChars)
+    .join("");
+}
+
+function boundPublicReferenceList(
+  values: readonly string[],
+  maxItems: number,
+  maxChars: number,
+): string[] {
+  return [...new Set(values
+    .map((value) => boundPublicReferenceText(value, maxChars))
+    .filter(Boolean))]
+    .slice(0, maxItems);
+}
+
+function boundNullablePublicReferenceText(
+  value: string | null,
+  maxChars: number,
+): string | null {
+  return value === null ? null : boundPublicReferenceText(value, maxChars);
+}
+
+export function buildPublicSafetyReferenceItem(item: SafetyReferenceItem): SafetyReferenceItem {
+  return {
+    id: boundPublicReferenceText(item.id, PUBLIC_REFERENCE_LIMITS.id),
+    source_id: boundPublicReferenceText(item.source_id, PUBLIC_REFERENCE_LIMITS.sourceId),
+    item_type: boundPublicReferenceText(item.item_type, PUBLIC_REFERENCE_LIMITS.type),
+    category: boundNullablePublicReferenceText(item.category, PUBLIC_REFERENCE_LIMITS.category),
+    subcategory: boundNullablePublicReferenceText(item.subcategory, PUBLIC_REFERENCE_LIMITS.category),
+    title: boundPublicReferenceText(item.title, PUBLIC_REFERENCE_LIMITS.title),
+    summary: boundPublicReferenceText(item.summary, PUBLIC_REFERENCE_LIMITS.summary),
+    keywords: boundPublicReferenceList(item.keywords, 24, PUBLIC_REFERENCE_LIMITS.listValue),
+    risk_tags: boundPublicReferenceList(item.risk_tags, 24, PUBLIC_REFERENCE_LIMITS.listValue),
+    primary_documents: boundPublicReferenceList(item.primary_documents, 24, PUBLIC_REFERENCE_LIMITS.listValue),
+    controls: boundPublicReferenceList(item.controls, 12, PUBLIC_REFERENCE_LIMITS.control),
+    ...(item.source_url !== undefined
+      ? { source_url: boundNullablePublicReferenceText(item.source_url, PUBLIC_REFERENCE_LIMITS.url) }
+      : {}),
+    ...(item.evidence_role ? { evidence_role: item.evidence_role } : {}),
+    ...(item.reflected_documents
+      ? { reflected_documents: boundPublicReferenceList(item.reflected_documents, 24, PUBLIC_REFERENCE_LIMITS.listValue) }
+      : {}),
+    ...(item.short_summary
+      ? { short_summary: boundPublicReferenceText(item.short_summary, PUBLIC_REFERENCE_LIMITS.summary) }
+      : {}),
+    ...(item.evidence_role_label
+      ? { evidence_role_label: boundPublicReferenceText(item.evidence_role_label, PUBLIC_REFERENCE_LIMITS.label) }
+      : {}),
+    ...(item.document_reflection_label
+      ? { document_reflection_label: boundPublicReferenceText(item.document_reflection_label, PUBLIC_REFERENCE_LIMITS.label) }
+      : {}),
+    ...(item.source_kind_label
+      ? { source_kind_label: boundPublicReferenceText(item.source_kind_label, PUBLIC_REFERENCE_LIMITS.label) }
+      : {}),
+    ...(item.operation_signal_label
+      ? { operation_signal_label: boundPublicReferenceText(item.operation_signal_label, PUBLIC_REFERENCE_LIMITS.label) }
+      : {}),
+    ...(item.display_title
+      ? { display_title: boundPublicReferenceText(item.display_title, PUBLIC_REFERENCE_LIMITS.title) }
+      : {}),
+    ...(item.display_summary
+      ? { display_summary: boundPublicReferenceText(item.display_summary, PUBLIC_REFERENCE_LIMITS.summary) }
+      : {}),
+    ...(item.retrieval_source ? { retrieval_source: item.retrieval_source } : {}),
+    ...(item.vector_similarity !== undefined ? { vector_similarity: item.vector_similarity } : {}),
+    ...(item.kosha_grounding ? {
+      kosha_grounding: {
+        ...item.kosha_grounding,
+        ...(item.kosha_grounding.metadata ? {
+          metadata: {
+            ...item.kosha_grounding.metadata,
+            uid: boundPublicReferenceText(item.kosha_grounding.metadata.uid, PUBLIC_REFERENCE_LIMITS.id),
+            stableDocumentKey: boundPublicReferenceText(
+              item.kosha_grounding.metadata.stableDocumentKey,
+              PUBLIC_REFERENCE_LIMITS.id,
+            ),
+            version: boundPublicReferenceText(item.kosha_grounding.metadata.version, PUBLIC_REFERENCE_LIMITS.type),
+            currentVersion: boundPublicReferenceText(
+              item.kosha_grounding.metadata.currentVersion,
+              PUBLIC_REFERENCE_LIMITS.type,
+            ),
+            reviewState: boundPublicReferenceText(
+              item.kosha_grounding.metadata.reviewState,
+              PUBLIC_REFERENCE_LIMITS.label,
+            ),
+            bodySha256: boundNullablePublicReferenceText(
+              item.kosha_grounding.metadata.bodySha256,
+              128,
+            ),
+            officialUrl: boundNullablePublicReferenceText(
+              item.kosha_grounding.metadata.officialUrl,
+              PUBLIC_REFERENCE_LIMITS.url,
+            ),
+            officialFileId: boundNullablePublicReferenceText(
+              item.kosha_grounding.metadata.officialFileId,
+              PUBLIC_REFERENCE_LIMITS.id,
+            ),
+            publishedAt: boundNullablePublicReferenceText(
+              item.kosha_grounding.metadata.publishedAt,
+              PUBLIC_REFERENCE_LIMITS.type,
+            ),
+            provenance: boundPublicReferenceText(
+              item.kosha_grounding.metadata.provenance,
+              PUBLIC_REFERENCE_LIMITS.provenance,
+            ),
+          },
+        } : { metadata: null }),
+      },
+    } : {}),
+    ...(item.kosha_guide ? {
+      kosha_guide: {
+        ...item.kosha_guide,
+        referenceId: boundPublicReferenceText(item.kosha_guide.referenceId, PUBLIC_REFERENCE_LIMITS.id),
+        stableDocumentKey: boundPublicReferenceText(
+          item.kosha_guide.stableDocumentKey,
+          PUBLIC_REFERENCE_LIMITS.id,
+        ),
+        version: boundPublicReferenceText(item.kosha_guide.version, PUBLIC_REFERENCE_LIMITS.type),
+        anchors: item.kosha_guide.anchors.slice(0, 8).map((anchor) => ({
+          page: anchor.page,
+          excerpt: boundPublicReferenceText(anchor.excerpt, PUBLIC_REFERENCE_LIMITS.anchorExcerpt),
+        })),
+        evidenceRef: boundNullablePublicReferenceText(
+          item.kosha_guide.evidenceRef,
+          PUBLIC_REFERENCE_LIMITS.provenance,
+        ),
+        ...(item.kosha_guide.officialUrl
+          ? { officialUrl: boundPublicReferenceText(item.kosha_guide.officialUrl, PUBLIC_REFERENCE_LIMITS.url) }
+          : {}),
+        ...(item.kosha_guide.officialFileId
+          ? { officialFileId: boundPublicReferenceText(item.kosha_guide.officialFileId, PUBLIC_REFERENCE_LIMITS.id) }
+          : {}),
+        ...(item.kosha_guide.publicationDate
+          ? { publicationDate: boundPublicReferenceText(item.kosha_guide.publicationDate, PUBLIC_REFERENCE_LIMITS.type) }
+          : {}),
+        ...(item.kosha_guide.officialVersion
+          ? { officialVersion: boundPublicReferenceText(item.kosha_guide.officialVersion, PUBLIC_REFERENCE_LIMITS.type) }
+          : {}),
+        ...(item.kosha_guide.pdfSha256
+          ? { pdfSha256: boundPublicReferenceText(item.kosha_guide.pdfSha256, 128) }
+          : {}),
+        ...(item.kosha_guide.bodySha256
+          ? { bodySha256: boundPublicReferenceText(item.kosha_guide.bodySha256, 128) }
+          : {}),
+      },
+    } : {}),
+  };
+}
+
 type SupabaseConfig = {
   url: string;
   serviceRoleKey: string;

@@ -1,9 +1,10 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 
 import type { HarnessImprovement } from "@/lib/db-harness";
-import type {
-  SafetyReferenceItem,
-  SafetyReferenceSearchResult
+import {
+  buildPublicSafetyReferenceItem,
+  type SafetyReferenceItem,
+  type SafetyReferenceSearchResult,
 } from "@/lib/safety-reference-catalog";
 import type {
   AskResponse,
@@ -267,6 +268,6 @@ export function buildGenerationEvidenceComparison(
     count: result.count,
     retrievalMode: result.retrievalMode,
     vectorSearch: result.vectorSearch,
-    items: result.items
+    items: result.items.map(buildPublicSafetyReferenceItem)
   };
 }

@@ -5,6 +5,7 @@ import type {
   SafetyReferenceVectorStatus
 } from "@/lib/safety-reference-catalog";
 import {
+  buildPublicSafetyReferenceItem,
   buildSafetyReferenceOperationalMetadata,
   deriveSafetyReferenceRetrievalModeFromItems,
   deriveSafetyReferenceOperationalView,
@@ -834,12 +835,15 @@ export function buildPublicDbHarnessPacket(packet: DbHarnessPacket): DbHarnessPa
   const parentCandidates = [...packet.sifCases, ...packet.directEvidence];
   return {
     ...packet,
-    directEvidence: packet.directEvidence.map(buildPublicKoshaActionEvidence),
+    directEvidence: packet.directEvidence
+      .map(buildPublicKoshaActionEvidence)
+      .map(buildPublicSafetyReferenceItem),
+    sifCases: packet.sifCases.map(buildPublicSafetyReferenceItem),
     supportingEvidence: packet.supportingEvidence.map((item) => (
       isKoshaTechnicalReference(item) && !hasRelevantKoshaParent(item, parentCandidates)
         ? buildParentlessKoshaIdentity(item)
         : buildPublicKoshaActionEvidence(item)
-    ))
+    )).map(buildPublicSafetyReferenceItem),
   };
 }
 

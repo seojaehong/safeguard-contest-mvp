@@ -200,6 +200,7 @@ describe("buildHarnessAgentResult", () => {
     expect(result.packet.retrievalContract.mode).toBe("unconfigured");
     expect(result.tenantMemoryDigest.workpacks).toHaveLength(1);
     expect(result.packet.workpackMemory).toEqual([]);
+    expect(result.packet.sifCases[0]?.body).toBeUndefined();
     expect(result.openClawUsageNote).toContain("OpenClaw");
   });
 
