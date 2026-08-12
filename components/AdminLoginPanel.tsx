@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient, type Provider, type Session, type SupabaseClient } from "@supabase/supabase-js";
-import { buildAuthCallbackUrl, resolveSafeNextPath } from "@/lib/auth-callback";
+import {
+  AUTH_TRANSACTION_STORAGE_KEY,
+  buildAuthCallbackUrl,
+  createAuthTransaction,
+  resolveSafeNextPath
+} from "@/lib/auth-callback";
 
 let browserClient: SupabaseClient | null = null;
 
@@ -51,16 +56,19 @@ export function AdminLoginPanel() {
     setIsSending(true);
     setMessage("");
     try {
+      const transaction = createAuthTransaction();
+      window.localStorage.setItem(AUTH_TRANSACTION_STORAGE_KEY, JSON.stringify(transaction));
       const { error } = await client.auth.signInWithOtp({
         email: email.trim(),
         options: {
-          emailRedirectTo: buildAuthCallbackUrl(window.location.origin, nextPath),
+          emailRedirectTo: buildAuthCallbackUrl(window.location.origin, nextPath, transaction.state),
           shouldCreateUser: true
         }
       });
       if (error) throw error;
       setMessage("이메일 가입/로그인 링크를 보냈습니다. 메일함에서 확인해 주세요.");
     } catch (error) {
+      window.localStorage.removeItem(AUTH_TRANSACTION_STORAGE_KEY);
       console.error("admin otp send failed", error);
       setMessage("로그인 링크 발송에 실패했습니다. Supabase Auth 설정과 Redirect URL을 확인해 주세요.");
     } finally {
@@ -73,14 +81,17 @@ export function AdminLoginPanel() {
     setIsSocialStarting(true);
     setMessage("");
     try {
+      const transaction = createAuthTransaction();
+      window.localStorage.setItem(AUTH_TRANSACTION_STORAGE_KEY, JSON.stringify(transaction));
       const { error } = await client.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: buildAuthCallbackUrl(window.location.origin, nextPath)
+          redirectTo: buildAuthCallbackUrl(window.location.origin, nextPath, transaction.state)
         }
       });
       if (error) throw error;
     } catch (error) {
+      window.localStorage.removeItem(AUTH_TRANSACTION_STORAGE_KEY);
       console.error("admin social login failed", error);
       setIsSocialStarting(false);
       setMessage("소셜 로그인 시작에 실패했습니다. Supabase Auth Provider 설정을 확인해 주세요.");

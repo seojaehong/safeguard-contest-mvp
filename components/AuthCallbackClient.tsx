@@ -4,7 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-import { parseAuthHashSession, resolveSafeNextPath } from "@/lib/auth-callback";
+import {
+  consumeAuthTransaction,
+  parseAuthHashSession,
+  resolveSafeNextPath
+} from "@/lib/auth-callback";
 
 let browserClient: SupabaseClient | null = null;
 
@@ -12,7 +16,11 @@ function getBrowserSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) return null;
-  if (!browserClient) browserClient = createClient(url, anonKey);
+  if (!browserClient) {
+    browserClient = createClient(url, anonKey, {
+      auth: { detectSessionInUrl: false }
+    });
+  }
   return browserClient;
 }
 
@@ -32,6 +40,12 @@ export function AuthCallbackClient() {
       return;
     }
     const supabase = client;
+
+    if (!consumeAuthTransaction(window.localStorage, params.get("auth_tx"))) {
+      window.history.replaceState(null, "", `/auth/callback?next=${encodeURIComponent(safeNextPath)}`);
+      setMessage("이 브라우저에서 시작하지 않은 로그인 링크입니다. 로그인 화면에서 새 링크를 받아 주세요.");
+      return;
+    }
 
     async function finishAndRedirect() {
       window.history.replaceState(null, "", `/auth/callback?next=${encodeURIComponent(safeNextPath)}`);
