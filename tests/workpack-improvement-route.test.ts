@@ -2,6 +2,11 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { parseOperationImprovements } from "@/lib/operation-improvement-history";
+import {
+  WORKPACK_IMPROVEMENT_JSON_REQUEST_MAX_BYTES,
+  WORKPACK_IMPROVEMENT_TEXT_MAX_CHARS,
+  WORKPACK_IMPROVEMENT_REFLECTED_DOCUMENTS_MAX_COUNT
+} from "@/lib/public-work-budget";
 
 const mocks = vi.hoisted(() => ({
   analyzeImprovementPhotos: vi.fn(),
@@ -156,6 +161,73 @@ describe("workpack improvement POST status contract", () => {
     expect(response.status).toBe(413);
     await expect(response.json()).resolves.toMatchObject({ code: "photo_payload_too_large" });
     expect(request.formData).not.toHaveBeenCalled();
+    expect(mocks.analyzeImprovementPhotos).not.toHaveBeenCalled();
+    expect(mocks.insert).not.toHaveBeenCalled();
+  });
+
+  it("rejects oversized JSON requests before authentication, analysis, or persistence", async () => {
+    const { POST } = await import("@/app/api/workpacks/[id]/improvements/route");
+    const response = await POST(new NextRequest(
+      "http://localhost/api/workpacks/workpack-1/improvements",
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "x".repeat(WORKPACK_IMPROVEMENT_JSON_REQUEST_MAX_BYTES + 1)
+      }
+    ), { params: Promise.resolve({ id: "workpack-1" }) });
+
+    expect(response.status).toBe(413);
+    await expect(response.json()).resolves.toMatchObject({
+      code: "PUBLIC_WORK_BUDGET_EXCEEDED",
+      limit: WORKPACK_IMPROVEMENT_JSON_REQUEST_MAX_BYTES
+    });
+    expect(mocks.analyzeImprovementPhotos).not.toHaveBeenCalled();
+    expect(mocks.insert).not.toHaveBeenCalled();
+  });
+
+  it("rejects excess reflected document entries before analysis or persistence", async () => {
+    const { POST } = await import("@/app/api/workpacks/[id]/improvements/route");
+    const response = await POST(new NextRequest(
+      "http://localhost/api/workpacks/workpack-1/improvements",
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          taskLabel: "외벽 도장",
+          hazardLabel: "추락",
+          improvementText: "난간 보강",
+          reflectedDocuments: Array.from(
+            { length: WORKPACK_IMPROVEMENT_REFLECTED_DOCUMENTS_MAX_COUNT + 1 },
+            (_, index) => `문서-${index}`
+          )
+        })
+      }
+    ), { params: Promise.resolve({ id: "workpack-1" }) });
+
+    expect(response.status).toBe(413);
+    await expect(response.json()).resolves.toMatchObject({ code: "improvement_field_budget_exceeded" });
+    expect(mocks.analyzeImprovementPhotos).not.toHaveBeenCalled();
+    expect(mocks.insert).not.toHaveBeenCalled();
+  });
+
+  it("rejects oversized improvement text before analysis or persistence", async () => {
+    const { POST } = await import("@/app/api/workpacks/[id]/improvements/route");
+    const response = await POST(new NextRequest(
+      "http://localhost/api/workpacks/workpack-1/improvements",
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          taskLabel: "외벽 도장",
+          hazardLabel: "추락",
+          improvementText: "x".repeat(WORKPACK_IMPROVEMENT_TEXT_MAX_CHARS + 1),
+          reflectedDocuments: ["위험성평가표"]
+        })
+      }
+    ), { params: Promise.resolve({ id: "workpack-1" }) });
+
+    expect(response.status).toBe(413);
+    await expect(response.json()).resolves.toMatchObject({ code: "improvement_field_budget_exceeded" });
     expect(mocks.analyzeImprovementPhotos).not.toHaveBeenCalled();
     expect(mocks.insert).not.toHaveBeenCalled();
   });

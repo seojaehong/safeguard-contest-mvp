@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import type { generateKnowledgeText } from "@/lib/ai";
 import {
   KnowledgeRawEvent,
@@ -20,6 +20,11 @@ import {
   PUBLIC_KNOWLEDGE_RAW_EVENTS_MAX_COUNT,
   serializedCharLength
 } from "@/lib/public-work-budget";
+import {
+  applyPublicAskWorkHeaders,
+  publicAskConcurrencyResponse,
+  type PublicAskWorkLease
+} from "@/lib/public-ask-admission";
 
 const MAX_TENANT_ID_LENGTH = 128;
 
@@ -35,6 +40,7 @@ export type KnowledgeMutationGateway = {
 export type KnowledgeCandidatePostDependencies = {
   generateText: typeof generateKnowledgeText;
   mutationGateway: KnowledgeMutationGateway;
+  acquireGenerationLease: () => Promise<PublicAskWorkLease | null>;
 };
 
 export type KnowledgeCandidateBuildDependencies = {
@@ -186,7 +192,7 @@ export function createKnowledgeCandidatePostHandler(
     throw new Error("Knowledge mutation gateway is required");
   }
 
-  return async function post(request: NextRequest) {
+  return async function post(request: Request) {
     const body = await request.json().catch(() => null) as unknown;
     if (typeof body !== "object" || body === null || Array.isArray(body)) {
       return NextResponse.json(
@@ -243,14 +249,31 @@ export function createKnowledgeCandidatePostHandler(
       );
     }
 
-    const { bundle, candidate, reviewContract, generated } = await buildKnowledgeCandidateDraft({
-      question,
-      rawEvents: events,
-      tenantContext,
-      limit,
-      generate: shouldGenerate,
-      signal: request.signal
-    }, dependencies);
+    let generationLease: PublicAskWorkLease | null = null;
+    if (shouldGenerate) {
+      try {
+        generationLease = await dependencies.acquireGenerationLease();
+      } catch (error) {
+        console.error("knowledge generation concurrency admission unavailable", error);
+        return publicAskConcurrencyResponse("enhanced");
+      }
+      if (!generationLease) return publicAskConcurrencyResponse("enhanced");
+    }
+
+    let draft: Awaited<ReturnType<typeof buildKnowledgeCandidateDraft>>;
+    try {
+      draft = await buildKnowledgeCandidateDraft({
+        question,
+        rawEvents: events,
+        tenantContext,
+        limit,
+        generate: shouldGenerate,
+        signal: request.signal
+      }, dependencies);
+    } finally {
+      await generationLease?.release();
+    }
+    const { bundle, candidate, reviewContract, generated } = draft;
     const responseBundle = {
       question: bundle.question,
       matchedHazards: bundle.matchedHazards,
@@ -260,7 +283,7 @@ export function createKnowledgeCandidatePostHandler(
       storagePolicy: bundle.storagePolicy
     };
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       ok: true,
       configured: generated.configured,
       storageMode: "stateless_candidate",
@@ -272,5 +295,8 @@ export function createKnowledgeCandidatePostHandler(
       generated,
       message: "검토용 지식 후보를 메모리에서 생성했습니다. DB 저장과 ontology publish는 수행하지 않았습니다."
     });
+    return generationLease
+      ? applyPublicAskWorkHeaders(response, "enhanced", generationLease.weight)
+      : response;
   };
 }

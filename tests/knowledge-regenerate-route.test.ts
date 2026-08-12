@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { generateKnowledgeText } from "@/lib/ai";
 import {
+  PUBLIC_KNOWLEDGE_REGENERATION_REQUEST_MAX_BYTES,
   PUBLIC_KNOWLEDGE_QUESTION_MAX_CHARS,
   PUBLIC_KNOWLEDGE_RAW_EVENT_MAX_CHARS,
   PUBLIC_KNOWLEDGE_RAW_EVENTS_MAX_COUNT
@@ -148,6 +149,22 @@ describe("knowledge candidate API", () => {
     expect(generateKnowledgeText).not.toHaveBeenCalled();
   });
 
+  it("rejects oversized knowledge regeneration bodies before JSON parsing or AI generation", async () => {
+    const { POST } = await import("@/app/api/knowledge/regenerate/route");
+    const response = await POST(new NextRequest("http://localhost/api/knowledge/regenerate", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: "x".repeat(PUBLIC_KNOWLEDGE_REGENERATION_REQUEST_MAX_BYTES + 1)
+    }));
+
+    expect(response.status).toBe(413);
+    await expect(response.json()).resolves.toMatchObject({
+      code: "PUBLIC_WORK_BUDGET_EXCEEDED",
+      limit: PUBLIC_KNOWLEDGE_REGENERATION_REQUEST_MAX_BYTES
+    });
+    expect(generateKnowledgeText).not.toHaveBeenCalled();
+  });
+
   it("rejects oversized raw event collections before candidate generation", async () => {
     const { POST } = await import("@/app/api/knowledge/regenerate/route");
     const rawEvents = Array.from({ length: PUBLIC_KNOWLEDGE_RAW_EVENTS_MAX_COUNT + 1 }, (_, index) => ({
@@ -217,10 +234,15 @@ describe("knowledge candidate API", () => {
 
   it("executes zero mutation gateway writes while returning a candidate", async () => {
     const mutationWrite = vi.fn(async () => undefined);
+    const release = vi.fn(async () => undefined);
     const { createKnowledgeCandidatePostHandler } = await import("@/lib/knowledge-candidate-route");
     const post = createKnowledgeCandidatePostHandler({
       generateText: vi.mocked(generateKnowledgeText),
-      mutationGateway: { write: mutationWrite }
+      mutationGateway: { write: mutationWrite },
+      acquireGenerationLease: async () => ({
+        weight: 2,
+        release
+      })
     });
     const response = await post(new NextRequest("http://localhost/api/knowledge/regenerate", {
       method: "POST",
@@ -252,6 +274,38 @@ describe("knowledge candidate API", () => {
       publishAllowed: false
     });
     expect(mutationWrite).toHaveBeenCalledTimes(0);
+    expect(release).toHaveBeenCalledTimes(1);
+  });
+
+  it("fails closed before AI generation when provider concurrency admission is full", async () => {
+    const { createKnowledgeCandidatePostHandler } = await import("@/lib/knowledge-candidate-route");
+    const post = createKnowledgeCandidatePostHandler({
+      generateText: vi.mocked(generateKnowledgeText),
+      mutationGateway: { write: vi.fn(async () => undefined) },
+      acquireGenerationLease: async () => null
+    });
+    const response = await post(new NextRequest("http://localhost/api/knowledge/regenerate", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        question: "추락 위험 통제대책을 검토해줘",
+        generate: true,
+        tenantContext: { organizationId: "org-1", siteId: "site-1" },
+        rawEvents: [{
+          source: "manual",
+          sourceId: "manual-1",
+          capturedAt: "2026-07-14T10:00:00.000Z",
+          title: "작업 절차",
+          payload: { note: "bounded" },
+          relatedHazardIds: ["hazard-fall"],
+          reflectedDocuments: ["위험성평가표"]
+        }]
+      })
+    }));
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({ code: "PUBLIC_ASK_CONCURRENCY_LIMIT" });
+    expect(generateKnowledgeText).not.toHaveBeenCalled();
   });
 
   it("returns an unpublished candidate that can only advance to human review", async () => {

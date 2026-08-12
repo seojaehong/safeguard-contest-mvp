@@ -16,6 +16,15 @@ import {
 import { withPublicPhotoAnalysisAdmission } from "@/lib/public-distributed-rate-limit";
 import { buildImprovementDraft, buildImprovementPhotoPath } from "@/lib/workpack-commercial";
 import { loadOwnedWorkpackOperationContext } from "@/lib/workpack-commercial-store";
+import {
+  enforcePublicJsonRequestBodyBudget,
+  isOverCharBudget,
+  WORKPACK_IMPROVEMENT_JSON_REQUEST_MAX_BYTES,
+  WORKPACK_IMPROVEMENT_LABEL_MAX_CHARS,
+  WORKPACK_IMPROVEMENT_REFLECTED_DOCUMENT_MAX_CHARS,
+  WORKPACK_IMPROVEMENT_REFLECTED_DOCUMENTS_MAX_COUNT,
+  WORKPACK_IMPROVEMENT_TEXT_MAX_CHARS
+} from "@/lib/public-work-budget";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -58,9 +67,23 @@ class ImprovementRequestError extends Error {
   }
 }
 
+function readBoundedString(value: unknown, maxChars: number, field: string) {
+  const parsed = readString(value);
+  if (isOverCharBudget(parsed, maxChars)) {
+    throw new ImprovementRequestError(`${field} 값이 허용 길이를 초과합니다.`, 413, "improvement_field_budget_exceeded");
+  }
+  return parsed;
+}
+
 function readStringArray(value: unknown) {
   if (!Array.isArray(value)) return [];
-  return value.filter((item): item is string => typeof item === "string").map((item) => item.trim()).filter(Boolean);
+  if (value.length > WORKPACK_IMPROVEMENT_REFLECTED_DOCUMENTS_MAX_COUNT) {
+    throw new ImprovementRequestError("반영 문서 수가 허용 한도를 초과합니다.", 413, "improvement_field_budget_exceeded");
+  }
+  return value
+    .filter((item): item is string => typeof item === "string")
+    .map((item) => readBoundedString(item, WORKPACK_IMPROVEMENT_REFLECTED_DOCUMENT_MAX_CHARS, "reflectedDocuments"))
+    .filter(Boolean);
 }
 
 function isFileValue(value: FormDataEntryValue | null): value is File {
@@ -107,26 +130,32 @@ async function readImprovementRequest(request: NextRequest): Promise<Improvement
     }
     const reflectedDocumentsRaw = readFormString(form, "reflectedDocuments");
     const reflectedDocuments = reflectedDocumentsRaw
-      ? reflectedDocumentsRaw.split(",").map((item) => item.trim()).filter(Boolean)
+      ? readStringArray(reflectedDocumentsRaw.split(","))
       : [];
     const beforeValue = form.get("beforePhoto");
     const afterValue = form.get("afterPhoto");
     return {
-      taskLabel: readFormString(form, "taskLabel"),
-      hazardLabel: readFormString(form, "hazardLabel"),
-      improvementText: readFormString(form, "improvementText"),
+      taskLabel: readBoundedString(readFormString(form, "taskLabel"), WORKPACK_IMPROVEMENT_LABEL_MAX_CHARS, "taskLabel"),
+      hazardLabel: readBoundedString(readFormString(form, "hazardLabel"), WORKPACK_IMPROVEMENT_LABEL_MAX_CHARS, "hazardLabel"),
+      improvementText: readBoundedString(readFormString(form, "improvementText"), WORKPACK_IMPROVEMENT_TEXT_MAX_CHARS, "improvementText"),
       reflectedDocuments,
       beforePhoto: isFileValue(beforeValue) ? beforeValue : null,
       afterPhoto: isFileValue(afterValue) ? afterValue : null
     };
   }
 
-  const parsed = await request.json().catch((): unknown => ({}));
+  let parsed: unknown;
+  try {
+    parsed = await request.json();
+  } catch (error) {
+    console.error("improvement JSON parse failed", error);
+    throw new ImprovementRequestError("개선사항 JSON 형식을 읽지 못했습니다.", 400, "invalid_json");
+  }
   const body = isRecord(parsed) ? parsed : {};
   return {
-    taskLabel: readString(body.taskLabel),
-    hazardLabel: readString(body.hazardLabel),
-    improvementText: readString(body.improvementText),
+    taskLabel: readBoundedString(body.taskLabel, WORKPACK_IMPROVEMENT_LABEL_MAX_CHARS, "taskLabel"),
+    hazardLabel: readBoundedString(body.hazardLabel, WORKPACK_IMPROVEMENT_LABEL_MAX_CHARS, "hazardLabel"),
+    improvementText: readBoundedString(body.improvementText, WORKPACK_IMPROVEMENT_TEXT_MAX_CHARS, "improvementText"),
     reflectedDocuments: readStringArray(body.reflectedDocuments),
     beforePhoto: null,
     afterPhoto: null
@@ -448,7 +477,13 @@ async function handlePost(request: NextRequest, context: RouteContext) {
 export async function POST(request: NextRequest, context: RouteContext) {
   const contentType = request.headers.get("content-type") || "";
   if (!contentType.includes("multipart/form-data")) {
-    return handlePost(request, context);
+    const bodyBudget = await enforcePublicJsonRequestBodyBudget(
+      request,
+      WORKPACK_IMPROVEMENT_JSON_REQUEST_MAX_BYTES,
+      "request body exceeds the workpack improvement JSON byte budget"
+    );
+    if (!bodyBudget.ok) return bodyBudget.response;
+    return handlePost(new NextRequest(bodyBudget.request), context);
   }
 
   const contentLengthValue = request.headers.get("content-length");

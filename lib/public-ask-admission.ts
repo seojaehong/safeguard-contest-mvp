@@ -50,7 +50,10 @@ function acquireInstanceWorkUnits(weight: number): (() => void) | null {
   };
 }
 
-export async function acquirePublicAskWorkLease(aiMode: AiMode): Promise<PublicAskWorkLease | null> {
+export async function acquirePublicAskWorkLease(
+  aiMode: AiMode,
+  options: { requireDistributedInProduction?: boolean } = {},
+): Promise<PublicAskWorkLease | null> {
   const weight = PUBLIC_ASK_PROVIDER_ADMISSION_POLICY.weights[aiMode];
   if (weight === 0) return { release: async () => undefined, weight };
 
@@ -58,7 +61,7 @@ export async function acquirePublicAskWorkLease(aiMode: AiMode): Promise<PublicA
     concurrency: PUBLIC_ASK_PROVIDER_ADMISSION_POLICY.capacity,
     leaseMs: PUBLIC_ASK_PROVIDER_ADMISSION_POLICY.leaseMs,
     namespace: PUBLIC_ASK_PROVIDER_ADMISSION_POLICY.namespace,
-    requireDistributedInProduction: false,
+    requireDistributedInProduction: options.requireDistributedInProduction === true,
     weight,
   });
   const release = distributedRelease === undefined
