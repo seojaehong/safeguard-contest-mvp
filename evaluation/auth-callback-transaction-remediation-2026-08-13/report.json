@@ -1,8 +1,9 @@
 {
   "schema": "safeclaw-auth-callback-transaction-remediation/v1",
-  "verdict": "PASS_CURRENT_SOURCE_AUTH_CALLBACK_TRANSACTION_LIVE_AND_RESCAN_PENDING",
+  "verdict": "PASS_LIVE_PRODUCTION_AUTH_CALLBACK_TRANSACTION_RESCAN_PENDING",
   "generatedAt": "2026-08-13T08:20:59.2591750+09:00",
   "sourceHead": "11ac094112cb3b83a14c36f294b84583ef45ce03",
+  "productionCommit": "b94f1fe5b6b655a11dcab60634fcba0130efd5df",
   "baselineScan": {
     "scanId": "28cba4f7-52be-4c42-ab0a-ba07ae972968",
     "findingId": "auth-callback-session-fixation",
@@ -24,6 +25,13 @@
     "frontendEvidenceReconciliation": {
       "status": "RED_SOURCE_IDENTITY_REFRESH_REQUIRED",
       "productRegressionObserved": false
+    },
+    "liveBrowser": {
+      "viewport": "1440x723",
+      "unsolicitedHashRejected": true,
+      "hashRemoved": true,
+      "localTransactionPresent": false,
+      "validAuthenticationFlowExecuted": false
     }
   },
   "mutationBoundary": {
@@ -36,7 +44,7 @@
     "koshaRegistryMutationPerformed": false
   },
   "remainingBoundaries": {
-    "liveDeploymentVerification": "PENDING",
+    "liveDeploymentVerification": "PASS",
     "followUpSecurityRescan": "PENDING",
     "frontendEvidenceRefresh": "PENDING",
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
