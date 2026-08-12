@@ -1,8 +1,9 @@
 {
   "schema": "safeclaw-security-request-budget-remediation/v1",
-  "verdict": "PASS_CURRENT_SOURCE_SECURITY_REQUEST_BUDGETS_LIVE_AND_RESCAN_PENDING",
+  "verdict": "PASS_LIVE_PRODUCTION_SECURITY_REQUEST_BUDGETS_RESCAN_PENDING",
   "generatedAt": "2026-08-13T08:15:14.4714075+09:00",
   "sourceHead": "fdba0221fe43cae6b8c0ab64bdf56046003d9317",
+  "productionCommit": "1d4d0237f68fd6f7c276f16e5b21a04dd4c3aefa",
   "baselineSourceHead": "2113607af4503f7a2e2d270c69872093da08dcdd",
   "baselineScan": {
     "scanId": "28cba4f7-52be-4c42-ab0a-ba07ae972968",
@@ -50,7 +51,21 @@
       "nextVersion": "15.5.22",
       "staticPages": 28
     },
-    "diffCheck": "PASS"
+    "diffCheck": "PASS",
+    "liveChecks": [
+      {
+        "path": "/api/knowledge/regenerate",
+        "status": 413,
+        "code": "PUBLIC_WORK_BUDGET_EXCEEDED",
+        "limit": 131072
+      },
+      {
+        "path": "/api/workpacks/nonexistent-security-probe/improvements",
+        "status": 413,
+        "code": "PUBLIC_WORK_BUDGET_EXCEEDED",
+        "limit": 16384
+      }
+    ]
   },
   "mutationBoundary": {
     "dbMutationPerformed": false,
@@ -61,7 +76,7 @@
     "koshaRegistryMutationPerformed": false
   },
   "remainingBoundaries": {
-    "liveDeploymentVerification": "PENDING",
+    "liveDeploymentVerification": "PASS",
     "followUpSecurityRescan": "PENDING",
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "approvalGatedBoundariesPreserved": true
