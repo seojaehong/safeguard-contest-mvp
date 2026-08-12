@@ -1,0 +1,45 @@
+{
+  "schema": "safeclaw-auth-callback-transaction-remediation/v1",
+  "verdict": "PASS_CURRENT_SOURCE_AUTH_CALLBACK_TRANSACTION_LIVE_AND_RESCAN_PENDING",
+  "generatedAt": "2026-08-13T08:20:59.2591750+09:00",
+  "sourceHead": "11ac094112cb3b83a14c36f294b84583ef45ce03",
+  "baselineScan": {
+    "scanId": "28cba4f7-52be-4c42-ab0a-ba07ae972968",
+    "findingId": "auth-callback-session-fixation",
+    "immutable": true
+  },
+  "controls": {
+    "browserTransactionTtlMinutes": 15,
+    "oneTimeTransactionConsumption": true,
+    "callbackStateRequired": true,
+    "automaticUrlSessionDetectionDisabled": true,
+    "unsolicitedHashSessionRejectedBeforeSetSession": true,
+    "oauthCodeRejectedWithoutLocalTransaction": true
+  },
+  "verification": {
+    "focusedTests": { "files": 1, "tests": 12, "status": "PASS" },
+    "typecheck": "PASS",
+    "build": { "status": "PASS", "nextVersion": "15.5.22", "staticPages": 28 },
+    "diffCheck": "PASS",
+    "frontendEvidenceReconciliation": {
+      "status": "RED_SOURCE_IDENTITY_REFRESH_REQUIRED",
+      "productRegressionObserved": false
+    }
+  },
+  "mutationBoundary": {
+    "liveAuthenticationFlowExecuted": false,
+    "dbMutationPerformed": false,
+    "providerDispatchPerformed": false,
+    "shareSessionCreated": false,
+    "vectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "liveDeploymentVerification": "PENDING",
+    "followUpSecurityRescan": "PENDING",
+    "frontendEvidenceRefresh": "PENDING",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedBoundariesPreserved": true
+  }
+}
