@@ -1,0 +1,69 @@
+{
+  "schema": "safeclaw-security-request-budget-remediation/v1",
+  "verdict": "PASS_CURRENT_SOURCE_SECURITY_REQUEST_BUDGETS_LIVE_AND_RESCAN_PENDING",
+  "generatedAt": "2026-08-13T08:15:14.4714075+09:00",
+  "sourceHead": "fdba0221fe43cae6b8c0ab64bdf56046003d9317",
+  "baselineSourceHead": "2113607af4503f7a2e2d270c69872093da08dcdd",
+  "baselineScan": {
+    "scanId": "28cba4f7-52be-4c42-ab0a-ba07ae972968",
+    "findingCount": 15,
+    "immutable": true
+  },
+  "remediations": [
+    {
+      "findingId": "knowledge-regeneration-admission",
+      "status": "current_source_remediated_pending_rescan",
+      "controls": [
+        "128 KiB request body budget before JSON parsing",
+        "shared weighted provider lease for generate=true",
+        "distributed lease required in production",
+        "503 fail-closed response when admission is unavailable",
+        "lease release after provider completion or failure"
+      ]
+    },
+    {
+      "findingId": "improvement-json-budget-bypass",
+      "status": "current_source_remediated_pending_rescan",
+      "controls": [
+        "16 KiB JSON request body budget before parsing",
+        "bounded task, hazard, and improvement text fields",
+        "bounded reflected document count and entry length",
+        "invalid JSON rejected with an explicit error",
+        "existing multipart photo admission preserved"
+      ]
+    }
+  ],
+  "verification": {
+    "focusedTests": {
+      "files": 4,
+      "tests": 30,
+      "status": "PASS"
+    },
+    "adjacentSecurityTests": {
+      "files": 7,
+      "tests": 50,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "diffCheck": "PASS"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerExecutionPerformed": false,
+    "shareSessionCreated": false,
+    "vectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "liveDeploymentVerification": "PENDING",
+    "followUpSecurityRescan": "PENDING",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedBoundariesPreserved": true
+  }
+}
