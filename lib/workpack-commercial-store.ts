@@ -402,17 +402,27 @@ export async function loadActivePublicShareSession(
     return { ok: false, status: 400, message: "이 공유 방식은 별도 식별이 필요합니다." };
   }
 
-  const { data: workpackData, error: workpackError } = await client
+  let workpackQuery = client
     .from("workpacks")
-    .select("question,deliverables")
+    .select("organization_id,site_id,question,deliverables")
     .eq("id", sessionData.workpack_id)
-    .maybeSingle();
+    .eq("organization_id", sessionData.organization_id);
+  workpackQuery = sessionData.site_id === null
+    ? workpackQuery.is("site_id", null)
+    : workpackQuery.eq("site_id", sessionData.site_id);
+  const { data: workpackData, error: workpackError } = await workpackQuery.maybeSingle();
 
   if (workpackError) {
     console.error("public share workpack fetch failed", workpackError);
     return { ok: false, status: 500, message: "작업팩 정보를 확인하지 못했습니다." };
   }
-  if (!workpackData || typeof workpackData.question !== "string" || !workpackData.question.trim()) {
+  if (
+    !workpackData
+    || workpackData.organization_id !== sessionData.organization_id
+    || workpackData.site_id !== sessionData.site_id
+    || typeof workpackData.question !== "string"
+    || !workpackData.question.trim()
+  ) {
     return { ok: false, status: 404, message: "연결된 작업 정보를 찾지 못했습니다." };
   }
 

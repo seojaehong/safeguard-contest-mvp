@@ -59,6 +59,24 @@ describe("Weather and KOSHA upstream integration security", () => {
     expect(fetchMock.mock.calls.every(([, init]) => init?.redirect === "manual")).toBe(true);
   });
 
+  it("uses HTTPS and bounds every KOSHA OpenAPI response before parsing", async () => {
+    vi.stubEnv("DATA_GO_KR_SERVICE_KEY", "test-service-key");
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response("{}", {
+      status: 200,
+      headers: { "content-length": String(1_048_577) },
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+    const { fetchKoshaOpenApiEvidence } = await import("@/lib/kosha-openapi");
+
+    const result = await fetchKoshaOpenApiEvidence("서울 건설업 비계 추락 작업");
+
+    expect(result.mode).toBe("fallback");
+    expect(result.detail).toContain("1048576-byte response limit");
+    expect(fetchMock).toHaveBeenCalled();
+    expect(fetchMock.mock.calls.every(([input]) => new URL(String(input)).protocol === "https:")).toBe(true);
+    expect(fetchMock.mock.calls.every(([, init]) => init?.redirect === "manual")).toBe(true);
+  });
+
   it("never sends the relay token to a rejected private proxy", async () => {
     vi.stubEnv("DATA_GO_KR_SERVICE_KEY", "test-service-key");
     vi.stubEnv("KOSHA_ACCIDENT_PROXY_URL", "https://169.254.169.254/latest");

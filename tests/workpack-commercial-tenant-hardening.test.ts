@@ -504,6 +504,66 @@ describe("commercial workpack service-role tenant hardening", () => {
     });
   });
 
+  it("rejects a public share session whose workpack belongs to another tenant", async () => {
+    const store = await vi.importActual<typeof import("@/lib/workpack-commercial-store")>(
+      "@/lib/workpack-commercial-store"
+    );
+    const tables = fixtureRows("site-a");
+    tables.workpack_share_sessions.push({
+      id: "44444444-4444-4444-8444-444444444444",
+      organization_id: "org-a",
+      site_id: "site-a",
+      workpack_id: "workpack-foreign",
+      recipients_snapshot: [{
+        workerId: "11111111-1111-4111-8111-111111111111",
+        displayName: "Tenant A Worker",
+        languageCode: "ko",
+        role: "viewer",
+        workerSnapshot: {
+          workerId: "11111111-1111-4111-8111-111111111111",
+          displayName: "Tenant A Worker"
+        }
+      }],
+      share_scope: "invited",
+      access_policy: {
+        anonymousAllowed: false,
+        manualLanguageSwitchAllowed: true,
+        requireKnownWorkerSnapshot: true
+      },
+      status: "active",
+      expires_at: "2099-01-01T00:00:00.000Z"
+    });
+    tables.workpacks.push({
+      id: "workpack-foreign",
+      organization_id: "org-b",
+      site_id: "site-b",
+      question: "Foreign tenant workpack",
+      deliverables: {
+        riskAssessmentDraft: "Foreign tenant confidential risk assessment"
+      }
+    });
+    const fake = createFixtureClient(tables);
+
+    const result = await store.loadActivePublicShareSession(fake.client as never, {
+      shareSessionId: "44444444-4444-4444-8444-444444444444",
+      workerId: "11111111-1111-4111-8111-111111111111"
+    });
+
+    expect(result).toMatchObject({ ok: false, status: 404 });
+    expect(fake.calls).toContainEqual({
+      table: "workpacks",
+      method: "eq",
+      column: "organization_id",
+      value: "org-a"
+    });
+    expect(fake.calls).toContainEqual({
+      table: "workpacks",
+      method: "eq",
+      column: "site_id",
+      value: "site-a"
+    });
+  });
+
   it("treats a missing public share session row as fail-closed not found", async () => {
     const store = await vi.importActual<typeof import("@/lib/workpack-commercial-store")>(
       "@/lib/workpack-commercial-store"

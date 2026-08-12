@@ -1,4 +1,5 @@
 import { IntegrationMode } from "./types";
+import { readBoundedResponseText } from "./server/upstream-http";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -19,7 +20,8 @@ type KoshaOpenApiReference = KoshaOpenApiEvidence["references"][number];
 
 const serviceKey = process.env.DATA_GO_KR_SERVICE_KEY?.trim() || process.env.PUBLIC_DATA_API_KEY?.trim() || "";
 const REQUEST_TIMEOUT_MS = 8_000;
-const KOSHA_SMART_SEARCH_URL = "http://apis.data.go.kr/B552468/srch/smartSearch";
+const KOSHA_RESPONSE_MAX_BYTES = 1_048_576;
+const KOSHA_SMART_SEARCH_URL = "https://apis.data.go.kr/B552468/srch/smartSearch";
 const KOSHA_MEDIA_URL = "https://apis.data.go.kr/B552468/selectMediaList01/getselectMediaList01";
 const KOSHA_CONSTRUCTION_DAILY_URL = "https://apis.data.go.kr/B552468/constDsstr01/getconstDsstr01";
 
@@ -144,10 +146,14 @@ async function fetchText(url: string, signal?: AbortSignal) {
   try {
     const response = await fetch(url, {
       cache: "no-store",
+      redirect: "manual",
       signal: controller.signal,
       headers: { accept: "application/json, application/xml;q=0.9, text/plain;q=0.8, */*;q=0.7" }
     });
-    const text = await response.text();
+    const text = await readBoundedResponseText(response, {
+      label: "KOSHA OpenAPI response",
+      maxBytes: KOSHA_RESPONSE_MAX_BYTES
+    });
     if (!response.ok) {
       throw new Error(text.slice(0, 160) || `HTTP ${response.status}`);
     }

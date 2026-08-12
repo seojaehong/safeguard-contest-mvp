@@ -26,4 +26,14 @@ describe("workpack submission preview completeness", () => {
     expect(source).toContain("submissionPreviewOpen ? (");
     expect(source).toContain("onToggle={(event) => setSubmissionPreviewOpen(event.currentTarget.open)}");
   });
+
+  it("escapes every TBM daily-risk cell before composing HTML", async () => {
+    const source = await readFile("components/WorkpackEditor.tsx", "utf8");
+    expect(source).toMatch(
+      /agendaRows\s*\.slice\(0, 3\)\s*\.map\(\(row\) => escapeHtml\(compactContent\(row, "금일 위험요인"\)\)\)\s*\.join\("<br \/>"\)/u
+    );
+    expect(source).not.toContain(
+      'agendaRows.slice(0, 3).map((row) => compactContent(row, "금일 위험요인")).join("<br />")'
+    );
+  });
 });

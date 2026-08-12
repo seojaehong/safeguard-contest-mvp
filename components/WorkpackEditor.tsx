@@ -1462,7 +1462,10 @@ function buildEducationSections(rows: SheetRow[], scenario: AskResponse["scenari
 
 function buildTbmLogSections(rows: SheetRow[], scenario: AskResponse["scenario"]) {
   const agendaRows = findRows(rows, ["위험", "조치", "확인", "보호구", "작업중지", "질문"], 5);
-  const dailyRiskText = agendaRows.slice(0, 3).map((row) => compactContent(row, "금일 위험요인")).join("<br />");
+  const dailyRiskText = agendaRows
+    .slice(0, 3)
+    .map((row) => escapeHtml(compactContent(row, "금일 위험요인")))
+    .join("<br />");
   const educationText = agendaRows.slice(0, 4).map((row, index) => `${index + 1}. ${escapeHtml(row.item)} - ${escapeHtml(row.content)}`).join("<br />");
   const attendeeHalf = Math.max(10, Math.min(20, Math.ceil(scenario.workerCount / 2)));
   const attendanceRows = Array.from({ length: attendeeHalf }, (_, index) => {
