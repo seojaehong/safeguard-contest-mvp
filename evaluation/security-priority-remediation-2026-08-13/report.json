@@ -1,0 +1,66 @@
+{
+  "schema": "safeclaw-security-priority-remediation/v1",
+  "generatedAt": "2026-08-13T08:55:36.7910325+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LIVE_PENDING",
+  "productCommit": "f0771be027e4f2e2b3f2d1b861d375a7eff27dcd",
+  "scan": {
+    "scanId": "c98ffa84-9951-4f68-9e1d-11f456abe901",
+    "baselineCommit": "003c48838b2c4365203de3cc2dae230200c79e96",
+    "findingCount": 23,
+    "severityCounts": {
+      "high": 1,
+      "medium": 18,
+      "low": 4
+    }
+  },
+  "remediations": [
+    {
+      "id": "public-share-tenant-tuple",
+      "status": "SOURCE_FIXED_DB_CONSTRAINT_APPROVAL_GATED",
+      "detail": "The public Share loader now constrains workpack lookup by the session organization and site tuple and verifies the returned tuple before disclosure. A database composite constraint remains a separate approval-gated migration."
+    },
+    {
+      "id": "tbm-html-escaping",
+      "status": "SOURCE_FIXED",
+      "detail": "Daily-risk text is HTML-escaped before it is joined into the TBM HTML preview and export surface."
+    },
+    {
+      "id": "kosha-upstream-transport-budget",
+      "status": "SOURCE_FIXED",
+      "detail": "KOSHA smart search uses HTTPS, rejects redirects, and reads response bodies through a 1048576-byte limit."
+    }
+  ],
+  "verification": {
+    "focused": {
+      "files": 3,
+      "tests": 23,
+      "result": "PASS"
+    },
+    "adjacent": {
+      "files": 7,
+      "tests": 78,
+      "result": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "result": "PASS",
+      "staticPages": 28
+    },
+    "diffCheck": "PASS",
+    "targetedSecretScan": "PASS"
+  },
+  "mutationBoundary": {
+    "dbSchemaChanged": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutation": false,
+    "wikiPublished": false,
+    "koshaRegistryMutated": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "databaseCompositeConstraint": "APPROVAL_GATED",
+    "liveDeploymentVerification": "PENDING"
+  }
+}
