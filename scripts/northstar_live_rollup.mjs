@@ -41,6 +41,7 @@ const ARTIFACTS = Object.freeze({
   shareRecipientContactVerification: path.join("evaluation", "share-recipient-contact-verification-2026-08-14", "report.json"),
   securityAtomicDbRaceApprovalBoundary: path.join("evaluation", "security-atomic-db-race-approval-boundary-2026-08-14", "report.json"),
   liveDocumentsShareRoutePerception: path.join("evaluation", "live-documents-share-route-perception-2026-08-14", "report.json"),
+  deploymentFreshnessGuard: path.join("evaluation", "deployment-freshness-guard-2026-08-14", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
@@ -339,6 +340,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const shareRecipientContactVerification = tryReadJson(rootDir, ARTIFACTS.shareRecipientContactVerification);
   const securityAtomicDbRaceApprovalBoundary = tryReadJson(rootDir, ARTIFACTS.securityAtomicDbRaceApprovalBoundary);
   const liveDocumentsShareRoutePerception = tryReadJson(rootDir, ARTIFACTS.liveDocumentsShareRoutePerception);
+  const deploymentFreshnessGuard = tryReadJson(rootDir, ARTIFACTS.deploymentFreshnessGuard);
   const publicJsonRequestBodyBudget = tryReadJson(rootDir, ARTIFACTS.publicJsonRequestBodyBudget);
   const improvementPhotoAnalysisBudget = tryReadJson(rootDir, ARTIFACTS.improvementPhotoAnalysisBudget);
   const publicProviderCancellation = tryReadJson(rootDir, ARTIFACTS.publicProviderCancellation);
@@ -447,6 +449,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "share_recipient_contact_verification_security", ARTIFACTS.shareRecipientContactVerification, shareRecipientContactVerification),
     evidenceStatus(rootDir, currentHead, liveCommit, "security_atomic_db_race_remediation", ARTIFACTS.securityAtomicDbRaceApprovalBoundary, securityAtomicDbRaceApprovalBoundary),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_documents_share_route_perception", ARTIFACTS.liveDocumentsShareRoutePerception, liveDocumentsShareRoutePerception),
+    evidenceStatus(rootDir, currentHead, liveCommit, "deployment_freshness_guard", ARTIFACTS.deploymentFreshnessGuard, deploymentFreshnessGuard),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_json_request_body_budget", ARTIFACTS.publicJsonRequestBodyBudget, publicJsonRequestBodyBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "improvement_photo_analysis_budget", ARTIFACTS.improvementPhotoAnalysisBudget, improvementPhotoAnalysisBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_cancellation", ARTIFACTS.publicProviderCancellation, publicProviderCancellation),
@@ -884,6 +887,18 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       exactSavedUserSessionReproduced: recordAt(liveDocumentsShareRoutePerception, "remainingBoundaries")?.exactSavedUserSessionReproduced === true,
       exactSavedShareVerdict: asString(recordAt(liveDocumentsShareRoutePerception, "remainingBoundaries")?.exactSavedShareVerdict),
       dbMutationPerformed: recordAt(liveDocumentsShareRoutePerception, "mutationBoundary")?.dbMutationPerformed === true,
+    },
+    deploymentFreshnessGuard: {
+      artifact: ARTIFACTS.deploymentFreshnessGuard,
+      verdict: isRecord(deploymentFreshnessGuard) ? asString(deploymentFreshnessGuard.verdict) : "missing",
+      sourceHead: isRecord(deploymentFreshnessGuard) ? asString(deploymentFreshnessGuard.sourceHead) : "",
+      productionCommit: asString(recordAt(deploymentFreshnessGuard, "productionBuild")?.commitSha),
+      currentNoticePresent: recordAt(recordAt(deploymentFreshnessGuard, "verification")?.liveBrowser, "normalCurrentDeployment")?.noticePresent === true,
+      driftRefreshVisible: recordAt(recordAt(deploymentFreshnessGuard, "verification")?.liveBrowser, "simulatedShaDrift")?.refreshButtonVisible === true,
+      frontendAuditViolations: asNumber(recordAt(recordAt(deploymentFreshnessGuard, "verification"), "canonicalFrontendStaticAudit")?.violationCount),
+      liveAfterDeploymentPending: recordAt(deploymentFreshnessGuard, "remainingBoundaries")?.liveAfterDeploymentPending === true,
+      exactSavedShareVerdict: asString(recordAt(deploymentFreshnessGuard, "remainingBoundaries")?.exactSavedShareVerdict),
+      dbMutationPerformed: recordAt(deploymentFreshnessGuard, "mutationBoundary")?.dbMutationPerformed === true,
     },
     mcpGenerationWorkBudgetSecurity: {
       artifact: ARTIFACTS.mcpGenerationWorkBudgetSecurity,
@@ -1396,6 +1411,12 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Measured rows Documents/Share: ${rollup.liveDocumentsShareRoutePerception.documentsRows}/${rollup.liveDocumentsShareRoutePerception.workspaceShareRows}; desktop Share regions: ${rollup.liveDocumentsShareRoutePerception.desktopShareRegions ?? "unknown"}`,
     `- Route split alone accepted: ${rollup.liveDocumentsShareRoutePerception.routeSplitAloneAcceptedAsFix}; DB mutation: ${rollup.liveDocumentsShareRoutePerception.dbMutationPerformed}`,
     `- Exact saved session reproduced: ${rollup.liveDocumentsShareRoutePerception.exactSavedUserSessionReproduced}; verdict: ${rollup.liveDocumentsShareRoutePerception.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "",
+    "## Deployment Freshness Guard",
+    `- Verdict: \`${rollup.deploymentFreshnessGuard.verdict}\``,
+    `- Source / production: \`${rollup.deploymentFreshnessGuard.sourceHead || "missing"}\` / \`${rollup.deploymentFreshnessGuard.productionCommit || "missing"}\``,
+    `- Current notice / drift refresh visible: ${rollup.deploymentFreshnessGuard.currentNoticePresent}/${rollup.deploymentFreshnessGuard.driftRefreshVisible}; frontend audit violations: ${rollup.deploymentFreshnessGuard.frontendAuditViolations ?? "unknown"}`,
+    `- Live pending: ${rollup.deploymentFreshnessGuard.liveAfterDeploymentPending}; DB mutation: ${rollup.deploymentFreshnessGuard.dbMutationPerformed}; exact saved Share: ${rollup.deploymentFreshnessGuard.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "",
     "## Security Resource Remediation",
     `- Verdict: \`${rollup.securityResourceRemediation.verdict}\``,

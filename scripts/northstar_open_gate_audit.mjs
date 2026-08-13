@@ -57,6 +57,7 @@ const EVIDENCE_PATHS = Object.freeze({
   shareRecipientContactVerification: path.join("evaluation", "share-recipient-contact-verification-2026-08-14", "report.json"),
   securityAtomicDbRaceApprovalBoundary: path.join("evaluation", "security-atomic-db-race-approval-boundary-2026-08-14", "report.json"),
   liveDocumentsShareRoutePerception: path.join("evaluation", "live-documents-share-route-perception-2026-08-14", "report.json"),
+  deploymentFreshnessGuard: path.join("evaluation", "deployment-freshness-guard-2026-08-14", "report.json"),
   agentChatDurableAdmission: path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"),
   mcpProviderAdmission: path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
@@ -4125,6 +4126,88 @@ function evaluateLiveDocumentsShareRoutePerceptionGate(rootDir) {
 
 /**
  * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateDeploymentFreshnessGuardGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.deploymentFreshnessGuard;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "deployment_freshness_guard",
+      label: "Live deployment freshness guard",
+      state: "missing",
+      evidencePath,
+      detail: "Live deployment freshness evidence is missing or invalid.",
+      nextActions: ["Re-run the no-mutation current-tab and simulated SHA-drift browser checks after production reaches the product commit."],
+    });
+  }
+
+  const sourceHead = readString(report.sourceHead);
+  const production = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const liveBrowser = isRecord(verification.liveBrowser) ? verification.liveBrowser : {};
+  const current = isRecord(liveBrowser.normalCurrentDeployment) ? liveBrowser.normalCurrentDeployment : {};
+  const drift = isRecord(liveBrowser.simulatedShaDrift) ? liveBrowser.simulatedShaDrift : {};
+  const mobile = isRecord(drift.mobile) ? drift.mobile : {};
+  const staticAudit = isRecord(verification.canonicalFrontendStaticAudit) ? verification.canonicalFrontendStaticAudit : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.shareSessionCreated === false
+    && mutation.providerDispatchCalled === false
+    && mutation.embeddingOrVectorMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_DEPLOYMENT_FRESHNESS_GUARD"
+    && sourceHead.length > 0
+    && sourceHead === readString(production.commitSha)
+    && isGitAncestor(rootDir, sourceHead)
+    && readString(production.branch) === "master"
+    && readString(production.environment) === "production"
+    && production.sourceHeadMatchesProduction === true
+    && current.noticePresent === false
+    && readNumber(current.bodyHeight) === 723
+    && readNumber(current.documentHeight) === 723
+    && current.horizontalOverflow === false
+    && drift.refreshButtonVisible === true
+    && readNumber(drift.desktopNoticeBottom) <= 723
+    && readString(drift.desktopBoxShadow) === "none"
+    && readNumber(mobile.bodyHeight) === 723
+    && mobile.horizontalOverflow === false
+    && readNumber(mobile.noticeBottom) <= 723
+    && readNumber(mobile.refreshButtonHeight) >= 44
+    && isRegularEvidenceFile(rootDir, drift.desktopScreenshot)
+    && isRegularEvidenceFile(rootDir, drift.mobileScreenshot)
+    && readString(staticAudit.sourceSha) === sourceHead
+    && readString(staticAudit.status) === "pass"
+    && readNumber(staticAudit.pageFiles) === 33
+    && readNumber(staticAudit.componentFiles) === 24
+    && readNumber(staticAudit.coverageIssues) === 0
+    && readNumber(staticAudit.violationCount) === 0
+    && readNumber(staticAudit.importantDeclarations) === 0
+    && remaining.liveAfterDeploymentPending === false
+    && remaining.exactSavedUserSessionReproduced === false
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && remaining.providerDispatchPersistenceApproved === false
+    && remaining.fullyAutomatedLaunchClaimAllowed === false
+    && noMutation;
+
+  return gateResult({
+    id: "deployment_freshness_guard",
+    label: "Live deployment freshness guard",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live production now detects a long-open tab whose embedded deployment SHA differs from /api/build-info, renders no notice for the current deployment, and keeps the 1440x723 and 390x723 Documents body bounded while the refresh action remains 44px on mobile. The canonical frontend audit is clean; this does not prove exact saved /share/[sessionId], which remains MISSING_EVIDENCE, or unlock provider/database/vector/wiki/KOSHA approval gates."
+      : `Deployment freshness verdict=${readString(report.verdict) || "missing"}, sourceLive=${sourceHead.length > 0 && sourceHead === readString(production.commitSha)}, currentNotice=${current.noticePresent === true}, driftNotice=${drift.refreshButtonVisible === true}, audit=${readString(staticAudit.status) || "missing"}/${readNumber(staticAudit.violationCount)}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Keep exact saved Share and provider/database/vector/wiki/KOSHA operations on their existing approval paths; do not treat stale-tab visibility as proof of those surfaces."]
+      : ["Restore aligned live SHA, current-tab null rendering, SHA-drift notice geometry, clean frontend audit, no-mutation boundaries, and exact saved Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
  * @param {unknown} relativePath
  */
 function isRegularEvidenceFile(rootDir, relativePath) {
@@ -7646,6 +7729,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateLiveDocumentSeedProfileIsolationGate(rootDir),
     evaluateUiDocumentsShareCockpitGate(rootDir),
     evaluateLiveDocumentsShareRoutePerceptionGate(rootDir),
+    evaluateDeploymentFreshnessGuardGate(rootDir),
     evaluateDispatchStandaloneCockpitGate(rootDir),
     evaluateShareResultFixtureCockpitGate(rootDir),
     evaluateShareRecipientLongContentFixtureGate(rootDir),

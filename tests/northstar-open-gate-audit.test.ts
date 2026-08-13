@@ -2672,6 +2672,42 @@ function createFixtureRoot(): string {
       embeddingOrVectorMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false,
     },
   });
+  const freshnessDir = path.join("evaluation", "deployment-freshness-guard-2026-08-14");
+  const freshnessDesktopScreenshot = path.join(freshnessDir, "stale-notice-desktop-1440x723.png");
+  const freshnessMobileScreenshot = path.join(freshnessDir, "stale-notice-mobile-390x723.png");
+  writeText(rootDir, freshnessDesktopScreenshot, "fixture image");
+  writeText(rootDir, freshnessMobileScreenshot, "fixture image");
+  writeJson(rootDir, path.join(freshnessDir, "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_DEPLOYMENT_FRESHNESS_GUARD",
+    sourceHead: "fixture-sha",
+    productionBuild: {
+      commitSha: "fixture-sha", branch: "master", environment: "production", sourceHeadMatchesProduction: true,
+    },
+    verification: {
+      liveBrowser: {
+        normalCurrentDeployment: { noticePresent: false, bodyHeight: 723, documentHeight: 723, horizontalOverflow: false },
+        simulatedShaDrift: {
+          refreshButtonVisible: true, desktopNoticeBottom: 707.33, desktopBoxShadow: "none",
+          desktopScreenshot: freshnessDesktopScreenshot,
+          mobile: { bodyHeight: 723, horizontalOverflow: false, noticeBottom: 711.33, refreshButtonHeight: 44 },
+          mobileScreenshot: freshnessMobileScreenshot,
+        },
+      },
+      canonicalFrontendStaticAudit: {
+        sourceSha: "fixture-sha", status: "pass", pageFiles: 33, componentFiles: 24,
+        coverageIssues: 0, violationCount: 0, importantDeclarations: 0,
+      },
+    },
+    remainingBoundaries: {
+      liveAfterDeploymentPending: false, exactSavedUserSessionReproduced: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE", providerDispatchPersistenceApproved: false,
+      fullyAutomatedLaunchClaimAllowed: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false, shareSessionCreated: false, providerDispatchCalled: false,
+      embeddingOrVectorMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "canonical", "scan-manifest.json"), {});
   writeJson(rootDir, path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "canonical", "findings.json"), {});
   writeJson(rootDir, path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "canonical", "coverage.json"), {});
@@ -4562,6 +4598,12 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "live_documents_share_route_perception")?.detail).toContain("1180px three-zone desktop workbench");
     expect(audit.gates.find((gate) => gate.id === "live_documents_share_route_perception")?.detail).toContain("exact saved /share/[sessionId]");
     expect(audit.gates.find((gate) => gate.id === "live_documents_share_route_perception")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "deployment_freshness_guard")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "deployment-freshness-guard-2026-08-14", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "deployment_freshness_guard")?.detail).toContain("long-open tab");
+    expect(audit.gates.find((gate) => gate.id === "deployment_freshness_guard")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.evidencePath).toBe(
       path.join("evaluation", "dispatch-standalone-viewport-2026-07-28", "report.json"),
@@ -5976,6 +6018,28 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(gate?.state).toBe("contradicted");
     expect(gate?.detail).toContain("documents=false");
     expect(gate?.detail).toContain("share=false");
+    expect(gate?.detail).toContain("exactShare=PASS");
+  });
+
+  it("fails deployment freshness closed when the exact Share or mutation boundary is overclaimed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "deployment-freshness-guard-2026-08-14", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      verification: { liveBrowser: { simulatedShaDrift: { refreshButtonVisible: boolean } } };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+      mutationBoundary: { dbMutationPerformed: boolean };
+    };
+    report.verification.liveBrowser.simulatedShaDrift.refreshButtonVisible = false;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    report.mutationBoundary.dbMutationPerformed = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-14T00:00:00.000Z", sourceSha: "fixture-sha" });
+    const gate = audit.gates.find((item) => item.id === "deployment_freshness_guard");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.detail).toContain("driftNotice=false");
+    expect(gate?.detail).toContain("noMutation=false");
     expect(gate?.detail).toContain("exactShare=PASS");
   });
 

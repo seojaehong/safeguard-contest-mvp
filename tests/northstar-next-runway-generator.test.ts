@@ -610,6 +610,17 @@ type NextRunwayReport = {
     exactSavedShareVerdict: string;
     dbMutationPerformed: boolean;
   };
+  deploymentFreshnessGuard: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    currentNoticePresent: boolean;
+    driftRefreshVisible: boolean;
+    frontendAuditViolations: number | null;
+    liveAfterDeploymentPending: boolean;
+    exactSavedShareVerdict: string;
+    dbMutationPerformed: boolean;
+  };
   mcpGenerationWorkBudgetSecurity: {
     verdict: string;
     sourceHead: string;
@@ -2137,6 +2148,20 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     remainingBoundaries: { exactSavedUserSessionReproduced: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
     mutationBoundary: { dbMutationPerformed: false },
   });
+  writeJson(root, "evaluation/deployment-freshness-guard-2026-08-14/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_DEPLOYMENT_FRESHNESS_GUARD",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha" },
+    verification: {
+      liveBrowser: {
+        normalCurrentDeployment: { noticePresent: false },
+        simulatedShaDrift: { refreshButtonVisible: true },
+      },
+      canonicalFrontendStaticAudit: { violationCount: 0 },
+    },
+    remainingBoundaries: { liveAfterDeploymentPending: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
+    mutationBoundary: { dbMutationPerformed: false },
+  });
   writeJson(root, "evaluation/document-authoring-pane-margin-2026-08-02/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
     productCommit: "fixture-sha",
@@ -3064,6 +3089,16 @@ describe("northstar next runway generator", () => {
       desktopShareRegions: 3,
       routeSplitAloneAcceptedAsFix: false,
       exactSavedUserSessionReproduced: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      dbMutationPerformed: false,
+    });
+    expect(report.provenCurrentState).toContain("deployment_freshness_guard");
+    expect(report.deploymentFreshnessGuard).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_DEPLOYMENT_FRESHNESS_GUARD",
+      currentNoticePresent: false,
+      driftRefreshVisible: true,
+      frontendAuditViolations: 0,
+      liveAfterDeploymentPending: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       dbMutationPerformed: false,
     });

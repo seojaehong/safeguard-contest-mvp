@@ -392,6 +392,17 @@ type RollupReport = {
     exactSavedShareVerdict: string;
     dbMutationPerformed: boolean;
   };
+  deploymentFreshnessGuard: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    currentNoticePresent: boolean;
+    driftRefreshVisible: boolean;
+    frontendAuditViolations: number | null;
+    liveAfterDeploymentPending: boolean;
+    exactSavedShareVerdict: string;
+    dbMutationPerformed: boolean;
+  };
   mcpGenerationWorkBudgetSecurity: {
     verdict: string;
     sourceHead: string;
@@ -514,6 +525,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "live_document_seed_profile_isolation", state: "proven", evidencePath: "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", detail: "all 60 documents passed seed-profile isolation" },
       { id: "security_atomic_db_race_remediation", state: "approval_gated", evidencePath: "evaluation/security-atomic-db-race-approval-boundary-2026-08-14/report.json", detail: "two sealed findings require transactional DB approval" },
       { id: "live_documents_share_route_perception", state: "proven", evidencePath: "evaluation/live-documents-share-route-perception-2026-08-14/report.json", detail: "fresh scoped live route geometry with exact saved Share gap" },
+      { id: "deployment_freshness_guard", state: "proven", evidencePath: "evaluation/deployment-freshness-guard-2026-08-14/report.json", detail: "live stale-tab refresh guard with exact saved Share gap" },
       { id: "provider_dispatch_persistence", state: "approval_gated", evidencePath: "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json", detail: "preview only" },
       { id: "supabase_rls_launch_isolation", state: "approval_gated", evidencePath: "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", detail: "approval required" },
       { id: "llm_wiki_publication", state: "approval_gated", evidencePath: "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", detail: "approval required" },
@@ -1319,6 +1331,23 @@ function createFixtureRoot(): { root: string; head: string } {
     remainingBoundaries: { exactSavedUserSessionReproduced: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
     mutationBoundary: { dbMutationPerformed: false },
   });
+  writeJson(root, "evaluation/deployment-freshness-guard-2026-08-14/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_DEPLOYMENT_FRESHNESS_GUARD",
+    sourceHead: "TO_FILL",
+    productionBuild: { commitSha: "TO_FILL" },
+    verification: {
+      liveBrowser: {
+        normalCurrentDeployment: { noticePresent: false },
+        simulatedShaDrift: { refreshButtonVisible: true },
+      },
+      canonicalFrontendStaticAudit: { violationCount: 0 },
+    },
+    remainingBoundaries: {
+      liveAfterDeploymentPending: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    mutationBoundary: { dbMutationPerformed: false },
+  });
   writeJson(root, "evaluation/document-authoring-pane-margin-2026-08-02/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
     productCommit: "TO_FILL",
@@ -1370,6 +1399,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/share-recipient-contact-verification-2026-08-14/report.json",
     "evaluation/security-atomic-db-race-approval-boundary-2026-08-14/report.json",
     "evaluation/live-documents-share-route-perception-2026-08-14/report.json",
+    "evaluation/deployment-freshness-guard-2026-08-14/report.json",
     "evaluation/learning-export-renderer-security-2026-08-02/report.json",
     "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
@@ -1796,6 +1826,16 @@ describe("northstar live rollup", () => {
       dbMutationPerformed: false,
     });
     expect(report.evidence.find((item) => item.id === "live_documents_share_route_perception")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.deploymentFreshnessGuard).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_DEPLOYMENT_FRESHNESS_GUARD",
+      currentNoticePresent: false,
+      driftRefreshVisible: true,
+      frontendAuditViolations: 0,
+      liveAfterDeploymentPending: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      dbMutationPerformed: false,
+    });
+    expect(report.evidence.find((item) => item.id === "deployment_freshness_guard")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "public_generation_admission_security")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "public_search_distributed_rate_limit_readiness")?.sourceStatus).toBe("ancestor");
     expect(report.learningExportRendererSecurity).toMatchObject({
