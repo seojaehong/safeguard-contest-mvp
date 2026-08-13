@@ -11,6 +11,7 @@ import {
 import {
   assertDocumentExportInputBudget,
   assertDocumentExportOutputBudget,
+  createDocumentExportInternalErrorPayload,
   DocumentExportLimitError,
   readDocumentExportRequestJson
 } from "@/lib/document-export-budget";
@@ -327,7 +328,7 @@ async function exportHwp(request: NextRequest) {
       );
     }
     return NextResponse.json(
-      { ok: false, error: error instanceof Error ? error.message : "HWP 문서를 만들지 못했습니다." },
+      createDocumentExportInternalErrorPayload("HWP", error),
       { status: 500, headers: { "cache-control": "no-store" } }
     );
   }

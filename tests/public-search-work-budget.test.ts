@@ -268,6 +268,40 @@ describe("public search work budgets", () => {
     expect(providerSignal?.aborted).toBe(true);
   });
 
+  it("keeps coalesced safety-reference work alive until the final consumer disconnects", async () => {
+    const safety = await import("@/app/api/safety-reference/search/route");
+    let providerSignal: AbortSignal | undefined;
+    mocks.searchSafetyReferences.mockImplementationOnce((input: { signal?: AbortSignal }) => {
+      providerSignal = input.signal;
+      return new Promise((_resolve, reject) => {
+        input.signal?.addEventListener("abort", () => reject(input.signal?.reason), { once: true });
+      });
+    });
+    const firstController = new AbortController();
+    const secondController = new AbortController();
+    const first = safety.GET(request(
+      "/api/safety-reference/search?q=비계",
+      "198.51.100.33",
+      firstController.signal,
+    ));
+    const second = safety.GET(request(
+      "/api/safety-reference/search?q=비계",
+      "198.51.100.34",
+      secondController.signal,
+    ));
+    await vi.waitFor(() => expect(mocks.searchSafetyReferences).toHaveBeenCalledTimes(1));
+
+    const firstReason = new Error("first safety-reference caller disconnected");
+    firstController.abort(firstReason);
+    await expect(first).rejects.toBe(firstReason);
+    expect(providerSignal?.aborted).toBe(false);
+
+    const secondReason = new Error("final safety-reference caller disconnected");
+    secondController.abort(secondReason);
+    await expect(second).rejects.toBe(secondReason);
+    expect(providerSignal?.aborted).toBe(true);
+  });
+
   it("rate limits repeated public searches before provider work", async () => {
     const legal = await import("@/app/api/search/route");
     const safety = await import("@/app/api/safety-reference/search/route");

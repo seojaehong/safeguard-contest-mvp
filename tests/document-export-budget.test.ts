@@ -1,8 +1,11 @@
 import { NextRequest } from "next/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { POST as exportHwp } from "@/app/api/export/hwp/route";
 import { POST as exportXlsx } from "@/app/api/export/xlsx/route";
-import { DOCUMENT_EXPORT_BUDGETS } from "@/lib/document-export-budget";
+import {
+  createDocumentExportInternalErrorPayload,
+  DOCUMENT_EXPORT_BUDGETS
+} from "@/lib/document-export-budget";
 
 const scenario = {
   companyName: "가온테크",
@@ -40,6 +43,20 @@ async function expectDocumentPayloadTooLarge(response: Response): Promise<void> 
 }
 
 describe("document export resource budgets", () => {
+  it("does not expose internal HWP filesystem paths in error responses", () => {
+    const error = new Error("WASM not found: C:\\srv\\app\\node_modules\\@rhwp\\core\\rhwp_bg.wasm");
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    const payload = createDocumentExportInternalErrorPayload("HWP", error);
+
+    expect(payload).toEqual({
+      ok: false,
+      error: "HWP 문서를 만들지 못했습니다."
+    });
+    expect(consoleError).toHaveBeenCalledWith("HWP export failed", error);
+    consoleError.mockRestore();
+  });
+
   it("rejects XLSX request bodies above the byte budget before workbook allocation", async () => {
     const response = await exportXlsx(request("xlsx", {
       mode: "single",

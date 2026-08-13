@@ -18,6 +18,14 @@ export class DocumentExportLimitError extends Error {
   }
 }
 
+export function createDocumentExportInternalErrorPayload(
+  format: "HWP" | "XLSX",
+  error: unknown,
+): { ok: false; error: string } {
+  console.error(`${format} export failed`, error);
+  return { ok: false, error: `${format} 문서를 만들지 못했습니다.` };
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }

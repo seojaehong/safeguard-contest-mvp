@@ -20,7 +20,14 @@ import {
 export const dynamic = "force-dynamic";
 
 const limiter = createRateLimiter({ limit: 30, windowMs: 60_000 });
-const inFlightSearches = new Map<string, ReturnType<typeof searchSafetyReferences>>();
+type InFlightSearch = {
+  controller: AbortController;
+  consumers: number;
+  settled: boolean;
+  promise: ReturnType<typeof searchSafetyReferences>;
+};
+
+const inFlightSearches = new Map<string, InFlightSearch>();
 
 function normalizeSearchValue(value: string): string {
   return value.replace(/\s+/gu, " ").trim();
@@ -31,17 +38,45 @@ function isOversizedFilter(value: string | undefined): boolean {
     && isOverCharBudget(value, PUBLIC_SAFETY_REFERENCE_FILTER_MAX_CHARS);
 }
 
-function searchCoalesced(
-  input: Parameters<typeof searchSafetyReferences>[0],
-): ReturnType<typeof searchSafetyReferences> {
-  const key = JSON.stringify(input);
-  const existing = inFlightSearches.get(key);
-  if (existing) return existing;
-  const pending = searchSafetyReferences(input).finally(() => {
-    inFlightSearches.delete(key);
+function waitForSearch<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+  signal.throwIfAborted();
+  return new Promise<T>((resolve, reject) => {
+    const abort = () => reject(signal.reason);
+    signal.addEventListener("abort", abort, { once: true });
+    promise.then(resolve, reject).finally(() => {
+      signal.removeEventListener("abort", abort);
+    });
   });
-  inFlightSearches.set(key, pending);
-  return pending;
+}
+
+async function searchCoalesced(
+  input: Parameters<typeof searchSafetyReferences>[0],
+  signal: AbortSignal,
+) {
+  const key = JSON.stringify(input);
+  let entry = inFlightSearches.get(key);
+  if (!entry) {
+    const controller = new AbortController();
+    let createdEntry: InFlightSearch;
+    const promise = searchSafetyReferences({ ...input, signal: controller.signal }).finally(() => {
+      createdEntry.settled = true;
+      if (inFlightSearches.get(key) === createdEntry) inFlightSearches.delete(key);
+    });
+    createdEntry = { controller, consumers: 0, settled: false, promise };
+    void createdEntry.promise.catch(() => undefined);
+    inFlightSearches.set(key, createdEntry);
+    entry = createdEntry;
+  }
+
+  entry.consumers += 1;
+  try {
+    return await waitForSearch(entry.promise, signal);
+  } finally {
+    entry.consumers -= 1;
+    if (entry.consumers === 0 && !entry.settled) {
+      entry.controller.abort(new Error("all safety-reference request consumers disconnected"));
+    }
+  }
 }
 
 export async function GET(request: NextRequest) {
@@ -85,7 +120,7 @@ export async function GET(request: NextRequest) {
     sourceId,
     riskTag,
     evidenceRole
-  });
+  }, request.signal);
   const publicResult = {
     ...result,
     items: result.items.map(buildPublicSafetyReferenceItem),
