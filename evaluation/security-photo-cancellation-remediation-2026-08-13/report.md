@@ -2,9 +2,9 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LIVE_PENDING`
+`PASS_LIVE_DEPLOYED_SOURCE_PHOTO_CANCELLATION_REMEDIATION`
 
-Product commit `676bb7c7a3051a92e769efa32600b22a49b68742` closes the source-backed finding `photo-analysis-disconnect-not-propagated`. The production marker was still `ec339f8504cd4568417474b5b892e9bc0c8135f5` at the initial check, so live source alignment remains pending.
+Product commit `676bb7c7a3051a92e769efa32600b22a49b68742` closes the source-backed finding `photo-analysis-disconnect-not-propagated`. Production build-info now reports the same product commit on `master` in deployment `safeguard-contest-p7ongqwnn-seojaehongs-projects.vercel.app`.
 
 ## Remediation
 
