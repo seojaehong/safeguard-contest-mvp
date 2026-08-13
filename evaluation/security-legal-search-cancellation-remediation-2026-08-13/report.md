@@ -2,9 +2,9 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LIVE_PENDING`
+`PASS_LIVE_DEPLOYED_SOURCE_LEGAL_SEARCH_CANCELLATION_REMEDIATION`
 
-Product commit `859de0e3823ed91ca558a3929240db58ff97182b` closes the source-backed finding `legal-search-disconnect-not-propagated`. The initial production marker remained `89d029b7c585546e0d4f4dad6d787c2ffe95ae94`, so live source alignment is pending.
+Product commit `859de0e3823ed91ca558a3929240db58ff97182b` closes the source-backed finding `legal-search-disconnect-not-propagated`. Production build-info now reports the same product commit on `master` in deployment `safeguard-contest-20l4lcfig-seojaehongs-projects.vercel.app`.
 
 ## Remediation
 

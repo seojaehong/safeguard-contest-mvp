@@ -1,14 +1,14 @@
 {
   "schemaVersion": "safeclaw-security-legal-search-cancellation-remediation/v1",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LIVE_PENDING",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_LEGAL_SEARCH_CANCELLATION_REMEDIATION",
   "sourceHead": "859de0e3823ed91ca558a3929240db58ff97182b",
   "productCommit": "859de0e3823ed91ca558a3929240db58ff97182b",
   "productionBuild": {
-    "commitSha": "89d029b7c585546e0d4f4dad6d787c2ffe95ae94",
+    "commitSha": "859de0e3823ed91ca558a3929240db58ff97182b",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-2cf1swjkz-seojaehongs-projects.vercel.app",
-    "sourceHeadLive": false
+    "deploymentUrl": "safeguard-contest-20l4lcfig-seojaehongs-projects.vercel.app",
+    "sourceHeadLive": true
   },
   "finding": {
     "slug": "legal-search-disconnect-not-propagated",
@@ -57,6 +57,6 @@
   "remainingBoundaries": {
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "approvalGatedBoundariesPreserved": true,
-    "liveAfterDeploymentRequired": true
+    "liveAfterDeploymentRequired": false
   }
 }
