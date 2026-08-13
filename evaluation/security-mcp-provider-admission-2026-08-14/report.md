@@ -4,12 +4,12 @@
 
 `PASS_LIVE_DEPLOYED_SOURCE_DURABLE_MCP_PROVIDER_ADMISSION_RESCAN_PENDING`
 
-Production commit `f02045420b7213b6e1088dfb24b673068fa5dea5` requires distributed, token-and-tenant-bound rate admission and a weighted durable concurrency lease before the two provider-generating MCP tools run. Missing or partial distributed configuration now fails before either generation handler. Read-only MCP tools and deterministic `template` generation remain available under their existing contracts.
+Production commit `75027ffa8e8ad26dfea2048a6429f36c5607c980` requires distributed, token-and-tenant-bound rate admission and a weighted durable concurrency lease before the two provider-generating MCP tools run. Missing or partial distributed configuration now fails before either generation handler. Read-only MCP tools and deterministic `template` generation remain available under their existing contracts; broker-authorized Hermes preload uses verified internal evidence without changing the redacted public MCP response.
 
 ## Verification
 
 - Focused admission/auth/route tests: 3 files, 61 tests, 0 failures.
-- Focused plus adjacent MCP tests: 8 files, 94 tests, 0 failures.
+- Focused plus adjacent MCP tests: 8 files, 122 tests, 0 failures.
 - Strict typecheck: PASS.
 - Next.js 15.5.22 production build: PASS, 28 static pages.
 - Dependency audit: 0 vulnerabilities.

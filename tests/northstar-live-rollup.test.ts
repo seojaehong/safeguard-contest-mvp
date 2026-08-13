@@ -443,6 +443,20 @@ type RollupReport = {
     llmWikiPublication: string;
     supabaseRlsLaunchIsolation: string;
   };
+  hermesOpenclawRuntime: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    testFilesPassed: number | null;
+    testsPassed: number | null;
+    durableAttemptLedgerWired: boolean;
+    ledgerAtomicReservation: boolean;
+    ledgerTerminalRequiresReservation: boolean;
+    ledgerStoresTerminalDigestOnly: boolean;
+    liveExecutionClaimed: boolean;
+    exactSavedShareVerdict: string;
+    authenticatedHermesCanary: string;
+  };
   liveDocumentSeedProfileIsolation: {
     verdict: string;
     beforePassed: number;
@@ -521,6 +535,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "public_provider_cancellation", state: "notice", evidencePath: "evaluation/public-provider-cancellation-2026-08-11/report.json", detail: "provider cancellation is source-proven in deployed production with live provider probe held" },
       { id: "public_provider_admission", state: "notice", evidencePath: "evaluation/public-provider-admission-2026-08-11/report.json", detail: "weighted instance admission is live with distributed activation pending" },
       { id: "learning_export_renderer_security", state: "proven", evidencePath: "evaluation/learning-export-renderer-security-2026-08-02/report.json", detail: "renderer-independent inert learning export source contract" },
+      { id: "hermes_remote_durable_ledger", state: "proven", evidencePath: "evaluation/hermes-openclaw-runtime-current-gate-2026-07-20/report.json", detail: "durable ledger wired without authenticated execution claim" },
       { id: "live_document_secondary_grounding", state: "proven", evidencePath: "evaluation/live-document-secondary-grounding-2026-07-25/report.json", detail: "all 30 supporting documents passed scenario grounding" },
       { id: "live_document_seed_profile_isolation", state: "proven", evidencePath: "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", detail: "all 60 documents passed seed-profile isolation" },
       { id: "security_atomic_db_race_remediation", state: "approval_gated", evidencePath: "evaluation/security-atomic-db-race-approval-boundary-2026-08-14/report.json", detail: "two sealed findings require transactional DB approval" },
@@ -1357,6 +1372,23 @@ function createFixtureRoot(): { root: string; head: string } {
     afterLive: { paneMarginBelow16Count: 0, minimumPaneMargin: 16, maximumShellRatio: 2.36 },
     remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
+  writeJson(root, "evaluation/hermes-openclaw-runtime-current-gate-2026-07-20/report.json", {
+    verdict: "adapter_boundary_pass_live_execution_not_claimed",
+    sourceShaForFocusedTests: "TO_FILL",
+    productionBuildInfoAtLiveSmoke: { commitSha: "TO_FILL" },
+    focusedTests: { status: "pass", testFilesPassed: 15, testsPassed: 333 },
+    sourceContract: {
+      durableAttemptLedgerWired: true,
+      ledgerAtomicReservation: true,
+      ledgerTerminalRequiresReservation: true,
+      ledgerStoresTerminalDigestOnly: true,
+    },
+    liveExecutionReadiness: { claimed: false },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      authenticatedHermesCanary: "APPROVAL_GATED",
+    },
+  });
 
   const firstCommit = commitAll(root, "seed fixtures");
   const replaceToken = (relativePath: string, commit = firstCommit): void => {
@@ -1413,6 +1445,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/mobile-p0-workspace-gate-2026-07-20/report.json",
     "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
     "evaluation/document-authoring-pane-margin-2026-08-02/report.json",
+    "evaluation/hermes-openclaw-runtime-current-gate-2026-07-20/report.json",
   ].forEach((relativePath) => replaceToken(relativePath));
   const head = commitAll(root, "bind evidence");
   {
@@ -1469,6 +1502,18 @@ describe("northstar live rollup", () => {
       foreignWorkerScenarioRelevance: true,
     });
     expect(report.evidence.find((item) => item.id === "live_document_quality_matrix")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.hermesOpenclawRuntime).toMatchObject({
+      verdict: "adapter_boundary_pass_live_execution_not_claimed",
+      testFilesPassed: 15,
+      testsPassed: 333,
+      durableAttemptLedgerWired: true,
+      ledgerAtomicReservation: true,
+      ledgerTerminalRequiresReservation: true,
+      ledgerStoresTerminalDigestOnly: true,
+      liveExecutionClaimed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      authenticatedHermesCanary: "APPROVAL_GATED",
+    });
     expect(report.liveDocumentQualityStressMatrix).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_STRESS_MATRIX",
       productCommitIncludedInProduction: true,

@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-13T20:12:23.447Z",
-  "head": "b7aa439aff084b2cfd8cd8003c7ca07ed4180ff2",
+  "generatedAt": "2026-08-13T20:50:08.311Z",
+  "head": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "062bf4e55c8c77d18e24543ed4a5044e475391af",
+    "commitSha": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-c3316ts0a-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-pfhxmz3lv-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 56
+    "gateCount": 57
   },
   "provenGates": [
     {
@@ -235,13 +235,19 @@
       "id": "mcp_generation_work_budget_security",
       "state": "notice",
       "artifact": "evaluation\\security-mcp-generation-work-budget-2026-08-04\\report.json",
-      "detail": "Current production f0204542 re-proves MCP invalid-token 401 fail-closed with instance admission before any MCP tool dispatch, provider call, or mutation. The new provider-admission companion preserves the 96 KiB measured body and authentication contracts through 94 adjacent MCP tests; a valid authenticated runtime probe, distributed activation, and fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Current production 75027ffa re-proves MCP invalid-token 401 fail-closed with instance admission before any MCP tool dispatch, provider call, or mutation. The provider-admission companion preserves the 96 KiB measured body and authentication contracts through 122 adjacent MCP tests; a valid authenticated runtime probe, distributed activation, and fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "learning_export_renderer_security",
       "state": "proven",
       "artifact": "evaluation\\learning-export-renderer-security-2026-08-02\\report.json",
       "detail": "Live source alignment proves a renderer-independent inert-text contract for downloaded Markdown/Obsidian learning exports: raw HTML, active/local URI schemes, image/link openers, Obsidian embeds, path metacharacters, and frontmatter are bounded; attachment CSP/no-sniff/no-store/no-referrer controls are present; JSONL provenance remains raw. This bounds the deferred candidate in current source but does not rewrite the sealed partial scan, replace a future full rescan, create a stored workpack, or close exact saved Share MISSING_EVIDENCE."
+    },
+    {
+      "id": "hermes_remote_durable_ledger",
+      "state": "proven",
+      "artifact": "evaluation\\hermes-openclaw-runtime-current-gate-2026-07-20\\report.json",
+      "detail": "Current production wires an explicit opt-in durable attempt/terminal ledger with atomic reservation, reservation-bound terminal digest persistence, DNS-pinned trusted transport, and fail-closed readiness. The live unauthenticated probe stops at AUTH_REQUIRED before engine execution; authenticated execution, LLM Wiki, provider persistence, vector runtime, KOSHA promotion, and exact saved Share remain approval-gated or MISSING_EVIDENCE."
     },
     {
       "id": "hermes_knowledge_review_authority",
@@ -674,11 +680,11 @@
   "mcpProviderAdmission": {
     "artifact": "evaluation\\security-mcp-provider-admission-2026-08-14\\report.json",
     "verdict": "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_MCP_PROVIDER_ADMISSION_RESCAN_PENDING",
-    "sourceHead": "f02045420b7213b6e1088dfb24b673068fa5dea5",
-    "productionCommit": "f02045420b7213b6e1088dfb24b673068fa5dea5",
+    "sourceHead": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
+    "productionCommit": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
     "findingId": "csf_b10479b6501c208c4d11644e",
     "focusedTests": 61,
-    "adjacentTests": 94,
+    "adjacentTests": 122,
     "liveRateLimitMode": "instance",
     "authenticatedProviderGenerationAvailability": "FAIL_CLOSED_UNTIL_DISTRIBUTED_CONFIG",
     "distributedProductionActivation": "OPEN_OPERATOR_CONFIGURATION",
@@ -994,6 +1000,21 @@
     "llmWikiPublication": "APPROVAL_GATED",
     "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
   },
+  "hermesOpenclawRuntime": {
+    "artifact": "evaluation\\hermes-openclaw-runtime-current-gate-2026-07-20\\report.json",
+    "verdict": "adapter_boundary_pass_live_execution_not_claimed",
+    "sourceHead": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
+    "productionCommit": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
+    "testFilesPassed": 15,
+    "testsPassed": 333,
+    "durableAttemptLedgerWired": true,
+    "ledgerAtomicReservation": true,
+    "ledgerTerminalRequiresReservation": true,
+    "ledgerStoresTerminalDigestOnly": true,
+    "liveExecutionClaimed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "authenticatedHermesCanary": "APPROVAL_GATED"
+  },
   "liveDocumentSecondaryGrounding": {
     "artifact": "evaluation\\live-document-secondary-grounding-2026-07-25\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT",
@@ -1085,10 +1106,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "b7aa439aff084b2cfd8cd8003c7ca07ed4180ff2",
+      "sourceCommit": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
       "sourceStatus": "exact",
-      "productionCommit": "b7aa439aff084b2cfd8cd8003c7ca07ed4180ff2",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -1261,10 +1282,10 @@
     {
       "id": "mcp_provider_admission_security",
       "artifact": "evaluation\\security-mcp-provider-admission-2026-08-14\\report.json",
-      "sourceCommit": "f02045420b7213b6e1088dfb24b673068fa5dea5",
-      "sourceStatus": "ancestor",
-      "productionCommit": "f02045420b7213b6e1088dfb24b673068fa5dea5",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
+      "sourceStatus": "exact",
+      "productionCommit": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
+      "productionStatus": "matches_live"
     },
     {
       "id": "share_recipient_contact_verification_security",
@@ -1401,6 +1422,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": "a9ca3cbe87efd753bb937620e4cd56113f66e1b3",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "hermes_remote_durable_ledger",
+      "artifact": "evaluation\\hermes-openclaw-runtime-current-gate-2026-07-20\\report.json",
+      "sourceCommit": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
+      "sourceStatus": "exact",
+      "productionCommit": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
+      "productionStatus": "matches_live"
     },
     {
       "id": "live_document_secondary_grounding",

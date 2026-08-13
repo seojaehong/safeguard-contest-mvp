@@ -74,6 +74,7 @@ const EVIDENCE_PATHS = Object.freeze({
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
+  hermesOpenclawRuntime: path.join("evaluation", "hermes-openclaw-runtime-current-gate-2026-07-20", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
@@ -4006,6 +4007,97 @@ function evaluateCurrentSecurityRemediationLedgerGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluateHermesRemoteDurableLedgerGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.hermesOpenclawRuntime;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "hermes_remote_durable_ledger",
+      label: "Hermes remote durable attempt ledger",
+      state: "missing",
+      evidencePath,
+      detail: "Hermes runtime and durable-ledger evidence is missing.",
+      nextActions: ["Run the Hermes current runtime gate after source and production are aligned."],
+    });
+  }
+
+  const productionBuild = isRecord(report.productionBuildInfoAtLiveSmoke)
+    ? report.productionBuildInfoAtLiveSmoke
+    : {};
+  const focusedTests = isRecord(report.focusedTests) ? report.focusedTests : {};
+  const liveSmoke = isRecord(report.liveUnauthenticatedBrokerSmoke)
+    ? report.liveUnauthenticatedBrokerSmoke
+    : {};
+  const sourceContract = isRecord(report.sourceContract) ? report.sourceContract : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const liveReadiness = isRecord(report.liveExecutionReadiness) ? report.liveExecutionReadiness : {};
+  const sourceHead = readString(report.sourceShaForFocusedTests);
+  const productionCommit = readString(productionBuild.commitSha);
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerDispatchLiveClaimed === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.vectorRuntimeActivated === false
+    && mutationBoundary.wikiPublicationPerformed === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false
+    && mutationBoundary.engineExecutionClaimed === false
+    && mutationBoundary.liveAuthenticatedExecutionPerformed === false;
+  const pass = report.verdict === "adapter_boundary_pass_live_execution_not_claimed"
+    && sourceHead !== ""
+    && productionCommit === sourceHead
+    && report.sourceHeadMatchesProduction === true
+    && isGitAncestor(rootDir, sourceHead)
+    && focusedTests.status === "pass"
+    && readNumber(focusedTests.testFilesPassed) >= 15
+    && readNumber(focusedTests.testsPassed) >= 333
+    && liveSmoke.status === "pass"
+    && liveSmoke.httpStatus === 401
+    && liveSmoke.code === "AUTH_REQUIRED"
+    && liveSmoke.engineExecutionReached === false
+    && sourceContract.routeWiresConfiguredTransport === true
+    && sourceContract.configuredTransportFailsClosed === true
+    && sourceContract.trustedTransportWired === true
+    && sourceContract.durableAttemptLedgerWired === true
+    && sourceContract.ledgerExplicitOptIn === true
+    && sourceContract.ledgerAtomicReservation === true
+    && sourceContract.ledgerTerminalRequiresReservation === true
+    && sourceContract.ledgerStoresTerminalDigestOnly === true
+    && sourceContract.readinessKeepsLedgerOpen === true
+    && sourceContract.executionReadyClaimed === false
+    && liveReadiness.claimed === false
+    && noMutation
+    && remainingBoundaries.exactSavedShareVerdict === "MISSING_EVIDENCE"
+    && remainingBoundaries.llmWikiPublication === "APPROVAL_GATED"
+    && remainingBoundaries.providerDispatchPersistence === "APPROVAL_GATED"
+    && remainingBoundaries.sifEmbeddingRuntime === "APPROVAL_GATED"
+    && remainingBoundaries.koshaExactPromotion === "APPROVAL_GATED"
+    && remainingBoundaries.authenticatedHermesCanary === "APPROVAL_GATED";
+
+  if (pass) {
+    return gateResult({
+      id: "hermes_remote_durable_ledger",
+      label: "Hermes remote durable attempt ledger",
+      state: "proven",
+      evidencePath,
+      detail: "Current production wires an explicit opt-in durable attempt/terminal ledger with atomic reservation, reservation-bound terminal digest persistence, DNS-pinned trusted transport, and fail-closed readiness. The live unauthenticated probe stops at AUTH_REQUIRED before engine execution; authenticated execution, LLM Wiki, provider persistence, vector runtime, KOSHA promotion, and exact saved Share remain approval-gated or MISSING_EVIDENCE.",
+      nextActions: [],
+    });
+  }
+
+  return gateResult({
+    id: "hermes_remote_durable_ledger",
+    label: "Hermes remote durable attempt ledger",
+    state: "contradicted",
+    evidencePath,
+    detail: `Hermes durable-ledger contract failed: source=${sourceHead || "missing"}, production=${productionCommit || "missing"}, ledger=${String(sourceContract.durableAttemptLedgerWired)}, liveClaim=${String(liveReadiness.claimed)}, noMutation=${String(noMutation)}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: ["Restore source/live alignment, durable-ledger atomicity, and all no-mutation and approval boundaries before marking the gate proven."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateLiveDocumentsShareRoutePerceptionGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.liveDocumentsShareRoutePerception;
   const report = readJsonFile(rootDir, evidencePath);
@@ -4900,7 +4992,7 @@ function evaluateMcpProviderAdmissionGate(rootDir) {
     && readNumber(focused.tests) === 61
     && readNumber(focused.failed) === 0
     && readNumber(adjacent.files) === 8
-    && readNumber(adjacent.tests) === 94
+    && readNumber(adjacent.tests) >= 94
     && readNumber(adjacent.failed) === 0
     && readString(verification.typecheck) === "PASS"
     && readNumber(verification.dependencyAuditVulnerabilities) === 0
@@ -6725,7 +6817,7 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
     && isEvidenceCurrentForPaths(rootDir, companionSourceHead, MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS)
     && companionPreserved.existingTransportBodyAndAuthenticationBudgetsRetained === true
     && readNumber(companionAdjacent.files) === 8
-    && readNumber(companionAdjacent.tests) === 94
+    && readNumber(companionAdjacent.tests) >= 94
     && readNumber(companionAdjacent.failed) === 0
     && readNumber(companionLive.status) === 401
     && companionLive.mcpToolDispatchPerformed === false
@@ -6802,7 +6894,7 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? `Current production ${currentProofHead.slice(0, 8)} re-proves MCP invalid-token 401 fail-closed with instance admission before any MCP tool dispatch, provider call, or mutation. The new provider-admission companion preserves the 96 KiB measured body and authentication contracts through 94 adjacent MCP tests; a valid authenticated runtime probe, distributed activation, and fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE.`
+      ? `Current production ${currentProofHead.slice(0, 8)} re-proves MCP invalid-token 401 fail-closed with instance admission before any MCP tool dispatch, provider call, or mutation. The provider-admission companion preserves the 96 KiB measured body and authentication contracts through ${readNumber(companionAdjacent.tests)} adjacent MCP tests; a valid authenticated runtime probe, distributed activation, and fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE.`
       : `MCP budget verdict=${readString(report.verdict) || "unknown"}, source/live=${sourceHead}/${productionCommit}, currentRefresh=${currentRefreshPass}, providerCompanion=${providerCompanionPass}, refreshHead=${currentRefreshSourceHead || "missing"}, bodyBytes=${readNumber(contract.postBodyMaxBytes)}, adjacent=${readNumber(adjacent.tests)}, liveAuth=${readNumber(liveProbe.status)}, validProbe=${liveProbe.validAuthenticatedBudgetProbeExecuted === true}, rescan=${remaining.freshSecurityRescanRequired === true}, noMutation=${noMutation && (currentRefreshNoMutation || companionNoMutation)}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
@@ -7723,6 +7815,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateSecurityFollowupRemediationGate(rootDir),
     evaluateMcpGenerationWorkBudgetSecurityGate(rootDir),
     evaluateLearningExportRendererSecurityGate(rootDir),
+    evaluateHermesRemoteDurableLedgerGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir),
     evaluateLiveDocumentSecondaryGroundingGate(rootDir),

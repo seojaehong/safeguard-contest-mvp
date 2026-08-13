@@ -21,10 +21,12 @@ const TEST_FILES = [
   "tests\\remote-hermes-runtime.test.ts",
   "tests\\remote-hermes-route.test.ts",
   "tests\\remote-hermes-https-transport.test.ts",
+  "tests\\remote-hermes-upstash-ledger.test.ts",
   "tests\\remote-hermes-service-auth.test.ts",
   "tests\\remote-engine-protocol.test.ts",
   "tests\\engine-runtime-readiness-policy.test.ts",
   "tests\\ai-provider-policy.test.ts",
+  "tests\\mcp-tools.test.ts",
 ];
 const TEST_ARGS = [
   "test",
@@ -61,6 +63,10 @@ function readSourceContract() {
     path.join(REPO_ROOT, "lib", "engine-runtime-readiness-policy.ts"),
     "utf8",
   );
+  const ledgerSource = fs.readFileSync(
+    path.join(REPO_ROOT, "lib", "remote-hermes-upstash-ledger.ts"),
+    "utf8",
+  );
   const routeWiresConfiguredTransport = routeSource.includes(
     "trustedTransport: createConfiguredRemoteHermesHttpsTransport(process.env)",
   );
@@ -69,15 +75,31 @@ function readSourceContract() {
   )
     && transportSource.includes("attestation.serviceId !== serviceId")
     && transportSource.includes('!/^[a-f0-9]{64}$/u.test(attestation.attestationDigest)');
-  const durableAttemptLedgerWired = routeSource.includes("attemptLedger:");
+  const durableAttemptLedgerWired = routeSource.includes(
+    "attemptLedger: createConfiguredRemoteHermesAttemptLedger({ environment: process.env })",
+  );
+  const ledgerExplicitOptIn = ledgerSource.includes(
+    'SAFECLAW_REMOTE_HERMES_LEDGER_MODE?.trim() !== "upstash"',
+  );
+  const ledgerAtomicReservation = ledgerSource.includes("'PX', ARGV[2], 'NX'")
+    && ledgerSource.includes("remote Hermes attempt was already reserved");
+  const ledgerTerminalRequiresReservation = ledgerSource.includes(
+    "if redis.call('EXISTS', KEYS[1]) == 0 then return -1 end",
+  );
+  const ledgerStoresTerminalDigestOnly = ledgerSource.includes("terminalDigest(record)")
+    && !ledgerSource.includes("JSON.stringify(record),");
   const readinessKeepsLedgerOpen = readinessSource.includes(
-    '? ["remote-attempt-ledger-required"]',
+    'contractReady && !durableLedgerReady',
   );
   return {
     routeWiresConfiguredTransport,
     configuredTransportFailsClosed,
     trustedTransportWired: routeWiresConfiguredTransport && configuredTransportFailsClosed,
     durableAttemptLedgerWired,
+    ledgerExplicitOptIn,
+    ledgerAtomicReservation,
+    ledgerTerminalRequiresReservation,
+    ledgerStoresTerminalDigestOnly,
     readinessKeepsLedgerOpen,
     executionReadyClaimed: false,
   };
@@ -188,15 +210,25 @@ function buildReport({
   liveUnauthenticatedBrokerSmoke,
   sourceContract,
 }) {
+  const productionCommit = typeof productionBuildInfo?.commitSha === "string"
+    ? productionBuildInfo.commitSha
+    : "";
+  const sourceHeadMatchesProduction = sourceSha === productionCommit;
   return {
     schemaVersion: "safeclaw-hermes-openclaw-runtime-current-gate/v1",
     checkedAt,
     sourceShaForFocusedTests: sourceSha,
     productionBuildInfoAtLiveSmoke: productionBuildInfo,
+    sourceHeadMatchesProduction,
     verdict: focusedTests.status === "pass"
       && liveUnauthenticatedBrokerSmoke.status === "pass"
+      && sourceHeadMatchesProduction
       && sourceContract.trustedTransportWired
-      && !sourceContract.durableAttemptLedgerWired
+      && sourceContract.durableAttemptLedgerWired
+      && sourceContract.ledgerExplicitOptIn
+      && sourceContract.ledgerAtomicReservation
+      && sourceContract.ledgerTerminalRequiresReservation
+      && sourceContract.ledgerStoresTerminalDigestOnly
       && sourceContract.readinessKeepsLedgerOpen
       ? "adapter_boundary_pass_live_execution_not_claimed"
       : "adapter_boundary_red_live_execution_not_claimed",
@@ -206,8 +238,20 @@ function buildReport({
     mutationBoundary: {
       dbMutationPerformed: false,
       providerDispatchLiveClaimed: false,
+      shareSessionCreated: false,
+      vectorRuntimeActivated: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
       engineExecutionClaimed: false,
       liveAuthenticatedExecutionPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+      sifEmbeddingRuntime: "APPROVAL_GATED",
+      koshaExactPromotion: "APPROVAL_GATED",
+      authenticatedHermesCanary: "APPROVAL_GATED",
     },
     liveExecutionReadiness: {
       claimed: false,
@@ -217,13 +261,15 @@ function buildReport({
         "deny-all remote tool policy",
         "Evidence Harness claim allowlist and immutable evidence digest",
         "DNS-pinned HTTPS trusted transport wired into the production route",
-        "terminal ledger interface and fail-closed terminal persistence contract",
+        "explicit opt-in Upstash attempt and terminal ledger wired into the production route",
+        "atomic attempt reservation and reservation-bound terminal digest persistence",
+        "public MCP evidence remains body-redacted while broker-authorized preload retains verified evidence bodies",
       ],
       requires: [
         "authenticated operator-owned site context",
         "local OpenClaw site/org binding attestation or configured remote Hermes gateway",
-        "durable cross-instance attempt and terminal ledger implementation",
-        "authenticated live execution canary after durable ledger approval",
+        "operator configuration for the remote Hermes gateway and explicit durable ledger mode",
+        "authenticated live execution canary after runtime configuration approval",
       ],
     },
   };
@@ -247,6 +293,7 @@ Live production runtime execution is still not claimed. The live \`/api/agent/ch
 
 - Source SHA for focused tests: \`${report.sourceShaForFocusedTests}\`
 - Production build-info observed during live smoke: \`${report.productionBuildInfoAtLiveSmoke?.commitSha || ""}\`
+- Source/live aligned: \`${report.sourceHeadMatchesProduction}\`
 - Live deployment URL: \`${deploymentUrl}\`
 - Worktree: \`${REPO_ROOT}\`
 - Branch: \`chore/recipient-foreign-live-gate-20260720\`
@@ -292,8 +339,14 @@ Result:
 
 - DB mutation performed: \`${report.mutationBoundary.dbMutationPerformed}\`
 - Provider dispatch live claimed: \`${report.mutationBoundary.providerDispatchLiveClaimed}\`
+- Share session created: \`${report.mutationBoundary.shareSessionCreated}\`
+- Vector runtime activated: \`${report.mutationBoundary.vectorRuntimeActivated}\`
+- LLM Wiki publication performed: \`${report.mutationBoundary.wikiPublicationPerformed}\`
+- KOSHA registry mutation performed: \`${report.mutationBoundary.koshaRegistryMutationPerformed}\`
 - Engine execution claimed: \`${report.mutationBoundary.engineExecutionClaimed}\`
 - Live authenticated execution performed: \`${report.mutationBoundary.liveAuthenticatedExecutionPerformed}\`
+
+Exact saved Share remains \`${report.remainingBoundaries.exactSavedShareVerdict}\`. LLM Wiki publication, provider persistence, SIF vector runtime, KOSHA exact promotion, and the authenticated Hermes canary remain approval-gated.
 
 ## Remote Hermes Source Contract
 
@@ -301,6 +354,10 @@ Result:
 - Configured transport fails closed on service/digest mismatch: \`${report.sourceContract.configuredTransportFailsClosed}\`
 - Trusted transport wired: \`${report.sourceContract.trustedTransportWired}\`
 - Durable attempt ledger wired: \`${report.sourceContract.durableAttemptLedgerWired}\`
+- Ledger explicit opt-in: \`${report.sourceContract.ledgerExplicitOptIn}\`
+- Atomic reservation: \`${report.sourceContract.ledgerAtomicReservation}\`
+- Terminal requires reservation: \`${report.sourceContract.ledgerTerminalRequiresReservation}\`
+- Terminal stores digest only: \`${report.sourceContract.ledgerStoresTerminalDigestOnly}\`
 - Readiness keeps the durable ledger blocker visible: \`${report.sourceContract.readinessKeepsLedgerOpen}\`
 - Execution-ready claimed: \`${report.sourceContract.executionReadyClaimed}\`
 
@@ -308,7 +365,7 @@ Result:
 
 This is the correct current state for launch safety: SafeClaw can demonstrate that Hermes/OpenClaw is integrated as a bounded adapter path, while avoiding the false claim that a production Hermes worker pool or local OAuth runtime is fully operational inside Vercel.
 
-The production route now supplies the DNS-pinned trusted HTTPS transport. Runtime creation still fails closed because no durable cross-instance attempt/terminal ledger is wired. The next proof requires the approved durable ledger plus an authenticated operator-owned canary; this report does not substitute source wiring for live execution.
+The production route now supplies both the DNS-pinned trusted HTTPS transport and an explicit opt-in durable attempt/terminal ledger. Runtime creation still fails closed unless the operator configures the remote gateway, signed policy, and \`SAFECLAW_REMOTE_HERMES_LEDGER_MODE=upstash\`. The next proof is an approved authenticated operator-owned canary; this report does not substitute source wiring for live execution.
 `;
 }
 

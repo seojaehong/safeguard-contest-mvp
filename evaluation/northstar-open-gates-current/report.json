@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-13T20:12:22.369Z",
-  "sourceSha": "b7aa439aff084b2cfd8cd8003c7ca07ed4180ff2",
+  "generatedAt": "2026-08-13T20:50:02.402Z",
+  "sourceSha": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
   "overall": "open",
   "gates": [
     {
@@ -381,7 +381,7 @@
       "state": "notice",
       "label": "MCP generation work-budget security",
       "evidencePath": "evaluation\\security-mcp-generation-work-budget-2026-08-04\\report.json",
-      "detail": "Current production f0204542 re-proves MCP invalid-token 401 fail-closed with instance admission before any MCP tool dispatch, provider call, or mutation. The new provider-admission companion preserves the 96 KiB measured body and authentication contracts through 94 adjacent MCP tests; a valid authenticated runtime probe, distributed activation, and fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Current production 75027ffa re-proves MCP invalid-token 401 fail-closed with instance admission before any MCP tool dispatch, provider call, or mutation. The provider-admission companion preserves the 96 KiB measured body and authentication contracts through 122 adjacent MCP tests; a valid authenticated runtime probe, distributed activation, and fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Run a valid credential-safe production MCP boundary probe without exposing the token.",
         "Activate the approved distributed limiter configuration and complete a fresh security rescan before reclassifying the sealed finding."
@@ -396,6 +396,14 @@
       "nextActions": [
         "Re-run the full repository security scan after the remaining findings are remediated so the immutable canonical coverage can reclassify the deferred candidate."
       ]
+    },
+    {
+      "id": "hermes_remote_durable_ledger",
+      "state": "proven",
+      "label": "Hermes remote durable attempt ledger",
+      "evidencePath": "evaluation\\hermes-openclaw-runtime-current-gate-2026-07-20\\report.json",
+      "detail": "Current production wires an explicit opt-in durable attempt/terminal ledger with atomic reservation, reservation-bound terminal digest persistence, DNS-pinned trusted transport, and fail-closed readiness. The live unauthenticated probe stops at AUTH_REQUIRED before engine execution; authenticated execution, LLM Wiki, provider persistence, vector runtime, KOSHA promotion, and exact saved Share remain approval-gated or MISSING_EVIDENCE.",
+      "nextActions": []
     },
     {
       "id": "hermes_knowledge_review_authority",

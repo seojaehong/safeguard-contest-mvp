@@ -4297,6 +4297,47 @@ function createFixtureRoot(): string {
       exactRegistryWriteArtifactCreated: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "hermes-openclaw-runtime-current-gate-2026-07-20", "report.json"), {
+    verdict: "adapter_boundary_pass_live_execution_not_claimed",
+    sourceShaForFocusedTests: "fixture-sha",
+    sourceHeadMatchesProduction: true,
+    productionBuildInfoAtLiveSmoke: { commitSha: "fixture-sha" },
+    focusedTests: { status: "pass", testFilesPassed: 15, testsPassed: 333 },
+    liveUnauthenticatedBrokerSmoke: {
+      status: "pass", httpStatus: 401, code: "AUTH_REQUIRED", engineExecutionReached: false,
+    },
+    sourceContract: {
+      routeWiresConfiguredTransport: true,
+      configuredTransportFailsClosed: true,
+      trustedTransportWired: true,
+      durableAttemptLedgerWired: true,
+      ledgerExplicitOptIn: true,
+      ledgerAtomicReservation: true,
+      ledgerTerminalRequiresReservation: true,
+      ledgerStoresTerminalDigestOnly: true,
+      readinessKeepsLedgerOpen: true,
+      executionReadyClaimed: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchLiveClaimed: false,
+      shareSessionCreated: false,
+      vectorRuntimeActivated: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+      engineExecutionClaimed: false,
+      liveAuthenticatedExecutionPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+      sifEmbeddingRuntime: "APPROVAL_GATED",
+      koshaExactPromotion: "APPROVAL_GATED",
+      authenticatedHermesCanary: "APPROVAL_GATED",
+    },
+    liveExecutionReadiness: { claimed: false },
+  });
   execFileSync("git", ["add", "."], { cwd: rootDir, stdio: "ignore" });
   execFileSync("git", ["commit", "-m", "fixture"], { cwd: rootDir, stdio: "ignore" });
   const fixtureSourceSha = execFileSync("git", ["rev-parse", "HEAD"], {
@@ -4307,7 +4348,7 @@ function createFixtureRoot(): string {
   return rootDir;
 }
 
-describe("northstar open gate audit", { timeout: 15_000 }, () => {
+describe("northstar open gate audit", { timeout: 60_000 }, () => {
   it("keeps approval-gated north-star work open instead of complete", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
@@ -4873,7 +4914,6 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "public_json_request_body_budget")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "public_provider_admission")?.state).toBe("notice");
   });
-
   it("keeps the current repository scan open and fails closed if saved Share is overclaimed", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
@@ -5990,6 +6030,39 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(gate?.state).toBe("contradicted");
     expect(gate?.evidencePath).toBe(path.join("evaluation", "documents-cockpit-workbench-geometry-2026-07-22", "report.json"));
     expect(gate?.detail).toContain("12/3/9/0 default document exposure budget");
+  });
+
+  it("proves the Hermes durable ledger without claiming authenticated execution", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-14T00:00:00.000Z" });
+
+    expect(audit.gates.find((gate) => gate.id === "hermes_remote_durable_ledger")).toMatchObject({
+      state: "proven",
+    });
+    expect(audit.gates.find((gate) => gate.id === "hermes_remote_durable_ledger")?.detail).toContain("authenticated execution");
+    expect(audit.gates.find((gate) => gate.id === "hermes_remote_durable_ledger")?.detail).toContain("MISSING_EVIDENCE");
+  });
+
+  it("fails the Hermes durable ledger closed when an authenticated canary is overclaimed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "hermes-openclaw-runtime-current-gate-2026-07-20", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      mutationBoundary: { liveAuthenticatedExecutionPerformed: boolean };
+      remainingBoundaries: { authenticatedHermesCanary: string };
+      liveExecutionReadiness: { claimed: boolean };
+    };
+    report.mutationBoundary.liveAuthenticatedExecutionPerformed = true;
+    report.remainingBoundaries.authenticatedHermesCanary = "PASS";
+    report.liveExecutionReadiness.claimed = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-14T00:00:00.000Z" });
+    expect(audit.gates.find((gate) => gate.id === "hermes_remote_durable_ledger")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "hermes_remote_durable_ledger")?.detail).toContain("liveClaim=true");
   });
 
   it("fails live route perception closed when the reported long page and mobile-like desktop share return", async () => {

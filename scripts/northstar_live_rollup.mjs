@@ -55,6 +55,7 @@ const ARTIFACTS = Object.freeze({
   mcpGenerationWorkBudgetSecurity: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-authority-ui-2026-07-25", "report.json"),
+  hermesOpenclawRuntime: path.join("evaluation", "hermes-openclaw-runtime-current-gate-2026-07-20", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
   kosha: path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json"),
@@ -179,6 +180,7 @@ function extractProductionCommit(report) {
   }
   const candidates = [
     isRecord(report.productionBuild) ? report.productionBuild.commitSha : "",
+    isRecord(report.productionBuildInfoAtLiveSmoke) ? report.productionBuildInfoAtLiveSmoke.commitSha : "",
     isRecord(report.liveBuildInfo) ? report.liveBuildInfo.commitSha : "",
     isRecord(report.production) ? report.production.commitSha : "",
     isRecord(report.build) ? report.build.commitSha : "",
@@ -202,6 +204,7 @@ function extractSourceCommit(report) {
   }
   return asString(report.sourceCommit)
     || asString(report.sourceSha)
+    || asString(report.sourceShaForFocusedTests)
     || asString(report.sourceHeadAtDraft)
     || asString(report.sourceHeadBeforeCommit)
     || asString(report.sourceHead)
@@ -354,6 +357,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const mcpGenerationWorkBudgetSecurity = tryReadJson(rootDir, ARTIFACTS.mcpGenerationWorkBudgetSecurity);
   const learningExportRendererSecurity = tryReadJson(rootDir, ARTIFACTS.learningExportRendererSecurity);
   const hermesKnowledgeReviewAuthorityUi = tryReadJson(rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
+  const hermesOpenclawRuntime = tryReadJson(rootDir, ARTIFACTS.hermesOpenclawRuntime);
   const liveDocumentSecondaryGrounding = tryReadJson(rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
   const liveDocumentSeedProfileIsolation = tryReadJson(rootDir, ARTIFACTS.liveDocumentSeedProfileIsolation);
   const kosha = tryReadJson(rootDir, ARTIFACTS.kosha);
@@ -463,6 +467,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "mcp_generation_work_budget_security", ARTIFACTS.mcpGenerationWorkBudgetSecurity, mcpGenerationWorkBudgetSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "learning_export_renderer_security", ARTIFACTS.learningExportRendererSecurity, learningExportRendererSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_knowledge_review_ui", ARTIFACTS.hermesKnowledgeReviewAuthorityUi, hermesKnowledgeReviewAuthorityUi),
+    evidenceStatus(rootDir, currentHead, liveCommit, "hermes_remote_durable_ledger", ARTIFACTS.hermesOpenclawRuntime, hermesOpenclawRuntime),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_secondary_grounding", ARTIFACTS.liveDocumentSecondaryGrounding, liveDocumentSecondaryGrounding),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_seed_profile_isolation", ARTIFACTS.liveDocumentSeedProfileIsolation, liveDocumentSeedProfileIsolation),
     evidenceStatus(rootDir, currentHead, liveCommit, "kosha_exact_trust_registry", ARTIFACTS.kosha, kosha),
@@ -1180,6 +1185,21 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       llmWikiPublication: asString(recordAt(hermesKnowledgeReviewAuthorityUi, "remainingBoundaries")?.llmWikiPublication),
       supabaseRlsLaunchIsolation: asString(recordAt(hermesKnowledgeReviewAuthorityUi, "remainingBoundaries")?.supabaseRlsLaunchIsolation),
     },
+    hermesOpenclawRuntime: {
+      artifact: ARTIFACTS.hermesOpenclawRuntime,
+      verdict: isRecord(hermesOpenclawRuntime) ? asString(hermesOpenclawRuntime.verdict) : "missing",
+      sourceHead: isRecord(hermesOpenclawRuntime) ? asString(hermesOpenclawRuntime.sourceShaForFocusedTests) : "",
+      productionCommit: extractProductionCommit(hermesOpenclawRuntime),
+      testFilesPassed: asNumber(recordAt(hermesOpenclawRuntime, "focusedTests")?.testFilesPassed),
+      testsPassed: asNumber(recordAt(hermesOpenclawRuntime, "focusedTests")?.testsPassed),
+      durableAttemptLedgerWired: recordAt(hermesOpenclawRuntime, "sourceContract")?.durableAttemptLedgerWired === true,
+      ledgerAtomicReservation: recordAt(hermesOpenclawRuntime, "sourceContract")?.ledgerAtomicReservation === true,
+      ledgerTerminalRequiresReservation: recordAt(hermesOpenclawRuntime, "sourceContract")?.ledgerTerminalRequiresReservation === true,
+      ledgerStoresTerminalDigestOnly: recordAt(hermesOpenclawRuntime, "sourceContract")?.ledgerStoresTerminalDigestOnly === true,
+      liveExecutionClaimed: recordAt(hermesOpenclawRuntime, "liveExecutionReadiness")?.claimed === true,
+      exactSavedShareVerdict: asString(recordAt(hermesOpenclawRuntime, "remainingBoundaries")?.exactSavedShareVerdict),
+      authenticatedHermesCanary: asString(recordAt(hermesOpenclawRuntime, "remainingBoundaries")?.authenticatedHermesCanary),
+    },
     liveDocumentSecondaryGrounding: {
       artifact: ARTIFACTS.liveDocumentSecondaryGrounding,
       verdict: isRecord(liveDocumentSecondaryGrounding) ? asString(liveDocumentSecondaryGrounding.verdict) : "missing",
@@ -1500,6 +1520,14 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Tenant-memory public promotion: ${rollup.hermesKnowledgeReviewAuthorityUi.tenantMemoryPublicPromotionAllowed}; site-manager acceptance required=${rollup.hermesKnowledgeReviewAuthorityUi.siteManagerAcceptanceRequiredBeforeWorkpackUse}`,
     `- Mutation boundary DB/provider/share/publication: ${rollup.hermesKnowledgeReviewAuthorityUi.dbMutationPerformed}/${rollup.hermesKnowledgeReviewAuthorityUi.providerDispatchCalled}/${rollup.hermesKnowledgeReviewAuthorityUi.shareSessionCreated}/${rollup.hermesKnowledgeReviewAuthorityUi.ontologyPublicationPerformed}`,
     `- Exact saved Share: ${rollup.hermesKnowledgeReviewAuthorityUi.exactSavedShareVerdict || "MISSING_EVIDENCE"}; LLM Wiki/RLS: ${rollup.hermesKnowledgeReviewAuthorityUi.llmWikiPublication || "APPROVAL_GATED"}/${rollup.hermesKnowledgeReviewAuthorityUi.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}`,
+    "",
+    "## Hermes Remote Durable Ledger",
+    "",
+    `- Verdict: \`${rollup.hermesOpenclawRuntime.verdict}\``,
+    `- Focused tests: ${rollup.hermesOpenclawRuntime.testFilesPassed ?? 0} files / ${rollup.hermesOpenclawRuntime.testsPassed ?? 0} tests`,
+    `- Ledger wired/atomic/reservation-bound/digest-only: ${rollup.hermesOpenclawRuntime.durableAttemptLedgerWired}/${rollup.hermesOpenclawRuntime.ledgerAtomicReservation}/${rollup.hermesOpenclawRuntime.ledgerTerminalRequiresReservation}/${rollup.hermesOpenclawRuntime.ledgerStoresTerminalDigestOnly}`,
+    `- Live authenticated execution claimed: ${rollup.hermesOpenclawRuntime.liveExecutionClaimed}; canary=${rollup.hermesOpenclawRuntime.authenticatedHermesCanary || "APPROVAL_GATED"}`,
+    `- Exact saved Share: ${rollup.hermesOpenclawRuntime.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "",
     "## Live Secondary Document Grounding",
     "",

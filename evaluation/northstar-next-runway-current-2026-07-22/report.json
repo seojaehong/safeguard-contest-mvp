@@ -1,36 +1,29 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-13T20:12:40.975Z",
+  "generatedAt": "2026-08-13T20:50:28.195Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "b7aa439aff084b2cfd8cd8003c7ca07ed4180ff2",
-  "productionCommit": "062bf4e55c8c77d18e24543ed4a5044e475391af",
+  "sourceHead": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
+  "productionCommit": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "062bf4e55c8c77d18e24543ed4a5044e475391af",
+    "commitSha": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-c3316ts0a-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-pfhxmz3lv-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": false,
-  "currentHeadIsEvidenceOnlyPending": true,
-  "sourceHeadLivePending": true,
+  "latestEvidenceCommitLive": true,
+  "currentHeadIsEvidenceOnlyPending": false,
+  "sourceHeadLivePending": false,
   "sourceHeadHasProductChanges": false,
-  "sourcePendingChangedPaths": [
-    "scripts/northstar_live_rollup.mjs",
-    "scripts/northstar_next_runway.mjs",
-    "scripts/northstar_open_gate_audit.mjs",
-    "tests/northstar-live-rollup.test.ts",
-    "tests/northstar-next-runway-generator.test.ts",
-    "tests/northstar-open-gate-audit.test.ts"
-  ],
+  "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "b7aa439aff084b2cfd8cd8003c7ca07ed4180ff2",
-  "liveRollupLiveCommit": "062bf4e55c8c77d18e24543ed4a5044e475391af",
+  "liveExactEvidenceCommit": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
+  "liveRollupLiveCommit": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -368,26 +361,26 @@
     "shareRecipientLongContent": "live route-controlled long-content fixture keeps desktop recipient Share in two regions, mobile recipient root <= 1.5 viewports, confirmation in the first viewport, long task text in local scroll, and the document group collapsed by default; route split alone is insufficient and this is not exact saved-session proof",
     "shareRouteEvidenceBoundary": "separate Share evidence into invited recipient fixture pass, exact saved/generated /share/[sessionId] missing evidence, and manager/workspace share-result route repro; do not use one route's pass to close another route's mobile-like complaint",
     "shareMobile": "current compact cockpit remains first-viewport bounded in current evidence",
-    "hermesOpenclaw": "adapter and fail-closed auth boundary current-proven; production now wires the DNS-pinned trusted HTTPS transport while durable cross-instance attempt/terminal ledger and authenticated live execution remain open; live unauthenticated broker smoke returns AUTH_REQUIRED before engine execution; live authenticated reviewer UI passes 8/8 viewport contracts and exposes SIF -> KOSHA -> law -> organization history -> site history -> external context authority roles, tenant-memory non-promotion, site-manager acceptance, and human-review requirements without provider, DB, publication, or Share mutation"
+    "hermesOpenclaw": "adapter, fail-closed auth, DNS-pinned trusted HTTPS transport, and explicit opt-in durable cross-instance attempt/terminal ledger are current-proven; authenticated live execution remains approval-gated, and the live unauthenticated broker smoke returns AUTH_REQUIRED before engine execution; live authenticated reviewer UI passes 8/8 viewport contracts and exposes SIF -> KOSHA -> law -> organization history -> site history -> external context authority roles, tenant-memory non-promotion, site-manager acceptance, and human-review requirements without provider, DB, publication, or Share mutation"
   },
   "hermesOpenclaw": {
     "verdict": "adapter_boundary_pass_live_execution_not_claimed",
     "focusedTests": {
-      "command": "npm.cmd test -- tests\\engine-adapter.test.ts tests\\hermes-engine-adapter.test.ts tests\\openclaw-hermes-route.test.ts tests\\openclaw-chat.test.ts tests\\openclaw-broker-ui-context.test.ts tests\\remote-hermes-contract.test.ts tests\\remote-hermes-runtime.test.ts tests\\remote-hermes-route.test.ts tests\\remote-hermes-https-transport.test.ts tests\\remote-hermes-service-auth.test.ts tests\\remote-engine-protocol.test.ts tests\\engine-runtime-readiness-policy.test.ts tests\\ai-provider-policy.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000 --hookTimeout=180000",
-      "testFilesPassed": 13,
-      "testsPassed": 290,
-      "durationSeconds": 12.97,
+      "command": "npm.cmd test -- tests\\engine-adapter.test.ts tests\\hermes-engine-adapter.test.ts tests\\openclaw-hermes-route.test.ts tests\\openclaw-chat.test.ts tests\\openclaw-broker-ui-context.test.ts tests\\remote-hermes-contract.test.ts tests\\remote-hermes-runtime.test.ts tests\\remote-hermes-route.test.ts tests\\remote-hermes-https-transport.test.ts tests\\remote-hermes-upstash-ledger.test.ts tests\\remote-hermes-service-auth.test.ts tests\\remote-engine-protocol.test.ts tests\\engine-runtime-readiness-policy.test.ts tests\\ai-provider-policy.test.ts tests\\mcp-tools.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000 --hookTimeout=180000",
+      "testFilesPassed": 15,
+      "testsPassed": 333,
+      "durationSeconds": 13.75,
       "status": "pass",
       "exitStatus": 0,
       "signal": null,
       "error": null,
       "stdoutTail": [
-        "> vitest run tests\\engine-adapter.test.ts tests\\hermes-engine-adapter.test.ts tests\\openclaw-hermes-route.test.ts tests\\openclaw-chat.test.ts tests\\openclaw-broker-ui-context.test.ts tests\\remote-hermes-contract.test.ts tests\\remote-hermes-runtime.test.ts tests\\remote-hermes-route.test.ts tests\\remote-hermes-https-transport.test.ts tests\\remote-hermes-service-auth.test.ts tests\\remote-engine-protocol.test.ts tests\\engine-runtime-readiness-policy.test.ts tests\\ai-provider-policy.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000 --hookTimeout=180000",
+        "> vitest run tests\\engine-adapter.test.ts tests\\hermes-engine-adapter.test.ts tests\\openclaw-hermes-route.test.ts tests\\openclaw-chat.test.ts tests\\openclaw-broker-ui-context.test.ts tests\\remote-hermes-contract.test.ts tests\\remote-hermes-runtime.test.ts tests\\remote-hermes-route.test.ts tests\\remote-hermes-https-transport.test.ts tests\\remote-hermes-upstash-ledger.test.ts tests\\remote-hermes-service-auth.test.ts tests\\remote-engine-protocol.test.ts tests\\engine-runtime-readiness-policy.test.ts tests\\ai-provider-policy.test.ts tests\\mcp-tools.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=90000 --hookTimeout=180000",
         " RUN  v4.1.10 C:/Users/iceam/OneDrive/.codex-worktrees/safeclaw-northstar-current",
-        " Test Files  13 passed (13)",
-        "      Tests  290 passed (290)",
-        "   Start at  16:20:00",
-        "   Duration  12.97s (transform 1.44s, setup 0ms, import 4.77s, tests 4.62s, environment 1ms)"
+        " Test Files  15 passed (15)",
+        "      Tests  333 passed (333)",
+        "   Start at  05:32:34",
+        "   Duration  13.75s (transform 1.58s, setup 0ms, import 4.88s, tests 4.93s, environment 1ms)"
       ],
       "stderrTail": []
     },
@@ -400,14 +393,18 @@
       "status": "pass"
     },
     "trustedTransportWired": true,
-    "durableAttemptLedgerWired": false,
+    "durableAttemptLedgerWired": true,
+    "ledgerExplicitOptIn": true,
+    "ledgerAtomicReservation": true,
+    "ledgerTerminalRequiresReservation": true,
+    "ledgerStoresTerminalDigestOnly": true,
     "readinessKeepsLedgerOpen": true,
     "liveExecutionClaimed": false,
     "remainingRequirements": [
       "authenticated operator-owned site context",
       "local OpenClaw site/org binding attestation or configured remote Hermes gateway",
-      "durable cross-instance attempt and terminal ledger implementation",
-      "authenticated live execution canary after durable ledger approval"
+      "operator configuration for the remote Hermes gateway and explicit durable ledger mode",
+      "authenticated live execution canary after runtime configuration approval"
     ]
   },
   "documentQualityGrounding": {
@@ -837,11 +834,11 @@
   },
   "mcpProviderAdmission": {
     "verdict": "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_MCP_PROVIDER_ADMISSION_RESCAN_PENDING",
-    "sourceHead": "f02045420b7213b6e1088dfb24b673068fa5dea5",
-    "productionCommit": "f02045420b7213b6e1088dfb24b673068fa5dea5",
+    "sourceHead": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
+    "productionCommit": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
     "findingId": "csf_b10479b6501c208c4d11644e",
     "focusedTests": 61,
-    "adjacentTests": 94,
+    "adjacentTests": 122,
     "liveRateLimitMode": "instance",
     "authenticatedProviderGenerationAvailability": "FAIL_CLOSED_UNTIL_DISTRIBUTED_CONFIG",
     "distributedProductionActivation": "OPEN_OPERATOR_CONFIGURATION",
@@ -1757,7 +1754,7 @@
     "resolve public Share storage readiness before exact saved-session closure: current evidence shows workpacks readable but workpack_share_sessions missing from production PostgREST schema cache",
     "do not create a production saved Share session unless the user supplies a concrete existing URL or explicitly approves DB-backed share-session creation; POST /api/workpacks/[id]/share-sessions inserts workpack_share_sessions",
     "keep invited-recipient ACK canary approval-gated: production workpack_share_sessions and workpack_read_confirmations rows require explicit live-data mutation approval before any real ACK readback claim",
-    "keep Hermes/OpenClaw live execution held: tenant envelope, tool denial, Evidence Harness, DNS-pinned trusted transport, and terminal persistence behavior are source-proven, while the durable cross-instance attempt/terminal ledger and authenticated canary remain open",
+    "keep Hermes/OpenClaw authenticated live execution held: tenant envelope, tool denial, Evidence Harness, DNS-pinned trusted transport, and the explicit opt-in atomic attempt/terminal ledger are source/live-proven, while operator configuration and the authenticated canary remain approval-gated",
     "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
     "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held",
     "preserve the immutable original 18-finding repository scan as the historical baseline; the sealed follow-up scan accounts for 5,241 files and retains 17 reportable findings plus one renderer-dependent deferred candidate, while the companion no-DB wave bounds 2 findings and mitigates 2 with a distributed-rate residual; resolve the remaining DB/RLS, renderer, distributed-rate, and exact saved Share boundaries before any security-complete claim"

@@ -1,14 +1,14 @@
 {
   "schemaVersion": "safeclaw-security-mcp-provider-admission/v1",
-  "generatedAt": "2026-08-14T02:42:17+09:00",
+  "generatedAt": "2026-08-14T05:48:38+09:00",
   "verdict": "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_MCP_PROVIDER_ADMISSION_RESCAN_PENDING",
-  "sourceHead": "f02045420b7213b6e1088dfb24b673068fa5dea5",
-  "productCommit": "f02045420b7213b6e1088dfb24b673068fa5dea5",
+  "sourceHead": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
+  "productCommit": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
   "productionBuild": {
-    "commitSha": "f02045420b7213b6e1088dfb24b673068fa5dea5",
+    "commitSha": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-jptss4oan-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-pfhxmz3lv-seojaehongs-projects.vercel.app",
     "sourceHeadMatchesProduction": true
   },
   "sealedFinding": {
@@ -64,7 +64,7 @@
     },
     "focusedAndAdjacentMcp": {
       "files": 8,
-      "tests": 94,
+      "tests": 122,
       "failed": 0,
       "status": "PASS"
     },
