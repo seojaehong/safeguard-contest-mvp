@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_READ_CONFIRMATION_REPLAY_SERIALIZATION_DB_CANARY_GATED",
+  "generatedAt": "2026-08-13T20:34:12.5833793+09:00",
+  "sourceHead": "ea2ed74feb976fd61c9f03eef679c6372cce6d46",
+  "productCommit": "ea2ed74feb976fd61c9f03eef679c6372cce6d46",
+  "productionBuild": {
+    "commitSha": "ea2ed74feb976fd61c9f03eef679c6372cce6d46",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-m33nrla1t-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
+  "securityFinding": {
+    "id": "read-confirmation-check-then-insert",
+    "severity": "medium",
+    "immutableOriginalBaselinePreserved": true,
+    "sourceRaceStatus": "remediated-live-deployed-source",
+    "liveDatabaseCanaryStatus": "approval-gated-not-executed"
+  },
+  "contract": {
+    "deterministicUuidPrimaryKey": true,
+    "canonicalContractVersion": "workpack-read-confirmation/v1",
+    "publicRecipientRouteCovered": true,
+    "managerRouteCovered": true,
+    "legacyRandomIdPrecheckPreserved": true,
+    "concurrentPrimaryKeyConflictReusesExactOwnedConfirmation": true,
+    "tenantSiteWorkpackSessionWorkerAndMethodVerified": true,
+    "mismatchedCollisionFailsClosed409": true,
+    "databaseMigrationRequiredForSourceRaceFix": false,
+    "newCompositeUniqueConstraintAdded": false
+  },
+  "verification": {
+    "focusedTests": {
+      "filesPassed": 2,
+      "testsPassed": 46
+    },
+    "adjacentCommercialAndApprovalTests": {
+      "filesPassed": 3,
+      "testsPassed": 22
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28,
+    "dependencyAuditVulnerabilities": 0,
+    "diffCheck": "PASS",
+    "targetedSecretScanNewCodeMatches": 0
+  },
+  "liveReadOnlyProbe": {
+    "endpoint": "/api/build-info",
+    "sourceHeadMatchesProduction": true,
+    "shareAcknowledgementPostExecuted": false,
+    "readConfirmationInsertAttempted": false
+  },
+  "mutationBoundary": {
+    "databaseMutationPerformed": false,
+    "databaseMigrationPerformed": false,
+    "providerDispatchPerformed": false,
+    "shareSessionCreated": false,
+    "readConfirmationCreated": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "productionReadConfirmationCanary": "APPROVAL_GATED_LIVE_DATA_MUTATION",
+    "publicShareSessionStorageReadiness": "NOT_CLAIMED_READY",
+    "databaseCompositeUniqueness": "NOT_ADDED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedClaimsUnchanged": true
+  }
+}
