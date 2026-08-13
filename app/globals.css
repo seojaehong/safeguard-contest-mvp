@@ -10879,7 +10879,8 @@ body:has(.safeclaw-landing) :is(
   gap: 8px;
 }
 
-.ai-connect-sif-packet-actions a {
+.ai-connect-sif-packet-actions a,
+.ai-connect-sif-packet-actions button {
   border: 1px solid rgba(246, 245, 239, 0.14);
   border-radius: var(--radius-control);
   background: rgba(255, 255, 255, 0.04);
@@ -10893,7 +10894,8 @@ body:has(.safeclaw-landing) :is(
   letter-spacing: var(--tracking-body);
 }
 
-.ai-connect-sif-packet-actions a:hover {
+.ai-connect-sif-packet-actions a:hover,
+.ai-connect-sif-packet-actions button:hover {
   border-color: rgba(255, 220, 46, 0.42);
   background: rgba(255, 220, 46, 0.1);
 }
@@ -18601,7 +18603,8 @@ body:has(.safeclaw-landing) :is(
   color: var(--workspace-ink);
 }
 
-.safeclaw-module-shell.module-variant-document .ai-connect-sif-packet-actions a {
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-packet-actions a,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-packet-actions button {
   background: var(--workspace-surface-1);
   color: var(--workspace-ink);
 }

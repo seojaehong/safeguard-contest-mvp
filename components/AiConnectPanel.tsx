@@ -411,7 +411,15 @@ export function AiConnectPanel() {
   }, [session?.access_token, loadTokens]);
 
   useEffect(() => {
-    fetch("/api/sif-embedding-gate/status")
+    if (!sessionChecked) return;
+    if (!session?.access_token) {
+      setSifGate(null);
+      setSifGateMessage("로그인 후 SIF 임베딩 승인 게이트를 확인할 수 있습니다.");
+      return;
+    }
+    fetch("/api/sif-embedding-gate/status", {
+      headers: { authorization: `Bearer ${session.access_token}` },
+    })
       .then(async (response) => {
         const payload = await response.json() as SifEmbeddingGateStatusResponse;
         setSifGate(payload);
@@ -421,7 +429,37 @@ export function AiConnectPanel() {
         console.warn("sif embedding gate status load failed", error);
         setSifGateMessage("SIF 임베딩 승인 게이트 상태를 불러오지 못했습니다.");
       });
-  }, []);
+  }, [session?.access_token, sessionChecked]);
+
+  const downloadSifApprovalPacket = useCallback(async (format: "markdown" | "json") => {
+    if (!session?.access_token) return;
+    setSifGateMessage("");
+    try {
+      const suffix = format === "json" ? "?format=json" : "";
+      const response = await fetch(`/api/sif-embedding-gate/approval-packet${suffix}`, {
+        headers: { authorization: `Bearer ${session.access_token}` },
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch((): unknown => null);
+        const message = payload && typeof payload === "object" && "message" in payload
+          && typeof payload.message === "string"
+          ? payload.message
+          : "승인 패킷을 내려받지 못했습니다.";
+        setSifGateMessage(message);
+        return;
+      }
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = format === "json" ? "sif-embedding-approval-packet.json" : "sif-embedding-approval-packet.md";
+      anchor.click();
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      console.warn("sif embedding approval packet download failed", error);
+      setSifGateMessage("승인 패킷을 내려받지 못했습니다.");
+    }
+  }, [session?.access_token]);
 
   useEffect(() => {
     fetch("/api/input-photos/hazard-analysis")
@@ -712,20 +750,12 @@ export function AiConnectPanel() {
                 <pre>{sifGate.nextApprovalGate.command}</pre>
               ) : null}
               <div className="ai-connect-sif-packet-actions">
-                <a
-                  href="/api/sif-embedding-gate/approval-packet"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <button type="button" onClick={() => void downloadSifApprovalPacket("markdown")}>
                   승인 패킷 열기
-                </a>
-                <a
-                  href="/api/sif-embedding-gate/approval-packet?format=json"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                </button>
+                <button type="button" onClick={() => void downloadSifApprovalPacket("json")}>
                   JSON 보기
-                </a>
+                </button>
               </div>
             </div>
             <div className={`ai-connect-sif-operator-gate ${sifGate.operatorGate.status}`}>

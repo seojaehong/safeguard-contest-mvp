@@ -136,6 +136,8 @@ const listedToken: TokenSummary = {
 type NetworkProbe = {
   tokenRequests: number;
   authenticatedTokenRequests: number;
+  sifStatusRequests: number;
+  authenticatedSifStatusRequests: number;
   issuedTokenLabel: string | null;
 };
 
@@ -148,7 +150,13 @@ async function fulfillJson(route: Route, body: unknown, status = 200): Promise<v
 }
 
 async function installNetworkFixtures(page: Page): Promise<NetworkProbe> {
-  const probe: NetworkProbe = { tokenRequests: 0, authenticatedTokenRequests: 0, issuedTokenLabel: null };
+  const probe: NetworkProbe = {
+    tokenRequests: 0,
+    authenticatedTokenRequests: 0,
+    sifStatusRequests: 0,
+    authenticatedSifStatusRequests: 0,
+    issuedTokenLabel: null,
+  };
 
   await page.route(`${DUMMY_SUPABASE_URL}/auth/v1/**`, async (route) => {
     if (route.request().url().includes("/token")) {
@@ -186,7 +194,13 @@ async function installNetworkFixtures(page: Page): Promise<NetworkProbe> {
       nextCursor: null,
     });
   });
-  await page.route("**/api/sif-embedding-gate/status", (route) => fulfillJson(route, sifFixture));
+  await page.route("**/api/sif-embedding-gate/status", (route) => {
+    probe.sifStatusRequests += 1;
+    if (route.request().headers().authorization === `Bearer ${ACCESS_TOKEN}`) {
+      probe.authenticatedSifStatusRequests += 1;
+    }
+    return fulfillJson(route, sifFixture);
+  });
   await page.route("**/api/input-photos/hazard-analysis", (route) => fulfillJson(route, photoFixture));
 
   return probe;
@@ -292,7 +306,7 @@ const roleChecks: readonly { selectors: readonly string[]; expected: TypographyM
       ".ai-connect-actions button",
       ".ai-connect-command-box button",
       ".ai-connect-token-items button",
-      ".ai-connect-sif-packet-actions a",
+      ".ai-connect-sif-packet-actions button",
     ],
     expected: { firstFont: "Noto Sans KR", size: "14px", weight: "700", lineHeight: 20, tracking: 0 },
   },
@@ -432,6 +446,8 @@ productionMatrix("AI connect production matrix", () => {
         await page.getByText(listedToken.label, { exact: true }).waitFor();
         await page.getByText(/만료 2026\. 10\. 10\./).waitFor();
         expect(probe.authenticatedTokenRequests).toBeGreaterThan(0);
+        expect(probe.sifStatusRequests).toBeGreaterThan(0);
+        expect(probe.authenticatedSifStatusRequests).toBe(probe.sifStatusRequests);
 
         await page.getByRole("button", { name: "연결 토큰 발급" }).click();
         await page.locator(".ai-connect-secret textarea").waitFor({ state: "visible" });
@@ -479,7 +495,7 @@ productionMatrix("AI connect production matrix", () => {
           { foregroundSelector: ".ai-connect-command-box pre", surfaceSelector: ".ai-connect-command-box pre" },
           { foregroundSelector: ".ai-connect-sif-next-gate code", surfaceSelector: ".ai-connect-sif-next-gate code" },
           { foregroundSelector: ".ai-connect-sif-command pre", surfaceSelector: ".ai-connect-sif-command pre" },
-          { foregroundSelector: ".ai-connect-sif-packet-actions a", surfaceSelector: ".ai-connect-sif-packet-actions a" },
+          { foregroundSelector: ".ai-connect-sif-packet-actions button", surfaceSelector: ".ai-connect-sif-packet-actions button" },
           { foregroundSelector: ".ai-connect-sif-verdict > span", surfaceSelector: ".ai-connect-sif-verdict" },
         ] as const) {
           const foreground = await page.locator(foregroundSelector).first().evaluate((element) => getComputedStyle(element).color);
