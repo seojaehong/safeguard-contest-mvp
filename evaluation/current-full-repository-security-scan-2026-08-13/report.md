@@ -2,7 +2,7 @@
 
 ## Verdict
 
-`NOTICE_CURRENT_SOURCE_SECURITY_SCAN_REMEDIATION_LIVE_AND_RESCAN_PENDING`
+`NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_RESCAN_PENDING`
 
 The Standard Codex Security scan `528ad724-6251-46fa-a812-48264396f321` completed and sealed against source revision `2c65f894be7cb37d0b50a2e1e19466a208400aaa`. It retained 15 reportable findings: 11 medium and 4 low. Coverage is explicitly partial rather than a line-by-line review of every tracked file.
 
@@ -17,7 +17,9 @@ Product commit `6fc07ad17d382f6c9fdd88472d90388874044050` addresses two findings
 
 Focused verification passed 2 files and 21 tests. Strict typecheck passed. Next.js 15.5.22 production build passed with 28 static pages.
 
-These are current-source remediations only. Live deployment verification and a fresh post-remediation security scan are still required before either finding can be closed in the canonical set. Thirteen reportable findings remain before that rescan, and no security-complete claim is allowed.
+Production build-info now reports product commit `6fc07ad17d382f6c9fdd88472d90388874044050` on `master` in `production`. This proves deployment of the tested source, not execution of a destructive or provider-backed live exploit. No provider cancellation request or forced HWP internal failure was executed against production.
+
+A fresh post-remediation security scan is still required before either finding can be closed in the canonical set. Thirteen reportable findings remain before that rescan, and no security-complete claim is allowed.
 
 ## Boundaries
 

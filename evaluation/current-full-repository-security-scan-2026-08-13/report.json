@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-current-full-repository-security-scan/v1",
-  "generatedAt": "2026-08-13T22:51:18.6003091+09:00",
-  "verdict": "NOTICE_CURRENT_SOURCE_SECURITY_SCAN_REMEDIATION_LIVE_AND_RESCAN_PENDING",
+  "generatedAt": "2026-08-13T22:54:00+09:00",
+  "verdict": "NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_RESCAN_PENDING",
   "userContext": "Preserve immutable original 18-finding baseline. Verify current f0c8a7be source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
   "immutableBaseline": {
     "scanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
@@ -35,20 +35,27 @@
     "productCommit": "6fc07ad17d382f6c9fdd88472d90388874044050",
     "sourceRemediatedCount": 2,
     "remainingReportableFindingCountBeforeRescan": 13,
-    "liveAfterDeploymentPending": true,
+    "liveAfterDeploymentPending": false,
+    "productionBuild": {
+      "commitSha": "6fc07ad17d382f6c9fdd88472d90388874044050",
+      "branch": "master",
+      "environment": "production",
+      "deploymentUrl": "safeguard-contest-r4gcpk99v-seojaehongs-projects.vercel.app",
+      "verifiedAt": "2026-08-13T22:54:00+09:00"
+    },
     "freshPostRemediationScanRequired": true,
     "securityCompleteClaimAllowed": false,
     "items": [
       {
         "slug": "safety-reference-disconnect-cancellation",
         "severity": "medium",
-        "disposition": "source_remediated_live_and_rescan_pending",
+        "disposition": "live_deployed_source_remediated_rescan_pending",
         "verification": "A coalesced provider search remains active while one consumer remains and aborts only after the final consumer disconnects."
       },
       {
         "slug": "hwp-error-path-disclosure",
         "severity": "low",
-        "disposition": "source_remediated_live_and_rescan_pending",
+        "disposition": "live_deployed_source_remediated_rescan_pending",
         "verification": "Internal HWP errors are logged server-side while the HTTP response returns a fixed public message."
       }
     ]
@@ -65,7 +72,8 @@
       "status": "PASS",
       "nextVersion": "15.5.22",
       "staticPages": 28
-    }
+    },
+    "liveVerificationBoundary": "Production marker proves deployment of the tested source. No provider cancellation request or forced HWP internal failure was executed against production."
   },
   "coverageLimitations": [
     "The current scan used focused threat surfaces and did not individually line-review all 5,612 tracked files.",
