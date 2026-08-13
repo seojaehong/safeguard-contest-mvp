@@ -6,6 +6,11 @@ import {
   findShareSessionRecipient
 } from "@/lib/workpack-commercial";
 import {
+  buildReadConfirmationId,
+  matchesReadConfirmationIdentity,
+  type ReadConfirmationIdentity
+} from "@/lib/read-confirmation-idempotency";
+import {
   createSupabaseAdminClient,
   toJson,
   type WorkspaceDatabase
@@ -252,6 +257,15 @@ export async function POST(request: NextRequest, context: RouteContext) {
   }
 
   const insert: WorkspaceDatabase["public"]["Tables"]["workpack_read_confirmations"]["Insert"] = {
+    id: buildReadConfirmationId({
+      organizationId: draft.insert.organization_id,
+      siteId: draft.insert.site_id ?? null,
+      workpackId: draft.insert.workpack_id,
+      shareSessionId: draft.insert.share_session_id || activeSession.session.id,
+      workerId: draft.insert.worker_id ?? null,
+      workerDisplayName: draft.insert.worker_display_name,
+      confirmationMethod: "button"
+    }),
     organization_id: draft.insert.organization_id,
     site_id: draft.insert.site_id,
     workpack_id: draft.insert.workpack_id,
@@ -269,6 +283,33 @@ export async function POST(request: NextRequest, context: RouteContext) {
     .select("id")
     .single();
 
+  if (error?.code === "23505") {
+    const identity: ReadConfirmationIdentity = {
+      organizationId: insert.organization_id,
+      siteId: insert.site_id ?? null,
+      workpackId: insert.workpack_id,
+      shareSessionId: insert.share_session_id || activeSession.session.id,
+      workerId: insert.worker_id ?? null,
+      workerDisplayName: insert.worker_display_name,
+      confirmationMethod: insert.confirmation_method || "button"
+    };
+    const { data: concurrent, error: concurrentError } = await client
+      .from("workpack_read_confirmations")
+      .select("id,organization_id,site_id,workpack_id,share_session_id,worker_id,worker_display_name,confirmation_method")
+      .eq("id", insert.id || buildReadConfirmationId(identity))
+      .maybeSingle();
+    if (concurrentError || !matchesReadConfirmationIdentity(concurrent, identity)) {
+      console.error("public share confirmation primary-key conflict mismatch", concurrentError);
+      return NextResponse.json({ ok: false, configured: true, confirmationId: null, message: "열람 확인 충돌의 귀속을 확인하지 못했습니다." }, { status: 409 });
+    }
+    return NextResponse.json({
+      ok: true,
+      configured: true,
+      confirmationId: concurrent.id,
+      idempotent: true,
+      message: "이미 저장된 작업자 열람 확인입니다."
+    });
+  }
   if (error) {
     console.error("public share confirmation create failed", error);
     return NextResponse.json({ ok: false, configured: true, confirmationId: null, message: "열람 확인 저장에 실패했습니다." }, { status: 500 });
