@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-13T13:13:24.405Z",
-  "sourceSha": "50de0f830aa35cc498e322371604785e6d188d69",
+  "generatedAt": "2026-08-13T14:16:49.927Z",
+  "sourceSha": "f472d41ce728dca12f20426226e206f57e630626",
   "overall": "open",
   "gates": [
     {
@@ -196,6 +196,16 @@
       "detail": "The immutable 17-finding Standard scan and separate 23-finding current set remain preserved. Current live/source receipts classify 17/23 findings as deployed-source remediated and keep six findings visible: three approval-gated database boundaries and three distributed-runtime controls. This is not a security-complete claim; exact saved Share remains MISSING_EVIDENCE and provider, vector, wiki, and KOSHA promotion approvals remain closed.",
       "nextActions": [
         "Close the three distributed-runtime controls with production configuration evidence and request separate approval before any database security migration or live canary."
+      ]
+    },
+    {
+      "id": "current_repository_security_rescan",
+      "state": "notice",
+      "label": "Current repository security rescan",
+      "evidencePath": "evaluation\\current-full-repository-security-scan-2026-08-13\\report.json",
+      "detail": "Standard current-revision scan 528ad724 is sealed with 15 findings (11 medium, 4 low) under partial coverage. Live source now bounds three findings, including fail-closed SIF corpus quality admission, while 12 findings and a fresh post-remediation scan remain open. The immutable original 18-accounted baseline is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Remediate or explicitly defer the remaining 12 findings, then run a fresh post-remediation Standard scan before any security-complete claim."
       ]
     },
     {

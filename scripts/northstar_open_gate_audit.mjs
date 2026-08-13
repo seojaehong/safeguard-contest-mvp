@@ -50,6 +50,7 @@ const EVIDENCE_PATHS = Object.freeze({
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
+  currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
@@ -3996,6 +3997,87 @@ function evaluateCurrentSecurityRemediationLedgerGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluateCurrentRepositorySecurityRescanGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.currentRepositorySecurityRescan;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "current_repository_security_rescan",
+      label: "Current repository security rescan",
+      state: "missing",
+      evidencePath,
+      detail: "The sealed current-revision repository security scan is missing or invalid.",
+      nextActions: ["Restore the sealed current scan without rewriting the immutable original baseline."],
+    });
+  }
+
+  const immutableBaseline = isRecord(report.immutableBaseline) ? report.immutableBaseline : {};
+  const currentScan = isRecord(report.currentScan) ? report.currentScan : {};
+  const remediation = isRecord(report.currentSourceRemediation) ? report.currentSourceRemediation : {};
+  const productionBuild = isRecord(remediation.productionBuild) ? remediation.productionBuild : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const items = Array.isArray(remediation.items) ? remediation.items.filter(isRecord) : [];
+  const slugs = new Set(items.map((item) => readString(item.slug)).filter(Boolean));
+  const canonical = isRecord(currentScan.canonicalArtifacts) ? currentScan.canonicalArtifacts : {};
+  const canonicalPaths = [canonical.manifest, canonical.findings, canonical.coverage, canonical.markdownProjection]
+    .map(readString)
+    .filter(Boolean);
+  const canonicalArtifactsExist = canonicalPaths.length === 4
+    && canonicalPaths.every((relativePath) => fs.existsSync(path.join(rootDir, relativePath)));
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.embeddingOrVectorMutationPerformed === false
+    && mutationBoundary.wikiPublicationPerformed === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "NOTICE_LIVE_DEPLOYED_SOURCE_THREE_FINDING_REMEDIATION_RESCAN_PENDING"
+    && readString(immutableBaseline.scanId) === "8fe9c06a-018c-446f-aa98-1b37df95287a"
+    && readNumber(immutableBaseline.accountedFindingCount) === 18
+    && immutableBaseline.preserved === true
+    && immutableBaseline.rewritten === false
+    && readString(currentScan.scanId) === "528ad724-6251-46fa-a812-48264396f321"
+    && readString(currentScan.status) === "completed"
+    && readString(currentScan.coverage) === "partial"
+    && readNumber(currentScan.reportableFindingCount) === 15
+    && readNumber(isRecord(currentScan.severityCounts) ? currentScan.severityCounts.medium : null) === 11
+    && readNumber(isRecord(currentScan.severityCounts) ? currentScan.severityCounts.low : null) === 4
+    && canonicalArtifactsExist
+    && readNumber(remediation.sourceRemediatedCount) === 3
+    && readNumber(remediation.liveDeployedRemediationCount) === 3
+    && readNumber(remediation.remainingReportableFindingCountBeforeRescan) === 12
+    && remediation.liveAfterDeploymentPending === false
+    && remediation.freshPostRemediationScanRequired === true
+    && remediation.securityCompleteClaimAllowed === false
+    && readString(remediation.latestSourceHead) === readString(productionBuild.commitSha)
+    && readString(productionBuild.branch) === "master"
+    && readString(productionBuild.environment) === "production"
+    && slugs.has("safety-reference-disconnect-cancellation")
+    && slugs.has("hwp-error-path-disclosure")
+    && slugs.has("sif-embedding-quality-admission")
+    && noMutation
+    && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && remainingBoundaries.approvalGatedBoundariesPreserved === true
+    && remainingBoundaries.securityCompleteClaimAllowed === false;
+
+  return gateResult({
+    id: "current_repository_security_rescan",
+    label: "Current repository security rescan",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Standard current-revision scan 528ad724 is sealed with 15 findings (11 medium, 4 low) under partial coverage. Live source now bounds three findings, including fail-closed SIF corpus quality admission, while 12 findings and a fresh post-remediation scan remain open. The immutable original 18-accounted baseline is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      : `Current scan verdict=${readString(report.verdict) || "missing"}, scan=${readString(currentScan.scanId) || "missing"}, findings=${readNumber(currentScan.reportableFindingCount)}, sourceRemediated=${readNumber(remediation.sourceRemediatedCount)}, liveRemediated=${readNumber(remediation.liveDeployedRemediationCount)}, remaining=${readNumber(remediation.remainingReportableFindingCountBeforeRescan)}, canonical=${canonicalArtifactsExist}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Remediate or explicitly defer the remaining 12 findings, then run a fresh post-remediation Standard scan before any security-complete claim."]
+      : ["Restore the exact sealed scan, three live source remediations, canonical artifacts, immutable baseline, and no-mutation boundaries."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateLearningExportRendererSecurityGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.learningExportRendererSecurity;
   const report = readJsonFile(rootDir, evidencePath);
@@ -6618,6 +6700,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateFullRepositorySecurityScanGate(rootDir),
     evaluateRepositorySecurityScanReconciliationGate(rootDir),
     evaluateCurrentSecurityRemediationLedgerGate(rootDir),
+    evaluateCurrentRepositorySecurityRescanGate(rootDir),
     evaluatePublicJsonRequestBodyBudgetGate(rootDir),
     evaluateSecurityResourceRemediationGate(rootDir),
     evaluateSecurityUpstreamTransportRemediationGate(rootDir),

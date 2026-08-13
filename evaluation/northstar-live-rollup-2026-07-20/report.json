@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-13T13:13:25.372Z",
-  "head": "50de0f830aa35cc498e322371604785e6d188d69",
+  "generatedAt": "2026-08-13T14:17:47.967Z",
+  "head": "f472d41ce728dca12f20426226e206f57e630626",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "50de0f830aa35cc498e322371604785e6d188d69",
+    "commitSha": "f472d41ce728dca12f20426226e206f57e630626",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-azk5elhpu-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-hfgikts2c-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 47
+    "gateCount": 48
   },
   "provenGates": [
     {
@@ -134,6 +134,12 @@
       "state": "notice",
       "artifact": "evaluation\\security-current-remediation-ledger-2026-08-13\\report.json",
       "detail": "The immutable 17-finding Standard scan and separate 23-finding current set remain preserved. Current live/source receipts classify 17/23 findings as deployed-source remediated and keep six findings visible: three approval-gated database boundaries and three distributed-runtime controls. This is not a security-complete claim; exact saved Share remains MISSING_EVIDENCE and provider, vector, wiki, and KOSHA promotion approvals remain closed."
+    },
+    {
+      "id": "current_repository_security_rescan",
+      "state": "notice",
+      "artifact": "evaluation\\current-full-repository-security-scan-2026-08-13\\report.json",
+      "detail": "Standard current-revision scan 528ad724 is sealed with 15 findings (11 medium, 4 low) under partial coverage. Live source now bounds three findings, including fail-closed SIF corpus quality admission, while 12 findings and a fresh post-remediation scan remain open. The immutable original 18-accounted baseline is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "public_json_request_body_budget",
@@ -941,9 +947,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "50de0f830aa35cc498e322371604785e6d188d69",
+      "sourceCommit": "f472d41ce728dca12f20426226e206f57e630626",
       "sourceStatus": "exact",
-      "productionCommit": "50de0f830aa35cc498e322371604785e6d188d69",
+      "productionCommit": "f472d41ce728dca12f20426226e206f57e630626",
       "productionStatus": "matches_live"
     },
     {
@@ -1094,9 +1100,17 @@
       "id": "current_security_remediation_ledger",
       "artifact": "evaluation\\security-current-remediation-ledger-2026-08-13\\report.json",
       "sourceCommit": "50de0f830aa35cc498e322371604785e6d188d69",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "50de0f830aa35cc498e322371604785e6d188d69",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "current_repository_security_rescan",
+      "artifact": "evaluation\\current-full-repository-security-scan-2026-08-13\\report.json",
+      "sourceCommit": "a412e68828201f89f32563fa7fd43bc2c99abd6d",
+      "sourceStatus": "ancestor",
+      "productionCommit": "a412e68828201f89f32563fa7fd43bc2c99abd6d",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "public_json_request_body_budget",

@@ -39,6 +39,7 @@ const ARTIFACTS = Object.freeze({
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
+  currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
@@ -2134,6 +2135,11 @@ export function buildNorthstarNextRunway(options) {
         gate: "current_security_remediation_ledger",
         state: "notice",
         reason: "17/23 current findings have deployed-source remediation receipts while three database findings remain approval-gated and three distributed-runtime findings remain open; security-complete is false",
+      },
+      {
+        gate: "current_repository_security_rescan",
+        state: "notice",
+        reason: "sealed current scan retains 15 findings under partial coverage; three live source remediations are bounded, 12 findings and a fresh post-remediation Standard scan remain open, and security-complete is false",
       },
       {
         gate: "mcp_generation_work_budget_security",

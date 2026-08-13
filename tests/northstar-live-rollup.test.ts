@@ -445,6 +445,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "full_repository_security_scan", state: "proven", evidencePath: "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json", detail: "sealed follow-up scan with 17 reportable findings and one deferred candidate" },
       { id: "repository_security_scan_reconciliation", state: "notice", evidencePath: "evaluation/repository-security-scan-reconciliation-2026-08-11/report.json", detail: "same-target scan conflict with fail-open receipts" },
       { id: "current_security_remediation_ledger", state: "notice", evidencePath: "evaluation/security-current-remediation-ledger-2026-08-13/report.json", detail: "17/23 deployed-source remediated; six approval or distributed-runtime boundaries remain open" },
+      { id: "current_repository_security_rescan", state: "notice", evidencePath: "evaluation/current-full-repository-security-scan-2026-08-13/report.json", detail: "15 findings, three live source remediations, 12 remaining, fresh scan required" },
       { id: "public_search_distributed_rate_limit_readiness", state: "notice", evidencePath: "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json", detail: "current-source capability with production configuration pending" },
       { id: "public_generation_admission_security", state: "notice", evidencePath: "evaluation/security-public-generation-admission-2026-08-04/report.json", detail: "live instance admission with distributed hardening and fresh rescan pending" },
       { id: "security_followup_remediation", state: "proven", evidencePath: "evaluation/codex-security-followup-remediation-2026-08-11/report.json", detail: "deployed three-finding remediation with immutable baseline preserved" },
@@ -1160,6 +1161,21 @@ function createFixtureRoot(): { root: string; head: string } {
     },
     remainingBoundaries: { securityCompleteClaimAllowed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
+  writeJson(root, "evaluation/current-full-repository-security-scan-2026-08-13/report.json", {
+    verdict: "NOTICE_LIVE_DEPLOYED_SOURCE_THREE_FINDING_REMEDIATION_RESCAN_PENDING",
+    sourceHead: "TO_FILL",
+    currentScan: { scanId: "528ad724-6251-46fa-a812-48264396f321", reportableFindingCount: 15 },
+    currentSourceRemediation: {
+      latestSourceHead: "TO_FILL",
+      sourceRemediatedCount: 3,
+      liveDeployedRemediationCount: 3,
+      remainingReportableFindingCountBeforeRescan: 12,
+      freshPostRemediationScanRequired: true,
+      securityCompleteClaimAllowed: false,
+      productionBuild: { commitSha: "TO_FILL" },
+    },
+    remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  });
   writeJson(root, "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
     sourceHead: "TO_FILL",
@@ -1215,6 +1231,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/security-upstream-transport-remediation-2026-08-11/report.json",
     "evaluation/security-safety-reference-surface-remediation-2026-08-11/report.json",
     "evaluation/security-current-remediation-ledger-2026-08-13/report.json",
+    "evaluation/current-full-repository-security-scan-2026-08-13/report.json",
     "evaluation/public-json-request-body-budget-2026-08-11/report.json",
     "evaluation/improvement-photo-analysis-budget-2026-08-11/report.json",
     "evaluation/public-provider-cancellation-2026-08-11/report.json",
@@ -1538,6 +1555,7 @@ describe("northstar live rollup", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.evidence.find((item) => item.id === "current_security_remediation_ledger")).toBeDefined();
+    expect(report.evidence.find((item) => item.id === "current_repository_security_rescan")).toBeDefined();
     expect(report.publicJsonRequestBodyBudget).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",
       findingId: "csf_44619971f6e14344d1d76da5",

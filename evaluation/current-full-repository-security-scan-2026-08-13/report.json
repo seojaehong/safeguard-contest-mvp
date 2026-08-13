@@ -2,6 +2,8 @@
   "schemaVersion": "safeclaw-current-full-repository-security-scan/v1",
   "generatedAt": "2026-08-13T23:06:00+09:00",
   "verdict": "NOTICE_LIVE_DEPLOYED_SOURCE_THREE_FINDING_REMEDIATION_RESCAN_PENDING",
+  "sourceHead": "a412e68828201f89f32563fa7fd43bc2c99abd6d",
+  "productionCommit": "a412e68828201f89f32563fa7fd43bc2c99abd6d",
   "userContext": "Preserve immutable original 18-finding baseline. Verify current f0c8a7be source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
   "immutableBaseline": {
     "scanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",

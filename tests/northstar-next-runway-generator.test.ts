@@ -1985,6 +1985,21 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     },
     remainingBoundaries: { securityCompleteClaimAllowed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
+  writeJson(root, "evaluation/current-full-repository-security-scan-2026-08-13/report.json", {
+    verdict: "NOTICE_LIVE_DEPLOYED_SOURCE_THREE_FINDING_REMEDIATION_RESCAN_PENDING",
+    sourceHead: "fixture-sha",
+    currentScan: { scanId: "528ad724-6251-46fa-a812-48264396f321", reportableFindingCount: 15 },
+    currentSourceRemediation: {
+      latestSourceHead: "fixture-sha",
+      sourceRemediatedCount: 3,
+      liveDeployedRemediationCount: 3,
+      remainingReportableFindingCountBeforeRescan: 12,
+      freshPostRemediationScanRequired: true,
+      securityCompleteClaimAllowed: false,
+      productionBuild: { commitSha: "fixture-sha" },
+    },
+    remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  });
   writeJson(root, "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
     sourceHead: "fixture-sha",
@@ -2791,6 +2806,10 @@ describe("northstar next runway generator", () => {
     });
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "current_security_remediation_ledger",
+      state: "notice",
+    }));
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "current_repository_security_rescan",
       state: "notice",
     }));
     expect(report.provenCurrentState).toContain("public_json_request_body_budget");

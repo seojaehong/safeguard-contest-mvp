@@ -2557,6 +2557,60 @@ function createFixtureRoot(): string {
     path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
     currentSecurityRemediationLedgerFixture(),
   );
+  writeJson(rootDir, path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "report.json"), {
+    verdict: "NOTICE_LIVE_DEPLOYED_SOURCE_THREE_FINDING_REMEDIATION_RESCAN_PENDING",
+    immutableBaseline: {
+      scanId: "8fe9c06a-018c-446f-aa98-1b37df95287a",
+      accountedFindingCount: 18,
+      preserved: true,
+      rewritten: false,
+    },
+    currentScan: {
+      scanId: "528ad724-6251-46fa-a812-48264396f321",
+      status: "completed",
+      coverage: "partial",
+      reportableFindingCount: 15,
+      severityCounts: { medium: 11, low: 4 },
+      canonicalArtifacts: {
+        manifest: "evaluation/current-full-repository-security-scan-2026-08-13/canonical/scan-manifest.json",
+        findings: "evaluation/current-full-repository-security-scan-2026-08-13/canonical/findings.json",
+        coverage: "evaluation/current-full-repository-security-scan-2026-08-13/canonical/coverage.json",
+        markdownProjection: "evaluation/current-full-repository-security-scan-2026-08-13/scan-report.md",
+      },
+    },
+    currentSourceRemediation: {
+      latestSourceHead: "fixture-sha",
+      sourceRemediatedCount: 3,
+      liveDeployedRemediationCount: 3,
+      remainingReportableFindingCountBeforeRescan: 12,
+      liveAfterDeploymentPending: false,
+      freshPostRemediationScanRequired: true,
+      securityCompleteClaimAllowed: false,
+      productionBuild: { commitSha: "fixture-sha", branch: "master", environment: "production" },
+      items: [
+        { slug: "safety-reference-disconnect-cancellation" },
+        { slug: "hwp-error-path-disclosure" },
+        { slug: "sif-embedding-quality-admission" },
+      ],
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      embeddingOrVectorMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      approvalGatedBoundariesPreserved: true,
+      securityCompleteClaimAllowed: false,
+    },
+  });
+  writeJson(rootDir, path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "canonical", "scan-manifest.json"), {});
+  writeJson(rootDir, path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "canonical", "findings.json"), {});
+  writeJson(rootDir, path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "canonical", "coverage.json"), {});
+  writeText(rootDir, path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "scan-report.md"), "# Scan\n");
   writeJson(rootDir, path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",
     sourceHead: "fixture-sha",
@@ -4274,6 +4328,34 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "current_security_remediation_ledger")?.state).toBe("notice");
     expect(audit.gates.find((gate) => gate.id === "public_json_request_body_budget")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "public_provider_admission")?.state).toBe("notice");
+  });
+
+  it("keeps the current repository scan open and fails closed if saved Share is overclaimed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-full-repository-security-scan-2026-08-13",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "current_repository_security_rescan");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("15 findings");
+    expect(gate?.detail).toContain("12 findings");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "current_repository_security_rescan")?.state)
+      .toBe("contradicted");
   });
 
   it("fails older governed-path gates closed when the companion weakens boundaries", async () => {

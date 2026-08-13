@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-13T13:13:39.889Z",
+  "generatedAt": "2026-08-13T14:18:04.533Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "50de0f830aa35cc498e322371604785e6d188d69",
-  "productionCommit": "50de0f830aa35cc498e322371604785e6d188d69",
+  "sourceHead": "f472d41ce728dca12f20426226e206f57e630626",
+  "productionCommit": "f472d41ce728dca12f20426226e206f57e630626",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "50de0f830aa35cc498e322371604785e6d188d69",
+    "commitSha": "f472d41ce728dca12f20426226e206f57e630626",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-azk5elhpu-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-hfgikts2c-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "50de0f830aa35cc498e322371604785e6d188d69",
-  "liveRollupLiveCommit": "50de0f830aa35cc498e322371604785e6d188d69",
+  "liveExactEvidenceCommit": "f472d41ce728dca12f20426226e206f57e630626",
+  "liveRollupLiveCommit": "f472d41ce728dca12f20426226e206f57e630626",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -51,6 +51,7 @@
     "fullRepositorySecurityScan": "evaluation\\follow-up-full-repository-security-scan-2026-08-02\\report.json",
     "repositorySecurityScanReconciliation": "evaluation\\repository-security-scan-reconciliation-2026-08-11\\report.json",
     "currentSecurityRemediationLedger": "evaluation\\security-current-remediation-ledger-2026-08-13\\report.json",
+    "currentRepositorySecurityRescan": "evaluation\\current-full-repository-security-scan-2026-08-13\\report.json",
     "publicJsonRequestBodyBudget": "evaluation\\public-json-request-body-budget-2026-08-11\\report.json",
     "improvementPhotoAnalysisBudget": "evaluation\\improvement-photo-analysis-budget-2026-08-11\\report.json",
     "publicProviderCancellation": "evaluation\\public-provider-cancellation-2026-08-11\\report.json",
@@ -139,6 +140,11 @@
       "gate": "current_security_remediation_ledger",
       "state": "notice",
       "reason": "17/23 current findings have deployed-source remediation receipts while three database findings remain approval-gated and three distributed-runtime findings remain open; security-complete is false"
+    },
+    {
+      "gate": "current_repository_security_rescan",
+      "state": "notice",
+      "reason": "sealed current scan retains 15 findings under partial coverage; three live source remediations are bounded, 12 findings and a fresh post-remediation Standard scan remain open, and security-complete is false"
     },
     {
       "gate": "mcp_generation_work_budget_security",
