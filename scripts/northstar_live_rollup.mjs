@@ -37,6 +37,7 @@ const ARTIFACTS = Object.freeze({
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "report.json"),
   agentChatDurableAdmission: path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"),
+  mcpProviderAdmission: path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
@@ -351,6 +352,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const currentSecurityRemediationLedger = tryReadJson(rootDir, ARTIFACTS.currentSecurityRemediationLedger);
   const currentRepositorySecurityRescan = tryReadJson(rootDir, ARTIFACTS.currentRepositorySecurityRescan);
   const agentChatDurableAdmission = tryReadJson(rootDir, ARTIFACTS.agentChatDurableAdmission);
+  const mcpProviderAdmission = tryReadJson(rootDir, ARTIFACTS.mcpProviderAdmission);
   const publicJsonRequestBodyBudget = tryReadJson(rootDir, ARTIFACTS.publicJsonRequestBodyBudget);
   const improvementPhotoAnalysisBudget = tryReadJson(rootDir, ARTIFACTS.improvementPhotoAnalysisBudget);
   const publicProviderCancellation = tryReadJson(rootDir, ARTIFACTS.publicProviderCancellation);
@@ -455,6 +457,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "current_security_remediation_ledger", ARTIFACTS.currentSecurityRemediationLedger, currentSecurityRemediationLedger),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_repository_security_rescan", ARTIFACTS.currentRepositorySecurityRescan, currentRepositorySecurityRescan),
     evidenceStatus(rootDir, currentHead, liveCommit, "agent_chat_durable_admission_security", ARTIFACTS.agentChatDurableAdmission, agentChatDurableAdmission),
+    evidenceStatus(rootDir, currentHead, liveCommit, "mcp_provider_admission_security", ARTIFACTS.mcpProviderAdmission, mcpProviderAdmission),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_json_request_body_budget", ARTIFACTS.publicJsonRequestBodyBudget, publicJsonRequestBodyBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "improvement_photo_analysis_budget", ARTIFACTS.improvementPhotoAnalysisBudget, improvementPhotoAnalysisBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_cancellation", ARTIFACTS.publicProviderCancellation, publicProviderCancellation),
@@ -820,6 +823,21 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       freshRescanRequired: recordAt(agentChatDurableAdmission, "remainingBoundaries")?.freshFullRepositorySecurityScanRequiredForCanonicalClosure === true,
       securityCompleteClaimAllowed: recordAt(agentChatDurableAdmission, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
       exactSavedShareVerdict: asString(recordAt(agentChatDurableAdmission, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    mcpProviderAdmission: {
+      artifact: ARTIFACTS.mcpProviderAdmission,
+      verdict: isRecord(mcpProviderAdmission) ? asString(mcpProviderAdmission.verdict) : "missing",
+      sourceHead: isRecord(mcpProviderAdmission) ? asString(mcpProviderAdmission.sourceHead) : "",
+      productionCommit: asString(recordAt(mcpProviderAdmission, "productionBuild")?.commitSha),
+      findingId: asString(recordAt(mcpProviderAdmission, "sealedFinding")?.findingId),
+      focusedTests: asNumber(recordAt(recordAt(mcpProviderAdmission, "verification"), "focused")?.tests),
+      adjacentTests: asNumber(recordAt(recordAt(mcpProviderAdmission, "verification"), "focusedAndAdjacentMcp")?.tests),
+      liveRateLimitMode: asString(recordAt(mcpProviderAdmission, "liveProbe")?.rateLimitMode),
+      authenticatedProviderGenerationAvailability: asString(recordAt(mcpProviderAdmission, "liveProbe")?.authenticatedProviderGenerationAvailability),
+      distributedProductionActivation: asString(recordAt(mcpProviderAdmission, "remainingBoundaries")?.distributedProductionActivation),
+      freshRescanRequired: recordAt(mcpProviderAdmission, "remainingBoundaries")?.freshFullRepositorySecurityScanRequiredForCanonicalClosure === true,
+      securityCompleteClaimAllowed: recordAt(mcpProviderAdmission, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
+      exactSavedShareVerdict: asString(recordAt(mcpProviderAdmission, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     mcpGenerationWorkBudgetSecurity: {
       artifact: ARTIFACTS.mcpGenerationWorkBudgetSecurity,

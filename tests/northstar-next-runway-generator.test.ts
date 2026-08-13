@@ -2014,6 +2014,27 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/security-mcp-provider-admission-2026-08-14/report.json", {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_MCP_PROVIDER_ADMISSION_RESCAN_PENDING",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha" },
+    sealedFinding: { findingId: "csf_b10479b6501c208c4d11644e" },
+    verification: {
+      focused: { tests: 61 },
+      focusedAndAdjacentMcp: { tests: 94 },
+    },
+    liveProbe: {
+      rateLimitMode: "instance",
+      authenticatedProviderGenerationAvailability: "FAIL_CLOSED_UNTIL_DISTRIBUTED_CONFIG",
+    },
+    remainingBoundaries: {
+      distributedProductionActivation: "OPEN_OPERATOR_CONFIGURATION",
+      validAuthenticatedRuntimeProbe: "NOT_EXECUTED_NO_MCP_TOKEN",
+      freshFullRepositorySecurityScanRequiredForCanonicalClosure: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/document-authoring-pane-margin-2026-08-02/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
     productCommit: "fixture-sha",
@@ -2879,6 +2900,23 @@ describe("northstar next runway generator", () => {
     });
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "mcp_generation_work_budget_security",
+      state: "notice",
+    }));
+    expect(report.mcpProviderAdmission).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_MCP_PROVIDER_ADMISSION_RESCAN_PENDING",
+      findingId: "csf_b10479b6501c208c4d11644e",
+      focusedTests: 61,
+      adjacentTests: 94,
+      liveRateLimitMode: "instance",
+      authenticatedProviderGenerationAvailability: "FAIL_CLOSED_UNTIL_DISTRIBUTED_CONFIG",
+      distributedProductionActivation: "OPEN_OPERATOR_CONFIGURATION",
+      validAuthenticatedRuntimeProbe: "NOT_EXECUTED_NO_MCP_TOKEN",
+      freshRescanRequired: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "mcp_provider_admission_security",
       state: "notice",
     }));
     expect(report.noticeState).toContainEqual(expect.objectContaining({

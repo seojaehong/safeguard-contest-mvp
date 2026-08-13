@@ -1190,6 +1190,26 @@ function createFixtureRoot(): { root: string; head: string } {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/security-mcp-provider-admission-2026-08-14/report.json", {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_MCP_PROVIDER_ADMISSION_RESCAN_PENDING",
+    sourceHead: "TO_FILL",
+    productionBuild: { commitSha: "TO_FILL" },
+    sealedFinding: { findingId: "csf_b10479b6501c208c4d11644e" },
+    verification: {
+      focused: { tests: 61 },
+      focusedAndAdjacentMcp: { tests: 94 },
+    },
+    liveProbe: {
+      rateLimitMode: "instance",
+      authenticatedProviderGenerationAvailability: "FAIL_CLOSED_UNTIL_DISTRIBUTED_CONFIG",
+    },
+    remainingBoundaries: {
+      distributedProductionActivation: "OPEN_OPERATOR_CONFIGURATION",
+      freshFullRepositorySecurityScanRequiredForCanonicalClosure: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/document-authoring-pane-margin-2026-08-02/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
     productCommit: "TO_FILL",
@@ -1237,6 +1257,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/public-provider-cancellation-2026-08-11/report.json",
     "evaluation/public-provider-admission-2026-08-11/report.json",
     "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json",
+    "evaluation/security-mcp-provider-admission-2026-08-14/report.json",
     "evaluation/learning-export-renderer-security-2026-08-02/report.json",
     "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
@@ -1608,6 +1629,19 @@ describe("northstar live rollup", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.evidence.find((item) => item.id === "mcp_generation_work_budget_security")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.mcpProviderAdmission).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_MCP_PROVIDER_ADMISSION_RESCAN_PENDING",
+      findingId: "csf_b10479b6501c208c4d11644e",
+      focusedTests: 61,
+      adjacentTests: 94,
+      liveRateLimitMode: "instance",
+      authenticatedProviderGenerationAvailability: "FAIL_CLOSED_UNTIL_DISTRIBUTED_CONFIG",
+      distributedProductionActivation: "OPEN_OPERATOR_CONFIGURATION",
+      freshRescanRequired: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "mcp_provider_admission_security")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "public_generation_admission_security")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "public_search_distributed_rate_limit_readiness")?.sourceStatus).toBe("ancestor");
     expect(report.learningExportRendererSecurity).toMatchObject({

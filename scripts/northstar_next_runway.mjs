@@ -41,6 +41,7 @@ const ARTIFACTS = Object.freeze({
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "report.json"),
   agentChatDurableAdmission: path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"),
+  mcpProviderAdmission: path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
@@ -1574,6 +1575,32 @@ function agentChatDurableAdmissionSummary(report) {
 }
 
 /** @param {unknown} report */
+function mcpProviderAdmissionSummary(report) {
+  if (!isRecord(report)) return {};
+  const production = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const live = isRecord(report.liveProbe) ? report.liveProbe : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focused) ? verification.focused : {};
+  const adjacent = isRecord(verification.focusedAndAdjacentMcp) ? verification.focusedAndAdjacentMcp : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(production.commitSha),
+    findingId: isRecord(report.sealedFinding) ? asString(report.sealedFinding.findingId) : "",
+    focusedTests: typeof focused.tests === "number" ? focused.tests : null,
+    adjacentTests: typeof adjacent.tests === "number" ? adjacent.tests : null,
+    liveRateLimitMode: asString(live.rateLimitMode),
+    authenticatedProviderGenerationAvailability: asString(live.authenticatedProviderGenerationAvailability),
+    distributedProductionActivation: asString(remaining.distributedProductionActivation),
+    validAuthenticatedRuntimeProbe: asString(remaining.validAuthenticatedRuntimeProbe),
+    freshRescanRequired: asBoolean(remaining.freshFullRepositorySecurityScanRequiredForCanonicalClosure),
+    securityCompleteClaimAllowed: asBoolean(remaining.securityCompleteClaimAllowed),
+    exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
+  };
+}
+
+/** @param {unknown} report */
 function mcpGenerationWorkBudgetSecuritySummary(report) {
   if (!isRecord(report)) return {};
   const contract = isRecord(report.currentSourceContract) ? report.currentSourceContract : {};
@@ -2005,6 +2032,10 @@ export function buildNorthstarNextRunway(options) {
     options.rootDir,
     ARTIFACTS.agentChatDurableAdmission,
   );
+  const mcpProviderAdmission = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.mcpProviderAdmission,
+  );
   const mcpGenerationWorkBudgetSecurity = readOptionalJson(
     options.rootDir,
     ARTIFACTS.mcpGenerationWorkBudgetSecurity,
@@ -2192,6 +2223,11 @@ export function buildNorthstarNextRunway(options) {
         state: "notice",
         reason: "deployed source fails authenticated Agent Chat closed until durable distributed admission is configured; authenticated runtime proof and a fresh rescan remain open",
       },
+      {
+        gate: "mcp_provider_admission_security",
+        state: "notice",
+        reason: "deployed source fails provider-generating MCP tools closed until token-and-tenant-bound durable distributed admission is configured; valid authenticated runtime proof and a fresh rescan remain open",
+      },
     ],
     approvalGated: approvalGates(approvalRunway, shareRecipientAckApproval),
     launchReadiness: launchReadinessSummary(launch),
@@ -2252,6 +2288,7 @@ export function buildNorthstarNextRunway(options) {
     publicProviderCancellation: publicProviderCancellationResult,
     publicProviderAdmission: publicProviderAdmissionResult,
     agentChatDurableAdmission: agentChatDurableAdmissionSummary(agentChatDurableAdmission),
+    mcpProviderAdmission: mcpProviderAdmissionSummary(mcpProviderAdmission),
     mcpGenerationWorkBudgetSecurity: mcpGenerationWorkBudgetSecurityResult,
     learningExportRendererSecurity: learningExportRendererSecurityResult,
     hermesKnowledgeReviewAuthorityUi: hermesKnowledgeReviewAuthorityUiSummary(hermesKnowledgeReviewAuthorityUi),
