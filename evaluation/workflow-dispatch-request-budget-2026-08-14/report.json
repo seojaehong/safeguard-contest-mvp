@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "safeclaw-workflow-dispatch-request-budget/v1",
+  "generatedAt": "2026-08-14T00:46:30+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_WORKFLOW_DISPATCH_REQUEST_BODY_BUDGET_LIVE_PENDING",
+  "productCommit": "aa907891",
+  "finding": {
+    "scanId": "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+    "ruleId": "resource-exhaustion.request-body-budget",
+    "title": "Workflow dispatch parses an unbounded JSON body before authorization",
+    "severity": "low"
+  },
+  "contract": {
+    "requestBodyMaxBytes": 65536,
+    "oversizedStatus": 413,
+    "oversizedCode": "WORKFLOW_DISPATCH_PAYLOAD_TOO_LARGE",
+    "jsonParsedOnlyAfterBudget": true,
+    "databaseClientCreatedForOversizedRequest": false,
+    "providerRelayCalledForOversizedRequest": false
+  },
+  "verification": {
+    "focusedAndAdjacentTests": {
+      "files": 3,
+      "tests": 78,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "diffCheck": "PASS"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "liveAfterDeploymentPending": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedBoundariesPreserved": true,
+    "securityCompleteClaimAllowed": false
+  }
+}
