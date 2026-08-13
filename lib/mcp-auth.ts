@@ -30,6 +30,8 @@ export interface McpAuthContext {
   source: McpAuthSource;
   /** DB 토큰이면 mcp_tokens.id, env 레거시면 null. */
   tokenId: string | null;
+  /** Admission-only sha256 bearer fingerprint. Plaintext bearer is never retained. */
+  admissionIdentity?: string;
 }
 
 /** decideAuthContext가 다루는 mcp_tokens 행의 최소 형태. */
@@ -217,12 +219,17 @@ export function asAuthContext(value: unknown): McpAuthContext | null {
   const v = value as Record<string, unknown>;
   if (v.source !== "db" && v.source !== "env" && v.source !== "broker") return null;
   if (!Array.isArray(v.scopes)) return null;
+  const admissionIdentity = typeof v.admissionIdentity === "string"
+    && /^[a-f0-9]{64}$/u.test(v.admissionIdentity)
+    ? v.admissionIdentity
+    : undefined;
   return {
     siteId: typeof v.siteId === "string" ? v.siteId : null,
     orgId: typeof v.orgId === "string" ? v.orgId : null,
     scopes: normalizeScopes(v.scopes),
     source: v.source,
     tokenId: typeof v.tokenId === "string" ? v.tokenId : null,
+    ...(admissionIdentity ? { admissionIdentity } : {}),
   };
 }
 

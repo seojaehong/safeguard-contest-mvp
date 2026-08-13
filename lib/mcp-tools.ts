@@ -64,7 +64,13 @@ export function toToolError(error: unknown): McpToolResult {
     : undefined;
   const payload = rawCode === "MCP_TOOL_FORBIDDEN"
     ? { code: "MCP_TOOL_FORBIDDEN", error: "도구 권한이 없습니다." }
-    : { code: "MCP_TOOL_INTERNAL_ERROR", error: "도구 실행 중 오류가 발생했습니다." };
+    : rawCode === "MCP_PROVIDER_ADMISSION_UNAVAILABLE"
+      ? { code: rawCode, error: "AI 생성 보호 서비스를 확인하는 동안 요청을 처리할 수 없습니다." }
+      : rawCode === "MCP_PROVIDER_RATE_LIMIT"
+        ? { code: rawCode, error: "AI 생성 요청이 너무 잦습니다. 잠시 후 다시 시도해 주세요." }
+        : rawCode === "MCP_PROVIDER_CONCURRENCY_LIMIT"
+          ? { code: rawCode, error: "AI 생성 작업이 많습니다. 잠시 후 다시 시도해 주세요." }
+          : { code: "MCP_TOOL_INTERNAL_ERROR", error: "도구 실행 중 오류가 발생했습니다." };
   return {
     content: [{
       type: "text",

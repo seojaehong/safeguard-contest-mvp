@@ -26,7 +26,8 @@ vi.mock("mcp-handler", () => ({
   }),
 }));
 
-vi.mock("@/lib/mcp-auth", () => ({
+vi.mock("@/lib/mcp-auth", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/mcp-auth")>()),
   isMcpEnabled: vi.fn(() => true),
   resolveMcpAuth: mocks.resolveMcpAuth,
 }));
@@ -43,13 +44,21 @@ type SafeParseSchema = {
 
 type ToolConfig = {
   inputSchema?: SafeParseSchema;
+  callback?: (args: Record<string, unknown>, extra: unknown) => Promise<{
+    content: Array<{ type: "text"; text: string }>;
+    isError?: boolean;
+  }>;
 };
 
 function captureToolConfigs(): Map<string, ToolConfig> {
   const tools = new Map<string, ToolConfig>();
   const server = {
-    registerTool(name: string, config: ToolConfig): object {
-      tools.set(name, config);
+    registerTool(
+      name: string,
+      config: ToolConfig,
+      callback: NonNullable<ToolConfig["callback"]>,
+    ): object {
+      tools.set(name, { ...config, callback });
       return {};
     },
   };
@@ -162,6 +171,38 @@ describe("MCP tool work budgets", () => {
       task: "용접",
       document_text: "가".repeat(MCP_DOCUMENT_TEXT_MAX_CHARS + 1),
     }).success).toBe(false);
+  });
+
+  it.each([
+    ["generate_safety_docpack", { question: "용접", mode: "full" }],
+    ["generate_reviewed_safety_docpack", { question: "용접", task: "용접", mode: "enhanced" }],
+  ] as const)("fails %s closed before provider work without durable production admission", async (toolName, args) => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const callback = captureToolConfigs().get(toolName)?.callback;
+    if (!callback) throw new Error(`Missing ${toolName} callback`);
+
+    const result = await callback(args, {
+      authInfo: {
+        extra: {
+          admissionIdentity: "b".repeat(64),
+          orgId: "org-1",
+          scopes: ["tools:write"],
+          siteId: "site-1",
+          source: "db",
+          tokenId: "token-1",
+        },
+      },
+    });
+
+    expect(result.isError).toBe(true);
+    expect(JSON.parse(result.content[0]?.text ?? "{}")).toMatchObject({
+      code: "MCP_PROVIDER_ADMISSION_UNAVAILABLE",
+    });
+    expect(error).toHaveBeenCalled();
+    error.mockRestore();
   });
 
   it("rejects an oversized chunked JSON-RPC body before the MCP handler", async () => {

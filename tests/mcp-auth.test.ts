@@ -404,6 +404,26 @@ describe("resolveMcpAuth tenant identity", () => {
     await expect(resolveMcpAuth("legacy-token")).resolves.toBeNull();
   });
 
+  it("preserves only a validated bearer fingerprint for provider admission", () => {
+    const admissionIdentity = "a".repeat(64);
+    expect(asAuthContext({
+      admissionIdentity,
+      siteId: "s",
+      orgId: "o",
+      scopes: ["tools:write"],
+      source: "db",
+      tokenId: "t",
+    })).toMatchObject({ admissionIdentity });
+    expect(asAuthContext({
+      admissionIdentity: "raw-bearer",
+      siteId: "s",
+      orgId: "o",
+      scopes: ["tools:write"],
+      source: "db",
+      tokenId: "t",
+    })).not.toHaveProperty("admissionIdentity");
+  });
+
   it("accepts a production legacy token only inside its bounded expiry window", async () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("SAFECLAW_MCP_TOKENS", "legacy-token");

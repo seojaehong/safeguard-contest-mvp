@@ -57,6 +57,7 @@ import {
   isMcpEnabled,
   resolveMcpAuth,
 } from "@/lib/mcp-auth";
+import { withMcpProviderAdmission } from "@/lib/mcp-provider-admission";
 import { registerScopedTool } from "@/lib/mcp-scoped-tool";
 import {
   buildAccidentCasesResult,
@@ -188,9 +189,13 @@ export function registerTools(server: McpServer): void {
       },
     },
     async ({ question, task, mode, includeFull }, authContext) => {
-      return generateReviewedSafetyDocpackHandler(
-        { question, task, mode, includeFull },
+      return withMcpProviderAdmission(
         authContext,
+        mode ?? "full",
+        () => generateReviewedSafetyDocpackHandler(
+          { question, task, mode, includeFull },
+          authContext,
+        ),
       );
     }
   );
@@ -213,7 +218,13 @@ export function registerTools(server: McpServer): void {
           .describe("각 문서 전체 본문 포함 여부 (기본 false — 프리뷰만)"),
       },
     },
-    generateSafetyDocpackHandler
+    async ({ question, mode, includeFull }, authContext) => {
+      return withMcpProviderAdmission(
+        authContext,
+        mode ?? "full",
+        () => generateSafetyDocpackHandler({ question, mode, includeFull }, authContext),
+      );
+    }
   );
 
   registerScopedTool(server,
@@ -349,7 +360,10 @@ const verifyToken = async (_req: Request, bearerToken?: string): Promise<AuthInf
     clientId: context.source === "db" ? `safeclaw-mcp:${context.tokenId}` : "safeclaw-mcp",
     scopes: context.scopes,
     // McpAuthContext — 평문 토큰은 포함하지 않는다. AuthInfo.extra는 Record<string, unknown>.
-    extra: context as unknown as Record<string, unknown>,
+    extra: {
+      ...context,
+      admissionIdentity: createHash("sha256").update(bearerToken).digest("hex"),
+    } as unknown as Record<string, unknown>,
   };
 };
 
