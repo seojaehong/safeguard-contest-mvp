@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-13T18:05:18.980Z
-Source HEAD at generation: 0230799edfade291323658f18152330ae8632b66
-Live commit at generation: 784a98323ff61792340c7a9ca24e651d81613647
+Generated at: 2026-08-13T18:33:52.404Z
+Source HEAD at generation: 4b9d20648ae8174aef2ea9f53858c6e27df5c1a9
+Live commit at generation: 8aa16231ffa0cf66010a55460b17841a01396943
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -255,6 +255,7 @@ Overall: `northstar_open_approval_gated`
 | current_repository_security_rescan | notice | evaluation\current-full-repository-security-scan-2026-08-13\report.json |
 | post_remediation_repository_security_scan | notice | evaluation\post-remediation-full-repository-security-scan-2026-08-14\report.json |
 | share_session_revocation_security | notice | evaluation\share-session-revocation-remediation-2026-08-14\report.json |
+| share_recipient_contact_verification_security | notice | evaluation\share-recipient-contact-verification-2026-08-14\report.json |
 | agent_chat_durable_admission_security | notice | evaluation\security-agent-chat-durable-admission-2026-08-14\report.json |
 | mcp_provider_admission_security | notice | evaluation\security-mcp-provider-admission-2026-08-14\report.json |
 | public_json_request_body_budget | proven | evaluation\public-json-request-body-budget-2026-08-11\report.json |
@@ -313,6 +314,7 @@ Overall: `northstar_open_approval_gated`
 | current_repository_security_rescan | ancestor | ancestor_of_head | evaluation\current-full-repository-security-scan-2026-08-13\report.json |
 | agent_chat_durable_admission_security | ancestor | ancestor_of_head | evaluation\security-agent-chat-durable-admission-2026-08-14\report.json |
 | mcp_provider_admission_security | ancestor | ancestor_of_head | evaluation\security-mcp-provider-admission-2026-08-14\report.json |
+| share_recipient_contact_verification_security | ancestor | missing | evaluation\share-recipient-contact-verification-2026-08-14\report.json |
 | public_json_request_body_budget | ancestor | ancestor_of_head | evaluation\public-json-request-body-budget-2026-08-11\report.json |
 | improvement_photo_analysis_budget | ancestor | ancestor_of_head | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
 | public_provider_cancellation | ancestor | ancestor_of_head | evaluation\public-provider-cancellation-2026-08-11\report.json |

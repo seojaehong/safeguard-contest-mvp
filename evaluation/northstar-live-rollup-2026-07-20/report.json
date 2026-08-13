@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-13T18:05:18.980Z",
-  "head": "0230799edfade291323658f18152330ae8632b66",
+  "generatedAt": "2026-08-13T18:33:52.404Z",
+  "head": "4b9d20648ae8174aef2ea9f53858c6e27df5c1a9",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "784a98323ff61792340c7a9ca24e651d81613647",
+    "commitSha": "8aa16231ffa0cf66010a55460b17841a01396943",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-7d8xjzo75-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-ijsf86so1-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 52
+    "gateCount": 53
   },
   "provenGates": [
     {
@@ -152,6 +152,12 @@
       "state": "notice",
       "artifact": "evaluation\\share-session-revocation-remediation-2026-08-14\\report.json",
       "detail": "Live production exposes an authenticated owner-only Share session revoke action scoped by session, workpack, organization, and site with durable status/timestamp evidence. The unauthenticated DELETE probe fails closed at 401, no production session was created or revoked, the canonical low finding remains immutable pending a fresh rescan, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "share_recipient_contact_verification_security",
+      "state": "notice",
+      "artifact": "evaluation\\share-recipient-contact-verification-2026-08-14\\report.json",
+      "detail": "Live source requires full snapshotted phone or email verification before an invited worker-attributed Share confirmation insert. The value is not stored or returned, mobile/desktop recipient geometry remains bounded, the safe live missing-session probe created no confirmation, the sealed low finding remains immutable pending a fresh rescan, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "agent_chat_durable_admission_security",
@@ -662,6 +668,23 @@
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
+  "shareRecipientContactVerification": {
+    "artifact": "evaluation\\share-recipient-contact-verification-2026-08-14\\report.json",
+    "verdict": "PASS_LIVE_DEPLOYED_SOURCE_SHARE_RECIPIENT_CONTACT_VERIFICATION_RESCAN_PENDING",
+    "sourceHead": "59ec22a61a9972103e44765b031026641bfe5c06",
+    "productionCommit": "59ec22a61a9972103e44765b031026641bfe5c06",
+    "findingId": "csf_e6a120c87c57d3529757bbde",
+    "workerIdAloneAccepted": false,
+    "verificationValuePersisted": false,
+    "adjacentTests": 124,
+    "browserTests": 7,
+    "liveMissingSessionStatus": 404,
+    "liveRealRecipientVerificationProbe": "NOT_EXECUTED_NO_EXISTING_SAVED_SESSION",
+    "freshRescanRequired": true,
+    "recipientAckLiveDataApproval": "APPROVAL_GATED",
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
   "mcpGenerationWorkBudgetSecurity": {
     "artifact": "evaluation\\security-mcp-generation-work-budget-2026-08-04\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
@@ -1001,9 +1024,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "0230799edfade291323658f18152330ae8632b66",
+      "sourceCommit": "4b9d20648ae8174aef2ea9f53858c6e27df5c1a9",
       "sourceStatus": "exact",
-      "productionCommit": "0230799edfade291323658f18152330ae8632b66",
+      "productionCommit": "4b9d20648ae8174aef2ea9f53858c6e27df5c1a9",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -1181,6 +1204,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": "f02045420b7213b6e1088dfb24b673068fa5dea5",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "share_recipient_contact_verification_security",
+      "artifact": "evaluation\\share-recipient-contact-verification-2026-08-14\\report.json",
+      "sourceCommit": "59ec22a61a9972103e44765b031026641bfe5c06",
+      "sourceStatus": "ancestor",
+      "productionCommit": null,
+      "productionStatus": "missing"
     },
     {
       "id": "public_json_request_body_budget",

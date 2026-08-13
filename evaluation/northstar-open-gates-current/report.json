@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-13T18:05:17.952Z",
-  "sourceSha": "0230799edfade291323658f18152330ae8632b66",
+  "generatedAt": "2026-08-13T18:33:50.904Z",
+  "sourceSha": "4b9d20648ae8174aef2ea9f53858c6e27df5c1a9",
   "overall": "open",
   "gates": [
     {
@@ -226,6 +226,16 @@
       "detail": "Live production exposes an authenticated owner-only Share session revoke action scoped by session, workpack, organization, and site with durable status/timestamp evidence. The unauthenticated DELETE probe fails closed at 401, no production session was created or revoked, the canonical low finding remains immutable pending a fresh rescan, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Run a fresh Standard scan before reclassifying the immutable finding; keep exact saved Share and DB-backed session creation approval-gated."
+      ]
+    },
+    {
+      "id": "share_recipient_contact_verification_security",
+      "state": "notice",
+      "label": "Share recipient contact verification security",
+      "evidencePath": "evaluation\\share-recipient-contact-verification-2026-08-14\\report.json",
+      "detail": "Live source requires full snapshotted phone or email verification before an invited worker-attributed Share confirmation insert. The value is not stored or returned, mobile/desktop recipient geometry remains bounded, the safe live missing-session probe created no confirmation, the sealed low finding remains immutable pending a fresh rescan, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Run a fresh Standard scan before reclassifying the immutable finding; keep exact saved Share and live recipient ACK approval-gated."
       ]
     },
     {
