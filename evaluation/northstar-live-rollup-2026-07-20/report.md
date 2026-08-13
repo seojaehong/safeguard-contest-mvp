@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-13T22:51:29.605Z
-Source HEAD at generation: efc62c3879ff171e6ec664d2b8cb843229486440
-Live commit at generation: efc62c3879ff171e6ec664d2b8cb843229486440
+Generated at: 2026-08-13T23:00:27.714Z
+Source HEAD at generation: bbc27eeafab69abc3faebf03449ab9cef0487981
+Live commit at generation: bbc27eeafab69abc3faebf03449ab9cef0487981
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -366,7 +366,7 @@ Overall: `northstar_open_approval_gated`
 | improvement_photo_analysis_budget | ancestor | ancestor_of_head | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
 | public_provider_cancellation | ancestor | ancestor_of_head | evaluation\public-provider-cancellation-2026-08-11\report.json |
 | public_provider_admission | ancestor | ancestor_of_head | evaluation\public-provider-admission-2026-08-11\report.json |
-| public_ask_distributed_admission | ancestor | matches_live_source_mismatch | evaluation\public-ask-distributed-admission-2026-08-14\report.json |
+| public_ask_distributed_admission | ancestor | ancestor_of_head | evaluation\public-ask-distributed-admission-2026-08-14\report.json |
 | public_search_distributed_rate_limit_readiness | ancestor | ancestor_of_head | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
 | public_generation_admission_security | missing | ancestor_of_head | evaluation\security-public-generation-admission-2026-08-04\report.json |
 | security_followup_remediation | ancestor | missing | evaluation\codex-security-followup-remediation-2026-08-11\report.json |
