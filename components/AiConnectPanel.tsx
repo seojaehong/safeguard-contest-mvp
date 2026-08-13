@@ -49,6 +49,8 @@ type McpTokenSummary = {
   disabled: boolean;
   lastUsedAt: string | null;
   createdAt: string;
+  expiresAt: string | null;
+  expired: boolean;
 };
 
 type TokenListResponse = {
@@ -314,6 +316,15 @@ function formatDate(value: string | null) {
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+  }).format(new Date(value));
+}
+
+function formatExpiryDate(value: string | null) {
+  if (!value) return "확인 필요";
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
   }).format(new Date(value));
 }
 
@@ -927,16 +938,18 @@ export function AiConnectPanel() {
         <span>발급 이력</span>
         <h2>현재 현장에 연결된 토큰</h2>
         <p className="muted">
-          최근 {tokenListLimit}개까지 표시합니다. 오래된 토큰은 API에서 계속 보호되며 필요 시 폐기 정책으로 관리합니다.
+          최근 {tokenListLimit}개까지 표시합니다. 토큰은 발급 후 90일에 만료되며 필요하면 새 토큰으로 교체합니다.
         </p>
         <div className="ai-connect-token-items">
           {tokens.length ? tokens.map((token) => (
             <article key={token.id}>
               <div>
                 <strong>{formatCustomerFacingLabel(token.label)}</strong>
-                <p>{token.siteName} · 최근 사용 {formatDate(token.lastUsedAt)}</p>
+                <p>{token.siteName} · 최근 사용 {formatDate(token.lastUsedAt)} · 만료 {formatExpiryDate(token.expiresAt)}</p>
               </div>
-              <span className={token.disabled ? "off" : "on"}>{token.disabled ? "꺼짐" : "사용 가능"}</span>
+              <span className={token.disabled || token.expired ? "off" : "on"}>
+                {token.disabled ? "꺼짐" : token.expired ? "만료" : "사용 가능"}
+              </span>
               <button
                 type="button"
                 className="secondary"

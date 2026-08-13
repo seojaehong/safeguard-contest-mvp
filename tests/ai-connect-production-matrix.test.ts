@@ -117,6 +117,8 @@ type TokenSummary = {
   disabled: boolean;
   lastUsedAt: string | null;
   createdAt: string;
+  expiresAt: string | null;
+  expired: boolean;
 };
 
 const listedToken: TokenSummary = {
@@ -127,6 +129,8 @@ const listedToken: TokenSummary = {
   disabled: false,
   lastUsedAt: null,
   createdAt: "2026-07-12T00:00:00.000Z",
+  expiresAt: "2026-10-10T00:00:00.000Z",
+  expired: false,
 };
 
 type NetworkProbe = {
@@ -426,6 +430,7 @@ productionMatrix("AI connect production matrix", () => {
         await page.goto(`${harness.baseUrl}/settings/ai-connect?theme=${theme}`, { waitUntil: "networkidle" });
         await page.locator(`.safeclaw-module-shell[data-ready='true'][data-theme='${theme}']`).waitFor();
         await page.getByText(listedToken.label, { exact: true }).waitFor();
+        await page.getByText(/만료 2026\. 10\. 10\./).waitFor();
         expect(probe.authenticatedTokenRequests).toBeGreaterThan(0);
 
         await page.getByRole("button", { name: "연결 토큰 발급" }).click();

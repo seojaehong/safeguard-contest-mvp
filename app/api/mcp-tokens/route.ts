@@ -20,6 +20,7 @@ import {
   type McpTokenOwnerScope,
 } from "@/lib/mcp-token-service";
 import { isRecord } from "@/lib/workspace-api";
+import { MCP_TOKEN_TTL_MS, resolveMcpTokenLifetime } from "@/lib/mcp-auth";
 import {
   enforceRequestBodyBudget,
   MCP_TOKEN_REQUEST_BODY_MAX_BYTES,
@@ -157,15 +158,20 @@ export async function GET(request: NextRequest) {
       ? encodeMcpTokenListCursor(pageRows[pageRows.length - 1])
       : null;
     const tokens = pageRows
-      .map((token) => ({
-        id: token.id,
-        label: token.label || "내 AI 연결",
-        siteName: token.site_id ? siteNameById.get(token.site_id) || "기본 현장" : "전체 현장",
-        scopes: token.scopes,
-        disabled: token.disabled,
-        lastUsedAt: token.last_used_at,
-        createdAt: token.created_at,
-      }));
+      .map((token) => {
+        const lifetime = resolveMcpTokenLifetime(token.created_at);
+        return {
+          id: token.id,
+          label: token.label || "내 AI 연결",
+          siteName: token.site_id ? siteNameById.get(token.site_id) || "기본 현장" : "전체 현장",
+          scopes: token.scopes,
+          disabled: token.disabled,
+          lastUsedAt: token.last_used_at,
+          createdAt: token.created_at,
+          expiresAt: lifetime.expiresAt,
+          expired: lifetime.expired,
+        };
+      });
 
     return NextResponse.json({
       ok: true,
@@ -235,7 +241,9 @@ export async function POST(request: NextRequest) {
       .from("mcp_tokens")
       .select("id", { count: "exact", head: true })
       .eq("site_id", context.siteId)
-      .eq("disabled", false);
+      .eq("disabled", false)
+      .gte("created_at", new Date(Date.now() - MCP_TOKEN_TTL_MS).toISOString())
+      .lte("created_at", new Date().toISOString());
 
     if (countError) throw countError;
     if (!canIssueMoreMcpTokens(activeTokenCount || 0)) {
@@ -263,6 +271,10 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) throw error;
+    const lifetime = resolveMcpTokenLifetime(data.created_at);
+    if (!lifetime.expiresAt || lifetime.expired) {
+      throw new Error("issued MCP token returned invalid lifetime metadata");
+    }
 
     return NextResponse.json({
       ok: true,
@@ -276,6 +288,8 @@ export async function POST(request: NextRequest) {
         disabled: data.disabled,
         lastUsedAt: data.last_used_at,
         createdAt: data.created_at,
+        expiresAt: lifetime.expiresAt,
+        expired: lifetime.expired,
       },
       message: "연결 토큰을 발급했습니다. 평문 토큰은 이 화면에서 한 번만 표시됩니다.",
     });

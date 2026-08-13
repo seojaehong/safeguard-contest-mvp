@@ -4,8 +4,8 @@
 // {siteId, orgId, scopes} 컨텍스트로 해석한다. 두 가지 소스:
 //   1. DB(mcp_tokens): Bearer의 sha256 해시로 조회(disabled=false). 사이트/조직에 귀속된
 //      테넌트 토큰. Supabase 서비스 롤이 있을 때만 사용 가능.
-//   2. env 레거시(SAFECLAW_MCP_TOKENS): 콤마 구분 전체 신뢰 토큰. 기존 운영자 토큰 무중단
-//      유지용 폴백. DB 미매칭 시에만 사용한다.
+//   2. env 레거시(SAFECLAW_MCP_TOKENS): 콤마 구분 전체 신뢰 토큰. production에서는
+//      SAFECLAW_MCP_LEGACY_EXPIRES_AT로 90일 이내 만료가 증명될 때만 사용한다.
 //
 // 보안 불변식:
 //   - 평문 토큰은 절대 저장/로그하지 않는다. DB에는 sha256 hex만, 컨텍스트에는 토큰 없음.
@@ -39,9 +39,11 @@ export interface McpTokenRow {
   org_id: string | null;
   scopes: unknown;
   disabled: boolean;
+  created_at: string | null;
 }
 
 const DEFAULT_SCOPES = ["tools:*"] as const;
+export const MCP_TOKEN_TTL_MS = 90 * 24 * 60 * 60 * 1000;
 
 export type McpToolName = (typeof MCP_TOOL_NAMES)[number];
 
@@ -100,6 +102,33 @@ export function matchesLegacyToken(token: string, legacyTokens: Set<string>): bo
   return legacyTokens.has(token.trim());
 }
 
+export function resolveMcpTokenLifetime(
+  createdAt: string | null | undefined,
+  nowMs = Date.now(),
+): { expiresAt: string | null; expired: boolean } {
+  const createdAtMs = typeof createdAt === "string" ? Date.parse(createdAt) : Number.NaN;
+  if (!Number.isFinite(createdAtMs) || !Number.isFinite(nowMs) || createdAtMs > nowMs) {
+    return { expiresAt: null, expired: true };
+  }
+  const expiresAtMs = createdAtMs + MCP_TOKEN_TTL_MS;
+  return {
+    expiresAt: new Date(expiresAtMs).toISOString(),
+    expired: expiresAtMs <= nowMs,
+  };
+}
+
+export function isLegacyMcpTokenAllowed(
+  environment: string | undefined,
+  expiresAt: string | null | undefined,
+  nowMs = Date.now(),
+): boolean {
+  if (environment !== "production") return true;
+  const expiresAtMs = typeof expiresAt === "string" ? Date.parse(expiresAt) : Number.NaN;
+  return Number.isFinite(expiresAtMs)
+    && expiresAtMs > nowMs
+    && expiresAtMs - nowMs <= MCP_TOKEN_TTL_MS;
+}
+
 /** scopes 컬럼(jsonb)을 알려진 권한만 남겨 정규화한다. 형태가 어긋나면 권한 없음. */
 export function normalizeScopes(value: unknown): string[] {
   if (!Array.isArray(value) || value.length === 0) return [];
@@ -141,8 +170,11 @@ export function requireMcpToolScope(
 }
 
 /** mcp_tokens 행 → 컨텍스트. 행이 없거나 disabled면 null(=DB 매칭 실패). */
-export function buildDbContext(row: McpTokenRow | null | undefined): McpAuthContext | null {
-  if (!row || row.disabled) return null;
+export function buildDbContext(
+  row: McpTokenRow | null | undefined,
+  nowMs = Date.now(),
+): McpAuthContext | null {
+  if (!row || row.disabled || resolveMcpTokenLifetime(row.created_at, nowMs).expired) return null;
   return {
     siteId: row.site_id ?? null,
     orgId: row.org_id ?? null,
@@ -169,6 +201,7 @@ export function decideAuthContext(input: {
   if (input.dbRow?.disabled) return null;
   const dbContext = buildDbContext(input.dbRow);
   if (dbContext) return dbContext;
+  if (input.dbRow) return null;
   if (matchesLegacyToken(input.token, input.legacyTokens)) return buildEnvContext();
   return null;
 }
@@ -254,7 +287,7 @@ export async function resolveMcpAuth(bearerToken: string | undefined | null): Pr
       const tokenHash = hashToken(token);
       const { data, error } = await client
         .from("mcp_tokens")
-        .select("id, site_id, org_id, scopes, disabled")
+        .select("id, site_id, org_id, scopes, disabled, created_at")
         .eq("token_hash", tokenHash)
         .maybeSingle();
       if (error) {
@@ -262,7 +295,10 @@ export async function resolveMcpAuth(bearerToken: string | undefined | null): Pr
         return null;
       } else if (data) {
         const persistedRow = data as McpTokenRow;
-        if (persistedRow.disabled) return null;
+        if (!buildDbContext(persistedRow)) {
+          log.warn("MCP token is disabled, expired, or has invalid lifetime metadata");
+          return null;
+        }
         if (!(await verifyPersistedTenantIdentity(client, persistedRow))) {
           log.warn("MCP token tenant identity could not be proven");
           return null;
@@ -286,5 +322,13 @@ export async function resolveMcpAuth(bearerToken: string | undefined | null): Pr
   if (dbRow) return buildDbContext(dbRow);
 
   const legacyTokens = parseLegacyTokens(process.env.SAFECLAW_MCP_TOKENS);
-  return decideAuthContext({ dbRow, legacyTokens, token });
+  if (!matchesLegacyToken(token, legacyTokens)) return null;
+  if (!isLegacyMcpTokenAllowed(
+    process.env.NODE_ENV,
+    process.env.SAFECLAW_MCP_LEGACY_EXPIRES_AT,
+  )) {
+    log.warn("Production legacy MCP token denied because bounded expiry is missing or invalid");
+    return null;
+  }
+  return buildEnvContext();
 }

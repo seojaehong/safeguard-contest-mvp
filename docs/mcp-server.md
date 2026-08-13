@@ -32,6 +32,10 @@ claude mcp add --transport http safeclaw \
 | 토큰당 20회/분 초과 (POST) | `429` (`Retry-After` 헤더) |
 
 - `SAFECLAW_MCP_TOKENS`는 콤마 구분 다중 토큰(`token-a,token-b`)을 지원한다.
+- DB 토큰은 `created_at`부터 90일 뒤 만료된다. 누락·잘못된 시각·미래 발급 시각은 인증에서
+  fail-closed(안전하게 거부)한다.
+- production의 레거시 env 토큰은 `SAFECLAW_MCP_LEGACY_EXPIRES_AT`에 현재보다 미래이면서
+  90일 이내인 ISO 8601 만료시각을 함께 설정해야 한다. 이 경계가 없거나 범위를 넘으면 `401`이다.
 - MCP 접근 토큰은 v0에서 정적 Bearer 토큰이다. 사용자 로그인은 Supabase Auth의 이메일
   매직링크와 소셜 OAuth(예: Kakao)를 사용할 수 있지만, SafeClaw가 외부 AI 대신 OpenAI OAuth를
   중계하지는 않는다.
@@ -46,8 +50,9 @@ env `SAFECLAW_MCP_TOKENS`는 **전체 신뢰**(모든 사이트 접근) 레거�
 - 인증 해석은 [`lib/mcp-auth.ts`](../lib/mcp-auth.ts) `resolveMcpAuth`가 담당한다:
   Bearer → `sha256` hex → `mcp_tokens` 조회(`disabled=false`) → `{siteId, orgId, scopes}`
   컨텍스트. **평문 토큰은 저장·로그하지 않는다**(DB엔 해시만, 컨텍스트/로그엔 토큰 없음).
-- **DB 우선, env 폴백**: DB에서 매칭되지 않으면 env 레거시 토큰으로 폴백한다(기존 운영자
-  토큰 무중단). Supabase 서비스 롤 미설정 시엔 env만으로 동작한다(회귀 없음).
+- **DB 우선, env 폴백**: DB에서 매칭되지 않을 때만 env 레거시 토큰을 검토한다. DB 행이
+  disabled·만료·시각 오류이면 같은 평문이 env에 있어도 폴백하지 않는다. Supabase 서비스 롤
+  미설정 시 env만으로 동작하지만 production은 명시된 90일 이내 만료시각이 필수다.
 - 활성화 조건도 확장됐다: env 토큰이 있거나 **Supabase 서비스 롤이 설정**되면 MCP 계층이
   켜진다(DB 전용 운영 시에도 `501`이 아니라 정상 동작).
 - 컨텍스트는 도구 핸들러의 `extra.authInfo.extra`로 전달되며, 중앙 `registerScopedTool`
@@ -90,7 +95,8 @@ env `SAFECLAW_MCP_TOKENS`는 **전체 신뢰**(모든 사이트 접근) 레거�
 `mcp_tokens(site_id, created_at desc)` 계열 조회 인덱스를 별도 마이그레이션으로 추가하는 것을
 권장한다(DB 스키마 변경이므로 적용 전 승인 필요).
 토큰 발급은 현장별 활성 토큰 50개를 넘으면 409로 막고, 사용하지 않는 토큰을 끈 뒤 다시
-발급하도록 안내한다. 비활성 토큰은 감사 이력으로 남고 인증에는 사용되지 않는다.
+발급하도록 안내한다. 90일이 지난 토큰은 활성 개수에서 제외되고 인증에는 사용되지 않는다.
+비활성·만료 토큰은 감사 이력으로 남는다.
 
 서비스 롤 키가 필요하다(`mcp_tokens`는 RLS로 `service_role` 전용). 평문 토큰은 발급 시
 stdout에 **한 번만** 출력되며 복구 불가다. CLI의 site name은 필수이며, 생략하거나 공백으로
@@ -110,7 +116,8 @@ npm.cmd run token:mcp -- "<label>" "<site name>"
 프로덕션 MCP 계층은 다음 중 하나가 설정되면 활성화된다.
 
 - 권장: Supabase `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`로 DB 기반 `mcp_tokens` 인증 사용
-- 레거시/운영자 폴백: Vercel 환경변수 `SAFECLAW_MCP_TOKENS`
+- 레거시/운영자 폴백: Vercel 환경변수 `SAFECLAW_MCP_TOKENS`와 90일 이내 ISO 8601 시각인
+  `SAFECLAW_MCP_LEGACY_EXPIRES_AT`
 
 둘 다 없으면 prod는 `501 Not Implemented`를 반환한다. 고객용 AI 연결은 DB 기반 토큰을
 사용해야 조직/현장 스코프, 해시 저장, 비활성화, 목록 페이지네이션, 활성 토큰 제한을 모두

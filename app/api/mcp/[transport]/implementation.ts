@@ -3,8 +3,9 @@
 // 외부/내장 AI 에이전트(Claude Code, OpenClaw, Hermes 등)가 SafeClaw의 안전관리
 // 도구를 Streamable HTTP MCP로 호출한다. v1 웹 서비스는 건드리지 않는 순수 추가 라우트다.
 //
-// 인증: Authorization Bearer + env SAFECLAW_MCP_TOKENS(콤마 구분 다중 토큰).
-//   - env 미설정: 501 "MCP not enabled" (도구 계층 자체가 꺼진 상태)
+// 인증: Authorization Bearer + DB 토큰 또는 env SAFECLAW_MCP_TOKENS 레거시 토큰.
+//   - DB/레거시 env 미설정: 501 "MCP not enabled" (도구 계층 자체가 꺼진 상태)
+//   - production 레거시 env는 SAFECLAW_MCP_LEGACY_EXPIRES_AT 만료 경계가 필수
 //   - 토큰 없음/불일치: 401 (withMcpAuth)
 // rate limiting: 토큰당 20/min.
 //

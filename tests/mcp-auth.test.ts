@@ -4,6 +4,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 
 import {
   MCP_TOOL_NAMES,
+  MCP_TOKEN_TTL_MS,
   McpToolScopeError,
   asAuthContext,
   buildDbContext,
@@ -14,13 +15,17 @@ import {
   isMcpToolAllowed,
   isMcpToolName,
   isReadOnlyMcpTool,
+  isLegacyMcpTokenAllowed,
   matchesLegacyToken,
   normalizeScopes,
   parseLegacyTokens,
   requireMcpToolScope,
+  resolveMcpTokenLifetime,
   resolveMcpAuth,
   type McpTokenRow,
 } from "@/lib/mcp-auth";
+
+const ACTIVE_TOKEN_CREATED_AT = new Date().toISOString();
 
 vi.mock("@/lib/supabase-admin", () => ({
   createSupabaseAdminClient: vi.fn(),
@@ -226,6 +231,7 @@ describe("buildDbContext", () => {
     org_id: "org-1",
     scopes: ["tools:*"],
     disabled: false,
+    created_at: ACTIVE_TOKEN_CREATED_AT,
   };
 
   it("maps an active row to a db context", () => {
@@ -244,8 +250,26 @@ describe("buildDbContext", () => {
     expect(buildDbContext(undefined)).toBeNull();
   });
 
+  it("fails closed for expired, malformed, missing, or future-issued rows", () => {
+    const now = Date.parse("2026-08-13T12:00:00.000Z");
+    expect(buildDbContext({
+      ...row,
+      created_at: new Date(now - MCP_TOKEN_TTL_MS).toISOString(),
+    }, now)).toBeNull();
+    expect(buildDbContext({ ...row, created_at: "not-a-date" }, now)).toBeNull();
+    expect(buildDbContext({ ...row, created_at: null }, now)).toBeNull();
+    expect(buildDbContext({ ...row, created_at: new Date(now + 1).toISOString() }, now)).toBeNull();
+  });
+
   it("nulls missing site/org and normalizes bad scopes", () => {
-    const ctx = buildDbContext({ id: "t", site_id: null, org_id: null, scopes: "oops", disabled: false });
+    const ctx = buildDbContext({
+      id: "t",
+      site_id: null,
+      org_id: null,
+      scopes: "oops",
+      disabled: false,
+      created_at: ACTIVE_TOKEN_CREATED_AT,
+    });
     expect(ctx).toEqual({ siteId: null, orgId: null, scopes: [], source: "db", tokenId: "t" });
   });
 });
@@ -263,7 +287,14 @@ describe("buildEnvContext", () => {
 });
 
 describe("decideAuthContext", () => {
-  const dbRow: McpTokenRow = { id: "t", site_id: "s", org_id: "o", scopes: ["tools:*"], disabled: false };
+  const dbRow: McpTokenRow = {
+    id: "t",
+    site_id: "s",
+    org_id: "o",
+    scopes: ["tools:*"],
+    disabled: false,
+    created_at: ACTIVE_TOKEN_CREATED_AT,
+  };
   const legacy = parseLegacyTokens("legacy-token");
 
   it("prefers a db row over the env legacy match", () => {
@@ -289,6 +320,39 @@ describe("decideAuthContext", () => {
   it("denies a disabled db token before considering the matching legacy fallback", () => {
     const disabled = { ...dbRow, disabled: true };
     expect(decideAuthContext({ dbRow: disabled, legacyTokens: legacy, token: "legacy-token" })).toBeNull();
+  });
+
+  it("denies an expired db token before considering the matching legacy fallback", () => {
+    const expired = { ...dbRow, created_at: "2000-01-01T00:00:00.000Z" };
+    expect(decideAuthContext({ dbRow: expired, legacyTokens: legacy, token: "legacy-token" })).toBeNull();
+  });
+});
+
+describe("MCP token lifetime", () => {
+  const now = Date.parse("2026-08-13T12:00:00.000Z");
+
+  it("derives a bounded 90-day expiry from persisted creation time", () => {
+    const createdAt = "2026-08-01T00:00:00.000Z";
+    expect(resolveMcpTokenLifetime(createdAt, now)).toEqual({
+      expiresAt: new Date(Date.parse(createdAt) + MCP_TOKEN_TTL_MS).toISOString(),
+      expired: false,
+    });
+  });
+
+  it("requires a bounded explicit expiry for production legacy tokens", () => {
+    expect(isLegacyMcpTokenAllowed("production", null, now)).toBe(false);
+    expect(isLegacyMcpTokenAllowed("production", "not-a-date", now)).toBe(false);
+    expect(isLegacyMcpTokenAllowed(
+      "production",
+      new Date(now + MCP_TOKEN_TTL_MS + 1).toISOString(),
+      now,
+    )).toBe(false);
+    expect(isLegacyMcpTokenAllowed(
+      "production",
+      new Date(now + 60_000).toISOString(),
+      now,
+    )).toBe(true);
+    expect(isLegacyMcpTokenAllowed("test", null, now)).toBe(true);
   });
 });
 
@@ -328,7 +392,32 @@ describe("resolveMcpAuth tenant identity", () => {
     org_id: "org-1",
     scopes: ["tools:read"],
     disabled: false,
+    created_at: ACTIVE_TOKEN_CREATED_AT,
   };
+
+  it("rejects production legacy tokens without a bounded explicit expiry", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("SAFECLAW_MCP_TOKENS", "legacy-token");
+    vi.stubEnv("SAFECLAW_MCP_LEGACY_EXPIRES_AT", "");
+    vi.mocked(createSupabaseAdminClient).mockReturnValue(null);
+
+    await expect(resolveMcpAuth("legacy-token")).resolves.toBeNull();
+  });
+
+  it("accepts a production legacy token only inside its bounded expiry window", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("SAFECLAW_MCP_TOKENS", "legacy-token");
+    vi.stubEnv("SAFECLAW_MCP_LEGACY_EXPIRES_AT", new Date(Date.now() + 60_000).toISOString());
+    vi.mocked(createSupabaseAdminClient).mockReturnValue(null);
+
+    await expect(resolveMcpAuth("legacy-token")).resolves.toEqual({
+      siteId: null,
+      orgId: null,
+      scopes: ["tools:*"],
+      source: "env",
+      tokenId: null,
+    });
+  });
 
   it("preserves a site token when the existing sites contract proves its organization", async () => {
     const fake = makeAuthClient({

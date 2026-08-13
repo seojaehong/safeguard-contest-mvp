@@ -383,6 +383,12 @@ allowEffect(
   "4px themed selected-document rail",
 );
 allowEffect(
+  ".safeclaw-module-shell.module-variant-document[data-module-route=\"/documents\"] [data-testid=\"document-section-index\"] button[aria-selected=\"true\"]",
+  "box-shadow",
+  "inset 0 -3px 0 var(--workspace-accent)",
+  "3px selected document section status rail",
+);
+allowEffect(
   ".hazard-stripe",
   "background-image",
   "repeating-linear-gradient(-45deg, var(--hazard) 0, var(--hazard) 12px, var(--steel-1, #111114) 12px, var(--steel-1, #111114) 24px)",
