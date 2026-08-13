@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-13T14:17:47.967Z",
-  "head": "f472d41ce728dca12f20426226e206f57e630626",
+  "generatedAt": "2026-08-13T14:47:54.299Z",
+  "head": "86871354794651619d5257f0689e5924b1962ddd",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f472d41ce728dca12f20426226e206f57e630626",
+    "commitSha": "86871354794651619d5257f0689e5924b1962ddd",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-hfgikts2c-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-jh9axvaan-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -139,7 +139,7 @@
       "id": "current_repository_security_rescan",
       "state": "notice",
       "artifact": "evaluation\\current-full-repository-security-scan-2026-08-13\\report.json",
-      "detail": "Standard current-revision scan 528ad724 is sealed with 15 findings (11 medium, 4 low) under partial coverage. Live source now bounds three findings, including fail-closed SIF corpus quality admission, while 12 findings and a fresh post-remediation scan remain open. The immutable original 18-accounted baseline is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Standard current-revision scan 528ad724 is sealed with 15 findings (11 medium, 4 low) under partial coverage. Live source now bounds four findings, including fail-closed SIF corpus quality admission and changed-knowledge review reset, while 11 findings and a fresh post-remediation scan remain open. The immutable original 18-accounted baseline is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "public_json_request_body_budget",
@@ -947,9 +947,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "f472d41ce728dca12f20426226e206f57e630626",
+      "sourceCommit": "86871354794651619d5257f0689e5924b1962ddd",
       "sourceStatus": "exact",
-      "productionCommit": "f472d41ce728dca12f20426226e206f57e630626",
+      "productionCommit": "86871354794651619d5257f0689e5924b1962ddd",
       "productionStatus": "matches_live"
     },
     {
@@ -1107,10 +1107,10 @@
     {
       "id": "current_repository_security_rescan",
       "artifact": "evaluation\\current-full-repository-security-scan-2026-08-13\\report.json",
-      "sourceCommit": "a412e68828201f89f32563fa7fd43bc2c99abd6d",
-      "sourceStatus": "ancestor",
-      "productionCommit": "a412e68828201f89f32563fa7fd43bc2c99abd6d",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "86871354794651619d5257f0689e5924b1962ddd",
+      "sourceStatus": "exact",
+      "productionCommit": "86871354794651619d5257f0689e5924b1962ddd",
+      "productionStatus": "matches_live"
     },
     {
       "id": "public_json_request_body_budget",

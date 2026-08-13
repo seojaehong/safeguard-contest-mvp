@@ -2,7 +2,7 @@
 
 ## Verdict
 
-`NOTICE_LIVE_DEPLOYED_SOURCE_THREE_FINDING_REMEDIATION_RESCAN_PENDING`
+`NOTICE_LIVE_DEPLOYED_SOURCE_FOUR_FINDING_REMEDIATION_RESCAN_PENDING`
 
 The Standard Codex Security scan `528ad724-6251-46fa-a812-48264396f321` completed and sealed against source revision `2c65f894be7cb37d0b50a2e1e19466a208400aaa`. It retained 15 reportable findings: 11 medium and 4 low. Coverage is explicitly partial rather than a line-by-line review of every tracked file.
 
@@ -21,11 +21,17 @@ Product commit `a412e688` adds a third approval-free source remediation:
 - Both operator approval flags cannot override a failed corpus-quality admission.
 - No embedding generation or vector upload was performed.
 
-Focused verification passed 2 files and 21 tests. Strict typecheck passed. Next.js 15.5.22 production build passed with 28 static pages.
+Product commit `86871354` adds a fourth approval-free source remediation:
 
-Production build-info reports product commit `a412e68828201f89f32563fa7fd43bc2c99abd6d` on `master` in `production`. This proves deployment of all three tested source remediations, not execution of a destructive or provider-backed live exploit. No provider cancellation request, forced HWP internal failure, embedding generation, or vector upload was executed against production.
+- Re-ingesting byte-equivalent event content preserves an existing approval receipt and skips the event update.
+- Changed content or provenance is updated atomically with `review_status=pending_review`, including the concurrent unique-conflict recovery path.
+- No live knowledge-event write or database mutation was performed for verification.
 
-A fresh post-remediation security scan is still required before the three findings can be closed in the canonical set. Twelve reportable findings remain before that rescan, and no security-complete claim is allowed.
+The original public-search/HWP verification passed 2 files and 21 tests. Knowledge ingest and adjacent review verification passed 7 files and 112 tests, including 16 focused ingest tests. Strict typecheck passed. Next.js 15.5.22 production build passed with 28 static pages.
+
+Production build-info reports product commit `86871354794651619d5257f0689e5924b1962ddd` on `master` in `production`. This proves deployment of all four tested source remediations, not execution of a destructive or provider-backed live exploit. No provider cancellation request, forced HWP internal failure, embedding generation, vector upload, or live knowledge-event re-ingestion was executed against production.
+
+A fresh post-remediation security scan is still required before the four findings can be closed in the canonical set. Eleven reportable findings remain before that rescan, and no security-complete claim is allowed.
 
 ## Boundaries
 

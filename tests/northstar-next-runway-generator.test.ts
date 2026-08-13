@@ -1986,14 +1986,14 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     remainingBoundaries: { securityCompleteClaimAllowed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
   writeJson(root, "evaluation/current-full-repository-security-scan-2026-08-13/report.json", {
-    verdict: "NOTICE_LIVE_DEPLOYED_SOURCE_THREE_FINDING_REMEDIATION_RESCAN_PENDING",
+    verdict: "NOTICE_LIVE_DEPLOYED_SOURCE_FOUR_FINDING_REMEDIATION_RESCAN_PENDING",
     sourceHead: "fixture-sha",
     currentScan: { scanId: "528ad724-6251-46fa-a812-48264396f321", reportableFindingCount: 15 },
     currentSourceRemediation: {
       latestSourceHead: "fixture-sha",
-      sourceRemediatedCount: 3,
-      liveDeployedRemediationCount: 3,
-      remainingReportableFindingCountBeforeRescan: 12,
+      sourceRemediatedCount: 4,
+      liveDeployedRemediationCount: 4,
+      remainingReportableFindingCountBeforeRescan: 11,
       freshPostRemediationScanRequired: true,
       securityCompleteClaimAllowed: false,
       productionBuild: { commitSha: "fixture-sha" },

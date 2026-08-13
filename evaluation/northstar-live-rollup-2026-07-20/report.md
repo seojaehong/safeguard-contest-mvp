@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-13T14:17:47.967Z
-Source HEAD at generation: f472d41ce728dca12f20426226e206f57e630626
-Live commit at generation: f472d41ce728dca12f20426226e206f57e630626
+Generated at: 2026-08-13T14:47:54.299Z
+Source HEAD at generation: 86871354794651619d5257f0689e5924b1962ddd
+Live commit at generation: 86871354794651619d5257f0689e5924b1962ddd
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -306,7 +306,7 @@ Overall: `northstar_open_approval_gated`
 | full_repository_security_scan | ancestor | ancestor_of_head | evaluation\follow-up-full-repository-security-scan-2026-08-02\report.json |
 | repository_security_scan_reconciliation | missing | missing | evaluation\repository-security-scan-reconciliation-2026-08-11\report.json |
 | current_security_remediation_ledger | ancestor | ancestor_of_head | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
-| current_repository_security_rescan | ancestor | ancestor_of_head | evaluation\current-full-repository-security-scan-2026-08-13\report.json |
+| current_repository_security_rescan | exact | matches_live | evaluation\current-full-repository-security-scan-2026-08-13\report.json |
 | public_json_request_body_budget | ancestor | ancestor_of_head | evaluation\public-json-request-body-budget-2026-08-11\report.json |
 | improvement_photo_analysis_budget | ancestor | ancestor_of_head | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
 | public_provider_cancellation | ancestor | ancestor_of_head | evaluation\public-provider-cancellation-2026-08-11\report.json |

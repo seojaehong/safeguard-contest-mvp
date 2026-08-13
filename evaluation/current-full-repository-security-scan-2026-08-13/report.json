@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-current-full-repository-security-scan/v1",
-  "generatedAt": "2026-08-13T23:06:00+09:00",
-  "verdict": "NOTICE_LIVE_DEPLOYED_SOURCE_THREE_FINDING_REMEDIATION_RESCAN_PENDING",
-  "sourceHead": "a412e68828201f89f32563fa7fd43bc2c99abd6d",
-  "productionCommit": "a412e68828201f89f32563fa7fd43bc2c99abd6d",
+  "generatedAt": "2026-08-13T23:36:31+09:00",
+  "verdict": "NOTICE_LIVE_DEPLOYED_SOURCE_FOUR_FINDING_REMEDIATION_RESCAN_PENDING",
+  "sourceHead": "86871354794651619d5257f0689e5924b1962ddd",
+  "productionCommit": "86871354794651619d5257f0689e5924b1962ddd",
   "userContext": "Preserve immutable original 18-finding baseline. Verify current f0c8a7be source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
   "immutableBaseline": {
     "scanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
@@ -34,21 +34,22 @@
     }
   },
   "currentSourceRemediation": {
-    "latestSourceHead": "a412e68828201f89f32563fa7fd43bc2c99abd6d",
+    "latestSourceHead": "86871354794651619d5257f0689e5924b1962ddd",
     "productCommits": [
       "6fc07ad17d382f6c9fdd88472d90388874044050",
-      "a412e68828201f89f32563fa7fd43bc2c99abd6d"
+      "a412e68828201f89f32563fa7fd43bc2c99abd6d",
+      "86871354794651619d5257f0689e5924b1962ddd"
     ],
-    "sourceRemediatedCount": 3,
-    "liveDeployedRemediationCount": 3,
-    "remainingReportableFindingCountBeforeRescan": 12,
+    "sourceRemediatedCount": 4,
+    "liveDeployedRemediationCount": 4,
+    "remainingReportableFindingCountBeforeRescan": 11,
     "liveAfterDeploymentPending": false,
     "productionBuild": {
-      "commitSha": "a412e68828201f89f32563fa7fd43bc2c99abd6d",
+      "commitSha": "86871354794651619d5257f0689e5924b1962ddd",
       "branch": "master",
       "environment": "production",
-      "deploymentUrl": "safeguard-contest-bis4wc0cl-seojaehongs-projects.vercel.app",
-      "verifiedAt": "2026-08-13T23:06:00+09:00"
+      "deploymentUrl": "safeguard-contest-jh9axvaan-seojaehongs-projects.vercel.app",
+      "verifiedAt": "2026-08-13T23:36:31+09:00"
     },
     "freshPostRemediationScanRequired": true,
     "securityCompleteClaimAllowed": false,
@@ -70,6 +71,12 @@
         "severity": "medium",
         "disposition": "live_deployed_source_remediated_rescan_pending",
         "verification": "Embedding and upload admission now fail closed for an empty corpus, empty embedding text, missing controls, missing primary documents, duplicate content hashes, or missing validation counts, even when both operator approval flags are true."
+      },
+      {
+        "slug": "knowledge-reingest-review-reset",
+        "severity": "medium",
+        "disposition": "live_deployed_source_remediated_rescan_pending",
+        "verification": "Identical re-ingestion preserves the existing review receipt without updating the event; changed content or provenance is updated atomically with review_status reset to pending_review, including the concurrent unique-conflict path."
       }
     ]
   },
@@ -97,7 +104,17 @@
       "embeddingGenerated": false,
       "vectorUploadPerformed": false
     },
-    "liveVerificationBoundary": "Production marker proves deployment of all three tested source remediations. No provider cancellation request, forced HWP internal failure, embedding generation, or vector upload was executed against production."
+    "knowledgeReingestReviewReset": {
+      "focusedFiles": 1,
+      "focusedTests": 16,
+      "adjacentFiles": 7,
+      "adjacentTests": 112,
+      "failed": 0,
+      "typecheck": "PASS",
+      "build": "PASS",
+      "databaseMutationPerformed": false
+    },
+    "liveVerificationBoundary": "Production marker proves deployment of all four tested source remediations. No provider cancellation request, forced HWP internal failure, embedding generation, vector upload, or live knowledge-event re-ingestion was executed against production."
   },
   "coverageLimitations": [
     "The current scan used focused threat surfaces and did not individually line-review all 5,612 tracked files.",
