@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_SIF_VECTOR_RECEIPT_ENFORCEMENT",
+  "sourceHead": "fcedb416552f64e87ca4c7939749d040bcc0c297",
+  "productCommit": "fcedb416552f64e87ca4c7939749d040bcc0c297",
+  "productionBuild": {
+    "commitSha": "fcedb416552f64e87ca4c7939749d040bcc0c297",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-o301bkpwh-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
+  "securityFinding": {
+    "id": "vector-runtime-ignores-verification-receipt",
+    "severity": "medium",
+    "status": "remediated-live-deployed-source"
+  },
+  "contract": {
+    "vectorFlagAloneInsufficient": true,
+    "postMigrationVerifierEmitsSha256Receipt": true,
+    "runtimeReceiptRedacted": true,
+    "runtimeFingerprintPinRequired": true,
+    "modelAndDimensionsPinned": true,
+    "corpusHashAndCountPinned": true,
+    "uploadCountMustMatchCorpus": true,
+    "tableRpcAndMetadataChecksRequired": true,
+    "tamperedEvidenceRejected": true,
+    "textRankedFallbackPreserved": true,
+    "currentRuntimeReceiptMachineVerified": false,
+    "currentVectorActivationAllowed": false
+  },
+  "verification": {
+    "focusedTests": {
+      "filesPassed": 3,
+      "testsPassed": 57
+    },
+    "focusedAndAdjacentTests": {
+      "filesPassed": 10,
+      "testsPassed": 82
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28,
+    "clientBundleSensitivePatternMatches": {
+      "PGRST205": 0,
+      "couldNotFindTable": 0,
+      "serviceRoleEnvName": 0,
+      "internalReceiptReason": 0
+    },
+    "dependencyAuditVulnerabilities": 0,
+    "diffCheck": "PASS",
+    "targetedSecretScanMatches": 0
+  },
+  "liveReadOnlyProbe": {
+    "ok": true,
+    "stage": "ready-for-approval",
+    "vectorStatus": "locked",
+    "flagEnabled": false,
+    "uploadVerified": false,
+    "verificationReceiptValid": false,
+    "providerOrVectorCallPerformed": false
+  },
+  "mutationBoundary": {
+    "databaseMutationPerformed": false,
+    "databaseMigrationPerformed": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "vectorFeatureFlagChanged": false,
+    "providerDispatchPerformed": false,
+    "shareSessionCreated": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "liveAfterDeploymentRequired": false,
+    "sifEmbeddingRuntime": "APPROVAL_GATED",
+    "runtimeReceiptAfterApprovedUpload": "REQUIRED",
+    "productionFingerprintConfiguration": "NOT_CHANGED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedClaimsUnchanged": true
+  }
+}
