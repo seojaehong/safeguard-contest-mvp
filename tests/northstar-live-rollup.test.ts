@@ -217,6 +217,16 @@ type RollupReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  currentSecurityRemediationLedger: {
+    verdict: string;
+    totalFindings: number | null;
+    deployedSourceRemediationCount: number | null;
+    unresolvedCount: number | null;
+    approvalGatedCount: number | null;
+    distributedRuntimeOpenCount: number | null;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   publicSearchDistributedRateLimitReadiness: {
     verdict: string;
     sourceHead: string;
@@ -434,6 +444,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "document_export_work_budget", state: "proven", evidencePath: "evaluation/document-export-work-budget-2026-08-01/report.json", detail: "eight export-budget findings remediated" },
       { id: "full_repository_security_scan", state: "proven", evidencePath: "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json", detail: "sealed follow-up scan with 17 reportable findings and one deferred candidate" },
       { id: "repository_security_scan_reconciliation", state: "notice", evidencePath: "evaluation/repository-security-scan-reconciliation-2026-08-11/report.json", detail: "same-target scan conflict with fail-open receipts" },
+      { id: "current_security_remediation_ledger", state: "notice", evidencePath: "evaluation/security-current-remediation-ledger-2026-08-13/report.json", detail: "17/23 deployed-source remediated; six approval or distributed-runtime boundaries remain open" },
       { id: "public_search_distributed_rate_limit_readiness", state: "notice", evidencePath: "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json", detail: "current-source capability with production configuration pending" },
       { id: "public_generation_admission_security", state: "notice", evidencePath: "evaluation/security-public-generation-admission-2026-08-04/report.json", detail: "live instance admission with distributed hardening and fresh rescan pending" },
       { id: "security_followup_remediation", state: "proven", evidencePath: "evaluation/codex-security-followup-remediation-2026-08-11/report.json", detail: "deployed three-finding remediation with immutable baseline preserved" },
@@ -1136,6 +1147,19 @@ function createFixtureRoot(): { root: string; head: string } {
     },
     boundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
+  writeJson(root, "evaluation/security-current-remediation-ledger-2026-08-13/report.json", {
+    verdict: "NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_LEDGER_OPEN_BOUNDARIES",
+    sourceHead: "TO_FILL",
+    productionBuild: { commitSha: "TO_FILL" },
+    findingDisposition: {
+      total: 23,
+      deployedSourceRemediationCount: 17,
+      unresolvedCount: 6,
+      approvalGatedCount: 3,
+      distributedRuntimeOpenCount: 3,
+    },
+    remainingBoundaries: { securityCompleteClaimAllowed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  });
   writeJson(root, "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
     sourceHead: "TO_FILL",
@@ -1190,6 +1214,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/security-resource-remediation-2026-08-11/report.json",
     "evaluation/security-upstream-transport-remediation-2026-08-11/report.json",
     "evaluation/security-safety-reference-surface-remediation-2026-08-11/report.json",
+    "evaluation/security-current-remediation-ledger-2026-08-13/report.json",
     "evaluation/public-json-request-body-budget-2026-08-11/report.json",
     "evaluation/improvement-photo-analysis-budget-2026-08-11/report.json",
     "evaluation/public-provider-cancellation-2026-08-11/report.json",
@@ -1502,6 +1527,17 @@ describe("northstar live rollup", () => {
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
+    expect(report.currentSecurityRemediationLedger).toMatchObject({
+      verdict: "NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_LEDGER_OPEN_BOUNDARIES",
+      totalFindings: 23,
+      deployedSourceRemediationCount: 17,
+      unresolvedCount: 6,
+      approvalGatedCount: 3,
+      distributedRuntimeOpenCount: 3,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "current_security_remediation_ledger")).toBeDefined();
     expect(report.publicJsonRequestBodyBudget).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",
       findingId: "csf_44619971f6e14344d1d76da5",

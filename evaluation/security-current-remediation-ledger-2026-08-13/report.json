@@ -1,0 +1,269 @@
+{
+  "schemaVersion": "safeclaw-security-current-remediation-ledger/v1",
+  "generatedAt": "2026-08-13T20:40:35.0973244+09:00",
+  "verdict": "NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_LEDGER_OPEN_BOUNDARIES",
+  "sourceHead": "4301edf79780d28079aebfa4ee715610152f2323",
+  "productionBuild": {
+    "commitSha": "4301edf79780d28079aebfa4ee715610152f2323",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-prdq02u4n-seojaehongs-projects.vercel.app",
+    "verifiedAt": "2026-08-13T20:40:35.0973244+09:00"
+  },
+  "immutableBaselines": {
+    "originalStandardScan": {
+      "scanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
+      "targetRevision": "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
+      "reportableFindingCount": 17,
+      "deferredCandidateCount": 1,
+      "preserved": true
+    },
+    "currentFindingSet": {
+      "scanId": "c98ffa84-9951-4f68-9e1d-11f456abe901",
+      "targetRevision": "003c48838b2c4365203de3cc2dae230200c79e96",
+      "findingCount": 23,
+      "severityCounts": {
+        "high": 1,
+        "medium": 18,
+        "low": 4
+      },
+      "preserved": true
+    }
+  },
+  "findingDisposition": {
+    "total": 23,
+    "deployedSourceRemediationCount": 17,
+    "unresolvedCount": 6,
+    "approvalGatedCount": 3,
+    "distributedRuntimeOpenCount": 3,
+    "securityCompleteClaimAllowed": false
+  },
+  "governedPathCompatibility": {
+    "verdict": "PASS_LIVE_DEPLOYED_SOURCE_CURRENT_SECURITY_GOVERNED_PATH_COMPATIBILITY",
+    "sourceHead": "4301edf79780d28079aebfa4ee715610152f2323",
+    "productionCommit": "4301edf79780d28079aebfa4ee715610152f2323",
+    "coveredGateIds": [
+      "public_json_request_body_budget",
+      "improvement_photo_analysis_budget",
+      "public_provider_cancellation",
+      "public_provider_admission",
+      "public_generation_admission_security",
+      "security_followup_remediation",
+      "mcp_generation_work_budget_security"
+    ],
+    "verification": {
+      "files": 27,
+      "tests": 269,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "originalSecurityBaselinesRewritten": false,
+    "noMutation": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "findings": [
+    {
+      "findingId": "csf_32ed9bacd31d6e84ee96670c",
+      "anchor": "forged-share-session-cross-tenant-disclosure",
+      "severity": "high",
+      "disposition": "deployed_source_remediated_with_approval_boundary",
+      "receiptPath": "evaluation/security-priority-remediation-2026-08-13/report.json",
+      "residualBoundary": "DATABASE_COMPOSITE_CONSTRAINT_APPROVAL_GATED"
+    },
+    {
+      "findingId": "csf_60ae470f243100a5ceff1625",
+      "anchor": "dispatch-null-tenant-rls-bypass",
+      "severity": "medium",
+      "disposition": "approval_gated",
+      "receiptPath": "evaluation/repository-security-scan-reconciliation-2026-08-11/report.json",
+      "residualBoundary": "SUPABASE_RLS_LIVE_ISOLATION_APPROVAL_GATED"
+    },
+    {
+      "findingId": "csf_6ca85fcda2063dad372a1ba0",
+      "anchor": "read-confirmation-check-then-insert",
+      "severity": "medium",
+      "disposition": "deployed_source_remediated_with_approval_boundary",
+      "receiptPath": "evaluation/security-read-confirmation-idempotency-remediation-2026-08-13/report.json",
+      "residualBoundary": "LIVE_DATABASE_CANARY_APPROVAL_GATED"
+    },
+    {
+      "findingId": "csf_6003dccadac8eda2a4d965f1",
+      "anchor": "photo-analysis-before-unpersistable-upload",
+      "severity": "medium",
+      "disposition": "deployed_source_remediated",
+      "receiptPath": "evaluation/security-photo-storage-alignment-2026-08-13/report.json",
+      "residualBoundary": "NONE"
+    },
+    {
+      "findingId": "csf_db6606a70118268c2f1f9ed2",
+      "anchor": "workers-org-only-site-reassignment",
+      "severity": "medium",
+      "disposition": "deployed_source_remediated_with_approval_boundary",
+      "receiptPath": "evaluation/security-worker-site-boundary-remediation-2026-08-13/report.json",
+      "residualBoundary": "DATABASE_SITE_CONSTRAINT_APPROVAL_GATED"
+    },
+    {
+      "findingId": "csf_6c2ccea59dc8f8acd9414403",
+      "anchor": "legacy-public-tables-without-rls",
+      "severity": "medium",
+      "disposition": "approval_gated",
+      "receiptPath": "evaluation/repository-security-scan-reconciliation-2026-08-11/report.json",
+      "residualBoundary": "SUPABASE_RLS_MIGRATION_APPROVAL_GATED"
+    },
+    {
+      "findingId": "csf_107c4ebc10082a6d894aedb4",
+      "anchor": "knowledge-ingest-duplicate-runs",
+      "severity": "medium",
+      "disposition": "deployed_source_remediated_with_approval_boundary",
+      "receiptPath": "evaluation/security-knowledge-ingest-idempotency-remediation-2026-08-13/report.json",
+      "residualBoundary": "EVENT_RUN_ATOMIC_TRANSACTION_APPROVAL_GATED"
+    },
+    {
+      "findingId": "csf_72350152046c347d29921d05",
+      "anchor": "tenant-owned-related-object-mismatch",
+      "severity": "low",
+      "disposition": "approval_gated",
+      "receiptPath": "evaluation/repository-security-scan-reconciliation-2026-08-11/report.json",
+      "residualBoundary": "TENANT_TUPLE_DATABASE_CONSTRAINT_APPROVAL_GATED"
+    },
+    {
+      "findingId": "csf_6013fe31acab79c3e5823fe3",
+      "anchor": "public-compute-instance-rate-fallback",
+      "severity": "medium",
+      "disposition": "distributed_runtime_open",
+      "receiptPath": "evaluation/security-public-generation-admission-2026-08-04/report.json",
+      "residualBoundary": "DISTRIBUTED_PRODUCTION_LIMITER_ACTIVATION_OPEN"
+    },
+    {
+      "findingId": "csf_e9f6acc76158d6936fdc7ec1",
+      "anchor": "public-ask-local-weighted-concurrency",
+      "severity": "medium",
+      "disposition": "distributed_runtime_open",
+      "receiptPath": "evaluation/public-provider-admission-2026-08-11/report.json",
+      "residualBoundary": "DISTRIBUTED_WEIGHTED_LEASE_ACTIVATION_OPEN"
+    },
+    {
+      "findingId": "csf_2b1622ad26e5c29920dbee2f",
+      "anchor": "remediation-without-work-lease",
+      "severity": "medium",
+      "disposition": "deployed_source_remediated",
+      "receiptPath": "evaluation/security-workpack-remediation-admission-2026-08-13/report.json",
+      "residualBoundary": "NONE"
+    },
+    {
+      "findingId": "csf_fe92b01d367cd83f6f5a8db1",
+      "anchor": "legal-search-disconnect-not-propagated",
+      "severity": "low",
+      "disposition": "deployed_source_remediated",
+      "receiptPath": "evaluation/security-legal-search-cancellation-remediation-2026-08-13/report.json",
+      "residualBoundary": "NONE"
+    },
+    {
+      "findingId": "csf_945cd27e0e1adc50b4c505e1",
+      "anchor": "photo-analysis-disconnect-not-propagated",
+      "severity": "low",
+      "disposition": "deployed_source_remediated",
+      "receiptPath": "evaluation/security-photo-cancellation-remediation-2026-08-13/report.json",
+      "residualBoundary": "NONE"
+    },
+    {
+      "findingId": "csf_4ced3a81d9d5719a98310abe",
+      "anchor": "knowledge-review-generation-unbounded",
+      "severity": "medium",
+      "disposition": "deployed_source_remediated",
+      "receiptPath": "evaluation/security-knowledge-review-admission-remediation-2026-08-13/report.json",
+      "residualBoundary": "NONE"
+    },
+    {
+      "findingId": "csf_0ab15ba3cb26ea2de42c969d",
+      "anchor": "agent-chat-process-local-quotas",
+      "severity": "medium",
+      "disposition": "distributed_runtime_open",
+      "receiptPath": "evaluation/security-remediation-current-2026-08-11/report.json",
+      "residualBoundary": "DISTRIBUTED_AGENT_CHAT_ADMISSION_OPEN"
+    },
+    {
+      "findingId": "csf_0b17ba1587b295e21dd8a141",
+      "anchor": "disabled-mcp-token-legacy-reauthorization",
+      "severity": "medium",
+      "disposition": "deployed_source_remediated",
+      "receiptPath": "evaluation/security-mcp-disabled-token-remediation-2026-08-13/report.json",
+      "residualBoundary": "NONE"
+    },
+    {
+      "findingId": "csf_7c6fb7d226f5f405b04f23f8",
+      "anchor": "mcp-token-no-expiry",
+      "severity": "medium",
+      "disposition": "deployed_source_remediated",
+      "receiptPath": "evaluation/security-mcp-token-expiry-remediation-2026-08-13/report.json",
+      "residualBoundary": "NONE"
+    },
+    {
+      "findingId": "csf_deda3425adf85884225538a4",
+      "anchor": "mcp-default-all-tool-scopes",
+      "severity": "medium",
+      "disposition": "deployed_source_remediated",
+      "receiptPath": "evaluation/security-mcp-default-scope-remediation-2026-08-13/report.json",
+      "residualBoundary": "NONE"
+    },
+    {
+      "findingId": "csf_e3ea8ca7f62b05b33d4beea2",
+      "anchor": "mcp-generation-no-weighted-lease",
+      "severity": "medium",
+      "disposition": "deployed_source_remediated_with_runtime_boundary",
+      "receiptPath": "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json",
+      "residualBoundary": "AUTHENTICATED_RUNTIME_PROBE_AND_DISTRIBUTED_ACTIVATION_OPEN"
+    },
+    {
+      "findingId": "csf_5af1870f3c0d961bbbedb904",
+      "anchor": "vector-runtime-ignores-verification-receipt",
+      "severity": "medium",
+      "disposition": "deployed_source_remediated_with_approval_boundary",
+      "receiptPath": "evaluation/security-sif-vector-receipt-remediation-2026-08-13/report.json",
+      "residualBoundary": "SIF_RUNTIME_ACTIVATION_APPROVAL_GATED"
+    },
+    {
+      "findingId": "csf_a993c141161ee9e601c1d09e",
+      "anchor": "public-security-state-diagnostics",
+      "severity": "low",
+      "disposition": "deployed_source_remediated",
+      "receiptPath": "evaluation/security-sif-operator-diagnostics-remediation-2026-08-13/report.json",
+      "residualBoundary": "NONE"
+    },
+    {
+      "findingId": "csf_721663901ae58571bcc40d00",
+      "anchor": "kosha-smart-search-cleartext-key",
+      "severity": "medium",
+      "disposition": "deployed_source_remediated",
+      "receiptPath": "evaluation/security-priority-remediation-2026-08-13/report.json",
+      "residualBoundary": "NONE"
+    },
+    {
+      "findingId": "csf_89fe636f990bbc8339535b55",
+      "anchor": "tbm-log-unescaped-html",
+      "severity": "medium",
+      "disposition": "deployed_source_remediated",
+      "receiptPath": "evaluation/security-priority-remediation-2026-08-13/report.json",
+      "residualBoundary": "NONE"
+    }
+  ],
+  "mutationBoundary": {
+    "dbSchemaChanged": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "securityCompleteClaimAllowed": false,
+    "freshFullRepositorySecurityScanRequiredForClosure": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "sifEmbeddingRuntime": "APPROVAL_GATED",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "koshaExactPromotion": "APPROVAL_GATED"
+  }
+}

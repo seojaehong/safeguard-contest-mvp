@@ -34,6 +34,7 @@ const ARTIFACTS = Object.freeze({
   documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
+  currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
@@ -345,6 +346,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const documentExportWorkBudget = tryReadJson(rootDir, ARTIFACTS.documentExportWorkBudget);
   const fullRepositorySecurityScan = tryReadJson(rootDir, ARTIFACTS.fullRepositorySecurityScan);
   const repositorySecurityScanReconciliation = tryReadJson(rootDir, ARTIFACTS.repositorySecurityScanReconciliation);
+  const currentSecurityRemediationLedger = tryReadJson(rootDir, ARTIFACTS.currentSecurityRemediationLedger);
   const publicJsonRequestBodyBudget = tryReadJson(rootDir, ARTIFACTS.publicJsonRequestBodyBudget);
   const improvementPhotoAnalysisBudget = tryReadJson(rootDir, ARTIFACTS.improvementPhotoAnalysisBudget);
   const publicProviderCancellation = tryReadJson(rootDir, ARTIFACTS.publicProviderCancellation);
@@ -446,6 +448,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "document_export_work_budget", ARTIFACTS.documentExportWorkBudget, documentExportWorkBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "full_repository_security_scan", ARTIFACTS.fullRepositorySecurityScan, fullRepositorySecurityScan),
     evidenceStatus(rootDir, currentHead, liveCommit, "repository_security_scan_reconciliation", ARTIFACTS.repositorySecurityScanReconciliation, repositorySecurityScanReconciliation),
+    evidenceStatus(rootDir, currentHead, liveCommit, "current_security_remediation_ledger", ARTIFACTS.currentSecurityRemediationLedger, currentSecurityRemediationLedger),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_json_request_body_budget", ARTIFACTS.publicJsonRequestBodyBudget, publicJsonRequestBodyBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "improvement_photo_analysis_budget", ARTIFACTS.improvementPhotoAnalysisBudget, improvementPhotoAnalysisBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_cancellation", ARTIFACTS.publicProviderCancellation, publicProviderCancellation),
@@ -632,6 +635,19 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       correctedCoverageCompleteness: asString(recordAt(repositorySecurityScanReconciliation, "correctedFreshScan")?.coverageCompleteness),
       securityCompleteClaimAllowed: recordAt(repositorySecurityScanReconciliation, "correctedFreshScan")?.securityCompleteClaimAllowed === true,
       exactSavedShareVerdict: asString(recordAt(repositorySecurityScanReconciliation, "boundaries")?.exactSavedShareVerdict),
+    },
+    currentSecurityRemediationLedger: {
+      artifact: ARTIFACTS.currentSecurityRemediationLedger,
+      verdict: isRecord(currentSecurityRemediationLedger) ? asString(currentSecurityRemediationLedger.verdict) : "missing",
+      sourceHead: isRecord(currentSecurityRemediationLedger) ? asString(currentSecurityRemediationLedger.sourceHead) : "",
+      productionCommit: asString(recordAt(currentSecurityRemediationLedger, "productionBuild")?.commitSha),
+      totalFindings: asNumber(recordAt(currentSecurityRemediationLedger, "findingDisposition")?.total),
+      deployedSourceRemediationCount: asNumber(recordAt(currentSecurityRemediationLedger, "findingDisposition")?.deployedSourceRemediationCount),
+      unresolvedCount: asNumber(recordAt(currentSecurityRemediationLedger, "findingDisposition")?.unresolvedCount),
+      approvalGatedCount: asNumber(recordAt(currentSecurityRemediationLedger, "findingDisposition")?.approvalGatedCount),
+      distributedRuntimeOpenCount: asNumber(recordAt(currentSecurityRemediationLedger, "findingDisposition")?.distributedRuntimeOpenCount),
+      securityCompleteClaimAllowed: recordAt(currentSecurityRemediationLedger, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
+      exactSavedShareVerdict: asString(recordAt(currentSecurityRemediationLedger, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     publicSearchDistributedRateLimitReadiness: {
       artifact: ARTIFACTS.publicSearchDistributedRateLimitReadiness,
@@ -1273,6 +1289,12 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Immutable original baseline: ${rollup.securityFollowupRemediation.immutableOriginalBaselineFindingCount ?? "unknown"}; rewritten=${rollup.securityFollowupRemediation.originalBaselineRewritten}`,
     `- Deferred candidates retained: ${rollup.securityFollowupRemediation.deferredCandidateCount ?? "unknown"}; live provider cancellation probe executed=${rollup.securityFollowupRemediation.liveProviderCancellationProbeExecuted}`,
     `- Exact saved Share: ${rollup.securityFollowupRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "",
+    "## Current Security Remediation Ledger",
+    `- Verdict: \`${rollup.currentSecurityRemediationLedger.verdict}\``,
+    `- Current finding set: ${rollup.currentSecurityRemediationLedger.totalFindings ?? "unknown"}; deployed-source remediation receipts: ${rollup.currentSecurityRemediationLedger.deployedSourceRemediationCount ?? "unknown"}; unresolved: ${rollup.currentSecurityRemediationLedger.unresolvedCount ?? "unknown"}`,
+    `- Approval-gated: ${rollup.currentSecurityRemediationLedger.approvalGatedCount ?? "unknown"}; distributed runtime open: ${rollup.currentSecurityRemediationLedger.distributedRuntimeOpenCount ?? "unknown"}; security-complete=${rollup.currentSecurityRemediationLedger.securityCompleteClaimAllowed}`,
+    `- Exact saved Share: ${rollup.currentSecurityRemediationLedger.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "",
     "## Security Resource Remediation",
     `- Verdict: \`${rollup.securityResourceRemediation.verdict}\``,

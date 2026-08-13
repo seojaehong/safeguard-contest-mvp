@@ -49,6 +49,7 @@ const EVIDENCE_PATHS = Object.freeze({
   documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
+  currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
@@ -3880,6 +3881,121 @@ function evaluateRepositorySecurityScanReconciliationGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluateCurrentSecurityRemediationLedgerGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.currentSecurityRemediationLedger;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "current_security_remediation_ledger",
+      label: "Current security remediation ledger",
+      state: "missing",
+      evidencePath,
+      detail: "The current 23-finding security remediation ledger is missing or invalid.",
+      nextActions: ["Restore the current security remediation ledger without rewriting either immutable scan baseline."],
+    });
+  }
+
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const immutableBaselines = isRecord(report.immutableBaselines) ? report.immutableBaselines : {};
+  const originalScan = isRecord(immutableBaselines.originalStandardScan) ? immutableBaselines.originalStandardScan : {};
+  const currentScan = isRecord(immutableBaselines.currentFindingSet) ? immutableBaselines.currentFindingSet : {};
+  const disposition = isRecord(report.findingDisposition) ? report.findingDisposition : {};
+  const findings = Array.isArray(report.findings) ? report.findings.filter(isRecord) : [];
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const expectedFindingIds = new Set([
+    "csf_32ed9bacd31d6e84ee96670c",
+    "csf_60ae470f243100a5ceff1625",
+    "csf_6ca85fcda2063dad372a1ba0",
+    "csf_6003dccadac8eda2a4d965f1",
+    "csf_db6606a70118268c2f1f9ed2",
+    "csf_6c2ccea59dc8f8acd9414403",
+    "csf_107c4ebc10082a6d894aedb4",
+    "csf_72350152046c347d29921d05",
+    "csf_6013fe31acab79c3e5823fe3",
+    "csf_e9f6acc76158d6936fdc7ec1",
+    "csf_2b1622ad26e5c29920dbee2f",
+    "csf_fe92b01d367cd83f6f5a8db1",
+    "csf_945cd27e0e1adc50b4c505e1",
+    "csf_4ced3a81d9d5719a98310abe",
+    "csf_0ab15ba3cb26ea2de42c969d",
+    "csf_0b17ba1587b295e21dd8a141",
+    "csf_7c6fb7d226f5f405b04f23f8",
+    "csf_deda3425adf85884225538a4",
+    "csf_e3ea8ca7f62b05b33d4beea2",
+    "csf_5af1870f3c0d961bbbedb904",
+    "csf_a993c141161ee9e601c1d09e",
+    "csf_721663901ae58571bcc40d00",
+    "csf_89fe636f990bbc8339535b55",
+  ]);
+  const actualFindingIds = new Set(findings.map((finding) => readString(finding.findingId)).filter(Boolean));
+  const deployedSourceCount = findings.filter((finding) => readString(finding.disposition).startsWith("deployed_source_remediated")).length;
+  const approvalGatedCount = findings.filter((finding) => readString(finding.disposition) === "approval_gated").length;
+  const distributedRuntimeOpenCount = findings.filter((finding) => readString(finding.disposition) === "distributed_runtime_open").length;
+  const receiptPathsValid = findings.every((finding) => {
+    const receiptPath = readString(finding.receiptPath);
+    return receiptPath.length > 0 && fs.existsSync(path.join(rootDir, receiptPath));
+  });
+  const noMutation = mutationBoundary.dbSchemaChanged === false
+    && mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.vectorOrEmbeddingMutationPerformed === false
+    && mutationBoundary.wikiPublicationPerformed === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_LEDGER_OPEN_BOUNDARIES"
+    && readString(report.sourceHead).length > 0
+    && readString(report.sourceHead) === readString(productionBuild.commitSha)
+    && readString(productionBuild.branch) === "master"
+    && readString(productionBuild.environment) === "production"
+    && readString(originalScan.scanId) === "8fe9c06a-018c-446f-aa98-1b37df95287a"
+    && readNumber(originalScan.reportableFindingCount) === 17
+    && readNumber(originalScan.deferredCandidateCount) === 1
+    && originalScan.preserved === true
+    && readString(currentScan.scanId) === "c98ffa84-9951-4f68-9e1d-11f456abe901"
+    && readNumber(currentScan.findingCount) === 23
+    && currentScan.preserved === true
+    && readNumber(disposition.total) === 23
+    && readNumber(disposition.deployedSourceRemediationCount) === 17
+    && readNumber(disposition.unresolvedCount) === 6
+    && readNumber(disposition.approvalGatedCount) === 3
+    && readNumber(disposition.distributedRuntimeOpenCount) === 3
+    && disposition.securityCompleteClaimAllowed === false
+    && findings.length === 23
+    && actualFindingIds.size === expectedFindingIds.size
+    && [...expectedFindingIds].every((findingId) => actualFindingIds.has(findingId))
+    && deployedSourceCount === 17
+    && approvalGatedCount === 3
+    && distributedRuntimeOpenCount === 3
+    && receiptPathsValid
+    && noMutation
+    && remainingBoundaries.securityCompleteClaimAllowed === false
+    && remainingBoundaries.freshFullRepositorySecurityScanRequiredForClosure === true
+    && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(remainingBoundaries.supabaseRlsLaunchIsolation) === "APPROVAL_GATED"
+    && readString(remainingBoundaries.providerDispatchPersistence) === "APPROVAL_GATED"
+    && readString(remainingBoundaries.sifEmbeddingRuntime) === "APPROVAL_GATED"
+    && readString(remainingBoundaries.llmWikiPublication) === "APPROVAL_GATED"
+    && readString(remainingBoundaries.koshaExactPromotion) === "APPROVAL_GATED";
+
+  return gateResult({
+    id: "current_security_remediation_ledger",
+    label: "Current security remediation ledger",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "The immutable 17-finding Standard scan and separate 23-finding current set remain preserved. Current live/source receipts classify 17/23 findings as deployed-source remediated and keep six findings visible: three approval-gated database boundaries and three distributed-runtime controls. This is not a security-complete claim; exact saved Share remains MISSING_EVIDENCE and provider, vector, wiki, and KOSHA promotion approvals remain closed."
+      : `Current ledger verdict=${readString(report.verdict) || "missing"}, findings=${findings.length}, deployed=${deployedSourceCount}, approval=${approvalGatedCount}, distributed=${distributedRuntimeOpenCount}, receipts=${receiptPathsValid}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Close the three distributed-runtime controls with production configuration evidence and request separate approval before any database security migration or live canary."]
+      : ["Restore the exact 23-finding ledger, receipt existence, immutable baselines, no-mutation boundary, and six open findings before using the current remediation count."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateLearningExportRendererSecurityGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.learningExportRendererSecurity;
   const report = readJsonFile(rootDir, evidencePath);
@@ -4306,6 +4422,39 @@ function isPublicProviderAdmissionCompatibilityCurrent(rootDir, gateId, governed
     && readString(compatibility.exactSavedShareVerdict) === "MISSING_EVIDENCE";
 }
 
+/**
+ * @param {string} rootDir
+ * @param {string} gateId
+ * @param {string[]} governedPaths
+ */
+function isCurrentSecurityRemediationCompatibilityCurrent(rootDir, gateId, governedPaths) {
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.currentSecurityRemediationLedger);
+  if (!isRecord(report) || !isRecord(report.governedPathCompatibility)) {
+    return false;
+  }
+  const compatibility = report.governedPathCompatibility;
+  const verification = isRecord(compatibility.verification) ? compatibility.verification : {};
+  const coveredGateIds = Array.isArray(compatibility.coveredGateIds)
+    ? compatibility.coveredGateIds.map(readString)
+    : [];
+  const sourceHead = readString(compatibility.sourceHead);
+  return readString(compatibility.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_CURRENT_SECURITY_GOVERNED_PATH_COMPATIBILITY"
+    && sourceHead.length > 0
+    && sourceHead === readString(compatibility.productionCommit)
+    && sourceHead === readString(report.productionBuild?.commitSha)
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, governedPaths)
+    && coveredGateIds.length === 7
+    && coveredGateIds.includes(gateId)
+    && readNumber(verification.files) === 27
+    && readNumber(verification.tests) === 269
+    && readNumber(verification.failed) === 0
+    && readString(verification.status) === "PASS"
+    && compatibility.originalSecurityBaselinesRewritten === false
+    && compatibility.noMutation === true
+    && readString(compatibility.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+}
+
 const LEARNING_EXPORT_RENDERER_SECURITY_PATHS = [
   "lib/workpack-learning-export.ts",
   "app/api/workpacks/[id]/learning-export/route.ts",
@@ -4403,7 +4552,8 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
   const productPathsCurrent = isEvidenceCurrentForPaths(rootDir, compatibilitySourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     || isSecurityUpstreamTransportCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
-    || isSecuritySafetyReferenceSurfaceCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS);
+    || isSecuritySafetyReferenceSurfaceCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
+    || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS);
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP"
     && sourceHead.length > 0
     && sourceHead === readString(deployment.productionCommit)
@@ -4490,7 +4640,8 @@ function evaluatePublicJsonRequestBodyBudgetGate(rootDir) {
   const sourceHead = readString(report.sourceHead);
   const productionCommit = readString(report.productionCommit);
   const sourceCurrent = isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)
-    || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS);
+    || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)
+    || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS);
   const expectedCases = [
     { path: "/api/ask", limit: 131072 },
     { path: "/api/ask/stream", limit: 131072 },
@@ -4917,7 +5068,8 @@ function evaluateImprovementPhotoAnalysisBudgetGate(rootDir) {
   const sourceHead = readString(report.sourceHead);
   const productionCommit = readString(report.productionCommit);
   const sourceCurrent = isEvidenceCurrentForPaths(rootDir, sourceHead, IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
-    || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS);
+    || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
+    || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS);
   const noMutation = mutation.dbSchemaMutation === false
     && mutation.dbDataMutation === false
     && mutation.providerDispatchCalled === false
@@ -5035,7 +5187,8 @@ function evaluatePublicProviderCancellationGate(rootDir) {
   const sourceHead = readString(report.sourceHead);
   const sourceCurrent = isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_PROVIDER_CANCELLATION_PATHS)
     || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
-    || isSecurityUpstreamTransportCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS);
+    || isSecurityUpstreamTransportCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
+    || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS);
   const noMutation = mutation.dbMutationPerformed === false
     && mutation.providerDispatchCalled === false
     && mutation.shareSessionCreated === false
@@ -5154,7 +5307,8 @@ function evaluatePublicProviderAdmissionGate(rootDir) {
     && sourceHead === readString(production.commitSha)
     && isGitAncestor(rootDir, sourceHead)
     && (isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_PROVIDER_ADMISSION_PATHS)
-      || isSecurityResourceRemediationCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS))
+      || isSecurityResourceRemediationCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
+      || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS))
     && findings.length === 2
     && findings.every((item) => readString(item.scanId) === "c4e9e2f1-7ce4-4313-a651-32205fca401f"
       && expectedFindingIds.has(readString(item.findingId))
@@ -5317,6 +5471,11 @@ function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
     && currentRefreshChecks.some((check) => readString(check.route) === "/api/workpack/remediate"
       && readString(check.probe) === "invalid-body-no-reference-or-ai-call")
     && currentRefreshNoMutation;
+  const currentCompatibilityPass = isCurrentSecurityRemediationCompatibilityCurrent(
+    rootDir,
+    "public_generation_admission_security",
+    PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS,
+  );
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN"
     && productCommit.length > 0
     && isGitAncestor(rootDir, productCommit)
@@ -5386,7 +5545,7 @@ function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
     && remainingBoundaries.freshPostChangeSecurityRescanRequired === true
     && remainingBoundaries.liveDeploymentVerificationRequired === false
     && remainingBoundaries.distributedProductionLimiterStillRecommended === true
-    && currentRefreshPass;
+    && (currentRefreshPass || currentCompatibilityPass);
 
   return gateResult({
     id: "public_generation_admission_security",
@@ -5474,6 +5633,11 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
     && currentRefreshProbe.providerCallPerformed === false
     && currentRefreshProbe.validAuthenticatedBudgetProbeExecuted === false
     && currentRefreshNoMutation;
+  const currentCompatibilityPass = isCurrentSecurityRemediationCompatibilityCurrent(
+    rootDir,
+    "mcp_generation_work_budget_security",
+    MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS,
+  );
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING"
     && sourceHead.length > 0
     && sourceHead === productionCommit
@@ -5525,7 +5689,7 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
     && remaining.distributedProductionActivationRequired === true
     && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
     && remaining.approvalGatedBoundariesUnchanged === true
-    && currentRefreshPass;
+    && (currentRefreshPass || currentCompatibilityPass);
 
   return gateResult({
     id: "mcp_generation_work_budget_security",
@@ -6434,6 +6598,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateDocumentExportWorkBudgetGate(rootDir),
     evaluateFullRepositorySecurityScanGate(rootDir),
     evaluateRepositorySecurityScanReconciliationGate(rootDir),
+    evaluateCurrentSecurityRemediationLedgerGate(rootDir),
     evaluatePublicJsonRequestBodyBudgetGate(rootDir),
     evaluateSecurityResourceRemediationGate(rootDir),
     evaluateSecurityUpstreamTransportRemediationGate(rootDir),

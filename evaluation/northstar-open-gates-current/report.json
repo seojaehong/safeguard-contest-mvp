@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-11T13:04:41.332Z",
-  "sourceSha": "397cce46258a72cdb9ec015c6735826dceb65a7e",
+  "generatedAt": "2026-08-13T11:57:34.559Z",
+  "sourceSha": "4301edf79780d28079aebfa4ee715610152f2323",
   "overall": "open",
   "gates": [
     {
@@ -186,6 +186,16 @@
       "detail": "The immutable f0c8a7be scans remain preserved at 17 findings / 1 deferred versus 0 / 0, and the zero-finding scan's two fail-open receipt contradictions remain rejected. Corrected Standard scan c4e9e2f1 is sealed at 910eccb7 with 14 open findings (8 medium, 6 low), partial coverage, and 9 deferred candidates. Reconciliation is proven, not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Remediate the 14 current-source findings and preserve all 9 deferred candidates; rerun after each bounded wave without rewriting the immutable baselines."
+      ]
+    },
+    {
+      "id": "current_security_remediation_ledger",
+      "state": "notice",
+      "label": "Current security remediation ledger",
+      "evidencePath": "evaluation\\security-current-remediation-ledger-2026-08-13\\report.json",
+      "detail": "The immutable 17-finding Standard scan and separate 23-finding current set remain preserved. Current live/source receipts classify 17/23 findings as deployed-source remediated and keep six findings visible: three approval-gated database boundaries and three distributed-runtime controls. This is not a security-complete claim; exact saved Share remains MISSING_EVIDENCE and provider, vector, wiki, and KOSHA promotion approvals remain closed.",
+      "nextActions": [
+        "Close the three distributed-runtime controls with production configuration evidence and request separate approval before any database security migration or live canary."
       ]
     },
     {

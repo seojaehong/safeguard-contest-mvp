@@ -68,6 +68,54 @@ function writeText(rootDir: string, relativePath: string, value: string): void {
   fs.writeFileSync(absolutePath, value, "utf8");
 }
 
+function currentSecurityRemediationLedgerFixture(): Record<string, unknown> {
+  const findingIds = [
+    "csf_32ed9bacd31d6e84ee96670c", "csf_60ae470f243100a5ceff1625", "csf_6ca85fcda2063dad372a1ba0",
+    "csf_6003dccadac8eda2a4d965f1", "csf_db6606a70118268c2f1f9ed2", "csf_6c2ccea59dc8f8acd9414403",
+    "csf_107c4ebc10082a6d894aedb4", "csf_72350152046c347d29921d05", "csf_6013fe31acab79c3e5823fe3",
+    "csf_e9f6acc76158d6936fdc7ec1", "csf_2b1622ad26e5c29920dbee2f", "csf_fe92b01d367cd83f6f5a8db1",
+    "csf_945cd27e0e1adc50b4c505e1", "csf_4ced3a81d9d5719a98310abe", "csf_0ab15ba3cb26ea2de42c969d",
+    "csf_0b17ba1587b295e21dd8a141", "csf_7c6fb7d226f5f405b04f23f8", "csf_deda3425adf85884225538a4",
+    "csf_e3ea8ca7f62b05b33d4beea2", "csf_5af1870f3c0d961bbbedb904", "csf_a993c141161ee9e601c1d09e",
+    "csf_721663901ae58571bcc40d00", "csf_89fe636f990bbc8339535b55",
+  ];
+  const approvalGated = new Set([findingIds[1], findingIds[5], findingIds[7]]);
+  const distributedOpen = new Set([findingIds[8], findingIds[9], findingIds[14]]);
+  return {
+    verdict: "NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_LEDGER_OPEN_BOUNDARIES",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", branch: "master", environment: "production" },
+    immutableBaselines: {
+      originalStandardScan: { scanId: "8fe9c06a-018c-446f-aa98-1b37df95287a", reportableFindingCount: 17, deferredCandidateCount: 1, preserved: true },
+      currentFindingSet: { scanId: "c98ffa84-9951-4f68-9e1d-11f456abe901", findingCount: 23, preserved: true },
+    },
+    findingDisposition: { total: 23, deployedSourceRemediationCount: 17, unresolvedCount: 6, approvalGatedCount: 3, distributedRuntimeOpenCount: 3, securityCompleteClaimAllowed: false },
+    findings: findingIds.map((findingId) => ({
+      findingId,
+      disposition: approvalGated.has(findingId)
+        ? "approval_gated"
+        : distributedOpen.has(findingId)
+          ? "distributed_runtime_open"
+          : "deployed_source_remediated",
+      receiptPath: "evaluation/repository-security-scan-reconciliation-2026-08-11/report.json",
+    })),
+    mutationBoundary: {
+      dbSchemaChanged: false, dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false,
+      vectorOrEmbeddingMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      securityCompleteClaimAllowed: false,
+      freshFullRepositorySecurityScanRequiredForClosure: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+      sifEmbeddingRuntime: "APPROVAL_GATED",
+      llmWikiPublication: "APPROVAL_GATED",
+      koshaExactPromotion: "APPROVAL_GATED",
+    },
+  };
+}
+
 function alignFixtureJsonSourceShas(directory: string, sourceSha: string): void {
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
     const entryPath = path.join(directory, entry.name);
@@ -2504,6 +2552,11 @@ function createFixtureRoot(): string {
       approvalGatedBoundariesPreserved: true,
     },
   });
+  writeJson(
+    rootDir,
+    path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
+    currentSecurityRemediationLedgerFixture(),
+  );
   writeJson(rootDir, path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",
     sourceHead: "fixture-sha",
@@ -3825,6 +3878,14 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "repository_security_scan_reconciliation")?.detail).toContain("two fail-open receipt contradictions");
     expect(audit.gates.find((gate) => gate.id === "repository_security_scan_reconciliation")?.detail).toContain("14 open findings");
     expect(audit.gates.find((gate) => gate.id === "repository_security_scan_reconciliation")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "current_security_remediation_ledger")).toMatchObject({
+      state: "notice",
+      evidencePath: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "current_security_remediation_ledger")?.detail).toContain("17/23");
+    expect(audit.gates.find((gate) => gate.id === "current_security_remediation_ledger")?.detail).toContain("six findings visible");
+    expect(audit.gates.find((gate) => gate.id === "current_security_remediation_ledger")?.detail).toContain("not a security-complete claim");
+    expect(audit.gates.find((gate) => gate.id === "current_security_remediation_ledger")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "public_json_request_body_budget")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),

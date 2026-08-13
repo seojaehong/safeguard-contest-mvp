@@ -270,6 +270,16 @@ type NextRunwayReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  currentSecurityRemediationLedger: {
+    verdict: string;
+    totalFindings: number | null;
+    deployedSourceRemediationCount: number | null;
+    unresolvedCount: number | null;
+    approvalGatedCount: number | null;
+    distributedRuntimeOpenCount: number | null;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   publicSearchDistributedRateLimitReadiness: {
     verdict: string;
     sourceHead: string;
@@ -1962,6 +1972,19 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     },
     boundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
+  writeJson(root, "evaluation/security-current-remediation-ledger-2026-08-13/report.json", {
+    verdict: "NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_LEDGER_OPEN_BOUNDARIES",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha" },
+    findingDisposition: {
+      total: 23,
+      deployedSourceRemediationCount: 17,
+      unresolvedCount: 6,
+      approvalGatedCount: 3,
+      distributedRuntimeOpenCount: 3,
+    },
+    remainingBoundaries: { securityCompleteClaimAllowed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  });
   writeJson(root, "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
     sourceHead: "fixture-sha",
@@ -2756,6 +2779,20 @@ describe("northstar next runway generator", () => {
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
+    expect(report.currentSecurityRemediationLedger).toMatchObject({
+      verdict: "NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_LEDGER_OPEN_BOUNDARIES",
+      totalFindings: 23,
+      deployedSourceRemediationCount: 17,
+      unresolvedCount: 6,
+      approvalGatedCount: 3,
+      distributedRuntimeOpenCount: 3,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "current_security_remediation_ledger",
+      state: "notice",
+    }));
     expect(report.provenCurrentState).toContain("public_json_request_body_budget");
     expect(report.publicJsonRequestBodyBudget).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",

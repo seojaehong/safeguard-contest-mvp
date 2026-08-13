@@ -38,6 +38,7 @@ const ARTIFACTS = Object.freeze({
   documentExportWorkBudget: path.join("evaluation", "document-export-work-budget-2026-08-01", "report.json"),
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
+  currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
@@ -848,6 +849,30 @@ function repositorySecurityScanReconciliationSummary(report) {
     correctedCoverageCompleteness: asString(corrected.coverageCompleteness),
     securityCompleteClaimAllowed: asBoolean(corrected.securityCompleteClaimAllowed),
     exactSavedShareVerdict: asString(boundaries.exactSavedShareVerdict),
+  };
+}
+
+/** @param {unknown} report */
+function currentSecurityRemediationLedgerSummary(report) {
+  if (!isRecord(report)) return {};
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const disposition = isRecord(report.findingDisposition) ? report.findingDisposition : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(productionBuild.commitSha),
+    totalFindings: typeof disposition.total === "number" ? disposition.total : null,
+    deployedSourceRemediationCount: typeof disposition.deployedSourceRemediationCount === "number"
+      ? disposition.deployedSourceRemediationCount
+      : null,
+    unresolvedCount: typeof disposition.unresolvedCount === "number" ? disposition.unresolvedCount : null,
+    approvalGatedCount: typeof disposition.approvalGatedCount === "number" ? disposition.approvalGatedCount : null,
+    distributedRuntimeOpenCount: typeof disposition.distributedRuntimeOpenCount === "number"
+      ? disposition.distributedRuntimeOpenCount
+      : null,
+    securityCompleteClaimAllowed: asBoolean(remaining.securityCompleteClaimAllowed),
+    exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
   };
 }
 
@@ -1909,6 +1934,10 @@ export function buildNorthstarNextRunway(options) {
     options.rootDir,
     ARTIFACTS.repositorySecurityScanReconciliation,
   );
+  const currentSecurityRemediationLedger = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.currentSecurityRemediationLedger,
+  );
   const publicSearchDistributedRateLimitReadiness = readOptionalJson(
     options.rootDir,
     ARTIFACTS.publicSearchDistributedRateLimitReadiness,
@@ -1998,6 +2027,9 @@ export function buildNorthstarNextRunway(options) {
   const fullRepositorySecuritySummary = fullRepositorySecurityScanSummary(fullRepositorySecurityScan);
   const repositorySecurityScanReconciliationResult = repositorySecurityScanReconciliationSummary(
     repositorySecurityScanReconciliation,
+  );
+  const currentSecurityRemediationLedgerResult = currentSecurityRemediationLedgerSummary(
+    currentSecurityRemediationLedger,
   );
   const publicSearchDistributedRateLimitReadinessResult = publicSearchDistributedRateLimitReadinessSummary(
     publicSearchDistributedRateLimitReadiness,
@@ -2099,6 +2131,11 @@ export function buildNorthstarNextRunway(options) {
         reason: "live instance admission is verified; distributed production activation and the fresh remediation diff scan remain open",
       },
       {
+        gate: "current_security_remediation_ledger",
+        state: "notice",
+        reason: "17/23 current findings have deployed-source remediation receipts while three database findings remain approval-gated and three distributed-runtime findings remain open; security-complete is false",
+      },
+      {
         gate: "mcp_generation_work_budget_security",
         state: "notice",
         reason: "deployed source includes the measured MCP body and token-bound admission budgets; a valid authenticated runtime probe, distributed activation, and fresh rescan remain open",
@@ -2166,6 +2203,7 @@ export function buildNorthstarNextRunway(options) {
     documentExportWorkBudget: documentExportWorkBudgetResult,
     fullRepositorySecurityScan: fullRepositorySecuritySummary,
     repositorySecurityScanReconciliation: repositorySecurityScanReconciliationResult,
+    currentSecurityRemediationLedger: currentSecurityRemediationLedgerResult,
     publicSearchDistributedRateLimitReadiness: publicSearchDistributedRateLimitReadinessResult,
     publicGenerationAdmissionSecurity: publicGenerationAdmissionSecurityResult,
     securityFollowupRemediation: securityFollowupRemediationResult,
@@ -2313,6 +2351,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Public provider cancellation is separately source-proven in deployed production: \`${report.publicProviderCancellation.verdict || "missing"}\`, finding \`${report.publicProviderCancellation.findingId || "missing"}\`, tests \`${report.publicProviderCancellation.tests ?? "unknown"}\`, and live provider cancellation call executed=\`${report.publicProviderCancellation.liveProviderCallExecuted === true}\`. The canonical finding remains immutable until follow-up scan \`${report.publicProviderCancellation.followUpSecurityScan || "REQUIRED"}\`, security-complete remains \`${report.publicProviderCancellation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.publicProviderCancellation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Public provider admission is separately live-measured: \`${report.publicProviderAdmission.verdict || "missing"}\`, corrected findings \`${report.publicProviderAdmission.findingCount ?? "unknown"}\`, capacity/full weight \`${report.publicProviderAdmission.capacity ?? "unknown"}/${report.publicProviderAdmission.fullModeWeight ?? "unknown"}\`, and no-provider live cases \`${report.publicProviderAdmission.liveCaseCount ?? "unknown"}\`. Production distributed activation remains \`${report.publicProviderAdmission.distributedProductionActivation || "PENDING_CONFIGURATION"}\`, follow-up scan remains \`${report.publicProviderAdmission.followUpSecurityScan || "REQUIRED"}\`, security-complete remains \`${report.publicProviderAdmission.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.publicProviderAdmission.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Repository security scan reconciliation is \`${report.repositorySecurityScanReconciliation.verdict || "missing"}\`. The immutable same-target scans and \`${report.repositorySecurityScanReconciliation.receiptContradictionCount ?? "unknown"}\` fail-open contradictions remain preserved; zero-finding accepted=\`${report.repositorySecurityScanReconciliation.zeroFindingClaimAccepted === true}\`. Corrected scan completed=\`${report.repositorySecurityScanReconciliation.correctedFreshScanCompleted === true}\`, id=\`${report.repositorySecurityScanReconciliation.correctedScanId || "missing"}\`, reportable=\`${report.repositorySecurityScanReconciliation.correctedReportableFindingCount ?? "unknown"}\`, deferred=\`${report.repositorySecurityScanReconciliation.correctedDeferredCandidateCount ?? "unknown"}\`, coverage=\`${report.repositorySecurityScanReconciliation.correctedCoverageCompleteness || "unknown"}\`, security-complete=\`${report.repositorySecurityScanReconciliation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.repositorySecurityScanReconciliation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
+- Current security remediation ledger is \`${report.currentSecurityRemediationLedger.verdict || "missing"}\`: deployed-source receipts \`${report.currentSecurityRemediationLedger.deployedSourceRemediationCount ?? "unknown"}/${report.currentSecurityRemediationLedger.totalFindings ?? "unknown"}\`, unresolved \`${report.currentSecurityRemediationLedger.unresolvedCount ?? "unknown"}\`, approval-gated \`${report.currentSecurityRemediationLedger.approvalGatedCount ?? "unknown"}\`, distributed-runtime open \`${report.currentSecurityRemediationLedger.distributedRuntimeOpenCount ?? "unknown"}\`, security-complete=\`${report.currentSecurityRemediationLedger.securityCompleteClaimAllowed === true}\`, exact saved Share \`${report.currentSecurityRemediationLedger.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - MCP generation work-budget security is separately measured: \`${report.mcpGenerationWorkBudgetSecurity.verdict || "missing"}\`, POST body budget \`${report.mcpGenerationWorkBudgetSecurity.postBodyMaxBytes ?? "unknown"}\` bytes, adjacent tests \`${report.mcpGenerationWorkBudgetSecurity.adjacentTests ?? "unknown"}\`, valid authenticated runtime probe pending=\`${report.mcpGenerationWorkBudgetSecurity.validAuthenticatedRuntimeProbeRequired === true}\`, distributed activation pending=\`${report.mcpGenerationWorkBudgetSecurity.distributedActivationRequired === true}\`, and fresh rescan required=\`${report.mcpGenerationWorkBudgetSecurity.freshRescanRequired === true}\`. This notice preserves the sealed finding and exact saved Share \`${report.mcpGenerationWorkBudgetSecurity.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live Hermes reviewer authority UI is measured separately: \`${report.hermesKnowledgeReviewAuthorityUi.verdict || "missing"}\`, local/live viewport contracts \`${report.hermesKnowledgeReviewAuthorityUi.localPassed ?? 0}/${report.hermesKnowledgeReviewAuthorityUi.localViewportCount ?? 0}\` and \`${report.hermesKnowledgeReviewAuthorityUi.livePassed ?? 0}/${report.hermesKnowledgeReviewAuthorityUi.liveViewportCount ?? 0}\`, with authority order \`${report.hermesKnowledgeReviewAuthorityUi.sourceOrder?.join(" -> ") || "missing"}\`. Human review remains required and machine evidence does not replace it; no DB/provider/share/publication mutation is claimed. Exact saved Share remains \`${report.hermesKnowledgeReviewAuthorityUi.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`, while LLM Wiki publication and Supabase RLS remain approval-gated.
 - Live supporting-document scenario grounding is measured separately: \`${report.liveDocumentSecondaryGrounding.verdict || "missing"}\`, live cases \`${report.liveDocumentSecondaryGrounding.livePassed ?? 0}/5\`, supporting documents \`${report.liveDocumentSecondaryGrounding.secondaryPassed ?? 0}/${report.liveDocumentSecondaryGrounding.secondaryReviewed ?? 0}\`, cross-scenario leakage \`${report.liveDocumentSecondaryGrounding.crossScenarioLeakageCount ?? 0}\`, and missingUnexpected \`${report.liveDocumentSecondaryGrounding.missingUnexpectedCount ?? 0}\`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains \`${report.liveDocumentSecondaryGrounding.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
