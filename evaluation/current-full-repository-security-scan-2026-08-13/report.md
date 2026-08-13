@@ -2,7 +2,7 @@
 
 ## Verdict
 
-`NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_RESCAN_PENDING`
+`NOTICE_CURRENT_SOURCE_THREE_FINDING_REMEDIATION_SIF_LIVE_PENDING_RESCAN_PENDING`
 
 The Standard Codex Security scan `528ad724-6251-46fa-a812-48264396f321` completed and sealed against source revision `2c65f894be7cb37d0b50a2e1e19466a208400aaa`. It retained 15 reportable findings: 11 medium and 4 low. Coverage is explicitly partial rather than a line-by-line review of every tracked file.
 
@@ -15,11 +15,17 @@ Product commit `6fc07ad17d382f6c9fdd88472d90388874044050` addresses two findings
 - Safety-reference coalescing now propagates cancellation only after the final request consumer disconnects.
 - HWP export failures log internal detail server-side and return a fixed public error message without absolute filesystem paths.
 
+Product commit `a412e688` adds a third approval-free source remediation:
+
+- SIF embedding and upload now fail closed when the corpus is empty, embedding text is empty, controls or primary documents are missing, content hashes are duplicated, or mandatory validation counts are absent.
+- Both operator approval flags cannot override a failed corpus-quality admission.
+- No embedding generation or vector upload was performed.
+
 Focused verification passed 2 files and 21 tests. Strict typecheck passed. Next.js 15.5.22 production build passed with 28 static pages.
 
-Production build-info now reports product commit `6fc07ad17d382f6c9fdd88472d90388874044050` on `master` in `production`. This proves deployment of the tested source, not execution of a destructive or provider-backed live exploit. No provider cancellation request or forced HWP internal failure was executed against production.
+Production build-info reports product commit `6fc07ad17d382f6c9fdd88472d90388874044050` on `master` in `production`. This proves deployment of the first two tested remediations, not execution of a destructive or provider-backed live exploit. SIF commit `a412e688` remains live-deployment pending. No provider cancellation request, forced HWP internal failure, embedding generation, or vector upload was executed against production.
 
-A fresh post-remediation security scan is still required before either finding can be closed in the canonical set. Thirteen reportable findings remain before that rescan, and no security-complete claim is allowed.
+A fresh post-remediation security scan is still required before the three findings can be closed in the canonical set. Twelve reportable findings remain before that rescan, and no security-complete claim is allowed.
 
 ## Boundaries
 
