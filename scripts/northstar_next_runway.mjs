@@ -40,6 +40,7 @@ const ARTIFACTS = Object.freeze({
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "report.json"),
+  agentChatDurableAdmission: path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
@@ -1552,6 +1553,27 @@ function publicProviderAdmissionSummary(report) {
 }
 
 /** @param {unknown} report */
+function agentChatDurableAdmissionSummary(report) {
+  if (!isRecord(report)) return {};
+  const production = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const live = isRecord(report.liveProbe) ? report.liveProbe : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(production.commitSha),
+    findingId: isRecord(report.sealedFinding) ? asString(report.sealedFinding.findingId) : "",
+    liveRateLimitMode: asString(live.rateLimitMode),
+    authenticatedAgentAvailability: asString(live.authenticatedAgentAvailability),
+    distributedProductionActivation: asString(remaining.distributedProductionActivation),
+    authenticatedRuntimeProbe: asString(remaining.authenticatedRuntimeProbe),
+    freshRescanRequired: asBoolean(remaining.freshFullRepositorySecurityScanRequiredForCanonicalClosure),
+    securityCompleteClaimAllowed: asBoolean(remaining.securityCompleteClaimAllowed),
+    exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
+  };
+}
+
+/** @param {unknown} report */
 function mcpGenerationWorkBudgetSecuritySummary(report) {
   if (!isRecord(report)) return {};
   const contract = isRecord(report.currentSourceContract) ? report.currentSourceContract : {};
@@ -1979,6 +2001,10 @@ export function buildNorthstarNextRunway(options) {
     options.rootDir,
     ARTIFACTS.publicProviderAdmission,
   );
+  const agentChatDurableAdmission = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.agentChatDurableAdmission,
+  );
   const mcpGenerationWorkBudgetSecurity = readOptionalJson(
     options.rootDir,
     ARTIFACTS.mcpGenerationWorkBudgetSecurity,
@@ -2161,6 +2187,11 @@ export function buildNorthstarNextRunway(options) {
         state: "notice",
         reason: "deployed source enforces weighted instance admission and no-provider work budgets; distributed production activation and a fresh rescan remain open",
       },
+      {
+        gate: "agent_chat_durable_admission_security",
+        state: "notice",
+        reason: "deployed source fails authenticated Agent Chat closed until durable distributed admission is configured; authenticated runtime proof and a fresh rescan remain open",
+      },
     ],
     approvalGated: approvalGates(approvalRunway, shareRecipientAckApproval),
     launchReadiness: launchReadinessSummary(launch),
@@ -2220,6 +2251,7 @@ export function buildNorthstarNextRunway(options) {
     improvementPhotoAnalysisBudget: improvementPhotoAnalysisBudgetResult,
     publicProviderCancellation: publicProviderCancellationResult,
     publicProviderAdmission: publicProviderAdmissionResult,
+    agentChatDurableAdmission: agentChatDurableAdmissionSummary(agentChatDurableAdmission),
     mcpGenerationWorkBudgetSecurity: mcpGenerationWorkBudgetSecurityResult,
     learningExportRendererSecurity: learningExportRendererSecurityResult,
     hermesKnowledgeReviewAuthorityUi: hermesKnowledgeReviewAuthorityUiSummary(hermesKnowledgeReviewAuthorityUi),
