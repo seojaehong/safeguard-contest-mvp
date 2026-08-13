@@ -1,0 +1,1427 @@
+{
+  "documentType": "codex-security.findings",
+  "findings": [
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "Unauthenticated enhanced and full Ask requests can multiply provider cost and concurrency across production instances when durable admission is unavailable."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "Unauthenticated enhanced and full Ask requests can multiply provider cost and concurrency across production instances when durable admission is unavailable."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_9b3cc6648586dabf4bfa61e9",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:870d59e3d495fb6220d1fc3714a1cf3eb48b312eb27a80359b512014848cedd3"
+      },
+      "identity": {
+        "anchor": "resource-exhaustion.distributed-provider-admission",
+        "instance": "finding-1"
+      },
+      "locations": [
+        {
+          "endLine": 69,
+          "path": "lib/public-ask-admission.ts",
+          "role": "root_control",
+          "startLine": 27
+        }
+      ],
+      "occurrenceId": "occ_3d486bd483b37fc1e16f213c",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Require distributed production rate and weighted concurrency admission for provider-backed Ask modes and fail closed when durable admission is unavailable.",
+      "remediationTests": [
+        "Add a regression for resource-exhaustion.distributed-provider-admission."
+      ],
+      "rootCause": {
+        "summary": "Unauthenticated enhanced and full Ask requests can multiply provider cost and concurrency across production instances when durable admission is unavailable."
+      },
+      "ruleId": "resource-exhaustion.distributed-provider-admission",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "medium",
+        "rationale": "Meaningful integrity, cost, availability, or confidentiality impact with material prerequisites keeps this below high."
+      },
+      "summary": "Unauthenticated enhanced and full Ask requests can multiply provider cost and concurrency across production instances when durable admission is unavailable.",
+      "taxonomy": {
+        "category": "resource-exhaustion",
+        "cwe": [
+          "CWE-770"
+        ]
+      },
+      "title": "Public Ask endpoints fall back to per-instance provider budgets",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Unauthenticated enhanced and full Ask requests can multiply provider cost and concurrency across production instances when durable admission is unavailable."
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "Public search paths retain per-instance or optional production admission for expensive upstream and embedding work, allowing horizontal amplification."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "Public search paths retain per-instance or optional production admission for expensive upstream and embedding work, allowing horizontal amplification."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_bb897a39277591f4fbab0ca7",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:984084009b64f3c74befa90140f368376adf5b246ba5c6021fa51fcc6e4d9f54"
+      },
+      "identity": {
+        "anchor": "resource-exhaustion.distributed-search-admission",
+        "instance": "finding-2"
+      },
+      "locations": [
+        {
+          "endLine": 120,
+          "path": "app/api/search/route.ts",
+          "role": "root_control",
+          "startLine": 70
+        }
+      ],
+      "occurrenceId": "occ_fbe5123a0b16e3a738b9d447",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Require distributed rate and weighted concurrency leases for every expensive public provider branch.",
+      "remediationTests": [
+        "Add a regression for resource-exhaustion.distributed-search-admission."
+      ],
+      "rootCause": {
+        "summary": "Public search paths retain per-instance or optional production admission for expensive upstream and embedding work, allowing horizontal amplification."
+      },
+      "ruleId": "resource-exhaustion.distributed-search-admission",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "medium",
+        "rationale": "Meaningful integrity, cost, availability, or confidentiality impact with material prerequisites keeps this below high."
+      },
+      "summary": "Public search paths retain per-instance or optional production admission for expensive upstream and embedding work, allowing horizontal amplification.",
+      "taxonomy": {
+        "category": "resource-exhaustion",
+        "cwe": [
+          "CWE-770"
+        ]
+      },
+      "title": "Legal, safety-reference, and weather provider work lacks durable shared admission",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Public search paths retain per-instance or optional production admission for expensive upstream and embedding work, allowing horizontal amplification."
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "Authenticated callers can multiply vision provider work across instances because durable user and global admission is optional."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "Authenticated callers can multiply vision provider work across instances because durable user and global admission is optional."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_59a833ceafb4d00e9651f656",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:63ccb04119e3f494042fc1560b3e61b735c5bd2ee71c9b44820ffd5a80227152"
+      },
+      "identity": {
+        "anchor": "resource-exhaustion.distributed-provider-admission",
+        "instance": "finding-3"
+      },
+      "locations": [
+        {
+          "endLine": 440,
+          "path": "lib/public-distributed-rate-limit.ts",
+          "role": "root_control",
+          "startLine": 379
+        }
+      ],
+      "occurrenceId": "occ_e5aa12e1d208c9e452b778e2",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Require distributed production admission plus durable authenticated-user and global provider quotas.",
+      "remediationTests": [
+        "Add a regression for resource-exhaustion.distributed-provider-admission."
+      ],
+      "rootCause": {
+        "summary": "Authenticated callers can multiply vision provider work across instances because durable user and global admission is optional."
+      },
+      "ruleId": "resource-exhaustion.distributed-provider-admission",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "medium",
+        "rationale": "Meaningful integrity, cost, availability, or confidentiality impact with material prerequisites keeps this below high."
+      },
+      "summary": "Authenticated callers can multiply vision provider work across instances because durable user and global admission is optional.",
+      "taxonomy": {
+        "category": "resource-exhaustion",
+        "cwe": [
+          "CWE-770"
+        ]
+      },
+      "title": "Authenticated photo analysis falls back to per-instance provider budgets",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Authenticated callers can multiply vision provider work across instances because durable user and global admission is optional."
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "Valid MCP tokens can multiply provider-generation work across instances when durable token or tenant admission is unavailable."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "Valid MCP tokens can multiply provider-generation work across instances when durable token or tenant admission is unavailable."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_b10479b6501c208c4d11644e",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:1a9012ca949ddf855b5872b77359fada485ca5de344837b8e61f38a521d8caa2"
+      },
+      "identity": {
+        "anchor": "resource-exhaustion.distributed-provider-admission",
+        "instance": "finding-4"
+      },
+      "locations": [
+        {
+          "endLine": 430,
+          "path": "app/api/mcp/[transport]/implementation.ts",
+          "role": "root_control",
+          "startLine": 356
+        }
+      ],
+      "occurrenceId": "occ_d4d06c2dc02bcc48f1a9ae1e",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Require distributed rate control and a durable provider-generation lease keyed by token and tenant.",
+      "remediationTests": [
+        "Add a regression for resource-exhaustion.distributed-provider-admission."
+      ],
+      "rootCause": {
+        "summary": "Valid MCP tokens can multiply provider-generation work across instances when durable token or tenant admission is unavailable."
+      },
+      "ruleId": "resource-exhaustion.distributed-provider-admission",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "medium",
+        "rationale": "Meaningful integrity, cost, availability, or confidentiality impact with material prerequisites keeps this below high."
+      },
+      "summary": "Valid MCP tokens can multiply provider-generation work across instances when durable token or tenant admission is unavailable.",
+      "taxonomy": {
+        "category": "resource-exhaustion",
+        "cwe": [
+          "CWE-770"
+        ]
+      },
+      "title": "Provider-generating MCP tools fall back to per-instance throttling",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Valid MCP tokens can multiply provider-generation work across instances when durable token or tenant admission is unavailable."
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "Authenticated agent chat can drive repeated model and tool loops under process-local admission, enabling cross-instance amplification."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "Authenticated agent chat can drive repeated model and tool loops under process-local admission, enabling cross-instance amplification."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_dbfc57f541ee5079a9bf9735",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:f4fc82bac2b5bcf1e24c83369955f0398102841a314727fe60d6bd25fd2f3b2f"
+      },
+      "identity": {
+        "anchor": "resource-exhaustion.distributed-agent-admission",
+        "instance": "finding-5"
+      },
+      "locations": [
+        {
+          "endLine": 160,
+          "path": "app/api/agent/chat/route.ts",
+          "role": "root_control",
+          "startLine": 1
+        }
+      ],
+      "occurrenceId": "occ_565d419a25994a2f9fd0f167",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Require durable tenant and user admission for agent loops before model or tool execution.",
+      "remediationTests": [
+        "Add a regression for resource-exhaustion.distributed-agent-admission."
+      ],
+      "rootCause": {
+        "summary": "Authenticated agent chat can drive repeated model and tool loops under process-local admission, enabling cross-instance amplification."
+      },
+      "ruleId": "resource-exhaustion.distributed-agent-admission",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "medium",
+        "rationale": "Meaningful integrity, cost, availability, or confidentiality impact with material prerequisites keeps this below high."
+      },
+      "summary": "Authenticated agent chat can drive repeated model and tool loops under process-local admission, enabling cross-instance amplification.",
+      "taxonomy": {
+        "category": "resource-exhaustion",
+        "cwe": [
+          "CWE-770"
+        ]
+      },
+      "title": "Agent chat engine work lacks a durable production concurrency lease",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Authenticated agent chat can drive repeated model and tool loops under process-local admission, enabling cross-instance amplification."
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "low",
+          "why": "The Work24 integration reads an upstream body without an enforced byte ceiling, allowing oversized responses to consume server memory."
+        },
+        "likelihood": {
+          "level": "low",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "The Work24 integration reads an upstream body without an enforced byte ceiling, allowing oversized responses to consume server memory."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_8fbc60361fadb15b2cbb960b",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:628997c35db8504f166ba2819ee3587a17ba52ff5dac84e082e25cfa4da8ba65"
+      },
+      "identity": {
+        "anchor": "resource-exhaustion.unbounded-upstream-read",
+        "instance": "finding-6"
+      },
+      "locations": [
+        {
+          "endLine": 205,
+          "path": "lib/work24.ts",
+          "role": "root_control",
+          "startLine": 136
+        }
+      ],
+      "occurrenceId": "occ_6a8dacd73b20a62d3fa80550",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Stream or budget the upstream response body and reject responses above a documented byte limit.",
+      "remediationTests": [
+        "Add a regression for resource-exhaustion.unbounded-upstream-read."
+      ],
+      "rootCause": {
+        "summary": "The Work24 integration reads an upstream body without an enforced byte ceiling, allowing oversized responses to consume server memory."
+      },
+      "ruleId": "resource-exhaustion.unbounded-upstream-read",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "low",
+        "rationale": "Bounded impact or stronger prerequisites keep this low."
+      },
+      "summary": "The Work24 integration reads an upstream body without an enforced byte ceiling, allowing oversized responses to consume server memory.",
+      "taxonomy": {
+        "category": "resource-exhaustion",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Work24 recommendation reads can consume unbounded upstream responses",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "The Work24 integration reads an upstream body without an enforced byte ceiling, allowing oversized responses to consume server memory."
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "An unauthenticated status request invokes a multi-query statistics collector without rate limiting or bounded caching."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "An unauthenticated status request invokes a multi-query statistics collector without rate limiting or bounded caching."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_f074a9799d651ccc2947754f",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:abf6d9a896cf345ffc2c7eb08185b767add032603818f8f97350bb50b991855a"
+      },
+      "identity": {
+        "anchor": "resource-exhaustion.public-status-fanout",
+        "instance": "finding-7"
+      },
+      "locations": [
+        {
+          "endLine": 22,
+          "path": "app/api/safety-reference/status/route.ts",
+          "role": "root_control",
+          "startLine": 4
+        }
+      ],
+      "occurrenceId": "occ_7ad7a27a57d4e402e8d549ba",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Protect the status route with shared rate admission and a short bounded cache or precomputed projection.",
+      "remediationTests": [
+        "Add a regression for resource-exhaustion.public-status-fanout."
+      ],
+      "rootCause": {
+        "summary": "An unauthenticated status request invokes a multi-query statistics collector without rate limiting or bounded caching."
+      },
+      "ruleId": "resource-exhaustion.public-status-fanout",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "medium",
+        "rationale": "Meaningful integrity, cost, availability, or confidentiality impact with material prerequisites keeps this below high."
+      },
+      "summary": "An unauthenticated status request invokes a multi-query statistics collector without rate limiting or bounded caching.",
+      "taxonomy": {
+        "category": "resource-exhaustion",
+        "cwe": [
+          "CWE-770"
+        ]
+      },
+      "title": "Public safety-reference status fans out into unthrottled database work",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "An unauthenticated status request invokes a multi-query statistics collector without rate limiting or bounded caching."
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "low",
+          "why": "The dispatch endpoint materializes attacker-controlled JSON before authentication and size enforcement."
+        },
+        "likelihood": {
+          "level": "low",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "The dispatch endpoint materializes attacker-controlled JSON before authentication and size enforcement."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_a28d72e66686034c403a48fb",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:1d8666e1aead41e55156a374562f688fca6e5cef9e98f7b1efca1c144e8fe2bf"
+      },
+      "identity": {
+        "anchor": "resource-exhaustion.request-body-budget",
+        "instance": "finding-8"
+      },
+      "locations": [
+        {
+          "endLine": 292,
+          "path": "app/api/workflow/dispatch/route.ts",
+          "role": "root_control",
+          "startLine": 270
+        }
+      ],
+      "occurrenceId": "occ_dec12b515543d64a9b30a03a",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Apply the repository request-body budget before JSON parsing and authenticate before expensive body handling.",
+      "remediationTests": [
+        "Add a regression for resource-exhaustion.request-body-budget."
+      ],
+      "rootCause": {
+        "summary": "The dispatch endpoint materializes attacker-controlled JSON before authentication and size enforcement."
+      },
+      "ruleId": "resource-exhaustion.request-body-budget",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "low",
+        "rationale": "Bounded impact or stronger prerequisites keep this low."
+      },
+      "summary": "The dispatch endpoint materializes attacker-controlled JSON before authentication and size enforcement.",
+      "taxonomy": {
+        "category": "resource-exhaustion",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Workflow dispatch parses an unbounded JSON body before authorization",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "The dispatch endpoint materializes attacker-controlled JSON before authentication and size enforcement."
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "The initial query_logs and documents tables have no RLS declarations in repository migrations."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "The initial query_logs and documents tables have no RLS declarations in repository migrations."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_5d14554fd10a7835c7ed8766",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:ef913b0afd890fe2f3b0628b34e006862230df84dc88eba7a429017a43cf623b"
+      },
+      "identity": {
+        "anchor": "authorization.missing-rls",
+        "instance": "finding-9"
+      },
+      "locations": [
+        {
+          "endLine": 17,
+          "path": "supabase/migrations/001_init.sql",
+          "role": "root_control",
+          "startLine": 1
+        }
+      ],
+      "occurrenceId": "occ_71f191145dfa52363d8cbea4",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Add an explicit migration enabling RLS with least-privilege policies and verify live grants.",
+      "remediationTests": [
+        "Add a regression for authorization.missing-rls."
+      ],
+      "rootCause": {
+        "summary": "The initial query_logs and documents tables have no RLS declarations in repository migrations."
+      },
+      "ruleId": "authorization.missing-rls",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "medium",
+        "rationale": "Meaningful integrity, cost, availability, or confidentiality impact with material prerequisites keeps this below high."
+      },
+      "summary": "The initial query_logs and documents tables have no RLS declarations in repository migrations.",
+      "taxonomy": {
+        "category": "authorization",
+        "cwe": [
+          "CWE-284"
+        ]
+      },
+      "title": "Legacy query and document tables are created without row-level security",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "The initial query_logs and documents tables have no RLS declarations in repository migrations."
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "An owner policy treats null organization identifiers as a wildcard, allowing any organization owner to manage those rows."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "An owner policy treats null organization identifiers as a wildcard, allowing any organization owner to manage those rows."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_6e8f0ee7fc3a6358ad5d0a4b",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:5662f5d156fe149d5dc5b61f50e13e3c8fe32a00ca87be21c5b4e372da9c53fc"
+      },
+      "identity": {
+        "anchor": "authorization.rls-null-tenant-wildcard",
+        "instance": "finding-10"
+      },
+      "locations": [
+        {
+          "endLine": 201,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 183
+        }
+      ],
+      "occurrenceId": "occ_6bee0ea008435132492fabe8",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Make organization_id non-null after an approved data plan and remove the wildcard.",
+      "remediationTests": [
+        "Add a regression for authorization.rls-null-tenant-wildcard."
+      ],
+      "rootCause": {
+        "summary": "An owner policy treats null organization identifiers as a wildcard, allowing any organization owner to manage those rows."
+      },
+      "ruleId": "authorization.rls-null-tenant-wildcard",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "medium",
+        "rationale": "Meaningful integrity, cost, availability, or confidentiality impact with material prerequisites keeps this below high."
+      },
+      "summary": "An owner policy treats null organization identifiers as a wildcard, allowing any organization owner to manage those rows.",
+      "taxonomy": {
+        "category": "authorization",
+        "cwe": [
+          "CWE-863"
+        ]
+      },
+      "title": "Null-organization dispatch logs are globally manageable",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "An owner policy treats null organization identifiers as a wildcard, allowing any organization owner to manage those rows."
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "low",
+          "why": "Broad owner RLS permits direct dispatch-log mutation that bypasses the application authoritative-receipt invariant."
+        },
+        "likelihood": {
+          "level": "low",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "Broad owner RLS permits direct dispatch-log mutation that bypasses the application authoritative-receipt invariant."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_4511ee921cf46f8a7a2e9773",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:2b541584b886c2b326b6869dd00027c3dbe0cb48d2bee1d1194ad7dae1cb4ad8"
+      },
+      "identity": {
+        "anchor": "integrity.direct-dispatch-receipt-write",
+        "instance": "finding-11"
+      },
+      "locations": [
+        {
+          "endLine": 201,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 183
+        }
+      ],
+      "occurrenceId": "occ_b1cb6b913f84b619c23735b9",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Restrict client writes and route receipt mutation through a narrow server operation.",
+      "remediationTests": [
+        "Add a regression for integrity.direct-dispatch-receipt-write."
+      ],
+      "rootCause": {
+        "summary": "Broad owner RLS permits direct dispatch-log mutation that bypasses the application authoritative-receipt invariant."
+      },
+      "ruleId": "integrity.direct-dispatch-receipt-write",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "low",
+        "rationale": "Bounded impact or stronger prerequisites keep this low."
+      },
+      "summary": "Broad owner RLS permits direct dispatch-log mutation that bypasses the application authoritative-receipt invariant.",
+      "taxonomy": {
+        "category": "integrity",
+        "cwe": [
+          "CWE-602"
+        ]
+      },
+      "title": "Direct PostgREST writes can forge dispatch receipt state",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Broad owner RLS permits direct dispatch-log mutation that bypasses the application authoritative-receipt invariant."
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "Broad owner mutation policy permits direct review-status transitions outside the application state machine."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "Broad owner mutation policy permits direct review-status transitions outside the application state machine."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_5031db3b519d4a5ce135b336",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:aa30cc8ac785aa29090e87e2a5fd25050cc82a969d4f52b57703fb0d7d95b253"
+      },
+      "identity": {
+        "anchor": "authorization.workflow-state-bypass",
+        "instance": "finding-12"
+      },
+      "locations": [
+        {
+          "endLine": 110,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "root_control",
+          "startLine": 94
+        }
+      ],
+      "occurrenceId": "occ_90cc278cc567c17b45c726e5",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Permit client reads only and route lifecycle mutations through narrow server operations.",
+      "remediationTests": [
+        "Add a regression for authorization.workflow-state-bypass."
+      ],
+      "rootCause": {
+        "summary": "Broad owner mutation policy permits direct review-status transitions outside the application state machine."
+      },
+      "ruleId": "authorization.workflow-state-bypass",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "medium",
+        "rationale": "Meaningful integrity, cost, availability, or confidentiality impact with material prerequisites keeps this below high."
+      },
+      "summary": "Broad owner mutation policy permits direct review-status transitions outside the application state machine.",
+      "taxonomy": {
+        "category": "authorization",
+        "cwe": [
+          "CWE-602"
+        ]
+      },
+      "title": "Organization owners can bypass the knowledge-review state machine through direct Supabase writes",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Broad owner mutation policy permits direct review-status transitions outside the application state machine."
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "Broad owner access allows direct writes to improvement approval fields without server transition and provenance checks."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "Broad owner access allows direct writes to improvement approval fields without server transition and provenance checks."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_c5185fe284dbef5f4cba7dec",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:1e8b5a2bb08fd26145bcc6789d85890ba943dc36a1149b6a37cfc01c7c948257"
+      },
+      "identity": {
+        "anchor": "integrity.direct-improvement-approval",
+        "instance": "finding-13"
+      },
+      "locations": [
+        {
+          "endLine": 211,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 195
+        }
+      ],
+      "occurrenceId": "occ_5e97cdfe71195c14d0a83de7",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Restrict approval fields to a narrow server RPC or service operation.",
+      "remediationTests": [
+        "Add a regression for integrity.direct-improvement-approval."
+      ],
+      "rootCause": {
+        "summary": "Broad owner access allows direct writes to improvement approval fields without server transition and provenance checks."
+      },
+      "ruleId": "integrity.direct-improvement-approval",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "medium",
+        "rationale": "Meaningful integrity, cost, availability, or confidentiality impact with material prerequisites keeps this below high."
+      },
+      "summary": "Broad owner access allows direct writes to improvement approval fields without server transition and provenance checks.",
+      "taxonomy": {
+        "category": "integrity",
+        "cwe": [
+          "CWE-602"
+        ]
+      },
+      "title": "Direct PostgREST writes can forge approved improvement state",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Broad owner access allows direct writes to improvement approval fields without server transition and provenance checks."
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "low",
+          "why": "Foreign keys establish existence but do not prove related organization, site, workpack, session, worker, and improvement IDs share one tenant tuple."
+        },
+        "likelihood": {
+          "level": "low",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "Foreign keys establish existence but do not prove related organization, site, workpack, session, worker, and improvement IDs share one tenant tuple."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_d6d00b2bf127dc66f8f3486d",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:63b6e02bc911cbf11f1807d189f402d8314c6a8b9324f0e9b96a4e0cd7ccea27"
+      },
+      "identity": {
+        "anchor": "tenant-integrity.related-object-binding",
+        "instance": "finding-14"
+      },
+      "locations": [
+        {
+          "endLine": 85,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 21
+        }
+      ],
+      "occurrenceId": "occ_ab4063dfeae7ac6cbe07b066",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Add approved composite tenant constraints or server-side tuple validation.",
+      "remediationTests": [
+        "Add a regression for tenant-integrity.related-object-binding."
+      ],
+      "rootCause": {
+        "summary": "Foreign keys establish existence but do not prove related organization, site, workpack, session, worker, and improvement IDs share one tenant tuple."
+      },
+      "ruleId": "tenant-integrity.related-object-binding",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "low",
+        "rationale": "Bounded impact or stronger prerequisites keep this low."
+      },
+      "summary": "Foreign keys establish existence but do not prove related organization, site, workpack, session, worker, and improvement IDs share one tenant tuple.",
+      "taxonomy": {
+        "category": "tenant-integrity",
+        "cwe": [
+          "CWE-345"
+        ]
+      },
+      "title": "Commercial child rows lack complete tenant-tuple constraints",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Foreign keys establish existence but do not prove related organization, site, workpack, session, worker, and improvement IDs share one tenant tuple."
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "Confirmation idempotency can match a poisoned row without proving the complete tenant tuple."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "Confirmation idempotency can match a poisoned row without proving the complete tenant tuple."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_fab037f156a1c0c7a2dcae32",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:551d26179fe05da63f49f49e86acd8e3268d8f770637887c1f77287ebf35507c"
+      },
+      "identity": {
+        "anchor": "tenant-integrity.related-object-binding",
+        "instance": "finding-15"
+      },
+      "locations": [
+        {
+          "endLine": 302,
+          "path": "app/api/share-sessions/[sessionId]/route.ts",
+          "role": "root_control",
+          "startLine": 232
+        }
+      ],
+      "occurrenceId": "occ_5fe83eaa02462a9135931983",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Add tuple constraints and verify the complete tuple before idempotent success.",
+      "remediationTests": [
+        "Add a regression for tenant-integrity.related-object-binding."
+      ],
+      "rootCause": {
+        "summary": "Confirmation idempotency can match a poisoned row without proving the complete tenant tuple."
+      },
+      "ruleId": "tenant-integrity.related-object-binding",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "medium",
+        "rationale": "Meaningful integrity, cost, availability, or confidentiality impact with material prerequisites keeps this below high."
+      },
+      "summary": "Confirmation idempotency can match a poisoned row without proving the complete tenant tuple.",
+      "taxonomy": {
+        "category": "tenant-integrity",
+        "cwe": [
+          "CWE-863"
+        ]
+      },
+      "title": "Cross-tenant confirmation rows can suppress legitimate public acknowledgements",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Confirmation idempotency can match a poisoned row without proving the complete tenant tuple."
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "low",
+          "why": "Token issuance counts active rows and inserts separately, so concurrent requests can both pass the cap."
+        },
+        "likelihood": {
+          "level": "low",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "Token issuance counts active rows and inserts separately, so concurrent requests can both pass the cap."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_a98f91f2e28285923aa618aa",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:3b35316d14a4680b00ba1acadac1577df0abc3e95541e239f4697218284f06ce"
+      },
+      "identity": {
+        "anchor": "business-logic.atomic-credential-admission",
+        "instance": "finding-16"
+      },
+      "locations": [
+        {
+          "endLine": 276,
+          "path": "app/api/mcp-tokens/route.ts",
+          "role": "root_control",
+          "startLine": 226
+        }
+      ],
+      "occurrenceId": "occ_c03ef47f2e57ea85faa26d91",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Use an atomic transactional function or per-site locked reservation.",
+      "remediationTests": [
+        "Add a regression for business-logic.atomic-credential-admission."
+      ],
+      "rootCause": {
+        "summary": "Token issuance counts active rows and inserts separately, so concurrent requests can both pass the cap."
+      },
+      "ruleId": "business-logic.atomic-credential-admission",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "low",
+        "rationale": "Bounded impact or stronger prerequisites keep this low."
+      },
+      "summary": "Token issuance counts active rows and inserts separately, so concurrent requests can both pass the cap.",
+      "taxonomy": {
+        "category": "business-logic",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "Concurrent MCP token issuance can exceed the active-token cap",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Token issuance counts active rows and inserts separately, so concurrent requests can both pass the cap."
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "low",
+          "why": "Worker lookup and upsert are separate operations, allowing concurrent requests to bypass different-site refusal."
+        },
+        "likelihood": {
+          "level": "low",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "Worker lookup and upsert are separate operations, allowing concurrent requests to bypass different-site refusal."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_8cec017794f281cd81e25643",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:a9572d48a1e25b20b2a5b098455665552790fd46216bab72641765c967d4aba7"
+      },
+      "identity": {
+        "anchor": "business-logic.atomic-site-binding",
+        "instance": "finding-17"
+      },
+      "locations": [
+        {
+          "endLine": 110,
+          "path": "app/api/workers/route.ts",
+          "role": "root_control",
+          "startLine": 50
+        }
+      ],
+      "occurrenceId": "occ_6a440ce0b224c5fd7ae20932",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Use an atomic RPC or conditional conflict update.",
+      "remediationTests": [
+        "Add a regression for business-logic.atomic-site-binding."
+      ],
+      "rootCause": {
+        "summary": "Worker lookup and upsert are separate operations, allowing concurrent requests to bypass different-site refusal."
+      },
+      "ruleId": "business-logic.atomic-site-binding",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "low",
+        "rationale": "Bounded impact or stronger prerequisites keep this low."
+      },
+      "summary": "Worker lookup and upsert are separate operations, allowing concurrent requests to bypass different-site refusal.",
+      "taxonomy": {
+        "category": "business-logic",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "Worker site-transfer protection has a check-then-upsert race",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Worker lookup and upsert are separate operations, allowing concurrent requests to bypass different-site refusal."
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "Public RLS grants direct reads of full corpus bodies, payload JSON, and ingestion metadata beyond the sanitized search projection."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "Public RLS grants direct reads of full corpus bodies, payload JSON, and ingestion metadata beyond the sanitized search projection."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_13dab14858f39744069a390e",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:9cce4e17378e61a81320ef2395e5d6d9c95cca385c000c27aebb5b7afdbfe6a5"
+      },
+      "identity": {
+        "anchor": "information-exposure.public-corpus-metadata",
+        "instance": "finding-18"
+      },
+      "locations": [
+        {
+          "endLine": 72,
+          "path": "supabase/migrations/004_safety_reference_catalog.sql",
+          "role": "root_control",
+          "startLine": 58
+        }
+      ],
+      "occurrenceId": "occ_0067bf1bd3123df954b48a76",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Expose a sanitized public view and restrict raw data to approved roles.",
+      "remediationTests": [
+        "Add a regression for information-exposure.public-corpus-metadata."
+      ],
+      "rootCause": {
+        "summary": "Public RLS grants direct reads of full corpus bodies, payload JSON, and ingestion metadata beyond the sanitized search projection."
+      },
+      "ruleId": "information-exposure.public-corpus-metadata",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "medium",
+        "rationale": "Meaningful integrity, cost, availability, or confidentiality impact with material prerequisites keeps this below high."
+      },
+      "summary": "Public RLS grants direct reads of full corpus bodies, payload JSON, and ingestion metadata beyond the sanitized search projection.",
+      "taxonomy": {
+        "category": "information-exposure",
+        "cwe": [
+          "CWE-200"
+        ]
+      },
+      "title": "Public safety-reference reads expose raw bodies and ingestion metadata",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Public RLS grants direct reads of full corpus bodies, payload JSON, and ingestion metadata beyond the sanitized search projection."
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "low",
+          "why": "Possession of the public Share URL identifiers is sufficient to create an acknowledgement attributed to that worker."
+        },
+        "likelihood": {
+          "level": "low",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "Possession of the public Share URL identifiers is sufficient to create an acknowledgement attributed to that worker."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_e6a120c87c57d3529757bbde",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:f4d85b0125e6dd37d19e3387dd7826d9cea6053c38d440a07caec2a2a166dccc"
+      },
+      "identity": {
+        "anchor": "authentication.bearer-invitation-attribution",
+        "instance": "finding-19"
+      },
+      "locations": [
+        {
+          "endLine": 302,
+          "path": "app/api/share-sessions/[sessionId]/route.ts",
+          "role": "root_control",
+          "startLine": 150
+        }
+      ],
+      "occurrenceId": "occ_ec546f5a1ad19ccafc7be8ab",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Require a scoped one-time confirmation secret or worker verification step.",
+      "remediationTests": [
+        "Add a regression for authentication.bearer-invitation-attribution."
+      ],
+      "rootCause": {
+        "summary": "Possession of the public Share URL identifiers is sufficient to create an acknowledgement attributed to that worker."
+      },
+      "ruleId": "authentication.bearer-invitation-attribution",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "low",
+        "rationale": "Bounded impact or stronger prerequisites keep this low."
+      },
+      "summary": "Possession of the public Share URL identifiers is sufficient to create an acknowledgement attributed to that worker.",
+      "taxonomy": {
+        "category": "authentication",
+        "cwe": [
+          "CWE-287"
+        ]
+      },
+      "title": "A copied invitation URL can submit worker-attributed read confirmations",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Possession of the public Share URL identifiers is sufficient to create an acknowledgement attributed to that worker."
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "low",
+          "why": "Storage and UI model a revoked state, but the application exposes creation and public use without an authenticated revoke operation."
+        },
+        "likelihood": {
+          "level": "low",
+          "why": "Source reachability is established; live prerequisites were not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "summary": "Storage and UI model a revoked state, but the application exposes creation and public use without an authenticated revoke operation."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source establishes the boundary and broken control; runtime assumptions are stated."
+      },
+      "findingId": "csf_81119e28edb5ebd0a227f9ca",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:41525b02172af2ecac6139da9800bf841ca7c5baaf532b76b0249ee56b3f6bd6"
+      },
+      "identity": {
+        "anchor": "authorization.missing-share-revocation",
+        "instance": "finding-20"
+      },
+      "locations": [
+        {
+          "endLine": 145,
+          "path": "app/api/workpacks/[id]/share-sessions/route.ts",
+          "role": "root_control",
+          "startLine": 1
+        }
+      ],
+      "occurrenceId": "occ_910281bbfb5ba11d8095fec5",
+      "provenance": {
+        "source": "codex-security-standard-scan",
+        "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+      },
+      "remediation": "Add an authenticated owner-only revoke operation with audit evidence; keep exact saved Share approval-gated.",
+      "remediationTests": [
+        "Add a regression for authorization.missing-share-revocation."
+      ],
+      "rootCause": {
+        "summary": "Storage and UI model a revoked state, but the application exposes creation and public use without an authenticated revoke operation."
+      },
+      "ruleId": "authorization.missing-share-revocation",
+      "severity": {
+        "changeConditions": "Raise only with stronger live impact evidence; close when the control is proven effective.",
+        "level": "low",
+        "rationale": "Bounded impact or stronger prerequisites keep this low."
+      },
+      "summary": "Storage and UI model a revoked state, but the application exposes creation and public use without an authenticated revoke operation.",
+      "taxonomy": {
+        "category": "authorization",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "The application exposes no operator path to revoke a saved Share session",
+      "validation": {
+        "limitations": [
+          "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Storage and UI model a revoked state, but the application exposes creation and public use without an authenticated revoke operation."
+      }
+    }
+  ],
+  "scanId": "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+  "schemaVersion": "1.0"
+}

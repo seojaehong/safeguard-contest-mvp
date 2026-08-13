@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "safeclaw-post-remediation-full-repository-security-scan/v1",
+  "generatedAt": "2026-08-14T00:38:23+09:00",
+  "verdict": "NOTICE_POST_REMEDIATION_STANDARD_SCAN_20_FINDINGS_APPROVAL_BOUNDARIES_PRESERVED",
+  "sourceHead": "8f5dc78f73d5048598fb2519bf7bb758ab090982",
+  "scan": {
+    "scanId": "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+    "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982",
+    "status": "complete",
+    "sealedAt": "2026-08-13T15:38:23.563472Z",
+    "mode": "standard",
+    "coverage": "partial",
+    "reviewedSurfaceCount": 5,
+    "reportableFindingCount": 20,
+    "severityCounts": {
+      "medium": 12,
+      "low": 8
+    }
+  },
+  "baselineReconciliation": {
+    "immutableOriginalScanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
+    "immutableOriginalAccountedFindingCount": 18,
+    "immutableOriginalPreserved": true,
+    "priorCurrentScanFindingCount": 15,
+    "priorRemediatedFindingsAbsentFromCurrentScan": [
+      "safety-reference-disconnect-cancellation",
+      "hwp-error-path-disclosure",
+      "sif-embedding-quality-admission",
+      "knowledge-reingest-review-reset",
+      "dispatch-archive-outcome-forgery"
+    ],
+    "comparisonBoundary": "Finding totals are not directly comparable because this scan reviewed broader authorization, direct PostgREST, Share attribution, and public status surfaces."
+  },
+  "prioritySummary": {
+    "approvalFreeSourceCandidates": [
+      "workflow dispatch request-body budget",
+      "Work24 upstream response byte budget",
+      "public safety-reference status admission and cache",
+      "saved Share owner revocation API"
+    ],
+    "approvalOrRuntimeVerificationRequired": [
+      "legacy table RLS and live grants",
+      "direct Supabase workflow-state restrictions",
+      "commercial tenant-tuple constraints",
+      "durable distributed provider admission",
+      "exact saved Share recipient attribution"
+    ]
+  },
+  "canonicalArtifacts": {
+    "manifest": "evaluation/post-remediation-full-repository-security-scan-2026-08-14/canonical/scan-manifest.json",
+    "findings": "evaluation/post-remediation-full-repository-security-scan-2026-08-14/canonical/findings.json",
+    "coverage": "evaluation/post-remediation-full-repository-security-scan-2026-08-14/canonical/coverage.json",
+    "markdownProjection": "evaluation/post-remediation-full-repository-security-scan-2026-08-14/scan-report.md",
+    "sarif": "evaluation/post-remediation-full-repository-security-scan-2026-08-14/exports/results.sarif"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedBoundariesPreserved": true,
+    "securityCompleteClaimAllowed": false
+  }
+}

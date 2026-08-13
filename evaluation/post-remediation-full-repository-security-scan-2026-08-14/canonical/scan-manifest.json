@@ -1,0 +1,89 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "fc7c553cb639bcc1d2c190e774cc3194491eaf777743de5a70b296f7936952c0"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "86f1799ecf4e6a3c13328d31bc3eadf53309f38ba1bdbce1c8799aceca9dbacb"
+      }
+    ],
+    "completedAt": "2026-08-13T15:38:23.563472Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.18"
+    },
+    "scope": {
+      "artifactsReviewed": [
+        "repository source at 8f5dc78f73d5048598fb2519bf7bb758ab090982",
+        "immutable prior baselines",
+        "five discovery receipts"
+      ],
+      "context": "Preserved the immutable original 18-finding baseline and approval boundaries.",
+      "excludePaths": [],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "Static current-revision analysis; live grants and distributed admission were not mutated.",
+        "Exact saved Share remains MISSING_EVIDENCE."
+      ],
+      "runtimeStatus": "No approval-gated mutation performed.",
+      "summary": "Whole-repository Standard security review of revision 8f5dc78f after five remediation waves.",
+      "validationMode": "source-to-sink static validation with remediation regression checks"
+    },
+    "sealedAt": "2026-08-13T15:38:23.563472Z",
+    "startedAt": "2026-08-13T15:13:18.268591Z",
+    "status": "completed",
+    "target": {
+      "displayName": "safeclaw-northstar-current",
+      "kind": "git_revision",
+      "revision": "8f5dc78f73d5048598fb2519bf7bb758ab090982",
+      "targetId": "target_sha256_59a91dd8129f171a6e0ff82b60460781f1067b1940d76c7a524e5f0e2b7ec5de"
+    },
+    "threatModel": {
+      "assets": [
+        "Provider availability and quota",
+        "Tenant operational records",
+        "Safety corpus data",
+        "Share attribution",
+        "Dispatch and review evidence"
+      ],
+      "assumptions": [
+        "Approval-gated mutations remain prohibited.",
+        "Exact saved Share evidence remains missing."
+      ],
+      "attackerCapabilities": [
+        "Send public API requests",
+        "Authenticate as tenant owner",
+        "Possess MCP token",
+        "Use public Supabase grants",
+        "Copy Share invitation URL"
+      ],
+      "securityObjectives": [
+        "Durably bound expensive work",
+        "Preserve tenant tuple integrity",
+        "Prevent state bypass",
+        "Sanitize public data",
+        "Preserve Share attribution"
+      ],
+      "summary": "Remote callers, tenant users, MCP token holders, and direct Supabase clients cross public compute, provider, tenant-data, Share, dispatch, and review-state boundaries.",
+      "trustBoundaries": [
+        "Public HTTP to server",
+        "Browser to server and Supabase",
+        "Server to providers",
+        "Share URL to confirmation",
+        "State machines to direct PostgREST"
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}

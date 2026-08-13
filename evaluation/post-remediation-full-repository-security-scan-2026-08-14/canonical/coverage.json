@@ -1,0 +1,91 @@
+{
+  "completeness": "partial",
+  "deferred": [
+    {
+      "area": "Runtime deployment configuration",
+      "id": "deferred-runtime-grants",
+      "reason": "Live Supabase grants, RLS deployment state, provider quotas, and distributed admission configuration were not mutated or exhaustively queried."
+    },
+    {
+      "area": "Exact saved Share session",
+      "id": "deferred-exact-share",
+      "reason": "No concrete approved production session URL or DB-backed creation approval; MISSING_EVIDENCE remains."
+    }
+  ],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [
+    {
+      "pattern": "node_modules/**",
+      "reason": "Generated dependency output."
+    },
+    {
+      "pattern": ".next/**",
+      "reason": "Generated build output."
+    },
+    {
+      "pattern": "evaluation/**",
+      "reason": "Prior evidence used for comparison, not treated as product attack surface."
+    }
+  ],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "repository",
+  "mode": "repository",
+  "openQuestions": [
+    {
+      "question": "Should every provider-backed production route fail closed until durable distributed admission is configured?"
+    },
+    {
+      "question": "Which direct Supabase writes are intentionally supported versus required to pass server state machines?"
+    },
+    {
+      "question": "Can an existing saved Share URL be supplied for no-mutation verification?"
+    }
+  ],
+  "scanId": "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "reported",
+      "id": "surface-public-provider",
+      "label": "Public compute and provider admission",
+      "notes": "Ask, search, photo, agent, MCP, Work24, status, and dispatch body boundaries reviewed.",
+      "receiptRefs": [],
+      "riskArea": "Resource exhaustion"
+    },
+    {
+      "disposition": "reported",
+      "id": "surface-tenant-data",
+      "label": "Tenant and database authorization",
+      "notes": "RLS, direct mutations, tuple binding, and raw public data reviewed.",
+      "receiptRefs": [],
+      "riskArea": "Authorization and tenant integrity"
+    },
+    {
+      "disposition": "reported",
+      "id": "surface-share-dispatch",
+      "label": "Share, acknowledgement, and dispatch",
+      "notes": "Share tuple checks, bearer attribution, revocation, dispatch, and confirmation reviewed.",
+      "receiptRefs": [],
+      "riskArea": "Authentication, authorization, and integrity"
+    },
+    {
+      "disposition": "reported",
+      "id": "surface-credentials-races",
+      "label": "Credential and site-binding races",
+      "notes": "MCP token cap and worker site-transfer race paths reviewed.",
+      "receiptRefs": [],
+      "riskArea": "Business logic and concurrency"
+    },
+    {
+      "disposition": "reported",
+      "id": "surface-remediation-regression",
+      "label": "Prior remediation regression",
+      "notes": "HWP, cancellation, corpus, re-ingest, and authoritative receipt remediations rechecked.",
+      "receiptRefs": [],
+      "riskArea": "Cross-boundary regression"
+    }
+  ]
+}
