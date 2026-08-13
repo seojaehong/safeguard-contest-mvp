@@ -1,6 +1,9 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { buildKnowledgeIngestRunId } from "@/lib/knowledge-ingest-idempotency";
+import {
+  buildKnowledgeIngestRunId,
+  knowledgeEventRequiresReviewReset,
+} from "@/lib/knowledge-ingest-idempotency";
 
 const mocks = vi.hoisted(() => ({
   createSupabaseAdminClient: vi.fn(),
@@ -154,6 +157,35 @@ beforeEach(() => {
 });
 
 describe("knowledge ingest tenant binding", () => {
+  it("detects changed reviewed content while treating reordered identity arrays as equivalent", () => {
+    const stored = {
+      captured_at: "2026-07-17T00:00:00.000Z",
+      title: "이동식 비계 작업 검토",
+      url: null,
+      payload: { nested: { b: 2, a: 1 } },
+      related_hazard_ids: ["fall", "collision"],
+      reflected_documents: ["TBM", "위험성평가표"],
+    };
+    const incoming = {
+      capturedAt: stored.captured_at,
+      title: stored.title,
+      url: stored.url,
+      payload: { nested: { a: 1, b: 2 } },
+      relatedHazardIds: ["collision", "fall"],
+      reflectedDocuments: ["위험성평가표", "TBM"],
+    };
+
+    expect(knowledgeEventRequiresReviewReset(stored, incoming)).toBe(false);
+    expect(knowledgeEventRequiresReviewReset({
+      ...stored,
+      captured_at: "2026-07-17T00:00:00+00:00",
+    }, incoming)).toBe(false);
+    expect(knowledgeEventRequiresReviewReset(stored, {
+      ...incoming,
+      title: "변경된 작업 검토",
+    })).toBe(true);
+  });
+
   it("rejects an otherwise valid event when siteId is missing", async () => {
     const fake = fakeClient();
     mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
@@ -289,6 +321,7 @@ describe("knowledge ingest tenant binding", () => {
         captured_at: "2026-07-17T01:00:00.000Z",
         title: "갱신된 이동식 비계 작업 검토",
         payload: { revision: 2 },
+        review_status: "pending_review",
       },
     });
     expect(fake.writes[1]).toMatchObject({
@@ -296,6 +329,7 @@ describe("knowledge ingest tenant binding", () => {
       payload: { raw_event_ids: ["event-existing"] },
     });
     expect(payload.savedEventId).toBe("event-existing");
+    expect(payload.eventReviewReset).toBe(true);
     expect(fake.calls).toEqual([
       { table: "sites", method: "eq", column: "id", value: "site-1" },
       { table: "organizations", method: "eq", column: "id", value: "org-1" },
@@ -375,6 +409,42 @@ describe("knowledge ingest tenant binding", () => {
       { table: "knowledge_events", method: "eq", column: "source", value: "manual" },
       { table: "knowledge_events", method: "eq", column: "source_id", value: "event-1" },
     ]);
+  });
+
+  it("preserves an approved event when identical content is ingested again", async () => {
+    const fake = fakeClient({
+      existingEvent: {
+        data: {
+          id: "event-approved",
+          site_id: "site-1",
+          captured_at: "2026-07-17T00:00:00+00:00",
+          title: "이동식 비계 작업 검토",
+          url: null,
+          payload: {},
+          related_hazard_ids: [],
+          reflected_documents: ["위험성평가표"],
+          review_status: "approved",
+        },
+        error: null,
+      },
+    });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    const { POST } = await import("@/app/api/knowledge/ingest/route");
+
+    const response = await POST(request());
+    const payload = await response.json() as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(fake.writes).toHaveLength(1);
+    expect(fake.writes[0]).toMatchObject({
+      table: "knowledge_regeneration_runs",
+      method: "insert",
+      payload: { raw_event_ids: ["event-approved"] },
+    });
+    expect(payload).toMatchObject({
+      savedEventId: "event-approved",
+      eventReviewReset: false,
+    });
   });
 
   it("reuses the deterministic run after a concurrent replay hits the primary key", async () => {

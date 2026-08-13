@@ -12,7 +12,10 @@ import {
   enforcePublicJsonRequestBodyBudget,
   KNOWLEDGE_WRITE_REQUEST_MAX_BYTES
 } from "@/lib/public-work-budget";
-import { buildKnowledgeIngestRunId } from "@/lib/knowledge-ingest-idempotency";
+import {
+  buildKnowledgeIngestRunId,
+  knowledgeEventRequiresReviewReset
+} from "@/lib/knowledge-ingest-idempotency";
 
 export const dynamic = "force-dynamic";
 
@@ -83,6 +86,7 @@ export async function POST(request: NextRequest) {
   let savedEventId: string | null = null;
   let savedRunId: string | null = null;
   let runCreated = false;
+  let eventReviewReset = false;
 
   try {
     if (client && user) {
@@ -138,11 +142,32 @@ export async function POST(request: NextRequest) {
         reflected_documents: normalized.event.reflectedDocuments,
         proposed_wiki_update: toJson(proposedWikiUpdate)
       };
-      const updateExistingEvent = async (eventId: string) => {
+      type ExistingKnowledgeEvent = {
+        id: string;
+        site_id: string | null;
+        captured_at: string;
+        title: string;
+        url: string | null;
+        payload: unknown;
+        related_hazard_ids: string[];
+        reflected_documents: string[];
+        review_status: string;
+      };
+      const updateExistingEvent = async (existing: ExistingKnowledgeEvent) => {
+        const requiresReviewReset = knowledgeEventRequiresReviewReset(existing, {
+          capturedAt: normalized.event.capturedAt,
+          title: normalized.event.title,
+          url: normalized.event.url || null,
+          payload: normalized.event.payload,
+          relatedHazardIds: normalized.event.relatedHazardIds,
+          reflectedDocuments: normalized.event.reflectedDocuments,
+        });
+        if (!requiresReviewReset) return existing.id;
+
         const { data, error } = await client
           .from("knowledge_events")
-          .update(eventMutableValues)
-          .eq("id", eventId)
+          .update({ ...eventMutableValues, review_status: "pending_review" })
+          .eq("id", existing.id)
           .eq("organization_id", context.organizationId)
           .eq("site_id", context.siteId)
           .eq("source", normalized.event.source)
@@ -150,12 +175,13 @@ export async function POST(request: NextRequest) {
           .select("id")
           .maybeSingle();
         if (error) throw error;
+        eventReviewReset = Boolean(data?.id);
         return data?.id || null;
       };
 
       const { data: existingEvent, error: existingEventError } = await client
         .from("knowledge_events")
-        .select("id,site_id")
+        .select("id,site_id,captured_at,title,url,payload,related_hazard_ids,reflected_documents,review_status")
         .eq("organization_id", context.organizationId)
         .eq("source", normalized.event.source)
         .eq("source_id", normalized.event.sourceId)
@@ -170,7 +196,7 @@ export async function POST(request: NextRequest) {
       }
 
       if (existingEvent) {
-        savedEventId = await updateExistingEvent(existingEvent.id);
+        savedEventId = await updateExistingEvent(existingEvent);
         if (!savedEventId) {
           return NextResponse.json({
             ok: false,
@@ -197,7 +223,7 @@ export async function POST(request: NextRequest) {
         } else if (eventError.code === "23505") {
           const { data: concurrentEvent, error: concurrentEventError } = await client
             .from("knowledge_events")
-            .select("id,site_id")
+            .select("id,site_id,captured_at,title,url,payload,related_hazard_ids,reflected_documents,review_status")
             .eq("organization_id", context.organizationId)
             .eq("source", normalized.event.source)
             .eq("source_id", normalized.event.sourceId)
@@ -212,7 +238,7 @@ export async function POST(request: NextRequest) {
             }, { status: 409 });
           }
 
-          savedEventId = await updateExistingEvent(concurrentEvent.id);
+          savedEventId = await updateExistingEvent(concurrentEvent);
           if (!savedEventId) {
             return NextResponse.json({
               ok: false,
@@ -310,6 +336,7 @@ export async function POST(request: NextRequest) {
     savedEventId,
     savedRunId,
     runCreated,
+    eventReviewReset,
     event: normalized.event,
     proposedWikiUpdate: {
       hazardIds: regenerationBundle.matchedHazards.map((hazard) => hazard.id),
