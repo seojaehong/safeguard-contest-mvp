@@ -1,14 +1,14 @@
 {
   "schemaVersion": "safeclaw-security-knowledge-review-admission-remediation/v1",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LIVE_PENDING",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_REVIEW_ADMISSION_REMEDIATION",
   "sourceHead": "8796e7beaaab8abac4ee9fc6ea92262f019774e6",
   "productCommit": "8796e7beaaab8abac4ee9fc6ea92262f019774e6",
   "productionBuild": {
-    "commitSha": "4de2d00fc013190af5ab725ce9c6cb025c0ff0bb",
+    "commitSha": "8796e7beaaab8abac4ee9fc6ea92262f019774e6",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-6vrtq8xcf-seojaehongs-projects.vercel.app",
-    "sourceHeadLive": false
+    "deploymentUrl": "safeguard-contest-657q1olc9-seojaehongs-projects.vercel.app",
+    "sourceHeadLive": true
   },
   "finding": {
     "slug": "knowledge-review-generation-unbounded",
@@ -49,6 +49,6 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "llmWikiPublicationApprovalRequired": true,
     "approvalGatedBoundariesPreserved": true,
-    "liveAfterDeploymentRequired": true
+    "liveAfterDeploymentRequired": false
   }
 }

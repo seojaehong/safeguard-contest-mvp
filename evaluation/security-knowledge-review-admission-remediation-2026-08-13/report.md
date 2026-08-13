@@ -2,9 +2,9 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LIVE_PENDING`
+`PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_REVIEW_ADMISSION_REMEDIATION`
 
-Product commit `8796e7beaaab8abac4ee9fc6ea92262f019774e6` closes the source-backed finding `knowledge-review-generation-unbounded`. The initial production marker remained `4de2d00fc013190af5ab725ce9c6cb025c0ff0bb`, so live source alignment is pending.
+Product commit `8796e7beaaab8abac4ee9fc6ea92262f019774e6` closes the source-backed finding `knowledge-review-generation-unbounded`. Production build-info now reports the same product commit on `master` in deployment `safeguard-contest-657q1olc9-seojaehongs-projects.vercel.app`.
 
 ## Remediation
 
