@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "safeclaw-public-ask-distributed-admission/v1",
+  "generatedAt": "2026-08-14T07:12:00+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PUBLIC_ASK_DISTRIBUTED_ADMISSION_LIVE_PENDING",
+  "sourceHead": "4fc478c936d92442a260663e1dfe6aec11cb8d4c",
+  "productCommit": "4fc478c936d92442a260663e1dfe6aec11cb8d4c",
+  "productionCommit": "46a505c8e7c6df947ee66003475b7b1685247c41",
+  "securityFinding": {
+    "scanId": "bd135da7",
+    "findingId": "csf_9b3cc6648586dabf4bfa61e9",
+    "title": "Public Ask endpoints fall back to per-instance provider budgets",
+    "severity": "medium",
+    "canonicalFindingRemainsImmutable": true,
+    "freshFollowUpScanRequired": true
+  },
+  "before": {
+    "evidencePath": "evaluation/public-provider-admission-2026-08-11/report.json",
+    "verdict": "PARTIAL_LIVE_PRODUCTION_WEIGHTED_INSTANCE_ADMISSION_DISTRIBUTED_ACTIVATION_PENDING",
+    "providerBackedProductionFallback": "instance",
+    "distributedProductionActivation": "PENDING_CONFIGURATION"
+  },
+  "currentSourceContract": {
+    "templateProviderWorkUnit": 0,
+    "templateRequiresDistributedAdmission": false,
+    "enhancedProviderWorkUnit": 2,
+    "fullProviderWorkUnit": 12,
+    "providerModesRequireDistributedRateAdmissionInProduction": true,
+    "providerModesRequireDistributedWeightedLeaseInProduction": true,
+    "jsonAndSseShareFailClosedContract": true,
+    "explicitHttpAdmissionFailureRetriedViaLegacyJson": false,
+    "providerWorkStartsAfterAdmission": true
+  },
+  "localProductionProbe": {
+    "baseUrl": "http://127.0.0.1:3083",
+    "vercelEnv": "production",
+    "distributedBackendConfigured": false,
+    "providerCallExecuted": false,
+    "cases": [
+      {
+        "path": "/api/ask",
+        "case": "template-no-provider",
+        "status": 200,
+        "rateLimitMode": "instance",
+        "aiMode": "template",
+        "workUnit": 0
+      },
+      {
+        "path": "/api/ask",
+        "case": "enhanced-distributed-unavailable",
+        "status": 503,
+        "rateLimitMode": "distributed",
+        "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+      },
+      {
+        "path": "/api/ask/stream",
+        "case": "enhanced-distributed-unavailable",
+        "status": 503,
+        "rateLimitMode": "distributed",
+        "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+      }
+    ]
+  },
+  "verification": {
+    "focusedVitest": {
+      "files": 3,
+      "tests": 21,
+      "failed": 0
+    },
+    "focusedAndAdjacentVitest": {
+      "files": 11,
+      "tests": 67,
+      "failed": 0
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "dependencyAuditVulnerabilities": 0,
+    "diffCheck": "PASS",
+    "ci": {
+      "runId": 31747932563,
+      "status": "FAIL_EXISTING_UNRELATED_CONTRACTS",
+      "askAdmissionTestsFailed": 0,
+      "failedTestFiles": 5,
+      "failedTests": 8,
+      "boundaries": [
+        "frontend evidence source hash drift",
+        "knowledge mobile hydration console contract",
+        "KOSHA current-review fixtures",
+        "runtime dependency override expectation",
+        "workspace Day/Night geometry equality"
+      ]
+    }
+  },
+  "productionBuild": {
+    "currentCommitSha": "46a505c8e7c6df947ee66003475b7b1685247c41",
+    "productCommitDeployed": false,
+    "liveAfterDeploymentPending": true,
+    "previewDeploymentCompleted": true
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerCallPerformedForEvidence": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorRuntimeMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "securityCompleteClaimAllowed": false,
+    "freshFollowUpScan": "REQUIRED",
+    "distributedBackendActivation": "OPERATOR_CONFIGURATION_REQUIRED",
+    "approvalGatedOperationsUnchanged": true
+  }
+}
