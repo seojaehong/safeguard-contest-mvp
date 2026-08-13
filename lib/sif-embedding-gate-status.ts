@@ -8,6 +8,7 @@ import runtimeProbeJson from "@/evaluation/sif-embedding-gate/runtime-db-probe.j
 import postMigrationVerifyJson from "@/evaluation/sif-embedding-gate/post-migration-verify.json";
 import manifestJson from "@/evaluation/sif-embedding-gate/sif-embedding-batch-manifest.json";
 import canaryReportJson from "@/evaluation/sif-embedding-canary-2026-07-09/report.json";
+import { evaluateSifVectorRuntimeReceipt } from "@/lib/sif-vector-verification-contract.mjs";
 
 export type SifEmbeddingArtifactIntegrity = {
   label: string;
@@ -163,6 +164,7 @@ export type SifEmbeddingGateStatus = {
     message: string;
     flagEnabled: boolean;
     uploadVerified: boolean;
+    verificationReceiptValid: boolean;
     uploadedCount: number;
     requiredUploadCount: number;
   };
@@ -352,9 +354,22 @@ function buildApprovalFingerprint(input: {
 function buildVectorGuard(
   vectorFeatureFlagEnabled: boolean,
   uploadedCount: number,
-  corpusCount: number
+  corpusCount: number,
+  verificationReceiptValid: boolean,
 ): SifEmbeddingGateStatus["vectorGuard"] {
   const uploadVerified = corpusCount > 0 && uploadedCount === corpusCount;
+  if (vectorFeatureFlagEnabled && !verificationReceiptValid) {
+    return {
+      status: "blocked",
+      label: "Vector 검색 차단",
+      message: "SAFETY_REFERENCE_VECTOR_SEARCH=1이지만 검증된 업로드·RPC receipt와 runtime fingerprint가 없어 vector 검색을 차단했습니다.",
+      flagEnabled: true,
+      uploadVerified,
+      verificationReceiptValid,
+      uploadedCount,
+      requiredUploadCount: corpusCount
+    };
+  }
   if (vectorFeatureFlagEnabled && !uploadVerified) {
     return {
       status: "blocked",
@@ -362,6 +377,7 @@ function buildVectorGuard(
       message: "업로드 수량 검증 전 SAFETY_REFERENCE_VECTOR_SEARCH=1이 감지됐습니다. flag를 끄고 row count/RPC smoke test 후 다시 켜야 합니다.",
       flagEnabled: true,
       uploadVerified,
+      verificationReceiptValid,
       uploadedCount,
       requiredUploadCount: corpusCount
     };
@@ -373,17 +389,19 @@ function buildVectorGuard(
       message: "업로드 수량이 코퍼스와 일치해 runtime vector 검색을 사용할 수 있는 상태입니다.",
       flagEnabled: true,
       uploadVerified,
+      verificationReceiptValid,
       uploadedCount,
       requiredUploadCount: corpusCount
     };
   }
-  if (uploadVerified) {
+  if (uploadVerified && verificationReceiptValid) {
     return {
       status: "ready",
       label: "Vector 검색 활성 대기",
       message: "업로드 검증이 끝났습니다. RPC smoke test 후 feature flag를 켤 수 있습니다.",
       flagEnabled: false,
       uploadVerified,
+      verificationReceiptValid,
       uploadedCount,
       requiredUploadCount: corpusCount
     };
@@ -394,6 +412,7 @@ function buildVectorGuard(
     message: "임베딩 생성과 DB 업로드가 승인 전 보류되어 있으므로 vector 검색은 꺼진 상태를 유지합니다.",
     flagEnabled: false,
     uploadVerified,
+    verificationReceiptValid,
     uploadedCount,
     requiredUploadCount: corpusCount
   };
@@ -991,7 +1010,24 @@ export function getSifEmbeddingGateStatus(
   const supabaseUrlPresent = hasEnv(env, "SUPABASE_URL") || hasEnv(env, "NEXT_PUBLIC_SUPABASE_URL");
   const supabaseServiceRolePresent = hasEnv(env, "SUPABASE_SERVICE_ROLE_KEY");
   const vectorFeatureFlagEnabled = env.SAFETY_REFERENCE_VECTOR_SEARCH === "1";
-  const vectorGuard = buildVectorGuard(vectorFeatureFlagEnabled, uploadedCount, readNumber(report, "corpusCount"));
+  const runtimeModel = env.SAFETY_REFERENCE_EMBEDDING_MODEL
+    || env.OPENAI_EMBEDDING_MODEL
+    || readString(report, "embeddingModel", "text-embedding-3-small");
+  const configuredDimensions = Number(env.SAFETY_REFERENCE_EMBEDDING_DIMENSIONS);
+  const runtimeDimensions = Number.isFinite(configuredDimensions)
+    ? Math.min(Math.max(Math.trunc(configuredDimensions), 256), 3072)
+    : readNumber(report, "embeddingDimensions", 1536);
+  const vectorVerification = evaluateSifVectorRuntimeReceipt(postMigrationVerifyJson, {
+    model: runtimeModel,
+    dimensions: runtimeDimensions,
+    fingerprint: env.SAFETY_REFERENCE_VECTOR_VERIFICATION_SHA256,
+  });
+  const vectorGuard = buildVectorGuard(
+    vectorFeatureFlagEnabled,
+    uploadedCount,
+    readNumber(report, "corpusCount"),
+    vectorVerification.ok,
+  );
   const runtimeExecutionReadyAfterApproval = openaiApiKeyPresent && supabaseUrlPresent && supabaseServiceRolePresent;
   const runtimeDbProbe = buildRuntimeDbProbeStatus();
   const canary = buildCanaryStatus();

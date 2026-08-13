@@ -11,6 +11,10 @@ import {
   searchSafetyReferences,
   type SafetyReferenceItem
 } from "@/lib/safety-reference-catalog";
+import {
+  createSifVectorRuntimeEvidence,
+  inspectSifVectorVerificationReceipt,
+} from "@/lib/sif-vector-verification-contract.mjs";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -89,6 +93,41 @@ function corpusReference(row: SifEmbeddingCorpusRow): SafetyReferenceItem {
   };
 }
 
+function readyVectorVerificationReport(): Record<string, unknown> {
+  const report: Record<string, unknown> = {
+    scope: "sif_embedding_post_migration_verify",
+    configured: true,
+    ok: true,
+    status: "ready",
+    dbMutationPerformed: false,
+    model: "text-embedding-3-small",
+    dimensions: 1536,
+    expectedCorpusCount: 6032,
+    fixedCorpusHash: "a".repeat(64),
+    safetyReferenceEmbeddings: { ok: true, count: 6032 },
+    matchRpc: { ok: true, rowCount: 3, model: "text-embedding-3-small" },
+    failedCheckIds: [],
+    checks: [
+      "sif_source_count_still_matches",
+      "embedding_table_ready",
+      "uploaded_row_count_matches_corpus",
+      "match_rpc_ready",
+      "embedding_samples_have_metadata",
+      "vector_feature_flag_allowed",
+    ].map((id) => ({ id, passed: true })),
+  };
+  const receipt = inspectSifVectorVerificationReceipt(report, {
+    model: "text-embedding-3-small",
+    dimensions: 1536,
+  });
+  report.verificationReceipt = {
+    algorithm: "sha256",
+    fingerprint: receipt.fingerprint,
+    machineVerified: receipt.evidenceValid,
+  };
+  return report;
+}
+
 describe("resolveSafetyReferenceVectorSearchState", () => {
   it("keeps vector retrieval disabled by default before DB approval", () => {
     const state = resolveSafetyReferenceVectorSearchState({});
@@ -99,15 +138,62 @@ describe("resolveSafetyReferenceVectorSearchState", () => {
     expect(state.model).toBe("text-embedding-3-small");
   });
 
-  it("falls back when vector retrieval is enabled without an OpenAI key", () => {
+  it("fails closed before key evaluation when the immutable verification receipt is absent", () => {
     const state = resolveSafetyReferenceVectorSearchState({
       SAFETY_REFERENCE_VECTOR_SEARCH: "1"
     });
 
     expect(state.enabled).toBe(false);
     expect(state.status.enabled).toBe(true);
-    expect(state.status.reason).toBe("missing-openai-key");
+    expect(state.status.reason).toBe("verification-receipt-required");
     expect(state.status.message).toContain("text/ranked");
+  });
+
+  it("rejects valid machine evidence until the runtime fingerprint is explicitly pinned", () => {
+    const state = resolveSafetyReferenceVectorSearchState({
+      SAFETY_REFERENCE_VECTOR_SEARCH: "1",
+      OPENAI_API_KEY: "fixture-key",
+    }, readyVectorVerificationReport());
+
+    expect(state.enabled).toBe(false);
+    expect(state.status.reason).toBe("verification-receipt-required");
+  });
+
+  it("enables vector retrieval only when evidence, declared receipt, and runtime fingerprint agree", () => {
+    const report = readyVectorVerificationReport();
+    const receipt = inspectSifVectorVerificationReceipt(report, {
+      model: "text-embedding-3-small",
+      dimensions: 1536,
+    });
+    const state = resolveSafetyReferenceVectorSearchState({
+      SAFETY_REFERENCE_VECTOR_SEARCH: "1",
+      SAFETY_REFERENCE_VECTOR_VERIFICATION_SHA256: receipt.fingerprint,
+      OPENAI_API_KEY: "fixture-key",
+    }, createSifVectorRuntimeEvidence(report, {
+      model: "text-embedding-3-small",
+      dimensions: 1536,
+    }));
+
+    expect(state.enabled).toBe(true);
+    expect(state.status.reason).toBe("no-results");
+  });
+
+  it("rejects a post-verification evidence change even when the old fingerprint remains configured", () => {
+    const report = readyVectorVerificationReport();
+    const receipt = inspectSifVectorVerificationReceipt(report, {
+      model: "text-embedding-3-small",
+      dimensions: 1536,
+    });
+    report.safetyReferenceEmbeddings = { ok: true, count: 6031 };
+
+    const state = resolveSafetyReferenceVectorSearchState({
+      SAFETY_REFERENCE_VECTOR_SEARCH: "1",
+      SAFETY_REFERENCE_VECTOR_VERIFICATION_SHA256: receipt.fingerprint,
+      OPENAI_API_KEY: "fixture-key",
+    }, report);
+
+    expect(state.enabled).toBe(false);
+    expect(state.status.reason).toBe("verification-receipt-required");
   });
 });
 
@@ -129,9 +215,8 @@ describe("searchSafetyReferences failure privacy", () => {
       errorCode: "safety_reference_search_failed",
       message: "안전 지식 DB 조회를 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.",
       vectorSearch: {
-        errorCode: "safety_reference_vector_failed",
-        reason: "embedding-failed",
-        message: "벡터 조회를 완료하지 못해 text/ranked 검색으로 대체합니다."
+        reason: "verification-receipt-required",
+        message: "검증된 SIF 업로드·RPC receipt가 없어 vector 검색을 차단하고 text/ranked 검색을 유지합니다."
       }
     });
 

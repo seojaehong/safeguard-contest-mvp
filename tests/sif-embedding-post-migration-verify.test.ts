@@ -112,6 +112,19 @@ describe("SIF embedding post-migration verifier", () => {
     expect((result.failedCheckIds as unknown[])).toEqual([]);
     const checks = result.checks as Array<Record<string, unknown>>;
     expect(checks.every((check) => check.passed === true)).toBe(true);
+    expect(asRecord(result.verificationReceipt)).toMatchObject({
+      algorithm: "sha256",
+      machineVerified: true,
+    });
+    expect(asRecord(result.verificationReceipt).fingerprint).toMatch(/^[a-f0-9]{64}$/u);
+    const runtimeReceipt = asRecord(JSON.parse(readFileSync(join(outDir, "runtime-vector-verification.json"), "utf8")));
+    expect(runtimeReceipt).toMatchObject({
+      schema: "safeclaw-sif-vector-runtime-verification/v1",
+      model: "text-embedding-3-small",
+      dimensions: 1536,
+    });
+    expect(asRecord(runtimeReceipt.verificationReceipt)).toEqual(result.verificationReceipt);
+    expect(JSON.stringify(runtimeReceipt)).not.toContain("error");
   });
 
   it("blocks vector activation when uploaded row count differs from the fixed corpus", () => {
@@ -130,5 +143,6 @@ describe("SIF embedding post-migration verifier", () => {
     expect(result.failedCheckIds as unknown[]).toContain("uploaded_row_count_matches_corpus");
     expect(result.failedCheckIds as unknown[]).toContain("vector_feature_flag_allowed");
     expect(result.nextAction).toContain("Do not enable vector search");
+    expect(asRecord(result.verificationReceipt).machineVerified).toBe(false);
   });
 });

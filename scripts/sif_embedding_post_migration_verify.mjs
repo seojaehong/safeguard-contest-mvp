@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { createSifVectorRuntimeEvidence } from "../lib/sif-vector-verification-contract.mjs";
 
 const DEFAULT_OUTPUT = "evaluation/sif-embedding-gate/post-migration-verify.json";
 const DEFAULT_GATE_DIR = "evaluation/sif-embedding-gate";
@@ -11,6 +12,7 @@ const DEFAULT_ENV_FILES = [".env.local"];
 function parseArgs(argv) {
   const options = {
     output: DEFAULT_OUTPUT,
+    receiptOutput: "",
     gateDir: DEFAULT_GATE_DIR,
     model: DEFAULT_MODEL,
     dimensions: DEFAULT_DIMENSIONS,
@@ -22,6 +24,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--output") options.output = argv[index += 1] || DEFAULT_OUTPUT;
+    else if (arg === "--receipt-output") options.receiptOutput = argv[index += 1] || "";
     else if (arg === "--gate-dir") options.gateDir = argv[index += 1] || DEFAULT_GATE_DIR;
     else if (arg === "--model") options.model = argv[index += 1] || DEFAULT_MODEL;
     else if (arg === "--dimensions") options.dimensions = Number(argv[index += 1] || DEFAULT_DIMENSIONS);
@@ -37,6 +40,7 @@ function parseArgs(argv) {
         "",
         "Options:",
         "  --output FILE              Write report JSON",
+        "  --receipt-output FILE      Write redacted runtime verification evidence",
         "  --gate-dir DIR             Read fixed corpus report from this directory",
         "  --model MODEL              Expected embedding model",
         "  --dimensions N             Expected embedding dimensions",
@@ -322,9 +326,18 @@ async function main() {
               ? "Apply the approved SIF-only migration before upload verification."
               : "Configure Supabase service role env and run the verifier again."
   };
+  const runtimeEvidence = createSifVectorRuntimeEvidence(result, {
+    model: options.model,
+    dimensions: options.dimensions,
+  });
+  result.verificationReceipt = runtimeEvidence.verificationReceipt;
 
   fs.mkdirSync(path.dirname(options.output), { recursive: true });
   fs.writeFileSync(options.output, `${JSON.stringify(result, null, 2)}\n`, "utf8");
+  const receiptOutput = options.receiptOutput
+    || path.join(path.dirname(options.output), "runtime-vector-verification.json");
+  fs.mkdirSync(path.dirname(receiptOutput), { recursive: true });
+  fs.writeFileSync(receiptOutput, `${JSON.stringify(runtimeEvidence, null, 2)}\n`, "utf8");
   console.log(JSON.stringify(result, null, 2));
   if (!result.ok) process.exit(1);
 }

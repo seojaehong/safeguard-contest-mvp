@@ -66,6 +66,7 @@ describe("SIF embedding gate status", () => {
       status: "locked",
       flagEnabled: false,
       uploadVerified: false,
+      verificationReceiptValid: false,
       uploadedCount: 0,
       requiredUploadCount: 6032
     });
@@ -358,6 +359,6 @@ describe("SIF embedding gate status", () => {
     const canonicalFixture = JSON.stringify(canonicalizeMachineFixture(jsonValue));
     const fixtureHash = createHash("sha256").update(canonicalFixture).digest("hex");
 
-    expect(fixtureHash).toBe("aa54fe63a5ef76d356b345c8b6ae7e929bbb6ac3b87c1953496db592210a7453");
+    expect(fixtureHash).toBe("a6c5b19166df45141806b59f873002f1ee6e87ebc27f2a78f2eb4ac184e3cfe4");
   });
 });

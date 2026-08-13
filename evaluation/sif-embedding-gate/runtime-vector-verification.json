@@ -1,0 +1,12 @@
+{
+  "schema": "safeclaw-sif-vector-runtime-verification/v1",
+  "model": "text-embedding-3-small",
+  "dimensions": 1536,
+  "expectedCorpusCount": 6032,
+  "fixedCorpusHash": "2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e",
+  "verificationReceipt": {
+    "algorithm": "sha256",
+    "fingerprint": "56cfd394a957233d81e94ff2e164e2bce4f4012d54b4852ea3b81dfd6f89654e",
+    "machineVerified": false
+  }
+}

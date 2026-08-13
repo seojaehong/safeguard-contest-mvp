@@ -1,4 +1,6 @@
 import { createLogger } from "@/lib/logger";
+import runtimeVerificationJson from "@/evaluation/sif-embedding-gate/runtime-vector-verification.json";
+import { evaluateSifVectorRuntimeReceipt } from "@/lib/sif-vector-verification-contract.mjs";
 
 export type KoshaGroundingReason =
   | "verified-current"
@@ -134,6 +136,7 @@ export type SafetyReferenceVectorStatus = {
   errorCode?: typeof SAFETY_REFERENCE_VECTOR_FAILURE_CODE;
   reason:
     | "disabled"
+    | "verification-receipt-required"
     | "missing-openai-key"
     | "embedding-failed"
     | "rpc-missing"
@@ -404,7 +407,8 @@ function getSupabaseConfig(): SupabaseConfig | null {
 }
 
 export function resolveSafetyReferenceVectorSearchState(
-  env: Record<string, string | undefined> = process.env
+  env: Record<string, string | undefined> = process.env,
+  verificationReport: unknown = runtimeVerificationJson,
 ): SafetyReferenceVectorRuntime {
   const model = env.SAFETY_REFERENCE_EMBEDDING_MODEL || env.OPENAI_EMBEDDING_MODEL || DEFAULT_EMBEDDING_MODEL;
   const dimensions = readEmbeddingDimensions(env.SAFETY_REFERENCE_EMBEDDING_DIMENSIONS);
@@ -423,6 +427,29 @@ export function resolveSafetyReferenceVectorSearchState(
         model,
         message: "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
       }
+    };
+  }
+
+  const verification = evaluateSifVectorRuntimeReceipt(verificationReport, {
+    model,
+    dimensions,
+    fingerprint: env.SAFETY_REFERENCE_VECTOR_VERIFICATION_SHA256,
+  });
+  if (!verification.ok) {
+    return {
+      enabled: false,
+      apiKey: null,
+      model,
+      dimensions,
+      status: {
+        enabled: true,
+        attempted: false,
+        ok: false,
+        reason: "verification-receipt-required",
+        count: 0,
+        model,
+        message: "검증된 SIF 업로드·RPC receipt가 없어 vector 검색을 차단하고 text/ranked 검색을 유지합니다.",
+      },
     };
   }
 
