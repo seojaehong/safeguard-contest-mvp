@@ -558,6 +558,19 @@ type NextRunwayReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  mcpProviderAdmission: {
+    verdict: string;
+    findingId: string;
+    focusedTests: number | null;
+    adjacentTests: number | null;
+    liveRateLimitMode: string;
+    authenticatedProviderGenerationAvailability: string;
+    distributedProductionActivation: string;
+    validAuthenticatedRuntimeProbe: string;
+    freshRescanRequired: boolean;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   mcpGenerationWorkBudgetSecurity: {
     verdict: string;
     sourceHead: string;

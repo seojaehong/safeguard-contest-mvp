@@ -341,6 +341,18 @@ type RollupReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  mcpProviderAdmission: {
+    verdict: string;
+    findingId: string;
+    focusedTests: number | null;
+    adjacentTests: number | null;
+    liveRateLimitMode: string;
+    authenticatedProviderGenerationAvailability: string;
+    distributedProductionActivation: string;
+    freshRescanRequired: boolean;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   mcpGenerationWorkBudgetSecurity: {
     verdict: string;
     sourceHead: string;
