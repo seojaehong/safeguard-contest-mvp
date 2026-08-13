@@ -283,6 +283,59 @@ describe("/api/agent/chat broker boundary", () => {
     expect(engine.run).not.toHaveBeenCalled();
   });
 
+  it("fails closed before body or site work when authenticated production admission is absent", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+    const events: string[] = [];
+    const engine = adapter();
+    const resolveContext = createBrokerContextResolver({
+      createClient: () => ({ marker: "client" }),
+      authenticate: async () => {
+        events.push("authenticate");
+        return { id: validContext.userId, email: "owner@example.com" };
+      },
+      findOwnedSite: async () => {
+        events.push("owned-site");
+        return validContext;
+      },
+    });
+    const incoming = request({ token: "valid-token", siteId: validContext.siteId });
+    const parseBody = vi.spyOn(incoming, "json").mockImplementation(async () => {
+      events.push("body");
+      return { message: "오늘 작업 위험을 봐줘", siteId: validContext.siteId };
+    });
+    const post = createAgentChatPost({ resolveContext, engine });
+
+    const response = await post(incoming);
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({ code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE" });
+    expect(events).toEqual(["authenticate"]);
+    expect(parseBody).not.toHaveBeenCalled();
+    expect(engine.checkAvailability).not.toHaveBeenCalled();
+    expect(engine.run).not.toHaveBeenCalled();
+  });
+
+  it("fails closed before engine work when the production concurrency lease is absent", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+    const engine = adapter();
+    const post = createAgentChatPost({
+      resolveContext: resolver(),
+      engine,
+      authenticatedLimiter: createRateLimiter({ limit: 5, windowMs: 60_000 }),
+    });
+
+    const response = await post(request({ token: "valid-token", siteId: validContext.siteId }));
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({ code: "AGENT_CHAT_CONCURRENCY_LIMIT" });
+    expect(engine.checkAvailability).not.toHaveBeenCalled();
+    expect(engine.run).not.toHaveBeenCalled();
+  });
+
   it("runs the authenticated limiter immediately after auth and before body or site work", async () => {
     const events: string[] = [];
     const engine = adapter();

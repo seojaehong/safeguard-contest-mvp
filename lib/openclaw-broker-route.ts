@@ -194,6 +194,7 @@ export function createAgentChatPost(dependencies: AgentChatRouteDependencies) {
           limit: AGENT_CHAT_ADMISSION_POLICY.authenticated.limit,
           windowMs: AGENT_CHAT_ADMISSION_POLICY.authenticated.windowMs,
           instanceLimiter: routeAuthenticatedLimiter,
+          requireDistributedInProduction: true,
         });
     const limited = publicRateLimitResponse(authenticatedDecision);
     if (limited) return limited;
@@ -236,7 +237,7 @@ export function createAgentChatPost(dependencies: AgentChatRouteDependencies) {
         concurrency: agentChatEngineConcurrency(),
         leaseMs: agentChatEngineLeaseMs(),
         namespace: AGENT_CHAT_ADMISSION_POLICY.engine.namespace,
-        requireDistributedInProduction: false,
+        requireDistributedInProduction: true,
       });
     } catch (error) {
       log.error("openclaw broker distributed engine admission unavailable", {
