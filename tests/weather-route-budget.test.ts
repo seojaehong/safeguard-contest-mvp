@@ -83,6 +83,22 @@ describe("weather route public work budget", () => {
     expect(mocks.fetchWeatherSignal).not.toHaveBeenCalled();
   });
 
+  it("fails weather work closed in production without distributed admission", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { GET } = await import("@/app/api/weather/route");
+
+    const response = await GET(weatherRequest("서울 옥외 폭염 작업", 20));
+
+    expect(response.status).toBe(503);
+    expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("distributed");
+    await expect(response.json()).resolves.toMatchObject({
+      code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    });
+    expect(mocks.fetchWeatherSignal).not.toHaveBeenCalled();
+    error.mockRestore();
+  });
+
   it("coalesces equivalent in-flight weather lookups", async () => {
     const { GET } = await import("@/app/api/weather/route");
     let resolveWeather: (value: WeatherRouteSignal) => void = () => undefined;

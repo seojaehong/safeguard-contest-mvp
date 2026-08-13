@@ -16,6 +16,12 @@ import {
   PUBLIC_SAFETY_REFERENCE_FILTER_MAX_CHARS,
   PUBLIC_SAFETY_REFERENCE_QUERY_MAX_CHARS,
 } from "@/lib/public-work-budget";
+import {
+  acquirePublicSearchWorkLease,
+  applyPublicSearchWorkHeaders,
+  checkPublicSearchProviderAdmission,
+  publicSearchAdmissionErrorResponse,
+} from "@/lib/public-search-admission";
 
 export const dynamic = "force-dynamic";
 
@@ -58,7 +64,14 @@ async function searchCoalesced(
   if (!entry) {
     const controller = new AbortController();
     let createdEntry: InFlightSearch;
-    const promise = searchSafetyReferences({ ...input, signal: controller.signal }).finally(() => {
+    const promise = (async () => {
+      const lease = await acquirePublicSearchWorkLease("safety-reference");
+      try {
+        return await searchSafetyReferences({ ...input, signal: controller.signal });
+      } finally {
+        await lease.release();
+      }
+    })().finally(() => {
       createdEntry.settled = true;
       if (inFlightSearches.get(key) === createdEntry) inFlightSearches.delete(key);
     });
@@ -113,21 +126,32 @@ export async function GET(request: NextRequest) {
     ), rateLimit);
   }
 
-  const result = await searchCoalesced({
-    query,
-    limit,
-    itemType,
-    sourceId,
-    riskTag,
-    evidenceRole
-  }, request.signal);
-  const publicResult = {
-    ...result,
-    items: result.items.map(buildPublicSafetyReferenceItem),
-  };
+  const providerRateLimit = await checkPublicSearchProviderAdmission(request, "safety-reference");
+  const providerLimited = publicRateLimitResponse(providerRateLimit);
+  if (providerLimited) return providerLimited;
 
-  return applyPublicRateLimitHeader(
-    NextResponse.json(publicResult, { status: result.ok ? 200 : 503 }),
-    rateLimit,
-  );
+  try {
+    const result = await searchCoalesced({
+      query,
+      limit,
+      itemType,
+      sourceId,
+      riskTag,
+      evidenceRole
+    }, request.signal);
+    const publicResult = {
+      ...result,
+      items: result.items.map(buildPublicSafetyReferenceItem),
+    };
+
+    return applyPublicSearchWorkHeaders(applyPublicRateLimitHeader(
+      NextResponse.json(publicResult, { status: result.ok ? 200 : 503 }),
+      providerRateLimit,
+    ), "safety-reference");
+  } catch (error) {
+    request.signal.throwIfAborted();
+    const admissionResponse = publicSearchAdmissionErrorResponse(error);
+    if (admissionResponse) return applyPublicRateLimitHeader(admissionResponse, providerRateLimit);
+    throw error;
+  }
 }

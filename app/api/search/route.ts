@@ -12,6 +12,12 @@ import {
   publicWorkBudgetExceeded,
   PUBLIC_LEGAL_SEARCH_QUERY_MAX_CHARS,
 } from "@/lib/public-work-budget";
+import {
+  acquirePublicSearchWorkLease,
+  applyPublicSearchWorkHeaders,
+  checkPublicSearchProviderAdmission,
+  publicSearchAdmissionErrorResponse,
+} from "@/lib/public-search-admission";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +52,14 @@ async function runCoalescedSearch(query: string, signal: AbortSignal) {
   if (!entry) {
     const controller = new AbortController();
     let createdEntry: InFlightSearch;
-    const promise = runSearch(query, controller.signal).finally(() => {
+    const promise = (async () => {
+      const lease = await acquirePublicSearchWorkLease("legal");
+      try {
+        return await runSearch(query, controller.signal);
+      } finally {
+        await lease.release();
+      }
+    })().finally(() => {
       createdEntry.settled = true;
       if (inFlightSearches.get(key) === createdEntry) inFlightSearches.delete(key);
     });
@@ -86,11 +99,22 @@ export async function GET(request: NextRequest) {
     ), rateLimit);
   }
 
-  const results = await runCoalescedSearch(q, request.signal);
-  return applyPublicRateLimitHeader(NextResponse.json({
-    q,
-    count: results.length,
-    results,
-    sourceMix: summarizeLegalSourceMix(results)
-  }), rateLimit);
+  const providerRateLimit = await checkPublicSearchProviderAdmission(request, "legal");
+  const providerLimited = publicRateLimitResponse(providerRateLimit);
+  if (providerLimited) return providerLimited;
+
+  try {
+    const results = await runCoalescedSearch(q, request.signal);
+    return applyPublicSearchWorkHeaders(applyPublicRateLimitHeader(NextResponse.json({
+      q,
+      count: results.length,
+      results,
+      sourceMix: summarizeLegalSourceMix(results)
+    }), providerRateLimit), "legal");
+  } catch (error) {
+    request.signal.throwIfAborted();
+    const admissionResponse = publicSearchAdmissionErrorResponse(error);
+    if (admissionResponse) return applyPublicRateLimitHeader(admissionResponse, providerRateLimit);
+    throw error;
+  }
 }

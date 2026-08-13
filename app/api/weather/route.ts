@@ -11,6 +11,12 @@ import {
   publicWorkBudgetExceeded,
   PUBLIC_WEATHER_QUESTION_MAX_CHARS
 } from "@/lib/public-work-budget";
+import {
+  acquirePublicSearchWorkLease,
+  applyPublicSearchWorkHeaders,
+  checkPublicSearchProviderAdmission,
+  publicSearchAdmissionErrorResponse,
+} from "@/lib/public-search-admission";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +47,14 @@ async function fetchCoalescedWeather(question: string, signal: AbortSignal) {
   if (!entry) {
     const controller = new AbortController();
     let createdEntry: InFlightWeather;
-    const promise = fetchWeatherSignal(question, controller.signal).finally(() => {
+    const promise = (async () => {
+      const lease = await acquirePublicSearchWorkLease("weather");
+      try {
+        return await fetchWeatherSignal(question, controller.signal);
+      } finally {
+        await lease.release();
+      }
+    })().finally(() => {
       createdEntry.settled = true;
       if (inFlightWeather.get(key) === createdEntry) inFlightWeather.delete(key);
     });
@@ -87,11 +100,20 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  const providerRateLimit = await checkPublicSearchProviderAdmission(request, "weather");
+  const providerLimited = publicRateLimitResponse(providerRateLimit);
+  if (providerLimited) return providerLimited;
+
   try {
     const weather = await fetchCoalescedWeather(question, request.signal);
-    return applyPublicRateLimitHeader(NextResponse.json({ ok: true, weather }), rateLimit);
+    return applyPublicSearchWorkHeaders(
+      applyPublicRateLimitHeader(NextResponse.json({ ok: true, weather }), providerRateLimit),
+      "weather",
+    );
   } catch (error) {
     request.signal.throwIfAborted();
+    const admissionResponse = publicSearchAdmissionErrorResponse(error);
+    if (admissionResponse) return applyPublicRateLimitHeader(admissionResponse, providerRateLimit);
     const message = error instanceof Error ? error.message : String(error);
     console.error("weather route failed", error);
     return NextResponse.json(

@@ -81,7 +81,7 @@ describe("public search work budgets", () => {
     expect(safetyResponse.status).toBe(200);
     expect(legalResponse.headers.get("X-SafeClaw-Rate-Limit")).toBe("distributed");
     expect(safetyResponse.headers.get("X-SafeClaw-Rate-Limit")).toBe("distributed");
-    expect(distributedFetch).toHaveBeenCalledTimes(2);
+    expect(distributedFetch).toHaveBeenCalledTimes(8);
     expect(mocks.runSearch).toHaveBeenCalledTimes(1);
     expect(mocks.searchSafetyReferences).toHaveBeenCalledTimes(1);
   });
@@ -116,6 +116,26 @@ describe("public search work budgets", () => {
     expect(queryResponse.status).toBe(413);
     expect(filterResponse.status).toBe(413);
     expect(mocks.searchSafetyReferences).not.toHaveBeenCalled();
+  });
+
+  it("fails provider work closed in production without distributed admission", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+    vi.stubEnv("VERCEL_ENV", "production");
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const legal = await import("@/app/api/search/route");
+    const safety = await import("@/app/api/safety-reference/search/route");
+
+    const legalResponse = await legal.GET(request("/api/search?q=산업안전", "203.0.113.81"));
+    const safetyResponse = await safety.GET(request("/api/safety-reference/search?q=비계", "203.0.113.82"));
+
+    expect(legalResponse.status).toBe(503);
+    expect(safetyResponse.status).toBe(503);
+    await expect(legalResponse.json()).resolves.toMatchObject({ code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE" });
+    await expect(safetyResponse.json()).resolves.toMatchObject({ code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE" });
+    expect(mocks.runSearch).not.toHaveBeenCalled();
+    expect(mocks.searchSafetyReferences).not.toHaveBeenCalled();
+    error.mockRestore();
   });
 
   it("returns bounded public safety-reference projections without local corpus bodies", async () => {
@@ -232,6 +252,37 @@ describe("public search work budgets", () => {
 
     expect(mocks.runSearch).toHaveBeenCalledTimes(1);
     expect(mocks.searchSafetyReferences).toHaveBeenCalledTimes(1);
+  });
+
+  it("acquires and releases one distributed lease for one coalesced upstream job", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "test-token");
+    const distributedFetch = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
+      const command = JSON.parse(String(init?.body)) as unknown[];
+      const script = String(command[1]);
+      if (script.includes("ZADD")) return Response.json({ result: [1, 6] });
+      if (script.includes("redis.call('ZREM',")) return Response.json({ result: 6 });
+      return Response.json({ result: [1, 59_000] });
+    });
+    vi.stubGlobal("fetch", distributedFetch);
+    const legal = await import("@/app/api/search/route");
+    let resolveLegal: (value: []) => void = () => undefined;
+    mocks.runSearch.mockImplementationOnce(() => new Promise<[]>((resolve) => {
+      resolveLegal = resolve;
+    }));
+
+    const first = legal.GET(request("/api/search?q=산업안전", "203.0.113.83"));
+    const second = legal.GET(request("/api/search?q=산업안전", "203.0.113.84"));
+    await vi.waitFor(() => expect(mocks.runSearch).toHaveBeenCalledTimes(1));
+    resolveLegal([]);
+    await Promise.all([first, second]);
+
+    const scripts = distributedFetch.mock.calls.map(([, init]) => {
+      const command = JSON.parse(String(init?.body)) as unknown[];
+      return String(command[1]);
+    });
+    expect(scripts.filter((script) => script.includes("ZADD"))).toHaveLength(1);
+    expect(scripts.filter((script) => script.includes("redis.call('ZREM',"))).toHaveLength(1);
   });
 
   it("keeps coalesced legal work alive until the final consumer disconnects", async () => {
