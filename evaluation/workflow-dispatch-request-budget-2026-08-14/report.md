@@ -2,11 +2,13 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_WORKFLOW_DISPATCH_REQUEST_BODY_BUDGET_LIVE_PENDING`
+`PASS_LIVE_PRODUCTION_WORKFLOW_DISPATCH_REQUEST_BODY_BUDGET`
 
 Product commit `aa907891` applies a 65,536-byte request budget before `POST /api/workflow/dispatch` parses JSON. Oversized requests return HTTP 413 with `WORKFLOW_DISPATCH_PAYLOAD_TOO_LARGE` before a Supabase client is created or a provider relay is called.
 
-This closes the current-source path for finding `resource-exhaustion.request-body-budget` from Codex Security scan `bd135da7-c309-4e8d-ace5-15222dd3f1c7`. Live deployment verification is still pending.
+Production marker `f47b89f8` includes the product commit. A no-mutation oversized live request returned HTTP 413 with `WORKFLOW_DISPATCH_PAYLOAD_TOO_LARGE` and limit 65,536 before provider or database work was expected.
+
+This closes the live source path for finding `resource-exhaustion.request-body-budget` from Codex Security scan `bd135da7-c309-4e8d-ace5-15222dd3f1c7`. A fresh scan is still required before the sealed canonical finding is reclassified.
 
 ## Verification
 

@@ -1,8 +1,9 @@
 {
   "schemaVersion": "safeclaw-workflow-dispatch-request-budget/v1",
   "generatedAt": "2026-08-14T00:46:30+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_WORKFLOW_DISPATCH_REQUEST_BODY_BUDGET_LIVE_PENDING",
-  "productCommit": "aa907891",
+  "verdict": "PASS_LIVE_PRODUCTION_WORKFLOW_DISPATCH_REQUEST_BODY_BUDGET",
+  "productCommit": "aa90789128023363263c18f89a9def85b5dc0c19",
+  "productionCommit": "f47b89f861d9b3daae2222f8e1e096fb2fb8e27f",
   "finding": {
     "scanId": "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
     "ruleId": "resource-exhaustion.request-body-budget",
@@ -30,7 +31,14 @@
       "nextVersion": "15.5.22",
       "staticPages": 28
     },
-    "diffCheck": "PASS"
+    "diffCheck": "PASS",
+    "liveProbe": {
+      "status": 413,
+      "code": "WORKFLOW_DISPATCH_PAYLOAD_TOO_LARGE",
+      "limit": 65536,
+      "providerWorkExpected": false,
+      "databaseWorkExpected": false
+    }
   },
   "mutationBoundary": {
     "dbMutationPerformed": false,
@@ -41,7 +49,7 @@
     "koshaRegistryMutationPerformed": false
   },
   "remainingBoundaries": {
-    "liveAfterDeploymentPending": true,
+    "liveAfterDeploymentPending": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "approvalGatedBoundariesPreserved": true,
     "securityCompleteClaimAllowed": false

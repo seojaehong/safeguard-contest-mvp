@@ -1,8 +1,9 @@
 {
   "schemaVersion": "safeclaw-post-remediation-security-source-closure/v1",
   "generatedAt": "2026-08-14T00:52:30+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_THREE_SECURITY_FINDING_REMEDIATIONS_LIVE_RESCAN_PENDING",
+  "verdict": "PASS_LIVE_PRODUCTION_TWO_SECURITY_REMEDIATIONS_ONE_DISTRIBUTED_RESIDUAL_RESCAN_PENDING",
   "sourceHead": "b026de1e82a936b03f04bbbcb3ae96f330afa832",
+  "productionCommit": "f47b89f861d9b3daae2222f8e1e096fb2fb8e27f",
   "sourceScan": {
     "scanId": "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
     "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982",
@@ -18,10 +19,13 @@
       "0647d70259e82028ca5e66a1852b011ff77c9c28",
       "b026de1e82a936b03f04bbbcb3ae96f330afa832"
     ],
-    "sourceRemediatedCount": 3,
-    "remainingReportableFindingCountBeforeRescan": 17,
+    "sourceRemediatedCount": 2,
+    "sourceMitigatedCount": 1,
+    "liveDeployedRemediationCount": 2,
+    "liveDeployedMitigationCount": 1,
+    "remainingReportableFindingCountBeforeRescan": 18,
     "freshPostRemediationScanRequired": true,
-    "liveAfterDeploymentPending": true,
+    "liveAfterDeploymentPending": false,
     "items": [
       {
         "ruleId": "resource-exhaustion.request-body-budget",
@@ -39,7 +43,8 @@
         "ruleId": "resource-exhaustion.public-status-fanout",
         "severity": "medium",
         "productCommit": "b026de1e82a936b03f04bbbcb3ae96f330afa832",
-        "verification": "The public status route applies request admission and a 30-second shared-cache projection before repeated catalog fan-out."
+        "verification": "The public status route applies request admission and a 30-second shared-cache projection before repeated catalog fan-out.",
+        "disposition": "live_source_mitigated_distributed_admission_residual"
       }
     ]
   },
@@ -56,7 +61,17 @@
       "nextVersion": "15.5.22",
       "staticPages": 28
     },
-    "diffCheck": "PASS"
+    "diffCheck": "PASS",
+    "liveVerification": {
+      "buildInfoCommit": "f47b89f861d9b3daae2222f8e1e096fb2fb8e27f",
+      "workflowDispatchOversizedStatus": 413,
+      "workflowDispatchOversizedCode": "WORKFLOW_DISPATCH_PAYLOAD_TOO_LARGE",
+      "safetyStatusHttpStatus": 200,
+      "safetyStatusRateLimitMode": "instance",
+      "safetyStatusCacheControl": "public, max-age=5",
+      "work24BoundedReaderIncludedInProduction": true,
+      "work24OversizedLiveUpstreamNotExecuted": true
+    }
   },
   "mutationBoundary": {
     "dbMutationPerformed": false,
