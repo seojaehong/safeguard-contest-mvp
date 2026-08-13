@@ -1,0 +1,111 @@
+{
+  "schemaVersion": "safeclaw-security-mcp-provider-admission/v1",
+  "generatedAt": "2026-08-14T02:42:17+09:00",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_MCP_PROVIDER_ADMISSION_RESCAN_PENDING",
+  "sourceHead": "f02045420b7213b6e1088dfb24b673068fa5dea5",
+  "productCommit": "f02045420b7213b6e1088dfb24b673068fa5dea5",
+  "productionBuild": {
+    "commitSha": "f02045420b7213b6e1088dfb24b673068fa5dea5",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-jptss4oan-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
+  "sealedFinding": {
+    "scanId": "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+    "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982",
+    "findingId": "csf_b10479b6501c208c4d11644e",
+    "ruleId": "resource-exhaustion.distributed-provider-admission",
+    "title": "Provider-generating MCP tools fall back to per-instance throttling",
+    "immutableFindingMutated": false,
+    "canonicalClosureClaimed": false
+  },
+  "contracts": {
+    "providerGeneratingTools": [
+      "generate_safety_docpack",
+      "generate_reviewed_safety_docpack"
+    ],
+    "tokenTenantRateAdmission": {
+      "namespace": "mcp-provider-generation",
+      "limit": 10,
+      "windowMs": 60000,
+      "bearerStoredOrLogged": false,
+      "sha256BearerFingerprintIncluded": true,
+      "organizationAndSiteIncluded": true,
+      "distributedRequiredInProduction": true,
+      "missingOrPartialConfigurationFailsBeforeProviderHandler": true
+    },
+    "providerConcurrencyLease": {
+      "namespace": "mcp-provider-generation-work",
+      "capacity": 12,
+      "leaseMs": 310000,
+      "weights": {
+        "template": 0,
+        "enhanced": 2,
+        "full": 12
+      },
+      "distributedRequiredInProduction": true,
+      "busyFailsBeforeProviderHandler": true,
+      "completionAndFailureReleaseLease": true
+    },
+    "preservedBehavior": {
+      "readOnlyMcpToolsUnaffected": true,
+      "templateModeOutsideProviderAdmission": true,
+      "developmentWeightedInstanceFallbackRetained": true,
+      "existingTransportBodyAndAuthenticationBudgetsRetained": true
+    }
+  },
+  "verification": {
+    "focused": {
+      "files": 3,
+      "tests": 61,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "focusedAndAdjacentMcp": {
+      "files": 8,
+      "tests": 94,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "dependencyAuditVulnerabilities": 0,
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "diffCheck": "PASS"
+  },
+  "liveProbe": {
+    "method": "POST",
+    "path": "/api/mcp/mcp",
+    "credential": "intentionally_invalid_non_secret",
+    "requestBodyBytes": 2,
+    "status": 401,
+    "rateLimitMode": "instance",
+    "mcpToolDispatchPerformed": false,
+    "providerGenerationExecuted": false,
+    "validAuthenticatedFailClosedProbeExecuted": false,
+    "productionDistributedConfigurationObserved": "ABSENT_VIA_PREAUTH_INSTANCE_HEADER",
+    "authenticatedProviderGenerationAvailability": "FAIL_CLOSED_UNTIL_DISTRIBUTED_CONFIG"
+  },
+  "mutationBoundary": {
+    "dbSchemaChanged": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "providerGenerationExecuted": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "distributedProductionActivation": "OPEN_OPERATOR_CONFIGURATION",
+    "validAuthenticatedRuntimeProbe": "NOT_EXECUTED_NO_MCP_TOKEN",
+    "freshFullRepositorySecurityScanRequiredForCanonicalClosure": true,
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedOperationsRemainApprovalGated": true
+  }
+}
