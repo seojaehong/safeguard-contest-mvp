@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { NextRequest } from "next/server";
 
 vi.mock("@/lib/safety-reference-catalog", () => ({
   getSafetyReferenceStats: vi.fn(async () => ({
@@ -28,7 +29,7 @@ describe("safety-reference status bundled KOSHA corpus", () => {
     vi.stubEnv("KOSHA_GUIDE_CORPUS_DIR", "");
     resetKoshaGuideCorpusCacheForTests();
 
-    const response = await GET();
+    const response = await GET(new NextRequest("http://localhost/api/safety-reference/status"));
     const body = await response.json() as {
       ok: boolean;
       status: string;

@@ -1,12 +1,30 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { loadKoshaGuideCorpus } from "@/lib/kosha-guide-corpus";
 import { getProductionExactKoshaTrustPins } from "@/lib/production-kosha-trust";
 import { getSafetyReferenceStats } from "@/lib/safety-reference-catalog";
 import { loadBundledExactKoshaReferences } from "@/lib/safety-reference-catalog-server";
+import { createRateLimiter } from "@/lib/rate-limit";
+import {
+  applyPublicRateLimitHeader,
+  checkPublicRateLimit,
+  publicRateLimitResponse,
+} from "@/lib/public-distributed-rate-limit";
 
 export const dynamic = "force-dynamic";
+const limiter = createRateLimiter({ limit: 30, windowMs: 60_000 });
+const STATUS_CACHE_CONTROL = "public, max-age=5, s-maxage=30, stale-while-revalidate=60";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const rateLimit = await checkPublicRateLimit({
+    request,
+    namespace: "safety-reference-status",
+    limit: 30,
+    windowMs: 60_000,
+    instanceLimiter: limiter,
+  });
+  const limited = publicRateLimitResponse(rateLimit);
+  if (limited) return limited;
+
   const exactTrustPins = getProductionExactKoshaTrustPins();
   const [catalog, localCorpus, exactTrustRegistryLoad] = await Promise.all([
     getSafetyReferenceStats(),
@@ -69,5 +87,7 @@ export async function GET() {
     message: `${catalog.message} ${localMessage} ${exactTrustMessage}`
   };
 
-  return NextResponse.json(result, { status: result.ok ? 200 : 503 });
+  const response = NextResponse.json(result, { status: result.ok ? 200 : 503 });
+  response.headers.set("Cache-Control", STATUS_CACHE_CONTROL);
+  return applyPublicRateLimitHeader(response, rateLimit);
 }

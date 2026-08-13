@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { NextRequest } from "next/server";
 
 const mocks = vi.hoisted(() => ({
   getSafetyReferenceStats: vi.fn(),
@@ -38,6 +39,10 @@ const readyCatalogStats = {
   message: "Supabase catalog ready"
 };
 
+function statusRequest() {
+  return new NextRequest("http://localhost/api/safety-reference/status");
+}
+
 describe("safety-reference status route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -59,7 +64,7 @@ describe("safety-reference status route", () => {
       failures: []
     });
 
-    const response = await GET();
+    const response = await GET(statusRequest());
     const payload = await response.json();
 
     expect(response.status).toBe(503);
@@ -91,7 +96,7 @@ describe("safety-reference status route", () => {
       failures: []
     });
 
-    const response = await GET();
+    const response = await GET(statusRequest());
     const payload = await response.json();
 
     expect(response.status).toBe(503);
@@ -121,10 +126,12 @@ describe("safety-reference status route", () => {
       indexedRecords: []
     });
 
-    const response = await GET();
+    const response = await GET(statusRequest());
     const payload = await response.json();
 
     expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("public, max-age=5, s-maxage=30, stale-while-revalidate=60");
+    expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("instance");
     expect(payload).toMatchObject({
       ok: true,
       status: "ready",
@@ -173,7 +180,7 @@ describe("safety-reference status route", () => {
       message: "exact KOSHA asset does not satisfy the immutable production trust pin"
     });
 
-    const response = await GET();
+    const response = await GET(statusRequest());
     const payload = await response.json();
 
     expect(response.status).toBe(503);
@@ -200,7 +207,7 @@ describe("safety-reference status route", () => {
       failures: ["hash:manifest"]
     });
 
-    const response = await GET();
+    const response = await GET(statusRequest());
     const payload = await response.json();
 
     expect(response.status).toBe(503);
