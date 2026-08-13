@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "safeclaw-post-remediation-security-source-closure/v1",
+  "generatedAt": "2026-08-14T00:52:30+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_THREE_SECURITY_FINDING_REMEDIATIONS_LIVE_RESCAN_PENDING",
+  "sourceHead": "b026de1e82a936b03f04bbbcb3ae96f330afa832",
+  "sourceScan": {
+    "scanId": "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+    "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982",
+    "reportableFindingCount": 20,
+    "severityCounts": {
+      "medium": 12,
+      "low": 8
+    }
+  },
+  "remediation": {
+    "productCommits": [
+      "aa90789128023363263c18f89a9def85b5dc0c19",
+      "0647d70259e82028ca5e66a1852b011ff77c9c28",
+      "b026de1e82a936b03f04bbbcb3ae96f330afa832"
+    ],
+    "sourceRemediatedCount": 3,
+    "remainingReportableFindingCountBeforeRescan": 17,
+    "freshPostRemediationScanRequired": true,
+    "liveAfterDeploymentPending": true,
+    "items": [
+      {
+        "ruleId": "resource-exhaustion.request-body-budget",
+        "severity": "low",
+        "productCommit": "aa90789128023363263c18f89a9def85b5dc0c19",
+        "verification": "Workflow dispatch rejects bodies above 65,536 bytes before JSON parsing, Supabase client creation, or provider relay."
+      },
+      {
+        "ruleId": "resource-exhaustion.unbounded-upstream-read",
+        "severity": "low",
+        "productCommit": "0647d70259e82028ca5e66a1852b011ff77c9c28",
+        "verification": "Work24 XML responses are streamed through the shared 262,144-byte bounded reader and oversized bodies fall back without parsing."
+      },
+      {
+        "ruleId": "resource-exhaustion.public-status-fanout",
+        "severity": "medium",
+        "productCommit": "b026de1e82a936b03f04bbbcb3ae96f330afa832",
+        "verification": "The public status route applies request admission and a 30-second shared-cache projection before repeated catalog fan-out."
+      }
+    ]
+  },
+  "verification": {
+    "focusedAndAdjacentTests": {
+      "files": 8,
+      "tests": 105,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "diffCheck": "PASS"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedBoundariesPreserved": true,
+    "securityCompleteClaimAllowed": false
+  }
+}
