@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-13T16:45:35.502Z",
-  "head": "2ad5ddf9b01e1098b313d5e84b5336e7dad43ab5",
+  "generatedAt": "2026-08-13T17:29:40.863Z",
+  "head": "0a12a9232f99a3d2711358815e035b3196ec88b9",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f784d59c0c0818b21ecfce7a5b0add7b5d6d92a3",
+    "commitSha": "d1f426b858170b6489a7e9b92ea125a63a0d02a3",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-eaj54hzd9-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-2jpq66e39-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 50
+    "gateCount": 51
   },
   "provenGates": [
     {
@@ -152,6 +152,12 @@
       "state": "notice",
       "artifact": "evaluation\\share-session-revocation-remediation-2026-08-14\\report.json",
       "detail": "Live production exposes an authenticated owner-only Share session revoke action scoped by session, workpack, organization, and site with durable status/timestamp evidence. The unauthenticated DELETE probe fails closed at 401, no production session was created or revoked, the canonical low finding remains immutable pending a fresh rescan, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "agent_chat_durable_admission_security",
+      "state": "notice",
+      "artifact": "evaluation\\security-agent-chat-durable-admission-2026-08-14\\report.json",
+      "detail": "Live source requires a distributed authenticated-user quota and engine-work lease before Agent Chat model or tool execution, with busy, failure, completion, and cancellation release covered by 24 focused and 55 adjacent tests. Production still reports pre-auth instance mode, so authenticated Agent Chat is fail-closed until operator configuration; the immutable medium finding and fresh rescan remain open, no provider or mutation work occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "public_json_request_body_budget",
@@ -620,6 +626,21 @@
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
+  "agentChatDurableAdmission": {
+    "artifact": "evaluation\\security-agent-chat-durable-admission-2026-08-14\\report.json",
+    "verdict": "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_AGENT_ADMISSION_RESCAN_PENDING",
+    "sourceHead": "ffccacd10f01451fba28e08ec0bbdf3a6e41dc70",
+    "productionCommit": "ffccacd10f01451fba28e08ec0bbdf3a6e41dc70",
+    "findingId": "csf_dbfc57f541ee5079a9bf9735",
+    "focusedTests": 24,
+    "adjacentTests": 55,
+    "liveRateLimitMode": "instance",
+    "authenticatedAgentAvailability": "FAIL_CLOSED_UNTIL_DISTRIBUTED_CONFIG",
+    "distributedProductionActivation": "OPEN_OPERATOR_CONFIGURATION",
+    "freshRescanRequired": true,
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
   "mcpGenerationWorkBudgetSecurity": {
     "artifact": "evaluation\\security-mcp-generation-work-budget-2026-08-04\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
@@ -959,9 +980,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "2ad5ddf9b01e1098b313d5e84b5336e7dad43ab5",
+      "sourceCommit": "0a12a9232f99a3d2711358815e035b3196ec88b9",
       "sourceStatus": "exact",
-      "productionCommit": "2ad5ddf9b01e1098b313d5e84b5336e7dad43ab5",
+      "productionCommit": "0a12a9232f99a3d2711358815e035b3196ec88b9",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -1122,6 +1143,14 @@
       "sourceCommit": "430a24b14c3d133151f4d750fe6b596fa85dd117",
       "sourceStatus": "ancestor",
       "productionCommit": "430a24b14c3d133151f4d750fe6b596fa85dd117",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "agent_chat_durable_admission_security",
+      "artifact": "evaluation\\security-agent-chat-durable-admission-2026-08-14\\report.json",
+      "sourceCommit": "ffccacd10f01451fba28e08ec0bbdf3a6e41dc70",
+      "sourceStatus": "ancestor",
+      "productionCommit": "ffccacd10f01451fba28e08ec0bbdf3a6e41dc70",
       "productionStatus": "ancestor_of_head"
     },
     {

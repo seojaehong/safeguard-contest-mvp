@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-13T16:45:33.587Z",
-  "sourceSha": "2ad5ddf9b01e1098b313d5e84b5336e7dad43ab5",
+  "generatedAt": "2026-08-13T17:29:40.016Z",
+  "sourceSha": "0a12a9232f99a3d2711358815e035b3196ec88b9",
   "overall": "open",
   "gates": [
     {
@@ -226,6 +226,17 @@
       "detail": "Live production exposes an authenticated owner-only Share session revoke action scoped by session, workpack, organization, and site with durable status/timestamp evidence. The unauthenticated DELETE probe fails closed at 401, no production session was created or revoked, the canonical low finding remains immutable pending a fresh rescan, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Run a fresh Standard scan before reclassifying the immutable finding; keep exact saved Share and DB-backed session creation approval-gated."
+      ]
+    },
+    {
+      "id": "agent_chat_durable_admission_security",
+      "state": "notice",
+      "label": "Agent chat durable admission security",
+      "evidencePath": "evaluation\\security-agent-chat-durable-admission-2026-08-14\\report.json",
+      "detail": "Live source requires a distributed authenticated-user quota and engine-work lease before Agent Chat model or tool execution, with busy, failure, completion, and cancellation release covered by 24 focused and 55 adjacent tests. Production still reports pre-auth instance mode, so authenticated Agent Chat is fail-closed until operator configuration; the immutable medium finding and fresh rescan remain open, no provider or mutation work occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Configure the approved distributed backend and run a bounded authenticated no-provider admission probe.",
+        "Run a fresh Standard scan before reclassifying the immutable finding or claiming security completion."
       ]
     },
     {

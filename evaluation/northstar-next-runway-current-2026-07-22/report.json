@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-13T16:45:51.314Z",
+  "generatedAt": "2026-08-13T17:29:56.036Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "2ad5ddf9b01e1098b313d5e84b5336e7dad43ab5",
-  "productionCommit": "f784d59c0c0818b21ecfce7a5b0add7b5d6d92a3",
+  "sourceHead": "0a12a9232f99a3d2711358815e035b3196ec88b9",
+  "productionCommit": "d1f426b858170b6489a7e9b92ea125a63a0d02a3",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f784d59c0c0818b21ecfce7a5b0add7b5d6d92a3",
+    "commitSha": "d1f426b858170b6489a7e9b92ea125a63a0d02a3",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-eaj54hzd9-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-2jpq66e39-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": false,
@@ -20,15 +20,13 @@
   "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
   "sourcePendingChangedPaths": [
-    "evaluation/share-session-revocation-remediation-2026-08-14/report.json",
-    "evaluation/share-session-revocation-remediation-2026-08-14/report.md",
-    "scripts/northstar_open_gate_audit.mjs",
-    "tests/northstar-open-gate-audit.test.ts"
+    "scripts/northstar_live_rollup.mjs",
+    "scripts/northstar_next_runway.mjs"
   ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "2ad5ddf9b01e1098b313d5e84b5336e7dad43ab5",
-  "liveRollupLiveCommit": "f784d59c0c0818b21ecfce7a5b0add7b5d6d92a3",
+  "liveExactEvidenceCommit": "0a12a9232f99a3d2711358815e035b3196ec88b9",
+  "liveRollupLiveCommit": "d1f426b858170b6489a7e9b92ea125a63a0d02a3",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -57,6 +55,7 @@
     "repositorySecurityScanReconciliation": "evaluation\\repository-security-scan-reconciliation-2026-08-11\\report.json",
     "currentSecurityRemediationLedger": "evaluation\\security-current-remediation-ledger-2026-08-13\\report.json",
     "currentRepositorySecurityRescan": "evaluation\\current-full-repository-security-scan-2026-08-13\\report.json",
+    "agentChatDurableAdmission": "evaluation\\security-agent-chat-durable-admission-2026-08-14\\report.json",
     "publicJsonRequestBodyBudget": "evaluation\\public-json-request-body-budget-2026-08-11\\report.json",
     "improvementPhotoAnalysisBudget": "evaluation\\improvement-photo-analysis-budget-2026-08-11\\report.json",
     "publicProviderCancellation": "evaluation\\public-provider-cancellation-2026-08-11\\report.json",
@@ -170,6 +169,11 @@
       "gate": "public_provider_admission",
       "state": "notice",
       "reason": "deployed source enforces weighted instance admission and no-provider work budgets; distributed production activation and a fresh rescan remain open"
+    },
+    {
+      "gate": "agent_chat_durable_admission_security",
+      "state": "notice",
+      "reason": "deployed source fails authenticated Agent Chat closed until durable distributed admission is configured; authenticated runtime proof and a fresh rescan remain open"
     }
   ],
   "approvalGated": [
@@ -779,6 +783,19 @@
     "liveCaseCount": 3,
     "distributedProductionActivation": "PENDING_CONFIGURATION",
     "followUpSecurityScan": "REQUIRED",
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "agentChatDurableAdmission": {
+    "verdict": "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_AGENT_ADMISSION_RESCAN_PENDING",
+    "sourceHead": "ffccacd10f01451fba28e08ec0bbdf3a6e41dc70",
+    "productionCommit": "ffccacd10f01451fba28e08ec0bbdf3a6e41dc70",
+    "findingId": "csf_dbfc57f541ee5079a9bf9735",
+    "liveRateLimitMode": "instance",
+    "authenticatedAgentAvailability": "FAIL_CLOSED_UNTIL_DISTRIBUTED_CONFIG",
+    "distributedProductionActivation": "OPEN_OPERATOR_CONFIGURATION",
+    "authenticatedRuntimeProbe": "NOT_EXECUTED_NO_USER_TOKEN",
+    "freshRescanRequired": true,
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
