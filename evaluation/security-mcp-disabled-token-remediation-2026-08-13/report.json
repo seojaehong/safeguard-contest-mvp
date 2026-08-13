@@ -1,8 +1,16 @@
 {
   "schema": "safeclaw-security-mcp-disabled-token-remediation/v1",
   "generatedAt": "2026-08-13T18:02:33.9748739+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LIVE_PENDING",
-  "productCommit": "01b286ee",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_MCP_DISABLED_TOKEN_REMEDIATION",
+  "productCommit": "01b286ee30fa56717ca5f060ba5e9171a9ed1096",
+  "productionBuild": {
+    "commitSha": "01b286ee30fa56717ca5f060ba5e9171a9ed1096",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-8gp4rcq1k-seojaehongs-projects.vercel.app",
+    "verifiedAt": "2026-08-13T18:04:10.8001398+09:00",
+    "scope": "DEPLOYED_SOURCE_ALIGNMENT_ONLY"
+  },
   "finding": {
     "anchor": "disabled-mcp-token-legacy-reauthorization",
     "severity": "medium",
@@ -45,6 +53,6 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "mcpTokenExpiry": "SEPARATE_SECURITY_FINDING",
     "mcpDefaultScopes": "SEPARATE_SECURITY_FINDING",
-    "liveDeploymentVerification": "PENDING"
+    "liveDeploymentVerification": "PRODUCT_COMMIT_ALIGNED_SOURCE_ONLY"
   }
 }
