@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "safeclaw-share-session-revocation-remediation/v1",
+  "generatedAt": "2026-08-14T01:36:00+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_OWNER_SHARE_SESSION_REVOCATION_LIVE_PENDING",
+  "sourceHead": "809f1febde9a1899489e16886ebcd46694efea0c",
+  "productionCommit": "f10210a34b3f7e1808fac868b61e57c03493f271",
+  "securityFinding": {
+    "scanId": "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+    "findingId": "csf_81119e28edb5ebd0a227f9ca",
+    "ruleId": "authorization.missing-share-revocation",
+    "severity": "low",
+    "immutableFindingPreserved": true,
+    "freshPostRemediationScanRequired": true
+  },
+  "sourceContract": {
+    "method": "DELETE",
+    "path": "/api/workpacks/[id]/share-sessions?sessionId=[uuid]",
+    "managerAuthenticationRequired": true,
+    "ownedWorkpackContextRequired": true,
+    "tupleFilters": [
+      "session_id",
+      "workpack_id",
+      "organization_id",
+      "site_id"
+    ],
+    "revokedStatusPersisted": true,
+    "updatedAtAuditEvidenceReturned": true,
+    "malformedSessionIdRejectedBeforeStorage": true,
+    "unknownOrForeignTupleFailsClosed": true,
+    "operatorUiAction": "공유 세션 중지",
+    "confirmationRequired": true
+  },
+  "verification": {
+    "focusedTests": {
+      "files": 3,
+      "tests": 92,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "browserGeometry": {
+      "files": 1,
+      "tests": 4,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "diffCheck": "PASS"
+  },
+  "liveVerification": {
+    "liveAfterDeploymentPending": true,
+    "destructiveRevokeProbeExecuted": false,
+    "reason": "No owned production saved Share session was supplied and creating or revoking one would mutate DB-backed share state."
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "shareSessionRevokedForEvidence": false,
+    "providerDispatchCalled": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "shareStorageAndCreationApproval": "APPROVAL_GATED",
+    "securityCompleteClaimAllowed": false
+  }
+}
