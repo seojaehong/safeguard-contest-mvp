@@ -1,0 +1,101 @@
+{
+  "schemaVersion": "safeclaw-share-recipient-contact-verification/v1",
+  "generatedAt": "2026-08-14T03:25:34+09:00",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_SHARE_RECIPIENT_CONTACT_VERIFICATION_RESCAN_PENDING",
+  "sourceHead": "59ec22a61a9972103e44765b031026641bfe5c06",
+  "productionCommit": "59ec22a61a9972103e44765b031026641bfe5c06",
+  "productionBuild": {
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-g4b88w2o2-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
+  "securityFinding": {
+    "scanId": "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+    "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982",
+    "findingId": "csf_e6a120c87c57d3529757bbde",
+    "ruleId": "authentication.bearer-invitation-attribution",
+    "severity": "low",
+    "title": "A copied invitation URL can submit worker-attributed read confirmations",
+    "immutableFindingPreserved": true,
+    "freshPostRemediationScanRequired": true
+  },
+  "sourceContract": {
+    "invitationWorkerIdAloneAcceptedForConfirmation": false,
+    "fullSnapshottedPhoneAccepted": true,
+    "fullSnapshottedEmailAccepted": true,
+    "partialPhoneAccepted": false,
+    "caseInsensitiveEmailNormalization": true,
+    "phoneFormattingNormalization": true,
+    "verificationValuePersisted": false,
+    "verificationValueReturned": false,
+    "verificationValueLogged": false,
+    "missingVerificationStatus": 403,
+    "mismatchedVerificationStatus": 403,
+    "missingRecipientContactStatus": 409,
+    "databaseInsertOccursOnlyAfterVerification": true,
+    "serverRecipientSnapshotRemainsAuthoritative": true,
+    "anonymousShareBehaviorPreserved": true
+  },
+  "uiContract": {
+    "invitedRecipientUsesContactVerificationInsteadOfEditableDisplayName": true,
+    "inputCountIncrease": 0,
+    "supportedCopyLanguages": ["ko", "vi", "en"],
+    "mobileConfirmationRemainsInFirstViewport": true,
+    "desktopRecipientWorkbenchRemainsMultiRegion": true,
+    "longContentRemainsContained": true
+  },
+  "verification": {
+    "focusedAndAdjacent": {
+      "files": 7,
+      "tests": 124,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "recipientBrowser": {
+      "files": 1,
+      "tests": 7,
+      "failed": 0,
+      "viewports": ["390x844", "390x723", "1024x768", "1440x723"],
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "dependencyAuditVulnerabilities": 0,
+    "diffCheck": "PASS"
+  },
+  "liveProbe": {
+    "method": "POST",
+    "path": "/api/share-sessions/[known-missing-session]",
+    "realSavedSessionUsed": false,
+    "realWorkerIdentityUsed": false,
+    "status": 404,
+    "configured": true,
+    "confirmationId": null,
+    "message": "유효한 공유 세션을 찾지 못했습니다.",
+    "contactVerificationBranchExecuted": false,
+    "reason": "A real saved session was not available and creating one would cross the DB-backed approval boundary. The probe proves the deployed route fails before insert for a missing session; source and browser tests prove the verification branch."
+  },
+  "mutationBoundary": {
+    "dbSchemaChanged": false,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "readConfirmationCreatedForEvidence": false,
+    "providerDispatchCalled": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "freshFullRepositorySecurityScanRequiredForCanonicalClosure": true,
+    "liveRealRecipientVerificationProbe": "NOT_EXECUTED_NO_EXISTING_SAVED_SESSION",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "shareStorageAndCreationApproval": "APPROVAL_GATED",
+    "recipientAckLiveDataApproval": "APPROVAL_GATED",
+    "securityCompleteClaimAllowed": false
+  }
+}
