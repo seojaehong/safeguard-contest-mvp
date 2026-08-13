@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-13T16:24:13.137Z",
+  "generatedAt": "2026-08-13T16:45:51.314Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "07fa5eb935cab51b577bd77d06aaaf91a9849e30",
-  "productionCommit": "91719a8590175037107f8a2ee7e39cba61ddfc90",
+  "sourceHead": "2ad5ddf9b01e1098b313d5e84b5336e7dad43ab5",
+  "productionCommit": "f784d59c0c0818b21ecfce7a5b0add7b5d6d92a3",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "91719a8590175037107f8a2ee7e39cba61ddfc90",
+    "commitSha": "f784d59c0c0818b21ecfce7a5b0add7b5d6d92a3",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-9vv51nvee-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-eaj54hzd9-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": false,
@@ -20,15 +20,15 @@
   "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
   "sourcePendingChangedPaths": [
-    "evaluation/post-remediation-security-source-closure-2026-08-14/report.json",
-    "evaluation/post-remediation-security-source-closure-2026-08-14/report.md",
+    "evaluation/share-session-revocation-remediation-2026-08-14/report.json",
+    "evaluation/share-session-revocation-remediation-2026-08-14/report.md",
     "scripts/northstar_open_gate_audit.mjs",
     "tests/northstar-open-gate-audit.test.ts"
   ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "07fa5eb935cab51b577bd77d06aaaf91a9849e30",
-  "liveRollupLiveCommit": "91719a8590175037107f8a2ee7e39cba61ddfc90",
+  "liveExactEvidenceCommit": "2ad5ddf9b01e1098b313d5e84b5336e7dad43ab5",
+  "liveRollupLiveCommit": "f784d59c0c0818b21ecfce7a5b0add7b5d6d92a3",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-13T16:23:56.778Z",
-  "sourceSha": "07fa5eb935cab51b577bd77d06aaaf91a9849e30",
+  "generatedAt": "2026-08-13T16:45:33.587Z",
+  "sourceSha": "2ad5ddf9b01e1098b313d5e84b5336e7dad43ab5",
   "overall": "open",
   "gates": [
     {
@@ -216,6 +216,16 @@
       "detail": "Fresh Standard scan bd135da7 is sealed at 20 findings (12 medium, 8 low) across five reviewed surfaces. Live source closes two findings and mitigates one public-status fanout finding while retaining its distributed-admission residual; 18 findings remain open or only partially mitigated before a fresh rescan. The immutable 18-finding baseline is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Remediate or explicitly defer the remaining 18 findings, activate approved distributed admission where required, then run a fresh scan before any security-complete claim."
+      ]
+    },
+    {
+      "id": "share_session_revocation_security",
+      "state": "notice",
+      "label": "Share session revocation security",
+      "evidencePath": "evaluation\\share-session-revocation-remediation-2026-08-14\\report.json",
+      "detail": "Live production exposes an authenticated owner-only Share session revoke action scoped by session, workpack, organization, and site with durable status/timestamp evidence. The unauthenticated DELETE probe fails closed at 401, no production session was created or revoked, the canonical low finding remains immutable pending a fresh rescan, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Run a fresh Standard scan before reclassifying the immutable finding; keep exact saved Share and DB-backed session creation approval-gated."
       ]
     },
     {

@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-13T16:23:59.024Z
-Source HEAD at generation: 07fa5eb935cab51b577bd77d06aaaf91a9849e30
-Live commit at generation: 91719a8590175037107f8a2ee7e39cba61ddfc90
+Generated at: 2026-08-13T16:45:35.502Z
+Source HEAD at generation: 2ad5ddf9b01e1098b313d5e84b5336e7dad43ab5
+Live commit at generation: f784d59c0c0818b21ecfce7a5b0add7b5d6d92a3
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -254,6 +254,7 @@ Overall: `northstar_open_approval_gated`
 | current_security_remediation_ledger | notice | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
 | current_repository_security_rescan | notice | evaluation\current-full-repository-security-scan-2026-08-13\report.json |
 | post_remediation_repository_security_scan | notice | evaluation\post-remediation-full-repository-security-scan-2026-08-14\report.json |
+| share_session_revocation_security | notice | evaluation\share-session-revocation-remediation-2026-08-14\report.json |
 | public_json_request_body_budget | proven | evaluation\public-json-request-body-budget-2026-08-11\report.json |
 | security_resource_remediation | proven | evaluation\security-resource-remediation-2026-08-11\report.json |
 | security_upstream_transport_remediation | proven | evaluation\security-upstream-transport-remediation-2026-08-11\report.json |
