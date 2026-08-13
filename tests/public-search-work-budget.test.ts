@@ -20,9 +20,10 @@ vi.mock("@/lib/safety-reference-catalog-server", () => ({
   searchSafetyReferences: mocks.searchSafetyReferences,
 }));
 
-function request(path: string, ip: string): NextRequest {
+function request(path: string, ip: string, signal?: AbortSignal): NextRequest {
   return new NextRequest(`http://localhost${path}`, {
     headers: { "x-forwarded-for": ip },
+    signal,
   });
 }
 
@@ -231,6 +232,40 @@ describe("public search work budgets", () => {
 
     expect(mocks.runSearch).toHaveBeenCalledTimes(1);
     expect(mocks.searchSafetyReferences).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps coalesced legal work alive until the final consumer disconnects", async () => {
+    const legal = await import("@/app/api/search/route");
+    let providerSignal: AbortSignal | undefined;
+    mocks.runSearch.mockImplementationOnce((_query: string, signal?: AbortSignal) => {
+      providerSignal = signal;
+      return new Promise<[]>((_resolve, reject) => {
+        signal?.addEventListener("abort", () => reject(signal.reason), { once: true });
+      });
+    });
+    const firstController = new AbortController();
+    const secondController = new AbortController();
+    const first = legal.GET(request(
+      "/api/search?q=산업안전",
+      "198.51.100.31",
+      firstController.signal,
+    ));
+    const second = legal.GET(request(
+      "/api/search?q=산업안전",
+      "198.51.100.32",
+      secondController.signal,
+    ));
+    await vi.waitFor(() => expect(mocks.runSearch).toHaveBeenCalledTimes(1));
+
+    const firstReason = new Error("first legal-search caller disconnected");
+    firstController.abort(firstReason);
+    await expect(first).rejects.toBe(firstReason);
+    expect(providerSignal?.aborted).toBe(false);
+
+    const secondReason = new Error("final legal-search caller disconnected");
+    secondController.abort(secondReason);
+    await expect(second).rejects.toBe(secondReason);
+    expect(providerSignal?.aborted).toBe(true);
   });
 
   it("rate limits repeated public searches before provider work", async () => {

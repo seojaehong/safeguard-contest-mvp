@@ -16,21 +16,55 @@ import {
 export const dynamic = "force-dynamic";
 
 const limiter = createRateLimiter({ limit: 30, windowMs: 60_000 });
-const inFlightSearches = new Map<string, ReturnType<typeof runSearch>>();
+type InFlightSearch = {
+  controller: AbortController;
+  consumers: number;
+  settled: boolean;
+  promise: ReturnType<typeof runSearch>;
+};
+
+const inFlightSearches = new Map<string, InFlightSearch>();
 
 function normalizeSearchQuery(value: string): string {
   return value.replace(/\s+/gu, " ").trim();
 }
 
-function runCoalescedSearch(query: string): ReturnType<typeof runSearch> {
-  const key = normalizeSearchQuery(query).toLowerCase();
-  const existing = inFlightSearches.get(key);
-  if (existing) return existing;
-  const pending = runSearch(query).finally(() => {
-    inFlightSearches.delete(key);
+function waitForSearch<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+  signal.throwIfAborted();
+  return new Promise<T>((resolve, reject) => {
+    const abort = () => reject(signal.reason);
+    signal.addEventListener("abort", abort, { once: true });
+    promise.then(resolve, reject).finally(() => {
+      signal.removeEventListener("abort", abort);
+    });
   });
-  inFlightSearches.set(key, pending);
-  return pending;
+}
+
+async function runCoalescedSearch(query: string, signal: AbortSignal) {
+  const key = normalizeSearchQuery(query).toLowerCase();
+  let entry = inFlightSearches.get(key);
+  if (!entry) {
+    const controller = new AbortController();
+    let createdEntry: InFlightSearch;
+    const promise = runSearch(query, controller.signal).finally(() => {
+      createdEntry.settled = true;
+      if (inFlightSearches.get(key) === createdEntry) inFlightSearches.delete(key);
+    });
+    createdEntry = { controller, consumers: 0, settled: false, promise };
+    void createdEntry.promise.catch(() => undefined);
+    inFlightSearches.set(key, createdEntry);
+    entry = createdEntry;
+  }
+
+  entry.consumers += 1;
+  try {
+    return await waitForSearch(entry.promise, signal);
+  } finally {
+    entry.consumers -= 1;
+    if (entry.consumers === 0 && !entry.settled) {
+      entry.controller.abort(new Error("all legal-search request consumers disconnected"));
+    }
+  }
 }
 
 export async function GET(request: NextRequest) {
@@ -52,7 +86,7 @@ export async function GET(request: NextRequest) {
     ), rateLimit);
   }
 
-  const results = await runCoalescedSearch(q);
+  const results = await runCoalescedSearch(q, request.signal);
   return applyPublicRateLimitHeader(NextResponse.json({
     q,
     count: results.length,

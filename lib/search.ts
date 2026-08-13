@@ -345,8 +345,8 @@ function finalizeDeliverablesTrace(
   };
 }
 
-export async function runSearch(query: string) {
-  return searchLegalSources(query);
+export async function runSearch(query: string, signal?: AbortSignal) {
+  return searchLegalSources(query, signal);
 }
 
 function inferLegalEvidenceMode(sourceMix: ReturnType<typeof summarizeLegalSourceMix>): AskResponse["status"]["lawgo"] {
