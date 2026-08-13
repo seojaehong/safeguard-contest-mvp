@@ -22,6 +22,8 @@ These source changes do not rewrite the sealed 20-finding scan. Before a fresh r
 - Live safety status: HTTP 200, readiness ready, rate mode `instance`, response-visible cache control `public, max-age=5`.
 - Work24 bounded reader is included in the production commit; an oversized live upstream response was not induced.
 
+The same 8-file / 105-test receipt also revalidates the governed-path contracts for the pre-existing public JSON body budget, public provider admission, and security follow-up gates after the scoped changes to `lib/public-work-budget.ts` and `lib/work24.ts`. Compatibility is accepted only while those governed paths remain unchanged after product commit `b026de1e`.
+
 ## Boundaries
 
 - No database, provider, Share-session, embedding/vector, wiki, or KOSHA registry mutation was performed.

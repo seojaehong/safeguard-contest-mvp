@@ -4663,6 +4663,86 @@ function isCurrentSecurityRemediationCompatibilityCurrent(rootDir, gateId, gover
     && readString(compatibility.exactSavedShareVerdict) === "MISSING_EVIDENCE";
 }
 
+const POST_REMEDIATION_SECURITY_CHANGED_PATHS = [
+  "app/api/workflow/dispatch/route.ts",
+  "app/api/safety-reference/status/route.ts",
+  "lib/public-work-budget.ts",
+  "lib/work24.ts",
+];
+
+const POST_REMEDIATION_SECURITY_COMPATIBILITY_GATE_IDS = [
+  "public_json_request_body_budget",
+  "public_provider_admission",
+  "security_followup_remediation",
+];
+
+/**
+ * @param {string} rootDir
+ * @param {string} gateId
+ * @param {string[]} governedPaths
+ */
+function isPostRemediationSecuritySourceCompatibilityCurrent(rootDir, gateId, governedPaths) {
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.postRemediationSecuritySourceClosure);
+  if (!isRecord(report) || !isRecord(report.governedPathCompatibility)) {
+    return false;
+  }
+  const compatibility = report.governedPathCompatibility;
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedAndAdjacentTests)
+    ? verification.focusedAndAdjacentTests
+    : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const remediation = isRecord(report.remediation) ? report.remediation : {};
+  const coveredGateIds = Array.isArray(compatibility.coveredGateIds)
+    ? compatibility.coveredGateIds.map(readString)
+    : [];
+  const changedGovernedPaths = Array.isArray(compatibility.changedGovernedPaths)
+    ? compatibility.changedGovernedPaths.map(readString)
+    : [];
+  const productCommits = Array.isArray(remediation.productCommits)
+    ? remediation.productCommits.map(readString)
+    : [];
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.embeddingOrVectorMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  return readString(report.verdict) === "PASS_LIVE_PRODUCTION_TWO_SECURITY_REMEDIATIONS_ONE_DISTRIBUTED_RESIDUAL_RESCAN_PENDING"
+    && readString(compatibility.verdict) === "PASS_LIVE_PRODUCTION_POST_REMEDIATION_GOVERNED_PATH_COMPATIBILITY"
+    && sourceHead.length > 0
+    && productionCommit.length > 0
+    && isGitAncestor(rootDir, sourceHead)
+    && isGitAncestor(rootDir, productionCommit)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, governedPaths)
+    && coveredGateIds.length === POST_REMEDIATION_SECURITY_COMPATIBILITY_GATE_IDS.length
+    && POST_REMEDIATION_SECURITY_COMPATIBILITY_GATE_IDS.every((id) => coveredGateIds.includes(id))
+    && coveredGateIds.includes(gateId)
+    && changedGovernedPaths.length === POST_REMEDIATION_SECURITY_CHANGED_PATHS.length
+    && POST_REMEDIATION_SECURITY_CHANGED_PATHS.every((item) => changedGovernedPaths.includes(item))
+    && productCommits.length === 3
+    && productCommits.includes("aa90789128023363263c18f89a9def85b5dc0c19")
+    && productCommits.includes("0647d70259e82028ca5e66a1852b011ff77c9c28")
+    && productCommits.includes("b026de1e82a936b03f04bbbcb3ae96f330afa832")
+    && readNumber(focused.files) === 8
+    && readNumber(focused.tests) === 105
+    && readNumber(focused.failed) === 0
+    && readString(focused.status) === "PASS"
+    && verification.typecheck === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && compatibility.originalSecurityBaselinesRewritten === false
+    && compatibility.noMutation === true
+    && noMutation
+    && remaining.approvalGatedBoundariesPreserved === true
+    && remaining.securityCompleteClaimAllowed === false
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+}
+
 const LEARNING_EXPORT_RENDERER_SECURITY_PATHS = [
   "lib/workpack-learning-export.ts",
   "app/api/workpacks/[id]/learning-export/route.ts",
@@ -4761,7 +4841,8 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     || isSecurityUpstreamTransportCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     || isSecuritySafetyReferenceSurfaceCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
-    || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS);
+    || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
+    || isPostRemediationSecuritySourceCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS);
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP"
     && sourceHead.length > 0
     && sourceHead === readString(deployment.productionCommit)
@@ -4849,7 +4930,8 @@ function evaluatePublicJsonRequestBodyBudgetGate(rootDir) {
   const productionCommit = readString(report.productionCommit);
   const sourceCurrent = isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)
     || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)
-    || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS);
+    || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)
+    || isPostRemediationSecuritySourceCompatibilityCurrent(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS);
   const expectedCases = [
     { path: "/api/ask", limit: 131072 },
     { path: "/api/ask/stream", limit: 131072 },
@@ -5516,7 +5598,8 @@ function evaluatePublicProviderAdmissionGate(rootDir) {
     && isGitAncestor(rootDir, sourceHead)
     && (isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_PROVIDER_ADMISSION_PATHS)
       || isSecurityResourceRemediationCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
-      || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS))
+      || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
+      || isPostRemediationSecuritySourceCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS))
     && findings.length === 2
     && findings.every((item) => readString(item.scanId) === "c4e9e2f1-7ce4-4313-a651-32205fca401f"
       && expectedFindingIds.has(readString(item.findingId))

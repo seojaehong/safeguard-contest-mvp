@@ -2647,15 +2647,23 @@ function createFixtureRoot(): string {
     remainingBoundaries: {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       securityCompleteClaimAllowed: false,
+      approvalGatedBoundariesPreserved: true,
     },
   });
   writeJson(rootDir, path.join("evaluation", "post-remediation-security-source-closure-2026-08-14", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_TWO_SECURITY_REMEDIATIONS_ONE_DISTRIBUTED_RESIDUAL_RESCAN_PENDING",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
     sourceScan: {
       scanId: "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
       reportableFindingCount: 20,
     },
     remediation: {
+      productCommits: [
+        "aa90789128023363263c18f89a9def85b5dc0c19",
+        "0647d70259e82028ca5e66a1852b011ff77c9c28",
+        "b026de1e82a936b03f04bbbcb3ae96f330afa832",
+      ],
       sourceRemediatedCount: 2,
       sourceMitigatedCount: 1,
       liveDeployedRemediationCount: 2,
@@ -2681,6 +2689,22 @@ function createFixtureRoot(): string {
         work24OversizedLiveUpstreamNotExecuted: true,
       },
     },
+    governedPathCompatibility: {
+      verdict: "PASS_LIVE_PRODUCTION_POST_REMEDIATION_GOVERNED_PATH_COMPATIBILITY",
+      coveredGateIds: [
+        "public_json_request_body_budget",
+        "public_provider_admission",
+        "security_followup_remediation",
+      ],
+      changedGovernedPaths: [
+        "app/api/workflow/dispatch/route.ts",
+        "app/api/safety-reference/status/route.ts",
+        "lib/public-work-budget.ts",
+        "lib/work24.ts",
+      ],
+      originalSecurityBaselinesRewritten: false,
+      noMutation: true,
+    },
     mutationBoundary: {
       dbMutationPerformed: false,
       providerDispatchCalled: false,
@@ -2692,6 +2716,7 @@ function createFixtureRoot(): string {
     remainingBoundaries: {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       securityCompleteClaimAllowed: false,
+      approvalGatedBoundariesPreserved: true,
     },
   });
   writeJson(rootDir, path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "canonical", "scan-manifest.json"), {});
@@ -4474,6 +4499,45 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "post_remediation_repository_security_scan")?.state)
       .toBe("contradicted");
+  });
+
+  it("uses the post-remediation receipt for older governed paths and fails closed if its boundaries weaken", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    writeText(rootDir, path.join("lib", "public-work-budget.ts"), "export const workflowDispatchLimit = 65536;\n");
+    writeText(rootDir, path.join("lib", "work24.ts"), "export const boundedWork24 = true;\n");
+    execFileSync("git", ["add", "lib/public-work-budget.ts", "lib/work24.ts"], { cwd: rootDir, stdio: "ignore" });
+    execFileSync("git", ["commit", "-m", "apply post-remediation governed path changes"], { cwd: rootDir, stdio: "ignore" });
+    const currentSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: rootDir, encoding: "utf8" }).trim();
+    const closurePath = path.join(
+      rootDir,
+      "evaluation",
+      "post-remediation-security-source-closure-2026-08-14",
+      "report.json",
+    );
+    const closure = JSON.parse(fs.readFileSync(closurePath, "utf8")) as {
+      sourceHead: string;
+      productionCommit: string;
+      governedPathCompatibility: { noMutation: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    closure.sourceHead = currentSha;
+    closure.productionCommit = currentSha;
+    fs.writeFileSync(closurePath, `${JSON.stringify(closure, null, 2)}\n`, "utf8");
+
+    const compatible = buildNorthstarOpenGateAudit({ rootDir });
+    expect(compatible.gates.find((gate) => gate.id === "public_json_request_body_budget")?.state).toBe("proven");
+    expect(compatible.gates.find((gate) => gate.id === "public_provider_admission")?.state).toBe("notice");
+    expect(compatible.gates.find((gate) => gate.id === "security_followup_remediation")?.state).toBe("proven");
+
+    closure.governedPathCompatibility.noMutation = false;
+    closure.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(closurePath, `${JSON.stringify(closure, null, 2)}\n`, "utf8");
+
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((gate) => gate.id === "public_json_request_body_budget")?.state).toBe("contradicted");
+    expect(contradicted.gates.find((gate) => gate.id === "public_provider_admission")?.state).toBe("contradicted");
+    expect(contradicted.gates.find((gate) => gate.id === "security_followup_remediation")?.state).toBe("contradicted");
   });
 
   it("fails older governed-path gates closed when the companion weakens boundaries", async () => {

@@ -73,6 +73,22 @@
       "work24OversizedLiveUpstreamNotExecuted": true
     }
   },
+  "governedPathCompatibility": {
+    "verdict": "PASS_LIVE_PRODUCTION_POST_REMEDIATION_GOVERNED_PATH_COMPATIBILITY",
+    "coveredGateIds": [
+      "public_json_request_body_budget",
+      "public_provider_admission",
+      "security_followup_remediation"
+    ],
+    "changedGovernedPaths": [
+      "app/api/workflow/dispatch/route.ts",
+      "app/api/safety-reference/status/route.ts",
+      "lib/public-work-budget.ts",
+      "lib/work24.ts"
+    ],
+    "originalSecurityBaselinesRewritten": false,
+    "noMutation": true
+  },
   "mutationBoundary": {
     "dbMutationPerformed": false,
     "providerDispatchCalled": false,
