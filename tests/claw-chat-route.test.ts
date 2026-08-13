@@ -233,6 +233,37 @@ describe("/api/agent/chat broker boundary", () => {
     expect(engine.run).not.toHaveBeenCalled();
   });
 
+  it("keeps the distributed lease until canceled engine work actually settles", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "test-token");
+    const distributedFetch = vi.fn(async (
+      _input: string | URL | Request,
+      _init?: RequestInit,
+    ) => Response.json({ result: [1, 59_000] }));
+    vi.stubGlobal("fetch", distributedFetch);
+    let engineSignal: AbortSignal | undefined;
+    const engine = adapter({
+      run: vi.fn(async ({ signal }) => {
+        engineSignal = signal;
+        await new Promise<void>((resolve) => signal.addEventListener("abort", () => resolve(), { once: true }));
+      }),
+    });
+    const post = createAgentChatPost({ resolveContext: resolver(), engine });
+
+    const response = await post(request({ token: "valid-token", siteId: validContext.siteId }));
+    const reader = response.body?.getReader();
+    expect(reader).toBeDefined();
+    await reader?.read();
+    expect(distributedFetch).toHaveBeenCalledTimes(3);
+
+    await reader?.cancel("client disconnected");
+
+    await vi.waitFor(() => expect(distributedFetch).toHaveBeenCalledTimes(4));
+    expect(engineSignal?.aborted).toBe(true);
+    const commands = distributedFetch.mock.calls.map((call) => JSON.parse(String(call[1]?.body)) as unknown[]);
+    expect(commands[3].join(" ")).toContain("safeclaw:public-concurrency:agent-chat-engine-work");
+  });
+
   it("fails closed before authentication when distributed admission configuration is partial", async () => {
     vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
     vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");

@@ -261,6 +261,10 @@ export function createAgentChatPost(dependencies: AgentChatRouteDependencies) {
     const history = capHistory(parseHistory(parsed.history));
     const systemPrompt = buildSystemPrompt(context.site);
     const prompt = buildOpenClawChatPrompt({ systemPrompt, history, message });
+    const executionController = new AbortController();
+    const abortFromRequest = (): void => executionController.abort(request.signal.reason);
+    if (request.signal.aborted) executionController.abort(request.signal.reason);
+    else request.signal.addEventListener("abort", abortFromRequest, { once: true });
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
         const encoder = new TextEncoder();
@@ -278,7 +282,7 @@ export function createAgentChatPost(dependencies: AgentChatRouteDependencies) {
             status: "start",
             label: "현장 연결을 확인하고 있습니다.",
           });
-          await dependencies.engine.run({ context, prompt, emit, signal: request.signal });
+          await dependencies.engine.run({ context, prompt, emit, signal: executionController.signal });
           emit({
             kind: "tool",
             name: "agent_engine",
@@ -297,12 +301,17 @@ export function createAgentChatPost(dependencies: AgentChatRouteDependencies) {
           });
           emit({ kind: "error", code: brokerError.code, message: brokerError.message });
         } finally {
+          request.signal.removeEventListener("abort", abortFromRequest);
           await releaseEngineLease();
-          controller.close();
+          try {
+            controller.close();
+          } catch {
+            log.warn("SSE close skipped after cancellation", { code: "SSE_ALREADY_CANCELED" });
+          }
         }
       },
-      async cancel() {
-        await releaseEngineLease();
+      cancel(reason) {
+        executionController.abort(reason);
       },
     });
 
