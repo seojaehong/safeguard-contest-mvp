@@ -131,7 +131,7 @@ export function validateStaticAuditPrerequisite(staticAudit, source, { now, repo
     || staticAudit.violationCount !== 0
     || staticAudit.coverageIssues !== 0
     || staticAudit.counts?.pageFiles !== routes.length
-    || staticAudit.counts?.componentFiles !== 23) {
+    || staticAudit.counts?.componentFiles !== 24) {
     throw new Error(
       `Static audit prerequisite failed: status=${staticAudit.status}, violations=${staticAudit.violationCount}, coverage=${staticAudit.coverageIssues}, pages=${staticAudit.counts?.pageFiles}, components=${staticAudit.counts?.componentFiles}`,
     );

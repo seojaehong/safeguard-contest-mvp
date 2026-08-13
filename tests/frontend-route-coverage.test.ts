@@ -429,7 +429,7 @@ describe("browser evidence reconciliation", () => {
         sourceSha: "1".repeat(40),
         sourceIdentity: fixtureIdentity.sourceIdentity,
         status: "pass",
-        counts: { pageFiles: 33, componentFiles: 23 },
+        counts: { pageFiles: 33, componentFiles: 24 },
         coverageIssues: 0,
         violationCount: 0,
       };
@@ -464,7 +464,7 @@ describe("browser evidence reconciliation", () => {
       sourceSha: source.sourceSha,
       sourceIdentity: source.sourceIdentity,
       status: "pass",
-      counts: { pageFiles: 33, componentFiles: 23 },
+      counts: { pageFiles: 33, componentFiles: 24 },
       coverageIssues: 0,
       violationCount: 0,
     };
@@ -517,7 +517,7 @@ describe("browser evidence reconciliation", () => {
       sourceSha: verifiedSourceSha,
       sourceIdentity,
       status: "pass",
-      counts: { pageFiles: 33, componentFiles: 23 },
+      counts: { pageFiles: 33, componentFiles: 24 },
       coverageIssues: 0,
       violationCount: 0,
     };
@@ -559,7 +559,7 @@ describe("browser evidence reconciliation", () => {
       sourceSha: source.sourceSha,
       sourceIdentity: source.sourceIdentity,
       status: "fail",
-      counts: { pageFiles: 33, componentFiles: 23 },
+      counts: { pageFiles: 33, componentFiles: 24 },
       coverageIssues: 0,
       violationCount: 1,
     };
