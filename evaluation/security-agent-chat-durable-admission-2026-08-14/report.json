@@ -1,0 +1,108 @@
+{
+  "schemaVersion": "safeclaw-security-agent-chat-durable-admission/v1",
+  "generatedAt": "2026-08-14T01:56:38+09:00",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_AGENT_ADMISSION_RESCAN_PENDING",
+  "sourceHead": "ffccacd10f01451fba28e08ec0bbdf3a6e41dc70",
+  "productCommit": "ffccacd10f01451fba28e08ec0bbdf3a6e41dc70",
+  "productionBuild": {
+    "commitSha": "ffccacd10f01451fba28e08ec0bbdf3a6e41dc70",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-gm4lx7t70-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
+  "sealedFinding": {
+    "scanId": "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+    "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982",
+    "findingId": "csf_dbfc57f541ee5079a9bf9735",
+    "ruleId": "resource-exhaustion.distributed-agent-admission",
+    "title": "Agent chat engine work lacks a durable production concurrency lease",
+    "immutableFindingMutated": false,
+    "canonicalClosureClaimed": false
+  },
+  "contracts": {
+    "authenticatedIdentityQuota": {
+      "namespace": "agent-chat-authenticated",
+      "limit": 5,
+      "windowMs": 60000,
+      "distributedRequiredInProduction": true,
+      "missingConfigurationFailsBeforeBodyAndSiteWork": true
+    },
+    "engineConcurrencyLease": {
+      "namespace": "agent-chat-engine-work",
+      "defaultConcurrency": 1,
+      "leaseBufferMs": 10000,
+      "distributedRequiredInProduction": true,
+      "missingConfigurationFailsBeforeAvailabilityOrEngineWork": true,
+      "busyFailsBeforeEngineWork": true,
+      "availabilityFailureReleasesLease": true,
+      "completionAndCancellationReleaseLease": true
+    },
+    "preAuthBoundary": {
+      "existingUnauthenticated401Preserved": true,
+      "instanceFallbackRetained": true
+    },
+    "developmentInstanceFallbackRetained": true,
+    "partialConfigurationFailsClosedBeforeAuthentication": true
+  },
+  "verification": {
+    "focused": {
+      "files": 1,
+      "tests": 24,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "focusedAndAdjacentCore": {
+      "files": 5,
+      "tests": 55,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "broaderHermesAttempt": {
+      "files": 6,
+      "testsPassed": 107,
+      "testsFailed": 1,
+      "status": "RED_EXISTING_APPROVAL_GATED_SCHEMA_DEPENDENCY",
+      "failure": "hermes-engine-adapter production harness fixture read public.workpack_improvements and received PGRST205 because the approval-gated table is absent from the live schema cache",
+      "relatedToThisDiff": false
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "diffCheck": "PASS"
+  },
+  "liveProbe": {
+    "method": "POST",
+    "path": "/api/agent/chat",
+    "authenticated": false,
+    "requestBody": {},
+    "status": 401,
+    "code": "AUTH_REQUIRED",
+    "rateLimitMode": "instance",
+    "providerWorkExecuted": false,
+    "authenticatedFailClosedProbeExecuted": false,
+    "productionDistributedConfigurationObserved": "ABSENT_VIA_PREAUTH_INSTANCE_HEADER",
+    "authenticatedAgentAvailability": "FAIL_CLOSED_UNTIL_DISTRIBUTED_CONFIG"
+  },
+  "mutationBoundary": {
+    "dbSchemaChanged": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "providerGenerationExecuted": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "distributedProductionActivation": "OPEN_OPERATOR_CONFIGURATION",
+    "authenticatedRuntimeProbe": "NOT_EXECUTED_NO_USER_TOKEN",
+    "freshFullRepositorySecurityScanRequiredForCanonicalClosure": true,
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedOperationsRemainApprovalGated": true
+  }
+}
