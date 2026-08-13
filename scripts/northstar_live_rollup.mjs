@@ -174,40 +174,20 @@ function extractProductionCommit(report) {
   if (!isRecord(report)) {
     return "";
   }
-  if (isRecord(report.productionBuild)) {
-    return asString(report.productionBuild.commitSha);
-  }
-  if (isRecord(report.liveBuildInfo)) {
-    return asString(report.liveBuildInfo.commitSha);
-  }
-  if (isRecord(report.production)) {
-    return asString(report.production.commitSha);
-  }
-  if (isRecord(report.build)) {
-    return asString(report.build.commitSha);
-  }
-  if (isRecord(report.buildInfo)) {
-    return asString(report.buildInfo.commitSha);
-  }
-  if (isRecord(report.liveDispatchState)) {
-    return asString(report.liveDispatchState.productionCommitSha);
-  }
-  if (typeof report.liveCommitAtDraft === "string") {
-    return asString(report.liveCommitAtDraft);
-  }
-  if (typeof report.productionCommitAtGeneration === "string") {
-    return asString(report.productionCommitAtGeneration);
-  }
-  if (typeof report.productionCommitAfterDeployment === "string") {
-    return asString(report.productionCommitAfterDeployment);
-  }
-  if (typeof report.productionCommit === "string") {
-    return asString(report.productionCommit);
-  }
-  if (isRecord(report.source)) {
-    return asString(report.source.productionMarkerAtValidation);
-  }
-  return "";
+  const candidates = [
+    isRecord(report.productionBuild) ? report.productionBuild.commitSha : "",
+    isRecord(report.liveBuildInfo) ? report.liveBuildInfo.commitSha : "",
+    isRecord(report.production) ? report.production.commitSha : "",
+    isRecord(report.build) ? report.build.commitSha : "",
+    isRecord(report.buildInfo) ? report.buildInfo.commitSha : "",
+    isRecord(report.liveDispatchState) ? report.liveDispatchState.productionCommitSha : "",
+    report.liveCommitAtDraft,
+    report.productionCommitAtGeneration,
+    report.productionCommitAfterDeployment,
+    report.productionCommit,
+    isRecord(report.source) ? report.source.productionMarkerAtValidation : "",
+  ];
+  return candidates.map(asString).find(Boolean) || "";
 }
 
 /**

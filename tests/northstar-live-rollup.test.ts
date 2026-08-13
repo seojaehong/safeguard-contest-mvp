@@ -426,7 +426,9 @@ type RollupReport = {
   };
   evidence: Array<{
     id: string;
+    sourceCommit: string | null;
     sourceStatus: string;
+    productionCommit: string | null;
     productionStatus: string;
   }>;
   contradictions: unknown[];
@@ -1240,6 +1242,7 @@ function createFixtureRoot(): { root: string; head: string } {
     verdict: "PASS_LIVE_DEPLOYED_SOURCE_SHARE_RECIPIENT_CONTACT_VERIFICATION_RESCAN_PENDING",
     sourceHead: "TO_FILL",
     productionCommit: "TO_FILL",
+    productionBuild: { branch: "master", environment: "production" },
     securityFinding: { findingId: "csf_e6a120c87c57d3529757bbde" },
     sourceContract: {
       invitationWorkerIdAloneAcceptedForConfirmation: false,
@@ -1706,6 +1709,8 @@ describe("northstar live rollup", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.evidence.find((item) => item.id === "share_recipient_contact_verification_security")?.productionStatus).toBe("ancestor_of_head");
+    const shareRecipientEvidence = report.evidence.find((item) => item.id === "share_recipient_contact_verification_security");
+    expect(shareRecipientEvidence?.productionCommit).toBe(shareRecipientEvidence?.sourceCommit);
     expect(report.evidence.find((item) => item.id === "public_generation_admission_security")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "public_search_distributed_rate_limit_readiness")?.sourceStatus).toBe("ancestor");
     expect(report.learningExportRendererSecurity).toMatchObject({
