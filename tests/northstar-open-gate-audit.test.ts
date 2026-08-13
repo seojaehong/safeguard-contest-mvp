@@ -2842,6 +2842,45 @@ function createFixtureRoot(): string {
       securityCompleteClaimAllowed: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "security-atomic-db-race-approval-boundary-2026-08-14", "report.json"), {
+    verdict: "APPROVAL_REQUIRED_TRANSACTIONAL_DB_RACE_REMEDIATION_NO_MUTATION",
+    sourceHead: "fixture-sha",
+    sealedScan: {
+      scanId: "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+      targetRevision: "8f5dc78f73d5048598fb2519bf7bb758ab090982",
+      immutableFindingsPreserved: true,
+    },
+    findings: [
+      {
+        findingId: "csf_a98f91f2e28285923aa618aa",
+        severity: "low",
+        currentSourceStillAffected: true,
+        requiredVerification: ["a", "b", "c", "d", "e"],
+      },
+      {
+        findingId: "csf_8cec017794f281cd81e25643",
+        severity: "low",
+        currentSourceStillAffected: true,
+        requiredVerification: ["a", "b", "c", "d", "e"],
+      },
+    ],
+    approvalRequest: { required: true, notApprovedOrPerformed: true },
+    mutationBoundary: {
+      migrationAuthored: false,
+      dbSchemaChanged: false,
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      embeddingOrVectorMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      securityCompleteClaimAllowed: false,
+      freshFullRepositorySecurityScanRequiredAfterRemediation: true,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"), {
     verdict: "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_AGENT_ADMISSION_RESCAN_PENDING",
     sourceHead: "fixture-sha",
@@ -4478,6 +4517,12 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.nextActions.join("\n")).toContain("PostgREST schema cache");
     expect(audit.gates.find((gate) => gate.id === "share_exact_saved_session_boundary")?.nextActions.join("\n")).toContain("Do not call POST /api/workpacks/[id]/share-sessions without explicit DB-backed share-session creation approval");
     expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.state).toBe("approval_gated");
+    expect(audit.gates.find((gate) => gate.id === "security_atomic_db_race_remediation")).toMatchObject({
+      state: "approval_gated",
+      evidencePath: path.join("evaluation", "security-atomic-db-race-approval-boundary-2026-08-14", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "security_atomic_db_race_remediation")?.detail).toContain("no migration");
+    expect(audit.gates.find((gate) => gate.id === "security_atomic_db_race_remediation")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.detail).toContain("attempt-level idempotency reservation");
     expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.detail).toContain("per-channel result persistence");
     expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.evidencePath).toBe(
@@ -4839,6 +4884,41 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
 
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "share_recipient_contact_verification_security")?.state)
+      .toBe("contradicted");
+  });
+
+  it("keeps atomic database race remediation approval-gated and rejects mutation overclaim", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "security-atomic-db-race-approval-boundary-2026-08-14",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "security_atomic_db_race_remediation");
+    expect(gate?.state).toBe("approval_gated");
+    expect(gate?.detail).toContain("Both sealed low findings remain open");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      findings: Array<{ currentSourceStillAffected: boolean }>;
+      approvalRequest: { notApprovedOrPerformed: boolean };
+      mutationBoundary: { migrationAuthored: boolean; dbMutationPerformed: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string; securityCompleteClaimAllowed: boolean };
+    };
+    report.findings[0].currentSourceStillAffected = false;
+    report.approvalRequest.notApprovedOrPerformed = false;
+    report.mutationBoundary.migrationAuthored = true;
+    report.mutationBoundary.dbMutationPerformed = true;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    report.remainingBoundaries.securityCompleteClaimAllowed = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "security_atomic_db_race_remediation")?.state)
       .toBe("contradicted");
   });
 

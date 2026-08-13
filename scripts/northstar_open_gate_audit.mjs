@@ -55,6 +55,7 @@ const EVIDENCE_PATHS = Object.freeze({
   postRemediationSecuritySourceClosure: path.join("evaluation", "post-remediation-security-source-closure-2026-08-14", "report.json"),
   shareSessionRevocationRemediation: path.join("evaluation", "share-session-revocation-remediation-2026-08-14", "report.json"),
   shareRecipientContactVerification: path.join("evaluation", "share-recipient-contact-verification-2026-08-14", "report.json"),
+  securityAtomicDbRaceApprovalBoundary: path.join("evaluation", "security-atomic-db-race-approval-boundary-2026-08-14", "report.json"),
   agentChatDurableAdmission: path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"),
   mcpProviderAdmission: path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
@@ -4398,6 +4399,76 @@ function evaluateShareRecipientContactVerificationGate(rootDir) {
   });
 }
 
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateSecurityAtomicDbRaceApprovalBoundaryGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.securityAtomicDbRaceApprovalBoundary;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "security_atomic_db_race_remediation",
+      label: "Atomic database race remediation",
+      state: "missing",
+      evidencePath,
+      detail: "Atomic MCP-token and worker-site race approval evidence is missing or invalid.",
+      nextActions: ["Restore the no-mutation operator decision packet before authoring any database migration."],
+    });
+  }
+
+  const sealedScan = isRecord(report.sealedScan) ? report.sealedScan : {};
+  const approval = isRecord(report.approvalRequest) ? report.approvalRequest : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const findings = Array.isArray(report.findings) ? report.findings.filter(isRecord) : [];
+  const expectedFindingIds = [
+    "csf_a98f91f2e28285923aa618aa",
+    "csf_8cec017794f281cd81e25643",
+  ];
+  const noMutation = mutation.migrationAuthored === false
+    && mutation.dbSchemaChanged === false
+    && mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.embeddingOrVectorMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "APPROVAL_REQUIRED_TRANSACTIONAL_DB_RACE_REMEDIATION_NO_MUTATION"
+    && readString(report.sourceHead).length > 0
+    && isGitAncestor(rootDir, readString(report.sourceHead))
+    && readString(sealedScan.scanId) === "bd135da7-c309-4e8d-ace5-15222dd3f1c7"
+    && readString(sealedScan.targetRevision) === "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+    && sealedScan.immutableFindingsPreserved === true
+    && findings.length === 2
+    && expectedFindingIds.every((id) => findings.some((finding) => (
+      readString(finding.findingId) === id
+      && readString(finding.severity) === "low"
+      && finding.currentSourceStillAffected === true
+      && Array.isArray(finding.requiredVerification)
+      && finding.requiredVerification.length >= 5
+    )))
+    && approval.required === true
+    && approval.notApprovedOrPerformed === true
+    && noMutation
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && remaining.securityCompleteClaimAllowed === false
+    && remaining.freshFullRepositorySecurityScanRequiredAfterRemediation === true;
+
+  return gateResult({
+    id: "security_atomic_db_race_remediation",
+    label: "Atomic database race remediation",
+    state: pass ? "approval_gated" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "The MCP token-cap and worker site-binding races have bounded transactional database designs and concurrency test plans, but no migration, RPC, trigger, DB mutation, or closure claim was made. Both sealed low findings remain open pending explicit schema approval, database integration proof, deployment, and a fresh scan; exact saved Share remains MISSING_EVIDENCE."
+      : `Atomic-race verdict=${readString(report.verdict) || "missing"}, findings=${findings.length}/2, approvalRequired=${approval.required === true}, approvalPerformed=${approval.notApprovedOrPerformed !== true}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}, securityComplete=${remaining.securityCompleteClaimAllowed === true}.`,
+    nextActions: pass
+      ? ["Obtain explicit migration/RPC/trigger approval before implementing or running the two transactional database concurrency suites."]
+      : ["Restore the immutable finding identities, transactional design, unapproved/no-mutation boundary, fresh-rescan requirement, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
 const AGENT_CHAT_DURABLE_ADMISSION_PATHS = [
   "lib/openclaw-broker-route.ts",
   "tests/claw-chat-route.test.ts",
@@ -7415,6 +7486,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluatePostRemediationRepositorySecurityScanGate(rootDir),
     evaluateShareSessionRevocationSecurityGate(rootDir),
     evaluateShareRecipientContactVerificationGate(rootDir),
+    evaluateSecurityAtomicDbRaceApprovalBoundaryGate(rootDir),
     evaluateAgentChatDurableAdmissionGate(rootDir),
     evaluateMcpProviderAdmissionGate(rootDir),
     evaluatePublicJsonRequestBodyBudgetGate(rootDir),
