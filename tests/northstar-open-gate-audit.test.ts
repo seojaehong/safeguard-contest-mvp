@@ -2896,6 +2896,7 @@ function createFixtureRoot(): string {
         readOnlyMcpToolsUnaffected: true,
         templateModeOutsideProviderAdmission: true,
         developmentWeightedInstanceFallbackRetained: true,
+        existingTransportBodyAndAuthenticationBudgetsRetained: true,
       },
     },
     verification: {
@@ -4809,6 +4810,45 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
 
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "mcp_provider_admission_security")?.state)
+      .toBe("contradicted");
+  });
+
+  it("uses durable MCP provider evidence as a fail-closed compatibility receipt for the earlier body budget", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "security-mcp-provider-admission-2026-08-14",
+      "report.json",
+    );
+    const earlierPath = path.join(
+      rootDir,
+      "evaluation",
+      "security-mcp-generation-work-budget-2026-08-04",
+      "report.json",
+    );
+    const earlier = JSON.parse(fs.readFileSync(earlierPath, "utf8")) as {
+      currentLiveRefresh: { verdict: string };
+    };
+    earlier.currentLiveRefresh.verdict = "STALE_REFRESH_FOR_COMPANION_TEST";
+    fs.writeFileSync(earlierPath, `${JSON.stringify(earlier, null, 2)}\n`, "utf8");
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((item) => item.id === "mcp_generation_work_budget_security")?.state)
+      .toBe("notice");
+    expect(audit.gates.find((item) => item.id === "mcp_generation_work_budget_security")?.detail)
+      .toContain("94 adjacent MCP tests");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      contracts: { preservedBehavior: { existingTransportBodyAndAuthenticationBudgetsRetained: boolean } };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.contracts.preservedBehavior.existingTransportBodyAndAuthenticationBudgetsRetained = false;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "mcp_generation_work_budget_security")?.state)
       .toBe("contradicted");
   });
 

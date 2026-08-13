@@ -6284,6 +6284,58 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
     "mcp_generation_work_budget_security",
     MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS,
   );
+  const providerCompanion = readJsonFile(rootDir, EVIDENCE_PATHS.mcpProviderAdmission);
+  const companionProduction = isRecord(providerCompanion?.productionBuild)
+    ? providerCompanion.productionBuild
+    : {};
+  const companionContracts = isRecord(providerCompanion?.contracts) ? providerCompanion.contracts : {};
+  const companionPreserved = isRecord(companionContracts.preservedBehavior)
+    ? companionContracts.preservedBehavior
+    : {};
+  const companionVerification = isRecord(providerCompanion?.verification)
+    ? providerCompanion.verification
+    : {};
+  const companionAdjacent = isRecord(companionVerification.focusedAndAdjacentMcp)
+    ? companionVerification.focusedAndAdjacentMcp
+    : {};
+  const companionLive = isRecord(providerCompanion?.liveProbe) ? providerCompanion.liveProbe : {};
+  const companionMutation = isRecord(providerCompanion?.mutationBoundary)
+    ? providerCompanion.mutationBoundary
+    : {};
+  const companionRemaining = isRecord(providerCompanion?.remainingBoundaries)
+    ? providerCompanion.remainingBoundaries
+    : {};
+  const companionSourceHead = readString(providerCompanion?.sourceHead);
+  const companionNoMutation = companionMutation.dbSchemaChanged === false
+    && companionMutation.dbMutationPerformed === false
+    && companionMutation.providerDispatchCalled === false
+    && companionMutation.providerGenerationExecuted === false
+    && companionMutation.shareSessionCreated === false
+    && companionMutation.vectorOrEmbeddingMutationPerformed === false
+    && companionMutation.wikiPublicationPerformed === false
+    && companionMutation.koshaRegistryMutationPerformed === false;
+  const providerCompanionPass = readString(providerCompanion?.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_MCP_PROVIDER_ADMISSION_RESCAN_PENDING"
+    && companionSourceHead.length > 0
+    && companionSourceHead === readString(companionProduction.commitSha)
+    && isGitAncestor(rootDir, companionSourceHead)
+    && isEvidenceCurrentForPaths(rootDir, companionSourceHead, MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS)
+    && companionPreserved.existingTransportBodyAndAuthenticationBudgetsRetained === true
+    && readNumber(companionAdjacent.files) === 8
+    && readNumber(companionAdjacent.tests) === 94
+    && readNumber(companionAdjacent.failed) === 0
+    && readNumber(companionLive.status) === 401
+    && companionLive.mcpToolDispatchPerformed === false
+    && companionLive.providerGenerationExecuted === false
+    && companionNoMutation
+    && companionRemaining.freshFullRepositorySecurityScanRequiredForCanonicalClosure === true
+    && companionRemaining.securityCompleteClaimAllowed === false
+    && readString(companionRemaining.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+  const currentRefreshBoundarySafe = currentRefreshSourceHead.length === 0 || (
+    currentRefreshProbe.mcpToolDispatchPerformed === false
+    && currentRefreshProbe.providerCallPerformed === false
+    && currentRefreshProbe.validAuthenticatedBudgetProbeExecuted === false
+    && currentRefreshNoMutation
+  );
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING"
     && sourceHead.length > 0
     && sourceHead === productionCommit
@@ -6335,7 +6387,10 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
     && remaining.distributedProductionActivationRequired === true
     && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
     && remaining.approvalGatedBoundariesUnchanged === true
-    && (currentRefreshPass || currentCompatibilityPass);
+    && currentRefreshBoundarySafe
+    && (currentRefreshPass || currentCompatibilityPass || providerCompanionPass);
+
+  const currentProofHead = currentRefreshPass ? currentRefreshSourceHead : companionSourceHead;
 
   return gateResult({
     id: "mcp_generation_work_budget_security",
@@ -6343,8 +6398,8 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? `Current production ${currentRefreshSourceHead.slice(0, 8)} re-proves MCP invalid-token 401 fail-closed with instance admission before any MCP tool dispatch, provider call, or mutation. The 96 KiB measured body contract, 77 adjacent tests, and zero dependency vulnerabilities remain preserved; a valid authenticated runtime probe, distributed activation, and fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE.`
-      : `MCP budget verdict=${readString(report.verdict) || "unknown"}, source/live=${sourceHead}/${productionCommit}, currentRefresh=${currentRefreshPass}, refreshHead=${currentRefreshSourceHead || "missing"}, bodyBytes=${readNumber(contract.postBodyMaxBytes)}, adjacent=${readNumber(adjacent.tests)}, liveAuth=${readNumber(liveProbe.status)}, validProbe=${liveProbe.validAuthenticatedBudgetProbeExecuted === true}, rescan=${remaining.freshSecurityRescanRequired === true}, noMutation=${noMutation && currentRefreshNoMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+      ? `Current production ${currentProofHead.slice(0, 8)} re-proves MCP invalid-token 401 fail-closed with instance admission before any MCP tool dispatch, provider call, or mutation. The new provider-admission companion preserves the 96 KiB measured body and authentication contracts through 94 adjacent MCP tests; a valid authenticated runtime probe, distributed activation, and fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE.`
+      : `MCP budget verdict=${readString(report.verdict) || "unknown"}, source/live=${sourceHead}/${productionCommit}, currentRefresh=${currentRefreshPass}, providerCompanion=${providerCompanionPass}, refreshHead=${currentRefreshSourceHead || "missing"}, bodyBytes=${readNumber(contract.postBodyMaxBytes)}, adjacent=${readNumber(adjacent.tests)}, liveAuth=${readNumber(liveProbe.status)}, validProbe=${liveProbe.validAuthenticatedBudgetProbeExecuted === true}, rescan=${remaining.freshSecurityRescanRequired === true}, noMutation=${noMutation && (currentRefreshNoMutation || companionNoMutation)}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
           "Run a valid credential-safe production MCP boundary probe without exposing the token.",
