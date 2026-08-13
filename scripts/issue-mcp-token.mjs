@@ -8,7 +8,7 @@ import { createHash, randomBytes } from "node:crypto";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-import { MCP_TOOL_SCOPES } from "../lib/mcp-tool-contract.mjs";
+import { MCP_DEFAULT_SCOPES } from "../lib/mcp-tool-contract.mjs";
 
 const REQUIRED_SITE_USAGE = 'Usage: node scripts/issue-mcp-token.mjs "<label>" "<site name>"';
 
@@ -58,7 +58,7 @@ export async function issueMcpToken({
       label,
       site_id: siteId,
       org_id: orgId,
-      scopes: [...MCP_TOOL_SCOPES],
+      scopes: [...MCP_DEFAULT_SCOPES],
     })
     .select("id")
     .single();

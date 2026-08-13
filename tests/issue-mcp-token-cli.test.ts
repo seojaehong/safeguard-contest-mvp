@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 
-import { MCP_TOOL_SCOPES } from "@/lib/mcp-tool-contract.mjs";
 import { issueMcpToken } from "@/scripts/issue-mcp-token.mjs";
 import type { IssueMcpTokenClient } from "@/scripts/issue-mcp-token.mjs";
 
@@ -101,7 +100,7 @@ describe("issueMcpToken CLI", () => {
       label: "Site operator",
       site_id: "site-1",
       org_id: "org-1",
-      scopes: [...MCP_TOOL_SCOPES],
+      scopes: ["tools:read"],
     }]);
   });
 });

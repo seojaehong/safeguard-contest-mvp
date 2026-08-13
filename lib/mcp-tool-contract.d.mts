@@ -12,3 +12,4 @@ export const MCP_TOOL_NAMES: readonly [
 ];
 
 export const MCP_TOOL_SCOPES: readonly string[];
+export const MCP_DEFAULT_SCOPES: readonly ["tools:read"];
