@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_INGEST_RUN_IDEMPOTENCY_ATOMIC_TRANSACTION_GATED",
+  "generatedAt": "2026-08-13T20:07:23.5599857+09:00",
+  "sourceHead": "02fa580248e7a2b304ee91527d70b5b39764cd3e",
+  "productCommit": "02fa580248e7a2b304ee91527d70b5b39764cd3e",
+  "productionBuild": {
+    "commitSha": "02fa580248e7a2b304ee91527d70b5b39764cd3e",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-ennpy4r5d-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
+  "securityFinding": {
+    "id": "knowledge-ingest-duplicate-runs",
+    "severity": "medium",
+    "immutableOriginalBaselinePreserved": true,
+    "duplicateRunRaceStatus": "remediated-live-deployed-source",
+    "eventRunAtomicityStatus": "approval-gated-migration-required"
+  },
+  "contract": {
+    "deterministicUuidPrimaryKey": true,
+    "canonicalContractVersion": "knowledge-ingest-run/v1",
+    "payloadObjectKeyOrderInvariant": true,
+    "setLikeArrayOrderInvariant": true,
+    "changedReplayContentProducesNewRun": true,
+    "concurrentPrimaryKeyConflictReusesExactOwnedRun": true,
+    "tenantSiteOrRawEventMismatchFailsClosed409": true,
+    "existingRunHistoryPreserved": true,
+    "databaseMigrationRequiredForDuplicateRunRace": false,
+    "databaseTransactionAdded": false
+  },
+  "verification": {
+    "focusedTests": {
+      "filesPassed": 2,
+      "testsPassed": 17
+    },
+    "adjacentKnowledgeTests": {
+      "filesPassed": 4,
+      "testsPassed": 96
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28,
+    "dependencyAuditVulnerabilities": 0,
+    "diffCheck": "PASS",
+    "targetedSecretScanMatches": 0
+  },
+  "liveReadOnlyProbe": {
+    "endpoint": "/api/build-info",
+    "sourceHeadMatchesProduction": true,
+    "knowledgeIngestPostExecuted": false,
+    "databaseWriteAttempted": false
+  },
+  "mutationBoundary": {
+    "databaseMutationPerformed": false,
+    "databaseMigrationPerformed": false,
+    "providerDispatchPerformed": false,
+    "shareSessionCreated": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "eventAndRunAtomicTransaction": "APPROVAL_GATED_DATABASE_FUNCTION_OR_MIGRATION_REQUIRED",
+    "partialEventWriteRecovery": "NOT_CLAIMED_REMEDIATED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedClaimsUnchanged": true
+  }
+}
