@@ -160,6 +160,7 @@ describe("/api/agent/chat broker boundary", () => {
   it("uses distributed counters for both pre-auth IP and authenticated identity admission", async () => {
     vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
     vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "test-token");
+    vi.stubEnv("OPENCLAW_CHAT_TIMEOUT_MS", "600000");
     const distributedFetch = vi.fn(async (
       _input: string | URL | Request,
       _init?: RequestInit,
@@ -176,11 +177,60 @@ describe("/api/agent/chat broker boundary", () => {
 
     expect(response.status).toBe(200);
     await response.text();
-    expect(distributedFetch).toHaveBeenCalledTimes(2);
+    expect(distributedFetch).toHaveBeenCalledTimes(4);
     const commands = distributedFetch.mock.calls.map((call) => JSON.parse(String(call[1]?.body)) as unknown[]);
     expect(commands[0].join(" ")).toContain("safeclaw:public-rate:agent-chat-pre-auth:");
     expect(commands[1].join(" ")).toContain("safeclaw:public-rate:agent-chat-authenticated:");
+    expect(commands[2].join(" ")).toContain("safeclaw:public-concurrency:agent-chat-engine-work");
+    expect(commands[2]).toContain("610000");
+    expect(commands[3].join(" ")).toContain("safeclaw:public-concurrency:agent-chat-engine-work");
     expect(engine.run).toHaveBeenCalledTimes(1);
+  });
+
+  it("fails before engine work when the distributed engine lease is busy", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "test-token");
+    const distributedFetch = vi.fn()
+      .mockResolvedValueOnce(Response.json({ result: [1, 59_000] }))
+      .mockResolvedValueOnce(Response.json({ result: [1, 59_000] }))
+      .mockResolvedValueOnce(Response.json({ result: [0, 1] }));
+    vi.stubGlobal("fetch", distributedFetch);
+    const engine = adapter();
+    const post = createAgentChatPost({ resolveContext: resolver(), engine });
+
+    const response = await post(request({ token: "valid-token", siteId: validContext.siteId }));
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({ code: "AGENT_CHAT_CONCURRENCY_LIMIT" });
+    expect(distributedFetch).toHaveBeenCalledTimes(3);
+    expect(engine.checkAvailability).not.toHaveBeenCalled();
+    expect(engine.run).not.toHaveBeenCalled();
+  });
+
+  it("releases the distributed engine lease when engine availability fails", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "test-token");
+    const distributedFetch = vi.fn(async (
+      _input: string | URL | Request,
+      _init?: RequestInit,
+    ) => Response.json({ result: [1, 59_000] }));
+    vi.stubGlobal("fetch", distributedFetch);
+    const engine = adapter({
+      checkAvailability: vi.fn(async () => {
+        throw new BrokerError("ENGINE_UNAVAILABLE", 503);
+      }),
+    });
+    const post = createAgentChatPost({ resolveContext: resolver(), engine });
+
+    const response = await post(request({ token: "valid-token", siteId: validContext.siteId }));
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({ code: "ENGINE_UNAVAILABLE" });
+    expect(distributedFetch).toHaveBeenCalledTimes(4);
+    const commands = distributedFetch.mock.calls.map((call) => JSON.parse(String(call[1]?.body)) as unknown[]);
+    expect(commands[2].join(" ")).toContain("safeclaw:public-concurrency:agent-chat-engine-work");
+    expect(commands[3].join(" ")).toContain("safeclaw:public-concurrency:agent-chat-engine-work");
+    expect(engine.run).not.toHaveBeenCalled();
   });
 
   it("fails closed before authentication when distributed admission configuration is partial", async () => {

@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 
 import { getClientIp } from "@/lib/api-guard";
 import {
+  acquirePublicConcurrencyLease,
   applyPublicRateLimitHeader,
   checkPublicRateLimit,
   publicRateLimitResponse,
@@ -58,6 +59,12 @@ export const AGENT_CHAT_ADMISSION_POLICY = {
     namespace: "agent-chat-pre-auth",
     windowMs: 60_000,
   },
+  engine: {
+    defaultConcurrency: 1,
+    defaultTimeoutMs: 240_000,
+    leaseBufferMs: 10_000,
+    namespace: "agent-chat-engine-work",
+  },
 } as const;
 export type AgentChatRouteDependencies = {
   resolveContext: ResolveBrokerContext;
@@ -85,6 +92,35 @@ function instanceDecision(limiter: RateLimiter, identifier: string): PublicRateL
     mode: "instance",
     reason: "instance_fallback",
   };
+}
+
+function agentChatEngineConcurrency(environment: EnvLike = process.env): number {
+  const parsed = Number.parseInt(environment.OPENCLAW_MAX_CONCURRENT ?? "", 10);
+  return Number.isSafeInteger(parsed) && parsed > 0
+    ? parsed
+    : AGENT_CHAT_ADMISSION_POLICY.engine.defaultConcurrency;
+}
+
+function agentChatEngineLeaseMs(environment: EnvLike = process.env): number {
+  const configuredTimeoutMs = Number.parseInt(environment.OPENCLAW_CHAT_TIMEOUT_MS ?? "", 10);
+  const timeoutMs = Number.isSafeInteger(configuredTimeoutMs) && configuredTimeoutMs > 0
+    ? configuredTimeoutMs
+    : AGENT_CHAT_ADMISSION_POLICY.engine.defaultTimeoutMs;
+  return timeoutMs + AGENT_CHAT_ADMISSION_POLICY.engine.leaseBufferMs;
+}
+
+function agentChatConcurrencyResponse(): Response {
+  return new Response(JSON.stringify({
+    code: "AGENT_CHAT_CONCURRENCY_LIMIT",
+    error: "에이전트 작업이 많습니다. 잠시 후 다시 시도해 주세요.",
+    retryAfterSeconds: 1,
+  }), {
+    status: 503,
+    headers: {
+      "Content-Type": "application/json",
+      "Retry-After": "1",
+    },
+  });
 }
 
 export function createProductionEngineAdapter(
@@ -194,9 +230,27 @@ export function createAgentChatPost(dependencies: AgentChatRouteDependencies) {
       return jsonError(brokerError);
     }
 
+    let distributedEngineRelease: (() => Promise<void>) | null | undefined;
+    try {
+      distributedEngineRelease = await acquirePublicConcurrencyLease({
+        concurrency: agentChatEngineConcurrency(),
+        leaseMs: agentChatEngineLeaseMs(),
+        namespace: AGENT_CHAT_ADMISSION_POLICY.engine.namespace,
+        requireDistributedInProduction: false,
+      });
+    } catch (error) {
+      log.error("openclaw broker distributed engine admission unavailable", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return agentChatConcurrencyResponse();
+    }
+    if (distributedEngineRelease === null) return agentChatConcurrencyResponse();
+    const releaseEngineLease = distributedEngineRelease ?? (async () => undefined);
+
     try {
       await dependencies.engine.checkAvailability(context, request.signal);
     } catch (error) {
+      await releaseEngineLease();
       const brokerError = error instanceof BrokerError
         ? error
         : new BrokerError("ENGINE_UNAVAILABLE", 503, error);
@@ -243,8 +297,12 @@ export function createAgentChatPost(dependencies: AgentChatRouteDependencies) {
           });
           emit({ kind: "error", code: brokerError.code, message: brokerError.message });
         } finally {
+          await releaseEngineLease();
           controller.close();
         }
+      },
+      async cancel() {
+        await releaseEngineLease();
       },
     });
 
