@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-13T23:00:27.064Z",
-  "sourceSha": "bbc27eeafab69abc3faebf03449ab9cef0487981",
+  "generatedAt": "2026-08-13T23:26:51.453Z",
+  "sourceSha": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
   "overall": "open",
   "gates": [
     {
@@ -352,6 +352,17 @@
       "nextActions": [
         "Configure and verify an approved distributed admission backend before enabling enhanced/full provider modes horizontally.",
         "Run a fresh repository security scan before reclassifying the immutable finding or making a security-complete claim."
+      ]
+    },
+    {
+      "id": "public_search_distributed_admission",
+      "state": "proven",
+      "label": "Public search distributed admission",
+      "evidencePath": "evaluation\\public-search-distributed-admission-2026-08-14\\report.json",
+      "detail": "Live legal, safety-reference, and weather provider work fails closed before upstream calls without distributed admission. Shared capacity is 12 with weights 6/3/1 per coalesced job. Immutable finding csf_bb897a39277591f4fbab0ca7 still requires a fresh scan; activation is OPERATOR_CONFIGURATION_REQUIRED, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Configure and verify the approved distributed backend before enabling horizontal provider work.",
+        "Run a fresh repository security scan before reclassifying the immutable finding."
       ]
     },
     {

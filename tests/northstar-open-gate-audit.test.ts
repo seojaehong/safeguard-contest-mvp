@@ -3497,6 +3497,71 @@ function createFixtureRoot(): string {
       approvalGatedOperationsUnchanged: true,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "public-search-distributed-admission-2026-08-14", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_PROVIDER_WORK_FAILS_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    securityFinding: { findingId: "csf_bb897a39277591f4fbab0ca7", canonicalFindingRemainsImmutable: true, freshFollowUpScanRequired: true },
+    currentSourceContract: {
+      capacity: 12,
+      leaseMs: 70000,
+      namespace: "public-search-provider-work",
+      weights: { legal: 6, "safety-reference": 3, weather: 1 },
+      validRequestsRequireDistributedRateAdmissionInProduction: true,
+      newCoalescedJobsRequireDistributedWeightedLeaseInProduction: true,
+      leaseCountedPerCoalescedUpstreamJob: true,
+      leaseReleasedOnSuccessErrorAndFinalConsumerCancellation: true,
+      providerWorkStartsAfterAdmission: true,
+    },
+    liveProductionProbe: {
+      productionCommit: "fixture-sha",
+      distributedBackendConfigured: false,
+      providerCallExecutedForEvidence: false,
+      cases: [
+        { path: "/api/search", kind: "legal", status: 503, rateLimitMode: "distributed", code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", retryAfterSeconds: 5 },
+        { path: "/api/safety-reference/search", kind: "safety-reference", status: 503, rateLimitMode: "distributed", code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", retryAfterSeconds: 5 },
+        { path: "/api/weather", kind: "weather", status: 503, rateLimitMode: "distributed", code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", retryAfterSeconds: 5 },
+      ],
+    },
+    verification: {
+      focusedAndAdjacentVitest: { files: 5, tests: 35, failed: 0 },
+      coalescedDistributedLeaseRegression: { httpConsumers: 2, upstreamJobs: 1, leaseAcquires: 1, leaseReleases: 1 },
+      typecheck: "PASS",
+      build: { status: "PASS" },
+      diffCheck: "PASS",
+    },
+    productionBuild: { currentCommitSha: "fixture-sha", productCommitDeployed: true, liveAfterDeploymentPending: false },
+    governedPathCompatibility: {
+      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_DISTRIBUTED_ADMISSION_GOVERNED_PATH_COMPATIBILITY",
+      sourceHead: "fixture-sha",
+      productionCommit: "fixture-sha",
+      coveredGateIds: ["public_provider_cancellation", "public_provider_admission"],
+      changedProductPaths: ["app/api/search/route.ts", "app/api/safety-reference/search/route.ts", "app/api/weather/route.ts", "lib/public-search-admission.ts"],
+      focusedAndAdjacentVitest: { files: 5, tests: 35, failed: 0 },
+      originalSecurityBaselineRewritten: false,
+      noMutation: true,
+      providerCallExecuted: false,
+      freshFollowUpScan: "REQUIRED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerCallPerformedForEvidence: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorRuntimeMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      securityCompleteClaimAllowed: false,
+      freshFollowUpScan: "REQUIRED",
+      distributedBackendActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      approvalGatedOperationsUnchanged: true,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
     sourceHead: "fixture-sha",
@@ -4649,6 +4714,13 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "public_ask_distributed_admission")?.detail).toContain("csf_9b3cc6648586dabf4bfa61e9");
     expect(audit.gates.find((gate) => gate.id === "public_ask_distributed_admission")?.detail).toContain("OPERATOR_CONFIGURATION_REQUIRED");
     expect(audit.gates.find((gate) => gate.id === "public_ask_distributed_admission")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "public_search_distributed_admission")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "public-search-distributed-admission-2026-08-14", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "public_search_distributed_admission")?.detail).toContain("csf_bb897a39277591f4fbab0ca7");
+    expect(audit.gates.find((gate) => gate.id === "public_search_distributed_admission")?.detail).toContain("OPERATOR_CONFIGURATION_REQUIRED");
+    expect(audit.gates.find((gate) => gate.id === "public_search_distributed_admission")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")).toMatchObject({
       state: "notice",
       evidencePath: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
@@ -6075,6 +6147,24 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "public_ask_distributed_admission")?.state).toBe("contradicted");
     expect(audit.gates.find((gate) => gate.id === "public_ask_distributed_admission")?.detail).toContain("providerCall=true");
     expect(audit.gates.find((gate) => gate.id === "public_ask_distributed_admission")?.detail).toContain("exactShare=PASS");
+  });
+
+  it("fails the public search distributed admission gate closed on provider execution or saved Share overclaim", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "public-search-distributed-admission-2026-08-14", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      liveProductionProbe: { providerCallExecutedForEvidence: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.liveProductionProbe.providerCallExecutedForEvidence = true;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "public_search_distributed_admission")?.state).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "public_search_distributed_admission")?.detail).toContain("providerCall=true");
+    expect(audit.gates.find((gate) => gate.id === "public_search_distributed_admission")?.detail).toContain("exactShare=PASS");
   });
 
   it("fails Hermes reviewer UI closed when more than one review body is selected", async () => {

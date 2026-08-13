@@ -355,6 +355,18 @@ type RollupReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  publicSearchDistributedAdmission: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    findingId: string;
+    liveCaseCount: number;
+    providerCallExecuted: boolean;
+    distributedBackendActivation: string;
+    freshFollowUpScan: string;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   mcpProviderAdmission: {
     verdict: string;
     findingId: string;
@@ -549,6 +561,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "public_provider_cancellation", state: "notice", evidencePath: "evaluation/public-provider-cancellation-2026-08-11/report.json", detail: "provider cancellation is source-proven in deployed production with live provider probe held" },
       { id: "public_provider_admission", state: "notice", evidencePath: "evaluation/public-provider-admission-2026-08-11/report.json", detail: "weighted instance admission is live with distributed activation pending" },
       { id: "public_ask_distributed_admission", state: "proven", evidencePath: "evaluation/public-ask-distributed-admission-2026-08-14/report.json", detail: "JSON and SSE provider modes fail closed without distributed admission" },
+      { id: "public_search_distributed_admission", state: "proven", evidencePath: "evaluation/public-search-distributed-admission-2026-08-14/report.json", detail: "legal, safety-reference, and weather provider work fails closed without distributed admission" },
       { id: "learning_export_renderer_security", state: "proven", evidencePath: "evaluation/learning-export-renderer-security-2026-08-02/report.json", detail: "renderer-independent inert learning export source contract" },
       { id: "hermes_remote_durable_ledger", state: "proven", evidencePath: "evaluation/hermes-openclaw-runtime-current-gate-2026-07-20/report.json", detail: "durable ledger wired without authenticated execution claim" },
       { id: "live_document_secondary_grounding", state: "proven", evidencePath: "evaluation/live-document-secondary-grounding-2026-07-25/report.json", detail: "all 30 supporting documents passed scenario grounding" },
@@ -1330,6 +1343,19 @@ function createFixtureRoot(): { root: string; head: string } {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/public-search-distributed-admission-2026-08-14/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_PROVIDER_WORK_FAILS_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    securityFinding: { findingId: "csf_bb897a39277591f4fbab0ca7" },
+    liveProductionProbe: { providerCallExecutedForEvidence: false, cases: [{}, {}, {}] },
+    remainingBoundaries: {
+      distributedBackendActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      freshFollowUpScan: "REQUIRED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/share-recipient-contact-verification-2026-08-14/report.json", {
     verdict: "PASS_LIVE_DEPLOYED_SOURCE_SHARE_RECIPIENT_CONTACT_VERIFICATION_RESCAN_PENDING",
     sourceHead: "TO_FILL",
@@ -1465,6 +1491,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/public-provider-cancellation-2026-08-11/report.json",
     "evaluation/public-provider-admission-2026-08-11/report.json",
     "evaluation/public-ask-distributed-admission-2026-08-14/report.json",
+    "evaluation/public-search-distributed-admission-2026-08-14/report.json",
     "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json",
     "evaluation/security-mcp-provider-admission-2026-08-14/report.json",
     "evaluation/share-recipient-contact-verification-2026-08-14/report.json",
@@ -1857,6 +1884,17 @@ describe("northstar live rollup", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.evidence.find((item) => item.id === "public_ask_distributed_admission")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.publicSearchDistributedAdmission).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_PROVIDER_WORK_FAILS_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION",
+      findingId: "csf_bb897a39277591f4fbab0ca7",
+      liveCaseCount: 3,
+      providerCallExecuted: false,
+      distributedBackendActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      freshFollowUpScan: "REQUIRED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "public_search_distributed_admission")?.productionStatus).toBe("ancestor_of_head");
     expect(report.mcpGenerationWorkBudgetSecurity).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
       postBodyMaxBytes: 98304,

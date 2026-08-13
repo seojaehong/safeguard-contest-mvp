@@ -47,6 +47,7 @@ const ARTIFACTS = Object.freeze({
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
   publicProviderAdmission: path.join("evaluation", "public-provider-admission-2026-08-11", "report.json"),
   publicAskDistributedAdmission: path.join("evaluation", "public-ask-distributed-admission-2026-08-14", "report.json"),
+  publicSearchDistributedAdmission: path.join("evaluation", "public-search-distributed-admission-2026-08-14", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
@@ -350,6 +351,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const publicProviderCancellation = tryReadJson(rootDir, ARTIFACTS.publicProviderCancellation);
   const publicProviderAdmission = tryReadJson(rootDir, ARTIFACTS.publicProviderAdmission);
   const publicAskDistributedAdmission = tryReadJson(rootDir, ARTIFACTS.publicAskDistributedAdmission);
+  const publicSearchDistributedAdmission = tryReadJson(rootDir, ARTIFACTS.publicSearchDistributedAdmission);
   const publicSearchDistributedRateLimitReadiness = tryReadJson(rootDir, ARTIFACTS.publicSearchDistributedRateLimitReadiness);
   const publicGenerationAdmissionSecurity = tryReadJson(rootDir, ARTIFACTS.publicGenerationAdmissionSecurity);
   const securityFollowupRemediation = tryReadJson(rootDir, ARTIFACTS.securityFollowupRemediation);
@@ -461,6 +463,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_cancellation", ARTIFACTS.publicProviderCancellation, publicProviderCancellation),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_admission", ARTIFACTS.publicProviderAdmission, publicProviderAdmission),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_ask_distributed_admission", ARTIFACTS.publicAskDistributedAdmission, publicAskDistributedAdmission),
+    evidenceStatus(rootDir, currentHead, liveCommit, "public_search_distributed_admission", ARTIFACTS.publicSearchDistributedAdmission, publicSearchDistributedAdmission),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_search_distributed_rate_limit_readiness", ARTIFACTS.publicSearchDistributedRateLimitReadiness, publicSearchDistributedRateLimitReadiness),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_generation_admission_security", ARTIFACTS.publicGenerationAdmissionSecurity, publicGenerationAdmissionSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "security_followup_remediation", ARTIFACTS.securityFollowupRemediation, securityFollowupRemediation),
@@ -828,6 +831,21 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       freshFollowUpScan: asString(recordAt(publicAskDistributedAdmission, "remainingBoundaries")?.freshFollowUpScan),
       securityCompleteClaimAllowed: recordAt(publicAskDistributedAdmission, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
       exactSavedShareVerdict: asString(recordAt(publicAskDistributedAdmission, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    publicSearchDistributedAdmission: {
+      artifact: ARTIFACTS.publicSearchDistributedAdmission,
+      verdict: isRecord(publicSearchDistributedAdmission) ? asString(publicSearchDistributedAdmission.verdict) : "missing",
+      sourceHead: isRecord(publicSearchDistributedAdmission) ? asString(publicSearchDistributedAdmission.sourceHead) : "",
+      productionCommit: isRecord(publicSearchDistributedAdmission) ? asString(publicSearchDistributedAdmission.productionCommit) : "",
+      findingId: asString(recordAt(publicSearchDistributedAdmission, "securityFinding")?.findingId),
+      liveCaseCount: Array.isArray(recordAt(publicSearchDistributedAdmission, "liveProductionProbe")?.cases)
+        ? recordAt(publicSearchDistributedAdmission, "liveProductionProbe").cases.length
+        : 0,
+      providerCallExecuted: recordAt(publicSearchDistributedAdmission, "liveProductionProbe")?.providerCallExecutedForEvidence === true,
+      distributedBackendActivation: asString(recordAt(publicSearchDistributedAdmission, "remainingBoundaries")?.distributedBackendActivation),
+      freshFollowUpScan: asString(recordAt(publicSearchDistributedAdmission, "remainingBoundaries")?.freshFollowUpScan),
+      securityCompleteClaimAllowed: recordAt(publicSearchDistributedAdmission, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
+      exactSavedShareVerdict: asString(recordAt(publicSearchDistributedAdmission, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     agentChatDurableAdmission: {
       artifact: ARTIFACTS.agentChatDurableAdmission,

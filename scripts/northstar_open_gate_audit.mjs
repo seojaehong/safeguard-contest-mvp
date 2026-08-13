@@ -65,6 +65,7 @@ const EVIDENCE_PATHS = Object.freeze({
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
   publicProviderAdmission: path.join("evaluation", "public-provider-admission-2026-08-11", "report.json"),
   publicAskDistributedAdmission: path.join("evaluation", "public-ask-distributed-admission-2026-08-14", "report.json"),
+  publicSearchDistributedAdmission: path.join("evaluation", "public-search-distributed-admission-2026-08-14", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
@@ -5329,6 +5330,62 @@ function isPublicAskDistributedAdmissionCompatibilityCurrent(rootDir, gateId, go
     && readString(compatibility.exactSavedShareVerdict) === "MISSING_EVIDENCE";
 }
 
+const PUBLIC_SEARCH_DISTRIBUTED_ADMISSION_COMPATIBILITY_GATE_IDS = [
+  "public_provider_cancellation",
+  "public_provider_admission",
+];
+
+const PUBLIC_SEARCH_DISTRIBUTED_ADMISSION_CHANGED_PATHS = [
+  "app/api/search/route.ts",
+  "app/api/safety-reference/search/route.ts",
+  "app/api/weather/route.ts",
+  "lib/public-search-admission.ts",
+];
+
+/**
+ * @param {string} rootDir
+ * @param {string} gateId
+ * @param {string[]} governedPaths
+ */
+function isPublicSearchDistributedAdmissionCompatibilityCurrent(rootDir, gateId, governedPaths) {
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.publicSearchDistributedAdmission);
+  if (!isRecord(report) || !isRecord(report.governedPathCompatibility)) return false;
+  const compatibility = report.governedPathCompatibility;
+  const coveredGateIds = Array.isArray(compatibility.coveredGateIds)
+    ? compatibility.coveredGateIds.map(readString)
+    : [];
+  const changedProductPaths = Array.isArray(compatibility.changedProductPaths)
+    ? compatibility.changedProductPaths.map(readString)
+    : [];
+  const tests = isRecord(compatibility.focusedAndAdjacentVitest)
+    ? compatibility.focusedAndAdjacentVitest
+    : {};
+  const sourceHead = readString(compatibility.sourceHead);
+  const productionCommit = readString(compatibility.productionCommit);
+  return readString(report.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_PROVIDER_WORK_FAILS_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION"
+    && readString(compatibility.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_DISTRIBUTED_ADMISSION_GOVERNED_PATH_COMPATIBILITY"
+    && sourceHead.length > 0
+    && sourceHead === readString(report.sourceHead)
+    && sourceHead === readString(report.productCommit)
+    && productionCommit === readString(report.productionCommit)
+    && isGitAncestor(rootDir, sourceHead)
+    && isGitAncestor(rootDir, productionCommit)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, governedPaths)
+    && coveredGateIds.length === PUBLIC_SEARCH_DISTRIBUTED_ADMISSION_COMPATIBILITY_GATE_IDS.length
+    && PUBLIC_SEARCH_DISTRIBUTED_ADMISSION_COMPATIBILITY_GATE_IDS.every((id) => coveredGateIds.includes(id))
+    && coveredGateIds.includes(gateId)
+    && changedProductPaths.length === PUBLIC_SEARCH_DISTRIBUTED_ADMISSION_CHANGED_PATHS.length
+    && PUBLIC_SEARCH_DISTRIBUTED_ADMISSION_CHANGED_PATHS.every((item) => changedProductPaths.includes(item))
+    && readNumber(tests.files) === 5
+    && readNumber(tests.tests) === 35
+    && readNumber(tests.failed) === 0
+    && compatibility.originalSecurityBaselineRewritten === false
+    && compatibility.noMutation === true
+    && compatibility.providerCallExecuted === false
+    && readString(compatibility.freshFollowUpScan) === "REQUIRED"
+    && readString(compatibility.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+}
+
 const SECURITY_RESOURCE_REMEDIATION_CHANGED_PATHS = [
   "app/api/knowledge/ingest/route.ts",
   "app/api/knowledge/review/prepare/route.ts",
@@ -6404,6 +6461,7 @@ function evaluatePublicProviderCancellationGate(rootDir) {
   const sourceCurrent = isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_PROVIDER_CANCELLATION_PATHS)
     || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
     || isPublicAskDistributedAdmissionCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
+    || isPublicSearchDistributedAdmissionCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
     || isSecurityUpstreamTransportCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
     || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS);
   const noMutation = mutation.dbMutationPerformed === false
@@ -6527,7 +6585,8 @@ function evaluatePublicProviderAdmissionGate(rootDir) {
       || isSecurityResourceRemediationCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
       || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
       || isPostRemediationSecuritySourceCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
-      || isPublicAskDistributedAdmissionCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS))
+      || isPublicAskDistributedAdmissionCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
+      || isPublicSearchDistributedAdmissionCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS))
     && findings.length === 2
     && findings.every((item) => readString(item.scanId) === "c4e9e2f1-7ce4-4313-a651-32205fca401f"
       && expectedFindingIds.has(readString(item.findingId))
@@ -6738,6 +6797,127 @@ function evaluatePublicAskDistributedAdmissionGate(rootDir) {
           "Run a fresh repository security scan before reclassifying the immutable finding or making a security-complete claim.",
         ]
       : ["Restore deployed source alignment, all JSON/SSE template/enhanced/full cases, verification totals, no-provider/no-mutation boundaries, fresh-scan requirement, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+const PUBLIC_SEARCH_DISTRIBUTED_ADMISSION_PATHS = [
+  "app/api/search/route.ts",
+  "app/api/safety-reference/search/route.ts",
+  "app/api/weather/route.ts",
+  "lib/public-search-admission.ts",
+];
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluatePublicSearchDistributedAdmissionGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.publicSearchDistributedAdmission;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "public_search_distributed_admission",
+      label: "Public search distributed admission",
+      state: "missing",
+      evidencePath,
+      detail: "Public search weighted distributed admission evidence is missing or invalid.",
+      nextActions: ["Restore deployed legal, safety-reference, and weather fail-closed evidence."],
+    });
+  }
+
+  const finding = isRecord(report.securityFinding) ? report.securityFinding : {};
+  const contract = isRecord(report.currentSourceContract) ? report.currentSourceContract : {};
+  const weights = isRecord(contract.weights) ? contract.weights : {};
+  const live = isRecord(report.liveProductionProbe) ? report.liveProductionProbe : {};
+  const cases = Array.isArray(live.cases) ? live.cases.filter(isRecord) : [];
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedAndAdjacentVitest) ? verification.focusedAndAdjacentVitest : {};
+  const coalesced = isRecord(verification.coalescedDistributedLeaseRegression)
+    ? verification.coalescedDistributedLeaseRegression
+    : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const production = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(report.productionCommit);
+  const casePass = (pathName, kind) => cases.some((item) => (
+    readString(item.path) === pathName
+    && readString(item.kind) === kind
+    && readNumber(item.status) === 503
+    && readString(item.rateLimitMode) === "distributed"
+    && readString(item.code) === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+    && readNumber(item.retryAfterSeconds) === 5
+  ));
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerCallPerformedForEvidence === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.vectorRuntimeMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_PROVIDER_WORK_FAILS_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION"
+    && sourceHead.length > 0
+    && sourceHead === productCommit
+    && productCommit === productionCommit
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_SEARCH_DISTRIBUTED_ADMISSION_PATHS)
+    && readString(finding.findingId) === "csf_bb897a39277591f4fbab0ca7"
+    && finding.canonicalFindingRemainsImmutable === true
+    && finding.freshFollowUpScanRequired === true
+    && readNumber(contract.capacity) === 12
+    && readNumber(contract.leaseMs) === 70000
+    && readString(contract.namespace) === "public-search-provider-work"
+    && readNumber(weights.legal) === 6
+    && readNumber(weights["safety-reference"]) === 3
+    && readNumber(weights.weather) === 1
+    && contract.validRequestsRequireDistributedRateAdmissionInProduction === true
+    && contract.newCoalescedJobsRequireDistributedWeightedLeaseInProduction === true
+    && contract.leaseCountedPerCoalescedUpstreamJob === true
+    && contract.leaseReleasedOnSuccessErrorAndFinalConsumerCancellation === true
+    && contract.providerWorkStartsAfterAdmission === true
+    && readString(live.productionCommit) === productionCommit
+    && live.distributedBackendConfigured === false
+    && live.providerCallExecutedForEvidence === false
+    && cases.length === 3
+    && casePass("/api/search", "legal")
+    && casePass("/api/safety-reference/search", "safety-reference")
+    && casePass("/api/weather", "weather")
+    && readNumber(focused.files) === 5
+    && readNumber(focused.tests) === 35
+    && readNumber(focused.failed) === 0
+    && readNumber(coalesced.httpConsumers) === 2
+    && readNumber(coalesced.upstreamJobs) === 1
+    && readNumber(coalesced.leaseAcquires) === 1
+    && readNumber(coalesced.leaseReleases) === 1
+    && verification.typecheck === "PASS"
+    && readString(build.status) === "PASS"
+    && verification.diffCheck === "PASS"
+    && readString(production.currentCommitSha) === productionCommit
+    && production.productCommitDeployed === true
+    && production.liveAfterDeploymentPending === false
+    && noMutation
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && remaining.securityCompleteClaimAllowed === false
+    && readString(remaining.freshFollowUpScan) === "REQUIRED"
+    && readString(remaining.distributedBackendActivation) === "OPERATOR_CONFIGURATION_REQUIRED"
+    && remaining.approvalGatedOperationsUnchanged === true;
+
+  return gateResult({
+    id: "public_search_distributed_admission",
+    label: "Public search distributed admission",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live legal, safety-reference, and weather provider work fails closed before upstream calls without distributed admission. Shared capacity is 12 with weights 6/3/1 per coalesced job. Immutable finding csf_bb897a39277591f4fbab0ca7 still requires a fresh scan; activation is OPERATOR_CONFIGURATION_REQUIRED, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      : `Public search admission verdict=${readString(report.verdict) || "unknown"}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_SEARCH_DISTRIBUTED_ADMISSION_PATHS)}, finding=${readString(finding.findingId) || "missing"}, liveCases=${cases.length}, providerCall=${live.providerCallExecutedForEvidence === true}, activation=${readString(remaining.distributedBackendActivation) || "missing"}, rescan=${readString(remaining.freshFollowUpScan) || "missing"}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Configure and verify the approved distributed backend before enabling horizontal provider work.",
+          "Run a fresh repository security scan before reclassifying the immutable finding.",
+        ]
+      : ["Restore source/live alignment, all three live cases, weighted coalesced lease receipts, no-mutation boundaries, fresh-scan requirement, and exact Share MISSING_EVIDENCE."],
   });
 }
 
@@ -8030,6 +8210,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluatePublicProviderCancellationGate(rootDir),
     evaluatePublicProviderAdmissionGate(rootDir),
     evaluatePublicAskDistributedAdmissionGate(rootDir),
+    evaluatePublicSearchDistributedAdmissionGate(rootDir),
     evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir),
     evaluatePublicGenerationAdmissionSecurityGate(rootDir),
     evaluateSecurityFollowupRemediationGate(rootDir),

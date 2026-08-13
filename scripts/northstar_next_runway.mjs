@@ -51,6 +51,7 @@ const ARTIFACTS = Object.freeze({
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
   publicProviderAdmission: path.join("evaluation", "public-provider-admission-2026-08-11", "report.json"),
   publicAskDistributedAdmission: path.join("evaluation", "public-ask-distributed-admission-2026-08-14", "report.json"),
+  publicSearchDistributedAdmission: path.join("evaluation", "public-search-distributed-admission-2026-08-14", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
@@ -1593,6 +1594,27 @@ function publicAskDistributedAdmissionSummary(report) {
 }
 
 /** @param {unknown} report */
+function publicSearchDistributedAdmissionSummary(report) {
+  if (!isRecord(report)) return {};
+  const finding = isRecord(report.securityFinding) ? report.securityFinding : {};
+  const live = isRecord(report.liveProductionProbe) ? report.liveProductionProbe : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productCommit: asString(report.productCommit),
+    productionCommit: asString(report.productionCommit),
+    findingId: asString(finding.findingId),
+    liveCaseCount: Array.isArray(live.cases) ? live.cases.length : 0,
+    providerCallExecuted: asBoolean(live.providerCallExecutedForEvidence),
+    distributedBackendActivation: asString(remaining.distributedBackendActivation),
+    freshFollowUpScan: asString(remaining.freshFollowUpScan),
+    securityCompleteClaimAllowed: asBoolean(remaining.securityCompleteClaimAllowed),
+    exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
+  };
+}
+
+/** @param {unknown} report */
 function agentChatDurableAdmissionSummary(report) {
   if (!isRecord(report)) return {};
   const production = isRecord(report.productionBuild) ? report.productionBuild : {};
@@ -2170,6 +2192,10 @@ export function buildNorthstarNextRunway(options) {
     options.rootDir,
     ARTIFACTS.publicAskDistributedAdmission,
   );
+  const publicSearchDistributedAdmission = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.publicSearchDistributedAdmission,
+  );
   const agentChatDurableAdmission = readOptionalJson(
     options.rootDir,
     ARTIFACTS.agentChatDurableAdmission,
@@ -2260,6 +2286,7 @@ export function buildNorthstarNextRunway(options) {
   const publicProviderCancellationResult = publicProviderCancellationSummary(publicProviderCancellation);
   const publicProviderAdmissionResult = publicProviderAdmissionSummary(publicProviderAdmission);
   const publicAskDistributedAdmissionResult = publicAskDistributedAdmissionSummary(publicAskDistributedAdmission);
+  const publicSearchDistributedAdmissionResult = publicSearchDistributedAdmissionSummary(publicSearchDistributedAdmission);
   const mcpGenerationWorkBudgetSecurityResult = mcpGenerationWorkBudgetSecuritySummary(
     mcpGenerationWorkBudgetSecurity,
   );
@@ -2466,6 +2493,7 @@ export function buildNorthstarNextRunway(options) {
     publicProviderCancellation: publicProviderCancellationResult,
     publicProviderAdmission: publicProviderAdmissionResult,
     publicAskDistributedAdmission: publicAskDistributedAdmissionResult,
+    publicSearchDistributedAdmission: publicSearchDistributedAdmissionResult,
     agentChatDurableAdmission: agentChatDurableAdmissionSummary(agentChatDurableAdmission),
     mcpProviderAdmission: mcpProviderAdmissionSummary(mcpProviderAdmission),
     shareRecipientContactVerification: shareRecipientContactVerificationSummary(shareRecipientContactVerification),

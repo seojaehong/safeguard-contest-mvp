@@ -576,6 +576,19 @@ type NextRunwayReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  publicSearchDistributedAdmission: {
+    verdict: string;
+    sourceHead: string;
+    productCommit: string;
+    productionCommit: string;
+    findingId: string;
+    liveCaseCount: number;
+    providerCallExecuted: boolean;
+    distributedBackendActivation: string;
+    freshFollowUpScan: string;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   mcpProviderAdmission: {
     verdict: string;
     findingId: string;
@@ -2059,6 +2072,20 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/public-search-distributed-admission-2026-08-14/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_PROVIDER_WORK_FAILS_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    securityFinding: { findingId: "csf_bb897a39277591f4fbab0ca7" },
+    liveProductionProbe: { providerCallExecutedForEvidence: false, cases: [{}, {}, {}] },
+    remainingBoundaries: {
+      distributedBackendActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      freshFollowUpScan: "REQUIRED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/repository-security-scan-reconciliation-2026-08-11/report.json", {
     verdict: "PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS",
     targetRevision: "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
@@ -3067,6 +3094,16 @@ describe("northstar next runway generator", () => {
       findingId: "csf_9b3cc6648586dabf4bfa61e9",
       localCaseCount: 3,
       liveCaseCount: 5,
+      providerCallExecuted: false,
+      distributedBackendActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      freshFollowUpScan: "REQUIRED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.publicSearchDistributedAdmission).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_PROVIDER_WORK_FAILS_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION",
+      findingId: "csf_bb897a39277591f4fbab0ca7",
+      liveCaseCount: 3,
       providerCallExecuted: false,
       distributedBackendActivation: "OPERATOR_CONFIGURATION_REQUIRED",
       freshFollowUpScan: "REQUIRED",

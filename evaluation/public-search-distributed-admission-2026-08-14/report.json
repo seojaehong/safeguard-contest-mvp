@@ -1,0 +1,138 @@
+{
+  "schemaVersion": "safeclaw-public-search-distributed-admission/v1",
+  "generatedAt": "2026-08-14T08:15:40.6873768+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_PROVIDER_WORK_FAILS_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION",
+  "sourceHead": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
+  "productCommit": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
+  "productionCommit": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
+  "securityFinding": {
+    "scanArtifact": "evaluation/post-remediation-full-repository-security-scan-2026-08-14/canonical/findings.json",
+    "findingId": "csf_bb897a39277591f4fbab0ca7",
+    "title": "Legal, safety-reference, and weather provider work lacks durable shared admission",
+    "severity": "medium",
+    "canonicalFindingRemainsImmutable": true,
+    "freshFollowUpScanRequired": true
+  },
+  "before": {
+    "legalRateLimitNamespace": "legal-search",
+    "safetyReferenceRateLimitNamespace": "safety-reference-search",
+    "weatherRateLimitNamespace": "public-weather",
+    "productionFallback": "instance",
+    "sharedWeightedProviderLease": false
+  },
+  "currentSourceContract": {
+    "capacity": 12,
+    "leaseMs": 70000,
+    "namespace": "public-search-provider-work",
+    "weights": {
+      "legal": 6,
+      "safety-reference": 3,
+      "weather": 1
+    },
+    "validRequestsRequireDistributedRateAdmissionInProduction": true,
+    "newCoalescedJobsRequireDistributedWeightedLeaseInProduction": true,
+    "leaseCountedPerCoalescedUpstreamJob": true,
+    "leaseReleasedOnSuccessErrorAndFinalConsumerCancellation": true,
+    "developmentInstanceFallbackPreserved": true,
+    "providerWorkStartsAfterAdmission": true
+  },
+  "liveProductionProbe": {
+    "baseUrl": "https://www.safeclaw.kr",
+    "productionCommit": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
+    "deploymentUrl": "safeguard-contest-4gf2p7qtu-seojaehongs-projects.vercel.app",
+    "distributedBackendConfigured": false,
+    "providerCallExecutedForEvidence": false,
+    "cases": [
+      {
+        "path": "/api/search",
+        "kind": "legal",
+        "status": 503,
+        "rateLimitMode": "distributed",
+        "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+        "retryAfterSeconds": 5
+      },
+      {
+        "path": "/api/safety-reference/search",
+        "kind": "safety-reference",
+        "status": 503,
+        "rateLimitMode": "distributed",
+        "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+        "retryAfterSeconds": 5
+      },
+      {
+        "path": "/api/weather",
+        "kind": "weather",
+        "status": 503,
+        "rateLimitMode": "distributed",
+        "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+        "retryAfterSeconds": 5
+      }
+    ]
+  },
+  "verification": {
+    "focusedAndAdjacentVitest": {
+      "files": 5,
+      "tests": 35,
+      "failed": 0
+    },
+    "coalescedDistributedLeaseRegression": {
+      "upstreamJobs": 1,
+      "httpConsumers": 2,
+      "leaseAcquires": 1,
+      "leaseReleases": 1
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "buildId": "yegsAn6_SApnLPFgNskq8"
+    },
+    "diffCheck": "PASS"
+  },
+  "productionBuild": {
+    "currentCommitSha": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
+    "productCommitDeployed": true,
+    "liveAfterDeploymentPending": false
+  },
+  "governedPathCompatibility": {
+    "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_DISTRIBUTED_ADMISSION_GOVERNED_PATH_COMPATIBILITY",
+    "sourceHead": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
+    "productionCommit": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
+    "coveredGateIds": [
+      "public_provider_cancellation",
+      "public_provider_admission"
+    ],
+    "changedProductPaths": [
+      "app/api/search/route.ts",
+      "app/api/safety-reference/search/route.ts",
+      "app/api/weather/route.ts",
+      "lib/public-search-admission.ts"
+    ],
+    "focusedAndAdjacentVitest": {
+      "files": 5,
+      "tests": 35,
+      "failed": 0
+    },
+    "originalSecurityBaselineRewritten": false,
+    "noMutation": true,
+    "providerCallExecuted": false,
+    "freshFollowUpScan": "REQUIRED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerCallPerformedForEvidence": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorRuntimeMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "securityCompleteClaimAllowed": false,
+    "freshFollowUpScan": "REQUIRED",
+    "distributedBackendActivation": "OPERATOR_CONFIGURATION_REQUIRED",
+    "approvalGatedOperationsUnchanged": true
+  }
+}

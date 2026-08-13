@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-13T23:00:27.714Z",
-  "head": "bbc27eeafab69abc3faebf03449ab9cef0487981",
+  "generatedAt": "2026-08-13T23:26:56.480Z",
+  "head": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "bbc27eeafab69abc3faebf03449ab9cef0487981",
+    "commitSha": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-6svcggcwv-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-4gf2p7qtu-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 58
+    "gateCount": 59
   },
   "provenGates": [
     {
@@ -218,6 +218,12 @@
       "state": "proven",
       "artifact": "evaluation\\public-ask-distributed-admission-2026-08-14\\report.json",
       "detail": "Current production keeps template work at zero and fails JSON/SSE enhanced/full closed with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before provider work when distributed admission is unavailable. The immutable csf_9b3cc6648586dabf4bfa61e9 finding still requires a fresh scan; backend activation is OPERATOR_CONFIGURATION_REQUIRED, no provider or mutation was used, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "public_search_distributed_admission",
+      "state": "proven",
+      "artifact": "evaluation\\public-search-distributed-admission-2026-08-14\\report.json",
+      "detail": "Live legal, safety-reference, and weather provider work fails closed before upstream calls without distributed admission. Shared capacity is 12 with weights 6/3/1 per coalesced job. Immutable finding csf_bb897a39277591f4fbab0ca7 still requires a fresh scan; activation is OPERATOR_CONFIGURATION_REQUIRED, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "public_search_distributed_rate_limit_readiness",
@@ -683,6 +689,19 @@
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
+  "publicSearchDistributedAdmission": {
+    "artifact": "evaluation\\public-search-distributed-admission-2026-08-14\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_PROVIDER_WORK_FAILS_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION",
+    "sourceHead": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
+    "productionCommit": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
+    "findingId": "csf_bb897a39277591f4fbab0ca7",
+    "liveCaseCount": 3,
+    "providerCallExecuted": false,
+    "distributedBackendActivation": "OPERATOR_CONFIGURATION_REQUIRED",
+    "freshFollowUpScan": "REQUIRED",
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
   "agentChatDurableAdmission": {
     "artifact": "evaluation\\security-agent-chat-durable-admission-2026-08-14\\report.json",
     "verdict": "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_AGENT_ADMISSION_RESCAN_PENDING",
@@ -1133,9 +1152,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "bbc27eeafab69abc3faebf03449ab9cef0487981",
+      "sourceCommit": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
       "sourceStatus": "exact",
-      "productionCommit": "bbc27eeafab69abc3faebf03449ab9cef0487981",
+      "productionCommit": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
       "productionStatus": "matches_live"
     },
     {
@@ -1385,6 +1404,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": "efc62c3879ff171e6ec664d2b8cb843229486440",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "public_search_distributed_admission",
+      "artifact": "evaluation\\public-search-distributed-admission-2026-08-14\\report.json",
+      "sourceCommit": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
+      "sourceStatus": "exact",
+      "productionCommit": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
+      "productionStatus": "matches_live"
     },
     {
       "id": "public_search_distributed_rate_limit_readiness",
