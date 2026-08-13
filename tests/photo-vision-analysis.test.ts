@@ -4,6 +4,7 @@ import { MAX_INPUT_HAZARD_PHOTO_FILES } from "@/lib/operation-improvements";
 import { transitionHazardPhotoUserDecision } from "@/lib/photo-vision-analysis-policy";
 import { searchSafetyReferences, type SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import {
+  HAZARD_PHOTO_FILE_VALIDATION,
   HAZARD_PHOTO_MIME_TYPES,
   MAX_HAZARD_PHOTO_BYTES,
   MAX_HAZARD_PHOTO_FILES,
@@ -162,6 +163,38 @@ describe("photo vision analysis contract", () => {
         responseId: "resp_vision_actual",
         model: actualModel
       });
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("aborts the OpenAI fetch when the caller disconnects", async () => {
+    const controller = new AbortController();
+    let fetchSignal: AbortSignal | null | undefined;
+    const fetchMock = vi.fn((_input: string | URL | Request, init?: RequestInit) => {
+      fetchSignal = init?.signal;
+      return new Promise<Response>((_resolve, reject) => {
+        init?.signal?.addEventListener("abort", () => reject(init.signal?.reason), { once: true });
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    try {
+      const provider = createOpenAiHazardPhotoVisionProvider({
+        OPENAI_API_KEY: "sk-contract",
+        OPENAI_VISION_MODEL: "gpt-configured-model"
+      });
+      if (!provider) throw new Error("Expected configured provider");
+
+      const pending = analyzeHazardPhotos({
+        question: "비계 작업",
+        photos: [createPhoto("scaffold.jpg", "image/jpeg")]
+      }, { provider, harness: null, signal: controller.signal });
+
+      await vi.waitFor(() => expect(fetchSignal).toBeInstanceOf(AbortSignal));
+      controller.abort(new DOMException("client disconnected", "AbortError"));
+
+      await expect(pending).rejects.toMatchObject({ name: "AbortError" });
+      expect(fetchSignal?.aborted).toBe(true);
     } finally {
       vi.unstubAllGlobals();
     }
@@ -653,6 +686,8 @@ describe("photo vision analysis contract", () => {
   it("keeps analysis limits aligned with the commercial photo bucket contract", () => {
     expect(MAX_HAZARD_PHOTO_BYTES).toBe(10_485_760);
     expect(HAZARD_PHOTO_MIME_TYPES).toEqual(["image/jpeg", "image/png", "image/webp"]);
+    expect(HAZARD_PHOTO_FILE_VALIDATION.description).toContain("JPEG/PNG/WebP");
+    expect(HAZARD_PHOTO_FILE_VALIDATION.description).not.toContain("GIF");
   });
 
   it("isolates signature read failures to the affected image", async () => {
@@ -1212,6 +1247,32 @@ describe("photo vision analysis contract", () => {
 
     expect(parsed.status).toBe("failed");
     expect(parsed.errorMessage).toBeTruthy();
+  });
+
+  it("propagates caller cancellation to the provider without converting it to a failed image", async () => {
+    const controller = new AbortController();
+    let providerSignal: AbortSignal | undefined;
+    const provider = {
+      name: "contract-stub",
+      model: "vision-contract-v1",
+      mode: "mock" as const,
+      analyze: vi.fn(async (input: { signal?: AbortSignal }) => {
+        providerSignal = input.signal;
+        return new Promise<string>((_resolve, reject) => {
+          input.signal?.addEventListener("abort", () => reject(input.signal?.reason), { once: true });
+        });
+      })
+    };
+
+    const pending = analyzeHazardPhotos({
+      question: "비계 점검",
+      photos: [createPhoto("cancellation.jpg", "image/jpeg")]
+    }, { provider, harness: null, signal: controller.signal });
+
+    await vi.waitFor(() => expect(providerSignal).toBe(controller.signal));
+    controller.abort(new DOMException("client disconnected", "AbortError"));
+
+    await expect(pending).rejects.toMatchObject({ name: "AbortError" });
   });
 
   it("rejects spoofed improvement photos with the shared MIME signature validator", async () => {

@@ -2,7 +2,11 @@ import type { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { POST } from "@/app/api/input-photos/hazard-analysis/route";
-import { analyzeHazardPhotos, MAX_HAZARD_PHOTO_REQUEST_BYTES } from "@/lib/photo-vision-analysis";
+import {
+  analyzeHazardPhotos,
+  HAZARD_PHOTO_FILE_VALIDATION,
+  MAX_HAZARD_PHOTO_REQUEST_BYTES
+} from "@/lib/photo-vision-analysis";
 import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
 
 vi.mock("@/lib/photo-vision-analysis", async (importOriginal) => {
@@ -18,7 +22,7 @@ vi.mock("@/lib/supabase-admin", () => ({
   getWorkspaceUser: vi.fn()
 }));
 
-function multipartRequest(files: File[], contentLength?: number): NextRequest {
+function multipartRequest(files: File[], contentLength?: number, signal?: AbortSignal): NextRequest {
   const form = new FormData();
   form.set("question", "옥상 방수 작업");
   files.forEach((file) => form.append("photos", file, file.name));
@@ -29,7 +33,8 @@ function multipartRequest(files: File[], contentLength?: number): NextRequest {
       "content-type": "multipart/form-data; boundary=contract-test",
       "x-forwarded-for": `route-test-${files.length}-${files.map((file) => file.name).join("-")}`
     }),
-    formData: async () => form
+    formData: async () => form,
+    signal
   } as unknown as NextRequest;
 }
 
@@ -136,6 +141,52 @@ describe("photo vision hazard analysis route", () => {
     expect(body.ok).toBe(true);
     expect(body.analysis.status).toBe("partial");
     expect(vi.mocked(analyzeHazardPhotos).mock.calls[0]?.[0].photos).toHaveLength(2);
+  });
+
+  it("propagates request cancellation to photo analysis", async () => {
+    const controller = new AbortController();
+    vi.mocked(analyzeHazardPhotos).mockResolvedValue({
+      status: "failed",
+      provider: "contract-stub",
+      providerMode: "mock",
+      model: "vision-contract-v1",
+      summary: "",
+      observations: [],
+      candidates: [],
+      ocrText: "",
+      siteSignals: [],
+      photoCount: 1,
+      images: [],
+      providerResponses: [],
+      fileValidation: HAZARD_PHOTO_FILE_VALIDATION,
+      counts: {
+        submitted: 1,
+        analyzed: 0,
+        rejected: 0,
+        failed: 1,
+        unconfigured: 0,
+        candidates: 0,
+        harnessConfirmed: 0,
+        harnessInsufficient: 0
+      },
+      harness: {
+        modelRole: "candidate_only",
+        authority: "safeclaw-db-mcp",
+        status: "pending",
+        confirms: ["evidence", "confirmedControls"],
+        confirmedAt: null,
+        errorMessage: null
+      }
+    } as Awaited<ReturnType<typeof analyzeHazardPhotos>>);
+
+    await POST(multipartRequest([
+      new File(["image"], "workface.jpg", { type: "image/jpeg" })
+    ], undefined, controller.signal));
+
+    expect(analyzeHazardPhotos).toHaveBeenCalledWith(
+      expect.objectContaining({ question: "옥상 방수 작업" }),
+      expect.objectContaining({ signal: controller.signal })
+    );
   });
 
   it("reports each partial-failure category accurately", async () => {

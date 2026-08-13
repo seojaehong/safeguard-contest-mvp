@@ -108,7 +108,7 @@ export const HAZARD_PHOTO_FILE_VALIDATION: HazardPhotoFileValidation = {
   mode: "signature_only",
   decodesPixels: false,
   signatureBytes: 12,
-  description: "JPEG/PNG/WebP/GIF 파일-family 시그니처만 확인하며 실제 pixel decode는 vision provider 단계에서 수행합니다."
+  description: "JPEG/PNG/WebP 파일-family 시그니처만 확인하며 실제 pixel decode는 vision provider 단계에서 수행합니다."
 };
 
 export type HazardPhotoSeverity = "high" | "medium" | "low" | "review";
@@ -127,6 +127,7 @@ export type HazardPhotoVisionProvider = {
     prompt: string;
     photo: File;
     photoIndex: number;
+    signal?: AbortSignal;
   }) => Promise<string | HazardPhotoProviderOutput>;
 };
 
@@ -260,6 +261,7 @@ export type HazardPhotoHarnessResolver = {
     question: string;
     candidates: HazardPhotoVisionCandidate[];
     images: HazardPhotoImageAnalysis[];
+    signal?: AbortSignal;
   }) => Promise<HazardPhotoHarnessResolution[]>;
 };
 
@@ -632,11 +634,18 @@ async function postOpenAiVisionImages(input: {
   model: string;
   prompt: string;
   photos: File[];
+  signal?: AbortSignal;
 }) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), VISION_TIMEOUT_MS);
+  const abortFromCaller = () => controller.abort(input.signal?.reason);
+  input.signal?.throwIfAborted();
+  input.signal?.addEventListener("abort", abortFromCaller, { once: true });
+  const timeout = setTimeout(() => controller.abort(
+    new DOMException("Photo vision provider timed out", "TimeoutError")
+  ), VISION_TIMEOUT_MS);
   try {
     const imageUrls = await Promise.all(input.photos.map((photo) => fileToDataUrl(photo)));
+    input.signal?.throwIfAborted();
     const content: ResponsesApiContent[] = [
       { type: "input_text", text: input.prompt },
       ...imageUrls.map((imageUrl) => ({ type: "input_image", image_url: imageUrl }))
@@ -673,6 +682,7 @@ async function postOpenAiVisionImages(input: {
     } satisfies HazardPhotoProviderOutput;
   } finally {
     clearTimeout(timeout);
+    input.signal?.removeEventListener("abort", abortFromCaller);
   }
 }
 
@@ -702,11 +712,12 @@ export function createOpenAiHazardPhotoVisionProvider(
     name: "openai",
     model,
     mode: "live",
-    analyze: async ({ prompt, photo }) => postOpenAiVisionImages({
+    analyze: async ({ prompt, photo, signal }) => postOpenAiVisionImages({
       apiKey,
       model,
       prompt,
-      photos: [photo]
+      photos: [photo],
+      signal
     })
   };
 }
@@ -817,16 +828,17 @@ function resolveCandidateFromReferences(input: {
 export function createSafeClawDbMcpHazardResolver(): HazardPhotoHarnessResolver {
   return {
     name: "safeclaw-db-mcp",
-    resolve: async ({ question, candidates }) => mapWithConcurrency(
+    resolve: async ({ question, candidates, signal }) => mapWithConcurrency(
       candidates,
       HAZARD_PHOTO_HARNESS_CONCURRENCY,
       async (candidate) => {
+        signal?.throwIfAborted();
         const query = buildHazardCandidateReferenceQuery({ question, candidate });
         try {
           const [direct, sif, supporting] = await Promise.all([
-            searchSafetyReferences({ query, limit: 6, evidenceRole: "direct" }),
-            searchSafetyReferences({ query, limit: 6, itemType: "sif-case" }),
-            searchSafetyReferences({ query, limit: 6, evidenceRole: "supporting" })
+            searchSafetyReferences({ query, limit: 6, evidenceRole: "direct", signal }),
+            searchSafetyReferences({ query, limit: 6, itemType: "sif-case", signal }),
+            searchSafetyReferences({ query, limit: 6, evidenceRole: "supporting", signal })
           ]);
           const provenanceByReference = new Map<string, HazardPhotoReferenceRetrieval[]>();
           ([
@@ -857,6 +869,7 @@ export function createSafeClawDbMcpHazardResolver(): HazardPhotoHarnessResolver 
           const references = filterPositivelyRelevantHazardReferences(candidate, referencePool);
           return resolveCandidateFromReferences({ query, candidate, references, provenanceByReference });
         } catch (error) {
+          signal?.throwIfAborted();
           const message = error instanceof Error ? error.message : "Candidate DB/MCP search failed";
           log.error(`Hazard candidate DB/MCP search failed: ${candidate.id}`, error);
           return {
@@ -956,7 +969,9 @@ export async function analyzeHazardPhotos(input: {
   provider?: HazardPhotoVisionProvider | null;
   harness?: HazardPhotoHarnessResolver | null;
   env?: Record<string, string | undefined>;
+  signal?: AbortSignal;
 } = {}): Promise<HazardPhotoVisionAnalysis> {
+  options.signal?.throwIfAborted();
   const env = options.env || process.env;
   const hasInjectedProvider = Object.prototype.hasOwnProperty.call(options, "provider");
   const provider = hasInjectedProvider
@@ -1045,6 +1060,7 @@ export async function analyzeHazardPhotos(input: {
     input.photos,
     HAZARD_PHOTO_PROVIDER_CONCURRENCY,
     async (photo, index): Promise<HazardPhotoImageAnalysis> => {
+    options.signal?.throwIfAborted();
     const base = {
       id: `photo-${index + 1}`,
       index,
@@ -1092,7 +1108,8 @@ export async function analyzeHazardPhotos(input: {
         question: input.question,
         prompt,
         photo,
-        photoIndex: index
+        photoIndex: index,
+        signal: options.signal
       });
       const output = typeof providerOutput === "string"
         ? {
@@ -1142,6 +1159,7 @@ export async function analyzeHazardPhotos(input: {
         error: null
       };
     } catch (error) {
+      options.signal?.throwIfAborted();
       log.error(`Hazard photo vision analysis failed: ${photo.name}`, error);
       return {
         ...base,
@@ -1163,7 +1181,8 @@ export async function analyzeHazardPhotos(input: {
       const resolutions = await harnessResolver.resolve({
         question: input.question,
         candidates: modelCandidates,
-        images: rawImages
+        images: rawImages,
+        signal: options.signal
       });
       const resolutionByCandidate = new Map(resolutions.map((resolution) => [resolution.candidateId, resolution]));
       resolvedCandidates = modelCandidates.map((candidate) => {
@@ -1203,6 +1222,7 @@ export async function analyzeHazardPhotos(input: {
         };
       });
     } catch (error) {
+      options.signal?.throwIfAborted();
       const message = error instanceof Error ? error.message : "DB/MCP harness resolution failed";
       log.error(`Hazard photo DB/MCP harness failed: ${harnessResolver.name}`, error);
       resolvedCandidates = modelCandidates.map((candidate) => ({

@@ -111,7 +111,7 @@ async function handlePost(request: NextRequest) {
     }, { status: 413 });
   }
 
-  const analysis = await analyzeHazardPhotos({ question, photos });
+  const analysis = await analyzeHazardPhotos({ question, photos }, { signal: request.signal });
   const hasAnalysis = analysis.status === "analyzed" || analysis.status === "partial";
   return NextResponse.json({
     ok: hasAnalysis,
