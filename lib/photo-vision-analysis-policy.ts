@@ -7,8 +7,7 @@ import {
 export const HAZARD_PHOTO_SIGNATURE_MIME_TYPES = [
   "image/jpeg",
   "image/png",
-  "image/webp",
-  "image/gif"
+  "image/webp"
 ] as const;
 
 export type HazardPhotoSignatureMimeType = typeof HAZARD_PHOTO_SIGNATURE_MIME_TYPES[number];
@@ -403,8 +402,5 @@ export function hasMatchingHazardPhotoSignature(
     case "image/webp":
       return startsWith(bytes, [0x52, 0x49, 0x46, 0x46]) &&
         startsWith(bytes.slice(8), [0x57, 0x45, 0x42, 0x50]);
-    case "image/gif":
-      return startsWith(bytes, [0x47, 0x49, 0x46, 0x38, 0x37, 0x61]) ||
-        startsWith(bytes, [0x47, 0x49, 0x46, 0x38, 0x39, 0x61]);
   }
 }

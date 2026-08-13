@@ -90,7 +90,7 @@ type ResponsesApiResponse = {
 const DEFAULT_MODEL = "gpt-4.1-mini";
 const VISION_TIMEOUT_MS = resolvePositiveIntEnv(process.env.OPENAI_VISION_TIMEOUT_MS, 20_000);
 export const MAX_HAZARD_PHOTO_FILES = MAX_INPUT_HAZARD_PHOTO_FILES;
-export const MAX_HAZARD_PHOTO_BYTES = 20 * 1024 * 1024;
+export const MAX_HAZARD_PHOTO_BYTES = 10 * 1024 * 1024;
 export const MAX_HAZARD_PHOTO_TOTAL_BYTES = 40 * 1024 * 1024;
 export const MAX_HAZARD_PHOTO_REQUEST_BYTES = MAX_HAZARD_PHOTO_TOTAL_BYTES + 1024 * 1024;
 export const HAZARD_PHOTO_PROVIDER_CONCURRENCY = 2;
@@ -894,7 +894,7 @@ export async function validateHazardPhotoFile(photo: File): Promise<HazardPhotoA
   if (photo.size > MAX_HAZARD_PHOTO_BYTES) {
     return {
       code: "file_too_large",
-      message: `${photo.name || "이름 없는 사진"}은 사진별 최대 용량 20MB를 초과합니다.`,
+      message: `${photo.name || "이름 없는 사진"}은 사진별 최대 용량 10MB를 초과합니다.`,
       retryable: false
     };
   }

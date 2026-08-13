@@ -4,6 +4,8 @@ import { MAX_INPUT_HAZARD_PHOTO_FILES } from "@/lib/operation-improvements";
 import { transitionHazardPhotoUserDecision } from "@/lib/photo-vision-analysis-policy";
 import { searchSafetyReferences, type SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import {
+  HAZARD_PHOTO_MIME_TYPES,
+  MAX_HAZARD_PHOTO_BYTES,
   MAX_HAZARD_PHOTO_FILES,
   analyzeHazardPhotos,
   buildImprovementAnalysisPayload,
@@ -90,8 +92,8 @@ describe("photo vision analysis contract", () => {
       ok: false,
       status: "unconfigured",
       maxInputPhotos: 10,
-      maxBytesPerPhoto: 20 * 1024 * 1024,
-      allowedMimeTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+      maxBytesPerPhoto: 10 * 1024 * 1024,
+      allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
       fileValidation: {
         mode: "signature_only",
         decodesPixels: false,
@@ -587,7 +589,7 @@ describe("photo vision analysis contract", () => {
       question: "점검",
       photos: [
         createSizedPhoto("empty.jpg", "image/jpeg", 0),
-        createSizedPhoto("oversized.webp", "image/webp", 20 * 1024 * 1024 + 1)
+        createSizedPhoto("oversized.webp", "image/webp", 10 * 1024 * 1024 + 1)
       ]
     }, { provider, harness: null });
 
@@ -617,7 +619,7 @@ describe("photo vision analysis contract", () => {
     expect(provider.analyze).not.toHaveBeenCalled();
   });
 
-  it("accepts authentic GIF bytes and rejects a mismatched JPEG signature before provider analysis", async () => {
+  it("rejects storage-incompatible GIF and mismatched JPEG files before provider analysis", async () => {
     const provider = {
       name: "contract-stub",
       model: "vision-contract-v1",
@@ -643,13 +645,14 @@ describe("photo vision analysis contract", () => {
       ]
     }, { provider, harness: null });
 
-    expect(provider.analyze).toHaveBeenCalledTimes(1);
-    expect(analysis.status).toBe("partial");
-    expect(analysis.images.map((image) => image.status)).toEqual(["analyzed", "rejected"]);
-    expect(analysis.images[1]?.error).toMatchObject({
-      code: "invalid_signature",
-      retryable: false
-    });
+    expect(provider.analyze).not.toHaveBeenCalled();
+    expect(analysis.status).toBe("failed");
+    expect(analysis.images.map((image) => image.error?.code)).toEqual(["unsupported_mime", "invalid_signature"]);
+  });
+
+  it("keeps analysis limits aligned with the commercial photo bucket contract", () => {
+    expect(MAX_HAZARD_PHOTO_BYTES).toBe(10_485_760);
+    expect(HAZARD_PHOTO_MIME_TYPES).toEqual(["image/jpeg", "image/png", "image/webp"]);
   });
 
   it("isolates signature read failures to the affected image", async () => {
