@@ -37,6 +37,9 @@ describe("workspace share simplification", () => {
     expect(sharePanel).toContain("providerDispatchUi.primaryLabel");
     expect(sharePanel).toContain("buildProviderDispatchChannelUiContract");
     expect(sharePanel).toContain("createAuthenticatedShareSession");
+    expect(sharePanel).toContain("revokeAuthenticatedShareSession");
+    expect(sharePanel).toContain("data-share-session-revoke");
+    expect(sharePanel).toContain("공유 세션 중지");
     expect(sharePanel).toContain("recipientMessageVariants.messageVariants");
     expect(sharePanel).toContain('id="workflow-language-select"');
   });

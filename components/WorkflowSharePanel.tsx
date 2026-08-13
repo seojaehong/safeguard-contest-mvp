@@ -15,6 +15,7 @@ import {
   createAuthenticatedShareSession,
   dispatchAuthenticatedShareSession,
   loadProviderDispatchCapability,
+  revokeAuthenticatedShareSession,
   resolveWorkflowMessagePreview,
   type ProviderDispatchUiState,
   type WorkflowDispatchChannelResult,
@@ -53,6 +54,11 @@ type ActiveChannel = Extract<Channel, "email" | "sms" | "kakao">;
 type MessageTarget = "manager" | `foreign:${string}`;
 type WorkflowSharePhase = "idle" | "saving-workpack" | "creating-session" | "dispatching" | "saving-log";
 type RemoteRecordStatus = "idle" | "loading" | "ready" | "unconfigured" | "error";
+type SessionRevokeState = {
+  status: "idle" | "revoking" | "success" | "error";
+  sessionId: string | null;
+  message: string;
+};
 type WorkflowSharePanelProps = {
   data: AskResponse;
   recipientSuggestions?: RecipientSuggestion[];
@@ -553,6 +559,11 @@ export function WorkflowSharePanel({
   const [providerDispatchState, setProviderDispatchState] = useState<ProviderDispatchUiState>({ status: "checking" });
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [mobileConfigExpanded, setMobileConfigExpanded] = useState(false);
+  const [sessionRevokeState, setSessionRevokeState] = useState<SessionRevokeState>({
+    status: "idle",
+    sessionId: null,
+    message: ""
+  });
 
   const selectedMessage = useMemo(() => {
     return resolveWorkflowMessagePreview(data, selectedMessageTarget);
@@ -759,6 +770,28 @@ export function WorkflowSharePanel({
         ? current.filter((item) => item !== channel)
         : [...current, channel]
     ));
+  }
+
+  async function revokeShareSession(sessionId: string) {
+    if (!authToken || !archiveWorkpackId || sessionRevokeState.status === "revoking") return;
+    if (!window.confirm("이 공유 세션을 중지할까요? 기존 초대 링크는 즉시 열리지 않게 됩니다.")) return;
+    setSessionRevokeState({ status: "revoking", sessionId, message: "공유 세션을 중지하고 있습니다." });
+    try {
+      const revoked = await revokeAuthenticatedShareSession(fetch, {
+        authToken,
+        workpackId: archiveWorkpackId,
+        shareSessionId: sessionId
+      });
+      setSessionRevokeState({ status: "success", sessionId, message: revoked.message });
+      setHistoryRefreshKey((current) => current + 1);
+    } catch (error) {
+      console.error("share session revoke failed", error);
+      setSessionRevokeState({
+        status: "error",
+        sessionId,
+        message: error instanceof Error ? error.message : "공유 세션을 중지하지 못했습니다."
+      });
+    }
   }
 
   async function saveDispatchHistory(request: DispatchArchiveRequest, evidenceScopeKey: string): Promise<void> {
@@ -1340,7 +1373,28 @@ export function WorkflowSharePanel({
               작업자 화면 미리보기
             </a>
           ) : null}
+          {activeSession?.status === "active" && authToken && archiveWorkpackId ? (
+            <button
+              type="button"
+              className="button secondary"
+              onClick={() => void revokeShareSession(activeSession.id)}
+              disabled={sessionRevokeState.status === "revoking"}
+              data-share-session-revoke
+            >
+              {sessionRevokeState.status === "revoking" && sessionRevokeState.sessionId === activeSession.id
+                ? "중지 중"
+                : "공유 세션 중지"}
+            </button>
+          ) : null}
         </div>
+        {sessionRevokeState.message ? (
+          <p
+            className="share-inline-note"
+            role={sessionRevokeState.status === "error" ? "alert" : "status"}
+          >
+            {sessionRevokeState.message}
+          </p>
+        ) : null}
       </div>
 
       <section className="message-preview-panel" aria-label={formatMessagePreviewHeading(data, selectedMessageTarget)} data-share-preview>

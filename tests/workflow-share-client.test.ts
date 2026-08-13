@@ -170,6 +170,44 @@ describe("authenticated workflow share client", () => {
     );
   });
 
+  it("revokes only the requested authenticated share session", async () => {
+    const { revokeAuthenticatedShareSession } = await loadClient();
+    const fetcher = vi.fn(async (_input: string, _init: RequestInit) => new Response(JSON.stringify({
+      ok: true,
+      configured: true,
+      revokedSessionId: "33333333-3333-4333-8333-333333333333",
+      revokedAt: "2026-08-14T01:00:00.000Z",
+      message: "공유 세션 중지 완료"
+    }), { status: 200, headers: { "content-type": "application/json" } }));
+
+    const result = await revokeAuthenticatedShareSession(fetcher, {
+      authToken: "access-token",
+      workpackId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      shareSessionId: "33333333-3333-4333-8333-333333333333"
+    });
+
+    expect(result.revokedSessionId).toBe("33333333-3333-4333-8333-333333333333");
+    expect(fetcher).toHaveBeenCalledWith(
+      "/api/workpacks/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/share-sessions?sessionId=33333333-3333-4333-8333-333333333333",
+      {
+        method: "DELETE",
+        headers: { authorization: "Bearer access-token" }
+      }
+    );
+  });
+
+  it("rejects malformed share session IDs before a revoke request", async () => {
+    const { revokeAuthenticatedShareSession } = await loadClient();
+    const fetcher = vi.fn();
+
+    await expect(revokeAuthenticatedShareSession(fetcher, {
+      authToken: "access-token",
+      workpackId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      shareSessionId: "not-a-session"
+    })).rejects.toThrow("취소할 shareSessionId가 올바른 UUID가 아닙니다.");
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
   it("dispatches exact canonical message variants with server authority identifiers", async () => {
     const { dispatchAuthenticatedShareSession } = await loadClient();
     const fetcher = vi.fn(async (_input: string, _init: RequestInit) => new Response(JSON.stringify({

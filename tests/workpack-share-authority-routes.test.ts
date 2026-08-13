@@ -248,6 +248,42 @@ function makeConfirmationClient(existingId: string | null) {
   };
 }
 
+function makeShareRevokeClient(options: { data?: Record<string, unknown> | null; error?: Record<string, unknown> | null } = {}) {
+  const filters: Array<[string, unknown]> = [];
+  let updated: unknown = null;
+  const query = {
+    update(value: unknown) {
+      updated = value;
+      return query;
+    },
+    eq(field: string, value: unknown) {
+      filters.push([field, value]);
+      return query;
+    },
+    is(field: string, value: unknown) {
+      filters.push([field, value]);
+      return query;
+    },
+    select() { return query; },
+    maybeSingle: async () => ({
+      data: options.data === undefined
+        ? { id: SESSION_ID, status: "revoked", updated_at: "2026-08-14T01:00:00.000Z" }
+        : options.data,
+      error: options.error || null
+    })
+  };
+  return {
+    client: {
+      from(table: string) {
+        if (table !== "workpack_share_sessions") throw new Error(`Unexpected table ${table}`);
+        return query;
+      }
+    },
+    filters: () => filters,
+    updated: () => updated
+  };
+}
+
 function makeConfirmationRaceClient(concurrentRow: Record<string, unknown>) {
   let maybeSingleCount = 0;
   let insertCount = 0;
@@ -778,6 +814,63 @@ describe("share session route authority", () => {
       worker_display_name: "Server Nguyen",
       language_code: "vi"
     })]);
+  });
+
+  it("lets only the owning manager revoke a session within the full workpack tuple", async () => {
+    const fake = makeShareRevokeClient();
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    const { DELETE } = await import("@/app/api/workpacks/[id]/share-sessions/route");
+
+    const response = await DELETE(new NextRequest(
+      `http://localhost/api/workpacks/${WORKPACK_ID}/share-sessions?sessionId=${SESSION_ID}`,
+      { method: "DELETE", headers: { authorization: "Bearer test-token" } }
+    ), { params: Promise.resolve({ id: WORKPACK_ID }) });
+    const body = await response.json() as { revokedSessionId: string; status: string; revokedAt: string };
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual(expect.objectContaining({
+      revokedSessionId: SESSION_ID,
+      status: "revoked",
+      revokedAt: "2026-08-14T01:00:00.000Z"
+    }));
+    expect(fake.updated()).toEqual(expect.objectContaining({ status: "revoked" }));
+    expect(fake.filters()).toEqual([
+      ["id", SESSION_ID],
+      ["workpack_id", WORKPACK_ID],
+      ["organization_id", "org-1"],
+      ["site_id", "site-1"]
+    ]);
+  });
+
+  it("rejects session revocation before storage access when manager auth is missing", async () => {
+    const fake = makeShareRevokeClient();
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.getWorkspaceUser.mockResolvedValueOnce(null);
+    const { DELETE } = await import("@/app/api/workpacks/[id]/share-sessions/route");
+
+    const response = await DELETE(new NextRequest(
+      `http://localhost/api/workpacks/${WORKPACK_ID}/share-sessions?sessionId=${SESSION_ID}`,
+      { method: "DELETE" }
+    ), { params: Promise.resolve({ id: WORKPACK_ID }) });
+
+    expect(response.status).toBe(401);
+    expect(fake.updated()).toBeNull();
+    expect(mocks.loadOwnedWorkpackOperationContext).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when a requested session is outside the owned tuple", async () => {
+    const fake = makeShareRevokeClient({ data: null });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    const { DELETE } = await import("@/app/api/workpacks/[id]/share-sessions/route");
+
+    const response = await DELETE(new NextRequest(
+      `http://localhost/api/workpacks/${WORKPACK_ID}/share-sessions?sessionId=${SESSION_ID}`,
+      { method: "DELETE", headers: { authorization: "Bearer test-token" } }
+    ), { params: Promise.resolve({ id: WORKPACK_ID }) });
+
+    expect(response.status).toBe(404);
+    expect(fake.filters()).toContainEqual(["organization_id", "org-1"]);
+    expect(fake.filters()).toContainEqual(["site_id", "site-1"]);
   });
 });
 

@@ -15,6 +15,7 @@ import {
 export const dynamic = "force-dynamic";
 
 const SHARE_SESSION_TTL_MS = 24 * 60 * 60 * 1_000;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -164,5 +165,59 @@ export async function POST(request: NextRequest, context: RouteContext) {
     shareSessionId: data.id,
     expiresAt: data.expires_at || expiresAt,
     message: "초대된 작업자 기준 공유 세션을 만들었습니다."
+  });
+}
+
+export async function DELETE(request: NextRequest, context: RouteContext) {
+  const client = createSupabaseAdminClient();
+  if (!client) {
+    return NextResponse.json({ ok: false, configured: false, revokedSessionId: null, message: "Supabase 저장소가 아직 설정되지 않았습니다." });
+  }
+
+  const user = await getWorkspaceUser(client, request.headers);
+  if (!user) {
+    return NextResponse.json({ ok: false, configured: true, revokedSessionId: null, message: "관리자 로그인이 필요합니다." }, { status: 401 });
+  }
+
+  const { id } = await context.params;
+  const owned = await loadOwnedWorkpackOperationContext(client, user, id);
+  if (!owned.ok) {
+    return NextResponse.json({ ok: false, configured: true, revokedSessionId: null, message: owned.message }, { status: owned.status });
+  }
+
+  const sessionId = request.nextUrl.searchParams.get("sessionId")?.trim() || "";
+  if (!UUID_PATTERN.test(sessionId)) {
+    return NextResponse.json({ ok: false, configured: true, revokedSessionId: null, message: "취소할 공유 세션 ID가 올바르지 않습니다." }, { status: 400 });
+  }
+
+  const revokedAt = new Date().toISOString();
+  let revokeQuery = client
+    .from("workpack_share_sessions")
+    .update({ status: "revoked", updated_at: revokedAt })
+    .eq("id", sessionId)
+    .eq("workpack_id", owned.context.workpackId)
+    .eq("organization_id", owned.context.organizationId);
+  revokeQuery = owned.context.siteId === null
+    ? revokeQuery.is("site_id", null)
+    : revokeQuery.eq("site_id", owned.context.siteId);
+  const { data, error } = await revokeQuery
+    .select("id,status,updated_at")
+    .maybeSingle();
+
+  if (error) {
+    console.error("share session revoke failed", error);
+    return NextResponse.json({ ok: false, configured: true, revokedSessionId: null, message: "공유 세션을 중지하지 못했습니다." }, { status: 500 });
+  }
+  if (!data) {
+    return NextResponse.json({ ok: false, configured: true, revokedSessionId: null, message: "소유한 작업팩에서 공유 세션을 찾지 못했습니다." }, { status: 404 });
+  }
+
+  return NextResponse.json({
+    ok: true,
+    configured: true,
+    revokedSessionId: data.id,
+    status: data.status,
+    revokedAt: data.updated_at || revokedAt,
+    message: "공유 세션을 중지했습니다. 기존 초대 링크는 더 이상 열리지 않습니다."
   });
 }

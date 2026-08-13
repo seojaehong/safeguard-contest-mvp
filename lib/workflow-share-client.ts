@@ -106,6 +106,12 @@ type ShareSessionRequest = {
   workerIds: string[];
 };
 
+type RevokeShareSessionRequest = {
+  authToken: string;
+  workpackId: string;
+  shareSessionId: string;
+};
+
 type DispatchRequest = {
   authToken: string;
   workpackId: string;
@@ -670,6 +676,41 @@ export async function createAuthenticatedShareSession(
     shareSessionId,
     expiresAt,
     message: readString(body.message) || "공유 세션을 만들었습니다."
+  };
+}
+
+export async function revokeAuthenticatedShareSession(
+  fetcher: Fetcher,
+  request: RevokeShareSessionRequest
+): Promise<{ revokedSessionId: string; revokedAt: string; message: string }> {
+  requireBearerContext(request.authToken, request.workpackId);
+  if (!uuidPattern.test(request.shareSessionId)) {
+    throw new Error("취소할 shareSessionId가 올바른 UUID가 아닙니다.");
+  }
+
+  const response = await fetcher(
+    `/api/workpacks/${encodeURIComponent(request.workpackId)}/share-sessions?sessionId=${encodeURIComponent(request.shareSessionId)}`,
+    {
+      method: "DELETE",
+      headers: { authorization: `Bearer ${request.authToken}` }
+    }
+  );
+  const body = await readResponseBody(response);
+  if (!response.ok || body.ok !== true) {
+    throw buildHttpError(body, response, "공유 세션을 중지하지 못했습니다.");
+  }
+  const revokedSessionId = readString(body.revokedSessionId);
+  if (revokedSessionId !== request.shareSessionId) {
+    throw new Error("공유 세션 취소 응답의 ID가 요청과 일치하지 않습니다.");
+  }
+  const revokedAt = readString(body.revokedAt);
+  if (!revokedAt || !Number.isFinite(Date.parse(revokedAt))) {
+    throw new Error("공유 세션 취소 응답의 시각이 올바르지 않습니다.");
+  }
+  return {
+    revokedSessionId,
+    revokedAt,
+    message: readString(body.message) || "공유 세션을 중지했습니다."
   };
 }
 
