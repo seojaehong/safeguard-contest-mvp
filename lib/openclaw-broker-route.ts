@@ -1,7 +1,13 @@
 import type { NextRequest } from "next/server";
 
-import { createRateLimiter } from "@/lib/rate-limit";
-import { enforceRateLimit } from "@/lib/api-guard";
+import { getClientIp } from "@/lib/api-guard";
+import {
+  applyPublicRateLimitHeader,
+  checkPublicRateLimit,
+  publicRateLimitResponse,
+  type PublicRateLimitDecision,
+} from "@/lib/public-distributed-rate-limit";
+import { createRateLimiter, type RateLimiter } from "@/lib/rate-limit";
 import { createLogger } from "@/lib/logger";
 import {
   buildSystemPrompt,
@@ -41,6 +47,18 @@ import { enforceRequestBodyBudget } from "@/lib/mcp-work-budget";
 
 const log = createLogger("api/agent/chat");
 export const AGENT_CHAT_REQUEST_BODY_MAX_BYTES = 64 * 1_024;
+export const AGENT_CHAT_ADMISSION_POLICY = {
+  authenticated: {
+    limit: 5,
+    namespace: "agent-chat-authenticated",
+    windowMs: 60_000,
+  },
+  preAuth: {
+    limit: 20,
+    namespace: "agent-chat-pre-auth",
+    windowMs: 60_000,
+  },
+} as const;
 export type AgentChatRouteDependencies = {
   resolveContext: ResolveBrokerContext;
   engine: EngineAdapter;
@@ -61,17 +79,12 @@ function jsonError(error: BrokerError): Response {
   });
 }
 
-function enforceAuthenticatedRateLimit(userId: string, limiter: ReturnType<typeof createRateLimiter>): Response | null {
-  const result = limiter.check(userId);
-  if (result.allowed) return null;
-  const retryAfter = String(result.retryAfterSeconds ?? 60);
-  return new Response(
-    JSON.stringify({ error: "요청이 너무 잦습니다. 잠시 후 다시 시도해 주세요.", retryAfterSeconds: Number(retryAfter) }),
-    {
-      status: 429,
-      headers: { "Content-Type": "application/json", "Retry-After": retryAfter },
-    },
-  );
+function instanceDecision(limiter: RateLimiter, identifier: string): PublicRateLimitDecision {
+  return {
+    ...limiter.check(identifier),
+    mode: "instance",
+    reason: "instance_fallback",
+  };
 }
 
 export function createProductionEngineAdapter(
@@ -113,7 +126,16 @@ export function createAgentChatPost(dependencies: AgentChatRouteDependencies) {
   const routePreAuthLimiter = dependencies.preAuthLimiter ?? createRateLimiter({ limit: 20, windowMs: 60_000 });
   const routeAuthenticatedLimiter = dependencies.authenticatedLimiter ?? createRateLimiter({ limit: 5, windowMs: 60_000 });
   return async function post(request: NextRequest): Promise<Response> {
-    const coarseLimited = enforceRateLimit(request, routePreAuthLimiter);
+    const preAuthDecision = dependencies.preAuthLimiter
+      ? instanceDecision(routePreAuthLimiter, getClientIp(request))
+      : await checkPublicRateLimit({
+          request,
+          namespace: AGENT_CHAT_ADMISSION_POLICY.preAuth.namespace,
+          limit: AGENT_CHAT_ADMISSION_POLICY.preAuth.limit,
+          windowMs: AGENT_CHAT_ADMISSION_POLICY.preAuth.windowMs,
+          instanceLimiter: routePreAuthLimiter,
+        });
+    const coarseLimited = publicRateLimitResponse(preAuthDecision);
     if (coarseLimited) return coarseLimited;
 
     let authentication;
@@ -124,10 +146,20 @@ export function createAgentChatPost(dependencies: AgentChatRouteDependencies) {
         ? error
         : new BrokerError("AUTH_BACKEND_UNAVAILABLE", 503, error);
       log.error("openclaw broker authentication failed", { code: brokerError.code });
-      return jsonError(brokerError);
+      return applyPublicRateLimitHeader(jsonError(brokerError), preAuthDecision);
     }
 
-    const limited = enforceAuthenticatedRateLimit(authentication.user.id, routeAuthenticatedLimiter);
+    const authenticatedDecision = dependencies.authenticatedLimiter
+      ? instanceDecision(routeAuthenticatedLimiter, authentication.user.id)
+      : await checkPublicRateLimit({
+          request,
+          identifier: authentication.user.id,
+          namespace: AGENT_CHAT_ADMISSION_POLICY.authenticated.namespace,
+          limit: AGENT_CHAT_ADMISSION_POLICY.authenticated.limit,
+          windowMs: AGENT_CHAT_ADMISSION_POLICY.authenticated.windowMs,
+          instanceLimiter: routeAuthenticatedLimiter,
+        });
+    const limited = publicRateLimitResponse(authenticatedDecision);
     if (limited) return limited;
 
     const bodyBudget = await enforceRequestBodyBudget(request, AGENT_CHAT_REQUEST_BODY_MAX_BYTES, {

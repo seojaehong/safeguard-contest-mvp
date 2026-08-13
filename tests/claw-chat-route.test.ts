@@ -88,6 +88,8 @@ function resolver(input: {
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
 });
 
 describe("/api/agent/chat broker boundary", () => {
@@ -153,6 +155,51 @@ describe("/api/agent/chat broker boundary", () => {
       ip: "198.51.100.199",
     }));
     expect(limited.status).toBe(429);
+  });
+
+  it("uses distributed counters for both pre-auth IP and authenticated identity admission", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "test-token");
+    const distributedFetch = vi.fn(async (
+      _input: string | URL | Request,
+      _init?: RequestInit,
+    ) => Response.json({ result: [1, 59_000] }));
+    vi.stubGlobal("fetch", distributedFetch);
+    const engine = adapter();
+    const post = createAgentChatPost({ resolveContext: resolver(), engine });
+
+    const response = await post(request({
+      token: "valid-token",
+      siteId: validContext.siteId,
+      ip: "198.51.100.88",
+    }));
+
+    expect(response.status).toBe(200);
+    await response.text();
+    expect(distributedFetch).toHaveBeenCalledTimes(2);
+    const commands = distributedFetch.mock.calls.map((call) => JSON.parse(String(call[1]?.body)) as unknown[]);
+    expect(commands[0].join(" ")).toContain("safeclaw:public-rate:agent-chat-pre-auth:");
+    expect(commands[1].join(" ")).toContain("safeclaw:public-rate:agent-chat-authenticated:");
+    expect(engine.run).toHaveBeenCalledTimes(1);
+  });
+
+  it("fails closed before authentication when distributed admission configuration is partial", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+    const resolveContext = resolver();
+    const authenticate = vi.spyOn(resolveContext, "authenticate");
+    const engine = adapter();
+    const post = createAgentChatPost({
+      resolveContext,
+      engine,
+    });
+
+    const response = await post(request({ token: "valid-token", siteId: validContext.siteId }));
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({ code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE" });
+    expect(authenticate).not.toHaveBeenCalled();
+    expect(engine.run).not.toHaveBeenCalled();
   });
 
   it("runs the authenticated limiter immediately after auth and before body or site work", async () => {
