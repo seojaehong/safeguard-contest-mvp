@@ -1,0 +1,113 @@
+{
+  "schemaVersion": "safeclaw-deployment-freshness-guard/v1",
+  "generatedAt": "2026-08-14T04:58:51.3600000+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_DEPLOYMENT_FRESHNESS_GUARD",
+  "sourceHead": "e4d66d547c25350ad90d2ef33233982648e3d4a2",
+  "implementationCommit": "3924782b58aa27b2c00f8281c0758d848c94b77d",
+  "productionBuild": {
+    "commitSha": "e4d66d547c25350ad90d2ef33233982648e3d4a2",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-40ik94esj-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
+  "problemBoundary": {
+    "currentDocumentsAndWorkspaceShareGeometryEvidence": "evaluation/live-documents-share-route-perception-2026-08-14/report.json",
+    "currentScopedGeometryVerdict": "PASS_LIVE_PRODUCTION_SCOPED_DOCUMENTS_AND_WORKSPACE_SHARE_EXACT_SESSION_GAP",
+    "serverResponseCacheObservedAsRootCause": false,
+    "longOpenBrowserTabCanRetainOldClientBundle": true,
+    "routeSplitAloneAcceptedAsFix": false
+  },
+  "implementation": {
+    "layoutWired": true,
+    "currentBuildShaSource": "VERCEL_GIT_COMMIT_SHA",
+    "buildInfoEndpoint": "/api/build-info",
+    "fetchCacheMode": "no-store",
+    "checksImmediately": true,
+    "checkIntervalMs": 60000,
+    "checksOnVisibilityChange": true,
+    "normalCurrentDeploymentRendersNotice": false,
+    "shaDriftRendersRefreshNotice": true,
+    "refreshActionLabel": "최신 버전으로 새로고침",
+    "failureHandling": "warn-and-preserve-current-ui"
+  },
+  "verification": {
+    "focused": {
+      "command": "npm.cmd exec -- vitest run tests\\deployment-freshness-guard.test.ts tests\\build-info-route.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 2,
+      "testsPassed": 4,
+      "testsFailed": 0
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPagesGenerated": 28
+    },
+    "liveBrowser": {
+      "tool": "Playwright MCP browser",
+      "route": "/documents?theme=day",
+      "normalCurrentDeployment": {
+        "viewport": { "width": 1440, "height": 723 },
+        "noticePresent": false,
+        "bodyHeight": 723,
+        "documentHeight": 723,
+        "horizontalOverflow": false
+      },
+      "simulatedShaDrift": {
+        "method": "Intercept only the freshness build-info response after the live page loaded, then dispatch the same visible-tab check used by the product.",
+        "noticeText": "새 버전이 배포됐습니다.새로고침",
+        "refreshButtonVisible": true,
+        "desktopNoticeBottom": 707.33,
+        "desktopBorderRadius": "14px",
+        "desktopBoxShadow": "none",
+        "desktopScreenshot": "evaluation/deployment-freshness-guard-2026-08-14/stale-notice-desktop-1440x723.png",
+        "mobile": {
+          "viewport": { "width": 390, "height": 723 },
+          "bodyHeight": 723,
+          "horizontalOverflow": false,
+          "noticeBottom": 711.33,
+          "refreshButtonHeight": 44
+        },
+        "mobileScreenshot": "evaluation/deployment-freshness-guard-2026-08-14/stale-notice-mobile-390x723.png"
+      }
+    },
+    "adjacentEvidenceContract": {
+      "command": "npm.cmd exec -- vitest run tests\\frontend-route-coverage.test.ts tests\\deployment-freshness-guard.test.ts --maxWorkers=1 --fileParallelism=false",
+      "passed": 41,
+      "failed": 0,
+      "classification": "PASS_AFTER_CANONICAL_STATIC_AUDIT_REFRESH",
+      "productBehaviorFailure": false,
+      "refreshRequired": false
+    },
+    "canonicalFrontendStaticAudit": {
+      "path": "evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json",
+      "sourceSha": "e4d66d547c25350ad90d2ef33233982648e3d4a2",
+      "status": "pass",
+      "pageFiles": 33,
+      "componentFiles": 24,
+      "coverageIssues": 0,
+      "violationCount": 0,
+      "importantDeclarations": 0
+    }
+  },
+  "remainingBoundaries": {
+    "liveAfterDeploymentPending": false,
+    "exactSavedUserSessionReproduced": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "providerDispatchPersistenceApproved": false,
+    "fullyAutomatedLaunchClaimAllowed": false
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  }
+}
