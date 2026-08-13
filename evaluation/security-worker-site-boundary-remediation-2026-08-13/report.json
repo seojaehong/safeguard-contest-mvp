@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "safeclaw-security-worker-site-boundary-remediation/v1",
+  "verdict": "PASS_CURRENT_SOURCE_WORKER_SITE_BOUNDARY_LIVE_PENDING",
+  "sourceHead": "dac299cd605101d7f4640525af514084a4944566",
+  "productCommit": "dac299cd605101d7f4640525af514084a4944566",
+  "productionBuild": {
+    "commitSha": "65cffd87e0a6500b79e4a7f27dd8c5a01724ccdd",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-a81mqmi37-seojaehongs-projects.vercel.app",
+    "sourceHeadLive": false
+  },
+  "finding": {
+    "title": "Worker APIs aggregate and reassign records across sites",
+    "severity": "medium",
+    "baselineScanId": "c98ffa84-9951-4f68-9e1d-11f456abe901",
+    "baselineRevision": "003c48838b2c4365203de3cc2dae230200c79e96",
+    "remediationScope": "Authenticated worker API route boundary only"
+  },
+  "contracts": {
+    "workerHistoryScopedToOrganization": true,
+    "workerHistoryScopedToResolvedSite": true,
+    "existingBindingsCheckedBeforeUpsert": true,
+    "crossSiteBindingRejectedBeforeWrite": true,
+    "legacyNullSiteBindingRejectedBeforeWrite": true,
+    "bindingLookupFailureFailsClosed": true,
+    "sameSiteUpdateContractPreserved": true,
+    "explicitTransferRequired": true
+  },
+  "verification": {
+    "focused": { "files": 1, "tests": 5, "status": "PASS" },
+    "adjacent": { "files": 3, "tests": 19, "status": "PASS" },
+    "typecheck": "PASS",
+    "build": { "status": "PASS", "nextVersion": "15.5.22", "staticPages": 28 },
+    "diffCheck": "PASS",
+    "secretScan": "PASS"
+  },
+  "mutationBoundary": {
+    "liveWorkerReadExecuted": false,
+    "liveWorkerWriteExecuted": false,
+    "dbSchemaMutationPerformed": false,
+    "dbDataMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "databaseSiteScopedUniqueConstraint": "APPROVAL_GATED",
+    "directSupabaseTenantTupleEnforcement": "APPROVAL_GATED",
+    "concurrentCrossSiteCreationRace": "REQUIRES_DATABASE_CONSTRAINT",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedBoundariesPreserved": true,
+    "liveAfterDeploymentRequired": true
+  }
+}
