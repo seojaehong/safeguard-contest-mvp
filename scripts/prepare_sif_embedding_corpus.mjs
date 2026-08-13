@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import process from "node:process";
+import { pathToFileURL } from "node:url";
 
 const DEFAULT_OUTPUT_DIR = "evaluation/sif-embedding-gate";
 const DEFAULT_MODEL = "text-embedding-3-small";
@@ -226,6 +227,54 @@ function buildValidationReport(items, skippedItems, records) {
   };
 }
 
+export function evaluateSifCorpusQualityAdmission(validation, corpusCount) {
+  const counts = {
+    emptyEmbeddingTextCount: validation.emptyEmbeddingTextCount,
+    missingControlsCount: validation.missingControlsCount,
+    missingPrimaryDocumentsCount: validation.missingPrimaryDocumentsCount,
+    duplicateContentHashCount: validation.duplicateContentHashCount
+  };
+  const failures = [];
+  if (!Number.isInteger(corpusCount) || corpusCount <= 0) failures.push("empty_corpus");
+  if (!Number.isInteger(counts.emptyEmbeddingTextCount) || counts.emptyEmbeddingTextCount !== 0) {
+    failures.push("empty_embedding_text");
+  }
+  if (!Number.isInteger(counts.missingControlsCount) || counts.missingControlsCount !== 0) {
+    failures.push("missing_controls");
+  }
+  if (!Number.isInteger(counts.missingPrimaryDocumentsCount) || counts.missingPrimaryDocumentsCount !== 0) {
+    failures.push("missing_primary_documents");
+  }
+  if (!Number.isInteger(counts.duplicateContentHashCount) || counts.duplicateContentHashCount !== 0) {
+    failures.push("duplicate_content_hashes");
+  }
+  return {
+    ok: failures.length === 0,
+    failures,
+    checks: {
+      corpusNonEmpty: Number.isInteger(corpusCount) && corpusCount > 0,
+      emptyEmbeddingTextCount: Number.isInteger(counts.emptyEmbeddingTextCount) ? counts.emptyEmbeddingTextCount : -1,
+      missingControlsCount: Number.isInteger(counts.missingControlsCount) ? counts.missingControlsCount : -1,
+      missingPrimaryDocumentsCount: Number.isInteger(counts.missingPrimaryDocumentsCount) ? counts.missingPrimaryDocumentsCount : -1,
+      duplicateContentHashCount: Number.isInteger(counts.duplicateContentHashCount) ? counts.duplicateContentHashCount : -1
+    }
+  };
+}
+
+export function buildSifEmbeddingAdmissionErrors(options, qualityAdmission) {
+  const errors = [];
+  if ((options.embed || options.upload) && !options.approvedEmbedding) {
+    errors.push("--embed requires explicit --approved-embedding after embedding cost approval");
+  }
+  if (options.upload && !options.approvedUpload) {
+    errors.push("--upload requires explicit --approved-upload after DB migration approval");
+  }
+  if ((options.embed || options.upload) && !qualityAdmission.ok) {
+    errors.push(`corpus quality admission failed: ${qualityAdmission.failures.join(", ")}`);
+  }
+  return errors;
+}
+
 async function embedRecords(records, model, batchSize) {
   const { default: OpenAI } = await import("openai");
   const client = new OpenAI();
@@ -329,24 +378,21 @@ async function main() {
   const skippedItems = items.filter((item) => !isEmbeddableSifItem(item));
   const records = items.filter(isEmbeddableSifItem).map(toCorpusRecord);
   const validation = buildValidationReport(items, skippedItems, records);
+  const qualityAdmission = evaluateSifCorpusQualityAdmission(validation, records.length);
   const batchSize = resolveBatchSize(options.batchSize);
   const manifest = buildBatchManifest(records, {
     batchSize,
     generatedAt: startedAt,
     model: options.model
   });
+  manifest.approvalGate.corpusQualityAdmissionRequired = true;
+  manifest.approvalGate.corpusQualityAdmissionPassed = qualityAdmission.ok;
 
   let embeddedCount = 0;
   let uploadedCount = 0;
   let uploadError = null;
   let embedded = [];
-  const approvalErrors = [];
-  if ((options.embed || options.upload) && !options.approvedEmbedding) {
-    approvalErrors.push("--embed requires explicit --approved-embedding after embedding cost approval");
-  }
-  if (options.upload && !options.approvedUpload) {
-    approvalErrors.push("--upload requires explicit --approved-upload after DB migration approval");
-  }
+  const approvalErrors = buildSifEmbeddingAdmissionErrors(options, qualityAdmission);
   if (approvalErrors.length) uploadError = approvalErrors.join("; ");
   if (options.embed || options.upload) {
     try {
@@ -383,7 +429,8 @@ async function main() {
       embeddingRequiresCostApproval: true,
       uploadRequiresMigrationApproval: true,
       uploadRequiresApprovedUploadFlag: true,
-      corpusReady: records.length > 0 && validation.emptyEmbeddingTextCount === 0
+      corpusReady: qualityAdmission.ok,
+      qualityAdmission
     },
     mode: options.upload ? "embed-and-upload" : options.embed ? "embed-only" : "corpus-only"
   };
@@ -391,7 +438,9 @@ async function main() {
   console.log(JSON.stringify({ ok: !uploadError, ...report, ...artifacts }, null, 2));
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

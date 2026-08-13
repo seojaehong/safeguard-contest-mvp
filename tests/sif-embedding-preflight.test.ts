@@ -4,6 +4,39 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
+type SifCorpusQualityAdmission = {
+  ok: boolean;
+  failures: string[];
+  checks: {
+    corpusNonEmpty: boolean;
+    emptyEmbeddingTextCount: number;
+    missingControlsCount: number;
+    missingPrimaryDocumentsCount: number;
+    duplicateContentHashCount: number;
+  };
+};
+
+type SifCorpusModule = {
+  buildSifEmbeddingAdmissionErrors: (
+    options: {
+      embed: boolean;
+      upload: boolean;
+      approvedEmbedding: boolean;
+      approvedUpload: boolean;
+    },
+    qualityAdmission: SifCorpusQualityAdmission,
+  ) => string[];
+  evaluateSifCorpusQualityAdmission: (
+    validation: Record<string, number>,
+    corpusCount: number,
+  ) => SifCorpusQualityAdmission;
+};
+
+async function loadSifCorpusModule(): Promise<SifCorpusModule> {
+  // @ts-expect-error -- executable MJS module exposes the audited runtime API.
+  return await import("../scripts/prepare_sif_embedding_corpus.mjs") as SifCorpusModule;
+}
+
 function asRecord(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new Error("Expected object");
@@ -193,6 +226,64 @@ describe("SIF embedding approval preflight", () => {
     expect(source).toContain("--approved-embedding");
     expect(source).toContain("--embed requires explicit --approved-embedding after embedding cost approval");
     expect(source).toContain("embeddingApprovedFlag");
+    expect(source).toContain("corpus quality admission failed");
+  });
+
+  it("fails closed on every mandatory SIF corpus quality defect", async () => {
+    const {
+      buildSifEmbeddingAdmissionErrors,
+      evaluateSifCorpusQualityAdmission
+    } = await loadSifCorpusModule();
+    const cleanValidation = {
+      emptyEmbeddingTextCount: 0,
+      missingControlsCount: 0,
+      missingPrimaryDocumentsCount: 0,
+      duplicateContentHashCount: 0
+    };
+
+    expect(evaluateSifCorpusQualityAdmission(cleanValidation, 8)).toMatchObject({
+      ok: true,
+      failures: []
+    });
+    expect(evaluateSifCorpusQualityAdmission(cleanValidation, 0).failures).toContain("empty_corpus");
+    expect(evaluateSifCorpusQualityAdmission({
+      ...cleanValidation,
+      emptyEmbeddingTextCount: 1
+    }, 8).failures).toContain("empty_embedding_text");
+    expect(evaluateSifCorpusQualityAdmission({
+      ...cleanValidation,
+      missingControlsCount: 1
+    }, 8).failures).toContain("missing_controls");
+    expect(evaluateSifCorpusQualityAdmission({
+      ...cleanValidation,
+      missingPrimaryDocumentsCount: 1
+    }, 8).failures).toContain("missing_primary_documents");
+    expect(evaluateSifCorpusQualityAdmission({
+      ...cleanValidation,
+      duplicateContentHashCount: 1
+    }, 8).failures).toContain("duplicate_content_hashes");
+    expect(evaluateSifCorpusQualityAdmission({}, 8)).toMatchObject({
+      ok: false,
+      failures: [
+        "empty_embedding_text",
+        "missing_controls",
+        "missing_primary_documents",
+        "duplicate_content_hashes"
+      ]
+    });
+
+    const failedQuality = evaluateSifCorpusQualityAdmission({
+      ...cleanValidation,
+      missingControlsCount: 1
+    }, 8);
+    expect(buildSifEmbeddingAdmissionErrors({
+      embed: true,
+      upload: true,
+      approvedEmbedding: true,
+      approvedUpload: true
+    }, failedQuality)).toEqual([
+      "corpus quality admission failed: missing_controls"
+    ]);
   });
 
   it("fails closed when a corpus record no longer matches its content hash", () => {
