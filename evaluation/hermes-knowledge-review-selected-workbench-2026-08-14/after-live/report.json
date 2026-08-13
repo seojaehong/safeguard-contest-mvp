@@ -1,0 +1,329 @@
+{
+  "schemaVersion": "safeclaw-hermes-knowledge-review-authority-ui/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+  "checkedAt": "2026-08-13T21:25:09.868Z",
+  "sourceHead": "6453a595d4771d64f07d79d3f042509be876c707",
+  "productCommit": "6453a595d4771d64f07d79d3f042509be876c707",
+  "baseUrl": "https://www.safeclaw.kr",
+  "mode": "live-production",
+  "productionBuild": {
+    "status": 200,
+    "ok": true,
+    "commitSha": "6453a595d4771d64f07d79d3f042509be876c707",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-ntvafzf4v-seojaehongs-projects.vercel.app"
+  },
+  "productionAligned": true,
+  "viewportCount": 8,
+  "passedCount": 8,
+  "failedCount": 0,
+  "authorityContract": {
+    "sourceOrder": [
+      "SIF",
+      "KOSHA",
+      "law",
+      "organization_history",
+      "site_history",
+      "external_context"
+    ],
+    "statutoryClaimsRequireLawProvenance": true,
+    "tenantMemoryPublicPromotionAllowed": false,
+    "siteManagerAcceptanceRequiredBeforeWorkpackUse": true,
+    "humanReviewRequired": true,
+    "machineEvidenceReplacesHumanReview": false
+  },
+  "workbenchContract": {
+    "candidateCount": 3,
+    "selectedCandidateCount": 1,
+    "selectedBodyCount": 1,
+    "desktopColumns": 2,
+    "mobileColumns": 1,
+    "candidateBodyInternalScroll": true
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "ontologyPublicationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
+  },
+  "results": [
+    {
+      "theme": "day",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "screenshot": "knowledge-review-authority-day-desktop-1440x900.png",
+      "metrics": {
+        "bodyHeight": 5803,
+        "viewportHeight": 900,
+        "horizontalOverflow": false,
+        "rootWidth": 1164,
+        "rootWidthRatio": 0.81,
+        "rootTop": 28.21875,
+        "workbenchColumns": 2,
+        "navigatorCandidateCount": 3,
+        "selectedCandidateCount": 1,
+        "selectedBodyCount": 1,
+        "selectedBodyOverflowY": "auto",
+        "navigatorBeforeDetail": true,
+        "selectedCandidateHeight": 480,
+        "authorityWidth": 834,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "actionGroupTop": 539.21875,
+        "firstActionBottom": 583.21875,
+        "firstActionDepth": 555,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "day",
+      "viewport": {
+        "name": "desktop-short",
+        "width": 1440,
+        "height": 723
+      },
+      "screenshot": "knowledge-review-authority-day-desktop-short-1440x723.png",
+      "metrics": {
+        "bodyHeight": 5803,
+        "viewportHeight": 723,
+        "horizontalOverflow": false,
+        "rootWidth": 1164,
+        "rootWidthRatio": 0.81,
+        "rootTop": 28.21875,
+        "workbenchColumns": 2,
+        "navigatorCandidateCount": 3,
+        "selectedCandidateCount": 1,
+        "selectedBodyCount": 1,
+        "selectedBodyOverflowY": "auto",
+        "navigatorBeforeDetail": true,
+        "selectedCandidateHeight": 480,
+        "authorityWidth": 834,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "actionGroupTop": 539.21875,
+        "firstActionBottom": 583.21875,
+        "firstActionDepth": 555,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "day",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "screenshot": "knowledge-review-authority-day-mobile-390x844.png",
+      "metrics": {
+        "bodyHeight": 3792,
+        "viewportHeight": 844,
+        "horizontalOverflow": false,
+        "rootWidth": 366,
+        "rootWidthRatio": 0.94,
+        "rootTop": 633.140625,
+        "workbenchColumns": 1,
+        "navigatorCandidateCount": 3,
+        "selectedCandidateCount": 1,
+        "selectedBodyCount": 1,
+        "selectedBodyOverflowY": "auto",
+        "navigatorBeforeDetail": false,
+        "selectedCandidateHeight": 716.4375,
+        "authorityWidth": 340,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "actionGroupTop": 1486.75,
+        "firstActionBottom": 1530.75,
+        "firstActionDepth": 897.609375,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "day",
+      "viewport": {
+        "name": "mobile-short",
+        "width": 390,
+        "height": 723
+      },
+      "screenshot": "knowledge-review-authority-day-mobile-short-390x723.png",
+      "metrics": {
+        "bodyHeight": 3792,
+        "viewportHeight": 723,
+        "horizontalOverflow": false,
+        "rootWidth": 366,
+        "rootWidthRatio": 0.94,
+        "rootTop": 604.140625,
+        "workbenchColumns": 1,
+        "navigatorCandidateCount": 3,
+        "selectedCandidateCount": 1,
+        "selectedBodyCount": 1,
+        "selectedBodyOverflowY": "auto",
+        "navigatorBeforeDetail": false,
+        "selectedCandidateHeight": 716.4375,
+        "authorityWidth": 340,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "actionGroupTop": 1457.75,
+        "firstActionBottom": 1501.75,
+        "firstActionDepth": 897.609375,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "night",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "screenshot": "knowledge-review-authority-night-desktop-1440x900.png",
+      "metrics": {
+        "bodyHeight": 5803,
+        "viewportHeight": 900,
+        "horizontalOverflow": false,
+        "rootWidth": 1164,
+        "rootWidthRatio": 0.81,
+        "rootTop": 28.21875,
+        "workbenchColumns": 2,
+        "navigatorCandidateCount": 3,
+        "selectedCandidateCount": 1,
+        "selectedBodyCount": 1,
+        "selectedBodyOverflowY": "auto",
+        "navigatorBeforeDetail": true,
+        "selectedCandidateHeight": 480,
+        "authorityWidth": 834,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "actionGroupTop": 539.21875,
+        "firstActionBottom": 583.21875,
+        "firstActionDepth": 555,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "night",
+      "viewport": {
+        "name": "desktop-short",
+        "width": 1440,
+        "height": 723
+      },
+      "screenshot": "knowledge-review-authority-night-desktop-short-1440x723.png",
+      "metrics": {
+        "bodyHeight": 5803,
+        "viewportHeight": 723,
+        "horizontalOverflow": false,
+        "rootWidth": 1164,
+        "rootWidthRatio": 0.81,
+        "rootTop": 28.21875,
+        "workbenchColumns": 2,
+        "navigatorCandidateCount": 3,
+        "selectedCandidateCount": 1,
+        "selectedBodyCount": 1,
+        "selectedBodyOverflowY": "auto",
+        "navigatorBeforeDetail": true,
+        "selectedCandidateHeight": 480,
+        "authorityWidth": 834,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "actionGroupTop": 539.21875,
+        "firstActionBottom": 583.21875,
+        "firstActionDepth": 555,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "night",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "screenshot": "knowledge-review-authority-night-mobile-390x844.png",
+      "metrics": {
+        "bodyHeight": 3792,
+        "viewportHeight": 844,
+        "horizontalOverflow": false,
+        "rootWidth": 366,
+        "rootWidthRatio": 0.94,
+        "rootTop": 633.140625,
+        "workbenchColumns": 1,
+        "navigatorCandidateCount": 3,
+        "selectedCandidateCount": 1,
+        "selectedBodyCount": 1,
+        "selectedBodyOverflowY": "auto",
+        "navigatorBeforeDetail": false,
+        "selectedCandidateHeight": 716.4375,
+        "authorityWidth": 340,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "actionGroupTop": 1486.75,
+        "firstActionBottom": 1530.75,
+        "firstActionDepth": 897.609375,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "night",
+      "viewport": {
+        "name": "mobile-short",
+        "width": 390,
+        "height": 723
+      },
+      "screenshot": "knowledge-review-authority-night-mobile-short-390x723.png",
+      "metrics": {
+        "bodyHeight": 3792,
+        "viewportHeight": 723,
+        "horizontalOverflow": false,
+        "rootWidth": 366,
+        "rootWidthRatio": 0.94,
+        "rootTop": 604.140625,
+        "workbenchColumns": 1,
+        "navigatorCandidateCount": 3,
+        "selectedCandidateCount": 1,
+        "selectedBodyCount": 1,
+        "selectedBodyOverflowY": "auto",
+        "navigatorBeforeDetail": false,
+        "selectedCandidateHeight": 716.4375,
+        "authorityWidth": 340,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "actionGroupTop": 1457.75,
+        "firstActionBottom": 1501.75,
+        "firstActionDepth": 897.609375,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "browserErrors": [],
+      "passed": true
+    }
+  ]
+}

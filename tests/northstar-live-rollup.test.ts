@@ -948,7 +948,7 @@ function createFixtureRoot(): { root: string; head: string } {
     },
     openBoundaries: { exactSavedShare: "MISSING_EVIDENCE" },
   });
-  writeJson(root, "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json", {
+  writeJson(root, "evaluation/hermes-knowledge-review-selected-workbench-2026-08-14/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
     sourceHead: "TO_FILL",
     productCommit: "TO_FILL",
@@ -962,6 +962,14 @@ function createFixtureRoot(): { root: string; head: string } {
       siteManagerAcceptanceRequiredBeforeWorkpackUse: true,
       humanReviewRequired: true,
       machineEvidenceReplacesHumanReview: false,
+    },
+    workbenchContract: {
+      candidateCount: 3,
+      selectedCandidateCount: 1,
+      selectedBodyCount: 1,
+      desktopColumns: 2,
+      mobileColumns: 1,
+      candidateBodyInternalScroll: true,
     },
     mutationBoundary: {
       dbMutationPerformed: false,
@@ -1433,7 +1441,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-documents-share-route-perception-2026-08-14/report.json",
     "evaluation/deployment-freshness-guard-2026-08-14/report.json",
     "evaluation/learning-export-renderer-security-2026-08-02/report.json",
-    "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
+    "evaluation/hermes-knowledge-review-selected-workbench-2026-08-14/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
     "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json",
     "evaluation/kosha-current-live-gate-2026-07-20/report.json",

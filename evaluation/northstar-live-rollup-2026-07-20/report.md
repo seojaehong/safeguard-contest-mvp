@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-13T20:50:08.311Z
-Source HEAD at generation: 75027ffa8e8ad26dfea2048a6429f36c5607c980
-Live commit at generation: 75027ffa8e8ad26dfea2048a6429f36c5607c980
+Generated at: 2026-08-13T21:44:59.159Z
+Source HEAD at generation: 6453a595d4771d64f07d79d3f042509be876c707
+Live commit at generation: 6453a595d4771d64f07d79d3f042509be876c707
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -228,6 +228,7 @@ Overall: `northstar_open_approval_gated`
 - Authority order: SIF -> KOSHA -> law -> organization_history -> site_history -> external_context
 - Human review required: true; machine replaces human review=false
 - Tenant-memory public promotion: false; site-manager acceptance required=true
+- Selected-only workbench candidates/selected/body: 3/1/1; desktop/mobile columns=2/1; body internal scroll=true
 - Mutation boundary DB/provider/share/publication: false/false/false/false
 - Exact saved Share: MISSING_EVIDENCE; LLM Wiki/RLS: APPROVAL_GATED/APPROVAL_GATED
 
@@ -302,7 +303,7 @@ Overall: `northstar_open_approval_gated`
 | learning_export_renderer_security | proven | evaluation\learning-export-renderer-security-2026-08-02\report.json |
 | hermes_remote_durable_ledger | proven | evaluation\hermes-openclaw-runtime-current-gate-2026-07-20\report.json |
 | hermes_knowledge_review_authority | proven | evaluation\hermes-knowledge-review-contract-live-2026-07-25\report.json |
-| hermes_knowledge_review_ui | proven | evaluation\hermes-knowledge-review-authority-ui-2026-07-25\report.json |
+| hermes_knowledge_review_ui | proven | evaluation\hermes-knowledge-review-selected-workbench-2026-08-14\report.json |
 | live_document_secondary_grounding | proven | evaluation\live-document-secondary-grounding-2026-07-25\report.json |
 | live_document_seed_profile_isolation | proven | evaluation\live-document-seed-profile-isolation-2026-07-25\report.json |
 | ui_documents_share_cockpit | proven | evaluation\document-risk-row-mobile-label-2026-08-02\after-live\report.json |
@@ -347,7 +348,7 @@ Overall: `northstar_open_approval_gated`
 | current_security_remediation_ledger | ancestor | ancestor_of_head | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
 | current_repository_security_rescan | ancestor | ancestor_of_head | evaluation\current-full-repository-security-scan-2026-08-13\report.json |
 | agent_chat_durable_admission_security | ancestor | ancestor_of_head | evaluation\security-agent-chat-durable-admission-2026-08-14\report.json |
-| mcp_provider_admission_security | exact | matches_live | evaluation\security-mcp-provider-admission-2026-08-14\report.json |
+| mcp_provider_admission_security | ancestor | ancestor_of_head | evaluation\security-mcp-provider-admission-2026-08-14\report.json |
 | share_recipient_contact_verification_security | ancestor | ancestor_of_head | evaluation\share-recipient-contact-verification-2026-08-14\report.json |
 | security_atomic_db_race_remediation | ancestor | missing | evaluation\security-atomic-db-race-approval-boundary-2026-08-14\report.json |
 | live_documents_share_route_perception | ancestor | ancestor_of_head | evaluation\live-documents-share-route-perception-2026-08-14\report.json |
@@ -364,8 +365,8 @@ Overall: `northstar_open_approval_gated`
 | security_safety_reference_surface_remediation | ancestor | ancestor_of_head | evaluation\security-safety-reference-surface-remediation-2026-08-11\report.json |
 | mcp_generation_work_budget_security | ancestor | ancestor_of_head | evaluation\security-mcp-generation-work-budget-2026-08-04\report.json |
 | learning_export_renderer_security | ancestor | ancestor_of_head | evaluation\learning-export-renderer-security-2026-08-02\report.json |
-| hermes_knowledge_review_ui | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-authority-ui-2026-07-25\report.json |
-| hermes_remote_durable_ledger | exact | matches_live | evaluation\hermes-openclaw-runtime-current-gate-2026-07-20\report.json |
+| hermes_knowledge_review_ui | exact | matches_live | evaluation\hermes-knowledge-review-selected-workbench-2026-08-14\report.json |
+| hermes_remote_durable_ledger | ancestor | ancestor_of_head | evaluation\hermes-openclaw-runtime-current-gate-2026-07-20\report.json |
 | live_document_secondary_grounding | ancestor | ancestor_of_head | evaluation\live-document-secondary-grounding-2026-07-25\report.json |
 | live_document_seed_profile_isolation | ancestor | ancestor_of_head | evaluation\live-document-seed-profile-isolation-2026-07-25\report.json |
 | kosha_exact_trust_registry | ancestor | ancestor_of_head | evaluation\kosha-current-live-gate-2026-07-20\report.json |

@@ -1461,7 +1461,7 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     },
     openBoundaries: { exactSavedShare: "MISSING_EVIDENCE" },
   });
-  writeJson(root, "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json", {
+  writeJson(root, "evaluation/hermes-knowledge-review-selected-workbench-2026-08-14/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
     sourceHead: "fixture-sha",
     productCommit: "fixture-product",
@@ -1475,6 +1475,14 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       siteManagerAcceptanceRequiredBeforeWorkpackUse: true,
       humanReviewRequired: true,
       machineEvidenceReplacesHumanReview: false,
+    },
+    workbenchContract: {
+      candidateCount: 3,
+      selectedCandidateCount: 1,
+      selectedBodyCount: 1,
+      desktopColumns: 2,
+      mobileColumns: 1,
+      candidateBodyInternalScroll: true,
     },
     mutationBoundary: {
       dbMutationPerformed: false,

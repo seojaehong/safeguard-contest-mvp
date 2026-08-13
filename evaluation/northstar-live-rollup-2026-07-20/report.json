@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-13T20:50:08.311Z",
-  "head": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
+  "generatedAt": "2026-08-13T21:44:59.159Z",
+  "head": "6453a595d4771d64f07d79d3f042509be876c707",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
+    "commitSha": "6453a595d4771d64f07d79d3f042509be876c707",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-pfhxmz3lv-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-ntvafzf4v-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -258,8 +258,8 @@
     {
       "id": "hermes_knowledge_review_ui",
       "state": "proven",
-      "artifact": "evaluation\\hermes-knowledge-review-authority-ui-2026-07-25\\report.json",
-      "detail": "Live authenticated reviewer cockpit passes 8/8 Day/Night desktop and mobile geometry cases, exposes six SIF -> KOSHA -> law -> tenant-memory evidence roles, requires law provenance and site-manager acceptance, and performs no DB, provider, publication, or Share mutation. LLM Wiki/RLS remain APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE."
+      "artifact": "evaluation\\hermes-knowledge-review-selected-workbench-2026-08-14\\report.json",
+      "detail": "Live authenticated reviewer cockpit passes 8/8 Day/Night desktop and mobile geometry cases with three navigable candidates, exactly one selected candidate/body, desktop two-column and mobile one-column containment, and internal candidate-body scroll. It exposes six SIF -> KOSHA -> law -> tenant-memory evidence roles, requires law provenance and site-manager acceptance, and performs no DB, provider, publication, or Share mutation. LLM Wiki/RLS remain APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "live_document_secondary_grounding",
@@ -971,11 +971,11 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "hermesKnowledgeReviewAuthorityUi": {
-    "artifact": "evaluation\\hermes-knowledge-review-authority-ui-2026-07-25\\report.json",
+    "artifact": "evaluation\\hermes-knowledge-review-selected-workbench-2026-08-14\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
-    "sourceHead": "719a73792d5a3fdc9f4cfea55b92f9282c08dbf9",
-    "productCommit": "a9fcde386f0d97e8b46553a9f083892f14e11799",
-    "productionCommit": "a9ca3cbe87efd753bb937620e4cd56113f66e1b3",
+    "sourceHead": "6453a595d4771d64f07d79d3f042509be876c707",
+    "productCommit": "6453a595d4771d64f07d79d3f042509be876c707",
+    "productionCommit": "6453a595d4771d64f07d79d3f042509be876c707",
     "localPassed": 8,
     "localViewportCount": 8,
     "livePassed": 8,
@@ -992,6 +992,12 @@
     "machineEvidenceReplacesHumanReview": false,
     "tenantMemoryPublicPromotionAllowed": false,
     "siteManagerAcceptanceRequiredBeforeWorkpackUse": true,
+    "candidateCount": 3,
+    "selectedCandidateCount": 1,
+    "selectedBodyCount": 1,
+    "desktopColumns": 2,
+    "mobileColumns": 1,
+    "candidateBodyInternalScroll": true,
     "dbMutationPerformed": false,
     "providerDispatchCalled": false,
     "shareSessionCreated": false,
@@ -1106,9 +1112,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
+      "sourceCommit": "6453a595d4771d64f07d79d3f042509be876c707",
       "sourceStatus": "exact",
-      "productionCommit": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
+      "productionCommit": "6453a595d4771d64f07d79d3f042509be876c707",
       "productionStatus": "matches_live"
     },
     {
@@ -1283,9 +1289,9 @@
       "id": "mcp_provider_admission_security",
       "artifact": "evaluation\\security-mcp-provider-admission-2026-08-14\\report.json",
       "sourceCommit": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "share_recipient_contact_verification_security",
@@ -1417,19 +1423,19 @@
     },
     {
       "id": "hermes_knowledge_review_ui",
-      "artifact": "evaluation\\hermes-knowledge-review-authority-ui-2026-07-25\\report.json",
-      "sourceCommit": "719a73792d5a3fdc9f4cfea55b92f9282c08dbf9",
-      "sourceStatus": "ancestor",
-      "productionCommit": "a9ca3cbe87efd753bb937620e4cd56113f66e1b3",
-      "productionStatus": "ancestor_of_head"
+      "artifact": "evaluation\\hermes-knowledge-review-selected-workbench-2026-08-14\\report.json",
+      "sourceCommit": "6453a595d4771d64f07d79d3f042509be876c707",
+      "sourceStatus": "exact",
+      "productionCommit": "6453a595d4771d64f07d79d3f042509be876c707",
+      "productionStatus": "matches_live"
     },
     {
       "id": "hermes_remote_durable_ledger",
       "artifact": "evaluation\\hermes-openclaw-runtime-current-gate-2026-07-20\\report.json",
       "sourceCommit": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "live_document_secondary_grounding",

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "safeclaw-hermes-knowledge-review-authority-ui-summary/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+  "checkedAt": "2026-08-13T21:25:09.868Z",
+  "sourceHead": "6453a595d4771d64f07d79d3f042509be876c707",
+  "productCommit": "6453a595d4771d64f07d79d3f042509be876c707",
+  "productionCommit": "6453a595d4771d64f07d79d3f042509be876c707",
+  "local": {
+    "path": "evaluation\\hermes-knowledge-review-selected-workbench-2026-08-14\\after-local\\report.json",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_AUTHORITY_UI",
+    "viewportCount": 8,
+    "passedCount": 8,
+    "failedCount": 0
+  },
+  "afterLive": {
+    "path": "evaluation\\hermes-knowledge-review-selected-workbench-2026-08-14\\after-live\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+    "viewportCount": 8,
+    "passedCount": 8,
+    "failedCount": 0
+  },
+  "authorityContract": {
+    "sourceOrder": [
+      "SIF",
+      "KOSHA",
+      "law",
+      "organization_history",
+      "site_history",
+      "external_context"
+    ],
+    "statutoryClaimsRequireLawProvenance": true,
+    "tenantMemoryPublicPromotionAllowed": false,
+    "siteManagerAcceptanceRequiredBeforeWorkpackUse": true,
+    "humanReviewRequired": true,
+    "machineEvidenceReplacesHumanReview": false
+  },
+  "workbenchContract": {
+    "candidateCount": 3,
+    "selectedCandidateCount": 1,
+    "selectedBodyCount": 1,
+    "desktopColumns": 2,
+    "mobileColumns": 1,
+    "candidateBodyInternalScroll": true
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "ontologyPublicationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
+  }
+}

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-13T20:50:02.402Z",
-  "sourceSha": "75027ffa8e8ad26dfea2048a6429f36c5607c980",
+  "generatedAt": "2026-08-13T21:44:58.077Z",
+  "sourceSha": "6453a595d4771d64f07d79d3f042509be876c707",
   "overall": "open",
   "gates": [
     {
@@ -417,8 +417,8 @@
       "id": "hermes_knowledge_review_ui",
       "state": "proven",
       "label": "Hermes knowledge reviewer UI",
-      "evidencePath": "evaluation\\hermes-knowledge-review-authority-ui-2026-07-25\\report.json",
-      "detail": "Live authenticated reviewer cockpit passes 8/8 Day/Night desktop and mobile geometry cases, exposes six SIF -> KOSHA -> law -> tenant-memory evidence roles, requires law provenance and site-manager acceptance, and performs no DB, provider, publication, or Share mutation. LLM Wiki/RLS remain APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE.",
+      "evidencePath": "evaluation\\hermes-knowledge-review-selected-workbench-2026-08-14\\report.json",
+      "detail": "Live authenticated reviewer cockpit passes 8/8 Day/Night desktop and mobile geometry cases with three navigable candidates, exactly one selected candidate/body, desktop two-column and mobile one-column containment, and internal candidate-body scroll. It exposes six SIF -> KOSHA -> law -> tenant-memory evidence roles, requires law provenance and site-manager acceptance, and performs no DB, provider, publication, or Share mutation. LLM Wiki/RLS remain APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": []
     },
     {
