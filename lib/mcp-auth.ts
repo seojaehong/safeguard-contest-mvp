@@ -166,6 +166,7 @@ export function decideAuthContext(input: {
   legacyTokens: Set<string>;
   token: string;
 }): McpAuthContext | null {
+  if (input.dbRow?.disabled) return null;
   const dbContext = buildDbContext(input.dbRow);
   if (dbContext) return dbContext;
   if (matchesLegacyToken(input.token, input.legacyTokens)) return buildEnvContext();
@@ -235,7 +236,8 @@ export function isMcpEnabled(): boolean {
 
 /**
  * Bearer 토큰을 인증 컨텍스트로 해석한다.
- * 1) Supabase 서비스 롤이 있으면 sha256 해시로 mcp_tokens 조회(disabled=false).
+ * 1) Supabase 서비스 롤이 있으면 sha256 해시로 mcp_tokens 조회.
+ *    해시가 disabled 행과 일치하면 env 레거시 폴백보다 먼저 인증을 거부한다.
  *    매칭 시 last_used_at을 fire-and-forget으로 갱신.
  * 2) DB 조회가 성공했지만 미매칭이거나 DB가 미설정이면 env 레거시 토큰으로 폴백.
  *    DB 조회 오류/예외는 env 토큰을 평가하지 않고 인증 실패.
@@ -254,13 +256,13 @@ export async function resolveMcpAuth(bearerToken: string | undefined | null): Pr
         .from("mcp_tokens")
         .select("id, site_id, org_id, scopes, disabled")
         .eq("token_hash", tokenHash)
-        .eq("disabled", false)
         .maybeSingle();
       if (error) {
         log.warn("mcp_tokens lookup failed — authentication denied", error);
         return null;
       } else if (data) {
         const persistedRow = data as McpTokenRow;
+        if (persistedRow.disabled) return null;
         if (!(await verifyPersistedTenantIdentity(client, persistedRow))) {
           log.warn("MCP token tenant identity could not be proven");
           return null;

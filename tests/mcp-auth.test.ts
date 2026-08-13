@@ -285,6 +285,11 @@ describe("decideAuthContext", () => {
     const disabled = { ...dbRow, disabled: true };
     expect(decideAuthContext({ dbRow: disabled, legacyTokens: legacy, token: "unknown" })).toBeNull();
   });
+
+  it("denies a disabled db token before considering the matching legacy fallback", () => {
+    const disabled = { ...dbRow, disabled: true };
+    expect(decideAuthContext({ dbRow: disabled, legacyTokens: legacy, token: "legacy-token" })).toBeNull();
+  });
 });
 
 describe("computeEnablement", () => {
@@ -357,6 +362,19 @@ describe("resolveMcpAuth tenant identity", () => {
     const existingOrg = { id: "org-1" };
     const fake = makeAuthClient({
       tokenRow: { ...tokenRow, site_id: null, org_id: existingOrg.id },
+    });
+    vi.mocked(createSupabaseAdminClient).mockReturnValue(fake.client);
+
+    await expect(resolveMcpAuth("persisted-token")).resolves.toBeNull();
+    expect(fake.lookups).toEqual([]);
+    expect(fake.updates).toEqual([]);
+  });
+
+  it("rejects a disabled persisted token even when the same plaintext remains in the legacy environment", async () => {
+    vi.stubEnv("SAFECLAW_MCP_TOKENS", "persisted-token");
+    const fake = makeAuthClient({
+      tokenRow: { ...tokenRow, disabled: true },
+      site: { data: { id: "site-1", organization_id: "org-1" } },
     });
     vi.mocked(createSupabaseAdminClient).mockReturnValue(fake.client);
 
