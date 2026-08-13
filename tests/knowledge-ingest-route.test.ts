@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { buildKnowledgeIngestRunId } from "@/lib/knowledge-ingest-idempotency";
 
 const mocks = vi.hoisted(() => ({
   createSupabaseAdminClient: vi.fn(),
@@ -59,6 +60,8 @@ function fakeClient(options: {
   existingEvents?: QueryResult[];
   eventInsert?: QueryResult;
   eventUpdate?: QueryResult;
+  runInsert?: QueryResult;
+  existingRun?: QueryResult;
 } = {}) {
   const calls: QueryCall[] = [];
   const writes: WriteCall[] = [];
@@ -118,16 +121,23 @@ function fakeClient(options: {
         }
 
         if (table === "knowledge_regeneration_runs") {
-          return {
+          const query = {
+            select: () => query,
+            eq(column: string, value: unknown) {
+              calls.push({ table, method: "eq", column, value });
+              return query;
+            },
+            maybeSingle: async () => options.existingRun ?? { data: null, error: null },
             insert(payload: unknown) {
               writes.push({ table, method: "insert", payload });
               return {
                 select: () => ({
-                  single: async () => ({ data: { id: "run-db-1" }, error: null }),
+                  single: async () => options.runInsert ?? { data: { id: "run-db-1" }, error: null },
                 }),
               };
             },
           };
+          return query;
         }
 
         throw new Error(`Unexpected table ${table}`);
@@ -240,6 +250,7 @@ describe("knowledge ingest tenant binding", () => {
       storageMode: "persistent",
       savedEventId: "event-db-1",
       savedRunId: "run-db-1",
+      runCreated: true,
     });
     expect(fake.calls).toEqual([
       { table: "sites", method: "eq", column: "id", value: "site-1" },
@@ -364,5 +375,119 @@ describe("knowledge ingest tenant binding", () => {
       { table: "knowledge_events", method: "eq", column: "source", value: "manual" },
       { table: "knowledge_events", method: "eq", column: "source_id", value: "event-1" },
     ]);
+  });
+
+  it("reuses the deterministic run after a concurrent replay hits the primary key", async () => {
+    const runId = buildKnowledgeIngestRunId({
+      organizationId: "org-1",
+      siteId: "site-1",
+      source: "manual",
+      sourceId: "event-1",
+      capturedAt: "2026-07-17T00:00:00.000Z",
+      title: "이동식 비계 작업 검토",
+      url: null,
+      payload: {},
+      relatedHazardIds: [],
+      reflectedDocuments: ["위험성평가표"],
+    });
+    const fake = fakeClient({
+      runInsert: {
+        data: null,
+        error: { code: "23505", message: "duplicate key value violates primary key" },
+      },
+      existingRun: {
+        data: {
+          id: runId,
+          organization_id: "org-1",
+          site_id: "site-1",
+          raw_event_ids: ["event-db-1"],
+        },
+        error: null,
+      },
+    });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    const { POST } = await import("@/app/api/knowledge/ingest/route");
+
+    const response = await POST(request());
+    const payload = await response.json() as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(payload).toMatchObject({ savedRunId: runId, runCreated: false });
+    expect(fake.writes[1]).toMatchObject({
+      table: "knowledge_regeneration_runs",
+      payload: { id: runId, raw_event_ids: ["event-db-1"] },
+    });
+  });
+
+  it("fails closed when a deterministic run collision has a different source event", async () => {
+    const runId = buildKnowledgeIngestRunId({
+      organizationId: "org-1",
+      siteId: "site-1",
+      source: "manual",
+      sourceId: "event-1",
+      capturedAt: "2026-07-17T00:00:00.000Z",
+      title: "이동식 비계 작업 검토",
+      url: null,
+      payload: {},
+      relatedHazardIds: [],
+      reflectedDocuments: ["위험성평가표"],
+    });
+    const fake = fakeClient({
+      runInsert: {
+        data: null,
+        error: { code: "23505", message: "duplicate key value violates primary key" },
+      },
+      existingRun: {
+        data: {
+          id: runId,
+          organization_id: "org-1",
+          site_id: "site-1",
+          raw_event_ids: ["event-other"],
+        },
+        error: null,
+      },
+    });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    const { POST } = await import("@/app/api/knowledge/ingest/route");
+
+    const response = await POST(request());
+
+    expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({ ok: false });
+  });
+});
+
+describe("knowledge ingest run identity", () => {
+  const identity = {
+    organizationId: "org-1",
+    siteId: "site-1",
+    source: "manual",
+    sourceId: "event-1",
+    capturedAt: "2026-07-17T00:00:00.000Z",
+    title: "이동식 비계 작업 검토",
+    url: null,
+    payload: { nested: { beta: 2, alpha: 1 }, active: true },
+    relatedHazardIds: ["hazard-b", "hazard-a"],
+    reflectedDocuments: ["TBM 브리핑", "위험성평가표"],
+  };
+
+  it("is stable across object key and set-like array ordering", () => {
+    const first = buildKnowledgeIngestRunId(identity);
+    const reordered = buildKnowledgeIngestRunId({
+      ...identity,
+      payload: { active: true, nested: { alpha: 1, beta: 2 } },
+      relatedHazardIds: ["hazard-a", "hazard-b"],
+      reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
+    });
+
+    expect(reordered).toBe(first);
+    expect(first).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-8[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+  });
+
+  it("changes when replay-relevant content changes", () => {
+    const first = buildKnowledgeIngestRunId(identity);
+
+    expect(buildKnowledgeIngestRunId({ ...identity, title: `${identity.title} 변경` })).not.toBe(first);
+    expect(buildKnowledgeIngestRunId({ ...identity, payload: { ...identity.payload, active: false } })).not.toBe(first);
   });
 });

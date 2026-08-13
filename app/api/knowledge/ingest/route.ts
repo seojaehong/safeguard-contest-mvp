@@ -12,6 +12,7 @@ import {
   enforcePublicJsonRequestBodyBudget,
   KNOWLEDGE_WRITE_REQUEST_MAX_BYTES
 } from "@/lib/public-work-budget";
+import { buildKnowledgeIngestRunId } from "@/lib/knowledge-ingest-idempotency";
 
 export const dynamic = "force-dynamic";
 
@@ -81,6 +82,7 @@ export async function POST(request: NextRequest) {
   }
   let savedEventId: string | null = null;
   let savedRunId: string | null = null;
+  let runCreated = false;
 
   try {
     if (client && user) {
@@ -223,9 +225,22 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      const deterministicRunId = buildKnowledgeIngestRunId({
+        organizationId: context.organizationId,
+        siteId: context.siteId,
+        source: normalized.event.source,
+        sourceId: normalized.event.sourceId,
+        capturedAt: normalized.event.capturedAt,
+        title: normalized.event.title,
+        url: normalized.event.url || null,
+        payload: normalized.event.payload,
+        relatedHazardIds: normalized.event.relatedHazardIds,
+        reflectedDocuments: normalized.event.reflectedDocuments,
+      });
       const { data: runData, error: runError } = await client
         .from("knowledge_regeneration_runs")
         .insert({
+          id: deterministicRunId,
           organization_id: context.organizationId,
           site_id: context.siteId,
           question,
@@ -241,8 +256,37 @@ export async function POST(request: NextRequest) {
         .select("id")
         .single();
 
-      if (runError) throw runError;
-      savedRunId = runData.id;
+      if (!runError) {
+        savedRunId = runData.id;
+        runCreated = true;
+      } else if (runError.code === "23505") {
+        const { data: existingRun, error: existingRunError } = await client
+          .from("knowledge_regeneration_runs")
+          .select("id,organization_id,site_id,raw_event_ids")
+          .eq("id", deterministicRunId)
+          .eq("organization_id", context.organizationId)
+          .eq("site_id", context.siteId)
+          .maybeSingle();
+        if (existingRunError) throw existingRunError;
+        if (
+          !existingRun
+          || existingRun.id !== deterministicRunId
+          || existingRun.organization_id !== context.organizationId
+          || existingRun.site_id !== context.siteId
+          || !Array.isArray(existingRun.raw_event_ids)
+          || existingRun.raw_event_ids.length !== 1
+          || existingRun.raw_event_ids[0] !== savedEventId
+        ) {
+          return NextResponse.json({
+            ok: false,
+            configured: true,
+            message: "동일 ingest run의 귀속 또는 원본 이벤트가 일치하지 않습니다."
+          }, { status: 409 });
+        }
+        savedRunId = existingRun.id;
+      } else {
+        throw runError;
+      }
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -265,6 +309,7 @@ export async function POST(request: NextRequest) {
     storageMode: "persistent",
     savedEventId,
     savedRunId,
+    runCreated,
     event: normalized.event,
     proposedWikiUpdate: {
       hazardIds: regenerationBundle.matchedHazards.map((hazard) => hazard.id),
