@@ -16,7 +16,7 @@ import {
   CURRENT_WORKPACK_STORAGE_KEY,
   parseStoredCurrentWorkpack
 } from "@/lib/current-workpack";
-import { fetchAskStream } from "@/lib/ask-stream-client";
+import { fetchAskStream, shouldRetryAskViaLegacy } from "@/lib/ask-stream-client";
 import { nextConsoleLines, type AgentConsoleLine } from "@/lib/agent-console-copy";
 import type { AskResponse, IntegrationMode, QualityContractStatus } from "@/lib/types";
 import { buildDbHarnessSurfaceContract, type HarnessImprovement, type HarnessMemoryInput } from "@/lib/db-harness";
@@ -1742,9 +1742,17 @@ export function SafeGuardCommandCenter({
       })) as AskResponse;
       applyGeneratedPayload(payload);
     } catch (streamError) {
-      // Stream fetch failed (non-200, network error, or ended without a final
-      // event) — fall back to the existing non-streaming path. Existing
-      // behavior/state contract must be preserved 100% on fallback.
+      if (!shouldRetryAskViaLegacy(streamError)) {
+        console.warn("AI 작업 콘솔 요청이 admission 경계에서 중단됐습니다.", streamError);
+        setState("error");
+        setWorkspacePage(nextWorkspacePageAfterGenerationError());
+        setMessage(streamError instanceof Error
+          ? streamError.message
+          : "문서팩 생성 보호 상태를 확인해야 합니다. 잠시 후 다시 시도해 주세요.");
+        return;
+      }
+      // Transport failures or streams without a final event can use the
+      // non-streaming path. Explicit HTTP admission failures must not retry.
       console.warn("AI 작업 콘솔 스트림 생성 실패 — 기존 경로로 재시도합니다.", streamError);
       setConsoleLines((current) => [
         ...current,

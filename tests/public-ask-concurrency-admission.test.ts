@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { acquirePublicAskWorkLease } from "@/lib/public-ask-admission";
+import {
+  acquirePublicAskWorkLease,
+  checkPublicAskProviderAdmission,
+} from "@/lib/public-ask-admission";
 
 describe("public ask weighted concurrency admission", () => {
   beforeEach(() => {
@@ -58,11 +61,19 @@ describe("public ask weighted concurrency admission", () => {
     await expect(lease?.release()).resolves.toBeUndefined();
   });
 
-  it("preserves weighted instance admission until distributed production configuration is activated", async () => {
+  it.each(["enhanced", "full"] as const)("fails %s mode closed until distributed production configuration is activated", async (aiMode) => {
     vi.stubEnv("VERCEL_ENV", "production");
 
-    const lease = await acquirePublicAskWorkLease("enhanced");
-    expect(lease?.weight).toBe(2);
-    await lease?.release();
+    const request = new Request("https://www.safeclaw.kr/api/ask", {
+      headers: { "x-forwarded-for": "203.0.113.120" },
+    });
+    await expect(checkPublicAskProviderAdmission(request, aiMode)).resolves.toMatchObject({
+      allowed: false,
+      mode: "distributed",
+      reason: "distributed_limiter_unavailable",
+    });
+    await expect(acquirePublicAskWorkLease(aiMode)).rejects.toThrow(
+      "distributed concurrency is required in production",
+    );
   });
 });

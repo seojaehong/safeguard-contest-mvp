@@ -150,9 +150,7 @@ export async function POST(request: NextRequest) {
       async (signal): Promise<PreparationExecution> => {
         let lease;
         try {
-          lease = await acquirePublicAskWorkLease("enhanced", {
-            requireDistributedInProduction: true
-          });
+          lease = await acquirePublicAskWorkLease("enhanced");
         } catch (error) {
           console.error("knowledge review preparation admission unavailable", error);
           return { admitted: false };

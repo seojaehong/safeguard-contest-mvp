@@ -19,7 +19,9 @@ import {
   acquirePublicAskWorkLease,
   applyPublicAskWorkHeaders,
   checkPublicAskAdmission,
+  checkPublicAskProviderAdmission,
   publicAskConcurrencyResponse,
+  publicAskUsesProvider,
   type PublicAskWorkLease,
 } from "@/lib/public-ask-admission";
 import { resolveRunAskMode } from "@/lib/run-ask-mode";
@@ -71,6 +73,13 @@ export async function POST(request: NextRequest) {
     requestedMode: requestedMode && ALLOWED_MODES.includes(requestedMode) ? requestedMode : undefined,
     envDefault: process.env.AI_MODE_DEFAULT,
   });
+  let effectiveRateLimit = rateLimit;
+  if (publicAskUsesProvider(aiMode)) {
+    const providerRateLimit = await checkPublicAskProviderAdmission(request, aiMode);
+    const providerLimited = publicRateLimitResponse(providerRateLimit);
+    if (providerLimited) return providerLimited;
+    effectiveRateLimit = providerRateLimit;
+  }
   const harnessMemory = parseHarnessMemoryInput(record.harnessMemory);
   let workLease: PublicAskWorkLease | null;
   try {
@@ -79,9 +88,9 @@ export async function POST(request: NextRequest) {
     log.error("public ask concurrency admission unavailable", {
       errorType: error instanceof Error ? error.name : typeof error,
     });
-    return applyPublicRateLimitHeader(publicAskConcurrencyResponse(aiMode), rateLimit);
+    return applyPublicRateLimitHeader(publicAskConcurrencyResponse(aiMode), effectiveRateLimit);
   }
-  if (!workLease) return applyPublicRateLimitHeader(publicAskConcurrencyResponse(aiMode), rateLimit);
+  if (!workLease) return applyPublicRateLimitHeader(publicAskConcurrencyResponse(aiMode), effectiveRateLimit);
 
   const workController = new AbortController();
   const abortWork = () => workController.abort(request.signal.reason);
@@ -143,5 +152,5 @@ export async function POST(request: NextRequest) {
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive"
     }
-  }), rateLimit), aiMode, workLease.weight);
+  }), effectiveRateLimit), aiMode, workLease.weight);
 }

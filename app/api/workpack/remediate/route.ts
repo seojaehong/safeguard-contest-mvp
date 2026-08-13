@@ -245,9 +245,7 @@ export async function POST(request: NextRequest) {
 
   let workLease: PublicAskWorkLease | null;
   try {
-    workLease = await acquirePublicAskWorkLease("enhanced", {
-      requireDistributedInProduction: true
-    });
+    workLease = await acquirePublicAskWorkLease("enhanced");
   } catch (error) {
     console.error("Workpack remediation admission unavailable", error);
     return applyPublicRateLimitHeader(publicAskConcurrencyResponse("enhanced"), rateLimit);

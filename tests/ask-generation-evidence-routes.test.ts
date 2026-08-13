@@ -215,6 +215,28 @@ describe("ask generation evidence routes", () => {
     expect(mocks.runAsk).toHaveBeenCalledTimes(10);
   });
 
+  it.each([
+    ["JSON enhanced", "/api/ask", "enhanced", () => import("@/app/api/ask/route")],
+    ["JSON full", "/api/ask", "full", () => import("@/app/api/ask/route")],
+    ["SSE enhanced", "/api/ask/stream", "enhanced", () => import("@/app/api/ask/stream/route")],
+    ["SSE full", "/api/ask/stream", "full", () => import("@/app/api/ask/stream/route")],
+  ] as const)("fails %s provider generation closed when distributed production admission is absent", async (_label, path, aiMode, loadRoute) => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    const { POST } = await loadRoute();
+
+    const response = await POST(requestWithBody(path, {
+      question: "성수동 외벽 도장 작업",
+      aiMode,
+    }, { ip: `203.0.113.${path.includes("stream") ? "121" : "120"}` }));
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({
+      code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    });
+    expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("distributed");
+    expect(mocks.runAsk).not.toHaveBeenCalled();
+  });
+
   it("holds a full-mode work lease until the SSE consumer cancels", async () => {
     let receivedSignal: AbortSignal | undefined;
     mocks.runAsk.mockImplementationOnce(async (_question, options: { signal?: AbortSignal }) => {

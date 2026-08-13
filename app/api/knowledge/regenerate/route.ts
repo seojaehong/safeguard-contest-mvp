@@ -28,9 +28,7 @@ const limiter = createRateLimiter({
 const postCandidate = createKnowledgeCandidatePostHandler({
   generateText: generateKnowledgeText,
   mutationGateway: BLOCKED_KNOWLEDGE_MUTATION_GATEWAY,
-  acquireGenerationLease: () => acquirePublicAskWorkLease("enhanced", {
-    requireDistributedInProduction: true
-  })
+  acquireGenerationLease: () => acquirePublicAskWorkLease("enhanced")
 });
 
 export async function POST(request: NextRequest) {

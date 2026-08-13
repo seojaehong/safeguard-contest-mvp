@@ -13,11 +13,27 @@ export type AskStreamRequest = {
   harnessMemory?: HarnessMemoryInput;
 };
 
+export class AskStreamHttpError extends Error {
+  readonly code: string | null;
+  readonly status: number;
+
+  constructor(message: string, status: number, code: string | null) {
+    super(message);
+    this.name = "AskStreamHttpError";
+    this.code = code;
+    this.status = status;
+  }
+}
+
+export function shouldRetryAskViaLegacy(error: unknown): boolean {
+  return !(error instanceof AskStreamHttpError);
+}
+
 /**
  * Fetches /api/ask/stream, calling `onEvent` for every parsed SSE frame, and
  * resolves with the `final` event's payload. Throws (never resolves) if the
  * response isn't ok, the body is missing, or the stream ends without ever
- * emitting a `final` event — callers should catch and fall back to /api/ask.
+ * emitting a `final` event. Callers may retry only non-HTTP transport failures.
  */
 export async function fetchAskStream(
   request: AskStreamRequest,
@@ -31,8 +47,22 @@ export async function fetchAskStream(
     signal
   });
 
-  if (!response.ok || !response.body) {
-    throw new Error(`문서팩 스트림 요청 실패: HTTP ${response.status}`);
+  if (!response.ok) {
+    const payload: unknown = await response.json().catch(() => null);
+    const body = typeof payload === "object" && payload !== null && !Array.isArray(payload)
+      ? payload as Record<string, unknown>
+      : {};
+    const message = typeof body.error === "string"
+      ? body.error
+      : `문서팩 스트림 요청 실패: HTTP ${response.status}`;
+    throw new AskStreamHttpError(
+      message,
+      response.status,
+      typeof body.code === "string" ? body.code : null,
+    );
+  }
+  if (!response.body) {
+    throw new Error("문서팩 스트림 응답 본문을 확인할 수 없습니다.");
   }
 
   const reader = response.body.getReader();
