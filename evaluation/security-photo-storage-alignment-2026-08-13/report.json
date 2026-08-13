@@ -1,0 +1,47 @@
+{
+  "schema": "safeclaw-security-photo-storage-alignment/v1",
+  "generatedAt": "2026-08-13T18:15:42.8256917+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LIVE_PENDING",
+  "productCommit": "584aa5ba",
+  "finding": {
+    "anchor": "photo-analysis-before-unpersistable-upload",
+    "severity": "medium",
+    "baselineScanId": "c98ffa84-9951-4f68-9e1d-11f456abe901",
+    "baselineCommit": "003c48838b2c4365203de3cc2dae230200c79e96"
+  },
+  "remediation": {
+    "status": "SOURCE_FIXED",
+    "maxBytesPerPhoto": 10485760,
+    "allowedMimeTypes": ["image/jpeg", "image/png", "image/webp"],
+    "providerCalledForUnpersistableFile": false,
+    "detail": "The shared photo validator now matches the commercial storage bucket before provider analysis."
+  },
+  "verification": {
+    "focusedAndAdjacent": {
+      "files": 5,
+      "tests": 59,
+      "result": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "result": "PASS",
+      "staticPages": 28
+    },
+    "diffCheck": "PASS",
+    "targetedSecretScan": "PASS"
+  },
+  "mutationBoundary": {
+    "photoProviderCalled": false,
+    "storageUploadPerformed": false,
+    "dbSchemaChanged": false,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutation": false,
+    "wikiPublished": false,
+    "koshaRegistryMutated": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "liveDeploymentVerification": "PENDING"
+  }
+}
