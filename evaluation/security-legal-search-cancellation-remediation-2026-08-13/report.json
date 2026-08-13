@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "safeclaw-security-legal-search-cancellation-remediation/v1",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LIVE_PENDING",
+  "sourceHead": "859de0e3823ed91ca558a3929240db58ff97182b",
+  "productCommit": "859de0e3823ed91ca558a3929240db58ff97182b",
+  "productionBuild": {
+    "commitSha": "89d029b7c585546e0d4f4dad6d787c2ffe95ae94",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-2cf1swjkz-seojaehongs-projects.vercel.app",
+    "sourceHeadLive": false
+  },
+  "finding": {
+    "slug": "legal-search-disconnect-not-propagated",
+    "severity": "low",
+    "baselineRevision": "003c48838b2c4365203de3cc2dae230200c79e96",
+    "remediation": "Count consumers of each coalesced query and abort provider fan-out only after the final request disconnects."
+  },
+  "contracts": {
+    "routePassesSharedSignalToRunSearch": true,
+    "runSearchPassesSignalToLegalSources": true,
+    "equivalentConcurrentQueriesCoalesce": true,
+    "firstConsumerDisconnectKeepsProviderAlive": true,
+    "finalConsumerDisconnectAbortsProvider": true,
+    "queryBudgetPreserved": true,
+    "distributedAndInstanceRateLimitsPreserved": true
+  },
+  "verification": {
+    "focused": {
+      "files": 2,
+      "tests": 16,
+      "status": "PASS"
+    },
+    "adjacent": {
+      "files": 5,
+      "tests": 34,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "diffCheck": "PASS",
+    "secretScan": "PASS"
+  },
+  "mutationBoundary": {
+    "legalProviderCalled": false,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedBoundariesPreserved": true,
+    "liveAfterDeploymentRequired": true
+  }
+}
