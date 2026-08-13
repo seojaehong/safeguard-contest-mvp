@@ -417,6 +417,7 @@ export function buildHarnessAgentResult(input: {
   referenceSearch: HarnessAgentSearchSummary[];
   auth?: HarnessAgentAuthSummary;
   memoryStages?: TenantHarnessMemoryStage[];
+  packetExposure?: "public" | "trusted_runtime";
 }): HarnessAgentResult {
   const internalPacket = buildDbHarnessPacket({
     question: input.question,
@@ -431,7 +432,9 @@ export function buildHarnessAgentResult(input: {
     }
   });
   const promptContext = buildHarnessPromptContext(internalPacket);
-  const packet = buildPublicDbHarnessPacket(internalPacket);
+  const packet = input.packetExposure === "trusted_runtime"
+    ? internalPacket
+    : buildPublicDbHarnessPacket(internalPacket);
   const tenantMemoryDigest = buildRuntimeTenantMemoryDigest(input.tenantMemory);
   const inferredSiteScope: TenantHarnessMemoryStage["siteScope"] = input.auth?.siteId
     ? "site"

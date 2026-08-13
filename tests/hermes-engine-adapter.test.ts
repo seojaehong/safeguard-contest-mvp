@@ -10,6 +10,7 @@ import type {
 } from "@/lib/safety-reference-catalog";
 import { isProductionTrustedKoshaReference } from "@/lib/production-kosha-trust";
 import * as safetyReferenceServer from "@/lib/safety-reference-catalog-server";
+import * as supabaseAdmin from "@/lib/supabase-admin";
 import {
   createExperimentalHermesAdapter,
   createRemoteHermesAdapter,
@@ -422,6 +423,7 @@ describe("experimental Hermes EngineAdapter", () => {
   });
 
   it("accepts the production executeClawTool Harness packet with controlled grounded searches", async () => {
+    const adminSpy = vi.spyOn(supabaseAdmin, "createSupabaseAdminClient").mockReturnValue(null);
     const searchSpy = vi.spyOn(safetyReferenceServer, "searchSafetyReferences").mockImplementation(
       async (options) => {
         if (options.itemType === "sif-case") {
@@ -448,10 +450,14 @@ describe("experimental Hermes EngineAdapter", () => {
 
     let searchCalls = 0;
     try {
-      await expect(engine.run(runInput())).resolves.toBeUndefined();
+      await expect(engine.run({
+        ...runInput(),
+        prompt: "외벽 도장 작업의 추락 위험을 점검해줘",
+      })).resolves.toBeUndefined();
       searchCalls = searchSpy.mock.calls.length;
     } finally {
       searchSpy.mockRestore();
+      adminSpy.mockRestore();
     }
 
     expect(searchCalls).toBe(3);

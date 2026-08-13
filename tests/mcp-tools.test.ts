@@ -204,6 +204,41 @@ describe("buildHarnessAgentResult", () => {
     expect(result.openClawUsageNote).toContain("OpenClaw");
   });
 
+  it("retains evidence bodies only for the broker-authorized runtime packet", () => {
+    const reference = {
+      id: "sif-runtime-1",
+      source_id: "kosha-sif",
+      item_type: "sif-case" as const,
+      category: "건설",
+      subcategory: null,
+      title: "외벽 도장 중 추락",
+      summary: "재해개요: 외벽 도장 중 추락",
+      body: "재해개요: 외벽 도장 중 추락. 위험성 감소대책: 난간 보강.",
+      keywords: ["외벽", "도장"],
+      risk_tags: ["추락"],
+      primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+      controls: ["난간 보강"],
+      evidence_role: "supporting" as const,
+    };
+    const shared = {
+      question: "성수동 외벽 도장 작업",
+      references: [reference],
+      referenceSearch: [],
+    };
+
+    const publicResult = buildHarnessAgentResult(shared);
+    const runtimeResult = buildHarnessAgentResult({
+      ...shared,
+      packetExposure: "trusted_runtime",
+    });
+
+    expect(publicResult.packet.sifCases[0]?.body).toBeUndefined();
+    expect(runtimeResult.packet.sifCases[0]?.body).toBe(reference.body);
+    expect(runtimeResult.packet.workpackMemory).toEqual([]);
+    expect(runtimeResult.packet.improvementMemory).toEqual([]);
+    expect(runtimeResult.packetClassification.rawMemoryForwardingAllowed).toBe(false);
+  });
+
   it("keeps search retrieval mode and vector status in the harness agent payload", () => {
     const result = buildHarnessAgentResult({
       question: "성수동 외벽 도장 작업",

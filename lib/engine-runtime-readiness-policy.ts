@@ -3,6 +3,7 @@ import {
   resolveRemoteHermesEndpointPolicy,
 } from "@/lib/remote-hermes-runtime";
 import { validateRemoteHermesPolicyAttestation } from "@/lib/remote-hermes-contract";
+import { isRemoteHermesAttemptLedgerConfigured } from "@/lib/remote-hermes-upstash-ledger";
 
 export type EngineRequestedMode = EngineMode | "unsupported";
 export type EngineRuntimeReadinessState =
@@ -105,15 +106,16 @@ export function assessEngineRuntimeReadiness(env: EnvLike): EngineRuntimeReadine
       issueCodes.push("remote-policy-attestation-required");
     }
     const contractReady = issueCodes.length === 0;
+    const durableLedgerReady = isRemoteHermesAttemptLedgerConfigured(env);
     return {
       requestedMode: requested,
       resolvedMode: resolved,
       state: contractReady ? "remote-contract-ready" : "configuration-required",
-      issueCodes: contractReady
+      issueCodes: contractReady && !durableLedgerReady
         ? ["remote-attempt-ledger-required"]
         : issueCodes,
       contractReady,
-      executionReady: false,
+      executionReady: contractReady && durableLedgerReady,
     };
   }
 

@@ -68,9 +68,24 @@ function approvedCurrentKoshaReference(): SafetyReferenceItem {
 
 describe("OpenClaw Hermes production route", () => {
   beforeEach(() => {
+    vi.unstubAllEnvs();
     vi.resetModules();
     mocks.createAgentChatPost.mockClear();
     mocks.createProductionEngineAdapter.mockClear();
+  });
+
+  it("injects the durable ledger only from explicit safe configuration", async () => {
+    vi.stubEnv("SAFECLAW_REMOTE_HERMES_LEDGER_MODE", "upstash");
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://ledger.example.test");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "ledger-token");
+
+    await import("@/app/api/agent/chat/route");
+
+    const dependencies = mocks.createProductionEngineAdapter.mock.calls[0]?.[1];
+    expect(dependencies?.remoteHermes?.attemptLedger).toMatchObject({
+      reserve: expect.any(Function),
+      recordTerminal: expect.any(Function),
+    });
   });
 
   it("injects a production KOSHA verifier that rejects metadata-only body claims", async () => {

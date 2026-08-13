@@ -198,6 +198,32 @@ describe("remote Hermes production route", () => {
     });
   });
 
+  it("reports execution readiness only with an explicit safe durable ledger configuration", () => {
+    expect(assessEngineRuntimeReadiness({
+      ...createRemoteEnv(),
+      SAFECLAW_REMOTE_HERMES_LEDGER_MODE: "upstash",
+      UPSTASH_REDIS_REST_URL: "https://ledger.example.test",
+      UPSTASH_REDIS_REST_TOKEN: "ledger-token",
+      VERCEL: "1",
+    })).toMatchObject({
+      state: "remote-contract-ready",
+      contractReady: true,
+      executionReady: true,
+      issueCodes: [],
+    });
+
+    expect(assessEngineRuntimeReadiness({
+      ...createRemoteEnv(),
+      SAFECLAW_REMOTE_HERMES_LEDGER_MODE: "upstash",
+      UPSTASH_REDIS_REST_URL: "http://ledger.example.test",
+      UPSTASH_REDIS_REST_TOKEN: "ledger-token",
+      VERCEL: "1",
+    })).toMatchObject({
+      executionReady: false,
+      issueCodes: ["remote-attempt-ledger-required"],
+    });
+  });
+
   it("uses the runtime URL normalization and hostname allowlist policy in readiness", () => {
     const env = createRemoteEnv();
     env.SAFECLAW_REMOTE_HERMES_ENDPOINT = "https://hermes.example.test:443/v1/naturalize";

@@ -108,6 +108,7 @@ export async function executeClawTool(
           orgId: authContext.orgId,
           tokenBound: Boolean(authContext.tokenId),
         } : undefined,
+        packetExposure: authContext?.source === "broker" ? "trusted_runtime" : "public",
       });
     }
     case "get_weather_signals": {
