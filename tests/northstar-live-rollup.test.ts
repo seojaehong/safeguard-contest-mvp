@@ -341,6 +341,20 @@ type RollupReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  publicAskDistributedAdmission: {
+    verdict: string;
+    sourceHead: string;
+    productCommit: string;
+    productionCommit: string;
+    findingId: string;
+    localCaseCount: number;
+    liveCaseCount: number;
+    providerCallExecuted: boolean;
+    distributedBackendActivation: string;
+    freshFollowUpScan: string;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   mcpProviderAdmission: {
     verdict: string;
     findingId: string;
@@ -534,6 +548,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "improvement_photo_analysis_budget", state: "notice", evidencePath: "evaluation/improvement-photo-analysis-budget-2026-08-11/report.json", detail: "photo budgets are live with instance admission and distributed activation open" },
       { id: "public_provider_cancellation", state: "notice", evidencePath: "evaluation/public-provider-cancellation-2026-08-11/report.json", detail: "provider cancellation is source-proven in deployed production with live provider probe held" },
       { id: "public_provider_admission", state: "notice", evidencePath: "evaluation/public-provider-admission-2026-08-11/report.json", detail: "weighted instance admission is live with distributed activation pending" },
+      { id: "public_ask_distributed_admission", state: "proven", evidencePath: "evaluation/public-ask-distributed-admission-2026-08-14/report.json", detail: "JSON and SSE provider modes fail closed without distributed admission" },
       { id: "learning_export_renderer_security", state: "proven", evidencePath: "evaluation/learning-export-renderer-security-2026-08-02/report.json", detail: "renderer-independent inert learning export source contract" },
       { id: "hermes_remote_durable_ledger", state: "proven", evidencePath: "evaluation/hermes-openclaw-runtime-current-gate-2026-07-20/report.json", detail: "durable ledger wired without authenticated execution claim" },
       { id: "live_document_secondary_grounding", state: "proven", evidencePath: "evaluation/live-document-secondary-grounding-2026-07-25/report.json", detail: "all 30 supporting documents passed scenario grounding" },
@@ -1300,6 +1315,21 @@ function createFixtureRoot(): { root: string; head: string } {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/public-ask-distributed-admission-2026-08-14/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_ASK_PROVIDER_MODES_FAIL_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION",
+    sourceHead: "TO_FILL",
+    productCommit: "TO_FILL",
+    productionCommit: "TO_FILL",
+    securityFinding: { findingId: "csf_9b3cc6648586dabf4bfa61e9" },
+    localProductionProbe: { providerCallExecuted: false, cases: [{}, {}, {}] },
+    liveProductionProbe: { providerCallExecuted: false, cases: [{}, {}, {}, {}, {}] },
+    remainingBoundaries: {
+      distributedBackendActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      freshFollowUpScan: "REQUIRED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/share-recipient-contact-verification-2026-08-14/report.json", {
     verdict: "PASS_LIVE_DEPLOYED_SOURCE_SHARE_RECIPIENT_CONTACT_VERIFICATION_RESCAN_PENDING",
     sourceHead: "TO_FILL",
@@ -1434,6 +1464,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/improvement-photo-analysis-budget-2026-08-11/report.json",
     "evaluation/public-provider-cancellation-2026-08-11/report.json",
     "evaluation/public-provider-admission-2026-08-11/report.json",
+    "evaluation/public-ask-distributed-admission-2026-08-14/report.json",
     "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json",
     "evaluation/security-mcp-provider-admission-2026-08-14/report.json",
     "evaluation/share-recipient-contact-verification-2026-08-14/report.json",
@@ -1814,6 +1845,18 @@ describe("northstar live rollup", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.evidence.find((item) => item.id === "public_provider_admission")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.publicAskDistributedAdmission).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_ASK_PROVIDER_MODES_FAIL_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION",
+      findingId: "csf_9b3cc6648586dabf4bfa61e9",
+      localCaseCount: 3,
+      liveCaseCount: 5,
+      providerCallExecuted: false,
+      distributedBackendActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      freshFollowUpScan: "REQUIRED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "public_ask_distributed_admission")?.productionStatus).toBe("ancestor_of_head");
     expect(report.mcpGenerationWorkBudgetSecurity).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
       postBodyMaxBytes: 98304,

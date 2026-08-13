@@ -50,6 +50,7 @@ const ARTIFACTS = Object.freeze({
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
   publicProviderAdmission: path.join("evaluation", "public-provider-admission-2026-08-11", "report.json"),
+  publicAskDistributedAdmission: path.join("evaluation", "public-ask-distributed-admission-2026-08-14", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
@@ -1569,6 +1570,29 @@ function publicProviderAdmissionSummary(report) {
 }
 
 /** @param {unknown} report */
+function publicAskDistributedAdmissionSummary(report) {
+  if (!isRecord(report)) return {};
+  const finding = isRecord(report.securityFinding) ? report.securityFinding : {};
+  const local = isRecord(report.localProductionProbe) ? report.localProductionProbe : {};
+  const live = isRecord(report.liveProductionProbe) ? report.liveProductionProbe : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productCommit: asString(report.productCommit),
+    productionCommit: asString(report.productionCommit),
+    findingId: asString(finding.findingId),
+    localCaseCount: Array.isArray(local.cases) ? local.cases.length : 0,
+    liveCaseCount: Array.isArray(live.cases) ? live.cases.length : 0,
+    providerCallExecuted: asBoolean(local.providerCallExecuted) || asBoolean(live.providerCallExecuted),
+    distributedBackendActivation: asString(remaining.distributedBackendActivation),
+    freshFollowUpScan: asString(remaining.freshFollowUpScan),
+    securityCompleteClaimAllowed: asBoolean(remaining.securityCompleteClaimAllowed),
+    exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
+  };
+}
+
+/** @param {unknown} report */
 function agentChatDurableAdmissionSummary(report) {
   if (!isRecord(report)) return {};
   const production = isRecord(report.productionBuild) ? report.productionBuild : {};
@@ -2142,6 +2166,10 @@ export function buildNorthstarNextRunway(options) {
     options.rootDir,
     ARTIFACTS.publicProviderAdmission,
   );
+  const publicAskDistributedAdmission = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.publicAskDistributedAdmission,
+  );
   const agentChatDurableAdmission = readOptionalJson(
     options.rootDir,
     ARTIFACTS.agentChatDurableAdmission,
@@ -2231,6 +2259,7 @@ export function buildNorthstarNextRunway(options) {
   const improvementPhotoAnalysisBudgetResult = improvementPhotoAnalysisBudgetSummary(improvementPhotoAnalysisBudget);
   const publicProviderCancellationResult = publicProviderCancellationSummary(publicProviderCancellation);
   const publicProviderAdmissionResult = publicProviderAdmissionSummary(publicProviderAdmission);
+  const publicAskDistributedAdmissionResult = publicAskDistributedAdmissionSummary(publicAskDistributedAdmission);
   const mcpGenerationWorkBudgetSecurityResult = mcpGenerationWorkBudgetSecuritySummary(
     mcpGenerationWorkBudgetSecurity,
   );
@@ -2279,6 +2308,7 @@ export function buildNorthstarNextRunway(options) {
       "full_repository_security_scan",
       "repository_security_scan_reconciliation",
       "public_json_request_body_budget",
+      "public_ask_distributed_admission",
       "security_followup_remediation",
       "security_resource_remediation",
       "security_upstream_transport_remediation",
@@ -2435,6 +2465,7 @@ export function buildNorthstarNextRunway(options) {
     improvementPhotoAnalysisBudget: improvementPhotoAnalysisBudgetResult,
     publicProviderCancellation: publicProviderCancellationResult,
     publicProviderAdmission: publicProviderAdmissionResult,
+    publicAskDistributedAdmission: publicAskDistributedAdmissionResult,
     agentChatDurableAdmission: agentChatDurableAdmissionSummary(agentChatDurableAdmission),
     mcpProviderAdmission: mcpProviderAdmissionSummary(mcpProviderAdmission),
     shareRecipientContactVerification: shareRecipientContactVerificationSummary(shareRecipientContactVerification),
@@ -2577,6 +2608,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Improvement photo analysis budgeting is separately live-measured: \`${report.improvementPhotoAnalysisBudget.verdict || "missing"}\`, finding \`${report.improvementPhotoAnalysisBudget.findingId || "missing"}\`, request bytes \`${report.improvementPhotoAnalysisBudget.maxRequestBytes ?? "unknown"}\`, concurrency \`${report.improvementPhotoAnalysisBudget.aggregateConcurrency ?? "unknown"}\`, and live admission cases \`${report.improvementPhotoAnalysisBudget.liveCaseCount ?? "unknown"}\`. Production admission remains \`${report.improvementPhotoAnalysisBudget.distributedProductionActivation || "unknown"}\`; the distributed multi-instance boundary and follow-up scan remain open, security-complete remains \`${report.improvementPhotoAnalysisBudget.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.improvementPhotoAnalysisBudget.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Public provider cancellation is separately source-proven in deployed production: \`${report.publicProviderCancellation.verdict || "missing"}\`, finding \`${report.publicProviderCancellation.findingId || "missing"}\`, tests \`${report.publicProviderCancellation.tests ?? "unknown"}\`, and live provider cancellation call executed=\`${report.publicProviderCancellation.liveProviderCallExecuted === true}\`. The canonical finding remains immutable until follow-up scan \`${report.publicProviderCancellation.followUpSecurityScan || "REQUIRED"}\`, security-complete remains \`${report.publicProviderCancellation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.publicProviderCancellation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Public provider admission is separately live-measured: \`${report.publicProviderAdmission.verdict || "missing"}\`, corrected findings \`${report.publicProviderAdmission.findingCount ?? "unknown"}\`, capacity/full weight \`${report.publicProviderAdmission.capacity ?? "unknown"}/${report.publicProviderAdmission.fullModeWeight ?? "unknown"}\`, and no-provider live cases \`${report.publicProviderAdmission.liveCaseCount ?? "unknown"}\`. Production distributed activation remains \`${report.publicProviderAdmission.distributedProductionActivation || "PENDING_CONFIGURATION"}\`, follow-up scan remains \`${report.publicProviderAdmission.followUpSecurityScan || "REQUIRED"}\`, security-complete remains \`${report.publicProviderAdmission.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.publicProviderAdmission.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
+- Public Ask distributed admission is separately live-proven: \`${report.publicAskDistributedAdmission.verdict || "missing"}\`, finding \`${report.publicAskDistributedAdmission.findingId || "missing"}\`, local/live cases \`${report.publicAskDistributedAdmission.localCaseCount ?? 0}/${report.publicAskDistributedAdmission.liveCaseCount ?? 0}\`, and provider call executed=\`${report.publicAskDistributedAdmission.providerCallExecuted === true}\`. Enhanced/full JSON and SSE fail closed before provider work while distributed admission is unavailable; backend activation remains \`${report.publicAskDistributedAdmission.distributedBackendActivation || "OPERATOR_CONFIGURATION_REQUIRED"}\`, fresh scan remains \`${report.publicAskDistributedAdmission.freshFollowUpScan || "REQUIRED"}\`, security-complete remains \`${report.publicAskDistributedAdmission.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.publicAskDistributedAdmission.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Repository security scan reconciliation is \`${report.repositorySecurityScanReconciliation.verdict || "missing"}\`. The immutable same-target scans and \`${report.repositorySecurityScanReconciliation.receiptContradictionCount ?? "unknown"}\` fail-open contradictions remain preserved; zero-finding accepted=\`${report.repositorySecurityScanReconciliation.zeroFindingClaimAccepted === true}\`. Corrected scan completed=\`${report.repositorySecurityScanReconciliation.correctedFreshScanCompleted === true}\`, id=\`${report.repositorySecurityScanReconciliation.correctedScanId || "missing"}\`, reportable=\`${report.repositorySecurityScanReconciliation.correctedReportableFindingCount ?? "unknown"}\`, deferred=\`${report.repositorySecurityScanReconciliation.correctedDeferredCandidateCount ?? "unknown"}\`, coverage=\`${report.repositorySecurityScanReconciliation.correctedCoverageCompleteness || "unknown"}\`, security-complete=\`${report.repositorySecurityScanReconciliation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.repositorySecurityScanReconciliation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Current security remediation ledger is \`${report.currentSecurityRemediationLedger.verdict || "missing"}\`: deployed-source receipts \`${report.currentSecurityRemediationLedger.deployedSourceRemediationCount ?? "unknown"}/${report.currentSecurityRemediationLedger.totalFindings ?? "unknown"}\`, unresolved \`${report.currentSecurityRemediationLedger.unresolvedCount ?? "unknown"}\`, approval-gated \`${report.currentSecurityRemediationLedger.approvalGatedCount ?? "unknown"}\`, distributed-runtime open \`${report.currentSecurityRemediationLedger.distributedRuntimeOpenCount ?? "unknown"}\`, security-complete=\`${report.currentSecurityRemediationLedger.securityCompleteClaimAllowed === true}\`, exact saved Share \`${report.currentSecurityRemediationLedger.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Atomic database race remediation is approval-gated: \`${report.securityAtomicDbRaceRemediation.verdict || "missing"}\`, sealed findings still open \`${report.securityAtomicDbRaceRemediation.openFindingCount ?? "unknown"}\`, approval required/performed \`${report.securityAtomicDbRaceRemediation.approvalRequired === true}/${report.securityAtomicDbRaceRemediation.approvalPerformed === true}\`, migration authored \`${report.securityAtomicDbRaceRemediation.migrationAuthored === true}\`, DB mutation performed \`${report.securityAtomicDbRaceRemediation.dbMutationPerformed === true}\`, fresh scan required \`${report.securityAtomicDbRaceRemediation.freshRescanRequired === true}\`, security-complete \`${report.securityAtomicDbRaceRemediation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.securityAtomicDbRaceRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.

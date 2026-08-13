@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-13T21:44:59.159Z
-Source HEAD at generation: 6453a595d4771d64f07d79d3f042509be876c707
-Live commit at generation: 6453a595d4771d64f07d79d3f042509be876c707
+Generated at: 2026-08-13T22:51:29.605Z
+Source HEAD at generation: efc62c3879ff171e6ec664d2b8cb843229486440
+Live commit at generation: efc62c3879ff171e6ec664d2b8cb843229486440
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -194,6 +194,14 @@ Overall: `northstar_open_approval_gated`
 - Exact saved Share: MISSING_EVIDENCE
 - Boundary: weighted process-instance admission is live; distributed multi-instance admission remains open.
 
+## Public Ask distributed admission
+- Verdict: `PASS_LIVE_PRODUCTION_PUBLIC_ASK_PROVIDER_MODES_FAIL_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION`
+- Finding: `csf_9b3cc6648586dabf4bfa61e9`; local/live cases=3/5
+- Provider call executed: false; distributed activation=OPERATOR_CONFIGURATION_REQUIRED
+- Follow-up scan: REQUIRED; security-complete=false
+- Exact saved Share: MISSING_EVIDENCE
+- Boundary: this proves deployed JSON/SSE fail-closed behavior without a provider call; it does not prove a configured distributed backend or close the immutable finding.
+
 ## Repository Security Scan Reconciliation
 
 - Verdict: `PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS`
@@ -296,6 +304,7 @@ Overall: `northstar_open_approval_gated`
 | improvement_photo_analysis_budget | notice | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
 | public_provider_cancellation | notice | evaluation\public-provider-cancellation-2026-08-11\report.json |
 | public_provider_admission | notice | evaluation\public-provider-admission-2026-08-11\report.json |
+| public_ask_distributed_admission | proven | evaluation\public-ask-distributed-admission-2026-08-14\report.json |
 | public_search_distributed_rate_limit_readiness | notice | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
 | public_generation_admission_security | notice | evaluation\security-public-generation-admission-2026-08-04\report.json |
 | security_followup_remediation | proven | evaluation\codex-security-followup-remediation-2026-08-11\report.json |
@@ -357,6 +366,7 @@ Overall: `northstar_open_approval_gated`
 | improvement_photo_analysis_budget | ancestor | ancestor_of_head | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
 | public_provider_cancellation | ancestor | ancestor_of_head | evaluation\public-provider-cancellation-2026-08-11\report.json |
 | public_provider_admission | ancestor | ancestor_of_head | evaluation\public-provider-admission-2026-08-11\report.json |
+| public_ask_distributed_admission | ancestor | matches_live_source_mismatch | evaluation\public-ask-distributed-admission-2026-08-14\report.json |
 | public_search_distributed_rate_limit_readiness | ancestor | ancestor_of_head | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
 | public_generation_admission_security | missing | ancestor_of_head | evaluation\security-public-generation-admission-2026-08-04\report.json |
 | security_followup_remediation | ancestor | missing | evaluation\codex-security-followup-remediation-2026-08-11\report.json |
@@ -365,7 +375,7 @@ Overall: `northstar_open_approval_gated`
 | security_safety_reference_surface_remediation | ancestor | ancestor_of_head | evaluation\security-safety-reference-surface-remediation-2026-08-11\report.json |
 | mcp_generation_work_budget_security | ancestor | ancestor_of_head | evaluation\security-mcp-generation-work-budget-2026-08-04\report.json |
 | learning_export_renderer_security | ancestor | ancestor_of_head | evaluation\learning-export-renderer-security-2026-08-02\report.json |
-| hermes_knowledge_review_ui | exact | matches_live | evaluation\hermes-knowledge-review-selected-workbench-2026-08-14\report.json |
+| hermes_knowledge_review_ui | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-selected-workbench-2026-08-14\report.json |
 | hermes_remote_durable_ledger | ancestor | ancestor_of_head | evaluation\hermes-openclaw-runtime-current-gate-2026-07-20\report.json |
 | live_document_secondary_grounding | ancestor | ancestor_of_head | evaluation\live-document-secondary-grounding-2026-07-25\report.json |
 | live_document_seed_profile_isolation | ancestor | ancestor_of_head | evaluation\live-document-seed-profile-isolation-2026-07-25\report.json |

@@ -1,10 +1,10 @@
 {
   "schemaVersion": "safeclaw-public-ask-distributed-admission/v1",
-  "generatedAt": "2026-08-14T07:12:00+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PUBLIC_ASK_DISTRIBUTED_ADMISSION_LIVE_PENDING",
+  "generatedAt": "2026-08-14T07:13:51+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_ASK_PROVIDER_MODES_FAIL_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION",
   "sourceHead": "4fc478c936d92442a260663e1dfe6aec11cb8d4c",
   "productCommit": "4fc478c936d92442a260663e1dfe6aec11cb8d4c",
-  "productionCommit": "46a505c8e7c6df947ee66003475b7b1685247c41",
+  "productionCommit": "efc62c3879ff171e6ec664d2b8cb843229486440",
   "securityFinding": {
     "scanId": "bd135da7",
     "findingId": "csf_9b3cc6648586dabf4bfa61e9",
@@ -60,6 +60,50 @@
       }
     ]
   },
+  "liveProductionProbe": {
+    "baseUrl": "https://www.safeclaw.kr",
+    "productionCommit": "efc62c3879ff171e6ec664d2b8cb843229486440",
+    "deploymentUrl": "safeguard-contest-oindbftdn-seojaehongs-projects.vercel.app",
+    "providerCallExecuted": false,
+    "cases": [
+      {
+        "path": "/api/ask",
+        "case": "template-no-provider",
+        "status": 200,
+        "rateLimitMode": "instance",
+        "aiMode": "template",
+        "workUnit": 0
+      },
+      {
+        "path": "/api/ask",
+        "case": "enhanced-distributed-unavailable",
+        "status": 503,
+        "rateLimitMode": "distributed",
+        "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+      },
+      {
+        "path": "/api/ask",
+        "case": "full-distributed-unavailable",
+        "status": 503,
+        "rateLimitMode": "distributed",
+        "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+      },
+      {
+        "path": "/api/ask/stream",
+        "case": "enhanced-distributed-unavailable",
+        "status": 503,
+        "rateLimitMode": "distributed",
+        "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+      },
+      {
+        "path": "/api/ask/stream",
+        "case": "full-distributed-unavailable",
+        "status": 503,
+        "rateLimitMode": "distributed",
+        "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+      }
+    ]
+  },
   "verification": {
     "focusedVitest": {
       "files": 3,
@@ -95,10 +139,46 @@
     }
   },
   "productionBuild": {
-    "currentCommitSha": "46a505c8e7c6df947ee66003475b7b1685247c41",
-    "productCommitDeployed": false,
-    "liveAfterDeploymentPending": true,
+    "currentCommitSha": "efc62c3879ff171e6ec664d2b8cb843229486440",
+    "productCommitDeployed": true,
+    "liveAfterDeploymentPending": false,
     "previewDeploymentCompleted": true
+  },
+  "governedPathCompatibility": {
+    "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_ASK_DISTRIBUTED_ADMISSION_GOVERNED_PATH_COMPATIBILITY",
+    "sourceHead": "4fc478c936d92442a260663e1dfe6aec11cb8d4c",
+    "productionCommit": "efc62c3879ff171e6ec664d2b8cb843229486440",
+    "coveredGateIds": [
+      "public_json_request_body_budget",
+      "public_provider_cancellation",
+      "public_provider_admission",
+      "public_generation_admission_security"
+    ],
+    "changedProductPaths": [
+      "app/api/ask/route.ts",
+      "app/api/ask/stream/route.ts",
+      "app/api/knowledge/regenerate/route.ts",
+      "app/api/knowledge/review/prepare/route.ts",
+      "app/api/workpack/remediate/route.ts",
+      "components/SafeGuardCommandCenter.tsx",
+      "lib/ask-stream-client.ts",
+      "lib/public-ask-admission.ts"
+    ],
+    "focusedVitest": {
+      "files": 3,
+      "tests": 21,
+      "failed": 0
+    },
+    "focusedAndAdjacentVitest": {
+      "files": 11,
+      "tests": 67,
+      "failed": 0
+    },
+    "originalSecurityBaselineRewritten": false,
+    "noMutation": true,
+    "providerCallExecuted": false,
+    "freshFollowUpScan": "REQUIRED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "mutationBoundary": {
     "dbMutationPerformed": false,

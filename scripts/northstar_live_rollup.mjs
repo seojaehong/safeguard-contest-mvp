@@ -46,6 +46,7 @@ const ARTIFACTS = Object.freeze({
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
   publicProviderAdmission: path.join("evaluation", "public-provider-admission-2026-08-11", "report.json"),
+  publicAskDistributedAdmission: path.join("evaluation", "public-ask-distributed-admission-2026-08-14", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
@@ -348,6 +349,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const improvementPhotoAnalysisBudget = tryReadJson(rootDir, ARTIFACTS.improvementPhotoAnalysisBudget);
   const publicProviderCancellation = tryReadJson(rootDir, ARTIFACTS.publicProviderCancellation);
   const publicProviderAdmission = tryReadJson(rootDir, ARTIFACTS.publicProviderAdmission);
+  const publicAskDistributedAdmission = tryReadJson(rootDir, ARTIFACTS.publicAskDistributedAdmission);
   const publicSearchDistributedRateLimitReadiness = tryReadJson(rootDir, ARTIFACTS.publicSearchDistributedRateLimitReadiness);
   const publicGenerationAdmissionSecurity = tryReadJson(rootDir, ARTIFACTS.publicGenerationAdmissionSecurity);
   const securityFollowupRemediation = tryReadJson(rootDir, ARTIFACTS.securityFollowupRemediation);
@@ -458,6 +460,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "improvement_photo_analysis_budget", ARTIFACTS.improvementPhotoAnalysisBudget, improvementPhotoAnalysisBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_cancellation", ARTIFACTS.publicProviderCancellation, publicProviderCancellation),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_admission", ARTIFACTS.publicProviderAdmission, publicProviderAdmission),
+    evidenceStatus(rootDir, currentHead, liveCommit, "public_ask_distributed_admission", ARTIFACTS.publicAskDistributedAdmission, publicAskDistributedAdmission),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_search_distributed_rate_limit_readiness", ARTIFACTS.publicSearchDistributedRateLimitReadiness, publicSearchDistributedRateLimitReadiness),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_generation_admission_security", ARTIFACTS.publicGenerationAdmissionSecurity, publicGenerationAdmissionSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "security_followup_remediation", ARTIFACTS.securityFollowupRemediation, securityFollowupRemediation),
@@ -805,6 +808,26 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       followUpSecurityScan: asString(recordAt(publicProviderAdmission, "remainingBoundaries")?.followUpSecurityScan),
       securityCompleteClaimAllowed: recordAt(publicProviderAdmission, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
       exactSavedShareVerdict: asString(recordAt(publicProviderAdmission, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    publicAskDistributedAdmission: {
+      artifact: ARTIFACTS.publicAskDistributedAdmission,
+      verdict: isRecord(publicAskDistributedAdmission) ? asString(publicAskDistributedAdmission.verdict) : "missing",
+      sourceHead: isRecord(publicAskDistributedAdmission) ? asString(publicAskDistributedAdmission.sourceHead) : "",
+      productCommit: isRecord(publicAskDistributedAdmission) ? asString(publicAskDistributedAdmission.productCommit) : "",
+      productionCommit: isRecord(publicAskDistributedAdmission) ? asString(publicAskDistributedAdmission.productionCommit) : "",
+      findingId: asString(recordAt(publicAskDistributedAdmission, "securityFinding")?.findingId),
+      localCaseCount: Array.isArray(recordAt(publicAskDistributedAdmission, "localProductionProbe")?.cases)
+        ? recordAt(publicAskDistributedAdmission, "localProductionProbe").cases.length
+        : 0,
+      liveCaseCount: Array.isArray(recordAt(publicAskDistributedAdmission, "liveProductionProbe")?.cases)
+        ? recordAt(publicAskDistributedAdmission, "liveProductionProbe").cases.length
+        : 0,
+      providerCallExecuted: recordAt(publicAskDistributedAdmission, "localProductionProbe")?.providerCallExecuted === true
+        || recordAt(publicAskDistributedAdmission, "liveProductionProbe")?.providerCallExecuted === true,
+      distributedBackendActivation: asString(recordAt(publicAskDistributedAdmission, "remainingBoundaries")?.distributedBackendActivation),
+      freshFollowUpScan: asString(recordAt(publicAskDistributedAdmission, "remainingBoundaries")?.freshFollowUpScan),
+      securityCompleteClaimAllowed: recordAt(publicAskDistributedAdmission, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
+      exactSavedShareVerdict: asString(recordAt(publicAskDistributedAdmission, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     agentChatDurableAdmission: {
       artifact: ARTIFACTS.agentChatDurableAdmission,
@@ -1489,6 +1512,14 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Follow-up scan: ${rollup.publicProviderAdmission.followUpSecurityScan || "REQUIRED"}; security-complete=${rollup.publicProviderAdmission.securityCompleteClaimAllowed}`,
     `- Exact saved Share: ${rollup.publicProviderAdmission.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "- Boundary: weighted process-instance admission is live; distributed multi-instance admission remains open.",
+    "",
+    "## Public Ask distributed admission",
+    `- Verdict: \`${rollup.publicAskDistributedAdmission.verdict}\``,
+    `- Finding: \`${rollup.publicAskDistributedAdmission.findingId || "missing"}\`; local/live cases=${rollup.publicAskDistributedAdmission.localCaseCount}/${rollup.publicAskDistributedAdmission.liveCaseCount}`,
+    `- Provider call executed: ${rollup.publicAskDistributedAdmission.providerCallExecuted}; distributed activation=${rollup.publicAskDistributedAdmission.distributedBackendActivation || "OPERATOR_CONFIGURATION_REQUIRED"}`,
+    `- Follow-up scan: ${rollup.publicAskDistributedAdmission.freshFollowUpScan || "REQUIRED"}; security-complete=${rollup.publicAskDistributedAdmission.securityCompleteClaimAllowed}`,
+    `- Exact saved Share: ${rollup.publicAskDistributedAdmission.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "- Boundary: this proves deployed JSON/SSE fail-closed behavior without a provider call; it does not prove a configured distributed backend or close the immutable finding.",
     "",
     "## Repository Security Scan Reconciliation",
     "",

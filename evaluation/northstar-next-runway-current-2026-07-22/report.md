@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `6453a595d4771d64f07d79d3f042509be876c707`
+Source HEAD: `efc62c3879ff171e6ec664d2b8cb843229486440`
 
-Production `/api/build-info`: `6453a595d4771d64f07d79d3f042509be876c707`
+Production `/api/build-info`: `efc62c3879ff171e6ec664d2b8cb843229486440`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `6453a595d4771d64f07d79d3f042509be876c707`
+Live rollup source head: `efc62c3879ff171e6ec664d2b8cb843229486440`
 
 Live rollup matches production: `true`
 
@@ -60,6 +60,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Improvement photo analysis budgeting is separately live-measured: `PASS_LIVE_PRODUCTION_IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_WITH_INSTANCE_ADMISSION`, finding `csf_4632cfb321a45b5f7429daef`, request bytes `42991616`, concurrency `2`, and live admission cases `2`. Production admission remains `INSTANCE_FALLBACK_ACTIVE_NOT_DISTRIBUTED`; the distributed multi-instance boundary and follow-up scan remain open, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Public provider cancellation is separately source-proven in deployed production: `PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_CANCELLATION_SOURCE_PROVEN`, finding `csf_278e8efc9722eb80016c42a3`, tests `104`, and live provider cancellation call executed=`false`. The canonical finding remains immutable until follow-up scan `REQUIRED`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Public provider admission is separately live-measured: `PARTIAL_LIVE_PRODUCTION_WEIGHTED_INSTANCE_ADMISSION_DISTRIBUTED_ACTIVATION_PENDING`, corrected findings `2`, capacity/full weight `12/12`, and no-provider live cases `3`. Production distributed activation remains `PENDING_CONFIGURATION`, follow-up scan remains `REQUIRED`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
+- Public Ask distributed admission is separately live-proven: `PASS_LIVE_PRODUCTION_PUBLIC_ASK_PROVIDER_MODES_FAIL_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION`, finding `csf_9b3cc6648586dabf4bfa61e9`, local/live cases `3/5`, and provider call executed=`false`. Enhanced/full JSON and SSE fail closed before provider work while distributed admission is unavailable; backend activation remains `OPERATOR_CONFIGURATION_REQUIRED`, fresh scan remains `REQUIRED`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Repository security scan reconciliation is `PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS`. The immutable same-target scans and `2` fail-open contradictions remain preserved; zero-finding accepted=`false`. Corrected scan completed=`true`, id=`c4e9e2f1-7ce4-4313-a651-32205fca401f`, reportable=`14`, deferred=`9`, coverage=`partial`, security-complete=`false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current security remediation ledger is `NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_LEDGER_OPEN_BOUNDARIES`: deployed-source receipts `17/23`, unresolved `6`, approval-gated `3`, distributed-runtime open `3`, security-complete=`false`, exact saved Share `MISSING_EVIDENCE`.
 - Atomic database race remediation is approval-gated: `APPROVAL_REQUIRED_TRANSACTIONAL_DB_RACE_REMEDIATION_NO_MUTATION`, sealed findings still open `2`, approval required/performed `true/false`, migration authored `false`, DB mutation performed `false`, fresh scan required `true`, security-complete `false`, and exact saved Share remains `MISSING_EVIDENCE`.

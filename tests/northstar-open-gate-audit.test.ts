@@ -3397,6 +3397,106 @@ function createFixtureRoot(): string {
       approvalGatedOperationsUnchanged: true,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "public-ask-distributed-admission-2026-08-14", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_ASK_PROVIDER_MODES_FAIL_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    securityFinding: {
+      findingId: "csf_9b3cc6648586dabf4bfa61e9",
+      canonicalFindingRemainsImmutable: true,
+      freshFollowUpScanRequired: true,
+    },
+    currentSourceContract: {
+      templateProviderWorkUnit: 0,
+      templateRequiresDistributedAdmission: false,
+      enhancedProviderWorkUnit: 2,
+      fullProviderWorkUnit: 12,
+      providerModesRequireDistributedRateAdmissionInProduction: true,
+      providerModesRequireDistributedWeightedLeaseInProduction: true,
+      jsonAndSseShareFailClosedContract: true,
+      explicitHttpAdmissionFailureRetriedViaLegacyJson: false,
+      providerWorkStartsAfterAdmission: true,
+    },
+    localProductionProbe: {
+      distributedBackendConfigured: false,
+      providerCallExecuted: false,
+      cases: [
+        { path: "/api/ask", case: "template-no-provider", status: 200, rateLimitMode: "instance", aiMode: "template", workUnit: 0 },
+        { path: "/api/ask", case: "enhanced-distributed-unavailable", status: 503, rateLimitMode: "distributed", code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE" },
+        { path: "/api/ask/stream", case: "enhanced-distributed-unavailable", status: 503, rateLimitMode: "distributed", code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE" },
+      ],
+    },
+    liveProductionProbe: {
+      productionCommit: "fixture-sha",
+      providerCallExecuted: false,
+      cases: [
+        { path: "/api/ask", case: "template-no-provider", status: 200, rateLimitMode: "instance", aiMode: "template", workUnit: 0 },
+        { path: "/api/ask", case: "enhanced-distributed-unavailable", status: 503, rateLimitMode: "distributed", code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE" },
+        { path: "/api/ask", case: "full-distributed-unavailable", status: 503, rateLimitMode: "distributed", code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE" },
+        { path: "/api/ask/stream", case: "enhanced-distributed-unavailable", status: 503, rateLimitMode: "distributed", code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE" },
+        { path: "/api/ask/stream", case: "full-distributed-unavailable", status: 503, rateLimitMode: "distributed", code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE" },
+      ],
+    },
+    verification: {
+      focusedVitest: { files: 3, tests: 21, failed: 0 },
+      focusedAndAdjacentVitest: { files: 11, tests: 67, failed: 0 },
+      typecheck: "PASS",
+      build: { status: "PASS", staticPages: 28 },
+      dependencyAuditVulnerabilities: 0,
+      diffCheck: "PASS",
+    },
+    productionBuild: {
+      currentCommitSha: "fixture-sha",
+      productCommitDeployed: true,
+      liveAfterDeploymentPending: false,
+      previewDeploymentCompleted: true,
+    },
+    governedPathCompatibility: {
+      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_ASK_DISTRIBUTED_ADMISSION_GOVERNED_PATH_COMPATIBILITY",
+      sourceHead: "fixture-sha",
+      productionCommit: "fixture-sha",
+      coveredGateIds: [
+        "public_json_request_body_budget",
+        "public_provider_cancellation",
+        "public_provider_admission",
+        "public_generation_admission_security",
+      ],
+      changedProductPaths: [
+        "app/api/ask/route.ts",
+        "app/api/ask/stream/route.ts",
+        "app/api/knowledge/regenerate/route.ts",
+        "app/api/knowledge/review/prepare/route.ts",
+        "app/api/workpack/remediate/route.ts",
+        "components/SafeGuardCommandCenter.tsx",
+        "lib/ask-stream-client.ts",
+        "lib/public-ask-admission.ts",
+      ],
+      focusedVitest: { files: 3, tests: 21, failed: 0 },
+      focusedAndAdjacentVitest: { files: 11, tests: 67, failed: 0 },
+      originalSecurityBaselineRewritten: false,
+      noMutation: true,
+      providerCallExecuted: false,
+      freshFollowUpScan: "REQUIRED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerCallPerformedForEvidence: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorRuntimeMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      securityCompleteClaimAllowed: false,
+      freshFollowUpScan: "REQUIRED",
+      distributedBackendActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      approvalGatedOperationsUnchanged: true,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
     sourceHead: "fixture-sha",
@@ -4542,6 +4642,13 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "public_provider_admission")?.detail).toContain("template 0, enhanced 2, full 12");
     expect(audit.gates.find((gate) => gate.id === "public_provider_admission")?.detail).toContain("process-instance admission");
     expect(audit.gates.find((gate) => gate.id === "public_provider_admission")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "public_ask_distributed_admission")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "public-ask-distributed-admission-2026-08-14", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "public_ask_distributed_admission")?.detail).toContain("csf_9b3cc6648586dabf4bfa61e9");
+    expect(audit.gates.find((gate) => gate.id === "public_ask_distributed_admission")?.detail).toContain("OPERATOR_CONFIGURATION_REQUIRED");
+    expect(audit.gates.find((gate) => gate.id === "public_ask_distributed_admission")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")).toMatchObject({
       state: "notice",
       evidencePath: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
@@ -5950,6 +6057,24 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("humanReview=false");
+  });
+
+  it("fails the public Ask distributed admission gate closed on provider execution or saved Share overclaim", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "public-ask-distributed-admission-2026-08-14", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      liveProductionProbe: { providerCallExecuted: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.liveProductionProbe.providerCallExecuted = true;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "public_ask_distributed_admission")?.state).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "public_ask_distributed_admission")?.detail).toContain("providerCall=true");
+    expect(audit.gates.find((gate) => gate.id === "public_ask_distributed_admission")?.detail).toContain("exactShare=PASS");
   });
 
   it("fails Hermes reviewer UI closed when more than one review body is selected", async () => {

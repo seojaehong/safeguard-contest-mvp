@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-13T21:44:59.159Z",
-  "head": "6453a595d4771d64f07d79d3f042509be876c707",
+  "generatedAt": "2026-08-13T22:51:29.605Z",
+  "head": "efc62c3879ff171e6ec664d2b8cb843229486440",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "6453a595d4771d64f07d79d3f042509be876c707",
+    "commitSha": "efc62c3879ff171e6ec664d2b8cb843229486440",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ntvafzf4v-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-oindbftdn-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 57
+    "gateCount": 58
   },
   "provenGates": [
     {
@@ -212,6 +212,12 @@
       "state": "notice",
       "artifact": "evaluation\\public-provider-admission-2026-08-11\\report.json",
       "detail": "Current production enforces mode-weighted provider work units (template 0, enhanced 2, full 12) with completion/cancellation release, 23 files / 215 tests governed-path compatibility, and live no-provider work-budget probes across ask, weather, and knowledge. Production still reports process-instance admission because Upstash is not configured; both canonical medium findings remain immutable, distributed activation and a fresh follow-up scan remain required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "public_ask_distributed_admission",
+      "state": "proven",
+      "artifact": "evaluation\\public-ask-distributed-admission-2026-08-14\\report.json",
+      "detail": "Current production keeps template work at zero and fails JSON/SSE enhanced/full closed with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before provider work when distributed admission is unavailable. The immutable csf_9b3cc6648586dabf4bfa61e9 finding still requires a fresh scan; backend activation is OPERATOR_CONFIGURATION_REQUIRED, no provider or mutation was used, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "public_search_distributed_rate_limit_readiness",
@@ -659,6 +665,21 @@
     "liveCaseCount": 3,
     "distributedProductionActivation": "PENDING_CONFIGURATION",
     "followUpSecurityScan": "REQUIRED",
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "publicAskDistributedAdmission": {
+    "artifact": "evaluation\\public-ask-distributed-admission-2026-08-14\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_ASK_PROVIDER_MODES_FAIL_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION",
+    "sourceHead": "4fc478c936d92442a260663e1dfe6aec11cb8d4c",
+    "productCommit": "4fc478c936d92442a260663e1dfe6aec11cb8d4c",
+    "productionCommit": "efc62c3879ff171e6ec664d2b8cb843229486440",
+    "findingId": "csf_9b3cc6648586dabf4bfa61e9",
+    "localCaseCount": 3,
+    "liveCaseCount": 5,
+    "providerCallExecuted": false,
+    "distributedBackendActivation": "OPERATOR_CONFIGURATION_REQUIRED",
+    "freshFollowUpScan": "REQUIRED",
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
@@ -1112,9 +1133,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "6453a595d4771d64f07d79d3f042509be876c707",
+      "sourceCommit": "efc62c3879ff171e6ec664d2b8cb843229486440",
       "sourceStatus": "exact",
-      "productionCommit": "6453a595d4771d64f07d79d3f042509be876c707",
+      "productionCommit": "efc62c3879ff171e6ec664d2b8cb843229486440",
       "productionStatus": "matches_live"
     },
     {
@@ -1358,6 +1379,14 @@
       "productionStatus": "ancestor_of_head"
     },
     {
+      "id": "public_ask_distributed_admission",
+      "artifact": "evaluation\\public-ask-distributed-admission-2026-08-14\\report.json",
+      "sourceCommit": "4fc478c936d92442a260663e1dfe6aec11cb8d4c",
+      "sourceStatus": "ancestor",
+      "productionCommit": "efc62c3879ff171e6ec664d2b8cb843229486440",
+      "productionStatus": "matches_live_source_mismatch"
+    },
+    {
       "id": "public_search_distributed_rate_limit_readiness",
       "artifact": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
       "sourceCommit": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
@@ -1425,9 +1454,9 @@
       "id": "hermes_knowledge_review_ui",
       "artifact": "evaluation\\hermes-knowledge-review-selected-workbench-2026-08-14\\report.json",
       "sourceCommit": "6453a595d4771d64f07d79d3f042509be876c707",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "6453a595d4771d64f07d79d3f042509be876c707",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "hermes_remote_durable_ledger",

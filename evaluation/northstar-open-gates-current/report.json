@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-13T21:44:58.077Z",
-  "sourceSha": "6453a595d4771d64f07d79d3f042509be876c707",
+  "generatedAt": "2026-08-13T22:51:28.416Z",
+  "sourceSha": "efc62c3879ff171e6ec664d2b8cb843229486440",
   "overall": "open",
   "gates": [
     {
@@ -341,6 +341,17 @@
       "nextActions": [
         "Configure and verify an approved distributed admission backend before claiming horizontal durability.",
         "Run a fresh full-repository security scan before reclassifying either immutable finding or making a security-complete claim."
+      ]
+    },
+    {
+      "id": "public_ask_distributed_admission",
+      "state": "proven",
+      "label": "Public Ask distributed admission",
+      "evidencePath": "evaluation\\public-ask-distributed-admission-2026-08-14\\report.json",
+      "detail": "Current production keeps template work at zero and fails JSON/SSE enhanced/full closed with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before provider work when distributed admission is unavailable. The immutable csf_9b3cc6648586dabf4bfa61e9 finding still requires a fresh scan; backend activation is OPERATOR_CONFIGURATION_REQUIRED, no provider or mutation was used, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Configure and verify an approved distributed admission backend before enabling enhanced/full provider modes horizontally.",
+        "Run a fresh repository security scan before reclassifying the immutable finding or making a security-complete claim."
       ]
     },
     {
