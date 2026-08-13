@@ -14,6 +14,12 @@ import {
   publicRateLimitResponse
 } from "@/lib/public-distributed-rate-limit";
 import {
+  acquirePublicAskWorkLease,
+  applyPublicAskWorkHeaders,
+  publicAskConcurrencyResponse,
+  type PublicAskWorkLease
+} from "@/lib/public-ask-admission";
+import {
   getSafetyReferenceDisplaySummary,
   getSafetyReferenceDisplayTitle,
   type SafetyReferenceItem
@@ -237,61 +243,80 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const promptBundle = await buildPrompt(parsed.request, request.signal);
-  if (!promptBundle) {
-    return applyPublicRateLimitHeader(
-      NextResponse.json({ ok: false, message: "rubric item not found" }, { status: 404 }),
-      rateLimit
-    );
+  let workLease: PublicAskWorkLease | null;
+  try {
+    workLease = await acquirePublicAskWorkLease("enhanced", {
+      requireDistributedInProduction: true
+    });
+  } catch (error) {
+    console.error("Workpack remediation admission unavailable", error);
+    return applyPublicRateLimitHeader(publicAskConcurrencyResponse("enhanced"), rateLimit);
+  }
+  if (!workLease) {
+    return applyPublicRateLimitHeader(publicAskConcurrencyResponse("enhanced"), rateLimit);
   }
 
-  const generated = await generateKnowledgeText(promptBundle.prompt, request.signal);
-  const fallbackText = buildFallbackText(promptBundle.rubricItem.title, promptBundle.rubricItem.improvementAction);
-  const text = generated.text.trim() || fallbackText;
-  const sources = promptBundle.matches.flatMap((match) => (
-    match.sources.slice(0, 1).map((source) => ({
-      title: source.title,
-      agency: `${source.agency} · 내장 서식/루브릭`,
-      url: source.url,
-      sourceType: "seed",
-      roleLabel: match.roleLabel,
-      reflectionLabel: match.documentReflectionLabel
-    }))
-  ));
-  const catalogSources = mapCatalogEvidence(promptBundle.catalog.items).map((source) => ({
-    title: source.title,
-    agency: labelCatalogAgency(source.type),
-    url: source.sourceUrl || `/knowledge?reference=${encodeURIComponent(source.title)}`,
-    sourceType: "catalog",
-    roleLabel: source.roleLabel || (source.role === "direct" ? "문서 문구 직접 근거" : "현장 판단 보조 근거"),
-    reflectionLabel: source.reflectionLabel || source.summary
-  }));
-  const catalogStatus = {
-    configured: promptBundle.catalog.configured,
-    ok: promptBundle.catalog.ok,
-    count: promptBundle.catalog.count,
-    message: promptBundle.catalog.message
-  };
-  const catalogNotice = promptBundle.catalog.ok
-    ? `Supabase 지식 DB ${promptBundle.catalog.count.toLocaleString("ko-KR")}건을 보완 근거 후보로 확인했습니다.`
-    : `Supabase 지식 DB 검색 실패 또는 미설정: ${promptBundle.catalog.message} 내장 법령·KOSHA seed 기준으로 보완했습니다.`;
+  try {
+    const promptBundle = await buildPrompt(parsed.request, request.signal);
+    if (!promptBundle) {
+      return applyPublicRateLimitHeader(
+        NextResponse.json({ ok: false, message: "rubric item not found" }, { status: 404 }),
+        rateLimit
+      );
+    }
 
-  return applyPublicRateLimitHeader(NextResponse.json({
-    ok: true,
-    configured: generated.configured,
-    providerLabel: generated.providerLabel,
-    policyNote: generated.text
-      ? `${generated.policyNote} ${catalogNotice}`
-      : `AI 제공자 응답이 없어 규칙 기반 보완 제안을 반환했습니다. ${catalogNotice}`,
-    catalogStatus,
-    rubricItem: {
-      id: promptBundle.rubricItem.id,
-      title: promptBundle.rubricItem.title,
-      category: promptBundle.rubricItem.category,
-      categoryLabel: rubricCategoryLabel(promptBundle.rubricItem.category)
-    },
-    documentKey: parsed.request.documentKey,
-    text,
-    sources: [...sources.slice(0, 3), ...catalogSources.slice(0, 2)]
-  }), rateLimit);
+    const generated = await generateKnowledgeText(promptBundle.prompt, request.signal);
+    const fallbackText = buildFallbackText(promptBundle.rubricItem.title, promptBundle.rubricItem.improvementAction);
+    const text = generated.text.trim() || fallbackText;
+    const sources = promptBundle.matches.flatMap((match) => (
+      match.sources.slice(0, 1).map((source) => ({
+        title: source.title,
+        agency: `${source.agency} · 내장 서식/루브릭`,
+        url: source.url,
+        sourceType: "seed",
+        roleLabel: match.roleLabel,
+        reflectionLabel: match.documentReflectionLabel
+      }))
+    ));
+    const catalogSources = mapCatalogEvidence(promptBundle.catalog.items).map((source) => ({
+      title: source.title,
+      agency: labelCatalogAgency(source.type),
+      url: source.sourceUrl || `/knowledge?reference=${encodeURIComponent(source.title)}`,
+      sourceType: "catalog",
+      roleLabel: source.roleLabel || (source.role === "direct" ? "문서 문구 직접 근거" : "현장 판단 보조 근거"),
+      reflectionLabel: source.reflectionLabel || source.summary
+    }));
+    const catalogStatus = {
+      configured: promptBundle.catalog.configured,
+      ok: promptBundle.catalog.ok,
+      count: promptBundle.catalog.count,
+      message: promptBundle.catalog.message
+    };
+    const catalogNotice = promptBundle.catalog.ok
+      ? `Supabase 지식 DB ${promptBundle.catalog.count.toLocaleString("ko-KR")}건을 보완 근거 후보로 확인했습니다.`
+      : `Supabase 지식 DB 검색 실패 또는 미설정: ${promptBundle.catalog.message} 내장 법령·KOSHA seed 기준으로 보완했습니다.`;
+    const response = NextResponse.json({
+      ok: true,
+      configured: generated.configured,
+      providerLabel: generated.providerLabel,
+      policyNote: generated.text
+        ? `${generated.policyNote} ${catalogNotice}`
+        : `AI 제공자 응답이 없어 규칙 기반 보완 제안을 반환했습니다. ${catalogNotice}`,
+      catalogStatus,
+      rubricItem: {
+        id: promptBundle.rubricItem.id,
+        title: promptBundle.rubricItem.title,
+        category: promptBundle.rubricItem.category,
+        categoryLabel: rubricCategoryLabel(promptBundle.rubricItem.category)
+      },
+      documentKey: parsed.request.documentKey,
+      text,
+      sources: [...sources.slice(0, 3), ...catalogSources.slice(0, 2)]
+    });
+
+    applyPublicAskWorkHeaders(response, "enhanced", workLease.weight);
+    return applyPublicRateLimitHeader(response, rateLimit);
+  } finally {
+    await workLease.release();
+  }
 }

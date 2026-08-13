@@ -10,9 +10,21 @@ import {
 } from "@/lib/public-work-budget";
 import { searchSafetyReferences, type SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 
+const admissionMocks = vi.hoisted(() => ({
+  acquirePublicAskWorkLease: vi.fn()
+}));
+
 vi.mock("@/lib/ai", () => ({
   generateKnowledgeText: vi.fn()
 }));
+
+vi.mock("@/lib/public-ask-admission", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/public-ask-admission")>();
+  return {
+    ...actual,
+    acquirePublicAskWorkLease: admissionMocks.acquirePublicAskWorkLease
+  };
+});
 
 vi.mock("@/lib/safety-reference-catalog", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/safety-reference-catalog")>();
@@ -64,6 +76,10 @@ function jsonRequest(body: unknown): NextRequest {
 describe("workpack remediation route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    admissionMocks.acquirePublicAskWorkLease.mockResolvedValue({
+      weight: 2,
+      release: vi.fn(async () => undefined)
+    });
     vi.mocked(generateKnowledgeText).mockResolvedValue({
       configured: true,
       providerLabel: "mock",
@@ -103,6 +119,8 @@ describe("workpack remediation route", () => {
     const generatedPrompt = vi.mocked(generateKnowledgeText).mock.calls[0]?.[0] || "";
 
     expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("instance");
+    expect(response.headers.get("X-SafeClaw-AI-Mode")).toBe("enhanced");
+    expect(response.headers.get("X-SafeClaw-Work-Unit")).toBe("2");
     expect(body.sources.some((source) => source.title === readableTitle)).toBe(true);
     expect(body.sources.every((source) => source.title !== rawTitle)).toBe(true);
     expect(body.sources.find((source) => source.title === readableTitle)?.url).toContain(encodeURIComponent(readableTitle));
@@ -135,6 +153,56 @@ describe("workpack remediation route", () => {
     expect(searchSafetyReferences).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledTimes(1);
     error.mockRestore();
+  });
+
+  it("fails closed before reference search when provider concurrency is full", async () => {
+    admissionMocks.acquirePublicAskWorkLease.mockResolvedValueOnce(null);
+    const response = await POST(jsonRequest({
+      question: "지하 기계실 배수펌프 점검",
+      documentKey: "riskAssessmentDraft",
+      documentText: "배수펌프 점검 전 안전조치",
+      rubricItemId: "required-risk-reduction"
+    }));
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({ code: "PUBLIC_ASK_CONCURRENCY_LIMIT" });
+    expect(searchSafetyReferences).not.toHaveBeenCalled();
+    expect(generateKnowledgeText).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when distributed provider admission is unavailable", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    admissionMocks.acquirePublicAskWorkLease.mockRejectedValueOnce(new Error("distributed admission unavailable"));
+    const response = await POST(jsonRequest({
+      question: "지하 기계실 배수펌프 점검",
+      documentKey: "riskAssessmentDraft",
+      documentText: "배수펌프 점검 전 안전조치",
+      rubricItemId: "required-risk-reduction"
+    }));
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({ code: "PUBLIC_ASK_CONCURRENCY_LIMIT" });
+    expect(searchSafetyReferences).not.toHaveBeenCalled();
+    expect(generateKnowledgeText).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledWith(
+      "Workpack remediation admission unavailable",
+      expect.any(Error)
+    );
+    error.mockRestore();
+  });
+
+  it("releases provider capacity after successful remediation", async () => {
+    const release = vi.fn(async () => undefined);
+    admissionMocks.acquirePublicAskWorkLease.mockResolvedValueOnce({ weight: 2, release });
+    const response = await POST(jsonRequest({
+      question: "지하 기계실 배수펌프 점검",
+      documentKey: "riskAssessmentDraft",
+      documentText: "배수펌프 점검 전 안전조치",
+      rubricItemId: "required-risk-reduction"
+    }));
+
+    expect(response.status).toBe(200);
+    expect(release).toHaveBeenCalledTimes(1);
   });
 
   it("rejects oversized remediation questions before reference search or AI generation", async () => {
@@ -197,6 +265,8 @@ describe("workpack remediation route", () => {
   it("forwards caller cancellation through reference search and AI generation", async () => {
     const controller = new AbortController();
     const reason = new Error("remediation caller disconnected");
+    const release = vi.fn(async () => undefined);
+    admissionMocks.acquirePublicAskWorkLease.mockResolvedValueOnce({ weight: 2, release });
     vi.mocked(generateKnowledgeText).mockImplementationOnce((_prompt: string, signal?: AbortSignal) => (
       new Promise((_, reject) => {
         signal?.addEventListener("abort", () => reject(signal.reason), { once: true });
@@ -227,5 +297,6 @@ describe("workpack remediation route", () => {
     await expect(pending).rejects.toBe(reason);
     expect(searchSignal?.aborted).toBe(true);
     expect(providerSignal?.aborted).toBe(true);
+    expect(release).toHaveBeenCalledTimes(1);
   });
 });
