@@ -1,8 +1,16 @@
 {
   "schema": "safeclaw-security-photo-storage-alignment/v1",
   "generatedAt": "2026-08-13T18:15:42.8256917+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LIVE_PENDING",
-  "productCommit": "584aa5ba",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_PHOTO_STORAGE_ALIGNMENT",
+  "productCommit": "584aa5baafebb196fa9a0c3f739d45a711cc540e",
+  "productionBuild": {
+    "commitSha": "584aa5baafebb196fa9a0c3f739d45a711cc540e",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-ckm2xeo8r-seojaehongs-projects.vercel.app",
+    "verifiedAt": "2026-08-13T18:17:34.8520155+09:00",
+    "scope": "DEPLOYED_SOURCE_ALIGNMENT_ONLY"
+  },
   "finding": {
     "anchor": "photo-analysis-before-unpersistable-upload",
     "severity": "medium",
@@ -42,6 +50,6 @@
   },
   "remainingBoundaries": {
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
-    "liveDeploymentVerification": "PENDING"
+    "liveDeploymentVerification": "PRODUCT_COMMIT_ALIGNED_SOURCE_ONLY"
   }
 }
