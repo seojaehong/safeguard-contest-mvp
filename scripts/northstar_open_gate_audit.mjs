@@ -55,6 +55,7 @@ const EVIDENCE_PATHS = Object.freeze({
   postRemediationSecuritySourceClosure: path.join("evaluation", "post-remediation-security-source-closure-2026-08-14", "report.json"),
   shareSessionRevocationRemediation: path.join("evaluation", "share-session-revocation-remediation-2026-08-14", "report.json"),
   agentChatDurableAdmission: path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"),
+  mcpProviderAdmission: path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
@@ -4403,6 +4404,138 @@ function evaluateAgentChatDurableAdmissionGate(rootDir) {
   });
 }
 
+const MCP_PROVIDER_ADMISSION_PATHS = [
+  "app/api/mcp/[transport]/implementation.ts",
+  "lib/mcp-auth.ts",
+  "lib/mcp-provider-admission.ts",
+  "lib/mcp-tools.ts",
+  "tests/mcp-auth.test.ts",
+  "tests/mcp-provider-admission.test.ts",
+  "tests/mcp-work-budget.test.ts",
+];
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateMcpProviderAdmissionGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.mcpProviderAdmission;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "mcp_provider_admission_security",
+      label: "MCP provider admission security",
+      state: "missing",
+      evidencePath,
+      detail: "MCP provider durable admission evidence is missing or invalid.",
+      nextActions: ["Restore the deployed source receipt without using a production MCP token or invoking provider work."],
+    });
+  }
+
+  const production = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const finding = isRecord(report.sealedFinding) ? report.sealedFinding : {};
+  const contracts = isRecord(report.contracts) ? report.contracts : {};
+  const rate = isRecord(contracts.tokenTenantRateAdmission) ? contracts.tokenTenantRateAdmission : {};
+  const lease = isRecord(contracts.providerConcurrencyLease) ? contracts.providerConcurrencyLease : {};
+  const weights = isRecord(lease.weights) ? lease.weights : {};
+  const preserved = isRecord(contracts.preservedBehavior) ? contracts.preservedBehavior : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focused) ? verification.focused : {};
+  const adjacent = isRecord(verification.focusedAndAdjacentMcp) ? verification.focusedAndAdjacentMcp : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const live = isRecord(report.liveProbe) ? report.liveProbe : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const tools = Array.isArray(contracts.providerGeneratingTools)
+    ? contracts.providerGeneratingTools.map(readString)
+    : [];
+  const noMutation = mutation.dbSchemaChanged === false
+    && mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.providerGenerationExecuted === false
+    && mutation.shareSessionCreated === false
+    && mutation.vectorOrEmbeddingMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_MCP_PROVIDER_ADMISSION_RESCAN_PENDING"
+    && sourceHead.length > 0
+    && sourceHead === readString(report.productCommit)
+    && sourceHead === readString(production.commitSha)
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, MCP_PROVIDER_ADMISSION_PATHS)
+    && readString(finding.scanId) === "bd135da7-c309-4e8d-ace5-15222dd3f1c7"
+    && readString(finding.findingId) === "csf_b10479b6501c208c4d11644e"
+    && readString(finding.ruleId) === "resource-exhaustion.distributed-provider-admission"
+    && finding.immutableFindingMutated === false
+    && finding.canonicalClosureClaimed === false
+    && tools.length === 2
+    && tools.includes("generate_safety_docpack")
+    && tools.includes("generate_reviewed_safety_docpack")
+    && readString(rate.namespace) === "mcp-provider-generation"
+    && readNumber(rate.limit) === 10
+    && readNumber(rate.windowMs) === 60000
+    && rate.bearerStoredOrLogged === false
+    && rate.sha256BearerFingerprintIncluded === true
+    && rate.organizationAndSiteIncluded === true
+    && rate.distributedRequiredInProduction === true
+    && rate.missingOrPartialConfigurationFailsBeforeProviderHandler === true
+    && readString(lease.namespace) === "mcp-provider-generation-work"
+    && readNumber(lease.capacity) === 12
+    && readNumber(lease.leaseMs) === 310000
+    && readNumber(weights.template) === 0
+    && readNumber(weights.enhanced) === 2
+    && readNumber(weights.full) === 12
+    && lease.distributedRequiredInProduction === true
+    && lease.busyFailsBeforeProviderHandler === true
+    && lease.completionAndFailureReleaseLease === true
+    && preserved.readOnlyMcpToolsUnaffected === true
+    && preserved.templateModeOutsideProviderAdmission === true
+    && preserved.developmentWeightedInstanceFallbackRetained === true
+    && readNumber(focused.files) === 3
+    && readNumber(focused.tests) === 61
+    && readNumber(focused.failed) === 0
+    && readNumber(adjacent.files) === 8
+    && readNumber(adjacent.tests) === 94
+    && readNumber(adjacent.failed) === 0
+    && readString(verification.typecheck) === "PASS"
+    && readNumber(verification.dependencyAuditVulnerabilities) === 0
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && readString(production.branch) === "master"
+    && readString(production.environment) === "production"
+    && production.sourceHeadMatchesProduction === true
+    && readNumber(live.status) === 401
+    && readString(live.rateLimitMode) === "instance"
+    && live.mcpToolDispatchPerformed === false
+    && live.providerGenerationExecuted === false
+    && live.validAuthenticatedFailClosedProbeExecuted === false
+    && readString(live.authenticatedProviderGenerationAvailability) === "FAIL_CLOSED_UNTIL_DISTRIBUTED_CONFIG"
+    && noMutation
+    && readString(remaining.distributedProductionActivation) === "OPEN_OPERATOR_CONFIGURATION"
+    && readString(remaining.validAuthenticatedRuntimeProbe) === "NOT_EXECUTED_NO_MCP_TOKEN"
+    && remaining.freshFullRepositorySecurityScanRequiredForCanonicalClosure === true
+    && remaining.securityCompleteClaimAllowed === false
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && remaining.approvalGatedOperationsRemainApprovalGated === true;
+
+  return gateResult({
+    id: "mcp_provider_admission_security",
+    label: "MCP provider admission security",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live source requires token-and-tenant-bound distributed rate admission plus a weighted durable lease before either provider-generating MCP tool runs, while read-only tools and deterministic template mode remain available. Production still reports pre-auth instance mode, so authenticated provider generation is fail-closed until operator configuration; the immutable medium finding and fresh rescan remain open, no provider or mutation work occurred, and exact saved Share remains MISSING_EVIDENCE."
+      : `MCP provider admission verdict=${readString(report.verdict) || "missing"}, sourceLive=${sourceHead.length > 0 && sourceHead === readString(production.commitSha)}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, MCP_PROVIDER_ADMISSION_PATHS)}, distributed=${readString(remaining.distributedProductionActivation) || "missing"}, authProbe=${readString(remaining.validAuthenticatedRuntimeProbe) || "missing"}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Configure the approved distributed backend and run a bounded authenticated no-provider MCP admission probe.",
+          "Run a fresh Standard scan before reclassifying the immutable finding or claiming security completion.",
+        ]
+      : ["Restore deployed source alignment, token/tenant rate admission, weighted lease, verification receipts, no-mutation boundaries, rescan requirement, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
 /**
  * @param {string} rootDir
  * @returns {GateResult}
@@ -7116,6 +7249,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluatePostRemediationRepositorySecurityScanGate(rootDir),
     evaluateShareSessionRevocationSecurityGate(rootDir),
     evaluateAgentChatDurableAdmissionGate(rootDir),
+    evaluateMcpProviderAdmissionGate(rootDir),
     evaluatePublicJsonRequestBodyBudgetGate(rootDir),
     evaluateSecurityResourceRemediationGate(rootDir),
     evaluateSecurityUpstreamTransportRemediationGate(rootDir),

@@ -2854,6 +2854,84 @@ function createFixtureRoot(): string {
       approvalGatedOperationsRemainApprovalGated: true,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"), {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_MCP_PROVIDER_ADMISSION_RESCAN_PENDING",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionBuild: {
+      commitSha: "fixture-sha",
+      branch: "master",
+      environment: "production",
+      sourceHeadMatchesProduction: true,
+    },
+    sealedFinding: {
+      scanId: "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+      findingId: "csf_b10479b6501c208c4d11644e",
+      ruleId: "resource-exhaustion.distributed-provider-admission",
+      immutableFindingMutated: false,
+      canonicalClosureClaimed: false,
+    },
+    contracts: {
+      providerGeneratingTools: ["generate_safety_docpack", "generate_reviewed_safety_docpack"],
+      tokenTenantRateAdmission: {
+        namespace: "mcp-provider-generation",
+        limit: 10,
+        windowMs: 60000,
+        bearerStoredOrLogged: false,
+        sha256BearerFingerprintIncluded: true,
+        organizationAndSiteIncluded: true,
+        distributedRequiredInProduction: true,
+        missingOrPartialConfigurationFailsBeforeProviderHandler: true,
+      },
+      providerConcurrencyLease: {
+        namespace: "mcp-provider-generation-work",
+        capacity: 12,
+        leaseMs: 310000,
+        weights: { template: 0, enhanced: 2, full: 12 },
+        distributedRequiredInProduction: true,
+        busyFailsBeforeProviderHandler: true,
+        completionAndFailureReleaseLease: true,
+      },
+      preservedBehavior: {
+        readOnlyMcpToolsUnaffected: true,
+        templateModeOutsideProviderAdmission: true,
+        developmentWeightedInstanceFallbackRetained: true,
+      },
+    },
+    verification: {
+      focused: { files: 3, tests: 61, failed: 0, status: "PASS" },
+      focusedAndAdjacentMcp: { files: 8, tests: 94, failed: 0, status: "PASS" },
+      typecheck: "PASS",
+      dependencyAuditVulnerabilities: 0,
+      build: { status: "PASS", staticPages: 28 },
+    },
+    liveProbe: {
+      status: 401,
+      rateLimitMode: "instance",
+      mcpToolDispatchPerformed: false,
+      providerGenerationExecuted: false,
+      validAuthenticatedFailClosedProbeExecuted: false,
+      authenticatedProviderGenerationAvailability: "FAIL_CLOSED_UNTIL_DISTRIBUTED_CONFIG",
+    },
+    mutationBoundary: {
+      dbSchemaChanged: false,
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      providerGenerationExecuted: false,
+      shareSessionCreated: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      distributedProductionActivation: "OPEN_OPERATOR_CONFIGURATION",
+      validAuthenticatedRuntimeProbe: "NOT_EXECUTED_NO_MCP_TOKEN",
+      freshFullRepositorySecurityScanRequiredForCanonicalClosure: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      approvalGatedOperationsRemainApprovalGated: true,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",
     sourceHead: "fixture-sha",
@@ -4697,6 +4775,40 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
 
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "agent_chat_durable_admission_security")?.state)
+      .toBe("contradicted");
+  });
+
+  it("connects durable MCP provider admission without hiding activation, rescan, or exact Share gaps", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "security-mcp-provider-admission-2026-08-14",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "mcp_provider_admission_security");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("token-and-tenant-bound");
+    expect(gate?.detail).toContain("fail-closed");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      liveProbe: { providerGenerationExecuted: boolean };
+      remainingBoundaries: {
+        distributedProductionActivation: string;
+        exactSavedShareVerdict: string;
+      };
+    };
+    report.liveProbe.providerGenerationExecuted = true;
+    report.remainingBoundaries.distributedProductionActivation = "DISTRIBUTED_ACTIVE";
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "mcp_provider_admission_security")?.state)
       .toBe("contradicted");
   });
 
