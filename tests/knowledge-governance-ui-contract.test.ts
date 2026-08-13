@@ -59,6 +59,15 @@ describe("knowledge governance UI contract", () => {
     expect(inboxSource).not.toContain("legalConfirmed: true");
   });
 
+  it("keeps multi-candidate review selected-only with bounded candidate text", () => {
+    expect(inboxSource).toContain('data-review-workbench="selected-only"');
+    expect(inboxSource).toContain('data-selected-review-candidate="true"');
+    expect(inboxSource).toContain('data-selected-candidate-body="true"');
+    expect(inboxSource).toContain("matchedHazardCount");
+    expect(cssSource).toMatch(/\.reviewWorkbench\s*\{[\s\S]*?grid-template-columns:\s*minmax\(220px, 280px\) minmax\(0, 1fr\);/u);
+    expect(cssSource).toMatch(/\.candidateText\s*\{[\s\S]*?overflow:\s*auto;/u);
+  });
+
   it("localizes schema field names at the presentation boundary", () => {
     expect(pageSource).toContain('roleLabel: "문서 역할"');
     expect(pageSource).toContain('shortSummary: "짧은 요약"');

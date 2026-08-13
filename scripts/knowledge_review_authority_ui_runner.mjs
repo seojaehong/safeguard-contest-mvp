@@ -91,6 +91,23 @@ const queueItem = {
     machineEvidenceReplacesHumanReview: false
   }
 };
+const queueItems = [
+  queueItem,
+  {
+    ...queueItem,
+    runId: "22222222-2222-4222-8222-222222222222",
+    candidateLabel: "작업계획서 지식 후보 검토",
+    candidateText: "양중 작업구역을 분리하고 신호수 배치 상태를 검토합니다.",
+    matchedHazardCount: 2
+  },
+  {
+    ...queueItem,
+    runId: "33333333-3333-4333-8333-333333333333",
+    candidateLabel: "TBM 브리핑 지식 후보 검토",
+    candidateText: "작업 전 정전·검전·잠금표지 상태를 확인합니다.",
+    matchedHazardCount: 3
+  }
+];
 
 const viewports = [
   { name: "desktop", width: 1440, height: 900 },
@@ -138,7 +155,7 @@ try {
           body: JSON.stringify({
             ok: true,
             configured: true,
-            queue: [queueItem],
+            queue: queueItems,
             dropped: { runCount: 0, eventCount: 0, reasons: [] }
           })
         });
@@ -151,19 +168,29 @@ try {
         await page.getByRole("tab", { name: "검토 흐름" }).click();
       }
       const inbox = page.locator('[data-knowledge-review-inbox="true"]');
-      await inbox.getByText(queueItem.candidateLabel).waitFor();
+      await inbox.getByRole("heading", { name: queueItem.candidateLabel }).waitFor();
       const metrics = await page.evaluate(() => {
         const root = document.querySelector("[data-knowledge-review-inbox='true']");
+        const workbench = document.querySelector("[data-review-workbench='selected-only']");
+        const navigator = workbench?.querySelector("nav[aria-label='지식 후보 목록']");
+        const selectedCandidate = workbench?.querySelector("[data-selected-review-candidate='true']");
+        const selectedBody = workbench?.querySelector("[data-selected-candidate-body='true']");
         const authority = document.querySelector("[data-review-authority-contract='true']");
         const actionGroup = document.querySelector("[role='group'][aria-label='검토 결정']");
         const firstAction = actionGroup?.querySelector("button");
         if (!(root instanceof HTMLElement)
+          || !(workbench instanceof HTMLElement)
+          || !(navigator instanceof HTMLElement)
+          || !(selectedCandidate instanceof HTMLElement)
+          || !(selectedBody instanceof HTMLElement)
           || !(authority instanceof HTMLElement)
           || !(actionGroup instanceof HTMLElement)
           || !(firstAction instanceof HTMLElement)) {
           throw new Error("Missing Hermes review authority UI");
         }
         const rootRect = root.getBoundingClientRect();
+        const navigatorRect = navigator.getBoundingClientRect();
+        const selectedCandidateRect = selectedCandidate.getBoundingClientRect();
         const authorityRect = authority.getBoundingClientRect();
         const actionRect = actionGroup.getBoundingClientRect();
         return {
@@ -176,6 +203,13 @@ try {
           rootWidth: rootRect.width,
           rootWidthRatio: Number((rootRect.width / window.innerWidth).toFixed(2)),
           rootTop: rootRect.top,
+          workbenchColumns: getComputedStyle(workbench).gridTemplateColumns.split(" ").length,
+          navigatorCandidateCount: navigator.querySelectorAll("button").length,
+          selectedCandidateCount: workbench.querySelectorAll("[data-selected-review-candidate='true']").length,
+          selectedBodyCount: workbench.querySelectorAll("[data-selected-candidate-body='true']").length,
+          selectedBodyOverflowY: getComputedStyle(selectedBody).overflowY,
+          navigatorBeforeDetail: navigatorRect.right <= selectedCandidateRect.left + 1,
+          selectedCandidateHeight: selectedCandidateRect.height,
           authorityWidth: authorityRect.width,
           authorityRoleCount: authority.querySelectorAll("[data-review-authority-role]").length,
           authorityContained: authority.scrollWidth <= authority.clientWidth + 1,
@@ -189,6 +223,13 @@ try {
       const screenshot = `knowledge-review-authority-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`;
       await page.screenshot({ path: path.join(outputDir, screenshot), fullPage: true });
       const passed = metrics.horizontalOverflow === false
+        && metrics.navigatorCandidateCount === queueItems.length
+        && metrics.selectedCandidateCount === 1
+        && metrics.selectedBodyCount === 1
+        && metrics.selectedBodyOverflowY === "auto"
+        && (viewport.width > 720
+          ? metrics.workbenchColumns === 2 && metrics.navigatorBeforeDetail && metrics.selectedCandidateHeight <= 580
+          : metrics.workbenchColumns === 1)
         && metrics.authorityRoleCount === 6
         && metrics.authorityContained
         && metrics.actionCount === 3
@@ -234,6 +275,14 @@ const report = {
     humanReviewRequired: true,
     machineEvidenceReplacesHumanReview: false
   },
+  workbenchContract: {
+    candidateCount: queueItems.length,
+    selectedCandidateCount: 1,
+    selectedBodyCount: 1,
+    desktopColumns: 2,
+    mobileColumns: 1,
+    candidateBodyInternalScroll: true
+  },
   mutationBoundary: {
     dbMutationPerformed: false,
     providerDispatchCalled: false,
@@ -252,6 +301,7 @@ await fs.writeFile(path.join(outputDir, "report.json"), `${JSON.stringify(report
 const rows = results.map((result) => (
   `| ${result.theme} | ${result.viewport.name} | ${result.viewport.width}x${result.viewport.height} | `
   + `${result.metrics.bodyHeight}/${result.metrics.viewportHeight} | ${result.metrics.rootWidthRatio} | `
+  + `${result.metrics.workbenchColumns}/${result.metrics.navigatorCandidateCount}/${result.metrics.selectedBodyCount} | `
   + `${result.metrics.authorityRoleCount} | ${result.metrics.firstActionDepth.toFixed(1)} | `
   + `${result.metrics.horizontalOverflow ? "yes" : "no"} | ${result.passed ? "PASS" : "RED"} |`
 )).join("\n");
@@ -264,8 +314,8 @@ const markdown = `# Hermes Knowledge Review Authority UI
 - Scope: ${liveMode ? "live production" : "current-source local production"} rendering with an authenticated, route-controlled review candidate fixture.
 - Production aligned: \`${productionAligned}\`
 
-| Theme | Viewport | Size | Body/viewport | Root width ratio | Authority roles | First action depth | Horizontal overflow | Verdict |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| Theme | Viewport | Size | Body/viewport | Root width ratio | Columns/candidates/body | Authority roles | First action depth | Horizontal overflow | Verdict |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
 ${rows}
 
 ## Contract
@@ -275,6 +325,8 @@ ${rows}
 - Organization and site memory cannot be promoted publicly.
 - Site-manager acceptance is required before workpack use.
 - Machine evidence does not replace human review.
+- The candidate navigator contains three fixtures while exactly one selected candidate body is mounted.
+- Desktop uses a two-column review workbench; mobile uses one column and keeps the candidate body internally scrollable.
 
 ## Boundary
 
@@ -317,6 +369,7 @@ if (liveMode && productionAligned && summaryOutput) {
       failedCount: report.failedCount
     },
     authorityContract: report.authorityContract,
+    workbenchContract: report.workbenchContract,
     mutationBoundary: report.mutationBoundary,
     remainingBoundaries: report.remainingBoundaries
   };

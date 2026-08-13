@@ -13,6 +13,7 @@ type ReviewInboxItem = {
   providerLabel: string | null;
   candidateText: string;
   sourceEventCount: number;
+  matchedHazardCount: number;
   reviewContract: {
     contractVersion: "knowledge-candidate-review.v1";
     status: "human_review_required";
@@ -140,10 +141,17 @@ function parseInboxItem(value: unknown): ReviewInboxItem | null {
     && value.sourceEventCount <= 20
     ? value.sourceEventCount
     : 0;
+  const matchedHazardCount = typeof value.matchedHazardCount === "number"
+    && Number.isInteger(value.matchedHazardCount)
+    && value.matchedHazardCount >= 0
+    && value.matchedHazardCount <= 20
+    ? value.matchedHazardCount
+    : -1;
 
   if (
     !candidateLabel
     || sourceEventCount === 0
+    || matchedHazardCount < 0
     || (status === "review_required" && (!candidateText || !reviewContract))
   ) return null;
   return {
@@ -153,6 +161,7 @@ function parseInboxItem(value: unknown): ReviewInboxItem | null {
     providerLabel: typeof value.providerLabel === "string" ? value.providerLabel.slice(0, 96) : null,
     candidateText,
     sourceEventCount,
+    matchedHazardCount,
     reviewContract
   };
 }
@@ -171,9 +180,11 @@ export function KnowledgeReviewInbox() {
   const [state, setState] = useState<"loading" | "signed_out" | "ready" | "error">("loading");
   const [session, setSession] = useState<Session | null>(null);
   const [pendingRunId, setPendingRunId] = useState<string | null>(null);
+  const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
 
   const accessToken = session?.access_token ?? null;
+  const selectedItem = items.find((item) => item.runId === selectedRunId) ?? items[0] ?? null;
 
   const loadInbox = useCallback(async (token: string) => {
     try {
@@ -293,11 +304,32 @@ export function KnowledgeReviewInbox() {
       {message ? <p className={styles.reviewInboxMessage} role="status">{message}</p> : null}
 
       {items.length > 0 ? (
-        <ul className={styles.reviewList}>
-          {items.map((item) => {
+        <div className={styles.reviewWorkbench} data-review-workbench="selected-only">
+          <nav className={styles.reviewNavigator} aria-label="지식 후보 목록">
+            <span className={styles.reviewNavigatorLabel}>검토 후보 {items.length}건</span>
+            <ul className={styles.reviewList}>
+              {items.map((item) => (
+                <li key={item.runId}>
+                  <button
+                    type="button"
+                    className={styles.reviewCandidateButton}
+                    aria-pressed={selectedItem?.runId === item.runId}
+                    onClick={() => setSelectedRunId(item.runId)}
+                  >
+                    <span>{item.status === "review_required" ? "검토 대기" : "후보 준비 전"}</span>
+                    <strong>{item.candidateLabel}</strong>
+                    <small>근거 {item.sourceEventCount} · 위험 {item.matchedHazardCount}</small>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {selectedItem ? (() => {
+            const item = selectedItem;
             const pending = pendingRunId === item.runId;
             return (
-              <li key={item.runId} className={styles.reviewItem} data-review-run-status={item.status}>
+              <article className={styles.reviewItem} data-review-run-status={item.status} data-selected-review-candidate="true">
                 <div className={styles.reviewItemHeading}>
                   <div>
                     <span>{item.status === "review_required" ? "검토 대기" : "후보 준비 전"}</span>
@@ -305,6 +337,7 @@ export function KnowledgeReviewInbox() {
                   </div>
                   <dl>
                     <div><dt>근거</dt><dd>{item.sourceEventCount}건</dd></div>
+                    <div><dt>위험</dt><dd>{item.matchedHazardCount}건</dd></div>
                     <div><dt>게시</dt><dd>미게시</dd></div>
                   </dl>
                 </div>
@@ -334,7 +367,7 @@ export function KnowledgeReviewInbox() {
                         <span>작업팩 적용 전 현장 책임자 확인</span>
                       </div>
                     </section>
-                    <p className={styles.candidateText}>{item.candidateText}</p>
+                    <p className={styles.candidateText} data-selected-candidate-body="true">{item.candidateText}</p>
                     <div className={styles.reviewMeta}>
                       <span>법적 확정 아님</span>
                       <span>온톨로지 미반영</span>
@@ -351,10 +384,10 @@ export function KnowledgeReviewInbox() {
                     후보 준비
                   </button>
                 ) : null}
-              </li>
+              </article>
             );
-          })}
-        </ul>
+          })() : null}
+        </div>
       ) : null}
     </section>
   );

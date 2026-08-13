@@ -39,6 +39,14 @@ const queueItem = {
   }
 };
 
+const secondQueueItem: typeof queueItem = {
+  ...queueItem,
+  runId: "22222222-2222-4222-8222-222222222222",
+  candidateLabel: "작업계획서 현장 지식 검토",
+  candidateText: "양중 작업구역을 분리하고 신호수 배치 상태를 검토합니다.",
+  matchedHazardCount: 2
+};
+
 describe("knowledge review inbox browser", () => {
   beforeAll(async () => {
     harness = await startIsolatedNextBrowserHarness({
@@ -59,7 +67,7 @@ describe("knowledge review inbox browser", () => {
     await harness?.stop();
   }, 30_000);
 
-  it("shows one mobile-safe decision group and submits the existing approval action", async () => {
+  it("shows one selected mobile-safe candidate and submits the existing approval action", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     await page.addInitScript(() => {
@@ -80,7 +88,7 @@ describe("knowledge review inbox browser", () => {
         }
       }));
     });
-    let queue: typeof queueItem[] = [queueItem];
+    let queue: typeof queueItem[] = [queueItem, secondQueueItem];
     const submittedBodies: unknown[] = [];
     const networkBodies: string[] = [];
 
@@ -118,7 +126,44 @@ describe("knowledge review inbox browser", () => {
     await page.getByRole("tab", { name: "검토 흐름" }).click();
     const inbox = page.locator('[data-knowledge-review-inbox="true"]');
     await inbox.waitFor();
-    await expect.poll(() => inbox.getByText("위험성평가표 현장 지식 검토").isVisible()).toBe(true);
+    await expect.poll(() => inbox.getByRole("heading", { name: "위험성평가표 현장 지식 검토" }).isVisible()).toBe(true);
+    expect(await inbox.locator('[data-review-workbench="selected-only"]').count()).toBe(1);
+    expect(await inbox.locator('[data-selected-review-candidate="true"]').count()).toBe(1);
+    expect(await inbox.locator('[data-selected-candidate-body="true"]').count()).toBe(1);
+    await expect.poll(() => inbox.getByText(queueItem.candidateText).isVisible()).toBe(true);
+    expect(await inbox.getByText(secondQueueItem.candidateText).isVisible()).toBe(false);
+    await inbox.getByRole("button", { name: /작업계획서 현장 지식 검토/u }).click();
+    await expect.poll(() => inbox.getByText(secondQueueItem.candidateText).isVisible()).toBe(true);
+    expect(await inbox.getByText(queueItem.candidateText).isVisible()).toBe(false);
+    expect(await inbox.getByText("위험 2").isVisible()).toBe(true);
+    await inbox.getByRole("button", { name: /위험성평가표 현장 지식 검토/u }).click();
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const workbenchMetrics = await inbox.locator('[data-review-workbench="selected-only"]').evaluate((root) => {
+      const navigator = root.querySelector<HTMLElement>('nav[aria-label="지식 후보 목록"]');
+      const detail = root.querySelector<HTMLElement>('[data-selected-review-candidate="true"]');
+      const body = root.querySelector<HTMLElement>('[data-selected-candidate-body="true"]');
+      if (!navigator || !detail || !body) throw new Error("review workbench geometry is incomplete");
+      const navigatorRect = navigator.getBoundingClientRect();
+      const detailRect = detail.getBoundingClientRect();
+      return {
+        columns: getComputedStyle(root).gridTemplateColumns,
+        navigatorRight: navigatorRect.right,
+        detailLeft: detailRect.left,
+        detailHeight: detailRect.height,
+        selectedBodyCount: root.querySelectorAll('[data-selected-candidate-body="true"]').length,
+        bodyOverflowY: getComputedStyle(body).overflowY,
+        rootOverflow: root.scrollWidth - root.clientWidth,
+        pageOverflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - window.innerWidth
+      };
+    });
+    expect(workbenchMetrics.columns.split(" ")).toHaveLength(2);
+    expect(workbenchMetrics.navigatorRight).toBeLessThanOrEqual(workbenchMetrics.detailLeft);
+    expect(workbenchMetrics.detailHeight).toBeLessThanOrEqual(580);
+    expect(workbenchMetrics.selectedBodyCount).toBe(1);
+    expect(workbenchMetrics.bodyOverflowY).toBe("auto");
+    expect(workbenchMetrics.rootOverflow).toBeLessThanOrEqual(1);
+    expect(workbenchMetrics.pageOverflow).toBeLessThanOrEqual(1);
     expect(await inbox.textContent()).not.toContain("홍길동");
     expect(networkBodies).not.toHaveLength(0);
     for (const forbidden of [
