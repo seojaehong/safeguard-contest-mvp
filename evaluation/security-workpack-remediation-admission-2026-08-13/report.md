@@ -2,9 +2,9 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_WORKPACK_REMEDIATION_ADMISSION_LIVE_PENDING`
+`PASS_LIVE_DEPLOYED_SOURCE_WORKPACK_REMEDIATION_ADMISSION`
 
-Product commit `b507258161a2981dc29555cded09d13d1f52d486` closes the source-backed finding `remediation-without-work-lease`. Production build-info still reports the prior commit `78eab5e1d58954f23e98c479e947df5224cc888a`, so live deployment proof remains pending.
+Product commit `b507258161a2981dc29555cded09d13d1f52d486` closes the source-backed finding `remediation-without-work-lease`. Production build-info reports the same product commit on `master` in deployment `safeguard-contest-4v6b2sh2t-seojaehongs-projects.vercel.app`.
 
 ## Remediation
 

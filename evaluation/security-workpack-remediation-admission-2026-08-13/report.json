@@ -1,14 +1,14 @@
 {
   "schemaVersion": "safeclaw-security-workpack-remediation-admission/v1",
-  "verdict": "PASS_CURRENT_SOURCE_WORKPACK_REMEDIATION_ADMISSION_LIVE_PENDING",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_WORKPACK_REMEDIATION_ADMISSION",
   "sourceHead": "b507258161a2981dc29555cded09d13d1f52d486",
   "productCommit": "b507258161a2981dc29555cded09d13d1f52d486",
   "productionBuild": {
-    "commitSha": "78eab5e1d58954f23e98c479e947df5224cc888a",
+    "commitSha": "b507258161a2981dc29555cded09d13d1f52d486",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-mbk1ih2ns-seojaehongs-projects.vercel.app",
-    "sourceHeadLive": false
+    "deploymentUrl": "safeguard-contest-4v6b2sh2t-seojaehongs-projects.vercel.app",
+    "sourceHeadLive": true
   },
   "finding": {
     "slug": "remediation-without-work-lease",
@@ -50,6 +50,6 @@
   "remainingBoundaries": {
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "approvalGatedBoundariesPreserved": true,
-    "liveAfterDeploymentRequired": true
+    "liveAfterDeploymentRequired": false
   }
 }
