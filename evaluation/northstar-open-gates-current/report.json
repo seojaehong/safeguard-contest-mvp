@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-13T17:29:40.016Z",
-  "sourceSha": "0a12a9232f99a3d2711358815e035b3196ec88b9",
+  "generatedAt": "2026-08-13T18:05:17.952Z",
+  "sourceSha": "0230799edfade291323658f18152330ae8632b66",
   "overall": "open",
   "gates": [
     {
@@ -240,6 +240,17 @@
       ]
     },
     {
+      "id": "mcp_provider_admission_security",
+      "state": "notice",
+      "label": "MCP provider admission security",
+      "evidencePath": "evaluation\\security-mcp-provider-admission-2026-08-14\\report.json",
+      "detail": "Live source requires token-and-tenant-bound distributed rate admission plus a weighted durable lease before either provider-generating MCP tool runs, while read-only tools and deterministic template mode remain available. Production still reports pre-auth instance mode, so authenticated provider generation is fail-closed until operator configuration; the immutable medium finding and fresh rescan remain open, no provider or mutation work occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Configure the approved distributed backend and run a bounded authenticated no-provider MCP admission probe.",
+        "Run a fresh Standard scan before reclassifying the immutable finding or claiming security completion."
+      ]
+    },
+    {
       "id": "public_json_request_body_budget",
       "state": "proven",
       "label": "Public JSON request body budget",
@@ -350,7 +361,7 @@
       "state": "notice",
       "label": "MCP generation work-budget security",
       "evidencePath": "evaluation\\security-mcp-generation-work-budget-2026-08-04\\report.json",
-      "detail": "Current production 87025eb8 re-proves MCP invalid-token 401 fail-closed with instance admission before any MCP tool dispatch, provider call, or mutation. The 96 KiB measured body contract, 77 adjacent tests, and zero dependency vulnerabilities remain preserved; a valid authenticated runtime probe, distributed activation, and fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Current production f0204542 re-proves MCP invalid-token 401 fail-closed with instance admission before any MCP tool dispatch, provider call, or mutation. The new provider-admission companion preserves the 96 KiB measured body and authentication contracts through 94 adjacent MCP tests; a valid authenticated runtime probe, distributed activation, and fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Run a valid credential-safe production MCP boundary probe without exposing the token.",
         "Activate the approved distributed limiter configuration and complete a fresh security rescan before reclassifying the sealed finding."
