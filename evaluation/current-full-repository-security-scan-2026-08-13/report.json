@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-current-full-repository-security-scan/v1",
-  "generatedAt": "2026-08-13T23:03:00+09:00",
-  "verdict": "NOTICE_CURRENT_SOURCE_THREE_FINDING_REMEDIATION_SIF_LIVE_PENDING_RESCAN_PENDING",
+  "generatedAt": "2026-08-13T23:06:00+09:00",
+  "verdict": "NOTICE_LIVE_DEPLOYED_SOURCE_THREE_FINDING_REMEDIATION_RESCAN_PENDING",
   "userContext": "Preserve immutable original 18-finding baseline. Verify current f0c8a7be source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
   "immutableBaseline": {
     "scanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
@@ -38,15 +38,15 @@
       "a412e68828201f89f32563fa7fd43bc2c99abd6d"
     ],
     "sourceRemediatedCount": 3,
-    "liveDeployedRemediationCount": 2,
+    "liveDeployedRemediationCount": 3,
     "remainingReportableFindingCountBeforeRescan": 12,
-    "liveAfterDeploymentPending": true,
+    "liveAfterDeploymentPending": false,
     "productionBuild": {
-      "commitSha": "6fc07ad17d382f6c9fdd88472d90388874044050",
+      "commitSha": "a412e68828201f89f32563fa7fd43bc2c99abd6d",
       "branch": "master",
       "environment": "production",
-      "deploymentUrl": "safeguard-contest-r4gcpk99v-seojaehongs-projects.vercel.app",
-      "verifiedAt": "2026-08-13T22:54:00+09:00"
+      "deploymentUrl": "safeguard-contest-bis4wc0cl-seojaehongs-projects.vercel.app",
+      "verifiedAt": "2026-08-13T23:06:00+09:00"
     },
     "freshPostRemediationScanRequired": true,
     "securityCompleteClaimAllowed": false,
@@ -66,7 +66,7 @@
       {
         "slug": "sif-embedding-quality-admission",
         "severity": "medium",
-        "disposition": "source_remediated_live_and_rescan_pending",
+        "disposition": "live_deployed_source_remediated_rescan_pending",
         "verification": "Embedding and upload admission now fail closed for an empty corpus, empty embedding text, missing controls, missing primary documents, duplicate content hashes, or missing validation counts, even when both operator approval flags are true."
       }
     ]
@@ -95,7 +95,7 @@
       "embeddingGenerated": false,
       "vectorUploadPerformed": false
     },
-    "liveVerificationBoundary": "Production marker proves deployment of the first two tested remediations. SIF quality admission remains live-deployment pending. No provider cancellation request, forced HWP internal failure, embedding generation, or vector upload was executed against production."
+    "liveVerificationBoundary": "Production marker proves deployment of all three tested source remediations. No provider cancellation request, forced HWP internal failure, embedding generation, or vector upload was executed against production."
   },
   "coverageLimitations": [
     "The current scan used focused threat surfaces and did not individually line-review all 5,612 tracked files.",
