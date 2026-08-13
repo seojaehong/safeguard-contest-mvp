@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "safeclaw-security-workpack-remediation-admission/v1",
+  "verdict": "PASS_CURRENT_SOURCE_WORKPACK_REMEDIATION_ADMISSION_LIVE_PENDING",
+  "sourceHead": "b507258161a2981dc29555cded09d13d1f52d486",
+  "productCommit": "b507258161a2981dc29555cded09d13d1f52d486",
+  "productionBuild": {
+    "commitSha": "78eab5e1d58954f23e98c479e947df5224cc888a",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-mbk1ih2ns-seojaehongs-projects.vercel.app",
+    "sourceHeadLive": false
+  },
+  "finding": {
+    "slug": "remediation-without-work-lease",
+    "severity": "medium",
+    "baselineRevision": "003c48838b2c4365203de3cc2dae230200c79e96",
+    "remediation": "Acquire the shared enhanced provider lease before safety-reference search and AI generation, fail closed when distributed admission is unavailable, and release on success, error, or caller cancellation."
+  },
+  "contracts": {
+    "enhancedWeightProviderLease": true,
+    "distributedLeaseRequiredInProduction": true,
+    "admissionBeforeReferenceSearch": true,
+    "admissionBeforeAiGeneration": true,
+    "concurrencyFullFailsClosed": true,
+    "admissionBackendFailureFailsClosed": true,
+    "callerCancellationPropagated": true,
+    "leaseReleasedAfterSuccessOrCancellation": true,
+    "workUnitResponseHeadersPresent": true,
+    "requestAndRateBudgetsPreserved": true
+  },
+  "verification": {
+    "focused": { "files": 1, "tests": 9, "status": "PASS" },
+    "adjacent": { "files": 5, "tests": 50, "status": "PASS" },
+    "typecheck": "PASS",
+    "build": { "status": "PASS", "nextVersion": "15.5.22", "staticPages": 28 },
+    "diffCheck": "PASS",
+    "secretScan": "PASS"
+  },
+  "mutationBoundary": {
+    "liveRemediationRequestExecuted": false,
+    "liveSafetyReferenceProviderCalled": false,
+    "liveAiProviderCalled": false,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedBoundariesPreserved": true,
+    "liveAfterDeploymentRequired": true
+  }
+}
