@@ -1,0 +1,106 @@
+{
+  "schemaVersion": "safeclaw-security-atomic-db-race-approval-boundary/v1",
+  "generatedAt": "2026-08-14T04:02:00+09:00",
+  "verdict": "APPROVAL_REQUIRED_TRANSACTIONAL_DB_RACE_REMEDIATION_NO_MUTATION",
+  "sourceHead": "cc24105b318dde26b909052b2cf3ed593b0796b0",
+  "sealedScan": {
+    "scanId": "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+    "targetRevision": "8f5dc78f73d5048598fb2519bf7bb758ab090982",
+    "immutableFindingsPreserved": true
+  },
+  "findings": [
+    {
+      "findingId": "csf_a98f91f2e28285923aa618aa",
+      "ruleId": "business-logic.atomic-credential-admission",
+      "severity": "low",
+      "title": "Concurrent MCP token issuance can exceed the active-token cap",
+      "currentSourceStillAffected": true,
+      "sourceLocations": [
+        "app/api/mcp-tokens/route.ts:240",
+        "app/api/mcp-tokens/route.ts:249",
+        "app/api/mcp-tokens/route.ts:267",
+        "scripts/issue-mcp-token.mjs:52",
+        "supabase/migrations/007_mcp_tokens.sql:14"
+      ],
+      "whySourceOnlyIsInsufficient": [
+        "The route count and insert are separate PostgREST operations.",
+        "A process mutex cannot serialize multiple serverless instances.",
+        "A route-only distributed lease would not protect the operator CLI direct insert path.",
+        "Mock tests cannot prove a database-wide active-token invariant."
+      ],
+      "minimumCorrectDesign": {
+        "databasePrimitive": "A per-site row-lock trigger or atomic transactional function protecting insert and activation updates.",
+        "lockTarget": "The sites row for the token site_id, selected FOR UPDATE.",
+        "activePredicate": "site_id match, disabled=false, created_at within the configured token lifetime, and created_at not in the future.",
+        "failureContract": "Reject at the cap with a stable database error mapped to HTTP 409 without returning plaintextToken.",
+        "coverage": "The database guard must protect API, CLI, and any future service-role insert path."
+      },
+      "requiredVerification": [
+        "Concurrent inserts at cap-1 allow exactly one success and finish at the cap.",
+        "Concurrent disabled-to-active updates cannot exceed the cap.",
+        "Disabled, expired, and future-dated rows follow the declared active predicate.",
+        "Different sites do not share one lock.",
+        "API and CLI never disclose plaintext on rejection."
+      ]
+    },
+    {
+      "findingId": "csf_8cec017794f281cd81e25643",
+      "ruleId": "business-logic.atomic-site-binding",
+      "severity": "low",
+      "title": "Worker site-transfer protection has a check-then-upsert race",
+      "currentSourceStillAffected": true,
+      "sourceLocations": [
+        "app/api/workers/route.ts:58",
+        "app/api/workers/route.ts:78",
+        "app/api/workers/route.ts:95",
+        "app/api/workers/route.ts:111",
+        "supabase/migrations/002_workspace_productization.sql:21"
+      ],
+      "whySourceOnlyIsInsufficient": [
+        "The route lookup and upsert are separate operations.",
+        "Two first writes can both observe no row and then overwrite site_id through the conflict update.",
+        "A multi-statement source workaround can partially persist a mixed worker batch before a later conflict.",
+        "A process mutex cannot serialize multiple serverless instances."
+      ],
+      "minimumCorrectDesign": {
+        "databasePrimitive": "A service-role-only transactional RPC for the complete worker batch.",
+        "conflictContract": "ON CONFLICT (organization_id, external_key) may update profile fields only when the stored site_id equals the requested site_id; site_id is never updated by conflict handling.",
+        "atomicFailure": "Any mismatched or null existing site binding raises a stable error and rolls back the complete batch.",
+        "tenantCheck": "The RPC verifies that site_id belongs to organization_id.",
+        "privilege": "EXECUTE remains unavailable to public, anon, and authenticated roles."
+      },
+      "requiredVerification": [
+        "Concurrent writes for different sites allow exactly one binding.",
+        "A mixed batch with one site conflict leaves no partial inserts or updates.",
+        "Same-site concurrent profile updates remain supported.",
+        "Null existing bindings, duplicate external keys, and organization/site mismatches fail closed.",
+        "The route preserves the existing workerMap success contract and maps only the stable site-conflict error to HTTP 409."
+      ]
+    }
+  ],
+  "approvalRequest": {
+    "required": true,
+    "scope": [
+      "Author and apply one or more Supabase migrations for the transactional controls.",
+      "Create trigger/function/RPC objects and least-privilege execution grants.",
+      "Run PostgreSQL or Supabase concurrency integration tests with temporary rows.",
+      "Update API and CLI paths to consume stable database errors or RPC results."
+    ],
+    "notApprovedOrPerformed": true
+  },
+  "mutationBoundary": {
+    "migrationAuthored": false,
+    "dbSchemaChanged": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "securityCompleteClaimAllowed": false,
+    "freshFullRepositorySecurityScanRequiredAfterRemediation": true
+  }
+}
