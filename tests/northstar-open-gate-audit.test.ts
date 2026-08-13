@@ -2777,6 +2777,71 @@ function createFixtureRoot(): string {
       securityCompleteClaimAllowed: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "share-recipient-contact-verification-2026-08-14", "report.json"), {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_SHARE_RECIPIENT_CONTACT_VERIFICATION_RESCAN_PENDING",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    securityFinding: {
+      scanId: "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+      findingId: "csf_e6a120c87c57d3529757bbde",
+      ruleId: "authentication.bearer-invitation-attribution",
+      severity: "low",
+      immutableFindingPreserved: true,
+      freshPostRemediationScanRequired: true,
+    },
+    sourceContract: {
+      invitationWorkerIdAloneAcceptedForConfirmation: false,
+      fullSnapshottedPhoneAccepted: true,
+      fullSnapshottedEmailAccepted: true,
+      partialPhoneAccepted: false,
+      verificationValuePersisted: false,
+      verificationValueReturned: false,
+      verificationValueLogged: false,
+      missingVerificationStatus: 403,
+      mismatchedVerificationStatus: 403,
+      missingRecipientContactStatus: 409,
+      databaseInsertOccursOnlyAfterVerification: true,
+      serverRecipientSnapshotRemainsAuthoritative: true,
+      anonymousShareBehaviorPreserved: true,
+    },
+    uiContract: {
+      inputCountIncrease: 0,
+      mobileConfirmationRemainsInFirstViewport: true,
+      desktopRecipientWorkbenchRemainsMultiRegion: true,
+      longContentRemainsContained: true,
+    },
+    verification: {
+      focusedAndAdjacent: { files: 7, tests: 124, failed: 0, status: "PASS" },
+      recipientBrowser: { files: 1, tests: 7, failed: 0, status: "PASS" },
+      typecheck: "PASS",
+      build: { status: "PASS", staticPages: 28 },
+    },
+    liveProbe: {
+      status: 404,
+      confirmationId: null,
+      realSavedSessionUsed: false,
+      realWorkerIdentityUsed: false,
+      contactVerificationBranchExecuted: false,
+    },
+    mutationBoundary: {
+      dbSchemaChanged: false,
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      readConfirmationCreatedForEvidence: false,
+      providerDispatchCalled: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      freshFullRepositorySecurityScanRequiredForCanonicalClosure: true,
+      liveRealRecipientVerificationProbe: "NOT_EXECUTED_NO_EXISTING_SAVED_SESSION",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      shareStorageAndCreationApproval: "APPROVAL_GATED",
+      recipientAckLiveDataApproval: "APPROVAL_GATED",
+      securityCompleteClaimAllowed: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"), {
     verdict: "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_AGENT_ADMISSION_RESCAN_PENDING",
     sourceHead: "fixture-sha",
@@ -4740,6 +4805,40 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
 
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "share_session_revocation_security")?.state)
+      .toBe("contradicted");
+  });
+
+  it("keeps recipient contact verification open for rescan and fails closed on attribution overclaim", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "share-recipient-contact-verification-2026-08-14",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "share_recipient_contact_verification_security");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("full snapshotted phone or email");
+    expect(gate?.detail).toContain("fresh rescan");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      sourceContract: { invitationWorkerIdAloneAcceptedForConfirmation: boolean; verificationValuePersisted: boolean };
+      mutationBoundary: { dbMutationPerformed: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string; recipientAckLiveDataApproval: string };
+    };
+    report.sourceContract.invitationWorkerIdAloneAcceptedForConfirmation = true;
+    report.sourceContract.verificationValuePersisted = true;
+    report.mutationBoundary.dbMutationPerformed = true;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    report.remainingBoundaries.recipientAckLiveDataApproval = "PROVEN";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "share_recipient_contact_verification_security")?.state)
       .toBe("contradicted");
   });
 

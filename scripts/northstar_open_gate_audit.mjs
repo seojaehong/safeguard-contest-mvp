@@ -54,6 +54,7 @@ const EVIDENCE_PATHS = Object.freeze({
   postRemediationRepositorySecurityScan: path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "report.json"),
   postRemediationSecuritySourceClosure: path.join("evaluation", "post-remediation-security-source-closure-2026-08-14", "report.json"),
   shareSessionRevocationRemediation: path.join("evaluation", "share-session-revocation-remediation-2026-08-14", "report.json"),
+  shareRecipientContactVerification: path.join("evaluation", "share-recipient-contact-verification-2026-08-14", "report.json"),
   agentChatDurableAdmission: path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"),
   mcpProviderAdmission: path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
@@ -4287,6 +4288,116 @@ function evaluateShareSessionRevocationSecurityGate(rootDir) {
   });
 }
 
+const SHARE_RECIPIENT_CONTACT_VERIFICATION_PATHS = [
+  "app/api/share-sessions/[sessionId]/route.ts",
+  "app/share/[sessionId]/page.tsx",
+  "lib/workpack-commercial.ts",
+];
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateShareRecipientContactVerificationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.shareRecipientContactVerification;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "share_recipient_contact_verification_security",
+      label: "Share recipient contact verification security",
+      state: "missing",
+      evidencePath,
+      detail: "Public Share recipient contact-verification evidence is missing or invalid.",
+      nextActions: ["Restore the source/live no-mutation receipt without creating a saved Share session."],
+    });
+  }
+
+  const finding = isRecord(report.securityFinding) ? report.securityFinding : {};
+  const contract = isRecord(report.sourceContract) ? report.sourceContract : {};
+  const ui = isRecord(report.uiContract) ? report.uiContract : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const adjacent = isRecord(verification.focusedAndAdjacent) ? verification.focusedAndAdjacent : {};
+  const browser = isRecord(verification.recipientBrowser) ? verification.recipientBrowser : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const live = isRecord(report.liveProbe) ? report.liveProbe : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutation.dbSchemaChanged === false
+    && mutation.dbMutationPerformed === false
+    && mutation.shareSessionCreated === false
+    && mutation.readConfirmationCreatedForEvidence === false
+    && mutation.providerDispatchCalled === false
+    && mutation.vectorOrEmbeddingMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_SHARE_RECIPIENT_CONTACT_VERIFICATION_RESCAN_PENDING"
+    && sourceHead.length > 0
+    && sourceHead === productionCommit
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, SHARE_RECIPIENT_CONTACT_VERIFICATION_PATHS)
+    && readString(finding.scanId) === "bd135da7-c309-4e8d-ace5-15222dd3f1c7"
+    && readString(finding.findingId) === "csf_e6a120c87c57d3529757bbde"
+    && readString(finding.ruleId) === "authentication.bearer-invitation-attribution"
+    && readString(finding.severity) === "low"
+    && finding.immutableFindingPreserved === true
+    && finding.freshPostRemediationScanRequired === true
+    && contract.invitationWorkerIdAloneAcceptedForConfirmation === false
+    && contract.fullSnapshottedPhoneAccepted === true
+    && contract.fullSnapshottedEmailAccepted === true
+    && contract.partialPhoneAccepted === false
+    && contract.verificationValuePersisted === false
+    && contract.verificationValueReturned === false
+    && contract.verificationValueLogged === false
+    && readNumber(contract.missingVerificationStatus) === 403
+    && readNumber(contract.mismatchedVerificationStatus) === 403
+    && readNumber(contract.missingRecipientContactStatus) === 409
+    && contract.databaseInsertOccursOnlyAfterVerification === true
+    && contract.serverRecipientSnapshotRemainsAuthoritative === true
+    && contract.anonymousShareBehaviorPreserved === true
+    && readNumber(ui.inputCountIncrease) === 0
+    && ui.mobileConfirmationRemainsInFirstViewport === true
+    && ui.desktopRecipientWorkbenchRemainsMultiRegion === true
+    && ui.longContentRemainsContained === true
+    && readNumber(adjacent.files) === 7
+    && readNumber(adjacent.tests) === 124
+    && readNumber(adjacent.failed) === 0
+    && readString(adjacent.status) === "PASS"
+    && readNumber(browser.files) === 1
+    && readNumber(browser.tests) === 7
+    && readNumber(browser.failed) === 0
+    && readString(browser.status) === "PASS"
+    && verification.typecheck === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && readNumber(live.status) === 404
+    && live.confirmationId === null
+    && live.realSavedSessionUsed === false
+    && live.realWorkerIdentityUsed === false
+    && live.contactVerificationBranchExecuted === false
+    && noMutation
+    && remaining.freshFullRepositorySecurityScanRequiredForCanonicalClosure === true
+    && readString(remaining.liveRealRecipientVerificationProbe) === "NOT_EXECUTED_NO_EXISTING_SAVED_SESSION"
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(remaining.shareStorageAndCreationApproval) === "APPROVAL_GATED"
+    && readString(remaining.recipientAckLiveDataApproval) === "APPROVAL_GATED"
+    && remaining.securityCompleteClaimAllowed === false;
+
+  return gateResult({
+    id: "share_recipient_contact_verification_security",
+    label: "Share recipient contact verification security",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live source requires full snapshotted phone or email verification before an invited worker-attributed Share confirmation insert. The value is not stored or returned, mobile/desktop recipient geometry remains bounded, the safe live missing-session probe created no confirmation, the sealed low finding remains immutable pending a fresh rescan, and exact saved Share remains MISSING_EVIDENCE."
+      : `Share recipient verification verdict=${readString(report.verdict) || "missing"}, sourceLive=${sourceHead.length > 0 && sourceHead === productionCommit}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, SHARE_RECIPIENT_CONTACT_VERIFICATION_PATHS)}, workerIdOnly=${contract.invitationWorkerIdAloneAcceptedForConfirmation === true}, persisted=${contract.verificationValuePersisted === true}, liveStatus=${readNumber(live.status)}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}, ack=${readString(remaining.recipientAckLiveDataApproval) || "missing"}.`,
+    nextActions: pass
+      ? ["Run a fresh Standard scan before reclassifying the immutable finding; keep exact saved Share and live recipient ACK approval-gated."]
+      : ["Restore source/live alignment, full contact verification before insert, non-persistence, browser containment, no-mutation evidence, fresh-rescan requirement, exact Share MISSING_EVIDENCE, and ACK approval gating."],
+  });
+}
+
 const AGENT_CHAT_DURABLE_ADMISSION_PATHS = [
   "lib/openclaw-broker-route.ts",
   "tests/claw-chat-route.test.ts",
@@ -7303,6 +7414,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentRepositorySecurityRescanGate(rootDir),
     evaluatePostRemediationRepositorySecurityScanGate(rootDir),
     evaluateShareSessionRevocationSecurityGate(rootDir),
+    evaluateShareRecipientContactVerificationGate(rootDir),
     evaluateAgentChatDurableAdmissionGate(rootDir),
     evaluateMcpProviderAdmissionGate(rootDir),
     evaluatePublicJsonRequestBodyBudgetGate(rootDir),
