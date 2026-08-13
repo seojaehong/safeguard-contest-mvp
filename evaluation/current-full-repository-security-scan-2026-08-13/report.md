@@ -2,7 +2,7 @@
 
 ## Verdict
 
-`NOTICE_LIVE_DEPLOYED_SOURCE_FOUR_FINDING_REMEDIATION_RESCAN_PENDING`
+`NOTICE_LIVE_DEPLOYED_SOURCE_FIVE_FINDING_REMEDIATION_RESCAN_PENDING`
 
 The Standard Codex Security scan `528ad724-6251-46fa-a812-48264396f321` completed and sealed against source revision `2c65f894be7cb37d0b50a2e1e19466a208400aaa`. It retained 15 reportable findings: 11 medium and 4 low. Coverage is explicitly partial rather than a line-by-line review of every tracked file.
 
@@ -27,11 +27,17 @@ Product commit `86871354` adds a fourth approval-free source remediation:
 - Changed content or provenance is updated atomically with `review_status=pending_review`, including the concurrent unique-conflict recovery path.
 - No live knowledge-event write or database mutation was performed for verification.
 
-The original public-search/HWP verification passed 2 files and 21 tests. Knowledge ingest and adjacent review verification passed 7 files and 112 tests, including 16 focused ingest tests. Strict typecheck passed. Next.js 15.5.22 production build passed with 28 static pages.
+Product commit `430a24b1` adds a fifth approval-free source remediation:
 
-Production build-info reports product commit `86871354794651619d5257f0689e5924b1962ddd` on `master` in `production`. This proves deployment of all four tested source remediations, not execution of a destructive or provider-backed live exploit. No provider cancellation request, forced HWP internal failure, embedding generation, vector upload, or live knowledge-event re-ingestion was executed against production.
+- Authenticated clients can no longer archive self-asserted provider, status, workflow-run, or failure receipts.
+- `POST /api/dispatch-logs` returns `dispatch_log_server_receipt_required` before any database write until authoritative server receipt persistence is separately approved and implemented.
+- Provider dispatch and dispatch-log database mutation were not executed for verification.
 
-A fresh post-remediation security scan is still required before the four findings can be closed in the canonical set. Eleven reportable findings remain before that rescan, and no security-complete claim is allowed.
+The original public-search/HWP verification passed 2 files and 21 tests. Knowledge ingest and adjacent review verification passed 7 files and 112 tests, including 16 focused ingest tests. Dispatch receipt admission verification passed 5 files and 30 tests. Strict typecheck passed. Next.js 15.5.22 production build passed with 28 static pages.
+
+Production build-info reports product commit `430a24b14c3d133151f4d750fe6b596fa85dd117` on `master` in `production`. This proves deployment of all five tested source remediations, not execution of a destructive or provider-backed live exploit. No provider cancellation request, forced HWP internal failure, embedding generation, vector upload, live knowledge-event re-ingestion, provider dispatch, or dispatch-log database write was executed against production.
+
+A fresh post-remediation security scan is still required before the five findings can be closed in the canonical set. Ten reportable findings remain before that rescan, and no security-complete claim is allowed.
 
 ## Boundaries
 

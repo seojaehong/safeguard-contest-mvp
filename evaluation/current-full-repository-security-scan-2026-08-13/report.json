@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-current-full-repository-security-scan/v1",
-  "generatedAt": "2026-08-13T23:36:31+09:00",
-  "verdict": "NOTICE_LIVE_DEPLOYED_SOURCE_FOUR_FINDING_REMEDIATION_RESCAN_PENDING",
-  "sourceHead": "86871354794651619d5257f0689e5924b1962ddd",
-  "productionCommit": "86871354794651619d5257f0689e5924b1962ddd",
+  "generatedAt": "2026-08-13T23:55:18+09:00",
+  "verdict": "NOTICE_LIVE_DEPLOYED_SOURCE_FIVE_FINDING_REMEDIATION_RESCAN_PENDING",
+  "sourceHead": "430a24b14c3d133151f4d750fe6b596fa85dd117",
+  "productionCommit": "430a24b14c3d133151f4d750fe6b596fa85dd117",
   "userContext": "Preserve immutable original 18-finding baseline. Verify current f0c8a7be source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
   "immutableBaseline": {
     "scanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
@@ -34,22 +34,23 @@
     }
   },
   "currentSourceRemediation": {
-    "latestSourceHead": "86871354794651619d5257f0689e5924b1962ddd",
+    "latestSourceHead": "430a24b14c3d133151f4d750fe6b596fa85dd117",
     "productCommits": [
       "6fc07ad17d382f6c9fdd88472d90388874044050",
       "a412e68828201f89f32563fa7fd43bc2c99abd6d",
-      "86871354794651619d5257f0689e5924b1962ddd"
+      "86871354794651619d5257f0689e5924b1962ddd",
+      "430a24b14c3d133151f4d750fe6b596fa85dd117"
     ],
-    "sourceRemediatedCount": 4,
-    "liveDeployedRemediationCount": 4,
-    "remainingReportableFindingCountBeforeRescan": 11,
+    "sourceRemediatedCount": 5,
+    "liveDeployedRemediationCount": 5,
+    "remainingReportableFindingCountBeforeRescan": 10,
     "liveAfterDeploymentPending": false,
     "productionBuild": {
-      "commitSha": "86871354794651619d5257f0689e5924b1962ddd",
+      "commitSha": "430a24b14c3d133151f4d750fe6b596fa85dd117",
       "branch": "master",
       "environment": "production",
-      "deploymentUrl": "safeguard-contest-jh9axvaan-seojaehongs-projects.vercel.app",
-      "verifiedAt": "2026-08-13T23:36:31+09:00"
+      "deploymentUrl": "safeguard-contest-g01oc9by4-seojaehongs-projects.vercel.app",
+      "verifiedAt": "2026-08-13T23:55:18+09:00"
     },
     "freshPostRemediationScanRequired": true,
     "securityCompleteClaimAllowed": false,
@@ -77,6 +78,12 @@
         "severity": "medium",
         "disposition": "live_deployed_source_remediated_rescan_pending",
         "verification": "Identical re-ingestion preserves the existing review receipt without updating the event; changed content or provenance is updated atomically with review_status reset to pending_review, including the concurrent unique-conflict path."
+      },
+      {
+        "slug": "dispatch-archive-outcome-forgery",
+        "severity": "low",
+        "disposition": "live_deployed_source_remediated_rescan_pending",
+        "verification": "Authenticated client POSTs can no longer persist self-asserted provider, status, workflow, or failure receipts; the route returns dispatch_log_server_receipt_required before any database write until authoritative server receipt persistence is approved and implemented."
       }
     ]
   },
@@ -114,7 +121,16 @@
       "build": "PASS",
       "databaseMutationPerformed": false
     },
-    "liveVerificationBoundary": "Production marker proves deployment of all four tested source remediations. No provider cancellation request, forced HWP internal failure, embedding generation, vector upload, or live knowledge-event re-ingestion was executed against production."
+    "dispatchArchiveReceiptAdmission": {
+      "focusedAndAdjacentFiles": 5,
+      "focusedAndAdjacentTests": 30,
+      "failed": 0,
+      "typecheck": "PASS",
+      "build": "PASS",
+      "providerDispatchCalled": false,
+      "databaseMutationPerformed": false
+    },
+    "liveVerificationBoundary": "Production marker proves deployment of all five tested source remediations. No provider cancellation request, forced HWP internal failure, embedding generation, vector upload, live knowledge-event re-ingestion, provider dispatch, or dispatch-log database write was executed against production."
   },
   "coverageLimitations": [
     "The current scan used focused threat surfaces and did not individually line-review all 5,612 tracked files.",

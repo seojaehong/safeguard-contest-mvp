@@ -2558,7 +2558,7 @@ function createFixtureRoot(): string {
     currentSecurityRemediationLedgerFixture(),
   );
   writeJson(rootDir, path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "report.json"), {
-    verdict: "NOTICE_LIVE_DEPLOYED_SOURCE_FOUR_FINDING_REMEDIATION_RESCAN_PENDING",
+    verdict: "NOTICE_LIVE_DEPLOYED_SOURCE_FIVE_FINDING_REMEDIATION_RESCAN_PENDING",
     immutableBaseline: {
       scanId: "8fe9c06a-018c-446f-aa98-1b37df95287a",
       accountedFindingCount: 18,
@@ -2580,9 +2580,9 @@ function createFixtureRoot(): string {
     },
     currentSourceRemediation: {
       latestSourceHead: "fixture-sha",
-      sourceRemediatedCount: 4,
-      liveDeployedRemediationCount: 4,
-      remainingReportableFindingCountBeforeRescan: 11,
+      sourceRemediatedCount: 5,
+      liveDeployedRemediationCount: 5,
+      remainingReportableFindingCountBeforeRescan: 10,
       liveAfterDeploymentPending: false,
       freshPostRemediationScanRequired: true,
       securityCompleteClaimAllowed: false,
@@ -2592,6 +2592,7 @@ function createFixtureRoot(): string {
         { slug: "hwp-error-path-disclosure" },
         { slug: "sif-embedding-quality-admission" },
         { slug: "knowledge-reingest-review-reset" },
+        { slug: "dispatch-archive-outcome-forgery" },
       ],
     },
     mutationBoundary: {
@@ -4345,8 +4346,9 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     const gate = audit.gates.find((item) => item.id === "current_repository_security_rescan");
     expect(gate?.state).toBe("notice");
     expect(gate?.detail).toContain("15 findings");
-    expect(gate?.detail).toContain("11 findings");
+    expect(gate?.detail).toContain("10 findings");
     expect(gate?.detail).toContain("changed-knowledge review reset");
+    expect(gate?.detail).toContain("authoritative dispatch receipt");
     expect(gate?.detail).toContain("MISSING_EVIDENCE");
 
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {

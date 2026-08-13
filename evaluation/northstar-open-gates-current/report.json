@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-13T14:47:52.933Z",
-  "sourceSha": "86871354794651619d5257f0689e5924b1962ddd",
+  "generatedAt": "2026-08-13T15:01:22.122Z",
+  "sourceSha": "430a24b14c3d133151f4d750fe6b596fa85dd117",
   "overall": "open",
   "gates": [
     {
@@ -203,9 +203,9 @@
       "state": "notice",
       "label": "Current repository security rescan",
       "evidencePath": "evaluation\\current-full-repository-security-scan-2026-08-13\\report.json",
-      "detail": "Standard current-revision scan 528ad724 is sealed with 15 findings (11 medium, 4 low) under partial coverage. Live source now bounds four findings, including fail-closed SIF corpus quality admission and changed-knowledge review reset, while 11 findings and a fresh post-remediation scan remain open. The immutable original 18-accounted baseline is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Standard current-revision scan 528ad724 is sealed with 15 findings (11 medium, 4 low) under partial coverage. Live source now bounds five findings, including fail-closed SIF corpus quality admission, changed-knowledge review reset, and authoritative dispatch receipt admission, while 10 findings and a fresh post-remediation scan remain open. The immutable original 18-accounted baseline is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Remediate or explicitly defer the remaining 11 findings, then run a fresh post-remediation Standard scan before any security-complete claim."
+        "Remediate or explicitly defer the remaining 10 findings, then run a fresh post-remediation Standard scan before any security-complete claim."
       ]
     },
     {

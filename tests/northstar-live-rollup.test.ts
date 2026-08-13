@@ -445,7 +445,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "full_repository_security_scan", state: "proven", evidencePath: "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json", detail: "sealed follow-up scan with 17 reportable findings and one deferred candidate" },
       { id: "repository_security_scan_reconciliation", state: "notice", evidencePath: "evaluation/repository-security-scan-reconciliation-2026-08-11/report.json", detail: "same-target scan conflict with fail-open receipts" },
       { id: "current_security_remediation_ledger", state: "notice", evidencePath: "evaluation/security-current-remediation-ledger-2026-08-13/report.json", detail: "17/23 deployed-source remediated; six approval or distributed-runtime boundaries remain open" },
-      { id: "current_repository_security_rescan", state: "notice", evidencePath: "evaluation/current-full-repository-security-scan-2026-08-13/report.json", detail: "15 findings, four live source remediations, 11 remaining, fresh scan required" },
+      { id: "current_repository_security_rescan", state: "notice", evidencePath: "evaluation/current-full-repository-security-scan-2026-08-13/report.json", detail: "15 findings, five live source remediations, 10 remaining, fresh scan required" },
       { id: "public_search_distributed_rate_limit_readiness", state: "notice", evidencePath: "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json", detail: "current-source capability with production configuration pending" },
       { id: "public_generation_admission_security", state: "notice", evidencePath: "evaluation/security-public-generation-admission-2026-08-04/report.json", detail: "live instance admission with distributed hardening and fresh rescan pending" },
       { id: "security_followup_remediation", state: "proven", evidencePath: "evaluation/codex-security-followup-remediation-2026-08-11/report.json", detail: "deployed three-finding remediation with immutable baseline preserved" },
@@ -1162,14 +1162,14 @@ function createFixtureRoot(): { root: string; head: string } {
     remainingBoundaries: { securityCompleteClaimAllowed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
   writeJson(root, "evaluation/current-full-repository-security-scan-2026-08-13/report.json", {
-    verdict: "NOTICE_LIVE_DEPLOYED_SOURCE_FOUR_FINDING_REMEDIATION_RESCAN_PENDING",
+    verdict: "NOTICE_LIVE_DEPLOYED_SOURCE_FIVE_FINDING_REMEDIATION_RESCAN_PENDING",
     sourceHead: "TO_FILL",
     currentScan: { scanId: "528ad724-6251-46fa-a812-48264396f321", reportableFindingCount: 15 },
     currentSourceRemediation: {
       latestSourceHead: "TO_FILL",
-      sourceRemediatedCount: 4,
-      liveDeployedRemediationCount: 4,
-      remainingReportableFindingCountBeforeRescan: 11,
+      sourceRemediatedCount: 5,
+      liveDeployedRemediationCount: 5,
+      remainingReportableFindingCountBeforeRescan: 10,
       freshPostRemediationScanRequired: true,
       securityCompleteClaimAllowed: false,
       productionBuild: { commitSha: "TO_FILL" },

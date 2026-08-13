@@ -4031,7 +4031,7 @@ function evaluateCurrentRepositorySecurityRescanGate(rootDir) {
     && mutationBoundary.embeddingOrVectorMutationPerformed === false
     && mutationBoundary.wikiPublicationPerformed === false
     && mutationBoundary.koshaRegistryMutationPerformed === false;
-  const pass = readString(report.verdict) === "NOTICE_LIVE_DEPLOYED_SOURCE_FOUR_FINDING_REMEDIATION_RESCAN_PENDING"
+  const pass = readString(report.verdict) === "NOTICE_LIVE_DEPLOYED_SOURCE_FIVE_FINDING_REMEDIATION_RESCAN_PENDING"
     && readString(immutableBaseline.scanId) === "8fe9c06a-018c-446f-aa98-1b37df95287a"
     && readNumber(immutableBaseline.accountedFindingCount) === 18
     && immutableBaseline.preserved === true
@@ -4043,9 +4043,9 @@ function evaluateCurrentRepositorySecurityRescanGate(rootDir) {
     && readNumber(isRecord(currentScan.severityCounts) ? currentScan.severityCounts.medium : null) === 11
     && readNumber(isRecord(currentScan.severityCounts) ? currentScan.severityCounts.low : null) === 4
     && canonicalArtifactsExist
-    && readNumber(remediation.sourceRemediatedCount) === 4
-    && readNumber(remediation.liveDeployedRemediationCount) === 4
-    && readNumber(remediation.remainingReportableFindingCountBeforeRescan) === 11
+    && readNumber(remediation.sourceRemediatedCount) === 5
+    && readNumber(remediation.liveDeployedRemediationCount) === 5
+    && readNumber(remediation.remainingReportableFindingCountBeforeRescan) === 10
     && remediation.liveAfterDeploymentPending === false
     && remediation.freshPostRemediationScanRequired === true
     && remediation.securityCompleteClaimAllowed === false
@@ -4056,6 +4056,7 @@ function evaluateCurrentRepositorySecurityRescanGate(rootDir) {
     && slugs.has("hwp-error-path-disclosure")
     && slugs.has("sif-embedding-quality-admission")
     && slugs.has("knowledge-reingest-review-reset")
+    && slugs.has("dispatch-archive-outcome-forgery")
     && noMutation
     && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
     && remainingBoundaries.approvalGatedBoundariesPreserved === true
@@ -4067,11 +4068,11 @@ function evaluateCurrentRepositorySecurityRescanGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Standard current-revision scan 528ad724 is sealed with 15 findings (11 medium, 4 low) under partial coverage. Live source now bounds four findings, including fail-closed SIF corpus quality admission and changed-knowledge review reset, while 11 findings and a fresh post-remediation scan remain open. The immutable original 18-accounted baseline is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      ? "Standard current-revision scan 528ad724 is sealed with 15 findings (11 medium, 4 low) under partial coverage. Live source now bounds five findings, including fail-closed SIF corpus quality admission, changed-knowledge review reset, and authoritative dispatch receipt admission, while 10 findings and a fresh post-remediation scan remain open. The immutable original 18-accounted baseline is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
       : `Current scan verdict=${readString(report.verdict) || "missing"}, scan=${readString(currentScan.scanId) || "missing"}, findings=${readNumber(currentScan.reportableFindingCount)}, sourceRemediated=${readNumber(remediation.sourceRemediatedCount)}, liveRemediated=${readNumber(remediation.liveDeployedRemediationCount)}, remaining=${readNumber(remediation.remainingReportableFindingCountBeforeRescan)}, canonical=${canonicalArtifactsExist}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
-      ? ["Remediate or explicitly defer the remaining 11 findings, then run a fresh post-remediation Standard scan before any security-complete claim."]
-      : ["Restore the exact sealed scan, four live source remediations, canonical artifacts, immutable baseline, and no-mutation boundaries."],
+      ? ["Remediate or explicitly defer the remaining 10 findings, then run a fresh post-remediation Standard scan before any security-complete claim."]
+      : ["Restore the exact sealed scan, five live source remediations, canonical artifacts, immutable baseline, and no-mutation boundaries."],
   });
 }
 
