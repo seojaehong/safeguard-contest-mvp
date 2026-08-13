@@ -286,6 +286,7 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
     expect(metrics.reviewHeadingLeft).toBeGreaterThanOrEqual(16);
     expect(metrics.outsideCards).toBe(0);
 
+    await page.getByLabel("Xác minh liên hệ mời").fill("010 1111 2222");
     await page.getByRole("button", { name: "Tôi đã xem" }).click();
     await expect.poll(() => page.getByText("Đã lưu xác nhận xem tài liệu.", { exact: true }).count()).toBe(1);
     await expect.poll(() => page.getByText("Lịch sử xác nhận đã được lưu cho quản lý.", { exact: true }).count()).toBe(1);
@@ -294,6 +295,7 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
     expect(confirmationBody).toEqual({
       workerId: WORKER_ID,
       displayName: "Server Nguyen",
+      recipientVerification: "010 1111 2222",
       languageCode: "vi"
     });
     await page.close();

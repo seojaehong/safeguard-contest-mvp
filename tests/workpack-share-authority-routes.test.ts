@@ -60,6 +60,7 @@ const WORKPACK_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const SESSION_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const WORKER_ID = "11111111-1111-4111-8111-111111111111";
 const KOREAN_WORKER_ID = "22222222-2222-4222-8222-222222222222";
+const RECIPIENT_VERIFICATION = "01011112222";
 const KO_MESSAGE = "[SafeClaw]\n작업 전 안전수칙을 확인해 주세요.";
 const VI_MESSAGE = "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh.";
 
@@ -593,7 +594,55 @@ describe("share session route authority", () => {
     expect(bodyText).not.toContain("Dừng công việc khi gió mạnh.");
   });
 
-  it("public recipient confirmation ignores forged body fields and stores the invited snapshot", async () => {
+  it("rejects a copied invitation URL without separate recipient contact verification", async () => {
+    const fake = makeConfirmationClient(null);
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    const { POST } = await import("@/app/api/share-sessions/[sessionId]/route");
+
+    const missing = await POST(jsonRequest(`/api/share-sessions/${SESSION_ID}?workerId=${WORKER_ID}`, {}), {
+      params: Promise.resolve({ sessionId: SESSION_ID })
+    });
+    const mismatch = await POST(jsonRequest(`/api/share-sessions/${SESSION_ID}?workerId=${WORKER_ID}`, {
+      recipientVerification: "010-9999-9999"
+    }), { params: Promise.resolve({ sessionId: SESSION_ID }) });
+
+    expect(missing.status).toBe(403);
+    expect(mismatch.status).toBe(403);
+    await expect(missing.json()).resolves.toMatchObject({
+      code: "SHARE_RECIPIENT_VERIFICATION_REQUIRED",
+      confirmationId: null
+    });
+    expect(fake.insertCount()).toBe(0);
+  });
+
+  it("fails closed when the invited worker snapshot has no verification contact", async () => {
+    const fake = makeConfirmationClient(null);
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    const sessionWithoutContact = publicSession();
+    sessionWithoutContact.session.recipients[0] = {
+      ...serverRecipient,
+      workerSnapshot: {
+        ...serverRecipient.workerSnapshot,
+        phone: "",
+        email: ""
+      }
+    };
+    mocks.loadActivePublicShareSession.mockResolvedValueOnce(sessionWithoutContact);
+    const { POST } = await import("@/app/api/share-sessions/[sessionId]/route");
+
+    const response = await POST(jsonRequest(`/api/share-sessions/${SESSION_ID}?workerId=${WORKER_ID}`, {
+      recipientVerification: RECIPIENT_VERIFICATION
+    }), { params: Promise.resolve({ sessionId: SESSION_ID }) });
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toMatchObject({
+      code: "SHARE_RECIPIENT_CONTACT_UNAVAILABLE",
+      confirmationId: null
+    });
+    expect(fake.insertCount()).toBe(0);
+  });
+
+  it("public recipient confirmation verifies contact, ignores forged fields, and stores the invited snapshot", async () => {
     const fake = makeConfirmationClient(null);
     mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
     const { POST } = await import("@/app/api/share-sessions/[sessionId]/route");
@@ -601,6 +650,7 @@ describe("share session route authority", () => {
     const response = await POST(jsonRequest(`/api/share-sessions/${SESSION_ID}`, {
       workerId: WORKER_ID,
       displayName: "Forged Name",
+      recipientVerification: "010 1111 2222",
       languageCode: "ko",
       workerSnapshot: {
         workerId: WORKER_ID,
@@ -626,6 +676,7 @@ describe("share session route authority", () => {
     const response = await POST(jsonRequest(`/api/share-sessions/${SESSION_ID}?workerId=${WORKER_ID}`, {
       workerId: KOREAN_WORKER_ID,
       displayName: "Forged Kim",
+      recipientVerification: "SERVER@example.com",
       languageCode: "ko"
     }), { params: Promise.resolve({ sessionId: SESSION_ID }) });
 
@@ -773,6 +824,7 @@ describe("share session route authority", () => {
     const workerConfirmResponse = await publicRecipientRoute.POST(jsonRequest(`/api/share-sessions/${created.shareSessionId}?workerId=${WORKER_ID}`, {
       workerId: KOREAN_WORKER_ID,
       displayName: "Forged Kim",
+      recipientVerification: RECIPIENT_VERIFICATION,
       languageCode: "ko"
     }), { params: Promise.resolve({ sessionId: created.shareSessionId }) });
     const workerConfirmation = await workerConfirmResponse.json() as { confirmationId: string };
@@ -2039,7 +2091,9 @@ describe("read confirmation route authority", () => {
     mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
     const { POST } = await import("@/app/api/share-sessions/[sessionId]/route");
 
-    const response = await POST(jsonRequest(`/api/share-sessions/${SESSION_ID}?workerId=${WORKER_ID}`, {}), {
+    const response = await POST(jsonRequest(`/api/share-sessions/${SESSION_ID}?workerId=${WORKER_ID}`, {
+      recipientVerification: RECIPIENT_VERIFICATION
+    }), {
       params: Promise.resolve({ sessionId: SESSION_ID })
     });
 
@@ -2074,7 +2128,9 @@ describe("read confirmation route authority", () => {
     mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
     const { POST } = await import("@/app/api/share-sessions/[sessionId]/route");
 
-    const response = await POST(jsonRequest(`/api/share-sessions/${SESSION_ID}?workerId=${WORKER_ID}`, {}), {
+    const response = await POST(jsonRequest(`/api/share-sessions/${SESSION_ID}?workerId=${WORKER_ID}`, {
+      recipientVerification: RECIPIENT_VERIFICATION
+    }), {
       params: Promise.resolve({ sessionId: SESSION_ID })
     });
 

@@ -121,6 +121,10 @@ type RecipientPortalCopy = {
   confirmationTitle: string;
   displayNameLabel: string;
   displayNamePlaceholder: string;
+  recipientVerificationLabel: string;
+  recipientVerificationPlaceholder: string;
+  recipientVerificationHint: string;
+  recipientVerificationRequired: string;
   languageLabel: string;
   confirmButton: string;
   submittingButton: string;
@@ -191,6 +195,10 @@ const RECIPIENT_PORTAL_COPY: Record<"ko" | "vi" | "en", RecipientPortalCopy> = {
     confirmationTitle: "열람 확인",
     displayNameLabel: "표시명",
     displayNamePlaceholder: "작업자 화면에 표시될 이름",
+    recipientVerificationLabel: "초대 연락처 확인",
+    recipientVerificationPlaceholder: "등록된 전화번호 전체 또는 이메일 전체",
+    recipientVerificationHint: "링크만 전달받은 사람이 작업자 명의 확인을 남기지 못하도록 초대 연락처를 대조합니다.",
+    recipientVerificationRequired: "등록된 전화번호 전체 또는 이메일 전체를 입력해 주세요.",
     languageLabel: "언어",
     confirmButton: "열람 확인",
     submittingButton: "확인 처리 중...",
@@ -263,6 +271,10 @@ const RECIPIENT_PORTAL_COPY: Record<"ko" | "vi" | "en", RecipientPortalCopy> = {
     confirmationTitle: "Xác nhận đã xem",
     displayNameLabel: "Tên hiển thị",
     displayNamePlaceholder: "Tên sẽ hiển thị trên màn hình công nhân",
+    recipientVerificationLabel: "Xác minh liên hệ mời",
+    recipientVerificationPlaceholder: "Toàn bộ số điện thoại hoặc email đã đăng ký",
+    recipientVerificationHint: "Thông tin liên hệ được đối chiếu để người chỉ có liên kết không thể xác nhận dưới tên công nhân.",
+    recipientVerificationRequired: "Nhập toàn bộ số điện thoại hoặc email đã đăng ký.",
     languageLabel: "Ngôn ngữ",
     confirmButton: "Tôi đã xem",
     submittingButton: "Đang lưu xác nhận...",
@@ -335,6 +347,10 @@ const RECIPIENT_PORTAL_COPY: Record<"ko" | "vi" | "en", RecipientPortalCopy> = {
     confirmationTitle: "Read confirmation",
     displayNameLabel: "Display name",
     displayNamePlaceholder: "Name shown on the worker screen",
+    recipientVerificationLabel: "Invitation contact verification",
+    recipientVerificationPlaceholder: "Full registered phone number or email",
+    recipientVerificationHint: "The registered contact is checked so a person with only the link cannot confirm as the worker.",
+    recipientVerificationRequired: "Enter the full registered phone number or email.",
     languageLabel: "Language",
     confirmButton: "I have reviewed it",
     submittingButton: "Saving confirmation...",
@@ -401,6 +417,7 @@ export default function ShareRecipientPage() {
   const [queryWorkerId, setQueryWorkerId] = useState<string | null>(null);
   const [workerId, setWorkerId] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [recipientVerification, setRecipientVerification] = useState("");
   const [languageCode, setLanguageCode] = useState<string>("ko");
   const [confirmationMessage, setConfirmationMessage] = useState("");
   const [isIdempotent, setIsIdempotent] = useState(false);
@@ -455,9 +472,12 @@ export default function ShareRecipientPage() {
     }
     if (selectedRecipient?.displayName) {
       body.displayName = body.displayName || selectedRecipient.displayName;
+      if (recipientVerification.trim()) {
+        body.recipientVerification = recipientVerification.trim();
+      }
     }
     return body;
-  }, [workerId, displayName, languageCode, selectedRecipient]);
+  }, [workerId, displayName, languageCode, selectedRecipient, recipientVerification]);
 
   const hasManualLanguageSelection = useMemo(() => {
     return sessionPayload?.accessPolicy.manualLanguageSwitchAllowed ?? false;
@@ -555,6 +575,10 @@ export default function ShareRecipientPage() {
       setConfirmationMessage(copy.missingWorkerId);
       return;
     }
+    if (selectedRecipient && !body.recipientVerification) {
+      setConfirmationMessage(copy.recipientVerificationRequired);
+      return;
+    }
     setFetchState("submitting");
     setConfirmationMessage("");
     setIsIdempotent(false);
@@ -596,7 +620,7 @@ export default function ShareRecipientPage() {
     && status === "active"
     && (
       isAnonymousOpenSession
-      || Boolean(workerId.trim())
+      || (Boolean(workerId.trim()) && Boolean(recipientVerification.trim()))
     );
 
   return (
@@ -688,16 +712,31 @@ export default function ShareRecipientPage() {
 
           <article className="safeclaw-share-recipient-card safeclaw-share-recipient-card-confirm">
                 <h3>{copy.confirmationTitle}</h3>
-              <label>
-                {copy.displayNameLabel}
-                <input
-                  type="text"
-                  value={displayName}
-                  onChange={(event) => setDisplayName(event.target.value)}
-                  placeholder={copy.displayNamePlaceholder}
-                  className="safeclaw-input"
-                />
-              </label>
+              {selectedRecipient ? (
+                <label>
+                  {copy.recipientVerificationLabel}
+                  <input
+                    type="text"
+                    value={recipientVerification}
+                    onChange={(event) => setRecipientVerification(event.target.value)}
+                    placeholder={copy.recipientVerificationPlaceholder}
+                    className="safeclaw-input"
+                    autoComplete="off"
+                    title={copy.recipientVerificationHint}
+                  />
+                </label>
+              ) : (
+                <label>
+                  {copy.displayNameLabel}
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={(event) => setDisplayName(event.target.value)}
+                    placeholder={copy.displayNamePlaceholder}
+                    className="safeclaw-input"
+                  />
+                </label>
+              )}
               {hasManualLanguageSelection && availableLanguages.length ? (
                 <label>
                   {copy.languageLabel}

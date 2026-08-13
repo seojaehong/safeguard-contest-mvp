@@ -4,7 +4,8 @@ import {
   buildImprovementDraft,
   buildImprovementPhotoPath,
   buildReadConfirmationDraft,
-  buildShareSessionDraft
+  buildShareSessionDraft,
+  verifyShareRecipientContact
 } from "@/lib/workpack-commercial";
 
 describe("commercial workpack operation contracts", () => {
@@ -69,6 +70,30 @@ describe("commercial workpack operation contracts", () => {
 
     if (draft.ok) throw new Error("empty worker snapshot should be rejected");
     expect(draft.message).toContain("snapshot");
+  });
+
+  it("verifies an invited worker with the full snapshotted phone or email", () => {
+    const recipient = {
+      workerId: "worker-1",
+      displayName: "Nguyen",
+      workerSnapshot: {
+        phone: "010-1234-5678",
+        email: "Nguyen@example.com"
+      }
+    };
+
+    expect(verifyShareRecipientContact(recipient, "010 1234 5678")).toEqual({ ok: true, method: "phone" });
+    expect(verifyShareRecipientContact(recipient, "nguyen@EXAMPLE.com")).toEqual({ ok: true, method: "email" });
+    expect(verifyShareRecipientContact(recipient, "5678")).toEqual({ ok: false, reason: "verification_mismatch" });
+    expect(verifyShareRecipientContact(recipient, "attacker@example.com")).toEqual({ ok: false, reason: "verification_mismatch" });
+  });
+
+  it("fails closed when an invited worker has no verification contact", () => {
+    expect(verifyShareRecipientContact({
+      workerId: "worker-1",
+      displayName: "Nguyen",
+      workerSnapshot: { workerId: "worker-1" }
+    }, "010-1234-5678")).toEqual({ ok: false, reason: "recipient_contact_unavailable" });
   });
 
   it("turns before/after photos into a reviewable improvement draft", () => {

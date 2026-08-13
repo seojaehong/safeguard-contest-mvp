@@ -257,6 +257,45 @@ function readSnapshotContact(recipient: ShareRecipientInput, key: "phone" | "ema
   return typeof value === "string" ? value.trim() : "";
 }
 
+function normalizePhoneVerification(value: string): string {
+  return value.replace(/\D/gu, "");
+}
+
+function normalizeEmailVerification(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+export type ShareRecipientContactVerification = {
+  ok: true;
+  method: "phone" | "email";
+} | {
+  ok: false;
+  reason: "missing_verification" | "recipient_contact_unavailable" | "verification_mismatch";
+};
+
+export function verifyShareRecipientContact(
+  recipient: ShareRecipientInput,
+  verification: string
+): ShareRecipientContactVerification {
+  const candidate = verification.trim();
+  if (!candidate) return { ok: false, reason: "missing_verification" };
+
+  const phone = normalizePhoneVerification(readSnapshotContact(recipient, "phone"));
+  const email = normalizeEmailVerification(readSnapshotContact(recipient, "email"));
+  if (!phone && !email) {
+    return { ok: false, reason: "recipient_contact_unavailable" };
+  }
+
+  const candidatePhone = normalizePhoneVerification(candidate);
+  if (phone.length >= 8 && candidatePhone === phone) {
+    return { ok: true, method: "phone" };
+  }
+  if (email && candidate.includes("@") && normalizeEmailVerification(candidate) === email) {
+    return { ok: true, method: "email" };
+  }
+  return { ok: false, reason: "verification_mismatch" };
+}
+
 export function validateDispatchContacts(input: {
   channels: WorkpackDispatchChannel[];
   recipients: ShareRecipientInput[];

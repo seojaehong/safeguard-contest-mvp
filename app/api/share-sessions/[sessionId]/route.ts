@@ -3,7 +3,8 @@ import { isRecord, readString } from "@/lib/workspace-api";
 import {
   buildReadConfirmationDraft,
   type ShareRecipientInput,
-  findShareSessionRecipient
+  findShareSessionRecipient,
+  verifyShareRecipientContact
 } from "@/lib/workpack-commercial";
 import {
   buildReadConfirmationId,
@@ -164,6 +165,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   const bodyWorkerId = readString(body.workerId);
   const workerId = queryWorkerId || bodyWorkerId || undefined;
   const displayName = readString(body.displayName);
+  const recipientVerification = readString(body.recipientVerification);
   const languageCode = sanitizeLanguageCode(body.languageCode);
   const manualWorkerSnapshot = isRecord(body.workerSnapshot) ? body.workerSnapshot : {};
 
@@ -201,6 +203,24 @@ export async function POST(request: NextRequest, context: RouteContext) {
       confirmationId: null,
       message: "초대된 작업자 링크로 다시 접속해 주세요."
     }, { status: 403 });
+  }
+
+  if (authorizedRecipient) {
+    const verification = verifyShareRecipientContact(authorizedRecipient, recipientVerification);
+    if (!verification.ok) {
+      const contactUnavailable = verification.reason === "recipient_contact_unavailable";
+      return NextResponse.json({
+        ok: false,
+        configured: true,
+        confirmationId: null,
+        code: contactUnavailable
+          ? "SHARE_RECIPIENT_CONTACT_UNAVAILABLE"
+          : "SHARE_RECIPIENT_VERIFICATION_REQUIRED",
+        message: contactUnavailable
+          ? "초대 연락처가 없어 열람 확인을 저장할 수 없습니다. 관리자에게 연락처 등록을 요청해 주세요."
+          : "초대 연락처 확인값이 일치해야 작업자 열람 확인을 저장할 수 있습니다."
+      }, { status: contactUnavailable ? 409 : 403 });
+    }
   }
 
   const resolvedDisplayName = authorizedRecipient?.displayName || displayName;
