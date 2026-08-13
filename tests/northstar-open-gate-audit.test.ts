@@ -2723,6 +2723,60 @@ function createFixtureRoot(): string {
   writeJson(rootDir, path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "canonical", "findings.json"), {});
   writeJson(rootDir, path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "canonical", "coverage.json"), {});
   writeText(rootDir, path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "scan-report.md"), "# Scan\n");
+  writeJson(rootDir, path.join("evaluation", "share-session-revocation-remediation-2026-08-14", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_OWNER_SHARE_SESSION_REVOCATION_RESCAN_PENDING",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    securityFinding: {
+      scanId: "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+      findingId: "csf_81119e28edb5ebd0a227f9ca",
+      ruleId: "authorization.missing-share-revocation",
+      severity: "low",
+      immutableFindingPreserved: true,
+      freshPostRemediationScanRequired: true,
+    },
+    sourceContract: {
+      method: "DELETE",
+      managerAuthenticationRequired: true,
+      ownedWorkpackContextRequired: true,
+      tupleFilters: ["session_id", "workpack_id", "organization_id", "site_id"],
+      revokedStatusPersisted: true,
+      updatedAtAuditEvidenceReturned: true,
+      malformedSessionIdRejectedBeforeStorage: true,
+      unknownOrForeignTupleFailsClosed: true,
+      operatorUiAction: "공유 세션 중지",
+      confirmationRequired: true,
+    },
+    verification: {
+      focusedTests: { files: 3, tests: 92, failed: 0, status: "PASS" },
+      browserGeometry: { files: 1, tests: 4, failed: 0, status: "PASS" },
+      typecheck: "PASS",
+      build: { status: "PASS", staticPages: 28 },
+    },
+    liveVerification: {
+      liveAfterDeploymentPending: false,
+      productionBranch: "master",
+      productionEnvironment: "production",
+      unauthenticatedDeleteStatus: 401,
+      unauthenticatedDeleteConfigured: true,
+      unauthenticatedDeleteRevokedSessionId: null,
+      destructiveRevokeProbeExecuted: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      shareSessionRevokedForEvidence: false,
+      providerDispatchCalled: false,
+      embeddingOrVectorMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      shareStorageAndCreationApproval: "APPROVAL_GATED",
+      securityCompleteClaimAllowed: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",
     sourceHead: "fixture-sha",
@@ -4498,6 +4552,38 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
 
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "post_remediation_repository_security_scan")?.state)
+      .toBe("contradicted");
+  });
+
+  it("keeps owner Share revocation open for rescan and fails closed on exact Share overclaim", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "share-session-revocation-remediation-2026-08-14",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "share_session_revocation_security");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("owner-only");
+    expect(gate?.detail).toContain("401");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      liveVerification: { destructiveRevokeProbeExecuted: boolean };
+      mutationBoundary: { dbMutationPerformed: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.liveVerification.destructiveRevokeProbeExecuted = true;
+    report.mutationBoundary.dbMutationPerformed = true;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "share_session_revocation_security")?.state)
       .toBe("contradicted");
   });
 

@@ -53,6 +53,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "report.json"),
   postRemediationRepositorySecurityScan: path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "report.json"),
   postRemediationSecuritySourceClosure: path.join("evaluation", "post-remediation-security-source-closure-2026-08-14", "report.json"),
+  shareSessionRevocationRemediation: path.join("evaluation", "share-session-revocation-remediation-2026-08-14", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
@@ -4181,6 +4182,109 @@ function evaluatePostRemediationRepositorySecurityScanGate(rootDir) {
   });
 }
 
+const SHARE_SESSION_REVOCATION_SECURITY_PATHS = [
+  "app/api/workpacks/[id]/share-sessions/route.ts",
+  "components/WorkflowSharePanel.tsx",
+  "lib/workflow-share-client.ts",
+];
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateShareSessionRevocationSecurityGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.shareSessionRevocationRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "share_session_revocation_security",
+      label: "Share session revocation security",
+      state: "missing",
+      evidencePath,
+      detail: "Owner-only Share session revocation evidence is missing or invalid.",
+      nextActions: ["Restore the live source receipt without creating or revoking a production Share session."],
+    });
+  }
+
+  const finding = isRecord(report.securityFinding) ? report.securityFinding : {};
+  const contract = isRecord(report.sourceContract) ? report.sourceContract : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedTests) ? verification.focusedTests : {};
+  const browser = isRecord(verification.browserGeometry) ? verification.browserGeometry : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const live = isRecord(report.liveVerification) ? report.liveVerification : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(report.productionCommit);
+  const tupleFilters = Array.isArray(contract.tupleFilters) ? contract.tupleFilters.map(readString) : [];
+  const expectedTupleFilters = ["session_id", "workpack_id", "organization_id", "site_id"];
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.shareSessionCreated === false
+    && mutation.shareSessionRevokedForEvidence === false
+    && mutation.providerDispatchCalled === false
+    && mutation.embeddingOrVectorMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_OWNER_SHARE_SESSION_REVOCATION_RESCAN_PENDING"
+    && sourceHead.length > 0
+    && sourceHead === productionCommit
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, SHARE_SESSION_REVOCATION_SECURITY_PATHS)
+    && readString(finding.scanId) === "bd135da7-c309-4e8d-ace5-15222dd3f1c7"
+    && readString(finding.findingId) === "csf_81119e28edb5ebd0a227f9ca"
+    && readString(finding.ruleId) === "authorization.missing-share-revocation"
+    && readString(finding.severity) === "low"
+    && finding.immutableFindingPreserved === true
+    && finding.freshPostRemediationScanRequired === true
+    && readString(contract.method) === "DELETE"
+    && contract.managerAuthenticationRequired === true
+    && contract.ownedWorkpackContextRequired === true
+    && tupleFilters.length === expectedTupleFilters.length
+    && expectedTupleFilters.every((item) => tupleFilters.includes(item))
+    && contract.revokedStatusPersisted === true
+    && contract.updatedAtAuditEvidenceReturned === true
+    && contract.malformedSessionIdRejectedBeforeStorage === true
+    && contract.unknownOrForeignTupleFailsClosed === true
+    && readString(contract.operatorUiAction) === "공유 세션 중지"
+    && contract.confirmationRequired === true
+    && readNumber(focused.files) === 3
+    && readNumber(focused.tests) === 92
+    && readNumber(focused.failed) === 0
+    && readString(focused.status) === "PASS"
+    && readNumber(browser.files) === 1
+    && readNumber(browser.tests) === 4
+    && readNumber(browser.failed) === 0
+    && readString(browser.status) === "PASS"
+    && verification.typecheck === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && live.liveAfterDeploymentPending === false
+    && readString(live.productionBranch) === "master"
+    && readString(live.productionEnvironment) === "production"
+    && readNumber(live.unauthenticatedDeleteStatus) === 401
+    && live.unauthenticatedDeleteConfigured === true
+    && live.unauthenticatedDeleteRevokedSessionId === null
+    && live.destructiveRevokeProbeExecuted === false
+    && noMutation
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(remaining.shareStorageAndCreationApproval) === "APPROVAL_GATED"
+    && remaining.securityCompleteClaimAllowed === false;
+
+  return gateResult({
+    id: "share_session_revocation_security",
+    label: "Share session revocation security",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live production exposes an authenticated owner-only Share session revoke action scoped by session, workpack, organization, and site with durable status/timestamp evidence. The unauthenticated DELETE probe fails closed at 401, no production session was created or revoked, the canonical low finding remains immutable pending a fresh rescan, and exact saved Share remains MISSING_EVIDENCE."
+      : `Share revocation verdict=${readString(report.verdict) || "missing"}, sourceLive=${sourceHead.length > 0 && sourceHead === productionCommit}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, SHARE_SESSION_REVOCATION_SECURITY_PATHS)}, auth=${readNumber(live.unauthenticatedDeleteStatus)}, destructiveProbe=${live.destructiveRevokeProbeExecuted === true}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Run a fresh Standard scan before reclassifying the immutable finding; keep exact saved Share and DB-backed session creation approval-gated."]
+      : ["Restore live source alignment, owner/tuple scoping, focused and browser verification, 401 fail-closed proof, no-mutation boundaries, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
 /**
  * @param {string} rootDir
  * @returns {GateResult}
@@ -6892,6 +6996,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentSecurityRemediationLedgerGate(rootDir),
     evaluateCurrentRepositorySecurityRescanGate(rootDir),
     evaluatePostRemediationRepositorySecurityScanGate(rootDir),
+    evaluateShareSessionRevocationSecurityGate(rootDir),
     evaluatePublicJsonRequestBodyBudgetGate(rootDir),
     evaluateSecurityResourceRemediationGate(rootDir),
     evaluateSecurityUpstreamTransportRemediationGate(rootDir),

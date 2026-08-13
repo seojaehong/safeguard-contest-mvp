@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-share-session-revocation-remediation/v1",
   "generatedAt": "2026-08-14T01:36:00+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_OWNER_SHARE_SESSION_REVOCATION_LIVE_PENDING",
+  "verdict": "PASS_LIVE_PRODUCTION_OWNER_SHARE_SESSION_REVOCATION_RESCAN_PENDING",
   "sourceHead": "809f1febde9a1899489e16886ebcd46694efea0c",
-  "productionCommit": "f10210a34b3f7e1808fac868b61e57c03493f271",
+  "productionCommit": "809f1febde9a1899489e16886ebcd46694efea0c",
   "securityFinding": {
     "scanId": "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
     "findingId": "csf_81119e28edb5ebd0a227f9ca",
@@ -52,7 +52,13 @@
     "diffCheck": "PASS"
   },
   "liveVerification": {
-    "liveAfterDeploymentPending": true,
+    "liveAfterDeploymentPending": false,
+    "productionBranch": "master",
+    "productionEnvironment": "production",
+    "deploymentUrl": "safeguard-contest-4xjrs2q11-seojaehongs-projects.vercel.app",
+    "unauthenticatedDeleteStatus": 401,
+    "unauthenticatedDeleteConfigured": true,
+    "unauthenticatedDeleteRevokedSessionId": null,
     "destructiveRevokeProbeExecuted": false,
     "reason": "No owned production saved Share session was supplied and creating or revoking one would mutate DB-backed share state."
   },
