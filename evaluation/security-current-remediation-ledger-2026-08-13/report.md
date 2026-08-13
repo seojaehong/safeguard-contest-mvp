@@ -2,7 +2,7 @@
 
 Verdict: `NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_LEDGER_OPEN_BOUNDARIES`
 
-The current production marker and source head are aligned at `4301edf79780d28079aebfa4ee715610152f2323`. This ledger maps the sealed 23-finding current scan set to the remediation receipts accumulated after the immutable original Standard scan.
+The current production marker and source head are aligned at `674999ce1562e76c7bb384a84e1dd67ea1bf6767`. This ledger maps the sealed 23-finding current scan set to the remediation receipts accumulated after the immutable original Standard scan.
 
 ## Disposition
 
@@ -17,7 +17,7 @@ The 17 remediated rows include scoped residual boundaries where applicable. Shar
 
 ## Governed-path compatibility
 
-The current source and production marker are aligned for seven previously stale Northstar security gates. A 27-file, 269-test current-source regression suite passed for public JSON budgets, photo analysis budgets, provider cancellation/admission, public generation admission, the security follow-up paths, and MCP generation budgets. This compatibility receipt does not rewrite their historical evidence or close their distributed/runtime approval boundaries.
+The current source and production marker are aligned for seven previously stale Northstar security gates. The compatibility receipt composes the `4301edf7` baseline (27 files / 269 tests) with the only later governed product delta, `lib/openclaw-broker-route.ts`, verified by a 5-file / 39-test broker and limiter suite plus strict typecheck and production build at `674999ce`. This does not rewrite historical evidence or close distributed/runtime approval boundaries.
 
 ## Open boundaries
 
@@ -26,7 +26,7 @@ The current source and production marker are aligned for seven previously stale 
 - `tenant-owned-related-object-mismatch`: database tenant-tuple constraints remain approval-gated.
 - `public-compute-instance-rate-fallback`: distributed production limiter activation remains open.
 - `public-ask-local-weighted-concurrency`: distributed weighted lease activation remains open.
-- `agent-chat-process-local-quotas`: distributed agent-chat admission remains open.
+- `agent-chat-process-local-quotas`: deployed source now supports separate atomic distributed counters for pre-auth IP and authenticated identity admission, but the production probe still reports `instance`, so distributed activation remains open.
 
 ## Immutable and mutation boundaries
 

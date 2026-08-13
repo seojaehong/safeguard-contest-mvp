@@ -1,0 +1,84 @@
+{
+  "schemaVersion": "safeclaw-security-agent-chat-distributed-admission-remediation/v1",
+  "generatedAt": "2026-08-13T21:18:31.9482271+09:00",
+  "verdict": "NOTICE_LIVE_DEPLOYED_SOURCE_AGENT_CHAT_DISTRIBUTED_ADMISSION_ACTIVATION_PENDING",
+  "sourceHead": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
+  "productCommit": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
+  "productionBuild": {
+    "commitSha": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-cbkj6kmeb-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
+  "finding": {
+    "findingId": "csf_0ab15ba3cb26ea2de42c969d",
+    "anchor": "agent-chat-process-local-quotas",
+    "disposition": "DISTRIBUTED_RUNTIME_ACTIVATION_OPEN"
+  },
+  "contracts": {
+    "preAuthIpAdmission": {
+      "namespace": "agent-chat-pre-auth",
+      "limit": 20,
+      "windowMs": 60000,
+      "distributedWhenConfigured": true
+    },
+    "authenticatedIdentityAdmission": {
+      "namespace": "agent-chat-authenticated",
+      "limit": 5,
+      "windowMs": 60000,
+      "distributedWhenConfigured": true
+    },
+    "completeConfigurationUsesAtomicDistributedCounters": true,
+    "partialConfigurationFailsClosedBeforeAuthentication": true,
+    "absentConfigurationPreservesInstanceFallback": true,
+    "rawClientIdentifiersSentToLimiter": false
+  },
+  "verification": {
+    "focused": {
+      "files": 1,
+      "tests": 19,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "focusedAndAdjacent": {
+      "files": 5,
+      "tests": 39,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    }
+  },
+  "liveProbe": {
+    "method": "POST",
+    "path": "/api/agent/chat",
+    "authenticated": false,
+    "status": 401,
+    "code": "AUTH_REQUIRED",
+    "rateLimitMode": "instance",
+    "providerWorkExecuted": false,
+    "distributedProductionActivationProven": false
+  },
+  "mutationBoundary": {
+    "dbSchemaChanged": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "providerGenerationExecuted": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "distributedProductionActivation": "OPEN",
+    "securityCompleteClaimAllowed": false,
+    "freshFullRepositorySecurityScanRequiredForClosure": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedOperationsRemainApprovalGated": true
+  }
+}

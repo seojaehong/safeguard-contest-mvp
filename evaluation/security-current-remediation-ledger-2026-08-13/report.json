@@ -1,14 +1,14 @@
 {
   "schemaVersion": "safeclaw-security-current-remediation-ledger/v1",
-  "generatedAt": "2026-08-13T20:40:35.0973244+09:00",
+  "generatedAt": "2026-08-13T21:18:31.9482271+09:00",
   "verdict": "NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_LEDGER_OPEN_BOUNDARIES",
-  "sourceHead": "4301edf79780d28079aebfa4ee715610152f2323",
+  "sourceHead": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
   "productionBuild": {
-    "commitSha": "4301edf79780d28079aebfa4ee715610152f2323",
+    "commitSha": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-prdq02u4n-seojaehongs-projects.vercel.app",
-    "verifiedAt": "2026-08-13T20:40:35.0973244+09:00"
+    "deploymentUrl": "safeguard-contest-cbkj6kmeb-seojaehongs-projects.vercel.app",
+    "verifiedAt": "2026-08-13T21:18:31.9482271+09:00"
   },
   "immutableBaselines": {
     "originalStandardScan": {
@@ -40,8 +40,8 @@
   },
   "governedPathCompatibility": {
     "verdict": "PASS_LIVE_DEPLOYED_SOURCE_CURRENT_SECURITY_GOVERNED_PATH_COMPATIBILITY",
-    "sourceHead": "4301edf79780d28079aebfa4ee715610152f2323",
-    "productionCommit": "4301edf79780d28079aebfa4ee715610152f2323",
+    "sourceHead": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
+    "productionCommit": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
     "coveredGateIds": [
       "public_json_request_body_budget",
       "improvement_photo_analysis_budget",
@@ -52,9 +52,29 @@
       "mcp_generation_work_budget_security"
     ],
     "verification": {
-      "files": 27,
-      "tests": 269,
-      "failed": 0,
+      "strategy": "baseline_plus_governed_delta",
+      "baseline": {
+        "sourceHead": "4301edf79780d28079aebfa4ee715610152f2323",
+        "files": 27,
+        "tests": 269,
+        "failed": 0,
+        "status": "PASS"
+      },
+      "delta": {
+        "sourceHead": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
+        "changedProductPaths": [
+          "lib/openclaw-broker-route.ts"
+        ],
+        "changedTestPaths": [
+          "tests/claw-chat-route.test.ts"
+        ],
+        "files": 5,
+        "tests": 39,
+        "failed": 0,
+        "typecheck": "PASS",
+        "build": "PASS",
+        "status": "PASS"
+      },
       "status": "PASS"
     },
     "originalSecurityBaselinesRewritten": false,
@@ -179,7 +199,7 @@
       "anchor": "agent-chat-process-local-quotas",
       "severity": "medium",
       "disposition": "distributed_runtime_open",
-      "receiptPath": "evaluation/security-remediation-current-2026-08-11/report.json",
+      "receiptPath": "evaluation/security-agent-chat-distributed-admission-remediation-2026-08-13/report.json",
       "residualBoundary": "DISTRIBUTED_AGENT_CHAT_ADMISSION_OPEN"
     },
     {

@@ -4222,6 +4222,60 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "public_provider_admission")?.state).toBe("notice");
   });
 
+  it("accepts the current security compatibility baseline plus the governed agent-chat delta", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const baselineSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: rootDir, encoding: "utf8" }).trim();
+    writeText(rootDir, path.join("lib", "openclaw-broker-route.ts"), "export const distributed = true;\n");
+    writeText(rootDir, path.join("tests", "claw-chat-route.test.ts"), "export const covered = true;\n");
+    execFileSync("git", ["add", "lib/openclaw-broker-route.ts", "tests/claw-chat-route.test.ts"], { cwd: rootDir, stdio: "ignore" });
+    execFileSync("git", ["commit", "-m", "change agent chat admission"], { cwd: rootDir, stdio: "ignore" });
+    const currentSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: rootDir, encoding: "utf8" }).trim();
+    const reportPath = path.join(rootDir, "evaluation", "security-current-remediation-ledger-2026-08-13", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as Record<string, unknown>;
+    report.sourceHead = currentSha;
+    report.productionBuild = { commitSha: currentSha, branch: "master", environment: "production" };
+    report.governedPathCompatibility = {
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_CURRENT_SECURITY_GOVERNED_PATH_COMPATIBILITY",
+      sourceHead: currentSha,
+      productionCommit: currentSha,
+      coveredGateIds: [
+        "public_json_request_body_budget",
+        "improvement_photo_analysis_budget",
+        "public_provider_cancellation",
+        "public_provider_admission",
+        "public_generation_admission_security",
+        "security_followup_remediation",
+        "mcp_generation_work_budget_security",
+      ],
+      verification: {
+        strategy: "baseline_plus_governed_delta",
+        baseline: { sourceHead: baselineSha, files: 27, tests: 269, failed: 0, status: "PASS" },
+        delta: {
+          sourceHead: currentSha,
+          changedProductPaths: ["lib/openclaw-broker-route.ts"],
+          changedTestPaths: ["tests/claw-chat-route.test.ts"],
+          files: 5,
+          tests: 39,
+          failed: 0,
+          typecheck: "PASS",
+          build: "PASS",
+          status: "PASS",
+        },
+        status: "PASS",
+      },
+      originalSecurityBaselinesRewritten: false,
+      noMutation: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    };
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "current_security_remediation_ledger")?.state).toBe("notice");
+    expect(audit.gates.find((gate) => gate.id === "public_json_request_body_budget")?.state).toBe("proven");
+    expect(audit.gates.find((gate) => gate.id === "public_provider_admission")?.state).toBe("notice");
+  });
+
   it("fails older governed-path gates closed when the companion weakens boundaries", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();

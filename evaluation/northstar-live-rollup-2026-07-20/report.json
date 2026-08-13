@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-13T12:09:05.699Z",
-  "head": "67c542c8a5b332f20557c1bdb0b8fe6952f12df1",
+  "generatedAt": "2026-08-13T12:30:23.226Z",
+  "head": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "67c542c8a5b332f20557c1bdb0b8fe6952f12df1",
+    "commitSha": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-qobzyr1mv-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-cbkj6kmeb-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -462,8 +462,8 @@
   "currentSecurityRemediationLedger": {
     "artifact": "evaluation\\security-current-remediation-ledger-2026-08-13\\report.json",
     "verdict": "NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_LEDGER_OPEN_BOUNDARIES",
-    "sourceHead": "4301edf79780d28079aebfa4ee715610152f2323",
-    "productionCommit": "4301edf79780d28079aebfa4ee715610152f2323",
+    "sourceHead": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
+    "productionCommit": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
     "totalFindings": 23,
     "deployedSourceRemediationCount": 17,
     "unresolvedCount": 6,
@@ -941,9 +941,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "67c542c8a5b332f20557c1bdb0b8fe6952f12df1",
+      "sourceCommit": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
       "sourceStatus": "exact",
-      "productionCommit": "67c542c8a5b332f20557c1bdb0b8fe6952f12df1",
+      "productionCommit": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
       "productionStatus": "matches_live"
     },
     {
@@ -1093,10 +1093,10 @@
     {
       "id": "current_security_remediation_ledger",
       "artifact": "evaluation\\security-current-remediation-ledger-2026-08-13\\report.json",
-      "sourceCommit": "4301edf79780d28079aebfa4ee715610152f2323",
-      "sourceStatus": "ancestor",
-      "productionCommit": "4301edf79780d28079aebfa4ee715610152f2323",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
+      "sourceStatus": "exact",
+      "productionCommit": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
+      "productionStatus": "matches_live"
     },
     {
       "id": "public_json_request_body_budget",

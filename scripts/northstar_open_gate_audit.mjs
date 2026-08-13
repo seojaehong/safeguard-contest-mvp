@@ -4434,6 +4434,8 @@ function isCurrentSecurityRemediationCompatibilityCurrent(rootDir, gateId, gover
   }
   const compatibility = report.governedPathCompatibility;
   const verification = isRecord(compatibility.verification) ? compatibility.verification : {};
+  const baseline = isRecord(verification.baseline) ? verification.baseline : {};
+  const delta = isRecord(verification.delta) ? verification.delta : {};
   const coveredGateIds = Array.isArray(compatibility.coveredGateIds)
     ? compatibility.coveredGateIds.map(readString)
     : [];
@@ -4446,9 +4448,26 @@ function isCurrentSecurityRemediationCompatibilityCurrent(rootDir, gateId, gover
     && isEvidenceCurrentForPaths(rootDir, sourceHead, governedPaths)
     && coveredGateIds.length === 7
     && coveredGateIds.includes(gateId)
-    && readNumber(verification.files) === 27
-    && readNumber(verification.tests) === 269
-    && readNumber(verification.failed) === 0
+    && readString(verification.strategy) === "baseline_plus_governed_delta"
+    && readString(baseline.sourceHead).length > 0
+    && isGitAncestor(rootDir, readString(baseline.sourceHead))
+    && readNumber(baseline.files) === 27
+    && readNumber(baseline.tests) === 269
+    && readNumber(baseline.failed) === 0
+    && readString(baseline.status) === "PASS"
+    && readString(delta.sourceHead) === sourceHead
+    && Array.isArray(delta.changedProductPaths)
+    && delta.changedProductPaths.length === 1
+    && delta.changedProductPaths[0] === "lib/openclaw-broker-route.ts"
+    && Array.isArray(delta.changedTestPaths)
+    && delta.changedTestPaths.length === 1
+    && delta.changedTestPaths[0] === "tests/claw-chat-route.test.ts"
+    && readNumber(delta.files) === 5
+    && readNumber(delta.tests) === 39
+    && readNumber(delta.failed) === 0
+    && readString(delta.typecheck) === "PASS"
+    && readString(delta.build) === "PASS"
+    && readString(delta.status) === "PASS"
     && readString(verification.status) === "PASS"
     && compatibility.originalSecurityBaselinesRewritten === false
     && compatibility.noMutation === true
