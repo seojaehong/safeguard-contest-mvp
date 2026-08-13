@@ -1,0 +1,48 @@
+{
+  "schema": "safeclaw-security-mcp-default-scope-remediation/v1",
+  "generatedAt": "2026-08-13T18:08:25.9508692+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LIVE_PENDING",
+  "productCommit": "86f2cb53",
+  "finding": {
+    "anchor": "mcp-default-all-tool-scopes",
+    "severity": "medium",
+    "baselineScanId": "c98ffa84-9951-4f68-9e1d-11f456abe901",
+    "baselineCommit": "003c48838b2c4365203de3cc2dae230200c79e96"
+  },
+  "remediation": {
+    "status": "SOURCE_FIXED",
+    "defaultScopes": ["tools:read"],
+    "writeScopeIssuedByDefault": false,
+    "detail": "Both the authenticated web issuance route and operator CLI now issue read-only MCP tokens by default."
+  },
+  "verification": {
+    "focusedAndAdjacent": {
+      "files": 5,
+      "tests": 80,
+      "result": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "result": "PASS",
+      "staticPages": 28
+    },
+    "diffCheck": "PASS",
+    "targetedSecretScan": "PASS"
+  },
+  "mutationBoundary": {
+    "existingTokensChanged": false,
+    "dbSchemaChanged": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutation": false,
+    "wikiPublished": false,
+    "koshaRegistryMutated": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "mcpTokenExpiry": "SEPARATE_SECURITY_FINDING",
+    "explicitWriteScopeIssuance": "NOT_IMPLEMENTED_IN_THIS_WAVE",
+    "liveDeploymentVerification": "PENDING"
+  }
+}
