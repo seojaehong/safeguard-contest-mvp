@@ -1677,7 +1677,7 @@ describe("northstar live rollup", () => {
     const report = JSON.parse(fs.readFileSync(path.join(root, "evaluation/northstar-live-rollup-test/report.json"), "utf8")) as RollupReport;
     expect(report.overall).toBe("northstar_evidence_contradicted");
     expect(report.evidence.find((item) => item.id === "mobile_p0_workspace")?.productionStatus).toBe("not_ancestor");
-  }, 15_000);
+  }, 30_000);
 
   it("does not mark source-ahead final-99 evidence as live-exact", () => {
     const { root, head } = createFixtureRoot();

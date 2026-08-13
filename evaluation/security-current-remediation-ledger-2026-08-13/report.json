@@ -1,14 +1,14 @@
 {
   "schemaVersion": "safeclaw-security-current-remediation-ledger/v1",
-  "generatedAt": "2026-08-13T21:18:31.9482271+09:00",
+  "generatedAt": "2026-08-13T22:11:47.2464426+09:00",
   "verdict": "NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_LEDGER_OPEN_BOUNDARIES",
-  "sourceHead": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
+  "sourceHead": "50de0f830aa35cc498e322371604785e6d188d69",
   "productionBuild": {
-    "commitSha": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
+    "commitSha": "50de0f830aa35cc498e322371604785e6d188d69",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-cbkj6kmeb-seojaehongs-projects.vercel.app",
-    "verifiedAt": "2026-08-13T21:18:31.9482271+09:00"
+    "deploymentUrl": "safeguard-contest-azk5elhpu-seojaehongs-projects.vercel.app",
+    "verifiedAt": "2026-08-13T22:11:47.2464426+09:00"
   },
   "immutableBaselines": {
     "originalStandardScan": {
@@ -40,8 +40,8 @@
   },
   "governedPathCompatibility": {
     "verdict": "PASS_LIVE_DEPLOYED_SOURCE_CURRENT_SECURITY_GOVERNED_PATH_COMPATIBILITY",
-    "sourceHead": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
-    "productionCommit": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
+    "sourceHead": "50de0f830aa35cc498e322371604785e6d188d69",
+    "productionCommit": "50de0f830aa35cc498e322371604785e6d188d69",
     "coveredGateIds": [
       "public_json_request_body_budget",
       "improvement_photo_analysis_budget",
@@ -61,7 +61,7 @@
         "status": "PASS"
       },
       "delta": {
-        "sourceHead": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
+        "sourceHead": "50de0f830aa35cc498e322371604785e6d188d69",
         "changedProductPaths": [
           "lib/openclaw-broker-route.ts"
         ],
@@ -69,7 +69,7 @@
           "tests/claw-chat-route.test.ts"
         ],
         "files": 5,
-        "tests": 39,
+        "tests": 42,
         "failed": 0,
         "typecheck": "PASS",
         "build": "PASS",

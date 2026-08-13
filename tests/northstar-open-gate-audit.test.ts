@@ -4256,7 +4256,7 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
           changedProductPaths: ["lib/openclaw-broker-route.ts"],
           changedTestPaths: ["tests/claw-chat-route.test.ts"],
           files: 5,
-          tests: 39,
+          tests: 42,
           failed: 0,
           typecheck: "PASS",
           build: "PASS",

@@ -1,14 +1,14 @@
 {
-  "schemaVersion": "safeclaw-security-agent-chat-distributed-admission-remediation/v1",
-  "generatedAt": "2026-08-13T21:18:31.9482271+09:00",
+  "schemaVersion": "safeclaw-security-agent-chat-distributed-admission-remediation/v2",
+  "generatedAt": "2026-08-13T22:11:47.2464426+09:00",
   "verdict": "NOTICE_LIVE_DEPLOYED_SOURCE_AGENT_CHAT_DISTRIBUTED_ADMISSION_ACTIVATION_PENDING",
-  "sourceHead": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
-  "productCommit": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
+  "sourceHead": "50de0f830aa35cc498e322371604785e6d188d69",
+  "productCommit": "50de0f830aa35cc498e322371604785e6d188d69",
   "productionBuild": {
-    "commitSha": "674999ce1562e76c7bb384a84e1dd67ea1bf6767",
+    "commitSha": "50de0f830aa35cc498e322371604785e6d188d69",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-cbkj6kmeb-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-azk5elhpu-seojaehongs-projects.vercel.app",
     "sourceHeadMatchesProduction": true
   },
   "finding": {
@@ -29,6 +29,17 @@
       "windowMs": 60000,
       "distributedWhenConfigured": true
     },
+    "engineConcurrencyAdmission": {
+      "namespace": "agent-chat-engine-work",
+      "defaultConcurrency": 1,
+      "leaseBufferMs": 10000,
+      "leaseTracksConfiguredEngineTimeout": true,
+      "distributedWhenConfigured": true,
+      "instanceGuardRetained": true,
+      "busyFailsBeforeEngineWork": true,
+      "availabilityFailureReleasesLease": true,
+      "completionAndCancellationReleaseLease": true
+    },
     "completeConfigurationUsesAtomicDistributedCounters": true,
     "partialConfigurationFailsClosedBeforeAuthentication": true,
     "absentConfigurationPreservesInstanceFallback": true,
@@ -37,13 +48,13 @@
   "verification": {
     "focused": {
       "files": 1,
-      "tests": 19,
+      "tests": 22,
       "failed": 0,
       "status": "PASS"
     },
     "focusedAndAdjacent": {
       "files": 5,
-      "tests": 39,
+      "tests": 42,
       "failed": 0,
       "status": "PASS"
     },

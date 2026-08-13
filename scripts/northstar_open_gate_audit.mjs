@@ -4463,7 +4463,7 @@ function isCurrentSecurityRemediationCompatibilityCurrent(rootDir, gateId, gover
     && delta.changedTestPaths.length === 1
     && delta.changedTestPaths[0] === "tests/claw-chat-route.test.ts"
     && readNumber(delta.files) === 5
-    && readNumber(delta.tests) === 39
+    && readNumber(delta.tests) === 42
     && readNumber(delta.failed) === 0
     && readString(delta.typecheck) === "PASS"
     && readString(delta.build) === "PASS"
