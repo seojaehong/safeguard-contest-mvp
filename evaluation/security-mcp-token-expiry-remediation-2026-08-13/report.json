@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_MCP_TOKEN_EXPIRY",
+  "sourceHead": "b42c1a54b9ee27ddffea4ae20ef405b721d4e513",
+  "productCommit": "b42c1a54b9ee27ddffea4ae20ef405b721d4e513",
+  "productionBuild": {
+    "commitSha": "b42c1a54b9ee27ddffea4ae20ef405b721d4e513",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-igtkhr11y-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
+  "securityFinding": {
+    "id": "mcp-token-no-expiry",
+    "severity": "medium",
+    "status": "remediated-live-deployed-source"
+  },
+  "contract": {
+    "persistedTokenMaxAgeDays": 90,
+    "invalidMissingOrFutureCreatedAtDenied": true,
+    "expiredPersistedTokenLegacyFallbackDenied": true,
+    "productionLegacyExpiryRequired": true,
+    "productionLegacyExpiryMaximumDays": 90,
+    "expiredTokensExcludedFromActiveIssuanceLimit": true,
+    "apiReturnsExpiryTruth": true,
+    "uiDisplaysExpiryAndExpiredStatus": true,
+    "databaseMigrationRequired": false
+  },
+  "verification": {
+    "focusedAndAdjacentTests": {
+      "filesPassed": 5,
+      "testsPassed": 74
+    },
+    "productionBrowserMatrix": {
+      "filesPassed": 1,
+      "testsPassed": 2,
+      "viewports": [
+        "1440x900",
+        "390x844",
+        "1440x320"
+      ],
+      "themes": [
+        "day",
+        "night"
+      ]
+    },
+    "frontendConsistencyAudit": {
+      "status": "pass",
+      "violationCount": 0,
+      "coverageIssues": 0
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28,
+    "diffCheck": "PASS",
+    "targetedSecretScanMatches": 0
+  },
+  "mutationBoundary": {
+    "databaseMutationPerformed": false,
+    "databaseMigrationPerformed": false,
+    "providerDispatchPerformed": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "mcpTokenIssuedOrAuthenticatedLive": false,
+    "productionEnvironmentChanged": false
+  },
+  "remainingBoundaries": {
+    "liveAfterDeploymentRequired": false,
+    "productionLegacyExpiryConfigurationChanged": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedClaimsUnchanged": true
+  }
+}
