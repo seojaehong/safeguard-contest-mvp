@@ -1,14 +1,14 @@
 {
   "schemaVersion": "safeclaw-security-worker-site-boundary-remediation/v1",
-  "verdict": "PASS_CURRENT_SOURCE_WORKER_SITE_BOUNDARY_LIVE_PENDING",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_WORKER_SITE_BOUNDARY",
   "sourceHead": "dac299cd605101d7f4640525af514084a4944566",
   "productCommit": "dac299cd605101d7f4640525af514084a4944566",
   "productionBuild": {
-    "commitSha": "65cffd87e0a6500b79e4a7f27dd8c5a01724ccdd",
+    "commitSha": "dac299cd605101d7f4640525af514084a4944566",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-a81mqmi37-seojaehongs-projects.vercel.app",
-    "sourceHeadLive": false
+    "deploymentUrl": "safeguard-contest-o85a3mdjm-seojaehongs-projects.vercel.app",
+    "sourceHeadLive": true
   },
   "finding": {
     "title": "Worker APIs aggregate and reassign records across sites",
@@ -52,6 +52,6 @@
     "concurrentCrossSiteCreationRace": "REQUIRES_DATABASE_CONSTRAINT",
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "approvalGatedBoundariesPreserved": true,
-    "liveAfterDeploymentRequired": true
+    "liveAfterDeploymentRequired": false
   }
 }

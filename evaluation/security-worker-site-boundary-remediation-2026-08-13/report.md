@@ -2,9 +2,9 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_WORKER_SITE_BOUNDARY_LIVE_PENDING`
+`PASS_LIVE_DEPLOYED_SOURCE_WORKER_SITE_BOUNDARY`
 
-Product commit `dac299cd605101d7f4640525af514084a4944566` closes the authenticated worker API's organization-only listing and implicit sequential site reassignment path. Production build-info still reports `65cffd87e0a6500b79e4a7f27dd8c5a01724ccdd`, so deployed-source alignment remains pending.
+Product commit `dac299cd605101d7f4640525af514084a4944566` closes the authenticated worker API's organization-only listing and implicit sequential site reassignment path. Production build-info reports the same product commit on `master` in deployment `safeguard-contest-o85a3mdjm-seojaehongs-projects.vercel.app`.
 
 ## Remediation
 
