@@ -1,34 +1,29 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-13T18:34:13.340Z",
+  "generatedAt": "2026-08-13T19:14:17.223Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "4b9d20648ae8174aef2ea9f53858c6e27df5c1a9",
-  "productionCommit": "8aa16231ffa0cf66010a55460b17841a01396943",
+  "sourceHead": "aff7ddb00d07d1c14fc8ddf8dc3a7d96d84c3c18",
+  "productionCommit": "aff7ddb00d07d1c14fc8ddf8dc3a7d96d84c3c18",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "8aa16231ffa0cf66010a55460b17841a01396943",
+    "commitSha": "aff7ddb00d07d1c14fc8ddf8dc3a7d96d84c3c18",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ijsf86so1-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-lav3ontav-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": false,
-  "currentHeadIsEvidenceOnlyPending": true,
-  "sourceHeadLivePending": true,
+  "latestEvidenceCommitLive": true,
+  "currentHeadIsEvidenceOnlyPending": false,
+  "sourceHeadLivePending": false,
   "sourceHeadHasProductChanges": false,
-  "sourcePendingChangedPaths": [
-    "scripts/northstar_live_rollup.mjs",
-    "scripts/northstar_next_runway.mjs",
-    "tests/northstar-live-rollup.test.ts",
-    "tests/northstar-next-runway-generator.test.ts"
-  ],
+  "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "4b9d20648ae8174aef2ea9f53858c6e27df5c1a9",
-  "liveRollupLiveCommit": "8aa16231ffa0cf66010a55460b17841a01396943",
+  "liveExactEvidenceCommit": "aff7ddb00d07d1c14fc8ddf8dc3a7d96d84c3c18",
+  "liveRollupLiveCommit": "aff7ddb00d07d1c14fc8ddf8dc3a7d96d84c3c18",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -60,6 +55,7 @@
     "agentChatDurableAdmission": "evaluation\\security-agent-chat-durable-admission-2026-08-14\\report.json",
     "mcpProviderAdmission": "evaluation\\security-mcp-provider-admission-2026-08-14\\report.json",
     "shareRecipientContactVerification": "evaluation\\share-recipient-contact-verification-2026-08-14\\report.json",
+    "securityAtomicDbRaceApprovalBoundary": "evaluation\\security-atomic-db-race-approval-boundary-2026-08-14\\report.json",
     "publicJsonRequestBodyBudget": "evaluation\\public-json-request-body-budget-2026-08-11\\report.json",
     "improvementPhotoAnalysisBudget": "evaluation\\improvement-photo-analysis-budget-2026-08-11\\report.json",
     "publicProviderCancellation": "evaluation\\public-provider-cancellation-2026-08-11\\report.json",
@@ -294,6 +290,22 @@
         "KOSHA exact-trust registry expanded beyond current exact pins",
         "operator checklist completion alone approves exact-trust promotion",
         "exact registry write artifact created before separate approval"
+      ]
+    },
+    {
+      "gate": "security_atomic_db_race_remediation",
+      "state": "approval_gated",
+      "evidencePath": "evaluation\\security-atomic-db-race-approval-boundary-2026-08-14\\report.json",
+      "readyForOperatorReview": true,
+      "currentSafetyLock": "no_migration_no_database_mutation_findings_open",
+      "approvalNeeded": [
+        "approve transactional migration, RPC, trigger, and concurrency test scope",
+        "approve temporary database rows for integration proof"
+      ],
+      "forbiddenUntilApproved": [
+        "database schema mutation",
+        "MCP token-cap or worker site-binding closure claim",
+        "security-complete claim before deployment and fresh scan"
       ]
     }
   ],
@@ -841,6 +853,23 @@
     "liveRealRecipientVerificationProbe": "NOT_EXECUTED_NO_EXISTING_SAVED_SESSION",
     "freshRescanRequired": true,
     "recipientAckLiveDataApproval": "APPROVAL_GATED",
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "securityAtomicDbRaceRemediation": {
+    "verdict": "APPROVAL_REQUIRED_TRANSACTIONAL_DB_RACE_REMEDIATION_NO_MUTATION",
+    "sourceHead": "cc24105b318dde26b909052b2cf3ed593b0796b0",
+    "scanId": "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+    "findingIds": [
+      "csf_a98f91f2e28285923aa618aa",
+      "csf_8cec017794f281cd81e25643"
+    ],
+    "openFindingCount": 2,
+    "approvalRequired": true,
+    "approvalPerformed": false,
+    "migrationAuthored": false,
+    "dbMutationPerformed": false,
+    "freshRescanRequired": true,
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },

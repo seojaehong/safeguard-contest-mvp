@@ -367,6 +367,19 @@ type RollupReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  securityAtomicDbRaceRemediation: {
+    verdict: string;
+    scanId: string;
+    findingIds: string[];
+    openFindingCount: number;
+    approvalRequired: boolean;
+    approvalPerformed: boolean;
+    migrationAuthored: boolean;
+    dbMutationPerformed: boolean;
+    freshRescanRequired: boolean;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   mcpGenerationWorkBudgetSecurity: {
     verdict: string;
     sourceHead: string;
@@ -487,6 +500,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "learning_export_renderer_security", state: "proven", evidencePath: "evaluation/learning-export-renderer-security-2026-08-02/report.json", detail: "renderer-independent inert learning export source contract" },
       { id: "live_document_secondary_grounding", state: "proven", evidencePath: "evaluation/live-document-secondary-grounding-2026-07-25/report.json", detail: "all 30 supporting documents passed scenario grounding" },
       { id: "live_document_seed_profile_isolation", state: "proven", evidencePath: "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", detail: "all 60 documents passed seed-profile isolation" },
+      { id: "security_atomic_db_race_remediation", state: "approval_gated", evidencePath: "evaluation/security-atomic-db-race-approval-boundary-2026-08-14/report.json", detail: "two sealed findings require transactional DB approval" },
       { id: "provider_dispatch_persistence", state: "approval_gated", evidencePath: "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json", detail: "preview only" },
       { id: "supabase_rls_launch_isolation", state: "approval_gated", evidencePath: "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", detail: "approval required" },
       { id: "llm_wiki_publication", state: "approval_gated", evidencePath: "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", detail: "approval required" },
@@ -1261,6 +1275,25 @@ function createFixtureRoot(): { root: string; head: string } {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/security-atomic-db-race-approval-boundary-2026-08-14/report.json", {
+    verdict: "APPROVAL_REQUIRED_TRANSACTIONAL_DB_RACE_REMEDIATION_NO_MUTATION",
+    sourceHead: "TO_FILL",
+    sealedScan: {
+      scanId: "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+      immutableFindingsPreserved: true,
+    },
+    findings: [
+      { findingId: "csf_a98f91f2e28285923aa618aa", currentSourceStillAffected: true },
+      { findingId: "csf_8cec017794f281cd81e25643", currentSourceStillAffected: true },
+    ],
+    approvalRequest: { required: true, notApprovedOrPerformed: true },
+    mutationBoundary: { migrationAuthored: false, dbMutationPerformed: false },
+    remainingBoundaries: {
+      freshFullRepositorySecurityScanRequiredAfterRemediation: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/document-authoring-pane-margin-2026-08-02/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
     productCommit: "TO_FILL",
@@ -1310,6 +1343,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json",
     "evaluation/security-mcp-provider-admission-2026-08-14/report.json",
     "evaluation/share-recipient-contact-verification-2026-08-14/report.json",
+    "evaluation/security-atomic-db-race-approval-boundary-2026-08-14/report.json",
     "evaluation/learning-export-renderer-security-2026-08-02/report.json",
     "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
@@ -1711,6 +1745,20 @@ describe("northstar live rollup", () => {
     expect(report.evidence.find((item) => item.id === "share_recipient_contact_verification_security")?.productionStatus).toBe("ancestor_of_head");
     const shareRecipientEvidence = report.evidence.find((item) => item.id === "share_recipient_contact_verification_security");
     expect(shareRecipientEvidence?.productionCommit).toBe(shareRecipientEvidence?.sourceCommit);
+    expect(report.securityAtomicDbRaceRemediation).toMatchObject({
+      verdict: "APPROVAL_REQUIRED_TRANSACTIONAL_DB_RACE_REMEDIATION_NO_MUTATION",
+      scanId: "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+      findingIds: ["csf_a98f91f2e28285923aa618aa", "csf_8cec017794f281cd81e25643"],
+      openFindingCount: 2,
+      approvalRequired: true,
+      approvalPerformed: false,
+      migrationAuthored: false,
+      dbMutationPerformed: false,
+      freshRescanRequired: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "security_atomic_db_race_remediation")?.sourceStatus).toBe("ancestor");
     expect(report.evidence.find((item) => item.id === "public_generation_admission_security")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "public_search_distributed_rate_limit_readiness")?.sourceStatus).toBe("ancestor");
     expect(report.learningExportRendererSecurity).toMatchObject({
@@ -1781,7 +1829,7 @@ describe("northstar live rollup", () => {
     expect(report.evidence.find((item) => item.id === "northstar_approval_runway")?.sourceStatus).toBe("ancestor");
     expect(report.evidence.find((item) => item.id === "northstar_approval_runway")?.productionStatus).toBe("ancestor_of_head");
     expect(report.contradictions).toHaveLength(0);
-  }, 15_000);
+  }, 30_000);
 
   it("fails closed when an evidence packet points outside the current history", () => {
     const { root, head } = createFixtureRoot();

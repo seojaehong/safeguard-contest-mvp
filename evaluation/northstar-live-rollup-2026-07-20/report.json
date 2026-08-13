@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-13T18:52:01.669Z",
-  "head": "e86ad3c94a9f10f1fd0045f634c4c972d41cd264",
+  "generatedAt": "2026-08-13T19:13:52.012Z",
+  "head": "aff7ddb00d07d1c14fc8ddf8dc3a7d96d84c3c18",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "e86ad3c94a9f10f1fd0045f634c4c972d41cd264",
+    "commitSha": "aff7ddb00d07d1c14fc8ddf8dc3a7d96d84c3c18",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-gzburd5eg-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-lav3ontav-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 53
+    "gateCount": 54
   },
   "provenGates": [
     {
@@ -305,6 +305,12 @@
     }
   ],
   "approvalGated": [
+    {
+      "id": "security_atomic_db_race_remediation",
+      "state": "approval_gated",
+      "artifact": "evaluation\\security-atomic-db-race-approval-boundary-2026-08-14\\report.json",
+      "detail": "The MCP token-cap and worker site-binding races have bounded transactional database designs and concurrency test plans, but no migration, RPC, trigger, DB mutation, or closure claim was made. Both sealed low findings remain open pending explicit schema approval, database integration proof, deployment, and a fresh scan; exact saved Share remains MISSING_EVIDENCE."
+    },
     {
       "id": "share_recipient_ack_approval",
       "state": "approval_gated",
@@ -685,6 +691,24 @@
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
+  "securityAtomicDbRaceRemediation": {
+    "artifact": "evaluation\\security-atomic-db-race-approval-boundary-2026-08-14\\report.json",
+    "verdict": "APPROVAL_REQUIRED_TRANSACTIONAL_DB_RACE_REMEDIATION_NO_MUTATION",
+    "sourceHead": "cc24105b318dde26b909052b2cf3ed593b0796b0",
+    "scanId": "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+    "findingIds": [
+      "csf_a98f91f2e28285923aa618aa",
+      "csf_8cec017794f281cd81e25643"
+    ],
+    "openFindingCount": 2,
+    "approvalRequired": true,
+    "approvalPerformed": false,
+    "migrationAuthored": false,
+    "dbMutationPerformed": false,
+    "freshRescanRequired": true,
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
   "mcpGenerationWorkBudgetSecurity": {
     "artifact": "evaluation\\security-mcp-generation-work-budget-2026-08-04\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
@@ -1024,9 +1048,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "4b9d20648ae8174aef2ea9f53858c6e27df5c1a9",
+      "sourceCommit": "8c4f36d0a48f31ca4ac1eb67e8bc8b6c1be10f63",
       "sourceStatus": "ancestor",
-      "productionCommit": "4b9d20648ae8174aef2ea9f53858c6e27df5c1a9",
+      "productionCommit": "8c4f36d0a48f31ca4ac1eb67e8bc8b6c1be10f63",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -1212,6 +1236,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": "59ec22a61a9972103e44765b031026641bfe5c06",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "security_atomic_db_race_remediation",
+      "artifact": "evaluation\\security-atomic-db-race-approval-boundary-2026-08-14\\report.json",
+      "sourceCommit": "cc24105b318dde26b909052b2cf3ed593b0796b0",
+      "sourceStatus": "ancestor",
+      "productionCommit": null,
+      "productionStatus": "missing"
     },
     {
       "id": "public_json_request_body_budget",

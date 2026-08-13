@@ -585,6 +585,19 @@ type NextRunwayReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  securityAtomicDbRaceRemediation: {
+    verdict: string;
+    scanId: string;
+    findingIds: string[];
+    openFindingCount: number;
+    approvalRequired: boolean;
+    approvalPerformed: boolean;
+    migrationAuthored: boolean;
+    dbMutationPerformed: boolean;
+    freshRescanRequired: boolean;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   mcpGenerationWorkBudgetSecurity: {
     verdict: string;
     sourceHead: string;
@@ -2084,6 +2097,22 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/security-atomic-db-race-approval-boundary-2026-08-14/report.json", {
+    verdict: "APPROVAL_REQUIRED_TRANSACTIONAL_DB_RACE_REMEDIATION_NO_MUTATION",
+    sourceHead: "fixture-sha",
+    sealedScan: { scanId: "bd135da7-c309-4e8d-ace5-15222dd3f1c7", immutableFindingsPreserved: true },
+    findings: [
+      { findingId: "csf_a98f91f2e28285923aa618aa", currentSourceStillAffected: true },
+      { findingId: "csf_8cec017794f281cd81e25643", currentSourceStillAffected: true },
+    ],
+    approvalRequest: { required: true, notApprovedOrPerformed: true },
+    mutationBoundary: { migrationAuthored: false, dbMutationPerformed: false },
+    remainingBoundaries: {
+      freshFullRepositorySecurityScanRequiredAfterRemediation: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/document-authoring-pane-margin-2026-08-02/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
     productCommit: "fixture-sha",
@@ -2309,6 +2338,7 @@ describe("northstar next runway generator", () => {
       "llm_wiki_publication",
       "sif_embedding_runtime",
       "kosha_exact_promotion_review_gate",
+      "security_atomic_db_race_remediation",
     ]);
     expect(report.approvalGated[0]).toMatchObject({
       state: "approval_gated",
@@ -2985,6 +3015,23 @@ describe("northstar next runway generator", () => {
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "share_recipient_contact_verification_security",
       state: "notice",
+    }));
+    expect(report.securityAtomicDbRaceRemediation).toMatchObject({
+      verdict: "APPROVAL_REQUIRED_TRANSACTIONAL_DB_RACE_REMEDIATION_NO_MUTATION",
+      scanId: "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+      findingIds: ["csf_a98f91f2e28285923aa618aa", "csf_8cec017794f281cd81e25643"],
+      openFindingCount: 2,
+      approvalRequired: true,
+      approvalPerformed: false,
+      migrationAuthored: false,
+      dbMutationPerformed: false,
+      freshRescanRequired: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.approvalGated).toContainEqual(expect.objectContaining({
+      gate: "security_atomic_db_race_remediation",
+      state: "approval_gated",
     }));
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "public_generation_admission_security",

@@ -39,6 +39,7 @@ const ARTIFACTS = Object.freeze({
   agentChatDurableAdmission: path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"),
   mcpProviderAdmission: path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"),
   shareRecipientContactVerification: path.join("evaluation", "share-recipient-contact-verification-2026-08-14", "report.json"),
+  securityAtomicDbRaceApprovalBoundary: path.join("evaluation", "security-atomic-db-race-approval-boundary-2026-08-14", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
@@ -335,6 +336,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const agentChatDurableAdmission = tryReadJson(rootDir, ARTIFACTS.agentChatDurableAdmission);
   const mcpProviderAdmission = tryReadJson(rootDir, ARTIFACTS.mcpProviderAdmission);
   const shareRecipientContactVerification = tryReadJson(rootDir, ARTIFACTS.shareRecipientContactVerification);
+  const securityAtomicDbRaceApprovalBoundary = tryReadJson(rootDir, ARTIFACTS.securityAtomicDbRaceApprovalBoundary);
   const publicJsonRequestBodyBudget = tryReadJson(rootDir, ARTIFACTS.publicJsonRequestBodyBudget);
   const improvementPhotoAnalysisBudget = tryReadJson(rootDir, ARTIFACTS.improvementPhotoAnalysisBudget);
   const publicProviderCancellation = tryReadJson(rootDir, ARTIFACTS.publicProviderCancellation);
@@ -441,6 +443,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "agent_chat_durable_admission_security", ARTIFACTS.agentChatDurableAdmission, agentChatDurableAdmission),
     evidenceStatus(rootDir, currentHead, liveCommit, "mcp_provider_admission_security", ARTIFACTS.mcpProviderAdmission, mcpProviderAdmission),
     evidenceStatus(rootDir, currentHead, liveCommit, "share_recipient_contact_verification_security", ARTIFACTS.shareRecipientContactVerification, shareRecipientContactVerification),
+    evidenceStatus(rootDir, currentHead, liveCommit, "security_atomic_db_race_remediation", ARTIFACTS.securityAtomicDbRaceApprovalBoundary, securityAtomicDbRaceApprovalBoundary),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_json_request_body_budget", ARTIFACTS.publicJsonRequestBodyBudget, publicJsonRequestBodyBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "improvement_photo_analysis_budget", ARTIFACTS.improvementPhotoAnalysisBudget, improvementPhotoAnalysisBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_cancellation", ARTIFACTS.publicProviderCancellation, publicProviderCancellation),
@@ -838,6 +841,25 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       recipientAckLiveDataApproval: asString(recordAt(shareRecipientContactVerification, "remainingBoundaries")?.recipientAckLiveDataApproval),
       securityCompleteClaimAllowed: recordAt(shareRecipientContactVerification, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
       exactSavedShareVerdict: asString(recordAt(shareRecipientContactVerification, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    securityAtomicDbRaceRemediation: {
+      artifact: ARTIFACTS.securityAtomicDbRaceApprovalBoundary,
+      verdict: isRecord(securityAtomicDbRaceApprovalBoundary) ? asString(securityAtomicDbRaceApprovalBoundary.verdict) : "missing",
+      sourceHead: isRecord(securityAtomicDbRaceApprovalBoundary) ? asString(securityAtomicDbRaceApprovalBoundary.sourceHead) : "",
+      scanId: asString(recordAt(securityAtomicDbRaceApprovalBoundary, "sealedScan")?.scanId),
+      findingIds: isRecord(securityAtomicDbRaceApprovalBoundary) && Array.isArray(securityAtomicDbRaceApprovalBoundary.findings)
+        ? securityAtomicDbRaceApprovalBoundary.findings.filter(isRecord).map((finding) => asString(finding.findingId)).filter(Boolean)
+        : [],
+      openFindingCount: isRecord(securityAtomicDbRaceApprovalBoundary) && Array.isArray(securityAtomicDbRaceApprovalBoundary.findings)
+        ? securityAtomicDbRaceApprovalBoundary.findings.filter((finding) => isRecord(finding) && finding.currentSourceStillAffected === true).length
+        : 0,
+      approvalRequired: recordAt(securityAtomicDbRaceApprovalBoundary, "approvalRequest")?.required === true,
+      approvalPerformed: recordAt(securityAtomicDbRaceApprovalBoundary, "approvalRequest")?.notApprovedOrPerformed !== true,
+      migrationAuthored: recordAt(securityAtomicDbRaceApprovalBoundary, "mutationBoundary")?.migrationAuthored === true,
+      dbMutationPerformed: recordAt(securityAtomicDbRaceApprovalBoundary, "mutationBoundary")?.dbMutationPerformed === true,
+      freshRescanRequired: recordAt(securityAtomicDbRaceApprovalBoundary, "remainingBoundaries")?.freshFullRepositorySecurityScanRequiredAfterRemediation === true,
+      securityCompleteClaimAllowed: recordAt(securityAtomicDbRaceApprovalBoundary, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
+      exactSavedShareVerdict: asString(recordAt(securityAtomicDbRaceApprovalBoundary, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     mcpGenerationWorkBudgetSecurity: {
       artifact: ARTIFACTS.mcpGenerationWorkBudgetSecurity,
@@ -1334,6 +1356,14 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Current finding set: ${rollup.currentSecurityRemediationLedger.totalFindings ?? "unknown"}; deployed-source remediation receipts: ${rollup.currentSecurityRemediationLedger.deployedSourceRemediationCount ?? "unknown"}; unresolved: ${rollup.currentSecurityRemediationLedger.unresolvedCount ?? "unknown"}`,
     `- Approval-gated: ${rollup.currentSecurityRemediationLedger.approvalGatedCount ?? "unknown"}; distributed runtime open: ${rollup.currentSecurityRemediationLedger.distributedRuntimeOpenCount ?? "unknown"}; security-complete=${rollup.currentSecurityRemediationLedger.securityCompleteClaimAllowed}`,
     `- Exact saved Share: ${rollup.currentSecurityRemediationLedger.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "",
+    "## Atomic Database Race Approval Boundary",
+    `- Verdict: \`${rollup.securityAtomicDbRaceRemediation.verdict}\``,
+    `- Sealed scan/findings still open: ${rollup.securityAtomicDbRaceRemediation.scanId || "missing"} / ${rollup.securityAtomicDbRaceRemediation.openFindingCount ?? "unknown"}`,
+    `- Approval required/performed: ${rollup.securityAtomicDbRaceRemediation.approvalRequired}/${rollup.securityAtomicDbRaceRemediation.approvalPerformed}`,
+    `- Migration authored: ${rollup.securityAtomicDbRaceRemediation.migrationAuthored}; DB mutation performed: ${rollup.securityAtomicDbRaceRemediation.dbMutationPerformed}`,
+    `- Fresh scan required: ${rollup.securityAtomicDbRaceRemediation.freshRescanRequired}; security-complete=${rollup.securityAtomicDbRaceRemediation.securityCompleteClaimAllowed}`,
+    `- Exact saved Share: ${rollup.securityAtomicDbRaceRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "",
     "## Security Resource Remediation",
     `- Verdict: \`${rollup.securityResourceRemediation.verdict}\``,

@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-13T18:52:01.669Z
-Source HEAD at generation: e86ad3c94a9f10f1fd0045f634c4c972d41cd264
-Live commit at generation: e86ad3c94a9f10f1fd0045f634c4c972d41cd264
+Generated at: 2026-08-13T19:13:52.012Z
+Source HEAD at generation: aff7ddb00d07d1c14fc8ddf8dc3a7d96d84c3c18
+Live commit at generation: aff7ddb00d07d1c14fc8ddf8dc3a7d96d84c3c18
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -124,6 +124,14 @@ Overall: `northstar_open_approval_gated`
 - Verdict: `NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_LEDGER_OPEN_BOUNDARIES`
 - Current finding set: 23; deployed-source remediation receipts: 17; unresolved: 6
 - Approval-gated: 3; distributed runtime open: 3; security-complete=false
+- Exact saved Share: MISSING_EVIDENCE
+
+## Atomic Database Race Approval Boundary
+- Verdict: `APPROVAL_REQUIRED_TRANSACTIONAL_DB_RACE_REMEDIATION_NO_MUTATION`
+- Sealed scan/findings still open: bd135da7-c309-4e8d-ace5-15222dd3f1c7 / 2
+- Approval required/performed: true/false
+- Migration authored: false; DB mutation performed: false
+- Fresh scan required: true; security-complete=false
 - Exact saved Share: MISSING_EVIDENCE
 
 ## Security Resource Remediation
@@ -280,6 +288,7 @@ Overall: `northstar_open_approval_gated`
 | share_recipient_long_content_fixture | proven | evaluation\share-recipient-long-content-fixture-2026-07-25\report.json |
 | share_exact_saved_session_boundary | notice | evaluation\share-exact-session-boundary-2026-07-22\report.json |
 | kosha_exact_trust_registry | proven | evaluation\kosha-current-northstar-regression-2026-07-22\report.json |
+| security_atomic_db_race_remediation | approval_gated | evaluation\security-atomic-db-race-approval-boundary-2026-08-14\report.json |
 | share_recipient_ack_approval | approval_gated | evaluation\share-recipient-ack-approval-preflight-current-2026-07-19\report.json |
 | provider_dispatch_persistence | approval_gated | evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json |
 | supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
@@ -315,6 +324,7 @@ Overall: `northstar_open_approval_gated`
 | agent_chat_durable_admission_security | ancestor | ancestor_of_head | evaluation\security-agent-chat-durable-admission-2026-08-14\report.json |
 | mcp_provider_admission_security | ancestor | ancestor_of_head | evaluation\security-mcp-provider-admission-2026-08-14\report.json |
 | share_recipient_contact_verification_security | ancestor | ancestor_of_head | evaluation\share-recipient-contact-verification-2026-08-14\report.json |
+| security_atomic_db_race_remediation | ancestor | missing | evaluation\security-atomic-db-race-approval-boundary-2026-08-14\report.json |
 | public_json_request_body_budget | ancestor | ancestor_of_head | evaluation\public-json-request-body-budget-2026-08-11\report.json |
 | improvement_photo_analysis_budget | ancestor | ancestor_of_head | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
 | public_provider_cancellation | ancestor | ancestor_of_head | evaluation\public-provider-cancellation-2026-08-11\report.json |
@@ -349,6 +359,7 @@ Overall: `northstar_open_approval_gated`
 
 ## Approval-Gated Work
 
+- security_atomic_db_race_remediation: The MCP token-cap and worker site-binding races have bounded transactional database designs and concurrency test plans, but no migration, RPC, trigger, DB mutation, or closure claim was made. Both sealed low findings remain open pending explicit schema approval, database integration proof, deployment, and a fresh scan; exact saved Share remains MISSING_EVIDENCE.
 - share_recipient_ack_approval: Recipient ACK route/test preflight is operator-ready, but a real production invited-recipient ACK canary would create workpack_share_sessions and workpack_read_confirmations rows, so it remains approval-gated with no DB mutation or provider message sent.
 - provider_dispatch_persistence: Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists with an updated_at trigger, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred.
 - supabase_rls_launch_isolation: Read-only RLS approval preflight passed at source SHA e6b382ec1f169934906deae4a2407adf590a6fbb, but live RLS catalog and tenant A/B isolation are not proven.
