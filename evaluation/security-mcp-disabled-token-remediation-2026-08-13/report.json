@@ -1,0 +1,50 @@
+{
+  "schema": "safeclaw-security-mcp-disabled-token-remediation/v1",
+  "generatedAt": "2026-08-13T18:02:33.9748739+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LIVE_PENDING",
+  "productCommit": "01b286ee",
+  "finding": {
+    "anchor": "disabled-mcp-token-legacy-reauthorization",
+    "severity": "medium",
+    "baselineScanId": "c98ffa84-9951-4f68-9e1d-11f456abe901",
+    "baselineCommit": "003c48838b2c4365203de3cc2dae230200c79e96"
+  },
+  "remediation": {
+    "status": "SOURCE_FIXED",
+    "detail": "MCP authentication now resolves a persisted token hash before the legacy environment fallback and denies a matching disabled row immediately."
+  },
+  "verification": {
+    "focused": {
+      "files": 1,
+      "tests": 36,
+      "result": "PASS"
+    },
+    "adjacent": {
+      "files": 5,
+      "tests": 80,
+      "result": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "result": "PASS",
+      "staticPages": 28
+    },
+    "diffCheck": "PASS",
+    "targetedSecretScan": "PASS"
+  },
+  "mutationBoundary": {
+    "dbSchemaChanged": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutation": false,
+    "wikiPublished": false,
+    "koshaRegistryMutated": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "mcpTokenExpiry": "SEPARATE_SECURITY_FINDING",
+    "mcpDefaultScopes": "SEPARATE_SECURITY_FINDING",
+    "liveDeploymentVerification": "PENDING"
+  }
+}
