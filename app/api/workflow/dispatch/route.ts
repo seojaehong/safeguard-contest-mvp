@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { enforceRateLimit } from "@/lib/api-guard";
+import { enforceRequestBodyBudget } from "@/lib/mcp-work-budget";
+import { WORKFLOW_DISPATCH_REQUEST_MAX_BYTES } from "@/lib/public-work-budget";
 import { isLiveDispatchEnabled, postWebhookWithTimeout, resolveWebhookConfig } from "@/lib/n8n-webhook";
 import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
 import { validateDispatchContacts, type WorkpackDispatchChannel } from "@/lib/workpack-commercial";
@@ -273,11 +275,20 @@ function isPreflightBlocked(channel: WorkflowChannel, preflightResults: Workflow
 export async function POST(request: NextRequest) {
   const limited = enforceRateLimit(request, limiter);
   if (limited) return limited;
+  const bodyBudget = await enforceRequestBodyBudget(
+    request,
+    WORKFLOW_DISPATCH_REQUEST_MAX_BYTES,
+    {
+      code: "WORKFLOW_DISPATCH_PAYLOAD_TOO_LARGE",
+      error: "Workflow dispatch request body exceeds the byte budget.",
+    },
+  );
+  if (!bodyBudget.ok) return bodyBudget.response;
   const webhookConfig = resolveWebhookConfig();
 
   let body: WorkflowRequest;
   try {
-    const parsed = await request.json() as unknown;
+    const parsed = await bodyBudget.request.json() as unknown;
     body = isRecord(parsed) ? parsed : {};
   } catch (error) {
     console.warn("workflow dispatch body parse failed", error);

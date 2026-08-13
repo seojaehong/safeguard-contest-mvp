@@ -6,7 +6,10 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { evaluateShareSessionReuse } from "@/components/WorkflowSharePolicy";
 import type { AskResponse } from "@/lib/types";
-import { PUBLIC_SHARE_ACK_REQUEST_MAX_BYTES } from "@/lib/public-work-budget";
+import {
+  PUBLIC_SHARE_ACK_REQUEST_MAX_BYTES,
+  WORKFLOW_DISPATCH_REQUEST_MAX_BYTES
+} from "@/lib/public-work-budget";
 import { buildReadConfirmationId } from "@/lib/read-confirmation-idempotency";
 import {
   buildCanonicalRecipientMessageVariants,
@@ -1571,6 +1574,27 @@ describe("workflow dispatch route authority", () => {
       messageVariants: { vi: "x".repeat(4_001) }
     }));
     expect(oversizedResponse.status).toBe(400);
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+
+  it("rejects an oversized workflow body before database or provider work", async () => {
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["sms"],
+      operatorNote: "x".repeat(WORKFLOW_DISPATCH_REQUEST_MAX_BYTES),
+      messageVariants: { vi: VI_MESSAGE }
+    }));
+    const body = await response.json() as { code: string; limit: number };
+
+    expect(response.status).toBe(413);
+    expect(body).toMatchObject({
+      code: "WORKFLOW_DISPATCH_PAYLOAD_TOO_LARGE",
+      limit: WORKFLOW_DISPATCH_REQUEST_MAX_BYTES
+    });
+    expect(mocks.createSupabaseAdminClient).not.toHaveBeenCalled();
     expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
   });
 
