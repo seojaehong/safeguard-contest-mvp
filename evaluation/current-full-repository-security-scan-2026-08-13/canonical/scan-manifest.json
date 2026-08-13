@@ -1,0 +1,82 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "8eb0aee65733be23226012c9ac3c6fb160571ce5263142686434266a81f046d9"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "7bf83e2f6d0a7a2fd346c7dab994b32d475d0de5cb6e1a55c03594912a17a80c"
+      }
+    ],
+    "completedAt": "2026-08-13T13:34:55.753667Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "528ad724-6251-46fa-a812-48264396f321",
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.18"
+    },
+    "scope": {
+      "context": "Read-only current-revision audit; immutable earlier scans remain separate.",
+      "excludePaths": [],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "Partial focused coverage, not line-by-line review of all 5,612 tracked files.",
+        "No runtime, network, DB catalog, provider, or dependency-scanner execution.",
+        "No exact saved Share session was created or probed."
+      ],
+      "runtimeStatus": "source-only",
+      "summary": "Fresh Standard scan of SafeClaw current source at 2c65f894.",
+      "validationMode": "static-source"
+    },
+    "sealedAt": "2026-08-13T13:34:55.753667Z",
+    "startedAt": "2026-08-13T13:18:58.418410Z",
+    "status": "completed",
+    "target": {
+      "displayName": "safeclaw-northstar-current",
+      "kind": "git_revision",
+      "revision": "2c65f894be7cb37d0b50a2e1e19466a208400aaa",
+      "targetId": "target_sha256_59a91dd8129f171a6e0ff82b60460781f1067b1940d76c7a524e5f0e2b7ec5de"
+    },
+    "threatModel": {
+      "assets": [
+        "Provider quota and serverless capacity",
+        "Tenant workpacks, workers, dispatch and acknowledgement evidence",
+        "MCP credentials and agent-engine availability",
+        "Knowledge review decisions, KOSHA exact trust, and SIF vector corpus"
+      ],
+      "assumptions": [
+        "Static source analysis only; no network or mutation was performed.",
+        "Optional deployment and migration prerequisites are recorded without claiming live state.",
+        "Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries remain open."
+      ],
+      "attackerCapabilities": [
+        "Send unauthenticated HTTP requests at high frequency",
+        "Authenticate as a normal tenant owner or hold a scoped MCP token",
+        "Use direct Supabase REST when canonical grants and policies are deployed",
+        "Influence tenant knowledge input or an operator-consumed corpus"
+      ],
+      "securityObjectives": [
+        "Enforce deployment-wide work budgets before billable operations",
+        "Keep related database objects tenant-bound and acknowledgements authentic",
+        "Make review and credential transitions atomic and server-authoritative",
+        "Fail closed on safety-corpus integrity before embedding or publication"
+      ],
+      "summary": "SafeClaw exposes public provider-backed generation and search, authenticated multi-tenant Supabase workflows, MCP and agent-engine integrations, and safety-knowledge review/vector pipelines.",
+      "trustBoundaries": [
+        "Unauthenticated HTTP to provider-backed routes",
+        "Authenticated browser and MCP clients to server and direct Supabase REST",
+        "Public Share capability URLs to service-role acknowledgement writes",
+        "Repository/operator corpus artifacts to embedding provider and vector storage"
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}

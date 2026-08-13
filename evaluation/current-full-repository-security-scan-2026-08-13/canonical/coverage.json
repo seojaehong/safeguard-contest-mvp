@@ -1,0 +1,101 @@
+{
+  "completeness": "partial",
+  "deferred": [
+    {
+      "area": "Runtime deployment configuration",
+      "id": "deferred-2cc32839ae14b5a8",
+      "reason": "Upstash and live Supabase grants and policies were not queried."
+    },
+    {
+      "area": "Dependency vulnerability enumeration",
+      "id": "deferred-6ef38ca57b4dc184",
+      "reason": "No package-manager or native dependency scanner was executed."
+    },
+    {
+      "area": "Exact saved Share session",
+      "id": "deferred-f039bb47e8bf68c5",
+      "reason": "No concrete saved-session URL or approved DB-backed creation flow; remains MISSING_EVIDENCE."
+    },
+    {
+      "area": "Broad line-by-line inventory",
+      "id": "deferred-97fa18bc547787a9",
+      "reason": "Focused threat surfaces and an independent baseline were reviewed; all 5,612 tracked files were not individually inspected."
+    }
+  ],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [
+    {
+      "pattern": "node_modules/**",
+      "reason": "Ignored dependency installation output; product source and lockfile usage were in scope."
+    },
+    {
+      "pattern": ".next/**",
+      "reason": "Ignored generated build output."
+    },
+    {
+      "pattern": "external runtime and live database catalogs",
+      "reason": "Static source-only scan; no network, DB, provider, or deployment probing."
+    }
+  ],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "repository",
+  "mode": "repository",
+  "openQuestions": [
+    {
+      "question": "Should provider-backed production routes fail closed until distributed admission is configured?"
+    },
+    {
+      "question": "Which canonical Supabase migrations and direct REST grants are currently deployed?"
+    },
+    {
+      "question": "Will SIF approval be bound to the exact corpus hash and manifest before vector activation?"
+    }
+  ],
+  "scanId": "528ad724-6251-46fa-a812-48264396f321",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "reported",
+      "id": "surface_public-compute-provider-upload-and-export-boundaries",
+      "label": "Public compute, provider, upload, and export boundaries",
+      "notes": "Ask, legal search, safety-reference search, photo analysis, and HWP export were traced.",
+      "receiptRefs": [],
+      "riskArea": "Resource exhaustion and information exposure"
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_authentication-tenant-database-share-and-dispatch-boundaries",
+      "label": "Authentication, tenant, database, Share, and dispatch boundaries",
+      "notes": "Application routes and canonical RLS migrations were reviewed; live DB state was not probed.",
+      "receiptRefs": [],
+      "riskArea": "Authorization and evidence integrity"
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_mcp-agent-and-hermes-boundaries",
+      "label": "MCP, agent, and Hermes boundaries",
+      "notes": "Token resolution, scopes, execution, replay, cancellation, and admission were reviewed.",
+      "receiptRefs": [],
+      "riskArea": "Credential issuance and provider admission"
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_knowledge-kosha-sif-vector-and-rendering-boundaries",
+      "label": "Knowledge, KOSHA, SIF vector, and rendering boundaries",
+      "notes": "Knowledge lifecycle, SIF upload, KOSHA exact trust, rendering, and path handling were reviewed.",
+      "receiptRefs": [],
+      "riskArea": "Review authority and safety provenance"
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_independent-general-security-baseline",
+      "label": "Independent general security baseline",
+      "notes": "Independent baseline corroborated the safety-reference distributed budget issue and found no additional confirmed replay, SSRF, credential, or injection issue.",
+      "receiptRefs": [],
+      "riskArea": "Cross-cutting"
+    }
+  ]
+}

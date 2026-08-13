@@ -1,0 +1,1717 @@
+{
+  "documentType": "codex-security.findings",
+  "findings": [
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "Unauthenticated sync and streaming Ask operations can multiply provider rate and weighted concurrency capacity across production instances when distributed admission is absent.",
+          "sink": "runAsk provider fan-out",
+          "source": "POST /api/ask and POST /api/ask/stream",
+          "summary": "POST /api/ask and POST /api/ask/stream crosses the broken control into runAsk provider fan-out."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "Unauthenticated sync and streaming Ask operations can multiply provider rate and weighted concurrency capacity across production instances when distributed admission is absent."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; runtime and deployment prerequisites are not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated remote caller selecting enhanced or full AI mode",
+          "entrypoint": "POST /api/ask and POST /api/ask/stream",
+          "outcome": "Unauthenticated sync and streaming Ask operations can multiply provider rate and weighted concurrency capacity across production instances when distributed admission is absent.",
+          "summary": "Unauthenticated remote caller selecting enhanced or full AI mode can reach POST /api/ask and POST /api/ask/stream under the stated prerequisites."
+        },
+        "summary": "Unauthenticated sync and streaming Ask operations can multiply provider rate and weighted concurrency capacity across production instances when distributed admission is absent."
+      },
+      "codeEvidence": [
+        {
+          "code": "Reviewed source at lib/public-ask-admission.ts:27-69",
+          "endLine": 69,
+          "explanation": "Production distributed admission is optional for public Ask rate and weighted provider leases.",
+          "id": "evidence-1",
+          "label": "Root control evidence",
+          "language": "typescript",
+          "path": "lib/public-ask-admission.ts",
+          "role": "root_control",
+          "startLine": 27
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Current source directly connects the stated attacker-controlled boundary to the broken control and sensitive operation; deployment prerequisites are recorded as limitations."
+      },
+      "findingId": "csf_21dd494543e7a569795d8d59",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:fae344483b6b8b5c8becd0a56d8eec4b48e5d0fc60e5a96ee1d54f5b43363c35"
+      },
+      "identity": {
+        "anchor": "distributed-provider-admission",
+        "instance": "public-ask-distributed-budget"
+      },
+      "locations": [
+        {
+          "endLine": 69,
+          "path": "lib/public-ask-admission.ts",
+          "role": "root_control",
+          "startLine": 27
+        }
+      ],
+      "occurrenceId": "occ_00ed53467f0a5d4179157616",
+      "preventiveControls": [],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Require distributed production rate and weighted concurrency admission for provider-backed Ask modes and fail closed when durable admission is unavailable.",
+      "remediationTests": [
+        "Add a regression that fails before runAsk provider fan-out when the broken control is not satisfied."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "Production distributed admission is optional for public Ask rate and weighted provider leases."
+      },
+      "ruleId": "resource-exhaustion.distributed-provider-admission",
+      "severity": {
+        "changeConditions": "Raise only with stronger runtime impact and reachability evidence; close when the broken control is proven effective.",
+        "level": "medium",
+        "rationale": "The source supports meaningful integrity, cost, or availability impact with material prerequisites that keep it below high."
+      },
+      "summary": "Unauthenticated sync and streaming Ask operations can multiply provider rate and weighted concurrency capacity across production instances when distributed admission is absent.",
+      "taxonomy": {
+        "category": "Resource exhaustion",
+        "cwe": [
+          "CWE-770"
+        ]
+      },
+      "title": "Public Ask endpoints fall back to per-instance provider budgets",
+      "validation": {
+        "assertions": [
+          "Unauthenticated sync and streaming Ask operations can multiply provider rate and weighted concurrency capacity across production instances when distributed admission is absent."
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "No live DB, provider, deployment, Share-session, vector, wiki, or KOSHA registry mutation was performed.",
+          "Optional deployment prerequisites are stated in the finding."
+        ],
+        "method": "Static source-to-sink review of the authorized current revision",
+        "summary": "Validated the attacker boundary, effective controls, counterevidence, and sink for POST /api/ask and POST /api/ask/stream."
+      },
+      "writeup": {
+        "reportPath": "findings/public-ask-distributed-budget/public-ask-distributed-budget.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "Public legal search uses an optional distributed rate limiter and no global concurrency lease before multi-provider retries.",
+          "sink": "Legal-provider retry fan-out",
+          "source": "GET /api/search",
+          "summary": "GET /api/search crosses the broken control into Legal-provider retry fan-out."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "Public legal search uses an optional distributed rate limiter and no global concurrency lease before multi-provider retries."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; runtime and deployment prerequisites are not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated remote caller sending distinct legal queries",
+          "entrypoint": "GET /api/search",
+          "outcome": "Public legal search uses an optional distributed rate limiter and no global concurrency lease before multi-provider retries.",
+          "summary": "Unauthenticated remote caller sending distinct legal queries can reach GET /api/search under the stated prerequisites."
+        },
+        "summary": "Public legal search uses an optional distributed rate limiter and no global concurrency lease before multi-provider retries."
+      },
+      "codeEvidence": [
+        {
+          "code": "Reviewed source at app/api/search/route.ts:70-95",
+          "endLine": 95,
+          "explanation": "Legal search has no fail-closed distributed request and concurrency admission before provider fan-out.",
+          "id": "evidence-1",
+          "label": "Root control evidence",
+          "language": "typescript",
+          "path": "app/api/search/route.ts",
+          "role": "root_control",
+          "startLine": 70
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Current source directly connects the stated attacker-controlled boundary to the broken control and sensitive operation; deployment prerequisites are recorded as limitations."
+      },
+      "findingId": "csf_226a088269752c14c5feae15",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:43f12990e9073db215c340f407f556b99cd0e822181dd7353640266537edf902"
+      },
+      "identity": {
+        "anchor": "distributed-search-admission",
+        "instance": "legal-search-distributed-budget"
+      },
+      "locations": [
+        {
+          "endLine": 95,
+          "path": "app/api/search/route.ts",
+          "role": "root_control",
+          "startLine": 70
+        }
+      ],
+      "occurrenceId": "occ_c6524429ac57003d6c92d870",
+      "preventiveControls": [],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Require distributed production rate limiting and a durable weighted concurrency lease for legal-provider work.",
+      "remediationTests": [
+        "Add a regression that fails before Legal-provider retry fan-out when the broken control is not satisfied."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "Legal search has no fail-closed distributed request and concurrency admission before provider fan-out."
+      },
+      "ruleId": "resource-exhaustion.distributed-search-admission",
+      "severity": {
+        "changeConditions": "Raise only with stronger runtime impact and reachability evidence; close when the broken control is proven effective.",
+        "level": "medium",
+        "rationale": "The source supports meaningful integrity, cost, or availability impact with material prerequisites that keep it below high."
+      },
+      "summary": "Public legal search uses an optional distributed rate limiter and no global concurrency lease before multi-provider retries.",
+      "taxonomy": {
+        "category": "Resource exhaustion",
+        "cwe": [
+          "CWE-770"
+        ]
+      },
+      "title": "Legal search lacks a durable production concurrency budget",
+      "validation": {
+        "assertions": [
+          "Public legal search uses an optional distributed rate limiter and no global concurrency lease before multi-provider retries."
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "No live DB, provider, deployment, Share-session, vector, wiki, or KOSHA registry mutation was performed.",
+          "Optional deployment prerequisites are stated in the finding."
+        ],
+        "method": "Static source-to-sink review of the authorized current revision",
+        "summary": "Validated the attacker boundary, effective controls, counterevidence, and sink for GET /api/search."
+      },
+      "writeup": {
+        "reportPath": "findings/legal-search-distributed-budget/legal-search-distributed-budget.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "The safety-reference coalescer stores only a promise and never propagates request cancellation into embedding and Supabase searches.",
+          "sink": "Embedding and Supabase reference work",
+          "source": "GET /api/safety-reference/search",
+          "summary": "GET /api/safety-reference/search crosses the broken control into Embedding and Supabase reference work."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "The safety-reference coalescer stores only a promise and never propagates request cancellation into embedding and Supabase searches."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; runtime and deployment prerequisites are not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated remote caller issuing unique searches then disconnecting",
+          "entrypoint": "GET /api/safety-reference/search",
+          "outcome": "The safety-reference coalescer stores only a promise and never propagates request cancellation into embedding and Supabase searches.",
+          "summary": "Unauthenticated remote caller issuing unique searches then disconnecting can reach GET /api/safety-reference/search under the stated prerequisites."
+        },
+        "summary": "The safety-reference coalescer stores only a promise and never propagates request cancellation into embedding and Supabase searches."
+      },
+      "codeEvidence": [
+        {
+          "code": "Reviewed source at app/api/safety-reference/search/route.ts:34-45",
+          "endLine": 45,
+          "explanation": "The route coalesces work without tracking consumers or forwarding cancellation.",
+          "id": "evidence-1",
+          "label": "Root control evidence",
+          "language": "typescript",
+          "path": "app/api/safety-reference/search/route.ts",
+          "role": "root_control",
+          "startLine": 34
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Current source directly connects the stated attacker-controlled boundary to the broken control and sensitive operation; deployment prerequisites are recorded as limitations."
+      },
+      "findingId": "csf_bb226c5ff9f0a152dfcdb124",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:a96052312a531269357bdbcafd7aec87ba66ad5f2874a836931d0229c576ba6e"
+      },
+      "identity": {
+        "anchor": "disconnect-cancellation",
+        "instance": "safety-reference-disconnect-cancellation"
+      },
+      "locations": [
+        {
+          "endLine": 45,
+          "path": "app/api/safety-reference/search/route.ts",
+          "role": "root_control",
+          "startLine": 34
+        }
+      ],
+      "occurrenceId": "occ_7d29e1d36f5a86b0f7bc7d54",
+      "preventiveControls": [],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Use consumer-counted coalescing and abort shared work after the final consumer disconnects.",
+      "remediationTests": [
+        "Add a regression that fails before Embedding and Supabase reference work when the broken control is not satisfied."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "The route coalesces work without tracking consumers or forwarding cancellation."
+      },
+      "ruleId": "resource-exhaustion.disconnect-cancellation",
+      "severity": {
+        "changeConditions": "Raise only with stronger runtime impact and reachability evidence; close when the broken control is proven effective.",
+        "level": "medium",
+        "rationale": "The source supports meaningful integrity, cost, or availability impact with material prerequisites that keep it below high."
+      },
+      "summary": "The safety-reference coalescer stores only a promise and never propagates request cancellation into embedding and Supabase searches.",
+      "taxonomy": {
+        "category": "Resource exhaustion",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Safety-reference work survives the final client disconnect",
+      "validation": {
+        "assertions": [
+          "The safety-reference coalescer stores only a promise and never propagates request cancellation into embedding and Supabase searches."
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "No live DB, provider, deployment, Share-session, vector, wiki, or KOSHA registry mutation was performed.",
+          "Optional deployment prerequisites are stated in the finding."
+        ],
+        "method": "Static source-to-sink review of the authorized current revision",
+        "summary": "Validated the attacker boundary, effective controls, counterevidence, and sink for GET /api/safety-reference/search."
+      },
+      "writeup": {
+        "reportPath": "findings/safety-reference-disconnect-cancellation/safety-reference-disconnect-cancellation.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "Public safety-reference search can multiply service-role database and optional embedding work across production instances.",
+          "sink": "Supabase search and optional OpenAI embeddings",
+          "source": "GET /api/safety-reference/search",
+          "summary": "GET /api/safety-reference/search crosses the broken control into Supabase search and optional OpenAI embeddings."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "Public safety-reference search can multiply service-role database and optional embedding work across production instances."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; runtime and deployment prerequisites are not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated remote caller issuing distinct safety-reference queries",
+          "entrypoint": "GET /api/safety-reference/search",
+          "outcome": "Public safety-reference search can multiply service-role database and optional embedding work across production instances.",
+          "summary": "Unauthenticated remote caller issuing distinct safety-reference queries can reach GET /api/safety-reference/search under the stated prerequisites."
+        },
+        "summary": "Public safety-reference search can multiply service-role database and optional embedding work across production instances."
+      },
+      "codeEvidence": [
+        {
+          "code": "Reviewed source at app/api/safety-reference/search/route.ts:47-88",
+          "endLine": 88,
+          "explanation": "The route has neither required distributed production rate limiting nor a durable concurrency lease.",
+          "id": "evidence-1",
+          "label": "Root control evidence",
+          "language": "typescript",
+          "path": "app/api/safety-reference/search/route.ts",
+          "role": "root_control",
+          "startLine": 47
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Current source directly connects the stated attacker-controlled boundary to the broken control and sensitive operation; deployment prerequisites are recorded as limitations."
+      },
+      "findingId": "csf_33d9a126ff7fdf104527fed5",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:a5aac35343e1405a236ab0299f4619416d4483c1de7ec1b14f12f8d385677c66"
+      },
+      "identity": {
+        "anchor": "distributed-search-admission",
+        "instance": "safety-reference-distributed-budget"
+      },
+      "locations": [
+        {
+          "endLine": 88,
+          "path": "app/api/safety-reference/search/route.ts",
+          "role": "root_control",
+          "startLine": 47
+        }
+      ],
+      "occurrenceId": "occ_db955988cef33e41d99045e5",
+      "preventiveControls": [],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Require distributed production rate control and durable weighted leases for database and embedding work.",
+      "remediationTests": [
+        "Add a regression that fails before Supabase search and optional OpenAI embeddings when the broken control is not satisfied."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "The route has neither required distributed production rate limiting nor a durable concurrency lease."
+      },
+      "ruleId": "resource-exhaustion.distributed-search-admission",
+      "severity": {
+        "changeConditions": "Raise only with stronger runtime impact and reachability evidence; close when the broken control is proven effective.",
+        "level": "medium",
+        "rationale": "The source supports meaningful integrity, cost, or availability impact with material prerequisites that keep it below high."
+      },
+      "summary": "Public safety-reference search can multiply service-role database and optional embedding work across production instances.",
+      "taxonomy": {
+        "category": "Resource exhaustion",
+        "cwe": [
+          "CWE-770"
+        ]
+      },
+      "title": "Safety-reference provider work uses per-instance production limits",
+      "validation": {
+        "assertions": [
+          "Public safety-reference search can multiply service-role database and optional embedding work across production instances."
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "No live DB, provider, deployment, Share-session, vector, wiki, or KOSHA registry mutation was performed.",
+          "Optional deployment prerequisites are stated in the finding."
+        ],
+        "method": "Static source-to-sink review of the authorized current revision",
+        "summary": "Validated the attacker boundary, effective controls, counterevidence, and sink for GET /api/safety-reference/search."
+      },
+      "writeup": {
+        "reportPath": "findings/safety-reference-distributed-budget/safety-reference-distributed-budget.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "An authenticated user can multiply OpenAI vision admission across scaled processes because production photo checks allow instance fallback.",
+          "sink": "OpenAI Responses vision analysis",
+          "source": "POST /api/input-photos/hazard-analysis",
+          "summary": "POST /api/input-photos/hazard-analysis crosses the broken control into OpenAI Responses vision analysis."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "An authenticated user can multiply OpenAI vision admission across scaled processes because production photo checks allow instance fallback."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; runtime and deployment prerequisites are not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "reachability": {
+          "attacker": "Authenticated workspace user submitting photo-analysis requests",
+          "entrypoint": "POST /api/input-photos/hazard-analysis",
+          "outcome": "An authenticated user can multiply OpenAI vision admission across scaled processes because production photo checks allow instance fallback.",
+          "summary": "Authenticated workspace user submitting photo-analysis requests can reach POST /api/input-photos/hazard-analysis under the stated prerequisites."
+        },
+        "summary": "An authenticated user can multiply OpenAI vision admission across scaled processes because production photo checks allow instance fallback."
+      },
+      "codeEvidence": [
+        {
+          "code": "Reviewed source at lib/public-distributed-rate-limit.ts:379-504",
+          "endLine": 504,
+          "explanation": "Photo admission explicitly permits process-local production fallback and lacks a durable per-user quota.",
+          "id": "evidence-1",
+          "label": "Root control evidence",
+          "language": "typescript",
+          "path": "lib/public-distributed-rate-limit.ts",
+          "role": "root_control",
+          "startLine": 379
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Current source directly connects the stated attacker-controlled boundary to the broken control and sensitive operation; deployment prerequisites are recorded as limitations."
+      },
+      "findingId": "csf_15d6fabdde8ef2b498223e1f",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:5ee815344be1431198ac1879f58ccb7dcb793222b7b0be6fbbcc4fc50c23f6bf"
+      },
+      "identity": {
+        "anchor": "distributed-provider-admission",
+        "instance": "photo-analysis-distributed-budget"
+      },
+      "locations": [
+        {
+          "endLine": 504,
+          "path": "lib/public-distributed-rate-limit.ts",
+          "role": "root_control",
+          "startLine": 379
+        }
+      ],
+      "occurrenceId": "occ_69101496c5101f10b197d073",
+      "preventiveControls": [],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Require distributed production admission plus durable authenticated-user and global provider quotas.",
+      "remediationTests": [
+        "Add a regression that fails before OpenAI Responses vision analysis when the broken control is not satisfied."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "Photo admission explicitly permits process-local production fallback and lacks a durable per-user quota."
+      },
+      "ruleId": "resource-exhaustion.distributed-provider-admission",
+      "severity": {
+        "changeConditions": "Raise only with stronger runtime impact and reachability evidence; close when the broken control is proven effective.",
+        "level": "medium",
+        "rationale": "The source supports meaningful integrity, cost, or availability impact with material prerequisites that keep it below high."
+      },
+      "summary": "An authenticated user can multiply OpenAI vision admission across scaled processes because production photo checks allow instance fallback.",
+      "taxonomy": {
+        "category": "Resource exhaustion",
+        "cwe": [
+          "CWE-770"
+        ]
+      },
+      "title": "Authenticated photo analysis falls back to per-instance provider budgets",
+      "validation": {
+        "assertions": [
+          "An authenticated user can multiply OpenAI vision admission across scaled processes because production photo checks allow instance fallback."
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "No live DB, provider, deployment, Share-session, vector, wiki, or KOSHA registry mutation was performed.",
+          "Optional deployment prerequisites are stated in the finding."
+        ],
+        "method": "Static source-to-sink review of the authorized current revision",
+        "summary": "Validated the attacker boundary, effective controls, counterevidence, and sink for POST /api/input-photos/hazard-analysis."
+      },
+      "writeup": {
+        "reportPath": "findings/photo-analysis-distributed-budget/photo-analysis-distributed-budget.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "The public HWP route embeds absolute WASM candidate paths in an exception and returns that message verbatim.",
+          "sink": "JSON 500 error response",
+          "source": "POST /api/export/hwp",
+          "summary": "POST /api/export/hwp crosses the broken control into JSON 500 error response."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "low",
+          "why": "The public HWP route embeds absolute WASM candidate paths in an exception and returns that message verbatim."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; runtime and deployment prerequisites are not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated remote HWP export caller during packaging failure",
+          "entrypoint": "POST /api/export/hwp",
+          "outcome": "The public HWP route embeds absolute WASM candidate paths in an exception and returns that message verbatim.",
+          "summary": "Unauthenticated remote HWP export caller during packaging failure can reach POST /api/export/hwp under the stated prerequisites."
+        },
+        "summary": "The public HWP route embeds absolute WASM candidate paths in an exception and returns that message verbatim."
+      },
+      "codeEvidence": [
+        {
+          "code": "Reviewed source at app/api/export/hwp/route.ts:49-64",
+          "endLine": 64,
+          "explanation": "Internal initialization diagnostics are reused as public error text.",
+          "id": "evidence-1",
+          "label": "Root control evidence",
+          "language": "typescript",
+          "path": "app/api/export/hwp/route.ts",
+          "role": "root_control",
+          "startLine": 49
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Current source directly connects the stated attacker-controlled boundary to the broken control and sensitive operation; deployment prerequisites are recorded as limitations."
+      },
+      "findingId": "csf_c5937055203cb12190d13520",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:5d3ce6e6e6a2a8f77bbe680ad8b4033adcbbb3b9a4c250d57112dfd1fa215f5a"
+      },
+      "identity": {
+        "anchor": "error-detail",
+        "instance": "hwp-error-path-disclosure"
+      },
+      "locations": [
+        {
+          "endLine": 64,
+          "path": "app/api/export/hwp/route.ts",
+          "role": "root_control",
+          "startLine": 49
+        }
+      ],
+      "occurrenceId": "occ_5bfb619790d9efe5ff2b2c75",
+      "preventiveControls": [],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Log internal details and return a fixed public error code and generic message.",
+      "remediationTests": [
+        "Add a regression that fails before JSON 500 error response when the broken control is not satisfied."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "Internal initialization diagnostics are reused as public error text."
+      },
+      "ruleId": "information-exposure.error-detail",
+      "severity": {
+        "changeConditions": "Raise only with stronger runtime impact and reachability evidence; close when the broken control is proven effective.",
+        "level": "low",
+        "rationale": "The path is constrained to low-impact disclosure or same-tenant behavior."
+      },
+      "summary": "The public HWP route embeds absolute WASM candidate paths in an exception and returns that message verbatim.",
+      "taxonomy": {
+        "category": "Sensitive information exposure",
+        "cwe": [
+          "CWE-209"
+        ]
+      },
+      "title": "HWP export failures can disclose absolute server paths",
+      "validation": {
+        "assertions": [
+          "The public HWP route embeds absolute WASM candidate paths in an exception and returns that message verbatim."
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "No live DB, provider, deployment, Share-session, vector, wiki, or KOSHA registry mutation was performed.",
+          "Optional deployment prerequisites are stated in the finding."
+        ],
+        "method": "Static source-to-sink review of the authorized current revision",
+        "summary": "Validated the attacker boundary, effective controls, counterevidence, and sink for POST /api/export/hwp."
+      },
+      "writeup": {
+        "reportPath": "findings/hwp-error-path-disclosure/hwp-error-path-disclosure.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "A write-capable MCP token can multiply provider-backed generation work across instances because rate limiting is optional and no generation lease exists.",
+          "sink": "Provider-backed runAsk work",
+          "source": "POST /api/mcp/mcp generation tools",
+          "summary": "POST /api/mcp/mcp generation tools crosses the broken control into Provider-backed runAsk work."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "A write-capable MCP token can multiply provider-backed generation work across instances because rate limiting is optional and no generation lease exists."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; runtime and deployment prerequisites are not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "reachability": {
+          "attacker": "Holder of a stolen or elevated MCP token",
+          "entrypoint": "POST /api/mcp/mcp generation tools",
+          "outcome": "A write-capable MCP token can multiply provider-backed generation work across instances because rate limiting is optional and no generation lease exists.",
+          "summary": "Holder of a stolen or elevated MCP token can reach POST /api/mcp/mcp generation tools under the stated prerequisites."
+        },
+        "summary": "A write-capable MCP token can multiply provider-backed generation work across instances because rate limiting is optional and no generation lease exists."
+      },
+      "codeEvidence": [
+        {
+          "code": "Reviewed source at app/api/mcp/[transport]/implementation.ts:356-380",
+          "endLine": 380,
+          "explanation": "MCP production rate enforcement is optional and provider-generating tools have no distributed concurrency lease.",
+          "id": "evidence-1",
+          "label": "Root control evidence",
+          "language": "typescript",
+          "path": "app/api/mcp/[transport]/implementation.ts",
+          "role": "root_control",
+          "startLine": 356
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Current source directly connects the stated attacker-controlled boundary to the broken control and sensitive operation; deployment prerequisites are recorded as limitations."
+      },
+      "findingId": "csf_5d732dadb969d462ed514cf1",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:2d6eb247b9d11b6891504534aa74495cb2a62d13de58ab3618086df1f3038d70"
+      },
+      "identity": {
+        "anchor": "distributed-provider-admission",
+        "instance": "mcp-distributed-provider-budget"
+      },
+      "locations": [
+        {
+          "endLine": 380,
+          "path": "app/api/mcp/[transport]/implementation.ts",
+          "role": "root_control",
+          "startLine": 356
+        }
+      ],
+      "occurrenceId": "occ_e18ecfbeff191258cab06e8d",
+      "preventiveControls": [],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Require distributed rate control and a durable provider-generation lease keyed by token or tenant.",
+      "remediationTests": [
+        "Add a regression that fails before Provider-backed runAsk work when the broken control is not satisfied."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "MCP production rate enforcement is optional and provider-generating tools have no distributed concurrency lease."
+      },
+      "ruleId": "resource-exhaustion.distributed-provider-admission",
+      "severity": {
+        "changeConditions": "Raise only with stronger runtime impact and reachability evidence; close when the broken control is proven effective.",
+        "level": "medium",
+        "rationale": "The source supports meaningful integrity, cost, or availability impact with material prerequisites that keep it below high."
+      },
+      "summary": "A write-capable MCP token can multiply provider-backed generation work across instances because rate limiting is optional and no generation lease exists.",
+      "taxonomy": {
+        "category": "Resource exhaustion",
+        "cwe": [
+          "CWE-770"
+        ]
+      },
+      "title": "Provider-generating MCP tools fall back to per-instance throttling",
+      "validation": {
+        "assertions": [
+          "A write-capable MCP token can multiply provider-backed generation work across instances because rate limiting is optional and no generation lease exists."
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "No live DB, provider, deployment, Share-session, vector, wiki, or KOSHA registry mutation was performed.",
+          "Optional deployment prerequisites are stated in the finding."
+        ],
+        "method": "Static source-to-sink review of the authorized current revision",
+        "summary": "Validated the attacker boundary, effective controls, counterevidence, and sink for POST /api/mcp/mcp generation tools."
+      },
+      "writeup": {
+        "reportPath": "findings/mcp-distributed-provider-budget/mcp-distributed-provider-budget.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "The site token limit is checked in one database request and inserted in another, allowing concurrent issuance above the cap.",
+          "sink": "mcp_tokens insert",
+          "source": "POST /api/mcp-tokens",
+          "summary": "POST /api/mcp-tokens crosses the broken control into mcp_tokens insert."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "low",
+          "why": "The site token limit is checked in one database request and inserted in another, allowing concurrent issuance above the cap."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; runtime and deployment prerequisites are not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "reachability": {
+          "attacker": "Authenticated organization owner",
+          "entrypoint": "POST /api/mcp-tokens",
+          "outcome": "The site token limit is checked in one database request and inserted in another, allowing concurrent issuance above the cap.",
+          "summary": "Authenticated organization owner can reach POST /api/mcp-tokens under the stated prerequisites."
+        },
+        "summary": "The site token limit is checked in one database request and inserted in another, allowing concurrent issuance above the cap."
+      },
+      "codeEvidence": [
+        {
+          "code": "Reviewed source at app/api/mcp-tokens/route.ts:240-271",
+          "endLine": 271,
+          "explanation": "Credential admission is a check-then-insert sequence without database atomicity.",
+          "id": "evidence-1",
+          "label": "Root control evidence",
+          "language": "typescript",
+          "path": "app/api/mcp-tokens/route.ts",
+          "role": "root_control",
+          "startLine": 240
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Current source directly connects the stated attacker-controlled boundary to the broken control and sensitive operation; deployment prerequisites are recorded as limitations."
+      },
+      "findingId": "csf_56854592e71732542f3d85ab",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:549629aee9c934a0ba0b7550bf80449dd24c01f3d1f61cea908f6a71511e1103"
+      },
+      "identity": {
+        "anchor": "atomic-credential-admission",
+        "instance": "mcp-token-cap-race"
+      },
+      "locations": [
+        {
+          "endLine": 271,
+          "path": "app/api/mcp-tokens/route.ts",
+          "role": "root_control",
+          "startLine": 240
+        }
+      ],
+      "occurrenceId": "occ_7708741a2ce3b5f063260c22",
+      "preventiveControls": [],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Use an atomic transactional database function or per-site locked reservation.",
+      "remediationTests": [
+        "Add a regression that fails before mcp_tokens insert when the broken control is not satisfied."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "Credential admission is a check-then-insert sequence without database atomicity."
+      },
+      "ruleId": "business-logic.atomic-credential-admission",
+      "severity": {
+        "changeConditions": "Raise only with stronger runtime impact and reachability evidence; close when the broken control is proven effective.",
+        "level": "low",
+        "rationale": "The path is constrained to low-impact disclosure or same-tenant behavior."
+      },
+      "summary": "The site token limit is checked in one database request and inserted in another, allowing concurrent issuance above the cap.",
+      "taxonomy": {
+        "category": "Credential management race",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "Concurrent MCP token issuance can exceed the active-token cap",
+      "validation": {
+        "assertions": [
+          "The site token limit is checked in one database request and inserted in another, allowing concurrent issuance above the cap."
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "No live DB, provider, deployment, Share-session, vector, wiki, or KOSHA registry mutation was performed.",
+          "Optional deployment prerequisites are stated in the finding."
+        ],
+        "method": "Static source-to-sink review of the authorized current revision",
+        "summary": "Validated the attacker boundary, effective controls, counterevidence, and sink for POST /api/mcp-tokens."
+      },
+      "writeup": {
+        "reportPath": "findings/mcp-token-cap-race/mcp-token-cap-race.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "Owner-only RLS does not bind confirmation foreign keys to the row tenant, and the public idempotency query omits organization and site filters.",
+          "sink": "Public idempotent success branch",
+          "source": "Direct PostgREST insert plus public acknowledgement",
+          "summary": "Direct PostgREST insert plus public acknowledgement crosses the broken control into Public idempotent success branch."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "Owner-only RLS does not bind confirmation foreign keys to the row tenant, and the public idempotency query omits organization and site filters."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; runtime and deployment prerequisites are not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "reachability": {
+          "attacker": "Authenticated direct REST user knowing victim related UUIDs",
+          "entrypoint": "Direct PostgREST insert plus public acknowledgement",
+          "outcome": "Owner-only RLS does not bind confirmation foreign keys to the row tenant, and the public idempotency query omits organization and site filters.",
+          "summary": "Authenticated direct REST user knowing victim related UUIDs can reach Direct PostgREST insert plus public acknowledgement under the stated prerequisites."
+        },
+        "summary": "Owner-only RLS does not bind confirmation foreign keys to the row tenant, and the public idempotency query omits organization and site filters."
+      },
+      "codeEvidence": [
+        {
+          "code": "Reviewed source at app/api/share-sessions/[sessionId]/route.ts:232-256",
+          "endLine": 256,
+          "explanation": "Related-object tenant binding is absent in RLS and omitted from the public idempotency lookup.",
+          "id": "evidence-1",
+          "label": "Root control evidence",
+          "language": "typescript",
+          "path": "app/api/share-sessions/[sessionId]/route.ts",
+          "role": "root_control",
+          "startLine": 232
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Current source directly connects the stated attacker-controlled boundary to the broken control and sensitive operation; deployment prerequisites are recorded as limitations."
+      },
+      "findingId": "csf_22c2322c5645a87c12cc8c9f",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:87276892606bfccbc20bbc599c0cfe71d0a29b779e789b02a314039a3b856feb"
+      },
+      "identity": {
+        "anchor": "related-object-binding",
+        "instance": "read-confirmation-cross-tenant-poisoning"
+      },
+      "locations": [
+        {
+          "endLine": 256,
+          "path": "app/api/share-sessions/[sessionId]/route.ts",
+          "role": "root_control",
+          "startLine": 232
+        }
+      ],
+      "occurrenceId": "occ_5fcf3612d4de92916323a563",
+      "preventiveControls": [],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Add tenant-tuple constraints and RLS checks, then filter and verify the complete tuple before idempotent success.",
+      "remediationTests": [
+        "Add a regression that fails before Public idempotent success branch when the broken control is not satisfied."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "Related-object tenant binding is absent in RLS and omitted from the public idempotency lookup."
+      },
+      "ruleId": "tenant-integrity.related-object-binding",
+      "severity": {
+        "changeConditions": "Raise only with stronger runtime impact and reachability evidence; close when the broken control is proven effective.",
+        "level": "medium",
+        "rationale": "The source supports meaningful integrity, cost, or availability impact with material prerequisites that keep it below high."
+      },
+      "summary": "Owner-only RLS does not bind confirmation foreign keys to the row tenant, and the public idempotency query omits organization and site filters.",
+      "taxonomy": {
+        "category": "Authorization and evidence integrity",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Cross-tenant confirmation rows can suppress legitimate public acknowledgements",
+      "validation": {
+        "assertions": [
+          "Owner-only RLS does not bind confirmation foreign keys to the row tenant, and the public idempotency query omits organization and site filters."
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "No live DB, provider, deployment, Share-session, vector, wiki, or KOSHA registry mutation was performed.",
+          "Optional deployment prerequisites are stated in the finding."
+        ],
+        "method": "Static source-to-sink review of the authorized current revision",
+        "summary": "Validated the attacker boundary, effective controls, counterevidence, and sink for Direct PostgREST insert plus public acknowledgement."
+      },
+      "writeup": {
+        "reportPath": "findings/read-confirmation-cross-tenant-poisoning/read-confirmation-cross-tenant-poisoning.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "The dispatch_logs policy grants every authenticated user all operations on rows whose organization_id is null.",
+          "sink": "Null-tenant dispatch rows",
+          "source": "Direct PostgREST dispatch_logs operation",
+          "summary": "Direct PostgREST dispatch_logs operation crosses the broken control into Null-tenant dispatch rows."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "The dispatch_logs policy grants every authenticated user all operations on rows whose organization_id is null."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; runtime and deployment prerequisites are not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "reachability": {
+          "attacker": "Any authenticated direct Supabase REST user",
+          "entrypoint": "Direct PostgREST dispatch_logs operation",
+          "outcome": "The dispatch_logs policy grants every authenticated user all operations on rows whose organization_id is null.",
+          "summary": "Any authenticated direct Supabase REST user can reach Direct PostgREST dispatch_logs operation under the stated prerequisites."
+        },
+        "summary": "The dispatch_logs policy grants every authenticated user all operations on rows whose organization_id is null."
+      },
+      "codeEvidence": [
+        {
+          "code": "Reviewed source at supabase/migrations/002_workspace_productization.sql:183-200",
+          "endLine": 200,
+          "explanation": "Nullable tenant ownership is treated as a universal allow condition.",
+          "id": "evidence-1",
+          "label": "Root control evidence",
+          "language": "sql",
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 183
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Current source directly connects the stated attacker-controlled boundary to the broken control and sensitive operation; deployment prerequisites are recorded as limitations."
+      },
+      "findingId": "csf_a10fe335a8f3c35a79eecad8",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:364a719d62bfd956a9c511d1dac4b92bf72b37a2ff3e33cc41b0205df03db872"
+      },
+      "identity": {
+        "anchor": "rls-null-tenant-wildcard",
+        "instance": "null-tenant-dispatch-rls"
+      },
+      "locations": [
+        {
+          "endLine": 200,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 183
+        }
+      ],
+      "occurrenceId": "occ_1fa1d4bb1ce00b81af42f191",
+      "preventiveControls": [],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Make organization_id non-null after a safe data plan and remove the null wildcard.",
+      "remediationTests": [
+        "Add a regression that fails before Null-tenant dispatch rows when the broken control is not satisfied."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "Nullable tenant ownership is treated as a universal allow condition."
+      },
+      "ruleId": "authorization.rls-null-tenant-wildcard",
+      "severity": {
+        "changeConditions": "Raise only with stronger runtime impact and reachability evidence; close when the broken control is proven effective.",
+        "level": "medium",
+        "rationale": "The source supports meaningful integrity, cost, or availability impact with material prerequisites that keep it below high."
+      },
+      "summary": "The dispatch_logs policy grants every authenticated user all operations on rows whose organization_id is null.",
+      "taxonomy": {
+        "category": "Broken access control",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Null-organization dispatch logs are globally manageable",
+      "validation": {
+        "assertions": [
+          "The dispatch_logs policy grants every authenticated user all operations on rows whose organization_id is null."
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "No live DB, provider, deployment, Share-session, vector, wiki, or KOSHA registry mutation was performed.",
+          "Optional deployment prerequisites are stated in the finding."
+        ],
+        "method": "Static source-to-sink review of the authorized current revision",
+        "summary": "Validated the attacker boundary, effective controls, counterevidence, and sink for Direct PostgREST dispatch_logs operation."
+      },
+      "writeup": {
+        "reportPath": "findings/null-tenant-dispatch-rls/null-tenant-dispatch-rls.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "Concurrent first-time saves for one worker key and different sites can bypass the pre-check and update the winning site.",
+          "sink": "workers upsert",
+          "source": "POST /api/workers",
+          "summary": "POST /api/workers crosses the broken control into workers upsert."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "low",
+          "why": "Concurrent first-time saves for one worker key and different sites can bypass the pre-check and update the winning site."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; runtime and deployment prerequisites are not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "reachability": {
+          "attacker": "Authenticated tenant owner",
+          "entrypoint": "POST /api/workers",
+          "outcome": "Concurrent first-time saves for one worker key and different sites can bypass the pre-check and update the winning site.",
+          "summary": "Authenticated tenant owner can reach POST /api/workers under the stated prerequisites."
+        },
+        "summary": "Concurrent first-time saves for one worker key and different sites can bypass the pre-check and update the winning site."
+      },
+      "codeEvidence": [
+        {
+          "code": "Reviewed source at app/api/workers/route.ts:78-114",
+          "endLine": 114,
+          "explanation": "Site-binding validation and mutation are not atomic.",
+          "id": "evidence-1",
+          "label": "Root control evidence",
+          "language": "typescript",
+          "path": "app/api/workers/route.ts",
+          "role": "root_control",
+          "startLine": 78
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Current source directly connects the stated attacker-controlled boundary to the broken control and sensitive operation; deployment prerequisites are recorded as limitations."
+      },
+      "findingId": "csf_c6999d9317bf2eae4d6e38aa",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:83581d71b0539583d2d40ff4a0d8d3d14cfb5a0110112d3711e77b1927b407e2"
+      },
+      "identity": {
+        "anchor": "atomic-site-binding",
+        "instance": "worker-site-transfer-race"
+      },
+      "locations": [
+        {
+          "endLine": 114,
+          "path": "app/api/workers/route.ts",
+          "role": "root_control",
+          "startLine": 78
+        }
+      ],
+      "occurrenceId": "occ_f04ce78967ebe528e1e7cef8",
+      "preventiveControls": [],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Use an atomic RPC or conditional ON CONFLICT update that refuses a different existing site.",
+      "remediationTests": [
+        "Add a regression that fails before workers upsert when the broken control is not satisfied."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "Site-binding validation and mutation are not atomic."
+      },
+      "ruleId": "business-logic.atomic-site-binding",
+      "severity": {
+        "changeConditions": "Raise only with stronger runtime impact and reachability evidence; close when the broken control is proven effective.",
+        "level": "low",
+        "rationale": "The path is constrained to low-impact disclosure or same-tenant behavior."
+      },
+      "summary": "Concurrent first-time saves for one worker key and different sites can bypass the pre-check and update the winning site.",
+      "taxonomy": {
+        "category": "Race condition and data integrity",
+        "cwe": [
+          "CWE-367"
+        ]
+      },
+      "title": "Worker site-transfer protection has a check-then-upsert race",
+      "validation": {
+        "assertions": [
+          "Concurrent first-time saves for one worker key and different sites can bypass the pre-check and update the winning site."
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "No live DB, provider, deployment, Share-session, vector, wiki, or KOSHA registry mutation was performed.",
+          "Optional deployment prerequisites are stated in the finding."
+        ],
+        "method": "Static source-to-sink review of the authorized current revision",
+        "summary": "Validated the attacker boundary, effective controls, counterevidence, and sink for POST /api/workers."
+      },
+      "writeup": {
+        "reportPath": "findings/worker-site-transfer-race/worker-site-transfer-race.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "An authenticated tenant owner can write arbitrary provider and status claims without an authoritative dispatch attempt or receipt.",
+          "sink": "Service-role dispatch_logs insert",
+          "source": "POST /api/dispatch-logs",
+          "summary": "POST /api/dispatch-logs crosses the broken control into Service-role dispatch_logs insert."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "low",
+          "why": "An authenticated tenant owner can write arbitrary provider and status claims without an authoritative dispatch attempt or receipt."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; runtime and deployment prerequisites are not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "reachability": {
+          "attacker": "Authenticated tenant owner",
+          "entrypoint": "POST /api/dispatch-logs",
+          "outcome": "An authenticated tenant owner can write arbitrary provider and status claims without an authoritative dispatch attempt or receipt.",
+          "summary": "Authenticated tenant owner can reach POST /api/dispatch-logs under the stated prerequisites."
+        },
+        "summary": "An authenticated tenant owner can write arbitrary provider and status claims without an authoritative dispatch attempt or receipt."
+      },
+      "codeEvidence": [
+        {
+          "code": "Reviewed source at app/api/dispatch-logs/route.ts:260-284",
+          "endLine": 284,
+          "explanation": "Archive evidence is not bound to an authoritative server-issued attempt or provider result.",
+          "id": "evidence-1",
+          "label": "Root control evidence",
+          "language": "typescript",
+          "path": "app/api/dispatch-logs/route.ts",
+          "role": "root_control",
+          "startLine": 260
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Current source directly connects the stated attacker-controlled boundary to the broken control and sensitive operation; deployment prerequisites are recorded as limitations."
+      },
+      "findingId": "csf_d36c17488f30a5ccca45a9a1",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:b2850b034c7adc96c70adbcb5ae225ababf77b9dbc655ed83610af9ba27ae2ec"
+      },
+      "identity": {
+        "anchor": "untrusted-provider-receipt",
+        "instance": "dispatch-archive-outcome-forgery"
+      },
+      "locations": [
+        {
+          "endLine": 284,
+          "path": "app/api/dispatch-logs/route.ts",
+          "role": "root_control",
+          "startLine": 260
+        }
+      ],
+      "occurrenceId": "occ_174a370bd5c115de3d4f5be7",
+      "preventiveControls": [],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Create archive rows only from immutable server attempts and verified provider results.",
+      "remediationTests": [
+        "Add a regression that fails before Service-role dispatch_logs insert when the broken control is not satisfied."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "Archive evidence is not bound to an authoritative server-issued attempt or provider result."
+      },
+      "ruleId": "integrity.untrusted-provider-receipt",
+      "severity": {
+        "changeConditions": "Raise only with stronger runtime impact and reachability evidence; close when the broken control is proven effective.",
+        "level": "low",
+        "rationale": "The path is constrained to low-impact disclosure or same-tenant behavior."
+      },
+      "summary": "An authenticated tenant owner can write arbitrary provider and status claims without an authoritative dispatch attempt or receipt.",
+      "taxonomy": {
+        "category": "Evidence integrity",
+        "cwe": [
+          "CWE-345"
+        ]
+      },
+      "title": "Dispatch archive accepts unverified provider outcomes",
+      "validation": {
+        "assertions": [
+          "An authenticated tenant owner can write arbitrary provider and status claims without an authoritative dispatch attempt or receipt."
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "No live DB, provider, deployment, Share-session, vector, wiki, or KOSHA registry mutation was performed.",
+          "Optional deployment prerequisites are stated in the finding."
+        ],
+        "method": "Static source-to-sink review of the authorized current revision",
+        "summary": "Validated the attacker boundary, effective controls, counterevidence, and sink for POST /api/dispatch-logs."
+      },
+      "writeup": {
+        "reportPath": "findings/dispatch-archive-outcome-forgery/dispatch-archive-outcome-forgery.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "Owner-wide FOR ALL RLS lets browser-authenticated owners alter review state and receipt-bearing fields outside the guarded review operation.",
+          "sink": "Promotion evaluation of stored approved state",
+          "source": "Direct knowledge table updates",
+          "summary": "Direct knowledge table updates crosses the broken control into Promotion evaluation of stored approved state."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "Owner-wide FOR ALL RLS lets browser-authenticated owners alter review state and receipt-bearing fields outside the guarded review operation."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; runtime and deployment prerequisites are not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "reachability": {
+          "attacker": "Authenticated organization owner using direct Supabase REST",
+          "entrypoint": "Direct knowledge table updates",
+          "outcome": "Owner-wide FOR ALL RLS lets browser-authenticated owners alter review state and receipt-bearing fields outside the guarded review operation.",
+          "summary": "Authenticated organization owner using direct Supabase REST can reach Direct knowledge table updates under the stated prerequisites."
+        },
+        "summary": "Owner-wide FOR ALL RLS lets browser-authenticated owners alter review state and receipt-bearing fields outside the guarded review operation."
+      },
+      "codeEvidence": [
+        {
+          "code": "Reviewed source at supabase/migrations/003_knowledge_runtime.sql:94-126",
+          "endLine": 126,
+          "explanation": "RLS grants broad mutation instead of server-enforced transitions and immutable review evidence.",
+          "id": "evidence-1",
+          "label": "Root control evidence",
+          "language": "sql",
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "root_control",
+          "startLine": 94
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Current source directly connects the stated attacker-controlled boundary to the broken control and sensitive operation; deployment prerequisites are recorded as limitations."
+      },
+      "findingId": "csf_19ff997724eac5b329d11e6e",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:75eff2fc8e632a11f0f614f0a11e4247e6407816ef5c76833598486f6f486d68"
+      },
+      "identity": {
+        "anchor": "workflow-state-bypass",
+        "instance": "knowledge-review-direct-write-bypass"
+      },
+      "locations": [
+        {
+          "endLine": 126,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "root_control",
+          "startLine": 94
+        }
+      ],
+      "occurrenceId": "occ_334033ce512e202134b8b8c5",
+      "preventiveControls": [],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Permit client reads only and route mutations through narrow server operations with append-only decisions.",
+      "remediationTests": [
+        "Add a regression that fails before Promotion evaluation of stored approved state when the broken control is not satisfied."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "RLS grants broad mutation instead of server-enforced transitions and immutable review evidence."
+      },
+      "ruleId": "authorization.workflow-state-bypass",
+      "severity": {
+        "changeConditions": "Raise only with stronger runtime impact and reachability evidence; close when the broken control is proven effective.",
+        "level": "medium",
+        "rationale": "The source supports meaningful integrity, cost, or availability impact with material prerequisites that keep it below high."
+      },
+      "summary": "Owner-wide FOR ALL RLS lets browser-authenticated owners alter review state and receipt-bearing fields outside the guarded review operation.",
+      "taxonomy": {
+        "category": "Broken access control and workflow integrity",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Organization owners can bypass the knowledge-review state machine through direct Supabase writes",
+      "validation": {
+        "assertions": [
+          "Owner-wide FOR ALL RLS lets browser-authenticated owners alter review state and receipt-bearing fields outside the guarded review operation."
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "No live DB, provider, deployment, Share-session, vector, wiki, or KOSHA registry mutation was performed.",
+          "Optional deployment prerequisites are stated in the finding."
+        ],
+        "method": "Static source-to-sink review of the authorized current revision",
+        "summary": "Validated the attacker boundary, effective controls, counterevidence, and sink for Direct knowledge table updates."
+      },
+      "writeup": {
+        "reportPath": "findings/knowledge-review-direct-write-bypass/knowledge-review-direct-write-bypass.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "Repeated ingestion replaces reviewed event content and provenance while preserving its prior review_status.",
+          "sink": "Existing knowledge_events update",
+          "source": "POST /api/knowledge/ingest",
+          "summary": "POST /api/knowledge/ingest crosses the broken control into Existing knowledge_events update."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "Repeated ingestion replaces reviewed event content and provenance while preserving its prior review_status."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; runtime and deployment prerequisites are not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "reachability": {
+          "attacker": "Authenticated owner or compromised repeated source input",
+          "entrypoint": "POST /api/knowledge/ingest",
+          "outcome": "Repeated ingestion replaces reviewed event content and provenance while preserving its prior review_status.",
+          "summary": "Authenticated owner or compromised repeated source input can reach POST /api/knowledge/ingest under the stated prerequisites."
+        },
+        "summary": "Repeated ingestion replaces reviewed event content and provenance while preserving its prior review_status."
+      },
+      "codeEvidence": [
+        {
+          "code": "Reviewed source at app/api/knowledge/ingest/route.ts:125-173",
+          "endLine": 173,
+          "explanation": "Reviewed events are mutable and replacement is not coupled to review invalidation or versioning.",
+          "id": "evidence-1",
+          "label": "Root control evidence",
+          "language": "typescript",
+          "path": "app/api/knowledge/ingest/route.ts",
+          "role": "root_control",
+          "startLine": 125
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Current source directly connects the stated attacker-controlled boundary to the broken control and sensitive operation; deployment prerequisites are recorded as limitations."
+      },
+      "findingId": "csf_ed9c7bdc75bbbc4f1100181c",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:4daa6d470048815de8d53bb758af9c1a56d31c4e71902b0e8635b11a530a1313"
+      },
+      "identity": {
+        "anchor": "review-lifecycle-reset",
+        "instance": "knowledge-reingest-review-reset"
+      },
+      "locations": [
+        {
+          "endLine": 173,
+          "path": "app/api/knowledge/ingest/route.ts",
+          "role": "root_control",
+          "startLine": 125
+        }
+      ],
+      "occurrenceId": "occ_e9ed68a3c24609df280bc2d3",
+      "preventiveControls": [],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Version reviewed events or atomically reset changed content and invalidate dependent runs.",
+      "remediationTests": [
+        "Add a regression that fails before Existing knowledge_events update when the broken control is not satisfied."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "Reviewed events are mutable and replacement is not coupled to review invalidation or versioning."
+      },
+      "ruleId": "integrity.review-lifecycle-reset",
+      "severity": {
+        "changeConditions": "Raise only with stronger runtime impact and reachability evidence; close when the broken control is proven effective.",
+        "level": "medium",
+        "rationale": "The source supports meaningful integrity, cost, or availability impact with material prerequisites that keep it below high."
+      },
+      "summary": "Repeated ingestion replaces reviewed event content and provenance while preserving its prior review_status.",
+      "taxonomy": {
+        "category": "Workflow state integrity",
+        "cwe": [
+          "CWE-841"
+        ]
+      },
+      "title": "Re-ingestion overwrites reviewed evidence without returning it to pending review",
+      "validation": {
+        "assertions": [
+          "Repeated ingestion replaces reviewed event content and provenance while preserving its prior review_status."
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "No live DB, provider, deployment, Share-session, vector, wiki, or KOSHA registry mutation was performed.",
+          "Optional deployment prerequisites are stated in the finding."
+        ],
+        "method": "Static source-to-sink review of the authorized current revision",
+        "summary": "Validated the attacker boundary, effective controls, counterevidence, and sink for POST /api/knowledge/ingest."
+      },
+      "writeup": {
+        "reportPath": "findings/knowledge-reingest-review-reset/knowledge-reingest-review-reset.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "The uploader computes missing-control, missing-document, and duplicate-content failures but does not enforce them before embedding and upload.",
+          "sink": "OpenAI embedding and Supabase vector upsert",
+          "source": "prepare_sif_embedding_corpus.mjs --embed/--upload",
+          "summary": "prepare_sif_embedding_corpus.mjs --embed/--upload crosses the broken control into OpenAI embedding and Supabase vector upsert."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "The uploader computes missing-control, missing-document, and duplicate-content failures but does not enforce them before embedding and upload."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Source reachability is established; runtime and deployment prerequisites are not overclaimed."
+        },
+        "limitations": [
+          "Static current-revision analysis only."
+        ],
+        "reachability": {
+          "attacker": "Malicious or corrupted SIF corpus content plus an approved operator run",
+          "entrypoint": "prepare_sif_embedding_corpus.mjs --embed/--upload",
+          "outcome": "The uploader computes missing-control, missing-document, and duplicate-content failures but does not enforce them before embedding and upload.",
+          "summary": "Malicious or corrupted SIF corpus content plus an approved operator run can reach prepare_sif_embedding_corpus.mjs --embed/--upload under the stated prerequisites."
+        },
+        "summary": "The uploader computes missing-control, missing-document, and duplicate-content failures but does not enforce them before embedding and upload."
+      },
+      "codeEvidence": [
+        {
+          "code": "Reviewed source at scripts/prepare_sif_embedding_corpus.mjs:330-388",
+          "endLine": 388,
+          "explanation": "Machine quality results and approved corpus identity are not fail-closed prerequisites for embedding or upload.",
+          "id": "evidence-1",
+          "label": "Root control evidence",
+          "language": "javascript",
+          "path": "scripts/prepare_sif_embedding_corpus.mjs",
+          "role": "root_control",
+          "startLine": 330
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Current source directly connects the stated attacker-controlled boundary to the broken control and sensitive operation; deployment prerequisites are recorded as limitations."
+      },
+      "findingId": "csf_ec150f5c484b460762e53e87",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:1e94b83fd6ada17aeb1113a27fcd463602846363869aa3f725cf95ea3c023bcb"
+      },
+      "identity": {
+        "anchor": "corpus-quality-admission",
+        "instance": "sif-embedding-quality-admission"
+      },
+      "locations": [
+        {
+          "endLine": 388,
+          "path": "scripts/prepare_sif_embedding_corpus.mjs",
+          "role": "root_control",
+          "startLine": 330
+        }
+      ],
+      "occurrenceId": "occ_046fe03fc4b938b9bdc7dc66",
+      "preventiveControls": [],
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Fail closed on mandatory corpus validation and bind approval to the exact corpus and manifest identity.",
+      "remediationTests": [
+        "Add a regression that fails before OpenAI embedding and Supabase vector upsert when the broken control is not satisfied."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "Machine quality results and approved corpus identity are not fail-closed prerequisites for embedding or upload."
+      },
+      "ruleId": "integrity.corpus-quality-admission",
+      "severity": {
+        "changeConditions": "Raise only with stronger runtime impact and reachability evidence; close when the broken control is proven effective.",
+        "level": "medium",
+        "rationale": "The source supports meaningful integrity, cost, or availability impact with material prerequisites that keep it below high."
+      },
+      "summary": "The uploader computes missing-control, missing-document, and duplicate-content failures but does not enforce them before embedding and upload.",
+      "taxonomy": {
+        "category": "Safety knowledge integrity",
+        "cwe": [
+          "CWE-20"
+        ]
+      },
+      "title": "SIF embedding upload proceeds despite failed corpus quality checks",
+      "validation": {
+        "assertions": [
+          "The uploader computes missing-control, missing-document, and duplicate-content failures but does not enforce them before embedding and upload."
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "No live DB, provider, deployment, Share-session, vector, wiki, or KOSHA registry mutation was performed.",
+          "Optional deployment prerequisites are stated in the finding."
+        ],
+        "method": "Static source-to-sink review of the authorized current revision",
+        "summary": "Validated the attacker boundary, effective controls, counterevidence, and sink for prepare_sif_embedding_corpus.mjs --embed/--upload."
+      },
+      "writeup": {
+        "reportPath": "findings/sif-embedding-quality-admission/sif-embedding-quality-admission.md"
+      }
+    }
+  ],
+  "scanId": "528ad724-6251-46fa-a812-48264396f321",
+  "schemaVersion": "1.0"
+}

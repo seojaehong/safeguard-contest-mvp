@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "safeclaw-current-full-repository-security-scan/v1",
+  "generatedAt": "2026-08-13T22:51:18.6003091+09:00",
+  "verdict": "NOTICE_CURRENT_SOURCE_SECURITY_SCAN_REMEDIATION_LIVE_AND_RESCAN_PENDING",
+  "userContext": "Preserve immutable original 18-finding baseline. Verify current f0c8a7be source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
+  "immutableBaseline": {
+    "scanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
+    "targetRevision": "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
+    "accountedFindingCount": 18,
+    "preserved": true,
+    "rewritten": false
+  },
+  "currentScan": {
+    "scanId": "528ad724-6251-46fa-a812-48264396f321",
+    "targetRevision": "2c65f894be7cb37d0b50a2e1e19466a208400aaa",
+    "status": "completed",
+    "sealedAt": "2026-08-13T13:34:55.753667Z",
+    "mode": "standard",
+    "validationMode": "static-source",
+    "coverage": "partial",
+    "reportableFindingCount": 15,
+    "severityCounts": {
+      "medium": 11,
+      "low": 4
+    },
+    "canonicalArtifacts": {
+      "manifest": "evaluation/current-full-repository-security-scan-2026-08-13/canonical/scan-manifest.json",
+      "findings": "evaluation/current-full-repository-security-scan-2026-08-13/canonical/findings.json",
+      "coverage": "evaluation/current-full-repository-security-scan-2026-08-13/canonical/coverage.json",
+      "markdownProjection": "evaluation/current-full-repository-security-scan-2026-08-13/scan-report.md",
+      "derivedWriteups": "evaluation/current-full-repository-security-scan-2026-08-13/findings"
+    }
+  },
+  "currentSourceRemediation": {
+    "productCommit": "6fc07ad17d382f6c9fdd88472d90388874044050",
+    "sourceRemediatedCount": 2,
+    "remainingReportableFindingCountBeforeRescan": 13,
+    "liveAfterDeploymentPending": true,
+    "freshPostRemediationScanRequired": true,
+    "securityCompleteClaimAllowed": false,
+    "items": [
+      {
+        "slug": "safety-reference-disconnect-cancellation",
+        "severity": "medium",
+        "disposition": "source_remediated_live_and_rescan_pending",
+        "verification": "A coalesced provider search remains active while one consumer remains and aborts only after the final consumer disconnects."
+      },
+      {
+        "slug": "hwp-error-path-disclosure",
+        "severity": "low",
+        "disposition": "source_remediated_live_and_rescan_pending",
+        "verification": "Internal HWP errors are logged server-side while the HTTP response returns a fixed public message."
+      }
+    ]
+  },
+  "verification": {
+    "focusedTests": {
+      "files": 2,
+      "tests": 21,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    }
+  },
+  "coverageLimitations": [
+    "The current scan used focused threat surfaces and did not individually line-review all 5,612 tracked files.",
+    "No live deployment, provider, database catalog, dependency scanner, or exact saved Share session was probed by the scan.",
+    "Upstash and live Supabase policy state remain deployment prerequisites rather than proven runtime facts."
+  ],
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedBoundariesPreserved": true,
+    "securityCompleteClaimAllowed": false
+  }
+}
