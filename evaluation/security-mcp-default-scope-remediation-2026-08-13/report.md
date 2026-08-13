@@ -2,9 +2,9 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LIVE_PENDING`
+`PASS_LIVE_DEPLOYED_SOURCE_MCP_READ_ONLY_DEFAULT`
 
-Product commit: `86f2cb53`
+Product and production marker: `86f2cb5372dd09b7dc30287a75de7d5a7f40569f` on `master` / `production` (`safeguard-contest-5p7yjzcrn-seojaehongs-projects.vercel.app`). This proves deployed-source alignment only; no live token was issued.
 
 ## Remediation
 
@@ -19,4 +19,4 @@ New MCP tokens issued by the authenticated web route or operator CLI now receive
 
 ## Boundaries
 
-Existing token rows were not changed. No DB schema/data mutation or external provider action was performed. Token expiry remains a separate security finding. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`. Live deployment alignment is pending.
+Existing token rows were not changed. No DB schema/data mutation or external provider action was performed. Token expiry remains a separate security finding. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`. The production marker confirms deployment of the read-only default source but does not replace a separately approved live issuance check.

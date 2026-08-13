@@ -1,8 +1,16 @@
 {
   "schema": "safeclaw-security-mcp-default-scope-remediation/v1",
   "generatedAt": "2026-08-13T18:08:25.9508692+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LIVE_PENDING",
-  "productCommit": "86f2cb53",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_MCP_READ_ONLY_DEFAULT",
+  "productCommit": "86f2cb5372dd09b7dc30287a75de7d5a7f40569f",
+  "productionBuild": {
+    "commitSha": "86f2cb5372dd09b7dc30287a75de7d5a7f40569f",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-5p7yjzcrn-seojaehongs-projects.vercel.app",
+    "verifiedAt": "2026-08-13T18:10:07.6100333+09:00",
+    "scope": "DEPLOYED_SOURCE_ALIGNMENT_ONLY"
+  },
   "finding": {
     "anchor": "mcp-default-all-tool-scopes",
     "severity": "medium",
@@ -43,6 +51,6 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "mcpTokenExpiry": "SEPARATE_SECURITY_FINDING",
     "explicitWriteScopeIssuance": "NOT_IMPLEMENTED_IN_THIS_WAVE",
-    "liveDeploymentVerification": "PENDING"
+    "liveDeploymentVerification": "PRODUCT_COMMIT_ALIGNED_SOURCE_ONLY"
   }
 }
