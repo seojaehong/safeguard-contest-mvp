@@ -353,6 +353,20 @@ type RollupReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  shareRecipientContactVerification: {
+    verdict: string;
+    findingId: string;
+    workerIdAloneAccepted: boolean;
+    verificationValuePersisted: boolean;
+    adjacentTests: number | null;
+    browserTests: number | null;
+    liveMissingSessionStatus: number | null;
+    liveRealRecipientVerificationProbe: string;
+    freshRescanRequired: boolean;
+    recipientAckLiveDataApproval: string;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   mcpGenerationWorkBudgetSecurity: {
     verdict: string;
     sourceHead: string;
@@ -1222,6 +1236,28 @@ function createFixtureRoot(): { root: string; head: string } {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/share-recipient-contact-verification-2026-08-14/report.json", {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_SHARE_RECIPIENT_CONTACT_VERIFICATION_RESCAN_PENDING",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    securityFinding: { findingId: "csf_e6a120c87c57d3529757bbde" },
+    sourceContract: {
+      invitationWorkerIdAloneAcceptedForConfirmation: false,
+      verificationValuePersisted: false,
+    },
+    verification: {
+      focusedAndAdjacent: { tests: 124 },
+      recipientBrowser: { tests: 7 },
+    },
+    liveProbe: { status: 404 },
+    remainingBoundaries: {
+      liveRealRecipientVerificationProbe: "NOT_EXECUTED_NO_EXISTING_SAVED_SESSION",
+      freshFullRepositorySecurityScanRequiredForCanonicalClosure: true,
+      recipientAckLiveDataApproval: "APPROVAL_GATED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/document-authoring-pane-margin-2026-08-02/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
     productCommit: "TO_FILL",
@@ -1270,6 +1306,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/public-provider-admission-2026-08-11/report.json",
     "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json",
     "evaluation/security-mcp-provider-admission-2026-08-14/report.json",
+    "evaluation/share-recipient-contact-verification-2026-08-14/report.json",
     "evaluation/learning-export-renderer-security-2026-08-02/report.json",
     "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
@@ -1654,6 +1691,21 @@ describe("northstar live rollup", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.evidence.find((item) => item.id === "mcp_provider_admission_security")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.shareRecipientContactVerification).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_SHARE_RECIPIENT_CONTACT_VERIFICATION_RESCAN_PENDING",
+      findingId: "csf_e6a120c87c57d3529757bbde",
+      workerIdAloneAccepted: false,
+      verificationValuePersisted: false,
+      adjacentTests: 124,
+      browserTests: 7,
+      liveMissingSessionStatus: 404,
+      liveRealRecipientVerificationProbe: "NOT_EXECUTED_NO_EXISTING_SAVED_SESSION",
+      freshRescanRequired: true,
+      recipientAckLiveDataApproval: "APPROVAL_GATED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "share_recipient_contact_verification_security")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "public_generation_admission_security")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "public_search_distributed_rate_limit_readiness")?.sourceStatus).toBe("ancestor");
     expect(report.learningExportRendererSecurity).toMatchObject({

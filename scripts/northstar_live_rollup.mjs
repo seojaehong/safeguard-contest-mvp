@@ -38,6 +38,7 @@ const ARTIFACTS = Object.freeze({
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "report.json"),
   agentChatDurableAdmission: path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"),
   mcpProviderAdmission: path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"),
+  shareRecipientContactVerification: path.join("evaluation", "share-recipient-contact-verification-2026-08-14", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
@@ -353,6 +354,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const currentRepositorySecurityRescan = tryReadJson(rootDir, ARTIFACTS.currentRepositorySecurityRescan);
   const agentChatDurableAdmission = tryReadJson(rootDir, ARTIFACTS.agentChatDurableAdmission);
   const mcpProviderAdmission = tryReadJson(rootDir, ARTIFACTS.mcpProviderAdmission);
+  const shareRecipientContactVerification = tryReadJson(rootDir, ARTIFACTS.shareRecipientContactVerification);
   const publicJsonRequestBodyBudget = tryReadJson(rootDir, ARTIFACTS.publicJsonRequestBodyBudget);
   const improvementPhotoAnalysisBudget = tryReadJson(rootDir, ARTIFACTS.improvementPhotoAnalysisBudget);
   const publicProviderCancellation = tryReadJson(rootDir, ARTIFACTS.publicProviderCancellation);
@@ -458,6 +460,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "current_repository_security_rescan", ARTIFACTS.currentRepositorySecurityRescan, currentRepositorySecurityRescan),
     evidenceStatus(rootDir, currentHead, liveCommit, "agent_chat_durable_admission_security", ARTIFACTS.agentChatDurableAdmission, agentChatDurableAdmission),
     evidenceStatus(rootDir, currentHead, liveCommit, "mcp_provider_admission_security", ARTIFACTS.mcpProviderAdmission, mcpProviderAdmission),
+    evidenceStatus(rootDir, currentHead, liveCommit, "share_recipient_contact_verification_security", ARTIFACTS.shareRecipientContactVerification, shareRecipientContactVerification),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_json_request_body_budget", ARTIFACTS.publicJsonRequestBodyBudget, publicJsonRequestBodyBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "improvement_photo_analysis_budget", ARTIFACTS.improvementPhotoAnalysisBudget, improvementPhotoAnalysisBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_cancellation", ARTIFACTS.publicProviderCancellation, publicProviderCancellation),
@@ -838,6 +841,23 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       freshRescanRequired: recordAt(mcpProviderAdmission, "remainingBoundaries")?.freshFullRepositorySecurityScanRequiredForCanonicalClosure === true,
       securityCompleteClaimAllowed: recordAt(mcpProviderAdmission, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
       exactSavedShareVerdict: asString(recordAt(mcpProviderAdmission, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    shareRecipientContactVerification: {
+      artifact: ARTIFACTS.shareRecipientContactVerification,
+      verdict: isRecord(shareRecipientContactVerification) ? asString(shareRecipientContactVerification.verdict) : "missing",
+      sourceHead: isRecord(shareRecipientContactVerification) ? asString(shareRecipientContactVerification.sourceHead) : "",
+      productionCommit: isRecord(shareRecipientContactVerification) ? asString(shareRecipientContactVerification.productionCommit) : "",
+      findingId: asString(recordAt(shareRecipientContactVerification, "securityFinding")?.findingId),
+      workerIdAloneAccepted: recordAt(shareRecipientContactVerification, "sourceContract")?.invitationWorkerIdAloneAcceptedForConfirmation === true,
+      verificationValuePersisted: recordAt(shareRecipientContactVerification, "sourceContract")?.verificationValuePersisted === true,
+      adjacentTests: asNumber(recordAt(recordAt(shareRecipientContactVerification, "verification"), "focusedAndAdjacent")?.tests),
+      browserTests: asNumber(recordAt(recordAt(shareRecipientContactVerification, "verification"), "recipientBrowser")?.tests),
+      liveMissingSessionStatus: asNumber(recordAt(shareRecipientContactVerification, "liveProbe")?.status),
+      liveRealRecipientVerificationProbe: asString(recordAt(shareRecipientContactVerification, "remainingBoundaries")?.liveRealRecipientVerificationProbe),
+      freshRescanRequired: recordAt(shareRecipientContactVerification, "remainingBoundaries")?.freshFullRepositorySecurityScanRequiredForCanonicalClosure === true,
+      recipientAckLiveDataApproval: asString(recordAt(shareRecipientContactVerification, "remainingBoundaries")?.recipientAckLiveDataApproval),
+      securityCompleteClaimAllowed: recordAt(shareRecipientContactVerification, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
+      exactSavedShareVerdict: asString(recordAt(shareRecipientContactVerification, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     mcpGenerationWorkBudgetSecurity: {
       artifact: ARTIFACTS.mcpGenerationWorkBudgetSecurity,

@@ -42,6 +42,7 @@ const ARTIFACTS = Object.freeze({
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "report.json"),
   agentChatDurableAdmission: path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"),
   mcpProviderAdmission: path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"),
+  shareRecipientContactVerification: path.join("evaluation", "share-recipient-contact-verification-2026-08-14", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
@@ -1601,6 +1602,34 @@ function mcpProviderAdmissionSummary(report) {
 }
 
 /** @param {unknown} report */
+function shareRecipientContactVerificationSummary(report) {
+  if (!isRecord(report)) return {};
+  const finding = isRecord(report.securityFinding) ? report.securityFinding : {};
+  const contract = isRecord(report.sourceContract) ? report.sourceContract : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const adjacent = isRecord(verification.focusedAndAdjacent) ? verification.focusedAndAdjacent : {};
+  const browser = isRecord(verification.recipientBrowser) ? verification.recipientBrowser : {};
+  const live = isRecord(report.liveProbe) ? report.liveProbe : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(report.productionCommit),
+    findingId: asString(finding.findingId),
+    workerIdAloneAccepted: asBoolean(contract.invitationWorkerIdAloneAcceptedForConfirmation),
+    verificationValuePersisted: asBoolean(contract.verificationValuePersisted),
+    adjacentTests: typeof adjacent.tests === "number" ? adjacent.tests : null,
+    browserTests: typeof browser.tests === "number" ? browser.tests : null,
+    liveMissingSessionStatus: typeof live.status === "number" ? live.status : null,
+    liveRealRecipientVerificationProbe: asString(remaining.liveRealRecipientVerificationProbe),
+    freshRescanRequired: asBoolean(remaining.freshFullRepositorySecurityScanRequiredForCanonicalClosure),
+    recipientAckLiveDataApproval: asString(remaining.recipientAckLiveDataApproval),
+    securityCompleteClaimAllowed: asBoolean(remaining.securityCompleteClaimAllowed),
+    exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
+  };
+}
+
+/** @param {unknown} report */
 function mcpGenerationWorkBudgetSecuritySummary(report) {
   if (!isRecord(report)) return {};
   const contract = isRecord(report.currentSourceContract) ? report.currentSourceContract : {};
@@ -2036,6 +2065,10 @@ export function buildNorthstarNextRunway(options) {
     options.rootDir,
     ARTIFACTS.mcpProviderAdmission,
   );
+  const shareRecipientContactVerification = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.shareRecipientContactVerification,
+  );
   const mcpGenerationWorkBudgetSecurity = readOptionalJson(
     options.rootDir,
     ARTIFACTS.mcpGenerationWorkBudgetSecurity,
@@ -2228,6 +2261,11 @@ export function buildNorthstarNextRunway(options) {
         state: "notice",
         reason: "deployed source fails provider-generating MCP tools closed until token-and-tenant-bound durable distributed admission is configured; valid authenticated runtime proof and a fresh rescan remain open",
       },
+      {
+        gate: "share_recipient_contact_verification_security",
+        state: "notice",
+        reason: "deployed source requires full snapshotted phone or email before worker-attributed confirmation; a real saved-session probe, fresh rescan, and live recipient ACK approval remain open",
+      },
     ],
     approvalGated: approvalGates(approvalRunway, shareRecipientAckApproval),
     launchReadiness: launchReadinessSummary(launch),
@@ -2289,6 +2327,7 @@ export function buildNorthstarNextRunway(options) {
     publicProviderAdmission: publicProviderAdmissionResult,
     agentChatDurableAdmission: agentChatDurableAdmissionSummary(agentChatDurableAdmission),
     mcpProviderAdmission: mcpProviderAdmissionSummary(mcpProviderAdmission),
+    shareRecipientContactVerification: shareRecipientContactVerificationSummary(shareRecipientContactVerification),
     mcpGenerationWorkBudgetSecurity: mcpGenerationWorkBudgetSecurityResult,
     learningExportRendererSecurity: learningExportRendererSecurityResult,
     hermesKnowledgeReviewAuthorityUi: hermesKnowledgeReviewAuthorityUiSummary(hermesKnowledgeReviewAuthorityUi),

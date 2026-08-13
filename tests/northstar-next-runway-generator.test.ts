@@ -571,6 +571,20 @@ type NextRunwayReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  shareRecipientContactVerification: {
+    verdict: string;
+    findingId: string;
+    workerIdAloneAccepted: boolean;
+    verificationValuePersisted: boolean;
+    adjacentTests: number | null;
+    browserTests: number | null;
+    liveMissingSessionStatus: number | null;
+    liveRealRecipientVerificationProbe: string;
+    freshRescanRequired: boolean;
+    recipientAckLiveDataApproval: string;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   mcpGenerationWorkBudgetSecurity: {
     verdict: string;
     sourceHead: string;
@@ -2048,6 +2062,28 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/share-recipient-contact-verification-2026-08-14/report.json", {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_SHARE_RECIPIENT_CONTACT_VERIFICATION_RESCAN_PENDING",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    securityFinding: { findingId: "csf_e6a120c87c57d3529757bbde" },
+    sourceContract: {
+      invitationWorkerIdAloneAcceptedForConfirmation: false,
+      verificationValuePersisted: false,
+    },
+    verification: {
+      focusedAndAdjacent: { tests: 124 },
+      recipientBrowser: { tests: 7 },
+    },
+    liveProbe: { status: 404 },
+    remainingBoundaries: {
+      liveRealRecipientVerificationProbe: "NOT_EXECUTED_NO_EXISTING_SAVED_SESSION",
+      freshFullRepositorySecurityScanRequiredForCanonicalClosure: true,
+      recipientAckLiveDataApproval: "APPROVAL_GATED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(root, "evaluation/document-authoring-pane-margin-2026-08-02/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
     productCommit: "fixture-sha",
@@ -2930,6 +2966,24 @@ describe("northstar next runway generator", () => {
     });
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "mcp_provider_admission_security",
+      state: "notice",
+    }));
+    expect(report.shareRecipientContactVerification).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_SHARE_RECIPIENT_CONTACT_VERIFICATION_RESCAN_PENDING",
+      findingId: "csf_e6a120c87c57d3529757bbde",
+      workerIdAloneAccepted: false,
+      verificationValuePersisted: false,
+      adjacentTests: 124,
+      browserTests: 7,
+      liveMissingSessionStatus: 404,
+      liveRealRecipientVerificationProbe: "NOT_EXECUTED_NO_EXISTING_SAVED_SESSION",
+      freshRescanRequired: true,
+      recipientAckLiveDataApproval: "APPROVAL_GATED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "share_recipient_contact_verification_security",
       state: "notice",
     }));
     expect(report.noticeState).toContainEqual(expect.objectContaining({
