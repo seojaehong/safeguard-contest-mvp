@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `aff7ddb00d07d1c14fc8ddf8dc3a7d96d84c3c18`
+Source HEAD: `85abd3058d523db84cf9d19d2bc5976422550deb`
 
-Production `/api/build-info`: `aff7ddb00d07d1c14fc8ddf8dc3a7d96d84c3c18`
+Production `/api/build-info`: `85abd3058d523db84cf9d19d2bc5976422550deb`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `aff7ddb00d07d1c14fc8ddf8dc3a7d96d84c3c18`
+Live rollup source head: `85abd3058d523db84cf9d19d2bc5976422550deb`
 
 Live rollup matches production: `true`
 
@@ -63,6 +63,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Repository security scan reconciliation is `PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS`. The immutable same-target scans and `2` fail-open contradictions remain preserved; zero-finding accepted=`false`. Corrected scan completed=`true`, id=`c4e9e2f1-7ce4-4313-a651-32205fca401f`, reportable=`14`, deferred=`9`, coverage=`partial`, security-complete=`false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current security remediation ledger is `NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_LEDGER_OPEN_BOUNDARIES`: deployed-source receipts `17/23`, unresolved `6`, approval-gated `3`, distributed-runtime open `3`, security-complete=`false`, exact saved Share `MISSING_EVIDENCE`.
 - Atomic database race remediation is approval-gated: `APPROVAL_REQUIRED_TRANSACTIONAL_DB_RACE_REMEDIATION_NO_MUTATION`, sealed findings still open `2`, approval required/performed `true/false`, migration authored `false`, DB mutation performed `false`, fresh scan required `true`, security-complete `false`, and exact saved Share remains `MISSING_EVIDENCE`.
+- Fresh live Documents/workspace Share route perception is `PASS_LIVE_PRODUCTION_SCOPED_DOCUMENTS_AND_WORKSPACE_SHARE_EXACT_SESSION_GAP`: measured rows Documents/Share `2/2`, desktop Share regions `3`, route split alone accepted `false`, DB mutation `false`, and exact saved user session reproduced/verdict `false/MISSING_EVIDENCE`.
 - MCP generation work-budget security is separately measured: `PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING`, POST body budget `98304` bytes, adjacent tests `77`, valid authenticated runtime probe pending=`true`, distributed activation pending=`true`, and fresh rescan required=`true`. This notice preserves the sealed finding and exact saved Share `MISSING_EVIDENCE`.
 - Live Hermes reviewer authority UI is measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI`, local/live viewport contracts `8/8` and `8/8`, with authority order `SIF -> KOSHA -> law -> organization_history -> site_history -> external_context`. Human review remains required and machine evidence does not replace it; no DB/provider/share/publication mutation is claimed. Exact saved Share remains `MISSING_EVIDENCE`, while LLM Wiki publication and Supabase RLS remain approval-gated.
 - Live supporting-document scenario grounding is measured separately: `PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT`, live cases `5/5`, supporting documents `30/30`, cross-scenario leakage `0`, and missingUnexpected `0`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains `MISSING_EVIDENCE`.

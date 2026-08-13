@@ -56,6 +56,7 @@ const EVIDENCE_PATHS = Object.freeze({
   shareSessionRevocationRemediation: path.join("evaluation", "share-session-revocation-remediation-2026-08-14", "report.json"),
   shareRecipientContactVerification: path.join("evaluation", "share-recipient-contact-verification-2026-08-14", "report.json"),
   securityAtomicDbRaceApprovalBoundary: path.join("evaluation", "security-atomic-db-race-approval-boundary-2026-08-14", "report.json"),
+  liveDocumentsShareRoutePerception: path.join("evaluation", "live-documents-share-route-perception-2026-08-14", "report.json"),
   agentChatDurableAdmission: path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"),
   mcpProviderAdmission: path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
@@ -4004,6 +4005,144 @@ function evaluateCurrentSecurityRemediationLedgerGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluateLiveDocumentsShareRoutePerceptionGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.liveDocumentsShareRoutePerception;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "live_documents_share_route_perception",
+      label: "Live Documents and workspace Share route perception",
+      state: "missing",
+      evidencePath,
+      detail: "Fresh live Documents and workspace Share route-perception evidence is missing or invalid.",
+      nextActions: ["Re-run the scoped 1440x723 and 390x723 live route geometry without creating a saved Share session."],
+    });
+  }
+
+  const sourceHead = readString(report.sourceHead);
+  const production = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const measurement = isRecord(report.measurement) ? report.measurement : {};
+  const documents = Array.isArray(measurement.documents) ? measurement.documents.filter(isRecord) : [];
+  const share = Array.isArray(measurement.workspaceShare) ? measurement.workspaceShare.filter(isRecord) : [];
+  const interpretation = isRecord(report.interpretation) ? report.interpretation : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const expectedCore = ["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"];
+
+  const documentRowPass = (row, width) => {
+    const viewport = isRecord(row.viewport) ? row.viewport : {};
+    const workbench = isRecord(row.workbench) ? row.workbench : {};
+    const core = Array.isArray(row.frontVisibleCoreLaunchers) ? row.frontVisibleCoreLaunchers.map(readString) : [];
+    return readNumber(viewport.width) === width
+      && readNumber(viewport.height) === 723
+      && readNumber(row.documentHeight) <= 728
+      && readNumber(row.bodyHeight) <= 728
+      && readNumber(row.bodyViewportRatio) <= 1.01
+      && readNumber(workbench.bottom) <= 723
+      && readNumber(row.frontVisibleCoreLauncherCount) === 3
+      && expectedCore.every((key) => core.includes(key))
+      && readNumber(row.frontVisibleSupportingLauncherCount) === 0
+      && row.horizontalOverflow === false
+      && readNumber(row.stickyOverlapCount) === 0
+      && readString(row.verdict) === "PASS"
+      && isRegularEvidenceFile(rootDir, row.screenshot);
+  };
+  const desktopDocument = documents.find((row) => readNumber(isRecord(row.viewport) ? row.viewport.width : null) === 1440);
+  const mobileDocument = documents.find((row) => readNumber(isRecord(row.viewport) ? row.viewport.width : null) === 390);
+  const documentsPass = documents.length === 2
+    && Boolean(desktopDocument && documentRowPass(desktopDocument, 1440))
+    && readNumber(desktopDocument?.uniqueDocumentKeyCount) === 12
+    && Boolean(mobileDocument && documentRowPass(mobileDocument, 390));
+
+  const desktopShare = share.find((row) => readNumber(isRecord(row.viewport) ? row.viewport.width : null) === 1440);
+  const mobileShare = share.find((row) => readNumber(isRecord(row.viewport) ? row.viewport.width : null) === 390);
+  const desktopRoot = isRecord(desktopShare?.root) ? desktopShare.root : {};
+  const mobileRoot = isRecord(mobileShare?.root) ? mobileShare.root : {};
+  const desktopColumns = Array.isArray(desktopShare?.gridTemplateColumns) ? desktopShare.gridTemplateColumns : [];
+  const mobileColumns = Array.isArray(mobileShare?.gridTemplateColumns) ? mobileShare.gridTemplateColumns : [];
+  const sharePass = share.length === 2
+    && readNumber(isRecord(desktopShare?.viewport) ? desktopShare.viewport.height : null) === 723
+    && readNumber(desktopShare?.documentHeight) <= 723
+    && readNumber(desktopShare?.bodyHeight) <= 723
+    && readNumber(desktopRoot.width) >= 1100
+    && readNumber(desktopRoot.bottom) <= 723
+    && desktopColumns.length === 3
+    && readNumber(desktopShare?.configurationWidth) >= 480
+    && readNumber(desktopShare?.messagePreviewWidth) >= 360
+    && readNumber(desktopShare?.desktopStatusRailWidth) >= 200
+    && readNumber(desktopShare?.distinctDesktopRegions) === 3
+    && desktopShare?.horizontalOverflow === false
+    && readString(desktopShare?.verdict) === "PASS_DESKTOP_THREE_ZONE"
+    && isRegularEvidenceFile(rootDir, desktopShare?.screenshot)
+    && readNumber(isRecord(mobileShare?.viewport) ? mobileShare.viewport.height : null) === 723
+    && readNumber(mobileShare?.documentHeight) <= 723
+    && readNumber(mobileShare?.bodyHeight) <= 723
+    && readNumber(mobileRoot.bottom) <= 723
+    && mobileColumns.length === 1
+    && readNumber(mobileShare?.messagePreviewWidth) >= 300
+    && readString(mobileShare?.desktopStatusRailDisplay) === "none"
+    && mobileShare?.horizontalOverflow === false
+    && readString(mobileShare?.verdict) === "PASS_MOBILE_STACK"
+    && isRegularEvidenceFile(rootDir, mobileShare?.screenshot);
+
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.shareSessionCreated === false
+    && mutation.providerDispatchCalled === false
+    && mutation.embeddingOrVectorMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_SCOPED_DOCUMENTS_AND_WORKSPACE_SHARE_EXACT_SESSION_GAP"
+    && sourceHead.length > 0
+    && sourceHead === readString(production.commitSha)
+    && isGitAncestor(rootDir, sourceHead)
+    && readString(production.branch) === "master"
+    && readString(production.environment) === "production"
+    && documentsPass
+    && sharePass
+    && interpretation.reportedDocumentsBodyHeight2070Reproduced === false
+    && interpretation.reportedWorkspaceShareDesktopMobileCardReproduced === false
+    && interpretation.routeSplitAloneAcceptedAsFix === false
+    && remaining.exactSavedUserSessionReproduced === false
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && remaining.fixtureOrWorkspaceShareAcceptedAsExactSavedProof === false
+    && remaining.concreteSavedSessionUrlProvided === false
+    && remaining.dbBackedSessionCreationApproved === false
+    && noMutation;
+
+  return gateResult({
+    id: "live_documents_share_route_perception",
+    label: "Live Documents and workspace Share route perception",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Fresh aligned production geometry proves the default /documents route is one viewport at 1440x723 and 390x723 with the core 3 visible, supporting 9 hidden, and zero sticky overlap; workspace Share is a 1180px three-zone desktop workbench and a separate 390px mobile stack. This scoped route proof does not claim every data-dependent state or exact saved /share/[sessionId], which remains MISSING_EVIDENCE, and route split alone is not accepted as the UX fix."
+      : `Live route perception verdict=${readString(report.verdict) || "missing"}, sourceLive=${sourceHead.length > 0 && sourceHead === readString(production.commitSha)}, documents=${documentsPass}, share=${sharePass}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Obtain a concrete existing production /share/[sessionId]?workerId=... URL for no-mutation exact saved-session geometry; do not substitute workspace Share or fixtures."]
+      : ["Restore aligned live 1440x723 and 390x723 route geometry, screenshots, no-mutation boundaries, route-split rejection, and exact saved Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @param {unknown} relativePath
+ */
+function isRegularEvidenceFile(rootDir, relativePath) {
+  const value = readString(relativePath);
+  if (!value) {
+    return false;
+  }
+  try {
+    return fs.statSync(path.join(rootDir, value)).isFile();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateCurrentRepositorySecurityRescanGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.currentRepositorySecurityRescan;
   const report = readJsonFile(rootDir, evidencePath);
@@ -7506,6 +7645,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateLiveDocumentSecondaryGroundingGate(rootDir),
     evaluateLiveDocumentSeedProfileIsolationGate(rootDir),
     evaluateUiDocumentsShareCockpitGate(rootDir),
+    evaluateLiveDocumentsShareRoutePerceptionGate(rootDir),
     evaluateDispatchStandaloneCockpitGate(rootDir),
     evaluateShareResultFixtureCockpitGate(rootDir),
     evaluateShareRecipientLongContentFixtureGate(rootDir),

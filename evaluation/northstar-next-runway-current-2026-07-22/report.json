@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-13T19:14:17.223Z",
+  "generatedAt": "2026-08-13T19:40:51.993Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "aff7ddb00d07d1c14fc8ddf8dc3a7d96d84c3c18",
-  "productionCommit": "aff7ddb00d07d1c14fc8ddf8dc3a7d96d84c3c18",
+  "sourceHead": "85abd3058d523db84cf9d19d2bc5976422550deb",
+  "productionCommit": "85abd3058d523db84cf9d19d2bc5976422550deb",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "aff7ddb00d07d1c14fc8ddf8dc3a7d96d84c3c18",
+    "commitSha": "85abd3058d523db84cf9d19d2bc5976422550deb",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-lav3ontav-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-45tj1alak-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "aff7ddb00d07d1c14fc8ddf8dc3a7d96d84c3c18",
-  "liveRollupLiveCommit": "aff7ddb00d07d1c14fc8ddf8dc3a7d96d84c3c18",
+  "liveExactEvidenceCommit": "85abd3058d523db84cf9d19d2bc5976422550deb",
+  "liveRollupLiveCommit": "85abd3058d523db84cf9d19d2bc5976422550deb",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -56,6 +56,7 @@
     "mcpProviderAdmission": "evaluation\\security-mcp-provider-admission-2026-08-14\\report.json",
     "shareRecipientContactVerification": "evaluation\\share-recipient-contact-verification-2026-08-14\\report.json",
     "securityAtomicDbRaceApprovalBoundary": "evaluation\\security-atomic-db-race-approval-boundary-2026-08-14\\report.json",
+    "liveDocumentsShareRoutePerception": "evaluation\\live-documents-share-route-perception-2026-08-14\\report.json",
     "publicJsonRequestBodyBudget": "evaluation\\public-json-request-body-budget-2026-08-11\\report.json",
     "improvementPhotoAnalysisBudget": "evaluation\\improvement-photo-analysis-budget-2026-08-11\\report.json",
     "publicProviderCancellation": "evaluation\\public-provider-cancellation-2026-08-11\\report.json",
@@ -872,6 +873,18 @@
     "freshRescanRequired": true,
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "liveDocumentsShareRoutePerception": {
+    "verdict": "PASS_LIVE_PRODUCTION_SCOPED_DOCUMENTS_AND_WORKSPACE_SHARE_EXACT_SESSION_GAP",
+    "sourceHead": "85abd3058d523db84cf9d19d2bc5976422550deb",
+    "productionCommit": "85abd3058d523db84cf9d19d2bc5976422550deb",
+    "documentsRows": 2,
+    "workspaceShareRows": 2,
+    "desktopShareRegions": 3,
+    "routeSplitAloneAcceptedAsFix": false,
+    "exactSavedUserSessionReproduced": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "dbMutationPerformed": false
   },
   "mcpGenerationWorkBudgetSecurity": {
     "verdict": "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",

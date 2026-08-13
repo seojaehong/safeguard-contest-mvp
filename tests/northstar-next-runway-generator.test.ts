@@ -598,6 +598,18 @@ type NextRunwayReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  liveDocumentsShareRoutePerception: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    documentsRows: number;
+    workspaceShareRows: number;
+    desktopShareRegions: number | null;
+    routeSplitAloneAcceptedAsFix: boolean;
+    exactSavedUserSessionReproduced: boolean;
+    exactSavedShareVerdict: string;
+    dbMutationPerformed: boolean;
+  };
   mcpGenerationWorkBudgetSecurity: {
     verdict: string;
     sourceHead: string;
@@ -2113,6 +2125,18 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/live-documents-share-route-perception-2026-08-14/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_SCOPED_DOCUMENTS_AND_WORKSPACE_SHARE_EXACT_SESSION_GAP",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha" },
+    measurement: {
+      documents: [{ viewport: { width: 1440, height: 723 } }, { viewport: { width: 390, height: 723 } }],
+      workspaceShare: [{ viewport: { width: 1440, height: 723 }, distinctDesktopRegions: 3 }, { viewport: { width: 390, height: 723 } }],
+    },
+    interpretation: { routeSplitAloneAcceptedAsFix: false },
+    remainingBoundaries: { exactSavedUserSessionReproduced: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
+    mutationBoundary: { dbMutationPerformed: false },
+  });
   writeJson(root, "evaluation/document-authoring-pane-margin-2026-08-02/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
     productCommit: "fixture-sha",
@@ -3033,6 +3057,16 @@ describe("northstar next runway generator", () => {
       gate: "security_atomic_db_race_remediation",
       state: "approval_gated",
     }));
+    expect(report.liveDocumentsShareRoutePerception).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_SCOPED_DOCUMENTS_AND_WORKSPACE_SHARE_EXACT_SESSION_GAP",
+      documentsRows: 2,
+      workspaceShareRows: 2,
+      desktopShareRegions: 3,
+      routeSplitAloneAcceptedAsFix: false,
+      exactSavedUserSessionReproduced: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      dbMutationPerformed: false,
+    });
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "public_generation_admission_security",
       state: "notice",

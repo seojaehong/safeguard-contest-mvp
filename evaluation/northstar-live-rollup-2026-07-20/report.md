@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-13T19:13:52.012Z
-Source HEAD at generation: aff7ddb00d07d1c14fc8ddf8dc3a7d96d84c3c18
-Live commit at generation: aff7ddb00d07d1c14fc8ddf8dc3a7d96d84c3c18
+Generated at: 2026-08-13T19:40:35.519Z
+Source HEAD at generation: 85abd3058d523db84cf9d19d2bc5976422550deb
+Live commit at generation: 85abd3058d523db84cf9d19d2bc5976422550deb
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -133,6 +133,14 @@ Overall: `northstar_open_approval_gated`
 - Migration authored: false; DB mutation performed: false
 - Fresh scan required: true; security-complete=false
 - Exact saved Share: MISSING_EVIDENCE
+
+## Live Documents / Workspace Share Route Perception
+
+- Verdict: `PASS_LIVE_PRODUCTION_SCOPED_DOCUMENTS_AND_WORKSPACE_SHARE_EXACT_SESSION_GAP`
+- Source / production: `85abd3058d523db84cf9d19d2bc5976422550deb` / `85abd3058d523db84cf9d19d2bc5976422550deb`
+- Measured rows Documents/Share: 2/2; desktop Share regions: 3
+- Route split alone accepted: false; DB mutation: false
+- Exact saved session reproduced: false; verdict: MISSING_EVIDENCE
 
 ## Security Resource Remediation
 - Verdict: `PASS_LIVE_PRODUCTION_SECURITY_RESOURCE_REMEDIATION`
@@ -283,6 +291,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_secondary_grounding | proven | evaluation\live-document-secondary-grounding-2026-07-25\report.json |
 | live_document_seed_profile_isolation | proven | evaluation\live-document-seed-profile-isolation-2026-07-25\report.json |
 | ui_documents_share_cockpit | proven | evaluation\document-risk-row-mobile-label-2026-08-02\after-live\report.json |
+| live_documents_share_route_perception | proven | evaluation\live-documents-share-route-perception-2026-08-14\report.json |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-viewport-2026-07-28\report.json |
 | share_result_fixture_cockpit | proven | evaluation\share-result-drilldown-2026-07-21\report.json |
 | share_recipient_long_content_fixture | proven | evaluation\share-recipient-long-content-fixture-2026-07-25\report.json |
@@ -300,7 +309,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | ancestor | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
 | live_document_quality_matrix | ancestor | ancestor_of_head | evaluation\live-document-quality-matrix-2026-07-24\report.json |
@@ -325,6 +334,7 @@ Overall: `northstar_open_approval_gated`
 | mcp_provider_admission_security | ancestor | ancestor_of_head | evaluation\security-mcp-provider-admission-2026-08-14\report.json |
 | share_recipient_contact_verification_security | ancestor | ancestor_of_head | evaluation\share-recipient-contact-verification-2026-08-14\report.json |
 | security_atomic_db_race_remediation | ancestor | missing | evaluation\security-atomic-db-race-approval-boundary-2026-08-14\report.json |
+| live_documents_share_route_perception | exact | matches_live | evaluation\live-documents-share-route-perception-2026-08-14\report.json |
 | public_json_request_body_budget | ancestor | ancestor_of_head | evaluation\public-json-request-body-budget-2026-08-11\report.json |
 | improvement_photo_analysis_budget | ancestor | ancestor_of_head | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
 | public_provider_cancellation | ancestor | ancestor_of_head | evaluation\public-provider-cancellation-2026-08-11\report.json |

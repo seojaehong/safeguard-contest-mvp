@@ -40,6 +40,7 @@ const ARTIFACTS = Object.freeze({
   mcpProviderAdmission: path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"),
   shareRecipientContactVerification: path.join("evaluation", "share-recipient-contact-verification-2026-08-14", "report.json"),
   securityAtomicDbRaceApprovalBoundary: path.join("evaluation", "security-atomic-db-race-approval-boundary-2026-08-14", "report.json"),
+  liveDocumentsShareRoutePerception: path.join("evaluation", "live-documents-share-route-perception-2026-08-14", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
@@ -337,6 +338,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const mcpProviderAdmission = tryReadJson(rootDir, ARTIFACTS.mcpProviderAdmission);
   const shareRecipientContactVerification = tryReadJson(rootDir, ARTIFACTS.shareRecipientContactVerification);
   const securityAtomicDbRaceApprovalBoundary = tryReadJson(rootDir, ARTIFACTS.securityAtomicDbRaceApprovalBoundary);
+  const liveDocumentsShareRoutePerception = tryReadJson(rootDir, ARTIFACTS.liveDocumentsShareRoutePerception);
   const publicJsonRequestBodyBudget = tryReadJson(rootDir, ARTIFACTS.publicJsonRequestBodyBudget);
   const improvementPhotoAnalysisBudget = tryReadJson(rootDir, ARTIFACTS.improvementPhotoAnalysisBudget);
   const publicProviderCancellation = tryReadJson(rootDir, ARTIFACTS.publicProviderCancellation);
@@ -444,6 +446,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "mcp_provider_admission_security", ARTIFACTS.mcpProviderAdmission, mcpProviderAdmission),
     evidenceStatus(rootDir, currentHead, liveCommit, "share_recipient_contact_verification_security", ARTIFACTS.shareRecipientContactVerification, shareRecipientContactVerification),
     evidenceStatus(rootDir, currentHead, liveCommit, "security_atomic_db_race_remediation", ARTIFACTS.securityAtomicDbRaceApprovalBoundary, securityAtomicDbRaceApprovalBoundary),
+    evidenceStatus(rootDir, currentHead, liveCommit, "live_documents_share_route_perception", ARTIFACTS.liveDocumentsShareRoutePerception, liveDocumentsShareRoutePerception),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_json_request_body_budget", ARTIFACTS.publicJsonRequestBodyBudget, publicJsonRequestBodyBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "improvement_photo_analysis_budget", ARTIFACTS.improvementPhotoAnalysisBudget, improvementPhotoAnalysisBudget),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_cancellation", ARTIFACTS.publicProviderCancellation, publicProviderCancellation),
@@ -860,6 +863,27 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       freshRescanRequired: recordAt(securityAtomicDbRaceApprovalBoundary, "remainingBoundaries")?.freshFullRepositorySecurityScanRequiredAfterRemediation === true,
       securityCompleteClaimAllowed: recordAt(securityAtomicDbRaceApprovalBoundary, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
       exactSavedShareVerdict: asString(recordAt(securityAtomicDbRaceApprovalBoundary, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    liveDocumentsShareRoutePerception: {
+      artifact: ARTIFACTS.liveDocumentsShareRoutePerception,
+      verdict: isRecord(liveDocumentsShareRoutePerception) ? asString(liveDocumentsShareRoutePerception.verdict) : "missing",
+      sourceHead: isRecord(liveDocumentsShareRoutePerception) ? asString(liveDocumentsShareRoutePerception.sourceHead) : "",
+      productionCommit: asString(recordAt(liveDocumentsShareRoutePerception, "productionBuild")?.commitSha),
+      documentsRows: Array.isArray(recordAt(liveDocumentsShareRoutePerception, "measurement")?.documents)
+        ? recordAt(liveDocumentsShareRoutePerception, "measurement")?.documents.length
+        : 0,
+      workspaceShareRows: Array.isArray(recordAt(liveDocumentsShareRoutePerception, "measurement")?.workspaceShare)
+        ? recordAt(liveDocumentsShareRoutePerception, "measurement")?.workspaceShare.length
+        : 0,
+      desktopShareRegions: asNumber(
+        Array.isArray(recordAt(liveDocumentsShareRoutePerception, "measurement")?.workspaceShare)
+          ? recordAt(liveDocumentsShareRoutePerception, "measurement")?.workspaceShare.find((row) => isRecord(row) && asNumber(recordAt(row, "viewport")?.width) === 1440)?.distinctDesktopRegions
+          : null,
+      ),
+      routeSplitAloneAcceptedAsFix: recordAt(liveDocumentsShareRoutePerception, "interpretation")?.routeSplitAloneAcceptedAsFix === true,
+      exactSavedUserSessionReproduced: recordAt(liveDocumentsShareRoutePerception, "remainingBoundaries")?.exactSavedUserSessionReproduced === true,
+      exactSavedShareVerdict: asString(recordAt(liveDocumentsShareRoutePerception, "remainingBoundaries")?.exactSavedShareVerdict),
+      dbMutationPerformed: recordAt(liveDocumentsShareRoutePerception, "mutationBoundary")?.dbMutationPerformed === true,
     },
     mcpGenerationWorkBudgetSecurity: {
       artifact: ARTIFACTS.mcpGenerationWorkBudgetSecurity,
@@ -1364,6 +1388,14 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Migration authored: ${rollup.securityAtomicDbRaceRemediation.migrationAuthored}; DB mutation performed: ${rollup.securityAtomicDbRaceRemediation.dbMutationPerformed}`,
     `- Fresh scan required: ${rollup.securityAtomicDbRaceRemediation.freshRescanRequired}; security-complete=${rollup.securityAtomicDbRaceRemediation.securityCompleteClaimAllowed}`,
     `- Exact saved Share: ${rollup.securityAtomicDbRaceRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "",
+    "## Live Documents / Workspace Share Route Perception",
+    "",
+    `- Verdict: \`${rollup.liveDocumentsShareRoutePerception.verdict}\``,
+    `- Source / production: \`${rollup.liveDocumentsShareRoutePerception.sourceHead || "missing"}\` / \`${rollup.liveDocumentsShareRoutePerception.productionCommit || "missing"}\``,
+    `- Measured rows Documents/Share: ${rollup.liveDocumentsShareRoutePerception.documentsRows}/${rollup.liveDocumentsShareRoutePerception.workspaceShareRows}; desktop Share regions: ${rollup.liveDocumentsShareRoutePerception.desktopShareRegions ?? "unknown"}`,
+    `- Route split alone accepted: ${rollup.liveDocumentsShareRoutePerception.routeSplitAloneAcceptedAsFix}; DB mutation: ${rollup.liveDocumentsShareRoutePerception.dbMutationPerformed}`,
+    `- Exact saved session reproduced: ${rollup.liveDocumentsShareRoutePerception.exactSavedUserSessionReproduced}; verdict: ${rollup.liveDocumentsShareRoutePerception.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "",
     "## Security Resource Remediation",
     `- Verdict: \`${rollup.securityResourceRemediation.verdict}\``,

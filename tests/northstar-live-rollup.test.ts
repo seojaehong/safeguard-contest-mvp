@@ -380,6 +380,18 @@ type RollupReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  liveDocumentsShareRoutePerception: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    documentsRows: number;
+    workspaceShareRows: number;
+    desktopShareRegions: number | null;
+    routeSplitAloneAcceptedAsFix: boolean;
+    exactSavedUserSessionReproduced: boolean;
+    exactSavedShareVerdict: string;
+    dbMutationPerformed: boolean;
+  };
   mcpGenerationWorkBudgetSecurity: {
     verdict: string;
     sourceHead: string;
@@ -501,6 +513,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "live_document_secondary_grounding", state: "proven", evidencePath: "evaluation/live-document-secondary-grounding-2026-07-25/report.json", detail: "all 30 supporting documents passed scenario grounding" },
       { id: "live_document_seed_profile_isolation", state: "proven", evidencePath: "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", detail: "all 60 documents passed seed-profile isolation" },
       { id: "security_atomic_db_race_remediation", state: "approval_gated", evidencePath: "evaluation/security-atomic-db-race-approval-boundary-2026-08-14/report.json", detail: "two sealed findings require transactional DB approval" },
+      { id: "live_documents_share_route_perception", state: "proven", evidencePath: "evaluation/live-documents-share-route-perception-2026-08-14/report.json", detail: "fresh scoped live route geometry with exact saved Share gap" },
       { id: "provider_dispatch_persistence", state: "approval_gated", evidencePath: "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json", detail: "preview only" },
       { id: "supabase_rls_launch_isolation", state: "approval_gated", evidencePath: "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", detail: "approval required" },
       { id: "llm_wiki_publication", state: "approval_gated", evidencePath: "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", detail: "approval required" },
@@ -1294,6 +1307,18 @@ function createFixtureRoot(): { root: string; head: string } {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/live-documents-share-route-perception-2026-08-14/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_SCOPED_DOCUMENTS_AND_WORKSPACE_SHARE_EXACT_SESSION_GAP",
+    sourceHead: "TO_FILL",
+    productionBuild: { commitSha: "TO_FILL" },
+    measurement: {
+      documents: [{ viewport: { width: 1440, height: 723 } }, { viewport: { width: 390, height: 723 } }],
+      workspaceShare: [{ viewport: { width: 1440, height: 723 }, distinctDesktopRegions: 3 }, { viewport: { width: 390, height: 723 } }],
+    },
+    interpretation: { routeSplitAloneAcceptedAsFix: false },
+    remainingBoundaries: { exactSavedUserSessionReproduced: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
+    mutationBoundary: { dbMutationPerformed: false },
+  });
   writeJson(root, "evaluation/document-authoring-pane-margin-2026-08-02/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_ACTION_PANE_MARGIN",
     productCommit: "TO_FILL",
@@ -1344,6 +1369,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/security-mcp-provider-admission-2026-08-14/report.json",
     "evaluation/share-recipient-contact-verification-2026-08-14/report.json",
     "evaluation/security-atomic-db-race-approval-boundary-2026-08-14/report.json",
+    "evaluation/live-documents-share-route-perception-2026-08-14/report.json",
     "evaluation/learning-export-renderer-security-2026-08-02/report.json",
     "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
@@ -1759,6 +1785,17 @@ describe("northstar live rollup", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.evidence.find((item) => item.id === "security_atomic_db_race_remediation")?.sourceStatus).toBe("ancestor");
+    expect(report.liveDocumentsShareRoutePerception).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_SCOPED_DOCUMENTS_AND_WORKSPACE_SHARE_EXACT_SESSION_GAP",
+      documentsRows: 2,
+      workspaceShareRows: 2,
+      desktopShareRegions: 3,
+      routeSplitAloneAcceptedAsFix: false,
+      exactSavedUserSessionReproduced: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      dbMutationPerformed: false,
+    });
+    expect(report.evidence.find((item) => item.id === "live_documents_share_route_perception")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "public_generation_admission_security")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "public_search_distributed_rate_limit_readiness")?.sourceStatus).toBe("ancestor");
     expect(report.learningExportRendererSecurity).toMatchObject({

@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "safeclaw-live-documents-share-route-perception/v1",
+  "generatedAt": "2026-08-14T04:20:25.8248863+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_SCOPED_DOCUMENTS_AND_WORKSPACE_SHARE_EXACT_SESSION_GAP",
+  "sourceHead": "85abd3058d523db84cf9d19d2bc5976422550deb",
+  "productionBuild": {
+    "commitSha": "85abd3058d523db84cf9d19d2bc5976422550deb",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-45tj1alak-seojaehongs-projects.vercel.app"
+  },
+  "measurement": {
+    "tool": "Playwright MCP browser",
+    "baseUrl": "https://www.safeclaw.kr",
+    "cacheBust": "85abd305",
+    "documents": [
+      {
+        "route": "/documents?theme=day",
+        "viewport": { "width": 1440, "height": 723 },
+        "documentHeight": 723,
+        "bodyHeight": 723,
+        "bodyViewportRatio": 1.0,
+        "workbench": { "left": 252, "top": 204, "right": 1424, "bottom": 652, "width": 1172, "height": 448 },
+        "uniqueDocumentKeyCount": 12,
+        "frontVisibleCoreLauncherCount": 3,
+        "frontVisibleCoreLaunchers": ["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"],
+        "frontVisibleSupportingLauncherCount": 0,
+        "horizontalOverflow": false,
+        "stickyOverlapCount": 0,
+        "screenshot": "evaluation/live-documents-share-route-perception-2026-08-14/documents-desktop-1440x723.png",
+        "verdict": "PASS"
+      },
+      {
+        "route": "/documents?theme=day",
+        "viewport": { "width": 390, "height": 723 },
+        "documentHeight": 723,
+        "bodyHeight": 723,
+        "bodyViewportRatio": 1.0,
+        "workbench": { "left": 12, "top": 173, "right": 378, "bottom": 669, "width": 366, "height": 495 },
+        "selectedEditor": { "left": 45, "top": 232, "right": 330, "bottom": 902, "width": 285, "height": 670 },
+        "frontVisibleCoreLauncherCount": 3,
+        "frontVisibleCoreLaunchers": ["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"],
+        "frontVisibleSupportingLauncherCount": 0,
+        "horizontalOverflow": false,
+        "stickyOverlapCount": 0,
+        "containmentNote": "The selected editor extends inside the bounded workbench flow while the page body remains one viewport; this is not a 2070px body stack.",
+        "screenshot": "evaluation/live-documents-share-route-perception-2026-08-14/documents-mobile-390x723.png",
+        "verdict": "PASS"
+      }
+    ],
+    "workspaceShare": [
+      {
+        "route": "/workspace share stage",
+        "viewport": { "width": 1440, "height": 723 },
+        "documentHeight": 723,
+        "bodyHeight": 723,
+        "root": { "left": 130, "top": 193, "right": 1310, "bottom": 715, "width": 1180, "height": 521 },
+        "gridTemplateColumns": [508.625, 399.635, 227.073],
+        "configurationWidth": 509,
+        "messagePreviewWidth": 400,
+        "desktopStatusRailWidth": 227,
+        "distinctDesktopRegions": 3,
+        "horizontalOverflow": false,
+        "screenshot": "evaluation/live-documents-share-route-perception-2026-08-14/workspace-share-desktop-1440x723.png",
+        "verdict": "PASS_DESKTOP_THREE_ZONE"
+      },
+      {
+        "route": "/workspace share stage",
+        "viewport": { "width": 390, "height": 723 },
+        "documentHeight": 723,
+        "bodyHeight": 723,
+        "root": { "left": 27, "top": 273, "right": 363, "bottom": 704, "width": 337, "height": 431 },
+        "gridTemplateColumns": [304],
+        "messagePreviewWidth": 304,
+        "desktopStatusRailDisplay": "none",
+        "horizontalOverflow": false,
+        "screenshot": "evaluation/live-documents-share-route-perception-2026-08-14/workspace-share-mobile-390x723.png",
+        "verdict": "PASS_MOBILE_STACK"
+      }
+    ]
+  },
+  "interpretation": {
+    "reportedDocumentsBodyHeight2070Reproduced": false,
+    "reportedWorkspaceShareDesktopMobileCardReproduced": false,
+    "currentDefaultRoutesAreStaleBundleCandidates": false,
+    "possibleRemainingCauses": [
+      "the user is viewing an older cached bundle",
+      "the user is viewing a different route or state",
+      "the user is viewing a data-dependent exact saved Share session"
+    ],
+    "routeSplitAloneAcceptedAsFix": false,
+    "acceptedStructure": "three-step route shell plus first-viewport cockpit plus bounded selected detail and internal scroll"
+  },
+  "remainingBoundaries": {
+    "exactSavedUserSessionReproduced": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "fixtureOrWorkspaceShareAcceptedAsExactSavedProof": false,
+    "concreteSavedSessionUrlProvided": false,
+    "dbBackedSessionCreationApproved": false
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  }
+}

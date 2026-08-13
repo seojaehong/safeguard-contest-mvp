@@ -2609,6 +2609,69 @@ function createFixtureRoot(): string {
       securityCompleteClaimAllowed: false,
     },
   });
+  const routePerceptionDir = path.join("evaluation", "live-documents-share-route-perception-2026-08-14");
+  const screenshots = [
+    "documents-desktop-1440x723.png",
+    "documents-mobile-390x723.png",
+    "workspace-share-desktop-1440x723.png",
+    "workspace-share-mobile-390x723.png",
+  ];
+  for (const screenshot of screenshots) {
+    writeText(rootDir, path.join(routePerceptionDir, screenshot), "fixture image");
+  }
+  writeJson(rootDir, path.join(routePerceptionDir, "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_SCOPED_DOCUMENTS_AND_WORKSPACE_SHARE_EXACT_SESSION_GAP",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", branch: "master", environment: "production" },
+    measurement: {
+      documents: [
+        {
+          route: "/documents?theme=day", viewport: { width: 1440, height: 723 }, documentHeight: 723, bodyHeight: 723,
+          bodyViewportRatio: 1, workbench: { bottom: 652 }, uniqueDocumentKeyCount: 12,
+          frontVisibleCoreLauncherCount: 3, frontVisibleCoreLaunchers: ["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"],
+          frontVisibleSupportingLauncherCount: 0, horizontalOverflow: false, stickyOverlapCount: 0,
+          screenshot: path.join(routePerceptionDir, screenshots[0]), verdict: "PASS",
+        },
+        {
+          route: "/documents?theme=day", viewport: { width: 390, height: 723 }, documentHeight: 723, bodyHeight: 723,
+          bodyViewportRatio: 1, workbench: { bottom: 669 }, frontVisibleCoreLauncherCount: 3,
+          frontVisibleCoreLaunchers: ["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"],
+          frontVisibleSupportingLauncherCount: 0, horizontalOverflow: false, stickyOverlapCount: 0,
+          screenshot: path.join(routePerceptionDir, screenshots[1]), verdict: "PASS",
+        },
+      ],
+      workspaceShare: [
+        {
+          route: "/workspace share stage", viewport: { width: 1440, height: 723 }, documentHeight: 723, bodyHeight: 723,
+          root: { width: 1180, bottom: 715 }, gridTemplateColumns: [509, 400, 227], configurationWidth: 509,
+          messagePreviewWidth: 400, desktopStatusRailWidth: 227, distinctDesktopRegions: 3, horizontalOverflow: false,
+          screenshot: path.join(routePerceptionDir, screenshots[2]), verdict: "PASS_DESKTOP_THREE_ZONE",
+        },
+        {
+          route: "/workspace share stage", viewport: { width: 390, height: 723 }, documentHeight: 723, bodyHeight: 723,
+          root: { width: 337, bottom: 704 }, gridTemplateColumns: [304], messagePreviewWidth: 304,
+          desktopStatusRailDisplay: "none", horizontalOverflow: false,
+          screenshot: path.join(routePerceptionDir, screenshots[3]), verdict: "PASS_MOBILE_STACK",
+        },
+      ],
+    },
+    interpretation: {
+      reportedDocumentsBodyHeight2070Reproduced: false,
+      reportedWorkspaceShareDesktopMobileCardReproduced: false,
+      routeSplitAloneAcceptedAsFix: false,
+    },
+    remainingBoundaries: {
+      exactSavedUserSessionReproduced: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      fixtureOrWorkspaceShareAcceptedAsExactSavedProof: false,
+      concreteSavedSessionUrlProvided: false,
+      dbBackedSessionCreationApproved: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false, shareSessionCreated: false, providerDispatchCalled: false,
+      embeddingOrVectorMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "canonical", "scan-manifest.json"), {});
   writeJson(rootDir, path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "canonical", "findings.json"), {});
   writeJson(rootDir, path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "canonical", "coverage.json"), {});
@@ -4492,6 +4555,13 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("/share/[sessionId] recipient cockpit geometry is live-proven");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("invited recipient fixture, exact saved/generated /share/[sessionId], and manager/workspace share-result");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).not.toContain("Promote the Share staged rail");
+    expect(audit.gates.find((gate) => gate.id === "live_documents_share_route_perception")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "live-documents-share-route-perception-2026-08-14", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_documents_share_route_perception")?.detail).toContain("1180px three-zone desktop workbench");
+    expect(audit.gates.find((gate) => gate.id === "live_documents_share_route_perception")?.detail).toContain("exact saved /share/[sessionId]");
+    expect(audit.gates.find((gate) => gate.id === "live_documents_share_route_perception")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.evidencePath).toBe(
       path.join("evaluation", "dispatch-standalone-viewport-2026-07-28", "report.json"),
@@ -5878,6 +5948,35 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
     expect(gate?.state).toBe("contradicted");
     expect(gate?.evidencePath).toBe(path.join("evaluation", "documents-cockpit-workbench-geometry-2026-07-22", "report.json"));
     expect(gate?.detail).toContain("12/3/9/0 default document exposure budget");
+  });
+
+  it("fails live route perception closed when the reported long page and mobile-like desktop share return", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "live-documents-share-route-perception-2026-08-14", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      measurement: { documents: Array<{ viewport: { width: number }; bodyHeight: number }>; workspaceShare: Array<{ viewport: { width: number }; distinctDesktopRegions?: number }> };
+      interpretation: { reportedDocumentsBodyHeight2070Reproduced: boolean; reportedWorkspaceShareDesktopMobileCardReproduced: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+      mutationBoundary: { dbMutationPerformed: boolean };
+    };
+    const desktopDocument = report.measurement.documents.find((row) => row.viewport.width === 1440);
+    const desktopShare = report.measurement.workspaceShare.find((row) => row.viewport.width === 1440);
+    if (!desktopDocument || !desktopShare) throw new Error("route perception fixture rows missing");
+    desktopDocument.bodyHeight = 2070;
+    desktopShare.distinctDesktopRegions = 1;
+    report.interpretation.reportedDocumentsBodyHeight2070Reproduced = true;
+    report.interpretation.reportedWorkspaceShareDesktopMobileCardReproduced = true;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    report.mutationBoundary.dbMutationPerformed = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-14T00:00:00.000Z", sourceSha: "fixture-sha" });
+    const gate = audit.gates.find((item) => item.id === "live_documents_share_route_perception");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.detail).toContain("documents=false");
+    expect(gate?.detail).toContain("share=false");
+    expect(gate?.detail).toContain("exactShare=PASS");
   });
 
   it("contradicts the UI gate when one document stacks two authoring cockpits", async () => {

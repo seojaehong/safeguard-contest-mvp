@@ -44,6 +44,7 @@ const ARTIFACTS = Object.freeze({
   mcpProviderAdmission: path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"),
   shareRecipientContactVerification: path.join("evaluation", "share-recipient-contact-verification-2026-08-14", "report.json"),
   securityAtomicDbRaceApprovalBoundary: path.join("evaluation", "security-atomic-db-race-approval-boundary-2026-08-14", "report.json"),
+  liveDocumentsShareRoutePerception: path.join("evaluation", "live-documents-share-route-perception-2026-08-14", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
@@ -1655,6 +1656,30 @@ function securityAtomicDbRaceRemediationSummary(report) {
 }
 
 /** @param {unknown} report */
+function liveDocumentsShareRoutePerceptionSummary(report) {
+  if (!isRecord(report)) return {};
+  const measurement = isRecord(report.measurement) ? report.measurement : {};
+  const documents = Array.isArray(measurement.documents) ? measurement.documents.filter(isRecord) : [];
+  const share = Array.isArray(measurement.workspaceShare) ? measurement.workspaceShare.filter(isRecord) : [];
+  const desktopShare = share.find((row) => isRecord(row.viewport) && row.viewport.width === 1440);
+  const interpretation = isRecord(report.interpretation) ? report.interpretation : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(isRecord(report.productionBuild) ? report.productionBuild.commitSha : ""),
+    documentsRows: documents.length,
+    workspaceShareRows: share.length,
+    desktopShareRegions: typeof desktopShare?.distinctDesktopRegions === "number" ? desktopShare.distinctDesktopRegions : null,
+    routeSplitAloneAcceptedAsFix: asBoolean(interpretation.routeSplitAloneAcceptedAsFix),
+    exactSavedUserSessionReproduced: asBoolean(remaining.exactSavedUserSessionReproduced),
+    exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
+    dbMutationPerformed: asBoolean(mutation.dbMutationPerformed),
+  };
+}
+
+/** @param {unknown} report */
 function mcpGenerationWorkBudgetSecuritySummary(report) {
   if (!isRecord(report)) return {};
   const contract = isRecord(report.currentSourceContract) ? report.currentSourceContract : {};
@@ -2098,6 +2123,7 @@ export function buildNorthstarNextRunway(options) {
     options.rootDir,
     ARTIFACTS.securityAtomicDbRaceApprovalBoundary,
   );
+  const liveDocumentsShareRoutePerception = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentsShareRoutePerception);
   const mcpGenerationWorkBudgetSecurity = readOptionalJson(
     options.rootDir,
     ARTIFACTS.mcpGenerationWorkBudgetSecurity,
@@ -2376,6 +2402,7 @@ export function buildNorthstarNextRunway(options) {
     mcpProviderAdmission: mcpProviderAdmissionSummary(mcpProviderAdmission),
     shareRecipientContactVerification: shareRecipientContactVerificationSummary(shareRecipientContactVerification),
     securityAtomicDbRaceRemediation: securityAtomicDbRaceRemediationSummary(securityAtomicDbRaceApprovalBoundary),
+    liveDocumentsShareRoutePerception: liveDocumentsShareRoutePerceptionSummary(liveDocumentsShareRoutePerception),
     mcpGenerationWorkBudgetSecurity: mcpGenerationWorkBudgetSecurityResult,
     learningExportRendererSecurity: learningExportRendererSecurityResult,
     hermesKnowledgeReviewAuthorityUi: hermesKnowledgeReviewAuthorityUiSummary(hermesKnowledgeReviewAuthorityUi),
@@ -2515,6 +2542,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Repository security scan reconciliation is \`${report.repositorySecurityScanReconciliation.verdict || "missing"}\`. The immutable same-target scans and \`${report.repositorySecurityScanReconciliation.receiptContradictionCount ?? "unknown"}\` fail-open contradictions remain preserved; zero-finding accepted=\`${report.repositorySecurityScanReconciliation.zeroFindingClaimAccepted === true}\`. Corrected scan completed=\`${report.repositorySecurityScanReconciliation.correctedFreshScanCompleted === true}\`, id=\`${report.repositorySecurityScanReconciliation.correctedScanId || "missing"}\`, reportable=\`${report.repositorySecurityScanReconciliation.correctedReportableFindingCount ?? "unknown"}\`, deferred=\`${report.repositorySecurityScanReconciliation.correctedDeferredCandidateCount ?? "unknown"}\`, coverage=\`${report.repositorySecurityScanReconciliation.correctedCoverageCompleteness || "unknown"}\`, security-complete=\`${report.repositorySecurityScanReconciliation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.repositorySecurityScanReconciliation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Current security remediation ledger is \`${report.currentSecurityRemediationLedger.verdict || "missing"}\`: deployed-source receipts \`${report.currentSecurityRemediationLedger.deployedSourceRemediationCount ?? "unknown"}/${report.currentSecurityRemediationLedger.totalFindings ?? "unknown"}\`, unresolved \`${report.currentSecurityRemediationLedger.unresolvedCount ?? "unknown"}\`, approval-gated \`${report.currentSecurityRemediationLedger.approvalGatedCount ?? "unknown"}\`, distributed-runtime open \`${report.currentSecurityRemediationLedger.distributedRuntimeOpenCount ?? "unknown"}\`, security-complete=\`${report.currentSecurityRemediationLedger.securityCompleteClaimAllowed === true}\`, exact saved Share \`${report.currentSecurityRemediationLedger.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Atomic database race remediation is approval-gated: \`${report.securityAtomicDbRaceRemediation.verdict || "missing"}\`, sealed findings still open \`${report.securityAtomicDbRaceRemediation.openFindingCount ?? "unknown"}\`, approval required/performed \`${report.securityAtomicDbRaceRemediation.approvalRequired === true}/${report.securityAtomicDbRaceRemediation.approvalPerformed === true}\`, migration authored \`${report.securityAtomicDbRaceRemediation.migrationAuthored === true}\`, DB mutation performed \`${report.securityAtomicDbRaceRemediation.dbMutationPerformed === true}\`, fresh scan required \`${report.securityAtomicDbRaceRemediation.freshRescanRequired === true}\`, security-complete \`${report.securityAtomicDbRaceRemediation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.securityAtomicDbRaceRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
+- Fresh live Documents/workspace Share route perception is \`${report.liveDocumentsShareRoutePerception.verdict || "missing"}\`: measured rows Documents/Share \`${report.liveDocumentsShareRoutePerception.documentsRows ?? 0}/${report.liveDocumentsShareRoutePerception.workspaceShareRows ?? 0}\`, desktop Share regions \`${report.liveDocumentsShareRoutePerception.desktopShareRegions ?? "unknown"}\`, route split alone accepted \`${report.liveDocumentsShareRoutePerception.routeSplitAloneAcceptedAsFix === true}\`, DB mutation \`${report.liveDocumentsShareRoutePerception.dbMutationPerformed === true}\`, and exact saved user session reproduced/verdict \`${report.liveDocumentsShareRoutePerception.exactSavedUserSessionReproduced === true}/${report.liveDocumentsShareRoutePerception.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - MCP generation work-budget security is separately measured: \`${report.mcpGenerationWorkBudgetSecurity.verdict || "missing"}\`, POST body budget \`${report.mcpGenerationWorkBudgetSecurity.postBodyMaxBytes ?? "unknown"}\` bytes, adjacent tests \`${report.mcpGenerationWorkBudgetSecurity.adjacentTests ?? "unknown"}\`, valid authenticated runtime probe pending=\`${report.mcpGenerationWorkBudgetSecurity.validAuthenticatedRuntimeProbeRequired === true}\`, distributed activation pending=\`${report.mcpGenerationWorkBudgetSecurity.distributedActivationRequired === true}\`, and fresh rescan required=\`${report.mcpGenerationWorkBudgetSecurity.freshRescanRequired === true}\`. This notice preserves the sealed finding and exact saved Share \`${report.mcpGenerationWorkBudgetSecurity.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live Hermes reviewer authority UI is measured separately: \`${report.hermesKnowledgeReviewAuthorityUi.verdict || "missing"}\`, local/live viewport contracts \`${report.hermesKnowledgeReviewAuthorityUi.localPassed ?? 0}/${report.hermesKnowledgeReviewAuthorityUi.localViewportCount ?? 0}\` and \`${report.hermesKnowledgeReviewAuthorityUi.livePassed ?? 0}/${report.hermesKnowledgeReviewAuthorityUi.liveViewportCount ?? 0}\`, with authority order \`${report.hermesKnowledgeReviewAuthorityUi.sourceOrder?.join(" -> ") || "missing"}\`. Human review remains required and machine evidence does not replace it; no DB/provider/share/publication mutation is claimed. Exact saved Share remains \`${report.hermesKnowledgeReviewAuthorityUi.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`, while LLM Wiki publication and Supabase RLS remain approval-gated.
 - Live supporting-document scenario grounding is measured separately: \`${report.liveDocumentSecondaryGrounding.verdict || "missing"}\`, live cases \`${report.liveDocumentSecondaryGrounding.livePassed ?? 0}/5\`, supporting documents \`${report.liveDocumentSecondaryGrounding.secondaryPassed ?? 0}/${report.liveDocumentSecondaryGrounding.secondaryReviewed ?? 0}\`, cross-scenario leakage \`${report.liveDocumentSecondaryGrounding.crossScenarioLeakageCount ?? 0}\`, and missingUnexpected \`${report.liveDocumentSecondaryGrounding.missingUnexpectedCount ?? 0}\`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains \`${report.liveDocumentSecondaryGrounding.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
