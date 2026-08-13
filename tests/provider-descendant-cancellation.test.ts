@@ -56,3 +56,22 @@ describe("Ask enrichment descendant cancellation", () => {
     expect(signals.every((signal) => signal.aborted)).toBe(true);
   });
 });
+
+describe("Work24 response budget", () => {
+  it("falls back without parsing an oversized upstream response", async () => {
+    vi.stubEnv("WORK24_AUTH_KEY", "test-work24-key");
+    const work24 = await import("@/lib/work24");
+    const fetchMock = vi.fn(async () => new Response(
+      "x".repeat(work24.WORK24_RESPONSE_MAX_BYTES + 1),
+      { status: 200 },
+    ));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await work24.fetchTrainingRecommendations("서울 외국인 안전교육");
+
+    expect(result.mode).toBe("fallback");
+    expect(result.recommendations).toEqual([]);
+    expect(result.detail).toContain(`exceeded the ${work24.WORK24_RESPONSE_MAX_BYTES}-byte response limit`);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+});

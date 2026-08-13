@@ -1,4 +1,7 @@
 import { IntegrationMode } from "./types";
+import { readBoundedResponseText } from "./server/upstream-http";
+
+export const WORK24_RESPONSE_MAX_BYTES = 256 * 1_024;
 
 type Work24Course = {
   title: string;
@@ -149,7 +152,10 @@ async function fetchCourseXml(params: Record<string, string>, signal?: AbortSign
   });
 
   const response = await fetch(url.toString(), { cache: "no-store", signal });
-  const text = await response.text();
+  const text = await readBoundedResponseText(response, {
+    label: "Work24 course response",
+    maxBytes: WORK24_RESPONSE_MAX_BYTES,
+  });
   if (!response.ok || text.includes("<error>")) {
     throw new Error(text.slice(0, 200));
   }
