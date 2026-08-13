@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_SIF_OPERATOR_DIAGNOSTICS_AUTHENTICATION",
+  "generatedAt": "2026-08-13T20:21:41.0795035+09:00",
+  "sourceHead": "94dcc969c5f0584be9b271b5038d376f04328db5",
+  "productCommit": "94dcc969c5f0584be9b271b5038d376f04328db5",
+  "productionBuild": {
+    "commitSha": "94dcc969c5f0584be9b271b5038d376f04328db5",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-o6ul9zh8a-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
+  "securityFinding": {
+    "id": "public-security-state-diagnostics",
+    "severity": "low",
+    "status": "remediated-live-deployed-source",
+    "immutableOriginalBaselinePreserved": true
+  },
+  "contract": {
+    "statusRequiresWorkspaceAuthentication": true,
+    "approvalPacketRequiresWorkspaceAuthentication": true,
+    "anonymousRequestsRejectedBeforeDiagnosticAssembly": true,
+    "clientStatusRequestUsesBearerSession": true,
+    "clientPacketDownloadUsesBearerSession": true,
+    "tokenInUrlOrQuery": false,
+    "publicResponseRedacted": true
+  },
+  "verification": {
+    "focusedApiTests": {
+      "filesPassed": 3,
+      "testsPassed": 11
+    },
+    "adjacentPresentationTests": {
+      "filesPassed": 2,
+      "testsPassed": 15
+    },
+    "authenticatedBrowserMatrix": {
+      "filesPassed": 1,
+      "testsPassed": 2,
+      "allSifStatusRequestsAuthenticated": true
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28,
+    "dependencyAuditVulnerabilities": 0,
+    "diffCheck": "PASS"
+  },
+  "liveReadOnlyProbes": [
+    {
+      "path": "/api/sif-embedding-gate/status",
+      "status": 401,
+      "bodyKeys": ["ok", "message"],
+      "internalDiagnosticFieldsPresent": false
+    },
+    {
+      "path": "/api/sif-embedding-gate/approval-packet?format=json",
+      "status": 401,
+      "bodyKeys": ["ok", "message"],
+      "internalDiagnosticFieldsPresent": false
+    }
+  ],
+  "mutationBoundary": {
+    "databaseMutationPerformed": false,
+    "databaseMigrationPerformed": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "vectorFeatureFlagChanged": false,
+    "providerDispatchPerformed": false,
+    "shareSessionCreated": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "sifEmbeddingRuntime": "APPROVAL_GATED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedClaimsUnchanged": true
+  }
+}
