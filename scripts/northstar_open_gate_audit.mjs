@@ -54,6 +54,7 @@ const EVIDENCE_PATHS = Object.freeze({
   postRemediationRepositorySecurityScan: path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "report.json"),
   postRemediationSecuritySourceClosure: path.join("evaluation", "post-remediation-security-source-closure-2026-08-14", "report.json"),
   shareSessionRevocationRemediation: path.join("evaluation", "share-session-revocation-remediation-2026-08-14", "report.json"),
+  agentChatDurableAdmission: path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
@@ -4285,6 +4286,123 @@ function evaluateShareSessionRevocationSecurityGate(rootDir) {
   });
 }
 
+const AGENT_CHAT_DURABLE_ADMISSION_PATHS = [
+  "lib/openclaw-broker-route.ts",
+  "tests/claw-chat-route.test.ts",
+];
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateAgentChatDurableAdmissionGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.agentChatDurableAdmission;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "agent_chat_durable_admission_security",
+      label: "Agent chat durable admission security",
+      state: "missing",
+      evidencePath,
+      detail: "Agent Chat durable production admission evidence is missing or invalid.",
+      nextActions: ["Restore the deployed source receipt without executing authenticated provider work."],
+    });
+  }
+
+  const finding = isRecord(report.sealedFinding) ? report.sealedFinding : {};
+  const contracts = isRecord(report.contracts) ? report.contracts : {};
+  const authenticated = isRecord(contracts.authenticatedIdentityQuota) ? contracts.authenticatedIdentityQuota : {};
+  const engine = isRecord(contracts.engineConcurrencyLease) ? contracts.engineConcurrencyLease : {};
+  const preAuth = isRecord(contracts.preAuthBoundary) ? contracts.preAuthBoundary : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focused) ? verification.focused : {};
+  const adjacent = isRecord(verification.focusedAndAdjacentCore) ? verification.focusedAndAdjacentCore : {};
+  const broader = isRecord(verification.broaderHermesAttempt) ? verification.broaderHermesAttempt : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const production = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const live = isRecord(report.liveProbe) ? report.liveProbe : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const noMutation = mutation.dbSchemaChanged === false
+    && mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.providerGenerationExecuted === false
+    && mutation.shareSessionCreated === false
+    && mutation.vectorOrEmbeddingMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_AGENT_ADMISSION_RESCAN_PENDING"
+    && sourceHead.length > 0
+    && sourceHead === readString(report.productCommit)
+    && sourceHead === readString(production.commitSha)
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, AGENT_CHAT_DURABLE_ADMISSION_PATHS)
+    && readString(finding.scanId) === "bd135da7-c309-4e8d-ace5-15222dd3f1c7"
+    && readString(finding.findingId) === "csf_dbfc57f541ee5079a9bf9735"
+    && readString(finding.ruleId) === "resource-exhaustion.distributed-agent-admission"
+    && finding.immutableFindingMutated === false
+    && finding.canonicalClosureClaimed === false
+    && readString(authenticated.namespace) === "agent-chat-authenticated"
+    && readNumber(authenticated.limit) === 5
+    && authenticated.distributedRequiredInProduction === true
+    && authenticated.missingConfigurationFailsBeforeBodyAndSiteWork === true
+    && readString(engine.namespace) === "agent-chat-engine-work"
+    && readNumber(engine.defaultConcurrency) === 1
+    && engine.distributedRequiredInProduction === true
+    && engine.missingConfigurationFailsBeforeAvailabilityOrEngineWork === true
+    && engine.busyFailsBeforeEngineWork === true
+    && engine.availabilityFailureReleasesLease === true
+    && engine.completionAndCancellationReleaseLease === true
+    && preAuth.existingUnauthenticated401Preserved === true
+    && preAuth.instanceFallbackRetained === true
+    && readNumber(focused.files) === 1
+    && readNumber(focused.tests) === 24
+    && readNumber(focused.failed) === 0
+    && readNumber(adjacent.files) === 5
+    && readNumber(adjacent.tests) === 55
+    && readNumber(adjacent.failed) === 0
+    && readNumber(broader.testsPassed) === 107
+    && readNumber(broader.testsFailed) === 1
+    && readString(broader.status) === "RED_EXISTING_APPROVAL_GATED_SCHEMA_DEPENDENCY"
+    && broader.relatedToThisDiff === false
+    && readString(verification.typecheck) === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && readString(production.branch) === "master"
+    && readString(production.environment) === "production"
+    && production.sourceHeadMatchesProduction === true
+    && readNumber(live.status) === 401
+    && readString(live.code) === "AUTH_REQUIRED"
+    && readString(live.rateLimitMode) === "instance"
+    && live.providerWorkExecuted === false
+    && live.authenticatedFailClosedProbeExecuted === false
+    && readString(live.authenticatedAgentAvailability) === "FAIL_CLOSED_UNTIL_DISTRIBUTED_CONFIG"
+    && noMutation
+    && readString(remaining.distributedProductionActivation) === "OPEN_OPERATOR_CONFIGURATION"
+    && readString(remaining.authenticatedRuntimeProbe) === "NOT_EXECUTED_NO_USER_TOKEN"
+    && remaining.freshFullRepositorySecurityScanRequiredForCanonicalClosure === true
+    && remaining.securityCompleteClaimAllowed === false
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && remaining.approvalGatedOperationsRemainApprovalGated === true;
+
+  return gateResult({
+    id: "agent_chat_durable_admission_security",
+    label: "Agent chat durable admission security",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live source requires a distributed authenticated-user quota and engine-work lease before Agent Chat model or tool execution, with busy, failure, completion, and cancellation release covered by 24 focused and 55 adjacent tests. Production still reports pre-auth instance mode, so authenticated Agent Chat is fail-closed until operator configuration; the immutable medium finding and fresh rescan remain open, no provider or mutation work occurred, and exact saved Share remains MISSING_EVIDENCE."
+      : `Agent admission verdict=${readString(report.verdict) || "missing"}, sourceLive=${sourceHead.length > 0 && sourceHead === readString(production.commitSha)}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, AGENT_CHAT_DURABLE_ADMISSION_PATHS)}, distributed=${readString(remaining.distributedProductionActivation) || "missing"}, authProbe=${readString(remaining.authenticatedRuntimeProbe) || "missing"}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Configure the approved distributed backend and run a bounded authenticated no-provider admission probe.",
+          "Run a fresh Standard scan before reclassifying the immutable finding or claiming security completion.",
+        ]
+      : ["Restore deployed source alignment, production fail-closed contracts, verification receipts, no-mutation boundaries, rescan requirement, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
 /**
  * @param {string} rootDir
  * @returns {GateResult}
@@ -6997,6 +7115,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentRepositorySecurityRescanGate(rootDir),
     evaluatePostRemediationRepositorySecurityScanGate(rootDir),
     evaluateShareSessionRevocationSecurityGate(rootDir),
+    evaluateAgentChatDurableAdmissionGate(rootDir),
     evaluatePublicJsonRequestBodyBudgetGate(rootDir),
     evaluateSecurityResourceRemediationGate(rootDir),
     evaluateSecurityUpstreamTransportRemediationGate(rootDir),

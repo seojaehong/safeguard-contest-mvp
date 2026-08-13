@@ -2777,6 +2777,83 @@ function createFixtureRoot(): string {
       securityCompleteClaimAllowed: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"), {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_AGENT_ADMISSION_RESCAN_PENDING",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionBuild: {
+      commitSha: "fixture-sha",
+      branch: "master",
+      environment: "production",
+      sourceHeadMatchesProduction: true,
+    },
+    sealedFinding: {
+      scanId: "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+      findingId: "csf_dbfc57f541ee5079a9bf9735",
+      ruleId: "resource-exhaustion.distributed-agent-admission",
+      immutableFindingMutated: false,
+      canonicalClosureClaimed: false,
+    },
+    contracts: {
+      authenticatedIdentityQuota: {
+        namespace: "agent-chat-authenticated",
+        limit: 5,
+        distributedRequiredInProduction: true,
+        missingConfigurationFailsBeforeBodyAndSiteWork: true,
+      },
+      engineConcurrencyLease: {
+        namespace: "agent-chat-engine-work",
+        defaultConcurrency: 1,
+        distributedRequiredInProduction: true,
+        missingConfigurationFailsBeforeAvailabilityOrEngineWork: true,
+        busyFailsBeforeEngineWork: true,
+        availabilityFailureReleasesLease: true,
+        completionAndCancellationReleaseLease: true,
+      },
+      preAuthBoundary: {
+        existingUnauthenticated401Preserved: true,
+        instanceFallbackRetained: true,
+      },
+    },
+    verification: {
+      focused: { files: 1, tests: 24, failed: 0, status: "PASS" },
+      focusedAndAdjacentCore: { files: 5, tests: 55, failed: 0, status: "PASS" },
+      broaderHermesAttempt: {
+        testsPassed: 107,
+        testsFailed: 1,
+        status: "RED_EXISTING_APPROVAL_GATED_SCHEMA_DEPENDENCY",
+        relatedToThisDiff: false,
+      },
+      typecheck: "PASS",
+      build: { status: "PASS", staticPages: 28 },
+    },
+    liveProbe: {
+      status: 401,
+      code: "AUTH_REQUIRED",
+      rateLimitMode: "instance",
+      providerWorkExecuted: false,
+      authenticatedFailClosedProbeExecuted: false,
+      authenticatedAgentAvailability: "FAIL_CLOSED_UNTIL_DISTRIBUTED_CONFIG",
+    },
+    mutationBoundary: {
+      dbSchemaChanged: false,
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      providerGenerationExecuted: false,
+      shareSessionCreated: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      distributedProductionActivation: "OPEN_OPERATOR_CONFIGURATION",
+      authenticatedRuntimeProbe: "NOT_EXECUTED_NO_USER_TOKEN",
+      freshFullRepositorySecurityScanRequiredForCanonicalClosure: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      approvalGatedOperationsRemainApprovalGated: true,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",
     sourceHead: "fixture-sha",
@@ -4584,6 +4661,42 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
 
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "share_session_revocation_security")?.state)
+      .toBe("contradicted");
+  });
+
+  it("connects durable Agent Chat admission without hiding activation, rescan, or exact Share gaps", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "security-agent-chat-durable-admission-2026-08-14",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "agent_chat_durable_admission_security");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("fail-closed");
+    expect(gate?.detail).toContain("immutable medium finding");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      liveProbe: { authenticatedFailClosedProbeExecuted: boolean };
+      mutationBoundary: { providerGenerationExecuted: boolean };
+      remainingBoundaries: {
+        distributedProductionActivation: string;
+        exactSavedShareVerdict: string;
+      };
+    };
+    report.liveProbe.authenticatedFailClosedProbeExecuted = true;
+    report.mutationBoundary.providerGenerationExecuted = true;
+    report.remainingBoundaries.distributedProductionActivation = "DISTRIBUTED_ACTIVE";
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "agent_chat_durable_admission_security")?.state)
       .toBe("contradicted");
   });
 
