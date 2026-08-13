@@ -51,6 +51,8 @@ const EVIDENCE_PATHS = Object.freeze({
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "report.json"),
+  postRemediationRepositorySecurityScan: path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "report.json"),
+  postRemediationSecuritySourceClosure: path.join("evaluation", "post-remediation-security-source-closure-2026-08-14", "report.json"),
   publicJsonRequestBodyBudget: path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"),
   improvementPhotoAnalysisBudget: path.join("evaluation", "improvement-photo-analysis-budget-2026-08-11", "report.json"),
   publicProviderCancellation: path.join("evaluation", "public-provider-cancellation-2026-08-11", "report.json"),
@@ -4080,6 +4082,109 @@ function evaluateCurrentRepositorySecurityRescanGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluatePostRemediationRepositorySecurityScanGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.postRemediationRepositorySecurityScan;
+  const report = readJsonFile(rootDir, evidencePath);
+  const closure = readJsonFile(rootDir, EVIDENCE_PATHS.postRemediationSecuritySourceClosure);
+  if (!isRecord(report) || !isRecord(closure)) {
+    return gateResult({
+      id: "post_remediation_repository_security_scan",
+      label: "Post-remediation repository security scan",
+      state: "missing",
+      evidencePath,
+      detail: "The sealed post-remediation scan or its bounded source-closure ledger is missing or invalid.",
+      nextActions: ["Restore both immutable scan evidence and the no-mutation source-closure ledger."],
+    });
+  }
+
+  const scan = isRecord(report.scan) ? report.scan : {};
+  const baseline = isRecord(report.baselineReconciliation) ? report.baselineReconciliation : {};
+  const canonical = isRecord(report.canonicalArtifacts) ? report.canonicalArtifacts : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const closureScan = isRecord(closure.sourceScan) ? closure.sourceScan : {};
+  const remediation = isRecord(closure.remediation) ? closure.remediation : {};
+  const verification = isRecord(closure.verification) ? closure.verification : {};
+  const focused = isRecord(verification.focusedAndAdjacentTests) ? verification.focusedAndAdjacentTests : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const live = isRecord(verification.liveVerification) ? verification.liveVerification : {};
+  const closureMutation = isRecord(closure.mutationBoundary) ? closure.mutationBoundary : {};
+  const closureRemaining = isRecord(closure.remainingBoundaries) ? closure.remainingBoundaries : {};
+  const items = Array.isArray(remediation.items) ? remediation.items.filter(isRecord) : [];
+  const itemByRule = new Map(items.map((item) => [readString(item.ruleId), item]));
+  const canonicalPaths = [canonical.manifest, canonical.findings, canonical.coverage, canonical.markdownProjection]
+    .map(readString)
+    .filter(Boolean);
+  const canonicalArtifactsExist = canonicalPaths.length === 4
+    && canonicalPaths.every((relativePath) => fs.existsSync(path.join(rootDir, relativePath)));
+  const noMutation = [mutation, closureMutation].every((boundary) => (
+    boundary.dbMutationPerformed === false
+    && boundary.providerDispatchCalled === false
+    && boundary.shareSessionCreated === false
+    && boundary.embeddingOrVectorMutationPerformed === false
+    && boundary.wikiPublicationPerformed === false
+    && boundary.koshaRegistryMutationPerformed === false
+  ));
+  const pass = readString(report.verdict) === "NOTICE_POST_REMEDIATION_STANDARD_SCAN_20_FINDINGS_APPROVAL_BOUNDARIES_PRESERVED"
+    && readString(scan.scanId) === "bd135da7-c309-4e8d-ace5-15222dd3f1c7"
+    && readString(scan.targetRevision) === "8f5dc78f73d5048598fb2519bf7bb758ab090982"
+    && readString(scan.status) === "complete"
+    && readString(scan.coverage) === "partial"
+    && readNumber(scan.reviewedSurfaceCount) === 5
+    && readNumber(scan.reportableFindingCount) === 20
+    && readNumber(isRecord(scan.severityCounts) ? scan.severityCounts.medium : null) === 12
+    && readNumber(isRecord(scan.severityCounts) ? scan.severityCounts.low : null) === 8
+    && readString(baseline.immutableOriginalScanId) === "8fe9c06a-018c-446f-aa98-1b37df95287a"
+    && readNumber(baseline.immutableOriginalAccountedFindingCount) === 18
+    && baseline.immutableOriginalPreserved === true
+    && readNumber(baseline.priorCurrentScanFindingCount) === 15
+    && canonicalArtifactsExist
+    && readString(closure.verdict) === "PASS_LIVE_PRODUCTION_TWO_SECURITY_REMEDIATIONS_ONE_DISTRIBUTED_RESIDUAL_RESCAN_PENDING"
+    && readString(closureScan.scanId) === readString(scan.scanId)
+    && readNumber(closureScan.reportableFindingCount) === 20
+    && readNumber(remediation.sourceRemediatedCount) === 2
+    && readNumber(remediation.sourceMitigatedCount) === 1
+    && readNumber(remediation.liveDeployedRemediationCount) === 2
+    && readNumber(remediation.liveDeployedMitigationCount) === 1
+    && readNumber(remediation.remainingReportableFindingCountBeforeRescan) === 18
+    && remediation.freshPostRemediationScanRequired === true
+    && remediation.liveAfterDeploymentPending === false
+    && readString(itemByRule.get("resource-exhaustion.public-status-fanout")?.disposition) === "live_source_mitigated_distributed_admission_residual"
+    && readNumber(focused.files) === 8
+    && readNumber(focused.tests) === 105
+    && readNumber(focused.failed) === 0
+    && readString(verification.typecheck) === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && readNumber(live.workflowDispatchOversizedStatus) === 413
+    && readString(live.workflowDispatchOversizedCode) === "WORKFLOW_DISPATCH_PAYLOAD_TOO_LARGE"
+    && readString(live.safetyStatusRateLimitMode) === "instance"
+    && live.work24BoundedReaderIncludedInProduction === true
+    && live.work24OversizedLiveUpstreamNotExecuted === true
+    && noMutation
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(closureRemaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && remaining.securityCompleteClaimAllowed === false
+    && closureRemaining.securityCompleteClaimAllowed === false;
+
+  return gateResult({
+    id: "post_remediation_repository_security_scan",
+    label: "Post-remediation repository security scan",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Fresh Standard scan bd135da7 is sealed at 20 findings (12 medium, 8 low) across five reviewed surfaces. Live source closes two findings and mitigates one public-status fanout finding while retaining its distributed-admission residual; 18 findings remain open or only partially mitigated before a fresh rescan. The immutable 18-finding baseline is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      : `Post-remediation scan verdict=${readString(report.verdict) || "missing"}, scan=${readString(scan.scanId) || "missing"}, findings=${readNumber(scan.reportableFindingCount)}, closure=${readString(closure.verdict) || "missing"}, remediated=${readNumber(remediation.sourceRemediatedCount)}, mitigated=${readNumber(remediation.sourceMitigatedCount)}, remaining=${readNumber(remediation.remainingReportableFindingCountBeforeRescan)}, canonical=${canonicalArtifactsExist}, noMutation=${noMutation}, exactShare=${readString(closureRemaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Remediate or explicitly defer the remaining 18 findings, activate approved distributed admission where required, then run a fresh scan before any security-complete claim."]
+      : ["Restore the exact sealed 20-finding scan, two live closures, one distributed residual, canonical artifacts, no-mutation boundary, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateLearningExportRendererSecurityGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.learningExportRendererSecurity;
   const report = readJsonFile(rootDir, evidencePath);
@@ -6703,6 +6808,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateRepositorySecurityScanReconciliationGate(rootDir),
     evaluateCurrentSecurityRemediationLedgerGate(rootDir),
     evaluateCurrentRepositorySecurityRescanGate(rootDir),
+    evaluatePostRemediationRepositorySecurityScanGate(rootDir),
     evaluatePublicJsonRequestBodyBudgetGate(rootDir),
     evaluateSecurityResourceRemediationGate(rootDir),
     evaluateSecurityUpstreamTransportRemediationGate(rootDir),

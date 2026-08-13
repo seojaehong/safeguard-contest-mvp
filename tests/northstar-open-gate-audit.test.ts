@@ -2613,6 +2613,91 @@ function createFixtureRoot(): string {
   writeJson(rootDir, path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "canonical", "findings.json"), {});
   writeJson(rootDir, path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "canonical", "coverage.json"), {});
   writeText(rootDir, path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "scan-report.md"), "# Scan\n");
+  writeJson(rootDir, path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "report.json"), {
+    verdict: "NOTICE_POST_REMEDIATION_STANDARD_SCAN_20_FINDINGS_APPROVAL_BOUNDARIES_PRESERVED",
+    scan: {
+      scanId: "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+      targetRevision: "8f5dc78f73d5048598fb2519bf7bb758ab090982",
+      status: "complete",
+      coverage: "partial",
+      reviewedSurfaceCount: 5,
+      reportableFindingCount: 20,
+      severityCounts: { medium: 12, low: 8 },
+    },
+    baselineReconciliation: {
+      immutableOriginalScanId: "8fe9c06a-018c-446f-aa98-1b37df95287a",
+      immutableOriginalAccountedFindingCount: 18,
+      immutableOriginalPreserved: true,
+      priorCurrentScanFindingCount: 15,
+    },
+    canonicalArtifacts: {
+      manifest: "evaluation/post-remediation-full-repository-security-scan-2026-08-14/canonical/scan-manifest.json",
+      findings: "evaluation/post-remediation-full-repository-security-scan-2026-08-14/canonical/findings.json",
+      coverage: "evaluation/post-remediation-full-repository-security-scan-2026-08-14/canonical/coverage.json",
+      markdownProjection: "evaluation/post-remediation-full-repository-security-scan-2026-08-14/scan-report.md",
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      embeddingOrVectorMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      securityCompleteClaimAllowed: false,
+    },
+  });
+  writeJson(rootDir, path.join("evaluation", "post-remediation-security-source-closure-2026-08-14", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_TWO_SECURITY_REMEDIATIONS_ONE_DISTRIBUTED_RESIDUAL_RESCAN_PENDING",
+    sourceScan: {
+      scanId: "bd135da7-c309-4e8d-ace5-15222dd3f1c7",
+      reportableFindingCount: 20,
+    },
+    remediation: {
+      sourceRemediatedCount: 2,
+      sourceMitigatedCount: 1,
+      liveDeployedRemediationCount: 2,
+      liveDeployedMitigationCount: 1,
+      remainingReportableFindingCountBeforeRescan: 18,
+      freshPostRemediationScanRequired: true,
+      liveAfterDeploymentPending: false,
+      items: [
+        { ruleId: "resource-exhaustion.request-body-budget" },
+        { ruleId: "resource-exhaustion.unbounded-upstream-read" },
+        { ruleId: "resource-exhaustion.public-status-fanout", disposition: "live_source_mitigated_distributed_admission_residual" },
+      ],
+    },
+    verification: {
+      focusedAndAdjacentTests: { files: 8, tests: 105, failed: 0, status: "PASS" },
+      typecheck: "PASS",
+      build: { status: "PASS", staticPages: 28 },
+      liveVerification: {
+        workflowDispatchOversizedStatus: 413,
+        workflowDispatchOversizedCode: "WORKFLOW_DISPATCH_PAYLOAD_TOO_LARGE",
+        safetyStatusRateLimitMode: "instance",
+        work24BoundedReaderIncludedInProduction: true,
+        work24OversizedLiveUpstreamNotExecuted: true,
+      },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      embeddingOrVectorMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      securityCompleteClaimAllowed: false,
+    },
+  });
+  writeJson(rootDir, path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "canonical", "scan-manifest.json"), {});
+  writeJson(rootDir, path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "canonical", "findings.json"), {});
+  writeJson(rootDir, path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "canonical", "coverage.json"), {});
+  writeText(rootDir, path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "scan-report.md"), "# Scan\n");
   writeJson(rootDir, path.join("evaluation", "public-json-request-body-budget-2026-08-11", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",
     sourceHead: "fixture-sha",
@@ -4359,6 +4444,35 @@ describe("northstar open gate audit", { timeout: 15_000 }, () => {
 
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "current_repository_security_rescan")?.state)
+      .toBe("contradicted");
+  });
+
+  it("connects the post-remediation scan without hiding its distributed and saved Share residuals", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const closurePath = path.join(
+      rootDir,
+      "evaluation",
+      "post-remediation-security-source-closure-2026-08-14",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "post_remediation_repository_security_scan");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("20 findings");
+    expect(gate?.detail).toContain("distributed-admission residual");
+    expect(gate?.detail).toContain("18 findings");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const closure = JSON.parse(fs.readFileSync(closurePath, "utf8")) as {
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    closure.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(closurePath, `${JSON.stringify(closure, null, 2)}\n`, "utf8");
+
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "post_remediation_repository_security_scan")?.state)
       .toBe("contradicted");
   });
 
