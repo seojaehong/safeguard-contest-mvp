@@ -23863,6 +23863,58 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
+.deployment-freshness-notice {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(360px, calc(100vw - 32px));
+  min-height: 52px;
+  padding: 8px 8px 8px 14px;
+  border: 1px solid #1f2937;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 10px 28px rgb(15 23 42 / 18%);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.deployment-freshness-notice button {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid #0f766e;
+  border-radius: 6px;
+  background: #0f766e;
+  color: #ffffff;
+  font: inherit;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+
+.deployment-freshness-notice button:hover {
+  background: #115e59;
+}
+
+.deployment-freshness-notice button:focus-visible {
+  outline: 3px solid #f59e0b;
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .deployment-freshness-notice {
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    justify-content: space-between;
+    max-width: none;
+  }
+}
+
 /* Keep the desktop Documents/Share step rail aligned with the route cockpit.
    Later theme rules restore the input-page sidebar width, so this final
    route-scoped guard prevents step status text from colliding at 1440px. */

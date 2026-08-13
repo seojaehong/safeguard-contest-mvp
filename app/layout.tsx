@@ -1,6 +1,14 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { GlobalBoundaryProbe } from "safeclaw-audit-error-escalation";
+import { DeploymentFreshnessGuard } from "@/components/DeploymentFreshnessGuard";
+
+const COMMIT_SHA_PATTERN = /^[0-9a-f]{40}$/u;
+
+function currentBuildSha(): string | null {
+  const value = process.env.VERCEL_GIT_COMMIT_SHA?.trim().toLowerCase();
+  return value && COMMIT_SHA_PATTERN.test(value) ? value : null;
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.safeclaw.kr"),
@@ -60,6 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <GlobalBoundaryProbe />
+        <DeploymentFreshnessGuard currentBuildSha={currentBuildSha()} />
         {children}
       </body>
     </html>
