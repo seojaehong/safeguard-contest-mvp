@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "safeclaw-security-photo-cancellation-remediation/v1",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LIVE_PENDING",
+  "sourceHead": "676bb7c7a3051a92e769efa32600b22a49b68742",
+  "productCommit": "676bb7c7a3051a92e769efa32600b22a49b68742",
+  "productionBuild": {
+    "commitSha": "ec339f8504cd4568417474b5b892e9bc0c8135f5",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-7uzzwhsvu-seojaehongs-projects.vercel.app",
+    "sourceHeadLive": false
+  },
+  "finding": {
+    "slug": "photo-analysis-disconnect-not-propagated",
+    "severity": "low",
+    "baselineRevision": "003c48838b2c4365203de3cc2dae230200c79e96",
+    "remediation": "Propagate the request AbortSignal through photo analysis, the OpenAI adapter, and grounding searches without converting cancellation into a failed image result."
+  },
+  "contracts": {
+    "routePassesRequestSignal": true,
+    "analysisPassesSignalToProvider": true,
+    "openAiFetchUsesLinkedSignal": true,
+    "groundingSearchesUseCallerSignal": true,
+    "abortErrorPropagates": true,
+    "storageCompatibleMimeDescription": "JPEG/PNG/WebP"
+  },
+  "verification": {
+    "focused": {
+      "files": 2,
+      "tests": 49,
+      "status": "PASS"
+    },
+    "adjacent": {
+      "files": 8,
+      "tests": 84,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "diffCheck": "PASS",
+    "secretScan": "PASS"
+  },
+  "mutationBoundary": {
+    "photoProviderCalled": false,
+    "photoUploadPerformed": false,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedBoundariesPreserved": true,
+    "liveAfterDeploymentRequired": true
+  }
+}
