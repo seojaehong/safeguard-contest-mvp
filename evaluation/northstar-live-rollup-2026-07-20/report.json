@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-13T15:08:27.047Z",
-  "head": "5d78454251888c62d43f5f2eba86b9a704962692",
+  "generatedAt": "2026-08-13T16:23:59.024Z",
+  "head": "07fa5eb935cab51b577bd77d06aaaf91a9849e30",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "5d78454251888c62d43f5f2eba86b9a704962692",
+    "commitSha": "91719a8590175037107f8a2ee7e39cba61ddfc90",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-izhtvcij1-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-9vv51nvee-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 48
+    "gateCount": 49
   },
   "provenGates": [
     {
@@ -140,6 +140,12 @@
       "state": "notice",
       "artifact": "evaluation\\current-full-repository-security-scan-2026-08-13\\report.json",
       "detail": "Standard current-revision scan 528ad724 is sealed with 15 findings (11 medium, 4 low) under partial coverage. Live source now bounds five findings, including fail-closed SIF corpus quality admission, changed-knowledge review reset, and authoritative dispatch receipt admission, while 10 findings and a fresh post-remediation scan remain open. The immutable original 18-accounted baseline is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "post_remediation_repository_security_scan",
+      "state": "notice",
+      "artifact": "evaluation\\post-remediation-full-repository-security-scan-2026-08-14\\report.json",
+      "detail": "Fresh Standard scan bd135da7 is sealed at 20 findings (12 medium, 8 low) across five reviewed surfaces. Live source closes two findings and mitigates one public-status fanout finding while retaining its distributed-admission residual; 18 findings remain open or only partially mitigated before a fresh rescan. The immutable 18-finding baseline is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "public_json_request_body_budget",
@@ -947,10 +953,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "5d78454251888c62d43f5f2eba86b9a704962692",
+      "sourceCommit": "07fa5eb935cab51b577bd77d06aaaf91a9849e30",
       "sourceStatus": "exact",
-      "productionCommit": "5d78454251888c62d43f5f2eba86b9a704962692",
-      "productionStatus": "matches_live"
+      "productionCommit": "07fa5eb935cab51b577bd77d06aaaf91a9849e30",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
