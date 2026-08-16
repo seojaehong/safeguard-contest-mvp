@@ -1,12 +1,12 @@
 # Documents Long-Form IA Probe
 
-Checked at: 2026-07-25T02:20:08.375Z
+Checked at: 2026-08-16T08:16:38.852Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD: `b174dbc3c57c5f94d861397f3daa13d887735a7b`
+Source HEAD: `be494e764282cc4961b1259975324ef0d38669bc`
 
-Production commit: `b174dbc3c57c5f94d861397f3daa13d887735a7b`
+Production commit: `be494e764282cc4961b1259975324ef0d38669bc`
 
 Verdict: `PASS_LIVE_PRODUCTION_MEASURED`
 
@@ -51,16 +51,16 @@ Forbidden:
 | default overview/cockpit | desktop-1440x900 | PASS | PASS | PASS | n/a | PASS | PASS | 1 | 1.75 | 317 | 632 | n/a | 1 | false | 786 | false | 0 |
 | same-document riskAssessmentDraft reselect landing | desktop-1440x900 | PASS | PASS | PASS | PASS | PASS | PASS | 1 | 1.75 | 317 | 632 | n/a | 1 | false | 786 | false | 0 |
 | all 12 document launcher exposure | desktop-1440x900 | PASS | n/a | n/a | n/a | PASS | PASS | 1 | 1.75 | 317 | 632 | n/a | 1 | false | 786 | false | 0 |
-| default overview/cockpit | mobile-short-390x723 | PASS | PASS | PASS | n/a | PASS | PASS | 1.01 | 2.23 | 534 | 660 | n/a | 1 | false | 740 | false | 0 |
-| same-document riskAssessmentDraft reselect landing | mobile-short-390x723 | PASS | PASS | PASS | PASS | PASS | PASS | 1.01 | 2.23 | 534 | 660 | n/a | 1 | false | 740 | false | 0 |
-| all 12 document launcher exposure | mobile-short-390x723 | PASS | n/a | n/a | n/a | PASS | PASS | 1.01 | 2.23 | 534 | 660 | n/a | 1 | false | 740 | false | 0 |
-| default overview/cockpit | mobile-390x844 | PASS | PASS | PASS | n/a | PASS | PASS | 1 | 2.23 | 650 | 776 | n/a | 1 | false | 740 | false | 0 |
-| same-document riskAssessmentDraft reselect landing | mobile-390x844 | PASS | PASS | PASS | PASS | PASS | PASS | 1 | 2.23 | 650 | 776 | n/a | 1 | false | 740 | false | 0 |
-| all 12 document launcher exposure | mobile-390x844 | PASS | n/a | n/a | n/a | PASS | PASS | 1 | 2.23 | 650 | 776 | n/a | 1 | false | 740 | false | 0 |
+| default overview/cockpit | mobile-short-390x723 | PASS | PASS | PASS | n/a | PASS | PASS | 1 | 2.03 | 480 | 647 | n/a | 1 | false | 714 | false | 0 |
+| same-document riskAssessmentDraft reselect landing | mobile-short-390x723 | PASS | PASS | PASS | PASS | PASS | PASS | 1 | 2.03 | 480 | 647 | n/a | 1 | false | 714 | false | 0 |
+| all 12 document launcher exposure | mobile-short-390x723 | PASS | n/a | n/a | n/a | PASS | PASS | 1 | 2.03 | 480 | 647 | n/a | 1 | false | 714 | false | 0 |
+| default overview/cockpit | mobile-390x844 | PASS | PASS | PASS | n/a | PASS | PASS | 1 | 2.03 | 596 | 763 | n/a | 1 | false | 714 | false | 0 |
+| same-document riskAssessmentDraft reselect landing | mobile-390x844 | PASS | PASS | PASS | PASS | PASS | PASS | 1 | 2.03 | 596 | 763 | n/a | 1 | false | 714 | false | 0 |
+| all 12 document launcher exposure | mobile-390x844 | PASS | n/a | n/a | n/a | PASS | PASS | 1 | 2.03 | 596 | 763 | n/a | 1 | false | 714 | false | 0 |
 
 ## Remaining UX Boundary
 
-- Product commit `b174dbc3` is a scoped risk-assessment cockpit remediation: desktop-short, desktop 1440x900, and mobile same-document risk reselect now record first action, field-first, and reselect landing PASS when the table above shows PASS. It does not close all-12 document containment or full 12-document authoring IA.
+- Product commit `be494e76` is a scoped risk-assessment cockpit remediation: desktop-short, desktop 1440x900, and mobile same-document risk reselect now record first action, field-first, and reselect landing PASS when the table above shows PASS. It does not close all-12 document containment or full 12-document authoring IA.
 - If `allDocumentLongFormVerdict` is RED or PARTIAL, product work should stay bounded to the documents route/component shell: master-detail, selected-only detail, accordion, local scroll, or drawer.
 - Supporting document launcher visibility is not itself the launch fix. Default closed supporting nav is acceptable, but the all-12 exposure state remains a follow-up when it still behaves like a long serial document surface rather than bounded navigation.
 - Do not use page count as the fix. Route split only helps orientation; long bodies must be locally contained.

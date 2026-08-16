@@ -1,12 +1,12 @@
 # Workspace Bounded Workbench Current Gate
 
-Checked at: 2026-08-13T15:06:02.570Z
+Checked at: 2026-08-16T08:15:20.135Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD: `5d78454251888c62d43f5f2eba86b9a704962692`
+Source HEAD: `be494e764282cc4961b1259975324ef0d38669bc`
 
-Production `/api/build-info`: `5d78454251888c62d43f5f2eba86b9a704962692`
+Production `/api/build-info`: `be494e764282cc4961b1259975324ef0d38669bc`
 
 Verdict: `PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP`
 
@@ -32,17 +32,17 @@ Allowed claim: measured routes can pass the scoped bounded-workbench contract wh
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | /documents?theme=day | day | default | 1440x723 | PASS | PASS | PASS | PASS | PASS | 1 | 1.75 | 317 | 632 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | false | false | 0 | false |
 | /documents?theme=day | day | selected-riskAssessmentDraft | 1440x723 | PASS | PASS | PASS | PASS | PASS | 1 | 1.75 | 317 | 632 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | false | false | 0 | false |
-| /documents?theme=day | day | selected-workPlanDraft-section-detail | 1440x723 | PASS | PASS | PASS | PASS | PASS | 1 | 2.21 | 694 | 0 | 1 | 1 | 6 | 1 | 1 | 1 | 0 | true | false | 0 | false |
+| /documents?theme=day | day | selected-workPlanDraft-section-detail | 1440x723 | PASS | PASS | PASS | PASS | PASS | 1 | 2.21 | 339 | 0 | 1 | 1 | 6 | 1 | 1 | 1 | 0 | true | false | 0 | false |
 | /documents?theme=day | day | supporting-9-expanded-index | 1440x723 | PASS | PASS | PASS | PASS | PASS | 1 | 1.75 | 317 | 632 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | true | false | 0 | false |
 | /documents?theme=day | day | generated-current-workpack | 1440x723 | PASS | PASS | PASS | PASS | PASS | 1 | 1.75 | 317 | 632 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | false | false | 0 | false |
 | /documents?theme=day | day | default | 390x723 | PASS | PASS | PASS | PASS | PASS | 1 | 2.03 | 480 | 647 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | false | false | 0 | false |
 | /documents?theme=day | day | selected-riskAssessmentDraft | 390x723 | PASS | PASS | PASS | PASS | PASS | 1 | 2.03 | 480 | 647 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | false | false | 0 | false |
-| /documents?theme=day | day | selected-workPlanDraft-section-detail | 390x723 | PASS | PASS | PASS | PASS | PASS | 1 | 2.3 | 629 | 0 | 1 | 1 | 6 | 1 | 1 | 1 | 0 | true | false | 0 | false |
+| /documents?theme=day | day | selected-workPlanDraft-section-detail | 390x723 | PASS | PASS | PASS | PASS | PASS | 1 | 2.3 | 480 | 0 | 1 | 1 | 6 | 1 | 1 | 1 | 0 | true | false | 0 | false |
 | /documents?theme=day | day | supporting-9-expanded-index | 390x723 | PASS | PASS | PASS | PASS | PASS | 1 | 2.03 | 480 | 647 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | true | false | 0 | false |
 | /documents?theme=day | day | generated-current-workpack | 390x723 | PASS | PASS | PASS | PASS | PASS | 1 | 2.03 | 480 | 647 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | false | false | 0 | false |
 | /documents?theme=night | night | default | 1440x723 | PASS | PASS | PASS | PASS | PASS | 1 | 1.75 | 317 | 632 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | false | false | 0 | false |
 | /documents?theme=night | night | selected-riskAssessmentDraft | 1440x723 | PASS | PASS | PASS | PASS | PASS | 1 | 1.75 | 317 | 632 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | false | false | 0 | false |
-| /documents?theme=night | night | selected-workPlanDraft-section-detail | 1440x723 | PASS | PASS | PASS | PASS | PASS | 1 | 2.21 | 694 | 0 | 1 | 1 | 6 | 1 | 1 | 1 | 0 | true | false | 0 | false |
+| /documents?theme=night | night | selected-workPlanDraft-section-detail | 1440x723 | PASS | PASS | PASS | PASS | PASS | 1 | 2.21 | 339 | 0 | 1 | 1 | 6 | 1 | 1 | 1 | 0 | true | false | 0 | false |
 | /documents?theme=night | night | supporting-9-expanded-index | 1440x723 | PASS | PASS | PASS | PASS | PASS | 1 | 1.75 | 317 | 632 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | true | false | 0 | false |
 | /documents?theme=night | night | generated-current-workpack | 1440x723 | PASS | PASS | PASS | PASS | PASS | 1 | 1.75 | 317 | 632 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | false | false | 0 | false |
 | /documents?theme=night | night | default | 390x723 | PASS | PASS | PASS | PASS | PASS | 1 | 2.03 | 480 | 647 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | false | false | 0 | false |

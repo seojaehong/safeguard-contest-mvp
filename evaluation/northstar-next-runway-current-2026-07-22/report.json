@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-16T08:12:27.098Z",
+  "generatedAt": "2026-08-16T08:19:32.827Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "e5ec97c77caf010bd2705c5805d3961830018b12",
-  "productionCommit": "e5ec97c77caf010bd2705c5805d3961830018b12",
+  "sourceHead": "be494e764282cc4961b1259975324ef0d38669bc",
+  "productionCommit": "be494e764282cc4961b1259975324ef0d38669bc",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "e5ec97c77caf010bd2705c5805d3961830018b12",
+    "commitSha": "be494e764282cc4961b1259975324ef0d38669bc",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-l826nrlrr-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-6bl3i33hz-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "e5ec97c77caf010bd2705c5805d3961830018b12",
-  "liveRollupLiveCommit": "e5ec97c77caf010bd2705c5805d3961830018b12",
+  "liveExactEvidenceCommit": "be494e764282cc4961b1259975324ef0d38669bc",
+  "liveRollupLiveCommit": "be494e764282cc4961b1259975324ef0d38669bc",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -1520,7 +1520,7 @@
   },
   "documentsLongFormIA": {
     "verdict": "PASS_LIVE_PRODUCTION_MEASURED",
-    "sourceHead": "b174dbc3c57c5f94d861397f3daa13d887735a7b",
+    "sourceHead": "be494e764282cc4961b1259975324ef0d38669bc",
     "routeSplitAloneAcceptedAsFix": false,
     "routeSplitVerdict": "PASS_ORIENTATION_ONLY",
     "providerDispatchLiveClaimed": false,
@@ -1560,7 +1560,7 @@
         "coreDocButtonCount": 3,
         "allDocTabButtonCount": 12,
         "supportingLauncherMovesEditorOutOfView": false,
-        "actionsBottom": 534,
+        "actionsBottom": 480,
         "hazardBottom": null,
         "horizontalOverflow": false,
         "stickyOverlapCount": 0
@@ -1573,7 +1573,7 @@
         "coreDocButtonCount": 3,
         "allDocTabButtonCount": 12,
         "supportingLauncherMovesEditorOutOfView": false,
-        "actionsBottom": 650,
+        "actionsBottom": 596,
         "hazardBottom": null,
         "horizontalOverflow": false,
         "stickyOverlapCount": 0
@@ -1611,8 +1611,8 @@
   },
   "boundedWorkbenchCurrent": {
     "verdict": "PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP",
-    "sourceHead": "5d78454251888c62d43f5f2eba86b9a704962692",
-    "productionCommit": "5d78454251888c62d43f5f2eba86b9a704962692",
+    "sourceHead": "be494e764282cc4961b1259975324ef0d38669bc",
+    "productionCommit": "be494e764282cc4961b1259975324ef0d38669bc",
     "routeSplitAloneAcceptedAsFix": false,
     "providerDispatchLiveClaimed": false,
     "externalProviderCalled": false,
