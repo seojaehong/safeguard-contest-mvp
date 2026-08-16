@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-16T18:23:30.892Z",
-  "head": "3de35eeac0992a91a48b5940ca2fd006940b90fa",
+  "generatedAt": "2026-08-16T21:23:45.948Z",
+  "head": "158e4f6081b5c466a8ee14bd036e737c800ec4a8",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "3de35eeac0992a91a48b5940ca2fd006940b90fa",
+    "commitSha": "158e4f6081b5c466a8ee14bd036e737c800ec4a8",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-917x9708f-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-mz585myda-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -85,7 +85,7 @@
       "id": "document_editorial_review_cockpit",
       "state": "proven",
       "artifact": "evaluation\\document-editorial-review-cockpit-2026-08-16\\report.json",
-      "detail": "Live Day/Night desktop-short 1440x723 and mobile-short 390x723 pass 4/4 with 12 canonical documents including riskAssessmentDraft, five explicit reviewer checks, a three-zone desktop and one-column mobile cockpit, unchanged page-body height, local-scroll containment, separate stale-aware review storage, zero API calls, and no current-workpack mutation. All four cases also prove deterministic close-button entry focus, one selected and tabbable document tab, Arrow/Home roving navigation, a labelled tabpanel, and Escape focus restoration. A separate live desktop/mobile receipt contract proves a fail-closed local JSON export for 12 documents x 5 checks, current text fingerprints, a recorded self-attested reviewer, and zero API calls. It does not prove reviewer identity, server recording, completed human review, or approval: automatedInteractionOnly=true, humanReviewCompleted=false, broad human wording review remains required, and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Live Day/Night desktop-short 1440x723 and mobile-short 390x723 pass 4/4 with 12 canonical documents including riskAssessmentDraft, five explicit reviewer checks, a three-zone desktop and one-column mobile cockpit, unchanged page-body height, local-scroll containment, separate stale-aware review storage, zero API calls, and no current-workpack mutation. All four cases also prove deterministic close-button entry focus, one selected and tabbable document tab, Arrow/Home roving navigation, a labelled tabpanel, and Escape focus restoration. A separate live desktop/mobile receipt contract proves a fail-closed local JSON export for 12 documents x 5 checks with current text fingerprints plus bound editorial finding IDs, categories, and fingerprints, a recorded self-attested reviewer, and zero API calls. It does not prove reviewer identity, server recording, completed human review, or approval: automatedInteractionOnly=true, humanReviewCompleted=false, broad human wording review remains required, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "current_live_document_editorial_runtime",
@@ -253,7 +253,7 @@
       "id": "security_followup_remediation",
       "state": "proven",
       "artifact": "evaluation\\codex-security-followup-remediation-2026-08-11\\report.json",
-      "detail": "The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its 12/147 compatibility check, and the current 23 files / 215 tests public-admission companion. This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its 12/147 compatibility check, and the latest search/KOSHA compatibility receipt (14 files / 245 tests; full CI 249 files / 2927 tests). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "mcp_generation_work_budget_security",
@@ -967,6 +967,10 @@
     "receiptDocumentCount": 12,
     "receiptUniqueDocumentKeyCount": 12,
     "receiptReviewerCheckCount": 5,
+    "receiptFindingsBound": true,
+    "receiptEditorialFindingCount": 27,
+    "receiptEditorialFindingsFingerprintRecorded": true,
+    "receiptEditorialFindingsReviewed": true,
     "receiptApiRequestCount": 0,
     "reviewerSelfAttested": true,
     "reviewerIdentityVerified": false,
@@ -1278,9 +1282,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "3de35eeac0992a91a48b5940ca2fd006940b90fa",
+      "sourceCommit": "158e4f6081b5c466a8ee14bd036e737c800ec4a8",
       "sourceStatus": "exact",
-      "productionCommit": "3de35eeac0992a91a48b5940ca2fd006940b90fa",
+      "productionCommit": "158e4f6081b5c466a8ee14bd036e737c800ec4a8",
       "productionStatus": "matches_live"
     },
     {

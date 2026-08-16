@@ -2,10 +2,11 @@
 
 Verdict: `PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT`
 
-Source: `3de35eeac0992a91a48b5940ca2fd006940b90fa`
+Source: `158e4f6081b5c466a8ee14bd036e737c800ec4a8`
 
 - Locked geometry: 2/2
 - Receipt documents/checks: 12/5
+- Editorial findings bound to receipt: 27; fingerprint recorded: true
 - API requests during local review/export: 0
 - Human review completed by this automated probe: `false`
 - Reviewer identity verified or server recorded: `false / false`

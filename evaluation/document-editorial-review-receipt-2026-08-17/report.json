@@ -1,17 +1,17 @@
 {
-  "schemaVersion": "safeclaw-document-editorial-review-receipt-evidence/v1",
-  "generatedAt": "2026-08-16T17:40:40.762Z",
+  "schemaVersion": "safeclaw-document-editorial-review-receipt-evidence/v2",
+  "generatedAt": "2026-08-16T21:23:25.922Z",
   "mode": "live-production",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHead": "3de35eeac0992a91a48b5940ca2fd006940b90fa",
+  "sourceHead": "158e4f6081b5c466a8ee14bd036e737c800ec4a8",
   "productionBuild": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "3de35eeac0992a91a48b5940ca2fd006940b90fa",
+    "commitSha": "158e4f6081b5c466a8ee14bd036e737c800ec4a8",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-917x9708f-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-mz585myda-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "sourceHeadMatchesProduction": true,
@@ -22,6 +22,8 @@
     "reviewerRequired": true,
     "receiptLockedBeforeAllDocuments": true,
     "currentTextFingerprintRequired": true,
+    "editorialFindingsFingerprintRequired": true,
+    "editorialFindingReviewRequired": true,
     "bodyHeightUnchanged": true,
     "desktopAndMobileContained": true,
     "localDownloadOnly": true,
@@ -49,22 +51,22 @@
       },
       "checklist": {
         "left": 1009,
-        "top": 126,
+        "top": 127,
         "right": 1309,
         "bottom": 710,
         "width": 300,
-        "height": 584,
-        "clientHeight": 584,
-        "scrollHeight": 734,
+        "height": 583,
+        "clientHeight": 583,
+        "scrollHeight": 971,
         "overflowY": "auto"
       },
       "receipt": {
         "left": 1024,
-        "top": 548,
+        "top": 535,
         "right": 1295,
-        "bottom": 710,
+        "bottom": 696,
         "width": 271,
-        "height": 162
+        "height": 161
       },
       "receiptLockedAtZero": true,
       "reviewerInputVisible": true,
@@ -96,16 +98,16 @@
         "width": 372,
         "height": 260,
         "clientHeight": 259,
-        "scrollHeight": 699,
+        "scrollHeight": 913,
         "overflowY": "auto"
       },
       "receipt": {
         "left": 21,
-        "top": 542,
+        "top": 543,
         "right": 369,
         "bottom": 704,
         "width": 348,
-        "height": 162
+        "height": 161
       },
       "receiptLockedAtZero": true,
       "reviewerInputVisible": true,
@@ -114,7 +116,7 @@
     }
   ],
   "receiptVerification": {
-    "schemaVersion": "safeclaw-document-editorial-review-receipt/v1",
+    "schemaVersion": "safeclaw-document-editorial-review-receipt/v2",
     "reviewerRecorded": true,
     "reviewedAtRecorded": true,
     "generationFingerprintRecorded": true,
@@ -123,8 +125,14 @@
     "reviewerCheckCount": 5,
     "checksComplete": true,
     "fingerprintsCurrent": true,
+    "findingsBound": true,
+    "editorialFindingsFingerprint": "348:c2c22a0e",
+    "editorialFindingCount": 27,
+    "editorialFindingIdsRecorded": true,
+    "editorialFindingCategoriesReconcile": true,
     "reviewCompletion": {
       "localChecklistCompleted": true,
+      "editorialFindingsReviewed": true,
       "reviewerSelfAttested": true,
       "reviewerIdentityVerified": false,
       "serverRecorded": false,

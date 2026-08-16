@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-16T18:23:30.892Z
-Source HEAD at generation: 3de35eeac0992a91a48b5940ca2fd006940b90fa
-Live commit at generation: 3de35eeac0992a91a48b5940ca2fd006940b90fa
+Generated at: 2026-08-16T21:23:45.948Z
+Source HEAD at generation: 158e4f6081b5c466a8ee14bd036e737c800ec4a8
+Live commit at generation: 158e4f6081b5c466a8ee14bd036e737c800ec4a8
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -92,7 +92,7 @@ Overall: `northstar_open_approval_gated`
 - Live geometry: pass=4/4, fail=0; documents/checks=12/5; desktop/mobile zones=3/1
 - Keyboard and screen reader: cases=4/4; roving tabs=true; labelled tabpanel=true; Escape focus restore=true; cockpit ready=true
 - Human review completed: false; broad human wording review required: true
-- Local review receipt: verdict=PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT; ready=true; locked cases=2/2; documents/checks=12/5; API requests=0
+- Local review receipt: verdict=PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT; ready=true; locked cases=2/2; documents/checks=12/5; findings bound/count/reviewed=true/27/true; API requests=0
 - Receipt boundary: reviewer self-attested=true; identity verified=false; server recorded=false; approval granted=false; proves human identity=false
 - Mutations DB/provider/Share/vector/wiki/KOSHA: false/false/false/false/false/false; exact saved Share: MISSING_EVIDENCE
 - Boundary: this proves a bounded, local, stale-aware human-review workflow and fail-closed self-attested JSON receipt exist; it does not prove reviewer identity, server recording, completed human review, or approval.

@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `3de35eeac0992a91a48b5940ca2fd006940b90fa`
+Source HEAD: `158e4f6081b5c466a8ee14bd036e737c800ec4a8`
 
-Production `/api/build-info`: `3de35eeac0992a91a48b5940ca2fd006940b90fa`
+Production `/api/build-info`: `158e4f6081b5c466a8ee14bd036e737c800ec4a8`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `3de35eeac0992a91a48b5940ca2fd006940b90fa`
+Live rollup source head: `158e4f6081b5c466a8ee14bd036e737c800ec4a8`
 
 Live rollup matches production: `true`
 
@@ -48,7 +48,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live synthetic wording and field usability are measured separately: `PASS_LIVE_PRODUCTION_SYNTHETIC_WORDING_REVIEW`, live scenarios passed `5/5`, live pending `false`. This gate catches fixed-profile field leakage and selected-document wording defects, while broad human review and exact saved Share evidence remain separate.
 - Live 12-deliverable presence and applicability are measured separately: `PASS_LIVE_PRODUCTION_12_DELIVERABLE_BROAD_REVIEW`, UI/integrity/reviewed documents `12/12/12`, before missingUnexpected `5`, live missingUnexpected `0`, and workPermitDraft presentNonEmpty `5/5`. The six-document synthetic wording gate is not accepted as 12-document deliverable coverage; exact saved Share remains `MISSING_EVIDENCE`.
 - Live 12-deliverable automated editorial quality is measured separately: `PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY`, live scenarios `5/5`, reviewed document surface `60`, placeholder/legal/awkward/evidence mismatch `0/0/0/0`, and duplicate findings exact/near `38/100`. This is reviewer-ready automated evidence with humanReviewCompleted=`false`, not a combined human PASS; exact saved Share remains `MISSING_EVIDENCE`.
-- The live 12-document human editorial review cockpit is measured separately: `PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_COCKPIT`, live geometry `4/4`, documents/checks `12/5`, desktop/mobile zones `3/1`, accessibility cases `4/4`, roving tabs/labelled tabpanel/Escape focus restore `true/true/true`, and cockpitReady=`true`. Its local receipt is `PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT`, ready=`true`, locked cases `2/2`, documents/checks `12/5`, and API requests `0`. It proves the bounded local workflow and fail-closed self-attested JSON receipt exist; reviewer identity verified/server recorded/approval granted remain `false/false/false`, humanReviewCompleted=`false`, broadHumanWordingReviewRequired=`true`, mutations DB/provider/Share/vector/wiki/KOSHA=`false/false/false/false/false/false`, and exact saved Share remains `MISSING_EVIDENCE`.
+- The live 12-document human editorial review cockpit is measured separately: `PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_COCKPIT`, live geometry `4/4`, documents/checks `12/5`, desktop/mobile zones `3/1`, accessibility cases `4/4`, roving tabs/labelled tabpanel/Escape focus restore `true/true/true`, and cockpitReady=`true`. Its local receipt is `PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT`, ready=`true`, locked cases `2/2`, documents/checks `12/5`, bound findings/count/reviewed `true/27/true`, and API requests `0`. It proves the bounded local workflow and fail-closed self-attested JSON receipt exist; reviewer identity verified/server recorded/approval granted remain `false/false/false`, humanReviewCompleted=`false`, broadHumanWordingReviewRequired=`true`, mutations DB/provider/Share/vector/wiki/KOSHA=`false/false/false/false/false/false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Live editorial duplicate classification is measured separately: `PASS_LIVE_PRODUCTION_EDITORIAL_DUPLICATE_CLASSIFICATION_REVIEWER_READY`, generic template overuse `4->0`, retained reviewer findings exact/near `31/100`, and humanReviewCompleted=`false`. Only generic template overuse fails automatically; safety-control and legal-reference repetition remains visible, and exact saved Share remains `MISSING_EVIDENCE`.
 - Live editorial near-duplicate classification preserves `100->100` findings while reducing unclassified human-review-required `54->0`. The retained role-prefix/context/hazard/control categories are `81/9/8/2`; humanReviewCompleted=`false` and exact saved Share remains `MISSING_EVIDENCE`.
 - Live product capability truth is measured separately: `PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH`; manual/provider dispatch is `preview_only` with reason `persistent_idempotency_unavailable`, scheduled briefing email ready=`false`, photo Vision/OCR ready/accepted-only=`true/true`, and AI modes are `template, enhanced, full`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains `MISSING_EVIDENCE` and Documents/Share IA remains `PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP`.
