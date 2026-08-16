@@ -1,21 +1,29 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-reviewer-cockpit-browser/v1",
   "verdict": "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY",
-  "checkedAt": "2026-08-16T16:29:34.817Z",
-  "sourceHead": "ed40eac88c0d12eb45a9da2687f4991cd4a505e7",
+  "checkedAt": "2026-08-16T16:59:10.570Z",
+  "sourceHead": "63fa3d39478c03d840bbb18fe98bb8e82576ddda",
   "cases": 3,
   "passedCases": 3,
   "desktopPass": true,
   "mobilePass": true,
   "responsiveTabPanelPass": true,
   "draftStorageIdentityPass": true,
+  "titleReconciliationPass": true,
   "draftStorageIdentity": {
     "sameFingerprintPreserved": true,
     "sourceIdentityPresent": true,
     "staleEnvelopeInjected": true,
     "staleFingerprintDiscarded": true,
     "staleExportDisabled": true,
-    "staleDraftNotice": "후보 구성이 변경되어 이전 검토 초안을 복원하지 않았습니다. 0개 완료, 64개 입력이 남았습니다."
+    "staleDraftNotice": "후보 구성이 변경되어 이전 검토 초안을 복원하지 않았습니다. 0개 완료, 64개 입력이 남았습니다.",
+    "titleReconciliationAccess": {
+      "candidateVisible": true,
+      "officialCurrentTitleVisible": true,
+      "corpusSourceTitleVisible": true,
+      "provenanceFullyVisible": true
+    },
+    "titleReconciliationScreenshot": "evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\desktop-title-provenance-1440x723.png"
   },
   "results": [
     {
@@ -103,8 +111,8 @@
       "semanticGroupCount": 24,
       "evidenceReceiptCount": 24,
       "exportInitiallyDisabled": true,
-      "firstEvidenceBottom": 456.28125,
-      "firstEvidenceReceiptBottom": 445.28125,
+      "firstEvidenceBottom": 497.28125,
+      "firstEvidenceReceiptBottom": 486.28125,
       "firstCheckBottom": 224.59375,
       "horizontalOverflow": false,
       "candidateEndState": {
@@ -117,8 +125,8 @@
       },
       "mobileKeyboardState": null,
       "receiptAccess": {
-        "receiptTop": 417.28125,
-        "receiptBottom": 445.28125,
+        "receiptTop": 458.28125,
+        "receiptBottom": 486.28125,
         "paneTop": 75,
         "paneBottom": 662,
         "fullyVisibleInsidePane": true
@@ -189,7 +197,7 @@
       },
       "candidatePanelColumns": "minmax(0px, 1fr) 360px",
       "mobileModeDisplay": "grid",
-      "evidenceDisplay": "block",
+      "evidenceDisplay": "flex",
       "reviewDisplay": "none",
       "visibleCandidatePanelCount": 1,
       "candidateButtonCount": 8,
