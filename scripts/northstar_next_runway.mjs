@@ -39,7 +39,7 @@ const ARTIFACTS = Object.freeze({
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
-  currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "report.json"),
+  currentRepositorySecurityRescan: path.join("evaluation", "current-repository-security-rescan-2026-08-16", "report.json"),
   agentChatDurableAdmission: path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"),
   mcpProviderAdmission: path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"),
   shareRecipientContactVerification: path.join("evaluation", "share-recipient-contact-verification-2026-08-14", "report.json"),
@@ -883,6 +883,42 @@ function currentSecurityRemediationLedgerSummary(report) {
       : null,
     securityCompleteClaimAllowed: asBoolean(remaining.securityCompleteClaimAllowed),
     exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
+  };
+}
+
+/** @param {unknown} report */
+function currentRepositorySecurityRescanSummary(report) {
+  if (!isRecord(report)) return {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focusedTests = isRecord(verification.focusedTests) ? verification.focusedTests : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    scanId: asString(report.scanId),
+    scanRevision: asString(report.scanRevision),
+    productCommit: asString(report.productCommit),
+    productionCommit: asString(report.productionCommit),
+    originalBaselineFindingCount: typeof report.immutableOriginalBaselineFindingCount === "number"
+      ? report.immutableOriginalBaselineFindingCount
+      : null,
+    freshReportableFindingCount: typeof report.freshReportableFindingCount === "number"
+      ? report.freshReportableFindingCount
+      : null,
+    liveRemediatedCount: typeof report.approvalFreeRemediatedCount === "number"
+      ? report.approvalFreeRemediatedCount
+      : null,
+    databaseApprovalGatedRemainingCount: typeof report.approvalGatedRemainingCount === "number"
+      ? report.approvalGatedRemainingCount
+      : null,
+    focusedTestFiles: typeof focusedTests.files === "number" ? focusedTests.files : null,
+    focusedTestCount: typeof focusedTests.tests === "number" ? focusedTests.tests : null,
+    focusedTestStatus: asString(focusedTests.status),
+    typecheck: asString(verification.typecheck),
+    build: asString(build.status),
+    exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
+    databaseSecurityRemediation: asString(remaining.databaseSecurityRemediation),
+    liveAfterDeploymentRequired: asBoolean(remaining.liveAfterDeploymentRequired),
   };
 }
 
@@ -2190,6 +2226,10 @@ export function buildNorthstarNextRunway(options) {
     options.rootDir,
     ARTIFACTS.currentSecurityRemediationLedger,
   );
+  const currentRepositorySecurityRescan = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.currentRepositorySecurityRescan,
+  );
   const publicSearchDistributedRateLimitReadiness = readOptionalJson(
     options.rootDir,
     ARTIFACTS.publicSearchDistributedRateLimitReadiness,
@@ -2310,6 +2350,9 @@ export function buildNorthstarNextRunway(options) {
   const currentSecurityRemediationLedgerResult = currentSecurityRemediationLedgerSummary(
     currentSecurityRemediationLedger,
   );
+  const currentRepositorySecurityRescanResult = currentRepositorySecurityRescanSummary(
+    currentRepositorySecurityRescan,
+  );
   const publicSearchDistributedRateLimitReadinessResult = publicSearchDistributedRateLimitReadinessSummary(
     publicSearchDistributedRateLimitReadiness,
   );
@@ -2421,7 +2464,7 @@ export function buildNorthstarNextRunway(options) {
       {
         gate: "current_repository_security_rescan",
         state: "notice",
-        reason: "sealed current scan retains 15 findings under partial coverage; three live source remediations are bounded, 12 findings and a fresh post-remediation Standard scan remain open, and security-complete is false",
+        reason: "current rescan records 17 fresh findings: 9 live-remediated and 8 DB approval-gated; the gate remains notice, not proven or security-complete",
       },
       {
         gate: "mcp_generation_work_budget_security",
@@ -2525,6 +2568,7 @@ export function buildNorthstarNextRunway(options) {
     fullRepositorySecurityScan: fullRepositorySecuritySummary,
     repositorySecurityScanReconciliation: repositorySecurityScanReconciliationResult,
     currentSecurityRemediationLedger: currentSecurityRemediationLedgerResult,
+    currentRepositorySecurityRescan: currentRepositorySecurityRescanResult,
     publicSearchDistributedRateLimitReadiness: publicSearchDistributedRateLimitReadinessResult,
     publicGenerationAdmissionSecurity: publicGenerationAdmissionSecurityResult,
     securityFollowupRemediation: securityFollowupRemediationResult,

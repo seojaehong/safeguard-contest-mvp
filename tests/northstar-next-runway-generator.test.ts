@@ -280,6 +280,24 @@ type NextRunwayReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  currentRepositorySecurityRescan: {
+    verdict: string;
+    scanId: string;
+    scanRevision: string;
+    productCommit: string;
+    productionCommit: string;
+    originalBaselineFindingCount: number | null;
+    freshReportableFindingCount: number | null;
+    liveRemediatedCount: number | null;
+    databaseApprovalGatedRemainingCount: number | null;
+    focusedTestFiles: number | null;
+    focusedTestCount: number | null;
+    focusedTestStatus: string;
+    typecheck: string;
+    build: string;
+    exactSavedShareVerdict: string;
+    databaseSecurityRemediation: string;
+  };
   publicSearchDistributedRateLimitReadiness: {
     verdict: string;
     sourceHead: string;
@@ -2167,20 +2185,26 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     },
     remainingBoundaries: { securityCompleteClaimAllowed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
-  writeJson(root, "evaluation/current-full-repository-security-scan-2026-08-13/report.json", {
-    verdict: "NOTICE_LIVE_DEPLOYED_SOURCE_FIVE_FINDING_REMEDIATION_RESCAN_PENDING",
-    sourceHead: "fixture-sha",
-    currentScan: { scanId: "528ad724-6251-46fa-a812-48264396f321", reportableFindingCount: 15 },
-    currentSourceRemediation: {
-      latestSourceHead: "fixture-sha",
-      sourceRemediatedCount: 5,
-      liveDeployedRemediationCount: 5,
-      remainingReportableFindingCountBeforeRescan: 10,
-      freshPostRemediationScanRequired: true,
-      securityCompleteClaimAllowed: false,
-      productionBuild: { commitSha: "fixture-sha" },
+  writeJson(root, "evaluation/current-repository-security-rescan-2026-08-16/report.json", {
+    verdict: "PASS_LIVE_DEPLOYED_APPROVAL_FREE_SECURITY_REMEDIATION",
+    scanId: "6a0d7b6b-9dd7-42e9-88c4-eb3381af8455",
+    scanRevision: "67fb4cf16f44931f085cd827ab0b5d85d7817181",
+    productCommit: "33e01cdd",
+    productionCommit: "41c1090b31e0efedf845e24f8c1c5de17ebded8a",
+    immutableOriginalBaselineFindingCount: 18,
+    freshReportableFindingCount: 17,
+    approvalFreeRemediatedCount: 9,
+    approvalGatedRemainingCount: 8,
+    verification: {
+      focusedTests: { files: 9, tests: 110, status: "PASS" },
+      typecheck: "PASS",
+      build: { status: "PASS" },
     },
-    remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      databaseSecurityRemediation: "APPROVAL_GATED",
+      liveAfterDeploymentRequired: false,
+    },
   });
   writeJson(root, "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
@@ -3105,7 +3129,27 @@ describe("northstar next runway generator", () => {
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "current_repository_security_rescan",
       state: "notice",
+      reason: expect.stringContaining("9 live-remediated and 8 DB approval-gated"),
     }));
+    expect(report.currentRepositorySecurityRescan).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_APPROVAL_FREE_SECURITY_REMEDIATION",
+      scanId: "6a0d7b6b-9dd7-42e9-88c4-eb3381af8455",
+      scanRevision: "67fb4cf16f44931f085cd827ab0b5d85d7817181",
+      productCommit: "33e01cdd",
+      productionCommit: "41c1090b31e0efedf845e24f8c1c5de17ebded8a",
+      originalBaselineFindingCount: 18,
+      freshReportableFindingCount: 17,
+      liveRemediatedCount: 9,
+      databaseApprovalGatedRemainingCount: 8,
+      focusedTestFiles: 9,
+      focusedTestCount: 110,
+      focusedTestStatus: "PASS",
+      typecheck: "PASS",
+      build: "PASS",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      databaseSecurityRemediation: "APPROVAL_GATED",
+      liveAfterDeploymentRequired: false,
+    });
     expect(report.provenCurrentState).toContain("public_json_request_body_budget");
     expect(report.publicJsonRequestBodyBudget).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",

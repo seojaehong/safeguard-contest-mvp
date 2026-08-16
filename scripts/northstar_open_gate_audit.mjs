@@ -50,7 +50,7 @@ const EVIDENCE_PATHS = Object.freeze({
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
-  currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-13", "report.json"),
+  currentRepositorySecurityRescan: path.join("evaluation", "current-repository-security-rescan-2026-08-16", "report.json"),
   postRemediationRepositorySecurityScan: path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "report.json"),
   postRemediationSecuritySourceClosure: path.join("evaluation", "post-remediation-security-source-closure-2026-08-14", "report.json"),
   shareSessionRevocationRemediation: path.join("evaluation", "share-session-revocation-remediation-2026-08-14", "report.json"),
@@ -4422,56 +4422,44 @@ function evaluateCurrentRepositorySecurityRescanGate(rootDir) {
     });
   }
 
-  const immutableBaseline = isRecord(report.immutableBaseline) ? report.immutableBaseline : {};
-  const currentScan = isRecord(report.currentScan) ? report.currentScan : {};
-  const remediation = isRecord(report.currentSourceRemediation) ? report.currentSourceRemediation : {};
-  const productionBuild = isRecord(remediation.productionBuild) ? remediation.productionBuild : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focusedTests = isRecord(verification.focusedTests) ? verification.focusedTests : {};
+  const build = isRecord(verification.build) ? verification.build : {};
   const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
   const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
-  const items = Array.isArray(remediation.items) ? remediation.items.filter(isRecord) : [];
-  const slugs = new Set(items.map((item) => readString(item.slug)).filter(Boolean));
-  const canonical = isRecord(currentScan.canonicalArtifacts) ? currentScan.canonicalArtifacts : {};
-  const canonicalPaths = [canonical.manifest, canonical.findings, canonical.coverage, canonical.markdownProjection]
-    .map(readString)
-    .filter(Boolean);
-  const canonicalArtifactsExist = canonicalPaths.length === 4
-    && canonicalPaths.every((relativePath) => fs.existsSync(path.join(rootDir, relativePath)));
+  const approvalFreeRemediations = Array.isArray(report.approvalFreeRemediations)
+    ? report.approvalFreeRemediations.filter((item) => readString(item) !== "")
+    : [];
+  const approvalGatedRemaining = Array.isArray(report.approvalGatedRemaining)
+    ? report.approvalGatedRemaining.filter((item) => readString(item) !== "")
+    : [];
   const noMutation = mutationBoundary.dbMutationPerformed === false
     && mutationBoundary.providerDispatchCalled === false
     && mutationBoundary.shareSessionCreated === false
-    && mutationBoundary.embeddingOrVectorMutationPerformed === false
+    && mutationBoundary.vectorMutationPerformed === false
     && mutationBoundary.wikiPublicationPerformed === false
     && mutationBoundary.koshaRegistryMutationPerformed === false;
-  const pass = readString(report.verdict) === "NOTICE_LIVE_DEPLOYED_SOURCE_FIVE_FINDING_REMEDIATION_RESCAN_PENDING"
-    && readString(immutableBaseline.scanId) === "8fe9c06a-018c-446f-aa98-1b37df95287a"
-    && readNumber(immutableBaseline.accountedFindingCount) === 18
-    && immutableBaseline.preserved === true
-    && immutableBaseline.rewritten === false
-    && readString(currentScan.scanId) === "528ad724-6251-46fa-a812-48264396f321"
-    && readString(currentScan.status) === "completed"
-    && readString(currentScan.coverage) === "partial"
-    && readNumber(currentScan.reportableFindingCount) === 15
-    && readNumber(isRecord(currentScan.severityCounts) ? currentScan.severityCounts.medium : null) === 11
-    && readNumber(isRecord(currentScan.severityCounts) ? currentScan.severityCounts.low : null) === 4
-    && canonicalArtifactsExist
-    && readNumber(remediation.sourceRemediatedCount) === 5
-    && readNumber(remediation.liveDeployedRemediationCount) === 5
-    && readNumber(remediation.remainingReportableFindingCountBeforeRescan) === 10
-    && remediation.liveAfterDeploymentPending === false
-    && remediation.freshPostRemediationScanRequired === true
-    && remediation.securityCompleteClaimAllowed === false
-    && readString(remediation.latestSourceHead) === readString(productionBuild.commitSha)
-    && readString(productionBuild.branch) === "master"
-    && readString(productionBuild.environment) === "production"
-    && slugs.has("safety-reference-disconnect-cancellation")
-    && slugs.has("hwp-error-path-disclosure")
-    && slugs.has("sif-embedding-quality-admission")
-    && slugs.has("knowledge-reingest-review-reset")
-    && slugs.has("dispatch-archive-outcome-forgery")
+  const pass = readString(report.verdict) === "PASS_LIVE_DEPLOYED_APPROVAL_FREE_SECURITY_REMEDIATION"
+    && readString(report.scanId) === "6a0d7b6b-9dd7-42e9-88c4-eb3381af8455"
+    && readString(report.scanRevision) === "67fb4cf16f44931f085cd827ab0b5d85d7817181"
+    && readString(report.productCommit) === "33e01cdd"
+    && readString(report.productionCommit) === "41c1090b31e0efedf845e24f8c1c5de17ebded8a"
+    && readNumber(report.immutableOriginalBaselineFindingCount) === 18
+    && readNumber(report.freshReportableFindingCount) === 17
+    && readNumber(report.approvalFreeRemediatedCount) === 9
+    && approvalFreeRemediations.length === 9
+    && readNumber(report.approvalGatedRemainingCount) === 8
+    && approvalGatedRemaining.length === 8
+    && readNumber(report.approvalFreeRemediatedCount) + readNumber(report.approvalGatedRemainingCount) === 17
+    && readNumber(focusedTests.files) === 9
+    && readNumber(focusedTests.tests) === 110
+    && readString(focusedTests.status) === "PASS"
+    && readString(verification.typecheck) === "PASS"
+    && readString(build.status) === "PASS"
     && noMutation
     && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
-    && remainingBoundaries.approvalGatedBoundariesPreserved === true
-    && remainingBoundaries.securityCompleteClaimAllowed === false;
+    && readString(remainingBoundaries.databaseSecurityRemediation) === "APPROVAL_GATED"
+    && remainingBoundaries.liveAfterDeploymentRequired === false;
 
   return gateResult({
     id: "current_repository_security_rescan",
@@ -4479,11 +4467,11 @@ function evaluateCurrentRepositorySecurityRescanGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Standard current-revision scan 528ad724 is sealed with 15 findings (11 medium, 4 low) under partial coverage. Live source now bounds five findings, including fail-closed SIF corpus quality admission, changed-knowledge review reset, and authoritative dispatch receipt admission, while 10 findings and a fresh post-remediation scan remain open. The immutable original 18-accounted baseline is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
-      : `Current scan verdict=${readString(report.verdict) || "missing"}, scan=${readString(currentScan.scanId) || "missing"}, findings=${readNumber(currentScan.reportableFindingCount)}, sourceRemediated=${readNumber(remediation.sourceRemediatedCount)}, liveRemediated=${readNumber(remediation.liveDeployedRemediationCount)}, remaining=${readNumber(remediation.remainingReportableFindingCountBeforeRescan)}, canonical=${canonicalArtifactsExist}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+      ? "Current repository security rescan 6a0d7b6b records 17 fresh findings against the preserved original baseline of 18: 9 live-remediated and 8 DB approval-gated. Focused tests 9 files / 110 tests, typecheck, and build pass; no mutation occurred, live-after-deployment is not pending, and exact saved Share remains MISSING_EVIDENCE. This gate remains notice and is not a proven or security-complete claim while databaseSecurityRemediation is APPROVAL_GATED."
+      : `Current scan verdict=${readString(report.verdict) || "missing"}, scan=${readString(report.scanId) || "missing"}, revision=${readString(report.scanRevision) || "missing"}, baseline=${readNumber(report.immutableOriginalBaselineFindingCount)}, fresh=${readNumber(report.freshReportableFindingCount)}, liveRemediated=${readNumber(report.approvalFreeRemediatedCount)}/${approvalFreeRemediations.length}, dbApprovalGated=${readNumber(report.approvalGatedRemainingCount)}/${approvalGatedRemaining.length}, tests=${readNumber(focusedTests.files)}/${readNumber(focusedTests.tests)}/${readString(focusedTests.status) || "missing"}, typecheck=${readString(verification.typecheck) || "missing"}, build=${readString(build.status) || "missing"}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, databaseSecurityRemediation=${readString(remainingBoundaries.databaseSecurityRemediation) || "missing"}, livePending=${remainingBoundaries.liveAfterDeploymentRequired}.`,
     nextActions: pass
-      ? ["Remediate or explicitly defer the remaining 10 findings, then run a fresh post-remediation Standard scan before any security-complete claim."]
-      : ["Restore the exact sealed scan, five live source remediations, canonical artifacts, immutable baseline, and no-mutation boundaries."],
+      ? ["Obtain explicit approval before remediating the eight database findings; keep the gate at notice until those approval-gated boundaries are closed and rescanned."]
+      : ["Restore the exact current rescan identity, 18/17 baseline, 9/8 disposition, verification passes, and no-mutation approval boundaries."],
   });
 }
 
