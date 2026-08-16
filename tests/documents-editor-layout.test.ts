@@ -254,12 +254,16 @@ describe("documents editor layout", () => {
       expect(new Set(geometry.reviewKeys).size).toBe(12);
       expect(geometry.reviewKeys).toContain("riskAssessmentDraft");
       expect(await dialog.getByLabel(/사람 검토 0\/12종 완료/u).count()).toBe(1);
+      const receiptButton = dialog.getByTestId("document-editorial-review-receipt-download");
+      expect(await receiptButton.isDisabled()).toBe(true);
+      await dialog.getByRole("textbox", { name: "검토자" }).fill("현장 검토자");
 
       const checkboxes = dialog.getByRole("checkbox");
       expect(await checkboxes.count()).toBe(5);
       for (const checkbox of await checkboxes.all()) await checkbox.check();
       await dialog.getByRole("button", { name: "검토 완료로 표시" }).click();
       await dialog.getByLabel(/사람 검토 1\/12종 완료/u).waitFor({ state: "visible" });
+      expect(await receiptButton.isDisabled()).toBe(true);
       expect(await dialog.evaluate((element) => element.scrollTop)).toBe(0);
 
       const currentWorkpackAfter = await page.evaluate((key) => window.localStorage.getItem(key), CURRENT_WORKPACK_STORAGE_KEY);
@@ -290,6 +294,102 @@ describe("documents editor layout", () => {
       await context.close();
     }
   }, 120_000);
+
+  it("exports a complete local review receipt and relocks it when document text changes", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const context = await browser.newContext({ viewport: { width: 1440, height: 723 }, acceptDownloads: true });
+    const page = await context.newPage();
+    await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+    await page.waitForFunction(() => (
+      document.querySelector(".safeclaw-module-shell")?.getAttribute("data-ready") === "true"
+    ));
+
+    const apiRequests: string[] = [];
+    page.on("request", (request) => {
+      if (new URL(request.url()).pathname.startsWith("/api/")) apiRequests.push(request.url());
+    });
+    await page.getByTestId("document-editorial-review-launch").click();
+    const dialog = page.getByTestId("document-editorial-review-dialog");
+    await dialog.waitFor({ state: "visible" });
+    await dialog.getByRole("textbox", { name: "검토자" }).fill("안전관리자 홍길동");
+
+    const tabs = dialog.getByRole("tablist", { name: "검토 문서 선택" }).getByRole("tab");
+    expect(await tabs.count()).toBe(12);
+    for (let index = 0; index < 12; index += 1) {
+      await tabs.nth(index).click();
+      const checkboxes = dialog.getByRole("checkbox");
+      expect(await checkboxes.count()).toBe(5);
+      for (const checkbox of await checkboxes.all()) await checkbox.check();
+      await dialog.getByRole("button", { name: "검토 완료로 표시" }).click();
+    }
+
+    await dialog.getByLabel(/사람 검토 12\/12종 완료/u).waitFor({ state: "visible" });
+    const receiptButton = dialog.getByTestId("document-editorial-review-receipt-download");
+    expect(await receiptButton.isEnabled()).toBe(true);
+    const downloadPromise = page.waitForEvent("download");
+    await receiptButton.click();
+    const download = await downloadPromise;
+    const downloadPath = await download.path();
+    if (!downloadPath) throw new Error("Document review receipt path is unavailable");
+    const receipt = JSON.parse(await readFile(downloadPath, "utf8")) as {
+      schemaVersion: string;
+      reviewer: string;
+      reviewedAt: string;
+      generationFingerprint: string;
+      canonicalDocumentCount: number;
+      reviewerCheckCount: number;
+      reviewCompletion: Record<string, boolean>;
+      documents: Array<{
+        key: string;
+        completedAt: string;
+        reviewedTextFingerprint: string;
+        currentTextFingerprint: string;
+        checks: Record<string, boolean>;
+      }>;
+      mutationBoundary: Record<string, boolean | string>;
+    };
+    expect(receipt.schemaVersion).toBe("safeclaw-document-editorial-review-receipt/v1");
+    expect(receipt.reviewer).toBe("안전관리자 홍길동");
+    expect(receipt.reviewedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/u);
+    expect(receipt.generationFingerprint.length).toBeGreaterThan(0);
+    expect(receipt.canonicalDocumentCount).toBe(12);
+    expect(receipt.reviewerCheckCount).toBe(5);
+    expect(receipt.reviewCompletion).toEqual({
+      localChecklistCompleted: true,
+      reviewerSelfAttested: true,
+      reviewerIdentityVerified: false,
+      serverRecorded: false,
+      approvalGranted: false
+    });
+    expect(receipt.documents).toHaveLength(12);
+    expect(new Set(receipt.documents.map((document) => document.key)).size).toBe(12);
+    expect(receipt.documents.every((document) => (
+      document.completedAt.length > 0
+      && document.reviewedTextFingerprint === document.currentTextFingerprint
+      && Object.values(document.checks).filter(Boolean).length === 5
+    ))).toBe(true);
+    expect(receipt.mutationBoundary).toMatchObject({
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorRuntimeCalled: false,
+      wikiPublished: false,
+      koshaRegistryMutationPerformed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE"
+    });
+    expect(apiRequests).toEqual([]);
+
+    await dialog.getByRole("button", { name: "문서 사람 검토 닫기" }).click();
+    const sourceEditor = await openSourceEditor(page, "위험성평가표");
+    await sourceEditor.fill(`${await sourceEditor.inputValue()}\n영수증 이후 변경 문구`);
+    await page.getByTestId("document-editorial-review-launch").click();
+    const reopenedDialog = page.getByTestId("document-editorial-review-dialog");
+    await reopenedDialog.getByText("검토 갱신 필요", { exact: true }).waitFor({ state: "visible" });
+    expect(await reopenedDialog.getByTestId("document-editorial-review-receipt-download").isDisabled()).toBe(true);
+    expect(apiRequests).toEqual([]);
+
+    await context.close();
+  }, 180_000);
 
   it("supports keyboard and screen-reader navigation in the document review cockpit", async () => {
     if (!browser) throw new Error("Browser was not started");

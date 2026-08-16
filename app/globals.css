@@ -19950,6 +19950,34 @@ body:has(.safeclaw-landing) :is(
   width: 100%;
 }
 
+.safeclaw-document-review-receipt {
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid var(--workspace-rule);
+  padding-top: 12px;
+}
+
+.safeclaw-document-review-receipt label {
+  display: grid;
+  gap: 6px;
+  color: var(--workspace-muted);
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
+
+.safeclaw-document-review-receipt input,
+.safeclaw-document-review-receipt .button {
+  width: 100%;
+  min-height: 44px;
+}
+
+.safeclaw-document-review-receipt small {
+  color: var(--workspace-muted);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
 @media (max-width: 760px) {
   .safeclaw-document-review-dialog {
     width: calc(100vw - 16px);

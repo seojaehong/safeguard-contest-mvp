@@ -212,6 +212,18 @@ type EditorialReviewEntry = {
 };
 type EditorialReviewState = Partial<Record<DocumentKey, EditorialReviewEntry>>;
 
+type EditorialReviewReceiptDocument = {
+  key: DocumentKey;
+  title: string;
+  tier: LaunchDocument["tier"];
+  owner: string;
+  completedAt: string;
+  reviewedTextFingerprint: string;
+  currentTextFingerprint: string;
+  checks: Record<EditorialReviewCheckKey, true>;
+  note: string;
+};
+
 function emptyEditorialReviewEntry(): EditorialReviewEntry {
   return { checks: {}, note: "", completedAt: null, reviewedTextFingerprint: null };
 }
@@ -1078,8 +1090,10 @@ function DocumentEditorialReviewDialog({
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const storageKey = `safeclaw.documentEditorialReview.v1:${generationFingerprint}`;
+  const reviewerStorageKey = `safeclaw.documentEditorialReviewReviewer.v1:${generationFingerprint}`;
   const [activeDocumentKey, setActiveDocumentKey] = useState<DocumentKey>(selectedDocumentKey);
   const [reviewState, setReviewState] = useState<EditorialReviewState>({});
+  const [reviewer, setReviewer] = useState("");
   const [loadedStorageKey, setLoadedStorageKey] = useState<string | null>(null);
 
   useEffect(() => {
@@ -1101,6 +1115,25 @@ function DocumentEditorialReviewDialog({
       console.warn("document editorial review state save failed", error);
     }
   }, [loadedStorageKey, reviewState, storageKey]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      setReviewer((window.localStorage.getItem(reviewerStorageKey) || "").slice(0, 120));
+    } catch (error) {
+      console.warn("document editorial reviewer load failed", error);
+      setReviewer("");
+    }
+  }, [reviewerStorageKey]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(reviewerStorageKey, reviewer);
+    } catch (error) {
+      console.warn("document editorial reviewer save failed", error);
+    }
+  }, [reviewer, reviewerStorageKey]);
 
   useEffect(() => {
     const reviewedCount = launchDocuments.filter((document) => (
@@ -1135,6 +1168,7 @@ function DocumentEditorialReviewDialog({
   const completedDocumentCount = launchDocuments.filter((document) => (
     editorialReviewIsCurrent(data, document.key, reviewState[document.key])
   )).length;
+  const receiptReady = completedDocumentCount === launchDocuments.length && reviewer.trim().length > 0;
 
   function updateEntry(updater: (entry: EditorialReviewEntry) => EditorialReviewEntry) {
     setReviewState((current) => ({
@@ -1168,6 +1202,79 @@ function DocumentEditorialReviewDialog({
         ? null
         : editorialTextFingerprint(buildDerivedDocumentText(data, activeDocument.key))
     }));
+  }
+
+  function downloadReviewReceipt() {
+    if (!receiptReady || typeof window === "undefined") return;
+
+    const documents = launchDocuments.map<EditorialReviewReceiptDocument>((document) => {
+      const entry = reviewState[document.key];
+      const currentTextFingerprint = editorialTextFingerprint(buildDerivedDocumentText(data, document.key));
+      if (!entry?.completedAt || entry.reviewedTextFingerprint !== currentTextFingerprint) {
+        throw new Error(`document-editorial-review-receipt-stale:${document.key}`);
+      }
+
+      const checks = Object.fromEntries(editorialReviewChecks.map((check) => {
+        if (entry.checks[check.key] !== true) {
+          throw new Error(`document-editorial-review-receipt-incomplete:${document.key}:${check.key}`);
+        }
+        return [check.key, true] as const;
+      })) as Record<EditorialReviewCheckKey, true>;
+
+      return {
+        key: document.key,
+        title: document.title,
+        tier: document.tier,
+        owner: document.owner,
+        completedAt: entry.completedAt,
+        reviewedTextFingerprint: entry.reviewedTextFingerprint,
+        currentTextFingerprint,
+        checks,
+        note: entry.note
+      };
+    });
+    const reviewedAt = documents.reduce((latest, document) => (
+      document.completedAt > latest ? document.completedAt : latest
+    ), documents[0]?.completedAt || new Date().toISOString());
+    const receipt = {
+      schemaVersion: "safeclaw-document-editorial-review-receipt/v1",
+      exportedAt: new Date().toISOString(),
+      reviewer: reviewer.trim(),
+      reviewedAt,
+      generationFingerprint,
+      canonicalDocumentCount: launchDocuments.length,
+      reviewerCheckCount: editorialReviewChecks.length,
+      reviewCompletion: {
+        localChecklistCompleted: true,
+        reviewerSelfAttested: true,
+        reviewerIdentityVerified: false,
+        serverRecorded: false,
+        approvalGranted: false
+      },
+      documents,
+      mutationBoundary: {
+        dbMutationPerformed: false,
+        providerDispatchCalled: false,
+        shareSessionCreated: false,
+        vectorRuntimeCalled: false,
+        wikiPublished: false,
+        koshaRegistryMutationPerformed: false,
+        exactSavedShareVerdict: "MISSING_EVIDENCE"
+      }
+    };
+    const blob = new Blob([`${JSON.stringify(receipt, null, 2)}\n`], { type: "application/json;charset=utf-8" });
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    const filenameFingerprint = generationFingerprint.replace(/[^a-zA-Z0-9_-]/gu, "-").slice(0, 24);
+    anchor.href = url;
+    anchor.download = `safeclaw-document-review-${filenameFingerprint || "receipt"}.json`;
+    try {
+      document.body.appendChild(anchor);
+      anchor.click();
+    } finally {
+      anchor.remove();
+      window.URL.revokeObjectURL(url);
+    }
   }
 
   function moveDocumentFocus(event: KeyboardEvent<HTMLButtonElement>, index: number) {
@@ -1313,6 +1420,33 @@ function DocumentEditorialReviewDialog({
               {activeReviewIsCurrent ? "완료 취소" : activeReviewIsStale ? "다시 검토 완료" : "검토 완료로 표시"}
             </button>
           </div>
+          <section className="safeclaw-document-review-receipt" aria-label="문서 검토 영수증">
+            <label>
+              <span>검토자</span>
+              <input
+                type="text"
+                value={reviewer}
+                maxLength={120}
+                autoComplete="name"
+                placeholder="이름 또는 직책"
+                onChange={(event) => setReviewer(event.target.value)}
+              />
+            </label>
+            <button
+              type="button"
+              className="button secondary"
+              data-testid="document-editorial-review-receipt-download"
+              disabled={!receiptReady}
+              onClick={downloadReviewReceipt}
+            >
+              검토 영수증 받기
+            </button>
+            <small role="status" aria-live="polite">
+              {receiptReady
+                ? "12종 현재 문구와 검토자 정보가 준비됐습니다."
+                : `12종 완료와 검토자 입력 후 열립니다. 현재 ${completedDocumentCount}/${launchDocuments.length}종`}
+            </small>
+          </section>
         </aside>
       </div>
     </dialog>
