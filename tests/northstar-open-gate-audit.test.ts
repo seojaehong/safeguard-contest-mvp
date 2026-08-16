@@ -2236,6 +2236,38 @@ function createFixtureRoot(): string {
       },
     ],
   });
+  writeJson(rootDir, path.join("evaluation", "documents-mobile-review-launch-2026-08-17", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_REVIEW_LAUNCH_CONTAINMENT",
+    sourceHead: "product-sha",
+    productionCommit: "evidence-sha",
+    afterLive: [
+      {
+        viewport: { width: 1440, height: 723 },
+        bodyHeight: 723,
+        bodyRatio: 1,
+        horizontalOverflow: false,
+        overlapCount: 0,
+        reviewLaunch: { top: 212, bottom: 242, height: 30 },
+      },
+      {
+        viewport: { width: 390, height: 723 },
+        bodyHeight: 723,
+        bodyRatio: 1,
+        horizontalOverflow: false,
+        overlapCount: 0,
+        coreDocumentCount: 3,
+        reviewLaunch: { top: 256, bottom: 300, height: 44 },
+        thirdCoreDocument: { top: 186, bottom: 252 },
+      },
+    ],
+    boundaries: {
+      liveAfterDeploymentPending: false,
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "document-section-navigation-2026-08-02", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_SECTION_NAVIGATION",
     sourceHead: "fixture-sha",
@@ -5067,6 +5099,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("Scoped first-task cockpit proof only, not full Documents/Share IA completion");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("12 unique document keys");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exactly 3 visible core launchers");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("mobile document-review launcher overlap moved from 1 to 0");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("0 visible supporting launchers");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("legacy document index hidden");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("6 readable section tabs");

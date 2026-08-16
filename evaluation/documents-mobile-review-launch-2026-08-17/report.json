@@ -1,7 +1,9 @@
 {
   "schema": "safeclaw-documents-mobile-review-launch/v1",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_DOCUMENT_REVIEW_LAUNCH_CONTAINMENT",
+  "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_REVIEW_LAUNCH_CONTAINMENT",
   "sourceHead": "b58066dd58777df4f6bd251418e202a5b7d045d1",
+  "evidenceHead": "71ed7df397161f800480a8de0ccf3b79890eea0c",
+  "productionCommit": "71ed7df397161f800480a8de0ccf3b79890eea0c",
   "baseUrl": "http://127.0.0.1:3092",
   "route": "/documents?theme=day",
   "before": {
@@ -87,6 +89,68 @@
       "screenshotSha256": "4a1aafe5a3257905ce09bd36d16764cf0b6e9aedc55fc1dfeae88487e2f9a58f"
     }
   ],
+  "afterLive": [
+    {
+      "viewport": {
+        "label": "live-desktop-1440x723",
+        "width": 1440,
+        "height": 723
+      },
+      "bodyHeight": 723,
+      "bodyRatio": 1,
+      "horizontalOverflow": false,
+      "overlapCount": 0,
+      "reviewLaunch": {
+        "left": 360,
+        "top": 212,
+        "right": 480,
+        "bottom": 242,
+        "width": 120,
+        "height": 30
+      },
+      "screenshot": "live-desktop-1440x723.png",
+      "screenshotSha256": "856369774182a8887f0c58c9f62c9020fc26511c14f4627966bd4b4bb264c09a"
+    },
+    {
+      "viewport": {
+        "label": "live-mobile-390x723",
+        "width": 390,
+        "height": 723
+      },
+      "bodyHeight": 723,
+      "bodyRatio": 1,
+      "horizontalOverflow": false,
+      "overlapCount": 0,
+      "coreDocumentCount": 3,
+      "reviewLaunch": {
+        "left": 225,
+        "top": 256,
+        "right": 345,
+        "bottom": 300,
+        "width": 120,
+        "height": 44
+      },
+      "supportingDocumentSummary": {
+        "left": 45,
+        "top": 256,
+        "right": 221,
+        "bottom": 301,
+        "width": 176,
+        "height": 45
+      },
+      "thirdCoreDocument": {
+        "label": "TBM 기록",
+        "left": 250,
+        "top": 186,
+        "right": 345,
+        "bottom": 252,
+        "width": 95,
+        "height": 66
+      },
+      "screenshot": "live-mobile-390x723.png",
+      "screenshotSha256": "c615da84e33a709712b6f3bfd4d7aca2ed78c30ab780c96d16a1baa5b4668f3f"
+    }
+  ],
   "verification": {
     "focusedBrowser": {
       "testFilesPassed": 1,
@@ -104,8 +168,8 @@
     "staticPages": 28
   },
   "boundaries": {
-    "currentSourceLocalProductionOnly": true,
-    "liveAfterDeploymentPending": true,
+    "currentSourceLocalProductionOnly": false,
+    "liveAfterDeploymentPending": false,
     "routeSplitAloneAcceptedAsFix": false,
     "dbMutationPerformed": false,
     "providerDispatchCalled": false,

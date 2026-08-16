@@ -1,8 +1,10 @@
 # Documents mobile review launch containment
 
-Verdict: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_DOCUMENT_REVIEW_LAUNCH_CONTAINMENT`
+Verdict: `PASS_LIVE_PRODUCTION_DOCUMENT_REVIEW_LAUNCH_CONTAINMENT`
 
 Product source: `b58066dd58777df4f6bd251418e202a5b7d045d1`
+
+Production evidence head: `71ed7df397161f800480a8de0ccf3b79890eea0c`
 
 ## Result
 
@@ -22,7 +24,8 @@ The 390x723 Documents cockpit previously placed the absolute-positioned `문서 
 - Strict TypeScript check: PASS.
 - Next.js production build: PASS, 28 static pages generated.
 - Screenshots: `desktop-1440x723.png`, `mobile-390x723.png`.
+- Live screenshots: `live-desktop-1440x723.png`, `live-mobile-390x723.png`.
 
 ## Boundary
 
-This is current-source local-production evidence. Live after-deployment verification is still required. It does not treat route splitting alone as the IA fix, create a Share session, call a provider, mutate a database/vector/KOSHA registry, or publish Wiki content. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.
+Production reached the evidence head and the desktop/mobile geometry was remeasured against `https://www.safeclaw.kr`. This evidence does not treat route splitting alone as the IA fix, create a Share session, call a provider, mutate a database/vector/KOSHA registry, or publish Wiki content. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.
