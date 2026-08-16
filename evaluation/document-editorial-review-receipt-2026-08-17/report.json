@@ -1,0 +1,159 @@
+{
+  "schemaVersion": "safeclaw-document-editorial-review-receipt-evidence/v1",
+  "generatedAt": "2026-08-16T17:38:14.657Z",
+  "mode": "current-source-local-production",
+  "baseUrl": "http://127.0.0.1:3094",
+  "sourceHead": "45cb66e92241fca3167d537ed676cd6532070db1",
+  "productionBuild": null,
+  "sourceHeadMatchesProduction": false,
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_DOCUMENT_EDITORIAL_REVIEW_RECEIPT",
+  "acceptanceContract": {
+    "canonicalDocumentCount": 12,
+    "reviewerCheckCount": 5,
+    "reviewerRequired": true,
+    "receiptLockedBeforeAllDocuments": true,
+    "currentTextFingerprintRequired": true,
+    "bodyHeightUnchanged": true,
+    "desktopAndMobileContained": true,
+    "localDownloadOnly": true,
+    "reviewerIdentityVerified": false,
+    "serverRecorded": false,
+    "approvalGranted": false
+  },
+  "results": [
+    {
+      "label": "desktop-1440x723",
+      "viewport": {
+        "width": 1440,
+        "height": 723
+      },
+      "bodyHeightBefore": 723,
+      "bodyHeightAfter": 723,
+      "bodyHeightUnchanged": true,
+      "dialog": {
+        "left": 130,
+        "top": 12,
+        "right": 1310,
+        "bottom": 711,
+        "width": 1180,
+        "height": 699
+      },
+      "checklist": {
+        "left": 1009,
+        "top": 126,
+        "right": 1309,
+        "bottom": 710,
+        "width": 300,
+        "height": 584,
+        "clientHeight": 584,
+        "scrollHeight": 734,
+        "overflowY": "auto"
+      },
+      "receipt": {
+        "left": 1024,
+        "top": 548,
+        "right": 1295,
+        "bottom": 710,
+        "width": 271,
+        "height": 162
+      },
+      "receiptLockedAtZero": true,
+      "reviewerInputVisible": true,
+      "horizontalOverflow": false,
+      "screenshot": "desktop-1440x723-locked.png"
+    },
+    {
+      "label": "mobile-390x723",
+      "viewport": {
+        "width": 390,
+        "height": 723
+      },
+      "bodyHeightBefore": 723,
+      "bodyHeightAfter": 723,
+      "bodyHeightUnchanged": true,
+      "dialog": {
+        "left": 8,
+        "top": 8,
+        "right": 382,
+        "bottom": 715,
+        "width": 374,
+        "height": 707
+      },
+      "checklist": {
+        "left": 9,
+        "top": 454,
+        "right": 381,
+        "bottom": 714,
+        "width": 372,
+        "height": 260,
+        "clientHeight": 259,
+        "scrollHeight": 699,
+        "overflowY": "auto"
+      },
+      "receipt": {
+        "left": 21,
+        "top": 542,
+        "right": 369,
+        "bottom": 704,
+        "width": 348,
+        "height": 162
+      },
+      "receiptLockedAtZero": true,
+      "reviewerInputVisible": true,
+      "horizontalOverflow": false,
+      "screenshot": "mobile-390x723-locked.png"
+    }
+  ],
+  "receiptVerification": {
+    "schemaVersion": "safeclaw-document-editorial-review-receipt/v1",
+    "reviewerRecorded": true,
+    "reviewedAtRecorded": true,
+    "generationFingerprintRecorded": true,
+    "documentCount": 12,
+    "uniqueDocumentKeyCount": 12,
+    "reviewerCheckCount": 5,
+    "checksComplete": true,
+    "fingerprintsCurrent": true,
+    "reviewCompletion": {
+      "localChecklistCompleted": true,
+      "reviewerSelfAttested": true,
+      "reviewerIdentityVerified": false,
+      "serverRecorded": false,
+      "approvalGranted": false
+    },
+    "mutationBoundary": {
+      "dbMutationPerformed": false,
+      "providerDispatchCalled": false,
+      "shareSessionCreated": false,
+      "vectorRuntimeCalled": false,
+      "wikiPublished": false,
+      "koshaRegistryMutationPerformed": false,
+      "exactSavedShareVerdict": "MISSING_EVIDENCE"
+    },
+    "apiRequestCount": 0,
+    "downloadSuggestedFilename": "safeclaw-document-review-00984ba6.json",
+    "screenshot": "desktop-ready-1440x723.png"
+  },
+  "reviewBoundary": {
+    "automatedInteractionOnly": true,
+    "humanReviewCompleted": false,
+    "localReceiptProvesHumanIdentity": false,
+    "broadHumanWordingReviewRequired": true
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorRuntimeCalled": false,
+    "wikiPublished": false,
+    "koshaRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "verification": {
+    "focusedReceiptBrowser": "PASS: 1 file / 1 test",
+    "focusedExistingReviewBrowser": "PASS: 1 file / 1 test",
+    "adjacentFullDocumentsBrowser": "INITIAL: 40/41 PASS; mobile-night evidence visibility timing RED; focused rerun PASS 1/1",
+    "typecheck": "PASS",
+    "build": "PASS: Next 15.5.22, 28 static pages"
+  }
+}
