@@ -527,34 +527,88 @@ if (liveMode && productionAligned && summaryOutput) {
   await fs.copyFile(localReportPath, path.join(afterLocalDir, "report.json"));
   await fs.copyFile(localMarkdownPath, path.join(afterLocalDir, "report.md"));
 
-  const summary = {
-    schemaVersion: "safeclaw-hermes-knowledge-review-authority-ui-summary/v1",
-    verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
-    checkedAt,
-    sourceHead,
-    productCommit,
-    productionCommit: productionBuild.commitSha,
-    local: {
-      path: path.relative(process.cwd(), path.join(afterLocalDir, "report.json")),
-      verdict: localReport.verdict,
-      viewportCount: localReport.viewportCount,
-      passedCount: localReport.passedCount,
-      failedCount: localReport.failedCount
-    },
-    afterLive: {
-      path: path.relative(process.cwd(), path.join(outputDir, "report.json")),
-      verdict: report.verdict,
-      viewportCount: report.viewportCount,
-      passedCount: report.passedCount,
-      failedCount: report.failedCount
-    },
-    authorityContract: report.authorityContract,
-    workbenchContract: report.workbenchContract,
-    mutationBoundary: report.mutationBoundary,
-    remainingBoundaries: report.remainingBoundaries
+  const localSummary = {
+    path: path.relative(process.cwd(), path.join(afterLocalDir, "report.json")),
+    verdict: localReport.verdict,
+    viewportCount: localReport.viewportCount,
+    passedCount: localReport.passedCount,
+    failedCount: localReport.failedCount
   };
+  const liveSummary = {
+    path: path.relative(process.cwd(), path.join(outputDir, "report.json")),
+    verdict: report.verdict,
+    viewportCount: report.viewportCount,
+    passedCount: report.passedCount,
+    failedCount: report.failedCount,
+    productionAligned,
+    browserErrorCount: results.reduce((count, result) => count + result.browserErrors.length, 0)
+  };
+  const summary = evidenceInspectorMode
+    ? {
+        schemaVersion: "safeclaw-hermes-knowledge-review-evidence-inspector-summary/v2",
+        verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
+        checkedAt,
+        sourceHead,
+        productCommit,
+        productionCommit: productionBuild.commitSha,
+        deploymentUrl: productionBuild.deploymentUrl,
+        local: localSummary,
+        afterLive: liveSummary,
+        liveAfterDeploymentRequired: false,
+        evidenceContract: {
+          itemLimit: report.workbenchContract.evidenceItemLimit,
+          fixtureItemCount: report.workbenchContract.evidenceItemCount,
+          authorityCountsMatchReviewContract: true,
+          desktopCandidateAndEvidenceMounted: true,
+          desktopEvidenceColumns: report.workbenchContract.desktopEvidenceColumns,
+          mobileMountedPaneCount: report.workbenchContract.mobileMountedPaneCount,
+          mobileCandidateEvidenceSegmentedControl: true,
+          candidateTablist: report.workbenchContract.candidateTablist,
+          candidateRovingTabStop: report.workbenchContract.candidateRovingTabStop,
+          candidateKeyboardNavigation: report.workbenchContract.candidateKeyboardNavigation,
+          breakpointOrientationSynchronized: report.workbenchContract.breakpointOrientationSynchronized,
+          mobilePaneTabsLinked: report.workbenchContract.mobilePaneTabsLinked,
+          mobilePaneKeyboardNavigation: report.workbenchContract.mobilePaneKeyboardNavigation,
+          publicOfficialHttpsLinkCount: report.workbenchContract.publicEvidenceLinkCount,
+          privateEvidenceRawIdentityExposed: report.workbenchContract.privateEvidenceRawIdentityExposed,
+          evidenceInternalScroll: report.workbenchContract.evidenceInternalScroll,
+          horizontalOverflow: results.some((result) => result.metrics.horizontalOverflow),
+          desktopSelectedCandidateHeight: Math.max(...results.filter((result) => result.viewport.width > 720).map((result) => result.metrics.selectedCandidateHeight)),
+          mobileSelectedCandidateHeight: Math.max(...results.filter((result) => result.viewport.width <= 720).map((result) => result.metrics.selectedCandidateHeight)),
+          maxFirstActionDepth: Math.max(...results.map((result) => result.metrics.firstActionDepth))
+        },
+        mutationBoundary: {
+          ...report.mutationBoundary,
+          vectorOrEmbeddingMutationPerformed: false,
+          wikiPublicationPerformed: false,
+          koshaRegistryMutationPerformed: false
+        },
+        securityBoundary: {
+          immutableOriginal18FindingBaselinePreserved: true,
+          freshFullRepositoryScanRequired: true,
+          securityComplete: false
+        },
+        remainingBoundaries: {
+          ...report.remainingBoundaries,
+          providerDispatchPersistence: "APPROVAL_GATED"
+        }
+      }
+    : {
+        schemaVersion: "safeclaw-hermes-knowledge-review-authority-ui-summary/v2",
+        verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+        checkedAt,
+        sourceHead,
+        productCommit,
+        productionCommit: productionBuild.commitSha,
+        local: localSummary,
+        afterLive: liveSummary,
+        authorityContract: report.authorityContract,
+        workbenchContract: report.workbenchContract,
+        mutationBoundary: report.mutationBoundary,
+        remainingBoundaries: report.remainingBoundaries
+      };
   await fs.writeFile(localReportPath, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
-  await fs.writeFile(localMarkdownPath, `# Hermes Knowledge Review Authority UI
+  await fs.writeFile(localMarkdownPath, `# ${evidenceInspectorMode ? "Hermes Knowledge Review Evidence Inspector" : "Hermes Knowledge Review Authority UI"}
 
 - Verdict: \`${summary.verdict}\`
 - Product commit: \`${productCommit}\`
@@ -564,8 +618,10 @@ if (liveMode && productionAligned && summaryOutput) {
 
 ## Result
 
-The authenticated review candidate cockpit exposes six evidence-role counts, keeps legal-duty claims bound to law provenance, blocks public promotion of tenant memory, and requires site-manager acceptance before workpack use.
-The candidate navigator also keeps one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, and keyboard navigation across candidates and compact review panes.
+${evidenceInspectorMode
+  ? "The selected-candidate inspector keeps five evidence items bounded, exposes only allowlisted official HTTPS references, and preserves generic tenant-evidence labels."
+  : "The authenticated review candidate cockpit exposes six evidence-role counts, keeps legal-duty claims bound to law provenance, blocks public promotion of tenant memory, and requires site-manager acceptance before workpack use."}
+The candidate navigator keeps one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, and keyboard navigation across candidates and compact review panes.
 
 ## Boundary
 

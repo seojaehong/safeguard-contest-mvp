@@ -1206,6 +1206,12 @@ function createFixtureRoot(): string {
       desktopColumns: 2,
       mobileColumns: 1,
       candidateBodyInternalScroll: true,
+      candidateTablist: true,
+      candidateRovingTabStop: true,
+      candidateKeyboardNavigation: true,
+      breakpointOrientationSynchronized: true,
+      mobilePaneTabsLinked: true,
+      mobilePaneKeyboardNavigation: true,
     },
     mutationBoundary: {
       dbMutationPerformed: false,
@@ -2811,6 +2817,12 @@ function createFixtureRoot(): string {
       desktopEvidenceColumns: 2,
       mobileMountedPaneCount: 1,
       mobileCandidateEvidenceSegmentedControl: true,
+      candidateTablist: true,
+      candidateRovingTabStop: true,
+      candidateKeyboardNavigation: true,
+      breakpointOrientationSynchronized: true,
+      mobilePaneTabsLinked: true,
+      mobilePaneKeyboardNavigation: true,
       publicOfficialHttpsLinkCount: 3,
       privateEvidenceRawIdentityExposed: false,
       evidenceInternalScroll: true,
@@ -6501,11 +6513,17 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const rootDir = createFixtureRoot();
     const reportPath = path.join(rootDir, "evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json");
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
-      evidenceContract: { privateEvidenceRawIdentityExposed: boolean };
+      evidenceContract: {
+        privateEvidenceRawIdentityExposed: boolean;
+        candidateKeyboardNavigation: boolean;
+        mobilePaneKeyboardNavigation: boolean;
+      };
       securityBoundary: { securityComplete: boolean };
       remainingBoundaries: { exactSavedShareVerdict: string };
     };
     report.evidenceContract.privateEvidenceRawIdentityExposed = true;
+    report.evidenceContract.candidateKeyboardNavigation = false;
+    report.evidenceContract.mobilePaneKeyboardNavigation = false;
     report.securityBoundary.securityComplete = true;
     report.remainingBoundaries.exactSavedShareVerdict = "PASS";
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
@@ -6516,6 +6534,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     });
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("exactShare=PASS");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("securityComplete=true");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("candidateKeyboard=false");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("mobilePaneKeyboard=false");
   });
 
   it("fails the public Ask distributed admission gate closed on provider execution or saved Share overclaim", async () => {
@@ -6575,6 +6595,27 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("bodies=2");
+  });
+
+  it("fails Hermes reviewer UI closed when keyboard navigation is not proven", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "hermes-knowledge-review-selected-workbench-2026-08-14", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      workbenchContract: {
+        candidateKeyboardNavigation: boolean;
+        mobilePaneKeyboardNavigation: boolean;
+      };
+    };
+    report.workbenchContract.candidateKeyboardNavigation = false;
+    report.workbenchContract.mobilePaneKeyboardNavigation = false;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "hermes_knowledge_review_ui");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.detail).toContain("candidateKeyboard=false");
+    expect(gate?.detail).toContain("mobilePaneKeyboard=false");
   });
 
   it("fails security remediation waves closed when non-closure boundaries are weakened", async () => {

@@ -519,6 +519,12 @@ function evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir) {
     && workbenchContract.desktopColumns === 2
     && workbenchContract.mobileColumns === 1
     && workbenchContract.candidateBodyInternalScroll === true
+    && workbenchContract.candidateTablist === true
+    && workbenchContract.candidateRovingTabStop === true
+    && workbenchContract.candidateKeyboardNavigation === true
+    && workbenchContract.breakpointOrientationSynchronized === true
+    && workbenchContract.mobilePaneTabsLinked === true
+    && workbenchContract.mobilePaneKeyboardNavigation === true
     && noMutation
     && remainingBoundaries.llmWikiPublication === "APPROVAL_GATED"
     && remainingBoundaries.supabaseRlsLaunchIsolation === "APPROVAL_GATED"
@@ -530,7 +536,7 @@ function evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir) {
       label: "Hermes knowledge reviewer UI",
       state: "proven",
       evidencePath,
-      detail: "Live authenticated reviewer cockpit passes 8/8 Day/Night desktop and mobile geometry cases with three navigable candidates, exactly one selected candidate/body, desktop two-column and mobile one-column containment, and internal candidate-body scroll. It exposes six SIF -> KOSHA -> law -> tenant-memory evidence roles, requires law provenance and site-manager acceptance, and performs no DB, provider, publication, or Share mutation. LLM Wiki/RLS remain APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE.",
+      detail: "Live authenticated reviewer cockpit passes 8/8 Day/Night desktop and mobile geometry cases with three navigable candidates, exactly one selected candidate/body, desktop two-column and mobile one-column containment, and internal candidate-body scroll. Candidate tabs keep one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, Arrow/Home/End navigation, and keyboard-operable compact panes. It exposes six SIF -> KOSHA -> law -> tenant-memory evidence roles, requires law provenance and site-manager acceptance, and performs no DB, provider, publication, or Share mutation. LLM Wiki/RLS remain APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE.",
       nextActions: [],
     });
   }
@@ -540,8 +546,8 @@ function evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir) {
     label: "Hermes knowledge reviewer UI",
     state: "contradicted",
     evidencePath,
-    detail: `Hermes reviewer UI contract failed: local=${readString(local.verdict) || "missing"}, live=${readString(afterLive.verdict) || "missing"}, candidates=${readNumber(workbenchContract.candidateCount)}, selected=${readNumber(workbenchContract.selectedCandidateCount)}, bodies=${readNumber(workbenchContract.selectedBodyCount)}, desktopColumns=${readNumber(workbenchContract.desktopColumns)}, mobileColumns=${readNumber(workbenchContract.mobileColumns)}, internalScroll=${String(workbenchContract.candidateBodyInternalScroll)}, humanReview=${String(authorityContract.humanReviewRequired)}, noMutation=${String(noMutation)}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
-    nextActions: ["Restore the six-role reviewer cockpit, live geometry, human-review, tenant-memory, and no-mutation boundaries."],
+    detail: `Hermes reviewer UI contract failed: local=${readString(local.verdict) || "missing"}, live=${readString(afterLive.verdict) || "missing"}, candidates=${readNumber(workbenchContract.candidateCount)}, selected=${readNumber(workbenchContract.selectedCandidateCount)}, bodies=${readNumber(workbenchContract.selectedBodyCount)}, desktopColumns=${readNumber(workbenchContract.desktopColumns)}, mobileColumns=${readNumber(workbenchContract.mobileColumns)}, internalScroll=${String(workbenchContract.candidateBodyInternalScroll)}, candidateTabs=${String(workbenchContract.candidateTablist)}, rovingTabStop=${String(workbenchContract.candidateRovingTabStop)}, candidateKeyboard=${String(workbenchContract.candidateKeyboardNavigation)}, mobilePaneKeyboard=${String(workbenchContract.mobilePaneKeyboardNavigation)}, humanReview=${String(authorityContract.humanReviewRequired)}, noMutation=${String(noMutation)}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: ["Restore the six-role reviewer cockpit, live geometry, linked roving tabs, keyboard navigation, human-review, tenant-memory, and no-mutation boundaries."],
   });
 }
 
@@ -4328,6 +4334,12 @@ function evaluateHermesKnowledgeReviewEvidenceInspectorGate(rootDir) {
     && contract.desktopEvidenceColumns === 2
     && contract.mobileMountedPaneCount === 1
     && contract.mobileCandidateEvidenceSegmentedControl === true
+    && contract.candidateTablist === true
+    && contract.candidateRovingTabStop === true
+    && contract.candidateKeyboardNavigation === true
+    && contract.breakpointOrientationSynchronized === true
+    && contract.mobilePaneTabsLinked === true
+    && contract.mobilePaneKeyboardNavigation === true
     && contract.publicOfficialHttpsLinkCount === 3
     && contract.privateEvidenceRawIdentityExposed === false
     && contract.evidenceInternalScroll === true
@@ -4347,8 +4359,8 @@ function evaluateHermesKnowledgeReviewEvidenceInspectorGate(rootDir) {
     state: pass ? "proven" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Live Hermes review evidence inspector passes 8/8 Day/Night desktop and mobile cases. It binds five displayed evidence items to the existing authority counts, mounts candidate plus evidence on desktop and one segmented pane on mobile, exposes only allowlisted official HTTPS references, keeps tenant evidence generic, and performs no mutation. The immutable 18-finding baseline remains preserved, a fresh full-repository scan is still required, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED."
-      : `Hermes evidence-inspector contract is contradicted: verdict=${readString(report.verdict) || "missing"}, local=${readString(local.verdict) || "missing"}, live=${readString(afterLive.verdict) || "missing"}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}, securityComplete=${String(security.securityComplete)}.`,
+      ? "Live Hermes review evidence inspector passes 8/8 Day/Night desktop and mobile cases. It binds five displayed evidence items to the existing authority counts, mounts candidate plus evidence on desktop and one linked keyboard-operable pane on mobile, exposes only allowlisted official HTTPS references, keeps tenant evidence generic, and performs no mutation. Candidate navigation retains a single roving tab stop, linked panels, and breakpoint-aware keyboard semantics. The immutable 18-finding baseline remains preserved, a fresh full-repository scan is still required, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED."
+      : `Hermes evidence-inspector contract is contradicted: verdict=${readString(report.verdict) || "missing"}, local=${readString(local.verdict) || "missing"}, live=${readString(afterLive.verdict) || "missing"}, candidateKeyboard=${String(contract.candidateKeyboardNavigation)}, mobilePaneKeyboard=${String(contract.mobilePaneKeyboardNavigation)}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}, securityComplete=${String(security.securityComplete)}.`,
     nextActions: pass ? [] : ["Restore the evidence-count, privacy, geometry, no-mutation, security-baseline, and approval boundaries, then rerun local and live probes."],
   });
 }
