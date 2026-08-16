@@ -3,59 +3,25 @@ import childProcess from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { pathToFileURL } from "node:url";
+import {
+  coreDocumentChecks,
+  requiredDeliverables,
+  resolveAskAiMode,
+  resolveDocsDir,
+  resolveExecutionMode,
+  shouldSkipAuthHistoryWrites
+} from "./final_99_gate_contract.mjs";
 
 const startedAt = Date.now();
 const rootDir = process.cwd();
 const outDir = path.resolve(process.env.SAFEGUARD_OUT_DIR || path.join(rootDir, "evaluation", "final-99-gate"));
-const docsDir = path.join(rootDir, "docs");
+const docsDir = resolveDocsDir();
 const baseUrl = process.env.SAFEGUARD_BASE_URL || "https://safeguard-contest-mvp.vercel.app";
 const primaryQuestion = process.env.SAFEGUARD_SMOKE_QUESTION
   || "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.";
-
-const requiredDeliverables = [
-  "workpackSummaryDraft",
-  "riskAssessmentDraft",
-  "workPlanDraft",
-  "tbmBriefing",
-  "tbmLogDraft",
-  "safetyEducationRecordDraft",
-  "emergencyResponseDraft",
-  "photoEvidenceDraft",
-  "foreignWorkerBriefing",
-  "foreignWorkerTransmission",
-  "kakaoMessage"
-];
-
-const coreDocumentChecks = [
-  {
-    id: "risk-assessment",
-    title: "위험성평가표",
-    key: "riskAssessmentDraft",
-    routeTitle: "위험성평가표",
-    requiredTerms: ["사전준비", "유해", "위험성", "감소대책", "확인"]
-  },
-  {
-    id: "work-plan",
-    title: "작업계획서",
-    key: "workPlanDraft",
-    routeTitle: "작업계획서",
-    requiredTerms: ["작업개요", "작업순서", "장비", "작업중지", "확인"]
-  },
-  {
-    id: "permit-inspection",
-    title: "허가/점검표",
-    key: "photoEvidenceDraft",
-    routeTitle: "작업허가 및 안전점검표",
-    requiredTerms: ["허가", "작업 전", "첨부", "종료", "확인"]
-  },
-  {
-    id: "tbm-log",
-    title: "TBM일지",
-    key: "tbmLogDraft",
-    routeTitle: "TBM일지",
-    requiredTerms: ["TBM", "위험성평가", "기상", "참석", "확인"]
-  }
-];
+const executionMode = resolveExecutionMode();
+const askAiMode = resolveAskAiMode(executionMode);
 
 const publicDataMap = [
   {
@@ -218,7 +184,10 @@ async function runAskGate() {
   const response = await fetchJson("/api/ask", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ question: primaryQuestion })
+    body: JSON.stringify({
+      question: primaryQuestion,
+      ...(askAiMode ? { aiMode: askAiMode } : {})
+    })
   });
   const deliverables = response.parsed?.deliverables || {};
   const missingDeliverables = requiredDeliverables.filter((key) => typeof deliverables[key] !== "string" || deliverables[key].length < 20);
@@ -236,8 +205,10 @@ async function runAskGate() {
     status: response.status,
     elapsedMs: response.elapsedMs,
     mode: response.parsed?.mode || "unknown",
+    requestedAiMode: askAiMode || "production-default",
     documentCount: requiredDeliverables.length - missingDeliverables.length,
     missingDeliverables,
+    rawPreview: response.rawPreview,
     externalSignals,
     payload: response.parsed
   };
@@ -344,7 +315,8 @@ function runOrchestrationDownloadSmoke() {
       ...process.env,
       SAFEGUARD_BASE_URL: baseUrl,
       SAFEGUARD_OUT_DIR: orchestrationDir,
-      SAFEGUARD_SMOKE_QUESTION: primaryQuestion
+      SAFEGUARD_SMOKE_QUESTION: primaryQuestion,
+      SAFEGUARD_SMOKE_AI_MODE: askAiMode || ""
     },
     timeout: 180_000
   });
@@ -391,6 +363,22 @@ async function runDocumentDownloadGate(askPayload) {
 }
 
 async function runRemediationGate(askPayload) {
+  if (executionMode === "no-mutation") {
+    return {
+      verdict: "pass_with_notice",
+      status: null,
+      configured: false,
+      providerLabel: "not-called:no-mutation",
+      catalogStatus: null,
+      textPreview: "",
+      sourceCount: 0,
+      mutationBoundary: {
+        providerGenerationCalled: false,
+        dbMutationPerformed: false
+      },
+      policy: "no-mutation 모드는 외부 AI 보완 생성을 호출하지 않습니다. 제안·편집·삽입 계약은 별도 live evidence를 유지합니다."
+    };
+  }
   const documentText = askPayload.deliverables?.riskAssessmentDraft || "";
   const response = await fetchJson("/api/workpack/remediate", {
     method: "POST",
@@ -504,14 +492,26 @@ async function runAuthHistoryGate(askPayload) {
   const base = {
     generatedAt: new Date().toISOString(),
     baseUrl,
-    authTokenPresent: Boolean(authToken)
+    authTokenPresent: Boolean(authToken),
+    executionMode
   };
-  if (!authToken) {
+  if (shouldSkipAuthHistoryWrites(authToken)) {
+    const noMutation = executionMode === "no-mutation";
     const gate = {
       ...base,
       verdict: "pass_with_notice",
-      configured: false,
-      message: "SAFEGUARD_AUTH_TOKEN이 없어 live 관리자 저장/재열기는 실행하지 않았습니다. UI는 비회원 임시 저장과 관리자 로그인 필요 상태로 방어합니다."
+      configured: Boolean(authToken),
+      authTokenIgnored: noMutation && Boolean(authToken),
+      message: noMutation
+        ? "no-mutation 모드가 관리자 저장/재열기 쓰기를 강제로 건너뛰었습니다. 인증 토큰이 있어도 사용하지 않았습니다."
+        : "SAFEGUARD_AUTH_TOKEN이 없어 live 관리자 저장/재열기는 실행하지 않았습니다. UI는 비회원 임시 저장과 관리자 로그인 필요 상태로 방어합니다.",
+      mutationBoundary: {
+        dbMutationPerformed: false,
+        dispatchLogMutationPerformed: false,
+        workerMutationPerformed: false,
+        workpackMutationPerformed: false,
+        educationMutationPerformed: false
+      }
     };
     writeJson("auth-history-smoke.json", gate);
     return gate;
@@ -623,6 +623,13 @@ async function runAuthHistoryGate(askPayload) {
     workpackId,
     reopenHref: workpackId ? `/documents?workpackId=${workpackId}` : null,
     checks,
+    mutationBoundary: {
+      dbMutationPerformed: checks.some((item) => item.ok && ["workers-upsert", "workpack-save", "education-save", "dispatch-log-save"].includes(item.name)),
+      dispatchLogMutationPerformed: checks.find((item) => item.name === "dispatch-log-save")?.ok === true,
+      workerMutationPerformed: checks.find((item) => item.name === "workers-upsert")?.ok === true,
+      workpackMutationPerformed: checks.find((item) => item.name === "workpack-save")?.ok === true,
+      educationMutationPerformed: checks.find((item) => item.name === "education-save")?.ok === true
+    },
     responses: {
       worker: { status: workerResponse.status, ok: workerResponse.parsed?.ok },
       workpack: { status: workpackResponse.status, ok: workpackResponse.parsed?.ok, workpackId },
@@ -703,8 +710,10 @@ async function runDispatchPolicyGate(askPayload) {
   const authGateOk = authGateResponse.status === 401
     && typeof authGateResponse.parsed?.message === "string"
     && authGateResponse.parsed.message.includes("관리자 로그인");
+  const providerNotCalled = [legacyRejectedResponse, lockedResponse, authGateResponse]
+    .every((response) => response.parsed?.providerCalled !== true);
   const capabilityOk = capabilityResponse.ok && capabilityResponse.parsed?.ok === true;
-  const gateOk = capabilityOk && legacyRejected && lockedOk && authGateOk;
+  const gateOk = capabilityOk && legacyRejected && lockedOk && authGateOk && providerNotCalled;
   return {
     verdict: gateOk ? "pass_with_notice" : "blocked",
     officialChannels: ["email", "sms"],
@@ -728,6 +737,11 @@ async function runDispatchPolicyGate(askPayload) {
       status: authGateResponse.status,
       message: authGateResponse.parsed?.message || "",
       providerCalled: authGateResponse.parsed?.providerCalled ?? null
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: !providerNotCalled,
+      shareSessionCreated: false
     }
   };
 }
@@ -864,12 +878,15 @@ function buildNoticeCarry(summary) {
   const notices = [];
   const authGate = summary.gates.find((gate) => gate.name === "auth-history-reuse");
   if (authGate?.verdict === "pass_with_notice") {
+    const noMutation = summary.executionMode === "no-mutation";
     notices.push({
       gate: "auth-history-reuse",
       sourceVerdict: authGate.verdict,
       carried: true,
       launchImpact: "operator-auth-gated",
-      reason: "SAFEGUARD_AUTH_TOKEN is intentionally absent from the local/live evidence run. Unauthenticated users remain defended by temporary browser state and login-required UI/API boundaries.",
+      reason: noMutation
+        ? "The explicit no-mutation run ignored any available SAFEGUARD_AUTH_TOKEN and skipped all admin save/reopen writes."
+        : "SAFEGUARD_AUTH_TOKEN is intentionally absent from the local/live evidence run. Unauthenticated users remain defended by temporary browser state and login-required UI/API boundaries.",
       allowedClaim: "관리자 인증 없는 환경에서도 비회원 임시 저장과 로그인 필요 상태가 방어된다.",
       forbiddenClaim: "관리자 서버 저장과 이력 재열기를 live에서 실행 완료했다.",
       nextSecureProof: "Run final-99 with SAFEGUARD_AUTH_TOKEN from a secure operator environment and verify server save/reopen evidence."
@@ -946,7 +963,22 @@ async function main() {
       commit: getCommitHash(),
       overall: "blocked",
       elapsedMs: elapsedMs(),
-      gates: [{ name: "ask-orchestration", verdict: "blocked", evidence: "11종 문서 생성 실패" }]
+      executionMode,
+      gates: [{ name: "ask-orchestration", verdict: "blocked", evidence: "12종 문서 생성 실패" }],
+      ask: {
+        status: askGate.status,
+        mode: askGate.mode,
+        requestedAiMode: askGate.requestedAiMode,
+        documentCount: askGate.documentCount,
+        missingDeliverables: askGate.missingDeliverables,
+        rawPreview: askGate.rawPreview
+      },
+      mutationBoundary: {
+        dbMutationPerformed: false,
+        providerDispatchCalled: false,
+        shareSessionCreated: false,
+        noMutationMode: executionMode === "no-mutation"
+      }
     };
     writeJson("prod-golden-path.json", summary);
     writeDecisionMarkdown(summary);
@@ -968,7 +1000,7 @@ async function main() {
 
   const productionBuild = await fetchProductionBuildInfo();
   const gates = [
-    { name: "ask-orchestration", verdict: askGate.verdict, evidence: `${askGate.documentCount}/11 documents` },
+    { name: "ask-orchestration", verdict: askGate.verdict, evidence: `${askGate.documentCount}/${requiredDeliverables.length} documents` },
     { name: "auth-history-reuse", verdict: authHistoryGate.verdict, evidence: authHistoryGate.workpackId || authHistoryGate.message },
     { name: "document-downloads", verdict: documentDownloadGate.verdict, evidence: "core PDF + orchestration XLS/HWPX/PDF smoke" },
     { name: "public-data-ai-map", verdict: evidenceGate.verdict, evidence: "docs/submission-evidence-map.md" },
@@ -983,9 +1015,16 @@ async function main() {
     commit: getCommitHash(),
     sourceCommit: getFullCommitHash(),
     productionBuild,
+    executionMode,
     overall,
     elapsedMs: elapsedMs(),
     gates,
+    mutationBoundary: {
+      dbMutationPerformed: authHistoryGate.mutationBoundary?.dbMutationPerformed === true,
+      providerDispatchCalled: dispatchPolicyGate.mutationBoundary?.providerDispatchCalled === true,
+      shareSessionCreated: false,
+      noMutationMode: executionMode === "no-mutation"
+    },
     outputs: {
       authHistory: outFile("auth-history-smoke.json"),
       documentDownloads: outFile("document-download-smoke.json"),
@@ -999,7 +1038,9 @@ async function main() {
     notes: [
       "provider 전파는 관리자 인증과 서버 소유 workpack/share session이 필요하며, 카카오/밴드는 승인 전이라 제외했습니다.",
       "HWPX는 제출형 초안으로 고지합니다.",
-      "관리자 이력 게이트는 SAFEGUARD_AUTH_TOKEN이 없으면 pass_with_notice로 남습니다."
+      executionMode === "no-mutation"
+        ? "no-mutation 모드는 인증 토큰 존재 여부와 무관하게 관리자 이력 쓰기를 건너뛰고 pass_with_notice를 유지합니다."
+        : "관리자 이력 게이트는 SAFEGUARD_AUTH_TOKEN이 없으면 pass_with_notice로 남습니다."
     ]
   };
 
@@ -1029,21 +1070,24 @@ async function main() {
   process.exit(overall === "blocked" ? 1 : 0);
 }
 
-main().catch((error) => {
-  ensureDir(outDir);
-  const payload = {
-    generatedAt: new Date().toISOString(),
-    baseUrl,
-    commit: getCommitHash(),
-    overall: "blocked",
-    elapsedMs: elapsedMs(),
-    error: error instanceof Error ? error.message : String(error)
-  };
-  writeJson("prod-golden-path.json", payload);
-  writeDecisionMarkdown({
-    ...payload,
-    gates: [{ name: "final-99-gate-runner", verdict: "blocked", evidence: payload.error }]
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
+if (isMain) {
+  main().catch((error) => {
+    ensureDir(outDir);
+    const payload = {
+      generatedAt: new Date().toISOString(),
+      baseUrl,
+      commit: getCommitHash(),
+      overall: "blocked",
+      elapsedMs: elapsedMs(),
+      error: error instanceof Error ? error.message : String(error)
+    };
+    writeJson("prod-golden-path.json", payload);
+    writeDecisionMarkdown({
+      ...payload,
+      gates: [{ name: "final-99-gate-runner", verdict: "blocked", evidence: payload.error }]
+    });
+    console.error(error);
+    process.exit(1);
   });
-  console.error(error);
-  process.exit(1);
-});
+}

@@ -12,11 +12,15 @@ const baseUrl = process.env.SAFEGUARD_BASE_URL || "https://safeguard-contest-mvp
 const outDir = path.resolve(process.env.SAFEGUARD_OUT_DIR || path.join(process.cwd(), "evaluation", "2026-04-29-orchestration-download-smoke"));
 const chromePath = process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const question = process.env.SAFEGUARD_SMOKE_QUESTION || "대구 달서구 창고업 고중량 박스 적재 및 수작업 운반. 작업자 5명, 숙련자 중심, 오늘 날씨를 반영해 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.";
+const askAiMode = ["template", "enhanced", "full"].includes(process.env.SAFEGUARD_SMOKE_AI_MODE || "")
+  ? process.env.SAFEGUARD_SMOKE_AI_MODE
+  : undefined;
 
 const documentMeta = [
   ["workpackSummaryDraft", "점검결과 요약", "workpack-summary"],
   ["riskAssessmentDraft", "위험성평가표", "risk-assessment"],
   ["workPlanDraft", "작업계획서", "work-plan"],
+  ["workPermitDraft", "작업허가 및 안전점검표", "work-permit"],
   ["tbmBriefing", "TBM/작업 전 안전점검회의", "tbm-briefing"],
   ["tbmLogDraft", "TBM 기록", "tbm-log"],
   ["safetyEducationRecordDraft", "안전보건교육 기록", "safety-education"],
@@ -621,7 +625,7 @@ const weatherResult = await fetchJson(weatherUrl);
 const askResult = await fetchJson(`${baseUrl}/api/ask`, {
   method: "POST",
   headers: { "content-type": "application/json" },
-  body: JSON.stringify({ question })
+  body: JSON.stringify({ question, ...(askAiMode ? { aiMode: askAiMode } : {}) })
 });
 
 if (!weatherResult.ok || !weatherResult.parsed?.weather) {

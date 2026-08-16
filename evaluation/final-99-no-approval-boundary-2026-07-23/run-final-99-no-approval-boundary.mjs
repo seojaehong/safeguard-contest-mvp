@@ -10,6 +10,7 @@ const OUT_DIR = path.join("evaluation", "final-99-no-approval-boundary-2026-07-2
 const DEFAULT_BASE_URL = "https://www.safeclaw.kr";
 const FINAL_99_REPORT_PATH = path.join("evaluation", "final-99-gate-current-2026-07-22", "report.json");
 const RUNNER_PATH = path.join("scripts", "final_99_gate_runner.mjs");
+const RUNNER_CONTRACT_PATH = path.join("scripts", "final_99_gate_contract.mjs");
 
 function parseArgs(argv) {
   const options = {
@@ -70,11 +71,15 @@ function json(value) {
 
 function inspectRunnerSource() {
   const source = fs.readFileSync(RUNNER_PATH, "utf8");
+  const contractSource = fs.readFileSync(RUNNER_CONTRACT_PATH, "utf8");
   return {
     runnerPath: RUNNER_PATH,
-    authTokenAbsentSkipsLiveWrites: source.includes("if (!authToken)")
+    authTokenAbsentSkipsLiveWrites: source.includes("shouldSkipAuthHistoryWrites(authToken)")
       && source.includes("SAFEGUARD_AUTH_TOKEN")
       && source.includes("pass_with_notice"),
+    explicitNoMutationModeAvailable: source.includes('executionMode === "no-mutation"')
+      && source.includes("authTokenIgnored")
+      && contractSource.includes("--no-mutation"),
     tokenPathPostsWorkers: source.includes('fetchJson("/api/workers"')
       && source.includes('method: "POST"'),
     tokenPathPostsWorkpacks: source.includes('fetchJson("/api/workpacks"')
@@ -140,6 +145,7 @@ async function main() {
     runnerPath: RUNNER_PATH,
     runnerNoApprovalRisk: {
       safeWhenSafeguardAuthTokenAbsent: runner.authTokenAbsentSkipsLiveWrites,
+      explicitNoMutationModeAvailable: runner.explicitNoMutationModeAvailable,
       authTokenPresentInThisReview,
       authHistoryReuseWritesWhenTokenPresent: runner.tokenPathPostsWorkers
         && runner.tokenPathPostsWorkpacks

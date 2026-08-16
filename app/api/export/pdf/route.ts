@@ -342,6 +342,30 @@ function findByKeywords(rows: PdfRow[], keywords: string[], limit: number) {
   return source.slice(0, limit);
 }
 
+function findPermitChecks(rows: PdfRow[]) {
+  const priorityKeywords = ["허가", "보호구", "격리", "차단", "출입통제", "종료"];
+  const selected: PdfRow[] = [];
+  const selectedRows = new Set<PdfRow>();
+
+  priorityKeywords.forEach((keyword) => {
+    const match = rows.find((row) => {
+      if (selectedRows.has(row)) return false;
+      return `${row.section} ${row.item} ${row.content}`.includes(keyword);
+    });
+    if (!match) return;
+    selected.push(match);
+    selectedRows.add(match);
+  });
+
+  const remaining = findByKeywords(
+    rows,
+    ["허가", "차단", "격리", "보호구", "가스", "화재", "종료"],
+    16
+  ).filter((row) => !selectedRows.has(row));
+
+  return [...selected, ...remaining].slice(0, 10);
+}
+
 function compactCell(row: PdfRow | undefined, fallback: string) {
   if (!row) return fallback;
   const value = row.content || row.item || fallback;
@@ -442,7 +466,7 @@ function renderWorkPlanRows(rows: PdfRow[], scenario: PdfScenario) {
 }
 
 function renderPermitRows(rows: PdfRow[], scenario: PdfScenario) {
-  const checks = findByKeywords(rows, ["허가", "차단", "격리", "보호구", "가스", "화재", "종료"], 6);
+  const checks = findPermitChecks(rows);
   return `
     <section class="section">
       <h2>1. 허가 기본정보</h2>

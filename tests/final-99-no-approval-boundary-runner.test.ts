@@ -130,6 +130,7 @@ describe("final-99 no-approval boundary runner", () => {
         authHistoryReuseWritesWhenTokenPresent: true,
         authTokenPresentInThisReview: false,
         dispatchLogWritesWhenTokenPresent: true,
+        explicitNoMutationModeAvailable: true,
         safeWhenSafeguardAuthTokenAbsent: true,
       });
       expect(report.forbiddenActionsWithoutApproval).toContain("Do not reinterpret pass_with_notice as fully automated launch readiness.");

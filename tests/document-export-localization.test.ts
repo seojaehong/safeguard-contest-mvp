@@ -258,4 +258,35 @@ describe("localized editable document exports", () => {
     }
     expect(html).not.toMatch(/>\s*(?:high|medium|low|planned|done|needsReview)\s*</u);
   });
+
+  it("keeps each required permit control when generic permit rows appear first", async () => {
+    const genericPermitRows = Array.from({ length: 8 }, (_, index) => ({
+      document: "작업허가 및 안전점검표",
+      section: "허가 기본정보",
+      item: `일반 허가 확인 ${index + 1}`,
+      content: `작업허가 기본 조건 ${index + 1}`
+    }));
+    const response = await exportPdf(new NextRequest("http://localhost/api/export/pdf?format=html", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        title: "작업허가 및 안전점검표",
+        scenario: { companyName: "테스트 건설", siteName: "제1현장", workSummary: "전기 설비 정비", workerCount: 4 },
+        rows: [
+          ...genericPermitRows,
+          { document: "작업허가 및 안전점검표", section: "보호구", item: "보호구 확인", content: "절연 보호구 착용" },
+          { document: "작업허가 및 안전점검표", section: "격리", item: "에너지 격리", content: "전원 격리 상태 확인" },
+          { document: "작업허가 및 안전점검표", section: "차단", item: "전원 차단", content: "차단기 잠금표지 확인" },
+          { document: "작업허가 및 안전점검표", section: "출입통제", item: "출입통제", content: "통제선과 감시자 배치" },
+          { document: "작업허가 및 안전점검표", section: "종료", item: "작업 종료", content: "종료 확인과 원상복구" }
+        ]
+      })
+    }));
+
+    expect(response.status).toBe(200);
+    const html = await response.text();
+    for (const requiredControl of ["허가", "보호구", "격리", "차단", "출입통제", "종료"]) {
+      expect(html).toContain(requiredControl);
+    }
+  });
 });
