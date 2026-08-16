@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-16T07:59:01.257Z
-Source HEAD at generation: 52fc4e1896c0dda73b9d3181d5239cdf14c3f00f
-Live commit at generation: 52fc4e1896c0dda73b9d3181d5239cdf14c3f00f
+Generated at: 2026-08-16T08:12:11.928Z
+Source HEAD at generation: e5ec97c77caf010bd2705c5805d3961830018b12
+Live commit at generation: e5ec97c77caf010bd2705c5805d3961830018b12
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -366,7 +366,7 @@ Overall: `northstar_open_approval_gated`
 | full_repository_security_scan | ancestor | ancestor_of_head | evaluation\follow-up-full-repository-security-scan-2026-08-02\report.json |
 | repository_security_scan_reconciliation | missing | missing | evaluation\repository-security-scan-reconciliation-2026-08-11\report.json |
 | current_security_remediation_ledger | ancestor | ancestor_of_head | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
-| current_repository_security_rescan | exact | matches_live | evaluation\final-approval-free-security-rescan-2026-08-16\report.json |
+| current_repository_security_rescan | ancestor | ancestor_of_head | evaluation\final-approval-free-security-rescan-2026-08-16\report.json |
 | agent_chat_durable_admission_security | ancestor | ancestor_of_head | evaluation\security-agent-chat-durable-admission-2026-08-14\report.json |
 | mcp_provider_admission_security | ancestor | ancestor_of_head | evaluation\security-mcp-provider-admission-2026-08-14\report.json |
 | share_recipient_contact_verification_security | ancestor | ancestor_of_head | evaluation\share-recipient-contact-verification-2026-08-14\report.json |
