@@ -180,6 +180,30 @@ describe("documents editor layout", () => {
       ));
 
       const baselineBodyHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+      const launcherGeometry = await page.evaluate(() => {
+        const reviewLaunch = document.querySelector<HTMLElement>('[data-testid="document-editorial-review-launch"]');
+        const coreButtons = Array.from(document.querySelectorAll<HTMLElement>(
+          '[data-testid="mobile-core-document-launcher"] .safeclaw-mobile-core-list button'
+        ));
+        if (!reviewLaunch || coreButtons.length !== 3) {
+          throw new Error("Missing document review launcher geometry targets");
+        }
+        const reviewRect = reviewLaunch.getBoundingClientRect();
+        const overlaps = coreButtons.filter((button) => {
+          const buttonRect = button.getBoundingClientRect();
+          return reviewRect.left < buttonRect.right
+            && reviewRect.right > buttonRect.left
+            && reviewRect.top < buttonRect.bottom
+            && reviewRect.bottom > buttonRect.top;
+        });
+        return {
+          reviewBottom: Math.round(reviewRect.bottom),
+          viewportHeight: window.innerHeight,
+          overlapCount: overlaps.length
+        };
+      });
+      expect(launcherGeometry.overlapCount).toBe(0);
+      expect(launcherGeometry.reviewBottom).toBeLessThanOrEqual(launcherGeometry.viewportHeight);
       const reviewRequests: string[] = [];
       page.on("request", (request) => {
         if (new URL(request.url()).pathname.startsWith("/api/")) reviewRequests.push(request.url());
