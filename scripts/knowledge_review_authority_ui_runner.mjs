@@ -19,6 +19,7 @@ const productCommit = process.env.SAFECLAW_KNOWLEDGE_UI_PRODUCT_COMMIT || source
 const authStorageKey = process.env.SAFECLAW_SUPABASE_STORAGE_KEY || "sb-fixture-auth-token";
 const liveMode = /^https:\/\/www\.safeclaw\.kr(?:\/|$)/u.test(baseUrl);
 const evidenceInspectorMode = process.env.SAFECLAW_KNOWLEDGE_UI_MODE === "evidence-inspector";
+const baseOrigin = new URL(baseUrl).origin;
 const productionBuild = liveMode
   ? await fetch(`${baseUrl}/api/build-info?codexCacheBust=${encodeURIComponent(checkedAt)}`)
       .then(async (response) => {
@@ -135,9 +136,18 @@ try {
       const page = await context.newPage();
       const browserErrors = [];
       page.on("console", (message) => {
-        if (message.type() === "error") browserErrors.push(message.text());
+        if (message.type() !== "error") return;
+        const text = message.text();
+        if (/^Failed to load resource: the server responded with a status of \d+/u.test(text)) return;
+        browserErrors.push(text);
       });
       page.on("pageerror", (error) => browserErrors.push(error.message));
+      page.on("response", (response) => {
+        if (response.status() < 400) return;
+        const url = new URL(response.url());
+        if (url.origin !== baseOrigin || url.pathname === "/favicon.ico") return;
+        browserErrors.push(`HTTP ${response.status()} ${url.pathname}`);
+      });
       await page.addInitScript((storageKey) => {
         localStorage.setItem(storageKey, JSON.stringify({
           access_token: "fixture-access-token",
