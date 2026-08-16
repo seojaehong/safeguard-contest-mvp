@@ -19633,6 +19633,384 @@ body:has(.safeclaw-landing) :is(
   margin-top: 0;
 }
 
+.safeclaw-document-review-launch {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: auto;
+  min-height: 30px;
+  border: 1px solid var(--workspace-rule-strong);
+  border-radius: 6px;
+  background: var(--workspace-surface-2);
+  color: var(--workspace-ink);
+  padding: 4px 7px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.safeclaw-document-review-launch:is(:hover, :focus-visible) {
+  border-color: var(--workspace-accent);
+  outline: none;
+}
+
+.safeclaw-document-review-launch span {
+  font-size: var(--text-caption);
+  font-weight: 750;
+}
+
+.safeclaw-document-review-launch strong {
+  color: var(--workspace-ink);
+  font-size: var(--text-caption);
+}
+
+.safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-mobile-document-priority {
+  position: relative;
+}
+
+.safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-mobile-document-priority > span,
+.safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-mobile-document-priority > h2 {
+  padding-right: 118px;
+}
+
+.safeclaw-document-review-dialog {
+  width: min(1180px, calc(100vw - 32px));
+  height: min(760px, calc(100vh - 24px));
+  max-width: none;
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--workspace-rule-strong);
+  border-radius: 8px;
+  background: var(--workspace-canvas);
+  color: var(--workspace-ink);
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.28);
+}
+
+.safeclaw-document-review-dialog::backdrop {
+  background: rgba(15, 23, 42, 0.62);
+}
+
+.safeclaw-document-review-dialog[open] {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.safeclaw-document-review-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 36px;
+  align-items: center;
+  gap: 16px;
+  min-height: 92px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--workspace-rule);
+  background: var(--workspace-surface-1);
+}
+
+.safeclaw-document-review-header > div:first-child {
+  min-width: 0;
+}
+
+.safeclaw-document-review-header span,
+.safeclaw-document-review-copy header span,
+.safeclaw-document-review-checklist header span {
+  color: var(--workspace-muted);
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
+
+.safeclaw-document-review-header h2,
+.safeclaw-document-review-copy h3 {
+  margin: 2px 0 0;
+  font-size: var(--text-section-title);
+  line-height: 1.25;
+}
+
+.safeclaw-document-review-header p {
+  margin: 4px 0 0;
+  color: var(--workspace-muted);
+  font-size: var(--text-table);
+  line-height: 1.45;
+}
+
+.safeclaw-document-review-progress {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.safeclaw-document-review-progress strong {
+  color: var(--workspace-ink);
+  font-size: var(--text-section-title);
+}
+
+.safeclaw-document-review-close {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--workspace-ink);
+  font: inherit;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.safeclaw-document-review-close:is(:hover, :focus-visible) {
+  border-color: var(--workspace-accent);
+  outline: none;
+}
+
+.safeclaw-document-review-workbench {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 300px;
+  height: auto;
+  min-height: 0;
+}
+
+.safeclaw-document-review-nav,
+.safeclaw-document-review-copy,
+.safeclaw-document-review-checklist {
+  min-width: 0;
+  min-height: 0;
+}
+
+.safeclaw-document-review-nav {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px;
+  border-right: 1px solid var(--workspace-rule);
+  background: var(--workspace-surface-2);
+  scrollbar-gutter: stable;
+}
+
+.safeclaw-document-review-nav button {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  min-height: 58px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--workspace-ink);
+  padding: 7px 8px;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.safeclaw-document-review-nav button[aria-pressed="true"] {
+  border-color: var(--workspace-accent);
+  background: var(--workspace-surface-1);
+}
+
+.safeclaw-document-review-nav button:is(:hover, :focus-visible) {
+  border-color: var(--workspace-rule-strong);
+  outline: none;
+}
+
+.safeclaw-document-review-nav small,
+.safeclaw-document-review-nav span {
+  color: var(--workspace-muted);
+  font-size: var(--text-caption);
+}
+
+.safeclaw-document-review-nav span.complete {
+  color: var(--workspace-success);
+}
+
+.safeclaw-document-review-nav span.missing {
+  color: var(--sc-danger);
+}
+
+.safeclaw-document-review-copy {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  padding: 14px 16px 16px;
+  background: var(--workspace-surface-1);
+}
+
+.safeclaw-document-review-copy > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+}
+
+.safeclaw-document-review-copy > header > strong {
+  flex: 0 0 auto;
+  color: var(--workspace-success);
+  font-size: var(--text-caption);
+}
+
+.safeclaw-document-review-copy > header > strong[data-presence="missingUnexpected"] {
+  color: var(--sc-danger);
+}
+
+.safeclaw-document-review-copy pre {
+  min-height: 0;
+  margin: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 6px;
+  background: var(--workspace-canvas);
+  padding: 14px;
+  color: var(--workspace-ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: var(--font-base);
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: 1.65;
+  scrollbar-gutter: stable;
+}
+
+.safeclaw-document-review-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 14px;
+  border-left: 1px solid var(--workspace-rule);
+  background: var(--workspace-surface-2);
+}
+
+.safeclaw-document-review-checklist > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.safeclaw-document-review-checks {
+  display: grid;
+  gap: 6px;
+}
+
+.safeclaw-document-review-checks label {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  min-height: 42px;
+  padding: 8px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 6px;
+  background: var(--workspace-surface-1);
+  font-size: var(--text-table);
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.safeclaw-document-review-checks input {
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+  accent-color: var(--workspace-accent);
+}
+
+.safeclaw-document-review-note {
+  display: grid;
+  gap: 6px;
+  color: var(--workspace-muted);
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
+
+.safeclaw-document-review-note textarea {
+  width: 100%;
+  min-height: 86px;
+  resize: vertical;
+}
+
+.safeclaw-document-review-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.safeclaw-document-review-actions .button {
+  width: 100%;
+}
+
+@media (max-width: 760px) {
+  .safeclaw-document-review-dialog {
+    width: calc(100vw - 16px);
+    height: calc(100vh - 16px);
+  }
+
+  .safeclaw-document-review-header {
+    grid-template-columns: minmax(0, 1fr) 36px;
+    min-height: 106px;
+    padding: 10px 12px;
+  }
+
+  .safeclaw-document-review-header p {
+    display: none;
+  }
+
+  .safeclaw-document-review-progress {
+    grid-column: 1;
+    grid-row: 2;
+    justify-items: start;
+  }
+
+  .safeclaw-document-review-close {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .safeclaw-document-review-workbench {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(180px, 0.9fr) minmax(260px, 1.1fr);
+    height: auto;
+  }
+
+  .safeclaw-document-review-nav {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-right: 0;
+    border-bottom: 1px solid var(--workspace-rule);
+    scrollbar-gutter: auto;
+  }
+
+  .safeclaw-document-review-nav button {
+    flex: 0 0 168px;
+  }
+
+  .safeclaw-document-review-copy {
+    padding: 10px 12px;
+  }
+
+  .safeclaw-document-review-checklist {
+    border-top: 1px solid var(--workspace-rule);
+    border-left: 0;
+    padding: 10px 12px;
+  }
+
+  .safeclaw-document-review-checks {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 900px) {
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-module-main {
     padding-bottom: 28px;

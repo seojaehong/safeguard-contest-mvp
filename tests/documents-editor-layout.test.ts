@@ -163,6 +163,103 @@ describe("documents editor layout", () => {
     expect(visibleText).not.toMatch(DEFAULT_VISIBLE_OPERATIONAL_LABELS);
   }, 90_000);
 
+  it("keeps the 12-document human review workflow local, bounded, and stale-aware", async () => {
+    if (!browser) throw new Error("Browser was not started");
+
+    const cases = [
+      { name: "desktop", width: 1440, height: 723, expectedColumns: 3 },
+      { name: "mobile", width: 390, height: 723, expectedColumns: 1 }
+    ];
+
+    for (const viewport of cases) {
+      const context = await browser.newContext({ viewport });
+      const page = await context.newPage();
+      await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+      await page.waitForFunction(() => (
+        document.querySelector(".safeclaw-module-shell")?.getAttribute("data-ready") === "true"
+      ));
+
+      const baselineBodyHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+      const reviewRequests: string[] = [];
+      page.on("request", (request) => {
+        if (new URL(request.url()).pathname.startsWith("/api/")) reviewRequests.push(request.url());
+      });
+
+      const currentWorkpackBefore = await page.evaluate((key) => window.localStorage.getItem(key), CURRENT_WORKPACK_STORAGE_KEY);
+      await page.getByTestId("document-editorial-review-launch").click();
+      const dialog = page.getByTestId("document-editorial-review-dialog");
+      await dialog.waitFor({ state: "visible" });
+
+      const geometry = await dialog.evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+        const workbench = element.querySelector<HTMLElement>(".safeclaw-document-review-workbench");
+        const columns = workbench
+          ? getComputedStyle(workbench).gridTemplateColumns.split(" ").filter(Boolean).length
+          : 0;
+        const reviewKeys = Array.from(element.querySelectorAll<HTMLElement>("[data-review-document-key]"))
+          .map((item) => item.dataset.reviewDocumentKey || "");
+        return {
+          top: rect.top,
+          bottom: rect.bottom,
+          left: rect.left,
+          right: rect.right,
+          viewportWidth: window.innerWidth,
+          viewportHeight: window.innerHeight,
+          bodyHeight: document.documentElement.scrollHeight,
+          horizontalOverflow: element.scrollWidth > element.clientWidth,
+          columns,
+          reviewKeys
+        };
+      });
+
+      expect(geometry.top).toBeGreaterThanOrEqual(0);
+      expect(geometry.bottom).toBeLessThanOrEqual(geometry.viewportHeight);
+      expect(geometry.left).toBeGreaterThanOrEqual(0);
+      expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth);
+      expect(geometry.bodyHeight).toBe(baselineBodyHeight);
+      expect(geometry.horizontalOverflow).toBe(false);
+      expect(geometry.columns).toBe(viewport.expectedColumns);
+      expect(geometry.reviewKeys).toHaveLength(12);
+      expect(new Set(geometry.reviewKeys).size).toBe(12);
+      expect(geometry.reviewKeys).toContain("riskAssessmentDraft");
+      expect(await dialog.getByLabel(/사람 검토 0\/12종 완료/u).count()).toBe(1);
+
+      const checkboxes = dialog.getByRole("checkbox");
+      expect(await checkboxes.count()).toBe(5);
+      for (const checkbox of await checkboxes.all()) await checkbox.check();
+      await dialog.getByRole("button", { name: "검토 완료로 표시" }).click();
+      await dialog.getByLabel(/사람 검토 1\/12종 완료/u).waitFor({ state: "visible" });
+      expect(await dialog.evaluate((element) => element.scrollTop)).toBe(0);
+
+      const currentWorkpackAfter = await page.evaluate((key) => window.localStorage.getItem(key), CURRENT_WORKPACK_STORAGE_KEY);
+      const reviewStorage = await page.evaluate(() => (
+        Object.keys(window.localStorage).filter((key) => key.startsWith("safeclaw.documentEditorialReview.v1:"))
+      ));
+      expect(currentWorkpackAfter).toBe(currentWorkpackBefore);
+      expect(reviewStorage).toHaveLength(1);
+      expect(reviewRequests).toEqual([]);
+
+      await dialog.getByRole("button", { name: "문서 사람 검토 닫기" }).click();
+      await page.reload({ waitUntil: "networkidle" });
+      await page.getByTestId("document-editorial-review-launch").click();
+      await page.getByTestId("document-editorial-review-dialog").getByLabel(/사람 검토 1\/12종 완료/u).waitFor({ state: "visible" });
+
+      if (viewport.name === "desktop") {
+        const currentDialog = page.getByTestId("document-editorial-review-dialog");
+        await currentDialog.getByRole("button", { name: "편집기로 열기" }).click();
+        const sourceEditor = await openSourceEditor(page, "위험성평가표");
+        await sourceEditor.fill(`${await sourceEditor.inputValue()}\n검토 후 변경 문구`);
+        await expect.poll(async () => (
+          page.getByTestId("document-editorial-review-launch").innerText()
+        )).toContain("0/12");
+        await page.getByTestId("document-editorial-review-launch").click();
+        await page.getByTestId("document-editorial-review-dialog").getByText("검토 갱신 필요", { exact: true }).waitFor({ state: "visible" });
+      }
+
+      await context.close();
+    }
+  }, 120_000);
+
   it("bounds the default documents route editor as a viewport-first cockpit", async () => {
     if (!browser) throw new Error("Browser was not started");
 

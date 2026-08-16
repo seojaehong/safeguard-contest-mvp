@@ -195,6 +195,80 @@ const launchDocuments: LaunchDocument[] = [
   }
 ];
 
+const editorialReviewChecks = [
+  { key: "scenario", label: "현장·작업 맥락이 현재 시나리오와 일치" },
+  { key: "hazards", label: "위험요인과 근로자 특성이 빠짐없이 반영" },
+  { key: "controls", label: "안전조치가 구체적이고 현장에서 실행 가능" },
+  { key: "legal", label: "법령·KOSHA 표현에 과장이나 대체 주장 없음" },
+  { key: "wording", label: "중복·템플릿 잔재·미완성 문구 없음" }
+] as const;
+
+type EditorialReviewCheckKey = (typeof editorialReviewChecks)[number]["key"];
+type EditorialReviewEntry = {
+  checks: Partial<Record<EditorialReviewCheckKey, boolean>>;
+  note: string;
+  completedAt: string | null;
+  reviewedTextFingerprint: string | null;
+};
+type EditorialReviewState = Partial<Record<DocumentKey, EditorialReviewEntry>>;
+
+function emptyEditorialReviewEntry(): EditorialReviewEntry {
+  return { checks: {}, note: "", completedAt: null, reviewedTextFingerprint: null };
+}
+
+function editorialTextFingerprint(text: string): string {
+  let hash = 2166136261;
+  for (let index = 0; index < text.length; index += 1) {
+    hash = Math.imul(hash ^ text.charCodeAt(index), 16777619);
+  }
+  return `${text.length}:${(hash >>> 0).toString(16)}`;
+}
+
+function parseEditorialReviewState(raw: string | null): EditorialReviewState {
+  if (!raw) return {};
+
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+
+    const record = parsed as Record<string, unknown>;
+    const state: EditorialReviewState = {};
+    launchDocuments.forEach((document) => {
+      const candidate = record[document.key];
+      if (!candidate || typeof candidate !== "object" || Array.isArray(candidate)) return;
+
+      const entry = candidate as Record<string, unknown>;
+      const rawChecks = entry.checks;
+      const checks: Partial<Record<EditorialReviewCheckKey, boolean>> = {};
+      if (rawChecks && typeof rawChecks === "object" && !Array.isArray(rawChecks)) {
+        const checkRecord = rawChecks as Record<string, unknown>;
+        editorialReviewChecks.forEach((check) => {
+          if (checkRecord[check.key] === true) checks[check.key] = true;
+        });
+      }
+
+      state[document.key] = {
+        checks,
+        note: typeof entry.note === "string" ? entry.note.slice(0, 2000) : "",
+        completedAt: typeof entry.completedAt === "string" ? entry.completedAt : null,
+        reviewedTextFingerprint: typeof entry.reviewedTextFingerprint === "string"
+          ? entry.reviewedTextFingerprint
+          : null
+      };
+    });
+    return state;
+  } catch (error) {
+    console.warn("document editorial review state parse failed", error);
+    return {};
+  }
+}
+
+function editorialReviewIsCurrent(data: AskResponse, key: DocumentKey, entry: EditorialReviewEntry | undefined): boolean {
+  if (!entry?.completedAt || typeof entry.reviewedTextFingerprint !== "string") return false;
+  if (!editorialReviewChecks.every((check) => entry.checks[check.key] === true)) return false;
+  return entry.reviewedTextFingerprint === editorialTextFingerprint(buildDerivedDocumentText(data, key));
+}
+
 const workerRoleOptions = [
   "현장관리자",
   "관리감독자",
@@ -825,11 +899,15 @@ function EvidenceCardList({ title, cards }: { title: string; cards: EvidenceCard
 function DocumentCockpit({
   data,
   selectedDocumentKey,
-  onSelectDocument
+  onSelectDocument,
+  reviewedDocumentCount,
+  onOpenEditorialReview
 }: {
   data: AskResponse;
   selectedDocumentKey?: DocumentKey;
   onSelectDocument: (key: DocumentKey) => void;
+  reviewedDocumentCount: number;
+  onOpenEditorialReview: () => void;
 }) {
   const primaryDocuments = launchDocuments.filter((item) => item.tier === "핵심");
   const remainingDocuments = launchDocuments.filter((item) => item.tier !== "핵심");
@@ -917,6 +995,15 @@ function DocumentCockpit({
             <a href="/dispatch">현장 전파</a>
           </div>
         </details>
+        <button
+          type="button"
+          className="safeclaw-document-review-launch"
+          data-testid="document-editorial-review-launch"
+          onClick={onOpenEditorialReview}
+        >
+          <span>문서 사람 검토</span>
+          <strong>{reviewedDocumentCount}/{launchDocuments.length}</strong>
+        </button>
       </section>
 
       <aside className="safeclaw-doc-index">
@@ -972,12 +1059,236 @@ function DocumentCockpit({
   );
 }
 
+function DocumentEditorialReviewDialog({
+  data,
+  generationFingerprint,
+  open,
+  selectedDocumentKey,
+  onClose,
+  onEditDocument,
+  onReviewedDocumentCountChange
+}: {
+  data: AskResponse;
+  generationFingerprint: string;
+  open: boolean;
+  selectedDocumentKey: DocumentKey;
+  onClose: () => void;
+  onEditDocument: (key: DocumentKey) => void;
+  onReviewedDocumentCountChange: (count: number) => void;
+}) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const storageKey = `safeclaw.documentEditorialReview.v1:${generationFingerprint}`;
+  const [activeDocumentKey, setActiveDocumentKey] = useState<DocumentKey>(selectedDocumentKey);
+  const [reviewState, setReviewState] = useState<EditorialReviewState>({});
+  const [loadedStorageKey, setLoadedStorageKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      setReviewState(parseEditorialReviewState(window.localStorage.getItem(storageKey)));
+    } catch (error) {
+      console.warn("document editorial review state load failed", error);
+      setReviewState({});
+    }
+    setLoadedStorageKey(storageKey);
+  }, [storageKey]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || loadedStorageKey !== storageKey) return;
+    try {
+      window.localStorage.setItem(storageKey, JSON.stringify(reviewState));
+    } catch (error) {
+      console.warn("document editorial review state save failed", error);
+    }
+  }, [loadedStorageKey, reviewState, storageKey]);
+
+  useEffect(() => {
+    const reviewedCount = launchDocuments.filter((document) => (
+      editorialReviewIsCurrent(data, document.key, reviewState[document.key])
+    )).length;
+    onReviewedDocumentCountChange(reviewedCount);
+  }, [data, onReviewedDocumentCountChange, reviewState]);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (open) {
+      setActiveDocumentKey(selectedDocumentKey);
+      if (!dialog.open) dialog.showModal();
+      return;
+    }
+    if (dialog.open) dialog.close();
+  }, [open, selectedDocumentKey]);
+
+  const activeDocument = launchDocuments.find((document) => document.key === activeDocumentKey) || launchDocuments[0];
+  const activeEntry = reviewState[activeDocument.key] || emptyEditorialReviewEntry();
+  const presence = documentPresenceLabel(data, activeDocument.key);
+  const checksComplete = editorialReviewChecks.every((check) => activeEntry.checks[check.key] === true);
+  const canComplete = checksComplete && presence.status !== "missingUnexpected";
+  const activeReviewIsCurrent = editorialReviewIsCurrent(data, activeDocument.key, activeEntry);
+  const activeReviewIsStale = Boolean(activeEntry.completedAt) && !activeReviewIsCurrent;
+  const completedDocumentCount = launchDocuments.filter((document) => (
+    editorialReviewIsCurrent(data, document.key, reviewState[document.key])
+  )).length;
+
+  function updateEntry(updater: (entry: EditorialReviewEntry) => EditorialReviewEntry) {
+    setReviewState((current) => ({
+      ...current,
+      [activeDocument.key]: updater(current[activeDocument.key] || emptyEditorialReviewEntry())
+    }));
+  }
+
+  function toggleCheck(checkKey: EditorialReviewCheckKey) {
+    updateEntry((entry) => {
+      const checks = { ...entry.checks, [checkKey]: entry.checks[checkKey] !== true };
+      return {
+        ...entry,
+        checks,
+        completedAt: editorialReviewChecks.every((check) => checks[check.key] === true)
+          ? entry.completedAt
+          : null,
+        reviewedTextFingerprint: editorialReviewChecks.every((check) => checks[check.key] === true)
+          ? entry.reviewedTextFingerprint
+          : null
+      };
+    });
+  }
+
+  function toggleComplete() {
+    if (!activeReviewIsCurrent && !canComplete) return;
+    updateEntry((entry) => ({
+      ...entry,
+      completedAt: activeReviewIsCurrent ? null : new Date().toISOString(),
+      reviewedTextFingerprint: activeReviewIsCurrent
+        ? null
+        : editorialTextFingerprint(buildDerivedDocumentText(data, activeDocument.key))
+    }));
+  }
+
+  return (
+    <dialog
+      ref={dialogRef}
+      className="safeclaw-document-review-dialog"
+      data-testid="document-editorial-review-dialog"
+      aria-labelledby="document-editorial-review-title"
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+      onClose={onClose}
+    >
+      <header className="safeclaw-document-review-header">
+        <div>
+          <span>12종 문서 · 사람 검토</span>
+          <h2 id="document-editorial-review-title">문서별 최종 문구 확인</h2>
+          <p>자동 검사는 준비 상태를 보조합니다. 최종 완료는 사람이 각 문서를 읽고 직접 표시합니다.</p>
+        </div>
+        <div className="safeclaw-document-review-progress" aria-label={`사람 검토 ${completedDocumentCount}/${launchDocuments.length}종 완료`}>
+          <strong>{completedDocumentCount}/{launchDocuments.length}</strong>
+          <span>이 브라우저에 저장</span>
+        </div>
+        <button type="button" className="safeclaw-document-review-close" aria-label="문서 사람 검토 닫기" onClick={onClose}>×</button>
+      </header>
+
+      <div className="safeclaw-document-review-workbench">
+        <nav className="safeclaw-document-review-nav" aria-label="검토 문서 선택">
+          {launchDocuments.map((document, index) => {
+            const entry = reviewState[document.key];
+            const complete = editorialReviewIsCurrent(data, document.key, entry);
+            const stale = Boolean(entry?.completedAt) && !complete;
+            const documentPresence = documentPresenceLabel(data, document.key);
+            return (
+              <button
+                key={document.key}
+                type="button"
+                data-review-document-key={document.key}
+                aria-pressed={activeDocument.key === document.key}
+                onClick={() => setActiveDocumentKey(document.key)}
+              >
+                <small>{String(index + 1).padStart(2, "0")} · {document.tier}</small>
+                <strong>{document.title}</strong>
+                <span className={complete ? "complete" : documentPresence.status === "missingUnexpected" ? "missing" : "pending"}>
+                  {complete ? "검토 완료" : documentPresence.status === "missingUnexpected" ? "생성 누락" : stale ? "검토 갱신 필요" : "검토 대기"}
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+
+        <section className="safeclaw-document-review-copy" aria-label={`${activeDocument.title} 검토 원문`}>
+          <header>
+            <div>
+              <span>{activeDocument.tier} · {activeDocument.owner}</span>
+              <h3>{activeDocument.title}</h3>
+            </div>
+            {presence.label ? <strong data-presence={presence.status}>{presence.label}</strong> : <strong data-presence="presentNonEmpty">작성됨</strong>}
+          </header>
+          <pre data-testid="document-editorial-review-copy">{buildDerivedDocumentText(data, activeDocument.key)}</pre>
+        </section>
+
+        <aside className="safeclaw-document-review-checklist" aria-label={`${activeDocument.title} 사람 검토 항목`}>
+          <header>
+            <span>사람 검토 항목</span>
+            <strong>{editorialReviewChecks.filter((check) => activeEntry.checks[check.key] === true).length}/{editorialReviewChecks.length}</strong>
+          </header>
+          <div className="safeclaw-document-review-checks">
+            {editorialReviewChecks.map((check) => (
+              <label key={check.key}>
+                <input
+                  type="checkbox"
+                  checked={activeEntry.checks[check.key] === true}
+                  onChange={() => toggleCheck(check.key)}
+                />
+                <span>{check.label}</span>
+              </label>
+            ))}
+          </div>
+          <label className="safeclaw-document-review-note">
+            <span>검토 메모</span>
+            <textarea
+              value={activeEntry.note}
+              maxLength={2000}
+              rows={4}
+              placeholder="수정할 문구나 현장 확인사항"
+              onChange={(event) => updateEntry((entry) => ({ ...entry, note: event.target.value }))}
+            />
+          </label>
+          {presence.status === "missingUnexpected" ? <p className="export-error">생성 누락 문서는 재생성 전 완료할 수 없습니다.</p> : null}
+          {activeReviewIsStale && presence.status !== "missingUnexpected" ? <p className="muted small">검토 후 문구가 변경되어 다시 확인해야 합니다.</p> : null}
+          <div className="safeclaw-document-review-actions">
+            <button
+              type="button"
+              className="button secondary"
+              onClick={() => {
+                onEditDocument(activeDocument.key);
+                onClose();
+              }}
+            >
+              편집기로 열기
+            </button>
+            <button
+              type="button"
+              className="button"
+              disabled={!activeReviewIsCurrent && !canComplete}
+              onClick={toggleComplete}
+            >
+              {activeReviewIsCurrent ? "완료 취소" : activeReviewIsStale ? "다시 검토 완료" : "검토 완료로 표시"}
+            </button>
+          </div>
+        </aside>
+      </div>
+    </dialog>
+  );
+}
+
 export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
   const current = useCurrentWorkpack(sample);
   const currentRef = useRef(current);
   const [focusToken, setFocusToken] = useState(0);
   const [requestedDocumentKey, setRequestedDocumentKey] = useState<DocumentKey | undefined>();
   const [selectedDocumentKey, setSelectedDocumentKey] = useState<DocumentKey>("riskAssessmentDraft");
+  const [editorialReviewOpen, setEditorialReviewOpen] = useState(false);
+  const [reviewedDocumentCount, setReviewedDocumentCount] = useState(0);
   useEffect(() => {
     currentRef.current = current;
   }, [current]);
@@ -1036,6 +1347,8 @@ export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
           data={current.data}
           selectedDocumentKey={selectedDocumentKey}
           onSelectDocument={selectDocument}
+          reviewedDocumentCount={reviewedDocumentCount}
+          onOpenEditorialReview={() => setEditorialReviewOpen(true)}
         />
         <WorkpackEditor
           data={current.data}
@@ -1046,6 +1359,15 @@ export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
           onDeliverablesChange={updateCurrentDeliverables}
         />
       </section>
+      <DocumentEditorialReviewDialog
+        data={current.data}
+        generationFingerprint={current.generationFingerprint}
+        open={editorialReviewOpen}
+        selectedDocumentKey={selectedDocumentKey}
+        onClose={() => setEditorialReviewOpen(false)}
+        onEditDocument={selectDocument}
+        onReviewedDocumentCountChange={setReviewedDocumentCount}
+      />
     </>
   );
 }
