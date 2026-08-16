@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>위험성평가표</title>
+  <style>
+    body { font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; margin: 34px; color: #1d2430; line-height: 1.6; }
+    h1 { margin: 0 0 8px; font-size: 24px; }
+    h2 { margin: 24px 0 8px; font-size: 16px; border-left: 4px solid #21594f; padding-left: 8px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 12px; }
+    th, td { border: 1px solid #9aa4b2; padding: 9px; vertical-align: top; font-size: 13px; }
+    th { background: #e8f1ed; }
+    .meta { color: #657084; margin-bottom: 18px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>위험성평가표</h1>
+  <div class="meta">SafeGuard 공식자료 기반 초안 · 현장 검토 후 사용</div>
+  
+    <h2>오늘 개선·이력 반영 - 위험성평가</h2>
+    <table>
+      <thead><tr><th style="width: 24%;">항목</th><th>내용</th></tr></thead>
+      <tbody><tr><td>- 공유 전 보완</td><td>SIF 유사사례</td></tr><tr><td>- 공유 전 보완</td><td>위험성평가표 근거</td></tr><tr><td>- 공유 전 보완</td><td>TBM 브리핑 근거</td></tr><tr><td>1</td><td>위험성평가표(구조화 편집본)</td></tr></tbody>
+    </table>
+  
+    <h2>1. 외벽 도장 작업</h2>
+    <table>
+      <thead><tr><th style="width: 24%;">항목</th><th>내용</th></tr></thead>
+      <tbody><tr><td>관리번호</td><td>RA-construction-painting-1</td></tr><tr><td>작업장소</td><td>서울 성수동 근린생활시설 현장</td></tr><tr><td>공정</td><td>이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제</td></tr><tr><td>세부작업</td><td>외벽 도장 작업</td></tr><tr><td>장비/도구</td><td>이동식 비계, 안전난간, 추락방지 보호구</td></tr><tr><td>유해·위험요인</td><td>이동식 비계 승·하강 및 작업발판 이동 중 추락</td></tr><tr><td>4M</td><td>Machine</td></tr><tr><td>재해형태</td><td>fall</td></tr><tr><td>현재 안전조치</td><td>작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검</td></tr><tr><td>가능성</td><td>3</td></tr><tr><td>중대성</td><td>4</td></tr><tr><td>위험등급</td><td>high</td></tr><tr><td>추가 감소대책</td><td>작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검</td></tr><tr><td>조치담당자</td><td>관리감독자</td></tr><tr><td>조치기한</td><td>현장 확인</td></tr><tr><td>확인방법</td><td>작업 전 TBM 및 현장 사진 확인</td></tr><tr><td>확인상태</td><td>planned</td></tr><tr><td>확인일</td><td>현장 확인</td></tr><tr><td>확인자</td><td>작업반장</td></tr><tr><td>가능성 판단근거</td><td>작업 전 노출 빈도와 현장 통제 상태를 함께 반영</td></tr><tr><td>중대성 판단근거</td><td>추락·충돌·화재 등 중대재해 가능성을 보수적으로 반영</td></tr><tr><td>근거</td><td>riskAssessmentDraft | tbmBriefing</td></tr></tbody>
+    </table>
+  
+    <h2>2. 강풍 시 비계 전도와 공구·자재 낙하</h2>
+    <table>
+      <thead><tr><th style="width: 24%;">항목</th><th>내용</th></tr></thead>
+      <tbody><tr><td>관리번호</td><td>RA-construction-painting-2</td></tr><tr><td>작업장소</td><td>서울 성수동 근린생활시설 현장</td></tr><tr><td>공정</td><td>이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제</td></tr><tr><td>세부작업</td><td>강풍 시 비계 전도와 공구·자재 낙하</td></tr><tr><td>장비/도구</td><td>이동식 비계, 안전난간, 추락방지 보호구</td></tr><tr><td>유해·위험요인</td><td>강풍 시 비계 전도와 공구·자재 낙하</td></tr><tr><td>4M</td><td>Machine</td></tr><tr><td>재해형태</td><td>fall</td></tr><tr><td>현재 안전조치</td><td>풍속 상승 또는 돌풍 체감 시 즉시 작업중지 후 지상 대기</td></tr><tr><td>가능성</td><td>2</td></tr><tr><td>중대성</td><td>4</td></tr><tr><td>위험등급</td><td>medium</td></tr><tr><td>추가 감소대책</td><td>풍속 상승 또는 돌풍 체감 시 즉시 작업중지 후 지상 대기</td></tr><tr><td>조치담당자</td><td>작업반장</td></tr><tr><td>조치기한</td><td>현장 확인</td></tr><tr><td>확인방법</td><td>작업 전 체크리스트 확인</td></tr><tr><td>확인상태</td><td>needsReview</td></tr><tr><td>확인일</td><td>현장 확인</td></tr><tr><td>확인자</td><td>작업반장</td></tr><tr><td>가능성 판단근거</td><td>작업 전 노출 빈도와 현장 통제 상태를 함께 반영</td></tr><tr><td>중대성 판단근거</td><td>추락·충돌·화재 등 중대재해 가능성을 보수적으로 반영</td></tr><tr><td>근거</td><td>riskAssessmentDraft | tbmBriefing</td></tr></tbody>
+    </table>
+  
+    <h2>3. 지게차 동선 인접 구간에서 작업자 충돌</h2>
+    <table>
+      <thead><tr><th style="width: 24%;">항목</th><th>내용</th></tr></thead>
+      <tbody><tr><td>관리번호</td><td>RA-construction-painting-3</td></tr><tr><td>작업장소</td><td>서울 성수동 근린생활시설 현장</td></tr><tr><td>공정</td><td>이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제</td></tr><tr><td>세부작업</td><td>지게차 동선 인접 구간에서 작업자 충돌</td></tr><tr><td>장비/도구</td><td>지게차, 랙, 팔레트, 신호장비</td></tr><tr><td>유해·위험요인</td><td>지게차 동선 인접 구간에서 작업자 충돌</td></tr><tr><td>4M</td><td>Machine</td></tr><tr><td>재해형태</td><td>struckBy</td></tr><tr><td>현재 안전조치</td><td>작업반장 주도로 보호구 착용과 작업구간 출입통제를 확인</td></tr><tr><td>가능성</td><td>2</td></tr><tr><td>중대성</td><td>4</td></tr><tr><td>위험등급</td><td>medium</td></tr><tr><td>추가 감소대책</td><td>작업반장 주도로 보호구 착용과 작업구간 출입통제를 확인</td></tr><tr><td>조치담당자</td><td>작업반장</td></tr><tr><td>조치기한</td><td>현장 확인</td></tr><tr><td>확인방법</td><td>작업 전 체크리스트 확인</td></tr><tr><td>확인상태</td><td>needsReview</td></tr><tr><td>확인일</td><td>현장 확인</td></tr><tr><td>확인자</td><td>작업반장</td></tr><tr><td>가능성 판단근거</td><td>작업 전 노출 빈도와 현장 통제 상태를 함께 반영</td></tr><tr><td>중대성 판단근거</td><td>추락·충돌·화재 등 중대재해 가능성을 보수적으로 반영</td></tr><tr><td>근거</td><td>riskAssessmentDraft | tbmBriefing</td></tr></tbody>
+    </table>
+  
+</body>
+</html>

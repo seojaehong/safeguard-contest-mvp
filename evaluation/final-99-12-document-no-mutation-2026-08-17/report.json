@@ -1,0 +1,67 @@
+{
+  "schema": "safeclaw-final-99-12-document-no-mutation/v1",
+  "generatedAt": "2026-08-16T23:43:21.925Z",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_INFRA_PENDING",
+  "productCommit": "0c5f9ce26e96ed14cd31cac3c57ea51cfaaa03d8",
+  "currentSourceLocal": {
+    "baseUrl": "http://127.0.0.1:3083",
+    "reportPath": "evaluation/final-99-current-no-mutation-2026-08-17-after-product-commit/report.json",
+    "overall": "pass_with_notice",
+    "elapsedMs": 10121,
+    "canonicalDocumentCount": 12,
+    "canonicalDocumentsPassed": 12,
+    "corePdfCount": 4,
+    "corePdfsPassed": 4,
+    "orchestrationDocumentCount": 12,
+    "orchestrationDownloadCount": 14,
+    "orchestrationFailureCount": 0,
+    "screenshotCount": 5
+  },
+  "liveBeforeProductCommit": {
+    "baseUrl": "https://www.safeclaw.kr",
+    "reportPath": "evaluation/final-99-current-no-mutation-2026-08-17-after-contract/report.json",
+    "sourceCommit": "a506be8fa19045df823d2e5848e4002804a5f965",
+    "productionCommit": "a506be8fa19045df823d2e5848e4002804a5f965",
+    "overall": "blocked",
+    "canonicalDocumentCount": 12,
+    "canonicalDocumentsPassed": 12,
+    "documentDownloadVerdict": "blocked",
+    "blockerCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "liveAfterDeploymentRequired": true
+  },
+  "nonAuthoritativeIntermediateArtifacts": [
+    "evaluation/final-99-current-no-mutation-2026-08-17",
+    "evaluation/final-99-current-no-mutation-2026-08-17-after-local",
+    "evaluation/final-99-current-no-mutation-2026-08-17-after-local-pdf-fix"
+  ],
+  "verification": {
+    "focusedGateAndPdfTests": {
+      "filesPassed": 3,
+      "testsPassed": 14
+    },
+    "documentsAndKnowledgeUiTests": {
+      "filesPassed": 3,
+      "testsPassed": 55,
+      "durationMs": 250720
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28
+  },
+  "mutationBoundary": {
+    "executionMode": "no-mutation",
+    "dbMutationPerformed": false,
+    "providerGenerationCalled": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "liveDistributedRateLimitReadiness": "RED_CONFIGURATION_PENDING",
+    "fullyAutomatedLaunchClaimAllowed": false
+  }
+}

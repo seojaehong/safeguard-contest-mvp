@@ -1,0 +1,17 @@
+{
+  "generatedAt": "2026-08-16T23:48:47.795Z",
+  "baseUrl": "http://127.0.0.1:3083",
+  "authTokenPresent": false,
+  "executionMode": "no-mutation",
+  "verdict": "pass_with_notice",
+  "configured": false,
+  "authTokenIgnored": false,
+  "message": "no-mutation 모드가 관리자 저장/재열기 쓰기를 강제로 건너뛰었습니다. 인증 토큰이 있어도 사용하지 않았습니다.",
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "dispatchLogMutationPerformed": false,
+    "workerMutationPerformed": false,
+    "workpackMutationPerformed": false,
+    "educationMutationPerformed": false
+  }
+}

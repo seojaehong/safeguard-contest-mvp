@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>위험성평가표</title>
+  <style>
+    body { font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; color: #17201d; }
+    .cover { border: 2px solid #1f4d43; background: #e8f1ed; padding: 18px; margin-bottom: 14px; }
+    .cover h1 { margin: 0 0 8px; font-size: 22px; }
+    .cover p { margin: 0; color: #5e6677; }
+    table { border-collapse: collapse; width: 100%; table-layout: fixed; font-family: "Malgun Gothic", sans-serif; margin-bottom: 14px; }
+    th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; mso-number-format:"\@"; word-break: keep-all; }
+    th { background: #1f4d43; color: #ffffff; font-weight: 700; text-align: center; }
+    .summary th { background: #6f4b26; }
+    .section-row td { background: #e8f1ed; color: #1f4d43; font-weight: 700; font-size: 14px; border-top: 2px solid #1f4d43; }
+    .center { text-align: center; width: 42px; }
+    .check-cell { text-align: center; color: #6f4b26; width: 90px; }
+    .note { color: #5e6677; font-size: 12px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="cover">
+    <h1>위험성평가표</h1>
+    <p>SafeGuard 현장 문서팩 · 검토/확인/서명용 Excel 서식</p>
+  </div>
+  <table class="summary">
+    <colgroup><col style="width: 34%;" /><col style="width: 12%;" /><col style="width: 54%;" /></colgroup>
+    <thead><tr><th>섹션</th><th>항목 수</th><th>주요 항목</th></tr></thead>
+    <tbody>
+    <tr>
+      <td>오늘 개선·이력 반영 - 위험성평가</td>
+      <td>4</td>
+      <td>- 공유 전 보완, - 공유 전 보완</td>
+    </tr>
+  
+    <tr>
+      <td>1. 외벽 도장 작업</td>
+      <td>22</td>
+      <td>관리번호, 작업장소</td>
+    </tr>
+  
+    <tr>
+      <td>2. 강풍 시 비계 전도와 공구·자재 낙하</td>
+      <td>22</td>
+      <td>관리번호, 작업장소</td>
+    </tr>
+  
+    <tr>
+      <td>3. 지게차 동선 인접 구간에서 작업자 충돌</td>
+      <td>22</td>
+      <td>관리번호, 작업장소</td>
+    </tr>
+  </tbody>
+  </table>
+  <table>
+    <colgroup><col style="width: 6%;" /><col style="width: 20%;" /><col style="width: 54%;" /><col style="width: 10%;" /><col style="width: 10%;" /></colgroup>
+    <thead><tr><th>No.</th><th>항목</th><th>내용</th><th>확인상태</th><th>담당자</th></tr></thead>
+    <tbody>
+    <tr class="section-row"><td colspan="5">오늘 개선·이력 반영 - 위험성평가</td></tr>
+    <tr><td class="center">1</td><td>- 공유 전 보완</td><td>SIF 유사사례</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">2</td><td>- 공유 전 보완</td><td>위험성평가표 근거</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">3</td><td>- 공유 전 보완</td><td>TBM 브리핑 근거</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">4</td><td>1</td><td>위험성평가표(구조화 편집본)</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr>
+  
+    <tr class="section-row"><td colspan="5">1. 외벽 도장 작업</td></tr>
+    <tr><td class="center">1</td><td>관리번호</td><td>RA-construction-painting-1</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">2</td><td>작업장소</td><td>서울 성수동 근린생활시설 현장</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">3</td><td>공정</td><td>이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">4</td><td>세부작업</td><td>외벽 도장 작업</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">5</td><td>장비/도구</td><td>이동식 비계, 안전난간, 추락방지 보호구</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">6</td><td>유해·위험요인</td><td>이동식 비계 승·하강 및 작업발판 이동 중 추락</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">7</td><td>4M</td><td>Machine</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">8</td><td>재해형태</td><td>fall</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">9</td><td>현재 안전조치</td><td>작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">10</td><td>가능성</td><td>3</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">11</td><td>중대성</td><td>4</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">12</td><td>위험등급</td><td>high</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">13</td><td>추가 감소대책</td><td>작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">14</td><td>조치담당자</td><td>관리감독자</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">15</td><td>조치기한</td><td>현장 확인</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">16</td><td>확인방법</td><td>작업 전 TBM 및 현장 사진 확인</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">17</td><td>확인상태</td><td>planned</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">18</td><td>확인일</td><td>현장 확인</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">19</td><td>확인자</td><td>작업반장</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">20</td><td>가능성 판단근거</td><td>작업 전 노출 빈도와 현장 통제 상태를 함께 반영</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">21</td><td>중대성 판단근거</td><td>추락·충돌·화재 등 중대재해 가능성을 보수적으로 반영</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">22</td><td>근거</td><td>riskAssessmentDraft | tbmBriefing</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr>
+  
+    <tr class="section-row"><td colspan="5">2. 강풍 시 비계 전도와 공구·자재 낙하</td></tr>
+    <tr><td class="center">1</td><td>관리번호</td><td>RA-construction-painting-2</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">2</td><td>작업장소</td><td>서울 성수동 근린생활시설 현장</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">3</td><td>공정</td><td>이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">4</td><td>세부작업</td><td>강풍 시 비계 전도와 공구·자재 낙하</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">5</td><td>장비/도구</td><td>이동식 비계, 안전난간, 추락방지 보호구</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">6</td><td>유해·위험요인</td><td>강풍 시 비계 전도와 공구·자재 낙하</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">7</td><td>4M</td><td>Machine</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">8</td><td>재해형태</td><td>fall</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">9</td><td>현재 안전조치</td><td>풍속 상승 또는 돌풍 체감 시 즉시 작업중지 후 지상 대기</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">10</td><td>가능성</td><td>2</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">11</td><td>중대성</td><td>4</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">12</td><td>위험등급</td><td>medium</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">13</td><td>추가 감소대책</td><td>풍속 상승 또는 돌풍 체감 시 즉시 작업중지 후 지상 대기</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">14</td><td>조치담당자</td><td>작업반장</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">15</td><td>조치기한</td><td>현장 확인</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">16</td><td>확인방법</td><td>작업 전 체크리스트 확인</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">17</td><td>확인상태</td><td>needsReview</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">18</td><td>확인일</td><td>현장 확인</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">19</td><td>확인자</td><td>작업반장</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">20</td><td>가능성 판단근거</td><td>작업 전 노출 빈도와 현장 통제 상태를 함께 반영</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">21</td><td>중대성 판단근거</td><td>추락·충돌·화재 등 중대재해 가능성을 보수적으로 반영</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">22</td><td>근거</td><td>riskAssessmentDraft | tbmBriefing</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr>
+  
+    <tr class="section-row"><td colspan="5">3. 지게차 동선 인접 구간에서 작업자 충돌</td></tr>
+    <tr><td class="center">1</td><td>관리번호</td><td>RA-construction-painting-3</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">2</td><td>작업장소</td><td>서울 성수동 근린생활시설 현장</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">3</td><td>공정</td><td>이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">4</td><td>세부작업</td><td>지게차 동선 인접 구간에서 작업자 충돌</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">5</td><td>장비/도구</td><td>지게차, 랙, 팔레트, 신호장비</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">6</td><td>유해·위험요인</td><td>지게차 동선 인접 구간에서 작업자 충돌</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">7</td><td>4M</td><td>Machine</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">8</td><td>재해형태</td><td>struckBy</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">9</td><td>현재 안전조치</td><td>작업반장 주도로 보호구 착용과 작업구간 출입통제를 확인</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">10</td><td>가능성</td><td>2</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">11</td><td>중대성</td><td>4</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">12</td><td>위험등급</td><td>medium</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">13</td><td>추가 감소대책</td><td>작업반장 주도로 보호구 착용과 작업구간 출입통제를 확인</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">14</td><td>조치담당자</td><td>작업반장</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">15</td><td>조치기한</td><td>현장 확인</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">16</td><td>확인방법</td><td>작업 전 체크리스트 확인</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">17</td><td>확인상태</td><td>needsReview</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">18</td><td>확인일</td><td>현장 확인</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">19</td><td>확인자</td><td>작업반장</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">20</td><td>가능성 판단근거</td><td>작업 전 노출 빈도와 현장 통제 상태를 함께 반영</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">21</td><td>중대성 판단근거</td><td>추락·충돌·화재 등 중대재해 가능성을 보수적으로 반영</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr><tr><td class="center">22</td><td>근거</td><td>riskAssessmentDraft | tbmBriefing</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr>
+  </tbody>
+  </table>
+  <p class="note">본 파일은 공식자료 기반 초안입니다. 현장관리자가 작업 전 최종 확인 후 사용하세요.</p>
+</body>
+</html>

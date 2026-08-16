@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2026-08-16T23:32:31.736Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "commit": "a506be8f",
+  "overall": "blocked",
+  "elapsedMs": 764,
+  "gates": [
+    {
+      "name": "ask-orchestration",
+      "verdict": "blocked",
+      "evidence": "12종 문서 생성 실패"
+    }
+  ]
+}
