@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-reviewer-cockpit-browser/v1",
   "verdict": "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY",
-  "checkedAt": "2026-08-16T13:55:20.864Z",
-  "sourceHead": "973bf64b19a1f8fcaf85931c0ced849c4fdefbad",
+  "checkedAt": "2026-08-16T16:29:34.817Z",
+  "sourceHead": "ed40eac88c0d12eb45a9da2687f4991cd4a505e7",
   "cases": 3,
   "passedCases": 3,
   "desktopPass": true,
@@ -11,6 +11,7 @@
   "draftStorageIdentityPass": true,
   "draftStorageIdentity": {
     "sameFingerprintPreserved": true,
+    "sourceIdentityPresent": true,
     "staleEnvelopeInjected": true,
     "staleFingerprintDiscarded": true,
     "staleExportDisabled": true,
@@ -100,8 +101,10 @@
       "selectedCandidateVisibleMobilePaneCount": 2,
       "requiredCheckCount": 40,
       "semanticGroupCount": 24,
+      "evidenceReceiptCount": 24,
       "exportInitiallyDisabled": true,
-      "firstEvidenceBottom": 420.28125,
+      "firstEvidenceBottom": 456.28125,
+      "firstEvidenceReceiptBottom": 445.28125,
       "firstCheckBottom": 224.59375,
       "horizontalOverflow": false,
       "candidateEndState": {
@@ -113,6 +116,13 @@
         "focusedIndex": 0
       },
       "mobileKeyboardState": null,
+      "receiptAccess": {
+        "receiptTop": 417.28125,
+        "receiptBottom": 445.28125,
+        "paneTop": 75,
+        "paneBottom": 662,
+        "fullyVisibleInsidePane": true
+      },
       "screenshot": "evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\desktop-1440x723.png"
     },
     {
@@ -198,8 +208,10 @@
       "selectedCandidateVisibleMobilePaneCount": 1,
       "requiredCheckCount": 40,
       "semanticGroupCount": 24,
+      "evidenceReceiptCount": 24,
       "exportInitiallyDisabled": true,
-      "firstEvidenceBottom": 703.5625,
+      "firstEvidenceBottom": 721.5625,
+      "firstEvidenceReceiptBottom": 720.5625,
       "firstCheckBottom": 0,
       "horizontalOverflow": false,
       "candidateEndState": {
@@ -215,6 +227,13 @@
         "reviewFocused": "0:review",
         "evidenceSelected": "true",
         "evidenceFocused": "0:evidence"
+      },
+      "receiptAccess": {
+        "receiptTop": 420.5625,
+        "receiptBottom": 444.5625,
+        "paneTop": 195,
+        "paneBottom": 671,
+        "fullyVisibleInsidePane": true
       },
       "screenshot": "evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\mobile-evidence-390x723.png"
     },
@@ -301,8 +320,10 @@
       "selectedCandidateVisibleMobilePaneCount": 1,
       "requiredCheckCount": 40,
       "semanticGroupCount": 24,
+      "evidenceReceiptCount": 24,
       "exportInitiallyDisabled": true,
       "firstEvidenceBottom": 0,
+      "firstEvidenceReceiptBottom": 0,
       "firstCheckBottom": 323.796875,
       "horizontalOverflow": false,
       "candidateEndState": {
@@ -319,6 +340,7 @@
         "evidenceSelected": "true",
         "evidenceFocused": "0:evidence"
       },
+      "receiptAccess": null,
       "screenshot": "evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\mobile-review-390x723.png"
     }
   ],

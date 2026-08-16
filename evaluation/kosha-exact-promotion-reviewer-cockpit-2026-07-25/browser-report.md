@@ -13,6 +13,8 @@ Verdict: `PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY`
 - Mobile evidence/review keyboard: true
 - Breakpoint-correct tabpanels: true
 - Candidate-bound draft restore: true
+- Evidence page receipts visible: true
+- Draft fingerprint contains source identity: true
 - Live progress status: true
 - Horizontal overflow: false
 

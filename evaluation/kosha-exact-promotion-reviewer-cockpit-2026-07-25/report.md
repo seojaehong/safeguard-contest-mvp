@@ -4,6 +4,7 @@ Verdict: `PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY`
 
 - Candidates: 8
 - Machine semantic groups: 24
+- PDF page receipts: 24
 - Required human inputs: 64
 - Initial completed inputs: 0
 - Export initially disabled: true
@@ -12,6 +13,8 @@ Verdict: `PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY`
 - Mobile evidence/review tabs: true
 - Responsive tabpanel semantics: true
 - Candidate-bound draft storage: true
+- Evidence page receipts: true
+- Draft bound to corpus identity: true
 - Live progress region: true
 - HTML: `evaluation\kosha-exact-promotion-reviewer-cockpit-2026-07-25\index.html`
 
