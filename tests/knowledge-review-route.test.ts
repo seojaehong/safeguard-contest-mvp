@@ -260,6 +260,14 @@ describe("knowledge review GET", () => {
         status: "review_required",
         sourceEventCount: 1,
         candidateText: "현장 안전 지식 후보를 검토합니다.",
+        evidenceItems: [{
+          authorityId: "external_context",
+          authorityLabel: "외부 작업 맥락",
+          sourceLabel: "외부 작업 맥락",
+          capturedAt: "2026-07-15T00:00:00.000Z",
+          metadata: [],
+          publicUrl: null
+        }],
         reviewContract: {
           contractVersion: "knowledge-candidate-review.v1",
           status: "human_review_required",
@@ -288,6 +296,9 @@ describe("knowledge review GET", () => {
     });
     expect(serialized).not.toContain("raw-secret");
     expect(serialized).not.toContain("token-secret");
+    expect(payload.queue[0].evidenceItems).toHaveLength(1);
+    expect(payload.queue[0].evidenceItems[0].id).toMatch(/^evidence-[0-9a-f]{16}$/u);
+    expect(payload.queue[0].evidenceItems[0].digest).toMatch(/^sha256:[0-9a-f]{16}$/u);
     for (const forbidden of [
       "현장 검토 이벤트",
       "manual-1",
@@ -326,6 +337,88 @@ describe("knowledge review GET", () => {
       operation: "in",
       args: ["status", ["draft", "generated", "review_required"]]
     });
+  });
+
+  it("exposes only bounded public references while keeping tenant evidence generic", async () => {
+    const fake = makeReadClient({
+      knowledge_events: [{
+        id: "event-law",
+        organization_id: "org-owned",
+        site_id: "site-1",
+        source: "lawgo",
+        source_id: "law-secret-id",
+        captured_at: "2026-07-15T00:00:00.000Z",
+        title: "산업안전보건법 제38조",
+        url: "https://www.law.go.kr/법령/산업안전보건법",
+        payload: { article: "제38조", internalNote: "law-raw-secret" },
+        related_hazard_ids: ["hazard-fall"],
+        reflected_documents: ["위험성평가표"],
+        review_status: "pending_review",
+        created_at: "2026-07-15T00:00:00.000Z"
+      }, {
+        id: "event-site",
+        organization_id: "org-owned",
+        site_id: "site-1",
+        source: "manual",
+        source_id: "site-secret-id",
+        captured_at: "2026-07-15T00:01:00.000Z",
+        title: "홍길동 현장 비공개 관찰",
+        url: "https://attacker.invalid/private-token",
+        payload: { provenanceScope: "site", workerNote: "private-worker-note" },
+        related_hazard_ids: ["hazard-fall"],
+        reflected_documents: ["위험성평가표"],
+        review_status: "pending_review",
+        created_at: "2026-07-15T00:01:00.000Z"
+      }],
+      knowledge_regeneration_runs: [{
+        id: "run-public-private",
+        organization_id: "org-owned",
+        site_id: "site-1",
+        question: "공개·비공개 근거 검토",
+        raw_event_ids: ["event-law", "event-site"],
+        generated_output: {},
+        provider: "vertex",
+        status: "review_required",
+        created_at: "2026-07-15T00:02:00.000Z"
+      }]
+    });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.getWorkspaceUser.mockResolvedValue({ id: "reviewer-1", email: "reviewer@example.com" });
+    const { GET } = await import("@/app/api/knowledge/review/route");
+
+    const response = await GET(new NextRequest("http://localhost/api/knowledge/review", {
+      headers: { authorization: "Bearer test-token" }
+    }));
+    const payload = await response.json();
+    const serialized = JSON.stringify(payload);
+
+    expect(response.status).toBe(200);
+    expect(payload.queue[0].evidenceItems).toEqual([
+      expect.objectContaining({
+        authorityId: "law",
+        sourceLabel: "산업안전보건법 제38조",
+        metadata: [{ label: "조문", value: "제38조" }],
+        publicUrl: expect.stringMatching(/^https:\/\/www\.law\.go\.kr\//u)
+      }),
+      expect.objectContaining({
+        authorityId: "site_history",
+        sourceLabel: "현장 전용 이력",
+        metadata: [],
+        publicUrl: null
+      })
+    ]);
+    for (const forbidden of [
+      "law-secret-id",
+      "site-secret-id",
+      "law-raw-secret",
+      "private-worker-note",
+      "홍길동",
+      "private-token",
+      "org-owned",
+      "site-1"
+    ]) {
+      expect(serialized, `evidence response exposes ${forbidden}`).not.toContain(forbidden);
+    }
   });
 
   it("drops invalid relations and generated output without exposing their contents", async () => {

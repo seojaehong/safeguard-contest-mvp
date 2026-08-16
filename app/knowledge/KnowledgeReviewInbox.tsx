@@ -14,6 +14,7 @@ type ReviewInboxItem = {
   candidateText: string;
   sourceEventCount: number;
   matchedHazardCount: number;
+  evidenceItems: ReviewEvidenceItem[];
   reviewContract: {
     contractVersion: "knowledge-candidate-review.v1";
     status: "human_review_required";
@@ -26,6 +27,17 @@ type ReviewInboxItem = {
     humanReviewRequired: true;
     machineEvidenceReplacesHumanReview: false;
   } | null;
+};
+
+type ReviewEvidenceItem = {
+  id: string;
+  authorityId: ReviewEvidenceAuthorityId;
+  authorityLabel: string;
+  sourceLabel: string;
+  capturedAt: string;
+  digest: string;
+  metadata: Array<{ label: string; value: string }>;
+  publicUrl: string | null;
 };
 
 type ReviewAuthorityId =
@@ -64,6 +76,15 @@ const REVIEW_AUTHORITY_PRESENTATION: ReadonlyArray<{
   { id: "sitePrivateMemory", label: "현장 이력" },
   { id: "externalContext", label: "외부 맥락" }
 ];
+const REVIEW_AUTHORITY_ROLE_BY_EVIDENCE: Record<ReviewEvidenceAuthorityId, ReviewAuthorityId> = {
+  sif: "sifIncidentControlEvidence",
+  kosha: "koshaTechnicalGuidance",
+  law: "lawStatutorySource",
+  organization_history: "organizationPrivateMemory",
+  site_history: "sitePrivateMemory",
+  external_context: "externalContext"
+};
+const PUBLIC_EVIDENCE_HOSTS = ["law.go.kr", "kosha.or.kr", "data.go.kr"] as const;
 
 const MAX_UI_TEXT_LENGTH = 12_000;
 let browserClient: SupabaseClient | null = null;
@@ -124,6 +145,59 @@ function readReviewContract(value: unknown): ReviewInboxItem["reviewContract"] {
   };
 }
 
+function readEvidenceItem(value: unknown): ReviewEvidenceItem | null {
+  if (!isRecord(value)) return null;
+  const id = readString(value.id, 64);
+  const authorityId = value.authorityId;
+  const authorityLabel = readString(value.authorityLabel, 64);
+  const sourceLabel = readString(value.sourceLabel, 160);
+  const capturedAt = readString(value.capturedAt, 40);
+  const digest = readString(value.digest, 32);
+  if (!id
+    || typeof authorityId !== "string"
+    || !REVIEW_EVIDENCE_AUTHORITY_IDS.includes(authorityId as ReviewEvidenceAuthorityId)
+    || !authorityLabel
+    || !sourceLabel
+    || !capturedAt
+    || !/^sha256:[0-9a-f]{16}$/u.test(digest)) return null;
+
+  const metadata = Array.isArray(value.metadata)
+    ? value.metadata.flatMap((item) => {
+        if (!isRecord(item)) return [];
+        const label = readString(item.label, 32);
+        const metadataValue = readString(item.value, 96);
+        return label && metadataValue ? [{ label, value: metadataValue }] : [];
+      }).slice(0, 4)
+    : [];
+  let publicUrl: string | null = null;
+  if (typeof value.publicUrl === "string") {
+    try {
+      const parsed = new URL(value.publicUrl);
+      const hostname = parsed.hostname.toLowerCase();
+      if (parsed.protocol === "https:"
+        && PUBLIC_EVIDENCE_HOSTS.some((host) => hostname === host || hostname.endsWith(`.${host}`))) {
+        publicUrl = parsed.toString().slice(0, 500);
+      }
+    } catch {
+      publicUrl = null;
+    }
+  }
+  return { id, authorityId: authorityId as ReviewEvidenceAuthorityId, authorityLabel, sourceLabel, capturedAt, digest, metadata, publicUrl };
+}
+
+function evidenceMatchesReviewContract(
+  evidenceItems: ReviewEvidenceItem[],
+  reviewContract: NonNullable<ReviewInboxItem["reviewContract"]>
+): boolean {
+  const counts = Object.fromEntries(
+    REVIEW_AUTHORITY_PRESENTATION.map(({ id }) => [id, 0])
+  ) as Record<ReviewAuthorityId, number>;
+  for (const evidence of evidenceItems) {
+    counts[REVIEW_AUTHORITY_ROLE_BY_EVIDENCE[evidence.authorityId]] += 1;
+  }
+  return REVIEW_AUTHORITY_PRESENTATION.every(({ id }) => counts[id] === reviewContract.sourceRoleCounts[id]);
+}
+
 function parseInboxItem(value: unknown): ReviewInboxItem | null {
   if (!isRecord(value)) return null;
   const runId = readString(value.runId, 128);
@@ -147,12 +221,17 @@ function parseInboxItem(value: unknown): ReviewInboxItem | null {
     && value.matchedHazardCount <= 20
     ? value.matchedHazardCount
     : -1;
+  const evidenceItems = Array.isArray(value.evidenceItems)
+    ? value.evidenceItems.map(readEvidenceItem).filter((item): item is ReviewEvidenceItem => item !== null).slice(0, 20)
+    : [];
 
   if (
     !candidateLabel
     || sourceEventCount === 0
+    || (status === "review_required" && evidenceItems.length !== sourceEventCount)
     || matchedHazardCount < 0
     || (status === "review_required" && (!candidateText || !reviewContract))
+    || (status === "review_required" && reviewContract && !evidenceMatchesReviewContract(evidenceItems, reviewContract))
   ) return null;
   return {
     runId,
@@ -162,6 +241,7 @@ function parseInboxItem(value: unknown): ReviewInboxItem | null {
     candidateText,
     sourceEventCount,
     matchedHazardCount,
+    evidenceItems,
     reviewContract
   };
 }
@@ -179,12 +259,27 @@ export function KnowledgeReviewInbox() {
   const [items, setItems] = useState<ReviewInboxItem[]>([]);
   const [state, setState] = useState<"loading" | "signed_out" | "ready" | "error">("loading");
   const [session, setSession] = useState<Session | null>(null);
+  const [compactViewport, setCompactViewport] = useState(false);
+  const [activeReviewPane, setActiveReviewPane] = useState<"candidate" | "evidence">("candidate");
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 720px)");
+    const sync = () => setCompactViewport(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
   const [pendingRunId, setPendingRunId] = useState<string | null>(null);
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
 
   const accessToken = session?.access_token ?? null;
   const selectedItem = items.find((item) => item.runId === selectedRunId) ?? items[0] ?? null;
+
+  function selectCandidate(runId: string): void {
+    setSelectedRunId(runId);
+    setActiveReviewPane("candidate");
+  }
 
   const loadInbox = useCallback(async (token: string) => {
     try {
@@ -314,7 +409,7 @@ export function KnowledgeReviewInbox() {
                     type="button"
                     className={styles.reviewCandidateButton}
                     aria-pressed={selectedItem?.runId === item.runId}
-                    onClick={() => setSelectedRunId(item.runId)}
+                    onClick={() => selectCandidate(item.runId)}
                   >
                     <span>{item.status === "review_required" ? "검토 대기" : "후보 준비 전"}</span>
                     <strong>{item.candidateLabel}</strong>
@@ -367,7 +462,58 @@ export function KnowledgeReviewInbox() {
                         <span>작업팩 적용 전 현장 책임자 확인</span>
                       </div>
                     </section>
-                    <p className={styles.candidateText} data-selected-candidate-body="true">{item.candidateText}</p>
+                    <div className={styles.reviewPaneTabs} role="tablist" aria-label="후보 검토 보기">
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={activeReviewPane === "candidate"}
+                        onClick={() => setActiveReviewPane("candidate")}
+                      >후보 문장</button>
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={activeReviewPane === "evidence"}
+                        onClick={() => setActiveReviewPane("evidence")}
+                      >근거 {item.evidenceItems.length}</button>
+                    </div>
+                    <div className={styles.reviewEvidenceWorkbench} data-review-evidence-workbench="true">
+                      {!compactViewport || activeReviewPane === "candidate" ? (
+                        <section className={styles.candidatePane} data-review-pane="candidate">
+                          <span className={styles.reviewPaneLabel}>후보 문장</span>
+                          <p className={styles.candidateText} data-selected-candidate-body="true">{item.candidateText}</p>
+                        </section>
+                      ) : null}
+                      {!compactViewport || activeReviewPane === "evidence" ? (
+                        <section className={styles.evidencePane} data-review-pane="evidence" aria-label="선택 후보 근거 목록">
+                          <div className={styles.evidencePaneHeader}>
+                            <span className={styles.reviewPaneLabel}>검증 근거</span>
+                            <small>최대 20건 · 원문 식별자 비공개</small>
+                          </div>
+                          <ol className={styles.evidenceList}>
+                            {item.evidenceItems.map((evidence) => (
+                              <li key={evidence.id} data-review-evidence-authority={evidence.authorityId}>
+                                <div className={styles.evidenceIdentity}>
+                                  <strong>{evidence.authorityLabel}</strong>
+                                  <span>{evidence.sourceLabel}</span>
+                                </div>
+                                <dl className={styles.evidenceFacts}>
+                                  <div><dt>수집</dt><dd><time dateTime={evidence.capturedAt}>{evidence.capturedAt.slice(0, 10)}</time></dd></div>
+                                  <div><dt>검증</dt><dd>{evidence.digest}</dd></div>
+                                  {evidence.metadata.map((entry) => (
+                                    <div key={`${evidence.id}-${entry.label}`}><dt>{entry.label}</dt><dd>{entry.value}</dd></div>
+                                  ))}
+                                </dl>
+                                {evidence.publicUrl ? (
+                                  <a href={evidence.publicUrl} target="_blank" rel="noreferrer">공식 원문 열기</a>
+                                ) : (
+                                  <span className={styles.privateEvidenceLabel}>검토 화면 내 비공개 근거</span>
+                                )}
+                              </li>
+                            ))}
+                          </ol>
+                        </section>
+                      ) : null}
+                    </div>
                     <div className={styles.reviewMeta}>
                       <span>법적 확정 아님</span>
                       <span>온톨로지 미반영</span>

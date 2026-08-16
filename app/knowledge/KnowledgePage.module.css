@@ -173,9 +173,11 @@
 .reviewWorkbench {
   display: grid;
   grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   gap: var(--space-4);
   min-width: 0;
   min-height: 480px;
+  height: min(580px, calc(100dvh - 120px));
   max-height: min(580px, calc(100dvh - 120px));
   margin-top: var(--space-5);
 }
@@ -298,11 +300,128 @@
 .candidateText {
   min-height: 96px;
   flex: 1 1 auto;
-  margin-top: var(--space-4) !important;
+  margin-top: var(--space-2) !important;
   overflow: auto;
   overscroll-behavior: contain;
   padding-right: var(--space-2);
   white-space: pre-wrap;
+}
+
+.reviewPaneTabs {
+  display: none;
+}
+
+.reviewEvidenceWorkbench {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
+  gap: var(--space-4);
+  min-width: 0;
+  min-height: 150px;
+  flex: 1 1 auto;
+  margin-top: var(--space-3);
+  overflow: hidden;
+}
+
+.candidatePane,
+.evidencePane {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--workspace-rule, #e2e5e9);
+  border-radius: var(--radius-control);
+  padding: var(--space-3);
+}
+
+.reviewPaneLabel {
+  color: var(--workspace-ink, #17191d);
+  font-size: var(--text-support);
+  font-weight: 700;
+  line-height: var(--leading-body);
+}
+
+.evidencePaneHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.evidencePaneHeader small,
+.privateEvidenceLabel {
+  color: var(--workspace-muted, #606873);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+}
+
+.evidenceList {
+  display: grid;
+  gap: var(--space-2);
+  min-height: 0;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+}
+
+.evidenceList li {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.7fr) minmax(0, 1.3fr) auto;
+  gap: var(--space-2);
+  align-items: start;
+  min-width: 0;
+  border-top: 1px solid var(--workspace-rule, #e2e5e9);
+  padding-top: var(--space-2);
+}
+
+.evidenceIdentity {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-1);
+}
+
+.evidenceIdentity strong,
+.evidenceIdentity span,
+.evidenceFacts,
+.evidenceList a {
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+}
+
+.evidenceIdentity span,
+.evidenceFacts dt {
+  color: var(--workspace-muted, #606873);
+}
+
+.evidenceIdentity span,
+.evidenceFacts dd {
+  overflow-wrap: anywhere;
+}
+
+.evidenceFacts {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  margin: 0;
+}
+
+.evidenceFacts > div {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
+.evidenceList a {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  color: var(--workspace-accent-text, #334155);
+  font-weight: 700;
+  text-underline-offset: 3px;
 }
 
 .reviewAuthority {
@@ -974,16 +1093,69 @@
   }
 
   .reviewActions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .reviewActions button {
+    padding: var(--space-2);
+    font-size: var(--text-caption);
+  }
+
+  .reviewPaneTabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    margin-top: var(--space-2);
+    padding: 1px;
+    background: var(--workspace-rule, #e2e5e9);
+  }
+
+  .reviewPaneTabs button {
+    min-width: 44px;
+    min-height: 44px;
+    border: 0;
+    background: var(--workspace-surface-1, #ffffff);
+    color: var(--workspace-muted, #606873);
+    font: inherit;
+    font-size: var(--text-support);
+    font-weight: 700;
+  }
+
+  .reviewPaneTabs button[aria-selected="true"] {
+    background: var(--workspace-ink, #17191d);
+    color: var(--workspace-surface-1, #ffffff);
+  }
+
+  .reviewEvidenceWorkbench {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 135px;
+    max-height: 135px;
+  }
+
+  .evidenceList li {
     grid-template-columns: minmax(0, 1fr);
   }
 
   .reviewAuthorityCounts {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(100px, 1fr));
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
   }
 
   .reviewBoundary {
-    display: grid;
+    display: flex;
+    flex-wrap: nowrap;
     gap: var(--space-2);
+    min-height: 44px;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+  }
+
+  .reviewBoundary span {
+    flex: 0 0 auto;
   }
 
   .promotionStage,
@@ -1051,6 +1223,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     min-height: 0;
+    height: auto;
     max-height: none;
   }
 
@@ -1077,16 +1250,14 @@
   }
 
   .candidateText {
+    min-height: 0;
     max-height: 220px;
   }
 
   .reviewAuthority {
     gap: var(--space-2);
-    margin-top: var(--space-3);
-    padding: var(--space-2) 0;
+    margin-top: var(--space-2);
+    padding: var(--space-1) 0;
   }
 
-  .reviewAuthorityCounts {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }

@@ -13,11 +13,57 @@ const queueItem = {
   runId: "11111111-1111-4111-8111-111111111111",
   status: "review_required",
   statusLabel: "검토 대기",
-  sourceEventCount: 1,
+  sourceEventCount: 5,
   candidateLabel: "위험성평가표 현장 지식 검토",
   candidateText: "작업발판 단부의 안전난간 상태를 확인하고 현장 책임자가 적용 여부를 검토합니다.",
   matchedHazardCount: 1,
   providerLabel: "fixture-provider",
+  evidenceItems: [{
+    id: "evidence-1111111111111111",
+    authorityId: "law",
+    authorityLabel: "법령 근거",
+    sourceLabel: "산업안전보건법 제38조",
+    capturedAt: "2026-07-16T00:00:00.000Z",
+    digest: "sha256:1111111111111111",
+    metadata: [{ label: "조문", value: "제38조" }],
+    publicUrl: "https://www.law.go.kr/법령/산업안전보건법"
+  }, {
+    id: "evidence-2222222222222222",
+    authorityId: "sif",
+    authorityLabel: "SIF 통제 근거",
+    sourceLabel: "추락 재해 통제 사례",
+    capturedAt: "2026-07-16T00:01:00.000Z",
+    digest: "sha256:2222222222222222",
+    metadata: [{ label: "자료 유형", value: "sif-case" }],
+    publicUrl: "https://www.kosha.or.kr/kosha/data/industrialAccidentStatus.do"
+  }, {
+    id: "evidence-3333333333333333",
+    authorityId: "kosha",
+    authorityLabel: "KOSHA 기술 지침",
+    sourceLabel: "추락 방지 기술 지침",
+    capturedAt: "2026-07-16T00:02:00.000Z",
+    digest: "sha256:3333333333333333",
+    metadata: [{ label: "가이드 코드", value: "C-49" }],
+    publicUrl: "https://portal.kosha.or.kr/archive/resources/tech-support/search/all"
+  }, {
+    id: "evidence-4444444444444444",
+    authorityId: "organization_history",
+    authorityLabel: "조직 전용 이력",
+    sourceLabel: "조직 전용 이력",
+    capturedAt: "2026-07-16T00:03:00.000Z",
+    digest: "sha256:4444444444444444",
+    metadata: [],
+    publicUrl: null
+  }, {
+    id: "evidence-5555555555555555",
+    authorityId: "site_history",
+    authorityLabel: "현장 전용 이력",
+    sourceLabel: "현장 전용 이력",
+    capturedAt: "2026-07-16T00:04:00.000Z",
+    digest: "sha256:5555555555555555",
+    metadata: [],
+    publicUrl: null
+  }],
   reviewContract: {
     contractVersion: "knowledge-candidate-review.v1",
     status: "human_review_required",
@@ -138,21 +184,46 @@ describe("knowledge review inbox browser", () => {
     expect(await inbox.getByText("위험 2").isVisible()).toBe(true);
     await inbox.getByRole("button", { name: /위험성평가표 현장 지식 검토/u }).click();
 
+    const evidenceTab = inbox.getByRole("tab", { name: "근거 5" });
+    await evidenceTab.click();
+    const evidencePane = inbox.locator('[data-review-pane="evidence"]');
+    await evidencePane.waitFor();
+    expect(await inbox.locator('[data-review-pane="candidate"]').count()).toBe(0);
+    expect(await evidencePane.textContent()).toContain("산업안전보건법 제38조");
+    expect(await evidencePane.textContent()).toContain("sha256:1111111111111111");
+    expect(await evidencePane.getByRole("link", { name: "공식 원문 열기" }).first().getAttribute("href")).toMatch(/^https:\/\//u);
+    await inbox.getByRole("button", { name: /작업계획서 현장 지식 검토/u }).click();
+    expect(await inbox.locator('[data-review-pane="candidate"]').count()).toBe(1);
+    expect(await inbox.locator('[data-review-pane="evidence"]').count()).toBe(0);
+    expect(await inbox.getByText(secondQueueItem.candidateText).isVisible()).toBe(true);
+    await inbox.getByRole("button", { name: /위험성평가표 현장 지식 검토/u }).click();
+
     await page.setViewportSize({ width: 1440, height: 900 });
+    await expect.poll(() => inbox.locator('[data-review-pane="evidence"]').count()).toBe(1);
     const workbenchMetrics = await inbox.locator('[data-review-workbench="selected-only"]').evaluate((root) => {
       const navigator = root.querySelector<HTMLElement>('nav[aria-label="지식 후보 목록"]');
       const detail = root.querySelector<HTMLElement>('[data-selected-review-candidate="true"]');
       const body = root.querySelector<HTMLElement>('[data-selected-candidate-body="true"]');
-      if (!navigator || !detail || !body) throw new Error("review workbench geometry is incomplete");
+      const evidenceWorkbench = root.querySelector<HTMLElement>('[data-review-evidence-workbench="true"]');
+      const evidenceList = root.querySelector<HTMLElement>('[data-review-pane="evidence"] ol');
+      const actions = root.querySelector<HTMLElement>('[role="group"][aria-label="검토 결정"]');
+      if (!navigator || !detail || !body || !evidenceWorkbench || !evidenceList || !actions) {
+        throw new Error("review workbench geometry is incomplete");
+      }
       const navigatorRect = navigator.getBoundingClientRect();
       const detailRect = detail.getBoundingClientRect();
+      const actionsRect = actions.getBoundingClientRect();
       return {
         columns: getComputedStyle(root).gridTemplateColumns,
         navigatorRight: navigatorRect.right,
         detailLeft: detailRect.left,
         detailHeight: detailRect.height,
         selectedBodyCount: root.querySelectorAll('[data-selected-candidate-body="true"]').length,
+        paneCount: root.querySelectorAll('[data-review-pane]').length,
+        paneColumns: getComputedStyle(evidenceWorkbench).gridTemplateColumns,
         bodyOverflowY: getComputedStyle(body).overflowY,
+        evidenceOverflowY: getComputedStyle(evidenceList).overflowY,
+        actionsContained: actionsRect.bottom <= detailRect.bottom + 1,
         rootOverflow: root.scrollWidth - root.clientWidth,
         pageOverflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - window.innerWidth
       };
@@ -161,9 +232,32 @@ describe("knowledge review inbox browser", () => {
     expect(workbenchMetrics.navigatorRight).toBeLessThanOrEqual(workbenchMetrics.detailLeft);
     expect(workbenchMetrics.detailHeight).toBeLessThanOrEqual(580);
     expect(workbenchMetrics.selectedBodyCount).toBe(1);
+    expect(workbenchMetrics.paneCount).toBe(2);
+    expect(workbenchMetrics.paneColumns.split(" ")).toHaveLength(2);
     expect(workbenchMetrics.bodyOverflowY).toBe("auto");
+    expect(workbenchMetrics.evidenceOverflowY).toBe("auto");
+    expect(workbenchMetrics.actionsContained).toBe(true);
     expect(workbenchMetrics.rootOverflow).toBeLessThanOrEqual(1);
     expect(workbenchMetrics.pageOverflow).toBeLessThanOrEqual(1);
+
+    await page.setViewportSize({ width: 1440, height: 723 });
+    const shortDesktopMetrics = await inbox.locator('[data-review-workbench="selected-only"]').evaluate((root) => {
+      const detail = root.querySelector<HTMLElement>('[data-selected-review-candidate="true"]');
+      const actions = root.querySelector<HTMLElement>('[role="group"][aria-label="검토 결정"]');
+      if (!detail || !actions) throw new Error("short desktop review geometry is incomplete");
+      const detailRect = detail.getBoundingClientRect();
+      const actionsRect = actions.getBoundingClientRect();
+      return {
+        detailHeight: detailRect.height,
+        actionsContained: actionsRect.bottom <= detailRect.bottom + 1,
+        paneCount: root.querySelectorAll('[data-review-pane]').length,
+        pageOverflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - window.innerWidth
+      };
+    });
+    expect(shortDesktopMetrics.detailHeight).toBeLessThanOrEqual(580);
+    expect(shortDesktopMetrics.actionsContained).toBe(true);
+    expect(shortDesktopMetrics.paneCount).toBe(2);
+    expect(shortDesktopMetrics.pageOverflow).toBeLessThanOrEqual(1);
     expect(await inbox.textContent()).not.toContain("홍길동");
     expect(networkBodies).not.toHaveLength(0);
     for (const forbidden of [

@@ -14,6 +14,8 @@ import {
 } from "@/lib/knowledge-review-prepare";
 import {
   buildKnowledgeCandidateReviewContract,
+  KNOWLEDGE_REVIEW_AUTHORITY_ORDER,
+  type KnowledgeEventProvenance,
   type KnowledgeCandidateReviewContract
 } from "@/lib/knowledge-governance";
 import type {
@@ -48,6 +50,7 @@ export type KnowledgeReviewInboxPresentationDto = {
   candidateText: string;
   matchedHazardCount: number;
   providerLabel: string | null;
+  evidenceItems: KnowledgeReviewEvidenceItem[];
   reviewContract: Pick<
     KnowledgeCandidateReviewContract,
     | "contractVersion"
@@ -62,6 +65,100 @@ export type KnowledgeReviewInboxPresentationDto = {
     | "machineEvidenceReplacesHumanReview"
   > | null;
 };
+
+type KnowledgeReviewEvidenceAuthorityId = typeof KNOWLEDGE_REVIEW_AUTHORITY_ORDER[number];
+
+export type KnowledgeReviewEvidenceItem = {
+  id: string;
+  authorityId: KnowledgeReviewEvidenceAuthorityId;
+  authorityLabel: string;
+  sourceLabel: string;
+  capturedAt: string;
+  digest: string;
+  metadata: Array<{ label: string; value: string }>;
+  publicUrl: string | null;
+};
+
+const KNOWLEDGE_REVIEW_EVIDENCE_LIMIT = 20;
+const EVIDENCE_AUTHORITY_LABELS: Record<KnowledgeReviewEvidenceAuthorityId, string> = {
+  sif: "SIF 통제 근거",
+  kosha: "KOSHA 기술 지침",
+  law: "법령 근거",
+  organization_history: "조직 전용 이력",
+  site_history: "현장 전용 이력",
+  external_context: "외부 작업 맥락"
+};
+const PUBLIC_EVIDENCE_AUTHORITIES = new Set<KnowledgeReviewEvidenceAuthorityId>(["sif", "kosha", "law"]);
+const PUBLIC_EVIDENCE_HOSTS = ["law.go.kr", "kosha.or.kr", "data.go.kr"] as const;
+const REVIEW_METADATA_LABELS: Record<string, string> = {
+  article: "조문",
+  articleNo: "조문 번호",
+  article_number: "조문 번호",
+  effectiveDate: "시행일",
+  guideCode: "가이드 코드",
+  guide_code: "가이드 코드",
+  itemType: "자료 유형",
+  item_type: "자료 유형"
+};
+
+function readVerifiedPublicEvidenceUrl(value: string | undefined): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    const hostname = url.hostname.toLowerCase();
+    if (url.protocol !== "https:") return null;
+    if (!PUBLIC_EVIDENCE_HOSTS.some((host) => hostname === host || hostname.endsWith(`.${host}`))) return null;
+    url.username = "";
+    url.password = "";
+    url.hash = "";
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
+function readPublicEvidenceTitle(value: string): string {
+  return value.replace(/[\u0000-\u001f\u007f]/gu, " ").replace(/\s+/gu, " ").trim().slice(0, 160);
+}
+
+function buildEvidenceMetadata(provenance: KnowledgeEventProvenance): Array<{ label: string; value: string }> {
+  if (!PUBLIC_EVIDENCE_AUTHORITIES.has(provenance.authorityId as KnowledgeReviewEvidenceAuthorityId)) return [];
+  return Object.entries(provenance.payloadEvidence.reviewMetadata)
+    .flatMap(([key, value]) => {
+      const label = REVIEW_METADATA_LABELS[key];
+      if (!label || value === null) return [];
+      return [{ label, value: String(value).slice(0, 96) }];
+    })
+    .slice(0, 4);
+}
+
+function buildKnowledgeReviewEvidenceItems(input: {
+  candidate: NonNullable<ReturnType<typeof readCurrentSourceBoundCandidate>>;
+  rawEvents: ReturnType<typeof buildKnowledgeReviewSourceSnapshot>["rawEvents"];
+}): KnowledgeReviewEvidenceItem[] {
+  const items = input.candidate.provenance.map((provenance, index) => {
+    const authorityId = provenance.authorityId as KnowledgeReviewEvidenceAuthorityId;
+    const rawEvent = input.rawEvents[index];
+    const isPublic = PUBLIC_EVIDENCE_AUTHORITIES.has(authorityId);
+    const publicTitle = isPublic && rawEvent ? readPublicEvidenceTitle(rawEvent.title) : "";
+    return {
+      id: `evidence-${provenance.eventReference.digest.slice(0, 16)}`,
+      authorityId,
+      authorityLabel: EVIDENCE_AUTHORITY_LABELS[authorityId],
+      sourceLabel: publicTitle || EVIDENCE_AUTHORITY_LABELS[authorityId],
+      capturedAt: provenance.eventReference.capturedAt,
+      digest: `sha256:${provenance.eventReference.digest.slice(0, 16)}`,
+      metadata: buildEvidenceMetadata(provenance),
+      publicUrl: isPublic ? readVerifiedPublicEvidenceUrl(rawEvent?.url) : null
+    } satisfies KnowledgeReviewEvidenceItem;
+  });
+  return items
+    .sort((left, right) => (
+      KNOWLEDGE_REVIEW_AUTHORITY_ORDER.indexOf(left.authorityId)
+      - KNOWLEDGE_REVIEW_AUTHORITY_ORDER.indexOf(right.authorityId)
+    ))
+    .slice(0, KNOWLEDGE_REVIEW_EVIDENCE_LIMIT);
+}
 
 export type KnowledgeReviewFailureUpdates = {
   runUpdated: boolean;
@@ -305,12 +402,15 @@ export async function loadKnowledgeReviewInbox(
 
   const queue: KnowledgeReviewInboxPresentationDto[] = relationValidRuns.map(({ run, events: relatedEvents }) => {
     const sourceEventCount = relatedEvents.length;
-    const candidate = run.site_id && run.status === "review_required"
-      ? readCurrentSourceBoundCandidate(run.generated_output, buildKnowledgeReviewSourceSnapshot({
+    const sourceBinding = run.site_id && run.status === "review_required"
+      ? buildKnowledgeReviewSourceSnapshot({
           eventIds: run.raw_event_ids,
           events: relatedEvents as KnowledgeReviewSourceEventRow[],
           tenantContext: { organizationId: run.organization_id, siteId: run.site_id }
-        }).snapshot)
+        })
+      : null;
+    const candidate = sourceBinding
+      ? readCurrentSourceBoundCandidate(run.generated_output, sourceBinding.snapshot)
       : null;
     const reviewContract = candidate ? buildKnowledgeCandidateReviewContract(candidate) : null;
     return {
@@ -322,6 +422,9 @@ export async function loadKnowledgeReviewInbox(
       candidateText: candidate?.generatedText ?? "",
       matchedHazardCount: candidate?.matchedHazardIds.length ?? 0,
       providerLabel: candidate?.providerLabel ?? null,
+      evidenceItems: candidate && sourceBinding
+        ? buildKnowledgeReviewEvidenceItems({ candidate, rawEvents: sourceBinding.rawEvents })
+        : [],
       reviewContract: reviewContract ? {
         contractVersion: reviewContract.contractVersion,
         status: reviewContract.status,
