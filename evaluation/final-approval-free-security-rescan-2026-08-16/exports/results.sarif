@@ -1,0 +1,485 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "automationDetails": {
+        "id": "38b87f68-ea7c-4843-a89c-5f97ba99e319"
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "toolExecutionNotifications": [
+            {
+              "level": "warning",
+              "message": {
+                "text": "Current provider-persistence policy makes it unreachable."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "No application references or explicit public grants establish a path."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Transport byte limits materially bound the parser surface."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "No strong attacker-controlled path under fixed trusted upstream configuration."
+              }
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "codexSecurityCoverageCompleteness": "partial",
+        "codexSecuritySchemaVersion": "1.0",
+        "codexSecurityTargetKind": "git_revision"
+      },
+      "results": [
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "evidence"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/010_commercial_operations.sql"
+                },
+                "region": {
+                  "endLine": 21,
+                  "startLine": 21
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Related IDs lack composite tenant enforcement."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:3f4946b8dd54aa760d39fb08001940cb20a21744737709e7928999f23f64dfc6"
+          },
+          "properties": {
+            "category": "Application security",
+            "confidence": "high",
+            "findingId": "csf_bc9904f1f61c42ae866c0ba8",
+            "occurrenceId": "occ_40da0f78abbff56c9f2c457f",
+            "severity": "medium"
+          },
+          "ruleId": "tenant-integrity.related-object-binding",
+          "ruleIndex": 8
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "evidence"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/workers/route.ts"
+                },
+                "region": {
+                  "endLine": 78,
+                  "startLine": 78
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Concurrent upserts can bypass the site conflict check."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:5ecae0aa2838ab0c39f7b18cb461047cd01ad6349df2fe2a3aecfa6489acfe4e"
+          },
+          "properties": {
+            "category": "Application security",
+            "confidence": "high",
+            "findingId": "csf_788583c7a8d6f80010d7eeec",
+            "occurrenceId": "occ_43939473d5745434dfe204e8",
+            "severity": "low"
+          },
+          "ruleId": "race-condition.worker-site-binding",
+          "ruleIndex": 7
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 18,
+                  "startLine": 3
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/supabase-admin.ts"
+                },
+                "region": {
+                  "endLine": 716,
+                  "startLine": 645
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Concurrent first-use operations can create duplicate tenant containers."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:e49ae01725168fc85ee6d81ae5707af9b8f678e53170ea0d76e73e363fd25818"
+          },
+          "properties": {
+            "category": "Race condition",
+            "confidence": "medium",
+            "findingId": "csf_6d81595b2c7de87bb0795ad9",
+            "occurrenceId": "occ_665a0959d7ded0c32c1a7306",
+            "severity": "low"
+          },
+          "ruleId": "business-logic.atomic-workspace-provisioning",
+          "ruleIndex": 3
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "evidence"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/010_commercial_operations.sql"
+                },
+                "region": {
+                  "endLine": 195,
+                  "startLine": 195
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Owners can directly set improvement approval attribution."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:bc48f46c159f086a18e40ffa14d3ef00bdf0744fcbbdffcb77e8b5655e59d061"
+          },
+          "properties": {
+            "category": "Application security",
+            "confidence": "high",
+            "findingId": "csf_0947d7c9e77b6d7dbfa61a49",
+            "occurrenceId": "occ_7ed1b791a1b6429df5d8bcfb",
+            "severity": "medium"
+          },
+          "ruleId": "authorization.approval-metadata-forgery",
+          "ruleIndex": 0
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "evidence"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/mcp-tokens/route.ts"
+                },
+                "region": {
+                  "endLine": 240,
+                  "startLine": 240
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Token quota count, check, and insert are non-atomic."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:c209c309b527a16d38b2b6688342c18b859cf40ce55b261dbebdc5d5d399343e"
+          },
+          "properties": {
+            "category": "Application security",
+            "confidence": "high",
+            "findingId": "csf_f228370516b4a34992b4ca8e",
+            "occurrenceId": "occ_82268b6ad50aefbc6c624cdd",
+            "severity": "low"
+          },
+          "ruleId": "race-condition.mcp-token-quota",
+          "ruleIndex": 6
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "evidence"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 183,
+                  "startLine": 183
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Owner FOR ALL access permits direct writes to provider receipt fields."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:73a2575b9d683053249ef901dc62ede54f3fa18501513839867ab3a0117afff3"
+          },
+          "properties": {
+            "category": "Application security",
+            "confidence": "high",
+            "findingId": "csf_c8f613bc9f209ca00e3e5d48",
+            "occurrenceId": "occ_ae6c3f3f00b5145ef4e0ffa2",
+            "severity": "medium"
+          },
+          "ruleId": "integrity.provider-receipt-forgery",
+          "ruleIndex": 5
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "evidence"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 183,
+                  "startLine": 183
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "dispatch_logs RLS treats null organization as accessible to every authenticated user."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:640c7ad6179f4f7c4de8cb580079948a9bfed4e62a77cda6fc1cfcaa8ab9d3ad"
+          },
+          "properties": {
+            "category": "Application security",
+            "confidence": "high",
+            "findingId": "csf_60deee7fdd7bde23f168187a",
+            "occurrenceId": "occ_b34f7652f437a88801a5676e",
+            "severity": "medium"
+          },
+          "ruleId": "authorization.null-tenant-wildcard",
+          "ruleIndex": 2
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "evidence"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/003_knowledge_runtime.sql"
+                },
+                "region": {
+                  "endLine": 94,
+                  "startLine": 94
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Owner policies permit direct changes to knowledge approval state."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:ded5f508fe7947bcb2521b2060778f90a34c349b6b2a7454aefbe65084483ab2"
+          },
+          "properties": {
+            "category": "Application security",
+            "confidence": "high",
+            "findingId": "csf_3e36c8b43b436ed24f667b89",
+            "occurrenceId": "occ_b8c860e77da2234d55aa6035",
+            "severity": "medium"
+          },
+          "ruleId": "authorization.approval-state-transition",
+          "ruleIndex": 1
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "evidence"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/004_safety_reference_catalog.sql"
+                },
+                "region": {
+                  "endLine": 58,
+                  "startLine": 58
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Anonymous base-table SELECT exposes raw bodies, paths, payloads, and ingestion metadata."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:b2e9016a685cb91c2773593387b88a7df62f8b426e9534f216af7daae4e5d6d2"
+          },
+          "properties": {
+            "category": "Application security",
+            "confidence": "high",
+            "findingId": "csf_d629fd729afeb6fb08f2c124",
+            "occurrenceId": "occ_dae8662aa62562e2600dd76b",
+            "severity": "low"
+          },
+          "ruleId": "data-exposure.raw-safety-corpus",
+          "ruleIndex": 4
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "Codex Security",
+          "rules": [
+            {
+              "id": "authorization.approval-metadata-forgery",
+              "name": "authorization.approval-metadata-forgery",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "authorization.approval-metadata-forgery"
+              }
+            },
+            {
+              "id": "authorization.approval-state-transition",
+              "name": "authorization.approval-state-transition",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "authorization.approval-state-transition"
+              }
+            },
+            {
+              "id": "authorization.null-tenant-wildcard",
+              "name": "authorization.null-tenant-wildcard",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "authorization.null-tenant-wildcard"
+              }
+            },
+            {
+              "id": "business-logic.atomic-workspace-provisioning",
+              "name": "business-logic.atomic-workspace-provisioning",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "business-logic.atomic-workspace-provisioning"
+              }
+            },
+            {
+              "id": "data-exposure.raw-safety-corpus",
+              "name": "data-exposure.raw-safety-corpus",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "data-exposure.raw-safety-corpus"
+              }
+            },
+            {
+              "id": "integrity.provider-receipt-forgery",
+              "name": "integrity.provider-receipt-forgery",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "integrity.provider-receipt-forgery"
+              }
+            },
+            {
+              "id": "race-condition.mcp-token-quota",
+              "name": "race-condition.mcp-token-quota",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "race-condition.mcp-token-quota"
+              }
+            },
+            {
+              "id": "race-condition.worker-site-binding",
+              "name": "race-condition.worker-site-binding",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "race-condition.worker-site-binding"
+              }
+            },
+            {
+              "id": "tenant-integrity.related-object-binding",
+              "name": "tenant-integrity.related-object-binding",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "tenant-integrity.related-object-binding"
+              }
+            }
+          ],
+          "version": "0.1.19"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

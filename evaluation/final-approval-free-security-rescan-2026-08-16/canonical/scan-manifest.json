@@ -1,0 +1,90 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "601cc9e81d140f3ac49b6c938b1330f4de36328baf2334f9a4a0c0a5644f2c42"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "c14e2a8a08ddef2300b9aaf666bc778fd049f95c3ace0993f8de62e8b40d138d"
+      }
+    ],
+    "completedAt": "2026-08-16T07:38:12.145364Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "38b87f68-ea7c-4843-a89c-5f97ba99e319",
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.19"
+    },
+    "scope": {
+      "artifactsReviewed": [
+        "evaluation/fresh-post-remediation-security-scan-2026-08-16/canonical/findings.json",
+        "evaluation/share-exact-session-boundary-2026-07-22/report.json"
+      ],
+      "context": "Preserve immutable original 18-finding baseline. Verify current f0c8a7be source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
+      "excludePaths": [],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "No live DB grants or migration-state probe.",
+        "No provider dispatch, saved Share creation, vector upload, wiki publication, or KOSHA registry mutation.",
+        "Exact saved Share remains MISSING_EVIDENCE."
+      ],
+      "runtimeStatus": "source and production marker aligned before scan; discovery itself remained offline",
+      "summary": "Fresh Standard full-repository verification at 52fc4e1896c0dda73b9d3181d5239cdf14c3f00f after five approval-free source remediations.",
+      "validationMode": "static-source-no-mutation"
+    },
+    "sealedAt": "2026-08-16T07:38:12.145364Z",
+    "startedAt": "2026-08-16T07:29:53.698910Z",
+    "status": "completed",
+    "target": {
+      "displayName": "safeclaw-northstar-current",
+      "kind": "git_revision",
+      "revision": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+      "targetId": "target_sha256_59a91dd8129f171a6e0ff82b60460781f1067b1940d76c7a524e5f0e2b7ec5de"
+    },
+    "threatModel": {
+      "assets": [
+        "Tenant workpacks and worker identities",
+        "Approval and dispatch provenance",
+        "Safety-reference corpus",
+        "MCP credentials and quotas",
+        "Service availability and provider budgets"
+      ],
+      "assumptions": [
+        "Vercel production deployment",
+        "Optional integrations execute only when configured",
+        "No DB/provider/share-session/vector/wiki/KOSHA registry mutation performed",
+        "Exact saved Share remains MISSING_EVIDENCE"
+      ],
+      "attackerCapabilities": [
+        "Unauthenticated public HTTP requests",
+        "Authenticated tenant concurrency",
+        "Direct PostgREST operations where grants permit",
+        "Abnormal optional upstream responses"
+      ],
+      "securityObjectives": [
+        "Preserve tenant isolation",
+        "Prevent forged approvals and provider receipts",
+        "Bound public and provider work",
+        "Maintain credential and prompt isolation",
+        "Fail closed across approval boundaries"
+      ],
+      "summary": "SafeClaw exposes public document/search APIs, authenticated tenant operations, direct Supabase/PostgREST data surfaces, optional AI/legal providers, and OpenClaw/MCP transport. Current source closes approval-free work-budget and isolation paths, while nine database authorization or atomicity findings remain approval-gated.",
+      "trustBoundaries": [
+        "Anonymous client to public Next.js routes",
+        "Authenticated tenant to service-role routes",
+        "Supabase PostgREST to RLS policies",
+        "Application to optional providers",
+        "Application to OpenClaw/MCP transport"
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}

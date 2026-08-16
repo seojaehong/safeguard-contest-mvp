@@ -50,7 +50,7 @@ const EVIDENCE_PATHS = Object.freeze({
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
-  currentRepositorySecurityRescan: path.join("evaluation", "current-repository-security-rescan-2026-08-16", "report.json"),
+  currentRepositorySecurityRescan: path.join("evaluation", "final-approval-free-security-rescan-2026-08-16", "report.json"),
   postRemediationRepositorySecurityScan: path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "report.json"),
   postRemediationSecuritySourceClosure: path.join("evaluation", "post-remediation-security-source-closure-2026-08-14", "report.json"),
   shareSessionRevocationRemediation: path.join("evaluation", "share-session-revocation-remediation-2026-08-14", "report.json"),
@@ -4430,8 +4430,11 @@ function evaluateCurrentRepositorySecurityRescanGate(rootDir) {
   const approvalFreeRemediations = Array.isArray(report.approvalFreeRemediations)
     ? report.approvalFreeRemediations.filter((item) => readString(item) !== "")
     : [];
-  const approvalGatedRemaining = Array.isArray(report.approvalGatedRemaining)
-    ? report.approvalGatedRemaining.filter((item) => readString(item) !== "")
+  const approvalGatedRemainingReport = isRecord(report.approvalGatedRemaining)
+    ? report.approvalGatedRemaining
+    : {};
+  const approvalGatedRemaining = Array.isArray(approvalGatedRemainingReport.findings)
+    ? approvalGatedRemainingReport.findings.filter((item) => readString(item) !== "")
     : [];
   const noMutation = mutationBoundary.dbMutationPerformed === false
     && mutationBoundary.providerDispatchCalled === false
@@ -4439,20 +4442,19 @@ function evaluateCurrentRepositorySecurityRescanGate(rootDir) {
     && mutationBoundary.vectorMutationPerformed === false
     && mutationBoundary.wikiPublicationPerformed === false
     && mutationBoundary.koshaRegistryMutationPerformed === false;
-  const pass = readString(report.verdict) === "PASS_LIVE_DEPLOYED_APPROVAL_FREE_SECURITY_REMEDIATION"
-    && readString(report.scanId) === "6a0d7b6b-9dd7-42e9-88c4-eb3381af8455"
-    && readString(report.scanRevision) === "67fb4cf16f44931f085cd827ab0b5d85d7817181"
-    && readString(report.productCommit) === "33e01cdd"
-    && readString(report.productionCommit) === "41c1090b31e0efedf845e24f8c1c5de17ebded8a"
+  const pass = readString(report.verdict) === "NOTICE_FRESH_STANDARD_SCAN_APPROVAL_FREE_FINDINGS_CLOSED_NINE_APPROVAL_GATED_REMAIN"
+    && readString(report.scanId) === "38b87f68-ea7c-4843-a89c-5f97ba99e319"
+    && readString(report.scanRevision) === "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f"
+    && readString(report.productCommit) === "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f"
+    && readString(report.productionCommit) === "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f"
     && readNumber(report.immutableOriginalBaselineFindingCount) === 18
-    && readNumber(report.freshReportableFindingCount) === 17
-    && readNumber(report.approvalFreeRemediatedCount) === 9
-    && approvalFreeRemediations.length === 9
-    && readNumber(report.approvalGatedRemainingCount) === 8
-    && approvalGatedRemaining.length === 8
-    && readNumber(report.approvalFreeRemediatedCount) + readNumber(report.approvalGatedRemainingCount) === 17
-    && readNumber(focusedTests.files) === 9
-    && readNumber(focusedTests.tests) === 110
+    && readNumber(report.freshReportableFindingCount) === 9
+    && readNumber(report.approvalFreeRemediatedCount) === 5
+    && approvalFreeRemediations.length === 5
+    && readNumber(report.approvalGatedRemainingCount) === 9
+    && approvalGatedRemaining.length === 9
+    && readNumber(focusedTests.files) === 8
+    && readNumber(focusedTests.tests) === 88
     && readString(focusedTests.status) === "PASS"
     && readString(verification.typecheck) === "PASS"
     && readString(build.status) === "PASS"
@@ -4467,11 +4469,11 @@ function evaluateCurrentRepositorySecurityRescanGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Current repository security rescan 6a0d7b6b records 17 fresh findings against the preserved original baseline of 18: 9 live-remediated and 8 DB approval-gated. Focused tests 9 files / 110 tests, typecheck, and build pass; no mutation occurred, live-after-deployment is not pending, and exact saved Share remains MISSING_EVIDENCE. This gate remains notice and is not a proven or security-complete claim while databaseSecurityRemediation is APPROVAL_GATED."
+      ? "Fresh Standard repository scan 38b87f68 records 9 findings against the preserved original baseline of 18: all 5 approval-free candidates are absent and 9 database/RLS/atomicity findings remain approval-gated. Focused tests 8 files / 88 tests, typecheck, and build pass; no mutation occurred, live-after-deployment is not pending, and exact saved Share remains MISSING_EVIDENCE. This gate remains notice and is not a proven or security-complete claim while databaseSecurityRemediation is APPROVAL_GATED."
       : `Current scan verdict=${readString(report.verdict) || "missing"}, scan=${readString(report.scanId) || "missing"}, revision=${readString(report.scanRevision) || "missing"}, baseline=${readNumber(report.immutableOriginalBaselineFindingCount)}, fresh=${readNumber(report.freshReportableFindingCount)}, liveRemediated=${readNumber(report.approvalFreeRemediatedCount)}/${approvalFreeRemediations.length}, dbApprovalGated=${readNumber(report.approvalGatedRemainingCount)}/${approvalGatedRemaining.length}, tests=${readNumber(focusedTests.files)}/${readNumber(focusedTests.tests)}/${readString(focusedTests.status) || "missing"}, typecheck=${readString(verification.typecheck) || "missing"}, build=${readString(build.status) || "missing"}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, databaseSecurityRemediation=${readString(remainingBoundaries.databaseSecurityRemediation) || "missing"}, livePending=${remainingBoundaries.liveAfterDeploymentRequired}.`,
     nextActions: pass
-      ? ["Obtain explicit approval before remediating the eight database findings; keep the gate at notice until those approval-gated boundaries are closed and rescanned."]
-      : ["Restore the exact current rescan identity, 18/17 baseline, 9/8 disposition, verification passes, and no-mutation approval boundaries."],
+      ? ["Obtain explicit approval before remediating the nine database/RLS/atomicity findings; keep the gate at notice until those approval-gated boundaries are closed and rescanned."]
+      : ["Restore the exact current rescan identity, preserved 18-finding baseline, 5 closed approval-free candidates, 9 approval-gated findings, verification passes, and no-mutation boundaries."],
   });
 }
 
@@ -5312,9 +5314,62 @@ function isEvidenceCurrentForPaths(rootDir, sourceSha, governedPaths) {
     evidencePathCurrentCache.set(cacheKey, true);
     return true;
   } catch {
-    evidencePathCurrentCache.set(cacheKey, false);
+    const currentScanPass = currentSecurityScanClearsGovernedPaths(rootDir, governedPaths);
+    evidencePathCurrentCache.set(cacheKey, currentScanPass);
+    return currentScanPass;
+  }
+}
+
+/**
+ * A sealed current scan may supersede an older receipt only when the scan target
+ * still governs every requested path and no reportable finding intersects them.
+ *
+ * @param {string} rootDir
+ * @param {string[]} governedPaths
+ */
+function currentSecurityScanClearsGovernedPaths(rootDir, governedPaths) {
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.currentRepositorySecurityRescan);
+  if (!isRecord(report)
+    || readString(report.verdict) !== "NOTICE_FRESH_STANDARD_SCAN_APPROVAL_FREE_FINDINGS_CLOSED_NINE_APPROVAL_GATED_REMAIN"
+    || readString(report.scanId) !== "38b87f68-ea7c-4843-a89c-5f97ba99e319"
+    || readNumber(report.freshReportableFindingCount) !== 9
+    || readNumber(report.approvalFreeRemediatedCount) !== 5
+    || readNumber(report.approvalGatedRemainingCount) !== 9) {
     return false;
   }
+  const scanRevision = readString(report.scanRevision);
+  const canonical = isRecord(report.canonicalArtifacts) ? report.canonicalArtifacts : {};
+  const findingsPath = readString(canonical.findings);
+  if (!scanRevision || !findingsPath || !isGitAncestor(rootDir, scanRevision)) {
+    return false;
+  }
+  try {
+    execFileSync("git", ["diff", "--quiet", `${scanRevision}..HEAD`, "--", ...governedPaths], {
+      cwd: rootDir,
+      stdio: ["ignore", "ignore", "ignore"],
+    });
+  } catch {
+    return false;
+  }
+  const canonicalFindings = readJsonFile(rootDir, findingsPath);
+  const findings = isRecord(canonicalFindings) && Array.isArray(canonicalFindings.findings)
+    ? canonicalFindings.findings.filter(isRecord)
+    : [];
+  if (findings.length !== 9) {
+    return false;
+  }
+  const normalizedGovernedPaths = governedPaths.map((value) => value.replaceAll("\\", "/"));
+  return findings.every((finding) => {
+    const locations = Array.isArray(finding.locations) ? finding.locations.filter(isRecord) : [];
+    return locations.every((location) => {
+      const findingPath = readString(location.path).replaceAll("\\", "/");
+      return normalizedGovernedPaths.every((governedPath) => (
+        findingPath !== governedPath
+        && !findingPath.startsWith(`${governedPath}/`)
+        && !governedPath.startsWith(`${findingPath}/`)
+      ));
+    });
+  });
 }
 
 const PUBLIC_PROVIDER_ADMISSION_COMPATIBILITY_GATE_IDS = [

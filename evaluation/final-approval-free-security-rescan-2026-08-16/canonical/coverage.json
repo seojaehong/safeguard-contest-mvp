@@ -1,0 +1,128 @@
+{
+  "completeness": "partial",
+  "deferred": [
+    {
+      "id": "deferred-d0ed0653d9c51b18",
+      "reason": "Current provider-persistence policy makes it unreachable.",
+      "surface": "n8n live webhook path"
+    },
+    {
+      "id": "deferred-faaa366f5c3b6733",
+      "reason": "No application references or explicit public grants establish a path.",
+      "surface": "legacy query_logs/documents"
+    },
+    {
+      "id": "deferred-0d9792a95ec0582c",
+      "reason": "Transport byte limits materially bound the parser surface.",
+      "surface": "multipart part count"
+    },
+    {
+      "id": "deferred-2de73c266403bfe2",
+      "reason": "No strong attacker-controlled path under fixed trusted upstream configuration.",
+      "surface": "DNS TOCTOU"
+    }
+  ],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [
+    {
+      "pattern": "live-database-state",
+      "reason": "No grants, migration deployment, data, or mutation probe."
+    },
+    {
+      "pattern": "approval-gated-integrations",
+      "reason": "No provider, Share, vector, wiki, or KOSHA registry mutation."
+    },
+    {
+      "pattern": "exact-saved-share",
+      "reason": "MISSING_EVIDENCE."
+    },
+    {
+      "pattern": "non-vercel-production",
+      "reason": "Validated deployment is Vercel."
+    }
+  ],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "repository",
+  "mode": "repository",
+  "openQuestions": [
+    {
+      "question": "Actual deployed Supabase grants and migrations remain approval-gated."
+    },
+    {
+      "question": "Exact saved /share/[sessionId] remains unavailable without an existing URL or approved creation flow."
+    }
+  ],
+  "scanId": "38b87f68-ea7c-4843-a89c-5f97ba99e319",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "no_issue_found",
+      "evidence": [
+        "lib/public-work-budget.ts",
+        "lib/document-export-budget.ts",
+        "app/api/workflow/dispatch/route.ts"
+      ],
+      "id": "surface_public-routes-and-body-parsers",
+      "label": "Public routes and body parsers",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "evidence": [
+        "app/api/mcp-tokens/route.ts",
+        "app/api/workers/route.ts",
+        "lib/supabase-admin.ts"
+      ],
+      "id": "surface_authenticated-commercial-routes",
+      "label": "Authenticated commercial routes",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "evidence": [
+        "supabase/migrations/002_workspace_productization.sql",
+        "supabase/migrations/003_knowledge_runtime.sql",
+        "supabase/migrations/004_safety_reference_catalog.sql",
+        "supabase/migrations/010_commercial_operations.sql"
+      ],
+      "id": "surface_supabase-migrations-and-rls",
+      "label": "Supabase migrations and RLS",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "evidence": [
+        "lib/korean-law-mcp.ts",
+        "lib/vertex/client.ts",
+        "lib/photo-vision-analysis.ts",
+        "lib/public-distributed-rate-limit.ts"
+      ],
+      "id": "surface_optional-upstream-clients",
+      "label": "Optional upstream clients",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "evidence": [
+        "lib/openclaw-broker-route.ts",
+        "app/api/mcp/[transport]/implementation.ts"
+      ],
+      "id": "surface_openclaw-and-mcp-transport-remediation",
+      "label": "OpenClaw and MCP transport remediation",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "evidence": [
+        "evaluation/share-exact-session-boundary-2026-07-22/report.json",
+        "MISSING_EVIDENCE"
+      ],
+      "id": "surface_exact-saved-share-runtime",
+      "label": "Exact saved Share runtime",
+      "receiptRefs": []
+    }
+  ]
+}

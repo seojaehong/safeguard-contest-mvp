@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-16T05:08:09.523Z",
-  "head": "b15df85b68235871ac521d01a6334ad90b122a26",
+  "generatedAt": "2026-08-16T07:59:01.257Z",
+  "head": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "b15df85b68235871ac521d01a6334ad90b122a26",
+    "commitSha": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-pwk2t28lh-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-rikf8q9o3-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -138,8 +138,8 @@
     {
       "id": "current_repository_security_rescan",
       "state": "notice",
-      "artifact": "evaluation\\current-full-repository-security-scan-2026-08-13\\report.json",
-      "detail": "Standard current-revision scan 528ad724 is sealed with 15 findings (11 medium, 4 low) under partial coverage. Live source now bounds five findings, including fail-closed SIF corpus quality admission, changed-knowledge review reset, and authoritative dispatch receipt admission, while 10 findings and a fresh post-remediation scan remain open. The immutable original 18-accounted baseline is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      "artifact": "evaluation\\final-approval-free-security-rescan-2026-08-16\\report.json",
+      "detail": "Fresh Standard repository scan 38b87f68 records 9 findings against the preserved original baseline of 18: all 5 approval-free candidates are absent and 9 database/RLS/atomicity findings remain approval-gated. Focused tests 8 files / 88 tests, typecheck, and build pass; no mutation occurred, live-after-deployment is not pending, and exact saved Share remains MISSING_EVIDENCE. This gate remains notice and is not a proven or security-complete claim while databaseSecurityRemediation is APPROVAL_GATED."
     },
     {
       "id": "post_remediation_repository_security_scan",
@@ -247,7 +247,7 @@
       "id": "mcp_generation_work_budget_security",
       "state": "notice",
       "artifact": "evaluation\\security-mcp-generation-work-budget-2026-08-04\\report.json",
-      "detail": "Current production 75027ffa re-proves MCP invalid-token 401 fail-closed with instance admission before any MCP tool dispatch, provider call, or mutation. The provider-admission companion preserves the 96 KiB measured body and authentication contracts through 122 adjacent MCP tests; a valid authenticated runtime probe, distributed activation, and fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Current production 87025eb8 re-proves MCP invalid-token 401 fail-closed with instance admission before any MCP tool dispatch, provider call, or mutation. The provider-admission companion preserves the 96 KiB measured body and authentication contracts through 122 adjacent MCP tests; a valid authenticated runtime probe, distributed activation, and fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "learning_export_renderer_security",
@@ -549,6 +549,26 @@
     "distributedRuntimeOpenCount": 3,
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "currentRepositorySecurityRescan": {
+    "artifact": "evaluation\\final-approval-free-security-rescan-2026-08-16\\report.json",
+    "verdict": "NOTICE_FRESH_STANDARD_SCAN_APPROVAL_FREE_FINDINGS_CLOSED_NINE_APPROVAL_GATED_REMAIN",
+    "scanId": "38b87f68-ea7c-4843-a89c-5f97ba99e319",
+    "scanRevision": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+    "productCommit": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+    "productionCommit": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+    "originalBaselineFindingCount": 18,
+    "freshReportableFindingCount": 9,
+    "liveRemediatedCount": 5,
+    "databaseApprovalGatedRemainingCount": 9,
+    "focusedTestFiles": 8,
+    "focusedTestCount": 88,
+    "focusedTestStatus": "PASS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "databaseSecurityRemediation": "APPROVAL_GATED",
+    "liveAfterDeploymentRequired": false
   },
   "publicSearchDistributedRateLimitReadiness": {
     "artifact": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
@@ -1187,9 +1207,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "b15df85b68235871ac521d01a6334ad90b122a26",
+      "sourceCommit": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
       "sourceStatus": "exact",
-      "productionCommit": "b15df85b68235871ac521d01a6334ad90b122a26",
+      "productionCommit": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
       "productionStatus": "matches_live"
     },
     {
@@ -1346,11 +1366,11 @@
     },
     {
       "id": "current_repository_security_rescan",
-      "artifact": "evaluation\\current-full-repository-security-scan-2026-08-13\\report.json",
-      "sourceCommit": "430a24b14c3d133151f4d750fe6b596fa85dd117",
-      "sourceStatus": "ancestor",
-      "productionCommit": "430a24b14c3d133151f4d750fe6b596fa85dd117",
-      "productionStatus": "ancestor_of_head"
+      "artifact": "evaluation\\final-approval-free-security-rescan-2026-08-16\\report.json",
+      "sourceCommit": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+      "sourceStatus": "exact",
+      "productionCommit": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+      "productionStatus": "matches_live"
     },
     {
       "id": "agent_chat_durable_admission_security",
@@ -1524,7 +1544,7 @@
       "id": "hermes_review_evidence_inspector",
       "artifact": "evaluation\\hermes-knowledge-review-evidence-inspector-2026-08-14\\report.json",
       "sourceCommit": "b15df85b68235871ac521d01a6334ad90b122a26",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "dac7ec54dc8999b54cdac43203b7b339c4d3b036",
       "productionStatus": "ancestor_of_head"
     },

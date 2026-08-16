@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-16T05:08:08.189Z",
-  "sourceSha": "b15df85b68235871ac521d01a6334ad90b122a26",
+  "generatedAt": "2026-08-16T07:56:59.569Z",
+  "sourceSha": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
   "overall": "open",
   "gates": [
     {
@@ -202,10 +202,10 @@
       "id": "current_repository_security_rescan",
       "state": "notice",
       "label": "Current repository security rescan",
-      "evidencePath": "evaluation\\current-full-repository-security-scan-2026-08-13\\report.json",
-      "detail": "Standard current-revision scan 528ad724 is sealed with 15 findings (11 medium, 4 low) under partial coverage. Live source now bounds five findings, including fail-closed SIF corpus quality admission, changed-knowledge review reset, and authoritative dispatch receipt admission, while 10 findings and a fresh post-remediation scan remain open. The immutable original 18-accounted baseline is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "evidencePath": "evaluation\\final-approval-free-security-rescan-2026-08-16\\report.json",
+      "detail": "Fresh Standard repository scan 38b87f68 records 9 findings against the preserved original baseline of 18: all 5 approval-free candidates are absent and 9 database/RLS/atomicity findings remain approval-gated. Focused tests 8 files / 88 tests, typecheck, and build pass; no mutation occurred, live-after-deployment is not pending, and exact saved Share remains MISSING_EVIDENCE. This gate remains notice and is not a proven or security-complete claim while databaseSecurityRemediation is APPROVAL_GATED.",
       "nextActions": [
-        "Remediate or explicitly defer the remaining 10 findings, then run a fresh post-remediation Standard scan before any security-complete claim."
+        "Obtain explicit approval before remediating the nine database/RLS/atomicity findings; keep the gate at notice until those approval-gated boundaries are closed and rescanned."
       ]
     },
     {
@@ -403,7 +403,7 @@
       "state": "notice",
       "label": "MCP generation work-budget security",
       "evidencePath": "evaluation\\security-mcp-generation-work-budget-2026-08-04\\report.json",
-      "detail": "Current production 75027ffa re-proves MCP invalid-token 401 fail-closed with instance admission before any MCP tool dispatch, provider call, or mutation. The provider-admission companion preserves the 96 KiB measured body and authentication contracts through 122 adjacent MCP tests; a valid authenticated runtime probe, distributed activation, and fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Current production 87025eb8 re-proves MCP invalid-token 401 fail-closed with instance admission before any MCP tool dispatch, provider call, or mutation. The provider-admission companion preserves the 96 KiB measured body and authentication contracts through 122 adjacent MCP tests; a valid authenticated runtime probe, distributed activation, and fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Run a valid credential-safe production MCP boundary probe without exposing the token.",
         "Activate the approved distributed limiter configuration and complete a fresh security rescan before reclassifying the sealed finding."

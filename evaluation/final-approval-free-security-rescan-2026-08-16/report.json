@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "safeclaw-final-approval-free-security-rescan/v1",
+  "generatedAt": "2026-08-16T16:38:12+09:00",
+  "verdict": "NOTICE_FRESH_STANDARD_SCAN_APPROVAL_FREE_FINDINGS_CLOSED_NINE_APPROVAL_GATED_REMAIN",
+  "sourceHead": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+  "scanId": "38b87f68-ea7c-4843-a89c-5f97ba99e319",
+  "scanRevision": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+  "productCommit": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+  "productionCommit": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+  "sourceHeadMatchesProduction": true,
+  "immutableOriginalBaselineFindingCount": 18,
+  "freshReportableFindingCount": 9,
+  "approvalFreeRemediatedCount": 5,
+  "approvalGatedRemainingCount": 9,
+  "approvalFreeRemediations": [
+    "public-request-body-deadlines",
+    "authenticated-json-body-budget",
+    "legal-detail-upstream-bounds",
+    "optional-provider-response-bounds",
+    "status-provider-admission"
+  ],
+  "immutableOriginalBaseline": {
+    "scanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
+    "findingCount": 18,
+    "preserved": true
+  },
+  "scan": {
+    "scanId": "38b87f68-ea7c-4843-a89c-5f97ba99e319",
+    "targetRevision": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+    "status": "complete",
+    "sealedAt": "2026-08-16T07:38:12.145364Z",
+    "mode": "standard",
+    "coverage": "partial",
+    "reviewedSurfaceCount": 6,
+    "reportableFindingCount": 9,
+    "severityCounts": {
+      "medium": 5,
+      "low": 4
+    }
+  },
+  "approvalFreeClosure": {
+    "candidateCount": 5,
+    "rediscoveredCount": 0,
+    "closedCandidates": [
+      "public-request-body-deadlines",
+      "authenticated-json-body-budget",
+      "legal-detail-upstream-bounds",
+      "optional-provider-response-bounds",
+      "status-provider-admission"
+    ]
+  },
+  "approvalGatedRemaining": {
+    "count": 9,
+    "findings": [
+      "dispatch-null-tenant-rls",
+      "dispatch-provider-receipt-forgery",
+      "knowledge-review-state-bypass",
+      "improvement-approval-metadata-forgery",
+      "tenant-tuple-constraint-gap",
+      "mcp-token-quota-race",
+      "worker-site-binding-race",
+      "raw-safety-corpus-rls",
+      "workspace-bootstrap-race"
+    ],
+    "databaseOrAtomicityApprovalRequired": true
+  },
+  "approvalGatedRemainingFindings": [
+    "dispatch-null-tenant-rls",
+    "dispatch-provider-receipt-forgery",
+    "knowledge-review-state-bypass",
+    "improvement-approval-metadata-forgery",
+    "tenant-tuple-constraint-gap",
+    "mcp-token-quota-race",
+    "worker-site-binding-race",
+    "raw-safety-corpus-rls",
+    "workspace-bootstrap-race"
+  ],
+  "canonicalArtifacts": {
+    "manifest": "evaluation/final-approval-free-security-rescan-2026-08-16/canonical/scan-manifest.json",
+    "findings": "evaluation/final-approval-free-security-rescan-2026-08-16/canonical/findings.json",
+    "coverage": "evaluation/final-approval-free-security-rescan-2026-08-16/canonical/coverage.json",
+    "markdownProjection": "evaluation/final-approval-free-security-rescan-2026-08-16/scan-report.md",
+    "sarif": "evaluation/final-approval-free-security-rescan-2026-08-16/exports/results.sarif"
+  },
+  "verification": {
+    "focusedTests": {
+      "files": 8,
+      "tests": 88,
+      "status": "PASS"
+    },
+    "expandedTests": {
+      "files": 19,
+      "tests": 263,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorMutationPerformed": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "databaseSecurityRemediation": "APPROVAL_GATED",
+    "liveAfterDeploymentRequired": false,
+    "approvalGatedBoundariesPreserved": true,
+    "securityCompleteClaimAllowed": false
+  }
+}

@@ -1,0 +1,618 @@
+{
+  "documentType": "codex-security.findings",
+  "findings": [
+    {
+      "attackPath": {
+        "dataflow": {
+          "summary": "The cited direct database or concurrent path bypasses the intended server-side control."
+        },
+        "impact": "Tenant integrity, approval provenance, quotas, or catalog confidentiality can be affected.",
+        "likelihood": "medium",
+        "reachability": {
+          "summary": "Requires the authenticated or PostgREST privileges stated in source and deployment of the cited schema."
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review with explicit counterevidence."
+      },
+      "findingId": "csf_60deee7fdd7bde23f168187a",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:640c7ad6179f4f7c4de8cb580079948a9bfed4e62a77cda6fc1cfcaa8ab9d3ad"
+      },
+      "identity": {
+        "anchor": "null-organization-dispatch-logs-are-globally-manageable-by-authenticated-users"
+      },
+      "locations": [
+        {
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "evidence",
+          "startLine": 183
+        }
+      ],
+      "occurrenceId": "occ_b34f7652f437a88801a5676e",
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Remove the null-tenant wildcard.",
+      "rootCause": {
+        "summary": "dispatch_logs RLS treats null organization as accessible to every authenticated user."
+      },
+      "ruleId": "authorization.null-tenant-wildcard",
+      "severity": {
+        "changeConditions": "Reassess after verified deployment control or approved schema remediation.",
+        "level": "medium",
+        "rationale": "Current source supports the stated impact under documented preconditions."
+      },
+      "summary": "dispatch_logs RLS treats null organization as accessible to every authenticated user.",
+      "taxonomy": {
+        "category": "Application security",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Null-organization dispatch logs are globally manageable by authenticated users",
+      "validation": {
+        "assertions": [
+          "dispatch_logs RLS treats null organization as accessible to every authenticated user."
+        ],
+        "limitations": [
+          "No live DB mutation or deployed-grant probe.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Independent source review",
+        "summary": "dispatch_logs RLS treats null organization as accessible to every authenticated user."
+      },
+      "writeup": {
+        "reportPath": "findings/dispatch-null-tenant-rls/dispatch-null-tenant-rls.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "summary": "The cited direct database or concurrent path bypasses the intended server-side control."
+        },
+        "impact": "Tenant integrity, approval provenance, quotas, or catalog confidentiality can be affected.",
+        "likelihood": "medium",
+        "reachability": {
+          "summary": "Requires the authenticated or PostgREST privileges stated in source and deployment of the cited schema."
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review with explicit counterevidence."
+      },
+      "findingId": "csf_c8f613bc9f209ca00e3e5d48",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:73a2575b9d683053249ef901dc62ede54f3fa18501513839867ab3a0117afff3"
+      },
+      "identity": {
+        "anchor": "organization-owners-can-directly-forge-dispatch-provider-receipts"
+      },
+      "locations": [
+        {
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "evidence",
+          "startLine": 183
+        }
+      ],
+      "occurrenceId": "occ_ae6c3f3f00b5145ef4e0ffa2",
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Use server-only validated transitions.",
+      "rootCause": {
+        "summary": "Owner FOR ALL access permits direct writes to provider receipt fields."
+      },
+      "ruleId": "integrity.provider-receipt-forgery",
+      "severity": {
+        "changeConditions": "Reassess after verified deployment control or approved schema remediation.",
+        "level": "medium",
+        "rationale": "Current source supports the stated impact under documented preconditions."
+      },
+      "summary": "Owner FOR ALL access permits direct writes to provider receipt fields.",
+      "taxonomy": {
+        "category": "Application security",
+        "cwe": [
+          "CWE-345"
+        ]
+      },
+      "title": "Organization owners can directly forge dispatch provider receipts",
+      "validation": {
+        "assertions": [
+          "Owner FOR ALL access permits direct writes to provider receipt fields."
+        ],
+        "limitations": [
+          "No live DB mutation or deployed-grant probe.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Independent source review",
+        "summary": "Owner FOR ALL access permits direct writes to provider receipt fields."
+      },
+      "writeup": {
+        "reportPath": "findings/dispatch-provider-receipt-forgery/dispatch-provider-receipt-forgery.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "summary": "The cited direct database or concurrent path bypasses the intended server-side control."
+        },
+        "impact": "Tenant integrity, approval provenance, quotas, or catalog confidentiality can be affected.",
+        "likelihood": "medium",
+        "reachability": {
+          "summary": "Requires the authenticated or PostgREST privileges stated in source and deployment of the cited schema."
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review with explicit counterevidence."
+      },
+      "findingId": "csf_3e36c8b43b436ed24f667b89",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:ded5f508fe7947bcb2521b2060778f90a34c349b6b2a7454aefbe65084483ab2"
+      },
+      "identity": {
+        "anchor": "knowledge-review-and-regeneration-states-can-be-changed-directly"
+      },
+      "locations": [
+        {
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "evidence",
+          "startLine": 94
+        }
+      ],
+      "occurrenceId": "occ_b8c860e77da2234d55aa6035",
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Use server-only reviewed transitions.",
+      "rootCause": {
+        "summary": "Owner policies permit direct changes to knowledge approval state."
+      },
+      "ruleId": "authorization.approval-state-transition",
+      "severity": {
+        "changeConditions": "Reassess after verified deployment control or approved schema remediation.",
+        "level": "medium",
+        "rationale": "Current source supports the stated impact under documented preconditions."
+      },
+      "summary": "Owner policies permit direct changes to knowledge approval state.",
+      "taxonomy": {
+        "category": "Application security",
+        "cwe": [
+          "CWE-863"
+        ]
+      },
+      "title": "Knowledge review and regeneration states can be changed directly",
+      "validation": {
+        "assertions": [
+          "Owner policies permit direct changes to knowledge approval state."
+        ],
+        "limitations": [
+          "No live DB mutation or deployed-grant probe.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Independent source review",
+        "summary": "Owner policies permit direct changes to knowledge approval state."
+      },
+      "writeup": {
+        "reportPath": "findings/knowledge-review-state-bypass/knowledge-review-state-bypass.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "summary": "The cited direct database or concurrent path bypasses the intended server-side control."
+        },
+        "impact": "Tenant integrity, approval provenance, quotas, or catalog confidentiality can be affected.",
+        "likelihood": "medium",
+        "reachability": {
+          "summary": "Requires the authenticated or PostgREST privileges stated in source and deployment of the cited schema."
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review with explicit counterevidence."
+      },
+      "findingId": "csf_0947d7c9e77b6d7dbfa61a49",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:bc48f46c159f086a18e40ffa14d3ef00bdf0744fcbbdffcb77e8b5655e59d061"
+      },
+      "identity": {
+        "anchor": "workpack-improvement-approval-metadata-is-client-forgeable"
+      },
+      "locations": [
+        {
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "evidence",
+          "startLine": 195
+        }
+      ],
+      "occurrenceId": "occ_7ed1b791a1b6429df5d8bcfb",
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Use an audited server-only transition.",
+      "rootCause": {
+        "summary": "Owners can directly set improvement approval attribution."
+      },
+      "ruleId": "authorization.approval-metadata-forgery",
+      "severity": {
+        "changeConditions": "Reassess after verified deployment control or approved schema remediation.",
+        "level": "medium",
+        "rationale": "Current source supports the stated impact under documented preconditions."
+      },
+      "summary": "Owners can directly set improvement approval attribution.",
+      "taxonomy": {
+        "category": "Application security",
+        "cwe": [
+          "CWE-863"
+        ]
+      },
+      "title": "Workpack improvement approval metadata is client-forgeable",
+      "validation": {
+        "assertions": [
+          "Owners can directly set improvement approval attribution."
+        ],
+        "limitations": [
+          "No live DB mutation or deployed-grant probe.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Independent source review",
+        "summary": "Owners can directly set improvement approval attribution."
+      },
+      "writeup": {
+        "reportPath": "findings/improvement-approval-metadata-forgery/improvement-approval-metadata-forgery.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "summary": "The cited direct database or concurrent path bypasses the intended server-side control."
+        },
+        "impact": "Tenant integrity, approval provenance, quotas, or catalog confidentiality can be affected.",
+        "likelihood": "medium",
+        "reachability": {
+          "summary": "Requires the authenticated or PostgREST privileges stated in source and deployment of the cited schema."
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review with explicit counterevidence."
+      },
+      "findingId": "csf_bc9904f1f61c42ae866c0ba8",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:3f4946b8dd54aa760d39fb08001940cb20a21744737709e7928999f23f64dfc6"
+      },
+      "identity": {
+        "anchor": "related-tenant-objects-are-not-bound-to-a-consistent-organization-tuple"
+      },
+      "locations": [
+        {
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "evidence",
+          "startLine": 21
+        }
+      ],
+      "occurrenceId": "occ_40da0f78abbff56c9f2c457f",
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Add approved composite tenant constraints.",
+      "rootCause": {
+        "summary": "Related IDs lack composite tenant enforcement."
+      },
+      "ruleId": "tenant-integrity.related-object-binding",
+      "severity": {
+        "changeConditions": "Reassess after verified deployment control or approved schema remediation.",
+        "level": "medium",
+        "rationale": "Current source supports the stated impact under documented preconditions."
+      },
+      "summary": "Related IDs lack composite tenant enforcement.",
+      "taxonomy": {
+        "category": "Application security",
+        "cwe": [
+          "CWE-345"
+        ]
+      },
+      "title": "Related tenant objects are not bound to a consistent organization tuple",
+      "validation": {
+        "assertions": [
+          "Related IDs lack composite tenant enforcement."
+        ],
+        "limitations": [
+          "No live DB mutation or deployed-grant probe.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Independent source review",
+        "summary": "Related IDs lack composite tenant enforcement."
+      },
+      "writeup": {
+        "reportPath": "findings/tenant-tuple-constraint-gap/tenant-tuple-constraint-gap.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "summary": "The cited direct database or concurrent path bypasses the intended server-side control."
+        },
+        "impact": "Tenant integrity, approval provenance, quotas, or catalog confidentiality can be affected.",
+        "likelihood": "low",
+        "reachability": {
+          "summary": "Requires the authenticated or PostgREST privileges stated in source and deployment of the cited schema."
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review with explicit counterevidence."
+      },
+      "findingId": "csf_f228370516b4a34992b4ca8e",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:c209c309b527a16d38b2b6688342c18b859cf40ce55b261dbebdc5d5d399343e"
+      },
+      "identity": {
+        "anchor": "mcp-active-token-limit-is-vulnerable-to-concurrent-issuance"
+      },
+      "locations": [
+        {
+          "path": "app/api/mcp-tokens/route.ts",
+          "role": "evidence",
+          "startLine": 240
+        }
+      ],
+      "occurrenceId": "occ_82268b6ad50aefbc6c624cdd",
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Use a transactional per-site issuance function.",
+      "rootCause": {
+        "summary": "Token quota count, check, and insert are non-atomic."
+      },
+      "ruleId": "race-condition.mcp-token-quota",
+      "severity": {
+        "changeConditions": "Reassess after verified deployment control or approved schema remediation.",
+        "level": "low",
+        "rationale": "Current source supports the stated impact under documented preconditions."
+      },
+      "summary": "Token quota count, check, and insert are non-atomic.",
+      "taxonomy": {
+        "category": "Application security",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "MCP active-token limit is vulnerable to concurrent issuance",
+      "validation": {
+        "assertions": [
+          "Token quota count, check, and insert are non-atomic."
+        ],
+        "limitations": [
+          "No live DB mutation or deployed-grant probe.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Independent source review",
+        "summary": "Token quota count, check, and insert are non-atomic."
+      },
+      "writeup": {
+        "reportPath": "findings/mcp-token-quota-race/mcp-token-quota-race.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "summary": "The cited direct database or concurrent path bypasses the intended server-side control."
+        },
+        "impact": "Tenant integrity, approval provenance, quotas, or catalog confidentiality can be affected.",
+        "likelihood": "low",
+        "reachability": {
+          "summary": "Requires the authenticated or PostgREST privileges stated in source and deployment of the cited schema."
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review with explicit counterevidence."
+      },
+      "findingId": "csf_788583c7a8d6f80010d7eeec",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:5ecae0aa2838ab0c39f7b18cb461047cd01ad6349df2fe2a3aecfa6489acfe4e"
+      },
+      "identity": {
+        "anchor": "concurrent-worker-creation-can-silently-transfer-a-worker-between-sites"
+      },
+      "locations": [
+        {
+          "path": "app/api/workers/route.ts",
+          "role": "evidence",
+          "startLine": 78
+        }
+      ],
+      "occurrenceId": "occ_43939473d5745434dfe204e8",
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Use atomic insert-or-same-site semantics.",
+      "rootCause": {
+        "summary": "Concurrent upserts can bypass the site conflict check."
+      },
+      "ruleId": "race-condition.worker-site-binding",
+      "severity": {
+        "changeConditions": "Reassess after verified deployment control or approved schema remediation.",
+        "level": "low",
+        "rationale": "Current source supports the stated impact under documented preconditions."
+      },
+      "summary": "Concurrent upserts can bypass the site conflict check.",
+      "taxonomy": {
+        "category": "Application security",
+        "cwe": [
+          "CWE-367"
+        ]
+      },
+      "title": "Concurrent worker creation can silently transfer a worker between sites",
+      "validation": {
+        "assertions": [
+          "Concurrent upserts can bypass the site conflict check."
+        ],
+        "limitations": [
+          "No live DB mutation or deployed-grant probe.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Independent source review",
+        "summary": "Concurrent upserts can bypass the site conflict check."
+      },
+      "writeup": {
+        "reportPath": "findings/worker-site-binding-race/worker-site-binding-race.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "summary": "The cited direct database or concurrent path bypasses the intended server-side control."
+        },
+        "impact": "Tenant integrity, approval provenance, quotas, or catalog confidentiality can be affected.",
+        "likelihood": "low",
+        "reachability": {
+          "summary": "Requires the authenticated or PostgREST privileges stated in source and deployment of the cited schema."
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review with explicit counterevidence."
+      },
+      "findingId": "csf_d629fd729afeb6fb08f2c124",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:b2e9016a685cb91c2773593387b88a7df62f8b426e9534f216af7daae4e5d6d2"
+      },
+      "identity": {
+        "anchor": "anonymous-clients-can-directly-read-raw-safety-reference-corpus-metadata"
+      },
+      "locations": [
+        {
+          "path": "supabase/migrations/004_safety_reference_catalog.sql",
+          "role": "evidence",
+          "startLine": 58
+        }
+      ],
+      "occurrenceId": "occ_dae8662aa62562e2600dd76b",
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Expose only a restricted public view or RPC.",
+      "rootCause": {
+        "summary": "Anonymous base-table SELECT exposes raw bodies, paths, payloads, and ingestion metadata."
+      },
+      "ruleId": "data-exposure.raw-safety-corpus",
+      "severity": {
+        "changeConditions": "Reassess after verified deployment control or approved schema remediation.",
+        "level": "low",
+        "rationale": "Current source supports the stated impact under documented preconditions."
+      },
+      "summary": "Anonymous base-table SELECT exposes raw bodies, paths, payloads, and ingestion metadata.",
+      "taxonomy": {
+        "category": "Application security",
+        "cwe": [
+          "CWE-200"
+        ]
+      },
+      "title": "Anonymous clients can directly read raw safety-reference corpus metadata",
+      "validation": {
+        "assertions": [
+          "Anonymous base-table SELECT exposes raw bodies, paths, payloads, and ingestion metadata."
+        ],
+        "limitations": [
+          "No live DB mutation or deployed-grant probe.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Independent source review",
+        "summary": "Anonymous base-table SELECT exposes raw bodies, paths, payloads, and ingestion metadata."
+      },
+      "writeup": {
+        "reportPath": "findings/raw-safety-corpus-rls/raw-safety-corpus-rls.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "summary": "Concurrent requests each observe no row and insert siblings."
+        },
+        "impact": "Split tenant state and inconsistent record visibility.",
+        "likelihood": "low",
+        "reachability": {
+          "summary": "Requires one authenticated user issuing concurrent first-use operations."
+        }
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Independent discovery and central source validation confirmed the cited path."
+      },
+      "findingId": "csf_6d81595b2c7de87bb0795ad9",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:e49ae01725168fc85ee6d81ae5707af9b8f678e53170ea0d76e73e363fd25818"
+      },
+      "identity": {
+        "anchor": "workspace-bootstrap-race",
+        "instance": "workspace-bootstrap-race"
+      },
+      "locations": [
+        {
+          "endLine": 716,
+          "path": "lib/supabase-admin.ts",
+          "role": "sink",
+          "startLine": 645
+        },
+        {
+          "endLine": 18,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 3
+        }
+      ],
+      "occurrenceId": "occ_665a0959d7ded0c32c1a7306",
+      "provenance": {
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Define uniqueness, reconcile duplicates, and provision atomically.",
+      "rootCause": {
+        "summary": "Select-then-insert provisioning lacks matching uniqueness constraints."
+      },
+      "ruleId": "business-logic.atomic-workspace-provisioning",
+      "severity": {
+        "changeConditions": "Reassess after the named control is implemented and verified.",
+        "level": "low",
+        "rationale": "Source-backed impact has material prerequisites and existing limiting controls."
+      },
+      "summary": "Concurrent first-use operations can create duplicate tenant containers.",
+      "taxonomy": {
+        "category": "Race condition",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "Initial workspace provisioning can create duplicate organizations or sites",
+      "validation": {
+        "assertions": [
+          "Concurrent first-use operations can create duplicate tenant containers."
+        ],
+        "limitations": [
+          "No mutation or live exploit.",
+          "Exact saved Share remains MISSING_EVIDENCE."
+        ],
+        "method": "Independent static source review",
+        "summary": "Concurrent first-use operations can create duplicate tenant containers."
+      },
+      "writeup": {
+        "reportPath": "findings/workspace-bootstrap-race/workspace-bootstrap-race.md"
+      }
+    }
+  ],
+  "scanId": "38b87f68-ea7c-4843-a89c-5f97ba99e319",
+  "schemaVersion": "1.0"
+}

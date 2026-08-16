@@ -2565,20 +2565,22 @@ function createFixtureRoot(): string {
     path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
     currentSecurityRemediationLedgerFixture(),
   );
-  writeJson(rootDir, path.join("evaluation", "current-repository-security-rescan-2026-08-16", "report.json"), {
-    verdict: "PASS_LIVE_DEPLOYED_APPROVAL_FREE_SECURITY_REMEDIATION",
-    scanId: "6a0d7b6b-9dd7-42e9-88c4-eb3381af8455",
-    scanRevision: "67fb4cf16f44931f085cd827ab0b5d85d7817181",
-    productCommit: "33e01cdd",
-    productionCommit: "41c1090b31e0efedf845e24f8c1c5de17ebded8a",
+  writeJson(rootDir, path.join("evaluation", "final-approval-free-security-rescan-2026-08-16", "report.json"), {
+    verdict: "NOTICE_FRESH_STANDARD_SCAN_APPROVAL_FREE_FINDINGS_CLOSED_NINE_APPROVAL_GATED_REMAIN",
+    scanId: "38b87f68-ea7c-4843-a89c-5f97ba99e319",
+    scanRevision: "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+    productCommit: "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+    productionCommit: "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
     immutableOriginalBaselineFindingCount: 18,
-    freshReportableFindingCount: 17,
-    approvalFreeRemediatedCount: 9,
-    approvalGatedRemainingCount: 8,
-    approvalFreeRemediations: Array.from({ length: 9 }, (_, index) => `live-remediation-${index + 1}`),
-    approvalGatedRemaining: Array.from({ length: 8 }, (_, index) => `db-approval-gated-${index + 1}`),
+    freshReportableFindingCount: 9,
+    approvalFreeRemediatedCount: 5,
+    approvalGatedRemainingCount: 9,
+    approvalFreeRemediations: Array.from({ length: 5 }, (_, index) => `live-remediation-${index + 1}`),
+    approvalGatedRemaining: {
+      findings: Array.from({ length: 9 }, (_, index) => `db-approval-gated-${index + 1}`),
+    },
     verification: {
-      focusedTests: { files: 9, tests: 110, status: "PASS" },
+      focusedTests: { files: 8, tests: 88, status: "PASS" },
       typecheck: "PASS",
       build: { status: "PASS" },
     },
@@ -5142,15 +5144,15 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const reportPath = path.join(
       rootDir,
       "evaluation",
-      "current-repository-security-rescan-2026-08-16",
+      "final-approval-free-security-rescan-2026-08-16",
       "report.json",
     );
 
     const audit = buildNorthstarOpenGateAudit({ rootDir });
     const gate = audit.gates.find((item) => item.id === "current_repository_security_rescan");
     expect(gate?.state).toBe("notice");
-    expect(gate?.detail).toContain("9 live-remediated");
-    expect(gate?.detail).toContain("8 DB approval-gated");
+    expect(gate?.detail).toContain("all 5 approval-free candidates are absent");
+    expect(gate?.detail).toContain("9 database/RLS/atomicity findings remain approval-gated");
     expect(gate?.detail).toContain("remains notice");
     expect(gate?.detail).toContain("not a proven or security-complete claim");
     expect(gate?.detail).toContain("MISSING_EVIDENCE");
@@ -5167,8 +5169,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const contradictions: Array<(candidate: typeof report) => void> = [
       (candidate) => { candidate.remainingBoundaries.exactSavedShareVerdict = "PASS"; },
       (candidate) => { candidate.remainingBoundaries.databaseSecurityRemediation = "COMPLETED"; },
-      (candidate) => { candidate.approvalFreeRemediatedCount = 10; },
-      (candidate) => { candidate.approvalGatedRemainingCount = 7; },
+      (candidate) => { candidate.approvalFreeRemediatedCount = 4; },
+      (candidate) => { candidate.approvalGatedRemainingCount = 8; },
     ];
     for (const contradict of contradictions) {
       const candidate = JSON.parse(original) as typeof report;
