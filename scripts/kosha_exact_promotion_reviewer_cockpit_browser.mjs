@@ -53,6 +53,7 @@ export async function runBrowserProbe(options) {
     { name: "mobile-review-390x723", width: 390, height: 723, mobileView: "review" },
   ];
   const results = [];
+  let draftStorageIdentity = null;
   try {
     for (const probe of cases) {
       const page = await browser.newPage({ viewport: { width: probe.width, height: probe.height } });
@@ -131,7 +132,17 @@ export async function runBrowserProbe(options) {
           tabbableMobileTabCount: [...document.querySelectorAll('[data-candidate-panel="0"] [data-mobile-mode]')]
             .filter((button) => button.tabIndex === 0).length,
           mobileControlLinksValid: [...document.querySelectorAll('[data-candidate-panel="0"] [data-mobile-mode]')]
-            .every((button) => document.getElementById(button.getAttribute("aria-controls") || "") !== null),
+            .every((button) => {
+              const pane = document.getElementById(button.getAttribute("aria-controls") || "");
+              return pane?.getAttribute("role") === (innerWidth <= 767 ? "tabpanel" : null)
+                && (innerWidth > 767 || pane?.getAttribute("aria-labelledby") === button.id);
+            }),
+          selectedCandidateMobilePaneRoleCount: document.querySelectorAll(
+            '[data-candidate-panel="0"] [data-mobile-pane][role="tabpanel"]',
+          ).length,
+          selectedCandidateVisibleMobilePaneCount: [...document.querySelectorAll(
+            '[data-candidate-panel="0"] [data-mobile-pane]',
+          )].filter((pane) => !pane.hidden).length,
           requiredCheckCount: document.querySelectorAll("input[data-check]").length,
           semanticGroupCount: document.querySelectorAll(".evidence-group").length,
           exportInitiallyDisabled: element("[data-export]") instanceof HTMLButtonElement
@@ -153,6 +164,31 @@ export async function runBrowserProbe(options) {
       });
       await page.close();
     }
+    const storagePage = await browser.newPage({ viewport: { width: 1440, height: 723 } });
+    await storagePage.goto(pathToFileURL(htmlPath).href, { waitUntil: "load" });
+    await storagePage.check('[data-check="0:0"]');
+    await storagePage.reload({ waitUntil: "load" });
+    const sameFingerprintPreserved = await storagePage.isChecked('[data-check="0:0"]');
+    const staleEnvelopeInjected = await storagePage.evaluate(() => {
+      const storageKey = "safeclaw-kosha-reviewer-cockpit-v2";
+      const stored = JSON.parse(localStorage.getItem(storageKey) || "null");
+      if (!stored || !Array.isArray(stored.rows)) return false;
+      stored.candidateFingerprint = "stale-candidate-fingerprint";
+      localStorage.setItem(storageKey, JSON.stringify(stored));
+      return true;
+    });
+    await storagePage.reload({ waitUntil: "load" });
+    const staleFingerprintDiscarded = !(await storagePage.isChecked('[data-check="0:0"]'));
+    const staleExportDisabled = await storagePage.isDisabled("[data-export]");
+    const staleDraftNotice = (await storagePage.textContent("[data-progress-live]")) || "";
+    draftStorageIdentity = {
+      sameFingerprintPreserved,
+      staleEnvelopeInjected,
+      staleFingerprintDiscarded,
+      staleExportDisabled,
+      staleDraftNotice,
+    };
+    await storagePage.close();
   } finally {
     await browser.close();
   }
@@ -180,6 +216,8 @@ export async function runBrowserProbe(options) {
     && row.selectedMobileTabCount === 1
     && row.tabbableMobileTabCount === 1
     && row.mobileControlLinksValid
+    && row.selectedCandidateMobilePaneRoleCount === (row.viewport.width <= 767 ? 2 : 0)
+    && row.selectedCandidateVisibleMobilePaneCount === (row.viewport.width <= 767 ? 1 : 2)
     && row.requiredCheckCount === 40
     && row.semanticGroupCount === 24
     && row.exportInitiallyDisabled
@@ -217,7 +255,23 @@ export async function runBrowserProbe(options) {
     && typeof mobileReview.firstCheckBottom === "number"
     && mobileReview.firstCheckBottom <= mobileReview.viewport.height,
   );
-  const verdict = allRowsPass && desktopPass && mobilePass
+  const responsiveTabPanelPass = results.every((row) => (
+    row.mobileControlLinksValid
+    && row.selectedCandidateMobilePaneRoleCount === (row.viewport.width <= 767 ? 2 : 0)
+    && row.selectedCandidateVisibleMobilePaneCount === (row.viewport.width <= 767 ? 1 : 2)
+  ));
+  const draftStorageIdentityPass = Boolean(
+    draftStorageIdentity?.sameFingerprintPreserved
+    && draftStorageIdentity?.staleEnvelopeInjected
+    && draftStorageIdentity?.staleFingerprintDiscarded
+    && draftStorageIdentity?.staleExportDisabled
+    && draftStorageIdentity?.staleDraftNotice.includes("후보 구성이 변경되어 이전 검토 초안을 복원하지 않았습니다."),
+  );
+  const verdict = allRowsPass
+    && desktopPass
+    && mobilePass
+    && responsiveTabPanelPass
+    && draftStorageIdentityPass
     ? "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY"
     : "RED_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY";
   const report = {
@@ -229,6 +283,9 @@ export async function runBrowserProbe(options) {
     passedCases: results.filter(() => allRowsPass).length,
     desktopPass,
     mobilePass,
+    responsiveTabPanelPass,
+    draftStorageIdentityPass,
+    draftStorageIdentity,
     results,
     mutationBoundary: {
       dbMutationPerformed: false,
@@ -258,6 +315,8 @@ Verdict: \`${report.verdict}\`
 - Candidate tabs: ${results.every((row) => row.selectedCandidateTabCount === 1 && row.tabbableCandidateTabCount === 1)}
 - Candidate End/Home keyboard: ${results.every((row) => row.candidateEndState.selectedIndex === 7 && row.candidateHomeState.selectedIndex === 0)}
 - Mobile evidence/review keyboard: ${[mobileEvidence, mobileReview].every((row) => row?.mobileKeyboardState?.reviewFocused === "0:review" && row?.mobileKeyboardState?.evidenceFocused === "0:evidence")}
+- Breakpoint-correct tabpanels: ${report.responsiveTabPanelPass}
+- Candidate-bound draft restore: ${report.draftStorageIdentityPass}
 - Live progress status: ${results.every((row) => row.progressLiveRole === "status" && row.progressLiveMode === "polite")}
 - Horizontal overflow: ${results.some((row) => row.horizontalOverflow)}
 
@@ -277,5 +336,7 @@ if (isMain) {
     cases: report.cases,
     desktopPass: report.desktopPass,
     mobilePass: report.mobilePass,
+    responsiveTabPanelPass: report.responsiveTabPanelPass,
+    draftStorageIdentityPass: report.draftStorageIdentityPass,
   }, null, 2)}\n`);
 }

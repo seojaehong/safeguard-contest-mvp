@@ -4592,6 +4592,8 @@ function createFixtureRoot(): string {
       candidateKeyboardNavigation: ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End"],
       breakpointOrientationSynchronized: true,
       mobileEvidenceReviewTabs: true,
+      responsiveTabPanelSemantics: true,
+      candidateBoundDraftStorage: true,
       progressLiveRegion: true,
     },
     boundary: {
@@ -4660,6 +4662,15 @@ function createFixtureRoot(): string {
     passedCases: 3,
     desktopPass: true,
     mobilePass: true,
+    responsiveTabPanelPass: true,
+    draftStorageIdentityPass: true,
+    draftStorageIdentity: {
+      sameFingerprintPreserved: true,
+      staleEnvelopeInjected: true,
+      staleFingerprintDiscarded: true,
+      staleExportDisabled: true,
+      staleDraftNotice: "후보 구성이 변경되어 이전 검토 초안을 복원하지 않았습니다. 0개 완료, 64개 입력이 남았습니다.",
+    },
     results: [
       { name: "desktop-1440x723", viewport: { width: 1440, height: 723 } },
       { name: "mobile-evidence-390x723", viewport: { width: 390, height: 723 } },
@@ -4687,6 +4698,8 @@ function createFixtureRoot(): string {
       selectedMobileTabCount: 1,
       tabbableMobileTabCount: 1,
       mobileControlLinksValid: true,
+      selectedCandidateMobilePaneRoleCount: row.viewport.width <= 767 ? 2 : 0,
+      selectedCandidateVisibleMobilePaneCount: row.viewport.width <= 767 ? 1 : 2,
       requiredCheckCount: 40,
       semanticGroupCount: 24,
       exportInitiallyDisabled: true,
@@ -7512,6 +7525,56 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       results: Array<{ candidateControlLinksValid: boolean }>;
     };
     browser.results[0]!.candidateControlLinksValid = false;
+    writeJson(rootDir, path.relative(rootDir, browserPath), browser);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("contradicted");
+  });
+
+  it("fails closed when the KOSHA mobile tabs lose reciprocal tabpanel semantics", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const browserPath = path.join(
+      rootDir,
+      "evaluation",
+      "kosha-exact-promotion-reviewer-cockpit-2026-07-25",
+      "browser-report.json",
+    );
+    const browser = JSON.parse(fs.readFileSync(browserPath, "utf8")) as {
+      responsiveTabPanelPass: boolean;
+      results: Array<{ selectedCandidateVisibleMobilePaneCount: number }>;
+    };
+    browser.responsiveTabPanelPass = false;
+    browser.results[1]!.selectedCandidateVisibleMobilePaneCount = 2;
+    writeJson(rootDir, path.relative(rootDir, browserPath), browser);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("contradicted");
+  });
+
+  it("fails closed when the KOSHA reviewer cockpit cannot reject a stale draft", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const browserPath = path.join(
+      rootDir,
+      "evaluation",
+      "kosha-exact-promotion-reviewer-cockpit-2026-07-25",
+      "browser-report.json",
+    );
+    const browser = JSON.parse(fs.readFileSync(browserPath, "utf8")) as {
+      draftStorageIdentityPass: boolean;
+    };
+    browser.draftStorageIdentityPass = false;
     writeJson(rootDir, path.relative(rootDir, browserPath), browser);
 
     const audit = buildNorthstarOpenGateAudit({

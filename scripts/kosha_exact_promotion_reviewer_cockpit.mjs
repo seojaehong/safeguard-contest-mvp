@@ -279,7 +279,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
           <button type="button" role="tab" id="mobile-tab-${index}-evidence" data-mobile-mode="${index}:evidence" aria-controls="evidence-pane-${index}" aria-selected="true" tabindex="0">근거</button>
           <button type="button" role="tab" id="mobile-tab-${index}-review" data-mobile-mode="${index}:review" aria-controls="review-pane-${index}" aria-selected="false" tabindex="-1">체크리스트</button>
         </nav>
-        <main class="evidence-pane" id="evidence-pane-${index}" aria-labelledby="mobile-tab-${index}-evidence">
+        <main class="evidence-pane" id="evidence-pane-${index}" data-mobile-pane="evidence">
           <header class="candidate-heading">
             <div><span>${escapeHtml(candidate.category)}</span><h1>${escapeHtml(candidate.title)}</h1></div>
             <a href="${escapeHtml(candidate.officialUrl)}" target="_blank" rel="noreferrer">공식 PDF 열기</a>
@@ -301,7 +301,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
             </dl>
           </details>
         </main>
-        <aside class="review-pane" id="review-pane-${index}" aria-labelledby="mobile-tab-${index}-review">
+        <aside class="review-pane" id="review-pane-${index}" data-mobile-pane="review">
           <header><span>사람 검토</span><strong data-review-status="${index}" aria-live="polite">8개 입력 필요</strong></header>
           <p class="boundary-note">기계 근거는 검토를 돕지만 판단을 대신하지 않습니다.</p>
           <div class="check-stack">${checks}</div>
@@ -363,20 +363,59 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
   <script>
     (() => {
       const payload = JSON.parse(document.getElementById("cockpit-data").textContent);
-      const storageKey = "safeclaw-kosha-reviewer-cockpit-v1";
+      const storageKey = "safeclaw-kosha-reviewer-cockpit-v2";
+      const legacyStorageKey = "safeclaw-kosha-reviewer-cockpit-v1";
+      const storageSchemaVersion = "safeclaw-kosha-reviewer-cockpit-state/v2";
+      const candidateFingerprint = JSON.stringify(payload.candidates.map((candidate) => ({
+        stableKey: candidate.stableKey,
+        version: candidate.version,
+        checks: candidate.requiredReviewChecks.map((check) => check.text)
+      })));
       const emptyState = () => payload.candidates.map((candidate) => ({
         stableKey: candidate.stableKey,
+        version: candidate.version,
         reviewer: "",
         reviewedAt: "",
         humanConfirmed: false,
         requiredReviewChecks: candidate.requiredReviewChecks.map((check) => ({ text: check.text, confirmed: false }))
       }));
       let state = emptyState();
+      let restorationNotice = "";
+      const compatibleStoredRows = (rows) => Array.isArray(rows)
+        && rows.length === payload.candidates.length
+        && rows.every((row, index) => {
+          const candidate = payload.candidates[index];
+          return row
+            && row.stableKey === candidate.stableKey
+            && row.version === candidate.version
+            && typeof row.reviewer === "string"
+            && typeof row.reviewedAt === "string"
+            && typeof row.humanConfirmed === "boolean"
+            && Array.isArray(row.requiredReviewChecks)
+            && row.requiredReviewChecks.length === candidate.requiredReviewChecks.length
+            && row.requiredReviewChecks.every((check, checkIndex) => (
+              check
+              && check.text === candidate.requiredReviewChecks[checkIndex].text
+              && typeof check.confirmed === "boolean"
+            ));
+        });
       try {
-        const stored = JSON.parse(localStorage.getItem(storageKey) || "null");
-        if (Array.isArray(stored) && stored.length === state.length) state = stored;
+        const storedRaw = localStorage.getItem(storageKey) || localStorage.getItem(legacyStorageKey);
+        const stored = JSON.parse(storedRaw || "null");
+        if (stored !== null) {
+          if (
+            stored.schemaVersion === storageSchemaVersion
+            && stored.candidateFingerprint === candidateFingerprint
+            && compatibleStoredRows(stored.rows)
+          ) {
+            state = stored.rows;
+          } else {
+            restorationNotice = "후보 구성이 변경되어 이전 검토 초안을 복원하지 않았습니다.";
+          }
+        }
       } catch (error) {
         console.warn("KOSHA reviewer cockpit local state could not be restored", error);
+        restorationNotice = "저장된 검토 초안을 읽지 못해 빈 상태로 시작합니다.";
       }
       const panels = [...document.querySelectorAll("[data-candidate-panel]")];
       const buttons = [...document.querySelectorAll("[data-candidate-button]")];
@@ -384,11 +423,28 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
       const exportButton = document.querySelector("[data-export]");
       const progressLive = document.querySelector("[data-progress-live]");
       const mobileBreakpoint = window.matchMedia("(max-width: 767px)");
-      const syncCandidateOrientation = () => {
-        candidateList.setAttribute("aria-orientation", mobileBreakpoint.matches ? "horizontal" : "vertical");
+      const syncMobilePaneSemantics = (panel) => {
+        const mobile = mobileBreakpoint.matches;
+        const selectedMode = panel.dataset.mobileView || "evidence";
+        panel.querySelectorAll("[data-mobile-pane]").forEach((pane) => {
+          const paneMode = pane.dataset.mobilePane;
+          if (mobile) {
+            pane.setAttribute("role", "tabpanel");
+            pane.setAttribute("aria-labelledby", "mobile-tab-" + panel.dataset.candidatePanel + "-" + paneMode);
+            pane.hidden = paneMode !== selectedMode;
+          } else {
+            pane.removeAttribute("role");
+            pane.removeAttribute("aria-labelledby");
+            pane.hidden = false;
+          }
+        });
       };
-      syncCandidateOrientation();
-      mobileBreakpoint.addEventListener("change", syncCandidateOrientation);
+      const syncResponsiveSemantics = () => {
+        candidateList.setAttribute("aria-orientation", mobileBreakpoint.matches ? "horizontal" : "vertical");
+        panels.forEach(syncMobilePaneSemantics);
+      };
+      syncResponsiveSemantics();
+      mobileBreakpoint.addEventListener("change", syncResponsiveSemantics);
       const completedInputs = (row) =>
         row.requiredReviewChecks.filter((check) => check.confirmed).length
         + (row.reviewer.trim() ? 1 : 0)
@@ -413,10 +469,18 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
         exportButton.textContent = completeCount === payload.checklistInputCount
           ? "검토 JSON 내보내기"
           : "검토 JSON 내보내기 · " + (payload.checklistInputCount - completeCount) + "개 입력 필요";
-        progressLive.textContent = completeCount === payload.checklistInputCount
+        const progressMessage = completeCount === payload.checklistInputCount
           ? "필수 입력 64개가 모두 완료되었습니다."
           : completeCount + "개 완료, " + (payload.checklistInputCount - completeCount) + "개 입력이 남았습니다.";
-        localStorage.setItem(storageKey, JSON.stringify(state));
+        progressLive.textContent = restorationNotice
+          ? restorationNotice + " " + progressMessage
+          : progressMessage;
+        localStorage.setItem(storageKey, JSON.stringify({
+          schemaVersion: storageSchemaVersion,
+          candidateFingerprint,
+          rows: state
+        }));
+        localStorage.removeItem(legacyStorageKey);
       };
       const selectCandidate = (index, moveFocus = false) => {
         panels.forEach((panel, panelIndex) => { panel.hidden = panelIndex !== index; });
@@ -450,6 +514,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
           modeButton.tabIndex = selected ? 0 : -1;
           if (selected && moveFocus) modeButton.focus();
         });
+        syncMobilePaneSemantics(panel);
       };
       document.querySelectorAll("[data-mobile-mode]").forEach((button) => button.addEventListener("click", (event) => {
         const [candidateIndex, mode] = event.currentTarget.dataset.mobileMode.split(":");
@@ -574,6 +639,8 @@ export function runReviewerCockpit(options) {
       candidateKeyboardNavigation: ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End"],
       breakpointOrientationSynchronized: true,
       mobileEvidenceReviewTabs: true,
+      responsiveTabPanelSemantics: true,
+      candidateBoundDraftStorage: true,
       progressLiveRegion: true,
     },
     outputHtml: path.relative(options.rootDir, path.join(outputDir, "index.html")),
@@ -592,6 +659,8 @@ Verdict: \`${report.verdict}\`
 - Candidate keyboard tabs: ${report.accessibilityContract.candidateTabCount} with one roving tab stop
 - Breakpoint orientation synchronized: ${report.accessibilityContract.breakpointOrientationSynchronized}
 - Mobile evidence/review tabs: ${report.accessibilityContract.mobileEvidenceReviewTabs}
+- Responsive tabpanel semantics: ${report.accessibilityContract.responsiveTabPanelSemantics}
+- Candidate-bound draft storage: ${report.accessibilityContract.candidateBoundDraftStorage}
 - Live progress region: ${report.accessibilityContract.progressLiveRegion}
 - HTML: \`${report.outputHtml}\`
 

@@ -124,6 +124,15 @@ describe("KOSHA exact promotion reviewer cockpit", () => {
     expect(result.html).toContain('mobileBreakpoint.matches ? "horizontal" : "vertical"');
     expect(result.html).toContain('role="tablist" aria-label="D-C-1 검토 보기"');
     expect(result.html).toContain('aria-controls="review-pane-0" aria-selected="false" tabindex="-1"');
+    expect(result.html).toContain('id="evidence-pane-0" data-mobile-pane="evidence"');
+    expect(result.html).toContain('id="review-pane-0" data-mobile-pane="review"');
+    expect(result.html).toContain('pane.setAttribute("role", "tabpanel")');
+    expect(result.html).toContain('pane.removeAttribute("role")');
+    expect(result.html).toContain('pane.hidden = paneMode !== selectedMode');
+    expect(result.html).toContain('safeclaw-kosha-reviewer-cockpit-state/v2');
+    expect(result.html).toContain('stored.candidateFingerprint === candidateFingerprint');
+    expect(result.html).toContain('compatibleStoredRows(stored.rows)');
+    expect(result.html).toContain('후보 구성이 변경되어 이전 검토 초안을 복원하지 않았습니다.');
     expect(result.html).toContain('ArrowDown: (index + 1) % buttons.length');
     expect(result.html).toContain('End: buttons.length - 1');
     expect(result.html.match(/<input type="checkbox" data-check=/g)).toHaveLength(40);
