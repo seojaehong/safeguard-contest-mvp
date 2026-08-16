@@ -1,9 +1,9 @@
 # Hermes Knowledge Review Authority UI
 
 - Verdict: `PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_EVIDENCE_INSPECTOR`
-- Source head: `4eb30810d623070796c9a754dd2af59ae82c6f4f`
-- Product commit: `4eb30810d623070796c9a754dd2af59ae82c6f4f`
-- Checked at: `2026-08-16T14:23:00.229Z`
+- Source head: `7ff45318ba8a8a0c411eb402bfa90c880c38015d`
+- Product commit: `7ff45318ba8a8a0c411eb402bfa90c880c38015d`
+- Checked at: `2026-08-16T14:31:03.212Z`
 - Scope: current-source local production rendering with an authenticated, route-controlled review candidate fixture.
 - Production aligned: `false`
 

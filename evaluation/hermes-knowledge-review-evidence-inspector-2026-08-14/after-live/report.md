@@ -1,9 +1,9 @@
 # Hermes Knowledge Review Authority UI
 
 - Verdict: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR`
-- Source head: `e7afe36bc380bca2666dcbd2115aa0e1e1e32e80`
-- Product commit: `bc160cbde13ff0441c24e7f0974c121e24b39025`
-- Checked at: `2026-08-16T13:11:34.853Z`
+- Source head: `7ff45318ba8a8a0c411eb402bfa90c880c38015d`
+- Product commit: `7ff45318ba8a8a0c411eb402bfa90c880c38015d`
+- Checked at: `2026-08-16T14:33:53.717Z`
 - Scope: live production rendering with an authenticated, route-controlled review candidate fixture.
 - Production aligned: `true`
 
@@ -29,6 +29,7 @@
 - Candidate tabs expose one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, and Arrow/Home/End keyboard navigation.
 - Desktop uses a two-column review workbench; mobile uses one column and keeps the candidate body internally scrollable.
 - Desktop mounts the selected candidate and five-item evidence inspector together; mobile mounts one linked pane behind a keyboard-operable segmented tab control.
+- Review decisions announce their pending state, expose busy semantics, disable all competing actions, and restore the settled status after the delayed save fixture completes.
 - Only allowlisted public law, KOSHA, and SIF references expose verified HTTPS links. Organization and site evidence retain generic labels and bounded digests only.
 
 ## Boundary

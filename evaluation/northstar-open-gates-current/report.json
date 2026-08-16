@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-16T13:55:35.745Z",
-  "sourceSha": "973bf64b19a1f8fcaf85931c0ced849c4fdefbad",
+  "generatedAt": "2026-08-16T14:37:59.908Z",
+  "sourceSha": "e5e1eb8c9f80624e7331453056b3c54b2205e883",
   "overall": "open",
   "gates": [
     {
@@ -462,7 +462,7 @@
       "state": "proven",
       "label": "Hermes knowledge reviewer UI",
       "evidencePath": "evaluation\\hermes-knowledge-review-selected-workbench-2026-08-14\\report.json",
-      "detail": "Live authenticated reviewer cockpit passes 8/8 Day/Night desktop and mobile geometry cases with three navigable candidates, exactly one selected candidate/body, desktop two-column and mobile one-column containment, and internal candidate-body scroll. Candidate tabs keep one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, Arrow/Home/End navigation, and keyboard-operable compact panes. It exposes six SIF -> KOSHA -> law -> tenant-memory evidence roles, requires law provenance and site-manager acceptance, and performs no DB, provider, publication, or Share mutation. LLM Wiki/RLS remain APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Live authenticated reviewer cockpit passes 8/8 Day/Night desktop and mobile geometry cases with three navigable candidates, exactly one selected candidate/body, desktop two-column and mobile one-column containment, and internal candidate-body scroll. Candidate tabs keep one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, Arrow/Home/End navigation, and keyboard-operable compact panes. Delayed review decisions announce pending and settled states, expose busy semantics, and disable competing actions during save. It exposes six SIF -> KOSHA -> law -> tenant-memory evidence roles, requires law provenance and site-manager acceptance, and performs no DB, provider, publication, or Share mutation. LLM Wiki/RLS remain APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": []
     },
     {
@@ -470,7 +470,7 @@
       "state": "proven",
       "label": "Hermes review evidence inspector",
       "evidencePath": "evaluation\\hermes-knowledge-review-evidence-inspector-2026-08-14\\report.json",
-      "detail": "Live Hermes review evidence inspector passes 8/8 Day/Night desktop and mobile cases. It binds five displayed evidence items to the existing authority counts, mounts candidate plus evidence on desktop and one linked keyboard-operable pane on mobile, exposes only allowlisted official HTTPS references, keeps tenant evidence generic, and performs no mutation. Candidate navigation retains a single roving tab stop, linked panels, and breakpoint-aware keyboard semantics. The immutable 18-finding baseline remains preserved, a fresh full-repository scan is still required, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED.",
+      "detail": "Live Hermes review evidence inspector passes 8/8 Day/Night desktop and mobile cases. It binds five displayed evidence items to the existing authority counts, mounts candidate plus evidence on desktop and one linked keyboard-operable pane on mobile, exposes only allowlisted official HTTPS references, keeps tenant evidence generic, and performs no mutation. Candidate navigation retains a single roving tab stop, linked panels, and breakpoint-aware keyboard semantics; delayed review decisions expose live pending/settled status, busy semantics, and disabled competing actions. The immutable 18-finding baseline remains preserved, a fresh full-repository scan is still required, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED.",
       "nextActions": []
     },
     {
