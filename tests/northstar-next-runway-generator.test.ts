@@ -270,6 +270,22 @@ type NextRunwayReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  documentEditorialReviewCockpit: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    livePassed: number;
+    liveFailed: number;
+    canonicalDocumentCount: number;
+    reviewerCheckCount: number;
+    desktopZones: number;
+    mobileColumns: number;
+    humanReviewCompleted: boolean;
+    broadHumanWordingReviewRequired: boolean;
+    dbMutationPerformed: boolean;
+    providerDispatchCalled: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSecurityRemediationLedger: {
     verdict: string;
     totalFindings: number | null;
@@ -975,6 +991,69 @@ function writeJson(root: string, relativePath: string, value: unknown): void {
   const absolutePath = path.join(root, relativePath);
   fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
   fs.writeFileSync(absolutePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+}
+
+function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
+  const results = [
+    { theme: "day", width: 1440, height: 723, workbenchColumns: 3 },
+    { theme: "night", width: 1440, height: 723, workbenchColumns: 3 },
+    { theme: "day", width: 390, height: 723, workbenchColumns: 1 },
+    { theme: "night", width: 390, height: 723, workbenchColumns: 1 },
+  ].map(({ theme, width, height, workbenchColumns }) => ({
+    theme,
+    width,
+    height,
+    beforeCompletion: {
+      viewportHeight: height,
+      bodyHeight: height,
+      workbenchColumns,
+      reviewDocumentCount: 12,
+      uniqueDocumentCount: 12,
+      includesRiskAssessment: true,
+      checkboxCount: 5,
+      horizontalOverflow: false,
+    },
+    afterCompletion: { currentWorkpackUnchanged: true, apiRequestCount: 0, dialogScrollTop: 0 },
+    verdict: "PASS",
+  }));
+
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_COCKPIT",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", environment: "production" },
+    sourceHeadMatchesProduction: true,
+    total: 4,
+    pass: 4,
+    fail: 0,
+    acceptanceContract: {
+      canonicalDocumentCount: 12,
+      includesRiskAssessment: true,
+      reviewerCheckCount: 5,
+      desktopZones: 3,
+      mobileColumns: 1,
+      bodyHeightUnchangedWhileOpen: true,
+      longCopyContained: true,
+      reviewStateStoredSeparately: true,
+      editedTextInvalidatesCompletion: true,
+      automaticReviewCannotClaimHumanCompletion: true,
+    },
+    reviewBoundary: {
+      automatedInteractionOnly: true,
+      humanReviewCompleted: false,
+      localCompletionIsApproval: false,
+      broadHumanWordingReviewRequired: true,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorRuntimeCalled: false,
+      wikiPublished: false,
+      koshaRegistryMutationPerformed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    results,
+  };
 }
 
 function commitAll(root: string, message: string): string {
@@ -1998,6 +2077,11 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     remainingSecurityWork: [],
     boundaries: { originalBaselineRewritten: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
+  writeJson(
+    root,
+    "evaluation/document-editorial-review-cockpit-2026-08-16/report.json",
+    documentEditorialReviewCockpitFixture(),
+  );
   writeJson(root, "evaluation/security-resource-remediation-2026-08-11/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_SECURITY_RESOURCE_REMEDIATION",
     sourceHead: "fixture-sha",
@@ -2503,7 +2587,7 @@ function pointLiveRollupAtHeadWithLive(root: string, head: string, liveCommit: s
 
 describe("northstar next runway generator", () => {
   it("marks the latest evidence commit as live when source, production, and live rollup align", async () => {
-    const { buildNorthstarNextRunway } = await loadNextRunwayModule();
+    const { buildNorthstarNextRunway, renderNorthstarNextRunwayMarkdown } = await loadNextRunwayModule();
     const { root, secondHead } = createFixtureRoot();
     pointLiveRollupAt(root, secondHead);
     const report = buildNorthstarNextRunway({
@@ -2511,6 +2595,7 @@ describe("northstar next runway generator", () => {
       buildInfo: { commitSha: secondHead },
       generatedAt: "2026-07-22T00:00:00.000Z",
     });
+    const markdown = renderNorthstarNextRunwayMarkdown(report);
 
     expect(report.sourceHead).toBe(secondHead);
     expect(report.productionCommit).toBe(secondHead);
@@ -3074,6 +3159,25 @@ describe("northstar next runway generator", () => {
       providerDispatchPersistence: "APPROVAL_GATED",
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
+    expect(report.documentEditorialReviewCockpit).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_COCKPIT",
+      livePassed: 4,
+      liveFailed: 0,
+      canonicalDocumentCount: 12,
+      reviewerCheckCount: 5,
+      desktopZones: 3,
+      mobileColumns: 1,
+      humanReviewCompleted: false,
+      broadHumanWordingReviewRequired: true,
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.provenCurrentState).toContain("document_editorial_review_cockpit");
+    expect(markdown).toContain("live geometry `4/4`");
+    expect(markdown).toContain("humanReviewCompleted=`false`");
+    expect(markdown).toContain("broadHumanWordingReviewRequired=`true`");
+    expect(markdown).toContain("exact saved Share remains `MISSING_EVIDENCE`");
     expect(report.provenCurrentState).toContain("security_upstream_transport_remediation");
     expect(report.provenCurrentState).toContain("security_safety_reference_surface_remediation");
     expect(report.securityUpstreamTransportRemediation).toMatchObject({

@@ -25,6 +25,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
   liveDocumentEditorialReview: path.join("evaluation", "live-document-editorial-review-2026-07-25", "report.json"),
+  documentEditorialReviewCockpit: path.join("evaluation", "document-editorial-review-cockpit-2026-08-16", "report.json"),
   liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
@@ -330,6 +331,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const liveDocumentWordingReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentWordingReview);
   const liveDocumentBroadReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentBroadReview);
   const liveDocumentEditorialReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialReview);
+  const documentEditorialReviewCockpit = tryReadJson(rootDir, ARTIFACTS.documentEditorialReviewCockpit);
   const liveDocumentEditorialDuplicateClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialDuplicateClassification);
   const liveDocumentEditorialNearClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialNearClassification);
   const productCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.productCapabilityTruth);
@@ -443,6 +445,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_wording_review", ARTIFACTS.liveDocumentWordingReview, liveDocumentWordingReview),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_broad_review", ARTIFACTS.liveDocumentBroadReview, liveDocumentBroadReview),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_review", ARTIFACTS.liveDocumentEditorialReview, liveDocumentEditorialReview),
+    evidenceStatus(rootDir, currentHead, liveCommit, "document_editorial_review_cockpit", ARTIFACTS.documentEditorialReviewCockpit, documentEditorialReviewCockpit),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_duplicate_classification", ARTIFACTS.liveDocumentEditorialDuplicateClassification, liveDocumentEditorialDuplicateClassification),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_near_classification", ARTIFACTS.liveDocumentEditorialNearClassification, liveDocumentEditorialNearClassification),
     evidenceStatus(rootDir, currentHead, liveCommit, "product_capability_truth", ARTIFACTS.productCapabilityTruth, productCapabilityTruth),
@@ -1102,6 +1105,23 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       exactSavedShareReproduced: recordAt(liveDocumentEditorialReview, "mutationBoundary")?.exactSavedShareReproduced === true,
       exactSavedShareVerdict: asString(recordAt(liveDocumentEditorialReview, "evidenceBoundary")?.exactSavedShareVerdict),
     },
+    documentEditorialReviewCockpit: {
+      artifact: ARTIFACTS.documentEditorialReviewCockpit,
+      verdict: isRecord(documentEditorialReviewCockpit) ? asString(documentEditorialReviewCockpit.verdict) : "missing",
+      sourceHead: isRecord(documentEditorialReviewCockpit) ? asString(documentEditorialReviewCockpit.sourceHead) : "",
+      productionCommit: asString(recordAt(documentEditorialReviewCockpit, "productionBuild")?.commitSha),
+      livePassed: asNumber(documentEditorialReviewCockpit?.pass),
+      liveFailed: asNumber(documentEditorialReviewCockpit?.fail),
+      canonicalDocumentCount: asNumber(recordAt(documentEditorialReviewCockpit, "acceptanceContract")?.canonicalDocumentCount),
+      reviewerCheckCount: asNumber(recordAt(documentEditorialReviewCockpit, "acceptanceContract")?.reviewerCheckCount),
+      desktopZones: asNumber(recordAt(documentEditorialReviewCockpit, "acceptanceContract")?.desktopZones),
+      mobileColumns: asNumber(recordAt(documentEditorialReviewCockpit, "acceptanceContract")?.mobileColumns),
+      humanReviewCompleted: recordAt(documentEditorialReviewCockpit, "reviewBoundary")?.humanReviewCompleted === true,
+      broadHumanWordingReviewRequired: recordAt(documentEditorialReviewCockpit, "reviewBoundary")?.broadHumanWordingReviewRequired === true,
+      dbMutationPerformed: recordAt(documentEditorialReviewCockpit, "mutationBoundary")?.dbMutationPerformed === true,
+      providerDispatchCalled: recordAt(documentEditorialReviewCockpit, "mutationBoundary")?.providerDispatchCalled === true,
+      exactSavedShareVerdict: asString(recordAt(documentEditorialReviewCockpit, "mutationBoundary")?.exactSavedShareVerdict),
+    },
     liveDocumentEditorialDuplicateClassification: {
       artifact: ARTIFACTS.liveDocumentEditorialDuplicateClassification,
       verdict: isRecord(liveDocumentEditorialDuplicateClassification)
@@ -1474,6 +1494,14 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- DB mutation: ${rollup.liveDocumentEditorialReview.dbMutationPerformed}; Share session created: ${rollup.liveDocumentEditorialReview.shareSessionCreated}; provider dispatch: ${rollup.liveDocumentEditorialReview.providerDispatchCalled}`,
     `- Exact saved Share: ${rollup.liveDocumentEditorialReview.exactSavedShareVerdict || "MISSING_EVIDENCE"}; reproduced=${rollup.liveDocumentEditorialReview.exactSavedShareReproduced}`,
     "- Boundary: this automated reviewer-ready contract does not combine the six-core wording and 12-deliverable presence gates into completed human review.",
+    "",
+    "## Live 12-Document Human Editorial Review Cockpit",
+    "",
+    `- Verdict: \`${rollup.documentEditorialReviewCockpit.verdict}\``,
+    `- Live geometry: pass=${rollup.documentEditorialReviewCockpit.livePassed}/4, fail=${rollup.documentEditorialReviewCockpit.liveFailed}; documents/checks=${rollup.documentEditorialReviewCockpit.canonicalDocumentCount}/${rollup.documentEditorialReviewCockpit.reviewerCheckCount}; desktop/mobile zones=${rollup.documentEditorialReviewCockpit.desktopZones}/${rollup.documentEditorialReviewCockpit.mobileColumns}`,
+    `- Human review completed: ${rollup.documentEditorialReviewCockpit.humanReviewCompleted}; broad human wording review required: ${rollup.documentEditorialReviewCockpit.broadHumanWordingReviewRequired}`,
+    `- DB mutation: ${rollup.documentEditorialReviewCockpit.dbMutationPerformed}; provider dispatch: ${rollup.documentEditorialReviewCockpit.providerDispatchCalled}; exact saved Share: ${rollup.documentEditorialReviewCockpit.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "- Boundary: this proves a bounded, local, stale-aware human-review workflow exists; automated browser interaction is not human completion.",
     "",
     "## Live Editorial Duplicate Classification",
     "",

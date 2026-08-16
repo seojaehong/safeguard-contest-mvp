@@ -37,6 +37,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
   liveDocumentEditorialReview: path.join("evaluation", "live-document-editorial-review-2026-07-25", "report.json"),
   currentLiveDocumentEditorialRuntime: path.join("evaluation", "live-document-editorial-review-current-2026-08-16", "report.json"),
+  documentEditorialReviewCockpit: path.join("evaluation", "document-editorial-review-cockpit-2026-08-16", "report.json"),
   liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   liveDocumentRainContextIsolation: path.join("evaluation", "live-document-rain-context-isolation-2026-07-25", "report.json"),
@@ -4059,6 +4060,109 @@ function evaluateCurrentSecurityRemediationLedgerGate(rootDir) {
     nextActions: pass
       ? ["Close the three distributed-runtime controls with production configuration evidence and request separate approval before any database security migration or live canary."]
       : ["Restore the exact 23-finding ledger, receipt existence, immutable baselines, no-mutation boundary, and six open findings before using the current remediation count."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateDocumentEditorialReviewCockpitGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.documentEditorialReviewCockpit;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "document_editorial_review_cockpit",
+      label: "Live 12-document human editorial review cockpit",
+      state: "missing",
+      evidencePath,
+      detail: "The live document editorial review cockpit evidence is missing or invalid.",
+      nextActions: ["Rerun the Day/Night desktop-short and mobile-short cockpit probe against current production."],
+    });
+  }
+
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const acceptance = isRecord(report.acceptanceContract) ? report.acceptanceContract : {};
+  const reviewBoundary = isRecord(report.reviewBoundary) ? report.reviewBoundary : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const results = Array.isArray(report.results) ? report.results.filter(isRecord) : [];
+  const desktopRows = results.filter((row) => readNumber(row.width) === 1440 && readNumber(row.height) === 723);
+  const mobileRows = results.filter((row) => readNumber(row.width) === 390 && readNumber(row.height) === 723);
+  const rowsPass = results.length === 4 && results.every((row) => {
+    const before = isRecord(row.beforeCompletion) ? row.beforeCompletion : {};
+    const after = isRecord(row.afterCompletion) ? row.afterCompletion : {};
+    return readString(row.verdict) === "PASS"
+      && readNumber(before.bodyHeight) === readNumber(before.viewportHeight)
+      && readNumber(before.reviewDocumentCount) === 12
+      && readNumber(before.uniqueDocumentCount) === 12
+      && before.includesRiskAssessment === true
+      && readNumber(before.checkboxCount) === 5
+      && before.horizontalOverflow === false
+      && after.currentWorkpackUnchanged === true
+      && readNumber(after.apiRequestCount) === 0
+      && readNumber(after.dialogScrollTop) === 0;
+  });
+  const sourceMatchesProduction = readString(report.sourceHead).length > 0
+    && readString(report.sourceHead) === readString(productionBuild.commitSha)
+    && report.sourceHeadMatchesProduction === true
+    && readString(productionBuild.environment) === "production";
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.vectorRuntimeCalled === false
+    && mutationBoundary.wikiPublished === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false
+    && readString(mutationBoundary.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+  const boundaryPass = reviewBoundary.automatedInteractionOnly === true
+    && reviewBoundary.humanReviewCompleted === false
+    && reviewBoundary.localCompletionIsApproval === false
+    && reviewBoundary.broadHumanWordingReviewRequired === true;
+  const contractPass = readNumber(acceptance.canonicalDocumentCount) === 12
+    && acceptance.includesRiskAssessment === true
+    && readNumber(acceptance.reviewerCheckCount) === 5
+    && readNumber(acceptance.desktopZones) === 3
+    && readNumber(acceptance.mobileColumns) === 1
+    && acceptance.bodyHeightUnchangedWhileOpen === true
+    && acceptance.longCopyContained === true
+    && acceptance.reviewStateStoredSeparately === true
+    && acceptance.editedTextInvalidatesCompletion === true
+    && acceptance.automaticReviewCannotClaimHumanCompletion === true;
+  const geometryPass = desktopRows.length === 2
+    && desktopRows.every((row) => readNumber(row.beforeCompletion?.workbenchColumns) === 3)
+    && mobileRows.length === 2
+    && mobileRows.every((row) => readNumber(row.beforeCompletion?.workbenchColumns) === 1);
+  const ready = readString(report.verdict) === "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_COCKPIT"
+    && readNumber(report.total) === 4
+    && readNumber(report.pass) === 4
+    && readNumber(report.fail) === 0
+    && sourceMatchesProduction
+    && rowsPass
+    && geometryPass
+    && contractPass
+    && boundaryPass
+    && noMutation;
+
+  if (ready) {
+    return gateResult({
+      id: "document_editorial_review_cockpit",
+      label: "Live 12-document human editorial review cockpit",
+      state: "proven",
+      evidencePath,
+      detail: "Live Day/Night desktop-short 1440x723 and mobile-short 390x723 pass 4/4 with 12 canonical documents including riskAssessmentDraft, five explicit reviewer checks, a three-zone desktop and one-column mobile cockpit, unchanged page-body height, local-scroll containment, separate stale-aware review storage, zero API calls, and no current-workpack mutation. This proves the human review workflow is available; automatedInteractionOnly=true and humanReviewCompleted=false, broad human wording review remains required, and exact saved Share remains MISSING_EVIDENCE.",
+      nextActions: [
+        "Use the cockpit for the separate human editorial review without treating automated geometry as human completion.",
+        "Keep exact saved Share and every DB/provider/vector/wiki/KOSHA mutation behind their existing approval boundaries.",
+      ],
+    });
+  }
+
+  return gateResult({
+    id: "document_editorial_review_cockpit",
+    label: "Live 12-document human editorial review cockpit",
+    state: "contradicted",
+    evidencePath,
+    detail: `Cockpit verdict=${readString(report.verdict) || "unknown"}, live=${readNumber(report.pass)}/4, rowsPass=${rowsPass}, geometryPass=${geometryPass}, contractPass=${contractPass}, sourceMatchesProduction=${sourceMatchesProduction}, humanReviewCompleted=${reviewBoundary.humanReviewCompleted === true}, exactShare=${readString(mutationBoundary.exactSavedShareVerdict) || "unknown"}, noMutation=${noMutation}.`,
+    nextActions: ["Restore the fail-closed review, geometry, source/live, and no-mutation contracts before claiming the cockpit proven."],
   });
 }
 
@@ -8445,6 +8549,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateLiveDocumentWordingReviewGate(rootDir),
     evaluateLiveDocumentBroadReviewGate(rootDir),
     evaluateLiveDocumentEditorialReviewGate(rootDir),
+    evaluateDocumentEditorialReviewCockpitGate(rootDir),
     evaluateCurrentLiveDocumentEditorialRuntimeGate(rootDir),
     evaluateProductCapabilityTruthGate(rootDir),
     evaluateDependencySecurityRemediationGate(rootDir),

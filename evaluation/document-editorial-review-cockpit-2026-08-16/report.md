@@ -1,8 +1,8 @@
 # Document Editorial Review Cockpit Evidence
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_DOCUMENT_EDITORIAL_REVIEW_COCKPIT`
-- Source: `65ae7188f2a4f12acd72143a1b665a1207334078`
-- Production: `local`
+- Verdict: `PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_COCKPIT`
+- Source: `e6d16cff8f00abfd8ecfe77cd661679c62d48d82`
+- Production: `e6d16cff8f00abfd8ecfe77cd661679c62d48d82`
 - Scope: local-only 12-document human review cockpit geometry and state isolation
 - Verification: Documents browser 39/39, focused review flow 1/1, strict typecheck PASS, Next 15.5.22 build PASS (28 static pages)
 - Human boundary: this automated probe does not complete human wording review or create approval evidence.

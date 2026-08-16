@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-16T09:27:58.287Z",
-  "head": "2d807c54be2a7438c5cf35b1a4cafac99ba6f80d",
+  "generatedAt": "2026-08-16T10:22:17.453Z",
+  "head": "e6d16cff8f00abfd8ecfe77cd661679c62d48d82",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "315fae6e6dbd06f62ec244d5e113591212a00252",
+    "commitSha": "e6d16cff8f00abfd8ecfe77cd661679c62d48d82",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ekacqoyll-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-f4sc2n8yo-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 61
+    "gateCount": 62
   },
   "provenGates": [
     {
@@ -80,6 +80,12 @@
       "state": "proven",
       "artifact": "evaluation\\live-document-editorial-review-2026-07-25\\report.json",
       "detail": "Five live production scenarios and all 60 canonical document surfaces pass the automated editorial contract: placeholder=0, legal overclaim=0, awkward composition 20->0, and evidence-domain mismatch 1->0. The companion duplicate classifier reduces generic-template overuse 4->0 while retaining exact=31 and near=100 reviewer findings. Near-classification keeps all 100 findings visible while reducing unclassified human-review-required 54->0 through role/context/hazard/control categories. Rain-context isolation evaluation\\live-document-rain-context-isolation-2026-07-25\\report.json fails the focused production-before scenario at 3 irrelevant document findings, passes the focused live-after at 0, and passes the strengthened five-scenario/60-document contract with 0 forbidden rain fragments, preventing 비산 from being treated as rain. humanReviewCompleted=false, the six-core wording and 12-presence gates are not combined as a human PASS, no DB/share/provider mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "document_editorial_review_cockpit",
+      "state": "proven",
+      "artifact": "evaluation\\document-editorial-review-cockpit-2026-08-16\\report.json",
+      "detail": "Live Day/Night desktop-short 1440x723 and mobile-short 390x723 pass 4/4 with 12 canonical documents including riskAssessmentDraft, five explicit reviewer checks, a three-zone desktop and one-column mobile cockpit, unchanged page-body height, local-scroll containment, separate stale-aware review storage, zero API calls, and no current-workpack mutation. This proves the human review workflow is available; automatedInteractionOnly=true and humanReviewCompleted=false, broad human wording review remains required, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "current_live_document_editorial_runtime",
@@ -938,6 +944,23 @@
     "exactSavedShareReproduced": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
+  "documentEditorialReviewCockpit": {
+    "artifact": "evaluation\\document-editorial-review-cockpit-2026-08-16\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_COCKPIT",
+    "sourceHead": "e6d16cff8f00abfd8ecfe77cd661679c62d48d82",
+    "productionCommit": "e6d16cff8f00abfd8ecfe77cd661679c62d48d82",
+    "livePassed": 4,
+    "liveFailed": 0,
+    "canonicalDocumentCount": 12,
+    "reviewerCheckCount": 5,
+    "desktopZones": 3,
+    "mobileColumns": 1,
+    "humanReviewCompleted": false,
+    "broadHumanWordingReviewRequired": true,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
   "liveDocumentEditorialDuplicateClassification": {
     "artifact": "evaluation\\live-document-editorial-duplicate-classification-2026-07-25\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_EDITORIAL_DUPLICATE_CLASSIFICATION_REVIEWER_READY",
@@ -1213,10 +1236,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "2d807c54be2a7438c5cf35b1a4cafac99ba6f80d",
+      "sourceCommit": "e6d16cff8f00abfd8ecfe77cd661679c62d48d82",
       "sourceStatus": "exact",
-      "productionCommit": "2d807c54be2a7438c5cf35b1a4cafac99ba6f80d",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "e6d16cff8f00abfd8ecfe77cd661679c62d48d82",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -1289,6 +1312,14 @@
       "sourceStatus": "missing",
       "productionCommit": "1cbb51dce13baf9f4809f4a0793b9d3ae3c088be",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "document_editorial_review_cockpit",
+      "artifact": "evaluation\\document-editorial-review-cockpit-2026-08-16\\report.json",
+      "sourceCommit": "e6d16cff8f00abfd8ecfe77cd661679c62d48d82",
+      "sourceStatus": "exact",
+      "productionCommit": "e6d16cff8f00abfd8ecfe77cd661679c62d48d82",
+      "productionStatus": "matches_live"
     },
     {
       "id": "live_document_editorial_duplicate_classification",

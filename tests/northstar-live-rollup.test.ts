@@ -227,6 +227,22 @@ type RollupReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  documentEditorialReviewCockpit: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    livePassed: number;
+    liveFailed: number;
+    canonicalDocumentCount: number;
+    reviewerCheckCount: number;
+    desktopZones: number;
+    mobileColumns: number;
+    humanReviewCompleted: boolean;
+    broadHumanWordingReviewRequired: boolean;
+    dbMutationPerformed: boolean;
+    providerDispatchCalled: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentRepositorySecurityRescan: {
     verdict: string;
     scanId: string;
@@ -556,6 +572,69 @@ function writeJson(root: string, relativePath: string, value: unknown): void {
   fs.writeFileSync(absolutePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
+function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
+  const results = [
+    { theme: "day", width: 1440, height: 723, workbenchColumns: 3 },
+    { theme: "night", width: 1440, height: 723, workbenchColumns: 3 },
+    { theme: "day", width: 390, height: 723, workbenchColumns: 1 },
+    { theme: "night", width: 390, height: 723, workbenchColumns: 1 },
+  ].map(({ theme, width, height, workbenchColumns }) => ({
+    theme,
+    width,
+    height,
+    beforeCompletion: {
+      viewportHeight: height,
+      bodyHeight: height,
+      workbenchColumns,
+      reviewDocumentCount: 12,
+      uniqueDocumentCount: 12,
+      includesRiskAssessment: true,
+      checkboxCount: 5,
+      horizontalOverflow: false,
+    },
+    afterCompletion: { currentWorkpackUnchanged: true, apiRequestCount: 0, dialogScrollTop: 0 },
+    verdict: "PASS",
+  }));
+
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_COCKPIT",
+    sourceHead: "TO_FILL",
+    productionBuild: { commitSha: "TO_FILL", environment: "production" },
+    sourceHeadMatchesProduction: true,
+    total: 4,
+    pass: 4,
+    fail: 0,
+    acceptanceContract: {
+      canonicalDocumentCount: 12,
+      includesRiskAssessment: true,
+      reviewerCheckCount: 5,
+      desktopZones: 3,
+      mobileColumns: 1,
+      bodyHeightUnchangedWhileOpen: true,
+      longCopyContained: true,
+      reviewStateStoredSeparately: true,
+      editedTextInvalidatesCompletion: true,
+      automaticReviewCannotClaimHumanCompletion: true,
+    },
+    reviewBoundary: {
+      automatedInteractionOnly: true,
+      humanReviewCompleted: false,
+      localCompletionIsApproval: false,
+      broadHumanWordingReviewRequired: true,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorRuntimeCalled: false,
+      wikiPublished: false,
+      koshaRegistryMutationPerformed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    results,
+  };
+}
+
 function commitAll(root: string, message: string): string {
   execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
   execFileSync("git", ["commit", "-m", message], { cwd: root, stdio: "ignore" });
@@ -581,6 +660,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "live_document_wording_review", state: "proven", evidencePath: "evaluation/live-document-wording-review-2026-07-24/report.json", detail: "five synthetic wording scenarios passed" },
       { id: "live_document_broad_review", state: "proven", evidencePath: "evaluation/live-document-broad-review-2026-07-25/report.json", detail: "all 12 deliverables passed" },
       { id: "live_document_editorial_review", state: "proven", evidencePath: "evaluation/live-document-editorial-review-2026-07-25/report.json", detail: "all 60 editorial surfaces passed automated contract" },
+      { id: "document_editorial_review_cockpit", state: "proven", evidencePath: "evaluation/document-editorial-review-cockpit-2026-08-16/report.json", detail: "live 4/4 cockpit preserves human review and exact Share boundaries" },
       { id: "product_capability_truth", state: "proven", evidencePath: "evaluation/product-capability-truth-2026-07-25/report.json", detail: "live capability truth passed without unlocking provider dispatch" },
       { id: "tenant_authorization_remediation", state: "proven", evidencePath: "evaluation/tenant-authorization-boundary-preflight-2026-07-29/report.json", detail: "two tenant findings remediated" },
       { id: "spreadsheet_formula_neutralization", state: "proven", evidencePath: "evaluation/spreadsheet-formula-neutralization-2026-08-01/report.json", detail: "four formula findings remediated" },
@@ -1319,6 +1399,11 @@ function createFixtureRoot(): { root: string; head: string } {
     },
     remainingBoundaries: { securityCompleteClaimAllowed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
+  writeJson(
+    root,
+    "evaluation/document-editorial-review-cockpit-2026-08-16/report.json",
+    documentEditorialReviewCockpitFixture(),
+  );
   writeJson(root, "evaluation/final-approval-free-security-rescan-2026-08-16/report.json", {
     verdict: "NOTICE_FRESH_STANDARD_SCAN_APPROVAL_FREE_FINDINGS_CLOSED_NINE_APPROVAL_GATED_REMAIN",
     scanId: "38b87f68-ea7c-4843-a89c-5f97ba99e319",
@@ -1541,6 +1626,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-document-wording-review-2026-07-24/report.json",
     "evaluation/live-document-broad-review-2026-07-25/report.json",
     "evaluation/live-document-editorial-review-2026-07-25/report.json",
+    "evaluation/document-editorial-review-cockpit-2026-08-16/report.json",
     "evaluation/live-document-editorial-duplicate-classification-2026-07-25/report.json",
     "evaluation/live-document-editorial-near-classification-2026-07-25/report.json",
     "evaluation/product-capability-truth-2026-07-25/report.json",
@@ -1977,6 +2063,23 @@ describe("northstar live rollup", () => {
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
+    expect(report.documentEditorialReviewCockpit).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_COCKPIT",
+      sourceHead: expect.any(String),
+      productionCommit: expect.any(String),
+      livePassed: 4,
+      liveFailed: 0,
+      canonicalDocumentCount: 12,
+      reviewerCheckCount: 5,
+      desktopZones: 3,
+      mobileColumns: 1,
+      humanReviewCompleted: false,
+      broadHumanWordingReviewRequired: true,
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "document_editorial_review_cockpit")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "public_ask_distributed_admission")?.productionStatus).toBe("ancestor_of_head");
     expect(report.publicSearchDistributedAdmission).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_PROVIDER_WORK_FAILS_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION",

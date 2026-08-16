@@ -68,6 +68,73 @@ function writeText(rootDir: string, relativePath: string, value: string): void {
   fs.writeFileSync(absolutePath, value, "utf8");
 }
 
+function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
+  const results = [
+    { theme: "day", width: 1440, height: 723, workbenchColumns: 3 },
+    { theme: "night", width: 1440, height: 723, workbenchColumns: 3 },
+    { theme: "day", width: 390, height: 723, workbenchColumns: 1 },
+    { theme: "night", width: 390, height: 723, workbenchColumns: 1 },
+  ].map(({ theme, width, height, workbenchColumns }) => ({
+    theme,
+    width,
+    height,
+    beforeCompletion: {
+      viewportHeight: height,
+      bodyHeight: height,
+      workbenchColumns,
+      reviewDocumentCount: 12,
+      uniqueDocumentCount: 12,
+      includesRiskAssessment: true,
+      checkboxCount: 5,
+      horizontalOverflow: false,
+    },
+    afterCompletion: {
+      currentWorkpackUnchanged: true,
+      apiRequestCount: 0,
+      dialogScrollTop: 0,
+    },
+    verdict: "PASS",
+  }));
+
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_COCKPIT",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", environment: "production" },
+    sourceHeadMatchesProduction: true,
+    total: 4,
+    pass: 4,
+    fail: 0,
+    acceptanceContract: {
+      canonicalDocumentCount: 12,
+      includesRiskAssessment: true,
+      reviewerCheckCount: 5,
+      desktopZones: 3,
+      mobileColumns: 1,
+      bodyHeightUnchangedWhileOpen: true,
+      longCopyContained: true,
+      reviewStateStoredSeparately: true,
+      editedTextInvalidatesCompletion: true,
+      automaticReviewCannotClaimHumanCompletion: true,
+    },
+    reviewBoundary: {
+      automatedInteractionOnly: true,
+      humanReviewCompleted: false,
+      localCompletionIsApproval: false,
+      broadHumanWordingReviewRequired: true,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorRuntimeCalled: false,
+      wikiPublished: false,
+      koshaRegistryMutationPerformed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    results,
+  };
+}
+
 function currentSecurityRemediationLedgerFixture(): Record<string, unknown> {
   const findingIds = [
     "csf_32ed9bacd31d6e84ee96670c", "csf_60ae470f243100a5ceff1625", "csf_6ca85fcda2063dad372a1ba0",
@@ -1311,6 +1378,11 @@ function createFixtureRoot(): string {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(
+    rootDir,
+    path.join("evaluation", "document-editorial-review-cockpit-2026-08-16", "report.json"),
+    documentEditorialReviewCockpitFixture(),
+  );
   writeJson(rootDir, path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"), {
     sourceSha: "fixture-sha",
     ok: true,
@@ -4719,6 +4791,17 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "current_live_document_editorial_runtime")?.detail).toContain("DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
     expect(audit.gates.find((gate) => gate.id === "current_live_document_editorial_runtime")?.detail).toContain("not a live content RED or PASS");
     expect(audit.gates.find((gate) => gate.id === "current_live_document_editorial_runtime")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "document-editorial-review-cockpit-2026-08-16", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("pass 4/4");
+    expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("12 canonical documents");
+    expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("five explicit reviewer checks");
+    expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("zero API calls");
+    expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("no current-workpack mutation");
+    expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("humanReviewCompleted=false");
+    expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
@@ -5059,6 +5142,50 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "current_live_document_editorial_runtime")?.detail).toContain(
       "boundaryPass=false",
     );
+  });
+
+  it.each([
+    {
+      name: "human review completion",
+      mutate: (report: Record<string, unknown>) => {
+        (report.reviewBoundary as Record<string, unknown>).humanReviewCompleted = true;
+      },
+      detail: "humanReviewCompleted=true",
+    },
+    {
+      name: "exact saved Share PASS",
+      mutate: (report: Record<string, unknown>) => {
+        (report.mutationBoundary as Record<string, unknown>).exactSavedShareVerdict = "PASS";
+      },
+      detail: "exactShare=PASS",
+    },
+    {
+      name: "an API request",
+      mutate: (report: Record<string, unknown>) => {
+        const results = report.results as Array<Record<string, unknown>>;
+        (results[0].afterCompletion as Record<string, unknown>).apiRequestCount = 1;
+      },
+      detail: "rowsPass=false",
+    },
+  ])("contradicts the editorial review cockpit on $name", async ({ mutate, detail }) => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "document-editorial-review-cockpit-2026-08-16",
+      "report.json",
+    );
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as Record<string, unknown>;
+    mutate(report);
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.overall).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain(detail);
   });
 
   it("fails security evidence closed when revision fields are not Git SHAs", async () => {

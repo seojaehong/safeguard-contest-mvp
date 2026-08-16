@@ -28,6 +28,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
   liveDocumentEditorialReview: path.join("evaluation", "live-document-editorial-review-2026-07-25", "report.json"),
+  documentEditorialReviewCockpit: path.join("evaluation", "document-editorial-review-cockpit-2026-08-16", "report.json"),
   liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
@@ -829,6 +830,33 @@ function fullRepositorySecurityScanSummary(report) {
     remediationRequired: asBoolean(remainingBoundaries.remediationRequired),
     distributedRateLimitResidual: asBoolean(remainingBoundaries.distributedRateLimitResidual),
     exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
+  };
+}
+
+/**
+ * @param {unknown} review
+ */
+function documentEditorialReviewCockpitSummary(review) {
+  if (!isRecord(review)) return {};
+  const acceptance = isRecord(review.acceptanceContract) ? review.acceptanceContract : {};
+  const reviewBoundary = isRecord(review.reviewBoundary) ? review.reviewBoundary : {};
+  const mutationBoundary = isRecord(review.mutationBoundary) ? review.mutationBoundary : {};
+  const productionBuild = isRecord(review.productionBuild) ? review.productionBuild : {};
+  return {
+    verdict: asString(review.verdict),
+    sourceHead: asString(review.sourceHead),
+    productionCommit: asString(productionBuild.commitSha),
+    livePassed: typeof review.pass === "number" ? review.pass : 0,
+    liveFailed: typeof review.fail === "number" ? review.fail : 0,
+    canonicalDocumentCount: typeof acceptance.canonicalDocumentCount === "number" ? acceptance.canonicalDocumentCount : 0,
+    reviewerCheckCount: typeof acceptance.reviewerCheckCount === "number" ? acceptance.reviewerCheckCount : 0,
+    desktopZones: typeof acceptance.desktopZones === "number" ? acceptance.desktopZones : 0,
+    mobileColumns: typeof acceptance.mobileColumns === "number" ? acceptance.mobileColumns : 0,
+    humanReviewCompleted: asBoolean(reviewBoundary.humanReviewCompleted),
+    broadHumanWordingReviewRequired: asBoolean(reviewBoundary.broadHumanWordingReviewRequired),
+    dbMutationPerformed: asBoolean(mutationBoundary.dbMutationPerformed),
+    providerDispatchCalled: asBoolean(mutationBoundary.providerDispatchCalled),
+    exactSavedShareVerdict: asString(mutationBoundary.exactSavedShareVerdict),
   };
 }
 
@@ -2203,6 +2231,7 @@ export function buildNorthstarNextRunway(options) {
   const liveDocumentWordingReview = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentWordingReview);
   const liveDocumentBroadReview = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentBroadReview);
   const liveDocumentEditorialReview = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentEditorialReview);
+  const documentEditorialReviewCockpit = readOptionalJson(options.rootDir, ARTIFACTS.documentEditorialReviewCockpit);
   const liveDocumentEditorialDuplicateClassification = readOptionalJson(
     options.rootDir,
     ARTIFACTS.liveDocumentEditorialDuplicateClassification,
@@ -2412,6 +2441,7 @@ export function buildNorthstarNextRunway(options) {
       "live_document_secondary_grounding",
       "live_document_seed_profile_isolation",
       "live_document_editorial_review",
+      "document_editorial_review_cockpit",
       "product_capability_truth",
       "dependency_security_remediation",
       "tenant_authorization_remediation",
@@ -2558,6 +2588,7 @@ export function buildNorthstarNextRunway(options) {
     liveDocumentWordingReview: liveDocumentWordingReviewSummary(liveDocumentWordingReview),
     liveDocumentBroadReview: liveDocumentBroadReviewSummary(liveDocumentBroadReview),
     liveDocumentEditorialReview: liveDocumentEditorialReviewSummary(liveDocumentEditorialReview),
+    documentEditorialReviewCockpit: documentEditorialReviewCockpitSummary(documentEditorialReviewCockpit),
     liveDocumentEditorialDuplicateClassification: liveDocumentEditorialDuplicateClassificationSummary(
       liveDocumentEditorialDuplicateClassification,
     ),
@@ -2717,6 +2748,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Live synthetic wording and field usability are measured separately: \`${report.liveDocumentWordingReview.verdict || "missing"}\`, live scenarios passed \`${report.liveDocumentWordingReview.livePassed ?? 0}/5\`, live pending \`${report.liveDocumentWordingReview.liveAfterDeploymentPending === true}\`. This gate catches fixed-profile field leakage and selected-document wording defects, while broad human review and exact saved Share evidence remain separate.
 - Live 12-deliverable presence and applicability are measured separately: \`${report.liveDocumentBroadReview.verdict || "missing"}\`, UI/integrity/reviewed documents \`${report.liveDocumentBroadReview.uiDocumentCount ?? 0}/${report.liveDocumentBroadReview.integrityRequiredCount ?? 0}/${report.liveDocumentBroadReview.reviewedDocumentCount ?? 0}\`, before missingUnexpected \`${report.liveDocumentBroadReview.beforeMissingUnexpected ?? 0}\`, live missingUnexpected \`${report.liveDocumentBroadReview.liveMissingUnexpected ?? 0}\`, and workPermitDraft presentNonEmpty \`${report.liveDocumentBroadReview.workPermitPresentNonEmpty ?? 0}/5\`. The six-document synthetic wording gate is not accepted as 12-document deliverable coverage; exact saved Share remains \`${report.liveDocumentBroadReview.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live 12-deliverable automated editorial quality is measured separately: \`${report.liveDocumentEditorialReview.verdict || "missing"}\`, live scenarios \`${report.liveDocumentEditorialReview.livePassed ?? 0}/${report.liveDocumentEditorialReview.scenarioCount ?? 0}\`, reviewed document surface \`${report.liveDocumentEditorialReview.reviewedDocumentSurfaceCount ?? 0}\`, placeholder/legal/awkward/evidence mismatch \`${report.liveDocumentEditorialReview.placeholderFindingCount ?? 0}/${report.liveDocumentEditorialReview.legalOverclaimFindingCount ?? 0}/${report.liveDocumentEditorialReview.awkwardCompositionFindingCount ?? 0}/${report.liveDocumentEditorialReview.evidenceDomainMismatchCount ?? 0}\`, and duplicate findings exact/near \`${report.liveDocumentEditorialReview.exactLineOveruseCount ?? 0}/${report.liveDocumentEditorialReview.nearDuplicateLineOveruseCount ?? 0}\`. This is reviewer-ready automated evidence with humanReviewCompleted=\`${report.liveDocumentEditorialReview.humanReviewCompleted === true}\`, not a combined human PASS; exact saved Share remains \`${report.liveDocumentEditorialReview.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
+- The live 12-document human editorial review cockpit is measured separately: \`${report.documentEditorialReviewCockpit.verdict || "missing"}\`, live geometry \`${report.documentEditorialReviewCockpit.livePassed ?? 0}/4\`, documents/checks \`${report.documentEditorialReviewCockpit.canonicalDocumentCount ?? 0}/${report.documentEditorialReviewCockpit.reviewerCheckCount ?? 0}\`, and desktop/mobile zones \`${report.documentEditorialReviewCockpit.desktopZones ?? 0}/${report.documentEditorialReviewCockpit.mobileColumns ?? 0}\`. It proves the bounded local workflow exists, while humanReviewCompleted=\`${report.documentEditorialReviewCockpit.humanReviewCompleted === true}\`, broadHumanWordingReviewRequired=\`${report.documentEditorialReviewCockpit.broadHumanWordingReviewRequired === true}\`, and exact saved Share remains \`${report.documentEditorialReviewCockpit.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live editorial duplicate classification is measured separately: \`${report.liveDocumentEditorialDuplicateClassification.verdict || "missing"}\`, generic template overuse \`${report.liveDocumentEditorialDuplicateClassification.beforeGenericTemplateOveruseCount ?? 0}->${report.liveDocumentEditorialDuplicateClassification.liveGenericTemplateOveruseCount ?? 0}\`, retained reviewer findings exact/near \`${report.liveDocumentEditorialDuplicateClassification.exactLineOveruseCount ?? 0}/${report.liveDocumentEditorialDuplicateClassification.nearDuplicateLineOveruseCount ?? 0}\`, and humanReviewCompleted=\`${report.liveDocumentEditorialDuplicateClassification.humanReviewCompleted === true}\`. Only generic template overuse fails automatically; safety-control and legal-reference repetition remains visible, and exact saved Share remains \`${report.liveDocumentEditorialDuplicateClassification.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live editorial near-duplicate classification preserves \`${report.liveDocumentEditorialNearClassification.beforeNearDuplicateLineOveruseCount ?? 0}->${report.liveDocumentEditorialNearClassification.liveNearDuplicateLineOveruseCount ?? 0}\` findings while reducing unclassified human-review-required \`${report.liveDocumentEditorialNearClassification.beforeHumanReviewRequiredCount ?? 0}->${report.liveDocumentEditorialNearClassification.liveHumanReviewRequiredCount ?? 0}\`. The retained role-prefix/context/hazard/control categories are \`${report.liveDocumentEditorialNearClassification.rolePrefixVariantCount ?? 0}/${report.liveDocumentEditorialNearClassification.independentContextCount ?? 0}/${report.liveDocumentEditorialNearClassification.hazardConsistencyCount ?? 0}/${report.liveDocumentEditorialNearClassification.controlConsistencyCount ?? 0}\`; humanReviewCompleted=\`${report.liveDocumentEditorialNearClassification.humanReviewCompleted === true}\` and exact saved Share remains \`${report.liveDocumentEditorialNearClassification.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live product capability truth is measured separately: \`${report.productCapabilityTruth.verdict || "missing"}\`; manual/provider dispatch is \`${report.productCapabilityTruth.dispatchMode || "unknown"}\` with reason \`${report.productCapabilityTruth.dispatchReason || "unknown"}\`, scheduled briefing email ready=\`${report.productCapabilityTruth.briefingEmailReady === true}\`, photo Vision/OCR ready/accepted-only=\`${report.productCapabilityTruth.photoVisionReady === true}/${report.productCapabilityTruth.photoAcceptedOnly === true}\`, and AI modes are \`${report.productCapabilityTruth.aiModes?.join(", ") || "missing"}\`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains \`${report.productCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}\` and Documents/Share IA remains \`${report.productCapabilityTruth.documentsShareIaVerdict || "OPEN_SEPARATE_VIEWPORT_IA_WAVE"}\`.

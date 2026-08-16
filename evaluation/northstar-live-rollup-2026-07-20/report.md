@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-16T09:27:58.287Z
-Source HEAD at generation: 2d807c54be2a7438c5cf35b1a4cafac99ba6f80d
-Live commit at generation: 315fae6e6dbd06f62ec244d5e113591212a00252
+Generated at: 2026-08-16T10:22:17.453Z
+Source HEAD at generation: e6d16cff8f00abfd8ecfe77cd661679c62d48d82
+Live commit at generation: e6d16cff8f00abfd8ecfe77cd661679c62d48d82
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -85,6 +85,14 @@ Overall: `northstar_open_approval_gated`
 - DB mutation: false; Share session created: false; provider dispatch: false
 - Exact saved Share: MISSING_EVIDENCE; reproduced=false
 - Boundary: this automated reviewer-ready contract does not combine the six-core wording and 12-deliverable presence gates into completed human review.
+
+## Live 12-Document Human Editorial Review Cockpit
+
+- Verdict: `PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_COCKPIT`
+- Live geometry: pass=4/4, fail=0; documents/checks=12/5; desktop/mobile zones=3/1
+- Human review completed: false; broad human wording review required: true
+- DB mutation: false; provider dispatch: false; exact saved Share: MISSING_EVIDENCE
+- Boundary: this proves a bounded, local, stale-aware human-review workflow exists; automated browser interaction is not human completion.
 
 ## Live Editorial Duplicate Classification
 
@@ -291,6 +299,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_wording_review | proven | evaluation\live-document-wording-review-2026-07-24\report.json |
 | live_document_broad_review | proven | evaluation\live-document-broad-review-2026-07-25\report.json |
 | live_document_editorial_review | proven | evaluation\live-document-editorial-review-2026-07-25\report.json |
+| document_editorial_review_cockpit | proven | evaluation\document-editorial-review-cockpit-2026-08-16\report.json |
 | current_live_document_editorial_runtime | notice | evaluation\live-document-editorial-review-current-2026-08-16\report.json |
 | product_capability_truth | proven | evaluation\product-capability-truth-2026-07-25\report.json |
 | dependency_security_remediation | proven | evaluation\dependency-security-remediation-2026-07-28\report.json |
@@ -347,7 +356,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
 | live_document_quality_matrix | ancestor | ancestor_of_head | evaluation\live-document-quality-matrix-2026-07-24\report.json |
@@ -357,6 +366,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_wording_review | ancestor | ancestor_of_head | evaluation\live-document-wording-review-2026-07-24\report.json |
 | live_document_broad_review | ancestor | ancestor_of_head | evaluation\live-document-broad-review-2026-07-25\report.json |
 | live_document_editorial_review | missing | ancestor_of_head | evaluation\live-document-editorial-review-2026-07-25\report.json |
+| document_editorial_review_cockpit | exact | matches_live | evaluation\document-editorial-review-cockpit-2026-08-16\report.json |
 | live_document_editorial_duplicate_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-duplicate-classification-2026-07-25\report.json |
 | live_document_editorial_near_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-near-classification-2026-07-25\report.json |
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |
