@@ -25,6 +25,8 @@ The sealed follow-up scan `3f0107a8-e4a4-4a5b-be37-a28bcea8b05a` reported three 
 
 Later improvement-photo admission and provider-cancellation waves changed `lib/public-distributed-rate-limit.ts` and `lib/ai.ts` inside this gate's governed paths. Current production `729bec6c297b742f6c652be5a7a325ac35a90f49` re-ran 12 focused and adjacent files / 147 tests with 0 failures. This companion check preserves the original sealed three-finding remediation evidence rather than replacing or rewriting it.
 
+Current production `bea397a43255bcd8ac354252c5ef89898ab30ec9` later changed only `lib/search.ts` inside this gate's governed paths so internal KOSHA grounding remains available to generation and citation validation while the public response stays bounded. A fresh compatibility receipt passed 14 focused and adjacent files / 245 tests, and GitHub CI run `31967581366` passed 249 files / 2,927 tests. This receipt does not rewrite the sealed scan or promote the immutable 18-finding baseline into a security-complete claim.
+
 ## Boundaries
 
 Production `/api/build-info` reports product commit `c4f58947dbbee20fb77edeb0edfddcc08c87f6a4` on `master`, deployment `safeguard-contest-mjnjdjxwk-seojaehongs-projects.vercel.app`.

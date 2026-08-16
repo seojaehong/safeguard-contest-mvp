@@ -166,6 +166,8 @@ function documentEditorialReviewReceiptFixture(): Record<string, unknown> {
       reviewerRequired: true,
       receiptLockedBeforeAllDocuments: true,
       currentTextFingerprintRequired: true,
+      editorialFindingsFingerprintRequired: true,
+      editorialFindingReviewRequired: true,
       localDownloadOnly: true,
       reviewerIdentityVerified: false,
       serverRecorded: false,
@@ -176,7 +178,7 @@ function documentEditorialReviewReceiptFixture(): Record<string, unknown> {
       { viewport: { width: 390, height: 723 }, bodyHeightBefore: 723, bodyHeightAfter: 723, bodyHeightUnchanged: true, dialog: { left: 8, top: 8, right: 382, bottom: 715 }, checklist: { overflowY: "auto" }, receiptLockedAtZero: true, reviewerInputVisible: true, horizontalOverflow: false },
     ],
     receiptVerification: {
-      schemaVersion: "safeclaw-document-editorial-review-receipt/v1",
+      schemaVersion: "safeclaw-document-editorial-review-receipt/v2",
       reviewerRecorded: true,
       reviewedAtRecorded: true,
       generationFingerprintRecorded: true,
@@ -185,8 +187,13 @@ function documentEditorialReviewReceiptFixture(): Record<string, unknown> {
       reviewerCheckCount: 5,
       checksComplete: true,
       fingerprintsCurrent: true,
+      findingsBound: true,
+      editorialFindingsFingerprint: "fixture-findings-fingerprint",
+      editorialFindingCount: 31,
+      editorialFindingIdsRecorded: true,
+      editorialFindingCategoriesReconcile: true,
       apiRequestCount: 0,
-      reviewCompletion: { localChecklistCompleted: true, reviewerSelfAttested: true, reviewerIdentityVerified: false, serverRecorded: false, approvalGranted: false },
+      reviewCompletion: { localChecklistCompleted: true, editorialFindingsReviewed: true, reviewerSelfAttested: true, reviewerIdentityVerified: false, serverRecorded: false, approvalGranted: false },
     },
     reviewBoundary: { automatedInteractionOnly: true, humanReviewCompleted: false, localReceiptProvesHumanIdentity: false, broadHumanWordingReviewRequired: true },
     mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, vectorRuntimeCalled: false, wikiPublished: false, koshaRegistryMutationPerformed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
@@ -2557,6 +2564,17 @@ function createFixtureRoot(): string {
       productionCommit: "fixture-sha",
       changedGovernedPaths: ["lib/ai.ts", "lib/public-distributed-rate-limit.ts"],
       focusedVitest: { files: 12, tests: 147, failed: 0 },
+      noMutation: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      originalBaselineRewritten: false,
+    },
+    latestPathCompatibility: {
+      verdict: "PASS_LIVE_PRODUCTION_CURRENT_SEARCH_KOSHA_COMPATIBILITY",
+      sourceHead: "fixture-sha",
+      productionCommit: "fixture-sha",
+      changedGovernedPaths: ["lib/search.ts"],
+      focusedVitest: { files: 14, tests: 245, failed: 0 },
+      fullCi: { filesPassed: 249, testsPassed: 2927, failed: 0 },
       noMutation: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       originalBaselineRewritten: false,
@@ -6057,6 +6075,25 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("compatibilityPass=false");
   });
 
+  it("fails security follow-up closed when the latest search compatibility receipt overclaims boundaries", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "codex-security-followup-remediation-2026-08-11", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      latestPathCompatibility: {
+        focusedVitest: { tests: number };
+        exactSavedShareVerdict: string;
+      };
+    };
+    report.latestPathCompatibility.focusedVitest.tests = 244;
+    report.latestPathCompatibility.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.state).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("latestCompatibilityPass=false");
+  });
+
   it("keeps public JSON body-budget scan and exact Share boundaries fail-closed", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
@@ -7157,6 +7194,16 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
   });
 
   it.each([
+    {
+      name: "unbound editorial findings",
+      mutate: (report: Record<string, unknown>) => {
+        const verification = report.receiptVerification as Record<string, unknown>;
+        verification.findingsBound = false;
+        verification.editorialFindingsFingerprint = "";
+        (verification.reviewCompletion as Record<string, unknown>).editorialFindingsReviewed = false;
+      },
+      detail: "receiptFindingsBound=false",
+    },
     {
       name: "claimed reviewer identity",
       mutate: (report: Record<string, unknown>) => {

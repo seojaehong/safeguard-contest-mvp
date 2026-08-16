@@ -682,12 +682,12 @@ function documentEditorialReviewReceiptFixture(): Record<string, unknown> {
     sourceHead: "TO_FILL",
     productionBuild: { commitSha: "TO_FILL", environment: "production" },
     sourceHeadMatchesProduction: true,
-    acceptanceContract: { canonicalDocumentCount: 12, reviewerCheckCount: 5, reviewerRequired: true, receiptLockedBeforeAllDocuments: true, currentTextFingerprintRequired: true, localDownloadOnly: true, reviewerIdentityVerified: false, serverRecorded: false, approvalGranted: false },
+    acceptanceContract: { canonicalDocumentCount: 12, reviewerCheckCount: 5, reviewerRequired: true, receiptLockedBeforeAllDocuments: true, currentTextFingerprintRequired: true, editorialFindingsFingerprintRequired: true, editorialFindingReviewRequired: true, localDownloadOnly: true, reviewerIdentityVerified: false, serverRecorded: false, approvalGranted: false },
     results: [
       { viewport: { width: 1440, height: 723 }, bodyHeightBefore: 723, bodyHeightAfter: 723, bodyHeightUnchanged: true, dialog: { right: 1310, bottom: 711 }, checklist: { overflowY: "auto" }, receiptLockedAtZero: true, reviewerInputVisible: true, horizontalOverflow: false },
       { viewport: { width: 390, height: 723 }, bodyHeightBefore: 723, bodyHeightAfter: 723, bodyHeightUnchanged: true, dialog: { right: 382, bottom: 715 }, checklist: { overflowY: "auto" }, receiptLockedAtZero: true, reviewerInputVisible: true, horizontalOverflow: false },
     ],
-    receiptVerification: { schemaVersion: "safeclaw-document-editorial-review-receipt/v1", documentCount: 12, uniqueDocumentKeyCount: 12, reviewerCheckCount: 5, checksComplete: true, fingerprintsCurrent: true, apiRequestCount: 0, reviewCompletion: { localChecklistCompleted: true, reviewerSelfAttested: true, reviewerIdentityVerified: false, serverRecorded: false, approvalGranted: false } },
+    receiptVerification: { schemaVersion: "safeclaw-document-editorial-review-receipt/v2", documentCount: 12, uniqueDocumentKeyCount: 12, reviewerCheckCount: 5, checksComplete: true, fingerprintsCurrent: true, findingsBound: true, editorialFindingsFingerprint: "fixture-findings-fingerprint", editorialFindingCount: 31, editorialFindingIdsRecorded: true, editorialFindingCategoriesReconcile: true, apiRequestCount: 0, reviewCompletion: { localChecklistCompleted: true, editorialFindingsReviewed: true, reviewerSelfAttested: true, reviewerIdentityVerified: false, serverRecorded: false, approvalGranted: false } },
     reviewBoundary: { automatedInteractionOnly: true, humanReviewCompleted: false, localReceiptProvesHumanIdentity: false, broadHumanWordingReviewRequired: true },
     mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, vectorRuntimeCalled: false, wikiPublished: false, koshaRegistryMutationPerformed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   };

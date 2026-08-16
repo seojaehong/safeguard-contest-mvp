@@ -384,14 +384,20 @@ function documentEditorialReviewCockpitSummary(review, receipt) {
     && receipt.sourceHeadMatchesProduction === true
     && asString(receiptProductionBuild.environment) === "production"
     && receiptRowsPass
-    && asString(receiptVerification.schemaVersion) === "safeclaw-document-editorial-review-receipt/v1"
+    && asString(receiptVerification.schemaVersion) === "safeclaw-document-editorial-review-receipt/v2"
     && asNumber(receiptVerification.documentCount) === 12
     && asNumber(receiptVerification.uniqueDocumentKeyCount) === 12
     && asNumber(receiptVerification.reviewerCheckCount) === 5
     && receiptVerification.checksComplete === true
     && receiptVerification.fingerprintsCurrent === true
+    && receiptVerification.findingsBound === true
+    && asString(receiptVerification.editorialFindingsFingerprint).length > 0
+    && asNumber(receiptVerification.editorialFindingCount) > 0
+    && receiptVerification.editorialFindingIdsRecorded === true
+    && receiptVerification.editorialFindingCategoriesReconcile === true
     && asNumber(receiptVerification.apiRequestCount) === 0
     && receiptCompletion.localChecklistCompleted === true
+    && receiptCompletion.editorialFindingsReviewed === true
     && receiptCompletion.reviewerSelfAttested === true
     && receiptCompletion.reviewerIdentityVerified === false
     && receiptCompletion.serverRecorded === false
@@ -460,6 +466,10 @@ function documentEditorialReviewCockpitSummary(review, receipt) {
     receiptDocumentCount: asNumber(receiptVerification.documentCount),
     receiptUniqueDocumentKeyCount: asNumber(receiptVerification.uniqueDocumentKeyCount),
     receiptReviewerCheckCount: asNumber(receiptVerification.reviewerCheckCount),
+    receiptFindingsBound: receiptVerification.findingsBound === true,
+    receiptEditorialFindingCount: asNumber(receiptVerification.editorialFindingCount),
+    receiptEditorialFindingsFingerprintRecorded: asString(receiptVerification.editorialFindingsFingerprint).length > 0,
+    receiptEditorialFindingsReviewed: receiptCompletion.editorialFindingsReviewed === true,
     receiptApiRequestCount: asNumber(receiptVerification.apiRequestCount),
     reviewerSelfAttested: receiptCompletion.reviewerSelfAttested === true,
     reviewerIdentityVerified: receiptCompletion.reviewerIdentityVerified === true,
@@ -1672,7 +1682,7 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Live geometry: pass=${rollup.documentEditorialReviewCockpit.livePassed}/4, fail=${rollup.documentEditorialReviewCockpit.liveFailed}; documents/checks=${rollup.documentEditorialReviewCockpit.canonicalDocumentCount}/${rollup.documentEditorialReviewCockpit.reviewerCheckCount}; desktop/mobile zones=${rollup.documentEditorialReviewCockpit.desktopZones}/${rollup.documentEditorialReviewCockpit.mobileColumns}`,
     `- Keyboard and screen reader: cases=${rollup.documentEditorialReviewCockpit.accessibilityRowsPassed}/4; roving tabs=${rollup.documentEditorialReviewCockpit.keyboardRovingTabNavigation}; labelled tabpanel=${rollup.documentEditorialReviewCockpit.screenReaderTabPanelContract}; Escape focus restore=${rollup.documentEditorialReviewCockpit.escapeRestoresLaunchFocus}; cockpit ready=${rollup.documentEditorialReviewCockpit.cockpitReady}`,
     `- Human review completed: ${rollup.documentEditorialReviewCockpit.humanReviewCompleted}; broad human wording review required: ${rollup.documentEditorialReviewCockpit.broadHumanWordingReviewRequired}`,
-    `- Local review receipt: verdict=${rollup.documentEditorialReviewCockpit.receiptVerdict || "missing"}; ready=${rollup.documentEditorialReviewCockpit.receiptReady}; locked cases=${rollup.documentEditorialReviewCockpit.receiptLockedCases}/2; documents/checks=${rollup.documentEditorialReviewCockpit.receiptUniqueDocumentKeyCount}/${rollup.documentEditorialReviewCockpit.receiptReviewerCheckCount}; API requests=${rollup.documentEditorialReviewCockpit.receiptApiRequestCount}`,
+    `- Local review receipt: verdict=${rollup.documentEditorialReviewCockpit.receiptVerdict || "missing"}; ready=${rollup.documentEditorialReviewCockpit.receiptReady}; locked cases=${rollup.documentEditorialReviewCockpit.receiptLockedCases}/2; documents/checks=${rollup.documentEditorialReviewCockpit.receiptUniqueDocumentKeyCount}/${rollup.documentEditorialReviewCockpit.receiptReviewerCheckCount}; findings bound/count/reviewed=${rollup.documentEditorialReviewCockpit.receiptFindingsBound}/${rollup.documentEditorialReviewCockpit.receiptEditorialFindingCount}/${rollup.documentEditorialReviewCockpit.receiptEditorialFindingsReviewed}; API requests=${rollup.documentEditorialReviewCockpit.receiptApiRequestCount}`,
     `- Receipt boundary: reviewer self-attested=${rollup.documentEditorialReviewCockpit.reviewerSelfAttested}; identity verified=${rollup.documentEditorialReviewCockpit.reviewerIdentityVerified}; server recorded=${rollup.documentEditorialReviewCockpit.serverRecorded}; approval granted=${rollup.documentEditorialReviewCockpit.approvalGranted}; proves human identity=${rollup.documentEditorialReviewCockpit.localReceiptProvesHumanIdentity}`,
     `- Mutations DB/provider/Share/vector/wiki/KOSHA: ${rollup.documentEditorialReviewCockpit.dbMutationPerformed}/${rollup.documentEditorialReviewCockpit.providerDispatchCalled}/${rollup.documentEditorialReviewCockpit.shareSessionCreated}/${rollup.documentEditorialReviewCockpit.vectorRuntimeCalled}/${rollup.documentEditorialReviewCockpit.wikiPublished}/${rollup.documentEditorialReviewCockpit.koshaRegistryMutationPerformed}; exact saved Share: ${rollup.documentEditorialReviewCockpit.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "- Boundary: this proves a bounded, local, stale-aware human-review workflow and fail-closed self-attested JSON receipt exist; it does not prove reviewer identity, server recording, completed human review, or approval.",

@@ -72,6 +72,29 @@
     "originalBaselineRewritten": false,
     "detail": "The shared admission helper and knowledge-generation cancellation path changed in later bounded security waves. Current regression coverage re-proves the original cancellation, distributed export concurrency, and safety-reference deadline contracts without rewriting the sealed scan or claiming the corrected full-repository scan is complete."
   },
+  "latestPathCompatibility": {
+    "verdict": "PASS_LIVE_PRODUCTION_CURRENT_SEARCH_KOSHA_COMPATIBILITY",
+    "sourceHead": "bea397a43255bcd8ac354252c5ef89898ab30ec9",
+    "productionCommit": "bea397a43255bcd8ac354252c5ef89898ab30ec9",
+    "changedGovernedPaths": [
+      "lib/search.ts"
+    ],
+    "focusedVitest": {
+      "files": 14,
+      "tests": 245,
+      "failed": 0
+    },
+    "fullCi": {
+      "runId": 31967581366,
+      "filesPassed": 249,
+      "testsPassed": 2927,
+      "failed": 0
+    },
+    "noMutation": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "originalBaselineRewritten": false,
+    "detail": "Current production changed lib/search.ts to keep internal KOSHA grounding data available to generation and citation validation while preserving the bounded public response. Fourteen focused and adjacent files re-prove cancellation, export admission, safety-reference deadlines, and KOSHA grounding; the current full CI run remains green without rewriting the sealed scan."
+  },
   "remainingSecurityWork": [],
   "boundaries": {
     "dbMutationPerformed": false,

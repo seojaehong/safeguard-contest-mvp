@@ -4287,21 +4287,29 @@ function evaluateDocumentEditorialReviewCockpitGate(rootDir) {
     && receiptAcceptance.reviewerRequired === true
     && receiptAcceptance.receiptLockedBeforeAllDocuments === true
     && receiptAcceptance.currentTextFingerprintRequired === true
+    && receiptAcceptance.editorialFindingsFingerprintRequired === true
+    && receiptAcceptance.editorialFindingReviewRequired === true
     && receiptAcceptance.localDownloadOnly === true
     && receiptAcceptance.reviewerIdentityVerified === false
     && receiptAcceptance.serverRecorded === false
     && receiptAcceptance.approvalGranted === false
-    && readString(receiptVerification.schemaVersion) === "safeclaw-document-editorial-review-receipt/v1"
+    && readString(receiptVerification.schemaVersion) === "safeclaw-document-editorial-review-receipt/v2"
     && readNumber(receiptVerification.documentCount) === 12
     && readNumber(receiptVerification.uniqueDocumentKeyCount) === 12
     && readNumber(receiptVerification.reviewerCheckCount) === 5
     && receiptVerification.checksComplete === true
     && receiptVerification.fingerprintsCurrent === true
+    && receiptVerification.findingsBound === true
+    && readString(receiptVerification.editorialFindingsFingerprint).length > 0
+    && readNumber(receiptVerification.editorialFindingCount) > 0
+    && receiptVerification.editorialFindingIdsRecorded === true
+    && receiptVerification.editorialFindingCategoriesReconcile === true
     && receiptVerification.reviewerRecorded === true
     && receiptVerification.reviewedAtRecorded === true
     && receiptVerification.generationFingerprintRecorded === true
     && readNumber(receiptVerification.apiRequestCount) === 0
     && receiptCompletion.localChecklistCompleted === true
+    && receiptCompletion.editorialFindingsReviewed === true
     && receiptCompletion.reviewerSelfAttested === true
     && receiptCompletion.reviewerIdentityVerified === false
     && receiptCompletion.serverRecorded === false
@@ -4330,7 +4338,7 @@ function evaluateDocumentEditorialReviewCockpitGate(rootDir) {
       label: "Live 12-document human editorial review cockpit",
       state: "proven",
       evidencePath,
-      detail: "Live Day/Night desktop-short 1440x723 and mobile-short 390x723 pass 4/4 with 12 canonical documents including riskAssessmentDraft, five explicit reviewer checks, a three-zone desktop and one-column mobile cockpit, unchanged page-body height, local-scroll containment, separate stale-aware review storage, zero API calls, and no current-workpack mutation. All four cases also prove deterministic close-button entry focus, one selected and tabbable document tab, Arrow/Home roving navigation, a labelled tabpanel, and Escape focus restoration. A separate live desktop/mobile receipt contract proves a fail-closed local JSON export for 12 documents x 5 checks, current text fingerprints, a recorded self-attested reviewer, and zero API calls. It does not prove reviewer identity, server recording, completed human review, or approval: automatedInteractionOnly=true, humanReviewCompleted=false, broad human wording review remains required, and exact saved Share remains MISSING_EVIDENCE.",
+      detail: "Live Day/Night desktop-short 1440x723 and mobile-short 390x723 pass 4/4 with 12 canonical documents including riskAssessmentDraft, five explicit reviewer checks, a three-zone desktop and one-column mobile cockpit, unchanged page-body height, local-scroll containment, separate stale-aware review storage, zero API calls, and no current-workpack mutation. All four cases also prove deterministic close-button entry focus, one selected and tabbable document tab, Arrow/Home roving navigation, a labelled tabpanel, and Escape focus restoration. A separate live desktop/mobile receipt contract proves a fail-closed local JSON export for 12 documents x 5 checks with current text fingerprints plus bound editorial finding IDs, categories, and fingerprints, a recorded self-attested reviewer, and zero API calls. It does not prove reviewer identity, server recording, completed human review, or approval: automatedInteractionOnly=true, humanReviewCompleted=false, broad human wording review remains required, and exact saved Share remains MISSING_EVIDENCE.",
       nextActions: [
         "Use the cockpit for the separate human editorial review without treating automated geometry as human completion.",
         "Keep exact saved Share and every DB/provider/vector/wiki/KOSHA mutation behind their existing approval boundaries.",
@@ -4343,7 +4351,7 @@ function evaluateDocumentEditorialReviewCockpitGate(rootDir) {
     label: "Live 12-document human editorial review cockpit",
     state: "contradicted",
     evidencePath,
-    detail: `Cockpit verdict=${readString(report.verdict) || "unknown"}, live=${readNumber(report.pass)}/4, rowsPass=${rowsPass}, accessibilityPass=${accessibilityPass}, geometryPass=${geometryPass}, contractPass=${contractPass}, receiptPass=${receiptPass}, receiptHumanReviewCompleted=${receiptReviewBoundary.humanReviewCompleted === true}, receiptReviewerIdentityVerified=${receiptCompletion.reviewerIdentityVerified === true}, receiptServerRecorded=${receiptCompletion.serverRecorded === true}, receiptApprovalGranted=${receiptCompletion.approvalGranted === true}, sourceMatchesProduction=${sourceMatchesProduction}, humanReviewCompleted=${reviewBoundary.humanReviewCompleted === true}, exactShare=${readString(mutationBoundary.exactSavedShareVerdict) || "unknown"}, receiptExactShare=${readString(receiptMutationBoundary.exactSavedShareVerdict) || "unknown"}, noMutation=${noMutation}, receiptNoMutation=${receiptNoMutation}.`,
+    detail: `Cockpit verdict=${readString(report.verdict) || "unknown"}, live=${readNumber(report.pass)}/4, rowsPass=${rowsPass}, accessibilityPass=${accessibilityPass}, geometryPass=${geometryPass}, contractPass=${contractPass}, receiptPass=${receiptPass}, receiptFindingsBound=${receiptVerification.findingsBound === true}, receiptFindingCount=${readNumber(receiptVerification.editorialFindingCount)}, receiptFindingsReviewed=${receiptCompletion.editorialFindingsReviewed === true}, receiptHumanReviewCompleted=${receiptReviewBoundary.humanReviewCompleted === true}, receiptReviewerIdentityVerified=${receiptCompletion.reviewerIdentityVerified === true}, receiptServerRecorded=${receiptCompletion.serverRecorded === true}, receiptApprovalGranted=${receiptCompletion.approvalGranted === true}, sourceMatchesProduction=${sourceMatchesProduction}, humanReviewCompleted=${reviewBoundary.humanReviewCompleted === true}, exactShare=${readString(mutationBoundary.exactSavedShareVerdict) || "unknown"}, receiptExactShare=${readString(receiptMutationBoundary.exactSavedShareVerdict) || "unknown"}, noMutation=${noMutation}, receiptNoMutation=${receiptNoMutation}.`,
     nextActions: ["Restore the fail-closed review, accessibility, geometry, source/live, and no-mutation contracts before claiming the cockpit proven."],
   });
 }
@@ -6336,6 +6344,9 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
   const currentPathCompatibility = isRecord(report.currentPathCompatibility)
     ? report.currentPathCompatibility
     : null;
+  const latestPathCompatibility = isRecord(report.latestPathCompatibility)
+    ? report.latestPathCompatibility
+    : null;
   const boundaries = isRecord(report.boundaries) ? report.boundaries : {};
   const sourceHead = readString(report.sourceHead);
   const remediations = Array.isArray(report.remediations) ? report.remediations.filter(isRecord) : [];
@@ -6374,7 +6385,37 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     && readString(currentPathCompatibility.exactSavedShareVerdict) === "MISSING_EVIDENCE"
     && currentPathCompatibility.originalBaselineRewritten === false
   );
-  const productPathsCurrent = isEvidenceCurrentForPaths(rootDir, compatibilitySourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS)
+  const latestCompatibilityFocused = latestPathCompatibility && isRecord(latestPathCompatibility.focusedVitest)
+    ? latestPathCompatibility.focusedVitest
+    : {};
+  const latestCompatibilityCi = latestPathCompatibility && isRecord(latestPathCompatibility.fullCi)
+    ? latestPathCompatibility.fullCi
+    : {};
+  const latestCompatibilitySourceHead = latestPathCompatibility
+    ? readString(latestPathCompatibility.sourceHead)
+    : "";
+  const latestCompatibilityPass = latestPathCompatibility === null || (
+    readString(latestPathCompatibility.verdict) === "PASS_LIVE_PRODUCTION_CURRENT_SEARCH_KOSHA_COMPATIBILITY"
+    && latestCompatibilitySourceHead.length > 0
+    && latestCompatibilitySourceHead === readString(latestPathCompatibility.productionCommit)
+    && Array.isArray(latestPathCompatibility.changedGovernedPaths)
+    && latestPathCompatibility.changedGovernedPaths.length === 1
+    && latestPathCompatibility.changedGovernedPaths[0] === "lib/search.ts"
+    && readNumber(latestCompatibilityFocused.files) === 14
+    && readNumber(latestCompatibilityFocused.tests) === 245
+    && readNumber(latestCompatibilityFocused.failed) === 0
+    && readNumber(latestCompatibilityCi.filesPassed) === 249
+    && readNumber(latestCompatibilityCi.testsPassed) === 2927
+    && readNumber(latestCompatibilityCi.failed) === 0
+    && latestPathCompatibility.noMutation === true
+    && readString(latestPathCompatibility.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && latestPathCompatibility.originalBaselineRewritten === false
+  );
+  const latestCompatibilityCurrent = latestPathCompatibility !== null
+    && latestCompatibilityPass
+    && isEvidenceCurrentForPaths(rootDir, latestCompatibilitySourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS);
+  const productPathsCurrent = latestCompatibilityCurrent
+    || isEvidenceCurrentForPaths(rootDir, compatibilitySourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     || isSecurityUpstreamTransportCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     || isSecuritySafetyReferenceSurfaceCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
@@ -6385,6 +6426,7 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     && sourceHead === readString(deployment.productionCommit)
     && isGitAncestor(rootDir, sourceHead)
     && compatibilityPass
+    && latestCompatibilityPass
     && productPathsCurrent
     && readString(deployment.branch) === "master"
     && readString(deployment.environment) === "production"
@@ -6418,8 +6460,8 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     state: pass ? "proven" : "contradicted",
     evidencePath,
     detail: pass
-      ? `The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its ${readNumber(compatibilityFocused.files)}/${readNumber(compatibilityFocused.tests)} compatibility check, and the current 23 files / 215 tests public-admission companion. This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.`
-      : `Security follow-up verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceHead.length > 0 && sourceHead === readString(deployment.productionCommit)}, compatibilityPass=${compatibilityPass}, productPathsCurrent=${productPathsCurrent}, findings=${readNumber(scan.sealedFindingCount)}, baseline=${readNumber(scan.immutableOriginalBaselineFindingCount)}, deferred=${readNumber(scan.deferredCandidateCount)}, remediations=${remediations.length}, tests=${readNumber(focused.tests)}, compatibilityTests=${readNumber(compatibilityFocused.tests)}, liveProviderProbe=${deployment.liveProviderCancellationProbeExecuted === true}, baselineRewritten=${boundaries.originalBaselineRewritten === true}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+      ? `The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its ${readNumber(compatibilityFocused.files)}/${readNumber(compatibilityFocused.tests)} compatibility check, and the latest search/KOSHA compatibility receipt (${readNumber(latestCompatibilityFocused.files)} files / ${readNumber(latestCompatibilityFocused.tests)} tests; full CI ${readNumber(latestCompatibilityCi.filesPassed)} files / ${readNumber(latestCompatibilityCi.testsPassed)} tests). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.`
+      : `Security follow-up verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceHead.length > 0 && sourceHead === readString(deployment.productionCommit)}, compatibilityPass=${compatibilityPass}, latestCompatibilityPass=${latestCompatibilityPass}, latestCompatibilityCurrent=${latestCompatibilityCurrent}, productPathsCurrent=${productPathsCurrent}, findings=${readNumber(scan.sealedFindingCount)}, baseline=${readNumber(scan.immutableOriginalBaselineFindingCount)}, deferred=${readNumber(scan.deferredCandidateCount)}, remediations=${remediations.length}, tests=${readNumber(focused.tests)}, compatibilityTests=${readNumber(compatibilityFocused.tests)}, latestCompatibilityTests=${readNumber(latestCompatibilityFocused.tests)}, liveProviderProbe=${deployment.liveProviderCancellationProbeExecuted === true}, baselineRewritten=${boundaries.originalBaselineRewritten === true}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
           "Keep the immutable baseline and two deferred candidates visible in future security review; do not convert this scoped remediation into a security-complete claim.",
