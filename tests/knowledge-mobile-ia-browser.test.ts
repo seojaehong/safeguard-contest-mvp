@@ -47,10 +47,16 @@ describe("knowledge mobile information architecture", () => {
     for (const theme of ["day", "night"] as const) {
       const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
       const browserErrors: string[] = [];
+      const httpErrors: string[] = [];
       page.on("console", (message) => {
         if (message.type() === "error") browserErrors.push(message.text());
       });
       page.on("pageerror", (error) => browserErrors.push(error.message));
+      page.on("response", (response) => {
+        if (response.status() >= 400) {
+          httpErrors.push(`HTTP ${response.status()} ${response.url()}`);
+        }
+      });
 
       try {
         await page.goto(`${baseUrl}/knowledge?theme=${theme}`, { waitUntil: "networkidle" });
@@ -126,6 +132,7 @@ describe("knowledge mobile information architecture", () => {
         expect(switchedLayout.panelTop, theme).toBeGreaterThanOrEqual(0);
         expect(switchedLayout.panelTop, theme).toBeLessThan(844);
         expect(browserErrors, theme).toEqual([]);
+        expect(httpErrors, theme).toEqual([]);
       } finally {
         await page.close();
       }

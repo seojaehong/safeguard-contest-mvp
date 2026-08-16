@@ -19984,6 +19984,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-document-review-findings article small,
 .safeclaw-document-review-findings > label {
   font-size: var(--text-caption);
+  font-weight: 600;
   line-height: var(--leading-caption);
   letter-spacing: var(--tracking-body);
 }
