@@ -4,8 +4,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
-const artifactDir = path.dirname(fileURLToPath(import.meta.url));
-const rootDir = path.resolve(artifactDir, "..", "..");
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const artifactDir = path.resolve(process.env.SAFECLAW_RECEIPT_OUT_DIR || scriptDir);
+const rootDir = path.resolve(scriptDir, "..", "..");
 const baseUrl = (process.env.SAFECLAW_BASE_URL || "https://www.safeclaw.kr").replace(/\/$/u, "");
 const sourceHead = execFileSync("git", ["rev-parse", "HEAD"], { cwd: rootDir, encoding: "utf8" }).trim();
 const isLive = /^https:\/\//u.test(baseUrl);
@@ -95,7 +96,11 @@ async function verifyReceipt(browser) {
   const tabs = dialog.getByRole("tablist", { name: "검토 문서 선택" }).getByRole("tab");
   for (let index = 0; index < 12; index += 1) {
     await tabs.nth(index).click();
-    for (const checkbox of await dialog.getByRole("checkbox").all()) await checkbox.check();
+    const checklistCheckboxes = dialog.locator(".safeclaw-document-review-checks").getByRole("checkbox");
+    if (await checklistCheckboxes.count() !== 5) throw new Error("document-review-checklist-count-mismatch");
+    for (const checkbox of await checklistCheckboxes.all()) await checkbox.check();
+    const findings = dialog.getByTestId("document-editorial-findings");
+    if (await findings.count()) await findings.getByRole("checkbox").check();
     await dialog.getByRole("button", { name: "검토 완료로 표시" }).click();
   }
   await dialog.getByLabel(/사람 검토 12\/12종 완료/u).waitFor({ state: "visible" });
@@ -118,6 +123,18 @@ async function verifyReceipt(browser) {
   const fingerprintsCurrent = documents.every((document) => (
     document.reviewedTextFingerprint === document.currentTextFingerprint
   ));
+  const findingsBound = documents.every((document) => (
+    document.findingsReviewed === true
+    && typeof document.editorialFindingsFingerprint === "string"
+    && document.editorialFindingsFingerprint.length > 0
+    && Array.isArray(document.editorialFindingIds)
+    && Object.values(document.editorialFindingCounts || {}).reduce((sum, count) => sum + Number(count || 0), 0)
+      === document.editorialFindingIds.length
+  ));
+  const editorialFindingCount = Number(payload.editorialFindingCount || 0);
+  const editorialFindingIds = Array.isArray(payload.editorialFindingIds) ? payload.editorialFindingIds : [];
+  const editorialFindingCategoryTotal = Object.values(payload.editorialFindingCounts || {})
+    .reduce((sum, count) => sum + Number(count || 0), 0);
   const result = {
     schemaVersion: payload.schemaVersion,
     reviewerRecorded: payload.reviewer === "자동화 검증용 검토자",
@@ -128,6 +145,11 @@ async function verifyReceipt(browser) {
     reviewerCheckCount: payload.reviewerCheckCount,
     checksComplete,
     fingerprintsCurrent,
+    findingsBound,
+    editorialFindingsFingerprint: payload.editorialFindingsFingerprint,
+    editorialFindingCount,
+    editorialFindingIdsRecorded: editorialFindingIds.length === editorialFindingCount,
+    editorialFindingCategoriesReconcile: editorialFindingCategoryTotal === editorialFindingCount,
     reviewCompletion: payload.reviewCompletion,
     mutationBoundary: payload.mutationBoundary,
     apiRequestCount: apiRequests.length,
@@ -152,7 +174,7 @@ function passes(report) {
   ));
   const receipt = report.receiptVerification;
   return lockedPass
-    && receipt.schemaVersion === "safeclaw-document-editorial-review-receipt/v1"
+    && receipt.schemaVersion === "safeclaw-document-editorial-review-receipt/v2"
     && receipt.reviewerRecorded
     && receipt.reviewedAtRecorded
     && receipt.generationFingerprintRecorded
@@ -161,7 +183,14 @@ function passes(report) {
     && receipt.reviewerCheckCount === 5
     && receipt.checksComplete
     && receipt.fingerprintsCurrent
+    && receipt.findingsBound
+    && typeof receipt.editorialFindingsFingerprint === "string"
+    && receipt.editorialFindingsFingerprint.length > 0
+    && receipt.editorialFindingCount > 0
+    && receipt.editorialFindingIdsRecorded
+    && receipt.editorialFindingCategoriesReconcile
     && receipt.reviewCompletion?.localChecklistCompleted === true
+    && receipt.reviewCompletion?.editorialFindingsReviewed === true
     && receipt.reviewCompletion?.reviewerSelfAttested === true
     && receipt.reviewCompletion?.reviewerIdentityVerified === false
     && receipt.reviewCompletion?.serverRecorded === false
@@ -185,7 +214,7 @@ try {
   results.push(await measureLockedCase(browser, { width: 390, height: 723 }, "mobile-390x723"));
   const receiptVerification = await verifyReceipt(browser);
   const report = {
-    schemaVersion: "safeclaw-document-editorial-review-receipt-evidence/v1",
+    schemaVersion: "safeclaw-document-editorial-review-receipt-evidence/v2",
     generatedAt: new Date().toISOString(),
     mode: isLive ? "live-production" : "current-source-local-production",
     baseUrl,
@@ -199,6 +228,8 @@ try {
       reviewerRequired: true,
       receiptLockedBeforeAllDocuments: true,
       currentTextFingerprintRequired: true,
+      editorialFindingsFingerprintRequired: true,
+      editorialFindingReviewRequired: true,
       bodyHeightUnchanged: true,
       desktopAndMobileContained: true,
       localDownloadOnly: true,
@@ -236,7 +267,7 @@ try {
     ? (isLive ? "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT" : "PASS_CURRENT_SOURCE_LOCAL_DOCUMENT_EDITORIAL_REVIEW_RECEIPT")
     : "RED_DOCUMENT_EDITORIAL_REVIEW_RECEIPT";
   await writeFile(path.join(artifactDir, "report.json"), `${JSON.stringify(report, null, 2)}\n`, "utf8");
-  const markdown = `# Document editorial review receipt\n\nVerdict: \`${report.verdict}\`\n\nSource: \`${sourceHead}\`\n\n- Locked geometry: ${results.filter((result) => result.receiptLockedAtZero).length}/${results.length}\n- Receipt documents/checks: ${receiptVerification.uniqueDocumentKeyCount}/${receiptVerification.reviewerCheckCount}\n- API requests during local review/export: ${receiptVerification.apiRequestCount}\n- Human review completed by this automated probe: \`false\`\n- Reviewer identity verified or server recorded: \`false / false\`\n- Exact saved Share: \`MISSING_EVIDENCE\`\n\nThis receipt is a local self-attested audit export. It does not approve provider dispatch, database writes, wiki publication, vector runtime, KOSHA registry promotion, or an exact saved Share session.\n`;
+  const markdown = `# Document editorial review receipt\n\nVerdict: \`${report.verdict}\`\n\nSource: \`${sourceHead}\`\n\n- Locked geometry: ${results.filter((result) => result.receiptLockedAtZero).length}/${results.length}\n- Receipt documents/checks: ${receiptVerification.uniqueDocumentKeyCount}/${receiptVerification.reviewerCheckCount}\n- Editorial findings bound to receipt: ${receiptVerification.editorialFindingCount}; fingerprint recorded: ${Boolean(receiptVerification.editorialFindingsFingerprint)}\n- API requests during local review/export: ${receiptVerification.apiRequestCount}\n- Human review completed by this automated probe: \`false\`\n- Reviewer identity verified or server recorded: \`false / false\`\n- Exact saved Share: \`MISSING_EVIDENCE\`\n\nThis receipt is a local self-attested audit export. It does not approve provider dispatch, database writes, wiki publication, vector runtime, KOSHA registry promotion, or an exact saved Share session.\n`;
   await writeFile(path.join(artifactDir, "report.md"), markdown, "utf8");
   if (!pass) process.exitCode = 1;
 } finally {

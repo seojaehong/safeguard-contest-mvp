@@ -1,4 +1,7 @@
 import { readFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
 import ExcelJS from "exceljs";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import type { Browser, Download, Page } from "playwright";
@@ -258,9 +261,13 @@ describe("documents editor layout", () => {
       expect(await receiptButton.isDisabled()).toBe(true);
       await dialog.getByRole("textbox", { name: "검토자" }).fill("현장 검토자");
 
-      const checkboxes = dialog.getByRole("checkbox");
-      expect(await checkboxes.count()).toBe(5);
-      for (const checkbox of await checkboxes.all()) await checkbox.check();
+      const checklistCheckboxes = dialog.locator(".safeclaw-document-review-checks").getByRole("checkbox");
+      expect(await checklistCheckboxes.count()).toBe(5);
+      for (const checkbox of await checklistCheckboxes.all()) await checkbox.check();
+      const findingCheckbox = dialog.getByTestId("document-editorial-findings").getByRole("checkbox");
+      expect(await findingCheckbox.count()).toBe(1);
+      expect(await dialog.getByRole("button", { name: "검토 완료로 표시" }).isDisabled()).toBe(true);
+      await findingCheckbox.check();
       await dialog.getByRole("button", { name: "검토 완료로 표시" }).click();
       await dialog.getByLabel(/사람 검토 1\/12종 완료/u).waitFor({ state: "visible" });
       expect(await receiptButton.isDisabled()).toBe(true);
@@ -315,13 +322,29 @@ describe("documents editor layout", () => {
 
     const tabs = dialog.getByRole("tablist", { name: "검토 문서 선택" }).getByRole("tab");
     expect(await tabs.count()).toBe(12);
+    let findingReviewDocumentCount = 0;
+    const reviewedTexts: Record<string, string> = {};
     for (let index = 0; index < 12; index += 1) {
-      await tabs.nth(index).click();
-      const checkboxes = dialog.getByRole("checkbox");
+      const tab = tabs.nth(index);
+      await tab.click();
+      const documentKey = await tab.getAttribute("data-review-document-key");
+      if (!documentKey) throw new Error(`Document review tab ${index} has no document key`);
+      reviewedTexts[documentKey] = await dialog.getByTestId("document-editorial-review-copy").innerText();
+      const checkboxes = dialog.locator(".safeclaw-document-review-checks").getByRole("checkbox");
       expect(await checkboxes.count()).toBe(5);
       for (const checkbox of await checkboxes.all()) await checkbox.check();
+      const findings = dialog.getByTestId("document-editorial-findings");
+      if (await findings.count()) {
+        findingReviewDocumentCount += 1;
+        expect(await findings.getByRole("listitem").count()).toBeGreaterThan(0);
+        const findingCheck = findings.getByRole("checkbox");
+        expect(await findingCheck.isChecked()).toBe(false);
+        expect(await dialog.getByRole("button", { name: "검토 완료로 표시" }).isDisabled()).toBe(true);
+        await findingCheck.check();
+      }
       await dialog.getByRole("button", { name: "검토 완료로 표시" }).click();
     }
+    expect(findingReviewDocumentCount).toBeGreaterThan(0);
 
     await dialog.getByLabel(/사람 검토 12\/12종 완료/u).waitFor({ state: "visible" });
     const receiptButton = dialog.getByTestId("document-editorial-review-receipt-download");
@@ -338,24 +361,77 @@ describe("documents editor layout", () => {
       generationFingerprint: string;
       canonicalDocumentCount: number;
       reviewerCheckCount: number;
+      editorialFindingsFingerprint: string;
+      editorialFindingCount: number;
+      editorialFindingIds: string[];
+      editorialFindingCounts: Record<string, number>;
       reviewCompletion: Record<string, boolean>;
       documents: Array<{
         key: string;
         completedAt: string;
         reviewedTextFingerprint: string;
         currentTextFingerprint: string;
+        findingsReviewed: boolean;
+        editorialFindingsFingerprint: string;
+        editorialFindingIds: string[];
+        editorialFindingCounts: Record<string, number>;
         checks: Record<string, boolean>;
       }>;
       mutationBoundary: Record<string, boolean | string>;
     };
-    expect(receipt.schemaVersion).toBe("safeclaw-document-editorial-review-receipt/v1");
+    expect(receipt.schemaVersion).toBe("safeclaw-document-editorial-review-receipt/v2");
     expect(receipt.reviewer).toBe("안전관리자 홍길동");
     expect(receipt.reviewedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/u);
     expect(receipt.generationFingerprint.length).toBeGreaterThan(0);
     expect(receipt.canonicalDocumentCount).toBe(12);
     expect(receipt.reviewerCheckCount).toBe(5);
+    expect(receipt.editorialFindingsFingerprint.length).toBeGreaterThan(0);
+    expect(receipt.editorialFindingCount).toBeGreaterThan(0);
+    expect(receipt.editorialFindingIds).toHaveLength(receipt.editorialFindingCount);
+    expect(Object.values(receipt.editorialFindingCounts).reduce((sum, count) => sum + count, 0)).toBe(receipt.editorialFindingCount);
+    const sample = buildSampleWorkpack();
+    const runnerUrl = pathToFileURL(path.resolve(process.cwd(), "scripts/safeclaw_editorial_review_runner.mjs")).href;
+    const runnerSource = `
+      import { reviewEditorialPayload } from ${JSON.stringify(runnerUrl)};
+      const payload = ${JSON.stringify({ deliverables: reviewedTexts })};
+      const result = reviewEditorialPayload(payload, ${JSON.stringify(sample.question)}, {});
+      process.stdout.write(JSON.stringify({
+        exactLineOveruseCount: result.exactLineOveruseCount,
+        nearDuplicateLineOveruseCount: result.nearDuplicateLineOveruseCount,
+        duplicateReviewCategoryCounts: result.duplicateReviewCategoryCounts,
+      }));
+    `;
+    const runnerResult = spawnSync(process.execPath, ["--input-type=module", "-e", runnerSource], {
+      cwd: process.cwd(),
+      encoding: "utf8"
+    });
+    if (runnerResult.status !== 0) {
+      throw new Error(`Editorial parity runner failed: ${runnerResult.stderr || runnerResult.stdout}`);
+    }
+    const canonicalFindings = JSON.parse(runnerResult.stdout) as {
+      exactLineOveruseCount: number;
+      nearDuplicateLineOveruseCount: number;
+      duplicateReviewCategoryCounts: {
+        exact: Record<string, number>;
+        near: Record<string, number>;
+      };
+    };
+    const canonicalCategoryCounts = [
+      canonicalFindings.duplicateReviewCategoryCounts.exact,
+      canonicalFindings.duplicateReviewCategoryCounts.near
+    ].reduce<Record<string, number>>((combined, counts) => {
+      Object.entries(counts).forEach(([category, count]) => {
+        combined[category] = (combined[category] || 0) + count;
+      });
+      return combined;
+    }, {});
+    expect(receipt.editorialFindingCounts).toEqual(canonicalCategoryCounts);
+    expect(receipt.editorialFindingCount).toBe(
+      canonicalFindings.exactLineOveruseCount + canonicalFindings.nearDuplicateLineOveruseCount
+    );
     expect(receipt.reviewCompletion).toEqual({
       localChecklistCompleted: true,
+      editorialFindingsReviewed: true,
       reviewerSelfAttested: true,
       reviewerIdentityVerified: false,
       serverRecorded: false,
@@ -366,6 +442,9 @@ describe("documents editor layout", () => {
     expect(receipt.documents.every((document) => (
       document.completedAt.length > 0
       && document.reviewedTextFingerprint === document.currentTextFingerprint
+      && document.findingsReviewed === true
+      && document.editorialFindingsFingerprint.length > 0
+      && document.editorialFindingIds.length === Object.values(document.editorialFindingCounts).reduce((sum, count) => sum + count, 0)
       && Object.values(document.checks).filter(Boolean).length === 5
     ))).toBe(true);
     expect(receipt.mutationBoundary).toMatchObject({

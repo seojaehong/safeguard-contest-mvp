@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { createClient, type Session } from "@supabase/supabase-js";
 import { CitationList } from "@/components/CitationList";
 import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
@@ -203,9 +203,26 @@ const editorialReviewChecks = [
   { key: "wording", label: "중복·템플릿 잔재·미완성 문구 없음" }
 ] as const;
 
+const editorialCanonicalDocumentKeys: DocumentKey[] = [
+  "workpackSummaryDraft",
+  "riskAssessmentDraft",
+  "workPlanDraft",
+  "workPermitDraft",
+  "tbmBriefing",
+  "tbmLogDraft",
+  "safetyEducationRecordDraft",
+  "emergencyResponseDraft",
+  "photoEvidenceDraft",
+  "foreignWorkerBriefing",
+  "foreignWorkerTransmission",
+  "kakaoMessage"
+];
+
 type EditorialReviewCheckKey = (typeof editorialReviewChecks)[number]["key"];
 type EditorialReviewEntry = {
   checks: Partial<Record<EditorialReviewCheckKey, boolean>>;
+  findingsReviewed: boolean;
+  reviewedFindingsFingerprint: string | null;
   note: string;
   completedAt: string | null;
   reviewedTextFingerprint: string | null;
@@ -220,12 +237,23 @@ type EditorialReviewReceiptDocument = {
   completedAt: string;
   reviewedTextFingerprint: string;
   currentTextFingerprint: string;
+  findingsReviewed: true;
+  editorialFindingsFingerprint: string;
+  editorialFindingIds: string[];
+  editorialFindingCounts: Partial<Record<EditorialFindingCategory, number>>;
   checks: Record<EditorialReviewCheckKey, true>;
   note: string;
 };
 
 function emptyEditorialReviewEntry(): EditorialReviewEntry {
-  return { checks: {}, note: "", completedAt: null, reviewedTextFingerprint: null };
+  return {
+    checks: {},
+    findingsReviewed: false,
+    reviewedFindingsFingerprint: null,
+    note: "",
+    completedAt: null,
+    reviewedTextFingerprint: null
+  };
 }
 
 function editorialTextFingerprint(text: string): string {
@@ -234,6 +262,183 @@ function editorialTextFingerprint(text: string): string {
     hash = Math.imul(hash ^ text.charCodeAt(index), 16777619);
   }
   return `${text.length}:${(hash >>> 0).toString(16)}`;
+}
+
+type EditorialFindingCategory =
+  | "generic-template-overuse"
+  | "legal-reference-consistency"
+  | "independent-document-context"
+  | "cross-document-hazard-consistency"
+  | "cross-document-control-consistency"
+  | "document-role-prefix-variant"
+  | "human-review-required";
+
+type EditorialDuplicateFinding = {
+  id: string;
+  kind: "exact" | "near";
+  category: EditorialFindingCategory;
+  documentKeys: DocumentKey[];
+  label: string;
+  excerpt: string;
+};
+
+const editorialFindingLabels: Record<EditorialFindingCategory, string> = {
+  "generic-template-overuse": "일반 템플릿 반복",
+  "legal-reference-consistency": "법령 근거 일관성",
+  "independent-document-context": "문서별 현장 맥락",
+  "cross-document-hazard-consistency": "위험요인 전달 일관성",
+  "cross-document-control-consistency": "안전조치 전달 일관성",
+  "document-role-prefix-variant": "문서 역할별 표현",
+  "human-review-required": "사람 판단 필요"
+};
+
+function normalizeEditorialLine(value: string): string {
+  return value.replace(/\s+/gu, " ").trim();
+}
+
+function splitEditorialReviewLines(value: string): string[] {
+  return value
+    .split(/\r?\n/gu)
+    .map((line) => normalizeEditorialLine(line.replace(/^\s*(?:[-*•]|\d+[.)])\s*/u, "")))
+    .filter((line) => line.length >= 28)
+    .filter((line) => !/^(?:문서명|현장명|회사명|작성일|작업일|작업명|목적|대상|장소)\s*[:：]/u.test(line));
+}
+
+function editorialLineTokens(value: string): Set<string> {
+  return new Set(
+    value.toLocaleLowerCase()
+      .replace(/[^\p{L}\p{N}\s]/gu, " ")
+      .split(/\s+/gu)
+      .filter((token) => token.length >= 2)
+  );
+}
+
+function editorialJaccard(left: Set<string>, right: Set<string>): number {
+  const union = new Set([...left, ...right]);
+  if (!union.size) return 0;
+  let intersection = 0;
+  left.forEach((token) => {
+    if (right.has(token)) intersection += 1;
+  });
+  return intersection / union.size;
+}
+
+function stripEditorialRolePrefix(value: string): string {
+  return normalizeEditorialLine(value)
+    .replace(/^[⚠️\s]*/u, "")
+    .replace(/^\[\d+\.\s*(.+)\]$/u, "$1")
+    .replace(/^(?:작업조건\s*판단|작업조건|기상\s*및\s*작업조건|TBM\s*조건확인|TBM\s*기록조건|작업\s*전\s*조건확인|허가\s*전\s*조건확인|교육\s*전\s*조건확인|비상대응\s*조건|촬영\s*확인조건|핵심\s*위험요인|핵심\s*위험|핵심위험|가장\s*큰\s*위험|유해·위험요인|위험요인\s*\d+|현재\s*안전조치|안전조치\s*\d+|조치내용|공정|작업구간|세부작업|단계별\s*안전조치|즉시\s*조치|필수조치|작업중지\s*기준|변경관리\s*확인)\s*[:：]\s*/u, "")
+    .toLocaleLowerCase();
+}
+
+function classifyEditorialExact(line: string): EditorialFindingCategory {
+  if (
+    /현장\s*조건\s*미지정.{0,30}작업\s*전\s*실제\s*환경\s*확인\s*필요/u.test(line)
+    || /현장\s*여건에\s*맞는\s*담당자.{0,80}전파\s*전\s*관리자가\s*확인/u.test(line)
+  ) return "generic-template-overuse";
+  if (/^(?:필수\s*안전조치\s*반영|관련\s*조문\s*확인)\s*[:：]/u.test(line)) {
+    return "legal-reference-consistency";
+  }
+  if (/^(?:작업조건|기상\s*및\s*작업조건)\s*[:：]/u.test(line)) {
+    return "independent-document-context";
+  }
+  if (/(?:확인|통제|차단|지정|작업중지|작업\s*보류|착용|분리|복창|가동)/u.test(line)) {
+    return "cross-document-control-consistency";
+  }
+  return "human-review-required";
+}
+
+function classifyEditorialNear(
+  left: { key: DocumentKey; line: string },
+  right: { key: DocumentKey; line: string }
+): EditorialFindingCategory {
+  const combined = `${left.line} ${right.line}`;
+  const pair = `${left.key}->${right.key}`;
+  if (
+    /작업조건|조건확인/u.test(combined)
+    && /^workpackSummaryDraft->(?:foreignWorkerBriefing|foreignWorkerTransmission|kakaoMessage)$/u.test(pair)
+  ) return "independent-document-context";
+  if (
+    /위험요인|위험\]/u.test(combined)
+    && /^(?:workpackSummaryDraft->safetyEducationRecordDraft|riskAssessmentDraft->(?:tbmBriefing|tbmLogDraft|photoEvidenceDraft))$/u.test(pair)
+  ) return "cross-document-hazard-consistency";
+  if (
+    /안전조치|조치내용|단계별\s*안전조치|즉시\s*조치|필수조치/u.test(combined)
+    && /^(?:riskAssessmentDraft->workPermitDraft|workPlanDraft->(?:safetyEducationRecordDraft|kakaoMessage)|workPermitDraft->(?:foreignWorkerBriefing|foreignWorkerTransmission|kakaoMessage))$/u.test(pair)
+  ) return "cross-document-control-consistency";
+  if (stripEditorialRolePrefix(left.line) === stripEditorialRolePrefix(right.line)) {
+    return "document-role-prefix-variant";
+  }
+  return "human-review-required";
+}
+
+function buildEditorialDuplicateFindings(data: AskResponse): EditorialDuplicateFinding[] {
+  const lines = editorialCanonicalDocumentKeys.flatMap((key) => (
+    [...new Set(splitEditorialReviewLines(buildDerivedDocumentText(data, key)))].map((line) => ({
+      key,
+      line,
+      normalized: line.toLocaleLowerCase()
+    }))
+  ));
+  const exactGroups = new Map<string, { line: string; documentKeys: Set<DocumentKey> }>();
+  lines.forEach((item) => {
+    const group = exactGroups.get(item.normalized) || { line: item.line, documentKeys: new Set<DocumentKey>() };
+    group.documentKeys.add(item.key);
+    exactGroups.set(item.normalized, group);
+  });
+  const findings: EditorialDuplicateFinding[] = [...exactGroups.values()]
+    .filter((group) => group.documentKeys.size >= 4)
+    .map((group) => {
+      const documentKeys = [...group.documentKeys];
+      const category = classifyEditorialExact(group.line);
+      const excerpt = group.line.slice(0, 180);
+      return {
+        id: editorialTextFingerprint(`exact|${category}|${documentKeys.join(",")}|${group.line}`),
+        kind: "exact" as const,
+        category,
+        documentKeys,
+        label: editorialFindingLabels[category],
+        excerpt
+      };
+    });
+
+  let nearCount = 0;
+  for (let leftIndex = 0; leftIndex < lines.length && nearCount < 20; leftIndex += 1) {
+    const left = lines[leftIndex];
+    const leftTokens = editorialLineTokens(left.line);
+    if (leftTokens.size < 5) continue;
+    for (let rightIndex = leftIndex + 1; rightIndex < lines.length && nearCount < 20; rightIndex += 1) {
+      const right = lines[rightIndex];
+      if (left.key === right.key || left.normalized === right.normalized) continue;
+      const roleNormalizedMatch = stripEditorialRolePrefix(left.line) === stripEditorialRolePrefix(right.line);
+      if (editorialJaccard(leftTokens, editorialLineTokens(right.line)) < 0.9 && !roleNormalizedMatch) continue;
+      const category = classifyEditorialNear(left, right);
+      const documentKeys = [left.key, right.key];
+      findings.push({
+        id: editorialTextFingerprint(`near|${category}|${documentKeys.join(",")}|${left.line}|${right.line}`),
+        kind: "near",
+        category,
+        documentKeys,
+        label: editorialFindingLabels[category],
+        excerpt: `${left.line.slice(0, 82)} ↔ ${right.line.slice(0, 82)}`
+      });
+      nearCount += 1;
+    }
+  }
+  return findings;
+}
+
+function editorialFindingsFingerprint(findings: EditorialDuplicateFinding[]): string {
+  return editorialTextFingerprint(findings.map((finding) => finding.id).sort().join("|"));
+}
+
+function editorialFindingCounts(
+  findings: EditorialDuplicateFinding[]
+): Partial<Record<EditorialFindingCategory, number>> {
+  return findings.reduce<Partial<Record<EditorialFindingCategory, number>>>((counts, finding) => ({
+    ...counts,
+    [finding.category]: (counts[finding.category] || 0) + 1
+  }), {});
 }
 
 function parseEditorialReviewState(raw: string | null): EditorialReviewState {
@@ -261,6 +466,10 @@ function parseEditorialReviewState(raw: string | null): EditorialReviewState {
 
       state[document.key] = {
         checks,
+        findingsReviewed: entry.findingsReviewed === true,
+        reviewedFindingsFingerprint: typeof entry.reviewedFindingsFingerprint === "string"
+          ? entry.reviewedFindingsFingerprint
+          : null,
         note: typeof entry.note === "string" ? entry.note.slice(0, 2000) : "",
         completedAt: typeof entry.completedAt === "string" ? entry.completedAt : null,
         reviewedTextFingerprint: typeof entry.reviewedTextFingerprint === "string"
@@ -275,9 +484,18 @@ function parseEditorialReviewState(raw: string | null): EditorialReviewState {
   }
 }
 
-function editorialReviewIsCurrent(data: AskResponse, key: DocumentKey, entry: EditorialReviewEntry | undefined): boolean {
+function editorialReviewIsCurrent(
+  data: AskResponse,
+  key: DocumentKey,
+  entry: EditorialReviewEntry | undefined,
+  findings: EditorialDuplicateFinding[]
+): boolean {
   if (!entry?.completedAt || typeof entry.reviewedTextFingerprint !== "string") return false;
   if (!editorialReviewChecks.every((check) => entry.checks[check.key] === true)) return false;
+  if (findings.length > 0 && (
+    entry.findingsReviewed !== true
+    || entry.reviewedFindingsFingerprint !== editorialFindingsFingerprint(findings)
+  )) return false;
   return entry.reviewedTextFingerprint === editorialTextFingerprint(buildDerivedDocumentText(data, key));
 }
 
@@ -1095,6 +1313,11 @@ function DocumentEditorialReviewDialog({
   const [reviewState, setReviewState] = useState<EditorialReviewState>({});
   const [reviewer, setReviewer] = useState("");
   const [loadedStorageKey, setLoadedStorageKey] = useState<string | null>(null);
+  const editorialFindings = useMemo(() => buildEditorialDuplicateFindings(data), [data]);
+  const findingsByDocument = useMemo(() => Object.fromEntries(launchDocuments.map((document) => [
+    document.key,
+    editorialFindings.filter((finding) => finding.documentKeys.includes(document.key))
+  ])) as Record<DocumentKey, EditorialDuplicateFinding[]>, [editorialFindings]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -1137,10 +1360,10 @@ function DocumentEditorialReviewDialog({
 
   useEffect(() => {
     const reviewedCount = launchDocuments.filter((document) => (
-      editorialReviewIsCurrent(data, document.key, reviewState[document.key])
+      editorialReviewIsCurrent(data, document.key, reviewState[document.key], findingsByDocument[document.key])
     )).length;
     onReviewedDocumentCountChange(reviewedCount);
-  }, [data, onReviewedDocumentCountChange, reviewState]);
+  }, [data, findingsByDocument, onReviewedDocumentCountChange, reviewState]);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -1160,13 +1383,19 @@ function DocumentEditorialReviewDialog({
 
   const activeDocument = launchDocuments.find((document) => document.key === activeDocumentKey) || launchDocuments[0];
   const activeEntry = reviewState[activeDocument.key] || emptyEditorialReviewEntry();
+  const activeFindings = findingsByDocument[activeDocument.key];
+  const activeFindingsFingerprint = editorialFindingsFingerprint(activeFindings);
+  const activeFindingsReviewed = activeFindings.length === 0 || (
+    activeEntry.findingsReviewed === true
+    && activeEntry.reviewedFindingsFingerprint === activeFindingsFingerprint
+  );
   const presence = documentPresenceLabel(data, activeDocument.key);
   const checksComplete = editorialReviewChecks.every((check) => activeEntry.checks[check.key] === true);
-  const canComplete = checksComplete && presence.status !== "missingUnexpected";
-  const activeReviewIsCurrent = editorialReviewIsCurrent(data, activeDocument.key, activeEntry);
+  const canComplete = checksComplete && activeFindingsReviewed && presence.status !== "missingUnexpected";
+  const activeReviewIsCurrent = editorialReviewIsCurrent(data, activeDocument.key, activeEntry, activeFindings);
   const activeReviewIsStale = Boolean(activeEntry.completedAt) && !activeReviewIsCurrent;
   const completedDocumentCount = launchDocuments.filter((document) => (
-    editorialReviewIsCurrent(data, document.key, reviewState[document.key])
+    editorialReviewIsCurrent(data, document.key, reviewState[document.key], findingsByDocument[document.key])
   )).length;
   const receiptReady = completedDocumentCount === launchDocuments.length && reviewer.trim().length > 0;
 
@@ -1193,6 +1422,22 @@ function DocumentEditorialReviewDialog({
     });
   }
 
+  function toggleFindingsReviewed() {
+    updateEntry((entry) => {
+      const findingsReviewed = !(
+        entry.findingsReviewed === true
+        && entry.reviewedFindingsFingerprint === activeFindingsFingerprint
+      );
+      return {
+        ...entry,
+        findingsReviewed,
+        reviewedFindingsFingerprint: findingsReviewed ? activeFindingsFingerprint : null,
+        completedAt: findingsReviewed ? entry.completedAt : null,
+        reviewedTextFingerprint: findingsReviewed ? entry.reviewedTextFingerprint : null
+      };
+    });
+  }
+
   function toggleComplete() {
     if (!activeReviewIsCurrent && !canComplete) return;
     updateEntry((entry) => ({
@@ -1210,8 +1455,16 @@ function DocumentEditorialReviewDialog({
     const documents = launchDocuments.map<EditorialReviewReceiptDocument>((document) => {
       const entry = reviewState[document.key];
       const currentTextFingerprint = editorialTextFingerprint(buildDerivedDocumentText(data, document.key));
+      const documentFindings = findingsByDocument[document.key];
+      const currentFindingsFingerprint = editorialFindingsFingerprint(documentFindings);
       if (!entry?.completedAt || entry.reviewedTextFingerprint !== currentTextFingerprint) {
         throw new Error(`document-editorial-review-receipt-stale:${document.key}`);
+      }
+      if (documentFindings.length > 0 && (
+        entry.findingsReviewed !== true
+        || entry.reviewedFindingsFingerprint !== currentFindingsFingerprint
+      )) {
+        throw new Error(`document-editorial-review-receipt-findings-unreviewed:${document.key}`);
       }
 
       const checks = Object.fromEntries(editorialReviewChecks.map((check) => {
@@ -1229,6 +1482,10 @@ function DocumentEditorialReviewDialog({
         completedAt: entry.completedAt,
         reviewedTextFingerprint: entry.reviewedTextFingerprint,
         currentTextFingerprint,
+        findingsReviewed: true,
+        editorialFindingsFingerprint: currentFindingsFingerprint,
+        editorialFindingIds: documentFindings.map((finding) => finding.id),
+        editorialFindingCounts: editorialFindingCounts(documentFindings),
         checks,
         note: entry.note
       };
@@ -1237,15 +1494,20 @@ function DocumentEditorialReviewDialog({
       document.completedAt > latest ? document.completedAt : latest
     ), documents[0]?.completedAt || new Date().toISOString());
     const receipt = {
-      schemaVersion: "safeclaw-document-editorial-review-receipt/v1",
+      schemaVersion: "safeclaw-document-editorial-review-receipt/v2",
       exportedAt: new Date().toISOString(),
       reviewer: reviewer.trim(),
       reviewedAt,
       generationFingerprint,
       canonicalDocumentCount: launchDocuments.length,
       reviewerCheckCount: editorialReviewChecks.length,
+      editorialFindingsFingerprint: editorialFindingsFingerprint(editorialFindings),
+      editorialFindingCount: editorialFindings.length,
+      editorialFindingIds: editorialFindings.map((finding) => finding.id),
+      editorialFindingCounts: editorialFindingCounts(editorialFindings),
       reviewCompletion: {
         localChecklistCompleted: true,
+        editorialFindingsReviewed: true,
         reviewerSelfAttested: true,
         reviewerIdentityVerified: false,
         serverRecorded: false,
@@ -1328,7 +1590,7 @@ function DocumentEditorialReviewDialog({
         <nav className="safeclaw-document-review-nav" role="tablist" aria-label="검토 문서 선택" aria-orientation="vertical">
           {launchDocuments.map((document, index) => {
             const entry = reviewState[document.key];
-            const complete = editorialReviewIsCurrent(data, document.key, entry);
+            const complete = editorialReviewIsCurrent(data, document.key, entry, findingsByDocument[document.key]);
             const stale = Boolean(entry?.completedAt) && !complete;
             const documentPresence = documentPresenceLabel(data, document.key);
             return (
@@ -1388,6 +1650,32 @@ function DocumentEditorialReviewDialog({
               </label>
             ))}
           </div>
+          {activeFindings.length > 0 ? (
+            <section className="safeclaw-document-review-findings" data-testid="document-editorial-findings" aria-label={`${activeDocument.title} 자동 중복 검토 후보`}>
+              <header>
+                <span>자동 중복 검토 후보</span>
+                <strong>{activeFindings.length}</strong>
+              </header>
+              <div role="list">
+                {activeFindings.map((finding) => (
+                  <article key={finding.id} role="listitem" data-finding-category={finding.category}>
+                    <strong>{finding.label}</strong>
+                    <small>{finding.kind === "exact" ? "같은 문장" : "유사 문장"} · {finding.excerpt}</small>
+                  </article>
+                ))}
+              </div>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={activeFindingsReviewed}
+                  onChange={toggleFindingsReviewed}
+                />
+                <span>표시된 {activeFindings.length}건을 읽고 문서 역할상 필요한 반복인지 확인</span>
+              </label>
+            </section>
+          ) : (
+            <p className="muted small" data-testid="document-editorial-findings-empty">이 문서와 연결된 자동 중복 후보가 없습니다.</p>
+          )}
           <label className="safeclaw-document-review-note">
             <span>검토 메모</span>
             <textarea

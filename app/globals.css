@@ -19946,6 +19946,67 @@ body:has(.safeclaw-landing) :is(
   accent-color: var(--workspace-accent);
 }
 
+.safeclaw-document-review-findings {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--workspace-rule-strong);
+  border-radius: var(--radius-control);
+  background: var(--workspace-surface-1);
+}
+
+.safeclaw-document-review-findings > header,
+.safeclaw-document-review-findings > label {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.safeclaw-document-review-findings > div {
+  display: grid;
+  gap: 6px;
+  max-height: 124px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.safeclaw-document-review-findings article {
+  display: grid;
+  gap: 3px;
+  padding: 7px 8px;
+  border-left: 3px solid var(--workspace-accent);
+  background: var(--workspace-surface-2);
+}
+
+.safeclaw-document-review-findings article strong,
+.safeclaw-document-review-findings article small,
+.safeclaw-document-review-findings > label {
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-document-review-findings article small {
+  color: var(--workspace-muted);
+  overflow-wrap: anywhere;
+}
+
+.safeclaw-document-review-findings > label {
+  justify-content: flex-start;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.safeclaw-document-review-findings > label input {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--workspace-accent);
+}
+
 .safeclaw-document-review-note {
   display: grid;
   gap: 6px;
