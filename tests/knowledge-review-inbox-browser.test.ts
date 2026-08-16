@@ -178,13 +178,13 @@ describe("knowledge review inbox browser", () => {
     expect(await inbox.locator('[data-selected-candidate-body="true"]').count()).toBe(1);
     await expect.poll(() => inbox.getByText(queueItem.candidateText).isVisible()).toBe(true);
     expect(await inbox.getByText(secondQueueItem.candidateText).isVisible()).toBe(false);
-    await inbox.getByRole("button", { name: /작업계획서 현장 지식 검토/u }).click();
+    await inbox.getByRole("tab", { name: /작업계획서 현장 지식 검토/u }).click();
     await expect.poll(() => inbox.getByText(secondQueueItem.candidateText).isVisible()).toBe(true);
     expect(await inbox.getByText(queueItem.candidateText).isVisible()).toBe(false);
     expect(await inbox.getByText("위험 2").isVisible()).toBe(true);
-    await inbox.getByRole("button", { name: /위험성평가표 현장 지식 검토/u }).click();
+    await inbox.getByRole("tab", { name: /위험성평가표 현장 지식 검토/u }).click();
 
-    const evidenceTab = inbox.getByRole("tab", { name: "근거 5" });
+    const evidenceTab = inbox.getByRole("tab", { name: "근거 5", exact: true });
     await evidenceTab.click();
     const evidencePane = inbox.locator('[data-review-pane="evidence"]');
     await evidencePane.waitFor();
@@ -192,11 +192,11 @@ describe("knowledge review inbox browser", () => {
     expect(await evidencePane.textContent()).toContain("산업안전보건법 제38조");
     expect(await evidencePane.textContent()).toContain("sha256:1111111111111111");
     expect(await evidencePane.getByRole("link", { name: "공식 원문 열기" }).first().getAttribute("href")).toMatch(/^https:\/\//u);
-    await inbox.getByRole("button", { name: /작업계획서 현장 지식 검토/u }).click();
+    await inbox.getByRole("tab", { name: /작업계획서 현장 지식 검토/u }).click();
     expect(await inbox.locator('[data-review-pane="candidate"]').count()).toBe(1);
     expect(await inbox.locator('[data-review-pane="evidence"]').count()).toBe(0);
     expect(await inbox.getByText(secondQueueItem.candidateText).isVisible()).toBe(true);
-    await inbox.getByRole("button", { name: /위험성평가표 현장 지식 검토/u }).click();
+    await inbox.getByRole("tab", { name: /위험성평가표 현장 지식 검토/u }).click();
 
     await page.setViewportSize({ width: 1440, height: 900 });
     await expect.poll(() => inbox.locator('[data-review-pane="evidence"]').count()).toBe(1);

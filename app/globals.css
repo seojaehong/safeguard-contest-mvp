@@ -19645,7 +19645,7 @@ body:has(.safeclaw-landing) :is(
   width: auto;
   min-height: 30px;
   border: 1px solid var(--workspace-rule-strong);
-  border-radius: 6px;
+  border-radius: var(--radius-control);
   background: var(--workspace-surface-2);
   color: var(--workspace-ink);
   padding: 4px 7px;
@@ -19660,12 +19660,17 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-document-review-launch span {
   font-size: var(--text-caption);
-  font-weight: 750;
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-document-review-launch strong {
   color: var(--workspace-ink);
   font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-mobile-document-priority {
@@ -19686,10 +19691,9 @@ body:has(.safeclaw-landing) :is(
   padding: 0;
   overflow: hidden;
   border: 1px solid var(--workspace-rule-strong);
-  border-radius: 8px;
+  border-radius: var(--radius-panel);
   background: var(--workspace-canvas);
   color: var(--workspace-ink);
-  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.28);
 }
 
 .safeclaw-document-review-dialog::backdrop {
@@ -19721,21 +19725,27 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-document-review-checklist header span {
   color: var(--workspace-muted);
   font-size: var(--text-caption);
-  font-weight: 700;
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-document-review-header h2,
 .safeclaw-document-review-copy h3 {
   margin: 2px 0 0;
   font-size: var(--text-section-title);
-  line-height: 1.25;
+  font-weight: 800;
+  line-height: var(--leading-section-title);
+  letter-spacing: var(--tracking-section-title);
 }
 
 .safeclaw-document-review-header p {
   margin: 4px 0 0;
   color: var(--workspace-muted);
   font-size: var(--text-table);
-  line-height: 1.45;
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-document-review-progress {
@@ -19748,6 +19758,9 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-document-review-progress strong {
   color: var(--workspace-ink);
   font-size: var(--text-section-title);
+  font-weight: 800;
+  line-height: var(--leading-section-title);
+  letter-spacing: var(--tracking-section-title);
 }
 
 .safeclaw-document-review-close {
@@ -19760,9 +19773,8 @@ body:has(.safeclaw-landing) :is(
   background: transparent;
   color: var(--workspace-ink);
   font: inherit;
-  font-size: 24px;
   font-weight: 700;
-  line-height: 1;
+  line-height: var(--leading-control);
   cursor: pointer;
 }
 
@@ -19803,7 +19815,7 @@ body:has(.safeclaw-landing) :is(
   width: 100%;
   min-height: 58px;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-control);
   background: transparent;
   color: var(--workspace-ink);
   padding: 7px 8px;
@@ -19826,6 +19838,9 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-document-review-nav span {
   color: var(--workspace-muted);
   font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-document-review-nav span.complete {
@@ -19855,6 +19870,9 @@ body:has(.safeclaw-landing) :is(
   flex: 0 0 auto;
   color: var(--workspace-success);
   font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-document-review-copy > header > strong[data-presence="missingUnexpected"] {
@@ -19867,7 +19885,7 @@ body:has(.safeclaw-landing) :is(
   overflow: auto;
   overscroll-behavior: contain;
   border: 1px solid var(--workspace-rule);
-  border-radius: 6px;
+  border-radius: var(--radius-control);
   background: var(--workspace-canvas);
   padding: 14px;
   color: var(--workspace-ink);
@@ -19876,7 +19894,8 @@ body:has(.safeclaw-landing) :is(
   font-family: var(--font-base);
   font-size: var(--text-table);
   font-weight: 500;
-  line-height: 1.65;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
   scrollbar-gutter: stable;
 }
 
@@ -19911,10 +19930,12 @@ body:has(.safeclaw-landing) :is(
   min-height: 42px;
   padding: 8px;
   border: 1px solid var(--workspace-rule);
-  border-radius: 6px;
+  border-radius: var(--radius-control);
   background: var(--workspace-surface-1);
   font-size: var(--text-table);
-  line-height: 1.45;
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
   cursor: pointer;
 }
 
@@ -19930,7 +19951,9 @@ body:has(.safeclaw-landing) :is(
   gap: 6px;
   color: var(--workspace-muted);
   font-size: var(--text-caption);
-  font-weight: 700;
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-document-review-note textarea {
@@ -19962,7 +19985,9 @@ body:has(.safeclaw-landing) :is(
   gap: 6px;
   color: var(--workspace-muted);
   font-size: var(--text-caption);
-  font-weight: 700;
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-document-review-receipt input,
@@ -19975,7 +20000,8 @@ body:has(.safeclaw-landing) :is(
   color: var(--workspace-muted);
   font-size: var(--text-caption);
   font-weight: 600;
-  line-height: 1.45;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 @media (max-width: 760px) {

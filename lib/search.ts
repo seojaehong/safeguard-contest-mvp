@@ -27,6 +27,7 @@ import {
   isSafetyReferenceRiskEligible,
   SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
   SAFETY_REFERENCE_SEARCH_FAILURE_MESSAGE,
+  type KoshaGroundingDecision,
   type KoshaGroundingReason,
   type SafetyReferenceItem,
   type SafetyReferenceRetrievalMode,
@@ -1529,10 +1530,15 @@ function compressSafetyReferenceMatches(items: SafetyReferenceItem[], limit = 5)
 export function buildSafetyReferenceSurfaceItem(
   item: SafetyReferenceItem,
   retrievalMode?: SafetyReferenceRetrievalMode,
-  options: { parentEvidenceReady?: boolean } = {}
+  options: {
+    parentEvidenceReady?: boolean;
+    groundingDecision?: KoshaGroundingDecision | null;
+  } = {}
 ) {
   const operationalView = deriveSafetyReferenceOperationalView(item);
-  const grounding = getKoshaGroundingDecision(item);
+  const grounding = options.groundingDecision === undefined
+    ? getKoshaGroundingDecision(item)
+    : options.groundingDecision;
   const groundingLifecycle = grounding?.metadata?.lifecycle;
   const technicalKosha = isKoshaTechnicalReference(item);
   const parentEvidenceReady = options.parentEvidenceReady ?? true;
@@ -2139,7 +2145,7 @@ export function attachDbHarnessFallback(response: AskResponse, input: {
     workpackMemory: input.harnessMemory.workpackMemory
   });
   const packet = buildPublicDbHarnessPacket(internalPacket);
-  const promptContext = buildHarnessPromptContext(packet);
+  const promptContext = buildHarnessPromptContext(internalPacket);
   const reflectedResponse = reflectDbHarnessInDeliverables(response, packet);
   const structuredResponse = attachPhotoSeedStructuredOutput(reflectedResponse, input.harnessMemory.improvements);
   return attachQualityContract({
@@ -2407,21 +2413,26 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
                 : undefined
             });
             const dbHarnessPacket = buildPublicDbHarnessPacket(internalDbHarnessPacket);
-            const koshaParentEvidenceReadyIdsEarly = buildKoshaParentEvidenceReadyIds(dbHarnessPacket);
+            const koshaParentEvidenceReadyIdsEarly = buildKoshaParentEvidenceReadyIds(internalDbHarnessPacket);
             const groundingPacket = buildGroundedGenerationPacket({
-              dbHarnessPacket,
+              dbHarnessPacket: internalDbHarnessPacket,
               legalCandidates: rawBase.slice(0, 6),
               eligibleKoshaIds: koshaParentEvidenceReadyIdsEarly
             });
             deliverablesGroundingPacket = groundingPacket;
-            const dbHarnessContext = buildHarnessPromptContext(dbHarnessPacket);
+            const dbHarnessContext = buildHarnessPromptContext(internalDbHarnessPacket);
+            const internalSafeRefItems = [
+              ...internalDbHarnessPacket.directEvidence,
+              ...internalDbHarnessPacket.sifCases,
+              ...internalDbHarnessPacket.supportingEvidence
+            ];
             const publicSafeRefItems = [
               ...dbHarnessPacket.directEvidence,
               ...dbHarnessPacket.sifCases,
               ...dbHarnessPacket.supportingEvidence
             ];
             const compressed = compressSafetyReferenceMatches(publicSafeRefItems, 5);
-            const koshaPrimaryRefsEarly = buildRequiredKoshaCitations(publicSafeRefItems, {
+            const koshaPrimaryRefsEarly = buildRequiredKoshaCitations(internalSafeRefItems, {
               parentEvidenceReadyIds: koshaParentEvidenceReadyIdsEarly
             });
             const koshaLinesEarly = [
@@ -2620,7 +2631,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       }
     });
     const dbHarnessEvidencePacket = buildPublicDbHarnessPacket(internalDbHarnessEvidencePacket);
-    const koshaParentEvidenceReadyIds = buildKoshaParentEvidenceReadyIds(dbHarnessEvidencePacket);
+    const koshaParentEvidenceReadyIds = buildKoshaParentEvidenceReadyIds(internalDbHarnessEvidencePacket);
     const hasIndependentParentEvidence = dbHarnessEvidencePacket.directEvidence.length > 0
       || dbHarnessEvidencePacket.sifCases.length > 0;
     const hasOperationalParentEvidence = hasIndependentParentEvidence
@@ -2859,7 +2870,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       }
     });
     const dbHarnessPacket = buildPublicDbHarnessPacket(internalDbHarnessPacket);
-    const dbHarnessPromptContext = buildHarnessPromptContext(dbHarnessPacket);
+    const dbHarnessPromptContext = buildHarnessPromptContext(internalDbHarnessPacket);
     const dbHarnessSummary = summarizeDbHarnessPacket(dbHarnessPacket);
     const dbHarnessAnswer = buildDbHarnessAnswer(dbHarnessPacket);
     const dbHarnessPracticalPoints = buildDbHarnessPracticalPoints(dbHarnessPacket);
@@ -2868,6 +2879,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       ...dbHarnessPacket.sifCases,
       ...dbHarnessPacket.supportingEvidence
     ];
+    const internalSafetyReferenceItemsById = new Map([
+      ...internalDbHarnessPacket.directEvidence,
+      ...internalDbHarnessPacket.sifCases,
+      ...internalDbHarnessPacket.supportingEvidence
+    ].map((item) => [item.id, item] as const));
     const upstreamDeliverablesExecutionTrace = deliverablesResult?.diagnostics.trace ?? {
       attempted: false,
       provider: null,
@@ -2933,7 +2949,10 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
           items: publicSafetyReferenceItems.slice(0, 8).map((item) => (
             buildSafetyReferenceSurfaceItem(item, safetyReference.retrievalMode, {
               parentEvidenceReady: !isKoshaTechnicalReference(item)
-                || koshaParentEvidenceReadyIds.has(item.id)
+                || koshaParentEvidenceReadyIds.has(item.id),
+              groundingDecision: getKoshaGroundingDecision(
+                internalSafetyReferenceItemsById.get(item.id) ?? item
+              )
             })
           ))
         },
