@@ -1681,6 +1681,16 @@ function evaluateLlmWikiGate(rootDir) {
     "knowledge_candidate_prompt_authority_separation",
     "knowledge_candidate_route_non_publishing",
     "knowledge_review_route_non_publishing",
+    "hermes_review_authority_ui_live",
+    "hermes_review_authority_contract",
+    "hermes_review_selected_workbench",
+    "hermes_review_authority_non_mutating",
+    "hermes_review_authority_boundaries_open",
+    "hermes_review_evidence_inspector_live",
+    "hermes_review_evidence_inspector_contract",
+    "hermes_review_evidence_inspector_verified",
+    "hermes_review_evidence_inspector_non_mutating",
+    "hermes_review_evidence_inspector_boundaries_open",
     "wiki_no_executable_publication_surface",
     "northstar_wiki_gate_approval_gated",
   ];
@@ -1702,6 +1712,42 @@ function evaluateLlmWikiGate(rootDir) {
     && publicationSurfaceInventory.publicationLedgerMigrationHits.length === 0
     && Array.isArray(publicationSurfaceInventory.publicationRoutePaths)
     && publicationSurfaceInventory.publicationRoutePaths.length === 0;
+  const hermesUi = isRecord(preflight) && isRecord(preflight.hermesReviewAuthorityUi)
+    ? preflight.hermesReviewAuthorityUi
+    : null;
+  const hermesInspector = isRecord(preflight) && isRecord(preflight.hermesReviewEvidenceInspector)
+    ? preflight.hermesReviewEvidenceInspector
+    : null;
+  const hermesUiPass = hermesUi !== null
+    && hermesUi.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI"
+    && hermesUi.liveViewportCount === 8
+    && hermesUi.livePassedCount === 8
+    && hermesUi.candidateCount === 3
+    && hermesUi.selectedCandidateCount === 1
+    && hermesUi.selectedBodyCount === 1
+    && hermesUi.desktopColumns === 2
+    && hermesUi.mobileColumns === 1
+    && hermesUi.candidateBodyInternalScroll === true
+    && hermesUi.humanReviewRequired === true
+    && hermesUi.machineEvidenceReplacesHumanReview === false
+    && hermesUi.exactSavedShareVerdict === "MISSING_EVIDENCE"
+    && hermesUi.llmWikiPublication === "APPROVAL_GATED"
+    && hermesUi.supabaseRlsLaunchIsolation === "APPROVAL_GATED";
+  const hermesInspectorPass = hermesInspector !== null
+    && hermesInspector.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR"
+    && hermesInspector.liveViewportCount === 8
+    && hermesInspector.livePassedCount === 8
+    && hermesInspector.productionAligned === true
+    && hermesInspector.itemLimit === 20
+    && hermesInspector.fixtureItemCount === 5
+    && hermesInspector.desktopEvidenceColumns === 2
+    && hermesInspector.mobileMountedPaneCount === 1
+    && hermesInspector.publicOfficialHttpsLinkCount === 3
+    && hermesInspector.privateEvidenceRawIdentityExposed === false
+    && hermesInspector.exactSavedShareVerdict === "MISSING_EVIDENCE"
+    && hermesInspector.llmWikiPublication === "APPROVAL_GATED"
+    && hermesInspector.supabaseRlsLaunchIsolation === "APPROVAL_GATED"
+    && hermesInspector.providerDispatchPersistence === "APPROVAL_GATED";
   const preflightReady = isRecord(preflight)
     && preflight.overall === "approval_ready_open"
     && preflight.launchReadiness === false
@@ -1711,6 +1757,8 @@ function evaluateLlmWikiGate(rootDir) {
     && preflight.failedCheckIds.length === 0
     && requiredWikiChecks.every((id) => passedCheckIds.has(id))
     && publicationSurfaceInventoryPass
+    && hermesUiPass
+    && hermesInspectorPass
     && preflightCurrent;
   if (redApproval && unavailable && preflightReady) {
     return gateResult({
@@ -1718,7 +1766,7 @@ function evaluateLlmWikiGate(rootDir) {
       label: "LLM Wiki publication",
       state: "approval_gated",
       evidencePath: preflightPath,
-      detail: `Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA ${preflightSourceSha || "not-recorded"}.`,
+      detail: `Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA ${preflightSourceSha || "not-recorded"}; Hermes selected-only reviewer workbench is live 8/8 with candidates/selected/body 3/1/1 and desktop/mobile columns 2/1, while the evidence inspector is live 8/8 with item budget/fixture 20/5, desktop evidence columns 2, mobile mounted panes 1, official HTTPS links 3, and private raw identity exposed=false. Exact saved Share remains MISSING_EVIDENCE; Wiki/RLS/provider persistence remain APPROVAL_GATED.`,
       nextActions: [
         "Approve final DDL, append-only ledger, graph pointer, and RPC threat model.",
         "Run approved publication canary in an isolated project.",

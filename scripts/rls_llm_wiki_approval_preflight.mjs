@@ -17,7 +17,8 @@ const REQUIRED_FILES = Object.freeze({
   knowledgeGovernance: "lib/knowledge-governance.ts",
   knowledgeCandidateRoute: "lib/knowledge-candidate-route.ts",
   knowledgeReviewRoute: "app/api/knowledge/review/route.ts",
-  hermesReviewAuthorityUi: "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
+  hermesReviewAuthorityUi: "evaluation/hermes-knowledge-review-selected-workbench-2026-08-14/report.json",
+  hermesReviewEvidenceInspector: "evaluation/hermes-knowledge-review-evidence-inspector-2026-08-14/report.json",
 });
 
 const NORTHSTAR_REPORT_CANDIDATES = Object.freeze([
@@ -212,11 +213,20 @@ function buildPreflight({ root }) {
   const knowledgeCandidateRouteText = readText(root, REQUIRED_FILES.knowledgeCandidateRoute);
   const knowledgeReviewRouteText = readText(root, REQUIRED_FILES.knowledgeReviewRoute);
   const hermesReviewAuthorityUi = readJson(root, REQUIRED_FILES.hermesReviewAuthorityUi);
+  const hermesReviewEvidenceInspector = readJson(root, REQUIRED_FILES.hermesReviewEvidenceInspector);
   const publicationSurface = publicationSurfaceInventory(root);
   const hermesAuthority = hermesReviewAuthorityUi.authorityContract ?? {};
+  const hermesWorkbench = hermesReviewAuthorityUi.workbenchContract ?? {};
   const hermesMutation = hermesReviewAuthorityUi.mutationBoundary ?? {};
   const hermesBoundaries = hermesReviewAuthorityUi.remainingBoundaries ?? {};
   const hermesAfterLive = hermesReviewAuthorityUi.afterLive ?? {};
+  const inspectorAfterLive = hermesReviewEvidenceInspector.afterLive ?? {};
+  const inspectorContract = hermesReviewEvidenceInspector.evidenceContract ?? {};
+  const inspectorVerification = hermesReviewEvidenceInspector.verification ?? {};
+  const inspectorTests = inspectorVerification.focusedAndAdjacentTests ?? {};
+  const inspectorMutation = hermesReviewEvidenceInspector.mutationBoundary ?? {};
+  const inspectorSecurity = hermesReviewEvidenceInspector.securityBoundary ?? {};
+  const inspectorBoundaries = hermesReviewEvidenceInspector.remainingBoundaries ?? {};
 
   const checks = [
     check("rls_status_approval_required", rlsReport.status === "approval_required", "Supabase RLS packet must stay approval_required."),
@@ -309,6 +319,16 @@ function buildPreflight({ root }) {
       "Hermes reviewer UI must preserve authority order, law provenance, tenant-memory, and human-review boundaries.",
     ),
     check(
+      "hermes_review_selected_workbench",
+      hermesWorkbench.candidateCount === 3 &&
+        hermesWorkbench.selectedCandidateCount === 1 &&
+        hermesWorkbench.selectedBodyCount === 1 &&
+        hermesWorkbench.desktopColumns === 2 &&
+        hermesWorkbench.mobileColumns === 1 &&
+        hermesWorkbench.candidateBodyInternalScroll === true,
+      "Hermes reviewer UI must preserve the selected-only bounded workbench contract.",
+    ),
+    check(
       "hermes_review_authority_non_mutating",
       hermesMutation.dbMutationPerformed === false &&
         hermesMutation.providerDispatchCalled === false &&
@@ -322,6 +342,65 @@ function buildPreflight({ root }) {
         hermesBoundaries.llmWikiPublication === "APPROVAL_GATED" &&
         hermesBoundaries.supabaseRlsLaunchIsolation === "APPROVAL_GATED",
       "Hermes reviewer UI evidence must not close exact Share, LLM Wiki publication, or RLS launch isolation.",
+    ),
+    check(
+      "hermes_review_evidence_inspector_live",
+      hermesReviewEvidenceInspector.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR" &&
+        inspectorAfterLive.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR" &&
+        inspectorAfterLive.viewportCount === 8 &&
+        inspectorAfterLive.passedCount === 8 &&
+        inspectorAfterLive.failedCount === 0 &&
+        inspectorAfterLive.productionAligned === true &&
+        inspectorAfterLive.browserErrorCount === 0 &&
+        hermesReviewEvidenceInspector.liveAfterDeploymentRequired === false,
+      "Hermes evidence inspector must retain its aligned 8/8 live viewport contract.",
+    ),
+    check(
+      "hermes_review_evidence_inspector_contract",
+      inspectorContract.itemLimit === 20 &&
+        inspectorContract.fixtureItemCount === 5 &&
+        inspectorContract.authorityCountsMatchReviewContract === true &&
+        inspectorContract.desktopCandidateAndEvidenceMounted === true &&
+        inspectorContract.desktopEvidenceColumns === 2 &&
+        inspectorContract.mobileMountedPaneCount === 1 &&
+        inspectorContract.mobileCandidateEvidenceSegmentedControl === true &&
+        inspectorContract.publicOfficialHttpsLinkCount === 3 &&
+        inspectorContract.privateEvidenceRawIdentityExposed === false &&
+        inspectorContract.evidenceInternalScroll === true &&
+        inspectorContract.horizontalOverflow === false,
+      "Hermes evidence inspector must preserve bounded official/private evidence presentation.",
+    ),
+    check(
+      "hermes_review_evidence_inspector_verified",
+      inspectorTests.files === 8 &&
+        inspectorTests.tests === 117 &&
+        inspectorTests.status === "PASS" &&
+        inspectorVerification.typecheck === "PASS" &&
+        inspectorVerification.build === "PASS" &&
+        inspectorVerification.staticPages === 28,
+      "Hermes evidence inspector verification receipt must stay complete.",
+    ),
+    check(
+      "hermes_review_evidence_inspector_non_mutating",
+      inspectorMutation.dbMutationPerformed === false &&
+        inspectorMutation.providerDispatchCalled === false &&
+        inspectorMutation.shareSessionCreated === false &&
+        inspectorMutation.ontologyPublicationPerformed === false &&
+        inspectorMutation.vectorOrEmbeddingMutationPerformed === false &&
+        inspectorMutation.wikiPublicationPerformed === false &&
+        inspectorMutation.koshaRegistryMutationPerformed === false &&
+        inspectorSecurity.immutableOriginal18FindingBaselinePreserved === true &&
+        inspectorSecurity.freshFullRepositoryScanRequired === true &&
+        inspectorSecurity.securityComplete === false,
+      "Hermes evidence inspector must remain non-mutating and must not claim security completion.",
+    ),
+    check(
+      "hermes_review_evidence_inspector_boundaries_open",
+      inspectorBoundaries.exactSavedShareVerdict === "MISSING_EVIDENCE" &&
+        inspectorBoundaries.llmWikiPublication === "APPROVAL_GATED" &&
+        inspectorBoundaries.supabaseRlsLaunchIsolation === "APPROVAL_GATED" &&
+        inspectorBoundaries.providerDispatchPersistence === "APPROVAL_GATED",
+      "Hermes evidence inspector must not close exact Share, Wiki/RLS, or provider persistence approvals.",
     ),
     check(
       "wiki_no_executable_publication_surface",
@@ -375,12 +454,37 @@ function buildPreflight({ root }) {
       productionCommit: hermesReviewAuthorityUi.productionCommit ?? null,
       liveViewportCount: hermesAfterLive.viewportCount ?? null,
       livePassedCount: hermesAfterLive.passedCount ?? null,
+      candidateCount: hermesWorkbench.candidateCount ?? null,
+      selectedCandidateCount: hermesWorkbench.selectedCandidateCount ?? null,
+      selectedBodyCount: hermesWorkbench.selectedBodyCount ?? null,
+      desktopColumns: hermesWorkbench.desktopColumns ?? null,
+      mobileColumns: hermesWorkbench.mobileColumns ?? null,
+      candidateBodyInternalScroll: hermesWorkbench.candidateBodyInternalScroll === true,
       authorityOrder: hermesAuthority.sourceOrder ?? [],
       humanReviewRequired: hermesAuthority.humanReviewRequired === true,
       machineEvidenceReplacesHumanReview: hermesAuthority.machineEvidenceReplacesHumanReview === true,
       exactSavedShareVerdict: hermesBoundaries.exactSavedShareVerdict ?? null,
       llmWikiPublication: hermesBoundaries.llmWikiPublication ?? null,
       supabaseRlsLaunchIsolation: hermesBoundaries.supabaseRlsLaunchIsolation ?? null,
+    },
+    hermesReviewEvidenceInspector: {
+      verdict: hermesReviewEvidenceInspector.verdict ?? null,
+      sourceHead: hermesReviewEvidenceInspector.sourceHead ?? null,
+      productCommit: hermesReviewEvidenceInspector.productCommit ?? null,
+      productionCommit: hermesReviewEvidenceInspector.productionCommit ?? null,
+      liveViewportCount: inspectorAfterLive.viewportCount ?? null,
+      livePassedCount: inspectorAfterLive.passedCount ?? null,
+      productionAligned: inspectorAfterLive.productionAligned === true,
+      itemLimit: inspectorContract.itemLimit ?? null,
+      fixtureItemCount: inspectorContract.fixtureItemCount ?? null,
+      desktopEvidenceColumns: inspectorContract.desktopEvidenceColumns ?? null,
+      mobileMountedPaneCount: inspectorContract.mobileMountedPaneCount ?? null,
+      publicOfficialHttpsLinkCount: inspectorContract.publicOfficialHttpsLinkCount ?? null,
+      privateEvidenceRawIdentityExposed: inspectorContract.privateEvidenceRawIdentityExposed === true,
+      exactSavedShareVerdict: inspectorBoundaries.exactSavedShareVerdict ?? null,
+      llmWikiPublication: inspectorBoundaries.llmWikiPublication ?? null,
+      supabaseRlsLaunchIsolation: inspectorBoundaries.supabaseRlsLaunchIsolation ?? null,
+      providerDispatchPersistence: inspectorBoundaries.providerDispatchPersistence ?? null,
     },
     publicationSurfaceInventory: publicationSurface,
     checks,
@@ -424,6 +528,18 @@ function renderMarkdown(report) {
     `- Machine evidence replaces human review: \`${report.hermesReviewAuthorityUi?.machineEvidenceReplacesHumanReview === true}\``,
     `- Exact saved Share: \`${report.hermesReviewAuthorityUi?.exactSavedShareVerdict ?? "MISSING_EVIDENCE"}\``,
     `- LLM Wiki / RLS: \`${report.hermesReviewAuthorityUi?.llmWikiPublication ?? "APPROVAL_GATED"}\` / \`${report.hermesReviewAuthorityUi?.supabaseRlsLaunchIsolation ?? "APPROVAL_GATED"}\``,
+    "",
+    "## Hermes Reviewer Evidence Inspector",
+    "",
+    `- Verdict: \`${report.hermesReviewEvidenceInspector?.verdict ?? "missing"}\``,
+    `- Live viewports: \`${report.hermesReviewEvidenceInspector?.livePassedCount ?? 0}/${report.hermesReviewEvidenceInspector?.liveViewportCount ?? 0}\``,
+    `- Production aligned: \`${report.hermesReviewEvidenceInspector?.productionAligned === true}\``,
+    `- Evidence item limit / fixture count: \`${report.hermesReviewEvidenceInspector?.itemLimit ?? 0}/${report.hermesReviewEvidenceInspector?.fixtureItemCount ?? 0}\``,
+    `- Desktop evidence columns / mobile mounted panes: \`${report.hermesReviewEvidenceInspector?.desktopEvidenceColumns ?? 0}/${report.hermesReviewEvidenceInspector?.mobileMountedPaneCount ?? 0}\``,
+    `- Public official HTTPS links: \`${report.hermesReviewEvidenceInspector?.publicOfficialHttpsLinkCount ?? 0}\``,
+    `- Private raw identity exposed: \`${report.hermesReviewEvidenceInspector?.privateEvidenceRawIdentityExposed === true}\``,
+    `- Exact saved Share: \`${report.hermesReviewEvidenceInspector?.exactSavedShareVerdict ?? "MISSING_EVIDENCE"}\``,
+    `- LLM Wiki / RLS / provider persistence: \`${report.hermesReviewEvidenceInspector?.llmWikiPublication ?? "APPROVAL_GATED"}\` / \`${report.hermesReviewEvidenceInspector?.supabaseRlsLaunchIsolation ?? "APPROVAL_GATED"}\` / \`${report.hermesReviewEvidenceInspector?.providerDispatchPersistence ?? "APPROVAL_GATED"}\``,
     "",
     "## Checks",
     "",

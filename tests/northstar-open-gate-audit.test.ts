@@ -1204,6 +1204,16 @@ function createFixtureRoot(): string {
       { id: "knowledge_candidate_prompt_authority_separation", passed: true },
       { id: "knowledge_candidate_route_non_publishing", passed: true },
       { id: "knowledge_review_route_non_publishing", passed: true },
+      { id: "hermes_review_authority_ui_live", passed: true },
+      { id: "hermes_review_authority_contract", passed: true },
+      { id: "hermes_review_selected_workbench", passed: true },
+      { id: "hermes_review_authority_non_mutating", passed: true },
+      { id: "hermes_review_authority_boundaries_open", passed: true },
+      { id: "hermes_review_evidence_inspector_live", passed: true },
+      { id: "hermes_review_evidence_inspector_contract", passed: true },
+      { id: "hermes_review_evidence_inspector_verified", passed: true },
+      { id: "hermes_review_evidence_inspector_non_mutating", passed: true },
+      { id: "hermes_review_evidence_inspector_boundaries_open", passed: true },
       { id: "wiki_no_executable_publication_surface", passed: true },
       { id: "northstar_rls_gate_approval_gated", passed: true },
       { id: "northstar_wiki_gate_approval_gated", passed: true },
@@ -1214,6 +1224,38 @@ function createFixtureRoot(): string {
       publicationSqlFunctionHits: [],
       publicationLedgerMigrationHits: [],
       publicationRoutePaths: [],
+    },
+    hermesReviewAuthorityUi: {
+      verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+      liveViewportCount: 8,
+      livePassedCount: 8,
+      candidateCount: 3,
+      selectedCandidateCount: 1,
+      selectedBodyCount: 1,
+      desktopColumns: 2,
+      mobileColumns: 1,
+      candidateBodyInternalScroll: true,
+      humanReviewRequired: true,
+      machineEvidenceReplacesHumanReview: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+    },
+    hermesReviewEvidenceInspector: {
+      verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
+      liveViewportCount: 8,
+      livePassedCount: 8,
+      productionAligned: true,
+      itemLimit: 20,
+      fixtureItemCount: 5,
+      desktopEvidenceColumns: 2,
+      mobileMountedPaneCount: 1,
+      publicOfficialHttpsLinkCount: 3,
+      privateEvidenceRawIdentityExposed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
     },
   });
   writeJson(rootDir, path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"), {
@@ -4907,6 +4949,9 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     );
     expect(audit.gates.find((gate) => gate.id === "supabase_rls_launch_isolation")?.state).toBe("approval_gated");
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_publication")?.state).toBe("approval_gated");
+    expect(audit.gates.find((gate) => gate.id === "llm_wiki_publication")?.detail).toContain("candidates/selected/body 3/1/1");
+    expect(audit.gates.find((gate) => gate.id === "llm_wiki_publication")?.detail).toContain("private raw identity exposed=false");
+    expect(audit.gates.find((gate) => gate.id === "llm_wiki_publication")?.detail).toContain("Exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "sif_embedding_runtime")?.state).toBe("approval_gated");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_trust_registry")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_trust_registry")?.nextActions).toContain(
@@ -6975,6 +7020,34 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     };
     report.checks = report.checks.filter((check) => check.id !== "wiki_no_executable_publication_surface");
     report.publicationSurfaceInventory.publicationRoutePaths = ["app/api/knowledge/publish/route.ts"];
+    writeJson(rootDir, reportPath, report);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.overall).toBe("contradicted");
+    const wikiGate = audit.gates.find((gate) => gate.id === "llm_wiki_publication");
+    expect(wikiGate?.state).toBe("contradicted");
+    expect(wikiGate?.detail).toContain("preflight is missing or failed");
+  });
+
+  it("contradicts LLM Wiki preflight when Hermes inspector closes protected boundaries", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json");
+    const report = JSON.parse(fs.readFileSync(path.join(rootDir, reportPath), "utf8")) as {
+      hermesReviewEvidenceInspector: {
+        privateEvidenceRawIdentityExposed: boolean;
+        exactSavedShareVerdict: string;
+        llmWikiPublication: string;
+      };
+    };
+    report.hermesReviewEvidenceInspector.privateEvidenceRawIdentityExposed = true;
+    report.hermesReviewEvidenceInspector.exactSavedShareVerdict = "PASS";
+    report.hermesReviewEvidenceInspector.llmWikiPublication = "PROVEN";
     writeJson(rootDir, reportPath, report);
 
     const audit = buildNorthstarOpenGateAudit({
