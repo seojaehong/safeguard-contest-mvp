@@ -1,10 +1,11 @@
 {
   "schemaVersion": "safeclaw-current-repository-security-rescan/v1",
-  "verdict": "PASS_CURRENT_SOURCE_APPROVAL_FREE_REMEDIATION_LIVE_PENDING",
+  "verdict": "PASS_LIVE_DEPLOYED_APPROVAL_FREE_SECURITY_REMEDIATION",
   "scanId": "6a0d7b6b-9dd7-42e9-88c4-eb3381af8455",
   "scanRevision": "67fb4cf16f44931f085cd827ab0b5d85d7817181",
   "productCommit": "33e01cdd",
-  "productionCommit": null,
+  "productionCommit": "41c1090b31e0efedf845e24f8c1c5de17ebded8a",
+  "productionDeploymentUrl": "safeguard-contest-c246l1rur-seojaehongs-projects.vercel.app",
   "immutableOriginalBaselineFindingCount": 18,
   "freshReportableFindingCount": 17,
   "approvalFreeRemediatedCount": 9,
@@ -54,6 +55,6 @@
   "remainingBoundaries": {
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "databaseSecurityRemediation": "APPROVAL_GATED",
-    "liveAfterDeploymentRequired": true
+    "liveAfterDeploymentRequired": false
   }
 }
