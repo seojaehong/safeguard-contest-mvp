@@ -4693,6 +4693,7 @@ function createFixtureRoot(): string {
     candidateCount: 8,
     semanticGroupCount: 24,
     pageReceiptCount: 24,
+    titleReconciledCandidateCount: 2,
     bodySnapshotId: "fixture-snapshot",
     bodySourceIdentitySha256: "c".repeat(64),
     checklistInputCount: 64,
@@ -4708,6 +4709,7 @@ function createFixtureRoot(): string {
       candidateBoundDraftStorage: true,
       evidencePageReceipts: true,
       draftBoundToCorpusIdentity: true,
+      titleProvenanceVisible: true,
       progressLiveRegion: true,
     },
     boundary: {
@@ -4778,6 +4780,7 @@ function createFixtureRoot(): string {
     mobilePass: true,
     responsiveTabPanelPass: true,
     draftStorageIdentityPass: true,
+    titleReconciliationPass: true,
     draftStorageIdentity: {
       sameFingerprintPreserved: true,
       sourceIdentityPresent: true,
@@ -4785,6 +4788,12 @@ function createFixtureRoot(): string {
       staleFingerprintDiscarded: true,
       staleExportDisabled: true,
       staleDraftNotice: "후보 구성이 변경되어 이전 검토 초안을 복원하지 않았습니다. 0개 완료, 64개 입력이 남았습니다.",
+      titleReconciliationAccess: {
+        candidateVisible: true,
+        officialCurrentTitleVisible: true,
+        corpusSourceTitleVisible: true,
+        provenanceFullyVisible: true,
+      },
     },
     results: [
       { name: "desktop-1440x723", viewport: { width: 1440, height: 723 } },
@@ -5299,6 +5308,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("completed review remains no-mutation plus separate approval");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("24/24 semantic groups");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("24/24 PDF page/body location receipts");
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("2 reconciled official/corpus title provenance rows");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("64 required human inputs");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("viewport-contained no-mutation UI");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.nextActions.join("\n")).toContain(
@@ -7770,6 +7780,41 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       draftStorageIdentityPass: boolean;
     };
     browser.draftStorageIdentityPass = false;
+    writeJson(rootDir, path.relative(rootDir, browserPath), browser);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("contradicted");
+  });
+
+  it("fails closed when the KOSHA reviewer cockpit loses title provenance", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const cockpitPath = path.join(
+      rootDir,
+      "evaluation",
+      "kosha-exact-promotion-reviewer-cockpit-2026-07-25",
+      "report.json",
+    );
+    const browserPath = path.join(
+      rootDir,
+      "evaluation",
+      "kosha-exact-promotion-reviewer-cockpit-2026-07-25",
+      "browser-report.json",
+    );
+    const cockpit = JSON.parse(fs.readFileSync(cockpitPath, "utf8")) as {
+      titleReconciledCandidateCount: number;
+    };
+    const browser = JSON.parse(fs.readFileSync(browserPath, "utf8")) as {
+      titleReconciliationPass: boolean;
+    };
+    cockpit.titleReconciledCandidateCount = 1;
+    browser.titleReconciliationPass = false;
+    writeJson(rootDir, path.relative(rootDir, cockpitPath), cockpit);
     writeJson(rootDir, path.relative(rootDir, browserPath), browser);
 
     const audit = buildNorthstarOpenGateAudit({

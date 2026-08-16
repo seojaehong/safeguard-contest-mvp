@@ -8531,6 +8531,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && readNumber(reviewerCockpit.candidateCount) === 8
     && readNumber(reviewerCockpit.semanticGroupCount) === 24
     && readNumber(reviewerCockpit.pageReceiptCount) === 24
+    && readNumber(reviewerCockpit.titleReconciledCandidateCount) === 2
     && readString(reviewerCockpit.bodySnapshotId) === readString(reviewerSupport.bodySnapshotId)
     && readString(reviewerCockpit.bodySourceIdentitySha256) === readString(reviewerSupport.bodySourceIdentitySha256)
     && readNumber(reviewerCockpit.checklistInputCount) === 64
@@ -8547,6 +8548,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && reviewerCockpitAccessibility.candidateBoundDraftStorage === true
     && reviewerCockpitAccessibility.evidencePageReceipts === true
     && reviewerCockpitAccessibility.draftBoundToCorpusIdentity === true
+    && reviewerCockpitAccessibility.titleProvenanceVisible === true
     && reviewerCockpitAccessibility.progressLiveRegion === true
     && reviewerCockpitBoundary !== null
     && reviewerCockpitBoundary.localReviewOnly === true
@@ -8575,11 +8577,17 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && reviewerCockpitBrowser.mobilePass === true
     && reviewerCockpitBrowser.responsiveTabPanelPass === true
     && reviewerCockpitBrowser.draftStorageIdentityPass === true
+    && reviewerCockpitBrowser.titleReconciliationPass === true
     && isRecord(reviewerCockpitBrowser.draftStorageIdentity)
     && reviewerCockpitBrowser.draftStorageIdentity.sameFingerprintPreserved === true
     && reviewerCockpitBrowser.draftStorageIdentity.sourceIdentityPresent === true
     && reviewerCockpitBrowser.draftStorageIdentity.staleFingerprintDiscarded === true
     && reviewerCockpitBrowser.draftStorageIdentity.staleExportDisabled === true
+    && isRecord(reviewerCockpitBrowser.draftStorageIdentity.titleReconciliationAccess)
+    && reviewerCockpitBrowser.draftStorageIdentity.titleReconciliationAccess.candidateVisible === true
+    && reviewerCockpitBrowser.draftStorageIdentity.titleReconciliationAccess.officialCurrentTitleVisible === true
+    && reviewerCockpitBrowser.draftStorageIdentity.titleReconciliationAccess.corpusSourceTitleVisible === true
+    && reviewerCockpitBrowser.draftStorageIdentity.titleReconciliationAccess.provenanceFullyVisible === true
     && cockpitBrowserRows.length === 3
     && cockpitBrowserRows.every((row) => {
       const viewport = isRecord(row.viewport) ? row.viewport : null;
@@ -8632,7 +8640,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && cockpitBrowserBoundary.humanReviewCompleted === false
     && cockpitBrowserBoundary.separatePromotionApprovalRequired === true;
   const reviewerCockpitDetail = reviewerCockpitPass && reviewerCockpitBrowserPass
-    ? ` Reviewer cockpit ${reviewerCockpitPath} presents 8 candidates, 24 bounded excerpts, 24 PDF page/body receipts, and all 64 required human inputs in a viewport-contained no-mutation UI; export remains locked until complete and promotion remains separate approval. Browser geometry ${reviewerCockpitBrowserPath} preserves one visible candidate, 40 checks, receipt access in the bounded evidence pane, three bounded desktop/mobile cases, reciprocal breakpoint-aware tab/tabpanel semantics, one roving tab stop, End/Home keyboard selection, corpus-and-receipt-bound draft restore that rejects stale fingerprints, and polite live progress.`
+    ? ` Reviewer cockpit ${reviewerCockpitPath} presents 8 candidates, 24 bounded excerpts, 24 PDF page/body receipts, 2 reconciled official/corpus title provenance rows, and all 64 required human inputs in a viewport-contained no-mutation UI; export remains locked until complete and promotion remains separate approval. Browser geometry ${reviewerCockpitBrowserPath} preserves one visible candidate, explicit official-current and corpus-source titles, 40 checks, receipt access in the bounded evidence pane, three bounded desktop/mobile cases, reciprocal breakpoint-aware tab/tabpanel semantics, one roving tab stop, End/Home keyboard selection, corpus-title-and-receipt-bound draft restore that rejects stale fingerprints, and polite live progress.`
     : "";
   if (!isRecord(report)) {
     return gateResult({
