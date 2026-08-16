@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
 import styles from "./KnowledgePage.module.css";
 
@@ -272,6 +272,11 @@ export function KnowledgeReviewInbox() {
   const [pendingRunId, setPendingRunId] = useState<string | null>(null);
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const candidateButtonRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const reviewPaneButtonRefs = useRef<Record<"candidate" | "evidence", HTMLButtonElement | null>>({
+    candidate: null,
+    evidence: null
+  });
 
   const accessToken = session?.access_token ?? null;
   const selectedItem = items.find((item) => item.runId === selectedRunId) ?? items[0] ?? null;
@@ -279,6 +284,40 @@ export function KnowledgeReviewInbox() {
   function selectCandidate(runId: string): void {
     setSelectedRunId(runId);
     setActiveReviewPane("candidate");
+  }
+
+  function moveCandidateSelection(index: number): void {
+    const item = items[index];
+    if (!item) return;
+    selectCandidate(item.runId);
+    candidateButtonRefs.current[index]?.focus();
+  }
+
+  function handleCandidateKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number): void {
+    const lastIndex = items.length - 1;
+    const targetByKey: Partial<Record<string, number>> = {
+      ArrowDown: (index + 1) % items.length,
+      ArrowRight: (index + 1) % items.length,
+      ArrowUp: (index - 1 + items.length) % items.length,
+      ArrowLeft: (index - 1 + items.length) % items.length,
+      Home: 0,
+      End: lastIndex
+    };
+    const target = targetByKey[event.key];
+    if (target === undefined) return;
+    event.preventDefault();
+    moveCandidateSelection(target);
+  }
+
+  function selectReviewPane(pane: "candidate" | "evidence", moveFocus = false): void {
+    setActiveReviewPane(pane);
+    if (moveFocus) reviewPaneButtonRefs.current[pane]?.focus();
+  }
+
+  function handleReviewPaneKeyDown(event: KeyboardEvent<HTMLButtonElement>): void {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    selectReviewPane(event.key === "ArrowRight" || event.key === "End" ? "evidence" : "candidate", true);
   }
 
   const loadInbox = useCallback(async (token: string) => {
@@ -402,29 +441,53 @@ export function KnowledgeReviewInbox() {
         <div className={styles.reviewWorkbench} data-review-workbench="selected-only">
           <nav className={styles.reviewNavigator} aria-label="지식 후보 목록">
             <span className={styles.reviewNavigatorLabel}>검토 후보 {items.length}건</span>
-            <ul className={styles.reviewList}>
-              {items.map((item) => (
-                <li key={item.runId}>
-                  <button
-                    type="button"
-                    className={styles.reviewCandidateButton}
-                    aria-pressed={selectedItem?.runId === item.runId}
-                    onClick={() => selectCandidate(item.runId)}
-                  >
-                    <span>{item.status === "review_required" ? "검토 대기" : "후보 준비 전"}</span>
-                    <strong>{item.candidateLabel}</strong>
-                    <small>근거 {item.sourceEventCount} · 위험 {item.matchedHazardCount}</small>
-                  </button>
-                </li>
-              ))}
+            <ul
+              className={styles.reviewList}
+              role="tablist"
+              aria-label="지식 후보"
+              aria-orientation={compactViewport ? "horizontal" : "vertical"}
+            >
+              {items.map((item, index) => {
+                const selected = selectedItem?.runId === item.runId;
+                return (
+                  <li key={item.runId} role="presentation">
+                    <button
+                      type="button"
+                      role="tab"
+                      id={`knowledge-review-candidate-tab-${index}`}
+                      aria-controls={`knowledge-review-candidate-panel-${index}`}
+                      className={styles.reviewCandidateButton}
+                      aria-selected={selected}
+                      tabIndex={selected ? 0 : -1}
+                      ref={(node) => { candidateButtonRefs.current[index] = node; }}
+                      onClick={() => selectCandidate(item.runId)}
+                      onKeyDown={(event) => handleCandidateKeyDown(event, index)}
+                    >
+                      <span>{item.status === "review_required" ? "검토 대기" : "후보 준비 전"}</span>
+                      <strong>{item.candidateLabel}</strong>
+                      <small>근거 {item.sourceEventCount} · 위험 {item.matchedHazardCount}</small>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
 
           {selectedItem ? (() => {
             const item = selectedItem;
             const pending = pendingRunId === item.runId;
+            const selectedIndex = items.findIndex((candidate) => candidate.runId === item.runId);
+            const candidatePaneTabId = `knowledge-review-pane-tab-candidate-${selectedIndex}`;
+            const evidencePaneTabId = `knowledge-review-pane-tab-evidence-${selectedIndex}`;
             return (
-              <article className={styles.reviewItem} data-review-run-status={item.status} data-selected-review-candidate="true">
+              <article
+                className={styles.reviewItem}
+                id={`knowledge-review-candidate-panel-${selectedIndex}`}
+                role="tabpanel"
+                aria-labelledby={`knowledge-review-candidate-tab-${selectedIndex}`}
+                data-review-run-status={item.status}
+                data-selected-review-candidate="true"
+              >
                 <div className={styles.reviewItemHeading}>
                   <div>
                     <span>{item.status === "review_required" ? "검토 대기" : "후보 준비 전"}</span>
@@ -462,29 +525,52 @@ export function KnowledgeReviewInbox() {
                         <span>작업팩 적용 전 현장 책임자 확인</span>
                       </div>
                     </section>
-                    <div className={styles.reviewPaneTabs} role="tablist" aria-label="후보 검토 보기">
+                    <div className={styles.reviewPaneTabs} role={compactViewport ? "tablist" : undefined} aria-label={compactViewport ? "후보 검토 보기" : undefined}>
                       <button
                         type="button"
-                        role="tab"
-                        aria-selected={activeReviewPane === "candidate"}
-                        onClick={() => setActiveReviewPane("candidate")}
+                        role={compactViewport ? "tab" : undefined}
+                        id={candidatePaneTabId}
+                        aria-controls={compactViewport ? `knowledge-review-pane-candidate-${selectedIndex}` : undefined}
+                        aria-selected={compactViewport ? activeReviewPane === "candidate" : undefined}
+                        tabIndex={compactViewport ? (activeReviewPane === "candidate" ? 0 : -1) : undefined}
+                        ref={(node) => { reviewPaneButtonRefs.current.candidate = node; }}
+                        onClick={() => selectReviewPane("candidate")}
+                        onKeyDown={handleReviewPaneKeyDown}
                       >후보 문장</button>
                       <button
                         type="button"
-                        role="tab"
-                        aria-selected={activeReviewPane === "evidence"}
-                        onClick={() => setActiveReviewPane("evidence")}
+                        role={compactViewport ? "tab" : undefined}
+                        id={evidencePaneTabId}
+                        aria-controls={compactViewport ? `knowledge-review-pane-evidence-${selectedIndex}` : undefined}
+                        aria-selected={compactViewport ? activeReviewPane === "evidence" : undefined}
+                        tabIndex={compactViewport ? (activeReviewPane === "evidence" ? 0 : -1) : undefined}
+                        ref={(node) => { reviewPaneButtonRefs.current.evidence = node; }}
+                        onClick={() => selectReviewPane("evidence")}
+                        onKeyDown={handleReviewPaneKeyDown}
                       >근거 {item.evidenceItems.length}</button>
                     </div>
                     <div className={styles.reviewEvidenceWorkbench} data-review-evidence-workbench="true">
                       {!compactViewport || activeReviewPane === "candidate" ? (
-                        <section className={styles.candidatePane} data-review-pane="candidate">
+                        <section
+                          className={styles.candidatePane}
+                          id={`knowledge-review-pane-candidate-${selectedIndex}`}
+                          role={compactViewport ? "tabpanel" : undefined}
+                          aria-labelledby={compactViewport ? candidatePaneTabId : undefined}
+                          data-review-pane="candidate"
+                        >
                           <span className={styles.reviewPaneLabel}>후보 문장</span>
                           <p className={styles.candidateText} data-selected-candidate-body="true">{item.candidateText}</p>
                         </section>
                       ) : null}
                       {!compactViewport || activeReviewPane === "evidence" ? (
-                        <section className={styles.evidencePane} data-review-pane="evidence" aria-label="선택 후보 근거 목록">
+                        <section
+                          className={styles.evidencePane}
+                          id={`knowledge-review-pane-evidence-${selectedIndex}`}
+                          role={compactViewport ? "tabpanel" : undefined}
+                          aria-labelledby={compactViewport ? evidencePaneTabId : undefined}
+                          aria-label={!compactViewport ? "선택 후보 근거 목록" : undefined}
+                          data-review-pane="evidence"
+                        >
                           <div className={styles.evidencePaneHeader}>
                             <span className={styles.reviewPaneLabel}>검증 근거</span>
                             <small>최대 20건 · 원문 식별자 비공개</small>

@@ -68,6 +68,19 @@ describe("knowledge governance UI contract", () => {
     expect(cssSource).toMatch(/\.candidateText\s*\{[\s\S]*?overflow:\s*auto;/u);
   });
 
+  it("exposes linked roving candidate tabs and keyboard-operable mobile review panes", () => {
+    expect(inboxSource).toContain('role="tablist"');
+    expect(inboxSource).toContain('aria-orientation={compactViewport ? "horizontal" : "vertical"}');
+    expect(inboxSource).toContain('role="tab"');
+    expect(inboxSource).toContain('aria-controls={`knowledge-review-candidate-panel-${index}`}');
+    expect(inboxSource).toContain('tabIndex={selected ? 0 : -1}');
+    expect(inboxSource).toContain('role="tabpanel"');
+    expect(inboxSource).toContain('ArrowDown: (index + 1) % items.length');
+    expect(inboxSource).toContain('End: lastIndex');
+    expect(inboxSource).toContain('onKeyDown={handleReviewPaneKeyDown}');
+    expect(cssSource).toMatch(/\.reviewCandidateButton:focus-visible[\s\S]*?outline:\s*3px solid/u);
+  });
+
   it("localizes schema field names at the presentation boundary", () => {
     expect(pageSource).toContain('roleLabel: "문서 역할"');
     expect(pageSource).toContain('shortSummary: "짧은 요약"');

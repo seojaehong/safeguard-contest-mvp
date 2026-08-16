@@ -220,9 +220,15 @@
   cursor: pointer;
 }
 
-.reviewCandidateButton[aria-pressed="true"] {
+.reviewCandidateButton[aria-selected="true"] {
   border-color: var(--workspace-ink, #17191d);
   box-shadow: inset 3px 0 0 var(--workspace-ink, #17191d);
+}
+
+.reviewCandidateButton:focus-visible,
+.reviewPaneTabs button:focus-visible {
+  outline: 3px solid var(--workspace-focus, #0b6eeb);
+  outline-offset: 2px;
 }
 
 .reviewCandidateButton span,

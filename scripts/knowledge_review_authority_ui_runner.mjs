@@ -187,6 +187,58 @@ try {
       }
       const inbox = page.locator('[data-knowledge-review-inbox="true"]');
       await inbox.getByRole("heading", { name: queueItem.candidateLabel }).waitFor();
+      const candidateTabs = inbox.locator('[role="tablist"][aria-label="지식 후보"] [role="tab"]');
+      await candidateTabs.first().focus();
+      await page.keyboard.press("End");
+      await page.waitForFunction(() => {
+        const tabs = Array.from(document.querySelectorAll('[role="tablist"][aria-label="지식 후보"] [role="tab"]'));
+        return tabs.at(-1)?.getAttribute("aria-selected") === "true";
+      });
+      const candidateEndState = await page.evaluate(() => {
+        const tabs = Array.from(document.querySelectorAll('[role="tablist"][aria-label="지식 후보"] [role="tab"]'));
+        return {
+          selectedIndex: tabs.findIndex((tab) => tab.getAttribute("aria-selected") === "true"),
+          focusedIndex: tabs.findIndex((tab) => tab === document.activeElement)
+        };
+      });
+      await page.keyboard.press("Home");
+      await page.waitForFunction(() => (
+        document.querySelector('[role="tablist"][aria-label="지식 후보"] [role="tab"]')
+          ?.getAttribute("aria-selected") === "true"
+      ));
+      const candidateHomeState = await page.evaluate(() => {
+        const tabs = Array.from(document.querySelectorAll('[role="tablist"][aria-label="지식 후보"] [role="tab"]'));
+        return {
+          selectedIndex: tabs.findIndex((tab) => tab.getAttribute("aria-selected") === "true"),
+          focusedIndex: tabs.findIndex((tab) => tab === document.activeElement)
+        };
+      });
+      let mobilePaneKeyboard = null;
+      if (viewport.width <= 720) {
+        const paneTabs = inbox.locator('[role="tablist"][aria-label="후보 검토 보기"] [role="tab"]');
+        await paneTabs.first().focus();
+        await page.keyboard.press("End");
+        await page.waitForFunction(() => document.querySelector('[data-review-pane="evidence"]') !== null);
+        const endState = await page.evaluate(() => {
+          const tabs = Array.from(document.querySelectorAll('[role="tablist"][aria-label="후보 검토 보기"] [role="tab"]'));
+          return {
+            selectedIndex: tabs.findIndex((tab) => tab.getAttribute("aria-selected") === "true"),
+            focusedIndex: tabs.findIndex((tab) => tab === document.activeElement),
+            mountedPane: document.querySelector("[data-review-pane]")?.getAttribute("data-review-pane") ?? null
+          };
+        });
+        await page.keyboard.press("Home");
+        await page.waitForFunction(() => document.querySelector('[data-review-pane="candidate"]') !== null);
+        const homeState = await page.evaluate(() => {
+          const tabs = Array.from(document.querySelectorAll('[role="tablist"][aria-label="후보 검토 보기"] [role="tab"]'));
+          return {
+            selectedIndex: tabs.findIndex((tab) => tab.getAttribute("aria-selected") === "true"),
+            focusedIndex: tabs.findIndex((tab) => tab === document.activeElement),
+            mountedPane: document.querySelector("[data-review-pane]")?.getAttribute("data-review-pane") ?? null
+          };
+        });
+        mobilePaneKeyboard = { endState, homeState };
+      }
       const metrics = await page.evaluate(() => {
         const root = document.querySelector("[data-knowledge-review-inbox='true']");
         const workbench = document.querySelector("[data-review-workbench='selected-only']");
@@ -198,6 +250,7 @@ try {
         const authority = document.querySelector("[data-review-authority-contract='true']");
         const actionGroup = document.querySelector("[role='group'][aria-label='검토 결정']");
         const firstAction = actionGroup?.querySelector("button");
+        const candidateTablist = navigator?.querySelector('[role="tablist"][aria-label="지식 후보"]');
         if (!(root instanceof HTMLElement)
           || !(workbench instanceof HTMLElement)
           || !(navigator instanceof HTMLElement)
@@ -206,7 +259,8 @@ try {
           || !(evidenceWorkbench instanceof HTMLElement)
           || !(authority instanceof HTMLElement)
           || !(actionGroup instanceof HTMLElement)
-          || !(firstAction instanceof HTMLElement)) {
+          || !(firstAction instanceof HTMLElement)
+          || !(candidateTablist instanceof HTMLElement)) {
           throw new Error("Missing Hermes review authority UI");
         }
         const rootRect = root.getBoundingClientRect();
@@ -214,6 +268,9 @@ try {
         const selectedCandidateRect = selectedCandidate.getBoundingClientRect();
         const authorityRect = authority.getBoundingClientRect();
         const actionRect = actionGroup.getBoundingClientRect();
+        const candidateTabs = Array.from(candidateTablist.querySelectorAll('[role="tab"]'));
+        const selectedCandidateTab = candidateTabs.find((tab) => tab.getAttribute("aria-selected") === "true");
+        const candidateControlIds = candidateTabs.map((tab) => tab.getAttribute("aria-controls") || "");
         return {
           bodyHeight: document.documentElement.scrollHeight,
           viewportHeight: window.innerHeight,
@@ -226,6 +283,16 @@ try {
           rootTop: rootRect.top,
           workbenchColumns: getComputedStyle(workbench).gridTemplateColumns.split(" ").length,
           navigatorCandidateCount: navigator.querySelectorAll("button").length,
+          candidateTablistRole: candidateTablist.getAttribute("role"),
+          candidateTablistOrientation: candidateTablist.getAttribute("aria-orientation"),
+          candidateTabCount: candidateTabs.length,
+          selectedCandidateTabCount: candidateTabs.filter((tab) => tab.getAttribute("aria-selected") === "true").length,
+          tabbableCandidateTabCount: candidateTabs.filter((tab) => tab.getAttribute("tabindex") === "0").length,
+          candidateControlIdsPresent: candidateControlIds.every(Boolean),
+          candidateControlIdsUnique: new Set(candidateControlIds).size === candidateTabs.length,
+          selectedCandidateControlLinked: selectedCandidateTab?.getAttribute("aria-controls") === selectedCandidate.id,
+          selectedCandidatePanelRole: selectedCandidate.getAttribute("role"),
+          selectedCandidatePanelLabelledBy: selectedCandidate.getAttribute("aria-labelledby") === selectedCandidateTab?.id,
           selectedCandidateCount: workbench.querySelectorAll("[data-selected-review-candidate='true']").length,
           selectedBodyCount: workbench.querySelectorAll("[data-selected-candidate-body='true']").length,
           selectedBodyOverflowY: getComputedStyle(selectedBody).overflowY,
@@ -250,7 +317,7 @@ try {
       });
       let mobileEvidence = null;
       if (viewport.width <= 720) {
-        await inbox.getByRole("tab", { name: `근거 ${queueItem.evidenceItems.length}` }).click();
+        await inbox.getByRole("tab", { name: `근거 ${queueItem.evidenceItems.length}`, exact: true }).click();
         mobileEvidence = await page.evaluate(() => {
           const workbench = document.querySelector("[data-review-workbench='selected-only']");
           const pane = workbench?.querySelector("[data-review-pane='evidence']");
@@ -272,6 +339,20 @@ try {
       await page.screenshot({ path: path.join(outputDir, screenshot), fullPage: false });
       const passed = metrics.horizontalOverflow === false
         && metrics.navigatorCandidateCount === queueItems.length
+        && metrics.candidateTablistRole === "tablist"
+        && metrics.candidateTablistOrientation === (viewport.width <= 720 ? "horizontal" : "vertical")
+        && metrics.candidateTabCount === queueItems.length
+        && metrics.selectedCandidateTabCount === 1
+        && metrics.tabbableCandidateTabCount === 1
+        && metrics.candidateControlIdsPresent
+        && metrics.candidateControlIdsUnique
+        && metrics.selectedCandidateControlLinked
+        && metrics.selectedCandidatePanelRole === "tabpanel"
+        && metrics.selectedCandidatePanelLabelledBy
+        && candidateEndState.selectedIndex === queueItems.length - 1
+        && candidateEndState.focusedIndex === queueItems.length - 1
+        && candidateHomeState.selectedIndex === 0
+        && candidateHomeState.focusedIndex === 0
         && metrics.selectedCandidateCount === 1
         && metrics.selectedBodyCount === 1
         && metrics.selectedBodyOverflowY === "auto"
@@ -293,10 +374,26 @@ try {
             && mobileEvidence.evidenceItemCount === queueItem.evidenceItems.length
             && mobileEvidence.publicEvidenceLinkCount === 3
             && mobileEvidence.listOverflowY === "auto"
-            && mobileEvidence.contained)
+            && mobileEvidence.contained
+            && mobilePaneKeyboard?.endState.selectedIndex === 1
+            && mobilePaneKeyboard.endState.focusedIndex === 1
+            && mobilePaneKeyboard.endState.mountedPane === "evidence"
+            && mobilePaneKeyboard.homeState.selectedIndex === 0
+            && mobilePaneKeyboard.homeState.focusedIndex === 0
+            && mobilePaneKeyboard.homeState.mountedPane === "candidate")
         && metrics.firstActionDepth <= viewport.height * 1.25
         && browserErrors.length === 0;
-      results.push({ theme, viewport, screenshot, metrics, mobileEvidence, browserErrors, passed });
+      results.push({
+        theme,
+        viewport,
+        screenshot,
+        metrics,
+        candidateKeyboard: { endState: candidateEndState, homeState: candidateHomeState },
+        mobilePaneKeyboard,
+        mobileEvidence,
+        browserErrors,
+        passed
+      });
       await context.close();
     }
   }
@@ -349,6 +446,12 @@ const report = {
     desktopColumns: 2,
     mobileColumns: 1,
     candidateBodyInternalScroll: true,
+    candidateTablist: true,
+    candidateRovingTabStop: true,
+    candidateKeyboardNavigation: true,
+    breakpointOrientationSynchronized: true,
+    mobilePaneTabsLinked: true,
+    mobilePaneKeyboardNavigation: true,
     evidenceItemLimit: 20,
     evidenceItemCount: queueItem.evidenceItems.length,
     desktopEvidenceColumns: 2,
@@ -400,8 +503,9 @@ ${rows}
 - Site-manager acceptance is required before workpack use.
 - Machine evidence does not replace human review.
 - The candidate navigator contains three fixtures while exactly one selected candidate body is mounted.
+- Candidate tabs expose one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, and Arrow/Home/End keyboard navigation.
 - Desktop uses a two-column review workbench; mobile uses one column and keeps the candidate body internally scrollable.
-- Desktop mounts the selected candidate and five-item evidence inspector together; mobile mounts only the selected candidate or evidence pane behind a segmented control.
+- Desktop mounts the selected candidate and five-item evidence inspector together; mobile mounts one linked pane behind a keyboard-operable segmented tab control.
 - Only allowlisted public law, KOSHA, and SIF references expose verified HTTPS links. Organization and site evidence retain generic labels and bounded digests only.
 
 ## Boundary
@@ -461,6 +565,7 @@ if (liveMode && productionAligned && summaryOutput) {
 ## Result
 
 The authenticated review candidate cockpit exposes six evidence-role counts, keeps legal-duty claims bound to law provenance, blocks public promotion of tenant memory, and requires site-manager acceptance before workpack use.
+The candidate navigator also keeps one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, and keyboard navigation across candidates and compact review panes.
 
 ## Boundary
 
