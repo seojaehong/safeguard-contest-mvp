@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-16T13:12:49.830Z",
-  "head": "e7afe36bc380bca2666dcbd2115aa0e1e1e32e80",
+  "generatedAt": "2026-08-16T13:55:36.711Z",
+  "head": "973bf64b19a1f8fcaf85931c0ced849c4fdefbad",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "e7afe36bc380bca2666dcbd2115aa0e1e1e32e80",
+    "commitSha": "ffa2948c3e14fe740b692b5b4bd8d8af805ecdcc",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-du9wexb7h-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-kpspj8ela-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -393,7 +393,7 @@
       "id": "kosha_exact_promotion_review_gate",
       "state": "approval_gated",
       "artifact": "evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\report.json",
-      "detail": "Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Official PDF audit evaluation\\kosha-exact-official-pdf-audit-2026-07-25\\report.json re-downloaded and machine-verified all 8 PDF/body pairs while preserving lifecycle, human-review, and promotion boundaries. Official lifecycle audit evaluation\\kosha-exact-official-lifecycle-audit-2026-07-25\\report.json reconciles all 8 packet versions against current and retired inventories with 8 exact official-current titles; corpus source titles remain separately preserved for provenance. Reviewer-support audit evaluation\\kosha-exact-promotion-reviewer-support-2026-07-25\\report.json records bounded excerpts for 8/8 candidates and 24/24 semantic groups without completing human review or creating a registry artifact. Reviewer cockpit evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\report.json presents 8 candidates, 24 bounded excerpts, and all 64 required human inputs in a viewport-contained no-mutation UI; export remains locked until complete and promotion remains separate approval. Browser geometry evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\browser-report.json preserves one visible candidate, 40 checks, three bounded desktop/mobile cases, linked tab/tabpanel semantics, one roving tab stop, End/Home keyboard selection, breakpoint-correct orientation, and polite live progress. Contract audit evaluation\\kosha-exact-promotion-review-contract-audit-2026-07-23\\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval."
+      "detail": "Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Official PDF audit evaluation\\kosha-exact-official-pdf-audit-2026-07-25\\report.json re-downloaded and machine-verified all 8 PDF/body pairs while preserving lifecycle, human-review, and promotion boundaries. Official lifecycle audit evaluation\\kosha-exact-official-lifecycle-audit-2026-07-25\\report.json reconciles all 8 packet versions against current and retired inventories with 8 exact official-current titles; corpus source titles remain separately preserved for provenance. Reviewer-support audit evaluation\\kosha-exact-promotion-reviewer-support-2026-07-25\\report.json records bounded excerpts for 8/8 candidates and 24/24 semantic groups without completing human review or creating a registry artifact. Reviewer cockpit evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\report.json presents 8 candidates, 24 bounded excerpts, and all 64 required human inputs in a viewport-contained no-mutation UI; export remains locked until complete and promotion remains separate approval. Browser geometry evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\browser-report.json preserves one visible candidate, 40 checks, three bounded desktop/mobile cases, reciprocal breakpoint-aware tab/tabpanel semantics, one roving tab stop, End/Home keyboard selection, candidate-bound draft restore that rejects stale fingerprints, and polite live progress. Contract audit evaluation\\kosha-exact-promotion-review-contract-audit-2026-07-23\\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval."
     }
   ],
   "mobileP0": {
@@ -1257,10 +1257,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "e7afe36bc380bca2666dcbd2115aa0e1e1e32e80",
+      "sourceCommit": "973bf64b19a1f8fcaf85931c0ced849c4fdefbad",
       "sourceStatus": "exact",
-      "productionCommit": "e7afe36bc380bca2666dcbd2115aa0e1e1e32e80",
-      "productionStatus": "matches_live"
+      "productionCommit": "973bf64b19a1f8fcaf85931c0ced849c4fdefbad",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -1594,17 +1594,17 @@
       "id": "hermes_knowledge_review_ui",
       "artifact": "evaluation\\hermes-knowledge-review-selected-workbench-2026-08-14\\report.json",
       "sourceCommit": "e7afe36bc380bca2666dcbd2115aa0e1e1e32e80",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "e7afe36bc380bca2666dcbd2115aa0e1e1e32e80",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "hermes_review_evidence_inspector",
       "artifact": "evaluation\\hermes-knowledge-review-evidence-inspector-2026-08-14\\report.json",
       "sourceCommit": "e7afe36bc380bca2666dcbd2115aa0e1e1e32e80",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "e7afe36bc380bca2666dcbd2115aa0e1e1e32e80",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "hermes_remote_durable_ledger",

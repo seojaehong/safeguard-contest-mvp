@@ -11,6 +11,8 @@ Verdict: `PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY`
 - Candidate tabs: true
 - Candidate End/Home keyboard: true
 - Mobile evidence/review keyboard: true
+- Breakpoint-correct tabpanels: true
+- Candidate-bound draft restore: true
 - Live progress status: true
 - Horizontal overflow: false
 

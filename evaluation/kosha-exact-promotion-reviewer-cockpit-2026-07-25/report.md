@@ -10,6 +10,8 @@ Verdict: `PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY`
 - Candidate keyboard tabs: 8 with one roving tab stop
 - Breakpoint orientation synchronized: true
 - Mobile evidence/review tabs: true
+- Responsive tabpanel semantics: true
+- Candidate-bound draft storage: true
 - Live progress region: true
 - HTML: `evaluation\kosha-exact-promotion-reviewer-cockpit-2026-07-25\index.html`
 
