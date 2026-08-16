@@ -76,6 +76,7 @@ const EVIDENCE_PATHS = Object.freeze({
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-selected-workbench-2026-08-14", "report.json"),
+  hermesKnowledgeReviewEvidenceInspector: path.join("evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json"),
   hermesOpenclawRuntime: path.join("evaluation", "hermes-openclaw-runtime-current-gate-2026-07-20", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
@@ -4009,6 +4010,86 @@ function evaluateCurrentSecurityRemediationLedgerGate(rootDir) {
     nextActions: pass
       ? ["Close the three distributed-runtime controls with production configuration evidence and request separate approval before any database security migration or live canary."]
       : ["Restore the exact 23-finding ledger, receipt existence, immutable baselines, no-mutation boundary, and six open findings before using the current remediation count."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateHermesKnowledgeReviewEvidenceInspectorGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.hermesKnowledgeReviewEvidenceInspector;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "hermes_review_evidence_inspector",
+      label: "Hermes review evidence inspector",
+      state: "missing",
+      evidencePath,
+      detail: "Hermes selected-candidate evidence inspector evidence is missing.",
+      nextActions: ["Run the bounded authenticated evidence-inspector probe against local and live production."],
+    });
+  }
+
+  const local = isRecord(report.local) ? report.local : {};
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const contract = isRecord(report.evidenceContract) ? report.evidenceContract : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const security = isRecord(report.securityBoundary) ? report.securityBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.ontologyPublicationPerformed === false
+    && mutation.vectorOrEmbeddingMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = report.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR"
+    && productCommit !== ""
+    && productionCommit !== ""
+    && isGitAncestor(rootDir, productCommit)
+    && isGitAncestor(rootDir, productionCommit)
+    && local.verdict === "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_EVIDENCE_INSPECTOR"
+    && local.viewportCount === 8
+    && local.passedCount === 8
+    && local.failedCount === 0
+    && afterLive.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR"
+    && afterLive.viewportCount === 8
+    && afterLive.passedCount === 8
+    && afterLive.failedCount === 0
+    && afterLive.productionAligned === true
+    && afterLive.browserErrorCount === 0
+    && contract.itemLimit === 20
+    && contract.fixtureItemCount === 5
+    && contract.authorityCountsMatchReviewContract === true
+    && contract.desktopCandidateAndEvidenceMounted === true
+    && contract.desktopEvidenceColumns === 2
+    && contract.mobileMountedPaneCount === 1
+    && contract.mobileCandidateEvidenceSegmentedControl === true
+    && contract.publicOfficialHttpsLinkCount === 3
+    && contract.privateEvidenceRawIdentityExposed === false
+    && contract.evidenceInternalScroll === true
+    && contract.horizontalOverflow === false
+    && noMutation
+    && security.immutableOriginal18FindingBaselinePreserved === true
+    && security.freshFullRepositoryScanRequired === true
+    && security.securityComplete === false
+    && remaining.exactSavedShareVerdict === "MISSING_EVIDENCE"
+    && remaining.llmWikiPublication === "APPROVAL_GATED"
+    && remaining.supabaseRlsLaunchIsolation === "APPROVAL_GATED"
+    && remaining.providerDispatchPersistence === "APPROVAL_GATED";
+
+  return gateResult({
+    id: "hermes_review_evidence_inspector",
+    label: "Hermes review evidence inspector",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live Hermes review evidence inspector passes 8/8 Day/Night desktop and mobile cases. It binds five displayed evidence items to the existing authority counts, mounts candidate plus evidence on desktop and one segmented pane on mobile, exposes only allowlisted official HTTPS references, keeps tenant evidence generic, and performs no mutation. The immutable 18-finding baseline remains preserved, a fresh full-repository scan is still required, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED."
+      : `Hermes evidence-inspector contract is contradicted: verdict=${readString(report.verdict) || "missing"}, local=${readString(local.verdict) || "missing"}, live=${readString(afterLive.verdict) || "missing"}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}, securityComplete=${String(security.securityComplete)}.`,
+    nextActions: pass ? [] : ["Restore the evidence-count, privacy, geometry, no-mutation, security-baseline, and approval boundaries, then rerun local and live probes."],
   });
 }
 
@@ -8219,6 +8300,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateHermesRemoteDurableLedgerGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir),
+    evaluateHermesKnowledgeReviewEvidenceInspectorGate(rootDir),
     evaluateLiveDocumentSecondaryGroundingGate(rootDir),
     evaluateLiveDocumentSeedProfileIsolationGate(rootDir),
     evaluateUiDocumentsShareCockpitGate(rootDir),

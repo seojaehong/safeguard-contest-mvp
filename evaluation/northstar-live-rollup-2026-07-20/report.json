@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-13T23:26:56.480Z",
-  "head": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
+  "generatedAt": "2026-08-16T05:08:09.523Z",
+  "head": "b15df85b68235871ac521d01a6334ad90b122a26",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
+    "commitSha": "b15df85b68235871ac521d01a6334ad90b122a26",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-4gf2p7qtu-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-pwk2t28lh-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 59
+    "gateCount": 60
   },
   "provenGates": [
     {
@@ -272,6 +272,12 @@
       "state": "proven",
       "artifact": "evaluation\\hermes-knowledge-review-selected-workbench-2026-08-14\\report.json",
       "detail": "Live authenticated reviewer cockpit passes 8/8 Day/Night desktop and mobile geometry cases with three navigable candidates, exactly one selected candidate/body, desktop two-column and mobile one-column containment, and internal candidate-body scroll. It exposes six SIF -> KOSHA -> law -> tenant-memory evidence roles, requires law provenance and site-manager acceptance, and performs no DB, provider, publication, or Share mutation. LLM Wiki/RLS remain APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "hermes_review_evidence_inspector",
+      "state": "proven",
+      "artifact": "evaluation\\hermes-knowledge-review-evidence-inspector-2026-08-14\\report.json",
+      "detail": "Live Hermes review evidence inspector passes 8/8 Day/Night desktop and mobile cases. It binds five displayed evidence items to the existing authority counts, mounts candidate plus evidence on desktop and one segmented pane on mobile, exposes only allowlisted official HTTPS references, keeps tenant evidence generic, and performs no mutation. The immutable 18-finding baseline remains preserved, a fresh full-repository scan is still required, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED."
     },
     {
       "id": "live_document_secondary_grounding",
@@ -1046,6 +1052,35 @@
     "llmWikiPublication": "APPROVAL_GATED",
     "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
   },
+  "hermesKnowledgeReviewEvidenceInspector": {
+    "artifact": "evaluation\\hermes-knowledge-review-evidence-inspector-2026-08-14\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
+    "sourceHead": "b15df85b68235871ac521d01a6334ad90b122a26",
+    "productCommit": "be8a0f143f40689fc02af791bc0b7ae5509046cd",
+    "productionCommit": "dac7ec54dc8999b54cdac43203b7b339c4d3b036",
+    "localPassed": 8,
+    "localViewportCount": 8,
+    "livePassed": 8,
+    "liveViewportCount": 8,
+    "productionAligned": true,
+    "browserErrorCount": 0,
+    "itemLimit": 20,
+    "fixtureItemCount": 5,
+    "desktopEvidenceColumns": 2,
+    "mobileMountedPaneCount": 1,
+    "publicOfficialHttpsLinkCount": 3,
+    "privateEvidenceRawIdentityExposed": false,
+    "evidenceInternalScroll": true,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "securityComplete": false,
+    "freshFullRepositoryScanRequired": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED"
+  },
   "hermesOpenclawRuntime": {
     "artifact": "evaluation\\hermes-openclaw-runtime-current-gate-2026-07-20\\report.json",
     "verdict": "adapter_boundary_pass_live_execution_not_claimed",
@@ -1152,9 +1187,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
+      "sourceCommit": "b15df85b68235871ac521d01a6334ad90b122a26",
       "sourceStatus": "exact",
-      "productionCommit": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
+      "productionCommit": "b15df85b68235871ac521d01a6334ad90b122a26",
       "productionStatus": "matches_live"
     },
     {
@@ -1409,9 +1444,9 @@
       "id": "public_search_distributed_admission",
       "artifact": "evaluation\\public-search-distributed-admission-2026-08-14\\report.json",
       "sourceCommit": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "public_search_distributed_rate_limit_readiness",
@@ -1483,6 +1518,14 @@
       "sourceCommit": "6453a595d4771d64f07d79d3f042509be876c707",
       "sourceStatus": "ancestor",
       "productionCommit": "6453a595d4771d64f07d79d3f042509be876c707",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "hermes_review_evidence_inspector",
+      "artifact": "evaluation\\hermes-knowledge-review-evidence-inspector-2026-08-14\\report.json",
+      "sourceCommit": "b15df85b68235871ac521d01a6334ad90b122a26",
+      "sourceStatus": "exact",
+      "productionCommit": "dac7ec54dc8999b54cdac43203b7b339c4d3b036",
       "productionStatus": "ancestor_of_head"
     },
     {

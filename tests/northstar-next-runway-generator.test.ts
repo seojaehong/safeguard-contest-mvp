@@ -333,6 +333,28 @@ type NextRunwayReport = {
     llmWikiPublication: string;
     supabaseRlsLaunchIsolation: string;
   };
+  hermesKnowledgeReviewEvidenceInspector: {
+    verdict: string;
+    localPassed: number;
+    localViewportCount: number;
+    livePassed: number;
+    liveViewportCount: number;
+    productionAligned: boolean;
+    browserErrorCount: number;
+    itemLimit: number;
+    fixtureItemCount: number;
+    desktopEvidenceColumns: number;
+    mobileMountedPaneCount: number;
+    publicOfficialHttpsLinkCount: number;
+    privateEvidenceRawIdentityExposed: boolean;
+    evidenceInternalScroll: boolean;
+    securityComplete: boolean;
+    freshFullRepositoryScanRequired: boolean;
+    exactSavedShareVerdict: string;
+    llmWikiPublication: string;
+    supabaseRlsLaunchIsolation: string;
+    providerDispatchPersistence: string;
+  };
   liveDocumentSeedProfileIsolation: {
     verdict: string;
     sourceHead: string;
@@ -1970,6 +1992,31 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/hermes-knowledge-review-evidence-inspector-2026-08-14/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-product",
+    productionCommit: "fixture-sha",
+    local: { viewportCount: 8, passedCount: 8, failedCount: 0 },
+    afterLive: { viewportCount: 8, passedCount: 8, failedCount: 0, productionAligned: true, browserErrorCount: 0 },
+    evidenceContract: {
+      itemLimit: 20,
+      fixtureItemCount: 5,
+      desktopEvidenceColumns: 2,
+      mobileMountedPaneCount: 1,
+      publicOfficialHttpsLinkCount: 3,
+      privateEvidenceRawIdentityExposed: false,
+      evidenceInternalScroll: true,
+    },
+    mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false },
+    securityBoundary: { freshFullRepositoryScanRequired: true, securityComplete: false },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+    },
+  });
   writeJson(root, "evaluation/security-upstream-transport-remediation-2026-08-11/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_SOURCE_PROVEN_UPSTREAM_TRANSPORT_SECURITY_NO_PROVIDER_PROBE",
     sourceHead: "fixture-sha",
@@ -2739,6 +2786,28 @@ describe("northstar next runway generator", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       llmWikiPublication: "APPROVAL_GATED",
       supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+    });
+    expect(report.hermesKnowledgeReviewEvidenceInspector).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
+      localPassed: 8,
+      localViewportCount: 8,
+      livePassed: 8,
+      liveViewportCount: 8,
+      productionAligned: true,
+      browserErrorCount: 0,
+      itemLimit: 20,
+      fixtureItemCount: 5,
+      desktopEvidenceColumns: 2,
+      mobileMountedPaneCount: 1,
+      publicOfficialHttpsLinkCount: 3,
+      privateEvidenceRawIdentityExposed: false,
+      evidenceInternalScroll: true,
+      securityComplete: false,
+      freshFullRepositoryScanRequired: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
     });
     expect(report.provenCurrentState).toContain("live_document_secondary_grounding");
     expect(report.liveDocumentSeedProfileIsolation).toMatchObject({

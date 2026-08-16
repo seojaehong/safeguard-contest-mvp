@@ -1,9 +1,11 @@
 # Hermes Knowledge Review Evidence Inspector
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_EVIDENCE_INSPECTOR_LIVE_PENDING`
+- Verdict: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR`
 - Product commit: `be8a0f143f40689fc02af791bc0b7ae5509046cd`
-- Probe source: `dac7ec54dc8999b54cdac43203b7b339c4d3b036`
+- Production commit: `dac7ec54dc8999b54cdac43203b7b339c4d3b036`
+- Deployment: `safeguard-contest-9bw8rfqfe-seojaehongs-projects.vercel.app`
 - Local production geometry: 8/8 PASS across Day/Night and 1440x900, 1440x723, 390x844, 390x723.
+- Live production geometry: 8/8 PASS across the same matrix, with zero browser errors.
 
 ## Result
 
@@ -18,11 +20,11 @@
 - Focused and adjacent tests: 8 files / 117 tests PASS.
 - Strict typecheck: PASS.
 - Next.js 15.5.22 build: PASS, 28 static pages.
-- Machine report and viewport screenshots: `after-local/`.
+- Machine reports and viewport screenshots: `after-local/` and `after-live/`.
 
 ## Boundary
 
-- This is current-source local-production evidence. Live after-deployment evidence is still required.
+- The live production marker contains the product commit and the after-live runner reports `productionAligned=true`.
 - No DB, provider, Share-session, ontology, vector/embedding, Wiki, or KOSHA registry mutation was performed.
 - The immutable original 18-finding security baseline remains preserved; a fresh full-repository scan is still required before any security-complete claim.
 - Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.

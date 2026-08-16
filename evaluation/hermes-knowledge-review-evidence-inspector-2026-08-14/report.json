@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-hermes-knowledge-review-evidence-inspector-summary/v1",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_EVIDENCE_INSPECTOR_LIVE_PENDING",
-  "checkedAt": "2026-08-16T04:49:19.702Z",
-  "sourceHead": "dac7ec54dc8999b54cdac43203b7b339c4d3b036",
+  "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
+  "checkedAt": "2026-08-16T04:51:53.142Z",
+  "sourceHead": "b15df85b68235871ac521d01a6334ad90b122a26",
   "productCommit": "be8a0f143f40689fc02af791bc0b7ae5509046cd",
   "local": {
     "path": "evaluation/hermes-knowledge-review-evidence-inspector-2026-08-14/after-local/report.json",
@@ -11,7 +11,18 @@
     "passedCount": 8,
     "failedCount": 0
   },
-  "liveAfterDeploymentRequired": true,
+  "productionCommit": "dac7ec54dc8999b54cdac43203b7b339c4d3b036",
+  "deploymentUrl": "safeguard-contest-9bw8rfqfe-seojaehongs-projects.vercel.app",
+  "afterLive": {
+    "path": "evaluation/hermes-knowledge-review-evidence-inspector-2026-08-14/after-live/report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
+    "viewportCount": 8,
+    "passedCount": 8,
+    "failedCount": 0,
+    "productionAligned": true,
+    "browserErrorCount": 0
+  },
+  "liveAfterDeploymentRequired": false,
   "evidenceContract": {
     "itemLimit": 20,
     "fixtureItemCount": 5,

@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `b8d24652d3a45ea9bfee50227eb6f37f4a703594`
+Source HEAD: `b15df85b68235871ac521d01a6334ad90b122a26`
 
-Production `/api/build-info`: `b8d24652d3a45ea9bfee50227eb6f37f4a703594`
+Production `/api/build-info`: `b15df85b68235871ac521d01a6334ad90b122a26`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `b8d24652d3a45ea9bfee50227eb6f37f4a703594`
+Live rollup source head: `b15df85b68235871ac521d01a6334ad90b122a26`
 
 Live rollup matches production: `true`
 
@@ -68,6 +68,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live deployment freshness is measured separately: `PASS_LIVE_PRODUCTION_DEPLOYMENT_FRESHNESS_GUARD`, current notice present `false`, simulated SHA-drift refresh visible `true`, frontend audit violations `0`, and live pending `false`. This closes only stale-tab visibility; DB mutation remains `false` and exact saved Share remains `MISSING_EVIDENCE`.
 - MCP generation work-budget security is separately measured: `PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING`, POST body budget `98304` bytes, adjacent tests `77`, valid authenticated runtime probe pending=`true`, distributed activation pending=`true`, and fresh rescan required=`true`. This notice preserves the sealed finding and exact saved Share `MISSING_EVIDENCE`.
 - Live Hermes reviewer authority UI is measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI`, local/live viewport contracts `8/8` and `8/8`, selected-only candidates/selected/body `3/1/1`, desktop/mobile columns `2/1`, and authority order `SIF -> KOSHA -> law -> organization_history -> site_history -> external_context`. Human review remains required and machine evidence does not replace it; no DB/provider/share/publication mutation is claimed. Exact saved Share remains `MISSING_EVIDENCE`, while LLM Wiki publication and Supabase RLS remain approval-gated.
+- Live Hermes evidence inspector is measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR`, local/live viewport contracts `8/8` and `8/8`, budget/items/desktop columns/mobile panes `20/5/2/1`, official HTTPS/private identity exposed `3/false`. Security-complete remains `false`, a fresh full-repository scan remains required, exact saved Share remains `MISSING_EVIDENCE`, and Wiki/RLS/provider persistence remain approval-gated.
 - Live supporting-document scenario grounding is measured separately: `PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT`, live cases `5/5`, supporting documents `30/30`, cross-scenario leakage `0`, and missingUnexpected `0`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains `MISSING_EVIDENCE`.
 - Live document seed-profile isolation is measured separately: `PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION`, before forbidden fragments `90`, live forbidden fragments `0`, reviewed document surface `60`, and secondary grounding `30/30`. This deterministic gate does not replace broad human wording review or exact saved Share evidence; exact saved Share remains `MISSING_EVIDENCE`.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level. DNS-pinned trusted transport wired=`true`; durable attempt ledger wired/atomic/reservation-bound/digest-only=`true/true/true/true`; live execution claimed=`false`.

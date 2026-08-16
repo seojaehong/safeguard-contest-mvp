@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-13T23:26:51.453Z",
-  "sourceSha": "b8d24652d3a45ea9bfee50227eb6f37f4a703594",
+  "generatedAt": "2026-08-16T05:08:08.189Z",
+  "sourceSha": "b15df85b68235871ac521d01a6334ad90b122a26",
   "overall": "open",
   "gates": [
     {
@@ -441,6 +441,14 @@
       "label": "Hermes knowledge reviewer UI",
       "evidencePath": "evaluation\\hermes-knowledge-review-selected-workbench-2026-08-14\\report.json",
       "detail": "Live authenticated reviewer cockpit passes 8/8 Day/Night desktop and mobile geometry cases with three navigable candidates, exactly one selected candidate/body, desktop two-column and mobile one-column containment, and internal candidate-body scroll. It exposes six SIF -> KOSHA -> law -> tenant-memory evidence roles, requires law provenance and site-manager acceptance, and performs no DB, provider, publication, or Share mutation. LLM Wiki/RLS remain APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": []
+    },
+    {
+      "id": "hermes_review_evidence_inspector",
+      "state": "proven",
+      "label": "Hermes review evidence inspector",
+      "evidencePath": "evaluation\\hermes-knowledge-review-evidence-inspector-2026-08-14\\report.json",
+      "detail": "Live Hermes review evidence inspector passes 8/8 Day/Night desktop and mobile cases. It binds five displayed evidence items to the existing authority counts, mounts candidate plus evidence on desktop and one segmented pane on mobile, exposes only allowlisted official HTTPS references, keeps tenant evidence generic, and performs no mutation. The immutable 18-finding baseline remains preserved, a fresh full-repository scan is still required, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED.",
       "nextActions": []
     },
     {

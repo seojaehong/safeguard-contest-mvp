@@ -469,6 +469,28 @@ type RollupReport = {
     llmWikiPublication: string;
     supabaseRlsLaunchIsolation: string;
   };
+  hermesKnowledgeReviewEvidenceInspector: {
+    verdict: string;
+    localPassed: number;
+    localViewportCount: number;
+    livePassed: number;
+    liveViewportCount: number;
+    productionAligned: boolean;
+    browserErrorCount: number;
+    itemLimit: number;
+    fixtureItemCount: number;
+    desktopEvidenceColumns: number;
+    mobileMountedPaneCount: number;
+    publicOfficialHttpsLinkCount: number;
+    privateEvidenceRawIdentityExposed: boolean;
+    evidenceInternalScroll: boolean;
+    securityComplete: boolean;
+    freshFullRepositoryScanRequired: boolean;
+    exactSavedShareVerdict: string;
+    llmWikiPublication: string;
+    supabaseRlsLaunchIsolation: string;
+    providerDispatchPersistence: string;
+  };
   hermesOpenclawRuntime: {
     verdict: string;
     sourceHead: string;
@@ -1328,6 +1350,31 @@ function createFixtureRoot(): { root: string; head: string } {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(root, "evaluation/hermes-knowledge-review-evidence-inspector-2026-08-14/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
+    sourceHead: "TO_FILL",
+    productCommit: "TO_FILL",
+    productionCommit: "TO_FILL",
+    local: { viewportCount: 8, passedCount: 8, failedCount: 0 },
+    afterLive: { viewportCount: 8, passedCount: 8, failedCount: 0, productionAligned: true, browserErrorCount: 0 },
+    evidenceContract: {
+      itemLimit: 20,
+      fixtureItemCount: 5,
+      desktopEvidenceColumns: 2,
+      mobileMountedPaneCount: 1,
+      publicOfficialHttpsLinkCount: 3,
+      privateEvidenceRawIdentityExposed: false,
+      evidenceInternalScroll: true,
+    },
+    mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false },
+    securityBoundary: { freshFullRepositoryScanRequired: true, securityComplete: false },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+    },
+  });
   writeJson(root, "evaluation/public-ask-distributed-admission-2026-08-14/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_PUBLIC_ASK_PROVIDER_MODES_FAIL_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION",
     sourceHead: "TO_FILL",
@@ -1500,6 +1547,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/deployment-freshness-guard-2026-08-14/report.json",
     "evaluation/learning-export-renderer-security-2026-08-02/report.json",
     "evaluation/hermes-knowledge-review-selected-workbench-2026-08-14/report.json",
+    "evaluation/hermes-knowledge-review-evidence-inspector-2026-08-14/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
     "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json",
     "evaluation/kosha-current-live-gate-2026-07-20/report.json",
@@ -2001,6 +2049,29 @@ describe("northstar live rollup", () => {
       supabaseRlsLaunchIsolation: "APPROVAL_GATED",
     });
     expect(report.evidence.find((item) => item.id === "hermes_knowledge_review_ui")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.hermesKnowledgeReviewEvidenceInspector).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
+      localPassed: 8,
+      localViewportCount: 8,
+      livePassed: 8,
+      liveViewportCount: 8,
+      productionAligned: true,
+      browserErrorCount: 0,
+      itemLimit: 20,
+      fixtureItemCount: 5,
+      desktopEvidenceColumns: 2,
+      mobileMountedPaneCount: 1,
+      publicOfficialHttpsLinkCount: 3,
+      privateEvidenceRawIdentityExposed: false,
+      evidenceInternalScroll: true,
+      securityComplete: false,
+      freshFullRepositoryScanRequired: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+    });
+    expect(report.evidence.find((item) => item.id === "hermes_review_evidence_inspector")?.productionStatus).toBe("ancestor_of_head");
     expect(report.liveDocumentSecondaryGrounding).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT",
       livePassed: 5,
