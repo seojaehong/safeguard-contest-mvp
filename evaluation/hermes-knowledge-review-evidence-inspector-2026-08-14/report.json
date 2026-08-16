@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "safeclaw-hermes-knowledge-review-evidence-inspector-summary/v1",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_EVIDENCE_INSPECTOR_LIVE_PENDING",
+  "checkedAt": "2026-08-16T04:49:19.702Z",
+  "sourceHead": "dac7ec54dc8999b54cdac43203b7b339c4d3b036",
+  "productCommit": "be8a0f143f40689fc02af791bc0b7ae5509046cd",
+  "local": {
+    "path": "evaluation/hermes-knowledge-review-evidence-inspector-2026-08-14/after-local/report.json",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_EVIDENCE_INSPECTOR",
+    "viewportCount": 8,
+    "passedCount": 8,
+    "failedCount": 0
+  },
+  "liveAfterDeploymentRequired": true,
+  "evidenceContract": {
+    "itemLimit": 20,
+    "fixtureItemCount": 5,
+    "authorityCountsMatchReviewContract": true,
+    "desktopCandidateAndEvidenceMounted": true,
+    "desktopEvidenceColumns": 2,
+    "mobileMountedPaneCount": 1,
+    "mobileCandidateEvidenceSegmentedControl": true,
+    "publicOfficialHttpsLinkCount": 3,
+    "privateEvidenceRawIdentityExposed": false,
+    "evidenceInternalScroll": true,
+    "horizontalOverflow": false,
+    "desktopSelectedCandidateHeight": 580,
+    "mobileSelectedCandidateHeight": 618.4375,
+    "maxFirstActionDepth": 903.609375
+  },
+  "verification": {
+    "focusedAndAdjacentTests": {
+      "files": 8,
+      "tests": 117,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "ontologyPublicationPerformed": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "securityBoundary": {
+    "immutableOriginal18FindingBaselinePreserved": true,
+    "freshFullRepositoryScanRequired": true,
+    "securityComplete": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED"
+  }
+}
