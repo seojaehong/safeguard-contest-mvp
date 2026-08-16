@@ -1,7 +1,7 @@
 # RLS / LLM Wiki Approval Preflight
 
-Generated: `2026-07-25T06:42:36.338Z`
-Source SHA: `e6b382ec1f169934906deae4a2407adf590a6fbb`
+Generated: `2026-08-16T08:42:10.346Z`
+Source SHA: `30cc7ed2249cb29c040500883c4ef7c46b6e9e75`
 Overall: `approval_ready_open`
 Launch readiness: `false`
 DB mutation performed: `false`
@@ -34,6 +34,18 @@ The approval packet is internally ready for operator review, but launch readines
 - Exact saved Share: `MISSING_EVIDENCE`
 - LLM Wiki / RLS: `APPROVAL_GATED` / `APPROVAL_GATED`
 
+## Hermes Reviewer Evidence Inspector
+
+- Verdict: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR`
+- Live viewports: `8/8`
+- Production aligned: `true`
+- Evidence item limit / fixture count: `20/5`
+- Desktop evidence columns / mobile mounted panes: `2/1`
+- Public official HTTPS links: `3`
+- Private raw identity exposed: `false`
+- Exact saved Share: `MISSING_EVIDENCE`
+- LLM Wiki / RLS / provider persistence: `APPROVAL_GATED` / `APPROVAL_GATED` / `APPROVAL_GATED`
+
 ## Checks
 
 | Check | Result | Message |
@@ -60,8 +72,14 @@ The approval packet is internally ready for operator review, but launch readines
 | `knowledge_review_route_non_publishing` | PASS | ok |
 | `hermes_review_authority_ui_live` | PASS | ok |
 | `hermes_review_authority_contract` | PASS | ok |
+| `hermes_review_selected_workbench` | PASS | ok |
 | `hermes_review_authority_non_mutating` | PASS | ok |
 | `hermes_review_authority_boundaries_open` | PASS | ok |
+| `hermes_review_evidence_inspector_live` | PASS | ok |
+| `hermes_review_evidence_inspector_contract` | PASS | ok |
+| `hermes_review_evidence_inspector_verified` | PASS | ok |
+| `hermes_review_evidence_inspector_non_mutating` | PASS | ok |
+| `hermes_review_evidence_inspector_boundaries_open` | PASS | ok |
 | `wiki_no_executable_publication_surface` | PASS | ok |
 | `northstar_rls_gate_approval_gated` | PASS | ok |
 | `northstar_wiki_gate_approval_gated` | PASS | ok |

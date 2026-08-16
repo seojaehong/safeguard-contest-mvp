@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-rls-llm-wiki-approval-preflight/v1",
-  "generatedAt": "2026-07-25T06:42:36.338Z",
-  "sourceSha": "e6b382ec1f169934906deae4a2407adf590a6fbb",
+  "generatedAt": "2026-08-16T08:42:10.346Z",
+  "sourceSha": "30cc7ed2249cb29c040500883c4ef7c46b6e9e75",
   "overall": "approval_ready_open",
   "launchReadiness": false,
   "dbMutationPerformed": false,
@@ -34,7 +34,8 @@
     "knowledgeGovernance": "lib/knowledge-governance.ts",
     "knowledgeCandidateRoute": "lib/knowledge-candidate-route.ts",
     "knowledgeReviewRoute": "app/api/knowledge/review/route.ts",
-    "hermesReviewAuthorityUi": "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
+    "hermesReviewAuthorityUi": "evaluation/hermes-knowledge-review-selected-workbench-2026-08-14/report.json",
+    "hermesReviewEvidenceInspector": "evaluation/hermes-knowledge-review-evidence-inspector-2026-08-14/report.json",
     "northstarReport": "evaluation/northstar-open-gates-current/report.json"
   },
   "artifactIntegrity": [
@@ -80,32 +81,43 @@
     },
     {
       "path": "lib/knowledge-candidate-route.ts",
-      "bytes": 8934,
-      "sha256": "284c25c1b1b959dbe1caf40868265642f97e1153cc45436ce46740af8dff4521"
+      "bytes": 10909,
+      "sha256": "d7e572003d199e1265fae943b999e5fe50e0a1f4e3f0ecb3d5e4ca2fec42fdb3"
     },
     {
       "path": "app/api/knowledge/review/route.ts",
-      "bytes": 6853,
-      "sha256": "a0d563569a6fe3c0aee478304f7b44b6c7b4e35fced87b80c2b02680a079c485"
+      "bytes": 7205,
+      "sha256": "beb126d309d530946809b81e2b70e74b61a672c8b5bd7efd64dd2dae1bb43226"
     },
     {
-      "path": "evaluation/hermes-knowledge-review-authority-ui-2026-07-25/report.json",
-      "bytes": 1658,
-      "sha256": "8401369ad8ec4c07ab7c5aa6451fa0b02e6c114eed770b4aafa2d3c14782ca60"
+      "path": "evaluation/hermes-knowledge-review-selected-workbench-2026-08-14/report.json",
+      "bytes": 1875,
+      "sha256": "95250c19565f1532b63bea073b06e895b8156cbd4aece94e4f4b011db26364cb"
+    },
+    {
+      "path": "evaluation/hermes-knowledge-review-evidence-inspector-2026-08-14/report.json",
+      "bytes": 2571,
+      "sha256": "65dc664f6c4fc8835f5d6fad851701814a2d00627550e3e892e6d9261f5bd394"
     },
     {
       "path": "evaluation/northstar-open-gates-current/report.json",
-      "bytes": 28300,
-      "sha256": "899423b537c53a1c8e4d19725f38c72a9220751bc099c079b3168f2b7df887c6"
+      "bytes": 62897,
+      "sha256": "c42d3388cc589d3d0c09a5b7e464c784df840bc59089cd5d79bdfa6fb76c13c8"
     }
   ],
   "hermesReviewAuthorityUi": {
     "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
-    "sourceHead": "719a73792d5a3fdc9f4cfea55b92f9282c08dbf9",
-    "productCommit": "a9fcde386f0d97e8b46553a9f083892f14e11799",
-    "productionCommit": "a9ca3cbe87efd753bb937620e4cd56113f66e1b3",
+    "sourceHead": "6453a595d4771d64f07d79d3f042509be876c707",
+    "productCommit": "6453a595d4771d64f07d79d3f042509be876c707",
+    "productionCommit": "6453a595d4771d64f07d79d3f042509be876c707",
     "liveViewportCount": 8,
     "livePassedCount": 8,
+    "candidateCount": 3,
+    "selectedCandidateCount": 1,
+    "selectedBodyCount": 1,
+    "desktopColumns": 2,
+    "mobileColumns": 1,
+    "candidateBodyInternalScroll": true,
     "authorityOrder": [
       "SIF",
       "KOSHA",
@@ -120,8 +132,27 @@
     "llmWikiPublication": "APPROVAL_GATED",
     "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
   },
+  "hermesReviewEvidenceInspector": {
+    "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
+    "sourceHead": "b15df85b68235871ac521d01a6334ad90b122a26",
+    "productCommit": "be8a0f143f40689fc02af791bc0b7ae5509046cd",
+    "productionCommit": "dac7ec54dc8999b54cdac43203b7b339c4d3b036",
+    "liveViewportCount": 8,
+    "livePassedCount": 8,
+    "productionAligned": true,
+    "itemLimit": 20,
+    "fixtureItemCount": 5,
+    "desktopEvidenceColumns": 2,
+    "mobileMountedPaneCount": 1,
+    "publicOfficialHttpsLinkCount": 3,
+    "privateEvidenceRawIdentityExposed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED"
+  },
   "publicationSurfaceInventory": {
-    "scannedFileCount": 237,
+    "scannedFileCount": 252,
     "publicationRpcCallHits": [],
     "publicationSqlFunctionHits": [],
     "publicationLedgerMigrationHits": [],
@@ -239,12 +270,42 @@
       "message": "ok"
     },
     {
+      "id": "hermes_review_selected_workbench",
+      "passed": true,
+      "message": "ok"
+    },
+    {
       "id": "hermes_review_authority_non_mutating",
       "passed": true,
       "message": "ok"
     },
     {
       "id": "hermes_review_authority_boundaries_open",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "hermes_review_evidence_inspector_live",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "hermes_review_evidence_inspector_contract",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "hermes_review_evidence_inspector_verified",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "hermes_review_evidence_inspector_non_mutating",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "hermes_review_evidence_inspector_boundaries_open",
       "passed": true,
       "message": "ok"
     },
