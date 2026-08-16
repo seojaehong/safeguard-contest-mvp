@@ -595,13 +595,11 @@ await fs.writeFile(path.join(outputDir, "report.md"), markdown, "utf8");
 const summaryOutput = process.env.SAFECLAW_KNOWLEDGE_UI_SUMMARY_OUTPUT;
 if (liveMode && productionAligned && summaryOutput) {
   const summaryDir = path.resolve(process.cwd(), summaryOutput);
-  const localReportPath = path.join(summaryDir, "report.json");
-  const localMarkdownPath = path.join(summaryDir, "report.md");
-  const localReport = JSON.parse(await fs.readFile(localReportPath, "utf8"));
+  const summaryReportPath = path.join(summaryDir, "report.json");
+  const summaryMarkdownPath = path.join(summaryDir, "report.md");
   const afterLocalDir = path.join(summaryDir, "after-local");
-  await fs.mkdir(afterLocalDir, { recursive: true });
-  await fs.copyFile(localReportPath, path.join(afterLocalDir, "report.json"));
-  await fs.copyFile(localMarkdownPath, path.join(afterLocalDir, "report.md"));
+  const localReportPath = path.join(afterLocalDir, "report.json");
+  const localReport = JSON.parse(await fs.readFile(localReportPath, "utf8"));
 
   const localSummary = {
     path: path.relative(process.cwd(), path.join(afterLocalDir, "report.json")),
@@ -687,8 +685,8 @@ if (liveMode && productionAligned && summaryOutput) {
         mutationBoundary: report.mutationBoundary,
         remainingBoundaries: report.remainingBoundaries
       };
-  await fs.writeFile(localReportPath, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
-  await fs.writeFile(localMarkdownPath, `# ${evidenceInspectorMode ? "Hermes Knowledge Review Evidence Inspector" : "Hermes Knowledge Review Authority UI"}
+  await fs.writeFile(summaryReportPath, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
+  await fs.writeFile(summaryMarkdownPath, `# ${evidenceInspectorMode ? "Hermes Knowledge Review Evidence Inspector" : "Hermes Knowledge Review Authority UI"}
 
 - Verdict: \`${summary.verdict}\`
 - Product commit: \`${productCommit}\`

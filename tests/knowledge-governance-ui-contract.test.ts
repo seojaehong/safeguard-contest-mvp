@@ -15,6 +15,10 @@ describe("knowledge governance UI contract", () => {
     path.join(process.cwd(), "app/knowledge/KnowledgeReviewInbox.tsx"),
     "utf8"
   );
+  const browserRunnerSource = fs.readFileSync(
+    path.join(process.cwd(), "scripts/knowledge_review_authority_ui_runner.mjs"),
+    "utf8"
+  );
 
   it("renders the four promotion stages from the shared governance model", () => {
     expect(pageSource).toContain("KNOWLEDGE_PROMOTION_STAGES");
@@ -88,6 +92,21 @@ describe("knowledge governance UI contract", () => {
     expect(inboxSource).toContain("aria-busy={pending}");
     expect(inboxSource).toContain('data-review-pending={pending ? "true" : "false"}');
     expect(inboxSource).toContain('className={styles.reviewInboxMessage} role="status"');
+  });
+
+  it("preserves the authoritative local report when assembling live evidence", () => {
+    expect(browserRunnerSource).toContain(
+      'const localReportPath = path.join(afterLocalDir, "report.json")'
+    );
+    expect(browserRunnerSource).toContain(
+      'const summaryReportPath = path.join(summaryDir, "report.json")'
+    );
+    expect(browserRunnerSource).toContain(
+      'await fs.writeFile(summaryReportPath, `${JSON.stringify(summary, null, 2)}\\n`, "utf8")'
+    );
+    expect(browserRunnerSource).not.toContain(
+      'fs.copyFile(localReportPath, path.join(afterLocalDir, "report.json"))'
+    );
   });
 
   it("localizes schema field names at the presentation boundary", () => {
