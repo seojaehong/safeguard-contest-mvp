@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { enforceRateLimit } from "@/lib/api-guard";
 import { enforceRequestBodyBudget } from "@/lib/mcp-work-budget";
-import { WORKFLOW_DISPATCH_REQUEST_MAX_BYTES } from "@/lib/public-work-budget";
+import {
+  PUBLIC_JSON_BODY_READ_TIMEOUT_MS,
+  WORKFLOW_DISPATCH_REQUEST_MAX_BYTES,
+} from "@/lib/public-work-budget";
 import { isLiveDispatchEnabled, postWebhookWithTimeout, resolveWebhookConfig } from "@/lib/n8n-webhook";
 import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
 import { validateDispatchContacts, type WorkpackDispatchChannel } from "@/lib/workpack-commercial";
@@ -281,6 +284,13 @@ export async function POST(request: NextRequest) {
     {
       code: "WORKFLOW_DISPATCH_PAYLOAD_TOO_LARGE",
       error: "Workflow dispatch request body exceeds the byte budget.",
+    },
+    {
+      timeoutMs: PUBLIC_JSON_BODY_READ_TIMEOUT_MS,
+      timeoutError: {
+        code: "WORKFLOW_DISPATCH_BODY_READ_TIMEOUT",
+        error: `Workflow dispatch request body was not received within ${PUBLIC_JSON_BODY_READ_TIMEOUT_MS}ms.`,
+      },
     },
   );
   if (!bodyBudget.ok) return bodyBudget.response;

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { cleanHtml, extractHangContent, flattenContent } from "korean-law-mcp/lib/article-parser";
-import { LawApiClient } from "korean-law-mcp/lib/api-client";
+import { fetchWithRetry } from "korean-law-mcp/lib/fetch-with-retry";
 import { normalizeLawSearchText, resolveLawAlias } from "korean-law-mcp/lib/search-normalizer";
 import { extractTag, parseInterpretationXML, parsePrecedentXML, stripHtml } from "korean-law-mcp/lib/xml-parser";
 import { readBoundedResponseText } from "./server/upstream-http";
@@ -22,6 +22,8 @@ const KLM_PRECEDENT_PREFIX = "klm-prec-";
 const KLM_INTERPRETATION_PREFIX = "klm-expc-";
 const DEFAULT_SEARCH_LIMIT = 3;
 const KOREAN_LAW_SEARCH_RESPONSE_MAX_BYTES = 1_024 * 1_024;
+const KOREAN_LAW_DETAIL_RESPONSE_MAX_BYTES = 4 * 1_024 * 1_024;
+const KOREAN_LAW_DETAIL_TIMEOUT_MS = 20_000;
 
 function getConfig(): KoreanLawMcpConfig {
   const explicitKey = process.env.KOREAN_LAW_MCP_LAW_OC?.trim() || "";
@@ -36,17 +38,6 @@ function getConfig(): KoreanLawMcpConfig {
     configured: process.env.KOREAN_LAW_MCP_ENABLED === "true" && Boolean(apiKey),
     keySource: explicitKey ? "KOREAN_LAW_MCP_LAW_OC" : lawgoKey ? "LAWGO_OC" : legacyLawKey ? "LAW_OC" : "none"
   };
-}
-
-function createClient() {
-  const config = getConfig();
-  if (!config.enabled) {
-    throw new Error("KOREAN_LAW_MCP_ENABLED가 false라 보강 검색을 사용하지 않습니다.");
-  }
-  if (!config.apiKey) {
-    throw new Error("KOREAN_LAW_MCP_LAW_OC, LAWGO_OC 또는 LAW_OC가 필요합니다.");
-  }
-  return new LawApiClient({ apiKey: config.apiKey });
 }
 
 function normalizeText(text?: unknown) {
@@ -242,6 +233,34 @@ async function fetchSearchXml(input: {
   return text;
 }
 
+async function fetchDetailJson(input: {
+  apiKey: string;
+  id: string;
+  type: KoreanLawMcpSourceType;
+}): Promise<string> {
+  const params = new URLSearchParams({
+    OC: input.apiKey,
+    type: "JSON",
+    target: input.type === "law" ? "eflaw" : input.type === "precedent" ? "prec" : "expc",
+  });
+  params.set(input.type === "law" ? "MST" : "ID", input.id);
+  const response = await fetchWithRetry(
+    `https://www.law.go.kr/DRF/lawService.do?${params.toString()}`,
+    { cache: "no-store", retries: 1, timeout: KOREAN_LAW_DETAIL_TIMEOUT_MS },
+  );
+  const text = await readBoundedResponseText(response, {
+    label: `korean-law-mcp ${input.type} detail response`,
+    maxBytes: KOREAN_LAW_DETAIL_RESPONSE_MAX_BYTES,
+  });
+  if (!response.ok) {
+    throw new Error(`korean-law-mcp ${input.type} detail failed with status ${response.status}`);
+  }
+  if (text.includes("<!DOCTYPE html") || text.includes("<html")) {
+    throw new Error(`korean-law-mcp ${input.type} detail returned an HTML error page`);
+  }
+  return text;
+}
+
 export async function searchKoreanLawMcp(
   query: string,
   limit = DEFAULT_SEARCH_LIMIT,
@@ -336,8 +355,8 @@ function buildDetailRecord(partial: Omit<DetailRecord, "sourceLabel" | "sourceSy
   };
 }
 
-async function loadLawDetail(client: LawApiClient, mst: string): Promise<DetailRecord | null> {
-  const jsonText = await client.getLawText({ mst });
+async function loadLawDetail(apiKey: string, mst: string): Promise<DetailRecord | null> {
+  const jsonText = await fetchDetailJson({ apiKey, id: mst, type: "law" });
   const data = JSON.parse(jsonText) as JsonRecord;
   const lawData = data.법령 as JsonRecord | undefined;
   if (!lawData) return null;
@@ -393,13 +412,8 @@ function buildSections(sections: Array<{ label: string; text?: unknown }>) {
     .join("\n\n");
 }
 
-async function loadPrecedentDetail(client: LawApiClient, id: string): Promise<DetailRecord | null> {
-  const responseText = await client.fetchApi({
-    endpoint: "lawService.do",
-    target: "prec",
-    type: "JSON",
-    extraParams: { ID: id }
-  });
+async function loadPrecedentDetail(apiKey: string, id: string): Promise<DetailRecord | null> {
+  const responseText = await fetchDetailJson({ apiKey, id, type: "precedent" });
 
   const data = JSON.parse(responseText) as JsonRecord;
   const prec = data.PrecService as JsonRecord | undefined;
@@ -436,13 +450,8 @@ async function loadPrecedentDetail(client: LawApiClient, id: string): Promise<De
   });
 }
 
-async function loadInterpretationDetail(client: LawApiClient, id: string): Promise<DetailRecord | null> {
-  const responseText = await client.fetchApi({
-    endpoint: "lawService.do",
-    target: "expc",
-    type: "JSON",
-    extraParams: { ID: id }
-  });
+async function loadInterpretationDetail(apiKey: string, id: string): Promise<DetailRecord | null> {
+  const responseText = await fetchDetailJson({ apiKey, id, type: "interpretation" });
 
   const data = JSON.parse(responseText) as JsonRecord;
   const interpretation = data.ExpcService as JsonRecord | undefined;
@@ -485,15 +494,13 @@ export async function getKoreanLawMcpDetail(id: string): Promise<DetailRecord | 
     return null;
   }
 
-  const client = createClient();
-
   if (parsed.type === "law") {
-    return loadLawDetail(client, parsed.rawId).catch(() => null);
+    return loadLawDetail(config.apiKey, parsed.rawId).catch(() => null);
   }
 
   if (parsed.type === "precedent") {
-    return loadPrecedentDetail(client, parsed.rawId).catch(() => null);
+    return loadPrecedentDetail(config.apiKey, parsed.rawId).catch(() => null);
   }
 
-  return loadInterpretationDetail(client, parsed.rawId).catch(() => null);
+  return loadInterpretationDetail(config.apiKey, parsed.rawId).catch(() => null);
 }

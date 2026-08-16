@@ -58,4 +58,15 @@ describe("cancellable Vertex transport", () => {
     await expect(pending).rejects.toBe(reason);
     expect(requestSignal?.aborted).toBe(true);
   });
+
+  it("rejects oversized Vertex responses before JSON parsing", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", {
+      headers: { "content-length": String(2 * 1024 * 1024 + 1) },
+    })));
+    const { generateWithVertex } = await import("@/lib/vertex/client");
+
+    await expect(generateWithVertex("gemini-test", "prompt")).rejects.toThrow(
+      "Vertex AI generation response exceeded the 2097152-byte response limit",
+    );
+  });
 });

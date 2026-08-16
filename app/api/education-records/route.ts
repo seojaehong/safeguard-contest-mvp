@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient, ensureWorkspaceContext, getWorkspaceUser, toJson } from "@/lib/supabase-admin";
 import { isRecord, parseEducationRecordDrafts, parseScenarioContext, parseWorkerProfiles, readString } from "@/lib/workspace-api";
+import {
+  AUTHENTICATED_EDUCATION_REQUEST_MAX_BYTES,
+  enforceAuthenticatedJsonRequestBodyBudget,
+} from "@/lib/public-work-budget";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +29,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, configured: true, savedCount: 0, message: "관리자 로그인이 필요합니다." }, { status: 401 });
   }
 
-  const parsed = await request.json().catch((): unknown => ({}));
+  const bodyBudget = await enforceAuthenticatedJsonRequestBodyBudget(request, AUTHENTICATED_EDUCATION_REQUEST_MAX_BYTES);
+  if (!bodyBudget.ok) return bodyBudget.response;
+  const parsed = await bodyBudget.request.json().catch((): unknown => ({}));
   const body = isRecord(parsed) ? parsed : {};
   const records = parseEducationRecordDrafts(body.records);
   const workers = parseWorkerProfiles(body.workers);

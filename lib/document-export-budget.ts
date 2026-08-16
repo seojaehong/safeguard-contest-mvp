@@ -1,7 +1,9 @@
 import type { NextRequest } from "next/server";
+import { enforceRequestBodyBudget } from "@/lib/mcp-work-budget";
 
 export const DOCUMENT_EXPORT_BUDGETS = {
   requestBytes: 256 * 1024,
+  requestReadTimeoutMs: 10_000,
   documents: 12,
   rows: 128,
   totalRows: 512,
@@ -15,6 +17,14 @@ export class DocumentExportLimitError extends Error {
   constructor(readonly reason: string) {
     super(`Document export request exceeds resource budget: ${reason}`);
     this.name = "DocumentExportLimitError";
+  }
+}
+
+export class DocumentExportRequestError extends Error {
+  constructor(readonly response: Response) {
+    super("Document export request body could not be read within its resource budget.");
+    this.name = "DocumentExportRequestError";
+    this.response.headers.set("Cache-Control", "no-store");
   }
 }
 
@@ -64,37 +74,22 @@ function assertFieldAndNestedBudget(value: unknown): void {
   }
 }
 
-async function readBoundedBody(request: NextRequest): Promise<string> {
-  const declaredLength = Number(request.headers.get("content-length"));
-  if (Number.isFinite(declaredLength) && declaredLength > DOCUMENT_EXPORT_BUDGETS.requestBytes) {
-    throw new DocumentExportLimitError("request_bytes");
-  }
-  if (!request.body) return "";
-
-  const reader = request.body.getReader();
-  const chunks: Buffer[] = [];
-  let totalBytes = 0;
-
-  try {
-    while (true) {
-      const chunk = await reader.read();
-      if (chunk.done) break;
-      totalBytes += chunk.value.byteLength;
-      if (totalBytes > DOCUMENT_EXPORT_BUDGETS.requestBytes) {
-        await reader.cancel();
-        throw new DocumentExportLimitError("request_bytes");
-      }
-      chunks.push(Buffer.from(chunk.value));
-    }
-  } finally {
-    reader.releaseLock();
-  }
-
-  return Buffer.concat(chunks, totalBytes).toString("utf8");
-}
-
 export async function readDocumentExportRequestJson(request: NextRequest): Promise<unknown> {
-  const text = await readBoundedBody(request);
+  const bodyBudget = await enforceRequestBodyBudget(request, DOCUMENT_EXPORT_BUDGETS.requestBytes, {
+    code: "DOCUMENT_EXPORT_LIMIT_EXCEEDED",
+    error: "Document export request exceeds the request byte limit.",
+  }, {
+    timeoutMs: DOCUMENT_EXPORT_BUDGETS.requestReadTimeoutMs,
+    timeoutError: {
+      code: "DOCUMENT_EXPORT_BODY_READ_TIMEOUT",
+      error: `Document export request body was not received within ${DOCUMENT_EXPORT_BUDGETS.requestReadTimeoutMs}ms.`,
+    },
+  });
+  if (!bodyBudget.ok) {
+    if (bodyBudget.response.status === 413) throw new DocumentExportLimitError("request_bytes");
+    throw new DocumentExportRequestError(bodyBudget.response);
+  }
+  const text = await bodyBudget.request.text();
   if (!text.trim()) return {};
   try {
     return JSON.parse(text) as unknown;

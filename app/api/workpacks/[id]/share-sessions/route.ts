@@ -11,6 +11,10 @@ import {
   loadOwnedWorkpackOperationContext,
   loadServerShareRecipients
 } from "@/lib/workpack-commercial-store";
+import {
+  AUTHENTICATED_COMMERCIAL_REQUEST_MAX_BYTES,
+  enforceAuthenticatedJsonRequestBodyBudget,
+} from "@/lib/public-work-budget";
 
 export const dynamic = "force-dynamic";
 
@@ -111,7 +115,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }, { status: 409 });
   }
 
-  const parsed = await request.json().catch((): unknown => ({}));
+  const bodyBudget = await enforceAuthenticatedJsonRequestBodyBudget(request, AUTHENTICATED_COMMERCIAL_REQUEST_MAX_BYTES);
+  if (!bodyBudget.ok) return bodyBudget.response;
+  const parsed = await bodyBudget.request.json().catch((): unknown => ({}));
   const body = isRecord(parsed) ? parsed : {};
   const recipientIds = parseShareRecipientIds(body.recipients);
   if (!recipientIds.ok) {

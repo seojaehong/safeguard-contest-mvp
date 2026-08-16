@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withPublicDocumentExportAdmission } from "@/lib/public-distributed-rate-limit";
+import {
+  DocumentExportRequestError,
+  readDocumentExportRequestJson,
+} from "@/lib/document-export-budget";
 import { EventEmitter } from "node:events";
 import fs from "node:fs";
 import path from "node:path";
@@ -23,7 +27,6 @@ import type { AccidentType, FourM } from "@/lib/risk-assessment-schema";
 
 export const dynamic = "force-dynamic";
 
-const MAX_PDF_REQUEST_BYTES = 256 * 1024;
 const MAX_PDF_ROWS = 128;
 const MAX_PDF_FIELD_CHARACTERS = 4_000;
 const MAX_PDF_RENDER_LINES = 512;
@@ -91,40 +94,6 @@ function assertPdfFieldBudget(value: unknown): void {
     if (isRecord(current)) {
       Object.values(current).forEach((item) => pending.push(item));
     }
-  }
-}
-
-async function readPdfRequestJson(request: NextRequest): Promise<unknown> {
-  const declaredLength = Number(request.headers.get("content-length"));
-  if (Number.isFinite(declaredLength) && declaredLength > MAX_PDF_REQUEST_BYTES) {
-    throw new PdfExportLimitError();
-  }
-  if (!request.body) return {};
-
-  const reader = request.body.getReader();
-  const chunks: Buffer[] = [];
-  let totalBytes = 0;
-  try {
-    while (true) {
-      const chunk = await reader.read();
-      if (chunk.done) break;
-      totalBytes += chunk.value.byteLength;
-      if (totalBytes > MAX_PDF_REQUEST_BYTES) {
-        await reader.cancel();
-        throw new PdfExportLimitError();
-      }
-      chunks.push(Buffer.from(chunk.value));
-    }
-  } finally {
-    reader.releaseLock();
-  }
-
-  const text = Buffer.concat(chunks, totalBytes).toString("utf8");
-  if (!text.trim()) return {};
-  try {
-    return JSON.parse(text) as unknown;
-  } catch {
-    return {};
   }
 }
 
@@ -1209,7 +1178,7 @@ async function buildBinaryPdf(
 
 async function exportPdf(request: NextRequest) {
   try {
-    const parsed = await readPdfRequestJson(request);
+    const parsed = await readDocumentExportRequestJson(request);
     assertPdfFieldBudget(parsed);
     const body = isRecord(parsed) ? parsed : {};
     assertPdfRowBudget(body);
@@ -1264,6 +1233,7 @@ async function exportPdf(request: NextRequest) {
       }
     });
   } catch (error) {
+    if (error instanceof DocumentExportRequestError) return error.response;
     if (error instanceof PdfExportLimitError) return pdfExportLimitResponse();
     throw error;
   }

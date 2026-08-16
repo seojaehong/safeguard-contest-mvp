@@ -200,6 +200,29 @@ describe("photo vision analysis contract", () => {
     }
   });
 
+  it("fails a photo analysis when the provider response exceeds its byte budget", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", {
+      headers: { "content-length": String(2 * 1024 * 1024 + 1) },
+    })));
+    try {
+      const provider = createOpenAiHazardPhotoVisionProvider({
+        OPENAI_API_KEY: "sk-contract",
+        OPENAI_VISION_MODEL: "gpt-configured-model"
+      });
+      if (!provider) throw new Error("Expected configured provider");
+
+      const analysis = await analyzeHazardPhotos({
+        question: "비계 작업",
+        photos: [createPhoto("scaffold.jpg", "image/jpeg")]
+      }, { provider, harness: null });
+
+      expect(analysis.images[0]?.status).toBe("failed");
+      expect(analysis.images[0]?.error?.message).toContain("2097152-byte response limit");
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("builds a constrained safety improvement prompt", () => {
     const prompt = buildImprovementVisionPrompt({
       taskLabel: "성수동 외벽 도장",

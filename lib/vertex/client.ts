@@ -5,6 +5,9 @@
  */
 import type { GenerationConfig } from "@google-cloud/vertexai";
 import { GoogleAuth, type JWTInput } from "google-auth-library";
+import { readBoundedResponseText } from "@/lib/server/upstream-http";
+
+const VERTEX_RESPONSE_MAX_BYTES = 2 * 1024 * 1024;
 
 let cachedAuth: GoogleAuth | null = null;
 
@@ -79,7 +82,10 @@ export async function generateWithVertex(
       cache: "no-store",
       signal: controller.signal,
     });
-    const raw = await response.text();
+    const raw = await readBoundedResponseText(response, {
+      label: "Vertex AI generation response",
+      maxBytes: VERTEX_RESPONSE_MAX_BYTES,
+    });
     const payload = raw ? JSON.parse(raw) as VertexGenerateResponse : {};
     if (!response.ok) {
       throw new Error(payload.error?.message || `Vertex AI returned HTTP ${response.status}`);

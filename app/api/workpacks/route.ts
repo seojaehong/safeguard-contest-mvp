@@ -5,6 +5,10 @@ import type { AskResponse } from "@/lib/types";
 import { isRecord, parseScenarioContext } from "@/lib/workspace-api";
 import { verifyAskResponseGenerationEvidence } from "@/lib/generation-evidence";
 import { buildWorkpackEvidenceSummary, buildWorkpackInsertPayload } from "@/lib/workpack-store";
+import {
+  AUTHENTICATED_WORKPACK_REQUEST_MAX_BYTES,
+  enforceAuthenticatedJsonRequestBodyBudget,
+} from "@/lib/public-work-budget";
 
 export const dynamic = "force-dynamic";
 
@@ -172,7 +176,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, configured: true, workpackId: null, message: "관리자 로그인이 필요합니다." }, { status: 401 });
   }
 
-  const parsed = await request.json().catch((): unknown => ({}));
+  const bodyBudget = await enforceAuthenticatedJsonRequestBodyBudget(request, AUTHENTICATED_WORKPACK_REQUEST_MAX_BYTES);
+  if (!bodyBudget.ok) return bodyBudget.response;
+  const parsed = await bodyBudget.request.json().catch((): unknown => ({}));
   const body = isRecord(parsed) ? parsed : {};
   const askResponse = readAskResponse(body.data);
   if (!askResponse) {

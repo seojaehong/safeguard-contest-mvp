@@ -14,6 +14,10 @@ import {
 } from "@/lib/supabase-admin";
 import { isRecord } from "@/lib/workspace-api";
 import { resolveBriefingEmailDispatchStatus } from "@/lib/server/briefing-dispatch-status";
+import {
+  AUTHENTICATED_BRIEFING_REQUEST_MAX_BYTES,
+  enforceAuthenticatedJsonRequestBodyBudget,
+} from "@/lib/public-work-budget";
 
 export const dynamic = "force-dynamic";
 
@@ -114,7 +118,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, configured: true, dispatch, message: "관리자 로그인이 필요합니다." }, { status: 401 });
   }
 
-  const parsed = await request.json().catch((): unknown => ({}));
+  const bodyBudget = await enforceAuthenticatedJsonRequestBodyBudget(request, AUTHENTICATED_BRIEFING_REQUEST_MAX_BYTES);
+  if (!bodyBudget.ok) return bodyBudget.response;
+  const parsed = await bodyBudget.request.json().catch((): unknown => ({}));
   const body = isRecord(parsed) ? parsed : {};
 
   const enabled = body.enabled === true;

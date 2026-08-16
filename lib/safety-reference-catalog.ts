@@ -1,6 +1,7 @@
 import { createLogger } from "@/lib/logger";
 import runtimeVerificationJson from "@/evaluation/sif-embedding-gate/runtime-vector-verification.json";
 import { evaluateSifVectorRuntimeReceipt } from "@/lib/sif-vector-verification-contract.mjs";
+import { readBoundedResponseText } from "@/lib/server/upstream-http";
 
 export type KoshaGroundingReason =
   | "verified-current"
@@ -2733,6 +2734,7 @@ function buildRestUrl(config: SupabaseConfig, table: string, params: URLSearchPa
 
 const SAFETY_REFERENCE_REQUEST_TIMEOUT_MS = 5_000;
 const SAFETY_REFERENCE_RESPONSE_BODY_MAX_BYTES = 1024 * 1024;
+const SAFETY_REFERENCE_EMBEDDING_RESPONSE_MAX_BYTES = 1024 * 1024;
 
 async function readBoundedJson(
   response: Response,
@@ -2998,7 +3000,10 @@ async function fetchQueryEmbedding(
         signal: controller.signal,
         cache: "no-store"
       });
-      const text = await response.text();
+      const text = await readBoundedResponseText(response, {
+        label: "OpenAI safety-reference embedding response",
+        maxBytes: SAFETY_REFERENCE_EMBEDDING_RESPONSE_MAX_BYTES,
+      });
       if (!response.ok) {
         if (attempt === 0) continue;
         return { ok: false, message: SAFETY_REFERENCE_VECTOR_FAILURE_MESSAGE };

@@ -12,6 +12,7 @@ import {
   assertDocumentExportInputBudget,
   assertDocumentExportOutputBudget,
   DocumentExportLimitError,
+  DocumentExportRequestError,
   readDocumentExportRequestJson
 } from "@/lib/document-export-budget";
 import { withPublicDocumentExportAdmission } from "@/lib/public-distributed-rate-limit";
@@ -242,6 +243,7 @@ async function exportXlsx(request: NextRequest) {
     const buffer = await buildXlsxForDocument({ title, rows, profile, scenario, structuredRiskRows });
     return xlsxResponse(buffer, `${scenario.companyName}-${title}`, "safeclaw-document");
   } catch (error) {
+    if (error instanceof DocumentExportRequestError) return error.response;
     if (error instanceof DocumentExportLimitError) {
       return NextResponse.json(
         {

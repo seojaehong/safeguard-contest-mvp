@@ -68,6 +68,33 @@ describe("document export resource budgets", () => {
     await expectDocumentPayloadTooLarge(response);
   });
 
+  it("cancels stalled document export bodies at the absolute read deadline", async () => {
+    vi.useFakeTimers();
+    try {
+      const cancel = vi.fn();
+      const body = new ReadableStream<Uint8Array>({ cancel });
+      const stalledRequest = new Request("http://localhost/api/export/hwp", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body,
+        duplex: "half",
+      } as RequestInit & { duplex: "half" });
+      const pending = exportHwp(new NextRequest(stalledRequest));
+
+      await vi.advanceTimersByTimeAsync(DOCUMENT_EXPORT_BUDGETS.requestReadTimeoutMs);
+      const response = await pending;
+
+      expect(response.status).toBe(408);
+      await expect(response.json()).resolves.toMatchObject({
+        code: "DOCUMENT_EXPORT_BODY_READ_TIMEOUT",
+        limit: DOCUMENT_EXPORT_BUDGETS.requestReadTimeoutMs,
+      });
+      expect(cancel).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it.each([
     "single",
     "workPlanStructured",

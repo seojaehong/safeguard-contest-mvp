@@ -9,6 +9,8 @@ import {
   MCP_TASK_MAX_CHARS,
 } from "@/lib/mcp-work-budget";
 import {
+  AUTHENTICATED_JSON_BODY_READ_TIMEOUT_MS,
+  enforceAuthenticatedJsonRequestBodyBudget,
   enforcePublicJsonRequestBodyBudget,
   PUBLIC_JSON_BODY_READ_TIMEOUT_MS,
 } from "@/lib/public-work-budget";
@@ -278,6 +280,35 @@ describe("MCP tool work budgets", () => {
       await expect(result.response.json()).resolves.toMatchObject({
         code: "PUBLIC_JSON_BODY_READ_TIMEOUT",
         limit: PUBLIC_JSON_BODY_READ_TIMEOUT_MS,
+      });
+      expect(cancel).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("enforces an absolute deadline while reading an authenticated JSON body", async () => {
+    vi.useFakeTimers();
+    try {
+      const cancel = vi.fn();
+      const body = new ReadableStream<Uint8Array>({ cancel });
+      const request = new Request("https://www.safeclaw.kr/api/workpacks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body,
+        duplex: "half",
+      } as RequestInit & { duplex: "half" });
+
+      const pending = enforceAuthenticatedJsonRequestBodyBudget(request, 1_024);
+      await vi.advanceTimersByTimeAsync(AUTHENTICATED_JSON_BODY_READ_TIMEOUT_MS);
+      const result = await pending;
+
+      expect(result.ok).toBe(false);
+      if (result.ok) throw new Error("Expected the authenticated body read to time out");
+      expect(result.response.status).toBe(408);
+      await expect(result.response.json()).resolves.toMatchObject({
+        code: "AUTHENTICATED_JSON_BODY_READ_TIMEOUT",
+        limit: AUTHENTICATED_JSON_BODY_READ_TIMEOUT_MS,
       });
       expect(cancel).toHaveBeenCalledTimes(1);
     } finally {

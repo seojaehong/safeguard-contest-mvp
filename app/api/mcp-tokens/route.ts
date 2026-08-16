@@ -23,6 +23,7 @@ import { isRecord } from "@/lib/workspace-api";
 import { MCP_TOKEN_TTL_MS, resolveMcpTokenLifetime } from "@/lib/mcp-auth";
 import {
   enforceRequestBodyBudget,
+  MCP_REQUEST_BODY_READ_TIMEOUT_MS,
   MCP_TOKEN_REQUEST_BODY_MAX_BYTES,
 } from "@/lib/mcp-work-budget";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -220,6 +221,12 @@ export async function POST(request: NextRequest) {
   const bodyBudget = await enforceRequestBodyBudget(request, MCP_TOKEN_REQUEST_BODY_MAX_BYTES, {
     code: "MCP_TOKEN_PAYLOAD_TOO_LARGE",
     error: `MCP token request body exceeds the ${MCP_TOKEN_REQUEST_BODY_MAX_BYTES}-byte limit.`,
+  }, {
+    timeoutMs: MCP_REQUEST_BODY_READ_TIMEOUT_MS,
+    timeoutError: {
+      code: "MCP_TOKEN_BODY_READ_TIMEOUT",
+      error: `MCP token request body was not received within ${MCP_REQUEST_BODY_READ_TIMEOUT_MS}ms.`,
+    },
   });
   if (!bodyBudget.ok) return bodyBudget.response;
 

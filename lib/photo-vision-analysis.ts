@@ -23,8 +23,10 @@ import {
   type SafetyReferenceSearchResult
 } from "@/lib/safety-reference-catalog";
 import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
+import { readBoundedResponseText } from "@/lib/server/upstream-http";
 
 const log = createLogger("photo-vision");
+const PHOTO_VISION_RESPONSE_MAX_BYTES = 2 * 1024 * 1024;
 
 function isControlExtractableFromBody(item: SafetyReferenceItem, control: string): boolean {
   if (!isKoshaTechnicalReference(item)) return true;
@@ -665,12 +667,13 @@ async function postOpenAiVisionImages(input: {
       signal: controller.signal
     });
 
-    if (!response.ok) {
-      const body = await response.text().catch(() => "");
-      throw new Error(`OpenAI vision failed: ${response.status} ${body}`);
-    }
+    const raw = await readBoundedResponseText(response, {
+      label: "OpenAI photo vision response",
+      maxBytes: PHOTO_VISION_RESPONSE_MAX_BYTES,
+    });
+    if (!response.ok) throw new Error(`OpenAI vision failed: ${response.status} ${raw}`);
 
-    const data = await response.json() as unknown;
+    const data = JSON.parse(raw) as unknown;
     const record = isRecord(data) ? data : {};
     return {
       outputText: extractResponseText(data),

@@ -13,6 +13,7 @@ import {
   assertDocumentExportOutputBudget,
   createDocumentExportInternalErrorPayload,
   DocumentExportLimitError,
+  DocumentExportRequestError,
   readDocumentExportRequestJson
 } from "@/lib/document-export-budget";
 import { withPublicDocumentExportAdmission } from "@/lib/public-distributed-rate-limit";
@@ -317,6 +318,7 @@ async function exportHwp(request: NextRequest) {
       }
     });
   } catch (error) {
+    if (error instanceof DocumentExportRequestError) return error.response;
     if (error instanceof DocumentExportLimitError) {
       return NextResponse.json(
         {

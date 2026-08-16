@@ -7,10 +7,13 @@ import {
   type RateLimiter,
   type RateLimitResult,
 } from "@/lib/rate-limit";
+import { readBoundedResponseText } from "@/lib/server/upstream-http";
 
 const DEFAULT_TIMEOUT_MS = 1_500;
+const UPSTASH_RESPONSE_MAX_BYTES = 64 * 1024;
 const DOCUMENT_EXPORT_LEASE_MS = 310_000;
 const PHOTO_ANALYSIS_LEASE_MS = 70_000;
+const SAFETY_REFERENCE_STATUS_LEASE_MS = 30_000;
 
 export const PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY = {
   concurrency: 2,
@@ -28,6 +31,14 @@ export const PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY = {
   workUnit: "photo-analysis",
 } as const;
 
+export const PUBLIC_SAFETY_REFERENCE_STATUS_ADMISSION_POLICY = {
+  concurrency: 2,
+  limit: 30,
+  namespace: "safety-reference-status",
+  windowMs: 60_000,
+  workUnit: "safety-reference-status",
+} as const;
+
 const documentExportLimiter = createRateLimiter({
   limit: PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.limit,
   windowMs: PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.windowMs,
@@ -41,6 +52,13 @@ const photoAnalysisLimiter = createRateLimiter({
 });
 const photoAnalysisConcurrency = createConcurrencyGuard(
   PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.concurrency,
+);
+const safetyReferenceStatusLimiter = createRateLimiter({
+  limit: PUBLIC_SAFETY_REFERENCE_STATUS_ADMISSION_POLICY.limit,
+  windowMs: PUBLIC_SAFETY_REFERENCE_STATUS_ADMISSION_POLICY.windowMs,
+});
+const safetyReferenceStatusConcurrency = createConcurrencyGuard(
+  PUBLIC_SAFETY_REFERENCE_STATUS_ADMISSION_POLICY.concurrency,
 );
 
 const FIXED_WINDOW_SCRIPT = [
@@ -154,7 +172,11 @@ async function checkUpstashRateLimit(input: {
     });
     if (!response.ok) throw new Error(`distributed limiter returned HTTP ${response.status}`);
 
-    const payload = await response.json() as { error?: unknown; result?: unknown };
+    const raw = await readBoundedResponseText(response, {
+      label: "Upstash rate-limit response",
+      maxBytes: UPSTASH_RESPONSE_MAX_BYTES,
+    });
+    const payload = JSON.parse(raw) as { error?: unknown; result?: unknown };
     if (typeof payload.error === "string" && payload.error) {
       throw new Error("distributed limiter rejected the atomic counter command");
     }
@@ -294,7 +316,11 @@ async function runUpstashCommand(
       signal: controller.signal,
     });
     if (!response.ok) throw new Error(`distributed concurrency returned HTTP ${response.status}`);
-    const payload = await response.json() as { error?: unknown; result?: unknown };
+    const raw = await readBoundedResponseText(response, {
+      label: "Upstash concurrency response",
+      maxBytes: UPSTASH_RESPONSE_MAX_BYTES,
+    });
+    const payload = JSON.parse(raw) as { error?: unknown; result?: unknown };
     if (typeof payload.error === "string" && payload.error) {
       throw new Error("distributed concurrency rejected the atomic lease command");
     }
@@ -381,6 +407,15 @@ async function acquirePhotoAnalysisLease(): Promise<(() => Promise<void>) | null
     concurrency: PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.concurrency,
     leaseMs: PHOTO_ANALYSIS_LEASE_MS,
     namespace: PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.namespace,
+    requireDistributedInProduction: true,
+  });
+}
+
+async function acquireSafetyReferenceStatusLease(): Promise<(() => Promise<void>) | null | undefined> {
+  return acquirePublicConcurrencyLease({
+    concurrency: PUBLIC_SAFETY_REFERENCE_STATUS_ADMISSION_POLICY.concurrency,
+    leaseMs: SAFETY_REFERENCE_STATUS_LEASE_MS,
+    namespace: PUBLIC_SAFETY_REFERENCE_STATUS_ADMISSION_POLICY.namespace,
     requireDistributedInProduction: true,
   });
 }
@@ -499,6 +534,65 @@ export async function withPublicPhotoAnalysisAdmission(
     const response = await work();
     applyPublicRateLimitHeader(response, decision);
     response.headers.set("X-SafeClaw-Work-Unit", PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.workUnit);
+    return response;
+  } finally {
+    await release();
+  }
+}
+
+function safetyReferenceStatusConcurrencyResponse(decision: PublicRateLimitDecision): Response {
+  const response = new Response(JSON.stringify({
+    error: "안전 지식 상태 확인 요청이 많습니다. 잠시 후 다시 시도해 주세요.",
+    code: "SAFETY_REFERENCE_STATUS_CONCURRENCY_LIMIT",
+    retryAfterSeconds: 1,
+  }), {
+    status: 503,
+    headers: {
+      "Content-Type": "application/json",
+      "Retry-After": "1",
+    },
+  });
+  applyPublicRateLimitHeader(response, decision);
+  response.headers.set("X-SafeClaw-Work-Unit", PUBLIC_SAFETY_REFERENCE_STATUS_ADMISSION_POLICY.workUnit);
+  return response;
+}
+
+export async function withPublicSafetyReferenceStatusAdmission(
+  request: Request,
+  work: () => Promise<Response>,
+): Promise<Response> {
+  const decision = await checkPublicRateLimit({
+    request,
+    namespace: PUBLIC_SAFETY_REFERENCE_STATUS_ADMISSION_POLICY.namespace,
+    limit: PUBLIC_SAFETY_REFERENCE_STATUS_ADMISSION_POLICY.limit,
+    windowMs: PUBLIC_SAFETY_REFERENCE_STATUS_ADMISSION_POLICY.windowMs,
+    instanceLimiter: safetyReferenceStatusLimiter,
+    requireDistributedInProduction: true,
+  });
+  const limited = publicRateLimitResponse(decision);
+  if (limited) {
+    limited.headers.set("X-SafeClaw-Work-Unit", PUBLIC_SAFETY_REFERENCE_STATUS_ADMISSION_POLICY.workUnit);
+    return limited;
+  }
+
+  let release: (() => void | Promise<void>) | null;
+  try {
+    const distributedRelease = await acquireSafetyReferenceStatusLease();
+    release = distributedRelease === undefined
+      ? safetyReferenceStatusConcurrency.tryAcquire()
+      : distributedRelease;
+  } catch (error) {
+    console.error("[public-rate-limit] safety-reference status concurrency unavailable", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return safetyReferenceStatusConcurrencyResponse(decision);
+  }
+  if (!release) return safetyReferenceStatusConcurrencyResponse(decision);
+
+  try {
+    const response = await work();
+    applyPublicRateLimitHeader(response, decision);
+    response.headers.set("X-SafeClaw-Work-Unit", PUBLIC_SAFETY_REFERENCE_STATUS_ADMISSION_POLICY.workUnit);
     return response;
   } finally {
     await release();

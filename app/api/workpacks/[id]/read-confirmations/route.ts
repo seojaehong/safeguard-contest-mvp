@@ -16,6 +16,10 @@ import {
   loadActiveOwnedShareSession,
   loadOwnedWorkpackOperationContext
 } from "@/lib/workpack-commercial-store";
+import {
+  AUTHENTICATED_COMMERCIAL_REQUEST_MAX_BYTES,
+  enforceAuthenticatedJsonRequestBodyBudget,
+} from "@/lib/public-work-budget";
 
 export const dynamic = "force-dynamic";
 
@@ -80,7 +84,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ ok: false, configured: true, confirmationId: null, message: owned.message }, { status: owned.status });
   }
 
-  const parsed = await request.json().catch((): unknown => ({}));
+  const bodyBudget = await enforceAuthenticatedJsonRequestBodyBudget(request, AUTHENTICATED_COMMERCIAL_REQUEST_MAX_BYTES);
+  if (!bodyBudget.ok) return bodyBudget.response;
+  const parsed = await bodyBudget.request.json().catch((): unknown => ({}));
   const body = isRecord(parsed) ? parsed : {};
   const shareSessionId = readString(body.shareSessionId);
   const workerId = readString(body.workerId);
