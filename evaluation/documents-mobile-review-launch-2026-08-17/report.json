@@ -1,0 +1,118 @@
+{
+  "schema": "safeclaw-documents-mobile-review-launch/v1",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_DOCUMENT_REVIEW_LAUNCH_CONTAINMENT",
+  "sourceHead": "b58066dd58777df4f6bd251418e202a5b7d045d1",
+  "baseUrl": "http://127.0.0.1:3092",
+  "route": "/documents?theme=day",
+  "before": {
+    "sourceCommit": "12ea936d75d407a167bc0bb510e1b40a233b139c",
+    "viewport": {
+      "width": 390,
+      "height": 723
+    },
+    "reviewLaunch": {
+      "left": 225,
+      "top": 186,
+      "right": 345,
+      "bottom": 216
+    },
+    "thirdCoreDocument": {
+      "label": "TBM 기록",
+      "left": 250,
+      "top": 186,
+      "right": 345,
+      "bottom": 252
+    },
+    "overlapCount": 1
+  },
+  "after": [
+    {
+      "viewport": {
+        "label": "desktop-1440x723",
+        "width": 1440,
+        "height": 723
+      },
+      "bodyHeight": 723,
+      "bodyRatio": 1,
+      "horizontalOverflow": false,
+      "overlapCount": 0,
+      "reviewLaunch": {
+        "left": 353,
+        "top": 212,
+        "right": 480,
+        "bottom": 242,
+        "width": 127,
+        "height": 30
+      },
+      "screenshot": "desktop-1440x723.png",
+      "screenshotSha256": "3ed66e0fa662ec237cf135fbf4582deddef47af60e8ed0088ba46cd7eb26050d"
+    },
+    {
+      "viewport": {
+        "label": "mobile-390x723",
+        "width": 390,
+        "height": 723
+      },
+      "bodyHeight": 723,
+      "bodyRatio": 1,
+      "horizontalOverflow": false,
+      "overlapCount": 0,
+      "coreDocumentCount": 3,
+      "reviewLaunch": {
+        "left": 225,
+        "top": 256,
+        "right": 345,
+        "bottom": 300,
+        "width": 120,
+        "height": 44
+      },
+      "supportingDocumentSummary": {
+        "left": 45,
+        "top": 256,
+        "right": 221,
+        "bottom": 301,
+        "width": 176,
+        "height": 45
+      },
+      "thirdCoreDocument": {
+        "label": "TBM 기록",
+        "left": 250,
+        "top": 186,
+        "right": 345,
+        "bottom": 252,
+        "width": 95,
+        "height": 66
+      },
+      "screenshot": "mobile-390x723.png",
+      "screenshotSha256": "4a1aafe5a3257905ce09bd36d16764cf0b6e9aedc55fc1dfeae88487e2f9a58f"
+    }
+  ],
+  "verification": {
+    "focusedBrowser": {
+      "testFilesPassed": 1,
+      "testsPassed": 1,
+      "testsSkipped": 39,
+      "durationSeconds": 44.9
+    },
+    "fullDocumentsBrowser": {
+      "testFilesPassed": 1,
+      "testsPassed": 40,
+      "durationSeconds": 242.23
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28
+  },
+  "boundaries": {
+    "currentSourceLocalProductionOnly": true,
+    "liveAfterDeploymentPending": true,
+    "routeSplitAloneAcceptedAsFix": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "wikiPublicationPerformed": false,
+    "vectorMutationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  }
+}
