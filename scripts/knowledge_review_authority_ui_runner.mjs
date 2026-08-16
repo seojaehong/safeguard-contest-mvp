@@ -18,6 +18,7 @@ const sourceHead = execFileSync("git", ["rev-parse", "HEAD"], {
 const productCommit = process.env.SAFECLAW_KNOWLEDGE_UI_PRODUCT_COMMIT || sourceHead;
 const authStorageKey = process.env.SAFECLAW_SUPABASE_STORAGE_KEY || "sb-fixture-auth-token";
 const liveMode = /^https:\/\/www\.safeclaw\.kr(?:\/|$)/u.test(baseUrl);
+const evidenceInspectorMode = process.env.SAFECLAW_KNOWLEDGE_UI_MODE === "evidence-inspector";
 const productionBuild = liveMode
   ? await fetch(`${baseUrl}/api/build-info?codexCacheBust=${encodeURIComponent(checkedAt)}`)
       .then(async (response) => {
@@ -301,11 +302,18 @@ const productionAligned = liveMode
   && productionBuild.environment === "production";
 const report = {
   schemaVersion: "safeclaw-hermes-knowledge-review-authority-ui/v2",
+  contractMode: evidenceInspectorMode ? "evidence-inspector" : "authority-ui",
   verdict: failed.length === 0 && productionAligned
-    ? "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI"
+    ? evidenceInspectorMode
+      ? "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR"
+      : "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI"
     : failed.length === 0 && !liveMode
-      ? "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_AUTHORITY_UI"
-      : "RED_HERMES_REVIEW_AUTHORITY_UI",
+      ? evidenceInspectorMode
+        ? "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_EVIDENCE_INSPECTOR"
+        : "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_AUTHORITY_UI"
+      : evidenceInspectorMode
+        ? "RED_HERMES_REVIEW_EVIDENCE_INSPECTOR"
+        : "RED_HERMES_REVIEW_AUTHORITY_UI",
   checkedAt,
   sourceHead,
   productCommit,
