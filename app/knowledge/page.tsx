@@ -9,7 +9,10 @@ import type {
   KnowledgeAuthorityId,
   KnowledgePromotionStageId
 } from "@/lib/knowledge-governance";
-import { getSafetyReferenceStats } from "@/lib/safety-reference-catalog";
+import {
+  getSafetyReferenceStats,
+  normalizeApprovedSafetyReferenceProvenanceUrl
+} from "@/lib/safety-reference-catalog";
 import { KnowledgeSectionNavigator } from "./KnowledgeSectionNavigator";
 import { KnowledgeReviewInbox } from "./KnowledgeReviewInbox";
 import styles from "./KnowledgePage.module.css";
@@ -406,6 +409,7 @@ export default async function KnowledgePage() {
               const reflection = item.document_reflection_label || item.primary_documents.join(" · ");
               const sourceKind = item.source_kind_label || item.evidence_role_label || "근거 항목";
               const summary = normalizeKnowledgeSnippet(item.short_summary || item.summary, KNOWLEDGE_SUMMARY_MAX_LENGTH);
+              const provenanceUrl = normalizeApprovedSafetyReferenceProvenanceUrl(item.source_url);
 
               return (
                 <li key={item.id} className={styles.referenceRow} data-knowledge-row>
@@ -425,8 +429,8 @@ export default async function KnowledgePage() {
                     <div className={styles.detailContent}>
                       {item.evidence_role_label ? <span>{item.evidence_role_label}</span> : null}
                       <a href={`/knowledge?reference=${encodeURIComponent(item.title)}`}>이 근거로 조회</a>
-                      {item.source_url ? (
-                        <a href={item.source_url} target="_blank" rel="noopener noreferrer">원문 열기</a>
+                      {provenanceUrl ? (
+                        <a href={provenanceUrl} target="_blank" rel="noopener noreferrer">원문 열기</a>
                       ) : null}
                     </div>
                   </details>

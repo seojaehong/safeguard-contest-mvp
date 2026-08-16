@@ -249,12 +249,27 @@ export async function POST(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ ok: false, configured: true, confirmationId: null, message: draft.message }, { status: 400 });
   }
 
+  const identity: ReadConfirmationIdentity = {
+    organizationId: draft.insert.organization_id,
+    siteId: draft.insert.site_id ?? null,
+    workpackId: draft.insert.workpack_id,
+    shareSessionId: draft.insert.share_session_id || activeSession.session.id,
+    workerId: draft.insert.worker_id ?? null,
+    workerDisplayName: draft.insert.worker_display_name,
+    confirmationMethod: "button"
+  };
   const existingQuery = client
     .from("workpack_read_confirmations")
-    .select("id")
-    .eq("workpack_id", activeSession.session.workpackId)
-    .eq("share_session_id", activeSession.session.id)
-    .eq("confirmation_method", "button");
+    .select("id,organization_id,site_id,workpack_id,share_session_id,worker_id,worker_display_name,confirmation_method")
+    .eq("organization_id", identity.organizationId)
+    .eq("workpack_id", identity.workpackId)
+    .eq("share_session_id", identity.shareSessionId)
+    .eq("confirmation_method", identity.confirmationMethod);
+  if (identity.siteId === null) {
+    existingQuery.is("site_id", null);
+  } else {
+    existingQuery.eq("site_id", identity.siteId);
+  }
   if (resolvedWorkerId) {
     existingQuery.eq("worker_id", resolvedWorkerId);
   } else {
@@ -266,7 +281,11 @@ export async function POST(request: NextRequest, context: RouteContext) {
     console.error("public share confirmation idempotency check failed", existingError);
     return NextResponse.json({ ok: false, configured: true, confirmationId: null, message: "열람 확인 중복 여부를 확인하지 못했습니다." }, { status: 500 });
   }
-  if (existing?.id) {
+  if (existing && !matchesReadConfirmationIdentity(existing, identity)) {
+    console.error("public share confirmation idempotency identity mismatch");
+    return NextResponse.json({ ok: false, configured: true, confirmationId: null, message: "기존 열람 확인의 귀속을 확인하지 못했습니다." }, { status: 409 });
+  }
+  if (existing) {
     return NextResponse.json({
       ok: true,
       configured: true,
@@ -277,15 +296,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   }
 
   const insert: WorkspaceDatabase["public"]["Tables"]["workpack_read_confirmations"]["Insert"] = {
-    id: buildReadConfirmationId({
-      organizationId: draft.insert.organization_id,
-      siteId: draft.insert.site_id ?? null,
-      workpackId: draft.insert.workpack_id,
-      shareSessionId: draft.insert.share_session_id || activeSession.session.id,
-      workerId: draft.insert.worker_id ?? null,
-      workerDisplayName: draft.insert.worker_display_name,
-      confirmationMethod: "button"
-    }),
+    id: buildReadConfirmationId(identity),
     organization_id: draft.insert.organization_id,
     site_id: draft.insert.site_id,
     workpack_id: draft.insert.workpack_id,
@@ -304,15 +315,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
     .single();
 
   if (error?.code === "23505") {
-    const identity: ReadConfirmationIdentity = {
-      organizationId: insert.organization_id,
-      siteId: insert.site_id ?? null,
-      workpackId: insert.workpack_id,
-      shareSessionId: insert.share_session_id || activeSession.session.id,
-      workerId: insert.worker_id ?? null,
-      workerDisplayName: insert.worker_display_name,
-      confirmationMethod: insert.confirmation_method || "button"
-    };
     const { data: concurrent, error: concurrentError } = await client
       .from("workpack_read_confirmations")
       .select("id,organization_id,site_id,workpack_id,share_session_id,worker_id,worker_display_name,confirmation_method")

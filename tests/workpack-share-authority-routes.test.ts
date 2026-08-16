@@ -164,13 +164,13 @@ function activeSession() {
   };
 }
 
-function publicSession() {
+function publicSession(siteId: string | null = "site-1") {
   return {
     ok: true,
     session: {
       id: SESSION_ID,
       organizationId: "org-1",
-      siteId: "site-1",
+      siteId,
       workpackId: WORKPACK_ID,
       shareScope: "invited",
       question: "부산 해운대 천장 누수 보수",
@@ -316,6 +316,32 @@ function makeConfirmationRaceClient(concurrentRow: Record<string, unknown>) {
     client: { from: () => query },
     insertCount: () => insertCount,
     inserted: () => inserted
+  };
+}
+
+function makeExistingPublicConfirmationClient(existingRow: Record<string, unknown>) {
+  const filters: Array<["eq" | "is", string, unknown]> = [];
+  let insertCount = 0;
+  const query = {
+    select() { return query; },
+    eq(field: string, value: unknown) {
+      filters.push(["eq", field, value]);
+      return query;
+    },
+    is(field: string, value: unknown) {
+      filters.push(["is", field, value]);
+      return query;
+    },
+    maybeSingle: async () => ({ data: existingRow, error: null }),
+    insert() {
+      insertCount += 1;
+      throw new Error("Existing confirmation must not be inserted again");
+    }
+  };
+  return {
+    client: { from: () => query },
+    filters: () => filters,
+    insertCount: () => insertCount
   };
 }
 
@@ -2065,6 +2091,108 @@ describe("read confirmation route authority", () => {
       language_code: "vi",
       worker_snapshot: serverRecipient.workerSnapshot
     });
+  });
+
+  it("reuses a fully matching public confirmation within the session tenant tuple", async () => {
+    const identity = {
+      organizationId: "org-1",
+      siteId: "site-1",
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      workerId: WORKER_ID,
+      workerDisplayName: "Server Nguyen",
+      confirmationMethod: "button"
+    };
+    const confirmationId = buildReadConfirmationId(identity);
+    const fake = makeExistingPublicConfirmationClient({
+      id: confirmationId,
+      organization_id: identity.organizationId,
+      site_id: identity.siteId,
+      workpack_id: identity.workpackId,
+      share_session_id: identity.shareSessionId,
+      worker_id: identity.workerId,
+      worker_display_name: identity.workerDisplayName,
+      confirmation_method: identity.confirmationMethod
+    });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    const { POST } = await import("@/app/api/share-sessions/[sessionId]/route");
+
+    const response = await POST(jsonRequest(`/api/share-sessions/${SESSION_ID}?workerId=${WORKER_ID}`, {
+      recipientVerification: RECIPIENT_VERIFICATION
+    }), { params: Promise.resolve({ sessionId: SESSION_ID }) });
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({ confirmationId, idempotent: true });
+    expect(fake.filters()).toContainEqual(["eq", "organization_id", identity.organizationId]);
+    expect(fake.filters()).toContainEqual(["eq", "site_id", identity.siteId]);
+    expect(fake.insertCount()).toBe(0);
+  });
+
+  it("fails closed when a public confirmation precheck returns a different stored identity", async () => {
+    const identity = {
+      organizationId: "org-1",
+      siteId: "site-1",
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      workerId: WORKER_ID,
+      workerDisplayName: "Server Nguyen",
+      confirmationMethod: "button"
+    };
+    const fake = makeExistingPublicConfirmationClient({
+      id: buildReadConfirmationId(identity),
+      organization_id: identity.organizationId,
+      site_id: identity.siteId,
+      workpack_id: identity.workpackId,
+      share_session_id: identity.shareSessionId,
+      worker_id: identity.workerId,
+      worker_display_name: "Different Worker",
+      confirmation_method: identity.confirmationMethod
+    });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    const { POST } = await import("@/app/api/share-sessions/[sessionId]/route");
+
+    const response = await POST(jsonRequest(`/api/share-sessions/${SESSION_ID}?workerId=${WORKER_ID}`, {
+      recipientVerification: RECIPIENT_VERIFICATION
+    }), { params: Promise.resolve({ sessionId: SESSION_ID }) });
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toMatchObject({ confirmationId: null });
+    expect(fake.insertCount()).toBe(0);
+  });
+
+  it("uses a null-safe site filter for public confirmation idempotency", async () => {
+    const identity = {
+      organizationId: "org-1",
+      siteId: null,
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      workerId: WORKER_ID,
+      workerDisplayName: "Server Nguyen",
+      confirmationMethod: "button"
+    };
+    const confirmationId = buildReadConfirmationId(identity);
+    const fake = makeExistingPublicConfirmationClient({
+      id: confirmationId,
+      organization_id: identity.organizationId,
+      site_id: null,
+      workpack_id: identity.workpackId,
+      share_session_id: identity.shareSessionId,
+      worker_id: identity.workerId,
+      worker_display_name: identity.workerDisplayName,
+      confirmation_method: identity.confirmationMethod
+    });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.loadActivePublicShareSession.mockResolvedValueOnce(publicSession(null));
+    const { POST } = await import("@/app/api/share-sessions/[sessionId]/route");
+
+    const response = await POST(jsonRequest(`/api/share-sessions/${SESSION_ID}?workerId=${WORKER_ID}`, {
+      recipientVerification: RECIPIENT_VERIFICATION
+    }), { params: Promise.resolve({ sessionId: SESSION_ID }) });
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({ confirmationId, idempotent: true });
+    expect(fake.filters()).toContainEqual(["is", "site_id", null]);
+    expect(fake.insertCount()).toBe(0);
   });
 
   it("reuses a concurrently inserted public recipient confirmation", async () => {

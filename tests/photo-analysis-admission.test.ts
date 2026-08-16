@@ -110,4 +110,22 @@ describe("photo analysis aggregate admission", () => {
     expect(error).toHaveBeenCalledOnce();
     error.mockRestore();
   });
+
+  it("fails closed in production when distributed admission is absent", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const work = vi.fn(async () => new Response("should-not-run"));
+
+    const response = await withPublicPhotoAnalysisAdmission(request("198.51.100.78"), work);
+
+    expect(response.status).toBe(503);
+    expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("distributed");
+    expect(response.headers.get("X-SafeClaw-Work-Unit")).toBe("photo-analysis");
+    await expect(response.json()).resolves.toMatchObject({
+      code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    });
+    expect(work).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledOnce();
+    error.mockRestore();
+  });
 });

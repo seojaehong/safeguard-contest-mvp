@@ -593,6 +593,17 @@ export type WorkspaceUser = {
   email: string | null;
 };
 
+export function isPlatformOperator(
+  user: WorkspaceUser,
+  env: Record<string, string | undefined> = process.env
+): boolean {
+  const allowedUserIds = env.SAFECLAW_PLATFORM_OPERATOR_USER_IDS
+    ?.split(",")
+    .map((value) => value.trim())
+    .filter(Boolean) || [];
+  return allowedUserIds.includes(user.id);
+}
+
 export function toJson(value: unknown): Json {
   return JSON.parse(JSON.stringify(value)) as Json;
 }

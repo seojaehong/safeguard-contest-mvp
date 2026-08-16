@@ -139,7 +139,8 @@ describe("knowledge page decision layout", () => {
     expect(technicalList).toContain("stats.samples.map");
     expect(technicalList).toContain("item.source_kind_label");
     expect(technicalList).toContain("item.document_reflection_label");
-    expect(technicalList).toContain("item.source_url ?");
+    expect(technicalList).toContain("normalizeApprovedSafetyReferenceProvenanceUrl(item.source_url)");
+    expect(technicalList).toContain("provenanceUrl ?");
     expect(technicalList).toContain("<details");
 
     expect(referenceList).toContain("<ul");

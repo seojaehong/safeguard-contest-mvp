@@ -74,4 +74,62 @@ describe("Work24 response budget", () => {
     expect(result.detail).toContain(`exceeded the ${work24.WORK24_RESPONSE_MAX_BYTES}-byte response limit`);
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
+
+  it("gives each upstream request an independent timeout while preserving fallback", async () => {
+    vi.useFakeTimers();
+    try {
+      vi.stubEnv("WORK24_AUTH_KEY", "test-work24-key");
+      const signals: AbortSignal[] = [];
+      const fetchMock = stalledFetch(signals);
+      vi.stubGlobal("fetch", fetchMock);
+      const work24 = await import("@/lib/work24");
+
+      const pending = work24.fetchTrainingRecommendations("서울 외국인 안전교육");
+      await Promise.resolve();
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+
+      await vi.advanceTimersByTimeAsync(work24.WORK24_REQUEST_TIMEOUT_MS);
+      const result = await pending;
+
+      expect(signals).toHaveLength(2);
+      expect(signals.every((signal) => signal.aborted)).toBe(true);
+      expect(signals.every((signal) => signal.reason instanceof Error
+        && signal.reason.message === `Work24 request timeout after ${work24.WORK24_REQUEST_TIMEOUT_MS}ms`)).toBe(true);
+      expect(result.mode).toBe("fallback");
+      expect(result.recommendations).toEqual([]);
+      expect(result.detail).toContain(`Work24 request timeout after ${work24.WORK24_REQUEST_TIMEOUT_MS}ms`);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
+describe("Law.go response budget", () => {
+  it("falls back without parsing an oversized detail response", async () => {
+    vi.stubEnv("LAWGO_OC", "test-lawgo-client");
+    const lawgo = await import("@/lib/lawgo");
+    const cancel = vi.fn();
+    const fetchMock = vi.fn(async () => new Response(
+      new ReadableStream<Uint8Array>({ cancel }),
+      {
+        status: 200,
+        headers: { "Content-Length": String(lawgo.LAWGO_RESPONSE_MAX_BYTES + 1) },
+      },
+    ));
+    vi.stubGlobal("fetch", fetchMock);
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    const result = await lawgo.getDetail("lawgo-prec-1");
+
+    expect(result).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(cancel).toHaveBeenCalledTimes(1);
+    expect(error).toHaveBeenCalledWith(
+      "Failed to fetch Law.go detail response",
+      expect.objectContaining({
+        message: `Law.go detail response exceeded the ${lawgo.LAWGO_RESPONSE_MAX_BYTES}-byte response limit`,
+      }),
+    );
+    error.mockRestore();
+  });
 });

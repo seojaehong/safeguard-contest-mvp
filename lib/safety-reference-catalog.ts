@@ -194,6 +194,31 @@ const PUBLIC_REFERENCE_LIMITS = {
   anchorExcerpt: 360,
 } as const;
 
+const APPROVED_SAFETY_REFERENCE_PROVENANCE_HOSTS = [
+  "law.go.kr",
+  "kosha.or.kr",
+  "data.go.kr",
+] as const;
+
+export function normalizeApprovedSafetyReferenceProvenanceUrl(
+  value: string | null | undefined,
+): string | null {
+  if (!value || value.length > PUBLIC_REFERENCE_LIMITS.url) return null;
+  try {
+    const url = new URL(value);
+    const hostname = url.hostname.toLowerCase();
+    const approvedHost = APPROVED_SAFETY_REFERENCE_PROVENANCE_HOSTS.some(
+      (host) => hostname === host || hostname.endsWith(`.${host}`),
+    );
+    if (url.protocol !== "https:" || !approvedHost) return null;
+    if (url.username || url.password || (url.port && url.port !== "443")) return null;
+    url.hash = "";
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
 function boundPublicReferenceText(value: string, maxChars: number): string {
   return Array.from(value
     .replace(/[\u0000-\u001f\u007f\u2028\u2029]+/gu, " ")
@@ -235,7 +260,7 @@ export function buildPublicSafetyReferenceItem(item: SafetyReferenceItem): Safet
     primary_documents: boundPublicReferenceList(item.primary_documents, 24, PUBLIC_REFERENCE_LIMITS.listValue),
     controls: boundPublicReferenceList(item.controls, 12, PUBLIC_REFERENCE_LIMITS.control),
     ...(item.source_url !== undefined
-      ? { source_url: boundNullablePublicReferenceText(item.source_url, PUBLIC_REFERENCE_LIMITS.url) }
+      ? { source_url: normalizeApprovedSafetyReferenceProvenanceUrl(item.source_url) }
       : {}),
     ...(item.evidence_role ? { evidence_role: item.evidence_role } : {}),
     ...(item.reflected_documents
@@ -288,9 +313,8 @@ export function buildPublicSafetyReferenceItem(item: SafetyReferenceItem): Safet
               item.kosha_grounding.metadata.bodySha256,
               128,
             ),
-            officialUrl: boundNullablePublicReferenceText(
+            officialUrl: normalizeApprovedSafetyReferenceProvenanceUrl(
               item.kosha_grounding.metadata.officialUrl,
-              PUBLIC_REFERENCE_LIMITS.url,
             ),
             officialFileId: boundNullablePublicReferenceText(
               item.kosha_grounding.metadata.officialFileId,
@@ -325,9 +349,7 @@ export function buildPublicSafetyReferenceItem(item: SafetyReferenceItem): Safet
           item.kosha_guide.evidenceRef,
           PUBLIC_REFERENCE_LIMITS.provenance,
         ),
-        ...(item.kosha_guide.officialUrl
-          ? { officialUrl: boundPublicReferenceText(item.kosha_guide.officialUrl, PUBLIC_REFERENCE_LIMITS.url) }
-          : {}),
+        officialUrl: normalizeApprovedSafetyReferenceProvenanceUrl(item.kosha_guide.officialUrl) || undefined,
         ...(item.kosha_guide.officialFileId
           ? { officialFileId: boundPublicReferenceText(item.kosha_guide.officialFileId, PUBLIC_REFERENCE_LIMITS.id) }
           : {}),

@@ -1,5 +1,8 @@
 import { mockDetails, mockSearchResults } from "./mock-data";
+import { readBoundedResponseText } from "./server/upstream-http";
 import { DetailRecord, SearchResult } from "./types";
+
+export const LAWGO_RESPONSE_MAX_BYTES = 1024 * 1024;
 
 const oc = process.env.LAWGO_OC?.trim() || process.env.LAW_OC?.trim() || "";
 const mockMode = process.env.LAWGO_MOCK_MODE === "force" || !oc;
@@ -418,7 +421,10 @@ async function fetchLawGo(endpoint: string, params: Record<string, string>, sign
     if (value) url.searchParams.set(key, value);
   });
   const response = await fetch(url.toString(), { cache: "no-store", headers: lawGoHeaders, signal });
-  const text = await response.text();
+  const text = await readBoundedResponseText(response, {
+    label: "Law.go response",
+    maxBytes: LAWGO_RESPONSE_MAX_BYTES,
+  });
   if (!response.ok) {
     throw new Error(text.slice(0, 160));
   }
@@ -548,7 +554,10 @@ export async function getDetail(id: string): Promise<DetailRecord | null> {
   let text: string;
   try {
     response = await fetch(url.toString(), { cache: "no-store", headers: lawGoHeaders });
-    text = await response.text();
+    text = await readBoundedResponseText(response, {
+      label: "Law.go detail response",
+      maxBytes: LAWGO_RESPONSE_MAX_BYTES,
+    });
   } catch (error) {
     console.error("Failed to fetch Law.go detail response", error);
     return parsed.type === "law" ? buildLawDetailFallback(id, parsed.raw) : null;

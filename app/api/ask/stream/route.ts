@@ -142,7 +142,6 @@ export async function POST(request: NextRequest) {
     cancel(reason) {
       if (!workController.signal.aborted) workController.abort(reason);
       request.signal.removeEventListener("abort", abortWork);
-      void workLease.release();
     },
   });
 

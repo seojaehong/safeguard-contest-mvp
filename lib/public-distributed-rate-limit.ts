@@ -381,7 +381,7 @@ async function acquirePhotoAnalysisLease(): Promise<(() => Promise<void>) | null
     concurrency: PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.concurrency,
     leaseMs: PHOTO_ANALYSIS_LEASE_MS,
     namespace: PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.namespace,
-    requireDistributedInProduction: false,
+    requireDistributedInProduction: true,
   });
 }
 
@@ -473,6 +473,7 @@ export async function withPublicPhotoAnalysisAdmission(
     limit: PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.limit,
     windowMs: PUBLIC_PHOTO_ANALYSIS_ADMISSION_POLICY.windowMs,
     instanceLimiter: photoAnalysisLimiter,
+    requireDistributedInProduction: true,
   });
   const limited = publicRateLimitResponse(decision);
   if (limited) {

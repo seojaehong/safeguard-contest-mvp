@@ -6,11 +6,13 @@ const mocks = vi.hoisted(() => ({
   createClient: vi.fn(),
   getStatus: vi.fn(),
   getUser: vi.fn(),
+  isPlatformOperator: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase-admin", () => ({
   createSupabaseAdminClient: mocks.createClient,
   getWorkspaceUser: mocks.getUser,
+  isPlatformOperator: mocks.isPlatformOperator,
 }));
 vi.mock("@/lib/sif-embedding-gate-status", () => ({
   getSifEmbeddingGateStatus: mocks.getStatus,
@@ -29,6 +31,7 @@ beforeEach(() => {
   vi.resetModules();
   mocks.createClient.mockReset().mockReturnValue({ auth: {} });
   mocks.getUser.mockReset().mockResolvedValue(null);
+  mocks.isPlatformOperator.mockReset().mockReturnValue(false);
   mocks.getStatus.mockReset().mockReturnValue({ ok: true, stage: "ready-for-approval" });
   mocks.buildPacket.mockReset().mockReturnValue({
     fileName: "sif-approval.md",
@@ -47,14 +50,28 @@ describe("SIF operator diagnostics routes", () => {
     expect(mocks.getStatus).not.toHaveBeenCalled();
   });
 
-  it("returns full status only to an authenticated workspace user", async () => {
+  it("rejects an authenticated tenant user before computing global status", async () => {
     mocks.getUser.mockResolvedValue({ id: "user-1", email: "owner@example.com" });
+    const { GET } = await import("@/app/api/sif-embedding-gate/status/route");
+
+    const response = await GET(request("/api/sif-embedding-gate/status", true));
+
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toEqual({ ok: false, message: "플랫폼 운영자 권한이 필요합니다." });
+    expect(mocks.getStatus).not.toHaveBeenCalled();
+  });
+
+  it("returns full status only to a platform operator", async () => {
+    const user = { id: "operator-1", email: "operator@example.com" };
+    mocks.getUser.mockResolvedValue(user);
+    mocks.isPlatformOperator.mockReturnValue(true);
     const { GET } = await import("@/app/api/sif-embedding-gate/status/route");
 
     const response = await GET(request("/api/sif-embedding-gate/status", true));
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ ok: true, stage: "ready-for-approval" });
+    expect(mocks.isPlatformOperator).toHaveBeenCalledWith(user);
     expect(mocks.getStatus).toHaveBeenCalledTimes(1);
   });
 
@@ -68,8 +85,20 @@ describe("SIF operator diagnostics routes", () => {
     expect(mocks.buildPacket).not.toHaveBeenCalled();
   });
 
-  it("serves an authenticated approval packet without changing approval state", async () => {
+  it("rejects an authenticated tenant user before reading approval artifacts", async () => {
     mocks.getUser.mockResolvedValue({ id: "user-1", email: "owner@example.com" });
+    const { GET } = await import("@/app/api/sif-embedding-gate/approval-packet/route");
+
+    const response = await GET(request("/api/sif-embedding-gate/approval-packet", true));
+
+    expect(response.status).toBe(403);
+    expect(mocks.getStatus).not.toHaveBeenCalled();
+    expect(mocks.buildPacket).not.toHaveBeenCalled();
+  });
+
+  it("serves a platform operator approval packet without changing approval state", async () => {
+    mocks.getUser.mockResolvedValue({ id: "operator-1", email: "operator@example.com" });
+    mocks.isPlatformOperator.mockReturnValue(true);
     const { GET } = await import("@/app/api/sif-embedding-gate/approval-packet/route");
 
     const response = await GET(request("/api/sif-embedding-gate/approval-packet", true));

@@ -267,6 +267,51 @@ describe("ask generation evidence routes", () => {
     expect(receivedSignal?.aborted).toBe(true);
   });
 
+  it("does not release the SSE work lease before cancelled provider work settles", async () => {
+    let finishWork: () => void = () => undefined;
+    const workGate = new Promise<void>((resolve) => { finishWork = resolve; });
+    let workSettled: () => void = () => undefined;
+    const settled = new Promise<void>((resolve) => { workSettled = resolve; });
+    mocks.runAsk.mockImplementationOnce(async (_question, options: { signal?: AbortSignal }) => {
+      try {
+        await workGate;
+        options.signal?.throwIfAborted();
+        return responseWithHarness();
+      } finally {
+        workSettled();
+      }
+    });
+    const { POST: postStream } = await import("@/app/api/ask/stream/route");
+    const { POST: postJson } = await import("@/app/api/ask/route");
+    const stream = await postStream(requestWithBody(
+      "/api/ask/stream",
+      { question: "성수동 외벽 도장 작업", aiMode: "full" },
+      { ip: "203.0.113.93" },
+    ));
+
+    await stream.body?.cancel("cancelled while provider transport is still settling");
+    const busy = await postJson(requestWithBody(
+      "/api/ask",
+      { question: "다른 현장 작업", aiMode: "full" },
+      { ip: "203.0.113.94" },
+    ));
+
+    expect(busy.status).toBe(503);
+    await expect(busy.json()).resolves.toMatchObject({ code: "PUBLIC_ASK_CONCURRENCY_LIMIT" });
+    expect(mocks.runAsk).toHaveBeenCalledTimes(1);
+
+    finishWork();
+    await settled;
+    await vi.waitFor(async () => {
+      const afterSettle = await postJson(requestWithBody(
+        "/api/ask",
+        { question: "정리 후 현장 작업", aiMode: "full" },
+        { ip: "203.0.113.95" },
+      ));
+      expect(afterSettle.status).toBe(200);
+    });
+  });
+
   it("aborts streaming work when the response consumer cancels", async () => {
     let receivedSignal: AbortSignal | undefined;
     mocks.runAsk.mockImplementationOnce(async (_question, options: { signal?: AbortSignal }) => {

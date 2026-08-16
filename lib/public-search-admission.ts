@@ -12,7 +12,11 @@ export type PublicSearchProviderKind = "legal" | "safety-reference" | "weather";
 
 export const PUBLIC_SEARCH_PROVIDER_ADMISSION_POLICY = {
   capacity: 12,
-  leaseMs: 70_000,
+  leaseMs: {
+    legal: 70_000,
+    "safety-reference": 130_000,
+    weather: 70_000,
+  } satisfies Record<PublicSearchProviderKind, number>,
   namespace: "public-search-provider-work",
   weights: {
     legal: 6,
@@ -75,7 +79,7 @@ export async function acquirePublicSearchWorkLease(
   try {
     distributedRelease = await acquirePublicConcurrencyLease({
       concurrency: PUBLIC_SEARCH_PROVIDER_ADMISSION_POLICY.capacity,
-      leaseMs: PUBLIC_SEARCH_PROVIDER_ADMISSION_POLICY.leaseMs,
+      leaseMs: PUBLIC_SEARCH_PROVIDER_ADMISSION_POLICY.leaseMs[kind],
       namespace: PUBLIC_SEARCH_PROVIDER_ADMISSION_POLICY.namespace,
       requireDistributedInProduction: true,
       weight,

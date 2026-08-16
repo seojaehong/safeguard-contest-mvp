@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   acquirePublicSearchWorkLease,
   checkPublicSearchProviderAdmission,
+  PUBLIC_SEARCH_PROVIDER_ADMISSION_POLICY,
   PublicSearchAdmissionError,
 } from "@/lib/public-search-admission";
 
@@ -51,6 +52,28 @@ describe("public search weighted provider admission", () => {
 
     await Promise.all([legal.release(), safetyFirst.release(), safetySecond.release()]);
     expect(activeUnits.size).toBe(0);
+  });
+
+  it("keeps the safety-reference lease beyond its bounded worst-case provider path", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "test-token");
+    let acquiredLeaseMs = 0;
+    vi.stubGlobal("fetch", vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
+      const command = JSON.parse(String(init?.body)) as unknown[];
+      const script = String(command[1]);
+      if (script.includes("ZADD")) {
+        const acquiredAt = Number(command[4]);
+        acquiredLeaseMs = Number(command[6]) - acquiredAt;
+        return Response.json({ result: [1, 3] });
+      }
+      return Response.json({ result: 3 });
+    }));
+
+    const lease = await acquirePublicSearchWorkLease("safety-reference");
+
+    expect(acquiredLeaseMs).toBe(PUBLIC_SEARCH_PROVIDER_ADMISSION_POLICY.leaseMs["safety-reference"]);
+    expect(acquiredLeaseMs).toBeGreaterThan(115_000);
+    await lease.release();
   });
 
   it("requires distributed rate and concurrency admission in production", async () => {

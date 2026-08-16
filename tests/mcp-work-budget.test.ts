@@ -7,6 +7,10 @@ import {
   MCP_REQUEST_BODY_MAX_BYTES,
   MCP_TASK_MAX_CHARS,
 } from "@/lib/mcp-work-budget";
+import {
+  enforcePublicJsonRequestBodyBudget,
+  PUBLIC_JSON_BODY_READ_TIMEOUT_MS,
+} from "@/lib/public-work-budget";
 
 const mocks = vi.hoisted(() => ({
   baseHandler: vi.fn(async (_request: Request) => Response.json({ ok: true })),
@@ -219,6 +223,35 @@ describe("MCP tool work budgets", () => {
     expect(response.status).toBe(413);
     expect(await response.json()).toMatchObject({ code: "MCP_PAYLOAD_TOO_LARGE" });
     expect(mocks.baseHandler).not.toHaveBeenCalled();
+  });
+
+  it("enforces an absolute deadline while reading a public JSON body", async () => {
+    vi.useFakeTimers();
+    try {
+      const cancel = vi.fn();
+      const body = new ReadableStream<Uint8Array>({ cancel });
+      const request = new Request("https://www.safeclaw.kr/api/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body,
+        duplex: "half",
+      } as RequestInit & { duplex: "half" });
+
+      const pending = enforcePublicJsonRequestBodyBudget(request, 1_024, "Request body is too large.");
+      await vi.advanceTimersByTimeAsync(PUBLIC_JSON_BODY_READ_TIMEOUT_MS);
+      const result = await pending;
+
+      expect(result.ok).toBe(false);
+      if (result.ok) throw new Error("Expected the public body read to time out");
+      expect(result.response.status).toBe(408);
+      await expect(result.response.json()).resolves.toMatchObject({
+        code: "PUBLIC_JSON_BODY_READ_TIMEOUT",
+        limit: PUBLIC_JSON_BODY_READ_TIMEOUT_MS,
+      });
+      expect(cancel).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("preserves the largest legitimate QA document payload", async () => {

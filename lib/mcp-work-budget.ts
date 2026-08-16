@@ -16,6 +16,11 @@ type RequestBodyBudgetError = {
   error: string;
 };
 
+type RequestBodyBudgetOptions = {
+  timeoutMs?: number;
+  timeoutError?: RequestBodyBudgetError;
+};
+
 function payloadTooLargeResponse(maxBytes: number, error: RequestBodyBudgetError): Response {
   return Response.json(
     {
@@ -27,10 +32,22 @@ function payloadTooLargeResponse(maxBytes: number, error: RequestBodyBudgetError
   );
 }
 
+function bodyReadTimeoutResponse(timeoutMs: number, error: RequestBodyBudgetError): Response {
+  return Response.json(
+    {
+      code: error.code,
+      error: error.error,
+      limit: timeoutMs,
+    },
+    { status: 408 },
+  );
+}
+
 export async function enforceRequestBodyBudget(
   request: Request,
   maxBytes: number,
   error: RequestBodyBudgetError,
+  options: RequestBodyBudgetOptions = {},
 ): Promise<McpRequestBodyBudgetResult> {
   const contentLength = request.headers.get("content-length");
   if (contentLength && /^\d+$/u.test(contentLength)) {
@@ -45,16 +62,48 @@ export async function enforceRequestBodyBudget(
   const reader = request.body.getReader();
   const chunks: Uint8Array[] = [];
   let totalBytes = 0;
+  const controller = new AbortController();
+  const timeoutError = options.timeoutMs
+    ? new Error(`Request body read timeout after ${options.timeoutMs}ms`)
+    : undefined;
+  const abortFromCaller = () => controller.abort(request.signal.reason);
+  if (request.signal.aborted) abortFromCaller();
+  else request.signal.addEventListener("abort", abortFromCaller, { once: true });
+  const timeout = options.timeoutMs
+    ? setTimeout(() => controller.abort(timeoutError), options.timeoutMs)
+    : undefined;
+  const abortRead = () => {
+    void reader.cancel(controller.signal.reason).catch(() => undefined);
+  };
+  controller.signal.addEventListener("abort", abortRead, { once: true });
+  const aborted = new Promise<never>((_resolve, reject) => {
+    controller.signal.addEventListener("abort", () => reject(controller.signal.reason), { once: true });
+  });
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    totalBytes += value.byteLength;
-    if (totalBytes > maxBytes) {
-      await reader.cancel("Request body budget exceeded");
-      return { ok: false, response: payloadTooLargeResponse(maxBytes, error) };
+  try {
+    while (true) {
+      controller.signal.throwIfAborted();
+      const { done, value } = await Promise.race([reader.read(), aborted]);
+      controller.signal.throwIfAborted();
+      if (done) break;
+      totalBytes += value.byteLength;
+      if (totalBytes > maxBytes) {
+        await reader.cancel("Request body budget exceeded");
+        return { ok: false, response: payloadTooLargeResponse(maxBytes, error) };
+      }
+      chunks.push(value);
     }
-    chunks.push(value);
+  } catch (readError) {
+    await reader.cancel(readError).catch(() => undefined);
+    if (timeoutError && readError === timeoutError && options.timeoutError && options.timeoutMs) {
+      return { ok: false, response: bodyReadTimeoutResponse(options.timeoutMs, options.timeoutError) };
+    }
+    throw readError;
+  } finally {
+    if (timeout) clearTimeout(timeout);
+    request.signal.removeEventListener("abort", abortFromCaller);
+    controller.signal.removeEventListener("abort", abortRead);
+    reader.releaseLock();
   }
 
   const body = new Uint8Array(totalBytes);

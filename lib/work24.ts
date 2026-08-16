@@ -2,6 +2,7 @@ import { IntegrationMode } from "./types";
 import { readBoundedResponseText } from "./server/upstream-http";
 
 export const WORK24_RESPONSE_MAX_BYTES = 256 * 1_024;
+export const WORK24_REQUEST_TIMEOUT_MS = 20_000;
 
 type Work24Course = {
   title: string;
@@ -151,15 +152,29 @@ async function fetchCourseXml(params: Record<string, string>, signal?: AbortSign
     if (value) url.searchParams.set(key, value);
   });
 
-  const response = await fetch(url.toString(), { cache: "no-store", signal });
-  const text = await readBoundedResponseText(response, {
-    label: "Work24 course response",
-    maxBytes: WORK24_RESPONSE_MAX_BYTES,
-  });
-  if (!response.ok || text.includes("<error>")) {
-    throw new Error(text.slice(0, 200));
+  const controller = new AbortController();
+  const abortFromCaller = () => controller.abort(signal?.reason);
+  signal?.throwIfAborted();
+  signal?.addEventListener("abort", abortFromCaller, { once: true });
+  const timeout = setTimeout(
+    () => controller.abort(new Error(`Work24 request timeout after ${WORK24_REQUEST_TIMEOUT_MS}ms`)),
+    WORK24_REQUEST_TIMEOUT_MS,
+  );
+
+  try {
+    const response = await fetch(url.toString(), { cache: "no-store", signal: controller.signal });
+    const text = await readBoundedResponseText(response, {
+      label: "Work24 course response",
+      maxBytes: WORK24_RESPONSE_MAX_BYTES,
+    });
+    if (!response.ok || text.includes("<error>")) {
+      throw new Error(text.slice(0, 200));
+    }
+    return text;
+  } finally {
+    clearTimeout(timeout);
+    signal?.removeEventListener("abort", abortFromCaller);
   }
-  return text;
 }
 
 export async function fetchTrainingRecommendations(question: string, signal?: AbortSignal): Promise<{
