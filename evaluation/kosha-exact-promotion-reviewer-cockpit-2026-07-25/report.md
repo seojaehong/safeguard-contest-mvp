@@ -7,6 +7,10 @@ Verdict: `PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY`
 - Required human inputs: 64
 - Initial completed inputs: 0
 - Export initially disabled: true
+- Candidate keyboard tabs: 8 with one roving tab stop
+- Breakpoint orientation synchronized: true
+- Mobile evidence/review tabs: true
+- Live progress region: true
 - HTML: `evaluation\kosha-exact-promotion-reviewer-cockpit-2026-07-25\index.html`
 
 ## Boundary

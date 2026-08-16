@@ -8385,6 +8385,9 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
   const reviewerCockpitBoundary = isRecord(reviewerCockpit) && isRecord(reviewerCockpit.boundary)
     ? reviewerCockpit.boundary
     : null;
+  const reviewerCockpitAccessibility = isRecord(reviewerCockpit) && isRecord(reviewerCockpit.accessibilityContract)
+    ? reviewerCockpit.accessibilityContract
+    : null;
   const reviewerCockpitPass = isRecord(reviewerCockpit)
     && readString(reviewerCockpit.schemaVersion) === "safeclaw-kosha-exact-promotion-reviewer-cockpit/v1"
     && readString(reviewerCockpit.verdict) === "PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY"
@@ -8393,6 +8396,14 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && readNumber(reviewerCockpit.checklistInputCount) === 64
     && readNumber(reviewerCockpit.initialCompletedInputCount) === 0
     && reviewerCockpit.exportInitiallyDisabled === true
+    && reviewerCockpitAccessibility !== null
+    && readNumber(reviewerCockpitAccessibility.candidateTabCount) === 8
+    && reviewerCockpitAccessibility.candidateRovingTabStop === true
+    && Array.isArray(reviewerCockpitAccessibility.candidateKeyboardNavigation)
+    && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End"].every((key) => reviewerCockpitAccessibility.candidateKeyboardNavigation.includes(key))
+    && reviewerCockpitAccessibility.breakpointOrientationSynchronized === true
+    && reviewerCockpitAccessibility.mobileEvidenceReviewTabs === true
+    && reviewerCockpitAccessibility.progressLiveRegion === true
     && reviewerCockpitBoundary !== null
     && reviewerCockpitBoundary.localReviewOnly === true
     && reviewerCockpitBoundary.dbMutationPerformed === false
@@ -8422,6 +8433,8 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && cockpitBrowserRows.every((row) => {
       const viewport = isRecord(row.viewport) ? row.viewport : null;
       const body = isRecord(row.body) ? row.body : null;
+      const candidateEndState = isRecord(row.candidateEndState) ? row.candidateEndState : null;
+      const candidateHomeState = isRecord(row.candidateHomeState) ? row.candidateHomeState : null;
       return viewport !== null
         && body !== null
         && readNumber(body.scrollWidth) === readNumber(body.clientWidth)
@@ -8429,6 +8442,23 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
         && readNumber(body.clientHeight) === readNumber(viewport.height)
         && readNumber(row.visibleCandidatePanelCount) === 1
         && readNumber(row.candidateButtonCount) === 8
+        && readString(row.candidateTablistRole) === "tablist"
+        && readString(row.candidateTablistOrientation) === (readNumber(viewport.width) <= 767 ? "horizontal" : "vertical")
+        && readNumber(row.selectedCandidateTabCount) === 1
+        && readNumber(row.tabbableCandidateTabCount) === 1
+        && row.candidateControlLinksValid === true
+        && candidateEndState !== null
+        && readNumber(candidateEndState.selectedIndex) === 7
+        && readNumber(candidateEndState.focusedIndex) === 7
+        && candidateHomeState !== null
+        && readNumber(candidateHomeState.selectedIndex) === 0
+        && readNumber(candidateHomeState.focusedIndex) === 0
+        && readString(row.progressLiveRole) === "status"
+        && readString(row.progressLiveMode) === "polite"
+        && readString(row.mobileTablistRole) === "tablist"
+        && readNumber(row.selectedMobileTabCount) === 1
+        && readNumber(row.tabbableMobileTabCount) === 1
+        && row.mobileControlLinksValid === true
         && readNumber(row.requiredCheckCount) === 40
         && readNumber(row.semanticGroupCount) === 24
         && row.exportInitiallyDisabled === true
@@ -8446,7 +8476,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && cockpitBrowserBoundary.humanReviewCompleted === false
     && cockpitBrowserBoundary.separatePromotionApprovalRequired === true;
   const reviewerCockpitDetail = reviewerCockpitPass && reviewerCockpitBrowserPass
-    ? ` Reviewer cockpit ${reviewerCockpitPath} presents 8 candidates, 24 bounded excerpts, and all 64 required human inputs in a viewport-contained no-mutation UI; export remains locked until complete and promotion remains separate approval. Browser geometry ${reviewerCockpitBrowserPath} preserves one visible candidate, 40 checks, and three bounded desktop/mobile cases.`
+    ? ` Reviewer cockpit ${reviewerCockpitPath} presents 8 candidates, 24 bounded excerpts, and all 64 required human inputs in a viewport-contained no-mutation UI; export remains locked until complete and promotion remains separate approval. Browser geometry ${reviewerCockpitBrowserPath} preserves one visible candidate, 40 checks, three bounded desktop/mobile cases, linked tab/tabpanel semantics, one roving tab stop, End/Home keyboard selection, breakpoint-correct orientation, and polite live progress.`
     : "";
   if (!isRecord(report)) {
     return gateResult({

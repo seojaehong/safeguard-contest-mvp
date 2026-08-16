@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-reviewer-cockpit-browser/v1",
   "verdict": "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY",
-  "checkedAt": "2026-07-25T02:34:45.086Z",
-  "sourceHead": "e7d8f6cafa13525a6a80f4f662f8136079cf2e7c",
+  "checkedAt": "2026-08-16T12:08:14.286Z",
+  "sourceHead": "306add7e078ac8613360f8afce010dd430c3dd64",
   "cases": 3,
   "passedCases": 3,
   "desktopPass": true,
@@ -76,12 +76,32 @@
       "reviewDisplay": "block",
       "visibleCandidatePanelCount": 1,
       "candidateButtonCount": 8,
+      "candidateTablistRole": "tablist",
+      "candidateTablistOrientation": "vertical",
+      "selectedCandidateTabCount": 1,
+      "tabbableCandidateTabCount": 1,
+      "candidateControlLinksValid": true,
+      "progressLiveRole": "status",
+      "progressLiveMode": "polite",
+      "mobileTablistRole": "tablist",
+      "selectedMobileTabCount": 1,
+      "tabbableMobileTabCount": 1,
+      "mobileControlLinksValid": true,
       "requiredCheckCount": 40,
       "semanticGroupCount": 24,
       "exportInitiallyDisabled": true,
       "firstEvidenceBottom": 420.28125,
       "firstCheckBottom": 224.59375,
       "horizontalOverflow": false,
+      "candidateEndState": {
+        "selectedIndex": 7,
+        "focusedIndex": 7
+      },
+      "candidateHomeState": {
+        "selectedIndex": 0,
+        "focusedIndex": 0
+      },
+      "mobileKeyboardState": null,
       "screenshot": "evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\desktop-1440x723.png"
     },
     {
@@ -152,12 +172,37 @@
       "reviewDisplay": "none",
       "visibleCandidatePanelCount": 1,
       "candidateButtonCount": 8,
+      "candidateTablistRole": "tablist",
+      "candidateTablistOrientation": "horizontal",
+      "selectedCandidateTabCount": 1,
+      "tabbableCandidateTabCount": 1,
+      "candidateControlLinksValid": true,
+      "progressLiveRole": "status",
+      "progressLiveMode": "polite",
+      "mobileTablistRole": "tablist",
+      "selectedMobileTabCount": 1,
+      "tabbableMobileTabCount": 1,
+      "mobileControlLinksValid": true,
       "requiredCheckCount": 40,
       "semanticGroupCount": 24,
       "exportInitiallyDisabled": true,
       "firstEvidenceBottom": 703.5625,
       "firstCheckBottom": 0,
       "horizontalOverflow": false,
+      "candidateEndState": {
+        "selectedIndex": 7,
+        "focusedIndex": 7
+      },
+      "candidateHomeState": {
+        "selectedIndex": 0,
+        "focusedIndex": 0
+      },
+      "mobileKeyboardState": {
+        "reviewSelected": "true",
+        "reviewFocused": "0:review",
+        "evidenceSelected": "true",
+        "evidenceFocused": "0:evidence"
+      },
       "screenshot": "evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\mobile-evidence-390x723.png"
     },
     {
@@ -228,12 +273,37 @@
       "reviewDisplay": "block",
       "visibleCandidatePanelCount": 1,
       "candidateButtonCount": 8,
+      "candidateTablistRole": "tablist",
+      "candidateTablistOrientation": "horizontal",
+      "selectedCandidateTabCount": 1,
+      "tabbableCandidateTabCount": 1,
+      "candidateControlLinksValid": true,
+      "progressLiveRole": "status",
+      "progressLiveMode": "polite",
+      "mobileTablistRole": "tablist",
+      "selectedMobileTabCount": 1,
+      "tabbableMobileTabCount": 1,
+      "mobileControlLinksValid": true,
       "requiredCheckCount": 40,
       "semanticGroupCount": 24,
       "exportInitiallyDisabled": true,
       "firstEvidenceBottom": 0,
       "firstCheckBottom": 323.796875,
       "horizontalOverflow": false,
+      "candidateEndState": {
+        "selectedIndex": 7,
+        "focusedIndex": 7
+      },
+      "candidateHomeState": {
+        "selectedIndex": 0,
+        "focusedIndex": 0
+      },
+      "mobileKeyboardState": {
+        "reviewSelected": "true",
+        "reviewFocused": "0:review",
+        "evidenceSelected": "true",
+        "evidenceFocused": "0:evidence"
+      },
       "screenshot": "evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\mobile-review-390x723.png"
     }
   ],

@@ -8,6 +8,10 @@ Verdict: `PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY`
 - Body height: desktop 723/723, mobile 723/723
 - Desktop widths: rail 230, evidence 850, review 360
 - Initial export disabled: true
+- Candidate tabs: true
+- Candidate End/Home keyboard: true
+- Mobile evidence/review keyboard: true
+- Live progress status: true
 - Horizontal overflow: false
 
 ## Boundary

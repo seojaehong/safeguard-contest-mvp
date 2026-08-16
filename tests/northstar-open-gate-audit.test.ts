@@ -4574,6 +4574,14 @@ function createFixtureRoot(): string {
     checklistInputCount: 64,
     initialCompletedInputCount: 0,
     exportInitiallyDisabled: true,
+    accessibilityContract: {
+      candidateTabCount: 8,
+      candidateRovingTabStop: true,
+      candidateKeyboardNavigation: ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End"],
+      breakpointOrientationSynchronized: true,
+      mobileEvidenceReviewTabs: true,
+      progressLiveRegion: true,
+    },
     boundary: {
       localReviewOnly: true,
       dbMutationPerformed: false,
@@ -4654,6 +4662,19 @@ function createFixtureRoot(): string {
       },
       visibleCandidatePanelCount: 1,
       candidateButtonCount: 8,
+      candidateTablistRole: "tablist",
+      candidateTablistOrientation: row.viewport.width <= 767 ? "horizontal" : "vertical",
+      selectedCandidateTabCount: 1,
+      tabbableCandidateTabCount: 1,
+      candidateControlLinksValid: true,
+      candidateEndState: { selectedIndex: 7, focusedIndex: 7 },
+      candidateHomeState: { selectedIndex: 0, focusedIndex: 0 },
+      progressLiveRole: "status",
+      progressLiveMode: "polite",
+      mobileTablistRole: "tablist",
+      selectedMobileTabCount: 1,
+      tabbableMobileTabCount: 1,
+      mobileControlLinksValid: true,
       requiredCheckCount: 40,
       semanticGroupCount: 24,
       exportInitiallyDisabled: true,
@@ -7427,6 +7448,30 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     };
     cockpit.exportInitiallyDisabled = false;
     writeJson(rootDir, path.relative(rootDir, cockpitPath), cockpit);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("contradicted");
+  });
+
+  it("fails closed when the KOSHA reviewer cockpit loses linked roving tabs", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const browserPath = path.join(
+      rootDir,
+      "evaluation",
+      "kosha-exact-promotion-reviewer-cockpit-2026-07-25",
+      "browser-report.json",
+    );
+    const browser = JSON.parse(fs.readFileSync(browserPath, "utf8")) as {
+      results: Array<{ candidateControlLinksValid: boolean }>;
+    };
+    browser.results[0]!.candidateControlLinksValid = false;
+    writeJson(rootDir, path.relative(rootDir, browserPath), browser);
 
     const audit = buildNorthstarOpenGateAudit({
       rootDir,
