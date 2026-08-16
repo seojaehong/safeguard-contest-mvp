@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-16T08:46:00.774Z",
-  "sourceSha": "0f7586f036562888a57d713d3d0463adaddee723",
+  "generatedAt": "2026-08-16T09:16:15.263Z",
+  "sourceSha": "89f15aae6b1fbca0d39cd9a6378fe02f27fc0915",
   "overall": "open",
   "gates": [
     {
@@ -104,6 +104,17 @@
       "nextActions": [
         "Perform a separate human editorial review for the recorded duplicate-line findings.",
         "Keep Documents/Share viewport IA and exact saved Share geometry as separate product/evidence boundaries."
+      ]
+    },
+    {
+      "id": "current_live_document_editorial_runtime",
+      "state": "notice",
+      "label": "Current live document editorial runtime",
+      "evidencePath": "evaluation\\live-document-editorial-review-current-2026-08-16\\report.json",
+      "detail": "Current-source local production passes 5/5 scenarios and 60/60 document surfaces with zero automated editorial findings, while current live production blocks all 5 cases before content review with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE. This is an operator-configuration availability notice, not a live content RED or PASS; 31 exact and 100 near-duplicate findings remain reviewer-visible, humanReviewCompleted=false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Configure the approved distributed admission backend and rerun the unchanged live five-by-twelve editorial contract.",
+        "Keep broad human review and exact saved Share evidence separate from automated runtime readiness."
       ]
     },
     {

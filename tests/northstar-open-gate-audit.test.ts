@@ -1258,6 +1258,59 @@ function createFixtureRoot(): string {
       providerDispatchPersistence: "APPROVAL_GATED",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "live-document-editorial-review-current-2026-08-16", "report.json"), {
+    verdict: "PASS_CURRENT_SOURCE_LOCAL_CONTENT_LIVE_RUNTIME_BLOCKED",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-production-sha",
+    beforeLive: {
+      verdict: "BLOCKED_LIVE_PRODUCTION_EDITORIAL_REVIEW_RUNTIME_UNAVAILABLE",
+      total: 5,
+      pass: 0,
+      fail: 0,
+      blocked: 5,
+      contentReviewExecutedCount: 0,
+      requestedDocumentSurfaceCount: 60,
+      reviewedDocumentSurfaceCount: 0,
+      runtimeBlockCodeCounts: { DISTRIBUTED_RATE_LIMIT_UNAVAILABLE: 5 },
+    },
+    afterLocal: {
+      sourceHead: "fixture-sha",
+      verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+      total: 5,
+      pass: 5,
+      fail: 0,
+      blocked: 0,
+      canonicalDocumentCount: 12,
+      requestedDocumentSurfaceCount: 60,
+      reviewedDocumentSurfaceCount: 60,
+      automatedFindingCounts: {
+        placeholder: 0,
+        legalOverclaim: 0,
+        awkwardComposition: 0,
+        scenarioIrrelevantContext: 0,
+        evidenceDomainMismatch: 0,
+        genericTemplateOveruse: 0,
+      },
+      retainedReviewerFindings: {
+        exactLineOveruse: 31,
+        nearDuplicateLineOveruse: 100,
+      },
+    },
+    boundaries: {
+      liveContentQualityPassClaimed: false,
+      liveAfterDeploymentRequired: true,
+      distributedAdmissionBackend: "OPERATOR_CONFIGURATION_REQUIRED",
+      broadHumanReviewRequired: true,
+      humanReviewCompleted: false,
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"), {
     sourceSha: "fixture-sha",
     ok: true,
@@ -4658,6 +4711,14 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("preventing 비산 from being treated as rain");
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("humanReviewCompleted=false");
     expect(audit.gates.find((gate) => gate.id === "live_document_editorial_review")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "current_live_document_editorial_runtime")).toMatchObject({
+      state: "notice",
+      evidencePath: path.join("evaluation", "live-document-editorial-review-current-2026-08-16", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "current_live_document_editorial_runtime")?.detail).toContain("60/60 document surfaces");
+    expect(audit.gates.find((gate) => gate.id === "current_live_document_editorial_runtime")?.detail).toContain("DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+    expect(audit.gates.find((gate) => gate.id === "current_live_document_editorial_runtime")?.detail).toContain("not a live content RED or PASS");
+    expect(audit.gates.find((gate) => gate.id === "current_live_document_editorial_runtime")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
@@ -4974,6 +5035,30 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.forbiddenClaims).toContain("KOSHA operator checklist completion alone approves exact-trust promotion.");
     expect(audit.forbiddenClaims).toContain("Real provider dispatch is production-live for any channel before persistent idempotency and provider result persistence approval.");
     expect(audit.safeDemoClaims).toContain("Photo hazard analysis readiness supports up to 10 images and keeps Before/After improvements as reviewed operation memory.");
+  });
+
+  it("fails the current editorial runtime boundary closed on a live content overclaim", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "live-document-editorial-review-current-2026-08-16",
+      "report.json",
+    );
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      boundaries: { liveContentQualityPassClaimed: boolean };
+    };
+    report.boundaries.liveContentQualityPassClaimed = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "current_live_document_editorial_runtime")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "current_live_document_editorial_runtime")?.detail).toContain(
+      "boundaryPass=false",
+    );
   });
 
   it("fails security evidence closed when revision fields are not Git SHAs", async () => {

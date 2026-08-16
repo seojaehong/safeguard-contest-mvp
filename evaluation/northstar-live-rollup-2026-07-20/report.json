@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-16T08:46:02.118Z",
-  "head": "0f7586f036562888a57d713d3d0463adaddee723",
+  "generatedAt": "2026-08-16T09:16:33.199Z",
+  "head": "89f15aae6b1fbca0d39cd9a6378fe02f27fc0915",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "0f7586f036562888a57d713d3d0463adaddee723",
+    "commitSha": "89f15aae6b1fbca0d39cd9a6378fe02f27fc0915",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-aztii8gid-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-hqlmwl0u1-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 60
+    "gateCount": 61
   },
   "provenGates": [
     {
@@ -80,6 +80,12 @@
       "state": "proven",
       "artifact": "evaluation\\live-document-editorial-review-2026-07-25\\report.json",
       "detail": "Five live production scenarios and all 60 canonical document surfaces pass the automated editorial contract: placeholder=0, legal overclaim=0, awkward composition 20->0, and evidence-domain mismatch 1->0. The companion duplicate classifier reduces generic-template overuse 4->0 while retaining exact=31 and near=100 reviewer findings. Near-classification keeps all 100 findings visible while reducing unclassified human-review-required 54->0 through role/context/hazard/control categories. Rain-context isolation evaluation\\live-document-rain-context-isolation-2026-07-25\\report.json fails the focused production-before scenario at 3 irrelevant document findings, passes the focused live-after at 0, and passes the strengthened five-scenario/60-document contract with 0 forbidden rain fragments, preventing 비산 from being treated as rain. humanReviewCompleted=false, the six-core wording and 12-presence gates are not combined as a human PASS, no DB/share/provider mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "current_live_document_editorial_runtime",
+      "state": "notice",
+      "artifact": "evaluation\\live-document-editorial-review-current-2026-08-16\\report.json",
+      "detail": "Current-source local production passes 5/5 scenarios and 60/60 document surfaces with zero automated editorial findings, while current live production blocks all 5 cases before content review with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE. This is an operator-configuration availability notice, not a live content RED or PASS; 31 exact and 100 near-duplicate findings remain reviewer-visible, humanReviewCompleted=false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "product_capability_truth",
@@ -1207,9 +1213,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "0f7586f036562888a57d713d3d0463adaddee723",
+      "sourceCommit": "89f15aae6b1fbca0d39cd9a6378fe02f27fc0915",
       "sourceStatus": "exact",
-      "productionCommit": "0f7586f036562888a57d713d3d0463adaddee723",
+      "productionCommit": "89f15aae6b1fbca0d39cd9a6378fe02f27fc0915",
       "productionStatus": "matches_live"
     },
     {
@@ -1584,7 +1590,7 @@
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
       "sourceCommit": "0f7586f036562888a57d713d3d0463adaddee723",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },

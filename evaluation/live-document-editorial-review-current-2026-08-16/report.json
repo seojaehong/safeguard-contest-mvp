@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "safeclaw-live-document-editorial-current/v1",
+  "generatedAt": "2026-08-16T09:04:57.736Z",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_CONTENT_LIVE_RUNTIME_BLOCKED",
+  "sourceHead": "89f15aae6b1fbca0d39cd9a6378fe02f27fc0915",
+  "productionCommit": "94554af349449cf5b7020faed73aa7e880d0ae33",
+  "beforeLive": {
+    "path": "evaluation/live-document-editorial-review-current-2026-08-16/before-live-blocked/report.json",
+    "generatedAt": "2026-08-16T09:00:01.682Z",
+    "elapsedMs": 796,
+    "verdict": "BLOCKED_LIVE_PRODUCTION_EDITORIAL_REVIEW_RUNTIME_UNAVAILABLE",
+    "total": 5,
+    "pass": 0,
+    "fail": 0,
+    "blocked": 5,
+    "contentReviewExecutedCount": 0,
+    "requestedDocumentSurfaceCount": 60,
+    "reviewedDocumentSurfaceCount": 0,
+    "runtimeBlockCodeCounts": {
+      "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE": 5
+    }
+  },
+  "afterLocal": {
+    "path": "evaluation/live-document-editorial-review-current-2026-08-16/after-local/report.json",
+    "generatedAt": "2026-08-16T09:04:57.736Z",
+    "elapsedMs": 20314,
+    "sourceHead": "89f15aae6b1fbca0d39cd9a6378fe02f27fc0915",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+    "total": 5,
+    "pass": 5,
+    "fail": 0,
+    "blocked": 0,
+    "canonicalDocumentCount": 12,
+    "requestedDocumentSurfaceCount": 60,
+    "reviewedDocumentSurfaceCount": 60,
+    "automatedFindingCounts": {
+      "placeholder": 0,
+      "legalOverclaim": 0,
+      "awkwardComposition": 0,
+      "scenarioIrrelevantContext": 0,
+      "evidenceDomainMismatch": 0,
+      "genericTemplateOveruse": 0
+    },
+    "retainedReviewerFindings": {
+      "exactLineOveruse": 31,
+      "nearDuplicateLineOveruse": 100
+    }
+  },
+  "boundaries": {
+    "liveContentQualityPassClaimed": false,
+    "liveAfterDeploymentRequired": true,
+    "distributedAdmissionBackend": "OPERATOR_CONFIGURATION_REQUIRED",
+    "broadHumanReviewRequired": true,
+    "humanReviewCompleted": false,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  }
+}

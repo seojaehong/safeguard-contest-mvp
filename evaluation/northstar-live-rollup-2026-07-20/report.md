@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-16T08:46:02.118Z
-Source HEAD at generation: 0f7586f036562888a57d713d3d0463adaddee723
-Live commit at generation: 0f7586f036562888a57d713d3d0463adaddee723
+Generated at: 2026-08-16T09:16:33.199Z
+Source HEAD at generation: 89f15aae6b1fbca0d39cd9a6378fe02f27fc0915
+Live commit at generation: 89f15aae6b1fbca0d39cd9a6378fe02f27fc0915
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -291,6 +291,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_wording_review | proven | evaluation\live-document-wording-review-2026-07-24\report.json |
 | live_document_broad_review | proven | evaluation\live-document-broad-review-2026-07-25\report.json |
 | live_document_editorial_review | proven | evaluation\live-document-editorial-review-2026-07-25\report.json |
+| current_live_document_editorial_runtime | notice | evaluation\live-document-editorial-review-current-2026-08-16\report.json |
 | product_capability_truth | proven | evaluation\product-capability-truth-2026-07-25\report.json |
 | dependency_security_remediation | proven | evaluation\dependency-security-remediation-2026-07-28\report.json |
 | tenant_authorization_remediation | proven | evaluation\tenant-authorization-boundary-preflight-2026-07-29\report.json |
@@ -393,7 +394,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_secondary_grounding | ancestor | ancestor_of_head | evaluation\live-document-secondary-grounding-2026-07-25\report.json |
 | live_document_seed_profile_isolation | ancestor | ancestor_of_head | evaluation\live-document-seed-profile-isolation-2026-07-25\report.json |
 | kosha_exact_trust_registry | ancestor | ancestor_of_head | evaluation\kosha-current-live-gate-2026-07-20\report.json |
-| rls_llm_wiki_approval_preflight | exact | missing | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
+| rls_llm_wiki_approval_preflight | ancestor | missing | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
 | sif_embedding_preflight | ancestor | missing | evaluation\sif-embedding-gate\approval-preflight-report.json |
 | live_critical_surface | ancestor | ancestor_of_head | evaluation\live-critical-surface-current-2026-07-20-rerun\report.json |
 | mobile_p0_workspace | ancestor | ancestor_of_head | evaluation\mobile-p0-workspace-gate-2026-07-20\report.json |

@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-16T08:46:17.755Z",
+  "generatedAt": "2026-08-16T09:16:50.201Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "0f7586f036562888a57d713d3d0463adaddee723",
-  "productionCommit": "0f7586f036562888a57d713d3d0463adaddee723",
+  "sourceHead": "89f15aae6b1fbca0d39cd9a6378fe02f27fc0915",
+  "productionCommit": "89f15aae6b1fbca0d39cd9a6378fe02f27fc0915",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "0f7586f036562888a57d713d3d0463adaddee723",
+    "commitSha": "89f15aae6b1fbca0d39cd9a6378fe02f27fc0915",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-aztii8gid-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-hqlmwl0u1-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "0f7586f036562888a57d713d3d0463adaddee723",
-  "liveRollupLiveCommit": "0f7586f036562888a57d713d3d0463adaddee723",
+  "liveExactEvidenceCommit": "89f15aae6b1fbca0d39cd9a6378fe02f27fc0915",
+  "liveRollupLiveCommit": "89f15aae6b1fbca0d39cd9a6378fe02f27fc0915",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -141,6 +141,11 @@
       "gate": "public_search_distributed_rate_limit_readiness",
       "state": "notice",
       "reason": "live capability is verified with X-SafeClaw-Rate-Limit=instance; production distributed configuration remains pending"
+    },
+    {
+      "gate": "current_live_document_editorial_runtime",
+      "state": "notice",
+      "reason": "current-source local production passes 5x12 editorial review while live production blocks before content evaluation with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE; operator configuration and a fresh unchanged live rerun remain required"
     },
     {
       "gate": "public_generation_admission_security",

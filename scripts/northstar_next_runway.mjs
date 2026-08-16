@@ -2452,6 +2452,11 @@ export function buildNorthstarNextRunway(options) {
         reason: "live capability is verified with X-SafeClaw-Rate-Limit=instance; production distributed configuration remains pending",
       },
       {
+        gate: "current_live_document_editorial_runtime",
+        state: "notice",
+        reason: "current-source local production passes 5x12 editorial review while live production blocks before content evaluation with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE; operator configuration and a fresh unchanged live rerun remain required",
+      },
+      {
         gate: "public_generation_admission_security",
         state: "notice",
         reason: "live instance admission is verified; distributed production activation and the fresh remediation diff scan remain open",
