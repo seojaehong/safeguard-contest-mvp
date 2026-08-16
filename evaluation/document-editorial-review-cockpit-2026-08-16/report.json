@@ -1,0 +1,218 @@
+{
+  "schemaVersion": "safeclaw-document-editorial-review-cockpit/v1",
+  "checkedAt": "2026-08-16T10:04:35.452Z",
+  "mode": "current-source-local-production",
+  "baseUrl": "http://127.0.0.1:3083",
+  "sourceHead": "65ae7188f2a4f12acd72143a1b665a1207334078",
+  "productionBuild": null,
+  "sourceHeadMatchesProduction": false,
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_DOCUMENT_EDITORIAL_REVIEW_COCKPIT",
+  "total": 4,
+  "pass": 4,
+  "fail": 0,
+  "acceptanceContract": {
+    "canonicalDocumentCount": 12,
+    "includesRiskAssessment": true,
+    "reviewerCheckCount": 5,
+    "desktopZones": 3,
+    "mobileColumns": 1,
+    "bodyHeightUnchangedWhileOpen": true,
+    "longCopyContained": true,
+    "reviewStateStoredSeparately": true,
+    "editedTextInvalidatesCompletion": true,
+    "automaticReviewCannotClaimHumanCompletion": true
+  },
+  "reviewBoundary": {
+    "automatedInteractionOnly": true,
+    "humanReviewCompleted": false,
+    "localCompletionIsApproval": false,
+    "broadHumanWordingReviewRequired": true
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorRuntimeCalled": false,
+    "wikiPublished": false,
+    "koshaRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "verification": {
+    "documentsEditorLayout": {
+      "filesPassed": 1,
+      "testsPassed": 39,
+      "status": "pass"
+    },
+    "focusedEditorialReview": {
+      "filesPassed": 1,
+      "testsPassed": 1,
+      "status": "pass"
+    },
+    "typecheck": {
+      "status": "pass"
+    },
+    "build": {
+      "status": "pass",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    }
+  },
+  "results": [
+    {
+      "theme": "day",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "expectedColumns": 3,
+      "route": "/documents?theme=day",
+      "state": "editorial-review-open-one-local-check-complete",
+      "beforeCompletion": {
+        "viewportWidth": 1440,
+        "viewportHeight": 723,
+        "bodyHeight": 723,
+        "dialogTop": 12,
+        "dialogBottom": 711,
+        "dialogLeft": 130,
+        "dialogRight": 1310,
+        "horizontalOverflow": false,
+        "workbenchColumns": 3,
+        "reviewDocumentCount": 12,
+        "uniqueDocumentCount": 12,
+        "includesRiskAssessment": true,
+        "checkboxCount": 5,
+        "selectedDocumentTitle": "위험성평가표",
+        "navScrollable": true,
+        "copyOverflow": "auto",
+        "checklistOverflow": "auto"
+      },
+      "afterCompletion": {
+        "currentWorkpackUnchanged": true,
+        "reviewStorageKeyCount": 1,
+        "dialogScrollTop": 0,
+        "apiRequestCount": 0
+      },
+      "screenshots": {
+        "open": "day-desktop-short-1440x723-open.png",
+        "oneComplete": "day-desktop-short-1440x723-one-complete.png"
+      },
+      "verdict": "PASS"
+    },
+    {
+      "theme": "night",
+      "label": "desktop-short-1440x723",
+      "width": 1440,
+      "height": 723,
+      "expectedColumns": 3,
+      "route": "/documents?theme=night",
+      "state": "editorial-review-open-one-local-check-complete",
+      "beforeCompletion": {
+        "viewportWidth": 1440,
+        "viewportHeight": 723,
+        "bodyHeight": 723,
+        "dialogTop": 12,
+        "dialogBottom": 711,
+        "dialogLeft": 130,
+        "dialogRight": 1310,
+        "horizontalOverflow": false,
+        "workbenchColumns": 3,
+        "reviewDocumentCount": 12,
+        "uniqueDocumentCount": 12,
+        "includesRiskAssessment": true,
+        "checkboxCount": 5,
+        "selectedDocumentTitle": "위험성평가표",
+        "navScrollable": true,
+        "copyOverflow": "auto",
+        "checklistOverflow": "auto"
+      },
+      "afterCompletion": {
+        "currentWorkpackUnchanged": true,
+        "reviewStorageKeyCount": 1,
+        "dialogScrollTop": 0,
+        "apiRequestCount": 0
+      },
+      "screenshots": {
+        "open": "night-desktop-short-1440x723-open.png",
+        "oneComplete": "night-desktop-short-1440x723-one-complete.png"
+      },
+      "verdict": "PASS"
+    },
+    {
+      "theme": "day",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "expectedColumns": 1,
+      "route": "/documents?theme=day",
+      "state": "editorial-review-open-one-local-check-complete",
+      "beforeCompletion": {
+        "viewportWidth": 390,
+        "viewportHeight": 723,
+        "bodyHeight": 723,
+        "dialogTop": 8,
+        "dialogBottom": 715,
+        "dialogLeft": 8,
+        "dialogRight": 382,
+        "horizontalOverflow": false,
+        "workbenchColumns": 1,
+        "reviewDocumentCount": 12,
+        "uniqueDocumentCount": 12,
+        "includesRiskAssessment": true,
+        "checkboxCount": 5,
+        "selectedDocumentTitle": "위험성평가표",
+        "navScrollable": true,
+        "copyOverflow": "auto",
+        "checklistOverflow": "auto"
+      },
+      "afterCompletion": {
+        "currentWorkpackUnchanged": true,
+        "reviewStorageKeyCount": 1,
+        "dialogScrollTop": 0,
+        "apiRequestCount": 0
+      },
+      "screenshots": {
+        "open": "day-mobile-short-390x723-open.png",
+        "oneComplete": "day-mobile-short-390x723-one-complete.png"
+      },
+      "verdict": "PASS"
+    },
+    {
+      "theme": "night",
+      "label": "mobile-short-390x723",
+      "width": 390,
+      "height": 723,
+      "expectedColumns": 1,
+      "route": "/documents?theme=night",
+      "state": "editorial-review-open-one-local-check-complete",
+      "beforeCompletion": {
+        "viewportWidth": 390,
+        "viewportHeight": 723,
+        "bodyHeight": 723,
+        "dialogTop": 8,
+        "dialogBottom": 715,
+        "dialogLeft": 8,
+        "dialogRight": 382,
+        "horizontalOverflow": false,
+        "workbenchColumns": 1,
+        "reviewDocumentCount": 12,
+        "uniqueDocumentCount": 12,
+        "includesRiskAssessment": true,
+        "checkboxCount": 5,
+        "selectedDocumentTitle": "위험성평가표",
+        "navScrollable": true,
+        "copyOverflow": "auto",
+        "checklistOverflow": "auto"
+      },
+      "afterCompletion": {
+        "currentWorkpackUnchanged": true,
+        "reviewStorageKeyCount": 1,
+        "dialogScrollTop": 0,
+        "apiRequestCount": 0
+      },
+      "screenshots": {
+        "open": "night-mobile-short-390x723-open.png",
+        "oneComplete": "night-mobile-short-390x723-one-complete.png"
+      },
+      "verdict": "PASS"
+    }
+  ]
+}
