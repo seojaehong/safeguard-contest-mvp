@@ -131,8 +131,8 @@ describe("knowledge mobile information architecture", () => {
         expect(switchedLayout.tabListTop, theme).toBeCloseTo(initial.tabListTop, 1);
         expect(switchedLayout.panelTop, theme).toBeGreaterThanOrEqual(0);
         expect(switchedLayout.panelTop, theme).toBeLessThan(844);
-        expect(browserErrors, theme).toEqual([]);
         expect(httpErrors, theme).toEqual([]);
+        expect(browserErrors, theme).toEqual([]);
       } finally {
         await page.close();
       }
