@@ -19703,7 +19703,7 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-document-review-header {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto 36px;
+  grid-template-columns: minmax(0, 1fr) auto 44px;
   align-items: center;
   gap: 16px;
   min-height: 92px;
@@ -19752,8 +19752,8 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-document-review-close {
   display: grid;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   place-items: center;
   border: 1px solid var(--workspace-rule);
   border-radius: 50%;
@@ -19957,7 +19957,7 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-document-review-header {
-    grid-template-columns: minmax(0, 1fr) 36px;
+    grid-template-columns: minmax(0, 1fr) 44px;
     min-height: 106px;
     padding: 10px 12px;
   }

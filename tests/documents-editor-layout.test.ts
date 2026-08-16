@@ -222,6 +222,9 @@ describe("documents editor layout", () => {
           : 0;
         const reviewKeys = Array.from(element.querySelectorAll<HTMLElement>("[data-review-document-key]"))
           .map((item) => item.dataset.reviewDocumentKey || "");
+        const closeButton = element.querySelector<HTMLElement>(".safeclaw-document-review-close");
+        if (!closeButton) throw new Error("Missing document review close button");
+        const closeButtonRect = closeButton.getBoundingClientRect();
         return {
           top: rect.top,
           bottom: rect.bottom,
@@ -232,7 +235,9 @@ describe("documents editor layout", () => {
           bodyHeight: document.documentElement.scrollHeight,
           horizontalOverflow: element.scrollWidth > element.clientWidth,
           columns,
-          reviewKeys
+          reviewKeys,
+          closeButtonWidth: Math.round(closeButtonRect.width),
+          closeButtonHeight: Math.round(closeButtonRect.height)
         };
       });
 
@@ -243,6 +248,8 @@ describe("documents editor layout", () => {
       expect(geometry.bodyHeight).toBe(baselineBodyHeight);
       expect(geometry.horizontalOverflow).toBe(false);
       expect(geometry.columns).toBe(viewport.expectedColumns);
+      expect(geometry.closeButtonWidth).toBeGreaterThanOrEqual(44);
+      expect(geometry.closeButtonHeight).toBeGreaterThanOrEqual(44);
       expect(geometry.reviewKeys).toHaveLength(12);
       expect(new Set(geometry.reviewKeys).size).toBe(12);
       expect(geometry.reviewKeys).toContain("riskAssessmentDraft");
@@ -426,6 +433,10 @@ describe("documents editor layout", () => {
           sourceSectionDrawerOpen: document.querySelector<HTMLDetailsElement>('[data-testid="risk-source-section-drawer"]')?.open ?? null,
           actionTexts: Array.from(document.querySelectorAll<HTMLElement>('[data-testid="document-section-actions"] button'))
             .map((button) => button.textContent?.replace(/\s+/gu, " ").trim()),
+          actionHeights: Array.from(document.querySelectorAll<HTMLElement>('[data-testid="document-section-actions"] button'))
+            .map((button) => Math.round(button.getBoundingClientRect().height)),
+          riskRowSelectorHeights: Array.from(document.querySelectorAll<HTMLElement>('[data-testid="risk-row-selector"]'))
+            .map((button) => Math.round(button.getBoundingClientRect().height)),
           fieldChipMetrics: Array.from(document.querySelectorAll<HTMLElement>('[data-testid="document-section-field-strip"] span'))
             .map((chip) => {
               const strong = chip.querySelector<HTMLElement>("strong");
@@ -462,6 +473,8 @@ describe("documents editor layout", () => {
       expect(metrics.firstRiskRowHeaderText).toContain("근거");
       expect(metrics.firstRiskRowHeaderText).toContain("확인");
       expect(metrics.actionTexts).toEqual(["근거 보기", "점검 보기"]);
+      expect(metrics.actionHeights.every((height) => height >= 44)).toBe(true);
+      expect(metrics.riskRowSelectorHeights.every((height) => height >= 44)).toBe(true);
       expect(metrics.fieldStrip.top).toBeGreaterThanOrEqual(metrics.toolbar.bottom + 4);
       expect(metrics.fieldStrip.bottom).toBeLessThanOrEqual(metrics.workpackShell.bottom);
       expect(metrics.sectionActions.top).toBeGreaterThanOrEqual(metrics.fieldStrip.bottom);
