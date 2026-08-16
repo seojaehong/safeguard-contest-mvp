@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "safeclaw-current-repository-security-rescan/v1",
+  "verdict": "PASS_CURRENT_SOURCE_APPROVAL_FREE_REMEDIATION_LIVE_PENDING",
+  "scanId": "6a0d7b6b-9dd7-42e9-88c4-eb3381af8455",
+  "scanRevision": "67fb4cf16f44931f085cd827ab0b5d85d7817181",
+  "productCommit": "33e01cdd",
+  "productionCommit": null,
+  "immutableOriginalBaselineFindingCount": 18,
+  "freshReportableFindingCount": 17,
+  "approvalFreeRemediatedCount": 9,
+  "approvalGatedRemainingCount": 8,
+  "approvalFreeRemediations": [
+    "safety-reference lease lifetime",
+    "Law.go bounded response bytes",
+    "public JSON body read deadline",
+    "SSE cancellation lease settlement",
+    "Work24 upstream timeout",
+    "photo analysis distributed production admission",
+    "public Share acknowledgement tuple-scoped idempotency",
+    "public provenance HTTPS origin policy",
+    "SIF global diagnostics operator authorization"
+  ],
+  "approvalGatedRemaining": [
+    "dispatch null-tenant RLS",
+    "dispatch provider receipt write policy",
+    "knowledge approval state transitions",
+    "workpack improvement approval metadata",
+    "related tenant object composite constraints",
+    "MCP token atomic quota",
+    "worker site-binding atomicity",
+    "raw safety-reference corpus public RLS"
+  ],
+  "verification": {
+    "focusedTests": {
+      "files": 9,
+      "tests": 110,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "staticPages": 28
+    },
+    "diffCheck": "PASS"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "databaseSecurityRemediation": "APPROVAL_GATED",
+    "liveAfterDeploymentRequired": true
+  }
+}
