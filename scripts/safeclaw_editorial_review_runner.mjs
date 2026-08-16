@@ -61,6 +61,64 @@ function text(value) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+const EDITORIAL_RUNTIME_BLOCK_CODES = new Set([
+  "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+  "DISTRIBUTED_RATE_LIMIT_MISCONFIGURED",
+]);
+
+export function classifyEditorialRuntimeBlock(api, payload) {
+  const code = payload && typeof payload === "object" && !Array.isArray(payload)
+    ? text(payload.code)
+    : "";
+  const status = api && typeof api === "object" && !Array.isArray(api)
+    ? Number(api.status)
+    : 0;
+  return status === 503 && EDITORIAL_RUNTIME_BLOCK_CODES.has(code)
+    ? { blocked: true, code }
+    : { blocked: false, code: "" };
+}
+
+export function summarizeEditorialExecution(results, options = {}) {
+  const pass = results.filter((item) => item.verdict === "PASS").length;
+  const fail = results.filter((item) => item.verdict === "RED").length;
+  const blocked = results.filter((item) => item.verdict === "BLOCKED").length;
+  const runtimeBlockCodeCounts = results.reduce((summary, item) => {
+    if (item.runtimeBlockCode) {
+      summary[item.runtimeBlockCode] = (summary[item.runtimeBlockCode] || 0) + 1;
+    }
+    return summary;
+  }, {});
+  const live = options.liveEnabled === true;
+  const local = options.localProduction === true;
+  const verdict = blocked === results.length && results.length > 0
+    ? live
+      ? local
+        ? "BLOCKED_CURRENT_SOURCE_LOCAL_PRODUCTION_EDITORIAL_REVIEW_RUNTIME_UNAVAILABLE"
+        : "BLOCKED_LIVE_PRODUCTION_EDITORIAL_REVIEW_RUNTIME_UNAVAILABLE"
+      : "BLOCKED_FIXTURE_EDITORIAL_REVIEW_RUNTIME_UNAVAILABLE"
+    : blocked > 0
+      ? "PARTIAL_EDITORIAL_REVIEW_RUNTIME_BLOCKED"
+      : fail === 0
+        ? live
+          ? local
+            ? "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY"
+            : "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY"
+          : "PASS_FIXTURE_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY"
+        : live
+          ? local
+            ? "RED_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT"
+            : "RED_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT"
+          : "RED_FIXTURE_12_DELIVERABLE_EDITORIAL_CONTRACT";
+  return {
+    blocked,
+    contentReviewExecutedCount: results.length - blocked,
+    fail,
+    pass,
+    runtimeBlockCodeCounts,
+    verdict,
+  };
+}
+
 function normalizeInline(value) {
   return text(value).replace(/\s+/gu, " ");
 }
@@ -370,7 +428,10 @@ async function fetchPayload(testCase) {
       api: {
         status: response.status,
         ok: response.ok,
-        elapsedMs: Date.now() - startedAt
+        elapsedMs: Date.now() - startedAt,
+        errorCode: payload && typeof payload === "object" && !Array.isArray(payload)
+          ? text(payload.code)
+          : ""
       }
     };
   } finally {
@@ -414,8 +475,11 @@ function writeMarkdown(report) {
 - Base URL: \`${report.baseUrl || "fixture"}\`
 - Source HEAD: \`${report.sourceHead || "unavailable"}\`
 - Production commit: \`${report.productionBuild?.commitSha || "not measured"}\`
-- Cases: ${report.total}, pass ${report.pass}, fail ${report.fail}
-- Reviewed documents: ${report.reviewedDocumentSurfaceCount}
+- Cases: ${report.total}, pass ${report.pass}, fail ${report.fail}, blocked ${report.blocked}
+- Content reviews executed: ${report.contentReviewExecutedCount}
+- Runtime block codes: \`${JSON.stringify(report.runtimeBlockCodeCounts)}\`
+- Requested document surfaces: ${report.requestedDocumentSurfaceCount}
+- Reviewed document surfaces: ${report.reviewedDocumentSurfaceCount}
 - Placeholder/template findings: ${report.placeholderFindingCount}
 - Legal overclaim findings: ${report.legalOverclaimFindingCount}
 - Awkward composition findings: ${report.awkwardCompositionFindingCount}
@@ -478,40 +542,49 @@ async function main() {
       runnerError = error instanceof Error ? error.message : String(error);
     }
     const review = reviewEditorialPayload(payload, testCase.question, testCase.expected);
+    const runtimeBlock = classifyEditorialRuntimeBlock(api, payload);
     const ok = !runnerError && (!api || api.ok) && review.ok;
+    const reviewedDocuments = runtimeBlock.blocked
+      ? review.documents.map((document) => ({
+          ...document,
+          failures: [],
+          verdict: "NOT_EVALUATED",
+        }))
+      : review.documents;
     results.push({
       id: testCase.id,
-      verdict: ok ? "PASS" : "RED",
+      verdict: runtimeBlock.blocked ? "BLOCKED" : ok ? "PASS" : "RED",
+      contentQualityVerdict: runtimeBlock.blocked ? "NOT_EVALUATED" : review.ok ? "PASS" : "RED",
+      runtimeBlockCode: runtimeBlock.code,
       elapsedMs: Date.now() - caseStartedAt,
       api,
       runnerError,
-      ...review
+      ...review,
+      requestedDocumentCount: review.reviewedDocumentCount,
+      reviewedDocumentCount: runtimeBlock.blocked ? 0 : review.reviewedDocumentCount,
+      passedDocumentCount: runtimeBlock.blocked ? 0 : review.passedDocumentCount,
+      failedDocumentCount: runtimeBlock.blocked ? 0 : review.failedDocumentCount,
+      documents: reviewedDocuments,
     });
   }
 
-  const pass = results.filter((item) => item.verdict === "PASS").length;
+  const execution = summarizeEditorialExecution(results, { liveEnabled, localProduction });
   const report = {
     generatedAt: new Date().toISOString(),
     elapsedMs: Date.now() - startedAt,
-    verdict: pass === results.length
-      ? liveEnabled
-        ? localProduction
-          ? "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY"
-          : "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY"
-        : "PASS_FIXTURE_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY"
-      : liveEnabled
-        ? localProduction
-          ? "RED_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT"
-          : "RED_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT"
-        : "RED_FIXTURE_12_DELIVERABLE_EDITORIAL_CONTRACT",
+    verdict: execution.verdict,
     mode: liveEnabled ? localProduction ? "current-source-local-production" : "live-production" : "fixture",
     baseUrl: liveEnabled ? baseUrl : null,
     sourceHead,
     productionBuild,
     total: results.length,
-    pass,
-    fail: results.length - pass,
+    pass: execution.pass,
+    fail: execution.fail,
+    blocked: execution.blocked,
+    contentReviewExecutedCount: execution.contentReviewExecutedCount,
+    runtimeBlockCodeCounts: execution.runtimeBlockCodeCounts,
     canonicalDocumentCount: canonicalDocuments.length,
+    requestedDocumentSurfaceCount: results.reduce((sum, item) => sum + item.requestedDocumentCount, 0),
     reviewedDocumentSurfaceCount: results.reduce((sum, item) => sum + item.reviewedDocumentCount, 0),
     placeholderFindingCount: results.reduce((sum, item) => sum + item.placeholderFindingCount, 0),
     legalOverclaimFindingCount: results.reduce((sum, item) => sum + item.legalOverclaimFindingCount, 0),
@@ -557,7 +630,7 @@ async function main() {
     reviewedDocumentSurfaceCount: report.reviewedDocumentSurfaceCount,
     outDir: path.relative(process.cwd(), outDir)
   }, null, 2));
-  process.exitCode = report.fail === 0 ? 0 : 1;
+  process.exitCode = report.fail === 0 && report.blocked === 0 ? 0 : 1;
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))) {

@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const SCRIPT_PATH = path.resolve(process.cwd(), "scripts/safeclaw_editorial_review_runner.mjs");
@@ -102,6 +103,52 @@ function runFixture(
 }
 
 describe("SafeClaw 12-deliverable editorial review", () => {
+  it("separates distributed admission outages from document quality failures", () => {
+    const moduleUrl = pathToFileURL(SCRIPT_PATH).href;
+    const source = `
+      import { classifyEditorialRuntimeBlock, summarizeEditorialExecution } from ${JSON.stringify(moduleUrl)};
+      const distributed = classifyEditorialRuntimeBlock(
+        { status: 503 },
+        { code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE" },
+      );
+      const generationFailure = classifyEditorialRuntimeBlock(
+        { status: 503 },
+        { code: "DOCUMENT_GENERATION_FAILED" },
+      );
+      const summary = summarizeEditorialExecution(
+        Array.from({ length: 5 }, () => ({
+          verdict: "BLOCKED",
+          runtimeBlockCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+        })),
+        { liveEnabled: true, localProduction: false },
+      );
+      process.stdout.write(JSON.stringify({ distributed, generationFailure, summary }));
+    `;
+    const result = spawnSync(process.execPath, ["--input-type=module", "-e", source], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+    });
+    expect(result.status).toBe(0);
+    const output = JSON.parse(result.stdout) as {
+      distributed: { blocked: boolean; code: string };
+      generationFailure: { blocked: boolean; code: string };
+      summary: Record<string, unknown>;
+    };
+    expect(output.distributed).toEqual({
+      blocked: true,
+      code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    });
+    expect(output.generationFailure).toEqual({ blocked: false, code: "" });
+    expect(output.summary).toEqual({
+      blocked: 5,
+      contentReviewExecutedCount: 0,
+      fail: 0,
+      pass: 0,
+      runtimeBlockCodeCounts: { DISTRIBUTED_RATE_LIMIT_UNAVAILABLE: 5 },
+      verdict: "BLOCKED_LIVE_PRODUCTION_EDITORIAL_REVIEW_RUNTIME_UNAVAILABLE",
+    });
+  });
+
   it("records all 12 reviewer excerpts without claiming completed human review", () => {
     const result = runFixture("울산 화학세척 작업", buildDocuments());
 
