@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `e5e1eb8c9f80624e7331453056b3c54b2205e883`
+Source HEAD: `346fc0c9527dc4f25df6076014386ee5c33381c3`
 
-Production `/api/build-info`: `7ff45318ba8a8a0c411eb402bfa90c880c38015d`
+Production `/api/build-info`: `71ed7df397161f800480a8de0ccf3b79890eea0c`
 
 Latest evidence commit live: `false`
 
@@ -14,17 +14,17 @@ Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `scripts/knowledge_review_authority_ui_runner.mjs`, `tests/knowledge-governance-ui-contract.test.ts`
+Source pending changed paths: `evaluation/documents-mobile-review-launch-2026-08-17/live-desktop-1440x723.png`, `evaluation/documents-mobile-review-launch-2026-08-17/live-mobile-390x723.png`, `evaluation/documents-mobile-review-launch-2026-08-17/report.json`, `evaluation/documents-mobile-review-launch-2026-08-17/report.md`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-open-gate-audit.test.ts`
 
 Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `e5e1eb8c9f80624e7331453056b3c54b2205e883`
+Live rollup source head: `346fc0c9527dc4f25df6076014386ee5c33381c3`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `e5e1eb8c9f80624e7331453056b3c54b2205e883` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `7ff45318ba8a8a0c411eb402bfa90c880c38015d`, and the live rollup remains exact for that deployed marker.
+Note: current HEAD `346fc0c9527dc4f25df6076014386ee5c33381c3` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `71ed7df397161f800480a8de0ccf3b79890eea0c`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 

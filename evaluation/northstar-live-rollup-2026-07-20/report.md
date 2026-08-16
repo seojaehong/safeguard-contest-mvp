@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-16T14:38:00.925Z
-Source HEAD at generation: e5e1eb8c9f80624e7331453056b3c54b2205e883
-Live commit at generation: 7ff45318ba8a8a0c411eb402bfa90c880c38015d
+Generated at: 2026-08-16T15:29:58.283Z
+Source HEAD at generation: 346fc0c9527dc4f25df6076014386ee5c33381c3
+Live commit at generation: 71ed7df397161f800480a8de0ccf3b79890eea0c
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -403,8 +403,8 @@ Overall: `northstar_open_approval_gated`
 | security_safety_reference_surface_remediation | ancestor | ancestor_of_head | evaluation\security-safety-reference-surface-remediation-2026-08-11\report.json |
 | mcp_generation_work_budget_security | ancestor | ancestor_of_head | evaluation\security-mcp-generation-work-budget-2026-08-04\report.json |
 | learning_export_renderer_security | ancestor | ancestor_of_head | evaluation\learning-export-renderer-security-2026-08-02\report.json |
-| hermes_knowledge_review_ui | ancestor | matches_live | evaluation\hermes-knowledge-review-selected-workbench-2026-08-14\report.json |
-| hermes_review_evidence_inspector | ancestor | matches_live | evaluation\hermes-knowledge-review-evidence-inspector-2026-08-14\report.json |
+| hermes_knowledge_review_ui | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-selected-workbench-2026-08-14\report.json |
+| hermes_review_evidence_inspector | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-evidence-inspector-2026-08-14\report.json |
 | hermes_remote_durable_ledger | ancestor | ancestor_of_head | evaluation\hermes-openclaw-runtime-current-gate-2026-07-20\report.json |
 | live_document_secondary_grounding | ancestor | ancestor_of_head | evaluation\live-document-secondary-grounding-2026-07-25\report.json |
 | live_document_seed_profile_isolation | ancestor | ancestor_of_head | evaluation\live-document-seed-profile-isolation-2026-07-25\report.json |
