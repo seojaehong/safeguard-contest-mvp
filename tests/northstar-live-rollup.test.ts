@@ -242,6 +242,19 @@ type RollupReport = {
     escapeRestoresLaunchFocus: boolean;
     accessibilityRowsPassed: number;
     cockpitReady: boolean;
+    receiptArtifact: string;
+    receiptVerdict: string;
+    receiptReady: boolean;
+    receiptLockedCases: number;
+    receiptDocumentCount: number;
+    receiptUniqueDocumentKeyCount: number;
+    receiptReviewerCheckCount: number;
+    receiptApiRequestCount: number;
+    reviewerSelfAttested: boolean;
+    reviewerIdentityVerified: boolean;
+    serverRecorded: boolean;
+    approvalGranted: boolean;
+    localReceiptProvesHumanIdentity: boolean;
     humanReviewCompleted: boolean;
     broadHumanWordingReviewRequired: boolean;
     dbMutationPerformed: boolean;
@@ -660,6 +673,23 @@ function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
     results,
+  };
+}
+
+function documentEditorialReviewReceiptFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT",
+    sourceHead: "TO_FILL",
+    productionBuild: { commitSha: "TO_FILL", environment: "production" },
+    sourceHeadMatchesProduction: true,
+    acceptanceContract: { canonicalDocumentCount: 12, reviewerCheckCount: 5, reviewerRequired: true, receiptLockedBeforeAllDocuments: true, currentTextFingerprintRequired: true, localDownloadOnly: true, reviewerIdentityVerified: false, serverRecorded: false, approvalGranted: false },
+    results: [
+      { viewport: { width: 1440, height: 723 }, bodyHeightBefore: 723, bodyHeightAfter: 723, bodyHeightUnchanged: true, dialog: { right: 1310, bottom: 711 }, checklist: { overflowY: "auto" }, receiptLockedAtZero: true, reviewerInputVisible: true, horizontalOverflow: false },
+      { viewport: { width: 390, height: 723 }, bodyHeightBefore: 723, bodyHeightAfter: 723, bodyHeightUnchanged: true, dialog: { right: 382, bottom: 715 }, checklist: { overflowY: "auto" }, receiptLockedAtZero: true, reviewerInputVisible: true, horizontalOverflow: false },
+    ],
+    receiptVerification: { schemaVersion: "safeclaw-document-editorial-review-receipt/v1", documentCount: 12, uniqueDocumentKeyCount: 12, reviewerCheckCount: 5, checksComplete: true, fingerprintsCurrent: true, apiRequestCount: 0, reviewCompletion: { localChecklistCompleted: true, reviewerSelfAttested: true, reviewerIdentityVerified: false, serverRecorded: false, approvalGranted: false } },
+    reviewBoundary: { automatedInteractionOnly: true, humanReviewCompleted: false, localReceiptProvesHumanIdentity: false, broadHumanWordingReviewRequired: true },
+    mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, vectorRuntimeCalled: false, wikiPublished: false, koshaRegistryMutationPerformed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   };
 }
 
@@ -1442,6 +1472,11 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/document-editorial-review-cockpit-2026-08-16/report.json",
     documentEditorialReviewCockpitFixture(),
   );
+  writeJson(
+    root,
+    "evaluation/document-editorial-review-receipt-2026-08-17/report.json",
+    documentEditorialReviewReceiptFixture(),
+  );
   writeJson(root, "evaluation/final-approval-free-security-rescan-2026-08-16/report.json", {
     verdict: "NOTICE_FRESH_STANDARD_SCAN_APPROVAL_FREE_FINDINGS_CLOSED_NINE_APPROVAL_GATED_REMAIN",
     scanId: "38b87f68-ea7c-4843-a89c-5f97ba99e319",
@@ -1675,6 +1710,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-document-broad-review-2026-07-25/report.json",
     "evaluation/live-document-editorial-review-2026-07-25/report.json",
     "evaluation/document-editorial-review-cockpit-2026-08-16/report.json",
+    "evaluation/document-editorial-review-receipt-2026-08-17/report.json",
     "evaluation/live-document-editorial-duplicate-classification-2026-07-25/report.json",
     "evaluation/live-document-editorial-near-classification-2026-07-25/report.json",
     "evaluation/product-capability-truth-2026-07-25/report.json",
@@ -2126,6 +2162,18 @@ describe("northstar live rollup", () => {
       escapeRestoresLaunchFocus: true,
       accessibilityRowsPassed: 4,
       cockpitReady: true,
+      receiptVerdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT",
+      receiptReady: true,
+      receiptLockedCases: 2,
+      receiptDocumentCount: 12,
+      receiptUniqueDocumentKeyCount: 12,
+      receiptReviewerCheckCount: 5,
+      receiptApiRequestCount: 0,
+      reviewerSelfAttested: true,
+      reviewerIdentityVerified: false,
+      serverRecorded: false,
+      approvalGranted: false,
+      localReceiptProvesHumanIdentity: false,
       humanReviewCompleted: false,
       broadHumanWordingReviewRequired: true,
       dbMutationPerformed: false,

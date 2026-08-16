@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-16T17:14:31.099Z",
-  "sourceSha": "dee977da9770877d798c141b0e41c00a76fd857c",
+  "generatedAt": "2026-08-16T18:23:29.908Z",
+  "sourceSha": "3de35eeac0992a91a48b5940ca2fd006940b90fa",
   "overall": "open",
   "gates": [
     {
@@ -111,7 +111,7 @@
       "state": "proven",
       "label": "Live 12-document human editorial review cockpit",
       "evidencePath": "evaluation\\document-editorial-review-cockpit-2026-08-16\\report.json",
-      "detail": "Live Day/Night desktop-short 1440x723 and mobile-short 390x723 pass 4/4 with 12 canonical documents including riskAssessmentDraft, five explicit reviewer checks, a three-zone desktop and one-column mobile cockpit, unchanged page-body height, local-scroll containment, separate stale-aware review storage, zero API calls, and no current-workpack mutation. All four cases also prove deterministic close-button entry focus, one selected and tabbable document tab, Arrow/Home roving navigation, a labelled tabpanel, and Escape focus restoration. This proves the human review workflow is available; automatedInteractionOnly=true and humanReviewCompleted=false, broad human wording review remains required, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Live Day/Night desktop-short 1440x723 and mobile-short 390x723 pass 4/4 with 12 canonical documents including riskAssessmentDraft, five explicit reviewer checks, a three-zone desktop and one-column mobile cockpit, unchanged page-body height, local-scroll containment, separate stale-aware review storage, zero API calls, and no current-workpack mutation. All four cases also prove deterministic close-button entry focus, one selected and tabbable document tab, Arrow/Home roving navigation, a labelled tabpanel, and Escape focus restoration. A separate live desktop/mobile receipt contract proves a fail-closed local JSON export for 12 documents x 5 checks, current text fingerprints, a recorded self-attested reviewer, and zero API calls. It does not prove reviewer identity, server recording, completed human review, or approval: automatedInteractionOnly=true, humanReviewCompleted=false, broad human wording review remains required, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Use the cockpit for the separate human editorial review without treating automated geometry as human completion.",
         "Keep exact saved Share and every DB/provider/vector/wiki/KOSHA mutation behind their existing approval boundaries."

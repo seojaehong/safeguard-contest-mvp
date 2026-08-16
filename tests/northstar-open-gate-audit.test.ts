@@ -154,6 +154,45 @@ function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
   };
 }
 
+function documentEditorialReviewReceiptFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", environment: "production" },
+    sourceHeadMatchesProduction: true,
+    acceptanceContract: {
+      canonicalDocumentCount: 12,
+      reviewerCheckCount: 5,
+      reviewerRequired: true,
+      receiptLockedBeforeAllDocuments: true,
+      currentTextFingerprintRequired: true,
+      localDownloadOnly: true,
+      reviewerIdentityVerified: false,
+      serverRecorded: false,
+      approvalGranted: false,
+    },
+    results: [
+      { viewport: { width: 1440, height: 723 }, bodyHeightBefore: 723, bodyHeightAfter: 723, bodyHeightUnchanged: true, dialog: { left: 130, top: 12, right: 1310, bottom: 711 }, checklist: { overflowY: "auto" }, receiptLockedAtZero: true, reviewerInputVisible: true, horizontalOverflow: false },
+      { viewport: { width: 390, height: 723 }, bodyHeightBefore: 723, bodyHeightAfter: 723, bodyHeightUnchanged: true, dialog: { left: 8, top: 8, right: 382, bottom: 715 }, checklist: { overflowY: "auto" }, receiptLockedAtZero: true, reviewerInputVisible: true, horizontalOverflow: false },
+    ],
+    receiptVerification: {
+      schemaVersion: "safeclaw-document-editorial-review-receipt/v1",
+      reviewerRecorded: true,
+      reviewedAtRecorded: true,
+      generationFingerprintRecorded: true,
+      documentCount: 12,
+      uniqueDocumentKeyCount: 12,
+      reviewerCheckCount: 5,
+      checksComplete: true,
+      fingerprintsCurrent: true,
+      apiRequestCount: 0,
+      reviewCompletion: { localChecklistCompleted: true, reviewerSelfAttested: true, reviewerIdentityVerified: false, serverRecorded: false, approvalGranted: false },
+    },
+    reviewBoundary: { automatedInteractionOnly: true, humanReviewCompleted: false, localReceiptProvesHumanIdentity: false, broadHumanWordingReviewRequired: true },
+    mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, vectorRuntimeCalled: false, wikiPublished: false, koshaRegistryMutationPerformed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  };
+}
+
 function currentSecurityRemediationLedgerFixture(): Record<string, unknown> {
   const findingIds = [
     "csf_32ed9bacd31d6e84ee96670c", "csf_60ae470f243100a5ceff1625", "csf_6ca85fcda2063dad372a1ba0",
@@ -1411,6 +1450,11 @@ function createFixtureRoot(): string {
     rootDir,
     path.join("evaluation", "document-editorial-review-cockpit-2026-08-16", "report.json"),
     documentEditorialReviewCockpitFixture(),
+  );
+  writeJson(
+    rootDir,
+    path.join("evaluation", "document-editorial-review-receipt-2026-08-17", "report.json"),
+    documentEditorialReviewReceiptFixture(),
   );
   writeJson(rootDir, path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"), {
     sourceSha: "fixture-sha",
@@ -4996,6 +5040,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("Arrow/Home roving navigation");
     expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("Escape focus restoration");
     expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("humanReviewCompleted=false");
+    expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("fail-closed local JSON export");
+    expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("does not prove reviewer identity");
     expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")).toMatchObject({
       state: "proven",
@@ -7108,6 +7154,48 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(gate?.state).toBe("contradicted");
     expect(gate?.evidencePath).toBe(path.join("evaluation", "document-authoring-pane-margin-2026-08-02", "report.json"));
     expect(gate?.detail).toContain("48/48 all-document selected-authoring and raw-source containment");
+  });
+
+  it.each([
+    {
+      name: "claimed reviewer identity",
+      mutate: (report: Record<string, unknown>) => {
+        const verification = report.receiptVerification as Record<string, unknown>;
+        (verification.reviewCompletion as Record<string, unknown>).reviewerIdentityVerified = true;
+      },
+      detail: "receiptReviewerIdentityVerified=true",
+    },
+    {
+      name: "claimed completed human review",
+      mutate: (report: Record<string, unknown>) => {
+        (report.reviewBoundary as Record<string, unknown>).humanReviewCompleted = true;
+      },
+      detail: "receiptHumanReviewCompleted=true",
+    },
+    {
+      name: "claimed exact saved Share",
+      mutate: (report: Record<string, unknown>) => {
+        (report.mutationBoundary as Record<string, unknown>).exactSavedShareVerdict = "PASS";
+      },
+      detail: "receiptExactShare=PASS",
+    },
+  ])("contradicts the editorial review receipt on $name", async ({ mutate, detail }) => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "document-editorial-review-receipt-2026-08-17",
+      "report.json",
+    );
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as Record<string, unknown>;
+    mutate(report);
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.overall).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")).toMatchObject({ state: "contradicted" });
+    expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain(detail);
   });
 
   it("contradicts the UI gate when a mobile document control falls below 44px", async () => {

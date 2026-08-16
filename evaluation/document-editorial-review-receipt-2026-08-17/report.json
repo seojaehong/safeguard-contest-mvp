@@ -1,12 +1,21 @@
 {
   "schemaVersion": "safeclaw-document-editorial-review-receipt-evidence/v1",
-  "generatedAt": "2026-08-16T17:38:14.657Z",
-  "mode": "current-source-local-production",
-  "baseUrl": "http://127.0.0.1:3094",
-  "sourceHead": "45cb66e92241fca3167d537ed676cd6532070db1",
-  "productionBuild": null,
-  "sourceHeadMatchesProduction": false,
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_DOCUMENT_EDITORIAL_REVIEW_RECEIPT",
+  "generatedAt": "2026-08-16T17:40:40.762Z",
+  "mode": "live-production",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceHead": "3de35eeac0992a91a48b5940ca2fd006940b90fa",
+  "productionBuild": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "3de35eeac0992a91a48b5940ca2fd006940b90fa",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-917x9708f-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "sourceHeadMatchesProduction": true,
+  "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT",
   "acceptanceContract": {
     "canonicalDocumentCount": 12,
     "reviewerCheckCount": 5,

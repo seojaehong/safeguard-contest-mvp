@@ -26,6 +26,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
   liveDocumentEditorialReview: path.join("evaluation", "live-document-editorial-review-2026-07-25", "report.json"),
   documentEditorialReviewCockpit: path.join("evaluation", "document-editorial-review-cockpit-2026-08-16", "report.json"),
+  documentEditorialReviewReceipt: path.join("evaluation", "document-editorial-review-receipt-2026-08-17", "report.json"),
   liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
@@ -312,8 +313,8 @@ function recordAt(value, key) {
   return isRecord(next) ? next : null;
 }
 
-/** @param {unknown} review */
-function documentEditorialReviewCockpitSummary(review) {
+/** @param {unknown} review @param {unknown} receipt */
+function documentEditorialReviewCockpitSummary(review, receipt) {
   if (!isRecord(review)) return { verdict: "missing", cockpitReady: false, accessibilityRowsPassed: 0 };
   const acceptance = recordAt(review, "acceptanceContract") || {};
   const reviewBoundary = recordAt(review, "reviewBoundary") || {};
@@ -356,6 +357,56 @@ function documentEditorialReviewCockpitSummary(review) {
     && mutationBoundary.vectorRuntimeCalled === false
     && mutationBoundary.wikiPublished === false
     && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const receiptProductionBuild = recordAt(receipt, "productionBuild") || {};
+  const receiptVerification = recordAt(receipt, "receiptVerification") || {};
+  const receiptCompletion = recordAt(receiptVerification, "reviewCompletion") || {};
+  const receiptReviewBoundary = recordAt(receipt, "reviewBoundary") || {};
+  const receiptMutationBoundary = recordAt(receipt, "mutationBoundary") || {};
+  const receiptRows = isRecord(receipt) && Array.isArray(receipt.results) ? receipt.results.filter(isRecord) : [];
+  const receiptRowsPass = receiptRows.length === 2 && receiptRows.every((row) => {
+    const viewport = recordAt(row, "viewport") || {};
+    const dialog = recordAt(row, "dialog") || {};
+    const checklist = recordAt(row, "checklist") || {};
+    return row.bodyHeightUnchanged === true
+      && asNumber(row.bodyHeightBefore) === asNumber(viewport.height)
+      && asNumber(row.bodyHeightAfter) === asNumber(viewport.height)
+      && row.receiptLockedAtZero === true
+      && row.reviewerInputVisible === true
+      && row.horizontalOverflow === false
+      && asNumber(dialog.right) <= asNumber(viewport.width)
+      && asNumber(dialog.bottom) <= asNumber(viewport.height)
+      && asString(checklist.overflowY) === "auto";
+  });
+  const receiptReady = isRecord(receipt)
+    && asString(receipt.verdict) === "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT"
+    && asString(receipt.sourceHead).length > 0
+    && asString(receipt.sourceHead) === asString(receiptProductionBuild.commitSha)
+    && receipt.sourceHeadMatchesProduction === true
+    && asString(receiptProductionBuild.environment) === "production"
+    && receiptRowsPass
+    && asString(receiptVerification.schemaVersion) === "safeclaw-document-editorial-review-receipt/v1"
+    && asNumber(receiptVerification.documentCount) === 12
+    && asNumber(receiptVerification.uniqueDocumentKeyCount) === 12
+    && asNumber(receiptVerification.reviewerCheckCount) === 5
+    && receiptVerification.checksComplete === true
+    && receiptVerification.fingerprintsCurrent === true
+    && asNumber(receiptVerification.apiRequestCount) === 0
+    && receiptCompletion.localChecklistCompleted === true
+    && receiptCompletion.reviewerSelfAttested === true
+    && receiptCompletion.reviewerIdentityVerified === false
+    && receiptCompletion.serverRecorded === false
+    && receiptCompletion.approvalGranted === false
+    && receiptReviewBoundary.automatedInteractionOnly === true
+    && receiptReviewBoundary.humanReviewCompleted === false
+    && receiptReviewBoundary.localReceiptProvesHumanIdentity === false
+    && receiptReviewBoundary.broadHumanWordingReviewRequired === true
+    && receiptMutationBoundary.dbMutationPerformed === false
+    && receiptMutationBoundary.providerDispatchCalled === false
+    && receiptMutationBoundary.shareSessionCreated === false
+    && receiptMutationBoundary.vectorRuntimeCalled === false
+    && receiptMutationBoundary.wikiPublished === false
+    && receiptMutationBoundary.koshaRegistryMutationPerformed === false
+    && asString(receiptMutationBoundary.exactSavedShareVerdict) === "MISSING_EVIDENCE";
   const cockpitReady = asString(review.verdict) === "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_COCKPIT"
     && asNumber(review.pass) === 4
     && asNumber(review.fail) === 0
@@ -384,7 +435,8 @@ function documentEditorialReviewCockpitSummary(review) {
     && reviewBoundary.localCompletionIsApproval === false
     && reviewBoundary.broadHumanWordingReviewRequired === true
     && noMutation
-    && asString(mutationBoundary.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+    && asString(mutationBoundary.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && receiptReady;
   return {
     artifact: ARTIFACTS.documentEditorialReviewCockpit,
     verdict: asString(review.verdict),
@@ -401,6 +453,19 @@ function documentEditorialReviewCockpitSummary(review) {
     escapeRestoresLaunchFocus: acceptance.escapeRestoresLaunchFocus === true,
     accessibilityRowsPassed,
     cockpitReady,
+    receiptArtifact: ARTIFACTS.documentEditorialReviewReceipt,
+    receiptVerdict: isRecord(receipt) ? asString(receipt.verdict) : "missing",
+    receiptReady,
+    receiptLockedCases: receiptRows.filter((row) => row.receiptLockedAtZero === true).length,
+    receiptDocumentCount: asNumber(receiptVerification.documentCount),
+    receiptUniqueDocumentKeyCount: asNumber(receiptVerification.uniqueDocumentKeyCount),
+    receiptReviewerCheckCount: asNumber(receiptVerification.reviewerCheckCount),
+    receiptApiRequestCount: asNumber(receiptVerification.apiRequestCount),
+    reviewerSelfAttested: receiptCompletion.reviewerSelfAttested === true,
+    reviewerIdentityVerified: receiptCompletion.reviewerIdentityVerified === true,
+    serverRecorded: receiptCompletion.serverRecorded === true,
+    approvalGranted: receiptCompletion.approvalGranted === true,
+    localReceiptProvesHumanIdentity: receiptReviewBoundary.localReceiptProvesHumanIdentity === true,
     humanReviewCompleted: reviewBoundary.humanReviewCompleted === true,
     broadHumanWordingReviewRequired: reviewBoundary.broadHumanWordingReviewRequired === true,
     dbMutationPerformed: mutationBoundary.dbMutationPerformed === true,
@@ -433,6 +498,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const liveDocumentBroadReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentBroadReview);
   const liveDocumentEditorialReview = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialReview);
   const documentEditorialReviewCockpit = tryReadJson(rootDir, ARTIFACTS.documentEditorialReviewCockpit);
+  const documentEditorialReviewReceipt = tryReadJson(rootDir, ARTIFACTS.documentEditorialReviewReceipt);
   const liveDocumentEditorialDuplicateClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialDuplicateClassification);
   const liveDocumentEditorialNearClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialNearClassification);
   const productCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.productCapabilityTruth);
@@ -1206,7 +1272,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       exactSavedShareReproduced: recordAt(liveDocumentEditorialReview, "mutationBoundary")?.exactSavedShareReproduced === true,
       exactSavedShareVerdict: asString(recordAt(liveDocumentEditorialReview, "evidenceBoundary")?.exactSavedShareVerdict),
     },
-    documentEditorialReviewCockpit: documentEditorialReviewCockpitSummary(documentEditorialReviewCockpit),
+    documentEditorialReviewCockpit: documentEditorialReviewCockpitSummary(documentEditorialReviewCockpit, documentEditorialReviewReceipt),
     liveDocumentEditorialDuplicateClassification: {
       artifact: ARTIFACTS.liveDocumentEditorialDuplicateClassification,
       verdict: isRecord(liveDocumentEditorialDuplicateClassification)
@@ -1606,8 +1672,10 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Live geometry: pass=${rollup.documentEditorialReviewCockpit.livePassed}/4, fail=${rollup.documentEditorialReviewCockpit.liveFailed}; documents/checks=${rollup.documentEditorialReviewCockpit.canonicalDocumentCount}/${rollup.documentEditorialReviewCockpit.reviewerCheckCount}; desktop/mobile zones=${rollup.documentEditorialReviewCockpit.desktopZones}/${rollup.documentEditorialReviewCockpit.mobileColumns}`,
     `- Keyboard and screen reader: cases=${rollup.documentEditorialReviewCockpit.accessibilityRowsPassed}/4; roving tabs=${rollup.documentEditorialReviewCockpit.keyboardRovingTabNavigation}; labelled tabpanel=${rollup.documentEditorialReviewCockpit.screenReaderTabPanelContract}; Escape focus restore=${rollup.documentEditorialReviewCockpit.escapeRestoresLaunchFocus}; cockpit ready=${rollup.documentEditorialReviewCockpit.cockpitReady}`,
     `- Human review completed: ${rollup.documentEditorialReviewCockpit.humanReviewCompleted}; broad human wording review required: ${rollup.documentEditorialReviewCockpit.broadHumanWordingReviewRequired}`,
+    `- Local review receipt: verdict=${rollup.documentEditorialReviewCockpit.receiptVerdict || "missing"}; ready=${rollup.documentEditorialReviewCockpit.receiptReady}; locked cases=${rollup.documentEditorialReviewCockpit.receiptLockedCases}/2; documents/checks=${rollup.documentEditorialReviewCockpit.receiptUniqueDocumentKeyCount}/${rollup.documentEditorialReviewCockpit.receiptReviewerCheckCount}; API requests=${rollup.documentEditorialReviewCockpit.receiptApiRequestCount}`,
+    `- Receipt boundary: reviewer self-attested=${rollup.documentEditorialReviewCockpit.reviewerSelfAttested}; identity verified=${rollup.documentEditorialReviewCockpit.reviewerIdentityVerified}; server recorded=${rollup.documentEditorialReviewCockpit.serverRecorded}; approval granted=${rollup.documentEditorialReviewCockpit.approvalGranted}; proves human identity=${rollup.documentEditorialReviewCockpit.localReceiptProvesHumanIdentity}`,
     `- Mutations DB/provider/Share/vector/wiki/KOSHA: ${rollup.documentEditorialReviewCockpit.dbMutationPerformed}/${rollup.documentEditorialReviewCockpit.providerDispatchCalled}/${rollup.documentEditorialReviewCockpit.shareSessionCreated}/${rollup.documentEditorialReviewCockpit.vectorRuntimeCalled}/${rollup.documentEditorialReviewCockpit.wikiPublished}/${rollup.documentEditorialReviewCockpit.koshaRegistryMutationPerformed}; exact saved Share: ${rollup.documentEditorialReviewCockpit.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
-    "- Boundary: this proves a bounded, local, stale-aware human-review workflow exists; automated browser interaction is not human completion.",
+    "- Boundary: this proves a bounded, local, stale-aware human-review workflow and fail-closed self-attested JSON receipt exist; it does not prove reviewer identity, server recording, completed human review, or approval.",
     "",
     "## Live Editorial Duplicate Classification",
     "",

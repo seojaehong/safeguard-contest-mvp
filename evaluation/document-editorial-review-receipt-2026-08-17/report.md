@@ -1,8 +1,8 @@
 # Document editorial review receipt
 
-Verdict: `PASS_CURRENT_SOURCE_LOCAL_DOCUMENT_EDITORIAL_REVIEW_RECEIPT`
+Verdict: `PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT`
 
-Source: `45cb66e92241fca3167d537ed676cd6532070db1`
+Source: `3de35eeac0992a91a48b5940ca2fd006940b90fa`
 
 - Locked geometry: 2/2
 - Receipt documents/checks: 12/5

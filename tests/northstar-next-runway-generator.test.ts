@@ -285,6 +285,18 @@ type NextRunwayReport = {
     escapeRestoresLaunchFocus: boolean;
     accessibilityRowsPassed: number;
     cockpitReady: boolean;
+    receiptVerdict: string;
+    receiptReady: boolean;
+    receiptLockedCases: number;
+    receiptDocumentCount: number;
+    receiptUniqueDocumentKeyCount: number;
+    receiptReviewerCheckCount: number;
+    receiptApiRequestCount: number;
+    reviewerSelfAttested: boolean;
+    reviewerIdentityVerified: boolean;
+    serverRecorded: boolean;
+    approvalGranted: boolean;
+    localReceiptProvesHumanIdentity: boolean;
     humanReviewCompleted: boolean;
     broadHumanWordingReviewRequired: boolean;
     dbMutationPerformed: boolean;
@@ -1081,6 +1093,23 @@ function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
     results,
+  };
+}
+
+function documentEditorialReviewReceiptFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", environment: "production" },
+    sourceHeadMatchesProduction: true,
+    acceptanceContract: { canonicalDocumentCount: 12, reviewerCheckCount: 5, reviewerRequired: true, receiptLockedBeforeAllDocuments: true, currentTextFingerprintRequired: true, localDownloadOnly: true, reviewerIdentityVerified: false, serverRecorded: false, approvalGranted: false },
+    results: [
+      { viewport: { width: 1440, height: 723 }, bodyHeightBefore: 723, bodyHeightAfter: 723, bodyHeightUnchanged: true, dialog: { right: 1310, bottom: 711 }, checklist: { overflowY: "auto" }, receiptLockedAtZero: true, reviewerInputVisible: true, horizontalOverflow: false },
+      { viewport: { width: 390, height: 723 }, bodyHeightBefore: 723, bodyHeightAfter: 723, bodyHeightUnchanged: true, dialog: { right: 382, bottom: 715 }, checklist: { overflowY: "auto" }, receiptLockedAtZero: true, reviewerInputVisible: true, horizontalOverflow: false },
+    ],
+    receiptVerification: { schemaVersion: "safeclaw-document-editorial-review-receipt/v1", documentCount: 12, uniqueDocumentKeyCount: 12, reviewerCheckCount: 5, checksComplete: true, fingerprintsCurrent: true, apiRequestCount: 0, reviewCompletion: { localChecklistCompleted: true, reviewerSelfAttested: true, reviewerIdentityVerified: false, serverRecorded: false, approvalGranted: false } },
+    reviewBoundary: { automatedInteractionOnly: true, humanReviewCompleted: false, localReceiptProvesHumanIdentity: false, broadHumanWordingReviewRequired: true },
+    mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, vectorRuntimeCalled: false, wikiPublished: false, koshaRegistryMutationPerformed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   };
 }
 
@@ -2119,6 +2148,11 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     root,
     "evaluation/document-editorial-review-cockpit-2026-08-16/report.json",
     documentEditorialReviewCockpitFixture(),
+  );
+  writeJson(
+    root,
+    "evaluation/document-editorial-review-receipt-2026-08-17/report.json",
+    documentEditorialReviewReceiptFixture(),
   );
   writeJson(root, "evaluation/security-resource-remediation-2026-08-11/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_SECURITY_RESOURCE_REMEDIATION",
@@ -3240,6 +3274,18 @@ describe("northstar next runway generator", () => {
       escapeRestoresLaunchFocus: true,
       accessibilityRowsPassed: 4,
       cockpitReady: true,
+      receiptVerdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT",
+      receiptReady: true,
+      receiptLockedCases: 2,
+      receiptDocumentCount: 12,
+      receiptUniqueDocumentKeyCount: 12,
+      receiptReviewerCheckCount: 5,
+      receiptApiRequestCount: 0,
+      reviewerSelfAttested: true,
+      reviewerIdentityVerified: false,
+      serverRecorded: false,
+      approvalGranted: false,
+      localReceiptProvesHumanIdentity: false,
       humanReviewCompleted: false,
       broadHumanWordingReviewRequired: true,
       dbMutationPerformed: false,
@@ -3255,6 +3301,8 @@ describe("northstar next runway generator", () => {
     expect(markdown).toContain("accessibility cases `4/4`");
     expect(markdown).toContain("roving tabs/labelled tabpanel/Escape focus restore `true/true/true`");
     expect(markdown).toContain("humanReviewCompleted=`false`");
+    expect(markdown).toContain("local receipt is `PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT`");
+    expect(markdown).toContain("identity verified/server recorded/approval granted remain `false/false/false`");
     expect(markdown).toContain("broadHumanWordingReviewRequired=`true`");
     expect(markdown).toContain("exact saved Share remains `MISSING_EVIDENCE`");
     expect(report.provenCurrentState).toContain("security_upstream_transport_remediation");
