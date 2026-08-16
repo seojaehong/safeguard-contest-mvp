@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-16T11:29:30.263Z
-Source HEAD at generation: 50f62c7884ade697ee1e6375bdde8497b12d4d7c
-Live commit at generation: 50f62c7884ade697ee1e6375bdde8497b12d4d7c
+Generated at: 2026-08-16T11:41:48.877Z
+Source HEAD at generation: 98dba948b5cdaa57e7e14814bf6162ded0d24f86
+Live commit at generation: 98dba948b5cdaa57e7e14814bf6162ded0d24f86
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -367,7 +367,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_wording_review | ancestor | ancestor_of_head | evaluation\live-document-wording-review-2026-07-24\report.json |
 | live_document_broad_review | ancestor | ancestor_of_head | evaluation\live-document-broad-review-2026-07-25\report.json |
 | live_document_editorial_review | missing | ancestor_of_head | evaluation\live-document-editorial-review-2026-07-25\report.json |
-| document_editorial_review_cockpit | exact | matches_live | evaluation\document-editorial-review-cockpit-2026-08-16\report.json |
+| document_editorial_review_cockpit | ancestor | ancestor_of_head | evaluation\document-editorial-review-cockpit-2026-08-16\report.json |
 | live_document_editorial_duplicate_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-duplicate-classification-2026-07-25\report.json |
 | live_document_editorial_near_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-near-classification-2026-07-25\report.json |
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |
