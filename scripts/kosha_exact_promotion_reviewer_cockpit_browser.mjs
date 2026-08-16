@@ -57,6 +57,32 @@ export async function runBrowserProbe(options) {
     for (const probe of cases) {
       const page = await browser.newPage({ viewport: { width: probe.width, height: probe.height } });
       await page.goto(pathToFileURL(htmlPath).href, { waitUntil: "load" });
+      await page.focus('[data-candidate-button="0"]');
+      await page.keyboard.press("End");
+      const candidateEndState = await page.evaluate(() => ({
+        selectedIndex: [...document.querySelectorAll("[data-candidate-button]")]
+          .findIndex((button) => button.getAttribute("aria-selected") === "true"),
+        focusedIndex: [...document.querySelectorAll("[data-candidate-button]")]
+          .findIndex((button) => button === document.activeElement),
+      }));
+      await page.keyboard.press("Home");
+      const candidateHomeState = await page.evaluate(() => ({
+        selectedIndex: [...document.querySelectorAll("[data-candidate-button]")]
+          .findIndex((button) => button.getAttribute("aria-selected") === "true"),
+        focusedIndex: [...document.querySelectorAll("[data-candidate-button]")]
+          .findIndex((button) => button === document.activeElement),
+      }));
+      let mobileKeyboardState = null;
+      if (probe.mobileView) {
+        await page.focus('[data-mobile-mode="0:evidence"]');
+        await page.keyboard.press("End");
+        const reviewSelected = await page.getAttribute('[data-mobile-mode="0:review"]', "aria-selected");
+        const reviewFocused = await page.evaluate(() => document.activeElement?.getAttribute("data-mobile-mode"));
+        await page.keyboard.press("Home");
+        const evidenceSelected = await page.getAttribute('[data-mobile-mode="0:evidence"]', "aria-selected");
+        const evidenceFocused = await page.evaluate(() => document.activeElement?.getAttribute("data-mobile-mode"));
+        mobileKeyboardState = { reviewSelected, reviewFocused, evidenceSelected, evidenceFocused };
+      }
       if (probe.mobileView === "review") {
         await page.click('[data-mobile-mode="0:review"]');
       }
@@ -88,6 +114,24 @@ export async function runBrowserProbe(options) {
           reviewDisplay: style(".review-pane")?.display ?? "",
           visibleCandidatePanelCount: visiblePanels.length,
           candidateButtonCount: document.querySelectorAll("[data-candidate-button]").length,
+          candidateTablistRole: element(".candidate-list")?.getAttribute("role") ?? "",
+          candidateTablistOrientation: element(".candidate-list")?.getAttribute("aria-orientation") ?? "",
+          selectedCandidateTabCount: document.querySelectorAll('[data-candidate-button][aria-selected="true"]').length,
+          tabbableCandidateTabCount: [...document.querySelectorAll("[data-candidate-button]")]
+            .filter((button) => button.tabIndex === 0).length,
+          candidateControlLinksValid: [...document.querySelectorAll("[data-candidate-button]")]
+            .every((button) => {
+              const panel = document.getElementById(button.getAttribute("aria-controls") || "");
+              return panel?.getAttribute("aria-labelledby") === button.id;
+            }),
+          progressLiveRole: element("[data-progress-live]")?.getAttribute("role") ?? "",
+          progressLiveMode: element("[data-progress-live]")?.getAttribute("aria-live") ?? "",
+          mobileTablistRole: element(".mobile-mode")?.getAttribute("role") ?? "",
+          selectedMobileTabCount: document.querySelectorAll('[data-candidate-panel="0"] [data-mobile-mode][aria-selected="true"]').length,
+          tabbableMobileTabCount: [...document.querySelectorAll('[data-candidate-panel="0"] [data-mobile-mode]')]
+            .filter((button) => button.tabIndex === 0).length,
+          mobileControlLinksValid: [...document.querySelectorAll('[data-candidate-panel="0"] [data-mobile-mode]')]
+            .every((button) => document.getElementById(button.getAttribute("aria-controls") || "") !== null),
           requiredCheckCount: document.querySelectorAll("input[data-check]").length,
           semanticGroupCount: document.querySelectorAll(".evidence-group").length,
           exportInitiallyDisabled: element("[data-export]") instanceof HTMLButtonElement
@@ -99,7 +143,14 @@ export async function runBrowserProbe(options) {
       });
       const screenshot = path.join(outputDir, `${probe.name}.png`);
       await page.screenshot({ path: screenshot, fullPage: false });
-      results.push({ name: probe.name, ...metrics, screenshot: path.relative(options.rootDir, screenshot) });
+      results.push({
+        name: probe.name,
+        ...metrics,
+        candidateEndState,
+        candidateHomeState,
+        mobileKeyboardState,
+        screenshot: path.relative(options.rootDir, screenshot),
+      });
       await page.close();
     }
   } finally {
@@ -114,6 +165,21 @@ export async function runBrowserProbe(options) {
     && row.body.scrollWidth === row.viewport.width
     && row.visibleCandidatePanelCount === 1
     && row.candidateButtonCount === 8
+    && row.candidateTablistRole === "tablist"
+    && row.candidateTablistOrientation === (row.viewport.width <= 767 ? "horizontal" : "vertical")
+    && row.selectedCandidateTabCount === 1
+    && row.tabbableCandidateTabCount === 1
+    && row.candidateControlLinksValid
+    && row.candidateEndState.selectedIndex === 7
+    && row.candidateEndState.focusedIndex === 7
+    && row.candidateHomeState.selectedIndex === 0
+    && row.candidateHomeState.focusedIndex === 0
+    && row.progressLiveRole === "status"
+    && row.progressLiveMode === "polite"
+    && row.mobileTablistRole === "tablist"
+    && row.selectedMobileTabCount === 1
+    && row.tabbableMobileTabCount === 1
+    && row.mobileControlLinksValid
     && row.requiredCheckCount === 40
     && row.semanticGroupCount === 24
     && row.exportInitiallyDisabled
@@ -138,6 +204,14 @@ export async function runBrowserProbe(options) {
     && mobileEvidence.reviewDisplay === "none"
     && mobileReview.evidenceDisplay === "none"
     && mobileReview.reviewDisplay !== "none"
+    && mobileEvidence.mobileKeyboardState?.reviewSelected === "true"
+    && mobileEvidence.mobileKeyboardState?.reviewFocused === "0:review"
+    && mobileEvidence.mobileKeyboardState?.evidenceSelected === "true"
+    && mobileEvidence.mobileKeyboardState?.evidenceFocused === "0:evidence"
+    && mobileReview.mobileKeyboardState?.reviewSelected === "true"
+    && mobileReview.mobileKeyboardState?.reviewFocused === "0:review"
+    && mobileReview.mobileKeyboardState?.evidenceSelected === "true"
+    && mobileReview.mobileKeyboardState?.evidenceFocused === "0:evidence"
     && typeof mobileEvidence.firstEvidenceBottom === "number"
     && mobileEvidence.firstEvidenceBottom <= mobileEvidence.viewport.height
     && typeof mobileReview.firstCheckBottom === "number"
@@ -181,6 +255,10 @@ Verdict: \`${report.verdict}\`
 - Body height: desktop ${desktop?.body.scrollHeight}/${desktop?.viewport.height}, mobile ${mobileEvidence?.body.scrollHeight}/${mobileEvidence?.viewport.height}
 - Desktop widths: rail ${desktop?.candidateRail?.width}, evidence ${desktop?.evidencePane?.width}, review ${desktop?.reviewPane?.width}
 - Initial export disabled: ${results.every((row) => row.exportInitiallyDisabled)}
+- Candidate tabs: ${results.every((row) => row.selectedCandidateTabCount === 1 && row.tabbableCandidateTabCount === 1)}
+- Candidate End/Home keyboard: ${results.every((row) => row.candidateEndState.selectedIndex === 7 && row.candidateHomeState.selectedIndex === 0)}
+- Mobile evidence/review keyboard: ${[mobileEvidence, mobileReview].every((row) => row?.mobileKeyboardState?.reviewFocused === "0:review" && row?.mobileKeyboardState?.evidenceFocused === "0:evidence")}
+- Live progress status: ${results.every((row) => row.progressLiveRole === "status" && row.progressLiveMode === "polite")}
 - Horizontal overflow: ${results.some((row) => row.horizontalOverflow)}
 
 ## Boundary

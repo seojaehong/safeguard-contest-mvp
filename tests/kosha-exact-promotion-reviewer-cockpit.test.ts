@@ -26,7 +26,8 @@ async function loadModule(): Promise<CockpitModule> {
     os.tmpdir(),
     `kosha-reviewer-cockpit-${process.pid}-${Date.now()}.mjs`,
   );
-  fs.copyFileSync(sourcePath, temporaryPath);
+  const source = fs.readFileSync(sourcePath, "utf8").replace(/^#![^\r\n]*\r?\n/, "");
+  fs.writeFileSync(temporaryPath, source, "utf8");
   return await import(`${pathToFileURL(temporaryPath).href}?v=${Date.now()}`) as CockpitModule;
 }
 
@@ -114,6 +115,17 @@ describe("KOSHA exact promotion reviewer cockpit", () => {
       },
     });
     expect(result.html.match(/data-candidate-button=/g)).toHaveLength(8);
+    expect(result.html).toContain('role="tablist" aria-label="KOSHA 검토 후보" aria-orientation="vertical"');
+    expect(result.html.match(/role="tab" id="candidate-tab-/g)).toHaveLength(8);
+    expect(result.html.match(/role="tabpanel" aria-labelledby="candidate-tab-/g)).toHaveLength(8);
+    expect(result.html).toContain('aria-controls="candidate-panel-0" aria-selected="true" tabindex="0"');
+    expect(result.html).toContain('aria-controls="candidate-panel-1" aria-selected="false" tabindex="-1"');
+    expect(result.html).toContain('role="status" aria-live="polite" data-progress-live');
+    expect(result.html).toContain('mobileBreakpoint.matches ? "horizontal" : "vertical"');
+    expect(result.html).toContain('role="tablist" aria-label="D-C-1 검토 보기"');
+    expect(result.html).toContain('aria-controls="review-pane-0" aria-selected="false" tabindex="-1"');
+    expect(result.html).toContain('ArrowDown: (index + 1) % buttons.length');
+    expect(result.html).toContain('End: buttons.length - 1');
     expect(result.html.match(/<input type="checkbox" data-check=/g)).toHaveLength(40);
     expect(result.html).toContain("data-export disabled");
     expect(result.html).toContain("검토 JSON 내보내기 · 64개 입력 필요");

@@ -256,7 +256,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
   };
 
   const candidateButtons = candidates.map((candidate, index) => `
-    <button class="candidate-button" type="button" data-candidate-button="${index}" aria-pressed="${index === 0}">
+    <button class="candidate-button" type="button" role="tab" id="candidate-tab-${index}" data-candidate-button="${index}" aria-controls="candidate-panel-${index}" aria-selected="${index === 0}" tabindex="${index === 0 ? 0 : -1}">
       <span>${escapeHtml(candidate.stableKey)}</span>
       <strong>${escapeHtml(candidate.version)}</strong>
       <small data-candidate-progress="${index}">0/8</small>
@@ -274,12 +274,12 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
         <span title="${escapeHtml(check.text)}">${escapeHtml(REVIEW_CHECK_LABELS.get(check.text) || check.text)}</span>
       </label>`).join("");
     return `
-      <section class="candidate-panel" data-candidate-panel="${index}" data-mobile-view="evidence" ${index === 0 ? "" : "hidden"}>
-        <nav class="mobile-mode" aria-label="${escapeHtml(candidate.stableKey)} 검토 보기">
-          <button type="button" data-mobile-mode="${index}:evidence" aria-pressed="true">근거</button>
-          <button type="button" data-mobile-mode="${index}:review" aria-pressed="false">체크리스트</button>
+      <section class="candidate-panel" id="candidate-panel-${index}" role="tabpanel" aria-labelledby="candidate-tab-${index}" data-candidate-panel="${index}" data-mobile-view="evidence" ${index === 0 ? "" : "hidden"}>
+        <nav class="mobile-mode" role="tablist" aria-label="${escapeHtml(candidate.stableKey)} 검토 보기">
+          <button type="button" role="tab" id="mobile-tab-${index}-evidence" data-mobile-mode="${index}:evidence" aria-controls="evidence-pane-${index}" aria-selected="true" tabindex="0">근거</button>
+          <button type="button" role="tab" id="mobile-tab-${index}-review" data-mobile-mode="${index}:review" aria-controls="review-pane-${index}" aria-selected="false" tabindex="-1">체크리스트</button>
         </nav>
-        <main class="evidence-pane">
+        <main class="evidence-pane" id="evidence-pane-${index}" aria-labelledby="mobile-tab-${index}-evidence">
           <header class="candidate-heading">
             <div><span>${escapeHtml(candidate.category)}</span><h1>${escapeHtml(candidate.title)}</h1></div>
             <a href="${escapeHtml(candidate.officialUrl)}" target="_blank" rel="noreferrer">공식 PDF 열기</a>
@@ -301,8 +301,8 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
             </dl>
           </details>
         </main>
-        <aside class="review-pane" aria-label="${escapeHtml(candidate.stableKey)} 사람 검토">
-          <header><span>사람 검토</span><strong data-review-status="${index}">8개 입력 필요</strong></header>
+        <aside class="review-pane" id="review-pane-${index}" aria-labelledby="mobile-tab-${index}-review">
+          <header><span>사람 검토</span><strong data-review-status="${index}" aria-live="polite">8개 입력 필요</strong></header>
           <p class="boundary-note">기계 근거는 검토를 돕지만 판단을 대신하지 않습니다.</p>
           <div class="check-stack">${checks}</div>
           <label class="field-label">검토자<input type="text" maxlength="120" autocomplete="name" data-reviewer="${index}"></label>
@@ -329,7 +329,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
     .workspace{display:grid;grid-template-columns:230px minmax(0,1fr);gap:0;min-height:0;height:auto}.candidate-rail{background:#f7faf8;border-right:1px solid var(--line);padding:12px;overflow:auto}
     .rail-label{display:block;color:var(--muted);font-size:12px;font-weight:700;margin:4px 4px 10px}.candidate-list{display:grid;gap:6px}
     .candidate-button{width:100%;border:1px solid transparent;background:transparent;text-align:left;padding:9px 10px;display:grid;grid-template-columns:1fr auto;gap:2px 8px;color:var(--ink);cursor:pointer;border-radius:6px}
-    .candidate-button:hover{background:#eaf1ed}.candidate-button[aria-pressed="true"]{background:#dcece4;border-color:#9ec5b2}.candidate-button span{font-size:12px;color:var(--muted)}.candidate-button strong{grid-column:1;font-size:13px}.candidate-button small{grid-column:2;grid-row:1/3;align-self:center;color:var(--accent);font-weight:700}
+    .candidate-button:hover{background:#eaf1ed}.candidate-button[aria-selected="true"]{background:#dcece4;border-color:#9ec5b2}.candidate-button span{font-size:12px;color:var(--muted)}.candidate-button strong{grid-column:1;font-size:13px}.candidate-button small{grid-column:2;grid-row:1/3;align-self:center;color:var(--accent);font-weight:700}
     .content{min-width:0;min-height:0}.candidate-panel{display:grid;grid-template-columns:minmax(0,1fr) 360px;height:100%;min-height:0}.candidate-panel[hidden]{display:none}.evidence-pane,.review-pane{overflow:auto;padding:18px 20px}.review-pane{background:#f8faf9;border-left:1px solid var(--line)}
     .candidate-heading{display:flex;gap:16px;align-items:flex-start}.candidate-heading div{min-width:0}.candidate-heading span{color:var(--accent);font-size:12px;font-weight:700}.candidate-heading h1{font-size:20px;line-height:1.35;margin:4px 0 0}.candidate-heading a{margin-left:auto;white-space:nowrap;color:#075e45;font-weight:700;font-size:13px}
     .identity-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);margin:16px 0 12px}.identity-grid div{padding:9px 10px;border-right:1px solid var(--line)}.identity-grid div:last-child{border:0}dt{font-size:11px;color:var(--muted)}dd{margin:3px 0 0;font-size:13px;font-weight:700}
@@ -339,8 +339,8 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
     .check-stack{display:grid;gap:6px}.check-row,.human-confirm{display:grid;grid-template-columns:18px 1fr;gap:8px;align-items:start;border:1px solid var(--line);background:#fff;padding:9px;border-radius:6px;font-size:12px;line-height:1.4}.check-row input,.human-confirm input{margin:2px 0 0;accent-color:var(--accent)}
     .field-label{display:grid;gap:5px;margin-top:10px;font-size:12px;font-weight:700}.field-label input{width:100%;border:1px solid #aebbb3;background:#fff;padding:9px;border-radius:4px}.human-confirm{margin-top:10px;border-color:#9ec5b2;background:#eef8f2}
     .footer-actions{display:flex;justify-content:flex-end;gap:8px;padding:8px 12px;background:#e8eeea;border-top:1px solid var(--line)}.footer-actions button{border:1px solid #295d48;padding:9px 12px;border-radius:5px;background:#fff;color:#184b38;font-weight:700;cursor:pointer}.footer-actions .primary{background:#087f5b;color:#fff;white-space:nowrap}.footer-actions button:disabled{cursor:not-allowed;opacity:.45}
-    .mobile-mode{display:none}.status-live{color:#8ce0bc}.complete .candidate-button small{color:#087f5b}
-    @media(max-width:767px){.topbar{align-items:flex-start;padding:12px;height:68px}.metrics{display:none}.workspace{display:flex;flex-direction:column;height:auto;overflow:hidden}.candidate-rail{flex:none;border-right:0;border-bottom:1px solid var(--line);padding:8px;overflow-x:auto}.rail-label{display:none}.candidate-list{display:flex;width:max-content}.candidate-button{width:132px}.content{flex:1;min-height:0}.candidate-panel{display:flex;flex-direction:column;height:100%;min-height:0}.candidate-panel[hidden]{display:none}.mobile-mode{display:grid;grid-template-columns:1fr 1fr;flex:none;border-bottom:1px solid var(--line);background:#f7faf8;padding:6px 8px}.mobile-mode button{border:0;border-bottom:2px solid transparent;background:transparent;padding:8px;color:var(--muted);font-weight:700}.mobile-mode button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}.candidate-panel[data-mobile-view="evidence"] .review-pane,.candidate-panel[data-mobile-view="review"] .evidence-pane{display:none}.evidence-pane,.review-pane{flex:1;min-height:0;overflow:auto;padding:14px 12px}.review-pane{border-left:0}.identity-grid{grid-template-columns:repeat(2,1fr)}.identity-grid div:nth-child(2){border-right:0}.candidate-heading{display:block}.candidate-heading a{display:inline-block;margin-top:8px}.footer-actions{padding:7px 8px}.footer-actions button{padding:8px 9px;font-size:13px}}
+    button:focus-visible,input:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #0b6eeb;outline-offset:2px}.mobile-mode{display:none}.status-live{color:#8ce0bc}.complete .candidate-button small{color:#087f5b}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(max-width:767px){.topbar{align-items:flex-start;padding:12px;height:68px}.metrics{display:none}.workspace{display:flex;flex-direction:column;height:auto;overflow:hidden}.candidate-rail{flex:none;border-right:0;border-bottom:1px solid var(--line);padding:8px;overflow-x:auto}.rail-label{display:none}.candidate-list{display:flex;width:max-content}.candidate-button{width:132px}.content{flex:1;min-height:0}.candidate-panel{display:flex;flex-direction:column;height:100%;min-height:0}.candidate-panel[hidden]{display:none}.mobile-mode{display:grid;grid-template-columns:1fr 1fr;flex:none;border-bottom:1px solid var(--line);background:#f7faf8;padding:6px 8px}.mobile-mode button{border:0;border-bottom:2px solid transparent;background:transparent;padding:8px;color:var(--muted);font-weight:700}.mobile-mode button[aria-selected="true"]{border-color:var(--accent);color:var(--accent)}.candidate-panel[data-mobile-view="evidence"] .review-pane,.candidate-panel[data-mobile-view="review"] .evidence-pane{display:none}.evidence-pane,.review-pane{flex:1;min-height:0;overflow:auto;padding:14px 12px}.review-pane{border-left:0}.identity-grid{grid-template-columns:repeat(2,1fr)}.identity-grid div:nth-child(2){border-right:0}.candidate-heading{display:block}.candidate-heading a{display:inline-block;margin-top:8px}.footer-actions{padding:7px 8px}.footer-actions button{padding:8px 9px;font-size:13px}}
   </style>
 </head>
 <body>
@@ -350,10 +350,11 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
       <div class="metrics"><div><strong>${candidates.length}</strong>후보</div><div><strong>${candidates.length * 3}</strong>근거 묶음</div><div><strong>${checklistInputCount}</strong>필수 입력</div><div><strong class="status-live">0</strong>외부 변경</div></div>
     </header>
     <div class="workspace">
-      <aside class="candidate-rail"><span class="rail-label">검토 후보</span><div class="candidate-list">${candidateButtons}</div></aside>
+      <aside class="candidate-rail"><span class="rail-label">검토 후보</span><div class="candidate-list" role="tablist" aria-label="KOSHA 검토 후보" aria-orientation="vertical">${candidateButtons}</div></aside>
       <div class="content">${candidatePanels}</div>
     </div>
     <div class="footer-actions">
+      <p class="sr-only" role="status" aria-live="polite" data-progress-live>64개 입력이 남았습니다.</p>
       <button type="button" data-reset title="이 브라우저에 저장된 입력을 모두 지웁니다">입력 초기화</button>
       <button class="primary" type="button" data-export disabled>검토 JSON 내보내기 · 64개 입력 필요</button>
     </div>
@@ -379,7 +380,15 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
       }
       const panels = [...document.querySelectorAll("[data-candidate-panel]")];
       const buttons = [...document.querySelectorAll("[data-candidate-button]")];
+      const candidateList = document.querySelector(".candidate-list");
       const exportButton = document.querySelector("[data-export]");
+      const progressLive = document.querySelector("[data-progress-live]");
+      const mobileBreakpoint = window.matchMedia("(max-width: 767px)");
+      const syncCandidateOrientation = () => {
+        candidateList.setAttribute("aria-orientation", mobileBreakpoint.matches ? "horizontal" : "vertical");
+      };
+      syncCandidateOrientation();
+      mobileBreakpoint.addEventListener("change", syncCandidateOrientation);
       const completedInputs = (row) =>
         row.requiredReviewChecks.filter((check) => check.confirmed).length
         + (row.reviewer.trim() ? 1 : 0)
@@ -404,20 +413,56 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
         exportButton.textContent = completeCount === payload.checklistInputCount
           ? "검토 JSON 내보내기"
           : "검토 JSON 내보내기 · " + (payload.checklistInputCount - completeCount) + "개 입력 필요";
+        progressLive.textContent = completeCount === payload.checklistInputCount
+          ? "필수 입력 64개가 모두 완료되었습니다."
+          : completeCount + "개 완료, " + (payload.checklistInputCount - completeCount) + "개 입력이 남았습니다.";
         localStorage.setItem(storageKey, JSON.stringify(state));
       };
-      const selectCandidate = (index) => {
+      const selectCandidate = (index, moveFocus = false) => {
         panels.forEach((panel, panelIndex) => { panel.hidden = panelIndex !== index; });
-        buttons.forEach((button, buttonIndex) => button.setAttribute("aria-pressed", String(buttonIndex === index)));
+        buttons.forEach((button, buttonIndex) => {
+          const selected = buttonIndex === index;
+          button.setAttribute("aria-selected", String(selected));
+          button.tabIndex = selected ? 0 : -1;
+        });
+        if (moveFocus) buttons[index].focus();
       };
       buttons.forEach((button, index) => button.addEventListener("click", () => selectCandidate(index)));
+      buttons.forEach((button, index) => button.addEventListener("keydown", (event) => {
+        const keyTargets = {
+          ArrowDown: (index + 1) % buttons.length,
+          ArrowRight: (index + 1) % buttons.length,
+          ArrowUp: (index - 1 + buttons.length) % buttons.length,
+          ArrowLeft: (index - 1 + buttons.length) % buttons.length,
+          Home: 0,
+          End: buttons.length - 1
+        };
+        if (!(event.key in keyTargets)) return;
+        event.preventDefault();
+        selectCandidate(keyTargets[event.key], true);
+      }));
+      const selectMobileMode = (panel, mode, moveFocus = false) => {
+        panel.dataset.mobileView = mode;
+        const modeButtons = [...panel.querySelectorAll("[data-mobile-mode]")];
+        modeButtons.forEach((modeButton) => {
+          const selected = modeButton.dataset.mobileMode.endsWith(":" + mode);
+          modeButton.setAttribute("aria-selected", String(selected));
+          modeButton.tabIndex = selected ? 0 : -1;
+          if (selected && moveFocus) modeButton.focus();
+        });
+      };
       document.querySelectorAll("[data-mobile-mode]").forEach((button) => button.addEventListener("click", (event) => {
         const [candidateIndex, mode] = event.currentTarget.dataset.mobileMode.split(":");
         const panel = document.querySelector("[data-candidate-panel='" + candidateIndex + "']");
-        panel.dataset.mobileView = mode;
-        panel.querySelectorAll("[data-mobile-mode]").forEach((modeButton) => {
-          modeButton.setAttribute("aria-pressed", String(modeButton.dataset.mobileMode.endsWith(":" + mode)));
-        });
+        selectMobileMode(panel, mode);
+      }));
+      document.querySelectorAll("[data-mobile-mode]").forEach((button) => button.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        const [candidateIndex] = event.currentTarget.dataset.mobileMode.split(":");
+        const panel = document.querySelector("[data-candidate-panel='" + candidateIndex + "']");
+        const mode = event.key === "ArrowRight" || event.key === "End" ? "review" : "evidence";
+        selectMobileMode(panel, mode, true);
       }));
       document.querySelectorAll("[data-check]").forEach((input) => input.addEventListener("change", (event) => {
         const [candidateIndex, checkIndex] = event.currentTarget.dataset.check.split(":").map(Number);
@@ -523,6 +568,14 @@ export function runReviewerCockpit(options) {
     checklistInputCount: outputPayload.checklistInputCount,
     initialCompletedInputCount: 0,
     exportInitiallyDisabled: true,
+    accessibilityContract: {
+      candidateTabCount: outputPayload.candidateCount,
+      candidateRovingTabStop: true,
+      candidateKeyboardNavigation: ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End"],
+      breakpointOrientationSynchronized: true,
+      mobileEvidenceReviewTabs: true,
+      progressLiveRegion: true,
+    },
     outputHtml: path.relative(options.rootDir, path.join(outputDir, "index.html")),
     boundary: outputPayload.boundary,
   };
@@ -536,6 +589,10 @@ Verdict: \`${report.verdict}\`
 - Required human inputs: ${report.checklistInputCount}
 - Initial completed inputs: ${report.initialCompletedInputCount}
 - Export initially disabled: ${report.exportInitiallyDisabled}
+- Candidate keyboard tabs: ${report.accessibilityContract.candidateTabCount} with one roving tab stop
+- Breakpoint orientation synchronized: ${report.accessibilityContract.breakpointOrientationSynchronized}
+- Mobile evidence/review tabs: ${report.accessibilityContract.mobileEvidenceReviewTabs}
+- Live progress region: ${report.accessibilityContract.progressLiveRegion}
 - HTML: \`${report.outputHtml}\`
 
 ## Boundary
