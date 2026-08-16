@@ -15,6 +15,7 @@ type CockpitModule = {
       candidateCount: number;
       semanticGroupCount: number;
       pageReceiptCount: number;
+      titleReconciledCandidateCount: number;
       checklistInputCount: number;
       bodySnapshotId: string;
       bodySourceIdentitySha256: string;
@@ -38,11 +39,16 @@ function fixture() {
   const candidates = Array.from({ length: 8 }, (_, index) => {
     const stableKey = `D-C-${index + 1}`;
     const version = `${stableKey}-2026`;
+    const officialCurrentTitle = `${stableKey} 공식 현재 제목`;
+    const title = `${version} ${officialCurrentTitle}`;
     return {
       order: index + 1,
       stableKey,
       version,
-      title: `${version} 검토 대상`,
+      title,
+      officialCurrentTitle,
+      sourceTitle: index === 0 ? `${version} corpus 원본 제목` : title,
+      titleReconciled: index === 0,
       category: "건설안전분야",
       publishedAt: "2026-01-30",
       officialFileId: `FILE-${index + 1}`,
@@ -125,6 +131,7 @@ describe("KOSHA exact promotion reviewer cockpit", () => {
       candidateCount: 8,
       semanticGroupCount: 24,
       pageReceiptCount: 24,
+      titleReconciledCandidateCount: 1,
       checklistInputCount: 64,
       bodySnapshotId: "fixture-snapshot",
       bodySourceIdentitySha256: "d".repeat(64),
@@ -152,7 +159,7 @@ describe("KOSHA exact promotion reviewer cockpit", () => {
     expect(result.html).toContain('pane.setAttribute("role", "tabpanel")');
     expect(result.html).toContain('pane.removeAttribute("role")');
     expect(result.html).toContain('pane.hidden = paneMode !== selectedMode');
-    expect(result.html).toContain('safeclaw-kosha-reviewer-cockpit-state/v3');
+    expect(result.html).toContain('safeclaw-kosha-reviewer-cockpit-state/v4');
     expect(result.html).toContain('stored.candidateFingerprint === candidateFingerprint');
     expect(result.html).toContain('compatibleStoredRows(stored.rows)');
     expect(result.html).toContain('후보 구성이 변경되어 이전 검토 초안을 복원하지 않았습니다.');
@@ -160,9 +167,17 @@ describe("KOSHA exact promotion reviewer cockpit", () => {
     expect(result.html).toContain('End: buttons.length - 1');
     expect(result.html.match(/<input type="checkbox" data-check=/g)).toHaveLength(40);
     expect(result.html.match(/data-evidence-receipt=/g)).toHaveLength(24);
+    expect(result.html.match(/data-title-provenance=/g)).toHaveLength(8);
+    expect(result.html).toContain("공식 현재 제목 · 건설안전분야");
+    expect(result.html).toContain("D-C-1-2026 corpus 원본 제목");
+    expect(result.html).toContain("표기 차이 있음");
+    expect(result.html).toContain("표기 동일");
     expect(result.html).toContain("PDF 1쪽");
     expect(result.html).toContain("bodySnapshotId: payload.bodySnapshotId");
     expect(result.html).toContain("bodySourceIdentitySha256: payload.bodySourceIdentitySha256");
+    expect(result.html).toContain("officialCurrentTitle: candidate.officialCurrentTitle");
+    expect(result.html).toContain("sourceTitle: candidate.sourceTitle");
+    expect(result.html).toContain("titleReconciled: candidate.titleReconciled");
     expect(result.html).toContain("evidenceReceipts: candidate.semanticGroups.map");
     expect(result.html).toContain("normalizedTextSha256: receipt.normalizedTextSha256");
     expect(result.html).toContain("data-export disabled");
@@ -230,5 +245,31 @@ describe("KOSHA exact promotion reviewer cockpit", () => {
       data.pdfAudit,
       data.lifecycleAudit,
     )).toThrow("kosha-reviewer-cockpit-pdf-audit-not-ready");
+  });
+
+  it("fails closed when title reconciliation provenance is inconsistent", async () => {
+    const module = await loadModule();
+    const data = fixture();
+    const candidates = data.template.candidateReviews as Array<Record<string, unknown>>;
+    candidates[0]!.titleReconciled = false;
+
+    expect(() => module.buildReviewerCockpit(
+      data.template,
+      data.pdfAudit,
+      data.lifecycleAudit,
+    )).toThrow("kosha-reviewer-cockpit-candidate-not-ready:D-C-1");
+  });
+
+  it("fails closed when the display title is not derived from the official current title", async () => {
+    const module = await loadModule();
+    const data = fixture();
+    const candidates = data.template.candidateReviews as Array<Record<string, unknown>>;
+    candidates[0]!.title = "legacy corpus display title";
+
+    expect(() => module.buildReviewerCockpit(
+      data.template,
+      data.pdfAudit,
+      data.lifecycleAudit,
+    )).toThrow("kosha-reviewer-cockpit-candidate-not-ready:D-C-1");
   });
 });

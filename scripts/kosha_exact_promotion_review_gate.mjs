@@ -484,6 +484,8 @@ export function buildKoshaExactPromotionReviewGate(options) {
     }
     const mismatches = [
       ["version", asString(candidate.version), asString(reviewRow.version)],
+      ["officialCurrentTitle", asString(candidate.officialCurrentTitle), asString(reviewRow.officialCurrentTitle)],
+      ["sourceTitle", asString(candidate.sourceTitle), asString(reviewRow.sourceTitle)],
       ["officialFileId", asString(candidate.officialFileId), asString(reviewRow.officialFileId)],
       ["bodySha256", asString(candidate.bodySha256), asString(reviewRow.bodySha256)],
       ["pdfSha256", asString(candidate.pdfSha256), asString(reviewRow.pdfSha256)],
@@ -644,12 +646,21 @@ export function buildKoshaExactPromotionReviewTemplate(options) {
     ],
     candidateReviews: candidates.map((candidate) => {
       const stableKey = asString(candidate.stableKey);
+      const title = asString(candidate.title);
+      const version = asString(candidate.version);
+      const officialCurrentTitle = asString(candidate.officialCurrentTitle);
+      const sourceTitle = asString(candidate.sourceTitle);
       const supportRow = reviewerSupportByStableKey.get(stableKey);
       const semanticGroups = supportRow && Array.isArray(supportRow.semanticGroups)
         ? supportRow.semanticGroups.filter(isRecord)
         : [];
       if (
         !supportRow ||
+        !version ||
+        !title ||
+        !officialCurrentTitle ||
+        !sourceTitle ||
+        title !== `${version} ${officialCurrentTitle}` ||
         asString(supportRow.version) !== asString(candidate.version) ||
         supportRow.contentRationaleMachineSupported !== true ||
         semanticGroups.length !== 3 ||
@@ -662,8 +673,11 @@ export function buildKoshaExactPromotionReviewTemplate(options) {
       return {
         order: typeof candidate.order === "number" && Number.isFinite(candidate.order) ? candidate.order : null,
         stableKey,
-        version: asString(candidate.version),
-        title: asString(candidate.title),
+        version,
+        title,
+        officialCurrentTitle,
+        sourceTitle,
+        titleReconciled: title !== sourceTitle,
         category: asString(candidate.category),
         publishedAt: asString(candidate.publishedAt),
         officialFileId: asString(candidate.officialFileId),

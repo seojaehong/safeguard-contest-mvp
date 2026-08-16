@@ -214,6 +214,10 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
   const candidates = candidateReviews.map((candidate, index) => {
     const stableKey = asString(candidate.stableKey);
     const version = asString(candidate.version);
+    const title = asString(candidate.title);
+    const officialCurrentTitle = asString(candidate.officialCurrentTitle);
+    const sourceTitle = asString(candidate.sourceTitle);
+    const titleReconciled = candidate.titleReconciled === true;
     const support = requireRecord(candidate.machineReviewerSupport, `support-${stableKey}`);
     const semanticGroups = requireRecords(support.semanticGroups, `semantic-groups-${stableKey}`);
     const requiredChecks = requireRecords(candidate.requiredReviewChecks, `required-checks-${stableKey}`);
@@ -222,6 +226,11 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
     if (
       !stableKey
       || !version
+      || !title
+      || !officialCurrentTitle
+      || !sourceTitle
+      || title !== `${version} ${officialCurrentTitle}`
+      || titleReconciled !== (title !== sourceTitle)
       || !pdfRow
       || !lifecycleRow
       || asString(pdfRow.version) !== version
@@ -240,7 +249,10 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
       order: index + 1,
       stableKey,
       version,
-      title: asString(candidate.title),
+      title,
+      officialCurrentTitle,
+      sourceTitle,
+      titleReconciled,
       category: asString(candidate.category),
       publishedAt: asString(candidate.publishedAt),
       officialFileId: asString(candidate.officialFileId),
@@ -302,11 +314,13 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
   const pageReceiptCount = candidates.reduce((candidateTotal, candidate) => (
     candidateTotal + candidate.semanticGroups.reduce((groupTotal, group) => groupTotal + group.pageReceipts.length, 0)
   ), 0);
+  const titleReconciledCandidateCount = candidates.filter((candidate) => candidate.titleReconciled).length;
   const payload = {
     schemaVersion: "safeclaw-kosha-exact-promotion-reviewer-cockpit/v1",
     candidateCount: candidates.length,
     semanticGroupCount: candidates.length * 3,
     pageReceiptCount,
+    titleReconciledCandidateCount,
     checklistInputCount,
     bodySnapshotId,
     bodySourceIdentitySha256,
@@ -354,9 +368,10 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
         </nav>
         <main class="evidence-pane" id="evidence-pane-${index}" data-mobile-pane="evidence">
           <header class="candidate-heading">
-            <div><span>${escapeHtml(candidate.category)}</span><h1>${escapeHtml(candidate.title)}</h1></div>
+            <div><span>공식 현재 제목 · ${escapeHtml(candidate.category)}</span><h1>${escapeHtml(candidate.officialCurrentTitle)}</h1></div>
             <a href="${escapeHtml(candidate.officialUrl)}" target="_blank" rel="noreferrer">공식 PDF 열기</a>
           </header>
+          <p class="title-provenance" data-title-provenance="${escapeHtml(candidate.stableKey)}"><strong>Corpus 원본 제목</strong><span>${escapeHtml(candidate.sourceTitle)}</span><em>${candidate.titleReconciled ? "표기 차이 있음" : "표기 동일"}</em></p>
           <dl class="identity-grid">
             <div><dt>현재 버전</dt><dd>${escapeHtml(candidate.version)}</dd></div>
             <div><dt>공식 게시일</dt><dd>${escapeHtml(candidate.publishedAt)}</dd></div>
@@ -369,6 +384,8 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
             <summary>파일·본문 식별자</summary>
             <dl>
               <div><dt>공식 파일 ID</dt><dd>${escapeHtml(candidate.officialFileId)}</dd></div>
+              <div><dt>공식 현재 제목</dt><dd>${escapeHtml(candidate.officialCurrentTitle)}</dd></div>
+              <div><dt>Corpus 원본 제목</dt><dd>${escapeHtml(candidate.sourceTitle)}</dd></div>
               <div><dt>본문 SHA-256</dt><dd>${escapeHtml(candidate.bodySha256)}</dd></div>
               <div><dt>PDF SHA-256</dt><dd>${escapeHtml(candidate.pdfSha256)}</dd></div>
             </dl>
@@ -406,7 +423,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
     .content{min-width:0;min-height:0}.candidate-panel{display:grid;grid-template-columns:minmax(0,1fr) 360px;height:100%;min-height:0}.candidate-panel[hidden]{display:none}.evidence-pane,.review-pane{overflow:auto;padding:18px 20px}.review-pane{background:#f8faf9;border-left:1px solid var(--line)}
     .candidate-heading{display:flex;gap:16px;align-items:flex-start}.candidate-heading div{min-width:0}.candidate-heading span{color:var(--accent);font-size:12px;font-weight:700}.candidate-heading h1{font-size:20px;line-height:1.35;margin:4px 0 0}.candidate-heading a{margin-left:auto;white-space:nowrap;color:#075e45;font-weight:700;font-size:13px}
     .identity-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);margin:16px 0 12px}.identity-grid div{padding:9px 10px;border-right:1px solid var(--line)}.identity-grid div:last-child{border:0}dt{font-size:11px;color:var(--muted)}dd{margin:3px 0 0;font-size:13px;font-weight:700}
-    .rationale{border-left:3px solid var(--accent);padding:8px 12px;background:var(--soft)}.rationale p{margin:4px 0 0;font-size:13px}.evidence-stack{display:grid;gap:8px;margin-top:12px}.evidence-group{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:10px 12px}
+    .title-provenance{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:start;margin:8px 0 0;padding:7px 9px;border:1px solid #d7b66f;background:#fff6df;font-size:12px}.title-provenance strong{color:#7a4300}.title-provenance span{overflow-wrap:anywhere}.title-provenance em{color:#704100;font-style:normal;font-weight:700;white-space:nowrap}.rationale{border-left:3px solid var(--accent);padding:8px 12px;background:var(--soft)}.rationale p{margin:4px 0 0;font-size:13px}.evidence-stack{display:grid;gap:8px;margin-top:12px}.evidence-group{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:10px 12px}
     .evidence-group header{display:flex;gap:10px;align-items:center;font-size:12px}.evidence-group header span{color:var(--muted)}.evidence-group p{font-size:13px;line-height:1.55;margin:8px 0 0;overflow-wrap:anywhere}.receipt-list{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:8px 0 0;padding:0}.receipt-list li{display:flex;align-items:center;gap:6px;min-height:28px;border:1px solid var(--line);background:var(--soft);padding:4px 7px;font-size:11px}.receipt-list code{font-family:Consolas,monospace}.receipt-list em{color:var(--warn);font-style:normal;font-weight:700}.hash-details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.hash-details summary{cursor:pointer;font-size:13px;font-weight:700}.hash-details dl{display:grid;gap:8px}.hash-details dd{font-family:Consolas,monospace;font-size:11px;overflow-wrap:anywhere}
     .review-pane>header{display:flex;justify-content:space-between;align-items:center}.review-pane>header span{font-size:12px;color:var(--muted);font-weight:700}.review-pane>header strong{font-size:13px;color:var(--warn)}.boundary-note{font-size:12px;color:#704100;background:#fff4dd;border:1px solid #e3bf75;padding:8px 10px;border-radius:6px}
     .check-stack{display:grid;gap:6px}.check-row,.human-confirm{display:grid;grid-template-columns:18px 1fr;gap:8px;align-items:start;border:1px solid var(--line);background:#fff;padding:9px;border-radius:6px;font-size:12px;line-height:1.4}.check-row input,.human-confirm input{margin:2px 0 0;accent-color:var(--accent)}
@@ -414,6 +431,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
     .footer-actions{display:flex;justify-content:flex-end;gap:8px;padding:8px 12px;background:#e8eeea;border-top:1px solid var(--line)}.footer-actions button{border:1px solid #295d48;padding:9px 12px;border-radius:5px;background:#fff;color:#184b38;font-weight:700;cursor:pointer}.footer-actions .primary{background:#087f5b;color:#fff;white-space:nowrap}.footer-actions button:disabled{cursor:not-allowed;opacity:.45}
     button:focus-visible,input:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #0b6eeb;outline-offset:2px}.mobile-mode{display:none}.status-live{color:#8ce0bc}.complete .candidate-button small{color:#087f5b}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
     @media(max-width:767px){.topbar{align-items:flex-start;padding:12px;height:68px}.metrics{display:none}.workspace{display:flex;flex-direction:column;height:auto;overflow:hidden}.candidate-rail{flex:none;border-right:0;border-bottom:1px solid var(--line);padding:8px;overflow-x:auto}.rail-label{display:none}.candidate-list{display:flex;width:max-content}.candidate-button{width:132px}.content{flex:1;min-height:0}.candidate-panel{display:flex;flex-direction:column;height:100%;min-height:0}.candidate-panel[hidden]{display:none}.mobile-mode{display:grid;grid-template-columns:1fr 1fr;flex:none;border-bottom:1px solid var(--line);background:#f7faf8;padding:6px 8px}.mobile-mode button{border:0;border-bottom:2px solid transparent;background:transparent;padding:8px;color:var(--muted);font-weight:700}.mobile-mode button[aria-selected="true"]{border-color:var(--accent);color:var(--accent)}.candidate-panel[data-mobile-view="evidence"] .review-pane,.candidate-panel[data-mobile-view="review"] .evidence-pane{display:none}.evidence-pane,.review-pane{flex:1;min-height:0;overflow:auto;padding:14px 12px}.review-pane{border-left:0}.identity-grid{grid-template-columns:repeat(2,1fr)}.identity-grid div:nth-child(2){border-right:0}.candidate-heading{display:block}.candidate-heading a{display:inline-block;margin-top:8px}.evidence-group{padding:8px 10px 0}.receipt-list{margin-top:6px}.receipt-list li{min-height:24px;padding:2px 6px}.footer-actions{padding:7px 8px}.footer-actions button{padding:8px 9px;font-size:13px}}
+    @media(max-width:767px){.evidence-pane{display:flex;flex-direction:column}.evidence-pane .candidate-heading{order:1}.evidence-pane .identity-grid{order:2}.evidence-pane .rationale{order:3}.evidence-pane .evidence-stack{order:4}.evidence-pane .title-provenance{order:5}.evidence-pane .hash-details{order:6}}
   </style>
 </head>
 <body>
@@ -436,12 +454,15 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
   <script>
     (() => {
       const payload = JSON.parse(document.getElementById("cockpit-data").textContent);
-      const storageKey = "safeclaw-kosha-reviewer-cockpit-v3";
-      const legacyStorageKeys = ["safeclaw-kosha-reviewer-cockpit-v2", "safeclaw-kosha-reviewer-cockpit-v1"];
-      const storageSchemaVersion = "safeclaw-kosha-reviewer-cockpit-state/v3";
+      const storageKey = "safeclaw-kosha-reviewer-cockpit-v4";
+      const legacyStorageKeys = ["safeclaw-kosha-reviewer-cockpit-v3", "safeclaw-kosha-reviewer-cockpit-v2", "safeclaw-kosha-reviewer-cockpit-v1"];
+      const storageSchemaVersion = "safeclaw-kosha-reviewer-cockpit-state/v4";
       const candidateFingerprint = JSON.stringify(payload.candidates.map((candidate) => ({
         stableKey: candidate.stableKey,
         version: candidate.version,
+        officialCurrentTitle: candidate.officialCurrentTitle,
+        sourceTitle: candidate.sourceTitle,
+        titleReconciled: candidate.titleReconciled,
         bodySha256: candidate.bodySha256,
         pdfSha256: candidate.pdfSha256,
         bodySnapshotId: payload.bodySnapshotId,
@@ -724,6 +745,7 @@ export function runReviewerCockpit(options) {
     candidateCount: outputPayload.candidateCount,
     semanticGroupCount: outputPayload.semanticGroupCount,
     pageReceiptCount: outputPayload.pageReceiptCount,
+    titleReconciledCandidateCount: outputPayload.titleReconciledCandidateCount,
     bodySnapshotId: outputPayload.bodySnapshotId,
     bodySourceIdentitySha256: outputPayload.bodySourceIdentitySha256,
     checklistInputCount: outputPayload.checklistInputCount,
@@ -739,6 +761,7 @@ export function runReviewerCockpit(options) {
       candidateBoundDraftStorage: true,
       evidencePageReceipts: true,
       draftBoundToCorpusIdentity: true,
+      titleProvenanceVisible: true,
       progressLiveRegion: true,
     },
     outputHtml: path.relative(options.rootDir, path.join(outputDir, "index.html")),
@@ -752,6 +775,7 @@ Verdict: \`${report.verdict}\`
 - Candidates: ${report.candidateCount}
 - Machine semantic groups: ${report.semanticGroupCount}
 - PDF page receipts: ${report.pageReceiptCount}
+- Reconciled title provenance rows: ${report.titleReconciledCandidateCount}
 - Required human inputs: ${report.checklistInputCount}
 - Initial completed inputs: ${report.initialCompletedInputCount}
 - Export initially disabled: ${report.exportInitiallyDisabled}
@@ -762,6 +786,7 @@ Verdict: \`${report.verdict}\`
 - Candidate-bound draft storage: ${report.accessibilityContract.candidateBoundDraftStorage}
 - Evidence page receipts: ${report.accessibilityContract.evidencePageReceipts}
 - Draft bound to corpus identity: ${report.accessibilityContract.draftBoundToCorpusIdentity}
+- Title provenance visible: ${report.accessibilityContract.titleProvenanceVisible}
 - Live progress region: ${report.accessibilityContract.progressLiveRegion}
 - HTML: \`${report.outputHtml}\`
 

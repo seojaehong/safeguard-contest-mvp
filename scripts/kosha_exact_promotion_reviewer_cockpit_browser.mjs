@@ -190,7 +190,7 @@ export async function runBrowserProbe(options) {
     await storagePage.reload({ waitUntil: "load" });
     const sameFingerprintPreserved = await storagePage.isChecked('[data-check="0:0"]');
     const staleEnvelopeResult = await storagePage.evaluate(() => {
-      const storageKey = "safeclaw-kosha-reviewer-cockpit-v3";
+      const storageKey = "safeclaw-kosha-reviewer-cockpit-v4";
       const stored = JSON.parse(localStorage.getItem(storageKey) || "null");
       if (!stored || !Array.isArray(stored.rows)) return false;
       const fingerprint = JSON.parse(stored.candidateFingerprint || "null");
@@ -198,6 +198,9 @@ export async function runBrowserProbe(options) {
       const sourceIdentityPresent = fingerprint.every((row) => (
         typeof row.bodySnapshotId === "string"
         && typeof row.bodySourceIdentitySha256 === "string"
+        && typeof row.officialCurrentTitle === "string"
+        && typeof row.sourceTitle === "string"
+        && typeof row.titleReconciled === "boolean"
         && typeof row.bodySha256 === "string"
         && typeof row.pdfSha256 === "string"
         && Array.isArray(row.evidenceReceipts)
@@ -213,6 +216,21 @@ export async function runBrowserProbe(options) {
     const staleFingerprintDiscarded = !(await storagePage.isChecked('[data-check="0:0"]'));
     const staleExportDisabled = await storagePage.isDisabled("[data-export]");
     const staleDraftNotice = (await storagePage.textContent("[data-progress-live]")) || "";
+    await storagePage.click('[data-candidate-button="2"]');
+    const titleReconciliationAccess = await storagePage.evaluate(() => {
+      const panel = document.querySelector('[data-candidate-panel="2"]');
+      const provenance = panel?.querySelector('[data-title-provenance="A-G-1"]');
+      const heading = panel?.querySelector(".candidate-heading h1");
+      return {
+        candidateVisible: panel instanceof HTMLElement && !panel.hidden,
+        officialCurrentTitleVisible: heading?.textContent?.includes("수직형 추락방망 설치 기술지원규정 포함") === true,
+        corpusSourceTitleVisible: provenance?.textContent?.includes("수직형 추락방망 설치") === true,
+        provenanceFullyVisible: provenance instanceof HTMLElement
+          && provenance.getBoundingClientRect().bottom <= panel?.querySelector(".evidence-pane")?.getBoundingClientRect().bottom,
+      };
+    });
+    const titleReconciliationScreenshot = path.join(outputDir, "desktop-title-provenance-1440x723.png");
+    await storagePage.screenshot({ path: titleReconciliationScreenshot, fullPage: false });
     draftStorageIdentity = {
       sameFingerprintPreserved,
       sourceIdentityPresent: staleEnvelopeResult,
@@ -221,6 +239,8 @@ export async function runBrowserProbe(options) {
       staleExportDisabled,
       staleDraftNotice,
     };
+    draftStorageIdentity.titleReconciliationAccess = titleReconciliationAccess;
+    draftStorageIdentity.titleReconciliationScreenshot = path.relative(options.rootDir, titleReconciliationScreenshot);
     await storagePage.close();
   } finally {
     await browser.close();
@@ -308,11 +328,18 @@ export async function runBrowserProbe(options) {
     && draftStorageIdentity?.staleExportDisabled
     && draftStorageIdentity?.staleDraftNotice.includes("후보 구성이 변경되어 이전 검토 초안을 복원하지 않았습니다."),
   );
+  const titleReconciliationPass = Boolean(
+    draftStorageIdentity?.titleReconciliationAccess?.candidateVisible
+    && draftStorageIdentity?.titleReconciliationAccess?.officialCurrentTitleVisible
+    && draftStorageIdentity?.titleReconciliationAccess?.corpusSourceTitleVisible
+    && draftStorageIdentity?.titleReconciliationAccess?.provenanceFullyVisible,
+  );
   const verdict = allRowsPass
     && desktopPass
     && mobilePass
     && responsiveTabPanelPass
     && draftStorageIdentityPass
+    && titleReconciliationPass
     ? "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY"
     : "RED_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY";
   const report = {
@@ -326,6 +353,7 @@ export async function runBrowserProbe(options) {
     mobilePass,
     responsiveTabPanelPass,
     draftStorageIdentityPass,
+    titleReconciliationPass,
     draftStorageIdentity,
     results,
     mutationBoundary: {
@@ -358,6 +386,7 @@ Verdict: \`${report.verdict}\`
 - Mobile evidence/review keyboard: ${[mobileEvidence, mobileReview].every((row) => row?.mobileKeyboardState?.reviewFocused === "0:review" && row?.mobileKeyboardState?.evidenceFocused === "0:evidence")}
 - Breakpoint-correct tabpanels: ${report.responsiveTabPanelPass}
 - Candidate-bound draft restore: ${report.draftStorageIdentityPass}
+- Official/corpus title provenance: ${report.titleReconciliationPass}
 - Evidence page receipts visible: ${results.every((row) => row.evidenceReceiptCount >= 24)}
 - Draft fingerprint contains source identity: ${report.draftStorageIdentity?.sourceIdentityPresent}
 - Live progress status: ${results.every((row) => row.progressLiveRole === "status" && row.progressLiveMode === "polite")}

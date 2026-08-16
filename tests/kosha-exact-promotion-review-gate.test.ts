@@ -10,6 +10,8 @@ type Candidate = {
   stableKey: string;
   version: string;
   title: string;
+  officialCurrentTitle: string;
+  sourceTitle: string;
   category: string;
   publishedAt: string;
   officialFileId: string;
@@ -97,6 +99,9 @@ type ReviewGateModule = {
       order: number | null;
       stableKey: string;
       title: string;
+      officialCurrentTitle: string;
+      sourceTitle: string;
+      titleReconciled: boolean;
       category: string;
       publishedAt: string;
       officialUrl: string;
@@ -162,11 +167,16 @@ function writeJson(root: string, relativePath: string, value: unknown): void {
 }
 
 function candidate(stableKey: string, index: number): Candidate {
+  const version = `${stableKey}-2026`;
+  const officialCurrentTitle = `${stableKey} official current title`;
+  const title = `${version} ${officialCurrentTitle}`;
   return {
     order: index,
     stableKey,
-    version: `${stableKey}-2026`,
-    title: `KOSHA guide ${stableKey}`,
+    version,
+    title,
+    officialCurrentTitle,
+    sourceTitle: index === 1 ? `${title} corpus source` : title,
     category: "KOSHA Guide",
     publishedAt: "2026-01-01",
     officialFileId: `FILE-${index}`,
@@ -204,6 +214,8 @@ function writeFixtureRoot(): { root: string; packetPath: string; reviewPath: str
     candidateReviews: candidates.map((row) => ({
       stableKey: row.stableKey,
       version: row.version,
+      officialCurrentTitle: row.officialCurrentTitle,
+      sourceTitle: row.sourceTitle,
       officialFileId: row.officialFileId,
       bodySha256: row.bodySha256,
       pdfSha256: row.pdfSha256,
@@ -536,6 +548,27 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.exactPromotionPerformed).toBe(false);
   });
 
+  it("fails closed when exported review title provenance does not match the packet", async () => {
+    const { root, packetPath, reviewPath } = writeFixtureRoot();
+    const review = JSON.parse(fs.readFileSync(path.join(root, reviewPath), "utf8")) as {
+      candidateReviews: Array<{ stableKey: string; officialCurrentTitle: string; sourceTitle: string }>;
+    };
+    const target = review.candidateReviews.find((row) => row.stableKey === "D-C-10");
+    if (!target) throw new Error("fixture-missing-d-c-10");
+    target.officialCurrentTitle = "forged official title";
+    target.sourceTitle = "forged corpus title";
+    writeJson(root, reviewPath, review);
+
+    const module = await loadReviewGateModule();
+    const report = module.buildKoshaExactPromotionReviewGate({ rootDir: root, packetPath, reviewPath });
+
+    expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
+    expect(report.failures).toContain("review-metadata-mismatch:D-C-10:officialCurrentTitle");
+    expect(report.failures).toContain("review-metadata-mismatch:D-C-10:sourceTitle");
+    expect(report.failureSummary.metadataMismatches).toBe(2);
+    expect(report.exactPromotionPerformed).toBe(false);
+  });
+
   it("fails closed when reviewedAt is not an ISO timestamp", async () => {
     const { root, packetPath, reviewPath } = writeFixtureRoot();
     const review = JSON.parse(fs.readFileSync(path.join(root, reviewPath), "utf8")) as {
@@ -791,7 +824,11 @@ describe("KOSHA exact promotion review gate", () => {
     expect(template.bodySourceIdentitySha256).toBe("c".repeat(64));
     expect(template.candidateReviews).toHaveLength(2);
     expect(template.candidateReviews[0].order).toBe(1);
-    expect(template.candidateReviews[0].title).toBe("KOSHA guide D-C-10");
+    expect(template.candidateReviews[0].title).toBe("D-C-10-2026 D-C-10 official current title");
+    expect(template.candidateReviews[0].officialCurrentTitle).toBe("D-C-10 official current title");
+    expect(template.candidateReviews[0].sourceTitle).toBe("D-C-10-2026 D-C-10 official current title corpus source");
+    expect(template.candidateReviews[0].titleReconciled).toBe(true);
+    expect(template.candidateReviews[1].titleReconciled).toBe(false);
     expect(template.candidateReviews[0].category).toBe("KOSHA Guide");
     expect(template.candidateReviews[0].publishedAt).toBe("2026-01-01");
     expect(template.candidateReviews[0].officialUrl).toBe("https://kosha.example.test/D-C-10.pdf");
@@ -855,5 +892,21 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.failures).toContain("missing-human-confirmation:D-C-10");
     expect(report.failures.some((failure) => failure.startsWith("unconfirmed-required-check:D-C-10"))).toBe(true);
     expect(report.exactRegistryWriteArtifactCreated).toBe(false);
+  });
+
+  it("fails closed when packet display title is not version plus official current title", async () => {
+    const { root, packetPath } = writeFixtureRoot();
+    const packet = JSON.parse(fs.readFileSync(path.join(root, packetPath), "utf8")) as {
+      candidates: Array<{ stableKey: string; title: string }>;
+    };
+    const target = packet.candidates.find((row) => row.stableKey === "D-C-10");
+    if (!target) throw new Error("fixture-missing-d-c-10");
+    target.title = "legacy corpus display title";
+    writeJson(root, packetPath, packet);
+
+    const module = await loadReviewGateModule();
+    expect(() => module.buildKoshaExactPromotionReviewTemplate({ rootDir: root, packetPath })).toThrow(
+      "kosha-review-template-reviewer-support-candidate-not-ready:D-C-10",
+    );
   });
 });
