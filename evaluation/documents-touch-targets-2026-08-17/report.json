@@ -1,0 +1,187 @@
+{
+  "schemaVersion": "safeclaw-documents-touch-targets/v1",
+  "checkedAt": "2026-08-16T15:52:07.844Z",
+  "mode": "current-source-local-production",
+  "baseUrl": "http://127.0.0.1:3083",
+  "sourceHead": "1a4ab653e7beac74abe536bdbd66125af3a19043",
+  "productionBuild": null,
+  "sourceHeadMatchesProduction": false,
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_DOCUMENT_TOUCH_TARGETS",
+  "total": 4,
+  "pass": 4,
+  "fail": 0,
+  "acceptanceContract": {
+    "sectionActionMinimumHeight": 44,
+    "riskRowSelectorMinimumHeight": 44,
+    "reviewCloseMinimumWidth": 44,
+    "reviewCloseMinimumHeight": 44,
+    "bodyViewportAllowancePx": 8,
+    "coreDocumentCount": 3,
+    "supportingDocumentsCollapsedByDefault": true,
+    "shellInternalScrollRequired": true
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "results": [
+    {
+      "theme": "day",
+      "label": "desktop-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "cockpit": {
+        "viewportWidth": 1440,
+        "viewportHeight": 723,
+        "bodyHeight": 723,
+        "horizontalOverflow": false,
+        "shellTop": 205,
+        "shellBottom": 653,
+        "shellRatio": 1.75,
+        "shellOverflowY": "auto",
+        "actionHeights": [
+          44,
+          44
+        ],
+        "selectorHeights": [
+          44,
+          44,
+          44
+        ],
+        "coreButtonCount": 3,
+        "supportingDocumentsOpen": false
+      },
+      "reviewDialog": {
+        "top": 12,
+        "bottom": 711,
+        "left": 130,
+        "right": 1310,
+        "closeWidth": 44,
+        "closeHeight": 44,
+        "horizontalOverflow": false
+      },
+      "screenshot": "day-desktop-1440x723.png",
+      "verdict": "PASS"
+    },
+    {
+      "theme": "night",
+      "label": "desktop-1440x723",
+      "width": 1440,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "cockpit": {
+        "viewportWidth": 1440,
+        "viewportHeight": 723,
+        "bodyHeight": 723,
+        "horizontalOverflow": false,
+        "shellTop": 205,
+        "shellBottom": 653,
+        "shellRatio": 1.75,
+        "shellOverflowY": "auto",
+        "actionHeights": [
+          44,
+          44
+        ],
+        "selectorHeights": [
+          44,
+          44,
+          44
+        ],
+        "coreButtonCount": 3,
+        "supportingDocumentsOpen": false
+      },
+      "reviewDialog": {
+        "top": 12,
+        "bottom": 711,
+        "left": 130,
+        "right": 1310,
+        "closeWidth": 44,
+        "closeHeight": 44,
+        "horizontalOverflow": false
+      },
+      "screenshot": "night-desktop-1440x723.png",
+      "verdict": "PASS"
+    },
+    {
+      "theme": "day",
+      "label": "mobile-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=day",
+      "cockpit": {
+        "viewportWidth": 390,
+        "viewportHeight": 723,
+        "bodyHeight": 723,
+        "horizontalOverflow": false,
+        "shellTop": 320,
+        "shellBottom": 672,
+        "shellRatio": 2.07,
+        "shellOverflowY": "auto",
+        "actionHeights": [
+          44,
+          44
+        ],
+        "selectorHeights": [
+          44,
+          44,
+          44
+        ],
+        "coreButtonCount": 3,
+        "supportingDocumentsOpen": false
+      },
+      "reviewDialog": {
+        "top": 8,
+        "bottom": 715,
+        "left": 8,
+        "right": 382,
+        "closeWidth": 44,
+        "closeHeight": 44,
+        "horizontalOverflow": false
+      },
+      "screenshot": "day-mobile-390x723.png",
+      "verdict": "PASS"
+    },
+    {
+      "theme": "night",
+      "label": "mobile-390x723",
+      "width": 390,
+      "height": 723,
+      "route": "/documents?theme=night",
+      "cockpit": {
+        "viewportWidth": 390,
+        "viewportHeight": 723,
+        "bodyHeight": 723,
+        "horizontalOverflow": false,
+        "shellTop": 320,
+        "shellBottom": 672,
+        "shellRatio": 2.07,
+        "shellOverflowY": "auto",
+        "actionHeights": [
+          44,
+          44
+        ],
+        "selectorHeights": [
+          44,
+          44,
+          44
+        ],
+        "coreButtonCount": 3,
+        "supportingDocumentsOpen": false
+      },
+      "reviewDialog": {
+        "top": 8,
+        "bottom": 715,
+        "left": 8,
+        "right": 382,
+        "closeWidth": 44,
+        "closeHeight": 44,
+        "horizontalOverflow": false
+      },
+      "screenshot": "night-mobile-390x723.png",
+      "verdict": "PASS"
+    }
+  ]
+}
