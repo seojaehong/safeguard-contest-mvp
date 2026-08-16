@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { createClient, type Session } from "@supabase/supabase-js";
 import { CitationList } from "@/components/CitationList";
 import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
@@ -1114,7 +1114,12 @@ function DocumentEditorialReviewDialog({
     if (!dialog) return;
     if (open) {
       setActiveDocumentKey(selectedDocumentKey);
-      if (!dialog.open) dialog.showModal();
+      if (!dialog.open) {
+        dialog.showModal();
+        window.requestAnimationFrame(() => {
+          dialog.querySelector<HTMLButtonElement>(".safeclaw-document-review-close")?.focus();
+        });
+      }
       return;
     }
     if (dialog.open) dialog.close();
@@ -1165,12 +1170,34 @@ function DocumentEditorialReviewDialog({
     }));
   }
 
+  function moveDocumentFocus(event: KeyboardEvent<HTMLButtonElement>, index: number) {
+    let nextIndex = index;
+    if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+      nextIndex = (index + 1) % launchDocuments.length;
+    } else if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
+      nextIndex = (index - 1 + launchDocuments.length) % launchDocuments.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = launchDocuments.length - 1;
+    } else {
+      return;
+    }
+    event.preventDefault();
+    const nextDocument = launchDocuments[nextIndex];
+    setActiveDocumentKey(nextDocument.key);
+    dialogRef.current
+      ?.querySelector<HTMLButtonElement>(`[data-review-document-key="${nextDocument.key}"]`)
+      ?.focus();
+  }
+
   return (
     <dialog
       ref={dialogRef}
       className="safeclaw-document-review-dialog"
       data-testid="document-editorial-review-dialog"
       aria-labelledby="document-editorial-review-title"
+      aria-describedby="document-editorial-review-description"
       onCancel={(event) => {
         event.preventDefault();
         onClose();
@@ -1181,9 +1208,9 @@ function DocumentEditorialReviewDialog({
         <div>
           <span>12종 문서 · 사람 검토</span>
           <h2 id="document-editorial-review-title">문서별 최종 문구 확인</h2>
-          <p>자동 검사는 준비 상태를 보조합니다. 최종 완료는 사람이 각 문서를 읽고 직접 표시합니다.</p>
+          <p id="document-editorial-review-description">자동 검사는 준비 상태를 보조합니다. 최종 완료는 사람이 각 문서를 읽고 직접 표시합니다.</p>
         </div>
-        <div className="safeclaw-document-review-progress" aria-label={`사람 검토 ${completedDocumentCount}/${launchDocuments.length}종 완료`}>
+        <div className="safeclaw-document-review-progress" aria-live="polite" aria-label={`사람 검토 ${completedDocumentCount}/${launchDocuments.length}종 완료`}>
           <strong>{completedDocumentCount}/{launchDocuments.length}</strong>
           <span>이 브라우저에 저장</span>
         </div>
@@ -1191,7 +1218,7 @@ function DocumentEditorialReviewDialog({
       </header>
 
       <div className="safeclaw-document-review-workbench">
-        <nav className="safeclaw-document-review-nav" aria-label="검토 문서 선택">
+        <nav className="safeclaw-document-review-nav" role="tablist" aria-label="검토 문서 선택" aria-orientation="vertical">
           {launchDocuments.map((document, index) => {
             const entry = reviewState[document.key];
             const complete = editorialReviewIsCurrent(data, document.key, entry);
@@ -1201,9 +1228,14 @@ function DocumentEditorialReviewDialog({
               <button
                 key={document.key}
                 type="button"
+                id={`document-editorial-review-tab-${document.key}`}
+                role="tab"
                 data-review-document-key={document.key}
-                aria-pressed={activeDocument.key === document.key}
+                aria-selected={activeDocument.key === document.key}
+                aria-controls="document-editorial-review-panel"
+                tabIndex={activeDocument.key === document.key ? 0 : -1}
                 onClick={() => setActiveDocumentKey(document.key)}
+                onKeyDown={(event) => moveDocumentFocus(event, index)}
               >
                 <small>{String(index + 1).padStart(2, "0")} · {document.tier}</small>
                 <strong>{document.title}</strong>
@@ -1215,7 +1247,13 @@ function DocumentEditorialReviewDialog({
           })}
         </nav>
 
-        <section className="safeclaw-document-review-copy" aria-label={`${activeDocument.title} 검토 원문`}>
+        <section
+          id="document-editorial-review-panel"
+          className="safeclaw-document-review-copy"
+          role="tabpanel"
+          aria-labelledby={`document-editorial-review-tab-${activeDocument.key}`}
+          tabIndex={0}
+        >
           <header>
             <div>
               <span>{activeDocument.tier} · {activeDocument.owner}</span>

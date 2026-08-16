@@ -260,6 +260,55 @@ describe("documents editor layout", () => {
     }
   }, 120_000);
 
+  it("supports keyboard and screen-reader navigation in the document review cockpit", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const context = await browser.newContext({ viewport: { width: 1440, height: 723 } });
+    const page = await context.newPage();
+    await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+    await page.waitForFunction(() => (
+      document.querySelector(".safeclaw-module-shell")?.getAttribute("data-ready") === "true"
+    ));
+
+    const launch = page.getByTestId("document-editorial-review-launch");
+    await launch.focus();
+    await launch.click();
+    const dialog = page.getByTestId("document-editorial-review-dialog");
+    await dialog.waitFor({ state: "visible" });
+    await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute("aria-label")))
+      .toBe("문서 사람 검토 닫기");
+    expect(await dialog.getAttribute("aria-describedby")).toBe("document-editorial-review-description");
+    expect(await dialog.locator("#document-editorial-review-description").count()).toBe(1);
+    expect(await dialog.getByLabel(/사람 검토 0\/12종 완료/u).getAttribute("aria-live")).toBe("polite");
+
+    const tablist = dialog.getByRole("tablist", { name: "검토 문서 선택" });
+    expect(await tablist.getAttribute("aria-orientation")).toBe("vertical");
+    const tabs = tablist.getByRole("tab");
+    expect(await tabs.count()).toBe(12);
+    expect(await tabs.nth(0).getAttribute("aria-selected")).toBe("true");
+    expect(await tabs.nth(0).getAttribute("tabindex")).toBe("0");
+    expect(await tabs.nth(1).getAttribute("tabindex")).toBe("-1");
+
+    await tabs.nth(0).focus();
+    await page.keyboard.press("ArrowRight");
+    await expect.poll(() => tabs.nth(1).getAttribute("aria-selected")).toBe("true");
+    await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute("data-review-document-key")))
+      .toBe(await tabs.nth(1).getAttribute("data-review-document-key"));
+    const secondTabId = await tabs.nth(1).getAttribute("id");
+    expect(await dialog.getByRole("tabpanel").getAttribute("aria-labelledby")).toBe(secondTabId);
+
+    await page.keyboard.press("End");
+    await expect.poll(() => tabs.nth(11).getAttribute("aria-selected")).toBe("true");
+    await page.keyboard.press("Home");
+    await expect.poll(() => tabs.nth(0).getAttribute("aria-selected")).toBe("true");
+
+    await page.keyboard.press("Escape");
+    await dialog.waitFor({ state: "hidden" });
+    await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute("data-testid")))
+      .toBe("document-editorial-review-launch");
+
+    await context.close();
+  }, 90_000);
+
   it("bounds the default documents route editor as a viewport-first cockpit", async () => {
     if (!browser) throw new Error("Browser was not started");
 

@@ -35,9 +35,61 @@ try {
       if (new URL(request.url()).pathname.startsWith("/api/")) apiRequests.push(request.url());
     });
 
-    await page.getByTestId("document-editorial-review-launch").click();
+    const launch = page.getByTestId("document-editorial-review-launch");
+    await launch.click();
     const dialog = page.getByTestId("document-editorial-review-dialog");
     await dialog.waitFor({ state: "visible" });
+
+    await page.waitForFunction(() => (
+      document.activeElement?.getAttribute("aria-label") === "문서 사람 검토 닫기"
+    ));
+    const tabs = dialog.getByRole("tab");
+    const initialAccessibility = await dialog.evaluate((element) => ({
+      initialFocusLabel: document.activeElement?.getAttribute("aria-label") || "",
+      describedBy: element.getAttribute("aria-describedby") || "",
+      liveProgress: element.querySelector(".safeclaw-document-review-progress")?.getAttribute("aria-live") || "",
+      tablistOrientation: element.querySelector('[role="tablist"]')?.getAttribute("aria-orientation") || "",
+      tabCount: element.querySelectorAll('[role="tab"]').length,
+      selectedTabCount: element.querySelectorAll('[role="tab"][aria-selected="true"]').length,
+      tabbableTabCount: Array.from(element.querySelectorAll('[role="tab"]'))
+        .filter((item) => item.getAttribute("tabindex") === "0").length
+    }));
+    await tabs.first().focus();
+    await page.keyboard.press("ArrowRight");
+    await page.waitForFunction(() => (
+      document.querySelector('[role="tab"][aria-selected="true"]')
+        ?.getAttribute("data-review-document-key") === "tbmBriefing"
+    ));
+    const arrowNavigation = await dialog.evaluate((element) => {
+      const selected = element.querySelector('[role="tab"][aria-selected="true"]');
+      const panel = element.querySelector('[role="tabpanel"]');
+      return {
+        selectedKey: selected?.getAttribute("data-review-document-key") || "",
+        selectedHasFocus: document.activeElement === selected,
+        panelLabelledBy: panel?.getAttribute("aria-labelledby") || "",
+        selectedTabId: selected?.id || ""
+      };
+    });
+    await page.keyboard.press("Home");
+    await page.waitForFunction(() => (
+      document.querySelector('[role="tab"][aria-selected="true"]')
+        ?.getAttribute("data-review-document-key") === "riskAssessmentDraft"
+    ));
+    await page.keyboard.press("Escape");
+    await dialog.waitFor({ state: "hidden" });
+    const escapeRestoresLaunchFocus = await page.evaluate(() => (
+      document.activeElement?.getAttribute("data-testid") === "document-editorial-review-launch"
+    ));
+    await launch.click();
+    await dialog.waitFor({ state: "visible" });
+
+    const accessibility = {
+      ...initialAccessibility,
+      arrowNavigationPass: arrowNavigation.selectedKey === "tbmBriefing"
+        && arrowNavigation.selectedHasFocus,
+      tabpanelLinked: arrowNavigation.panelLabelledBy === arrowNavigation.selectedTabId,
+      escapeRestoresLaunchFocus
+    };
 
     const beforeCompletion = await dialog.evaluate((element) => {
       const rect = element.getBoundingClientRect();
@@ -100,6 +152,16 @@ try {
       && beforeCompletion.selectedDocumentTitle === "위험성평가표"
       && beforeCompletion.copyOverflow === "auto"
       && beforeCompletion.checklistOverflow === "auto"
+      && accessibility.initialFocusLabel === "문서 사람 검토 닫기"
+      && accessibility.describedBy === "document-editorial-review-description"
+      && accessibility.liveProgress === "polite"
+      && accessibility.tablistOrientation === "vertical"
+      && accessibility.tabCount === 12
+      && accessibility.selectedTabCount === 1
+      && accessibility.tabbableTabCount === 1
+      && accessibility.arrowNavigationPass
+      && accessibility.tabpanelLinked
+      && accessibility.escapeRestoresLaunchFocus
       && afterCompletion.currentWorkpack === baseline.currentWorkpack
       && afterCompletion.reviewStorageKeys.length === 1
       && afterCompletion.dialogScrollTop === 0
@@ -112,6 +174,7 @@ try {
       route: `/documents?theme=${probe.theme}`,
       state: "editorial-review-open-one-local-check-complete",
       beforeCompletion,
+      accessibility,
       afterCompletion: {
         currentWorkpackUnchanged: afterCompletion.currentWorkpack === baseline.currentWorkpack,
         reviewStorageKeyCount: afterCompletion.reviewStorageKeys.length,
@@ -162,7 +225,10 @@ const report = {
     longCopyContained: true,
     reviewStateStoredSeparately: true,
     editedTextInvalidatesCompletion: true,
-    automaticReviewCannotClaimHumanCompletion: true
+    automaticReviewCannotClaimHumanCompletion: true,
+    keyboardRovingTabNavigation: true,
+    screenReaderTabPanelContract: true,
+    escapeRestoresLaunchFocus: true
   },
   reviewBoundary: {
     automatedInteractionOnly: true,
@@ -180,7 +246,7 @@ const report = {
     exactSavedShareVerdict: "MISSING_EVIDENCE"
   },
   verification: {
-    documentsEditorLayout: { filesPassed: 1, testsPassed: 39, status: "pass" },
+    documentsEditorLayout: { filesPassed: 1, testsPassed: 40, status: "pass" },
     focusedEditorialReview: { filesPassed: 1, testsPassed: 1, status: "pass" },
     typecheck: { status: "pass" },
     build: { status: "pass", nextVersion: "15.5.22", staticPages: 28 }
@@ -190,9 +256,9 @@ const report = {
 
 await writeFile(path.join(outputDir, "report.json"), `${JSON.stringify(report, null, 2)}\n`, "utf8");
 const rows = results.map((result) => (
-  `| ${result.theme} | ${result.label} | ${result.beforeCompletion.bodyHeight}/${result.height} | ${result.beforeCompletion.workbenchColumns} | ${result.beforeCompletion.reviewDocumentCount} | ${result.beforeCompletion.checkboxCount} | ${result.afterCompletion.currentWorkpackUnchanged ? "yes" : "no"} | ${result.afterCompletion.apiRequestCount} | ${result.verdict} |`
+  `| ${result.theme} | ${result.label} | ${result.beforeCompletion.bodyHeight}/${result.height} | ${result.beforeCompletion.workbenchColumns} | ${result.beforeCompletion.reviewDocumentCount} | ${result.beforeCompletion.checkboxCount} | ${result.accessibility.arrowNavigationPass ? "yes" : "no"} | ${result.accessibility.escapeRestoresLaunchFocus ? "yes" : "no"} | ${result.afterCompletion.currentWorkpackUnchanged ? "yes" : "no"} | ${result.afterCompletion.apiRequestCount} | ${result.verdict} |`
 )).join("\n");
-await writeFile(path.join(outputDir, "report.md"), `# Document Editorial Review Cockpit Evidence\n\n- Verdict: \`${report.verdict}\`\n- Source: \`${sourceHead}\`\n- Production: \`${productionBuild?.commitSha || "local"}\`\n- Scope: local-only 12-document human review cockpit geometry and state isolation\n- Verification: Documents browser 39/39, focused review flow 1/1, strict typecheck PASS, Next 15.5.22 build PASS (28 static pages)\n- Human boundary: this automated probe does not complete human wording review or create approval evidence.\n- Mutation boundary: no DB/provider/Share/vector/wiki/KOSHA registry mutation; exact saved Share remains \`MISSING_EVIDENCE\`.\n\n| Theme | Viewport | Body/Viewport | Zones | Documents | Checks | Current workpack unchanged | API calls | Verdict |\n|---|---|---:|---:|---:|---:|---|---:|---|\n${rows}\n\nThe default Documents page remains viewport-contained. Long document text and the checklist are exposed only inside the modal workbench's local scroll regions.\n`, "utf8");
+await writeFile(path.join(outputDir, "report.md"), `# Document Editorial Review Cockpit Evidence\n\n- Verdict: \`${report.verdict}\`\n- Source: \`${sourceHead}\`\n- Production: \`${productionBuild?.commitSha || "local"}\`\n- Scope: local-only 12-document human review cockpit geometry, keyboard access, and state isolation\n- Verification: Documents browser 40/40, focused review flow 1/1, strict typecheck PASS, Next 15.5.22 build PASS (28 static pages)\n- Human boundary: this automated probe does not complete human wording review or create approval evidence.\n- Mutation boundary: no DB/provider/Share/vector/wiki/KOSHA registry mutation; exact saved Share remains \`MISSING_EVIDENCE\`.\n\n| Theme | Viewport | Body/Viewport | Zones | Documents | Checks | Arrow navigation | Escape focus restore | Current workpack unchanged | API calls | Verdict |\n|---|---|---:|---:|---:|---:|---|---|---|---:|---|\n${rows}\n\nThe default Documents page remains viewport-contained. Long document text and the checklist are exposed only inside the modal workbench's local scroll regions. The dialog uses a roving tab contract, a labelled tabpanel, and deterministic focus entry and restoration.\n`, "utf8");
 
 console.log(JSON.stringify({ verdict: report.verdict, total: report.total, pass: report.pass, fail: report.fail }, null, 2));
 if (report.fail > 0) process.exitCode = 1;

@@ -19812,7 +19812,7 @@ body:has(.safeclaw-landing) :is(
   cursor: pointer;
 }
 
-.safeclaw-document-review-nav button[aria-pressed="true"] {
+.safeclaw-document-review-nav button[aria-selected="true"] {
   border-color: var(--workspace-accent);
   background: var(--workspace-surface-1);
 }
