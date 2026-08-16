@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-16T08:42:23.907Z",
-  "sourceSha": "30cc7ed2249cb29c040500883c4ef7c46b6e9e75",
+  "generatedAt": "2026-08-16T08:46:00.774Z",
+  "sourceSha": "0f7586f036562888a57d713d3d0463adaddee723",
   "overall": "open",
   "gates": [
     {
@@ -582,7 +582,7 @@
       "state": "approval_gated",
       "label": "Supabase RLS launch isolation",
       "evidencePath": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Read-only RLS approval preflight passed at source SHA 30cc7ed2249cb29c040500883c4ef7c46b6e9e75, but live RLS catalog and tenant A/B isolation are not proven.",
+      "detail": "Read-only RLS approval preflight passed at source SHA 0f7586f036562888a57d713d3d0463adaddee723, but live RLS catalog and tenant A/B isolation are not proven.",
       "nextActions": [
         "Approve authoritative project and credential provenance.",
         "Run read-only live catalog capture.",
@@ -594,7 +594,7 @@
       "state": "approval_gated",
       "label": "LLM Wiki publication",
       "evidencePath": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 30cc7ed2249cb29c040500883c4ef7c46b6e9e75; Hermes selected-only reviewer workbench is live 8/8 with candidates/selected/body 3/1/1 and desktop/mobile columns 2/1, while the evidence inspector is live 8/8 with item budget/fixture 20/5, desktop evidence columns 2, mobile mounted panes 1, official HTTPS links 3, and private raw identity exposed=false. Exact saved Share remains MISSING_EVIDENCE; Wiki/RLS/provider persistence remain APPROVAL_GATED.",
+      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 0f7586f036562888a57d713d3d0463adaddee723; Hermes selected-only reviewer workbench is live 8/8 with candidates/selected/body 3/1/1 and desktop/mobile columns 2/1, while the evidence inspector is live 8/8 with item budget/fixture 20/5, desktop evidence columns 2, mobile mounted panes 1, official HTTPS links 3, and private raw identity exposed=false. Exact saved Share remains MISSING_EVIDENCE; Wiki/RLS/provider persistence remain APPROVAL_GATED.",
       "nextActions": [
         "Approve final DDL, append-only ledger, graph pointer, and RPC threat model.",
         "Run approved publication canary in an isolated project.",

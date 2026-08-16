@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-16T08:42:24.892Z",
-  "head": "30cc7ed2249cb29c040500883c4ef7c46b6e9e75",
+  "generatedAt": "2026-08-16T08:46:02.118Z",
+  "head": "0f7586f036562888a57d713d3d0463adaddee723",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "6e65d4b66eaa9ac5a10f321c0406d10129bac9fb",
+    "commitSha": "0f7586f036562888a57d713d3d0463adaddee723",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-2uizj1jwc-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-aztii8gid-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -363,13 +363,13 @@
       "id": "supabase_rls_launch_isolation",
       "state": "approval_gated",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Read-only RLS approval preflight passed at source SHA 30cc7ed2249cb29c040500883c4ef7c46b6e9e75, but live RLS catalog and tenant A/B isolation are not proven."
+      "detail": "Read-only RLS approval preflight passed at source SHA 0f7586f036562888a57d713d3d0463adaddee723, but live RLS catalog and tenant A/B isolation are not proven."
     },
     {
       "id": "llm_wiki_publication",
       "state": "approval_gated",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 30cc7ed2249cb29c040500883c4ef7c46b6e9e75; Hermes selected-only reviewer workbench is live 8/8 with candidates/selected/body 3/1/1 and desktop/mobile columns 2/1, while the evidence inspector is live 8/8 with item budget/fixture 20/5, desktop evidence columns 2, mobile mounted panes 1, official HTTPS links 3, and private raw identity exposed=false. Exact saved Share remains MISSING_EVIDENCE; Wiki/RLS/provider persistence remain APPROVAL_GATED."
+      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 0f7586f036562888a57d713d3d0463adaddee723; Hermes selected-only reviewer workbench is live 8/8 with candidates/selected/body 3/1/1 and desktop/mobile columns 2/1, while the evidence inspector is live 8/8 with item budget/fixture 20/5, desktop evidence columns 2, mobile mounted panes 1, official HTTPS links 3, and private raw identity exposed=false. Exact saved Share remains MISSING_EVIDENCE; Wiki/RLS/provider persistence remain APPROVAL_GATED."
     },
     {
       "id": "sif_embedding_runtime",
@@ -1207,10 +1207,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "30cc7ed2249cb29c040500883c4ef7c46b6e9e75",
+      "sourceCommit": "0f7586f036562888a57d713d3d0463adaddee723",
       "sourceStatus": "exact",
-      "productionCommit": "30cc7ed2249cb29c040500883c4ef7c46b6e9e75",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "0f7586f036562888a57d713d3d0463adaddee723",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -1583,7 +1583,7 @@
     {
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
-      "sourceCommit": "30cc7ed2249cb29c040500883c4ef7c46b6e9e75",
+      "sourceCommit": "0f7586f036562888a57d713d3d0463adaddee723",
       "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
