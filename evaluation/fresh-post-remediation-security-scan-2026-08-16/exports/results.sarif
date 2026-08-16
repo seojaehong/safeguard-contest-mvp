@@ -1,0 +1,939 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "automationDetails": {
+        "id": "cbcef1c0-e5ae-4e1a-9141-7451868ecb51"
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "toolExecutionNotifications": [
+            {
+              "level": "warning",
+              "message": {
+                "text": "Current provider-persistence policy makes it unreachable."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "No application references or explicit public grants establish a path."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Transport byte limits materially bound the parser surface."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "No strong attacker-controlled path under fixed trusted upstream configuration."
+              }
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "codexSecurityCoverageCompleteness": "partial",
+        "codexSecuritySchemaVersion": "1.0",
+        "codexSecurityTargetKind": "git_revision"
+      },
+      "results": [
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "evidence"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 183,
+                  "startLine": 183
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Owner FOR ALL access permits direct writes to provider receipt fields."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:73a2575b9d683053249ef901dc62ede54f3fa18501513839867ab3a0117afff3"
+          },
+          "properties": {
+            "category": "Application security",
+            "confidence": "high",
+            "findingId": "csf_c8f613bc9f209ca00e3e5d48",
+            "occurrenceId": "occ_39955b02dffe14c0907de7dd",
+            "severity": "medium"
+          },
+          "ruleId": "integrity.provider-receipt-forgery",
+          "ruleIndex": 5
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "evidence"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 183,
+                  "startLine": 183
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "dispatch_logs RLS treats null organization as accessible to every authenticated user."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:640c7ad6179f4f7c4de8cb580079948a9bfed4e62a77cda6fc1cfcaa8ab9d3ad"
+          },
+          "properties": {
+            "category": "Application security",
+            "confidence": "high",
+            "findingId": "csf_60deee7fdd7bde23f168187a",
+            "occurrenceId": "occ_434471f4976177defb288a47",
+            "severity": "medium"
+          },
+          "ruleId": "authorization.null-tenant-wildcard",
+          "ruleIndex": 2
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/vertex/client.ts"
+                },
+                "region": {
+                  "endLine": 85,
+                  "startLine": 69
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/photo-vision-analysis.ts"
+                },
+                "region": {
+                  "endLine": 673,
+                  "startLine": 654
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/safety-reference-catalog.ts"
+                },
+                "region": {
+                  "endLine": 3006,
+                  "startLine": 2984
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/public-distributed-rate-limit.ts"
+                },
+                "region": {
+                  "endLine": 157,
+                  "startLine": 135
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/public-distributed-rate-limit.ts"
+                },
+                "region": {
+                  "endLine": 297,
+                  "startLine": 278
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Optional provider clients parse complete responses without byte ceilings."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:9fcc68afc6f7399cbd3b2df391e9e1e32f26c1b1fa95cc456478d788ccb5da63"
+          },
+          "properties": {
+            "category": "Resource exhaustion",
+            "confidence": "high",
+            "findingId": "csf_5c06a9da58ba7f8772aa6eea",
+            "occurrenceId": "occ_55a6b6057069aa30373d1f41",
+            "severity": "low"
+          },
+          "ruleId": "resource-exhaustion.optional-provider-response",
+          "ruleIndex": 10
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "evidence"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/workers/route.ts"
+                },
+                "region": {
+                  "endLine": 78,
+                  "startLine": 78
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Concurrent upserts can bypass the site conflict check."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:5ecae0aa2838ab0c39f7b18cb461047cd01ad6349df2fe2a3aecfa6489acfe4e"
+          },
+          "properties": {
+            "category": "Application security",
+            "confidence": "high",
+            "findingId": "csf_788583c7a8d6f80010d7eeec",
+            "occurrenceId": "occ_5887fdc0903a8675b3267d47",
+            "severity": "low"
+          },
+          "ruleId": "race-condition.worker-site-binding",
+          "ruleIndex": 7
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/briefing/settings/route.ts"
+                },
+                "region": {
+                  "endLine": 121,
+                  "startLine": 112
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/education-records/route.ts"
+                },
+                "region": {
+                  "endLine": 32,
+                  "startLine": 23
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/workers/route.ts"
+                },
+                "region": {
+                  "endLine": 52,
+                  "startLine": 45
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/workpacks/route.ts"
+                },
+                "region": {
+                  "endLine": 176,
+                  "startLine": 170
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/workpacks/%5Bid%5D/share-sessions/route.ts"
+                },
+                "region": {
+                  "endLine": 115,
+                  "startLine": 104
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/mcp-tokens/route.ts"
+                },
+                "region": {
+                  "endLine": 226,
+                  "startLine": 199
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Authenticated mutation routes parse bodies without shared byte and time limits."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:a2f5735e7e9b7f8361651fbbbbf5cbb9e07b1c23173eff5a815462242c1299d2"
+          },
+          "properties": {
+            "category": "Resource exhaustion",
+            "confidence": "high",
+            "findingId": "csf_1545ef2bf52c4cfe32352b18",
+            "occurrenceId": "occ_7202141bd3890da0b231ba9f",
+            "severity": "low"
+          },
+          "ruleId": "resource-exhaustion.authenticated-json-body",
+          "ruleIndex": 8
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/mcp-work-budget.ts"
+                },
+                "region": {
+                  "endLine": 120,
+                  "startLine": 47
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/document-export-budget.ts"
+                },
+                "region": {
+                  "endLine": 93,
+                  "startLine": 67
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/export/pdf/route.ts"
+                },
+                "region": {
+                  "endLine": 128,
+                  "startLine": 97
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "entrypoint"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/workflow/dispatch/route.ts"
+                },
+                "region": {
+                  "endLine": 296,
+                  "startLine": 282
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Public byte-limited body readers lack absolute read deadlines."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:3228778c775720f05d7b4ddd82adeb2facb4329ec10e7ecc96052ad9d40e140c"
+          },
+          "properties": {
+            "category": "Resource exhaustion",
+            "confidence": "high",
+            "findingId": "csf_ad6ff8a7ae09508aefe22828",
+            "occurrenceId": "occ_74da50d2411d3560f674c999",
+            "severity": "low"
+          },
+          "ruleId": "resource-exhaustion.public-slow-request-body",
+          "ruleIndex": 11
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "evidence"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/010_commercial_operations.sql"
+                },
+                "region": {
+                  "endLine": 21,
+                  "startLine": 21
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Related IDs lack composite tenant enforcement."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:3f4946b8dd54aa760d39fb08001940cb20a21744737709e7928999f23f64dfc6"
+          },
+          "properties": {
+            "category": "Application security",
+            "confidence": "high",
+            "findingId": "csf_bc9904f1f61c42ae866c0ba8",
+            "occurrenceId": "occ_77e2a5a7e7b8692c9aaa64c8",
+            "severity": "medium"
+          },
+          "ruleId": "tenant-integrity.related-object-binding",
+          "ruleIndex": 13
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "evidence"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/003_knowledge_runtime.sql"
+                },
+                "region": {
+                  "endLine": 94,
+                  "startLine": 94
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Owner policies permit direct changes to knowledge approval state."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:ded5f508fe7947bcb2521b2060778f90a34c349b6b2a7454aefbe65084483ab2"
+          },
+          "properties": {
+            "category": "Application security",
+            "confidence": "high",
+            "findingId": "csf_3e36c8b43b436ed24f667b89",
+            "occurrenceId": "occ_82d435b167dfc18e7b454e98",
+            "severity": "medium"
+          },
+          "ruleId": "authorization.approval-state-transition",
+          "ruleIndex": 1
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 18,
+                  "startLine": 3
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/supabase-admin.ts"
+                },
+                "region": {
+                  "endLine": 716,
+                  "startLine": 645
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Concurrent first-use operations can create duplicate tenant containers."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:e49ae01725168fc85ee6d81ae5707af9b8f678e53170ea0d76e73e363fd25818"
+          },
+          "properties": {
+            "category": "Race condition",
+            "confidence": "medium",
+            "findingId": "csf_6d81595b2c7de87bb0795ad9",
+            "occurrenceId": "occ_b8d3f53bb4b9c96b4ca2c801",
+            "severity": "low"
+          },
+          "ruleId": "business-logic.atomic-workspace-provisioning",
+          "ruleIndex": 3
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "entrypoint"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/safety-reference/status/route.ts"
+                },
+                "region": {
+                  "endLine": 35,
+                  "startLine": 20
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/safety-reference-catalog.ts"
+                },
+                "region": {
+                  "endLine": 3426,
+                  "startLine": 3377
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "One public status request fans out into multiple catalog operations without an operation lease."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:8bd794e7930a855ee57757d0c8333387451036b16e64438f2c4838f544637340"
+          },
+          "properties": {
+            "category": "Resource exhaustion",
+            "confidence": "high",
+            "findingId": "csf_52332956c1cf0cf3211b28c9",
+            "occurrenceId": "occ_d3428e2d54f713db644a2a95",
+            "severity": "low"
+          },
+          "ruleId": "resource-exhaustion.status-fanout-admission",
+          "ruleIndex": 12
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "evidence"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/010_commercial_operations.sql"
+                },
+                "region": {
+                  "endLine": 195,
+                  "startLine": 195
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Owners can directly set improvement approval attribution."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:bc48f46c159f086a18e40ffa14d3ef00bdf0744fcbbdffcb77e8b5655e59d061"
+          },
+          "properties": {
+            "category": "Application security",
+            "confidence": "high",
+            "findingId": "csf_0947d7c9e77b6d7dbfa61a49",
+            "occurrenceId": "occ_d75b1b1ab53021d8f7d40475",
+            "severity": "medium"
+          },
+          "ruleId": "authorization.approval-metadata-forgery",
+          "ruleIndex": 0
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "entrypoint"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/law/%5Bid%5D/page.tsx"
+                },
+                "region": {
+                  "endLine": 50,
+                  "startLine": 47
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "entrypoint"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/precedent/%5Bid%5D/page.tsx"
+                },
+                "region": {
+                  "endLine": 7,
+                  "startLine": 4
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "entrypoint"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/interpretation/%5Bid%5D/page.tsx"
+                },
+                "region": {
+                  "endLine": 7,
+                  "startLine": 4
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/korean-law-mcp.ts"
+                },
+                "region": {
+                  "endLine": 498,
+                  "startLine": 339
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Public legal-detail requests use unbounded third-party detail methods."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:c45fee1da042d5a2704d8662075713a832153634cdce383dc205f50e962fd474"
+          },
+          "properties": {
+            "category": "Resource exhaustion",
+            "confidence": "high",
+            "findingId": "csf_7f2867fd681478fc6d9ec45c",
+            "occurrenceId": "occ_da7e9c083a7999cfd9ca8a48",
+            "severity": "low"
+          },
+          "ruleId": "resource-exhaustion.legal-detail-upstream",
+          "ruleIndex": 9
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "evidence"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/004_safety_reference_catalog.sql"
+                },
+                "region": {
+                  "endLine": 58,
+                  "startLine": 58
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Anonymous base-table SELECT exposes raw bodies, paths, payloads, and ingestion metadata."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:b2e9016a685cb91c2773593387b88a7df62f8b426e9534f216af7daae4e5d6d2"
+          },
+          "properties": {
+            "category": "Application security",
+            "confidence": "high",
+            "findingId": "csf_d629fd729afeb6fb08f2c124",
+            "occurrenceId": "occ_deb575bddedaa7c7399dedcd",
+            "severity": "low"
+          },
+          "ruleId": "data-exposure.raw-safety-corpus",
+          "ruleIndex": 4
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "evidence"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/mcp-tokens/route.ts"
+                },
+                "region": {
+                  "endLine": 240,
+                  "startLine": 240
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Token quota count, check, and insert are non-atomic."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:c209c309b527a16d38b2b6688342c18b859cf40ce55b261dbebdc5d5d399343e"
+          },
+          "properties": {
+            "category": "Application security",
+            "confidence": "high",
+            "findingId": "csf_f228370516b4a34992b4ca8e",
+            "occurrenceId": "occ_efebdb7a4e4c9d2627d1f8ab",
+            "severity": "low"
+          },
+          "ruleId": "race-condition.mcp-token-quota",
+          "ruleIndex": 6
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "Codex Security",
+          "rules": [
+            {
+              "id": "authorization.approval-metadata-forgery",
+              "name": "authorization.approval-metadata-forgery",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "authorization.approval-metadata-forgery"
+              }
+            },
+            {
+              "id": "authorization.approval-state-transition",
+              "name": "authorization.approval-state-transition",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "authorization.approval-state-transition"
+              }
+            },
+            {
+              "id": "authorization.null-tenant-wildcard",
+              "name": "authorization.null-tenant-wildcard",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "authorization.null-tenant-wildcard"
+              }
+            },
+            {
+              "id": "business-logic.atomic-workspace-provisioning",
+              "name": "business-logic.atomic-workspace-provisioning",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "business-logic.atomic-workspace-provisioning"
+              }
+            },
+            {
+              "id": "data-exposure.raw-safety-corpus",
+              "name": "data-exposure.raw-safety-corpus",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "data-exposure.raw-safety-corpus"
+              }
+            },
+            {
+              "id": "integrity.provider-receipt-forgery",
+              "name": "integrity.provider-receipt-forgery",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "integrity.provider-receipt-forgery"
+              }
+            },
+            {
+              "id": "race-condition.mcp-token-quota",
+              "name": "race-condition.mcp-token-quota",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "race-condition.mcp-token-quota"
+              }
+            },
+            {
+              "id": "race-condition.worker-site-binding",
+              "name": "race-condition.worker-site-binding",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "race-condition.worker-site-binding"
+              }
+            },
+            {
+              "id": "resource-exhaustion.authenticated-json-body",
+              "name": "resource-exhaustion.authenticated-json-body",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "resource-exhaustion.authenticated-json-body"
+              }
+            },
+            {
+              "id": "resource-exhaustion.legal-detail-upstream",
+              "name": "resource-exhaustion.legal-detail-upstream",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "resource-exhaustion.legal-detail-upstream"
+              }
+            },
+            {
+              "id": "resource-exhaustion.optional-provider-response",
+              "name": "resource-exhaustion.optional-provider-response",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "resource-exhaustion.optional-provider-response"
+              }
+            },
+            {
+              "id": "resource-exhaustion.public-slow-request-body",
+              "name": "resource-exhaustion.public-slow-request-body",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "resource-exhaustion.public-slow-request-body"
+              }
+            },
+            {
+              "id": "resource-exhaustion.status-fanout-admission",
+              "name": "resource-exhaustion.status-fanout-admission",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "resource-exhaustion.status-fanout-admission"
+              }
+            },
+            {
+              "id": "tenant-integrity.related-object-binding",
+              "name": "tenant-integrity.related-object-binding",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "tenant-integrity.related-object-binding"
+              }
+            }
+          ],
+          "version": "0.1.19"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

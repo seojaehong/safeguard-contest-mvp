@@ -1,0 +1,121 @@
+{
+  "completeness": "partial",
+  "deferred": [
+    {
+      "id": "deferred-d0ed0653d9c51b18",
+      "reason": "Current provider-persistence policy makes it unreachable.",
+      "surface": "n8n live webhook path"
+    },
+    {
+      "id": "deferred-faaa366f5c3b6733",
+      "reason": "No application references or explicit public grants establish a path.",
+      "surface": "legacy query_logs/documents"
+    },
+    {
+      "id": "deferred-0d9792a95ec0582c",
+      "reason": "Transport byte limits materially bound the parser surface.",
+      "surface": "multipart part count"
+    },
+    {
+      "id": "deferred-2de73c266403bfe2",
+      "reason": "No strong attacker-controlled path under fixed trusted upstream configuration.",
+      "surface": "DNS TOCTOU"
+    }
+  ],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [
+    {
+      "pattern": "live-database-state",
+      "reason": "No grants, migration deployment, data, or mutation probe."
+    },
+    {
+      "pattern": "approval-gated-integrations",
+      "reason": "No provider, Share, vector, wiki, or KOSHA registry mutation."
+    },
+    {
+      "pattern": "exact-saved-share",
+      "reason": "MISSING_EVIDENCE."
+    },
+    {
+      "pattern": "non-vercel-production",
+      "reason": "Validated deployment is Vercel."
+    }
+  ],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "repository",
+  "mode": "repository",
+  "openQuestions": [
+    {
+      "question": "Actual deployed Supabase grants and migrations remain approval-gated."
+    },
+    {
+      "question": "Platform body limits are defense in depth, not a source contract."
+    }
+  ],
+  "scanId": "cbcef1c0-e5ae-4e1a-9141-7451868ecb51",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "reported",
+      "evidence": [
+        "app/api/export",
+        "app/api/workflow/dispatch/route.ts"
+      ],
+      "id": "surface_public-routes-and-body-parsers",
+      "label": "Public routes and body parsers",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "evidence": [
+        "app/api/workpacks",
+        "app/api/workers/route.ts"
+      ],
+      "id": "surface_authenticated-commercial-routes",
+      "label": "Authenticated commercial routes",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "evidence": [
+        "supabase/migrations"
+      ],
+      "id": "surface_supabase-migrations-and-rls",
+      "label": "Supabase migrations and RLS",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "evidence": [
+        "lib/korean-law-mcp.ts",
+        "lib/vertex/client.ts",
+        "lib/photo-vision-analysis.ts"
+      ],
+      "id": "surface_optional-upstream-clients",
+      "label": "Optional upstream clients",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "evidence": [
+        "lib/openclaw-chat.ts",
+        "app/api/mcp/[transport]/implementation.ts"
+      ],
+      "id": "surface_openclaw-and-mcp-transport-remediation",
+      "label": "OpenClaw and MCP transport remediation",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "evidence": [
+        "MISSING_EVIDENCE"
+      ],
+      "id": "surface_exact-saved-share-runtime",
+      "label": "Exact saved Share runtime",
+      "receiptRefs": []
+    }
+  ]
+}

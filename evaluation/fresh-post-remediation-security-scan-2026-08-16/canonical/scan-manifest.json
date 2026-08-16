@@ -1,0 +1,88 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "5eb210dd97b331ddd48548d4d1f8e54b0561dc39c91eac5c33ce5210c3e14290"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "ed50c2ce0950458cdb79b36502445e89e00ffa553c2d8c57baaecb0403b0cd2f"
+      }
+    ],
+    "completedAt": "2026-08-16T07:05:39.582977Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "cbcef1c0-e5ae-4e1a-9141-7451868ecb51",
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.19"
+    },
+    "scope": {
+      "artifactsReviewed": [
+        "immutable 18-finding baseline",
+        "completed 14-finding reconciliation",
+        "current registered source"
+      ],
+      "excludePaths": [],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "Coverage is partial: security surfaces and source-backed searches were reviewed rather than every file line-by-line."
+      ],
+      "runtimeStatus": "Source revision verified; no mutation-based runtime validation.",
+      "summary": "Whole-repository Standard scan at registered revision 3a45a34be436d2db3199c0e9ba913b396cdf1688.",
+      "validationMode": "Independent baseline, focused investigators, and central static validation."
+    },
+    "sealedAt": "2026-08-16T07:05:39.582977Z",
+    "startedAt": "2026-08-16T06:41:29.752696Z",
+    "status": "completed",
+    "target": {
+      "displayName": "safeclaw-northstar-current",
+      "kind": "git_revision",
+      "revision": "3a45a34be436d2db3199c0e9ba913b396cdf1688",
+      "targetId": "target_sha256_59a91dd8129f171a6e0ff82b60460781f1067b1940d76c7a524e5f0e2b7ec5de"
+    },
+    "threatModel": {
+      "assets": [
+        "Tenant workpacks and identities",
+        "Approval and dispatch provenance",
+        "Safety-reference corpus",
+        "MCP credentials",
+        "Service availability and secrets"
+      ],
+      "assumptions": [
+        "Vercel production",
+        "Optional integrations only when configured",
+        "No live mutation authorized",
+        "Exact saved Share remains MISSING_EVIDENCE"
+      ],
+      "attackerCapabilities": [
+        "Unauthenticated requests",
+        "Authenticated tenant concurrency",
+        "Direct PostgREST use when grants permit",
+        "Abnormal optional upstream responses"
+      ],
+      "securityObjectives": [
+        "Tenant isolation",
+        "Authoritative approvals and receipts",
+        "Bounded resource use",
+        "Secret isolation",
+        "No unapproved mutation"
+      ],
+      "summary": "SafeClaw is a public Next.js application with anonymous routes, authenticated tenant administration, service-role Supabase operations, optional upstream providers, and approval-gated state changes.",
+      "trustBoundaries": [
+        "Anonymous client to public routes",
+        "Authenticated tenant to service-role routes",
+        "PostgREST to Supabase RLS",
+        "Application to optional providers",
+        "Application to subprocess"
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}

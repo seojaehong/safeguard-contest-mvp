@@ -1,0 +1,101 @@
+{
+  "schemaVersion": "safeclaw-fresh-post-remediation-security-scan/v1",
+  "generatedAt": "2026-08-16T16:05:39+09:00",
+  "verdict": "NOTICE_FRESH_STANDARD_SCAN_14_FINDINGS_FIVE_APPROVAL_FREE_REMEDIATIONS_OPEN",
+  "sourceHead": "3a45a34be436d2db3199c0e9ba913b396cdf1688",
+  "productionBuild": {
+    "commitSha": "3a45a34be436d2db3199c0e9ba913b396cdf1688",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-5e2qdjxs5-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
+  "scan": {
+    "scanId": "cbcef1c0-e5ae-4e1a-9141-7451868ecb51",
+    "targetRevision": "3a45a34be436d2db3199c0e9ba913b396cdf1688",
+    "status": "complete",
+    "sealedAt": "2026-08-16T07:05:39.582977Z",
+    "mode": "standard",
+    "coverage": "partial",
+    "reportableFindingCount": 14,
+    "severityCounts": {
+      "medium": 5,
+      "low": 9
+    }
+  },
+  "baselineReconciliation": {
+    "immutableOriginalScanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
+    "immutableOriginalPreserved": true,
+    "completedPriorPostRemediationScanTarget": "380206d8d2262002890a9140abfeac91540dcc0b",
+    "priorPostRemediationFindingCount": 14,
+    "sixRemediatedFindingsAbsent": [
+      "optional upstream search and KOSHA response bounds",
+      "authenticated multipart and MCP body-read deadlines",
+      "production MCP distributed admission",
+      "OpenClaw prompt and environment isolation",
+      "public safety-reference status projection"
+    ],
+    "comparisonBoundary": "The current count is not a simple delta because the fresh full scan found sibling body-budget, upstream-response, workspace-provisioning, and status-admission paths."
+  },
+  "findingDisposition": {
+    "databaseApprovalGatedCount": 9,
+    "approvalFreeSourceCandidateCount": 5,
+    "securityCompleteClaimAllowed": false
+  },
+  "approvalFreeSourceCandidates": [
+    "public-request-body-deadlines",
+    "authenticated-json-body-budget",
+    "legal-detail-upstream-bounds",
+    "optional-provider-response-bounds",
+    "status-provider-admission"
+  ],
+  "approvalGatedDatabaseFindings": [
+    "dispatch-null-tenant-rls",
+    "dispatch-provider-receipt-forgery",
+    "knowledge-review-state-bypass",
+    "improvement-approval-metadata-forgery",
+    "tenant-tuple-constraint-gap",
+    "mcp-token-quota-race",
+    "worker-site-binding-race",
+    "raw-safety-corpus-rls",
+    "workspace-bootstrap-race"
+  ],
+  "canonicalArtifacts": {
+    "manifest": "evaluation/fresh-post-remediation-security-scan-2026-08-16/canonical/scan-manifest.json",
+    "findings": "evaluation/fresh-post-remediation-security-scan-2026-08-16/canonical/findings.json",
+    "coverage": "evaluation/fresh-post-remediation-security-scan-2026-08-16/canonical/coverage.json",
+    "markdownProjection": "evaluation/fresh-post-remediation-security-scan-2026-08-16/scan-report.md",
+    "sarif": "evaluation/fresh-post-remediation-security-scan-2026-08-16/exports/results.sarif"
+  },
+  "verification": {
+    "focusedTests": {
+      "files": 7,
+      "tests": 76,
+      "status": "PASS"
+    },
+    "adjacentTests": {
+      "files": 10,
+      "tests": 92,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedBoundariesPreserved": true,
+    "securityCompleteClaimAllowed": false
+  }
+}
