@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   MCP_DOCUMENT_TEXT_MAX_CHARS,
   MCP_GENERATION_QUESTION_MAX_CHARS,
+  MCP_REQUEST_BODY_READ_TIMEOUT_MS,
   MCP_REQUEST_BODY_MAX_BYTES,
   MCP_TASK_MAX_CHARS,
 } from "@/lib/mcp-work-budget";
@@ -225,6 +226,36 @@ describe("MCP tool work budgets", () => {
     expect(mocks.baseHandler).not.toHaveBeenCalled();
   });
 
+  it("enforces an absolute deadline while reading an authenticated MCP body", async () => {
+    vi.useFakeTimers();
+    try {
+      const cancel = vi.fn();
+      const body = new ReadableStream<Uint8Array>({ cancel });
+      const pending = handler(new Request("https://www.safeclaw.kr/api/mcp/mcp", {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer slow-body-token",
+          "Content-Type": "application/json",
+        },
+        body,
+        duplex: "half",
+      } as RequestInit & { duplex: "half" }));
+
+      await vi.advanceTimersByTimeAsync(MCP_REQUEST_BODY_READ_TIMEOUT_MS);
+      const response = await pending;
+
+      expect(response.status).toBe(408);
+      await expect(response.json()).resolves.toMatchObject({
+        code: "MCP_BODY_READ_TIMEOUT",
+        limit: MCP_REQUEST_BODY_READ_TIMEOUT_MS,
+      });
+      expect(cancel).toHaveBeenCalledTimes(1);
+      expect(mocks.baseHandler).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("enforces an absolute deadline while reading a public JSON body", async () => {
     vi.useFakeTimers();
     try {
@@ -312,6 +343,32 @@ describe("MCP tool work budgets", () => {
 
     expect(response.status).toBe(503);
     expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("distributed");
+    expect(mocks.baseHandler).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalled();
+    error.mockRestore();
+  });
+
+  it("fails closed before MCP authentication when production distributed admission is absent", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    const response = await handler(new Request("https://www.safeclaw.kr/api/mcp/mcp", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer production-token",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+    }));
+
+    expect(response.status).toBe(503);
+    expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("distributed");
+    await expect(response.json()).resolves.toMatchObject({
+      code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    });
+    expect(mocks.resolveMcpAuth).not.toHaveBeenCalled();
     expect(mocks.baseHandler).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalled();
     error.mockRestore();

@@ -1,4 +1,6 @@
 import { EventEmitter } from "node:events";
+import fs from "node:fs";
+import path from "node:path";
 import { PassThrough } from "node:stream";
 import type { ChildProcessWithoutNullStreams } from "node:child_process";
 
@@ -145,7 +147,7 @@ describe("OpenClaw chat routing", () => {
       local: true
     });
 
-    expect(buildOpenClawChatArgs(config, "성수동 외벽 도장 작업", "broker-opaque-request-key")).toEqual([
+    expect(buildOpenClawChatArgs(config, "C:\\Users\\user\\AppData\\Local\\Temp\\message.txt", "broker-opaque-request-key")).toEqual([
       "--profile",
       "safeclaw",
       "agent",
@@ -156,8 +158,8 @@ describe("OpenClaw chat routing", () => {
       "openai/gpt-5.5",
       "--session-key",
       "agent:main:broker-opaque-request-key",
-      "-m",
-      "성수동 외벽 도장 작업"
+      "--message-file",
+      "C:\\Users\\user\\AppData\\Local\\Temp\\message.txt",
     ]);
     expect(buildOpenClawStatusArgs(config)).toEqual([
       "--profile",
@@ -222,7 +224,7 @@ describe("OpenClaw chat routing", () => {
 
     expect(config.requiredAuthProvider).toBe("openai/oauth");
     expect(config.model).toBe("openai/gpt-5.5");
-    expect(buildOpenClawChatArgs(config, "테스트")).toEqual([
+    expect(buildOpenClawChatArgs(config, "C:\\Temp\\message.txt")).toEqual([
       "--profile",
       "safeclaw",
       "agent",
@@ -231,8 +233,8 @@ describe("OpenClaw chat routing", () => {
       "--local",
       "--model",
       "openai/gpt-5.5",
-      "-m",
-      "테스트"
+      "--message-file",
+      "C:\\Temp\\message.txt",
     ]);
   });
 
@@ -247,7 +249,7 @@ describe("OpenClaw chat routing", () => {
 
   it("resolves the Windows npm shim to node plus openclaw.mjs when available", () => {
     const config = resolveOpenClawChatConfig({});
-    const command = resolveOpenClawSpawn(config, "ping");
+    const command = resolveOpenClawSpawn(config, "C:\\Temp\\message.txt");
 
     if (process.platform === "win32" && process.env.APPDATA) {
       expect(command.command === process.execPath || command.command === "openclaw").toBe(true);
@@ -256,7 +258,7 @@ describe("OpenClaw chat routing", () => {
     }
     expect(command.args).toContain("--profile");
     expect(command.args).toContain("safeclaw");
-    expect(command.args).toContain("ping");
+    expect(command.args).toContain("C:\\Temp\\message.txt");
   });
 
   it("does not enable the local CLI flag without explicit server-only configuration", () => {
@@ -265,11 +267,140 @@ describe("OpenClaw chat routing", () => {
   });
 
   it("always spawns OpenClaw without a shell", () => {
-    expect(resolveSpawnOptions()).toMatchObject({
+    const options = resolveSpawnOptions({
+      PATH: "C:\\Windows\\System32",
+      APPDATA: "C:\\Users\\user\\AppData\\Roaming",
+      SUPABASE_SERVICE_ROLE_KEY: "supabase-secret",
+      OPENAI_API_KEY: "provider-secret",
+      UPSTASH_REDIS_REST_TOKEN: "upstash-secret",
+      REMOTE_HERMES_SIGNING_SECRET: "hermes-secret",
+    });
+    expect(options).toMatchObject({
       shell: false,
       windowsHide: true,
       stdio: ["ignore", "pipe", "pipe"],
+      env: {
+        PATH: "C:\\Windows\\System32",
+        APPDATA: "C:\\Users\\user\\AppData\\Roaming",
+      },
     });
+    expect(options.env).not.toHaveProperty("SUPABASE_SERVICE_ROLE_KEY");
+    expect(options.env).not.toHaveProperty("OPENAI_API_KEY");
+    expect(options.env).not.toHaveProperty("UPSTASH_REDIS_REST_TOKEN");
+    expect(options.env).not.toHaveProperty("REMOTE_HERMES_SIGNING_SECRET");
+  });
+
+  it("passes prompts through a private message file and removes it after child close", async () => {
+    const module = await import("@/lib/openclaw-chat");
+    const child = Object.assign(new EventEmitter(), {
+      stdout: new PassThrough(),
+      stderr: new PassThrough(),
+      kill: vi.fn(() => true),
+    });
+    const prompt = "confidential prompt fragment";
+    let messageFilePath = "";
+    const spawnProcess = vi.fn((_command: string, args: string[]) => {
+      const messageFileIndex = args.indexOf("--message-file");
+      expect(messageFileIndex).toBeGreaterThan(-1);
+      messageFilePath = args[messageFileIndex + 1] ?? "";
+      expect(args.join(" ")).not.toContain(prompt);
+      expect(fs.readFileSync(messageFilePath, "utf8")).toBe(prompt);
+      if (process.platform !== "win32") {
+        expect(fs.statSync(messageFilePath).mode & 0o777).toBe(0o600);
+        expect(fs.statSync(path.dirname(messageFilePath)).mode & 0o777).toBe(0o700);
+      }
+      return child as unknown as ChildProcessWithoutNullStreams;
+    });
+    const runChat = module.createOpenClawChatRunner({ spawnProcess });
+    const run = runChat({
+      config: resolveOpenClawChatConfig({ OPENCLAW_LOCAL: "1" }),
+      prompt,
+      emit: () => undefined,
+    });
+
+    child.emit("close", 0, null);
+    await expect(run).resolves.toBeUndefined();
+    expect(fs.existsSync(messageFilePath)).toBe(false);
+    expect(fs.existsSync(path.dirname(messageFilePath))).toBe(false);
+  });
+
+  it("removes the prompt file after abort when the child exits", async () => {
+    const module = await import("@/lib/openclaw-chat");
+    const child = Object.assign(new EventEmitter(), {
+      stdout: new PassThrough(),
+      stderr: new PassThrough(),
+      kill: vi.fn(() => true),
+    });
+    let messageFilePath = "";
+    const runChat = module.createOpenClawChatRunner({
+      spawnProcess: (_command, args) => {
+        messageFilePath = args[args.indexOf("--message-file") + 1] ?? "";
+        return child as unknown as ChildProcessWithoutNullStreams;
+      },
+    });
+    const controller = new AbortController();
+    const reason = new Error("cancelled");
+    const run = runChat({
+      config: resolveOpenClawChatConfig({ OPENCLAW_LOCAL: "1" }),
+      prompt: "abort-only secret",
+      emit: () => undefined,
+      signal: controller.signal,
+    });
+
+    controller.abort(reason);
+    child.emit("close", null, "SIGTERM");
+    await expect(run).rejects.toBe(reason);
+    expect(fs.existsSync(messageFilePath)).toBe(false);
+    expect(fs.existsSync(path.dirname(messageFilePath))).toBe(false);
+  });
+
+  it("removes the prompt file when spawning OpenClaw fails", async () => {
+    const module = await import("@/lib/openclaw-chat");
+    let messageFilePath = "";
+    const spawnError = new Error("spawn failed");
+    const runChat = module.createOpenClawChatRunner({
+      spawnProcess: (_command, args) => {
+        messageFilePath = args[args.indexOf("--message-file") + 1] ?? "";
+        expect(fs.existsSync(messageFilePath)).toBe(true);
+        throw spawnError;
+      },
+    });
+
+    await expect(runChat({
+      config: resolveOpenClawChatConfig({ OPENCLAW_LOCAL: "1" }),
+      prompt: "spawn-error secret",
+      emit: () => undefined,
+    })).rejects.toBe(spawnError);
+    expect(fs.existsSync(messageFilePath)).toBe(false);
+    expect(fs.existsSync(path.dirname(messageFilePath))).toBe(false);
+  });
+
+  it("removes the prompt file after a child process error closes", async () => {
+    const module = await import("@/lib/openclaw-chat");
+    const child = Object.assign(new EventEmitter(), {
+      stdout: new PassThrough(),
+      stderr: new PassThrough(),
+      kill: vi.fn(() => true),
+    });
+    let messageFilePath = "";
+    const runChat = module.createOpenClawChatRunner({
+      spawnProcess: (_command, args) => {
+        messageFilePath = args[args.indexOf("--message-file") + 1] ?? "";
+        return child as unknown as ChildProcessWithoutNullStreams;
+      },
+    });
+    const childError = new Error("child process error");
+    const run = runChat({
+      config: resolveOpenClawChatConfig({ OPENCLAW_LOCAL: "1" }),
+      prompt: "child-error secret",
+      emit: () => undefined,
+    });
+
+    child.emit("error", childError);
+    child.emit("close", null, null);
+    await expect(run).rejects.toBe(childError);
+    expect(fs.existsSync(messageFilePath)).toBe(false);
+    expect(fs.existsSync(path.dirname(messageFilePath))).toBe(false);
   });
 
   it("fails before OAuth or spawn when site-bound MCP identity cannot be proven", async () => {

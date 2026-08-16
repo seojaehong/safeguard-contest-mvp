@@ -7,6 +7,7 @@ import {
   MAX_HAZARD_PHOTO_TOTAL_BYTES
 } from "@/lib/photo-vision-analysis";
 import { withPublicPhotoAnalysisAdmission } from "@/lib/public-distributed-rate-limit";
+import { enforcePublicMultipartRequestBodyBudget } from "@/lib/public-work-budget";
 import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
 
 export const dynamic = "force-dynamic";
@@ -87,7 +88,16 @@ async function handlePost(request: NextRequest) {
     }, { status: 400 });
   }
 
-  const form = await request.formData();
+  const bodyBudget = await enforcePublicMultipartRequestBodyBudget(
+    request,
+    MAX_HAZARD_PHOTO_REQUEST_BYTES,
+    "photo analysis multipart body exceeds the request byte budget"
+  );
+  if (!bodyBudget.ok) return bodyBudget.response;
+  const boundedRequest = bodyBudget.request === request
+    ? request
+    : new NextRequest(bodyBudget.request);
+  const form = await boundedRequest.formData();
   const question = readQuestion(form);
   const photos = readPhotos(form);
   if (!photos.length) {

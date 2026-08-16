@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 vi.mock("@/lib/safety-reference-catalog", () => ({
+  buildPublicSafetyReferenceItem: (item: Record<string, unknown>) => item,
   getSafetyReferenceStats: vi.fn(async () => ({
     ok: true,
     configured: true,

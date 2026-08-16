@@ -1,6 +1,7 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
 import type { ClawChatEvent, ClawHistoryMessage } from "./agent-loop";
@@ -70,11 +71,11 @@ export function resolveOpenClawChatConfig(env: EnvLike): OpenClawChatConfig {
   };
 }
 
-export function resolveOpenClawSpawn(config: OpenClawChatConfig, prompt: string): {
+export function resolveOpenClawSpawn(config: OpenClawChatConfig, messageFilePath: string): {
   command: string;
   args: string[];
 } {
-  return resolveOpenClawCommand(config, buildOpenClawChatArgs(config, prompt));
+  return resolveOpenClawCommand(config, buildOpenClawChatArgs(config, messageFilePath));
 }
 
 export function resolveOpenClawCommand(config: OpenClawChatConfig, args: string[]): {
@@ -95,15 +96,64 @@ export function resolveOpenClawCommand(config: OpenClawChatConfig, args: string[
   return { command: config.bin, args };
 }
 
-export function resolveSpawnOptions(): {
+const OPENCLAW_CHILD_ENV_ALLOWLIST = new Set([
+  "APPDATA",
+  "COMSPEC",
+  "FORCE_COLOR",
+  "HOME",
+  "HOMEDRIVE",
+  "HOMEPATH",
+  "LANG",
+  "LC_ALL",
+  "LC_CTYPE",
+  "LOCALAPPDATA",
+  "NO_COLOR",
+  "NODE_ENV",
+  "PATH",
+  "PATHEXT",
+  "PROGRAMDATA",
+  "PROGRAMFILES",
+  "PROGRAMFILES(X86)",
+  "PROGRAMW6432",
+  "SYSTEMROOT",
+  "TEMP",
+  "TERM",
+  "TMP",
+  "TZ",
+  "USERPROFILE",
+  "WINDIR",
+]);
+
+function resolveOpenClawChildEnv(source: EnvLike): NodeJS.ProcessEnv {
+  const nodeEnv = source.NODE_ENV === "development" || source.NODE_ENV === "test"
+    ? source.NODE_ENV
+    : "production";
+  const childEnv: NodeJS.ProcessEnv = {
+    NODE_ENV: nodeEnv,
+  };
+  for (const [key, value] of Object.entries(source)) {
+    if (
+      key.toUpperCase() !== "NODE_ENV"
+      && value !== undefined
+      && OPENCLAW_CHILD_ENV_ALLOWLIST.has(key.toUpperCase())
+    ) {
+      childEnv[key] = value;
+    }
+  }
+  return childEnv;
+}
+
+export function resolveSpawnOptions(env: EnvLike = process.env): {
   shell: false;
   windowsHide: true;
   stdio: ["ignore", "pipe", "pipe"];
+  env: NodeJS.ProcessEnv;
 } {
   return {
     shell: false,
     windowsHide: true,
     stdio: ["ignore", "pipe", "pipe"],
+    env: resolveOpenClawChildEnv(env),
   };
 }
 
@@ -134,7 +184,7 @@ export function buildOpenClawStatusArgs(config: OpenClawChatConfig): string[] {
 
 export function buildOpenClawChatArgs(
   config: OpenClawChatConfig,
-  prompt: string,
+  messageFilePath: string,
   sessionKey?: string,
 ): string[] {
   return [
@@ -147,9 +197,31 @@ export function buildOpenClawChatArgs(
     "--model",
     config.model,
     ...(sessionKey ? ["--session-key", `agent:${config.agent}:${sessionKey}`] : []),
-    "-m",
-    prompt
+    "--message-file",
+    messageFilePath,
   ];
+}
+
+function createOpenClawMessageFile(prompt: string): { directoryPath: string; filePath: string } {
+  const directoryPath = fs.mkdtempSync(path.join(os.tmpdir(), "safeclaw-openclaw-"));
+  try {
+    fs.chmodSync(directoryPath, 0o700);
+    const filePath = path.join(directoryPath, "message.txt");
+    fs.writeFileSync(filePath, prompt, { encoding: "utf8", flag: "wx", mode: 0o600 });
+    return { directoryPath, filePath };
+  } catch (error) {
+    fs.rmSync(directoryPath, { force: true, recursive: true });
+    throw error;
+  }
+}
+
+function removeOpenClawMessageFile(directoryPath: string): Error | null {
+  try {
+    fs.rmSync(directoryPath, { force: true, recursive: true });
+    return null;
+  } catch (error) {
+    return error instanceof Error ? error : new Error(String(error));
+  }
 }
 
 export function buildOpenClawChatPrompt(input: {
@@ -419,12 +491,41 @@ export function createOpenClawChatRunner(dependencies: {
       reject(input.signal.reason ?? new BrokerError("ENGINE_EXECUTION_FAILED", 500));
       return;
     }
+    const messageFile = createOpenClawMessageFile(input.prompt);
+    let messageFileRemoved = false;
+    const removeMessageFile = (): Error | null => {
+      if (messageFileRemoved) return null;
+      messageFileRemoved = true;
+      return removeOpenClawMessageFile(messageFile.directoryPath);
+    };
+    const rejectAfterCleanup = (error: unknown): void => {
+      const cleanupError = removeMessageFile();
+      if (cleanupError) {
+        reject(new AggregateError([error, cleanupError], "OpenClaw chat failed and message cleanup failed"));
+        return;
+      }
+      reject(error);
+    };
+    const resolveAfterCleanup = (): void => {
+      const cleanupError = removeMessageFile();
+      if (cleanupError) {
+        reject(cleanupError);
+        return;
+      }
+      resolve();
+    };
     const sessionKey = createOpenClawBrokerSessionKey();
     const command = resolveOpenClawCommand(
       input.config,
-      buildOpenClawChatArgs(input.config, input.prompt, sessionKey),
+      buildOpenClawChatArgs(input.config, messageFile.filePath, sessionKey),
     );
-    const child = spawnProcess(command.command, command.args, resolveSpawnOptions());
+    let child: ChildProcessWithoutNullStreams;
+    try {
+      child = spawnProcess(command.command, command.args, resolveSpawnOptions());
+    } catch (error) {
+      rejectAfterCleanup(error);
+      return;
+    }
     let closeObserved = false;
     let terminationError: unknown = null;
     let outputBytes = 0;
@@ -442,7 +543,7 @@ export function createOpenClawChatRunner(dependencies: {
         child.kill("SIGKILL");
         clearTimeout(timeout);
         input.signal?.removeEventListener("abort", abort);
-        reject(error);
+        rejectAfterCleanup(error);
       }, terminationGraceMs);
     };
     const abort = (): void => terminate(input.signal?.reason ?? new BrokerError("ENGINE_EXECUTION_FAILED", 500));
@@ -472,14 +573,14 @@ export function createOpenClawChatRunner(dependencies: {
       if (terminationTimer) clearTimeout(terminationTimer);
       input.signal?.removeEventListener("abort", abort);
       if (terminationError) {
-        reject(terminationError);
+        rejectAfterCleanup(terminationError);
         return;
       }
       if (code === 0) {
-        resolve();
+        resolveAfterCleanup();
         return;
       }
-      reject(new Error(`OpenClaw chat failed (code=${code ?? "null"}, signal=${signal ?? "none"})`));
+      rejectAfterCleanup(new Error(`OpenClaw chat failed (code=${code ?? "null"}, signal=${signal ?? "none"})`));
     });
   });
   };

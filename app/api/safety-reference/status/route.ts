@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { loadKoshaGuideCorpus } from "@/lib/kosha-guide-corpus";
 import { getProductionExactKoshaTrustPins } from "@/lib/production-kosha-trust";
-import { getSafetyReferenceStats } from "@/lib/safety-reference-catalog";
+import {
+  buildPublicSafetyReferenceItem,
+  getSafetyReferenceStats,
+} from "@/lib/safety-reference-catalog";
 import { loadBundledExactKoshaReferences } from "@/lib/safety-reference-catalog-server";
 import { createRateLimiter } from "@/lib/rate-limit";
 import {
@@ -59,6 +62,7 @@ export async function GET(request: NextRequest) {
     : `exact KOSHA registry integrity gate blocked: ${exactTrustRegistryLoad.reason}.`;
   const result = {
     ...catalog,
+    samples: catalog.samples.map(buildPublicSafetyReferenceItem),
     ok: searchReady,
     status,
     searchReady,

@@ -1,4 +1,4 @@
-import type { NextRequest } from "next/server";
+import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { POST } from "@/app/api/input-photos/hazard-analysis/route";
@@ -8,6 +8,7 @@ import {
   MAX_HAZARD_PHOTO_REQUEST_BYTES
 } from "@/lib/photo-vision-analysis";
 import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
+import { PUBLIC_MULTIPART_BODY_READ_TIMEOUT_MS } from "@/lib/public-work-budget";
 
 vi.mock("@/lib/photo-vision-analysis", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/photo-vision-analysis")>();
@@ -141,6 +142,39 @@ describe("photo vision hazard analysis route", () => {
     expect(body.ok).toBe(true);
     expect(body.analysis.status).toBe("partial");
     expect(vi.mocked(analyzeHazardPhotos).mock.calls[0]?.[0].photos).toHaveLength(2);
+  });
+
+  it("times out a stalled authenticated multipart upload before parsing or provider work", async () => {
+    vi.useFakeTimers();
+    try {
+      const cancel = vi.fn();
+      const stream = new ReadableStream<Uint8Array>({ cancel });
+      const request = new NextRequest(new Request("http://localhost/api/input-photos/hazard-analysis", {
+        method: "POST",
+        headers: {
+          authorization: "Bearer route-test-token",
+          "content-length": "1024",
+          "content-type": "multipart/form-data; boundary=contract-test",
+          "x-forwarded-for": "route-test-slow-multipart"
+        },
+        body: stream,
+        duplex: "half"
+      } as RequestInit & { duplex: "half" }));
+
+      const pending = POST(request);
+      await vi.advanceTimersByTimeAsync(PUBLIC_MULTIPART_BODY_READ_TIMEOUT_MS);
+      const response = await pending;
+
+      expect(response.status).toBe(408);
+      await expect(response.json()).resolves.toMatchObject({
+        code: "PUBLIC_MULTIPART_BODY_READ_TIMEOUT",
+        limit: PUBLIC_MULTIPART_BODY_READ_TIMEOUT_MS
+      });
+      expect(cancel).toHaveBeenCalledTimes(1);
+      expect(analyzeHazardPhotos).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("propagates request cancellation to photo analysis", async () => {

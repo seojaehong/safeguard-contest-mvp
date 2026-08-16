@@ -6,6 +6,7 @@ export const MCP_SEARCH_QUERY_MAX_CHARS = 1_000;
 export const MCP_DOC_TYPE_MAX_CHARS = 128;
 export const MCP_REQUEST_BODY_MAX_BYTES = 96 * 1_024;
 export const MCP_TOKEN_REQUEST_BODY_MAX_BYTES = 8 * 1_024;
+export const MCP_REQUEST_BODY_READ_TIMEOUT_MS = 10_000;
 
 export type McpRequestBodyBudgetResult =
   | { ok: true; request: Request }
@@ -126,5 +127,11 @@ export async function enforceMcpRequestBodyBudget(
   return enforceRequestBodyBudget(request, maxBytes, {
     code: "MCP_PAYLOAD_TOO_LARGE",
     error: `MCP request body exceeds the ${maxBytes}-byte limit.`,
+  }, {
+    timeoutMs: MCP_REQUEST_BODY_READ_TIMEOUT_MS,
+    timeoutError: {
+      code: "MCP_BODY_READ_TIMEOUT",
+      error: `MCP request body was not received within ${MCP_REQUEST_BODY_READ_TIMEOUT_MS}ms.`,
+    },
   });
 }

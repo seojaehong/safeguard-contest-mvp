@@ -1,4 +1,5 @@
 import { pickOfficialSafetyResources, type OfficialSafetyResource } from "./official-safety-resources";
+import { readBoundedResponseText } from "./server/upstream-http";
 import { IntegrationMode } from "./types";
 
 type VerifiedOfficialResource = OfficialSafetyResource & {
@@ -8,6 +9,7 @@ type VerifiedOfficialResource = OfficialSafetyResource & {
 };
 
 const REQUEST_TIMEOUT_MS = 5_000;
+const OFFICIAL_RESOURCE_CHECK_RESPONSE_MAX_BYTES = 64 * 1_024;
 const RETRY_COUNT = 1;
 
 async function wait(ms: number, signal?: AbortSignal) {
@@ -41,7 +43,10 @@ async function fetchWithTimeout(url: string, signal?: AbortSignal): Promise<bool
         "User-Agent": "SafeClaw safety-workpack official-resource-check"
       }
     });
-    const text = await response.text().catch(() => "");
+    const text = await readBoundedResponseText(response, {
+      label: "official safety resource check response",
+      maxBytes: OFFICIAL_RESOURCE_CHECK_RESPONSE_MAX_BYTES,
+    });
     return response.ok && (text.length > 0 || response.headers.has("content-type"));
   } finally {
     clearTimeout(timeout);

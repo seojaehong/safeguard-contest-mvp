@@ -4,6 +4,7 @@ import { cleanHtml, extractHangContent, flattenContent } from "korean-law-mcp/li
 import { LawApiClient } from "korean-law-mcp/lib/api-client";
 import { normalizeLawSearchText, resolveLawAlias } from "korean-law-mcp/lib/search-normalizer";
 import { extractTag, parseInterpretationXML, parsePrecedentXML, stripHtml } from "korean-law-mcp/lib/xml-parser";
+import { readBoundedResponseText } from "./server/upstream-http";
 import { DetailRecord, SearchResult } from "./types";
 
 type KoreanLawMcpSourceType = "law" | "precedent" | "interpretation";
@@ -20,6 +21,7 @@ const KLM_LAW_PREFIX = "klm-law-";
 const KLM_PRECEDENT_PREFIX = "klm-prec-";
 const KLM_INTERPRETATION_PREFIX = "klm-expc-";
 const DEFAULT_SEARCH_LIMIT = 3;
+const KOREAN_LAW_SEARCH_RESPONSE_MAX_BYTES = 1_024 * 1_024;
 
 function getConfig(): KoreanLawMcpConfig {
   const explicitKey = process.env.KOREAN_LAW_MCP_LAW_OC?.trim() || "";
@@ -227,7 +229,10 @@ async function fetchSearchXml(input: {
     cache: "no-store",
     signal: input.signal,
   });
-  const text = await response.text();
+  const text = await readBoundedResponseText(response, {
+    label: `korean-law-mcp ${input.target} search response`,
+    maxBytes: KOREAN_LAW_SEARCH_RESPONSE_MAX_BYTES,
+  });
   if (!response.ok) {
     throw new Error(`korean-law-mcp ${input.target} search failed with status ${response.status}`);
   }

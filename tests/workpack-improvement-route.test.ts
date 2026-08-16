@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { parseOperationImprovements } from "@/lib/operation-improvement-history";
 import {
+  PUBLIC_MULTIPART_BODY_READ_TIMEOUT_MS,
   WORKPACK_IMPROVEMENT_JSON_REQUEST_MAX_BYTES,
   WORKPACK_IMPROVEMENT_TEXT_MAX_CHARS,
   WORKPACK_IMPROVEMENT_REFLECTED_DOCUMENTS_MAX_COUNT
@@ -163,6 +164,43 @@ describe("workpack improvement POST status contract", () => {
     expect(request.formData).not.toHaveBeenCalled();
     expect(mocks.analyzeImprovementPhotos).not.toHaveBeenCalled();
     expect(mocks.insert).not.toHaveBeenCalled();
+  });
+
+  it("times out a stalled owned multipart request before analysis or persistence", async () => {
+    vi.useFakeTimers();
+    try {
+      const cancel = vi.fn();
+      const stream = new ReadableStream<Uint8Array>({ cancel });
+      const request = new NextRequest(new Request(
+        "http://localhost/api/workpacks/workpack-1/improvements", {
+          method: "POST",
+          headers: {
+            authorization: "Bearer route-test-token",
+            "content-length": "2048",
+            "content-type": "multipart/form-data; boundary=contract-test",
+            "x-forwarded-for": "198.51.100.199"
+          },
+          body: stream,
+          duplex: "half"
+        } as RequestInit & { duplex: "half" }
+      ));
+      const { POST } = await import("@/app/api/workpacks/[id]/improvements/route");
+
+      const pending = POST(request, { params: Promise.resolve({ id: "workpack-1" }) });
+      await vi.advanceTimersByTimeAsync(PUBLIC_MULTIPART_BODY_READ_TIMEOUT_MS);
+      const response = await pending;
+
+      expect(response.status).toBe(408);
+      await expect(response.json()).resolves.toMatchObject({
+        code: "PUBLIC_MULTIPART_BODY_READ_TIMEOUT",
+        limit: PUBLIC_MULTIPART_BODY_READ_TIMEOUT_MS
+      });
+      expect(cancel).toHaveBeenCalledTimes(1);
+      expect(mocks.analyzeImprovementPhotos).not.toHaveBeenCalled();
+      expect(mocks.insert).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("rejects oversized JSON requests before authentication, analysis, or persistence", async () => {

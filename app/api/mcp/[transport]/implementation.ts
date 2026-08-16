@@ -383,6 +383,7 @@ async function protectedBaseHandler(request: Request): Promise<Response> {
     limit: 20,
     windowMs: 60_000,
     instanceLimiter,
+    requireDistributedInProduction: true,
   });
   const rateLimitRejection = publicRateLimitResponse(rateDecision);
   if (rateLimitRejection) return rateLimitRejection;
@@ -411,6 +412,7 @@ export async function handler(request: Request): Promise<Response> {
     limit: 20,
     windowMs: 60_000,
     instanceLimiter: coarseInstanceLimiter,
+    requireDistributedInProduction: true,
   });
   const coarseRejection = publicRateLimitResponse(coarseDecision);
   if (coarseRejection) return coarseRejection;

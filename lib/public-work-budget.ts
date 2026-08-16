@@ -25,6 +25,7 @@ export const PUBLIC_LEGAL_SEARCH_QUERY_MAX_CHARS = 240;
 export const PUBLIC_SAFETY_REFERENCE_QUERY_MAX_CHARS = 500;
 export const PUBLIC_SAFETY_REFERENCE_FILTER_MAX_CHARS = 128;
 export const PUBLIC_JSON_BODY_READ_TIMEOUT_MS = 10_000;
+export const PUBLIC_MULTIPART_BODY_READ_TIMEOUT_MS = 10_000;
 
 export type PublicWorkBudgetError = {
   ok: false;
@@ -70,6 +71,23 @@ export async function enforcePublicJsonRequestBodyBudget(
     timeoutError: {
       code: "PUBLIC_JSON_BODY_READ_TIMEOUT",
       error: `Public JSON request body was not received within ${PUBLIC_JSON_BODY_READ_TIMEOUT_MS}ms.`,
+    },
+  });
+}
+
+export async function enforcePublicMultipartRequestBodyBudget(
+  request: Request,
+  maxBytes: number,
+  message: string,
+) {
+  return enforceRequestBodyBudget(request, maxBytes, {
+    code: "PUBLIC_MULTIPART_BODY_TOO_LARGE",
+    error: message,
+  }, {
+    timeoutMs: PUBLIC_MULTIPART_BODY_READ_TIMEOUT_MS,
+    timeoutError: {
+      code: "PUBLIC_MULTIPART_BODY_READ_TIMEOUT",
+      error: `Multipart request body was not received within ${PUBLIC_MULTIPART_BODY_READ_TIMEOUT_MS}ms.`,
     },
   });
 }

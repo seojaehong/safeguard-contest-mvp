@@ -18,6 +18,7 @@ import { buildImprovementDraft, buildImprovementPhotoPath } from "@/lib/workpack
 import { loadOwnedWorkpackOperationContext } from "@/lib/workpack-commercial-store";
 import {
   enforcePublicJsonRequestBodyBudget,
+  enforcePublicMultipartRequestBodyBudget,
   isOverCharBudget,
   WORKPACK_IMPROVEMENT_JSON_REQUEST_MAX_BYTES,
   WORKPACK_IMPROVEMENT_LABEL_MAX_CHARS,
@@ -318,9 +319,22 @@ async function handlePost(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ ok: false, configured: true, improvementId: null, message: owned.message }, { status: owned.status });
   }
 
+  let boundedRequest = request;
+  if ((request.headers.get("content-type") || "").includes("multipart/form-data")) {
+    const bodyBudget = await enforcePublicMultipartRequestBodyBudget(
+      request,
+      MAX_HAZARD_PHOTO_REQUEST_BYTES,
+      "workpack improvement multipart body exceeds the request byte budget"
+    );
+    if (!bodyBudget.ok) return bodyBudget.response;
+    boundedRequest = bodyBudget.request === request
+      ? request
+      : new NextRequest(bodyBudget.request);
+  }
+
   let body: ImprovementRequest;
   try {
-    body = await readImprovementRequest(request);
+    body = await readImprovementRequest(boundedRequest);
   } catch (error) {
     if (error instanceof ImprovementRequestError) {
       return NextResponse.json({

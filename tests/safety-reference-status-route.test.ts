@@ -8,7 +8,11 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/safety-reference-catalog", () => ({
-  getSafetyReferenceStats: mocks.getSafetyReferenceStats
+  getSafetyReferenceStats: mocks.getSafetyReferenceStats,
+  buildPublicSafetyReferenceItem: (item: Record<string, unknown>) => {
+    const { body: _body, payload: _payload, metadata: _metadata, ...publicItem } = item;
+    return publicItem;
+  }
 }));
 
 vi.mock("@/lib/kosha-guide-corpus", () => ({
@@ -159,6 +163,51 @@ describe("safety-reference status route", () => {
       officialFileId: "CTC2026012913263450093332"
     });
     expect(JSON.stringify(payload)).not.toContain("C:/private/kosha-corpus");
+  });
+
+  it("projects catalog samples without raw body, payload, or metadata", async () => {
+    mocks.getSafetyReferenceStats.mockResolvedValue({
+      ...readyCatalogStats,
+      samples: [{
+        id: "sample-1",
+        source_id: "source-1",
+        item_type: "guide",
+        category: "전기",
+        subcategory: null,
+        title: "감전 예방",
+        summary: "공개 요약",
+        body: "private full corpus body",
+        keywords: ["감전"],
+        risk_tags: ["전기"],
+        primary_documents: ["위험성평가표"],
+        controls: ["검전"],
+        payload: { internal: "secret" },
+        metadata: { privatePath: "C:/private/corpus" }
+      }]
+    });
+    mocks.loadKoshaGuideCorpus.mockResolvedValue({
+      status: "ready",
+      rootDir: "C:/private/kosha-corpus",
+      snapshotId: "snapshot-id",
+      manifestSha256: "manifest-sha256",
+      inventoryCount: 1_040,
+      itemCount: 1_040,
+      chunkCount: 20_520,
+      failureCount: 0,
+      records: [],
+      indexedRecords: []
+    });
+
+    const response = await GET(statusRequest());
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.samples[0]).toMatchObject({ title: "감전 예방", summary: "공개 요약" });
+    expect(payload.samples[0]).not.toHaveProperty("body");
+    expect(payload.samples[0]).not.toHaveProperty("payload");
+    expect(payload.samples[0]).not.toHaveProperty("metadata");
+    expect(JSON.stringify(payload)).not.toContain("private full corpus body");
+    expect(JSON.stringify(payload)).not.toContain("C:/private/corpus");
   });
 
   it("fails closed when the exact KOSHA trust assets fail runtime integrity loading", async () => {

@@ -1,4 +1,5 @@
 import { IntegrationMode } from "./types";
+import { readBoundedResponseText } from "./server/upstream-http";
 
 export type KoshaEducationRecommendation = {
   title: string;
@@ -33,6 +34,7 @@ type KoshaEduApiResponse = {
 
 const BASE_URL = "https://edu.kosha.or.kr";
 const API_BASE = `${BASE_URL}/api/portal24/bizG/p/GETEA02001`;
+const KOSHA_EDUCATION_RESPONSE_MAX_BYTES = 1_024 * 1_024;
 const TIMEOUT_MS = 20_000;
 const MAX_ATTEMPTS = 2;
 
@@ -77,7 +79,10 @@ async function postKoshaEdu(endpoint: string, body: Record<string, unknown>, sig
         signal: controller.signal,
         cache: "no-store"
       });
-      const text = await response.text();
+      const text = await readBoundedResponseText(response, {
+        label: `KOSHA EDU ${endpoint} response`,
+        maxBytes: KOSHA_EDUCATION_RESPONSE_MAX_BYTES,
+      });
       if (!response.ok) {
         throw new Error(`KOSHA EDU ${endpoint} returned ${response.status}: ${text.slice(0, 160)}`);
       }
