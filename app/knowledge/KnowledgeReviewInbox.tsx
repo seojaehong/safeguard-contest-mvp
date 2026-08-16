@@ -368,7 +368,7 @@ export function KnowledgeReviewInbox() {
   async function submit(runId: string, action: ReviewAction): Promise<void> {
     if (!accessToken) return;
     setPendingRunId(runId);
-    setMessage("");
+    setMessage("검토 결과를 저장하는 중입니다.");
     try {
       const response = await fetch("/api/knowledge/review", {
         method: "POST",
@@ -395,7 +395,7 @@ export function KnowledgeReviewInbox() {
   async function prepare(runId: string): Promise<void> {
     if (!accessToken) return;
     setPendingRunId(runId);
-    setMessage("");
+    setMessage("검토 후보를 준비하는 중입니다.");
     try {
       const response = await fetch("/api/knowledge/review/prepare", {
         method: "POST",
@@ -475,7 +475,7 @@ export function KnowledgeReviewInbox() {
 
           {selectedItem ? (() => {
             const item = selectedItem;
-            const pending = pendingRunId === item.runId;
+            const pending = pendingRunId !== null;
             const selectedIndex = items.findIndex((candidate) => candidate.runId === item.runId);
             const candidatePaneTabId = `knowledge-review-pane-tab-candidate-${selectedIndex}`;
             const evidencePaneTabId = `knowledge-review-pane-tab-evidence-${selectedIndex}`;
@@ -485,8 +485,10 @@ export function KnowledgeReviewInbox() {
                 id={`knowledge-review-candidate-panel-${selectedIndex}`}
                 role="tabpanel"
                 aria-labelledby={`knowledge-review-candidate-tab-${selectedIndex}`}
+                aria-busy={pending}
                 data-review-run-status={item.status}
                 data-selected-review-candidate="true"
+                data-review-pending={pending ? "true" : "false"}
               >
                 <div className={styles.reviewItemHeading}>
                   <div>
@@ -605,14 +607,14 @@ export function KnowledgeReviewInbox() {
                       <span>온톨로지 미반영</span>
                       {item.providerLabel ? <span>{item.providerLabel}</span> : null}
                     </div>
-                    <div className={styles.reviewActions} role="group" aria-label="검토 결정">
+                    <div className={styles.reviewActions} role="group" aria-label="검토 결정" aria-busy={pending}>
                       <button type="button" disabled={pending} onClick={() => void submit(item.runId, "approve_candidate")}>후보 승인</button>
                       <button type="button" disabled={pending} onClick={() => void submit(item.runId, "keep_site_only")}>현장 전용 유지</button>
                       <button type="button" disabled={pending} onClick={() => void submit(item.runId, "reject")}>반려</button>
                     </div>
                   </>
                 ) : item.status === "draft" ? (
-                  <button className={styles.prepareButton} type="button" disabled={pending} onClick={() => void prepare(item.runId)}>
+                  <button className={styles.prepareButton} type="button" disabled={pending} aria-busy={pending} onClick={() => void prepare(item.runId)}>
                     후보 준비
                   </button>
                 ) : null}

@@ -81,6 +81,15 @@ describe("knowledge governance UI contract", () => {
     expect(cssSource).toMatch(/\.reviewCandidateButton:focus-visible[\s\S]*?outline:\s*3px solid/u);
   });
 
+  it("announces pending review decisions and exposes a busy action boundary", () => {
+    expect(inboxSource).toContain('setMessage("검토 결과를 저장하는 중입니다.")');
+    expect(inboxSource).toContain('setMessage("검토 후보를 준비하는 중입니다.")');
+    expect(inboxSource).toContain("const pending = pendingRunId !== null");
+    expect(inboxSource).toContain("aria-busy={pending}");
+    expect(inboxSource).toContain('data-review-pending={pending ? "true" : "false"}');
+    expect(inboxSource).toContain('className={styles.reviewInboxMessage} role="status"');
+  });
+
   it("localizes schema field names at the presentation boundary", () => {
     expect(pageSource).toContain('roleLabel: "문서 역할"');
     expect(pageSource).toContain('shortSummary: "짧은 요약"');

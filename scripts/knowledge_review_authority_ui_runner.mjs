@@ -135,6 +135,8 @@ try {
       const context = await browser.newContext({ viewport });
       const page = await context.newPage();
       const browserErrors = [];
+      let releaseReviewPost = null;
+      let reviewPostObserved = false;
       page.on("console", (message) => {
         if (message.type() !== "error") return;
         const text = message.text();
@@ -167,6 +169,16 @@ try {
         }));
       }, authStorageKey);
       await page.route("**/api/knowledge/review", async (route) => {
+        if (route.request().method() === "POST") {
+          reviewPostObserved = true;
+          await new Promise((resolve) => { releaseReviewPost = resolve; });
+          await route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify({ ok: true })
+          });
+          return;
+        }
         await route.fulfill({
           status: 200,
           contentType: "application/json",
@@ -337,6 +349,58 @@ try {
       }
       const screenshot = `knowledge-review-authority-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`;
       await page.screenshot({ path: path.join(outputDir, screenshot), fullPage: false });
+      await inbox.getByRole("button", { name: "후보 승인", exact: true }).click();
+      await page.waitForFunction(() => (
+        document.querySelector("[data-selected-review-candidate='true']")?.getAttribute("aria-busy") === "true"
+      ));
+      for (let attempt = 0; attempt < 100 && !releaseReviewPost; attempt += 1) {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      const pendingDecision = await page.evaluate(() => {
+        const candidate = document.querySelector("[data-selected-review-candidate='true']");
+        const actionGroup = document.querySelector("[role='group'][aria-label='검토 결정']");
+        const status = document.querySelector("[data-knowledge-review-inbox='true'] [role='status']");
+        const buttons = actionGroup ? [...actionGroup.querySelectorAll("button")] : [];
+        return {
+          candidateBusy: candidate?.getAttribute("aria-busy") === "true",
+          pendingDataState: candidate?.getAttribute("data-review-pending") === "true",
+          actionGroupBusy: actionGroup?.getAttribute("aria-busy") === "true",
+          disabledActionCount: buttons.filter((button) => button.disabled).length,
+          statusText: status?.textContent || ""
+        };
+      });
+      if (!releaseReviewPost) throw new Error("Hermes review POST did not reach the delayed fixture");
+      releaseReviewPost();
+      await page.waitForFunction(() => {
+        const candidate = document.querySelector("[data-selected-review-candidate='true']");
+        const status = document.querySelector("[data-knowledge-review-inbox='true'] [role='status']");
+        return candidate?.getAttribute("aria-busy") === "false"
+          && status?.textContent?.includes("검토 결과를 저장했습니다. 게시되지는 않았습니다.");
+      });
+      const settledDecision = await page.evaluate(() => {
+        const candidate = document.querySelector("[data-selected-review-candidate='true']");
+        const actionGroup = document.querySelector("[role='group'][aria-label='검토 결정']");
+        const status = document.querySelector("[data-knowledge-review-inbox='true'] [role='status']");
+        const buttons = actionGroup ? [...actionGroup.querySelectorAll("button")] : [];
+        return {
+          candidateBusy: candidate?.getAttribute("aria-busy") === "true",
+          pendingDataState: candidate?.getAttribute("data-review-pending") === "true",
+          actionGroupBusy: actionGroup?.getAttribute("aria-busy") === "true",
+          enabledActionCount: buttons.filter((button) => !button.disabled).length,
+          statusText: status?.textContent || ""
+        };
+      });
+      const decisionPendingContract = reviewPostObserved
+        && pendingDecision.candidateBusy
+        && pendingDecision.pendingDataState
+        && pendingDecision.actionGroupBusy
+        && pendingDecision.disabledActionCount === 3
+        && pendingDecision.statusText === "검토 결과를 저장하는 중입니다."
+        && !settledDecision.candidateBusy
+        && !settledDecision.pendingDataState
+        && !settledDecision.actionGroupBusy
+        && settledDecision.enabledActionCount === 3
+        && settledDecision.statusText === "검토 결과를 저장했습니다. 게시되지는 않았습니다.";
       const passed = metrics.horizontalOverflow === false
         && metrics.navigatorCandidateCount === queueItems.length
         && metrics.candidateTablistRole === "tablist"
@@ -382,6 +446,7 @@ try {
             && mobilePaneKeyboard.homeState.focusedIndex === 0
             && mobilePaneKeyboard.homeState.mountedPane === "candidate")
         && metrics.firstActionDepth <= viewport.height * 1.25
+        && decisionPendingContract
         && browserErrors.length === 0;
       results.push({
         theme,
@@ -391,6 +456,12 @@ try {
         candidateKeyboard: { endState: candidateEndState, homeState: candidateHomeState },
         mobilePaneKeyboard,
         mobileEvidence,
+        decisionPending: {
+          reviewPostObserved,
+          pending: pendingDecision,
+          settled: settledDecision,
+          passed: decisionPendingContract
+        },
         browserErrors,
         passed
       });
@@ -452,6 +523,10 @@ const report = {
     breakpointOrientationSynchronized: true,
     mobilePaneTabsLinked: true,
     mobilePaneKeyboardNavigation: true,
+    decisionPendingStatusLive: results.every((result) => result.decisionPending.pending.statusText === "검토 결과를 저장하는 중입니다."),
+    decisionBusyStateExposed: results.every((result) => result.decisionPending.pending.candidateBusy && result.decisionPending.pending.actionGroupBusy),
+    decisionActionsDisabledDuringSave: results.every((result) => result.decisionPending.pending.disabledActionCount === 3),
+    decisionSettlesAccessibly: results.every((result) => result.decisionPending.passed),
     evidenceItemLimit: 20,
     evidenceItemCount: queueItem.evidenceItems.length,
     desktopEvidenceColumns: 2,
@@ -506,6 +581,7 @@ ${rows}
 - Candidate tabs expose one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, and Arrow/Home/End keyboard navigation.
 - Desktop uses a two-column review workbench; mobile uses one column and keeps the candidate body internally scrollable.
 - Desktop mounts the selected candidate and five-item evidence inspector together; mobile mounts one linked pane behind a keyboard-operable segmented tab control.
+- Review decisions announce their pending state, expose busy semantics, disable all competing actions, and restore the settled status after the delayed save fixture completes.
 - Only allowlisted public law, KOSHA, and SIF references expose verified HTTPS links. Organization and site evidence retain generic labels and bounded digests only.
 
 ## Boundary
@@ -569,6 +645,10 @@ if (liveMode && productionAligned && summaryOutput) {
           breakpointOrientationSynchronized: report.workbenchContract.breakpointOrientationSynchronized,
           mobilePaneTabsLinked: report.workbenchContract.mobilePaneTabsLinked,
           mobilePaneKeyboardNavigation: report.workbenchContract.mobilePaneKeyboardNavigation,
+          decisionPendingStatusLive: report.workbenchContract.decisionPendingStatusLive,
+          decisionBusyStateExposed: report.workbenchContract.decisionBusyStateExposed,
+          decisionActionsDisabledDuringSave: report.workbenchContract.decisionActionsDisabledDuringSave,
+          decisionSettlesAccessibly: report.workbenchContract.decisionSettlesAccessibly,
           publicOfficialHttpsLinkCount: report.workbenchContract.publicEvidenceLinkCount,
           privateEvidenceRawIdentityExposed: report.workbenchContract.privateEvidenceRawIdentityExposed,
           evidenceInternalScroll: report.workbenchContract.evidenceInternalScroll,
@@ -621,7 +701,7 @@ if (liveMode && productionAligned && summaryOutput) {
 ${evidenceInspectorMode
   ? "The selected-candidate inspector keeps five evidence items bounded, exposes only allowlisted official HTTPS references, and preserves generic tenant-evidence labels."
   : "The authenticated review candidate cockpit exposes six evidence-role counts, keeps legal-duty claims bound to law provenance, blocks public promotion of tenant memory, and requires site-manager acceptance before workpack use."}
-The candidate navigator keeps one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, and keyboard navigation across candidates and compact review panes.
+The candidate navigator keeps one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, and keyboard navigation across candidates and compact review panes. Delayed decision saves expose a live pending message, busy semantics, disabled competing actions, and an accessible settled state.
 
 ## Boundary
 

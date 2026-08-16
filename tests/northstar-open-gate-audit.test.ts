@@ -1212,6 +1212,10 @@ function createFixtureRoot(): string {
       breakpointOrientationSynchronized: true,
       mobilePaneTabsLinked: true,
       mobilePaneKeyboardNavigation: true,
+      decisionPendingStatusLive: true,
+      decisionBusyStateExposed: true,
+      decisionActionsDisabledDuringSave: true,
+      decisionSettlesAccessibly: true,
     },
     mutationBoundary: {
       dbMutationPerformed: false,
@@ -2823,6 +2827,10 @@ function createFixtureRoot(): string {
       breakpointOrientationSynchronized: true,
       mobilePaneTabsLinked: true,
       mobilePaneKeyboardNavigation: true,
+      decisionPendingStatusLive: true,
+      decisionBusyStateExposed: true,
+      decisionActionsDisabledDuringSave: true,
+      decisionSettlesAccessibly: true,
       publicOfficialHttpsLinkCount: 3,
       privateEvidenceRawIdentityExposed: false,
       evidenceInternalScroll: true,
@@ -6629,6 +6637,27 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(gate?.state).toBe("contradicted");
     expect(gate?.detail).toContain("candidateKeyboard=false");
     expect(gate?.detail).toContain("mobilePaneKeyboard=false");
+  });
+
+  it("fails Hermes reviewer UI and evidence inspector closed when decision pending state is not proven", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const authorityPath = path.join(rootDir, "evaluation", "hermes-knowledge-review-selected-workbench-2026-08-14", "report.json");
+    const inspectorPath = path.join(rootDir, "evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json");
+    const authority = JSON.parse(fs.readFileSync(authorityPath, "utf8")) as {
+      workbenchContract: { decisionPendingStatusLive: boolean };
+    };
+    const inspector = JSON.parse(fs.readFileSync(inspectorPath, "utf8")) as {
+      evidenceContract: { decisionBusyStateExposed: boolean };
+    };
+    authority.workbenchContract.decisionPendingStatusLive = false;
+    inspector.evidenceContract.decisionBusyStateExposed = false;
+    fs.writeFileSync(authorityPath, `${JSON.stringify(authority, null, 2)}\n`, "utf8");
+    fs.writeFileSync(inspectorPath, `${JSON.stringify(inspector, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((item) => item.id === "hermes_knowledge_review_ui")?.state).toBe("contradicted");
+    expect(audit.gates.find((item) => item.id === "hermes_review_evidence_inspector")?.state).toBe("contradicted");
   });
 
   it("fails security remediation waves closed when non-closure boundaries are weakened", async () => {
