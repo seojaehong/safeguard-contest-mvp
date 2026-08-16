@@ -1,8 +1,8 @@
 # Documents Touch Target Evidence
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_DOCUMENT_TOUCH_TARGETS`
-- Source: `1a4ab653e7beac74abe536bdbd66125af3a19043`
-- Production: `local`
+- Verdict: `PASS_LIVE_PRODUCTION_DOCUMENT_TOUCH_TARGETS`
+- Source: `e65d9786dae432016fcbeadd865ac75566380293`
+- Production: `e65d9786dae432016fcbeadd865ac75566380293`
 - Scope: Documents section actions, risk-row selectors, and human-review close control
 - Boundary: no DB/provider/Share mutation; exact saved Share remains `MISSING_EVIDENCE`
 

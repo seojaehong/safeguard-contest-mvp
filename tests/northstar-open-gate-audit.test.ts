@@ -2268,6 +2268,46 @@ function createFixtureRoot(): string {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "documents-touch-targets-2026-08-17", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_TOUCH_TARGETS",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", branch: "master", environment: "production" },
+    sourceHeadMatchesProduction: true,
+    total: 4,
+    pass: 4,
+    fail: 0,
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    results: [
+      { width: 1440, height: 723, verdict: "PASS" },
+      { width: 1440, height: 723, verdict: "PASS" },
+      { width: 390, height: 723, verdict: "PASS" },
+      { width: 390, height: 723, verdict: "PASS" },
+    ].map((item) => ({
+      ...item,
+      cockpit: {
+        viewportWidth: item.width,
+        viewportHeight: item.height,
+        bodyHeight: item.height,
+        horizontalOverflow: false,
+        shellRatio: item.width === 390 ? 2.07 : 1.75,
+        shellOverflowY: "auto",
+        actionHeights: [44, 44],
+        selectorHeights: [44, 44, 44],
+        coreButtonCount: 3,
+        supportingDocumentsOpen: false,
+      },
+      reviewDialog: {
+        closeWidth: 44,
+        closeHeight: 44,
+        horizontalOverflow: false,
+      },
+    })),
+  });
   writeJson(rootDir, path.join("evaluation", "document-section-navigation-2026-08-02", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_SECTION_NAVIGATION",
     sourceHead: "fixture-sha",
@@ -5100,6 +5140,9 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("12 unique document keys");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exactly 3 visible core launchers");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("mobile document-review launcher overlap moved from 1 to 0");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("44px section actions");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("44px risk-row selectors");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("44x44 human-review close control");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("0 visible supporting launchers");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("legacy document index hidden");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("6 readable section tabs");
@@ -7015,6 +7058,26 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(gate?.state).toBe("contradicted");
     expect(gate?.evidencePath).toBe(path.join("evaluation", "document-authoring-pane-margin-2026-08-02", "report.json"));
     expect(gate?.detail).toContain("48/48 all-document selected-authoring and raw-source containment");
+  });
+
+  it("contradicts the UI gate when a mobile document control falls below 44px", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const geometryPath = path.join(rootDir, "evaluation", "documents-touch-targets-2026-08-17", "report.json");
+    const geometry = JSON.parse(fs.readFileSync(geometryPath, "utf8")) as {
+      results: Array<{ cockpit: { selectorHeights: number[] } }>;
+    };
+    geometry.results[2].cockpit.selectorHeights[0] = 36;
+    fs.writeFileSync(geometryPath, `${JSON.stringify(geometry, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+    const gate = audit.gates.find((item) => item.id === "ui_documents_share_cockpit");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.evidencePath).toBe(path.join("evaluation", "documents-touch-targets-2026-08-17", "report.json"));
   });
 
   it("contradicts the UI gate when a raw source editor escapes its bounded viewport", async () => {
