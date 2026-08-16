@@ -2,9 +2,9 @@
   "schemaVersion": "safeclaw-hermes-knowledge-review-authority-ui/v2",
   "contractMode": "evidence-inspector",
   "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_EVIDENCE_INSPECTOR",
-  "checkedAt": "2026-08-16T13:10:46.303Z",
-  "sourceHead": "e7afe36bc380bca2666dcbd2115aa0e1e1e32e80",
-  "productCommit": "bc160cbde13ff0441c24e7f0974c121e24b39025",
+  "checkedAt": "2026-08-16T14:23:00.229Z",
+  "sourceHead": "4eb30810d623070796c9a754dd2af59ae82c6f4f",
+  "productCommit": "4eb30810d623070796c9a754dd2af59ae82c6f4f",
   "baseUrl": "http://127.0.0.1:3091",
   "mode": "current-source-local-production",
   "productionBuild": {
@@ -47,6 +47,10 @@
     "breakpointOrientationSynchronized": true,
     "mobilePaneTabsLinked": true,
     "mobilePaneKeyboardNavigation": true,
+    "decisionPendingStatusLive": true,
+    "decisionBusyStateExposed": true,
+    "decisionActionsDisabledDuringSave": true,
+    "decisionSettlesAccessibly": true,
     "evidenceItemLimit": 20,
     "evidenceItemCount": 5,
     "desktopEvidenceColumns": 2,
@@ -125,6 +129,24 @@
       },
       "mobilePaneKeyboard": null,
       "mobileEvidence": null,
+      "decisionPending": {
+        "reviewPostObserved": true,
+        "pending": {
+          "candidateBusy": true,
+          "pendingDataState": true,
+          "actionGroupBusy": true,
+          "disabledActionCount": 3,
+          "statusText": "검토 결과를 저장하는 중입니다."
+        },
+        "settled": {
+          "candidateBusy": false,
+          "pendingDataState": false,
+          "actionGroupBusy": false,
+          "enabledActionCount": 3,
+          "statusText": "검토 결과를 저장했습니다. 게시되지는 않았습니다."
+        },
+        "passed": true
+      },
       "browserErrors": [],
       "passed": true
     },
@@ -186,6 +208,24 @@
       },
       "mobilePaneKeyboard": null,
       "mobileEvidence": null,
+      "decisionPending": {
+        "reviewPostObserved": true,
+        "pending": {
+          "candidateBusy": true,
+          "pendingDataState": true,
+          "actionGroupBusy": true,
+          "disabledActionCount": 3,
+          "statusText": "검토 결과를 저장하는 중입니다."
+        },
+        "settled": {
+          "candidateBusy": false,
+          "pendingDataState": false,
+          "actionGroupBusy": false,
+          "enabledActionCount": 3,
+          "statusText": "검토 결과를 저장했습니다. 게시되지는 않았습니다."
+        },
+        "passed": true
+      },
       "browserErrors": [],
       "passed": true
     },
@@ -264,6 +304,24 @@
         "publicEvidenceLinkCount": 3,
         "listOverflowY": "auto",
         "contained": true
+      },
+      "decisionPending": {
+        "reviewPostObserved": true,
+        "pending": {
+          "candidateBusy": true,
+          "pendingDataState": true,
+          "actionGroupBusy": true,
+          "disabledActionCount": 3,
+          "statusText": "검토 결과를 저장하는 중입니다."
+        },
+        "settled": {
+          "candidateBusy": false,
+          "pendingDataState": false,
+          "actionGroupBusy": false,
+          "enabledActionCount": 3,
+          "statusText": "검토 결과를 저장했습니다. 게시되지는 않았습니다."
+        },
+        "passed": true
       },
       "browserErrors": [],
       "passed": true
@@ -344,6 +402,24 @@
         "listOverflowY": "auto",
         "contained": true
       },
+      "decisionPending": {
+        "reviewPostObserved": true,
+        "pending": {
+          "candidateBusy": true,
+          "pendingDataState": true,
+          "actionGroupBusy": true,
+          "disabledActionCount": 3,
+          "statusText": "검토 결과를 저장하는 중입니다."
+        },
+        "settled": {
+          "candidateBusy": false,
+          "pendingDataState": false,
+          "actionGroupBusy": false,
+          "enabledActionCount": 3,
+          "statusText": "검토 결과를 저장했습니다. 게시되지는 않았습니다."
+        },
+        "passed": true
+      },
       "browserErrors": [],
       "passed": true
     },
@@ -405,6 +481,24 @@
       },
       "mobilePaneKeyboard": null,
       "mobileEvidence": null,
+      "decisionPending": {
+        "reviewPostObserved": true,
+        "pending": {
+          "candidateBusy": true,
+          "pendingDataState": true,
+          "actionGroupBusy": true,
+          "disabledActionCount": 3,
+          "statusText": "검토 결과를 저장하는 중입니다."
+        },
+        "settled": {
+          "candidateBusy": false,
+          "pendingDataState": false,
+          "actionGroupBusy": false,
+          "enabledActionCount": 3,
+          "statusText": "검토 결과를 저장했습니다. 게시되지는 않았습니다."
+        },
+        "passed": true
+      },
       "browserErrors": [],
       "passed": true
     },
@@ -466,6 +560,24 @@
       },
       "mobilePaneKeyboard": null,
       "mobileEvidence": null,
+      "decisionPending": {
+        "reviewPostObserved": true,
+        "pending": {
+          "candidateBusy": true,
+          "pendingDataState": true,
+          "actionGroupBusy": true,
+          "disabledActionCount": 3,
+          "statusText": "검토 결과를 저장하는 중입니다."
+        },
+        "settled": {
+          "candidateBusy": false,
+          "pendingDataState": false,
+          "actionGroupBusy": false,
+          "enabledActionCount": 3,
+          "statusText": "검토 결과를 저장했습니다. 게시되지는 않았습니다."
+        },
+        "passed": true
+      },
       "browserErrors": [],
       "passed": true
     },
@@ -483,7 +595,7 @@
         "horizontalOverflow": false,
         "rootWidth": 366,
         "rootWidthRatio": 0.94,
-        "rootTop": 605.140625,
+        "rootTop": 589.140625,
         "workbenchColumns": 1,
         "navigatorCandidateCount": 3,
         "candidateTablistRole": "tablist",
@@ -509,8 +621,8 @@
         "authorityWidth": 340,
         "authorityRoleCount": 6,
         "authorityContained": true,
-        "actionGroupTop": 1464.75,
-        "firstActionBottom": 1508.75,
+        "actionGroupTop": 1448.75,
+        "firstActionBottom": 1492.75,
         "firstActionDepth": 903.609375,
         "actionCount": 3,
         "actionContained": true
@@ -544,6 +656,24 @@
         "publicEvidenceLinkCount": 3,
         "listOverflowY": "auto",
         "contained": true
+      },
+      "decisionPending": {
+        "reviewPostObserved": true,
+        "pending": {
+          "candidateBusy": true,
+          "pendingDataState": true,
+          "actionGroupBusy": true,
+          "disabledActionCount": 3,
+          "statusText": "검토 결과를 저장하는 중입니다."
+        },
+        "settled": {
+          "candidateBusy": false,
+          "pendingDataState": false,
+          "actionGroupBusy": false,
+          "enabledActionCount": 3,
+          "statusText": "검토 결과를 저장했습니다. 게시되지는 않았습니다."
+        },
+        "passed": true
       },
       "browserErrors": [],
       "passed": true
@@ -623,6 +753,24 @@
         "publicEvidenceLinkCount": 3,
         "listOverflowY": "auto",
         "contained": true
+      },
+      "decisionPending": {
+        "reviewPostObserved": true,
+        "pending": {
+          "candidateBusy": true,
+          "pendingDataState": true,
+          "actionGroupBusy": true,
+          "disabledActionCount": 3,
+          "statusText": "검토 결과를 저장하는 중입니다."
+        },
+        "settled": {
+          "candidateBusy": false,
+          "pendingDataState": false,
+          "actionGroupBusy": false,
+          "enabledActionCount": 3,
+          "statusText": "검토 결과를 저장했습니다. 게시되지는 않았습니다."
+        },
+        "passed": true
       },
       "browserErrors": [],
       "passed": true
