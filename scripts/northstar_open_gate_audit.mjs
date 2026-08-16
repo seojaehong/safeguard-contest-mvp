@@ -4102,6 +4102,23 @@ function evaluateDocumentEditorialReviewCockpitGate(rootDir) {
       && readNumber(after.apiRequestCount) === 0
       && readNumber(after.dialogScrollTop) === 0;
   });
+  const accessibilityPass = results.length === 4 && results.every((row) => {
+    const accessibility = isRecord(row.accessibility) ? row.accessibility : {};
+    return readString(accessibility.initialFocusLabel) === "문서 사람 검토 닫기"
+      && accessibility.initialFocusIsCloseButton === true
+      && accessibility.initialFocusInsideDialog === true
+      && readString(accessibility.describedBy) === "document-editorial-review-description"
+      && readString(accessibility.liveProgress) === "polite"
+      && readString(accessibility.tablistOrientation) === "vertical"
+      && readNumber(accessibility.tabCount) === 12
+      && readNumber(accessibility.selectedTabCount) === 1
+      && readNumber(accessibility.tabbableTabCount) === 1
+      && accessibility.arrowNavigationPass === true
+      && accessibility.homeNavigationPass === true
+      && accessibility.tabpanelLinked === true
+      && accessibility.dialogClosedOnEscape === true
+      && accessibility.escapeRestoresLaunchFocus === true;
+  });
   const sourceMatchesProduction = readString(report.sourceHead).length > 0
     && readString(report.sourceHead) === readString(productionBuild.commitSha)
     && report.sourceHeadMatchesProduction === true
@@ -4126,7 +4143,10 @@ function evaluateDocumentEditorialReviewCockpitGate(rootDir) {
     && acceptance.longCopyContained === true
     && acceptance.reviewStateStoredSeparately === true
     && acceptance.editedTextInvalidatesCompletion === true
-    && acceptance.automaticReviewCannotClaimHumanCompletion === true;
+    && acceptance.automaticReviewCannotClaimHumanCompletion === true
+    && acceptance.keyboardRovingTabNavigation === true
+    && acceptance.screenReaderTabPanelContract === true
+    && acceptance.escapeRestoresLaunchFocus === true;
   const geometryPass = desktopRows.length === 2
     && desktopRows.every((row) => readNumber(row.beforeCompletion?.workbenchColumns) === 3)
     && mobileRows.length === 2
@@ -4137,6 +4157,7 @@ function evaluateDocumentEditorialReviewCockpitGate(rootDir) {
     && readNumber(report.fail) === 0
     && sourceMatchesProduction
     && rowsPass
+    && accessibilityPass
     && geometryPass
     && contractPass
     && boundaryPass
@@ -4148,7 +4169,7 @@ function evaluateDocumentEditorialReviewCockpitGate(rootDir) {
       label: "Live 12-document human editorial review cockpit",
       state: "proven",
       evidencePath,
-      detail: "Live Day/Night desktop-short 1440x723 and mobile-short 390x723 pass 4/4 with 12 canonical documents including riskAssessmentDraft, five explicit reviewer checks, a three-zone desktop and one-column mobile cockpit, unchanged page-body height, local-scroll containment, separate stale-aware review storage, zero API calls, and no current-workpack mutation. This proves the human review workflow is available; automatedInteractionOnly=true and humanReviewCompleted=false, broad human wording review remains required, and exact saved Share remains MISSING_EVIDENCE.",
+      detail: "Live Day/Night desktop-short 1440x723 and mobile-short 390x723 pass 4/4 with 12 canonical documents including riskAssessmentDraft, five explicit reviewer checks, a three-zone desktop and one-column mobile cockpit, unchanged page-body height, local-scroll containment, separate stale-aware review storage, zero API calls, and no current-workpack mutation. All four cases also prove deterministic close-button entry focus, one selected and tabbable document tab, Arrow/Home roving navigation, a labelled tabpanel, and Escape focus restoration. This proves the human review workflow is available; automatedInteractionOnly=true and humanReviewCompleted=false, broad human wording review remains required, and exact saved Share remains MISSING_EVIDENCE.",
       nextActions: [
         "Use the cockpit for the separate human editorial review without treating automated geometry as human completion.",
         "Keep exact saved Share and every DB/provider/vector/wiki/KOSHA mutation behind their existing approval boundaries.",
@@ -4161,8 +4182,8 @@ function evaluateDocumentEditorialReviewCockpitGate(rootDir) {
     label: "Live 12-document human editorial review cockpit",
     state: "contradicted",
     evidencePath,
-    detail: `Cockpit verdict=${readString(report.verdict) || "unknown"}, live=${readNumber(report.pass)}/4, rowsPass=${rowsPass}, geometryPass=${geometryPass}, contractPass=${contractPass}, sourceMatchesProduction=${sourceMatchesProduction}, humanReviewCompleted=${reviewBoundary.humanReviewCompleted === true}, exactShare=${readString(mutationBoundary.exactSavedShareVerdict) || "unknown"}, noMutation=${noMutation}.`,
-    nextActions: ["Restore the fail-closed review, geometry, source/live, and no-mutation contracts before claiming the cockpit proven."],
+    detail: `Cockpit verdict=${readString(report.verdict) || "unknown"}, live=${readNumber(report.pass)}/4, rowsPass=${rowsPass}, accessibilityPass=${accessibilityPass}, geometryPass=${geometryPass}, contractPass=${contractPass}, sourceMatchesProduction=${sourceMatchesProduction}, humanReviewCompleted=${reviewBoundary.humanReviewCompleted === true}, exactShare=${readString(mutationBoundary.exactSavedShareVerdict) || "unknown"}, noMutation=${noMutation}.`,
+    nextActions: ["Restore the fail-closed review, accessibility, geometry, source/live, and no-mutation contracts before claiming the cockpit proven."],
   });
 }
 

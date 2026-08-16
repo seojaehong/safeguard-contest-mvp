@@ -46,6 +46,8 @@ try {
     const tabs = dialog.getByRole("tab");
     const initialAccessibility = await dialog.evaluate((element) => ({
       initialFocusLabel: document.activeElement?.getAttribute("aria-label") || "",
+      initialFocusIsCloseButton: document.activeElement === element.querySelector(".safeclaw-document-review-close"),
+      initialFocusInsideDialog: document.activeElement ? element.contains(document.activeElement) : false,
       describedBy: element.getAttribute("aria-describedby") || "",
       liveProgress: element.querySelector(".safeclaw-document-review-progress")?.getAttribute("aria-live") || "",
       tablistOrientation: element.querySelector('[role="tablist"]')?.getAttribute("aria-orientation") || "",
@@ -54,40 +56,67 @@ try {
       tabbableTabCount: Array.from(element.querySelectorAll('[role="tab"]'))
         .filter((item) => item.getAttribute("tabindex") === "0").length
     }));
+    const firstTabKey = await tabs.first().getAttribute("data-review-document-key");
+    const secondTabKey = await tabs.nth(1).getAttribute("data-review-document-key");
+    if (!firstTabKey || !secondTabKey) throw new Error("Document review tab keys are unavailable");
     await tabs.first().focus();
     await page.keyboard.press("ArrowRight");
-    await page.waitForFunction(() => (
-      document.querySelector('[role="tab"][aria-selected="true"]')
-        ?.getAttribute("data-review-document-key") === "tbmBriefing"
-    ));
-    const arrowNavigation = await dialog.evaluate((element) => {
-      const selected = element.querySelector('[role="tab"][aria-selected="true"]');
-      const panel = element.querySelector('[role="tabpanel"]');
-      return {
-        selectedKey: selected?.getAttribute("data-review-document-key") || "",
-        selectedHasFocus: document.activeElement === selected,
-        panelLabelledBy: panel?.getAttribute("aria-labelledby") || "",
-        selectedTabId: selected?.id || ""
-      };
-    });
+    await page.waitForTimeout(100);
+    const selectedTabs = dialog.locator('[role="tab"][aria-selected="true"]');
+    const tabbableTabs = dialog.locator('[role="tab"][tabindex="0"]');
+    const selectedTabId = await selectedTabs.first().getAttribute("id");
+    const selectedTabKey = await selectedTabs.first().getAttribute("data-review-document-key");
+    const selectedTabControls = await selectedTabs.first().getAttribute("aria-controls");
+    const panel = dialog.getByRole("tabpanel");
+    const panelId = await panel.getAttribute("id");
+    const arrowNavigation = {
+      selectedKey: selectedTabKey,
+      selectedTabCount: await selectedTabs.count(),
+      tabbableTabCount: await tabbableTabs.count(),
+      selectedMatchesTabbable: selectedTabKey === await tabbableTabs.first().getAttribute("data-review-document-key"),
+      selectedHasFocus: await page.evaluate((expectedKey) => (
+        document.activeElement?.getAttribute("data-review-document-key") === expectedKey
+      ), secondTabKey),
+      selectedTabControls,
+      panelId,
+      panelCount: await dialog.getByRole("tabpanel").count(),
+      panelLabelledBy: await panel.getAttribute("aria-labelledby"),
+      selectedTabId
+    };
     await page.keyboard.press("Home");
-    await page.waitForFunction(() => (
-      document.querySelector('[role="tab"][aria-selected="true"]')
-        ?.getAttribute("data-review-document-key") === "riskAssessmentDraft"
-    ));
+    await page.waitForTimeout(100);
+    const homeSelectedTabs = dialog.locator('[role="tab"][aria-selected="true"]');
+    const homeTabbableTabs = dialog.locator('[role="tab"][tabindex="0"]');
+    const homeSelectedId = await homeSelectedTabs.first().getAttribute("id");
+    const homePanel = dialog.getByRole("tabpanel");
+    const homeNavigationPass = await homeSelectedTabs.count() === 1
+      && await homeTabbableTabs.count() === 1
+      && await homeSelectedTabs.first().getAttribute("data-review-document-key") === firstTabKey
+      && await homeTabbableTabs.first().getAttribute("data-review-document-key") === firstTabKey
+      && await page.evaluate((expectedKey) => (
+        document.activeElement?.getAttribute("data-review-document-key") === expectedKey
+      ), firstTabKey)
+      && await homeSelectedTabs.first().getAttribute("aria-controls") === await homePanel.getAttribute("id")
+      && await homePanel.getAttribute("aria-labelledby") === homeSelectedId;
     await page.keyboard.press("Escape");
     await dialog.waitFor({ state: "hidden" });
-    const escapeRestoresLaunchFocus = await page.evaluate(() => (
-      document.activeElement?.getAttribute("data-testid") === "document-editorial-review-launch"
-    ));
+    const dialogClosedOnEscape = await dialog.evaluate((element) => !element.open);
+    const escapeRestoresLaunchFocus = await launch.evaluate((element) => document.activeElement === element);
     await launch.click();
     await dialog.waitFor({ state: "visible" });
 
     const accessibility = {
       ...initialAccessibility,
-      arrowNavigationPass: arrowNavigation.selectedKey === "tbmBriefing"
+      arrowNavigationPass: arrowNavigation.selectedKey === secondTabKey
+        && arrowNavigation.selectedTabCount === 1
+        && arrowNavigation.tabbableTabCount === 1
+        && arrowNavigation.selectedMatchesTabbable
         && arrowNavigation.selectedHasFocus,
-      tabpanelLinked: arrowNavigation.panelLabelledBy === arrowNavigation.selectedTabId,
+      tabpanelLinked: arrowNavigation.panelCount === 1
+        && arrowNavigation.selectedTabControls === arrowNavigation.panelId
+        && arrowNavigation.panelLabelledBy === arrowNavigation.selectedTabId,
+      homeNavigationPass,
+      dialogClosedOnEscape,
       escapeRestoresLaunchFocus
     };
 
@@ -153,6 +182,8 @@ try {
       && beforeCompletion.copyOverflow === "auto"
       && beforeCompletion.checklistOverflow === "auto"
       && accessibility.initialFocusLabel === "문서 사람 검토 닫기"
+      && accessibility.initialFocusIsCloseButton
+      && accessibility.initialFocusInsideDialog
       && accessibility.describedBy === "document-editorial-review-description"
       && accessibility.liveProgress === "polite"
       && accessibility.tablistOrientation === "vertical"
@@ -161,6 +192,8 @@ try {
       && accessibility.tabbableTabCount === 1
       && accessibility.arrowNavigationPass
       && accessibility.tabpanelLinked
+      && accessibility.homeNavigationPass
+      && accessibility.dialogClosedOnEscape
       && accessibility.escapeRestoresLaunchFocus
       && afterCompletion.currentWorkpack === baseline.currentWorkpack
       && afterCompletion.reviewStorageKeys.length === 1
@@ -258,7 +291,7 @@ await writeFile(path.join(outputDir, "report.json"), `${JSON.stringify(report, n
 const rows = results.map((result) => (
   `| ${result.theme} | ${result.label} | ${result.beforeCompletion.bodyHeight}/${result.height} | ${result.beforeCompletion.workbenchColumns} | ${result.beforeCompletion.reviewDocumentCount} | ${result.beforeCompletion.checkboxCount} | ${result.accessibility.arrowNavigationPass ? "yes" : "no"} | ${result.accessibility.escapeRestoresLaunchFocus ? "yes" : "no"} | ${result.afterCompletion.currentWorkpackUnchanged ? "yes" : "no"} | ${result.afterCompletion.apiRequestCount} | ${result.verdict} |`
 )).join("\n");
-await writeFile(path.join(outputDir, "report.md"), `# Document Editorial Review Cockpit Evidence\n\n- Verdict: \`${report.verdict}\`\n- Source: \`${sourceHead}\`\n- Production: \`${productionBuild?.commitSha || "local"}\`\n- Scope: local-only 12-document human review cockpit geometry, keyboard access, and state isolation\n- Verification: Documents browser 40/40, focused review flow 1/1, strict typecheck PASS, Next 15.5.22 build PASS (28 static pages)\n- Human boundary: this automated probe does not complete human wording review or create approval evidence.\n- Mutation boundary: no DB/provider/Share/vector/wiki/KOSHA registry mutation; exact saved Share remains \`MISSING_EVIDENCE\`.\n\n| Theme | Viewport | Body/Viewport | Zones | Documents | Checks | Arrow navigation | Escape focus restore | Current workpack unchanged | API calls | Verdict |\n|---|---|---:|---:|---:|---:|---|---|---|---:|---|\n${rows}\n\nThe default Documents page remains viewport-contained. Long document text and the checklist are exposed only inside the modal workbench's local scroll regions. The dialog uses a roving tab contract, a labelled tabpanel, and deterministic focus entry and restoration.\n`, "utf8");
+await writeFile(path.join(outputDir, "report.md"), `# Document Editorial Review Cockpit Evidence\n\n- Verdict: \`${report.verdict}\`\n- Source: \`${sourceHead}\`\n- Production: \`${productionBuild?.commitSha || "local"}\`\n- Scope: 12-document human review cockpit geometry, keyboard access, browser-local state, and source/live isolation\n- Verification: Documents browser 40/40, focused review flow 1/1, strict typecheck PASS, Next 15.5.22 build PASS (28 static pages)\n- Human boundary: this automated probe does not complete human wording review or create approval evidence.\n- Mutation boundary: no DB/provider/Share/vector/wiki/KOSHA registry mutation; exact saved Share remains \`MISSING_EVIDENCE\`.\n\n| Theme | Viewport | Body/Viewport | Zones | Documents | Checks | Arrow navigation | Escape focus restore | Current workpack unchanged | API calls | Verdict |\n|---|---|---:|---:|---:|---:|---|---|---|---:|---|\n${rows}\n\nThe default Documents page remains viewport-contained. Long document text and the checklist are exposed only inside the modal workbench's local scroll regions. The dialog uses a roving tab contract, a labelled tabpanel, and deterministic focus entry and restoration.\n`, "utf8");
 
 console.log(JSON.stringify({ verdict: report.verdict, total: report.total, pass: report.pass, fail: report.fail }, null, 2));
 if (report.fail > 0) process.exitCode = 1;

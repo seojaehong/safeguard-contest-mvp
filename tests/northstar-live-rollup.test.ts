@@ -237,10 +237,19 @@ type RollupReport = {
     reviewerCheckCount: number;
     desktopZones: number;
     mobileColumns: number;
+    keyboardRovingTabNavigation: boolean;
+    screenReaderTabPanelContract: boolean;
+    escapeRestoresLaunchFocus: boolean;
+    accessibilityRowsPassed: number;
+    cockpitReady: boolean;
     humanReviewCompleted: boolean;
     broadHumanWordingReviewRequired: boolean;
     dbMutationPerformed: boolean;
     providerDispatchCalled: boolean;
+    shareSessionCreated: boolean;
+    vectorRuntimeCalled: boolean;
+    wikiPublished: boolean;
+    koshaRegistryMutationPerformed: boolean;
     exactSavedShareVerdict: string;
   };
   currentRepositorySecurityRescan: {
@@ -593,6 +602,22 @@ function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
       horizontalOverflow: false,
     },
     afterCompletion: { currentWorkpackUnchanged: true, apiRequestCount: 0, dialogScrollTop: 0 },
+    accessibility: {
+      initialFocusLabel: "문서 사람 검토 닫기",
+      initialFocusIsCloseButton: true,
+      initialFocusInsideDialog: true,
+      describedBy: "document-editorial-review-description",
+      liveProgress: "polite",
+      tablistOrientation: "vertical",
+      tabCount: 12,
+      selectedTabCount: 1,
+      tabbableTabCount: 1,
+      arrowNavigationPass: true,
+      homeNavigationPass: true,
+      tabpanelLinked: true,
+      dialogClosedOnEscape: true,
+      escapeRestoresLaunchFocus: true,
+    },
     verdict: "PASS",
   }));
 
@@ -610,6 +635,9 @@ function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
       reviewerCheckCount: 5,
       desktopZones: 3,
       mobileColumns: 1,
+      keyboardRovingTabNavigation: true,
+      screenReaderTabPanelContract: true,
+      escapeRestoresLaunchFocus: true,
       bodyHeightUnchangedWhileOpen: true,
       longCopyContained: true,
       reviewStateStoredSeparately: true,
@@ -2073,10 +2101,19 @@ describe("northstar live rollup", () => {
       reviewerCheckCount: 5,
       desktopZones: 3,
       mobileColumns: 1,
+      keyboardRovingTabNavigation: true,
+      screenReaderTabPanelContract: true,
+      escapeRestoresLaunchFocus: true,
+      accessibilityRowsPassed: 4,
+      cockpitReady: true,
       humanReviewCompleted: false,
       broadHumanWordingReviewRequired: true,
       dbMutationPerformed: false,
       providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorRuntimeCalled: false,
+      wikiPublished: false,
+      koshaRegistryMutationPerformed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.evidence.find((item) => item.id === "document_editorial_review_cockpit")?.productionStatus).toBe("ancestor_of_head");

@@ -312,6 +312,107 @@ function recordAt(value, key) {
   return isRecord(next) ? next : null;
 }
 
+/** @param {unknown} review */
+function documentEditorialReviewCockpitSummary(review) {
+  if (!isRecord(review)) return { verdict: "missing", cockpitReady: false, accessibilityRowsPassed: 0 };
+  const acceptance = recordAt(review, "acceptanceContract") || {};
+  const reviewBoundary = recordAt(review, "reviewBoundary") || {};
+  const mutationBoundary = recordAt(review, "mutationBoundary") || {};
+  const productionBuild = recordAt(review, "productionBuild") || {};
+  const rows = Array.isArray(review.results) ? review.results.filter(isRecord) : [];
+  const rowsPass = rows.length === 4 && rows.every((row) => {
+    const before = recordAt(row, "beforeCompletion") || {};
+    const after = recordAt(row, "afterCompletion") || {};
+    return asString(row.verdict) === "PASS"
+      && asNumber(before.bodyHeight) === asNumber(before.viewportHeight)
+      && asNumber(before.reviewDocumentCount) === 12
+      && asNumber(before.uniqueDocumentCount) === 12
+      && before.includesRiskAssessment === true
+      && asNumber(before.checkboxCount) === 5
+      && before.horizontalOverflow === false
+      && after.currentWorkpackUnchanged === true
+      && asNumber(after.apiRequestCount) === 0
+      && asNumber(after.dialogScrollTop) === 0;
+  });
+  const desktopRows = rows.filter((row) => asNumber(row.width) === 1440 && asNumber(row.height) === 723);
+  const mobileRows = rows.filter((row) => asNumber(row.width) === 390 && asNumber(row.height) === 723);
+  const geometryPass = desktopRows.length === 2
+    && desktopRows.every((row) => asNumber(recordAt(row, "beforeCompletion")?.workbenchColumns) === 3)
+    && mobileRows.length === 2
+    && mobileRows.every((row) => asNumber(recordAt(row, "beforeCompletion")?.workbenchColumns) === 1);
+  const accessibilityRowsPassed = rows.filter((row) => {
+    const accessibility = recordAt(row, "accessibility") || {};
+    return accessibility.initialFocusIsCloseButton === true
+      && accessibility.initialFocusInsideDialog === true
+      && accessibility.arrowNavigationPass === true
+      && accessibility.homeNavigationPass === true
+      && accessibility.tabpanelLinked === true
+      && accessibility.dialogClosedOnEscape === true
+      && accessibility.escapeRestoresLaunchFocus === true;
+  }).length;
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.vectorRuntimeCalled === false
+    && mutationBoundary.wikiPublished === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const cockpitReady = asString(review.verdict) === "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_COCKPIT"
+    && asNumber(review.pass) === 4
+    && asNumber(review.fail) === 0
+    && asString(review.sourceHead).length > 0
+    && asString(review.sourceHead) === asString(productionBuild.commitSha)
+    && review.sourceHeadMatchesProduction === true
+    && asString(productionBuild.environment) === "production"
+    && rowsPass
+    && geometryPass
+    && asNumber(acceptance.canonicalDocumentCount) === 12
+    && acceptance.includesRiskAssessment === true
+    && asNumber(acceptance.reviewerCheckCount) === 5
+    && asNumber(acceptance.desktopZones) === 3
+    && asNumber(acceptance.mobileColumns) === 1
+    && acceptance.bodyHeightUnchangedWhileOpen === true
+    && acceptance.longCopyContained === true
+    && acceptance.reviewStateStoredSeparately === true
+    && acceptance.editedTextInvalidatesCompletion === true
+    && acceptance.automaticReviewCannotClaimHumanCompletion === true
+    && acceptance.keyboardRovingTabNavigation === true
+    && acceptance.screenReaderTabPanelContract === true
+    && acceptance.escapeRestoresLaunchFocus === true
+    && accessibilityRowsPassed === 4
+    && reviewBoundary.automatedInteractionOnly === true
+    && reviewBoundary.humanReviewCompleted === false
+    && reviewBoundary.localCompletionIsApproval === false
+    && reviewBoundary.broadHumanWordingReviewRequired === true
+    && noMutation
+    && asString(mutationBoundary.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+  return {
+    artifact: ARTIFACTS.documentEditorialReviewCockpit,
+    verdict: asString(review.verdict),
+    sourceHead: asString(review.sourceHead),
+    productionCommit: asString(productionBuild.commitSha),
+    livePassed: asNumber(review.pass),
+    liveFailed: asNumber(review.fail),
+    canonicalDocumentCount: asNumber(acceptance.canonicalDocumentCount),
+    reviewerCheckCount: asNumber(acceptance.reviewerCheckCount),
+    desktopZones: asNumber(acceptance.desktopZones),
+    mobileColumns: asNumber(acceptance.mobileColumns),
+    keyboardRovingTabNavigation: acceptance.keyboardRovingTabNavigation === true,
+    screenReaderTabPanelContract: acceptance.screenReaderTabPanelContract === true,
+    escapeRestoresLaunchFocus: acceptance.escapeRestoresLaunchFocus === true,
+    accessibilityRowsPassed,
+    cockpitReady,
+    humanReviewCompleted: reviewBoundary.humanReviewCompleted === true,
+    broadHumanWordingReviewRequired: reviewBoundary.broadHumanWordingReviewRequired === true,
+    dbMutationPerformed: mutationBoundary.dbMutationPerformed === true,
+    providerDispatchCalled: mutationBoundary.providerDispatchCalled === true,
+    shareSessionCreated: mutationBoundary.shareSessionCreated === true,
+    vectorRuntimeCalled: mutationBoundary.vectorRuntimeCalled === true,
+    wikiPublished: mutationBoundary.wikiPublished === true,
+    koshaRegistryMutationPerformed: mutationBoundary.koshaRegistryMutationPerformed === true,
+    exactSavedShareVerdict: asString(mutationBoundary.exactSavedShareVerdict),
+  };
+}
+
 /**
  * @param {string} rootDir
  * @param {unknown} buildInfo
@@ -1105,23 +1206,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       exactSavedShareReproduced: recordAt(liveDocumentEditorialReview, "mutationBoundary")?.exactSavedShareReproduced === true,
       exactSavedShareVerdict: asString(recordAt(liveDocumentEditorialReview, "evidenceBoundary")?.exactSavedShareVerdict),
     },
-    documentEditorialReviewCockpit: {
-      artifact: ARTIFACTS.documentEditorialReviewCockpit,
-      verdict: isRecord(documentEditorialReviewCockpit) ? asString(documentEditorialReviewCockpit.verdict) : "missing",
-      sourceHead: isRecord(documentEditorialReviewCockpit) ? asString(documentEditorialReviewCockpit.sourceHead) : "",
-      productionCommit: asString(recordAt(documentEditorialReviewCockpit, "productionBuild")?.commitSha),
-      livePassed: asNumber(documentEditorialReviewCockpit?.pass),
-      liveFailed: asNumber(documentEditorialReviewCockpit?.fail),
-      canonicalDocumentCount: asNumber(recordAt(documentEditorialReviewCockpit, "acceptanceContract")?.canonicalDocumentCount),
-      reviewerCheckCount: asNumber(recordAt(documentEditorialReviewCockpit, "acceptanceContract")?.reviewerCheckCount),
-      desktopZones: asNumber(recordAt(documentEditorialReviewCockpit, "acceptanceContract")?.desktopZones),
-      mobileColumns: asNumber(recordAt(documentEditorialReviewCockpit, "acceptanceContract")?.mobileColumns),
-      humanReviewCompleted: recordAt(documentEditorialReviewCockpit, "reviewBoundary")?.humanReviewCompleted === true,
-      broadHumanWordingReviewRequired: recordAt(documentEditorialReviewCockpit, "reviewBoundary")?.broadHumanWordingReviewRequired === true,
-      dbMutationPerformed: recordAt(documentEditorialReviewCockpit, "mutationBoundary")?.dbMutationPerformed === true,
-      providerDispatchCalled: recordAt(documentEditorialReviewCockpit, "mutationBoundary")?.providerDispatchCalled === true,
-      exactSavedShareVerdict: asString(recordAt(documentEditorialReviewCockpit, "mutationBoundary")?.exactSavedShareVerdict),
-    },
+    documentEditorialReviewCockpit: documentEditorialReviewCockpitSummary(documentEditorialReviewCockpit),
     liveDocumentEditorialDuplicateClassification: {
       artifact: ARTIFACTS.liveDocumentEditorialDuplicateClassification,
       verdict: isRecord(liveDocumentEditorialDuplicateClassification)
@@ -1499,8 +1584,9 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     "",
     `- Verdict: \`${rollup.documentEditorialReviewCockpit.verdict}\``,
     `- Live geometry: pass=${rollup.documentEditorialReviewCockpit.livePassed}/4, fail=${rollup.documentEditorialReviewCockpit.liveFailed}; documents/checks=${rollup.documentEditorialReviewCockpit.canonicalDocumentCount}/${rollup.documentEditorialReviewCockpit.reviewerCheckCount}; desktop/mobile zones=${rollup.documentEditorialReviewCockpit.desktopZones}/${rollup.documentEditorialReviewCockpit.mobileColumns}`,
+    `- Keyboard and screen reader: cases=${rollup.documentEditorialReviewCockpit.accessibilityRowsPassed}/4; roving tabs=${rollup.documentEditorialReviewCockpit.keyboardRovingTabNavigation}; labelled tabpanel=${rollup.documentEditorialReviewCockpit.screenReaderTabPanelContract}; Escape focus restore=${rollup.documentEditorialReviewCockpit.escapeRestoresLaunchFocus}; cockpit ready=${rollup.documentEditorialReviewCockpit.cockpitReady}`,
     `- Human review completed: ${rollup.documentEditorialReviewCockpit.humanReviewCompleted}; broad human wording review required: ${rollup.documentEditorialReviewCockpit.broadHumanWordingReviewRequired}`,
-    `- DB mutation: ${rollup.documentEditorialReviewCockpit.dbMutationPerformed}; provider dispatch: ${rollup.documentEditorialReviewCockpit.providerDispatchCalled}; exact saved Share: ${rollup.documentEditorialReviewCockpit.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    `- Mutations DB/provider/Share/vector/wiki/KOSHA: ${rollup.documentEditorialReviewCockpit.dbMutationPerformed}/${rollup.documentEditorialReviewCockpit.providerDispatchCalled}/${rollup.documentEditorialReviewCockpit.shareSessionCreated}/${rollup.documentEditorialReviewCockpit.vectorRuntimeCalled}/${rollup.documentEditorialReviewCockpit.wikiPublished}/${rollup.documentEditorialReviewCockpit.koshaRegistryMutationPerformed}; exact saved Share: ${rollup.documentEditorialReviewCockpit.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "- Boundary: this proves a bounded, local, stale-aware human-review workflow exists; automated browser interaction is not human completion.",
     "",
     "## Live Editorial Duplicate Classification",

@@ -1,17 +1,17 @@
 {
   "schemaVersion": "safeclaw-document-editorial-review-cockpit/v1",
-  "checkedAt": "2026-08-16T10:08:31.805Z",
+  "checkedAt": "2026-08-16T11:29:15.792Z",
   "mode": "live-production",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHead": "e6d16cff8f00abfd8ecfe77cd661679c62d48d82",
+  "sourceHead": "50f62c7884ade697ee1e6375bdde8497b12d4d7c",
   "productionBuild": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "e6d16cff8f00abfd8ecfe77cd661679c62d48d82",
+    "commitSha": "50f62c7884ade697ee1e6375bdde8497b12d4d7c",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-f4sc2n8yo-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-owh8jlaeq-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "sourceHeadMatchesProduction": true,
@@ -29,7 +29,10 @@
     "longCopyContained": true,
     "reviewStateStoredSeparately": true,
     "editedTextInvalidatesCompletion": true,
-    "automaticReviewCannotClaimHumanCompletion": true
+    "automaticReviewCannotClaimHumanCompletion": true,
+    "keyboardRovingTabNavigation": true,
+    "screenReaderTabPanelContract": true,
+    "escapeRestoresLaunchFocus": true
   },
   "reviewBoundary": {
     "automatedInteractionOnly": true,
@@ -49,7 +52,7 @@
   "verification": {
     "documentsEditorLayout": {
       "filesPassed": 1,
-      "testsPassed": 39,
+      "testsPassed": 40,
       "status": "pass"
     },
     "focusedEditorialReview": {
@@ -94,6 +97,22 @@
         "copyOverflow": "auto",
         "checklistOverflow": "auto"
       },
+      "accessibility": {
+        "initialFocusLabel": "문서 사람 검토 닫기",
+        "initialFocusIsCloseButton": true,
+        "initialFocusInsideDialog": true,
+        "describedBy": "document-editorial-review-description",
+        "liveProgress": "polite",
+        "tablistOrientation": "vertical",
+        "tabCount": 12,
+        "selectedTabCount": 1,
+        "tabbableTabCount": 1,
+        "arrowNavigationPass": true,
+        "tabpanelLinked": true,
+        "homeNavigationPass": true,
+        "dialogClosedOnEscape": true,
+        "escapeRestoresLaunchFocus": true
+      },
       "afterCompletion": {
         "currentWorkpackUnchanged": true,
         "reviewStorageKeyCount": 1,
@@ -132,6 +151,22 @@
         "navScrollable": true,
         "copyOverflow": "auto",
         "checklistOverflow": "auto"
+      },
+      "accessibility": {
+        "initialFocusLabel": "문서 사람 검토 닫기",
+        "initialFocusIsCloseButton": true,
+        "initialFocusInsideDialog": true,
+        "describedBy": "document-editorial-review-description",
+        "liveProgress": "polite",
+        "tablistOrientation": "vertical",
+        "tabCount": 12,
+        "selectedTabCount": 1,
+        "tabbableTabCount": 1,
+        "arrowNavigationPass": true,
+        "tabpanelLinked": true,
+        "homeNavigationPass": true,
+        "dialogClosedOnEscape": true,
+        "escapeRestoresLaunchFocus": true
       },
       "afterCompletion": {
         "currentWorkpackUnchanged": true,
@@ -172,6 +207,22 @@
         "copyOverflow": "auto",
         "checklistOverflow": "auto"
       },
+      "accessibility": {
+        "initialFocusLabel": "문서 사람 검토 닫기",
+        "initialFocusIsCloseButton": true,
+        "initialFocusInsideDialog": true,
+        "describedBy": "document-editorial-review-description",
+        "liveProgress": "polite",
+        "tablistOrientation": "vertical",
+        "tabCount": 12,
+        "selectedTabCount": 1,
+        "tabbableTabCount": 1,
+        "arrowNavigationPass": true,
+        "tabpanelLinked": true,
+        "homeNavigationPass": true,
+        "dialogClosedOnEscape": true,
+        "escapeRestoresLaunchFocus": true
+      },
       "afterCompletion": {
         "currentWorkpackUnchanged": true,
         "reviewStorageKeyCount": 1,
@@ -210,6 +261,22 @@
         "navScrollable": true,
         "copyOverflow": "auto",
         "checklistOverflow": "auto"
+      },
+      "accessibility": {
+        "initialFocusLabel": "문서 사람 검토 닫기",
+        "initialFocusIsCloseButton": true,
+        "initialFocusInsideDialog": true,
+        "describedBy": "document-editorial-review-description",
+        "liveProgress": "polite",
+        "tablistOrientation": "vertical",
+        "tabCount": 12,
+        "selectedTabCount": 1,
+        "tabbableTabCount": 1,
+        "arrowNavigationPass": true,
+        "tabpanelLinked": true,
+        "homeNavigationPass": true,
+        "dialogClosedOnEscape": true,
+        "escapeRestoresLaunchFocus": true
       },
       "afterCompletion": {
         "currentWorkpackUnchanged": true,

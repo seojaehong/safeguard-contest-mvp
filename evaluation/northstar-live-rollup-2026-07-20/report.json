@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-16T10:33:45.308Z",
-  "head": "ae1d513c5bc3455372a638d3f1f1293ce1a505bb",
+  "generatedAt": "2026-08-16T11:29:30.263Z",
+  "head": "50f62c7884ade697ee1e6375bdde8497b12d4d7c",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "ae1d513c5bc3455372a638d3f1f1293ce1a505bb",
+    "commitSha": "50f62c7884ade697ee1e6375bdde8497b12d4d7c",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ix9vl0s16-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-owh8jlaeq-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -85,7 +85,7 @@
       "id": "document_editorial_review_cockpit",
       "state": "proven",
       "artifact": "evaluation\\document-editorial-review-cockpit-2026-08-16\\report.json",
-      "detail": "Live Day/Night desktop-short 1440x723 and mobile-short 390x723 pass 4/4 with 12 canonical documents including riskAssessmentDraft, five explicit reviewer checks, a three-zone desktop and one-column mobile cockpit, unchanged page-body height, local-scroll containment, separate stale-aware review storage, zero API calls, and no current-workpack mutation. This proves the human review workflow is available; automatedInteractionOnly=true and humanReviewCompleted=false, broad human wording review remains required, and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Live Day/Night desktop-short 1440x723 and mobile-short 390x723 pass 4/4 with 12 canonical documents including riskAssessmentDraft, five explicit reviewer checks, a three-zone desktop and one-column mobile cockpit, unchanged page-body height, local-scroll containment, separate stale-aware review storage, zero API calls, and no current-workpack mutation. All four cases also prove deterministic close-button entry focus, one selected and tabbable document tab, Arrow/Home roving navigation, a labelled tabpanel, and Escape focus restoration. This proves the human review workflow is available; automatedInteractionOnly=true and humanReviewCompleted=false, broad human wording review remains required, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "current_live_document_editorial_runtime",
@@ -947,18 +947,27 @@
   "documentEditorialReviewCockpit": {
     "artifact": "evaluation\\document-editorial-review-cockpit-2026-08-16\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_COCKPIT",
-    "sourceHead": "e6d16cff8f00abfd8ecfe77cd661679c62d48d82",
-    "productionCommit": "e6d16cff8f00abfd8ecfe77cd661679c62d48d82",
+    "sourceHead": "50f62c7884ade697ee1e6375bdde8497b12d4d7c",
+    "productionCommit": "50f62c7884ade697ee1e6375bdde8497b12d4d7c",
     "livePassed": 4,
     "liveFailed": 0,
     "canonicalDocumentCount": 12,
     "reviewerCheckCount": 5,
     "desktopZones": 3,
     "mobileColumns": 1,
+    "keyboardRovingTabNavigation": true,
+    "screenReaderTabPanelContract": true,
+    "escapeRestoresLaunchFocus": true,
+    "accessibilityRowsPassed": 4,
+    "cockpitReady": true,
     "humanReviewCompleted": false,
     "broadHumanWordingReviewRequired": true,
     "dbMutationPerformed": false,
     "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorRuntimeCalled": false,
+    "wikiPublished": false,
+    "koshaRegistryMutationPerformed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "liveDocumentEditorialDuplicateClassification": {
@@ -1236,9 +1245,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "ae1d513c5bc3455372a638d3f1f1293ce1a505bb",
+      "sourceCommit": "50f62c7884ade697ee1e6375bdde8497b12d4d7c",
       "sourceStatus": "exact",
-      "productionCommit": "ae1d513c5bc3455372a638d3f1f1293ce1a505bb",
+      "productionCommit": "50f62c7884ade697ee1e6375bdde8497b12d4d7c",
       "productionStatus": "matches_live"
     },
     {
@@ -1316,10 +1325,10 @@
     {
       "id": "document_editorial_review_cockpit",
       "artifact": "evaluation\\document-editorial-review-cockpit-2026-08-16\\report.json",
-      "sourceCommit": "e6d16cff8f00abfd8ecfe77cd661679c62d48d82",
-      "sourceStatus": "ancestor",
-      "productionCommit": "e6d16cff8f00abfd8ecfe77cd661679c62d48d82",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "50f62c7884ade697ee1e6375bdde8497b12d4d7c",
+      "sourceStatus": "exact",
+      "productionCommit": "50f62c7884ade697ee1e6375bdde8497b12d4d7c",
+      "productionStatus": "matches_live"
     },
     {
       "id": "live_document_editorial_duplicate_classification",

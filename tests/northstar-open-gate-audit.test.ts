@@ -93,6 +93,22 @@ function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
       apiRequestCount: 0,
       dialogScrollTop: 0,
     },
+    accessibility: {
+      initialFocusLabel: "문서 사람 검토 닫기",
+      initialFocusIsCloseButton: true,
+      initialFocusInsideDialog: true,
+      describedBy: "document-editorial-review-description",
+      liveProgress: "polite",
+      tablistOrientation: "vertical",
+      tabCount: 12,
+      selectedTabCount: 1,
+      tabbableTabCount: 1,
+      arrowNavigationPass: true,
+      homeNavigationPass: true,
+      tabpanelLinked: true,
+      dialogClosedOnEscape: true,
+      escapeRestoresLaunchFocus: true,
+    },
     verdict: "PASS",
   }));
 
@@ -115,6 +131,9 @@ function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
       reviewStateStoredSeparately: true,
       editedTextInvalidatesCompletion: true,
       automaticReviewCannotClaimHumanCompletion: true,
+      keyboardRovingTabNavigation: true,
+      screenReaderTabPanelContract: true,
+      escapeRestoresLaunchFocus: true,
     },
     reviewBoundary: {
       automatedInteractionOnly: true,
@@ -4800,6 +4819,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("five explicit reviewer checks");
     expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("zero API calls");
     expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("no current-workpack mutation");
+    expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("Arrow/Home roving navigation");
+    expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("Escape focus restoration");
     expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("humanReviewCompleted=false");
     expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")).toMatchObject({
@@ -5166,6 +5187,21 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
         (results[0].afterCompletion as Record<string, unknown>).apiRequestCount = 1;
       },
       detail: "rowsPass=false",
+    },
+    {
+      name: "missing Escape focus restoration",
+      mutate: (report: Record<string, unknown>) => {
+        const results = report.results as Array<Record<string, unknown>>;
+        (results[0].accessibility as Record<string, unknown>).escapeRestoresLaunchFocus = false;
+      },
+      detail: "accessibilityPass=false",
+    },
+    {
+      name: "a vector runtime mutation",
+      mutate: (report: Record<string, unknown>) => {
+        (report.mutationBoundary as Record<string, unknown>).vectorRuntimeCalled = true;
+      },
+      detail: "noMutation=false",
     },
   ])("contradicts the editorial review cockpit on $name", async ({ mutate, detail }) => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();

@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-16T10:33:45.308Z
-Source HEAD at generation: ae1d513c5bc3455372a638d3f1f1293ce1a505bb
-Live commit at generation: ae1d513c5bc3455372a638d3f1f1293ce1a505bb
+Generated at: 2026-08-16T11:29:30.263Z
+Source HEAD at generation: 50f62c7884ade697ee1e6375bdde8497b12d4d7c
+Live commit at generation: 50f62c7884ade697ee1e6375bdde8497b12d4d7c
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -90,8 +90,9 @@ Overall: `northstar_open_approval_gated`
 
 - Verdict: `PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_COCKPIT`
 - Live geometry: pass=4/4, fail=0; documents/checks=12/5; desktop/mobile zones=3/1
+- Keyboard and screen reader: cases=4/4; roving tabs=true; labelled tabpanel=true; Escape focus restore=true; cockpit ready=true
 - Human review completed: false; broad human wording review required: true
-- DB mutation: false; provider dispatch: false; exact saved Share: MISSING_EVIDENCE
+- Mutations DB/provider/Share/vector/wiki/KOSHA: false/false/false/false/false/false; exact saved Share: MISSING_EVIDENCE
 - Boundary: this proves a bounded, local, stale-aware human-review workflow exists; automated browser interaction is not human completion.
 
 ## Live Editorial Duplicate Classification
@@ -366,7 +367,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_wording_review | ancestor | ancestor_of_head | evaluation\live-document-wording-review-2026-07-24\report.json |
 | live_document_broad_review | ancestor | ancestor_of_head | evaluation\live-document-broad-review-2026-07-25\report.json |
 | live_document_editorial_review | missing | ancestor_of_head | evaluation\live-document-editorial-review-2026-07-25\report.json |
-| document_editorial_review_cockpit | ancestor | ancestor_of_head | evaluation\document-editorial-review-cockpit-2026-08-16\report.json |
+| document_editorial_review_cockpit | exact | matches_live | evaluation\document-editorial-review-cockpit-2026-08-16\report.json |
 | live_document_editorial_duplicate_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-duplicate-classification-2026-07-25\report.json |
 | live_document_editorial_near_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-near-classification-2026-07-25\report.json |
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |

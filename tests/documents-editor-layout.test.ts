@@ -294,17 +294,25 @@ describe("documents editor layout", () => {
     await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute("data-review-document-key")))
       .toBe(await tabs.nth(1).getAttribute("data-review-document-key"));
     const secondTabId = await tabs.nth(1).getAttribute("id");
-    expect(await dialog.getByRole("tabpanel").getAttribute("aria-labelledby")).toBe(secondTabId);
+    const tabpanel = dialog.getByRole("tabpanel");
+    expect(await tabpanel.count()).toBe(1);
+    expect(await tabs.nth(1).getAttribute("aria-controls")).toBe(await tabpanel.getAttribute("id"));
+    expect(await tabpanel.getAttribute("aria-labelledby")).toBe(secondTabId);
 
     await page.keyboard.press("End");
     await expect.poll(() => tabs.nth(11).getAttribute("aria-selected")).toBe("true");
+    await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute("data-review-document-key")))
+      .toBe(await tabs.nth(11).getAttribute("data-review-document-key"));
     await page.keyboard.press("Home");
     await expect.poll(() => tabs.nth(0).getAttribute("aria-selected")).toBe("true");
+    await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute("data-review-document-key")))
+      .toBe(await tabs.nth(0).getAttribute("data-review-document-key"));
+    expect(await tabs.nth(0).getAttribute("aria-controls")).toBe(await tabpanel.getAttribute("id"));
+    expect(await tabpanel.getAttribute("aria-labelledby")).toBe(await tabs.nth(0).getAttribute("id"));
 
     await page.keyboard.press("Escape");
     await dialog.waitFor({ state: "hidden" });
-    await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute("data-testid")))
-      .toBe("document-editorial-review-launch");
+    await expect.poll(() => launch.evaluate((element) => document.activeElement === element)).toBe(true);
 
     await context.close();
   }, 90_000);
