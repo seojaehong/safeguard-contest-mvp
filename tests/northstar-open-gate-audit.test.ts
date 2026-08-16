@@ -4641,6 +4641,10 @@ function createFixtureRoot(): string {
     failedCount: 0,
     semanticGroupCount: 24,
     failedSemanticGroupCount: 0,
+    pageReceiptCount: 24,
+    semanticGroupsWithoutPageReceipt: 0,
+    bodySnapshotId: "fixture-snapshot",
+    bodySourceIdentitySha256: "c".repeat(64),
     reviewBoundary: {
       humanReviewCompleted: false,
       reviewChecklistComplete: false,
@@ -4657,12 +4661,40 @@ function createFixtureRoot(): string {
     exactPromotionPerformed: false,
     exactRegistryWriteArtifactCreated: false,
     separatePromotionApprovalRequired: true,
+    results: Array.from({ length: 8 }, (_, candidateIndex) => ({
+      stableKey: `KEY-${candidateIndex}`,
+      contentRationaleMachineSupported: true,
+      failedSemanticGroups: [],
+      humanReviewCompleted: false,
+      humanConfirmed: false,
+      semanticGroups: Array.from({ length: 3 }, (_, groupIndex) => ({
+        group: groupIndex + 1,
+        evidenceTerm: `term-${groupIndex + 1}`,
+        matchBodyCharStart: groupIndex * 100 + 10,
+        matchBodyCharEnd: groupIndex * 100 + 20,
+        locationMappingComplete: true,
+        locationMappingFailure: null,
+        machineSupported: true,
+        pageReceipts: [{
+          pageNumber: groupIndex + 1,
+          bodyCharStart: groupIndex * 100,
+          bodyCharEnd: (groupIndex + 1) * 100,
+          matchCharStart: groupIndex * 100 + 10,
+          matchCharEnd: groupIndex * 100 + 20,
+          normalizedTextSha256: "d".repeat(64),
+          ocrCandidate: false,
+        }],
+      })),
+    })),
   });
   writeJson(rootDir, path.join("evaluation", "kosha-exact-promotion-reviewer-cockpit-2026-07-25", "report.json"), {
     schemaVersion: "safeclaw-kosha-exact-promotion-reviewer-cockpit/v1",
     verdict: "PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY",
     candidateCount: 8,
     semanticGroupCount: 24,
+    pageReceiptCount: 24,
+    bodySnapshotId: "fixture-snapshot",
+    bodySourceIdentitySha256: "c".repeat(64),
     checklistInputCount: 64,
     initialCompletedInputCount: 0,
     exportInitiallyDisabled: true,
@@ -4674,6 +4706,8 @@ function createFixtureRoot(): string {
       mobileEvidenceReviewTabs: true,
       responsiveTabPanelSemantics: true,
       candidateBoundDraftStorage: true,
+      evidencePageReceipts: true,
+      draftBoundToCorpusIdentity: true,
       progressLiveRegion: true,
     },
     boundary: {
@@ -4746,6 +4780,7 @@ function createFixtureRoot(): string {
     draftStorageIdentityPass: true,
     draftStorageIdentity: {
       sameFingerprintPreserved: true,
+      sourceIdentityPresent: true,
       staleEnvelopeInjected: true,
       staleFingerprintDiscarded: true,
       staleExportDisabled: true,
@@ -4782,6 +4817,10 @@ function createFixtureRoot(): string {
       selectedCandidateVisibleMobilePaneCount: row.viewport.width <= 767 ? 1 : 2,
       requiredCheckCount: 40,
       semanticGroupCount: 24,
+      evidenceReceiptCount: 24,
+      receiptAccess: row.name === "mobile-review-390x723"
+        ? null
+        : { fullyVisibleInsidePane: true },
       exportInitiallyDisabled: true,
       horizontalOverflow: false,
     })),
@@ -5259,6 +5298,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("shallow human-confirmation-only reviews are blocked");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("completed review remains no-mutation plus separate approval");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("24/24 semantic groups");
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("24/24 PDF page/body location receipts");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("64 required human inputs");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("viewport-contained no-mutation UI");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.nextActions.join("\n")).toContain(
@@ -7603,6 +7643,36 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     };
     lifecycleAudit.exactTitleIdentityMatchCount = 7;
     writeJson(rootDir, path.relative(rootDir, auditPath), lifecycleAudit);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("contradicted");
+  });
+
+  it("fails closed when KOSHA reviewer support loses a page-to-body mapping receipt", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const supportPath = path.join(
+      rootDir,
+      "evaluation",
+      "kosha-exact-promotion-reviewer-support-2026-07-25",
+      "report.json",
+    );
+    const support = JSON.parse(fs.readFileSync(supportPath, "utf8")) as {
+      results: Array<{
+        semanticGroups: Array<{
+          locationMappingComplete: boolean;
+          locationMappingFailure: string | null;
+        }>;
+      }>;
+    };
+    support.results[0]!.semanticGroups[0]!.locationMappingComplete = false;
+    support.results[0]!.semanticGroups[0]!.locationMappingFailure = "semantic-match-non-whitespace-gap";
+    writeJson(rootDir, path.relative(rootDir, supportPath), support);
 
     const audit = buildNorthstarOpenGateAudit({
       rootDir,

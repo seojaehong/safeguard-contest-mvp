@@ -8458,6 +8458,37 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
   const reviewerSupportMutationBoundary = isRecord(reviewerSupport) && isRecord(reviewerSupport.mutationBoundary)
     ? reviewerSupport.mutationBoundary
     : null;
+  const reviewerSupportRows = isRecord(reviewerSupport) && Array.isArray(reviewerSupport.results)
+    ? reviewerSupport.results.filter(isRecord)
+    : [];
+  const reviewerSupportRowsProvePageReceipts = reviewerSupportRows.length === 8
+    && reviewerSupportRows.every((row) => {
+      const groups = Array.isArray(row.semanticGroups) ? row.semanticGroups.filter(isRecord) : [];
+      return row.contentRationaleMachineSupported === true
+        && Array.isArray(row.failedSemanticGroups)
+        && row.failedSemanticGroups.length === 0
+        && row.humanReviewCompleted === false
+        && row.humanConfirmed === false
+        && groups.length === 3
+        && groups.every((group) => {
+          const receipts = Array.isArray(group.pageReceipts) ? group.pageReceipts.filter(isRecord) : [];
+          return group.machineSupported === true
+            && group.locationMappingComplete === true
+            && group.locationMappingFailure === null
+            && Boolean(readString(group.evidenceTerm))
+            && readNumber(group.matchBodyCharStart) !== null
+            && readNumber(group.matchBodyCharEnd) !== null
+            && readNumber(group.matchBodyCharEnd) > readNumber(group.matchBodyCharStart)
+            && receipts.length >= 1
+            && receipts.every((receipt) => readNumber(receipt.pageNumber) !== null
+              && readNumber(receipt.pageNumber) > 0
+              && readNumber(receipt.matchCharStart) !== null
+              && readNumber(receipt.matchCharEnd) !== null
+              && readNumber(receipt.matchCharEnd) > readNumber(receipt.matchCharStart)
+              && /^[0-9a-f]{64}$/.test(readString(receipt.normalizedTextSha256))
+              && typeof receipt.ocrCandidate === "boolean");
+        });
+    });
   const reviewerSupportProvesSemanticCoverage = isRecord(reviewerSupport)
     && readString(reviewerSupport.schemaVersion) === "safeclaw-kosha-exact-promotion-reviewer-support/v1"
     && readString(reviewerSupport.verdict) === "PASS_MACHINE_REVIEWER_SUPPORT_HUMAN_CONFIRMATION_REQUIRED"
@@ -8466,6 +8497,11 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && readNumber(reviewerSupport.failedCount) === 0
     && readNumber(reviewerSupport.semanticGroupCount) === 24
     && readNumber(reviewerSupport.failedSemanticGroupCount) === 0
+    && readNumber(reviewerSupport.pageReceiptCount) === 24
+    && readNumber(reviewerSupport.semanticGroupsWithoutPageReceipt) === 0
+    && Boolean(readString(reviewerSupport.bodySnapshotId))
+    && /^[0-9a-f]{64}$/.test(readString(reviewerSupport.bodySourceIdentitySha256))
+    && reviewerSupportRowsProvePageReceipts
     && reviewerSupportBoundary !== null
     && reviewerSupportBoundary.humanReviewCompleted === false
     && reviewerSupportBoundary.reviewChecklistComplete === false
@@ -8481,7 +8517,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && reviewerSupport.exactRegistryWriteArtifactCreated === false
     && reviewerSupport.separatePromotionApprovalRequired === true;
   const reviewerSupportDetail = reviewerSupportProvesSemanticCoverage
-    ? ` Reviewer-support audit ${reviewerSupportPath} records bounded excerpts for 8/8 candidates and 24/24 semantic groups without completing human review or creating a registry artifact.`
+    ? ` Reviewer-support audit ${reviewerSupportPath} records bounded excerpts plus 24/24 PDF page/body location receipts for 8/8 candidates and 24/24 semantic groups, bound to the corpus snapshot identity, without completing human review or creating a registry artifact.`
     : "";
   const reviewerCockpitBoundary = isRecord(reviewerCockpit) && isRecord(reviewerCockpit.boundary)
     ? reviewerCockpit.boundary
@@ -8494,6 +8530,9 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && readString(reviewerCockpit.verdict) === "PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY"
     && readNumber(reviewerCockpit.candidateCount) === 8
     && readNumber(reviewerCockpit.semanticGroupCount) === 24
+    && readNumber(reviewerCockpit.pageReceiptCount) === 24
+    && readString(reviewerCockpit.bodySnapshotId) === readString(reviewerSupport.bodySnapshotId)
+    && readString(reviewerCockpit.bodySourceIdentitySha256) === readString(reviewerSupport.bodySourceIdentitySha256)
     && readNumber(reviewerCockpit.checklistInputCount) === 64
     && readNumber(reviewerCockpit.initialCompletedInputCount) === 0
     && reviewerCockpit.exportInitiallyDisabled === true
@@ -8506,6 +8545,8 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && reviewerCockpitAccessibility.mobileEvidenceReviewTabs === true
     && reviewerCockpitAccessibility.responsiveTabPanelSemantics === true
     && reviewerCockpitAccessibility.candidateBoundDraftStorage === true
+    && reviewerCockpitAccessibility.evidencePageReceipts === true
+    && reviewerCockpitAccessibility.draftBoundToCorpusIdentity === true
     && reviewerCockpitAccessibility.progressLiveRegion === true
     && reviewerCockpitBoundary !== null
     && reviewerCockpitBoundary.localReviewOnly === true
@@ -8534,6 +8575,11 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && reviewerCockpitBrowser.mobilePass === true
     && reviewerCockpitBrowser.responsiveTabPanelPass === true
     && reviewerCockpitBrowser.draftStorageIdentityPass === true
+    && isRecord(reviewerCockpitBrowser.draftStorageIdentity)
+    && reviewerCockpitBrowser.draftStorageIdentity.sameFingerprintPreserved === true
+    && reviewerCockpitBrowser.draftStorageIdentity.sourceIdentityPresent === true
+    && reviewerCockpitBrowser.draftStorageIdentity.staleFingerprintDiscarded === true
+    && reviewerCockpitBrowser.draftStorageIdentity.staleExportDisabled === true
     && cockpitBrowserRows.length === 3
     && cockpitBrowserRows.every((row) => {
       const viewport = isRecord(row.viewport) ? row.viewport : null;
@@ -8568,6 +8614,9 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
         && readNumber(row.selectedCandidateVisibleMobilePaneCount) === (readNumber(viewport.width) <= 767 ? 1 : 2)
         && readNumber(row.requiredCheckCount) === 40
         && readNumber(row.semanticGroupCount) === 24
+        && readNumber(row.evidenceReceiptCount) === 24
+        && (readString(row.name) === "mobile-review-390x723"
+          || (isRecord(row.receiptAccess) && row.receiptAccess.fullyVisibleInsidePane === true))
         && row.exportInitiallyDisabled === true
         && row.horizontalOverflow === false;
     })
@@ -8583,7 +8632,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && cockpitBrowserBoundary.humanReviewCompleted === false
     && cockpitBrowserBoundary.separatePromotionApprovalRequired === true;
   const reviewerCockpitDetail = reviewerCockpitPass && reviewerCockpitBrowserPass
-    ? ` Reviewer cockpit ${reviewerCockpitPath} presents 8 candidates, 24 bounded excerpts, and all 64 required human inputs in a viewport-contained no-mutation UI; export remains locked until complete and promotion remains separate approval. Browser geometry ${reviewerCockpitBrowserPath} preserves one visible candidate, 40 checks, three bounded desktop/mobile cases, reciprocal breakpoint-aware tab/tabpanel semantics, one roving tab stop, End/Home keyboard selection, candidate-bound draft restore that rejects stale fingerprints, and polite live progress.`
+    ? ` Reviewer cockpit ${reviewerCockpitPath} presents 8 candidates, 24 bounded excerpts, 24 PDF page/body receipts, and all 64 required human inputs in a viewport-contained no-mutation UI; export remains locked until complete and promotion remains separate approval. Browser geometry ${reviewerCockpitBrowserPath} preserves one visible candidate, 40 checks, receipt access in the bounded evidence pane, three bounded desktop/mobile cases, reciprocal breakpoint-aware tab/tabpanel semantics, one roving tab stop, End/Home keyboard selection, corpus-and-receipt-bound draft restore that rejects stale fingerprints, and polite live progress.`
     : "";
   if (!isRecord(report)) {
     return gateResult({
