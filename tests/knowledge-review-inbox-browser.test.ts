@@ -279,6 +279,26 @@ describe("knowledge review inbox browser", () => {
     expect(authorityText).toContain("조직·현장 이력은 외부 승격 금지");
     expect(authorityText).toContain("작업팩 적용 전 현장 책임자 확인");
     expect(authorityText).toContain("사람 검토 필요");
+    const authorityCounts = page.getByRole("list", { name: "근거 구성 수량, 가로로 스크롤 가능" });
+    const reviewBoundary = page.getByRole("region", { name: "후보 적용 경계, 가로로 스크롤 가능" });
+    expect(await authorityCounts.getAttribute("tabindex")).toBe("0");
+    expect(await reviewBoundary.getAttribute("tabindex")).toBe("0");
+    await authorityCounts.evaluate((element) => {
+      element.style.width = "160px";
+      element.style.maxWidth = "160px";
+      element.style.gridTemplateColumns = "repeat(6, 180px)";
+    });
+    expect(await authorityCounts.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
+    await authorityCounts.focus();
+    expect(await authorityCounts.evaluate((element) => document.activeElement === element)).toBe(true);
+    await page.keyboard.press("ArrowRight");
+    await expect.poll(() => authorityCounts.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
+    await reviewBoundary.focus();
+    expect(await reviewBoundary.evaluate((element) => document.activeElement === element)).toBe(true);
+    await authorityCounts.evaluate((element) => {
+      element.removeAttribute("style");
+      element.scrollLeft = 0;
+    });
 
     const metrics = await inbox.evaluate((root) => {
       const groups = [...root.querySelectorAll<HTMLElement>('[role="group"][aria-label="검토 결정"]')];

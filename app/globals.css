@@ -19854,6 +19854,10 @@ body:has(.safeclaw-landing) :is(
   min-height: 0;
 }
 
+.safeclaw-document-review-mobile-nav {
+  display: none;
+}
+
 .safeclaw-document-review-nav,
 .safeclaw-document-review-copy,
 .safeclaw-document-review-checklist {
@@ -20164,16 +20168,57 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-document-review-nav {
-    display: flex;
-    overflow-x: auto;
-    overflow-y: hidden;
-    border-right: 0;
-    border-bottom: 1px solid var(--workspace-rule);
-    scrollbar-gutter: auto;
+    display: none;
   }
 
-  .safeclaw-document-review-nav button {
-    flex: 0 0 168px;
+  .safeclaw-document-review-mobile-nav {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    gap: 6px;
+    align-items: end;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--workspace-rule);
+    background: var(--workspace-surface-2);
+  }
+
+  .safeclaw-document-review-mobile-nav label {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+    color: var(--workspace-muted);
+    font-size: var(--text-caption);
+    font-weight: 700;
+  }
+
+  .safeclaw-document-review-mobile-nav select,
+  .safeclaw-document-review-mobile-nav button {
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 44px;
+    border: 1px solid var(--workspace-rule-strong);
+    border-radius: var(--radius-control);
+    background: var(--workspace-surface-1);
+    color: var(--workspace-ink);
+    font: inherit;
+  }
+
+  .safeclaw-document-review-mobile-nav select {
+    width: 100%;
+    padding: 0 8px;
+  }
+
+  .safeclaw-document-review-mobile-nav button {
+    display: grid;
+    width: 44px;
+    place-items: center;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  .safeclaw-document-review-mobile-nav :is(select, button):focus-visible {
+    outline: 3px solid var(--workspace-accent);
+    outline-offset: 1px;
   }
 
   .safeclaw-document-review-copy {

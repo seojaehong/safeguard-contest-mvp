@@ -257,6 +257,27 @@ describe("documents editor layout", () => {
       expect(new Set(geometry.reviewKeys).size).toBe(12);
       expect(geometry.reviewKeys).toContain("riskAssessmentDraft");
       expect(await dialog.getByLabel(/사람 검토 0\/12종 완료/u).count()).toBe(1);
+      const mobileNavigator = dialog.getByTestId("document-review-mobile-nav");
+      if (viewport.name === "mobile") {
+        await expect.poll(() => mobileNavigator.isVisible()).toBe(true);
+        const mobileSelect = mobileNavigator.getByRole("combobox", { name: "검토 문서 선택" });
+        expect(await mobileSelect.locator("option").count()).toBe(12);
+        expect(await mobileSelect.inputValue()).toBe("riskAssessmentDraft");
+        await mobileSelect.selectOption("workPermitDraft");
+        await expect.poll(() => dialog.locator("#document-editorial-review-panel h3").textContent()).toBe("안전작업허가 확인서");
+        await mobileNavigator.getByRole("button", { name: "다음 검토 문서" }).click();
+        expect(await mobileSelect.inputValue()).toBe("safetyEducationRecordDraft");
+        await mobileNavigator.getByRole("button", { name: "이전 검토 문서" }).click();
+        expect(await mobileSelect.inputValue()).toBe("workPermitDraft");
+        for (const button of await mobileNavigator.getByRole("button").all()) {
+          const box = await button.boundingBox();
+          expect(box?.width || 0).toBeGreaterThanOrEqual(44);
+          expect(box?.height || 0).toBeGreaterThanOrEqual(44);
+        }
+        await mobileSelect.selectOption("riskAssessmentDraft");
+      } else {
+        expect(await mobileNavigator.isVisible()).toBe(false);
+      }
       const receiptButton = dialog.getByTestId("document-editorial-review-receipt-download");
       expect(await receiptButton.isDisabled()).toBe(true);
       await dialog.getByRole("textbox", { name: "검토자" }).fill("현장 검토자");

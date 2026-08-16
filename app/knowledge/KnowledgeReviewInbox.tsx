@@ -320,6 +320,18 @@ export function KnowledgeReviewInbox() {
     selectReviewPane(event.key === "ArrowRight" || event.key === "End" ? "evidence" : "candidate", true);
   }
 
+  function handleHorizontalScrollKey(event: KeyboardEvent<HTMLElement>): void {
+    const element = event.currentTarget;
+    let left: number | null = null;
+    if (event.key === "ArrowRight") left = Math.min(element.scrollLeft + 96, element.scrollWidth);
+    if (event.key === "ArrowLeft") left = Math.max(element.scrollLeft - 96, 0);
+    if (event.key === "Home") left = 0;
+    if (event.key === "End") left = element.scrollWidth;
+    if (left === null) return;
+    event.preventDefault();
+    element.scrollLeft = left;
+  }
+
   const loadInbox = useCallback(async (token: string) => {
     try {
       const response = await fetch("/api/knowledge/review", {
@@ -513,7 +525,7 @@ export function KnowledgeReviewInbox() {
                         <strong>근거 구성</strong>
                         <span>사람 검토 필요</span>
                       </div>
-                      <ul className={styles.reviewAuthorityCounts}>
+                      <ul className={styles.reviewAuthorityCounts} tabIndex={0} aria-label="근거 구성 수량, 가로로 스크롤 가능" onKeyDown={handleHorizontalScrollKey}>
                         {REVIEW_AUTHORITY_PRESENTATION.map(({ id, label }) => (
                           <li key={id} data-review-authority-role={id}>
                             <span>{label}</span>
@@ -521,7 +533,7 @@ export function KnowledgeReviewInbox() {
                           </li>
                         ))}
                       </ul>
-                      <div className={styles.reviewBoundary}>
+                      <div className={styles.reviewBoundary} role="region" tabIndex={0} aria-label="후보 적용 경계, 가로로 스크롤 가능" onKeyDown={handleHorizontalScrollKey}>
                         <span>법적 의무는 법령 근거 확인</span>
                         <span>조직·현장 이력은 외부 승격 금지</span>
                         <span>작업팩 적용 전 현장 책임자 확인</span>

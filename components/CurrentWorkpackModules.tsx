@@ -1382,6 +1382,7 @@ function DocumentEditorialReviewDialog({
   }, [open, selectedDocumentKey]);
 
   const activeDocument = launchDocuments.find((document) => document.key === activeDocumentKey) || launchDocuments[0];
+  const activeDocumentIndex = launchDocuments.findIndex((document) => document.key === activeDocument.key);
   const activeEntry = reviewState[activeDocument.key] || emptyEditorialReviewEntry();
   const activeFindings = findingsByDocument[activeDocument.key];
   const activeFindingsFingerprint = editorialFindingsFingerprint(activeFindings);
@@ -1560,6 +1561,11 @@ function DocumentEditorialReviewDialog({
       ?.focus();
   }
 
+  function moveMobileDocument(offset: -1 | 1) {
+    const nextIndex = (activeDocumentIndex + offset + launchDocuments.length) % launchDocuments.length;
+    setActiveDocumentKey(launchDocuments[nextIndex].key);
+  }
+
   return (
     <dialog
       ref={dialogRef}
@@ -1587,6 +1593,24 @@ function DocumentEditorialReviewDialog({
       </header>
 
       <div className="safeclaw-document-review-workbench">
+        <div className="safeclaw-document-review-mobile-nav" data-testid="document-review-mobile-nav">
+          <button type="button" aria-label="이전 검토 문서" title="이전 검토 문서" onClick={() => moveMobileDocument(-1)}>←</button>
+          <label>
+            <span>검토 문서</span>
+            <select
+              aria-label="검토 문서 선택"
+              value={activeDocument.key}
+              onChange={(event) => setActiveDocumentKey(event.target.value as DocumentKey)}
+            >
+              {launchDocuments.map((document, index) => (
+                <option key={document.key} value={document.key}>
+                  {String(index + 1).padStart(2, "0")}/{launchDocuments.length} · {document.title} · {document.tier}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button type="button" aria-label="다음 검토 문서" title="다음 검토 문서" onClick={() => moveMobileDocument(1)}>→</button>
+        </div>
         <nav className="safeclaw-document-review-nav" role="tablist" aria-label="검토 문서 선택" aria-orientation="vertical">
           {launchDocuments.map((document, index) => {
             const entry = reviewState[document.key];

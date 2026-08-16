@@ -94,6 +94,13 @@ describe("knowledge governance UI contract", () => {
     expect(inboxSource).toContain('className={styles.reviewInboxMessage} role="status"');
   });
 
+  it("makes horizontally contained authority evidence keyboard reachable", () => {
+    expect(inboxSource).toContain('className={styles.reviewAuthorityCounts} tabIndex={0} aria-label="근거 구성 수량, 가로로 스크롤 가능" onKeyDown={handleHorizontalScrollKey}');
+    expect(inboxSource).toContain('className={styles.reviewBoundary} role="region" tabIndex={0} aria-label="후보 적용 경계, 가로로 스크롤 가능" onKeyDown={handleHorizontalScrollKey}');
+    expect(inboxSource).toContain('if (event.key === "End") left = element.scrollWidth;');
+    expect(cssSource).toMatch(/\.reviewAuthorityCounts:focus-visible,[\s\S]*?\.reviewBoundary:focus-visible[\s\S]*?outline:\s*3px solid/u);
+  });
+
   it("preserves the authoritative local report when assembling live evidence", () => {
     expect(browserRunnerSource).toContain(
       'const localReportPath = path.join(afterLocalDir, "report.json")'

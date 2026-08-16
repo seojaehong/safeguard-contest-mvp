@@ -1164,6 +1164,12 @@
     flex: 0 0 auto;
   }
 
+  .reviewAuthorityCounts:focus-visible,
+  .reviewBoundary:focus-visible {
+    outline: 3px solid var(--workspace-accent, #087f5b);
+    outline-offset: 2px;
+  }
+
   .promotionStage,
   .promotionStage:nth-child(2) {
     border-right: 0;
