@@ -91,6 +91,8 @@ type ReviewGateModule = {
     exactPromotionPerformed: boolean;
     machineReviewerSupportIncluded: boolean;
     machineEvidenceReplacesHumanReview: boolean;
+    bodySnapshotId: string;
+    bodySourceIdentitySha256: string;
     candidateReviews: Array<{
       order: number | null;
       stableKey: string;
@@ -109,7 +111,22 @@ type ReviewGateModule = {
           group: number | null;
           requiredAny: string[];
           matchedTerms: string[];
+          evidenceTerm: string;
           excerpt: string;
+          matchBodyCharStart: number;
+          matchBodyCharEnd: number;
+          locationMappingComplete: boolean;
+          locationMappingFailure: string | null;
+          pageReceipts: Array<{
+            pageNumber: number;
+            bodyCharStart: number;
+            bodyCharEnd: number;
+            matchCharStart: number;
+            matchCharEnd: number;
+            normalizedTextSha256: string;
+            ocrCandidate: boolean;
+            extractionStatus: string;
+          }>;
         }>;
       };
       reviewer: string;
@@ -247,6 +264,10 @@ function writeFixtureRoot(): { root: string; packetPath: string; reviewPath: str
     failedCount: 0,
     semanticGroupCount: candidates.length * 3,
     failedSemanticGroupCount: 0,
+    pageReceiptCount: candidates.length * 3,
+    semanticGroupsWithoutPageReceipt: 0,
+    bodySnapshotId: "fixture-snapshot",
+    bodySourceIdentitySha256: "c".repeat(64),
     reviewBoundary: {
       humanReviewCompleted: false,
       reviewChecklistComplete: false,
@@ -269,7 +290,22 @@ function writeFixtureRoot(): { root: string; packetPath: string; reviewPath: str
       semanticGroups: [1, 2, 3].map((group) => ({
         group,
         matchedTerms: [`term-${group}`],
+        evidenceTerm: `term-${group}`,
         excerpt: `review context ${group}`,
+        matchBodyCharStart: (group - 1) * 100 + 10,
+        matchBodyCharEnd: (group - 1) * 100 + 20,
+        locationMappingComplete: true,
+        locationMappingFailure: null,
+        pageReceipts: [{
+          pageNumber: group,
+          bodyCharStart: (group - 1) * 100,
+          bodyCharEnd: group * 100,
+          matchCharStart: (group - 1) * 100 + 10,
+          matchCharEnd: (group - 1) * 100 + 20,
+          normalizedTextSha256: "d".repeat(64),
+          ocrCandidate: false,
+          extractionStatus: "success",
+        }],
         machineSupported: true,
       })),
       failedSemanticGroups: [],
@@ -403,6 +439,54 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.reviewerSupportMachineVerified).toBe(false);
     expect(report.failures).toContain("reviewer-support-candidate-not-supported:D-C-10");
     expect(report.exactPromotionPerformed).toBe(false);
+    expect(() => module.buildKoshaExactPromotionReviewTemplate({ rootDir: root, packetPath })).toThrow(
+      "kosha-review-template-reviewer-support-candidate-not-ready:D-C-10",
+    );
+  });
+
+  it("fails closed when reviewer support omits a page receipt", async () => {
+    const { root, packetPath, reviewPath } = writeFixtureRoot();
+    const supportPath = path.join(root, "evaluation/kosha-exact-promotion-reviewer-support-2026-07-25/report.json");
+    const support = JSON.parse(fs.readFileSync(supportPath, "utf8")) as {
+      results: Array<{ stableKey: string; semanticGroups: Array<{ pageReceipts: unknown[] }> }>;
+    };
+    const target = support.results.find((row) => row.stableKey === "D-C-10");
+    if (!target) throw new Error("fixture-missing-d-c-10-reviewer-support");
+    target.semanticGroups[0].pageReceipts = [];
+    writeJson(root, path.relative(root, supportPath), support);
+
+    const module = await loadReviewGateModule();
+    const report = module.buildKoshaExactPromotionReviewGate({ rootDir: root, packetPath, reviewPath });
+
+    expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
+    expect(report.reviewerSupportMachineVerified).toBe(false);
+    expect(report.failures).toContain("reviewer-support-candidate-not-supported:D-C-10");
+    expect(() => module.buildKoshaExactPromotionReviewTemplate({ rootDir: root, packetPath })).toThrow(
+      "kosha-review-template-reviewer-support-candidate-not-ready:D-C-10",
+    );
+  });
+
+  it("fails closed when page receipts exist but location mapping is incomplete", async () => {
+    const { root, packetPath, reviewPath } = writeFixtureRoot();
+    const supportPath = path.join(root, "evaluation/kosha-exact-promotion-reviewer-support-2026-07-25/report.json");
+    const support = JSON.parse(fs.readFileSync(supportPath, "utf8")) as {
+      results: Array<{
+        stableKey: string;
+        semanticGroups: Array<{ locationMappingComplete: boolean; locationMappingFailure: string | null }>;
+      }>;
+    };
+    const target = support.results.find((row) => row.stableKey === "D-C-10");
+    if (!target) throw new Error("fixture-missing-d-c-10-reviewer-support");
+    target.semanticGroups[0].locationMappingComplete = false;
+    target.semanticGroups[0].locationMappingFailure = "semantic-match-non-whitespace-gap";
+    writeJson(root, path.relative(root, supportPath), support);
+
+    const module = await loadReviewGateModule();
+    const report = module.buildKoshaExactPromotionReviewGate({ rootDir: root, packetPath, reviewPath });
+
+    expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
+    expect(report.reviewerSupportMachineVerified).toBe(false);
+    expect(report.failures).toContain("reviewer-support-candidate-not-supported:D-C-10");
     expect(() => module.buildKoshaExactPromotionReviewTemplate({ rootDir: root, packetPath })).toThrow(
       "kosha-review-template-reviewer-support-candidate-not-ready:D-C-10",
     );
@@ -703,6 +787,8 @@ describe("KOSHA exact promotion review gate", () => {
     expect(template.exactPromotionPerformed).toBe(false);
     expect(template.machineReviewerSupportIncluded).toBe(true);
     expect(template.machineEvidenceReplacesHumanReview).toBe(false);
+    expect(template.bodySnapshotId).toBe("fixture-snapshot");
+    expect(template.bodySourceIdentitySha256).toBe("c".repeat(64));
     expect(template.candidateReviews).toHaveLength(2);
     expect(template.candidateReviews[0].order).toBe(1);
     expect(template.candidateReviews[0].title).toBe("KOSHA guide D-C-10");
@@ -716,6 +802,9 @@ describe("KOSHA exact promotion review gate", () => {
     expect(template.candidateReviews[0].machineReviewerSupport.humanConfirmationRequired).toBe(true);
     expect(template.candidateReviews[0].machineReviewerSupport.semanticGroups).toHaveLength(3);
     expect(template.candidateReviews[0].machineReviewerSupport.semanticGroups.every((group) => group.excerpt.length > 0)).toBe(true);
+    expect(template.candidateReviews[0].machineReviewerSupport.semanticGroups.every((group) => group.locationMappingComplete)).toBe(true);
+    expect(template.candidateReviews[0].machineReviewerSupport.semanticGroups.every((group) => group.locationMappingFailure === null)).toBe(true);
+    expect(template.candidateReviews[0].machineReviewerSupport.semanticGroups.every((group) => group.pageReceipts.length === 1)).toBe(true);
     expect(template.candidateReviews.every((row) => row.reviewer === "")).toBe(true);
     expect(template.candidateReviews.every((row) => row.reviewedAt === "")).toBe(true);
     expect(template.candidateReviews.every((row) => row.humanConfirmed === false)).toBe(true);

@@ -145,13 +145,32 @@ export async function runBrowserProbe(options) {
           )].filter((pane) => !pane.hidden).length,
           requiredCheckCount: document.querySelectorAll("input[data-check]").length,
           semanticGroupCount: document.querySelectorAll(".evidence-group").length,
+          evidenceReceiptCount: document.querySelectorAll("[data-evidence-receipt]").length,
           exportInitiallyDisabled: element("[data-export]") instanceof HTMLButtonElement
             && element("[data-export]").disabled,
           firstEvidenceBottom: rectangle(".evidence-group")?.bottom ?? null,
+          firstEvidenceReceiptBottom: rectangle("[data-evidence-receipt]")?.bottom ?? null,
           firstCheckBottom: rectangle(".check-row")?.bottom ?? null,
           horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
         };
       });
+      let receiptAccess = null;
+      if (metrics.evidenceDisplay !== "none") {
+        const firstReceipt = page.locator("[data-evidence-receipt]").first();
+        await firstReceipt.scrollIntoViewIfNeeded();
+        receiptAccess = await page.evaluate(() => {
+          const receipt = document.querySelector("[data-evidence-receipt]")?.getBoundingClientRect();
+          const pane = document.querySelector(".evidence-pane")?.getBoundingClientRect();
+          if (!receipt || !pane) return null;
+          return {
+            receiptTop: receipt.top,
+            receiptBottom: receipt.bottom,
+            paneTop: pane.top,
+            paneBottom: pane.bottom,
+            fullyVisibleInsidePane: receipt.top >= pane.top && receipt.bottom <= pane.bottom,
+          };
+        });
+      }
       const screenshot = path.join(outputDir, `${probe.name}.png`);
       await page.screenshot({ path: screenshot, fullPage: false });
       results.push({
@@ -160,6 +179,7 @@ export async function runBrowserProbe(options) {
         candidateEndState,
         candidateHomeState,
         mobileKeyboardState,
+        receiptAccess,
         screenshot: path.relative(options.rootDir, screenshot),
       });
       await page.close();
@@ -169,13 +189,25 @@ export async function runBrowserProbe(options) {
     await storagePage.check('[data-check="0:0"]');
     await storagePage.reload({ waitUntil: "load" });
     const sameFingerprintPreserved = await storagePage.isChecked('[data-check="0:0"]');
-    const staleEnvelopeInjected = await storagePage.evaluate(() => {
-      const storageKey = "safeclaw-kosha-reviewer-cockpit-v2";
+    const staleEnvelopeResult = await storagePage.evaluate(() => {
+      const storageKey = "safeclaw-kosha-reviewer-cockpit-v3";
       const stored = JSON.parse(localStorage.getItem(storageKey) || "null");
       if (!stored || !Array.isArray(stored.rows)) return false;
-      stored.candidateFingerprint = "stale-candidate-fingerprint";
+      const fingerprint = JSON.parse(stored.candidateFingerprint || "null");
+      if (!Array.isArray(fingerprint) || !fingerprint[0]?.bodySourceIdentitySha256) return false;
+      const sourceIdentityPresent = fingerprint.every((row) => (
+        typeof row.bodySnapshotId === "string"
+        && typeof row.bodySourceIdentitySha256 === "string"
+        && typeof row.bodySha256 === "string"
+        && typeof row.pdfSha256 === "string"
+        && Array.isArray(row.evidenceReceipts)
+        && row.evidenceReceipts.every((group) => Array.isArray(group.pageReceipts)
+          && group.pageReceipts.every((receipt) => typeof receipt.normalizedTextSha256 === "string"))
+      ));
+      fingerprint[0].evidenceReceipts[0].pageReceipts[0].normalizedTextSha256 = "0".repeat(64);
+      stored.candidateFingerprint = JSON.stringify(fingerprint);
       localStorage.setItem(storageKey, JSON.stringify(stored));
-      return true;
+      return sourceIdentityPresent;
     });
     await storagePage.reload({ waitUntil: "load" });
     const staleFingerprintDiscarded = !(await storagePage.isChecked('[data-check="0:0"]'));
@@ -183,7 +215,8 @@ export async function runBrowserProbe(options) {
     const staleDraftNotice = (await storagePage.textContent("[data-progress-live]")) || "";
     draftStorageIdentity = {
       sameFingerprintPreserved,
-      staleEnvelopeInjected,
+      sourceIdentityPresent: staleEnvelopeResult,
+      staleEnvelopeInjected: staleEnvelopeResult,
       staleFingerprintDiscarded,
       staleExportDisabled,
       staleDraftNotice,
@@ -220,6 +253,7 @@ export async function runBrowserProbe(options) {
     && row.selectedCandidateVisibleMobilePaneCount === (row.viewport.width <= 767 ? 1 : 2)
     && row.requiredCheckCount === 40
     && row.semanticGroupCount === 24
+    && row.evidenceReceiptCount >= 24
     && row.exportInitiallyDisabled
     && !row.horizontalOverflow
   ));
@@ -231,6 +265,9 @@ export async function runBrowserProbe(options) {
     && desktop.mobileModeDisplay === "none"
     && typeof desktop.firstEvidenceBottom === "number"
     && desktop.firstEvidenceBottom <= desktop.viewport.height
+    && typeof desktop.firstEvidenceReceiptBottom === "number"
+    && desktop.firstEvidenceReceiptBottom <= desktop.viewport.height
+    && desktop.receiptAccess?.fullyVisibleInsidePane === true
     && typeof desktop.firstCheckBottom === "number"
     && desktop.firstCheckBottom <= desktop.viewport.height,
   );
@@ -252,6 +289,9 @@ export async function runBrowserProbe(options) {
     && mobileReview.mobileKeyboardState?.evidenceFocused === "0:evidence"
     && typeof mobileEvidence.firstEvidenceBottom === "number"
     && mobileEvidence.firstEvidenceBottom <= mobileEvidence.viewport.height
+    && typeof mobileEvidence.firstEvidenceReceiptBottom === "number"
+    && mobileEvidence.firstEvidenceReceiptBottom <= mobileEvidence.viewport.height
+    && mobileEvidence.receiptAccess?.fullyVisibleInsidePane === true
     && typeof mobileReview.firstCheckBottom === "number"
     && mobileReview.firstCheckBottom <= mobileReview.viewport.height,
   );
@@ -262,6 +302,7 @@ export async function runBrowserProbe(options) {
   ));
   const draftStorageIdentityPass = Boolean(
     draftStorageIdentity?.sameFingerprintPreserved
+    && draftStorageIdentity?.sourceIdentityPresent
     && draftStorageIdentity?.staleEnvelopeInjected
     && draftStorageIdentity?.staleFingerprintDiscarded
     && draftStorageIdentity?.staleExportDisabled
@@ -317,6 +358,8 @@ Verdict: \`${report.verdict}\`
 - Mobile evidence/review keyboard: ${[mobileEvidence, mobileReview].every((row) => row?.mobileKeyboardState?.reviewFocused === "0:review" && row?.mobileKeyboardState?.evidenceFocused === "0:evidence")}
 - Breakpoint-correct tabpanels: ${report.responsiveTabPanelPass}
 - Candidate-bound draft restore: ${report.draftStorageIdentityPass}
+- Evidence page receipts visible: ${results.every((row) => row.evidenceReceiptCount >= 24)}
+- Draft fingerprint contains source identity: ${report.draftStorageIdentity?.sourceIdentityPresent}
 - Live progress status: ${results.every((row) => row.progressLiveRole === "status" && row.progressLiveMode === "polite")}
 - Horizontal overflow: ${results.some((row) => row.horizontalOverflow)}
 

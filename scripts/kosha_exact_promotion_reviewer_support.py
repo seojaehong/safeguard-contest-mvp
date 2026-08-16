@@ -106,11 +106,10 @@ def _normalized_text(value: str) -> str:
     return re.sub(r"\s+", "", value)
 
 
-def _excerpt(body: str, term: str, radius: int = 90) -> str:
-    compact = re.sub(r"\s+", " ", body).strip()
+def _match_context(body: str, term: str, radius: int = 90) -> tuple[str, int, int]:
     normalized_chars: list[str] = []
     source_indexes: list[int] = []
-    for source_index, character in enumerate(compact):
+    for source_index, character in enumerate(body):
         if character.isspace():
             continue
         normalized_chars.append(character)
@@ -119,15 +118,93 @@ def _excerpt(body: str, term: str, radius: int = 90) -> str:
     normalized_term = _normalized_text(term)
     normalized_index = normalized.find(normalized_term)
     if normalized_index < 0 or not normalized_term:
-        return ""
+        return "", -1, -1
     source_start = source_indexes[normalized_index]
     source_end_index = normalized_index + len(normalized_term) - 1
     source_end = source_indexes[source_end_index] + 1
     start = max(0, source_start - radius)
-    end = min(len(compact), source_end + radius)
+    end = min(len(body), source_end + radius)
     prefix = "..." if start > 0 else ""
-    suffix = "..." if end < len(compact) else ""
-    return f"{prefix}{compact[start:end]}{suffix}"
+    suffix = "..." if end < len(body) else ""
+    excerpt = re.sub(r"\s+", " ", body[start:end]).strip()
+    return f"{prefix}{excerpt}{suffix}", source_start, source_end
+
+
+def _page_receipts(
+    body_row: JsonObject,
+    body: str,
+    match_start: int,
+    match_end: int,
+) -> tuple[list[JsonObject], str | None]:
+    pages_value = body_row.get("pages")
+    if not isinstance(pages_value, list) or not pages_value:
+        raise ReviewerSupportError("reviewer-support-page-metadata-missing")
+    pages = pages_value
+    receipts: list[JsonObject] = []
+    previous_page_number = 0
+    previous_page_end = 0
+    for page_index, page_value in enumerate(pages):
+        if not isinstance(page_value, dict):
+            raise ReviewerSupportError(f"reviewer-support-invalid-page-row:{page_index}")
+        page_start = page_value.get("body_char_start")
+        page_end = page_value.get("body_char_end")
+        page_number = page_value.get("page_number")
+        page_digest = _text(page_value.get("normalized_text_sha256"))
+        ocr_candidate = page_value.get("ocr_candidate")
+        extraction_status = _text(page_value.get("extraction_status"))
+        if (
+            not isinstance(page_start, int)
+            or isinstance(page_start, bool)
+            or not isinstance(page_end, int)
+            or isinstance(page_end, bool)
+            or not isinstance(page_number, int)
+            or isinstance(page_number, bool)
+            or page_start < 0
+            or page_end < page_start
+            or page_end > len(body)
+            or page_number <= 0
+            or page_number <= previous_page_number
+            or page_start < previous_page_end
+            or re.fullmatch(r"[0-9a-f]{64}", page_digest) is None
+            or not isinstance(ocr_candidate, bool)
+            or extraction_status not in {"success", "empty"}
+        ):
+            raise ReviewerSupportError(
+                f"reviewer-support-invalid-page-metadata:{page_index + 1}"
+            )
+        previous_page_number = page_number
+        previous_page_end = page_end
+        overlap_start = max(match_start, page_start)
+        overlap_end = min(match_end, page_end)
+        if overlap_start >= overlap_end:
+            continue
+        receipts.append(
+            {
+                "pageNumber": page_number,
+                "bodyCharStart": page_start,
+                "bodyCharEnd": page_end,
+                "matchCharStart": overlap_start,
+                "matchCharEnd": overlap_end,
+                "normalizedTextSha256": page_digest,
+                "ocrCandidate": ocr_candidate,
+                "extractionStatus": extraction_status,
+            }
+        )
+    if not receipts:
+        return [], "semantic-match-page-location-missing"
+
+    coverage_cursor = match_start
+    for receipt in receipts:
+        receipt_start = int(receipt["matchCharStart"])
+        receipt_end = int(receipt["matchCharEnd"])
+        if receipt_start < coverage_cursor:
+            return receipts, "semantic-match-page-location-overlap"
+        if _normalized_text(body[coverage_cursor:receipt_start]):
+            return receipts, "semantic-match-non-whitespace-gap"
+        coverage_cursor = receipt_end
+    if _normalized_text(body[coverage_cursor:match_end]):
+        return receipts, "semantic-match-non-whitespace-gap"
+    return receipts, None
 
 
 def _assert_upstream_boundaries(
@@ -201,14 +278,32 @@ def build_report(
         for index, terms in enumerate(groups, start=1):
             matched_terms = [term for term in terms if term in normalized_body]
             first_term = matched_terms[0] if matched_terms else ""
-            excerpt = _excerpt(body, first_term) if first_term else ""
+            excerpt, match_start, match_end = (
+                _match_context(body, first_term) if first_term else ("", -1, -1)
+            )
+            page_receipts, location_mapping_failure = (
+                _page_receipts(body_row, body, match_start, match_end)
+                if match_start >= 0 and match_end > match_start
+                else ([], "semantic-match-location-unavailable")
+            )
             group_rows.append(
                 {
                     "group": index,
                     "requiredAny": list(terms),
                     "matchedTerms": matched_terms,
+                    "evidenceTerm": first_term,
                     "excerpt": excerpt,
-                    "machineSupported": bool(matched_terms) and bool(excerpt),
+                    "matchBodyCharStart": match_start,
+                    "matchBodyCharEnd": match_end,
+                    "pageReceipts": page_receipts,
+                    "locationMappingComplete": location_mapping_failure is None,
+                    "locationMappingFailure": location_mapping_failure,
+                    "machineSupported": (
+                        bool(matched_terms)
+                        and bool(excerpt)
+                        and bool(page_receipts)
+                        and location_mapping_failure is None
+                    ),
                 }
             )
         failed_groups = [row["group"] for row in group_rows if row["machineSupported"] is not True]
@@ -247,6 +342,19 @@ def build_report(
         "failedCount": failed_count,
         "semanticGroupCount": sum(len(row["semanticGroups"]) for row in results),
         "failedSemanticGroupCount": sum(len(row["failedSemanticGroups"]) for row in results),
+        "pageReceiptCount": sum(
+            len(group["pageReceipts"])
+            for row in results
+            for group in row["semanticGroups"]
+        ),
+        "semanticGroupsWithoutPageReceipt": sum(
+            1
+            for row in results
+            for group in row["semanticGroups"]
+            if not group["pageReceipts"]
+        ),
+        "bodySnapshotId": _text(current.get("snapshot_id")),
+        "bodySourceIdentitySha256": _text(current.get("source_identity_sha256")),
         "results": results,
         "reviewBoundary": {
             "humanReviewCompleted": False,
@@ -311,6 +419,13 @@ def render_markdown(report: JsonObject) -> str:
                 [
                     f"- Group {_integer(group.get('group'))}: matched `{', '.join(group.get('matchedTerms', []))}`",
                     f"  - Excerpt: {_text(group.get('excerpt'))}",
+                    "  - Page receipts: " + ", ".join(
+                        f"p.{_integer(receipt.get('pageNumber'))} "
+                        f"chars {_integer(receipt.get('matchCharStart'))}-{_integer(receipt.get('matchCharEnd'))} "
+                        f"sha {_text(receipt.get('normalizedTextSha256'))[:12]}"
+                        for receipt in group.get("pageReceipts", [])
+                        if isinstance(receipt, dict)
+                    ),
                 ]
             )
         details.append("\n".join(detail_lines))
@@ -322,6 +437,8 @@ def render_markdown(report: JsonObject) -> str:
 - Machine-supported candidates: `{_integer(report.get("machineSupportedCount"))}`
 - Semantic groups: `{_integer(report.get("semanticGroupCount"))}`
 - Failed semantic groups: `{_integer(report.get("failedSemanticGroupCount"))}`
+- Page receipts: `{_integer(report.get("pageReceiptCount"))}`
+- Semantic groups without page receipt: `{_integer(report.get("semanticGroupsWithoutPageReceipt"))}`
 - Human review completed: `false`
 - Exact promotion performed: `false`
 

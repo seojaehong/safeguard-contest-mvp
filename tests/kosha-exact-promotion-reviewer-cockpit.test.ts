@@ -14,7 +14,10 @@ type CockpitModule = {
     payload: {
       candidateCount: number;
       semanticGroupCount: number;
+      pageReceiptCount: number;
       checklistInputCount: number;
+      bodySnapshotId: string;
+      bodySourceIdentitySha256: string;
       boundary: Record<string, boolean>;
     };
   };
@@ -54,7 +57,22 @@ function fixture() {
           group: groupIndex + 1,
           requiredAny: [`term-${groupIndex + 1}`],
           matchedTerms: [`term-${groupIndex + 1}`],
+          evidenceTerm: `term-${groupIndex + 1}`,
           excerpt: `reviewer excerpt ${groupIndex + 1}`,
+          matchBodyCharStart: groupIndex * 100 + 10,
+          matchBodyCharEnd: groupIndex * 100 + 20,
+          locationMappingComplete: true,
+          locationMappingFailure: null,
+          pageReceipts: [{
+            pageNumber: groupIndex + 1,
+            bodyCharStart: groupIndex * 100,
+            bodyCharEnd: (groupIndex + 1) * 100,
+            matchCharStart: groupIndex * 100 + 10,
+            matchCharEnd: groupIndex * 100 + 20,
+            normalizedTextSha256: "c".repeat(64),
+            ocrCandidate: groupIndex === 2,
+            extractionStatus: "success",
+          }],
         })),
       },
       requiredReviewChecks: Array.from({ length: 5 }, (_, checkIndex) => ({
@@ -71,6 +89,8 @@ function fixture() {
       schemaVersion: "safeclaw-kosha-exact-promotion-review/v1",
       reviewTemplateOnly: true,
       exactPromotionPerformed: false,
+      bodySnapshotId: "fixture-snapshot",
+      bodySourceIdentitySha256: "d".repeat(64),
       candidateReviews: candidates,
     },
     pdfAudit: {
@@ -104,7 +124,10 @@ describe("KOSHA exact promotion reviewer cockpit", () => {
     expect(result.payload).toMatchObject({
       candidateCount: 8,
       semanticGroupCount: 24,
+      pageReceiptCount: 24,
       checklistInputCount: 64,
+      bodySnapshotId: "fixture-snapshot",
+      bodySourceIdentitySha256: "d".repeat(64),
       boundary: {
         localReviewOnly: true,
         dbMutationPerformed: false,
@@ -129,13 +152,19 @@ describe("KOSHA exact promotion reviewer cockpit", () => {
     expect(result.html).toContain('pane.setAttribute("role", "tabpanel")');
     expect(result.html).toContain('pane.removeAttribute("role")');
     expect(result.html).toContain('pane.hidden = paneMode !== selectedMode');
-    expect(result.html).toContain('safeclaw-kosha-reviewer-cockpit-state/v2');
+    expect(result.html).toContain('safeclaw-kosha-reviewer-cockpit-state/v3');
     expect(result.html).toContain('stored.candidateFingerprint === candidateFingerprint');
     expect(result.html).toContain('compatibleStoredRows(stored.rows)');
     expect(result.html).toContain('후보 구성이 변경되어 이전 검토 초안을 복원하지 않았습니다.');
     expect(result.html).toContain('ArrowDown: (index + 1) % buttons.length');
     expect(result.html).toContain('End: buttons.length - 1');
     expect(result.html.match(/<input type="checkbox" data-check=/g)).toHaveLength(40);
+    expect(result.html.match(/data-evidence-receipt=/g)).toHaveLength(24);
+    expect(result.html).toContain("PDF 1쪽");
+    expect(result.html).toContain("bodySnapshotId: payload.bodySnapshotId");
+    expect(result.html).toContain("bodySourceIdentitySha256: payload.bodySourceIdentitySha256");
+    expect(result.html).toContain("evidenceReceipts: candidate.semanticGroups.map");
+    expect(result.html).toContain("normalizedTextSha256: receipt.normalizedTextSha256");
     expect(result.html).toContain("data-export disabled");
     expect(result.html).toContain("검토 JSON 내보내기 · 64개 입력 필요");
     expect(result.html).toContain("기계 근거는 검토를 돕지만 판단을 대신하지 않습니다.");
@@ -155,6 +184,41 @@ describe("KOSHA exact promotion reviewer cockpit", () => {
       data.pdfAudit,
       data.lifecycleAudit,
     )).toThrow("kosha-reviewer-cockpit-candidate-not-ready:D-C-1");
+  });
+
+  it("fails closed when a machine-supported semantic group has no page receipt", async () => {
+    const module = await loadModule();
+    const data = fixture();
+    const candidates = data.template.candidateReviews as Array<Record<string, unknown>>;
+    const support = candidates[0]?.machineReviewerSupport as {
+      semanticGroups: Array<Record<string, unknown>>;
+    };
+    if (support.semanticGroups[0]) support.semanticGroups[0].pageReceipts = [];
+
+    expect(() => module.buildReviewerCockpit(
+      data.template,
+      data.pdfAudit,
+      data.lifecycleAudit,
+    )).toThrow("kosha-reviewer-cockpit-invalid-page-receipts-D-C-1-1");
+  });
+
+  it("fails closed when page receipts exist but location mapping is incomplete", async () => {
+    const module = await loadModule();
+    const data = fixture();
+    const candidates = data.template.candidateReviews as Array<Record<string, unknown>>;
+    const support = candidates[0]?.machineReviewerSupport as {
+      semanticGroups: Array<Record<string, unknown>>;
+    };
+    if (support.semanticGroups[0]) {
+      support.semanticGroups[0].locationMappingComplete = false;
+      support.semanticGroups[0].locationMappingFailure = "semantic-match-non-whitespace-gap";
+    }
+
+    expect(() => module.buildReviewerCockpit(
+      data.template,
+      data.pdfAudit,
+      data.lifecycleAudit,
+    )).toThrow("kosha-reviewer-cockpit-invalid-page-receipts-D-C-1-1");
   });
 
   it("fails closed when upstream PDF or lifecycle evidence is not ready", async () => {

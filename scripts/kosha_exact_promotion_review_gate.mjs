@@ -42,6 +42,48 @@ function asBoolean(value) {
 }
 
 /**
+ * @param {unknown} value
+ */
+function pageReceiptsPass(group) {
+  if (!isRecord(group)
+    || !asString(group.evidenceTerm)
+    || !Number.isInteger(group.matchBodyCharStart)
+    || !Number.isInteger(group.matchBodyCharEnd)
+    || Number(group.matchBodyCharStart) < 0
+    || Number(group.matchBodyCharEnd) <= Number(group.matchBodyCharStart)
+    || group.locationMappingComplete !== true
+    || group.locationMappingFailure !== null
+    || !Array.isArray(group.pageReceipts)
+    || group.pageReceipts.length === 0) {
+    return false;
+  }
+  const receipts = group.pageReceipts;
+  const receiptsValid = receipts.every((receipt) => isRecord(receipt)
+      && Number.isInteger(receipt.pageNumber)
+      && Number(receipt.pageNumber) > 0
+      && Number.isInteger(receipt.bodyCharStart)
+      && Number.isInteger(receipt.bodyCharEnd)
+      && Number.isInteger(receipt.matchCharStart)
+      && Number.isInteger(receipt.matchCharEnd)
+      && Number(receipt.bodyCharStart) >= 0
+      && Number(receipt.bodyCharEnd) > Number(receipt.bodyCharStart)
+      && Number(receipt.matchCharStart) >= Number(receipt.bodyCharStart)
+      && Number(receipt.matchCharEnd) <= Number(receipt.bodyCharEnd)
+      && Number(receipt.matchCharEnd) > Number(receipt.matchCharStart)
+      && /^[0-9a-f]{64}$/.test(asString(receipt.normalizedTextSha256))
+      && typeof receipt.ocrCandidate === "boolean");
+  if (!receiptsValid) return false;
+  if (Number(receipts[0].matchCharStart) !== Number(group.matchBodyCharStart)
+    || Number(receipts.at(-1).matchCharEnd) !== Number(group.matchBodyCharEnd)) {
+    return false;
+  }
+  return receipts.every((receipt, index) => index === 0
+    || (Number(receipt.pageNumber) > Number(receipts[index - 1].pageNumber)
+      && Number(receipt.bodyCharStart) >= Number(receipts[index - 1].bodyCharEnd)
+      && Number(receipt.matchCharStart) >= Number(receipts[index - 1].matchCharEnd)));
+}
+
+/**
  * @param {string} value
  */
 function isIsoTimestamp(value) {
@@ -316,6 +358,10 @@ export function buildKoshaExactPromotionReviewGate(options) {
     reviewerSupportRecord.failedCount !== 0 ||
     reviewerSupportRecord.semanticGroupCount !== candidates.length * 3 ||
     reviewerSupportRecord.failedSemanticGroupCount !== 0 ||
+    reviewerSupportRecord.semanticGroupsWithoutPageReceipt !== 0 ||
+    Number(reviewerSupportRecord.pageReceiptCount) < Number(reviewerSupportRecord.semanticGroupCount) ||
+    !asString(reviewerSupportRecord.bodySnapshotId) ||
+    !/^[0-9a-f]{64}$/.test(asString(reviewerSupportRecord.bodySourceIdentitySha256)) ||
     reviewerSupportRecord.exactPromotionPerformed !== false ||
     reviewerSupportRecord.exactRegistryWriteArtifactCreated !== false ||
     reviewerSupportRecord.separatePromotionApprovalRequired !== true ||
@@ -416,7 +462,9 @@ export function buildKoshaExactPromotionReviewGate(options) {
         ? reviewerSupportRow.semanticGroups.filter(isRecord)
         : [];
       const semanticGroupsPass = semanticGroups.length === 3
-        && semanticGroups.every((group) => group.machineSupported === true && Boolean(asString(group.excerpt)));
+        && semanticGroups.every((group) => group.machineSupported === true
+          && Boolean(asString(group.excerpt))
+          && pageReceiptsPass(group));
       if (
         asString(reviewerSupportRow.version) !== asString(candidate.version) ||
         reviewerSupportRow.contentRationaleMachineSupported !== true ||
@@ -563,6 +611,10 @@ export function buildKoshaExactPromotionReviewTemplate(options) {
     reviewerSupportRecord.machineSupportedCount !== candidates.length ||
     reviewerSupportRecord.failedCount !== 0 ||
     reviewerSupportRecord.failedSemanticGroupCount !== 0 ||
+    reviewerSupportRecord.semanticGroupsWithoutPageReceipt !== 0 ||
+    Number(reviewerSupportRecord.pageReceiptCount) < Number(reviewerSupportRecord.semanticGroupCount) ||
+    !asString(reviewerSupportRecord.bodySnapshotId) ||
+    !/^[0-9a-f]{64}$/.test(asString(reviewerSupportRecord.bodySourceIdentitySha256)) ||
     reviewerSupportRecord.exactPromotionPerformed !== false ||
     reviewerSupportRecord.exactRegistryWriteArtifactCreated !== false ||
     reviewerSupportBoundary === null ||
@@ -581,6 +633,8 @@ export function buildKoshaExactPromotionReviewTemplate(options) {
     exactPromotionPerformed: false,
     machineReviewerSupportIncluded: true,
     machineEvidenceReplacesHumanReview: false,
+    bodySnapshotId: asString(reviewerSupportRecord.bodySnapshotId),
+    bodySourceIdentitySha256: asString(reviewerSupportRecord.bodySourceIdentitySha256),
     instructions: [
       "Fill reviewer and reviewedAt for each candidate.",
       "Use machineReviewerSupport only as read-only context; inspect the official PDF and body evidence yourself.",
@@ -599,7 +653,9 @@ export function buildKoshaExactPromotionReviewTemplate(options) {
         asString(supportRow.version) !== asString(candidate.version) ||
         supportRow.contentRationaleMachineSupported !== true ||
         semanticGroups.length !== 3 ||
-        semanticGroups.some((group) => group.machineSupported !== true || !asString(group.excerpt))
+        semanticGroups.some((group) => group.machineSupported !== true
+          || !asString(group.excerpt)
+          || !pageReceiptsPass(group))
       ) {
         throw new Error(`kosha-review-template-reviewer-support-candidate-not-ready:${stableKey}`);
       }
@@ -625,7 +681,24 @@ export function buildKoshaExactPromotionReviewTemplate(options) {
             group: typeof group.group === "number" ? group.group : null,
             requiredAny: Array.isArray(group.requiredAny) ? group.requiredAny.map(asString).filter(Boolean) : [],
             matchedTerms: Array.isArray(group.matchedTerms) ? group.matchedTerms.map(asString).filter(Boolean) : [],
+            evidenceTerm: asString(group.evidenceTerm),
             excerpt: asString(group.excerpt),
+            matchBodyCharStart: Number(group.matchBodyCharStart),
+            matchBodyCharEnd: Number(group.matchBodyCharEnd),
+            locationMappingComplete: group.locationMappingComplete === true,
+            locationMappingFailure: group.locationMappingFailure === null ? null : asString(group.locationMappingFailure),
+            pageReceipts: Array.isArray(group.pageReceipts)
+              ? group.pageReceipts.filter(isRecord).map((receipt) => ({
+                  pageNumber: Number(receipt.pageNumber),
+                  bodyCharStart: Number(receipt.bodyCharStart),
+                  bodyCharEnd: Number(receipt.bodyCharEnd),
+                  matchCharStart: Number(receipt.matchCharStart),
+                  matchCharEnd: Number(receipt.matchCharEnd),
+                  normalizedTextSha256: asString(receipt.normalizedTextSha256),
+                  ocrCandidate: receipt.ocrCandidate === true,
+                  extractionStatus: asString(receipt.extractionStatus),
+                }))
+              : [],
           })),
         },
         reviewer: "",
