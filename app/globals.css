@@ -19665,8 +19665,8 @@ body:has(.safeclaw-landing) :is(
   letter-spacing: var(--tracking-body);
 }
 
-.safeclaw-document-review-launch strong {
-  color: var(--workspace-ink);
+.safeclaw-module-shell[data-module-route="/documents"] .safeclaw-module-content .safeclaw-document-review-launch strong {
+  color: var(--workspace-accent-ink);
   font-size: var(--text-caption);
   font-weight: 600;
   line-height: var(--leading-caption);

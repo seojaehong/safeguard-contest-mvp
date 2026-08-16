@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withPublicDocumentExportAdmission } from "@/lib/public-distributed-rate-limit";
 import {
+  DocumentExportLimitError,
   DocumentExportRequestError,
   readDocumentExportRequestJson,
 } from "@/lib/document-export-budget";
@@ -1234,6 +1235,7 @@ async function exportPdf(request: NextRequest) {
     });
   } catch (error) {
     if (error instanceof DocumentExportRequestError) return error.response;
+    if (error instanceof DocumentExportLimitError) return pdfExportLimitResponse();
     if (error instanceof PdfExportLimitError) return pdfExportLimitResponse();
     throw error;
   }
