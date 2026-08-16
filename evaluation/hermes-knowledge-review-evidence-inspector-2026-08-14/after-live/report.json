@@ -2,18 +2,18 @@
   "schemaVersion": "safeclaw-hermes-knowledge-review-authority-ui/v2",
   "contractMode": "evidence-inspector",
   "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
-  "checkedAt": "2026-08-16T04:51:53.142Z",
-  "sourceHead": "b15df85b68235871ac521d01a6334ad90b122a26",
-  "productCommit": "be8a0f143f40689fc02af791bc0b7ae5509046cd",
+  "checkedAt": "2026-08-16T13:11:34.853Z",
+  "sourceHead": "e7afe36bc380bca2666dcbd2115aa0e1e1e32e80",
+  "productCommit": "bc160cbde13ff0441c24e7f0974c121e24b39025",
   "baseUrl": "https://www.safeclaw.kr",
   "mode": "live-production",
   "productionBuild": {
     "status": 200,
     "ok": true,
-    "commitSha": "dac7ec54dc8999b54cdac43203b7b339c4d3b036",
+    "commitSha": "e7afe36bc380bca2666dcbd2115aa0e1e1e32e80",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-9bw8rfqfe-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-du9wexb7h-seojaehongs-projects.vercel.app"
   },
   "productionAligned": true,
   "viewportCount": 8,
@@ -41,6 +41,12 @@
     "desktopColumns": 2,
     "mobileColumns": 1,
     "candidateBodyInternalScroll": true,
+    "candidateTablist": true,
+    "candidateRovingTabStop": true,
+    "candidateKeyboardNavigation": true,
+    "breakpointOrientationSynchronized": true,
+    "mobilePaneTabsLinked": true,
+    "mobilePaneKeyboardNavigation": true,
     "evidenceItemLimit": 20,
     "evidenceItemCount": 5,
     "desktopEvidenceColumns": 2,
@@ -78,6 +84,16 @@
         "rootTop": 28.21875,
         "workbenchColumns": 2,
         "navigatorCandidateCount": 3,
+        "candidateTablistRole": "tablist",
+        "candidateTablistOrientation": "vertical",
+        "candidateTabCount": 3,
+        "selectedCandidateTabCount": 1,
+        "tabbableCandidateTabCount": 1,
+        "candidateControlIdsPresent": true,
+        "candidateControlIdsUnique": true,
+        "selectedCandidateControlLinked": true,
+        "selectedCandidatePanelRole": "tabpanel",
+        "selectedCandidatePanelLabelledBy": true,
         "selectedCandidateCount": 1,
         "selectedBodyCount": 1,
         "selectedBodyOverflowY": "auto",
@@ -97,6 +113,17 @@
         "actionCount": 3,
         "actionContained": true
       },
+      "candidateKeyboard": {
+        "endState": {
+          "selectedIndex": 2,
+          "focusedIndex": 2
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0
+        }
+      },
+      "mobilePaneKeyboard": null,
       "mobileEvidence": null,
       "browserErrors": [],
       "passed": true
@@ -118,6 +145,16 @@
         "rootTop": 28.21875,
         "workbenchColumns": 2,
         "navigatorCandidateCount": 3,
+        "candidateTablistRole": "tablist",
+        "candidateTablistOrientation": "vertical",
+        "candidateTabCount": 3,
+        "selectedCandidateTabCount": 1,
+        "tabbableCandidateTabCount": 1,
+        "candidateControlIdsPresent": true,
+        "candidateControlIdsUnique": true,
+        "selectedCandidateControlLinked": true,
+        "selectedCandidatePanelRole": "tabpanel",
+        "selectedCandidatePanelLabelledBy": true,
         "selectedCandidateCount": 1,
         "selectedBodyCount": 1,
         "selectedBodyOverflowY": "auto",
@@ -137,6 +174,17 @@
         "actionCount": 3,
         "actionContained": true
       },
+      "candidateKeyboard": {
+        "endState": {
+          "selectedIndex": 2,
+          "focusedIndex": 2
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0
+        }
+      },
+      "mobilePaneKeyboard": null,
       "mobileEvidence": null,
       "browserErrors": [],
       "passed": true
@@ -155,9 +203,19 @@
         "horizontalOverflow": false,
         "rootWidth": 366,
         "rootWidthRatio": 0.94,
-        "rootTop": 633.140625,
+        "rootTop": 587.140625,
         "workbenchColumns": 1,
         "navigatorCandidateCount": 3,
+        "candidateTablistRole": "tablist",
+        "candidateTablistOrientation": "horizontal",
+        "candidateTabCount": 3,
+        "selectedCandidateTabCount": 1,
+        "tabbableCandidateTabCount": 1,
+        "candidateControlIdsPresent": true,
+        "candidateControlIdsUnique": true,
+        "selectedCandidateControlLinked": true,
+        "selectedCandidatePanelRole": "tabpanel",
+        "selectedCandidatePanelLabelledBy": true,
         "selectedCandidateCount": 1,
         "selectedBodyCount": 1,
         "selectedBodyOverflowY": "auto",
@@ -171,11 +229,33 @@
         "authorityWidth": 340,
         "authorityRoleCount": 6,
         "authorityContained": true,
-        "actionGroupTop": 1492.75,
-        "firstActionBottom": 1536.75,
+        "actionGroupTop": 1446.75,
+        "firstActionBottom": 1490.75,
         "firstActionDepth": 903.609375,
         "actionCount": 3,
         "actionContained": true
+      },
+      "candidateKeyboard": {
+        "endState": {
+          "selectedIndex": 2,
+          "focusedIndex": 2
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0
+        }
+      },
+      "mobilePaneKeyboard": {
+        "endState": {
+          "selectedIndex": 1,
+          "focusedIndex": 1,
+          "mountedPane": "evidence"
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0,
+          "mountedPane": "candidate"
+        }
       },
       "mobileEvidence": {
         "paneCount": 1,
@@ -202,9 +282,19 @@
         "horizontalOverflow": false,
         "rootWidth": 366,
         "rootWidthRatio": 0.94,
-        "rootTop": 604.140625,
+        "rootTop": 591.140625,
         "workbenchColumns": 1,
         "navigatorCandidateCount": 3,
+        "candidateTablistRole": "tablist",
+        "candidateTablistOrientation": "horizontal",
+        "candidateTabCount": 3,
+        "selectedCandidateTabCount": 1,
+        "tabbableCandidateTabCount": 1,
+        "candidateControlIdsPresent": true,
+        "candidateControlIdsUnique": true,
+        "selectedCandidateControlLinked": true,
+        "selectedCandidatePanelRole": "tabpanel",
+        "selectedCandidatePanelLabelledBy": true,
         "selectedCandidateCount": 1,
         "selectedBodyCount": 1,
         "selectedBodyOverflowY": "auto",
@@ -218,11 +308,33 @@
         "authorityWidth": 340,
         "authorityRoleCount": 6,
         "authorityContained": true,
-        "actionGroupTop": 1463.75,
-        "firstActionBottom": 1507.75,
+        "actionGroupTop": 1450.75,
+        "firstActionBottom": 1494.75,
         "firstActionDepth": 903.609375,
         "actionCount": 3,
         "actionContained": true
+      },
+      "candidateKeyboard": {
+        "endState": {
+          "selectedIndex": 2,
+          "focusedIndex": 2
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0
+        }
+      },
+      "mobilePaneKeyboard": {
+        "endState": {
+          "selectedIndex": 1,
+          "focusedIndex": 1,
+          "mountedPane": "evidence"
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0,
+          "mountedPane": "candidate"
+        }
       },
       "mobileEvidence": {
         "paneCount": 1,
@@ -252,6 +364,16 @@
         "rootTop": 28.21875,
         "workbenchColumns": 2,
         "navigatorCandidateCount": 3,
+        "candidateTablistRole": "tablist",
+        "candidateTablistOrientation": "vertical",
+        "candidateTabCount": 3,
+        "selectedCandidateTabCount": 1,
+        "tabbableCandidateTabCount": 1,
+        "candidateControlIdsPresent": true,
+        "candidateControlIdsUnique": true,
+        "selectedCandidateControlLinked": true,
+        "selectedCandidatePanelRole": "tabpanel",
+        "selectedCandidatePanelLabelledBy": true,
         "selectedCandidateCount": 1,
         "selectedBodyCount": 1,
         "selectedBodyOverflowY": "auto",
@@ -271,6 +393,17 @@
         "actionCount": 3,
         "actionContained": true
       },
+      "candidateKeyboard": {
+        "endState": {
+          "selectedIndex": 2,
+          "focusedIndex": 2
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0
+        }
+      },
+      "mobilePaneKeyboard": null,
       "mobileEvidence": null,
       "browserErrors": [],
       "passed": true
@@ -292,6 +425,16 @@
         "rootTop": 28.21875,
         "workbenchColumns": 2,
         "navigatorCandidateCount": 3,
+        "candidateTablistRole": "tablist",
+        "candidateTablistOrientation": "vertical",
+        "candidateTabCount": 3,
+        "selectedCandidateTabCount": 1,
+        "tabbableCandidateTabCount": 1,
+        "candidateControlIdsPresent": true,
+        "candidateControlIdsUnique": true,
+        "selectedCandidateControlLinked": true,
+        "selectedCandidatePanelRole": "tabpanel",
+        "selectedCandidatePanelLabelledBy": true,
         "selectedCandidateCount": 1,
         "selectedBodyCount": 1,
         "selectedBodyOverflowY": "auto",
@@ -311,6 +454,17 @@
         "actionCount": 3,
         "actionContained": true
       },
+      "candidateKeyboard": {
+        "endState": {
+          "selectedIndex": 2,
+          "focusedIndex": 2
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0
+        }
+      },
+      "mobilePaneKeyboard": null,
       "mobileEvidence": null,
       "browserErrors": [],
       "passed": true
@@ -329,9 +483,19 @@
         "horizontalOverflow": false,
         "rootWidth": 366,
         "rootWidthRatio": 0.94,
-        "rootTop": 633.140625,
+        "rootTop": 605.140625,
         "workbenchColumns": 1,
         "navigatorCandidateCount": 3,
+        "candidateTablistRole": "tablist",
+        "candidateTablistOrientation": "horizontal",
+        "candidateTabCount": 3,
+        "selectedCandidateTabCount": 1,
+        "tabbableCandidateTabCount": 1,
+        "candidateControlIdsPresent": true,
+        "candidateControlIdsUnique": true,
+        "selectedCandidateControlLinked": true,
+        "selectedCandidatePanelRole": "tabpanel",
+        "selectedCandidatePanelLabelledBy": true,
         "selectedCandidateCount": 1,
         "selectedBodyCount": 1,
         "selectedBodyOverflowY": "auto",
@@ -345,11 +509,33 @@
         "authorityWidth": 340,
         "authorityRoleCount": 6,
         "authorityContained": true,
-        "actionGroupTop": 1492.75,
-        "firstActionBottom": 1536.75,
+        "actionGroupTop": 1464.75,
+        "firstActionBottom": 1508.75,
         "firstActionDepth": 903.609375,
         "actionCount": 3,
         "actionContained": true
+      },
+      "candidateKeyboard": {
+        "endState": {
+          "selectedIndex": 2,
+          "focusedIndex": 2
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0
+        }
+      },
+      "mobilePaneKeyboard": {
+        "endState": {
+          "selectedIndex": 1,
+          "focusedIndex": 1,
+          "mountedPane": "evidence"
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0,
+          "mountedPane": "candidate"
+        }
       },
       "mobileEvidence": {
         "paneCount": 1,
@@ -376,9 +562,19 @@
         "horizontalOverflow": false,
         "rootWidth": 366,
         "rootWidthRatio": 0.94,
-        "rootTop": 604.140625,
+        "rootTop": 591.140625,
         "workbenchColumns": 1,
         "navigatorCandidateCount": 3,
+        "candidateTablistRole": "tablist",
+        "candidateTablistOrientation": "horizontal",
+        "candidateTabCount": 3,
+        "selectedCandidateTabCount": 1,
+        "tabbableCandidateTabCount": 1,
+        "candidateControlIdsPresent": true,
+        "candidateControlIdsUnique": true,
+        "selectedCandidateControlLinked": true,
+        "selectedCandidatePanelRole": "tabpanel",
+        "selectedCandidatePanelLabelledBy": true,
         "selectedCandidateCount": 1,
         "selectedBodyCount": 1,
         "selectedBodyOverflowY": "auto",
@@ -392,11 +588,33 @@
         "authorityWidth": 340,
         "authorityRoleCount": 6,
         "authorityContained": true,
-        "actionGroupTop": 1463.75,
-        "firstActionBottom": 1507.75,
+        "actionGroupTop": 1450.75,
+        "firstActionBottom": 1494.75,
         "firstActionDepth": 903.609375,
         "actionCount": 3,
         "actionContained": true
+      },
+      "candidateKeyboard": {
+        "endState": {
+          "selectedIndex": 2,
+          "focusedIndex": 2
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0
+        }
+      },
+      "mobilePaneKeyboard": {
+        "endState": {
+          "selectedIndex": 1,
+          "focusedIndex": 1,
+          "mountedPane": "evidence"
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0,
+          "mountedPane": "candidate"
+        }
       },
       "mobileEvidence": {
         "paneCount": 1,

@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-16T12:24:16.152Z
-Source HEAD at generation: ea0d8afac00bc28e0bd97122a19c2eef16caeb3e
-Live commit at generation: ea0d8afac00bc28e0bd97122a19c2eef16caeb3e
+Generated at: 2026-08-16T13:12:49.830Z
+Source HEAD at generation: e7afe36bc380bca2666dcbd2115aa0e1e1e32e80
+Live commit at generation: e7afe36bc380bca2666dcbd2115aa0e1e1e32e80
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -246,6 +246,7 @@ Overall: `northstar_open_approval_gated`
 - Human review required: true; machine replaces human review=false
 - Tenant-memory public promotion: false; site-manager acceptance required=true
 - Selected-only workbench candidates/selected/body: 3/1/1; desktop/mobile columns=2/1; body internal scroll=true
+- Candidate accessibility tabs/roving/keyboard/orientation/mobile pane links/mobile pane keyboard: true/true/true/true/true/true
 - Mutation boundary DB/provider/share/publication: false/false/false/false
 - Exact saved Share: MISSING_EVIDENCE; LLM Wiki/RLS: APPROVAL_GATED/APPROVAL_GATED
 
@@ -254,6 +255,7 @@ Overall: `northstar_open_approval_gated`
 - Verdict: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR`
 - Local/live viewport contracts: 8/8 and 8/8; browser errors=0
 - Evidence budget/items/desktop columns/mobile panes: 20/5/2/1
+- Inspector accessibility tabs/roving/keyboard/orientation/mobile pane links/mobile pane keyboard: true/true/true/true/true/true
 - Official HTTPS links/private identity exposed/internal scroll: 3/false/true
 - Security complete: false; fresh full-repository scan required=true
 - Exact saved Share: MISSING_EVIDENCE; Wiki/RLS/provider persistence: APPROVAL_GATED/APPROVAL_GATED/APPROVAL_GATED
@@ -399,8 +401,8 @@ Overall: `northstar_open_approval_gated`
 | security_safety_reference_surface_remediation | ancestor | ancestor_of_head | evaluation\security-safety-reference-surface-remediation-2026-08-11\report.json |
 | mcp_generation_work_budget_security | ancestor | ancestor_of_head | evaluation\security-mcp-generation-work-budget-2026-08-04\report.json |
 | learning_export_renderer_security | ancestor | ancestor_of_head | evaluation\learning-export-renderer-security-2026-08-02\report.json |
-| hermes_knowledge_review_ui | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-selected-workbench-2026-08-14\report.json |
-| hermes_review_evidence_inspector | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-evidence-inspector-2026-08-14\report.json |
+| hermes_knowledge_review_ui | exact | matches_live | evaluation\hermes-knowledge-review-selected-workbench-2026-08-14\report.json |
+| hermes_review_evidence_inspector | exact | matches_live | evaluation\hermes-knowledge-review-evidence-inspector-2026-08-14\report.json |
 | hermes_remote_durable_ledger | ancestor | ancestor_of_head | evaluation\hermes-openclaw-runtime-current-gate-2026-07-20\report.json |
 | live_document_secondary_grounding | ancestor | ancestor_of_head | evaluation\live-document-secondary-grounding-2026-07-25\report.json |
 | live_document_seed_profile_isolation | ancestor | ancestor_of_head | evaluation\live-document-seed-profile-isolation-2026-07-25\report.json |

@@ -1,10 +1,10 @@
 {
-  "schemaVersion": "safeclaw-hermes-knowledge-review-authority-ui-summary/v1",
+  "schemaVersion": "safeclaw-hermes-knowledge-review-authority-ui-summary/v2",
   "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
-  "checkedAt": "2026-08-13T21:25:09.868Z",
-  "sourceHead": "6453a595d4771d64f07d79d3f042509be876c707",
-  "productCommit": "6453a595d4771d64f07d79d3f042509be876c707",
-  "productionCommit": "6453a595d4771d64f07d79d3f042509be876c707",
+  "checkedAt": "2026-08-16T13:09:54.648Z",
+  "sourceHead": "e7afe36bc380bca2666dcbd2115aa0e1e1e32e80",
+  "productCommit": "bc160cbde13ff0441c24e7f0974c121e24b39025",
+  "productionCommit": "e7afe36bc380bca2666dcbd2115aa0e1e1e32e80",
   "local": {
     "path": "evaluation\\hermes-knowledge-review-selected-workbench-2026-08-14\\after-local\\report.json",
     "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_AUTHORITY_UI",
@@ -17,7 +17,9 @@
     "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
     "viewportCount": 8,
     "passedCount": 8,
-    "failedCount": 0
+    "failedCount": 0,
+    "productionAligned": true,
+    "browserErrorCount": 0
   },
   "authorityContract": {
     "sourceOrder": [
@@ -40,7 +42,20 @@
     "selectedBodyCount": 1,
     "desktopColumns": 2,
     "mobileColumns": 1,
-    "candidateBodyInternalScroll": true
+    "candidateBodyInternalScroll": true,
+    "candidateTablist": true,
+    "candidateRovingTabStop": true,
+    "candidateKeyboardNavigation": true,
+    "breakpointOrientationSynchronized": true,
+    "mobilePaneTabsLinked": true,
+    "mobilePaneKeyboardNavigation": true,
+    "evidenceItemLimit": 20,
+    "evidenceItemCount": 5,
+    "desktopEvidenceColumns": 2,
+    "mobileMountedPaneCount": 1,
+    "publicEvidenceLinkCount": 3,
+    "privateEvidenceRawIdentityExposed": false,
+    "evidenceInternalScroll": true
   },
   "mutationBoundary": {
     "dbMutationPerformed": false,

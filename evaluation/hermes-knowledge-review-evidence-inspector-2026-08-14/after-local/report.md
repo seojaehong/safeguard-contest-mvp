@@ -1,9 +1,9 @@
 # Hermes Knowledge Review Authority UI
 
 - Verdict: `PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_EVIDENCE_INSPECTOR`
-- Source head: `dac7ec54dc8999b54cdac43203b7b339c4d3b036`
-- Product commit: `be8a0f143f40689fc02af791bc0b7ae5509046cd`
-- Checked at: `2026-08-16T04:49:19.702Z`
+- Source head: `e7afe36bc380bca2666dcbd2115aa0e1e1e32e80`
+- Product commit: `bc160cbde13ff0441c24e7f0974c121e24b39025`
+- Checked at: `2026-08-16T13:10:46.303Z`
 - Scope: current-source local production rendering with an authenticated, route-controlled review candidate fixture.
 - Production aligned: `false`
 
@@ -26,8 +26,9 @@
 - Site-manager acceptance is required before workpack use.
 - Machine evidence does not replace human review.
 - The candidate navigator contains three fixtures while exactly one selected candidate body is mounted.
+- Candidate tabs expose one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, and Arrow/Home/End keyboard navigation.
 - Desktop uses a two-column review workbench; mobile uses one column and keeps the candidate body internally scrollable.
-- Desktop mounts the selected candidate and five-item evidence inspector together; mobile mounts only the selected candidate or evidence pane behind a segmented control.
+- Desktop mounts the selected candidate and five-item evidence inspector together; mobile mounts one linked pane behind a keyboard-operable segmented tab control.
 - Only allowlisted public law, KOSHA, and SIF references expose verified HTTPS links. Organization and site evidence retain generic labels and bounded digests only.
 
 ## Boundary

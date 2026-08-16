@@ -1,20 +1,20 @@
 {
-  "schemaVersion": "safeclaw-hermes-knowledge-review-evidence-inspector-summary/v1",
+  "schemaVersion": "safeclaw-hermes-knowledge-review-evidence-inspector-summary/v2",
   "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
-  "checkedAt": "2026-08-16T04:51:53.142Z",
-  "sourceHead": "b15df85b68235871ac521d01a6334ad90b122a26",
-  "productCommit": "be8a0f143f40689fc02af791bc0b7ae5509046cd",
+  "checkedAt": "2026-08-16T13:11:34.853Z",
+  "sourceHead": "e7afe36bc380bca2666dcbd2115aa0e1e1e32e80",
+  "productCommit": "bc160cbde13ff0441c24e7f0974c121e24b39025",
+  "productionCommit": "e7afe36bc380bca2666dcbd2115aa0e1e1e32e80",
+  "deploymentUrl": "safeguard-contest-du9wexb7h-seojaehongs-projects.vercel.app",
   "local": {
-    "path": "evaluation/hermes-knowledge-review-evidence-inspector-2026-08-14/after-local/report.json",
+    "path": "evaluation\\hermes-knowledge-review-evidence-inspector-2026-08-14\\after-local\\report.json",
     "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_EVIDENCE_INSPECTOR",
     "viewportCount": 8,
     "passedCount": 8,
     "failedCount": 0
   },
-  "productionCommit": "dac7ec54dc8999b54cdac43203b7b339c4d3b036",
-  "deploymentUrl": "safeguard-contest-9bw8rfqfe-seojaehongs-projects.vercel.app",
   "afterLive": {
-    "path": "evaluation/hermes-knowledge-review-evidence-inspector-2026-08-14/after-live/report.json",
+    "path": "evaluation\\hermes-knowledge-review-evidence-inspector-2026-08-14\\after-live\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
     "viewportCount": 8,
     "passedCount": 8,
@@ -31,6 +31,12 @@
     "desktopEvidenceColumns": 2,
     "mobileMountedPaneCount": 1,
     "mobileCandidateEvidenceSegmentedControl": true,
+    "candidateTablist": true,
+    "candidateRovingTabStop": true,
+    "candidateKeyboardNavigation": true,
+    "breakpointOrientationSynchronized": true,
+    "mobilePaneTabsLinked": true,
+    "mobilePaneKeyboardNavigation": true,
     "publicOfficialHttpsLinkCount": 3,
     "privateEvidenceRawIdentityExposed": false,
     "evidenceInternalScroll": true,
@@ -38,16 +44,6 @@
     "desktopSelectedCandidateHeight": 580,
     "mobileSelectedCandidateHeight": 618.4375,
     "maxFirstActionDepth": 903.609375
-  },
-  "verification": {
-    "focusedAndAdjacentTests": {
-      "files": 8,
-      "tests": 117,
-      "status": "PASS"
-    },
-    "typecheck": "PASS",
-    "build": "PASS",
-    "staticPages": 28
   },
   "mutationBoundary": {
     "dbMutationPerformed": false,

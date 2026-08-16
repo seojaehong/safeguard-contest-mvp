@@ -1,14 +1,15 @@
 # Hermes Knowledge Review Authority UI
 
 - Verdict: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI`
-- Product commit: `6453a595d4771d64f07d79d3f042509be876c707`
-- Production commit: `6453a595d4771d64f07d79d3f042509be876c707`
+- Product commit: `bc160cbde13ff0441c24e7f0974c121e24b39025`
+- Production commit: `e7afe36bc380bca2666dcbd2115aa0e1e1e32e80`
 - Local geometry: 8/8 PASS
 - Live geometry: 8/8 PASS
 
 ## Result
 
 The authenticated review candidate cockpit exposes six evidence-role counts, keeps legal-duty claims bound to law provenance, blocks public promotion of tenant memory, and requires site-manager acceptance before workpack use.
+The candidate navigator keeps one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, and keyboard navigation across candidates and compact review panes.
 
 ## Boundary
 
