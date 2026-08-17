@@ -1,8 +1,10 @@
 {
   "schema": "safeclaw-final-99-12-document-no-mutation/v1",
-  "generatedAt": "2026-08-16T23:43:21.925Z",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_INFRA_PENDING",
+  "generatedAt": "2026-08-17T00:15:17.351Z",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_DISTRIBUTED_ADMISSION_BLOCKED",
   "productCommit": "0c5f9ce26e96ed14cd31cac3c57ea51cfaaa03d8",
+  "currentSourceCommit": "e8f721aa2bf2cfb06efe0a806302c9497a43f68b",
+  "productionCommit": "e8f721aa2bf2cfb06efe0a806302c9497a43f68b",
   "currentSourceLocal": {
     "baseUrl": "http://127.0.0.1:3083",
     "reportPath": "evaluation/final-99-current-no-mutation-2026-08-17-after-product-commit/report.json",
@@ -28,6 +30,23 @@
     "documentDownloadVerdict": "blocked",
     "blockerCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
     "liveAfterDeploymentRequired": true
+  },
+  "liveAfterDeployment": {
+    "baseUrl": "https://www.safeclaw.kr",
+    "reportPath": "evaluation/final-99-current-no-mutation-2026-08-17-after-live/report.json",
+    "sourceCommit": "e8f721aa2bf2cfb06efe0a806302c9497a43f68b",
+    "productionCommit": "e8f721aa2bf2cfb06efe0a806302c9497a43f68b",
+    "productionEnvironment": "production",
+    "overall": "blocked",
+    "canonicalDocumentCount": 12,
+    "canonicalDocumentsPassed": 12,
+    "documentDownloadVerdict": "blocked",
+    "corePdfGeneratedCount": 4,
+    "corePdfsPassed": 0,
+    "orchestrationVerdict": "blocked",
+    "blockerCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "freshLiveRerunCompleted": true,
+    "liveRemediationRequired": true
   },
   "nonAuthoritativeIntermediateArtifacts": [
     "evaluation/final-99-current-no-mutation-2026-08-17",
@@ -61,7 +80,7 @@
   "remainingBoundaries": {
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "providerDispatchPersistence": "APPROVAL_GATED",
-    "liveDistributedRateLimitReadiness": "RED_CONFIGURATION_PENDING",
+    "liveDistributedRateLimitReadiness": "RED_DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
     "fullyAutomatedLaunchClaimAllowed": false
   }
 }

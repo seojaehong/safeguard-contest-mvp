@@ -7492,6 +7492,120 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(finalGate?.detail).toContain("dispatch-policy=provider-approval-gated");
   });
 
+  it("keeps final-99 as notice while recording source-aligned 12-document no-mutation coverage and the live distributed blocker", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    writeJson(rootDir, path.join("evaluation", "final-99-12-document-no-mutation-2026-08-17", "report.json"), {
+      schema: "safeclaw-final-99-12-document-no-mutation/v1",
+      currentSourceCommit: "fixture-sha",
+      currentSourceLocal: {
+        overall: "pass_with_notice",
+        canonicalDocumentCount: 12,
+        canonicalDocumentsPassed: 12,
+        corePdfCount: 4,
+        corePdfsPassed: 4,
+        orchestrationDocumentCount: 12,
+        orchestrationDownloadCount: 14,
+        orchestrationFailureCount: 0,
+      },
+      liveAfterDeployment: {
+        sourceCommit: "fixture-sha",
+        productionCommit: "fixture-sha",
+        overall: "blocked",
+        canonicalDocumentCount: 12,
+        canonicalDocumentsPassed: 12,
+        documentDownloadVerdict: "blocked",
+        blockerCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+        freshLiveRerunCompleted: true,
+        liveRemediationRequired: true,
+      },
+      mutationBoundary: {
+        executionMode: "no-mutation",
+        dbMutationPerformed: false,
+        providerGenerationCalled: false,
+        providerDispatchCalled: false,
+        shareSessionCreated: false,
+        vectorOrEmbeddingMutationPerformed: false,
+        wikiPublicationPerformed: false,
+        koshaRegistryMutationPerformed: false,
+      },
+      remainingBoundaries: {
+        exactSavedShareVerdict: "MISSING_EVIDENCE",
+        providerDispatchPersistence: "APPROVAL_GATED",
+        fullyAutomatedLaunchClaimAllowed: false,
+      },
+    });
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-08-17T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+    const finalGate = audit.gates.find((gate) => gate.id === "final_99_gate");
+
+    expect(finalGate?.state).toBe("notice");
+    expect(finalGate?.detail).toContain("coverage 12/12, 4/4");
+    expect(finalGate?.detail).toContain("14 downloads and 0 failures");
+    expect(finalGate?.detail).toContain("DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+    expect(finalGate?.detail).toContain("exact saved Share is MISSING_EVIDENCE");
+  });
+
+  it("contradicts final-99 when its 12-document companion closes a protected boundary", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join("evaluation", "final-99-12-document-no-mutation-2026-08-17", "report.json");
+    writeJson(rootDir, reportPath, {
+      schema: "safeclaw-final-99-12-document-no-mutation/v1",
+      currentSourceCommit: "fixture-sha",
+      currentSourceLocal: {
+        overall: "pass_with_notice",
+        canonicalDocumentCount: 12,
+        canonicalDocumentsPassed: 12,
+        corePdfCount: 4,
+        corePdfsPassed: 4,
+        orchestrationDocumentCount: 12,
+        orchestrationDownloadCount: 14,
+        orchestrationFailureCount: 0,
+      },
+      liveAfterDeployment: {
+        sourceCommit: "fixture-sha",
+        productionCommit: "fixture-sha",
+        overall: "blocked",
+        canonicalDocumentCount: 12,
+        canonicalDocumentsPassed: 12,
+        documentDownloadVerdict: "blocked",
+        blockerCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+        freshLiveRerunCompleted: true,
+        liveRemediationRequired: true,
+      },
+      mutationBoundary: {
+        executionMode: "no-mutation",
+        dbMutationPerformed: false,
+        providerGenerationCalled: false,
+        providerDispatchCalled: false,
+        shareSessionCreated: false,
+        vectorOrEmbeddingMutationPerformed: false,
+        wikiPublicationPerformed: false,
+        koshaRegistryMutationPerformed: false,
+      },
+      remainingBoundaries: {
+        exactSavedShareVerdict: "PASS",
+        providerDispatchPersistence: "APPROVAL_GATED",
+        fullyAutomatedLaunchClaimAllowed: false,
+      },
+    });
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-08-17T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+    const finalGate = audit.gates.find((gate) => gate.id === "final_99_gate");
+
+    expect(finalGate?.state).toBe("contradicted");
+    expect(finalGate?.detail).toContain("violates its source/live, coverage, mutation, or approval-boundary contract");
+  });
+
   it("contradicts the KOSHA exact trust gate when live exact pins are stale", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();

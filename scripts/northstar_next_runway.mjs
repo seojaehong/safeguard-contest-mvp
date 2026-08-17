@@ -17,6 +17,7 @@ const ARTIFACTS = Object.freeze({
   openGate: path.join("evaluation", "northstar-open-gates-current", "report.json"),
   liveRollup: path.join("evaluation", "northstar-live-rollup-2026-07-20", "report.json"),
   final99: path.join("evaluation", "final-99-gate-current-2026-07-22", "report.json"),
+  final99TwelveDocumentNoMutation: path.join("evaluation", "final-99-12-document-no-mutation-2026-08-17", "report.json"),
   workspaceInformationArchitecture: path.join("evaluation", "workspace-information-architecture-2026-07-21", "report.json"),
   hermesOpenclawRuntime: path.join("evaluation", "hermes-openclaw-runtime-current-gate-2026-07-20", "report.json"),
   launchReadiness: path.join("evaluation", "launch-readiness-current-2026-07-22", "report.json"),
@@ -2393,6 +2394,10 @@ export function buildNorthstarNextRunway(options) {
   const sourceHead = gitHead(options.rootDir);
   const liveCommit = isRecord(options.buildInfo) ? asString(options.buildInfo.commitSha) : "";
   const liveRollup = readJson(options.rootDir, ARTIFACTS.liveRollup);
+  const final99TwelveDocumentNoMutation = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.final99TwelveDocumentNoMutation,
+  );
   const approvalRunway = readJson(options.rootDir, ARTIFACTS.approvalRunway);
   const hermes = readJson(options.rootDir, ARTIFACTS.hermesOpenclawRuntime);
   const launch = readJson(options.rootDir, ARTIFACTS.launchReadiness);
@@ -2648,7 +2653,10 @@ export function buildNorthstarNextRunway(options) {
       {
         gate: "final_99_gate",
         state: "notice",
-        reason: "pass_with_notice with carried auth-history and dispatch-policy notices",
+        reason: isRecord(final99TwelveDocumentNoMutation)
+          && isRecord(final99TwelveDocumentNoMutation.liveAfterDeployment)
+          ? `pass_with_notice with carried auth-history and dispatch-policy notices; no-mutation 12-document local coverage passes while source-aligned live downloads remain ${asString(final99TwelveDocumentNoMutation.liveAfterDeployment.overall)} (${asString(final99TwelveDocumentNoMutation.liveAfterDeployment.blockerCode) || "no blocker"})`
+          : "pass_with_notice with carried auth-history and dispatch-policy notices",
       },
       {
         gate: "public_search_distributed_rate_limit_readiness",
@@ -2731,6 +2739,42 @@ export function buildNorthstarNextRunway(options) {
       },
     ],
     launchReadiness: launchReadinessSummary(launch),
+    final99TwelveDocumentNoMutation: {
+      verdict: isRecord(final99TwelveDocumentNoMutation)
+        ? asString(final99TwelveDocumentNoMutation.verdict)
+        : "missing",
+      currentSourceCommit: isRecord(final99TwelveDocumentNoMutation)
+        ? asString(final99TwelveDocumentNoMutation.currentSourceCommit)
+        : "",
+      localCanonicalPassed: isRecord(final99TwelveDocumentNoMutation)
+        && isRecord(final99TwelveDocumentNoMutation.currentSourceLocal)
+        ? final99TwelveDocumentNoMutation.currentSourceLocal.canonicalDocumentsPassed
+        : null,
+      localCorePdfsPassed: isRecord(final99TwelveDocumentNoMutation)
+        && isRecord(final99TwelveDocumentNoMutation.currentSourceLocal)
+        ? final99TwelveDocumentNoMutation.currentSourceLocal.corePdfsPassed
+        : null,
+      localOrchestrationDownloads: isRecord(final99TwelveDocumentNoMutation)
+        && isRecord(final99TwelveDocumentNoMutation.currentSourceLocal)
+        ? final99TwelveDocumentNoMutation.currentSourceLocal.orchestrationDownloadCount
+        : null,
+      liveOverall: isRecord(final99TwelveDocumentNoMutation)
+        && isRecord(final99TwelveDocumentNoMutation.liveAfterDeployment)
+        ? asString(final99TwelveDocumentNoMutation.liveAfterDeployment.overall)
+        : "missing",
+      liveBlockerCode: isRecord(final99TwelveDocumentNoMutation)
+        && isRecord(final99TwelveDocumentNoMutation.liveAfterDeployment)
+        ? asString(final99TwelveDocumentNoMutation.liveAfterDeployment.blockerCode)
+        : "",
+      exactSavedShareVerdict: isRecord(final99TwelveDocumentNoMutation)
+        && isRecord(final99TwelveDocumentNoMutation.remainingBoundaries)
+        ? asString(final99TwelveDocumentNoMutation.remainingBoundaries.exactSavedShareVerdict)
+        : "MISSING_EVIDENCE",
+      fullyAutomatedLaunchClaimAllowed: isRecord(final99TwelveDocumentNoMutation)
+        && isRecord(final99TwelveDocumentNoMutation.remainingBoundaries)
+        ? final99TwelveDocumentNoMutation.remainingBoundaries.fullyAutomatedLaunchClaimAllowed === true
+        : false,
+    },
     uiInterpretation: {
       routeSplitAloneAcceptedAsFix: false,
       acceptedStructure: "three-step app shell plus first-viewport cockpit plus bounded drilldown/detail panes",
@@ -2950,7 +2994,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - SIF embedding approval preflight is approval-held: no embedding generation, no upload, and vector runtime disabled until approval.
 - North Star approval runway is current and separates runtime/provider/database/vector gates from ordinary UI/evidence iteration.
 - RLS / LLM Wiki approval preflight remains operator-review ready, with no DB mutation or launch-readiness claim.
-- Final-99 is \`pass_with_notice\`, not clean launch-complete.
+- Final-99 is \`pass_with_notice\`, not clean launch-complete. Its 12-document no-mutation companion is \`${report.final99TwelveDocumentNoMutation.verdict}\`: local documents/core PDFs/downloads \`${report.final99TwelveDocumentNoMutation.localCanonicalPassed ?? "unknown"}/12\`, \`${report.final99TwelveDocumentNoMutation.localCorePdfsPassed ?? "unknown"}/4\`, and \`${report.final99TwelveDocumentNoMutation.localOrchestrationDownloads ?? "unknown"}/14\`; the source-aligned live rerun is \`${report.final99TwelveDocumentNoMutation.liveOverall}\` with \`${report.final99TwelveDocumentNoMutation.liveBlockerCode || "no blocker"}\`. Exact saved Share remains \`${report.final99TwelveDocumentNoMutation.exactSavedShareVerdict}\`, and fully automated launch allowed remains \`${report.final99TwelveDocumentNoMutation.fullyAutomatedLaunchClaimAllowed}\`.
 
 ## Approval-Gated Boundaries
 

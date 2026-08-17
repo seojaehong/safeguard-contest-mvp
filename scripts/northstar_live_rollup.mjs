@@ -17,6 +17,7 @@ const ARTIFACTS = Object.freeze({
   openGate: path.join("evaluation", "northstar-open-gates-current", "report.json"),
   final99: path.join("evaluation", "final-99-gate-current-2026-07-22", "report.json"),
   final99NoticeCarry: path.join("evaluation", "final-99-gate-current-2026-07-22", "notice-carry.json"),
+  final99TwelveDocumentNoMutation: path.join("evaluation", "final-99-12-document-no-mutation-2026-08-17", "report.json"),
   liveHarness: path.join("evaluation", "live-harness-quality-probe-current-2026-07-20", "report.json"),
   liveDocumentQualityMatrix: path.join("evaluation", "live-document-quality-matrix-2026-07-24", "report.json"),
   liveDocumentQualityStressMatrix: path.join("evaluation", "live-document-quality-stress-matrix-2026-07-24", "report.json"),
@@ -208,6 +209,7 @@ function extractSourceCommit(report) {
     return "";
   }
   return asString(report.sourceCommit)
+    || asString(report.currentSourceCommit)
     || asString(report.sourceSha)
     || asString(report.sourceShaForFocusedTests)
     || asString(report.sourceHeadAtDraft)
@@ -499,6 +501,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const openGate = tryReadJson(rootDir, ARTIFACTS.openGate);
   const final99 = tryReadJson(rootDir, ARTIFACTS.final99);
   const final99NoticeCarry = tryReadJson(rootDir, ARTIFACTS.final99NoticeCarry);
+  const final99TwelveDocumentNoMutation = tryReadJson(rootDir, ARTIFACTS.final99TwelveDocumentNoMutation);
   const liveHarness = tryReadJson(rootDir, ARTIFACTS.liveHarness);
   const liveDocumentQualityMatrix = tryReadJson(rootDir, ARTIFACTS.liveDocumentQualityMatrix);
   const liveDocumentQualityStressMatrix = tryReadJson(rootDir, ARTIFACTS.liveDocumentQualityStressMatrix);
@@ -614,6 +617,14 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const evidence = [
     evidenceStatus(rootDir, currentHead, liveCommit, "open_gate", ARTIFACTS.openGate, openGate),
     evidenceStatus(rootDir, currentHead, liveCommit, "final_99_gate", ARTIFACTS.final99, final99),
+    evidenceStatus(
+      rootDir,
+      currentHead,
+      liveCommit,
+      "final_99_12_document_no_mutation",
+      ARTIFACTS.final99TwelveDocumentNoMutation,
+      final99TwelveDocumentNoMutation,
+    ),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_harness_quality", ARTIFACTS.liveHarness, liveHarness),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_quality_matrix", ARTIFACTS.liveDocumentQualityMatrix, liveDocumentQualityMatrix),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_quality_stress_matrix", ARTIFACTS.liveDocumentQualityStressMatrix, liveDocumentQualityStressMatrix),
@@ -1565,6 +1576,43 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       overall: isRecord(final99) ? asString(final99.overall) : "missing",
       productionCommit: extractProductionCommit(final99),
       noticeCarry: final99Notices,
+      twelveDocumentNoMutation: {
+        artifact: ARTIFACTS.final99TwelveDocumentNoMutation,
+        verdict: isRecord(final99TwelveDocumentNoMutation)
+          ? asString(final99TwelveDocumentNoMutation.verdict)
+          : "missing",
+        currentSourceCommit: isRecord(final99TwelveDocumentNoMutation)
+          ? asString(final99TwelveDocumentNoMutation.currentSourceCommit)
+          : "",
+        localCanonicalPassed: isRecord(final99TwelveDocumentNoMutation)
+          && isRecord(final99TwelveDocumentNoMutation.currentSourceLocal)
+          ? final99TwelveDocumentNoMutation.currentSourceLocal.canonicalDocumentsPassed
+          : null,
+        localCorePdfsPassed: isRecord(final99TwelveDocumentNoMutation)
+          && isRecord(final99TwelveDocumentNoMutation.currentSourceLocal)
+          ? final99TwelveDocumentNoMutation.currentSourceLocal.corePdfsPassed
+          : null,
+        localOrchestrationDownloads: isRecord(final99TwelveDocumentNoMutation)
+          && isRecord(final99TwelveDocumentNoMutation.currentSourceLocal)
+          ? final99TwelveDocumentNoMutation.currentSourceLocal.orchestrationDownloadCount
+          : null,
+        liveOverall: isRecord(final99TwelveDocumentNoMutation)
+          && isRecord(final99TwelveDocumentNoMutation.liveAfterDeployment)
+          ? asString(final99TwelveDocumentNoMutation.liveAfterDeployment.overall)
+          : "missing",
+        liveBlockerCode: isRecord(final99TwelveDocumentNoMutation)
+          && isRecord(final99TwelveDocumentNoMutation.liveAfterDeployment)
+          ? asString(final99TwelveDocumentNoMutation.liveAfterDeployment.blockerCode)
+          : "",
+        exactSavedShareVerdict: isRecord(final99TwelveDocumentNoMutation)
+          && isRecord(final99TwelveDocumentNoMutation.remainingBoundaries)
+          ? asString(final99TwelveDocumentNoMutation.remainingBoundaries.exactSavedShareVerdict)
+          : "MISSING_EVIDENCE",
+        fullyAutomatedLaunchClaimAllowed: isRecord(final99TwelveDocumentNoMutation)
+          && isRecord(final99TwelveDocumentNoMutation.remainingBoundaries)
+          ? final99TwelveDocumentNoMutation.remainingBoundaries.fullyAutomatedLaunchClaimAllowed === true
+          : false,
+      },
     },
     kosha: {
       artifact: ARTIFACTS.kosha,
@@ -1902,6 +1950,9 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
       lines.push(`- ${notice.gate}: ${notice.launchImpact} — forbidden: ${notice.forbiddenClaim}`);
     }
   }
+  lines.push(
+    `- Final99 12-document no-mutation companion: ${rollup.final99.twelveDocumentNoMutation.verdict}; local documents/core PDFs/downloads ${rollup.final99.twelveDocumentNoMutation.localCanonicalPassed ?? "unknown"}/12, ${rollup.final99.twelveDocumentNoMutation.localCorePdfsPassed ?? "unknown"}/4, ${rollup.final99.twelveDocumentNoMutation.localOrchestrationDownloads ?? "unknown"}/14; live ${rollup.final99.twelveDocumentNoMutation.liveOverall} (${rollup.final99.twelveDocumentNoMutation.liveBlockerCode || "no blocker"}); exact saved Share ${rollup.final99.twelveDocumentNoMutation.exactSavedShareVerdict}; fully automated launch allowed ${rollup.final99.twelveDocumentNoMutation.fullyAutomatedLaunchClaimAllowed}.`,
+  );
   lines.push("", "## Approval-Gated Work", "");
   for (const gate of rollup.approvalGated) {
     lines.push(`- ${gate.id}: ${gate.detail}`);

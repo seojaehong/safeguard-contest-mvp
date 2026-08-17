@@ -27,6 +27,7 @@ const EVIDENCE_PATHS = Object.freeze({
     path.join("evaluation", "final-99-gate", "notice-carry.json"),
   ]),
   final99NoApprovalBoundary: path.join("evaluation", "final-99-no-approval-boundary-2026-07-23", "report.json"),
+  final99TwelveDocumentNoMutation: path.join("evaluation", "final-99-12-document-no-mutation-2026-08-17", "report.json"),
   liveHarness: path.join("evaluation", "live-harness-quality-probe-current-2026-07-20", "report.json"),
   documentQualityGrounding: path.join("evaluation", "document-quality-grounding-current-gate-2026-07-19", "report.json"),
   liveDocumentQualityMatrix: path.join("evaluation", "live-document-quality-matrix-2026-07-24", "report.json"),
@@ -296,6 +297,72 @@ function evaluateFinal99Gate(rootDir) {
     });
   }
 
+  const twelveDocumentCompanion = readJsonFile(rootDir, EVIDENCE_PATHS.final99TwelveDocumentNoMutation);
+  const localResult = isRecord(twelveDocumentCompanion?.currentSourceLocal)
+    ? twelveDocumentCompanion.currentSourceLocal
+    : {};
+  const liveResult = isRecord(twelveDocumentCompanion?.liveAfterDeployment)
+    ? twelveDocumentCompanion.liveAfterDeployment
+    : {};
+  const mutationBoundary = isRecord(twelveDocumentCompanion?.mutationBoundary)
+    ? twelveDocumentCompanion.mutationBoundary
+    : {};
+  const remainingBoundaries = isRecord(twelveDocumentCompanion?.remainingBoundaries)
+    ? twelveDocumentCompanion.remainingBoundaries
+    : {};
+  const liveResultIsHonest = (
+    (readString(liveResult.overall) === "blocked"
+      && readString(liveResult.documentDownloadVerdict) === "blocked"
+      && readString(liveResult.blockerCode) === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+      && liveResult.liveRemediationRequired === true)
+    || ((readString(liveResult.overall) === "pass" || readString(liveResult.overall) === "pass_with_notice")
+      && readString(liveResult.documentDownloadVerdict) === "pass")
+  );
+  const twelveDocumentCompanionPresent = isRecord(twelveDocumentCompanion);
+  const twelveDocumentCompanionReady = twelveDocumentCompanionPresent
+    && readString(twelveDocumentCompanion.schema) === "safeclaw-final-99-12-document-no-mutation/v1"
+    && readString(twelveDocumentCompanion.currentSourceCommit) !== ""
+    && readString(liveResult.sourceCommit) === readString(liveResult.productionCommit)
+    && readString(liveResult.sourceCommit) === readString(twelveDocumentCompanion.currentSourceCommit)
+    && localResult.overall === "pass_with_notice"
+    && localResult.canonicalDocumentCount === 12
+    && localResult.canonicalDocumentsPassed === 12
+    && localResult.corePdfCount === 4
+    && localResult.corePdfsPassed === 4
+    && localResult.orchestrationDocumentCount === 12
+    && localResult.orchestrationDownloadCount === 14
+    && localResult.orchestrationFailureCount === 0
+    && liveResult.canonicalDocumentCount === 12
+    && liveResult.canonicalDocumentsPassed === 12
+    && liveResult.freshLiveRerunCompleted === true
+    && liveResultIsHonest
+    && readString(mutationBoundary.executionMode) === "no-mutation"
+    && mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerGenerationCalled === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.vectorOrEmbeddingMutationPerformed === false
+    && mutationBoundary.wikiPublicationPerformed === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false
+    && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(remainingBoundaries.providerDispatchPersistence) === "APPROVAL_GATED"
+    && remainingBoundaries.fullyAutomatedLaunchClaimAllowed === false;
+
+  if (twelveDocumentCompanionPresent && !twelveDocumentCompanionReady) {
+    return gateResult({
+      id: "final_99_gate",
+      label: "Final 99 evidence gate",
+      state: "contradicted",
+      evidencePath: EVIDENCE_PATHS.final99TwelveDocumentNoMutation,
+      detail: "The 12-document no-mutation companion is present but violates its source/live, coverage, mutation, or approval-boundary contract.",
+      nextActions: ["Regenerate the 12-document no-mutation companion without weakening live or approval boundaries."],
+    });
+  }
+
+  const twelveDocumentDetail = twelveDocumentCompanionReady
+    ? ` The no-mutation companion ${EVIDENCE_PATHS.final99TwelveDocumentNoMutation} proves local canonical/core/orchestration coverage 12/12, 4/4, and 12 documents with 14 downloads and 0 failures. Its fresh source-aligned live rerun remains ${readString(liveResult.overall)} with ${readString(liveResult.blockerCode) || "no blocker"}; exact saved Share is MISSING_EVIDENCE and fully automated launch remains forbidden.`
+    : "";
+
   const overall = readString(report.overall);
   if (overall === "pass" || overall === "pass_with_notice") {
     const noticeCarryEvidence = readFirstJsonFile(rootDir, EVIDENCE_PATHS.final99NoticeCarryCandidates);
@@ -327,8 +394,8 @@ function evaluateFinal99Gate(rootDir) {
       state: overall === "pass" ? "proven" : "notice",
       evidencePath,
       detail: overall === "pass_with_notice" && noticeCarryReady
-        ? `final-99 overall is ${overall}; ${carriedNoticeCount} notices are explicitly carried in ${noticeCarryPath}: ${noticeImpacts}. Fully automated launch remains forbidden until those approval/auth gates are proven.${noApprovalBoundaryDetail}`
-        : `final-99 overall is ${overall}.`,
+        ? `final-99 overall is ${overall}; ${carriedNoticeCount} notices are explicitly carried in ${noticeCarryPath}: ${noticeImpacts}. Fully automated launch remains forbidden until those approval/auth gates are proven.${noApprovalBoundaryDetail}${twelveDocumentDetail}`
+        : `final-99 overall is ${overall}.${twelveDocumentDetail}`,
       nextActions: overall === "pass_with_notice"
         ? noticeCarryReady
           ? [

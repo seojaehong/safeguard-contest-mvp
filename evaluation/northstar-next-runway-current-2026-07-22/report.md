@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `7cd5966e3778ad4d97ff67c04908b7c1e9d1c3f4`
+Source HEAD: `e8f721aa2bf2cfb06efe0a806302c9497a43f68b`
 
-Production `/api/build-info`: `7cd5966e3778ad4d97ff67c04908b7c1e9d1c3f4`
+Production `/api/build-info`: `e8f721aa2bf2cfb06efe0a806302c9497a43f68b`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `7cd5966e3778ad4d97ff67c04908b7c1e9d1c3f4`
+Live rollup source head: `e8f721aa2bf2cfb06efe0a806302c9497a43f68b`
 
 Live rollup matches production: `true`
 
@@ -76,7 +76,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - SIF embedding approval preflight is approval-held: no embedding generation, no upload, and vector runtime disabled until approval.
 - North Star approval runway is current and separates runtime/provider/database/vector gates from ordinary UI/evidence iteration.
 - RLS / LLM Wiki approval preflight remains operator-review ready, with no DB mutation or launch-readiness claim.
-- Final-99 is `pass_with_notice`, not clean launch-complete.
+- Final-99 is `pass_with_notice`, not clean launch-complete. Its 12-document no-mutation companion is `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_DISTRIBUTED_ADMISSION_BLOCKED`: local documents/core PDFs/downloads `12/12`, `4/4`, and `14/14`; the source-aligned live rerun is `blocked` with `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`. Exact saved Share remains `MISSING_EVIDENCE`, and fully automated launch allowed remains `false`.
 
 ## Approval-Gated Boundaries
 

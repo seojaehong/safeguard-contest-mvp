@@ -578,6 +578,18 @@ type RollupReport = {
     exactSavedShareReproduced: boolean;
     exactSavedShareVerdict: string;
   };
+  final99: {
+    twelveDocumentNoMutation: {
+      verdict: string;
+      localCanonicalPassed: number | null;
+      localCorePdfsPassed: number | null;
+      localOrchestrationDownloads: number | null;
+      liveOverall: string;
+      liveBlockerCode: string;
+      exactSavedShareVerdict: string;
+      fullyAutomatedLaunchClaimAllowed: boolean;
+    };
+  };
   evidence: Array<{
     id: string;
     sourceCommit: string | null;
@@ -765,6 +777,27 @@ function createFixtureRoot(): { root: string; head: string } {
     notices: [
       { gate: "auth-history-reuse", launchImpact: "operator-auth-gated", allowedClaim: "allowed", forbiddenClaim: "forbidden" },
     ],
+  });
+  writeJson(root, "evaluation/final-99-12-document-no-mutation-2026-08-17/report.json", {
+    schema: "safeclaw-final-99-12-document-no-mutation/v1",
+    verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_DISTRIBUTED_ADMISSION_BLOCKED",
+    currentSourceCommit: "TO_FILL",
+    productionCommit: "TO_FILL",
+    currentSourceLocal: {
+      canonicalDocumentsPassed: 12,
+      corePdfsPassed: 4,
+      orchestrationDownloadCount: 14,
+    },
+    liveAfterDeployment: {
+      sourceCommit: "TO_FILL",
+      productionCommit: "TO_FILL",
+      overall: "blocked",
+      blockerCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      fullyAutomatedLaunchClaimAllowed: false,
+    },
   });
   writeJson(root, "evaluation/live-harness-quality-probe-current-2026-07-20/report.json", {
     sourceSha: "TO_FILL",
@@ -1701,6 +1734,7 @@ function createFixtureRoot(): { root: string; head: string } {
   };
   [
     "evaluation/final-99-gate-current-2026-07-22/report.json",
+    "evaluation/final-99-12-document-no-mutation-2026-08-17/report.json",
     "evaluation/live-harness-quality-probe-current-2026-07-20/report.json",
     "evaluation/live-document-quality-matrix-2026-07-24/report.json",
     "evaluation/live-document-quality-stress-matrix-2026-07-24/report.json",
@@ -2420,4 +2454,22 @@ describe("northstar live rollup", () => {
     expect(final99?.productionStatus).toBe("matches_live_source_mismatch");
     expect(report.contradictions).toHaveLength(0);
   }, 15_000);
+
+  it("rolls up the source-aligned 12-document no-mutation companion without closing launch boundaries", () => {
+    const { root, head } = createFixtureRoot();
+    const report = runRollup(root, head);
+
+    expect(report.final99.twelveDocumentNoMutation).toMatchObject({
+      verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_DISTRIBUTED_ADMISSION_BLOCKED",
+      localCanonicalPassed: 12,
+      localCorePdfsPassed: 4,
+      localOrchestrationDownloads: 14,
+      liveOverall: "blocked",
+      liveBlockerCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      fullyAutomatedLaunchClaimAllowed: false,
+    });
+    expect(report.evidence.find((item) => item.id === "final_99_12_document_no_mutation")?.sourceStatus).toBe("ancestor");
+    expect(report.contradictions).toHaveLength(0);
+  }, 30_000);
 });

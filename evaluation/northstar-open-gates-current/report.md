@@ -1,14 +1,14 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-08-16T22:37:22.932Z
-Source SHA: `7cd5966e3778ad4d97ff67c04908b7c1e9d1c3f4`
+Generated at: 2026-08-17T00:36:53.215Z
+Source SHA: `e8f721aa2bf2cfb06efe0a806302c9497a43f68b`
 Overall: `open`
 
 ## Gate Matrix
 
 | Gate | State | Evidence | Detail |
 | --- | --- | --- | --- |
-| final_99_gate | notice | evaluation\final-99-gate-current-2026-07-22\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate-current-2026-07-22\notice-carry.json: auth-history-reuse=operator-auth-gated, dispatch-policy=provider-approval-gated. Fully automated launch remains forbidden until those approval/auth gates are proven. Full final-99 rerun is not treated as no-approval cleanup; evaluation\final-99-no-approval-boundary-2026-07-23\report.json records the mutation boundary. |
+| final_99_gate | notice | evaluation\final-99-gate-current-2026-07-22\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate-current-2026-07-22\notice-carry.json: auth-history-reuse=operator-auth-gated, dispatch-policy=provider-approval-gated. Fully automated launch remains forbidden until those approval/auth gates are proven. Full final-99 rerun is not treated as no-approval cleanup; evaluation\final-99-no-approval-boundary-2026-07-23\report.json records the mutation boundary. The no-mutation companion evaluation\final-99-12-document-no-mutation-2026-08-17\report.json proves local canonical/core/orchestration coverage 12/12, 4/4, and 12 documents with 14 downloads and 0 failures. Its fresh source-aligned live rerun remains blocked with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE; exact saved Share is MISSING_EVIDENCE and fully automated launch remains forbidden. |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json | Live harness probe passed with zero failed contracts. |
 | document_quality_grounding | proven | evaluation\document-quality-grounding-current-gate-2026-07-19\report.json | Current source proves the document-quality grounding contract with 135 focused tests: SIF/KOSHA/law evidence stays before LLM prose, LLM role remains naturalize_only, unsupported provider hazards are rejected, qualityContract blocks incomplete outputs, and KOSHA support is not promoted to statutory mandate. This is not a claim that every live model sample is excellent. |
 | live_document_quality_matrix | proven | evaluation\live-document-quality-matrix-2026-07-24\report.json | Five live production scenarios pass the measured document-quality matrix: structured risk rows are present, current/additional controls remain distinct, foreign-worker briefing stays scenario-relevant, and no DB/share-session/provider mutation occurred. This scoped matrix does not replace broad human wording review. |

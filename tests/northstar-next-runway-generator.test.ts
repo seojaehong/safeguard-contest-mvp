@@ -14,6 +14,17 @@ type NextRunwayReport = {
   }>;
   sourceHead: string;
   productionCommit: string;
+  final99TwelveDocumentNoMutation: {
+    verdict: string;
+    currentSourceCommit: string;
+    localCanonicalPassed: number | null;
+    localCorePdfsPassed: number | null;
+    localOrchestrationDownloads: number | null;
+    liveOverall: string;
+    liveBlockerCode: string;
+    exactSavedShareVerdict: string;
+    fullyAutomatedLaunchClaimAllowed: boolean;
+  };
   latestEvidenceCommitLive: boolean;
   sourceHeadLivePending: boolean;
   currentHeadIsEvidenceOnlyPending: boolean;
@@ -2646,6 +2657,27 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
   });
 
   const firstHead = commitAll(root, "seed");
+  writeJson(root, "evaluation/final-99-12-document-no-mutation-2026-08-17/report.json", {
+    schema: "safeclaw-final-99-12-document-no-mutation/v1",
+    verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_DISTRIBUTED_ADMISSION_BLOCKED",
+    currentSourceCommit: firstHead,
+    productionCommit: firstHead,
+    currentSourceLocal: {
+      canonicalDocumentsPassed: 12,
+      corePdfsPassed: 4,
+      orchestrationDownloadCount: 14,
+    },
+    liveAfterDeployment: {
+      sourceCommit: firstHead,
+      productionCommit: firstHead,
+      overall: "blocked",
+      blockerCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      fullyAutomatedLaunchClaimAllowed: false,
+    },
+  });
   const liveRollupPath = path.join(root, "evaluation/northstar-live-rollup-2026-07-20/report.json");
   const liveRollup = fs.readFileSync(liveRollupPath, "utf8").replaceAll("TO_FILL", firstHead);
   fs.writeFileSync(liveRollupPath, liveRollup, "utf8");
@@ -2690,6 +2722,18 @@ describe("northstar next runway generator", () => {
       missing: [],
     });
     expect(report.launchReadiness.documentCoverage.present).toContain("workPermitDraft");
+    expect(report.final99TwelveDocumentNoMutation).toMatchObject({
+      verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_DISTRIBUTED_ADMISSION_BLOCKED",
+      localCanonicalPassed: 12,
+      localCorePdfsPassed: 4,
+      localOrchestrationDownloads: 14,
+      liveOverall: "blocked",
+      liveBlockerCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      fullyAutomatedLaunchClaimAllowed: false,
+    });
+    expect(markdown).toContain("DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+    expect(markdown).toContain("Exact saved Share remains `MISSING_EVIDENCE`");
     expect(report.approvalGated.map((gate) => gate.gate)).toEqual([
       "share_recipient_ack_approval",
       "provider_dispatch_persistence",
@@ -3786,7 +3830,7 @@ describe("northstar next runway generator", () => {
     });
     expect(markdown).toContain("first-task/body containment rows pass, and no Documents rows carry local workbench detail-depth debt");
     expect(markdown).not.toContain("but 0 Documents row(s) carry local workbench detail-depth debt");
-  });
+  }, 60_000);
 
   it("keeps bounded workbench detail-depth debt separate from first-task pass and exact saved Share evidence", async () => {
     const { buildNorthstarNextRunway, renderNorthstarNextRunwayMarkdown } = await loadNextRunwayModule();

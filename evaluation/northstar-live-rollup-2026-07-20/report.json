@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-16T22:37:24.233Z",
-  "head": "7cd5966e3778ad4d97ff67c04908b7c1e9d1c3f4",
+  "generatedAt": "2026-08-17T00:37:01.227Z",
+  "head": "e8f721aa2bf2cfb06efe0a806302c9497a43f68b",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "7cd5966e3778ad4d97ff67c04908b7c1e9d1c3f4",
+    "commitSha": "e8f721aa2bf2cfb06efe0a806302c9497a43f68b",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-oh2cx6756-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-onfas95qw-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -25,7 +25,7 @@
       "id": "final_99_gate",
       "state": "notice",
       "artifact": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
-      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-22\\notice-carry.json: auth-history-reuse=operator-auth-gated, dispatch-policy=provider-approval-gated. Fully automated launch remains forbidden until those approval/auth gates are proven. Full final-99 rerun is not treated as no-approval cleanup; evaluation\\final-99-no-approval-boundary-2026-07-23\\report.json records the mutation boundary."
+      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-22\\notice-carry.json: auth-history-reuse=operator-auth-gated, dispatch-policy=provider-approval-gated. Fully automated launch remains forbidden until those approval/auth gates are proven. Full final-99 rerun is not treated as no-approval cleanup; evaluation\\final-99-no-approval-boundary-2026-07-23\\report.json records the mutation boundary. The no-mutation companion evaluation\\final-99-12-document-no-mutation-2026-08-17\\report.json proves local canonical/core/orchestration coverage 12/12, 4/4, and 12 documents with 14 downloads and 0 failures. Its fresh source-aligned live rerun remains blocked with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE; exact saved Share is MISSING_EVIDENCE and fully automated launch remains forbidden."
     },
     {
       "id": "live_harness_quality",
@@ -1266,7 +1266,19 @@
         "allowedClaim": "메일·문자는 관리자 인증과 서버 소유 세션에서만 전송 가능한 정책으로 잠겨 있다.",
         "forbiddenClaim": "카카오·밴드 또는 모든 provider 전파가 실제 승인 채널로 live 완료됐다."
       }
-    ]
+    ],
+    "twelveDocumentNoMutation": {
+      "artifact": "evaluation\\final-99-12-document-no-mutation-2026-08-17\\report.json",
+      "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_DISTRIBUTED_ADMISSION_BLOCKED",
+      "currentSourceCommit": "e8f721aa2bf2cfb06efe0a806302c9497a43f68b",
+      "localCanonicalPassed": 12,
+      "localCorePdfsPassed": 4,
+      "localOrchestrationDownloads": 14,
+      "liveOverall": "blocked",
+      "liveBlockerCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      "exactSavedShareVerdict": "MISSING_EVIDENCE",
+      "fullyAutomatedLaunchClaimAllowed": false
+    }
   },
   "kosha": {
     "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
@@ -1282,9 +1294,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "7cd5966e3778ad4d97ff67c04908b7c1e9d1c3f4",
+      "sourceCommit": "e8f721aa2bf2cfb06efe0a806302c9497a43f68b",
       "sourceStatus": "exact",
-      "productionCommit": "7cd5966e3778ad4d97ff67c04908b7c1e9d1c3f4",
+      "productionCommit": "e8f721aa2bf2cfb06efe0a806302c9497a43f68b",
       "productionStatus": "matches_live"
     },
     {
@@ -1294,6 +1306,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": "b17f59371b90cd9fbe334374e0243e021adbe6f3",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "final_99_12_document_no_mutation",
+      "artifact": "evaluation\\final-99-12-document-no-mutation-2026-08-17\\report.json",
+      "sourceCommit": "e8f721aa2bf2cfb06efe0a806302c9497a43f68b",
+      "sourceStatus": "exact",
+      "productionCommit": "e8f721aa2bf2cfb06efe0a806302c9497a43f68b",
+      "productionStatus": "matches_live"
     },
     {
       "id": "live_harness_quality",
