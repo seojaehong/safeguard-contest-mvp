@@ -2378,6 +2378,34 @@ function createFixtureRoot(): string {
     },
     remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", fullyAutomatedLaunchClaimAllowed: false },
   });
+  writeJson(rootDir, path.join("evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_KNOWLEDGE_VIEWPORT_WORKBENCH",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-product-sha",
+    productionCommit: "fixture-sha",
+    sourceHeadMatchesProduction: true,
+    productCommitIncludedInProduction: true,
+    routeSplitAloneAcceptedAsFix: false,
+    selectedOnlyWorkbenchRequired: true,
+    browser: {
+      rowCount: 10, passCount: 10, maxBodyRatio: 1.02, horizontalOverflowRows: 0,
+      outsideElementRows: 0, visiblePanelCountPerRow: 1, reachableSectionCountPerRow: 6,
+      minimumControlHeight: 44, minimumLocalScrollPanelCount: 4, screenshotCount: 10,
+      desktop: { caseCount: 4, selectedOnly: true, localScrollContained: true },
+      tablet: { caseCount: 2, selectedOnly: true, localScrollContained: true },
+      mobile: { caseCount: 4, selectedOnly: true, localScrollContained: true },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false,
+      vectorMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublicationVerdict: "APPROVAL_GATED",
+      sifEmbeddingRuntimeVerdict: "APPROVAL_GATED",
+      fullyAutomatedLaunchClaimAllowed: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "documents-touch-targets-2026-08-17", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_TOUCH_TARGETS",
     sourceHead: "fixture-sha",
@@ -5142,6 +5170,12 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     });
     expect(audit.gates.find((gate) => gate.id === "ontology_viewport_workbench")?.detail).toContain("mobile task switching passes 4/4");
     expect(audit.gates.find((gate) => gate.id === "ontology_viewport_workbench")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("six reachable tasks");
+    expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("Wiki publication plus SIF embedding remain APPROVAL_GATED");
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
@@ -7314,6 +7348,21 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "ontology_viewport_workbench")?.detail).toContain("mobileSwitch=3/4");
+  });
+
+  it("fails Knowledge viewport workbench closed when publication boundaries are overclaimed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remainingBoundaries: { llmWikiPublicationVerdict: string };
+    };
+    report.remainingBoundaries.llmWikiPublicationVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-17T00:00:00.000Z" });
+    expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")).toMatchObject({ state: "contradicted" });
+    expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("wiki=PASS");
   });
 
   it.each([

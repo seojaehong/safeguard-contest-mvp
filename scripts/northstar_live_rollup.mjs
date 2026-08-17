@@ -33,6 +33,7 @@ const ARTIFACTS = Object.freeze({
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
   documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
   ontologyViewportWorkbench: path.join("evaluation", "ontology-viewport-workbench-2026-08-17", "report.json"),
+  knowledgeViewportWorkbench: path.join("evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json"),
   tenantAuthorizationRemediation: path.join("evaluation", "tenant-authorization-boundary-preflight-2026-07-29", "report.json"),
   spreadsheetFormulaNeutralization: path.join("evaluation", "spreadsheet-formula-neutralization-2026-08-01", "report.json"),
   publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
@@ -519,6 +520,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const productCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.productCapabilityTruth);
   const documentExportCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.documentExportCapabilityTruth);
   const ontologyViewportWorkbench = tryReadJson(rootDir, ARTIFACTS.ontologyViewportWorkbench);
+  const knowledgeViewportWorkbench = tryReadJson(rootDir, ARTIFACTS.knowledgeViewportWorkbench);
   const tenantAuthorizationRemediation = tryReadJson(rootDir, ARTIFACTS.tenantAuthorizationRemediation);
   const spreadsheetFormulaNeutralization = tryReadJson(rootDir, ARTIFACTS.spreadsheetFormulaNeutralization);
   const publicProviderWorkBudget = tryReadJson(rootDir, ARTIFACTS.publicProviderWorkBudget);
@@ -643,6 +645,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "product_capability_truth", ARTIFACTS.productCapabilityTruth, productCapabilityTruth),
     evidenceStatus(rootDir, currentHead, liveCommit, "document_export_capability_truth", ARTIFACTS.documentExportCapabilityTruth, documentExportCapabilityTruth),
     evidenceStatus(rootDir, currentHead, liveCommit, "ontology_viewport_workbench", ARTIFACTS.ontologyViewportWorkbench, ontologyViewportWorkbench),
+    evidenceStatus(rootDir, currentHead, liveCommit, "knowledge_viewport_workbench", ARTIFACTS.knowledgeViewportWorkbench, knowledgeViewportWorkbench),
     evidenceStatus(rootDir, currentHead, liveCommit, "tenant_authorization_remediation", ARTIFACTS.tenantAuthorizationRemediation, tenantAuthorizationRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "spreadsheet_formula_neutralization", ARTIFACTS.spreadsheetFormulaNeutralization, spreadsheetFormulaNeutralization),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_work_budget", ARTIFACTS.publicProviderWorkBudget, publicProviderWorkBudget),
@@ -1403,6 +1406,22 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       exactSavedShareVerdict: asString(recordAt(ontologyViewportWorkbench, "remainingBoundaries")?.exactSavedShareVerdict),
       fullyAutomatedLaunchClaimAllowed: recordAt(ontologyViewportWorkbench, "remainingBoundaries")?.fullyAutomatedLaunchClaimAllowed === true,
     },
+    knowledgeViewportWorkbench: {
+      artifact: ARTIFACTS.knowledgeViewportWorkbench,
+      verdict: isRecord(knowledgeViewportWorkbench) ? asString(knowledgeViewportWorkbench.verdict) : "missing",
+      sourceHead: isRecord(knowledgeViewportWorkbench) ? asString(knowledgeViewportWorkbench.sourceHead) : "",
+      productCommit: isRecord(knowledgeViewportWorkbench) ? asString(knowledgeViewportWorkbench.productCommit) : "",
+      productionCommit: extractProductionCommit(knowledgeViewportWorkbench),
+      rowCount: asNumber(recordAt(knowledgeViewportWorkbench, "browser")?.rowCount),
+      passCount: asNumber(recordAt(knowledgeViewportWorkbench, "browser")?.passCount),
+      maxBodyRatio: asNumber(recordAt(knowledgeViewportWorkbench, "browser")?.maxBodyRatio),
+      visiblePanelCountPerRow: asNumber(recordAt(knowledgeViewportWorkbench, "browser")?.visiblePanelCountPerRow),
+      reachableSectionCountPerRow: asNumber(recordAt(knowledgeViewportWorkbench, "browser")?.reachableSectionCountPerRow),
+      exactSavedShareVerdict: asString(recordAt(knowledgeViewportWorkbench, "remainingBoundaries")?.exactSavedShareVerdict),
+      llmWikiPublicationVerdict: asString(recordAt(knowledgeViewportWorkbench, "remainingBoundaries")?.llmWikiPublicationVerdict),
+      sifEmbeddingRuntimeVerdict: asString(recordAt(knowledgeViewportWorkbench, "remainingBoundaries")?.sifEmbeddingRuntimeVerdict),
+      fullyAutomatedLaunchClaimAllowed: recordAt(knowledgeViewportWorkbench, "remainingBoundaries")?.fullyAutomatedLaunchClaimAllowed === true,
+    },
     tenantAuthorizationRemediation: {
       artifact: ARTIFACTS.tenantAuthorizationRemediation,
       verdict: isRecord(tenantAuthorizationRemediation) ? asString(tenantAuthorizationRemediation.verdict) : "missing",
@@ -1928,7 +1947,13 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Live browser rows: ${rollup.ontologyViewportWorkbench.passCount ?? 0}/${rollup.ontologyViewportWorkbench.rowCount ?? 0}; maximum body ratio=${rollup.ontologyViewportWorkbench.maxBodyRatio ?? "unknown"}`,
     `- Mobile task switching: ${rollup.ontologyViewportWorkbench.mobileTaskSwitchVerifiedCount ?? 0}/4; long content remains inside local-scroll panes.`,
     `- Exact saved Share: ${rollup.ontologyViewportWorkbench.exactSavedShareVerdict || "MISSING_EVIDENCE"}; fully automated launch=${rollup.ontologyViewportWorkbench.fullyAutomatedLaunchClaimAllowed}`,
-    "- Boundary: this proves fail-closed export truth and usable browser fallbacks; it does not activate distributed server XLSX/HWP export.",
+    "- Boundary: this proves ontology viewport containment only; it does not activate approval-gated runtimes.",
+    "",
+    "## Knowledge viewport workbench",
+    `- Verdict: \`${rollup.knowledgeViewportWorkbench.verdict}\``,
+    `- Live browser rows: ${rollup.knowledgeViewportWorkbench.passCount ?? 0}/${rollup.knowledgeViewportWorkbench.rowCount ?? 0}; maximum body ratio=${rollup.knowledgeViewportWorkbench.maxBodyRatio ?? "unknown"}`,
+    `- Selected exposure: ${rollup.knowledgeViewportWorkbench.visiblePanelCountPerRow ?? 0} visible panel and ${rollup.knowledgeViewportWorkbench.reachableSectionCountPerRow ?? 0} reachable tasks per row; long content remains locally scroll-contained.`,
+    `- Boundaries: exact saved Share=${rollup.knowledgeViewportWorkbench.exactSavedShareVerdict || "MISSING_EVIDENCE"}; Wiki publication=${rollup.knowledgeViewportWorkbench.llmWikiPublicationVerdict || "APPROVAL_GATED"}; SIF embedding=${rollup.knowledgeViewportWorkbench.sifEmbeddingRuntimeVerdict || "APPROVAL_GATED"}; fully automated launch=${rollup.knowledgeViewportWorkbench.fullyAutomatedLaunchClaimAllowed}`,
     "",
     "## Live Hermes Reviewer Authority UI",
     "",

@@ -225,6 +225,18 @@ type NextRunwayReport = {
     exactSavedShareVerdict: string;
     fullyAutomatedLaunchClaimAllowed: boolean;
   };
+  knowledgeViewportWorkbench: {
+    verdict: string;
+    rowCount: number;
+    passCount: number;
+    maxBodyRatio: number;
+    visiblePanelCountPerRow: number;
+    reachableSectionCountPerRow: number;
+    exactSavedShareVerdict: string;
+    llmWikiPublicationVerdict: string;
+    sifEmbeddingRuntimeVerdict: string;
+    fullyAutomatedLaunchClaimAllowed: boolean;
+  };
   dependencySecurityRemediation: {
     verdict: string;
     beforeVulnerablePackages: number;
@@ -2739,6 +2751,22 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, vectorMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false },
     remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", fullyAutomatedLaunchClaimAllowed: false },
   });
+  writeJson(root, "evaluation/knowledge-viewport-workbench-2026-08-17/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_KNOWLEDGE_VIEWPORT_WORKBENCH",
+    sourceHead: firstHead, productCommit: firstHead, productionCommit: firstHead,
+    sourceHeadMatchesProduction: true, productCommitIncludedInProduction: true,
+    routeSplitAloneAcceptedAsFix: false, selectedOnlyWorkbenchRequired: true,
+    browser: {
+      rowCount: 10, passCount: 10, maxBodyRatio: 1.02, horizontalOverflowRows: 0,
+      outsideElementRows: 0, visiblePanelCountPerRow: 1, reachableSectionCountPerRow: 6,
+      minimumControlHeight: 44, minimumLocalScrollPanelCount: 4, screenshotCount: 10,
+      desktop: { caseCount: 4, selectedOnly: true, localScrollContained: true },
+      tablet: { caseCount: 2, selectedOnly: true, localScrollContained: true },
+      mobile: { caseCount: 4, selectedOnly: true, localScrollContained: true },
+    },
+    mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, vectorMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false },
+    remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", llmWikiPublicationVerdict: "APPROVAL_GATED", sifEmbeddingRuntimeVerdict: "APPROVAL_GATED", fullyAutomatedLaunchClaimAllowed: false },
+  });
   const liveRollupPath = path.join(root, "evaluation/northstar-live-rollup-2026-07-20/report.json");
   const liveRollup = fs.readFileSync(liveRollupPath, "utf8").replaceAll("TO_FILL", firstHead);
   fs.writeFileSync(liveRollupPath, liveRollup, "utf8");
@@ -2990,6 +3018,19 @@ describe("northstar next runway generator", () => {
       fullyAutomatedLaunchClaimAllowed: false,
     });
     expect(report.provenCurrentState).toContain("ontology_viewport_workbench");
+    expect(report.knowledgeViewportWorkbench).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_KNOWLEDGE_VIEWPORT_WORKBENCH",
+      rowCount: 10,
+      passCount: 10,
+      maxBodyRatio: 1.02,
+      visiblePanelCountPerRow: 1,
+      reachableSectionCountPerRow: 6,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublicationVerdict: "APPROVAL_GATED",
+      sifEmbeddingRuntimeVerdict: "APPROVAL_GATED",
+      fullyAutomatedLaunchClaimAllowed: false,
+    });
+    expect(report.provenCurrentState).toContain("knowledge_viewport_workbench");
     expect(report.hermesOpenclaw).toMatchObject({
       verdict: "adapter_boundary_pass_live_execution_not_claimed",
       trustedTransportWired: true,

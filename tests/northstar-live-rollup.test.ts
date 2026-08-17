@@ -174,6 +174,18 @@ type RollupReport = {
     exactSavedShareVerdict: string;
     fullyAutomatedLaunchClaimAllowed: boolean;
   };
+  knowledgeViewportWorkbench: {
+    verdict: string;
+    rowCount: number;
+    passCount: number;
+    maxBodyRatio: number;
+    visiblePanelCountPerRow: number;
+    reachableSectionCountPerRow: number;
+    exactSavedShareVerdict: string;
+    llmWikiPublicationVerdict: string;
+    sifEmbeddingRuntimeVerdict: string;
+    fullyAutomatedLaunchClaimAllowed: boolean;
+  };
   tenantAuthorizationRemediation: {
     verdict: string;
     greenFindings: number | null;
@@ -1137,6 +1149,22 @@ function createFixtureRoot(): { root: string; head: string } {
     mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, vectorMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false },
     remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", fullyAutomatedLaunchClaimAllowed: false },
   });
+  writeJson(root, "evaluation/knowledge-viewport-workbench-2026-08-17/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_KNOWLEDGE_VIEWPORT_WORKBENCH",
+    sourceHead: "TO_FILL", productCommit: "TO_FILL", productionCommit: "TO_FILL",
+    sourceHeadMatchesProduction: true, productCommitIncludedInProduction: true,
+    routeSplitAloneAcceptedAsFix: false, selectedOnlyWorkbenchRequired: true,
+    browser: {
+      rowCount: 10, passCount: 10, maxBodyRatio: 1.02, horizontalOverflowRows: 0,
+      outsideElementRows: 0, visiblePanelCountPerRow: 1, reachableSectionCountPerRow: 6,
+      minimumControlHeight: 44, minimumLocalScrollPanelCount: 4, screenshotCount: 10,
+      desktop: { caseCount: 4, selectedOnly: true, localScrollContained: true },
+      tablet: { caseCount: 2, selectedOnly: true, localScrollContained: true },
+      mobile: { caseCount: 4, selectedOnly: true, localScrollContained: true },
+    },
+    mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, vectorMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false },
+    remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", llmWikiPublicationVerdict: "APPROVAL_GATED", sifEmbeddingRuntimeVerdict: "APPROVAL_GATED", fullyAutomatedLaunchClaimAllowed: false },
+  });
   writeJson(root, "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json", {
     verdict: "COMPLETED_FOLLOWUP_REPOSITORY_SECURITY_SCAN_OPEN_FINDINGS_AND_DEFERRED_REVIEW",
     sourceHead: "TO_FILL",
@@ -1813,6 +1841,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/product-capability-truth-2026-07-25/report.json",
     "evaluation/document-export-capability-truth-2026-08-17/report.json",
     "evaluation/ontology-viewport-workbench-2026-08-17/report.json",
+    "evaluation/knowledge-viewport-workbench-2026-08-17/report.json",
     "evaluation/tenant-authorization-boundary-preflight-2026-07-29/report.json",
     "evaluation/spreadsheet-formula-neutralization-2026-08-01/report.json",
     "evaluation/public-provider-work-budget-2026-08-01/report.json",
@@ -2052,6 +2081,19 @@ describe("northstar live rollup", () => {
       fullyAutomatedLaunchClaimAllowed: false,
     });
     expect(report.evidence.find((item) => item.id === "ontology_viewport_workbench")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.knowledgeViewportWorkbench).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_KNOWLEDGE_VIEWPORT_WORKBENCH",
+      rowCount: 10,
+      passCount: 10,
+      maxBodyRatio: 1.02,
+      visiblePanelCountPerRow: 1,
+      reachableSectionCountPerRow: 6,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublicationVerdict: "APPROVAL_GATED",
+      sifEmbeddingRuntimeVerdict: "APPROVAL_GATED",
+      fullyAutomatedLaunchClaimAllowed: false,
+    });
+    expect(report.evidence.find((item) => item.id === "knowledge_viewport_workbench")?.productionStatus).toBe("ancestor_of_head");
     expect(report.tenantAuthorizationRemediation).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
       greenFindings: 2,

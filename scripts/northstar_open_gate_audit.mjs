@@ -46,6 +46,7 @@ const EVIDENCE_PATHS = Object.freeze({
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
   documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
   ontologyViewportWorkbench: path.join("evaluation", "ontology-viewport-workbench-2026-08-17", "report.json"),
+  knowledgeViewportWorkbench: path.join("evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json"),
   dispatchEntryCapabilityTruth: path.join("evaluation", "dispatch-entry-capability-truth-2026-07-28", "report.json"),
   landingHumanReviewBoundary: path.join("evaluation", "landing-human-review-boundary-2026-07-28", "report.json"),
   dependencySecurityRemediation: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
@@ -1751,6 +1752,90 @@ function evaluateOntologyViewportWorkbenchGate(rootDir) {
     evidencePath,
     detail: `Ontology verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, rows=${readNumber(browser.passCount)}/${readNumber(browser.rowCount)}, maxBodyRatio=${readNumber(browser.maxBodyRatio)}, overflowRows=${readNumber(browser.horizontalOverflowRows)}, overlapRows=${readNumber(browser.overlapRows)}, mobileSwitch=${readNumber(mobile.taskSwitchVerifiedCount)}/4, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: ["Restore viewport containment, task switching, no-mutation boundaries, and current live alignment, then rerun the ontology browser contract."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateKnowledgeViewportWorkbenchGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.knowledgeViewportWorkbench;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "knowledge_viewport_workbench",
+      label: "Live Knowledge viewport workbench",
+      state: "missing",
+      evidencePath,
+      detail: "Live Knowledge viewport workbench evidence is missing or invalid.",
+      nextActions: ["Rerun the selected-only Day/Night desktop, tablet, and mobile Knowledge browser contract against current production."],
+    });
+  }
+
+  const browser = isRecord(report.browser) ? report.browser : {};
+  const desktop = isRecord(browser.desktop) ? browser.desktop : {};
+  const tablet = isRecord(browser.tablet) ? browser.tablet : {};
+  const mobile = isRecord(browser.mobile) ? browser.mobile : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceMatchesProduction = readString(report.sourceHead).length > 0
+    && readString(report.sourceHead) === readString(report.productionCommit)
+    && report.sourceHeadMatchesProduction === true
+    && report.productCommitIncludedInProduction === true;
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.vectorMutationPerformed === false
+    && mutationBoundary.wikiPublicationPerformed === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const liveReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_KNOWLEDGE_VIEWPORT_WORKBENCH"
+    && sourceMatchesProduction
+    && readNumber(browser.rowCount) === 10
+    && readNumber(browser.passCount) === 10
+    && readNumber(browser.maxBodyRatio) <= 1.02
+    && readNumber(browser.horizontalOverflowRows) === 0
+    && readNumber(browser.outsideElementRows) === 0
+    && readNumber(browser.visiblePanelCountPerRow) === 1
+    && readNumber(browser.reachableSectionCountPerRow) === 6
+    && readNumber(browser.minimumControlHeight) >= 44
+    && readNumber(browser.minimumLocalScrollPanelCount) >= 4
+    && readNumber(browser.screenshotCount) === 10
+    && readNumber(desktop.caseCount) === 4
+    && desktop.selectedOnly === true
+    && desktop.localScrollContained === true
+    && readNumber(tablet.caseCount) === 2
+    && tablet.selectedOnly === true
+    && tablet.localScrollContained === true
+    && readNumber(mobile.caseCount) === 4
+    && mobile.selectedOnly === true
+    && mobile.localScrollContained === true
+    && report.routeSplitAloneAcceptedAsFix === false
+    && report.selectedOnlyWorkbenchRequired === true
+    && noMutation
+    && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(remainingBoundaries.llmWikiPublicationVerdict) === "APPROVAL_GATED"
+    && readString(remainingBoundaries.sifEmbeddingRuntimeVerdict) === "APPROVAL_GATED"
+    && remainingBoundaries.fullyAutomatedLaunchClaimAllowed === false;
+
+  if (liveReady) {
+    return gateResult({
+      id: "knowledge_viewport_workbench",
+      label: "Live Knowledge viewport workbench",
+      state: "proven",
+      evidencePath,
+      detail: `Production /knowledge passes ${readNumber(browser.passCount)}/${readNumber(browser.rowCount)} Day/Night browser rows with maximum body ratio ${readNumber(browser.maxBodyRatio)}, one visible panel, six reachable tasks, zero horizontal overflow, and ${readNumber(browser.minimumControlHeight)}px minimum controls. Long content remains inside local-scroll panels; route split alone is not accepted. No mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus SIF embedding remain APPROVAL_GATED.`,
+      nextActions: [],
+    });
+  }
+
+  return gateResult({
+    id: "knowledge_viewport_workbench",
+    label: "Live Knowledge viewport workbench",
+    state: "contradicted",
+    evidencePath,
+    detail: `Knowledge verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, rows=${readNumber(browser.passCount)}/${readNumber(browser.rowCount)}, maxBodyRatio=${readNumber(browser.maxBodyRatio)}, visiblePanels=${readNumber(browser.visiblePanelCountPerRow)}, reachableTasks=${readNumber(browser.reachableSectionCountPerRow)}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, wiki=${readString(remainingBoundaries.llmWikiPublicationVerdict) || "missing"}, embedding=${readString(remainingBoundaries.sifEmbeddingRuntimeVerdict) || "missing"}.`,
+    nextActions: ["Restore selected-only viewport containment and approval boundaries, then rerun the current-production Knowledge browser contract."],
   });
 }
 
@@ -9170,6 +9255,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateProductCapabilityTruthGate(rootDir),
     evaluateDocumentExportCapabilityTruthGate(rootDir),
     evaluateOntologyViewportWorkbenchGate(rootDir),
+    evaluateKnowledgeViewportWorkbenchGate(rootDir),
     evaluateDependencySecurityRemediationGate(rootDir),
     evaluateTenantAuthorizationRemediationGate(rootDir),
     evaluateSpreadsheetFormulaNeutralizationGate(rootDir),
