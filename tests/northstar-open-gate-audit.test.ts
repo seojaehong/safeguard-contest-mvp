@@ -2394,6 +2394,12 @@ function createFixtureRoot(): string {
       desktop: { caseCount: 4, selectedOnly: true, localScrollContained: true },
       tablet: { caseCount: 2, selectedOnly: true, localScrollContained: true },
       mobile: { caseCount: 4, selectedOnly: true, localScrollContained: true },
+      referenceDisclosure: {
+        technicalDisclosureCount: 6, referenceDisclosureCount: 7, defaultOpenDisclosureCount: 0,
+        exclusiveDisclosureGroups: true, maxMobileTechnicalScrollRatio: 4.47,
+        maxMobileReferenceScrollRatio: 3.68, maxFirstDisclosureBottom: 590.97,
+        minPanelBottom: 611.39, firstDisclosureInsidePanel: true,
+      },
     },
     mutationBoundary: {
       dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false,
@@ -5175,6 +5181,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       evidencePath: path.join("evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json"),
     });
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("six reachable tasks");
+    expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("KOSHA disclosures are 6/7");
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("Wiki publication plus SIF embedding remain APPROVAL_GATED");
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")).toMatchObject({
       state: "proven",
@@ -7363,6 +7370,21 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-17T00:00:00.000Z" });
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")).toMatchObject({ state: "contradicted" });
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("wiki=PASS");
+  });
+
+  it("fails Knowledge viewport workbench closed when reference disclosures open by default", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      browser: { referenceDisclosure: { defaultOpenDisclosureCount: number } };
+    };
+    report.browser.referenceDisclosure.defaultOpenDisclosureCount = 1;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-17T00:00:00.000Z" });
+    expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")).toMatchObject({ state: "contradicted" });
+    expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("defaultOpen=1");
   });
 
   it.each([

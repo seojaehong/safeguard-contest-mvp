@@ -181,6 +181,13 @@ type RollupReport = {
     maxBodyRatio: number;
     visiblePanelCountPerRow: number;
     reachableSectionCountPerRow: number;
+    technicalDisclosureCount: number;
+    referenceDisclosureCount: number;
+    defaultOpenDisclosureCount: number;
+    exclusiveDisclosureGroups: boolean;
+    maxMobileTechnicalScrollRatio: number;
+    maxMobileReferenceScrollRatio: number;
+    firstDisclosureInsidePanel: boolean;
     exactSavedShareVerdict: string;
     llmWikiPublicationVerdict: string;
     sifEmbeddingRuntimeVerdict: string;
@@ -1161,6 +1168,11 @@ function createFixtureRoot(): { root: string; head: string } {
       desktop: { caseCount: 4, selectedOnly: true, localScrollContained: true },
       tablet: { caseCount: 2, selectedOnly: true, localScrollContained: true },
       mobile: { caseCount: 4, selectedOnly: true, localScrollContained: true },
+      referenceDisclosure: {
+        technicalDisclosureCount: 6, referenceDisclosureCount: 7, defaultOpenDisclosureCount: 0,
+        exclusiveDisclosureGroups: true, maxMobileTechnicalScrollRatio: 4.47,
+        maxMobileReferenceScrollRatio: 3.68, firstDisclosureInsidePanel: true,
+      },
     },
     mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, vectorMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false },
     remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", llmWikiPublicationVerdict: "APPROVAL_GATED", sifEmbeddingRuntimeVerdict: "APPROVAL_GATED", fullyAutomatedLaunchClaimAllowed: false },
@@ -2088,6 +2100,13 @@ describe("northstar live rollup", () => {
       maxBodyRatio: 1.02,
       visiblePanelCountPerRow: 1,
       reachableSectionCountPerRow: 6,
+      technicalDisclosureCount: 6,
+      referenceDisclosureCount: 7,
+      defaultOpenDisclosureCount: 0,
+      exclusiveDisclosureGroups: true,
+      maxMobileTechnicalScrollRatio: 4.47,
+      maxMobileReferenceScrollRatio: 3.68,
+      firstDisclosureInsidePanel: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       llmWikiPublicationVerdict: "APPROVAL_GATED",
       sifEmbeddingRuntimeVerdict: "APPROVAL_GATED",
