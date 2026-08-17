@@ -31,6 +31,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
+  documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
   tenantAuthorizationRemediation: path.join("evaluation", "tenant-authorization-boundary-preflight-2026-07-29", "report.json"),
   spreadsheetFormulaNeutralization: path.join("evaluation", "spreadsheet-formula-neutralization-2026-08-01", "report.json"),
   publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
@@ -515,6 +516,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const liveDocumentEditorialDuplicateClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialDuplicateClassification);
   const liveDocumentEditorialNearClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialNearClassification);
   const productCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.productCapabilityTruth);
+  const documentExportCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.documentExportCapabilityTruth);
   const tenantAuthorizationRemediation = tryReadJson(rootDir, ARTIFACTS.tenantAuthorizationRemediation);
   const spreadsheetFormulaNeutralization = tryReadJson(rootDir, ARTIFACTS.spreadsheetFormulaNeutralization);
   const publicProviderWorkBudget = tryReadJson(rootDir, ARTIFACTS.publicProviderWorkBudget);
@@ -637,6 +639,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_duplicate_classification", ARTIFACTS.liveDocumentEditorialDuplicateClassification, liveDocumentEditorialDuplicateClassification),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_near_classification", ARTIFACTS.liveDocumentEditorialNearClassification, liveDocumentEditorialNearClassification),
     evidenceStatus(rootDir, currentHead, liveCommit, "product_capability_truth", ARTIFACTS.productCapabilityTruth, productCapabilityTruth),
+    evidenceStatus(rootDir, currentHead, liveCommit, "document_export_capability_truth", ARTIFACTS.documentExportCapabilityTruth, documentExportCapabilityTruth),
     evidenceStatus(rootDir, currentHead, liveCommit, "tenant_authorization_remediation", ARTIFACTS.tenantAuthorizationRemediation, tenantAuthorizationRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "spreadsheet_formula_neutralization", ARTIFACTS.spreadsheetFormulaNeutralization, spreadsheetFormulaNeutralization),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_work_budget", ARTIFACTS.publicProviderWorkBudget, publicProviderWorkBudget),
@@ -1367,6 +1370,23 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       exactSavedShareVerdict: asString(recordAt(productCapabilityTruth, "remainingBoundaries")?.exactSavedShareVerdict),
       documentsShareIaVerdict: asString(recordAt(productCapabilityTruth, "remainingBoundaries")?.documentsShareIaVerdict),
     },
+    documentExportCapabilityTruth: {
+      artifact: ARTIFACTS.documentExportCapabilityTruth,
+      verdict: isRecord(documentExportCapabilityTruth) ? asString(documentExportCapabilityTruth.verdict) : "missing",
+      sourceHead: isRecord(documentExportCapabilityTruth) ? asString(documentExportCapabilityTruth.sourceHead) : "",
+      productCommit: isRecord(documentExportCapabilityTruth) ? asString(documentExportCapabilityTruth.productCommit) : "",
+      productionCommit: extractProductionCommit(documentExportCapabilityTruth),
+      admissionMode: asString(recordAt(documentExportCapabilityTruth, "capability")?.admission?.mode),
+      admissionReason: asString(recordAt(documentExportCapabilityTruth, "capability")?.admission?.reason),
+      admissionReady: recordAt(recordAt(documentExportCapabilityTruth, "capability"), "admission")?.ready === true,
+      desktopPanelWidth: asNumber(recordAt(recordAt(documentExportCapabilityTruth, "browser"), "desktop")?.panelWidth),
+      desktopBetaButtonWidth: asNumber(recordAt(recordAt(documentExportCapabilityTruth, "browser"), "desktop")?.legacyXlsButtonWidth),
+      mobilePanelWidth: asNumber(recordAt(recordAt(documentExportCapabilityTruth, "browser"), "mobile")?.panelWidth),
+      mobileBetaButtonWidth: asNumber(recordAt(recordAt(documentExportCapabilityTruth, "browser"), "mobile")?.legacyXlsButtonWidth),
+      distributedAdmissionActivation: asString(recordAt(documentExportCapabilityTruth, "remainingBoundaries")?.distributedAdmissionActivation),
+      exactSavedShareVerdict: asString(recordAt(documentExportCapabilityTruth, "remainingBoundaries")?.exactSavedShareVerdict),
+      fullyAutomatedLaunchClaimAllowed: recordAt(documentExportCapabilityTruth, "remainingBoundaries")?.fullyAutomatedLaunchClaimAllowed === true,
+    },
     tenantAuthorizationRemediation: {
       artifact: ARTIFACTS.tenantAuthorizationRemediation,
       verdict: isRecord(tenantAuthorizationRemediation) ? asString(tenantAuthorizationRemediation.verdict) : "missing",
@@ -1877,6 +1897,16 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Exact saved Share: ${rollup.productCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     `- Documents/Share IA: ${rollup.productCapabilityTruth.documentsShareIaVerdict || "OPEN_SEPARATE_VIEWPORT_IA_WAVE"}`,
     "- Boundary: capability truth does not unlock provider persistence, exact saved Share, or Documents/Share viewport IA.",
+    "",
+    "## Live Document Export Capability Truth",
+    "",
+    `- Verdict: \`${rollup.documentExportCapabilityTruth.verdict}\``,
+    `- Admission: ${rollup.documentExportCapabilityTruth.admissionMode || "unknown"}/${rollup.documentExportCapabilityTruth.admissionReason || "unknown"}; ready=${rollup.documentExportCapabilityTruth.admissionReady}`,
+    `- Desktop panel/beta button: ${rollup.documentExportCapabilityTruth.desktopPanelWidth ?? "unknown"}/${rollup.documentExportCapabilityTruth.desktopBetaButtonWidth ?? "unknown"}px`,
+    `- Mobile panel/beta button: ${rollup.documentExportCapabilityTruth.mobilePanelWidth ?? "unknown"}/${rollup.documentExportCapabilityTruth.mobileBetaButtonWidth ?? "unknown"}px`,
+    `- Distributed activation: ${rollup.documentExportCapabilityTruth.distributedAdmissionActivation || "OPERATOR_CONFIGURATION_REQUIRED"}; fully automated launch=${rollup.documentExportCapabilityTruth.fullyAutomatedLaunchClaimAllowed}`,
+    `- Exact saved Share: ${rollup.documentExportCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "- Boundary: this proves fail-closed export truth and usable browser fallbacks; it does not activate distributed server XLSX/HWP export.",
     "",
     "## Live Hermes Reviewer Authority UI",
     "",

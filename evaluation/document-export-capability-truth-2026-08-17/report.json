@@ -1,13 +1,14 @@
 {
   "schemaVersion": "safeclaw-document-export-capability-truth/v1",
-  "generatedAt": "2026-08-17T11:22:00+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH_LIVE_PENDING",
-  "sourceHead": "8389302c29ba8383b494554179f4ec461b57eeef",
-  "productCommit": "8389302c29ba8383b494554179f4ec461b57eeef",
-  "productionCommitAtLocalRun": "3223948e58fdaeb845724ea8880f1a380e5cc8fb",
-  "sourceHeadMatchesProduction": false,
-  "mode": "current-source-local-production",
-  "baseUrl": "http://127.0.0.1:3084",
+  "generatedAt": "2026-08-17T11:58:51+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH",
+  "sourceHead": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
+  "productCommit": "f28ed068f76109453d9265314d406242badbe40c",
+  "productionCommit": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
+  "productCommitIncludedInProduction": true,
+  "sourceHeadMatchesProduction": true,
+  "mode": "live-production",
+  "baseUrl": "https://www.safeclaw.kr",
   "capability": {
     "endpoint": "/api/export/pdf",
     "getStatus": 200,
@@ -17,56 +18,96 @@
       "reason": "distributed_limiter_unavailable"
     },
     "credentialMaterialExposed": false,
-    "postStatus": 503,
-    "postCode": "PUBLIC_EXPORT_CONCURRENCY_LIMIT",
-    "postWorkUnit": "document-export",
+    "localGuardedPostStatus": 503,
+    "localGuardedPostCode": "PUBLIC_EXPORT_CONCURRENCY_LIMIT",
+    "localGuardedPostWorkUnit": "document-export",
     "serverExportWorkExecuted": false
   },
   "browser": {
     "desktop": {
       "viewport": "1440x723",
       "bodyHeight": 723,
+      "documentHeight": 723,
       "viewportHeight": 723,
       "horizontalOverflow": false,
       "readiness": "locked",
       "readinessText": "정식 출력 잠김 · PDF·호환 형식 사용",
+      "panelWidth": 843,
+      "toolsWidth": 855,
+      "xlsxButtonWidth": 805,
+      "hwpButtonWidth": 805,
+      "pdfButtonWidth": 805,
+      "legacyXlsButtonWidth": 191.25,
+      "legacyHwpxButtonWidth": 191.25,
       "xlsxDisabled": true,
       "hwpDisabled": true,
       "pdfDisabled": false,
       "legacyXlsDisabled": false,
-      "screenshot": "evaluation/document-export-capability-truth-2026-08-17/after-local/documents-export-locked-desktop-1440x723.png"
+      "legacyHwpxDisabled": false,
+      "screenshot": "evaluation/document-export-capability-truth-2026-08-17/after-live/documents-export-locked-desktop-1440x723.png"
     },
     "mobile": {
       "viewport": "390x723",
       "bodyHeight": 723,
+      "documentHeight": 723,
       "viewportHeight": 723,
       "horizontalOverflow": false,
       "readiness": "locked",
       "readinessText": "정식 출력 잠김 · PDF·호환 형식 사용",
+      "panelWidth": 262,
+      "toolsWidth": 285,
+      "xlsxButtonWidth": 236,
+      "hwpButtonWidth": 236,
+      "pdfButtonWidth": 236,
+      "legacyXlsButtonWidth": 220,
+      "legacyHwpxButtonWidth": 220,
       "xlsxDisabled": true,
       "hwpDisabled": true,
       "pdfDisabled": false,
       "legacyXlsDisabled": false,
-      "screenshot": "evaluation/document-export-capability-truth-2026-08-17/after-local/documents-export-locked-mobile-390x723.png"
+      "legacyHwpxDisabled": false,
+      "screenshot": "evaluation/document-export-capability-truth-2026-08-17/after-live/documents-export-locked-mobile-390x723.png"
     }
   },
+  "panelRemediation": {
+    "beforeLiveCommit": "3865c650d0cd783a79691396863650f6ba0da5fb",
+    "desktopPanelWidthBefore": 206.25,
+    "desktopPanelWidthAfter": 843,
+    "mobilePanelWidthBefore": 129,
+    "mobilePanelWidthAfter": 262,
+    "desktopBetaButtonWidthAfter": 191.25,
+    "mobileBetaButtonWidthAfter": 220,
+    "routeSplitAloneAcceptedAsFix": false
+  },
+  "governedPathCompatibility": {
+    "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_ADMISSION_COMPATIBILITY",
+    "sourceHead": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
+    "productionCommit": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
+    "changedGovernedPaths": ["lib/public-distributed-rate-limit.ts"],
+    "coveredGateIds": [
+      "improvement_photo_analysis_budget",
+      "public_provider_admission",
+      "security_followup_remediation"
+    ],
+    "focusedAndAdjacentTests": { "files": 10, "tests": 47, "failed": 0, "status": "PASS" },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "originalSecurityBaselinesRewritten": false,
+    "noMutation": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
   "verification": {
-    "focusedTests": {
-      "files": 4,
-      "tests": 64,
-      "status": "PASS"
-    },
-    "lockedBrowserRegression": {
-      "files": 1,
-      "tests": 1,
+    "focusedTests": { "files": 4, "tests": 64, "status": "PASS" },
+    "frontendRouteCoverage": { "files": 1, "tests": 39, "status": "PASS" },
+    "frontendConsistencyAudit": {
+      "pageFiles": 33,
+      "componentFiles": 24,
+      "violations": 0,
+      "importantViolations": 0,
       "status": "PASS"
     },
     "typecheck": "PASS",
-    "build": {
-      "status": "PASS",
-      "nextVersion": "15.5.22",
-      "staticPages": 28
-    }
+    "build": { "status": "PASS", "nextVersion": "15.5.22", "staticPages": 28 }
   },
   "mutationBoundary": {
     "dbMutationPerformed": false,
@@ -78,7 +119,7 @@
   },
   "remainingBoundaries": {
     "distributedAdmissionActivation": "OPERATOR_CONFIGURATION_REQUIRED",
-    "liveAfterDeploymentRequired": true,
+    "liveAfterDeploymentRequired": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "fullyAutomatedLaunchClaimAllowed": false
   }

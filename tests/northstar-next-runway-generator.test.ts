@@ -203,6 +203,19 @@ type NextRunwayReport = {
     exactSavedShareVerdict: string;
     documentsShareIaVerdict: string;
   };
+  documentExportCapabilityTruth: {
+    verdict: string;
+    admissionMode: string;
+    admissionReason: string;
+    admissionReady: boolean;
+    desktopPanelWidth: number;
+    desktopBetaButtonWidth: number;
+    mobilePanelWidth: number;
+    mobileBetaButtonWidth: number;
+    distributedAdmissionActivation: string;
+    exactSavedShareVerdict: string;
+    fullyAutomatedLaunchClaimAllowed: boolean;
+  };
   dependencySecurityRemediation: {
     verdict: string;
     beforeVulnerablePackages: number;
@@ -2678,6 +2691,22 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       fullyAutomatedLaunchClaimAllowed: false,
     },
   });
+  writeJson(root, "evaluation/document-export-capability-truth-2026-08-17/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-product-sha",
+    productionCommit: "fixture-sha",
+    capability: { admission: { mode: "unavailable", ready: false, reason: "distributed_limiter_unavailable" } },
+    browser: {
+      desktop: { panelWidth: 843, legacyXlsButtonWidth: 191.25 },
+      mobile: { panelWidth: 262, legacyXlsButtonWidth: 220 },
+    },
+    remainingBoundaries: {
+      distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      fullyAutomatedLaunchClaimAllowed: false,
+    },
+  });
   const liveRollupPath = path.join(root, "evaluation/northstar-live-rollup-2026-07-20/report.json");
   const liveRollup = fs.readFileSync(liveRollupPath, "utf8").replaceAll("TO_FILL", firstHead);
   fs.writeFileSync(liveRollupPath, liveRollup, "utf8");
@@ -2905,6 +2934,20 @@ describe("northstar next runway generator", () => {
       documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
     });
     expect(report.provenCurrentState).toContain("product_capability_truth");
+    expect(report.documentExportCapabilityTruth).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH",
+      admissionMode: "unavailable",
+      admissionReason: "distributed_limiter_unavailable",
+      admissionReady: false,
+      desktopPanelWidth: 843,
+      desktopBetaButtonWidth: 191.25,
+      mobilePanelWidth: 262,
+      mobileBetaButtonWidth: 220,
+      distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      fullyAutomatedLaunchClaimAllowed: false,
+    });
+    expect(report.provenCurrentState).toContain("document_export_capability_truth");
     expect(report.hermesOpenclaw).toMatchObject({
       verdict: "adapter_boundary_pass_live_execution_not_claimed",
       trustedTransportWired: true,

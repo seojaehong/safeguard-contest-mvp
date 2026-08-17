@@ -44,6 +44,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   liveDocumentRainContextIsolation: path.join("evaluation", "live-document-rain-context-isolation-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
+  documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
   dispatchEntryCapabilityTruth: path.join("evaluation", "dispatch-entry-capability-truth-2026-07-28", "report.json"),
   landingHumanReviewBoundary: path.join("evaluation", "landing-human-review-boundary-2026-07-28", "report.json"),
   dependencySecurityRemediation: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
@@ -1578,6 +1579,96 @@ function evaluateProductCapabilityTruthGate(rootDir) {
     evidencePath,
     detail: `Capability verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, dispatch=${readString(providerDispatch.mode) || "unknown"}/${readString(providerDispatch.reason) || "unknown"}, providerCalled=${providerDispatch.providerCalled === true}, briefingEmailReady=${briefing.emailReady === true}, photoReady=${photo.ready === true}, photoAcceptedOnly=${photo.acceptedOnly === true}, photoPost=${photo.photoPostAnalysisExecuted === true}, uiTruthPass=${uiTruthPass}, entryTruthPass=${entryTruthPass}, landingTruthPass=${landingTruthPass}, viewportIaPass=${currentViewportIaPass}, aiModes=${sortedModes || "missing"}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, ia=${readString(remainingBoundaries.documentsShareIaVerdict) || "missing"}.`,
     nextActions: ["Restore the fail-closed capability boundaries and rerun current-production truth evidence without mutation."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateDocumentExportCapabilityTruthGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.documentExportCapabilityTruth;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "document_export_capability_truth",
+      label: "Live document export capability truth",
+      state: "missing",
+      evidencePath,
+      detail: "Live document export capability truth evidence is missing or invalid.",
+      nextActions: ["Rerun the read-only export admission and desktop/mobile Documents geometry checks against current production."],
+    });
+  }
+
+  const capability = isRecord(report.capability) ? report.capability : {};
+  const admission = isRecord(capability.admission) ? capability.admission : {};
+  const browser = isRecord(report.browser) ? report.browser : {};
+  const desktop = isRecord(browser.desktop) ? browser.desktop : {};
+  const mobile = isRecord(browser.mobile) ? browser.mobile : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceMatchesProduction = readString(report.sourceHead).length > 0
+    && readString(report.sourceHead) === readString(report.productionCommit)
+    && report.sourceHeadMatchesProduction === true
+    && report.productCommitIncludedInProduction === true;
+  const viewportPass = [desktop, mobile].every((row) => (
+    readNumber(row.bodyHeight) === 723
+    && readNumber(row.viewportHeight) === 723
+    && row.horizontalOverflow === false
+    && readString(row.readiness) === "locked"
+    && readString(row.readinessText) === "정식 출력 잠김 · PDF·호환 형식 사용"
+    && row.xlsxDisabled === true
+    && row.hwpDisabled === true
+    && row.pdfDisabled === false
+    && row.legacyXlsDisabled === false
+    && row.legacyHwpxDisabled === false
+  ));
+  const geometryPass = readNumber(desktop.panelWidth) >= readNumber(desktop.toolsWidth) - 16
+    && readNumber(desktop.xlsxButtonWidth) > 180
+    && readNumber(desktop.legacyXlsButtonWidth) > 140
+    && readNumber(mobile.panelWidth) >= readNumber(mobile.toolsWidth) - 24
+    && readNumber(mobile.pdfButtonWidth) > 220
+    && readNumber(mobile.legacyXlsButtonWidth) >= 220;
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.vectorMutationPerformed === false
+    && mutationBoundary.wikiPublicationPerformed === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const liveReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH"
+    && sourceMatchesProduction
+    && readNumber(capability.getStatus) === 200
+    && readString(admission.mode) === "unavailable"
+    && admission.ready === false
+    && readString(admission.reason) === "distributed_limiter_unavailable"
+    && capability.credentialMaterialExposed === false
+    && capability.serverExportWorkExecuted === false
+    && viewportPass
+    && geometryPass
+    && noMutation
+    && readString(remainingBoundaries.distributedAdmissionActivation) === "OPERATOR_CONFIGURATION_REQUIRED"
+    && remainingBoundaries.liveAfterDeploymentRequired === false
+    && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && remainingBoundaries.fullyAutomatedLaunchClaimAllowed === false;
+
+  if (liveReady) {
+    return gateResult({
+      id: "document_export_capability_truth",
+      label: "Live document export capability truth",
+      state: "proven",
+      evidencePath,
+      detail: `Production export admission is honestly locked (${readString(admission.reason)}): server XLSX/HWP remain disabled while browser PDF, legacy XLS, and HWPX draft remain enabled. Desktop panel=${readNumber(desktop.panelWidth)}px with beta=${readNumber(desktop.legacyXlsButtonWidth)}px; mobile panel=${readNumber(mobile.panelWidth)}px with beta=${readNumber(mobile.legacyXlsButtonWidth)}px. Distributed activation remains OPERATOR_CONFIGURATION_REQUIRED, fully automated launch remains forbidden, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`,
+      nextActions: ["Configure distributed admission separately before enabling server XLSX/HWP export."],
+    });
+  }
+
+  return gateResult({
+    id: "document_export_capability_truth",
+    label: "Live document export capability truth",
+    state: "contradicted",
+    evidencePath,
+    detail: `Export verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, admission=${readString(admission.mode) || "unknown"}/${readString(admission.reason) || "unknown"}, ready=${admission.ready === true}, viewportPass=${viewportPass}, geometryPass=${geometryPass}, noMutation=${noMutation}, activation=${readString(remainingBoundaries.distributedAdmissionActivation) || "missing"}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: ["Restore the fail-closed export capability boundary and rerun current-production evidence without mutation."],
   });
 }
 
@@ -6188,6 +6279,47 @@ function isSecurityResourceRemediationCompatibilityCurrent(rootDir, gateId, gove
  * @param {string} gateId
  * @param {string[]} governedPaths
  */
+function isDocumentExportAdmissionCompatibilityCurrent(rootDir, gateId, governedPaths) {
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.documentExportCapabilityTruth);
+  if (!isRecord(report) || !isRecord(report.governedPathCompatibility)) {
+    return false;
+  }
+  const compatibility = report.governedPathCompatibility;
+  const tests = isRecord(compatibility.focusedAndAdjacentTests) ? compatibility.focusedAndAdjacentTests : {};
+  const coveredGateIds = Array.isArray(compatibility.coveredGateIds)
+    ? compatibility.coveredGateIds.map(readString)
+    : [];
+  const changedGovernedPaths = Array.isArray(compatibility.changedGovernedPaths)
+    ? compatibility.changedGovernedPaths.map(readString)
+    : [];
+  const sourceHead = readString(compatibility.sourceHead);
+  return readString(report.verdict) === "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH"
+    && readString(compatibility.verdict) === "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_ADMISSION_COMPATIBILITY"
+    && sourceHead.length > 0
+    && sourceHead === readString(compatibility.productionCommit)
+    && sourceHead === readString(report.productionCommit)
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, governedPaths)
+    && coveredGateIds.length === 3
+    && coveredGateIds.includes(gateId)
+    && changedGovernedPaths.length === 1
+    && changedGovernedPaths[0] === "lib/public-distributed-rate-limit.ts"
+    && readNumber(tests.files) === 10
+    && readNumber(tests.tests) === 47
+    && readNumber(tests.failed) === 0
+    && readString(tests.status) === "PASS"
+    && compatibility.typecheck === "PASS"
+    && compatibility.build === "PASS"
+    && compatibility.originalSecurityBaselinesRewritten === false
+    && compatibility.noMutation === true
+    && readString(compatibility.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+}
+
+/**
+ * @param {string} rootDir
+ * @param {string} gateId
+ * @param {string[]} governedPaths
+ */
 function isPublicProviderAdmissionCompatibilityCurrent(rootDir, gateId, governedPaths) {
   const report = readJsonFile(rootDir, EVIDENCE_PATHS.publicProviderAdmission);
   if (!isRecord(report) || !isRecord(report.governedPathCompatibility)) {
@@ -6488,13 +6620,19 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     || isSecuritySafetyReferenceSurfaceCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     || isPostRemediationSecuritySourceCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS);
+  const exportAdmissionCompatibilityCurrent = isDocumentExportAdmissionCompatibilityCurrent(
+    rootDir,
+    "security_followup_remediation",
+    SECURITY_FOLLOWUP_REMEDIATION_PATHS,
+  );
+  const currentProductPaths = productPathsCurrent || exportAdmissionCompatibilityCurrent;
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP"
     && sourceHead.length > 0
     && sourceHead === readString(deployment.productionCommit)
     && isGitAncestor(rootDir, sourceHead)
     && compatibilityPass
     && latestCompatibilityPass
-    && productPathsCurrent
+    && currentProductPaths
     && readString(deployment.branch) === "master"
     && readString(deployment.environment) === "production"
     && deployment.liveAfterDeploymentRequired === false
@@ -6528,7 +6666,7 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     evidencePath,
     detail: pass
       ? `The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its ${readNumber(compatibilityFocused.files)}/${readNumber(compatibilityFocused.tests)} compatibility check, and the latest search/KOSHA compatibility receipt (${readNumber(latestCompatibilityFocused.files)} files / ${readNumber(latestCompatibilityFocused.tests)} tests; full CI ${readNumber(latestCompatibilityCi.filesPassed)} files / ${readNumber(latestCompatibilityCi.testsPassed)} tests). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.`
-      : `Security follow-up verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceHead.length > 0 && sourceHead === readString(deployment.productionCommit)}, compatibilityPass=${compatibilityPass}, latestCompatibilityPass=${latestCompatibilityPass}, latestCompatibilityCurrent=${latestCompatibilityCurrent}, productPathsCurrent=${productPathsCurrent}, findings=${readNumber(scan.sealedFindingCount)}, baseline=${readNumber(scan.immutableOriginalBaselineFindingCount)}, deferred=${readNumber(scan.deferredCandidateCount)}, remediations=${remediations.length}, tests=${readNumber(focused.tests)}, compatibilityTests=${readNumber(compatibilityFocused.tests)}, latestCompatibilityTests=${readNumber(latestCompatibilityFocused.tests)}, liveProviderProbe=${deployment.liveProviderCancellationProbeExecuted === true}, baselineRewritten=${boundaries.originalBaselineRewritten === true}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+      : `Security follow-up verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceHead.length > 0 && sourceHead === readString(deployment.productionCommit)}, compatibilityPass=${compatibilityPass}, latestCompatibilityPass=${latestCompatibilityPass}, latestCompatibilityCurrent=${latestCompatibilityCurrent}, productPathsCurrent=${currentProductPaths}, exportAdmissionCompatibility=${exportAdmissionCompatibilityCurrent}, findings=${readNumber(scan.sealedFindingCount)}, baseline=${readNumber(scan.immutableOriginalBaselineFindingCount)}, deferred=${readNumber(scan.deferredCandidateCount)}, remediations=${remediations.length}, tests=${readNumber(focused.tests)}, compatibilityTests=${readNumber(compatibilityFocused.tests)}, latestCompatibilityTests=${readNumber(latestCompatibilityFocused.tests)}, liveProviderProbe=${deployment.liveProviderCancellationProbeExecuted === true}, baselineRewritten=${boundaries.originalBaselineRewritten === true}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
           "Keep the immutable baseline and two deferred candidates visible in future security review; do not convert this scoped remediation into a security-complete claim.",
@@ -7006,7 +7144,8 @@ function evaluateImprovementPhotoAnalysisBudgetGate(rootDir) {
   const productionCommit = readString(report.productionCommit);
   const sourceCurrent = isEvidenceCurrentForPaths(rootDir, sourceHead, IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
     || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
-    || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS);
+    || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
+    || isDocumentExportAdmissionCompatibilityCurrent(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS);
   const noMutation = mutation.dbSchemaMutation === false
     && mutation.dbDataMutation === false
     && mutation.providerDispatchCalled === false
@@ -7250,7 +7389,8 @@ function evaluatePublicProviderAdmissionGate(rootDir) {
       || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
       || isPostRemediationSecuritySourceCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
       || isPublicAskDistributedAdmissionCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
-      || isPublicSearchDistributedAdmissionCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS))
+      || isPublicSearchDistributedAdmissionCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
+      || isDocumentExportAdmissionCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS))
     && findings.length === 2
     && findings.every((item) => readString(item.scanId) === "c4e9e2f1-7ce4-4313-a651-32205fca401f"
       && expectedFindingIds.has(readString(item.findingId))
@@ -8946,6 +9086,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateDocumentEditorialReviewCockpitGate(rootDir),
     evaluateCurrentLiveDocumentEditorialRuntimeGate(rootDir),
     evaluateProductCapabilityTruthGate(rootDir),
+    evaluateDocumentExportCapabilityTruthGate(rootDir),
     evaluateDependencySecurityRemediationGate(rootDir),
     evaluateTenantAuthorizationRemediationGate(rootDir),
     evaluateSpreadsheetFormulaNeutralizationGate(rootDir),

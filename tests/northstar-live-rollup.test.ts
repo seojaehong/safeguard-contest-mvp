@@ -152,6 +152,19 @@ type RollupReport = {
     exactSavedShareVerdict: string;
     documentsShareIaVerdict: string;
   };
+  documentExportCapabilityTruth: {
+    verdict: string;
+    admissionMode: string;
+    admissionReason: string;
+    admissionReady: boolean;
+    desktopPanelWidth: number;
+    desktopBetaButtonWidth: number;
+    mobilePanelWidth: number;
+    mobileBetaButtonWidth: number;
+    distributedAdmissionActivation: string;
+    exactSavedShareVerdict: string;
+    fullyAutomatedLaunchClaimAllowed: boolean;
+  };
   tenantAuthorizationRemediation: {
     verdict: string;
     greenFindings: number | null;
@@ -732,6 +745,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "live_document_editorial_review", state: "proven", evidencePath: "evaluation/live-document-editorial-review-2026-07-25/report.json", detail: "all 60 editorial surfaces passed automated contract" },
       { id: "document_editorial_review_cockpit", state: "proven", evidencePath: "evaluation/document-editorial-review-cockpit-2026-08-16/report.json", detail: "live 4/4 cockpit preserves human review and exact Share boundaries" },
       { id: "product_capability_truth", state: "proven", evidencePath: "evaluation/product-capability-truth-2026-07-25/report.json", detail: "live capability truth passed without unlocking provider dispatch" },
+      { id: "document_export_capability_truth", state: "proven", evidencePath: "evaluation/document-export-capability-truth-2026-08-17/report.json", detail: "live export truth passed while distributed admission remains locked" },
       { id: "tenant_authorization_remediation", state: "proven", evidencePath: "evaluation/tenant-authorization-boundary-preflight-2026-07-29/report.json", detail: "two tenant findings remediated" },
       { id: "spreadsheet_formula_neutralization", state: "proven", evidencePath: "evaluation/spreadsheet-formula-neutralization-2026-08-01/report.json", detail: "four formula findings remediated" },
       { id: "public_provider_work_budget", state: "proven", evidencePath: "evaluation/public-provider-work-budget-2026-08-01/report.json", detail: "four provider-budget findings remediated" },
@@ -1072,6 +1086,22 @@ function createFixtureRoot(): { root: string; head: string } {
     remainingBoundaries: {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
+    },
+  });
+  writeJson(root, "evaluation/document-export-capability-truth-2026-08-17/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH",
+    sourceHead: "TO_FILL",
+    productCommit: "TO_FILL",
+    productionCommit: "TO_FILL",
+    capability: { admission: { mode: "unavailable", ready: false, reason: "distributed_limiter_unavailable" } },
+    browser: {
+      desktop: { panelWidth: 843, legacyXlsButtonWidth: 191.25 },
+      mobile: { panelWidth: 262, legacyXlsButtonWidth: 220 },
+    },
+    remainingBoundaries: {
+      distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      fullyAutomatedLaunchClaimAllowed: false,
     },
   });
   writeJson(root, "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json", {
@@ -1748,6 +1778,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-document-editorial-duplicate-classification-2026-07-25/report.json",
     "evaluation/live-document-editorial-near-classification-2026-07-25/report.json",
     "evaluation/product-capability-truth-2026-07-25/report.json",
+    "evaluation/document-export-capability-truth-2026-08-17/report.json",
     "evaluation/tenant-authorization-boundary-preflight-2026-07-29/report.json",
     "evaluation/spreadsheet-formula-neutralization-2026-08-01/report.json",
     "evaluation/public-provider-work-budget-2026-08-01/report.json",
@@ -1963,6 +1994,20 @@ describe("northstar live rollup", () => {
       documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
     });
     expect(report.evidence.find((item) => item.id === "product_capability_truth")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.documentExportCapabilityTruth).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH",
+      admissionMode: "unavailable",
+      admissionReason: "distributed_limiter_unavailable",
+      admissionReady: false,
+      desktopPanelWidth: 843,
+      desktopBetaButtonWidth: 191.25,
+      mobilePanelWidth: 262,
+      mobileBetaButtonWidth: 220,
+      distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      fullyAutomatedLaunchClaimAllowed: false,
+    });
+    expect(report.evidence.find((item) => item.id === "document_export_capability_truth")?.productionStatus).toBe("ancestor_of_head");
     expect(report.tenantAuthorizationRemediation).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
       greenFindings: 2,

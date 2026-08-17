@@ -1,0 +1,171 @@
+{
+  "generatedAt": "2026-08-17T02:58:51.780Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceHead": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
+  "capabilityStatus": 200,
+  "capability": {
+    "ok": true,
+    "route": "/api/export/pdf",
+    "methods": [
+      "POST"
+    ],
+    "formats": [
+      "html",
+      "pdf"
+    ],
+    "admission": {
+      "mode": "unavailable",
+      "ready": false,
+      "reason": "distributed_limiter_unavailable"
+    },
+    "message": "Server document export is temporarily locked until distributed admission is configured. Browser-side formats remain available."
+  },
+  "rows": [
+    {
+      "bodyHeight": 723,
+      "documentHeight": 723,
+      "viewportHeight": 723,
+      "horizontalOverflow": false,
+      "viewport": "1440x723",
+      "readiness": "locked",
+      "readinessText": "정식 출력 잠김 · PDF·호환 형식 사용",
+      "panel": {
+        "x": 539,
+        "y": 126.015625,
+        "width": 843,
+        "height": 1207.71875,
+        "bottom": 1333.734375
+      },
+      "tools": {
+        "x": 533,
+        "y": 63.015625,
+        "width": 855,
+        "height": 1376.71875,
+        "bottom": 1439.734375
+      },
+      "xlsx": {
+        "disabled": true,
+        "rect": {
+          "x": 558,
+          "y": 249.15625,
+          "width": 805,
+          "height": 46,
+          "bottom": 295.15625
+        }
+      },
+      "hwp": {
+        "disabled": true,
+        "rect": {
+          "x": 558,
+          "y": 303.15625,
+          "width": 805,
+          "height": 46,
+          "bottom": 349.15625
+        }
+      },
+      "pdf": {
+        "disabled": false,
+        "rect": {
+          "x": 558,
+          "y": 357.15625,
+          "width": 805,
+          "height": 46,
+          "bottom": 403.15625
+        }
+      },
+      "legacyXls": {
+        "disabled": false,
+        "rect": {
+          "x": 765.25,
+          "y": 463.15625,
+          "width": 191.25,
+          "height": 46,
+          "bottom": 509.15625
+        }
+      },
+      "legacyHwpx": {
+        "disabled": false,
+        "rect": {
+          "x": 566,
+          "y": 463.15625,
+          "width": 191.25,
+          "height": 46,
+          "bottom": 509.15625
+        }
+      }
+    },
+    {
+      "bodyHeight": 723,
+      "documentHeight": 723,
+      "viewportHeight": 723,
+      "horizontalOverflow": false,
+      "viewport": "390x723",
+      "readiness": "locked",
+      "readinessText": "정식 출력 잠김 · PDF·호환 형식 사용",
+      "panel": {
+        "x": 49,
+        "y": 198.09375,
+        "width": 262,
+        "height": 1882.9375,
+        "bottom": 2081.03125
+      },
+      "tools": {
+        "x": 45,
+        "y": 143.09375,
+        "width": 285,
+        "height": 2031.9375,
+        "bottom": 2175.03125
+      },
+      "xlsx": {
+        "disabled": true,
+        "rect": {
+          "x": 62,
+          "y": 317.1875,
+          "width": 236,
+          "height": 46,
+          "bottom": 363.1875
+        }
+      },
+      "hwp": {
+        "disabled": true,
+        "rect": {
+          "x": 62,
+          "y": 371.1875,
+          "width": 236,
+          "height": 46,
+          "bottom": 417.1875
+        }
+      },
+      "pdf": {
+        "disabled": false,
+        "rect": {
+          "x": 62,
+          "y": 425.1875,
+          "width": 236,
+          "height": 46,
+          "bottom": 471.1875
+        }
+      },
+      "legacyXls": {
+        "disabled": false,
+        "rect": {
+          "x": 70,
+          "y": 583.1875,
+          "width": 220,
+          "height": 46,
+          "bottom": 629.1875
+        }
+      },
+      "legacyHwpx": {
+        "disabled": false,
+        "rect": {
+          "x": 70,
+          "y": 529.1875,
+          "width": 220,
+          "height": 46,
+          "bottom": 575.1875
+        }
+      }
+    }
+  ]
+}

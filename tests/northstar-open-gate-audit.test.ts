@@ -2319,6 +2319,44 @@ function createFixtureRoot(): string {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-product-sha",
+    productionCommit: "fixture-sha",
+    productCommitIncludedInProduction: true,
+    sourceHeadMatchesProduction: true,
+    capability: {
+      getStatus: 200,
+      admission: { mode: "unavailable", ready: false, reason: "distributed_limiter_unavailable" },
+      credentialMaterialExposed: false,
+      serverExportWorkExecuted: false,
+    },
+    browser: {
+      desktop: {
+        bodyHeight: 723, viewportHeight: 723, horizontalOverflow: false,
+        readiness: "locked", readinessText: "정식 출력 잠김 · PDF·호환 형식 사용",
+        panelWidth: 843, toolsWidth: 855, xlsxButtonWidth: 805, legacyXlsButtonWidth: 191.25,
+        xlsxDisabled: true, hwpDisabled: true, pdfDisabled: false, legacyXlsDisabled: false, legacyHwpxDisabled: false,
+      },
+      mobile: {
+        bodyHeight: 723, viewportHeight: 723, horizontalOverflow: false,
+        readiness: "locked", readinessText: "정식 출력 잠김 · PDF·호환 형식 사용",
+        panelWidth: 262, toolsWidth: 285, pdfButtonWidth: 236, legacyXlsButtonWidth: 220,
+        xlsxDisabled: true, hwpDisabled: true, pdfDisabled: false, legacyXlsDisabled: false, legacyHwpxDisabled: false,
+      },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false,
+      vectorMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      liveAfterDeploymentRequired: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      fullyAutomatedLaunchClaimAllowed: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "documents-touch-targets-2026-08-17", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_TOUCH_TARGETS",
     sourceHead: "fixture-sha",
@@ -5070,6 +5108,13 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("landing-human-review-boundary");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("Scoped Documents and Workspace/fixture Share viewport IA");
+    expect(audit.gates.find((gate) => gate.id === "document_export_capability_truth")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "document_export_capability_truth")?.detail).toContain("honestly locked");
+    expect(audit.gates.find((gate) => gate.id === "document_export_capability_truth")?.detail).toContain("OPERATOR_CONFIGURATION_REQUIRED");
+    expect(audit.gates.find((gate) => gate.id === "document_export_capability_truth")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
@@ -7191,6 +7236,40 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(gate?.state).toBe("contradicted");
     expect(gate?.evidencePath).toBe(path.join("evaluation", "document-authoring-pane-margin-2026-08-02", "report.json"));
     expect(gate?.detail).toContain("48/48 all-document selected-authoring and raw-source containment");
+  });
+
+  it("fails document export capability truth closed when locked server actions are enabled", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "document-export-capability-truth-2026-08-17", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      browser: { desktop: { xlsxDisabled: boolean } };
+    };
+    report.browser.desktop.xlsxDisabled = false;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-17T00:00:00.000Z" });
+    expect(audit.gates.find((gate) => gate.id === "document_export_capability_truth")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "document_export_capability_truth")?.detail).toContain("viewportPass=false");
+  });
+
+  it("fails document export capability truth closed when exact Share is overclaimed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "document-export-capability-truth-2026-08-17", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-17T00:00:00.000Z" });
+    expect(audit.gates.find((gate) => gate.id === "document_export_capability_truth")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "document_export_capability_truth")?.detail).toContain("exactShare=PASS");
   });
 
   it.each([
