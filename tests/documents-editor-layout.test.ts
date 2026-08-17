@@ -2809,6 +2809,43 @@ describe("documents editor layout", () => {
     expect(metrics.firstHeaderBorderColor).toBe("rgb(231, 234, 238)");
   }, 90_000);
 
+  it("shows server export as locked while preserving browser-side formats", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 723 } });
+    await page.route("**/api/export/pdf", async (route) => {
+      if (route.request().method() !== "GET") {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        contentType: "application/json",
+        status: 200,
+        body: JSON.stringify({
+          ok: true,
+          admission: {
+            mode: "unavailable",
+            ready: false,
+            reason: "distributed_limiter_unavailable"
+          }
+        })
+      });
+    });
+
+    await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+    await page.getByTestId("editor-export-panel").locator(":scope > summary").click();
+    const readiness = page.locator('[data-server-export-readiness="locked"]');
+    await readiness.waitFor({ state: "visible" });
+
+    await expect.poll(() => readiness.textContent()).toContain("정식 출력 잠김 · PDF·호환 형식 사용");
+    expect(await page.getByRole("button", { name: "Excel 표 양식(.xlsx)" }).isDisabled()).toBe(true);
+    expect(await page.getByRole("button", { name: "한글 표 양식(.hwp)" }).isDisabled()).toBe(true);
+    expect(await page.getByRole("button", { name: "PDF(브라우저 인쇄)" }).isEnabled()).toBe(true);
+
+    await page.locator(".download-bar details summary", { hasText: "베타 형식" }).click();
+    expect(await page.getByRole("button", { name: "XLS(구형 호환)" }).isEnabled()).toBe(true);
+    expect(await page.getByRole("button", { name: ".hwpx 텍스트 초안" }).isEnabled()).toBe(true);
+  }, 90_000);
+
   it("keeps exported HTML document styling aligned with the workspace system", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });

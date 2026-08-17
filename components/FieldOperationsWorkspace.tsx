@@ -321,7 +321,7 @@ function AdminAccessPanel({
           <span className="eyebrow">이력 저장</span>
           <strong>{storageSnapshot.label}</strong>
         </div>
-        <p className="muted small">PDF·XLS·HWPX 다운로드와 메일·문자 전파는 바로 사용할 수 있습니다. 관리자 로그인 시 작업자, 교육, 전파 이력이 저장됩니다.</p>
+        <p className="muted small">브라우저 출력·호환 형식은 로그인 없이 사용합니다. 정식 서버 출력과 메일·문자 전파는 운영 보호 상태에 따라 잠길 수 있고, 관리자 로그인 시 작업자·교육·전파 이력이 저장됩니다.</p>
       </article>
     );
   }

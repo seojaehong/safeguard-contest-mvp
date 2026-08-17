@@ -114,6 +114,16 @@ type UpstashConfiguration =
   | { state: "invalid" }
   | { state: "ready"; token: string; url: string };
 
+export type PublicDistributedAdmissionReadiness = {
+  mode: "distributed" | "instance" | "unavailable";
+  ready: boolean;
+  reason:
+    | "distributed_configured"
+    | "distributed_limiter_misconfigured"
+    | "distributed_limiter_unavailable"
+    | "instance_fallback";
+};
+
 function readUpstashConfiguration(environment: Environment): UpstashConfiguration {
   const url = environment.UPSTASH_REDIS_REST_URL?.trim() ?? "";
   const token = environment.UPSTASH_REDIS_REST_TOKEN?.trim() ?? "";
@@ -391,6 +401,24 @@ export async function acquirePublicConcurrencyLease(input: {
       });
     }
   };
+}
+
+export function getPublicDistributedAdmissionReadiness(input: {
+  environment?: Environment;
+  requireDistributedInProduction: boolean;
+}): PublicDistributedAdmissionReadiness {
+  const environment = input.environment ?? process.env;
+  const config = readUpstashConfiguration(environment);
+  if (config.state === "ready") {
+    return { mode: "distributed", ready: true, reason: "distributed_configured" };
+  }
+  if (config.state === "invalid") {
+    return { mode: "unavailable", ready: false, reason: "distributed_limiter_misconfigured" };
+  }
+  if (input.requireDistributedInProduction && environment.VERCEL_ENV === "production") {
+    return { mode: "unavailable", ready: false, reason: "distributed_limiter_unavailable" };
+  }
+  return { mode: "instance", ready: true, reason: "instance_fallback" };
 }
 
 async function acquireDocumentExportLease(): Promise<(() => Promise<void>) | null | undefined> {

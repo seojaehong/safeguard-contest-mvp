@@ -92,6 +92,7 @@ type CustomerTemplateField = {
   mapsTo: string;
   appliesTo: string;
 };
+type ServerExportReadiness = "checking" | "ready" | "locked";
 
 const accidentTypeLabels: Record<RiskAssessmentRow["accidentType"], string> = {
   fall: "추락",
@@ -2795,6 +2796,7 @@ export function WorkpackEditor({
   const [hwpxStatus, setHwpxStatus] = useState<"idle" | "building" | "error">("idle");
   const [xlsxStatus, setXlsxStatus] = useState<"idle" | "building" | "error">("idle");
   const [hwpStatus, setHwpStatus] = useState<"idle" | "building" | "error">("idle");
+  const [serverExportReadiness, setServerExportReadiness] = useState<ServerExportReadiness>("checking");
   const [imageStatus, setImageStatus] = useState<"idle" | "error">("idle");
   const [sheetStatus, setSheetStatus] = useState<"idle" | "copied" | "error">("idle");
   const [templateKind, setTemplateKind] = useState<TemplateKind>("sheet");
@@ -2818,6 +2820,28 @@ export function WorkpackEditor({
     source: "generated",
     requiresRevalidation: false
   });
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void (async () => {
+      try {
+        const response = await fetch("/api/export/pdf", {
+          cache: "no-store",
+          signal: controller.signal
+        });
+        if (!response.ok) throw new Error(`export readiness failed (${response.status})`);
+        const payload = await response.json() as {
+          admission?: { ready?: unknown };
+        };
+        setServerExportReadiness(payload.admission?.ready === true ? "ready" : "locked");
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        console.error("document export readiness check failed", error);
+        setServerExportReadiness("locked");
+      }
+    })();
+    return () => controller.abort();
+  }, []);
   const selected = documentMeta.find((item) => item.key === selectedKey) || documentMeta[0];
   const selectedSupportingDocument = supportingDocumentMeta.some((item) => item.key === selected.key);
   const selectedTemplate = templatePresets.find((preset) => preset.kind === templateKind) || templatePresets[0];
@@ -3992,6 +4016,15 @@ export function WorkpackEditor({
     popup.document.write("<!doctype html><html lang=\"ko\"><head><meta charset=\"utf-8\" /><title>SafeClaw PDF 준비 중</title></head><body><p>제출용 PDF 화면을 준비하고 있습니다.</p></body></html>");
     popup.document.close();
 
+    if (serverExportReadiness === "locked") {
+      popup.document.open();
+      popup.document.write(buildHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, data, riskAssessmentRows));
+      popup.document.close();
+      popup.focus();
+      popup.print();
+      return;
+    }
+
     try {
       const response = await fetch("/api/export/pdf?format=html", {
         method: "POST",
@@ -4584,11 +4617,22 @@ export function WorkpackEditor({
               <em>PDF · XLSX · HWP</em>
             </summary>
             <div className={`${styles.utilityContent} ${styles.exportContent}`}>
+              <p
+                className="muted small"
+                data-server-export-readiness={serverExportReadiness}
+                role="status"
+              >
+                {serverExportReadiness === "ready"
+                  ? "정식 서버 출력 준비"
+                  : serverExportReadiness === "checking"
+                    ? "정식 서버 출력 상태 확인 중"
+                    : "정식 출력 잠김 · PDF·호환 형식 사용"}
+              </p>
               <div className={`download-bar ${styles.primaryExports}`}>
-                <button type="button" className="button" onClick={() => void downloadXlsx()} disabled={xlsxStatus === "building"} title="OOXML 정식 .xlsx 양식 (시트/헤더/표/서명란)">
+                <button type="button" className="button" onClick={() => void downloadXlsx()} disabled={xlsxStatus === "building" || serverExportReadiness !== "ready"} title="OOXML 정식 .xlsx 양식 (시트/헤더/표/서명란)">
                   {xlsxStatus === "building" ? "Excel 생성 중" : "Excel 표 양식(.xlsx)"}
                 </button>
-                <button type="button" className="button" onClick={() => void downloadHwp()} disabled={hwpStatus === "building"} title="한컴 native .hwp 표 양식 (격자 표 + 셀)">
+                <button type="button" className="button" onClick={() => void downloadHwp()} disabled={hwpStatus === "building" || serverExportReadiness !== "ready"} title="한컴 native .hwp 표 양식 (격자 표 + 셀)">
                   {hwpStatus === "building" ? "한글 표 생성 중" : "한글 표 양식(.hwp)"}
                 </button>
                 <button type="button" className="button secondary" onClick={() => void printPdf()}>PDF(브라우저 인쇄)</button>

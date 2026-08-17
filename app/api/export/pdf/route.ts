@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withPublicDocumentExportAdmission } from "@/lib/public-distributed-rate-limit";
+import {
+  getPublicDistributedAdmissionReadiness,
+  withPublicDocumentExportAdmission,
+} from "@/lib/public-distributed-rate-limit";
 import {
   DocumentExportLimitError,
   DocumentExportRequestError,
@@ -53,13 +56,19 @@ type PdfScenario = {
 type PdfDocumentKind = "risk" | "workPlan" | "permit" | "tbm" | "education" | "generic";
 
 export async function GET() {
+  const admission = getPublicDistributedAdmissionReadiness({
+    requireDistributedInProduction: true,
+  });
   return NextResponse.json(
     {
       ok: true,
       route: "/api/export/pdf",
       methods: ["POST"],
       formats: ["html", "pdf"],
-      message: "POST SafeClaw document rows to render binary PDF by default. Use ?format=html for print-ready HTML source."
+      admission,
+      message: admission.ready
+        ? "POST SafeClaw document rows to render binary PDF by default. Use ?format=html for print-ready HTML source."
+        : "Server document export is temporarily locked until distributed admission is configured. Browser-side formats remain available."
     },
     {
       headers: {

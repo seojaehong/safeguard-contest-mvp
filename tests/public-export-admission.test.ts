@@ -2,7 +2,10 @@ import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createConcurrencyGuard } from "@/lib/rate-limit";
-import { withPublicDocumentExportAdmission } from "@/lib/public-distributed-rate-limit";
+import {
+  getPublicDistributedAdmissionReadiness,
+  withPublicDocumentExportAdmission,
+} from "@/lib/public-distributed-rate-limit";
 
 function postRequest(path: string): NextRequest {
   return new NextRequest(`http://localhost${path}`, {
@@ -24,6 +27,64 @@ describe("public export aggregate admission", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
+  });
+
+  it("reports production export readiness without exposing distributed credentials", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    expect(getPublicDistributedAdmissionReadiness({
+      environment: { VERCEL_ENV: "production" },
+      requireDistributedInProduction: true,
+    })).toEqual({
+      mode: "unavailable",
+      ready: false,
+      reason: "distributed_limiter_unavailable",
+    });
+    expect(getPublicDistributedAdmissionReadiness({
+      environment: {
+        UPSTASH_REDIS_REST_TOKEN: "secret-token",
+        UPSTASH_REDIS_REST_URL: "https://example.upstash.io",
+        VERCEL_ENV: "production",
+      },
+      requireDistributedInProduction: true,
+    })).toEqual({
+      mode: "distributed",
+      ready: true,
+      reason: "distributed_configured",
+    });
+
+    const { GET: pdfReadiness } = await import("@/app/api/export/pdf/route");
+    const response = await pdfReadiness();
+    const payload = await response.json() as {
+      admission: Record<string, unknown>;
+      message: string;
+    };
+    expect(response.status).toBe(200);
+    expect(payload.admission).toEqual({
+      mode: "unavailable",
+      ready: false,
+      reason: "distributed_limiter_unavailable",
+    });
+    expect(JSON.stringify(payload)).not.toContain("secret-token");
+    expect(payload.message).toContain("temporarily locked");
+  });
+
+  it("keeps non-production export readiness on the bounded instance path", () => {
+    expect(getPublicDistributedAdmissionReadiness({
+      environment: {},
+      requireDistributedInProduction: true,
+    })).toEqual({
+      mode: "instance",
+      ready: true,
+      reason: "instance_fallback",
+    });
+    expect(getPublicDistributedAdmissionReadiness({
+      environment: { UPSTASH_REDIS_REST_URL: "https://example.upstash.io" },
+      requireDistributedInProduction: true,
+    })).toEqual({
+      mode: "unavailable",
+      ready: false,
+      reason: "distributed_limiter_misconfigured",
+    });
   });
 
   it("fails every expensive export route closed before parsing when distributed configuration is partial", async () => {

@@ -176,4 +176,15 @@ describe("user-visible Korean copy contract", () => {
     expect(center).toContain("개선 전/개선 후 사진 포함 승인 항목만");
     expect(center).toContain("개선 전/개선 후 사진 포함 승인");
   });
+
+  it("does not promise server document export before runtime admission is ready", () => {
+    const editor = read("components/WorkpackEditor.tsx");
+    const fieldOperations = read("components/FieldOperationsWorkspace.tsx");
+
+    expect(fieldOperations).not.toContain("PDF·XLS·HWPX 다운로드와 메일·문자 전파는 바로 사용할 수 있습니다");
+    expect(fieldOperations).toContain("정식 서버 출력과 메일·문자 전파는 운영 보호 상태에 따라 잠길 수 있고");
+    expect(editor).toContain("data-server-export-readiness");
+    expect(editor).toContain("정식 출력 잠김 · PDF·호환 형식 사용");
+    expect(editor).toContain('serverExportReadiness !== "ready"');
+  });
 });
