@@ -1,10 +1,10 @@
 {
   "schema": "safeclaw-knowledge-viewport-workbench/v1",
   "verdict": "PASS_LIVE_PRODUCTION_KNOWLEDGE_VIEWPORT_WORKBENCH",
-  "sourceHead": "b6a11993cbb6dfffb5dddce3bfccc4ca7408f76c",
-  "productCommit": "b6a11993cbb6dfffb5dddce3bfccc4ca7408f76c",
-  "productionCommit": "b6a11993cbb6dfffb5dddce3bfccc4ca7408f76c",
-  "productionDeployment": "safeguard-contest-fg0yp1axl-seojaehongs-projects.vercel.app",
+  "sourceHead": "b11496284522a54bdb9f28688340e629b8c44afb",
+  "productCommit": "b11496284522a54bdb9f28688340e629b8c44afb",
+  "productionCommit": "b11496284522a54bdb9f28688340e629b8c44afb",
+  "productionDeployment": "safeguard-contest-6e99hl8e2-seojaehongs-projects.vercel.app",
   "sourceHeadMatchesProduction": true,
   "productCommitIncludedInProduction": true,
   "routeSplitAloneAcceptedAsFix": false,
@@ -12,7 +12,9 @@
   "before": {
     "historicalMobileBodyHeight": 1152,
     "historicalEvidence": "evaluation/knowledge-mobile-current-master-2026-07-19/report.md",
-    "allDesktopPanelsExposedByDefault": true
+    "allDesktopPanelsExposedByDefault": true,
+    "mobile723TechnicalScrollHeight": 2537,
+    "mobile723ReferenceScrollHeight": 1896
   },
   "browser": {
     "artifact": "evaluation/knowledge-viewport-workbench-2026-08-17/browser-metrics.json",
@@ -25,8 +27,21 @@
     "reachableSectionCountPerRow": 6,
     "minimumControlHeight": 44,
     "minimumLocalScrollPanelCount": 4,
-    "maximumPanelScrollRatio": 13.86,
+    "maximumPanelScrollRatio": 13.28,
     "screenshotCount": 10,
+    "referenceDisclosure": {
+      "technicalDisclosureCount": 6,
+      "referenceDisclosureCount": 7,
+      "defaultOpenDisclosureCount": 0,
+      "exclusiveDisclosureGroups": true,
+      "mobile723TechnicalScrollHeight": 818,
+      "mobile723ReferenceScrollHeight": 674,
+      "maxMobileTechnicalScrollRatio": 4.47,
+      "maxMobileReferenceScrollRatio": 3.68,
+      "maxFirstDisclosureBottom": 590.97,
+      "minPanelBottom": 611.39,
+      "firstDisclosureInsidePanel": true
+    },
     "desktop": {
       "caseCount": 4,
       "maxBodyRatio": 1,
@@ -49,12 +64,11 @@
   "verification": {
     "focusedKnowledgeTests": 23,
     "browserEvidenceTests": 1,
-    "frontendIdentityTests": 48,
     "typecheck": "PASS",
     "build": "PASS",
     "staticPages": 28,
-    "githubActionsRun": "https://github.com/seojaehong/safeguard-contest-mvp/actions/runs/32001280102",
-    "githubActionsConclusion": "success"
+    "githubActionsRun": null,
+    "githubActionsConclusion": "not_created_for_commit"
   },
   "mutationBoundary": {
     "dbMutationPerformed": false,
