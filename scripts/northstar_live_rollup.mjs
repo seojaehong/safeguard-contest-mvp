@@ -32,6 +32,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
   documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
+  ontologyViewportWorkbench: path.join("evaluation", "ontology-viewport-workbench-2026-08-17", "report.json"),
   tenantAuthorizationRemediation: path.join("evaluation", "tenant-authorization-boundary-preflight-2026-07-29", "report.json"),
   spreadsheetFormulaNeutralization: path.join("evaluation", "spreadsheet-formula-neutralization-2026-08-01", "report.json"),
   publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
@@ -517,6 +518,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const liveDocumentEditorialNearClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialNearClassification);
   const productCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.productCapabilityTruth);
   const documentExportCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.documentExportCapabilityTruth);
+  const ontologyViewportWorkbench = tryReadJson(rootDir, ARTIFACTS.ontologyViewportWorkbench);
   const tenantAuthorizationRemediation = tryReadJson(rootDir, ARTIFACTS.tenantAuthorizationRemediation);
   const spreadsheetFormulaNeutralization = tryReadJson(rootDir, ARTIFACTS.spreadsheetFormulaNeutralization);
   const publicProviderWorkBudget = tryReadJson(rootDir, ARTIFACTS.publicProviderWorkBudget);
@@ -640,6 +642,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_near_classification", ARTIFACTS.liveDocumentEditorialNearClassification, liveDocumentEditorialNearClassification),
     evidenceStatus(rootDir, currentHead, liveCommit, "product_capability_truth", ARTIFACTS.productCapabilityTruth, productCapabilityTruth),
     evidenceStatus(rootDir, currentHead, liveCommit, "document_export_capability_truth", ARTIFACTS.documentExportCapabilityTruth, documentExportCapabilityTruth),
+    evidenceStatus(rootDir, currentHead, liveCommit, "ontology_viewport_workbench", ARTIFACTS.ontologyViewportWorkbench, ontologyViewportWorkbench),
     evidenceStatus(rootDir, currentHead, liveCommit, "tenant_authorization_remediation", ARTIFACTS.tenantAuthorizationRemediation, tenantAuthorizationRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "spreadsheet_formula_neutralization", ARTIFACTS.spreadsheetFormulaNeutralization, spreadsheetFormulaNeutralization),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_work_budget", ARTIFACTS.publicProviderWorkBudget, publicProviderWorkBudget),
@@ -1387,6 +1390,19 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       exactSavedShareVerdict: asString(recordAt(documentExportCapabilityTruth, "remainingBoundaries")?.exactSavedShareVerdict),
       fullyAutomatedLaunchClaimAllowed: recordAt(documentExportCapabilityTruth, "remainingBoundaries")?.fullyAutomatedLaunchClaimAllowed === true,
     },
+    ontologyViewportWorkbench: {
+      artifact: ARTIFACTS.ontologyViewportWorkbench,
+      verdict: isRecord(ontologyViewportWorkbench) ? asString(ontologyViewportWorkbench.verdict) : "missing",
+      sourceHead: isRecord(ontologyViewportWorkbench) ? asString(ontologyViewportWorkbench.sourceHead) : "",
+      productCommit: isRecord(ontologyViewportWorkbench) ? asString(ontologyViewportWorkbench.productCommit) : "",
+      productionCommit: extractProductionCommit(ontologyViewportWorkbench),
+      rowCount: asNumber(recordAt(ontologyViewportWorkbench, "browser")?.rowCount),
+      passCount: asNumber(recordAt(ontologyViewportWorkbench, "browser")?.passCount),
+      maxBodyRatio: asNumber(recordAt(ontologyViewportWorkbench, "browser")?.maxBodyRatio),
+      mobileTaskSwitchVerifiedCount: asNumber(recordAt(recordAt(ontologyViewportWorkbench, "browser"), "mobile")?.taskSwitchVerifiedCount),
+      exactSavedShareVerdict: asString(recordAt(ontologyViewportWorkbench, "remainingBoundaries")?.exactSavedShareVerdict),
+      fullyAutomatedLaunchClaimAllowed: recordAt(ontologyViewportWorkbench, "remainingBoundaries")?.fullyAutomatedLaunchClaimAllowed === true,
+    },
     tenantAuthorizationRemediation: {
       artifact: ARTIFACTS.tenantAuthorizationRemediation,
       verdict: isRecord(tenantAuthorizationRemediation) ? asString(tenantAuthorizationRemediation.verdict) : "missing",
@@ -1906,6 +1922,12 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Mobile panel/beta button: ${rollup.documentExportCapabilityTruth.mobilePanelWidth ?? "unknown"}/${rollup.documentExportCapabilityTruth.mobileBetaButtonWidth ?? "unknown"}px`,
     `- Distributed activation: ${rollup.documentExportCapabilityTruth.distributedAdmissionActivation || "OPERATOR_CONFIGURATION_REQUIRED"}; fully automated launch=${rollup.documentExportCapabilityTruth.fullyAutomatedLaunchClaimAllowed}`,
     `- Exact saved Share: ${rollup.documentExportCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "",
+    "## Ontology viewport workbench",
+    `- Verdict: \`${rollup.ontologyViewportWorkbench.verdict}\``,
+    `- Live browser rows: ${rollup.ontologyViewportWorkbench.passCount ?? 0}/${rollup.ontologyViewportWorkbench.rowCount ?? 0}; maximum body ratio=${rollup.ontologyViewportWorkbench.maxBodyRatio ?? "unknown"}`,
+    `- Mobile task switching: ${rollup.ontologyViewportWorkbench.mobileTaskSwitchVerifiedCount ?? 0}/4; long content remains inside local-scroll panes.`,
+    `- Exact saved Share: ${rollup.ontologyViewportWorkbench.exactSavedShareVerdict || "MISSING_EVIDENCE"}; fully automated launch=${rollup.ontologyViewportWorkbench.fullyAutomatedLaunchClaimAllowed}`,
     "- Boundary: this proves fail-closed export truth and usable browser fallbacks; it does not activate distributed server XLSX/HWP export.",
     "",
     "## Live Hermes Reviewer Authority UI",

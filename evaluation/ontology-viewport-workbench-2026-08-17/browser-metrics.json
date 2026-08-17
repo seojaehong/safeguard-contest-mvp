@@ -1,0 +1,376 @@
+{
+  "source": "https://www.safeclaw.kr",
+  "generatedAt": "2026-08-17T04:26:03.944Z",
+  "metrics": [
+    {
+      "variant": "desktop-723-day",
+      "viewport": {
+        "width": 1440,
+        "height": 723
+      },
+      "bodyHeight": 723,
+      "bodyRatio": 1,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visibleNeighborhoodNodes": 15,
+      "overlapPairs": 0,
+      "minimumControlHeight": 44,
+      "minimumNodeContrast": 16.01,
+      "minimumNodeTextContrast": 5.6,
+      "desktopGraphVisible": true,
+      "mobileRelationsVisible": false,
+      "expandedGraphVerified": false,
+      "expandedGraphNodeCount": 0,
+      "dialogKeyboardContract": false,
+      "explorerPane": {
+        "width": 848.5625,
+        "clientHeight": 366,
+        "scrollHeight": 1022,
+        "overflowY": "auto"
+      },
+      "directoryPane": {
+        "width": 339.4375,
+        "clientHeight": 366,
+        "scrollHeight": 614,
+        "overflowY": "auto"
+      },
+      "mobileDirectoryPane": null,
+      "mobileTaskSwitchVerified": false
+    },
+    {
+      "variant": "desktop-900-day",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyHeight": 900,
+      "bodyRatio": 1,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visibleNeighborhoodNodes": 15,
+      "overlapPairs": 0,
+      "minimumControlHeight": 44,
+      "minimumNodeContrast": 16.01,
+      "minimumNodeTextContrast": 5.6,
+      "desktopGraphVisible": true,
+      "mobileRelationsVisible": false,
+      "expandedGraphVerified": false,
+      "expandedGraphNodeCount": 0,
+      "dialogKeyboardContract": false,
+      "explorerPane": {
+        "width": 848.5625,
+        "clientHeight": 543,
+        "scrollHeight": 1022,
+        "overflowY": "auto"
+      },
+      "directoryPane": {
+        "width": 339.4375,
+        "clientHeight": 543,
+        "scrollHeight": 614,
+        "overflowY": "auto"
+      },
+      "mobileDirectoryPane": null,
+      "mobileTaskSwitchVerified": false
+    },
+    {
+      "variant": "tablet-1000-day",
+      "viewport": {
+        "width": 1024,
+        "height": 1000
+      },
+      "bodyHeight": 1000,
+      "bodyRatio": 1,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visibleNeighborhoodNodes": 15,
+      "overlapPairs": 0,
+      "minimumControlHeight": 44,
+      "minimumNodeContrast": 16.01,
+      "minimumNodeTextContrast": 5.6,
+      "desktopGraphVisible": true,
+      "mobileRelationsVisible": false,
+      "expandedGraphVerified": false,
+      "expandedGraphNodeCount": 0,
+      "dialogKeyboardContract": false,
+      "explorerPane": {
+        "width": 788,
+        "clientHeight": 514,
+        "scrollHeight": 1022,
+        "overflowY": "auto"
+      },
+      "directoryPane": {
+        "width": 0,
+        "clientHeight": 0,
+        "scrollHeight": 0,
+        "overflowY": "auto"
+      },
+      "mobileDirectoryPane": null,
+      "mobileTaskSwitchVerified": false
+    },
+    {
+      "variant": "mobile-723-day",
+      "viewport": {
+        "width": 390,
+        "height": 723
+      },
+      "bodyHeight": 723,
+      "bodyRatio": 1,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visibleNeighborhoodNodes": 0,
+      "overlapPairs": 0,
+      "minimumControlHeight": 44,
+      "minimumNodeContrast": 16.01,
+      "minimumNodeTextContrast": 5.6,
+      "desktopGraphVisible": false,
+      "mobileRelationsVisible": true,
+      "expandedGraphVerified": true,
+      "expandedGraphNodeCount": 15,
+      "dialogKeyboardContract": true,
+      "explorerPane": {
+        "width": 390,
+        "clientHeight": 322,
+        "scrollHeight": 848,
+        "overflowY": "auto"
+      },
+      "directoryPane": {
+        "width": 0,
+        "clientHeight": 0,
+        "scrollHeight": 0,
+        "overflowY": "auto"
+      },
+      "mobileDirectoryPane": {
+        "width": 390,
+        "clientHeight": 322,
+        "scrollHeight": 1080,
+        "overflowY": "auto"
+      },
+      "mobileTaskSwitchVerified": true
+    },
+    {
+      "variant": "mobile-844-day",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyHeight": 844,
+      "bodyRatio": 1,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visibleNeighborhoodNodes": 0,
+      "overlapPairs": 0,
+      "minimumControlHeight": 44,
+      "minimumNodeContrast": 16.01,
+      "minimumNodeTextContrast": 5.6,
+      "desktopGraphVisible": false,
+      "mobileRelationsVisible": true,
+      "expandedGraphVerified": true,
+      "expandedGraphNodeCount": 15,
+      "dialogKeyboardContract": true,
+      "explorerPane": {
+        "width": 390,
+        "clientHeight": 443,
+        "scrollHeight": 848,
+        "overflowY": "auto"
+      },
+      "directoryPane": {
+        "width": 0,
+        "clientHeight": 0,
+        "scrollHeight": 0,
+        "overflowY": "auto"
+      },
+      "mobileDirectoryPane": {
+        "width": 390,
+        "clientHeight": 443,
+        "scrollHeight": 1080,
+        "overflowY": "auto"
+      },
+      "mobileTaskSwitchVerified": true
+    },
+    {
+      "variant": "desktop-723-night",
+      "viewport": {
+        "width": 1440,
+        "height": 723
+      },
+      "bodyHeight": 723,
+      "bodyRatio": 1,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visibleNeighborhoodNodes": 15,
+      "overlapPairs": 0,
+      "minimumControlHeight": 44,
+      "minimumNodeContrast": 16.01,
+      "minimumNodeTextContrast": 5.6,
+      "desktopGraphVisible": true,
+      "mobileRelationsVisible": false,
+      "expandedGraphVerified": false,
+      "expandedGraphNodeCount": 0,
+      "dialogKeyboardContract": false,
+      "explorerPane": {
+        "width": 848.5625,
+        "clientHeight": 366,
+        "scrollHeight": 1022,
+        "overflowY": "auto"
+      },
+      "directoryPane": {
+        "width": 339.4375,
+        "clientHeight": 366,
+        "scrollHeight": 614,
+        "overflowY": "auto"
+      },
+      "mobileDirectoryPane": null,
+      "mobileTaskSwitchVerified": false
+    },
+    {
+      "variant": "desktop-900-night",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyHeight": 900,
+      "bodyRatio": 1,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visibleNeighborhoodNodes": 15,
+      "overlapPairs": 0,
+      "minimumControlHeight": 44,
+      "minimumNodeContrast": 16.01,
+      "minimumNodeTextContrast": 5.6,
+      "desktopGraphVisible": true,
+      "mobileRelationsVisible": false,
+      "expandedGraphVerified": false,
+      "expandedGraphNodeCount": 0,
+      "dialogKeyboardContract": false,
+      "explorerPane": {
+        "width": 848.5625,
+        "clientHeight": 543,
+        "scrollHeight": 1022,
+        "overflowY": "auto"
+      },
+      "directoryPane": {
+        "width": 339.4375,
+        "clientHeight": 543,
+        "scrollHeight": 614,
+        "overflowY": "auto"
+      },
+      "mobileDirectoryPane": null,
+      "mobileTaskSwitchVerified": false
+    },
+    {
+      "variant": "tablet-1000-night",
+      "viewport": {
+        "width": 1024,
+        "height": 1000
+      },
+      "bodyHeight": 1000,
+      "bodyRatio": 1,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visibleNeighborhoodNodes": 15,
+      "overlapPairs": 0,
+      "minimumControlHeight": 44,
+      "minimumNodeContrast": 16.01,
+      "minimumNodeTextContrast": 5.6,
+      "desktopGraphVisible": true,
+      "mobileRelationsVisible": false,
+      "expandedGraphVerified": false,
+      "expandedGraphNodeCount": 0,
+      "dialogKeyboardContract": false,
+      "explorerPane": {
+        "width": 788,
+        "clientHeight": 514,
+        "scrollHeight": 1022,
+        "overflowY": "auto"
+      },
+      "directoryPane": {
+        "width": 0,
+        "clientHeight": 0,
+        "scrollHeight": 0,
+        "overflowY": "auto"
+      },
+      "mobileDirectoryPane": null,
+      "mobileTaskSwitchVerified": false
+    },
+    {
+      "variant": "mobile-723-night",
+      "viewport": {
+        "width": 390,
+        "height": 723
+      },
+      "bodyHeight": 723,
+      "bodyRatio": 1,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visibleNeighborhoodNodes": 0,
+      "overlapPairs": 0,
+      "minimumControlHeight": 44,
+      "minimumNodeContrast": 16.01,
+      "minimumNodeTextContrast": 5.6,
+      "desktopGraphVisible": false,
+      "mobileRelationsVisible": true,
+      "expandedGraphVerified": true,
+      "expandedGraphNodeCount": 15,
+      "dialogKeyboardContract": true,
+      "explorerPane": {
+        "width": 390,
+        "clientHeight": 322,
+        "scrollHeight": 848,
+        "overflowY": "auto"
+      },
+      "directoryPane": {
+        "width": 0,
+        "clientHeight": 0,
+        "scrollHeight": 0,
+        "overflowY": "auto"
+      },
+      "mobileDirectoryPane": {
+        "width": 390,
+        "clientHeight": 322,
+        "scrollHeight": 1080,
+        "overflowY": "auto"
+      },
+      "mobileTaskSwitchVerified": true
+    },
+    {
+      "variant": "mobile-844-night",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyHeight": 844,
+      "bodyRatio": 1,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visibleNeighborhoodNodes": 0,
+      "overlapPairs": 0,
+      "minimumControlHeight": 44,
+      "minimumNodeContrast": 16.01,
+      "minimumNodeTextContrast": 5.6,
+      "desktopGraphVisible": false,
+      "mobileRelationsVisible": true,
+      "expandedGraphVerified": true,
+      "expandedGraphNodeCount": 15,
+      "dialogKeyboardContract": true,
+      "explorerPane": {
+        "width": 390,
+        "clientHeight": 443,
+        "scrollHeight": 848,
+        "overflowY": "auto"
+      },
+      "directoryPane": {
+        "width": 0,
+        "clientHeight": 0,
+        "scrollHeight": 0,
+        "overflowY": "auto"
+      },
+      "mobileDirectoryPane": {
+        "width": 390,
+        "clientHeight": 443,
+        "scrollHeight": 1080,
+        "overflowY": "auto"
+      },
+      "mobileTaskSwitchVerified": true
+    }
+  ]
+}

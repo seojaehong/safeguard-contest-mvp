@@ -165,6 +165,15 @@ type RollupReport = {
     exactSavedShareVerdict: string;
     fullyAutomatedLaunchClaimAllowed: boolean;
   };
+  ontologyViewportWorkbench: {
+    verdict: string;
+    rowCount: number;
+    passCount: number;
+    maxBodyRatio: number;
+    mobileTaskSwitchVerifiedCount: number;
+    exactSavedShareVerdict: string;
+    fullyAutomatedLaunchClaimAllowed: boolean;
+  };
   tenantAuthorizationRemediation: {
     verdict: string;
     greenFindings: number | null;
@@ -746,6 +755,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "document_editorial_review_cockpit", state: "proven", evidencePath: "evaluation/document-editorial-review-cockpit-2026-08-16/report.json", detail: "live 4/4 cockpit preserves human review and exact Share boundaries" },
       { id: "product_capability_truth", state: "proven", evidencePath: "evaluation/product-capability-truth-2026-07-25/report.json", detail: "live capability truth passed without unlocking provider dispatch" },
       { id: "document_export_capability_truth", state: "proven", evidencePath: "evaluation/document-export-capability-truth-2026-08-17/report.json", detail: "live export truth passed while distributed admission remains locked" },
+      { id: "ontology_viewport_workbench", state: "proven", evidencePath: "evaluation/ontology-viewport-workbench-2026-08-17/report.json", detail: "live ontology viewport workbench passed with exact Share boundary retained" },
       { id: "tenant_authorization_remediation", state: "proven", evidencePath: "evaluation/tenant-authorization-boundary-preflight-2026-07-29/report.json", detail: "two tenant findings remediated" },
       { id: "spreadsheet_formula_neutralization", state: "proven", evidencePath: "evaluation/spreadsheet-formula-neutralization-2026-08-01/report.json", detail: "four formula findings remediated" },
       { id: "public_provider_work_budget", state: "proven", evidencePath: "evaluation/public-provider-work-budget-2026-08-01/report.json", detail: "four provider-budget findings remediated" },
@@ -1103,6 +1113,29 @@ function createFixtureRoot(): { root: string; head: string } {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       fullyAutomatedLaunchClaimAllowed: false,
     },
+  });
+  writeJson(root, "evaluation/ontology-viewport-workbench-2026-08-17/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_ONTOLOGY_VIEWPORT_WORKBENCH",
+    sourceHead: "TO_FILL",
+    productCommit: "TO_FILL",
+    productionCommit: "TO_FILL",
+    sourceHeadMatchesProduction: true,
+    productCommitIncludedInProduction: true,
+    routeSplitAloneAcceptedAsFix: false,
+    browser: {
+      rowCount: 10,
+      passCount: 10,
+      maxBodyRatio: 1,
+      horizontalOverflowRows: 0,
+      overlapRows: 0,
+      minimumControlHeight: 44,
+      screenshotCount: 14,
+      desktop: { caseCount: 4, explorerPaneWidth: 848.5625, directoryPaneWidth: 339.4375, localScrollContained: true },
+      tablet: { caseCount: 2, singleTaskPane: true, localScrollContained: true },
+      mobile: { caseCount: 4, taskSwitchVerifiedCount: 4, minimumPaneClientHeight: 322, localScrollContained: true, selectionReturnsToExplorerTop: true },
+    },
+    mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, vectorMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false },
+    remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", fullyAutomatedLaunchClaimAllowed: false },
   });
   writeJson(root, "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json", {
     verdict: "COMPLETED_FOLLOWUP_REPOSITORY_SECURITY_SCAN_OPEN_FINDINGS_AND_DEFERRED_REVIEW",
@@ -1779,6 +1812,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-document-editorial-near-classification-2026-07-25/report.json",
     "evaluation/product-capability-truth-2026-07-25/report.json",
     "evaluation/document-export-capability-truth-2026-08-17/report.json",
+    "evaluation/ontology-viewport-workbench-2026-08-17/report.json",
     "evaluation/tenant-authorization-boundary-preflight-2026-07-29/report.json",
     "evaluation/spreadsheet-formula-neutralization-2026-08-01/report.json",
     "evaluation/public-provider-work-budget-2026-08-01/report.json",
@@ -2008,6 +2042,16 @@ describe("northstar live rollup", () => {
       fullyAutomatedLaunchClaimAllowed: false,
     });
     expect(report.evidence.find((item) => item.id === "document_export_capability_truth")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.ontologyViewportWorkbench).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_ONTOLOGY_VIEWPORT_WORKBENCH",
+      rowCount: 10,
+      passCount: 10,
+      maxBodyRatio: 1,
+      mobileTaskSwitchVerifiedCount: 4,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      fullyAutomatedLaunchClaimAllowed: false,
+    });
+    expect(report.evidence.find((item) => item.id === "ontology_viewport_workbench")?.productionStatus).toBe("ancestor_of_head");
     expect(report.tenantAuthorizationRemediation).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
       greenFindings: 2,

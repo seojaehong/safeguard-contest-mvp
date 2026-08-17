@@ -216,6 +216,15 @@ type NextRunwayReport = {
     exactSavedShareVerdict: string;
     fullyAutomatedLaunchClaimAllowed: boolean;
   };
+  ontologyViewportWorkbench: {
+    verdict: string;
+    rowCount: number;
+    passCount: number;
+    maxBodyRatio: number;
+    mobileTaskSwitchVerifiedCount: number;
+    exactSavedShareVerdict: string;
+    fullyAutomatedLaunchClaimAllowed: boolean;
+  };
   dependencySecurityRemediation: {
     verdict: string;
     beforeVulnerablePackages: number;
@@ -2707,6 +2716,29 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       fullyAutomatedLaunchClaimAllowed: false,
     },
   });
+  writeJson(root, "evaluation/ontology-viewport-workbench-2026-08-17/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_ONTOLOGY_VIEWPORT_WORKBENCH",
+    sourceHead: firstHead,
+    productCommit: firstHead,
+    productionCommit: firstHead,
+    sourceHeadMatchesProduction: true,
+    productCommitIncludedInProduction: true,
+    routeSplitAloneAcceptedAsFix: false,
+    browser: {
+      rowCount: 10,
+      passCount: 10,
+      maxBodyRatio: 1,
+      horizontalOverflowRows: 0,
+      overlapRows: 0,
+      minimumControlHeight: 44,
+      screenshotCount: 14,
+      desktop: { caseCount: 4, explorerPaneWidth: 848.5625, directoryPaneWidth: 339.4375, localScrollContained: true },
+      tablet: { caseCount: 2, singleTaskPane: true, localScrollContained: true },
+      mobile: { caseCount: 4, taskSwitchVerifiedCount: 4, minimumPaneClientHeight: 322, localScrollContained: true, selectionReturnsToExplorerTop: true },
+    },
+    mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, vectorMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false },
+    remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", fullyAutomatedLaunchClaimAllowed: false },
+  });
   const liveRollupPath = path.join(root, "evaluation/northstar-live-rollup-2026-07-20/report.json");
   const liveRollup = fs.readFileSync(liveRollupPath, "utf8").replaceAll("TO_FILL", firstHead);
   fs.writeFileSync(liveRollupPath, liveRollup, "utf8");
@@ -2948,6 +2980,16 @@ describe("northstar next runway generator", () => {
       fullyAutomatedLaunchClaimAllowed: false,
     });
     expect(report.provenCurrentState).toContain("document_export_capability_truth");
+    expect(report.ontologyViewportWorkbench).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_ONTOLOGY_VIEWPORT_WORKBENCH",
+      rowCount: 10,
+      passCount: 10,
+      maxBodyRatio: 1,
+      mobileTaskSwitchVerifiedCount: 4,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      fullyAutomatedLaunchClaimAllowed: false,
+    });
+    expect(report.provenCurrentState).toContain("ontology_viewport_workbench");
     expect(report.hermesOpenclaw).toMatchObject({
       verdict: "adapter_boundary_pass_live_execution_not_claimed",
       trustedTransportWired: true,

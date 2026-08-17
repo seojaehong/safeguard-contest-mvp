@@ -1,0 +1,65 @@
+{
+  "schema": "safeclaw-ontology-viewport-workbench/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_ONTOLOGY_VIEWPORT_WORKBENCH",
+  "sourceHead": "89b72fe306bf529378b11626fb405f1d285f4906",
+  "productCommit": "02c9ce7fb7f5af1700efdb962af2e05c0e9222ad",
+  "productionCommit": "89b72fe306bf529378b11626fb405f1d285f4906",
+  "sourceHeadMatchesProduction": true,
+  "productCommitIncludedInProduction": true,
+  "routeSplitAloneAcceptedAsFix": false,
+  "before": {
+    "desktopBodyHeight": 2077,
+    "mobileBodyHeight": 2893,
+    "historicalMobileBodyHeight": 4602
+  },
+  "browser": {
+    "artifact": "evaluation/ontology-viewport-workbench-2026-08-17/browser-metrics.json",
+    "rowCount": 10,
+    "passCount": 10,
+    "maxBodyRatio": 1,
+    "horizontalOverflowRows": 0,
+    "overlapRows": 0,
+    "minimumControlHeight": 44,
+    "screenshotCount": 14,
+    "desktop": {
+      "caseCount": 4,
+      "explorerPaneWidth": 848.5625,
+      "directoryPaneWidth": 339.4375,
+      "localScrollContained": true
+    },
+    "tablet": {
+      "caseCount": 2,
+      "singleTaskPane": true,
+      "localScrollContained": true
+    },
+    "mobile": {
+      "caseCount": 4,
+      "taskSwitchVerifiedCount": 4,
+      "minimumPaneClientHeight": 322,
+      "localScrollContained": true,
+      "selectionReturnsToExplorerTop": true
+    }
+  },
+  "verification": {
+    "browserTests": 1,
+    "unitContractTests": 9,
+    "frontendRouteAndOntologyTests": 48,
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28,
+    "githubActionsRun": "https://github.com/seojaehong/safeguard-contest-mvp/actions/runs/31994327025",
+    "githubActionsConclusion": "success"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "fullyAutomatedLaunchClaimAllowed": false
+  }
+}

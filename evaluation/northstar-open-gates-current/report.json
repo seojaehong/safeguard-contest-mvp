@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-17T03:35:43.757Z",
-  "sourceSha": "dd49bd761a2d277683c1b0f45db0714f54723203",
+  "generatedAt": "2026-08-17T05:00:37.277Z",
+  "sourceSha": "89b72fe306bf529378b11626fb405f1d285f4906",
   "overall": "open",
   "gates": [
     {
@@ -148,6 +148,14 @@
       "nextActions": [
         "Configure distributed admission separately before enabling server XLSX/HWP export."
       ]
+    },
+    {
+      "id": "ontology_viewport_workbench",
+      "state": "proven",
+      "label": "Live ontology viewport workbench",
+      "evidencePath": "evaluation\\ontology-viewport-workbench-2026-08-17\\report.json",
+      "detail": "Production /ontology passes 10/10 Day/Night browser rows with body ratio 1, zero horizontal overflow and overlap, and 44px minimum controls. Desktop keeps 848.5625px explorer plus 339.4375px directory panes; tablet and mobile expose one bounded task pane at a time, and mobile task switching passes 4/4 with selection returning to the explorer top. Route split alone is not accepted, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": []
     },
     {
       "id": "dependency_security_remediation",

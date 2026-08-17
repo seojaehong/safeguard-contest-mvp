@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-17T03:35:44.725Z",
-  "head": "dd49bd761a2d277683c1b0f45db0714f54723203",
+  "generatedAt": "2026-08-17T05:00:38.662Z",
+  "head": "89b72fe306bf529378b11626fb405f1d285f4906",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
+    "commitSha": "89b72fe306bf529378b11626fb405f1d285f4906",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-cm4on9pfw-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-4iuse263d-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 63
+    "gateCount": 64
   },
   "provenGates": [
     {
@@ -104,6 +104,12 @@
       "state": "proven",
       "artifact": "evaluation\\document-export-capability-truth-2026-08-17\\report.json",
       "detail": "Production export admission is honestly locked (distributed_limiter_unavailable): server XLSX/HWP remain disabled while browser PDF, legacy XLS, and HWPX draft remain enabled. Desktop panel=843px with beta=191.25px; mobile panel=262px with beta=220px. Distributed activation remains OPERATOR_CONFIGURATION_REQUIRED, fully automated launch remains forbidden, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "ontology_viewport_workbench",
+      "state": "proven",
+      "artifact": "evaluation\\ontology-viewport-workbench-2026-08-17\\report.json",
+      "detail": "Production /ontology passes 10/10 Day/Night browser rows with body ratio 1, zero horizontal overflow and overlap, and 44px minimum controls. Desktop keeps 848.5625px explorer plus 339.4375px directory panes; tablet and mobile expose one bounded task pane at a time, and mobile task switching passes 4/4 with selection returning to the explorer top. Route split alone is not accepted, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "dependency_security_remediation",
@@ -1065,6 +1071,19 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "fullyAutomatedLaunchClaimAllowed": false
   },
+  "ontologyViewportWorkbench": {
+    "artifact": "evaluation\\ontology-viewport-workbench-2026-08-17\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_ONTOLOGY_VIEWPORT_WORKBENCH",
+    "sourceHead": "89b72fe306bf529378b11626fb405f1d285f4906",
+    "productCommit": "02c9ce7fb7f5af1700efdb962af2e05c0e9222ad",
+    "productionCommit": "89b72fe306bf529378b11626fb405f1d285f4906",
+    "rowCount": 10,
+    "passCount": 10,
+    "maxBodyRatio": 1,
+    "mobileTaskSwitchVerifiedCount": 4,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "fullyAutomatedLaunchClaimAllowed": false
+  },
   "tenantAuthorizationRemediation": {
     "artifact": "evaluation\\tenant-authorization-boundary-preflight-2026-07-29\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
@@ -1317,10 +1336,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "dd49bd761a2d277683c1b0f45db0714f54723203",
+      "sourceCommit": "89b72fe306bf529378b11626fb405f1d285f4906",
       "sourceStatus": "exact",
-      "productionCommit": "dd49bd761a2d277683c1b0f45db0714f54723203",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "89b72fe306bf529378b11626fb405f1d285f4906",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -1440,6 +1459,14 @@
       "sourceCommit": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
       "sourceStatus": "ancestor",
       "productionCommit": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "ontology_viewport_workbench",
+      "artifact": "evaluation\\ontology-viewport-workbench-2026-08-17\\report.json",
+      "sourceCommit": "89b72fe306bf529378b11626fb405f1d285f4906",
+      "sourceStatus": "exact",
+      "productionCommit": "89b72fe306bf529378b11626fb405f1d285f4906",
       "productionStatus": "matches_live"
     },
     {

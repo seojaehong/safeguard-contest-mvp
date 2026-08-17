@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-17T03:35:44.725Z
-Source HEAD at generation: dd49bd761a2d277683c1b0f45db0714f54723203
-Live commit at generation: 62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9
+Generated at: 2026-08-17T05:00:38.662Z
+Source HEAD at generation: 89b72fe306bf529378b11626fb405f1d285f4906
+Live commit at generation: 89b72fe306bf529378b11626fb405f1d285f4906
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -248,6 +248,12 @@ Overall: `northstar_open_approval_gated`
 - Mobile panel/beta button: 262/220px
 - Distributed activation: OPERATOR_CONFIGURATION_REQUIRED; fully automated launch=false
 - Exact saved Share: MISSING_EVIDENCE
+
+## Ontology viewport workbench
+- Verdict: `PASS_LIVE_PRODUCTION_ONTOLOGY_VIEWPORT_WORKBENCH`
+- Live browser rows: 10/10; maximum body ratio=1
+- Mobile task switching: 4/4; long content remains inside local-scroll panes.
+- Exact saved Share: MISSING_EVIDENCE; fully automated launch=false
 - Boundary: this proves fail-closed export truth and usable browser fallbacks; it does not activate distributed server XLSX/HWP export.
 
 ## Live Hermes Reviewer Authority UI
@@ -320,6 +326,7 @@ Overall: `northstar_open_approval_gated`
 | current_live_document_editorial_runtime | notice | evaluation\live-document-editorial-review-current-2026-08-16\report.json |
 | product_capability_truth | proven | evaluation\product-capability-truth-2026-07-25\report.json |
 | document_export_capability_truth | proven | evaluation\document-export-capability-truth-2026-08-17\report.json |
+| ontology_viewport_workbench | proven | evaluation\ontology-viewport-workbench-2026-08-17\report.json |
 | dependency_security_remediation | proven | evaluation\dependency-security-remediation-2026-07-28\report.json |
 | tenant_authorization_remediation | proven | evaluation\tenant-authorization-boundary-preflight-2026-07-29\report.json |
 | spreadsheet_formula_neutralization | proven | evaluation\spreadsheet-formula-neutralization-2026-08-01\report.json |
@@ -374,7 +381,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
@@ -389,7 +396,8 @@ Overall: `northstar_open_approval_gated`
 | live_document_editorial_duplicate_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-duplicate-classification-2026-07-25\report.json |
 | live_document_editorial_near_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-near-classification-2026-07-25\report.json |
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |
-| document_export_capability_truth | ancestor | matches_live | evaluation\document-export-capability-truth-2026-08-17\report.json |
+| document_export_capability_truth | ancestor | ancestor_of_head | evaluation\document-export-capability-truth-2026-08-17\report.json |
+| ontology_viewport_workbench | exact | matches_live | evaluation\ontology-viewport-workbench-2026-08-17\report.json |
 | tenant_authorization_remediation | ancestor | ancestor_of_head | evaluation\tenant-authorization-boundary-preflight-2026-07-29\report.json |
 | spreadsheet_formula_neutralization | ancestor | ancestor_of_head | evaluation\spreadsheet-formula-neutralization-2026-08-01\report.json |
 | public_provider_work_budget | ancestor | ancestor_of_head | evaluation\public-provider-work-budget-2026-08-01\report.json |

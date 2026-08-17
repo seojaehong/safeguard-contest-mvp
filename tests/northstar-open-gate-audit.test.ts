@@ -2357,6 +2357,27 @@ function createFixtureRoot(): string {
       fullyAutomatedLaunchClaimAllowed: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "ontology-viewport-workbench-2026-08-17", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_ONTOLOGY_VIEWPORT_WORKBENCH",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-product-sha",
+    productionCommit: "fixture-sha",
+    sourceHeadMatchesProduction: true,
+    productCommitIncludedInProduction: true,
+    routeSplitAloneAcceptedAsFix: false,
+    browser: {
+      rowCount: 10, passCount: 10, maxBodyRatio: 1, horizontalOverflowRows: 0,
+      overlapRows: 0, minimumControlHeight: 44, screenshotCount: 14,
+      desktop: { caseCount: 4, explorerPaneWidth: 848.56, directoryPaneWidth: 339.44, localScrollContained: true },
+      tablet: { caseCount: 2, singleTaskPane: true, localScrollContained: true },
+      mobile: { caseCount: 4, taskSwitchVerifiedCount: 4, minimumPaneClientHeight: 322, localScrollContained: true, selectionReturnsToExplorerTop: true },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false,
+      vectorMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", fullyAutomatedLaunchClaimAllowed: false },
+  });
   writeJson(rootDir, path.join("evaluation", "documents-touch-targets-2026-08-17", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_TOUCH_TARGETS",
     sourceHead: "fixture-sha",
@@ -5115,6 +5136,12 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "document_export_capability_truth")?.detail).toContain("honestly locked");
     expect(audit.gates.find((gate) => gate.id === "document_export_capability_truth")?.detail).toContain("OPERATOR_CONFIGURATION_REQUIRED");
     expect(audit.gates.find((gate) => gate.id === "document_export_capability_truth")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "ontology_viewport_workbench")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "ontology-viewport-workbench-2026-08-17", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "ontology_viewport_workbench")?.detail).toContain("mobile task switching passes 4/4");
+    expect(audit.gates.find((gate) => gate.id === "ontology_viewport_workbench")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
@@ -7270,6 +7297,23 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "document_export_capability_truth")?.detail).toContain("exactShare=PASS");
+  });
+
+  it("fails ontology viewport workbench closed when mobile task switching regresses", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "ontology-viewport-workbench-2026-08-17", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      browser: { mobile: { taskSwitchVerifiedCount: number } };
+    };
+    report.browser.mobile.taskSwitchVerifiedCount = 3;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-17T00:00:00.000Z" });
+    expect(audit.gates.find((gate) => gate.id === "ontology_viewport_workbench")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "ontology_viewport_workbench")?.detail).toContain("mobileSwitch=3/4");
   });
 
   it.each([

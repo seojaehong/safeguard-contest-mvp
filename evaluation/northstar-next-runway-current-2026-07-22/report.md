@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `dd49bd761a2d277683c1b0f45db0714f54723203`
+Source HEAD: `89b72fe306bf529378b11626fb405f1d285f4906`
 
-Production `/api/build-info`: `62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9`
+Production `/api/build-info`: `89b72fe306bf529378b11626fb405f1d285f4906`
 
-Latest evidence commit live: `false`
+Latest evidence commit live: `true`
 
-Source head live pending: `true`
+Source head live pending: `false`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/document-export-capability-truth-2026-08-17/after-live/documents-export-locked-desktop-1440x723.png`, `evaluation/document-export-capability-truth-2026-08-17/after-live/documents-export-locked-mobile-390x723.png`, `evaluation/document-export-capability-truth-2026-08-17/after-live/report.json`, `evaluation/document-export-capability-truth-2026-08-17/after-local-panel-expansion/documents-export-expanded-desktop-1440x723.png`, `evaluation/document-export-capability-truth-2026-08-17/after-local-panel-expansion/documents-export-expanded-mobile-390x723.png`, `evaluation/document-export-capability-truth-2026-08-17/before-beta-expansion-live/documents-export-expanded-desktop-1440x723.png`, `evaluation/document-export-capability-truth-2026-08-17/before-beta-expansion-live/documents-export-expanded-mobile-390x723.png`, `evaluation/document-export-capability-truth-2026-08-17/before-panel-expansion-live/documents-export-locked-desktop-1440x723.png`, `evaluation/document-export-capability-truth-2026-08-17/before-panel-expansion-live/documents-export-locked-mobile-390x723.png`, `evaluation/document-export-capability-truth-2026-08-17/report.json`, `evaluation/document-export-capability-truth-2026-08-17/report.md`, `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
+Source pending changed paths: `none`
 
-Current head is evidence-only pending: `true`
+Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `dd49bd761a2d277683c1b0f45db0714f54723203`
+Live rollup source head: `89b72fe306bf529378b11626fb405f1d285f4906`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `dd49bd761a2d277683c1b0f45db0714f54723203` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9`, and the live rollup remains exact for that deployed marker.
+Note: source HEAD and production marker match for this artifact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -53,6 +53,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live editorial near-duplicate classification preserves `100->100` findings while reducing unclassified human-review-required `54->0`. The retained role-prefix/context/hazard/control categories are `81/9/8/2`; humanReviewCompleted=`false` and exact saved Share remains `MISSING_EVIDENCE`.
 - Live product capability truth is measured separately: `PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH`; manual/provider dispatch is `preview_only` with reason `persistent_idempotency_unavailable`, scheduled briefing email ready=`false`, photo Vision/OCR ready/accepted-only=`true/true`, and AI modes are `template, enhanced, full`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains `MISSING_EVIDENCE` and Documents/Share IA remains `PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP`.
 - Live document export capability truth is measured separately: `PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH`; admission is `unavailable/distributed_limiter_unavailable` with ready=`false`. Desktop panel/beta width is `843/191.25px`; mobile is `262/220px`. This proves fail-closed export truth and browser fallbacks, not distributed activation; activation remains `OPERATOR_CONFIGURATION_REQUIRED`, fully automated launch remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
+- Live Ontology viewport workbench is measured separately: `PASS_LIVE_PRODUCTION_ONTOLOGY_VIEWPORT_WORKBENCH`; browser rows `10/10`, maximum body ratio `1`, mobile task switches `4/4`. Route splitting alone is not treated as the fix; long content remains in local-scroll panes. Exact saved Share remains `MISSING_EVIDENCE` and fully automated launch remains `false`.
 - Public generation admission security is measured separately: `PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN`, live mode `instance`, dependency vulnerabilities `0`, distributed hardening open=`true`, and fresh diff scan required=`true`. This notice does not close multi-instance protection, the immutable scan finding, approval-gated operations, or exact saved Share; exact saved Share remains `MISSING_EVIDENCE`.
 - Security follow-up remediation is separately proven: `PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP`, sealed findings `3`, focused tests `129`, and remaining security work `0`. The immutable original baseline remains `18` findings with rewritten=`false`; two deferred candidates and the separate public-admission notice remain visible, no live provider cancellation probe is claimed, and exact saved Share remains `MISSING_EVIDENCE`.
 - Fresh security resource remediation is scoped rather than security-complete: `PASS_LIVE_PRODUCTION_SECURITY_RESOURCE_REMEDIATION`, remediated `6/20`, remaining `14`, provider persistence `APPROVAL_GATED`, exact saved Share `MISSING_EVIDENCE`.

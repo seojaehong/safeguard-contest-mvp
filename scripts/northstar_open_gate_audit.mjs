@@ -45,6 +45,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveDocumentRainContextIsolation: path.join("evaluation", "live-document-rain-context-isolation-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
   documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
+  ontologyViewportWorkbench: path.join("evaluation", "ontology-viewport-workbench-2026-08-17", "report.json"),
   dispatchEntryCapabilityTruth: path.join("evaluation", "dispatch-entry-capability-truth-2026-07-28", "report.json"),
   landingHumanReviewBoundary: path.join("evaluation", "landing-human-review-boundary-2026-07-28", "report.json"),
   dependencySecurityRemediation: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
@@ -1669,6 +1670,87 @@ function evaluateDocumentExportCapabilityTruthGate(rootDir) {
     evidencePath,
     detail: `Export verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, admission=${readString(admission.mode) || "unknown"}/${readString(admission.reason) || "unknown"}, ready=${admission.ready === true}, viewportPass=${viewportPass}, geometryPass=${geometryPass}, noMutation=${noMutation}, activation=${readString(remainingBoundaries.distributedAdmissionActivation) || "missing"}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: ["Restore the fail-closed export capability boundary and rerun current-production evidence without mutation."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateOntologyViewportWorkbenchGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.ontologyViewportWorkbench;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "ontology_viewport_workbench",
+      label: "Live ontology viewport workbench",
+      state: "missing",
+      evidencePath,
+      detail: "Live ontology viewport workbench evidence is missing or invalid.",
+      nextActions: ["Rerun the Day/Night desktop, tablet, and mobile ontology browser contract against current production."],
+    });
+  }
+
+  const browser = isRecord(report.browser) ? report.browser : {};
+  const desktop = isRecord(browser.desktop) ? browser.desktop : {};
+  const tablet = isRecord(browser.tablet) ? browser.tablet : {};
+  const mobile = isRecord(browser.mobile) ? browser.mobile : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceMatchesProduction = readString(report.sourceHead).length > 0
+    && readString(report.sourceHead) === readString(report.productionCommit)
+    && report.sourceHeadMatchesProduction === true
+    && report.productCommitIncludedInProduction === true;
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.vectorMutationPerformed === false
+    && mutationBoundary.wikiPublicationPerformed === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const liveReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_ONTOLOGY_VIEWPORT_WORKBENCH"
+    && sourceMatchesProduction
+    && readNumber(browser.rowCount) === 10
+    && readNumber(browser.passCount) === 10
+    && readNumber(browser.maxBodyRatio) === 1
+    && readNumber(browser.horizontalOverflowRows) === 0
+    && readNumber(browser.overlapRows) === 0
+    && readNumber(browser.minimumControlHeight) >= 44
+    && readNumber(browser.screenshotCount) === 14
+    && readNumber(desktop.caseCount) === 4
+    && readNumber(desktop.explorerPaneWidth) >= 840
+    && readNumber(desktop.directoryPaneWidth) >= 330
+    && desktop.localScrollContained === true
+    && readNumber(tablet.caseCount) === 2
+    && tablet.singleTaskPane === true
+    && tablet.localScrollContained === true
+    && readNumber(mobile.caseCount) === 4
+    && readNumber(mobile.taskSwitchVerifiedCount) === 4
+    && readNumber(mobile.minimumPaneClientHeight) >= 322
+    && mobile.localScrollContained === true
+    && mobile.selectionReturnsToExplorerTop === true
+    && report.routeSplitAloneAcceptedAsFix === false
+    && noMutation
+    && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && remainingBoundaries.fullyAutomatedLaunchClaimAllowed === false;
+
+  if (liveReady) {
+    return gateResult({
+      id: "ontology_viewport_workbench",
+      label: "Live ontology viewport workbench",
+      state: "proven",
+      evidencePath,
+      detail: `Production /ontology passes ${readNumber(browser.passCount)}/${readNumber(browser.rowCount)} Day/Night browser rows with body ratio ${readNumber(browser.maxBodyRatio)}, zero horizontal overflow and overlap, and ${readNumber(browser.minimumControlHeight)}px minimum controls. Desktop keeps ${readNumber(desktop.explorerPaneWidth)}px explorer plus ${readNumber(desktop.directoryPaneWidth)}px directory panes; tablet and mobile expose one bounded task pane at a time, and mobile task switching passes ${readNumber(mobile.taskSwitchVerifiedCount)}/4 with selection returning to the explorer top. Route split alone is not accepted, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`,
+      nextActions: [],
+    });
+  }
+
+  return gateResult({
+    id: "ontology_viewport_workbench",
+    label: "Live ontology viewport workbench",
+    state: "contradicted",
+    evidencePath,
+    detail: `Ontology verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, rows=${readNumber(browser.passCount)}/${readNumber(browser.rowCount)}, maxBodyRatio=${readNumber(browser.maxBodyRatio)}, overflowRows=${readNumber(browser.horizontalOverflowRows)}, overlapRows=${readNumber(browser.overlapRows)}, mobileSwitch=${readNumber(mobile.taskSwitchVerifiedCount)}/4, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: ["Restore viewport containment, task switching, no-mutation boundaries, and current live alignment, then rerun the ontology browser contract."],
   });
 }
 
@@ -9087,6 +9169,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentLiveDocumentEditorialRuntimeGate(rootDir),
     evaluateProductCapabilityTruthGate(rootDir),
     evaluateDocumentExportCapabilityTruthGate(rootDir),
+    evaluateOntologyViewportWorkbenchGate(rootDir),
     evaluateDependencySecurityRemediationGate(rootDir),
     evaluateTenantAuthorizationRemediationGate(rootDir),
     evaluateSpreadsheetFormulaNeutralizationGate(rootDir),
