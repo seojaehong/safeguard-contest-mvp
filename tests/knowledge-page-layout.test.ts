@@ -196,11 +196,9 @@ describe("knowledge page decision layout", () => {
     ] as const) {
       const page = await browser.newPage({ viewport });
       await page.goto(`${baseUrl}/knowledge?theme=day`, { waitUntil: "domcontentloaded" });
-      if (viewport.name === "mobile") {
-        const referencesTab = page.getByRole("tab", { name: "참고자료" });
-        await referencesTab.click();
-        await expect.poll(() => referencesTab.getAttribute("aria-selected")).toBe("true");
-      }
+      const referencesTab = page.getByRole("tab", { name: "참고자료" });
+      await referencesTab.click();
+      await expect.poll(() => referencesTab.getAttribute("aria-selected")).toBe("true");
       const referenceLibrary = page.locator('[data-knowledge-list="reference-library"]');
       await expect.poll(() => referenceLibrary.isVisible(), { message: viewport.name }).toBe(true);
       await referenceLibrary.locator("details").first().click();

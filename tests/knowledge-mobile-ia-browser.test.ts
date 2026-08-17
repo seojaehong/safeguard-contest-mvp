@@ -187,7 +187,7 @@ describe("knowledge mobile information architecture", () => {
     }
   }, 35_000);
 
-  it("preserves every knowledge section in desktop source order without hiding", async () => {
+  it("uses the same selected-only bounded workbench on desktop", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     try {
@@ -197,10 +197,33 @@ describe("knowledge mobile information architecture", () => {
       expect(await panels.evaluateAll((elements) => elements.map((element) => (
         (element as HTMLElement).dataset.knowledgePanel
       )))).toEqual(["today", "governance", "technical", "references", "wiki", "diagnostics"]);
-      for (let index = 0; index < await panels.count(); index += 1) {
-        expect(await panels.nth(index).isVisible(), `desktop panel ${index}`).toBe(true);
-      }
-      expect(await page.getByRole("tablist", { name: "지식 DB 작업 보기" }).isVisible()).toBe(false);
+      await expectActiveSection(page, "diagnostics", "진단");
+      expect(await page.getByRole("tablist", { name: "지식 DB 작업 보기" }).isVisible()).toBe(true);
+
+      const geometry = await page.evaluate(() => {
+        const activePanel = document.querySelector<HTMLElement>('[data-knowledge-panel="diagnostics"]');
+        const tabList = document.querySelector<HTMLElement>('[role="tablist"]');
+        if (!activePanel || !tabList) throw new Error("Missing desktop knowledge workbench");
+        const panelRect = activePanel.getBoundingClientRect();
+        return {
+          bodyHeight: document.documentElement.scrollHeight,
+          viewportHeight: window.innerHeight,
+          panelTop: panelRect.top,
+          panelBottom: panelRect.bottom,
+          panelClientHeight: activePanel.clientHeight,
+          panelScrollHeight: activePanel.scrollHeight,
+          panelOverflowY: getComputedStyle(activePanel).overflowY,
+          tabCount: tabList.querySelectorAll('[role="tab"]').length,
+          horizontalOverflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - window.innerWidth
+        };
+      });
+      expect(geometry.bodyHeight).toBeLessThanOrEqual(geometry.viewportHeight + 8);
+      expect(geometry.panelTop).toBeGreaterThanOrEqual(0);
+      expect(geometry.panelBottom).toBeLessThanOrEqual(geometry.viewportHeight + 1);
+      expect(geometry.panelScrollHeight).toBeGreaterThanOrEqual(geometry.panelClientHeight);
+      expect(geometry.panelOverflowY).toBe("auto");
+      expect(geometry.tabCount).toBe(6);
+      expect(geometry.horizontalOverflow).toBe(0);
     } finally {
       await page.close();
     }
