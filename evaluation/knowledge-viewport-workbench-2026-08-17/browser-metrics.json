@@ -1,6 +1,6 @@
 {
   "source": "https://www.safeclaw.kr",
-  "generatedAt": "2026-08-17T07:41:50.977Z",
+  "generatedAt": "2026-08-17T08:38:46.676Z",
   "metrics": [
     {
       "variant": "desktop-723-day",
@@ -19,8 +19,8 @@
       "panelBottom": 611.39,
       "firstDisclosureTop": 447.39,
       "firstDisclosureBottom": 491.39,
-      "localScrollPanelCount": 4,
-      "maximumPanelScrollRatio": 3.69,
+      "localScrollPanelCount": 3,
+      "maximumPanelScrollRatio": 2.62,
       "panels": [
         {
           "id": "today",
@@ -49,17 +49,17 @@
         {
           "id": "wiki",
           "clientHeight": 285,
-          "scrollHeight": 894,
+          "scrollHeight": 285,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {
           "id": "governance",
           "clientHeight": 285,
-          "scrollHeight": 1053,
+          "scrollHeight": 383,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {
@@ -89,8 +89,8 @@
       "panelBottom": 788.39,
       "firstDisclosureTop": 447.39,
       "firstDisclosureBottom": 491.39,
-      "localScrollPanelCount": 4,
-      "maximumPanelScrollRatio": 2.28,
+      "localScrollPanelCount": 2,
+      "maximumPanelScrollRatio": 1.62,
       "panels": [
         {
           "id": "today",
@@ -119,17 +119,17 @@
         {
           "id": "wiki",
           "clientHeight": 462,
-          "scrollHeight": 894,
+          "scrollHeight": 462,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {
           "id": "governance",
           "clientHeight": 462,
-          "scrollHeight": 1053,
+          "scrollHeight": 462,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {
@@ -159,8 +159,8 @@
       "panelBottom": 910.78,
       "firstDisclosureTop": 496.78,
       "firstDisclosureBottom": 540.78,
-      "localScrollPanelCount": 4,
-      "maximumPanelScrollRatio": 2.27,
+      "localScrollPanelCount": 2,
+      "maximumPanelScrollRatio": 1.38,
       "panels": [
         {
           "id": "today",
@@ -189,17 +189,17 @@
         {
           "id": "wiki",
           "clientHeight": 562,
-          "scrollHeight": 894,
+          "scrollHeight": 562,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {
           "id": "governance",
           "clientHeight": 562,
-          "scrollHeight": 1274,
+          "scrollHeight": 562,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {
@@ -230,7 +230,7 @@
       "firstDisclosureTop": 522.97,
       "firstDisclosureBottom": 590.97,
       "localScrollPanelCount": 6,
-      "maximumPanelScrollRatio": 13.28,
+      "maximumPanelScrollRatio": 4.47,
       "panels": [
         {
           "id": "today",
@@ -259,17 +259,17 @@
         {
           "id": "wiki",
           "clientHeight": 183,
-          "scrollHeight": 1361,
+          "scrollHeight": 372,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {
           "id": "governance",
           "clientHeight": 183,
-          "scrollHeight": 2431,
+          "scrollHeight": 403,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {
@@ -300,7 +300,7 @@
       "firstDisclosureTop": 522.97,
       "firstDisclosureBottom": 590.97,
       "localScrollPanelCount": 5,
-      "maximumPanelScrollRatio": 8,
+      "maximumPanelScrollRatio": 2.69,
       "panels": [
         {
           "id": "today",
@@ -329,17 +329,17 @@
         {
           "id": "wiki",
           "clientHeight": 304,
-          "scrollHeight": 1361,
+          "scrollHeight": 372,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {
           "id": "governance",
           "clientHeight": 304,
-          "scrollHeight": 2431,
+          "scrollHeight": 403,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {
@@ -369,8 +369,8 @@
       "panelBottom": 611.39,
       "firstDisclosureTop": 447.39,
       "firstDisclosureBottom": 491.39,
-      "localScrollPanelCount": 4,
-      "maximumPanelScrollRatio": 3.69,
+      "localScrollPanelCount": 3,
+      "maximumPanelScrollRatio": 2.62,
       "panels": [
         {
           "id": "today",
@@ -399,17 +399,17 @@
         {
           "id": "wiki",
           "clientHeight": 285,
-          "scrollHeight": 894,
+          "scrollHeight": 285,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {
           "id": "governance",
           "clientHeight": 285,
-          "scrollHeight": 1053,
+          "scrollHeight": 383,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {
@@ -439,8 +439,8 @@
       "panelBottom": 788.39,
       "firstDisclosureTop": 447.39,
       "firstDisclosureBottom": 491.39,
-      "localScrollPanelCount": 4,
-      "maximumPanelScrollRatio": 2.28,
+      "localScrollPanelCount": 2,
+      "maximumPanelScrollRatio": 1.62,
       "panels": [
         {
           "id": "today",
@@ -469,17 +469,17 @@
         {
           "id": "wiki",
           "clientHeight": 462,
-          "scrollHeight": 894,
+          "scrollHeight": 462,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {
           "id": "governance",
           "clientHeight": 462,
-          "scrollHeight": 1053,
+          "scrollHeight": 462,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {
@@ -509,8 +509,8 @@
       "panelBottom": 910.78,
       "firstDisclosureTop": 496.78,
       "firstDisclosureBottom": 540.78,
-      "localScrollPanelCount": 4,
-      "maximumPanelScrollRatio": 2.27,
+      "localScrollPanelCount": 2,
+      "maximumPanelScrollRatio": 1.38,
       "panels": [
         {
           "id": "today",
@@ -539,17 +539,17 @@
         {
           "id": "wiki",
           "clientHeight": 562,
-          "scrollHeight": 894,
+          "scrollHeight": 562,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {
           "id": "governance",
           "clientHeight": 562,
-          "scrollHeight": 1274,
+          "scrollHeight": 562,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {
@@ -580,7 +580,7 @@
       "firstDisclosureTop": 522.97,
       "firstDisclosureBottom": 590.97,
       "localScrollPanelCount": 6,
-      "maximumPanelScrollRatio": 13.28,
+      "maximumPanelScrollRatio": 4.47,
       "panels": [
         {
           "id": "today",
@@ -609,17 +609,17 @@
         {
           "id": "wiki",
           "clientHeight": 183,
-          "scrollHeight": 1361,
+          "scrollHeight": 372,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {
           "id": "governance",
           "clientHeight": 183,
-          "scrollHeight": 2431,
+          "scrollHeight": 403,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {
@@ -650,7 +650,7 @@
       "firstDisclosureTop": 522.97,
       "firstDisclosureBottom": 590.97,
       "localScrollPanelCount": 5,
-      "maximumPanelScrollRatio": 8,
+      "maximumPanelScrollRatio": 2.69,
       "panels": [
         {
           "id": "today",
@@ -679,17 +679,17 @@
         {
           "id": "wiki",
           "clientHeight": 304,
-          "scrollHeight": 1361,
+          "scrollHeight": 372,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {
           "id": "governance",
           "clientHeight": 304,
-          "scrollHeight": 2431,
+          "scrollHeight": 403,
           "overflowY": "auto",
-          "disclosureCount": 0,
+          "disclosureCount": 2,
           "openDisclosureCount": 0
         },
         {

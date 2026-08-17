@@ -1,10 +1,10 @@
 {
   "schema": "safeclaw-knowledge-viewport-workbench/v1",
   "verdict": "PASS_LIVE_PRODUCTION_KNOWLEDGE_VIEWPORT_WORKBENCH",
-  "sourceHead": "b11496284522a54bdb9f28688340e629b8c44afb",
-  "productCommit": "b11496284522a54bdb9f28688340e629b8c44afb",
-  "productionCommit": "b11496284522a54bdb9f28688340e629b8c44afb",
-  "productionDeployment": "safeguard-contest-6e99hl8e2-seojaehongs-projects.vercel.app",
+  "sourceHead": "5678b95f490bc72a9928606e440cebe7e840034d",
+  "productCommit": "5678b95f490bc72a9928606e440cebe7e840034d",
+  "productionCommit": "5678b95f490bc72a9928606e440cebe7e840034d",
+  "productionDeployment": "safeguard-contest-cd217y3v9-seojaehongs-projects.vercel.app",
   "sourceHeadMatchesProduction": true,
   "productCommitIncludedInProduction": true,
   "routeSplitAloneAcceptedAsFix": false,
@@ -14,7 +14,9 @@
     "historicalEvidence": "evaluation/knowledge-mobile-current-master-2026-07-19/report.md",
     "allDesktopPanelsExposedByDefault": true,
     "mobile723TechnicalScrollHeight": 2537,
-    "mobile723ReferenceScrollHeight": 1896
+    "mobile723ReferenceScrollHeight": 1896,
+    "mobile723WikiScrollHeight": 1361,
+    "mobile723GovernanceScrollHeight": 2431
   },
   "browser": {
     "artifact": "evaluation/knowledge-viewport-workbench-2026-08-17/browser-metrics.json",
@@ -27,8 +29,8 @@
     "reachableSectionCountPerRow": 6,
     "minimumControlHeight": 44,
     "minimumLocalScrollPanelCount": 4,
-    "maximumPanelScrollRatio": 13.28,
-    "screenshotCount": 10,
+    "maximumPanelScrollRatio": 4.47,
+    "screenshotCount": 18,
     "referenceDisclosure": {
       "technicalDisclosureCount": 6,
       "referenceDisclosureCount": 7,
@@ -41,6 +43,24 @@
       "maxFirstDisclosureBottom": 590.97,
       "minPanelBottom": 611.39,
       "firstDisclosureInsidePanel": true
+    },
+    "progressiveDisclosure": {
+      "technicalDisclosureCount": 6,
+      "referenceDisclosureCount": 7,
+      "wikiDisclosureCount": 2,
+      "governanceDisclosureCount": 2,
+      "defaultOpenDisclosureCount": 0,
+      "exclusiveDisclosureGroups": true,
+      "mobile723TechnicalScrollHeight": 818,
+      "mobile723ReferenceScrollHeight": 674,
+      "mobile723WikiScrollHeight": 372,
+      "mobile723GovernanceScrollHeight": 403,
+      "maxMobileTechnicalScrollRatio": 4.47,
+      "maxMobileReferenceScrollRatio": 3.68,
+      "maxMobileWikiScrollRatio": 2.03,
+      "maxMobileGovernanceScrollRatio": 2.2,
+      "firstDisclosureInsidePanel": true,
+      "firstReviewStateInsidePanel": true
     },
     "desktop": {
       "caseCount": 4,
