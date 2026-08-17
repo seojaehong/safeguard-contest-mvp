@@ -2853,11 +2853,41 @@ describe("documents editor layout", () => {
     expect(exportBounds!.height).toBeLessThan(1_200);
     expect((await page.getByRole("button", { name: "Excel 표 양식(.xlsx)" }).boundingBox())!.width).toBeGreaterThan(180);
 
-    await page.setViewportSize({ width: 390, height: 723 });
+    const betaSummary = page.locator(".download-bar details summary", { hasText: "베타 형식" });
+    await betaSummary.click();
+    expect(await page.getByRole("button", { name: "XLS(구형 호환)" }).isEnabled()).toBe(true);
+    expect(await page.getByRole("button", { name: ".hwpx 텍스트 초안" }).isEnabled()).toBe(true);
+    expect((await page.getByRole("button", { name: "XLS(구형 호환)" }).boundingBox())!.width).toBeGreaterThan(140);
+    await betaSummary.click();
+
+    const mobilePage = await browser.newPage({ viewport: { width: 390, height: 723 } });
+    await mobilePage.route("**/api/export/pdf", async (route) => {
+      if (route.request().method() !== "GET") {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        contentType: "application/json",
+        status: 200,
+        body: JSON.stringify({
+          ok: true,
+          admission: {
+            mode: "unavailable",
+            ready: false,
+            reason: "distributed_limiter_unavailable"
+          }
+        })
+      });
+    });
+    await mobilePage.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+    const mobileExportPanel = mobilePage.getByTestId("editor-export-panel");
+    const mobileSecondaryTools = mobilePage.getByTestId("editor-secondary-tools");
+    await mobileExportPanel.locator(":scope > summary").click();
+    await mobilePage.locator('[data-server-export-readiness="locked"]').waitFor({ state: "visible" });
     const [mobileExportBounds, mobileToolsBounds, mobilePdfBounds] = await Promise.all([
-      exportPanel.boundingBox(),
-      secondaryTools.boundingBox(),
-      page.getByRole("button", { name: "PDF(브라우저 인쇄)" }).boundingBox()
+      mobileExportPanel.boundingBox(),
+      mobileSecondaryTools.boundingBox(),
+      mobilePage.getByRole("button", { name: "PDF(브라우저 인쇄)" }).boundingBox()
     ]);
     expect(mobileExportBounds).not.toBeNull();
     expect(mobileToolsBounds).not.toBeNull();
@@ -2865,9 +2895,11 @@ describe("documents editor layout", () => {
     expect(mobileExportBounds!.width).toBeGreaterThanOrEqual(mobileToolsBounds!.width - 24);
     expect(mobilePdfBounds!.width).toBeGreaterThan(220);
 
-    await page.locator(".download-bar details summary", { hasText: "베타 형식" }).click();
-    expect(await page.getByRole("button", { name: "XLS(구형 호환)" }).isEnabled()).toBe(true);
-    expect(await page.getByRole("button", { name: ".hwpx 텍스트 초안" }).isEnabled()).toBe(true);
+    await mobilePage.locator(".download-bar details summary", { hasText: "베타 형식" }).click();
+    expect(await mobilePage.getByRole("button", { name: "XLS(구형 호환)" }).isEnabled()).toBe(true);
+    expect(await mobilePage.getByRole("button", { name: ".hwpx 텍스트 초안" }).isEnabled()).toBe(true);
+    expect((await mobilePage.getByRole("button", { name: "XLS(구형 호환)" }).boundingBox())!.width).toBeGreaterThanOrEqual(220);
+    await mobilePage.close();
   }, 90_000);
 
   it("keeps exported HTML document styling aligned with the workspace system", async () => {

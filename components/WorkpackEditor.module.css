@@ -1260,6 +1260,15 @@
 
 .primaryExports > :global(.advanced-downloads) {
   grid-column: 1 / -1;
+  width: 100%;
+  min-width: 0;
+}
+
+.exportContent :global(.advanced-downloads.inline .advanced-download-grid) {
+  position: static;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
 }
 
 .exportWorkbench {
