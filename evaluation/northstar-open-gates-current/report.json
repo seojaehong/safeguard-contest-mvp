@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-17T01:42:24.883Z",
-  "sourceSha": "10790e50adff015064aba185307d72656f32090e",
+  "generatedAt": "2026-08-17T03:35:43.757Z",
+  "sourceSha": "dd49bd761a2d277683c1b0f45db0714f54723203",
   "overall": "open",
   "gates": [
     {
@@ -137,6 +137,16 @@
       "nextActions": [
         "Keep provider dispatch persistence approval-gated.",
         "Measure exact saved Share geometry with a concrete existing session URL or separately approved creation flow."
+      ]
+    },
+    {
+      "id": "document_export_capability_truth",
+      "state": "proven",
+      "label": "Live document export capability truth",
+      "evidencePath": "evaluation\\document-export-capability-truth-2026-08-17\\report.json",
+      "detail": "Production export admission is honestly locked (distributed_limiter_unavailable): server XLSX/HWP remain disabled while browser PDF, legacy XLS, and HWPX draft remain enabled. Desktop panel=843px with beta=191.25px; mobile panel=262px with beta=220px. Distributed activation remains OPERATOR_CONFIGURATION_REQUIRED, fully automated launch remains forbidden, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Configure distributed admission separately before enabling server XLSX/HWP export."
       ]
     },
     {

@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-17T01:42:25.576Z
-Source HEAD at generation: 10790e50adff015064aba185307d72656f32090e
-Live commit at generation: 10790e50adff015064aba185307d72656f32090e
+Generated at: 2026-08-17T03:35:44.725Z
+Source HEAD at generation: dd49bd761a2d277683c1b0f45db0714f54723203
+Live commit at generation: 62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -240,6 +240,16 @@ Overall: `northstar_open_approval_gated`
 - Documents/Share IA: PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP
 - Boundary: capability truth does not unlock provider persistence, exact saved Share, or Documents/Share viewport IA.
 
+## Live Document Export Capability Truth
+
+- Verdict: `PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH`
+- Admission: unavailable/distributed_limiter_unavailable; ready=false
+- Desktop panel/beta button: 843/191.25px
+- Mobile panel/beta button: 262/220px
+- Distributed activation: OPERATOR_CONFIGURATION_REQUIRED; fully automated launch=false
+- Exact saved Share: MISSING_EVIDENCE
+- Boundary: this proves fail-closed export truth and usable browser fallbacks; it does not activate distributed server XLSX/HWP export.
+
 ## Live Hermes Reviewer Authority UI
 
 - Verdict: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI`
@@ -309,6 +319,7 @@ Overall: `northstar_open_approval_gated`
 | document_editorial_review_cockpit | proven | evaluation\document-editorial-review-cockpit-2026-08-16\report.json |
 | current_live_document_editorial_runtime | notice | evaluation\live-document-editorial-review-current-2026-08-16\report.json |
 | product_capability_truth | proven | evaluation\product-capability-truth-2026-07-25\report.json |
+| document_export_capability_truth | proven | evaluation\document-export-capability-truth-2026-08-17\report.json |
 | dependency_security_remediation | proven | evaluation\dependency-security-remediation-2026-07-28\report.json |
 | tenant_authorization_remediation | proven | evaluation\tenant-authorization-boundary-preflight-2026-07-29\report.json |
 | spreadsheet_formula_neutralization | proven | evaluation\spreadsheet-formula-neutralization-2026-08-01\report.json |
@@ -363,7 +374,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
@@ -378,6 +389,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_editorial_duplicate_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-duplicate-classification-2026-07-25\report.json |
 | live_document_editorial_near_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-near-classification-2026-07-25\report.json |
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |
+| document_export_capability_truth | ancestor | matches_live | evaluation\document-export-capability-truth-2026-08-17\report.json |
 | tenant_authorization_remediation | ancestor | ancestor_of_head | evaluation\tenant-authorization-boundary-preflight-2026-07-29\report.json |
 | spreadsheet_formula_neutralization | ancestor | ancestor_of_head | evaluation\spreadsheet-formula-neutralization-2026-08-01\report.json |
 | public_provider_work_budget | ancestor | ancestor_of_head | evaluation\public-provider-work-budget-2026-08-01\report.json |
