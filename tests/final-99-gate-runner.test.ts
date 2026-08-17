@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import fs from "node:fs";
+import path from "node:path";
 
 import {
   coreDocumentChecks,
@@ -39,8 +40,10 @@ describe("final-99 gate runner contract", () => {
   });
 
   it("allows evidence-only runs to isolate generated documentation", () => {
-    expect(resolveDocsDir({}, "C:\\repo")).toBe("C:\\repo\\docs");
-    expect(resolveDocsDir({ SAFEGUARD_DOCS_DIR: "C:\\scan\\docs" }, "C:\\repo")).toBe("C:\\scan\\docs");
+    const cwd = path.resolve("test-repo");
+    const isolatedDocs = path.resolve("test-scan", "docs");
+    expect(resolveDocsDir({}, cwd)).toBe(path.join(cwd, "docs"));
+    expect(resolveDocsDir({ SAFEGUARD_DOCS_DIR: isolatedDocs }, cwd)).toBe(isolatedDocs);
   });
 
   it("keeps the orchestration download smoke on the same 12-document contract", () => {

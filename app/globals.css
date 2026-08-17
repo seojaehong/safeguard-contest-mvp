@@ -20187,7 +20187,9 @@ body:has(.safeclaw-landing) :is(
     min-width: 0;
     color: var(--workspace-muted);
     font-size: var(--text-caption);
-    font-weight: 700;
+    font-weight: 600;
+    line-height: var(--leading-caption);
+    letter-spacing: var(--tracking-body);
   }
 
   .safeclaw-document-review-mobile-nav select,
@@ -20212,7 +20214,10 @@ body:has(.safeclaw-landing) :is(
     width: 44px;
     place-items: center;
     padding: 0;
-    font-size: 20px;
+    font-size: var(--text-control);
+    font-weight: 700;
+    line-height: var(--leading-control);
+    letter-spacing: var(--tracking-body);
     cursor: pointer;
   }
 
