@@ -21,7 +21,7 @@ The historical mobile body height was `1152px`, and the old desktop source expos
 - Dedicated live production geometry contract: `1/1` passed.
 - Canonical frontend identity and route coverage contracts: `48/48` passed.
 - Strict typecheck and production build passed; 28 static pages generated.
-- GitHub Actions remains pending until this evidence commit is pushed.
+- GitHub Actions run `32001280102` passed typecheck, the full test suite, and the production build.
 
 ## Boundaries
 

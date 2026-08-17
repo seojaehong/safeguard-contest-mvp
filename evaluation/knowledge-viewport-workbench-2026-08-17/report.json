@@ -53,8 +53,8 @@
     "typecheck": "PASS",
     "build": "PASS",
     "staticPages": 28,
-    "githubActionsRun": null,
-    "githubActionsConclusion": "PENDING"
+    "githubActionsRun": "https://github.com/seojaehong/safeguard-contest-mvp/actions/runs/32001280102",
+    "githubActionsConclusion": "success"
   },
   "mutationBoundary": {
     "dbMutationPerformed": false,
