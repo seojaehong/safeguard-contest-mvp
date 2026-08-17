@@ -942,6 +942,7 @@
 }
 
 .utilityPanel[open] {
+  grid-column: 1 / -1;
   border-color: var(--workspace-rule-strong);
 }
 

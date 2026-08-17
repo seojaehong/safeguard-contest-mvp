@@ -2841,6 +2841,30 @@ describe("documents editor layout", () => {
     expect(await page.getByRole("button", { name: "한글 표 양식(.hwp)" }).isDisabled()).toBe(true);
     expect(await page.getByRole("button", { name: "PDF(브라우저 인쇄)" }).isEnabled()).toBe(true);
 
+    const exportPanel = page.getByTestId("editor-export-panel");
+    const secondaryTools = page.getByTestId("editor-secondary-tools");
+    const [exportBounds, toolsBounds] = await Promise.all([
+      exportPanel.boundingBox(),
+      secondaryTools.boundingBox()
+    ]);
+    expect(exportBounds).not.toBeNull();
+    expect(toolsBounds).not.toBeNull();
+    expect(exportBounds!.width).toBeGreaterThanOrEqual(toolsBounds!.width - 16);
+    expect(exportBounds!.height).toBeLessThan(1_200);
+    expect((await page.getByRole("button", { name: "Excel 표 양식(.xlsx)" }).boundingBox())!.width).toBeGreaterThan(180);
+
+    await page.setViewportSize({ width: 390, height: 723 });
+    const [mobileExportBounds, mobileToolsBounds, mobilePdfBounds] = await Promise.all([
+      exportPanel.boundingBox(),
+      secondaryTools.boundingBox(),
+      page.getByRole("button", { name: "PDF(브라우저 인쇄)" }).boundingBox()
+    ]);
+    expect(mobileExportBounds).not.toBeNull();
+    expect(mobileToolsBounds).not.toBeNull();
+    expect(mobilePdfBounds).not.toBeNull();
+    expect(mobileExportBounds!.width).toBeGreaterThanOrEqual(mobileToolsBounds!.width - 24);
+    expect(mobilePdfBounds!.width).toBeGreaterThan(220);
+
     await page.locator(".download-bar details summary", { hasText: "베타 형식" }).click();
     expect(await page.getByRole("button", { name: "XLS(구형 호환)" }).isEnabled()).toBe(true);
     expect(await page.getByRole("button", { name: ".hwpx 텍스트 초안" }).isEnabled()).toBe(true);
