@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-17T08:05:52.735Z",
-  "head": "e918853d4aee8330d92e6d29233d8d0ecca23ebd",
+  "generatedAt": "2026-08-17T09:27:15.940Z",
+  "head": "8ae3c0e89ad9e9679945d21e562a4ffe778d6a97",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "e918853d4aee8330d92e6d29233d8d0ecca23ebd",
+    "commitSha": "8ae3c0e89ad9e9679945d21e562a4ffe778d6a97",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-eyehufcxz-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-k2btdi5nv-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -115,7 +115,7 @@
       "id": "knowledge_viewport_workbench",
       "state": "proven",
       "artifact": "evaluation\\knowledge-viewport-workbench-2026-08-17\\report.json",
-      "detail": "Production /knowledge passes 10/10 Day/Night browser rows with maximum body ratio 1.02, one visible panel, six reachable tasks, zero horizontal overflow, and 44px minimum controls. KOSHA disclosures are 6/7 technical/reference rows with defaultOpen=0, exclusive groups, mobile scroll ratios 4.47/3.68, and the first disclosure contained inside the panel. Long content remains inside local-scroll panels; route split alone is not accepted. No mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus SIF embedding remain APPROVAL_GATED."
+      "detail": "Production /knowledge passes 10/10 Day/Night browser rows with maximum body ratio 1.02, one visible panel, six reachable tasks, zero horizontal overflow, and 44px minimum controls. KOSHA disclosures are 6/7 technical/reference rows; Wiki/governance disclosures are 2/2. All groups are exclusive with defaultOpen=0, mobile scroll ratios 4.47/3.68/2.03/2.2, and first review state panel-contained=true. Long content remains inside local-scroll panels; route split alone is not accepted. No mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus SIF embedding remain APPROVAL_GATED."
     },
     {
       "id": "dependency_security_remediation",
@@ -1093,9 +1093,9 @@
   "knowledgeViewportWorkbench": {
     "artifact": "evaluation\\knowledge-viewport-workbench-2026-08-17\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_KNOWLEDGE_VIEWPORT_WORKBENCH",
-    "sourceHead": "b11496284522a54bdb9f28688340e629b8c44afb",
-    "productCommit": "b11496284522a54bdb9f28688340e629b8c44afb",
-    "productionCommit": "b11496284522a54bdb9f28688340e629b8c44afb",
+    "sourceHead": "5678b95f490bc72a9928606e440cebe7e840034d",
+    "productCommit": "5678b95f490bc72a9928606e440cebe7e840034d",
+    "productionCommit": "5678b95f490bc72a9928606e440cebe7e840034d",
     "rowCount": 10,
     "passCount": 10,
     "maxBodyRatio": 1.02,
@@ -1103,11 +1103,16 @@
     "reachableSectionCountPerRow": 6,
     "technicalDisclosureCount": 6,
     "referenceDisclosureCount": 7,
+    "wikiDisclosureCount": 2,
+    "governanceDisclosureCount": 2,
     "defaultOpenDisclosureCount": 0,
     "exclusiveDisclosureGroups": true,
     "maxMobileTechnicalScrollRatio": 4.47,
     "maxMobileReferenceScrollRatio": 3.68,
+    "maxMobileWikiScrollRatio": 2.03,
+    "maxMobileGovernanceScrollRatio": 2.2,
     "firstDisclosureInsidePanel": true,
+    "firstReviewStateInsidePanel": true,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "llmWikiPublicationVerdict": "APPROVAL_GATED",
     "sifEmbeddingRuntimeVerdict": "APPROVAL_GATED",
@@ -1365,9 +1370,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "e918853d4aee8330d92e6d29233d8d0ecca23ebd",
+      "sourceCommit": "8ae3c0e89ad9e9679945d21e562a4ffe778d6a97",
       "sourceStatus": "exact",
-      "productionCommit": "e918853d4aee8330d92e6d29233d8d0ecca23ebd",
+      "productionCommit": "8ae3c0e89ad9e9679945d21e562a4ffe778d6a97",
       "productionStatus": "matches_live"
     },
     {
@@ -1501,9 +1506,9 @@
     {
       "id": "knowledge_viewport_workbench",
       "artifact": "evaluation\\knowledge-viewport-workbench-2026-08-17\\report.json",
-      "sourceCommit": "b11496284522a54bdb9f28688340e629b8c44afb",
+      "sourceCommit": "5678b95f490bc72a9928606e440cebe7e840034d",
       "sourceStatus": "ancestor",
-      "productionCommit": "b11496284522a54bdb9f28688340e629b8c44afb",
+      "productionCommit": "5678b95f490bc72a9928606e440cebe7e840034d",
       "productionStatus": "ancestor_of_head"
     },
     {

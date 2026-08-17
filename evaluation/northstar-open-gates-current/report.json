@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-17T08:05:51.428Z",
-  "sourceSha": "e918853d4aee8330d92e6d29233d8d0ecca23ebd",
+  "generatedAt": "2026-08-17T09:27:14.551Z",
+  "sourceSha": "8ae3c0e89ad9e9679945d21e562a4ffe778d6a97",
   "overall": "open",
   "gates": [
     {
@@ -162,7 +162,7 @@
       "state": "proven",
       "label": "Live Knowledge viewport workbench",
       "evidencePath": "evaluation\\knowledge-viewport-workbench-2026-08-17\\report.json",
-      "detail": "Production /knowledge passes 10/10 Day/Night browser rows with maximum body ratio 1.02, one visible panel, six reachable tasks, zero horizontal overflow, and 44px minimum controls. KOSHA disclosures are 6/7 technical/reference rows with defaultOpen=0, exclusive groups, mobile scroll ratios 4.47/3.68, and the first disclosure contained inside the panel. Long content remains inside local-scroll panels; route split alone is not accepted. No mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus SIF embedding remain APPROVAL_GATED.",
+      "detail": "Production /knowledge passes 10/10 Day/Night browser rows with maximum body ratio 1.02, one visible panel, six reachable tasks, zero horizontal overflow, and 44px minimum controls. KOSHA disclosures are 6/7 technical/reference rows; Wiki/governance disclosures are 2/2. All groups are exclusive with defaultOpen=0, mobile scroll ratios 4.47/3.68/2.03/2.2, and first review state panel-contained=true. Long content remains inside local-scroll panels; route split alone is not accepted. No mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus SIF embedding remain APPROVAL_GATED.",
       "nextActions": []
     },
     {

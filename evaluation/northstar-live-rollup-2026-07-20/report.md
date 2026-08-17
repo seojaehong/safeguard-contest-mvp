@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-17T08:05:52.735Z
-Source HEAD at generation: e918853d4aee8330d92e6d29233d8d0ecca23ebd
-Live commit at generation: e918853d4aee8330d92e6d29233d8d0ecca23ebd
+Generated at: 2026-08-17T09:27:15.940Z
+Source HEAD at generation: 8ae3c0e89ad9e9679945d21e562a4ffe778d6a97
+Live commit at generation: 8ae3c0e89ad9e9679945d21e562a4ffe778d6a97
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -260,7 +260,7 @@ Overall: `northstar_open_approval_gated`
 - Verdict: `PASS_LIVE_PRODUCTION_KNOWLEDGE_VIEWPORT_WORKBENCH`
 - Live browser rows: 10/10; maximum body ratio=1.02
 - Selected exposure: 1 visible panel and 6 reachable tasks per row; long content remains locally scroll-contained.
-- KOSHA references: 6/7 technical/reference disclosures, default open=0, exclusive groups=true, mobile ratios=4.47/3.68, first item panel-contained=true.
+- Progressive disclosure: 6/7/2/2 technical/reference/wiki/governance disclosures, default open=0, exclusive groups=true, mobile ratios=4.47/3.68/2.03/2.2, first item/review state panel-contained=true/true.
 - Boundaries: exact saved Share=MISSING_EVIDENCE; Wiki publication=APPROVAL_GATED; SIF embedding=APPROVAL_GATED; fully automated launch=false
 
 ## Live Hermes Reviewer Authority UI
