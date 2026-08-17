@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-17T08:02:10.426Z
-Source HEAD at generation: 40e5636705828edf7d0b89fc4f3e9cde82b8c6f8
-Live commit at generation: 40e5636705828edf7d0b89fc4f3e9cde82b8c6f8
+Generated at: 2026-08-17T08:05:52.735Z
+Source HEAD at generation: e918853d4aee8330d92e6d29233d8d0ecca23ebd
+Live commit at generation: e918853d4aee8330d92e6d29233d8d0ecca23ebd
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
