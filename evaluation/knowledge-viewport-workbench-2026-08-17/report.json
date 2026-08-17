@@ -1,0 +1,73 @@
+{
+  "schema": "safeclaw-knowledge-viewport-workbench/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_KNOWLEDGE_VIEWPORT_WORKBENCH",
+  "sourceHead": "b6a11993cbb6dfffb5dddce3bfccc4ca7408f76c",
+  "productCommit": "b6a11993cbb6dfffb5dddce3bfccc4ca7408f76c",
+  "productionCommit": "b6a11993cbb6dfffb5dddce3bfccc4ca7408f76c",
+  "productionDeployment": "safeguard-contest-fg0yp1axl-seojaehongs-projects.vercel.app",
+  "sourceHeadMatchesProduction": true,
+  "productCommitIncludedInProduction": true,
+  "routeSplitAloneAcceptedAsFix": false,
+  "selectedOnlyWorkbenchRequired": true,
+  "before": {
+    "historicalMobileBodyHeight": 1152,
+    "historicalEvidence": "evaluation/knowledge-mobile-current-master-2026-07-19/report.md",
+    "allDesktopPanelsExposedByDefault": true
+  },
+  "browser": {
+    "artifact": "evaluation/knowledge-viewport-workbench-2026-08-17/browser-metrics.json",
+    "rowCount": 10,
+    "passCount": 10,
+    "maxBodyRatio": 1.02,
+    "horizontalOverflowRows": 0,
+    "outsideElementRows": 0,
+    "visiblePanelCountPerRow": 1,
+    "reachableSectionCountPerRow": 6,
+    "minimumControlHeight": 44,
+    "minimumLocalScrollPanelCount": 4,
+    "maximumPanelScrollRatio": 13.86,
+    "screenshotCount": 10,
+    "desktop": {
+      "caseCount": 4,
+      "maxBodyRatio": 1,
+      "selectedOnly": true,
+      "localScrollContained": true
+    },
+    "tablet": {
+      "caseCount": 2,
+      "maxBodyRatio": 1.02,
+      "selectedOnly": true,
+      "localScrollContained": true
+    },
+    "mobile": {
+      "caseCount": 4,
+      "maxBodyRatio": 1.01,
+      "selectedOnly": true,
+      "localScrollContained": true
+    }
+  },
+  "verification": {
+    "focusedKnowledgeTests": 23,
+    "browserEvidenceTests": 1,
+    "frontendIdentityTests": 48,
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28,
+    "githubActionsRun": null,
+    "githubActionsConclusion": "PENDING"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublicationVerdict": "APPROVAL_GATED",
+    "sifEmbeddingRuntimeVerdict": "APPROVAL_GATED",
+    "fullyAutomatedLaunchClaimAllowed": false
+  }
+}

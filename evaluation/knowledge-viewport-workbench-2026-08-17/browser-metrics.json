@@ -1,0 +1,566 @@
+{
+  "source": "https://www.safeclaw.kr",
+  "generatedAt": "2026-08-17T05:40:21.063Z",
+  "metrics": [
+    {
+      "variant": "desktop-723-day",
+      "viewport": {
+        "width": 1440,
+        "height": 723
+      },
+      "bodyHeight": 723,
+      "bodyRatio": 1,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visiblePanelCount": 1,
+      "reachableSectionCount": 6,
+      "minimumControlHeight": 44,
+      "panelTop": 326.39,
+      "panelBottom": 611.39,
+      "localScrollPanelCount": 4,
+      "maximumPanelScrollRatio": 4.76,
+      "panels": [
+        {
+          "id": "today",
+          "clientHeight": 285,
+          "scrollHeight": 285,
+          "overflowY": "auto"
+        },
+        {
+          "id": "technical",
+          "clientHeight": 285,
+          "scrollHeight": 1357,
+          "overflowY": "auto"
+        },
+        {
+          "id": "references",
+          "clientHeight": 285,
+          "scrollHeight": 1217,
+          "overflowY": "auto"
+        },
+        {
+          "id": "wiki",
+          "clientHeight": 285,
+          "scrollHeight": 894,
+          "overflowY": "auto"
+        },
+        {
+          "id": "governance",
+          "clientHeight": 285,
+          "scrollHeight": 1053,
+          "overflowY": "auto"
+        },
+        {
+          "id": "diagnostics",
+          "clientHeight": 285,
+          "scrollHeight": 285,
+          "overflowY": "auto"
+        }
+      ]
+    },
+    {
+      "variant": "desktop-900-day",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyHeight": 900,
+      "bodyRatio": 1,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visiblePanelCount": 1,
+      "reachableSectionCount": 6,
+      "minimumControlHeight": 44,
+      "panelTop": 326.39,
+      "panelBottom": 788.39,
+      "localScrollPanelCount": 4,
+      "maximumPanelScrollRatio": 2.94,
+      "panels": [
+        {
+          "id": "today",
+          "clientHeight": 462,
+          "scrollHeight": 462,
+          "overflowY": "auto"
+        },
+        {
+          "id": "technical",
+          "clientHeight": 462,
+          "scrollHeight": 1357,
+          "overflowY": "auto"
+        },
+        {
+          "id": "references",
+          "clientHeight": 462,
+          "scrollHeight": 1217,
+          "overflowY": "auto"
+        },
+        {
+          "id": "wiki",
+          "clientHeight": 462,
+          "scrollHeight": 894,
+          "overflowY": "auto"
+        },
+        {
+          "id": "governance",
+          "clientHeight": 462,
+          "scrollHeight": 1053,
+          "overflowY": "auto"
+        },
+        {
+          "id": "diagnostics",
+          "clientHeight": 462,
+          "scrollHeight": 462,
+          "overflowY": "auto"
+        }
+      ]
+    },
+    {
+      "variant": "tablet-1000-day",
+      "viewport": {
+        "width": 1024,
+        "height": 1000
+      },
+      "bodyHeight": 1023,
+      "bodyRatio": 1.02,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visiblePanelCount": 1,
+      "reachableSectionCount": 6,
+      "minimumControlHeight": 44,
+      "panelTop": 348.78,
+      "panelBottom": 910.78,
+      "localScrollPanelCount": 4,
+      "maximumPanelScrollRatio": 2.73,
+      "panels": [
+        {
+          "id": "today",
+          "clientHeight": 562,
+          "scrollHeight": 562,
+          "overflowY": "auto"
+        },
+        {
+          "id": "technical",
+          "clientHeight": 562,
+          "scrollHeight": 1534,
+          "overflowY": "auto"
+        },
+        {
+          "id": "references",
+          "clientHeight": 562,
+          "scrollHeight": 1325,
+          "overflowY": "auto"
+        },
+        {
+          "id": "wiki",
+          "clientHeight": 562,
+          "scrollHeight": 894,
+          "overflowY": "auto"
+        },
+        {
+          "id": "governance",
+          "clientHeight": 562,
+          "scrollHeight": 1274,
+          "overflowY": "auto"
+        },
+        {
+          "id": "diagnostics",
+          "clientHeight": 562,
+          "scrollHeight": 562,
+          "overflowY": "auto"
+        }
+      ]
+    },
+    {
+      "variant": "mobile-723-day",
+      "viewport": {
+        "width": 390,
+        "height": 723
+      },
+      "bodyHeight": 733,
+      "bodyRatio": 1.01,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visiblePanelCount": 1,
+      "reachableSectionCount": 6,
+      "minimumControlHeight": 44,
+      "panelTop": 437.97,
+      "panelBottom": 620.97,
+      "localScrollPanelCount": 6,
+      "maximumPanelScrollRatio": 13.86,
+      "panels": [
+        {
+          "id": "today",
+          "clientHeight": 183,
+          "scrollHeight": 614,
+          "overflowY": "auto"
+        },
+        {
+          "id": "technical",
+          "clientHeight": 183,
+          "scrollHeight": 2537,
+          "overflowY": "auto"
+        },
+        {
+          "id": "references",
+          "clientHeight": 183,
+          "scrollHeight": 1896,
+          "overflowY": "auto"
+        },
+        {
+          "id": "wiki",
+          "clientHeight": 183,
+          "scrollHeight": 1361,
+          "overflowY": "auto"
+        },
+        {
+          "id": "governance",
+          "clientHeight": 183,
+          "scrollHeight": 2431,
+          "overflowY": "auto"
+        },
+        {
+          "id": "diagnostics",
+          "clientHeight": 183,
+          "scrollHeight": 247,
+          "overflowY": "auto"
+        }
+      ]
+    },
+    {
+      "variant": "mobile-844-day",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyHeight": 854,
+      "bodyRatio": 1.01,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visiblePanelCount": 1,
+      "reachableSectionCount": 6,
+      "minimumControlHeight": 44,
+      "panelTop": 437.97,
+      "panelBottom": 741.97,
+      "localScrollPanelCount": 5,
+      "maximumPanelScrollRatio": 8.35,
+      "panels": [
+        {
+          "id": "today",
+          "clientHeight": 304,
+          "scrollHeight": 614,
+          "overflowY": "auto"
+        },
+        {
+          "id": "technical",
+          "clientHeight": 304,
+          "scrollHeight": 2537,
+          "overflowY": "auto"
+        },
+        {
+          "id": "references",
+          "clientHeight": 304,
+          "scrollHeight": 1896,
+          "overflowY": "auto"
+        },
+        {
+          "id": "wiki",
+          "clientHeight": 304,
+          "scrollHeight": 1361,
+          "overflowY": "auto"
+        },
+        {
+          "id": "governance",
+          "clientHeight": 304,
+          "scrollHeight": 2431,
+          "overflowY": "auto"
+        },
+        {
+          "id": "diagnostics",
+          "clientHeight": 304,
+          "scrollHeight": 304,
+          "overflowY": "auto"
+        }
+      ]
+    },
+    {
+      "variant": "desktop-723-night",
+      "viewport": {
+        "width": 1440,
+        "height": 723
+      },
+      "bodyHeight": 723,
+      "bodyRatio": 1,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visiblePanelCount": 1,
+      "reachableSectionCount": 6,
+      "minimumControlHeight": 44,
+      "panelTop": 326.39,
+      "panelBottom": 611.39,
+      "localScrollPanelCount": 4,
+      "maximumPanelScrollRatio": 4.76,
+      "panels": [
+        {
+          "id": "today",
+          "clientHeight": 285,
+          "scrollHeight": 285,
+          "overflowY": "auto"
+        },
+        {
+          "id": "technical",
+          "clientHeight": 285,
+          "scrollHeight": 1357,
+          "overflowY": "auto"
+        },
+        {
+          "id": "references",
+          "clientHeight": 285,
+          "scrollHeight": 1217,
+          "overflowY": "auto"
+        },
+        {
+          "id": "wiki",
+          "clientHeight": 285,
+          "scrollHeight": 894,
+          "overflowY": "auto"
+        },
+        {
+          "id": "governance",
+          "clientHeight": 285,
+          "scrollHeight": 1053,
+          "overflowY": "auto"
+        },
+        {
+          "id": "diagnostics",
+          "clientHeight": 285,
+          "scrollHeight": 285,
+          "overflowY": "auto"
+        }
+      ]
+    },
+    {
+      "variant": "desktop-900-night",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyHeight": 900,
+      "bodyRatio": 1,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visiblePanelCount": 1,
+      "reachableSectionCount": 6,
+      "minimumControlHeight": 44,
+      "panelTop": 326.39,
+      "panelBottom": 788.39,
+      "localScrollPanelCount": 4,
+      "maximumPanelScrollRatio": 2.94,
+      "panels": [
+        {
+          "id": "today",
+          "clientHeight": 462,
+          "scrollHeight": 462,
+          "overflowY": "auto"
+        },
+        {
+          "id": "technical",
+          "clientHeight": 462,
+          "scrollHeight": 1357,
+          "overflowY": "auto"
+        },
+        {
+          "id": "references",
+          "clientHeight": 462,
+          "scrollHeight": 1217,
+          "overflowY": "auto"
+        },
+        {
+          "id": "wiki",
+          "clientHeight": 462,
+          "scrollHeight": 894,
+          "overflowY": "auto"
+        },
+        {
+          "id": "governance",
+          "clientHeight": 462,
+          "scrollHeight": 1053,
+          "overflowY": "auto"
+        },
+        {
+          "id": "diagnostics",
+          "clientHeight": 462,
+          "scrollHeight": 462,
+          "overflowY": "auto"
+        }
+      ]
+    },
+    {
+      "variant": "tablet-1000-night",
+      "viewport": {
+        "width": 1024,
+        "height": 1000
+      },
+      "bodyHeight": 1023,
+      "bodyRatio": 1.02,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visiblePanelCount": 1,
+      "reachableSectionCount": 6,
+      "minimumControlHeight": 44,
+      "panelTop": 348.78,
+      "panelBottom": 910.78,
+      "localScrollPanelCount": 4,
+      "maximumPanelScrollRatio": 2.73,
+      "panels": [
+        {
+          "id": "today",
+          "clientHeight": 562,
+          "scrollHeight": 562,
+          "overflowY": "auto"
+        },
+        {
+          "id": "technical",
+          "clientHeight": 562,
+          "scrollHeight": 1534,
+          "overflowY": "auto"
+        },
+        {
+          "id": "references",
+          "clientHeight": 562,
+          "scrollHeight": 1325,
+          "overflowY": "auto"
+        },
+        {
+          "id": "wiki",
+          "clientHeight": 562,
+          "scrollHeight": 894,
+          "overflowY": "auto"
+        },
+        {
+          "id": "governance",
+          "clientHeight": 562,
+          "scrollHeight": 1274,
+          "overflowY": "auto"
+        },
+        {
+          "id": "diagnostics",
+          "clientHeight": 562,
+          "scrollHeight": 562,
+          "overflowY": "auto"
+        }
+      ]
+    },
+    {
+      "variant": "mobile-723-night",
+      "viewport": {
+        "width": 390,
+        "height": 723
+      },
+      "bodyHeight": 733,
+      "bodyRatio": 1.01,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visiblePanelCount": 1,
+      "reachableSectionCount": 6,
+      "minimumControlHeight": 44,
+      "panelTop": 437.97,
+      "panelBottom": 620.97,
+      "localScrollPanelCount": 6,
+      "maximumPanelScrollRatio": 13.86,
+      "panels": [
+        {
+          "id": "today",
+          "clientHeight": 183,
+          "scrollHeight": 614,
+          "overflowY": "auto"
+        },
+        {
+          "id": "technical",
+          "clientHeight": 183,
+          "scrollHeight": 2537,
+          "overflowY": "auto"
+        },
+        {
+          "id": "references",
+          "clientHeight": 183,
+          "scrollHeight": 1896,
+          "overflowY": "auto"
+        },
+        {
+          "id": "wiki",
+          "clientHeight": 183,
+          "scrollHeight": 1361,
+          "overflowY": "auto"
+        },
+        {
+          "id": "governance",
+          "clientHeight": 183,
+          "scrollHeight": 2431,
+          "overflowY": "auto"
+        },
+        {
+          "id": "diagnostics",
+          "clientHeight": 183,
+          "scrollHeight": 247,
+          "overflowY": "auto"
+        }
+      ]
+    },
+    {
+      "variant": "mobile-844-night",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyHeight": 854,
+      "bodyRatio": 1.01,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visiblePanelCount": 1,
+      "reachableSectionCount": 6,
+      "minimumControlHeight": 44,
+      "panelTop": 437.97,
+      "panelBottom": 741.97,
+      "localScrollPanelCount": 5,
+      "maximumPanelScrollRatio": 8.35,
+      "panels": [
+        {
+          "id": "today",
+          "clientHeight": 304,
+          "scrollHeight": 614,
+          "overflowY": "auto"
+        },
+        {
+          "id": "technical",
+          "clientHeight": 304,
+          "scrollHeight": 2537,
+          "overflowY": "auto"
+        },
+        {
+          "id": "references",
+          "clientHeight": 304,
+          "scrollHeight": 1896,
+          "overflowY": "auto"
+        },
+        {
+          "id": "wiki",
+          "clientHeight": 304,
+          "scrollHeight": 1361,
+          "overflowY": "auto"
+        },
+        {
+          "id": "governance",
+          "clientHeight": 304,
+          "scrollHeight": 2431,
+          "overflowY": "auto"
+        },
+        {
+          "id": "diagnostics",
+          "clientHeight": 304,
+          "scrollHeight": 304,
+          "overflowY": "auto"
+        }
+      ]
+    }
+  ]
+}
