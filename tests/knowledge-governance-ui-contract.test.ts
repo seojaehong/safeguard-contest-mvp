@@ -134,7 +134,7 @@ describe("knowledge governance UI contract", () => {
   });
 
   it("gives repeated knowledge disclosures and links full touch targets", () => {
-    expect(cssSource).toMatch(/\.rowDetails summary[\s\S]*?min-height:\s*44px;/u);
+    expect(cssSource).toMatch(/\.referenceDisclosure > summary[\s\S]*?min-height:\s*44px;/u);
     expect(cssSource).toMatch(/\.detailContent a[\s\S]*?min-height:\s*44px;/u);
   });
 });

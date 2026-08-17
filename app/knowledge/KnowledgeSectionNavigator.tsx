@@ -31,16 +31,17 @@ function revealTargetWhenNeeded(hash: string): void {
     const target = document.getElementById(hash.slice(1));
     if (!target) return;
     const panel = target.closest<HTMLElement>('[data-knowledge-panel]');
+    const section = target.closest<HTMLElement>("section") ?? target;
     if (panel && panel.scrollHeight > panel.clientHeight) {
       panel.scrollTo({
-        top: Math.max(0, target.offsetTop - panel.offsetTop - 8),
+        top: Math.max(0, section.offsetTop - panel.offsetTop - 8),
         behavior: "auto"
       });
       return;
     }
-    const rectangle = target.getBoundingClientRect();
+    const rectangle = section.getBoundingClientRect();
     if (rectangle.top < 0 || rectangle.bottom > window.innerHeight) {
-      target.scrollIntoView({ block: "start" });
+      section.scrollIntoView({ block: "start" });
     }
   });
 }

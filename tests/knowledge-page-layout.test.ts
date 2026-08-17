@@ -142,11 +142,13 @@ describe("knowledge page decision layout", () => {
     expect(technicalList).toContain("normalizeApprovedSafetyReferenceProvenanceUrl(item.source_url)");
     expect(technicalList).toContain("provenanceUrl ?");
     expect(technicalList).toContain("<details");
+    expect(technicalList).toContain('name="technical-support-reference"');
 
     expect(referenceList).toContain("<ul");
     expect(referenceList).toContain("<li");
     expect(referenceList).toContain("koshaReferenceEntries.map");
     expect(referenceList).toContain("<details");
+    expect(referenceList).toContain('name="reference-library-entry"');
     expect(referenceData.match(/href:\s*"\/kosha-references\//g)).toHaveLength(7);
     expect(referenceData).toContain("risk-assessment-implementation-manual-2022.pdf");
     expect(referenceData).toContain("tbm-pre-work-safety-meeting-guide-2023.pdf");
@@ -170,6 +172,9 @@ describe("knowledge page decision layout", () => {
     expect(pageSource).toContain("stats.ingestionRuns");
     expect(pageSource).toContain("stats.message");
     expect(pageSource).toContain("data-knowledge-provenance");
+    expect(pageSource.indexOf('data-knowledge-list="technical-support"')).toBeLessThan(
+      pageSource.indexOf('aria-label="KOSHA 기술 지원 적재 현황"')
+    );
   });
 
   it("keeps the scoped styles quiet, bounded, and single-column on mobile", () => {
@@ -372,6 +377,7 @@ describe("knowledge page decision layout", () => {
         }
         return element.open;
       })).toBe(true);
+      expect(await activeList.locator("details[open]").count()).toBe(1);
     }
 
     const metrics = await page.evaluate((listSelector) => {

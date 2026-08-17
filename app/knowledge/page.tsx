@@ -391,18 +391,6 @@ export default async function KnowledgePage() {
             </p>
           </header>
 
-          <dl className={styles.metricStrip} aria-label="KOSHA 기술 지원 적재 현황">
-            <div><dt>전체</dt><dd>{stats.technicalTotal.toLocaleString("ko-KR")}건</dd></div>
-            <div><dt>규정</dt><dd>{stats.technicalSupportRegulations.toLocaleString("ko-KR")}건</dd></div>
-            <div><dt>지침</dt><dd>{stats.technicalGuidelines.toLocaleString("ko-KR")}건</dd></div>
-            <div><dt>적재 실행</dt><dd>{stats.ingestionRuns.toLocaleString("ko-KR")}회</dd></div>
-          </dl>
-
-          <p className={styles.provenance} data-knowledge-provenance="true">
-            <strong>데이터 연결 상태</strong>
-            <span>{stats.message}</span>
-          </p>
-
           {/* data-knowledge-list="technical-support" */}
           <ul className={styles.referenceList} data-knowledge-list="technical-support">
             {stats.samples.map((item) => {
@@ -413,25 +401,26 @@ export default async function KnowledgePage() {
 
               return (
                 <li key={item.id} className={styles.referenceRow} data-knowledge-row>
-                  <div className={styles.rowIdentity}>
-                    <span className={styles.sourceKind}>{sourceKind}</span>
-                    <h3>{item.title}</h3>
-                  </div>
-                  <p className={styles.rowSummary} data-knowledge-summary="true">{summary}</p>
-                  <dl className={styles.reflection}>
-                    <div>
-                      <dt>반영 문서</dt>
-                      <dd>{reflection}</dd>
-                    </div>
-                  </dl>
-                  <details className={styles.rowDetails}>
-                    <summary>근거 정보</summary>
-                    <div className={styles.detailContent}>
-                      {item.evidence_role_label ? <span>{item.evidence_role_label}</span> : null}
-                      <a href={`/knowledge?reference=${encodeURIComponent(item.title)}`}>이 근거로 조회</a>
-                      {provenanceUrl ? (
-                        <a href={provenanceUrl} target="_blank" rel="noopener noreferrer">원문 열기</a>
-                      ) : null}
+                  <details className={styles.referenceDisclosure} name="technical-support-reference">
+                    <summary>
+                      <span className={styles.sourceKind}>{sourceKind}</span>
+                      <strong>{item.title}</strong>
+                    </summary>
+                    <div className={styles.referenceDetailGrid}>
+                      <p className={styles.rowSummary} data-knowledge-summary="true">{summary}</p>
+                      <dl className={styles.reflection}>
+                        <div>
+                          <dt>반영 문서</dt>
+                          <dd>{reflection}</dd>
+                        </div>
+                      </dl>
+                      <div className={styles.detailContent}>
+                        {item.evidence_role_label ? <span>{item.evidence_role_label}</span> : null}
+                        <a href={`/knowledge?reference=${encodeURIComponent(item.title)}`}>이 근거로 조회</a>
+                        {provenanceUrl ? (
+                          <a href={provenanceUrl} target="_blank" rel="noopener noreferrer">원문 열기</a>
+                        ) : null}
+                      </div>
                     </div>
                   </details>
                 </li>
@@ -439,6 +428,16 @@ export default async function KnowledgePage() {
             })}
           </ul>
           {/* data-knowledge-list-end="technical-support" */}
+          <dl className={styles.metricStrip} aria-label="KOSHA 기술 지원 적재 현황" tabIndex={0}>
+            <div><dt>전체</dt><dd>{stats.technicalTotal.toLocaleString("ko-KR")}건</dd></div>
+            <div><dt>규정</dt><dd>{stats.technicalSupportRegulations.toLocaleString("ko-KR")}건</dd></div>
+            <div><dt>지침</dt><dd>{stats.technicalGuidelines.toLocaleString("ko-KR")}건</dd></div>
+            <div><dt>적재 실행</dt><dd>{stats.ingestionRuns.toLocaleString("ko-KR")}회</dd></div>
+          </dl>
+          <details className={styles.provenance} data-knowledge-provenance="true">
+            <summary>데이터 연결 상태</summary>
+            <p>{stats.message}</p>
+          </details>
         </section>
         </div>
 
@@ -458,39 +457,39 @@ export default async function KnowledgePage() {
             <p>위험성평가·안전보건진단 작성 시 본문 옆에 펼쳐 참고하세요.</p>
           </header>
 
-          <p className={styles.provenance} data-knowledge-provenance="true">
-            <strong>자료 출처</strong>
-            <span>KOSHA 공식 발간 매뉴얼·가이드라인 PDF. 출처: 안전보건공단 (공공누리 1유형, 출처표시 자유사용/재배포 가능).</span>
-          </p>
-
           {/* data-knowledge-list="reference-library" */}
           <ul className={styles.referenceList} data-knowledge-list="reference-library">
             {koshaReferenceEntries.map((entry) => (
               <li key={entry.href} className={styles.referenceRow} data-knowledge-row>
-                <div className={styles.rowIdentity}>
-                  <span className={styles.sourceKind}>{entry.sourceKind}</span>
-                  <h3>{entry.title}</h3>
-                </div>
-                <p className={styles.rowSummary} data-knowledge-summary="true">
-                  {normalizeKnowledgeSnippet(entry.summary)}
-                </p>
-                <dl className={styles.reflection}>
-                  <div>
-                    <dt>반영 문서</dt>
-                    <dd>{entry.reflectedLocation}</dd>
-                  </div>
-                </dl>
-                <details className={styles.rowDetails}>
-                  <summary>PDF 정보</summary>
-                  <div className={styles.detailContent}>
-                    <span>{entry.fileMeta}</span>
-                    <a href={entry.href} target="_blank" rel="noopener noreferrer">PDF 원문 열기</a>
+                <details className={styles.referenceDisclosure} name="reference-library-entry">
+                  <summary>
+                    <span className={styles.sourceKind}>{entry.sourceKind}</span>
+                    <strong>{entry.title}</strong>
+                  </summary>
+                  <div className={styles.referenceDetailGrid}>
+                    <p className={styles.rowSummary} data-knowledge-summary="true">
+                      {normalizeKnowledgeSnippet(entry.summary)}
+                    </p>
+                    <dl className={styles.reflection}>
+                      <div>
+                        <dt>반영 문서</dt>
+                        <dd>{entry.reflectedLocation}</dd>
+                      </div>
+                    </dl>
+                    <div className={styles.detailContent}>
+                      <span>{entry.fileMeta}</span>
+                      <a href={entry.href} target="_blank" rel="noopener noreferrer">PDF 원문 열기</a>
+                    </div>
                   </div>
                 </details>
               </li>
             ))}
           </ul>
           {/* data-knowledge-list-end="reference-library" */}
+          <details className={styles.provenance} data-knowledge-provenance="true">
+            <summary>자료 출처</summary>
+            <p>KOSHA 공식 발간 매뉴얼·가이드라인 PDF. 출처: 안전보건공단 (공공누리 1유형, 출처표시 자유사용/재배포 가능).</p>
+          </details>
         </section>
         </div>
 

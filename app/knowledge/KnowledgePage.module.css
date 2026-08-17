@@ -827,9 +827,6 @@
 }
 
 .provenance {
-  display: grid;
-  grid-template-columns: 128px minmax(0, 1fr);
-  gap: var(--space-3);
   margin-top: var(--space-3);
   border-left: 3px solid #66717f;
   border-radius: var(--radius-control);
@@ -841,11 +838,17 @@
   letter-spacing: var(--tracking-body);
 }
 
-.provenance strong {
+.provenance > summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  cursor: pointer;
   color: var(--workspace-ink, #17191d);
+  font-weight: 700;
 }
 
-.provenance span {
+.provenance > p {
+  margin-top: var(--space-2) !important;
   color: var(--workspace-muted, #606873);
 }
 
@@ -871,18 +874,48 @@
   padding: var(--space-4) var(--space-1);
 }
 
-.rowIdentity,
 .rowSummary,
 .reflection {
   min-width: 0;
 }
 
-.rowIdentity h3 {
-  margin-top: var(--space-1);
+.referenceDisclosure {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.referenceDisclosure > summary {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.85fr) minmax(0, 2.15fr);
+  gap: var(--space-3) var(--space-6);
+  align-items: center;
+  min-height: 44px;
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.referenceDisclosure > summary strong {
   font-size: var(--text-body);
   font-weight: 500;
   line-height: var(--leading-body);
   letter-spacing: var(--tracking-body);
+}
+
+.referenceDisclosure > summary::marker {
+  color: var(--workspace-muted, #606873);
+}
+
+.referenceDisclosure[open] > summary {
+  padding-bottom: var(--space-3);
+}
+
+.referenceDetailGrid {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.9fr) minmax(0, 1.2fr) minmax(190px, 0.8fr);
+  gap: var(--space-3) var(--space-6);
+  min-width: 0;
+  border-top: 1px dashed var(--workspace-rule, #e2e5e9);
+  padding-top: var(--space-3);
 }
 
 .rowSummary {
@@ -907,14 +940,6 @@
   letter-spacing: var(--tracking-body);
 }
 
-.rowDetails {
-  grid-column: 1 / -1;
-  min-width: 0;
-  border-top: 1px dashed var(--workspace-rule, #e2e5e9);
-  padding-top: var(--space-3);
-}
-
-.rowDetails summary,
 .rawDetails summary {
   display: inline-flex;
   align-items: center;
@@ -1047,6 +1072,10 @@
     grid-template-columns: minmax(190px, 0.85fr) minmax(0, 1.15fr);
   }
 
+  .referenceDetailGrid {
+    grid-template-columns: minmax(190px, 0.85fr) minmax(0, 1.15fr);
+  }
+
   .promotionFlow {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1099,6 +1128,39 @@
     padding-top: var(--space-5);
   }
 
+  .knowledgePanel:is([data-knowledge-panel="technical"], [data-knowledge-panel="references"]) .section {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0;
+    padding-top: var(--space-3);
+  }
+
+  .knowledgePanel:is([data-knowledge-panel="technical"], [data-knowledge-panel="references"]) .sectionHeader {
+    display: contents;
+  }
+
+  .knowledgePanel:is([data-knowledge-panel="technical"], [data-knowledge-panel="references"]) .sectionHeader > div {
+    order: 1;
+  }
+
+  .knowledgePanel:is([data-knowledge-panel="technical"], [data-knowledge-panel="references"]) .referenceList {
+    order: 2;
+    margin-top: var(--space-3);
+  }
+
+  .knowledgePanel:is([data-knowledge-panel="technical"], [data-knowledge-panel="references"]) .sectionHeader > p {
+    order: 3;
+    margin-top: var(--space-3) !important;
+  }
+
+  .knowledgePanel[data-knowledge-panel="technical"] .metricStrip {
+    order: 4;
+  }
+
+  .knowledgePanel:is([data-knowledge-panel="technical"], [data-knowledge-panel="references"]) .provenance {
+    order: 5;
+  }
+
   .sectionHeader h2,
   .compactHeader h2 {
     font-size: var(--text-component-title);
@@ -1110,7 +1172,7 @@
   .metricStrip,
   .promotionFlow,
   .referenceRow,
-  .provenance,
+  .referenceDetailGrid,
   .wikiGrid {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -1223,26 +1285,36 @@
   }
 
   .metricStrip > div {
-    border-right: 0;
-    border-bottom: 1px solid var(--workspace-rule, #e2e5e9);
-  }
-
-  .metricStrip > div:last-child {
+    min-width: 88px;
+    border-right: 1px solid var(--workspace-rule, #e2e5e9);
     border-bottom: 0;
   }
 
+  .metricStrip {
+    grid-template-columns: repeat(4, minmax(88px, 1fr));
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+  }
+
+  .metricStrip:focus-visible {
+    outline: 3px solid var(--workspace-focus, #0b6eeb);
+    outline-offset: 2px;
+  }
+
   .referenceRow {
-    gap: var(--space-3);
-    padding: var(--space-4) var(--space-1);
+    gap: 0;
+    padding: var(--space-2) var(--space-1);
   }
 
-  .reflection,
-  .rowDetails {
+  .referenceDisclosure > summary {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-1);
+    min-height: 52px;
+  }
+
+  .reflection {
     grid-column: 1;
-  }
-
-  .rowDetails summary {
-    width: 100%;
   }
 
   .detailContent {

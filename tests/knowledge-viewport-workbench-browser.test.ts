@@ -25,6 +25,8 @@ type PanelMetric = {
   clientHeight: number;
   scrollHeight: number;
   overflowY: string;
+  disclosureCount: number;
+  openDisclosureCount: number;
 };
 
 type BrowserMetric = {
@@ -39,6 +41,8 @@ type BrowserMetric = {
   minimumControlHeight: number;
   panelTop: number;
   panelBottom: number;
+  firstDisclosureTop: number;
+  firstDisclosureBottom: number;
   localScrollPanelCount: number;
   maximumPanelScrollRatio: number;
   panels: PanelMetric[];
@@ -66,9 +70,15 @@ async function auditVariant(
       id: element.dataset.knowledgePanel || "missing",
       clientHeight: element.clientHeight,
       scrollHeight: element.scrollHeight,
-      overflowY: window.getComputedStyle(element).overflowY
+      overflowY: window.getComputedStyle(element).overflowY,
+      disclosureCount: element.querySelectorAll("[data-knowledge-row] details").length,
+      openDisclosureCount: element.querySelectorAll("[data-knowledge-row] details[open]").length
     })));
   }
+
+  const technicalTab = page.getByRole("tab", { name: "기술 지원" });
+  await technicalTab.click();
+  await expect.poll(() => technicalTab.getAttribute("aria-selected")).toBe("true");
 
   const geometry = await page.evaluate(() => {
     const visible = (element: Element) => {
@@ -77,7 +87,7 @@ async function auditVariant(
       return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
     };
     const root = document.querySelector<HTMLElement>('[data-knowledge-surface]');
-    const activePanel = document.querySelector<HTMLElement>('[data-knowledge-panel="diagnostics"]');
+    const activePanel = document.querySelector<HTMLElement>('[data-knowledge-panel="technical"]');
     if (!root || !activePanel) throw new Error("Missing knowledge workbench geometry targets");
     const controls = [...root.querySelectorAll<HTMLElement>('button, input, select, summary, a')].filter(visible);
     const outsideElements = [...root.querySelectorAll<HTMLElement>("*")]
@@ -87,6 +97,9 @@ async function auditVariant(
         return rect.left < -0.5 || rect.right > window.innerWidth + 0.5;
       });
     const panelRect = activePanel.getBoundingClientRect();
+    const firstDisclosure = activePanel.querySelector<HTMLElement>("[data-knowledge-row] details > summary");
+    if (!firstDisclosure) throw new Error("Missing first KOSHA disclosure");
+    const firstDisclosureRect = firstDisclosure.getBoundingClientRect();
     return {
       bodyHeight: document.documentElement.scrollHeight,
       horizontalOverflow: Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, 0),
@@ -96,7 +109,9 @@ async function auditVariant(
         ? Math.min(...controls.map((element) => element.getBoundingClientRect().height))
         : 0,
       panelTop: panelRect.top,
-      panelBottom: panelRect.bottom
+      panelBottom: panelRect.bottom,
+      firstDisclosureTop: firstDisclosureRect.top,
+      firstDisclosureBottom: firstDisclosureRect.bottom
     };
   });
 
@@ -112,9 +127,20 @@ async function auditVariant(
   expect(geometry.minimumControlHeight).toBeGreaterThanOrEqual(44);
   expect(geometry.panelTop).toBeGreaterThanOrEqual(0);
   expect(geometry.panelBottom).toBeLessThanOrEqual(height + 1);
+  expect(geometry.firstDisclosureTop).toBeGreaterThanOrEqual(geometry.panelTop);
+  expect(geometry.firstDisclosureBottom).toBeLessThanOrEqual(geometry.panelBottom);
   expect(panels).toHaveLength(6);
   expect(panels.every((panel) => panel.overflowY === "auto")).toBe(true);
   expect(panels.some((panel) => panel.scrollHeight > panel.clientHeight)).toBe(true);
+  expect(panels.every((panel) => panel.openDisclosureCount === 0)).toBe(true);
+  expect(panels.find((panel) => panel.id === "references")?.disclosureCount).toBe(7);
+  const technicalPanel = panels.find((panel) => panel.id === "technical");
+  const referencesPanel = panels.find((panel) => panel.id === "references");
+  if (!technicalPanel || !referencesPanel) throw new Error("Missing KOSHA reference panels");
+  if (width === 390) {
+    expect(technicalPanel.scrollHeight / technicalPanel.clientHeight).toBeLessThanOrEqual(6.1);
+    expect(referencesPanel.scrollHeight / referencesPanel.clientHeight).toBeLessThanOrEqual(4.1);
+  }
 
   const variant = `${width === 390 ? "mobile" : width === 1024 ? "tablet" : "desktop"}-${height}-${theme}`;
   await page.screenshot({ path: path.join(artifactDirectory, `${variant}.png`), fullPage: true });
@@ -130,6 +156,8 @@ async function auditVariant(
     minimumControlHeight: Math.round(geometry.minimumControlHeight * 100) / 100,
     panelTop: Math.round(geometry.panelTop * 100) / 100,
     panelBottom: Math.round(geometry.panelBottom * 100) / 100,
+    firstDisclosureTop: Math.round(geometry.firstDisclosureTop * 100) / 100,
+    firstDisclosureBottom: Math.round(geometry.firstDisclosureBottom * 100) / 100,
     localScrollPanelCount: panels.filter((panel) => panel.scrollHeight > panel.clientHeight).length,
     maximumPanelScrollRatio: Math.max(...panels.map((panel) => (
       Math.round((panel.scrollHeight / Math.max(panel.clientHeight, 1)) * 100) / 100
@@ -143,14 +171,22 @@ describe.skipIf(!baseUrl)("knowledge viewport workbench production browser contr
     fs.mkdirSync(artifactDirectory, { recursive: true });
     const browser = await chromium.launch({ headless: true });
     try {
-      const page = await browser.newPage();
       const metrics: BrowserMetric[] = [];
       for (const theme of ["day", "night"] as const) {
-        metrics.push(await auditVariant(page, theme, { width: 1440, height: 723 }));
-        metrics.push(await auditVariant(page, theme, { width: 1440, height: 900 }));
-        metrics.push(await auditVariant(page, theme, { width: 1024, height: 1000 }));
-        metrics.push(await auditVariant(page, theme, { width: 390, height: 723 }));
-        metrics.push(await auditVariant(page, theme, { width: 390, height: 844 }));
+        for (const viewport of [
+          { width: 1440, height: 723 },
+          { width: 1440, height: 900 },
+          { width: 1024, height: 1000 },
+          { width: 390, height: 723 },
+          { width: 390, height: 844 }
+        ] as const) {
+          const page = await browser.newPage({ viewport });
+          try {
+            metrics.push(await auditVariant(page, theme, viewport));
+          } finally {
+            await page.close();
+          }
+        }
       }
       fs.writeFileSync(
         path.join(artifactDirectory, "browser-metrics.json"),
