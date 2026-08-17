@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-17T05:00:37.277Z",
-  "sourceSha": "89b72fe306bf529378b11626fb405f1d285f4906",
+  "generatedAt": "2026-08-17T06:06:32.007Z",
+  "sourceSha": "7fbb9695128dcf5db48d2f8abf82fd2d098dc0ea",
   "overall": "open",
   "gates": [
     {
@@ -155,6 +155,14 @@
       "label": "Live ontology viewport workbench",
       "evidencePath": "evaluation\\ontology-viewport-workbench-2026-08-17\\report.json",
       "detail": "Production /ontology passes 10/10 Day/Night browser rows with body ratio 1, zero horizontal overflow and overlap, and 44px minimum controls. Desktop keeps 848.5625px explorer plus 339.4375px directory panes; tablet and mobile expose one bounded task pane at a time, and mobile task switching passes 4/4 with selection returning to the explorer top. Route split alone is not accepted, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": []
+    },
+    {
+      "id": "knowledge_viewport_workbench",
+      "state": "proven",
+      "label": "Live Knowledge viewport workbench",
+      "evidencePath": "evaluation\\knowledge-viewport-workbench-2026-08-17\\report.json",
+      "detail": "Production /knowledge passes 10/10 Day/Night browser rows with maximum body ratio 1.02, one visible panel, six reachable tasks, zero horizontal overflow, and 44px minimum controls. Long content remains inside local-scroll panels; route split alone is not accepted. No mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus SIF embedding remain APPROVAL_GATED.",
       "nextActions": []
     },
     {

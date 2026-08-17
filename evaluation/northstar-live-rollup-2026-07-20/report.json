@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-17T05:00:38.662Z",
-  "head": "89b72fe306bf529378b11626fb405f1d285f4906",
+  "generatedAt": "2026-08-17T06:06:38.013Z",
+  "head": "7fbb9695128dcf5db48d2f8abf82fd2d098dc0ea",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "89b72fe306bf529378b11626fb405f1d285f4906",
+    "commitSha": "ab11b1bed992c94d0235c9599572722ef6fa5580",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-4iuse263d-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-7syms8ehd-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 64
+    "gateCount": 65
   },
   "provenGates": [
     {
@@ -110,6 +110,12 @@
       "state": "proven",
       "artifact": "evaluation\\ontology-viewport-workbench-2026-08-17\\report.json",
       "detail": "Production /ontology passes 10/10 Day/Night browser rows with body ratio 1, zero horizontal overflow and overlap, and 44px minimum controls. Desktop keeps 848.5625px explorer plus 339.4375px directory panes; tablet and mobile expose one bounded task pane at a time, and mobile task switching passes 4/4 with selection returning to the explorer top. Route split alone is not accepted, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "knowledge_viewport_workbench",
+      "state": "proven",
+      "artifact": "evaluation\\knowledge-viewport-workbench-2026-08-17\\report.json",
+      "detail": "Production /knowledge passes 10/10 Day/Night browser rows with maximum body ratio 1.02, one visible panel, six reachable tasks, zero horizontal overflow, and 44px minimum controls. Long content remains inside local-scroll panels; route split alone is not accepted. No mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus SIF embedding remain APPROVAL_GATED."
     },
     {
       "id": "dependency_security_remediation",
@@ -1084,6 +1090,22 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "fullyAutomatedLaunchClaimAllowed": false
   },
+  "knowledgeViewportWorkbench": {
+    "artifact": "evaluation\\knowledge-viewport-workbench-2026-08-17\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_KNOWLEDGE_VIEWPORT_WORKBENCH",
+    "sourceHead": "b6a11993cbb6dfffb5dddce3bfccc4ca7408f76c",
+    "productCommit": "b6a11993cbb6dfffb5dddce3bfccc4ca7408f76c",
+    "productionCommit": "b6a11993cbb6dfffb5dddce3bfccc4ca7408f76c",
+    "rowCount": 10,
+    "passCount": 10,
+    "maxBodyRatio": 1.02,
+    "visiblePanelCountPerRow": 1,
+    "reachableSectionCountPerRow": 6,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublicationVerdict": "APPROVAL_GATED",
+    "sifEmbeddingRuntimeVerdict": "APPROVAL_GATED",
+    "fullyAutomatedLaunchClaimAllowed": false
+  },
   "tenantAuthorizationRemediation": {
     "artifact": "evaluation\\tenant-authorization-boundary-preflight-2026-07-29\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
@@ -1336,10 +1358,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "89b72fe306bf529378b11626fb405f1d285f4906",
+      "sourceCommit": "7fbb9695128dcf5db48d2f8abf82fd2d098dc0ea",
       "sourceStatus": "exact",
-      "productionCommit": "89b72fe306bf529378b11626fb405f1d285f4906",
-      "productionStatus": "matches_live"
+      "productionCommit": "7fbb9695128dcf5db48d2f8abf82fd2d098dc0ea",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -1465,9 +1487,17 @@
       "id": "ontology_viewport_workbench",
       "artifact": "evaluation\\ontology-viewport-workbench-2026-08-17\\report.json",
       "sourceCommit": "89b72fe306bf529378b11626fb405f1d285f4906",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "89b72fe306bf529378b11626fb405f1d285f4906",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "knowledge_viewport_workbench",
+      "artifact": "evaluation\\knowledge-viewport-workbench-2026-08-17\\report.json",
+      "sourceCommit": "b6a11993cbb6dfffb5dddce3bfccc4ca7408f76c",
+      "sourceStatus": "ancestor",
+      "productionCommit": "b6a11993cbb6dfffb5dddce3bfccc4ca7408f76c",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "tenant_authorization_remediation",
