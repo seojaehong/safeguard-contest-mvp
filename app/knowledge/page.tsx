@@ -316,58 +316,78 @@ export default async function KnowledgePage() {
 
           <KnowledgeReviewInbox />
 
-          <ol className={styles.promotionFlow} aria-label="지식 승격 네 단계">
-            {KNOWLEDGE_PROMOTION_STAGES.map((stage) => (
-              <li key={stage.id} className={styles.promotionStage} data-knowledge-stage={stage.id}>
-                <div className={styles.stageHeading}>
-                  <span className={styles.stageSequence}>{stage.sequence}</span>
-                  <span className={styles.stageState}>{stage.stateLabel}</span>
-                </div>
-                <h3>{KNOWLEDGE_STAGE_PRESENTATION[stage.id].label}</h3>
-                <p>{KNOWLEDGE_STAGE_PRESENTATION[stage.id].detail}</p>
-                <dl className={styles.stageMeta}>
-                  <div>
-                    <dt>소유</dt>
-                    <dd>{KNOWLEDGE_STAGE_PRESENTATION[stage.id].ownerLabel}</dd>
-                  </div>
-                  <div>
-                    <dt>다음 상태</dt>
-                    <dd>{stage.nextStage ? NEXT_STAGE_LABELS[stage.nextStage] : "최종 읽기 범위"}</dd>
-                  </div>
-                </dl>
-              </li>
-            ))}
-          </ol>
+          <div className={styles.governanceSupport}>
+            <details
+              className={styles.supportDisclosure}
+              name="knowledge-governance-support"
+              data-knowledge-progressive-disclosure="promotion"
+            >
+              <summary>
+                <span className={styles.kicker}>승격 단계</span>
+                <strong>원본부터 게시 전까지 4단계 확인</strong>
+                <span>4단계</span>
+              </summary>
+              <ol className={styles.promotionFlow} aria-label="지식 승격 네 단계">
+                {KNOWLEDGE_PROMOTION_STAGES.map((stage) => (
+                  <li key={stage.id} className={styles.promotionStage} data-knowledge-stage={stage.id}>
+                    <div className={styles.stageHeading}>
+                      <span className={styles.stageSequence}>{stage.sequence}</span>
+                      <span className={styles.stageState}>{stage.stateLabel}</span>
+                    </div>
+                    <h3>{KNOWLEDGE_STAGE_PRESENTATION[stage.id].label}</h3>
+                    <p>{KNOWLEDGE_STAGE_PRESENTATION[stage.id].detail}</p>
+                    <dl className={styles.stageMeta}>
+                      <div>
+                        <dt>소유</dt>
+                        <dd>{KNOWLEDGE_STAGE_PRESENTATION[stage.id].ownerLabel}</dd>
+                      </div>
+                      <div>
+                        <dt>다음 상태</dt>
+                        <dd>{stage.nextStage ? NEXT_STAGE_LABELS[stage.nextStage] : "최종 읽기 범위"}</dd>
+                      </div>
+                    </dl>
+                  </li>
+                ))}
+              </ol>
+            </details>
 
-          <div className={styles.authorityMap} data-knowledge-authority-map="true">
-            <header className={styles.authorityMapHeader}>
-              <span className={styles.kicker}>권위와 출처</span>
-              <h3>근거별 권위와 적용 범위</h3>
-            </header>
-            <ul className={styles.authorityTable} aria-label="지식 근거별 권위와 적용 범위">
-              {KNOWLEDGE_AUTHORITY_LANES.map((lane) => (
-                <li key={lane.id} className={styles.authorityRow} data-knowledge-authority={lane.id}>
-                  <div className={styles.authorityIdentity}>
-                    <strong>{KNOWLEDGE_AUTHORITY_PRESENTATION[lane.id].label}</strong>
-                    <span>{KNOWLEDGE_AUTHORITY_PRESENTATION[lane.id].provenanceRule}</span>
-                  </div>
-                  <dl className={styles.authorityFacts}>
-                    <div>
-                      <dt>권위</dt>
-                      <dd>{lane.authorityLabel}</dd>
-                    </div>
-                    <div>
-                      <dt>범위</dt>
-                      <dd>{lane.scopeLabel}</dd>
-                    </div>
-                    <div>
-                      <dt>법적 역할</dt>
-                      <dd>{lane.legalDutyLabel}</dd>
-                    </div>
-                  </dl>
-                </li>
-              ))}
-            </ul>
+            <details
+              className={styles.supportDisclosure}
+              name="knowledge-governance-support"
+              data-knowledge-progressive-disclosure="authority"
+            >
+              <summary>
+                <span className={styles.kicker}>권위와 출처</span>
+                <strong>근거별 권위와 적용 범위</strong>
+                <span>{KNOWLEDGE_AUTHORITY_LANES.length}개 근거</span>
+              </summary>
+              <div className={styles.authorityMap} data-knowledge-authority-map="true">
+                <ul className={styles.authorityTable} aria-label="지식 근거별 권위와 적용 범위">
+                  {KNOWLEDGE_AUTHORITY_LANES.map((lane) => (
+                    <li key={lane.id} className={styles.authorityRow} data-knowledge-authority={lane.id}>
+                      <div className={styles.authorityIdentity}>
+                        <strong>{KNOWLEDGE_AUTHORITY_PRESENTATION[lane.id].label}</strong>
+                        <span>{KNOWLEDGE_AUTHORITY_PRESENTATION[lane.id].provenanceRule}</span>
+                      </div>
+                      <dl className={styles.authorityFacts}>
+                        <div>
+                          <dt>권위</dt>
+                          <dd>{lane.authorityLabel}</dd>
+                        </div>
+                        <div>
+                          <dt>범위</dt>
+                          <dd>{lane.scopeLabel}</dd>
+                        </div>
+                        <div>
+                          <dt>법적 역할</dt>
+                          <dd>{lane.legalDutyLabel}</dd>
+                        </div>
+                      </dl>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </details>
           </div>
         </section>
         </div>
@@ -401,7 +421,7 @@ export default async function KnowledgePage() {
 
               return (
                 <li key={item.id} className={styles.referenceRow} data-knowledge-row>
-                  <details className={styles.referenceDisclosure} name="technical-support-reference">
+                  <details className={styles.referenceDisclosure} name="technical-support-reference" data-knowledge-progressive-disclosure="technical">
                     <summary>
                       <span className={styles.sourceKind}>{sourceKind}</span>
                       <strong>{item.title}</strong>
@@ -461,7 +481,7 @@ export default async function KnowledgePage() {
           <ul className={styles.referenceList} data-knowledge-list="reference-library">
             {koshaReferenceEntries.map((entry) => (
               <li key={entry.href} className={styles.referenceRow} data-knowledge-row>
-                <details className={styles.referenceDisclosure} name="reference-library-entry">
+                <details className={styles.referenceDisclosure} name="reference-library-entry" data-knowledge-progressive-disclosure="reference">
                   <summary>
                     <span className={styles.sourceKind}>{entry.sourceKind}</span>
                     <strong>{entry.title}</strong>
@@ -500,7 +520,7 @@ export default async function KnowledgePage() {
           aria-labelledby="knowledge-tab-wiki"
           data-knowledge-panel="wiki"
         >
-        <section className={styles.section} aria-labelledby="wiki-index-heading">
+        <section className={`${styles.section} ${styles.wikiSection}`} aria-labelledby="wiki-index-heading">
           <header className={styles.sectionHeader}>
             <div>
               <span className={styles.kicker}>색인</span>
@@ -508,18 +528,13 @@ export default async function KnowledgePage() {
             </div>
             <p>위험요인/서식 위키의 전체 목차입니다. 화면 기본 흐름에서는 근거 행과 반영 위치를 먼저 확인합니다.</p>
           </header>
-          <details className={styles.rawDetails}>
-            <summary>위키 목차 원문 펼치기</summary>
-            <pre>{indexMarkdown}</pre>
-          </details>
-        </section>
-
-        <section className={styles.wikiGrid} aria-label="내장 위키">
-          <article className={styles.wikiColumn}>
-            <header className={styles.compactHeader}>
+          <div className={styles.wikiGrid} aria-label="내장 위키">
+          <details className={styles.wikiColumn} name="knowledge-wiki-directory" data-knowledge-progressive-disclosure="hazards">
+            <summary className={styles.wikiDirectorySummary}>
               <span className={styles.kicker}>위험요인</span>
-              <h2>위험요인 위키</h2>
-            </header>
+              <strong>위험요인 위키</strong>
+              <span>{hazardEntries.length}개</span>
+            </summary>
             <ul className={styles.wikiList}>
               {hazardEntries.map((entry) => (
                 <li key={entry.href}>
@@ -530,12 +545,13 @@ export default async function KnowledgePage() {
                 </li>
               ))}
             </ul>
-          </article>
-          <article className={styles.wikiColumn}>
-            <header className={styles.compactHeader}>
+          </details>
+          <details className={styles.wikiColumn} name="knowledge-wiki-directory" data-knowledge-progressive-disclosure="forms">
+            <summary className={styles.wikiDirectorySummary}>
               <span className={styles.kicker}>서식</span>
-              <h2>서식 위키</h2>
-            </header>
+              <strong>서식 위키</strong>
+              <span>{formEntries.length}개</span>
+            </summary>
             <ul className={styles.wikiList}>
               {formEntries.map((entry) => (
                 <li key={entry.href}>
@@ -546,7 +562,12 @@ export default async function KnowledgePage() {
                 </li>
               ))}
             </ul>
-          </article>
+          </details>
+          </div>
+          <details className={styles.rawDetails}>
+            <summary>위키 목차 원문 펼치기</summary>
+            <pre>{indexMarkdown}</pre>
+          </details>
         </section>
         </div>
 

@@ -65,6 +65,7 @@ describe("knowledge governance UI contract", () => {
 
   it("keeps multi-candidate review selected-only with bounded candidate text", () => {
     expect(inboxSource).toContain('data-review-workbench="selected-only"');
+    expect(inboxSource).toContain("data-knowledge-review-state");
     expect(inboxSource).toContain('data-selected-review-candidate="true"');
     expect(inboxSource).toContain('data-selected-candidate-body="true"');
     expect(inboxSource).toContain("matchedHazardCount");
@@ -129,6 +130,12 @@ describe("knowledge governance UI contract", () => {
   it("keeps the governance surface bounded and single-column on mobile", () => {
     expect(cssSource).toContain(".promotionFlow");
     expect(cssSource).toContain(".authorityTable");
+    expect(pageSource).toContain('data-knowledge-progressive-disclosure="promotion"');
+    expect(pageSource).toContain('data-knowledge-progressive-disclosure="authority"');
+    expect(pageSource).toContain('name="knowledge-governance-support"');
+    expect(pageSource).toContain('data-knowledge-progressive-disclosure="hazards"');
+    expect(pageSource).toContain('data-knowledge-progressive-disclosure="forms"');
+    expect(pageSource).toContain('name="knowledge-wiki-directory"');
     expect(cssSource).toContain("@media (max-width: 720px)");
     expect(cssSource).not.toMatch(/gradient\s*\(/i);
   });

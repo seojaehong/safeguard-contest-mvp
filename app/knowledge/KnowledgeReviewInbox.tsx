@@ -441,11 +441,11 @@ export function KnowledgeReviewInbox() {
         <p>승인 결과도 미게시 상태로 보관되며 법적 확정 또는 온톨로지 반영으로 간주되지 않습니다.</p>
       </header>
 
-      {state === "loading" ? <p className={styles.reviewInboxState}>검토 대기 목록을 불러오는 중입니다.</p> : null}
-      {state === "signed_out" ? <p className={styles.reviewInboxState}>로그인 후 검토 대기 후보를 확인할 수 있습니다.</p> : null}
-      {state === "error" ? <p className={styles.reviewInboxState}>로그인 또는 검토 저장소 연결을 확인해 주세요.</p> : null}
+      {state === "loading" ? <p className={styles.reviewInboxState} data-knowledge-review-state>검토 대기 목록을 불러오는 중입니다.</p> : null}
+      {state === "signed_out" ? <p className={styles.reviewInboxState} data-knowledge-review-state>로그인 후 검토 대기 후보를 확인할 수 있습니다.</p> : null}
+      {state === "error" ? <p className={styles.reviewInboxState} data-knowledge-review-state>로그인 또는 검토 저장소 연결을 확인해 주세요.</p> : null}
       {state === "ready" && items.length === 0 ? (
-        <p className={styles.reviewInboxState}>검토 대기 후보가 없습니다.</p>
+        <p className={styles.reviewInboxState} data-knowledge-review-state>검토 대기 후보가 없습니다.</p>
       ) : null}
       {message ? <p className={styles.reviewInboxMessage} role="status">{message}</p> : null}
 

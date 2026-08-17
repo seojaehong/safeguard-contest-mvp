@@ -218,6 +218,44 @@
   padding-top: var(--space-6);
 }
 
+.governanceSupport {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+.supportDisclosure {
+  min-width: 0;
+  border-top: 1px solid var(--workspace-rule, #e2e5e9);
+  border-bottom: 1px solid var(--workspace-rule, #e2e5e9);
+  background: var(--workspace-surface-1, #ffffff);
+}
+
+.supportDisclosure > summary,
+.wikiDirectorySummary {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.6fr) minmax(0, 1.4fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  min-height: 52px;
+  padding: var(--space-2) var(--space-1);
+  cursor: pointer;
+}
+
+.supportDisclosure > summary strong,
+.wikiDirectorySummary strong {
+  font-size: var(--text-support);
+  line-height: var(--leading-body);
+}
+
+.supportDisclosure > summary > span:last-child,
+.wikiDirectorySummary > span:last-child {
+  color: var(--workspace-muted, #606873);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  line-height: var(--leading-caption);
+}
+
 .reviewInbox {
   min-width: 0;
   margin-top: var(--space-6);
@@ -630,7 +668,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   min-width: 0;
-  margin: var(--space-5) 0 0;
+  margin: 0;
   padding: 0;
   border-top: 1px solid var(--workspace-rule, #e2e5e9);
   border-bottom: 1px solid var(--workspace-rule, #e2e5e9);
@@ -722,7 +760,7 @@
 
 .authorityMap {
   min-width: 0;
-  margin-top: var(--space-8);
+  margin-top: 0;
 }
 
 .authorityMapHeader h3 {
@@ -1006,13 +1044,18 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-8);
   min-width: 0;
-  margin-top: var(--space-8);
+  margin-top: var(--space-4);
 }
 
 .wikiColumn {
   min-width: 0;
   border-top: 1px solid var(--workspace-rule, #e2e5e9);
-  padding-top: var(--space-6);
+  border-bottom: 1px solid var(--workspace-rule, #e2e5e9);
+}
+
+.wikiDirectorySummary {
+  grid-template-columns: minmax(100px, 0.5fr) minmax(0, 1.5fr) auto;
+  list-style-position: inside;
 }
 
 .wikiList {
@@ -1133,6 +1176,73 @@
     flex-direction: column;
     margin-top: 0;
     padding-top: var(--space-3);
+  }
+
+  .knowledgePanel[data-knowledge-panel="wiki"] .wikiSection {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0;
+    padding-top: var(--space-3);
+  }
+
+  .knowledgePanel[data-knowledge-panel="wiki"] .sectionHeader {
+    display: contents;
+  }
+
+  .knowledgePanel[data-knowledge-panel="wiki"] .sectionHeader > div {
+    order: 1;
+  }
+
+  .knowledgePanel[data-knowledge-panel="wiki"] .wikiGrid {
+    order: 2;
+    margin-top: var(--space-3);
+  }
+
+  .knowledgePanel[data-knowledge-panel="wiki"] .sectionHeader > p {
+    order: 3;
+    margin-top: var(--space-3) !important;
+  }
+
+  .knowledgePanel[data-knowledge-panel="wiki"] .rawDetails {
+    order: 4;
+  }
+
+  .knowledgePanel[data-knowledge-panel="governance"] .governanceSection {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0;
+    padding-top: var(--space-3);
+  }
+
+  .knowledgePanel[data-knowledge-panel="governance"] .sectionHeader {
+    display: contents;
+  }
+
+  .knowledgePanel[data-knowledge-panel="governance"] .sectionHeader > div {
+    order: 1;
+  }
+
+  .knowledgePanel[data-knowledge-panel="governance"] .reviewInbox {
+    order: 2;
+    margin-top: var(--space-3);
+    padding: var(--space-3) 0;
+  }
+
+  .knowledgePanel[data-knowledge-panel="governance"] .reviewInboxHeader {
+    gap: var(--space-1);
+  }
+
+  .knowledgePanel[data-knowledge-panel="governance"] .reviewInboxHeader > p {
+    display: none;
+  }
+
+  .knowledgePanel[data-knowledge-panel="governance"] .sectionHeader > p {
+    order: 3;
+    margin-top: var(--space-3) !important;
+  }
+
+  .knowledgePanel[data-knowledge-panel="governance"] .governanceSupport {
+    order: 4;
   }
 
   .knowledgePanel:is([data-knowledge-panel="technical"], [data-knowledge-panel="references"]) .sectionHeader {
@@ -1288,6 +1398,17 @@
     min-width: 88px;
     border-right: 1px solid var(--workspace-rule, #e2e5e9);
     border-bottom: 0;
+  }
+
+  .supportDisclosure > summary,
+  .wikiDirectorySummary {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .supportDisclosure > summary .kicker,
+  .wikiDirectorySummary .kicker {
+    grid-column: 1 / -1;
   }
 
   .metricStrip {

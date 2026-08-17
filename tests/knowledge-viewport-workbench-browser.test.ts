@@ -54,6 +54,7 @@ async function auditVariant(
   viewport: { width: 1440 | 1024 | 390; height: 723 | 844 | 900 | 1000 }
 ): Promise<BrowserMetric> {
   const { width, height } = viewport;
+  const variant = `${width === 390 ? "mobile" : width === 1024 ? "tablet" : "desktop"}-${height}-${theme}`;
   await page.setViewportSize(viewport);
   await page.goto(`${baseUrl}/knowledge?theme=${theme}`, { waitUntil: "networkidle" });
   await page.locator('[data-knowledge-surface] [data-enhanced="true"]').waitFor();
@@ -71,9 +72,44 @@ async function auditVariant(
       clientHeight: element.clientHeight,
       scrollHeight: element.scrollHeight,
       overflowY: window.getComputedStyle(element).overflowY,
-      disclosureCount: element.querySelectorAll("[data-knowledge-row] details").length,
-      openDisclosureCount: element.querySelectorAll("[data-knowledge-row] details[open]").length
+      disclosureCount: element.querySelectorAll("[data-knowledge-progressive-disclosure]").length,
+      openDisclosureCount: element.querySelectorAll("[data-knowledge-progressive-disclosure][open]").length
     })));
+  }
+
+  for (const sectionId of ["wiki", "governance"] as const) {
+    const section = sections.find((item) => item.id === sectionId);
+    if (!section) throw new Error(`Missing ${sectionId} section definition`);
+    const tab = page.getByRole("tab", { name: section.label });
+    await tab.click();
+    const panel = page.locator(`[data-knowledge-panel="${sectionId}"]`);
+    const disclosures = panel.locator("[data-knowledge-progressive-disclosure]");
+    expect(await disclosures.count()).toBe(2);
+    await disclosures.nth(0).locator("summary").click();
+    await expect.poll(() => disclosures.nth(0).getAttribute("open")).not.toBeNull();
+    await expect.poll(() => disclosures.nth(1).getAttribute("open")).toBeNull();
+    await disclosures.nth(1).locator("summary").click();
+    await expect.poll(() => disclosures.nth(0).getAttribute("open")).toBeNull();
+    await expect.poll(() => disclosures.nth(1).getAttribute("open")).not.toBeNull();
+    await disclosures.nth(1).locator("summary").click();
+    await expect.poll(() => disclosures.nth(1).getAttribute("open")).toBeNull();
+    await panel.evaluate((element) => { element.scrollTop = 0; });
+    if (sectionId === "governance" && width === 390) {
+      const state = panel.locator("[data-knowledge-review-state]");
+      await state.waitFor();
+      const stateGeometry = await state.evaluate((element) => {
+        const panelElement = element.closest<HTMLElement>('[data-knowledge-panel="governance"]');
+        if (!panelElement) throw new Error("Missing governance panel");
+        const panelRect = panelElement.getBoundingClientRect();
+        const stateRect = element.getBoundingClientRect();
+        return { panelTop: panelRect.top, panelBottom: panelRect.bottom, stateTop: stateRect.top, stateBottom: stateRect.bottom };
+      });
+      expect(stateGeometry.stateTop).toBeGreaterThanOrEqual(stateGeometry.panelTop);
+      expect(stateGeometry.stateBottom).toBeLessThanOrEqual(stateGeometry.panelBottom);
+    }
+    if (height === 723) {
+      await page.screenshot({ path: path.join(artifactDirectory, `${variant}-${sectionId}.png`), fullPage: true });
+    }
   }
 
   const technicalTab = page.getByRole("tab", { name: "기술 지원" });
@@ -133,16 +169,22 @@ async function auditVariant(
   expect(panels.every((panel) => panel.overflowY === "auto")).toBe(true);
   expect(panels.some((panel) => panel.scrollHeight > panel.clientHeight)).toBe(true);
   expect(panels.every((panel) => panel.openDisclosureCount === 0)).toBe(true);
+  expect(panels.find((panel) => panel.id === "technical")?.disclosureCount).toBe(6);
   expect(panels.find((panel) => panel.id === "references")?.disclosureCount).toBe(7);
+  expect(panels.find((panel) => panel.id === "wiki")?.disclosureCount).toBe(2);
+  expect(panels.find((panel) => panel.id === "governance")?.disclosureCount).toBe(2);
   const technicalPanel = panels.find((panel) => panel.id === "technical");
   const referencesPanel = panels.find((panel) => panel.id === "references");
-  if (!technicalPanel || !referencesPanel) throw new Error("Missing KOSHA reference panels");
+  const wikiPanel = panels.find((panel) => panel.id === "wiki");
+  const governancePanel = panels.find((panel) => panel.id === "governance");
+  if (!technicalPanel || !referencesPanel || !wikiPanel || !governancePanel) throw new Error("Missing Knowledge panels");
   if (width === 390) {
     expect(technicalPanel.scrollHeight / technicalPanel.clientHeight).toBeLessThanOrEqual(6.1);
     expect(referencesPanel.scrollHeight / referencesPanel.clientHeight).toBeLessThanOrEqual(4.1);
+    expect(wikiPanel.scrollHeight / wikiPanel.clientHeight).toBeLessThanOrEqual(4.1);
+    expect(governancePanel.scrollHeight / governancePanel.clientHeight).toBeLessThanOrEqual(5.5);
   }
 
-  const variant = `${width === 390 ? "mobile" : width === 1024 ? "tablet" : "desktop"}-${height}-${theme}`;
   await page.screenshot({ path: path.join(artifactDirectory, `${variant}.png`), fullPage: true });
   return {
     variant,
