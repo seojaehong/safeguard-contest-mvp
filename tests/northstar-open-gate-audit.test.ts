@@ -2390,7 +2390,7 @@ function createFixtureRoot(): string {
     browser: {
       rowCount: 10, passCount: 10, maxBodyRatio: 1.02, horizontalOverflowRows: 0,
       outsideElementRows: 0, visiblePanelCountPerRow: 1, reachableSectionCountPerRow: 6,
-      minimumControlHeight: 44, minimumLocalScrollPanelCount: 4, screenshotCount: 10,
+      minimumControlHeight: 44, minimumLocalScrollPanelCount: 4, screenshotCount: 18,
       desktop: { caseCount: 4, selectedOnly: true, localScrollContained: true },
       tablet: { caseCount: 2, selectedOnly: true, localScrollContained: true },
       mobile: { caseCount: 4, selectedOnly: true, localScrollContained: true },
@@ -2399,6 +2399,14 @@ function createFixtureRoot(): string {
         exclusiveDisclosureGroups: true, maxMobileTechnicalScrollRatio: 4.47,
         maxMobileReferenceScrollRatio: 3.68, maxFirstDisclosureBottom: 590.97,
         minPanelBottom: 611.39, firstDisclosureInsidePanel: true,
+      },
+      progressiveDisclosure: {
+        technicalDisclosureCount: 6, referenceDisclosureCount: 7,
+        wikiDisclosureCount: 2, governanceDisclosureCount: 2,
+        defaultOpenDisclosureCount: 0, exclusiveDisclosureGroups: true,
+        maxMobileTechnicalScrollRatio: 4.47, maxMobileReferenceScrollRatio: 3.68,
+        maxMobileWikiScrollRatio: 2.03, maxMobileGovernanceScrollRatio: 2.2,
+        firstDisclosureInsidePanel: true, firstReviewStateInsidePanel: true,
       },
     },
     mutationBoundary: {
@@ -5182,6 +5190,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     });
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("six reachable tasks");
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("KOSHA disclosures are 6/7");
+    expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("Wiki/governance disclosures are 2/2");
+    expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("first review state panel-contained=true");
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("Wiki publication plus SIF embedding remain APPROVAL_GATED");
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")).toMatchObject({
       state: "proven",
@@ -7372,19 +7382,73 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("wiki=PASS");
   });
 
-  it("fails Knowledge viewport workbench closed when reference disclosures open by default", async () => {
+  it("fails Knowledge viewport workbench closed when progressive disclosures open by default", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
     const reportPath = path.join(rootDir, "evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json");
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
-      browser: { referenceDisclosure: { defaultOpenDisclosureCount: number } };
+      browser: { progressiveDisclosure: { defaultOpenDisclosureCount: number } };
     };
-    report.browser.referenceDisclosure.defaultOpenDisclosureCount = 1;
+    report.browser.progressiveDisclosure.defaultOpenDisclosureCount = 1;
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
 
     const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-17T00:00:00.000Z" });
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")).toMatchObject({ state: "contradicted" });
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("defaultOpen=1");
+  });
+
+  it.each([
+    { name: "wiki disclosure count", field: "wikiDisclosureCount", value: 1 },
+    { name: "governance disclosure count", field: "governanceDisclosureCount", value: 1 },
+    { name: "first review state containment", field: "firstReviewStateInsidePanel", value: false },
+  ] as const)("fails Knowledge viewport workbench closed when $name is broken", async ({ field, value }) => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      browser: { progressiveDisclosure: Record<string, number | boolean> };
+    };
+    report.browser.progressiveDisclosure[field] = value;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-17T00:00:00.000Z" });
+    expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")).toMatchObject({ state: "contradicted" });
+  });
+
+  it.each([
+    {
+      name: "mobile Wiki scroll ratio is missing",
+      mutate: (browser: {
+        progressiveDisclosure: Record<string, unknown>;
+        referenceDisclosure: Record<string, unknown>;
+      }) => {
+        delete browser.progressiveDisclosure.maxMobileWikiScrollRatio;
+      },
+    },
+    {
+      name: "first disclosure bottom is missing",
+      mutate: (browser: {
+        progressiveDisclosure: Record<string, unknown>;
+        referenceDisclosure: Record<string, unknown>;
+      }) => {
+        delete browser.referenceDisclosure.maxFirstDisclosureBottom;
+      },
+    },
+  ])("fails Knowledge viewport workbench closed when $name", async ({ mutate }) => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      browser: {
+        progressiveDisclosure: Record<string, unknown>;
+        referenceDisclosure: Record<string, unknown>;
+      };
+    };
+    mutate(report.browser);
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-17T00:00:00.000Z" });
+    expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")).toMatchObject({ state: "contradicted" });
   });
 
   it.each([

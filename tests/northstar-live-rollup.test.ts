@@ -187,7 +187,12 @@ type RollupReport = {
     exclusiveDisclosureGroups: boolean;
     maxMobileTechnicalScrollRatio: number;
     maxMobileReferenceScrollRatio: number;
+    wikiDisclosureCount: number;
+    governanceDisclosureCount: number;
+    maxMobileWikiScrollRatio: number;
+    maxMobileGovernanceScrollRatio: number;
     firstDisclosureInsidePanel: boolean;
+    firstReviewStateInsidePanel: boolean;
     exactSavedShareVerdict: string;
     llmWikiPublicationVerdict: string;
     sifEmbeddingRuntimeVerdict: string;
@@ -1164,7 +1169,7 @@ function createFixtureRoot(): { root: string; head: string } {
     browser: {
       rowCount: 10, passCount: 10, maxBodyRatio: 1.02, horizontalOverflowRows: 0,
       outsideElementRows: 0, visiblePanelCountPerRow: 1, reachableSectionCountPerRow: 6,
-      minimumControlHeight: 44, minimumLocalScrollPanelCount: 4, screenshotCount: 10,
+      minimumControlHeight: 44, minimumLocalScrollPanelCount: 4, screenshotCount: 18,
       desktop: { caseCount: 4, selectedOnly: true, localScrollContained: true },
       tablet: { caseCount: 2, selectedOnly: true, localScrollContained: true },
       mobile: { caseCount: 4, selectedOnly: true, localScrollContained: true },
@@ -1172,6 +1177,14 @@ function createFixtureRoot(): { root: string; head: string } {
         technicalDisclosureCount: 6, referenceDisclosureCount: 7, defaultOpenDisclosureCount: 0,
         exclusiveDisclosureGroups: true, maxMobileTechnicalScrollRatio: 4.47,
         maxMobileReferenceScrollRatio: 3.68, firstDisclosureInsidePanel: true,
+      },
+      progressiveDisclosure: {
+        technicalDisclosureCount: 6, referenceDisclosureCount: 7,
+        wikiDisclosureCount: 2, governanceDisclosureCount: 2,
+        defaultOpenDisclosureCount: 0, exclusiveDisclosureGroups: true,
+        maxMobileTechnicalScrollRatio: 4.47, maxMobileReferenceScrollRatio: 3.68,
+        maxMobileWikiScrollRatio: 2.03, maxMobileGovernanceScrollRatio: 2.2,
+        firstDisclosureInsidePanel: true, firstReviewStateInsidePanel: true,
       },
     },
     mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, vectorMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false },
@@ -2106,7 +2119,12 @@ describe("northstar live rollup", () => {
       exclusiveDisclosureGroups: true,
       maxMobileTechnicalScrollRatio: 4.47,
       maxMobileReferenceScrollRatio: 3.68,
+      wikiDisclosureCount: 2,
+      governanceDisclosureCount: 2,
+      maxMobileWikiScrollRatio: 2.03,
+      maxMobileGovernanceScrollRatio: 2.2,
       firstDisclosureInsidePanel: true,
+      firstReviewStateInsidePanel: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       llmWikiPublicationVerdict: "APPROVAL_GATED",
       sifEmbeddingRuntimeVerdict: "APPROVAL_GATED",
