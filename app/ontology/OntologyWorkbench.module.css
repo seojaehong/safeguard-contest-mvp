@@ -96,6 +96,8 @@
 .loopStrip strong { font-size: 15px; line-height: 24px; }
 .loopStrip small { color: var(--ontology-muted); font-size: 12px; line-height: 18px; }
 
+.mobileViewControl { display: none; }
+
 .explorer,
 .directory { padding: 24px; }
 
@@ -326,6 +328,65 @@
 .dialogScroller { min-height: 0; overflow: auto; padding: 16px; background: var(--ontology-graph-canvas); }
 .dialogScroller .graphViewport { min-width: 920px; }
 
+@media (min-width: 1101px) {
+  .root {
+    height: max(474px, calc(100dvh - 249px));
+    grid-template-columns: minmax(0, 2fr) minmax(300px, 0.8fr);
+    grid-template-rows: 90px minmax(0, 1fr);
+    gap: 16px;
+  }
+  .summaryGrid { grid-column: 1 / -1; }
+  .summaryGrid article { min-height: 90px; padding: 12px 16px; }
+  .summaryGrid strong { font-size: 24px; line-height: 30px; }
+  .loopStrip { display: none; }
+  .explorer,
+  .directory {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1100px) {
+  .root {
+    height: max(560px, calc(100dvh - 318px));
+    grid-template-rows: 90px 44px minmax(0, 1fr);
+    gap: 16px;
+  }
+  .summaryGrid article { min-height: 90px; padding: 12px 16px; }
+  .summaryGrid strong { font-size: 24px; line-height: 30px; }
+  .loopStrip { display: none; }
+  .mobileViewControl {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .mobileViewControl button {
+    min-height: 44px;
+    border: 1px solid var(--ontology-line);
+    border-radius: 8px;
+    background: var(--ontology-surface);
+    color: var(--ontology-ink);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .mobileViewControl button[aria-pressed="true"] {
+    border-color: var(--sc-hazard-yellow);
+    background: var(--sc-hazard-yellow);
+    color: var(--sc-steel-950);
+  }
+  .explorer,
+  .directory {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .explorer.mobileHidden,
+  .directory.mobileHidden { display: none; }
+}
+
 /* The module shell colors generic buttons by theme. Ontology controls keep their semantic surfaces. */
 :global(.safeclaw-module-shell[data-theme]) .root .graphNode {
   border-color: var(--ontology-card-border);
@@ -384,23 +445,61 @@
 
 @media (max-width: 720px) {
   .root { gap: 16px; }
-  .summaryGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-  .summaryGrid article { min-height: 100px; padding: 12px; }
-  .summaryGrid article:nth-child(n + 4) { display: none; }
-  .summaryGrid strong { font-size: 22px; line-height: 30px; }
-  .summaryGrid small { font-size: 11px; line-height: 16px; }
+  .summaryGrid { display: none; }
   .loopStrip { display: none; }
+  .mobileViewControl {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .mobileViewControl button {
+    min-height: 44px;
+    border: 1px solid var(--ontology-line);
+    border-radius: 8px;
+    background: var(--ontology-surface);
+    color: var(--ontology-ink);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .mobileViewControl button[aria-pressed="true"] {
+    border-color: var(--sc-hazard-yellow);
+    background: var(--sc-hazard-yellow);
+    color: var(--sc-steel-950);
+  }
+  .mobileViewControl button:focus-visible {
+    outline: 3px solid var(--ontology-focus-ring);
+    outline-offset: 2px;
+  }
   .explorer,
-  .directory { padding: 16px; }
+  .directory {
+    height: clamp(300px, calc(100dvh - 399px), 520px);
+    padding: 16px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .explorer { display: flex; flex-direction: column; }
+  .explorer > * { flex: 0 0 auto; }
+  .explorer.mobileHidden,
+  .directory.mobileHidden { display: none; }
   .explorerHeader { display: grid; }
   .depthControl { width: 100%; }
   .depthControl button { flex: 1; }
-  .toolbar { grid-template-columns: 1fr; }
-  .searchField { grid-column: auto; }
-  .selectionSummary { display: grid; }
+  .toolbar { order: 2; grid-template-columns: 1fr 1fr; }
+  .searchField { grid-column: 1 / -1; }
+  .selectionSummary { order: 1; display: grid; }
   .expandButton { width: 100%; }
   .desktopGraph { display: none; }
-  .mobileRelations { display: grid; gap: 8px; margin-top: 16px; }
+  .mobileRelations {
+    order: 3;
+    display: grid;
+    max-height: 276px;
+    gap: 8px;
+    margin-top: 16px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
   .mobileRelations h3 { margin: 0 0 4px; font-size: 16px; line-height: 24px; }
   .mobileRelations p { color: var(--ontology-muted); font-size: 14px; line-height: 22px; }
   .mobileRelations button { min-height: 84px; }

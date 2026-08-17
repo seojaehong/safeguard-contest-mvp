@@ -4,11 +4,13 @@ import { chromium, type Page } from "playwright";
 import { describe, expect, it } from "vitest";
 
 const baseUrl = process.env.ONTOLOGY_BASE_URL;
-const artifactDirectory = path.resolve(__dirname, "..", "evaluation", "ontology-ui-remediation-2026-07-15");
+const artifactDirectory = path.resolve(__dirname, "..", "evaluation", "ontology-viewport-workbench-2026-08-17");
 
 type BrowserMetric = {
   variant: string;
   viewport: { width: number; height: number };
+  bodyHeight: number;
+  bodyRatio: number;
   horizontalOverflow: number;
   outsideElementCount: number;
   visibleNeighborhoodNodes: number;
@@ -21,6 +23,10 @@ type BrowserMetric = {
   expandedGraphVerified: boolean;
   expandedGraphNodeCount: number;
   dialogKeyboardContract: boolean;
+  explorerPane: { width: number; clientHeight: number; scrollHeight: number; overflowY: string };
+  directoryPane: { width: number; clientHeight: number; scrollHeight: number; overflowY: string };
+  mobileDirectoryPane: { width: number; clientHeight: number; scrollHeight: number; overflowY: string } | null;
+  mobileTaskSwitchVerified: boolean;
 };
 
 function luminanceChannel(value: number) {
@@ -40,8 +46,12 @@ function contrastRatio(foreground: number[], background: number[]) {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-async function auditVariant(page: Page, theme: "day" | "night", width: 1440 | 1024 | 390): Promise<BrowserMetric> {
-  const height = width === 390 ? 844 : 1000;
+async function auditVariant(
+  page: Page,
+  theme: "day" | "night",
+  viewport: { width: 1440 | 1024 | 390; height: 723 | 844 | 900 | 1000 }
+): Promise<BrowserMetric> {
+  const { width, height } = viewport;
   await page.setViewportSize({ width, height });
   await page.goto(`${baseUrl}/ontology?theme=${theme}`, { waitUntil: "networkidle" });
   await page.locator('[data-module-route="/ontology"][data-ready="true"]').waitFor();
@@ -49,10 +59,12 @@ async function auditVariant(page: Page, theme: "day" | "night", width: 1440 | 10
   const desktopGraph = page.locator('[data-testid="ontology-neighborhood-graph"]').first();
   const mobileRelations = page.locator('[data-testid="ontology-mobile-relations"]');
   const desktopGraphVisible = await desktopGraph.isVisible();
-  const mobileRelationsVisible = await mobileRelations.isVisible();
+  let mobileRelationsVisible = await mobileRelations.isVisible();
   let expandedGraphVerified = false;
   let expandedGraphNodeCount = 0;
   let dialogKeyboardContract = false;
+  let mobileTaskSwitchVerified = false;
+  let mobileDirectoryPane: BrowserMetric["mobileDirectoryPane"] = null;
   let expandedNodeContrasts: Array<{ foreground: number[]; background: number[] }> = [];
   let expandedNodeTextContrasts: Array<{ foreground: number[]; background: number[] }> = [];
 
@@ -60,8 +72,11 @@ async function auditVariant(page: Page, theme: "day" | "night", width: 1440 | 10
 
   if (width === 390) {
     expect(desktopGraphVisible).toBe(false);
+    await mobileRelations.scrollIntoViewIfNeeded();
+    mobileRelationsVisible = await mobileRelations.isVisible();
     expect(mobileRelationsVisible).toBe(true);
     const trigger = page.getByRole("button", { name: "그래프 전체 화면" });
+    await trigger.scrollIntoViewIfNeeded();
     await trigger.click();
     const dialog = page.getByRole("dialog", { name: "온톨로지 그래프 전체 화면" });
     await dialog.waitFor();
@@ -104,6 +119,24 @@ async function auditVariant(page: Page, theme: "day" | "night", width: 1440 | 10
     await page.keyboard.press("Escape");
     expect(await trigger.evaluate((element) => element === document.activeElement)).toBe(true);
     dialogKeyboardContract = shiftTabStayedInside;
+
+    const explorerPanel = page.locator("#ontology-explorer-panel");
+    const directoryPanel = page.locator("#ontology-directory-panel");
+    await page.getByRole("button", { name: "전체 목록" }).click();
+    expect(await explorerPanel.isVisible()).toBe(false);
+    expect(await directoryPanel.isVisible()).toBe(true);
+    mobileDirectoryPane = await directoryPanel.evaluate((element) => ({
+      width: element.getBoundingClientRect().width,
+      clientHeight: element.clientHeight,
+      scrollHeight: element.scrollHeight,
+      overflowY: window.getComputedStyle(element).overflowY
+    }));
+    await page.screenshot({ path: path.join(artifactDirectory, `mobile-${height}-${theme}-directory.png`), fullPage: true });
+    await directoryPanel.getByRole("button").first().click();
+    expect(await explorerPanel.isVisible()).toBe(true);
+    expect(await directoryPanel.isVisible()).toBe(false);
+    expect(await explorerPanel.evaluate((element) => element.scrollTop)).toBe(0);
+    mobileTaskSwitchVerified = true;
   } else {
     expect(desktopGraphVisible).toBe(true);
     expect(mobileRelationsVisible).toBe(false);
@@ -159,14 +192,27 @@ async function auditVariant(page: Page, theme: "day" | "night", width: 1440 | 10
         const rect = element.getBoundingClientRect();
         return rect.left < -0.5 || rect.right > window.innerWidth + 0.5;
       });
+    const pane = (selector: string) => {
+      const element = document.querySelector<HTMLElement>(selector);
+      if (!element) return { width: 0, clientHeight: 0, scrollHeight: 0, overflowY: "missing" };
+      return {
+        width: element.getBoundingClientRect().width,
+        clientHeight: element.clientHeight,
+        scrollHeight: element.scrollHeight,
+        overflowY: window.getComputedStyle(element).overflowY
+      };
+    };
     return {
+      bodyHeight: document.documentElement.scrollHeight,
       horizontalOverflow: Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, 0),
       outsideElementCount: outsideElements.length,
       visibleNeighborhoodNodes: nodes.length,
       overlapPairs,
       minimumControlHeight,
       nodeContrasts,
-      nodeTextContrasts
+      nodeTextContrasts,
+      explorerPane: pane("#ontology-explorer-panel"),
+      directoryPane: pane("#ontology-directory-panel")
     };
   });
   const allNodeContrasts = [...geometry.nodeContrasts, ...expandedNodeContrasts];
@@ -179,21 +225,27 @@ async function auditVariant(page: Page, theme: "day" | "night", width: 1440 | 10
     : null;
 
   expect(geometry.horizontalOverflow).toBe(0);
+  const maximumBodyHeight = width === 1024 ? Math.round(height * 1.1) : height;
+  expect(geometry.bodyHeight).toBeLessThanOrEqual(maximumBodyHeight);
   if (width === 390) expect(geometry.outsideElementCount).toBe(0);
   expect(geometry.overlapPairs).toBe(0);
   if (width !== 390) expect(geometry.visibleNeighborhoodNodes).toBe(15);
   if (width === 390) expect(expandedGraphNodeCount).toBe(15);
   expect(geometry.minimumControlHeight).toBeGreaterThanOrEqual(44);
+  expect(geometry.explorerPane.overflowY).toBe("auto");
+  if (width !== 390) expect(geometry.directoryPane.overflowY).toBe("auto");
   expect(minimumNodeContrast).not.toBeNull();
   expect(minimumNodeTextContrast).not.toBeNull();
   if (minimumNodeContrast !== null) expect(minimumNodeContrast).toBeGreaterThanOrEqual(4.5);
   if (minimumNodeTextContrast !== null) expect(minimumNodeTextContrast).toBeGreaterThanOrEqual(4.5);
 
-  const variant = `${width === 390 ? "mobile" : width === 1024 ? "tablet" : "desktop"}-${theme}`;
+  const variant = `${width === 390 ? "mobile" : width === 1024 ? "tablet" : "desktop"}-${height}-${theme}`;
   await page.screenshot({ path: path.join(artifactDirectory, `${variant}.png`), fullPage: true });
   return {
     variant,
     viewport: { width, height },
+    bodyHeight: geometry.bodyHeight,
+    bodyRatio: Math.round((geometry.bodyHeight / height) * 100) / 100,
     horizontalOverflow: geometry.horizontalOverflow,
     outsideElementCount: geometry.outsideElementCount,
     visibleNeighborhoodNodes: geometry.visibleNeighborhoodNodes,
@@ -205,7 +257,11 @@ async function auditVariant(page: Page, theme: "day" | "night", width: 1440 | 10
     mobileRelationsVisible,
     expandedGraphVerified,
     expandedGraphNodeCount,
-    dialogKeyboardContract
+    dialogKeyboardContract,
+    explorerPane: geometry.explorerPane,
+    directoryPane: geometry.directoryPane,
+    mobileDirectoryPane,
+    mobileTaskSwitchVerified
   };
 }
 
@@ -217,9 +273,11 @@ describe.skipIf(!baseUrl)("ontology UI production browser contract", () => {
       const page = await browser.newPage();
       const metrics: BrowserMetric[] = [];
       for (const theme of ["day", "night"] as const) {
-        metrics.push(await auditVariant(page, theme, 1440));
-        metrics.push(await auditVariant(page, theme, 1024));
-        metrics.push(await auditVariant(page, theme, 390));
+        metrics.push(await auditVariant(page, theme, { width: 1440, height: 723 }));
+        metrics.push(await auditVariant(page, theme, { width: 1440, height: 900 }));
+        metrics.push(await auditVariant(page, theme, { width: 1024, height: 1000 }));
+        metrics.push(await auditVariant(page, theme, { width: 390, height: 723 }));
+        metrics.push(await auditVariant(page, theme, { width: 390, height: 844 }));
       }
       fs.writeFileSync(
         path.join(artifactDirectory, "browser-metrics.json"),

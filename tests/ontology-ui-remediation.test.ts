@@ -158,6 +158,34 @@ describe("ontology P0 presentation contract", () => {
     expect(styles).toMatch(/\.mobileRelations\s*\{[\s\S]*?display:\s*grid/);
   });
 
+  it("uses a mobile task switcher instead of stacking the explorer and full directory", () => {
+    const explorer = read("app/ontology/OntologyExplorer.tsx");
+    const styles = read("app/ontology/OntologyWorkbench.module.css");
+
+    expect(explorer).toContain('const [mobileView, setMobileView] = useState<"explorer" | "directory">("explorer")');
+    expect(explorer).toContain('aria-label="안전지식 보기 선택"');
+    expect(explorer).toContain('aria-controls="ontology-explorer-panel"');
+    expect(explorer).toContain('aria-controls="ontology-directory-panel"');
+    expect(explorer).toContain('setMobileView("explorer")');
+    expect(explorer).toContain("explorerPanelRef.current?.scrollTo({ top: 0 })");
+    expect(styles).toMatch(/@media \(max-width: 720px\)[\s\S]*?\.directory\.mobileHidden\s*\{\s*display:\s*none/);
+    expect(styles).toMatch(/@media \(max-width: 720px\)[\s\S]*?\.summaryGrid\s*\{\s*display:\s*none/);
+    expect(styles).toMatch(/height:\s*clamp\(300px, calc\(100dvh - 399px\), 520px\)/);
+    expect(styles).toMatch(/\.selectionSummary\s*\{\s*order:\s*1/);
+    expect(styles).toMatch(/\.explorer > \*\s*\{\s*flex:\s*0 0 auto/);
+    expect(styles).toMatch(/\.mobileRelations\s*\{[\s\S]*?max-height:\s*276px[\s\S]*?overflow-y:\s*auto/);
+  });
+
+  it("keeps the desktop explorer and directory in a bounded two-column workbench", () => {
+    const styles = read("app/ontology/OntologyWorkbench.module.css");
+
+    expect(styles).toMatch(/@media \(min-width: 1101px\)[\s\S]*?height:\s*max\(474px, calc\(100dvh - 249px\)\)/);
+    expect(styles).toMatch(/grid-template-columns:\s*minmax\(0, 2fr\) minmax\(300px, 0\.8fr\)/);
+    expect(styles).toMatch(/\.summaryGrid\s*\{\s*grid-column:\s*1 \/ -1/);
+    expect(styles).toMatch(/\.explorer,[\s\S]*?\.directory\s*\{[\s\S]*?overflow-y:\s*auto/);
+    expect(styles).toMatch(/@media \(min-width: 721px\) and \(max-width: 1100px\)[\s\S]*?grid-template-rows:\s*90px 44px minmax\(0, 1fr\)/);
+  });
+
   it("uses design tokens and customer-facing Korean labels at the presentation boundary", () => {
     const page = read("app/ontology/page.tsx");
     const explorer = read("app/ontology/OntologyExplorer.tsx");

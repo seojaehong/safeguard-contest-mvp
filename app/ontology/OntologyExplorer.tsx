@@ -98,8 +98,10 @@ export function OntologyExplorer({
   const [depth, setDepth] = useState<1 | 2>(1);
   const [zoom, setZoom] = useState(1);
   const [visibleListCount, setVisibleListCount] = useState(9);
+  const [mobileView, setMobileView] = useState<"explorer" | "directory">("explorer");
   const [expanded, setExpanded] = useState(false);
   const [selectedNodeId, setSelectedNodeId] = useState(model.focusNodeId || model.list[0]?.id || "");
+  const explorerPanelRef = useRef<HTMLElement>(null);
   const expandButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -162,6 +164,11 @@ export function OntologyExplorer({
     setSelectedNodeId(nodeId);
   }
 
+  function showExplorerFromStart() {
+    setMobileView("explorer");
+    window.requestAnimationFrame(() => explorerPanelRef.current?.scrollTo({ top: 0 }));
+  }
+
   function closeExpandedGraph() {
     setExpanded(false);
     window.requestAnimationFrame(() => expandButtonRef.current?.focus());
@@ -183,7 +190,31 @@ export function OntologyExplorer({
         <div><span>04</span><strong>다음 작업</strong><small>검증 후 재사용</small></div>
       </section>
 
-      <section className={styles.explorer} aria-labelledby="ontology-explorer-title">
+      <div className={styles.mobileViewControl} aria-label="안전지식 보기 선택">
+        <button
+          type="button"
+          aria-controls="ontology-explorer-panel"
+          aria-pressed={mobileView === "explorer"}
+          onClick={showExplorerFromStart}
+        >
+          관계 탐색
+        </button>
+        <button
+          type="button"
+          aria-controls="ontology-directory-panel"
+          aria-pressed={mobileView === "directory"}
+          onClick={() => setMobileView("directory")}
+        >
+          전체 목록
+        </button>
+      </div>
+
+      <section
+        ref={explorerPanelRef}
+        id="ontology-explorer-panel"
+        className={`${styles.explorer}${mobileView === "directory" ? ` ${styles.mobileHidden}` : ""}`}
+        aria-labelledby="ontology-explorer-title"
+      >
         <header className={styles.explorerHeader}>
           <div>
             <span>관계 탐색</span>
@@ -262,7 +293,11 @@ export function OntologyExplorer({
         </div>
       </section>
 
-      <section className={styles.directory} aria-labelledby="ontology-directory-title">
+      <section
+        id="ontology-directory-panel"
+        className={`${styles.directory}${mobileView === "explorer" ? ` ${styles.mobileHidden}` : ""}`}
+        aria-labelledby="ontology-directory-title"
+      >
         <header>
           <div><span>전체 목록</span><h2 id="ontology-directory-title">검증된 안전지식 찾기</h2></div>
           <strong>{filteredList.length.toLocaleString("ko-KR")}개</strong>
@@ -274,7 +309,10 @@ export function OntologyExplorer({
               type="button"
               className={item.id === selectedNodeId ? styles.activeListNode : ""}
               aria-pressed={item.id === selectedNodeId}
-              onClick={() => selectNode(item.id)}
+              onClick={() => {
+                selectNode(item.id);
+                showExplorerFromStart();
+              }}
             >
               <span>{KIND_KO[item.kind]}</span>
               <strong>{item.label}</strong>
