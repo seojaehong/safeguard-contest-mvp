@@ -248,6 +248,7 @@ try {
       }
       const inbox = page.locator('[data-knowledge-review-inbox="true"]');
       await inbox.getByRole("heading", { name: queueItem.candidateLabel }).waitFor();
+      await inbox.scrollIntoViewIfNeeded();
       const candidateTabs = inbox.locator('[role="tablist"][aria-label="지식 후보"] [role="tab"]');
       await candidateTabs.nth(1).click();
       const revisionDecision = await page.evaluate(() => {
