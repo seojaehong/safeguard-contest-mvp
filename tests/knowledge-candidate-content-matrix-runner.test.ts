@@ -5,7 +5,11 @@ import { evaluateCandidateMatrixPayload } from "../scripts/knowledge_candidate_c
 const testCase = {
   id: "chemical-cleaning",
   expectedHazardIds: ["chemical-msds"],
-  requiredAnyGroups: [["화학물질", "MSDS"], ["누출", "보호구"]]
+  requiredAnyGroups: [["화학물질", "MSDS"], ["누출", "보호구"]],
+  requiredEvidenceAnyGroups: [
+    ["물질안전보건자료 조회 서비스"],
+    ["산업안전보건법"]
+  ]
 };
 
 function payload() {
@@ -19,7 +23,7 @@ function payload() {
       generatedBy: "hermes_or_llm",
       reviewStatus: "pending_review",
       publicationState: "unpublished",
-      generatedText: "1) 위험요인 요약: 화학물질 누출 위험\n2) 문서 반영 위치: 위험성평가표\n3) 통제대책: MSDS와 보호구 확인\n4) 검수 필요 항목: 현장 책임자 확인",
+      generatedText: "1) 위험요인 요약: 화학물질 누출 위험\n2) 문서 반영 위치: 위험성평가표\n3) 통제대책: MSDS와 보호구 확인\n4) 검수 필요 항목: 근거 구분: KOSHA 기술·공식자료 후보 - 물질안전보건자료 조회 서비스 / 현행 법령 후보 - 산업안전보건법. 현장 책임자 확인",
       matchedHazardIds: ["chemical-msds"],
       dbMutationAllowed: false,
       dbMutationPerformed: false,
@@ -62,6 +66,10 @@ describe("knowledge candidate content matrix runner", () => {
       failures: [],
       missingHazardIds: [],
       missingTermGroups: [],
+      missingEvidenceTermGroups: [],
+      reviewerEvidenceTraceVisible: true,
+      technicalGuidanceBoundaryVisible: true,
+      lawCandidateBoundaryVisible: true,
       boundary: {
         storageMode: "stateless_candidate",
         savedRunId: null,
@@ -82,6 +90,23 @@ describe("knowledge candidate content matrix runner", () => {
       ok: false,
       missingTermGroups: [["화학물질", "MSDS"], ["누출", "보호구"]]
     });
+  });
+
+  it("fails closed when provenance exists only in metadata and is absent from reviewer-visible text", () => {
+    const unsafe = payload();
+    unsafe.candidate.generatedText = "1) 위험요인 요약: 화학물질 누출 위험\n2) 문서 반영 위치: 위험성평가표\n3) 통제대책: MSDS와 보호구 확인\n4) 검수 필요 항목: 현장 책임자 확인";
+
+    const result = evaluateCandidateMatrixPayload(testCase, 200, unsafe);
+    expect(result.ok).toBe(false);
+    expect(result.missingEvidenceTermGroups).toEqual([
+      ["물질안전보건자료 조회 서비스"],
+      ["산업안전보건법"]
+    ]);
+    expect(result.failures).toEqual(expect.arrayContaining([
+      "reviewer_evidence_trace_missing",
+      "technical_guidance_boundary_missing",
+      "law_candidate_boundary_missing"
+    ]));
   });
 
   it("fails closed for publication, mutation, or human-review overclaims", () => {

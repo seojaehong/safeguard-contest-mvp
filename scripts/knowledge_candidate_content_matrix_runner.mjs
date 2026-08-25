@@ -40,9 +40,16 @@ export function evaluateCandidateMatrixPayload(testCase, responseStatus, payload
   const generationMode = options.generationMode === "deterministic" ? "deterministic" : "provider";
   const matchedHazardIds = asArray(candidate.matchedHazardIds).filter((value) => typeof value === "string");
   const requiredAnyGroups = asArray(testCase.requiredAnyGroups).map((group) => asArray(group));
+  const requiredEvidenceAnyGroups = asArray(testCase.requiredEvidenceAnyGroups).map((group) => asArray(group));
   const missingTermGroups = requiredAnyGroups
     .filter((group) => !includesAny(generatedText, group))
     .map((group) => group.map(readString));
+  const missingEvidenceTermGroups = requiredEvidenceAnyGroups
+    .filter((group) => !includesAny(generatedText, group))
+    .map((group) => group.map(readString));
+  const reviewerEvidenceTraceVisible = includesAny(generatedText, ["근거 구분", "적용 근거 후보"]);
+  const technicalGuidanceBoundaryVisible = includesAny(generatedText, ["KOSHA 기술·공식자료 후보", "KOSHA 기술지침 후보"]);
+  const lawCandidateBoundaryVisible = includesAny(generatedText, ["현행 법령 후보", "법령 근거 후보"]);
   const missingHazardIds = asArray(testCase.expectedHazardIds)
     .filter((hazardId) => !matchedHazardIds.includes(readString(hazardId)));
   const failures = [
@@ -73,7 +80,11 @@ export function evaluateCandidateMatrixPayload(testCase, responseStatus, payload
     ...(readiness.humanReviewCompleted !== false ? ["human_review_overclaimed"] : []),
     ...(readiness.publicationState !== "unpublished" || readiness.publishAllowed !== false ? ["readiness_publication_boundary_failed"] : []),
     ...missingHazardIds.map((hazardId) => `missing_hazard:${hazardId}`),
-    ...missingTermGroups.map((group) => `missing_term_group:${group.join("|")}`)
+    ...missingTermGroups.map((group) => `missing_term_group:${group.join("|")}`),
+    ...missingEvidenceTermGroups.map((group) => `missing_evidence_term_group:${group.join("|")}`),
+    ...(!reviewerEvidenceTraceVisible ? ["reviewer_evidence_trace_missing"] : []),
+    ...(!technicalGuidanceBoundaryVisible ? ["technical_guidance_boundary_missing"] : []),
+    ...(!lawCandidateBoundaryVisible ? ["law_candidate_boundary_missing"] : [])
   ];
 
   return {
@@ -83,7 +94,11 @@ export function evaluateCandidateMatrixPayload(testCase, responseStatus, payload
     failures,
     missingHazardIds,
     missingTermGroups,
+    missingEvidenceTermGroups,
     matchedHazardIds,
+    reviewerEvidenceTraceVisible,
+    technicalGuidanceBoundaryVisible,
+    lawCandidateBoundaryVisible,
     generatedTextLength: generatedText.length,
     generatedTextExcerpt: compactExcerpt(generatedText),
     readiness: {
@@ -133,9 +148,9 @@ function currentHead() {
 
 function markdownFor(report) {
   const rows = report.results.map((result) => (
-    `| ${result.id} | ${result.responseStatus} | ${result.matchedHazardIds.join(", ")} | ${result.readiness.presentSectionCount}/4 | ${result.failures.join("; ") || "none"} | ${result.ok ? "PASS" : "RED"} |`
+    `| ${result.id} | ${result.responseStatus} | ${result.matchedHazardIds.join(", ")} | ${result.readiness.presentSectionCount}/4 | ${result.reviewerEvidenceTraceVisible ? "visible" : "missing"} | ${result.missingEvidenceTermGroups.length} | ${result.failures.join("; ") || "none"} | ${result.ok ? "PASS" : "RED"} |`
   )).join("\n");
-  return `# LLM Wiki Candidate Content Matrix\n\n- Verdict: \`${report.verdict}\`\n- Mode: \`${report.mode}\`\n- Generation mode: \`${report.generationMode}\`\n- Base URL: \`${report.baseUrl}\`\n- Source head: \`${report.sourceHead}\`\n- Production commit: \`${report.productionBuild.commitSha ?? "not-live"}\`\n- Cases: ${report.passedCount}/${report.totalCount} PASS\n\n| Scenario | HTTP | Matched hazards | Sections | Failures | Verdict |\n| --- | ---: | --- | ---: | --- | --- |\n${rows}\n\n## Contract\n\n- Each scenario uses the deployed stateless \`/api/knowledge/regenerate\` path.\n- Deterministic mode proves the built-in safety-knowledge fallback; provider mode separately proves enhanced LLM generation when runtime admission is available.\n- The response must expose the server-derived four-section content-readiness contract.\n- Scenario hazard IDs and scenario-specific term groups must remain grounded in generated text.\n- Placeholder text, legal overclaim, missing law provenance, and missing hazard grounding fail closed.\n- All candidates remain unpublished and require human review.\n\n## Boundary\n\n- This matrix does not read the actual production candidate queue.\n- No DB write, Wiki publication, provider dispatch, Share-session creation, embedding/vector mutation, or KOSHA registry mutation is performed.\n- Exact saved Share remains \`MISSING_EVIDENCE\`.\n- LLM Wiki publication and Supabase RLS isolation remain \`APPROVAL_GATED\`.\n`;
+  return `# LLM Wiki Candidate Content Matrix\n\n- Verdict: \`${report.verdict}\`\n- Mode: \`${report.mode}\`\n- Generation mode: \`${report.generationMode}\`\n- Base URL: \`${report.baseUrl}\`\n- Source head: \`${report.sourceHead}\`\n- Production commit: \`${report.productionBuild.commitSha ?? "not-live"}\`\n- Cases: ${report.passedCount}/${report.totalCount} PASS\n- Reviewer-visible source traces: ${report.reviewerEvidenceTraceCount}/${report.totalCount}\n\n| Scenario | HTTP | Matched hazards | Sections | Evidence trace | Missing evidence groups | Failures | Verdict |\n| --- | ---: | --- | ---: | --- | ---: | --- | --- |\n${rows}\n\n## Contract\n\n- Each scenario uses the deployed stateless \`/api/knowledge/regenerate\` path.\n- Deterministic mode proves the built-in safety-knowledge fallback; provider mode separately proves enhanced LLM generation when runtime admission is available.\n- The response must expose the server-derived four-section content-readiness contract.\n- Scenario hazard IDs and scenario-specific term groups must remain grounded in generated text.\n- Scenario-specific KOSHA/official source terms must be visible in the candidate body, not only in server metadata.\n- Candidate text must label KOSHA material as technical/official guidance and law material as a current-law review candidate.\n- Placeholder text, legal overclaim, missing law provenance, and missing hazard grounding fail closed.\n- All candidates remain unpublished and require human review.\n\n## Boundary\n\n- This matrix does not read the actual production candidate queue.\n- No DB write, Wiki publication, provider dispatch, Share-session creation, embedding/vector mutation, or KOSHA registry mutation is performed.\n- Exact saved Share remains \`MISSING_EVIDENCE\`.\n- LLM Wiki publication and Supabase RLS isolation remain \`APPROVAL_GATED\`.\n`;
 }
 
 export async function runKnowledgeCandidateContentMatrix(options = {}) {
@@ -184,7 +199,11 @@ export async function runKnowledgeCandidateContentMatrix(options = {}) {
         failures: [`request_error:${error instanceof Error ? error.message : String(error)}`],
         missingHazardIds: asArray(testCase.expectedHazardIds),
         missingTermGroups: asArray(testCase.requiredAnyGroups),
+        missingEvidenceTermGroups: asArray(testCase.requiredEvidenceAnyGroups),
         matchedHazardIds: [],
+        reviewerEvidenceTraceVisible: false,
+        technicalGuidanceBoundaryVisible: false,
+        lawCandidateBoundaryVisible: false,
         generatedTextLength: 0,
         generatedTextExcerpt: "",
         readiness: {},
@@ -225,6 +244,9 @@ export async function runKnowledgeCandidateContentMatrix(options = {}) {
     passedCount: results.length - failedCount,
     failedCount,
     requiredSectionCount: 4,
+    reviewerEvidenceTraceCount: results.filter((result) => result.reviewerEvidenceTraceVisible === true).length,
+    technicalGuidanceBoundaryCount: results.filter((result) => result.technicalGuidanceBoundaryVisible === true).length,
+    lawCandidateBoundaryCount: results.filter((result) => result.lawCandidateBoundaryVisible === true).length,
     scenarioCandidateBuildExecuted: results.length,
     llmGenerationAttempted: generationMode === "provider",
     actualProductionCandidateQueueRead: false,
