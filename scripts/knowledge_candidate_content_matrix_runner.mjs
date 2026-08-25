@@ -199,15 +199,18 @@ export async function runKnowledgeCandidateContentMatrix(options = {}) {
     && productionBuild.commitSha === sourceHead
     && productionBuild.branch === "master"
     && productionBuild.environment === "production";
+  const passVerdict = generationMode === "provider"
+    ? "LLM_WIKI_CANDIDATE_CONTENT_MATRIX"
+    : "WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX";
   const verdict = failedCount === 0
     ? liveMode && productionAligned
-      ? "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_MATRIX"
+      ? "PASS_LIVE_PRODUCTION_" + passVerdict
       : liveMode
-        ? "PASS_LIVE_CONTENT_MATRIX_SOURCE_ALIGNMENT_PENDING"
-        : "PASS_CURRENT_SOURCE_LOCAL_LLM_WIKI_CANDIDATE_CONTENT_MATRIX"
+        ? "PASS_LIVE_" + passVerdict + "_SOURCE_ALIGNMENT_PENDING"
+        : "PASS_CURRENT_SOURCE_LOCAL_" + passVerdict
     : liveMode
-      ? "RED_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_MATRIX"
-      : "RED_CURRENT_SOURCE_LOCAL_LLM_WIKI_CANDIDATE_CONTENT_MATRIX";
+      ? "RED_LIVE_PRODUCTION_" + passVerdict
+      : "RED_CURRENT_SOURCE_LOCAL_" + passVerdict;
   const report = {
     schemaVersion: "safeclaw-llm-wiki-candidate-content-matrix/v1",
     verdict,

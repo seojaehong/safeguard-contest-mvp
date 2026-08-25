@@ -13,7 +13,10 @@ export default defineConfig({
     environment: "node",
     server: {
       deps: {
-        external: [/live_harness_quality_probe\.mjs$/],
+        external: [
+          /live_harness_quality_probe\.mjs$/,
+          /knowledge_candidate_content_matrix_runner\.mjs$/
+        ],
       },
     },
   },
