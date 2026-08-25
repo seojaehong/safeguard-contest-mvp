@@ -269,6 +269,30 @@ type NextRunwayReport = {
     llmWikiPublication: string;
     supabaseRlsLaunchIsolation: string;
   };
+  llmWikiCandidateContentMatrix: {
+    verdict: string;
+    localPassed: number;
+    localFailed: number;
+    livePassed: number;
+    liveFailed: number;
+    providerVerdict: string;
+    providerPassed: number;
+    providerFailed: number;
+    providerRuntimeBlocker: string;
+    scenarioCount: number;
+    requiredSectionCount: number;
+    textualHazardGroundingRequired: boolean;
+    matchedHazardMetadataAloneAccepted: boolean;
+    actualProductionCandidateQueueRead: boolean;
+    routeFixtureAcceptedAsGenerationProof: boolean;
+    deterministicFallbackProvenLive: boolean;
+    enhancedLlmGenerationProvenLive: boolean;
+    humanReviewCompleted: boolean;
+    publicationState: string;
+    exactSavedShareVerdict: string;
+    llmWikiPublication: string;
+    supabaseRlsLaunchIsolation: string;
+  };
   dependencySecurityRemediation: {
     verdict: string;
     beforeVulnerablePackages: number;
@@ -2830,6 +2854,54 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     },
     remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", llmWikiPublication: "APPROVAL_GATED", supabaseRlsLaunchIsolation: "APPROVAL_GATED" },
   });
+  writeJson(root, "evaluation/llm-wiki-candidate-content-matrix-2026-08-25/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX_LLM_ENHANCED_RUNTIME_BLOCKED",
+    productCommit: firstHead,
+    sourceHead: firstHead,
+    productionCommit: firstHead,
+    liveAfterDeploymentRequired: false,
+    afterLocal: { verdict: "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX", sourceHead: firstHead, generationMode: "deterministic", passedCount: 5, failedCount: 0 },
+    afterLive: { verdict: "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX", sourceHead: firstHead, productionCommit: firstHead, generationMode: "deterministic", passedCount: 5, failedCount: 0 },
+    afterLiveProvider: {
+      verdict: "RED_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_MATRIX",
+      sourceHead: firstHead,
+      productionCommit: firstHead,
+      generationMode: "provider",
+      passedCount: 0,
+      failedCount: 5,
+      httpStatuses: [503, 503, 503, 503, 503],
+      runtimeBlocker: "distributed_rate_limit_unavailable_before_ai_generation",
+    },
+    contentContract: {
+      scenarioCount: 5,
+      requiredSectionCount: 4,
+      scenarioSpecificTermGroupsRequired: true,
+      textualHazardGroundingRequired: true,
+      matchedHazardMetadataAloneAccepted: false,
+      placeholderFindingCount: 0,
+      legalOverclaimFindingCount: 0,
+      humanReviewCompleted: false,
+      publicationState: "unpublished",
+      publishAllowed: false,
+    },
+    scopeBoundary: {
+      actualProductionCandidateQueueRead: false,
+      routeControlledBrowserFixtureAcceptedAsGenerationProof: false,
+      deterministicFallbackProvenCurrentSource: true,
+      deterministicFallbackProvenLive: true,
+      enhancedLlmGenerationProvenLive: false,
+      enhancedLlmRuntimeState: "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION",
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      ontologyPublicationPerformed: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", llmWikiPublication: "APPROVAL_GATED", supabaseRlsLaunchIsolation: "APPROVAL_GATED" },
+  });
   const liveRollupPath = path.join(root, "evaluation/northstar-live-rollup-2026-07-20/report.json");
   const liveRollup = fs.readFileSync(liveRollupPath, "utf8").replaceAll("TO_FILL", firstHead);
   fs.writeFileSync(liveRollupPath, liveRollup, "utf8");
@@ -3127,6 +3199,32 @@ describe("northstar next runway generator", () => {
       supabaseRlsLaunchIsolation: "APPROVAL_GATED",
     });
     expect(report.provenCurrentState).toContain("llm_wiki_candidate_content_readiness");
+    expect(report.llmWikiCandidateContentMatrix).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX_LLM_ENHANCED_RUNTIME_BLOCKED",
+      localPassed: 5,
+      localFailed: 0,
+      livePassed: 5,
+      liveFailed: 0,
+      providerVerdict: "RED_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_MATRIX",
+      providerPassed: 0,
+      providerFailed: 5,
+      providerRuntimeBlocker: "distributed_rate_limit_unavailable_before_ai_generation",
+      scenarioCount: 5,
+      requiredSectionCount: 4,
+      textualHazardGroundingRequired: true,
+      matchedHazardMetadataAloneAccepted: false,
+      actualProductionCandidateQueueRead: false,
+      routeFixtureAcceptedAsGenerationProof: false,
+      deterministicFallbackProvenLive: true,
+      enhancedLlmGenerationProvenLive: false,
+      humanReviewCompleted: false,
+      publicationState: "unpublished",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+    });
+    expect(report.provenCurrentState).toContain("llm_wiki_candidate_content_matrix");
+    expect(markdown).toContain("does not read the production candidate queue or claim enhanced LLM quality");
     expect(report.hermesOpenclaw).toMatchObject({
       verdict: "adapter_boundary_pass_live_execution_not_claimed",
       trustedTransportWired: true,

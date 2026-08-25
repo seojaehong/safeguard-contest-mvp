@@ -2468,6 +2468,71 @@ function createFixtureRoot(): string {
       supabaseRlsLaunchIsolation: "APPROVAL_GATED",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "llm-wiki-candidate-content-matrix-2026-08-25", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX_LLM_ENHANCED_RUNTIME_BLOCKED",
+    productCommit: "b".repeat(40),
+    sourceHead: "a".repeat(40),
+    productionCommit: "a".repeat(40),
+    liveAfterDeploymentRequired: false,
+    afterLocal: {
+      verdict: "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+      sourceHead: "a".repeat(40),
+      generationMode: "deterministic",
+      passedCount: 5,
+      failedCount: 0,
+    },
+    afterLive: {
+      verdict: "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+      sourceHead: "a".repeat(40),
+      productionCommit: "a".repeat(40),
+      generationMode: "deterministic",
+      passedCount: 5,
+      failedCount: 0,
+    },
+    afterLiveProvider: {
+      verdict: "RED_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_MATRIX",
+      sourceHead: "a".repeat(40),
+      productionCommit: "a".repeat(40),
+      generationMode: "provider",
+      passedCount: 0,
+      failedCount: 5,
+      httpStatuses: [503, 503, 503, 503, 503],
+      runtimeBlocker: "distributed_rate_limit_unavailable_before_ai_generation",
+    },
+    contentContract: {
+      scenarioCount: 5,
+      requiredSectionCount: 4,
+      scenarioSpecificTermGroupsRequired: true,
+      textualHazardGroundingRequired: true,
+      matchedHazardMetadataAloneAccepted: false,
+      placeholderFindingCount: 0,
+      legalOverclaimFindingCount: 0,
+      humanReviewCompleted: false,
+      publicationState: "unpublished",
+      publishAllowed: false,
+    },
+    scopeBoundary: {
+      actualProductionCandidateQueueRead: false,
+      routeControlledBrowserFixtureAcceptedAsGenerationProof: false,
+      deterministicFallbackProvenCurrentSource: true,
+      deterministicFallbackProvenLive: true,
+      enhancedLlmGenerationProvenLive: false,
+      enhancedLlmRuntimeState: "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION",
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      ontologyPublicationPerformed: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "documents-touch-targets-2026-08-17", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_TOUCH_TARGETS",
     sourceHead: "fixture-sha",
@@ -5245,6 +5310,13 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     });
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_readiness")?.detail).toContain("four required sections");
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_readiness")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_matrix")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "llm-wiki-candidate-content-matrix-2026-08-25", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_matrix")?.detail).toContain("pass 5/5");
+    expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_matrix")?.detail).toContain("blocked 0/5");
+    expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_matrix")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("first review state panel-contained=true");
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("Wiki publication plus SIF embedding remain APPROVAL_GATED");
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")).toMatchObject({
@@ -7467,6 +7539,22 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
 
     const audit = buildNorthstarOpenGateAudit({ rootDir, sourceSha: "fixture-sha" });
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_readiness")?.state).toBe("contradicted");
+  });
+
+  it("fails the Wiki candidate matrix closed when enhanced LLM generation is overclaimed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "llm-wiki-candidate-content-matrix-2026-08-25", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      scopeBoundary: { enhancedLlmGenerationProvenLive: boolean };
+    };
+    report.scopeBoundary.enhancedLlmGenerationProvenLive = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, sourceSha: "fixture-sha" });
+    const gate = audit.gates.find((item) => item.id === "llm_wiki_candidate_content_matrix");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.detail).toContain("enhancedLive=true");
   });
 
   it("fails Knowledge viewport workbench closed when progressive disclosures open by default", async () => {

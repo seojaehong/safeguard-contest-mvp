@@ -48,6 +48,7 @@ const EVIDENCE_PATHS = Object.freeze({
   ontologyViewportWorkbench: path.join("evaluation", "ontology-viewport-workbench-2026-08-17", "report.json"),
   knowledgeViewportWorkbench: path.join("evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json"),
   llmWikiCandidateContentReadiness: path.join("evaluation", "llm-wiki-candidate-readiness-2026-08-25", "report.json"),
+  llmWikiCandidateContentMatrix: path.join("evaluation", "llm-wiki-candidate-content-matrix-2026-08-25", "report.json"),
   dispatchEntryCapabilityTruth: path.join("evaluation", "dispatch-entry-capability-truth-2026-07-28", "report.json"),
   landingHumanReviewBoundary: path.join("evaluation", "landing-human-review-boundary-2026-07-28", "report.json"),
   dependencySecurityRemediation: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
@@ -1972,6 +1973,108 @@ function evaluateLlmWikiCandidateContentReadinessGate(rootDir) {
     evidencePath,
     detail: `Readiness verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, local=${readNumber(local.passedCount)}/${readNumber(local.viewportCount)}, live=${readNumber(afterLive.passedCount)}/${readNumber(afterLive.viewportCount)}, browserErrors=${readNumber(afterLive.browserErrorCount)}, sections=${readNumber(readiness.requiredSectionCount)}, approvalBlocked=${readiness.approvalFailsClosedForRevision === true}, humanReviewCompleted=${readiness.humanReviewCompleted === true}, publishAllowed=${readiness.publishAllowed === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, wiki=${readString(remainingBoundaries.llmWikiPublication) || "missing"}, rls=${readString(remainingBoundaries.supabaseRlsLaunchIsolation) || "missing"}.`,
     nextActions: ["Restore source/live alignment, four-section readiness, fail-closed approval, no-mutation behavior, and approval boundaries, then rerun the live candidate-readiness contract."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateLlmWikiCandidateContentMatrixGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.llmWikiCandidateContentMatrix;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "llm_wiki_candidate_content_matrix",
+      label: "Live Wiki candidate fallback content matrix",
+      state: "missing",
+      evidencePath,
+      detail: "Live Wiki candidate fallback content-matrix evidence is missing or invalid.",
+      nextActions: ["Run the five-scenario stateless fallback matrix and the separate enhanced-provider probe against current production."],
+    });
+  }
+
+  const afterLocal = isRecord(report.afterLocal) ? report.afterLocal : {};
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const afterLiveProvider = isRecord(report.afterLiveProvider) ? report.afterLiveProvider : {};
+  const contentContract = isRecord(report.contentContract) ? report.contentContract : {};
+  const scopeBoundary = isRecord(report.scopeBoundary) ? report.scopeBoundary : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(afterLive.sourceHead);
+  const productionCommit = readString(afterLive.productionCommit);
+  const productCommit = readString(report.productCommit);
+  const sourceMatchesProduction = /^[0-9a-f]{40}$/u.test(sourceHead)
+    && /^[0-9a-f]{40}$/u.test(productCommit)
+    && sourceHead === productionCommit
+    && /^[0-9a-f]{40}$/u.test(productionCommit);
+  const localPass = readString(afterLocal.verdict) === "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX"
+    && readNumber(afterLocal.passedCount) === 5
+    && readNumber(afterLocal.failedCount) === 0;
+  const liveFallbackPass = readString(afterLive.verdict) === "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX"
+    && readNumber(afterLive.passedCount) === 5
+    && readNumber(afterLive.failedCount) === 0;
+  const providerBlockPreserved = readString(afterLiveProvider.verdict) === "RED_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_MATRIX"
+    && readNumber(afterLiveProvider.passedCount) === 0
+    && readNumber(afterLiveProvider.failedCount) === 5
+    && readString(afterLiveProvider.runtimeBlocker) === "distributed_rate_limit_unavailable_before_ai_generation"
+    && Array.isArray(afterLiveProvider.httpStatuses)
+    && afterLiveProvider.httpStatuses.length === 5
+    && afterLiveProvider.httpStatuses.every((status) => status === 503);
+  const contractPass = readNumber(contentContract.scenarioCount) === 5
+    && readNumber(contentContract.requiredSectionCount) === 4
+    && contentContract.scenarioSpecificTermGroupsRequired === true
+    && contentContract.textualHazardGroundingRequired === true
+    && contentContract.matchedHazardMetadataAloneAccepted === false
+    && readNumber(contentContract.placeholderFindingCount) === 0
+    && readNumber(contentContract.legalOverclaimFindingCount) === 0
+    && contentContract.humanReviewCompleted === false
+    && readString(contentContract.publicationState) === "unpublished"
+    && contentContract.publishAllowed === false;
+  const scopePass = scopeBoundary.actualProductionCandidateQueueRead === false
+    && scopeBoundary.routeControlledBrowserFixtureAcceptedAsGenerationProof === false
+    && scopeBoundary.deterministicFallbackProvenCurrentSource === true
+    && scopeBoundary.deterministicFallbackProvenLive === true
+    && scopeBoundary.enhancedLlmGenerationProvenLive === false
+    && readString(scopeBoundary.enhancedLlmRuntimeState) === "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION";
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.ontologyPublicationPerformed === false
+    && mutationBoundary.vectorOrEmbeddingMutationPerformed === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const boundariesPass = readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(remainingBoundaries.llmWikiPublication) === "APPROVAL_GATED"
+    && readString(remainingBoundaries.supabaseRlsLaunchIsolation) === "APPROVAL_GATED";
+  const proven = readString(report.verdict) === "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX_LLM_ENHANCED_RUNTIME_BLOCKED"
+    && report.liveAfterDeploymentRequired === false
+    && sourceMatchesProduction
+    && localPass
+    && liveFallbackPass
+    && providerBlockPreserved
+    && contractPass
+    && scopePass
+    && noMutation
+    && boundariesPass;
+
+  if (proven) {
+    return gateResult({
+      id: "llm_wiki_candidate_content_matrix",
+      label: "Live Wiki candidate fallback content matrix",
+      state: "proven",
+      evidencePath,
+      detail: "Current-source and production stateless fallback candidates pass 5/5 chemical, hot-work, confined-space, forklift, and foreign-worker fall scenarios with four non-empty sections, textual hazard grounding, zero placeholders, and zero legal overclaims. The enhanced LLM probe remains explicitly blocked 0/5 by distributed admission before AI generation; this gate does not claim enhanced LLM quality or read the production candidate queue. Human review remains incomplete, publication is disallowed, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus Supabase RLS remain APPROVAL_GATED.",
+      nextActions: ["Configure distributed provider admission, then rerun the five-scenario provider matrix without weakening fail-closed admission."],
+    });
+  }
+
+  return gateResult({
+    id: "llm_wiki_candidate_content_matrix",
+    label: "Live Wiki candidate fallback content matrix",
+    state: "contradicted",
+    evidencePath,
+    detail: `Matrix verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, local=${readNumber(afterLocal.passedCount)}/5, liveFallback=${readNumber(afterLive.passedCount)}/5, providerBlocked=${providerBlockPreserved}, enhancedLive=${scopeBoundary.enhancedLlmGenerationProvenLive === true}, sections=${readNumber(contentContract.requiredSectionCount)}, textualGrounding=${contentContract.textualHazardGroundingRequired === true}, humanReviewCompleted=${contentContract.humanReviewCompleted === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, wiki=${readString(remainingBoundaries.llmWikiPublication) || "missing"}, rls=${readString(remainingBoundaries.supabaseRlsLaunchIsolation) || "missing"}.`,
+    nextActions: ["Restore the five-scenario fallback PASS, explicit enhanced-runtime block, source/live alignment, no-mutation boundary, and approval boundaries."],
   });
 }
 
@@ -9393,6 +9496,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateOntologyViewportWorkbenchGate(rootDir),
     evaluateKnowledgeViewportWorkbenchGate(rootDir),
     evaluateLlmWikiCandidateContentReadinessGate(rootDir),
+    evaluateLlmWikiCandidateContentMatrixGate(rootDir),
     evaluateDependencySecurityRemediationGate(rootDir),
     evaluateTenantAuthorizationRemediationGate(rootDir),
     evaluateSpreadsheetFormulaNeutralizationGate(rootDir),
