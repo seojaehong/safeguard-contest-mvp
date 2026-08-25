@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "safeclaw-llm-wiki-candidate-content-matrix-summary/v1",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_DETERMINISTIC_WIKI_CANDIDATE_MATRIX_LIVE_PENDING",
+  "checkedAt": "2026-08-25T12:26:40.198Z",
+  "productCommit": "f07da7c51eaabdc9c15b1a9c85e9655b16d5ba6f",
+  "beforeLive": {
+    "path": "evaluation/llm-wiki-candidate-content-matrix-2026-08-25/before-live/report.json",
+    "sourceHead": "80a6f43a6aafb894983556bc297fd3f87be61efd",
+    "productionCommit": "80a6f43a6aafb894983556bc297fd3f87be61efd",
+    "generationMode": "provider",
+    "verdict": "RED_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_MATRIX",
+    "passedCount": 0,
+    "failedCount": 5,
+    "runtimeBlocker": "distributed_rate_limit_unavailable_before_ai_generation"
+  },
+  "afterLocal": {
+    "path": "evaluation/llm-wiki-candidate-content-matrix-2026-08-25/after-local/report.json",
+    "sourceHead": "f07da7c51eaabdc9c15b1a9c85e9655b16d5ba6f",
+    "generationMode": "deterministic",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_LLM_WIKI_CANDIDATE_CONTENT_MATRIX",
+    "passedCount": 5,
+    "failedCount": 0
+  },
+  "afterLive": null,
+  "liveAfterDeploymentRequired": true,
+  "contentContract": {
+    "scenarioCount": 5,
+    "requiredSectionCount": 4,
+    "scenarioSpecificTermGroupsRequired": true,
+    "textualHazardGroundingRequired": true,
+    "matchedHazardMetadataAloneAccepted": false,
+    "placeholderFindingCount": 0,
+    "legalOverclaimFindingCount": 0,
+    "humanReviewCompleted": false,
+    "publicationState": "unpublished",
+    "publishAllowed": false
+  },
+  "scopeBoundary": {
+    "actualProductionCandidateQueueRead": false,
+    "routeControlledBrowserFixtureAcceptedAsGenerationProof": false,
+    "deterministicFallbackProvenCurrentSource": true,
+    "enhancedLlmGenerationProvenLive": false,
+    "enhancedLlmRuntimeState": "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "ontologyPublicationPerformed": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
+  }
+}

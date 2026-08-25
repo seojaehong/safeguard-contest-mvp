@@ -1,0 +1,414 @@
+{
+  "schemaVersion": "safeclaw-llm-wiki-candidate-content-matrix/v1",
+  "verdict": "RED_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_MATRIX",
+  "checkedAt": "2026-08-25T12:20:05.631Z",
+  "mode": "live-production",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceHead": "80a6f43a6aafb894983556bc297fd3f87be61efd",
+  "productionBuild": {
+    "status": 200,
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "80a6f43a6aafb894983556bc297fd3f87be61efd",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-ed6aavvk0-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "productionAligned": true,
+  "totalCount": 5,
+  "passedCount": 0,
+  "failedCount": 5,
+  "requiredSectionCount": 4,
+  "scenarioSpecificGenerationExecuted": 5,
+  "actualProductionCandidateQueueRead": false,
+  "routeControlledBrowserFixtureIsNotActualProductionQueue": true,
+  "humanReviewCompleted": false,
+  "publicationState": "unpublished",
+  "publishAllowed": false,
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "ontologyPublicationPerformed": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
+  },
+  "results": [
+    {
+      "id": "chemical-cleaning",
+      "ok": false,
+      "responseStatus": 503,
+      "failures": [
+        "http_status:503",
+        "response_not_ok",
+        "provider_not_configured",
+        "storage_not_stateless",
+        "saved_run_created",
+        "candidate_contract_mismatch",
+        "candidate_not_pending_review",
+        "candidate_publication_state_changed",
+        "candidate_db_mutation_boundary_failed",
+        "candidate_publish_allowed",
+        "human_review_not_required",
+        "machine_evidence_replaces_human_review",
+        "review_contract_mutation_boundary_failed",
+        "readiness_contract_mismatch",
+        "readiness:missing",
+        "required_sections_incomplete",
+        "placeholder_content",
+        "legal_overclaim",
+        "law_provenance_missing",
+        "hazard_grounding_missing",
+        "human_review_overclaimed",
+        "readiness_publication_boundary_failed",
+        "missing_hazard:chemical-msds",
+        "missing_term_group:화학물질|세척제|MSDS",
+        "missing_term_group:누출|보호구|환기"
+      ],
+      "missingHazardIds": [
+        "chemical-msds"
+      ],
+      "missingTermGroups": [
+        [
+          "화학물질",
+          "세척제",
+          "MSDS"
+        ],
+        [
+          "누출",
+          "보호구",
+          "환기"
+        ]
+      ],
+      "matchedHazardIds": [],
+      "generatedTextLength": 0,
+      "generatedTextExcerpt": "",
+      "readiness": {
+        "status": null,
+        "requiredSectionCount": null,
+        "presentSectionCount": null,
+        "nonEmptySectionCount": null,
+        "placeholderFindingCount": null,
+        "legalOverclaimFindingCount": null,
+        "statutoryClaimDetected": null,
+        "lawProvenancePresent": null,
+        "hazardGroundingPresent": null,
+        "unresolvedReviewItems": []
+      },
+      "boundary": {
+        "storageMode": null,
+        "savedRunId": null,
+        "publicationState": null,
+        "dbMutationAllowed": null,
+        "dbMutationPerformed": null,
+        "publishAllowed": null,
+        "humanReviewRequired": null,
+        "machineEvidenceReplacesHumanReview": null
+      }
+    },
+    {
+      "id": "hot-work-fire",
+      "ok": false,
+      "responseStatus": 503,
+      "failures": [
+        "http_status:503",
+        "response_not_ok",
+        "provider_not_configured",
+        "storage_not_stateless",
+        "saved_run_created",
+        "candidate_contract_mismatch",
+        "candidate_not_pending_review",
+        "candidate_publication_state_changed",
+        "candidate_db_mutation_boundary_failed",
+        "candidate_publish_allowed",
+        "human_review_not_required",
+        "machine_evidence_replaces_human_review",
+        "review_contract_mutation_boundary_failed",
+        "readiness_contract_mismatch",
+        "readiness:missing",
+        "required_sections_incomplete",
+        "placeholder_content",
+        "legal_overclaim",
+        "law_provenance_missing",
+        "hazard_grounding_missing",
+        "human_review_overclaimed",
+        "readiness_publication_boundary_failed",
+        "missing_hazard:hot-work-fire",
+        "missing_term_group:용접|화기",
+        "missing_term_group:화재|불티|가연물"
+      ],
+      "missingHazardIds": [
+        "hot-work-fire"
+      ],
+      "missingTermGroups": [
+        [
+          "용접",
+          "화기"
+        ],
+        [
+          "화재",
+          "불티",
+          "가연물"
+        ]
+      ],
+      "matchedHazardIds": [],
+      "generatedTextLength": 0,
+      "generatedTextExcerpt": "",
+      "readiness": {
+        "status": null,
+        "requiredSectionCount": null,
+        "presentSectionCount": null,
+        "nonEmptySectionCount": null,
+        "placeholderFindingCount": null,
+        "legalOverclaimFindingCount": null,
+        "statutoryClaimDetected": null,
+        "lawProvenancePresent": null,
+        "hazardGroundingPresent": null,
+        "unresolvedReviewItems": []
+      },
+      "boundary": {
+        "storageMode": null,
+        "savedRunId": null,
+        "publicationState": null,
+        "dbMutationAllowed": null,
+        "dbMutationPerformed": null,
+        "publishAllowed": null,
+        "humanReviewRequired": null,
+        "machineEvidenceReplacesHumanReview": null
+      }
+    },
+    {
+      "id": "confined-space",
+      "ok": false,
+      "responseStatus": 503,
+      "failures": [
+        "http_status:503",
+        "response_not_ok",
+        "provider_not_configured",
+        "storage_not_stateless",
+        "saved_run_created",
+        "candidate_contract_mismatch",
+        "candidate_not_pending_review",
+        "candidate_publication_state_changed",
+        "candidate_db_mutation_boundary_failed",
+        "candidate_publish_allowed",
+        "human_review_not_required",
+        "machine_evidence_replaces_human_review",
+        "review_contract_mutation_boundary_failed",
+        "readiness_contract_mismatch",
+        "readiness:missing",
+        "required_sections_incomplete",
+        "placeholder_content",
+        "legal_overclaim",
+        "law_provenance_missing",
+        "hazard_grounding_missing",
+        "human_review_overclaimed",
+        "readiness_publication_boundary_failed",
+        "missing_hazard:confined-space",
+        "missing_term_group:밀폐공간|탱크",
+        "missing_term_group:산소결핍|유해가스|환기"
+      ],
+      "missingHazardIds": [
+        "confined-space"
+      ],
+      "missingTermGroups": [
+        [
+          "밀폐공간",
+          "탱크"
+        ],
+        [
+          "산소결핍",
+          "유해가스",
+          "환기"
+        ]
+      ],
+      "matchedHazardIds": [],
+      "generatedTextLength": 0,
+      "generatedTextExcerpt": "",
+      "readiness": {
+        "status": null,
+        "requiredSectionCount": null,
+        "presentSectionCount": null,
+        "nonEmptySectionCount": null,
+        "placeholderFindingCount": null,
+        "legalOverclaimFindingCount": null,
+        "statutoryClaimDetected": null,
+        "lawProvenancePresent": null,
+        "hazardGroundingPresent": null,
+        "unresolvedReviewItems": []
+      },
+      "boundary": {
+        "storageMode": null,
+        "savedRunId": null,
+        "publicationState": null,
+        "dbMutationAllowed": null,
+        "dbMutationPerformed": null,
+        "publishAllowed": null,
+        "humanReviewRequired": null,
+        "machineEvidenceReplacesHumanReview": null
+      }
+    },
+    {
+      "id": "forklift-traffic",
+      "ok": false,
+      "responseStatus": 503,
+      "failures": [
+        "http_status:503",
+        "response_not_ok",
+        "provider_not_configured",
+        "storage_not_stateless",
+        "saved_run_created",
+        "candidate_contract_mismatch",
+        "candidate_not_pending_review",
+        "candidate_publication_state_changed",
+        "candidate_db_mutation_boundary_failed",
+        "candidate_publish_allowed",
+        "human_review_not_required",
+        "machine_evidence_replaces_human_review",
+        "review_contract_mutation_boundary_failed",
+        "readiness_contract_mismatch",
+        "readiness:missing",
+        "required_sections_incomplete",
+        "placeholder_content",
+        "legal_overclaim",
+        "law_provenance_missing",
+        "hazard_grounding_missing",
+        "human_review_overclaimed",
+        "readiness_publication_boundary_failed",
+        "missing_hazard:forklift-traffic",
+        "missing_term_group:지게차",
+        "missing_term_group:보행자|동선|충돌",
+        "missing_term_group:신호수|운행경로|접근금지"
+      ],
+      "missingHazardIds": [
+        "forklift-traffic"
+      ],
+      "missingTermGroups": [
+        [
+          "지게차"
+        ],
+        [
+          "보행자",
+          "동선",
+          "충돌"
+        ],
+        [
+          "신호수",
+          "운행경로",
+          "접근금지"
+        ]
+      ],
+      "matchedHazardIds": [],
+      "generatedTextLength": 0,
+      "generatedTextExcerpt": "",
+      "readiness": {
+        "status": null,
+        "requiredSectionCount": null,
+        "presentSectionCount": null,
+        "nonEmptySectionCount": null,
+        "placeholderFindingCount": null,
+        "legalOverclaimFindingCount": null,
+        "statutoryClaimDetected": null,
+        "lawProvenancePresent": null,
+        "hazardGroundingPresent": null,
+        "unresolvedReviewItems": []
+      },
+      "boundary": {
+        "storageMode": null,
+        "savedRunId": null,
+        "publicationState": null,
+        "dbMutationAllowed": null,
+        "dbMutationPerformed": null,
+        "publishAllowed": null,
+        "humanReviewRequired": null,
+        "machineEvidenceReplacesHumanReview": null
+      }
+    },
+    {
+      "id": "fall-foreign-worker",
+      "ok": false,
+      "responseStatus": 503,
+      "failures": [
+        "http_status:503",
+        "response_not_ok",
+        "provider_not_configured",
+        "storage_not_stateless",
+        "saved_run_created",
+        "candidate_contract_mismatch",
+        "candidate_not_pending_review",
+        "candidate_publication_state_changed",
+        "candidate_db_mutation_boundary_failed",
+        "candidate_publish_allowed",
+        "human_review_not_required",
+        "machine_evidence_replaces_human_review",
+        "review_contract_mutation_boundary_failed",
+        "readiness_contract_mismatch",
+        "readiness:missing",
+        "required_sections_incomplete",
+        "placeholder_content",
+        "legal_overclaim",
+        "law_provenance_missing",
+        "hazard_grounding_missing",
+        "human_review_overclaimed",
+        "readiness_publication_boundary_failed",
+        "missing_hazard:fall-scaffold",
+        "missing_hazard:foreign-worker-briefing",
+        "missing_term_group:비계|고소작업",
+        "missing_term_group:추락|안전대|안전난간",
+        "missing_term_group:외국인|쉬운 한국어|다국어"
+      ],
+      "missingHazardIds": [
+        "fall-scaffold",
+        "foreign-worker-briefing"
+      ],
+      "missingTermGroups": [
+        [
+          "비계",
+          "고소작업"
+        ],
+        [
+          "추락",
+          "안전대",
+          "안전난간"
+        ],
+        [
+          "외국인",
+          "쉬운 한국어",
+          "다국어"
+        ]
+      ],
+      "matchedHazardIds": [],
+      "generatedTextLength": 0,
+      "generatedTextExcerpt": "",
+      "readiness": {
+        "status": null,
+        "requiredSectionCount": null,
+        "presentSectionCount": null,
+        "nonEmptySectionCount": null,
+        "placeholderFindingCount": null,
+        "legalOverclaimFindingCount": null,
+        "statutoryClaimDetected": null,
+        "lawProvenancePresent": null,
+        "hazardGroundingPresent": null,
+        "unresolvedReviewItems": []
+      },
+      "boundary": {
+        "storageMode": null,
+        "savedRunId": null,
+        "publicationState": null,
+        "dbMutationAllowed": null,
+        "dbMutationPerformed": null,
+        "publishAllowed": null,
+        "humanReviewRequired": null,
+        "machineEvidenceReplacesHumanReview": null
+      }
+    }
+  ]
+}
