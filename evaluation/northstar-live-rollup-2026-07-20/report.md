@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-17T09:27:15.940Z
-Source HEAD at generation: 8ae3c0e89ad9e9679945d21e562a4ffe778d6a97
-Live commit at generation: 8ae3c0e89ad9e9679945d21e562a4ffe778d6a97
+Generated at: 2026-08-25T11:58:59.885Z
+Source HEAD at generation: 1bdbc3e2edadac5afbc6a2eef0811a132b1d7307
+Live commit at generation: c7cb6280724239611a95f278c8b1fb2c6191168b
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -263,6 +263,12 @@ Overall: `northstar_open_approval_gated`
 - Progressive disclosure: 6/7/2/2 technical/reference/wiki/governance disclosures, default open=0, exclusive groups=true, mobile ratios=4.47/3.68/2.03/2.2, first item/review state panel-contained=true/true.
 - Boundaries: exact saved Share=MISSING_EVIDENCE; Wiki publication=APPROVAL_GATED; SIF embedding=APPROVAL_GATED; fully automated launch=false
 
+## LLM Wiki candidate content readiness
+- Verdict: `PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS`
+- Local/live viewport rows: 8/8 and 8/8; browser errors=0.
+- Readiness contract: 4 required sections; ready/revision fixtures=2/1; approval fail-closed=true; site-only/reject available=true/true.
+- Boundaries: human review complete=false; publication=unpublished; publish allowed=false; DB/Wiki mutation=false/false; exact saved Share=MISSING_EVIDENCE; Wiki/RLS=APPROVAL_GATED/APPROVAL_GATED.
+
 ## Live Hermes Reviewer Authority UI
 
 - Verdict: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI`
@@ -335,6 +341,7 @@ Overall: `northstar_open_approval_gated`
 | document_export_capability_truth | proven | evaluation\document-export-capability-truth-2026-08-17\report.json |
 | ontology_viewport_workbench | proven | evaluation\ontology-viewport-workbench-2026-08-17\report.json |
 | knowledge_viewport_workbench | proven | evaluation\knowledge-viewport-workbench-2026-08-17\report.json |
+| llm_wiki_candidate_content_readiness | proven | evaluation\llm-wiki-candidate-readiness-2026-08-25\report.json |
 | dependency_security_remediation | proven | evaluation\dependency-security-remediation-2026-07-28\report.json |
 | tenant_authorization_remediation | proven | evaluation\tenant-authorization-boundary-preflight-2026-07-29\report.json |
 | spreadsheet_formula_neutralization | proven | evaluation\spreadsheet-formula-neutralization-2026-08-01\report.json |
@@ -389,7 +396,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
@@ -407,6 +414,7 @@ Overall: `northstar_open_approval_gated`
 | document_export_capability_truth | ancestor | ancestor_of_head | evaluation\document-export-capability-truth-2026-08-17\report.json |
 | ontology_viewport_workbench | ancestor | ancestor_of_head | evaluation\ontology-viewport-workbench-2026-08-17\report.json |
 | knowledge_viewport_workbench | ancestor | ancestor_of_head | evaluation\knowledge-viewport-workbench-2026-08-17\report.json |
+| llm_wiki_candidate_content_readiness | ancestor | matches_live | evaluation\llm-wiki-candidate-readiness-2026-08-25\report.json |
 | tenant_authorization_remediation | ancestor | ancestor_of_head | evaluation\tenant-authorization-boundary-preflight-2026-07-29\report.json |
 | spreadsheet_formula_neutralization | ancestor | ancestor_of_head | evaluation\spreadsheet-formula-neutralization-2026-08-01\report.json |
 | public_provider_work_budget | ancestor | ancestor_of_head | evaluation\public-provider-work-budget-2026-08-01\report.json |

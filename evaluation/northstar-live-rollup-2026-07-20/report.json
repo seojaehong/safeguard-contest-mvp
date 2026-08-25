@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-17T09:27:15.940Z",
-  "head": "8ae3c0e89ad9e9679945d21e562a4ffe778d6a97",
+  "generatedAt": "2026-08-25T11:58:59.885Z",
+  "head": "1bdbc3e2edadac5afbc6a2eef0811a132b1d7307",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "8ae3c0e89ad9e9679945d21e562a4ffe778d6a97",
+    "commitSha": "c7cb6280724239611a95f278c8b1fb2c6191168b",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-k2btdi5nv-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-27c6m8ycx-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 65
+    "gateCount": 66
   },
   "provenGates": [
     {
@@ -116,6 +116,12 @@
       "state": "proven",
       "artifact": "evaluation\\knowledge-viewport-workbench-2026-08-17\\report.json",
       "detail": "Production /knowledge passes 10/10 Day/Night browser rows with maximum body ratio 1.02, one visible panel, six reachable tasks, zero horizontal overflow, and 44px minimum controls. KOSHA disclosures are 6/7 technical/reference rows; Wiki/governance disclosures are 2/2. All groups are exclusive with defaultOpen=0, mobile scroll ratios 4.47/3.68/2.03/2.2, and first review state panel-contained=true. Long content remains inside local-scroll panels; route split alone is not accepted. No mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus SIF embedding remain APPROVAL_GATED."
+    },
+    {
+      "id": "llm_wiki_candidate_content_readiness",
+      "state": "proven",
+      "artifact": "evaluation\\llm-wiki-candidate-readiness-2026-08-25\\report.json",
+      "detail": "Production LLM Wiki candidate review passes local/live 8/8 viewport rows with four required sections. Revision-required candidates fail closed for approval while site-only and reject remain available. Human review is not complete, publication remains unpublished and disallowed, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and LLM Wiki publication plus Supabase RLS remain APPROVAL_GATED."
     },
     {
       "id": "dependency_security_remediation",
@@ -1118,6 +1124,32 @@
     "sifEmbeddingRuntimeVerdict": "APPROVAL_GATED",
     "fullyAutomatedLaunchClaimAllowed": false
   },
+  "llmWikiCandidateContentReadiness": {
+    "artifact": "evaluation\\llm-wiki-candidate-readiness-2026-08-25\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS",
+    "sourceHead": "c7cb6280724239611a95f278c8b1fb2c6191168b",
+    "productCommit": "aac729a3c63fad8f0adb82c01d8d24d4f51f3b4d",
+    "productionCommit": "c7cb6280724239611a95f278c8b1fb2c6191168b",
+    "localPassed": 8,
+    "localViewportCount": 8,
+    "livePassed": 8,
+    "liveViewportCount": 8,
+    "browserErrorCount": 0,
+    "requiredSectionCount": 4,
+    "readyFixtureCount": 2,
+    "revisionRequiredFixtureCount": 1,
+    "approvalFailsClosedForRevision": true,
+    "keepSiteOnlyAvailableForRevision": true,
+    "rejectAvailableForRevision": true,
+    "humanReviewCompleted": false,
+    "publicationState": "unpublished",
+    "publishAllowed": false,
+    "dbMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
+  },
   "tenantAuthorizationRemediation": {
     "artifact": "evaluation\\tenant-authorization-boundary-preflight-2026-07-29\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
@@ -1370,10 +1402,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "8ae3c0e89ad9e9679945d21e562a4ffe778d6a97",
+      "sourceCommit": "1bdbc3e2edadac5afbc6a2eef0811a132b1d7307",
       "sourceStatus": "exact",
-      "productionCommit": "8ae3c0e89ad9e9679945d21e562a4ffe778d6a97",
-      "productionStatus": "matches_live"
+      "productionCommit": "1bdbc3e2edadac5afbc6a2eef0811a132b1d7307",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -1510,6 +1542,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": "5678b95f490bc72a9928606e440cebe7e840034d",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "llm_wiki_candidate_content_readiness",
+      "artifact": "evaluation\\llm-wiki-candidate-readiness-2026-08-25\\report.json",
+      "sourceCommit": "c7cb6280724239611a95f278c8b1fb2c6191168b",
+      "sourceStatus": "ancestor",
+      "productionCommit": "c7cb6280724239611a95f278c8b1fb2c6191168b",
+      "productionStatus": "matches_live"
     },
     {
       "id": "tenant_authorization_remediation",

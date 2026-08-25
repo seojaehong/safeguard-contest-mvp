@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-17T09:27:14.551Z",
-  "sourceSha": "8ae3c0e89ad9e9679945d21e562a4ffe778d6a97",
+  "generatedAt": "2026-08-25T11:58:57.090Z",
+  "sourceSha": "1bdbc3e2edadac5afbc6a2eef0811a132b1d7307",
   "overall": "open",
   "gates": [
     {
@@ -163,6 +163,14 @@
       "label": "Live Knowledge viewport workbench",
       "evidencePath": "evaluation\\knowledge-viewport-workbench-2026-08-17\\report.json",
       "detail": "Production /knowledge passes 10/10 Day/Night browser rows with maximum body ratio 1.02, one visible panel, six reachable tasks, zero horizontal overflow, and 44px minimum controls. KOSHA disclosures are 6/7 technical/reference rows; Wiki/governance disclosures are 2/2. All groups are exclusive with defaultOpen=0, mobile scroll ratios 4.47/3.68/2.03/2.2, and first review state panel-contained=true. Long content remains inside local-scroll panels; route split alone is not accepted. No mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus SIF embedding remain APPROVAL_GATED.",
+      "nextActions": []
+    },
+    {
+      "id": "llm_wiki_candidate_content_readiness",
+      "state": "proven",
+      "label": "Live LLM Wiki candidate content readiness",
+      "evidencePath": "evaluation\\llm-wiki-candidate-readiness-2026-08-25\\report.json",
+      "detail": "Production LLM Wiki candidate review passes local/live 8/8 viewport rows with four required sections. Revision-required candidates fail closed for approval while site-only and reject remain available. Human review is not complete, publication remains unpublished and disallowed, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and LLM Wiki publication plus Supabase RLS remain APPROVAL_GATED.",
       "nextActions": []
     },
     {
