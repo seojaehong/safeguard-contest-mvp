@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-25T12:02:08.636Z
-Source HEAD at generation: 35bf61dfb57e96a0bc01116df33e14eda8453c35
-Live commit at generation: 35bf61dfb57e96a0bc01116df33e14eda8453c35
+Generated at: 2026-08-25T13:07:27.482Z
+Source HEAD at generation: 504839e5fb49d7a5cafc80531aa73686a496af18
+Live commit at generation: db896d45116418c7a185d9dad443a198be7a8de3
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -269,6 +269,12 @@ Overall: `northstar_open_approval_gated`
 - Readiness contract: 4 required sections; ready/revision fixtures=2/1; approval fail-closed=true; site-only/reject available=true/true.
 - Boundaries: human review complete=false; publication=unpublished; publish allowed=false; DB/Wiki mutation=false/false; exact saved Share=MISSING_EVIDENCE; Wiki/RLS=APPROVAL_GATED/APPROVAL_GATED.
 
+## Wiki candidate content matrix
+- Verdict: `PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX_LLM_ENHANCED_RUNTIME_BLOCKED`
+- Deterministic fallback local/live: 5/5 and 5/5; scenarios=5, required sections=4, textual hazard grounding=true, metadata-only accepted=false.
+- Enhanced provider remains 0/5 with verdict `RED_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_MATRIX` and runtime blocker `distributed_rate_limit_unavailable_before_ai_generation`; enhanced live quality proven=false.
+- Boundaries: actual production queue read=false; route fixture accepted as generation proof=false; human review complete=false; publication=unpublished; DB/Wiki mutation=false/false; exact saved Share=MISSING_EVIDENCE; Wiki/RLS=APPROVAL_GATED/APPROVAL_GATED.
+
 ## Live Hermes Reviewer Authority UI
 
 - Verdict: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI`
@@ -342,6 +348,7 @@ Overall: `northstar_open_approval_gated`
 | ontology_viewport_workbench | proven | evaluation\ontology-viewport-workbench-2026-08-17\report.json |
 | knowledge_viewport_workbench | proven | evaluation\knowledge-viewport-workbench-2026-08-17\report.json |
 | llm_wiki_candidate_content_readiness | proven | evaluation\llm-wiki-candidate-readiness-2026-08-25\report.json |
+| llm_wiki_candidate_content_matrix | proven | evaluation\llm-wiki-candidate-content-matrix-2026-08-25\report.json |
 | dependency_security_remediation | proven | evaluation\dependency-security-remediation-2026-07-28\report.json |
 | tenant_authorization_remediation | proven | evaluation\tenant-authorization-boundary-preflight-2026-07-29\report.json |
 | spreadsheet_formula_neutralization | proven | evaluation\spreadsheet-formula-neutralization-2026-08-01\report.json |
@@ -396,7 +403,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
@@ -415,6 +422,7 @@ Overall: `northstar_open_approval_gated`
 | ontology_viewport_workbench | ancestor | ancestor_of_head | evaluation\ontology-viewport-workbench-2026-08-17\report.json |
 | knowledge_viewport_workbench | ancestor | ancestor_of_head | evaluation\knowledge-viewport-workbench-2026-08-17\report.json |
 | llm_wiki_candidate_content_readiness | ancestor | ancestor_of_head | evaluation\llm-wiki-candidate-readiness-2026-08-25\report.json |
+| llm_wiki_candidate_content_matrix | ancestor | matches_live | evaluation\llm-wiki-candidate-content-matrix-2026-08-25\report.json |
 | tenant_authorization_remediation | ancestor | ancestor_of_head | evaluation\tenant-authorization-boundary-preflight-2026-07-29\report.json |
 | spreadsheet_formula_neutralization | ancestor | ancestor_of_head | evaluation\spreadsheet-formula-neutralization-2026-08-01\report.json |
 | public_provider_work_budget | ancestor | ancestor_of_head | evaluation\public-provider-work-budget-2026-08-01\report.json |

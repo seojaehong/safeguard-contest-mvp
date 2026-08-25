@@ -1,17 +1,21 @@
 # LLM Wiki Candidate Content Matrix
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_DETERMINISTIC_WIKI_CANDIDATE_MATRIX_LIVE_PENDING`
+- Verdict: `PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX_LLM_ENHANCED_RUNTIME_BLOCKED`
 - Product commit: `f07da7c51eaabdc9c15b1a9c85e9655b16d5ba6f`
+- Source/production commit: `db896d45116418c7a185d9dad443a198be7a8de3`
 - Current-source deterministic fallback: 5/5 PASS
-- Previous live enhanced LLM attempt: 0/5 RED before AI generation
+- Live production deterministic fallback: 5/5 PASS
+- Live enhanced LLM attempt: 0/5 RED before AI generation
 
 ## Current-source result
 
 The stateless candidate builder produced grounded four-section review candidates for chemical cleaning, hot work, confined space, forklift traffic, and foreign-worker fall scenarios. Every case preserved its expected hazard IDs and scenario-specific terms, reported zero placeholder or legal-overclaim findings, required human review, and remained unpublished.
 
-## Live boundary
+The changed Knowledge regeneration path also retains caller cancellation propagation: `tests/knowledge-regenerate-route.test.ts` passes 18/18, including forwarding the request `AbortSignal` into provider generation and rejecting with the caller's abort reason instead of entering a fallback path.
 
-The pre-deployment production run returned HTTP 503 for all five provider-mode requests because distributed admission was unavailable before AI generation. This is an honest runtime configuration blocker, not a content PASS. The product commit must deploy before the deterministic live matrix can be promoted; provider-mode generation remains separately unproven until distributed admission is configured and a fresh run passes.
+## Live result
+
+Production commit `db896d45116418c7a185d9dad443a198be7a8de3` returned 5/5 PASS for the deterministic fallback matrix. The same production commit returned HTTP 503 for all five provider-mode requests because distributed admission was unavailable before AI generation. This is an honest runtime configuration blocker, not an enhanced LLM content PASS. Provider-mode generation remains separately unproven until distributed admission is configured and a fresh run passes.
 
 ## Scope
 

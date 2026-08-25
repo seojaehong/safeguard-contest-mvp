@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-25T12:02:05.882Z",
-  "sourceSha": "35bf61dfb57e96a0bc01116df33e14eda8453c35",
+  "generatedAt": "2026-08-25T13:07:24.799Z",
+  "sourceSha": "504839e5fb49d7a5cafc80531aa73686a496af18",
   "overall": "open",
   "gates": [
     {
@@ -172,6 +172,16 @@
       "evidencePath": "evaluation\\llm-wiki-candidate-readiness-2026-08-25\\report.json",
       "detail": "Production LLM Wiki candidate review passes local/live 8/8 viewport rows with four required sections. Revision-required candidates fail closed for approval while site-only and reject remain available. Human review is not complete, publication remains unpublished and disallowed, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and LLM Wiki publication plus Supabase RLS remain APPROVAL_GATED.",
       "nextActions": []
+    },
+    {
+      "id": "llm_wiki_candidate_content_matrix",
+      "state": "proven",
+      "label": "Live Wiki candidate fallback content matrix",
+      "evidencePath": "evaluation\\llm-wiki-candidate-content-matrix-2026-08-25\\report.json",
+      "detail": "Current-source and production stateless fallback candidates pass 5/5 chemical, hot-work, confined-space, forklift, and foreign-worker fall scenarios with four non-empty sections, textual hazard grounding, zero placeholders, and zero legal overclaims. The enhanced LLM probe remains explicitly blocked 0/5 by distributed admission before AI generation; this gate does not claim enhanced LLM quality or read the production candidate queue. Human review remains incomplete, publication is disallowed, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus Supabase RLS remain APPROVAL_GATED.",
+      "nextActions": [
+        "Configure distributed provider admission, then rerun the five-scenario provider matrix without weakening fail-closed admission."
+      ]
     },
     {
       "id": "dependency_security_remediation",
@@ -383,7 +393,7 @@
       "state": "notice",
       "label": "Public provider cancellation",
       "evidencePath": "evaluation\\public-provider-cancellation-2026-08-11\\report.json",
-      "detail": "Weather coalescing now cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The product commit is live with 9 files / 104 tests plus a current 23 files / 215 tests governed-path companion, but no live provider cancellation call was executed, the canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Weather coalescing now cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The product commit is live with 9 files / 104 tests plus a current 1 file / 18 tests Knowledge regeneration cancellation compatibility receipt, but no live provider cancellation call was executed, the canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Run a fresh full-repository security scan before reclassifying the immutable finding or making a security-complete claim."
       ]

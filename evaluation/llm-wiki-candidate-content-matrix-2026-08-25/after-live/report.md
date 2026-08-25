@@ -1,11 +1,11 @@
 # LLM Wiki Candidate Content Matrix
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX`
-- Mode: `current-source-local-production`
+- Verdict: `PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX`
+- Mode: `live-production`
 - Generation mode: `deterministic`
-- Base URL: `http://127.0.0.1:3085`
+- Base URL: `https://www.safeclaw.kr`
 - Source head: `db896d45116418c7a185d9dad443a198be7a8de3`
-- Production commit: `not-live`
+- Production commit: `db896d45116418c7a185d9dad443a198be7a8de3`
 - Cases: 5/5 PASS
 
 | Scenario | HTTP | Matched hazards | Sections | Failures | Verdict |

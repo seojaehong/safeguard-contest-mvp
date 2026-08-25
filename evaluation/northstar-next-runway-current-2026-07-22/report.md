@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `35bf61dfb57e96a0bc01116df33e14eda8453c35`
+Source HEAD: `504839e5fb49d7a5cafc80531aa73686a496af18`
 
-Production `/api/build-info`: `35bf61dfb57e96a0bc01116df33e14eda8453c35`
+Production `/api/build-info`: `db896d45116418c7a185d9dad443a198be7a8de3`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `none`
+Source pending changed paths: `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
 
-Current head is evidence-only pending: `false`
+Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `35bf61dfb57e96a0bc01116df33e14eda8453c35`
+Live rollup source head: `504839e5fb49d7a5cafc80531aa73686a496af18`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `504839e5fb49d7a5cafc80531aa73686a496af18` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `db896d45116418c7a185d9dad443a198be7a8de3`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -56,6 +56,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live Ontology viewport workbench is measured separately: `PASS_LIVE_PRODUCTION_ONTOLOGY_VIEWPORT_WORKBENCH`; browser rows `10/10`, maximum body ratio `1`, mobile task switches `4/4`. Route splitting alone is not treated as the fix; long content remains in local-scroll panes. Exact saved Share remains `MISSING_EVIDENCE` and fully automated launch remains `false`.
 - Live Knowledge viewport workbench is measured separately: `PASS_LIVE_PRODUCTION_KNOWLEDGE_VIEWPORT_WORKBENCH`; browser rows `10/10`, maximum body ratio `1.02`, selected exposure `1` visible panel and `6` reachable tasks. Progressive disclosures technical/reference/wiki/governance are `6/7/2/2`, default open `0`, exclusive groups `true`, mobile ratios `4.47/3.68/2.03/2.2`, and first item/review state panel-contained `true/true`. Route splitting alone is not treated as the fix; long content remains in local-scroll panels. Exact saved Share remains `MISSING_EVIDENCE`, Wiki publication remains `APPROVAL_GATED`, and SIF embedding remains `APPROVAL_GATED`.
 - LLM Wiki candidate content readiness is measured separately: `PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS`; local/live viewport rows `8/8` and `8/8`, required sections `4`, ready/revision fixtures `2/1`, approval fail-closed `true`, and site-only/reject availability `true/true`. Human review remains `false`, publication remains `unpublished` with publishAllowed=`false`; exact saved Share remains `MISSING_EVIDENCE`, while Wiki publication and Supabase RLS remain `APPROVAL_GATED/APPROVAL_GATED`.
+- Wiki candidate generation content is measured separately from that browser fixture: `PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX_LLM_ENHANCED_RUNTIME_BLOCKED`; deterministic fallback local/live scenarios `5/5` and `5/5`, while the enhanced provider remains `0/5` with blocker `distributed_rate_limit_unavailable_before_ai_generation`. This does not read the production candidate queue or claim enhanced LLM quality: queueRead=`false`, fixtureAcceptedAsGenerationProof=`false`, enhancedLive=`false`, humanReviewCompleted=`false`, exact saved Share=`MISSING_EVIDENCE`, Wiki/RLS=`APPROVAL_GATED/APPROVAL_GATED`.
 - Public generation admission security is measured separately: `PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN`, live mode `instance`, dependency vulnerabilities `0`, distributed hardening open=`true`, and fresh diff scan required=`true`. This notice does not close multi-instance protection, the immutable scan finding, approval-gated operations, or exact saved Share; exact saved Share remains `MISSING_EVIDENCE`.
 - Security follow-up remediation is separately proven: `PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP`, sealed findings `3`, focused tests `129`, and remaining security work `0`. The immutable original baseline remains `18` findings with rewritten=`false`; two deferred candidates and the separate public-admission notice remain visible, no live provider cancellation probe is claimed, and exact saved Share remains `MISSING_EVIDENCE`.
 - Fresh security resource remediation is scoped rather than security-complete: `PASS_LIVE_PRODUCTION_SECURITY_RESOURCE_REMEDIATION`, remediated `6/20`, remaining `14`, provider persistence `APPROVAL_GATED`, exact saved Share `MISSING_EVIDENCE`.
