@@ -333,6 +333,10 @@ describe("knowledge candidate API", () => {
     });
     expect(payload.candidate.generatedText).toContain("밀폐공간 산소결핍·중독");
     expect(payload.candidate.generatedText).toContain("출입 전 산소·유해가스 측정");
+    expect(payload.candidate.generatedText).toContain("KOSHA 기술·공식자료 후보 - 안전보건법령 스마트검색");
+    expect(payload.candidate.generatedText).toContain("현행 법령 후보 - 법제처 국가법령정보 산업안전보건법");
+    expect(payload.candidate.generatedText).toContain("기술 참고 후보로만 사용");
+    expect(payload.candidate.generatedText).toContain("이 후보는 사람 검토 전 게시하지 않습니다");
   });
 
   it("fails closed before AI generation when provider concurrency admission is full", async () => {

@@ -179,6 +179,19 @@ export function buildDeterministicKnowledgeCandidateText(
   const documents = [...new Set(bundle.matchedHazards.flatMap((hazard) => hazard.primaryDocuments))]
     .map((documentKey) => candidateDocumentLabels[documentKey as keyof typeof candidateDocumentLabels] ?? documentKey);
   const controls = [...new Set(bundle.matchedHazards.flatMap((hazard) => hazard.controls))];
+  const sources = [...new Map(
+    bundle.matchedHazards
+      .flatMap((hazard) => hazard.sources)
+      .map((source) => [source.id, source] as const)
+  ).values()];
+  const koshaSourceTitles = sources
+    .filter((source) => source.agency === "KOSHA" && source.sourceType !== "law")
+    .map((source) => source.title)
+    .slice(0, 3);
+  const lawSourceTitles = sources
+    .filter((source) => source.sourceType === "law" || source.agency === "MOLEG")
+    .map((source) => source.title)
+    .slice(0, 2);
   const hazardSummary = hazards.length > 0
     ? hazards.join(" · ")
     : "매칭된 내장 위험요인이 없어 현장 책임자의 위험요인 확인이 필요합니다.";
@@ -188,12 +201,18 @@ export function buildDeterministicKnowledgeCandidateText(
   const controlText = controls.length > 0
     ? controls.join(" · ")
     : "작업 전 현장 책임자가 작업중지 기준과 보호구·접근통제를 확인합니다.";
+  const koshaEvidenceText = koshaSourceTitles.length > 0
+    ? koshaSourceTitles.join(" · ")
+    : "현장 조건에 맞는 KOSHA 자료를 검토자가 지정";
+  const lawEvidenceText = lawSourceTitles.length > 0
+    ? lawSourceTitles.join(" · ")
+    : "현행 법령 근거를 검토자가 별도 확인";
 
   return [
     `1) 위험요인 요약: ${hazardSummary}`,
     `2) 문서 반영 위치: ${documentTargets}`,
     `3) 통제대책: ${controlText}`,
-    "4) 검수 필요 항목: 현장 책임자가 실제 작업조건, 담당자, 확인시각과 적용 근거를 검토합니다. 이 후보는 사람 검토 전 게시하지 않습니다."
+    `4) 검수 필요 항목: 근거 구분: KOSHA 기술·공식자료 후보 - ${koshaEvidenceText} (기술 참고 후보로만 사용) / 현행 법령 후보 - ${lawEvidenceText} (현장 적용 여부 별도 확인). 현장 책임자가 실제 작업조건, 담당자, 확인시각과 적용 근거를 검토합니다. 이 후보는 사람 검토 전 게시하지 않습니다.`
   ].join("\n");
 }
 
