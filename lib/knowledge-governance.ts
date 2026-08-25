@@ -207,7 +207,7 @@ const STATUTORY_CLAIM_PATTERNS = [
   /산업안전보건법(?:에|에\s*따라|상)/u,
   /(?:법률|시행령|시행규칙)(?:에|에\s*따라|상)/u
 ] as const;
-const HAZARD_GROUNDING_PATTERN = /위험|추락|끼임|감전|화재|폭발|충돌|전도|질식|양중|화학|유해|고소|굴착|밀폐/u;
+const HAZARD_GROUNDING_PATTERN = /추락|끼임|감전|화재|폭발|충돌|전도|질식|양중|화학|유해|고소|굴착|밀폐|산소결핍|누출|지게차/u;
 
 function readKnowledgeCandidateSections(text: string): Map<KnowledgeCandidateRequiredSectionId, string> {
   const labelToId = new Map<string, KnowledgeCandidateRequiredSectionId>(
@@ -248,8 +248,7 @@ export function evaluateKnowledgeCandidateContentReadiness(
   const legalOverclaimFindingCount = LEGAL_OVERCLAIM_PATTERNS.filter((pattern) => pattern.test(candidate.generatedText)).length;
   const statutoryClaimDetected = STATUTORY_CLAIM_PATTERNS.some((pattern) => pattern.test(candidate.generatedText));
   const lawProvenancePresent = candidate.provenance.some((item) => item.authorityId === "law");
-  const hazardGroundingPresent = candidate.matchedHazardIds.length > 0
-    || HAZARD_GROUNDING_PATTERN.test(sectionText.get("hazard_summary") ?? "");
+  const hazardGroundingPresent = HAZARD_GROUNDING_PATTERN.test(sectionText.get("hazard_summary") ?? "");
   const unresolvedReviewItems = [
     ...sections.filter((section) => !section.present).map((section) => `missing_section:${section.id}`),
     ...sections.filter((section) => section.present && !section.nonEmpty).map((section) => `empty_section:${section.id}`),
@@ -651,9 +650,7 @@ export function buildKnowledgeCandidate(input: {
     stage: "candidate",
     reviewStatus: "pending_review",
     publicationState: "unpublished",
-    generatedBy: input.generatedText || input.providerLabel
-      ? "hermes_or_llm"
-      : "safeclaw_candidate_builder",
+    generatedBy: input.providerLabel ? "hermes_or_llm" : "safeclaw_candidate_builder",
     providerLabel: input.providerLabel,
     authority: "none",
     nextStage: "human_review",

@@ -5,7 +5,11 @@ import {
   type KnowledgeCandidate,
   type KnowledgeEventProvenance
 } from "@/lib/knowledge-governance";
-import { normalizeKnowledgeRawEvent, type KnowledgeRawEvent } from "@/lib/safety-knowledge";
+import {
+  getSafetyKnowledgeHazardTitles,
+  normalizeKnowledgeRawEvent,
+  type KnowledgeRawEvent
+} from "@/lib/safety-knowledge";
 import type { WorkspaceDatabase, WorkspaceUser } from "@/lib/supabase-admin";
 import { toJson } from "@/lib/supabase-admin";
 
@@ -233,8 +237,14 @@ function validateCandidate(
   return candidate;
 }
 
-function buildSafeReviewQuestion(eventCount: number): string {
-  return `원본 이벤트 ${eventCount}건 기반 현장 지식 후보 검토`;
+function buildSafeReviewQuestion(rawEvents: readonly KnowledgeRawEvent[]): string {
+  const hazardTitles = getSafetyKnowledgeHazardTitles([
+    ...new Set(rawEvents.flatMap((event) => event.relatedHazardIds))
+  ]);
+  const semanticScope = hazardTitles.length > 0
+    ? ` ${hazardTitles.slice(0, 4).join(" · ")}`
+    : "";
+  return `원본 이벤트 ${rawEvents.length}건 기반${semanticScope} 현장 지식 후보 검토`;
 }
 
 export async function prepareKnowledgeReviewCandidate(
@@ -333,7 +343,7 @@ export async function prepareKnowledgeReviewCandidate(
     events: orderedEvents as KnowledgeReviewSourceEventRow[],
     tenantContext: { organizationId: run.organization_id, siteId: run.site_id }
   });
-  const safeQuestion = buildSafeReviewQuestion(orderedEvents.length);
+  const safeQuestion = buildSafeReviewQuestion(sourceBinding.rawEvents);
   let built: KnowledgeReviewCandidateBuildResult;
   try {
     built = await dependencies.buildCandidate({

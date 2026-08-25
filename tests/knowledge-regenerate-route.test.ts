@@ -277,6 +277,64 @@ describe("knowledge candidate API", () => {
     expect(release).toHaveBeenCalledTimes(1);
   });
 
+  it("builds a four-section stateless fallback without calling an AI provider", async () => {
+    const { POST } = await import("@/app/api/knowledge/regenerate/route");
+    const response = await POST(new NextRequest("http://localhost/api/knowledge/regenerate", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        question: "밀폐공간 탱크 작업의 산소결핍 통제대책을 검토해줘",
+        generate: false,
+        tenantContext: { organizationId: "org-1", siteId: "site-1" },
+        rawEvents: [{
+          source: "lawgo",
+          sourceId: "law-confined-space",
+          capturedAt: "2026-08-25T00:00:00.000Z",
+          title: "밀폐공간 작업 현행 법령 검토 이벤트",
+          payload: { scenario: "탱크 내부 산소결핍" },
+          relatedHazardIds: ["confined-space"],
+          reflectedDocuments: ["위험성평가표", "비상대응 절차"]
+        }]
+      })
+    }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(generateKnowledgeText).not.toHaveBeenCalled();
+    expect(payload).toMatchObject({
+      configured: false,
+      storageMode: "stateless_candidate",
+      savedRunId: null,
+      candidate: {
+        generatedBy: "safeclaw_candidate_builder",
+        matchedHazardIds: ["confined-space"],
+        dbMutationPerformed: false,
+        publishAllowed: false
+      },
+      contentReadiness: {
+        status: "ready_for_human_review",
+        requiredSectionCount: 4,
+        presentSectionCount: 4,
+        nonEmptySectionCount: 4,
+        placeholderFindingCount: 0,
+        legalOverclaimFindingCount: 0,
+        lawProvenancePresent: true,
+        hazardGroundingPresent: true,
+        unresolvedReviewItems: [],
+        humanReviewCompleted: false,
+        publicationState: "unpublished",
+        publishAllowed: false
+      },
+      generated: {
+        configured: false,
+        providerLabel: null,
+        fallbackUsed: true
+      }
+    });
+    expect(payload.candidate.generatedText).toContain("밀폐공간 산소결핍·중독");
+    expect(payload.candidate.generatedText).toContain("출입 전 산소·유해가스 측정");
+  });
+
   it("fails closed before AI generation when provider concurrency admission is full", async () => {
     const { createKnowledgeCandidatePostHandler } = await import("@/lib/knowledge-candidate-route");
     const post = createKnowledgeCandidatePostHandler({
@@ -309,6 +367,17 @@ describe("knowledge candidate API", () => {
   });
 
   it("returns an unpublished candidate that can only advance to human review", async () => {
+    vi.mocked(generateKnowledgeText).mockResolvedValueOnce({
+      configured: true,
+      text: [
+        "1) 위험요인 요약: 작업발판 단부 추락 위험",
+        "2) 문서 반영 위치: 위험성평가표와 TBM 브리핑",
+        "3) 통제대책: 안전난간 설치 상태를 작업 전 확인",
+        "4) 검수 필요 항목: 현장 책임자가 실제 설치 상태 확인"
+      ].join("\n"),
+      providerLabel: "Hermes",
+      policyNote: "candidate only"
+    });
     const { POST } = await import("@/app/api/knowledge/regenerate/route");
     const response = await POST(new NextRequest("http://localhost/api/knowledge/regenerate", {
       method: "POST",
@@ -376,6 +445,22 @@ describe("knowledge candidate API", () => {
         humanReviewRequired: true,
         machineEvidenceReplacesHumanReview: false,
         dbMutationAllowed: false,
+        publishAllowed: false
+      },
+      contentReadiness: {
+        contractVersion: "knowledge-candidate-content-readiness.v1",
+        status: "ready_for_human_review",
+        requiredSectionCount: 4,
+        presentSectionCount: 4,
+        nonEmptySectionCount: 4,
+        placeholderFindingCount: 0,
+        legalOverclaimFindingCount: 0,
+        statutoryClaimDetected: false,
+        lawProvenancePresent: true,
+        hazardGroundingPresent: true,
+        unresolvedReviewItems: [],
+        humanReviewCompleted: false,
+        publicationState: "unpublished",
         publishAllowed: false
       }
     });

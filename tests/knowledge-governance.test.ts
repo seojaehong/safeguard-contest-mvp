@@ -369,4 +369,26 @@ describe("knowledge governance contract", () => {
     });
     expect(readiness.unresolvedReviewItems).toContain("statutory_claim_without_law_provenance");
   });
+
+  it("does not treat matched hazard metadata as textual hazard grounding", () => {
+    const candidate = buildKnowledgeCandidate({
+      question: "현장 지식 후보를 검토해줘",
+      rawEvents: [lawEvent],
+      matchedHazardIds: ["chemical-msds"],
+      generatedText: [
+        "1) 위험요인 요약: 작업 조건을 확인합니다.",
+        "2) 문서 반영 위치: 위험성평가표",
+        "3) 통제대책: 현장 조건에 맞는 조치를 확인합니다.",
+        "4) 검수 필요 항목: 현장 책임자 확인"
+      ].join("\n"),
+      providerLabel: "Hermes",
+      tenantContext
+    });
+
+    expect(evaluateKnowledgeCandidateContentReadiness(candidate)).toMatchObject({
+      status: "revision_required",
+      hazardGroundingPresent: false,
+      unresolvedReviewItems: ["hazard_grounding_missing"]
+    });
+  });
 });

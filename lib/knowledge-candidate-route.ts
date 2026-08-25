@@ -9,6 +9,7 @@ import {
   buildKnowledgeCandidate,
   buildKnowledgeCandidateReviewContract,
   classifyKnowledgeEvent,
+  evaluateKnowledgeCandidateContentReadiness,
   type KnowledgeCandidate,
   type KnowledgeTenantContext
 } from "@/lib/knowledge-governance";
@@ -158,13 +159,51 @@ export function buildKnowledgePrompt(
   ].join("\n");
 }
 
+const candidateDocumentLabels = {
+  riskAssessment: "위험성평가표",
+  workPlan: "작업계획서",
+  tbmBriefing: "TBM 브리핑",
+  tbmLog: "TBM 기록",
+  safetyEducation: "안전보건교육",
+  emergencyResponse: "비상대응 절차",
+  photoEvidence: "사진 증빙",
+  foreignWorkerBriefing: "외국인 근로자 안내문",
+  foreignWorkerTransmission: "외국인 근로자 전파문",
+  dispatch: "현장 전파"
+} as const;
+
+export function buildDeterministicKnowledgeCandidateText(
+  bundle: ReturnType<typeof buildKnowledgeRegenerationBundle>
+): string {
+  const hazards = bundle.matchedHazards.map((hazard) => hazard.title);
+  const documents = [...new Set(bundle.matchedHazards.flatMap((hazard) => hazard.primaryDocuments))]
+    .map((documentKey) => candidateDocumentLabels[documentKey as keyof typeof candidateDocumentLabels] ?? documentKey);
+  const controls = [...new Set(bundle.matchedHazards.flatMap((hazard) => hazard.controls))];
+  const hazardSummary = hazards.length > 0
+    ? hazards.join(" · ")
+    : "매칭된 내장 위험요인이 없어 현장 책임자의 위험요인 확인이 필요합니다.";
+  const documentTargets = documents.length > 0
+    ? documents.join(" · ")
+    : "위험성평가표와 TBM 브리핑에서 현장 적용 위치를 확인합니다.";
+  const controlText = controls.length > 0
+    ? controls.join(" · ")
+    : "작업 전 현장 책임자가 작업중지 기준과 보호구·접근통제를 확인합니다.";
+
+  return [
+    `1) 위험요인 요약: ${hazardSummary}`,
+    `2) 문서 반영 위치: ${documentTargets}`,
+    `3) 통제대책: ${controlText}`,
+    "4) 검수 필요 항목: 현장 책임자가 실제 작업조건, 담당자, 확인시각과 적용 근거를 검토합니다. 이 후보는 사람 검토 전 게시하지 않습니다."
+  ].join("\n");
+}
+
 export async function buildKnowledgeCandidateDraft(
   input: KnowledgeCandidateBuildInput,
   dependencies: KnowledgeCandidateBuildDependencies
 ) {
   const limit = Math.min(Math.max(Math.trunc(input.limit ?? 4), 1), 10);
   const bundle = buildKnowledgeRegenerationBundle(input.question, input.rawEvents, limit);
-  const generated = input.generate === false
+  const providerResult = input.generate === false
     ? {
         configured: false,
         text: "",
@@ -172,6 +211,16 @@ export async function buildKnowledgeCandidateDraft(
         policyNote: "generate=true가 아니어서 AI 초안 생성을 건너뛰었습니다."
       }
     : await dependencies.generateText(buildKnowledgePrompt(bundle, input.tenantContext), input.signal);
+  const fallbackUsed = !providerResult.text.trim();
+  const generated = fallbackUsed
+    ? {
+        ...providerResult,
+        text: buildDeterministicKnowledgeCandidateText(bundle),
+        providerLabel: null,
+        fallbackUsed: true,
+        policyNote: `${providerResult.policyNote} 내장 안전지식 기반 검토 후보를 대신 구성했습니다.`
+      }
+    : { ...providerResult, fallbackUsed: false };
   const candidate = buildKnowledgeCandidate({
     question: input.question,
     rawEvents: bundle.rawEvents,
@@ -181,8 +230,9 @@ export async function buildKnowledgeCandidateDraft(
     tenantContext: input.tenantContext
   });
   const reviewContract = buildKnowledgeCandidateReviewContract(candidate);
+  const contentReadiness = evaluateKnowledgeCandidateContentReadiness(candidate);
 
-  return { bundle, candidate, reviewContract, generated };
+  return { bundle, candidate, reviewContract, contentReadiness, generated };
 }
 
 export function createKnowledgeCandidatePostHandler(
@@ -273,7 +323,7 @@ export function createKnowledgeCandidatePostHandler(
     } finally {
       await generationLease?.release();
     }
-    const { bundle, candidate, reviewContract, generated } = draft;
+    const { bundle, candidate, reviewContract, contentReadiness, generated } = draft;
     const responseBundle = {
       question: bundle.question,
       matchedHazards: bundle.matchedHazards,
@@ -291,6 +341,7 @@ export function createKnowledgeCandidatePostHandler(
       bundle: responseBundle,
       candidate,
       reviewContract,
+      contentReadiness,
       aiReady: true,
       generated,
       message: "검토용 지식 후보를 메모리에서 생성했습니다. DB 저장과 ontology publish는 수행하지 않았습니다."

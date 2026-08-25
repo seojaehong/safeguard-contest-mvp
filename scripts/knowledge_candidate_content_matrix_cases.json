@@ -1,0 +1,102 @@
+{
+  "schemaVersion": "safeclaw-knowledge-candidate-content-matrix-cases/v1",
+  "cases": [
+    {
+      "id": "chemical-cleaning",
+      "question": "화학물질 세척제 누출 작업의 위험요인과 문서 통제대책을 검토해줘",
+      "expectedHazardIds": ["chemical-msds"],
+      "requiredAnyGroups": [
+        ["화학물질", "세척제", "MSDS"],
+        ["누출", "보호구", "환기"]
+      ],
+      "rawEvent": {
+        "source": "lawgo",
+        "sourceId": "matrix-law-chemical",
+        "capturedAt": "2026-08-25T00:00:00.000Z",
+        "title": "화학물질 세척 작업 현행 법령 검토 이벤트",
+        "url": "https://www.law.go.kr/",
+        "payload": { "scenario": "화학물질 세척제 누출과 피부 접촉" },
+        "relatedHazardIds": ["chemical-msds"],
+        "reflectedDocuments": ["위험성평가표", "안전보건교육", "비상대응 절차"]
+      }
+    },
+    {
+      "id": "hot-work-fire",
+      "question": "용접 화기작업 중 불티와 화재 위험의 통제대책을 검토해줘",
+      "expectedHazardIds": ["hot-work-fire"],
+      "requiredAnyGroups": [
+        ["용접", "화기"],
+        ["화재", "불티", "가연물"]
+      ],
+      "rawEvent": {
+        "source": "lawgo",
+        "sourceId": "matrix-law-hot-work",
+        "capturedAt": "2026-08-25T00:01:00.000Z",
+        "title": "화기작업 현행 법령 검토 이벤트",
+        "url": "https://www.law.go.kr/",
+        "payload": { "scenario": "용접 불티와 가연물 화재" },
+        "relatedHazardIds": ["hot-work-fire"],
+        "reflectedDocuments": ["위험성평가표", "작업계획서", "TBM 브리핑"]
+      }
+    },
+    {
+      "id": "confined-space",
+      "question": "밀폐공간 탱크 작업의 산소결핍과 유해가스 통제대책을 검토해줘",
+      "expectedHazardIds": ["confined-space"],
+      "requiredAnyGroups": [
+        ["밀폐공간", "탱크"],
+        ["산소결핍", "유해가스", "환기"]
+      ],
+      "rawEvent": {
+        "source": "lawgo",
+        "sourceId": "matrix-law-confined-space",
+        "capturedAt": "2026-08-25T00:02:00.000Z",
+        "title": "밀폐공간 작업 현행 법령 검토 이벤트",
+        "url": "https://www.law.go.kr/",
+        "payload": { "scenario": "탱크 내부 산소결핍과 유해가스" },
+        "relatedHazardIds": ["confined-space"],
+        "reflectedDocuments": ["위험성평가표", "TBM 브리핑", "비상대응 절차"]
+      }
+    },
+    {
+      "id": "forklift-traffic",
+      "question": "지게차 상하차 구역의 보행자 동선 충돌 위험과 통제대책을 검토해줘",
+      "expectedHazardIds": ["forklift-traffic"],
+      "requiredAnyGroups": [
+        ["지게차"],
+        ["보행자", "동선", "충돌"],
+        ["신호수", "운행경로", "접근금지"]
+      ],
+      "rawEvent": {
+        "source": "lawgo",
+        "sourceId": "matrix-law-forklift",
+        "capturedAt": "2026-08-25T00:03:00.000Z",
+        "title": "지게차 상하차 작업 현행 법령 검토 이벤트",
+        "url": "https://www.law.go.kr/",
+        "payload": { "scenario": "지게차와 보행자 동선 충돌" },
+        "relatedHazardIds": ["forklift-traffic"],
+        "reflectedDocuments": ["위험성평가표", "작업계획서", "TBM 기록"]
+      }
+    },
+    {
+      "id": "fall-foreign-worker",
+      "question": "외국인 근로자가 참여하는 비계 고소작업의 추락 위험과 쉬운 안전 지시를 검토해줘",
+      "expectedHazardIds": ["fall-scaffold", "foreign-worker-briefing"],
+      "requiredAnyGroups": [
+        ["비계", "고소작업"],
+        ["추락", "안전대", "안전난간"],
+        ["외국인", "쉬운 한국어", "다국어"]
+      ],
+      "rawEvent": {
+        "source": "lawgo",
+        "sourceId": "matrix-law-fall-foreign",
+        "capturedAt": "2026-08-25T00:04:00.000Z",
+        "title": "외국인 근로자 고소작업 현행 법령 검토 이벤트",
+        "url": "https://www.law.go.kr/",
+        "payload": { "scenario": "외국인 근로자 비계 고소작업 추락" },
+        "relatedHazardIds": ["fall-scaffold", "foreign-worker-briefing"],
+        "reflectedDocuments": ["위험성평가표", "TBM 브리핑", "외국인 근로자 안내문"]
+      }
+    }
+  ]
+}

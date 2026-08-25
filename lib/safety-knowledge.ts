@@ -140,6 +140,13 @@ export function getSafetyKnowledgeSources() {
   return typedResources;
 }
 
+export function getSafetyKnowledgeHazardTitles(hazardIds: readonly string[]): string[] {
+  const requested = new Set(hazardIds);
+  return typedHazards
+    .filter((hazard) => requested.has(hazard.id))
+    .map((hazard) => hazard.title);
+}
+
 export function getSafetyKnowledgeTemplates() {
   return typedTemplates;
 }

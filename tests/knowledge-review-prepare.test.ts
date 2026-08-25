@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildKnowledgeCandidate,
   classifyKnowledgeEvent,
   type KnowledgeCandidate
 } from "@/lib/knowledge-governance";
@@ -225,6 +226,63 @@ describe("knowledge review candidate preparation", () => {
       column: "site_id",
       value: "site-1"
     });
+  });
+
+  it("preserves catalog hazard meaning without leaking raw event text into the builder question", async () => {
+    const rawChemicalEvent = {
+      source: "manual" as const,
+      sourceId: "manual-secret",
+      capturedAt: "2026-07-16T00:00:00.000Z",
+      title: "김철수 화학 세척 작업 원문",
+      url: "https://private.example/secret",
+      payload: { residentNumber: "secret", scenario: "피부 접촉" },
+      relatedHazardIds: ["chemical-msds"],
+      reflectedDocuments: ["위험성평가표"]
+    };
+    const fake = makeClient({
+      run: { question: "김철수 서명 완료 화학물질 세척 검토" },
+      events: [{
+        id: "event-1",
+        organization_id: "org-1",
+        site_id: "site-1",
+        source: rawChemicalEvent.source,
+        source_id: rawChemicalEvent.sourceId,
+        captured_at: rawChemicalEvent.capturedAt,
+        title: rawChemicalEvent.title,
+        url: rawChemicalEvent.url,
+        payload: rawChemicalEvent.payload,
+        related_hazard_ids: rawChemicalEvent.relatedHazardIds,
+        reflected_documents: rawChemicalEvent.reflectedDocuments,
+        review_status: "pending_review"
+      }]
+    });
+    let builderQuestion = "";
+
+    await prepareKnowledgeReviewCandidate(fake.client, user, { runId: "run-1" }, {
+      buildCandidate: async (input) => {
+        builderQuestion = input.question;
+        return {
+          candidate: buildKnowledgeCandidate({
+            question: input.question,
+            rawEvents: [rawChemicalEvent],
+            matchedHazardIds: ["chemical-msds"],
+            generatedText: [
+              "1) 위험요인 요약: 화학물질 세척제 누출과 피부 접촉 위험",
+              "2) 문서 반영 위치: 위험성평가표와 안전보건교육",
+              "3) 통제대책: MSDS와 보호구를 작업 전 확인",
+              "4) 검수 필요 항목: 현장 책임자가 실제 세척제와 환기 상태 확인"
+            ].join("\n"),
+            providerLabel: "fixture-provider",
+            tenantContext: { organizationId: "org-1", siteId: "site-1" }
+          }),
+          configured: true,
+          providerLabel: "fixture-provider"
+        };
+      }
+    });
+
+    expect(builderQuestion).toContain("화학물질·세척제 노출");
+    expect(builderQuestion).not.toMatch(/김철수|residentNumber|피부 접촉|manual-secret/u);
   });
 
   it.each([
