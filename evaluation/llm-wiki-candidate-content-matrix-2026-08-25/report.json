@@ -1,10 +1,10 @@
 {
   "schemaVersion": "safeclaw-llm-wiki-candidate-content-matrix-summary/v1",
-  "verdict": "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX_LLM_ENHANCED_RUNTIME_BLOCKED",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_EVIDENCE_VISIBILITY_LIVE_PENDING",
   "checkedAt": "2026-08-25T12:35:25.654Z",
-  "productCommit": "f07da7c51eaabdc9c15b1a9c85e9655b16d5ba6f",
-  "sourceHead": "db896d45116418c7a185d9dad443a198be7a8de3",
-  "productionCommit": "db896d45116418c7a185d9dad443a198be7a8de3",
+  "productCommit": "909c1747f47e501b3b7dcde30df957e500d43858",
+  "sourceHead": "909c1747f47e501b3b7dcde30df957e500d43858",
+  "productionCommit": "e9138a2fbd6e78a7ead3eead0a511b2d8e21c171",
   "beforeLive": {
     "path": "evaluation/llm-wiki-candidate-content-matrix-2026-08-25/before-live/report.json",
     "sourceHead": "80a6f43a6aafb894983556bc297fd3f87be61efd",
@@ -15,6 +15,28 @@
     "failedCount": 5,
     "runtimeBlocker": "distributed_rate_limit_unavailable_before_ai_generation"
   },
+  "evidenceVisibilityBeforeLive": {
+    "path": "evaluation/llm-wiki-candidate-content-matrix-2026-08-25/before-evidence-visibility-live/report.json",
+    "sourceHead": "e9138a2fbd6e78a7ead3eead0a511b2d8e21c171",
+    "productionCommit": "e9138a2fbd6e78a7ead3eead0a511b2d8e21c171",
+    "verdict": "RED_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+    "passedCount": 0,
+    "failedCount": 5,
+    "reviewerEvidenceTraceCount": 0,
+    "technicalGuidanceBoundaryCount": 0,
+    "lawCandidateBoundaryCount": 0
+  },
+  "evidenceVisibilityAfterLocal": {
+    "path": "evaluation/llm-wiki-candidate-content-matrix-2026-08-25/after-evidence-visibility-local/report.json",
+    "sourceHead": "909c1747f47e501b3b7dcde30df957e500d43858",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+    "passedCount": 5,
+    "failedCount": 0,
+    "reviewerEvidenceTraceCount": 5,
+    "technicalGuidanceBoundaryCount": 5,
+    "lawCandidateBoundaryCount": 5
+  },
+  "evidenceVisibilityAfterLive": null,
   "afterLocal": {
     "path": "evaluation/llm-wiki-candidate-content-matrix-2026-08-25/after-local/report.json",
     "sourceHead": "db896d45116418c7a185d9dad443a198be7a8de3",
@@ -44,13 +66,16 @@
     "httpStatuses": [503, 503, 503, 503, 503],
     "runtimeBlocker": "distributed_rate_limit_unavailable_before_ai_generation"
   },
-  "liveAfterDeploymentRequired": false,
+  "liveAfterDeploymentRequired": true,
   "contentContract": {
     "scenarioCount": 5,
     "requiredSectionCount": 4,
     "scenarioSpecificTermGroupsRequired": true,
     "textualHazardGroundingRequired": true,
     "matchedHazardMetadataAloneAccepted": false,
+    "reviewerVisibleEvidenceTraceRequired": true,
+    "scenarioSpecificOfficialSourceTermsRequired": true,
+    "technicalGuidanceAndLawRolesSeparated": true,
     "placeholderFindingCount": 0,
     "legalOverclaimFindingCount": 0,
     "humanReviewCompleted": false,
@@ -78,6 +103,7 @@
     "routeControlledBrowserFixtureAcceptedAsGenerationProof": false,
     "deterministicFallbackProvenCurrentSource": true,
     "deterministicFallbackProvenLive": true,
+    "evidenceVisibilityContractProvenLive": false,
     "enhancedLlmGenerationProvenLive": false,
     "enhancedLlmRuntimeState": "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION"
   },
