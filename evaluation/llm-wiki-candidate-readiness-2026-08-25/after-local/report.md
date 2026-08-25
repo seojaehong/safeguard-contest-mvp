@@ -1,9 +1,9 @@
 # Hermes Knowledge Review Authority UI
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_AUTHORITY_UI`
-- Source head: `2b7c874f668603d62edf2cac08968cf09a12c158`
+- Verdict: `PASS_CURRENT_SOURCE_LOCAL_LLM_WIKI_CANDIDATE_CONTENT_READINESS`
+- Source head: `d2c35f34efa63380e608227453b52d2a2c159613`
 - Product commit: `aac729a3`
-- Checked at: `2026-08-25T11:30:54.718Z`
+- Checked at: `2026-08-25T11:35:11.390Z`
 - Scope: current-source local production rendering with an authenticated, route-controlled review candidate fixture.
 - Production aligned: `false`
 

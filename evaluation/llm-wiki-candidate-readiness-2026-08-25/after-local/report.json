@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-hermes-knowledge-review-authority-ui/v2",
-  "contractMode": "authority-ui",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_AUTHORITY_UI",
-  "checkedAt": "2026-08-25T11:30:54.718Z",
-  "sourceHead": "2b7c874f668603d62edf2cac08968cf09a12c158",
+  "contractMode": "candidate-content-readiness",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_LLM_WIKI_CANDIDATE_CONTENT_READINESS",
+  "checkedAt": "2026-08-25T11:35:11.390Z",
+  "sourceHead": "d2c35f34efa63380e608227453b52d2a2c159613",
   "productCommit": "aac729a3",
   "baseUrl": "http://127.0.0.1:3084",
   "mode": "current-source-local-production",
