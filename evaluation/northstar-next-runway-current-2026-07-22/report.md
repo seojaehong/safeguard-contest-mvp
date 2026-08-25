@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `1bdbc3e2edadac5afbc6a2eef0811a132b1d7307`
+Source HEAD: `35bf61dfb57e96a0bc01116df33e14eda8453c35`
 
-Production `/api/build-info`: `c7cb6280724239611a95f278c8b1fb2c6191168b`
+Production `/api/build-info`: `35bf61dfb57e96a0bc01116df33e14eda8453c35`
 
-Latest evidence commit live: `false`
+Latest evidence commit live: `true`
 
-Source head live pending: `true`
+Source head live pending: `false`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/llm-wiki-candidate-readiness-2026-08-25/after-live/knowledge-review-authority-day-desktop-1440x900.png`, `evaluation/llm-wiki-candidate-readiness-2026-08-25/after-live/knowledge-review-authority-day-desktop-short-1440x723.png`, `evaluation/llm-wiki-candidate-readiness-2026-08-25/after-live/knowledge-review-authority-day-mobile-390x844.png`, `evaluation/llm-wiki-candidate-readiness-2026-08-25/after-live/knowledge-review-authority-day-mobile-short-390x723.png`, `evaluation/llm-wiki-candidate-readiness-2026-08-25/after-live/knowledge-review-authority-night-desktop-1440x900.png`, `evaluation/llm-wiki-candidate-readiness-2026-08-25/after-live/knowledge-review-authority-night-desktop-short-1440x723.png`, `evaluation/llm-wiki-candidate-readiness-2026-08-25/after-live/knowledge-review-authority-night-mobile-390x844.png`, `evaluation/llm-wiki-candidate-readiness-2026-08-25/after-live/knowledge-review-authority-night-mobile-short-390x723.png`, `evaluation/llm-wiki-candidate-readiness-2026-08-25/after-live/report.json`, `evaluation/llm-wiki-candidate-readiness-2026-08-25/after-live/report.md`, `evaluation/llm-wiki-candidate-readiness-2026-08-25/after-local/knowledge-review-authority-day-desktop-1440x900.png`, `evaluation/llm-wiki-candidate-readiness-2026-08-25/after-local/knowledge-review-authority-day-desktop-short-1440x723.png`, `evaluation/llm-wiki-candidate-readiness-2026-08-25/after-local/knowledge-review-authority-day-mobile-short-390x723.png`, `evaluation/llm-wiki-candidate-readiness-2026-08-25/after-local/report.json`, `evaluation/llm-wiki-candidate-readiness-2026-08-25/after-local/report.md`, `evaluation/llm-wiki-candidate-readiness-2026-08-25/report.json`, `evaluation/llm-wiki-candidate-readiness-2026-08-25/report.md`, `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
+Source pending changed paths: `none`
 
-Current head is evidence-only pending: `true`
+Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `1bdbc3e2edadac5afbc6a2eef0811a132b1d7307`
+Live rollup source head: `35bf61dfb57e96a0bc01116df33e14eda8453c35`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `1bdbc3e2edadac5afbc6a2eef0811a132b1d7307` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `c7cb6280724239611a95f278c8b1fb2c6191168b`, and the live rollup remains exact for that deployed marker.
+Note: source HEAD and production marker match for this artifact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
