@@ -19,6 +19,7 @@ const productCommit = process.env.SAFECLAW_KNOWLEDGE_UI_PRODUCT_COMMIT || source
 const authStorageKey = process.env.SAFECLAW_SUPABASE_STORAGE_KEY || "sb-fixture-auth-token";
 const liveMode = /^https:\/\/www\.safeclaw\.kr(?:\/|$)/u.test(baseUrl);
 const evidenceInspectorMode = process.env.SAFECLAW_KNOWLEDGE_UI_MODE === "evidence-inspector";
+const candidateReadinessMode = process.env.SAFECLAW_KNOWLEDGE_UI_MODE === "candidate-readiness";
 const baseOrigin = new URL(baseUrl).origin;
 const productionBuild = liveMode
   ? await fetch(`${baseUrl}/api/build-info?codexCacheBust=${encodeURIComponent(checkedAt)}`)
@@ -562,18 +563,28 @@ const productionAligned = liveMode
   && productionBuild.environment === "production";
 const report = {
   schemaVersion: "safeclaw-hermes-knowledge-review-authority-ui/v2",
-  contractMode: evidenceInspectorMode ? "evidence-inspector" : "authority-ui",
+  contractMode: evidenceInspectorMode
+    ? "evidence-inspector"
+    : candidateReadinessMode
+      ? "candidate-content-readiness"
+      : "authority-ui",
   verdict: failed.length === 0 && productionAligned
     ? evidenceInspectorMode
       ? "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR"
-      : "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI"
+      : candidateReadinessMode
+        ? "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS"
+        : "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI"
     : failed.length === 0 && !liveMode
       ? evidenceInspectorMode
         ? "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_EVIDENCE_INSPECTOR"
-        : "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_AUTHORITY_UI"
+        : candidateReadinessMode
+          ? "PASS_CURRENT_SOURCE_LOCAL_LLM_WIKI_CANDIDATE_CONTENT_READINESS"
+          : "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_AUTHORITY_UI"
       : evidenceInspectorMode
         ? "RED_HERMES_REVIEW_EVIDENCE_INSPECTOR"
-        : "RED_HERMES_REVIEW_AUTHORITY_UI",
+        : candidateReadinessMode
+          ? "RED_LLM_WIKI_CANDIDATE_CONTENT_READINESS"
+          : "RED_HERMES_REVIEW_AUTHORITY_UI",
   checkedAt,
   sourceHead,
   productCommit,
@@ -767,7 +778,29 @@ if (liveMode && productionAligned && summaryOutput) {
           providerDispatchPersistence: "APPROVAL_GATED"
         }
       }
-    : {
+    : candidateReadinessMode
+      ? {
+          schemaVersion: "safeclaw-llm-wiki-candidate-content-readiness-summary/v1",
+          verdict: "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS",
+          checkedAt,
+          sourceHead,
+          productCommit,
+          productionCommit: productionBuild.commitSha,
+          deploymentUrl: productionBuild.deploymentUrl,
+          local: localSummary,
+          afterLive: liveSummary,
+          liveAfterDeploymentRequired: false,
+          contentReadinessContract: report.contentReadinessContract,
+          workbenchContract: report.workbenchContract,
+          mutationBoundary: {
+            ...report.mutationBoundary,
+            vectorOrEmbeddingMutationPerformed: false,
+            wikiPublicationPerformed: false,
+            koshaRegistryMutationPerformed: false
+          },
+          remainingBoundaries: report.remainingBoundaries
+        }
+      : {
         schemaVersion: "safeclaw-hermes-knowledge-review-authority-ui-summary/v2",
         verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
         checkedAt,
@@ -782,7 +815,12 @@ if (liveMode && productionAligned && summaryOutput) {
         remainingBoundaries: report.remainingBoundaries
       };
   await fs.writeFile(summaryReportPath, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
-  await fs.writeFile(summaryMarkdownPath, `# ${evidenceInspectorMode ? "Hermes Knowledge Review Evidence Inspector" : "Hermes Knowledge Review Authority UI"}
+  const summaryTitle = evidenceInspectorMode
+    ? "Hermes Knowledge Review Evidence Inspector"
+    : candidateReadinessMode
+      ? "LLM Wiki Candidate Content Readiness"
+      : "Hermes Knowledge Review Authority UI";
+  await fs.writeFile(summaryMarkdownPath, `# ${summaryTitle}
 
 - Verdict: \`${summary.verdict}\`
 - Product commit: \`${productCommit}\`
@@ -794,7 +832,9 @@ if (liveMode && productionAligned && summaryOutput) {
 
 ${evidenceInspectorMode
   ? "The selected-candidate inspector keeps five evidence items bounded, exposes only allowlisted official HTTPS references, and preserves generic tenant-evidence labels."
-  : "The authenticated review candidate cockpit exposes six evidence-role counts, keeps legal-duty claims bound to law provenance, blocks public promotion of tenant memory, and requires site-manager acceptance before workpack use."}
+  : candidateReadinessMode
+    ? "The candidate cockpit derives four required content sections server-side, exposes revision reasons, and blocks approval while keeping site-only and reject decisions available."
+    : "The authenticated review candidate cockpit exposes six evidence-role counts, keeps legal-duty claims bound to law provenance, blocks public promotion of tenant memory, and requires site-manager acceptance before workpack use."}
 The candidate navigator keeps one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, and keyboard navigation across candidates and compact review panes. Delayed decision saves expose a live pending message, busy semantics, disabled competing actions, and an accessible settled state.
 
 ## Boundary
