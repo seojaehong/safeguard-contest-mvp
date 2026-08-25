@@ -2469,25 +2469,41 @@ function createFixtureRoot(): string {
     },
   });
   writeJson(rootDir, path.join("evaluation", "llm-wiki-candidate-content-matrix-2026-08-25", "report.json"), {
-    verdict: "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX_LLM_ENHANCED_RUNTIME_BLOCKED",
+    verdict: "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_EVIDENCE_VISIBILITY_LLM_ENHANCED_RUNTIME_BLOCKED",
     productCommit: "b".repeat(40),
     sourceHead: "a".repeat(40),
     productionCommit: "a".repeat(40),
     liveAfterDeploymentRequired: false,
-    afterLocal: {
+    evidenceVisibilityBeforeLive: {
+      verdict: "RED_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+      sourceHead: "a".repeat(40),
+      productionCommit: "a".repeat(40),
+      passedCount: 0,
+      failedCount: 5,
+      reviewerEvidenceTraceCount: 0,
+      technicalGuidanceBoundaryCount: 0,
+      lawCandidateBoundaryCount: 0,
+    },
+    evidenceVisibilityAfterLocal: {
       verdict: "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
       sourceHead: "a".repeat(40),
       generationMode: "deterministic",
       passedCount: 5,
       failedCount: 0,
+      reviewerEvidenceTraceCount: 5,
+      technicalGuidanceBoundaryCount: 5,
+      lawCandidateBoundaryCount: 5,
     },
-    afterLive: {
+    evidenceVisibilityAfterLive: {
       verdict: "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
       sourceHead: "a".repeat(40),
       productionCommit: "a".repeat(40),
       generationMode: "deterministic",
       passedCount: 5,
       failedCount: 0,
+      reviewerEvidenceTraceCount: 5,
+      technicalGuidanceBoundaryCount: 5,
+      lawCandidateBoundaryCount: 5,
     },
     afterLiveProvider: {
       verdict: "RED_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_MATRIX",
@@ -2505,6 +2521,9 @@ function createFixtureRoot(): string {
       scenarioSpecificTermGroupsRequired: true,
       textualHazardGroundingRequired: true,
       matchedHazardMetadataAloneAccepted: false,
+      reviewerVisibleEvidenceTraceRequired: true,
+      scenarioSpecificOfficialSourceTermsRequired: true,
+      technicalGuidanceAndLawRolesSeparated: true,
       placeholderFindingCount: 0,
       legalOverclaimFindingCount: 0,
       humanReviewCompleted: false,
@@ -2516,6 +2535,7 @@ function createFixtureRoot(): string {
       routeControlledBrowserFixtureAcceptedAsGenerationProof: false,
       deterministicFallbackProvenCurrentSource: true,
       deterministicFallbackProvenLive: true,
+      evidenceVisibilityContractProvenLive: true,
       enhancedLlmGenerationProvenLive: false,
       enhancedLlmRuntimeState: "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION",
     },
@@ -7555,6 +7575,22 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const gate = audit.gates.find((item) => item.id === "llm_wiki_candidate_content_matrix");
     expect(gate?.state).toBe("contradicted");
     expect(gate?.detail).toContain("enhancedLive=true");
+  });
+
+  it("fails the Wiki candidate matrix closed when reviewer-visible live evidence is incomplete", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "llm-wiki-candidate-content-matrix-2026-08-25", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      evidenceVisibilityAfterLive: { reviewerEvidenceTraceCount: number };
+    };
+    report.evidenceVisibilityAfterLive.reviewerEvidenceTraceCount = 4;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, sourceSha: "fixture-sha" });
+    const gate = audit.gates.find((item) => item.id === "llm_wiki_candidate_content_matrix");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.detail).toContain("visibleTrace=4/5");
   });
 
   it("fails Knowledge viewport workbench closed when progressive disclosures open by default", async () => {

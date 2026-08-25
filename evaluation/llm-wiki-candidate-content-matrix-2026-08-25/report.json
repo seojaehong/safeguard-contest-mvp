@@ -1,10 +1,10 @@
 {
   "schemaVersion": "safeclaw-llm-wiki-candidate-content-matrix-summary/v1",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_EVIDENCE_VISIBILITY_LIVE_PENDING",
+  "verdict": "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_EVIDENCE_VISIBILITY_LLM_ENHANCED_RUNTIME_BLOCKED",
   "checkedAt": "2026-08-25T12:35:25.654Z",
   "productCommit": "909c1747f47e501b3b7dcde30df957e500d43858",
-  "sourceHead": "909c1747f47e501b3b7dcde30df957e500d43858",
-  "productionCommit": "e9138a2fbd6e78a7ead3eead0a511b2d8e21c171",
+  "sourceHead": "b22b918c2f27c2072f6ba6bc6bc8f822f3c975f0",
+  "productionCommit": "b22b918c2f27c2072f6ba6bc6bc8f822f3c975f0",
   "beforeLive": {
     "path": "evaluation/llm-wiki-candidate-content-matrix-2026-08-25/before-live/report.json",
     "sourceHead": "80a6f43a6aafb894983556bc297fd3f87be61efd",
@@ -36,7 +36,18 @@
     "technicalGuidanceBoundaryCount": 5,
     "lawCandidateBoundaryCount": 5
   },
-  "evidenceVisibilityAfterLive": null,
+  "evidenceVisibilityAfterLive": {
+    "path": "evaluation/llm-wiki-candidate-content-matrix-2026-08-25/after-evidence-visibility-live/report.json",
+    "sourceHead": "b22b918c2f27c2072f6ba6bc6bc8f822f3c975f0",
+    "productionCommit": "b22b918c2f27c2072f6ba6bc6bc8f822f3c975f0",
+    "deploymentUrl": "safeguard-contest-194hdqzw6-seojaehongs-projects.vercel.app",
+    "verdict": "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+    "passedCount": 5,
+    "failedCount": 0,
+    "reviewerEvidenceTraceCount": 5,
+    "technicalGuidanceBoundaryCount": 5,
+    "lawCandidateBoundaryCount": 5
+  },
   "afterLocal": {
     "path": "evaluation/llm-wiki-candidate-content-matrix-2026-08-25/after-local/report.json",
     "sourceHead": "db896d45116418c7a185d9dad443a198be7a8de3",
@@ -66,7 +77,7 @@
     "httpStatuses": [503, 503, 503, 503, 503],
     "runtimeBlocker": "distributed_rate_limit_unavailable_before_ai_generation"
   },
-  "liveAfterDeploymentRequired": true,
+  "liveAfterDeploymentRequired": false,
   "contentContract": {
     "scenarioCount": 5,
     "requiredSectionCount": 4,
@@ -85,7 +96,7 @@
   "compatibilityContracts": {
     "providerCancellation": {
       "verdict": "PASS_CURRENT_SOURCE_KNOWLEDGE_PROVIDER_CANCELLATION_COMPATIBILITY",
-      "sourceHead": "f07da7c51eaabdc9c15b1a9c85e9655b16d5ba6f",
+      "sourceHead": "909c1747f47e501b3b7dcde30df957e500d43858",
       "changedGovernedPath": "lib/knowledge-candidate-route.ts",
       "focusedVitest": {
         "file": "tests/knowledge-regenerate-route.test.ts",
@@ -103,7 +114,7 @@
     "routeControlledBrowserFixtureAcceptedAsGenerationProof": false,
     "deterministicFallbackProvenCurrentSource": true,
     "deterministicFallbackProvenLive": true,
-    "evidenceVisibilityContractProvenLive": false,
+    "evidenceVisibilityContractProvenLive": true,
     "enhancedLlmGenerationProvenLive": false,
     "enhancedLlmRuntimeState": "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION"
   },
