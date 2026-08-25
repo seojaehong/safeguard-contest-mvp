@@ -1,11 +1,11 @@
 # Hermes Knowledge Review Authority UI
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_LLM_WIKI_CANDIDATE_CONTENT_READINESS`
+- Verdict: `PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS`
 - Source head: `c7cb6280724239611a95f278c8b1fb2c6191168b`
 - Product commit: `aac729a3c63fad8f0adb82c01d8d24d4f51f3b4d`
-- Checked at: `2026-08-25T11:39:34.352Z`
-- Scope: current-source local production rendering with an authenticated, route-controlled review candidate fixture.
-- Production aligned: `false`
+- Checked at: `2026-08-25T11:39:56.395Z`
+- Scope: live production rendering with an authenticated, route-controlled review candidate fixture.
+- Production aligned: `true`
 
 | Theme | Viewport | Size | Body/viewport | Root width ratio | Columns/candidates/body | Authority roles | First action depth | Horizontal overflow | Verdict |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
