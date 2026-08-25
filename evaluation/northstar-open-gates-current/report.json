@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-25T13:13:31.272Z",
-  "sourceSha": "bc8df284d9cf2ced4b57191a92c020abafb13320",
+  "generatedAt": "2026-08-25T13:50:46.495Z",
+  "sourceSha": "57bd8d949b8e02ff541646aeef3d2f5b80594122",
   "overall": "open",
   "gates": [
     {
@@ -178,7 +178,7 @@
       "state": "proven",
       "label": "Live Wiki candidate fallback content matrix",
       "evidencePath": "evaluation\\llm-wiki-candidate-content-matrix-2026-08-25\\report.json",
-      "detail": "Current-source and production stateless fallback candidates pass 5/5 chemical, hot-work, confined-space, forklift, and foreign-worker fall scenarios with four non-empty sections, textual hazard grounding, zero placeholders, and zero legal overclaims. The enhanced LLM probe remains explicitly blocked 0/5 by distributed admission before AI generation; this gate does not claim enhanced LLM quality or read the production candidate queue. Human review remains incomplete, publication is disallowed, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus Supabase RLS remain APPROVAL_GATED.",
+      "detail": "Current-source and production stateless fallback candidates pass 5/5 chemical, hot-work, confined-space, forklift, and foreign-worker fall scenarios with four non-empty sections, textual hazard grounding, and reviewer-visible source grounding. The measured live remediation moves visible evidence traces, KOSHA technical/official-source boundaries, and current-law candidate boundaries from 0/5 to 5/5 without legal overclaim. The enhanced LLM probe remains explicitly blocked 0/5 by distributed admission before AI generation; this gate does not claim enhanced LLM quality or read the production candidate queue. Human review remains incomplete, publication is disallowed, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus Supabase RLS remain APPROVAL_GATED.",
       "nextActions": [
         "Configure distributed provider admission, then rerun the five-scenario provider matrix without weakening fail-closed admission."
       ]
