@@ -71,7 +71,12 @@ function makeReviewClient(options: FakeOptions = {}) {
     question: "원본 이벤트 2건 기반 현장 지식 후보 검토",
     rawEvents: sourceBinding.rawEvents,
     matchedHazardIds: ["hazard-1", "hazard-2"],
-    generatedText: "현장 위험요인을 검토하고 필요한 예방조치를 확인합니다.",
+    generatedText: [
+      "1) 위험요인 요약: 현장 추락 및 충돌 위험",
+      "2) 문서 반영 위치: 위험성평가표와 TBM 브리핑",
+      "3) 통제대책: 작업구역을 분리하고 예방조치를 확인",
+      "4) 검수 필요 항목: 현장 책임자가 적용 상태 확인"
+    ].join("\n"),
     providerLabel: "fixture-provider",
     tenantContext: { organizationId: "org-1", siteId: "site-1" }
   });
@@ -1131,6 +1136,34 @@ describe("knowledge review actions", () => {
         compensationRequired: false
       });
     }
+  });
+
+  it("blocks candidate approval when the derived Wiki content readiness requires revision", async () => {
+    const fake = makeReviewClient();
+    const generatedOutput = fake.run.generated_output as {
+      candidate: { generatedText: string };
+    };
+    generatedOutput.candidate.generatedText = "위험요인을 검토하고 필요한 예방조치를 확인합니다.";
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "approve_candidate" }
+    )).rejects.toMatchObject({
+      status: 409,
+      code: "review_candidate_revision_required",
+      compensationRequired: false
+    });
+    expect(fake.updates).toHaveLength(0);
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "keep_site_only" }
+    )).resolves.toMatchObject({
+      ok: true,
+      action: "keep_site_only"
+    });
   });
 
   it("resumes only the final run update after all events were safely reviewed", async () => {

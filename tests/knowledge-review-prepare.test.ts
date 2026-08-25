@@ -44,7 +44,12 @@ function makeCandidate(runId: string): KnowledgeCandidate {
     dbMutationPerformed: false,
     publishAllowed: false,
     question: "원본 이벤트 1건 기반 현장 지식 후보 검토",
-    generatedText: "추락 방지 난간 상태를 확인하고 현장 책임자가 검토합니다.",
+    generatedText: [
+      "1) 위험요인 요약: 작업발판 단부 추락 위험",
+      "2) 문서 반영 위치: 위험성평가표와 TBM 브리핑",
+      "3) 통제대책: 추락 방지 난간 상태를 작업 전 확인",
+      "4) 검수 필요 항목: 현장 책임자가 실제 설치 상태 확인"
+    ].join("\n"),
     matchedHazardIds: ["hazard-fall"],
     tenantContext: { organizationId: "org-1", siteId: "site-1" },
     provenance: [provenance]

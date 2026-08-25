@@ -286,6 +286,18 @@ describe("knowledge review GET", () => {
           publicationState: "unpublished",
           humanReviewRequired: true,
           machineEvidenceReplacesHumanReview: false
+        },
+        contentReadiness: {
+          contractVersion: "knowledge-candidate-content-readiness.v1",
+          status: "revision_required",
+          requiredSectionCount: 4,
+          presentSectionCount: 0,
+          nonEmptySectionCount: 0,
+          placeholderFindingCount: 0,
+          legalOverclaimFindingCount: 0,
+          humanReviewCompleted: false,
+          publicationState: "unpublished",
+          publishAllowed: false
         }
       }],
       dropped: {

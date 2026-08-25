@@ -82,6 +82,28 @@ const queueItem = {
     publicationState: "unpublished",
     humanReviewRequired: true,
     machineEvidenceReplacesHumanReview: false
+  },
+  contentReadiness: {
+    contractVersion: "knowledge-candidate-content-readiness.v1",
+    status: "ready_for_human_review",
+    requiredSectionCount: 4,
+    presentSectionCount: 4,
+    nonEmptySectionCount: 4,
+    sections: [
+      { id: "hazard_summary", label: "위험요인 요약", present: true, nonEmpty: true },
+      { id: "document_targets", label: "문서 반영 위치", present: true, nonEmpty: true },
+      { id: "controls", label: "통제대책", present: true, nonEmpty: true },
+      { id: "review_items", label: "검수 필요 항목", present: true, nonEmpty: true }
+    ],
+    placeholderFindingCount: 0,
+    legalOverclaimFindingCount: 0,
+    statutoryClaimDetected: true,
+    lawProvenancePresent: true,
+    hazardGroundingPresent: true,
+    unresolvedReviewItems: [] as string[],
+    humanReviewCompleted: false,
+    publicationState: "unpublished",
+    publishAllowed: false
   }
 };
 
@@ -90,7 +112,17 @@ const secondQueueItem: typeof queueItem = {
   runId: "22222222-2222-4222-8222-222222222222",
   candidateLabel: "작업계획서 현장 지식 검토",
   candidateText: "양중 작업구역을 분리하고 신호수 배치 상태를 검토합니다.",
-  matchedHazardCount: 2
+  matchedHazardCount: 2,
+  contentReadiness: {
+    ...queueItem.contentReadiness,
+    status: "revision_required",
+    presentSectionCount: 3,
+    nonEmptySectionCount: 3,
+    sections: queueItem.contentReadiness.sections.map((section) => section.id === "review_items"
+      ? { ...section, present: false, nonEmpty: false }
+      : section),
+    unresolvedReviewItems: ["missing_section:review_items"]
+  }
 };
 
 describe("knowledge review inbox browser", () => {
@@ -182,7 +214,11 @@ describe("knowledge review inbox browser", () => {
     await expect.poll(() => inbox.getByText(secondQueueItem.candidateText).isVisible()).toBe(true);
     expect(await inbox.getByText(queueItem.candidateText).isVisible()).toBe(false);
     expect(await inbox.getByText("위험 2").isVisible()).toBe(true);
+    expect(await inbox.locator('[data-review-content-readiness="revision_required"]').count()).toBe(1);
+    expect(await inbox.getByRole("button", { name: "후보 승인" }).isDisabled()).toBe(true);
     await inbox.getByRole("tab", { name: /위험성평가표 현장 지식 검토/u }).click();
+    expect(await inbox.locator('[data-review-content-readiness="ready_for_human_review"]').count()).toBe(1);
+    expect(await inbox.getByRole("button", { name: "후보 승인" }).isDisabled()).toBe(false);
 
     const evidenceTab = inbox.getByRole("tab", { name: "근거 5", exact: true });
     await evidenceTab.click();

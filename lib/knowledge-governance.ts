@@ -154,6 +154,130 @@ export type KnowledgeCandidateReviewContract = {
   publishAllowed: false;
 };
 
+export const KNOWLEDGE_CANDIDATE_REQUIRED_SECTIONS = [
+  { id: "hazard_summary", label: "위험요인 요약" },
+  { id: "document_targets", label: "문서 반영 위치" },
+  { id: "controls", label: "통제대책" },
+  { id: "review_items", label: "검수 필요 항목" }
+] as const;
+
+type KnowledgeCandidateRequiredSectionId = typeof KNOWLEDGE_CANDIDATE_REQUIRED_SECTIONS[number]["id"];
+
+export type KnowledgeCandidateContentReadiness = {
+  contractVersion: "knowledge-candidate-content-readiness.v1";
+  status: "ready_for_human_review" | "revision_required";
+  requiredSectionCount: 4;
+  presentSectionCount: number;
+  nonEmptySectionCount: number;
+  sections: Array<{
+    id: KnowledgeCandidateRequiredSectionId;
+    label: string;
+    present: boolean;
+    nonEmpty: boolean;
+  }>;
+  placeholderFindingCount: number;
+  legalOverclaimFindingCount: number;
+  statutoryClaimDetected: boolean;
+  lawProvenancePresent: boolean;
+  hazardGroundingPresent: boolean;
+  unresolvedReviewItems: string[];
+  humanReviewCompleted: false;
+  publicationState: "unpublished";
+  publishAllowed: false;
+};
+
+const SECTION_HEADING_PATTERN = /^\s*(?:#{1,6}\s*)?(?:\*{1,2})?\s*(?:\d+\s*[.)]|[①②③④])?\s*(위험요인\s*요약|문서\s*반영\s*위치|통제\s*대책|검수\s*필요\s*항목)\s*(?:\*{1,2})?\s*(?::|：|-)?\s*(.*)$/u;
+const PLACEHOLDER_PATTERNS = [
+  /\b(?:todo|tbd)\b/iu,
+  /(?:작성|내용|정보|항목)\s*(?:필요|예정)/u,
+  /추후\s*(?:입력|작성|확인)/u,
+  /(?:임시|샘플)\s*(?:문구|텍스트)/u,
+  /(?:여기에|아래에)\s*(?:입력|작성)/u
+] as const;
+const LEGAL_OVERCLAIM_PATTERNS = [
+  /법적\s*효력(?:을|이)?\s*(?:보장|확정)/u,
+  /(?:법령|법적\s*의무|법정\s*(?:교육|서류|절차))(?:을|를)?\s*(?:대체|갈음)/u,
+  /(?:자동|완전)\s*(?:준수|충족)/u,
+  /법적\s*(?:책임|의무)(?:이|가)?\s*(?:면제|없어짐)/u
+] as const;
+const STATUTORY_CLAIM_PATTERNS = [
+  /법령상/u,
+  /법적\s*의무/u,
+  /법정\s*(?:교육|서류|절차)/u,
+  /산업안전보건법(?:에|에\s*따라|상)/u,
+  /(?:법률|시행령|시행규칙)(?:에|에\s*따라|상)/u
+] as const;
+const HAZARD_GROUNDING_PATTERN = /위험|추락|끼임|감전|화재|폭발|충돌|전도|질식|양중|화학|유해|고소|굴착|밀폐/u;
+
+function readKnowledgeCandidateSections(text: string): Map<KnowledgeCandidateRequiredSectionId, string> {
+  const labelToId = new Map<string, KnowledgeCandidateRequiredSectionId>(
+    KNOWLEDGE_CANDIDATE_REQUIRED_SECTIONS.map((section) => [section.label.replace(/\s+/gu, ""), section.id])
+  );
+  const sections = new Map<KnowledgeCandidateRequiredSectionId, string[]>();
+  let activeSection: KnowledgeCandidateRequiredSectionId | null = null;
+
+  for (const line of text.replace(/\r\n?/gu, "\n").split("\n")) {
+    const heading = line.match(SECTION_HEADING_PATTERN);
+    if (heading) {
+      activeSection = labelToId.get((heading[1] ?? "").replace(/\s+/gu, "")) ?? null;
+      if (activeSection) sections.set(activeSection, [(heading[2] ?? "").trim()]);
+      continue;
+    }
+    if (activeSection) sections.get(activeSection)?.push(line.trim());
+  }
+
+  return new Map([...sections.entries()].map(([id, lines]) => [
+    id,
+    lines.join("\n").replace(/\s+/gu, " ").trim()
+  ]));
+}
+
+export function evaluateKnowledgeCandidateContentReadiness(
+  candidate: KnowledgeCandidate
+): KnowledgeCandidateContentReadiness {
+  const sectionText = readKnowledgeCandidateSections(candidate.generatedText);
+  const sections = KNOWLEDGE_CANDIDATE_REQUIRED_SECTIONS.map((section) => {
+    const content = sectionText.get(section.id);
+    return {
+      ...section,
+      present: content !== undefined,
+      nonEmpty: Boolean(content)
+    };
+  });
+  const placeholderFindingCount = PLACEHOLDER_PATTERNS.filter((pattern) => pattern.test(candidate.generatedText)).length;
+  const legalOverclaimFindingCount = LEGAL_OVERCLAIM_PATTERNS.filter((pattern) => pattern.test(candidate.generatedText)).length;
+  const statutoryClaimDetected = STATUTORY_CLAIM_PATTERNS.some((pattern) => pattern.test(candidate.generatedText));
+  const lawProvenancePresent = candidate.provenance.some((item) => item.authorityId === "law");
+  const hazardGroundingPresent = candidate.matchedHazardIds.length > 0
+    || HAZARD_GROUNDING_PATTERN.test(sectionText.get("hazard_summary") ?? "");
+  const unresolvedReviewItems = [
+    ...sections.filter((section) => !section.present).map((section) => `missing_section:${section.id}`),
+    ...sections.filter((section) => section.present && !section.nonEmpty).map((section) => `empty_section:${section.id}`),
+    ...(placeholderFindingCount > 0 ? ["placeholder_content"] : []),
+    ...(legalOverclaimFindingCount > 0 ? ["legal_overclaim"] : []),
+    ...(statutoryClaimDetected && !lawProvenancePresent ? ["statutory_claim_without_law_provenance"] : []),
+    ...(!hazardGroundingPresent ? ["hazard_grounding_missing"] : [])
+  ];
+
+  return {
+    contractVersion: "knowledge-candidate-content-readiness.v1",
+    status: unresolvedReviewItems.length === 0 ? "ready_for_human_review" : "revision_required",
+    requiredSectionCount: 4,
+    presentSectionCount: sections.filter((section) => section.present).length,
+    nonEmptySectionCount: sections.filter((section) => section.nonEmpty).length,
+    sections,
+    placeholderFindingCount,
+    legalOverclaimFindingCount,
+    statutoryClaimDetected,
+    lawProvenancePresent,
+    hazardGroundingPresent,
+    unresolvedReviewItems,
+    humanReviewCompleted: false,
+    publicationState: "unpublished",
+    publishAllowed: false
+  };
+}
+
 export const KNOWLEDGE_PROMOTION_STAGES: readonly KnowledgePromotionStage[] = [
   {
     id: "knowledge_event",

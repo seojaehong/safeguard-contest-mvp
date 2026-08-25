@@ -14,7 +14,9 @@ import {
 } from "@/lib/knowledge-review-prepare";
 import {
   buildKnowledgeCandidateReviewContract,
+  evaluateKnowledgeCandidateContentReadiness,
   KNOWLEDGE_REVIEW_AUTHORITY_ORDER,
+  type KnowledgeCandidateContentReadiness,
   type KnowledgeEventProvenance,
   type KnowledgeCandidateReviewContract
 } from "@/lib/knowledge-governance";
@@ -64,6 +66,7 @@ export type KnowledgeReviewInboxPresentationDto = {
     | "humanReviewRequired"
     | "machineEvidenceReplacesHumanReview"
   > | null;
+  contentReadiness: KnowledgeCandidateContentReadiness | null;
 };
 
 type KnowledgeReviewEvidenceAuthorityId = typeof KNOWLEDGE_REVIEW_AUTHORITY_ORDER[number];
@@ -436,7 +439,8 @@ export async function loadKnowledgeReviewInbox(
         publicationState: reviewContract.publicationState,
         humanReviewRequired: reviewContract.humanReviewRequired,
         machineEvidenceReplacesHumanReview: reviewContract.machineEvidenceReplacesHumanReview
-      } : null
+      } : null,
+      contentReadiness: candidate ? evaluateKnowledgeCandidateContentReadiness(candidate) : null
     };
   });
   const includedEventIds = new Set(relationValidRuns.flatMap((item) => item.events.map((event) => event.id)));
@@ -1065,13 +1069,23 @@ export async function applyKnowledgeReviewAction(
       cause: error
     });
   }
-  if (!readCurrentSourceBoundCandidate(run.generated_output, sourceBinding.snapshot, {
+  const currentCandidate = readCurrentSourceBoundCandidate(run.generated_output, sourceBinding.snapshot, {
     requireSafeEnvelope: runIsActionable
-  })) {
+  });
+  if (!currentCandidate) {
     throw new KnowledgeReviewError({
       status: 409,
       code: "review_candidate_source_binding_invalid",
       message: "검토 후보가 현재 원본 이벤트 snapshot과 일치하지 않습니다."
+    });
+  }
+  if (runIsActionable
+    && request.action === "approve_candidate"
+    && evaluateKnowledgeCandidateContentReadiness(currentCandidate).status !== "ready_for_human_review") {
+    throw new KnowledgeReviewError({
+      status: 409,
+      code: "review_candidate_revision_required",
+      message: "필수 섹션과 근거 준비도를 충족한 후보만 승인할 수 있습니다."
     });
   }
 

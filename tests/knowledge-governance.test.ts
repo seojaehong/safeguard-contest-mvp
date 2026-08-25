@@ -5,7 +5,8 @@ import {
   KNOWLEDGE_PROMOTION_STAGES,
   buildKnowledgeCandidate,
   buildKnowledgeCandidateReviewContract,
-  classifyKnowledgeEvent
+  classifyKnowledgeEvent,
+  evaluateKnowledgeCandidateContentReadiness
 } from "@/lib/knowledge-governance";
 
 const lawEvent: KnowledgeRawEvent = {
@@ -275,5 +276,97 @@ describe("knowledge governance contract", () => {
       dbMutationAllowed: false,
       publishAllowed: false
     });
+  });
+
+  it("requires all four non-empty Wiki review sections before human approval", () => {
+    const candidate = buildKnowledgeCandidate({
+      question: "추락 위험 통제대책을 검토해줘",
+      rawEvents: [lawEvent],
+      matchedHazardIds: ["hazard-fall"],
+      generatedText: [
+        "1) 위험요인 요약: 작업발판 단부 추락 위험",
+        "2) 문서 반영 위치: 위험성평가표와 TBM 브리핑",
+        "3) 통제대책: 안전난간 설치 상태를 작업 전 확인",
+        "4) 검수 필요 항목: 현장 책임자가 실제 설치 상태 확인"
+      ].join("\n"),
+      providerLabel: "Hermes",
+      tenantContext
+    });
+
+    expect(evaluateKnowledgeCandidateContentReadiness(candidate)).toMatchObject({
+      status: "ready_for_human_review",
+      requiredSectionCount: 4,
+      presentSectionCount: 4,
+      nonEmptySectionCount: 4,
+      placeholderFindingCount: 0,
+      legalOverclaimFindingCount: 0,
+      lawProvenancePresent: true,
+      hazardGroundingPresent: true,
+      unresolvedReviewItems: [],
+      humanReviewCompleted: false,
+      publicationState: "unpublished",
+      publishAllowed: false
+    });
+  });
+
+  it("fails Wiki review readiness for missing, empty, and placeholder sections", () => {
+    const candidate = buildKnowledgeCandidate({
+      question: "추락 위험 통제대책을 검토해줘",
+      rawEvents: [lawEvent],
+      matchedHazardIds: ["hazard-fall"],
+      generatedText: [
+        "## 위험요인 요약",
+        "추락 위험",
+        "## 문서 반영 위치",
+        "작성 필요",
+        "## 통제대책",
+        ""
+      ].join("\n"),
+      providerLabel: "Hermes",
+      tenantContext
+    });
+
+    expect(evaluateKnowledgeCandidateContentReadiness(candidate)).toMatchObject({
+      status: "revision_required",
+      presentSectionCount: 3,
+      nonEmptySectionCount: 2,
+      placeholderFindingCount: 1
+    });
+    expect(evaluateKnowledgeCandidateContentReadiness(candidate).unresolvedReviewItems).toEqual(expect.arrayContaining([
+      "empty_section:controls",
+      "missing_section:review_items",
+      "placeholder_content"
+    ]));
+  });
+
+  it("fails Wiki review readiness for legal overclaim or statutory claims without law provenance", () => {
+    const manualEvent: KnowledgeRawEvent = {
+      ...lawEvent,
+      source: "manual",
+      sourceId: "site-note",
+      payload: { provenanceScope: "site" }
+    };
+    const candidate = buildKnowledgeCandidate({
+      question: "현장 지식 후보를 검토해줘",
+      rawEvents: [manualEvent],
+      matchedHazardIds: ["hazard-fall"],
+      generatedText: [
+        "1) 위험요인 요약: 추락 위험",
+        "2) 문서 반영 위치: 위험성평가표",
+        "3) 통제대책: 이 문서는 법적 의무를 대체하며 산업안전보건법에 따라 자동 준수된다.",
+        "4) 검수 필요 항목: 현장 상태 확인"
+      ].join("\n"),
+      providerLabel: "Hermes",
+      tenantContext
+    });
+    const readiness = evaluateKnowledgeCandidateContentReadiness(candidate);
+
+    expect(readiness).toMatchObject({
+      status: "revision_required",
+      legalOverclaimFindingCount: 2,
+      statutoryClaimDetected: true,
+      lawProvenancePresent: false
+    });
+    expect(readiness.unresolvedReviewItems).toContain("statutory_claim_without_law_provenance");
   });
 });

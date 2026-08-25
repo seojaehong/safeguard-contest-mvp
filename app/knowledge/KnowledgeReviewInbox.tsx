@@ -27,6 +27,30 @@ type ReviewInboxItem = {
     humanReviewRequired: true;
     machineEvidenceReplacesHumanReview: false;
   } | null;
+  contentReadiness: ReviewContentReadiness | null;
+};
+
+type ReviewContentReadiness = {
+  contractVersion: "knowledge-candidate-content-readiness.v1";
+  status: "ready_for_human_review" | "revision_required";
+  requiredSectionCount: 4;
+  presentSectionCount: number;
+  nonEmptySectionCount: number;
+  sections: Array<{
+    id: "hazard_summary" | "document_targets" | "controls" | "review_items";
+    label: string;
+    present: boolean;
+    nonEmpty: boolean;
+  }>;
+  placeholderFindingCount: number;
+  legalOverclaimFindingCount: number;
+  statutoryClaimDetected: boolean;
+  lawProvenancePresent: boolean;
+  hazardGroundingPresent: boolean;
+  unresolvedReviewItems: string[];
+  humanReviewCompleted: false;
+  publicationState: "unpublished";
+  publishAllowed: false;
 };
 
 type ReviewEvidenceItem = {
@@ -198,6 +222,64 @@ function evidenceMatchesReviewContract(
   return REVIEW_AUTHORITY_PRESENTATION.every(({ id }) => counts[id] === reviewContract.sourceRoleCounts[id]);
 }
 
+function readContentReadiness(value: unknown): ReviewContentReadiness | null {
+  if (!isRecord(value) || !Array.isArray(value.sections) || !Array.isArray(value.unresolvedReviewItems)) return null;
+  const sectionIds = ["hazard_summary", "document_targets", "controls", "review_items"] as const;
+  const sections = value.sections.flatMap((section) => {
+    if (!isRecord(section)
+      || typeof section.id !== "string"
+      || !sectionIds.includes(section.id as typeof sectionIds[number])
+      || typeof section.label !== "string"
+      || typeof section.present !== "boolean"
+      || typeof section.nonEmpty !== "boolean") return [];
+    return [{
+      id: section.id as typeof sectionIds[number],
+      label: section.label.slice(0, 40),
+      present: section.present,
+      nonEmpty: section.nonEmpty
+    }];
+  });
+  const counts = [
+    value.presentSectionCount,
+    value.nonEmptySectionCount,
+    value.placeholderFindingCount,
+    value.legalOverclaimFindingCount
+  ];
+  const valid = value.contractVersion === "knowledge-candidate-content-readiness.v1"
+    && (value.status === "ready_for_human_review" || value.status === "revision_required")
+    && value.requiredSectionCount === 4
+    && sections.length === 4
+    && new Set(sections.map((section) => section.id)).size === 4
+    && counts.every((count) => typeof count === "number" && Number.isInteger(count) && count >= 0)
+    && value.presentSectionCount === sections.filter((section) => section.present).length
+    && value.nonEmptySectionCount === sections.filter((section) => section.nonEmpty).length
+    && typeof value.statutoryClaimDetected === "boolean"
+    && typeof value.lawProvenancePresent === "boolean"
+    && typeof value.hazardGroundingPresent === "boolean"
+    && value.unresolvedReviewItems.every((item) => typeof item === "string" && item.length <= 96)
+    && value.humanReviewCompleted === false
+    && value.publicationState === "unpublished"
+    && value.publishAllowed === false;
+  if (!valid) return null;
+  return {
+    contractVersion: "knowledge-candidate-content-readiness.v1",
+    status: value.status as ReviewContentReadiness["status"],
+    requiredSectionCount: 4,
+    presentSectionCount: value.presentSectionCount as number,
+    nonEmptySectionCount: value.nonEmptySectionCount as number,
+    sections,
+    placeholderFindingCount: value.placeholderFindingCount as number,
+    legalOverclaimFindingCount: value.legalOverclaimFindingCount as number,
+    statutoryClaimDetected: value.statutoryClaimDetected as boolean,
+    lawProvenancePresent: value.lawProvenancePresent as boolean,
+    hazardGroundingPresent: value.hazardGroundingPresent as boolean,
+    unresolvedReviewItems: (value.unresolvedReviewItems as string[]).slice(0, 12),
+    humanReviewCompleted: false,
+    publicationState: "unpublished",
+    publishAllowed: false
+  };
+}
+
 function parseInboxItem(value: unknown): ReviewInboxItem | null {
   if (!isRecord(value)) return null;
   const runId = readString(value.runId, 128);
@@ -209,6 +291,7 @@ function parseInboxItem(value: unknown): ReviewInboxItem | null {
   const candidateText = readString(value.candidateText, MAX_UI_TEXT_LENGTH);
   const candidateLabel = readString(value.candidateLabel, 500);
   const reviewContract = status === "review_required" ? readReviewContract(value.reviewContract) : null;
+  const contentReadiness = status === "review_required" ? readContentReadiness(value.contentReadiness) : null;
   const sourceEventCount = typeof value.sourceEventCount === "number"
     && Number.isInteger(value.sourceEventCount)
     && value.sourceEventCount > 0
@@ -230,7 +313,7 @@ function parseInboxItem(value: unknown): ReviewInboxItem | null {
     || sourceEventCount === 0
     || (status === "review_required" && evidenceItems.length !== sourceEventCount)
     || matchedHazardCount < 0
-    || (status === "review_required" && (!candidateText || !reviewContract))
+    || (status === "review_required" && (!candidateText || !reviewContract || !contentReadiness))
     || (status === "review_required" && reviewContract && !evidenceMatchesReviewContract(evidenceItems, reviewContract))
   ) return null;
   return {
@@ -242,7 +325,8 @@ function parseInboxItem(value: unknown): ReviewInboxItem | null {
     sourceEventCount,
     matchedHazardCount,
     evidenceItems,
-    reviewContract
+    reviewContract,
+    contentReadiness
   };
 }
 
@@ -573,6 +657,30 @@ export function KnowledgeReviewInbox() {
                           data-review-pane="candidate"
                         >
                           <span className={styles.reviewPaneLabel}>후보 문장</span>
+                          {item.contentReadiness ? (
+                            <section
+                              className={styles.reviewReadiness}
+                              aria-label="후보 콘텐츠 검토 준비도"
+                              data-review-content-readiness={item.contentReadiness.status}
+                            >
+                              <div>
+                                <strong>검토 준비도</strong>
+                                <span>{item.contentReadiness.status === "ready_for_human_review" ? "사람 검토 가능" : "수정 필요"}</span>
+                              </div>
+                              <ul aria-label="필수 섹션 상태">
+                                {item.contentReadiness.sections.map((section) => (
+                                  <li key={section.id} data-readiness-section={section.id} data-ready={section.nonEmpty ? "true" : "false"}>
+                                    <span>{section.label}</span>
+                                    <strong>{section.nonEmpty ? "확인" : "누락"}</strong>
+                                  </li>
+                                ))}
+                              </ul>
+                              <p>
+                                placeholder {item.contentReadiness.placeholderFindingCount} · 법적 과장 {item.contentReadiness.legalOverclaimFindingCount}
+                                {item.contentReadiness.statutoryClaimDetected ? ` · 법령 근거 ${item.contentReadiness.lawProvenancePresent ? "확인" : "누락"}` : ""}
+                              </p>
+                            </section>
+                          ) : null}
                           <p className={styles.candidateText} data-selected-candidate-body="true">{item.candidateText}</p>
                         </section>
                       ) : null}
@@ -620,7 +728,12 @@ export function KnowledgeReviewInbox() {
                       {item.providerLabel ? <span>{item.providerLabel}</span> : null}
                     </div>
                     <div className={styles.reviewActions} role="group" aria-label="검토 결정" aria-busy={pending}>
-                      <button type="button" disabled={pending} onClick={() => void submit(item.runId, "approve_candidate")}>후보 승인</button>
+                      <button
+                        type="button"
+                        disabled={pending || item.contentReadiness?.status !== "ready_for_human_review"}
+                        title={item.contentReadiness?.status === "revision_required" ? "필수 섹션과 근거 준비도를 먼저 보완해야 합니다." : undefined}
+                        onClick={() => void submit(item.runId, "approve_candidate")}
+                      >후보 승인</button>
                       <button type="button" disabled={pending} onClick={() => void submit(item.runId, "keep_site_only")}>현장 전용 유지</button>
                       <button type="button" disabled={pending} onClick={() => void submit(item.runId, "reject")}>반려</button>
                     </div>
