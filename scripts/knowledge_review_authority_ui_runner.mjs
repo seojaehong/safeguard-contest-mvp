@@ -70,7 +70,12 @@ const queueItem = {
   statusLabel: "검토 대기",
   sourceEventCount: 5,
   candidateLabel: "고소작업 지식 후보 검토",
-  candidateText: "작업발판 단부의 안전난간 상태와 추락방지 조치를 확인하고 현장 책임자가 적용 여부를 검토합니다.",
+  candidateText: [
+    "1) 위험요인 요약: 작업발판 단부 추락 위험",
+    "2) 문서 반영 위치: 위험성평가표와 TBM 브리핑",
+    "3) 통제대책: 안전난간 상태와 추락방지 조치를 작업 전 확인",
+    "4) 검수 필요 항목: 현장 책임자가 실제 적용 상태 확인"
+  ].join("\n"),
   matchedHazardCount: 1,
   providerLabel: "SafeClaw candidate builder",
   evidenceItems: [
@@ -98,6 +103,28 @@ const queueItem = {
     publicationState: "unpublished",
     humanReviewRequired: true,
     machineEvidenceReplacesHumanReview: false
+  },
+  contentReadiness: {
+    contractVersion: "knowledge-candidate-content-readiness.v1",
+    status: "ready_for_human_review",
+    requiredSectionCount: 4,
+    presentSectionCount: 4,
+    nonEmptySectionCount: 4,
+    sections: [
+      { id: "hazard_summary", label: "위험요인 요약", present: true, nonEmpty: true },
+      { id: "document_targets", label: "문서 반영 위치", present: true, nonEmpty: true },
+      { id: "controls", label: "통제대책", present: true, nonEmpty: true },
+      { id: "review_items", label: "검수 필요 항목", present: true, nonEmpty: true }
+    ],
+    placeholderFindingCount: 0,
+    legalOverclaimFindingCount: 0,
+    statutoryClaimDetected: true,
+    lawProvenancePresent: true,
+    hazardGroundingPresent: true,
+    unresolvedReviewItems: [],
+    humanReviewCompleted: false,
+    publicationState: "unpublished",
+    publishAllowed: false
   }
 };
 const queueItems = [
@@ -106,14 +133,36 @@ const queueItems = [
     ...queueItem,
     runId: "22222222-2222-4222-8222-222222222222",
     candidateLabel: "작업계획서 지식 후보 검토",
-    candidateText: "양중 작업구역을 분리하고 신호수 배치 상태를 검토합니다.",
-    matchedHazardCount: 2
+    candidateText: "위험요인을 검토하고 필요한 예방조치를 확인합니다.",
+    matchedHazardCount: 2,
+    contentReadiness: {
+      ...queueItem.contentReadiness,
+      status: "revision_required",
+      presentSectionCount: 0,
+      nonEmptySectionCount: 0,
+      sections: queueItem.contentReadiness.sections.map((section) => ({
+        ...section,
+        present: false,
+        nonEmpty: false
+      })),
+      unresolvedReviewItems: [
+        "missing_section:hazard_summary",
+        "missing_section:document_targets",
+        "missing_section:controls",
+        "missing_section:review_items"
+      ]
+    }
   },
   {
     ...queueItem,
     runId: "33333333-3333-4333-8333-333333333333",
     candidateLabel: "TBM 브리핑 지식 후보 검토",
-    candidateText: "작업 전 정전·검전·잠금표지 상태를 확인합니다.",
+    candidateText: [
+      "1) 위험요인 요약: 정전 작업 중 감전 및 재통전 위험",
+      "2) 문서 반영 위치: 작업허가서와 TBM 브리핑",
+      "3) 통제대책: 정전·검전·잠금표지 상태를 작업 전 확인",
+      "4) 검수 필요 항목: 현장 책임자가 재통전 절차 확인"
+    ].join("\n"),
     matchedHazardCount: 3
   }
 ];
@@ -200,6 +249,19 @@ try {
       const inbox = page.locator('[data-knowledge-review-inbox="true"]');
       await inbox.getByRole("heading", { name: queueItem.candidateLabel }).waitFor();
       const candidateTabs = inbox.locator('[role="tablist"][aria-label="지식 후보"] [role="tab"]');
+      await candidateTabs.nth(1).click();
+      const revisionDecision = await page.evaluate(() => {
+        const readiness = document.querySelector('[data-review-content-readiness="revision_required"]');
+        const actionGroup = document.querySelector('[role="group"][aria-label="검토 결정"]');
+        const buttons = actionGroup ? [...actionGroup.querySelectorAll("button")] : [];
+        return {
+          readinessVisible: readiness instanceof HTMLElement,
+          approveDisabled: buttons[0]?.disabled === true,
+          keepSiteOnlyEnabled: buttons[1]?.disabled === false,
+          rejectEnabled: buttons[2]?.disabled === false
+        };
+      });
+      await candidateTabs.first().click();
       await candidateTabs.first().focus();
       await page.keyboard.press("End");
       await page.waitForFunction(() => {
@@ -260,6 +322,8 @@ try {
         const evidenceWorkbench = workbench?.querySelector("[data-review-evidence-workbench='true']");
         const evidencePane = workbench?.querySelector("[data-review-pane='evidence']");
         const authority = document.querySelector("[data-review-authority-contract='true']");
+        const readiness = document.querySelector("[data-review-content-readiness='ready_for_human_review']");
+        const candidatePane = document.querySelector("[data-review-pane='candidate']");
         const actionGroup = document.querySelector("[role='group'][aria-label='검토 결정']");
         const firstAction = actionGroup?.querySelector("button");
         const candidateTablist = navigator?.querySelector('[role="tablist"][aria-label="지식 후보"]');
@@ -270,6 +334,8 @@ try {
           || !(selectedBody instanceof HTMLElement)
           || !(evidenceWorkbench instanceof HTMLElement)
           || !(authority instanceof HTMLElement)
+          || !(readiness instanceof HTMLElement)
+          || !(candidatePane instanceof HTMLElement)
           || !(actionGroup instanceof HTMLElement)
           || !(firstAction instanceof HTMLElement)
           || !(candidateTablist instanceof HTMLElement)) {
@@ -320,6 +386,11 @@ try {
           authorityWidth: authorityRect.width,
           authorityRoleCount: authority.querySelectorAll("[data-review-authority-role]").length,
           authorityContained: authority.scrollWidth <= authority.clientWidth + 1,
+          readinessPanelCount: document.querySelectorAll("[data-review-content-readiness]").length,
+          readinessSectionCount: readiness.querySelectorAll("[data-readiness-section]").length,
+          readySectionCount: readiness.querySelectorAll('[data-readiness-section][data-ready="true"]').length,
+          readinessInsideCandidatePane: candidatePane.contains(readiness),
+          candidatePaneOverflowY: getComputedStyle(candidatePane).overflowY,
           actionGroupTop: actionRect.top,
           firstActionBottom: firstAction.getBoundingClientRect().bottom,
           firstActionDepth: firstAction.getBoundingClientRect().bottom - rootRect.top,
@@ -425,6 +496,15 @@ try {
           : metrics.workbenchColumns === 1)
         && metrics.authorityRoleCount === 6
         && metrics.authorityContained
+        && metrics.readinessPanelCount === 1
+        && metrics.readinessSectionCount === 4
+        && metrics.readySectionCount === 4
+        && metrics.readinessInsideCandidatePane
+        && metrics.candidatePaneOverflowY === "auto"
+        && revisionDecision.readinessVisible
+        && revisionDecision.approveDisabled
+        && revisionDecision.keepSiteOnlyEnabled
+        && revisionDecision.rejectEnabled
         && metrics.actionCount === 3
         && metrics.actionContained
         && (viewport.width > 720
@@ -462,6 +542,7 @@ try {
           settled: settledDecision,
           passed: decisionPendingContract
         },
+        revisionDecision,
         browserErrors,
         passed
       });
@@ -535,6 +616,19 @@ const report = {
     privateEvidenceRawIdentityExposed: false,
     evidenceInternalScroll: true
   },
+  contentReadinessContract: {
+    contractVersion: "knowledge-candidate-content-readiness.v1",
+    requiredSectionCount: 4,
+    readyFixtureCount: 2,
+    revisionRequiredFixtureCount: 1,
+    selectedReadinessPanelCount: 1,
+    approvalFailsClosedForRevision: results.every((result) => result.revisionDecision.approveDisabled),
+    keepSiteOnlyAvailableForRevision: results.every((result) => result.revisionDecision.keepSiteOnlyEnabled),
+    rejectAvailableForRevision: results.every((result) => result.revisionDecision.rejectEnabled),
+    humanReviewCompleted: false,
+    publicationState: "unpublished",
+    publishAllowed: false
+  },
   mutationBoundary: {
     dbMutationPerformed: false,
     providerDispatchCalled: false,
@@ -582,6 +676,7 @@ ${rows}
 - Desktop uses a two-column review workbench; mobile uses one column and keeps the candidate body internally scrollable.
 - Desktop mounts the selected candidate and five-item evidence inspector together; mobile mounts one linked pane behind a keyboard-operable segmented tab control.
 - Review decisions announce their pending state, expose busy semantics, disable all competing actions, and restore the settled status after the delayed save fixture completes.
+- Each selected candidate exposes one server-derived readiness panel with four required sections. A revision-required candidate disables only candidate approval while keeping site-only retention and rejection available.
 - Only allowlisted public law, KOSHA, and SIF references expose verified HTTPS links. Organization and site evidence retain generic labels and bounded digests only.
 
 ## Boundary
