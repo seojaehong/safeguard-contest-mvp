@@ -2420,6 +2420,54 @@ function createFixtureRoot(): string {
       fullyAutomatedLaunchClaimAllowed: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "llm-wiki-candidate-readiness-2026-08-25", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS",
+    sourceHead: "a".repeat(40),
+    productCommit: "b".repeat(40),
+    productionCommit: "a".repeat(40),
+    liveAfterDeploymentRequired: false,
+    local: {
+      verdict: "PASS_CURRENT_SOURCE_LOCAL_LLM_WIKI_CANDIDATE_CONTENT_READINESS",
+      viewportCount: 8,
+      passedCount: 8,
+      failedCount: 0,
+    },
+    afterLive: {
+      verdict: "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS",
+      viewportCount: 8,
+      passedCount: 8,
+      failedCount: 0,
+      productionAligned: true,
+      browserErrorCount: 0,
+    },
+    contentReadinessContract: {
+      contractVersion: "knowledge-candidate-content-readiness.v1",
+      requiredSectionCount: 4,
+      readyFixtureCount: 2,
+      revisionRequiredFixtureCount: 1,
+      selectedReadinessPanelCount: 1,
+      approvalFailsClosedForRevision: true,
+      keepSiteOnlyAvailableForRevision: true,
+      rejectAvailableForRevision: true,
+      humanReviewCompleted: false,
+      publicationState: "unpublished",
+      publishAllowed: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      ontologyPublicationPerformed: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "documents-touch-targets-2026-08-17", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_TOUCH_TARGETS",
     sourceHead: "fixture-sha",
@@ -5191,6 +5239,12 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("six reachable tasks");
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("KOSHA disclosures are 6/7");
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("Wiki/governance disclosures are 2/2");
+    expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_readiness")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "llm-wiki-candidate-readiness-2026-08-25", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_readiness")?.detail).toContain("four required sections");
+    expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_readiness")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("first review state panel-contained=true");
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("Wiki publication plus SIF embedding remain APPROVAL_GATED");
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")).toMatchObject({
@@ -7380,6 +7434,39 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-17T00:00:00.000Z" });
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")).toMatchObject({ state: "contradicted" });
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("wiki=PASS");
+  });
+
+  it.each([
+    {
+      name: "human review is claimed complete",
+      mutate: (report: Record<string, unknown>) => {
+        (report.contentReadinessContract as Record<string, unknown>).humanReviewCompleted = true;
+      },
+    },
+    {
+      name: "publication and exact Share boundaries are overclaimed",
+      mutate: (report: Record<string, unknown>) => {
+        const boundaries = report.remainingBoundaries as Record<string, unknown>;
+        boundaries.exactSavedShareVerdict = "PASS";
+        boundaries.llmWikiPublication = "PASS";
+      },
+    },
+    {
+      name: "a database mutation is claimed",
+      mutate: (report: Record<string, unknown>) => {
+        (report.mutationBoundary as Record<string, unknown>).dbMutationPerformed = true;
+      },
+    },
+  ])("fails LLM Wiki candidate readiness closed when $name", async ({ mutate }) => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "llm-wiki-candidate-readiness-2026-08-25", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as Record<string, unknown>;
+    mutate(report);
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, sourceSha: "fixture-sha" });
+    expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_readiness")?.state).toBe("contradicted");
   });
 
   it("fails Knowledge viewport workbench closed when progressive disclosures open by default", async () => {

@@ -34,6 +34,7 @@ const ARTIFACTS = Object.freeze({
   documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
   ontologyViewportWorkbench: path.join("evaluation", "ontology-viewport-workbench-2026-08-17", "report.json"),
   knowledgeViewportWorkbench: path.join("evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json"),
+  llmWikiCandidateContentReadiness: path.join("evaluation", "llm-wiki-candidate-readiness-2026-08-25", "report.json"),
   tenantAuthorizationRemediation: path.join("evaluation", "tenant-authorization-boundary-preflight-2026-07-29", "report.json"),
   spreadsheetFormulaNeutralization: path.join("evaluation", "spreadsheet-formula-neutralization-2026-08-01", "report.json"),
   publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
@@ -521,6 +522,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const documentExportCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.documentExportCapabilityTruth);
   const ontologyViewportWorkbench = tryReadJson(rootDir, ARTIFACTS.ontologyViewportWorkbench);
   const knowledgeViewportWorkbench = tryReadJson(rootDir, ARTIFACTS.knowledgeViewportWorkbench);
+  const llmWikiCandidateContentReadiness = tryReadJson(rootDir, ARTIFACTS.llmWikiCandidateContentReadiness);
   const tenantAuthorizationRemediation = tryReadJson(rootDir, ARTIFACTS.tenantAuthorizationRemediation);
   const spreadsheetFormulaNeutralization = tryReadJson(rootDir, ARTIFACTS.spreadsheetFormulaNeutralization);
   const publicProviderWorkBudget = tryReadJson(rootDir, ARTIFACTS.publicProviderWorkBudget);
@@ -646,6 +648,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "document_export_capability_truth", ARTIFACTS.documentExportCapabilityTruth, documentExportCapabilityTruth),
     evidenceStatus(rootDir, currentHead, liveCommit, "ontology_viewport_workbench", ARTIFACTS.ontologyViewportWorkbench, ontologyViewportWorkbench),
     evidenceStatus(rootDir, currentHead, liveCommit, "knowledge_viewport_workbench", ARTIFACTS.knowledgeViewportWorkbench, knowledgeViewportWorkbench),
+    evidenceStatus(rootDir, currentHead, liveCommit, "llm_wiki_candidate_content_readiness", ARTIFACTS.llmWikiCandidateContentReadiness, llmWikiCandidateContentReadiness),
     evidenceStatus(rootDir, currentHead, liveCommit, "tenant_authorization_remediation", ARTIFACTS.tenantAuthorizationRemediation, tenantAuthorizationRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "spreadsheet_formula_neutralization", ARTIFACTS.spreadsheetFormulaNeutralization, spreadsheetFormulaNeutralization),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_work_budget", ARTIFACTS.publicProviderWorkBudget, publicProviderWorkBudget),
@@ -1434,6 +1437,32 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       sifEmbeddingRuntimeVerdict: asString(recordAt(knowledgeViewportWorkbench, "remainingBoundaries")?.sifEmbeddingRuntimeVerdict),
       fullyAutomatedLaunchClaimAllowed: recordAt(knowledgeViewportWorkbench, "remainingBoundaries")?.fullyAutomatedLaunchClaimAllowed === true,
     },
+    llmWikiCandidateContentReadiness: {
+      artifact: ARTIFACTS.llmWikiCandidateContentReadiness,
+      verdict: isRecord(llmWikiCandidateContentReadiness) ? asString(llmWikiCandidateContentReadiness.verdict) : "missing",
+      sourceHead: isRecord(llmWikiCandidateContentReadiness) ? asString(llmWikiCandidateContentReadiness.sourceHead) : "",
+      productCommit: isRecord(llmWikiCandidateContentReadiness) ? asString(llmWikiCandidateContentReadiness.productCommit) : "",
+      productionCommit: isRecord(llmWikiCandidateContentReadiness) ? asString(llmWikiCandidateContentReadiness.productionCommit) : "",
+      localPassed: asNumber(recordAt(llmWikiCandidateContentReadiness, "local")?.passedCount),
+      localViewportCount: asNumber(recordAt(llmWikiCandidateContentReadiness, "local")?.viewportCount),
+      livePassed: asNumber(recordAt(llmWikiCandidateContentReadiness, "afterLive")?.passedCount),
+      liveViewportCount: asNumber(recordAt(llmWikiCandidateContentReadiness, "afterLive")?.viewportCount),
+      browserErrorCount: asNumber(recordAt(llmWikiCandidateContentReadiness, "afterLive")?.browserErrorCount),
+      requiredSectionCount: asNumber(recordAt(llmWikiCandidateContentReadiness, "contentReadinessContract")?.requiredSectionCount),
+      readyFixtureCount: asNumber(recordAt(llmWikiCandidateContentReadiness, "contentReadinessContract")?.readyFixtureCount),
+      revisionRequiredFixtureCount: asNumber(recordAt(llmWikiCandidateContentReadiness, "contentReadinessContract")?.revisionRequiredFixtureCount),
+      approvalFailsClosedForRevision: recordAt(llmWikiCandidateContentReadiness, "contentReadinessContract")?.approvalFailsClosedForRevision === true,
+      keepSiteOnlyAvailableForRevision: recordAt(llmWikiCandidateContentReadiness, "contentReadinessContract")?.keepSiteOnlyAvailableForRevision === true,
+      rejectAvailableForRevision: recordAt(llmWikiCandidateContentReadiness, "contentReadinessContract")?.rejectAvailableForRevision === true,
+      humanReviewCompleted: recordAt(llmWikiCandidateContentReadiness, "contentReadinessContract")?.humanReviewCompleted === true,
+      publicationState: asString(recordAt(llmWikiCandidateContentReadiness, "contentReadinessContract")?.publicationState),
+      publishAllowed: recordAt(llmWikiCandidateContentReadiness, "contentReadinessContract")?.publishAllowed === true,
+      dbMutationPerformed: recordAt(llmWikiCandidateContentReadiness, "mutationBoundary")?.dbMutationPerformed === true,
+      wikiPublicationPerformed: recordAt(llmWikiCandidateContentReadiness, "mutationBoundary")?.wikiPublicationPerformed === true,
+      exactSavedShareVerdict: asString(recordAt(llmWikiCandidateContentReadiness, "remainingBoundaries")?.exactSavedShareVerdict),
+      llmWikiPublication: asString(recordAt(llmWikiCandidateContentReadiness, "remainingBoundaries")?.llmWikiPublication),
+      supabaseRlsLaunchIsolation: asString(recordAt(llmWikiCandidateContentReadiness, "remainingBoundaries")?.supabaseRlsLaunchIsolation),
+    },
     tenantAuthorizationRemediation: {
       artifact: ARTIFACTS.tenantAuthorizationRemediation,
       verdict: isRecord(tenantAuthorizationRemediation) ? asString(tenantAuthorizationRemediation.verdict) : "missing",
@@ -1967,6 +1996,12 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Selected exposure: ${rollup.knowledgeViewportWorkbench.visiblePanelCountPerRow ?? "unknown"} visible panel and ${rollup.knowledgeViewportWorkbench.reachableSectionCountPerRow ?? "unknown"} reachable tasks per row; long content remains locally scroll-contained.`,
     `- Progressive disclosure: ${rollup.knowledgeViewportWorkbench.technicalDisclosureCount ?? "unknown"}/${rollup.knowledgeViewportWorkbench.referenceDisclosureCount ?? "unknown"}/${rollup.knowledgeViewportWorkbench.wikiDisclosureCount ?? "unknown"}/${rollup.knowledgeViewportWorkbench.governanceDisclosureCount ?? "unknown"} technical/reference/wiki/governance disclosures, default open=${rollup.knowledgeViewportWorkbench.defaultOpenDisclosureCount ?? "unknown"}, exclusive groups=${rollup.knowledgeViewportWorkbench.exclusiveDisclosureGroups === true}, mobile ratios=${rollup.knowledgeViewportWorkbench.maxMobileTechnicalScrollRatio ?? "unknown"}/${rollup.knowledgeViewportWorkbench.maxMobileReferenceScrollRatio ?? "unknown"}/${rollup.knowledgeViewportWorkbench.maxMobileWikiScrollRatio ?? "unknown"}/${rollup.knowledgeViewportWorkbench.maxMobileGovernanceScrollRatio ?? "unknown"}, first item/review state panel-contained=${rollup.knowledgeViewportWorkbench.firstDisclosureInsidePanel === true}/${rollup.knowledgeViewportWorkbench.firstReviewStateInsidePanel === true}.`,
     `- Boundaries: exact saved Share=${rollup.knowledgeViewportWorkbench.exactSavedShareVerdict || "MISSING_EVIDENCE"}; Wiki publication=${rollup.knowledgeViewportWorkbench.llmWikiPublicationVerdict || "APPROVAL_GATED"}; SIF embedding=${rollup.knowledgeViewportWorkbench.sifEmbeddingRuntimeVerdict || "APPROVAL_GATED"}; fully automated launch=${rollup.knowledgeViewportWorkbench.fullyAutomatedLaunchClaimAllowed}`,
+    "",
+    "## LLM Wiki candidate content readiness",
+    `- Verdict: \`${rollup.llmWikiCandidateContentReadiness.verdict}\``,
+    `- Local/live viewport rows: ${rollup.llmWikiCandidateContentReadiness.localPassed ?? "unknown"}/${rollup.llmWikiCandidateContentReadiness.localViewportCount ?? "unknown"} and ${rollup.llmWikiCandidateContentReadiness.livePassed ?? "unknown"}/${rollup.llmWikiCandidateContentReadiness.liveViewportCount ?? "unknown"}; browser errors=${rollup.llmWikiCandidateContentReadiness.browserErrorCount ?? "unknown"}.`,
+    `- Readiness contract: ${rollup.llmWikiCandidateContentReadiness.requiredSectionCount ?? "unknown"} required sections; ready/revision fixtures=${rollup.llmWikiCandidateContentReadiness.readyFixtureCount ?? "unknown"}/${rollup.llmWikiCandidateContentReadiness.revisionRequiredFixtureCount ?? "unknown"}; approval fail-closed=${rollup.llmWikiCandidateContentReadiness.approvalFailsClosedForRevision === true}; site-only/reject available=${rollup.llmWikiCandidateContentReadiness.keepSiteOnlyAvailableForRevision === true}/${rollup.llmWikiCandidateContentReadiness.rejectAvailableForRevision === true}.`,
+    `- Boundaries: human review complete=${rollup.llmWikiCandidateContentReadiness.humanReviewCompleted === true}; publication=${rollup.llmWikiCandidateContentReadiness.publicationState || "unpublished"}; publish allowed=${rollup.llmWikiCandidateContentReadiness.publishAllowed === true}; DB/Wiki mutation=${rollup.llmWikiCandidateContentReadiness.dbMutationPerformed === true}/${rollup.llmWikiCandidateContentReadiness.wikiPublicationPerformed === true}; exact saved Share=${rollup.llmWikiCandidateContentReadiness.exactSavedShareVerdict || "MISSING_EVIDENCE"}; Wiki/RLS=${rollup.llmWikiCandidateContentReadiness.llmWikiPublication || "APPROVAL_GATED"}/${rollup.llmWikiCandidateContentReadiness.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}.`,
     "",
     "## Live Hermes Reviewer Authority UI",
     "",

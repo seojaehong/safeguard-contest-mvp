@@ -198,6 +198,28 @@ type RollupReport = {
     sifEmbeddingRuntimeVerdict: string;
     fullyAutomatedLaunchClaimAllowed: boolean;
   };
+  llmWikiCandidateContentReadiness: {
+    verdict: string;
+    localPassed: number;
+    localViewportCount: number;
+    livePassed: number;
+    liveViewportCount: number;
+    browserErrorCount: number;
+    requiredSectionCount: number;
+    readyFixtureCount: number;
+    revisionRequiredFixtureCount: number;
+    approvalFailsClosedForRevision: boolean;
+    keepSiteOnlyAvailableForRevision: boolean;
+    rejectAvailableForRevision: boolean;
+    humanReviewCompleted: boolean;
+    publicationState: string;
+    publishAllowed: boolean;
+    dbMutationPerformed: boolean;
+    wikiPublicationPerformed: boolean;
+    exactSavedShareVerdict: string;
+    llmWikiPublication: string;
+    supabaseRlsLaunchIsolation: string;
+  };
   tenantAuthorizationRemediation: {
     verdict: string;
     greenFindings: number | null;
@@ -1190,6 +1212,24 @@ function createFixtureRoot(): { root: string; head: string } {
     mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, vectorMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false },
     remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", llmWikiPublicationVerdict: "APPROVAL_GATED", sifEmbeddingRuntimeVerdict: "APPROVAL_GATED", fullyAutomatedLaunchClaimAllowed: false },
   });
+  writeJson(root, "evaluation/llm-wiki-candidate-readiness-2026-08-25/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS",
+    sourceHead: "TO_FILL", productCommit: "TO_FILL", productionCommit: "TO_FILL",
+    local: { verdict: "PASS_CURRENT_SOURCE_LOCAL_LLM_WIKI_CANDIDATE_CONTENT_READINESS", viewportCount: 8, passedCount: 8, failedCount: 0 },
+    afterLive: { verdict: "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS", viewportCount: 8, passedCount: 8, failedCount: 0, productionAligned: true, browserErrorCount: 0 },
+    contentReadinessContract: {
+      requiredSectionCount: 4, readyFixtureCount: 2, revisionRequiredFixtureCount: 1,
+      selectedReadinessPanelCount: 1, approvalFailsClosedForRevision: true,
+      keepSiteOnlyAvailableForRevision: true, rejectAvailableForRevision: true,
+      humanReviewCompleted: false, publicationState: "unpublished", publishAllowed: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false,
+      ontologyPublicationPerformed: false, vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", llmWikiPublication: "APPROVAL_GATED", supabaseRlsLaunchIsolation: "APPROVAL_GATED" },
+  });
   writeJson(root, "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json", {
     verdict: "COMPLETED_FOLLOWUP_REPOSITORY_SECURITY_SCAN_OPEN_FINDINGS_AND_DEFERRED_REVIEW",
     sourceHead: "TO_FILL",
@@ -1867,6 +1907,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/document-export-capability-truth-2026-08-17/report.json",
     "evaluation/ontology-viewport-workbench-2026-08-17/report.json",
     "evaluation/knowledge-viewport-workbench-2026-08-17/report.json",
+    "evaluation/llm-wiki-candidate-readiness-2026-08-25/report.json",
     "evaluation/tenant-authorization-boundary-preflight-2026-07-29/report.json",
     "evaluation/spreadsheet-formula-neutralization-2026-08-01/report.json",
     "evaluation/public-provider-work-budget-2026-08-01/report.json",
@@ -2131,6 +2172,29 @@ describe("northstar live rollup", () => {
       fullyAutomatedLaunchClaimAllowed: false,
     });
     expect(report.evidence.find((item) => item.id === "knowledge_viewport_workbench")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.llmWikiCandidateContentReadiness).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS",
+      localPassed: 8,
+      localViewportCount: 8,
+      livePassed: 8,
+      liveViewportCount: 8,
+      browserErrorCount: 0,
+      requiredSectionCount: 4,
+      readyFixtureCount: 2,
+      revisionRequiredFixtureCount: 1,
+      approvalFailsClosedForRevision: true,
+      keepSiteOnlyAvailableForRevision: true,
+      rejectAvailableForRevision: true,
+      humanReviewCompleted: false,
+      publicationState: "unpublished",
+      publishAllowed: false,
+      dbMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+    });
+    expect(report.evidence.find((item) => item.id === "llm_wiki_candidate_content_readiness")?.productionStatus).toBe("ancestor_of_head");
     expect(report.tenantAuthorizationRemediation).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
       greenFindings: 2,

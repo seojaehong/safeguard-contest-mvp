@@ -37,6 +37,7 @@ const ARTIFACTS = Object.freeze({
   documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
   ontologyViewportWorkbench: path.join("evaluation", "ontology-viewport-workbench-2026-08-17", "report.json"),
   knowledgeViewportWorkbench: path.join("evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json"),
+  llmWikiCandidateContentReadiness: path.join("evaluation", "llm-wiki-candidate-readiness-2026-08-25", "report.json"),
   dependencySecurityRemediation: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
   tenantAuthorizationRemediation: path.join("evaluation", "tenant-authorization-boundary-preflight-2026-07-29", "report.json"),
   spreadsheetFormulaNeutralization: path.join("evaluation", "spreadsheet-formula-neutralization-2026-08-01", "report.json"),
@@ -758,6 +759,87 @@ function knowledgeViewportWorkbenchSummary(report) {
     sifEmbeddingRuntimeVerdict: asString(remainingBoundaries.sifEmbeddingRuntimeVerdict),
     fullyAutomatedLaunchClaimAllowed: asBoolean(remainingBoundaries.fullyAutomatedLaunchClaimAllowed),
   };
+}
+
+/** @param {unknown} report */
+function llmWikiCandidateContentReadinessSummary(report) {
+  if (!isRecord(report)) return {};
+  const local = isRecord(report.local) ? report.local : {};
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const readiness = isRecord(report.contentReadinessContract) ? report.contentReadinessContract : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productCommit: asString(report.productCommit),
+    productionCommit: asString(report.productionCommit),
+    localVerdict: asString(local.verdict),
+    localPassed: typeof local.passedCount === "number" ? local.passedCount : 0,
+    localViewportCount: typeof local.viewportCount === "number" ? local.viewportCount : 0,
+    localFailed: typeof local.failedCount === "number" ? local.failedCount : 0,
+    liveVerdict: asString(afterLive.verdict),
+    livePassed: typeof afterLive.passedCount === "number" ? afterLive.passedCount : 0,
+    liveViewportCount: typeof afterLive.viewportCount === "number" ? afterLive.viewportCount : 0,
+    liveFailed: typeof afterLive.failedCount === "number" ? afterLive.failedCount : 0,
+    productionAligned: asBoolean(afterLive.productionAligned),
+    browserErrorCount: typeof afterLive.browserErrorCount === "number" ? afterLive.browserErrorCount : 0,
+    requiredSectionCount: typeof readiness.requiredSectionCount === "number" ? readiness.requiredSectionCount : 0,
+    readyFixtureCount: typeof readiness.readyFixtureCount === "number" ? readiness.readyFixtureCount : 0,
+    revisionRequiredFixtureCount: typeof readiness.revisionRequiredFixtureCount === "number" ? readiness.revisionRequiredFixtureCount : 0,
+    selectedReadinessPanelCount: typeof readiness.selectedReadinessPanelCount === "number" ? readiness.selectedReadinessPanelCount : 0,
+    approvalFailsClosedForRevision: asBoolean(readiness.approvalFailsClosedForRevision),
+    keepSiteOnlyAvailableForRevision: asBoolean(readiness.keepSiteOnlyAvailableForRevision),
+    rejectAvailableForRevision: asBoolean(readiness.rejectAvailableForRevision),
+    humanReviewCompleted: asBoolean(readiness.humanReviewCompleted),
+    publicationState: asString(readiness.publicationState),
+    publishAllowed: asBoolean(readiness.publishAllowed),
+    dbMutationPerformed: asBoolean(mutationBoundary.dbMutationPerformed),
+    providerDispatchCalled: asBoolean(mutationBoundary.providerDispatchCalled),
+    shareSessionCreated: asBoolean(mutationBoundary.shareSessionCreated),
+    ontologyPublicationPerformed: asBoolean(mutationBoundary.ontologyPublicationPerformed),
+    vectorOrEmbeddingMutationPerformed: asBoolean(mutationBoundary.vectorOrEmbeddingMutationPerformed),
+    wikiPublicationPerformed: asBoolean(mutationBoundary.wikiPublicationPerformed),
+    koshaRegistryMutationPerformed: asBoolean(mutationBoundary.koshaRegistryMutationPerformed),
+    exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
+    llmWikiPublication: asString(remainingBoundaries.llmWikiPublication),
+    supabaseRlsLaunchIsolation: asString(remainingBoundaries.supabaseRlsLaunchIsolation),
+  };
+}
+
+/** @param {ReturnType<typeof llmWikiCandidateContentReadinessSummary>} summary */
+function llmWikiCandidateContentReadinessProven(summary) {
+  return summary.verdict === "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS"
+    && summary.localVerdict === "PASS_CURRENT_SOURCE_LOCAL_LLM_WIKI_CANDIDATE_CONTENT_READINESS"
+    && summary.localPassed === 8
+    && summary.localViewportCount === 8
+    && summary.localFailed === 0
+    && summary.liveVerdict === "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS"
+    && summary.livePassed === 8
+    && summary.liveViewportCount === 8
+    && summary.liveFailed === 0
+    && summary.productionAligned === true
+    && summary.browserErrorCount === 0
+    && summary.requiredSectionCount === 4
+    && summary.readyFixtureCount === 2
+    && summary.revisionRequiredFixtureCount === 1
+    && summary.selectedReadinessPanelCount === 1
+    && summary.approvalFailsClosedForRevision === true
+    && summary.keepSiteOnlyAvailableForRevision === true
+    && summary.rejectAvailableForRevision === true
+    && summary.humanReviewCompleted === false
+    && summary.publicationState === "unpublished"
+    && summary.publishAllowed === false
+    && summary.dbMutationPerformed === false
+    && summary.providerDispatchCalled === false
+    && summary.shareSessionCreated === false
+    && summary.ontologyPublicationPerformed === false
+    && summary.vectorOrEmbeddingMutationPerformed === false
+    && summary.wikiPublicationPerformed === false
+    && summary.koshaRegistryMutationPerformed === false
+    && summary.exactSavedShareVerdict === "MISSING_EVIDENCE"
+    && summary.llmWikiPublication === "APPROVAL_GATED"
+    && summary.supabaseRlsLaunchIsolation === "APPROVAL_GATED";
 }
 
 /**
@@ -2509,6 +2591,8 @@ export function buildNorthstarNextRunway(options) {
   const productCapabilityTruth = readOptionalJson(options.rootDir, ARTIFACTS.productCapabilityTruth);
   const documentExportCapabilityTruth = readOptionalJson(options.rootDir, ARTIFACTS.documentExportCapabilityTruth);
   const knowledgeViewportWorkbench = readOptionalJson(options.rootDir, ARTIFACTS.knowledgeViewportWorkbench);
+  const llmWikiCandidateContentReadiness = readOptionalJson(options.rootDir, ARTIFACTS.llmWikiCandidateContentReadiness);
+  const llmWikiCandidateContentReadinessResult = llmWikiCandidateContentReadinessSummary(llmWikiCandidateContentReadiness);
   const dependencySecurityRemediation = readOptionalJson(options.rootDir, ARTIFACTS.dependencySecurityRemediation);
   const tenantAuthorizationRemediation = readOptionalJson(options.rootDir, ARTIFACTS.tenantAuthorizationRemediation);
   const spreadsheetFormulaNeutralization = readOptionalJson(options.rootDir, ARTIFACTS.spreadsheetFormulaNeutralization);
@@ -2715,6 +2799,9 @@ export function buildNorthstarNextRunway(options) {
       "document_export_capability_truth",
       "ontology_viewport_workbench",
       "knowledge_viewport_workbench",
+      ...(llmWikiCandidateContentReadinessProven(llmWikiCandidateContentReadinessResult)
+        ? ["llm_wiki_candidate_content_readiness"]
+        : []),
       "dependency_security_remediation",
       "tenant_authorization_remediation",
       "spreadsheet_formula_neutralization",
@@ -2910,6 +2997,7 @@ export function buildNorthstarNextRunway(options) {
     documentExportCapabilityTruth: documentExportCapabilityTruthSummary(documentExportCapabilityTruth),
     ontologyViewportWorkbench: ontologyViewportWorkbenchSummary(ontologyViewportWorkbench),
     knowledgeViewportWorkbench: knowledgeViewportWorkbenchSummary(knowledgeViewportWorkbench),
+    llmWikiCandidateContentReadiness: llmWikiCandidateContentReadinessResult,
     dependencySecurityRemediation: dependencySecuritySummary,
     tenantAuthorizationRemediation: tenantAuthorizationSummary,
     spreadsheetFormulaNeutralization: spreadsheetFormulaSummary,
@@ -3069,6 +3157,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Live document export capability truth is measured separately: \`${report.documentExportCapabilityTruth.verdict || "missing"}\`; admission is \`${report.documentExportCapabilityTruth.admissionMode || "unknown"}/${report.documentExportCapabilityTruth.admissionReason || "unknown"}\` with ready=\`${report.documentExportCapabilityTruth.admissionReady === true}\`. Desktop panel/beta width is \`${report.documentExportCapabilityTruth.desktopPanelWidth ?? 0}/${report.documentExportCapabilityTruth.desktopBetaButtonWidth ?? 0}px\`; mobile is \`${report.documentExportCapabilityTruth.mobilePanelWidth ?? 0}/${report.documentExportCapabilityTruth.mobileBetaButtonWidth ?? 0}px\`. This proves fail-closed export truth and browser fallbacks, not distributed activation; activation remains \`${report.documentExportCapabilityTruth.distributedAdmissionActivation || "OPERATOR_CONFIGURATION_REQUIRED"}\`, fully automated launch remains \`${report.documentExportCapabilityTruth.fullyAutomatedLaunchClaimAllowed === true}\`, and exact saved Share remains \`${report.documentExportCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live Ontology viewport workbench is measured separately: \`${report.ontologyViewportWorkbench.verdict || "missing"}\`; browser rows \`${report.ontologyViewportWorkbench.passCount ?? 0}/${report.ontologyViewportWorkbench.rowCount ?? 0}\`, maximum body ratio \`${report.ontologyViewportWorkbench.maxBodyRatio ?? 0}\`, mobile task switches \`${report.ontologyViewportWorkbench.mobileTaskSwitchVerifiedCount ?? 0}/4\`. Route splitting alone is not treated as the fix; long content remains in local-scroll panes. Exact saved Share remains \`${report.ontologyViewportWorkbench.exactSavedShareVerdict || "MISSING_EVIDENCE"}\` and fully automated launch remains \`${report.ontologyViewportWorkbench.fullyAutomatedLaunchClaimAllowed === true}\`.
 - Live Knowledge viewport workbench is measured separately: \`${report.knowledgeViewportWorkbench.verdict || "missing"}\`; browser rows \`${report.knowledgeViewportWorkbench.passCount ?? "unknown"}/${report.knowledgeViewportWorkbench.rowCount ?? "unknown"}\`, maximum body ratio \`${report.knowledgeViewportWorkbench.maxBodyRatio ?? "unknown"}\`, selected exposure \`${report.knowledgeViewportWorkbench.visiblePanelCountPerRow ?? "unknown"}\` visible panel and \`${report.knowledgeViewportWorkbench.reachableSectionCountPerRow ?? "unknown"}\` reachable tasks. Progressive disclosures technical/reference/wiki/governance are \`${report.knowledgeViewportWorkbench.technicalDisclosureCount ?? "unknown"}/${report.knowledgeViewportWorkbench.referenceDisclosureCount ?? "unknown"}/${report.knowledgeViewportWorkbench.wikiDisclosureCount ?? "unknown"}/${report.knowledgeViewportWorkbench.governanceDisclosureCount ?? "unknown"}\`, default open \`${report.knowledgeViewportWorkbench.defaultOpenDisclosureCount ?? "unknown"}\`, exclusive groups \`${report.knowledgeViewportWorkbench.exclusiveDisclosureGroups === true}\`, mobile ratios \`${report.knowledgeViewportWorkbench.maxMobileTechnicalScrollRatio ?? "unknown"}/${report.knowledgeViewportWorkbench.maxMobileReferenceScrollRatio ?? "unknown"}/${report.knowledgeViewportWorkbench.maxMobileWikiScrollRatio ?? "unknown"}/${report.knowledgeViewportWorkbench.maxMobileGovernanceScrollRatio ?? "unknown"}\`, and first item/review state panel-contained \`${report.knowledgeViewportWorkbench.firstDisclosureInsidePanel === true}/${report.knowledgeViewportWorkbench.firstReviewStateInsidePanel === true}\`. Route splitting alone is not treated as the fix; long content remains in local-scroll panels. Exact saved Share remains \`${report.knowledgeViewportWorkbench.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`, Wiki publication remains \`${report.knowledgeViewportWorkbench.llmWikiPublicationVerdict || "APPROVAL_GATED"}\`, and SIF embedding remains \`${report.knowledgeViewportWorkbench.sifEmbeddingRuntimeVerdict || "APPROVAL_GATED"}\`.
+- LLM Wiki candidate content readiness is measured separately: \`${report.llmWikiCandidateContentReadiness.verdict || "missing"}\`; local/live viewport rows \`${report.llmWikiCandidateContentReadiness.localPassed ?? 0}/${report.llmWikiCandidateContentReadiness.localViewportCount ?? 0}\` and \`${report.llmWikiCandidateContentReadiness.livePassed ?? 0}/${report.llmWikiCandidateContentReadiness.liveViewportCount ?? 0}\`, required sections \`${report.llmWikiCandidateContentReadiness.requiredSectionCount ?? 0}\`, ready/revision fixtures \`${report.llmWikiCandidateContentReadiness.readyFixtureCount ?? 0}/${report.llmWikiCandidateContentReadiness.revisionRequiredFixtureCount ?? 0}\`, approval fail-closed \`${report.llmWikiCandidateContentReadiness.approvalFailsClosedForRevision === true}\`, and site-only/reject availability \`${report.llmWikiCandidateContentReadiness.keepSiteOnlyAvailableForRevision === true}/${report.llmWikiCandidateContentReadiness.rejectAvailableForRevision === true}\`. Human review remains \`${report.llmWikiCandidateContentReadiness.humanReviewCompleted === true}\`, publication remains \`${report.llmWikiCandidateContentReadiness.publicationState || "unpublished"}\` with publishAllowed=\`${report.llmWikiCandidateContentReadiness.publishAllowed === true}\`; exact saved Share remains \`${report.llmWikiCandidateContentReadiness.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`, while Wiki publication and Supabase RLS remain \`${report.llmWikiCandidateContentReadiness.llmWikiPublication || "APPROVAL_GATED"}/${report.llmWikiCandidateContentReadiness.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}\`.
 - Public generation admission security is measured separately: \`${report.publicGenerationAdmissionSecurity.verdict || "missing"}\`, live mode \`${report.publicGenerationAdmissionSecurity.liveMode || "unknown"}\`, dependency vulnerabilities \`${report.publicGenerationAdmissionSecurity.vulnerabilityCount ?? "unknown"}\`, distributed hardening open=\`${report.publicGenerationAdmissionSecurity.distributedHardeningOpen === true}\`, and fresh diff scan required=\`${report.publicGenerationAdmissionSecurity.freshRescanRequired === true}\`. This notice does not close multi-instance protection, the immutable scan finding, approval-gated operations, or exact saved Share; exact saved Share remains \`${report.publicGenerationAdmissionSecurity.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Security follow-up remediation is separately proven: \`${report.securityFollowupRemediation.verdict || "missing"}\`, sealed findings \`${report.securityFollowupRemediation.sealedFindingCount ?? "unknown"}\`, focused tests \`${report.securityFollowupRemediation.focusedTests ?? "unknown"}\`, and remaining security work \`${report.securityFollowupRemediation.remainingSecurityWorkCount ?? "unknown"}\`. The immutable original baseline remains \`${report.securityFollowupRemediation.immutableOriginalBaselineFindingCount ?? "unknown"}\` findings with rewritten=\`${report.securityFollowupRemediation.originalBaselineRewritten === true}\`; two deferred candidates and the separate public-admission notice remain visible, no live provider cancellation probe is claimed, and exact saved Share remains \`${report.securityFollowupRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Fresh security resource remediation is scoped rather than security-complete: \`${report.securityResourceRemediation.verdict || "missing"}\`, remediated \`${report.securityResourceRemediation.remediatedFindingCount ?? "unknown"}/${report.securityResourceRemediation.scanFindingCount ?? "unknown"}\`, remaining \`${report.securityResourceRemediation.remainingScanFindings ?? "unknown"}\`, provider persistence \`${report.securityResourceRemediation.providerDispatchPersistence || "unknown"}\`, exact saved Share \`${report.securityResourceRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.

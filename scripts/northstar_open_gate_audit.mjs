@@ -47,6 +47,7 @@ const EVIDENCE_PATHS = Object.freeze({
   documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
   ontologyViewportWorkbench: path.join("evaluation", "ontology-viewport-workbench-2026-08-17", "report.json"),
   knowledgeViewportWorkbench: path.join("evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json"),
+  llmWikiCandidateContentReadiness: path.join("evaluation", "llm-wiki-candidate-readiness-2026-08-25", "report.json"),
   dispatchEntryCapabilityTruth: path.join("evaluation", "dispatch-entry-capability-truth-2026-07-28", "report.json"),
   landingHumanReviewBoundary: path.join("evaluation", "landing-human-review-boundary-2026-07-28", "report.json"),
   dependencySecurityRemediation: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
@@ -1880,6 +1881,97 @@ function evaluateKnowledgeViewportWorkbenchGate(rootDir) {
     evidencePath,
     detail: `Knowledge verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, rows=${readNumber(browser.passCount)}/${readNumber(browser.rowCount)}, maxBodyRatio=${readNumber(browser.maxBodyRatio)}, visiblePanels=${readNumber(browser.visiblePanelCountPerRow)}, reachableTasks=${readNumber(browser.reachableSectionCountPerRow)}, disclosures=${readNumber(progressiveDisclosure.technicalDisclosureCount)}/${readNumber(progressiveDisclosure.referenceDisclosureCount)}/${readNumber(progressiveDisclosure.wikiDisclosureCount)}/${readNumber(progressiveDisclosure.governanceDisclosureCount)}, defaultOpen=${readNumber(progressiveDisclosure.defaultOpenDisclosureCount)}, mobileRatios=${readNumber(progressiveDisclosure.maxMobileTechnicalScrollRatio)}/${readNumber(progressiveDisclosure.maxMobileReferenceScrollRatio)}/${readNumber(progressiveDisclosure.maxMobileWikiScrollRatio)}/${readNumber(progressiveDisclosure.maxMobileGovernanceScrollRatio)}, firstDisclosureInsidePanel=${progressiveDisclosure.firstDisclosureInsidePanel === true}, firstReviewStateInsidePanel=${progressiveDisclosure.firstReviewStateInsidePanel === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, wiki=${readString(remainingBoundaries.llmWikiPublicationVerdict) || "missing"}, embedding=${readString(remainingBoundaries.sifEmbeddingRuntimeVerdict) || "missing"}.`,
     nextActions: ["Restore selected-only viewport containment and approval boundaries, then rerun the current-production Knowledge browser contract."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateLlmWikiCandidateContentReadinessGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.llmWikiCandidateContentReadiness;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "llm_wiki_candidate_content_readiness",
+      label: "Live LLM Wiki candidate content readiness",
+      state: "missing",
+      evidencePath,
+      detail: "Live LLM Wiki candidate content-readiness evidence is missing or invalid.",
+      nextActions: ["Rerun the candidate-readiness Day/Night desktop and mobile browser contract against current production."],
+    });
+  }
+
+  const local = isRecord(report.local) ? report.local : {};
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const readiness = isRecord(report.contentReadinessContract) ? report.contentReadinessContract : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(report.productionCommit);
+  const sourceMatchesProduction = /^[0-9a-f]{40}$/u.test(sourceHead)
+    && /^[0-9a-f]{40}$/u.test(productCommit)
+    && /^[0-9a-f]{40}$/u.test(productionCommit)
+    && sourceHead === productionCommit;
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.ontologyPublicationPerformed === false
+    && mutationBoundary.vectorOrEmbeddingMutationPerformed === false
+    && mutationBoundary.wikiPublicationPerformed === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const localPass = readString(local.verdict) === "PASS_CURRENT_SOURCE_LOCAL_LLM_WIKI_CANDIDATE_CONTENT_READINESS"
+    && readNumber(local.viewportCount) === 8
+    && readNumber(local.passedCount) === 8
+    && readNumber(local.failedCount) === 0;
+  const livePass = readString(afterLive.verdict) === "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS"
+    && readNumber(afterLive.viewportCount) === 8
+    && readNumber(afterLive.passedCount) === 8
+    && readNumber(afterLive.failedCount) === 0
+    && afterLive.productionAligned === true
+    && readNumber(afterLive.browserErrorCount) === 0;
+  const readinessPass = readString(readiness.contractVersion) === "knowledge-candidate-content-readiness.v1"
+    && readNumber(readiness.requiredSectionCount) === 4
+    && readNumber(readiness.readyFixtureCount) === 2
+    && readNumber(readiness.revisionRequiredFixtureCount) === 1
+    && readNumber(readiness.selectedReadinessPanelCount) === 1
+    && readiness.approvalFailsClosedForRevision === true
+    && readiness.keepSiteOnlyAvailableForRevision === true
+    && readiness.rejectAvailableForRevision === true
+    && readiness.humanReviewCompleted === false
+    && readString(readiness.publicationState) === "unpublished"
+    && readiness.publishAllowed === false;
+  const approvalBoundariesPreserved = readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(remainingBoundaries.llmWikiPublication) === "APPROVAL_GATED"
+    && readString(remainingBoundaries.supabaseRlsLaunchIsolation) === "APPROVAL_GATED";
+  const proven = readString(report.verdict) === "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS"
+    && report.liveAfterDeploymentRequired === false
+    && sourceMatchesProduction
+    && localPass
+    && livePass
+    && readinessPass
+    && noMutation
+    && approvalBoundariesPreserved;
+
+  if (proven) {
+    return gateResult({
+      id: "llm_wiki_candidate_content_readiness",
+      label: "Live LLM Wiki candidate content readiness",
+      state: "proven",
+      evidencePath,
+      detail: "Production LLM Wiki candidate review passes local/live 8/8 viewport rows with four required sections. Revision-required candidates fail closed for approval while site-only and reject remain available. Human review is not complete, publication remains unpublished and disallowed, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and LLM Wiki publication plus Supabase RLS remain APPROVAL_GATED.",
+      nextActions: [],
+    });
+  }
+
+  return gateResult({
+    id: "llm_wiki_candidate_content_readiness",
+    label: "Live LLM Wiki candidate content readiness",
+    state: "contradicted",
+    evidencePath,
+    detail: `Readiness verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, local=${readNumber(local.passedCount)}/${readNumber(local.viewportCount)}, live=${readNumber(afterLive.passedCount)}/${readNumber(afterLive.viewportCount)}, browserErrors=${readNumber(afterLive.browserErrorCount)}, sections=${readNumber(readiness.requiredSectionCount)}, approvalBlocked=${readiness.approvalFailsClosedForRevision === true}, humanReviewCompleted=${readiness.humanReviewCompleted === true}, publishAllowed=${readiness.publishAllowed === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, wiki=${readString(remainingBoundaries.llmWikiPublication) || "missing"}, rls=${readString(remainingBoundaries.supabaseRlsLaunchIsolation) || "missing"}.`,
+    nextActions: ["Restore source/live alignment, four-section readiness, fail-closed approval, no-mutation behavior, and approval boundaries, then rerun the live candidate-readiness contract."],
   });
 }
 
@@ -9300,6 +9392,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateDocumentExportCapabilityTruthGate(rootDir),
     evaluateOntologyViewportWorkbenchGate(rootDir),
     evaluateKnowledgeViewportWorkbenchGate(rootDir),
+    evaluateLlmWikiCandidateContentReadinessGate(rootDir),
     evaluateDependencySecurityRemediationGate(rootDir),
     evaluateTenantAuthorizationRemediationGate(rootDir),
     evaluateSpreadsheetFormulaNeutralizationGate(rootDir),

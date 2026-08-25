@@ -249,6 +249,26 @@ type NextRunwayReport = {
     sifEmbeddingRuntimeVerdict: string;
     fullyAutomatedLaunchClaimAllowed: boolean;
   };
+  llmWikiCandidateContentReadiness: {
+    verdict: string;
+    localPassed: number;
+    localViewportCount: number;
+    livePassed: number;
+    liveViewportCount: number;
+    browserErrorCount: number;
+    requiredSectionCount: number;
+    readyFixtureCount: number;
+    revisionRequiredFixtureCount: number;
+    approvalFailsClosedForRevision: boolean;
+    keepSiteOnlyAvailableForRevision: boolean;
+    rejectAvailableForRevision: boolean;
+    humanReviewCompleted: boolean;
+    publicationState: string;
+    publishAllowed: boolean;
+    exactSavedShareVerdict: string;
+    llmWikiPublication: string;
+    supabaseRlsLaunchIsolation: string;
+  };
   dependencySecurityRemediation: {
     verdict: string;
     beforeVulnerablePackages: number;
@@ -2792,6 +2812,24 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, vectorMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false },
     remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", llmWikiPublicationVerdict: "APPROVAL_GATED", sifEmbeddingRuntimeVerdict: "APPROVAL_GATED", fullyAutomatedLaunchClaimAllowed: false },
   });
+  writeJson(root, "evaluation/llm-wiki-candidate-readiness-2026-08-25/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS",
+    sourceHead: firstHead, productCommit: firstHead, productionCommit: firstHead,
+    local: { verdict: "PASS_CURRENT_SOURCE_LOCAL_LLM_WIKI_CANDIDATE_CONTENT_READINESS", viewportCount: 8, passedCount: 8, failedCount: 0 },
+    afterLive: { verdict: "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS", viewportCount: 8, passedCount: 8, failedCount: 0, productionAligned: true, browserErrorCount: 0 },
+    contentReadinessContract: {
+      requiredSectionCount: 4, readyFixtureCount: 2, revisionRequiredFixtureCount: 1,
+      selectedReadinessPanelCount: 1, approvalFailsClosedForRevision: true,
+      keepSiteOnlyAvailableForRevision: true, rejectAvailableForRevision: true,
+      humanReviewCompleted: false, publicationState: "unpublished", publishAllowed: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false,
+      ontologyPublicationPerformed: false, vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", llmWikiPublication: "APPROVAL_GATED", supabaseRlsLaunchIsolation: "APPROVAL_GATED" },
+  });
   const liveRollupPath = path.join(root, "evaluation/northstar-live-rollup-2026-07-20/report.json");
   const liveRollup = fs.readFileSync(liveRollupPath, "utf8").replaceAll("TO_FILL", firstHead);
   fs.writeFileSync(liveRollupPath, liveRollup, "utf8");
@@ -3068,6 +3106,27 @@ describe("northstar next runway generator", () => {
       fullyAutomatedLaunchClaimAllowed: false,
     });
     expect(report.provenCurrentState).toContain("knowledge_viewport_workbench");
+    expect(report.llmWikiCandidateContentReadiness).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS",
+      localPassed: 8,
+      localViewportCount: 8,
+      livePassed: 8,
+      liveViewportCount: 8,
+      browserErrorCount: 0,
+      requiredSectionCount: 4,
+      readyFixtureCount: 2,
+      revisionRequiredFixtureCount: 1,
+      approvalFailsClosedForRevision: true,
+      keepSiteOnlyAvailableForRevision: true,
+      rejectAvailableForRevision: true,
+      humanReviewCompleted: false,
+      publicationState: "unpublished",
+      publishAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+    });
+    expect(report.provenCurrentState).toContain("llm_wiki_candidate_content_readiness");
     expect(report.hermesOpenclaw).toMatchObject({
       verdict: "adapter_boundary_pass_live_execution_not_claimed",
       trustedTransportWired: true,
@@ -4209,4 +4268,24 @@ describe("northstar next runway generator", () => {
     expect(report.liveRollupMatchesProduction).toBe(false);
     expect(report.nextSafeWorkWithoutApproval).toContain("refresh live rollup before claiming live-exact if production advances beyond the current live rollup head");
   }, 15_000);
+
+  it("does not prove Wiki candidate readiness when a publication boundary is overclaimed", async () => {
+    const { buildNorthstarNextRunway } = await loadNextRunwayModule();
+    const { root, secondHead } = createFixtureRoot();
+    const reportPath = path.join(root, "evaluation/llm-wiki-candidate-readiness-2026-08-25/report.json");
+    const evidence = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remainingBoundaries: { llmWikiPublication: string };
+    };
+    evidence.remainingBoundaries.llmWikiPublication = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(evidence, null, 2)}\n`, "utf8");
+    pointLiveRollupAt(root, secondHead);
+
+    const report = buildNorthstarNextRunway({
+      rootDir: root,
+      buildInfo: { commitSha: secondHead },
+    });
+
+    expect(report.provenCurrentState).not.toContain("llm_wiki_candidate_content_readiness");
+    expect(report.llmWikiCandidateContentReadiness.llmWikiPublication).toBe("PASS");
+  }, 30_000);
 });
