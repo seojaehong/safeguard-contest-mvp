@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-25T13:50:48.755Z",
-  "head": "57bd8d949b8e02ff541646aeef3d2f5b80594122",
+  "generatedAt": "2026-08-26T02:01:52.568Z",
+  "head": "886278c36ab6196e4877cd49ecd39b0b292d1bcf",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "b22b918c2f27c2072f6ba6bc6bc8f822f3c975f0",
+    "commitSha": "f4ab34d0f8fd204b3d5dfa7ef77bfe183acc7ff2",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-194hdqzw6-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-cqcbeyur8-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -127,7 +127,7 @@
       "id": "llm_wiki_candidate_content_matrix",
       "state": "proven",
       "artifact": "evaluation\\llm-wiki-candidate-content-matrix-2026-08-25\\report.json",
-      "detail": "Current-source and production stateless fallback candidates pass 5/5 chemical, hot-work, confined-space, forklift, and foreign-worker fall scenarios with four non-empty sections, textual hazard grounding, and reviewer-visible source grounding. The measured live remediation moves visible evidence traces, KOSHA technical/official-source boundaries, and current-law candidate boundaries from 0/5 to 5/5 without legal overclaim. The enhanced LLM probe remains explicitly blocked 0/5 by distributed admission before AI generation; this gate does not claim enhanced LLM quality or read the production candidate queue. Human review remains incomplete, publication is disallowed, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus Supabase RLS remain APPROVAL_GATED."
+      "detail": "Current-source and production stateless fallback candidates pass 5/5 chemical, hot-work, confined-space, forklift, and foreign-worker fall scenarios with four non-empty sections, textual hazard grounding, and reviewer-visible source grounding. Visible evidence roles move 0/5 to 5/5, and explicit safe original-event review facts separately move 0/5 to 5/5 while private event-term exposure remains 0. Arbitrary raw payload is not accepted as reviewer-visible context. The enhanced LLM probe remains explicitly blocked 0/5 by distributed admission before AI generation; this gate does not claim enhanced LLM quality or read the production candidate queue. Human review remains incomplete, publication is disallowed, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus Supabase RLS remain APPROVAL_GATED."
     },
     {
       "id": "dependency_security_remediation",
@@ -1158,18 +1158,21 @@
   },
   "llmWikiCandidateContentMatrix": {
     "artifact": "evaluation\\llm-wiki-candidate-content-matrix-2026-08-25\\report.json",
-    "verdict": "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_EVIDENCE_VISIBILITY_LLM_ENHANCED_RUNTIME_BLOCKED",
-    "productCommit": "909c1747f47e501b3b7dcde30df957e500d43858",
+    "verdict": "PASS_LIVE_PRODUCTION_WIKI_EVENT_SEMANTIC_AND_EVIDENCE_VISIBILITY_LLM_ENHANCED_RUNTIME_BLOCKED",
+    "productCommit": "4df4dd68f5133f757233bcd34ac247140221220a",
     "localPassed": 5,
     "localFailed": 0,
     "livePassed": 5,
     "liveFailed": 0,
-    "sourceHead": "b22b918c2f27c2072f6ba6bc6bc8f822f3c975f0",
-    "productionCommit": "b22b918c2f27c2072f6ba6bc6bc8f822f3c975f0",
+    "sourceHead": "f4ab34d0f8fd204b3d5dfa7ef77bfe183acc7ff2",
+    "productionCommit": "f4ab34d0f8fd204b3d5dfa7ef77bfe183acc7ff2",
     "beforeVisibleEvidenceTraceCount": 0,
     "liveVisibleEvidenceTraceCount": 5,
     "liveTechnicalGuidanceBoundaryCount": 5,
     "liveLawCandidateBoundaryCount": 5,
+    "beforeEventSemanticGroundingCount": 0,
+    "liveEventSemanticGroundingCount": 5,
+    "livePrivateEventExposureCount": 0,
     "providerVerdict": "RED_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_MATRIX",
     "providerPassed": 0,
     "providerFailed": 5,
@@ -1181,6 +1184,9 @@
     "reviewerVisibleEvidenceTraceRequired": true,
     "scenarioSpecificOfficialSourceTermsRequired": true,
     "technicalGuidanceAndLawRolesSeparated": true,
+    "explicitEventReviewFactsRequired": true,
+    "arbitraryRawPayloadAcceptedAsReviewFact": false,
+    "privateEventTermExposureAllowed": false,
     "placeholderFindingCount": 0,
     "legalOverclaimFindingCount": 0,
     "humanReviewCompleted": false,
@@ -1189,6 +1195,8 @@
     "routeFixtureAcceptedAsGenerationProof": false,
     "deterministicFallbackProvenLive": true,
     "evidenceVisibilityContractProvenLive": true,
+    "eventSemanticGroundingProvenCurrentSource": true,
+    "eventSemanticGroundingProvenLive": true,
     "enhancedLlmGenerationProvenLive": false,
     "enhancedLlmRuntimeState": "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION",
     "dbMutationPerformed": false,
@@ -1449,9 +1457,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "57bd8d949b8e02ff541646aeef3d2f5b80594122",
+      "sourceCommit": "886278c36ab6196e4877cd49ecd39b0b292d1bcf",
       "sourceStatus": "exact",
-      "productionCommit": "57bd8d949b8e02ff541646aeef3d2f5b80594122",
+      "productionCommit": "886278c36ab6196e4877cd49ecd39b0b292d1bcf",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -1601,9 +1609,9 @@
     {
       "id": "llm_wiki_candidate_content_matrix",
       "artifact": "evaluation\\llm-wiki-candidate-content-matrix-2026-08-25\\report.json",
-      "sourceCommit": "b22b918c2f27c2072f6ba6bc6bc8f822f3c975f0",
+      "sourceCommit": "f4ab34d0f8fd204b3d5dfa7ef77bfe183acc7ff2",
       "sourceStatus": "ancestor",
-      "productionCommit": "b22b918c2f27c2072f6ba6bc6bc8f822f3c975f0",
+      "productionCommit": "f4ab34d0f8fd204b3d5dfa7ef77bfe183acc7ff2",
       "productionStatus": "matches_live"
     },
     {

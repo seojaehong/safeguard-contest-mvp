@@ -129,7 +129,7 @@
   "compatibilityContracts": {
     "providerCancellation": {
       "verdict": "PASS_CURRENT_SOURCE_KNOWLEDGE_PROVIDER_CANCELLATION_COMPATIBILITY",
-      "sourceHead": "909c1747f47e501b3b7dcde30df957e500d43858",
+      "sourceHead": "4df4dd68f5133f757233bcd34ac247140221220a",
       "changedGovernedPath": "lib/knowledge-candidate-route.ts",
       "focusedVitest": {
         "file": "tests/knowledge-regenerate-route.test.ts",

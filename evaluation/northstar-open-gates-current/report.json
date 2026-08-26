@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-25T13:50:46.495Z",
-  "sourceSha": "57bd8d949b8e02ff541646aeef3d2f5b80594122",
+  "generatedAt": "2026-08-26T02:01:44.203Z",
+  "sourceSha": "886278c36ab6196e4877cd49ecd39b0b292d1bcf",
   "overall": "open",
   "gates": [
     {
@@ -178,7 +178,7 @@
       "state": "proven",
       "label": "Live Wiki candidate fallback content matrix",
       "evidencePath": "evaluation\\llm-wiki-candidate-content-matrix-2026-08-25\\report.json",
-      "detail": "Current-source and production stateless fallback candidates pass 5/5 chemical, hot-work, confined-space, forklift, and foreign-worker fall scenarios with four non-empty sections, textual hazard grounding, and reviewer-visible source grounding. The measured live remediation moves visible evidence traces, KOSHA technical/official-source boundaries, and current-law candidate boundaries from 0/5 to 5/5 without legal overclaim. The enhanced LLM probe remains explicitly blocked 0/5 by distributed admission before AI generation; this gate does not claim enhanced LLM quality or read the production candidate queue. Human review remains incomplete, publication is disallowed, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus Supabase RLS remain APPROVAL_GATED.",
+      "detail": "Current-source and production stateless fallback candidates pass 5/5 chemical, hot-work, confined-space, forklift, and foreign-worker fall scenarios with four non-empty sections, textual hazard grounding, and reviewer-visible source grounding. Visible evidence roles move 0/5 to 5/5, and explicit safe original-event review facts separately move 0/5 to 5/5 while private event-term exposure remains 0. Arbitrary raw payload is not accepted as reviewer-visible context. The enhanced LLM probe remains explicitly blocked 0/5 by distributed admission before AI generation; this gate does not claim enhanced LLM quality or read the production candidate queue. Human review remains incomplete, publication is disallowed, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus Supabase RLS remain APPROVAL_GATED.",
       "nextActions": [
         "Configure distributed provider admission, then rerun the five-scenario provider matrix without weakening fail-closed admission."
       ]
