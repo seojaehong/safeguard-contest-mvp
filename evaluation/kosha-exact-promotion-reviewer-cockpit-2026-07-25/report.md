@@ -20,6 +20,9 @@ Verdict: `PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY`
 - Live progress region: true
 - Candidate position labels: true
 - Mobile candidate progress visible: true
+- Visible draft persistence status: true
+- Draft restore status visible: true
+- Draft save failure visible: true
 - Mobile candidate scroll snap: true
 - Selected candidate auto reveal: true
 - Readable evidence cues: true

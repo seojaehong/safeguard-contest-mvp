@@ -20,6 +20,7 @@ Verdict: `PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY`
 - Candidate navigation readability: true
 - Evidence reading hierarchy: true
 - Mobile candidate progress visibility: true
+- Draft persistence visibility: true
 - Evidence page receipts visible: true
 - Draft fingerprint contains source identity: true
 - Live progress status: true
