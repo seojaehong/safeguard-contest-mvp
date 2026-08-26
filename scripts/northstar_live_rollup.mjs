@@ -67,6 +67,7 @@ const ARTIFACTS = Object.freeze({
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-selected-workbench-2026-08-14", "report.json"),
   hermesKnowledgeReviewEvidenceInspector: path.join("evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json"),
   hermesReviewEventFactTraceability: path.join("evaluation", "hermes-knowledge-review-event-facts-2026-08-26", "report.json"),
+  hermesReviewTraceBlocks: path.join("evaluation", "hermes-knowledge-review-trace-blocks-2026-08-26", "report.json"),
   hermesOpenclawRuntime: path.join("evaluation", "hermes-openclaw-runtime-current-gate-2026-07-20", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
@@ -557,6 +558,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const hermesKnowledgeReviewAuthorityUi = tryReadJson(rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
   const hermesKnowledgeReviewEvidenceInspector = tryReadJson(rootDir, ARTIFACTS.hermesKnowledgeReviewEvidenceInspector);
   const hermesReviewEventFactTraceability = tryReadJson(rootDir, ARTIFACTS.hermesReviewEventFactTraceability);
+  const hermesReviewTraceBlocks = tryReadJson(rootDir, ARTIFACTS.hermesReviewTraceBlocks);
   const hermesOpenclawRuntime = tryReadJson(rootDir, ARTIFACTS.hermesOpenclawRuntime);
   const liveDocumentSecondaryGrounding = tryReadJson(rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
   const liveDocumentSeedProfileIsolation = tryReadJson(rootDir, ARTIFACTS.liveDocumentSeedProfileIsolation);
@@ -685,6 +687,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_knowledge_review_ui", ARTIFACTS.hermesKnowledgeReviewAuthorityUi, hermesKnowledgeReviewAuthorityUi),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_review_evidence_inspector", ARTIFACTS.hermesKnowledgeReviewEvidenceInspector, hermesKnowledgeReviewEvidenceInspector),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_review_event_fact_traceability", ARTIFACTS.hermesReviewEventFactTraceability, hermesReviewEventFactTraceability),
+    evidenceStatus(rootDir, currentHead, liveCommit, "hermes_review_trace_blocks", ARTIFACTS.hermesReviewTraceBlocks, hermesReviewTraceBlocks),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_remote_durable_ledger", ARTIFACTS.hermesOpenclawRuntime, hermesOpenclawRuntime),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_secondary_grounding", ARTIFACTS.liveDocumentSecondaryGrounding, liveDocumentSecondaryGrounding),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_seed_profile_isolation", ARTIFACTS.liveDocumentSeedProfileIsolation, liveDocumentSeedProfileIsolation),
@@ -1786,6 +1789,29 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       supabaseRlsLaunchIsolation: asString(recordAt(hermesReviewEventFactTraceability, "remainingBoundaries")?.supabaseRlsLaunchIsolation),
       providerDispatchPersistence: asString(recordAt(hermesReviewEventFactTraceability, "remainingBoundaries")?.providerDispatchPersistence),
     },
+    hermesReviewTraceBlocks: {
+      artifact: ARTIFACTS.hermesReviewTraceBlocks,
+      verdict: isRecord(hermesReviewTraceBlocks) ? asString(hermesReviewTraceBlocks.verdict) : "missing",
+      sourceHead: isRecord(hermesReviewTraceBlocks) ? asString(hermesReviewTraceBlocks.sourceHead) : "",
+      productCommit: isRecord(hermesReviewTraceBlocks) ? asString(hermesReviewTraceBlocks.productCommit) : "",
+      productionCommit: extractProductionCommit(hermesReviewTraceBlocks),
+      beforePassed: asNumber(recordAt(hermesReviewTraceBlocks, "beforeLive")?.passedCount),
+      beforeViewportCount: asNumber(recordAt(hermesReviewTraceBlocks, "beforeLive")?.viewportCount),
+      localPassed: asNumber(recordAt(hermesReviewTraceBlocks, "local")?.passedCount),
+      localViewportCount: asNumber(recordAt(hermesReviewTraceBlocks, "local")?.viewportCount),
+      livePassed: asNumber(recordAt(hermesReviewTraceBlocks, "afterLive")?.passedCount),
+      liveViewportCount: asNumber(recordAt(hermesReviewTraceBlocks, "afterLive")?.viewportCount),
+      resolvedTraceCount: asNumber(recordAt(hermesReviewTraceBlocks, "traceabilityContract")?.resolvedTraceCount),
+      unresolvedTraceCount: asNumber(recordAt(hermesReviewTraceBlocks, "traceabilityContract")?.unresolvedTraceCount),
+      scopedFixtureHazardCount: asNumber(recordAt(hermesReviewTraceBlocks, "traceabilityContract")?.scopedFixtureHazardCount),
+      allHazardsClosed: recordAt(hermesReviewTraceBlocks, "traceabilityContract")?.allHazardsClosed === true,
+      allDocumentsClosed: recordAt(hermesReviewTraceBlocks, "traceabilityContract")?.allDocumentsClosed === true,
+      humanReviewCompleted: recordAt(hermesReviewTraceBlocks, "traceabilityContract")?.humanReviewCompleted === true,
+      exactSavedShareVerdict: asString(recordAt(hermesReviewTraceBlocks, "remainingBoundaries")?.exactSavedShareVerdict),
+      llmWikiPublication: asString(recordAt(hermesReviewTraceBlocks, "remainingBoundaries")?.llmWikiPublication),
+      supabaseRlsLaunchIsolation: asString(recordAt(hermesReviewTraceBlocks, "remainingBoundaries")?.supabaseRlsLaunchIsolation),
+      providerDispatchPersistence: asString(recordAt(hermesReviewTraceBlocks, "remainingBoundaries")?.providerDispatchPersistence),
+    },
     kosha: {
       artifact: ARTIFACTS.kosha,
       verdict: isRecord(kosha) ? asString(kosha.verdict) : "missing",
@@ -2117,6 +2143,13 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Before/local/live viewport passes: ${rollup.hermesReviewEventFactTraceability.beforePassed ?? 0}/${rollup.hermesReviewEventFactTraceability.beforeViewportCount ?? 0}, ${rollup.hermesReviewEventFactTraceability.localPassed ?? 0}/${rollup.hermesReviewEventFactTraceability.localViewportCount ?? 0}, ${rollup.hermesReviewEventFactTraceability.livePassed ?? 0}/${rollup.hermesReviewEventFactTraceability.liveViewportCount ?? 0}`,
     `- Bound/orphan/private facts: ${rollup.hermesReviewEventFactTraceability.boundFactCount ?? 0}/${rollup.hermesReviewEventFactTraceability.orphanFactCount ?? 0}/${rollup.hermesReviewEventFactTraceability.privateEventTextExposed}`,
     `- This reviewer-support proof does not close full hazard-to-control-to-document-to-evidence traceability. Human review completed=${rollup.hermesReviewEventFactTraceability.humanReviewCompleted}; exact saved Share=${rollup.hermesReviewEventFactTraceability.exactSavedShareVerdict || "MISSING_EVIDENCE"}; Wiki/RLS/provider persistence=${rollup.hermesReviewEventFactTraceability.llmWikiPublication || "APPROVAL_GATED"}/${rollup.hermesReviewEventFactTraceability.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}/${rollup.hermesReviewEventFactTraceability.providerDispatchPersistence || "APPROVAL_GATED"}`,
+    "",
+    "## Live Hermes Hazard-to-Evidence Trace Blocks",
+    "",
+    `- Verdict: \`${rollup.hermesReviewTraceBlocks.verdict}\``,
+    `- Before/local/live viewport passes: ${rollup.hermesReviewTraceBlocks.beforePassed ?? 0}/${rollup.hermesReviewTraceBlocks.beforeViewportCount ?? 0}, ${rollup.hermesReviewTraceBlocks.localPassed ?? 0}/${rollup.hermesReviewTraceBlocks.localViewportCount ?? 0}, ${rollup.hermesReviewTraceBlocks.livePassed ?? 0}/${rollup.hermesReviewTraceBlocks.liveViewportCount ?? 0}`,
+    `- Resolved/unresolved/scoped hazards: ${rollup.hermesReviewTraceBlocks.resolvedTraceCount ?? 0}/${rollup.hermesReviewTraceBlocks.unresolvedTraceCount ?? 0}/${rollup.hermesReviewTraceBlocks.scopedFixtureHazardCount ?? 0}`,
+    `- All hazards/documents closed=${rollup.hermesReviewTraceBlocks.allHazardsClosed}/${rollup.hermesReviewTraceBlocks.allDocumentsClosed}; human review completed=${rollup.hermesReviewTraceBlocks.humanReviewCompleted}; exact saved Share=${rollup.hermesReviewTraceBlocks.exactSavedShareVerdict || "MISSING_EVIDENCE"}; Wiki/RLS/provider persistence=${rollup.hermesReviewTraceBlocks.llmWikiPublication || "APPROVAL_GATED"}/${rollup.hermesReviewTraceBlocks.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}/${rollup.hermesReviewTraceBlocks.providerDispatchPersistence || "APPROVAL_GATED"}`,
     "",
     "## Hermes Remote Durable Ledger",
     "",

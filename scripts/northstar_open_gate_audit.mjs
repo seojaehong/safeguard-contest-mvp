@@ -87,6 +87,7 @@ const EVIDENCE_PATHS = Object.freeze({
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-selected-workbench-2026-08-14", "report.json"),
   hermesKnowledgeReviewEvidenceInspector: path.join("evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json"),
   hermesReviewEventFactTraceability: path.join("evaluation", "hermes-knowledge-review-event-facts-2026-08-26", "report.json"),
+  hermesReviewTraceBlocks: path.join("evaluation", "hermes-knowledge-review-trace-blocks-2026-08-26", "report.json"),
   hermesOpenclawRuntime: path.join("evaluation", "hermes-openclaw-runtime-current-gate-2026-07-20", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
@@ -6854,6 +6855,98 @@ function evaluateHermesReviewEventFactTraceabilityGate(rootDir) {
 
 /**
  * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateHermesReviewTraceBlocksGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.hermesReviewTraceBlocks;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "hermes_review_trace_blocks",
+      label: "Hermes review hazard-to-evidence trace blocks",
+      state: "missing",
+      evidencePath,
+      detail: "Hermes review hazard-to-evidence trace-block evidence is missing.",
+      nextActions: ["Run the bounded authenticated trace-block probe against local and live production."],
+    });
+  }
+
+  const beforeLive = isRecord(report.beforeLive) ? report.beforeLive : {};
+  const local = isRecord(report.local) ? report.local : {};
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const contract = isRecord(report.traceabilityContract) ? report.traceabilityContract : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const security = isRecord(report.securityBoundary) ? report.securityBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.ontologyPublicationPerformed === false
+    && mutation.vectorOrEmbeddingMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = report.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_BLOCKS"
+    && productCommit !== ""
+    && productionCommit !== ""
+    && isGitAncestor(rootDir, productCommit)
+    && isGitAncestor(rootDir, productionCommit)
+    && beforeLive.verdict === "RED_HERMES_REVIEW_TRACE_BLOCKS"
+    && beforeLive.viewportCount === 8
+    && beforeLive.passedCount === 0
+    && beforeLive.failedCount === 8
+    && beforeLive.panelCount === 0
+    && beforeLive.resolvedTraceCount === 0
+    && local.verdict === "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_TRACE_BLOCKS"
+    && local.viewportCount === 8
+    && local.passedCount === 8
+    && local.failedCount === 0
+    && afterLive.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_BLOCKS"
+    && afterLive.viewportCount === 8
+    && afterLive.passedCount === 8
+    && afterLive.failedCount === 0
+    && afterLive.productionAligned === true
+    && afterLive.browserErrorCount === 0
+    && contract.expectedTraceCount === 1
+    && contract.panelCount === 1
+    && contract.resolvedTraceCount === 1
+    && contract.unresolvedTraceCount === 0
+    && contract.hazardBound === true
+    && contract.controlsBound === true
+    && contract.primaryDocumentsBound === true
+    && contract.evidenceRowsBound === true
+    && contract.insideCandidatePane === true
+    && contract.approvalFailsClosedWhenIncomplete === true
+    && contract.humanReviewCompleted === false
+    && contract.publicationState === "unpublished"
+    && contract.beforePanelCount === 0
+    && contract.beforeResolvedTraceCount === 0
+    && contract.scopedFixtureHazardCount === 1
+    && contract.allHazardsClosed === false
+    && contract.allDocumentsClosed === false
+    && contract.machineEvidenceReplacesHumanReview === false
+    && noMutation
+    && security.immutableOriginal18FindingBaselinePreserved === true
+    && remaining.exactSavedShareVerdict === "MISSING_EVIDENCE"
+    && remaining.llmWikiPublication === "APPROVAL_GATED"
+    && remaining.supabaseRlsLaunchIsolation === "APPROVAL_GATED"
+    && remaining.providerDispatchPersistence === "APPROVAL_GATED";
+
+  return gateResult({
+    id: "hermes_review_trace_blocks",
+    label: "Hermes review hazard-to-evidence trace blocks",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live Hermes review trace blocks move from 0/8 to 8/8 and bind one scoped hazard to canonical controls, primary document targets, and an exact reviewer evidence row. Approval fails closed for incomplete traces. This is not all-hazard or all-document closure; human review remains incomplete, publication stays unpublished, the immutable 18-finding baseline is preserved, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED."
+      : `Hermes review trace blocks are contradicted: verdict=${readString(report.verdict) || "missing"}, before=${readString(beforeLive.verdict) || "missing"}, local=${readString(local.verdict) || "missing"}, live=${readString(afterLive.verdict) || "missing"}, resolved=${String(contract.resolvedTraceCount)}, unresolved=${String(contract.unresolvedTraceCount)}, allHazards=${String(contract.allHazardsClosed)}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass ? [] : ["Restore complete scoped trace binding, approval fail-closed behavior, no-mutation, human-review, and approval boundaries, then rerun local and live probes."],
+  });
+}
+
+/**
+ * @param {string} rootDir
  * @param {string} gateId
  * @param {string[]} governedPaths
  */
@@ -9741,6 +9834,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir),
     evaluateHermesKnowledgeReviewEvidenceInspectorGate(rootDir),
     evaluateHermesReviewEventFactTraceabilityGate(rootDir),
+    evaluateHermesReviewTraceBlocksGate(rootDir),
     evaluateLiveDocumentSecondaryGroundingGate(rootDir),
     evaluateLiveDocumentSeedProfileIsolationGate(rootDir),
     evaluateUiDocumentsShareCockpitGate(rootDir),

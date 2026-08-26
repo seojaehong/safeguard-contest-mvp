@@ -538,6 +538,22 @@ type NextRunwayReport = {
     humanReviewCompleted: boolean;
     exactSavedShareVerdict: string;
   };
+  hermesReviewTraceBlocks: {
+    verdict: string;
+    beforePassed: number;
+    beforeViewportCount: number;
+    localPassed: number;
+    localViewportCount: number;
+    livePassed: number;
+    liveViewportCount: number;
+    resolvedTraceCount: number;
+    unresolvedTraceCount: number;
+    scopedFixtureHazardCount: number;
+    allHazardsClosed: boolean;
+    allDocumentsClosed: boolean;
+    humanReviewCompleted: boolean;
+    exactSavedShareVerdict: string;
+  };
   liveDocumentSeedProfileIsolation: {
     verdict: string;
     sourceHead: string;
@@ -2811,6 +2827,29 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       providerDispatchPersistence: "APPROVAL_GATED",
     },
   });
+  writeJson(root, "evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_BLOCKS",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-product",
+    productionCommit: "fixture-sha",
+    beforeLive: { viewportCount: 8, passedCount: 0, failedCount: 8 },
+    local: { viewportCount: 8, passedCount: 8, failedCount: 0 },
+    afterLive: { viewportCount: 8, passedCount: 8, failedCount: 0 },
+    traceabilityContract: {
+      resolvedTraceCount: 1,
+      unresolvedTraceCount: 0,
+      scopedFixtureHazardCount: 1,
+      allHazardsClosed: false,
+      allDocumentsClosed: false,
+      humanReviewCompleted: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+    },
+  });
   writeJson(root, "evaluation/document-export-capability-truth-2026-08-17/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH",
     sourceHead: "fixture-sha",
@@ -4466,6 +4505,23 @@ describe("northstar next runway generator", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.provenCurrentState).toContain("hermes_review_event_fact_traceability");
+    expect(report.hermesReviewTraceBlocks).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_BLOCKS",
+      beforePassed: 0,
+      beforeViewportCount: 8,
+      localPassed: 8,
+      localViewportCount: 8,
+      livePassed: 8,
+      liveViewportCount: 8,
+      resolvedTraceCount: 1,
+      unresolvedTraceCount: 0,
+      scopedFixtureHazardCount: 1,
+      allHazardsClosed: false,
+      allDocumentsClosed: false,
+      humanReviewCompleted: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.provenCurrentState).toContain("hermes_review_trace_blocks");
 
     expect(report.provenCurrentState).not.toContain("llm_wiki_candidate_content_readiness");
     expect(report.llmWikiCandidateContentReadiness.llmWikiPublication).toBe("PASS");
