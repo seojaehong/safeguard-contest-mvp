@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `a103ff5037535d6eca500a978ebb80b4d7eee7af`
+Source HEAD: `8eac8508b8fcd6af4ec7d7fe485ece029798ee31`
 
-Production `/api/build-info`: `a103ff5037535d6eca500a978ebb80b4d7eee7af`
+Production `/api/build-info`: `f98d83995152394dbb2e76d018003299bc1d6b7a`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `none`
+Source pending changed paths: `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-authority-day-desktop-1440x900.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-authority-day-desktop-short-1440x723.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-authority-day-mobile-390x844.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-authority-day-mobile-short-390x723.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-authority-night-desktop-1440x900.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-authority-night-desktop-short-1440x723.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-authority-night-mobile-390x844.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-authority-night-mobile-short-390x723.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-candidate-subject-day-desktop-1440x900.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-candidate-subject-day-desktop-short-1440x723.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-candidate-subject-day-mobile-390x844.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-candidate-subject-day-mobile-short-390x723.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-candidate-subject-night-desktop-1440x900.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-candidate-subject-night-desktop-short-1440x723.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-candidate-subject-night-mobile-390x844.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-candidate-subject-night-mobile-short-390x723.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-evidence-readability-day-desktop-1440x900.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-evidence-readability-day-desktop-short-1440x723.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-evidence-readability-day-mobile-390x844.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-evidence-readability-day-mobile-short-390x723.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-evidence-readability-night-desktop-1440x900.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-evidence-readability-night-desktop-short-1440x723.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-evidence-readability-night-mobile-390x844.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/knowledge-review-evidence-readability-night-mobile-short-390x723.png`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/report.json`, `evaluation/hermes-review-subject-context-2026-08-27/after-live/report.md`, `evaluation/hermes-review-subject-context-2026-08-27/report.json`, `evaluation/hermes-review-subject-context-2026-08-27/report.md`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-open-gate-audit.test.ts`
 
-Current head is evidence-only pending: `false`
+Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `a103ff5037535d6eca500a978ebb80b4d7eee7af`
+Live rollup source head: `8eac8508b8fcd6af4ec7d7fe485ece029798ee31`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `8eac8508b8fcd6af4ec7d7fe485ece029798ee31` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `f98d83995152394dbb2e76d018003299bc1d6b7a`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
