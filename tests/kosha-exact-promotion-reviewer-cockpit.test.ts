@@ -203,6 +203,10 @@ describe("KOSHA exact promotion reviewer cockpit", () => {
     expect(result.html).toContain("normalizedTextSha256: receipt.normalizedTextSha256");
     expect(result.html).toContain("data-export disabled");
     expect(result.html).toContain("검토 JSON 내보내기 · 64개 입력 필요");
+    expect(result.html).toContain("data-next-incomplete");
+    expect(result.html).toContain("다음 미완료 후보");
+    expect(result.html).toContain("completedInputs(state[index]) < 8");
+    expect(result.html).toContain('selectMobileMode(panels[nextIndex], "review")');
     expect(result.html).toContain("기계 근거는 검토를 돕지만 판단을 대신하지 않습니다.");
   });
 

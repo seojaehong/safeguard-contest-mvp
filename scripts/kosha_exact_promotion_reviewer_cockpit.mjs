@@ -458,6 +458,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
     <div class="footer-actions">
       <p class="sr-only" role="status" aria-live="polite" data-progress-live>64개 입력이 남았습니다.</p>
       <button type="button" data-reset title="이 브라우저에 저장된 입력을 모두 지웁니다">입력 초기화</button>
+      <button type="button" data-next-incomplete>다음 미완료 후보</button>
       <button class="primary" type="button" data-export disabled>검토 JSON 내보내기 · 64개 입력 필요</button>
     </div>
   </div>
@@ -550,6 +551,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
       const candidateList = document.querySelector(".candidate-list");
       const candidateContext = document.querySelector("[data-candidate-context]");
       const exportButton = document.querySelector("[data-export]");
+      const nextIncompleteButton = document.querySelector("[data-next-incomplete]");
       const progressLive = document.querySelector("[data-progress-live]");
       const draftStatus = document.querySelector("[data-draft-status]");
       const mobileBreakpoint = window.matchMedia("(max-width: 767px)");
@@ -607,6 +609,10 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
         exportButton.textContent = completeCount === payload.checklistInputCount
           ? "검토 JSON 내보내기"
           : "검토 JSON 내보내기 · " + (payload.checklistInputCount - completeCount) + "개 입력 필요";
+        nextIncompleteButton.disabled = completeCount === payload.checklistInputCount;
+        nextIncompleteButton.textContent = completeCount === payload.checklistInputCount
+          ? "모든 후보 입력 완료"
+          : "다음 미완료 후보";
         const progressMessage = completeCount === payload.checklistInputCount
           ? "필수 입력 64개가 모두 완료되었습니다."
           : completeCount + "개 완료, " + (payload.checklistInputCount - completeCount) + "개 입력이 남았습니다.";
@@ -699,6 +705,16 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
         if (!window.confirm("이 브라우저에 저장된 KOSHA 검토 입력을 모두 지울까요?")) return;
         state = emptyState();
         render("로컬 초안 · 입력 초기화됨");
+      });
+      nextIncompleteButton.addEventListener("click", () => {
+        const selectedIndex = buttons.findIndex((button) => button.getAttribute("aria-selected") === "true");
+        const nextIndex = Array.from({ length: state.length }, (_, offset) => (selectedIndex + offset + 1) % state.length)
+          .find((index) => completedInputs(state[index]) < 8);
+        if (nextIndex === undefined) return;
+        selectCandidate(nextIndex, true);
+        if (mobileBreakpoint.matches) {
+          selectMobileMode(panels[nextIndex], "review");
+        }
       });
       exportButton.addEventListener("click", () => {
         if (exportButton.disabled) return;
@@ -804,6 +820,7 @@ export function runReviewerCockpit(options) {
       visibleDraftPersistenceStatus: true,
       draftRestoreStatusVisible: true,
       draftSaveFailureVisible: true,
+      nextIncompleteCandidateNavigation: true,
       mobileCandidateScrollSnap: true,
       selectedCandidateAutoReveal: true,
       readableEvidenceCues: true,
@@ -838,6 +855,7 @@ Verdict: \`${report.verdict}\`
 - Visible draft persistence status: ${report.accessibilityContract.visibleDraftPersistenceStatus}
 - Draft restore status visible: ${report.accessibilityContract.draftRestoreStatusVisible}
 - Draft save failure visible: ${report.accessibilityContract.draftSaveFailureVisible}
+- Next incomplete candidate navigation: ${report.accessibilityContract.nextIncompleteCandidateNavigation}
 - Mobile candidate scroll snap: ${report.accessibilityContract.mobileCandidateScrollSnap}
 - Selected candidate auto reveal: ${report.accessibilityContract.selectedCandidateAutoReveal}
 - Readable evidence cues: ${report.accessibilityContract.readableEvidenceCues}

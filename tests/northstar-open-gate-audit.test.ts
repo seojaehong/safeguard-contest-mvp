@@ -5381,6 +5381,7 @@ function createFixtureRoot(): string {
       visibleDraftPersistenceStatus: true,
       draftRestoreStatusVisible: true,
       draftSaveFailureVisible: true,
+      nextIncompleteCandidateNavigation: true,
       mobileCandidateScrollSnap: true,
       selectedCandidateAutoReveal: true,
       readableEvidenceCues: true,
@@ -5459,6 +5460,7 @@ function createFixtureRoot(): string {
     evidenceReadingHierarchyPass: true,
     mobileCandidateProgressVisibilityPass: true,
     draftPersistenceVisibilityPass: true,
+    nextIncompleteNavigationPass: true,
     draftStorageIdentity: {
       sameFingerprintPreserved: true,
       sourceIdentityPresent: true,
@@ -5471,6 +5473,8 @@ function createFixtureRoot(): string {
       restoredDraftStatus: "로컬 초안 · 저장된 입력 복원됨",
       staleDraftStatus: "로컬 초안 · 이전 초안 제외 · 빈 상태 저장됨",
       saveFailureStatus: "로컬 초안 · 저장 실패 · 입력은 현재 화면에만 유지",
+      nextIncompleteInitialSelectedIndex: 1,
+      nextIncompleteSkippedCompletedIndex: 2,
       titleReconciliationAccess: {
         candidateVisible: true,
         officialCurrentTitleVisible: true,
@@ -5528,6 +5532,8 @@ function createFixtureRoot(): string {
         ? null
         : { fullyVisibleInsidePane: true },
       exportInitiallyDisabled: true,
+      nextIncompleteVisible: true,
+      nextIncompleteInitiallyEnabled: true,
       horizontalOverflow: false,
     })),
     mutationBoundary: {
@@ -9267,6 +9273,32 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     };
     browser.draftPersistenceVisibilityPass = false;
     browser.results[1]!.draftStatusVisible = false;
+    writeJson(rootDir, path.relative(rootDir, browserPath), browser);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("contradicted");
+  });
+
+  it("fails closed when the KOSHA reviewer cockpit cannot navigate to the next incomplete candidate", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const browserPath = path.join(
+      rootDir,
+      "evaluation",
+      "kosha-exact-promotion-reviewer-cockpit-2026-07-25",
+      "browser-report.json",
+    );
+    const browser = JSON.parse(fs.readFileSync(browserPath, "utf8")) as {
+      nextIncompleteNavigationPass: boolean;
+      draftStorageIdentity: { nextIncompleteSkippedCompletedIndex: number };
+    };
+    browser.nextIncompleteNavigationPass = false;
+    browser.draftStorageIdentity.nextIncompleteSkippedCompletedIndex = 1;
     writeJson(rootDir, path.relative(rootDir, browserPath), browser);
 
     const audit = buildNorthstarOpenGateAudit({

@@ -178,6 +178,10 @@ export async function runBrowserProbe(options) {
             .every((paragraph) => (paragraph.textContent || "").trim().length > 0),
           exportInitiallyDisabled: element("[data-export]") instanceof HTMLButtonElement
             && element("[data-export]").disabled,
+          nextIncompleteVisible: element("[data-next-incomplete]") instanceof HTMLButtonElement
+            && element("[data-next-incomplete]").getClientRects().length > 0,
+          nextIncompleteInitiallyEnabled: element("[data-next-incomplete]") instanceof HTMLButtonElement
+            && !element("[data-next-incomplete]").disabled,
           firstEvidenceBottom: rectangle(".evidence-group")?.bottom ?? null,
           firstEvidenceReceiptBottom: rectangle("[data-evidence-receipt]")?.bottom ?? null,
           firstEvidenceReadingCueBottom: rectangle(".evidence-reading-cue")?.bottom ?? null,
@@ -253,6 +257,23 @@ export async function runBrowserProbe(options) {
     const staleExportDisabled = await storagePage.isDisabled("[data-export]");
     const staleDraftNotice = (await storagePage.textContent("[data-progress-live]")) || "";
     const staleDraftStatus = (await storagePage.textContent("[data-draft-status]")) || "";
+    await storagePage.click("[data-next-incomplete]");
+    const nextIncompleteInitialSelectedIndex = await storagePage.evaluate(() => (
+      [...document.querySelectorAll("[data-candidate-button]")]
+        .findIndex((button) => button.getAttribute("aria-selected") === "true")
+    ));
+    for (let checkIndex = 0; checkIndex < 5; checkIndex += 1) {
+      await storagePage.check(`[data-check="1:${checkIndex}"]`);
+    }
+    await storagePage.fill("[data-reviewer='1']", "검토자");
+    await storagePage.fill("[data-reviewed-at='1']", "2026-08-27T10:30");
+    await storagePage.check("[data-human-confirm='1']");
+    await storagePage.click('[data-candidate-button="0"]');
+    await storagePage.click("[data-next-incomplete]");
+    const nextIncompleteSkippedCompletedIndex = await storagePage.evaluate(() => (
+      [...document.querySelectorAll("[data-candidate-button]")]
+        .findIndex((button) => button.getAttribute("aria-selected") === "true")
+    ));
     await storagePage.click('[data-candidate-button="2"]');
     const titleReconciliationAccess = await storagePage.evaluate(() => {
       const panel = document.querySelector('[data-candidate-panel="2"]');
@@ -279,6 +300,8 @@ export async function runBrowserProbe(options) {
       changedDraftStatus,
       restoredDraftStatus,
       staleDraftStatus,
+      nextIncompleteInitialSelectedIndex,
+      nextIncompleteSkippedCompletedIndex,
     };
     draftStorageIdentity.titleReconciliationAccess = titleReconciliationAccess;
     draftStorageIdentity.titleReconciliationScreenshot = path.relative(options.rootDir, titleReconciliationScreenshot);
@@ -440,6 +463,12 @@ export async function runBrowserProbe(options) {
     && row.draftStatusText.startsWith("로컬 초안 ·")
   ))
     && draftStorageIdentityPass;
+  const nextIncompleteNavigationPass = results.every((row) => (
+    row.nextIncompleteVisible === true
+    && row.nextIncompleteInitiallyEnabled === true
+  ))
+    && draftStorageIdentity?.nextIncompleteInitialSelectedIndex === 1
+    && draftStorageIdentity?.nextIncompleteSkippedCompletedIndex === 2;
   const verdict = allRowsPass
     && desktopPass
     && mobilePass
@@ -450,6 +479,7 @@ export async function runBrowserProbe(options) {
     && evidenceReadingHierarchyPass
     && mobileCandidateProgressVisibilityPass
     && draftPersistenceVisibilityPass
+    && nextIncompleteNavigationPass
     ? "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY"
     : "RED_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY";
   const report = {
@@ -468,6 +498,7 @@ export async function runBrowserProbe(options) {
     evidenceReadingHierarchyPass,
     mobileCandidateProgressVisibilityPass,
     draftPersistenceVisibilityPass,
+    nextIncompleteNavigationPass,
     draftStorageIdentity,
     results,
     mutationBoundary: {
@@ -508,6 +539,7 @@ Verdict: \`${report.verdict}\`
 - Evidence reading hierarchy: ${report.evidenceReadingHierarchyPass}
 - Mobile candidate progress visibility: ${report.mobileCandidateProgressVisibilityPass}
 - Draft persistence visibility: ${report.draftPersistenceVisibilityPass}
+- Next incomplete navigation: ${report.nextIncompleteNavigationPass}
 - Evidence page receipts visible: ${results.every((row) => row.evidenceReceiptCount >= 24)}
 - Draft fingerprint contains source identity: ${report.draftStorageIdentity?.sourceIdentityPresent}
 - Live progress status: ${results.every((row) => row.progressLiveRole === "status" && row.progressLiveMode === "polite")}
