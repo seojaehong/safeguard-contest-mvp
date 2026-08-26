@@ -147,6 +147,14 @@ export function getSafetyKnowledgeHazardTitles(hazardIds: readonly string[]): st
     .map((hazard) => hazard.title);
 }
 
+export function getSafetyKnowledgeHazardsByIds(hazardIds: readonly string[]): SafetyKnowledgeHazard[] {
+  const hazardById = new Map(typedHazards.map((hazard) => [hazard.id, hazard]));
+  return [...new Set(hazardIds)].flatMap((hazardId) => {
+    const hazard = hazardById.get(hazardId);
+    return hazard ? [hazard] : [];
+  });
+}
+
 export function getSafetyKnowledgeTemplates() {
   return typedTemplates;
 }

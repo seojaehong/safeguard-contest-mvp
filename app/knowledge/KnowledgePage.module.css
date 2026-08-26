@@ -479,6 +479,58 @@
   padding: var(--space-3) 0;
 }
 
+.reviewTraceability {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  border-block: 1px solid var(--workspace-rule, #e2e5e9);
+  padding: var(--space-3) 0;
+}
+
+.reviewTraceability > div,
+.reviewTraceability li {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.reviewTraceability > div {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+}
+
+.reviewTraceability > div span,
+.reviewTraceability li span {
+  color: var(--workspace-muted, #606873);
+}
+
+.reviewTraceability ol {
+  display: grid;
+  gap: var(--space-2);
+  max-height: 180px;
+  margin: 0;
+  padding-left: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.reviewTraceability > p {
+  margin: 0;
+  color: var(--workspace-danger, #b42318);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+}
+
+.reviewTraceability strong,
+.reviewTraceability span {
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+}
+
+.reviewTraceability[data-review-traceability="incomplete"] > div span,
+.reviewTraceability [data-review-trace="unresolved"] > strong {
+  color: var(--workspace-danger, #b42318);
+}
+
 .reviewEventFacts > div {
   display: flex;
   align-items: baseline;

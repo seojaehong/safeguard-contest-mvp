@@ -79,6 +79,17 @@ const queueItem = {
       "worker-phone: 010-9876-5432"
     ]
   }],
+  traceItems: [{
+    id: "trace-fall-scaffold",
+    hazardId: "fall-scaffold",
+    hazardTitle: "비계·고소작업 추락",
+    controls: ["작업발판·난간·바퀴 잠금 확인", "안전대와 안전모 착용 확인"],
+    primaryDocuments: ["위험성평가표", "TBM 브리핑"],
+    evidenceIds: ["evidence-5555555555555555"],
+    resolved: true,
+    unresolvedReviewItems: [] as string[]
+  }],
+  traceabilityComplete: true,
   reviewContract: {
     contractVersion: "knowledge-candidate-review.v1",
     status: "human_review_required",
@@ -128,6 +139,13 @@ const secondQueueItem: typeof queueItem = {
   candidateLabel: "작업계획서 현장 지식 검토",
   candidateText: "양중 작업구역을 분리하고 신호수 배치 상태를 검토합니다.",
   matchedHazardCount: 2,
+  traceItems: [{
+    ...queueItem.traceItems[0],
+    resolved: false,
+    evidenceIds: [],
+    unresolvedReviewItems: ["missing_bound_evidence"]
+  }],
+  traceabilityComplete: false,
   contentReadiness: {
     ...queueItem.contentReadiness,
     status: "revision_required",
@@ -238,10 +256,20 @@ describe("knowledge review inbox browser", () => {
     expect(await inbox.getByText(queueItem.candidateText).isVisible()).toBe(false);
     expect(await inbox.getByText("위험 2").isVisible()).toBe(true);
     expect(await inbox.locator('[data-review-content-readiness="revision_required"]').count()).toBe(1);
+    const incompleteTraceability = inbox.locator('[data-review-traceability="incomplete"]');
+    expect(await incompleteTraceability.count()).toBe(1);
+    expect(await incompleteTraceability.locator('[data-review-trace="unresolved"]').count()).toBe(1);
+    expect(await incompleteTraceability.textContent()).toContain("근거 미연결");
     expect(await inbox.getByRole("button", { name: "후보 승인" }).isDisabled()).toBe(true);
     await inbox.getByRole("tab", { name: /위험성평가표 현장 지식 검토/u }).click();
     expect(await inbox.locator('[data-review-content-readiness="ready_for_human_review"]').count()).toBe(1);
     expect(await inbox.getByRole("button", { name: "후보 승인" }).isDisabled()).toBe(false);
+    const traceability = inbox.locator('[data-review-traceability="complete"]');
+    expect(await traceability.count()).toBe(1);
+    expect(await traceability.locator('[data-review-trace="resolved"]').count()).toBe(1);
+    expect(await traceability.textContent()).toContain("비계·고소작업 추락");
+    expect(await traceability.textContent()).toContain("위험성평가표");
+    expect(await traceability.textContent()).toContain("현장 전용 이력");
 
     const evidenceTab = inbox.getByRole("tab", { name: "근거 5", exact: true });
     await evidenceTab.click();

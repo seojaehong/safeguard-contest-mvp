@@ -12,6 +12,7 @@ import {
   readCurrentSourceBoundCandidate,
   type KnowledgeReviewSourceEventRow
 } from "@/lib/knowledge-review-prepare";
+import { getSafetyKnowledgeHazardsByIds } from "@/lib/safety-knowledge";
 import {
   buildKnowledgeCandidateReviewContract,
   evaluateKnowledgeCandidateContentReadiness,
@@ -54,6 +55,8 @@ export type KnowledgeReviewInboxPresentationDto = {
   matchedHazardCount: number;
   providerLabel: string | null;
   evidenceItems: KnowledgeReviewEvidenceItem[];
+  traceItems: KnowledgeReviewTraceItem[];
+  traceabilityComplete: boolean;
   reviewContract: Pick<
     KnowledgeCandidateReviewContract,
     | "contractVersion"
@@ -82,6 +85,17 @@ export type KnowledgeReviewEvidenceItem = {
   metadata: Array<{ label: string; value: string }>;
   publicUrl: string | null;
   reviewFacts: string[];
+};
+
+export type KnowledgeReviewTraceItem = {
+  id: string;
+  hazardId: string;
+  hazardTitle: string;
+  controls: string[];
+  primaryDocuments: string[];
+  evidenceIds: string[];
+  resolved: boolean;
+  unresolvedReviewItems: string[];
 };
 
 const KNOWLEDGE_REVIEW_EVIDENCE_LIMIT = 20;
@@ -164,6 +178,73 @@ function buildKnowledgeReviewEvidenceItems(input: {
       - KNOWLEDGE_REVIEW_AUTHORITY_ORDER.indexOf(right.authorityId)
     ))
     .slice(0, KNOWLEDGE_REVIEW_EVIDENCE_LIMIT);
+}
+
+const TRACE_DOCUMENT_LABELS: Record<string, string> = {
+  riskAssessment: "위험성평가표",
+  workPlan: "작업계획서",
+  tbmBriefing: "TBM 브리핑",
+  tbmLog: "TBM 기록",
+  safetyEducation: "안전보건교육",
+  emergencyResponse: "비상대응 절차",
+  photoEvidence: "사진 증빙",
+  foreignWorkerBriefing: "외국인 근로자 안내문",
+  foreignWorkerTransmission: "외국인 근로자 전파문",
+  dispatch: "현장 전파"
+};
+
+function buildKnowledgeReviewTraceItems(input: {
+  candidate: NonNullable<ReturnType<typeof readCurrentSourceBoundCandidate>>;
+  rawEvents: ReturnType<typeof buildKnowledgeReviewSourceSnapshot>["rawEvents"];
+  evidenceItems: KnowledgeReviewEvidenceItem[];
+}): KnowledgeReviewTraceItem[] {
+  const evidenceByDigest = new Map(input.evidenceItems.map((item) => [item.digest.slice("sha256:".length), item.id]));
+  const evidenceIdsByHazard = new Map<string, Set<string>>();
+  input.candidate.provenance.forEach((provenance, index) => {
+    const evidenceId = evidenceByDigest.get(provenance.eventReference.digest.slice(0, 16));
+    if (!evidenceId) return;
+    for (const hazardId of input.rawEvents[index]?.relatedHazardIds ?? []) {
+      const ids = evidenceIdsByHazard.get(hazardId) ?? new Set<string>();
+      ids.add(evidenceId);
+      evidenceIdsByHazard.set(hazardId, ids);
+    }
+  });
+  const knownHazards = getSafetyKnowledgeHazardsByIds(input.candidate.matchedHazardIds);
+  const knownIds = new Set(knownHazards.map((hazard) => hazard.id));
+  const traces = knownHazards.map((hazard) => {
+    const evidenceIds = [...(evidenceIdsByHazard.get(hazard.id) ?? [])];
+    const controls = [...new Set(hazard.controls.map((item) => item.trim()).filter(Boolean))].slice(0, 4);
+    const primaryDocuments = [...new Set(hazard.primaryDocuments.map((item) => TRACE_DOCUMENT_LABELS[item] ?? item))].slice(0, 4);
+    const unresolvedReviewItems = [
+      ...(controls.length === 0 ? ["missing_controls"] : []),
+      ...(primaryDocuments.length === 0 ? ["missing_primary_documents"] : []),
+      ...(evidenceIds.length === 0 ? ["missing_bound_evidence"] : [])
+    ];
+    return {
+      id: `trace-${hazard.id}`,
+      hazardId: hazard.id,
+      hazardTitle: hazard.title,
+      controls,
+      primaryDocuments,
+      evidenceIds,
+      resolved: unresolvedReviewItems.length === 0,
+      unresolvedReviewItems
+    } satisfies KnowledgeReviewTraceItem;
+  });
+  for (const hazardId of input.candidate.matchedHazardIds) {
+    if (knownIds.has(hazardId)) continue;
+    traces.push({
+      id: `trace-unresolved-${traces.length + 1}`,
+      hazardId: "unresolved",
+      hazardTitle: "등록되지 않은 위험요인",
+      controls: [],
+      primaryDocuments: [],
+      evidenceIds: [...(evidenceIdsByHazard.get(hazardId) ?? [])],
+      resolved: false,
+      unresolvedReviewItems: ["unknown_hazard", "missing_controls", "missing_primary_documents"]
+    });
+  }
+  return traces.slice(0, 20);
 }
 
 export type KnowledgeReviewFailureUpdates = {
@@ -419,6 +500,12 @@ export async function loadKnowledgeReviewInbox(
       ? readCurrentSourceBoundCandidate(run.generated_output, sourceBinding.snapshot)
       : null;
     const reviewContract = candidate ? buildKnowledgeCandidateReviewContract(candidate) : null;
+    const evidenceItems = candidate && sourceBinding
+      ? buildKnowledgeReviewEvidenceItems({ candidate, rawEvents: sourceBinding.rawEvents })
+      : [];
+    const traceItems = candidate && sourceBinding
+      ? buildKnowledgeReviewTraceItems({ candidate, rawEvents: sourceBinding.rawEvents, evidenceItems })
+      : [];
     return {
       runId: run.id,
       status: run.status as KnowledgeReviewInboxPresentationDto["status"],
@@ -428,9 +515,12 @@ export async function loadKnowledgeReviewInbox(
       candidateText: candidate?.generatedText ?? "",
       matchedHazardCount: candidate?.matchedHazardIds.length ?? 0,
       providerLabel: candidate?.providerLabel ?? null,
-      evidenceItems: candidate && sourceBinding
-        ? buildKnowledgeReviewEvidenceItems({ candidate, rawEvents: sourceBinding.rawEvents })
-        : [],
+      evidenceItems,
+      traceItems,
+      traceabilityComplete: Boolean(candidate)
+        && traceItems.length === candidate?.matchedHazardIds.length
+        && traceItems.length > 0
+        && traceItems.every((item) => item.resolved),
       reviewContract: reviewContract ? {
         contractVersion: reviewContract.contractVersion,
         status: reviewContract.status,
@@ -1090,6 +1180,26 @@ export async function applyKnowledgeReviewAction(
       code: "review_candidate_revision_required",
       message: "필수 섹션과 근거 준비도를 충족한 후보만 승인할 수 있습니다."
     });
+  }
+  if (runIsActionable && request.action === "approve_candidate") {
+    const evidenceItems = buildKnowledgeReviewEvidenceItems({
+      candidate: currentCandidate,
+      rawEvents: sourceBinding.rawEvents
+    });
+    const traceItems = buildKnowledgeReviewTraceItems({
+      candidate: currentCandidate,
+      rawEvents: sourceBinding.rawEvents,
+      evidenceItems
+    });
+    if (traceItems.length !== currentCandidate.matchedHazardIds.length
+      || traceItems.length === 0
+      || traceItems.some((item) => !item.resolved)) {
+      throw new KnowledgeReviewError({
+        status: 409,
+        code: "review_candidate_traceability_incomplete",
+        message: "위험요인, 통제대책, 반영 문서와 근거 연결이 완성된 후보만 승인할 수 있습니다."
+      });
+    }
   }
 
   const eventById = new Map((events ?? []).map((event) => [event.id, event]));

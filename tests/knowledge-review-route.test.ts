@@ -43,7 +43,7 @@ function makeReadClient(
       title: "현장 검토 이벤트",
       url: "https://private.example/token-secret",
       payload: { workerNote: "raw-secret" },
-      related_hazard_ids: ["hazard-fall"],
+      related_hazard_ids: ["fall-scaffold"],
       reflected_documents: ["위험성평가표"],
       review_status: "pending_review",
       created_at: "2026-07-15T00:01:00.000Z"
@@ -88,7 +88,11 @@ function makeReadClient(
     const candidate = buildKnowledgeCandidate({
       question: `원본 이벤트 ${sourceEvents.length}건 기반 현장 지식 후보 검토`,
       rawEvents: sourceBinding.rawEvents,
-      matchedHazardIds: [],
+      matchedHazardIds: [...new Set(sourceEvents.flatMap((event) => (
+        Array.isArray(event.related_hazard_ids)
+          ? event.related_hazard_ids.filter((item): item is string => typeof item === "string")
+          : []
+      )))],
       generatedText: "현장 안전 지식 후보를 검토합니다.",
       providerLabel: typeof run.provider === "string" ? run.provider : null,
       tenantContext: { organizationId: run.organization_id, siteId: run.site_id }
@@ -311,6 +315,17 @@ describe("knowledge review GET", () => {
     expect(payload.queue[0].evidenceItems).toHaveLength(1);
     expect(payload.queue[0].evidenceItems[0].id).toMatch(/^evidence-[0-9a-f]{16}$/u);
     expect(payload.queue[0].evidenceItems[0].digest).toMatch(/^sha256:[0-9a-f]{16}$/u);
+    expect(payload.queue[0].traceabilityComplete).toBe(true);
+    expect(payload.queue[0].traceItems).toEqual([
+      expect.objectContaining({
+        hazardId: "fall-scaffold",
+        hazardTitle: "비계·고소작업 추락",
+        resolved: true,
+        evidenceIds: [payload.queue[0].evidenceItems[0].id]
+      })
+    ]);
+    expect(payload.queue[0].traceItems[0].controls.length).toBeGreaterThan(0);
+    expect(payload.queue[0].traceItems[0].primaryDocuments).toContain("위험성평가표");
     for (const forbidden of [
       "현장 검토 이벤트",
       "manual-1",
@@ -363,7 +378,7 @@ describe("knowledge review GET", () => {
         title: "산업안전보건법 제38조",
         url: "https://www.law.go.kr/법령/산업안전보건법",
         payload: { article: "제38조", internalNote: "law-raw-secret" },
-        related_hazard_ids: ["hazard-fall"],
+        related_hazard_ids: ["fall-scaffold"],
         reflected_documents: ["위험성평가표"],
         review_status: "pending_review",
         created_at: "2026-07-15T00:00:00.000Z"
@@ -386,7 +401,7 @@ describe("knowledge review GET", () => {
             "worker-phone: 010-9876-5432"
           ]
         },
-        related_hazard_ids: ["hazard-fall"],
+        related_hazard_ids: ["fall-scaffold"],
         reflected_documents: ["위험성평가표"],
         review_status: "pending_review",
         created_at: "2026-07-15T00:01:00.000Z"

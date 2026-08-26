@@ -15,6 +15,8 @@ type ReviewInboxItem = {
   sourceEventCount: number;
   matchedHazardCount: number;
   evidenceItems: ReviewEvidenceItem[];
+  traceItems: ReviewTraceItem[];
+  traceabilityComplete: boolean;
   reviewContract: {
     contractVersion: "knowledge-candidate-review.v1";
     status: "human_review_required";
@@ -63,6 +65,17 @@ type ReviewEvidenceItem = {
   metadata: Array<{ label: string; value: string }>;
   publicUrl: string | null;
   reviewFacts: string[];
+};
+
+type ReviewTraceItem = {
+  id: string;
+  hazardId: string;
+  hazardTitle: string;
+  controls: string[];
+  primaryDocuments: string[];
+  evidenceIds: string[];
+  resolved: boolean;
+  unresolvedReviewItems: string[];
 };
 
 type ReviewAuthorityId =
@@ -270,6 +283,42 @@ function evidenceMatchesReviewContract(
   return REVIEW_AUTHORITY_PRESENTATION.every(({ id }) => counts[id] === reviewContract.sourceRoleCounts[id]);
 }
 
+function readTraceItem(value: unknown, evidenceIds: ReadonlySet<string>): ReviewTraceItem | null {
+  if (!isRecord(value)) return null;
+  const id = readString(value.id, 160);
+  const hazardId = readString(value.hazardId, 128);
+  const hazardTitle = readString(value.hazardTitle, 160);
+  const readList = (input: unknown, maxItems: number, maxLength: number): string[] => (
+    Array.isArray(input)
+      ? [...new Set(input.flatMap((item) => {
+          const text = readString(item, maxLength);
+          return text ? [text] : [];
+        }))].slice(0, maxItems)
+      : []
+  );
+  const controls = readList(value.controls, 4, 180);
+  const primaryDocuments = readList(value.primaryDocuments, 4, 80);
+  const traceEvidenceIds = readList(value.evidenceIds, 20, 160)
+    .filter((evidenceId) => evidenceIds.has(evidenceId));
+  const unresolvedReviewItems = readList(value.unresolvedReviewItems, 8, 96);
+  const resolved = value.resolved === true
+    && controls.length > 0
+    && primaryDocuments.length > 0
+    && traceEvidenceIds.length > 0
+    && unresolvedReviewItems.length === 0;
+  if (!id || !hazardId || !hazardTitle || typeof value.resolved !== "boolean") return null;
+  return {
+    id,
+    hazardId,
+    hazardTitle,
+    controls,
+    primaryDocuments,
+    evidenceIds: traceEvidenceIds,
+    resolved,
+    unresolvedReviewItems: resolved ? [] : (unresolvedReviewItems.length > 0 ? unresolvedReviewItems : ["invalid_trace_binding"])
+  };
+}
+
 function readContentReadiness(value: unknown): ReviewContentReadiness | null {
   if (!isRecord(value) || !Array.isArray(value.sections) || !Array.isArray(value.unresolvedReviewItems)) return null;
   const sectionIds = ["hazard_summary", "document_targets", "controls", "review_items"] as const;
@@ -355,6 +404,14 @@ function parseInboxItem(value: unknown): ReviewInboxItem | null {
   const evidenceItems = Array.isArray(value.evidenceItems)
     ? value.evidenceItems.map(readEvidenceItem).filter((item): item is ReviewEvidenceItem => item !== null).slice(0, 20)
     : [];
+  const evidenceIds = new Set(evidenceItems.map((item) => item.id));
+  const traceItems = Array.isArray(value.traceItems)
+    ? value.traceItems.map((item) => readTraceItem(item, evidenceIds)).filter((item): item is ReviewTraceItem => item !== null).slice(0, 20)
+    : [];
+  const traceabilityComplete = value.traceabilityComplete === true
+    && traceItems.length === matchedHazardCount
+    && traceItems.length > 0
+    && traceItems.every((item) => item.resolved);
 
   if (
     !candidateLabel
@@ -373,6 +430,8 @@ function parseInboxItem(value: unknown): ReviewInboxItem | null {
     sourceEventCount,
     matchedHazardCount,
     evidenceItems,
+    traceItems,
+    traceabilityComplete,
     reviewContract,
     contentReadiness
   };
@@ -730,6 +789,34 @@ export function KnowledgeReviewInbox() {
                               </p>
                             </section>
                           ) : null}
+                          <section
+                            className={styles.reviewTraceability}
+                            aria-label="위험요인 종단 추적"
+                            data-review-traceability={item.traceabilityComplete ? "complete" : "incomplete"}
+                          >
+                            <div>
+                              <strong>위험요인 종단 추적</strong>
+                              <span>{item.traceabilityComplete ? "근거 연결 완료" : "승인 전 연결 필요"}</span>
+                            </div>
+                            {item.traceItems.length > 0 ? (
+                              <ol>
+                                {item.traceItems.map((trace) => (
+                                  <li key={trace.id} data-review-trace={trace.resolved ? "resolved" : "unresolved"}>
+                                    <strong>{trace.hazardTitle}</strong>
+                                    <span>조치 {trace.controls.join(" · ") || "누락"}</span>
+                                    <span>문서 {trace.primaryDocuments.join(" · ") || "누락"}</span>
+                                    <span>
+                                      근거 {trace.evidenceIds.map((evidenceId) => (
+                                        item.evidenceItems.find((evidence) => evidence.id === evidenceId)?.sourceLabel
+                                      )).filter(Boolean).join(" · ") || "미연결"}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ol>
+                            ) : (
+                              <p data-review-trace="unresolved">연결된 위험요인 근거가 없습니다. 후보를 다시 준비해 주세요.</p>
+                            )}
+                          </section>
                           {candidatePresentation.eventFacts.length > 0 ? (
                             <section
                               className={styles.reviewEventFacts}
@@ -803,8 +890,12 @@ export function KnowledgeReviewInbox() {
                     <div className={styles.reviewActions} role="group" aria-label="검토 결정" aria-busy={pending}>
                       <button
                         type="button"
-                        disabled={pending || item.contentReadiness?.status !== "ready_for_human_review"}
-                        title={item.contentReadiness?.status === "revision_required" ? "필수 섹션과 근거 준비도를 먼저 보완해야 합니다." : undefined}
+                        disabled={pending || item.contentReadiness?.status !== "ready_for_human_review" || !item.traceabilityComplete}
+                        title={!item.traceabilityComplete
+                          ? "위험요인, 통제대책, 반영 문서와 근거 연결을 먼저 확인해야 합니다."
+                          : item.contentReadiness?.status === "revision_required"
+                            ? "필수 섹션과 근거 준비도를 먼저 보완해야 합니다."
+                            : undefined}
                         onClick={() => void submit(item.runId, "approve_candidate")}
                       >후보 승인</button>
                       <button type="button" disabled={pending} onClick={() => void submit(item.runId, "keep_site_only")}>현장 전용 유지</button>

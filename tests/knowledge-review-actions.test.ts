@@ -22,6 +22,7 @@ type FakeOptions = {
   additionalRuns?: Array<Record<string, unknown>>;
   beforeRunUpdate?: (run: Record<string, unknown>) => void;
   beforeEventUpdate?: (events: Array<Record<string, unknown>>, attempt: number) => void;
+  traceHazardIds?: [string, string];
 };
 
 type FakeQueryResult = {
@@ -30,6 +31,7 @@ type FakeQueryResult = {
 };
 
 function makeReviewClient(options: FakeOptions = {}) {
+  const traceHazardIds = options.traceHazardIds ?? ["fall-scaffold", "forklift-traffic"];
   const events: Array<Record<string, unknown>> = [
     {
       id: "event-1",
@@ -43,7 +45,7 @@ function makeReviewClient(options: FakeOptions = {}) {
       review_status: "pending_review",
       proposed_wiki_update: { existingKey: "event-one" },
       payload: { rawSecret: "preserve-one" },
-      related_hazard_ids: ["hazard-1"],
+      related_hazard_ids: [traceHazardIds[0]],
       reflected_documents: ["위험성평가표"]
     },
     {
@@ -58,7 +60,7 @@ function makeReviewClient(options: FakeOptions = {}) {
       review_status: "pending_review",
       proposed_wiki_update: { existingKey: "event-two" },
       payload: { rawSecret: "preserve-two" },
-      related_hazard_ids: ["hazard-2"],
+      related_hazard_ids: [traceHazardIds[1]],
       reflected_documents: ["위험성평가표"]
     }
   ];
@@ -70,7 +72,7 @@ function makeReviewClient(options: FakeOptions = {}) {
   const candidate = buildKnowledgeCandidate({
     question: "원본 이벤트 2건 기반 현장 지식 후보 검토",
     rawEvents: sourceBinding.rawEvents,
-    matchedHazardIds: ["hazard-1", "hazard-2"],
+    matchedHazardIds: traceHazardIds,
     generatedText: [
       "1) 위험요인 요약: 현장 추락 및 충돌 위험",
       "2) 문서 반영 위치: 위험성평가표와 TBM 브리핑",
@@ -1164,6 +1166,27 @@ describe("knowledge review actions", () => {
       ok: true,
       action: "keep_site_only"
     });
+  });
+
+  it("fails candidate approval closed when a hazard lacks canonical control and document traceability", async () => {
+    const fake = makeReviewClient({ traceHazardIds: ["unregistered-hazard-a", "unregistered-hazard-b"] });
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "approve_candidate" }
+    )).rejects.toMatchObject({
+      status: 409,
+      code: "review_candidate_traceability_incomplete",
+      compensationRequired: false
+    });
+    expect(fake.updates).toHaveLength(0);
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "keep_site_only" }
+    )).resolves.toMatchObject({ ok: true, action: "keep_site_only" });
   });
 
   it("resumes only the final run update after all events were safely reviewed", async () => {

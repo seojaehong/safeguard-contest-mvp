@@ -29,7 +29,7 @@ function makeCandidate(runId: string): KnowledgeCandidate {
     title: "작업자 홍길동 서명 포함 원문",
     url: "https://private.example/photo.jpg?signature=secret",
     payload: { residentNumber: "secret", photo: "base64-secret", signature: "secret" },
-    relatedHazardIds: ["hazard-fall"],
+    relatedHazardIds: ["fall-scaffold"],
     reflectedDocuments: ["위험성평가표"]
   }, { organizationId: "org-1", siteId: "site-1" });
   return {
@@ -44,14 +44,14 @@ function makeCandidate(runId: string): KnowledgeCandidate {
     dbMutationAllowed: false,
     dbMutationPerformed: false,
     publishAllowed: false,
-    question: "원본 이벤트 1건 기반 현장 지식 후보 검토",
+    question: "원본 이벤트 1건 기반 비계·고소작업 추락 현장 지식 후보 검토",
     generatedText: [
       "1) 위험요인 요약: 작업발판 단부 추락 위험",
       "2) 문서 반영 위치: 위험성평가표와 TBM 브리핑",
       "3) 통제대책: 추락 방지 난간 상태를 작업 전 확인",
       "4) 검수 필요 항목: 현장 책임자가 실제 설치 상태 확인"
     ].join("\n"),
-    matchedHazardIds: ["hazard-fall"],
+    matchedHazardIds: ["fall-scaffold"],
     tenantContext: { organizationId: "org-1", siteId: "site-1" },
     provenance: [provenance]
   };
@@ -81,7 +81,7 @@ function makeClient(options: FakeOptions = {}) {
     title: "작업자 홍길동 서명 포함 원문",
     url: "https://private.example/photo.jpg?signature=secret",
     payload: { residentNumber: "secret", photo: "base64-secret", signature: "secret" },
-    related_hazard_ids: ["hazard-fall"],
+    related_hazard_ids: ["fall-scaffold"],
     reflected_documents: ["위험성평가표"],
     review_status: "pending_review",
     proposed_wiki_update: {},
@@ -206,7 +206,7 @@ describe("knowledge review candidate preparation", () => {
       }
     });
     expect(JSON.stringify(result)).not.toMatch(/홍길동|residentNumber|base64-secret|signature=secret/u);
-    expect(builderQuestion).toBe("원본 이벤트 1건 기반 현장 지식 후보 검토");
+    expect(builderQuestion).toBe("원본 이벤트 1건 기반 비계·고소작업 추락 현장 지식 후보 검토");
     expect(builderQuestion).not.toContain("홍길동");
     expect(fake.calls).toContainEqual({
       table: "knowledge_regeneration_runs",
