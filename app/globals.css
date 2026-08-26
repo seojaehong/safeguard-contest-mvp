@@ -20149,6 +20149,10 @@ body:has(.safeclaw-landing) :is(
   letter-spacing: var(--tracking-body);
 }
 
+.safeclaw-document-review-storage-status[data-status="error"] {
+  color: #9a3d18;
+}
+
 @media (max-width: 760px) {
   .safeclaw-document-review-dialog {
     width: calc(100vw - 16px);

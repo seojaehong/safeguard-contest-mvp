@@ -5029,6 +5029,7 @@ function evaluateDocumentEditorialReviewCockpitGate(rootDir) {
   const acceptance = isRecord(report.acceptanceContract) ? report.acceptanceContract : {};
   const reviewBoundary = isRecord(report.reviewBoundary) ? report.reviewBoundary : {};
   const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const storageFailureProbe = isRecord(report.storageFailureProbe) ? report.storageFailureProbe : {};
   const results = Array.isArray(report.results) ? report.results.filter(isRecord) : [];
   const desktopRows = results.filter((row) => readNumber(row.width) === 1440 && readNumber(row.height) === 723);
   const mobileRows = results.filter((row) => readNumber(row.width) === 390 && readNumber(row.height) === 723);
@@ -5042,9 +5043,15 @@ function evaluateDocumentEditorialReviewCockpitGate(rootDir) {
       && before.includesRiskAssessment === true
       && readNumber(before.checkboxCount) === 5
       && before.horizontalOverflow === false
+      && readString(before.storageStatus) === "empty"
       && after.currentWorkpackUnchanged === true
+      && readNumber(after.reviewerStorageKeyCount) === 1
+      && readString(after.storageStatus) === "saved"
       && readNumber(after.apiRequestCount) === 0
-      && readNumber(after.dialogScrollTop) === 0;
+      && readNumber(after.dialogScrollTop) === 0
+      && readString(row.afterReload?.storageStatus) === "restored"
+      && readString(row.afterReload?.reviewerInputValue) === "자동 검증 검토자"
+      && readString(row.afterReload?.persistedReviewer) === "자동 검증 검토자";
   });
   const accessibilityPass = results.length === 4 && results.every((row) => {
     const accessibility = isRecord(row.accessibility) ? row.accessibility : {};
@@ -5078,6 +5085,11 @@ function evaluateDocumentEditorialReviewCockpitGate(rootDir) {
     && reviewBoundary.humanReviewCompleted === false
     && reviewBoundary.localCompletionIsApproval === false
     && reviewBoundary.broadHumanWordingReviewRequired === true;
+  const storagePass = report.storageFailureProbePass === true
+    && readString(storageFailureProbe.verdict) === "PASS"
+    && readString(storageFailureProbe.status) === "error"
+    && storageFailureProbe.visible === true
+    && readString(storageFailureProbe.message).includes("복원하거나 저장할 수 없습니다");
   const contractPass = readNumber(acceptance.canonicalDocumentCount) === 12
     && acceptance.includesRiskAssessment === true
     && readNumber(acceptance.reviewerCheckCount) === 5
@@ -5086,6 +5098,9 @@ function evaluateDocumentEditorialReviewCockpitGate(rootDir) {
     && acceptance.bodyHeightUnchangedWhileOpen === true
     && acceptance.longCopyContained === true
     && acceptance.reviewStateStoredSeparately === true
+    && acceptance.reviewerHydrationDoesNotOverwriteStorage === true
+    && acceptance.storageLifecycleVisible === true
+    && acceptance.storageFailureVisible === true
     && acceptance.editedTextInvalidatesCompletion === true
     && acceptance.automaticReviewCannotClaimHumanCompletion === true
     && acceptance.keyboardRovingTabNavigation === true
@@ -5179,6 +5194,7 @@ function evaluateDocumentEditorialReviewCockpitGate(rootDir) {
     && geometryPass
     && contractPass
     && boundaryPass
+    && storagePass
     && noMutation
     && receiptPass;
 
@@ -5188,7 +5204,7 @@ function evaluateDocumentEditorialReviewCockpitGate(rootDir) {
       label: "Live 12-document human editorial review cockpit",
       state: "proven",
       evidencePath,
-      detail: "Live Day/Night desktop-short 1440x723 and mobile-short 390x723 pass 4/4 with 12 canonical documents including riskAssessmentDraft, five explicit reviewer checks, a three-zone desktop and one-column mobile cockpit, unchanged page-body height, local-scroll containment, separate stale-aware review storage, zero API calls, and no current-workpack mutation. All four cases also prove deterministic close-button entry focus, one selected and tabbable document tab, Arrow/Home roving navigation, a labelled tabpanel, and Escape focus restoration. A separate live desktop/mobile receipt contract proves a fail-closed local JSON export for 12 documents x 5 checks with current text fingerprints plus bound editorial finding IDs, categories, and fingerprints, a recorded self-attested reviewer, and zero API calls. It does not prove reviewer identity, server recording, completed human review, or approval: automatedInteractionOnly=true, humanReviewCompleted=false, broad human wording review remains required, and exact saved Share remains MISSING_EVIDENCE.",
+      detail: "Live Day/Night desktop-short 1440x723 and mobile-short 390x723 pass 4/4 with 12 canonical documents including riskAssessmentDraft, five explicit reviewer checks, a three-zone desktop and one-column mobile cockpit, unchanged page-body height, local-scroll containment, separate stale-aware review storage, zero API calls, and no current-workpack mutation. All four cases prove empty -> saved -> reload-restored storage state without overwriting the self-attested reviewer, while a separate mobile storage-denial probe fails visibly. They also prove deterministic close-button entry focus, one selected and tabbable document tab, Arrow/Home roving navigation, a labelled tabpanel, and Escape focus restoration. A separate live desktop/mobile receipt contract proves a fail-closed local JSON export for 12 documents x 5 checks with current text fingerprints plus bound editorial finding IDs, categories, and fingerprints, a recorded self-attested reviewer, and zero API calls. It does not prove reviewer identity, server recording, completed human review, or approval: automatedInteractionOnly=true, humanReviewCompleted=false, broad human wording review remains required, and exact saved Share remains MISSING_EVIDENCE.",
       nextActions: [
         "Use the cockpit for the separate human editorial review without treating automated geometry as human completion.",
         "Keep exact saved Share and every DB/provider/vector/wiki/KOSHA mutation behind their existing approval boundaries.",
@@ -5201,7 +5217,7 @@ function evaluateDocumentEditorialReviewCockpitGate(rootDir) {
     label: "Live 12-document human editorial review cockpit",
     state: "contradicted",
     evidencePath,
-    detail: `Cockpit verdict=${readString(report.verdict) || "unknown"}, live=${readNumber(report.pass)}/4, rowsPass=${rowsPass}, accessibilityPass=${accessibilityPass}, geometryPass=${geometryPass}, contractPass=${contractPass}, receiptPass=${receiptPass}, receiptFindingsBound=${receiptVerification.findingsBound === true}, receiptFindingCount=${readNumber(receiptVerification.editorialFindingCount)}, receiptFindingsReviewed=${receiptCompletion.editorialFindingsReviewed === true}, receiptHumanReviewCompleted=${receiptReviewBoundary.humanReviewCompleted === true}, receiptReviewerIdentityVerified=${receiptCompletion.reviewerIdentityVerified === true}, receiptServerRecorded=${receiptCompletion.serverRecorded === true}, receiptApprovalGranted=${receiptCompletion.approvalGranted === true}, sourceMatchesProduction=${sourceMatchesProduction}, humanReviewCompleted=${reviewBoundary.humanReviewCompleted === true}, exactShare=${readString(mutationBoundary.exactSavedShareVerdict) || "unknown"}, receiptExactShare=${readString(receiptMutationBoundary.exactSavedShareVerdict) || "unknown"}, noMutation=${noMutation}, receiptNoMutation=${receiptNoMutation}.`,
+    detail: `Cockpit verdict=${readString(report.verdict) || "unknown"}, live=${readNumber(report.pass)}/4, rowsPass=${rowsPass}, accessibilityPass=${accessibilityPass}, geometryPass=${geometryPass}, contractPass=${contractPass}, storagePass=${storagePass}, receiptPass=${receiptPass}, receiptFindingsBound=${receiptVerification.findingsBound === true}, receiptFindingCount=${readNumber(receiptVerification.editorialFindingCount)}, receiptFindingsReviewed=${receiptCompletion.editorialFindingsReviewed === true}, receiptHumanReviewCompleted=${receiptReviewBoundary.humanReviewCompleted === true}, receiptReviewerIdentityVerified=${receiptCompletion.reviewerIdentityVerified === true}, receiptServerRecorded=${receiptCompletion.serverRecorded === true}, receiptApprovalGranted=${receiptCompletion.approvalGranted === true}, sourceMatchesProduction=${sourceMatchesProduction}, humanReviewCompleted=${reviewBoundary.humanReviewCompleted === true}, exactShare=${readString(mutationBoundary.exactSavedShareVerdict) || "unknown"}, receiptExactShare=${readString(receiptMutationBoundary.exactSavedShareVerdict) || "unknown"}, noMutation=${noMutation}, receiptNoMutation=${receiptNoMutation}.`,
     nextActions: ["Restore the fail-closed review, accessibility, geometry, source/live, and no-mutation contracts before claiming the cockpit proven."],
   });
 }

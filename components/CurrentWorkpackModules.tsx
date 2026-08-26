@@ -228,6 +228,7 @@ type EditorialReviewEntry = {
   reviewedTextFingerprint: string | null;
 };
 type EditorialReviewState = Partial<Record<DocumentKey, EditorialReviewEntry>>;
+type EditorialReviewStorageStatus = "loading" | "empty" | "restored" | "saved" | "error";
 
 type EditorialReviewReceiptDocument = {
   key: DocumentKey;
@@ -1313,6 +1314,8 @@ function DocumentEditorialReviewDialog({
   const [reviewState, setReviewState] = useState<EditorialReviewState>({});
   const [reviewer, setReviewer] = useState("");
   const [loadedStorageKey, setLoadedStorageKey] = useState<string | null>(null);
+  const [storageStatus, setStorageStatus] = useState<EditorialReviewStorageStatus>("loading");
+  const hydratedStoragePairRef = useRef<string | null>(null);
   const editorialFindings = useMemo(() => buildEditorialDuplicateFindings(data), [data]);
   const findingsByDocument = useMemo(() => Object.fromEntries(launchDocuments.map((document) => [
     document.key,
@@ -1321,42 +1324,40 @@ function DocumentEditorialReviewDialog({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const storagePair = `${storageKey}|${reviewerStorageKey}`;
+    hydratedStoragePairRef.current = storagePair;
+    setStorageStatus("loading");
     try {
-      setReviewState(parseEditorialReviewState(window.localStorage.getItem(storageKey)));
+      const storedReview = window.localStorage.getItem(storageKey);
+      const storedReviewer = window.localStorage.getItem(reviewerStorageKey);
+      setReviewState(parseEditorialReviewState(storedReview));
+      setReviewer((storedReviewer || "").slice(0, 120));
+      setStorageStatus(storedReview !== null || Boolean(storedReviewer?.trim()) ? "restored" : "empty");
     } catch (error) {
-      console.warn("document editorial review state load failed", error);
+      console.warn("document editorial review storage load failed", error);
       setReviewState({});
+      setReviewer("");
+      setStorageStatus("error");
     }
     setLoadedStorageKey(storageKey);
-  }, [storageKey]);
+  }, [reviewerStorageKey, storageKey]);
 
   useEffect(() => {
     if (typeof window === "undefined" || loadedStorageKey !== storageKey) return;
+    const storagePair = `${storageKey}|${reviewerStorageKey}`;
+    if (hydratedStoragePairRef.current === storagePair) {
+      hydratedStoragePairRef.current = null;
+      return;
+    }
     try {
       window.localStorage.setItem(storageKey, JSON.stringify(reviewState));
-    } catch (error) {
-      console.warn("document editorial review state save failed", error);
-    }
-  }, [loadedStorageKey, reviewState, storageKey]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      setReviewer((window.localStorage.getItem(reviewerStorageKey) || "").slice(0, 120));
-    } catch (error) {
-      console.warn("document editorial reviewer load failed", error);
-      setReviewer("");
-    }
-  }, [reviewerStorageKey]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
       window.localStorage.setItem(reviewerStorageKey, reviewer);
+      setStorageStatus("saved");
     } catch (error) {
-      console.warn("document editorial reviewer save failed", error);
+      console.warn("document editorial review storage save failed", error);
+      setStorageStatus("error");
     }
-  }, [reviewer, reviewerStorageKey]);
+  }, [loadedStorageKey, reviewState, reviewer, reviewerStorageKey, storageKey]);
 
   useEffect(() => {
     const reviewedCount = launchDocuments.filter((document) => (
@@ -1733,6 +1734,23 @@ function DocumentEditorialReviewDialog({
             </button>
           </div>
           <section className="safeclaw-document-review-receipt" aria-label="문서 검토 영수증">
+            <small
+              className="safeclaw-document-review-storage-status"
+              data-status={storageStatus}
+              data-testid="document-editorial-review-storage-status"
+              role="status"
+              aria-live="polite"
+            >
+              {storageStatus === "loading"
+                ? "로컬 검토 기록을 확인하는 중입니다."
+                : storageStatus === "empty"
+                  ? "이 문서팩의 로컬 검토 기록이 없습니다."
+                  : storageStatus === "restored"
+                    ? "이 브라우저의 검토 기록과 검토자 정보를 복원했습니다."
+                    : storageStatus === "saved"
+                      ? "검토 기록과 검토자 정보를 이 브라우저에 저장했습니다."
+                      : "브라우저 저장소 오류로 검토 기록을 복원하거나 저장할 수 없습니다."}
+            </small>
             <label>
               <span>검토자</span>
               <input

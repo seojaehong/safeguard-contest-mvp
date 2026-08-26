@@ -332,6 +332,7 @@ function documentEditorialReviewCockpitSummary(review, receipt) {
   const reviewBoundary = recordAt(review, "reviewBoundary") || {};
   const mutationBoundary = recordAt(review, "mutationBoundary") || {};
   const productionBuild = recordAt(review, "productionBuild") || {};
+  const storageFailureProbe = recordAt(review, "storageFailureProbe") || {};
   const rows = Array.isArray(review.results) ? review.results.filter(isRecord) : [];
   const rowsPass = rows.length === 4 && rows.every((row) => {
     const before = recordAt(row, "beforeCompletion") || {};
@@ -343,9 +344,15 @@ function documentEditorialReviewCockpitSummary(review, receipt) {
       && before.includesRiskAssessment === true
       && asNumber(before.checkboxCount) === 5
       && before.horizontalOverflow === false
+      && asString(before.storageStatus) === "empty"
       && after.currentWorkpackUnchanged === true
+      && asNumber(after.reviewerStorageKeyCount) === 1
+      && asString(after.storageStatus) === "saved"
       && asNumber(after.apiRequestCount) === 0
-      && asNumber(after.dialogScrollTop) === 0;
+      && asNumber(after.dialogScrollTop) === 0
+      && asString(recordAt(row, "afterReload")?.storageStatus) === "restored"
+      && asString(recordAt(row, "afterReload")?.reviewerInputValue) === "자동 검증 검토자"
+      && asString(recordAt(row, "afterReload")?.persistedReviewer) === "자동 검증 검토자";
   });
   const desktopRows = rows.filter((row) => asNumber(row.width) === 1440 && asNumber(row.height) === 723);
   const mobileRows = rows.filter((row) => asNumber(row.width) === 390 && asNumber(row.height) === 723);
@@ -369,6 +376,10 @@ function documentEditorialReviewCockpitSummary(review, receipt) {
     && mutationBoundary.vectorRuntimeCalled === false
     && mutationBoundary.wikiPublished === false
     && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const storagePass = review.storageFailureProbePass === true
+    && asString(storageFailureProbe.verdict) === "PASS"
+    && asString(storageFailureProbe.status) === "error"
+    && storageFailureProbe.visible === true;
   const receiptProductionBuild = recordAt(receipt, "productionBuild") || {};
   const receiptVerification = recordAt(receipt, "receiptVerification") || {};
   const receiptCompletion = recordAt(receiptVerification, "reviewCompletion") || {};
@@ -442,12 +453,16 @@ function documentEditorialReviewCockpitSummary(review, receipt) {
     && acceptance.bodyHeightUnchangedWhileOpen === true
     && acceptance.longCopyContained === true
     && acceptance.reviewStateStoredSeparately === true
+    && acceptance.reviewerHydrationDoesNotOverwriteStorage === true
+    && acceptance.storageLifecycleVisible === true
+    && acceptance.storageFailureVisible === true
     && acceptance.editedTextInvalidatesCompletion === true
     && acceptance.automaticReviewCannotClaimHumanCompletion === true
     && acceptance.keyboardRovingTabNavigation === true
     && acceptance.screenReaderTabPanelContract === true
     && acceptance.escapeRestoresLaunchFocus === true
     && accessibilityRowsPassed === 4
+    && storagePass
     && reviewBoundary.automatedInteractionOnly === true
     && reviewBoundary.humanReviewCompleted === false
     && reviewBoundary.localCompletionIsApproval === false
@@ -470,6 +485,10 @@ function documentEditorialReviewCockpitSummary(review, receipt) {
     screenReaderTabPanelContract: acceptance.screenReaderTabPanelContract === true,
     escapeRestoresLaunchFocus: acceptance.escapeRestoresLaunchFocus === true,
     accessibilityRowsPassed,
+    reviewerHydrationDoesNotOverwriteStorage: acceptance.reviewerHydrationDoesNotOverwriteStorage === true,
+    storageLifecycleVisible: acceptance.storageLifecycleVisible === true,
+    storageFailureVisible: acceptance.storageFailureVisible === true,
+    storageFailureProbePass: storagePass,
     cockpitReady,
     receiptArtifact: ARTIFACTS.documentEditorialReviewReceipt,
     receiptVerdict: isRecord(receipt) ? asString(receipt.verdict) : "missing",
@@ -2028,6 +2047,7 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Verdict: \`${rollup.documentEditorialReviewCockpit.verdict}\``,
     `- Live geometry: pass=${rollup.documentEditorialReviewCockpit.livePassed}/4, fail=${rollup.documentEditorialReviewCockpit.liveFailed}; documents/checks=${rollup.documentEditorialReviewCockpit.canonicalDocumentCount}/${rollup.documentEditorialReviewCockpit.reviewerCheckCount}; desktop/mobile zones=${rollup.documentEditorialReviewCockpit.desktopZones}/${rollup.documentEditorialReviewCockpit.mobileColumns}`,
     `- Keyboard and screen reader: cases=${rollup.documentEditorialReviewCockpit.accessibilityRowsPassed}/4; roving tabs=${rollup.documentEditorialReviewCockpit.keyboardRovingTabNavigation}; labelled tabpanel=${rollup.documentEditorialReviewCockpit.screenReaderTabPanelContract}; Escape focus restore=${rollup.documentEditorialReviewCockpit.escapeRestoresLaunchFocus}; cockpit ready=${rollup.documentEditorialReviewCockpit.cockpitReady}`,
+    `- Browser-local persistence: reviewer hydration preserved=${rollup.documentEditorialReviewCockpit.reviewerHydrationDoesNotOverwriteStorage}; lifecycle visible=${rollup.documentEditorialReviewCockpit.storageLifecycleVisible}; failure visible=${rollup.documentEditorialReviewCockpit.storageFailureVisible}; denial probe=${rollup.documentEditorialReviewCockpit.storageFailureProbePass}`,
     `- Human review completed: ${rollup.documentEditorialReviewCockpit.humanReviewCompleted}; broad human wording review required: ${rollup.documentEditorialReviewCockpit.broadHumanWordingReviewRequired}`,
     `- Local review receipt: verdict=${rollup.documentEditorialReviewCockpit.receiptVerdict || "missing"}; ready=${rollup.documentEditorialReviewCockpit.receiptReady}; locked cases=${rollup.documentEditorialReviewCockpit.receiptLockedCases}/2; documents/checks=${rollup.documentEditorialReviewCockpit.receiptUniqueDocumentKeyCount}/${rollup.documentEditorialReviewCockpit.receiptReviewerCheckCount}; findings bound/count/reviewed=${rollup.documentEditorialReviewCockpit.receiptFindingsBound}/${rollup.documentEditorialReviewCockpit.receiptEditorialFindingCount}/${rollup.documentEditorialReviewCockpit.receiptEditorialFindingsReviewed}; API requests=${rollup.documentEditorialReviewCockpit.receiptApiRequestCount}`,
     `- Receipt boundary: reviewer self-attested=${rollup.documentEditorialReviewCockpit.reviewerSelfAttested}; identity verified=${rollup.documentEditorialReviewCockpit.reviewerIdentityVerified}; server recorded=${rollup.documentEditorialReviewCockpit.serverRecorded}; approval granted=${rollup.documentEditorialReviewCockpit.approvalGranted}; proves human identity=${rollup.documentEditorialReviewCockpit.localReceiptProvesHumanIdentity}`,

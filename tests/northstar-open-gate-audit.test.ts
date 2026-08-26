@@ -87,11 +87,19 @@ function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
       includesRiskAssessment: true,
       checkboxCount: 5,
       horizontalOverflow: false,
+      storageStatus: "empty",
     },
     afterCompletion: {
       currentWorkpackUnchanged: true,
+      reviewerStorageKeyCount: 1,
+      storageStatus: "saved",
       apiRequestCount: 0,
       dialogScrollTop: 0,
+    },
+    afterReload: {
+      storageStatus: "restored",
+      reviewerInputValue: "자동 검증 검토자",
+      persistedReviewer: "자동 검증 검토자",
     },
     accessibility: {
       initialFocusLabel: "문서 사람 검토 닫기",
@@ -120,6 +128,13 @@ function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
     total: 4,
     pass: 4,
     fail: 0,
+    storageFailureProbePass: true,
+    storageFailureProbe: {
+      verdict: "PASS",
+      status: "error",
+      visible: true,
+      message: "브라우저 저장소 오류로 검토 기록을 복원하거나 저장할 수 없습니다.",
+    },
     acceptanceContract: {
       canonicalDocumentCount: 12,
       includesRiskAssessment: true,
@@ -129,6 +144,9 @@ function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
       bodyHeightUnchangedWhileOpen: true,
       longCopyContained: true,
       reviewStateStoredSeparately: true,
+      reviewerHydrationDoesNotOverwriteStorage: true,
+      storageLifecycleVisible: true,
+      storageFailureVisible: true,
       editedTextInvalidatesCompletion: true,
       automaticReviewCannotClaimHumanCompletion: true,
       keyboardRovingTabNavigation: true,
@@ -5707,6 +5725,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("no current-workpack mutation");
     expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("Arrow/Home roving navigation");
     expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("Escape focus restoration");
+    expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("empty -> saved -> reload-restored");
+    expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("storage-denial probe fails visibly");
     expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("humanReviewCompleted=false");
     expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("fail-closed local JSON export");
     expect(audit.gates.find((gate) => gate.id === "document_editorial_review_cockpit")?.detail).toContain("does not prove reviewer identity");
@@ -6163,6 +6183,21 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
         (results[0].accessibility as Record<string, unknown>).escapeRestoresLaunchFocus = false;
       },
       detail: "accessibilityPass=false",
+    },
+    {
+      name: "a hidden storage failure",
+      mutate: (report: Record<string, unknown>) => {
+        (report.storageFailureProbe as Record<string, unknown>).visible = false;
+      },
+      detail: "storagePass=false",
+    },
+    {
+      name: "reviewer storage overwritten after reload",
+      mutate: (report: Record<string, unknown>) => {
+        const results = report.results as Array<Record<string, unknown>>;
+        (results[0].afterReload as Record<string, unknown>).persistedReviewer = "";
+      },
+      detail: "rowsPass=false",
     },
     {
       name: "a vector runtime mutation",

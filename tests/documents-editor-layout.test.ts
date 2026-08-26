@@ -216,6 +216,9 @@ describe("documents editor layout", () => {
       await page.getByTestId("document-editorial-review-launch").click();
       const dialog = page.getByTestId("document-editorial-review-dialog");
       await dialog.waitFor({ state: "visible" });
+      await expect.poll(() => dialog.getByTestId("document-editorial-review-storage-status").innerText()).toBe(
+        "이 문서팩의 로컬 검토 기록이 없습니다."
+      );
 
       const geometry = await dialog.evaluate((element) => {
         const rect = element.getBoundingClientRect();
@@ -305,7 +308,19 @@ describe("documents editor layout", () => {
       await dialog.getByRole("button", { name: "문서 사람 검토 닫기" }).click();
       await page.reload({ waitUntil: "networkidle" });
       await page.getByTestId("document-editorial-review-launch").click();
-      await page.getByTestId("document-editorial-review-dialog").getByLabel(/사람 검토 1\/12종 완료/u).waitFor({ state: "visible" });
+      const restoredDialog = page.getByTestId("document-editorial-review-dialog");
+      await restoredDialog.getByLabel(/사람 검토 1\/12종 완료/u).waitFor({ state: "visible" });
+      await expect.poll(() => restoredDialog.getByTestId("document-editorial-review-storage-status").innerText()).toBe(
+        "이 브라우저의 검토 기록과 검토자 정보를 복원했습니다."
+      );
+      expect(await restoredDialog.getByRole("textbox", { name: "검토자" }).inputValue()).toBe("현장 검토자");
+      const persistedReviewer = await page.evaluate(() => {
+        const reviewerKey = Object.keys(window.localStorage).find((key) => (
+          key.startsWith("safeclaw.documentEditorialReviewReviewer.v1:")
+        ));
+        return reviewerKey ? window.localStorage.getItem(reviewerKey) : null;
+      });
+      expect(persistedReviewer).toBe("현장 검토자");
 
       if (viewport.name === "desktop") {
         const currentDialog = page.getByTestId("document-editorial-review-dialog");
@@ -322,6 +337,30 @@ describe("documents editor layout", () => {
       await context.close();
     }
   }, 120_000);
+
+  it("shows a fail-visible status when local editorial review storage is unavailable", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const context = await browser.newContext({ viewport: { width: 390, height: 723 } });
+    await context.addInitScript(() => {
+      const originalSetItem = Storage.prototype.setItem;
+      Storage.prototype.setItem = function setItem(key: string, value: string) {
+        if (key.startsWith("safeclaw.documentEditorialReview")) {
+          throw new DOMException("storage blocked for test", "QuotaExceededError");
+        }
+        return originalSetItem.call(this, key, value);
+      };
+    });
+    const page = await context.newPage();
+    await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+    await page.getByTestId("document-editorial-review-launch").click();
+    const dialog = page.getByTestId("document-editorial-review-dialog");
+    await dialog.waitFor({ state: "visible" });
+    await dialog.getByRole("textbox", { name: "검토자" }).fill("저장 실패 검토자");
+    const storageStatus = dialog.getByTestId("document-editorial-review-storage-status");
+    await expect.poll(() => storageStatus.getAttribute("data-status")).toBe("error");
+    expect(await storageStatus.innerText()).toContain("복원하거나 저장할 수 없습니다");
+    await context.close();
+  }, 90_000);
 
   it("exports a complete local review receipt and relocks it when document text changes", async () => {
     if (!browser) throw new Error("Browser was not started");
