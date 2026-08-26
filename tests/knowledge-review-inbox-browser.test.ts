@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import type { Browser } from "playwright";
+import { chromium, type Browser } from "playwright";
 import {
   startIsolatedNextBrowserHarness,
   type IsolatedNextBrowserHarness
@@ -162,6 +162,12 @@ const secondQueueItem: typeof queueItem = {
 
 describe("knowledge review inbox browser", () => {
   beforeAll(async () => {
+    const externalBaseUrl = process.env.SAFECLAW_KNOWLEDGE_REVIEW_BASE_URL?.trim();
+    if (externalBaseUrl) {
+      baseUrl = externalBaseUrl.replace(/\/$/u, "");
+      browser = await chromium.launch({ headless: true });
+      return;
+    }
     harness = await startIsolatedNextBrowserHarness({
       slug: "knowledge-review-inbox",
       initialPath: "/knowledge?theme=day",
@@ -177,7 +183,11 @@ describe("knowledge review inbox browser", () => {
   }, 140_000);
 
   afterAll(async () => {
-    await harness?.stop();
+    if (harness) {
+      await harness.stop();
+    } else {
+      await browser?.close();
+    }
   }, 30_000);
 
   it("shows one selected mobile-safe candidate and submits the existing approval action", async () => {

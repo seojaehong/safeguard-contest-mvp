@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "safeclaw-hermes-evidence-digest-readability/v1",
+  "checkedAt": "2026-08-26T23:09:00+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_EVIDENCE_READABILITY_LIVE_PENDING",
+  "sourceHead": "5f3982a13fcde79d97c3d1acf7c998f85f5d14ef",
+  "productCommit": "5f3982a13fcde79d97c3d1acf7c998f85f5d14ef",
+  "scope": "Hermes and LLM Wiki knowledge-review candidate/evidence workbench presentation only",
+  "beforeLive": {
+    "sourceHead": "77de49e5c92824e6b78db4e0dacd605d6f3fa275",
+    "screenshot": "evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/after-live/knowledge-review-trace-matrix-day-desktop-short-1440x723.png",
+    "findingCount": 2,
+    "findings": [
+      "The evidence digest wrapped one character per line inside the narrow desktop-short evidence pane.",
+      "The four readiness cells compressed their Korean labels into narrow vertical fragments inside the candidate pane."
+    ]
+  },
+  "afterLocal": {
+    "sourceCommit": "5f3982a13fcde79d97c3d1acf7c998f85f5d14ef",
+    "baseUrl": "isolated Next.js browser harness",
+    "desktopViewport": "1440x723",
+    "mobileViewport": "390x844",
+    "desktopScreenshot": "evaluation/hermes-evidence-digest-readability-2026-08-26/after-local-desktop-short-1440x723.png",
+    "mobileScreenshot": "evaluation/hermes-evidence-digest-readability-2026-08-26/after-local-mobile-390x844.png",
+    "evidenceDigestMinWidth": 160,
+    "evidenceDigestMaxHeight": 36,
+    "readinessSectionMinWidth": 120,
+    "readinessLabelMaxHeight": 36,
+    "desktopEvidenceColumns": 1,
+    "desktopReadinessColumns": 2,
+    "mobilePaneMode": "selected one-column tabpanel",
+    "horizontalOverflow": false,
+    "visualDigestReadable": true,
+    "visualReadinessLabelsReadable": true
+  },
+  "verification": {
+    "knowledgeReviewBrowser": "2/2 PASS",
+    "adjacentKnowledgeUi": "14/14 PASS; 1 environment-dependent browser case skipped",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": "28/28"
+  },
+  "boundaries": {
+    "humanReviewCompleted": false,
+    "wikiPublished": false,
+    "dbMutationPerformed": false,
+    "providerCallPerformed": false,
+    "shareSessionCreated": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublicationVerdict": "APPROVAL_GATED",
+    "liveAfterDeploymentRequired": true
+  }
+}
