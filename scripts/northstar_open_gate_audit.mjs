@@ -50,6 +50,7 @@ const EVIDENCE_PATHS = Object.freeze({
   knowledgeViewportWorkbench: path.join("evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json"),
   llmWikiCandidateContentReadiness: path.join("evaluation", "llm-wiki-candidate-readiness-2026-08-25", "report.json"),
   llmWikiCandidateContentMatrix: path.join("evaluation", "llm-wiki-candidate-content-matrix-2026-08-25", "report.json"),
+  llmWikiSifEvidenceMatrix: path.join("evaluation", "llm-wiki-sif-evidence-matrix-2026-08-26", "report.json"),
   dispatchEntryCapabilityTruth: path.join("evaluation", "dispatch-entry-capability-truth-2026-07-28", "report.json"),
   landingHumanReviewBoundary: path.join("evaluation", "landing-human-review-boundary-2026-07-28", "report.json"),
   dependencySecurityRemediation: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
@@ -2194,6 +2195,100 @@ function evaluateLlmWikiCandidateContentMatrixGate(rootDir) {
     evidencePath,
     detail: `Matrix verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, local=${readNumber(afterLocal.passedCount)}/5, liveFallback=${readNumber(afterLive.passedCount)}/5, evidenceVisibilityRemediation=${evidenceVisibilityRemediationProven}, visibleTrace=${readNumber(afterLive.reviewerEvidenceTraceCount)}/5, technicalBoundary=${readNumber(afterLive.technicalGuidanceBoundaryCount)}/5, lawBoundary=${readNumber(afterLive.lawCandidateBoundaryCount)}/5, eventSemanticRemediation=${eventSemanticRemediationProven}, eventFacts=${readNumber(afterEventSemanticLive.eventSemanticGroundingCount)}/5, privateExposure=${readNumber(afterEventSemanticLive.privateEventExposureCount)}, providerBlocked=${providerBlockPreserved}, enhancedLive=${scopeBoundary.enhancedLlmGenerationProvenLive === true}, sections=${readNumber(contentContract.requiredSectionCount)}, textualGrounding=${contentContract.textualHazardGroundingRequired === true}, humanReviewCompleted=${contentContract.humanReviewCompleted === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, wiki=${readString(remainingBoundaries.llmWikiPublication) || "missing"}, rls=${readString(remainingBoundaries.supabaseRlsLaunchIsolation) || "missing"}.`,
     nextActions: ["Restore the five-scenario fallback PASS, explicit enhanced-runtime block, source/live alignment, no-mutation boundary, and approval boundaries."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateLlmWikiSifEvidenceMatrixGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.llmWikiSifEvidenceMatrix;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "llm_wiki_sif_evidence_matrix",
+      label: "Live Wiki SIF evidence matrix",
+      state: "missing",
+      evidencePath,
+      detail: "Live SIF -> KOSHA -> law Wiki candidate evidence is missing or invalid.",
+      nextActions: ["Run the five-scenario stateless SIF evidence matrix against current source and production."],
+    });
+  }
+
+  const afterLocal = isRecord(report.afterLocal) ? report.afterLocal : {};
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const contentContract = isRecord(report.contentContract) ? report.contentContract : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(report.productionCommit);
+  const productCommit = readString(report.productCommit);
+  const authorityOrder = Array.isArray(contentContract.authorityOrder)
+    ? contentContract.authorityOrder.map(readString)
+    : [];
+  const sourceMatchesProduction = /^[0-9a-f]{40}$/u.test(sourceHead)
+    && sourceHead === productionCommit
+    && /^[0-9a-f]{40}$/u.test(productCommit);
+  const localPass = readString(afterLocal.verdict) === "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX"
+    && readNumber(afterLocal.passedCount) === 5
+    && readNumber(afterLocal.failedCount) === 0
+    && readNumber(afterLocal.sifEvidenceBoundaryCount) === 5
+    && readNumber(afterLocal.technicalGuidanceBoundaryCount) === 5
+    && readNumber(afterLocal.lawCandidateBoundaryCount) === 5
+    && readNumber(afterLocal.privateEventExposureCount) === 0;
+  const livePass = readString(afterLive.verdict) === "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX"
+    && readString(afterLive.sourceHead) === sourceHead
+    && readString(afterLive.productionCommit) === productionCommit
+    && readNumber(afterLive.passedCount) === 5
+    && readNumber(afterLive.failedCount) === 0
+    && readNumber(afterLive.sifEvidenceBoundaryCount) === 5
+    && readNumber(afterLive.technicalGuidanceBoundaryCount) === 5
+    && readNumber(afterLive.lawCandidateBoundaryCount) === 5
+    && readNumber(afterLive.eventSemanticGroundingCount) === 5
+    && readNumber(afterLive.privateEventExposureCount) === 0;
+  const contractPass = authorityOrder.join(",") === "sif,kosha,law"
+    && readNumber(contentContract.scenarioCount) === 5
+    && contentContract.reviewerVisibleSifEvidenceRequired === true
+    && contentContract.sifProvenanceRequired === true
+    && contentContract.sifIncidentControlEvidenceIsNonStatutory === true
+    && contentContract.koshaTechnicalGuidanceIsNonStatutory === true
+    && contentContract.statutoryClaimsRequireLawProvenance === true
+    && contentContract.privateSifTitleExposureAllowed === false
+    && contentContract.humanReviewCompleted === false
+    && readString(contentContract.publicationState) === "unpublished"
+    && contentContract.publishAllowed === false;
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.ontologyPublicationPerformed === false
+    && mutationBoundary.vectorOrEmbeddingMutationPerformed === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const boundariesPass = remainingBoundaries.actualProductionCandidateQueueRead === false
+    && readString(remainingBoundaries.enhancedLlmRuntime) === "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION"
+    && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(remainingBoundaries.llmWikiPublication) === "APPROVAL_GATED"
+    && readString(remainingBoundaries.supabaseRlsLaunchIsolation) === "APPROVAL_GATED";
+  const proven = readString(report.verdict) === "PASS_LIVE_PRODUCTION_SIF_KOSHA_LAW_WIKI_CANDIDATE_EVIDENCE"
+    && report.liveAfterDeploymentRequired === false
+    && sourceMatchesProduction
+    && localPass
+    && livePass
+    && contractPass
+    && noMutation
+    && boundariesPass;
+
+  return gateResult({
+    id: "llm_wiki_sif_evidence_matrix",
+    label: "Live Wiki SIF evidence matrix",
+    state: proven ? "proven" : "contradicted",
+    evidencePath,
+    detail: proven
+      ? "Current-source and production stateless Wiki candidates pass 5/5 scenarios with reviewer-visible SIF provenance, KOSHA technical guidance, and current-law boundaries in SIF -> KOSHA -> law order. Event facts pass 5/5, private SIF/event exposure is 0, human review remains incomplete, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and enhanced runtime plus Wiki/RLS remain blocked or APPROVAL_GATED."
+      : `SIF matrix verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, local=${readNumber(afterLocal.passedCount)}/5, live=${readNumber(afterLive.passedCount)}/5, SIF=${readNumber(afterLive.sifEvidenceBoundaryCount)}/5, KOSHA=${readNumber(afterLive.technicalGuidanceBoundaryCount)}/5, law=${readNumber(afterLive.lawCandidateBoundaryCount)}/5, privateExposure=${readNumber(afterLive.privateEventExposureCount)}, order=${authorityOrder.join(" -> ") || "missing"}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: proven
+      ? ["Keep enhanced LLM runtime, actual candidate-queue review, Wiki publication, and Supabase RLS as separate approval/configuration gates."]
+      : ["Restore the five-scenario SIF -> KOSHA -> law live contract and preserved no-mutation/approval boundaries."],
   });
 }
 
@@ -9979,6 +10074,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateKnowledgeViewportWorkbenchGate(rootDir),
     evaluateLlmWikiCandidateContentReadinessGate(rootDir),
     evaluateLlmWikiCandidateContentMatrixGate(rootDir),
+    evaluateLlmWikiSifEvidenceMatrixGate(rootDir),
     evaluateDependencySecurityRemediationGate(rootDir),
     evaluateTenantAuthorizationRemediationGate(rootDir),
     evaluateSpreadsheetFormulaNeutralizationGate(rootDir),

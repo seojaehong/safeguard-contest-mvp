@@ -2597,6 +2597,39 @@ function createFixtureRoot(): string {
       supabaseRlsLaunchIsolation: "APPROVAL_GATED",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "llm-wiki-sif-evidence-matrix-2026-08-26", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_SIF_KOSHA_LAW_WIKI_CANDIDATE_EVIDENCE",
+    productCommit: "b".repeat(40), sourceHead: "a".repeat(40), productionCommit: "a".repeat(40),
+    liveAfterDeploymentRequired: false,
+    afterLocal: {
+      verdict: "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+      passedCount: 5, failedCount: 0, sifEvidenceBoundaryCount: 5,
+      technicalGuidanceBoundaryCount: 5, lawCandidateBoundaryCount: 5, privateEventExposureCount: 0,
+    },
+    afterLive: {
+      verdict: "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+      sourceHead: "a".repeat(40), productionCommit: "a".repeat(40), passedCount: 5, failedCount: 0,
+      sifEvidenceBoundaryCount: 5, technicalGuidanceBoundaryCount: 5, lawCandidateBoundaryCount: 5,
+      eventSemanticGroundingCount: 5, privateEventExposureCount: 0,
+    },
+    contentContract: {
+      authorityOrder: ["sif", "kosha", "law"], scenarioCount: 5,
+      reviewerVisibleSifEvidenceRequired: true, sifProvenanceRequired: true,
+      sifIncidentControlEvidenceIsNonStatutory: true, koshaTechnicalGuidanceIsNonStatutory: true,
+      statutoryClaimsRequireLawProvenance: true, privateSifTitleExposureAllowed: false,
+      humanReviewCompleted: false, publicationState: "unpublished", publishAllowed: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false,
+      ontologyPublicationPerformed: false, vectorOrEmbeddingMutationPerformed: false, koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      actualProductionCandidateQueueRead: false,
+      enhancedLlmRuntime: "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION",
+      exactSavedShareVerdict: "MISSING_EVIDENCE", llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "documents-touch-targets-2026-08-17", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_TOUCH_TARGETS",
     sourceHead: "fixture-sha",
@@ -5547,6 +5580,12 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_matrix")?.detail).toContain("blocked 0/5");
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_matrix")?.detail).toContain("event review facts separately move 0/5 to 5/5");
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_matrix")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "llm_wiki_sif_evidence_matrix")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "llm-wiki-sif-evidence-matrix-2026-08-26", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "llm_wiki_sif_evidence_matrix")?.detail).toContain("SIF -> KOSHA -> law");
+    expect(audit.gates.find((gate) => gate.id === "llm_wiki_sif_evidence_matrix")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("first review state panel-contained=true");
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("Wiki publication plus SIF embedding remain APPROVAL_GATED");
     expect(audit.gates.find((gate) => gate.id === "dependency_security_remediation")).toMatchObject({
@@ -7918,6 +7957,38 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(gate?.state).toBe("contradicted");
     expect(gate?.detail).toContain("eventFacts=4/5");
     expect(gate?.detail).toContain("privateExposure=1");
+  });
+
+  it("fails the Wiki SIF evidence matrix closed when live SIF coverage regresses", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "llm-wiki-sif-evidence-matrix-2026-08-26", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      afterLive: { sifEvidenceBoundaryCount: number };
+    };
+    report.afterLive.sifEvidenceBoundaryCount = 4;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, sourceSha: "fixture-sha" });
+    const gate = audit.gates.find((item) => item.id === "llm_wiki_sif_evidence_matrix");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.detail).toContain("SIF=4/5");
+  });
+
+  it("fails the Wiki SIF evidence matrix closed when exact saved Share is overclaimed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "llm-wiki-sif-evidence-matrix-2026-08-26", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, sourceSha: "fixture-sha" });
+    const gate = audit.gates.find((item) => item.id === "llm_wiki_sif_evidence_matrix");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.detail).toContain("exactShare=PASS");
   });
 
   it("fails Knowledge viewport workbench closed when progressive disclosures open by default", async () => {

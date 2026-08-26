@@ -40,6 +40,7 @@ const ARTIFACTS = Object.freeze({
   knowledgeViewportWorkbench: path.join("evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json"),
   llmWikiCandidateContentReadiness: path.join("evaluation", "llm-wiki-candidate-readiness-2026-08-25", "report.json"),
   llmWikiCandidateContentMatrix: path.join("evaluation", "llm-wiki-candidate-content-matrix-2026-08-25", "report.json"),
+  llmWikiSifEvidenceMatrix: path.join("evaluation", "llm-wiki-sif-evidence-matrix-2026-08-26", "report.json"),
   dependencySecurityRemediation: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
   tenantAuthorizationRemediation: path.join("evaluation", "tenant-authorization-boundary-preflight-2026-07-29", "report.json"),
   spreadsheetFormulaNeutralization: path.join("evaluation", "spreadsheet-formula-neutralization-2026-08-01", "report.json"),
@@ -1032,6 +1033,91 @@ function llmWikiCandidateContentMatrixProven(summary) {
     && summary.ontologyPublicationPerformed === false
     && summary.vectorOrEmbeddingMutationPerformed === false
     && summary.koshaRegistryMutationPerformed === false
+    && summary.exactSavedShareVerdict === "MISSING_EVIDENCE"
+    && summary.llmWikiPublication === "APPROVAL_GATED"
+    && summary.supabaseRlsLaunchIsolation === "APPROVAL_GATED";
+}
+
+/** @param {unknown} report */
+function llmWikiSifEvidenceMatrixSummary(report) {
+  if (!isRecord(report)) return {};
+  const afterLocal = isRecord(report.afterLocal) ? report.afterLocal : {};
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const contentContract = isRecord(report.contentContract) ? report.contentContract : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    productCommit: asString(report.productCommit),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(report.productionCommit),
+    liveAfterDeploymentRequired: asBoolean(report.liveAfterDeploymentRequired),
+    localPassed: typeof afterLocal.passedCount === "number" ? afterLocal.passedCount : 0,
+    localFailed: typeof afterLocal.failedCount === "number" ? afterLocal.failedCount : 0,
+    livePassed: typeof afterLive.passedCount === "number" ? afterLive.passedCount : 0,
+    liveFailed: typeof afterLive.failedCount === "number" ? afterLive.failedCount : 0,
+    liveSifEvidenceBoundaryCount: typeof afterLive.sifEvidenceBoundaryCount === "number" ? afterLive.sifEvidenceBoundaryCount : 0,
+    liveTechnicalGuidanceBoundaryCount: typeof afterLive.technicalGuidanceBoundaryCount === "number" ? afterLive.technicalGuidanceBoundaryCount : 0,
+    liveLawCandidateBoundaryCount: typeof afterLive.lawCandidateBoundaryCount === "number" ? afterLive.lawCandidateBoundaryCount : 0,
+    liveEventSemanticGroundingCount: typeof afterLive.eventSemanticGroundingCount === "number" ? afterLive.eventSemanticGroundingCount : 0,
+    livePrivateEventExposureCount: typeof afterLive.privateEventExposureCount === "number" ? afterLive.privateEventExposureCount : 0,
+    authorityOrder: Array.isArray(contentContract.authorityOrder) ? contentContract.authorityOrder.map(asString) : [],
+    scenarioCount: typeof contentContract.scenarioCount === "number" ? contentContract.scenarioCount : 0,
+    reviewerVisibleSifEvidenceRequired: asBoolean(contentContract.reviewerVisibleSifEvidenceRequired),
+    sifProvenanceRequired: asBoolean(contentContract.sifProvenanceRequired),
+    sifIncidentControlEvidenceIsNonStatutory: asBoolean(contentContract.sifIncidentControlEvidenceIsNonStatutory),
+    koshaTechnicalGuidanceIsNonStatutory: asBoolean(contentContract.koshaTechnicalGuidanceIsNonStatutory),
+    statutoryClaimsRequireLawProvenance: asBoolean(contentContract.statutoryClaimsRequireLawProvenance),
+    privateSifTitleExposureAllowed: asBoolean(contentContract.privateSifTitleExposureAllowed),
+    humanReviewCompleted: asBoolean(contentContract.humanReviewCompleted),
+    publicationState: asString(contentContract.publicationState),
+    publishAllowed: asBoolean(contentContract.publishAllowed),
+    dbMutationPerformed: asBoolean(mutationBoundary.dbMutationPerformed),
+    providerDispatchCalled: asBoolean(mutationBoundary.providerDispatchCalled),
+    shareSessionCreated: asBoolean(mutationBoundary.shareSessionCreated),
+    ontologyPublicationPerformed: asBoolean(mutationBoundary.ontologyPublicationPerformed),
+    vectorOrEmbeddingMutationPerformed: asBoolean(mutationBoundary.vectorOrEmbeddingMutationPerformed),
+    koshaRegistryMutationPerformed: asBoolean(mutationBoundary.koshaRegistryMutationPerformed),
+    actualProductionCandidateQueueRead: asBoolean(remainingBoundaries.actualProductionCandidateQueueRead),
+    enhancedLlmRuntime: asString(remainingBoundaries.enhancedLlmRuntime),
+    exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
+    llmWikiPublication: asString(remainingBoundaries.llmWikiPublication),
+    supabaseRlsLaunchIsolation: asString(remainingBoundaries.supabaseRlsLaunchIsolation),
+  };
+}
+
+/** @param {ReturnType<typeof llmWikiSifEvidenceMatrixSummary>} summary */
+function llmWikiSifEvidenceMatrixProven(summary) {
+  return summary.verdict === "PASS_LIVE_PRODUCTION_SIF_KOSHA_LAW_WIKI_CANDIDATE_EVIDENCE"
+    && summary.liveAfterDeploymentRequired === false
+    && /^[0-9a-f]{40}$/u.test(summary.sourceHead || "")
+    && summary.sourceHead === summary.productionCommit
+    && summary.localPassed === 5 && summary.localFailed === 0
+    && summary.livePassed === 5 && summary.liveFailed === 0
+    && summary.liveSifEvidenceBoundaryCount === 5
+    && summary.liveTechnicalGuidanceBoundaryCount === 5
+    && summary.liveLawCandidateBoundaryCount === 5
+    && summary.liveEventSemanticGroundingCount === 5
+    && summary.livePrivateEventExposureCount === 0
+    && summary.authorityOrder.join(",") === "sif,kosha,law"
+    && summary.scenarioCount === 5
+    && summary.reviewerVisibleSifEvidenceRequired === true
+    && summary.sifProvenanceRequired === true
+    && summary.sifIncidentControlEvidenceIsNonStatutory === true
+    && summary.koshaTechnicalGuidanceIsNonStatutory === true
+    && summary.statutoryClaimsRequireLawProvenance === true
+    && summary.privateSifTitleExposureAllowed === false
+    && summary.humanReviewCompleted === false
+    && summary.publicationState === "unpublished"
+    && summary.publishAllowed === false
+    && summary.dbMutationPerformed === false
+    && summary.providerDispatchCalled === false
+    && summary.shareSessionCreated === false
+    && summary.ontologyPublicationPerformed === false
+    && summary.vectorOrEmbeddingMutationPerformed === false
+    && summary.koshaRegistryMutationPerformed === false
+    && summary.actualProductionCandidateQueueRead === false
+    && summary.enhancedLlmRuntime === "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION"
     && summary.exactSavedShareVerdict === "MISSING_EVIDENCE"
     && summary.llmWikiPublication === "APPROVAL_GATED"
     && summary.supabaseRlsLaunchIsolation === "APPROVAL_GATED";
@@ -2886,6 +2972,8 @@ export function buildNorthstarNextRunway(options) {
   const llmWikiCandidateContentReadinessResult = llmWikiCandidateContentReadinessSummary(llmWikiCandidateContentReadiness);
   const llmWikiCandidateContentMatrix = readOptionalJson(options.rootDir, ARTIFACTS.llmWikiCandidateContentMatrix);
   const llmWikiCandidateContentMatrixResult = llmWikiCandidateContentMatrixSummary(llmWikiCandidateContentMatrix);
+  const llmWikiSifEvidenceMatrix = readOptionalJson(options.rootDir, ARTIFACTS.llmWikiSifEvidenceMatrix);
+  const llmWikiSifEvidenceMatrixResult = llmWikiSifEvidenceMatrixSummary(llmWikiSifEvidenceMatrix);
   const dependencySecurityRemediation = readOptionalJson(options.rootDir, ARTIFACTS.dependencySecurityRemediation);
   const tenantAuthorizationRemediation = readOptionalJson(options.rootDir, ARTIFACTS.tenantAuthorizationRemediation);
   const spreadsheetFormulaNeutralization = readOptionalJson(options.rootDir, ARTIFACTS.spreadsheetFormulaNeutralization);
@@ -3104,6 +3192,9 @@ export function buildNorthstarNextRunway(options) {
       ...(llmWikiCandidateContentMatrixProven(llmWikiCandidateContentMatrixResult)
         ? ["llm_wiki_candidate_content_matrix"]
         : []),
+      ...(llmWikiSifEvidenceMatrixProven(llmWikiSifEvidenceMatrixResult)
+        ? ["llm_wiki_sif_evidence_matrix"]
+        : []),
       "dependency_security_remediation",
       "tenant_authorization_remediation",
       "spreadsheet_formula_neutralization",
@@ -3314,6 +3405,7 @@ export function buildNorthstarNextRunway(options) {
     knowledgeViewportWorkbench: knowledgeViewportWorkbenchSummary(knowledgeViewportWorkbench),
     llmWikiCandidateContentReadiness: llmWikiCandidateContentReadinessResult,
     llmWikiCandidateContentMatrix: llmWikiCandidateContentMatrixResult,
+    llmWikiSifEvidenceMatrix: llmWikiSifEvidenceMatrixResult,
     dependencySecurityRemediation: dependencySecuritySummary,
     tenantAuthorizationRemediation: tenantAuthorizationSummary,
     spreadsheetFormulaNeutralization: spreadsheetFormulaSummary,
@@ -3479,6 +3571,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Live Knowledge viewport workbench is measured separately: \`${report.knowledgeViewportWorkbench.verdict || "missing"}\`; browser rows \`${report.knowledgeViewportWorkbench.passCount ?? "unknown"}/${report.knowledgeViewportWorkbench.rowCount ?? "unknown"}\`, maximum body ratio \`${report.knowledgeViewportWorkbench.maxBodyRatio ?? "unknown"}\`, selected exposure \`${report.knowledgeViewportWorkbench.visiblePanelCountPerRow ?? "unknown"}\` visible panel and \`${report.knowledgeViewportWorkbench.reachableSectionCountPerRow ?? "unknown"}\` reachable tasks. Progressive disclosures technical/reference/wiki/governance are \`${report.knowledgeViewportWorkbench.technicalDisclosureCount ?? "unknown"}/${report.knowledgeViewportWorkbench.referenceDisclosureCount ?? "unknown"}/${report.knowledgeViewportWorkbench.wikiDisclosureCount ?? "unknown"}/${report.knowledgeViewportWorkbench.governanceDisclosureCount ?? "unknown"}\`, default open \`${report.knowledgeViewportWorkbench.defaultOpenDisclosureCount ?? "unknown"}\`, exclusive groups \`${report.knowledgeViewportWorkbench.exclusiveDisclosureGroups === true}\`, mobile ratios \`${report.knowledgeViewportWorkbench.maxMobileTechnicalScrollRatio ?? "unknown"}/${report.knowledgeViewportWorkbench.maxMobileReferenceScrollRatio ?? "unknown"}/${report.knowledgeViewportWorkbench.maxMobileWikiScrollRatio ?? "unknown"}/${report.knowledgeViewportWorkbench.maxMobileGovernanceScrollRatio ?? "unknown"}\`, and first item/review state panel-contained \`${report.knowledgeViewportWorkbench.firstDisclosureInsidePanel === true}/${report.knowledgeViewportWorkbench.firstReviewStateInsidePanel === true}\`. Route splitting alone is not treated as the fix; long content remains in local-scroll panels. Exact saved Share remains \`${report.knowledgeViewportWorkbench.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`, Wiki publication remains \`${report.knowledgeViewportWorkbench.llmWikiPublicationVerdict || "APPROVAL_GATED"}\`, and SIF embedding remains \`${report.knowledgeViewportWorkbench.sifEmbeddingRuntimeVerdict || "APPROVAL_GATED"}\`.
 - LLM Wiki candidate content readiness is measured separately: \`${report.llmWikiCandidateContentReadiness.verdict || "missing"}\`; local/live viewport rows \`${report.llmWikiCandidateContentReadiness.localPassed ?? 0}/${report.llmWikiCandidateContentReadiness.localViewportCount ?? 0}\` and \`${report.llmWikiCandidateContentReadiness.livePassed ?? 0}/${report.llmWikiCandidateContentReadiness.liveViewportCount ?? 0}\`, required sections \`${report.llmWikiCandidateContentReadiness.requiredSectionCount ?? 0}\`, ready/revision fixtures \`${report.llmWikiCandidateContentReadiness.readyFixtureCount ?? 0}/${report.llmWikiCandidateContentReadiness.revisionRequiredFixtureCount ?? 0}\`, approval fail-closed \`${report.llmWikiCandidateContentReadiness.approvalFailsClosedForRevision === true}\`, and site-only/reject availability \`${report.llmWikiCandidateContentReadiness.keepSiteOnlyAvailableForRevision === true}/${report.llmWikiCandidateContentReadiness.rejectAvailableForRevision === true}\`. Human review remains \`${report.llmWikiCandidateContentReadiness.humanReviewCompleted === true}\`, publication remains \`${report.llmWikiCandidateContentReadiness.publicationState || "unpublished"}\` with publishAllowed=\`${report.llmWikiCandidateContentReadiness.publishAllowed === true}\`; exact saved Share remains \`${report.llmWikiCandidateContentReadiness.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`, while Wiki publication and Supabase RLS remain \`${report.llmWikiCandidateContentReadiness.llmWikiPublication || "APPROVAL_GATED"}/${report.llmWikiCandidateContentReadiness.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}\`.
 - Wiki candidate generation content is measured separately from that browser fixture: \`${report.llmWikiCandidateContentMatrix.verdict || "missing"}\`; deterministic fallback local/live scenarios \`${report.llmWikiCandidateContentMatrix.localPassed ?? 0}/5\` and \`${report.llmWikiCandidateContentMatrix.livePassed ?? 0}/5\`. Reviewer-visible evidence traces move \`${report.llmWikiCandidateContentMatrix.beforeVisibleEvidenceTraceCount ?? 0}->${report.llmWikiCandidateContentMatrix.liveVisibleEvidenceTraceCount ?? 0}/5\`; live KOSHA technical/official-source and current-law candidate boundaries are \`${report.llmWikiCandidateContentMatrix.liveTechnicalGuidanceBoundaryCount ?? 0}/5\` and \`${report.llmWikiCandidateContentMatrix.liveLawCandidateBoundaryCount ?? 0}/5\`. Explicit safe event semantics move \`${report.llmWikiCandidateContentMatrix.beforeEventSemanticGroundingCount ?? 0}->${report.llmWikiCandidateContentMatrix.liveEventSemanticGroundingCount ?? 0}/5\` with private exposure \`${report.llmWikiCandidateContentMatrix.livePrivateEventExposureCount ?? 0}\`; arbitrary raw payload accepted=\`${report.llmWikiCandidateContentMatrix.arbitraryRawPayloadAcceptedAsReviewFact === true}\`. The enhanced provider remains \`${report.llmWikiCandidateContentMatrix.providerPassed ?? 0}/5\` with blocker \`${report.llmWikiCandidateContentMatrix.providerRuntimeBlocker || "missing"}\`. This does not read the production candidate queue or claim enhanced LLM quality: queueRead=\`${report.llmWikiCandidateContentMatrix.actualProductionCandidateQueueRead === true}\`, fixtureAcceptedAsGenerationProof=\`${report.llmWikiCandidateContentMatrix.routeFixtureAcceptedAsGenerationProof === true}\`, enhancedLive=\`${report.llmWikiCandidateContentMatrix.enhancedLlmGenerationProvenLive === true}\`, humanReviewCompleted=\`${report.llmWikiCandidateContentMatrix.humanReviewCompleted === true}\`, exact saved Share=\`${report.llmWikiCandidateContentMatrix.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`, Wiki/RLS=\`${report.llmWikiCandidateContentMatrix.llmWikiPublication || "APPROVAL_GATED"}/${report.llmWikiCandidateContentMatrix.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}\`.
+- Reviewer-visible SIF evidence is measured by a separate companion matrix: \`${report.llmWikiSifEvidenceMatrix.verdict || "missing"}\`; local/live \`${report.llmWikiSifEvidenceMatrix.localPassed ?? 0}/5\` and \`${report.llmWikiSifEvidenceMatrix.livePassed ?? 0}/5\`, authority order \`${report.llmWikiSifEvidenceMatrix.authorityOrder?.join(" -> ") || "missing"}\`, live SIF/KOSHA/law boundaries \`${report.llmWikiSifEvidenceMatrix.liveSifEvidenceBoundaryCount ?? 0}/${report.llmWikiSifEvidenceMatrix.liveTechnicalGuidanceBoundaryCount ?? 0}/${report.llmWikiSifEvidenceMatrix.liveLawCandidateBoundaryCount ?? 0}\` of 5, event facts \`${report.llmWikiSifEvidenceMatrix.liveEventSemanticGroundingCount ?? 0}/5\`, and private exposure \`${report.llmWikiSifEvidenceMatrix.livePrivateEventExposureCount ?? 0}\`. This does not read the production candidate queue, complete human review, enable enhanced runtime, publish Wiki content, mutate DB/vector/KOSHA registry state, or close exact saved Share \`${report.llmWikiSifEvidenceMatrix.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Public generation admission security is measured separately: \`${report.publicGenerationAdmissionSecurity.verdict || "missing"}\`, live mode \`${report.publicGenerationAdmissionSecurity.liveMode || "unknown"}\`, dependency vulnerabilities \`${report.publicGenerationAdmissionSecurity.vulnerabilityCount ?? "unknown"}\`, distributed hardening open=\`${report.publicGenerationAdmissionSecurity.distributedHardeningOpen === true}\`, and fresh diff scan required=\`${report.publicGenerationAdmissionSecurity.freshRescanRequired === true}\`. This notice does not close multi-instance protection, the immutable scan finding, approval-gated operations, or exact saved Share; exact saved Share remains \`${report.publicGenerationAdmissionSecurity.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Security follow-up remediation is separately proven: \`${report.securityFollowupRemediation.verdict || "missing"}\`, sealed findings \`${report.securityFollowupRemediation.sealedFindingCount ?? "unknown"}\`, focused tests \`${report.securityFollowupRemediation.focusedTests ?? "unknown"}\`, and remaining security work \`${report.securityFollowupRemediation.remainingSecurityWorkCount ?? "unknown"}\`. The immutable original baseline remains \`${report.securityFollowupRemediation.immutableOriginalBaselineFindingCount ?? "unknown"}\` findings with rewritten=\`${report.securityFollowupRemediation.originalBaselineRewritten === true}\`; two deferred candidates and the separate public-admission notice remain visible, no live provider cancellation probe is claimed, and exact saved Share remains \`${report.securityFollowupRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Fresh security resource remediation is scoped rather than security-complete: \`${report.securityResourceRemediation.verdict || "missing"}\`, remediated \`${report.securityResourceRemediation.remediatedFindingCount ?? "unknown"}/${report.securityResourceRemediation.scanFindingCount ?? "unknown"}\`, remaining \`${report.securityResourceRemediation.remainingScanFindings ?? "unknown"}\`, provider persistence \`${report.securityResourceRemediation.providerDispatchPersistence || "unknown"}\`, exact saved Share \`${report.securityResourceRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.

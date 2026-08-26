@@ -37,6 +37,7 @@ const ARTIFACTS = Object.freeze({
   knowledgeViewportWorkbench: path.join("evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json"),
   llmWikiCandidateContentReadiness: path.join("evaluation", "llm-wiki-candidate-readiness-2026-08-25", "report.json"),
   llmWikiCandidateContentMatrix: path.join("evaluation", "llm-wiki-candidate-content-matrix-2026-08-25", "report.json"),
+  llmWikiSifEvidenceMatrix: path.join("evaluation", "llm-wiki-sif-evidence-matrix-2026-08-26", "report.json"),
   tenantAuthorizationRemediation: path.join("evaluation", "tenant-authorization-boundary-preflight-2026-07-29", "report.json"),
   spreadsheetFormulaNeutralization: path.join("evaluation", "spreadsheet-formula-neutralization-2026-08-01", "report.json"),
   publicProviderWorkBudget: path.join("evaluation", "public-provider-work-budget-2026-08-01", "report.json"),
@@ -530,6 +531,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const knowledgeViewportWorkbench = tryReadJson(rootDir, ARTIFACTS.knowledgeViewportWorkbench);
   const llmWikiCandidateContentReadiness = tryReadJson(rootDir, ARTIFACTS.llmWikiCandidateContentReadiness);
   const llmWikiCandidateContentMatrix = tryReadJson(rootDir, ARTIFACTS.llmWikiCandidateContentMatrix);
+  const llmWikiSifEvidenceMatrix = tryReadJson(rootDir, ARTIFACTS.llmWikiSifEvidenceMatrix);
   const tenantAuthorizationRemediation = tryReadJson(rootDir, ARTIFACTS.tenantAuthorizationRemediation);
   const spreadsheetFormulaNeutralization = tryReadJson(rootDir, ARTIFACTS.spreadsheetFormulaNeutralization);
   const publicProviderWorkBudget = tryReadJson(rootDir, ARTIFACTS.publicProviderWorkBudget);
@@ -661,6 +663,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "knowledge_viewport_workbench", ARTIFACTS.knowledgeViewportWorkbench, knowledgeViewportWorkbench),
     evidenceStatus(rootDir, currentHead, liveCommit, "llm_wiki_candidate_content_readiness", ARTIFACTS.llmWikiCandidateContentReadiness, llmWikiCandidateContentReadiness),
     evidenceStatus(rootDir, currentHead, liveCommit, "llm_wiki_candidate_content_matrix", ARTIFACTS.llmWikiCandidateContentMatrix, llmWikiCandidateContentMatrix),
+    evidenceStatus(rootDir, currentHead, liveCommit, "llm_wiki_sif_evidence_matrix", ARTIFACTS.llmWikiSifEvidenceMatrix, llmWikiSifEvidenceMatrix),
     evidenceStatus(rootDir, currentHead, liveCommit, "tenant_authorization_remediation", ARTIFACTS.tenantAuthorizationRemediation, tenantAuthorizationRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "spreadsheet_formula_neutralization", ARTIFACTS.spreadsheetFormulaNeutralization, spreadsheetFormulaNeutralization),
     evidenceStatus(rootDir, currentHead, liveCommit, "public_provider_work_budget", ARTIFACTS.publicProviderWorkBudget, publicProviderWorkBudget),
@@ -1568,6 +1571,31 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       llmWikiPublication: asString(recordAt(llmWikiCandidateContentMatrix, "remainingBoundaries")?.llmWikiPublication),
       supabaseRlsLaunchIsolation: asString(recordAt(llmWikiCandidateContentMatrix, "remainingBoundaries")?.supabaseRlsLaunchIsolation),
     },
+    llmWikiSifEvidenceMatrix: {
+      artifact: ARTIFACTS.llmWikiSifEvidenceMatrix,
+      verdict: isRecord(llmWikiSifEvidenceMatrix) ? asString(llmWikiSifEvidenceMatrix.verdict) : "missing",
+      productCommit: isRecord(llmWikiSifEvidenceMatrix) ? asString(llmWikiSifEvidenceMatrix.productCommit) : "",
+      sourceHead: isRecord(llmWikiSifEvidenceMatrix) ? asString(llmWikiSifEvidenceMatrix.sourceHead) : "",
+      productionCommit: isRecord(llmWikiSifEvidenceMatrix) ? asString(llmWikiSifEvidenceMatrix.productionCommit) : "",
+      localPassed: asNumber(recordAt(llmWikiSifEvidenceMatrix, "afterLocal")?.passedCount),
+      livePassed: asNumber(recordAt(llmWikiSifEvidenceMatrix, "afterLive")?.passedCount),
+      liveSifEvidenceBoundaryCount: asNumber(recordAt(llmWikiSifEvidenceMatrix, "afterLive")?.sifEvidenceBoundaryCount),
+      liveTechnicalGuidanceBoundaryCount: asNumber(recordAt(llmWikiSifEvidenceMatrix, "afterLive")?.technicalGuidanceBoundaryCount),
+      liveLawCandidateBoundaryCount: asNumber(recordAt(llmWikiSifEvidenceMatrix, "afterLive")?.lawCandidateBoundaryCount),
+      liveEventSemanticGroundingCount: asNumber(recordAt(llmWikiSifEvidenceMatrix, "afterLive")?.eventSemanticGroundingCount),
+      livePrivateEventExposureCount: asNumber(recordAt(llmWikiSifEvidenceMatrix, "afterLive")?.privateEventExposureCount),
+      authorityOrder: Array.isArray(recordAt(llmWikiSifEvidenceMatrix, "contentContract")?.authorityOrder)
+        ? recordAt(llmWikiSifEvidenceMatrix, "contentContract").authorityOrder.map(asString)
+        : [],
+      humanReviewCompleted: recordAt(llmWikiSifEvidenceMatrix, "contentContract")?.humanReviewCompleted === true,
+      actualProductionCandidateQueueRead: recordAt(llmWikiSifEvidenceMatrix, "remainingBoundaries")?.actualProductionCandidateQueueRead === true,
+      enhancedLlmRuntime: asString(recordAt(llmWikiSifEvidenceMatrix, "remainingBoundaries")?.enhancedLlmRuntime),
+      dbMutationPerformed: recordAt(llmWikiSifEvidenceMatrix, "mutationBoundary")?.dbMutationPerformed === true,
+      wikiPublicationPerformed: recordAt(llmWikiSifEvidenceMatrix, "mutationBoundary")?.ontologyPublicationPerformed === true,
+      exactSavedShareVerdict: asString(recordAt(llmWikiSifEvidenceMatrix, "remainingBoundaries")?.exactSavedShareVerdict),
+      llmWikiPublication: asString(recordAt(llmWikiSifEvidenceMatrix, "remainingBoundaries")?.llmWikiPublication),
+      supabaseRlsLaunchIsolation: asString(recordAt(llmWikiSifEvidenceMatrix, "remainingBoundaries")?.supabaseRlsLaunchIsolation),
+    },
     tenantAuthorizationRemediation: {
       artifact: ARTIFACTS.tenantAuthorizationRemediation,
       verdict: isRecord(tenantAuthorizationRemediation) ? asString(tenantAuthorizationRemediation.verdict) : "missing",
@@ -2191,6 +2219,12 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Safe original-event semantics: ${rollup.llmWikiCandidateContentMatrix.beforeEventSemanticGroundingCount ?? "unknown"}->${rollup.llmWikiCandidateContentMatrix.liveEventSemanticGroundingCount ?? "unknown"}/5; private exposure=${rollup.llmWikiCandidateContentMatrix.livePrivateEventExposureCount ?? "unknown"}; explicit reviewFacts=${rollup.llmWikiCandidateContentMatrix.explicitEventReviewFactsRequired === true}; arbitrary raw payload accepted=${rollup.llmWikiCandidateContentMatrix.arbitraryRawPayloadAcceptedAsReviewFact === true}; contract live=${rollup.llmWikiCandidateContentMatrix.eventSemanticGroundingProvenLive === true}.`,
     `- Enhanced provider remains ${rollup.llmWikiCandidateContentMatrix.providerPassed ?? "unknown"}/${rollup.llmWikiCandidateContentMatrix.providerPassed + rollup.llmWikiCandidateContentMatrix.providerFailed} with verdict \`${rollup.llmWikiCandidateContentMatrix.providerVerdict || "missing"}\` and runtime blocker \`${rollup.llmWikiCandidateContentMatrix.providerRuntimeBlocker || "missing"}\`; enhanced live quality proven=${rollup.llmWikiCandidateContentMatrix.enhancedLlmGenerationProvenLive === true}.`,
     `- Boundaries: actual production queue read=${rollup.llmWikiCandidateContentMatrix.actualProductionCandidateQueueRead === true}; route fixture accepted as generation proof=${rollup.llmWikiCandidateContentMatrix.routeFixtureAcceptedAsGenerationProof === true}; human review complete=${rollup.llmWikiCandidateContentMatrix.humanReviewCompleted === true}; publication=${rollup.llmWikiCandidateContentMatrix.publicationState || "unpublished"}; DB/Wiki mutation=${rollup.llmWikiCandidateContentMatrix.dbMutationPerformed === true}/${rollup.llmWikiCandidateContentMatrix.wikiPublicationPerformed === true}; exact saved Share=${rollup.llmWikiCandidateContentMatrix.exactSavedShareVerdict || "MISSING_EVIDENCE"}; Wiki/RLS=${rollup.llmWikiCandidateContentMatrix.llmWikiPublication || "APPROVAL_GATED"}/${rollup.llmWikiCandidateContentMatrix.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}.`,
+    "",
+    "## Wiki SIF evidence matrix",
+    "",
+    `- Verdict: \`${rollup.llmWikiSifEvidenceMatrix.verdict}\`; local/live ${rollup.llmWikiSifEvidenceMatrix.localPassed ?? "unknown"}/5 and ${rollup.llmWikiSifEvidenceMatrix.livePassed ?? "unknown"}/5.`,
+    `- Reviewer-visible authority order: ${(rollup.llmWikiSifEvidenceMatrix.authorityOrder || []).join(" -> ") || "missing"}; live SIF/KOSHA/law boundaries ${rollup.llmWikiSifEvidenceMatrix.liveSifEvidenceBoundaryCount ?? "unknown"}/${rollup.llmWikiSifEvidenceMatrix.liveTechnicalGuidanceBoundaryCount ?? "unknown"}/${rollup.llmWikiSifEvidenceMatrix.liveLawCandidateBoundaryCount ?? "unknown"} of 5; event facts ${rollup.llmWikiSifEvidenceMatrix.liveEventSemanticGroundingCount ?? "unknown"}/5; private exposure ${rollup.llmWikiSifEvidenceMatrix.livePrivateEventExposureCount ?? "unknown"}.`,
+    `- Boundaries: actual production queue read=${rollup.llmWikiSifEvidenceMatrix.actualProductionCandidateQueueRead === true}; enhanced runtime=${rollup.llmWikiSifEvidenceMatrix.enhancedLlmRuntime || "missing"}; human review complete=${rollup.llmWikiSifEvidenceMatrix.humanReviewCompleted === true}; DB/Wiki mutation=${rollup.llmWikiSifEvidenceMatrix.dbMutationPerformed === true}/${rollup.llmWikiSifEvidenceMatrix.wikiPublicationPerformed === true}; exact saved Share=${rollup.llmWikiSifEvidenceMatrix.exactSavedShareVerdict || "MISSING_EVIDENCE"}; Wiki/RLS=${rollup.llmWikiSifEvidenceMatrix.llmWikiPublication || "APPROVAL_GATED"}/${rollup.llmWikiSifEvidenceMatrix.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}.`,
     "",
     "## Live Hermes Reviewer Authority UI",
     "",

@@ -321,6 +321,16 @@ type NextRunwayReport = {
     llmWikiPublication: string;
     supabaseRlsLaunchIsolation: string;
   };
+  llmWikiSifEvidenceMatrix: {
+    verdict: string;
+    localPassed: number;
+    livePassed: number;
+    liveSifEvidenceBoundaryCount: number;
+    liveTechnicalGuidanceBoundaryCount: number;
+    liveLawCandidateBoundaryCount: number;
+    authorityOrder: string[];
+    exactSavedShareVerdict: string;
+  };
   dependencySecurityRemediation: {
     verdict: string;
     beforeVulnerablePackages: number;
@@ -3075,6 +3085,15 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     },
     remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", llmWikiPublication: "APPROVAL_GATED", supabaseRlsLaunchIsolation: "APPROVAL_GATED" },
   });
+  writeJson(root, "evaluation/llm-wiki-sif-evidence-matrix-2026-08-26/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_SIF_KOSHA_LAW_WIKI_CANDIDATE_EVIDENCE",
+    productCommit: firstHead, sourceHead: firstHead, productionCommit: firstHead, liveAfterDeploymentRequired: false,
+    afterLocal: { verdict: "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX", passedCount: 5, failedCount: 0, sifEvidenceBoundaryCount: 5, technicalGuidanceBoundaryCount: 5, lawCandidateBoundaryCount: 5, privateEventExposureCount: 0 },
+    afterLive: { verdict: "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX", sourceHead: firstHead, productionCommit: firstHead, passedCount: 5, failedCount: 0, sifEvidenceBoundaryCount: 5, technicalGuidanceBoundaryCount: 5, lawCandidateBoundaryCount: 5, eventSemanticGroundingCount: 5, privateEventExposureCount: 0 },
+    contentContract: { authorityOrder: ["sif", "kosha", "law"], scenarioCount: 5, reviewerVisibleSifEvidenceRequired: true, sifProvenanceRequired: true, sifIncidentControlEvidenceIsNonStatutory: true, koshaTechnicalGuidanceIsNonStatutory: true, statutoryClaimsRequireLawProvenance: true, privateSifTitleExposureAllowed: false, humanReviewCompleted: false, publicationState: "unpublished", publishAllowed: false },
+    mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, ontologyPublicationPerformed: false, vectorOrEmbeddingMutationPerformed: false, koshaRegistryMutationPerformed: false },
+    remainingBoundaries: { actualProductionCandidateQueueRead: false, enhancedLlmRuntime: "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION", exactSavedShareVerdict: "MISSING_EVIDENCE", llmWikiPublication: "APPROVAL_GATED", supabaseRlsLaunchIsolation: "APPROVAL_GATED" },
+  });
   const liveRollupPath = path.join(root, "evaluation/northstar-live-rollup-2026-07-20/report.json");
   const liveRollup = fs.readFileSync(liveRollupPath, "utf8").replaceAll("TO_FILL", firstHead);
   fs.writeFileSync(liveRollupPath, liveRollup, "utf8");
@@ -3427,6 +3446,18 @@ describe("northstar next runway generator", () => {
     });
     expect(report.provenCurrentState).toContain("llm_wiki_candidate_content_matrix");
     expect(markdown).toContain("does not read the production candidate queue or claim enhanced LLM quality");
+    expect(report.llmWikiSifEvidenceMatrix).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_SIF_KOSHA_LAW_WIKI_CANDIDATE_EVIDENCE",
+      localPassed: 5,
+      livePassed: 5,
+      liveSifEvidenceBoundaryCount: 5,
+      liveTechnicalGuidanceBoundaryCount: 5,
+      liveLawCandidateBoundaryCount: 5,
+      authorityOrder: ["sif", "kosha", "law"],
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.provenCurrentState).toContain("llm_wiki_sif_evidence_matrix");
+    expect(markdown).toContain("Reviewer-visible SIF evidence is measured by a separate companion matrix");
     expect(report.hermesOpenclaw).toMatchObject({
       verdict: "adapter_boundary_pass_live_execution_not_claimed",
       trustedTransportWired: true,

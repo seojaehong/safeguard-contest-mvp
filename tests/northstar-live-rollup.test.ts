@@ -272,6 +272,16 @@ type RollupReport = {
     llmWikiPublication: string;
     supabaseRlsLaunchIsolation: string;
   };
+  llmWikiSifEvidenceMatrix: {
+    verdict: string;
+    localPassed: number | null;
+    livePassed: number | null;
+    liveSifEvidenceBoundaryCount: number | null;
+    liveTechnicalGuidanceBoundaryCount: number | null;
+    liveLawCandidateBoundaryCount: number | null;
+    authorityOrder: string[];
+    exactSavedShareVerdict: string;
+  };
   tenantAuthorizationRemediation: {
     verdict: string;
     greenFindings: number | null;
@@ -1413,6 +1423,15 @@ function createFixtureRoot(): { root: string; head: string } {
     },
     remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", llmWikiPublication: "APPROVAL_GATED", supabaseRlsLaunchIsolation: "APPROVAL_GATED" },
   });
+  writeJson(root, "evaluation/llm-wiki-sif-evidence-matrix-2026-08-26/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_SIF_KOSHA_LAW_WIKI_CANDIDATE_EVIDENCE",
+    productCommit: "TO_FILL", sourceHead: "TO_FILL", productionCommit: "TO_FILL", liveAfterDeploymentRequired: false,
+    afterLocal: { verdict: "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX", passedCount: 5, failedCount: 0, sifEvidenceBoundaryCount: 5, technicalGuidanceBoundaryCount: 5, lawCandidateBoundaryCount: 5, privateEventExposureCount: 0 },
+    afterLive: { verdict: "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX", sourceHead: "TO_FILL", productionCommit: "TO_FILL", passedCount: 5, failedCount: 0, sifEvidenceBoundaryCount: 5, technicalGuidanceBoundaryCount: 5, lawCandidateBoundaryCount: 5, eventSemanticGroundingCount: 5, privateEventExposureCount: 0 },
+    contentContract: { authorityOrder: ["sif", "kosha", "law"], scenarioCount: 5, reviewerVisibleSifEvidenceRequired: true, sifProvenanceRequired: true, sifIncidentControlEvidenceIsNonStatutory: true, koshaTechnicalGuidanceIsNonStatutory: true, statutoryClaimsRequireLawProvenance: true, privateSifTitleExposureAllowed: false, humanReviewCompleted: false, publicationState: "unpublished", publishAllowed: false },
+    mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, ontologyPublicationPerformed: false, vectorOrEmbeddingMutationPerformed: false, koshaRegistryMutationPerformed: false },
+    remainingBoundaries: { actualProductionCandidateQueueRead: false, enhancedLlmRuntime: "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION", exactSavedShareVerdict: "MISSING_EVIDENCE", llmWikiPublication: "APPROVAL_GATED", supabaseRlsLaunchIsolation: "APPROVAL_GATED" },
+  });
   writeJson(root, "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json", {
     verdict: "COMPLETED_FOLLOWUP_REPOSITORY_SECURITY_SCAN_OPEN_FINDINGS_AND_DEFERRED_REVIEW",
     sourceHead: "TO_FILL",
@@ -2155,6 +2174,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/knowledge-viewport-workbench-2026-08-17/report.json",
     "evaluation/llm-wiki-candidate-readiness-2026-08-25/report.json",
     "evaluation/llm-wiki-candidate-content-matrix-2026-08-25/report.json",
+    "evaluation/llm-wiki-sif-evidence-matrix-2026-08-26/report.json",
     "evaluation/tenant-authorization-boundary-preflight-2026-07-29/report.json",
     "evaluation/spreadsheet-formula-neutralization-2026-08-01/report.json",
     "evaluation/public-provider-work-budget-2026-08-01/report.json",
@@ -2499,6 +2519,17 @@ describe("northstar live rollup", () => {
       supabaseRlsLaunchIsolation: "APPROVAL_GATED",
     });
     expect(report.evidence.find((item) => item.id === "llm_wiki_candidate_content_matrix")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.llmWikiSifEvidenceMatrix).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_SIF_KOSHA_LAW_WIKI_CANDIDATE_EVIDENCE",
+      localPassed: 5,
+      livePassed: 5,
+      liveSifEvidenceBoundaryCount: 5,
+      liveTechnicalGuidanceBoundaryCount: 5,
+      liveLawCandidateBoundaryCount: 5,
+      authorityOrder: ["sif", "kosha", "law"],
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "llm_wiki_sif_evidence_matrix")?.productionStatus).toBe("ancestor_of_head");
     expect(report.tenantAuthorizationRemediation).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
       greenFindings: 2,
