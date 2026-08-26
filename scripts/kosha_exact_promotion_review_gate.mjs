@@ -103,6 +103,16 @@ function isIsoTimestamp(value) {
 }
 
 /**
+ * @param {string} value
+ * @param {string} generatedAt
+ */
+function isReviewTimestampAllowed(value, generatedAt) {
+  return isIsoTimestamp(value)
+    && isIsoTimestamp(generatedAt)
+    && Date.parse(value) <= Date.parse(generatedAt);
+}
+
+/**
  * @param {string} rootDir
  */
 function gitHead(rootDir) {
@@ -286,6 +296,7 @@ export function buildKoshaExactPromotionReviewGate(options) {
   const officialPdfAuditPath = options.officialPdfAuditPath || DEFAULT_OFFICIAL_PDF_AUDIT_PATH;
   const officialLifecycleAuditPath = options.officialLifecycleAuditPath || DEFAULT_OFFICIAL_LIFECYCLE_AUDIT_PATH;
   const reviewerSupportPath = options.reviewerSupportPath || DEFAULT_REVIEWER_SUPPORT_PATH;
+  const generatedAt = options.generatedAt || new Date().toISOString();
   const packet = readJson(resolveInsideRoot(rootDir, packetPath));
   const officialPdfAudit = readJson(resolveInsideRoot(rootDir, officialPdfAuditPath));
   const officialLifecycleAudit = readJson(resolveInsideRoot(rootDir, officialLifecycleAuditPath));
@@ -519,8 +530,8 @@ export function buildKoshaExactPromotionReviewGate(options) {
     if (!asString(reviewRow.reviewer)) failures.push(`missing-reviewer:${stableKey}`);
     const reviewedAt = asString(reviewRow.reviewedAt);
     if (!reviewedAt) failures.push(`missing-reviewed-at:${stableKey}`);
-    else if (!isIsoTimestamp(reviewedAt)) failures.push(`invalid-reviewed-at:${stableKey}`);
-    if (officialPdfAuditPass && officialLifecycleAuditPass && reviewerSupportPass && mismatches.length === 0 && requiredChecks.every((checkText) => asBoolean(checkedByText.get(checkText)?.confirmed)) && asBoolean(reviewRow.humanConfirmed) && asString(reviewRow.reviewer) && isIsoTimestamp(reviewedAt)) {
+    else if (!isReviewTimestampAllowed(reviewedAt, generatedAt)) failures.push(`invalid-reviewed-at:${stableKey}`);
+    if (officialPdfAuditPass && officialLifecycleAuditPass && reviewerSupportPass && mismatches.length === 0 && requiredChecks.every((checkText) => asBoolean(checkedByText.get(checkText)?.confirmed)) && asBoolean(reviewRow.humanConfirmed) && asString(reviewRow.reviewer) && isReviewTimestampAllowed(reviewedAt, generatedAt)) {
       passed.push(stableKey);
     }
   }
@@ -534,7 +545,7 @@ export function buildKoshaExactPromotionReviewGate(options) {
     failureSummary.duplicateReviewRows === 0;
   return {
     schemaVersion: SCHEMA_VERSION,
-    generatedAt: options.generatedAt || new Date().toISOString(),
+    generatedAt,
     sourceHead: gitHead(rootDir),
     packetPath,
     officialPdfAuditPath,

@@ -207,6 +207,9 @@ describe("KOSHA exact promotion reviewer cockpit", () => {
     expect(result.html).toContain("다음 미완료 후보");
     expect(result.html).toContain("completedInputs(state[index]) < 8");
     expect(result.html).toContain('selectMobileMode(panels[nextIndex], "review")');
+    expect(result.html).toContain("미래 시각은 검토 완료로 인정되지 않습니다.");
+    expect(result.html).toContain("validReviewedAt(row.reviewedAt)");
+    expect(result.html).toContain('setAttribute("aria-invalid", String(reviewedAtInvalid))');
     expect(result.html).toContain("기계 근거는 검토를 돕지만 판단을 대신하지 않습니다.");
   });
 

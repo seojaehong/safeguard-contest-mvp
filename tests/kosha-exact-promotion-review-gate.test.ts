@@ -894,6 +894,29 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.exactRegistryWriteArtifactCreated).toBe(false);
   });
 
+  it("fails closed when reviewedAt is later than the gate run", async () => {
+    const { root, packetPath, reviewPath } = writeFixtureRoot();
+    const review = JSON.parse(fs.readFileSync(path.join(root, reviewPath), "utf8")) as {
+      candidateReviews: Array<{ stableKey: string; reviewedAt: string }>;
+    };
+    const target = review.candidateReviews.find((row) => row.stableKey === "D-C-10");
+    if (!target) throw new Error("fixture-missing-d-c-10");
+    target.reviewedAt = "2026-07-22T00:00:01.000Z";
+    writeJson(root, reviewPath, review);
+    const module = await loadReviewGateModule();
+    const report = module.buildKoshaExactPromotionReviewGate({
+      rootDir: root,
+      packetPath,
+      reviewPath,
+      generatedAt: "2026-07-22T00:00:00.000Z",
+    });
+
+    expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
+    expect(report.failures).toContain("invalid-reviewed-at:D-C-10");
+    expect(report.failureSummary.invalidReviewedAt).toBe(1);
+    expect(report.exactPromotionPerformed).toBe(false);
+  });
+
   it("fails closed when packet display title is not version plus official current title", async () => {
     const { root, packetPath } = writeFixtureRoot();
     const packet = JSON.parse(fs.readFileSync(path.join(root, packetPath), "utf8")) as {

@@ -5382,6 +5382,7 @@ function createFixtureRoot(): string {
       draftRestoreStatusVisible: true,
       draftSaveFailureVisible: true,
       nextIncompleteCandidateNavigation: true,
+      futureReviewTimestampBlocked: true,
       mobileCandidateScrollSnap: true,
       selectedCandidateAutoReveal: true,
       readableEvidenceCues: true,
@@ -5461,6 +5462,7 @@ function createFixtureRoot(): string {
     mobileCandidateProgressVisibilityPass: true,
     draftPersistenceVisibilityPass: true,
     nextIncompleteNavigationPass: true,
+    futureReviewTimestampPass: true,
     draftStorageIdentity: {
       sameFingerprintPreserved: true,
       sourceIdentityPresent: true,
@@ -5475,6 +5477,11 @@ function createFixtureRoot(): string {
       saveFailureStatus: "로컬 초안 · 저장 실패 · 입력은 현재 화면에만 유지",
       nextIncompleteInitialSelectedIndex: 1,
       nextIncompleteSkippedCompletedIndex: 2,
+      futureTimestampState: {
+        ariaInvalid: "true",
+        errorVisible: true,
+        candidateProgress: "0/8",
+      },
       titleReconciliationAccess: {
         candidateVisible: true,
         officialCurrentTitleVisible: true,
@@ -5534,6 +5541,8 @@ function createFixtureRoot(): string {
       exportInitiallyDisabled: true,
       nextIncompleteVisible: true,
       nextIncompleteInitiallyEnabled: true,
+      reviewedAtMaxPresent: true,
+      futureTimestampErrorInitiallyHidden: true,
       horizontalOverflow: false,
     })),
     mutationBoundary: {
@@ -9299,6 +9308,32 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     };
     browser.nextIncompleteNavigationPass = false;
     browser.draftStorageIdentity.nextIncompleteSkippedCompletedIndex = 1;
+    writeJson(rootDir, path.relative(rootDir, browserPath), browser);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("contradicted");
+  });
+
+  it("fails closed when the KOSHA reviewer cockpit accepts a future review timestamp", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const browserPath = path.join(
+      rootDir,
+      "evaluation",
+      "kosha-exact-promotion-reviewer-cockpit-2026-07-25",
+      "browser-report.json",
+    );
+    const browser = JSON.parse(fs.readFileSync(browserPath, "utf8")) as {
+      futureReviewTimestampPass: boolean;
+      draftStorageIdentity: { futureTimestampState: { ariaInvalid: string } };
+    };
+    browser.futureReviewTimestampPass = false;
+    browser.draftStorageIdentity.futureTimestampState.ariaInvalid = "false";
     writeJson(rootDir, path.relative(rootDir, browserPath), browser);
 
     const audit = buildNorthstarOpenGateAudit({

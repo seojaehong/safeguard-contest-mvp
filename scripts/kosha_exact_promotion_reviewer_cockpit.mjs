@@ -404,7 +404,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
           <p class="boundary-note">기계 근거는 검토를 돕지만 판단을 대신하지 않습니다.</p>
           <div class="check-stack">${checks}</div>
           <label class="field-label">검토자<input type="text" maxlength="120" autocomplete="name" data-reviewer="${index}"></label>
-          <label class="field-label">검토 시각<input type="datetime-local" data-reviewed-at="${index}"></label>
+          <label class="field-label">검토 시각<input type="datetime-local" data-reviewed-at="${index}" aria-describedby="reviewed-at-error-${index}"><span class="field-error" id="reviewed-at-error-${index}" data-reviewed-at-error="${index}" hidden>미래 시각은 검토 완료로 인정되지 않습니다.</span></label>
           <label class="human-confirm">
             <input type="checkbox" data-human-confirm="${index}">
             <span>이 후보의 전체 근거와 현재성을 직접 확인했습니다.</span>
@@ -435,7 +435,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
     .evidence-group header{display:flex;gap:10px;align-items:center;font-size:12px}.evidence-group header span{color:var(--muted)}.evidence-reading-cue{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:start;margin:8px 0 0;padding:6px 8px;background:#eef8f2;border-left:3px solid var(--accent);font-size:12px;line-height:1.45}.evidence-reading-cue strong{color:#075e45;white-space:nowrap}.receipt-list{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:8px 0 0;padding:0}.receipt-list li{display:flex;align-items:center;gap:6px;min-height:28px;border:1px solid var(--line);background:var(--soft);padding:4px 7px;font-size:11px}.receipt-list code{font-family:Consolas,monospace}.receipt-list em{color:var(--warn);font-style:normal;font-weight:700}.evidence-source-excerpt{margin-top:8px;border-top:1px dashed var(--line);padding-top:7px}.evidence-source-excerpt summary{cursor:pointer;color:var(--muted);font-size:12px;font-weight:700}.evidence-source-excerpt p{font-size:12px;line-height:1.55;margin:7px 0 0;overflow-wrap:anywhere}.hash-details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.hash-details summary{cursor:pointer;font-size:13px;font-weight:700}.hash-details dl{display:grid;gap:8px}.hash-details dd{font-family:Consolas,monospace;font-size:11px;overflow-wrap:anywhere}
     .review-pane>header{display:flex;justify-content:space-between;align-items:center}.review-pane>header span{font-size:12px;color:var(--muted);font-weight:700}.review-pane>header strong{font-size:13px;color:var(--warn)}.boundary-note{font-size:12px;color:#704100;background:#fff4dd;border:1px solid #e3bf75;padding:8px 10px;border-radius:6px}
     .check-stack{display:grid;gap:6px}.check-row,.human-confirm{display:grid;grid-template-columns:18px 1fr;gap:8px;align-items:start;border:1px solid var(--line);background:#fff;padding:9px;border-radius:6px;font-size:12px;line-height:1.4}.check-row input,.human-confirm input{margin:2px 0 0;accent-color:var(--accent)}
-    .field-label{display:grid;gap:5px;margin-top:10px;font-size:12px;font-weight:700}.field-label input{width:100%;border:1px solid #aebbb3;background:#fff;padding:9px;border-radius:4px}.human-confirm{margin-top:10px;border-color:#9ec5b2;background:#eef8f2}
+    .field-label{display:grid;gap:5px;margin-top:10px;font-size:12px;font-weight:700}.field-label input{width:100%;border:1px solid #aebbb3;background:#fff;padding:9px;border-radius:4px}.field-label input[aria-invalid="true"]{border-color:#b42318;background:#fff5f4}.field-error{color:#b42318;font-size:11px}.human-confirm{margin-top:10px;border-color:#9ec5b2;background:#eef8f2}
     .footer-actions{display:flex;justify-content:flex-end;gap:8px;padding:8px 12px;background:#e8eeea;border-top:1px solid var(--line)}.footer-actions button{border:1px solid #295d48;padding:9px 12px;border-radius:5px;background:#fff;color:#184b38;font-weight:700;cursor:pointer}.footer-actions .primary{background:#087f5b;color:#fff;white-space:nowrap}.footer-actions button:disabled{cursor:not-allowed;opacity:.45}
     button:focus-visible,input:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #0b6eeb;outline-offset:2px}.mobile-mode{display:none}.status-live{color:#8ce0bc}.complete .candidate-button small{color:#087f5b}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
     @media(max-width:767px){.topbar{align-items:flex-start;padding:12px;height:68px}.topbar-purpose{display:none}.draft-status{margin-left:0}.topbar-purpose+.draft-status::before{content:""}.metrics{display:none}.workspace{display:flex;flex-direction:column;height:auto;overflow:hidden}.candidate-rail{flex:none;border-right:0;border-bottom:1px solid var(--line);padding:6px 8px;overflow:hidden}.candidate-rail-header{display:flex;min-height:16px;margin:0 4px 4px}.candidate-rail-header .rail-label{display:none}.candidate-list{display:flex;gap:6px;width:auto;overflow-x:auto;overscroll-behavior-inline:contain;scroll-padding-inline:0;scroll-snap-type:x mandatory;scrollbar-width:thin}.candidate-button{flex:0 0 calc((100vw - 38px)/2);width:auto;min-height:44px;padding:4px 8px;scroll-snap-align:start}.content{flex:1;min-height:0}.candidate-panel{display:flex;flex-direction:column;height:100%;min-height:0}.candidate-panel[hidden]{display:none}.mobile-mode{display:grid;grid-template-columns:1fr 1fr;flex:none;border-bottom:1px solid var(--line);background:#f7faf8;padding:2px 8px}.mobile-mode button{min-height:44px;border:0;border-bottom:2px solid transparent;background:transparent;padding:4px 8px;color:var(--muted);font-weight:700}.mobile-mode button[aria-selected="true"]{border-color:var(--accent);color:var(--accent)}.candidate-panel[data-mobile-view="evidence"] .review-pane,.candidate-panel[data-mobile-view="review"] .evidence-pane{display:none}.evidence-pane,.review-pane{flex:1;min-height:0;overflow:auto;padding:14px 12px}.review-pane{border-left:0}.identity-grid{grid-template-columns:repeat(2,1fr)}.identity-grid div:nth-child(2){border-right:0}.candidate-heading{display:block}.candidate-heading a{display:inline-block;margin-top:8px}.evidence-group{padding:8px 10px 0}.receipt-list{margin-top:6px}.receipt-list li{min-height:24px;padding:2px 6px}.footer-actions{padding:7px 8px}.footer-actions button{padding:8px 9px;font-size:13px}}
@@ -555,6 +555,11 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
       const progressLive = document.querySelector("[data-progress-live]");
       const draftStatus = document.querySelector("[data-draft-status]");
       const mobileBreakpoint = window.matchMedia("(max-width: 767px)");
+      const validReviewedAt = (value) => Boolean(value) && Number.isFinite(Date.parse(value)) && Date.parse(value) <= Date.now();
+      const localNowValue = () => {
+        const now = new Date();
+        return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      };
       const syncMobilePaneSemantics = (panel) => {
         const mobile = mobileBreakpoint.matches;
         const selectedMode = panel.dataset.mobileView || "evidence";
@@ -580,7 +585,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
       const completedInputs = (row) =>
         row.requiredReviewChecks.filter((check) => check.confirmed).length
         + (row.reviewer.trim() ? 1 : 0)
-        + (row.reviewedAt ? 1 : 0)
+        + (validReviewedAt(row.reviewedAt) ? 1 : 0)
         + (row.humanConfirmed ? 1 : 0);
       const updateCandidateContext = () => {
         const selectedIndex = buttons.findIndex((button) => button.getAttribute("aria-selected") === "true");
@@ -596,7 +601,12 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
             document.querySelector('[data-check="' + index + ':' + checkIndex + '"]').checked = check.confirmed;
           });
           document.querySelector("[data-reviewer='" + index + "']").value = row.reviewer;
-          document.querySelector("[data-reviewed-at='" + index + "']").value = row.reviewedAt;
+          const reviewedAtInput = document.querySelector("[data-reviewed-at='" + index + "']");
+          reviewedAtInput.value = row.reviewedAt;
+          reviewedAtInput.max = localNowValue();
+          const reviewedAtInvalid = Boolean(row.reviewedAt) && !validReviewedAt(row.reviewedAt);
+          reviewedAtInput.setAttribute("aria-invalid", String(reviewedAtInvalid));
+          document.querySelector("[data-reviewed-at-error='" + index + "']").hidden = !reviewedAtInvalid;
           document.querySelector("[data-human-confirm='" + index + "']").checked = row.humanConfirmed;
           const count = completedInputs(row);
           document.querySelector("[data-candidate-progress='" + index + "']").textContent = count + "/8";
@@ -696,6 +706,9 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
       document.querySelectorAll("[data-reviewed-at]").forEach((input) => input.addEventListener("input", (event) => {
         state[Number(event.currentTarget.dataset.reviewedAt)].reviewedAt = event.currentTarget.value;
         render("로컬 초안 · 변경사항 저장됨");
+      }));
+      document.querySelectorAll("[data-reviewed-at]").forEach((input) => input.addEventListener("focus", (event) => {
+        event.currentTarget.max = localNowValue();
       }));
       document.querySelectorAll("[data-human-confirm]").forEach((input) => input.addEventListener("change", (event) => {
         state[Number(event.currentTarget.dataset.humanConfirm)].humanConfirmed = event.currentTarget.checked;
@@ -821,6 +834,7 @@ export function runReviewerCockpit(options) {
       draftRestoreStatusVisible: true,
       draftSaveFailureVisible: true,
       nextIncompleteCandidateNavigation: true,
+      futureReviewTimestampBlocked: true,
       mobileCandidateScrollSnap: true,
       selectedCandidateAutoReveal: true,
       readableEvidenceCues: true,
@@ -856,6 +870,7 @@ Verdict: \`${report.verdict}\`
 - Draft restore status visible: ${report.accessibilityContract.draftRestoreStatusVisible}
 - Draft save failure visible: ${report.accessibilityContract.draftSaveFailureVisible}
 - Next incomplete candidate navigation: ${report.accessibilityContract.nextIncompleteCandidateNavigation}
+- Future review timestamp blocked: ${report.accessibilityContract.futureReviewTimestampBlocked}
 - Mobile candidate scroll snap: ${report.accessibilityContract.mobileCandidateScrollSnap}
 - Selected candidate auto reveal: ${report.accessibilityContract.selectedCandidateAutoReveal}
 - Readable evidence cues: ${report.accessibilityContract.readableEvidenceCues}

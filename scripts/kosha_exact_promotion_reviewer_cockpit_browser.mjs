@@ -182,6 +182,10 @@ export async function runBrowserProbe(options) {
             && element("[data-next-incomplete]").getClientRects().length > 0,
           nextIncompleteInitiallyEnabled: element("[data-next-incomplete]") instanceof HTMLButtonElement
             && !element("[data-next-incomplete]").disabled,
+          reviewedAtMaxPresent: element("[data-reviewed-at='0']") instanceof HTMLInputElement
+            && Boolean(element("[data-reviewed-at='0']").max),
+          futureTimestampErrorInitiallyHidden: element("[data-reviewed-at-error='0']") instanceof HTMLElement
+            && element("[data-reviewed-at-error='0']").hidden,
           firstEvidenceBottom: rectangle(".evidence-group")?.bottom ?? null,
           firstEvidenceReceiptBottom: rectangle("[data-evidence-receipt]")?.bottom ?? null,
           firstEvidenceReadingCueBottom: rectangle(".evidence-reading-cue")?.bottom ?? null,
@@ -257,6 +261,17 @@ export async function runBrowserProbe(options) {
     const staleExportDisabled = await storagePage.isDisabled("[data-export]");
     const staleDraftNotice = (await storagePage.textContent("[data-progress-live]")) || "";
     const staleDraftStatus = (await storagePage.textContent("[data-draft-status]")) || "";
+    await storagePage.fill("[data-reviewed-at='0']", "2099-01-01T00:00");
+    const futureTimestampState = await storagePage.evaluate(() => {
+      const input = document.querySelector("[data-reviewed-at='0']");
+      const error = document.querySelector("[data-reviewed-at-error='0']");
+      return {
+        ariaInvalid: input?.getAttribute("aria-invalid") || "",
+        errorVisible: error instanceof HTMLElement && !error.hidden && error.getClientRects().length > 0,
+        candidateProgress: document.querySelector("[data-candidate-progress='0']")?.textContent?.trim() || "",
+      };
+    });
+    await storagePage.fill("[data-reviewed-at='0']", "");
     await storagePage.click("[data-next-incomplete]");
     const nextIncompleteInitialSelectedIndex = await storagePage.evaluate(() => (
       [...document.querySelectorAll("[data-candidate-button]")]
@@ -266,7 +281,11 @@ export async function runBrowserProbe(options) {
       await storagePage.check(`[data-check="1:${checkIndex}"]`);
     }
     await storagePage.fill("[data-reviewer='1']", "검토자");
-    await storagePage.fill("[data-reviewed-at='1']", "2026-08-27T10:30");
+    const validPastReviewTime = await storagePage.evaluate(() => {
+      const value = new Date(Date.now() - 60_000);
+      return new Date(value.getTime() - value.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+    });
+    await storagePage.fill("[data-reviewed-at='1']", validPastReviewTime);
     await storagePage.check("[data-human-confirm='1']");
     await storagePage.click('[data-candidate-button="0"]');
     await storagePage.click("[data-next-incomplete]");
@@ -302,6 +321,7 @@ export async function runBrowserProbe(options) {
       staleDraftStatus,
       nextIncompleteInitialSelectedIndex,
       nextIncompleteSkippedCompletedIndex,
+      futureTimestampState,
     };
     draftStorageIdentity.titleReconciliationAccess = titleReconciliationAccess;
     draftStorageIdentity.titleReconciliationScreenshot = path.relative(options.rootDir, titleReconciliationScreenshot);
@@ -469,6 +489,13 @@ export async function runBrowserProbe(options) {
   ))
     && draftStorageIdentity?.nextIncompleteInitialSelectedIndex === 1
     && draftStorageIdentity?.nextIncompleteSkippedCompletedIndex === 2;
+  const futureReviewTimestampPass = results.every((row) => (
+    row.reviewedAtMaxPresent === true
+    && row.futureTimestampErrorInitiallyHidden === true
+  ))
+    && draftStorageIdentity?.futureTimestampState?.ariaInvalid === "true"
+    && draftStorageIdentity?.futureTimestampState?.errorVisible === true
+    && draftStorageIdentity?.futureTimestampState?.candidateProgress === "0/8";
   const verdict = allRowsPass
     && desktopPass
     && mobilePass
@@ -480,6 +507,7 @@ export async function runBrowserProbe(options) {
     && mobileCandidateProgressVisibilityPass
     && draftPersistenceVisibilityPass
     && nextIncompleteNavigationPass
+    && futureReviewTimestampPass
     ? "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY"
     : "RED_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY";
   const report = {
@@ -499,6 +527,7 @@ export async function runBrowserProbe(options) {
     mobileCandidateProgressVisibilityPass,
     draftPersistenceVisibilityPass,
     nextIncompleteNavigationPass,
+    futureReviewTimestampPass,
     draftStorageIdentity,
     results,
     mutationBoundary: {
@@ -540,6 +569,7 @@ Verdict: \`${report.verdict}\`
 - Mobile candidate progress visibility: ${report.mobileCandidateProgressVisibilityPass}
 - Draft persistence visibility: ${report.draftPersistenceVisibilityPass}
 - Next incomplete navigation: ${report.nextIncompleteNavigationPass}
+- Future review timestamp blocked: ${report.futureReviewTimestampPass}
 - Evidence page receipts visible: ${results.every((row) => row.evidenceReceiptCount >= 24)}
 - Draft fingerprint contains source identity: ${report.draftStorageIdentity?.sourceIdentityPresent}
 - Live progress status: ${results.every((row) => row.progressLiveRole === "status" && row.progressLiveMode === "polite")}
