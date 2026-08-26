@@ -23,6 +23,7 @@ Verdict: `PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY`
 - Visible draft persistence status: true
 - Draft restore status visible: true
 - Draft save failure visible: true
+- Next incomplete candidate navigation: true
 - Mobile candidate scroll snap: true
 - Selected candidate auto reveal: true
 - Readable evidence cues: true
