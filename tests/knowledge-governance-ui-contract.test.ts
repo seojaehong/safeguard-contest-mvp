@@ -117,6 +117,18 @@ describe("knowledge governance UI contract", () => {
     );
   });
 
+  it("keeps hazard-to-evidence trace evidence scoped and fail closed", () => {
+    expect(browserRunnerSource).toContain('process.env.SAFECLAW_KNOWLEDGE_UI_MODE === "trace-blocks"');
+    expect(browserRunnerSource).toContain('schemaVersion: "safeclaw-hermes-review-trace-block-summary/v1"');
+    expect(browserRunnerSource).toContain('verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_BLOCKS"');
+    expect(browserRunnerSource).toContain("approvalFailsClosedWhenIncomplete: true");
+    expect(browserRunnerSource).toContain("allHazardsClosed: false");
+    expect(browserRunnerSource).toContain("allDocumentsClosed: false");
+    expect(browserRunnerSource).toContain("machineEvidenceReplacesHumanReview: false");
+    expect(browserRunnerSource).toContain('exactSavedShareVerdict: "MISSING_EVIDENCE"');
+    expect(browserRunnerSource).toContain("knowledge-review-trace-block-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png");
+  });
+
   it("localizes schema field names at the presentation boundary", () => {
     expect(pageSource).toContain('roleLabel: "문서 역할"');
     expect(pageSource).toContain('shortSummary: "짧은 요약"');

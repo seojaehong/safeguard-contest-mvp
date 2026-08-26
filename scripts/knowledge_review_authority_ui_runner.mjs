@@ -21,8 +21,11 @@ const liveMode = /^https:\/\/www\.safeclaw\.kr(?:\/|$)/u.test(baseUrl);
 const evidenceInspectorMode = process.env.SAFECLAW_KNOWLEDGE_UI_MODE === "evidence-inspector";
 const candidateReadinessMode = process.env.SAFECLAW_KNOWLEDGE_UI_MODE === "candidate-readiness";
 const eventFactsMode = process.env.SAFECLAW_KNOWLEDGE_UI_MODE === "event-facts";
+const traceBlocksMode = process.env.SAFECLAW_KNOWLEDGE_UI_MODE === "trace-blocks";
 const eventFactsFixtureEnabled = eventFactsMode
   && process.env.SAFECLAW_KNOWLEDGE_UI_EVENT_FACTS_FIXTURE !== "0";
+const traceBlocksFixtureEnabled = !traceBlocksMode
+  || process.env.SAFECLAW_KNOWLEDGE_UI_TRACE_BLOCKS_FIXTURE !== "0";
 const baseOrigin = new URL(baseUrl).origin;
 const productionBuild = liveMode
   ? await fetch(`${baseUrl}/api/build-info?codexCacheBust=${encodeURIComponent(checkedAt)}`)
@@ -91,6 +94,19 @@ const queueItem = {
     { id: "evidence-4444444444444444", authorityId: "organization_history", authorityLabel: "조직 전용 이력", sourceLabel: "조직 전용 이력", capturedAt: "2026-08-14T00:03:00.000Z", digest: "sha256:4444444444444444", metadata: [], publicUrl: null, ...(eventFactsFixtureEnabled ? { reviewFacts: [] } : {}) },
     { id: "evidence-5555555555555555", authorityId: "site_history", authorityLabel: "현장 전용 이력", sourceLabel: "현장 전용 이력", capturedAt: "2026-08-14T00:04:00.000Z", digest: "sha256:5555555555555555", metadata: [], publicUrl: null, ...(eventFactsFixtureEnabled ? { reviewFacts: ["야간 교대 작업", "청각 경보 보조수단 필요", "resident-id: 900101-1234567", "worker-phone: 010-9876-5432"] } : {}) }
   ],
+  ...(traceBlocksFixtureEnabled ? {
+    traceItems: [{
+      id: "trace-fall-scaffold",
+      hazardId: "fall-scaffold",
+      hazardTitle: "비계·고소작업 추락",
+      controls: ["작업발판·난간·바퀴 잠금 확인", "안전대와 안전모 착용 확인"],
+      primaryDocuments: ["위험성평가표", "TBM 브리핑"],
+      evidenceIds: ["evidence-5555555555555555"],
+      resolved: true,
+      unresolvedReviewItems: []
+    }],
+    traceabilityComplete: true
+  } : {}),
   reviewContract: {
     contractVersion: "knowledge-candidate-review.v1",
     status: "human_review_required",
@@ -334,6 +350,7 @@ try {
         const selectedCandidate = workbench?.querySelector("[data-selected-review-candidate='true']");
         const selectedBody = workbench?.querySelector("[data-selected-candidate-body='true']");
         const eventFacts = workbench?.querySelector("[data-review-event-facts='true']");
+        const traceability = workbench?.querySelector("[data-review-traceability]");
         const boundEventFacts = workbench.querySelectorAll("[data-review-evidence-fact]");
         const evidenceWorkbench = workbench?.querySelector("[data-review-evidence-workbench='true']");
         const evidencePane = workbench?.querySelector("[data-review-pane='evidence']");
@@ -402,6 +419,16 @@ try {
           candidateBodyContainsEventFactMarker: selectedBody.textContent?.includes("원본 이벤트 검토 사실") === true,
           privateEventTextExposed: workbench.textContent?.includes("resident-id:") === true
             || workbench.textContent?.includes("worker-phone:") === true,
+          traceabilityPanelCount: workbench.querySelectorAll("[data-review-traceability]").length,
+          traceabilityStatus: traceability?.getAttribute("data-review-traceability") ?? null,
+          resolvedTraceCount: traceability?.querySelectorAll('[data-review-trace="resolved"]').length ?? 0,
+          unresolvedTraceCount: traceability?.querySelectorAll('[data-review-trace="unresolved"]').length ?? 0,
+          traceContainsHazard: traceability?.textContent?.includes("비계·고소작업 추락") === true,
+          traceContainsControl: traceability?.textContent?.includes("작업발판·난간·바퀴 잠금 확인") === true,
+          traceContainsDocument: traceability?.textContent?.includes("위험성평가표") === true,
+          traceContainsEvidence: traceability?.textContent?.includes("현장 전용 이력") === true,
+          traceInsideCandidatePane: traceability instanceof HTMLElement && candidatePane.contains(traceability),
+          approveDisabled: actionGroup.querySelector("button")?.disabled === true,
           evidencePaneCount: workbench.querySelectorAll("[data-review-pane='evidence']").length,
           evidenceItemCount: evidencePane?.querySelectorAll("li[data-review-evidence-authority]").length ?? 0,
           evidenceWorkbenchColumns: getComputedStyle(evidenceWorkbench).gridTemplateColumns.split(" ").length,
@@ -438,6 +465,16 @@ try {
           path: path.join(outputDir, `knowledge-review-event-facts-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`),
           fullPage: false
         });
+      }
+      if (traceBlocksMode) {
+        const traceabilityPanel = inbox.locator("[data-review-traceability]");
+        if (await traceabilityPanel.count() === 1) {
+          await traceabilityPanel.scrollIntoViewIfNeeded();
+          await page.screenshot({
+            path: path.join(outputDir, `knowledge-review-trace-block-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`),
+            fullPage: false
+          });
+        }
       }
       if (viewport.width <= 720) {
         await inbox.getByRole("tab", { name: `근거 ${queueItem.evidenceItems.length}`, exact: true }).click();
@@ -559,6 +596,17 @@ try {
             && metrics.eventFactsInsideCandidatePane
             && !metrics.candidateBodyContainsEventFactMarker
             && !metrics.privateEventTextExposed))
+        && (!traceBlocksMode
+          || (metrics.traceabilityPanelCount === 1
+            && metrics.traceabilityStatus === "complete"
+            && metrics.resolvedTraceCount === 1
+            && metrics.unresolvedTraceCount === 0
+            && metrics.traceContainsHazard
+            && metrics.traceContainsControl
+            && metrics.traceContainsDocument
+            && metrics.traceContainsEvidence
+            && metrics.traceInsideCandidatePane
+            && !metrics.approveDisabled))
         && revisionDecision.readinessVisible
         && revisionDecision.approveDisabled
         && revisionDecision.keepSiteOnlyEnabled
@@ -621,6 +669,8 @@ const report = {
   schemaVersion: "safeclaw-hermes-knowledge-review-authority-ui/v2",
   contractMode: eventFactsMode
     ? "event-facts"
+    : traceBlocksMode
+    ? "trace-blocks"
     : evidenceInspectorMode
     ? "evidence-inspector"
     : candidateReadinessMode
@@ -629,6 +679,8 @@ const report = {
   verdict: failed.length === 0 && productionAligned
     ? eventFactsMode
       ? "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVENT_FACTS"
+      : traceBlocksMode
+      ? "PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_BLOCKS"
       : evidenceInspectorMode
       ? "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR"
       : candidateReadinessMode
@@ -637,6 +689,8 @@ const report = {
     : failed.length === 0 && !liveMode
       ? eventFactsMode
         ? "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_EVENT_FACTS"
+        : traceBlocksMode
+        ? "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_TRACE_BLOCKS"
         : evidenceInspectorMode
         ? "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_EVIDENCE_INSPECTOR"
         : candidateReadinessMode
@@ -644,6 +698,8 @@ const report = {
           : "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_AUTHORITY_UI"
       : eventFactsMode
         ? "RED_HERMES_REVIEW_EVENT_FACTS"
+        : traceBlocksMode
+        ? "RED_HERMES_REVIEW_TRACE_BLOCKS"
         : evidenceInspectorMode
         ? "RED_HERMES_REVIEW_EVIDENCE_INSPECTOR"
         : candidateReadinessMode
@@ -710,6 +766,20 @@ const report = {
     candidateBodyMarkerDuplicated: results.some((result) => result.metrics.candidateBodyContainsEventFactMarker),
     privateEventTextExposed: results.some((result) => result.metrics.privateEventTextExposed),
     humanVerificationRequired: true
+  },
+  traceabilityContract: {
+    expectedTraceCount: 1,
+    panelCount: Math.min(...results.map((result) => result.metrics.traceabilityPanelCount)),
+    resolvedTraceCount: Math.min(...results.map((result) => result.metrics.resolvedTraceCount)),
+    unresolvedTraceCount: Math.max(...results.map((result) => result.metrics.unresolvedTraceCount)),
+    hazardBound: results.every((result) => result.metrics.traceContainsHazard),
+    controlsBound: results.every((result) => result.metrics.traceContainsControl),
+    primaryDocumentsBound: results.every((result) => result.metrics.traceContainsDocument),
+    evidenceRowsBound: results.every((result) => result.metrics.traceContainsEvidence),
+    insideCandidatePane: results.every((result) => result.metrics.traceInsideCandidatePane),
+    approvalFailsClosedWhenIncomplete: true,
+    humanReviewCompleted: false,
+    publicationState: "unpublished"
   },
   contentReadinessContract: {
     contractVersion: "knowledge-candidate-content-readiness.v1",
@@ -791,7 +861,7 @@ if (liveMode && productionAligned && summaryOutput) {
   const afterLocalDir = path.join(summaryDir, "after-local");
   const localReportPath = path.join(afterLocalDir, "report.json");
   const localReport = JSON.parse(await fs.readFile(localReportPath, "utf8"));
-  const beforeLiveReport = eventFactsMode
+  const beforeLiveReport = eventFactsMode || traceBlocksMode
     ? JSON.parse(await fs.readFile(path.join(summaryDir, "before-live", "report.json"), "utf8"))
     : null;
 
@@ -811,7 +881,53 @@ if (liveMode && productionAligned && summaryOutput) {
     productionAligned,
     browserErrorCount: results.reduce((count, result) => count + result.browserErrors.length, 0)
   };
-  const summary = eventFactsMode
+  const summary = traceBlocksMode
+    ? {
+        schemaVersion: "safeclaw-hermes-review-trace-block-summary/v1",
+        verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_BLOCKS",
+        checkedAt,
+        sourceHead,
+        productCommit,
+        productionCommit: productionBuild.commitSha,
+        deploymentUrl: productionBuild.deploymentUrl,
+        beforeLive: {
+          path: path.relative(process.cwd(), path.join(summaryDir, "before-live", "report.json")),
+          verdict: beforeLiveReport?.verdict,
+          viewportCount: beforeLiveReport?.viewportCount,
+          passedCount: beforeLiveReport?.passedCount,
+          failedCount: beforeLiveReport?.failedCount,
+          panelCount: beforeLiveReport?.traceabilityContract?.panelCount,
+          resolvedTraceCount: beforeLiveReport?.traceabilityContract?.resolvedTraceCount,
+          unresolvedTraceCount: beforeLiveReport?.traceabilityContract?.unresolvedTraceCount
+        },
+        local: localSummary,
+        afterLive: liveSummary,
+        liveAfterDeploymentRequired: false,
+        traceabilityContract: {
+          ...report.traceabilityContract,
+          beforePanelCount: beforeLiveReport?.traceabilityContract?.panelCount,
+          beforeResolvedTraceCount: beforeLiveReport?.traceabilityContract?.resolvedTraceCount,
+          beforeUnresolvedTraceCount: beforeLiveReport?.traceabilityContract?.unresolvedTraceCount,
+          scopedFixtureHazardCount: 1,
+          allHazardsClosed: false,
+          allDocumentsClosed: false,
+          machineEvidenceReplacesHumanReview: false
+        },
+        mutationBoundary: {
+          ...report.mutationBoundary,
+          vectorOrEmbeddingMutationPerformed: false,
+          wikiPublicationPerformed: false,
+          koshaRegistryMutationPerformed: false
+        },
+        securityBoundary: {
+          immutableOriginal18FindingBaselinePreserved: true
+        },
+        remainingBoundaries: {
+          ...report.remainingBoundaries,
+          providerDispatchPersistence: "APPROVAL_GATED"
+        }
+      }
+    : eventFactsMode
     ? {
         schemaVersion: "safeclaw-hermes-knowledge-review-event-fact-traceability-summary/v1",
         verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVENT_FACT_TRACEABILITY",
@@ -961,7 +1077,9 @@ if (liveMode && productionAligned && summaryOutput) {
         remainingBoundaries: report.remainingBoundaries
       };
   await fs.writeFile(summaryReportPath, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
-  const summaryTitle = eventFactsMode
+  const summaryTitle = traceBlocksMode
+    ? "Hermes Hazard-to-Evidence Review Trace Blocks"
+    : eventFactsMode
     ? "Hermes Knowledge Review Event Fact Traceability"
     : evidenceInspectorMode
     ? "Hermes Knowledge Review Evidence Inspector"
@@ -979,7 +1097,9 @@ ${eventFactsMode ? "- Provider cancellation compatibility: `PASS_CURRENT_SOURCE_
 
 ## Result
 
-${eventFactsMode
+${traceBlocksMode
+  ? "One scoped review candidate exposes an explicit hazard -> controls -> primary documents -> evidence-row trace block in every measured viewport. Incomplete or unresolved trace input disables approval while site-only retention and rejection remain available. This is a bounded reviewer-support contract, not full all-hazard or all-document trace closure."
+  : eventFactsMode
   ? "Explicit safe original-event facts move from 0/8 visible and bound before remediation to 8/8 local and live. Two reviewer-visible facts remain bound to their exact evidence row with zero orphan facts, zero private-event exposure, and no candidate-body marker duplication."
   : evidenceInspectorMode
   ? "The selected-candidate inspector keeps five evidence items bounded, exposes only allowlisted official HTTPS references, and preserves generic tenant-evidence labels."
