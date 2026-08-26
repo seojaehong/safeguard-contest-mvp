@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "safeclaw-llm-wiki-sif-evidence-matrix-summary/v1",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_SIF_KOSHA_LAW_WIKI_CANDIDATE_LIVE_PENDING",
+  "checkedAt": "2026-08-26T11:37:00.5067540Z",
+  "productCommit": "b777fa07c8fa651931796eb6df933ba0e4de4300",
+  "sourceHead": "b777fa07c8fa651931796eb6df933ba0e4de4300",
+  "productionCommit": null,
+  "priorLiveEvidence": {
+    "path": "evaluation/llm-wiki-candidate-content-matrix-2026-08-25/report.json",
+    "sourceHead": "f4ab34d0f8fd204b3d5dfa7ef77bfe183acc7ff2",
+    "verdict": "PASS_LIVE_PRODUCTION_WIKI_EVENT_SEMANTIC_AND_EVIDENCE_VISIBILITY_LLM_ENHANCED_RUNTIME_BLOCKED",
+    "sifEvidenceContractPresent": false,
+    "sifEvidenceVisibilityMeasured": false,
+    "boundary": "The prior PASS proves KOSHA/law evidence visibility and event facts; it is not SIF reviewer-visible evidence proof."
+  },
+  "afterLocal": {
+    "path": "evaluation/llm-wiki-sif-evidence-matrix-2026-08-26/after-local/report.json",
+    "sourceHead": "b777fa07c8fa651931796eb6df933ba0e4de4300",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+    "generationMode": "deterministic",
+    "totalCount": 5,
+    "passedCount": 5,
+    "failedCount": 0,
+    "sifEvidenceBoundaryCount": 5,
+    "technicalGuidanceBoundaryCount": 5,
+    "lawCandidateBoundaryCount": 5,
+    "eventSemanticGroundingCount": 5,
+    "privateEventExposureCount": 0
+  },
+  "afterLive": null,
+  "liveAfterDeploymentRequired": true,
+  "contentContract": {
+    "authorityOrder": ["sif", "kosha", "law"],
+    "scenarioCount": 5,
+    "reviewerVisibleSifEvidenceRequired": true,
+    "sifProvenanceRequired": true,
+    "sifIncidentControlEvidenceIsNonStatutory": true,
+    "koshaTechnicalGuidanceIsNonStatutory": true,
+    "statutoryClaimsRequireLawProvenance": true,
+    "privateSifTitleExposureAllowed": false,
+    "humanReviewCompleted": false,
+    "publicationState": "unpublished",
+    "publishAllowed": false
+  },
+  "verification": {
+    "focusedVitest": {
+      "files": 4,
+      "tests": 41,
+      "failed": 0
+    },
+    "strictTypecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "ontologyPublicationPerformed": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "actualProductionCandidateQueueRead": false,
+    "enhancedLlmRuntime": "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
+  }
+}
